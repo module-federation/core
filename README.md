@@ -17,7 +17,7 @@ This is a stable and viable workaround to leverage Module Federation [until this
 
 ```js
 // next.config.js
-const { withModuleFederation } = require("nextjs-with-module-federation");
+const { withModuleFederation } = require("@module-federation/nextjs-with-module-federation");
 
 module.exports = {
   webpack: (config, options) => {
@@ -56,7 +56,7 @@ module.exports = {
 
 ```jsx
 import Document, { Html, Head, Main, NextScript } from "next/document";
-import { sharePatch } from "nextjs-with-module-federation";
+import { sharePatch } from "@module-federation/nextjs-with-module-federation";
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
