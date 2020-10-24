@@ -1,12 +1,13 @@
-# nextjs-with-module-federation
+nextjs-with-module-federation
+====================================
 
 This plugin enables Module Federation on Next.js
 
 This is a workaround to hard limitations caused by Next.js being synchronous.
 
-I am working on an update to Webpack Core which will circumvent projects with older architecture (like next)
+I am working on an update to Webpack Core which will circumvent projects with older architecture (like Next.js).
 
-This is a stable and viable workaround to leverage Module Federation till I complete this: https://github.com/webpack/webpack/issues/11811
+This is a stable and viable workaround to leverage Module Federation [until this issue is resolved](https://github.com/webpack/webpack/issues/11811).
 
 **Once I PR webpack, this workaround will no longer be required.**
 
@@ -16,7 +17,7 @@ This is a stable and viable workaround to leverage Module Federation till I comp
 
 ```js
 // next.config.js
-const withFederation = require("nextjs-with-module-federation/withModuleFederation");
+const { withModuleFederation } = require("nextjs-with-module-federation");
 
 module.exports = {
   webpack: (config, options) => {
@@ -51,12 +52,11 @@ module.exports = {
 };
 ```
 
-2. Add the `sharePatch` to `_document.js`
-   This will solve the react sharing issue.
+2. Add the `sharePatch` to `_document.js`. This will solve the react sharing issue.
 
 ```jsx
 import Document, { Html, Head, Main, NextScript } from "next/document";
-const sharePatch = require("nextjs-with-module-federation/patchSharing");
+import { sharePatch } from "nextjs-with-module-federation";
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
@@ -71,16 +71,20 @@ class MyDocument extends Document {
         <script src="http://localhost:3000/_next/static/chunks/webpack.js" />
         <script src="http://localhost:3000/_next/static/runtime/remoteEntry.js" />
         <Head />
+        <body>
+          <Main />
+          <NextScript />
+        </body>
       </Html>
     );
   }
 }
 ```
 
-3. Use top-level-await (for now)
+3. Use top-level-await
 
 ```js
-//some-component.js
+// some-component.js
 const Nav = (await import("../components/nav")).default;
 const _ = await import("lodash");
 ```
