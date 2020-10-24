@@ -1,5 +1,5 @@
 {
-  "name": "nextjs-with-module-federation",
+  "name": "@module-federation/nextjs-with-module-federation",
   "version": "1.0.0",
   "description": "Module Federation helper for NextJS",
   "main": "index.js",
