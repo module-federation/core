@@ -8,6 +8,11 @@ I am working on an update to Webpack Core which will circumvent projects with ol
 
 This is a stable and viable workaround to leverage Module Federation [until this issue is resolved](https://github.com/webpack/webpack/issues/11811).
 
+### Supports 
+- next ^9.5.6
+- SSG
+- SSR
+
 **Once I PR webpack, this workaround will no longer be required.**
 
 # Check out our book
