@@ -25,7 +25,7 @@ This is a stable and viable workaround to leverage Module Federation [until this
 // next.config.js
 const {
   withModuleFederation,
-} = require("@module-federation/nexjs-mf");
+} = require("@module-federation/nextjs-mf");
 const path = require("path");
 
 module.exports = {
@@ -65,7 +65,7 @@ module.exports = {
 
 ```jsx
 import Document, { Html, Head, Main, NextScript } from "next/document";
-import { patchSharing } from "@module-federation/nexjs-mf";
+import { patchSharing } from "@module-federation/nextjs-mf";
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
@@ -106,7 +106,7 @@ Next.js uses `runtimeChunk:'single'`
 Which forces us to also add the webpack script itself. Till this is fixed in webpack, heres a plugin that will merge the runtimes back together for MF
 
 ```js
-const {MergeRuntime} = require("@module-federation/nexjs-mf");
+const {MergeRuntime} = require("@module-federation/nextjs-mf");
 // in your next config.
 config.plugins.push(new MergeRuntime());
 ```

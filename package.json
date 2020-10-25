@@ -4,7 +4,7 @@
   "version": "0.0.1-alhpa.3",
   "description": "Module Federation helper for NextJS",
   "main": "index.js",
-  "repository": "https://github.com/module-federation/nexjs-mf",
+  "repository": "https://github.com/module-federation/nextjs-mf",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "license": "MIT",
   "scripts": {
