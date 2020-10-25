@@ -1,6 +1,7 @@
 {
-  "name": "@module-federation/nexjs-mf",
-  "version": "1.0.0",
+  "public": true,
+  "name": "@module-federation/nextjs-mf",
+  "version": "0.0.1-alpha.0",
   "description": "Module Federation helper for NextJS",
   "main": "index.js",
   "repository": "https://github.com/module-federation/nexjs-mf",
