@@ -16,5 +16,8 @@
   },
   "peerDependencies": {
     "react": "^16 || ^17"
+  },
+  "dependencies": {
+    "shelljs": "^0.8.4"
   }
 }
