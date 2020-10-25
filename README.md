@@ -10,6 +10,13 @@ This is a stable and viable workaround to leverage Module Federation [until this
 
 **Once I PR webpack, this workaround will no longer be required.**
 
+# Check out our book
+
+| <a href="https://module-federation.myshopify.com/products/practical-module-federation" target="_blank"><img src="./docs/MFCover.png" alt='Practical Module Federation Book' width="95%"/></a> | <a href="https://module-federation.myshopify.com/products/practical-module-federation" target="_blank">We will be actively updating this book over the next year as we learn more about best practices and what issues people are running into with Module Federation, as well as with every release of Webpack as it moves towards a release candidate and release. So with your one purchase you are buying a whole year of updates.</a> |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+
+
+
 ## How to use it
 
 1. Use `withModuleFederation` in your `next.config.js`
@@ -18,7 +25,7 @@ This is a stable and viable workaround to leverage Module Federation [until this
 // next.config.js
 const {
   withModuleFederation,
-} = require("@module-federation/nextjs-with-module-federation");
+} = require("@module-federation/nexjs-mf");
 const path = require("path");
 
 module.exports = {
@@ -58,7 +65,7 @@ module.exports = {
 
 ```jsx
 import Document, { Html, Head, Main, NextScript } from "next/document";
-import { patchSharing } from "@module-federation/nextjs-with-module-federation";
+import { patchSharing } from "@module-federation/nexjs-mf";
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
