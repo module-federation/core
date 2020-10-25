@@ -33,7 +33,7 @@ const withModuleFederation = (config, options, mfConfig) => {
     };
   } else {
     config.externals = {
-      react: path.resolve("./react.js"),
+      react: path.resolve(__dirname, "./react.js"),
       // "react-dom": path.resolve("./react-dom.js"),
     };
   }

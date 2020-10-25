@@ -1,4 +1,4 @@
-nextjs-with-module-federation
+Module Federation For Next.js
 ====================================
 
 This plugin enables Module Federation on Next.js
@@ -55,11 +55,11 @@ module.exports = {
 };
 ```
 
-2. Add the `sharePatch` to `_document.js`. This will solve the react sharing issue.
+2. Add the `patchSharing` to `_document.js`. This will solve the react sharing issue.
 
 ```jsx
 import Document, { Html, Head, Main, NextScript } from "next/document";
-import { sharePatch } from "@module-federation/nextjs-with-module-federation";
+import { patchSharing } from "@module-federation/nextjs-with-module-federation";
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
@@ -70,7 +70,7 @@ class MyDocument extends Document {
   render() {
     return (
       <Html>
-        {sharePatch()}
+        {patchSharing()}
         <script src="http://localhost:3000/_next/static/chunks/webpack.js" />
         <script src="http://localhost:3000/_next/static/runtime/remoteEntry.js" />
         <Head />
