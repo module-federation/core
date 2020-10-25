@@ -17,7 +17,10 @@ This is a stable and viable workaround to leverage Module Federation [until this
 
 ```js
 // next.config.js
-const { withModuleFederation } = require("@module-federation/nextjs-with-module-federation");
+const {
+  withModuleFederation,
+} = require("@module-federation/nextjs-with-module-federation");
+const path = require("path");
 
 module.exports = {
   webpack: (config, options) => {
@@ -41,7 +44,7 @@ module.exports = {
       shared: ["lodash"],
     };
     // Configures ModuleFederation and other Webpack properties
-    withFederation(config, options, mfConf);
+    withModuleFederation(config, options, mfConf);
 
     if (!isServer) {
       config.output.publicPath = "http://localhost:3001/_next/";
