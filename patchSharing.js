@@ -5,7 +5,7 @@ const patchSharing = () => {
   const reactPath = path.dirname(__non_webpack_require__.resolve("react"));
   const umdReact =
     process.env.NODE_ENV === "production"
-      ? path.join(reactPath, "umd/react.production.js")
+      ? path.join(reactPath, "umd/react.production.min.js")
       : path.join(reactPath, "umd/react.development.js");
   const stringReact = fs.readFileSync(umdReact, "utf-8");
   return React.createElement("script", {
