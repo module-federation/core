@@ -1,1 +1,4 @@
 .git
+renovate.json
+.gitignore
+.github
