@@ -1,15 +1,19 @@
 {
-  "name": "@module-federation/nextjs-with-module-federation",
+  "name": "@module-federation/nexjs-mf",
   "version": "1.0.0",
   "description": "Module Federation helper for NextJS",
   "main": "index.js",
-  "repository": "https://github.com/module-federation/nextjs-with-module-federation",
+  "repository": "https://github.com/module-federation/nexjs-mf",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "license": "MIT",
   "scripts": {
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\""
   },
   "devDependencies": {
-    "prettier": "2.1.2"
+    "prettier": "^2.1.2",
+    "react": "^17.0.1"
+  },
+  "peerDependencies": {
+    "react": "^16 || ^17"
   }
 }
