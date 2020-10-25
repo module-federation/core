@@ -23,7 +23,7 @@ module.exports = class MergeRemoteChunksPlugin {
       if (files.length > 1) {
         const runtime = fs.readFileSync(files[0], "utf-8");
         const remoteContainer = fs.readFileSync(files[1], "utf-8");
-        const merged = [runtime,remoteContainer].join("\n");
+        const merged = [runtime, remoteContainer].join("\n");
         const remotePath = path.join(output.compiler.context, ".next/static");
         if (fs.existsSync(remotePath)) {
           fs.mkdir(remotePath, { recursive: true }, (err) => {
@@ -36,7 +36,7 @@ module.exports = class MergeRemoteChunksPlugin {
             ".next/static/remoteEntryMerged.js"
           ),
           merged,
-          ()=>{}
+          () => {}
         );
       }
     });
