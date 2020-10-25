@@ -90,3 +90,24 @@ class MyDocument extends Document {
 const Nav = (await import("../components/nav")).default;
 const _ = await import("lodash");
 ```
+
+## Experimental
+
+Use at your own risk.
+
+Next.js uses `runtimeChunk:'single'`
+Which forces us to also add the webpack script itself. Till this is fixed in webpack, heres a plugin that will merge the runtimes back together for MF
+
+```js
+const {MergeRuntime} = require("@module-federation/nexjs-mf");
+// in your next config.
+config.plugins.push(new MergeRuntime());
+```
+
+This allows the following to be done
+
+```diff
+  - <script src="http://localhost:3000/_next/static/chunks/webpack.js" />
+  - <script src="http://localhost:3000/_next/static/runtime/remoteEntry.js" />
+  + <script src="http://localhost:3000/_next/static/remoteEntryMerged.js" />
+```
