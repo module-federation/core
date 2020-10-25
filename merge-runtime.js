@@ -32,7 +32,10 @@ module.exports = class MergeRemoteChunksPlugin {
           });
         }
         fs.writeFile(
-          path.resolve(files[1]),
+          path.resolve(
+            output.compiler.context,
+            ".next/static/remoteEntry.js"
+          ),
           merged,
           ()=>{}
         );
