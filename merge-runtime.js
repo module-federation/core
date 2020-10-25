@@ -21,7 +21,6 @@ module.exports = class MergeRemoteChunksPlugin {
         .map((file) => path.join(output.compiler.context, ".next", file));
 
       if (files.length > 1) {
-        console.log(files)
         const runtime = fs.readFileSync(files[0], "utf-8");
         const remoteContainer = fs.readFileSync(files[1], "utf-8");
         const merged = [runtime,remoteContainer].join("\n");
@@ -34,7 +33,7 @@ module.exports = class MergeRemoteChunksPlugin {
         fs.writeFile(
           path.resolve(
             output.compiler.context,
-            ".next/static/remoteEntry.js"
+            ".next/static/remoteEntryMerged.js"
           ),
           merged,
           ()=>{}
