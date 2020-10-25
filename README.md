@@ -99,7 +99,7 @@ Next.js uses `runtimeChunk:'single'`
 Which forces us to also add the webpack script itself. Till this is fixed in webpack, heres a plugin that will merge the runtimes back together for MF
 
 ```js
-const MergeRuntime = require("@module-federation/nexjs-mf/merge-runtime");
+const {MergeRuntime} = require("@module-federation/nexjs-mf");
 // in your next config.
 config.plugins.push(new MergeRuntime());
 ```
