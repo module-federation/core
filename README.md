@@ -18,7 +18,7 @@ This is a stable and viable workaround to leverage Module Federation [until this
 // next.config.js
 const {
   withModuleFederation,
-} = require("@module-federation/nextjs-with-module-federation");
+} = require("@module-federation/nexjs-mf");
 const path = require("path");
 
 module.exports = {
@@ -58,7 +58,7 @@ module.exports = {
 
 ```jsx
 import Document, { Html, Head, Main, NextScript } from "next/document";
-import { patchSharing } from "@module-federation/nextjs-with-module-federation";
+import { patchSharing } from "@module-federation/nexjs-mf";
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
