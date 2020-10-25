@@ -26,7 +26,6 @@ module.exports = class MergeRemoteChunksPlugin {
           .cat(files)
           .to(
             path.resolve(
-              __dirname,
               ".next/static/runtime/remoteEntryMerged.js",
             ),
           );
