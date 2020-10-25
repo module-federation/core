@@ -58,3 +58,4 @@ const withModuleFederation = (config, options, mfConfig) => {
   );
 };
 module.exports = withModuleFederation;
+
