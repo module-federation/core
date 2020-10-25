@@ -1,5 +1,4 @@
-Module Federation For Next.js
-====================================
+# Module Federation For Next.js
 
 This plugin enables Module Federation on Next.js
 
