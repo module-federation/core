@@ -18,8 +18,8 @@ This is a stable and viable workaround to leverage Module Federation [until this
 
 
 ## How to use it
-
-1. Use `withModuleFederation` in your `next.config.js`
+1. Install Next ^9.5.6 (currently in canary)
+2. Use `withModuleFederation` in your `next.config.js`
 
 ```js
 // next.config.js
@@ -61,7 +61,7 @@ module.exports = {
 };
 ```
 
-2. Add the `patchSharing` to `_document.js`. This will solve the react sharing issue.
+3. Add the `patchSharing` to `_document.js`. This will solve the react sharing issue.
 
 ```jsx
 import Document, { Html, Head, Main, NextScript } from "next/document";
@@ -90,7 +90,7 @@ class MyDocument extends Document {
 }
 ```
 
-3. Use top-level-await
+4. Use top-level-await
 
 ```js
 // some-component.js
