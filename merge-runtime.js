@@ -1,5 +1,6 @@
 const shell = require("shelljs");
 const path = require("path");
+const fs = require('fs')
 module.exports = class MergeRemoteChunksPlugin {
   // Define `apply` as its prototype method which is supplied with compiler as its argument
   apply(compiler) {
@@ -20,13 +21,21 @@ module.exports = class MergeRemoteChunksPlugin {
             emittedAsset.includes(neededChunk),
           ),
         )
-        .map((file) => path.resolve(__dirname, ".next", file));
+        .map((file) => path.join(output.compiler.context, ".next", file));
+
       if (files.length > 0) {
+        const remotePath = path.join(output.compiler.context,".next/static")
+        if(fs.existsSync(remotePath)) {
+          fs.mkdir(remotePath, {recursive: true}, (err) => {
+            if (err) throw err;
+          });
+        }
         shell
           .cat(files)
           .to(
             path.resolve(
-              ".next/static/runtime/remoteEntryMerged.js",
+              output.compiler.context,
+              ".next/static/remoteEntryMerged.js",
             ),
           );
       }
