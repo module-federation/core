@@ -10,6 +10,6 @@
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\""
   },
   "devDependencies": {
-    "prettier": "^2.1.2"
+    "prettier": "2.1.2"
   }
 }
