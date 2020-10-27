@@ -1,5 +1,5 @@
 const path = require("path");
-
+const MergeRuntime = require('./merge-runtime')
 const nextServerRemote = (remoteObject) => {
   if (!typeof remoteObject === "object") {
     throw new Error("Remotes must be configured as an object");
@@ -37,7 +37,6 @@ const withModuleFederation = (config, options, mfConfig) => {
       // "react-dom": path.resolve("./react-dom.js"),
     };
   }
-
   const federationConfig = {
     name: mfConfig.name,
     library: mfConfig.library
@@ -54,7 +53,8 @@ const withModuleFederation = (config, options, mfConfig) => {
     throw new Error("Module Federation only works with Webpack 5");
   }
   config.plugins.push(
-    new options.webpack.container.ModuleFederationPlugin(federationConfig)
+    new options.webpack.container.ModuleFederationPlugin(federationConfig),
+    new MergeRuntime(federationConfig)
   );
 };
 module.exports = withModuleFederation;
