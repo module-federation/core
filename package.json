@@ -10,7 +10,11 @@
   "scripts": {
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\""
   },
+  "bin": {
+    "nextjs-mf": "./bin/nextjs-mf.js"
+  },
   "devDependencies": {
+    "commander": "^6.2.0",
     "prettier": "^2.1.2",
     "react": "^17.0.1"
   },

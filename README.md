@@ -23,7 +23,20 @@ This is a stable and viable workaround to leverage Module Federation [until this
 #### Demo
 You can see it in action here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs
 
-## How to use it
+## How to use on a fresh nextjs app
+
+```sh
+yarn global add @module-federation/nextjs-mf@0.0.1-beta.4
+```
+
+Run this inside of a fresh nextjs install.
+
+```sh
+nextjs-mf upgrade -p 3001
+```
+
+## How to use on an existing app
+
 1. Install Next ^9.5.6 (currently in canary)
 2. Use `withModuleFederation` in your `next.config.js`
 
