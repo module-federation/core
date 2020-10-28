@@ -23,7 +23,20 @@ This is a stable and viable workaround to leverage Module Federation [until this
 #### Demo
 You can see it in action here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs
 
-## How to use it
+## How to use on a fresh nextjs app
+
+```sh
+yarn global add @module-federation/nextjs-mf@0.0.1-beta.4
+```
+
+Run this inside of a fresh nextjs install.
+
+```sh
+nextjs-mf upgrade -p 3001
+```
+
+## How to use on an existing app
+
 1. Install Next ^9.5.6 (currently in canary)
 2. Use `withModuleFederation` in your `next.config.js`
 
@@ -38,6 +51,7 @@ module.exports = {
   webpack: (config, options) => {
     const { buildId, dev, isServer, defaultLoaders, webpack } = options;
     const mfConf = {
+      mergeRuntime: true, //this is experimental,  read below
       name: "next2",
       library: { type: config.output.libraryTarget, name: "next2" },
       filename: "static/runtime/remoteEntry.js",
@@ -111,16 +125,22 @@ Use at your own risk.
 Next.js uses `runtimeChunk:'single'`
 Which forces us to also add the webpack script itself. Till this is fixed in webpack, heres a plugin that will merge the runtimes back together for MF
 
+This can be enabled via `mergeRuntime` flag. This is not part of Module Federation, its part of this plugin.
+
+```withModuleFederation(config, options, {mergeRuntime:true,...mfConf})```
+
+You can manually add it as follows
+
 ```js
 const {MergeRuntime} = require("@module-federation/nextjs-mf");
 // in your next config.
-config.plugins.push(new MergeRuntime());
+config.plugins.push(new MergeRuntime({filename: 'remoteEntry'}));
 ```
 
 This allows the following to be done
 
 ```diff
-  - <script src="http://localhost:3000/_next/static/chunks/webpack.js" />
-  - <script src="http://localhost:3000/_next/static/runtime/remoteEntry.js" />
-  + <script src="http://localhost:3000/_next/static/remoteEntryMerged.js" />
+- <script src="http://localhost:3000/_next/static/chunks/webpack.js" />
+- <script src="http://localhost:3000/_next/static/runtime/remoteEntry.js" />
++ <script src="http://localhost:3000/_next/static/remoteEntryMerged.js" />
 ```
