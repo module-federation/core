@@ -73,16 +73,20 @@ export default MyDocument;`;
 const upgrade = ({ port: p }) => {
   const port = p || 3000;
 
+  const nextJSMFpkgJSON = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, "../package.json")).toString()
+  );
+
   // Upgrade package.json
   const pkgJSON = JSON.parse(fs.readFileSync("package.json").toString());
   const name = pkgJSON.name;
   pkgJSON.resolutions = {
     webpack: "5.1.3",
-    next: "9.5.5",
   };
   pkgJSON.scripts.dev = `next dev -p ${port}`;
-  pkgJSON.dependencies.next = "^9.5.6-canary.0";
-  pkgJSON.dependencies["@module-federation/nextjs-mf"] = "0.0.1-beta.4";
+  pkgJSON.dependencies[
+    "@module-federation/nextjs-mf"
+  ] = `^${nextJSMFpkgJSON.version}`;
   fs.writeFileSync("package.json", JSON.stringify(pkgJSON, null, 2));
 
   fs.writeFileSync("next.config.js", nextConfigJS({ name, port }));
