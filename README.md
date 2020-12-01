@@ -8,7 +8,8 @@ I am working on an update to Webpack Core which will circumvent projects with ol
 
 This is a stable and viable workaround to leverage Module Federation [until this issue is resolved](https://github.com/webpack/webpack/issues/11811).
 
-### Supports 
+### Supports
+
 - next ^9.5.6
 - SSG
 - SSR
@@ -21,6 +22,7 @@ This is a stable and viable workaround to leverage Module Federation [until this
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 
 #### Demo
+
 You can see it in action here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs
 
 ## How to use on a fresh nextjs app
@@ -41,9 +43,7 @@ nextjs-mf upgrade -p 3001
 
 ```js
 // next.config.js
-const {
-  withModuleFederation,
-} = require("@module-federation/nextjs-mf");
+const { withModuleFederation } = require("@module-federation/nextjs-mf");
 const path = require("path");
 
 module.exports = {
@@ -70,10 +70,6 @@ module.exports = {
     };
     // Configures ModuleFederation and other Webpack properties
     withModuleFederation(config, options, mfConf);
-
-    if (!isServer) {
-      config.output.publicPath = "http://localhost:3001/_next/";
-    }
 
     return config;
   },
@@ -126,14 +122,14 @@ Which forces us to also add the webpack script itself. Till this is fixed in web
 
 This can be enabled via `mergeRuntime` flag. This is not part of Module Federation, its part of this plugin.
 
-```withModuleFederation(config, options, {mergeRuntime:true,...mfConf})```
+`withModuleFederation(config, options, {mergeRuntime:true,...mfConf})`
 
 You can manually add it as follows
 
 ```js
-const {MergeRuntime} = require("@module-federation/nextjs-mf");
+const { MergeRuntime } = require("@module-federation/nextjs-mf");
 // in your next config.
-config.plugins.push(new MergeRuntime({filename: 'remoteEntry'}));
+config.plugins.push(new MergeRuntime({ filename: "remoteEntry" }));
 ```
 
 This allows the following to be done

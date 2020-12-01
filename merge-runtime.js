@@ -36,17 +36,17 @@ module.exports = class MergeRemoteChunksPlugin {
         const runtime = fs.readFileSync(files[0], "utf-8");
         const remoteContainer = fs.readFileSync(files[1], "utf-8");
         const merged = [runtime, remoteContainer].join("\n");
-        const remotePath = path.join(compiler.options.output.path, "static");
+        const remotePath = path.join(
+          compiler.options.output.path,
+          "static/runtime"
+        );
         if (fs.existsSync(remotePath)) {
           fs.mkdir(remotePath, { recursive: true }, (err) => {
             if (err) throw err;
           });
         }
         fs.writeFile(
-          path.join(
-            remotePath,
-            "/remoteEntryMerged.js"
-          ),
+          path.join(remotePath, "/remoteEntryMerged.js"),
           merged,
           () => {}
         );
