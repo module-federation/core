@@ -1,27 +1,19 @@
 {
   "public": true,
-  "name": "@module-federation/nextjs-mf",
-  "version": "0.0.2",
-  "description": "Module Federation helper for NextJS",
+  "name": "@module-federation/concat-runtime",
+  "version": "0.0.1",
+  "description": "Joins runtimeChunk: \"single\" back to a ModuleFederationPlugin remote containers for independent functionality",
   "main": "index.js",
-  "repository": "https://github.com/module-federation/nextjs-mf",
+  "repository": "https://github.com/module-federation/concat-runtime",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "license": "MIT",
   "scripts": {
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\""
   },
-  "bin": {
-    "nextjs-mf": "./bin/nextjs-mf.js"
-  },
   "devDependencies": {
-    "commander": "^6.2.0",
-    "prettier": "^2.1.2",
-    "react": "^17.0.1"
-  },
-  "peerDependencies": {
-    "react": "^16 || ^17"
+    "prettier": "^2.1.2"
   },
   "dependencies": {
-    "shelljs": "^0.8.4"
+    "webpack-sources": "^2.2.0"
   }
 }
