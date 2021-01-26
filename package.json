@@ -11,7 +11,7 @@
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\""
   },
   "devDependencies": {
-    "prettier": "^2.1.2"
+    "prettier": "2.2.1"
   },
   "dependencies": {
     "webpack-sources": "^2.2.0"
