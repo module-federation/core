@@ -1,2 +1,8 @@
+const withModuleFederation = require("./withModuleFederation");
+const patchSharing = require("./patchSharing");
 const MergeRuntime = require("./merge-runtime");
-module.exports = MergeRuntime
+module.exports = {
+  withModuleFederation,
+  patchSharing,
+  MergeRuntime,
+};
