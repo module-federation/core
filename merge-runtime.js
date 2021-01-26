@@ -1,3 +1,4 @@
+
 const ConcatSource = require('webpack-sources/lib/ConcatSource');
 
 module.exports = class ModuleFedSingleRuntimePlugin {
