@@ -35,7 +35,7 @@ const withModuleFederation = (config, options, mfConfig) => {
     library: mfConfig.library
       ? mfConfig.library
       : { type: config.output.libraryTarget, name: mfConfig.name },
-    filename: "static/runtime/remoteEntry.js",
+    filename: mfConfig.filename || "static/runtime/remoteEntry.js",
     remotes: options.isServer
       ? nextServerRemote(mfConfig.remotes)
       : mfConfig.remotes,
