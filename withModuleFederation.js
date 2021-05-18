@@ -25,17 +25,10 @@ const nextServerRemote = (remoteObject) => {
 const withModuleFederation = (config, options, mfConfig) => {
   config.experiments = { topLevelAwait: true };
   if (!options.isServer) {
-    config.output.library = mfConfig.name;
-
-    config.externals = {
-      react: "React",
-      // ReactDOM: "ReactDOM"
-    };
+    config.output.uniqueName = mfConfig.name;
+    Object.assign(config.resolve.alias,{ react: require.resolve("./react.js")})
   } else {
-    config.externals = {
-      react: path.resolve(__dirname, "./react.js"),
-      // "react-dom": path.resolve("./react-dom.js"),
-    };
+    config.externals.push({react:require.resolve("./react.js")})
   }
   const federationConfig = {
     name: mfConfig.name,
@@ -49,9 +42,7 @@ const withModuleFederation = (config, options, mfConfig) => {
     exposes: mfConfig.exposes,
     shared: mfConfig.shared,
   };
-  if (!options.webpack.container) {
-    throw new Error("Module Federation only works with Webpack 5");
-  }
+
   config.plugins.push(
     new options.webpack.container.ModuleFederationPlugin(federationConfig)
   );

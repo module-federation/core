@@ -1,56 +1,58 @@
-const path = require("path");
-const fs = require("fs");
-module.exports = class MergeRemoteChunksPlugin {
+const ConcatSource = require("webpack-sources/lib/ConcatSource");
+
+const PLUGIN_NAME = "ModuleFedSingleRuntimePlugin";
+
+/**
+ * Merge a runtime with your remote entry.
+ */
+class ModuleFedSingleRuntimePlugin {
+  /**
+   * @param {object} options
+   * @param {string} [options.fileName= remoteEntry.js] The file name to concat the runtime with
+   * @param {string} [options.runtime= webpack] The runtime to merge
+   */
   constructor(options) {
-    this._options = Object.assign(
-      {},
-      {
-        filename: "remoteEntry",
-      },
-      options
-    );
+    this._options = {
+      fileName: "remoteEntry.js",
+      runtime: "webpack",
+      ...options,
+    };
   }
+
   // Define `apply` as its prototype method which is supplied with compiler as its argument
   apply(compiler) {
     if (!this._options) return null;
     const options = this._options;
 
     // Specify the event hook to attach to
-    compiler.hooks.afterEmit.tap("MergeRemoteChunksPlugin", (output) => {
-      const emittedAssets = Array.from(output.emittedAssets);
-      const { dir, name } = path.parse(options.filename);
-      const files = ["static/chunks/webpack", path.join(dir, name)]
-        .filter((neededChunk) =>
-          emittedAssets.some((emmitedAsset) =>
-            emmitedAsset.includes(neededChunk)
-          )
-        )
-        .map((neededChunk) =>
-          emittedAssets.find((emittedAsset) =>
-            emittedAsset.includes(neededChunk)
-          )
-        )
-        .map((file) => path.join(compiler.options.output.path, file));
-
-      if (files.length > 1) {
-        const runtime = fs.readFileSync(files[0], "utf-8");
-        const remoteContainer = fs.readFileSync(files[1], "utf-8");
-        const merged = [runtime, remoteContainer].join("\n");
-        const remotePath = path.join(
-          compiler.options.output.path,
-          "static/runtime"
-        );
-        if (fs.existsSync(remotePath)) {
-          fs.mkdir(remotePath, { recursive: true }, (err) => {
-            if (err) throw err;
-          });
-        }
-        fs.writeFile(
-          path.join(remotePath, "/remoteEntryMerged.js"),
-          merged,
-          () => {}
+    compiler.hooks.thisCompilation.tap(
+      "EnableSingleRunTimeForFederationPlugin",
+      (compilation) => {
+        compilation.hooks.processAssets.tap(
+          {
+            name: "EnableSingleRunTimeForFederationPlugin",
+            stage: compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
+          },
+          (assets) => {
+            const assetArray = Object.keys(assets);
+            let runtimePath = assetArray.find((asset) => {
+              return asset.includes(this._options.runtime);
+            });
+            let remoteEntryPath = assetArray.find((asset) => {
+              return asset.includes(this._options.fileName);
+            });
+            compilation.updateAsset(
+              remoteEntryPath,
+              new ConcatSource(
+                compilation.getAsset(runtimePath).source.buffer().toString(),
+                compilation.getAsset(remoteEntryPath).source.buffer().toString()
+              )
+            );
+          }
         );
       }
-    });
+    );
   }
-};
+}
+
+module.exports = ModuleFedSingleRuntimePlugin;

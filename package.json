@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/nextjs-mf",
-  "version": "0.0.2",
+  "version": "0.1.2-beta.0",
   "description": "Module Federation helper for NextJS",
   "main": "index.js",
   "repository": "https://github.com/module-federation/nextjs-mf",
@@ -14,14 +14,13 @@
     "nextjs-mf": "./bin/nextjs-mf.js"
   },
   "devDependencies": {
-    "prettier": "^2.1.2",
-    "react": "^17.0.1"
+    "prettier": "2.3.0",
+    "react": "17.0.2"
   },
   "peerDependencies": {
     "react": "^16 || ^17"
   },
   "dependencies": {
-    "shelljs": "^0.8.4",
-    "commander": "^6.2.0"
+    "webpack-sources": "^2.2.0"
   }
 }
