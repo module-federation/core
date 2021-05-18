@@ -18,27 +18,40 @@ class ModuleFedSingleRuntimePlugin {
       ...options,
     };
   }
+
   // Define `apply` as its prototype method which is supplied with compiler as its argument
   apply(compiler) {
     if (!this._options) return null;
     const options = this._options;
 
     // Specify the event hook to attach to
-    compiler.hooks.emit.tap(PLUGIN_NAME, (compilation) => {
-      const { assets } = compilation;
-      const assetArray = Object.keys(assets);
-
-      let runtimePath = assetArray.find((asset) => {
-        return asset.includes(this._options.runtime);
-      });
-      const runtime = assets[runtimePath];
-      let remoteEntryPath = assetArray.find((asset) => {
-        return asset.includes(this._options.fileName);
-      });
-      const remoteEntry = assets[remoteEntryPath];
-      const mergedSource = new ConcatSource(runtime, remoteEntry);
-      assets[remoteEntryPath] = mergedSource;
-    });
+    compiler.hooks.thisCompilation.tap(
+      "EnableSingleRunTimeForFederationPlugin",
+      (compilation) => {
+        compilation.hooks.processAssets.tap(
+          {
+            name: "EnableSingleRunTimeForFederationPlugin",
+            stage: compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
+          },
+          (assets) => {
+            const assetArray = Object.keys(assets);
+            let runtimePath = assetArray.find((asset) => {
+              return asset.includes(this._options.runtime);
+            });
+            let remoteEntryPath = assetArray.find((asset) => {
+              return asset.includes(this._options.fileName);
+            });
+            compilation.updateAsset(
+              remoteEntryPath,
+              new ConcatSource(
+                compilation.getAsset(runtimePath).source.buffer().toString(),
+                compilation.getAsset(remoteEntryPath).source.buffer().toString()
+              )
+            );
+          }
+        );
+      }
+    );
   }
 }
 

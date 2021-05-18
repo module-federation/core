@@ -1,8 +1,8 @@
 const path = require("path");
 const fs = require("fs");
-const React = require("react");
-global.React = React;
 const patchSharing = () => {
+  const React = require("react");
+  global.React = React;
   const reactPath = path.dirname(__non_webpack_require__.resolve("react"));
   const umdReact =
     process.env.NODE_ENV === "production"
