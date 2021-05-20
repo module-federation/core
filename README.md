@@ -10,7 +10,7 @@ This is a stable and viable workaround to leverage Module Federation [until this
 
 ### Supports
 
-- next ^9.5.6
+- next ^10.0.0
 - SSG
 - SSR
 
