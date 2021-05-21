@@ -35,19 +35,21 @@ class ModuleFedSingleRuntimePlugin {
           },
           (assets) => {
             const assetArray = Object.keys(assets);
-            let runtimePath = assetArray.find((asset) => {
-              return asset.includes(this._options.runtime);
-            });
-            let remoteEntryPath = assetArray.find((asset) => {
+            const remoteEntryPath = assetArray.find((asset) => {
               return asset.includes(this._options.fileName);
             });
-            compilation.updateAsset(
-              remoteEntryPath,
-              new ConcatSource(
-                compilation.getAsset(runtimePath).source.buffer().toString(),
-                compilation.getAsset(remoteEntryPath).source.buffer().toString()
-              )
-            );
+            if (remoteEntryPath) {
+              const runtimePath = assetArray.find((asset) => {
+                return asset.includes(this._options.runtime);
+              });
+              compilation.updateAsset(
+                remoteEntryPath,
+                new ConcatSource(
+                  compilation.getAsset(runtimePath).source.buffer().toString(),
+                  compilation.getAsset(remoteEntryPath).source.buffer().toString()
+                )
+              );
+            }
           }
         );
       }
