@@ -8,12 +8,12 @@ const PLUGIN_NAME = "ModuleFedSingleRuntimePlugin";
 class ModuleFedSingleRuntimePlugin {
   /**
    * @param {object} options
-   * @param {string} [options.fileName= remoteEntry.js] The file name to concat the runtime with
+   * @param {string} [options.filename= static/runtime/remoteEntry.js] The file name to concat the runtime with
    * @param {string} [options.runtime= webpack] The runtime to merge
    */
   constructor(options) {
     this._options = {
-      fileName: "remoteEntry.js",
+      filename: "static/runtime/remoteEntry.js",
       runtime: "webpack",
       ...options,
     };
@@ -36,7 +36,7 @@ class ModuleFedSingleRuntimePlugin {
           (assets) => {
             const assetArray = Object.keys(assets);
             const remoteEntryPath = assetArray.find((asset) => {
-              return asset.includes(this._options.fileName);
+              return asset.includes(this._options.filename);
             });
             if (remoteEntryPath) {
               const runtimePath = assetArray.find((asset) => {
@@ -46,7 +46,10 @@ class ModuleFedSingleRuntimePlugin {
                 remoteEntryPath,
                 new ConcatSource(
                   compilation.getAsset(runtimePath).source.buffer().toString(),
-                  compilation.getAsset(remoteEntryPath).source.buffer().toString()
+                  compilation
+                    .getAsset(remoteEntryPath)
+                    .source.buffer()
+                    .toString()
                 )
               );
             }
