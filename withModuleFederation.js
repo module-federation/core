@@ -26,9 +26,15 @@ const withModuleFederation = (config, options, mfConfig) => {
   config.experiments = { topLevelAwait: true };
   if (!options.isServer) {
     config.output.uniqueName = mfConfig.name;
-    Object.assign(config.resolve.alias,{ react: require.resolve("./react.js")})
+    Object.assign(config.resolve.alias,{
+      react: require.resolve("./react.js"),
+      '../next-server/lib/router-context': require.resolve("./next_router_context.js"),
+    })
   } else {
-    config.externals.push({react:require.resolve("./react.js")})
+    config.externals.push({
+      react:require.resolve("./react.js"),
+      '../next-server/lib/router-context': require.resolve("./next_router_context.js"),
+    })
   }
   const federationConfig = {
     name: mfConfig.name,
