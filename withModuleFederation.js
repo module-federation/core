@@ -40,8 +40,8 @@ const withModuleFederation = (config, options, mfConfig) => {
     });
   } else {
     Object.assign(config.resolve.alias, {
-      react$: require.resolve("./react.js"),
-      "react-dom$": require.resolve("./react-dom.js"),
+      // react$: require.resolve("./react.js"),
+      "react-dom/server$": require.resolve("./react-dom.js"),
       "../next-server/lib/router-context": require.resolve(
         "./next_router_context.js"
       ),
@@ -49,13 +49,13 @@ const withModuleFederation = (config, options, mfConfig) => {
         "./head-manager-context.js"
       ),
     });
-    // config.externals.push({
-    //   react: require.resolve("./react.js"),
-    //   "react-dom": require.resolve("./react-dom.js"),
-    //   "../next-server/lib/router-context": require.resolve(
-    //     "./next_router_context.js"
-    //   ),
-    // });
+    config.externals.unshift({
+      react: require.resolve("./react.js"),
+      // "react-dom": require.resolve("./react-dom.js"),
+      // "../next-server/lib/router-context": require.resolve(
+      //   "./next_router_context.js"
+      // ),
+    });
   }
   const federationConfig = {
     name: mfConfig.name,
