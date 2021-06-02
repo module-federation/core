@@ -39,12 +39,23 @@ const withModuleFederation = (config, options, mfConfig) => {
       ),
     });
   } else {
-    config.externals.push({
-      // react: require.resolve("./react.js"),
-      // "../next-server/lib/router-context": require.resolve(
-      //   "./next_router_context.js"
-      // ),
+    Object.assign(config.resolve.alias, {
+      react$: require.resolve("./react.js"),
+      "react-dom$": require.resolve("./react-dom.js"),
+      "../next-server/lib/router-context": require.resolve(
+        "./next_router_context.js"
+      ),
+      "../next-server/lib/head-manager-context": require.resolve(
+        "./head-manager-context.js"
+      ),
     });
+    // config.externals.push({
+    //   react: require.resolve("./react.js"),
+    //   "react-dom": require.resolve("./react-dom.js"),
+    //   "../next-server/lib/router-context": require.resolve(
+    //     "./next_router_context.js"
+    //   ),
+    // });
   }
   const federationConfig = {
     name: mfConfig.name,

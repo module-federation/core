@@ -10,7 +10,7 @@ if (global.React) {
   console.log("loading fresh react");
   var isWebpack = typeof __non_webpack_require__ === "undefined";
   global.React = isWebpack
-    ? __non_webpack_require__("react")
+    ? __non_webpack_require__("react/cjs/react.production.min")
     : require("react/cjs/react.production.min");
   module.exports = global.React;
 }
