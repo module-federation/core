@@ -10,7 +10,7 @@ This is a stable and viable workaround to leverage Module Federation [until this
 
 ### Supports
 
-- next ^9.5.6
+- next ^10.2.x
 - SSG
 - SSR
 
@@ -50,7 +50,7 @@ module.exports = {
   webpack: (config, options) => {
     const { buildId, dev, isServer, defaultLoaders, webpack } = options;
     const mfConf = {
-      mergeRuntime: true, //this is experimental,  read below
+      mergeRuntime: true,
       name: "next2",
       library: { type: config.output.libraryTarget, name: "next2" },
       filename: "static/runtime/remoteEntry.js",
@@ -74,35 +74,6 @@ module.exports = {
     return config;
   },
 };
-```
-
-2. Add the `patchSharing` to `_document.js`. This will solve the react sharing issue.
-
-```jsx
-import Document, { Html, Head, Main, NextScript } from "next/document";
-import { patchSharing } from "@module-federation/nextjs-mf";
-
-class MyDocument extends Document {
-  static async getInitialProps(ctx) {
-    const initialProps = await Document.getInitialProps(ctx);
-    return { ...initialProps };
-  }
-
-  render() {
-    return (
-      <Html>
-        {patchSharing()}
-        <script src="http://localhost:3000/_next/static/chunks/webpack.js" />
-        <script src="http://localhost:3000/_next/static/runtime/remoteEntry.js" />
-        <Head />
-        <body>
-          <Main />
-          <NextScript />
-        </body>
-      </Html>
-    );
-  }
-}
 ```
 
 3. Use top-level-await
