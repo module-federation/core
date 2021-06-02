@@ -76,11 +76,11 @@ module.exports = {
 };
 ```
 
-2. Add the `patchSharing` to `_document.js`. This will solve the react sharing issue.
+2. Add the `patchSharingSrc` to `_document.js`. This will solve the react sharing issue.
 
 ```jsx
 import Document, { Html, Head, Main, NextScript } from "next/document";
-import { patchSharing } from "@module-federation/nextjs-mf";
+import { patchSharingSrc } from "@module-federation/nextjs-mf";
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
@@ -91,7 +91,7 @@ class MyDocument extends Document {
   render() {
     return (
       <Html>
-        {patchSharing()}
+        {patchSharingSrc()}
         <script src="http://localhost:3000/_next/static/chunks/webpack.js" />
         <script src="http://localhost:3000/_next/static/runtime/remoteEntry.js" />
         <Head />
