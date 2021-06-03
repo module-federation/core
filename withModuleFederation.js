@@ -1,6 +1,6 @@
 const path = require("path");
 const MergeRuntime = require("./merge-runtime");
-const DeifnePlugin = require("webpack/lib/DefinePlugin");
+const DefinePlugin = require("webpack/lib/DefinePlugin");
 
 const nextServerRemote = (remoteObject) => {
   if (!typeof remoteObject === "object") {
@@ -77,7 +77,7 @@ const withModuleFederation = (config, options, mfConfig) => {
     config.plugins.push(new MergeRuntime(federationConfig));
   }
   config.plugins.push(
-    new DeifnePlugin({
+    new DefinePlugin({
       __CURRENT_HOST__: JSON.stringify(mfConfig.name),
       __LISTED_REMOTES__: JSON.stringify(Object.keys(federationConfig.remotes)),
     })
