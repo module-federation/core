@@ -46,6 +46,12 @@ nextjs-mf upgrade -p 3001
 const { withModuleFederation } = require("@module-federation/nextjs-mf");
 const path = require("path");
 
+// For SSR, resolve to disk path (or you can use code streaming if you have access)
+// in production use the chunks
+const ssrRemoteEntry = (process.env.NODE_ENV === 'production') ? 
+  path.join('<remotes-path>/next1/.next/server/chunks/static/runtime/remoteEntry.js')
+  path.resolve(__dirname, "../next1/.next/server/static/runtime/remoteEntry.js")
+
 module.exports = {
   webpack: (config, options) => {
     const { buildId, dev, isServer, defaultLoaders, webpack } = options;
@@ -55,12 +61,8 @@ module.exports = {
       library: { type: config.output.libraryTarget, name: "next2" },
       filename: "static/runtime/remoteEntry.js",
       remotes: {
-        // For SSR, resolve to disk path (or you can use code streaming if you have access)
         next1: isServer
-          ? path.resolve(
-              __dirname,
-              "../next1/.next/server/static/runtime/remoteEntry.js"
-            )
+          ? ssrRemoteEntry
           : "next1", // for client, treat it as a global
       },
       exposes: {
