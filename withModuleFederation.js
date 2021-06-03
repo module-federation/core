@@ -50,7 +50,7 @@ const withModuleFederation = (config, options, mfConfig) => {
       ),
     });
     config.externals.unshift({
-      react: require.resolve("./react.js"),
+      react: path.relative(path.join(config.context, 'node_modules'), require.resolve("./react.js")),
       // "react-dom": require.resolve("./react-dom.js"),
       // "../next-server/lib/router-context": require.resolve(
       //   "./next_router_context.js"
