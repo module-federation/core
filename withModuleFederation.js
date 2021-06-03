@@ -1,5 +1,7 @@
 const path = require("path");
 const MergeRuntime = require("./merge-runtime");
+const DefinePlugin = require("webpack/lib/DefinePlugin");
+
 const nextServerRemote = (remoteObject) => {
   if (!typeof remoteObject === "object") {
     throw new Error("Remotes must be configured as an object");
@@ -26,15 +28,34 @@ const withModuleFederation = (config, options, mfConfig) => {
   config.experiments = { topLevelAwait: true };
   if (!options.isServer) {
     config.output.uniqueName = mfConfig.name;
-    Object.assign(config.resolve.alias,{
-      react: require.resolve("./react.js"),
-      '../next-server/lib/router-context': require.resolve("./next_router_context.js"),
-    })
+    Object.assign(config.resolve.alias, {
+      react$: require.resolve("./react.js"),
+      "react-dom$": require.resolve("./react-dom.js"),
+      "../next-server/lib/router-context": require.resolve(
+        "./next_router_context.js"
+      ),
+      "../next-server/lib/head-manager-context": require.resolve(
+        "./head-manager-context.js"
+      ),
+    });
   } else {
-    config.externals.push({
-      react:require.resolve("./react.js"),
-      '../next-server/lib/router-context': require.resolve("./next_router_context.js"),
-    })
+    Object.assign(config.resolve.alias, {
+      // react$: require.resolve("./react.js"),
+      "react-dom/server$": require.resolve("./react-dom.js"),
+      "../next-server/lib/router-context": require.resolve(
+        "./next_router_context.js"
+      ),
+      "../next-server/lib/head-manager-context": require.resolve(
+        "./head-manager-context.js"
+      ),
+    });
+    config.externals.unshift({
+      react: require.resolve("./react.js"),
+      // "react-dom": require.resolve("./react-dom.js"),
+      // "../next-server/lib/router-context": require.resolve(
+      //   "./next_router_context.js"
+      // ),
+    });
   }
   const federationConfig = {
     name: mfConfig.name,
@@ -55,5 +76,11 @@ const withModuleFederation = (config, options, mfConfig) => {
   if (mfConfig.mergeRuntime) {
     config.plugins.push(new MergeRuntime(federationConfig));
   }
+  config.plugins.push(
+    new DefinePlugin({
+      __CURRENT_HOST__: JSON.stringify(mfConfig.name),
+      __LISTED_REMOTES__: JSON.stringify(Object.keys(federationConfig.remotes)),
+    })
+  );
 };
 module.exports = withModuleFederation;
