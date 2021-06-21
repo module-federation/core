@@ -48,9 +48,9 @@ const path = require("path");
 
 // For SSR, resolve to disk path (or you can use code streaming if you have access)
 // in production use the chunks
-const ssrRemoteEntry = (process.env.NODE_ENV === 'production') ? 
-  path.join('<remotes-path>/next1/.next/server/chunks/static/runtime/remoteEntry.js')
-  path.resolve(__dirname, "../next1/.next/server/static/runtime/remoteEntry.js")
+const ssrRemoteEntry = (process.env.NODE_ENV === 'production')
+  ? path.join('<remotes-path>/next1/.next/server/chunks/static/runtime/remoteEntry.js')
+  : path.resolve(__dirname, "../next1/.next/server/static/runtime/remoteEntry.js")
 
 module.exports = {
   webpack: (config, options) => {
