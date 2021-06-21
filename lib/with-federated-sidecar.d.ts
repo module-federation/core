@@ -1,10 +1,10 @@
 import type { ModuleFederationPluginOptions } from "webpack/lib/container/ModuleFederationPlugin";
 
-export type WithModuleFederationOptions = {
+export type WithFederatedSidecarOptions = {
   removePlugins?: string[];
 };
 
-export function withModuleFederation(
+export function withFederatedSidecar(
   federationPluginOptions: ModuleFederationPluginOptions,
-  withModuleFederationOptions?: WithModuleFederationOptions
+  withModuleFederationOptions?: WithFederatedSidecarOptions
 ): (nextConfig?: any) => any;

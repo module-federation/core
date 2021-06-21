@@ -24,27 +24,27 @@ This is a stable and viable workaround to leverage Module Federation [until this
 
 You can see it in action here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs (needs to be updated)
 
-## How to add to a nextjs app
+## How to add a sidecar for exposes to your nextjs app
 
-1. Use `withModuleFederation` in your `next.config.js`
+1. Use `withFederatedSidecar` in your `next.config.js` of the app that you wish to expose modules from. We'll call this "next2".
 
 ```js
 // next.config.js
-const { withModuleFederation } = require("@module-federation/nextjs-mf");
+const { withFederatedSidecar } = require("@module-federation/nextjs-mf");
 
-module.exports = withModuleFederation({
-  mergeRuntime: true,
+module.exports = withFederatedSidecar({
   name: "next2",
-  library: { type: "var", name: "next2" },
   filename: "static/chunks/remoteEntry.js",
-  remotes: {
-    next1: "next1", // for client, treat it as a global
-  },
   exposes: {
-    "./nav": "./components/nav",
+    "./sampleComponent": "./components/sampleComponent.js",
   },
   shared: {
     react: {
+      // Notice shared are NOT eager here.
+      requiredVersion: false,
+      singleton: true,
+    },
+    "next/dynamic": {
       requiredVersion: false,
       singleton: true,
     },
@@ -58,7 +58,44 @@ module.exports = withModuleFederation({
 });
 ```
 
-3. Add the remote entry to the \_document
+3. For the consuming application, we'll call it "next1", add an instance of the ModuleFederationPlugin to your webpack config:
+
+```js
+module.exports = {
+  webpack(config) {
+    config.plugins.push(
+      new options.webpack.container.ModuleFederationPlugin({
+        remoteType: "var",
+        remotes: {
+          next2: "next2",
+        },
+        shared: {
+          react: {
+            // Notice shared ARE eager here.
+            eager: true,
+            singleton: true,
+            requiredVersion: false,
+          },
+          "next/dynamic": {
+            eager: true,
+            singleton: true,
+            requiredVersion: false,
+          },
+          "next/link": {
+            eager: true,
+            singleton: true,
+            requiredVersion: false,
+          },
+        },
+      })
+    );
+
+    return config;
+  },
+};
+```
+
+4. Add the remote entry for "next2" to the \_document for "next1"
 
 ```js
 import Document, { Html, Head, Main, NextScript } from "next/document";
@@ -75,7 +112,7 @@ class MyDocument extends Document {
         <Head />
         <body>
           <Main />
-          <script src="http://your-domain-here.com/next1RemoteEntry.js" />
+          <script src="http://next2-domain-here.com/_next/static/chunks/remoteEntry.js" />
           <NextScript />
         </body>
       </Html>
@@ -86,10 +123,10 @@ class MyDocument extends Document {
 export default MyDocument;
 ```
 
-4. Use next/dynamic to import from your remotes
+5. Use next/dynamic to import from your remotes
 
 ```js
-const SampleComponent = dynamic(() => import("next1/sampleComponent"), {
+const SampleComponent = dynamic(() => import("next2/sampleComponent"), {
   ssr: false,
 });
 ```

@@ -1,5 +1,5 @@
-const withModuleFederation = require("./lib/with-module-federation");
+const withFederatedSidecar = require("./lib/with-federated-sidecar");
 
 module.exports = {
-  withModuleFederation,
+  withFederatedSidecar,
 };

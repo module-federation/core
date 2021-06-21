@@ -1,2 +1,2 @@
-export type { WithModuleFederationOptions } from "./lib/with-module-federation";
-export { withModuleFederation } from "./lib/with-module-federation";
+export type { WithFederatedSidecarOptions } from "./lib/with-federated-sidecar";
+export { withFederatedSidecar } from "./lib/with-federated-sidecar";
