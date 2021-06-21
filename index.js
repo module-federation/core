@@ -1,6 +1,5 @@
-const withModuleFederation = require("./withModuleFederation");
-const MergeRuntime = require("./merge-runtime");
+const withModuleFederation = require("./lib/with-module-federation");
+
 module.exports = {
   withModuleFederation,
-  MergeRuntime
 };
