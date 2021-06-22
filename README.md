@@ -77,7 +77,17 @@ module.exports = {
 };
 ```
 
-4. Add the remote entry for "next2" to the \_document for "next1"
+4. Make sure you have an `_app.js` file, then add the loader
+
+```js
+// we attach next internals to share scope at runtime
+config.module.rules.push({
+  test: /_app.js/,
+  loader: "@module-federation/nextjs-mf/lib/federation-loader.js",
+});
+```
+
+5. Add the remote entry for "next2" to the \_document for "next1"
 
 ```js
 import Document, { Html, Head, Main, NextScript } from "next/document";
@@ -104,34 +114,7 @@ class MyDocument extends Document {
 
 export default MyDocument;
 ```
-5. Add additional share scope to `_app.js` - this ensures next internals are available for the rest of the app
-   
-```js
-// TODO: make this a loader so its automatic
-if (process.browser) {
-  //bolt on some next internals that cannot be shared via MF api
-  Object.assign(__webpack_share_scopes__.default, {
-    "next/link": {
-      [next.version]: {
-        loaded: true,
-        get: () => Promise.resolve(() => require("next/link")),
-      },
-    },
-    "next/head": {
-      [next.version]: {
-        loaded: true,
-        get: () => Promise.resolve(() => require("next/head")),
-      },
-    },
-    "next/dynamic": {
-      [next.version]: {
-        loaded: true,
-        get: () => Promise.resolve(() => require("next/dynamic")),
-      },
-    },
-  });
-}
-```
+
 6. Use next/dynamic to import from your remotes
 
 ```js
