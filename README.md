@@ -43,15 +43,7 @@ module.exports = withFederatedSidecar({
       // Notice shared are NOT eager here.
       requiredVersion: false,
       singleton: true,
-    },
-    "next/dynamic": {
-      requiredVersion: false,
-      singleton: true,
-    },
-    "next/link": {
-      requiredVersion: false,
-      singleton: true,
-    },
+    }
   },
 })({
   // your original next.config.js export
@@ -115,6 +107,7 @@ export default MyDocument;
 5. Add additional share scope to `_app.js` - this ensures next internals are available for the rest of the app
    
 ```js
+// TODO: make this a loader so its automatic
 if (process.browser) {
   //bolt on some next internals that cannot be shared via MF api
   Object.assign(__webpack_share_scopes__.default, {
