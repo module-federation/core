@@ -50,7 +50,7 @@ module.exports = withFederatedSidecar({
 });
 ```
 
-3. For the consuming application, we'll call it "next1", add an instance of the ModuleFederationPlugin to your webpack config:
+2. For the consuming application, we'll call it "next1", add an instance of the ModuleFederationPlugin to your webpack config:
 
 ```js
 module.exports = {
@@ -77,7 +77,7 @@ module.exports = {
 };
 ```
 
-4. Make sure you have an `_app.js` file, then add the loader
+3. Make sure you have an `_app.js` file, then add the loader
 
 ```js
 // we attach next internals to share scope at runtime
@@ -87,7 +87,7 @@ config.module.rules.push({
 });
 ```
 
-5. Add the remote entry for "next2" to the \_document for "next1"
+4. Add the remote entry for "next2" to the \_document for "next1"
 
 ```js
 import Document, { Html, Head, Main, NextScript } from "next/document";
@@ -115,7 +115,7 @@ class MyDocument extends Document {
 export default MyDocument;
 ```
 
-6. Use next/dynamic to import from your remotes
+5. Use next/dynamic to import from your remotes
 
 ```js
 const SampleComponent = dynamic(() => import("next2/sampleComponent"), {
