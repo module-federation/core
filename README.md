@@ -75,17 +75,7 @@ module.exports = {
             eager: true,
             singleton: true,
             requiredVersion: false,
-          },
-          "next/dynamic": {
-            eager: true,
-            singleton: true,
-            requiredVersion: false,
-          },
-          "next/link": {
-            eager: true,
-            singleton: true,
-            requiredVersion: false,
-          },
+          }
         },
       })
     );
@@ -122,8 +112,34 @@ class MyDocument extends Document {
 
 export default MyDocument;
 ```
-
-5. Use next/dynamic to import from your remotes
+5. Add additional share scope to `_app.js` - this ensures next internals are available for the rest of the app
+   
+```js
+if (process.browser) {
+  //bolt on some next internals that cannot be shared via MF api
+  Object.assign(__webpack_share_scopes__.default, {
+    "next/link": {
+      [next.version]: {
+        loaded: true,
+        get: () => Promise.resolve(() => require("next/link")),
+      },
+    },
+    "next/head": {
+      [next.version]: {
+        loaded: true,
+        get: () => Promise.resolve(() => require("next/head")),
+      },
+    },
+    "next/dynamic": {
+      [next.version]: {
+        loaded: true,
+        get: () => Promise.resolve(() => require("next/dynamic")),
+      },
+    },
+  });
+}
+```
+6. Use next/dynamic to import from your remotes
 
 ```js
 const SampleComponent = dynamic(() => import("next2/sampleComponent"), {
