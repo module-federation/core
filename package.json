@@ -12,7 +12,7 @@
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\""
   },
   "devDependencies": {
-    "next": "11.0.0",
+    "next": "11.0.1",
     "prettier": "2.3.2",
     "webpack": "5.40.0"
   }
