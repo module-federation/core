@@ -11,6 +11,9 @@
   "scripts": {
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\""
   },
+  "dependencies": {
+    "webpack-federated-stats-plugin": "2.0.5"
+  },
   "devDependencies": {
     "next": "11.0.0",
     "prettier": "2.3.2",
