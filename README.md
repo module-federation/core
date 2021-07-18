@@ -10,10 +10,8 @@ This is a stable and viable workaround to leverage Module Federation [until this
 
 ### Supports
 
-- next ^10.2.x
+- next ^10.2.x || ^11.x.x
 - Client side only
-
-**Once I PR webpack, this workaround will no longer be required.**
 
 # Check out our book
 
@@ -62,11 +60,9 @@ module.exports = {
           next2: "next2",
         },
         shared: {
-          react: {
-            // Notice shared ARE eager here.
-            eager: true,
-            singleton: true,
-            requiredVersion: false,
+          // we have to share something to ensure share scope is initialized
+          "@module-federation/nextjs-mf/lib/noop": {
+            eager: false
           }
         },
       })
