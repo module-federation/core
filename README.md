@@ -24,7 +24,7 @@ This is a stable and viable workaround to leverage Module Federation [until this
 
 You can see it in action here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs (needs to be updated)
 
-## How to add a sidecar for exposes to your nextjs app
+## How to add a sidecar for exposure to your nextjs app
 
 1. Use `withFederatedSidecar` in your `next.config.js` of the app that you wish to expose modules from. We'll call this "next2".
 
@@ -54,7 +54,7 @@ module.exports = withFederatedSidecar({
 
 ```js
 module.exports = {
-  webpack(config) {
+  webpack(config, options) {
     config.plugins.push(
       new options.webpack.container.ModuleFederationPlugin({
         remoteType: "var",
