@@ -2,25 +2,36 @@
 
 This plugin enables Module Federation on Next.js
 
-This is a workaround to hard limitations caused by Next.js being synchronous.
-
-I am working on an update to Webpack Core which will circumvent projects with older architecture (like Next.js).
-
-This is a stable and viable workaround to leverage Module Federation [until this issue is resolved](https://github.com/webpack/webpack/issues/11811).
+This is a stable and viable solution to leverage Module Federation [until this issue is resolved](https://github.com/webpack/webpack/issues/11811).
 
 ### Supports
 
 - next ^10.2.x || ^11.x.x
 - Client side only
 
-# Check out our book
+## Whats shared by default?
 
-| <a href="https://module-federation.myshopify.com/products/practical-module-federation" target="_blank"><img src="./docs/MFCover.png" alt='Practical Module Federation Book' width="95%"/></a> | <a href="https://module-federation.myshopify.com/products/practical-module-federation" target="_blank">We will be actively updating this book over the next year as we learn more about best practices and what issues people are running into with Module Federation, as well as with every release of Webpack as it moves towards a release candidate and release. So with your one purchase you are buying a whole year of updates.</a> |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+Under the hood we share some next internals automatically
+You do not need to share these packages, sharing next internals yourself will cause errors.
 
-#### Demo
+```js
+ "next/dynamic": {
+    requiredVersion: false,
+    singleton: true,
+  },
+  "next/link": {
+    requiredVersion: false,
+    singleton: true,
+  },
+  "next/head": {
+    requiredVersion: false,
+    singleton: true,
+  },
+```
 
-You can see it in action here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs (needs to be updated)
+## Demo
+
+You can see it in action here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs
 
 ## How to add a sidecar for exposes to your nextjs app
 
@@ -41,7 +52,7 @@ module.exports = withFederatedSidecar({
       // Notice shared are NOT eager here.
       requiredVersion: false,
       singleton: true,
-    }
+    },
   },
 })({
   // your original next.config.js export
@@ -62,8 +73,8 @@ module.exports = {
         shared: {
           // we have to share something to ensure share scope is initialized
           "@module-federation/nextjs-mf/lib/noop": {
-            eager: false
-          }
+            eager: false,
+          },
         },
       })
     );
@@ -118,3 +129,10 @@ const SampleComponent = dynamic(() => import("next2/sampleComponent"), {
   ssr: false,
 });
 ```
+
+## Contact
+
+If you have any questions or need to report a bug
+<a href="https://twitter.com/ScriptedAlchemy"> Reach me on Twitter @ScriptedAlchemy</a>
+
+Or join this discussion thread: https://github.com/module-federation/module-federation-examples/discussions/978
