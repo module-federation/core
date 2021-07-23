@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/nextjs-mf",
-  "version": "2.3.1",
+  "version": "3.1.1",
   "description": "Module Federation helper for NextJS",
   "main": "index.js",
   "types": "index.d.ts",
@@ -11,6 +11,7 @@
   "scripts": {
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\""
   },
+  "publishConfig": { "registry": "https://r.privjs.com" },
   "dependencies": {
     "webpack-federated-stats-plugin": "2.0.5"
   },
