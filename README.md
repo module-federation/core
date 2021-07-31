@@ -29,6 +29,56 @@ You do not need to share these packages, sharing next internals yourself will ca
   },
 ```
 
+## Things to watch out for
+
+There's a big in next.js which causes it to attempt and fail to resolve federated imports on files imported into the `pages/index.js`
+
+Its recommended using the low-level api to be safe.
+
+```js
+const SampleComponent = dynamic(
+  () => window.next2.get("./sampleComponent").then((factory) => factory()),
+  {
+    ssr: false,
+  }
+);
+```
+
+Make sure you are using `mini-css-extract-plugin@2` - version 2 supports resolving assets through `publicPath:'auto'`
+
+## Options
+
+```js
+withFederatedSidecar(
+  {
+    name: "next2",
+    filename: "static/chunks/remoteEntry.js",
+    exposes: {
+      "./sampleComponent": "./components/sampleComponent.js",
+    },
+    shared: {
+      react: {
+        // Notice shared are NOT eager here.
+        requiredVersion: false,
+        singleton: true,
+      },
+    },
+  },
+  {
+    removePlugins: [
+      // optional
+      // these are the defaults
+      "BuildManifestPlugin",
+      "ReactLoadablePlugin",
+      "DropClientPage",
+      "WellKnownErrorsPlugin",
+      "ModuleFederationPlugin",
+    ],
+    publicPath: "auto", // defaults to 'auto', is optional
+  }
+);
+```
+
 ## Demo
 
 You can see it in action here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs
@@ -125,9 +175,12 @@ export default MyDocument;
 5. Use next/dynamic to import from your remotes
 
 ```js
-const SampleComponent = dynamic(() => import("next2/sampleComponent"), {
-  ssr: false,
-});
+const SampleComponent = dynamic(
+  () => window.next2.get("./sampleComponent").then((factory) => factory()),
+  {
+    ssr: false,
+  }
+);
 ```
 
 ## Contact
