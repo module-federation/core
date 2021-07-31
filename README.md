@@ -2,85 +2,102 @@
 
 This plugin enables Module Federation on Next.js
 
-This is a workaround to hard limitations caused by Next.js being synchronous.
-
-I am working on an update to Webpack Core which will circumvent projects with older architecture (like Next.js).
-
-This is a stable and viable workaround to leverage Module Federation [until this issue is resolved](https://github.com/webpack/webpack/issues/11811).
+This is a stable and viable solution to leverage Module Federation [until this issue is resolved](https://github.com/webpack/webpack/issues/11811).
 
 ### Supports
 
-- next ^10.0.0
-- SSG
-- SSR
+- next ^10.2.x || ^11.x.x
+- Client side only
 
-**Once I PR webpack, this workaround will no longer be required.**
+## Whats shared by default?
 
-# Check out our book
+Under the hood we share some next internals automatically
+You do not need to share these packages, sharing next internals yourself will cause errors.
 
-| <a href="https://module-federation.myshopify.com/products/practical-module-federation" target="_blank"><img src="./docs/MFCover.png" alt='Practical Module Federation Book' width="95%"/></a> | <a href="https://module-federation.myshopify.com/products/practical-module-federation" target="_blank">We will be actively updating this book over the next year as we learn more about best practices and what issues people are running into with Module Federation, as well as with every release of Webpack as it moves towards a release candidate and release. So with your one purchase you are buying a whole year of updates.</a> |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+```js
+ "next/dynamic": {
+    requiredVersion: false,
+    singleton: true,
+  },
+  "next/link": {
+    requiredVersion: false,
+    singleton: true,
+  },
+  "next/head": {
+    requiredVersion: false,
+    singleton: true,
+  },
+```
 
-#### Demo
+## Demo
 
 You can see it in action here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs
 
-## How to use on a fresh nextjs app
+## How to add a sidecar for exposes to your nextjs app
 
-```sh
-yarn global add @module-federation/nextjs-mf
-```
-
-Run this inside of a fresh nextjs install.
-
-```sh
-nextjs-mf upgrade -p 3001
-```
-
-## How to use on an existing app
-
-1. Use `withModuleFederation` in your `next.config.js`
+1. Use `withFederatedSidecar` in your `next.config.js` of the app that you wish to expose modules from. We'll call this "next2".
 
 ```js
 // next.config.js
-const { withModuleFederation } = require("@module-federation/nextjs-mf");
-const path = require("path");
+const { withFederatedSidecar } = require("@module-federation/nextjs-mf");
 
+module.exports = withFederatedSidecar({
+  name: "next2",
+  filename: "static/chunks/remoteEntry.js",
+  exposes: {
+    "./sampleComponent": "./components/sampleComponent.js",
+  },
+  shared: {
+    react: {
+      // Notice shared are NOT eager here.
+      requiredVersion: false,
+      singleton: true,
+    },
+  },
+})({
+  // your original next.config.js export
+});
+```
+
+2. For the consuming application, we'll call it "next1", add an instance of the ModuleFederationPlugin to your webpack config:
+
+```js
 module.exports = {
-  webpack: (config, options) => {
-    const { buildId, dev, isServer, defaultLoaders, webpack } = options;
-    const mfConf = {
-      mergeRuntime: true, //this is experimental,  read below
-      name: "next2",
-      library: { type: config.output.libraryTarget, name: "next2" },
-      filename: "static/runtime/remoteEntry.js",
-      remotes: {
-        // For SSR, resolve to disk path (or you can use code streaming if you have access)
-        next1: isServer
-          ? path.resolve(
-              __dirname,
-              "../next1/.next/server/static/runtime/remoteEntry.js"
-            )
-          : "next1", // for client, treat it as a global
-      },
-      exposes: {
-        "./nav": "./components/nav",
-      },
-      shared: ["lodash"],
-    };
-    // Configures ModuleFederation and other Webpack properties
-    withModuleFederation(config, options, mfConf);
+  webpack(config) {
+    config.plugins.push(
+      new options.webpack.container.ModuleFederationPlugin({
+        remoteType: "var",
+        remotes: {
+          next2: "next2",
+        },
+        shared: {
+          // we have to share something to ensure share scope is initialized
+          "@module-federation/nextjs-mf/lib/noop": {
+            eager: false,
+          },
+        },
+      })
+    );
 
     return config;
   },
 };
 ```
 
-2. Add the `patchSharing` to `_document.js`. This will solve the react sharing issue.
+3. Make sure you have an `_app.js` file, then add the loader
 
-```jsx
+```js
+// we attach next internals to share scope at runtime
+config.module.rules.push({
+  test: /_app.js/,
+  loader: "@module-federation/nextjs-mf/lib/federation-loader.js",
+});
+```
+
+4. Add the remote entry for "next2" to the \_document for "next1"
+
+```js
 import Document, { Html, Head, Main, NextScript } from "next/document";
-import { patchSharing } from "@module-federation/nextjs-mf";
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
@@ -91,51 +108,31 @@ class MyDocument extends Document {
   render() {
     return (
       <Html>
-        {patchSharing()}
-        <script src="http://localhost:3000/_next/static/chunks/webpack.js" />
-        <script src="http://localhost:3000/_next/static/runtime/remoteEntry.js" />
         <Head />
         <body>
           <Main />
+          <script src="http://next2-domain-here.com/_next/static/chunks/remoteEntry.js" />
           <NextScript />
         </body>
       </Html>
     );
   }
 }
+
+export default MyDocument;
 ```
 
-3. Use top-level-await
+5. Use next/dynamic to import from your remotes
 
 ```js
-// some-component.js
-const Nav = (await import("../components/nav")).default;
-const _ = await import("lodash");
+const SampleComponent = dynamic(() => import("next2/sampleComponent"), {
+  ssr: false,
+});
 ```
 
-## Experimental
+## Contact
 
-Use at your own risk.
+If you have any questions or need to report a bug
+<a href="https://twitter.com/ScriptedAlchemy"> Reach me on Twitter @ScriptedAlchemy</a>
 
-Next.js uses `runtimeChunk:'single'`
-Which forces us to also add the webpack script itself. Till this is fixed in webpack, heres a plugin that will merge the runtimes back together for MF
-
-This can be enabled via `mergeRuntime` flag. This is not part of Module Federation, its part of this plugin.
-
-`withModuleFederation(config, options, {mergeRuntime:true,...mfConf})`
-
-You can manually add it as follows
-
-```js
-const { MergeRuntime } = require("@module-federation/nextjs-mf");
-// in your next config.
-config.plugins.push(new MergeRuntime({ filename: "remoteEntry" }));
-```
-
-This allows the following to be done
-
-```diff
-- <script src="http://localhost:3000/_next/static/chunks/webpack.js" />
-- <script src="http://localhost:3000/_next/static/runtime/remoteEntry.js" />
-+ <script src="http://localhost:3000/_next/static/remoteEntryMerged.js" />
-```
+Or join this discussion thread: https://github.com/module-federation/module-federation-examples/discussions/978
