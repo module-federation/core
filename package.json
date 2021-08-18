@@ -13,7 +13,7 @@
   },
   "publishConfig": { "registry": "https://r.privjs.com" },
   "dependencies": {
-    "webpack-federated-stats-plugin": "2.0.5"
+    "webpack-federated-stats-plugin": "2.0.8"
   },
   "devDependencies": {
     "next": "11.0.1",
