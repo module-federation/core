@@ -16,17 +16,67 @@ You do not need to share these packages, sharing next internals yourself will ca
 
 ```js
  "next/dynamic": {
-    requiredVersion: false,
+  requiredVersion: false,
     singleton: true,
-  },
-  "next/link": {
-    requiredVersion: false,
+},
+"next/link": {
+  requiredVersion: false,
     singleton: true,
-  },
-  "next/head": {
-    requiredVersion: false,
+},
+"next/head": {
+  requiredVersion: false,
     singleton: true,
+},
+```
+
+## Things to watch out for
+
+There's a bug in next.js which causes it to attempt and fail to resolve federated imports on files imported into the `pages/index.js`
+
+Its recommended using the low-level api to be safe.
+
+```js
+const SampleComponent = dynamic(
+  () => window.next2.get("./sampleComponent").then((factory) => factory()),
+  {
+    ssr: false,
+  }
+);
+```
+
+Make sure you are using `mini-css-extract-plugin@2` - version 2 supports resolving assets through `publicPath:'auto'`
+
+## Options
+
+```js
+withFederatedSidecar(
+  {
+    name: "next2",
+    filename: "static/chunks/remoteEntry.js",
+    exposes: {
+      "./sampleComponent": "./components/sampleComponent.js",
+    },
+    shared: {
+      react: {
+        // Notice shared are NOT eager here.
+        requiredVersion: false,
+        singleton: true,
+      },
+    },
   },
+  {
+    removePlugins: [
+      // optional
+      // these are the defaults
+      "BuildManifestPlugin",
+      "ReactLoadablePlugin",
+      "DropClientPage",
+      "WellKnownErrorsPlugin",
+      "ModuleFederationPlugin",
+    ],
+    publicPath: "auto", // defaults to 'auto', is optional
+  }
+);
 ```
 
 ## Demo
@@ -59,11 +109,11 @@ module.exports = withFederatedSidecar({
 });
 ```
 
-2. For the consuming application, we'll call it "next1", add an instance of the ModuleFederationPlugin to your webpack config:
+2. For the consuming application, we'll call it "next1", add an instance of the ModuleFederationPlugin to your webpack config, and ensure you have a [custom Next.js App](https://nextjs.org/docs/advanced-features/custom-app) `pages/_app.js` (or `.tsx`):
 
 ```js
 module.exports = {
-  webpack(config) {
+  webpack(config, options) {
     config.plugins.push(
       new options.webpack.container.ModuleFederationPlugin({
         remoteType: "var",
@@ -71,6 +121,12 @@ module.exports = {
           next2: "next2",
         },
         shared: {
+          react: {
+            // Notice shared ARE eager here.
+            eager: true,
+            singleton: true,
+            requiredVersion: false,
+          },
           // we have to share something to ensure share scope is initialized
           "@module-federation/nextjs-mf/lib/noop": {
             eager: false,
@@ -78,20 +134,16 @@ module.exports = {
         },
       })
     );
+    
+    // we attach next internals to share scope at runtime
+    config.module.rules.push({
+      test: /pages\/_app.[jt]sx?/,
+      loader: "@module-federation/nextjs-mf/lib/federation-loader.js",
+    });
 
     return config;
   },
 };
-```
-
-3. Make sure you have an `_app.js` file, then add the loader
-
-```js
-// we attach next internals to share scope at runtime
-config.module.rules.push({
-  test: /_app.js/,
-  loader: "@module-federation/nextjs-mf/lib/federation-loader.js",
-});
 ```
 
 4. Add the remote entry for "next2" to the \_document for "next1"
@@ -125,9 +177,14 @@ export default MyDocument;
 5. Use next/dynamic to import from your remotes
 
 ```js
-const SampleComponent = dynamic(() => import("next2/sampleComponent"), {
-  ssr: false,
-});
+import dynamic from 'next/dynamic';
+
+const SampleComponent = dynamic(
+  () => window.next2.get("./sampleComponent").then((factory) => factory()),
+  {
+    ssr: false,
+  }
+);
 ```
 
 ## Contact

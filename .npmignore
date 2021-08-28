@@ -3,3 +3,4 @@ renovate.json
 .gitignore
 .github
 .idea
+.npmrc
