@@ -134,7 +134,7 @@ module.exports = {
         },
       })
     );
-    
+
     // we attach next internals to share scope at runtime
     config.module.rules.push({
       test: /pages\/_app.[jt]sx?/,
@@ -177,7 +177,7 @@ export default MyDocument;
 5. Use next/dynamic to import from your remotes
 
 ```js
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
 const SampleComponent = dynamic(
   () => window.next2.get("./sampleComponent").then((factory) => factory()),
