@@ -15,7 +15,7 @@
     "registry": "https://r.privjs.com"
   },
   "dependencies": {
-    "webpack-federated-stats-plugin": "2.0.5"
+    "chalk": "^4.0.0"
   },
   "devDependencies": {
     "next": "11.0.1",
