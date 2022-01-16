@@ -6,7 +6,7 @@ This is a stable and viable solution to leverage Module Federation [until this i
 
 ### Supports
 
-- next ^10.2.x || ^11.x.x
+- next ^10.2.x || ^11.x.x || ^12.x.x
 - Client side only
 
 ## Whats shared by default?
@@ -15,18 +15,32 @@ Under the hood we share some next internals automatically
 You do not need to share these packages, sharing next internals yourself will cause errors.
 
 ```js
- "next/dynamic": {
-  requiredVersion: false,
+const sharedDefaults = {
+  "next/dynamic": {
+    requiredVersion: false,
     singleton: true,
-},
-"next/link": {
-  requiredVersion: false,
+  },
+  "styled-jsx": {
+    requiredVersion: false,
     singleton: true,
-},
-"next/head": {
-  requiredVersion: false,
+  },
+  "next/link": {
+    requiredVersion: false,
     singleton: true,
-},
+  },
+  "next/router": {
+    requiredVersion: false,
+    singleton: true,
+  },
+  "next/scrip t": {
+    requiredVersion: false,
+    singleton: true,
+  },
+  "next/head": {
+    requiredVersion: false,
+    singleton: true,
+  },
+};
 ```
 
 ## Things to watch out for
