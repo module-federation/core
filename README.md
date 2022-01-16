@@ -32,7 +32,7 @@ const sharedDefaults = {
     requiredVersion: false,
     singleton: true,
   },
-  "next/scrip t": {
+  "next/script": {
     requiredVersion: false,
     singleton: true,
   },
