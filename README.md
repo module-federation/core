@@ -2,12 +2,13 @@
 
 This plugin enables Module Federation on Next.js
 
-This is a stable and viable solution to leverage Module Federation [until this issue is resolved](https://github.com/webpack/webpack/issues/11811).
-
 ### Supports
 
-- next ^10.2.x || ^11.x.x
-- Client side only
+- next ^10.2.x || ^11.x.x || ^12.x.x
+- Client side only, SSR is another package currently in beta
+
+I highly recommend referencing this application which takes advantage of the best capabilities:
+https://github.com/module-federation/module-federation-examples
 
 ## Whats shared by default?
 
@@ -15,33 +16,45 @@ Under the hood we share some next internals automatically
 You do not need to share these packages, sharing next internals yourself will cause errors.
 
 ```js
- "next/dynamic": {
-  requiredVersion: false,
+const shared = {
+  "next/dynamic": {
+    requiredVersion: false,
     singleton: true,
-},
-"next/link": {
-  requiredVersion: false,
+  },
+  "next/link": {
+    requiredVersion: false,
     singleton: true,
-},
-"next/head": {
-  requiredVersion: false,
+  },
+  "next/head": {
+    requiredVersion: false,
     singleton: true,
-},
+  },
+  "next/router": {
+    requiredVersion: false,
+    singleton: true,
+  },
+};
 ```
 
-## Things to watch out for
-
-There's a bug in next.js which causes it to attempt and fail to resolve federated imports on files imported into the `pages/index.js`
-
-Its recommended using the low-level api to be safe.
+## Usage
 
 ```js
-const SampleComponent = dynamic(
-  () => window.next2.get("./sampleComponent").then((factory) => factory()),
-  {
-    ssr: false,
-  }
-);
+const SampleComponent = dynamic(() => import("next2/sampleComponent"), {
+  ssr: false,
+});
+```
+
+If you want support for sync imports. It is possible in next@12 as long as there is an async boundary.
+#### See the implementation here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs/home/pages
+
+With async boundary installed at the page level. You can then do the following
+
+```js
+if (process.browser) {
+  const SomeHook = require("next2/someHook");
+
+  import SomeComponent from "next2/someComponent";
+}
 ```
 
 Make sure you are using `mini-css-extract-plugin@2` - version 2 supports resolving assets through `publicPath:'auto'`
@@ -116,9 +129,10 @@ module.exports = {
   webpack(config, options) {
     config.plugins.push(
       new options.webpack.container.ModuleFederationPlugin({
-        remoteType: "var",
         remotes: {
-          next2: "next2",
+          next2: "next2@http://pathToRemotejs",
+          // if you embed the script into the document manually
+          next2: 'next2'
         },
         shared: {
           react: {
@@ -126,10 +140,6 @@ module.exports = {
             eager: true,
             singleton: true,
             requiredVersion: false,
-          },
-          // we have to share something to ensure share scope is initialized
-          "@module-federation/nextjs-mf/lib/noop": {
-            eager: false,
           },
         },
       })
@@ -163,6 +173,7 @@ class MyDocument extends Document {
         <Head />
         <body>
           <Main />
+          Scipt is only needed if you are not using the federation @ syntax when setting your remotes. 
           <script src="http://next2-domain-here.com/_next/static/chunks/remoteEntry.js" />
           <NextScript />
         </body>
@@ -174,7 +185,7 @@ class MyDocument extends Document {
 export default MyDocument;
 ```
 
-5. Use next/dynamic to import from your remotes
+5. Use next/dynamic or low level api to import remotes.
 
 ```js
 import dynamic from "next/dynamic";
@@ -185,6 +196,12 @@ const SampleComponent = dynamic(
     ssr: false,
   }
 );
+
+// or
+
+const SampleComponent = dynamic(() => import("next2/sampleComponent"), {
+  ssr: false,
+});
 ```
 
 ## Contact
