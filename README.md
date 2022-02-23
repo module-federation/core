@@ -52,9 +52,9 @@ With async boundary installed at the page level. You can then do the following
 ```js
 if (process.browser) {
   const SomeHook = require("next2/someHook");
-
-  import SomeComponent from "next2/someComponent";
 }
+// if client only file
+import SomeComponent from "next2/someComponent";
 ```
 
 Make sure you are using `mini-css-extract-plugin@2` - version 2 supports resolving assets through `publicPath:'auto'`
