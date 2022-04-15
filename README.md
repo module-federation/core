@@ -10,6 +10,11 @@ This plugin enables Module Federation on Next.js
 I highly recommend referencing this application which takes advantage of the best capabilities:
 https://github.com/module-federation/module-federation-examples
 
+## Looking for SSR support?
+SSR support for federated applications is much harder, as such - it utilizes a different licensing model.
+If you need SSR support, consider this package instead - it does everything that nextjs-mf does, and them some.
+https://app.privjs.com/buy/packageDetail?pkg=@module-federation/nextjs-ssr
+
 ## Whats shared by default?
 
 Under the hood we share some next internals automatically
