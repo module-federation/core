@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "next": "11.0.1",
-    "prettier": "2.3.2",
+    "prettier": "2.7.1",
     "webpack": "5.45.1"
   }
 }
