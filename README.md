@@ -11,6 +11,7 @@ I highly recommend referencing this application which takes advantage of the bes
 https://github.com/module-federation/module-federation-examples
 
 ## Looking for SSR support?
+
 SSR support for federated applications is much harder, as such - it utilizes a different licensing model.
 If you need SSR support, consider this package instead - it does everything that nextjs-mf does, and them some.
 https://app.privjs.com/buy/packageDetail?pkg=@module-federation/nextjs-ssr
@@ -22,22 +23,34 @@ You do not need to share these packages, sharing next internals yourself will ca
 
 ```js
 const shared = {
-  "next/dynamic": {
-    requiredVersion: false,
-    singleton: true,
-  },
-  "next/link": {
-    requiredVersion: false,
-    singleton: true,
-  },
-  "next/head": {
-    requiredVersion: false,
-    singleton: true,
-  },
-  "next/router": {
-    requiredVersion: false,
-    singleton: true,
-  },
+    "next/dynamic": {
+        requiredVersion: false,
+        singleton: true,
+    },
+    "styled-jsx": {
+        requiredVersion: false,
+        singleton: true,
+    },
+    "next/link": {
+        requiredVersion: false,
+        singleton: true,
+    },
+    "next/router": {
+        requiredVersion: false,
+        singleton: true,
+    },
+    "next/script": {
+        requiredVersion: false,
+        singleton: true,
+    },
+    "next/head": {
+        requiredVersion: false,
+        singleton: true,
+    },
+    react: {
+        singleton: true,
+        import: false,
+    },
 };
 ```
 
@@ -50,6 +63,7 @@ const SampleComponent = dynamic(() => import("next2/sampleComponent"), {
 ```
 
 If you want support for sync imports. It is possible in next@12 as long as there is an async boundary.
+
 #### See the implementation here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs/home/pages
 
 With async boundary installed at the page level. You can then do the following
@@ -75,11 +89,7 @@ withFederatedSidecar(
       "./sampleComponent": "./components/sampleComponent.js",
     },
     shared: {
-      react: {
-        // Notice shared are NOT eager here.
-        requiredVersion: false,
-        singleton: true,
-      },
+     
     },
   },
   {
@@ -116,11 +126,7 @@ module.exports = withFederatedSidecar({
     "./sampleComponent": "./components/sampleComponent.js",
   },
   shared: {
-    react: {
-      // Notice shared are NOT eager here.
-      requiredVersion: false,
-      singleton: true,
-    },
+   
   },
 })({
   // your original next.config.js export
@@ -137,15 +143,10 @@ module.exports = {
         remotes: {
           next2: "next2@http://pathToRemotejs",
           // if you embed the script into the document manually
-          next2: 'next2'
+          next2: "next2",
         },
         shared: {
-          react: {
-            // Notice shared ARE eager here.
-            eager: true,
-            singleton: true,
-            requiredVersion: false,
-          },
+         
         },
       })
     );
@@ -161,36 +162,7 @@ module.exports = {
 };
 ```
 
-4. Add the remote entry for "next2" to the \_document for "next1"
-
-```js
-import Document, { Html, Head, Main, NextScript } from "next/document";
-
-class MyDocument extends Document {
-  static async getInitialProps(ctx) {
-    const initialProps = await Document.getInitialProps(ctx);
-    return { ...initialProps };
-  }
-
-  render() {
-    return (
-      <Html>
-        <Head />
-        <body>
-          <Main />
-          Scipt is only needed if you are not using the federation @ syntax when setting your remotes. 
-          <script src="http://next2-domain-here.com/_next/static/chunks/remoteEntry.js" />
-          <NextScript />
-        </body>
-      </Html>
-    );
-  }
-}
-
-export default MyDocument;
-```
-
-5. Use next/dynamic or low level api to import remotes.
+4Use next/dynamic or low level api to import remotes.
 
 ```js
 import dynamic from "next/dynamic";
