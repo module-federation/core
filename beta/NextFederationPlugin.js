@@ -206,8 +206,6 @@ class ChildFederation {
           childCompiler.options.plugins.splice(index, 1)
           return
         }
-        console.log(plugin.constructor.name);
-
       })
 
 
