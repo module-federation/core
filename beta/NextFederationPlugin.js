@@ -185,7 +185,7 @@ class ChildFederation {
         new webpack.web.JsonpTemplatePlugin(childOutput),
         new LoaderTargetPlugin('web'),
         new LibraryPlugin('var'),
-        new webpack.DefinePlugin({'process.env.REMOTES': JSON.stringify(this._options.remotes)})
+        new webpack.DefinePlugin({'process.env.REMOTES': JSON.stringify(this._options.remotes)}),
         new AddRuntimeRequiremetToPromiseExternal()
       ]);
       new RemoveRRRuntimePlugin().apply(childCompiler)
@@ -203,6 +203,7 @@ class ChildFederation {
         }
       })
 
+      childCompiler.experiments.lazyCompilation = false
       childCompiler.options.optimization.runtimeChunk = false
       delete childCompiler.options.optimization.splitChunks
       childCompiler.outputFileSystem = compiler.outputFileSystem
