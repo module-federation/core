@@ -76,6 +76,7 @@ class ModuleFederationPlugin {
     }
   }
 }
+
 class RemoveRRRuntimePlugin {
   apply(compiler) {
     const webpack = compiler.webpack
@@ -84,9 +85,9 @@ class RemoveRRRuntimePlugin {
         name: 'RemoveRRRuntimePlugin',
         state: compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
       }, (assets) => {
-        Object.keys(assets).forEach((filename)=>{
+        Object.keys(assets).forEach((filename) => {
           const asset = compilation.getAsset(filename);
-          const newSource = asset.source.source().replace(/RefreshHelpers/g,'NoExist')
+          const newSource = asset.source.source().replace(/RefreshHelpers/g, 'NoExist')
           const updatedAsset = new webpack.sources.RawSource(newSource)
 
           if (asset) {
@@ -99,6 +100,7 @@ class RemoveRRRuntimePlugin {
     });
   }
 }
+
 const DEFAULT_SHARE_SCOPE = {
   'react': {
     singleton: true,
@@ -165,20 +167,12 @@ class ChildFederation {
         chunkFilename: compiler.options.output.chunkFilename.replace('.js', '-fed.js'),
         filename: compiler.options.output.chunkFilename.replace('.js', '-fed.js'),
       }
-      const externalizedShares= Object.entries(DEFAULT_SHARE_SCOPE).reduce((acc,item)=>{
-        const [key,value] = item;
-        acc[key] = {...item, import:false}
-
-        // if(['react','react-dom'].includes(key)) {
-        //   acc[key].import = false
-        // }
+      const externalizedShares = Object.entries(DEFAULT_SHARE_SCOPE).reduce((acc, item) => {
+        const [key, value] = item;
+        acc[key] = {...item, import: false}
         return acc
-      },{})
+      }, {})
       const childCompiler = compilation.createChildCompiler(CHILD_PLUGIN_NAME, childOutput, [
-        // new EntryPlugin(compiler.context, 'data:text/javascript,module.exports = {}', {
-        //   name: 'noop',
-        // }),
-
         new ModuleFederationPlugin({
           // library: {type: 'var', name: buildName},
           ...this._options,
@@ -192,11 +186,12 @@ class ChildFederation {
         new LoaderTargetPlugin('web'),
         new LibraryPlugin('var'),
         new webpack.DefinePlugin({'process.env.REMOTES': JSON.stringify(this._options.remotes)})
+        new AddRuntimeRequiremetToPromiseExternal()
       ]);
       new RemoveRRRuntimePlugin().apply(childCompiler)
 
-      childCompiler.options.plugins.forEach((plugin,index) => {
-        if(
+      childCompiler.options.plugins.forEach((plugin, index) => {
+        if (
           plugin.constructor.name === 'HotModuleReplacementPlugin' ||
           plugin.constructor.name === 'NextFederationPlugin' ||
           plugin.constructor.name === 'CopyFilePlugin' ||
@@ -207,22 +202,6 @@ class ChildFederation {
           return
         }
       })
-
-
-      // const rulses = childCompiler.options.module.rules.find(rule => rule.oneOf).oneOf
-      // rulses.forEach((rule) => {
-      //   // console.log(require('util').inspect(rule))
-      //   if (rule.use && Array.isArray(rule.use)) {
-      //     const rrLoaderIndex = rule.use.findIndex((loader) => {
-      //       if (typeof loader === 'string') {
-      //         return loader.includes('react-refresh')
-      //       }
-      //     })
-      //     if (rrLoaderIndex !== -1) {
-      //       rule.use.splice(rrLoaderIndex, 1)
-      //     }
-      //   }
-      // })
 
       childCompiler.options.optimization.runtimeChunk = false
       delete childCompiler.options.optimization.splitChunks
@@ -248,6 +227,27 @@ class ChildFederation {
   }
 }
 
+class AddRuntimeRequiremetToPromiseExternal {
+  apply(compiler) {
+    compiler.hooks.compilation.tap(
+      "AddRuntimeRequiremetToPromiseExternal",
+      compilation => {
+        const RuntimeGlobals = compiler.webpack.RuntimeGlobals
+        if (compilation.outputOptions.trustedTypes) {
+          compilation.hooks.additionalModuleRuntimeRequirements.tap(
+            "AddRuntimeRequiremetToPromiseExternal",
+            (module, set, context) => {
+              if (module.externalType === 'promise') {
+                set.add(RuntimeGlobals.loadScript)
+              }
+            }
+          );
+        }
+      }
+    );
+  }
+}
+
 class NextFederationPlugin {
   constructor(options) {
     this._options = options
@@ -255,7 +255,7 @@ class NextFederationPlugin {
 
   apply(compiler) {
     const webpack = compiler.webpack;
-    const sharedForHost = Object.entries({...this._options.shared || {},...DEFAULT_SHARE_SCOPE}).reduce((acc, item) => {
+    const sharedForHost = Object.entries({...this._options.shared || {}, ...DEFAULT_SHARE_SCOPE}).reduce((acc, item) => {
       const [itemKey, shareOptions] = item
 
       const shareKey = 'host' + (item.shareKey || itemKey)
@@ -267,9 +267,8 @@ class NextFederationPlugin {
         acc[shareKey].shareKey = itemKey
       }
 
-      if(DEFAULT_SHARE_SCOPE[itemKey]) {
+      if (DEFAULT_SHARE_SCOPE[itemKey]) {
         acc[shareKey].packageName = itemKey
-        // acc[shareKey].eager = true
       }
       return acc
     }, {})
@@ -288,9 +287,8 @@ class NextFederationPlugin {
     }).apply(compiler);
     new webpack.DefinePlugin({'process.env.REMOTES': JSON.stringify(this._options.remotes)}).apply(compiler)
     new ChildFederation(this._options).apply(compiler);
+    new AddRuntimeRequiremetToPromiseExternal().apply(compiler)
   }
 }
 
 module.exports = NextFederationPlugin
-
-
