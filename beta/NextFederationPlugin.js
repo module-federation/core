@@ -203,7 +203,7 @@ class ChildFederation {
         }
       })
 
-      childCompiler.experiments.lazyCompilation = false
+      childCompiler.options.experiments.lazyCompilation = false
       childCompiler.options.optimization.runtimeChunk = false
       delete childCompiler.options.optimization.splitChunks
       childCompiler.outputFileSystem = compiler.outputFileSystem
