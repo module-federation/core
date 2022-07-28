@@ -207,6 +207,7 @@ class ChildFederation {
           new LibraryPlugin("var"),
           new webpack.DefinePlugin({
             "process.env.REMOTES": JSON.stringify(this._options.remotes),
+            "process.env.CURRENT_HOST": JSON.stringify(this._options.name)
           }),
           new AddRuntimeRequiremetToPromiseExternal(),
         ]
@@ -313,6 +314,7 @@ class NextFederationPlugin {
     }).apply(compiler);
     new webpack.DefinePlugin({
       "process.env.REMOTES": JSON.stringify(this._options.remotes),
+      "process.env.CURRENT_HOST": JSON.stringify(this._options.name)
     }).apply(compiler);
     new ChildFederation(this._options).apply(compiler);
     new AddRuntimeRequiremetToPromiseExternal().apply(compiler);
