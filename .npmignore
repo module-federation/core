@@ -4,4 +4,4 @@ renovate.json
 .github
 .idea
 .npmrc
-NextFederationPlugin.js
+./NextFederationPlugin.js
