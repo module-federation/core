@@ -215,9 +215,14 @@ class ChildFederation {
       );
       new RemoveRRRuntimePlugin().apply(childCompiler);
 
+      const MiniCss = childCompiler.options.plugins.find((p) => {
+        return p.constructor.name === "NextMiniCssExtractPlugin";
+      });
+
       childCompiler.options.plugins.forEach((plugin, index) => {
         if (
           plugin.constructor.name === "HotModuleReplacementPlugin" ||
+          plugin.constructor.name === "NextMiniCssExtractPlugin" ||
           plugin.constructor.name === "NextFederationPlugin" ||
           plugin.constructor.name === "CopyFilePlugin" ||
           plugin.constructor.name === "ProfilingPlugin" ||
@@ -225,9 +230,19 @@ class ChildFederation {
           plugin.constructor.name === "ReactFreshWebpackPlugin"
         ) {
           childCompiler.options.plugins.splice(index, 1);
-          return;
         }
       });
+
+      if(MiniCss) {
+        new MiniCss.constructor({
+          ...MiniCss.options,
+          filename: MiniCss.options.filename.replace(".css", "-fed.css"),
+          chunkFilename: MiniCss.options.chunkFilename.replace(
+            ".css",
+            "-fed.css"
+          ),
+        }).apply(childCompiler);
+      }
 
       childCompiler.options.experiments.lazyCompilation = false;
       childCompiler.options.optimization.runtimeChunk = false;
@@ -303,7 +318,7 @@ class NextFederationPlugin {
 
     new webpack.container.ModuleFederationPlugin({
       ...this._options,
-      exposes: {},
+      filename: 'dontUseThisRemote.js',
       shared: {
         noop: {
           import: "data:text/javascript,module.exports = {};",
