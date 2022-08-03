@@ -273,16 +273,17 @@ class AddRuntimeRequiremetToPromiseExternal {
       "AddRuntimeRequiremetToPromiseExternal",
       (compilation) => {
         const RuntimeGlobals = compiler.webpack.RuntimeGlobals;
-        if (compilation.outputOptions.trustedTypes) {
+        // if (compilation.outputOptions.trustedTypes) {
           compilation.hooks.additionalModuleRuntimeRequirements.tap(
             "AddRuntimeRequiremetToPromiseExternal",
             (module, set, context) => {
               if (module.externalType === "promise") {
                 set.add(RuntimeGlobals.loadScript);
+                set.add(RuntimeGlobals.require);
               }
             }
           );
-        }
+        // }
       }
     );
   }
@@ -318,7 +319,7 @@ class NextFederationPlugin {
 
     new webpack.container.ModuleFederationPlugin({
       ...this._options,
-      filename: 'dontUseThisRemote.js',
+      exposes: {},
       shared: {
         noop: {
           import: "data:text/javascript,module.exports = {};",
