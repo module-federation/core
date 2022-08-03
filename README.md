@@ -4,7 +4,7 @@ This plugin enables Module Federation on Next.js
 
 ### Supports
 
-- next ^10.2.x || ^11.x.x || ^12.x.x
+- next ^11.x.x || ^12.x.x
 - Client side only, SSR is another package currently in beta
 
 I highly recommend referencing this application which takes advantage of the best capabilities:
@@ -22,35 +22,43 @@ Under the hood we share some next internals automatically
 You do not need to share these packages, sharing next internals yourself will cause errors.
 
 ```js
-const shared = {
-    "next/dynamic": {
-        requiredVersion: false,
-        singleton: true,
-    },
-    "styled-jsx": {
-        requiredVersion: false,
-        singleton: true,
-    },
-    "next/link": {
-        requiredVersion: false,
-        singleton: true,
-    },
-    "next/router": {
-        requiredVersion: false,
-        singleton: true,
-    },
-    "next/script": {
-        requiredVersion: false,
-        singleton: true,
-    },
-    "next/head": {
-        requiredVersion: false,
-        singleton: true,
-    },
-    react: {
-        singleton: true,
-        import: false,
-    },
+const DEFAULT_SHARE_SCOPE = {
+   react: {
+      singleton: true,
+      requiredVersion: false,
+   },
+   "react/": {
+      singleton: true,
+      requiredVersion: false,
+   },
+   "react-dom": {
+      singleton: true,
+      requiredVersion: false,
+   },
+   "next/dynamic": {
+      requiredVersion: false,
+      singleton: true,
+   },
+   "styled-jsx": {
+      requiredVersion: false,
+      singleton: true,
+   },
+   "next/link": {
+      requiredVersion: false,
+      singleton: true,
+   },
+   "next/router": {
+      requiredVersion: false,
+      singleton: true,
+   },
+   "next/script": {
+      requiredVersion: false,
+      singleton: true,
+   },
+   "next/head": {
+      requiredVersion: false,
+      singleton: true,
+   },
 };
 ```
 
@@ -78,116 +86,9 @@ import SomeComponent from "next2/someComponent";
 
 Make sure you are using `mini-css-extract-plugin@2` - version 2 supports resolving assets through `publicPath:'auto'`
 
-## Options
-
-```js
-withFederatedSidecar(
-  {
-    name: "next2",
-    filename: "static/chunks/remoteEntry.js",
-    exposes: {
-      "./sampleComponent": "./components/sampleComponent.js",
-    },
-    shared: {
-     
-    },
-  },
-  {
-    removePlugins: [
-      // optional
-      // these are the defaults
-      "BuildManifestPlugin",
-      "ReactLoadablePlugin",
-      "DropClientPage",
-      "WellKnownErrorsPlugin",
-      "ModuleFederationPlugin",
-    ],
-    publicPath: "auto", // defaults to 'auto', is optional
-  }
-);
-```
-
 ## Demo
 
 You can see it in action here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs
-
-## How to add a sidecar for exposes to your nextjs app
-
-1. Use `withFederatedSidecar` in your `next.config.js` of the app that you wish to expose modules from. We'll call this "next2".
-
-```js
-// next.config.js
-const { withFederatedSidecar } = require("@module-federation/nextjs-mf");
-
-module.exports = withFederatedSidecar({
-  name: "next2",
-  filename: "static/chunks/remoteEntry.js",
-  exposes: {
-    "./sampleComponent": "./components/sampleComponent.js",
-  },
-  shared: {
-   
-  },
-})({
-  // your original next.config.js export
-});
-```
-
-2. For the consuming application, we'll call it "next1", add an instance of the ModuleFederationPlugin to your webpack config, and ensure you have a [custom Next.js App](https://nextjs.org/docs/advanced-features/custom-app) `pages/_app.js` (or `.tsx`):
-
-```js
-module.exports = {
-  webpack(config, options) {
-    config.plugins.push(
-      new options.webpack.container.ModuleFederationPlugin({
-        remotes: {
-          next2: "next2@http://pathToRemotejs",
-          // if you embed the script into the document manually
-          next2: "next2",
-        },
-        shared: {
-         
-        },
-      })
-    );
-
-    // we attach next internals to share scope at runtime
-    config.module.rules.push({
-      test: /pages\/_app.[jt]sx?/,
-      loader: "@module-federation/nextjs-mf/lib/federation-loader.js",
-    });
-
-    return config;
-  },
-};
-```
-
-4. Use next/dynamic or low level api to import remotes.
-
-```js
-import dynamic from "next/dynamic";
-
-const SampleComponent = dynamic(
-  () => window.next2.get("./sampleComponent").then((factory) => factory()),
-  {
-    ssr: false,
-  }
-);
-
-// or
-
-const SampleComponent = dynamic(() => import("next2/sampleComponent"), {
-  ssr: false,
-});
-```
-
-
-# The New Beta
-
-I have recently redesigned this plugin from the ground up. From my testing so far, Ive not been able to find any limitations.
-
-If you wish to start working with what will become the next major release, follow the documentation below AND NOT what is documented above
-
 
 ## Usage
 
@@ -228,7 +129,7 @@ You can see it in action here: https://github.com/module-federation/module-feder
 
 ```js
 // next.config.js
-const NextFederationPlugin = require('@module-federation/nextjs-mf/beta/NextFederationPlugin');
+const NextFederationPlugin = require('@module-federation/nextjs-mf/NextFederationPlugin');
 
 module.exports = {
   webpack(config, options) {
@@ -258,7 +159,7 @@ module.exports = {
 
 // _app.js or some other file in as high up in the app (like next's new layouts)
 // this ensures various parts of next.js are imported and "used" somewhere so that they wont be tree shaken out
-import '@module-federation/nextjs-mf/beta/include-defaults';
+import '@module-federation/nextjs-mf/lib/include-defaults';
 
 ```
 
@@ -268,7 +169,7 @@ import '@module-federation/nextjs-mf/beta/include-defaults';
 ```js
 // next.config.js
 
-const NextFederationPlugin = require('@module-federation/nextjs-mf/beta/NextFederationPlugin');
+const NextFederationPlugin = require('@module-federation/nextjs-mf/NextFederationPlugin');
 
 module.exports = {
   webpack(config, options) {
@@ -289,7 +190,7 @@ module.exports = {
 
 // _app.js or some other file in as high up in the app (like next's new layouts)
 // this ensures various parts of next.js are imported and "used" somewhere so that they wont be tree shaken out
-import '@module-federation/nextjs-mf/beta/include-defaults';
+import '@module-federation/nextjs-mf/lib/include-defaults';
 
 ```
 
@@ -310,6 +211,23 @@ const SampleComponent = dynamic(
 const SampleComponent = dynamic(() => import("next2/sampleComponent"), {
   ssr: false,
 });
+```
+
+## Utilities
+
+Ive added a util for dynamic chunk loading, in the event you need to load remote containers dynamically. 
+
+```js
+import {injectScript} from '@module-federation/nextjs-mf/lib/utils';
+// if i have remotes in my federation plugin, i can pass the name of the remote
+injectScript('home').then((remoteContainer)=>{
+  remoteContainer.get('./exposedModule')
+})
+// if i want to load a custom remote not known at build time.
+
+injectScript({global:'home', url:'http://somthing.com/remoteEntry.js'}).then((remoteContainer)=>{
+   remoteContainer.get('./exposedModule')
+})
 ```
 
 
