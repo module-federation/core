@@ -1,3 +1,3 @@
-const withFederatedSidecar = require("./lib/NextFederationPlugin");
+const NextFederationPlugin = require("./lib/NextFederationPlugin");
 
-module.exports = withFederatedSidecar
+module.exports = NextFederationPlugin
