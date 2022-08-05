@@ -114,7 +114,7 @@ const DEFAULT_SHARE_SCOPE = {
     singleton: true,
     requiredVersion: false,
   },
-  "react/": {
+  "react/jsx-runtime": {
     singleton: true,
     requiredVersion: false,
   },
@@ -185,8 +185,11 @@ class ChildFederation {
       const externalizedShares = Object.entries(DEFAULT_SHARE_SCOPE).reduce(
         (acc, item) => {
           const [key, value] = item;
-          acc[key] = { ...item, import: false };
-          return acc;
+          acc[key] = { ...value, import: false };
+          if(key === 'react/jsx-runtime') {
+            delete acc[key].import
+          }
+          return acc
         },
         {}
       );
