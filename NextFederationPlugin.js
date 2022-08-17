@@ -277,24 +277,80 @@ class AddRuntimeRequiremetToPromiseExternal {
       (compilation) => {
         const RuntimeGlobals = compiler.webpack.RuntimeGlobals;
         // if (compilation.outputOptions.trustedTypes) {
-          compilation.hooks.additionalModuleRuntimeRequirements.tap(
-            "AddRuntimeRequiremetToPromiseExternal",
-            (module, set, context) => {
-              if (module.externalType === "promise") {
-                set.add(RuntimeGlobals.loadScript);
-                set.add(RuntimeGlobals.require);
-              }
+        compilation.hooks.additionalModuleRuntimeRequirements.tap(
+          "AddRuntimeRequiremetToPromiseExternal",
+          (module, set, context) => {
+            if (module.externalType === "promise") {
+              set.add(RuntimeGlobals.loadScript);
+              set.add(RuntimeGlobals.require);
             }
-          );
+          }
+        );
         // }
       }
     );
   }
 }
 
+function extractUrlAndGlobal(urlAndGlobal) {
+  const index = urlAndGlobal.indexOf("@");
+  if (index <= 0 || index === urlAndGlobal.length - 1) {
+    throw new Error(`Invalid request "${urlAndGlobal}"`);
+  }
+  return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
+}
+
+function generateRemoteTemplate(url,global) {
+  return `promise new Promise(function(resolve, reject) {
+                       var __webpack_error__ = new Error();
+                       if (typeof ${global} !== 'undefined') return resolve();
+                       __webpack_require__.l(
+                         ${JSON.stringify(url)},
+                         function(event) {
+                           if (typeof ${global} !== 'undefined') return resolve();
+                           var errorType = event && (event.type === 'load' ? 'missing' : event.type);
+                           var realSrc = event && event.target && event.target.src;
+                           __webpack_error__.message =
+                             'Loading script failed.\\n(' + errorType + ': ' + realSrc + ')';
+                           __webpack_error__.name = 'ScriptExternalLoadError';
+                           __webpack_error__.type = errorType;
+                           __webpack_error__.request = realSrc;
+                           reject(__webpack_error__);
+                         },
+                         ${JSON.stringify(global)},
+                       );
+                     }).then(function(){
+                       return {
+                         get: function(args) {
+                           if(!${global}.__initialized) {
+                              try {
+                                ${global}.init(__webpack_require__.S.default)
+                              } catch(e){
+                              }
+                            }
+                            ${global}.__initialized = true
+                            return ${global}.get(args)
+                         },
+                         init: function(){}
+                       }
+                     })`
+}
+
 class NextFederationPlugin {
   constructor(options) {
     this._options = options;
+    if(options.remotes) {
+      const parsedRemotes = Object.entries(options.remotes).reduce((acc, remote)=>{
+        if(remote[1].includes('@')) {
+          const [url,global] = extractUrlAndGlobal(remote[1])
+          acc[remote[0]] = generateRemoteTemplate(url,global);
+          return acc
+        }
+        acc[remote[1]] = acc[remote[0]]
+      },{})
+      this._options.remotes = parsedRemotes
+    }
+
   }
 
   apply(compiler) {
