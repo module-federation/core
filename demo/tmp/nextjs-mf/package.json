@@ -7,6 +7,6 @@
   "types": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "chalk": "^4.0.0"
+    "chalk": "4.1.2"
   }
 }

@@ -101,11 +101,13 @@
 
 "@module-federation/nextjs-mf@^5.0.0":
   version "0.0.0"
-  uid ""
+  dependencies:
+    chalk "4.1.2"
 
 "@module-federation/nextjs-mf@link:./tmp/nextjs-mf":
   version "0.0.0"
-  uid ""
+  dependencies:
+    chalk "4.1.2"
 
 "@next/env@12.2.2":
   version "12.2.2"
@@ -438,7 +440,7 @@ antd@4.20.0:
     rc-util "^5.20.0"
     scroll-into-view-if-needed "^2.2.25"
 
-antd@^4.22.3:
+antd@4.22.6:
   version "4.22.6"
   resolved "https://registry.yarnpkg.com/antd/-/antd-4.22.6.tgz#f9b90072ab2550f931def2e2e93b26281760529e"
   integrity sha512-cyGq4CFrKcHISkyvXHODqhV8X0W7r6GHP37H/KvvmYibz/1sdts3Sa0FoAPy/c165TjAcSC/ZHxJhuGbo42zvA==
@@ -659,7 +661,7 @@ caniuse-lite@^1.0.30001332, caniuse-lite@^1.0.30001370:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001378.tgz#3d2159bf5a8f9ca093275b0d3ecc717b00f27b67"
   integrity sha512-JVQnfoO7FK7WvU4ZkBRbPjaot4+YqxogSDosHv0Hv5mWpUESmN+UubMU6L/hGz8QlQ2aY5U0vR6MOs6j/CXpNA==
 
-chalk@^4.0.0, chalk@^4.1.0:
+chalk@4.1.2, chalk@^4.1.0:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-4.1.2.tgz#aac4e2b7734a740867aeb16bf02aad556a1e7a01"
   integrity sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==
@@ -761,7 +763,7 @@ concat-map@0.0.1:
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
   integrity sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==
 
-concurrently@^7.0.0:
+concurrently@7.3.0:
   version "7.3.0"
   resolved "https://registry.yarnpkg.com/concurrently/-/concurrently-7.3.0.tgz#eb45cdbc8df43da195f619aba218a980cae49184"
   integrity sha512-IiDwm+8DOcFEInca494A8V402tNTQlJaYq78RF2rijOrKEk/AOHTxhN4U1cp7GYKYX5Q6Ymh1dLTBlzIMN0ikA==
@@ -1000,7 +1002,7 @@ fast-json-stable-stringify@^2.0.0:
   resolved "https://registry.yarnpkg.com/fast-json-stable-stringify/-/fast-json-stable-stringify-2.1.0.tgz#874bf69c6f404c2b5d99c481341399fd55892633"
   integrity sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw==
 
-feather-route-matcher@^4.0.0:
+feather-route-matcher@4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/feather-route-matcher/-/feather-route-matcher-4.0.0.tgz#ab04f84cb78b28b58a8c8d009971e2f1016d3a27"
   integrity sha512-ZBQx/3pMDnpjJi3zUDEhZ5Mvu+lUsTyWQoKH3tWEb0LysDZmzui0tH0oyMvA8fEWWJtHbvOzOpIWwoOBst/Apw==
@@ -1570,7 +1572,7 @@ neo-async@^2.6.2:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.2.tgz#b4aafb93e3aeb2d8174ca53cf163ab7d7308305f"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
 
-next-compose-plugins@^2.2.1:
+next-compose-plugins@2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/next-compose-plugins/-/next-compose-plugins-2.2.1.tgz#020fc53f275a7e719d62521bef4300fbb6fde5ab"
   integrity sha512-OjJ+fV15FXO2uQXQagLD4C0abYErBjyjE0I0FHpOEIB8upw0hg1ldFP6cqHTJBH1cZqy96OeR3u1dJ+Ez2D4Bg==
@@ -1604,7 +1606,7 @@ next@12.2.2:
 "nextjs-shared@link:shared":
   version "1.0.0"
   dependencies:
-    feather-route-matcher "^4.0.0"
+    feather-route-matcher "4.0.0"
 
 node-releases@^2.0.6:
   version "2.0.6"
@@ -2734,7 +2736,7 @@ watchpack@^2.3.1:
     glob-to-regexp "^0.4.1"
     graceful-fs "^4.1.2"
 
-webpack-merge@^5.8.0:
+webpack-merge@5.8.0:
   version "5.8.0"
   resolved "https://registry.yarnpkg.com/webpack-merge/-/webpack-merge-5.8.0.tgz#2b39dbf22af87776ad744c390223731d30a68f61"
   integrity sha512-/SaI7xY0831XwP6kzuwhKWVKDP9t1QY1h65lAFLbZqMPIuYcD9QAW4u9STIbU9kaJbPBB/geU/gLr1wDjOhQ+Q==
