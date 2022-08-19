@@ -383,6 +383,7 @@ class NextFederationPlugin {
           return acc
         }
         acc[remote[1]] = acc[remote[0]]
+        return acc
       }, {})
       this._options.remotes = parsedRemotes
     }
