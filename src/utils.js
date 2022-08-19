@@ -8,7 +8,7 @@ const runtimeRemotes = Object.entries(remoteVars).reduce((acc, item) => {
     const [global, url] = value.split("@");
     acc[key] = { global, url };
   } else {
-    throw new Error(`[mf] Invalid value recieved for runtime_remote "${key}"`);
+    throw new Error(`[mf] Invalid value received for runtime_remote "${key}"`);
   }
   return acc;
 }, {});

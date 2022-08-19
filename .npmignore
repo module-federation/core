@@ -6,3 +6,5 @@ renovate.json
 .npmrc
 /NextFederationPlugin.js
 ./NextFederationPlugin.js
+demo
+src

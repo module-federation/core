@@ -26,11 +26,11 @@ class ModuleFederationPlugin {
    * @returns {void}
    */
   apply(compiler) {
-    const { _options: options } = this;
+    const {_options: options} = this;
     const webpack = compiler.webpack;
-    const { ContainerPlugin, ContainerReferencePlugin } = webpack.container;
-    const { SharePlugin } = webpack.sharing;
-    const library = options.library || { type: "var", name: options.name };
+    const {ContainerPlugin, ContainerReferencePlugin} = webpack.container;
+    const {SharePlugin} = webpack.sharing;
+    const library = options.library || {type: "var", name: options.name};
     const remoteType =
       options.remoteType ||
       (options.library && /** @type {ExternalsType} */ options.library.type) ||
@@ -91,7 +91,7 @@ class RemoveRRRuntimePlugin {
         state: compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE
       }, assets => {
         Object.keys(assets).forEach(filename => {
-          if(filename.includes('.js') || filename.includes('.mjs')) {
+          if (filename.includes('.js') || filename.includes('.mjs')) {
             const asset = compilation.getAsset(filename);
             const newSource = asset.source.source().replace(/RefreshHelpers/g, "NoExist");
             const updatedAsset = new webpack.sources.RawSource(newSource);
@@ -185,8 +185,8 @@ class ChildFederation {
       const externalizedShares = Object.entries(DEFAULT_SHARE_SCOPE).reduce(
         (acc, item) => {
           const [key, value] = item;
-          acc[key] = { ...value, import: false };
-          if(key === 'react/jsx-runtime') {
+          acc[key] = {...value, import: false};
+          if (key === 'react/jsx-runtime') {
             delete acc[key].import
           }
           return acc
@@ -236,7 +236,7 @@ class ChildFederation {
         }
       });
 
-      if(MiniCss) {
+      if (MiniCss) {
         new MiniCss.constructor({
           ...MiniCss.options,
           filename: MiniCss.options.filename.replace(".css", "-fed.css"),
@@ -277,24 +277,115 @@ class AddRuntimeRequiremetToPromiseExternal {
       (compilation) => {
         const RuntimeGlobals = compiler.webpack.RuntimeGlobals;
         // if (compilation.outputOptions.trustedTypes) {
-          compilation.hooks.additionalModuleRuntimeRequirements.tap(
-            "AddRuntimeRequiremetToPromiseExternal",
-            (module, set, context) => {
-              if (module.externalType === "promise") {
-                set.add(RuntimeGlobals.loadScript);
-                set.add(RuntimeGlobals.require);
-              }
+        compilation.hooks.additionalModuleRuntimeRequirements.tap(
+          "AddRuntimeRequiremetToPromiseExternal",
+          (module, set, context) => {
+            if (module.externalType === "promise") {
+              set.add(RuntimeGlobals.loadScript);
+              set.add(RuntimeGlobals.require);
             }
-          );
+          }
+        );
         // }
       }
     );
   }
 }
 
+function extractUrlAndGlobal(urlAndGlobal) {
+  const index = urlAndGlobal.indexOf("@");
+  if (index <= 0 || index === urlAndGlobal.length - 1) {
+    throw new Error(`Invalid request "${urlAndGlobal}"`);
+  }
+  return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
+}
+
+function generateRemoteTemplate(url, global) {
+
+  return `promise new Promise(function (resolve, reject) {
+    var __webpack_error__ = new Error();
+    if (typeof ${global} !== 'undefined') return resolve();
+    __webpack_require__.l(
+      ${JSON.stringify(url)},
+      function (event) {
+        if (typeof ${global} !== 'undefined') return resolve();
+        var errorType = event && (event.type === 'load' ? 'missing' : event.type);
+        var realSrc = event && event.target && event.target.src;
+        __webpack_error__.message =
+          'Loading script failed.\\n(' + errorType + ': ' + realSrc + ')';
+        __webpack_error__.name = 'ScriptExternalLoadError';
+        __webpack_error__.type = errorType;
+        __webpack_error__.request = realSrc;
+        reject(__webpack_error__);
+      },
+      ${JSON.stringify(global)},
+    );
+  }).then(function () {
+  console.log('remote loaded ${global}')
+    if (!__webpack_require__.S.default) {
+       __webpack_require__.I('default')
+    }
+    console.log("after init")
+    return null
+  }).then(function () {
+console.log('in thennable')
+    const proxy = {
+      get: ${global}.get,
+      init: (args) => {
+      console.log('calling init')
+        const handler = {
+          get(target, prop) {
+            if (target[prop]) {
+              Object.values(target[prop]).forEach((o) => {
+                o.loaded = 1
+              })
+            }
+            return target[prop]
+          },
+          set(target, property, value, receiver) {
+            if (target[property]) {
+              return target[property]
+            }
+            target[property] = value
+            return true
+          }
+        }
+        try {
+          ${global}.init(new Proxy(__webpack_require__.S.default, handler))
+        } catch (e) {
+
+        }
+        ${global}.__initialized = true
+      }
+    }
+    if (!${global}.__initialized) {
+      proxy.init()
+    }
+    return proxy
+  })`
+}
+
+function createRuntimeVariables(remotes) {
+  return Object.entries(remotes).reduce((acc, remote) => {
+    acc[remote[0]] = remote[1].replace('promise ', '');
+    return acc
+  }, {})
+}
+
 class NextFederationPlugin {
   constructor(options) {
     this._options = options;
+    if (options.remotes) {
+      const parsedRemotes = Object.entries(options.remotes).reduce((acc, remote) => {
+        if (remote[1].includes('@')) {
+          const [url, global] = extractUrlAndGlobal(remote[1])
+          acc[remote[0]] = generateRemoteTemplate(url, global);
+          return acc
+        }
+        acc[remote[1]] = acc[remote[0]]
+      }, {})
+      this._options.remotes = parsedRemotes
+    }
   }
 
   apply(compiler) {
@@ -333,7 +424,7 @@ class NextFederationPlugin {
       },
     }).apply(compiler);
     new webpack.DefinePlugin({
-      "process.env.REMOTES": JSON.stringify(this._options.remotes),
+      "process.env.REMOTES": createRuntimeVariables(this._options.remotes),
       "process.env.CURRENT_HOST": JSON.stringify(this._options.name)
     }).apply(compiler);
     new ChildFederation(this._options).apply(compiler);

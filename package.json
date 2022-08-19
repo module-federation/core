@@ -3,12 +3,13 @@
   "name": "@module-federation/nextjs-mf",
   "version": "5.0.4",
   "description": "Module Federation helper for NextJS",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "repository": "https://github.com/module-federation/nextjs-mf",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "demo": "cd demo && yarn install && yarn dev", 
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\""
   },
   "publishConfig": {
