@@ -26,6 +26,10 @@ module.exports = {
             './menu': './pages/_menu.js',
             './pages-map': './pages-map.js',
           },
+          extraOptions: {
+            disableImageLoaderFix: false,
+            disableUrlLoaderFix: false,
+          }
         }),
       );
     }

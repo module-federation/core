@@ -6,11 +6,15 @@ const CHILD_PLUGIN_NAME = "ChildFederationPlugin";
 
 ("use strict");
 
+const path = require('path');
+const injectRuleLoader = require('./loaders/helpers').injectRuleLoader;
+const hasLoader = require('./loaders/helpers').hasLoader;
+
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ExternalsType} ExternalsType */
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ModuleFederationPluginOptions} ModuleFederationPluginOptions */
 
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").Shared} Shared */
-/** @typedef {import("../Compiler")} Compiler */
+/** @typedef {import("webpack").Compiler} Compiler */
 
 class ModuleFederationPlugin {
   /**
@@ -149,8 +153,9 @@ const DEFAULT_SHARE_SCOPE = {
 };
 
 class ChildFederation {
-  constructor(options) {
+  constructor(options, extraOptions = {}) {
     this._options = options;
+    this._extraOptions = extraOptions;
   }
 
   apply(compiler) {
@@ -213,10 +218,22 @@ class ChildFederation {
             "process.env.REMOTES": JSON.stringify(this._options.remotes),
             "process.env.CURRENT_HOST": JSON.stringify(this._options.name)
           }),
-          new AddRuntimeRequiremetToPromiseExternal(),
+          new AddRuntimeRequirementToPromiseExternal(),
         ]
       );
       new RemoveRRRuntimePlugin().apply(childCompiler);
+
+      childCompiler.options.module.rules.forEach((rule) => {
+        // next-image-loader fix which adds remote's hostname to the assets url
+        if (!this._extraOptions.disableImageLoaderFix && hasLoader(rule, 'next-image-loader')) {
+          injectRuleLoader(rule, { loader: path.resolve(__dirname, './loaders/fixImageLoader.js') });
+        }    
+        
+        // url-loader fix for which adds remote's hostname to the assets url
+        if (!this._extraOptions.disableUrlLoaderFix && hasLoader(rule, 'url-loader')) {
+          injectRuleLoader({ loader: path.resolve(__dirname, './loaders/fixUrlLoader.js') });
+        }
+      });
 
       const MiniCss = childCompiler.options.plugins.find((p) => {
         return p.constructor.name === "NextMiniCssExtractPlugin";
@@ -270,15 +287,15 @@ class ChildFederation {
   }
 }
 
-class AddRuntimeRequiremetToPromiseExternal {
+class AddRuntimeRequirementToPromiseExternal {
   apply(compiler) {
     compiler.hooks.compilation.tap(
-      "AddRuntimeRequiremetToPromiseExternal",
+      "AddRuntimeRequirementToPromiseExternal",
       (compilation) => {
         const RuntimeGlobals = compiler.webpack.RuntimeGlobals;
         // if (compilation.outputOptions.trustedTypes) {
         compilation.hooks.additionalModuleRuntimeRequirements.tap(
-          "AddRuntimeRequiremetToPromiseExternal",
+          "AddRuntimeRequirementToPromiseExternal",
           (module, set, context) => {
             if (module.externalType === "promise") {
               set.add(RuntimeGlobals.loadScript);
@@ -374,7 +391,9 @@ function createRuntimeVariables(remotes) {
 
 class NextFederationPlugin {
   constructor(options) {
-    this._options = options;
+    const { extraOptions, ...mainOpts } = options;
+    this._options = mainOpts;
+    this._extraOptions = extraOptions;
     if (options.remotes) {
       const parsedRemotes = Object.entries(options.remotes).reduce((acc, remote) => {
         if (remote[1].includes('@')) {
@@ -428,8 +447,8 @@ class NextFederationPlugin {
       "process.env.REMOTES": createRuntimeVariables(this._options.remotes),
       "process.env.CURRENT_HOST": JSON.stringify(this._options.name)
     }).apply(compiler);
-    new ChildFederation(this._options).apply(compiler);
-    new AddRuntimeRequiremetToPromiseExternal().apply(compiler);
+    new ChildFederation(this._options, this._extraOptions).apply(compiler);
+    new AddRuntimeRequirementToPromiseExternal().apply(compiler);
   }
 }
 

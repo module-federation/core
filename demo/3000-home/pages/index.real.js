@@ -1,7 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
-import { Alert } from 'antd';
 
 const CheckoutTitle = dynamic(() => import('checkout/CheckoutTitle'), { ssr: false });
 const ButtonOldAnt = dynamic(() => import('checkout/ButtonOldAnt'), { ssr: false });
@@ -82,7 +81,7 @@ const Home = () => {
             </td>
           </tr>
           <tr>
-            <td>🐞</td>
+            <td>✅</td>
             <td>
               Loading remote component with PNG image from localhost:3001
               <br />
@@ -93,11 +92,10 @@ const Home = () => {
             </td>
             <td>
               <WebpackPngRemote />
-              <Alert message="Need to write a fix for image-loader" type="error" />
             </td>
           </tr>
           <tr>
-            <td>🐞</td>
+            <td>✅</td>
             <td>
               Loading remote component with SVG from localhost:3001
               <br />
@@ -108,7 +106,6 @@ const Home = () => {
             </td>
             <td>
               <WebpackSvgRemote />
-              <Alert message="Need to write a fix for url-loader" type="error" />
             </td>
           </tr>
         </tbody>
