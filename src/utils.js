@@ -64,15 +64,23 @@ function injectScript(keyOrRuntimeRemoteItem) {
   }
 
   // 2) Initialize remote container
-  return asyncContainer.then(async (container) => {
-    if (!__webpack_share_scopes__.default) {
-      await __webpack_init_sharing__("default");
+  return asyncContainer
+    .then((container) => {
+      if (!__webpack_share_scopes__.default) {
+        return __webpack_init_sharing__("default").then(() => container);
+      } else {
+        return container;
+      }
+    })
+    .then((container) => {
+      try {
+        container.init(__webpack_share_scopes__.default)
+      } catch (e) {
+        // maybe container already initialized so nothing to throw
+      }
+      return container; 
     }
-    try {
-      await container.init(__webpack_share_scopes__.default);
-    } catch (e) {}
-    return container;
-  });
+  );
 };
 
 module.exports.injectScript = injectScript;
