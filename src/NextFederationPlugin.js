@@ -382,7 +382,7 @@ class NextFederationPlugin {
           acc[remote[0]] = generateRemoteTemplate(url, global);
           return acc
         }
-        acc[remote[1]] = acc[remote[0]]
+        acc[remote[0]] = remote[1];
         return acc
       }, {})
       this._options.remotes = parsedRemotes
