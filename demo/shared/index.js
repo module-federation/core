@@ -98,7 +98,7 @@ export function createFederatedCatchAll() {
       const container = await injectScript(remote);
       const [FederatedPage, FederatedMenu] = await Promise.all([
         container.get(mod).then(factory => factory().default),
-        container.get('./menu').then(factory => factory().default),
+        container.get('./pages/_menu').then(factory => factory().default),
       ]);
 
       console.log({ FederatedMenu });

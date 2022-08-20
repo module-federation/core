@@ -9,6 +9,8 @@ const CHILD_PLUGIN_NAME = "ChildFederationPlugin";
 const path = require('path');
 const injectRuleLoader = require('./loaders/helpers').injectRuleLoader;
 const hasLoader = require('./loaders/helpers').hasLoader;
+const addPageMapIfNeeded =
+  require('./loaders/nextPageMapLoader').addPageMapIfNeeded;
 
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ExternalsType} ExternalsType */
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ModuleFederationPluginOptions} ModuleFederationPluginOptions */
@@ -205,6 +207,10 @@ class ChildFederation {
           new ModuleFederationPlugin({
             // library: {type: 'var', name: buildName},
             ...this._options,
+            exposes: addPageMapIfNeeded(
+              compiler.options.context,
+              this._options.exposes
+            ),
             runtime: false,
             shared: {
               ...externalizedShares,

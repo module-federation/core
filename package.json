@@ -16,7 +16,8 @@
     "registry": "https://r.privjs.com"
   },
   "dependencies": {
-    "chalk": "^4.0.0"
+    "chalk": "^4.0.0",
+    "fast-glob": "^3.2.11"
   },
   "devDependencies": {
     "next": "11.0.1",
