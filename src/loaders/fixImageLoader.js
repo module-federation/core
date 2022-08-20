@@ -1,5 +1,3 @@
-/** @typedef {import("webpack").LoaderContext} LoaderContext */
-
 /**
  * This loader was specially created for tunning next-image-loader result
  *   see https://github.com/vercel/next.js/blob/canary/packages/next/build/webpack/loaders/next-image-loader.js
@@ -11,14 +9,15 @@
  *
  * __webpack_require__.p - is a global variable in webpack container which contains publicPath
  *   For example:  http://localhost:3000/_next
- * 
- * @type {(this: LoaderContext<{}>, content: string) => string>}
+ *
+ * @type {(this: import("webpack").LoaderContext<{}>, content: string) => string>}
  */
 function fixImageLoader(content) {
   // replace(/(.+\:\/\/[^\/]+)\/.* /i, '$1')
   //    this regexp will extract the hostname from publicPath
   //    http://localhost:3000/_next/... -> http://localhost:3000
-  const currentHostnameCode = "__webpack_require__.p.replace(/(.+\\:\\/\\/[^\\/]+)\\/.*/i, '$1')";
+  const currentHostnameCode =
+    "__webpack_require__.p.replace(/(.+\\:\\/\\/[^\\/]+)\\/.*/i, '$1')";
 
   return content.replace('"src":', `"src":${currentHostnameCode}+`);
 }

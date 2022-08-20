@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
-import { useRouter } from 'next/router';
+import {useEffect} from 'react';
+import {useRouter} from 'next/router';
 import dynamic from 'next/dynamic';
 
-const Home = dynamic(import('home/pages/index'), { ssr: false });
+const Home = dynamic(import('home/pages/index'), {ssr: false});
 
-const Page = props => {
+const Page = (props) => {
   const router = useRouter();
   useEffect(() => {
     if (props.needsPush) {
@@ -18,7 +18,7 @@ const Page = props => {
   return <Home {...props} />;
 };
 
-Page.getInitialProps = async ctx => {
+Page.getInitialProps = async (ctx) => {
   if (process.browser) {
     const page = (await import('home/pages/index')).default;
     console.log('running get initial props client side');

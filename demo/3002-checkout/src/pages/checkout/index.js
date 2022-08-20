@@ -1,7 +1,7 @@
 import React from 'react';
 import Head from 'next/head';
 
-const Checkout = props => (
+const Checkout = (props) => (
   <div>
     <Head>
       <title>checkout</title>
@@ -10,7 +10,12 @@ const Checkout = props => (
 
     <div className="hero">
       <h1>checkout page</h1>
-      <h3 className="title">This is a federated page owned by localhost:3002</h3>
+      <h3 className="title">
+        This is a federated page owned by localhost:3002!!
+      </h3>
+      <p className="description">
+        This application serves code from <code>src/</code> folder.
+      </p>
       <span>
         {' '}
         Data from federated <pre>getInitalProps</pre>
@@ -38,7 +43,9 @@ const Checkout = props => (
   </div>
 );
 Checkout.getInitialProps = async () => {
-  const swapi = await fetch('https://jsonplaceholder.typicode.com/todos/1').then(res => res.json());
+  const swapi = await fetch(
+    'https://jsonplaceholder.typicode.com/todos/1'
+  ).then((res) => res.json());
   return swapi;
 };
 export default Checkout;
