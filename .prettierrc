@@ -3,6 +3,5 @@
   "arrowParens": "always",
   "tabWidth": 2,
   "useTabs": false,
-  "trailingComma": "es5",
-  "bracketSpacing": false
+  "trailingComma": "es5"
 }

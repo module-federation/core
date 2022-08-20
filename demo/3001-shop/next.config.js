@@ -20,6 +20,7 @@ module.exports = {
               './pages/shop/products/[...slug].js',
             './pages/shop/test-webpack-png': './pages/shop/test-webpack-png.js',
             './pages/shop/test-webpack-svg': './pages/shop/test-webpack-svg.js',
+            './pages/shop/exposed-pages': './pages/shop/exposed-pages.js',
             // components
             './useCustomRemoteHook': './components/useCustomRemoteHook.js',
             './WebpackSvg': './components/WebpackSvg.js',
