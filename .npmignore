@@ -4,7 +4,8 @@ renovate.json
 .github
 .idea
 .npmrc
-/NextFederationPlugin.js
 ./NextFederationPlugin.js
 demo
 src
+rollup.config.js
+*.log
