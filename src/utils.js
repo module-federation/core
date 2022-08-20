@@ -76,6 +76,13 @@ function injectScript(keyOrRuntimeRemoteItem) {
     })
     .then(function(container) {
         try {
+          // WARNING: here might be a potential BUG.
+          //   `container.init` does not return a Promise, and here we do not call `then` on it.
+          // But according to [docs](https://webpack.js.org/concepts/module-federation/#dynamic-remote-containers) 
+          //   it must be async.
+          // The problem may be in Proxy in NextFederationPlugin.js.
+          //   or maybe a bug in the webpack itself - instead of returning rejected promise it just throws an error.
+          // But now everything works properly and we keep this code as is.
           container.init(__webpack_share_scopes__.default)
         } catch (e) {
           // maybe container already initialized so nothing to throw
