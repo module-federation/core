@@ -1,14 +1,15 @@
-import React, {useEffect} from 'react';
+import React, { useEffect, useState } from 'react';
 
 const CheckoutTitle = () => {
-  console.log('---------loading remote component---------');
+  const [hookData, setHookData] = useState('');
+
   useEffect(() => {
-    console.log('HOOKS WORKS');
+    setHookData('with hooks data');
   }, []);
+
   return (
     <h3 className="title">
-      {' '}
-      This title came from <code>checkout</code> !!!
+      This title came from <code>checkout</code> {hookData}!!!
     </h3>
   );
 };

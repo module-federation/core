@@ -1,35 +1,17 @@
 require('@module-federation/nextjs-mf/lib/include-defaults');
-// if(process.browser && (typeof __webpack_share_scopes__ === "undefined" || !__webpack_share_scopes__.default)) {
-//   __webpack_init_sharing__('default');
-// }
-// require('next/link')
-// require('next/router')
-// require('next/head')
-// require('next/script')
-// require('next/dynamic')
-// require('styled-jsx')
-//
-// require('next/dynamic')
-// require('next/head')
-// require('next/link')
-// require('next/router')
-// require('next/script')
-// require('react')
-if (process.env.NODE_ENV === 'development') {
-  require('react/jsx-dev-runtime');
-}
-// console.log(__webpack_init_sharing__('default'));
 
-console.log(__webpack_share_scopes__);
+// console.log(__webpack_init_sharing__('default'));
+// console.log(__webpack_share_scopes__);
+
 import dynamic from 'next/dynamic';
 import 'antd/dist/antd.css';
 
 const page = import('./_app.real');
 const AppPage = dynamic(() => import('./_app.real'));
-const Page = props => {
+const Page = (props) => {
   return <AppPage {...props} />;
 };
-Page.getInitialProps = async ctx => {
+Page.getInitialProps = async (ctx) => {
   const getInitialProps = (await page).default?.getInitialProps;
   if (getInitialProps) {
     return getInitialProps(ctx);
