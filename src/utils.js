@@ -1,6 +1,6 @@
 const remoteVars = process.env.REMOTES || {};
 
-const runtimeRemotes = Object.entries(remoteVars).reduce((acc, item) => {
+const runtimeRemotes = Object.entries(remoteVars).reduce(function (acc, item) {
   const [key, value] = item;
   if (typeof value === 'object' && typeof value.then === 'function') {
     acc[key] = { asyncContainer: value };
@@ -64,15 +64,31 @@ function injectScript(keyOrRuntimeRemoteItem) {
   }
 
   // 2) Initialize remote container
-  return asyncContainer.then(async (container) => {
-    if (!__webpack_share_scopes__.default) {
-      await __webpack_init_sharing__('default');
-    }
-    try {
-      await container.init(__webpack_share_scopes__.default);
-    } catch (e) {}
-    return container;
-  });
+  return asyncContainer
+    .then(function (container) {
+      if (!__webpack_share_scopes__.default) {
+        return __webpack_init_sharing__('default').then(function () {
+          return container;
+        });
+      } else {
+        return container;
+      }
+    })
+    .then(function (container) {
+      try {
+        // WARNING: here might be a potential BUG.
+        //   `container.init` does not return a Promise, and here we do not call `then` on it.
+        // But according to [docs](https://webpack.js.org/concepts/module-federation/#dynamic-remote-containers)
+        //   it must be async.
+        // The problem may be in Proxy in NextFederationPlugin.js.
+        //   or maybe a bug in the webpack itself - instead of returning rejected promise it just throws an error.
+        // But now everything works properly and we keep this code as is.
+        container.init(__webpack_share_scopes__.default);
+      } catch (e) {
+        // maybe container already initialized so nothing to throw
+      }
+      return container;
+    });
 }
 
 module.exports.injectScript = injectScript;
