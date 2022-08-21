@@ -5,7 +5,7 @@ import 'antd/dist/antd.css';
 
 const page = import('./_app.real');
 const Page = dynamic(() => import('./_app.real'));
-Page.getInitialProps = async ctx => {
+Page.getInitialProps = async (ctx) => {
   const appProps = await App.getInitialProps(ctx);
   const getInitialProps = (await page).default?.getInitialProps;
   if (getInitialProps) {
