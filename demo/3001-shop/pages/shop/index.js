@@ -21,8 +21,6 @@ const Shop = () => (
         <br />
         <br />
         <WebpackPng />
-        <br />
-        <WebpackSvg />
       </p>
     </div>
     <style jsx>{`
