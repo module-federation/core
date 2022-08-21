@@ -1,5 +1,7 @@
 import React from 'react';
 import Head from 'next/head';
+import WebpackPng from '../../components/WebpackPng';
+import WebpackSvg from '../../components/WebpackSvg';
 
 const Shop = () => (
   <div>
@@ -16,6 +18,11 @@ const Shop = () => (
       <p className="description">
         This application manually exposes <code>page-map</code> and its modules
         (see next.config.js file).
+        <br />
+        <br />
+        <WebpackPng />
+        <br />
+        <WebpackSvg />
       </p>
     </div>
     <style jsx>{`

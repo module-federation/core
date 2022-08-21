@@ -135,16 +135,28 @@ const Home = () => {
       <h2 style={{ marginTop: '30px' }}>Other problems to fix:</h2>
       <ul>
         <li>
-          🐞 Incorrectly exposed modules in next.config.js (e.g. typo in path)
-          do not throw an error in console
-        </li>
-        <li>
           🐞{' '}
           <a href="http://localhost:3000/shop/products/A">
             localhost:3000/shop/products/A
           </a>{' '}
           do not obtain correct router path. So in this case page cannot receive
           `slug` value.
+        </li>
+        <li>
+          🐞 Incorrectly exposed modules in next.config.js (e.g. typo in path)
+          do not throw an error in console
+        </li>
+        <li>
+          📝 Try to introduce a remote entry loading according to prefix path.
+          It will be nice runtime improvement if you have eg 20 apps and load
+          just one remoteEntry instead of all of them.
+        </li>
+        <li>
+          📝 It will be nice to regenerate remoteEntry if new page was added in
+          remote app.
+        </li>
+        <li>
+          📝 Remote components do not regenerate chunks if they were changed.
         </li>
       </ul>
     </>
