@@ -17,6 +17,9 @@ module.exports = {
             './SharedNav': './components/SharedNav.js',
           },
           shared: {},
+          extraOptions: {
+            exposePages: true,
+          },
         })
       );
     }

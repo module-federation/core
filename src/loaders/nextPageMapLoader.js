@@ -22,16 +22,10 @@ function nextPageMapLoader() {
 
 /**
  * Webpack config generator for `exposes` option.
- *
- * If `exposes` map does not have `./pages-map` record then
  *   - automatically create `./pages-map` module
- *   - automatically add all page modules to `exposes`
+ *   - automatically add all page modules
  */
-function addPageMapIfNeeded(cwd, exposes) {
-  if (exposes['./pages-map']) {
-    return exposes;
-  }
-
+function exposeNextjsPages(cwd) {
   const pages = getNextPages(cwd);
 
   const pageModulesMap = {};
@@ -45,7 +39,6 @@ function addPageMapIfNeeded(cwd, exposes) {
   const exposesWithPageMap = {
     './pages-map': `${__filename}!${__filename}`,
     ...pageModulesMap,
-    ...exposes,
   };
 
   return exposesWithPageMap;
@@ -133,4 +126,4 @@ function preparePageMap(pages) {
 }
 
 module.exports = nextPageMapLoader;
-module.exports.addPageMapIfNeeded = addPageMapIfNeeded;
+module.exports.exposeNextjsPages = exposeNextjsPages;

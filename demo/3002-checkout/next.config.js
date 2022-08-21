@@ -21,6 +21,9 @@ module.exports = {
             './ButtonOldAnt': './src/components/ButtonOldAnt.js',
           },
           shared: {},
+          extraOptions: {
+            exposePages: true,
+          },
         })
       );
     }

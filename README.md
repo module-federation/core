@@ -119,6 +119,17 @@ Make sure you are using `mini-css-extract-plugin@2` - version 2 supports resolvi
 This plugin works exactly like ModuleFederationPlugin, use it as you'd normally.
 Note that we already share react and next stuff for you automatically.
 
+Also you may automatically expose all nextjs pages if you provide the following option `extraOptions.exposePages: true`:
+
+```js
+new NextFederationPlugin({
+  name: 'next2',
+  extraOptions: {
+    exposePages: true,
+  }
+})
+```
+
 ## Demo
 
 You can see it in action here: https://github.com/module-federation/module-federation-examples/pull/2147
