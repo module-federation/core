@@ -10,11 +10,11 @@
  * @type {(this: import("webpack").LoaderContext<{}>, content: string) => string>}
  */
 function fixUrlLoader(content) {
-  // replace(/(.+\:\/\/[^\/]+)\/.* /i, '$1')
+  // replace(/(.+\:\/\/[^\/]+){0,1}\/.*/i, '$1')
   //    this regexp will extract the hostname from publicPath
   //    http://localhost:3000/_next/... -> http://localhost:3000
   const currentHostnameCode =
-    "__webpack_require__.p.replace(/(.+\\:\\/\\/[^\\/]+)\\/.*/i, '$1')";
+    "__webpack_require__.p.replace(/(.+\\:\\/\\/[^\\/]+){0,1}\\/.*/i, '$1')";
 
   return content.replace(
     'export default "/',
