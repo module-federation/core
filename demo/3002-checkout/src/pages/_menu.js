@@ -3,6 +3,7 @@ import { Menu } from 'antd';
 
 const menuItems = [
   { label: 'Main checkout', key: '/checkout' },
+  { label: 'Exposed pages', key: '/checkout/exposed-pages' },
   {
     label: 'Exposed components',
     children: [
@@ -17,7 +18,9 @@ export default function AppMenu() {
 
   return (
     <>
-      <div style={{ padding: '10px', fontWeight: 600, backgroundColor: '#fff' }}>
+      <div
+        style={{ padding: '10px', fontWeight: 600, backgroundColor: '#fff' }}
+      >
         Checkout App Menu
       </div>
       <Menu

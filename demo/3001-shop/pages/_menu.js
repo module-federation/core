@@ -5,6 +5,7 @@ const menuItems = [
   { label: 'Main shop', key: '/shop' },
   { label: 'Product A', key: '/shop/products/A' },
   { label: 'Product B', key: '/shop/products/B' },
+  { label: 'Exposed pages', key: '/shop/exposed-pages' },
   {
     label: 'Exposed components',
     children: [
@@ -19,7 +20,11 @@ export default function AppMenu() {
 
   return (
     <>
-      <div style={{ padding: '10px', fontWeight: 600, backgroundColor: '#fff' }}>Shop App Menu</div>
+      <div
+        style={{ padding: '10px', fontWeight: 600, backgroundColor: '#fff' }}
+      >
+        Shop App Menu
+      </div>
       <Menu
         mode="inline"
         selectedKeys={[router.asPath]}

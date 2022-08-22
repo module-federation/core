@@ -3,7 +3,7 @@ import Link from 'next/link';
 const links = [
   { href: 'https://zeit.co/now', label: 'ZEIT' },
   { href: 'https://github.com/zeit/next.js', label: 'GitHub' },
-].map(link => {
+].map((link) => {
   link.key = `nav-link-${link.href}-${link.label}`;
   return link;
 });
@@ -27,7 +27,8 @@ const Nav = () => {
       <style jsx>{`
         :global(body) {
           margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, Avenir Next, Avenir, Helvetica, sans-serif;
+          font-family: -apple-system, BlinkMacSystemFont, Avenir Next, Avenir,
+            Helvetica, sans-serif;
         }
         nav {
           text-align: center;

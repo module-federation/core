@@ -12,23 +12,21 @@ module.exports = {
           remotes: {
             home: `home@http://localhost:3000/_next/static/chunks/remoteEntry.js`,
             shop: 'shop@http://localhost:3001/_next/static/chunks/remoteEntry.js',
-            checkout: 'checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js',
+            checkout:
+              'checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js',
           },
           filename: 'static/chunks/remoteEntry.js',
           exposes: {
-            // pages
-            './pages/checkout/index': './pages/checkout/index.js',
-            './pages/checkout/test-check-button': './pages/checkout/test-check-button.js',
-            './pages/checkout/test-title': './pages/checkout/test-title.js',
-            // components
-            './CheckoutTitle': './components/CheckoutTitle.js',
-            './ButtonOldAnt': './components/ButtonOldAnt.js',
-            // utilities
-            './menu': './pages/_menu.js',
-            './pages-map': './pages-map.js',
+            './CheckoutTitle': './src/components/CheckoutTitle.js',
+            './ButtonOldAnt': './src/components/ButtonOldAnt.js',
           },
           shared: {},
-        }),
+          extraOptions: {
+            exposePages: true,
+            enableImageLoaderFix: true,
+            enableUrlLoaderFix: true,
+          },
+        })
       );
     }
 

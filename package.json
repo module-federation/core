@@ -9,18 +9,20 @@
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "demo": "cd demo && yarn install && yarn dev",
+    "demo": "yarn build && cd demo && yarn install && yarn dev",
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\"",
-    "build": "rollup -c"
+    "build": "cp -r ./src/ lib/ && rollup -c"
   },
   "publishConfig": {
     "registry": "https://r.privjs.com"
   },
   "dependencies": {
-    "chalk": "^4.0.0"
+    "chalk": "^4.0.0",
+    "fast-glob": "^3.2.11"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.2",
+    "@rollup/plugin-multi-entry": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "next": "11.0.1",
     "prettier": "2.3.2",

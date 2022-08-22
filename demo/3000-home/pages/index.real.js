@@ -2,10 +2,18 @@ import React from 'react';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
 
-const CheckoutTitle = dynamic(() => import('checkout/CheckoutTitle'), { ssr: false });
-const ButtonOldAnt = dynamic(() => import('checkout/ButtonOldAnt'), { ssr: false });
-const WebpackSvgRemote = dynamic(() => import('shop/WebpackSvg'), { ssr: false });
-const WebpackPngRemote = dynamic(() => import('shop/WebpackPng'), { ssr: false });
+const CheckoutTitle = dynamic(() => import('checkout/CheckoutTitle'), {
+  ssr: false,
+});
+const ButtonOldAnt = dynamic(() => import('checkout/ButtonOldAnt'), {
+  ssr: false,
+});
+const WebpackSvgRemote = dynamic(() => import('shop/WebpackSvg'), {
+  ssr: false,
+});
+const WebpackPngRemote = dynamic(() => import('shop/WebpackPng'), {
+  ssr: false,
+});
 
 const Home = () => {
   return (
@@ -19,27 +27,36 @@ const Home = () => {
         This is SPA combined from 3 different nextjs applications.
       </h1>
       <p className="description">
-        They utilize omnidirectional routing and pages or components are able to be federated
-        between applications.
+        They utilize omnidirectional routing and pages or components are able to
+        be federated between applications.
       </p>
       <p>You may open any application by clicking on the links below:</p>
       <ul>
         <li>
-          <a href="#reloadPage" onClick={() => (window.location = 'http://localhost:3000')}>
+          <a
+            href="#reloadPage"
+            onClick={() => (window.location = 'http://localhost:3000')}
+          >
             localhost:3000
           </a>
           {' – '}
           <b>home</b>
         </li>
         <li>
-          <a href="#reloadPage" onClick={() => (window.location = 'http://localhost:3001')}>
+          <a
+            href="#reloadPage"
+            onClick={() => (window.location = 'http://localhost:3001')}
+          >
             localhost:3001
           </a>
           {' – '}
           <b>shop</b>
         </li>
         <li>
-          <a href="#reloadPage" onClick={() => (window.location = 'http://localhost:3002')}>
+          <a
+            href="#reloadPage"
+            onClick={() => (window.location = 'http://localhost:3002')}
+          >
             localhost:3002
           </a>
           {' – '}
@@ -63,10 +80,12 @@ const Home = () => {
             <td>
               Loading remote component (CheckoutTitle) from localhost:3002
               <br />
-              <blockquote>dynamic(()=&gt;import('checkout/CheckoutTitle'))</blockquote>
+              <blockquote>
+                dynamic(()=&gt;import('checkout/CheckoutTitle'))
+              </blockquote>
             </td>
             <td>
-              <h3>This title came from checkout !!!</h3>
+              <h3>This title came from checkout with hooks data!!!</h3>
             </td>
             <td>
               <CheckoutTitle />
@@ -74,7 +93,9 @@ const Home = () => {
           </tr>
           <tr>
             <td>✅</td>
-            <td>Load federated component from checkout with old antd version</td>
+            <td>
+              Load federated component from checkout with old antd version
+            </td>
             <td>[Button from antd@4.20.0]</td>
             <td>
               <ButtonOldAnt />
@@ -113,14 +134,29 @@ const Home = () => {
 
       <h2 style={{ marginTop: '30px' }}>Other problems to fix:</h2>
       <ul>
-        <li>🐞 Menu do not work correctly (home menu do not return back for / path)</li>
         <li>
-          🐞 Incorrectly exposed modules in next.config.js (e.g. typo in path) do not throw an error
-          in console
+          🐞{' '}
+          <a href="http://localhost:3000/shop/products/A">
+            localhost:3000/shop/products/A
+          </a>{' '}
+          do not obtain correct router path. So in this case page cannot receive
+          `slug` value.
         </li>
         <li>
-          🐞 <a href="http://localhost:3000/shop/products/A">localhost:3000/shop/products/A</a> do
-          not obtain correct router path. So in this case page cannot receive `slug` value.
+          🐞 Incorrectly exposed modules in next.config.js (e.g. typo in path)
+          do not throw an error in console
+        </li>
+        <li>
+          📝 Try to introduce a remote entry loading according to prefix path.
+          It will be nice runtime improvement if you have eg 20 apps and load
+          just one remoteEntry instead of all of them.
+        </li>
+        <li>
+          📝 It will be nice to regenerate remoteEntry if new page was added in
+          remote app.
+        </li>
+        <li>
+          📝 Remote components do not regenerate chunks if they were changed.
         </li>
       </ul>
     </>

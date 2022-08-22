@@ -4,16 +4,16 @@ import { injectScript, remotes } from '@module-federation/nextjs-mf/lib/utils';
 
 export async function matchFederatedPage(path) {
   const maps = await Promise.all(
-    Object.keys(remotes).map(remote => {
-      console.log({ remote });
+    Object.keys(remotes).map((remote) => {
+      console.log('FederatedCatchAll:', { remote });
 
-      return injectScript(remote).then(container => {
+      return injectScript(remote).then((container) => {
         return container
           .get('./pages-map')
-          .then(factory => ({ remote, config: factory().default }))
+          .then((factory) => ({ remote, config: factory().default }))
           .catch(() => null);
       });
-    }),
+    })
   );
 
   const config = {};
@@ -29,7 +29,7 @@ export async function matchFederatedPage(path) {
     }
   }
 
-  console.log(config);
+  console.log('FederatedCatchAll:', config);
 
   const matcher = createMatcher(config);
   const match = matcher(path);
@@ -38,7 +38,7 @@ export async function matchFederatedPage(path) {
 }
 
 export function createFederatedCatchAll() {
-  const FederatedCatchAll = initialProps => {
+  const FederatedCatchAll = (initialProps) => {
     const [lazyProps, setProps] = React.useState({});
 
     const { FederatedPage, render404, renderError, needsReload, ...props } = {
@@ -71,7 +71,7 @@ export function createFederatedCatchAll() {
     return null;
   };
 
-  FederatedCatchAll.getInitialProps = async ctx => {
+  FederatedCatchAll.getInitialProps = async (ctx) => {
     const { err, req, res, AppTree, ...props } = ctx;
     if (err) {
       // TODO: Run getInitialProps for error page
@@ -81,11 +81,11 @@ export function createFederatedCatchAll() {
       return { needsReload: true, ...props };
     }
 
-    console.log('in browser');
+    console.log('FederatedCatchAll:', 'in browser');
     const matchedPage = await matchFederatedPage(ctx.asPath);
 
     try {
-      console.log('matchedPage', matchedPage);
+      console.log('FederatedCatchAll:', 'matchedPage', matchedPage);
       const remote = matchedPage?.value?.remote;
       const mod = matchedPage?.value?.module;
 
@@ -94,18 +94,26 @@ export function createFederatedCatchAll() {
         return { render404: true, ...props };
       }
 
-      console.log('loading exposed module', mod, 'from remote', remote);
+      console.log(
+        'FederatedCatchAll:',
+        'loading exposed module',
+        mod,
+        'from remote',
+        remote
+      );
       const container = await injectScript(remote);
       const [FederatedPage, FederatedMenu] = await Promise.all([
-        container.get(mod).then(factory => factory().default),
-        container.get('./menu').then(factory => factory().default),
+        container.get(mod).then((factory) => factory().default),
+        container.get('./pages/_menu').then((factory) => factory().default),
       ]);
 
-      console.log({ FederatedMenu });
+      console.log('FederatedCatchAll:', { FederatedMenu });
 
       // Send new menu via event, _app will listen to this and render the new menu
       if (typeof window !== 'undefined' && FederatedMenu) {
-        window.dispatchEvent(new CustomEvent('federated-menu', { detail: FederatedMenu }));
+        window.dispatchEvent(
+          new CustomEvent('federated-menu', { detail: FederatedMenu })
+        );
       }
 
       if (!FederatedPage) {
@@ -117,10 +125,11 @@ export function createFederatedCatchAll() {
         ...ctx,
         query: matchedPage.params,
       };
-      const federatedPageProps = (await FederatedPage.getInitialProps?.(modifiedContext)) || {};
+      const federatedPageProps =
+        (await FederatedPage.getInitialProps?.(modifiedContext)) || {};
       return { ...federatedPageProps, FederatedPage };
     } catch (err) {
-      console.log('err', err);
+      console.log('FederatedCatchAll:', 'err', err);
       // TODO: Run getInitialProps for error page
       return { renderError: true, ...props };
     }

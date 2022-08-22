@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/router';
 import { Layout, version } from 'antd';
 import AppMenu from './_menu';
 
@@ -8,7 +9,7 @@ const SharedNav = dynamic(
     const mod = import('home/SharedNav');
     return mod;
   },
-  { ssr: false },
+  { ssr: false }
 );
 
 function MyApp({ Component, pageProps }) {
@@ -23,6 +24,14 @@ function MyApp({ Component, pageProps }) {
     };
   }, []);
 
+  // Return back App menu if federated page does not used
+  const { pathname } = useRouter();
+  useEffect(() => {
+    if (pathname !== '/[...federatedPage]' && MenuComponent !== AppMenu) {
+      setMenuComponent(() => AppMenu);
+    }
+  }, [pathname]);
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <SharedNav />
@@ -34,7 +43,9 @@ function MyApp({ Component, pageProps }) {
           <Layout.Content style={{ background: '#fff', padding: 20 }}>
             <Component {...pageProps} />
           </Layout.Content>
-          <Layout.Footer style={{ background: '#fff', color: '#999', textAlign: 'center' }}>
+          <Layout.Footer
+            style={{ background: '#fff', color: '#999', textAlign: 'center' }}
+          >
             antd@{version}
           </Layout.Footer>
         </Layout>

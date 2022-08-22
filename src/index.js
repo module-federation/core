@@ -1,3 +1,3 @@
-const NextFederationPlugin = require("./NextFederationPlugin");
+const NextFederationPlugin = require('./NextFederationPlugin');
 
-module.exports = NextFederationPlugin
+module.exports = NextFederationPlugin;
