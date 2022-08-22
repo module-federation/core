@@ -241,7 +241,7 @@ class ChildFederation {
       childCompiler.options.module.rules.forEach((rule) => {
         // next-image-loader fix which adds remote's hostname to the assets url
         if (
-          !this._extraOptions.disableImageLoaderFix &&
+          this._extraOptions.enableImageLoaderFix &&
           hasLoader(rule, 'next-image-loader')
         ) {
           injectRuleLoader(rule, {
@@ -251,7 +251,7 @@ class ChildFederation {
 
         // url-loader fix for which adds remote's hostname to the assets url
         if (
-          !this._extraOptions.disableUrlLoaderFix &&
+          this._extraOptions.enableUrlLoaderFix &&
           hasLoader(rule, 'url-loader')
         ) {
           injectRuleLoader({
