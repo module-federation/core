@@ -99,7 +99,7 @@ class RemoveRRRuntimePlugin {
           },
           (assets) => {
             Object.keys(assets).forEach((filename) => {
-              if (filename.includes('.js') || filename.includes('.mjs')) {
+              if (filename.endsWith('.js') || filename.endsWith('.mjs')) {
                 const asset = compilation.getAsset(filename);
                 const newSource = asset.source
                   .source()
