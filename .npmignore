@@ -9,3 +9,4 @@ demo
 src
 rollup.config.js
 *.log
+/yarn.lock

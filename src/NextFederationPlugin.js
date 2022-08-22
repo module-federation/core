@@ -6,16 +6,14 @@ const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
 
 ('use strict');
 
-const path = require('path');
-const injectRuleLoader = require('./loaders/helpers').injectRuleLoader;
-const hasLoader = require('./loaders/helpers').hasLoader;
-const exposeNextjsPages =
-  require('./loaders/nextPageMapLoader').exposeNextjsPages;
+import path from 'path';
+import { injectRuleLoader, hasLoader } from './loaders/helpers';
+import { exposeNextjsPages } from './loaders/nextPageMapLoader';
 
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ExternalsType} ExternalsType */
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ModuleFederationPluginOptions} ModuleFederationPluginOptions */
 
-/** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").Shared} Shared */
+/** @typedef {import("webpack").Shared} Shared */
 /** @typedef {import("webpack").Compiler} Compiler */
 
 class ModuleFederationPlugin {

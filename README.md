@@ -126,8 +126,8 @@ new NextFederationPlugin({
   name: 'next2',
   extraOptions: {
     exposePages: true,
-  }
-})
+  },
+});
 ```
 
 ## Demo
