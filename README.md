@@ -129,16 +129,16 @@ new NextFederationPlugin({
   exposes: ...,
   shared: ...,
   extraOptions: {
-    exposePages: true,
-    enableImageLoaderFix: true,
-    enableUrlLoaderFix: true,
+    exposePages: true, // `false` by default
+    enableImageLoaderFix: true, // `false` by default
+    enableUrlLoaderFix: true, // `false` by default
   },
 });
 ```
 
-- `exposePages` – (boolean, `false` by default) exposes automatically all nextjs pages for you and theirs `./pages-map`.
-- `enableImageLoaderFix` – (boolean, `false` by default) adds public hostname to all assets bundled by `nextjs-image-loader`. So if you serve remoteEntry from `http://example.com` then all bundled assets will get this hostname in runtime. It's something like Base URL in HTML but for federated modules.
-- `enableUrlLoaderFix` – (boolean, `false` by default) adds public hostname to all assets bundled by `url-loader`.
+- `exposePages` – exposes automatically all nextjs pages for you and theirs `./pages-map`.
+- `enableImageLoaderFix` – adds public hostname to all assets bundled by `nextjs-image-loader`. So if you serve remoteEntry from `http://example.com` then all bundled assets will get this hostname in runtime. It's something like Base URL in HTML but for federated modules.
+- `enableUrlLoaderFix` – adds public hostname to all assets bundled by `url-loader`.
 
 ## Demo
 
