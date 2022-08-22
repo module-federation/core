@@ -119,16 +119,26 @@ Make sure you are using `mini-css-extract-plugin@2` - version 2 supports resolvi
 This plugin works exactly like ModuleFederationPlugin, use it as you'd normally.
 Note that we already share react and next stuff for you automatically.
 
-Also you may automatically expose all nextjs pages if you provide the following option `extraOptions.exposePages: true`:
+Also NextFederationPlugin has own optional argument `extraOptions` where you can unlock additional features of this plugin:
 
 ```js
 new NextFederationPlugin({
-  name: 'next2',
+  name: ...,
+  filename: ...,
+  remotes: ...,
+  exposes: ...,
+  shared: ...,
   extraOptions: {
     exposePages: true,
+    enableImageLoaderFix: true,
+    enableUrlLoaderFix: true,
   },
 });
 ```
+
+- `extraOptions.exposePages: boolean` – exposes automatically all nextjs pages for you and theirs `./pages-map`
+- `extraOptions.enableImageLoaderFix: boolean` – adds public hostname to all assets bundled by `nextjs-image-loader`. So if you serve remoteEntry from `http://example.com` then all bundled assets will get this hostname in runtime. It's something like Base URL in HTML but for federated modules.
+- `extraOptions.enableUrlLoaderFix: boolean` – adds public hostname to all assets bundled by `url-loader`
 
 ## Demo
 
