@@ -30,8 +30,8 @@ module.exports = {
             './pages-map': './pages-map.js',
           },
           extraOptions: {
-            disableImageLoaderFix: false,
-            disableUrlLoaderFix: false,
+            enableImageLoaderFix: true,
+            enableUrlLoaderFix: true,
           },
         })
       );

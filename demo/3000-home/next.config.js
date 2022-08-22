@@ -19,6 +19,8 @@ module.exports = {
           shared: {},
           extraOptions: {
             exposePages: true,
+            enableImageLoaderFix: true,
+            enableUrlLoaderFix: true,
           },
         })
       );
