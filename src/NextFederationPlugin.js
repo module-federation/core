@@ -360,19 +360,16 @@ function generateRemoteTemplate(url, global) {
       ${JSON.stringify(global)},
     );
   }).then(function () {
-    if (!__webpack_require__.S.default) {
-      __webpack_require__.I('default')
-    }
-    return null
-  }).then(function () {
     const proxy = {
       get: ${global}.get,
       init: (args) => {
         const handler = {
           get(target, prop) {
             if (target[prop]) {
-              Object.values(target[prop]).forEach((o) => {
-                o.loaded = 1
+              Object.values(target[prop]).forEach(function(o) {
+                if(o.from === '_N_E') {
+                  o.loaded = true
+                }
               })
             }
             return target[prop]
