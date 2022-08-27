@@ -9,6 +9,7 @@ const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
 import path from 'path';
 import { injectRuleLoader, hasLoader } from './loaders/helpers';
 import { exposeNextjsPages } from './loaders/nextPageMapLoader';
+import DevHmrFixInvalidPongPlugin from './plugins/DevHmrFixInvalidPongPlugin';
 
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ExternalsType} ExternalsType */
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ModuleFederationPluginOptions} ModuleFederationPluginOptions */
@@ -470,6 +471,9 @@ class NextFederationPlugin {
     }).apply(compiler);
     new ChildFederation(this._options, this._extraOptions).apply(compiler);
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
+    if (compiler.options.mode === 'development') {
+      new DevHmrFixInvalidPongPlugin().apply(compiler);
+    }
   }
 }
 
