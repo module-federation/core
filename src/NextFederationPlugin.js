@@ -184,7 +184,7 @@ class ChildFederation {
           'Ensure NextFederationPlugin only runs on the client build'
         );
         console.warn(
-          'if(options.isServer) { config.plugins.push(new NextFederationPlugin(options)); }'
+          'if (!options.isServer) config.plugins.push(new NextFederationPlugin(options));'
         );
       }
       if (!this.createdCompiler[compiler.options.name]) {
