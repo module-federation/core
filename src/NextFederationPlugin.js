@@ -275,11 +275,9 @@ class ChildFederation {
         'DropClientPage',
         'ReactFreshWebpackPlugin',
       ];
-      
+
       childCompiler.options.plugins = childCompiler.options.plugins.filter(
-        (plugin) => {
-          return !removePlugins.includes(plugin.constructor.name);
-        }
+        (plugin) => !removePlugins.includes(plugin.constructor.name)
       );
 
       if (MiniCss) {
