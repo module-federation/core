@@ -176,6 +176,17 @@ class ChildFederation {
     const library = compiler.options.output.library;
 
     compiler.hooks.thisCompilation.tap(CHILD_PLUGIN_NAME, (compilation) => {
+      if (compiler.options.name !== 'client') {
+        console.warn(
+          'ChildFederationPlugin is only compatible with the client compiler'
+        );
+        console.warn(
+          'Ensure NextFederationPlugin only runs on the client build'
+        );
+        console.warn(
+          'if(options.isServer) { config.plugins.push(new NextFederationPlugin(options)); }'
+        );
+      }
       if (!this.createdCompiler[compiler.options.name]) {
         this.createdCompiler[compiler.options.name] = true;
         const buildName = this._options.name;
@@ -200,7 +211,7 @@ class ChildFederation {
         const externalizedShares = Object.entries(DEFAULT_SHARE_SCOPE).reduce(
           (acc, item) => {
             const [key, value] = item;
-            acc[key] = {...value, import: false};
+            acc[key] = { ...value, import: false };
             if (key === 'react/jsx-runtime') {
               delete acc[key].import;
             }
