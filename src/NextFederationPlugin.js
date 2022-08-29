@@ -163,6 +163,7 @@ class ChildFederation {
   constructor(options, extraOptions = {}) {
     this._options = options;
     this._extraOptions = extraOptions;
+    this.createdCompiler = {};
   }
 
   apply(compiler) {
@@ -175,136 +176,139 @@ class ChildFederation {
     const library = compiler.options.output.library;
 
     compiler.hooks.thisCompilation.tap(CHILD_PLUGIN_NAME, (compilation) => {
-      const buildName = this._options.name;
-      const childOutput = {
-        ...compiler.options.output,
-        publicPath: 'auto',
-        chunkLoadingGlobal: buildName + 'chunkLoader',
-        uniqueName: buildName,
-        library: {
-          name: buildName,
-          type: library.type,
-        },
-        chunkFilename: compiler.options.output.chunkFilename.replace(
-          '.js',
-          '-fed.js'
-        ),
-        filename: compiler.options.output.chunkFilename.replace(
-          '.js',
-          '-fed.js'
-        ),
-      };
-      const externalizedShares = Object.entries(DEFAULT_SHARE_SCOPE).reduce(
-        (acc, item) => {
-          const [key, value] = item;
-          acc[key] = { ...value, import: false };
-          if (key === 'react/jsx-runtime') {
-            delete acc[key].import;
-          }
-          return acc;
-        },
-        {}
-      );
-      const childCompiler = compilation.createChildCompiler(
-        CHILD_PLUGIN_NAME,
-        childOutput,
-        [
-          new ModuleFederationPlugin({
-            // library: {type: 'var', name: buildName},
-            ...this._options,
-            exposes: {
-              ...this._options.exposes,
-              ...(this._extraOptions.exposePages
-                ? exposeNextjsPages(compiler.options.context)
-                : {}),
-            },
-            runtime: false,
-            shared: {
-              ...externalizedShares,
-              ...this._options.shared,
-            },
-          }),
-          new webpack.web.JsonpTemplatePlugin(childOutput),
-          new LoaderTargetPlugin('web'),
-          new LibraryPlugin('var'),
-          new webpack.DefinePlugin({
-            'process.env.REMOTES': JSON.stringify(this._options.remotes),
-            'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
-          }),
-          new AddRuntimeRequirementToPromiseExternal(),
-        ]
-      );
-      new RemoveRRRuntimePlugin().apply(childCompiler);
-
-      childCompiler.options.module.rules.forEach((rule) => {
-        // next-image-loader fix which adds remote's hostname to the assets url
-        if (
-          this._extraOptions.enableImageLoaderFix &&
-          hasLoader(rule, 'next-image-loader')
-        ) {
-          injectRuleLoader(rule, {
-            loader: path.resolve(__dirname, './loaders/fixImageLoader.js'),
-          });
-        }
-
-        // url-loader fix for which adds remote's hostname to the assets url
-        if (
-          this._extraOptions.enableUrlLoaderFix &&
-          hasLoader(rule, 'url-loader')
-        ) {
-          injectRuleLoader({
-            loader: path.resolve(__dirname, './loaders/fixUrlLoader.js'),
-          });
-        }
-      });
-
-      const MiniCss = childCompiler.options.plugins.find((p) => {
-        return p.constructor.name === 'NextMiniCssExtractPlugin';
-      });
-
-      childCompiler.options.plugins.forEach((plugin, index) => {
-        if (
-          plugin.constructor.name === 'HotModuleReplacementPlugin' ||
-          plugin.constructor.name === 'NextMiniCssExtractPlugin' ||
-          plugin.constructor.name === 'NextFederationPlugin' ||
-          plugin.constructor.name === 'CopyFilePlugin' ||
-          plugin.constructor.name === 'ProfilingPlugin' ||
-          plugin.constructor.name === 'DropClientPage' ||
-          plugin.constructor.name === 'ReactFreshWebpackPlugin'
-        ) {
-          childCompiler.options.plugins.splice(index, 1);
-        }
-      });
-
-      if (MiniCss) {
-        new MiniCss.constructor({
-          ...MiniCss.options,
-          filename: MiniCss.options.filename.replace('.css', '-fed.css'),
-          chunkFilename: MiniCss.options.chunkFilename.replace(
-            '.css',
-            '-fed.css'
+      if (!this.createdCompiler[compiler.options.name]) {
+        this.createdCompiler[compiler.options.name] = true;
+        const buildName = this._options.name;
+        const childOutput = {
+          ...compiler.options.output,
+          publicPath: 'auto',
+          chunkLoadingGlobal: buildName + 'chunkLoader',
+          uniqueName: buildName,
+          library: {
+            name: buildName,
+            type: library.type,
+          },
+          chunkFilename: compiler.options.output.chunkFilename.replace(
+            '.js',
+            '-fed.js'
           ),
-        }).apply(childCompiler);
-      }
+          filename: compiler.options.output.chunkFilename.replace(
+            '.js',
+            '-fed.js'
+          ),
+        };
+        const externalizedShares = Object.entries(DEFAULT_SHARE_SCOPE).reduce(
+          (acc, item) => {
+            const [key, value] = item;
+            acc[key] = {...value, import: false};
+            if (key === 'react/jsx-runtime') {
+              delete acc[key].import;
+            }
+            return acc;
+          },
+          {}
+        );
+        const childCompiler = compilation.createChildCompiler(
+          CHILD_PLUGIN_NAME,
+          childOutput,
+          [
+            new ModuleFederationPlugin({
+              // library: {type: 'var', name: buildName},
+              ...this._options,
+              exposes: {
+                ...this._options.exposes,
+                ...(this._extraOptions.exposePages
+                  ? exposeNextjsPages(compiler.options.context)
+                  : {}),
+              },
+              runtime: false,
+              shared: {
+                ...externalizedShares,
+                ...this._options.shared,
+              },
+            }),
+            new webpack.web.JsonpTemplatePlugin(childOutput),
+            new LoaderTargetPlugin('web'),
+            new LibraryPlugin('var'),
+            new webpack.DefinePlugin({
+              'process.env.REMOTES': JSON.stringify(this._options.remotes),
+              'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
+            }),
+            new AddRuntimeRequirementToPromiseExternal(),
+          ]
+        );
+        new RemoveRRRuntimePlugin().apply(childCompiler);
 
-      childCompiler.options.experiments.lazyCompilation = false;
-      childCompiler.options.optimization.runtimeChunk = false;
-      delete childCompiler.options.optimization.splitChunks;
-      childCompiler.outputFileSystem = compiler.outputFileSystem;
-      if (compiler.options.mode === 'development') {
-        childCompiler.run((err, stats) => {
-          if (err) {
-            console.error(err);
-            throw new Error(err);
+        childCompiler.options.module.rules.forEach((rule) => {
+          // next-image-loader fix which adds remote's hostname to the assets url
+          if (
+            this._extraOptions.enableImageLoaderFix &&
+            hasLoader(rule, 'next-image-loader')
+          ) {
+            injectRuleLoader(rule, {
+              loader: path.resolve(__dirname, './loaders/fixImageLoader.js'),
+            });
+          }
+
+          // url-loader fix for which adds remote's hostname to the assets url
+          if (
+            this._extraOptions.enableUrlLoaderFix &&
+            hasLoader(rule, 'url-loader')
+          ) {
+            injectRuleLoader({
+              loader: path.resolve(__dirname, './loaders/fixUrlLoader.js'),
+            });
           }
         });
-      } else {
-        childCompiler.runAsChild((err, stats) => {
-          if (err) {
-            console.error(err);
-            throw new Error(err);
+
+        const MiniCss = childCompiler.options.plugins.find((p) => {
+          return p.constructor.name === 'NextMiniCssExtractPlugin';
+        });
+
+        childCompiler.options.plugins.forEach((plugin, index) => {
+          if (
+            plugin.constructor.name === 'HotModuleReplacementPlugin' ||
+            plugin.constructor.name === 'NextMiniCssExtractPlugin' ||
+            plugin.constructor.name === 'NextFederationPlugin' ||
+            plugin.constructor.name === 'CopyFilePlugin' ||
+            plugin.constructor.name === 'ProfilingPlugin' ||
+            plugin.constructor.name === 'DropClientPage' ||
+            plugin.constructor.name === 'ReactFreshWebpackPlugin'
+          ) {
+            childCompiler.options.plugins.splice(index, 1);
           }
         });
+
+        if (MiniCss) {
+          new MiniCss.constructor({
+            ...MiniCss.options,
+            filename: MiniCss.options.filename.replace('.css', '-fed.css'),
+            chunkFilename: MiniCss.options.chunkFilename.replace(
+              '.css',
+              '-fed.css'
+            ),
+          }).apply(childCompiler);
+        }
+
+        childCompiler.options.experiments.lazyCompilation = false;
+        childCompiler.options.optimization.runtimeChunk = false;
+        delete childCompiler.options.optimization.splitChunks;
+        childCompiler.outputFileSystem = compiler.outputFileSystem;
+        if (compiler.options.mode === 'development') {
+          childCompiler.run((err, stats) => {
+            if (err) {
+              console.error(err);
+              throw new Error(err);
+            }
+          });
+        } else {
+          childCompiler.runAsChild((err, stats) => {
+            if (err) {
+              console.error(err);
+              throw new Error(err);
+            }
+          });
+        }
       }
     });
   }
