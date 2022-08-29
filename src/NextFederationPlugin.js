@@ -262,23 +262,25 @@ class ChildFederation {
         return p.constructor.name === 'NextMiniCssExtractPlugin';
       });
 
-      childCompiler.options.plugins = childCompiler.options.plugins.filter((plugin) => {
-        const removePlugins = [
-          'NextJsRequireCacheHotReloader',
-          'BuildManifestPlugin',
-          'WellKnownErrorsPlugin',
-          'WebpackBuildEventsPlugin',
-          'HotModuleReplacementPlugin',
-          'NextMiniCssExtractPlugin',
-          'NextFederationPlugin',
-          'CopyFilePlugin',
-          'ProfilingPlugin',
-          'DropClientPage',
-          'ReactFreshWebpackPlugin',
-        ];
-
-        return !removePlugins.includes(plugin.constructor.name);
-      });
+      const removePlugins = [
+        'NextJsRequireCacheHotReloader',
+        'BuildManifestPlugin',
+        'WellKnownErrorsPlugin',
+        'WebpackBuildEventsPlugin',
+        'HotModuleReplacementPlugin',
+        'NextMiniCssExtractPlugin',
+        'NextFederationPlugin',
+        'CopyFilePlugin',
+        'ProfilingPlugin',
+        'DropClientPage',
+        'ReactFreshWebpackPlugin',
+      ];
+      
+      childCompiler.options.plugins = childCompiler.options.plugins.filter(
+        (plugin) => {
+          return !removePlugins.includes(plugin.constructor.name);
+        }
+      );
 
       if (MiniCss) {
         new MiniCss.constructor({
