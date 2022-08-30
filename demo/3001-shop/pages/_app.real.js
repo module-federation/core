@@ -27,7 +27,11 @@ function MyApp({ Component, pageProps }) {
   // Return back App menu if federated page does not used
   const { pathname } = useRouter();
   useEffect(() => {
-    if (pathname !== '/[...federatedPage]' && MenuComponent !== AppMenu) {
+    if (
+      // pathname !== '/[...federatedPage]' &&
+      !window.mf_nextjs.isFederatedPathname(pathname) &&
+      MenuComponent !== AppMenu
+    ) {
       setMenuComponent(() => AppMenu);
     }
   }, [pathname]);

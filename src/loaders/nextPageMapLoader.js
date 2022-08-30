@@ -7,17 +7,22 @@ const fs = require('fs');
  * @type {(this: import("webpack").LoaderContext<{}>, content: string) => string>}
  */
 function nextPageMapLoader() {
-  const pages = getNextPages(this.rootContext);
-  const pageMap = preparePageMap(pages);
-
   // const [pagesRoot] = getNextPagesRoot(this.rootContext);
   // this.addContextDependency(pagesRoot);
+  const opts = this.getOptions();
+  const pages = getNextPages(this.rootContext);
 
-  const result = `module.exports = { 
-    default: ${JSON.stringify(pageMap)},
-  };`;
+  let result = '';
+  if (Object.hasOwnProperty.call(opts, 'v2')) {
+    result = preparePageMapV2(pages);
+  } else {
+    result = preparePageMap(pages);
+  }
 
-  this.callback(null, result);
+  this.callback(
+    null,
+    `module.exports = { default: ${JSON.stringify(result)} };`
+  );
 }
 
 /**
@@ -38,6 +43,7 @@ function exposeNextjsPages(cwd) {
 
   const exposesWithPageMap = {
     './pages-map': `${__filename}!${__filename}`,
+    './pages-map-v2': `${__filename}?v2!${__filename}`,
     ...pageModulesMap,
   };
 
@@ -119,6 +125,32 @@ function preparePageMap(pages) {
       '/' +
       page.replace(/\[\.\.\.[^\]]+\]/gi, '*').replace(/\[([^\]]+)\]/gi, ':$1');
     key = key.replace(/^\/pages\//, '/').replace(/\/index$/, '') || '/';
+    result[key] = `./${page}`;
+  });
+
+  return result;
+}
+
+/**
+ * Create MF list of NextJS pages
+ *
+ * From
+ *   ['pages/index.tsx', 'pages/storage/[...slug].tsx', 'pages/storage/index.tsx']
+ * Getting the following map
+ *   {
+ *     '/': './pages/index',
+ *     '/storage': './pages/storage/index'
+ *     '/storage/[...slug]': './pages/storage/[...slug]',
+ *   }
+ *
+ * @type {(pages: string[]) => {[key: string]: string}}
+ */
+function preparePageMapV2(pages) {
+  const result = {};
+
+  pages.forEach((pagePath) => {
+    const page = sanitizePagePath(pagePath);
+    let key = page.replace(/^pages\//, '/').replace(/\/index$/, '') || '/';
     result[key] = `./${page}`;
   });
 

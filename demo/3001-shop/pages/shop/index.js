@@ -1,7 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
 import WebpackPng from '../../components/WebpackPng';
-import WebpackSvg from '../../components/WebpackSvg';
 
 const Shop = () => (
   <div>

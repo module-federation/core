@@ -30,6 +30,7 @@ module.exports = {
             './pages-map': './pages-map.js',
           },
           extraOptions: {
+            exposePages: true,
             enableImageLoaderFix: true,
             enableUrlLoaderFix: true,
           },
