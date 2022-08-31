@@ -135,14 +135,6 @@ const Home = () => {
       <h2 style={{ marginTop: '30px' }}>Other problems to fix:</h2>
       <ul>
         <li>
-          🐞{' '}
-          <a href="http://localhost:3000/shop/products/A">
-            localhost:3000/shop/products/A
-          </a>{' '}
-          do not obtain correct router path. So in this case page cannot receive
-          `slug` value.
-        </li>
-        <li>
           🐞 Incorrectly exposed modules in next.config.js (e.g. typo in path)
           do not throw an error in console
         </li>
