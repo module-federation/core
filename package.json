@@ -9,9 +9,12 @@
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "yarn build && cd demo && yarn install && yarn dev",
+    "demo": "sleep 3 && cd demo && yarn install && yarn dev",
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\"",
-    "build": "rm -rf lib && cp -r ./src/ lib/ && rollup -c"
+    "sync-files": "cpx \"src/**/*.js\" lib/",
+    "compile": "rollup -c",
+    "build": "rm -rf lib && yarn sync-files && yarn compile",
+    "dev": "rm -rf lib && concurrently \"yarn sync-files --watch\" \"yarn compile --watch\" \"yarn demo\""
   },
   "publishConfig": {
     "registry": "https://r.privjs.com"
@@ -24,12 +27,17 @@
     "@rollup/plugin-commonjs": "^22.0.2",
     "@rollup/plugin-multi-entry": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
+    "concurrently": "^7.3.0",
+    "cpx": "^1.5.0",
     "next": "11.0.1",
     "prettier": "2.3.2",
     "rollup": "^2.78.1",
     "rollup-obfuscator": "^3.0.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-typescript2": "^0.33.0",
+    "typescript": "^4.8.2",
+    "tslib": "^2.4.0",
     "webpack": "5.45.1"
   }
 }

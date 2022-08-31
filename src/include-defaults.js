@@ -13,6 +13,6 @@ if (process.env.NODE_ENV === 'development') {
   require('react/jsx-dev-runtime');
 }
 
-require('./global-mf-nextjs');
+require('./mf-router');
 
 module.exports = {};

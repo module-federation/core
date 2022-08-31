@@ -1,5 +1,6 @@
 const fg = require('fast-glob');
 const fs = require('fs');
+const UrlNode = require('../mf-router/UrlNode').UrlNode;
 
 /**
  * Webpack loader which prepares MF map for NextJS pages
@@ -119,13 +120,20 @@ function sanitizePagePath(item) {
 function preparePageMap(pages) {
   const result = {};
 
-  pages.forEach((pagePath) => {
-    const page = sanitizePagePath(pagePath);
-    let key =
-      '/' +
-      page.replace(/\[\.\.\.[^\]]+\]/gi, '*').replace(/\[([^\]]+)\]/gi, ':$1');
+  const clearedPages = pages.map((p) => `/${sanitizePagePath(p)}`);
+
+  // getSortedRoutes @see https://github.com/vercel/next.js/blob/canary/packages/next/shared/lib/router/utils/sorted-routes.ts
+  const root = new UrlNode();
+  clearedPages.forEach((pagePath) => root.insert(pagePath));
+  // Smoosh will then sort those sublevels up to the point where you get the correct route definition priority
+  const sortedPages = root.smoosh();
+
+  sortedPages.forEach((page) => {
+    let key = page
+      .replace(/\[\.\.\.[^\]]+\]/gi, '*')
+      .replace(/\[([^\]]+)\]/gi, ':$1');
     key = key.replace(/^\/pages\//, '/').replace(/\/index$/, '') || '/';
-    result[key] = `./${page}`;
+    result[key] = `.${page}`;
   });
 
   return result;
@@ -148,10 +156,17 @@ function preparePageMap(pages) {
 function preparePageMapV2(pages) {
   const result = {};
 
-  pages.forEach((pagePath) => {
-    const page = sanitizePagePath(pagePath);
-    let key = page.replace(/^pages\//, '/').replace(/\/index$/, '') || '/';
-    result[key] = `./${page}`;
+  const clearedPages = pages.map((p) => `/${sanitizePagePath(p)}`);
+
+  // getSortedRoutes @see https://github.com/vercel/next.js/blob/canary/packages/next/shared/lib/router/utils/sorted-routes.ts
+  const root = new UrlNode();
+  clearedPages.forEach((pagePath) => root.insert(pagePath));
+  // Smoosh will then sort those sublevels up to the point where you get the correct route definition priority
+  const sortedPages = root.smoosh();
+
+  sortedPages.forEach((page) => {
+    let key = page.replace(/^\/pages\//, '/').replace(/\/index$/, '') || '/';
+    result[key] = `.${page}`;
   });
 
   return result;

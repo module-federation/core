@@ -30,7 +30,7 @@ function MyApp({ Component, pageProps }) {
   useEffect(() => {
     if (
       // pathname !== '/[...federatedPage]' &&
-      !window.mf_nextjs.isFederatedPathname(pathname) &&
+      !window.mf_router.isFederatedPathname(pathname) &&
       MenuComponent !== AppMenu
     ) {
       setMenuComponent(() => AppMenu);
