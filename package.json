@@ -7,6 +7,9 @@
   "types": "lib/index.d.ts",
   "repository": "https://github.com/module-federation/nextjs-mf",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
+  "contributors": [
+    "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
+  ],
   "license": "MIT",
   "scripts": {
     "demo": "sleep 3 && cd demo && yarn install && yarn dev",
