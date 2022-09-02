@@ -4,7 +4,6 @@
     "./3000-home",
     "./3001-shop",
     "./3002-checkout",
-    "./shared",
     "./tmp/nextjs-mf"
   ],
   "scripts": {
