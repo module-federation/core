@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
+import router from 'next/router';
 import { Layout, version } from 'antd';
 import AppMenu from './_menu';
+import { injectScript } from '@module-federation/nextjs-mf/lib/utils';
 
 const SharedNav = dynamic(
   () => {
@@ -12,29 +13,47 @@ const SharedNav = dynamic(
   { ssr: false }
 );
 
+async function getMFMenuComponent(pathname) {
+  const route = window?.mf_router?.pathnameToRoute(pathname);
+  if (route) {
+    const remote = window?.mf_router?.pageListFederated?.[route]?.remote;
+    if (remote) {
+      // set remote menu
+      const container = await injectScript(remote);
+      const Component = (await container.get('./pages/_menu'))().default;
+      return Component;
+    } else {
+      return () => null;
+    }
+  } else {
+    return AppMenu;
+  }
+}
+
 function MyApp({ Component, pageProps }) {
   const [MenuComponent, setMenuComponent] = useState(() => AppMenu);
   useEffect(() => {
-    const cb = ({ detail }) => {
-      if (detail && detail !== MenuComponent) setMenuComponent(() => detail);
+    const handleRouteChange = async (url) => {
+      const RouteMenu = await getMFMenuComponent(url);
+      if (MenuComponent !== RouteMenu) {
+        setMenuComponent(() => RouteMenu);
+      }
     };
-    window.addEventListener('federated-menu', cb);
-    return () => {
-      window.removeEventListener('federated-menu', cb);
-    };
-  }, []);
 
-  // Return back App menu if federated page does not used
-  const { pathname } = useRouter();
+    router.events.on('routeChangeStart', handleRouteChange);
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChange);
+    };
+  }, [MenuComponent]);
   useEffect(() => {
-    if (
-      // pathname !== '/[...federatedPage]' &&
-      !window.mf_router.isFederatedPathname(pathname) &&
-      MenuComponent !== AppMenu
-    ) {
-      setMenuComponent(() => AppMenu);
-    }
-  }, [pathname]);
+    // This code is used for first rendering
+    // for loading correct menu of remote apps
+    getMFMenuComponent(router.pathname).then((RouteMenu) => {
+      if (RouteMenu !== MenuComponent) {
+        setMenuComponent(() => RouteMenu);
+      }
+    });
+  }, []);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
