@@ -1,28 +1,33 @@
-const CommonJsChunkLoadingPlugin = require("./CommonJsChunkLoadingPlugin")
+import CommonJsChunkLoadingPlugin from "./CommonJsChunkLoadingPlugin";
 
-class StreamingTargetPlugin {
-  constructor(options) {
+class NodeSoftwareStreamRuntime {
+  constructor(options, context) {
     this.options = options || {};
+    this.context = context || {};
   }
 
   apply(compiler) {
     if (compiler.options.target) {
       console.warn(
-        `target should be set to false while using StreamingTargetPlugin plugin, actual target: ${compiler.options.target}`
+        `target should be set to false while using NodeSoftwareStreamRuntime plugin, actual target: ${compiler.options.target}`
       );
     }
-    const webpack = compiler.webpack
+
+    // When used with Next.js, context is needed to use Next.js webpack
+    const { webpack } = compiler
+
     // This will enable CommonJsChunkFormatPlugin
     compiler.options.output.chunkFormat = "commonjs";
     // This will force async chunk loading
     compiler.options.output.chunkLoading = "async-node";
     // Disable default config
     compiler.options.output.enabledChunkLoadingTypes = false;
-    const NodeEnvironmentPlugin = (webpack && webpack.node.NodeEnvironmentPlugin) || require("webpack/lib/node/NodeEnvironmentPlugin");
-    new NodeEnvironmentPlugin({
+
+    new ((webpack && webpack.node && webpack.node.NodeEnvironmentPlugin) ||
+      require("webpack/lib/node/NodeEnvironmentPlugin"))({
       infrastructureLogging: compiler.options.infrastructureLogging,
     }).apply(compiler);
-    new (webpack?.node.NodeTargetPlugin ||
+    new ((webpack && webpack.node && webpack.node.NodeTargetPlugin) ||
       require("webpack/lib/node/NodeTargetPlugin"))().apply(compiler);
     new CommonJsChunkLoadingPlugin(
       {
@@ -31,10 +36,9 @@ class StreamingTargetPlugin {
         remotes: this.options.remotes,
         baseURI: compiler.options.output.publicPath,
         promiseBaseURI: this.options.promiseBaseURI,
-      },
-      this.context
+      }
     ).apply(compiler);
   }
 }
 
-module.exports = StreamingTargetPlugin;
+export default NodeSoftwareStreamRuntime;

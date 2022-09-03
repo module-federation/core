@@ -1,5 +1,6 @@
 "use strict";
 
+import StreamingTargetPlugin from "../index"
 const executeLoadTemplate = `
     function executeLoad(remoteUrl) {
     console.log('remoteUrl',remoteUrl)
@@ -45,11 +46,17 @@ const executeLoadTemplate = `
 function buildRemotes(mfConf, webpack) {
 
 return Object.entries(mfConf.remotes || {}).reduce((acc, [name, config]) => {
+  // TODO: this should use promise new promise not external.
+  // I believe we need to enable externalPResets: async node or supported library/chunk loading types.
   const loadTemplate = `
-  promise new Promise((resolve)=>{
+  external new Promise((resolve)=>{
+  console.log('sitting on promise')
   ${executeLoadTemplate}
   resolve(executeLoad(${JSON.stringify(config)})
-  }));
+  })).then(remote=>{
+  console.log(remote);
+  return remote
+  });
   `
   acc.buildTime[name] = loadTemplate
   return acc
@@ -160,7 +167,8 @@ class StreamingFederation {
 
   apply(compiler) {
     // When used with Next.js, context is needed to use Next.js webpack
-    const { webpack, ModuleFederationPlugin } = this.context;
+    const {webpack} = compiler
+
 
     const { buildTime, runtime, hot } = buildRemotes(
         this.options,
@@ -171,17 +179,18 @@ class StreamingFederation {
       "process.env.REMOTE_CONFIG": hot,
     };
 
-    console.log(buildTime);
+    // new ((webpack && webpack.DefinePlugin) || require("webpack").DefinePlugin)(
+    //     defs
+    // ).apply(compiler);
 
-    new ((webpack && webpack.DefinePlugin) || require("webpack").DefinePlugin)(
-        defs
-    ).apply(compiler);
-    new (ModuleFederationPlugin || (webpack && webpack.container.ModuleFederationPlugin) ||
-        require("webpack/lib/container/ModuleFederationPlugin"))({
+    const pluginOptions = {
       ...this.options,
-      remotes: buildTime,
-    }).apply(compiler);
+      remotes: buildTime
+    }
+
+    new ((webpack && webpack.container.ModuleFederationPlugin) ||
+        require("webpack/lib/container/ModuleFederationPlugin"))(pluginOptions).apply(compiler);
   }
 }
 
-module.exports = StreamingFederation;
+export default  StreamingFederation;

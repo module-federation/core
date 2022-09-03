@@ -12,78 +12,10 @@ const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
 import path from 'path';
 import {injectRuleLoader, hasLoader} from './loaders/helpers';
 import {exposeNextjsPages} from './loaders/nextPageMapLoader'
+import {reKeyHostShared, DEFAULT_SHARE_SCOPE} from './internal'
 import StreamingTargetPlugin from '../node-plugin/streaming';
 import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
-
-/** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ExternalsType} ExternalsType */
-/** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ModuleFederationPluginOptions} ModuleFederationPluginOptions */
-
-/** @typedef {import("webpack").Shared} Shared */
-/** @typedef {import("webpack").Compiler} Compiler */
-
-class ModuleFederationPlugin {
-  /**
-   * @param {ModuleFederationPluginOptions} options options
-   */
-  constructor(options) {
-    this._options = options;
-  }
-
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
-  apply(compiler) {
-    const {_options: options} = this;
-    const webpack = compiler.webpack;
-    const {ContainerPlugin, ContainerReferencePlugin} = webpack.container;
-    const {SharePlugin} = webpack.sharing;
-    const library = options.library || {type: 'var', name: options.name};
-    const remoteType =
-      options.remoteType ||
-      (options.library && /** @type {ExternalsType} */ options.library.type) ||
-      'script';
-    if (
-      library &&
-      !compiler.options.output.enabledLibraryTypes.includes(library.type)
-    ) {
-      compiler.options.output.enabledLibraryTypes.push(library.type);
-    }
-
-    if (
-      options.exposes &&
-      (Array.isArray(options.exposes)
-        ? options.exposes.length > 0
-        : Object.keys(options.exposes).length > 0)
-    ) {
-      new ContainerPlugin({
-        name: options.name,
-        library,
-        filename: options.filename,
-        runtime: options.runtime,
-        exposes: options.exposes,
-      }).apply(compiler);
-    }
-    if (
-      options.remotes &&
-      (Array.isArray(options.remotes)
-        ? options.remotes.length > 0
-        : Object.keys(options.remotes).length > 0)
-    ) {
-      new ContainerReferencePlugin({
-        remoteType,
-        remotes: options.remotes,
-      }).apply(compiler);
-    }
-    if (options.shared) {
-      new SharePlugin({
-        shared: options.shared,
-        shareScope: options.shareScope,
-      }).apply(compiler);
-    }
-  }
-}
+import ChildFriendlyModuleFederationPlugin from "./ModuleFederationPlugin";
 
 class RemoveRRRuntimePlugin {
   /**
@@ -125,94 +57,57 @@ class RemoveRRRuntimePlugin {
   }
 }
 
-const DEFAULT_SHARE_SCOPE = {
-  react: {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'react/jsx-runtime': {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'react-dom': {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'next/dynamic': {
-    requiredVersion: false,
-    singleton: true,
-  },
-  'styled-jsx': {
-    requiredVersion: false,
-    singleton: true,
-  },
-  'next/link': {
-    requiredVersion: false,
-    singleton: true,
-  },
-  'next/router': {
-    requiredVersion: false,
-    singleton: true,
-  },
-  'next/script': {
-    requiredVersion: false,
-    singleton: true,
-  },
-  'next/head': {
-    requiredVersion: false,
-    singleton: true,
-  },
-};
 
-const deriveOutputPath = (isServer, outputPath) => {
-  if (isServer) {
-    return path.join(
-      outputPath.split('/server/')[0],
-      "/static/ssr"
-    );
+function removeTapFromHook(hooks, tapName) {
+  const index = hooks.taps.findIndex(tap => {
+    console.log(tap.name)
+    return tap.name === tapName
+  });
+  if (index > -1) {
+    hooks.taps.splice(index, 1);
   }
-  return outputPath;
 }
 
-const moveFilesToClientDirectory = (isServer,stats)=>{
-
-  if(isServer) {
+const moveFilesToClientDirectory = (isServer, stats) => {
+  if (isServer) {
     const staticDirExists = fs.existsSync(path.join(stats.compilation.options.output.path.split('/server/')[0], 'static'))
-    if(!staticDirExists) {
-      fs.mkdirSync(path.join(stats.compilation.options.output.path.split('/server/')[0], 'ssr'));
-      Object.keys(stats.compilation.assets).forEach((asset) => {
-        // older versions of next.js have a different output order
-        const absolutePath = path.join(stats.compilation.options.output.path, asset);
-        if (!staticDirExists) {
-          mv(absolutePath,path.join(stats.compilation.options.output.path.split('/server/')[0], 'ssr', asset),{mkdirp: true}, (err) => {
-            if(err) {
-              throw err
-            }
-          })
-        } else {
-          mv(absolutePath,path.join(stats.compilation.options.output.path.split('/server/')[0],'static/ssr', asset),{mkdirp: true}, (err) => {
-            if(err) {
-              throw err
-            }
-          })
-        }
-      })
-    }
+    fs.mkdirSync(path.join(stats.compilation.options.output.path.split('/server/')[0], 'ssr'));
+    Object.keys(stats.compilation.assets).forEach((asset) => {
+      // older versions of next.js have a different output order
+      const absolutePath = path.join(stats.compilation.options.output.path, asset);
+
+      if (!staticDirExists) {
+        mv(absolutePath, path.join(stats.compilation.options.output.path.split('/server/')[0], 'ssr', asset), {mkdirp: true}, (err) => {
+          if (err) {
+            throw err
+          }
+        })
+      } else {
+        mv(absolutePath, path.join(stats.compilation.options.output.path.split('/server/')[0], 'static/ssr', asset), {mkdirp: true}, (err) => {
+          if (err) {
+            throw err
+          }
+        })
+      }
+    })
   } else {
     // would be better to add assets to complation via process assets stage api instead of manually writing to disk
-    if(fs.existsSync(path.join(stats.compilation.options.output.path,'ssr'))) {
-      mv(path.join(stats.compilation.options.output.path,'ssr'), path.join(stats.compilation.options.output.path,'static/ssr'), {mkdirp: true}, function(err) {
-        if(err) { throw err; }
+    if (fs.existsSync(path.join(stats.compilation.options.output.path, 'ssr'))) {
+      mv(path.join(stats.compilation.options.output.path, 'ssr'), path.join(stats.compilation.options.output.path, 'static/ssr'), {mkdirp: true}, function (err) {
+        if (err) {
+          throw err;
+        }
       });
     }
   }
 }
 const computeRemoteFilename = (isServer, filename) => {
-  if(isServer && filename) {
+  if (isServer && filename) {
     return path.basename(filename);
   }
   return filename
 }
+
 class ChildFederation {
   constructor(options, extraOptions = {}) {
     this._options = options;
@@ -223,6 +118,7 @@ class ChildFederation {
     const webpack = compiler.webpack;
     const LibraryPlugin = webpack.library.EnableLibraryPlugin;
     const LoaderTargetPlugin = webpack.LoaderTargetPlugin;
+    const NodeTargetPlugin = webpack.node.NodeTargetPlugin;
     const library = compiler.options.output.library;
     const isServer = compiler.options.name === 'server'
     compiler.hooks.thisCompilation.tap(CHILD_PLUGIN_NAME, (compilation) => {
@@ -259,10 +155,7 @@ class ChildFederation {
         {}
       );
 
-      const FederationPlugin = {
-        client: ModuleFederationPlugin,
-        server: NodeFederationPlugin
-      }[compiler.options.name]
+      const FederationPlugin = ChildFriendlyModuleFederationPlugin;
 
       const federationPluginOptions = {
         // library: {type: 'var', name: buildName},
@@ -296,17 +189,16 @@ class ChildFederation {
         ]
       } else if (compiler.options.name === 'server') {
         plugins = [
-          new webpack.web.JsonpTemplatePlugin(childOutput),
-          new FederationPlugin(federationPluginOptions, {webpack: compiler.webpack, ModuleFederationPlugin}),
-          new webpack.node.NodeTemplatePlugin(childOutput),
-          new LoaderTargetPlugin('async-node'),
+          new FederationPlugin(federationPluginOptions),
+          // new webpack.node.NodeTemplatePlugin(childOutput),
+          // new LoaderTargetPlugin(false),
           new StreamingTargetPlugin(federationPluginOptions, webpack),
-          new LibraryPlugin('commonjs-module'),
+          // new LibraryPlugin('commonjs-module'),
           // new webpack.DefinePlugin({
           //   'process.env.REMOTES': JSON.stringify(this._options.remotes),
           //   'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
           // }),
-          new AddRuntimeRequirementToPromiseExternal()
+          // new AddRuntimeRequirementToPromiseExternal()
         ]
       }
       const childCompiler = compilation.createChildCompiler(
@@ -314,6 +206,8 @@ class ChildFederation {
         childOutput,
         plugins
       );
+
+
       new RemoveRRRuntimePlugin().apply(childCompiler);
 
       childCompiler.options.module.rules.forEach((rule) => {
@@ -360,6 +254,12 @@ class ChildFederation {
         (plugin) => !removePlugins.includes(plugin.constructor.name)
       );
 
+      // SERVER STUFF FOR CHILD COMPILER
+      if (isServer) {
+        removeTapFromHook(childCompiler.hooks.thisCompilation, 'Target');
+        childCompiler.options.externals = ['next']
+      }
+
       if (MiniCss) {
         new MiniCss.constructor({
           ...MiniCss.options,
@@ -377,7 +277,7 @@ class ChildFederation {
       childCompiler.outputFileSystem = compiler.outputFileSystem;
       if (compiler.options.mode === 'development') {
         childCompiler.run((err, stats) => {
-          moveFilesToClientDirectory(isServer,stats)
+          moveFilesToClientDirectory(isServer, stats)
           if (err) {
             console.error(err);
             throw new Error(err);
@@ -385,7 +285,7 @@ class ChildFederation {
         });
       } else {
         childCompiler.run((err, stats) => {
-          moveFilesToClientDirectory(isServer,stats)
+          moveFilesToClientDirectory(isServer, stats)
 
           if (err) {
             console.error(err);
@@ -428,7 +328,8 @@ function extractUrlAndGlobal(urlAndGlobal) {
 }
 
 function generateRemoteTemplate(url, global) {
-  return `promise new Promise(function (resolve, reject) {
+  return `external new Promise(function (resolve, reject) {
+  console.log('using browser template');
     var __webpack_error__ = new Error();
     if (typeof ${global} !== 'undefined') return resolve();
     __webpack_require__.l(
@@ -486,33 +387,12 @@ function generateRemoteTemplate(url, global) {
 
 function createRuntimeVariables(remotes) {
   return Object.entries(remotes).reduce((acc, remote) => {
-    acc[remote[0]] = remote[1].replace('promise ', '');
+    // handle promise new promise and external new promise
+    acc[remote[0]] = remote[1].replace('promise ', '').replace('external ','')
     return acc;
   }, {});
 }
 
-const reKeyHostShared = (options) => {
-  return Object.entries({
-    ...(options || {}),
-    ...DEFAULT_SHARE_SCOPE,
-  }).reduce((acc, item) => {
-    const [itemKey, shareOptions] = item;
-
-    const shareKey = 'host' + (item.shareKey || itemKey);
-    acc[shareKey] = shareOptions;
-    if (!shareOptions.import) {
-      acc[shareKey].import = itemKey;
-    }
-    if (!shareOptions.shareKey) {
-      acc[shareKey].shareKey = itemKey;
-    }
-
-    if (DEFAULT_SHARE_SCOPE[itemKey]) {
-      acc[shareKey].packageName = itemKey;
-    }
-    return acc;
-  }, {});
-}
 
 class NextFederationPlugin {
   constructor(options) {
@@ -525,6 +405,9 @@ class NextFederationPlugin {
     compiler.options.devtool = false;
     const webpack = compiler.webpack;
     if (compiler.options.name === 'server') {
+      compiler.options.target = false;
+      new StreamingTargetPlugin(this._options, webpack).apply(compiler)
+
       // output remote to ssr if server
       this._options.filename = this._options.filename.replace('/chunks', '/ssr')
     } else {
@@ -566,12 +449,17 @@ class NextFederationPlugin {
         },
       }
 
-      if (compiler.options.name === 'server') {
-        compiler.options.target = false;
-        new StreamingTargetPlugin(hostFederationPluginOptions).apply(compiler)
-      }
+      compiler.options.output.chunkFilename = compiler.options.output.chunkFilename.replace(
+        '.js',
+        '-[chunkhash].js'
+      ),
+        //   compiler.options.output.filename = compiler.options.output.filename.replace(
+        //   '.js',
+        //   '-[contenthash].js'
+        // ),
+        compiler.options.optimization.chunkIds = 'named'
 
-      new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
+      new ModuleFederationPlugin(hostFederationPluginOptions, {ModuleFederationPlugin}).apply(compiler);
       new webpack.DefinePlugin({
         'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
         'process.env.CURRENT_HOST': JSON.stringify(this._options.name),

@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { Layout, version } from 'antd';
+import App from 'next/app'
 import AppMenu from './_menu';
-console.log(import('home/SharedNav').then(console.log))
+
 const SharedNav = dynamic(
   () => {
     const mod = import('home/SharedNav');
     return mod;
   },
-  { ssr: false }
+  { ssr: true }
 );
 
 function MyApp({ Component, pageProps }) {
@@ -48,10 +49,21 @@ function MyApp({ Component, pageProps }) {
           >
             antd@{version}
           </Layout.Footer>
+
         </Layout>
       </Layout>
     </Layout>
   );
+}
+
+MyApp.getInitialProps = async (ctx) =>{
+  console.log('loading app real');
+  const props = await App.getInitialProps(ctx);
+console.log('props');
+console.log(require('home/SharedNav'))
+console.log('after');
+
+  return  {...props}
 }
 
 export default MyApp;
