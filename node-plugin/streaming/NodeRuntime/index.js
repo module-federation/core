@@ -2,6 +2,7 @@
 
 const executeLoadTemplate = `
     function executeLoad(remoteUrl) {
+    console.log('remoteUrl',remoteUrl)
         const scriptUrl = remoteUrl.split("@")[1];
         const moduleName = remoteUrl.split("@")[0];
         console.log("executing remote load", scriptUrl);
@@ -42,6 +43,18 @@ const executeLoadTemplate = `
 `;
 
 function buildRemotes(mfConf, webpack) {
+
+return Object.entries(mfConf.remotes || {}).reduce((acc, [name, config]) => {
+  const loadTemplate = `
+  promise new Promise((resolve)=>{
+  ${executeLoadTemplate}
+  resolve(executeLoad(${JSON.stringify(config)})
+  }));
+  `
+  acc.buildTime[name] = loadTemplate
+  return acc
+}, { runtime: {}, buildTime: {}, hot: {} });
+//old design
   return Object.entries(mfConf.remotes || {}).reduce(
       (acc, [name, config]) => {
         const hasMiddleware = config.startsWith("middleware ");
@@ -157,6 +170,8 @@ class StreamingFederation {
       "process.env.REMOTES": runtime,
       "process.env.REMOTE_CONFIG": hot,
     };
+
+    console.log(buildTime);
 
     new ((webpack && webpack.DefinePlugin) || require("webpack").DefinePlugin)(
         defs

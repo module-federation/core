@@ -519,21 +519,6 @@ class NextFederationPlugin {
     const {extraOptions, ...mainOpts} = options;
     this._options = mainOpts;
     this._extraOptions = extraOptions;
-    if (options.remotes) {
-      const parsedRemotes = Object.entries(options.remotes).reduce(
-        (acc, remote) => {
-          if (remote[1].includes('@')) {
-            const [url, global] = extractUrlAndGlobal(remote[1]);
-            acc[remote[0]] = generateRemoteTemplate(url, global);
-            return acc;
-          }
-          acc[remote[0]] = remote[1];
-          return acc;
-        },
-        {}
-      );
-      this._options.remotes = parsedRemotes;
-    }
   }
 
   apply(compiler) {
@@ -542,6 +527,22 @@ class NextFederationPlugin {
     if (compiler.options.name === 'server') {
       // output remote to ssr if server
       this._options.filename = this._options.filename.replace('/chunks', '/ssr')
+    } else {
+      if (this._options.remotes) {
+        const parsedRemotes = Object.entries(this._options.remotes).reduce(
+          (acc, remote) => {
+            if (remote[1].includes('@')) {
+              const [url, global] = extractUrlAndGlobal(remote[1]);
+              acc[remote[0]] = generateRemoteTemplate(url, global);
+              return acc;
+            }
+            acc[remote[0]] = remote[1];
+            return acc;
+          },
+          {}
+        );
+        this._options.remotes = parsedRemotes;
+      }
     }
 
 
