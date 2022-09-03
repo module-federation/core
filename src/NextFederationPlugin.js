@@ -1,3 +1,6 @@
+import fs from "fs";
+import mv from 'mv';
+
 const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
 /*
 	MIT License http://www.opensource.org/licenses/mit-license.php
@@ -7,8 +10,10 @@ const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
 ('use strict');
 
 import path from 'path';
-import { injectRuleLoader, hasLoader } from './loaders/helpers';
-import { exposeNextjsPages } from './loaders/nextPageMapLoader';
+import {injectRuleLoader, hasLoader} from './loaders/helpers';
+import {exposeNextjsPages} from './loaders/nextPageMapLoader'
+import StreamingTargetPlugin from '../node-plugin/streaming';
+import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
 
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ExternalsType} ExternalsType */
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ModuleFederationPluginOptions} ModuleFederationPluginOptions */
@@ -30,11 +35,11 @@ class ModuleFederationPlugin {
    * @returns {void}
    */
   apply(compiler) {
-    const { _options: options } = this;
+    const {_options: options} = this;
     const webpack = compiler.webpack;
-    const { ContainerPlugin, ContainerReferencePlugin } = webpack.container;
-    const { SharePlugin } = webpack.sharing;
-    const library = options.library || { type: 'var', name: options.name };
+    const {ContainerPlugin, ContainerReferencePlugin} = webpack.container;
+    const {SharePlugin} = webpack.sharing;
+    const library = options.library || {type: 'var', name: options.name};
     const remoteType =
       options.remoteType ||
       (options.library && /** @type {ExternalsType} */ options.library.type) ||
@@ -159,6 +164,55 @@ const DEFAULT_SHARE_SCOPE = {
   },
 };
 
+const deriveOutputPath = (isServer, outputPath) => {
+  if (isServer) {
+    return path.join(
+      outputPath.split('/server/')[0],
+      "/static/ssr"
+    );
+  }
+  return outputPath;
+}
+
+const moveFilesToClientDirectory = (isServer,stats)=>{
+
+  if(isServer) {
+    const staticDirExists = fs.existsSync(path.join(stats.compilation.options.output.path.split('/server/')[0], 'static'))
+    if(!staticDirExists) {
+      fs.mkdirSync(path.join(stats.compilation.options.output.path.split('/server/')[0], 'ssr'));
+      Object.keys(stats.compilation.assets).forEach((asset) => {
+        // older versions of next.js have a different output order
+        const absolutePath = path.join(stats.compilation.options.output.path, asset);
+        if (!staticDirExists) {
+          mv(absolutePath,path.join(stats.compilation.options.output.path.split('/server/')[0], 'ssr', asset),{mkdirp: true}, (err) => {
+            if(err) {
+              throw err
+            }
+          })
+        } else {
+          mv(absolutePath,path.join(stats.compilation.options.output.path.split('/server/')[0],'static/ssr', asset),{mkdirp: true}, (err) => {
+            if(err) {
+              throw err
+            }
+          })
+        }
+      })
+    }
+  } else {
+    // would be better to add assets to complation via process assets stage api instead of manually writing to disk
+    if(fs.existsSync(path.join(stats.compilation.options.output.path,'ssr'))) {
+      mv(path.join(stats.compilation.options.output.path,'ssr'), path.join(stats.compilation.options.output.path,'static/ssr'), {mkdirp: true}, function(err) {
+        if(err) { throw err; }
+      });
+    }
+  }
+}
+const computeRemoteFilename = (isServer, filename) => {
+  if(isServer && filename) {
+    return path.basename(filename);
+  }
+  return filename
+}
 class ChildFederation {
   constructor(options, extraOptions = {}) {
     this._options = options;
@@ -167,17 +221,15 @@ class ChildFederation {
 
   apply(compiler) {
     const webpack = compiler.webpack;
-    const EntryPlugin = webpack.EntryPlugin;
     const LibraryPlugin = webpack.library.EnableLibraryPlugin;
-    const MFP = webpack.container.ModuleFederationPlugin;
-    const ContainerPlugin = webpack.container.ContainerPlugin;
     const LoaderTargetPlugin = webpack.LoaderTargetPlugin;
     const library = compiler.options.output.library;
-
+    const isServer = compiler.options.name === 'server'
     compiler.hooks.thisCompilation.tap(CHILD_PLUGIN_NAME, (compilation) => {
       const buildName = this._options.name;
       const childOutput = {
         ...compiler.options.output,
+        // path: deriveOutputPath(isServer, compiler.options.output.path),
         publicPath: 'auto',
         chunkLoadingGlobal: buildName + 'chunkLoader',
         uniqueName: buildName,
@@ -189,15 +241,16 @@ class ChildFederation {
           '.js',
           '-fed.js'
         ),
-        filename: compiler.options.output.chunkFilename.replace(
+        filename: compiler.options.output.filename.replace(
           '.js',
           '-fed.js'
         ),
       };
+
       const externalizedShares = Object.entries(DEFAULT_SHARE_SCOPE).reduce(
         (acc, item) => {
           const [key, value] = item;
-          acc[key] = { ...value, import: false };
+          acc[key] = {...value, import: false};
           if (key === 'react/jsx-runtime') {
             delete acc[key].import;
           }
@@ -205,25 +258,33 @@ class ChildFederation {
         },
         {}
       );
-      const childCompiler = compilation.createChildCompiler(
-        CHILD_PLUGIN_NAME,
-        childOutput,
-        [
-          new ModuleFederationPlugin({
-            // library: {type: 'var', name: buildName},
-            ...this._options,
-            exposes: {
-              ...this._options.exposes,
-              ...(this._extraOptions.exposePages
-                ? exposeNextjsPages(compiler.options.context)
-                : {}),
-            },
-            runtime: false,
-            shared: {
-              ...externalizedShares,
-              ...this._options.shared,
-            },
-          }),
+
+      const FederationPlugin = {
+        client: ModuleFederationPlugin,
+        server: NodeFederationPlugin
+      }[compiler.options.name]
+
+      const federationPluginOptions = {
+        // library: {type: 'var', name: buildName},
+        ...this._options,
+        filename: computeRemoteFilename(isServer, this._options.filename),
+        exposes: {
+          ...this._options.exposes,
+          ...(this._extraOptions.exposePages
+            ? exposeNextjsPages(compiler.options.context)
+            : {}),
+        },
+        runtime: false,
+        shared: {
+          ...externalizedShares,
+          ...this._options.shared,
+        },
+      }
+
+      let plugins;
+      if (compiler.options.name === 'client') {
+        plugins = [
+          new FederationPlugin(federationPluginOptions),
           new webpack.web.JsonpTemplatePlugin(childOutput),
           new LoaderTargetPlugin('web'),
           new LibraryPlugin('var'),
@@ -233,6 +294,25 @@ class ChildFederation {
           }),
           new AddRuntimeRequirementToPromiseExternal(),
         ]
+      } else if (compiler.options.name === 'server') {
+        plugins = [
+          new webpack.web.JsonpTemplatePlugin(childOutput),
+          new FederationPlugin(federationPluginOptions, {webpack: compiler.webpack, ModuleFederationPlugin}),
+          new webpack.node.NodeTemplatePlugin(childOutput),
+          new LoaderTargetPlugin('async-node'),
+          new StreamingTargetPlugin(federationPluginOptions, webpack),
+          new LibraryPlugin('commonjs-module'),
+          // new webpack.DefinePlugin({
+          //   'process.env.REMOTES': JSON.stringify(this._options.remotes),
+          //   'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
+          // }),
+          new AddRuntimeRequirementToPromiseExternal()
+        ]
+      }
+      const childCompiler = compilation.createChildCompiler(
+        CHILD_PLUGIN_NAME,
+        childOutput,
+        plugins
       );
       new RemoveRRRuntimePlugin().apply(childCompiler);
 
@@ -297,13 +377,16 @@ class ChildFederation {
       childCompiler.outputFileSystem = compiler.outputFileSystem;
       if (compiler.options.mode === 'development') {
         childCompiler.run((err, stats) => {
+          moveFilesToClientDirectory(isServer,stats)
           if (err) {
             console.error(err);
             throw new Error(err);
           }
         });
       } else {
-        childCompiler.runAsChild((err, stats) => {
+        childCompiler.run((err, stats) => {
+          moveFilesToClientDirectory(isServer,stats)
+
           if (err) {
             console.error(err);
             throw new Error(err);
@@ -408,9 +491,32 @@ function createRuntimeVariables(remotes) {
   }, {});
 }
 
+const reKeyHostShared = (options) => {
+  return Object.entries({
+    ...(options || {}),
+    ...DEFAULT_SHARE_SCOPE,
+  }).reduce((acc, item) => {
+    const [itemKey, shareOptions] = item;
+
+    const shareKey = 'host' + (item.shareKey || itemKey);
+    acc[shareKey] = shareOptions;
+    if (!shareOptions.import) {
+      acc[shareKey].import = itemKey;
+    }
+    if (!shareOptions.shareKey) {
+      acc[shareKey].shareKey = itemKey;
+    }
+
+    if (DEFAULT_SHARE_SCOPE[itemKey]) {
+      acc[shareKey].packageName = itemKey;
+    }
+    return acc;
+  }, {});
+}
+
 class NextFederationPlugin {
   constructor(options) {
-    const { extraOptions, ...mainOpts } = options;
+    const {extraOptions, ...mainOpts} = options;
     this._options = mainOpts;
     this._extraOptions = extraOptions;
     if (options.remotes) {
@@ -431,46 +537,47 @@ class NextFederationPlugin {
   }
 
   apply(compiler) {
+    compiler.options.devtool = false;
     const webpack = compiler.webpack;
-    const sharedForHost = Object.entries({
-      ...(this._options.shared || {}),
-      ...DEFAULT_SHARE_SCOPE,
-    }).reduce((acc, item) => {
-      const [itemKey, shareOptions] = item;
+    if (compiler.options.name === 'server') {
+      // output remote to ssr if server
+      this._options.filename = this._options.filename.replace('/chunks', '/ssr')
+    }
 
-      const shareKey = 'host' + (item.shareKey || itemKey);
-      acc[shareKey] = shareOptions;
-      if (!shareOptions.import) {
-        acc[shareKey].import = itemKey;
-      }
-      if (!shareOptions.shareKey) {
-        acc[shareKey].shareKey = itemKey;
-      }
 
-      if (DEFAULT_SHARE_SCOPE[itemKey]) {
-        acc[shareKey].packageName = itemKey;
-      }
-      return acc;
-    }, {});
+    const ModuleFederationPlugin = {
+      client: webpack.container.ModuleFederationPlugin,
+      server: NodeFederationPlugin
+    }[compiler.options.name]
+    // ignore edge runtime and middleware builds
+    if (ModuleFederationPlugin) {
 
-    new webpack.container.ModuleFederationPlugin({
-      ...this._options,
-      exposes: {},
-      shared: {
-        noop: {
-          import: 'data:text/javascript,module.exports = {};',
-          requiredVersion: false,
-          version: '0',
+      const hostFederationPluginOptions = {
+        ...this._options,
+        exposes: {},
+        shared: {
+          noop: {
+            import: 'data:text/javascript,module.exports = {};',
+            requiredVersion: false,
+            version: '0',
+          },
+          ...reKeyHostShared(this._options.shared),
         },
-        ...sharedForHost,
-      },
-    }).apply(compiler);
-    new webpack.DefinePlugin({
-      'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
-      'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
-    }).apply(compiler);
-    new ChildFederation(this._options, this._extraOptions).apply(compiler);
-    new AddRuntimeRequirementToPromiseExternal().apply(compiler);
+      }
+
+      if (compiler.options.name === 'server') {
+        compiler.options.target = false;
+        new StreamingTargetPlugin(hostFederationPluginOptions).apply(compiler)
+      }
+
+      new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
+      new webpack.DefinePlugin({
+        'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
+        'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
+      }).apply(compiler);
+      new ChildFederation(this._options, this._extraOptions).apply(compiler);
+      new AddRuntimeRequirementToPromiseExternal().apply(compiler);
+    }
   }
 }
 

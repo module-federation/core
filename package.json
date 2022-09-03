@@ -10,6 +10,7 @@
   "license": "MIT",
   "scripts": {
     "demo": "yarn build && cd demo && yarn install && yarn dev",
+    "debug": "yarn build && cd demo; yarn sync-pkg && yarn --force && cd 3000-home && yarn build",
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\"",
     "build": "rm -rf lib && cp -r ./src/ lib/ && rollup -c"
   },
@@ -18,7 +19,8 @@
   },
   "dependencies": {
     "chalk": "^4.0.0",
-    "fast-glob": "^3.2.11"
+    "fast-glob": "^3.2.11",
+    "mv": "^2.1.1"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.2",
@@ -30,6 +32,6 @@
     "rollup-obfuscator": "^3.0.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
-    "webpack": "5.45.1"
+    "webpack": "5.64.4"
   }
 }

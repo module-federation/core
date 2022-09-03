@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { Layout, version } from 'antd';
 import AppMenu from './_menu';
-
+console.log(import('home/SharedNav'));
 const SharedNav = dynamic(
   () => {
     const mod = import('home/SharedNav');

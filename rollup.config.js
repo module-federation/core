@@ -3,13 +3,13 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import globals from 'rollup-plugin-node-globals';
 import builtins from 'rollup-plugin-node-builtins';
 import { obfuscator } from 'rollup-obfuscator';
-const fg = require('fast-glob');
+
 export default {
   input: ['./src/NextFederationPlugin.js'],
   output: {
     dir: 'lib',
     format: 'cjs',
-    preserveModules: true,
+    preserveModules: false,
     exports: 'auto',
   },
   external: [
@@ -30,6 +30,6 @@ export default {
       filename: false,
     }),
     builtins(),
-    obfuscator(),
+    // obfuscator(),
   ],
 };
