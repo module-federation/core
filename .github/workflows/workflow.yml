@@ -1,0 +1,8 @@
+name: "Workflow"
+on: ["push"]
+jobs:
+  build:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: TODO to Issue
+        uses: alstr/todo-to-issue-action@v4
