@@ -1,21 +1,20 @@
-import fs from "fs";
-import mv from 'mv';
-
-const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
 /*
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 
 ('use strict');
-
+import fs from "fs";
+import mv from 'mv';
 import path from 'path';
 import {injectRuleLoader, hasLoader} from './loaders/helpers';
 import {exposeNextjsPages} from './loaders/nextPageMapLoader'
-import {reKeyHostShared, DEFAULT_SHARE_SCOPE} from './internal'
+import {reKeyHostShared, DEFAULT_SHARE_SCOPE, extractUrlAndGlobal} from './internal'
 import StreamingTargetPlugin from '../node-plugin/streaming';
 import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
 import ChildFriendlyModuleFederationPlugin from "./ModuleFederationPlugin";
+
+const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
 
 class RemoveRRRuntimePlugin {
   /**
@@ -57,17 +56,7 @@ class RemoveRRRuntimePlugin {
   }
 }
 
-
-function removeTapFromHook(hooks, tapName) {
-  const index = hooks.taps.findIndex(tap => {
-    console.log(tap.name)
-    return tap.name === tapName
-  });
-  if (index > -1) {
-    hooks.taps.splice(index, 1);
-  }
-}
-
+//TODO: this should use webpack asset stage hooks instead to read & add additional assets to a compilation
 const moveFilesToClientDirectory = (isServer, stats) => {
   if (isServer) {
     const staticDirExists = fs.existsSync(path.join(stats.compilation.options.output.path.split('/server/')[0], 'static'))
@@ -146,7 +135,7 @@ class ChildFederation {
       const externalizedShares = Object.entries(DEFAULT_SHARE_SCOPE).reduce(
         (acc, item) => {
           const [key, value] = item;
-          acc[key] = {...value, import: false};
+          acc[key] = {...value, import: `data:text/javascript,module.exports = require("${key}");`};
           if (key === 'react/jsx-runtime') {
             delete acc[key].import;
           }
@@ -190,7 +179,7 @@ class ChildFederation {
       } else if (compiler.options.name === 'server') {
         plugins = [
           new FederationPlugin(federationPluginOptions),
-          // new webpack.node.NodeTemplatePlugin(childOutput),
+          new webpack.node.NodeTemplatePlugin(childOutput),
           // new LoaderTargetPlugin('async-node'),
           new StreamingTargetPlugin(federationPluginOptions, webpack),
           new LibraryPlugin(federationPluginOptions.library.type),
@@ -256,8 +245,13 @@ class ChildFederation {
 
       // SERVER STUFF FOR CHILD COMPILER
       if (isServer) {
-        removeTapFromHook(childCompiler.hooks.thisCompilation, 'Target');
-        childCompiler.options.externals = ['next']
+        childCompiler.options.externals = [
+          "next",
+          { react: "react" },
+          "react/jsx-runtime",
+          "react/jsx-dev-runtime",
+          "styled-jsx",
+        ]
       }
 
       if (MiniCss) {
@@ -319,13 +313,6 @@ class AddRuntimeRequirementToPromiseExternal {
   }
 }
 
-function extractUrlAndGlobal(urlAndGlobal) {
-  const index = urlAndGlobal.indexOf('@');
-  if (index <= 0 || index === urlAndGlobal.length - 1) {
-    throw new Error(`Invalid request "${urlAndGlobal}"`);
-  }
-  return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
-}
 
 function generateRemoteTemplate(url, global) {
   return `external new Promise(function (resolve, reject) {

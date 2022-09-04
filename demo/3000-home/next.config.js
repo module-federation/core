@@ -5,10 +5,10 @@ module.exports = {
     const {isServer} = options
       config.plugins.push(
         new NextFederationPlugin({
-          name: 'home',
+          name: 'home_app',
           filename: 'static/chunks/remoteEntry.js',
           remotes: {
-            home: `home@http://localhost:3000/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+            home: `home_app@http://localhost:3000/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
             shop: `shop@http://localhost:3001/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
             checkout:
               `checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,

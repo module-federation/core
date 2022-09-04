@@ -20,6 +20,11 @@
 // VMT is like Realms but better - easiest analogy would be like forking the main thread, without going off main thread
 // VMT allows for scope isolation, but still allows reflection and non-primitive memory pointers to be shared - perfect for MFP
 
+
+//TODO: should use extractUrlAndGlobal from internal.js
+//TODO: should use Template system like LoadFileChunk runtime does.
+//TODO: should use vm.runInThisContext instead of eval
+//TODO: global.webpackChunkLoad could use a better convention? I have to use a special http client to get out of my infra firewall
 const executeLoadTemplate = `
     function executeLoad(remoteUrl) {
     console.log('remoteUrl',remoteUrl)
@@ -31,23 +36,13 @@ const executeLoadTemplate = `
          (global.webpackChunkLoad || fetch)(scriptUrl).then(function(res){
             return res.text();
           }).then(function(scriptContent){
-         try {
-          console.log('straight content eval', eval(scriptContent));
-         } catch (e) {};     
-           try {
-         console.log('with module name', eval(scriptContent + '\\n  try{' + moduleName + '}catch(e) { null; };'));
-         } catch (e) {};
-          try {
-         console.log('with exports',eval('let exports = {};' + scriptContent + 'exports'))
-         } catch (e) {};
-          try {
-         console.log('module',eval(scriptContent + 'module.exports.home'))
-         } catch (e) {};
-         
             try {
               const remote = eval(scriptContent + 'module.exports');
-               console.log('evalueated to', remote);
-              resolve(remote[moduleName] || remote)
+              //TODO: need something like a chunk loading queue, this can lead to async issues
+              // if two containers load the same remote, they can overwrite global scope
+              // should check someone is already loading remote and await that
+              global.__remote_scope__[moduleName] = remote[moduleName] || remote
+              resolve(global.__remote_scope__[moduleName])
             } catch(e) {
               console.error('problem executing remote module', moduleName);
               reject(e);
@@ -76,15 +71,25 @@ const executeLoadTemplate = `
 function buildRemotes(mfConf, webpack) {
 
 return Object.entries(mfConf.remotes || {}).reduce((acc, [name, config]) => {
-  // TODO: this should use promise new promise not external.
-  // I believe we need to enable externalPresets: asyncNode or supported library/chunk loading types.
+  // TODO: global remote scope object should go into webpack runtime as a runtime requirement
+  // this can be done by referenceing my LoadFile, CommonJs plugins in this directory.
   const loadTemplate = `promise new Promise((resolve)=>{
-  console.log('sitting on promise');
-  ${executeLoadTemplate}
-  resolve(executeLoad(${JSON.stringify(config)}))
-  }).then(remote=>{
-  console.log(remote);
-  return remote
+    if(!global.__remote_scope__) {
+      // create a global scope for container, similar to how remotes are set on window in the browser
+      global.__remote_scope__ = {}
+    }
+    ${executeLoadTemplate}
+    resolve(executeLoad(${JSON.stringify(config)}))
+    }).then(remote=>{
+      console.log(remote);
+      
+      return {
+      get: remote.get,
+      init: (args)=> {
+        console.log(args)
+        return remote.init(args)
+      }
+    }
   });
   `
   acc.buildTime[name] = loadTemplate

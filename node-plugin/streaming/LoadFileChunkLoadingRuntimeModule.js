@@ -43,6 +43,13 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
    * @returns {string} runtime code
    */
   generate() {
+    // name in this context is always the current remote itself.
+    // this code below is in each webpack runtime, host and remotes
+    // remote entries handle their own loading of chunks, so i have fractal self awareness
+    // hosts will likely never run the http chunk loading runtime, they use fs.readFile
+    // remotes only use fs.readFile if we were to cache the chunks on disk after fetching - otherwise its always using http
+    // so for example, if im in hostA and require(remoteb/module) --> console.log of name in runtime code will return remoteb
+
     const { baseURI, promiseBaseURI, remotes, name } = this.options;
     const { webpack } = this.context;
     const chunkHasJs =
@@ -203,17 +210,23 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           Template.indent([
                             loadScriptTemplate,
 
-                            "console.log('needs to load remote script');",
+                            `console.log('needs to load remote module from', ${JSON.stringify(name)});`,
+                            `console.log('remotes known to', ${JSON.stringify(name)}, ${JSON.stringify(remotes)})`,
+                            // keys are mostly useless here, we want to find remote by its global (unique name)
+                            `var remotes = ${JSON.stringify(
+                              Object.values(remotes).reduce((acc,remote)=>{
+                                //TODO, need to handle all other cases like when remote is not a @ styax string
+                                const [global,url] = remote.split('@');
+                                acc[global] = url
+                                return acc
+                              },{})
+                            )};`,
+          //TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise()
+          // global will/should still exist - but can only be known at runtime
+                            `console.log('remotes keyed by global name',remotes)`,
 
-                            `console.log('before remote var creation')`,
-                            `console.log('before remote var creation', ${JSON.stringify(
-                              remotes
-                            )})`,
-                            `var remotes = ${JSON.stringify(remotes)};`,
-
-                            `console.log('remotes in chunk load',remotes)`,
-
-                            `console.log('global.REMOTE_CONFIG',global.REMOTE_CONFIG)`,
+                            `console.log('global.__remote_scope__',global.__remote_scope__)`,
+                            `console.log('global.__remote_scope__[${JSON.stringify(name)}]',global.__remote_scope__[${JSON.stringify(name)}])`,
 
                             `if(global.REMOTE_CONFIG && !global.REMOTE_CONFIG[${JSON.stringify(
                               name
@@ -227,21 +240,44 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                               `Object.assign(global.REMOTE_CONFIG, remotes)`,
                             ]),
                             "}",
-
-                            `var requestedRemote = global.REMOTE_CONFIG[${JSON.stringify(
+                            //TODO: this global.REMOTE_CONFIG doesnt work in this v5 core, not sure if i need to keep it or not
+                            // not deleting it yet since i might need this for tracking all the remote entries across systems
+                            // for now, im going to use locally known remote scope from remoteEntry config
+                            // update: We will most likely need this, since remote would not have its own config
+                            // id need to access the host system and find the known url
+                            // basically this is how i create publicPath: auto on servers.
+                            // `var requestedRemote = global.REMOTE_CONFIG[${JSON.stringify(
+                            //   name
+                            // )}]`,
+                            "console.log('about to derive remote making request')",
+                            //TODO: remotes variable will not work in many cases for looking up remotes own url, see note above
+                            // this only works becuase the demo lists all remotes and all remotes happen to be same url and version
+                            `var requestedRemote = remotes[${JSON.stringify(
                               name
                             )}]`,
+                            "console.log('requested remote', requestedRemote)",
+                            //TODO: we need to support when user implements own promise new promise function
+                            // for example i have my own promise remotes, not global@remotename
+                            // so there could be cases where remote may be function still - not sure
+
+
+                            //TODO: need to handle if chunk fetch fails/crashes - ensure server still can keep loading
+                            // right now if you throw an error in here, server will stall forever
 
                             `if(typeof requestedRemote === 'function'){
                               requestedRemote = await requestedRemote()
                             }`,
-                            `console.log('requestedRemote',requestedRemote);`,
+                            `console.log('var requestedRemote',requestedRemote);`,
 
-                            `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
+                            // example: uncomment this and server will never reply
+                            // `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
+                            // since im looping over remote and creating global at build time, i dont need to split string at runtime
+                            // there may still be a use case for that with promise new promise, depending on how we design it.
+                            `var scriptUrl = new URL(requestedRemote);`,
 
                             `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
 
-                            `console.log('remotes global',global.REMOTE_CONFIG);`,
+                            // `console.log('remotes global',global.REMOTE_CONFIG);`,
 
                             `console.log('chunkname to request',chunkName);`,
                             `var fileToReplace = require('path').basename(scriptUrl.pathname);`,
@@ -249,10 +285,15 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             `console.log('will load remote chunk', scriptUrl.toString());`,
                             `loadScript(scriptUrl.toString(), function(err, content) {`,
                             Template.indent([
+                              "console.log('load script callback fired')",
                               "if(err) {console.error('error loading remote chunk', scriptUrl.toString(),'got',content); return reject(err);}",
                               "var chunk = {};",
+                              "try {",
                               "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
                                 "(chunk, require, require('path').dirname(filename), filename);",
+                              "} catch (e) {",
+                                "console.log('runInThisContext thew', e)",
+                              "}",
                               "installChunk(chunk);",
                             ]),
                             "});",
@@ -262,97 +303,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         "});",
                         "promises.push(installedChunkData[2] = promise);",
                       ]),
-                      // if its federated modules
-                      // hasJsMatcher === true
-                      //   ? "} else if(false) { // all chunks have JS"
-                      //   : `} else if(!${hasJsMatcher("chunkId")}) {`,
-                      // Template.indent([
-                      //   "// load the chunk and return promise to it",
-                      //   "var promise = new Promise(async function(resolve, reject) {",
-                      //   Template.indent([
-                      //     "installedChunkData = installedChunks[chunkId] = [resolve, reject];",
-                      //     `var filename = require('path').join(__dirname, ${JSON.stringify(
-                      //       rootOutputDir
-                      //     )} + ${
-                      //       RuntimeGlobals.getChunkScriptFilename
-                      //     }(chunkId));`,
-                      //     "var fs = require('fs');",
-                      //     "if(fs.existsSync(filename)) {",
-                      //     Template.indent([
-                      //       'console.log(filename,"exists locally")',
-                      //       "fs.readFile(filename, 'utf-8', function(err, content) {",
-                      //       Template.indent([
-                      //         "if(err) return reject(err);",
-                      //         "var chunk = {};",
-                      //         "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
-                      //         "(chunk, require, require('path').dirname(filename), filename);",
-                      //         "installChunk(chunk);",
-                      //       ]),
-                      //       "});",
-                      //     ]),
-                      //     "} else {",
-                      //     Template.indent([
-                      //       loadScriptTemplate,
-                      //
-                      //       "console.log('needs to load remote script');",
-                      //
-                      //       `console.log('before remote var creation')`,
-                      //       `console.log('before remote var creation', ${JSON.stringify(
-                      //         remotes
-                      //       )})`,
-                      //       `var remotes = ${JSON.stringify(remotes)};`,
-                      //
-                      //       `console.log('remotes in chunk load',remotes)`,
-                      //
-                      //       `console.log('global.REMOTE_CONFIG',global.REMOTE_CONFIG)`,
-                      //
-                      //       `if(global.REMOTE_CONFIG && !global.REMOTE_CONFIG[${JSON.stringify(
-                      //         name
-                      //       )}]) {
-                      //       if(global.loadedRemotes){
-                      //         for (const property in global.loadedRemotes) {
-                      //           global.REMOTE_CONFIG[property] = global.loadedRemotes[property].path
-                      //         }
-                      //       }`,
-                      //       Template.indent([
-                      //         `Object.assign(global.REMOTE_CONFIG, remotes)`,
-                      //       ]),
-                      //       "}",
-                      //
-                      //       `var requestedRemote = global.REMOTE_CONFIG[${JSON.stringify(
-                      //         name
-                      //       )}]`,
-                      //
-                      //       `if(typeof requestedRemote === 'function'){
-                      //         requestedRemote = await requestedRemote()
-                      //       }`,
-                      //       `console.log('requestedRemote',requestedRemote);`,
-                      //
-                      //       `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
-                      //
-                      //       `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
-                      //
-                      //       `console.log('remotes global',global.REMOTE_CONFIG);`,
-                      //
-                      //       `console.log('chunkname to request',chunkName);`,
-                      //       `var fileToReplace = require('path').basename(scriptUrl.pathname);`,
-                      //       `scriptUrl.pathname = scriptUrl.pathname.replace(fileToReplace, chunkName);`,
-                      //       `console.log('will load remote chunk', scriptUrl.toString());`,
-                      //       `loadScript(scriptUrl.toString(), function(err, content) {`,
-                      //       Template.indent([
-                      //         "if(err) {console.error('error loading remote chunk', scriptUrl.toString(),'got',content); return reject(err);}",
-                      //         "var chunk = {};",
-                      //         "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
-                      //         "(chunk, require, require('path').dirname(filename), filename);",
-                      //         "installChunk(chunk);",
-                      //       ]),
-                      //       "});",
-                      //     ]),
-                      //     "}",
-                      //   ]),
-                      //   "});",
-                      //   "promises.push(installedChunkData[2] = promise);",
-                      // ]),
                       "} else installedChunks[chunkId] = 0;",
                     ]),
                     "}",
@@ -546,7 +496,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           }(chunkId));`,
                           `var fs = require('fs');
                           if(fs.existsSync(filename)) {
-                            console.log('file extsts',filename);
                             fs.readFile(filename, 'utf-8', function(err, content) {`,
                           Template.indent([
                             "if(err) { return reject(err);}",
