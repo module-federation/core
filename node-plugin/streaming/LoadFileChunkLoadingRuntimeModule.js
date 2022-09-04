@@ -195,7 +195,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           "var fs = require('fs');",
                           "if(fs.existsSync(filename)) {",
                           Template.indent([
-                            'console.log(filename,"exists locally")',
                             "fs.readFile(filename, 'utf-8', function(err, content) {",
                             Template.indent([
                               "if(err) return reject(err);",

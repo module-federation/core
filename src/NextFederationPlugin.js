@@ -135,7 +135,7 @@ class ChildFederation {
       const externalizedShares = Object.entries(DEFAULT_SHARE_SCOPE).reduce(
         (acc, item) => {
           const [key, value] = item;
-          acc[key] = {...value, import: `data:text/javascript,module.exports = require("${key}");`};
+          acc[key] = {...value, import: false};
           if (key === 'react/jsx-runtime') {
             delete acc[key].import;
           }
@@ -180,6 +180,7 @@ class ChildFederation {
         plugins = [
           new FederationPlugin(federationPluginOptions),
           new webpack.node.NodeTemplatePlugin(childOutput),
+          new webpack.ExternalsPlugin(compiler.options.externalsType, compiler.options.externals),
           // new LoaderTargetPlugin('async-node'),
           new StreamingTargetPlugin(federationPluginOptions, webpack),
           new LibraryPlugin(federationPluginOptions.library.type),
@@ -187,7 +188,7 @@ class ChildFederation {
           //   'process.env.REMOTES': JSON.stringify(this._options.remotes),
           //   'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
           // }),
-          // new AddRuntimeRequirementToPromiseExternal()
+          new AddRuntimeRequirementToPromiseExternal()
         ]
       }
       const childCompiler = compilation.createChildCompiler(
@@ -245,13 +246,16 @@ class ChildFederation {
 
       // SERVER STUFF FOR CHILD COMPILER
       if (isServer) {
-        childCompiler.options.externals = [
-          "next",
-          { react: "react" },
-          "react/jsx-runtime",
-          "react/jsx-dev-runtime",
-          "styled-jsx",
-        ]
+        console.log(childCompiler.options.name, childCompiler.options.externals)
+
+        // childCompiler.options.externals.push('react')
+        //   = [
+        //   "next",
+        //   { react: "react" },
+        //   "react/jsx-runtime",
+        //   "react/jsx-dev-runtime",
+        //   "styled-jsx",
+        // ]
       }
 
       if (MiniCss) {
@@ -315,7 +319,7 @@ class AddRuntimeRequirementToPromiseExternal {
 
 
 function generateRemoteTemplate(url, global) {
-  return `external new Promise(function (resolve, reject) {
+  return `promise new Promise(function (resolve, reject) {
   console.log('using browser template');
     var __webpack_error__ = new Error();
     if (typeof ${global} !== 'undefined') return resolve();
@@ -390,6 +394,7 @@ class NextFederationPlugin {
 
   apply(compiler) {
     compiler.options.devtool = false;
+    const isServer = compiler.options.name === 'server'
     const webpack = compiler.webpack;
     if (compiler.options.name === 'server') {
       compiler.options.target = false;
@@ -424,6 +429,7 @@ class NextFederationPlugin {
     }[compiler.options.name]
     // ignore edge runtime and middleware builds
     if (ModuleFederationPlugin) {
+      const internalShare = reKeyHostShared(this._options.shared)
       const hostFederationPluginOptions = {
         ...this._options,
         exposes: {},
@@ -431,12 +437,15 @@ class NextFederationPlugin {
           noop: {
             import: 'data:text/javascript,module.exports = {};',
             requiredVersion: false,
+            eager: true,
             version: '0',
           },
-          ...reKeyHostShared(this._options.shared),
+          ...internalShare,
         },
       }
-
+      if(isServer) {
+        console.log(hostFederationPluginOptions);
+      }
       compiler.options.output.chunkFilename = compiler.options.output.chunkFilename.replace(
         '.js',
         '-[chunkhash].js'

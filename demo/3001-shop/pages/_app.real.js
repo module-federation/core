@@ -14,6 +14,8 @@ const SharedNav = dynamic(
 );
 
 function MyApp({ Component, pageProps }) {
+  console.log('sync require of shared nav', require('home/SharedNav'))
+
   const [MenuComponent, setMenuComponent] = useState(() => AppMenu);
   useEffect(() => {
     const cb = ({ detail }) => {
@@ -60,7 +62,7 @@ MyApp.getInitialProps = async (ctx) =>{
   console.log('loading app real');
   const props = await App.getInitialProps(ctx);
 console.log('props');
-console.log(require('home/SharedNav'))
+
 console.log('after');
 
   return  {...props}
