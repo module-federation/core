@@ -58,7 +58,7 @@ export const reKeyHostShared = (options) => {
     }
     return acc;
   }, {});
-}
+};
 
 export const extractUrlAndGlobal = (urlAndGlobal) => {
   const index = urlAndGlobal.indexOf('@');
@@ -66,4 +66,4 @@ export const extractUrlAndGlobal = (urlAndGlobal) => {
     throw new Error(`Invalid request "${urlAndGlobal}"`);
   }
   return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
-}
+};

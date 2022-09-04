@@ -69,9 +69,11 @@ function injectScript(keyOrRuntimeRemoteItem) {
     .then(function (container) {
       if (!__webpack_share_scopes__.default) {
         // not always a promise, so we wrap it in a resolve
-        return Promise.resolve(__webpack_init_sharing__('default')).then(function () {
-          return container;
-        });
+        return Promise.resolve(__webpack_init_sharing__('default')).then(
+          function () {
+            return container;
+          }
+        );
       } else {
         return container;
       }

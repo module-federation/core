@@ -1,6 +1,6 @@
-const RuntimeGlobals = require("webpack/lib/RuntimeGlobals");
-const StartupChunkDependenciesPlugin = require("webpack/lib/runtime/StartupChunkDependenciesPlugin");
-import ChunkLoadingRuntimeModule from "./LoadFileChunkLoadingRuntimeModule";
+const RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
+const StartupChunkDependenciesPlugin = require('webpack/lib/runtime/StartupChunkDependenciesPlugin');
+import ChunkLoadingRuntimeModule from './LoadFileChunkLoadingRuntimeModule';
 // const ChunkLoadingRuntimeModule = require('webpack/lib/node/ReadFileChunkLoadingRuntimeModule')
 class CommonJsChunkLoadingPlugin {
   constructor(options) {
@@ -15,14 +15,14 @@ class CommonJsChunkLoadingPlugin {
    */
   apply(compiler) {
     const chunkLoadingValue = this._asyncChunkLoading
-      ? "async-node"
-      : "require";
+      ? 'async-node'
+      : 'require';
     new StartupChunkDependenciesPlugin({
       chunkLoading: chunkLoadingValue,
       asyncChunkLoading: this._asyncChunkLoading,
     }).apply(compiler);
     compiler.hooks.thisCompilation.tap(
-      "CommonJsChunkLoadingPlugin",
+      'CommonJsChunkLoadingPlugin',
       (compilation) => {
         // Always enabled
         const isEnabledForChunk = () => true;
@@ -35,38 +35,40 @@ class CommonJsChunkLoadingPlugin {
           set.add(RuntimeGlobals.hasOwnProperty);
           compilation.addRuntimeModule(
             chunk,
-            new ChunkLoadingRuntimeModule(set, this.options, {webpack: compiler.webpack})
+            new ChunkLoadingRuntimeModule(set, this.options, {
+              webpack: compiler.webpack,
+            })
           );
         };
 
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.ensureChunkHandlers)
-          .tap("CommonJsChunkLoadingPlugin", handler);
+          .tap('CommonJsChunkLoadingPlugin', handler);
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadUpdateHandlers)
-          .tap("CommonJsChunkLoadingPlugin", handler);
+          .tap('CommonJsChunkLoadingPlugin', handler);
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadManifest)
-          .tap("CommonJsChunkLoadingPlugin", handler);
+          .tap('CommonJsChunkLoadingPlugin', handler);
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.baseURI)
-          .tap("CommonJsChunkLoadingPlugin", handler);
+          .tap('CommonJsChunkLoadingPlugin', handler);
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.externalInstallChunk)
-          .tap("CommonJsChunkLoadingPlugin", handler);
+          .tap('CommonJsChunkLoadingPlugin', handler);
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.onChunksLoaded)
-          .tap("CommonJsChunkLoadingPlugin", handler);
+          .tap('CommonJsChunkLoadingPlugin', handler);
 
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.ensureChunkHandlers)
-          .tap("CommonJsChunkLoadingPlugin", (chunk, set) => {
+          .tap('CommonJsChunkLoadingPlugin', (chunk, set) => {
             if (!isEnabledForChunk(chunk)) return;
             set.add(RuntimeGlobals.getChunkScriptFilename);
           });
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadUpdateHandlers)
-          .tap("CommonJsChunkLoadingPlugin", (chunk, set) => {
+          .tap('CommonJsChunkLoadingPlugin', (chunk, set) => {
             if (!isEnabledForChunk(chunk)) return;
             set.add(RuntimeGlobals.getChunkUpdateScriptFilename);
             set.add(RuntimeGlobals.moduleCache);
@@ -75,7 +77,7 @@ class CommonJsChunkLoadingPlugin {
           });
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadManifest)
-          .tap("CommonJsChunkLoadingPlugin", (chunk, set) => {
+          .tap('CommonJsChunkLoadingPlugin', (chunk, set) => {
             if (!isEnabledForChunk(chunk)) return;
             set.add(RuntimeGlobals.getUpdateManifestFilename);
           });

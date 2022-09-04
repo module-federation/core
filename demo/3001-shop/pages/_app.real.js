@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { Layout, version } from 'antd';
-import App from 'next/app'
+import App from 'next/app';
 import AppMenu from './_menu';
 
 const SharedNav = dynamic(
@@ -14,7 +14,7 @@ const SharedNav = dynamic(
 );
 
 function MyApp({ Component, pageProps }) {
-  console.log('sync require of shared nav', require('home/SharedNav'))
+  console.log('sync require of shared nav', require('home/SharedNav'));
 
   const [MenuComponent, setMenuComponent] = useState(() => AppMenu);
   useEffect(() => {
@@ -51,21 +51,20 @@ function MyApp({ Component, pageProps }) {
           >
             antd@{version}
           </Layout.Footer>
-
         </Layout>
       </Layout>
     </Layout>
   );
 }
 
-MyApp.getInitialProps = async (ctx) =>{
+MyApp.getInitialProps = async (ctx) => {
   console.log('loading app real');
   const props = await App.getInitialProps(ctx);
-console.log('props');
+  console.log('props');
 
-console.log('after');
+  console.log('after');
 
-  return  {...props}
-}
+  return { ...props };
+};
 
 export default MyApp;

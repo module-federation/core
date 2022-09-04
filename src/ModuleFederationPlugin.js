@@ -18,11 +18,11 @@ class ModuleFederationPlugin {
    * @returns {void}
    */
   apply(compiler) {
-    const {_options: options} = this;
+    const { _options: options } = this;
     const webpack = compiler.webpack;
-    const {ContainerPlugin, ContainerReferencePlugin} = webpack.container;
-    const {SharePlugin} = webpack.sharing;
-    const library = options.library || {type: 'var', name: options.name};
+    const { ContainerPlugin, ContainerReferencePlugin } = webpack.container;
+    const { SharePlugin } = webpack.sharing;
+    const library = options.library || { type: 'var', name: options.name };
     const remoteType =
       options.remoteType ||
       (options.library && /** @type {ExternalsType} */ options.library.type) ||
@@ -68,4 +68,4 @@ class ModuleFederationPlugin {
   }
 }
 
-export default ModuleFederationPlugin
+export default ModuleFederationPlugin;
