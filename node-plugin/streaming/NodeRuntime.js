@@ -1,6 +1,25 @@
 "use strict";
+// possible remote evaluators
+// this depends on the chunk format selected.
+// commonjs2 - it think, is lazily evaluated - beware
+// const remote = eval(scriptContent + '\n  try{' + moduleName + '}catch(e) { null; };');
+// commonjs - fine to use but exports marker doesnt exist
+// const remote = eval('let exports = {};' + scriptContent + 'exports');
+// commonjs-module, ideal since it returns a commonjs module format
+// const remote = eval(scriptContent + 'module.exports')
 
-import StreamingTargetPlugin from "../index"
+// Note on ESM.
+// Its possible to use ESM import, but its impossible to invalidate the module cache
+// So once something is imported, its stuck. This is problematic with at-runtime since we want to hot reload node
+// if ESM were used, youd be forced to restart the process to re-import modules or use a worker pool
+// Workaround is possible with query string on end of request, but this leaks memory badly
+// with commonjs, we can at least reset the require cache to "reboot" webpack runtime
+// It *can* leak memory, but ive not been able to replicate this to an extent that would be concerning.
+// ESM WILL leak memory, big difference.
+// Im talking with TC39 about a proposal around "virtual module trees" which would solve many problems.
+// VMT is like Realms but better - easiest analogy would be like forking the main thread, without going off main thread
+// VMT allows for scope isolation, but still allows reflection and non-primitive memory pointers to be shared - perfect for MFP
+
 const executeLoadTemplate = `
     function executeLoad(remoteUrl) {
     console.log('remoteUrl',remoteUrl)
@@ -12,11 +31,22 @@ const executeLoadTemplate = `
          (global.webpackChunkLoad || fetch)(scriptUrl).then(function(res){
             return res.text();
           }).then(function(scriptContent){
+         try {
+          console.log('straight content eval', eval(scriptContent));
+         } catch (e) {};     
+           try {
+         console.log('with module name', eval(scriptContent + '\\n  try{' + moduleName + '}catch(e) { null; };'));
+         } catch (e) {};
+          try {
+         console.log('with exports',eval('let exports = {};' + scriptContent + 'exports'))
+         } catch (e) {};
+          try {
+         console.log('module',eval(scriptContent + 'module.exports.home'))
+         } catch (e) {};
          
-          // const remote = eval(scriptContent + '\\n  try{' + moduleName + '}catch(e) { null; };');
             try {
-              const remote = eval('let exports = {};' + scriptContent + 'exports');
-         
+              const remote = eval(scriptContent + 'module.exports');
+               console.log('evalueated to', remote);
               resolve(remote[moduleName] || remote)
             } catch(e) {
               console.error('problem executing remote module', moduleName);
@@ -47,13 +77,12 @@ function buildRemotes(mfConf, webpack) {
 
 return Object.entries(mfConf.remotes || {}).reduce((acc, [name, config]) => {
   // TODO: this should use promise new promise not external.
-  // I believe we need to enable externalPResets: async node or supported library/chunk loading types.
-  const loadTemplate = `
-  external new Promise((resolve)=>{
-  console.log('sitting on promise')
+  // I believe we need to enable externalPresets: asyncNode or supported library/chunk loading types.
+  const loadTemplate = `promise new Promise((resolve)=>{
+  console.log('sitting on promise');
   ${executeLoadTemplate}
-  resolve(executeLoad(${JSON.stringify(config)})
-  })).then(remote=>{
+  resolve(executeLoad(${JSON.stringify(config)}))
+  }).then(remote=>{
   console.log(remote);
   return remote
   });

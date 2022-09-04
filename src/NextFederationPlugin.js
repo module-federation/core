@@ -191,9 +191,9 @@ class ChildFederation {
         plugins = [
           new FederationPlugin(federationPluginOptions),
           // new webpack.node.NodeTemplatePlugin(childOutput),
-          // new LoaderTargetPlugin(false),
+          // new LoaderTargetPlugin('async-node'),
           new StreamingTargetPlugin(federationPluginOptions, webpack),
-          // new LibraryPlugin('commonjs-module'),
+          new LibraryPlugin(federationPluginOptions.library.type),
           // new webpack.DefinePlugin({
           //   'process.env.REMOTES': JSON.stringify(this._options.remotes),
           //   'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
@@ -407,7 +407,9 @@ class NextFederationPlugin {
     if (compiler.options.name === 'server') {
       compiler.options.target = false;
       new StreamingTargetPlugin(this._options, webpack).apply(compiler)
-
+      this._options.library = {};
+      this._options.library.type = 'commonjs-module';
+      this._options.library.name = this._options.name
       // output remote to ssr if server
       this._options.filename = this._options.filename.replace('/chunks', '/ssr')
     } else {
@@ -435,7 +437,6 @@ class NextFederationPlugin {
     }[compiler.options.name]
     // ignore edge runtime and middleware builds
     if (ModuleFederationPlugin) {
-
       const hostFederationPluginOptions = {
         ...this._options,
         exposes: {},
