@@ -180,6 +180,7 @@ class ChildFederation {
         plugins = [
           new FederationPlugin(federationPluginOptions),
           new webpack.node.NodeTemplatePlugin(childOutput),
+          //TODO: Externals function needs to internalize any shared module for host and remote build
           new webpack.ExternalsPlugin(compiler.options.externalsType, compiler.options.externals),
           // new LoaderTargetPlugin('async-node'),
           new StreamingTargetPlugin(federationPluginOptions, webpack),
