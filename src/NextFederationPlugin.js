@@ -30,35 +30,37 @@ class RemoveRRRuntimePlugin {
    */
   apply(compiler) {
     const webpack = compiler.webpack;
+    // only impacts dev mode - dont waste the memory during prod build
+    if (compiler.options.mode === 'development') {
+      compiler.hooks.thisCompilation.tap(
+        'RemoveRRRuntimePlugin',
+        (compilation) => {
+          compilation.hooks.processAssets.tap(
+            {
+              name: 'RemoveRRRuntimePlugin',
+              state: compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
+            },
+            (assets) => {
+              Object.keys(assets).forEach((filename) => {
+                if (filename.endsWith('.js') || filename.endsWith('.mjs')) {
+                  const asset = compilation.getAsset(filename);
+                  const newSource = asset.source
+                    .source()
+                    .replace(/RefreshHelpers/g, 'NoExist');
+                  const updatedAsset = new webpack.sources.RawSource(newSource);
 
-    compiler.hooks.thisCompilation.tap(
-      'RemoveRRRuntimePlugin',
-      (compilation) => {
-        compilation.hooks.processAssets.tap(
-          {
-            name: 'RemoveRRRuntimePlugin',
-            state: compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
-          },
-          (assets) => {
-            Object.keys(assets).forEach((filename) => {
-              if (filename.endsWith('.js') || filename.endsWith('.mjs')) {
-                const asset = compilation.getAsset(filename);
-                const newSource = asset.source
-                  .source()
-                  .replace(/RefreshHelpers/g, 'NoExist');
-                const updatedAsset = new webpack.sources.RawSource(newSource);
-
-                if (asset) {
-                  compilation.updateAsset(filename, updatedAsset);
-                } else {
-                  compilation.emitAsset(filename, updatedAsset);
+                  if (asset) {
+                    compilation.updateAsset(filename, updatedAsset);
+                  } else {
+                    compilation.emitAsset(filename, updatedAsset);
+                  }
                 }
-              }
-            });
-          }
-        );
-      }
-    );
+              });
+            }
+          );
+        }
+      );
+    }
   }
 }
 
