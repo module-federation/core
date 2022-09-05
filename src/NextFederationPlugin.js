@@ -13,6 +13,8 @@ import {
   reKeyHostShared,
   DEFAULT_SHARE_SCOPE,
   extractUrlAndGlobal,
+  generateRemoteTemplate,
+  internalizeSharedPackages,
 } from './internal';
 import StreamingTargetPlugin from '../node-plugin/streaming';
 import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
@@ -220,10 +222,11 @@ class ChildFederation {
           new FederationPlugin(federationPluginOptions),
           new webpack.node.NodeTemplatePlugin(childOutput),
           //TODO: Externals function needs to internalize any shared module for host and remote build
-          new webpack.ExternalsPlugin(
-            compiler.options.externalsType,
-            compiler.options.externals
-          ),
+          new webpack.ExternalsPlugin(compiler.options.externalsType, [
+            ...Object.keys(DEFAULT_SHARE_SCOPE),
+            'react/jsx-runtime',
+            'react/jsx-dev-runtime',
+          ]),
           // new LoaderTargetPlugin('async-node'),
           new StreamingTargetPlugin(federationPluginOptions, webpack),
           new LibraryPlugin(federationPluginOptions.library.type),
@@ -288,11 +291,10 @@ class ChildFederation {
 
       // SERVER STUFF FOR CHILD COMPILER
       if (isServer) {
-        console.log(
-          childCompiler.options.name,
-          childCompiler.options.externals
-        );
-
+        // console.log(
+        //   childCompiler.options.name,
+        //   childCompiler.options.externals
+        // );
         // childCompiler.options.externals.push('react')
         //   = [
         //   "next",
@@ -362,64 +364,6 @@ class AddRuntimeRequirementToPromiseExternal {
   }
 }
 
-function generateRemoteTemplate(url, global) {
-  return `promise new Promise(function (resolve, reject) {
-  console.log('using browser template');
-    var __webpack_error__ = new Error();
-    if (typeof ${global} !== 'undefined') return resolve();
-    __webpack_require__.l(
-      ${JSON.stringify(url)},
-      function (event) {
-        if (typeof ${global} !== 'undefined') return resolve();
-        var errorType = event && (event.type === 'load' ? 'missing' : event.type);
-        var realSrc = event && event.target && event.target.src;
-        __webpack_error__.message =
-          'Loading script failed.\\n(' + errorType + ': ' + realSrc + ')';
-        __webpack_error__.name = 'ScriptExternalLoadError';
-        __webpack_error__.type = errorType;
-        __webpack_error__.request = realSrc;
-        reject(__webpack_error__);
-      },
-      ${JSON.stringify(global)},
-    );
-  }).then(function () {
-    const proxy = {
-      get: ${global}.get,
-      init: (args) => {
-        const handler = {
-          get(target, prop) {
-            if (target[prop]) {
-              Object.values(target[prop]).forEach(function(o) {
-                if(o.from === '_N_E') {
-                  o.loaded = true
-                }
-              })
-            }
-            return target[prop]
-          },
-          set(target, property, value, receiver) {
-            if (target[property]) {
-              return target[property]
-            }
-            target[property] = value
-            return true
-          }
-        }
-        try {
-          ${global}.init(new Proxy(__webpack_require__.S.default, handler))
-        } catch (e) {
-
-        }
-        ${global}.__initialized = true
-      }
-    }
-    if (!${global}.__initialized) {
-      proxy.init()
-    }
-    return proxy
-  })`;
-}
-
 function createRuntimeVariables(remotes) {
   return Object.entries(remotes).reduce((acc, remote) => {
     // handle promise new promise and external new promise
@@ -436,10 +380,10 @@ class NextFederationPlugin {
   }
 
   apply(compiler) {
-    compiler.options.devtool = false;
     const isServer = compiler.options.name === 'server';
     const webpack = compiler.webpack;
     if (compiler.options.name === 'server') {
+      // target false because we use our own target for node env
       compiler.options.target = false;
       new StreamingTargetPlugin(this._options, webpack).apply(compiler);
       this._options.library = {};
@@ -450,6 +394,9 @@ class NextFederationPlugin {
         '/chunks',
         '/ssr'
       );
+
+      // should this be a plugin that we apply to the compiler?
+      internalizeSharedPackages(this._options, compiler);
     } else {
       if (this._options.remotes) {
         const parsedRemotes = Object.entries(this._options.remotes).reduce(
@@ -488,19 +435,16 @@ class NextFederationPlugin {
           ...internalShare,
         },
       };
-      if (isServer) {
-        console.log(hostFederationPluginOptions);
-      }
-      (compiler.options.output.chunkFilename =
-        compiler.options.output.chunkFilename.replace(
-          '.js',
-          '-[chunkhash].js'
-        )),
-        //   compiler.options.output.filename = compiler.options.output.filename.replace(
-        //   '.js',
-        //   '-[contenthash].js'
-        // ),
-        (compiler.options.optimization.chunkIds = 'named');
+
+      // compiler.options.output.chunkFilename = compiler.options.output.chunkFilename.replace(
+      //     '.js',
+      //     '-[chunkhash].js'
+      //   )
+      //   compiler.options.output.filename = compiler.options.output.filename.replace(
+      //   '.js',
+      //   '-[contenthash].js'
+      // ),
+      compiler.options.optimization.chunkIds = 'named';
 
       new ModuleFederationPlugin(hostFederationPluginOptions, {
         ModuleFederationPlugin,

@@ -247,7 +247,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                               `Object.assign(global.REMOTE_CONFIG, remotes)`,
                             ]),
                             '}',
-                      /*   TODO: this global.REMOTE_CONFIG doesnt work in this v5 core, not sure if i need to keep it or not
+                            /*   TODO: this global.REMOTE_CONFIG doesnt work in this v5 core, not sure if i need to keep it or not
                                  not deleting it yet since i might need this for tracking all the remote entries across systems
                                  for now, im going to use locally known remote scope from remoteEntry config
                                  update: We will most likely need this, since remote would not have its own config

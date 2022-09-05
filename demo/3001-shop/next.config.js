@@ -34,6 +34,9 @@ module.exports = {
           './pages/_menu': './pages/_menu.js',
           './pages-map': './pages-map.js',
         },
+        shared: {
+          lodash: {},
+        },
         extraOptions: {
           enableImageLoaderFix: true,
           enableUrlLoaderFix: true,

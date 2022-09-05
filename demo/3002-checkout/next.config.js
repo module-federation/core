@@ -23,7 +23,9 @@ module.exports = {
           './CheckoutTitle': './src/components/CheckoutTitle.js',
           './ButtonOldAnt': './src/components/ButtonOldAnt.js',
         },
-        shared: {},
+        shared: {
+          lodash: {},
+        },
         extraOptions: {
           exposePages: true,
           enableImageLoaderFix: true,
