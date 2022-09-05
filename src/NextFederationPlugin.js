@@ -223,7 +223,8 @@ class ChildFederation {
           new webpack.node.NodeTemplatePlugin(childOutput),
           //TODO: Externals function needs to internalize any shared module for host and remote build
           new webpack.ExternalsPlugin(compiler.options.externalsType, [
-            ...Object.keys(DEFAULT_SHARE_SCOPE),
+            // next dynamic needs to be within webpack, cannot be externalized
+            ...Object.keys(DEFAULT_SHARE_SCOPE).filter((k)=>k !== 'next/dynamic'),
             'react/jsx-runtime',
             'react/jsx-dev-runtime',
           ]),
