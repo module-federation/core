@@ -15,6 +15,7 @@ import {
   extractUrlAndGlobal,
   generateRemoteTemplate,
   internalizeSharedPackages,
+  getOutputPath
 } from './internal';
 import StreamingTargetPlugin from '../node-plugin/streaming';
 import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
@@ -38,7 +39,8 @@ class RemoveRRRuntimePlugin {
           compilation.hooks.processAssets.tap(
             {
               name: 'RemoveRRRuntimePlugin',
-              state: compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
+              state:
+                compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
             },
             (assets) => {
               Object.keys(assets).forEach((filename) => {
@@ -64,55 +66,45 @@ class RemoveRRRuntimePlugin {
   }
 }
 
+
+
 //TODO: this should use webpack asset stage hooks instead to read & add additional assets to a compilation
-const moveFilesToClientDirectory = (isServer, stats) => {
+const moveFilesToClientDirectory = (isServer, compilation, callback) => {
+  let outputPath = getOutputPath(compilation)
+  const staticDirExists = fs.existsSync(path.join(outputPath, 'static'));
+  const ssrPathTemp = path.join(outputPath, 'ssr');
+  const ssrOutputPath = path.join(outputPath, 'static/ssr');
+
   if (isServer) {
-    const staticDirExists = fs.existsSync(
-      path.join(
-        stats.compilation.options.output.path.split('/server/')[0],
-        'static'
-      )
-    );
-    fs.mkdirSync(
-      path.join(
-        stats.compilation.options.output.path.split('/server/')[0],
-        'ssr'
-      )
-    );
-    Object.keys(stats.compilation.assets).forEach((asset) => {
+    Object.keys(compilation.assets).forEach((asset) => {
       // older versions of next.js have a different output order
-      const absolutePath = path.join(
-        stats.compilation.options.output.path,
-        asset
-      );
+      const absolutePath = path.join(compilation.options.output.path, asset);
 
       if (!staticDirExists) {
         mv(
           absolutePath,
-          path.join(
-            stats.compilation.options.output.path.split('/server/')[0],
-            'ssr',
-            asset
-          ),
+          path.join(ssrPathTemp, asset),
           { mkdirp: true },
           (err) => {
             if (err) {
               throw err;
+            }
+            if (callback) {
+              callback();
             }
           }
         );
       } else {
         mv(
           absolutePath,
-          path.join(
-            stats.compilation.options.output.path.split('/server/')[0],
-            'static/ssr',
-            asset
-          ),
+          path.join(ssrOutputPath, asset),
           { mkdirp: true },
           (err) => {
             if (err) {
               throw err;
+            }
+            if (callback) {
+              callback();
             }
           }
         );
@@ -120,16 +112,19 @@ const moveFilesToClientDirectory = (isServer, stats) => {
     });
   } else {
     // would be better to add assets to complation via process assets stage api instead of manually writing to disk
-    if (
-      fs.existsSync(path.join(stats.compilation.options.output.path, 'ssr'))
-    ) {
+    console.log('assets exist', fs.existsSync(ssrPathTemp), ssrPathTemp);
+    if (fs.existsSync(ssrPathTemp)) {
       mv(
-        path.join(stats.compilation.options.output.path, 'ssr'),
-        path.join(stats.compilation.options.output.path, 'static/ssr'),
+        path.join(ssrPathTemp),
+        path.join(ssrOutputPath),
         { mkdirp: true },
         function (err) {
           if (err) {
             throw err;
+          }
+          console.log('moved files to client')
+          if (callback) {
+            callback();
           }
         }
       );
@@ -156,10 +151,23 @@ class ChildFederation {
     const NodeTargetPlugin = webpack.node.NodeTargetPlugin;
     const library = compiler.options.output.library;
     const isServer = compiler.options.name === 'server';
+    const isDev = compiler.options.mode === 'development';
+    let outputPath
+    if(isDev && isServer) {
+      outputPath = path.join(getOutputPath(compiler), 'static/ssr');
+    } else {
+      if (isServer) {
+        outputPath = path.join(getOutputPath(compiler), 'ssr');
+      } else {
+        outputPath = compiler.options.output.path
+      }
+    }
+
     compiler.hooks.thisCompilation.tap(CHILD_PLUGIN_NAME, (compilation) => {
       const buildName = this._options.name;
       const childOutput = {
         ...compiler.options.output,
+        path: outputPath,
         // path: deriveOutputPath(isServer, compiler.options.output.path),
         publicPath: 'auto',
         chunkLoadingGlobal: buildName + 'chunkLoader',
@@ -226,7 +234,9 @@ class ChildFederation {
           //TODO: Externals function needs to internalize any shared module for host and remote build
           new webpack.ExternalsPlugin(compiler.options.externalsType, [
             // next dynamic needs to be within webpack, cannot be externalized
-            ...Object.keys(DEFAULT_SHARE_SCOPE).filter((k)=>k !== 'next/dynamic'),
+            ...Object.keys(DEFAULT_SHARE_SCOPE).filter(
+              (k) => k !== 'next/dynamic'
+            ),
             'react/jsx-runtime',
             'react/jsx-dev-runtime',
           ]),
@@ -245,6 +255,8 @@ class ChildFederation {
         childOutput,
         plugins
       );
+
+      childCompiler.outputPath = outputPath;
 
       new RemoveRRRuntimePlugin().apply(childCompiler);
 
@@ -292,22 +304,6 @@ class ChildFederation {
         (plugin) => !removePlugins.includes(plugin.constructor.name)
       );
 
-      // SERVER STUFF FOR CHILD COMPILER
-      if (isServer) {
-        // console.log(
-        //   childCompiler.options.name,
-        //   childCompiler.options.externals
-        // );
-        // childCompiler.options.externals.push('react')
-        //   = [
-        //   "next",
-        //   { react: "react" },
-        //   "react/jsx-runtime",
-        //   "react/jsx-dev-runtime",
-        //   "styled-jsx",
-        // ]
-      }
-
       if (MiniCss) {
         new MiniCss.constructor({
           ...MiniCss.options,
@@ -322,22 +318,83 @@ class ChildFederation {
       childCompiler.options.experiments.lazyCompilation = false;
       childCompiler.options.optimization.runtimeChunk = false;
       delete childCompiler.options.optimization.splitChunks;
-      childCompiler.outputFileSystem = compiler.outputFileSystem;
+      childCompiler.outputFileSystem = fs;
+      // help wanted for all asset pipeline stuff below
+      let childAssets
+      if (isServer) {
+        childAssets = new Promise((resolve) => {
+          childCompiler.hooks.afterEmit.tap(
+            CHILD_PLUGIN_NAME,
+            (childCompilation) => {
+              console.log('after emit assets server');
+              resolve(childCompilation.assets);
+            }
+          );
+        });
+      } else {
+        if(isDev) {
+          childAssets = new Promise((resolve) => {
+            childCompiler.hooks.afterEmit.tap(
+              CHILD_PLUGIN_NAME,
+              (childCompilation) => {
+                resolve(childCompilation.assets);
+              }
+            );
+          });
+
+        } else {
+
+            //TODO: improve this
+            childAssets = new Promise((resolve, reject) => {
+              fs.readdir(
+                path.join(childCompiler.context, '.next/ssr'),
+                function (err, files) {
+                  if (err) {
+                    reject('Unable to scan directory: ' + err);
+                    return;
+                  }
+
+                  const allFiles = files.map(function (file) {
+                    return new Promise((res, rej) => {
+                      fs.readFile(
+                        path.join(childCompiler.context, '.next/ssr', file),
+                        (err, data) => {
+                          if (err) rej(err);
+                          compilation.assets[path.join('static/ssr', file)] = new compiler.webpack.sources.RawSource(data)
+                          res();
+                        }
+                      );
+                    });
+                  });
+                  Promise.all(allFiles).then(resolve).catch(reject)
+                }
+              );
+            });
+        }
+      }
+      // on main compiler add extra assets from server output to browser build
+      compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
+        console.log(compiler.options.name);
+        console.log('in additional assets hook for main build', childAssets);
+
+        return childAssets
+      });
+
       if (compiler.options.mode === 'development') {
         childCompiler.run((err, stats) => {
-          moveFilesToClientDirectory(isServer, stats);
+          // moveFilesToClientDirectory(isServer, stats);
           if (err) {
             console.error(err);
-            throw new Error(err);
+            throw err
           }
         });
       } else {
         childCompiler.run((err, stats) => {
-          moveFilesToClientDirectory(isServer, stats);
+          // moveFilesToClientDirectory(isServer, stats);
 
           if (err) {
             console.error(err);
-            throw new Error(err);
+            throw err
           }
         });
       }
@@ -368,11 +425,11 @@ class AddRuntimeRequirementToPromiseExternal {
 }
 
 function createRuntimeVariables(remotes) {
-  return Object.entries(remotes).reduce((acc, remote) => {
+  return JSON.stringify(Object.entries(remotes).reduce((acc, remote) => {
     // handle promise new promise and external new promise
     acc[remote[0]] = remote[1].replace('promise ', '').replace('external ', '');
     return acc;
-  }, {});
+  }, {}))
 }
 
 class NextFederationPlugin {
@@ -452,6 +509,7 @@ class NextFederationPlugin {
       new ModuleFederationPlugin(hostFederationPluginOptions, {
         ModuleFederationPlugin,
       }).apply(compiler);
+      //todo runtime variable creation needs to be applied for server and client builds
       new webpack.DefinePlugin({
         'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
         'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
