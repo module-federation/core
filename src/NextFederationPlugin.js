@@ -319,6 +319,7 @@ class ChildFederation {
       childCompiler.options.optimization.runtimeChunk = false;
       delete childCompiler.options.optimization.splitChunks;
       childCompiler.outputFileSystem = fs;
+      // help wanted for all asset pipeline stuff below
       let childAssets
       if (isServer) {
         childAssets = new Promise((resolve) => {
