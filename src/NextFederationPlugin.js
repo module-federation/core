@@ -38,7 +38,8 @@ class RemoveRRRuntimePlugin {
           compilation.hooks.processAssets.tap(
             {
               name: 'RemoveRRRuntimePlugin',
-              state: compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
+              state:
+                compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
             },
             (assets) => {
               Object.keys(assets).forEach((filename) => {
@@ -65,39 +66,39 @@ class RemoveRRRuntimePlugin {
 }
 
 //TODO: this should use webpack asset stage hooks instead to read & add additional assets to a compilation
-const moveFilesToClientDirectory = (isServer, stats) => {
+const moveFilesToClientDirectory = (isServer, compilation, callback) => {
+  let outputPath = compilation.options.output.path.split(path.sep)
+  outputPath = outputPath.slice(0,outputPath.findIndex((i)=>{
+    return i === (isServer ? 'server' : 'static')
+  })).join(path.sep)
+  const staticDirExists = fs.existsSync(
+    path.join(outputPath, 'static')
+  );
+  const ssrPathTemp =  path.join(
+    outputPath,
+    'ssr'
+  )
+  const ssrOutputPath = path.join(outputPath,'static/ssr')
+
   if (isServer) {
-    const staticDirExists = fs.existsSync(
-      path.join(
-        stats.compilation.options.output.path.split('/server/')[0],
-        'static'
-      )
-    );
-    fs.mkdirSync(
-      path.join(
-        stats.compilation.options.output.path.split('/server/')[0],
-        'ssr'
-      )
-    );
-    Object.keys(stats.compilation.assets).forEach((asset) => {
+    Object.keys(compilation.assets).forEach((asset) => {
       // older versions of next.js have a different output order
       const absolutePath = path.join(
-        stats.compilation.options.output.path,
+        compilation.options.output.path,
         asset
       );
 
       if (!staticDirExists) {
         mv(
           absolutePath,
-          path.join(
-            stats.compilation.options.output.path.split('/server/')[0],
-            'ssr',
-            asset
-          ),
+          path.join(ssrPathTemp, asset),
           { mkdirp: true },
           (err) => {
             if (err) {
               throw err;
+            }
+            if(callback) {
+              callback()
             }
           }
         );
@@ -105,14 +106,16 @@ const moveFilesToClientDirectory = (isServer, stats) => {
         mv(
           absolutePath,
           path.join(
-            stats.compilation.options.output.path.split('/server/')[0],
-            'static/ssr',
+            ssrOutputPath,
             asset
           ),
           { mkdirp: true },
           (err) => {
             if (err) {
               throw err;
+            }
+            if(callback) {
+              callback()
             }
           }
         );
@@ -121,15 +124,18 @@ const moveFilesToClientDirectory = (isServer, stats) => {
   } else {
     // would be better to add assets to complation via process assets stage api instead of manually writing to disk
     if (
-      fs.existsSync(path.join(stats.compilation.options.output.path, 'ssr'))
+      fs.existsSync(ssrPathTemp)
     ) {
       mv(
-        path.join(stats.compilation.options.output.path, 'ssr'),
-        path.join(stats.compilation.options.output.path, 'static/ssr'),
+        path.join(ssrPathTemp),
+        path.join(ssrOutputPath),
         { mkdirp: true },
         function (err) {
           if (err) {
             throw err;
+          }
+          if(callback) {
+            callback()
           }
         }
       );
@@ -226,7 +232,9 @@ class ChildFederation {
           //TODO: Externals function needs to internalize any shared module for host and remote build
           new webpack.ExternalsPlugin(compiler.options.externalsType, [
             // next dynamic needs to be within webpack, cannot be externalized
-            ...Object.keys(DEFAULT_SHARE_SCOPE).filter((k)=>k !== 'next/dynamic'),
+            ...Object.keys(DEFAULT_SHARE_SCOPE).filter(
+              (k) => k !== 'next/dynamic'
+            ),
             'react/jsx-runtime',
             'react/jsx-dev-runtime',
           ]),
@@ -322,7 +330,46 @@ class ChildFederation {
       childCompiler.options.experiments.lazyCompilation = false;
       childCompiler.options.optimization.runtimeChunk = false;
       delete childCompiler.options.optimization.splitChunks;
-      childCompiler.outputFileSystem = compiler.outputFileSystem;
+      childCompiler.outputFileSystem = fs;
+      if (isServer) {
+
+        const childAssets = new Promise((resolve) => {
+          childCompiler.hooks.afterEmit.tap(
+            CHILD_PLUGIN_NAME,
+            (childCompilation) => {
+              console.log('after emit assets');
+              const { outputPath } = childCompiler;
+              const webpackContext = childCompiler.context;
+              const outputDirWithCwd = path.relative(webpackContext, outputPath);
+              moveFilesToClientDirectory(isServer, childCompilation, resolve);
+            }
+          );
+        });
+        // on main compiler add extra assets from server output to browser build
+        compilation.hooks.additionalAssets.tapPromise(
+          CHILD_PLUGIN_NAME,
+          (callback) => {
+            console.log('in additional assets hook for main build');
+            if (!isServer) {
+              return Promise.resolve();
+            }
+            return childAssets
+
+            return childAssets.then((childCompile) => {
+              console.log(childCompile.assets);
+              for (const assetName in childCompile.assets) {
+                console.log(`${assetName}: ${childCompile.assets[assetName]}`);
+                // if (compilation.getAsset(assetName)) {
+                //   compilation.updateAsset(assetName, assets[assetName]);
+                // } else {
+                  compilation.assets['../ssr/'+assetName] = childCompile.assets[assetName];
+                // }
+              }
+            });
+          }
+        );
+      }
+
       if (compiler.options.mode === 'development') {
         childCompiler.run((err, stats) => {
           moveFilesToClientDirectory(isServer, stats);
@@ -333,7 +380,7 @@ class ChildFederation {
         });
       } else {
         childCompiler.run((err, stats) => {
-          moveFilesToClientDirectory(isServer, stats);
+          // moveFilesToClientDirectory(isServer, stats);
 
           if (err) {
             console.error(err);
@@ -452,6 +499,7 @@ class NextFederationPlugin {
       new ModuleFederationPlugin(hostFederationPluginOptions, {
         ModuleFederationPlugin,
       }).apply(compiler);
+      //todo runtime variable creation needs to be applied for server and client builds
       new webpack.DefinePlugin({
         'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
         'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
