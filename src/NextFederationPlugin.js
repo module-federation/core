@@ -304,22 +304,6 @@ class ChildFederation {
         (plugin) => !removePlugins.includes(plugin.constructor.name)
       );
 
-      // SERVER STUFF FOR CHILD COMPILER
-      if (isServer) {
-        // console.log(
-        //   childCompiler.options.name,
-        //   childCompiler.options.externals
-        // );
-        // childCompiler.options.externals.push('react')
-        //   = [
-        //   "next",
-        //   { react: "react" },
-        //   "react/jsx-runtime",
-        //   "react/jsx-dev-runtime",
-        //   "styled-jsx",
-        // ]
-      }
-
       if (MiniCss) {
         new MiniCss.constructor({
           ...MiniCss.options,
@@ -335,7 +319,7 @@ class ChildFederation {
       childCompiler.options.optimization.runtimeChunk = false;
       delete childCompiler.options.optimization.splitChunks;
       childCompiler.outputFileSystem = fs;
-      let childAssets;
+      let childAssets
       if (isServer) {
         childAssets = new Promise((resolve) => {
           childCompiler.hooks.afterEmit.tap(
@@ -352,53 +336,49 @@ class ChildFederation {
             childCompiler.hooks.afterEmit.tap(
               CHILD_PLUGIN_NAME,
               (childCompilation) => {
-                console.log('after emit assets client');
-                console.log(childCompilation.assets);
                 resolve(childCompilation.assets);
               }
             );
           });
 
-        }
-        return
-        // childAssets = new Promise(resolve =>{
-        //   moveFilesToClientDirectory(isServer, compilation, resolve);
-        // })
-        // this is better, but leaving off for now as it runs code through terser optimization
-        childAssets = new Promise((resolve, reject) => {
-          fs.readdir(
-            path.join(childCompiler.context, '.next/ssr'),
-            function (err, files) {
-              //handling error
-              if (err) {
-                reject('Unable to scan directory: ' + err);
-                return;
-              }
+        } else {
 
-              const allFiles = files.map(function (file) {
-                // Do whatever you want to do with the file
-                return new Promise((res, rej) => {
-                  fs.readFile(
-                    path.join(childCompiler.context, '.next/ssr', file),
-                    (err, data) => {
-                      if (err) rej(err);
-                      compilation.assets[path.join('static/ssr', file)] = new compiler.webpack.sources.RawSource(data)
-                      res();
-                    }
-                  );
-                });
-              });
-              Promise.all(allFiles).then(resolve).catch(reject)
-            }
-          );
-        });
+            // this is better, but leaving off for now as it runs code through terser optimization
+            childAssets = new Promise((resolve, reject) => {
+              fs.readdir(
+                path.join(childCompiler.context, '.next/ssr'),
+                function (err, files) {
+                  //handling error
+                  if (err) {
+                    reject('Unable to scan directory: ' + err);
+                    return;
+                  }
+
+                  const allFiles = files.map(function (file) {
+                    // Do whatever you want to do with the file
+                    return new Promise((res, rej) => {
+                      fs.readFile(
+                        path.join(childCompiler.context, '.next/ssr', file),
+                        (err, data) => {
+                          if (err) rej(err);
+                          compilation.assets[path.join('static/ssr', file)] = new compiler.webpack.sources.RawSource(data)
+                          res();
+                        }
+                      );
+                    });
+                  });
+                  Promise.all(allFiles).then(resolve).catch(reject)
+                }
+              );
+            });
+        }
       }
       // on main compiler add extra assets from server output to browser build
       compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
         console.log(compiler.options.name);
         console.log('in additional assets hook for main build', childAssets);
 
-        return childAssets;
+        return childAssets
       });
 
       if (compiler.options.mode === 'development') {
