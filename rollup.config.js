@@ -24,12 +24,10 @@ export default {
   plugins: [
     nodeResolve({ preferBuiltins: true }), // or `true`
     commonjs(),
-    // multi(),
     globals({
       dirname: false,
       filename: false,
     }),
     builtins(),
-    obfuscator(),
   ],
 };
