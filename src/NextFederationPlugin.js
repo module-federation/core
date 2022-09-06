@@ -15,6 +15,7 @@ import {
   extractUrlAndGlobal,
   generateRemoteTemplate,
   internalizeSharedPackages,
+  getOutputPath
 } from './internal';
 import StreamingTargetPlugin from '../node-plugin/streaming';
 import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
@@ -65,18 +66,11 @@ class RemoveRRRuntimePlugin {
   }
 }
 
+
+
 //TODO: this should use webpack asset stage hooks instead to read & add additional assets to a compilation
 const moveFilesToClientDirectory = (isServer, compilation, callback) => {
-  let outputPath = compilation.options.output.path.split(path.sep);
-  const foundIndex = outputPath.findIndex((i) => {
-    return i === (isServer ? 'server' : 'static');
-  })
-  outputPath = outputPath
-    .slice(
-      0,
-      foundIndex > 0 ? foundIndex : outputPath.length
-    )
-    .join(path.sep);
+  let outputPath = getOutputPath(compilation)
   const staticDirExists = fs.existsSync(path.join(outputPath, 'static'));
   const ssrPathTemp = path.join(outputPath, 'ssr');
   const ssrOutputPath = path.join(outputPath, 'static/ssr');
@@ -118,6 +112,7 @@ const moveFilesToClientDirectory = (isServer, compilation, callback) => {
     });
   } else {
     // would be better to add assets to complation via process assets stage api instead of manually writing to disk
+    console.log('assets exist', fs.existsSync(ssrPathTemp), ssrPathTemp);
     if (fs.existsSync(ssrPathTemp)) {
       mv(
         path.join(ssrPathTemp),
@@ -156,10 +151,23 @@ class ChildFederation {
     const NodeTargetPlugin = webpack.node.NodeTargetPlugin;
     const library = compiler.options.output.library;
     const isServer = compiler.options.name === 'server';
+    const isDev = compiler.options.mode === 'development';
+    let outputPath
+    if(isDev && isServer) {
+      outputPath = path.join(getOutputPath(compiler), 'static/ssr');
+    } else {
+      if (isServer) {
+        outputPath = path.join(getOutputPath(compiler), 'ssr');
+      } else {
+        outputPath = compiler.options.output.path
+      }
+    }
+
     compiler.hooks.thisCompilation.tap(CHILD_PLUGIN_NAME, (compilation) => {
       const buildName = this._options.name;
       const childOutput = {
         ...compiler.options.output,
+        path: outputPath,
         // path: deriveOutputPath(isServer, compiler.options.output.path),
         publicPath: 'auto',
         chunkLoadingGlobal: buildName + 'chunkLoader',
@@ -248,6 +256,8 @@ class ChildFederation {
         plugins
       );
 
+      childCompiler.outputPath = outputPath;
+
       new RemoveRRRuntimePlugin().apply(childCompiler);
 
       childCompiler.options.module.rules.forEach((rule) => {
@@ -331,49 +341,57 @@ class ChildFederation {
           childCompiler.hooks.afterEmit.tap(
             CHILD_PLUGIN_NAME,
             (childCompilation) => {
-              console.log('after emit assets');
-              const { outputPath } = childCompiler;
-              const webpackContext = childCompiler.context;
-              const outputDirWithCwd = path.relative(
-                webpackContext,
-                outputPath
-              );
-              moveFilesToClientDirectory(isServer, childCompilation, resolve);
+              console.log('after emit assets server');
+              resolve(childCompilation.assets);
             }
           );
         });
       } else {
-        childAssets = new Promise(resolve =>{
-          moveFilesToClientDirectory(isServer, compilation, resolve);
-        })
+        if(isDev) {
+          childAssets = new Promise((resolve) => {
+            childCompiler.hooks.afterEmit.tap(
+              CHILD_PLUGIN_NAME,
+              (childCompilation) => {
+                console.log('after emit assets client');
+                console.log(childCompilation.assets);
+                resolve(childCompilation.assets);
+              }
+            );
+          });
+
+        }
+        return
+        // childAssets = new Promise(resolve =>{
+        //   moveFilesToClientDirectory(isServer, compilation, resolve);
+        // })
         // this is better, but leaving off for now as it runs code through terser optimization
-        // childAssets = new Promise((resolve, reject) => {
-        //   fs.readdir(
-        //     path.join(childCompiler.context, '.next/ssr'),
-        //     function (err, files) {
-        //       //handling error
-        //       if (err) {
-        //         reject('Unable to scan directory: ' + err);
-        //         return;
-        //       }
-        //
-        //       const allFiles = files.map(function (file) {
-        //         // Do whatever you want to do with the file
-        //         return new Promise((res, rej) => {
-        //           fs.readFile(
-        //             path.join(childCompiler.context, '.next/ssr', file),
-        //             (err, data) => {
-        //               if (err) rej(err);
-        //               compilation.assets[path.join('static/ssr', file)] = new compiler.webpack.sources.RawSource(data)
-        //               res();
-        //             }
-        //           );
-        //         });
-        //       });
-        //       Promise.all(allFiles).then(resolve).catch(reject)
-        //     }
-        //   );
-        // });
+        childAssets = new Promise((resolve, reject) => {
+          fs.readdir(
+            path.join(childCompiler.context, '.next/ssr'),
+            function (err, files) {
+              //handling error
+              if (err) {
+                reject('Unable to scan directory: ' + err);
+                return;
+              }
+
+              const allFiles = files.map(function (file) {
+                // Do whatever you want to do with the file
+                return new Promise((res, rej) => {
+                  fs.readFile(
+                    path.join(childCompiler.context, '.next/ssr', file),
+                    (err, data) => {
+                      if (err) rej(err);
+                      compilation.assets[path.join('static/ssr', file)] = new compiler.webpack.sources.RawSource(data)
+                      res();
+                    }
+                  );
+                });
+              });
+              Promise.all(allFiles).then(resolve).catch(reject)
+            }
+          );
+        });
       }
       // on main compiler add extra assets from server output to browser build
       compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {

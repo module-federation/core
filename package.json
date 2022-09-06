@@ -9,7 +9,7 @@
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "demo": "yarn build && cd demo && yarn install && yarn dev",
+    "demo": "yarn build && cd demo && yarn sync-pkg && yarn --force && yarn dev",
     "debug": "yarn build && cd demo; yarn sync-pkg && yarn --force && yarn build && yarn serve",
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\"",
     "build": "rm -rf lib && cp -r ./src/ lib/ && rollup -c"

@@ -1,5 +1,6 @@
 import { parseOptions } from 'webpack/lib/container/options';
 import { isRequiredVersion } from 'webpack/lib/sharing/utils';
+import path from "path";
 
 export const DEFAULT_SHARE_SCOPE = {
   react: {
@@ -193,3 +194,19 @@ export const internalizeSharedPackages = (options, compiler) => {
     };
   }
 };
+
+export const getOutputPath = (compiler) => {
+  const isServer = compiler.options.target !== 'client';
+  let outputPath = compiler.options.output.path.split(path.sep);
+  const foundIndex = outputPath.findIndex((i) => {
+    return i === (isServer ? 'server' : 'static');
+  })
+  outputPath = outputPath
+    .slice(
+      0,
+      foundIndex > 0 ? foundIndex : outputPath.length
+    )
+    .join(path.sep);
+
+  return outputPath
+}
