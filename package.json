@@ -13,9 +13,6 @@
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\"",
     "build": "rm -rf lib && cp -r ./src/ lib/ && rollup -c"
   },
-  "publishConfig": {
-    "registry": "https://r.privjs.com"
-  },
   "dependencies": {
     "chalk": "^4.0.0",
     "fast-glob": "^3.2.11"
