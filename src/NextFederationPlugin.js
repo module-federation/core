@@ -343,19 +343,17 @@ class ChildFederation {
 
         } else {
 
-            // this is better, but leaving off for now as it runs code through terser optimization
+            //TODO: improve this
             childAssets = new Promise((resolve, reject) => {
               fs.readdir(
                 path.join(childCompiler.context, '.next/ssr'),
                 function (err, files) {
-                  //handling error
                   if (err) {
                     reject('Unable to scan directory: ' + err);
                     return;
                   }
 
                   const allFiles = files.map(function (file) {
-                    // Do whatever you want to do with the file
                     return new Promise((res, rej) => {
                       fs.readFile(
                         path.join(childCompiler.context, '.next/ssr', file),
