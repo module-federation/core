@@ -23,7 +23,7 @@ module.exports.hasLoader = function hasLoader(rule, loaderName) {
       const loader = rule.use[i];
       // check exact name, eg "url-loader" or its path "node_modules/url-loader/dist/cjs.js"
       if (
-        (loader.loader === 'string' &&
+        (typeof loader.loader === 'string' &&
         loader.loader === loaderName )||
        (Array.isArray(loader.loader) && loader.loader.includes(`/${loaderName}/`))
       ) {
