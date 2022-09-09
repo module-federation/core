@@ -38,7 +38,7 @@ export default [
     ],
   },
   {
-    input: ['./src/mf-router/index.ts'],
+    input: ['./src/runtime-mf-loader/MFPageLoader.ts'],
     output: {
       dir: 'lib',
       format: 'cjs',
@@ -46,7 +46,7 @@ export default [
       exports: 'auto',
       sourcemap: !production,
     },
-    external: ['next/dist/client/router'],
+    external: ['next/router'],
     plugins: [
       typescript({
         outDir: 'lib',

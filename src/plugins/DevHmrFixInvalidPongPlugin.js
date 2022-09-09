@@ -33,7 +33,7 @@ class DevHmrFixInvalidPongPlugin {
                     'g'
                   ),
                   `if (payload.event === \\"pong\\" && payload.invalid && !self.__NEXT_DATA__.err) {
-                    if (window.mf_router &&  window.mf_router.isFederatedPathname(window.location.pathname)) return;
+                    if (window.mf_loader &&  window.mf_loader.isFederatedPathname(window.location.pathname)) return;
                   `.replaceAll('\n', '\\n')
                 );
 

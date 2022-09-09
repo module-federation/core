@@ -1,6 +1,6 @@
 const fg = require('fast-glob');
 const fs = require('fs');
-const UrlNode = require('../mf-router/UrlNode').UrlNode;
+const UrlNode = require('../runtime-mf-loader/UrlNode').UrlNode;
 
 /**
  * Webpack loader which prepares MF map for NextJS pages

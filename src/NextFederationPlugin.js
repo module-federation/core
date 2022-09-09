@@ -477,4 +477,11 @@ class NextFederationPlugin {
   }
 }
 
+NextFederationPlugin.loaders = [
+  {
+    test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
+    loader: path.resolve(__dirname, './loaders/patchNextClientPageLoader'),
+  },
+];
+
 module.exports = NextFederationPlugin;
