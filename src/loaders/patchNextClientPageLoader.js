@@ -7,8 +7,8 @@ const path = require('path');
  * @type {(this: import("webpack").LoaderContext<{}>, content: string) => string>}
  */
 function patchNextClientPageLoader(content) {
-  if (content.includes('MFPageLoader')) {
-    // If MFPageLoader already applied then skip patch
+  if (content.includes('MFLoader')) {
+    // If MFLoader already applied then skip patch
     return content;
   }
 
@@ -19,21 +19,21 @@ function patchNextClientPageLoader(content) {
     path.resolve(__dirname, '../include-defaults.js')
   );
   path.resolve(__dirname, '../include-defaults.js');
-  const pathMFPageLoader = path.relative(
+  const pathMFLoader = path.relative(
     this.context,
-    path.resolve(__dirname, '../runtime-mf-loader/MFPageLoader.js')
+    path.resolve(__dirname, '../runtime-mf-loader/MFLoader.js')
   );
 
   patchedContent = content.replace(
     'exports.default = PageLoader;',
     `
       require("${pathIncludeDefaults}");
-      const MFPageLoader = require("${pathMFPageLoader}").MFPageLoader;
+      const MFLoader = require("${pathMFLoader}").MFLoader;
 
       class PageLoaderExtended extends PageLoader {
         constructor(buildId, assetPrefix) {
           super(buildId, assetPrefix);
-          global.mf_loader = new MFPageLoader(this);
+          global.mf_loader = new MFLoader(this);
         }
 
         _getPageListOriginal() {

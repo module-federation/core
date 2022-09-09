@@ -15,7 +15,7 @@ export type RouteInfoLoader = {
   remote?: string;
 } & Partial<RouteInfo>;
 
-export class MFPageLoader {
+export class MFLoader {
   /**
    * List of pages that belongs to the current host application
    */
@@ -29,17 +29,18 @@ export class MFPageLoader {
   /**
    * Computable list of available local & remote pages in proper sorted order.
    */
-  pageListCombinedCache: string[] | undefined;
+  pageListCombinedCache: WeakMap<string[], string[]>;
 
   private _nextPageLoader: PageLoader;
   private _isLoaded: Promise<any>;
 
   constructor(nextPageLoader: PageLoader) {
     this._nextPageLoader = nextPageLoader;
+    this._clearPageListCombinedCache();
 
     this._isLoaded = new Promise(async (resolve) => {
-      this.wrapLoadRoute(nextPageLoader);
-      this.wrapWhenEntrypoint(nextPageLoader);
+      this._wrapLoadRoute(nextPageLoader);
+      this._wrapWhenEntrypoint(nextPageLoader);
 
       this.pageListLocal = await (
         this._nextPageLoader as any
@@ -66,8 +67,12 @@ export class MFPageLoader {
     });
   }
 
+  private _clearPageListCombinedCache() {
+    this.pageListCombinedCache = new WeakMap();
+  }
+
   private prepareCombinedPageList(pagesList: string[]): string[] {
-    if (!this.pageListCombinedCache) {
+    if (!this.pageListCombinedCache.has(pagesList)) {
       // getSortedRoutes @see https://github.com/vercel/next.js/blob/canary/packages/next/shared/lib/router/utils/sorted-routes.ts
       const root = new UrlNode();
       pagesList.forEach((pagePath) => root.insert(pagePath));
@@ -75,9 +80,9 @@ export class MFPageLoader {
         root.insert(pagePath)
       );
       // Smoosh will then sort those sublevels up to the point where you get the correct route definition priority
-      this.pageListCombinedCache = root.smoosh();
+      this.pageListCombinedCache.set(pagesList, root.smoosh());
     }
-    return this.pageListCombinedCache;
+    return this.pageListCombinedCache.get(pagesList) || [];
   }
 
   private async getRouteInfo(route: string): Promise<undefined | RouteInfo> {
@@ -114,17 +119,13 @@ export class MFPageLoader {
     return combinedPageList;
   }
 
-  async loadRoute(route: string) {}
-
   /**
    * Check that current browser pathname is served by federated remotes.
    *
    * Eg. if cleanPathname `/shop/nodkz/product123` and pageListFederated is ['/shop/nodkz/[...mee]']
    *     then this method will match federated dynamic route and return true.
    *
-   * This method widely is used by
-   *   - DevHmrFixInvalidPongPlugin (fix HMR in dev mode)
-   *   - TODO: add more
+   * PS. This method is used by DevHmrFixInvalidPongPlugin (fix HMR page reloads in dev mode)
    */
   isFederatedPathname(cleanPathname: string): boolean {
     return !!this.pathnameToRoute(cleanPathname);
@@ -174,10 +175,14 @@ export class MFPageLoader {
    */
   addFederatedPages(routeLoaders: Record<string, RouteInfoLoader>) {
     console.log('addFederatedPages', routeLoaders);
-    this.pageListCombinedCache = undefined;
-    const hostPages = this.getLocalPages();
-    const newFederatedRoutes = Object.keys(routeLoaders);
-    newFederatedRoutes.forEach((route) => {
+
+    // we need to reset cache because new federated pages appears
+    this._clearPageListCombinedCache();
+
+    const hostPages = this.pageListLocal || [];
+    const newFederatedPages = Object.keys(routeLoaders);
+    newFederatedPages.forEach((route) => {
+      // host page cannot be overrided by remote page (in other case I think it's strange)
       if (!hostPages.includes(route)) {
         this.pageListFederated[route] = routeLoaders[route];
       }
@@ -186,7 +191,7 @@ export class MFPageLoader {
     // if router initialized and just added federated pages matches current pathname
     // then kick route to rerender page with new federated page
     const pathname = window.location.pathname;
-    if (this._pathnameToRoute(pathname, newFederatedRoutes)) {
+    if (this._pathnameToRoute(pathname, newFederatedPages)) {
       router.replace(window.location);
       console.log('router.replace(window.location);');
     }
@@ -213,14 +218,7 @@ export class MFPageLoader {
     }
   }
 
-  /**
-   * List of pages that belongs to the current host application
-   */
-  getLocalPages(): string[] {
-    return this.pageListLocal || [];
-  }
-
-  private wrapLoadRoute(nextPageLoader: PageLoader) {
+  private _wrapLoadRoute(nextPageLoader: PageLoader) {
     if (!nextPageLoader?.routeLoader?.loadRoute) {
       throw new Error(
         '[nextjs-mf] Cannot wrap `pageLoader.routeLoader.loadRoute()` with custom logic.'
@@ -246,7 +244,7 @@ export class MFPageLoader {
     };
   }
 
-  private wrapWhenEntrypoint(nextPageLoader: PageLoader) {
+  private _wrapWhenEntrypoint(nextPageLoader: PageLoader) {
     if (!nextPageLoader.routeLoader?.whenEntrypoint) {
       throw new Error(
         '[nextjs-mf] Cannot wrap `pageLoader.routeLoader.whenEntrypoint()` with custom logic.'
@@ -274,8 +272,7 @@ export class MFPageLoader {
           this.prepareCombinedPageList(this.pageListLocal || [])
         );
         if (federatedRoute) {
-          // TODO: fix router properties
-          // it still shows wrong data
+          // TODO: fix router properties for the first page load of federated page http://localhost:3000/shop/products/B
           console.log('replace entrypoint /_error by', federatedRoute);
           return this.getRouteInfo(federatedRoute);
         }

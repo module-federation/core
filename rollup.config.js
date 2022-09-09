@@ -38,7 +38,7 @@ export default [
     ],
   },
   {
-    input: ['./src/runtime-mf-loader/MFPageLoader.ts'],
+    input: ['./src/runtime-mf-loader/MFLoader.ts'],
     output: {
       dir: 'lib',
       format: 'cjs',
