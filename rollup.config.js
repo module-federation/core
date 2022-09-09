@@ -3,7 +3,6 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import typescript from 'rollup-plugin-typescript2';
 import globals from 'rollup-plugin-node-globals';
 import builtins from 'rollup-plugin-node-builtins';
-import { obfuscator } from 'rollup-obfuscator';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -28,13 +27,11 @@ export default [
     plugins: [
       nodeResolve({ preferBuiltins: true }), // or `true`
       commonjs(),
-      // multi(),
       globals({
         dirname: false,
         filename: false,
       }),
       builtins(),
-      obfuscator(),
     ],
   },
   {
