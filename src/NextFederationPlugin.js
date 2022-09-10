@@ -220,7 +220,9 @@ class ChildFederation {
             },
             runtime: false,
             shared: {
-              ...externalizedShares,
+              ...(this._extraOptions.skipSharingNextInternals
+                ? {}
+                : externalizedShares),
               ...this._options.shared,
             },
           }),
