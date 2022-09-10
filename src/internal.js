@@ -2,6 +2,9 @@ import { parseOptions } from 'webpack/lib/container/options';
 import { isRequiredVersion } from 'webpack/lib/sharing/utils';
 import path from "path";
 
+// the share scope we attach by default
+// in hosts we re-key them to prevent webpack moving the modules into their own chunks (cause eager error)
+// in remote these are marked as import:false as we always expect the host to prove them
 export const DEFAULT_SHARE_SCOPE = {
   react: {
     singleton: true,
@@ -40,7 +43,7 @@ export const DEFAULT_SHARE_SCOPE = {
     singleton: true,
   },
 };
-
+// put host infront of any shared module key, so "hostreact"
 export const reKeyHostShared = (options) => {
   return Object.entries({
     ...(options || {}),
@@ -64,6 +67,7 @@ export const reKeyHostShared = (options) => {
   }, {});
 };
 
+// split the @ syntax into url and global
 export const extractUrlAndGlobal = (urlAndGlobal) => {
   const index = urlAndGlobal.indexOf('@');
   if (index <= 0 || index === urlAndGlobal.length - 1) {
@@ -72,6 +76,7 @@ export const extractUrlAndGlobal = (urlAndGlobal) => {
   return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
 };
 
+// browser template to convert remote into promise new promise and use require.loadChunk to load the chunk
 export const generateRemoteTemplate = (url, global) => {
   return `promise new Promise(function (resolve, reject) {
   console.log('using browser template');
@@ -165,6 +170,8 @@ const parseShareOptions = (options) => {
   }, {});
 };
 
+
+// shared packages must be compiled into webpack bundle, not require() pass through
 export const internalizeSharedPackages = (options, compiler) => {
   //TODO: should use this util for other areas where we read MF options from userland
   if (!options.shared) {
@@ -195,6 +202,7 @@ export const internalizeSharedPackages = (options, compiler) => {
   }
 };
 
+// determine output base path, derives .next folder location
 export const getOutputPath = (compiler) => {
   const isServer = compiler.options.target !== 'client';
   let outputPath = compiler.options.output.path.split(path.sep);

@@ -1,6 +1,4 @@
-// if(process.browser && (typeof __webpack_share_scopes__ === "undefined" || !__webpack_share_scopes__.default)) {
-//   __webpack_init_sharing__('default');
-// }
+// this is needed to ensure webpack does not attempt to tree shake unused modules. Since these should always come from host
 require('react');
 require('react-dom');
 require('next/link');
