@@ -79,7 +79,6 @@ export const extractUrlAndGlobal = (urlAndGlobal) => {
 // browser template to convert remote into promise new promise and use require.loadChunk to load the chunk
 export const generateRemoteTemplate = (url, global) => {
   return `promise new Promise(function (resolve, reject) {
-  console.log('using browser template');
     var __webpack_error__ = new Error();
     if (typeof ${global} !== 'undefined') return resolve();
     __webpack_require__.l(
