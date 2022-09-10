@@ -311,11 +311,11 @@ class ChildFederation {
         }
       }
       // on main compiler add extra assets from server output to browser build
-      compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
-        console.log('additional hooks', compiler.options.name);
-        console.log('in additional assets hook for main build');
-        return childAssets
-      });
+      // compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
+      //   console.log('additional hooks', compiler.options.name);
+      //   console.log('in additional assets hook for main build');
+      //   return childAssets
+      // });
 
 
       childCompilers[compiler.options.name] = childCompiler;
