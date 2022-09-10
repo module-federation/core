@@ -134,6 +134,7 @@ new NextFederationPlugin({
     exposePages: true, // `false` by default
     enableImageLoaderFix: true, // `false` by default
     enableUrlLoaderFix: true, // `false` by default
+    skipSharingNextInternals: true // `false` by default
   },
 });
 ```
@@ -141,6 +142,7 @@ new NextFederationPlugin({
 - `exposePages` – exposes automatically all nextjs pages for you and theirs `./pages-map`.
 - `enableImageLoaderFix` – adds public hostname to all assets bundled by `nextjs-image-loader`. So if you serve remoteEntry from `http://example.com` then all bundled assets will get this hostname in runtime. It's something like Base URL in HTML but for federated modules.
 - `enableUrlLoaderFix` – adds public hostname to all assets bundled by `url-loader`.
+- `skipSharingNextInternals` - skips sharing of common nextjs modules. Helpful when you would like explicit control over shared modules, such as a non-nextjs host with a federated nextjs child application.
 
 ## Demo
 
