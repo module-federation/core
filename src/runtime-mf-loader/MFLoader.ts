@@ -59,7 +59,9 @@ export class MFLoader {
 
       await Promise.all(
         Object.keys(remotes).map((remote) => {
-          return this.loadFederatedPages(remote);
+          return this.loadFederatedPages(remote).catch((e) => {
+            console.error(`[nextjs-mf] ${e.message}`);
+          });
         })
       );
 
@@ -214,7 +216,7 @@ export class MFLoader {
       });
       this.addFederatedPages(pageLoaders);
     } catch (e) {
-      console.warn(`Remote ${remote} does not have ./pages-map-v2`);
+      console.warn(`[nextjs-mf] Remote ${remote} does not have ./pages-map-v2`);
     }
   }
 
