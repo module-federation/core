@@ -1,3 +1,4 @@
+// plugin was copied over because ContainerPlugin is called in compiler.hooks.afterPlugins which doest seem to work in child compiler
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ExternalsType} ExternalsType */
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ModuleFederationPluginOptions} ModuleFederationPluginOptions */
 
