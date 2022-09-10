@@ -43,9 +43,11 @@ class RemoveRRRuntimePlugin {
                 compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
             },
             (assets) => {
+              //can this be improved? I need react refresh not to cause global collision in dev mode
               Object.keys(assets).forEach((filename) => {
                 if (filename.endsWith('.js') || filename.endsWith('.mjs')) {
                   const asset = compilation.getAsset(filename);
+                  // easiest way to solve it is to prevent react refresh helpers from running when its a federated module chunk
                   const newSource = asset.source
                     .source()
                     .replace(/RefreshHelpers/g, 'NoExist');
@@ -158,7 +160,7 @@ class ChildFederation {
           new LoaderTargetPlugin('web'),
           new LibraryPlugin('var'),
           new webpack.DefinePlugin({
-            'process.env.REMOTES': JSON.stringify(this._options.remotes),
+            'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
             'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
           }),
           new AddRuntimeRequirementToPromiseExternal(),
@@ -317,28 +319,35 @@ class ChildFederation {
       //   return childAssets
       // });
 
-
+      // cache the serer compiler instance, we will run the server child compiler during the client main compilation
+      // we need to do this because i need access to data from the client build to inject into the server build
+      // in prod builds, server build runs first, followed by client build
+      // in dev, client build runs first, followed by server build
       childCompilers[compiler.options.name] = childCompiler;
 
-      //wrong hook for this
-      if(!isServer) {
-        compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
-          return new Promise((res,rej)=>{
-            childCompilers["server"].run((err)=>{
-              if(err) rej(err);
-              res();
-            })
-          })
-        });
-      } else return
-      if (compiler.options.mode === 'development') {
+
+      if(isDev) {
+        // in dev, run the compilers in the order they are created (client, server)
         childCompiler.run((err, stats) => {
           if (err) {
             console.error(err);
             throw err
           }
         });
-      } else {
+        // in prod, if client
+      } else if(!isServer) {
+        //wrong hook for this
+        // add hook for additional assets to prevent compile from sealing.
+        compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
+          return new Promise((res,rej)=>{
+            // run server child compilation during client main compilation
+            childCompilers["server"].run((err)=>{
+              if(err) rej(err);
+              res();
+            })
+          })
+        });
+        // run client child compiler like normal
         childCompiler.run((err, stats) => {
           if (err) {
             console.error(err);
@@ -373,11 +382,19 @@ class AddRuntimeRequirementToPromiseExternal {
 }
 
 function createRuntimeVariables(remotes) {
-  return JSON.stringify(Object.entries(remotes).reduce((acc, remote) => {
+  return Object.entries(remotes).reduce((acc, remote) => {
     // handle promise new promise and external new promise
-    acc[remote[0]] = remote[1].replace('promise ', '').replace('external ', '');
+    if(remote[1].startsWith('promise ')||remote[1].startsWith('external ')) {
+      const promiseCall = remote[1].replace('promise ', '').replace('external ', '');
+      acc[remote[0]] = `function() {
+        return ${promiseCall}
+      }`
+      return acc
+    }
+    // if somehow its just the @ syntax or something else, pass it through
+    acc[remote[0]] = remote[1]
     return acc;
-  }, {}))
+  }, {})
 }
 
 class NextFederationPlugin {
