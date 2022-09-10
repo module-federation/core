@@ -259,59 +259,61 @@ class ChildFederation {
       // no custom chunk splitting should be derived from host (next)
       delete childCompiler.options.optimization.splitChunks;
       childCompiler.outputFileSystem = fs;
+
+      // TODO: this can likely be deleted now, if running server child compiler under client is the best way to go
       // help wanted for all asset pipeline stuff below
-      let childAssets
-      if (isServer) {
-        childAssets = new Promise((resolve) => {
-          childCompiler.hooks.afterEmit.tap(
-            CHILD_PLUGIN_NAME,
-            (childCompilation) => {
-              console.log('after emit assets server');
-              resolve(childCompilation.assets);
-            }
-          );
-        });
-      } else {
-        if(isDev) {
-          childAssets = new Promise((resolve) => {
-            childCompiler.hooks.afterEmit.tap(
-              CHILD_PLUGIN_NAME,
-              (childCompilation) => {
-                resolve(childCompilation.assets);
-              }
-            );
-          });
-
-        } else {
-
-            //TODO: improve this
-            // childAssets = new Promise((resolve, reject) => {
-            //   fs.readdir(
-            //     path.join(childCompiler.context, '.next/ssr'),
-            //     function (err, files) {
-            //       if (err) {
-            //         reject('Unable to scan directory: ' + err);
-            //         return;
-            //       }
-            //
-            //       const allFiles = files.map(function (file) {
-            //         return new Promise((res, rej) => {
-            //           fs.readFile(
-            //             path.join(childCompiler.context, '.next/ssr', file),
-            //             (err, data) => {
-            //               if (err) rej(err);
-            //               compilation.assets[path.join('static/ssr', file)] = new compiler.webpack.sources.RawSource(data)
-            //               res();
-            //             }
-            //           );
-            //         });
-            //       });
-            //       Promise.all(allFiles).then(resolve).catch(reject)
-            //     }
-            //   );
-            // });
-        }
-      }
+      // let childAssets
+      // if (isServer) {
+      //   childAssets = new Promise((resolve) => {
+      //     childCompiler.hooks.afterEmit.tap(
+      //       CHILD_PLUGIN_NAME,
+      //       (childCompilation) => {
+      //         console.log('after emit assets server');
+      //         resolve(childCompilation.assets);
+      //       }
+      //     );
+      //   });
+      // } else {
+      //   if(isDev) {
+      //     childAssets = new Promise((resolve) => {
+      //       childCompiler.hooks.afterEmit.tap(
+      //         CHILD_PLUGIN_NAME,
+      //         (childCompilation) => {
+      //           resolve(childCompilation.assets);
+      //         }
+      //       );
+      //     });
+      //
+      //   } else {
+      //
+      //       TODO: improve this
+      //       childAssets = new Promise((resolve, reject) => {
+      //         fs.readdir(
+      //           path.join(childCompiler.context, '.next/ssr'),
+      //           function (err, files) {
+      //             if (err) {
+      //               reject('Unable to scan directory: ' + err);
+      //               return;
+      //             }
+      //
+      //             const allFiles = files.map(function (file) {
+      //               return new Promise((res, rej) => {
+      //                 fs.readFile(
+      //                   path.join(childCompiler.context, '.next/ssr', file),
+      //                   (err, data) => {
+      //                     if (err) rej(err);
+      //                     compilation.assets[path.join('static/ssr', file)] = new compiler.webpack.sources.RawSource(data)
+      //                     res();
+      //                   }
+      //                 );
+      //               });
+      //             });
+      //             Promise.all(allFiles).then(resolve).catch(reject)
+      //           }
+      //         );
+      //       });
+      //   }
+      // }
       // on main compiler add extra assets from server output to browser build
       // compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
       //   console.log('additional hooks', compiler.options.name);
