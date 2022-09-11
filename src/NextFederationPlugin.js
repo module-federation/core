@@ -326,9 +326,15 @@ class ChildFederation {
       } else if (!isServer) {
         //wrong hook for this
         // add hook for additional assets to prevent compile from sealing.
-        compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
+        compiler.hooks.afterEmit.tapPromise(CHILD_PLUGIN_NAME, () => {
           return new Promise((res, rej) => {
+            fs.readFile(path.join(outputPath,'react-loadable-manifest.json'),'utf-8' ,(err, data) => {
+              if (err) rej(err);
+              const manifest = JSON.parse(data);
+              console.log(manifest)
+            })
             // run server child compilation during client main compilation
+            // would be ideal if this could start sooner in build cycle.
             childCompilers['server'].run((err) => {
               if (err) rej(err);
               res();

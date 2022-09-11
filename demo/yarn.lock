@@ -100,7 +100,7 @@
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
 "@module-federation/nextjs-mf@file:./tmp/nextjs-mf":
-  version "5.2.0"
+  version "5.2.1"
   dependencies:
     chalk "^4.0.0"
     fast-glob "^3.2.11"
