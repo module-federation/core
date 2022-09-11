@@ -1,3 +1,5 @@
+import { UrlNode } from './UrlNode';
+
 const TEST_DYNAMIC_ROUTE = /\/\[[^/]+?\](?=\/|$)/;
 export function isDynamicRoute(route: string) {
   return TEST_DYNAMIC_ROUTE.test(route);
@@ -61,4 +63,28 @@ function escapeStringRegexp(str: string) {
     return str.replace(reReplaceRegExp, '\\$&');
   }
   return str;
+}
+
+export function pathnameToRoute(
+  cleanPathname: string,
+  routes: string[]
+): string | undefined {
+  if (routes.includes(cleanPathname)) {
+    return cleanPathname;
+  }
+
+  for (const route of routes) {
+    if (isDynamicRoute(route) && getRouteRegex(route).re.test(cleanPathname)) {
+      return route;
+    }
+  }
+
+  return undefined;
+}
+
+export function sortNextPages(pages: string[]): string[] {
+  const root = new UrlNode();
+  pages.forEach((pageRoute) => root.insert(pageRoute));
+  // Smoosh will then sort those sublevels up to the point where you get the correct route definition priority
+  return root.smoosh();
 }
