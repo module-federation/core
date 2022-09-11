@@ -1,11 +1,10 @@
-('use strict');
 /*
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Zackary Jackson @ScriptedAlchemy
 */
+'use strict';
 
 import fs from 'fs';
-import mv from 'mv';
 import path from 'path';
 import { injectRuleLoader, hasLoader } from './loaders/helpers';
 import { exposeNextjsPages } from './loaders/nextPageMapLoader';
@@ -15,7 +14,7 @@ import {
   extractUrlAndGlobal,
   generateRemoteTemplate,
   internalizeSharedPackages,
-  getOutputPath
+  getOutputPath,
 } from './internal';
 import StreamingTargetPlugin from '../node-plugin/streaming';
 import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
@@ -74,12 +73,11 @@ const computeRemoteFilename = (isServer, filename) => {
   }
   return filename;
 };
-const childCompilers = {}
+const childCompilers = {};
 class ChildFederation {
   constructor(options, extraOptions = {}) {
     this._options = options;
     this._extraOptions = extraOptions;
-
   }
 
   apply(compiler) {
@@ -90,14 +88,14 @@ class ChildFederation {
     const library = compiler.options.output.library;
     const isServer = compiler.options.name === 'server';
     const isDev = compiler.options.mode === 'development';
-    let outputPath
-    if(isDev && isServer) {
+    let outputPath;
+    if (isDev && isServer) {
       outputPath = path.join(getOutputPath(compiler), 'static/ssr');
     } else {
       if (isServer) {
         outputPath = path.join(getOutputPath(compiler), 'static/ssr');
       } else {
-        outputPath = compiler.options.output.path
+        outputPath = compiler.options.output.path;
       }
     }
 
@@ -148,8 +146,8 @@ class ChildFederation {
         runtime: false,
         shared: {
           ...(this._extraOptions.skipSharingNextInternals
-                ? {}
-                : externalizedShares),
+            ? {}
+            : externalizedShares),
           ...this._options.shared,
         },
       };
@@ -162,7 +160,9 @@ class ChildFederation {
           new LoaderTargetPlugin('web'),
           new LibraryPlugin('var'),
           new webpack.DefinePlugin({
-            'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
+            'process.env.REMOTES': createRuntimeVariables(
+              this._options.remotes
+            ),
             'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
           }),
           new AddRuntimeRequirementToPromiseExternal(),
@@ -329,33 +329,32 @@ class ChildFederation {
       // in dev, client build runs first, followed by server build
       childCompilers[compiler.options.name] = childCompiler;
 
-
-      if(isDev) {
+      if (isDev) {
         // in dev, run the compilers in the order they are created (client, server)
         childCompiler.run((err, stats) => {
           if (err) {
             console.error(err);
-            throw err
+            throw err;
           }
         });
         // in prod, if client
-      } else if(!isServer) {
+      } else if (!isServer) {
         //wrong hook for this
         // add hook for additional assets to prevent compile from sealing.
         compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
-          return new Promise((res,rej)=>{
+          return new Promise((res, rej) => {
             // run server child compilation during client main compilation
-            childCompilers["server"].run((err)=>{
-              if(err) rej(err);
+            childCompilers['server'].run((err) => {
+              if (err) rej(err);
               res();
-            })
-          })
+            });
+          });
         });
         // run client child compiler like normal
         childCompiler.run((err, stats) => {
           if (err) {
             console.error(err);
-            throw err
+            throw err;
           }
         });
       }
@@ -388,17 +387,19 @@ class AddRuntimeRequirementToPromiseExternal {
 function createRuntimeVariables(remotes) {
   return Object.entries(remotes).reduce((acc, remote) => {
     // handle promise new promise and external new promise
-    if(remote[1].startsWith('promise ')||remote[1].startsWith('external ')) {
-      const promiseCall = remote[1].replace('promise ', '').replace('external ', '');
+    if (remote[1].startsWith('promise ') || remote[1].startsWith('external ')) {
+      const promiseCall = remote[1]
+        .replace('promise ', '')
+        .replace('external ', '');
       acc[remote[0]] = `function() {
         return ${promiseCall}
-      }`
-      return acc
+      }`;
+      return acc;
     }
     // if somehow its just the @ syntax or something else, pass it through
-    acc[remote[0]] = remote[1]
+    acc[remote[0]] = remote[1];
     return acc;
-  }, {})
+  }, {});
 }
 
 class NextFederationPlugin {
