@@ -15,7 +15,8 @@ import {
   generateRemoteTemplate,
   internalizeSharedPackages,
   getOutputPath,
-  externalizedShares
+  externalizedShares,
+  removePlugins
 } from './internal';
 import StreamingTargetPlugin from '../node-plugin/streaming';
 import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
@@ -147,7 +148,7 @@ class ChildFederation {
           new FederationPlugin(federationPluginOptions),
           new webpack.web.JsonpTemplatePlugin(childOutput),
           new LoaderTargetPlugin('web'),
-          new LibraryPlugin('var'),
+          new LibraryPlugin(this._options.library.type),
           new webpack.DefinePlugin({
             'process.env.REMOTES': createRuntimeVariables(
               this._options.remotes
@@ -186,9 +187,6 @@ class ChildFederation {
       );
 
       childCompiler.outputPath = outputPath;
-
-      new RemoveRRRuntimePlugin().apply(childCompiler);
-
       childCompiler.options.module.rules.forEach((rule) => {
         // next-image-loader fix which adds remote's hostname to the assets url
         if (
@@ -210,24 +208,27 @@ class ChildFederation {
           });
         }
       });
+      childCompiler.options.experiments.lazyCompilation = false;
+      childCompiler.options.optimization.runtimeChunk = false;
+      // no custom chunk splitting should be derived from host (next)
+      delete childCompiler.options.optimization.splitChunks;
+      childCompiler.outputFileSystem = fs;
+
+      if (compiler.options.optimization.minimize) {
+        for (const minimizer of compiler.options.optimization.minimizer) {
+          if (typeof minimizer === "function") {
+            minimizer.call(childCompiler, childCompiler)
+          } else if (minimizer !== "...") {
+            minimizer.apply(childCompiler);
+          }
+        }
+      }
+
+      new RemoveRRRuntimePlugin().apply(childCompiler);
 
       const MiniCss = childCompiler.options.plugins.find((p) => {
         return p.constructor.name === 'NextMiniCssExtractPlugin';
       });
-
-      const removePlugins = [
-        'NextJsRequireCacheHotReloader',
-        'BuildManifestPlugin',
-        'WellKnownErrorsPlugin',
-        'WebpackBuildEventsPlugin',
-        'HotModuleReplacementPlugin',
-        'NextMiniCssExtractPlugin',
-        'NextFederationPlugin',
-        'CopyFilePlugin',
-        'ProfilingPlugin',
-        'DropClientPage',
-        'ReactFreshWebpackPlugin',
-      ];
 
       childCompiler.options.plugins = childCompiler.options.plugins.filter(
         (plugin) => !removePlugins.includes(plugin.constructor.name)
@@ -245,11 +246,6 @@ class ChildFederation {
         }).apply(childCompiler);
       }
 
-      childCompiler.options.experiments.lazyCompilation = false;
-      childCompiler.options.optimization.runtimeChunk = false;
-      // no custom chunk splitting should be derived from host (next)
-      delete childCompiler.options.optimization.splitChunks;
-      childCompiler.outputFileSystem = fs;
 
       // TODO: this can likely be deleted now, if running server child compiler under client is the best way to go
       // help wanted for all asset pipeline stuff below
@@ -417,6 +413,11 @@ class NextFederationPlugin {
       // should this be a plugin that we apply to the compiler?
       internalizeSharedPackages(this._options, compiler);
     } else {
+      this._options.library = {
+        // assign remote name to object to avoid SWC mangling top level variable
+        type: 'window',
+        name: this._options.name,
+      };
       if (this._options.remotes) {
         const parsedRemotes = Object.entries(this._options.remotes).reduce(
           (acc, remote) => {

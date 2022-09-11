@@ -22,7 +22,7 @@
     "@rollup/plugin-commonjs": "^22.0.2",
     "@rollup/plugin-multi-entry": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
-    "next": "12.2.2",
+    "next": "12.3.0",
     "prettier": "2.3.2",
     "rollup": "^2.78.1",
     "rollup-obfuscator": "^3.0.1",
