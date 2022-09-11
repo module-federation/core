@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/nextjs-mf",
-  "version": "5.1.2",
+  "version": "5.2.0",
   "description": "Module Federation helper for NextJS",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -14,19 +14,15 @@
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\"",
     "build": "rm -rf lib && cp -r ./src/ lib/ && rollup -c"
   },
-  "publishConfig": {
-    "registry": "https://r.privjs.com"
-  },
   "dependencies": {
     "chalk": "^4.0.0",
-    "fast-glob": "^3.2.11",
-    "mv": "^2.1.1"
+    "fast-glob": "^3.2.11"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.2",
     "@rollup/plugin-multi-entry": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
-    "next": "11.0.1",
+    "next": "12.2.2",
     "prettier": "2.3.2",
     "rollup": "^2.78.1",
     "rollup-obfuscator": "^3.0.1",
