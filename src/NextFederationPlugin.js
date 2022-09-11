@@ -228,7 +228,7 @@ class ChildFederation {
           }),
           new webpack.web.JsonpTemplatePlugin(childOutput),
           new LoaderTargetPlugin('web'),
-          new LibraryPlugin('var'),
+          new LibraryPlugin(this._options.library.type),
           new webpack.DefinePlugin({
             'process.env.REMOTES': JSON.stringify(this._options.remotes),
             'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
@@ -430,6 +430,14 @@ class NextFederationPlugin {
       );
       this._options.remotes = parsedRemotes;
     }
+    if(this._options.library) {
+      console.error('[mf] you cannot set custom library')
+    }
+    this._options.library = {
+      // assign remote name to object to avoid SWC mangling top level variable
+      type: 'window',
+      name: this._options.name,
+    };
   }
 
   apply(compiler) {
