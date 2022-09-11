@@ -1,14 +1,14 @@
-const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
+('use strict');
+
 /*
 	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
+	Author Zackary Jackson @ScriptedAlchemy
 */
-
-('use strict');
 
 import path from 'path';
 import { injectRuleLoader, hasLoader } from './loaders/helpers';
 import { exposeNextjsPages } from './loaders/nextPageMapLoader';
+const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
 
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ExternalsType} ExternalsType */
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ModuleFederationPluginOptions} ModuleFederationPluginOptions */
