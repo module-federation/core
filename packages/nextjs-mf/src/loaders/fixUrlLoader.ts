@@ -9,7 +9,7 @@
  *
  * @type {(this: import("webpack").LoaderContext<{}>, content: string) => string>}
  */
-function fixUrlLoader(content) {
+export function fixUrlLoader(content: string) {
   // replace(/(.+\:\/\/[^\/]+){0,1}\/.*/i, '$1')
   //    this regexp will extract the hostname from publicPath
   //    http://localhost:3000/_next/... -> http://localhost:3000
@@ -22,4 +22,4 @@ function fixUrlLoader(content) {
   );
 }
 
-module.exports = fixUrlLoader;
+export default fixUrlLoader;

@@ -12,7 +12,7 @@
  *
  * @type {(this: import("webpack").LoaderContext<{}>, content: string) => string>}
  */
-function fixImageLoader(content) {
+export function fixImageLoader(content: string) {
   // replace(/(.+\:\/\/[^\/]+){0,1}\/.*/i, '$1')
   //    this regexp will extract the hostname from publicPath
   //    http://localhost:3000/_next/... -> http://localhost:3000
@@ -22,4 +22,4 @@ function fixImageLoader(content) {
   return content.replace('"src":', `"src":${currentHostnameCode}+`);
 }
 
-module.exports = fixImageLoader;
+export default fixImageLoader;
