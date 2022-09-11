@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import {Suspense, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { Layout, version } from 'antd';
@@ -10,12 +10,13 @@ const SharedNav = dynamic(
     const mod = import('home/SharedNav');
     return mod;
   },
-  { ssr: true }
+  // must use suspense until chunk flushing is implemented for SSR. Otherwise, we get hydration errors
+  // since we are missing chunks in initial render, webpack needs to go fetch them at runtime
+  // this causes hydration error or flicker as next expects chunks to be loaded and ready before render
+  { suspense: true }
 );
 
 function MyApp({ Component, pageProps }) {
-  console.log('sync require of shared nav', require('home/SharedNav'));
-
   const [MenuComponent, setMenuComponent] = useState(() => AppMenu);
   useEffect(() => {
     const cb = ({ detail }) => {
@@ -37,7 +38,9 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <SharedNav />
+      <Suspense fallback={'Loading Nav'}>
+        <SharedNav />
+      </Suspense>
       <Layout>
         <Layout.Sider width={200}>
           <MenuComponent />

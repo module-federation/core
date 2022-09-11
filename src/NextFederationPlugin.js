@@ -43,9 +43,11 @@ class RemoveRRRuntimePlugin {
                 compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
             },
             (assets) => {
+              //can this be improved? I need react refresh not to cause global collision in dev mode
               Object.keys(assets).forEach((filename) => {
                 if (filename.endsWith('.js') || filename.endsWith('.mjs')) {
                   const asset = compilation.getAsset(filename);
+                  // easiest way to solve it is to prevent react refresh helpers from running when its a federated module chunk
                   const newSource = asset.source
                     .source()
                     .replace(/RefreshHelpers/g, 'NoExist');
@@ -66,82 +68,18 @@ class RemoveRRRuntimePlugin {
   }
 }
 
-
-
-//TODO: this should use webpack asset stage hooks instead to read & add additional assets to a compilation
-const moveFilesToClientDirectory = (isServer, compilation, callback) => {
-  let outputPath = getOutputPath(compilation)
-  const staticDirExists = fs.existsSync(path.join(outputPath, 'static'));
-  const ssrPathTemp = path.join(outputPath, 'ssr');
-  const ssrOutputPath = path.join(outputPath, 'static/ssr');
-
-  if (isServer) {
-    Object.keys(compilation.assets).forEach((asset) => {
-      // older versions of next.js have a different output order
-      const absolutePath = path.join(compilation.options.output.path, asset);
-
-      if (!staticDirExists) {
-        mv(
-          absolutePath,
-          path.join(ssrPathTemp, asset),
-          { mkdirp: true },
-          (err) => {
-            if (err) {
-              throw err;
-            }
-            if (callback) {
-              callback();
-            }
-          }
-        );
-      } else {
-        mv(
-          absolutePath,
-          path.join(ssrOutputPath, asset),
-          { mkdirp: true },
-          (err) => {
-            if (err) {
-              throw err;
-            }
-            if (callback) {
-              callback();
-            }
-          }
-        );
-      }
-    });
-  } else {
-    // would be better to add assets to complation via process assets stage api instead of manually writing to disk
-    console.log('assets exist', fs.existsSync(ssrPathTemp), ssrPathTemp);
-    if (fs.existsSync(ssrPathTemp)) {
-      mv(
-        path.join(ssrPathTemp),
-        path.join(ssrOutputPath),
-        { mkdirp: true },
-        function (err) {
-          if (err) {
-            throw err;
-          }
-          console.log('moved files to client')
-          if (callback) {
-            callback();
-          }
-        }
-      );
-    }
-  }
-};
 const computeRemoteFilename = (isServer, filename) => {
   if (isServer && filename) {
     return path.basename(filename);
   }
   return filename;
 };
-
+const childCompilers = {}
 class ChildFederation {
   constructor(options, extraOptions = {}) {
     this._options = options;
     this._extraOptions = extraOptions;
+
   }
 
   apply(compiler) {
@@ -157,7 +95,7 @@ class ChildFederation {
       outputPath = path.join(getOutputPath(compiler), 'static/ssr');
     } else {
       if (isServer) {
-        outputPath = path.join(getOutputPath(compiler), 'ssr');
+        outputPath = path.join(getOutputPath(compiler), 'static/ssr');
       } else {
         outputPath = compiler.options.output.path
       }
@@ -224,7 +162,7 @@ class ChildFederation {
           new LoaderTargetPlugin('web'),
           new LibraryPlugin('var'),
           new webpack.DefinePlugin({
-            'process.env.REMOTES': JSON.stringify(this._options.remotes),
+            'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
             'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
           }),
           new AddRuntimeRequirementToPromiseExternal(),
@@ -307,6 +245,7 @@ class ChildFederation {
       );
 
       if (MiniCss) {
+        // grab mini-css and reconfigure it to avoid conflicts with host
         new MiniCss.constructor({
           ...MiniCss.options,
           filename: MiniCss.options.filename.replace('.css', '-fed.css'),
@@ -319,81 +258,101 @@ class ChildFederation {
 
       childCompiler.options.experiments.lazyCompilation = false;
       childCompiler.options.optimization.runtimeChunk = false;
+      // no custom chunk splitting should be derived from host (next)
       delete childCompiler.options.optimization.splitChunks;
       childCompiler.outputFileSystem = fs;
+
+      // TODO: this can likely be deleted now, if running server child compiler under client is the best way to go
       // help wanted for all asset pipeline stuff below
-      let childAssets
-      if (isServer) {
-        childAssets = new Promise((resolve) => {
-          childCompiler.hooks.afterEmit.tap(
-            CHILD_PLUGIN_NAME,
-            (childCompilation) => {
-              console.log('after emit assets server');
-              resolve(childCompilation.assets);
-            }
-          );
-        });
-      } else {
-        if(isDev) {
-          childAssets = new Promise((resolve) => {
-            childCompiler.hooks.afterEmit.tap(
-              CHILD_PLUGIN_NAME,
-              (childCompilation) => {
-                resolve(childCompilation.assets);
-              }
-            );
-          });
-
-        } else {
-
-            //TODO: improve this
-            childAssets = new Promise((resolve, reject) => {
-              fs.readdir(
-                path.join(childCompiler.context, '.next/ssr'),
-                function (err, files) {
-                  if (err) {
-                    reject('Unable to scan directory: ' + err);
-                    return;
-                  }
-
-                  const allFiles = files.map(function (file) {
-                    return new Promise((res, rej) => {
-                      fs.readFile(
-                        path.join(childCompiler.context, '.next/ssr', file),
-                        (err, data) => {
-                          if (err) rej(err);
-                          compilation.assets[path.join('static/ssr', file)] = new compiler.webpack.sources.RawSource(data)
-                          res();
-                        }
-                      );
-                    });
-                  });
-                  Promise.all(allFiles).then(resolve).catch(reject)
-                }
-              );
-            });
-        }
-      }
+      // let childAssets
+      // if (isServer) {
+      //   childAssets = new Promise((resolve) => {
+      //     childCompiler.hooks.afterEmit.tap(
+      //       CHILD_PLUGIN_NAME,
+      //       (childCompilation) => {
+      //         console.log('after emit assets server');
+      //         resolve(childCompilation.assets);
+      //       }
+      //     );
+      //   });
+      // } else {
+      //   if(isDev) {
+      //     childAssets = new Promise((resolve) => {
+      //       childCompiler.hooks.afterEmit.tap(
+      //         CHILD_PLUGIN_NAME,
+      //         (childCompilation) => {
+      //           resolve(childCompilation.assets);
+      //         }
+      //       );
+      //     });
+      //
+      //   } else {
+      //
+      //       TODO: improve this
+      //       childAssets = new Promise((resolve, reject) => {
+      //         fs.readdir(
+      //           path.join(childCompiler.context, '.next/ssr'),
+      //           function (err, files) {
+      //             if (err) {
+      //               reject('Unable to scan directory: ' + err);
+      //               return;
+      //             }
+      //
+      //             const allFiles = files.map(function (file) {
+      //               return new Promise((res, rej) => {
+      //                 fs.readFile(
+      //                   path.join(childCompiler.context, '.next/ssr', file),
+      //                   (err, data) => {
+      //                     if (err) rej(err);
+      //                     compilation.assets[path.join('static/ssr', file)] = new compiler.webpack.sources.RawSource(data)
+      //                     res();
+      //                   }
+      //                 );
+      //               });
+      //             });
+      //             Promise.all(allFiles).then(resolve).catch(reject)
+      //           }
+      //         );
+      //       });
+      //   }
+      // }
       // on main compiler add extra assets from server output to browser build
-      compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
-        console.log(compiler.options.name);
-        console.log('in additional assets hook for main build', childAssets);
+      // compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
+      //   console.log('additional hooks', compiler.options.name);
+      //   console.log('in additional assets hook for main build');
+      //   return childAssets
+      // });
 
-        return childAssets
-      });
+      // cache the serer compiler instance, we will run the server child compiler during the client main compilation
+      // we need to do this because i need access to data from the client build to inject into the server build
+      // in prod builds, server build runs first, followed by client build
+      // in dev, client build runs first, followed by server build
+      childCompilers[compiler.options.name] = childCompiler;
 
-      if (compiler.options.mode === 'development') {
+
+      if(isDev) {
+        // in dev, run the compilers in the order they are created (client, server)
         childCompiler.run((err, stats) => {
-          // moveFilesToClientDirectory(isServer, stats);
           if (err) {
             console.error(err);
             throw err
           }
         });
-      } else {
+        // in prod, if client
+      } else if(!isServer) {
+        //wrong hook for this
+        // add hook for additional assets to prevent compile from sealing.
+        compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
+          return new Promise((res,rej)=>{
+            // run server child compilation during client main compilation
+            childCompilers["server"].run((err)=>{
+              if(err) rej(err);
+              res();
+            })
+          })
+        });
+        // run client child compiler like normal
         childCompiler.run((err, stats) => {
-          // moveFilesToClientDirectory(isServer, stats);
-
           if (err) {
             console.error(err);
             throw err
@@ -427,11 +386,19 @@ class AddRuntimeRequirementToPromiseExternal {
 }
 
 function createRuntimeVariables(remotes) {
-  return JSON.stringify(Object.entries(remotes).reduce((acc, remote) => {
+  return Object.entries(remotes).reduce((acc, remote) => {
     // handle promise new promise and external new promise
-    acc[remote[0]] = remote[1].replace('promise ', '').replace('external ', '');
+    if(remote[1].startsWith('promise ')||remote[1].startsWith('external ')) {
+      const promiseCall = remote[1].replace('promise ', '').replace('external ', '');
+      acc[remote[0]] = `function() {
+        return ${promiseCall}
+      }`
+      return acc
+    }
+    // if somehow its just the @ syntax or something else, pass it through
+    acc[remote[0]] = remote[1]
     return acc;
-  }, {}))
+  }, {})
 }
 
 class NextFederationPlugin {

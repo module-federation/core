@@ -3,11 +3,17 @@ const remoteVars = process.env.REMOTES || {};
 const runtimeRemotes = Object.entries(remoteVars).reduce(function (acc, item) {
   const [key, value] = item;
   if (typeof value === 'object' && typeof value.then === 'function') {
+    // if its an object with a thennable (eagerly executing function)
     acc[key] = { asyncContainer: value };
+  } else if (typeof value === 'function') {
+    // if its a function that must be called (lazily executing function)
+    acc[key] = { asyncContainer: value() };
   } else if (typeof value === 'string') {
+    // if its just a string (global@url)
     const [global, url] = value.split('@');
     acc[key] = { global, url };
   } else {
+    // we dont know or currently support this type
     console.log('remotes process', process.env.REMOTES);
     throw new Error(`[mf] Invalid value received for runtime_remote "${key}"`);
   }
