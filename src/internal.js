@@ -225,3 +225,17 @@ export const getOutputPath = (compiler) => {
 
   return outputPath;
 };
+
+export const removePlugins = [
+  'NextJsRequireCacheHotReloader',
+  'BuildManifestPlugin',
+  'WellKnownErrorsPlugin',
+  'WebpackBuildEventsPlugin',
+  'HotModuleReplacementPlugin',
+  'NextMiniCssExtractPlugin',
+  'NextFederationPlugin',
+  'CopyFilePlugin',
+  'ProfilingPlugin',
+  'DropClientPage',
+  'ReactFreshWebpackPlugin',
+];

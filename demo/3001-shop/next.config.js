@@ -1,6 +1,7 @@
 const NextFederationPlugin = require('@module-federation/nextjs-mf/lib/NextFederationPlugin');
 
 module.exports = {
+  swcMinify: true,
   webpack(config, options) {
     const { isServer } = options;
     config.plugins.push(
