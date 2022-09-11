@@ -6,6 +6,7 @@
   "private": true,
   "dependencies": {
     "@swc/helpers": "~0.3.3",
+    "fast-glob": "^3.2.12",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
@@ -20,7 +21,6 @@
     "@swc/jest": "0.2.20",
     "@types/jest": "28.1.1",
     "@types/node": "^18.7.16",
-    "@types/webpack": "^5.28.0",
     "@typescript-eslint/eslint-plugin": "~5.33.1",
     "@typescript-eslint/parser": "~5.33.1",
     "eslint": "~8.15.0",
