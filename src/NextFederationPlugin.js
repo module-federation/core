@@ -15,6 +15,7 @@ import {
   generateRemoteTemplate,
   internalizeSharedPackages,
   getOutputPath,
+  externalizedShares
 } from './internal';
 import StreamingTargetPlugin from '../node-plugin/streaming';
 import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
@@ -118,18 +119,6 @@ class ChildFederation {
         ),
         filename: compiler.options.output.filename.replace('.js', '-fed.js'),
       };
-
-      const externalizedShares = Object.entries(DEFAULT_SHARE_SCOPE).reduce(
-        (acc, item) => {
-          const [key, value] = item;
-          acc[key] = { ...value, import: false };
-          if (key === 'react/jsx-runtime') {
-            delete acc[key].import;
-          }
-          return acc;
-        },
-        {}
-      );
 
       const FederationPlugin = ChildFriendlyModuleFederationPlugin;
 

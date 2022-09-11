@@ -1,6 +1,6 @@
 import { parseOptions } from 'webpack/lib/container/options';
 import { isRequiredVersion } from 'webpack/lib/sharing/utils';
-import path from "path";
+import path from 'path';
 
 // the share scope we attach by default
 // in hosts we re-key them to prevent webpack moving the modules into their own chunks (cause eager error)
@@ -169,7 +169,6 @@ const parseShareOptions = (options) => {
   }, {});
 };
 
-
 // shared packages must be compiled into webpack bundle, not require() pass through
 export const internalizeSharedPackages = (options, compiler) => {
   //TODO: should use this util for other areas where we read MF options from userland
@@ -201,19 +200,28 @@ export const internalizeSharedPackages = (options, compiler) => {
   }
 };
 
+export const externalizedShares = Object.entries(DEFAULT_SHARE_SCOPE).reduce(
+  (acc, item) => {
+    const [key, value] = item;
+    acc[key] = { ...value, import: false };
+    if (key === 'react/jsx-runtime') {
+      delete acc[key].import;
+    }
+    return acc;
+  },
+  {}
+);
+
 // determine output base path, derives .next folder location
 export const getOutputPath = (compiler) => {
   const isServer = compiler.options.target !== 'client';
   let outputPath = compiler.options.output.path.split(path.sep);
   const foundIndex = outputPath.findIndex((i) => {
     return i === (isServer ? 'server' : 'static');
-  })
+  });
   outputPath = outputPath
-    .slice(
-      0,
-      foundIndex > 0 ? foundIndex : outputPath.length
-    )
+    .slice(0, foundIndex > 0 ? foundIndex : outputPath.length)
     .join(path.sep);
 
-  return outputPath
-}
+  return outputPath;
+};
