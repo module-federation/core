@@ -141,7 +141,7 @@ class ChildFederation {
           ...this._options.shared,
         },
       };
-
+console.log(federationPluginOptions);
       let plugins;
       if (compiler.options.name === 'client') {
         plugins = [
