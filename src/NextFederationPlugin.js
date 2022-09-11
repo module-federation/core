@@ -382,7 +382,7 @@ function createRuntimeVariables(remotes) {
       return acc;
     }
     // if somehow its just the @ syntax or something else, pass it through
-    acc[remote[0]] = remote[1];
+    acc[remote[0]] = JSON.stringify(remote[1]);
     return acc;
   }, {});
 }
@@ -432,6 +432,12 @@ class NextFederationPlugin {
           {}
         );
         this._options.remotes = parsedRemotes;
+        //todo runtime variable creation needs to be applied for server as well. this is just for client
+        // todo: this needs to be refactored into something more comprehensive. this is just a quick fix
+        new webpack.DefinePlugin({
+          'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
+          'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
+        }).apply(compiler);
       }
     }
 
@@ -456,23 +462,10 @@ class NextFederationPlugin {
         },
       };
 
-      // compiler.options.output.chunkFilename = compiler.options.output.chunkFilename.replace(
-      //     '.js',
-      //     '-[chunkhash].js'
-      //   )
-      //   compiler.options.output.filename = compiler.options.output.filename.replace(
-      //   '.js',
-      //   '-[contenthash].js'
-      // ),
       compiler.options.optimization.chunkIds = 'named';
 
       new ModuleFederationPlugin(hostFederationPluginOptions, {
         ModuleFederationPlugin,
-      }).apply(compiler);
-      //todo runtime variable creation needs to be applied for server and client builds
-      new webpack.DefinePlugin({
-        'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
-        'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
       }).apply(compiler);
       new ChildFederation(this._options, this._extraOptions).apply(compiler);
       new AddRuntimeRequirementToPromiseExternal().apply(compiler);
