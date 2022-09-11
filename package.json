@@ -16,8 +16,7 @@
   },
   "dependencies": {
     "chalk": "^4.0.0",
-    "fast-glob": "^3.2.11",
-    "mv": "^2.1.1"
+    "fast-glob": "^3.2.11"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.2",
