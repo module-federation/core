@@ -2,7 +2,9 @@
   "name": "module-federation",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "build": "nx build"
+  },
   "private": true,
   "dependencies": {
     "@swc/helpers": "~0.3.3",
