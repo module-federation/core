@@ -1,4 +1,4 @@
-import { WebpackOptionsNormalized } from 'webpack';
+import type { WebpackOptionsNormalized } from 'webpack';
 
 type Module = WebpackOptionsNormalized['module'];
 type Rules = Module['rules'];
