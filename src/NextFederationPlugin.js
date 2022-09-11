@@ -1,9 +1,9 @@
+('use strict');
 /*
 	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
+	Author Zackary Jackson @ScriptedAlchemy
 */
 
-('use strict');
 import fs from 'fs';
 import mv from 'mv';
 import path from 'path';
@@ -209,7 +209,9 @@ class ChildFederation {
         },
         runtime: false,
         shared: {
-          ...externalizedShares,
+          ...(this._extraOptions.skipSharingNextInternals
+                ? {}
+                : externalizedShares),
           ...this._options.shared,
         },
       };

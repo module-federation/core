@@ -5,7 +5,7 @@ This plugin enables Module Federation on Next.js
 ### Supports
 
 - next ^11.x.x || ^12.x.x
-- Client side only, SSR is another package currently in beta
+- Client side only, SSR has a PR open. Help needed
 
 I highly recommend referencing this application which takes advantage of the best capabilities:
 https://github.com/module-federation/module-federation-examples
@@ -15,6 +15,8 @@ https://github.com/module-federation/module-federation-examples
 SSR support for federated applications is much harder, as such - it utilizes a different licensing model.
 If you need SSR support, consider this package instead - it does everything that nextjs-mf does, and them some.
 https://app.privjs.com/buy/packageDetail?pkg=@module-federation/nextjs-ssr
+
+There is a pull request moving SSR into this repo and package - but it is not ready yet.
 
 ## Whats shared by default?
 
@@ -132,6 +134,7 @@ new NextFederationPlugin({
     exposePages: true, // `false` by default
     enableImageLoaderFix: true, // `false` by default
     enableUrlLoaderFix: true, // `false` by default
+    skipSharingNextInternals: true // `false` by default
   },
 });
 ```
@@ -139,6 +142,7 @@ new NextFederationPlugin({
 - `exposePages` – exposes automatically all nextjs pages for you and theirs `./pages-map`.
 - `enableImageLoaderFix` – adds public hostname to all assets bundled by `nextjs-image-loader`. So if you serve remoteEntry from `http://example.com` then all bundled assets will get this hostname in runtime. It's something like Base URL in HTML but for federated modules.
 - `enableUrlLoaderFix` – adds public hostname to all assets bundled by `url-loader`.
+- `skipSharingNextInternals` - skips sharing of common nextjs modules. Helpful when you would like explicit control over shared modules, such as a non-nextjs host with a federated nextjs child application.
 
 ## Demo
 
