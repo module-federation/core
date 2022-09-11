@@ -1,4 +1,0 @@
-{
-  "extends": ["config:base"],
-  "ignorePaths": ["**/demo/**"]
-}

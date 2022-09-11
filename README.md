@@ -1,262 +1,94 @@
-# Module Federation For Next.js
 
-This plugin enables Module Federation on Next.js
 
-### Supports
+# ModuleFederation
 
-- next ^11.x.x || ^12.x.x
-- Client side only, SSR has a PR open. Help needed
+This project was generated using [Nx](https://nx.dev).
 
-I highly recommend referencing this application which takes advantage of the best capabilities:
-https://github.com/module-federation/module-federation-examples
+<p style="text-align: center;"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="450"></p>
 
-## Looking for SSR support?
+🔎 **Smart, Fast and Extensible Build System**
 
-SSR support for federated applications is much harder, as such - it utilizes a different licensing model.
-If you need SSR support, consider this package instead - it does everything that nextjs-mf does, and them some.
-https://app.privjs.com/buy/packageDetail?pkg=@module-federation/nextjs-ssr
+## Adding capabilities to your workspace
 
-There is a pull request moving SSR into this repo and package - but it is not ready yet.
+Nx supports many plugins which add capabilities for developing different types of applications and different tools.
 
-## Whats shared by default?
+These capabilities include generating applications, libraries, etc as well as the devtools to test, and build projects as well.
 
-Under the hood we share some next internals automatically
-You do not need to share these packages, sharing next internals yourself will cause errors.
+Below are our core plugins:
 
-```js
-const DEFAULT_SHARE_SCOPE = {
-  react: {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'react/': {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'react-dom': {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'next/dynamic': {
-    requiredVersion: false,
-    singleton: true,
-  },
-  'styled-jsx': {
-    requiredVersion: false,
-    singleton: true,
-  },
-  'next/link': {
-    requiredVersion: false,
-    singleton: true,
-  },
-  'next/router': {
-    requiredVersion: false,
-    singleton: true,
-  },
-  'next/script': {
-    requiredVersion: false,
-    singleton: true,
-  },
-  'next/head': {
-    requiredVersion: false,
-    singleton: true,
-  },
-};
-```
+- [React](https://reactjs.org)
+  - `npm install --save-dev @nrwl/react`
+- Web (no framework frontends)
+  - `npm install --save-dev @nrwl/web`
+- [Angular](https://angular.io)
+  - `npm install --save-dev @nrwl/angular`
+- [Nest](https://nestjs.com)
+  - `npm install --save-dev @nrwl/nest`
+- [Express](https://expressjs.com)
+  - `npm install --save-dev @nrwl/express`
+- [Node](https://nodejs.org)
+  - `npm install --save-dev @nrwl/node`
 
-## Usage
+There are also many [community plugins](https://nx.dev/community) you could add.
 
-```js
-const SampleComponent = dynamic(() => import('next2/sampleComponent'), {
-  ssr: false,
-});
-```
+## Generate an application
 
-If you want support for sync imports. It is possible in next@12 as long as there is an async boundary.
+Run `nx g @nrwl/react:app my-app` to generate an application.
 
-#### See the implementation here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs/home/pages
+> You can use any of the plugins above to generate applications as well.
 
-With async boundary installed at the page level. You can then do the following
+When using Nx, you can create multiple applications and libraries in the same workspace.
 
-```js
-if (process.browser) {
-  const SomeHook = require('next2/someHook');
-}
-// if client only file
-import SomeComponent from 'next2/someComponent';
-```
+## Generate a library
 
-Make sure you are using `mini-css-extract-plugin@2` - version 2 supports resolving assets through `publicPath:'auto'`
+Run `nx g @nrwl/react:lib my-lib` to generate a library.
 
-## Demo
+> You can also use any of the plugins above to generate libraries as well.
 
-You can see it in action here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs
+Libraries are shareable across libraries and applications. They can be imported from `@module-federation/mylib`.
 
-## Usage
+## Development server
 
-```js
-const SampleComponent = dynamic(() => import('next2/sampleComponent'), {
-  ssr: false,
-});
-```
+Run `nx serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
 
-If you want support for sync imports. It is possible in next@12 as long as there is an async boundary.
+## Code scaffolding
 
-#### See the implementation here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs/home/pages
+Run `nx g @nrwl/react:component my-component --project=my-app` to generate a new component.
 
-With async boundary installed at the page level. You can then do the following
+## Build
 
-```js
-if (process.browser) {
-  const SomeHook = require('next2/someHook');
-}
-// if client only file
-import SomeComponent from 'next2/someComponent';
-```
+Run `nx build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
-Make sure you are using `mini-css-extract-plugin@2` - version 2 supports resolving assets through `publicPath:'auto'`
+## Running unit tests
 
-## Options
+Run `nx test my-app` to execute the unit tests via [Jest](https://jestjs.io).
 
-This plugin works exactly like ModuleFederationPlugin, use it as you'd normally.
-Note that we already share react and next stuff for you automatically.
+Run `nx affected:test` to execute the unit tests affected by a change.
 
-Also NextFederationPlugin has own optional argument `extraOptions` where you can unlock additional features of this plugin:
+## Running end-to-end tests
 
-```js
-new NextFederationPlugin({
-  name: ...,
-  filename: ...,
-  remotes: ...,
-  exposes: ...,
-  shared: ...,
-  extraOptions: {
-    exposePages: true, // `false` by default
-    enableImageLoaderFix: true, // `false` by default
-    enableUrlLoaderFix: true, // `false` by default
-  },
-});
-```
+Run `nx e2e my-app` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
 
-- `exposePages` – exposes automatically all nextjs pages for you and theirs `./pages-map`.
-- `enableImageLoaderFix` – adds public hostname to all assets bundled by `nextjs-image-loader`. So if you serve remoteEntry from `http://example.com` then all bundled assets will get this hostname in runtime. It's something like Base URL in HTML but for federated modules.
-- `enableUrlLoaderFix` – adds public hostname to all assets bundled by `url-loader`.
+Run `nx affected:e2e` to execute the end-to-end tests affected by a change.
 
-## Demo
+## Understand your workspace
 
-You can see it in action here: https://github.com/module-federation/module-federation-examples/pull/2147
+Run `nx graph` to see a diagram of the dependencies of your projects.
 
-## Implementing the Plugin
+## Further help
 
-1. Use `NextFederationPlugin` in your `next.config.js` of the app that you wish to expose modules from. We'll call this "next2".
+Visit the [Nx Documentation](https://nx.dev) to learn more.
 
-```js
-// next.config.js
-const NextFederationPlugin = require('@module-federation/nextjs-mf/NextFederationPlugin');
 
-module.exports = {
-  webpack(config, options) {
-    if (!options.isServer) {
-      config.plugins.push(
-        new NextFederationPlugin({
-          name: 'next2',
-          remotes: {
-            next1: `next1@http://localhost:3001/_next/static/chunks/remoteEntry.js`,
-          },
-          filename: 'static/chunks/remoteEntry.js',
-          exposes: {
-            './title': './components/exposedTitle.js',
-            './checkout': './pages/checkout',
-            './pages-map': './pages-map.js',
-          },
-          shared: {
-            // whatever else
-          },
-        })
-      );
-    }
 
-    return config;
-  },
-};
+## ☁ Nx Cloud
 
-// _app.js or some other file in as high up in the app (like next's new layouts)
-// this ensures various parts of next.js are imported and "used" somewhere so that they wont be tree shaken out
-import '@module-federation/nextjs-mf/lib/include-defaults';
-```
+### Distributed Computation Caching & Distributed Task Execution
 
-2. For the consuming application, we'll call it "next1", add an instance of the ModuleFederationPlugin to your webpack config, and ensure you have a [custom Next.js App](https://nextjs.org/docs/advanced-features/custom-app) `pages/_app.js` (or `.tsx`):
-   Inside that \_app.js or layout.js file, ensure you import `include-defaults` file
+<p style="text-align: center;"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-cloud-card.png"></p>
 
-```js
-// next.config.js
+Nx Cloud pairs with Nx in order to enable you to build and test code more rapidly, by up to 10 times. Even teams that are new to Nx can connect to Nx Cloud and start saving time instantly.
 
-const NextFederationPlugin = require('@module-federation/nextjs-mf/NextFederationPlugin');
+Teams using Nx gain the advantage of building full-stack applications with their preferred framework alongside Nx’s advanced code generation and project dependency graph, plus a unified experience for both frontend and backend developers.
 
-module.exports = {
-  webpack(config, options) {
-    if (!options.isServer) {
-      config.plugins.push(
-        new NextFederationPlugin({
-          name: 'next1',
-          remotes: {
-            next2: `next2@http://localhost:3000/_next/static/chunks/remoteEntry.js`,
-          },
-        })
-      );
-    }
-
-    return config;
-  },
-};
-
-// _app.js or some other file in as high up in the app (like next's new layouts)
-// this ensures various parts of next.js are imported and "used" somewhere so that they wont be tree shaken out
-import '@module-federation/nextjs-mf/lib/include-defaults';
-```
-
-4. Use next/dynamic or low level api to import remotes.
-
-```js
-import dynamic from 'next/dynamic';
-
-const SampleComponent = dynamic(
-  () => window.next2.get('./sampleComponent').then((factory) => factory()),
-  {
-    ssr: false,
-  }
-);
-
-// or
-
-const SampleComponent = dynamic(() => import('next2/sampleComponent'), {
-  ssr: false,
-});
-```
-
-## Utilities
-
-Ive added a util for dynamic chunk loading, in the event you need to load remote containers dynamically.
-
-```js
-import { injectScript } from '@module-federation/nextjs-mf/lib/utils';
-// if i have remotes in my federation plugin, i can pass the name of the remote
-injectScript('home').then((remoteContainer) => {
-  remoteContainer.get('./exposedModule');
-});
-// if i want to load a custom remote not known at build time.
-
-injectScript({
-  global: 'home',
-  url: 'http://somthing.com/remoteEntry.js',
-}).then((remoteContainer) => {
-  remoteContainer.get('./exposedModule');
-});
-```
-
-## Contact
-
-If you have any questions or need to report a bug
-<a href="https://twitter.com/ScriptedAlchemy"> Reach me on Twitter @ScriptedAlchemy</a>
-
-Or join this discussion thread: https://github.com/module-federation/module-federation-examples/discussions/978
+Visit [Nx Cloud](https://nx.app/) to learn more.
