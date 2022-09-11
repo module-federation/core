@@ -2,7 +2,6 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
-    "nextjs-mf": "packages/nextjs-mf",
-    "nextjs-mf-test": "packages/nextjs-mf-test"
+    "nextjs-mf": "packages/nextjs-mf"
   }
 }
