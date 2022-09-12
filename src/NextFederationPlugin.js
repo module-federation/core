@@ -160,7 +160,7 @@ class ChildFederation {
         ];
       } else if (compiler.options.name === 'server') {
         plugins = [
-          new NodeFederationPlugin(federationPluginOptions, {FederationPlugin}),
+          new NodeFederationPlugin(federationPluginOptions, {ModuleFederationPlugin: FederationPlugin}),
           new webpack.node.NodeTemplatePlugin(childOutput),
           //TODO: Externals function needs to internalize any shared module for host and remote build
           new webpack.ExternalsPlugin(compiler.options.externalsType, [
@@ -178,7 +178,7 @@ class ChildFederation {
           //   'process.env.REMOTES': JSON.stringify(this._options.remotes),
           //   'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
           // }),
-          // new AddRuntimeRequirementToPromiseExternal(),
+          new AddRuntimeRequirementToPromiseExternal(),
         ];
       }
       const childCompiler = compilation.createChildCompiler(
