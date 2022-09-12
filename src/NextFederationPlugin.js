@@ -350,7 +350,7 @@ function generateRemoteTemplate(url, global) {
     if (typeof ${global} !== 'undefined') return resolve();
     __webpack_require__.l(
       ${JSON.stringify(url)},
-      async function (event) {
+      function (event) {
         if (typeof ${global} !== 'undefined') return resolve();
         var errorType = event && (event.type === 'load' ? 'missing' : event.type);
         var realSrc = event && event.target && event.target.src;
