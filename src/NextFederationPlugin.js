@@ -348,7 +348,9 @@ function generateRemoteTemplate(url, global) {
   return `promise new Promise(function (resolve, reject) {
     var __webpack_error__ = new Error();
     if (typeof ${global} !== 'undefined') return resolve();
-    __webpack_require__.l(${JSON.stringify(url)}, (event) => {
+    __webpack_require__.l(
+      ${JSON.stringify(url)},
+      async function (event) {
         if (typeof ${global} !== 'undefined') return resolve();
         var errorType = event && (event.type === 'load' ? 'missing' : event.type);
         var realSrc = event && event.target && event.target.src;
@@ -358,9 +360,45 @@ function generateRemoteTemplate(url, global) {
         __webpack_error__.type = errorType;
         __webpack_error__.request = realSrc;
         reject(__webpack_error__);
-      }, ${JSON.stringify(global)},
+      },
+      ${JSON.stringify(global)},
     );
-  }).then(() => (${global}))`;
+  }).then(function () {
+    const proxy = {
+      get: ${global}.get,
+      init: (...args) => {
+        const handler = {
+          get(target, prop) {
+            if (target[prop]) {
+              Object.values(target[prop]).forEach(function(o) {
+                if(o.from === '_N_E') {
+                  o.loaded = 1
+                }
+              })
+            }
+            return target[prop]
+          },
+          set(target, property, value, receiver) {
+            if (target[property]) {
+              return target[property]
+            }
+            target[property] = value
+            return true
+          }
+        }
+        try {
+          ${global}.init(new Proxy(args[0], handler))
+        } catch (e) {
+
+        }
+        ${global}.__initialized = true
+      }
+    }
+    if (!${global}.__initialized) {
+      proxy.init()
+    }
+    return proxy
+  })`;
 }
 
 function createRuntimeVariables(remotes) {
