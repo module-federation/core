@@ -77,7 +77,9 @@ function buildRemotes(mfConf, webpack) {
       const loadTemplate = `promise new Promise((resolve)=>{
     if(!global.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser
-      global.__remote_scope__ = {}
+      global.__remote_scope__ = {
+        _config: {},
+      }
     }
     ${executeLoadTemplate}
     resolve(executeLoad(${JSON.stringify(config)}))

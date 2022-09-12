@@ -224,9 +224,11 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                                 return acc;
                               }, {})
                             )};`,
+                            "Object.assign(global.__remote_scope__._config, remotes)",
                             /* TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise()
     global will/should still exist - but can only be known at runtime */
                             `console.log('remotes keyed by global name',remotes)`,
+                            `console.log('remote scope configs',global.__remote_scope__._config)`,
 
                             `console.log('global.__remote_scope__',global.__remote_scope__)`,
                             `console.log('global.__remote_scope__[${JSON.stringify(
