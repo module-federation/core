@@ -1,14 +1,14 @@
-const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
+('use strict');
+
 /*
 	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
+	Author Zackary Jackson @ScriptedAlchemy
 */
-
-('use strict');
 
 import path from 'path';
 import { injectRuleLoader, hasLoader } from './loaders/helpers';
 import { exposeNextjsPages } from './loaders/nextPageMapLoader';
+const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
 
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ExternalsType} ExternalsType */
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ModuleFederationPluginOptions} ModuleFederationPluginOptions */
@@ -220,13 +220,15 @@ class ChildFederation {
             },
             runtime: false,
             shared: {
-              ...externalizedShares,
+              ...(this._extraOptions.skipSharingNextInternals
+                ? {}
+                : externalizedShares),
               ...this._options.shared,
             },
           }),
           new webpack.web.JsonpTemplatePlugin(childOutput),
           new LoaderTargetPlugin('web'),
-          new LibraryPlugin('var'),
+          new LibraryPlugin(this._options.library.type),
           new webpack.DefinePlugin({
             'process.env.REMOTES': JSON.stringify(this._options.remotes),
             'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
@@ -428,6 +430,14 @@ class NextFederationPlugin {
       );
       this._options.remotes = parsedRemotes;
     }
+    if(this._options.library) {
+      console.error('[mf] you cannot set custom library')
+    }
+    this._options.library = {
+      // assign remote name to object to avoid SWC mangling top level variable
+      type: 'window',
+      name: this._options.name,
+    };
   }
 
   apply(compiler) {
