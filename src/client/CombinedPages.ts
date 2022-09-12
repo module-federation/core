@@ -23,6 +23,11 @@ export class CombinedPages {
     this.remotePages = remotePages;
   }
 
+  async isLocalRoute(route: string) {
+    const localPages = await this.localPagesGetter();
+    return localPages.includes(route);
+  }
+
   async getPageList(): Promise<string[]> {
     const localPages = await this.localPagesGetter();
     const remotePages = this.remotePages.getPageList();
@@ -33,8 +38,9 @@ export class CombinedPages {
       this.localPagesCache = localPages;
       this.remotePagesCache = remotePages;
       this.sortedPageCache = sortNextPages([...localPages, ...remotePages]);
+      console.log('SORTING PAGES!!!!');
     }
-    console.log('Sorted combined pages', this.sortedPageCache);
+    console.log('Combined page list', this.sortedPageCache);
     return this.sortedPageCache;
   }
 }

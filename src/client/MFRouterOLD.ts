@@ -15,7 +15,7 @@ export type RouteInfoLoader = {
   remote?: string;
 } & Partial<RouteInfo>;
 
-export class MFLoader {
+export class MFRouter {
   /**
    * List of pages that belongs to the current host application
    */
@@ -164,7 +164,7 @@ export class MFLoader {
    *   but previously added remote pages are able for replacement by new ones
    *
    *   @example
-   *    window.mf_loader.addFederatedPages({
+   *    window.mf_router.addFederatedPages({
    *      '/shop/nodkz/[...mee]': {
    *        loadAsyncModule: () => Promise.resolve({ default: () => 'Works!' }),
    *      },

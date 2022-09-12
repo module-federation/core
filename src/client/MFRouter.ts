@@ -1,19 +1,25 @@
+import EventEmitter from 'eventemitter3';
 import { pathnameToRoute } from './helpers';
 import type PageLoader from 'next/dist/client/page-loader';
 import { CombinedPages } from './CombinedPages';
 import { RemotePages } from './RemotePages';
 
-export class MFLoader {
+type EventTypes = 'loadedRemoteRoute' | 'loadedLocalRoute';
+
+export class MFRouter {
   /** Local & Remote pages sorted in correct order */
   combinedPages: CombinedPages;
   /** Remote pages loader */
   remotePages: RemotePages;
+  /** EventEmitter which allows to subscribe on different events */
+  ee: EventEmitter<EventTypes>;
   /** Original nextjs PageLoader which passed by `patchNextClientPageLoader.js` */
   private _nextPageLoader: PageLoader;
   private _isLoaded: Promise<any>;
 
   constructor(nextPageLoader: PageLoader) {
     this._nextPageLoader = nextPageLoader;
+    this.ee = new EventEmitter();
 
     this.remotePages = new RemotePages();
     this.combinedPages = new CombinedPages(
@@ -54,7 +60,7 @@ export class MFLoader {
   }
 
   async pathnameToRoute(cleanPathname: string): Promise<string | undefined> {
-    const routes = await this.combinedPages.getPageList();
+    const routes = await this.getPageList();
     return pathnameToRoute(cleanPathname, routes);
   }
 
@@ -76,11 +82,21 @@ export class MFLoader {
     }
 
     // replace loadRoute logic
-    routeLoader.loadRoute = async (route: string) => {
+    routeLoader.loadRoute = async (route, prefetch) => {
       console.log('routeLoader.loadRoute', route);
-      const routeInfo = this.remotePages.hasRoute(route)
-        ? await this.remotePages.getRouteInfo(route)
-        : await routeLoader._loadRouteOriginal(route);
+      let routeInfo;
+      if (await this.combinedPages.isLocalRoute(route)) {
+        routeInfo = await routeLoader._loadRouteOriginal(route);
+        this.ee.emit('loadedLocalRoute', routeInfo, prefetch);
+      } else {
+        routeInfo = await this.remotePages.getRouteInfo(route);
+        this.ee.emit(
+          'loadedRemoteRoute',
+          routeInfo,
+          prefetch,
+          this.remotePages.routeToRemote(route)
+        );
+      }
       return routeInfo;
     };
   }
@@ -112,7 +128,14 @@ export class MFLoader {
         if (route) {
           // TODO: fix router properties for the first page load of federated page http://localhost:3000/shop/products/B
           console.log('replace entrypoint /_error by', route);
-          return this.remotePages.getRouteInfo(route);
+          const routeInfo = await this.remotePages.getRouteInfo(route);
+          this.ee.emit(
+            'loadedRemoteRoute',
+            routeInfo,
+            false,
+            this.remotePages.routeToRemote(route)
+          );
+          return routeInfo;
         }
       }
       console.log('whenEntrypoint', route);

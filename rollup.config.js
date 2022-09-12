@@ -35,7 +35,7 @@ export default [
     ],
   },
   {
-    input: ['./src/runtime-mf-loader/MFLoader.ts'],
+    input: ['./src/client/MFRouter.ts', './src/client/useMFRouter.ts'],
     output: {
       dir: 'lib',
       format: 'cjs',
@@ -43,7 +43,7 @@ export default [
       exports: 'auto',
       sourcemap: !production,
     },
-    external: ['next/router'],
+    external: ['next/router', 'react', 'eventemitter3'],
     plugins: [
       typescript({
         outDir: 'lib',
