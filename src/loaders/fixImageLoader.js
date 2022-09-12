@@ -1,3 +1,6 @@
+const path = require('path');
+const Template = require('webpack/lib/Template');
+
 /**
  * This loader was specially created for tunning next-image-loader result
  *   see https://github.com/vercel/next.js/blob/canary/packages/next/build/webpack/loaders/next-image-loader.js
@@ -12,14 +15,44 @@
  *
  * @type {(this: import("webpack").LoaderContext<{}>, content: string) => string>}
  */
-function fixImageLoader(content) {
-  // replace(/(.+\:\/\/[^\/]+){0,1}\/.*/i, '$1')
-  //    this regexp will extract the hostname from publicPath
-  //    http://localhost:3000/_next/... -> http://localhost:3000
-  const currentHostnameCode =
-    "__webpack_require__.p.replace(/(.+\\:\\/\\/[^\\/]+){0,1}\\/.*/i, '$1')";
+async function fixImageLoader(remaining) {
+  this.cacheable(true);
+  const isServer = this._compiler.options.name !== 'client';
+  const result = await this.importModule(
+    `${this.resourcePath}.webpack[javascript/auto]` + `!=!${remaining}`
+  );
+  const content = result.default || result;
 
-  return content.replace('"src":', `"src":${currentHostnameCode}+`);
+  const computedAssetPrefix = isServer
+    ? `(global.__dynamicAssetPrefix && global.__dynamicAssetPrefix.indexOf(\'://\') > 0 ? new URL(global.__dynamicAssetPrefix).origin : \'\')`
+    : `(__webpack_public_path__ && __webpack_public_path__.indexOf('://') > 0 ? new URL(__webpack_public_path__).origin : \'\')`;
+
+  const constructedObject = Object.entries(content).reduce(
+    (acc, [key, value]) => {
+      if (key === 'src') {
+        if (value && value.indexOf('://') < 0) {
+          value = path.join(value);
+        }
+        acc.push(
+          `${key}: computedAssetsPrefixReference + ${JSON.stringify(value)}`
+        );
+        return acc;
+      }
+      acc.push(`${key}: ${JSON.stringify(value)}`);
+      return acc;
+    },
+    []
+  );
+  const updated = Template.asString([
+    "let computedAssetsPrefixReference = '';",
+    'try {',
+    Template.indent(`computedAssetsPrefixReference = ${computedAssetPrefix};`),
+    '} catch (e) {}',
+    'export default {',
+    Template.indent(constructedObject.join(',\n')),
+    '}',
+  ]);
+  return updated;
 }
 
-module.exports = fixImageLoader;
+module.exports.pitch = fixImageLoader;

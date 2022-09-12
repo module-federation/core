@@ -4,13 +4,13 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Zackary Jackson @ScriptedAlchemy
 */
-import path from 'path';
-import {
+const path = require('path');
+const {
   injectRuleLoader,
   hasLoader,
   toDisplayErrors,
-} from './loaders/helpers';
-import { exposeNextjsPages } from './loaders/nextPageMapLoader';
+} = require('./loaders/helpers');
+const { exposeNextjsPages } = require('./loaders/nextPageMapLoader');
 const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
 
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ExternalsType} ExternalsType */
