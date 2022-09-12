@@ -121,6 +121,7 @@ class ChildFederation {
         filename: compiler.options.output.filename.replace('.js', '-fed.js'),
       };
 
+      // using ModuleFederationPlugin does not work, i had to fork because of afterPlugins hook on containerPlugin.
       const FederationPlugin = ChildFriendlyModuleFederationPlugin;
 
       const federationPluginOptions = {
@@ -159,7 +160,7 @@ class ChildFederation {
         ];
       } else if (compiler.options.name === 'server') {
         plugins = [
-          new FederationPlugin(federationPluginOptions),
+          new NodeFederationPlugin(federationPluginOptions, {ModuleFederationPlugin: FederationPlugin}),
           new webpack.node.NodeTemplatePlugin(childOutput),
           //TODO: Externals function needs to internalize any shared module for host and remote build
           new webpack.ExternalsPlugin(compiler.options.externalsType, [
