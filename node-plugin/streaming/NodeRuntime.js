@@ -70,6 +70,11 @@ const executeLoadTemplate = `
 function buildRemotes(mfConf, webpack) {
   return Object.entries(mfConf.remotes || {}).reduce(
     (acc, [name, config]) => {
+// if its already been converted into promise, dont do it again
+      if(config.startsWith('promise ') || config.startsWith('external ')){
+        acc.buildTime[name] = config;
+        return acc;
+      }
       /*
   TODO: global remote scope object should go into webpack runtime as a runtime requirement
    this can be done by referencing my LoadFile, CommonJs plugins in this directory.
@@ -224,7 +229,7 @@ class StreamingFederation {
       remotes: buildTime,
     };
 
-    new ((webpack && webpack.container.ModuleFederationPlugin) ||
+    new (this.context.ModuleFederationPlugin || (webpack && webpack.container.ModuleFederationPlugin) ||
       require('webpack/lib/container/ModuleFederationPlugin'))(
       pluginOptions
     ).apply(compiler);
