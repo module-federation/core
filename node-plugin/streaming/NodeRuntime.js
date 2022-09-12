@@ -224,7 +224,7 @@ class StreamingFederation {
       remotes: buildTime,
     };
 
-    new ((webpack && webpack.container.ModuleFederationPlugin) ||
+    new (this.context.ModuleFederationPlugin || (webpack && webpack.container.ModuleFederationPlugin) ||
       require('webpack/lib/container/ModuleFederationPlugin'))(
       pluginOptions
     ).apply(compiler);
