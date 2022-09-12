@@ -225,6 +225,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                               }, {})
                             )};`,
                             "Object.assign(global.__remote_scope__._config, remotes)",
+                            "const remoteRegistry = global.__remote_scope__._config",
                             /* TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise()
     global will/should still exist - but can only be known at runtime */
                             `console.log('remotes keyed by global name',remotes)`,
@@ -237,18 +238,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                               name
                             )}])`,
 
-                            `if(global.REMOTE_CONFIG && !global.REMOTE_CONFIG[${JSON.stringify(
-                              name
-                            )}]) {
-                  if(global.loadedRemotes){
-                    for (const property in global.loadedRemotes) {
-                      global.REMOTE_CONFIG[property] = global.loadedRemotes[property].path
-                    }
-                  }`,
-                            Template.indent([
-                              `Object.assign(global.REMOTE_CONFIG, remotes)`,
-                            ]),
-                            '}',
                             /*   TODO: this global.REMOTE_CONFIG doesnt work in this v5 core, not sure if i need to keep it or not
                                  not deleting it yet since i might need this for tracking all the remote entries across systems
                                  for now, im going to use locally known remote scope from remoteEntry config
@@ -260,9 +249,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                                 )}]`,
                              */
                             "console.log('about to derive remote making request')",
-                            /*TODO: remotes variable will not work in many cases for looking up remotes own url, see note above
-                                    this only works becuase the demo lists all remotes and all remotes happen to be same url and version */
-                            `var requestedRemote = remotes[${JSON.stringify(
+                            `var requestedRemote = remoteRegistry[${JSON.stringify(
                               name
                             )}]`,
                             "console.log('requested remote', requestedRemote)",
@@ -285,8 +272,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             `var scriptUrl = new URL(requestedRemote);`,
 
                             `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
-
-                            // `console.log('remotes global',global.REMOTE_CONFIG);`,
 
                             `console.log('chunkname to request',chunkName);`,
                             `var fileToReplace = require('path').basename(scriptUrl.pathname);`,

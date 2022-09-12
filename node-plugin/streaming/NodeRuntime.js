@@ -79,6 +79,7 @@ function buildRemotes(mfConf, webpack) {
   TODO: global remote scope object should go into webpack runtime as a runtime requirement
    this can be done by referencing my LoadFile, CommonJs plugins in this directory.
   */
+      const [global, url] = config.split('@');
       const loadTemplate = `promise new Promise((resolve)=>{
     if(!global.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser
@@ -86,6 +87,9 @@ function buildRemotes(mfConf, webpack) {
         _config: {},
       }
     }
+    
+    global.__remote_scope__._config[${JSON.stringify(global)}] = ${JSON.stringify(url)};
+ 
     ${executeLoadTemplate}
     resolve(executeLoad(${JSON.stringify(config)}))
     }).then(remote=>{
