@@ -4,9 +4,12 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Zackary Jackson @ScriptedAlchemy
 */
-
 import path from 'path';
-import { injectRuleLoader, hasLoader } from './loaders/helpers';
+import {
+  injectRuleLoader,
+  hasLoader,
+  toDisplayErrors,
+} from './loaders/helpers';
 import { exposeNextjsPages } from './loaders/nextPageMapLoader';
 const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
 
@@ -164,12 +167,14 @@ class ChildFederation {
     this._options = options;
     this._extraOptions = extraOptions;
   }
-
+  /**
+   * Apply the plugin
+   * @param {Compiler} compiler the compiler instance
+   * @returns {void}
+   */
   apply(compiler) {
     const webpack = compiler.webpack;
-    const EntryPlugin = webpack.EntryPlugin;
     const LibraryPlugin = webpack.library.EnableLibraryPlugin;
-    const MFP = webpack.container.ModuleFederationPlugin;
     const ContainerPlugin = webpack.container.ContainerPlugin;
     const LoaderTargetPlugin = webpack.LoaderTargetPlugin;
     const library = compiler.options.output.library;
@@ -300,15 +305,20 @@ class ChildFederation {
       if (compiler.options.mode === 'development') {
         childCompiler.run((err, stats) => {
           if (err) {
-            console.error(err);
-            throw new Error(err);
+            compilation.errors.push(err);
+          }
+          if (stats && stats.hasErrors()) {
+            compilation.errors.push(
+              new Error(toDisplayErrors(stats.compilation.errors))
+            );
           }
         });
       } else {
         childCompiler.runAsChild((err, stats) => {
-          if (err) {
-            console.error(err);
-            throw new Error(err);
+          if (stats.hasErrors()) {
+            compilation.errors.push(
+              new Error(toDisplayErrors(stats.compilation.errors))
+            );
           }
         });
       }
@@ -317,6 +327,11 @@ class ChildFederation {
 }
 
 class AddRuntimeRequirementToPromiseExternal {
+  /**
+   * Apply the plugin
+   * @param {Compiler} compiler the compiler instance
+   * @returns {void}
+   */
   apply(compiler) {
     compiler.hooks.compilation.tap(
       'AddRuntimeRequirementToPromiseExternal',
@@ -430,8 +445,8 @@ class NextFederationPlugin {
       );
       this._options.remotes = parsedRemotes;
     }
-    if(this._options.library) {
-      console.error('[mf] you cannot set custom library')
+    if (this._options.library) {
+      console.error('[mf] you cannot set custom library');
     }
     this._options.library = {
       // assign remote name to object to avoid SWC mangling top level variable
@@ -439,7 +454,11 @@ class NextFederationPlugin {
       name: this._options.name,
     };
   }
-
+  /**
+   * Apply the plugin
+   * @param {Compiler} compiler the compiler instance
+   * @returns {void}
+   */
   apply(compiler) {
     const webpack = compiler.webpack;
     const sharedForHost = Object.entries({
