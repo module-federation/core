@@ -42,7 +42,15 @@ export class RemoteContainer {
       );
     }
 
-    return new RemoteContainer(data);
+    let container: RemoteContainer;
+    if (this.instances[data.url]) {
+      container = this.instances[data.url];
+    } else {
+      container = new RemoteContainer(data);
+      this.instances[data.url] = container;
+    }
+
+    return container;
   }
 
   constructor(opts: RemoteData) {

@@ -1,4 +1,4 @@
-import { RemoteContainer } from './RemoteContainer';
+import { PageMap, RemoteContainer } from './RemoteContainer';
 
 export type RemoteString = string;
 export type PathPrefix = string;
@@ -15,6 +15,7 @@ export class RemotePages {
   remotes: Record<RemoteString, RemoteContainer> = {};
   paths: Record<PathPrefix, RemoteContainer> = {};
   pageListCache: string[] | undefined;
+  private asyncLoadedPageMaps: Set<RemoteContainer>;
 
   constructor(remoteToRoutes?: RemoteToRoutes) {
     const cfg = remoteToRoutes || {
@@ -24,12 +25,15 @@ export class RemotePages {
       ],
       'shop@http://localhost:3001/_next/static/chunks/remoteEntry.js': [
         '/shop',
+        '/shop/products/[...slug]',
       ],
       'checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js': [
         '/checkout',
+        '/checkout/exposed-pages',
       ],
     };
 
+    this.asyncLoadedPageMaps = new Set();
     Object.keys(cfg).forEach((remoteStr) => {
       this.addRemoteSync(remoteStr, cfg[remoteStr]);
     });
@@ -45,10 +49,10 @@ export class RemotePages {
     this.remotes[remoteStr] = remote;
 
     if (typeof pathPrefixes === 'string') {
-      this.paths[pathPrefixes] = remote;
+      this.registerRoute(pathPrefixes, remote);
     } else if (Array.isArray(pathPrefixes)) {
       pathPrefixes.forEach((pathPrefix) => {
-        this.paths[pathPrefix] = remote;
+        this.registerRoute(pathPrefix, remote);
       });
     }
   }
@@ -58,14 +62,26 @@ export class RemotePages {
   }
 
   async loadRemotePageMap(remoteStr: RemoteString) {
-    this.pageListCache = undefined;
     const remote = RemoteContainer.createSingleton(remoteStr);
     this.remotes[remoteStr] = remote;
+    return this._processPageMap(remote);
+  }
 
+  registerRoute(route: string, remote: RemoteContainer) {
+    this.paths[route] = remote;
+    this.pageListCache = Object.keys(this.paths);
+  }
+
+  async _processPageMap(remote: RemoteContainer): Promise<PageMap | undefined> {
     const pageMap = await remote.getPageMap();
-    if (pageMap) {
+    if (!pageMap) return undefined;
+
+    // init once page map from remote if it wasn't done before
+    // here we updating real routes received from remote app in runtime
+    if (!this.asyncLoadedPageMaps.has(remote)) {
+      this.asyncLoadedPageMaps.add(remote);
       Object.keys(pageMap).forEach((route) => {
-        this.paths[route] = remote;
+        this.registerRoute(route, remote);
       });
     }
 
@@ -78,7 +94,7 @@ export class RemotePages {
       return undefined;
     }
 
-    const pageMap = await remote.getPageMap();
+    const pageMap = await this._processPageMap(remote);
     if (!pageMap) {
       return undefined;
     }
@@ -121,6 +137,8 @@ export class RemotePages {
   }
 
   getPageList() {
+    // it's very important to return the same Array instance
+    // because it instance is used in CombinedPages for recalculation of sorted version of all routes
     const pageList = this.pageListCache || Object.keys(this.paths);
     this.pageListCache = pageList;
     return pageList;
@@ -133,8 +151,8 @@ export class RemotePages {
     const mod = await this.routeToPageModule(route);
     if (mod) {
       routeInfo = {
-        component: exports.default,
-        exports,
+        component: mod.default,
+        exports: mod,
         styles: [],
       };
     }

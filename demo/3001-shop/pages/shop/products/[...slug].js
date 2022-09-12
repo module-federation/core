@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 export default function ProductPage() {
@@ -16,8 +15,6 @@ export default function ProductPage() {
 
   return (
     <div>
-      <Link href="/shop/nodkz/aaaaaaaaa">Test dynamic route (nodkz)</Link>
-      <Link href="/shop/test/aaaaaaaaa">Test dynamic route (test)</Link>
       <h1>Product with id {query?.slug}!!! </h1>
       <div>{cnt}</div>
       <pre>{JSON.stringify(router, undefined, 2)}</pre>
