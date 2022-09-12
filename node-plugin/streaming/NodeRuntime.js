@@ -73,7 +73,6 @@ function buildRemotes(mfConf, webpack) {
 // if its already been converted into promise, dont do it again
       if(config.startsWith('promise ') || config.startsWith('external ')){
         acc.buildTime[name] = config;
-        console.log('apready condifured', name)
         return acc;
       }
       /*
