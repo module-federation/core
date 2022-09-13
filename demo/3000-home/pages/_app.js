@@ -46,7 +46,25 @@ function MyApp({ Component, pageProps }) {
 
 MyApp.getInitialProps = async (ctx) => {
   const appProps = await App.getInitialProps(ctx);
-  return appProps;
+
+  return {
+    ...appProps,
+    mfRoutes: require('../../mfRoutes'),
+    // mfRoutes: {
+    //   'home@http://localhost:3000/_next/static/chunks/remoteEntry.js': [
+    //     '/',
+    //     '/home',
+    //   ],
+    //   'shop@http://localhost:3001/_next/static/chunks/remoteEntry.js': [
+    //     '/shop',
+    //     '/shop/products/[...slug]',
+    //   ],
+    //   'checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js': [
+    //     '/checkout',
+    //     '/checkout/exposed-pages',
+    //   ],
+    // },
+  };
 };
 
 export default MyApp;

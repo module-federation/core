@@ -34,20 +34,7 @@ export class MFClient {
     this._nextPageLoader = nextPageLoader;
     this.events = new EventEmitter<EventTypes>();
 
-    const cfg = {
-      'home@http://localhost:3000/_next/static/chunks/remoteEntry.js': [
-        '/',
-        '/home',
-      ],
-      'shop@http://localhost:3001/_next/static/chunks/remoteEntry.js': [
-        '/shop',
-        '/shop/products/[...slug]',
-      ],
-      'checkout@http://localhost:3002/_next/static/chunks/remote///Entry.js': [
-        '/checkout',
-        '/checkout/exposed-pages',
-      ],
-    };
+    const cfg = (global as any)?.__NEXT_DATA__?.props?.mfRoutes || {};
 
     this.remotePages = new RemotePages();
     Object.keys(cfg).forEach((remoteStr) => {
