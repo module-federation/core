@@ -1,6 +1,7 @@
 import * as React from 'react';
 import type { MFRouter } from './MFRouter';
 import type { RemoteContainer } from './RemoteContainer';
+import singletonRouter from 'next/dist/client/router';
 
 export type MFRouterHookOptions = {
   /**
@@ -53,16 +54,25 @@ export function useMFRouter(opts: MFRouterHookOptions): MFRouter {
       }
     };
 
-    const handleRemoteRoute = (
-      routeInfo: any,
-      prefetch: boolean,
-      remote: RemoteContainer
-    ) => {
-      if (!prefetch) processRemoteChange(remote);
-    };
+    // const handleRemoteRoute = (
+    //   routeInfo: any,
+    //   prefetch: boolean,
+    //   remote: RemoteContainer
+    // ) => {
+    //   if (!prefetch) processRemoteChange(remote);
+    // };
 
-    const handleLocalRoute = (routeInfo: any, prefetch: boolean) => {
-      if (!prefetch) processRemoteChange(undefined);
+    // const handleLocalRoute = (routeInfo: any, prefetch: boolean) => {
+    //   if (!prefetch) processRemoteChange(undefined);
+    // };
+
+    const handleRouterChange = (pathname: string) => {
+      if (mfRouter.isFederatedPathname(pathname)) {
+        const remote = mfRouter.remotePages.routeToRemote(pathname);
+        processRemoteChange(remote);
+      } else {
+        processRemoteChange(undefined);
+      }
     };
 
     // Step 2: run bootstrap logic
@@ -77,12 +87,16 @@ export function useMFRouter(opts: MFRouterHookOptions): MFRouter {
     }
 
     // Step 3: Subscribe on events
-    mfRouter.ee.on('loadedRemoteRoute', handleRemoteRoute);
-    mfRouter.ee.on('loadedLocalRoute', handleLocalRoute);
+    singletonRouter.events.on('routeChangeStart', handleRouterChange);
     return () => {
-      mfRouter.ee.off('loadedRemoteRoute', handleRemoteRoute);
-      mfRouter.ee.off('loadedLocalRoute', handleLocalRoute);
+      singletonRouter.events.off('routeChangeStart', handleRouterChange);
     };
+    // mfRouter.events.on('loadedRemoteRoute', handleRemoteRoute);
+    // mfRouter.events.on('loadedLocalRoute', handleLocalRoute);
+    // return () => {
+    //   mfRouter.events.off('loadedRemoteRoute', handleRemoteRoute);
+    //   mfRouter.events.off('loadedLocalRoute', handleLocalRoute);
+    // };
   }, []);
 
   return mfRouter;
