@@ -15,9 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      // Temporarily interchanged to support JS migration
-      "@module-federation/nextjs-mf-js": ["packages/nextjs-mf/src/index.ts"],
-      "@module-federation/nextjs-mf": ["packages/nextjs-mf-js/src/index.js"]
+      "@module-federation/nextjs-mf": ["packages/nextjs-mf-js/src/index.js"],
+      "@module-federation/nextjs-mf-js": ["packages/nextjs-mf/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

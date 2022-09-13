@@ -341,7 +341,7 @@ function createRuntimeVariables(remotes) {
   }, {});
 }
 
-class NextFederationPlugin {
+export class NextFederationPlugin {
   constructor(options) {
     const { extraOptions, ...mainOpts } = options;
     this._options = mainOpts;
@@ -406,5 +406,3 @@ class NextFederationPlugin {
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
   }
 }
-
-module.exports = NextFederationPlugin;
