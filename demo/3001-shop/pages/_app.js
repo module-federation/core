@@ -2,7 +2,7 @@ import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Layout, version } from 'antd';
 import HostAppMenu from './_menu';
-import { useMFRouter } from '@module-federation/nextjs-mf/lib/client/useMFRouter';
+import { useMFClient } from '@module-federation/nextjs-mf/lib/client/useMFClient';
 
 import 'antd/dist/antd.css';
 
@@ -16,7 +16,7 @@ const SharedNav = dynamic(
 
 function MyApp({ Component, pageProps }) {
   const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
-  useMFRouter({
+  useMFClient({
     onChangeRemote: async (remote) => {
       if (remote) {
         const RemoteAppMenu =

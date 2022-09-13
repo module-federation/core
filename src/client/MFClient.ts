@@ -3,25 +3,58 @@ import { pathnameToRoute } from './helpers';
 import type PageLoader from 'next/dist/client/page-loader';
 import { CombinedPages } from './CombinedPages';
 import { RemotePages } from './RemotePages';
+import { RemoteContainer } from './RemoteContainer';
 
 type EventTypes = 'loadedRemoteRoute' | 'loadedLocalRoute';
 
-export class MFRouter {
+// "beforeHistoryChange",
+// "routeChangeStart",
+// "routeChangeComplete",
+// "routeChangeError",
+// "hashChangeStart",
+// "hashChangeComplete"
+
+/** Remote Container string eg `home@https://example.com/_next/static/chunks/remoteEntry.js` */
+export type RemoteString = string;
+
+export class MFClient {
+  /** List of registred remotes */
+  remotes: Record<RemoteString, RemoteContainer> = {};
   /** Local & Remote pages sorted in correct order */
   combinedPages: CombinedPages;
   /** Remote pages loader */
   remotePages: RemotePages;
   /** EventEmitter which allows to subscribe on different events */
-  ee: EventEmitter<EventTypes>;
+  events: EventEmitter<EventTypes>;
   /** Original nextjs PageLoader which passed by `patchNextClientPageLoader.js` */
   private _nextPageLoader: PageLoader;
   private _isLoaded: Promise<any>;
 
   constructor(nextPageLoader: PageLoader) {
     this._nextPageLoader = nextPageLoader;
-    this.ee = new EventEmitter();
+    this.events = new EventEmitter<EventTypes>();
+
+    const cfg = {
+      'home@http://localhost:3000/_next/static/chunks/remoteEntry.js': [
+        '/',
+        '/home',
+      ],
+      'shop@http://localhost:3001/_next/static/chunks/remoteEntry.js': [
+        '/shop',
+        '/shop/products/[...slug]',
+      ],
+      'checkout@http://localhost:3002/_next/static/chunks/remote///Entry.js': [
+        '/checkout',
+        '/checkout/exposed-pages',
+      ],
+    };
 
     this.remotePages = new RemotePages();
+    Object.keys(cfg).forEach((remoteStr) => {
+      const remote = this.registerRemote(remoteStr);
+      this.remotePages.addRoutes(cfg[remoteStr], remote);
+    });
+
     this.combinedPages = new CombinedPages(
       (this._nextPageLoader as any)._getPageListOriginal.bind(
         this._nextPageLoader
@@ -45,6 +78,12 @@ export class MFRouter {
    */
   async getPageList() {
     return this.combinedPages.getPageList();
+  }
+
+  registerRemote(remoteStr: RemoteString) {
+    const remote = RemoteContainer.createSingleton(remoteStr);
+    this.remotes[remote.global] = remote;
+    return remote;
   }
 
   /**
@@ -87,10 +126,10 @@ export class MFRouter {
       let routeInfo;
       if (await this.combinedPages.isLocalRoute(route)) {
         routeInfo = await routeLoader._loadRouteOriginal(route);
-        this.ee.emit('loadedLocalRoute', routeInfo, prefetch);
+        this.events.emit('loadedLocalRoute', routeInfo, prefetch);
       } else {
         routeInfo = await this.remotePages.getRouteInfo(route);
-        this.ee.emit(
+        this.events.emit(
           'loadedRemoteRoute',
           routeInfo,
           prefetch,
@@ -129,7 +168,7 @@ export class MFRouter {
           // TODO: fix router properties for the first page load of federated page http://localhost:3000/shop/products/B
           console.log('replace entrypoint /_error by', route);
           const routeInfo = await this.remotePages.getRouteInfo(route);
-          this.ee.emit(
+          this.events.emit(
             'loadedRemoteRoute',
             routeInfo,
             false,

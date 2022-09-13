@@ -1,9 +1,9 @@
 import * as React from 'react';
-import type { MFRouter } from './MFRouter';
+import type { MFClient } from './MFClient';
 import type { RemoteContainer } from './RemoteContainer';
 import singletonRouter from 'next/dist/client/router';
 
-export type MFRouterHookOptions = {
+export type MFClientHookOptions = {
   /**
    * This callback will be called when user switches to federated page
    *   - as a first arg you will receive RemoteContainer
@@ -21,7 +21,7 @@ export type MFRouterHookOptions = {
    */
   onChangeRemote?: (
     remote: RemoteContainer | undefined,
-    mfRouter: MFRouter
+    MFClient: MFClient
   ) => void;
 };
 
@@ -34,10 +34,10 @@ const isBrowser = typeof window !== 'undefined';
 /**
  * React hook which provides convenient way for working with ModuleFederation runtime changes in runtime;
  */
-export function useMFRouter(opts: MFRouterHookOptions): MFRouter {
-  const mfRouter: MFRouter = isBrowser
-    ? (window as any).mf_router
-    : /* TODO: inject here SSR version of MFRouter if it will be needed in future */ ({} as any);
+export function useMFClient(opts: MFClientHookOptions): MFClient {
+  const MFClient: MFClient = isBrowser
+    ? (window as any).mf_client
+    : /* TODO: inject here SSR version of MFClient if it will be needed in future */ ({} as any);
 
   const innerState = React.useRef<InnerState>({
     remote: undefined,
@@ -49,26 +49,14 @@ export function useMFRouter(opts: MFRouterHookOptions): MFRouter {
       if (innerState.current.remote !== remote) {
         innerState.current.remote = remote;
         if (opts?.onChangeRemote) {
-          opts.onChangeRemote(remote, mfRouter);
+          opts.onChangeRemote(remote, MFClient);
         }
       }
     };
 
-    // const handleRemoteRoute = (
-    //   routeInfo: any,
-    //   prefetch: boolean,
-    //   remote: RemoteContainer
-    // ) => {
-    //   if (!prefetch) processRemoteChange(remote);
-    // };
-
-    // const handleLocalRoute = (routeInfo: any, prefetch: boolean) => {
-    //   if (!prefetch) processRemoteChange(undefined);
-    // };
-
     const handleRouterChange = (pathname: string) => {
-      if (mfRouter.isFederatedPathname(pathname)) {
-        const remote = mfRouter.remotePages.routeToRemote(pathname);
+      if (MFClient.isFederatedPathname(pathname)) {
+        const remote = MFClient.remotePages.routeToRemote(pathname);
         processRemoteChange(remote);
       } else {
         processRemoteChange(undefined);
@@ -76,8 +64,8 @@ export function useMFRouter(opts: MFRouterHookOptions): MFRouter {
     };
 
     // Step 2: run bootstrap logic
-    const initialRemote = mfRouter.isFederatedPathname(window.location.pathname)
-      ? mfRouter.remotePages.routeToRemote(window.location.pathname)
+    const initialRemote = MFClient.isFederatedPathname(window.location.pathname)
+      ? MFClient.remotePages.routeToRemote(window.location.pathname)
       : undefined;
 
     if (initialRemote) {
@@ -91,13 +79,7 @@ export function useMFRouter(opts: MFRouterHookOptions): MFRouter {
     return () => {
       singletonRouter.events.off('routeChangeStart', handleRouterChange);
     };
-    // mfRouter.events.on('loadedRemoteRoute', handleRemoteRoute);
-    // mfRouter.events.on('loadedLocalRoute', handleLocalRoute);
-    // return () => {
-    //   mfRouter.events.off('loadedRemoteRoute', handleRemoteRoute);
-    //   mfRouter.events.off('loadedLocalRoute', handleLocalRoute);
-    // };
   }, []);
 
-  return mfRouter;
+  return MFClient;
 }

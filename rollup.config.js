@@ -35,7 +35,11 @@ export default [
     ],
   },
   {
-    input: ['./src/client/MFRouter.ts', './src/client/useMFRouter.ts'],
+    input: [
+      './src/client/MFClient.ts',
+      './src/client/useMFClient.ts',
+      './src/client/useMFRemote.ts',
+    ],
     output: {
       dir: 'lib',
       format: 'cjs',
@@ -43,7 +47,12 @@ export default [
       exports: 'auto',
       sourcemap: !production,
     },
-    external: ['next/router', 'react', 'eventemitter3'],
+    external: [
+      'next/router',
+      'next/dist/client/router',
+      'react',
+      'eventemitter3',
+    ],
     plugins: [
       typescript({
         outDir: 'lib',

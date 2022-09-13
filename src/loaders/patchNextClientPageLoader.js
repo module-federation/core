@@ -7,8 +7,8 @@ const path = require('path');
  * @type {(this: import("webpack").LoaderContext<{}>, content: string) => string>}
  */
 function patchNextClientPageLoader(content) {
-  if (content.includes('MFRouter')) {
-    // If MFRouter already applied then skip patch
+  if (content.includes('MFClient')) {
+    // If MFClient already applied then skip patch
     return content;
   }
 
@@ -19,21 +19,21 @@ function patchNextClientPageLoader(content) {
     path.resolve(__dirname, '../include-defaults.js')
   );
   path.resolve(__dirname, '../include-defaults.js');
-  const pathMFRouter = path.relative(
+  const pathMFClient = path.relative(
     this.context,
-    path.resolve(__dirname, '../client/MFRouter.js')
+    path.resolve(__dirname, '../client/MFClient.js')
   );
 
   patchedContent = content.replace(
     'exports.default = PageLoader;',
     `
       require("${pathIncludeDefaults}");
-      const MFRouter = require("${pathMFRouter}").MFRouter;
+      const MFClient = require("${pathMFClient}").MFClient;
 
       class PageLoaderExtended extends PageLoader {
         constructor(buildId, assetPrefix) {
           super(buildId, assetPrefix);
-          global.mf_router = new MFRouter(this);
+          global.mf_client = new MFClient(this);
         }
 
         _getPageListOriginal() {
@@ -42,7 +42,7 @@ function patchNextClientPageLoader(content) {
 
         getPageList() {
           console.log('PageLoaderExtended.getPageList()');
-          return global.mf_router.getPageList();
+          return global.mf_client.getPageList();
         }
       }
       exports.default = PageLoaderExtended;

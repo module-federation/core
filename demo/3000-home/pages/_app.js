@@ -3,13 +3,13 @@ import App from 'next/app';
 import { Layout, version } from 'antd';
 import HostAppMenu from './_menu';
 import SharedNav from '../components/SharedNav';
-import { useMFRouter } from '@module-federation/nextjs-mf/lib/client/useMFRouter';
+import { useMFClient } from '@module-federation/nextjs-mf/lib/client/useMFClient';
 
 import 'antd/dist/antd.css';
 
 function MyApp({ Component, pageProps }) {
   const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
-  useMFRouter({
+  useMFClient({
     onChangeRemote: async (remote) => {
       if (remote) {
         const RemoteAppMenu =

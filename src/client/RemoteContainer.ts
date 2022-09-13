@@ -1,4 +1,7 @@
+import EventEmitter from 'eventemitter3';
 import { injectScript } from '../utils';
+
+type EventTypes = 'loadStart' | 'loadComplete' | 'loadError';
 
 export type WebpackRemoteContainer = {
   get(modulePath: ModulePath): () => any;
@@ -16,18 +19,16 @@ export class RemoteContainer {
   url: string;
   container: WebpackRemoteContainer | undefined;
   pageMap: PageMap | undefined;
+  error?: Error;
+  events: EventEmitter<EventTypes>;
 
   static instances: Record<string, RemoteContainer> = {};
-
-  static parseString(remoteStr: string): RemoteData | undefined {
-    const [global, url] = remoteStr.split('@');
-    return { global, url };
-  }
 
   static createSingleton(remote: string | RemoteData) {
     let data: RemoteData | undefined;
     if (typeof remote === 'string') {
-      data = this.parseString(remote);
+      const [global, url] = remote.split('@');
+      data = { global, url };
     } else if (remote?.global && remote?.url) {
       data = { global: remote.global, url: remote.url };
     }
@@ -43,11 +44,11 @@ export class RemoteContainer {
     }
 
     let container: RemoteContainer;
-    if (this.instances[data.url]) {
-      container = this.instances[data.url];
+    if (this.instances[data.global]) {
+      container = this.instances[data.global];
     } else {
       container = new RemoteContainer(data);
-      this.instances[data.url] = container;
+      this.instances[data.global] = container;
     }
 
     return container;
@@ -56,6 +57,11 @@ export class RemoteContainer {
   constructor(opts: RemoteData) {
     this.global = opts.global;
     this.url = opts.url;
+    this.events = new EventEmitter<EventTypes>();
+  }
+
+  isLoaded(): boolean {
+    return !!this.container;
   }
 
   async getContainer(): Promise<WebpackRemoteContainer> {
@@ -63,18 +69,26 @@ export class RemoteContainer {
       return this.container;
     }
 
-    console.log(`Loading remote container: ${this.url}`);
-    const container = await injectScript({
-      global: this.global,
-      url: this.url,
-    });
-    if (container) {
-      this.container = container;
-      console.log(`Remote container was loaded: ${this.global}`);
-      return container;
-    }
+    this.events.emit('loadStart', this);
 
-    throw Error(`[nextjs-mf] Remote container ${this.url} is empty`);
+    try {
+      const container = await injectScript({
+        global: this.global,
+        url: this.url,
+      });
+
+      if (container) {
+        this.container = container;
+        this.events.emit('loadComplete', this);
+        return container;
+      }
+
+      throw Error(`[nextjs-mf] Remote container ${this.url} is empty`);
+    } catch (e) {
+      this.error = e;
+      this.events.emit('loadError', e.message, this);
+      throw e;
+    }
   }
 
   async getModule(modulePath: string, exportName?: string) {
@@ -99,7 +113,9 @@ export class RemoteContainer {
       this.pageMap = pageMap;
     } else {
       this.pageMap = {};
-      console.warn(`[nextjs-mf] Container `);
+      console.warn(
+        `[nextjs-mf] Container ${this.global} does not expose "./pages-map-v2" module.`
+      );
     }
 
     return this.pageMap;
