@@ -1,5 +1,6 @@
 const path = require('path');
 const Template = require('webpack/lib/Template');
+const RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
 
 /**
  * This loader was specially created for tunning next-image-loader result
@@ -24,8 +25,8 @@ async function fixImageLoader(remaining) {
   const content = result.default || result;
 
   const computedAssetPrefix = isServer
-    ? `(global.__dynamicAssetPrefix && global.__dynamicAssetPrefix.indexOf(\'://\') > 0 ? new URL(global.__dynamicAssetPrefix).origin : \'\')`
-    : `(__webpack_public_path__ && __webpack_public_path__.indexOf('://') > 0 ? new URL(__webpack_public_path__).origin : \'\')`;
+    ? ` \'\'`
+    : `(${RuntimeGlobals.publicPath} && ${RuntimeGlobals.publicPath}.indexOf('://') > 0 ? new URL(${RuntimeGlobals.publicPath}).origin : \'\')`;
 
   const constructedObject = Object.entries(content).reduce(
     (acc, [key, value]) => {

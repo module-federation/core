@@ -241,6 +241,7 @@ class ChildFederation {
           new AddRuntimeRequirementToPromiseExternal(),
         ]
       );
+
       new RemoveRRRuntimePlugin().apply(childCompiler);
 
       childCompiler.options.module.rules.forEach((rule) => {
@@ -314,10 +315,10 @@ class ChildFederation {
           }
         });
       } else {
-        childCompiler.runAsChild((err, stats) => {
-          if (stats.hasErrors()) {
+        childCompiler.runAsChild((err, entries,childCompiliation) => {
+          if (childCompiliation.getStats().hasErrors()) {
             compilation.errors.push(
-              new Error(toDisplayErrors(stats.compilation.errors))
+              new Error(toDisplayErrors(childCompiliation.getStats().compilation.errors))
             );
           }
         });
