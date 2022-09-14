@@ -368,13 +368,13 @@ function generateRemoteTemplate(url, global) {
   }).then(function () {
     const proxy = {
       get: ${global}.get,
-      init: (args) => {
+      init: function(shareScope) {
         const handler = {
           get(target, prop) {
             if (target[prop]) {
               Object.values(target[prop]).forEach(function(o) {
                 if(o.from === '_N_E') {
-                  o.loaded = true
+                  o.loaded = 1
                 }
               })
             }
@@ -389,7 +389,7 @@ function generateRemoteTemplate(url, global) {
           }
         }
         try {
-          ${global}.init(new Proxy(__webpack_require__.S.default, handler))
+          ${global}.init(new Proxy(shareScope, handler))
         } catch (e) {
 
         }
