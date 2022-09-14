@@ -13,7 +13,7 @@
       },
       "configurations": {
         "development": {
-          "outputPath": "apps/home"
+          "outputPath": "dist/apps/home"
         },
         "production": {}
       }
@@ -50,5 +50,6 @@
       }
     }
   },
-  "tags": []
+  "tags": [],
+  "implicitDependencies": ["nextjs-mf"]
 }
