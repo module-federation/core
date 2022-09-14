@@ -41,7 +41,6 @@ function patchNextClientPageLoader(content) {
         }
 
         getPageList() {
-          console.log('PageLoaderExtended.getPageList()');
           return global.mf_client.getPageList();
         }
       }

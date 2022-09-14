@@ -14,6 +14,11 @@ export type RemoteData = {
 };
 export type PageMap = Record<NextRoute, ModulePath>;
 
+/**
+ * This is a Lazy loader of webpack remote container with some NextJS-specific helper methods.
+ *
+ * It provides the ability to register remote, and load & init it on the first use.
+ */
 export class RemoteContainer {
   global: string;
   url: string;
@@ -24,6 +29,13 @@ export class RemoteContainer {
 
   static instances: Record<string, RemoteContainer> = {};
 
+  /**
+   * Create or reuse existed remote entry.
+   *
+   * Be careful, Singleton pattern does not work well in webpack builds,
+   * because one module may be copied between different chunks. In such a way
+   * you obtain several lists of instances.
+   */
   static createSingleton(remote: string | RemoteData) {
     let data: RemoteData | undefined;
     if (typeof remote === 'string') {
@@ -60,10 +72,17 @@ export class RemoteContainer {
     this.events = new EventEmitter<EventTypes>();
   }
 
+  /**
+   * Check is the current remoteEntry.js loaded or not
+   */
   isLoaded(): boolean {
     return !!this.container;
   }
 
+  /**
+   * Returns initialized webpack RemoteContainer.
+   * If its' script does not loaded - then load & init it firstly.
+   */
   async getContainer(): Promise<WebpackRemoteContainer> {
     if (this.container) {
       return this.container;
@@ -91,6 +110,13 @@ export class RemoteContainer {
     }
   }
 
+  /**
+   * Return remote module from container.
+   * If you provide `exportName` it automatically return exact property value from module.
+   *
+   * @example
+   *   remote.getModule('./pages/index', 'default')
+   */
   async getModule(modulePath: string, exportName?: string) {
     const container = await this.getContainer();
     const modFactory = await container.get(modulePath);
@@ -103,6 +129,9 @@ export class RemoteContainer {
     }
   }
 
+  /**
+   * Retrieve registered nextjs' routes from remote app
+   */
   async getPageMap(): Promise<PageMap | undefined> {
     if (this.pageMap) {
       return this.pageMap;

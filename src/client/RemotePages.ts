@@ -10,6 +10,10 @@ export type RouteInfo = {
   styles: string[];
 };
 
+/**
+ * A class which prepares/loads a list of remotes pages and knows how
+ * to prepare NextJS pseudo-module of route data.
+ */
 export class RemotePages {
   paths: Record<PathPrefix, RemoteContainer> = {};
   pageListCache: string[] | undefined;
@@ -23,10 +27,9 @@ export class RemotePages {
     });
   }
 
-  async loadRemotePageMap(remote: RemoteContainer) {
-    return this._processPageMap(remote);
-  }
-
+  /**
+   * Add remote routes for specific RemoteContainer which serves them.
+   */
   addRoutes(routes: string | string[], remote: RemoteContainer) {
     if (Array.isArray(routes)) {
       routes.forEach((route) => {
@@ -38,7 +41,12 @@ export class RemotePages {
     this.pageListCache = Object.keys(this.paths);
   }
 
-  async _processPageMap(remote: RemoteContainer): Promise<PageMap | undefined> {
+  /**
+   * Load a remote page map and add its routes to registry.
+   */
+  async loadRemotePageMap(
+    remote: RemoteContainer
+  ): Promise<PageMap | undefined> {
     const pageMap = await remote.getPageMap();
     if (!pageMap) return undefined;
 
@@ -52,13 +60,17 @@ export class RemotePages {
     return pageMap;
   }
 
+  /**
+   * Get remote module according to provided next route.
+   * Under the hood it automatically determines which remote need to be used.
+   */
   async routeToPageModule(route: string) {
     const remote = this.routeToRemote(route);
     if (!remote) {
       return undefined;
     }
 
-    const pageMap = await this._processPageMap(remote);
+    const pageMap = await this.loadRemotePageMap(remote);
     if (!pageMap) {
       return undefined;
     }
@@ -71,12 +83,15 @@ export class RemotePages {
     return remote.getModule(modulePath);
   }
 
+  /**
+   * Check that provided route present in registry.
+   */
   hasRoute(route: string): boolean {
     return !!this.pageListCache?.includes(route);
   }
 
   /**
-   * Find remote according to provided route
+   * Find remote according to provided route.
    */
   routeToRemote(route: string): RemoteContainer | undefined {
     let bestMatch: string | undefined;
@@ -100,6 +115,9 @@ export class RemotePages {
     return undefined;
   }
 
+  /**
+   * Get cached unsorted list of remote routes.
+   */
   getPageList() {
     // it's very important to return the same Array instance
     // because it instance is used in CombinedPages for recalculation of sorted version of all routes
@@ -108,8 +126,10 @@ export class RemotePages {
     return pageList;
   }
 
+  /**
+   * Get prepared pseudo-module which is consumed by Nextjs' router.
+   */
   async getRouteInfo(route: string): Promise<undefined | RouteInfo> {
-    console.log('--- start getRouteInfo', route);
     let routeInfo;
 
     try {
@@ -130,8 +150,6 @@ export class RemotePages {
       };
       console.warn(e);
     }
-
-    console.log('--- end getRouteInfo', routeInfo);
     return routeInfo;
   }
 }

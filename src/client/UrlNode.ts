@@ -1,5 +1,7 @@
 /**
- * This class copied from
+ * This class provides a logic of sorting dynamic routes in NextJS.
+ *
+ * It was copied from
  * @see https://github.com/vercel/next.js/blob/canary/packages/next/shared/lib/router/utils/sorted-routes.ts
  */
 export class UrlNode {

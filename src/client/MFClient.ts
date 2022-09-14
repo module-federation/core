@@ -1,24 +1,21 @@
+import type PageLoader from 'next/dist/client/page-loader';
 import EventEmitter from 'eventemitter3';
 import { pathnameToRoute } from './helpers';
-import type PageLoader from 'next/dist/client/page-loader';
 import { CombinedPages } from './CombinedPages';
 import { RemotePages } from './RemotePages';
 import { RemoteContainer } from './RemoteContainer';
 
 type EventTypes = 'loadedRemoteRoute' | 'loadedLocalRoute';
 
-// "beforeHistoryChange",
-// "routeChangeStart",
-// "routeChangeComplete",
-// "routeChangeError",
-// "hashChangeStart",
-// "hashChangeComplete"
-
 /** Remote Container string eg `home@https://example.com/_next/static/chunks/remoteEntry.js` */
 export type RemoteString = string;
 
+/**
+ * The main class for Module Federation on the client side in runtime.
+ * Instance of this class is a Singleton and stored in `window.mf_client` variable.
+ */
 export class MFClient {
-  /** List of registred remotes */
+  /** List of registered remotes */
   remotes: Record<RemoteString, RemoteContainer> = {};
   /** Local & Remote pages sorted in correct order */
   combinedPages: CombinedPages;
@@ -63,12 +60,6 @@ export class MFClient {
     return this.combinedPages.getPageList();
   }
 
-  registerRemote(remoteStr: RemoteString) {
-    const remote = RemoteContainer.createSingleton(remoteStr);
-    this.remotes[remote.global] = remote;
-    return remote;
-  }
-
   /**
    * Check that current browser pathname is served by federated remotes.
    *
@@ -81,11 +72,35 @@ export class MFClient {
     return !!this.remotePages.routeToRemote(cleanPathname);
   }
 
+  /**
+   * Add remote entry to remotes registry of MFClient.
+   * This RemoteContainer will be used for loading remote pages.
+   *
+   * @remoteStr string -  eg. `home@https://example.com/_next/static/chunks/remoteEntry.js`
+   */
+  registerRemote(remoteStr: RemoteString) {
+    const remote = RemoteContainer.createSingleton(remoteStr);
+    this.remotes[remote.global] = remote;
+    return remote;
+  }
+
+  /**
+   * Convert browser pathname to NextJS route.
+   *
+   *   /shop/products/123 -> /shop/products/[...id]
+   *
+   * For regular pages logic is simple (just match exact name).
+   * But for dynamic routes it's quite complicated - page list must be in specific order.
+   */
   async pathnameToRoute(cleanPathname: string): Promise<string | undefined> {
     const routes = await this.getPageList();
     return pathnameToRoute(cleanPathname, routes);
   }
 
+  /**
+   * This method patch routeLoader.loadRoute() in runtime (on bootstrap).
+   * During the build it's quite complicated to do.
+   */
   private _wrapLoadRoute(nextPageLoader: PageLoader) {
     if (!nextPageLoader?.routeLoader?.loadRoute) {
       throw new Error(
@@ -105,7 +120,6 @@ export class MFClient {
 
     // replace loadRoute logic
     routeLoader.loadRoute = async (route, prefetch) => {
-      console.log('routeLoader.loadRoute', route);
       let routeInfo;
       if (await this.combinedPages.isLocalRoute(route)) {
         routeInfo = await routeLoader._loadRouteOriginal(route);
@@ -123,6 +137,10 @@ export class MFClient {
     };
   }
 
+  /**
+   * This method patch routeLoader.whenEntrypoint() in runtime (on bootstrap).
+   * During the build it's quite complicated to do.
+   */
   private _wrapWhenEntrypoint(nextPageLoader: PageLoader) {
     if (!nextPageLoader.routeLoader?.whenEntrypoint) {
       throw new Error(
@@ -143,7 +161,6 @@ export class MFClient {
 
     // replace routeLoader.whenEntrypoint logic
     routeLoader.whenEntrypoint = async (route: string) => {
-      console.log('routeLoader.whenEntrypoint', route);
       if (route === '/_error') {
         let route = await this.pathnameToRoute(window.location.pathname);
         if (!route) {
@@ -165,7 +182,7 @@ export class MFClient {
         }
         if (route) {
           // TODO: fix router properties for the first page load of federated page http://localhost:3000/shop/products/B
-          console.log('replace entrypoint /_error by', route);
+          console.warn('replace entrypoint /_error by', route);
           const routeInfo = await this.remotePages.getRouteInfo(route);
           this.events.emit(
             'loadedRemoteRoute',
@@ -176,7 +193,6 @@ export class MFClient {
           return routeInfo;
         }
       }
-      console.log('whenEntrypoint', route);
       const routeInfo = await routeLoader._whenEntrypointOriginal(route);
       return routeInfo;
     };

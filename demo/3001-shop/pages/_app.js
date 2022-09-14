@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import App from 'next/app';
 import dynamic from 'next/dynamic';
 import { Layout, version } from 'antd';
 import HostAppMenu from './_menu';
