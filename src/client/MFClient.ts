@@ -28,7 +28,6 @@ export class MFClient {
   events: EventEmitter<EventTypes>;
   /** Original nextjs PageLoader which passed by `patchNextClientPageLoader.js` */
   private _nextPageLoader: PageLoader;
-  private _isLoaded: Promise<any>;
 
   constructor(nextPageLoader: PageLoader) {
     this._nextPageLoader = nextPageLoader;
@@ -49,11 +48,8 @@ export class MFClient {
       this.remotePages
     );
 
-    this._isLoaded = new Promise(async (resolve) => {
-      this._wrapLoadRoute(nextPageLoader);
-      this._wrapWhenEntrypoint(nextPageLoader);
-      resolve(true);
-    });
+    this._wrapLoadRoute(nextPageLoader);
+    this._wrapWhenEntrypoint(nextPageLoader);
   }
 
   /**
@@ -149,8 +145,24 @@ export class MFClient {
     routeLoader.whenEntrypoint = async (route: string) => {
       console.log('routeLoader.whenEntrypoint', route);
       if (route === '/_error') {
-        await this._isLoaded;
-        const route = await this.pathnameToRoute(window.location.pathname);
+        let route = await this.pathnameToRoute(window.location.pathname);
+        if (!route) {
+          // if route not found then try to load all non-downloaded remoteEntries
+          // and try to find route again
+          const awaitRemotes = [] as Promise<any>[];
+          Object.values(this.remotes).forEach((remote) => {
+            if (!remote.isLoaded()) {
+              awaitRemotes.push(
+                remote
+                  .getContainer()
+                  .then(() => this.remotePages.loadRemotePageMap(remote))
+                  .catch(() => null)
+              );
+            }
+          });
+          await Promise.all(awaitRemotes);
+          route = await this.pathnameToRoute(window.location.pathname);
+        }
         if (route) {
           // TODO: fix router properties for the first page load of federated page http://localhost:3000/shop/products/B
           console.log('replace entrypoint /_error by', route);
