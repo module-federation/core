@@ -368,7 +368,7 @@ function generateRemoteTemplate(url, global) {
   }).then(function () {
     const proxy = {
       get: ${global}.get,
-      init: (...args) => {
+      init: function(shareScope) {
         const handler = {
           get(target, prop) {
             if (target[prop]) {
@@ -389,7 +389,7 @@ function generateRemoteTemplate(url, global) {
           }
         }
         try {
-          ${global}.init(new Proxy(args[0], handler))
+          ${global}.init(new Proxy(shareScope, handler))
         } catch (e) {
 
         }
