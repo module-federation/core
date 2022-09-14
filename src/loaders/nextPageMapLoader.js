@@ -1,6 +1,10 @@
 const fg = require('fast-glob');
 const fs = require('fs');
 
+// TODO: import UrlNode from ./client folder when whole project migrates on TypeScript (but right now using JS copy of this class)
+// const UrlNode = require('../client/UrlNode').UrlNode;
+const UrlNode = require('./UrlNode').UrlNode;
+
 /**
  * Webpack loader which prepares MF map for NextJS pages
  *
@@ -121,14 +125,11 @@ function preparePageMap(pages) {
 
   const clearedPages = pages.map((p) => `/${sanitizePagePath(p)}`);
 
-  // TODO: Enable page sorting when CODEBASE migrate on NX (right now problem with Rollup config to use TS file from JS)
-  // const UrlNode = require('../client/UrlNode').UrlNode;
-  // // getSortedRoutes @see https://github.com/vercel/next.js/blob/canary/packages/next/shared/lib/router/utils/sorted-routes.ts
-  // const root = new UrlNode();
-  // clearedPages.forEach((pagePath) => root.insert(pagePath));
-  // // Smoosh will then sort those sublevels up to the point where you get the correct route definition priority
-  // const sortedPages = root.smoosh();
-  const sortedPages = clearedPages;
+  // getSortedRoutes @see https://github.com/vercel/next.js/blob/canary/packages/next/shared/lib/router/utils/sorted-routes.ts
+  const root = new UrlNode();
+  clearedPages.forEach((pagePath) => root.insert(pagePath));
+  // Smoosh will then sort those sublevels up to the point where you get the correct route definition priority
+  const sortedPages = root.smoosh();
 
   sortedPages.forEach((page) => {
     let key = page
