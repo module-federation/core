@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "npmScope": "module-federation",
-  "defaultProject": "nextjs-mf-js",
+  "defaultProject": "nextjs-mf",
   "affected": {
     "defaultBase": "main"
   },
