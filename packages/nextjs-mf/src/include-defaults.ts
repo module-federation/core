@@ -7,8 +7,8 @@ require('next/script');
 require('next/dynamic');
 require('styled-jsx');
 
-if (process.env["NODE_ENV"] === 'development') {
+if (process.env['NODE_ENV'] === 'development') {
   require('react/jsx-dev-runtime');
 }
 
-module.exports = {};
+export {};

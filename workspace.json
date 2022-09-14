@@ -3,7 +3,6 @@
   "version": 2,
   "projects": {
     "home": "apps/home",
-    "nextjs-mf": "packages/nextjs-mf-js",
-    "nextjs-mf-js": "packages/nextjs-mf"
+    "nextjs-mf": "packages/nextjs-mf"
   }
 }

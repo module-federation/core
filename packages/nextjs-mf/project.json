@@ -1,24 +1,22 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/nextjs-mf/src",
+  "sourceRoot": "packages/nextjs-mf-js/src",
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:swc",
+      "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/nextjs-mf",
-        "main": "packages/nextjs-mf/src/index.ts",
-        "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
-        "assets": ["packages/nextjs-mf/*.md"],
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true
+        "outputPath": "dist/packages/nextjs-mf-js",
+        "main": "packages/nextjs-mf-js/src/index.js",
+        "tsConfig": "packages/nextjs-mf-js/tsconfig.lib.json",
+        "assets": ["packages/nextjs-mf-js/*.md"]
       }
     },
     "publish": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "command": "node tools/scripts/publish.mjs nextjs-mf {args.ver} {args.tag}"
+        "command": "node tools/scripts/publish.mjs nextjs-mf-js {args.ver} {args.tag}"
       },
       "dependsOn": [
         {
@@ -31,14 +29,14 @@
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/nextjs-mf/**/*.ts"]
+        "lintFilePatterns": ["packages/nextjs-mf-js/**/*.js"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/nextjs-mf"],
+      "outputs": ["coverage/packages/nextjs-mf-js"],
       "options": {
-        "jestConfig": "packages/nextjs-mf/jest.config.ts",
+        "jestConfig": "packages/nextjs-mf-js/jest.config.js",
         "passWithNoTests": true
       }
     }
