@@ -21,8 +21,8 @@ export default [
       'webpack',
       'crypto',
       'next',
+      'fast-glob',
       /node_modules/,
-      /loaders/,
     ], // tells Rollup 'I know what I'm doing here'
     plugins: [
       nodeResolve({ preferBuiltins: true }), // or `true`

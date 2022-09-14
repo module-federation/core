@@ -1,15 +1,19 @@
-const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
-*/
-
 ('use strict');
 
-import path from 'path';
-import { injectRuleLoader, hasLoader } from './loaders/helpers';
-import { exposeNextjsPages } from './loaders/nextPageMapLoader';
-import DevHmrFixInvalidPongPlugin from './plugins/DevHmrFixInvalidPongPlugin';
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Zackary Jackson @ScriptedAlchemy
+*/
+const path = require('path');
+const {
+  injectRuleLoader,
+  hasLoader,
+  toDisplayErrors,
+} = require('./loaders/helpers');
+const { exposeNextjsPages } = require('./loaders/nextPageMapLoader');
+const DevHmrFixInvalidPongPlugin = require('./plugins/DevHmrFixInvalidPongPlugin');
+
+const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
 
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ExternalsType} ExternalsType */
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ModuleFederationPluginOptions} ModuleFederationPluginOptions */
@@ -165,12 +169,14 @@ class ChildFederation {
     this._options = options;
     this._extraOptions = extraOptions;
   }
-
+  /**
+   * Apply the plugin
+   * @param {Compiler} compiler the compiler instance
+   * @returns {void}
+   */
   apply(compiler) {
     const webpack = compiler.webpack;
-    const EntryPlugin = webpack.EntryPlugin;
     const LibraryPlugin = webpack.library.EnableLibraryPlugin;
-    const MFP = webpack.container.ModuleFederationPlugin;
     const ContainerPlugin = webpack.container.ContainerPlugin;
     const LoaderTargetPlugin = webpack.LoaderTargetPlugin;
     const library = compiler.options.output.library;
@@ -221,13 +227,15 @@ class ChildFederation {
             },
             runtime: false,
             shared: {
-              ...externalizedShares,
+              ...(this._extraOptions.skipSharingNextInternals
+                ? {}
+                : externalizedShares),
               ...this._options.shared,
             },
           }),
           new webpack.web.JsonpTemplatePlugin(childOutput),
           new LoaderTargetPlugin('web'),
-          new LibraryPlugin('var'),
+          new LibraryPlugin(this._options.library.type),
           new webpack.DefinePlugin({
             'process.env.REMOTES': JSON.stringify(this._options.remotes),
             'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
@@ -235,6 +243,7 @@ class ChildFederation {
           new AddRuntimeRequirementToPromiseExternal(),
         ]
       );
+
       new RemoveRRRuntimePlugin().apply(childCompiler);
 
       childCompiler.options.module.rules.forEach((rule) => {
@@ -299,15 +308,22 @@ class ChildFederation {
       if (compiler.options.mode === 'development') {
         childCompiler.run((err, stats) => {
           if (err) {
-            console.error(err);
-            throw new Error(err);
+            compilation.errors.push(err);
+          }
+          if (stats && stats.hasErrors()) {
+            compilation.errors.push(
+              new Error(toDisplayErrors(stats.compilation.errors))
+            );
           }
         });
       } else {
-        childCompiler.runAsChild((err, stats) => {
-          if (err) {
-            console.error(err);
-            throw new Error(err);
+        childCompiler.runAsChild((err, entries, childCompilation) => {
+          if (childCompilation.getStats().hasErrors()) {
+            compilation.errors.push(
+              new Error(
+                toDisplayErrors(childCompilation.getStats().compilation.errors)
+              )
+            );
           }
         });
       }
@@ -316,6 +332,11 @@ class ChildFederation {
 }
 
 class AddRuntimeRequirementToPromiseExternal {
+  /**
+   * Apply the plugin
+   * @param {Compiler} compiler the compiler instance
+   * @returns {void}
+   */
   apply(compiler) {
     compiler.hooks.compilation.tap(
       'AddRuntimeRequirementToPromiseExternal',
@@ -367,13 +388,13 @@ function generateRemoteTemplate(url, global) {
   }).then(function () {
     const proxy = {
       get: ${global}.get,
-      init: (args) => {
+      init: function(shareScope) {
         const handler = {
           get(target, prop) {
             if (target[prop]) {
               Object.values(target[prop]).forEach(function(o) {
                 if(o.from === '_N_E') {
-                  o.loaded = true
+                  o.loaded = 1
                 }
               })
             }
@@ -388,7 +409,7 @@ function generateRemoteTemplate(url, global) {
           }
         }
         try {
-          ${global}.init(new Proxy(__webpack_require__.S.default, handler))
+          ${global}.init(new Proxy(shareScope, handler))
         } catch (e) {
 
         }
@@ -429,8 +450,20 @@ class NextFederationPlugin {
       );
       this._options.remotes = parsedRemotes;
     }
+    if (this._options.library) {
+      console.error('[mf] you cannot set custom library');
+    }
+    this._options.library = {
+      // assign remote name to object to avoid SWC mangling top level variable
+      type: 'window',
+      name: this._options.name,
+    };
   }
-
+  /**
+   * Apply the plugin
+   * @param {Compiler} compiler the compiler instance
+   * @returns {void}
+   */
   apply(compiler) {
     const webpack = compiler.webpack;
     const sharedForHost = Object.entries({

@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/nextjs-mf",
-  "version": "5.1.3",
+  "version": "5.2.2",
   "description": "Module Federation helper for NextJS",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,12 +13,12 @@
   "license": "MIT",
   "scripts": {
     "demo": "sleep 3 && cd demo && yarn install && yarn dev",
+    "dev": "rm -rf lib && concurrently \"yarn sync-files --watch\" \"yarn compile --watch\" \"yarn demo\"",
     "prettier": "prettier --write \"**/*.{js,json,md,ts,tsx}\"",
     "sync-files": "cpx \"src/**/*.js\" lib/",
     "compile": "rollup -c",
     "build": "rm -rf lib && yarn sync-files && yarn compile",
-    "dev": "rm -rf lib && concurrently \"yarn sync-files --watch\" \"yarn compile --watch\" \"yarn demo\"",
-    "dev:pkg": "rm -rf lib && concurrently \"yarn sync-files --watch\" \"yarn compile --watch\""
+    "prepublishOnly": "yarn build"
   },
   "dependencies": {
     "chalk": "^4.0.0",
