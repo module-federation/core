@@ -28,7 +28,7 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.2",
     "@rollup/plugin-multi-entry": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-node-resolve": "14.1.0",
     "@types/react": "^18.0.19",
     "concurrently": "^7.3.0",
     "cpx": "^1.5.0",
