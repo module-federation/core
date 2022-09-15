@@ -18,6 +18,7 @@
     "cpx": "1.5.0"
   },
   "resolutions": {
-    "@module-federation/nextjs-mf": "link:./tmp/nextjs-mf"
+    "@module-federation/nextjs-mf": "link:./tmp/nextjs-mf",
+    "webpack": "file:../node_modules/webpack"
   }
 }
