@@ -95,9 +95,7 @@ class ChildFederationPlugin {
   apply(compiler) {
     const webpack = compiler.webpack;
     const LibraryPlugin = webpack.library.EnableLibraryPlugin;
-    const ContainerPlugin = webpack.container.ContainerPlugin;
     const LoaderTargetPlugin = webpack.LoaderTargetPlugin;
-    const NodeTargetPlugin = webpack.node.NodeTargetPlugin;
     const library = compiler.options.output.library;
     const isServer = compiler.options.name === 'server';
     const isDev = compiler.options.mode === 'development';
@@ -340,13 +338,15 @@ class ChildFederationPlugin {
         });
         // in prod, if client
       } else if (!isServer) {
-        //wrong hook for this
-        // add hook for additional assets to prevent compile from sealing.
-        compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
-          return new Promise((res, rej) => {
-            // run server child compilation during client main compilation
-            childCompilers['server'].run((err, stats) => {
-              if (err) {
+// if ssr enabled and server in compiler cache
+        if(childCompilers['server']) {
+          //wrong hook for this
+          // add hook for additional assets to prevent compile from sealing.
+          compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
+            return new Promise((res, rej) => {
+              // run server child compilation during client main compilation
+              childCompilers['server'].run((err, stats) => {
+                if (err) {
                 compilation.errors.push(err);
                 rej()
               }
@@ -356,10 +356,11 @@ class ChildFederationPlugin {
                 );
                 rej()
               }
-              res()
+                res()
+              });
             });
           });
-        });
+        }
         // run client child compiler like normal
         childCompiler.run((err, stats) => {
           if (err) {
