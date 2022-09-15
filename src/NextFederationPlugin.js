@@ -11,6 +11,8 @@ const {
   toDisplayErrors,
 } = require('./loaders/helpers');
 const { exposeNextjsPages } = require('./loaders/nextPageMapLoader');
+const DevHmrFixInvalidPongPlugin = require('./plugins/DevHmrFixInvalidPongPlugin');
+
 const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
 
 /** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ExternalsType} ExternalsType */
@@ -162,7 +164,7 @@ const DEFAULT_SHARE_SCOPE = {
   },
 };
 
-class ChildFederation {
+class ChildFederationPlugin {
   constructor(options, extraOptions = {}) {
     this._options = options;
     this._extraOptions = extraOptions;
@@ -315,10 +317,12 @@ class ChildFederation {
           }
         });
       } else {
-        childCompiler.runAsChild((err, entries,childCompiliation) => {
-          if (childCompiliation.getStats().hasErrors()) {
+        childCompiler.runAsChild((err, entries, childCompilation) => {
+          if (childCompilation.getStats().hasErrors()) {
             compilation.errors.push(
-              new Error(toDisplayErrors(childCompiliation.getStats().compilation.errors))
+              new Error(
+                toDisplayErrors(childCompilation.getStats().compilation.errors)
+              )
             );
           }
         });
@@ -461,6 +465,13 @@ class NextFederationPlugin {
    * @returns {void}
    */
   apply(compiler) {
+    if (this._extraOptions.automaticPageStitching) {
+      compiler.options.module.rules.push({
+        test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
+        loader: path.resolve(__dirname, './loaders/patchNextClientPageLoader'),
+      });
+    }
+
     const webpack = compiler.webpack;
     const sharedForHost = Object.entries({
       ...(this._options.shared || {}),
@@ -499,8 +510,13 @@ class NextFederationPlugin {
       'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
       'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
     }).apply(compiler);
-    new ChildFederation(this._options, this._extraOptions).apply(compiler);
+    new ChildFederationPlugin(this._options, this._extraOptions).apply(
+      compiler
+    );
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
+    if (compiler.options.mode === 'development') {
+      new DevHmrFixInvalidPongPlugin().apply(compiler);
+    }
   }
 }
 

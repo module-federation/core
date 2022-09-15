@@ -22,6 +22,7 @@ module.exports = {
             enableImageLoaderFix: true,
             enableUrlLoaderFix: true,
             skipSharingNextInternals: false,
+            automaticPageStitching: true,
           },
         })
       );
