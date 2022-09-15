@@ -426,7 +426,7 @@ class NextFederationPlugin {
   constructor(options) {
     const {extraOptions, ...mainOpts} = options;
     this._options = mainOpts;
-    this._extraOptions = extraOptions;
+    this._extraOptions = extraOptions || {};
   }
 
   /**

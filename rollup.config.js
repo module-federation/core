@@ -8,9 +8,9 @@ const production = !process.env.ROLLUP_WATCH;
 
 export default [
   {
-    input: ['./NextFederationPlugin.js'],
+    input: ['./src/NextFederationPlugin.js'],
     output: {
-      dir: '../lib',
+      dir: './lib',
       format: 'cjs',
       preserveModules: false,
       exports: 'auto',
@@ -36,12 +36,12 @@ export default [
   },
   {
     input: [
-      './client/MFClient.ts',
-      './client/useMFClient.ts',
-      './client/useMFRemote.ts',
+      './src/client/MFClient.ts',
+      './src/client/useMFClient.ts',
+      './src/client/useMFRemote.ts',
     ],
     output: {
-      dir: '../lib',
+      dir: './lib',
       format: 'cjs',
       preserveModules: true,
       exports: 'auto',
