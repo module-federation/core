@@ -164,7 +164,7 @@ const DEFAULT_SHARE_SCOPE = {
   },
 };
 
-class ChildFederation {
+class ChildFederationPlugin {
   constructor(options, extraOptions = {}) {
     this._options = options;
     this._extraOptions = extraOptions;
@@ -510,7 +510,9 @@ class NextFederationPlugin {
       'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
       'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
     }).apply(compiler);
-    new ChildFederation(this._options, this._extraOptions).apply(compiler);
+    new ChildFederationPlugin(this._options, this._extraOptions).apply(
+      compiler
+    );
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
     if (compiler.options.mode === 'development') {
       new DevHmrFixInvalidPongPlugin().apply(compiler);
