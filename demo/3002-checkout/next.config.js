@@ -3,8 +3,6 @@ const NextFederationPlugin = require('@module-federation/nextjs-mf');
 module.exports = {
   webpack(config, options) {
     if (!options.isServer) {
-      config.module.rules.push(...NextFederationPlugin.loaders);
-
       config.plugins.push(
         new NextFederationPlugin({
           name: 'checkout',

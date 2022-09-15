@@ -465,6 +465,13 @@ class NextFederationPlugin {
    * @returns {void}
    */
   apply(compiler) {
+    if (!this._extraOptions.disableMFClient) {
+      compiler.options.module.rules.push({
+        test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
+        loader: path.resolve(__dirname, './loaders/patchNextClientPageLoader'),
+      });
+    }
+
     const webpack = compiler.webpack;
     const sharedForHost = Object.entries({
       ...(this._options.shared || {}),
@@ -510,12 +517,5 @@ class NextFederationPlugin {
     }
   }
 }
-
-NextFederationPlugin.loaders = [
-  {
-    test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
-    loader: path.resolve(__dirname, './loaders/patchNextClientPageLoader'),
-  },
-];
 
 module.exports = NextFederationPlugin;
