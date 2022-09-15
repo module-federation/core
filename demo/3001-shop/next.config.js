@@ -23,6 +23,7 @@ module.exports = {
             exposePages: true,
             enableImageLoaderFix: true,
             enableUrlLoaderFix: true,
+            automaticPageStitching: true,
           },
         })
       );

@@ -465,7 +465,7 @@ class NextFederationPlugin {
    * @returns {void}
    */
   apply(compiler) {
-    if (!this._extraOptions.disableMFClient) {
+    if (this._extraOptions.automaticPageStitching) {
       compiler.options.module.rules.push({
         test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
         loader: path.resolve(__dirname, './loaders/patchNextClientPageLoader'),

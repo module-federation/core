@@ -22,7 +22,7 @@ module.exports = {
             enableImageLoaderFix: true,
             enableUrlLoaderFix: true,
             skipSharingNextInternals: false,
-            disableMFClient: false,
+            automaticPageStitching: true,
           },
         })
       );
