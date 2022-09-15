@@ -18,7 +18,6 @@ function patchNextClientPageLoader(content) {
     this.context,
     path.resolve(__dirname, '../include-defaults.js')
   );
-  path.resolve(__dirname, '../include-defaults.js');
   const pathMFClient = path.relative(
     this.context,
     path.resolve(__dirname, '../client/MFClient.js')
@@ -27,8 +26,8 @@ function patchNextClientPageLoader(content) {
   patchedContent = content.replace(
     'exports.default = PageLoader;',
     `
-      require("${pathIncludeDefaults}");
-      const MFClient = require("${pathMFClient}").MFClient;
+      require(${JSON.stringify(pathIncludeDefaults)});
+      const MFClient = require(${JSON.stringify(pathMFClient)}).MFClient;
 
       class PageLoaderExtended extends PageLoader {
         constructor(buildId, assetPrefix) {
