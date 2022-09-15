@@ -436,7 +436,8 @@ class NextFederationPlugin {
   apply(compiler) {
     const isServer = compiler.options.name === 'server';
     const webpack = compiler.webpack;
-    if (compiler.options.name === 'server') {
+    if (isServer) {
+      console.error('[nextjs-mf] WARNING: SSR IS NOT FULLY SUPPORTED YET, Only use pluign on client builds');
       // target false because we use our own target for node env
       compiler.options.target = false;
       new StreamingTargetPlugin(this._options, webpack).apply(compiler);
@@ -516,7 +517,7 @@ class NextFederationPlugin {
       new ModuleFederationPlugin(hostFederationPluginOptions, {
         ModuleFederationPlugin,
       }).apply(compiler);
-      new ChildFederation(this._options, this._extraOptions).apply(compiler);
+      new ChildFederationPlugin(this._options, this._extraOptions).apply(compiler);
       new AddRuntimeRequirementToPromiseExternal().apply(compiler);
       if (compiler.options.mode === 'development') {
         new DevHmrFixInvalidPongPlugin().apply(compiler);
