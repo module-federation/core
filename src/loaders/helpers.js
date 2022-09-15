@@ -33,3 +33,15 @@ module.exports.hasLoader = function hasLoader(rule, loaderName) {
   }
   return false;
 };
+
+module.exports.toDisplayErrors = function toDisplayErrors(err) {
+  return err
+    .map((error) => {
+      let message = error.message;
+      if (error.stack) {
+        message += '\n' + error.stack;
+      }
+      return message;
+    })
+    .join('\n');
+};

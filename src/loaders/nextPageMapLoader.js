@@ -1,23 +1,32 @@
 const fg = require('fast-glob');
 const fs = require('fs');
 
+// TODO: import UrlNode from ./client folder when whole project migrates on TypeScript (but right now using JS copy of this class)
+// const UrlNode = require('../client/UrlNode').UrlNode;
+const UrlNode = require('./UrlNode').UrlNode;
+
 /**
  * Webpack loader which prepares MF map for NextJS pages
  *
  * @type {(this: import("webpack").LoaderContext<{}>, content: string) => string>}
  */
 function nextPageMapLoader() {
-  const pages = getNextPages(this.rootContext);
-  const pageMap = preparePageMap(pages);
-
   // const [pagesRoot] = getNextPagesRoot(this.rootContext);
   // this.addContextDependency(pagesRoot);
+  const opts = this.getOptions();
+  const pages = getNextPages(this.rootContext);
 
-  const result = `module.exports = { 
-    default: ${JSON.stringify(pageMap)},
-  };`;
+  let result = '';
+  if (Object.hasOwnProperty.call(opts, 'v2')) {
+    result = preparePageMapV2(pages);
+  } else {
+    result = preparePageMap(pages);
+  }
 
-  this.callback(null, result);
+  this.callback(
+    null,
+    `module.exports = { default: ${JSON.stringify(result)} };`
+  );
 }
 
 /**
@@ -38,6 +47,7 @@ function exposeNextjsPages(cwd) {
 
   const exposesWithPageMap = {
     './pages-map': `${__filename}!${__filename}`,
+    './pages-map-v2': `${__filename}?v2!${__filename}`,
     ...pageModulesMap,
   };
 
@@ -113,13 +123,53 @@ function sanitizePagePath(item) {
 function preparePageMap(pages) {
   const result = {};
 
-  pages.forEach((pagePath) => {
-    const page = sanitizePagePath(pagePath);
-    let key =
-      '/' +
-      page.replace(/\[\.\.\.[^\]]+\]/gi, '*').replace(/\[([^\]]+)\]/gi, ':$1');
+  const clearedPages = pages.map((p) => `/${sanitizePagePath(p)}`);
+
+  // getSortedRoutes @see https://github.com/vercel/next.js/blob/canary/packages/next/shared/lib/router/utils/sorted-routes.ts
+  const root = new UrlNode();
+  clearedPages.forEach((pagePath) => root.insert(pagePath));
+  // Smoosh will then sort those sublevels up to the point where you get the correct route definition priority
+  const sortedPages = root.smoosh();
+
+  sortedPages.forEach((page) => {
+    let key = page
+      .replace(/\[\.\.\.[^\]]+\]/gi, '*')
+      .replace(/\[([^\]]+)\]/gi, ':$1');
     key = key.replace(/^\/pages\//, '/').replace(/\/index$/, '') || '/';
-    result[key] = `./${page}`;
+    result[key] = `.${page}`;
+  });
+
+  return result;
+}
+
+/**
+ * Create MF list of NextJS pages
+ *
+ * From
+ *   ['pages/index.tsx', 'pages/storage/[...slug].tsx', 'pages/storage/index.tsx']
+ * Getting the following map
+ *   {
+ *     '/': './pages/index',
+ *     '/storage': './pages/storage/index'
+ *     '/storage/[...slug]': './pages/storage/[...slug]',
+ *   }
+ *
+ * @type {(pages: string[]) => {[key: string]: string}}
+ */
+function preparePageMapV2(pages) {
+  const result = {};
+
+  const clearedPages = pages.map((p) => `/${sanitizePagePath(p)}`);
+
+  // getSortedRoutes @see https://github.com/vercel/next.js/blob/canary/packages/next/shared/lib/router/utils/sorted-routes.ts
+  const root = new UrlNode();
+  clearedPages.forEach((pagePath) => root.insert(pagePath));
+  // Smoosh will then sort those sublevels up to the point where you get the correct route definition priority
+  const sortedPages = root.smoosh();
+
+  sortedPages.forEach((page) => {
+    let key = page.replace(/^\/pages\//, '/').replace(/\/index$/, '') || '/';
+    result[key] = `.${page}`;
   });
 
   return result;

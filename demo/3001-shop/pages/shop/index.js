@@ -1,8 +1,8 @@
 import React from 'react';
 import Head from 'next/head';
 import WebpackPng from '../../components/WebpackPng';
-import WebpackSvg from '../../components/WebpackSvg';
 console.log('nested remote',import('home/SharedNav'))
+
 const Shop = () => (
   <div>
     <Head>
