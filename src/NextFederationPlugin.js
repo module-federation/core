@@ -6,8 +6,14 @@
 
 import fs from 'fs';
 import path from 'path';
-import { injectRuleLoader, hasLoader } from './loaders/helpers';
-import { exposeNextjsPages } from './loaders/nextPageMapLoader';
+const {
+  injectRuleLoader,
+  hasLoader,
+  toDisplayErrors,
+} = require('./loaders/helpers');
+const { exposeNextjsPages } = require('./loaders/nextPageMapLoader');
+const DevHmrFixInvalidPongPlugin = require('./plugins/DevHmrFixInvalidPongPlugin');
+
 import {
   reKeyHostShared,
   DEFAULT_SHARE_SCOPE,
@@ -76,15 +82,20 @@ const computeRemoteFilename = (isServer, filename) => {
   return filename;
 };
 const childCompilers = {};
-class ChildFederation {
+class ChildFederationPlugin {
   constructor(options, extraOptions = {}) {
     this._options = options;
     this._extraOptions = extraOptions;
   }
-
+  /**
+   * Apply the plugin
+   * @param {Compiler} compiler the compiler instance
+   * @returns {void}
+   */
   apply(compiler) {
     const webpack = compiler.webpack;
     const LibraryPlugin = webpack.library.EnableLibraryPlugin;
+    const ContainerPlugin = webpack.container.ContainerPlugin;
     const LoaderTargetPlugin = webpack.LoaderTargetPlugin;
     const NodeTargetPlugin = webpack.node.NodeTargetPlugin;
     const library = compiler.options.output.library;
@@ -319,8 +330,12 @@ class ChildFederation {
         // in dev, run the compilers in the order they are created (client, server)
         childCompiler.run((err, stats) => {
           if (err) {
-            console.error(err);
-            throw err;
+            compilation.errors.push(err);
+          }
+          if (stats && stats.hasErrors()) {
+            compilation.errors.push(
+              new Error(toDisplayErrors(stats.compilation.errors))
+            );
           }
         });
         // in prod, if client
@@ -330,17 +345,30 @@ class ChildFederation {
         compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
           return new Promise((res, rej) => {
             // run server child compilation during client main compilation
-            childCompilers['server'].run((err) => {
-              if (err) rej(err);
-              res();
+            childCompilers['server'].run((err, stats) => {
+              if (err) {
+                compilation.errors.push(err);
+                rej()
+              }
+              if (stats && stats.hasErrors()) {
+                compilation.errors.push(
+                  new Error(toDisplayErrors(stats.compilation.errors))
+                );
+                rej()
+              }
+              res()
             });
           });
         });
         // run client child compiler like normal
         childCompiler.run((err, stats) => {
           if (err) {
-            console.error(err);
-            throw err;
+            compilation.errors.push(err);
+          }
+          if (stats && stats.hasErrors()) {
+            compilation.errors.push(
+              new Error(toDisplayErrors(stats.compilation.errors))
+            );
           }
         });
       }
@@ -349,6 +377,11 @@ class ChildFederation {
 }
 
 class AddRuntimeRequirementToPromiseExternal {
+  /**
+   * Apply the plugin
+   * @param {Compiler} compiler the compiler instance
+   * @returns {void}
+   */
   apply(compiler) {
     compiler.hooks.compilation.tap(
       'AddRuntimeRequirementToPromiseExternal',
@@ -390,11 +423,16 @@ function createRuntimeVariables(remotes) {
 
 class NextFederationPlugin {
   constructor(options) {
-    const { extraOptions, ...mainOpts } = options;
+    const {extraOptions, ...mainOpts} = options;
     this._options = mainOpts;
     this._extraOptions = extraOptions;
   }
 
+  /**
+   * Apply the plugin
+   * @param {Compiler} compiler the compiler instance
+   * @returns {void}
+   */
   apply(compiler) {
     const isServer = compiler.options.name === 'server';
     const webpack = compiler.webpack;
@@ -414,11 +452,12 @@ class NextFederationPlugin {
       // should this be a plugin that we apply to the compiler?
       internalizeSharedPackages(this._options, compiler);
     } else {
-      this._options.library = {
-        // assign remote name to object to avoid SWC mangling top level variable
-        type: 'window',
-        name: this._options.name,
-      };
+      if (this._extraOptions.automaticPageStitching) {
+        compiler.options.module.rules.push({
+          test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
+          loader: path.resolve(__dirname, './loaders/patchNextClientPageLoader'),
+        });
+      }
       if (this._options.remotes) {
         const parsedRemotes = Object.entries(this._options.remotes).reduce(
           (acc, remote) => {
@@ -433,14 +472,23 @@ class NextFederationPlugin {
           {}
         );
         this._options.remotes = parsedRemotes;
-        //todo runtime variable creation needs to be applied for server as well. this is just for client
-        // todo: this needs to be refactored into something more comprehensive. this is just a quick fix
-        new webpack.DefinePlugin({
-          'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
-          'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
-        }).apply(compiler);
       }
+      if (this._options.library) {
+        console.error('[mf] you cannot set custom library');
+      }
+      this._options.library = {
+        // assign remote name to object to avoid SWC mangling top level variable
+        type: 'window',
+        name: this._options.name,
+      };
     }
+    //todo runtime variable creation needs to be applied for server as well. this is just for client
+    // todo: this needs to be refactored into something more comprehensive. this is just a quick fix
+    new webpack.DefinePlugin({
+      'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
+      'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
+    }).apply(compiler);
+
 
     const ModuleFederationPlugin = {
       client: webpack.container.ModuleFederationPlugin,
@@ -470,6 +518,9 @@ class NextFederationPlugin {
       }).apply(compiler);
       new ChildFederation(this._options, this._extraOptions).apply(compiler);
       new AddRuntimeRequirementToPromiseExternal().apply(compiler);
+      if (compiler.options.mode === 'development') {
+        new DevHmrFixInvalidPongPlugin().apply(compiler);
+      }
     }
   }
 }
