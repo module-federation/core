@@ -8,6 +8,7 @@
   "private": true,
   "dependencies": {
     "@swc/helpers": "~0.3.3",
+    "antd": "^4.23.1",
     "core-js": "^3.6.5",
     "fast-glob": "^3.2.12",
     "next": "12.2.5",

@@ -1,17 +1,22 @@
-import Head from 'next/head';
+// require('@module-federation/nextjs-mf/lib/include-defaults');
 
-import './styles.css';
+import '@module-federation/nextjs-mf/include-defaults';
 
-function CustomApp({ Component, pageProps }) {
-  return (
-    <>
-      <Head>
-        <title>Welcome to home!</title>
-      </Head>
-      <main className="app">
-        <Component {...pageProps} />
-      </main>
-    </>
-  );
-}
-export default CustomApp;
+// console.log(__webpack_init_sharing__('default'));
+// console.log(__webpack_share_scopes__);
+
+import dynamic from 'next/dynamic';
+import 'antd/dist/antd.css';
+
+const page = import('./_app.real');
+const AppPage = dynamic(() => import('./_app.real'));
+const Page = (props) => {
+  return <AppPage {...props} />;
+};
+Page.getInitialProps = async (ctx) => {
+  const getInitialProps = (await page).default?.getInitialProps;
+  if (getInitialProps) {
+    return getInitialProps(ctx);
+  }
+};
+export default Page;
