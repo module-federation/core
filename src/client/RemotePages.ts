@@ -1,4 +1,5 @@
 import { PageMap, RemoteContainer } from './RemoteContainer';
+import * as React from 'react';
 
 export type PathPrefix = string;
 
@@ -18,13 +19,12 @@ export class RemotePages {
   paths: Record<PathPrefix, RemoteContainer> = {};
   pageListCache: string[] | undefined;
   private asyncLoadedPageMaps: Set<RemoteContainer>;
+  private mode?: 'production' | 'development';
 
-  constructor(remoteToRoutes?: RemoteToRoutes) {
+  constructor(mode?: 'production' | 'development') {
     this.asyncLoadedPageMaps = new Set();
     this.pageListCache = undefined;
-    remoteToRoutes?.forEach((routes, remote) => {
-      this.addRoutes(routes, remote);
-    });
+    this.mode = mode;
   }
 
   /**
@@ -142,13 +142,39 @@ export class RemotePages {
         };
       }
     } catch (e) {
-      routeInfo = {
-        // TODO: provide ability to customize component with Error
-        component: () => e.message,
-        exports: {},
-        styles: [],
-      };
-      console.warn(e);
+      if (this.mode !== 'development') {
+        // in PROD throw error, nextjs will reload the page according to its internal logic
+        throw e;
+      } else {
+        // in DEV mod show error in browser
+        console.warn(e);
+        routeInfo = {
+          component: () =>
+            React.createElement(
+              'div',
+              null,
+              React.createElement(
+                'div',
+                null,
+                'This page is shown only in DEVELOPMENT mode. In PRODUCTION NextJS will reload this page trying to obtain it again from the server.'
+              ),
+              React.createElement(
+                'div',
+                null,
+                'Federated page ',
+                route,
+                ' load error:'
+              ),
+              React.createElement(
+                'div',
+                null,
+                React.createElement('b', null, e.message)
+              )
+            ),
+          exports: {},
+          styles: [],
+        };
+      }
     }
     return routeInfo;
   }

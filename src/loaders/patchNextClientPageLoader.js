@@ -32,7 +32,7 @@ function patchNextClientPageLoader(content) {
       class PageLoaderExtended extends PageLoader {
         constructor(buildId, assetPrefix) {
           super(buildId, assetPrefix);
-          global.mf_client = new MFClient(this);
+          global.mf_client = new MFClient(this, { mode: process.env.NODE_ENV });
         }
 
         _getPageListOriginal() {

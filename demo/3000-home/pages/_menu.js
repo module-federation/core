@@ -4,6 +4,7 @@ import { Menu } from 'antd';
 const menuItems = [
   { label: 'Main home', key: '/' },
   { label: 'Test hook from remote', key: '/home/test-remote-hook' },
+  { label: 'Test broken remotes', key: '/home/test-broken-remotes' },
   { label: 'Exposed pages', key: '/home/exposed-pages' },
   {
     label: 'Exposed components',

@@ -10,6 +10,10 @@ type EventTypes = 'loadedRemoteRoute' | 'loadedLocalRoute';
 /** Remote Container string eg `home@https://example.com/_next/static/chunks/remoteEntry.js` */
 export type RemoteString = string;
 
+export type MFClientOptions = {
+  mode: 'production' | 'development';
+};
+
 /**
  * The main class for Module Federation on the client side in runtime.
  * Instance of this class is a Singleton and stored in `window.mf_client` variable.
@@ -26,13 +30,13 @@ export class MFClient {
   /** Original nextjs PageLoader which passed by `patchNextClientPageLoader.js` */
   private _nextPageLoader: PageLoader;
 
-  constructor(nextPageLoader: PageLoader) {
+  constructor(nextPageLoader: PageLoader, opts: MFClientOptions) {
     this._nextPageLoader = nextPageLoader;
     this.events = new EventEmitter<EventTypes>();
 
     const cfg = (global as any)?.__NEXT_DATA__?.props?.mfRoutes || {};
 
-    this.remotePages = new RemotePages();
+    this.remotePages = new RemotePages(opts?.mode);
     Object.keys(cfg).forEach((remoteStr) => {
       const remote = this.registerRemote(remoteStr);
       this.remotePages.addRoutes(cfg[remoteStr], remote);
@@ -125,13 +129,18 @@ export class MFClient {
         routeInfo = await routeLoader._loadRouteOriginal(route);
         this.events.emit('loadedLocalRoute', routeInfo, prefetch);
       } else {
-        routeInfo = await this.remotePages.getRouteInfo(route);
-        this.events.emit(
-          'loadedRemoteRoute',
-          routeInfo,
-          prefetch,
-          this.remotePages.routeToRemote(route)
-        );
+        try {
+          routeInfo = await this.remotePages.getRouteInfo(route);
+          this.events.emit(
+            'loadedRemoteRoute',
+            routeInfo,
+            prefetch,
+            this.remotePages.routeToRemote(route)
+          );
+        } catch (e) {
+          // as fallback try to use original loadRoute for keeping nextjs logic for routes load errors
+          routeInfo = await routeLoader._loadRouteOriginal(route);
+        }
       }
       return routeInfo;
     };
@@ -162,35 +171,39 @@ export class MFClient {
     // replace routeLoader.whenEntrypoint logic
     routeLoader.whenEntrypoint = async (route: string) => {
       if (route === '/_error') {
-        let route = await this.pathnameToRoute(window.location.pathname);
-        if (!route) {
-          // if route not found then try to load all non-downloaded remoteEntries
-          // and try to find route again
-          const awaitRemotes = [] as Promise<any>[];
-          Object.values(this.remotes).forEach((remote) => {
-            if (!remote.isLoaded()) {
-              awaitRemotes.push(
-                remote
-                  .getContainer()
-                  .then(() => this.remotePages.loadRemotePageMap(remote))
-                  .catch(() => null)
-              );
-            }
-          });
-          await Promise.all(awaitRemotes);
-          route = await this.pathnameToRoute(window.location.pathname);
-        }
-        if (route) {
-          // TODO: fix router properties for the first page load of federated page http://localhost:3000/shop/products/B
-          console.warn('replace entrypoint /_error by', route);
-          const routeInfo = await this.remotePages.getRouteInfo(route);
-          this.events.emit(
-            'loadedRemoteRoute',
-            routeInfo,
-            false,
-            this.remotePages.routeToRemote(route)
-          );
-          return routeInfo;
+        try {
+          let route = await this.pathnameToRoute(window.location.pathname);
+          if (!route) {
+            // if route not found then try to load all non-downloaded remoteEntries
+            // and try to find route again
+            const awaitRemotes = [] as Promise<any>[];
+            Object.values(this.remotes).forEach((remote) => {
+              if (!remote.isLoaded()) {
+                awaitRemotes.push(
+                  remote
+                    .getContainer()
+                    .then(() => this.remotePages.loadRemotePageMap(remote))
+                    .catch(() => null)
+                );
+              }
+            });
+            await Promise.all(awaitRemotes);
+            route = await this.pathnameToRoute(window.location.pathname);
+          }
+          if (route) {
+            // TODO: fix router properties for the first page load of federated page http://localhost:3000/shop/products/B
+            console.warn('replace entrypoint /_error by', route);
+            const routeInfo = await this.remotePages.getRouteInfo(route);
+            this.events.emit(
+              'loadedRemoteRoute',
+              routeInfo,
+              false,
+              this.remotePages.routeToRemote(route)
+            );
+            return routeInfo;
+          }
+        } catch (e) {
+          // do nothing, load original entrypoint
         }
       }
       const routeInfo = await routeLoader._whenEntrypointOriginal(route);
