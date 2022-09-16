@@ -11,4 +11,10 @@ module.exports = {
     '/checkout',
     '/checkout/exposed-pages',
   ],
+  'unresolvedHost@http://localhost:3333/_next/static/chunks/remoteEntry.js': [
+    '/unresolved-host',
+  ],
+  'wrongEntry@http://localhost:3000/_next/static/chunks/remoteEntryWrong.js': [
+    '/wrong-entry',
+  ],
 };
