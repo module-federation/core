@@ -1,3 +1,5 @@
+import { extractUrlAndGlobal } from './internal';
+
 const remoteVars = process.env.REMOTES || {};
 
 const runtimeRemotes = Object.entries(remoteVars).reduce(function (acc, item) {
@@ -10,7 +12,7 @@ const runtimeRemotes = Object.entries(remoteVars).reduce(function (acc, item) {
     acc[key] = { asyncContainer: value() };
   } else if (typeof value === 'string') {
     // if its just a string (global@url)
-    const [global, url] = value.split('@');
+    const [url, global] = extractUrlAndGlobal(value);
     acc[key] = { global, url };
   } else {
     // we dont know or currently support this type
