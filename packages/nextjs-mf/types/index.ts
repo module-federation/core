@@ -1,4 +1,4 @@
-import type { container } from 'webpack';
+import type { container, WebpackOptionsNormalized } from 'webpack';
 
 export type ModuleFederationPluginOptions = ConstructorParameters<
   typeof container.ModuleFederationPlugin
@@ -28,17 +28,33 @@ export type ExternalsType = Required<
   ModuleFederationPluginOptions['remoteType']
 >;
 
-type Container = {
-  get: () => void;
+type ModulePath = string;
+
+export type WebpackRemoteContainer = {
+  get(modulePath: ModulePath): () => any;
   init: (obj: typeof __webpack_share_scopes__['']) => void;
 };
 
-export type AsyncContainer = Promise<Container>;
+export type AsyncContainer = Promise<WebpackRemoteContainer>;
 
-export type RuntimeRemote = {
+export type RemoteData = {
+  global: string;
+  url: string;
+};
+
+export type RuntimeRemote = Partial<RemoteData> & {
   asyncContainer?: AsyncContainer;
-  global?: string;
-  url?: string;
 };
 
 export type RuntimeRemotesMap = Record<string, RuntimeRemote>;
+
+type Module = WebpackOptionsNormalized['module'];
+type Rules = Module['rules'];
+export type RuleSetRuleUnion = Rules[0];
+type RuleSetRule = Extract<RuleSetRuleUnion, { loader?: string }>;
+export type Loader = Extract<RuleSetRule['use'], { loader?: string }>;
+
+// Types for MFClient
+export type EventTypes = 'loadStart' | 'loadComplete' | 'loadError';
+type NextRoute = string;
+export type PageMap = Record<NextRoute, ModulePath>;

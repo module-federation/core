@@ -7,7 +7,10 @@ import type {
 
 import path from 'path';
 
-const remoteVars = process.env['REMOTES'] || ({} as RuntimeRemotesMap);
+const remoteVars = (process.env['REMOTES'] || {}) as Record<
+  string,
+  Promise<any> | string | (() => Promise<any>)
+>;
 
 export const runtimeRemotes = Object.entries(remoteVars).reduce(function (
   acc,

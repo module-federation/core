@@ -1,11 +1,4 @@
-import type { WebpackOptionsNormalized } from 'webpack';
-
-type Module = WebpackOptionsNormalized['module'];
-type Rules = Module['rules'];
-type RuleSetRuleUnion = Rules[0];
-
-type RuleSetRule = Extract<RuleSetRuleUnion, { loader?: string }>;
-type Loader = Extract<RuleSetRule['use'], { loader?: string }>;
+import type { RuleSetRuleUnion, Loader } from '../../types';
 
 /**
  * Inject a loader into the current module rule.

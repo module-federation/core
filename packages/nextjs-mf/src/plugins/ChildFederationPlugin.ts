@@ -2,7 +2,7 @@ import type { Compiler, WebpackError } from 'webpack';
 import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
-} from '../types';
+} from '../../types';
 
 import path from 'path';
 import fs from 'fs';
@@ -15,12 +15,12 @@ import {
   getOutputPath,
   externalizedShares,
   removePlugins,
-} from '../lib/internal';
+} from '../internal';
 import {
   computeRemoteFilename,
   createRuntimeVariables,
   toDisplayErrors,
-} from '../lib/utils';
+} from '../../utils';
 
 import StreamingTargetPlugin from '../node-plugin/streaming';
 import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';

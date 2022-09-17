@@ -8,7 +8,7 @@ import type {
   NextFederationPluginOptions,
   NextFederationPluginExtraOptions,
   ModuleFederationPluginOptions,
-} from '../types';
+} from '../../types';
 import type { Compiler } from 'webpack';
 
 import path from 'path';
@@ -21,8 +21,8 @@ import {
   extractUrlAndGlobal,
   generateRemoteTemplate,
   internalizeSharedPackages,
-} from '../lib/internal';
-import { createRuntimeVariables } from '../lib/utils';
+} from '../internal';
+import { createRuntimeVariables } from '../../utils';
 
 import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
 import ChildFederationPlugin from './ChildFederationPlugin';
