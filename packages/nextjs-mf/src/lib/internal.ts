@@ -1,11 +1,12 @@
-import { Compiler } from 'webpack';
-import path from 'path';
-import {
+import type { Compiler } from 'webpack';
+import type {
   ModuleFederationPluginOptions,
+  Shared,
   SharedConfig,
   SharedObject,
-} from '../plugins/ModuleFederationPlugin';
+} from '../types';
 
+import path from 'path';
 import { parseOptions } from 'webpack/lib/container/options';
 import { isRequiredVersion } from 'webpack/lib/sharing/utils';
 
@@ -54,10 +55,10 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
 
 // put host in-front of any shared module key, so "hostreact"
 export const reKeyHostShared = (
-  options: SharedConfig
+  options: Shared = {}
 ): Record<string, SharedConfig> => {
   const shared = {
-    ...(options || {}),
+    ...options,
     ...DEFAULT_SHARE_SCOPE,
   } as Record<string, SharedConfig>;
 
@@ -257,7 +258,7 @@ export const getOutputPath = (compiler: Compiler) => {
     ?.slice(0, foundIndex && foundIndex > 0 ? foundIndex : outputPath.length)
     .join(path.sep);
 
-  return outputPath;
+  return outputPath as string;
 };
 
 export const removePlugins = [

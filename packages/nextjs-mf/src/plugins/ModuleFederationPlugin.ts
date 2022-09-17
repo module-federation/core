@@ -1,4 +1,5 @@
-import type { Compiler, container } from 'webpack';
+import type { Compiler } from 'webpack';
+import type { ModuleFederationPluginOptions, ExternalsType } from '../types';
 
 export default class ModuleFederationPlugin {
   private _options!: ModuleFederationPluginOptions;
@@ -6,12 +7,6 @@ export default class ModuleFederationPlugin {
   constructor(options: ModuleFederationPluginOptions) {
     this._options = options;
   }
-
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
   apply(compiler: Compiler) {
     const { _options: options } = this;
     const webpack = compiler.webpack;
@@ -63,18 +58,3 @@ export default class ModuleFederationPlugin {
     }
   }
 }
-
-export type ModuleFederationPluginOptions = ConstructorParameters<
-  typeof container.ModuleFederationPlugin
->['0'];
-
-export type Shared = ModuleFederationPluginOptions['shared'];
-
-export type SharedObject = Extract<Shared, ModuleFederationPluginOptions>;
-
-export type SharedConfig = Extract<
-  SharedObject[keyof SharedObject],
-  { eager?: boolean }
->;
-
-type ExternalsType = Required<ModuleFederationPluginOptions['remoteType']>;

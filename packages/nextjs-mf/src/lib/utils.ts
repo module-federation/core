@@ -1,10 +1,11 @@
-type RuntimeRemote = {
-  asyncContainer?: Promise<any>;
-  global?: string;
-  url?: string;
-};
+import type {
+  AsyncContainer,
+  Remotes,
+  RuntimeRemotesMap,
+  RuntimeRemote,
+} from '../types';
 
-type RuntimeRemotesMap = Record<string, RuntimeRemote>;
+import path from 'path';
 
 const remoteVars = process.env['REMOTES'] || ({} as RuntimeRemotesMap);
 
@@ -47,7 +48,7 @@ export const runtimeRemotes = Object.entries(remoteVars).reduce(function (
  */
 export function injectScript(keyOrRuntimeRemoteItem: string | RuntimeRemote) {
   // 1) Load remote container if needed
-  let asyncContainer;
+  let asyncContainer: RuntimeRemote['asyncContainer'];
   const reference =
     typeof keyOrRuntimeRemoteItem === 'string'
       ? runtimeRemotes[keyOrRuntimeRemoteItem]
@@ -65,15 +66,22 @@ export function injectScript(keyOrRuntimeRemoteItem: string | RuntimeRemote) {
     };
 
     asyncContainer = new Promise(function (resolve, reject) {
+      function resolveRemoteGlobal() {
+        const asyncContainer = window[
+          remoteGlobal
+        ] as unknown as AsyncContainer;
+        return resolve(asyncContainer);
+      }
+
       if (typeof window[remoteGlobal] !== 'undefined') {
-        return resolve(window[remoteGlobal]);
+        return resolveRemoteGlobal();
       }
 
       (__webpack_require__ as any).l(
         reference.url,
         function (event: Event) {
           if (typeof window[remoteGlobal] !== 'undefined') {
-            return resolve(window[remoteGlobal]);
+            return resolveRemoteGlobal();
           }
 
           const errorType =
