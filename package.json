@@ -15,7 +15,8 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "regenerator-runtime": "0.13.7",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "webpack": "5.64.4"
   },
   "devDependencies": {
     "@module-federation/nextjs-mf": "link:./dist/packages/nextjs-mf",
