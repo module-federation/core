@@ -1,4 +1,5 @@
-declare module '__webpack_require__' {}
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="../../node_modules/webpack/module.d.ts" />
 
-declare const __webpack_init_sharing__: (scope: 'default') => Promise<void>;
-declare const __webpack_share_scopes__: { default: unknown };
+declare module 'webpack/lib/container/options';
+declare module 'webpack/lib/sharing/utils';
