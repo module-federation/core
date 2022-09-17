@@ -135,3 +135,45 @@ export function injectScript(keyOrRuntimeRemoteItem: string | RuntimeRemote) {
 }
 
 // module.exports.injectScript = injectScript;
+
+export const computeRemoteFilename = (isServer: boolean, filename: string) => {
+  if (isServer && filename) {
+    return path.basename(filename);
+  }
+  return filename;
+};
+
+export const createRuntimeVariables = (remotes: Remotes) => {
+  if (!remotes) {
+    return {};
+  }
+
+  return Object.entries(remotes).reduce((acc, remote) => {
+    // handle promise new promise and external new promise
+    if (remote[1].startsWith('promise ') || remote[1].startsWith('external ')) {
+      const promiseCall = remote[1]
+        .replace('promise ', '')
+        .replace('external ', '');
+      acc[remote[0]] = `function() {
+        return ${promiseCall}
+      }`;
+      return acc;
+    }
+    // if somehow its just the @ syntax or something else, pass it through
+    acc[remote[0]] = JSON.stringify(remote[1]);
+
+    return acc;
+  }, {} as Record<string, string>);
+};
+
+export function toDisplayErrors(err: Error[]) {
+  return err
+    .map((error) => {
+      let message = error.message;
+      if (error.stack) {
+        message += '\n' + error.stack;
+      }
+      return message;
+    })
+    .join('\n');
+}
