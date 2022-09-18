@@ -18,11 +18,10 @@ export default [
     external: [
       'fs',
       'path',
-      'webpack',
       'crypto',
       'next',
       'fast-glob',
-      /node_modules/,
+      /node_modules\/(?!webpack)/
     ], // tells Rollup 'I know what I'm doing here'
     plugins: [
       nodeResolve({ preferBuiltins: true }), // or `true`
