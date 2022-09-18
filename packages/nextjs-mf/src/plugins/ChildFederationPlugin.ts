@@ -1,4 +1,4 @@
-import type { Compiler, WebpackError } from 'webpack';
+import type { Compiler, WebpackError, WebpackPluginInstance } from 'webpack';
 import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
@@ -22,8 +22,13 @@ import {
   toDisplayErrors,
 } from '../../utils';
 
-import StreamingTargetPlugin from '../node-plugin/streaming';
-import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
+// import StreamingTargetPlugin from '../node-plugin/streaming';
+// import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
+
+import {
+  NodeFederationPlugin,
+  StreamingFederationPlugin,
+} from '@module-federation/node';
 
 import ChildFriendlyModuleFederationPlugin from './ModuleFederationPlugin';
 import RemoveRRRuntimePlugin from './RemoveRRRuntimePlugin';
@@ -64,7 +69,7 @@ export class ChildFederationPlugin {
     }
 
     compiler.hooks.thisCompilation.tap(CHILD_PLUGIN_NAME, (compilation) => {
-      let plugins;
+      let plugins = [] as WebpackPluginInstance[];
       const buildName = this._options.name;
       // using ModuleFederationPlugin does not work, i had to fork because of afterPlugins hook on containerPlugin.
       const FederationPlugin = ChildFriendlyModuleFederationPlugin;
@@ -119,8 +124,7 @@ export class ChildFederationPlugin {
           // Removing 'childOutput' as TS is throwing an error
           new webpack.web.JsonpTemplatePlugin(), // new webpack.web.JsonpTemplatePlugin(childOutput),
           new LoaderTargetPlugin('web'),
-          this._options.library &&
-            new LibraryPlugin(this._options.library.type),
+          new LibraryPlugin(this._options.library?.type as string),
           new webpack.DefinePlugin({
             'process.env.REMOTES': createRuntimeVariables(
               this._options.remotes
@@ -145,9 +149,10 @@ export class ChildFederationPlugin {
             'react/jsx-dev-runtime',
           ]),
           // new LoaderTargetPlugin('async-node'),
-          new StreamingTargetPlugin(federationPluginOptions, webpack),
-          federationPluginOptions.library &&
-            new LibraryPlugin(federationPluginOptions.library.type),
+          new StreamingFederationPlugin(federationPluginOptions, {
+            ModuleFederationPlugin: webpack.container.ModuleFederationPlugin,
+          }),
+          new LibraryPlugin(federationPluginOptions.library?.type as string),
           // new webpack.DefinePlugin({
           //   'process.env.REMOTES': JSON.stringify(this._options.remotes),
           //   'process.env.CURRENT_HOST': JSON.stringify(this._options.name),

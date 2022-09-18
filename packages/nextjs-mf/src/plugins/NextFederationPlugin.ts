@@ -13,8 +13,13 @@ import type { Compiler } from 'webpack';
 
 import path from 'path';
 
-import StreamingTargetPlugin from '../node-plugin/streaming';
-import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
+// import StreamingTargetPlugin from '../node-plugin/streaming';
+// import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
+
+import {
+  NodeFederationPlugin,
+  StreamingFederationPlugin,
+} from '@module-federation/node';
 
 import {
   reKeyHostShared,
@@ -63,7 +68,9 @@ export class NextFederationPlugin {
       // target false because we use our own target for node env
       compiler.options.target = false;
 
-      new StreamingTargetPlugin(this._options, webpack).apply(compiler);
+      new StreamingFederationPlugin(this._options, {
+        ModuleFederationPlugin: webpack.container.ModuleFederationPlugin,
+      }).apply(compiler);
 
       this._options.library = {
         type: 'commonjs-module',
@@ -130,7 +137,7 @@ export class NextFederationPlugin {
     // ignore edge runtime and middleware builds
     if (ModuleFederationPlugin) {
       const internalShare = reKeyHostShared(this._options.shared);
-      const hostFederationPluginOptions = {
+      const hostFederationPluginOptions: ModuleFederationPluginOptions = {
         ...this._options,
         exposes: {},
         shared: {
