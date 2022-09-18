@@ -39,7 +39,7 @@
     "rollup-obfuscator": "^3.0.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-typescript2": "^0.33.0",
+    "rollup-plugin-typescript2": "0.34.0",
     "tslib": "^2.4.0",
     "typescript": "^4.8.2",
     "webpack": "5.64.4"
