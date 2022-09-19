@@ -35,7 +35,7 @@ const Home = () => {
         <li>
           <a
             href="#reloadPage"
-            onClick={() => (window.location = 'http://localhost:3000')}
+            onClick={() => (window.location.href = 'http://localhost:3000')}
           >
             localhost:3000
           </a>
@@ -45,7 +45,7 @@ const Home = () => {
         <li>
           <a
             href="#reloadPage"
-            onClick={() => (window.location = 'http://localhost:3001')}
+            onClick={() => (window.location.href = 'http://localhost:3001')}
           >
             localhost:3001
           </a>
@@ -55,7 +55,7 @@ const Home = () => {
         <li>
           <a
             href="#reloadPage"
-            onClick={() => (window.location = 'http://localhost:3002')}
+            onClick={() => (window.location.href = 'http://localhost:3002')}
           >
             localhost:3002
           </a>
@@ -65,7 +65,7 @@ const Home = () => {
       </ul>
 
       <h2 style={{ marginTop: '30px' }}>Federation test cases</h2>
-      <table border="1" cellPadding={5}>
+      <table border={1} cellPadding={5}>
         <thead>
           <tr>
             <td></td>
@@ -81,7 +81,7 @@ const Home = () => {
               Loading remote component (CheckoutTitle) from localhost:3002
               <br />
               <blockquote>
-                dynamic(()=&gt;import('checkout/CheckoutTitle'))
+                dynamic(()=&gt;import(&apos;checkout/CheckoutTitle&apos;))
               </blockquote>
             </td>
             <td>
@@ -134,14 +134,6 @@ const Home = () => {
 
       <h2 style={{ marginTop: '30px' }}>Other problems to fix:</h2>
       <ul>
-        <li>
-          🐞{' '}
-          <a href="http://localhost:3000/shop/products/A">
-            localhost:3000/shop/products/A
-          </a>{' '}
-          do not obtain correct router path. So in this case page cannot receive
-          `slug` value.
-        </li>
         <li>
           🐞 Incorrectly exposed modules in next.config.js (e.g. typo in path)
           do not throw an error in console

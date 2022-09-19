@@ -1,12 +1,16 @@
+import type { ItemType } from 'antd/lib/menu/hooks/useItems';
+
 import { useRouter } from 'next/router';
 import { Menu } from 'antd';
 
-const menuItems = [
+const menuItems: ItemType[] = [
   { label: 'Main home', key: '/' },
   { label: 'Test hook from remote', key: '/home/test-remote-hook' },
+  { label: 'Test broken remotes', key: '/home/test-broken-remotes' },
   { label: 'Exposed pages', key: '/home/exposed-pages' },
   {
     label: 'Exposed components',
+    type: 'group',
     children: [{ label: 'home/SharedNav', key: '/home/test-shared-nav' }],
   },
 ];
