@@ -1,5 +1,5 @@
 module.exports = {
-  'home@http://localhost:3000/_next/static/chunks/remoteEntry.js': [
+  'home_app@http://localhost:3000/_next/static/chunks/remoteEntry.js': [
     '/',
     '/home',
   ],

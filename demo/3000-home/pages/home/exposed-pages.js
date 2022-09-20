@@ -6,13 +6,19 @@ export default function ExposedPages() {
   const [pageMapV2, setPageMapV2] = useState('');
 
   useEffect(() => {
-    injectScript('home')
+    injectScript({
+      global: 'home_app',
+      url: 'http://localhost:3000/_next/static/chunks/remoteEntry.js',
+    })
       .then((container) => container.get('./pages-map'))
       .then((data) => {
         setPageMap(data);
       });
 
-    injectScript('home')
+    injectScript({
+      global: 'home_app',
+      url: 'http://localhost:3000/_next/static/chunks/remoteEntry.js',
+    })
       .then((container) => container.get('./pages-map-v2'))
       .then((data) => {
         setPageMapV2(data);
