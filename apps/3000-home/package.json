@@ -1,5 +1,5 @@
 {
-  "name": "home",
+  "name": "@module-federation/3000-home",
   "version": "0.0.1",
   "dependencies": {
     "@nrwl/workspace": "14.7.3",

@@ -1,5 +1,5 @@
 {
-  "name": "shop",
+  "name": "@module-federation/3001-shop",
   "version": "0.0.1",
   "dependencies": {
     "@nrwl/workspace": "14.7.3",

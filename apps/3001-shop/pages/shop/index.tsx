@@ -3,7 +3,7 @@ import Head from 'next/head';
 
 import WebpackPng from '../../components/WebpackPng';
 
-console.log('nested remote',import('home/SharedNav'))
+console.log('nested remote', import('home/SharedNav'));
 
 const Shop = () => (
   <div>

@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/shop",
+  "sourceRoot": "apps/3001-shop",
   "projectType": "application",
   "targets": {
     "build": {
@@ -8,12 +8,12 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "root": "apps/shop",
-        "outputPath": "dist/apps/shop"
+        "root": "apps/3001-shop",
+        "outputPath": "dist/apps/3001-shop"
       },
       "configurations": {
         "development": {
-          "outputPath": "dist/apps/shop"
+          "outputPath": "dist/apps/3001-shop"
         },
         "production": {}
       }
@@ -22,17 +22,17 @@
       "executor": "@nrwl/next:server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "shop:build",
+        "buildTarget": "3001-shop:build",
         "dev": true,
         "port": 3001
       },
       "configurations": {
         "development": {
-          "buildTarget": "shop:build:development",
+          "buildTarget": "3001-shop:build:development",
           "dev": true
         },
         "production": {
-          "buildTarget": "shop:build:production",
+          "buildTarget": "3001-shop:build:production",
           "dev": false
         }
       }
@@ -40,14 +40,14 @@
     "export": {
       "executor": "@nrwl/next:export",
       "options": {
-        "buildTarget": "shop:build:production"
+        "buildTarget": "3001-shop:build:production"
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/shop/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": ["apps/3001-shop/**/*.{ts,tsx,js,jsx}"]
       }
     }
   },

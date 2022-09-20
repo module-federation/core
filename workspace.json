@@ -2,11 +2,11 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
-    "checkout": "apps/checkout",
-    "home": "apps/home",
+    "3000-home": "apps/3000-home",
+    "3001-shop": "apps/3001-shop",
+    "3002-checkout": "apps/3002-checkout",
     "nextjs-mf": "packages/nextjs-mf",
     "node": "packages/node",
-    "shared": "packages/shared",
-    "shop": "apps/shop"
+    "shared": "packages/shared"
   }
 }

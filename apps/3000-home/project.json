@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/home",
+  "sourceRoot": "apps/3000-home",
   "projectType": "application",
   "targets": {
     "build": {
@@ -8,12 +8,12 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "root": "apps/home",
-        "outputPath": "dist/apps/home"
+        "root": "apps/3000-home",
+        "outputPath": "dist/apps/3000-home"
       },
       "configurations": {
         "development": {
-          "outputPath": "dist/apps/home"
+          "outputPath": "dist/apps/3000-home"
         },
         "production": {}
       }
@@ -22,17 +22,17 @@
       "executor": "@nrwl/next:server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "home:build",
+        "buildTarget": "3000-home:build",
         "dev": true,
         "port": 3000
       },
       "configurations": {
         "development": {
-          "buildTarget": "home:build:development",
+          "buildTarget": "3000-home:build:development",
           "dev": true
         },
         "production": {
-          "buildTarget": "home:build:production",
+          "buildTarget": "3000-home:build:production",
           "dev": false
         }
       }
@@ -40,14 +40,14 @@
     "export": {
       "executor": "@nrwl/next:export",
       "options": {
-        "buildTarget": "home:build:production"
+        "buildTarget": "3000-home:build:production"
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/home/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": ["apps/3000-home/**/*.{ts,tsx,js,jsx}"]
       }
     }
   },
