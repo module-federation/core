@@ -476,8 +476,7 @@ class NextFederationPlugin {
     //todo runtime variable creation needs to be applied for server as well. this is just for client
     // todo: this needs to be refactored into something more comprehensive. this is just a quick fix
     new webpack.DefinePlugin({
-      'process.env.REMOTES': {
-  },
+      'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
       'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
     }).apply(compiler);
 
