@@ -6,13 +6,13 @@ export default function ExposedPages() {
   const [pageMapV2, setPageMapV2] = useState('');
 
   useEffect(() => {
-    injectScript('home')
+    injectScript('home_app')
       .then((container) => container.get('./pages-map'))
       .then((data) => {
         setPageMap(data);
       });
 
-    injectScript('home')
+    injectScript('home_app')
       .then((container) => container.get('./pages-map-v2'))
       .then((data) => {
         setPageMapV2(data);
