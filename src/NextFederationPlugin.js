@@ -25,8 +25,6 @@ import {
   parseRemotes
 } from './internal';
 import {extractUrlAndGlobal} from './utils'
-import StreamingTargetPlugin from '../node-plugin/streaming';
-import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
 import ChildFriendlyModuleFederationPlugin from './ModuleFederationPlugin';
 
 const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
@@ -169,6 +167,9 @@ class ChildFederationPlugin {
           new AddRuntimeRequirementToPromiseExternal(),
         ];
       } else if (compiler.options.name === 'server') {
+        const StreamingTargetPlugin = require('../node-plugin/streaming').default;
+        const NodeFederationPlugin = require('../node-plugin/streaming/NodeRuntime').default;
+
         plugins = [
           new NodeFederationPlugin(federationPluginOptions, {ModuleFederationPlugin: FederationPlugin}),
           new webpack.node.NodeTemplatePlugin(childOutput),
@@ -442,6 +443,7 @@ class NextFederationPlugin {
       console.error('[nextjs-mf] WARNING: SSR IS NOT FULLY SUPPORTED YET, Only use pluign on client builds');
       // target false because we use our own target for node env
       compiler.options.target = false;
+      const StreamingTargetPlugin = require('../node-plugin/streaming').default;
       new StreamingTargetPlugin(this._options, webpack).apply(compiler);
       this._options.library = {};
       this._options.library.type = 'commonjs-module';
@@ -480,11 +482,8 @@ class NextFederationPlugin {
       'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
     }).apply(compiler);
 
+    const ModuleFederationPlugin = isServer ? require('../node-plugin/streaming/NodeRuntime').default : webpack.container.ModuleFederationPlugin;
 
-    const ModuleFederationPlugin = {
-      client: webpack.container.ModuleFederationPlugin,
-      server: NodeFederationPlugin,
-    }[compiler.options.name];
     // ignore edge runtime and middleware builds
     if (ModuleFederationPlugin) {
       const internalShare = reKeyHostShared(this._options.shared);
