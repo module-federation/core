@@ -15,7 +15,7 @@
  * It was copied from
  * @see https://github.com/vercel/next.js/blob/canary/packages/next/shared/lib/router/utils/sorted-routes.ts
  */
-module.exports = class UrlNode {
+class UrlNode {
   placeholder = true;
   children = new Map();
   slugName = null;
@@ -207,3 +207,5 @@ module.exports = class UrlNode {
       ._insert(urlPaths.slice(1), slugNames, isCatchAll);
   }
 }
+
+module.exports = { UrlNode };

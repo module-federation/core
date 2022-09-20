@@ -101,5 +101,4 @@ export const injectScript = (keyOrRuntimeRemoteItem) => {
       }
       return container;
     });
-}
-
+};
