@@ -1,3 +1,10 @@
+import type { LoaderContext } from 'webpack';
+
+import { Template, RuntimeGlobals } from 'webpack';
+import path from 'path';
+// import Template from 'webpack/lib/Template';
+// import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+
 /**
  * This loader was specially created for tunning next-image-loader result
  *   see https://github.com/vercel/next.js/blob/canary/packages/next/build/webpack/loaders/next-image-loader.js
@@ -12,14 +19,52 @@
  *
  * @type {(this: import("webpack").LoaderContext<{}>, content: string) => string>}
  */
-export function fixImageLoader(content: string) {
-  // replace(/(.+\:\/\/[^\/]+){0,1}\/.*/i, '$1')
-  //    this regexp will extract the hostname from publicPath
-  //    http://localhost:3000/_next/... -> http://localhost:3000
-  const currentHostnameCode =
-    "__webpack_require__.p.replace(/(.+\\:\\/\\/[^\\/]+){0,1}\\/.*/i, '$1')";
+export async function fixImageLoader(
+  this: LoaderContext<Record<string, unknown>>,
+  remaining: string
+) {
+  this.cacheable(true);
 
-  return content.replace('"src":', `"src":${currentHostnameCode}+`);
+  const isServer = this._compiler?.options.name !== 'client';
+
+  const result = await this.importModule(
+    `${this.resourcePath}.webpack[javascript/auto]` + `!=!${remaining}`
+  );
+
+  const content = (result.default || result) as Record<string, string>;
+
+  const computedAssetPrefix = isServer
+    ? `''`
+    : `(${RuntimeGlobals.publicPath} && ${RuntimeGlobals.publicPath}.indexOf('://') > 0 ? new URL(${RuntimeGlobals.publicPath}).origin : '')`;
+
+  const constructedObject = Object.entries(content).reduce(
+    (acc, [key, value]) => {
+      if (key === 'src') {
+        if (value && value.indexOf('://') < 0) {
+          value = path.join(value);
+        }
+        acc.push(
+          `${key}: computedAssetsPrefixReference + ${JSON.stringify(value)}`
+        );
+        return acc;
+      }
+      acc.push(`${key}: ${JSON.stringify(value)}`);
+      return acc;
+    },
+    [] as string[]
+  );
+
+  const updated = Template.asString([
+    "let computedAssetsPrefixReference = '';",
+    'try {',
+    Template.indent(`computedAssetsPrefixReference = ${computedAssetPrefix};`),
+    '} catch (e) {}',
+    'export default {',
+    Template.indent(constructedObject.join(',\n')),
+    '}',
+  ]);
+  return updated;
 }
 
-export default fixImageLoader;
+export const pitch = fixImageLoader;
+// module.exports.pitch = fixImageLoader;
