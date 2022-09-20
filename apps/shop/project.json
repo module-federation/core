@@ -24,7 +24,7 @@
       "options": {
         "buildTarget": "shop:build",
         "dev": true,
-        "port": 4201
+        "port": 3001
       },
       "configurations": {
         "development": {

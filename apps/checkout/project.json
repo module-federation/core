@@ -24,7 +24,7 @@
       "options": {
         "buildTarget": "checkout:build",
         "dev": true,
-        "port": 4202
+        "port": 3002
       },
       "configurations": {
         "development": {
