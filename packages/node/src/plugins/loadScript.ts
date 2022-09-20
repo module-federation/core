@@ -3,7 +3,7 @@
  * loadScript(scriptUrl, cb)
  */
 
-export = `
+export default `
     function loadScript(url,cb,chunkID) {
         var url;
         var cb = arguments[arguments.length - 1];

@@ -243,8 +243,8 @@ class StreamingFederationPlugin {
     { experiments, ...options }: StreamingFederationOptions,
     context: Context
   ) {
-    this.options = options || {};
-    this.context = context || {};
+    this.options = options || ({} as ModuleFederationPluginOptions);
+    this.context = context || ({} as Context);
     this.experiments = experiments || {};
   }
 

@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="../../../node_modules/webpack/module.d.ts" />
+
 import type { container, WebpackOptionsNormalized } from 'webpack';
 
 export type ModuleFederationPluginOptions = ConstructorParameters<
@@ -32,7 +35,7 @@ type ModulePath = string;
 
 export type WebpackRemoteContainer = {
   get(modulePath: ModulePath): () => any;
-  init: (obj: typeof __webpack_share_scopes__['']) => void;
+  init: (obj: typeof __webpack_share_scopes__[string]) => void;
 };
 
 export type AsyncContainer = Promise<WebpackRemoteContainer>;
