@@ -6,6 +6,7 @@
     "home": "apps/home",
     "nextjs-mf": "packages/nextjs-mf",
     "node": "packages/node",
+    "shared": "packages/shared",
     "shop": "apps/shop"
   }
 }
