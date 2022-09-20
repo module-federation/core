@@ -17,7 +17,6 @@ import DevHmrFixInvalidPongPlugin from './plugins/DevHmrFixInvalidPongPlugin'
 import {
   reKeyHostShared,
   DEFAULT_SHARE_SCOPE,
-  extractUrlAndGlobal,
   generateRemoteTemplate,
   internalizeSharedPackages,
   getOutputPath,
@@ -25,6 +24,7 @@ import {
   removePlugins,
   parseRemotes
 } from './internal';
+import {extractUrlAndGlobal} from './utils'
 import StreamingTargetPlugin from '../node-plugin/streaming';
 import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
 import ChildFriendlyModuleFederationPlugin from './ModuleFederationPlugin';

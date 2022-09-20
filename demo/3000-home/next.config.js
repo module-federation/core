@@ -1,7 +1,5 @@
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
-const {customPromise} = require('@module-federation/nextjs-mf/lib/utils')
-const Template = require('webpack').Template
-console.log(NextFederationPlugin);
+const {promiseTemplate} = require('@module-federation/nextjs-mf/lib/build-utils');
 module.exports = {
   webpack(config, options) {
     const { isServer } = options;
@@ -19,13 +17,13 @@ module.exports = {
           name: 'home_app',
           filename: 'static/chunks/remoteEntry.js',
           remotes: {
-            shop: customPromise(remotes.shop,Template, function() { new Promise((resolve, reject) => {
+            shop: promiseTemplate(remotes.shop, function() { new Promise((resolve, reject) => {
               console.log('runing other promise');
               setTimeout(() => {
                 resolve('shop');
               } , 1000);
             })}),
-            checkout: customPromise(remotes.checkout, Template),
+            checkout: promiseTemplate(remotes.checkout),
           },
           exposes: {
             './SharedNav': './components/SharedNav.js',

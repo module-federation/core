@@ -37,6 +37,12 @@ export default [
         inlineSources: !production,
       }),
       commonjs(),
+      globals({
+        dirname: false,
+        filename: false,
+        process: false,
+        global: false,
+      }),
       renameNodeModules('dependencies'),
     ],
   },
@@ -45,6 +51,7 @@ export default [
       './src/NextFederationPlugin.js',
       './src/utils.js',
       './src/internal.js',
+      './src/build-utils.js',
     ],
     output: {
       dir: 'lib',
@@ -60,7 +67,7 @@ export default [
       'crypto',
       'next',
       'fast-glob',
-      /webpack-sources/,
+      'webpack-sources',
     ], // tells Rollup 'I know what I'm doing here'
     plugins: [
       renameNodeModules('dependencies'),
@@ -71,6 +78,7 @@ export default [
         filename: false,
         process: false,
         fs: false,
+        global: false,
       }),
       builtins(),
     ],

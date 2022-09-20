@@ -1,5 +1,6 @@
 import { parseOptions } from 'webpack/lib/container/options';
 import { isRequiredVersion } from 'webpack/lib/sharing/utils';
+import {extractUrlAndGlobal} from "./utils";
 import path from 'path';
 
 // the share scope we attach by default
@@ -65,15 +66,6 @@ export const reKeyHostShared = (options) => {
     }
     return acc;
   }, {});
-};
-
-// split the @ syntax into url and global
-export const extractUrlAndGlobal = (urlAndGlobal) => {
-  const index = urlAndGlobal.indexOf('@');
-  if (index <= 0 || index === urlAndGlobal.length - 1) {
-    throw new Error(`Invalid request "${urlAndGlobal}"`);
-  }
-  return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
 };
 
 // browser template to convert remote into promise new promise and use require.loadChunk to load the chunk
@@ -259,33 +251,4 @@ export const parseRemotes = (remotes) =>{
     },
     {}
   );
-}
-
-export const customPromise = (remote,Template,...otherPromises) => {
-  let promises = '';
-  if (otherPromises) {
-    promises = otherPromises.map((p) => {
-      return Template.getFunctionContent(p)
-    })
-  }
-  const allPromises = [
-    parseRemoteSyntax(remote),
-    ...promises
-  ].map((p) => {
-    return p + ',';
-  })
-
-  return Template.asString([
-    'promise new Promise(function(resolve, reject) {',
-    Template.indent([
-      'Promise.all([',
-      Template.indent(allPromises),
-      ']).then(function(promises) {',
-      Template.indent([
-        'resolve(promises[0]);',
-      ]),
-      '})',
-    ]),
-    '})',
-  ])
 }
