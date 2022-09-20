@@ -7,6 +7,8 @@ import type {
 
 import path from 'path';
 
+import { extractUrlAndGlobal } from '../src/internal';
+
 const remoteVars = (process.env['REMOTES'] || {}) as Record<
   string,
   Promise<any> | string | (() => Promise<any>)
@@ -27,7 +29,7 @@ export const runtimeRemotes = Object.entries(remoteVars).reduce(function (
   }
   // if its just a string (global@url)
   else if (typeof value === 'string') {
-    const [global, url] = value.split('@');
+    const [url, global] = extractUrlAndGlobal(value);
     acc[key] = { global, url };
   }
   // we dont know or currently support this type
@@ -39,6 +41,8 @@ export const runtimeRemotes = Object.entries(remoteVars).reduce(function (
 },
 {} as RuntimeRemotesMap);
 
+export const remotes = runtimeRemotes;
+
 /**
  * Return initialized remote container by remote's key or its runtime remote item data.
  *
@@ -47,7 +51,9 @@ export const runtimeRemotes = Object.entries(remoteVars).reduce(function (
  * or
  *    { asyncContainer } - async container is a promise that resolves to the remote container
  */
-export function injectScript(keyOrRuntimeRemoteItem: string | RuntimeRemote) {
+export const injectScript = (
+  keyOrRuntimeRemoteItem: string | RuntimeRemote
+) => {
   // 1) Load remote container if needed
   let asyncContainer: RuntimeRemote['asyncContainer'];
   const reference =
@@ -91,7 +97,13 @@ export function injectScript(keyOrRuntimeRemoteItem: string | RuntimeRemote) {
             event && event.target && (event.target as HTMLScriptElement).src;
 
           __webpack_error__.message =
-            'Loading script failed.\n(' + errorType + ': ' + realSrc + ')';
+            'Loading script failed.\n(' +
+            errorType +
+            ': ' +
+            realSrc +
+            ' or global var ' +
+            remoteGlobal +
+            ')';
 
           __webpack_error__.name = 'ScriptExternalLoadError';
           __webpack_error__.type = errorType;
@@ -133,7 +145,7 @@ export function injectScript(keyOrRuntimeRemoteItem: string | RuntimeRemote) {
       }
       return container;
     });
-}
+};
 
 export const computeRemoteFilename = (isServer: boolean, filename: string) => {
   if (isServer && filename) {
@@ -165,7 +177,7 @@ export const createRuntimeVariables = (remotes: Remotes) => {
   }, {} as Record<string, string>);
 };
 
-export function toDisplayErrors(err: Error[]) {
+export const toDisplayErrors = (err: Error[]) => {
   return err
     .map((error) => {
       let message = error.message;
@@ -175,4 +187,4 @@ export function toDisplayErrors(err: Error[]) {
       return message;
     })
     .join('\n');
-}
+};
