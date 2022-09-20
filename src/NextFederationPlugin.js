@@ -17,14 +17,13 @@ import DevHmrFixInvalidPongPlugin from './plugins/DevHmrFixInvalidPongPlugin'
 import {
   reKeyHostShared,
   DEFAULT_SHARE_SCOPE,
-  generateRemoteTemplate,
   internalizeSharedPackages,
   getOutputPath,
   externalizedShares,
   removePlugins,
   parseRemotes
 } from './internal';
-import {extractUrlAndGlobal} from './utils'
+
 import ChildFriendlyModuleFederationPlugin from './ModuleFederationPlugin';
 
 const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
