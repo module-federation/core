@@ -27,3 +27,16 @@ export const promiseTemplate = (remote,...otherPromises) => {
     '})',
   ])
 }
+export const promiseFactory = (factory) => {
+  const template =  Template.asString([
+    'function() {',
+    Template.indent([
+      'new Promise(',
+      factory.toString(),
+      ')',
+    ].join('')),
+    '}',
+  ]);
+
+  return template
+}
