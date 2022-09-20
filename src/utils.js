@@ -61,7 +61,13 @@ export const injectScript = (keyOrRuntimeRemoteItem) => {
             event && (event.type === 'load' ? 'missing' : event.type);
           var realSrc = event && event.target && event.target.src;
           __webpack_error__.message =
-            'Loading script failed.\n(' + errorType + ': ' + realSrc + ')';
+            'Loading script failed.\n(' +
+            errorType +
+            ': ' +
+            realSrc +
+            ' or global var ' +
+            remoteGlobal +
+            ')';
           __webpack_error__.name = 'ScriptExternalLoadError';
           __webpack_error__.type = errorType;
           __webpack_error__.request = realSrc;
