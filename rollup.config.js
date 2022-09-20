@@ -3,17 +3,20 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import typescript from 'rollup-plugin-typescript2';
 import globals from 'rollup-plugin-node-globals';
 import builtins from 'rollup-plugin-node-builtins';
+import path from "path";
+import renameNodeModules from "rollup-plugin-rename-node-modules";
 
 const production = !process.env.ROLLUP_WATCH;
 
 export default [
   {
-    input: ['./src/NextFederationPlugin.js'],
+    input: ['./src/NextFederationPlugin.js','./src/utils.js'],
     output: {
-      dir: './lib',
+      dir: 'lib',
       format: 'cjs',
-      preserveModules: false,
+      preserveModules: true,
       exports: 'auto',
+      preserveModulesRoot: 'src',
     },
     external: [
       'fs',
@@ -24,11 +27,13 @@ export default [
       /node_modules\/(?!webpack)/
     ], // tells Rollup 'I know what I'm doing here'
     plugins: [
+      renameNodeModules('dependencies', !production),
       nodeResolve({ preferBuiltins: true }), // or `true`
       commonjs(),
       globals({
         dirname: false,
         filename: false,
+        process: false,
       }),
       builtins(),
     ],

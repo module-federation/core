@@ -22,7 +22,7 @@ const runtimeRemotes = Object.entries(remoteVars).reduce(function (acc, item) {
   return acc;
 }, {});
 
-module.exports.remotes = runtimeRemotes;
+export const remotes = runtimeRemotes;
 
 /**
  * Return initialized remote container by remote's key or its runtime remote item data.
@@ -32,7 +32,7 @@ module.exports.remotes = runtimeRemotes;
  * or
  *    { asyncContainer } - async container is a promise that resolves to the remote container
  */
-function injectScript(keyOrRuntimeRemoteItem) {
+export const injectScript = (keyOrRuntimeRemoteItem) => {
   let reference = keyOrRuntimeRemoteItem;
   if (typeof keyOrRuntimeRemoteItem === 'string') {
     reference = runtimeRemotes[keyOrRuntimeRemoteItem];
@@ -103,4 +103,3 @@ function injectScript(keyOrRuntimeRemoteItem) {
     });
 }
 
-module.exports.injectScript = injectScript;
