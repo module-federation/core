@@ -22,4 +22,6 @@ export function fixUrlLoader(content: string) {
   );
 }
 
+// module.exports = fixUrlLoader;
+
 export default fixUrlLoader;
