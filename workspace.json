@@ -2,6 +2,7 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
+    "checkout": "apps/checkout",
     "home": "apps/home",
     "nextjs-mf": "packages/nextjs-mf",
     "node": "packages/node",
