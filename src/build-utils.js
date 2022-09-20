@@ -13,7 +13,6 @@ export const promiseTemplate = (remote,...otherPromises) => {
   ].map((p) => {
     return p + ',';
   })
-console.log(Template)
   return Template.asString([
     'promise new Promise(function(resolve, reject) {',
     Template.indent([
