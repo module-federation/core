@@ -11,7 +11,7 @@
     "dev": "concurrently -n _,home,shop,checkout \"yarn sync-pkg -w\" \"cd 3000-home; npm run dev\" \"cd 3001-shop; npm run dev\" \"cd 3002-checkout; npm run dev\"",
     "build": "yarn sync-pkg && concurrently -n home,shop,checkout \"cd 3000-home; npm run build\" \"cd 3001-shop; npm run build\" \"cd 3002-checkout; npm run build\"",
     "start": "yarn sync-pkg && concurrently -n home,shop,checkout \"cd 3000-home; npm run start\" \"cd 3001-shop; npm run start\" \"cd 3002-checkout; npm run start\"",
-    "sync-pkg": "cpx \"../lib/**\" ./tmp/nextjs-mf/lib && cd ./tmp/nextjs-mf/lib"
+    "sync-pkg": "cpx \"../lib/**\" ./tmp/nextjs-mf/lib"
   },
   "dependencies": {
     "concurrently": "^7.0.0",
