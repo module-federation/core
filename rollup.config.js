@@ -16,11 +16,12 @@ export default [
       './src/client/useMFRemote.ts',
     ],
     output: {
-      dir: './lib',
+      dir: 'lib',
       format: 'cjs',
       preserveModules: true,
       exports: 'auto',
       sourcemap: !production,
+      preserveModulesRoot: 'src',
     },
     treeshake: false,
     external: [
