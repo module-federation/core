@@ -50,7 +50,7 @@ export default [
       dir: 'lib',
       format: 'cjs',
       preserveModules: true,
-      exports: 'auto',
+      exports: 'named',
       preserveModulesRoot: 'src',
     },
     treeshake: false,
@@ -60,7 +60,7 @@ export default [
       'crypto',
       'next',
       'fast-glob',
-      /node_modules\/(?!webpack)/,
+      /webpack-sources/,
     ], // tells Rollup 'I know what I'm doing here'
     plugins: [
       renameNodeModules('dependencies'),

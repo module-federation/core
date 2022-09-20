@@ -1,4 +1,4 @@
-const NextFederationPlugin = require('@module-federation/nextjs-mf/lib/NextFederationPlugin');
+const NextFederationPlugin = require('@module-federation/nextjs-mf');
 
 module.exports = {
   swcMinify: true,

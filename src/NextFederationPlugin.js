@@ -6,13 +6,13 @@
 
 import fs from 'fs';
 import path from 'path';
-const {
+import {
   injectRuleLoader,
   hasLoader,
   toDisplayErrors,
-} = require('./loaders/helpers');
-const { exposeNextjsPages } = require('./loaders/nextPageMapLoader');
-const DevHmrFixInvalidPongPlugin = require('./plugins/DevHmrFixInvalidPongPlugin');
+} from './loaders/helpers'
+import { exposeNextjsPages } from './loaders/nextPageMapLoader'
+import DevHmrFixInvalidPongPlugin from './plugins/DevHmrFixInvalidPongPlugin'
 
 import {
   reKeyHostShared,
@@ -22,7 +22,8 @@ import {
   internalizeSharedPackages,
   getOutputPath,
   externalizedShares,
-  removePlugins
+  removePlugins,
+  parseRemotes
 } from './internal';
 import StreamingTargetPlugin from '../node-plugin/streaming';
 import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
@@ -461,19 +462,7 @@ class NextFederationPlugin {
         });
       }
       if (this._options.remotes) {
-        const parsedRemotes = Object.entries(this._options.remotes).reduce(
-          (acc, remote) => {
-            if (remote[1].includes('@')) {
-              const [url, global] = extractUrlAndGlobal(remote[1]);
-              acc[remote[0]] = generateRemoteTemplate(url, global);
-              return acc;
-            }
-            acc[remote[0]] = remote[1];
-            return acc;
-          },
-          {}
-        );
-        this._options.remotes = parsedRemotes;
+        this._options.remotes = parseRemotes(this._options.remotes)
       }
       if (this._options.library) {
         console.error('[mf] you cannot set custom library');
@@ -487,7 +476,8 @@ class NextFederationPlugin {
     //todo runtime variable creation needs to be applied for server as well. this is just for client
     // todo: this needs to be refactored into something more comprehensive. this is just a quick fix
     new webpack.DefinePlugin({
-      'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
+      'process.env.REMOTES': {
+  },
       'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
     }).apply(compiler);
 
@@ -527,4 +517,4 @@ class NextFederationPlugin {
   }
 }
 
-module.exports = NextFederationPlugin;
+export default NextFederationPlugin;

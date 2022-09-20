@@ -78,7 +78,7 @@ export const extractUrlAndGlobal = (urlAndGlobal) => {
 
 // browser template to convert remote into promise new promise and use require.loadChunk to load the chunk
 export const generateRemoteTemplate = (url, global) => {
-  return `promise new Promise(function (resolve, reject) {
+  return `new Promise(function (resolve, reject) {
     var __webpack_error__ = new Error();
     if (typeof ${global} !== 'undefined') return resolve();
     __webpack_require__.l(
@@ -239,3 +239,53 @@ export const removePlugins = [
   'DropClientPage',
   'ReactFreshWebpackPlugin',
 ];
+
+export const parseRemoteSyntax = (remote) => {
+  if (typeof remote === 'string' && remote.includes('@')) {
+    const [url, global] = extractUrlAndGlobal(remote);
+    return generateRemoteTemplate(url, global);
+  }
+  return remote
+}
+export const parseRemotes = (remotes) =>{
+  return Object.entries(remotes).reduce(
+    (acc, remote) => {
+      if (typeof remote[1] === 'string' && remote[1].includes('@')) {
+        acc[remote[0]] = 'promise ' + parseRemoteSyntax(remote[1])
+        return acc;
+      }
+      acc[remote[0]] = remote[1];
+      return acc;
+    },
+    {}
+  );
+}
+
+export const customPromise = (remote,Template,...otherPromises) => {
+  let promises = '';
+  if (otherPromises) {
+    promises = otherPromises.map((p) => {
+      return Template.getFunctionContent(p)
+    })
+  }
+  const allPromises = [
+    parseRemoteSyntax(remote),
+    ...promises
+  ].map((p) => {
+    return p + ',';
+  })
+
+  return Template.asString([
+    'promise new Promise(function(resolve, reject) {',
+    Template.indent([
+      'Promise.all([',
+      Template.indent(allPromises),
+      ']).then(function(promises) {',
+      Template.indent([
+        'resolve(promises[0]);',
+      ]),
+      '})',
+    ]),
+    '})',
+  ])
+}

@@ -1,4 +1,4 @@
-import { extractUrlAndGlobal } from './internal';
+import { extractUrlAndGlobal, customPromise as customPromiseTemplate } from './internal';
 
 const remoteVars = process.env.REMOTES || {};
 
@@ -108,3 +108,5 @@ export const injectScript = (keyOrRuntimeRemoteItem) => {
       return container;
     });
 };
+
+export const customPromise = customPromiseTemplate
