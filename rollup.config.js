@@ -36,6 +36,7 @@ export default [
         inlineSources: !production,
       }),
       commonjs(),
+      renameNodeModules('dependencies'),
     ],
   },
   {
