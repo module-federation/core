@@ -22,7 +22,7 @@ export default [
       exports: 'auto',
       sourcemap: !production,
     },
-    treeShake: false,
+    treeshake: false,
     external: [
       'next/router',
       'next/dist/client/router',
@@ -51,7 +51,7 @@ export default [
       exports: 'auto',
       preserveModulesRoot: 'src',
     },
-    treeShake: false,
+    treeshake: false,
     external: [
       'fs',
       'path',
