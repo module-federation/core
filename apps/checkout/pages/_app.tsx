@@ -59,7 +59,7 @@ MyApp.getInitialProps = async (ctx) => {
 
   return {
     ...appProps,
-    mfRoutes: require('../../../mfRoutes'),
+    mfRoutes: (await import('@internal/shared')).mfRoutes,
     // mfRoutes: {
     //   'home@http://localhost:3000/_next/static/chunks/remoteEntry.js': [
     //     '/',
