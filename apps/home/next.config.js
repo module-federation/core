@@ -18,15 +18,15 @@ const nextConfig = {
           name: 'home_app',
           filename: 'static/chunks/remoteEntry.js',
           remotes: {
-            shop: `shop@http://localhost:3001/_next/static/${
+            shop: `shop@http://localhost:4201/_next/static/${
               isServer ? 'ssr' : 'chunks'
             }/remoteEntry.js`,
-            checkout: `checkout@http://localhost:3002/_next/static/${
+            checkout: `checkout@http://localhost:4202/_next/static/${
               isServer ? 'ssr' : 'chunks'
             }/remoteEntry.js`,
           },
           exposes: {
-            './SharedNav': './components/SharedNav.js',
+            './SharedNav': './components/SharedNav',
           },
           shared: {
             lodash: {},

@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@module-federation/nextjs-mf": "link:./dist/packages/nextjs-mf",
+    "@module-federation/node": "link:./dist/packages/node",
     "@nrwl/cli": "14.7.3",
     "@nrwl/eslint-plugin-nx": "14.7.3",
     "@nrwl/jest": "14.7.3",
