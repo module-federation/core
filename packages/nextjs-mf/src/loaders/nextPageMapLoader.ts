@@ -1,23 +1,34 @@
+import type { LoaderContext } from 'webpack';
+
 import fg from 'fast-glob';
 import fs from 'fs';
+
+import { UrlNode } from '../../client/UrlNode';
 
 /**
  * Webpack loader which prepares MF map for NextJS pages
  *
- * @type {(this: import("webpack").LoaderContext<{}>, content: string) => string>}
  */
-export function nextPageMapLoader(this: any) {
-  const pages = getNextPages(this.rootContext);
-  const pageMap = preparePageMap(pages);
-
+export default function nextPageMapLoader(
+  this: LoaderContext<Record<string, unknown>>
+) {
   // const [pagesRoot] = getNextPagesRoot(this.rootContext);
   // this.addContextDependency(pagesRoot);
+  const opts = this.getOptions();
+  const pages = getNextPages(this.rootContext);
 
-  const result = `module.exports = {
-    default: ${JSON.stringify(pageMap)},
-  };`;
+  let result = {};
 
-  this.callback(null, result);
+  if (Object.hasOwnProperty.call(opts, 'v2')) {
+    result = preparePageMapV2(pages);
+  } else {
+    result = preparePageMap(pages);
+  }
+
+  this.callback(
+    null,
+    `module.exports = { default: ${JSON.stringify(result)} };`
+  );
 }
 
 /**
@@ -38,6 +49,7 @@ export function exposeNextjsPages(cwd: string) {
 
   const exposesWithPageMap = {
     './pages-map': `${__filename}!${__filename}`,
+    './pages-map-v2': `${__filename}?v2!${__filename}`,
     ...pageModulesMap,
   };
 
@@ -59,8 +71,6 @@ function getNextPagesRoot(appRoot: string) {
  * From provided ROOT_DIR `scan` pages directory
  * and return list of user defined pages
  * (except special ones, like _app, _document, _error)
- *
- * @type {(rootDir: string) => string[]}
  */
 function getNextPages(rootDir: string) {
   const [cwd, pagesDir] = getNextPagesRoot(rootDir);
@@ -101,6 +111,7 @@ function sanitizePagePath(item: string) {
  *
  * From
  *   ['pages/index.tsx', 'pages/storage/[...slug].tsx', 'pages/storage/index.tsx']
+ *
  * Getting the following map
  *   {
  *     '/': './pages/index',
@@ -108,18 +119,56 @@ function sanitizePagePath(item: string) {
  *     '/storage': './pages/storage/index'
  *   }
  *
- * @type {(pages: string[]) => {[key: string]: string}}
  */
 function preparePageMap(pages: string[]) {
   const result = {} as Record<string, string>;
 
-  pages.forEach((pagePath) => {
-    const page = sanitizePagePath(pagePath);
-    let key =
-      '/' +
-      page.replace(/\[\.\.\.[^\]]+\]/gi, '*').replace(/\[([^\]]+)\]/gi, ':$1');
+  const clearedPages = pages.map((p) => `/${sanitizePagePath(p)}`);
+
+  // getSortedRoutes @see https://github.com/vercel/next.js/blob/canary/packages/next/shared/lib/router/utils/sorted-routes.ts
+  const root = new UrlNode();
+  clearedPages.forEach((pagePath) => root.insert(pagePath));
+  // Smoosh will then sort those sublevels up to the point where you get the correct route definition priority
+  const sortedPages = root.smoosh();
+
+  sortedPages.forEach((page) => {
+    let key = page
+      .replace(/\[\.\.\.[^\]]+\]/gi, '*')
+      .replace(/\[([^\]]+)\]/gi, ':$1');
     key = key.replace(/^\/pages\//, '/').replace(/\/index$/, '') || '/';
-    result[key] = `./${page}`;
+    result[key] = `.${page}`;
+  });
+
+  return result;
+}
+
+/**
+ * Create MF list of NextJS pages
+ *
+ * From
+ *   ['pages/index.tsx', 'pages/storage/[...slug].tsx', 'pages/storage/index.tsx']
+ * Getting the following map
+ *   {
+ *     '/': './pages/index',
+ *     '/storage': './pages/storage/index'
+ *     '/storage/[...slug]': './pages/storage/[...slug]',
+ *   }
+ *
+ */
+function preparePageMapV2(pages: string[]) {
+  const result = {} as Record<string, string>;
+
+  const clearedPages = pages.map((p) => `/${sanitizePagePath(p)}`);
+
+  // getSortedRoutes @see https://github.com/vercel/next.js/blob/canary/packages/next/shared/lib/router/utils/sorted-routes.ts
+  const root = new UrlNode();
+  clearedPages.forEach((pagePath) => root.insert(pagePath));
+  // Smoosh will then sort those sublevels up to the point where you get the correct route definition priority
+  const sortedPages = root.smoosh();
+
+  sortedPages.forEach((page) => {
+    const key = page.replace(/^\/pages\//, '/').replace(/\/index$/, '') || '/';
+    result[key] = `.${page}`;
   });
 
   return result;
