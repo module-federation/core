@@ -175,7 +175,7 @@ export class ChildFederationPlugin {
           hasLoader(rule, 'next-image-loader')
         ) {
           injectRuleLoader(rule, {
-            loader: path.resolve(__dirname, './loaders/fixImageLoader.js'),
+            loader: path.resolve(__dirname, '../loaders/fixImageLoader'),
           });
         }
 
@@ -185,7 +185,7 @@ export class ChildFederationPlugin {
           hasLoader(rule, 'url-loader')
         ) {
           injectRuleLoader({
-            loader: path.resolve(__dirname, './loaders/fixUrlLoader.js'),
+            loader: path.resolve(__dirname, '../loaders/fixUrlLoader'),
           });
         }
       });

@@ -17,6 +17,7 @@ const nextConfig = {
       config.plugins.push(
         new NextFederationPlugin({
           name: 'checkout',
+          filename: 'static/chunks/remoteEntry.js',
           remotes: {
             home: `home_app@http://localhost:4200/_next/static/${
               isServer ? 'ssr' : 'chunks'
@@ -28,10 +29,9 @@ const nextConfig = {
               isServer ? 'ssr' : 'chunks'
             }/remoteEntry.js`,
           },
-          filename: 'static/chunks/remoteEntry.js',
           exposes: {
-            './CheckoutTitle': './components/CheckoutTitle.js',
-            './ButtonOldAnt': './components/ButtonOldAnt.js',
+            './CheckoutTitle': './components/CheckoutTitle',
+            './ButtonOldAnt': './components/ButtonOldAnt',
           },
           shared: {
             lodash: {},

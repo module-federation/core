@@ -41,11 +41,11 @@ export class NextFederationPlugin {
     const { extraOptions, ...mainOpts } = options;
     this._options = mainOpts;
     this._extraOptions = {
-      ...extraOptions,
       automaticPageStitching: false,
       enableImageLoaderFix: false,
       enableUrlLoaderFix: false,
       skipSharingNextInternals: false,
+      ...extraOptions,
     };
   }
 
@@ -90,7 +90,7 @@ export class NextFederationPlugin {
           test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
           loader: path.resolve(
             __dirname,
-            './loaders/patchNextClientPageLoader'
+            '../loaders/patchNextClientPageLoader'
           ),
         });
       }

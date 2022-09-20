@@ -4,11 +4,13 @@ import { useRouter } from 'next/router';
 export default function ProductPage() {
   const [cnt, setCounter] = useState(0);
   const router = useRouter();
+  
   useEffect(() => {
     setInterval(() => {
       setCounter((s) => s + 1);
     }, 1000);
   }, []);
+
   const { query } = useRouter();
 
   if (cnt === 0) return null;

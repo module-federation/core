@@ -1,5 +1,5 @@
 export const mfRoutes = {
-  'home@http://localhost:4200/_next/static/chunks/remoteEntry.js': [
+  'home_app@http://localhost:4200/_next/static/chunks/remoteEntry.js': [
     '/',
     '/home',
   ],

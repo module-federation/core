@@ -39,8 +39,6 @@ export const runtimeRemotes = Object.entries(remoteVars).reduce(function (
 },
 {} as RuntimeRemotesMap);
 
-// module.exports.remotes = runtimeRemotes;
-
 /**
  * Return initialized remote container by remote's key or its runtime remote item data.
  *
@@ -136,8 +134,6 @@ export function injectScript(keyOrRuntimeRemoteItem: string | RuntimeRemote) {
       return container;
     });
 }
-
-// module.exports.injectScript = injectScript;
 
 export const computeRemoteFilename = (isServer: boolean, filename: string) => {
   if (isServer && filename) {

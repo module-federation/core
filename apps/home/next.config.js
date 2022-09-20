@@ -18,6 +18,11 @@ const nextConfig = {
           name: 'home_app',
           filename: 'static/chunks/remoteEntry.js',
           remotes: {
+            // Failing to add this entry, causes '/exposed-pages' route
+            // to throw error.
+            home: `home_app@http://localhost:4200/_next/static/${
+              isServer ? 'ssr' : 'chunks'
+            }/remoteEntry.js`,
             shop: `shop@http://localhost:4201/_next/static/${
               isServer ? 'ssr' : 'chunks'
             }/remoteEntry.js`,

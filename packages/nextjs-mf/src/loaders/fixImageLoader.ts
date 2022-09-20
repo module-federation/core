@@ -17,7 +17,6 @@ import path from 'path';
  * __webpack_require__.p - is a global variable in webpack container which contains publicPath
  *   For example:  http://localhost:3000/_next
  *
- * @type {(this: import("webpack").LoaderContext<{}>, content: string) => string>}
  */
 export async function fixImageLoader(
   this: LoaderContext<Record<string, unknown>>,
@@ -63,8 +62,8 @@ export async function fixImageLoader(
     Template.indent(constructedObject.join(',\n')),
     '}',
   ]);
+
   return updated;
 }
 
 export const pitch = fixImageLoader;
-// module.exports.pitch = fixImageLoader;
