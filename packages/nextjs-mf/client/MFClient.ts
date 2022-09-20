@@ -1,4 +1,5 @@
 import type PageLoader from 'next/dist/client/page-loader';
+
 import EventEmitter from 'eventemitter3';
 import { pathnameToRoute } from './helpers';
 import { CombinedPages } from './CombinedPages';
