@@ -31,8 +31,8 @@ const nextConfig = {
             }/remoteEntry.js`,
           },
           exposes: {
-            './CheckoutTitle': './components/CheckoutTitle',
-            './ButtonOldAnt': './components/ButtonOldAnt',
+            './CheckoutTitle': './src/components/CheckoutTitle',
+            './ButtonOldAnt': './src/components/ButtonOldAnt',
           },
           shared: {
             lodash: {},
