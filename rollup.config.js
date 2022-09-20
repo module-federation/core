@@ -70,6 +70,7 @@ export default [
         dirname: false,
         filename: false,
         process: false,
+        fs: false,
       }),
       builtins(),
     ],
