@@ -19,16 +19,17 @@ module.exports = {
           filename: 'static/chunks/remoteEntry.js',
           remotes: {
             shop: promiseTemplate(
-              promiseFactory((resolve, reject) => {
-                resolve(remotes.shop);
-              }),
-              promiseFactory((resolve,reject)=>{
+              // can also be a string if it needs to be computed in scope
+              `(resolve, reject) => {
+                resolve("${remotes.shop}");
+              }`,
+              (resolve,reject)=>{
               console.log('runing other promise');
               setTimeout(() => {
                 console.log('resolving promise');
                 resolve();
               } , 1000);
-            })),
+            }),
             checkout: remotes.checkout,
           },
           exposes: {

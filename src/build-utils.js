@@ -23,7 +23,7 @@ const transformInput = (code) => {
   }).code
 }
 
-
+//urlAndGlobal is defined in the template wrapper
 const remoteTemplate = function() {
     const index = urlAndGlobal.indexOf('@');
     if (index <= 0 || index === urlAndGlobal.length - 1) {
@@ -85,19 +85,40 @@ const remoteTemplate = function() {
       return proxy
     })
 }
+export const promiseFactory = (factory) => {
 
+  const wrapper = `new Promise(${factory.toString()})`
+console.log(wrapper)
+  if (wrapper.includes('require(', 'import(', 'import ')) {
+    throw new Error('promiseFactory does not support require, import, or import statements');
+  }
+
+  const template = Template.asString([
+    'function() {',
+    Template.indent([
+      wrapper
+    ]),
+    '}',
+  ]);
+
+  return template
+}
 
 export const promiseTemplate = (remote, ...otherPromises) => {
   let promises = '';
   if (otherPromises) {
     promises = otherPromises.map((p) => {
-      return Template.getFunctionContent(p)
+      return Template.getFunctionContent(promiseFactory(p))
     })
   }
+
+
+
   let remoteSyntax = remote
   let remoteFactory = parseRemoteSyntax
-  if(remote.startsWith('function')) {
-    remoteSyntax = Template.getFunctionContent(remote);
+
+  if(typeof remote === 'function' || remote.startsWith('function') || remote.startsWith('(')) {
+    remoteSyntax = Template.getFunctionContent(promiseFactory(remote))
     remoteFactory = (remoteSyntax) => {
       return Template.asString([
         `${remoteSyntax}.then(function(urlAndGlobal) {`,
@@ -114,6 +135,8 @@ export const promiseTemplate = (remote, ...otherPromises) => {
     remoteFactory(remoteSyntax),
     ...promises
   ].join(',\n')
+
+
   return Template.asString([
     'promise new Promise(function(resolve, reject) {',
     transformInput(Template.indent([
@@ -128,23 +151,20 @@ export const promiseTemplate = (remote, ...otherPromises) => {
     '})',
   ])
 }
-export const promiseFactory = (factory) => {
 
-  const wrapper = `new Promise(${factory.toString()})`
-
-  if (wrapper.includes('require(', 'import(', 'import ')) {
-    throw new Error('promiseFactory does not support require, import, or import statements');
-  }
-
-  const template = Template.asString([
-    'function() {',
-    Template.indent([
-      wrapper
-    ]),
-    '}',
-  ]);
-
-
-  return template
-
-}
+// remotes: {
+//   shop: promiseTemplate('global@url', (resolve,reject) => {}),
+//     shop: promiseTemplate(
+//     // can also be a string if it needs to be computed in scope
+//     `(resolve, reject) => {
+//                 resolve("${remotes.shop}");
+//               }`,
+//     (resolve,reject)=>{
+//       console.log('runing other promise');
+//       setTimeout(() => {
+//         console.log('resolving promise');
+//         resolve();
+//       } , 1000);
+//     }),
+//     checkout: remotes.checkout,
+// },
