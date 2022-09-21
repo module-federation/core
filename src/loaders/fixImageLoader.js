@@ -1,6 +1,5 @@
-const path = require('path');
-const Template = require('webpack/lib/Template');
-const RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
+import Template from 'webpack/lib/Template';
+import path from 'path';
 
 /**
  * This loader was specially created for tunning next-image-loader result
@@ -18,6 +17,7 @@ const RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
  */
 async function fixImageLoader(remaining) {
   this.cacheable(true);
+  const publicPath = this._compiler.webpack.RuntimeGlobals.publicPath;
   const isServer = this._compiler.options.name !== 'client';
   const result = await this.importModule(
     `${this.resourcePath}.webpack[javascript/auto]` + `!=!${remaining}`
@@ -26,7 +26,7 @@ async function fixImageLoader(remaining) {
 
   const computedAssetPrefix = isServer
     ? ` \'\'`
-    : `(${RuntimeGlobals.publicPath} && ${RuntimeGlobals.publicPath}.indexOf('://') > 0 ? new URL(${RuntimeGlobals.publicPath}).origin : \'\')`;
+    : `(${publicPath} && ${publicPath}.indexOf('://') > 0 ? new URL(${publicPath}).origin : \'\')`;
 
   const constructedObject = Object.entries(content).reduce(
     (acc, [key, value]) => {
