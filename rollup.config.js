@@ -60,6 +60,7 @@ export default [
       'crypto',
       'next',
       'fast-glob',
+      /!webpack\/lib\/Template/,
       /node_modules\/(?!webpack)/,
     ], // tells Rollup 'I know what I'm doing here'
     plugins: [
