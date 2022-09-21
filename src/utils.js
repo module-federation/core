@@ -1,6 +1,15 @@
-import { extractUrlAndGlobal } from './internal';
+// split the @ syntax into url and global
+export const extractUrlAndGlobal = (urlAndGlobal) => {
+  const index = urlAndGlobal.indexOf('@');
+  if (index <= 0 || index === urlAndGlobal.length - 1) {
+    throw new Error(`Invalid request "${urlAndGlobal}"`);
+  }
+  return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
+};
 
 const remoteVars = process.env.REMOTES || {};
+
+console.log(remoteVars);
 
 const runtimeRemotes = Object.entries(remoteVars).reduce(function (acc, item) {
   const [key, value] = item;

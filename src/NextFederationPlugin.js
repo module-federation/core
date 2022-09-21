@@ -6,26 +6,24 @@
 
 import fs from 'fs';
 import path from 'path';
-const {
+import {
   injectRuleLoader,
   hasLoader,
   toDisplayErrors,
-} = require('./loaders/helpers');
-const { exposeNextjsPages } = require('./loaders/nextPageMapLoader');
-const DevHmrFixInvalidPongPlugin = require('./plugins/DevHmrFixInvalidPongPlugin');
+} from './loaders/helpers'
+import { exposeNextjsPages } from './loaders/nextPageMapLoader'
+import DevHmrFixInvalidPongPlugin from './plugins/DevHmrFixInvalidPongPlugin'
 
 import {
   reKeyHostShared,
   DEFAULT_SHARE_SCOPE,
-  extractUrlAndGlobal,
-  generateRemoteTemplate,
   internalizeSharedPackages,
   getOutputPath,
   externalizedShares,
-  removePlugins
+  removePlugins,
+  parseRemotes
 } from './internal';
-import StreamingTargetPlugin from '../node-plugin/streaming';
-import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
+
 import ChildFriendlyModuleFederationPlugin from './ModuleFederationPlugin';
 
 const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
@@ -168,6 +166,9 @@ class ChildFederationPlugin {
           new AddRuntimeRequirementToPromiseExternal(),
         ];
       } else if (compiler.options.name === 'server') {
+        const StreamingTargetPlugin = require('../node-plugin/streaming').default;
+        const NodeFederationPlugin = require('../node-plugin/streaming/NodeRuntime').default;
+
         plugins = [
           new NodeFederationPlugin(federationPluginOptions, {ModuleFederationPlugin: FederationPlugin}),
           new webpack.node.NodeTemplatePlugin(childOutput),
@@ -441,6 +442,7 @@ class NextFederationPlugin {
       console.error('[nextjs-mf] WARNING: SSR IS NOT FULLY SUPPORTED YET, Only use pluign on client builds');
       // target false because we use our own target for node env
       compiler.options.target = false;
+      const StreamingTargetPlugin = require('../node-plugin/streaming').default;
       new StreamingTargetPlugin(this._options, webpack).apply(compiler);
       this._options.library = {};
       this._options.library.type = 'commonjs-module';
@@ -460,20 +462,9 @@ class NextFederationPlugin {
           loader: path.resolve(__dirname, './loaders/patchNextClientPageLoader'),
         });
       }
+
       if (this._options.remotes) {
-        const parsedRemotes = Object.entries(this._options.remotes).reduce(
-          (acc, remote) => {
-            if (remote[1].includes('@')) {
-              const [url, global] = extractUrlAndGlobal(remote[1]);
-              acc[remote[0]] = generateRemoteTemplate(url, global);
-              return acc;
-            }
-            acc[remote[0]] = remote[1];
-            return acc;
-          },
-          {}
-        );
-        this._options.remotes = parsedRemotes;
+        this._options.remotes = parseRemotes(this._options.remotes)
       }
       if (this._options.library) {
         console.error('[mf] you cannot set custom library');
@@ -491,11 +482,8 @@ class NextFederationPlugin {
       'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
     }).apply(compiler);
 
+    const ModuleFederationPlugin = isServer ? require('../node-plugin/streaming/NodeRuntime').default : webpack.container.ModuleFederationPlugin;
 
-    const ModuleFederationPlugin = {
-      client: webpack.container.ModuleFederationPlugin,
-      server: NodeFederationPlugin,
-    }[compiler.options.name];
     // ignore edge runtime and middleware builds
     if (ModuleFederationPlugin) {
       const internalShare = reKeyHostShared(this._options.shared);
@@ -527,4 +515,4 @@ class NextFederationPlugin {
   }
 }
 
-module.exports = NextFederationPlugin;
+export default NextFederationPlugin;
