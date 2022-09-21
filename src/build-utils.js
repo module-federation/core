@@ -88,7 +88,6 @@ const remoteTemplate = function() {
 export const promiseFactory = (factory) => {
 
   const wrapper = `new Promise(${factory.toString()})`
-console.log(wrapper)
   if (wrapper.includes('require(', 'import(', 'import ')) {
     throw new Error('promiseFactory does not support require, import, or import statements');
   }
