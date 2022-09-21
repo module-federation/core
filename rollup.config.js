@@ -52,6 +52,7 @@ export default [
       './src/utils.js',
       './src/internal.js',
       './src/build-utils.js',
+      './src/loaders/fixImageLoader.js',
     ],
     output: {
       dir: 'lib',
@@ -68,6 +69,7 @@ export default [
       'next',
       'fast-glob',
       'webpack-sources',
+      /!webpack\/lib\/Template/,
     ], // tells Rollup 'I know what I'm doing here'
     plugins: [
       renameNodeModules('dependencies'),
