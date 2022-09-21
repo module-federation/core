@@ -462,6 +462,7 @@ class NextFederationPlugin {
           loader: path.resolve(__dirname, './loaders/patchNextClientPageLoader'),
         });
       }
+
       if (this._options.remotes) {
         this._options.remotes = parseRemotes(this._options.remotes)
       }

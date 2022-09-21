@@ -67,7 +67,6 @@ export const reKeyHostShared = (options) => {
     return acc;
   }, {});
 };
-
 // browser template to convert remote into promise new promise and use require.loadChunk to load the chunk
 export const generateRemoteTemplate = (url, global) => {
   return `new Promise(function (resolve, reject) {
@@ -242,7 +241,7 @@ export const parseRemoteSyntax = (remote) => {
 export const parseRemotes = (remotes) =>{
   return Object.entries(remotes).reduce(
     (acc, remote) => {
-      if (typeof remote[1] === 'string' && remote[1].includes('@')) {
+      if (!remote[1].startsWith('promise ') && remote[1].includes('@')) {
         acc[remote[0]] = 'promise ' + parseRemoteSyntax(remote[1])
         return acc;
       }
