@@ -20,7 +20,7 @@ module.exports = {
           remotes: {
             shop: promiseTemplate(
               promiseFactory((resolve, reject) => {
-                resolve('shop@http://localhost:3001/_next/static/chunks/remoteEntry.js');
+                resolve(remotes.shop);
               }),
               promiseFactory((resolve,reject)=>{
               console.log('runing other promise');
