@@ -9,8 +9,6 @@ export const extractUrlAndGlobal = (urlAndGlobal) => {
 
 const remoteVars = process.env.REMOTES || {};
 
-console.log(remoteVars);
-
 const runtimeRemotes = Object.entries(remoteVars).reduce(function (acc, item) {
   const [key, value] = item;
   if (typeof value === 'object' && typeof value.then === 'function') {
