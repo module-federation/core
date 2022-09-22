@@ -10,6 +10,8 @@
         "outputPath": "dist/packages/nextjs-mf",
         "main": "packages/nextjs-mf/src/index.js",
         "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true,
         "assets": ["packages/nextjs-mf/*.md"]
       }
     },

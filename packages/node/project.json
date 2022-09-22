@@ -10,6 +10,8 @@
         "outputPath": "dist/packages/node",
         "main": "packages/node/src/index.js",
         "tsConfig": "packages/node/tsconfig.lib.json",
+        "updateBuildableProjectDepsInPackageJson": true,
+        "buildableProjectDepsInPackageJsonType": "dependencies",
         "assets": ["packages/node/*.md"]
       }
     },

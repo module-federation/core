@@ -1,5 +1,10 @@
 {
+  "public": true,
   "name": "@module-federation/node",
   "version": "0.0.1",
-  "type": "commonjs"
+  "type": "commonjs",
+  "description": "Module Federation helper for Node",
+  "repository": "https://github.com/module-federation/nextjs-mf",
+  "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
+  "license": "MIT"
 }
