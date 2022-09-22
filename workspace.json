@@ -6,7 +6,6 @@
     "3001-shop": "apps/3001-shop",
     "3002-checkout": "apps/3002-checkout",
     "nextjs-mf": "packages/nextjs-mf",
-    "node": "packages/node",
-    "shared": "packages/shared"
+    "node": "packages/node"
   }
 }

@@ -52,25 +52,24 @@ MyApp.getInitialProps = async (ctx) => {
 
   return {
     ...appProps,
-    mfRoutes: (await import('@internal/shared')).mfRoutes,
-    // mfRoutes: {
-    //   'home_app@http://localhost:4200/_next/static/chunks/remoteEntry.js': [
-    //     '/',
-    //     '/home',
-    //   ],
-    //   'shop@http://localhost:4201/_next/static/chunks/remoteEntry.js': [
-    //     '/shop',
-    //     '/shop/products/[...slug]',
-    //   ],
-    //   'checkout@http://localhost:4202/_next/static/chunks/remoteEntry.js': [
-    //     '/checkout',
-    //     '/checkout/exposed-pages',
-    //   ],
-    //   'unresolvedHost@http://localhost:3333/_next/static/chunks/remoteEntry.js':
-    //     ['/unresolved-host'],
-    //   'wrongEntry@http://localhost:4200/_next/static/chunks/remoteEntryWrong.js':
-    //     ['/wrong-entry'],
-    // },
+    mfRoutes: {
+      'home_app@http://localhost:3000/_next/static/chunks/remoteEntry.js': [
+        '/',
+        '/home',
+      ],
+      'shop@http://localhost:3001/_next/static/chunks/remoteEntry.js': [
+        '/shop',
+        '/shop/products/[...slug]',
+      ],
+      'checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js': [
+        '/checkout',
+        '/checkout/exposed-pages',
+      ],
+      'unresolvedHost@http://localhost:3333/_next/static/chunks/remoteEntry.js':
+        ['/unresolved-host'],
+      'wrongEntry@http://localhost:3000/_next/static/chunks/remoteEntryWrong.js':
+        ['/wrong-entry'],
+    },
   };
 };
 

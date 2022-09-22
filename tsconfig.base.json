@@ -16,7 +16,6 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@internal/shared": ["packages/shared/src/index.ts"],
       "@module-federation/nextjs-mf": ["packages/nextjs-mf/src/index.ts"],
       "@module-federation/nextjs-mf/client": [
         "packages/nextjs-mf/client/index.ts"
