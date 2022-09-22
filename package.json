@@ -37,7 +37,7 @@
     "next": "12.3.0",
     "prettier": "2.3.2",
     "react": "^18.2.0",
-    "rollup": "^2.78.1",
+    "rollup": "2.79.1",
     "rollup-obfuscator": "^3.0.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
