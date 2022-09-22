@@ -53,6 +53,7 @@ export default [
       './src/internal.js',
       './src/build-utils.js',
       './src/loaders/fixImageLoader.js',
+      './node-plugin/streaming/index.js',
     ],
     output: {
       dir: 'lib',
