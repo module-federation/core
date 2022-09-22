@@ -3,7 +3,6 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import typescript from 'rollup-plugin-typescript2';
 import globals from 'rollup-plugin-node-globals';
 import builtins from 'rollup-plugin-node-builtins';
-import path from 'path';
 import renameNodeModules from 'rollup-plugin-rename-node-modules';
 
 const production = !process.env.ROLLUP_WATCH;
@@ -53,7 +52,6 @@ export default [
       './src/internal.js',
       './src/build-utils.js',
       './src/loaders/fixImageLoader.js',
-      './node-plugin/streaming/index.js',
     ],
     output: {
       dir: 'lib',

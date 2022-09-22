@@ -10,9 +10,9 @@ import {
   injectRuleLoader,
   hasLoader,
   toDisplayErrors,
-} from './loaders/helpers'
-import { exposeNextjsPages } from './loaders/nextPageMapLoader'
-import DevHmrFixInvalidPongPlugin from './plugins/DevHmrFixInvalidPongPlugin'
+} from './loaders/helpers';
+import { exposeNextjsPages } from './loaders/nextPageMapLoader';
+import DevHmrFixInvalidPongPlugin from './plugins/DevHmrFixInvalidPongPlugin';
 
 import {
   reKeyHostShared,
@@ -21,10 +21,12 @@ import {
   getOutputPath,
   externalizedShares,
   removePlugins,
-  parseRemotes
+  parseRemotes,
 } from './internal';
 
 import ChildFriendlyModuleFederationPlugin from './ModuleFederationPlugin';
+import StreamingTargetPlugin from '../node-plugin/streaming';
+import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
 
 const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
 
@@ -166,11 +168,10 @@ class ChildFederationPlugin {
           new AddRuntimeRequirementToPromiseExternal(),
         ];
       } else if (compiler.options.name === 'server') {
-        const StreamingTargetPlugin = require('../node-plugin/streaming').default;
-        const NodeFederationPlugin = require('../node-plugin/streaming/NodeRuntime').default;
-
         plugins = [
-          new NodeFederationPlugin(federationPluginOptions, {ModuleFederationPlugin: FederationPlugin}),
+          new NodeFederationPlugin(federationPluginOptions, {
+            ModuleFederationPlugin: FederationPlugin,
+          }),
           new webpack.node.NodeTemplatePlugin(childOutput),
           //TODO: Externals function needs to internalize any shared module for host and remote build
           new webpack.ExternalsPlugin(compiler.options.externalsType, [
@@ -227,9 +228,9 @@ class ChildFederationPlugin {
 
       if (compiler.options.optimization.minimize) {
         for (const minimizer of compiler.options.optimization.minimizer) {
-          if (typeof minimizer === "function") {
-            minimizer.call(childCompiler, childCompiler)
-          } else if (minimizer !== "...") {
+          if (typeof minimizer === 'function') {
+            minimizer.call(childCompiler, childCompiler);
+          } else if (minimizer !== '...') {
             minimizer.apply(childCompiler);
           }
         }
@@ -256,7 +257,6 @@ class ChildFederationPlugin {
           ),
         }).apply(childCompiler);
       }
-
 
       // TODO: this can likely be deleted now, if running server child compiler under client is the best way to go
       // help wanted for all asset pipeline stuff below
@@ -339,28 +339,31 @@ class ChildFederationPlugin {
         });
         // in prod, if client
       } else if (!isServer) {
-// if ssr enabled and server in compiler cache
-        if(childCompilers['server']) {
+        // if ssr enabled and server in compiler cache
+        if (childCompilers['server']) {
           //wrong hook for this
           // add hook for additional assets to prevent compile from sealing.
-          compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
-            return new Promise((res, rej) => {
-              // run server child compilation during client main compilation
-              childCompilers['server'].run((err, stats) => {
-                if (err) {
-                compilation.errors.push(err);
-                rej()
-              }
-              if (stats && stats.hasErrors()) {
-                compilation.errors.push(
-                  new Error(toDisplayErrors(stats.compilation.errors))
-                );
-                rej()
-              }
-                res()
+          compilation.hooks.additionalAssets.tapPromise(
+            CHILD_PLUGIN_NAME,
+            () => {
+              return new Promise((res, rej) => {
+                // run server child compilation during client main compilation
+                childCompilers['server'].run((err, stats) => {
+                  if (err) {
+                    compilation.errors.push(err);
+                    rej();
+                  }
+                  if (stats && stats.hasErrors()) {
+                    compilation.errors.push(
+                      new Error(toDisplayErrors(stats.compilation.errors))
+                    );
+                    rej();
+                  }
+                  res();
+                });
               });
-            });
-          });
+            }
+          );
         }
         // run client child compiler like normal
         childCompiler.run((err, stats) => {
@@ -425,7 +428,7 @@ function createRuntimeVariables(remotes) {
 
 class NextFederationPlugin {
   constructor(options) {
-    const {extraOptions, ...mainOpts} = options;
+    const { extraOptions, ...mainOpts } = options;
     this._options = mainOpts;
     this._extraOptions = extraOptions || {};
   }
@@ -439,10 +442,11 @@ class NextFederationPlugin {
     const isServer = compiler.options.name === 'server';
     const webpack = compiler.webpack;
     if (isServer) {
-      console.error('[nextjs-mf] WARNING: SSR IS NOT FULLY SUPPORTED YET, Only use pluign on client builds');
+      console.error(
+        '[nextjs-mf] WARNING: SSR IS NOT FULLY SUPPORTED YET, Only use pluign on client builds'
+      );
       // target false because we use our own target for node env
       compiler.options.target = false;
-      const StreamingTargetPlugin = require('../node-plugin/streaming').default;
       new StreamingTargetPlugin(this._options, webpack).apply(compiler);
       this._options.library = {};
       this._options.library.type = 'commonjs-module';
@@ -459,12 +463,15 @@ class NextFederationPlugin {
       if (this._extraOptions.automaticPageStitching) {
         compiler.options.module.rules.push({
           test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
-          loader: path.resolve(__dirname, './loaders/patchNextClientPageLoader'),
+          loader: path.resolve(
+            __dirname,
+            './loaders/patchNextClientPageLoader'
+          ),
         });
       }
 
       if (this._options.remotes) {
-        this._options.remotes = parseRemotes(this._options.remotes)
+        this._options.remotes = parseRemotes(this._options.remotes);
       }
       if (this._options.library) {
         console.error('[mf] you cannot set custom library');
@@ -482,7 +489,9 @@ class NextFederationPlugin {
       'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
     }).apply(compiler);
 
-    const ModuleFederationPlugin = isServer ? require('../node-plugin/streaming/NodeRuntime').default : webpack.container.ModuleFederationPlugin;
+    const ModuleFederationPlugin = isServer
+      ? NodeFederationPlugin
+      : webpack.container.ModuleFederationPlugin;
 
     // ignore edge runtime and middleware builds
     if (ModuleFederationPlugin) {
@@ -506,7 +515,9 @@ class NextFederationPlugin {
       new ModuleFederationPlugin(hostFederationPluginOptions, {
         ModuleFederationPlugin,
       }).apply(compiler);
-      new ChildFederationPlugin(this._options, this._extraOptions).apply(compiler);
+      new ChildFederationPlugin(this._options, this._extraOptions).apply(
+        compiler
+      );
       new AddRuntimeRequirementToPromiseExternal().apply(compiler);
       if (compiler.options.mode === 'development') {
         new DevHmrFixInvalidPongPlugin().apply(compiler);
