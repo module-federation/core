@@ -13,21 +13,12 @@ import type { Compiler } from 'webpack';
 
 import path from 'path';
 
-// import StreamingTargetPlugin from '../node-plugin/streaming';
-// import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
-
-import {
-  NodeFederationPlugin,
-  StreamingFederationPlugin,
-} from '@module-federation/node';
-
 import {
   reKeyHostShared,
-  extractUrlAndGlobal,
-  generateRemoteTemplate,
   internalizeSharedPackages,
+  parseRemotes,
 } from '../internal';
-import { createRuntimeVariables } from '../../utils';
+import { createRuntimeVariables } from '../../utils/common';
 
 import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
 import ChildFederationPlugin from './ChildFederationPlugin';
@@ -68,6 +59,9 @@ export class NextFederationPlugin {
       // target false because we use our own target for node env
       compiler.options.target = false;
 
+      const StreamingFederationPlugin =
+        require('@module-federation/node').StreamingFederationPlugin;
+
       new StreamingFederationPlugin(this._options, {
         ModuleFederationPlugin: webpack.container.ModuleFederationPlugin,
       }).apply(compiler);
@@ -96,19 +90,7 @@ export class NextFederationPlugin {
       }
 
       if (this._options.remotes) {
-        const parsedRemotes = Object.entries(this._options.remotes).reduce(
-          (acc, remote) => {
-            if (remote[1].includes('@')) {
-              const [url, global] = extractUrlAndGlobal(remote[1]);
-              acc[remote[0]] = generateRemoteTemplate(url, global);
-              return acc;
-            }
-            acc[remote[0]] = remote[1];
-            return acc;
-          },
-          {} as Record<string, string>
-        );
-        this._options.remotes = parsedRemotes;
+        this._options.remotes = parseRemotes(this._options.remotes);
       }
 
       if (this._options.library) {
@@ -129,10 +111,9 @@ export class NextFederationPlugin {
       'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
     }).apply(compiler);
 
-    const ModuleFederationPlugin = {
-      client: webpack.container.ModuleFederationPlugin,
-      server: NodeFederationPlugin,
-    }[compiler.options.name];
+    const ModuleFederationPlugin = isServer
+      ? require('@module-federation/node').NodeFederationPlugin
+      : webpack.container.ModuleFederationPlugin;
 
     // ignore edge runtime and middleware builds
     if (ModuleFederationPlugin) {

@@ -10,10 +10,11 @@ import path from 'path';
 import { parseOptions } from 'webpack/lib/container/options';
 import { isRequiredVersion } from 'webpack/lib/sharing/utils';
 
+import { extractUrlAndGlobal } from '../utils';
+
 // the share scope we attach by default
 // in hosts we re-key them to prevent webpack moving the modules into their own chunks (cause eager error)
 // in remote these are marked as import:false as we always expect the host to prove them
-
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
   react: {
     singleton: true,
@@ -84,18 +85,9 @@ export const reKeyHostShared = (
   }, {} as Record<string, SharedConfig>);
 };
 
-// split the @ syntax into url and global
-export const extractUrlAndGlobal = (urlAndGlobal: string) => {
-  const index = urlAndGlobal.indexOf('@');
-  if (index <= 0 || index === urlAndGlobal.length - 1) {
-    throw new Error(`Invalid request "${urlAndGlobal}"`);
-  }
-  return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
-};
-
 // browser template to convert remote into promise new promise and use require.loadChunk to load the chunk
 export const generateRemoteTemplate = (url: string, global: any) => {
-  return `promise new Promise(function (resolve, reject) {
+  return `new Promise(function (resolve, reject) {
     var __webpack_error__ = new Error();
     if (typeof ${global} !== 'undefined') return resolve();
     __webpack_require__.l(
@@ -149,43 +141,6 @@ export const generateRemoteTemplate = (url: string, global: any) => {
     }
     return proxy
   })`;
-};
-
-const parseShareOptions = (options: ModuleFederationPluginOptions) => {
-  const sharedOptions: [string, SharedConfig][] = parseOptions(
-    options.shared,
-    (item: string, key: string) => {
-      if (typeof item !== 'string')
-        throw new Error('Unexpected array in shared');
-
-      /** @type {SharedConfig} */
-      const config =
-        item === key || !isRequiredVersion(item)
-          ? {
-              import: item,
-            }
-          : {
-              import: key,
-              requiredVersion: item,
-            };
-      return config;
-    },
-    (item: any) => item
-  );
-
-  return sharedOptions.reduce((acc, [key, options]) => {
-    acc[key] = {
-      import: options.import,
-      shareKey: options.shareKey || key,
-      shareScope: options.shareScope,
-      requiredVersion: options.requiredVersion,
-      strictVersion: options.strictVersion,
-      singleton: options.singleton,
-      packageName: options.packageName,
-      eager: options.eager,
-    };
-    return acc;
-  }, {} as Record<string, SharedConfig>);
 };
 
 // shared packages must be compiled into webpack bundle, not require() pass through
@@ -274,3 +229,60 @@ export const removePlugins = [
   'DropClientPage',
   'ReactFreshWebpackPlugin',
 ];
+
+export const parseRemoteSyntax = (remote: string) => {
+  if (typeof remote === 'string' && remote.includes('@')) {
+    const [url, global] = extractUrlAndGlobal(remote);
+    return generateRemoteTemplate(url, global);
+  }
+
+  return remote;
+};
+
+export const parseRemotes = (remotes: Record<string, any>) => {
+  return Object.entries(remotes).reduce((acc, remote) => {
+    if (!remote[1].startsWith('promise ') && remote[1].includes('@')) {
+      acc[remote[0]] = 'promise ' + parseRemoteSyntax(remote[1]);
+      return acc;
+    }
+    acc[remote[0]] = remote[1];
+    return acc;
+  }, {} as Record<string, string>);
+};
+
+const parseShareOptions = (options: ModuleFederationPluginOptions) => {
+  const sharedOptions: [string, SharedConfig][] = parseOptions(
+    options.shared,
+    (item: string, key: string) => {
+      if (typeof item !== 'string')
+        throw new Error('Unexpected array in shared');
+
+      /** @type {SharedConfig} */
+      const config =
+        item === key || !isRequiredVersion(item)
+          ? {
+              import: item,
+            }
+          : {
+              import: key,
+              requiredVersion: item,
+            };
+      return config;
+    },
+    (item: any) => item
+  );
+
+  return sharedOptions.reduce((acc, [key, options]) => {
+    acc[key] = {
+      import: options.import,
+      shareKey: options.shareKey || key,
+      shareScope: options.shareScope,
+      requiredVersion: options.requiredVersion,
+      strictVersion: options.strictVersion,
+      singleton: options.singleton,
+      packageName: options.packageName,
+      eager: options.eager,
+    };
+    return acc;
+  }, {} as Record<string, SharedConfig>);
+};

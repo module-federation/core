@@ -20,15 +20,7 @@ import {
   computeRemoteFilename,
   createRuntimeVariables,
   toDisplayErrors,
-} from '../../utils';
-
-// import StreamingTargetPlugin from '../node-plugin/streaming';
-// import NodeFederationPlugin from '../node-plugin/streaming/NodeRuntime';
-
-import {
-  NodeFederationPlugin,
-  StreamingFederationPlugin,
-} from '@module-federation/node';
+} from '../../utils/common';
 
 import ChildFriendlyModuleFederationPlugin from './ModuleFederationPlugin';
 import RemoveRRRuntimePlugin from './RemoveRRRuntimePlugin';
@@ -119,10 +111,7 @@ export class ChildFederationPlugin {
       if (compiler.options.name === 'client') {
         plugins = [
           new FederationPlugin(federationPluginOptions),
-          // FIXME: JsonpTemplate no more expects constructor arguments
-          // https://github.com/webpack/webpack/blob/main/lib/web/JsonpTemplatePlugin.js
-          // Removing 'childOutput' as TS is throwing an error
-          new webpack.web.JsonpTemplatePlugin(), // new webpack.web.JsonpTemplatePlugin(childOutput),
+          new webpack.web.JsonpTemplatePlugin(),
           new LoaderTargetPlugin('web'),
           new LibraryPlugin(this._options.library?.type as string),
           new webpack.DefinePlugin({
@@ -134,6 +123,11 @@ export class ChildFederationPlugin {
           new AddRuntimeRequirementToPromiseExternal(),
         ];
       } else if (compiler.options.name === 'server') {
+        const {
+          NodeFederationPlugin,
+          StreamingFederationPlugin,
+        } = require('@module-federation/node');
+
         plugins = [
           new NodeFederationPlugin(federationPluginOptions, {
             ModuleFederationPlugin: FederationPlugin,
@@ -168,6 +162,7 @@ export class ChildFederationPlugin {
       );
 
       childCompiler.outputPath = outputPath;
+
       childCompiler.options.module.rules.forEach((rule) => {
         // next-image-loader fix which adds remote's hostname to the assets url
         if (
