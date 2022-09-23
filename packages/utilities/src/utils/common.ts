@@ -5,8 +5,6 @@ import type {
   RuntimeRemote
 } from '../types';
 
-import path from 'path';
-
 // @ts-ignore
 const remoteVars = (process.env.REMOTES || {}) as Record<
   string,
@@ -153,13 +151,6 @@ export const injectScript = (
       }
       return container;
     });
-};
-
-export const computeRemoteFilename = (isServer: boolean, filename: string) => {
-  if (isServer && filename) {
-    return path.basename(filename);
-  }
-  return filename;
 };
 
 export const createRuntimeVariables = (remotes: Remotes) => {
