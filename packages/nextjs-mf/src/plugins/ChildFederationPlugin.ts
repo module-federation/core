@@ -15,10 +15,10 @@ import {
   getOutputPath,
   externalizedShares,
   removePlugins,
+  toDisplayErrors
 } from '../internal';
 import {
   createRuntimeVariables,
-  toDisplayErrors,
 } from '@module-federation/utilities';
 
 import {computeRemoteFilename} from "../../utils/build-utils";

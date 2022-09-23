@@ -286,3 +286,15 @@ const parseShareOptions = (options: ModuleFederationPluginOptions) => {
     return acc;
   }, {} as Record<string, SharedConfig>);
 };
+
+export const toDisplayErrors = (err: Error[]) => {
+  return err
+    .map((error) => {
+      let message = error.message;
+      if (error.stack) {
+        message += '\n' + error.stack;
+      }
+      return message;
+    })
+    .join('\n');
+};
