@@ -1,11 +1,19 @@
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
-/// <reference path="../../../node_modules/webpack/module.d.ts" />
+/// <reference path="../../../../node_modules/webpack/module.d.ts" />
 
 import type { container, WebpackOptionsNormalized } from 'webpack';
 
 export type ModuleFederationPluginOptions = ConstructorParameters<
   typeof container.ModuleFederationPlugin
 >['0'];
+
+declare const __webpack_share_scopes__: Record<
+  string,
+  Record<
+    string,
+    { loaded?: 1; get: () => Promise<unknown>; from: string; eager: boolean }
+    >
+  >;
 
 export interface NextFederationPluginExtraOptions {
   enableImageLoaderFix?: boolean;

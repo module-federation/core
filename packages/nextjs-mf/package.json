@@ -1,7 +1,7 @@
 {
-  "version": "5.5.1",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "version": "5.5.3",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
   "contributors": [
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
   ],

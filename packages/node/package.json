@@ -1,8 +1,10 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "type": "commonjs",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
   "description": "Module Federation helper for Node",
   "repository": "https://github.com/module-federation/nextjs-mf",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",

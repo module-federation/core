@@ -2,7 +2,7 @@ import type {
   AsyncContainer,
   Remotes,
   RuntimeRemotesMap,
-  RuntimeRemote,
+  RuntimeRemote
 } from '../types';
 
 import path from 'path';
@@ -147,7 +147,7 @@ export const injectScript = (
         // The problem may be in Proxy in NextFederationPlugin.js.
         //   or maybe a bug in the webpack itself - instead of returning rejected promise it just throws an error.
         // But now everything works properly and we keep this code as is.
-        container.init(__webpack_share_scopes__['default']);
+        container.init(__webpack_share_scopes__['default'] as any);
       } catch (e) {
         // maybe container already initialized so nothing to throw
       }
