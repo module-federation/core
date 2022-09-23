@@ -1,6 +1,6 @@
 import Template from './Template';
 import { parseRemoteSyntax } from '../src/internal';
-import { WebpackRemoteContainer } from '@module-federation/utils';
+import { WebpackRemoteContainer } from '@module-federation/utilities';
 
 const swc = require('@swc/core');
 
@@ -85,6 +85,7 @@ const remoteTemplate = function () {
   }).then(function () {
     const proxy: WebpackRemoteContainer = {
       get: remoteGlobal.get,
+      //@ts-ignore
       init: function (shareScope) {
         const handler: ProxyHandler<typeof __webpack_share_scopes__> = {
           get(target, prop: string) {
