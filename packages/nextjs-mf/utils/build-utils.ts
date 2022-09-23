@@ -97,13 +97,13 @@ const remoteTemplate = function () {
             }
             return target[prop];
           },
-          // set(target, property: string, value: any, receiver: any) {
-          //   if (target[property]) {
-          //     return target[property];
-          //   }
-          //   target[property] = value;
-          //   return true;
-          // },
+          set(target, property: string, value, receiver) {
+            if (target[property]) {
+              return target[property] as unknown as boolean;
+            }
+            target[property] = value;
+            return true;
+          },
         };
 
         try {
@@ -122,8 +122,6 @@ const remoteTemplate = function () {
     return proxy;
   });
 };
-
-remoteTemplate.toString();
 
 export const promiseFactory = (factory: string | Function) => {
   const wrapper = `new Promise(${factory.toString()})`;
