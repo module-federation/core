@@ -1,7 +1,6 @@
-
 import Template from './Template';
-import { parseRemoteSyntax, generateRemoteTemplate } from '../src/internal';
-import {AsyncContainer} from "../types";
+import { parseRemoteSyntax } from '../src/internal';
+import { WebpackRemoteContainer } from '../types';
 
 const swc = require('@swc/core');
 
@@ -22,52 +21,57 @@ const transformInput = (code: string) => {
       transform: {},
     },
   }).code;
-
-  return code;
 };
 
 // // To satisfy Typescript.
 declare const urlAndGlobal: string;
-declare const remote: string;
-declare const resolve: string;
 //remote is defined in the template wrapper
-const remoteTemplate = function() {
+const remoteTemplate = function () {
   const index = urlAndGlobal.indexOf('@');
+
   if (index <= 0 || index === urlAndGlobal.length - 1) {
     throw new Error(`Invalid request "${urlAndGlobal}"`);
   }
-  var remote = {url: urlAndGlobal.substring(index + 1), global: urlAndGlobal.substring(0, index)}
-  return new Promise(function (resolve, reject) {
-    function resolveRemoteGlobal() {
-      const asyncContainer = window[
-        remoteGlobal
-        ] as unknown as AsyncContainer;
-      return resolve(asyncContainer);
-    }
+  var remote = {
+    url: urlAndGlobal.substring(index + 1),
+    global: urlAndGlobal.substring(0, index) as unknown as number, // this casting to satisfy TS
+  };
 
-    if (typeof window[remoteGlobal] !== 'undefined') {
-      return resolveRemoteGlobal();
+  const remoteGlobal = window[
+    remote.global
+  ] as unknown as WebpackRemoteContainer & {
+    __initialized: boolean;
+  };
+
+  return new Promise<void>(function (resolve, reject) {
+    const __webpack_error__ = new Error() as Error & {
+      type: string;
+      request: string | null;
+    };
+
+    if (typeof remoteGlobal !== 'undefined') {
+      return resolve();
     }
 
     (__webpack_require__ as any).l(
-      reference.url,
+      remote.url,
       function (event: Event) {
-        if (typeof window[remoteGlobal] !== 'undefined') {
-          return resolveRemoteGlobal();
+        if (typeof window[remote.global] !== 'undefined') {
+          return resolve();
         }
 
-        const errorType =
+        var errorType =
           event && (event.type === 'load' ? 'missing' : event.type);
-        const realSrc =
+        var realSrc =
           event && event.target && (event.target as HTMLScriptElement).src;
 
         __webpack_error__.message =
-          'Loading script failed.\n(' +
+          'Loading script failed.(' +
           errorType +
           ': ' +
           realSrc +
           ' or global var ' +
-          remoteGlobal +
+          remote.global +
           ')';
 
         __webpack_error__.name = 'ScriptExternalLoadError';
@@ -76,47 +80,50 @@ const remoteTemplate = function() {
 
         reject(__webpack_error__);
       },
-      remoteGlobal
+      remote.global
     );
   }).then(function () {
-    const proxy = {
-      get: window[remote.global].get,
+    const proxy: WebpackRemoteContainer = {
+      get: remoteGlobal.get,
       init: function (shareScope) {
-        const handler = {
-          get(target, prop) {
+        const handler: ProxyHandler<typeof __webpack_share_scopes__> = {
+          get(target, prop: string) {
             if (target[prop]) {
               Object.values(target[prop]).forEach(function (o) {
                 if (o.from === '_N_E') {
-                  o.loaded = 1
+                  o.loaded = 1;
                 }
-              })
+              });
             }
-            return target[prop]
+            return target[prop];
           },
-          set(target, property, value, receiver) {
-            if (target[property]) {
-              return target[property]
-            }
-            target[property] = value
-            return true
-          }
-        }
+          // set(target, property: string, value: any, receiver: any) {
+          //   if (target[property]) {
+          //     return target[property];
+          //   }
+          //   target[property] = value;
+          //   return true;
+          // },
+        };
+
         try {
-          window[remote.global].init(new Proxy(shareScope, handler))
-        } catch (e) {
+          remoteGlobal.init(
+            new Proxy(shareScope as typeof __webpack_share_scopes__, handler)
+          );
+        } catch (e) {}
 
-        }
-        window[remote.global].__initialized = true
-      }
-    }
-    if (!window[remote.global].__initialized) {
-      proxy.init()
-    }
-    return proxy
-  })
-}
+        remoteGlobal.__initialized = true;
+      },
+    };
 
-remoteTemplate.toString()
+    if (!remoteGlobal.__initialized) {
+      proxy.init();
+    }
+    return proxy;
+  });
+};
+
+remoteTemplate.toString();
 
 export const promiseFactory = (factory: string | Function) => {
   const wrapper = `new Promise(${factory.toString()})`;
@@ -171,7 +178,7 @@ export const promiseTemplate = (
     remoteFactory = (remoteSyntax) => {
       return Template.asString([
         `${remoteSyntax}.then(function(remote) {`,
-          Template.indent([Template.getFunctionContent(remoteTemplate)]),
+        Template.indent([Template.getFunctionContent(remoteTemplate)]),
         '})',
       ]);
     };

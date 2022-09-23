@@ -35,7 +35,7 @@ type ModulePath = string;
 
 export type WebpackRemoteContainer = {
   get(modulePath: ModulePath): () => any;
-  init: (obj: typeof __webpack_share_scopes__[string]) => void;
+  init: (obj?: typeof __webpack_share_scopes__) => void;
 };
 
 export type AsyncContainer = Promise<WebpackRemoteContainer>;
