@@ -10,7 +10,7 @@ import path from 'path';
 import { parseOptions } from 'webpack/lib/container/options';
 import { isRequiredVersion } from 'webpack/lib/sharing/utils';
 
-import { extractUrlAndGlobal } from '../utils';
+import { extractUrlAndGlobal } from '../utils/common';
 
 // the share scope we attach by default
 // in hosts we re-key them to prevent webpack moving the modules into their own chunks (cause eager error)

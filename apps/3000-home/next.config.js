@@ -1,10 +1,9 @@
 const { withNx } = require('@nrwl/next/plugins/with-nx');
 
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
-// const {
-//   promiseTemplate,
-//   promiseFactory,
-// } = require('@module-federation/nextjs-mf/utils');
+const {
+  promiseTemplate,
+} = require('@module-federation/nextjs-mf/utils/build-utils');
 
 /**
  * @type {import('@nrwl/next/plugins/with-nx').WithNxOptions}
@@ -32,7 +31,18 @@ const nextConfig = {
           name: 'home_app',
           filename: 'static/chunks/remoteEntry.js',
           remotes: {
-            shop: remotes.shop,
+            shop: promiseTemplate(
+              // can also be a string if it needs to be computed in scope
+              `(resolve, reject) => {
+                resolve("${remotes.shop}");
+              }`,
+              (resolve,reject)=>{
+                console.log('runing other promise');
+                setTimeout(() => {
+                  console.log('resolving promise');
+                  resolve();
+                } , 1000);
+              }),
             checkout: remotes.checkout,
           },
           exposes: {

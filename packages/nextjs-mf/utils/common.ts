@@ -5,8 +5,6 @@ import type {
   RuntimeRemote,
 } from '../types';
 
-console.log(require('path').resolve(__dirname, './common'));
-
 import path from 'path';
 
 const remoteVars = (process.env['REMOTES'] || {}) as Record<
