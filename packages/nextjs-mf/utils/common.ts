@@ -7,7 +7,8 @@ import type {
 
 import path from 'path';
 
-const remoteVars = (process.env['REMOTES'] || {}) as Record<
+// @ts-ignore
+const remoteVars = (process.env.REMOTES || {}) as Record<
   string,
   Promise<any> | string | (() => Promise<any>)
 >;
