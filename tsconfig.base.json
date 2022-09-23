@@ -17,13 +17,8 @@
     "baseUrl": ".",
     "paths": {
       "@module-federation/nextjs-mf": ["packages/nextjs-mf/src/index.ts"],
-      "@module-federation/nextjs-mf/client": [
-        "packages/nextjs-mf/client/index.ts"
-      ],
-      "@module-federation/nextjs-mf/utils": [
-        "packages/nextjs-mf/utils/index.ts"
-      ],
-      "@module-federation/node": ["packages/node/src/index.js"]
+      "@module-federation/node": ["packages/node/src/index.js"],
+      "@module-federation/utils": ["packages/utils/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

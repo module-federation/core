@@ -5,24 +5,20 @@
 'use strict';
 
 import type {
-  NextFederationPluginOptions,
-  NextFederationPluginExtraOptions,
   ModuleFederationPluginOptions,
-} from '../../types';
-import type { Compiler } from 'webpack';
+  NextFederationPluginExtraOptions,
+  NextFederationPluginOptions,
+} from '@module-federation/utils';
+import { createRuntimeVariables } from '@module-federation/utils';
 
 import path from 'path';
+import type { Compiler } from 'webpack';
 
-import {
-  reKeyHostShared,
-  internalizeSharedPackages,
-  parseRemotes,
-} from '../internal';
-import { createRuntimeVariables } from '../../utils/common';
+import { internalizeSharedPackages, parseRemotes, reKeyHostShared, } from '../internal';
+import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
+import ChildFederationPlugin from './ChildFederationPlugin';
 
 import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
-import ChildFederationPlugin from './ChildFederationPlugin';
-import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
 
 export class NextFederationPlugin {
   private _options: ModuleFederationPluginOptions;

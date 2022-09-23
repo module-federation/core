@@ -1,0 +1,439 @@
+{
+	"name": "@types/scheduler",
+	"versions": {
+		"0.10.0": {
+			"name": "@types/scheduler",
+			"version": "0.10.0",
+			"description": "TypeScript definitions for scheduler",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Nathan Bierema",
+					"url": "https://github.com/Methuselah96",
+					"githubUsername": "Methuselah96"
+				}
+			],
+			"main": "",
+			"types": "",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "d4281c8c1bd9933ea6a15d652a403b1634b421e909716ccb1975099cec306109",
+			"typeScriptVersion": "2.1",
+			"_id": "@types/scheduler@0.10.0",
+			"dist": {
+				"integrity": "sha512-kYsBuZdFKybL/G7PbB+ydX+4K13AN+HNGsXeF4SX1kduNbTWM8WqQaYE1xzbwEfNeyjzZ0azRmbpOKBHSl2pwA==",
+				"shasum": "9b5617d5ac31993c460b69900714cfef788e5db4",
+				"tarball": "https://registry.npmjs.org/@types/scheduler/-/scheduler-0.10.0.tgz",
+				"fileCount": 4,
+				"unpackedSize": 3581,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJb3+FpCRA9TVsSAnZWagAALqkP/0eVw/C7kqj5Bej2OJ5t\n9z1IYXkxLkXlbQXubm6u8CxkRTCWPu2/iaQZ6QO6JhkzsBAsfMpO1vgOXNff\n877+UGi329OWr+synStxASbY8HS9FV4reIAIIod7C6jpbvbfNHq9erI6EmNv\nsfZoZP/2Baw7sLoxpCe5Pw74W0bD9yTpL2wHxvHd01VGSxwQYE505VIxskDT\n0LZGucTBEXaCEANXkpMnB43tZAlzkScyzLLplUH09WLEheBC3wpbIUzbU4Q6\ntJGFPbpHdiZqPpmdGdr8KbHMejCxhPs2U7sBMrmMIkubigCogJwrlE1lAkc4\nh9qqbUcio7R24uelyUODzPltxdLJM/biOHV5GU/wJLHbs8b0rCuJrdX1v15n\nG/KhnApnjyvZh7r8UEflsEDC09L/ZzBku3uT3DITTg6Oy8hS1m+MKDz7W14C\nlePWKJb12MLfWsW/iDla8OYMyqV/iRWBuhKpP+1DDEQSR1vX+MMCBIqCk8VS\nQ9Ud0EumIeQQTxkYovFcKRa4+wIlaEN48gezcfRuzhRYLrkSDA4YVAtUGXbP\n9P2QsBh4V3pL4Q3V674H7/vcWHci+nA3lyHKzpOjjKUaw9mLh5zhG6FaTKGs\nE4YzwNuoTH/XGlk3ap80vcdq8cHwXwPtMBylt3Nm0dgrky7W4bo25NoBVVTX\nXXFj\r\n=V4LH\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCHz0DxVdYC46ncxACwW6mV1gJ9plr03/UkpG5YrMY5OwCIQDygHC8W2l7PgXcfuDHFT393ZLnVdfjxUPZjXWOBZEKPw=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/scheduler_0.10.0_1541398888276_0.18850927695785624"
+			},
+			"_hasShrinkwrap": false
+		},
+		"0.12.0": {
+			"name": "@types/scheduler",
+			"version": "0.12.0",
+			"description": "TypeScript definitions for scheduler",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Nathan Bierema",
+					"url": "https://github.com/Methuselah96",
+					"githubUsername": "Methuselah96"
+				}
+			],
+			"main": "",
+			"types": "index",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "680b4cf0ac8677e33e3a79157bc92e59a8f5a63fd92226112bd9f218871e4c0f",
+			"typeScriptVersion": "2.1",
+			"_id": "@types/scheduler@0.12.0",
+			"dist": {
+				"integrity": "sha512-tcmRUJMzhcwYS/AXg/dtj5/Rrs3Sf8IP2B1vpy8ZhYIBrDOrjpu9q6ysecD2rAqAidzmhzC8SZ8QLCtlFzjSrA==",
+				"shasum": "f2d6663802c4c8b4468dde655d0af610287b151c",
+				"tarball": "https://registry.npmjs.org/@types/scheduler/-/scheduler-0.12.0.tgz",
+				"fileCount": 4,
+				"unpackedSize": 3747,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJcQSAJCRA9TVsSAnZWagAAZvAP/jmfF6V3IVwg3Bvfhv68\nKOc6Uhcn88gOYa1rOT8uMw6MWWTo98NyGjOasqoY2fRmJIAWGMpYJ2UGmjH5\nWSIaIdgC59T7Ef99d8QzWzgDijm3LOPiE/SNXIEoB1oFJmQG4k7UfqeYezpp\nrZn2jmcRxjmPMhFW9I1qr0G89rXhxcYjVPS6FoFxJ5NMpdlrtX5tDlGQZ0LR\n/QD3lvRih832CS0Q/bvWOFLkS2TholsQ92lgBRIztrq2axjTG0C/eZYgha2i\nLJJLKzdrgjbxXVaEXCdY3rrA9NK1lvp42OLS85h+UvD9FiMjCf5N50dmLLpl\nK5Wi3/UNCSWHI/1fb95w0mvQ4SJwF2pvB+21TaP1Qs9sPaq5Nm9tXzHlqYd4\nEmCXkVlinA8M5RyTbyZdVGAjE83LNXU90JqX4i2SsQjYgeXBTU9MrqufTu9A\nOuKHPVl4/vmhP0RCvaWrC/e2UvvfIDXWOyyAh0y+TNISEEbB22c7tK0ltcf5\n5wCbGtKEiyYIJZ0DNeWUTxyxQU//Zc5v/deIiFdoQQGiIsuxcISUGsPGYvBW\nclBKWwXf+MImFD2yqXchiWT0uIFjkz+3Jd2d56RocmtFQ5Yb2FyihTuAS9vI\n7gVMhZoOKd304Iwe+nus3bnHUKkDm7v48Dv6a54U7+o9t4hLrVUAdeJUN8Fa\nTnpQ\r\n=+CHL\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCIDNFctlZy10RoziwgiptndkAf9DbaGe2MHLOrzyWhiAIhAO+Z17Kt7HkAifQ9n0XW0kNcIokJyC79pgm1osG64Thu"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/scheduler_0.12.0_1547771913009_0.3560664649564984"
+			},
+			"_hasShrinkwrap": false
+		},
+		"0.12.1": {
+			"name": "@types/scheduler",
+			"version": "0.12.1",
+			"description": "TypeScript definitions for scheduler",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Nathan Bierema",
+					"url": "https://github.com/Methuselah96",
+					"githubUsername": "Methuselah96"
+				},
+				{
+					"name": "Sebastian Silbermann",
+					"url": "https://github.com/eps1lon",
+					"githubUsername": "eps1lon"
+				}
+			],
+			"main": "",
+			"types": "index",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/scheduler"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "97d9b730fb6c67c488fe1bd0bae243c3750a411457bd240d4c01d39d251b8b6d",
+			"typeScriptVersion": "2.8",
+			"_id": "@types/scheduler@0.12.1",
+			"dist": {
+				"integrity": "sha512-XyL0jqjNrtC5evlPzAx25XCUxyrP5PFgsWwbCNkj6CPlABEd9ikr1B3wGd9KiCad7wbLd7MpL3KKe2dGpLKnZw==",
+				"shasum": "3204ac7ac5c639b3d152a8a5e1ed5f3206d3c7b0",
+				"tarball": "https://registry.npmjs.org/@types/scheduler/-/scheduler-0.12.1.tgz",
+				"fileCount": 5,
+				"unpackedSize": 8185,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJcrN4vCRA9TVsSAnZWagAAAbsQAJFhvCCn/3qdWTkFMIND\nu7gHkX3hK6AeBkjTgjClnf9aeOygGkDybd3btD2KGrB5pFG1XC6i7m4frtTJ\nJl89x2kB0pnbY1bfAaL+5ulzDzBCFAJHsNmOmiNww1f3W3PpKTMHihjeRcRe\nUESKjOFHwX/yuitfQNHC52HexQIszvz3kT1r4u0UWOIqcweOzHIQ1kJEmXQX\nXXLC7uscYPRuVaLGgYgKTzIL19XhZBNwhp55SnXkifbcDUvZszkufe3DMh7W\n17B158iutuCZXoDd99D85XUqwqZLjb1+QCGzYCqXqxQdmNjXaT5FpUar6cJE\nSyksTU1UcHbplofbkp1Y6zHe4c1ETOU2U0L3pbrWdwmy8yhIKquqJyh3oRK4\n/8PONghDyAgZJBYN9PL50q8oJEJt3eWR7m0lmBAuXA/XEcKGlVkq+hYFKh9m\nRyFtG1uiD3dsLeua/uSfCpjd60COP79ezKlQh9dVXx2wUZ2o95Qwafg3xslT\nokRpHihWK1o6GuRZL/IeyWGBo6HafIgIa2u5ZaWyDQcttrOyfMj+9aimS5lJ\no9Ce5phzXzjAoTz3LAJMM2IwmrrcY+P0/fePBJ9RcZJs6oD/oiW2E8Y/TWJ5\neIzAR9pPQcx6wOnL4UTf4d3vxEZE6u0EHmM0DQFjwb8V2fYneA0DuOCJSxAS\nA8jW\r\n=g58T\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCEXWj7ZVfrl5twpEJi0MYrv04YvvFcOP/4mGMUu6gf7QIhANK2JYoPpoS2dYGLQkexonHy+aj1HDTvnYb2/Bj1hmr9"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/scheduler_0.12.1_1554832943162_0.8619528403675984"
+			},
+			"_hasShrinkwrap": false
+		},
+		"0.16.0": {
+			"name": "@types/scheduler",
+			"version": "0.16.0",
+			"description": "TypeScript definitions for scheduler",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Nathan Bierema",
+					"url": "https://github.com/Methuselah96",
+					"githubUsername": "Methuselah96"
+				},
+				{
+					"name": "Sebastian Silbermann",
+					"url": "https://github.com/eps1lon",
+					"githubUsername": "eps1lon"
+				}
+			],
+			"main": "",
+			"types": "index",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/scheduler"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "4129796eee54eabea79d46638599a96623646e59f20af7db392e6352cefe4926",
+			"typeScriptVersion": "2.8",
+			"_id": "@types/scheduler@0.16.0",
+			"dist": {
+				"integrity": "sha512-Ru6zqw+j3Rhn6Dgg7j/SSKOC+2Rpm92V6f+tvXMZTZ8KgAqtOdD2fHWUYvcU2zrsciw46oTIWjeJ86Hun9AuZg==",
+				"shasum": "0375e7f8ff3c75d0dc1c6cef5bfabc2a514f9ca4",
+				"tarball": "https://registry.npmjs.org/@types/scheduler/-/scheduler-0.16.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 8216,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJdllx9CRA9TVsSAnZWagAAOSkP/RV3nHzUeiTmL/tY/TiX\nX3zPuGbDF5M/IabquvLXKRrhxq8HKGCPefyl7uKHuc7nZewxqWbWlRzDiupN\n1FYVpOIr61s0N8Jbj6/PFjASQkgS1tZ2o3fTIEvxeCHJsNThNk71iOazXfib\nUC8/ALNpifmMQY9ze9FUOVxa1aUTmWH2/lX4egw1H60CK0Y3Dmw/V++ocBVE\nsZSOHsO5CFCQcmK3erfoJyBanLER9isUDxeVDmnGOAAzfljFnmp3zb3l86uF\nNlEZGK7j84KcydFGGoi5NIxqPNtAH/z/2GheKm2r9qR91eAtufjNXWgmMAJ0\n6XWFEwB+6uT11fGg8PijquAPbg79Q0pdoUcUwzTg2n37DMiWSo6de8orFKEX\ncLc/o9awjsJ6RJ8r/5WLpkBj6eV2ytTICVCXd3G3XVhU6yy2rZy1bQ0F9eeG\nRWQO6V6hdNDhOF9GMQ2zMLIokKklU4EvGZU7f60GuwTxva6BR6z1ye7iPZ3T\nUmJ+AuLRrriGyj1yv088HMS+ouTv0C+o4zDQJDmmLn1W+SQwD9YgwYMXD6Qu\nuxI5cyf3cJ8OcUA/IxRqqTtPvLVrToZL0ZfCQnknEJLrythdxAHVzWoZRSzg\n1lcmSsjGONztWKGTVgDTXhmO1Rbb3s4bda9/G4kglIqP/9+a8usafnOsq87O\n0tE6\r\n=f0D8\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIEa4ZaJBK1Ib7k2873iyZhnCHxywUh3OANaqXgp7eapnAiBVUavlVr+fjoGBJ87G5/V+vRRbpLmvvCKP2HhkG5LH/Q=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/scheduler_0.16.0_1570135165253_0.5640897489174515"
+			},
+			"_hasShrinkwrap": false
+		},
+		"0.16.1": {
+			"name": "@types/scheduler",
+			"version": "0.16.1",
+			"description": "TypeScript definitions for scheduler",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Nathan Bierema",
+					"url": "https://github.com/Methuselah96",
+					"githubUsername": "Methuselah96"
+				},
+				{
+					"name": "Sebastian Silbermann",
+					"url": "https://github.com/eps1lon",
+					"githubUsername": "eps1lon"
+				}
+			],
+			"main": "",
+			"types": "index",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/scheduler"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "de6e7ac9ebefa8aded2268fa4680d75483f921610b36328b5342711bb1f96af1",
+			"typeScriptVersion": "2.8",
+			"_id": "@types/scheduler@0.16.1",
+			"dist": {
+				"integrity": "sha512-EaCxbanVeyxDRTQBkdLb3Bvl/HK7PBK6UJjsSixB0iHKoWxE5uu2Q/DgtpOhPIojN0Zl1whvOd7PoHs2P0s5eA==",
+				"shasum": "18845205e86ff0038517aab7a18a62a6b9f71275",
+				"tarball": "https://registry.npmjs.org/@types/scheduler/-/scheduler-0.16.1.tgz",
+				"fileCount": 5,
+				"unpackedSize": 8252,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJdphNoCRA9TVsSAnZWagAAieEP/0KD83PwTo8ZDnqGKKL+\nTxlwK52KXMN3vRkFouhoP73NmZpgwGJZw4QQfr3JQDkZ8MQIFkfu4WObrMwQ\nbzEfgXLr86eufnbs6q24Y3zjnbwCsnI/aCm/rLUoeUZ4c24qfPbZmILc7P2G\nAVuo1nTcY4jWjW4Pmib1yUB7HkR5hAeCeSNZ8GbY1+DIluX3g3NkNp1i8SWk\nlv884N7qptqoDm0apupNxfNOboTLTQHUBIzwNgHQ3PkXtNAck+UPgaP3fZ+A\nrT7KhOQ0hmyZFWpPNFUDAU53NumXVxbi5ap1iZUXi9SR3oAoIdm/V5TjNiCn\nxSeJHCF41LmpI+QcZVilqciJuU+AJ/6UuVzlgLH8lBxlghrjkHM4e0v2g0MY\nM31krdBxyNwgatn+6nRpN+yFOPM2OpFSKY6n3FDiz/gOoXijyRxqwmShZXA6\nRM8S9S8gpv7cfaXqAqhDLSf4uNlS0NimqwYZDYUvwwk3asRE5HVCEppV/TOg\nFOmmf9mqIuck5poblkdP468gVsupTlxUvH3GDmEZwh5TGjkZHxc3lQ/fk73/\nfFZoOAmNF7t0e4d5Uc1uycJ62oYM7XgqBDkGDY1nVpFqGQx9UP+outVXPTe6\ncWw5wo+VDd8HQAtaDjdo/CU+xHXo2N6CVr7a7GT1/1da4HiTEfTPqJxvXLwg\nLdc+\r\n=XCW4\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQC83JzDR9bL2UeQXcAG6BxQm+bpzCaeK1kOIa2ehgFadQIgN638d8Yyuyth9hSIMER+/xF688SqWywp8+c+g1C1854="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/scheduler_0.16.1_1571165031758_0.8998430705540541"
+			},
+			"_hasShrinkwrap": false
+		},
+		"0.16.2": {
+			"name": "@types/scheduler",
+			"version": "0.16.2",
+			"description": "TypeScript definitions for scheduler",
+			"homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/scheduler",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Nathan Bierema",
+					"url": "https://github.com/Methuselah96",
+					"githubUsername": "Methuselah96"
+				},
+				{
+					"name": "Sebastian Silbermann",
+					"url": "https://github.com/eps1lon",
+					"githubUsername": "eps1lon"
+				}
+			],
+			"main": "",
+			"types": "index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/scheduler"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "122d740959245799b89613cc799b1a2e3274d1ee1db6c9abd7b6e4dadc0696ec",
+			"typeScriptVersion": "3.6",
+			"_id": "@types/scheduler@0.16.2",
+			"dist": {
+				"integrity": "sha512-hppQEBDmlwhFAXKJX2KnWLYu5yMfi91yazPb2l+lbJiwW+wdo1gNeRA+3RgNSO39WYX2euey41KEwnqesU2Jew==",
+				"shasum": "1a62f89525723dde24ba1b01b092bf5df8ad4d39",
+				"tarball": "https://registry.npmjs.org/@types/scheduler/-/scheduler-0.16.2.tgz",
+				"fileCount": 5,
+				"unpackedSize": 8344,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJg5IiBCRA9TVsSAnZWagAASU8P/00mEwMPQWPEqjVtTMLM\nBt369wlehMGhVoQ1fpKl7jw0FmUA3snas7XPjqEEyprYIokN4EnAA4vdyPFe\niT4e9Jekv40f4YxIHYBkeKXzFxAfOYJEC08TjpAE0qf4CHy1+Ou0kP/57dgc\ncCo0nXVbJDXaYbEyyrRynON2THYGzhHDQfGl7fjKcJWOgAF7BW7tKuVmSji+\n4CPENZKROVwctfTQS/FXghsxCgOk/oP5J+UhiCYELGcwAV37VXRl1PdiN6nF\nCWNSxctgqkPhR7SgruhWQEXK8IRHi8nvAWfqbsKOIqKyweSCJ8SWVf26TZqO\nFHroewd1ecdwuMQxlXiNOfr0eIsIPkmPwQJcCOf+qgmcSFqFRlCqFkYGnwwM\nG2qClcrRIoZZVCnJsekHGSy2FYgqhkXWOvpnaK1dZCtomqyXH6K+5XLbAM78\ni+ZA3o9iyKepXfWXCJ/70K9FqCR5sdhDtiyMSdhGv30h+nz6ho4Vhexp1wXh\n2kmzVMrsdlUk15ItEovN6YlZK1KdZa/mlLgvrX8LITAEs4oR7V4U+VO4hVEr\nEafYIDFhHBhj9umkemyRlRlf0gkYjd6/8Nq8c3Og3UGREeTEt5jjXQKgNKBn\n7caYf0LqRMSm8pVmc1nH4MgUnxjLXNILXs1X7ybJoRKpgQbzecz0QGdWEmxp\ncMA3\r\n=hWSw\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDRDm8/+YVHeyMLKUcClwHopHnLU0dPL+5jLRblObT/TQIgH3mjI0wlmMr8laeD6HIyginHGrOquS0QUYWWFGcghek="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/scheduler_0.16.2_1625589889200_0.6085707496699111"
+			},
+			"_hasShrinkwrap": false
+		}
+	},
+	"time": {
+		"created": "2018-11-05T06:21:28.056Z",
+		"0.10.0": "2018-11-05T06:21:28.489Z",
+		"modified": "2022-08-15T08:31:24.116Z",
+		"0.12.0": "2019-01-18T00:38:33.118Z",
+		"0.12.1": "2019-04-09T18:02:23.298Z",
+		"0.16.0": "2019-10-03T20:39:25.419Z",
+		"0.16.1": "2019-10-15T18:43:51.903Z",
+		"0.16.2": "2021-07-06T16:44:49.372Z"
+	},
+	"users": {},
+	"dist-tags": {
+		"latest": "0.16.2",
+		"ts2.1": "0.12.0",
+		"ts2.2": "0.12.0",
+		"ts2.3": "0.12.0",
+		"ts2.4": "0.12.0",
+		"ts2.5": "0.12.0",
+		"ts2.6": "0.12.0",
+		"ts2.7": "0.12.0",
+		"ts2.8": "0.16.1",
+		"ts2.9": "0.16.1",
+		"ts3.0": "0.16.1",
+		"ts3.1": "0.16.1",
+		"ts3.2": "0.16.1",
+		"ts3.3": "0.16.1",
+		"ts3.4": "0.16.1",
+		"ts3.5": "0.16.1",
+		"ts3.6": "0.16.2",
+		"ts3.7": "0.16.2",
+		"ts3.8": "0.16.2",
+		"ts3.9": "0.16.2",
+		"ts4.0": "0.16.2",
+		"ts4.1": "0.16.2",
+		"ts4.2": "0.16.2",
+		"ts4.3": "0.16.2",
+		"ts4.4": "0.16.2",
+		"ts4.5": "0.16.2",
+		"ts4.6": "0.16.2",
+		"ts4.7": "0.16.2",
+		"ts4.8": "0.16.2",
+		"ts4.9": "0.16.2"
+	},
+	"_uplinks": {
+		"npmjs": {
+			"etag": "W/\"2b317e3f76a3600a0d426bc84395fde3\"",
+			"fetched": 1663961190750
+		}
+	},
+	"_distfiles": {
+		"scheduler-0.10.0.tgz": {
+			"url": "https://registry.npmjs.org/@types/scheduler/-/scheduler-0.10.0.tgz",
+			"sha": "9b5617d5ac31993c460b69900714cfef788e5db4",
+			"registry": "npmjs"
+		},
+		"scheduler-0.12.0.tgz": {
+			"url": "https://registry.npmjs.org/@types/scheduler/-/scheduler-0.12.0.tgz",
+			"sha": "f2d6663802c4c8b4468dde655d0af610287b151c",
+			"registry": "npmjs"
+		},
+		"scheduler-0.12.1.tgz": {
+			"url": "https://registry.npmjs.org/@types/scheduler/-/scheduler-0.12.1.tgz",
+			"sha": "3204ac7ac5c639b3d152a8a5e1ed5f3206d3c7b0",
+			"registry": "npmjs"
+		},
+		"scheduler-0.16.0.tgz": {
+			"url": "https://registry.npmjs.org/@types/scheduler/-/scheduler-0.16.0.tgz",
+			"sha": "0375e7f8ff3c75d0dc1c6cef5bfabc2a514f9ca4",
+			"registry": "npmjs"
+		},
+		"scheduler-0.16.1.tgz": {
+			"url": "https://registry.npmjs.org/@types/scheduler/-/scheduler-0.16.1.tgz",
+			"sha": "18845205e86ff0038517aab7a18a62a6b9f71275",
+			"registry": "npmjs"
+		},
+		"scheduler-0.16.2.tgz": {
+			"url": "https://registry.npmjs.org/@types/scheduler/-/scheduler-0.16.2.tgz",
+			"sha": "1a62f89525723dde24ba1b01b092bf5df8ad4d39",
+			"registry": "npmjs"
+		}
+	},
+	"_attachments": {},
+	"_rev": "1-9fac02295e650569",
+	"_id": "@types/scheduler",
+	"readme": "# Installation\r\n> `npm install --save @types/scheduler`\r\n\r\n# Summary\r\nThis package contains type definitions for scheduler (https://reactjs.org/).\r\n\r\n# Details\r\nFiles were exported from https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/scheduler.\r\n\r\n### Additional Details\r\n * Last updated: Tue, 06 Jul 2021 16:34:20 GMT\r\n * Dependencies: none\r\n * Global values: none\r\n\r\n# Credits\r\nThese definitions were written by [Nathan Bierema](https://github.com/Methuselah96), and [Sebastian Silbermann](https://github.com/eps1lon)."
+}

@@ -1,0 +1,3610 @@
+{
+	"name": "@types/history",
+	"versions": {
+		"2.0.14-alpha": {
+			"name": "@types/history",
+			"version": "2.0.14-alpha",
+			"description": "Type definitions for history v2.0.0 from https://www.github.com/DefinitelyTyped/DefinitelyTyped",
+			"main": "",
+			"scripts": {},
+			"author": {
+				"name": "Sergey Buturlakin",
+				"email": "https://github.com/sergey-buturlakin"
+			},
+			"license": "MIT",
+			"typings": "index.d.ts",
+			"dependencies": {
+				"history/lib/actions": "*"
+			},
+			"_id": "@types/history@2.0.14-alpha",
+			"_shasum": "4fc0e5cbeabc43b3b7c9d3fefe3240f0ca847490",
+			"_from": "output\\history",
+			"_resolved": "file:output\\history",
+			"_npmVersion": "3.8.2",
+			"_nodeVersion": "5.5.0",
+			"_npmUser": {
+				"name": "types",
+				"email": "ryan.cavanaugh@microsoft.com"
+			},
+			"dist": {
+				"shasum": "4fc0e5cbeabc43b3b7c9d3fefe3240f0ca847490",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.14-alpha.tgz",
+				"integrity": "sha512-MjdX80V2t/mdyVK9cBOtyet1mP4pmjVDkA5psgv2CmOUJwR0MfG2M26adFRE89RCS9I8TYOhIQZkT09uZdMSfg==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIA66Nyc0+Kv53HzdgMjMvkRLoCXVogOYq5aNT+qPi2rEAiEA41rDgRd5T1uS2OvqjRpki9GCQ6vpnDpMOHL5I454KvY="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-16-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.14-alpha.tgz_1463461773367_0.9326223325915635"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.15-alpha": {
+			"name": "@types/history",
+			"version": "2.0.15-alpha",
+			"description": "Type definitions for history v2.0.0 from https://www.github.com/DefinitelyTyped/DefinitelyTyped",
+			"main": "",
+			"scripts": {},
+			"author": {
+				"name": "Sergey Buturlakin",
+				"email": "https://github.com/sergey-buturlakin"
+			},
+			"license": "MIT",
+			"typings": "index.d.ts",
+			"dependencies": {
+				"history/lib/actions": "*"
+			},
+			"_id": "@types/history@2.0.15-alpha",
+			"_shasum": "df4a9fa9d5a23e06edb081325c3285cc189c5666",
+			"_from": "output\\history",
+			"_resolved": "file:output\\history",
+			"_npmVersion": "3.8.2",
+			"_nodeVersion": "5.5.0",
+			"_npmUser": {
+				"name": "types",
+				"email": "ryan.cavanaugh@microsoft.com"
+			},
+			"dist": {
+				"shasum": "df4a9fa9d5a23e06edb081325c3285cc189c5666",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.15-alpha.tgz",
+				"integrity": "sha512-Xryts77LaXDePEfYReeMVXj6Qyl1y7iAURi1BoUoXgvVO2zh9Vksd/FLULTr7XdqgtV0Y4/lUSg8JcWj96issw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDQUkNHDlBc8OE5gvfNB9nijcifV3Ll9E77nC7fCeQ7kAIgCgtAqRsjqndGnS1Oq5HEZQYKYmR/ELc9Wc5OxBpwZPc="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.15-alpha.tgz_1463692153385_0.9900277694687247"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.20-alpha": {
+			"name": "@types/history",
+			"version": "2.0.20-alpha",
+			"description": "TypeScript definitions for history v2.0.0",
+			"main": "",
+			"scripts": {},
+			"author": {
+				"name": "Sergey Buturlakin",
+				"email": "https://github.com/sergey-buturlakin"
+			},
+			"license": "MIT",
+			"typings": "index.d.ts",
+			"dependencies": {},
+			"_id": "@types/history@2.0.20-alpha",
+			"_shasum": "b26191b297dc6f2148c8ada1e6184c0a95dd5532",
+			"_from": "output\\history",
+			"_resolved": "file:output\\history",
+			"_npmVersion": "3.8.2",
+			"_nodeVersion": "5.5.0",
+			"_npmUser": {
+				"name": "types",
+				"email": "ryan.cavanaugh@microsoft.com"
+			},
+			"dist": {
+				"shasum": "b26191b297dc6f2148c8ada1e6184c0a95dd5532",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.20-alpha.tgz",
+				"integrity": "sha512-lasPEjIq51PgDKGk6tFBrALeJ8vHVFG1VVfyU9CXxLfo7AuGEZdluY7E+41r8siA6a6sl+jEUG6DaRShK+iTFw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCWJ0bE7/r1/9yTdpTPkXzzEOys22OIxPPSi9KgLsBnnQIhANg6QxTWl75+vsVbJlxYUoqtpNNJ7Rqmbl2DQhkyjPp3"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-16-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.20-alpha.tgz_1463773601264_0.2698400265071541"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.21-alpha": {
+			"name": "@types/history",
+			"version": "2.0.21-alpha",
+			"description": "TypeScript definitions for history v2.0.0",
+			"main": "",
+			"scripts": {},
+			"author": {
+				"name": "Sergey Buturlakin",
+				"email": "https://github.com/sergey-buturlakin"
+			},
+			"license": "MIT",
+			"typings": "index.d.ts",
+			"dependencies": {},
+			"_id": "@types/history@2.0.21-alpha",
+			"_shasum": "30624340023549e1e026f860764d78240fd7f669",
+			"_from": "output\\history",
+			"_resolved": "file:output\\history",
+			"_npmVersion": "3.8.2",
+			"_nodeVersion": "5.5.0",
+			"_npmUser": {
+				"name": "types",
+				"email": "ryan.cavanaugh@microsoft.com"
+			},
+			"dist": {
+				"shasum": "30624340023549e1e026f860764d78240fd7f669",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.21-alpha.tgz",
+				"integrity": "sha512-I0/9KUuxAfp36PJsn9sV2L49MCAdf/AgNa8y2n2Eam5MDUtj2t7co7RzqzvK7544WGNWl6FgPDZK3dosjQkrMw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDUURe2CBKkdqanYAhT+TbwspuF3pg2yFqbeGIOI5vv5QIgKyYTwOFOHWoDlfw4OHx17O9zvtC6l6bi0QENfcEOcrg="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.21-alpha.tgz_1464152696555_0.7244730116799474"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.22-alpha": {
+			"name": "@types/history",
+			"version": "2.0.22-alpha",
+			"description": "TypeScript definitions for history v2.0.0",
+			"main": "",
+			"scripts": {},
+			"author": {
+				"name": "Sergey Buturlakin",
+				"email": "https://github.com/sergey-buturlakin"
+			},
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"license": "MIT",
+			"typings": "index.d.ts",
+			"dependencies": {},
+			"_id": "@types/history@2.0.22-alpha",
+			"_shasum": "4c763a47ba82a738d4b1e05d87249d12be24927a",
+			"_from": "output\\history",
+			"_resolved": "file:output\\history",
+			"_npmVersion": "3.9.5",
+			"_nodeVersion": "6.2.2",
+			"_npmUser": {
+				"name": "types",
+				"email": "ryan.cavanaugh@microsoft.com"
+			},
+			"dist": {
+				"shasum": "4c763a47ba82a738d4b1e05d87249d12be24927a",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.22-alpha.tgz",
+				"integrity": "sha512-7X1jNe1WdZpmnv+99eXTb3EvOnxA56anI388E88uJLkaVbnBQgcCLdwrhvXTG0RGaJ7G0cWCFJRt5AyUt7XNVw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQCLwvUegNiEarOuLdfnV68nxxapiwuEyqG1K+Ip8aGbFAIgEzwNO/MI1S/q9OJSXDZheW2szyKA6f4i5RE0KUPCjz8="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-16-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.22-alpha.tgz_1467401585046_0.041186420479789376"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.23-alpha": {
+			"name": "@types/history",
+			"version": "2.0.23-alpha",
+			"description": "TypeScript definitions for history v2.0.0",
+			"main": "",
+			"scripts": {},
+			"author": {
+				"name": "Sergey Buturlakin",
+				"email": "https://github.com/sergey-buturlakin"
+			},
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"license": "MIT",
+			"typings": "index.d.ts",
+			"dependencies": {},
+			"_id": "@types/history@2.0.23-alpha",
+			"_shasum": "04de2b6954780941d693e6b2aed07d5b0eb2a9f1",
+			"_from": "output\\history",
+			"_resolved": "file:output\\history",
+			"_npmVersion": "3.7.2",
+			"_nodeVersion": "6.2.1",
+			"_npmUser": {
+				"name": "types",
+				"email": "ryan.cavanaugh@microsoft.com"
+			},
+			"dist": {
+				"shasum": "04de2b6954780941d693e6b2aed07d5b0eb2a9f1",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.23-alpha.tgz",
+				"integrity": "sha512-YcF1esMlnXOhWaid0dQmL5oHzOLFOD/WvuFgbWNX3GrK3ffc9iROQ7Pu5s6YUOsuGDXkQItxXgvG1OmI7HjXUg==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCHwoEq8JZp6F/UmMFt9sE1aE76BKIi6zgjOwYrIryye0CIQDDZcRze9cx9/4oPVwLjZSjcTfQ3dQkciidrI5xjDhySQ=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-16-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.23-alpha.tgz_1467413703897_0.1274084944743663"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.24-alpha": {
+			"name": "@types/history",
+			"version": "2.0.24-alpha",
+			"description": "TypeScript definitions for history v2.0.0",
+			"main": "",
+			"scripts": {},
+			"author": {
+				"name": "Sergey Buturlakin",
+				"email": "https://github.com/sergey-buturlakin"
+			},
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"license": "MIT",
+			"typings": "index.d.ts",
+			"dependencies": {},
+			"_id": "@types/history@2.0.24-alpha",
+			"_shasum": "bd97f801bc93738319768302ee4cf01a8ae0a707",
+			"_from": "output\\history",
+			"_resolved": "file:output\\history",
+			"_npmVersion": "3.7.2",
+			"_nodeVersion": "6.2.1",
+			"_npmUser": {
+				"name": "types",
+				"email": "ryan.cavanaugh@microsoft.com"
+			},
+			"dist": {
+				"shasum": "bd97f801bc93738319768302ee4cf01a8ae0a707",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.24-alpha.tgz",
+				"integrity": "sha512-p++tBKCpXW6ev1XFYI8BT9TtVL91W8yHyaLkiZpjCkzWqSTd9j95xyx3AzgFEmBb4g85qa5mpYK8VFm4Vm4DKA==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIAljbvFT9hOwtUD2qH5sWgmV+v1OUbQ5UnaT8gDZs+R6AiALBXrPLmGyQ22CrZtPIwPGg92T/BuzCiry3nh3T7NX0Q=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.24-alpha.tgz_1467426841568_0.40737665817141533"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.25-alpha": {
+			"name": "@types/history",
+			"version": "2.0.25-alpha",
+			"description": "TypeScript definitions for history v2.0.0",
+			"main": "",
+			"scripts": {},
+			"author": {
+				"name": "Sergey Buturlakin",
+				"email": "https://github.com/sergey-buturlakin"
+			},
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"license": "MIT",
+			"typings": "index.d.ts",
+			"dependencies": {},
+			"_id": "@types/history@2.0.25-alpha",
+			"_shasum": "e0e65a998b0827c922a234feb725b3075886785d",
+			"_from": "output\\history",
+			"_resolved": "file:output\\history",
+			"_npmVersion": "3.7.2",
+			"_nodeVersion": "6.2.1",
+			"_npmUser": {
+				"name": "types",
+				"email": "ryan.cavanaugh@microsoft.com"
+			},
+			"dist": {
+				"shasum": "e0e65a998b0827c922a234feb725b3075886785d",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.25-alpha.tgz",
+				"integrity": "sha512-7TJtnUyOsHR+h0ccvp9wQj4Roe/yLqE8QXajYiF2uuBfmd22X1krawS71wfaDQbsQkmIJEruQ4Hh8wELEvSxGQ==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCQnZd+4EcE3V0oIjlMaaxYNb1qdW515jZ1sjzEehbbCwIhAJFCQ3ZaEicfU/WMXKfbnKm7CIflk5nOKXb0LoapW73q"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-16-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.25-alpha.tgz_1467591860385_0.3033699723891914"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.26-alpha": {
+			"name": "@types/history",
+			"version": "2.0.26-alpha",
+			"description": "TypeScript definitions for history v2.0.0",
+			"main": "",
+			"scripts": {},
+			"author": {
+				"name": "Sergey Buturlakin",
+				"email": "https://github.com/sergey-buturlakin"
+			},
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"license": "MIT",
+			"typings": "index.d.ts",
+			"dependencies": {},
+			"_id": "@types/history@2.0.26-alpha",
+			"_shasum": "ef0a33cb40334691900182ba82d74dc893558e94",
+			"_from": "output\\history",
+			"_resolved": "file:output\\history",
+			"_npmVersion": "3.10.3",
+			"_nodeVersion": "6.3.0",
+			"_npmUser": {
+				"name": "types",
+				"email": "ryan.cavanaugh@microsoft.com"
+			},
+			"dist": {
+				"shasum": "ef0a33cb40334691900182ba82d74dc893558e94",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.26-alpha.tgz",
+				"integrity": "sha512-32c79X1MGk0uGb/I2EoDnwAWs2/Ue4uJLQfJCwaoQvzuru3IQKnJF7oqZTpDx634J2vyafs9tR1BCxs6nqBYKA==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDNyKSUqLCRZERcpRGNy8hELDbUlpYyn93brmWtFApRVQIgTcCFPAqPmLZcCKLytA8yvHpNNr6mFz9b8/JH1vVfFk8="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.26-alpha.tgz_1468009560000_0.3205860739108175"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.27-alpha": {
+			"name": "@types/history",
+			"version": "2.0.27-alpha",
+			"description": "TypeScript definitions for history v2.0.0",
+			"main": "",
+			"scripts": {},
+			"author": {
+				"name": "Sergey Buturlakin",
+				"email": "https://github.com/sergey-buturlakin"
+			},
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"license": "MIT",
+			"typings": "index.d.ts",
+			"dependencies": {},
+			"_id": "@types/history@2.0.27-alpha",
+			"_shasum": "779e71ec925b7726d9102a77ea842efa19e77fe6",
+			"_from": "output\\history",
+			"_resolved": "file:output\\history",
+			"_npmVersion": "3.10.3",
+			"_nodeVersion": "6.3.0",
+			"_npmUser": {
+				"name": "types",
+				"email": "ryan.cavanaugh@microsoft.com"
+			},
+			"dist": {
+				"shasum": "779e71ec925b7726d9102a77ea842efa19e77fe6",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.27-alpha.tgz",
+				"integrity": "sha512-zXj1WpOOfpXrV7h5hISJFTpS8ewMwNojYqMLapYDO/V6c+qX9qaecA6GEQQJiTjan+ztvWGCHr2MgvBPN8ZpUw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCN2202GF/yJczKcuU+PGmPjcrssL3kxo9XUuISTw6WQQIhAJ77wZnbIFCrwerUwQii1Y7uh6V1W/Fh5jC8YkclVz4H"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-16-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.27-alpha.tgz_1468276127915_0.47435711696743965"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.28": {
+			"name": "@types/history",
+			"version": "2.0.28",
+			"description": "TypeScript definitions for history v2.0.0",
+			"main": "",
+			"scripts": {},
+			"author": {
+				"name": "Sergey Buturlakin",
+				"email": "https://github.com/sergey-buturlakin"
+			},
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"license": "MIT",
+			"typings": "index.d.ts",
+			"dependencies": {},
+			"_id": "@types/history@2.0.28",
+			"_shasum": "321c97fc27fac7601103f1ea162e8c563b15a259",
+			"_from": "output\\history",
+			"_resolved": "file:output\\history",
+			"_npmVersion": "3.10.3",
+			"_nodeVersion": "6.3.0",
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"dist": {
+				"shasum": "321c97fc27fac7601103f1ea162e8c563b15a259",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.28.tgz",
+				"integrity": "sha512-8jqotzfC1cfUsqek2xZg4KXEVUB3V9b0HuYEAEBf2iB79J6LAE9tnfRCeQiTFY1HLZmN6YN2FUwPWZfrv6WzNQ==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCi0OxPeFj+ZfJPTLKY0jYBP5eYQayzHchEvZRdJoHWKwIhAL8rtwnSi/fBzKizTH2LjBrPCnkAP53wTf1OM7mxdlu2"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-16-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.28.tgz_1468507898842_0.46730930684134364"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.29": {
+			"name": "@types/history",
+			"version": "2.0.29",
+			"description": "TypeScript definitions for history v2.0.0",
+			"license": "MIT",
+			"author": {
+				"name": "Sergey Buturlakin",
+				"email": "https://github.com/sergey-buturlakin"
+			},
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typings": "index.d.ts",
+			"_id": "@types/history@2.0.29",
+			"_shasum": "450bb27080f2695f00b20cd487781780f80e7e4a",
+			"_from": "output\\history",
+			"_resolved": "file:output\\history",
+			"_npmVersion": "3.10.3",
+			"_nodeVersion": "6.3.0",
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"dist": {
+				"shasum": "450bb27080f2695f00b20cd487781780f80e7e4a",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.29.tgz",
+				"integrity": "sha512-Ez2z+2PkCAH6SxjpOBopr/TCoAVuAoe86BfN+MAz2mErVIhwPg58M230mTsQeykpo2GZw+MzGfa7ODs7VHN4Pg==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDb+BXcCLHJd4nLmgKFy5nc5DZ4obWZ4pBuzaeW6vjWcgIhAIsQHbAQW+0xapZ6t+iuet/LxvifnprRdfZFG4GoBYyE"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.29.tgz_1468933888952_0.3601018136832863"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.30": {
+			"name": "@types/history",
+			"version": "2.0.30",
+			"description": "TypeScript definitions for history v2.0.0",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typings": "index.d.ts",
+			"_id": "@types/history@2.0.30",
+			"dist": {
+				"shasum": "aec5d3c32711a80e6b6e2e0e809e2b55bbeea8ec",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.30.tgz",
+				"integrity": "sha512-Uu1J/SY1RXHL/t7xo5LWV246ZQ8XN5rwKdWFK1kEh7oEfddCXqYb7EGdS59AeQiVuMESxcpaWXENIEyYKMK85A==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCxXPiSjlZabCEqwxuM5ciZND1cVXiC0rmUOeNQV94xaAIhAP0m2YxH1eANILtJlhpbvV3TZcr3vRoTW/DQnXfE3GGM"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.30.tgz_1470921504299_0.42406878317706287"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.31": {
+			"name": "@types/history",
+			"version": "2.0.31",
+			"description": "TypeScript definitions for history v2.0.0",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typings": "index.d.ts",
+			"_id": "@types/history@2.0.31",
+			"dist": {
+				"shasum": "d710ce05f7638c32fea3dead05b03db89359f049",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.31.tgz",
+				"integrity": "sha512-LRjlKDq+2eQ6Q1oZNOBh1G2VSqTdk+w1KdsNA0cepqNq1XNSYRCWS062p3LxN3ADYtHwxTayudnFaw2O5tq3Aw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDAbaoXzgVRG80ledrQUkViv4IThp0R/YwOKrXci8BVwQIgdTav42IYKBnXMPevD/Fyygr/W2hGL3558AiyXzinIcg="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.31.tgz_1471366359672_0.8263488230295479"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.32": {
+			"name": "@types/history",
+			"version": "2.0.32",
+			"description": "TypeScript definitions for history v2.0.0",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typings": "index.d.ts",
+			"_id": "@types/history@2.0.32",
+			"dist": {
+				"shasum": "87fc1e8a9c2d60cf934d31f8a1784b535e6a39d9",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.32.tgz",
+				"integrity": "sha512-j38ovryFbPkdFffvKmUaA2EuQ+JRZgeZPG0ALMy0Dphi7pUxIQefgoesrbDCGFZG0eUd93PJ6f6hf+sRNojLFw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIBLVMOHIoSmUP/vvCdz2mADVKMHDDLZv64tZInmvNMQnAiEA0/OZj6tPBkZOi5uZQT1O7ydk8yb1udWwjymGnD2RJdQ="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.32.tgz_1471888689941_0.16837960970588028"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.33": {
+			"name": "@types/history",
+			"version": "2.0.33",
+			"description": "TypeScript definitions for history v2.0.0",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typings": "index.d.ts",
+			"_id": "@types/history@2.0.33",
+			"dist": {
+				"shasum": "08e78622b5c612c450b1b65fb1dcc51fecffb7a8",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.33.tgz",
+				"integrity": "sha512-+vSJcyCVufkHNB/PbJuHjItTx3k0JaAf/8n1+oJ+Rzd54/LZFJRqwdWc9YYzHHANNAMKu5tO0K2HFYR+godSAA==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIDs8EApXhaGnKdALS4Q3QbgloejvdgL8MloQMxSYPkJdAiBpvEDx/AKe6SG6XdxkjUWtDB/FIDLI9ITjpYP987gJDw=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-16-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.33.tgz_1471892221015_0.03908149804919958"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.34": {
+			"name": "@types/history",
+			"version": "2.0.34",
+			"description": "TypeScript definitions for history v2.0.0",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typings": "index.d.ts",
+			"_id": "@types/history@2.0.34",
+			"dist": {
+				"shasum": "1b56894958f2c9ba3e0a894098ac6b21bcff3609",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.34.tgz",
+				"integrity": "sha512-9Ii5mA10ZuZsbZ5jwVGIt0/tRlVBdJH5xtgRx8TP5n/go54ty8QpKy3hrC7aQtRm/9Lsbgdayi8zJHLBhlYJOQ==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIGr4UAViLlyeoclRlMf8LeyQncZhXGnaIC4YJ64x7xTCAiA2wsaO84P4/w+NZ0tTtW3gD1RIunPfjGO3xPllpx/oIQ=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-16-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.34.tgz_1472613923136_0.5957459807395935"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.35": {
+			"name": "@types/history",
+			"version": "2.0.35",
+			"description": "TypeScript definitions for history v2.0.0",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typings": "index.d.ts",
+			"typesPublisherContentHash": "382df262f199f4d58aa9ee6434e56081f32b8a5ea441cf3b0d969eddcf6ba531",
+			"_id": "@types/history@2.0.35",
+			"dist": {
+				"shasum": "460c67bb13b21e6c1c1b2a3f6e54af46d4c0282e",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.35.tgz",
+				"integrity": "sha512-F32v4y7iIZmZzHf/mc7a867os74cHBUxoe/IDmlj/yj2X7cRimkwxqhCEC+u5QhvRcnoxBCK/lgEyRmcbyGBsw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIBGaC2i4Ro4BuBYueORvVznXanTgwQFX6Rs+GG0YKwweAiEAkJmAx4dGqS1998rxMhkmbeWflaljhM2ZjxuCoqiHeAY="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-16-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.35.tgz_1473700480959_0.5961009692400694"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.36": {
+			"name": "@types/history",
+			"version": "2.0.36",
+			"description": "TypeScript definitions for history v2.0.0",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typings": "index.d.ts",
+			"typesPublisherContentHash": "689e4dca2bb46863e7e2dbc61ceadbb4419ebc09aac8eca99c695d19a3eb07aa",
+			"_id": "@types/history@2.0.36",
+			"dist": {
+				"shasum": "397313d344c4bc8150652daf391382e17ef04e24",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.36.tgz",
+				"integrity": "sha512-eQ1KjNNrczN2eZuDdVdsJQeNGrlYqw7lz/E6JfiF8FfzxUotlWATsgH82GnzA/ofxpMrJyaSfWOaGpEvHbpO+w==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQCRORgvpkMpXVB5PoBpqn0nwviOf7Ycvhe0bNnCKxxjjAIgNKPQwuLflHAJlCZ8UOoKQEq7OXq8TRtMLEbttlMjmnM="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-16-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.36.tgz_1474306695332_0.1424888432957232"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.37": {
+			"name": "@types/history",
+			"version": "2.0.37",
+			"description": "TypeScript definitions for history v2.0.0",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typings": "index.d.ts",
+			"typesPublisherContentHash": "0155bf2f234c0dd8d4eb45b577110cf8d6ee2adcbf4f9def10f8e2c486d9f748",
+			"_id": "@types/history@2.0.37",
+			"dist": {
+				"shasum": "65d400308e5d3a5662caf724a399e10dc9704103",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.37.tgz",
+				"integrity": "sha512-q//yTierkN7GF0i9gqaTkC2Q0g+2rNa8VJKi7mcsJof+Vb/97dHpgBt+ZwQmKu/YpJ7gexS18qQNf0UXoulzeQ==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIDYWmC5tvXZlQ6gAFj2cTZx2zzrrzGI5js+DjdPTMwX5AiEA+01GP3rhB9mVm1LxsXvhVaZ4po3N5oalH2z3WfHNuoE="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-16-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.37.tgz_1474314939126_0.272295223781839"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.38": {
+			"name": "@types/history",
+			"version": "2.0.38",
+			"description": "TypeScript definitions for history v2.0.0",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typings": "index.d.ts",
+			"typesPublisherContentHash": "689e4dca2bb46863e7e2dbc61ceadbb4419ebc09aac8eca99c695d19a3eb07aa",
+			"_id": "@types/history@2.0.38",
+			"dist": {
+				"shasum": "ee59cdf1a4a0d9f27fa597e2ce5af8c99ae440d0",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.38.tgz",
+				"integrity": "sha512-fVrbXcwxiHrhOTIvutytf/lF7nUbBrLJGi0n51hPiSH/naMCGZsUWI7DtuwhzZ2S8PcrMUEKkxeWuFBHyolvFA==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQC9XAlLjoed6rXTwaq0USGl40L4anLktoG4f30Z66wAawIhAPBHIarqeE0Uv6lcgVOVKJ3Aa4cZLomHEwSwVu2z/ikY"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-16-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.38.tgz_1475508284302_0.3577177699189633"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.39": {
+			"name": "@types/history",
+			"version": "2.0.39",
+			"description": "TypeScript definitions for history v2.0.0",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typings": "index.d.ts",
+			"typesPublisherContentHash": "689e4dca2bb46863e7e2dbc61ceadbb4419ebc09aac8eca99c695d19a3eb07aa",
+			"_id": "@types/history@2.0.39",
+			"dist": {
+				"shasum": "f07c1a770dc95f17d439bd22648109fde1bcd9ad",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.39.tgz",
+				"integrity": "sha512-n4ke+mtXjXBUUKq6B+ISuklEGbVylpjKSXlWgRJVMsUC2uqYcsH+A5z793mHrqH68db1bMXbcf0PUN6lCI7Xug==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIFP8Rg3GS0YneeMNFlSHMtsxtdAqXPNAr8kdhP3DQCPoAiBUZhoEQ9uZx4SIRmQEq6YJMYbhq8v/AqjUkY+Hece7xw=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.39.tgz_1476387466716_0.9431460434570909"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.40": {
+			"name": "@types/history",
+			"version": "2.0.40",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typings": "index.d.ts",
+			"typesPublisherContentHash": "5e9eee6722467a2f5cf9e894c4dd09c21e405209a5b31012930b09b51cbcc77e",
+			"_id": "@types/history@2.0.40",
+			"dist": {
+				"shasum": "6a369de73e33dc9312f9f7444dd6afe6f346b3b9",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.40.tgz",
+				"integrity": "sha512-tgy50b31XwFPqlTBjJFPWHYxcJxz5BnnUyV+fVPvuuRfXej8IbQz05EL/4YtKwLvZWOlSbTYrnBekyu2QRCrfA==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCMDkzvyLo/Q2BQfjIdjQFfHu0vWJW9C/fkbznxGx9fpAIhAJa4S3D+//tucphEpB0KyjQwgHOjRPGnQKMR5FdBNFqB"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.40.tgz_1480350633963_0.7139079407788813"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.41": {
+			"name": "@types/history",
+			"version": "2.0.41",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typesPublisherContentHash": "6a82979165f90a3fc4dd2f9c67a3dc5b09e7daf579fb934a02f196e4f15c9814",
+			"_id": "@types/history@2.0.41",
+			"dist": {
+				"shasum": "88faa58e931d1c676daca71369cbc3767737d8d3",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.41.tgz",
+				"integrity": "sha512-yOK9ikfIwYtSg787T+LlH1C5eZfNj2odXa2J4343wbjJreiKlzF9npJfazplxbNtAK/jCGQ3d2o6nX9nhzXOBA==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDDxpl4KHrWWSLIoh4meGQIWovg6SeOBVfZHeyWcOguHAIhAL9e4+gci6yOebTin4AUl1mzLJBdU2Msi6WI4ILf9ocR"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-18-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.41.tgz_1480360712653_0.29791216435842216"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.42": {
+			"name": "@types/history",
+			"version": "2.0.42",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typesPublisherContentHash": "0a0ddfba465060c78c866263033bcd47b82860581d7dcc0864d45821cc1ef403",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@2.0.42",
+			"dist": {
+				"shasum": "6ddb556f1a3b870e2e4fde131f1b13cbf3a99c4d",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.42.tgz",
+				"integrity": "sha512-r47BOrolQN9CCGLDl6d7bKtmCNpUW2c2G2rkGA45mZtGm76fb4QVuCQaBYtwvOHWD5fVLXwLZRh+cmDAYIJL6Q==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQC+EJmOp1tpKDcit280AwRjurmeE0HwmAos29QYUSA94gIhAICDPA6PKRM762dHV+k1CPOvuOzlbTUy/NKdbfEf6OAw"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-18-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.42.tgz_1482885334933_0.6243195959832519"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.43": {
+			"name": "@types/history",
+			"version": "2.0.43",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typesPublisherContentHash": "6a82979165f90a3fc4dd2f9c67a3dc5b09e7daf579fb934a02f196e4f15c9814",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@2.0.43",
+			"dist": {
+				"shasum": "8b1101111eb07324d69d349853371de28d1a9fab",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.43.tgz",
+				"integrity": "sha512-2cMenqQqCBfO4o3HLqDBbjY+qBx/eP2nkg1h4iJiDP91MahOviinvttOWaHO9vs2bMFKVJnapoOwya5kgEObYQ==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIGKUI53FE46JSkf1dxVvdqEsR4YzGxLL0xk+F201sx7sAiEA/bAIlDoL2hEzlK+NTG9Vbo2oK8zp6XZETsanhV1TzRo="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-18-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.43.tgz_1483466514324_0.14164355909451842"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.44": {
+			"name": "@types/history",
+			"version": "2.0.44",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typesPublisherContentHash": "5e9eee6722467a2f5cf9e894c4dd09c21e405209a5b31012930b09b51cbcc77e",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@2.0.44",
+			"dist": {
+				"shasum": "1502843ba54c3be5768f079de05a5d6f03ba60ec",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.44.tgz",
+				"integrity": "sha512-M4REu97FvV5GiryT3aIXHIsPYv8VDiGH78TrF/b77LGaL5YtfVGRPFunYXDYnf7SsDFZ/LloEnvXyUHYOYqtJQ==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIHaYeiCIa2iCaloRvbQ1rzQWec2YrDHysCmDa47260QFAiBsjo7RZx4HCJf1fUIdG7lHhJG51zGwmIH1Cj8YYd+2tw=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.44.tgz_1484074424023_0.7225634849164635"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.45": {
+			"name": "@types/history",
+			"version": "2.0.45",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typesPublisherContentHash": "3e890671a00d1286748b5427b5e47e2fcffb5b8f21f3fd2887c73758aebf2829",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@2.0.45",
+			"dist": {
+				"shasum": "c76d79a65d189220d9d50f62e0143bdac30a564b",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.45.tgz",
+				"integrity": "sha512-rHqxW2I2IYvGIQHTntts8j4pZjz47Aycoo/zH2l3+Jmk+/oW/z9plYvJXZveyQYJ4pq8roEmi+IQTNA+ngpBfg==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDPIt6wJhJ7aqOSqU1/RaYa9ivLqYuQjodDpnGNwlJvpAIgSbOkM5n/MYL0T4+iX7yHdcx99zFBdgSfT+slzouPffc="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-18-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.45.tgz_1484320913784_0.6576679770369083"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"4.5.0": {
+			"name": "@types/history",
+			"version": "4.5.0",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>, Young Rok Kim <https://github.com/rokoroku>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typesPublisherContentHash": "45037ccf6be302a064b7340234125f5acbb59d90f0c52deafb66b3545a39cd71",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@4.5.0",
+			"dist": {
+				"shasum": "2f5c3aad4fbd00f89e99b83083e354bc5308e307",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.5.0.tgz",
+				"integrity": "sha512-hj2IP3u0ys/rtU5mEsFhxsGddBRetlhXto2qVuIL7W3Zd+k9hheFKUV2su0KvZaSBXpoS/Jq26pfJDf+vfZ0oA==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIGSOqER5lMxfoB1VZo5LsgN/5Z1IDx3S+sDKnIP352LlAiBGzuvAZvvsE/XEtuy6Jmfols7WnhB6xj5PgpQ5Hq4UmA=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/history-4.5.0.tgz_1484321240269_0.8184699546545744"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.46": {
+			"name": "@types/history",
+			"version": "2.0.46",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"author": "Sergey Buturlakin <https://github.com/sergey-buturlakin>, Nathan Brown <https://github.com/ngbrown>",
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typesPublisherContentHash": "5e9eee6722467a2f5cf9e894c4dd09c21e405209a5b31012930b09b51cbcc77e",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@2.0.46",
+			"dist": {
+				"shasum": "0a62c9ddf4f37a9f7ff5fa27d63adc603a046fd9",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.46.tgz",
+				"integrity": "sha512-nOdyuT2+Kud8vk+dYd3BgnyzSwjbbGVIsT4xAuCr/kRh9xJdRQs1LK7cELID+XeSMUGYHHA8txhwWracEHYgeg==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDUtZtjPr+d2n66sm9ZyBz8xya4y7P4XDuqesbZI+b/jgIhAPzs3cbVQsz6yKAGTpklvm/KxKN3ZsedZnqktJtP0oIn"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-18-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.46.tgz_1486176197899_0.10035497276112437"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"3.2.0": {
+			"name": "@types/history",
+			"version": "3.2.0",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown"
+				},
+				{
+					"name": "Karol Janyst",
+					"url": "https://github.com/LKay"
+				}
+			],
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typesPublisherContentHash": "ea809fa87dc16edc75d646bcf61ce8b70a3103c95291aef2272f217506b5926d",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@3.2.0",
+			"dist": {
+				"shasum": "b9afac537ef30c4ca3aa1a6bea08c039011073d4",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-3.2.0.tgz",
+				"integrity": "sha512-3YyyP45aehGy8sqetEK9WDYm5+2pTrUL5ufwXlSva6YPxi3mqkG2wq1m+ljTe2rFDUrX8Tf6DIPXN1YmSUQW7A==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDunjrKEGQ3tFDfcVI+fxz+xepReCDu9hH5TwgS9a79yQIhAIVWiSHyA3+L/T4vKped4KvckxsuAH0FlL3MisiBW5VU"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/history-3.2.0.tgz_1487577193488_0.21464996878057718"
+			},
+			"directories": {}
+		},
+		"2.0.47": {
+			"name": "@types/history",
+			"version": "2.0.47",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown"
+				}
+			],
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typesPublisherContentHash": "7ac3741cefd4c5d6e40e148e19ae53e9ccaec4767e06da4807711c701cb0cba4",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@2.0.47",
+			"dist": {
+				"shasum": "adc61b3e4245076dc72fac8cea0b835c374cfa1e",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.47.tgz",
+				"integrity": "sha512-COhqPuyIEIkoS8lEu+wTwSxEQlgTcnTrTVFpfYVlKylfy+g/hamqL5AUzym1hdkr6OfWu7RtwUzwuf5qS+jh0g==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQCnVTH3h2Z0IidQ5YcHii1uAnJnWTPQeMuXVrF6nPN47QIgZMseVLFbl7f1AYuk0+aVl3KhKgIbPdClOKLF8DvJJFQ="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-18-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.47.tgz_1488291856037_0.6803125294391066"
+			},
+			"directories": {}
+		},
+		"3.2.1": {
+			"name": "@types/history",
+			"version": "3.2.1",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown"
+				},
+				{
+					"name": "Karol Janyst",
+					"url": "https://github.com/LKay"
+				}
+			],
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typesPublisherContentHash": "45f81e9ad4342d0265704c049f35ccc450c80b95fc178cdff4f2f46638bddb9e",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@3.2.1",
+			"dist": {
+				"shasum": "0039ab0e0be2a0cc22bac171d27a44588103d123",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-3.2.1.tgz",
+				"integrity": "sha512-DhrjxTMpzM/gOL9mA23P3xq3C4oDRxE3T3mq6Fmga+MPyLCB38mp42wLtatqL8pVdBAI1hZx4LJF9SLHG6eapA==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCC0ZnxVMeAxNhWXuTPYbvB2WqlVqcZU6sceOpqmmrCAgIhAOyTLAkYpOTG6D7lAHueIzMJrz59WTuagJPwVP0i9zsW"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-18-east.internal.npmjs.com",
+				"tmp": "tmp/history-3.2.1.tgz_1488291859006_0.8529797554947436"
+			},
+			"directories": {}
+		},
+		"2.0.48": {
+			"name": "@types/history",
+			"version": "2.0.48",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown"
+				}
+			],
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typesPublisherContentHash": "81f1a83dcc245d7aa0f4ad9dd2ab5835258f253ab885d4c4285b12316a5744f8",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@2.0.48",
+			"dist": {
+				"shasum": "7e2868c3ad73d83c482f1d68f148c4fdc79c8a79",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.48.tgz",
+				"integrity": "sha512-aAeH+qD1/44Ye0YhC63vdiF56Pn6fr6l+7HI3RFCnh2p1jTxYB9FLSw+RafZ1iFauB6/udqusKaGQrWj37EqsA==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQD6Fr3Z5+GMT3ir/XtpbIX8xQR83ivUTKF+oi80IW2MGQIhAIcOLmHkCmBsPfkDqNaY+mnZqljuv1WLGeAZJpn2YCfE"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-18-east.internal.npmjs.com",
+				"tmp": "tmp/history-2.0.48.tgz_1489095198168_0.7930637903045863"
+			},
+			"directories": {}
+		},
+		"4.5.1": {
+			"name": "@types/history",
+			"version": "4.5.1",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku"
+				}
+			],
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typesPublisherContentHash": "e2e9b54625878a16dd62bb152066a46574418ce4b09db3beceb2fc4883c06917",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@4.5.1",
+			"dist": {
+				"shasum": "da4a145410466eac20e94b51c8778a7551d1d4db",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.5.1.tgz",
+				"integrity": "sha512-9M+SQj4W6MvqplIDaJTVAtkSGS6d/lvI809H2Cj1GcFawRQ5K3z/DJ8Yml3X5STRYfH+77ZSiI1RtQbVWUwhlQ==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQCOahbUF7TN4zaGK8nqPhB0lOr4sn88CwCC+TQKltz9+QIgaOy7x1gb/qYjCLxF7G9yswifx4LwZT3AvfCqHx5joQQ="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ryan.cavanaugh@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "packages-18-east.internal.npmjs.com",
+				"tmp": "tmp/history-4.5.1.tgz_1493946764962_0.7208113172091544"
+			},
+			"directories": {}
+		},
+		"4.5.2": {
+			"name": "@types/history",
+			"version": "4.5.2",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku"
+				}
+			],
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typesPublisherContentHash": "b7a2f34f95ea3e9e441fa5e8c636b3247c8c6cc800058526535d58bc2b69c7c2",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@4.5.2",
+			"dist": {
+				"integrity": "sha512-55ZPUGprvuwJ1r+PNarMdbeR3QYs6GojU/QT52hCNWZfH6nEPNbWMynaLpsd8GNhxHA4qNLO51MaH6z3DWVK1g==",
+				"shasum": "7739c850b7a5de94221accb352f9cabd1bcabe7c",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.5.2.tgz",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQD/4oR1dAa/Zse/0GqWlqr/Qgnl8mbwq+fMSmTYZ7lu/AIgKelO8x2UlifPVcbO8vpSd1oIzA683z1ZeMDMX5/NpeE="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history-4.5.2.tgz_1496692589205_0.5316470700781792"
+			},
+			"directories": {}
+		},
+		"4.6.0": {
+			"name": "@types/history",
+			"version": "4.6.0",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku"
+				}
+			],
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"peerDependencies": {},
+			"typesPublisherContentHash": "905f3ec1c8545dd07798d850575aa185a09b3f7057f77f498d06008caa540ea4",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@4.6.0",
+			"dist": {
+				"integrity": "sha512-2A0stT6b61DANLErAfSkeQ77N+A3FbR7ardUJUP3xm9f4W8qtG9ispBYDUX42Fl1EbR0rqSV3IWjbB6ew7hXRw==",
+				"shasum": "093d67ed780d889c9543f6dca24ebee0b6b9fc45",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.6.0.tgz",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIEnxMiE/dCgBCx1KqGN4aP/27zUI/faZ+vgDMm7NsedxAiAoEDFlM1ItNEH1olu0/SZlUUL+8S7BJ3wXPMGV0OPh6w=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history-4.6.0.tgz_1498226630603_0.45391750684939325"
+			},
+			"directories": {}
+		},
+		"2.0.49": {
+			"name": "@types/history",
+			"version": "2.0.49",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				}
+			],
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "c9e82efe47d0119775d6440a656c1cf0eb937781d43fd487c4e46dd3954b0ba7",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@2.0.49",
+			"dist": {
+				"integrity": "sha512-P/aCyGbdBY4ysn7F6M168Op8wefgv69rvidNRsLmQwWVQ7D3Vlr7APIq46CxzSA9vB1GIgV97ToZxLJ/s4hXnA==",
+				"shasum": "5f626148a0de1e4eb334e66076d15c1a53aa45e2",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.49.tgz",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIG6qKHcs/x731lY7iOmPCcJ75N5rgw+iaidrYiIa4xsjAiEApZlbDCXCzk1iFE8b+KcyqRSmpMb5jpZCKtT11/0kxmw="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history-2.0.49.tgz_1505769894507_0.5195006558205932"
+			},
+			"directories": {}
+		},
+		"3.2.2": {
+			"name": "@types/history",
+			"version": "3.2.2",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Karol Janyst",
+					"url": "https://github.com/LKay",
+					"githubUsername": "LKay"
+				}
+			],
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "3fd7b6b9689d6b4feaeeefc17131a8df67049cf790369ab863cb45d6f725c1d6",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@3.2.2",
+			"dist": {
+				"integrity": "sha512-DMvBzeA2dp1uZZftXkoqPC4TrdHlyuuTabCOxHY6EAKOJRMaPVu8b6lvX0QxEGKZq3cK/h3JCSxgfKmbDOYmRw==",
+				"shasum": "b6affa240cb10b5f841c6443d8a24d7f3fc8bb0c",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-3.2.2.tgz",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDo8qkCPFnID6mYNLt56GpPfuAYrRBf9F6weFpi1ObTJQIgEkewizSSE3zf/h9RvQYNkPOhUrcFOx/f9CRPVWJBDHM="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history-3.2.2.tgz_1505769896555_0.1022487748414278"
+			},
+			"directories": {}
+		},
+		"4.6.1": {
+			"name": "@types/history",
+			"version": "4.6.1",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku",
+					"githubUsername": "rokoroku"
+				}
+			],
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "44c4b2bde5bd5a7aaa82af408c84ca4103c873e774b4f65b0a17725b3d52a0f4",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@4.6.1",
+			"dist": {
+				"integrity": "sha512-Z8DQIdWtl0ff+tXDKeG3P0IOXd0kCI5wCXqZZjymjwcwe/o46BlEXeDrN09L9qnhzHmo9ObpkrlMCHPfbVvewA==",
+				"shasum": "0dbaef4febad5d074d06dbdfae6b027d1d701d25",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.6.1.tgz",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQCLCPeQJ+ymqcd50dKv8mD6M2snm0Ie59A2i3SprCtkSQIgY9YRY76GA8dmx8doeqhWqd2PH/E4JKZXwb0BmqB+/6k="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history-4.6.1.tgz_1508184711458_0.03199842502363026"
+			},
+			"directories": {}
+		},
+		"4.6.2": {
+			"name": "@types/history",
+			"version": "4.6.2",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku",
+					"githubUsername": "rokoroku"
+				}
+			],
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://www.github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "58b09a522772403ece2aad8cace378033fe2f5b996050b981b9dfa2f2b11bbae",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@4.6.2",
+			"dist": {
+				"integrity": "sha512-eVAb52MJ4lfPLiO9VvTgv8KaZDEIqCwhv+lXOMLlt4C1YHTShgmMULEg0RrCbnqfYd6QKfHsMp0MiX0vWISpSw==",
+				"shasum": "12cfaba693ba20f114ed5765467ff25fdf67ddb0",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.6.2.tgz",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIFTV6m5YxSRUHBxr3++Zss7tdoH4legu5VFepus2CqtCAiEAoItAeIboFjoactE8Co6U9pf9hu3ouhUaCSuOemAdXuw="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history-4.6.2.tgz_1510615669366_0.1435552081093192"
+			},
+			"directories": {}
+		},
+		"4.7.0": {
+			"name": "@types/history",
+			"version": "4.7.0",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku",
+					"githubUsername": "rokoroku"
+				}
+			],
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "7cd632220965f83b4f1f940321757e33aaed133dee85975a41386ff35546c2be",
+			"typeScriptVersion": "2.3",
+			"_id": "@types/history@4.7.0",
+			"dist": {
+				"integrity": "sha512-1A/RUAX4VtmGzNTGLSfmiPxQ3XwUSe/1YN4lW9GRa+j307oFK6MPjhlvw6jEHDodUBIvSvrA7/iHDchr5LS+0Q==",
+				"shasum": "2fac51050c68f7d6f96c5aafc631132522f4aa3f",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.7.0.tgz",
+				"fileCount": 12,
+				"unpackedSize": 9618,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbX5z0CRA9TVsSAnZWagAACyMP/32kZbJvu+0ZYxuy/w1t\neEJS1Kf7TfwoNXOyGOYw/s1Cw6vxswLrg0xsFbkF4shxkofoXz+qGzetvrMZ\npGOEeGnpxDho9whYQBpkp/YD7Qr2GPwyfCSUIU3rGAxla75nZevW0PN8MDXj\npkHLQ6foCmcQm8jIJ0JiIKOz9YeIGkcid0HS2PtWTwa3guSkevARDPwZxhRP\n2tLZqvyQM1mi8cWoQOCbfGCWMUnHd3j15CCntWMWi6nitJxYQqLaDRf/f2J6\nxsvFt8mBUKOhopezpTwqVtHE7xtwYcdWRwiduzJYc9tykR1fpxTk0OM0+ai6\njI8z3qmA8f+myFygMJs4vWtKTANB4poicggBgnLqX/mzWGXAdI0eQJ3U8Oq6\nqaaGIxBKAkOapc16MoGYd0jEYdmUsmdJo1AJdjuptDAEx91yvGF1BIKLikpy\nnqQwvEllxabeZYdYmJYyWAyym8L8y99wMk+3ynvjgbktQ4hlg7WWKxSNmIOu\nUGpFegJ5UANahWUkDKR3UJXeXGAotOg74J0y10fl+XPRDQ2IBAvfYOJ33uy+\nO3KDj/knGdXaYvGimGHo/e3HXPkzZdwevXxVgJGJ2je1jJ322xjvF6nRWD8O\nXSPbYTDlvPwZf9kcxmTeX4HuubcdVXZ1UkbFOj+FfHjCZRGytC+dd2m8RK/d\ntqcS\r\n=DNQJ\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCICBXX4JZ/l88WDY/pcwuwbChqTG6ZfbYiNKEDE9RixxMAiBYGxI7TjQUSyI/C/dmqzeIMem9eo82JY5eWEpUdVsuFQ=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_4.7.0_1532992756224_0.5062082189100856"
+			},
+			"_hasShrinkwrap": false
+		},
+		"4.7.1": {
+			"name": "@types/history",
+			"version": "4.7.1",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku",
+					"githubUsername": "rokoroku"
+				}
+			],
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "40dfa5eb6c7b6cea4924cc5906b742b08b3fdb55430adb56f9bce08fee4df385",
+			"typeScriptVersion": "2.3",
+			"_id": "@types/history@4.7.1",
+			"dist": {
+				"integrity": "sha512-g7RRtPg2f2OJm3kvYVTAGEr3R+YN53XwZgpP8r4cl3ugJB+95hbPfOU5tjOoAOz4bTLQuiHVUJh8rl4hEDUUjQ==",
+				"shasum": "66849a23ceef917b57f0787c885f41ce03480f5c",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.7.1.tgz",
+				"fileCount": 12,
+				"unpackedSize": 9876,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbv51dCRA9TVsSAnZWagAAmJsQAILAKjdp87xGc7sV7Qq1\njnUax+u0bDVbx29yTTgHbGTUJynB3tYOEAKIJwAGiVwTkJdVkkg9qHl6Bc02\noTgwJIpkNXhAOFH2pf/zY75RJ9WIW7sNE2LJGG3WmFik78EYJO2/5LsKUBUL\nQTo7cyJYzggbXCQI13YWAzduszB3vt1BGh8w3ooJ+5es60m/F3BXMLuwSq3Q\n5+q8iSmoDbq11mdWI1CI236L45Z7p3pm/UXRro4nqjFr6THK1sapYk7d8D29\nMHpi+Fc7/M0+nKbwCLUBlpJfcMfD8ycIYiLKLJE3UvAnSfmpPrzyKBhTfv3h\nVQYO6qfrpnoySYS8UvzbNCdISXdJdJa8lRCmOH189+lpyF9Cig9CWovCuh6Q\ncVBkDaLkxXm69Km1Vy9M+mIY42x89e71HKhRGKD0CwkpF5IRf4Z5h2eQh2ex\n4RyHQQnWO/4ZMs89x5LHEsDua7Q7w2/aAKMikM97SrJxILuCFcB2OprP7GC3\nWK/scat85h0DIMBohVx5V6sTYCvOGg22e8LjWl3lBf0XC1MJv98OMSVqO8/i\noEzKh5m4nUOzd+aXhE9ah5Qp6BhO4gx18nOEjQzdk8nXADqAOpYxW3L72/RK\nrCN+SIddCg06R3Tu/DhVw23a79Dj1NiZYx1UG+HE/NtT+cHdlA7JkJG4GNE9\nA0UF\r\n=KWfU\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQCHFN3y6HmHJn8OAiiHCdjj47DFMWG4eLQKAHBkS9trwgIgRFice9W+8WxMjmYRLvjUxjWwUoOj6aB5jDJ37pFoiSo="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_4.7.1_1539284316920_0.524810406721276"
+			},
+			"_hasShrinkwrap": false
+		},
+		"4.7.2": {
+			"name": "@types/history",
+			"version": "4.7.2",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku",
+					"githubUsername": "rokoroku"
+				}
+			],
+			"main": "",
+			"types": "",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "9bac9cf00de12a18142d3f0f2e139428d84788981932c17479eb52abc54baff1",
+			"typeScriptVersion": "2.3",
+			"_id": "@types/history@4.7.2",
+			"dist": {
+				"integrity": "sha512-ui3WwXmjTaY73fOQ3/m3nnajU/Orhi6cEu5rzX+BrAAJxa3eITXZ5ch9suPqtM03OWhAHhPSyBGCN4UKoxO20Q==",
+				"shasum": "0e670ea254d559241b6eeb3894f8754991e73220",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.7.2.tgz",
+				"fileCount": 12,
+				"unpackedSize": 10071,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbx5e3CRA9TVsSAnZWagAAnCMQAJaejM/zBBNAlP6dWEH+\nX140TtGs6052qavVIDs3UNerbvaZeHcqC4FVeeaxhytn+PnTPu9UsCycd77P\nWR1LOMJ6uMc8Oek7ukavRMkdNQpSBPhy80US97ZiodbQl8+VcMHKqxE1WTA6\n1RTG80QbB5UdnatdoRJD7WpZnSat6UJZBe8R5YoljBZIDF1FvFN7iIrtaU3p\nCilXymzri9gLB1A1IgA1IV+Bc8R8FO9CyMKN1hi8SiGj0t9dS5XWY6FjTgRb\noqoRSeLPIBXLGUUc7lV1QqV6Egw27Y7ML8vhQwRnYI+ZQksPGj9ypMmx/fuw\nGpH3n5YgsKQubVMxsYrPlYEEvgFdXfmGVg9dv56uzKXV0GZnbnn89ye8BVaS\nfji+an+oTkyIbE/EuWo4PMhSdQRFQHm6qwtbFhNT6ChaRLkbYbZ0mM+hepTl\nxvMVXKJ3mQ+KI2If4nfJw3RAhUgKIF1P1o2vX4tFK5QDzzNU+x47yc4s3alT\nOU7KD4dU//7oyJ309TMayl53jwLVK6g3gvRe6gnsN8bIAdED3DOCKJloxchQ\nnmjHd9fHlinmsp5HXcQ0i1fClNIlXAxu95Y/ZCxZkxyNViy62RhQoP99y7Di\n1K6oG5rSgc8Ma/ZhFQH47iFH7tgw8cP67gFdHpJeOds8mgdNvP/drw1JO0Hl\nVena\r\n=kfUm\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIDipspn/cl4IkOYPNR4Coz7UHN/u7z9OCccINT3RkdriAiEAxiq3J2t4LEiE4buDycbHBSaSmbmDnwcrU8sbAC4yA7o="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_4.7.2_1539807158409_0.5858394681621466"
+			},
+			"_hasShrinkwrap": false
+		},
+		"3.2.3": {
+			"name": "@types/history",
+			"version": "3.2.3",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Karol Janyst",
+					"url": "https://github.com/LKay",
+					"githubUsername": "LKay"
+				}
+			],
+			"main": "",
+			"types": "index",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/history"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "56ec342c7adeff224b1e876ba615c65ab28a405db65ee89712be9f6949f93c49",
+			"typeScriptVersion": "2.0",
+			"_id": "@types/history@3.2.3",
+			"dist": {
+				"integrity": "sha512-s4SNWd31cmFP52ilv3LKCh344ayIXmfmcfExsegGspgnk/pQh75Yo6v49uzSE1oFMXp+Sz4GVnesL7rgybX9tQ==",
+				"shasum": "2416fee5cac641da2d05a905de5af5cb50162f60",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-3.2.3.tgz",
+				"fileCount": 14,
+				"unpackedSize": 7932,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJceCncCRA9TVsSAnZWagAApPkP/0V9dnHEqpJFib2NHwF7\nIQMu68bds609uUGlN5nSnx/sjRQG3y87+trGpoihktFNZp6K0j+RCfjsFHKt\n8mUFp8MHI1HfQgdggBvHrOdXKqZ1fpmIEbnHLTjiD86trW1FSb5DkMlUkiDS\nqU+VONzvCnH//KdM1+kIGTBesXXR71L2nvmz2T8QUal6yz4yHM+IFz8sO+/p\n1DRomf9V7RIks1uKJE9ihqZm6PI+PYWC+IjFJO8VSaOb3TgE+CdsGlVVYedz\n0bFBQh9Av5zv9LCHjigYolpE/U3EDl1pu5XyfKXDzw0BOTI8yHfKcfAurOE7\nsSsfINq4hXD634ekJb2IfAk3HYRrXKjo/wU7I0y4p+qkqxvrph4j0XhuLiBO\nxdoO1wfVlsGLGYiKRNz1OsrUSa7g6Kz4arzZk78dvBPEmguUgCvAyUM17WTP\n5XvgQlEzo0Ta1ROoE3GpCM3JfLaoEWm5Tgv8s/ycSD0q9lB3kremT0BngHor\nCoenm6yoGM3hUC6hGbX+gxuQELhPjPt0V0t1GvTDKKxBH6MXHHwamngnnw9b\nCdtYPOF7v9wpSZW2Me2rOTTAIYos1Q83QZmxPWvCFItrFcIz3sd6AxB+5WoY\nMK1JkXKv3lD41vq3MJdkns3fFlgCCoTzlXajr9bqaATGEEYypQPS35uD66hc\nPLdb\r\n=RcBo\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIDvNRDRNtnwRLq0FkEO+C4Zjq8A9NfWtJyZhI8eqI6H5AiBs8jax3o4gVd5YDrsa69WO4BL417vllxxmN9p6gPAn9w=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_3.2.3_1551378908016_0.7565481875613738"
+			},
+			"_hasShrinkwrap": false
+		},
+		"4.7.3": {
+			"name": "@types/history",
+			"version": "4.7.3",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku",
+					"githubUsername": "rokoroku"
+				},
+				{
+					"name": "Daniel Nixon",
+					"url": "https://github.com/danielnixon",
+					"githubUsername": "danielnixon"
+				}
+			],
+			"main": "",
+			"types": "index",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/history"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "8470994e618073d2dad188ef43e56f4ea1071746c3382475c4fe804bcbf0ed3e",
+			"typeScriptVersion": "2.3",
+			"_id": "@types/history@4.7.3",
+			"dist": {
+				"integrity": "sha512-cS5owqtwzLN5kY+l+KgKdRJ/Cee8tlmQoGQuIE9tWnSmS3JMKzmxo2HIAk2wODMifGwO20d62xZQLYz+RLfXmw==",
+				"shasum": "856c99cdc1551d22c22b18b5402719affec9839a",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.7.3.tgz",
+				"fileCount": 12,
+				"unpackedSize": 10911,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJdXWKICRA9TVsSAnZWagAArkQP/3nxuhq8fiGJlVhXHeMa\nkNs30iN+Y+TBo86UOV/wLTPQT1JHkEDV1/rYeyQlpBzLVpZcss9Q/zMggrQt\n9VfwS2dLnzES07hhSnBnA8z8P+FCqJxV8Z9MjSFt0KcjFQetzrbB/lvZ4rmo\nWdZ/+JvadRATNu3ssNaYxzsQp8mIrOdKs2DyadW+JhR2OfSHtM6LAczeMZ5g\nOsApVUiS//Ek2uM4hYV/prrqS+P4peYt99zmJDfRA+89UuN4TaitgNJCiVig\nnpXjcqWGRjU3J+RgBzj/cFfPeAj+V9+UzxBGa396oygbDrJVwM1drVnQ1D2t\nIEnLLgonUkVHVpuB6w+kQ0bB/YZV8aHV4INr+6kaLCQdzVnxJzaVLqYGrH0H\n92oHGuSeQpg33bQXz8vLqY6P3lB0tG0O5FTK26dDcr1OYOfhV1GeClcHKo+l\nDpkygPc1n+4dm+0jAPAUMkJkI0AzfG0GKdcUHUNCBnYERLCtgd4Xw7d7Sv7k\nSK9EQXmzcU5QtDsety4P/ttePSTLG1rlnvd5POEDJDQPllRjQBvNw3OCXNHv\nWEVpZkofIGJsBVGFBCCD1bn3LOohXp3fFyHkwItsB0ZnAI1hpITbpOHLuoDZ\ndfpcleQMxUmrMk9tuK0nkjXH3lhOcSzbuVRfsF+Suph2b35RoGu4Sr6PvOzM\ntH+A\r\n=ZOem\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDYvlFmCKV/4WIYGmVgyAyH3HcgBXI14utnYiwA9qwJcwIhALYAOi1xJ35hu122zOfSl6Vv5DmVM/nLJO3IEDfHSdLZ"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_4.7.3_1566401160102_0.9379207460438397"
+			},
+			"_hasShrinkwrap": false
+		},
+		"3.2.4": {
+			"name": "@types/history",
+			"version": "3.2.4",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Karol Janyst",
+					"url": "https://github.com/LKay",
+					"githubUsername": "LKay"
+				}
+			],
+			"main": "",
+			"types": "index",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/history"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "ca89543b50546664882bf79473e502f5428ac152f7aa61da8b9e89ea7b917a6f",
+			"typeScriptVersion": "2.3",
+			"_id": "@types/history@3.2.4",
+			"dist": {
+				"integrity": "sha512-q7x8QeCRk2T6DR2UznwYW//mpN5uNlyajkewH2xd1s1ozCS4oHFRg2WMusxwLFlE57EkUYsd/gCapLBYzV3ffg==",
+				"shasum": "0b6c62240d1fac020853aa5608758991d9f6ef3d",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-3.2.4.tgz",
+				"fileCount": 14,
+				"unpackedSize": 8236,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJdXrlLCRA9TVsSAnZWagAAUP8P/iVKI9tcqthN48fWEajW\nvTqyYDUH4t9ZOOwbG40EVbzpP2bFEREcJmIx6A6SVaOMM8FaCiCiKsGRuJab\n0iK+4qZjRDw+YlM7lDbm9nJZusTuA3uLfoj3es3zKo/9oWa5jDa2fTNaFRAH\nYfGL7XlqLL0NchciIHXOy3WfGlHRHRIbhSki2WWPWvpoKW+RBfgm/9hy72Vs\nVU+s6C3bb1/C6gGTQG8mylbqu1bSF+OSoVmXFXS8LbsPQDFk32D8zmk4Coru\n4byRmOsv9qU4ho2eIA8jMoXM/UGO3uu9Dw8fQ75zhAguUZ0aQj8FsVUEkO69\nmddn+IFRh60yY/p0Jk8BiTrcTZ62zCfTEhyG5isEaXbhNsoiv5jMSJ2kgmPx\nXxF6czrHizOBCQJtXyPJF0Dy7qViNxp1Szy41oEVIexY8ZygfEW/5QMgnxZW\ncmiGg2l7j0YnUaL4GfcXjFB3tfxKEhQc87GTTxfozyoNz/JBeUAyOPSFXbt2\nDGcjNcDp1kOlRmYiaFzq5RhaCEcGb/zPWc3VF9IVROzl2oe+wC7AWhU5IcGm\nKUxewEyDuOk6f73Q33ptKoIyL4DH6A8g8P/t4ctrNp8uA/7n//ZaAyMcQkAv\nmVHW0koh8jsNS15FN/NoiCFgIiHWE3KoJ2uU8cB5YyoghUGB2WWZSj0SFRQ6\no5qX\r\n=Lzx4\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQCsvrqMDW/IMjYNOAuVtmriwNTSWzQBMrX1o+0VLfIuQAIgXHV/AfHjnthrYEh+cvdH0udixreiRgKnVVq4USjQOGs="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_3.2.4_1566488906753_0.6031410609446155"
+			},
+			"_hasShrinkwrap": false
+		},
+		"4.7.4": {
+			"name": "@types/history",
+			"version": "4.7.4",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku",
+					"githubUsername": "rokoroku"
+				},
+				{
+					"name": "Daniel Nixon",
+					"url": "https://github.com/danielnixon",
+					"githubUsername": "danielnixon"
+				}
+			],
+			"main": "",
+			"types": "index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/history"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "28dd6a99b525cffbe54e1ed9f4616aff63e87de1a147108fb59a94560a0b4562",
+			"typeScriptVersion": "2.8",
+			"_id": "@types/history@4.7.4",
+			"dist": {
+				"integrity": "sha512-+o2igcuZA3xtOoFH56s+MCZVidwlJNcJID57DSCyawS2i910yG9vkwehCjJNZ6ImhCR5S9DbvIJKyYHcMyOfMw==",
+				"shasum": "06cbceb0ace6a342a9aafcb655a688cf38f6150d",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.7.4.tgz",
+				"fileCount": 12,
+				"unpackedSize": 11126,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJeHfsZCRA9TVsSAnZWagAA8wsQAJhvZmTPwI0mqGdhgAAw\nQnTUAwKj+OV3WEBGS0zUVjVQVD9ZM84OJmsqdPh6bF4btEew7c3uH7lf8cGv\n/VPewEG+K97n8aqmp5oNdoKWoPENxuKef/+Gge05E1T0ctTCwi41scgexTZe\necocNMNlLArgvI1UI1wi9ez4RMibfWnDYvCRL4R1HbAEGIPaL7VjG2qlEXTK\nfosfmcspWxPcJjulvyJUvL1GcZbjDSRx5/pRKZOEfjgDx5H2PRRtX+HdJKmX\nFXzzLi5xdk70F4lmluHnw6Ez1dqVgecwmiZ0V+vpLIz8ptzFoUZUnEYgJAz9\nbgXjdEyoImJa7QeuY4Vr9xzHkdfY2wzpxVzJAFqbEKM9XSAhnUwMzc7dTLvv\nQIyg1wvl1IOxRsfKSbF1ZrP/srjifDU5XU1Boa1Fhe+QrAbO7iZgF4GgQ+r8\nIjaDkktboO4l1i9gwF8SVlDvHKEnjRcqHBTCv+TFH0y26pUZYseL9lcOKOdG\nnUYivyAlWmA0nHPhWlsMSyMIB7LKTSYM49QocBuzN6P4wd9aPzAy38T8xZaL\nOHkSsqvTHX6lVdc4jnZlT6OAtU6+SKul217hT49IVKOnyJsC5f7+DMNEFCqS\nL6qJohHE3bk8yLRPdWTNWn+c1dMctgBoJtMYXEQtwfSDn4XKfcTmPHwRHubH\n6Tie\r\n=xXDW\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDRcNJpzwDNXi5JPtXp1w146NQm1VJ2ixyHA3S3Qr064wIhAKBSZVz3SnXyW2Vry3HQ5UgMqf0cdIjl3zJrbIKIyH46"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_4.7.4_1579023128702_0.2560474275591311"
+			},
+			"_hasShrinkwrap": false
+		},
+		"4.7.5": {
+			"name": "@types/history",
+			"version": "4.7.5",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku",
+					"githubUsername": "rokoroku"
+				},
+				{
+					"name": "Daniel Nixon",
+					"url": "https://github.com/danielnixon",
+					"githubUsername": "danielnixon"
+				}
+			],
+			"main": "",
+			"types": "index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/history"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "60578ef918b04b47998fd8e17fa18f92d770aa0b14fa249caa0c42e2a46e1d11",
+			"typeScriptVersion": "2.8",
+			"_id": "@types/history@4.7.5",
+			"dist": {
+				"integrity": "sha512-wLD/Aq2VggCJXSjxEwrMafIP51Z+13H78nXIX0ABEuIGhmB5sNGbR113MOKo+yfw+RDo1ZU3DM6yfnnRF/+ouw==",
+				"shasum": "527d20ef68571a4af02ed74350164e7a67544860",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.7.5.tgz",
+				"fileCount": 12,
+				"unpackedSize": 11132,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJeNJ1wCRA9TVsSAnZWagAAiicP/jzPEyupn1tDo8dgE5sJ\nSFeYVImYy6kPPHYZIWWo0iJJeyWdwugyD06FKGUL8Hmo2b41fZldrwPHZcS2\nbs30BX0M+kJ/h/1zlN9se2GDrBTB0J/Qs3lY6sXUHVyRiIaxXQmKo2l0Wn3z\nNafEyiolcILt4+5+QCvV/o+XIiKyKeHTlvgOsDks+oJ3viaz9Znb9UVzBfVS\nJazUY1PB/1jpg4KkaEapfoy8SO4bvs2SvCxGJbsF96xbQ2IjFCDZlTqIoOMz\nlxWlC5n5RSGYmFr2sxXs7b6otB/OhACcVV6KYww6L/54dhM+9Nwm7P9sJ+ew\nUsgG6BFUgweO5DoHC2HM1xuOTrC4wvFDfHXINZFek8nhstWAoNcO6BEB/pxp\nB5Ibr+PdvlSQtHCL92Vx3OEox8cfrmgFh5kwoT/04PdqkHR4+uLKiLR20DuT\nxErEKJnn98JbU/cpT/YMduXq7oMJqVpqH91ucikVHJ5HCSI+nL17IE6Rta9O\nme9kg5urb6lCzmi46dPD86G1/imDbrOwEo9t4x+/tEl0/aTVrvUIYoCJZCSr\ng5CUk/uoS9CrrdDWS/S24wOoGEGyqoloEh2Fx8DSnn93kcwn2eZ/oXRTGQdp\nxO8VmrCTUwX6n90JAMJu+Oztt6iq7xs+PBGUAQ8/hEOOvma9pQ3PO4+hoePC\nvyiW\r\n=Eaho\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIGAKiq2hg8y35B74g8Fz0e7+oDm2j0aoZLCNM50K+gZKAiEAlbb+p/QmawT5/hgI+uzB6ZjvM47jnscscoZaFKM7xbw="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_4.7.5_1580506479807_0.8381244613492955"
+			},
+			"_hasShrinkwrap": false
+		},
+		"2.0.50": {
+			"name": "@types/history",
+			"version": "2.0.50",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				}
+			],
+			"main": "",
+			"types": "index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/history"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "b7786b2cac6e6a213144a955f5a322655bf4b1665ae3166f78f327f108d03f35",
+			"typeScriptVersion": "3.0",
+			"_id": "@types/history@2.0.50",
+			"dist": {
+				"integrity": "sha512-Bwsh40tvegM9I2+E+fkCQ0TTgAOBsAE4B7azw8Eha4ZtteNdZodmXX7JkrsGcuIWb0Due3O8PDKXG/cZuyA+BA==",
+				"shasum": "ae6ba9ecd68a27426d9603ae749abc7b64fd5733",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.50.tgz",
+				"fileCount": 14,
+				"unpackedSize": 10052,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJevin8CRA9TVsSAnZWagAAyIcP/0weVfMjrX0NGWc28L6B\n6E8nqrgccr9bUDu4P0wugKOuEPYLrksO21qL1i8CIwtaJ7xnSau4hZ3ZezOx\npCejxxatVtDYyEYqzyos3QeQdgVdUwvI/8/mbPmnq2/buNF8gHNMxuFyFo2f\nd5FkgStRg+aj+lwM1kDF3A9htlaTcjldIcstFEGWb/KyN9dLmnxtohRRBOYT\nMfpjI0yOMYFXUZEY8X8XlBaiqvg9w2vOK5RCpjK3AERcMiLXXpOwCspceKw8\nL9DgmLQHWwATye6h/hxwzyW/uQaUuZFcLRnKj7wygH7Dp490e2T3ya1U11xX\ncIj7IbUw8s1FeTJ0Fuvpn5kNQTs3LrQ1lDgy7eEZnhsq7fcwl26Hzi9Y0sVr\nSsr8tIW7dkGPJzf8ucJY0CiNo+EjK+IoPlQPHvkUy3HGV/61w3sORaxHT6yD\n8th9CwNonz4MFu2XB8MTyGVXe9yxUhDcjrbwajyS2h2vy90E+vOmM4o7glQM\nQ6Nu37s4Evssa0hjXnACsZ7fGsu/FN19ExdqJQaBeid6BPOuYNm69HJwMZ7H\nKr3rRAPKdRRPEyxZqkH1nQR9U7UvFuRslHGuY8mbrpHCV89B1bsh1obesqT2\nJmJqapsgfH5ygOFRlA4tWAF953bA7/oScQsMoPGSTT4rPVo3y/Bn0UdrGCfd\nSQVP\r\n=aON2\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIE1TL20Ex72PIozfbl1rXCbtgbXyh2X9DhVFPf2QBE71AiBi/46djQnpxVJi0UuJ9XCSql3bHVczT0mhOOZqi8XZaA=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_2.0.50_1589520892447_0.4849492867539975"
+			},
+			"_hasShrinkwrap": false
+		},
+		"4.7.6": {
+			"name": "@types/history",
+			"version": "4.7.6",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku",
+					"githubUsername": "rokoroku"
+				},
+				{
+					"name": "Daniel Nixon",
+					"url": "https://github.com/danielnixon",
+					"githubUsername": "danielnixon"
+				}
+			],
+			"main": "",
+			"types": "index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/history"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "68a06d41d61eedf26d232947fd3455d99b097132c10138d43aad54e5e96dfa40",
+			"typeScriptVersion": "3.0",
+			"_id": "@types/history@4.7.6",
+			"dist": {
+				"integrity": "sha512-GRTZLeLJ8ia00ZH8mxMO8t0aC9M1N9bN461Z2eaRurJo6Fpa+utgCwLzI4jQHcrdzuzp5WPN9jRwpsCQ1VhJ5w==",
+				"shasum": "ed8fc802c45b8e8f54419c2d054e55c9ea344356",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.7.6.tgz",
+				"fileCount": 12,
+				"unpackedSize": 11094,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJewxVCCRA9TVsSAnZWagAAyB4P/2+fLt4xFZAXFSnR62jh\nnzsTrz+ikARui6Jr++1+YnOA79kVd/i4Y1AlwTsh6Teo6VItA8e9enbnx/RD\nXQCpVqyJAZHovPrSqvX8zlx7iOqzfWLkpnUX0R0uM/u//xfdAVmVsJAFSUly\nlkJKe98QPrnVlJ0J7Wi8muz1biMftl8GPXpmkV8c+xhhUcLxVmN7joe7cHET\njkVN+/SvJQDwZwBTC3PMcx0w02LHwC7Ev+vBI3Q5q4DPHH9Q/TQdvpSIBTaj\nwi6CK2g7pbM1BQGeRzco7bYo4Q7K5ZmwsZESTUgEINx8ub5X0AK5gDLuK4Rg\n4AbEupK8iWEVNWLFEK9OB2vZQy4xI3gkGv/lMks0111Q+aqpLSnX+XrFFTwq\nT99thxrrm8kMahsQK4SvtlYwkYv6gcSz/pWF/J8GDv6ADck7v0Fs4egycTlV\nU77MouBjFBTV2rTOaU60F6N22rMLJixd7pem0elVFxC7ka8k5g0ROblFMzdH\nl6RYuhQr2hwKNTyTMzzUkscLE4xIBMQjI7hswRxYPVrsoCcY9a3tGoqhqfXG\nBv16uKHZsa/m6ycvlkelQS2QfHdcpL2TBB5e69R+jxx3pl8NNZhTtpPtIMtM\nzBCmVxCZuuq7PRtf/YPEBqVqJ3+DyZMqttbLR3IMtQIEoZYWxIzSxjj5qxBQ\nQiJy\r\n=UkwQ\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDoT0JXHS4vNbRPyLizKdeEIeZ3AHkQl/aSpSskwyotcgIgOQ/xK57JqSddf6Qw8o+MzY4fG58v3ggljKrUKHVYkg8="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_4.7.6_1589843266204_0.7556959478330705"
+			},
+			"_hasShrinkwrap": false
+		},
+		"4.7.7": {
+			"name": "@types/history",
+			"version": "4.7.7",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku",
+					"githubUsername": "rokoroku"
+				},
+				{
+					"name": "Daniel Nixon",
+					"url": "https://github.com/danielnixon",
+					"githubUsername": "danielnixon"
+				}
+			],
+			"main": "",
+			"types": "index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/history"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "216a7eecde4f079ad391ab97b15a1d1f46fdb72799f86fef92d0e2548f98f253",
+			"typeScriptVersion": "3.0",
+			"_id": "@types/history@4.7.7",
+			"dist": {
+				"integrity": "sha512-2xtoL22/3Mv6a70i4+4RB7VgbDDORoWwjcqeNysojZA0R7NK17RbY5Gof/2QiFfJgX+KkWghbwJ+d/2SB8Ndzg==",
+				"shasum": "613957d900fab9ff84c8dfb24fa3eef0c2a40896",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.7.7.tgz",
+				"fileCount": 12,
+				"unpackedSize": 11288,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJfG1ToCRA9TVsSAnZWagAA9CsP/RFmspU5VOoWkQ8vzwT6\ny6FnsU3nvxXjuqHLSLBryVr0J8xfUYMPcgLA+cQ3jKc7oWoue0x5Agcc59iY\nCZSOQAygWf8uDTyGAa3OnJpzNaHLemjvfzONzKLb3DYWDxmUwa7hG4ZG9+PR\nQBzYhqdgCbrYEidAR0raSkvXiLVhNO1ppbDp7fp2GGxZXsb+DTkoGCe9ZMHl\n1/U/p5MbqQfAXso6+92oygJ8Vo2tSdkwNjQBK4IwEnDQELFghCBoRyJS2uTk\nB8EcdOGF9sJb5Ck5iBQmbsaOjgrHdassJ3Ql0dxQiEUUND7mTGGfUTbG8mXa\nxC06F5chofqMJxU0+UkzsG37KyX9M6FCePBP0mTGrlV1dnWTJVAbdGPWCeTE\nO+axDDTKFFAALOtRyCCXNQbsEuGFixXG6Us9gshyBUV2DvD1FrGcbvwaR2nJ\nVX6WrUHEl7mnMcKZfcbKOosVgPIDzbE6Pyap06IEXVsFa665/nkAwR1sLftH\nKSeiKWER77lzuZSxIiAilhNMZP4MWUkkF5ZjeYUXebFc17hZ/RAWCutw5qrl\nwgEPoBGDOLDS3rZ1enRmWoJp3h34cnGWLmHgs9rZgrEKrRt23eno9wMzYYPO\nap+6lsALPQbxh8R9GBgb24DOKQPhHYW0N4QvbFIPtIMltjOICBhtNIpc1rPC\nQpY4\r\n=G0s8\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDKn/imzsQSZRhf8VM0zls4sd9MNHVHtHKZ8BbRaeL7vgIgSn/nz1Fqugbneng7k7/vlEI6kLma9MMvWrvgs/3rgbs="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "ts-npm-types@microsoft.com",
+					"name": "types"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_4.7.7_1595626727748_0.5468455314884266"
+			},
+			"_hasShrinkwrap": false
+		},
+		"4.7.8": {
+			"name": "@types/history",
+			"version": "4.7.8",
+			"description": "TypeScript definitions for history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku",
+					"githubUsername": "rokoroku"
+				},
+				{
+					"name": "Daniel Nixon",
+					"url": "https://github.com/danielnixon",
+					"githubUsername": "danielnixon"
+				}
+			],
+			"main": "",
+			"types": "index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/history"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "e55dcbc32a4f1bf9b7dc3625f4d3b5c9171463b3c173ab41c555c51d79846aef",
+			"typeScriptVersion": "3.2",
+			"_id": "@types/history@4.7.8",
+			"dist": {
+				"integrity": "sha512-S78QIYirQcUoo6UJZx9CSP0O2ix9IaeAXwQi26Rhr/+mg7qqPy8TzaxHSUut7eGjL8WmLccT7/MXf304WjqHcA==",
+				"shasum": "49348387983075705fe8f4e02fb67f7daaec4934",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.7.8.tgz",
+				"fileCount": 12,
+				"unpackedSize": 10896,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJfYpkRCRA9TVsSAnZWagAAd44QAI8EYuoEExgkdPHB94Qw\ndutBlaa9HrTBTJCl7oz/qofHY+YdTpflYP2itMNCH+iIxYHPF8f/LTegRTbY\nhcE5ZSGfbbZIjfHIkz9qQEf72PqMcZLtr5texqfPvVj0oBJX9QuPafMMCyc8\n471emt/I3PhLkhzvITKHCJcgTCa6l1wZ3ObbL30uQtvs3UMwvbxuP/GIHXwP\nE+3evdddEMKGwpVdXve4jLFLCeRY1BTkhZqbKb2uJB9WZaehwhri/XIX68Nv\niMDQiVAfCU8P4Jtrf81ItdAAuJAK+t+GuUG9f+hSZEU8JCUsJ0gijCwEZijp\nPyz7CnLs1jLuepcqz+5QcLvxzXrR4TzYMbymEYFx9D4bWM5WSEIGfpYPLzwD\nnFljZ5ARKUVqG4gZZvxdP2Fi6zEDPJktUqni0BhVF8xYMfA2QIqix9/onn46\nkjyzziOUwS4jQY/vsBcq4db+UA/Uuu3iiYaGhAXKI2ySjXR1bUdRiWTj5qAy\nrZiwHgnuDDXmcIrkYPn/llUX/R7iEslMhjsXUtGqGKwDBPc0e/ei6K5Bl1Cf\nbfXBS9200y0GIinUT/E3jOw58V9uJ7RMUxkRDTbMmiP8w9gtCiRV+V2qvLgO\n+0bJVqIFwCpnbDeUCiyImNsNHn8n3G4PHMR2MgAXsOfQvN+T9bQLIRaqhK0Y\nZ6m+\r\n=X/n8\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQC5dJWvaEti5ILrOQOEp8Bg0O8IutMQrub+Bqyo1gS/XwIhAN/FM/DkycZk26jBL5PWeCNX7Kp6VVAzheTP2ALVgaV+"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_4.7.8_1600297233139_0.2133813517094545"
+			},
+			"_hasShrinkwrap": false
+		},
+		"4.7.9": {
+			"name": "@types/history",
+			"version": "4.7.9",
+			"description": "TypeScript definitions for history",
+			"homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku",
+					"githubUsername": "rokoroku"
+				},
+				{
+					"name": "Daniel Nixon",
+					"url": "https://github.com/danielnixon",
+					"githubUsername": "danielnixon"
+				}
+			],
+			"main": "",
+			"types": "index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/history"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "ea71e3c5c442ddc15358ab1c06c6dfa2c69a4a6f5e151747811b649554201b52",
+			"typeScriptVersion": "3.6",
+			"_id": "@types/history@4.7.9",
+			"dist": {
+				"integrity": "sha512-MUc6zSmU3tEVnkQ78q0peeEjKWPUADMlC/t++2bI8WnAG2tvYRPIgHG8lWkXwqc8MsUF6Z2MOf+Mh5sazOmhiQ==",
+				"shasum": "1cfb6d60ef3822c589f18e70f8b12f9a28ce8724",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.7.9.tgz",
+				"fileCount": 12,
+				"unpackedSize": 11196,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJg5MxyCRA9TVsSAnZWagAADWAP/1dcrVjV9zq+QM3tZK24\nxDT1NAZpAL47lMfN+Ye2FcytVBgJ0w1v4jLsvkeLe8N/ZD/UYEo2rFZodUD3\njGN1w3XTAMnmQ+k2gpXG0fR9YcVQZqAnG7puk/D+2OiwA077KLRacD9XMjyw\nuRIITd/xZUPt+yRrMGMTgtkjo8v9MUvZ1X5zXW99dKB5rQZgsUglB+mSpAJA\nWFG15b6GCJvcxmZuhh3S7K/BRTLCw3ozUphQujFGQLlqvaokcIzDBWiybq58\ngBgto8nENNzqKuplGXD5sOK/C0IvlFcM6n2pdEZgy6jEX5yinE9m1wNW+n7E\nrutuhtNbc9UClygDyYuXg8IOYiZ+SsFSp5Jzu55RqGPM9yrCxzSxHxf4S8n+\ne2OXCPIwi2VegHpq6KU+03zcRCSMJhpGaAn5xOYbKzrrmEs1KFz0CNW4tCo4\nltmxk8Oq+k/ElqtuaIUoCAXJZguGVxFntPetyzn4R3z672P7nmeLfdnagAfj\n5UYcEGN6ocOo0jpFuGIy8noMJUEj24b6cR+U0OwF/5Xv8+3c93X3riNlLzHb\nZfAnVIfwrSwdv3uezeJ1fJJA4Wj6KA/tHDY21a+wssECx1Gk4R+xdqGv6lYQ\npKitHe04PQhBfP8m4DzdX79UMKQFWH80fVJftrvWpX5GehwnlB5WX9E4MV5F\nH8pG\r\n=s0wh\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCf2lOM6HOUxRiUAJXVVHsgUlHjtLHJw22SPRX+xzd2wQIhAP9SOPOkKxzkBpbivxs9oJKmi2p/S5LSvPXiG2e+q0Sb"
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_4.7.9_1625607282060_0.8973669239986681"
+			},
+			"_hasShrinkwrap": false
+		},
+		"3.2.5": {
+			"name": "@types/history",
+			"version": "3.2.5",
+			"description": "TypeScript definitions for history",
+			"homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Karol Janyst",
+					"url": "https://github.com/LKay",
+					"githubUsername": "LKay"
+				}
+			],
+			"main": "",
+			"types": "index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/history"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "58101c03cafefac14ed615308a4e582d9c2042c906a9c70c1d7b51728f3019a1",
+			"typeScriptVersion": "3.6",
+			"_id": "@types/history@3.2.5",
+			"dist": {
+				"integrity": "sha512-TqWYI0mlqS5qhH8MHgJJs0RcgvvZLxkn0bi2qK07liZqP7M9rl1kpJ6TCAUo5Cp4vP5DObIqHcky0MWyyQojVQ==",
+				"shasum": "be614208f1a10a20c414b4d3762d1f2b65b53ae4",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-3.2.5.tgz",
+				"fileCount": 14,
+				"unpackedSize": 8439,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJg5Mx+CRA9TVsSAnZWagAADCoQAJQhShkvKNPnBxH8B5L0\nsiIzDiS0/6Cu4FFsO/gpzLAdg248pUzZL+DYsJjfwZw8/8WbRlAKZWVaCzkW\nkwWe22Oo2vQQgC/y3SjHsZsHO/fqmimIph6Yt6CctWNN7h7PjIcRHDO7f+Q4\nmF+V6sPawvU+fPNgpc7qrl6sOiol6XcP0Qeh5m+WqlDpgw+Oo8b9eIyovggf\n7oyJB63GDp2giqmanHslym3M6vpJU3hhaTOeBZbOVz+L++ruzksQ/02NtdEt\nDrtYrIErbukIVBHxu/sy53gv1BCoNuZZgL+8biVxn7Nz1RRGqwdRHJo1oW0M\n7kmq0OyJ8onj1JMzWBEbXLWweNvGUqEJxw1VwE0+NpYcqf/biX6pIUa0gjaT\npqEiqh1goNoZMKQczoYksF4DLfOIMVgVk0o6Qm8JUhY1jLJSGXA25iu2iNiO\n0zxUmda50/2y4ojiK7jcXzyZ0BGjZ6IcpblH+vVTMn8noppBNUFxzYnCPvGo\nhIPF6+xRSrOOPfhR8V4XfHSwrkP1jBPjpk5BqC8GPSq62XHyow+lf9EWeiyt\nM5aN2GvWhFo+Ho2yTAU9g1pYkpM5Lcl4CvaoNhJ5RrxyS+TyWXUgSkk+lNdy\nnzTo4H8X7CL8AaytQtsqa4cl2mErx0FdSmK8Gt3zUx7WLANd5nw4DBadM3wH\nxoYp\r\n=Cnfm\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIAU9a7luQiooggrq0NBEmnVdFkUfsJAbu2tpbm+R+cUcAiAKRy+s6c59QW5RC4avF9LvuvBUnY18p43rC2QztcbFMg=="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_3.2.5_1625607293518_0.11936336957251359"
+			},
+			"_hasShrinkwrap": false
+		},
+		"2.0.51": {
+			"name": "@types/history",
+			"version": "2.0.51",
+			"description": "TypeScript definitions for history",
+			"homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				}
+			],
+			"main": "",
+			"types": "index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/history"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "9961722a2f4c58cbc6730b62db48783fc194a8327f1eadeec27380ac01d4c20e",
+			"typeScriptVersion": "3.6",
+			"_id": "@types/history@2.0.51",
+			"dist": {
+				"integrity": "sha512-B5YRwLxbpFlmiKcOYsvNIcFT0GYNIGsYC1lLFqoiUeHdTzfGjz1NABo//FuPc/fQAdpGdq4pPSug/9eayOi1yg==",
+				"shasum": "fbeb15d5d87592b21d92da23347361f151d507ec",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-2.0.51.tgz",
+				"fileCount": 14,
+				"unpackedSize": 10366,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJg5MyDCRA9TVsSAnZWagAAYsMP/RBzjGaE/D6egUvS0NVV\nxCP77zpVA14bGb8dwVuYTnHS4LzxqqAo+zL+6sINvVRtxr2lfH123zcoy01S\nOr4PHzGn8g6/mV/BisI1LGZyCQHIeACQDxfegnE7u/rY8Dp1Q1uLGIv4O39e\ndUeN7KFMQb1R3SER7zkpHk7kDkwyuwmqIeB6YFhy0ke76ZueoM7lcDrIBeTD\nc9Wb3oLiGHi9Zoxa/L9EPju0BA6uVkRrh+uTW1NAJUCwcBQhlKVAfkvqxLBy\nmEZsdXzwt+yAgODTLn9VL4eDi7uplKa+REIhj717yvggX2FvCPIa/qoAycl9\nrNFEuv2ImfMZNR4E+jrX95X6MGBOk1l7CsWwKCrZsDiU6/dlbg5tDSlMjb72\n2zUL5uWrWMyivjITZ5jehYHTfp0H1ryCBdhlxhSNuYp+kYmc2lhOiQe1zah9\nD2lYXMXki9MZfdDnpCITGJ3jtfTaKOAAapHZgEvK8LEbkqi/sR5K50q2/D38\n7Zjz0SsI+Oa65JwDf326+4T1dNPxPMGO/YdL5GuKTd1+nanK8gPvf6I4O4CL\n//CuUVSUNHfvcZ1tJF+fqCWRtkMxL7su7ddpjpCLB+vISOTNnm1Fe/RTF2h8\nzBPO887L7rr55gR+jHR3xTV2+JjXRDF9WwAjXpuhMW096chEzdPpt9nXt3Vb\nHi6/\r\n=Rjzw\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIG/yBmKSii6bNdkCPWLUKh7e44vnsWTu4BWl1C/tEzKuAiAPh8OC88MZxwyY8q+GSfqN/qmss6Kh3tLi79aRKBZEuQ=="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_2.0.51_1625607299426_0.8216805235116917"
+			},
+			"_hasShrinkwrap": false
+		},
+		"4.7.10": {
+			"name": "@types/history",
+			"version": "4.7.10",
+			"description": "TypeScript definitions for history",
+			"homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku",
+					"githubUsername": "rokoroku"
+				},
+				{
+					"name": "Daniel Nixon",
+					"url": "https://github.com/danielnixon",
+					"githubUsername": "danielnixon"
+				}
+			],
+			"main": "",
+			"types": "index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/history"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "8d077e6998e70607ca3c5d9ac6606612e57021cb42cda00b6fe213239f007e95",
+			"typeScriptVersion": "3.8",
+			"_id": "@types/history@4.7.10",
+			"dist": {
+				"integrity": "sha512-kq1vceWANyZLEt/+hbTWSAjLNhhXYgUw6Ywi0KQ9C7pZJP4Qrr0xjSKb3t59e5GwWtk1L6zt5KTxjH4oPk2l/w==",
+				"shasum": "992865313bb97d80eefa6aab5f2e4f1e10e84e86",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.7.10.tgz",
+				"fileCount": 12,
+				"unpackedSize": 11152,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJh3J7sCRA9TVsSAnZWagAAZlwQAJDA0l435DGiDtJdPLsU\nmqPx4PPMHBnRBon+qicR+O+z9z/uxdyDHOX+0Y9r1K9MC/yHBjc+5zATdq/A\nuFeFhr+wXsJ12TyvyY/1K/nxnVtf9AcWwbNWhIznr7d6fvlopVKVZdVbJljQ\nZOVVN5z+aue/bvQLpWNO5yxbWfFNZcRFpC3Q6ADYaYVDq516teHOS0bTllsP\nzmMVRoRHwwKlis80U1Re8s1Ql53gk+FoLuX24tpRhJj519oqIoaYB/PI0Rf4\nUV3zaTQdek1KPkVOGHqrf7CCgj7hTjcJN6WdWcEPiA1UuWEZwXSXjNxzt5wC\nd3ZhNsmNAhqCsFY1oCxEdyoGNQ2I1QOKIU7Phd5qPbhzpseQ53tPnWSu14Yk\nyVrM6rVtkbWGrf/p1BM/VmgcK+MnLm5tyNU8d7a9l9JLbCtP6/0nQuLVQ43l\nlTuHCn5SeFZeFic6To/FVNHQCLBzG028+4ughB0BIu7D32U++Mka5PpJ+Z5b\nG36AHejSdKFByeSiRlOECRofcCSD2p3Nf2+rvgmLeRZ8nWylKUT/Xy7yT518\nOin/c5hgJX4CuWxrHY8IqGKLr8uPmFwVi4jLLqXChoPjkFLtXrzbM387ruJf\nczssdbEtmRFbCLTDvdE7oGdwZwn0n1mpFCsBlJx2Zh28YLNirgqry+MrGIe0\n5iBF\r\n=gg1m\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIHA29VdWpHpwroa10bx08QhLfXABcarnkZin2N2fhT17AiEAz2Irni3K7blZ7mmilvMb3oh/ZGl6afrrn09+fs3FIec="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_4.7.10_1641848556122_0.24636930320399086"
+			},
+			"_hasShrinkwrap": false
+		},
+		"4.7.11": {
+			"name": "@types/history",
+			"version": "4.7.11",
+			"description": "TypeScript definitions for history",
+			"homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/history",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "Sergey Buturlakin",
+					"url": "https://github.com/sergey-buturlakin",
+					"githubUsername": "sergey-buturlakin"
+				},
+				{
+					"name": "Nathan Brown",
+					"url": "https://github.com/ngbrown",
+					"githubUsername": "ngbrown"
+				},
+				{
+					"name": "Young Rok Kim",
+					"url": "https://github.com/rokoroku",
+					"githubUsername": "rokoroku"
+				},
+				{
+					"name": "Daniel Nixon",
+					"url": "https://github.com/danielnixon",
+					"githubUsername": "danielnixon"
+				}
+			],
+			"main": "",
+			"types": "index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/history"
+			},
+			"scripts": {},
+			"dependencies": {},
+			"typesPublisherContentHash": "141516ba36ab9f2b221dc957cba4ac21d9a06776c05786e6773c5581f8cf7455",
+			"typeScriptVersion": "3.8",
+			"_id": "@types/history@4.7.11",
+			"dist": {
+				"integrity": "sha512-qjDJRrmvBMiTx+jyLxvLfJU7UznFuokDv4f3WRuriHKERccVpFU+8XMQUAbDzoiJCsmexxRExQeMwwCdamSKDA==",
+				"shasum": "56588b17ae8f50c53983a524fc3cc47437969d64",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-4.7.11.tgz",
+				"fileCount": 12,
+				"unpackedSize": 11214,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJh5FaPCRA9TVsSAnZWagAAYm4P/R0hAkWdpKwmJ68Yj5Df\niMUeesIWEmviYDUDxbkar0cy6wb88X/bxhSXsLoopIiSTJdJmJ2JDYGIE4QA\npyJkpK/uEnwg/3paU24YEgK2Qt9/ySnwp+lAunCM85cgP9mYrWUSH6tQT0Xy\nhbVfbTsKHmo6Gs2lgaN4DDluTIiuRj4vtMlaC4pXQrHvQTD7BhbBeIK2qiE2\n0zo87IIMPC+/dgzJsEOTFIS9A1E5SA1/+hVYrjTrDXGGiIWLpeJmjPvU8rfD\n606pTmZumnLGBrpFY7z9RjWdBl0w22oFx9GOWqfAzINU6++dJVqUKVdxJzSs\nBfq/KLX0SSzzgnd5LWkARm0bT71sEdmO9Dt1qPoGSDUB2eUXX62+cwS6c1tQ\nb3JnNJOxLuGji+ZWb59UiIJCRpznG1+PYNQPV6nluHwE1OT+91d1Y97Xv+5u\nvgfo1CRstxB+E8c9pZ/kjuKjJ2DueZCEQvsQyPLDA3zxyan8neyQGNTrKaVl\nZc/GAEIStb7y5ugP6Hk6v8cGPrJ7RRw5mp/Kp7l7VtP/opErjsbONhX5w9zi\nvt/xZksxtXQMrBJb2Cum/COfEitkrfzQdWX4JbLfRSAKqWAv+kCYP04MXiuq\nL+6fCshxfKw4cTYusx1OgOUBBKvZ317XJ/mfC43LlfiAjXg7oqtR8CqnsaLe\nNDQT\r\n=PaZ9\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIFOW/aWUCyYmZ0Hgp2CkAioYb2gBjT5HZaWsc90q9mnRAiAubP8YWnRPk2DxmTq0hyUon42mm+JJXIy7qtXpgEGf9Q=="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_4.7.11_1642354319328_0.46866146096054706"
+			},
+			"_hasShrinkwrap": false
+		},
+		"5.0.0": {
+			"name": "@types/history",
+			"version": "5.0.0",
+			"typings": null,
+			"description": "Stub TypeScript definitions entry for history, which provides its own types definitions",
+			"main": "",
+			"scripts": {},
+			"author": "",
+			"license": "MIT",
+			"dependencies": {
+				"history": "*"
+			},
+			"_id": "@types/history@5.0.0",
+			"dist": {
+				"integrity": "sha512-hy8b7Y1J8OGe6LbAjj3xniQrj3v6lsivCcrmf4TzSgPzLkhIeKgc5IZnT7ReIqmEuodjfO8EYAuoFvIrHi/+jQ==",
+				"shasum": "29f919f0c8e302763798118f45b19cab4a886f14",
+				"tarball": "https://registry.npmjs.org/@types/history/-/history-5.0.0.tgz",
+				"fileCount": 3,
+				"unpackedSize": 1640,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJh50biCRA9TVsSAnZWagAAkcIP/11ZypVp715G3ASn7Vha\nQ+OVKQwkl7PnD4J+pLn2KLice5xKB7WNBPWsIiHjWg9XyXy/S29BCzHq3cXy\nwg1VE5zni40l8wi6iiJbyJI3IVplYpUiMsfw1bd6nzPgrIfhfcnck5t43qQ2\nNcc9ipxolNcjI4EZGFl+HEcnTwsx/8ztrauzwmgFKcuVtB/+obh6yn+8pgI8\nN1YPx3eUijzcxbxogcDFLDRtFowhJFodEhsP1XO1t6ppyYERIprtR+36A2T8\nmZ5dwYGn2TLQBpijTjyINAgQS84iYO7vdpxiIZUbCYShYW/K04puIqA2GM1R\nrCE3QQzhmyEz0z6u5cZyJyYPnAQ+t9RKz4uzKRQwfvWUzCA0ZcPPio4IFwHU\ndXUAW4ls1E21kl7FXVUOli3z0/gGGoEZBBhgxS/4apD3G9Y5BiRVPuCf/OQ1\nLibflTBYRG6Ix4kga/oa8jiOptn/sN9QbnFs5/p+PC+ew7iZo9p+CDxcErKV\njNTd6Jn4RSqPBgjs9EgB1gS5ShY7RkBmXs16rRlm4xuoHlHNlwhPIVCal0ji\nSRUoYPLyBvVyLG2G5FI4NNYoTrvprdZSYe8v29VRVTN1yDMn9tveFiKhKCRC\nzqNd5rw4aXo1grnsGXoMniuWt2y5b01iOBtfPvJXVy/7fPrxO6NlwYA+qJcR\nGPYT\r\n=xN5S\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIHSehTCc8+LmgOZU12K/lR2jIt0dpyuIOFqgLnx4Ex4qAiBdCudPOjmgS69GqR75d4y2ZnPsdKdRD99vQrg16qLWlQ=="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/history_5.0.0_1642546914252_0.4847335300313138"
+			},
+			"_hasShrinkwrap": false,
+			"deprecated": "This is a stub types definition. history provides its own type definitions, so you do not need this installed.",
+			"contributors": []
+		}
+	},
+	"time": {
+		"modified": "2022-06-13T01:10:26.961Z",
+		"created": "2016-05-17T05:09:37.135Z",
+		"2.0.14-alpha": "2016-05-17T05:09:37.135Z",
+		"2.0.15-alpha": "2016-05-19T21:09:15.969Z",
+		"2.0.20-alpha": "2016-05-20T19:46:43.495Z",
+		"2.0.21-alpha": "2016-05-25T05:04:57.035Z",
+		"2.0.22-alpha": "2016-07-01T19:33:08.527Z",
+		"2.0.23-alpha": "2016-07-01T22:55:07.455Z",
+		"2.0.24-alpha": "2016-07-02T02:34:02.166Z",
+		"2.0.25-alpha": "2016-07-04T00:24:23.671Z",
+		"2.0.26-alpha": "2016-07-08T20:26:02.378Z",
+		"2.0.27-alpha": "2016-07-11T22:28:50.915Z",
+		"2.0.28": "2016-07-14T14:51:39.698Z",
+		"2.0.29": "2016-07-19T13:11:30.740Z",
+		"2.0.30": "2016-08-11T13:18:24.528Z",
+		"2.0.31": "2016-08-16T16:52:39.907Z",
+		"2.0.32": "2016-08-22T17:58:10.159Z",
+		"2.0.33": "2016-08-22T18:57:03.784Z",
+		"2.0.34": "2016-08-31T03:25:25.855Z",
+		"2.0.35": "2016-09-12T17:14:43.990Z",
+		"2.0.36": "2016-09-19T17:38:18.272Z",
+		"2.0.37": "2016-09-19T19:55:41.965Z",
+		"2.0.38": "2016-10-03T15:24:46.858Z",
+		"2.0.39": "2016-10-13T19:37:46.937Z",
+		"2.0.40": "2016-11-28T16:30:34.229Z",
+		"2.0.41": "2016-11-28T19:18:34.457Z",
+		"2.0.42": "2016-12-28T00:35:36.823Z",
+		"2.0.43": "2017-01-03T18:01:56.156Z",
+		"2.0.44": "2017-01-10T18:53:44.262Z",
+		"2.0.45": "2017-01-13T15:21:55.425Z",
+		"4.5.0": "2017-01-13T15:27:20.557Z",
+		"2.0.46": "2017-02-04T02:43:19.763Z",
+		"3.2.0": "2017-02-20T07:53:13.707Z",
+		"2.0.47": "2017-02-28T14:24:17.903Z",
+		"3.2.1": "2017-02-28T14:24:20.879Z",
+		"2.0.48": "2017-03-09T21:33:20.530Z",
+		"4.5.1": "2017-05-05T01:12:47.025Z",
+		"4.5.2": "2017-06-05T19:56:29.263Z",
+		"4.6.0": "2017-06-23T14:03:50.700Z",
+		"2.0.49": "2017-09-18T21:24:54.888Z",
+		"3.2.2": "2017-09-18T21:24:56.645Z",
+		"4.6.1": "2017-10-16T20:11:51.573Z",
+		"4.6.2": "2017-11-13T23:27:49.437Z",
+		"4.7.0": "2018-07-30T23:19:16.292Z",
+		"4.7.1": "2018-10-11T18:58:37.086Z",
+		"4.7.2": "2018-10-17T20:12:38.537Z",
+		"3.2.3": "2019-02-28T18:35:08.245Z",
+		"4.7.3": "2019-08-21T15:26:00.215Z",
+		"3.2.4": "2019-08-22T15:48:26.883Z",
+		"4.7.4": "2020-01-14T17:32:08.816Z",
+		"4.7.5": "2020-01-31T21:34:39.924Z",
+		"2.0.50": "2020-05-15T05:34:52.628Z",
+		"4.7.6": "2020-05-18T23:07:46.305Z",
+		"4.7.7": "2020-07-24T21:38:47.838Z",
+		"4.7.8": "2020-09-16T23:00:33.258Z",
+		"4.7.9": "2021-07-06T21:34:42.170Z",
+		"3.2.5": "2021-07-06T21:34:53.704Z",
+		"2.0.51": "2021-07-06T21:34:59.588Z",
+		"4.7.10": "2022-01-10T21:02:36.316Z",
+		"4.7.11": "2022-01-16T17:31:59.496Z",
+		"5.0.0": "2022-01-18T23:01:54.483Z"
+	},
+	"users": {},
+	"dist-tags": {
+		"latest": "5.0.0",
+		"ts2.0": "4.6.2",
+		"ts2.1": "4.6.2",
+		"ts2.2": "4.6.2",
+		"ts2.3": "4.7.3",
+		"ts2.4": "4.7.3",
+		"ts2.5": "4.7.3",
+		"ts2.6": "4.7.3",
+		"ts2.7": "4.7.3",
+		"ts2.8": "4.7.5",
+		"ts2.9": "4.7.5",
+		"ts3.0": "4.7.7",
+		"ts3.1": "4.7.7",
+		"ts3.2": "4.7.8",
+		"ts3.3": "4.7.8",
+		"ts3.4": "4.7.8",
+		"ts3.5": "4.7.8",
+		"ts3.6": "4.7.9",
+		"ts3.7": "4.7.9",
+		"ts3.8": "4.7.11",
+		"ts3.9": "4.7.11",
+		"ts4.0": "4.7.11",
+		"ts4.1": "4.7.11",
+		"ts4.2": "4.7.11",
+		"ts4.3": "4.7.11",
+		"ts4.4": "4.7.11",
+		"ts4.5": "4.7.11",
+		"ts4.6": "4.7.11"
+	},
+	"_uplinks": {
+		"npmjs": {
+			"etag": "W/\"e8b8457faaa020d48ad3604bba636a06\"",
+			"fetched": 1663961191066
+		}
+	},
+	"_distfiles": {
+		"history-2.0.14-alpha.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.14-alpha.tgz",
+			"sha": "4fc0e5cbeabc43b3b7c9d3fefe3240f0ca847490",
+			"registry": "npmjs"
+		},
+		"history-2.0.15-alpha.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.15-alpha.tgz",
+			"sha": "df4a9fa9d5a23e06edb081325c3285cc189c5666",
+			"registry": "npmjs"
+		},
+		"history-2.0.20-alpha.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.20-alpha.tgz",
+			"sha": "b26191b297dc6f2148c8ada1e6184c0a95dd5532",
+			"registry": "npmjs"
+		},
+		"history-2.0.21-alpha.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.21-alpha.tgz",
+			"sha": "30624340023549e1e026f860764d78240fd7f669",
+			"registry": "npmjs"
+		},
+		"history-2.0.22-alpha.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.22-alpha.tgz",
+			"sha": "4c763a47ba82a738d4b1e05d87249d12be24927a",
+			"registry": "npmjs"
+		},
+		"history-2.0.23-alpha.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.23-alpha.tgz",
+			"sha": "04de2b6954780941d693e6b2aed07d5b0eb2a9f1",
+			"registry": "npmjs"
+		},
+		"history-2.0.24-alpha.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.24-alpha.tgz",
+			"sha": "bd97f801bc93738319768302ee4cf01a8ae0a707",
+			"registry": "npmjs"
+		},
+		"history-2.0.25-alpha.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.25-alpha.tgz",
+			"sha": "e0e65a998b0827c922a234feb725b3075886785d",
+			"registry": "npmjs"
+		},
+		"history-2.0.26-alpha.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.26-alpha.tgz",
+			"sha": "ef0a33cb40334691900182ba82d74dc893558e94",
+			"registry": "npmjs"
+		},
+		"history-2.0.27-alpha.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.27-alpha.tgz",
+			"sha": "779e71ec925b7726d9102a77ea842efa19e77fe6",
+			"registry": "npmjs"
+		},
+		"history-2.0.28.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.28.tgz",
+			"sha": "321c97fc27fac7601103f1ea162e8c563b15a259",
+			"registry": "npmjs"
+		},
+		"history-2.0.29.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.29.tgz",
+			"sha": "450bb27080f2695f00b20cd487781780f80e7e4a",
+			"registry": "npmjs"
+		},
+		"history-2.0.30.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.30.tgz",
+			"sha": "aec5d3c32711a80e6b6e2e0e809e2b55bbeea8ec",
+			"registry": "npmjs"
+		},
+		"history-2.0.31.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.31.tgz",
+			"sha": "d710ce05f7638c32fea3dead05b03db89359f049",
+			"registry": "npmjs"
+		},
+		"history-2.0.32.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.32.tgz",
+			"sha": "87fc1e8a9c2d60cf934d31f8a1784b535e6a39d9",
+			"registry": "npmjs"
+		},
+		"history-2.0.33.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.33.tgz",
+			"sha": "08e78622b5c612c450b1b65fb1dcc51fecffb7a8",
+			"registry": "npmjs"
+		},
+		"history-2.0.34.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.34.tgz",
+			"sha": "1b56894958f2c9ba3e0a894098ac6b21bcff3609",
+			"registry": "npmjs"
+		},
+		"history-2.0.35.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.35.tgz",
+			"sha": "460c67bb13b21e6c1c1b2a3f6e54af46d4c0282e",
+			"registry": "npmjs"
+		},
+		"history-2.0.36.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.36.tgz",
+			"sha": "397313d344c4bc8150652daf391382e17ef04e24",
+			"registry": "npmjs"
+		},
+		"history-2.0.37.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.37.tgz",
+			"sha": "65d400308e5d3a5662caf724a399e10dc9704103",
+			"registry": "npmjs"
+		},
+		"history-2.0.38.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.38.tgz",
+			"sha": "ee59cdf1a4a0d9f27fa597e2ce5af8c99ae440d0",
+			"registry": "npmjs"
+		},
+		"history-2.0.39.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.39.tgz",
+			"sha": "f07c1a770dc95f17d439bd22648109fde1bcd9ad",
+			"registry": "npmjs"
+		},
+		"history-2.0.40.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.40.tgz",
+			"sha": "6a369de73e33dc9312f9f7444dd6afe6f346b3b9",
+			"registry": "npmjs"
+		},
+		"history-2.0.41.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.41.tgz",
+			"sha": "88faa58e931d1c676daca71369cbc3767737d8d3",
+			"registry": "npmjs"
+		},
+		"history-2.0.42.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.42.tgz",
+			"sha": "6ddb556f1a3b870e2e4fde131f1b13cbf3a99c4d",
+			"registry": "npmjs"
+		},
+		"history-2.0.43.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.43.tgz",
+			"sha": "8b1101111eb07324d69d349853371de28d1a9fab",
+			"registry": "npmjs"
+		},
+		"history-2.0.44.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.44.tgz",
+			"sha": "1502843ba54c3be5768f079de05a5d6f03ba60ec",
+			"registry": "npmjs"
+		},
+		"history-2.0.45.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.45.tgz",
+			"sha": "c76d79a65d189220d9d50f62e0143bdac30a564b",
+			"registry": "npmjs"
+		},
+		"history-4.5.0.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.5.0.tgz",
+			"sha": "2f5c3aad4fbd00f89e99b83083e354bc5308e307",
+			"registry": "npmjs"
+		},
+		"history-2.0.46.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.46.tgz",
+			"sha": "0a62c9ddf4f37a9f7ff5fa27d63adc603a046fd9",
+			"registry": "npmjs"
+		},
+		"history-3.2.0.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-3.2.0.tgz",
+			"sha": "b9afac537ef30c4ca3aa1a6bea08c039011073d4",
+			"registry": "npmjs"
+		},
+		"history-2.0.47.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.47.tgz",
+			"sha": "adc61b3e4245076dc72fac8cea0b835c374cfa1e",
+			"registry": "npmjs"
+		},
+		"history-3.2.1.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-3.2.1.tgz",
+			"sha": "0039ab0e0be2a0cc22bac171d27a44588103d123",
+			"registry": "npmjs"
+		},
+		"history-2.0.48.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.48.tgz",
+			"sha": "7e2868c3ad73d83c482f1d68f148c4fdc79c8a79",
+			"registry": "npmjs"
+		},
+		"history-4.5.1.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.5.1.tgz",
+			"sha": "da4a145410466eac20e94b51c8778a7551d1d4db",
+			"registry": "npmjs"
+		},
+		"history-4.5.2.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.5.2.tgz",
+			"sha": "7739c850b7a5de94221accb352f9cabd1bcabe7c",
+			"registry": "npmjs"
+		},
+		"history-4.6.0.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.6.0.tgz",
+			"sha": "093d67ed780d889c9543f6dca24ebee0b6b9fc45",
+			"registry": "npmjs"
+		},
+		"history-2.0.49.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.49.tgz",
+			"sha": "5f626148a0de1e4eb334e66076d15c1a53aa45e2",
+			"registry": "npmjs"
+		},
+		"history-3.2.2.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-3.2.2.tgz",
+			"sha": "b6affa240cb10b5f841c6443d8a24d7f3fc8bb0c",
+			"registry": "npmjs"
+		},
+		"history-4.6.1.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.6.1.tgz",
+			"sha": "0dbaef4febad5d074d06dbdfae6b027d1d701d25",
+			"registry": "npmjs"
+		},
+		"history-4.6.2.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.6.2.tgz",
+			"sha": "12cfaba693ba20f114ed5765467ff25fdf67ddb0",
+			"registry": "npmjs"
+		},
+		"history-4.7.0.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.7.0.tgz",
+			"sha": "2fac51050c68f7d6f96c5aafc631132522f4aa3f",
+			"registry": "npmjs"
+		},
+		"history-4.7.1.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.7.1.tgz",
+			"sha": "66849a23ceef917b57f0787c885f41ce03480f5c",
+			"registry": "npmjs"
+		},
+		"history-4.7.2.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.7.2.tgz",
+			"sha": "0e670ea254d559241b6eeb3894f8754991e73220",
+			"registry": "npmjs"
+		},
+		"history-3.2.3.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-3.2.3.tgz",
+			"sha": "2416fee5cac641da2d05a905de5af5cb50162f60",
+			"registry": "npmjs"
+		},
+		"history-4.7.3.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.7.3.tgz",
+			"sha": "856c99cdc1551d22c22b18b5402719affec9839a",
+			"registry": "npmjs"
+		},
+		"history-3.2.4.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-3.2.4.tgz",
+			"sha": "0b6c62240d1fac020853aa5608758991d9f6ef3d",
+			"registry": "npmjs"
+		},
+		"history-4.7.4.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.7.4.tgz",
+			"sha": "06cbceb0ace6a342a9aafcb655a688cf38f6150d",
+			"registry": "npmjs"
+		},
+		"history-4.7.5.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.7.5.tgz",
+			"sha": "527d20ef68571a4af02ed74350164e7a67544860",
+			"registry": "npmjs"
+		},
+		"history-2.0.50.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.50.tgz",
+			"sha": "ae6ba9ecd68a27426d9603ae749abc7b64fd5733",
+			"registry": "npmjs"
+		},
+		"history-4.7.6.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.7.6.tgz",
+			"sha": "ed8fc802c45b8e8f54419c2d054e55c9ea344356",
+			"registry": "npmjs"
+		},
+		"history-4.7.7.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.7.7.tgz",
+			"sha": "613957d900fab9ff84c8dfb24fa3eef0c2a40896",
+			"registry": "npmjs"
+		},
+		"history-4.7.8.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.7.8.tgz",
+			"sha": "49348387983075705fe8f4e02fb67f7daaec4934",
+			"registry": "npmjs"
+		},
+		"history-4.7.9.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.7.9.tgz",
+			"sha": "1cfb6d60ef3822c589f18e70f8b12f9a28ce8724",
+			"registry": "npmjs"
+		},
+		"history-3.2.5.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-3.2.5.tgz",
+			"sha": "be614208f1a10a20c414b4d3762d1f2b65b53ae4",
+			"registry": "npmjs"
+		},
+		"history-2.0.51.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-2.0.51.tgz",
+			"sha": "fbeb15d5d87592b21d92da23347361f151d507ec",
+			"registry": "npmjs"
+		},
+		"history-4.7.10.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.7.10.tgz",
+			"sha": "992865313bb97d80eefa6aab5f2e4f1e10e84e86",
+			"registry": "npmjs"
+		},
+		"history-4.7.11.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-4.7.11.tgz",
+			"sha": "56588b17ae8f50c53983a524fc3cc47437969d64",
+			"registry": "npmjs"
+		},
+		"history-5.0.0.tgz": {
+			"url": "https://registry.npmjs.org/@types/history/-/history-5.0.0.tgz",
+			"sha": "29f919f0c8e302763798118f45b19cab4a886f14",
+			"registry": "npmjs"
+		}
+	},
+	"_attachments": {},
+	"_rev": "1-1c1ca69b75a9c3aa",
+	"_id": "@types/history",
+	"readme": "This is a stub types definition for @types/history (https://github.com/remix-run/history#readme).\n\nhistory provides its own type definitions, so you don't need @types/history installed!"
+}

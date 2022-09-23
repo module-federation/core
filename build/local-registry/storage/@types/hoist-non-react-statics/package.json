@@ -1,0 +1,306 @@
+{
+	"name": "@types/hoist-non-react-statics",
+	"versions": {
+		"3.0.0": {
+			"name": "@types/hoist-non-react-statics",
+			"version": "3.0.0",
+			"description": "TypeScript definitions for hoist-non-react-statics",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "JounQin",
+					"url": "https://github.com/JounQin",
+					"githubUsername": "JounQin"
+				}
+			],
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {
+				"@types/react": "*"
+			},
+			"typesPublisherContentHash": "9fcc563f123747ac7e7e08c736548ad3b42926bcdbed398b346091e459ec832f",
+			"typeScriptVersion": "2.8",
+			"_id": "@types/hoist-non-react-statics@3.0.0",
+			"dist": {
+				"integrity": "sha512-Qdgaa9I0wMwR6q5WA0Ulmu95sTQGHscVEpJbOcHn2rqb69RMUw0faBCoU5t92SrXlAZfqJ1Secpa8VzB/Yerrw==",
+				"shasum": "1c6a0869d9769f189f4932d1a64ec7c7a2c8fdbc",
+				"tarball": "https://registry.npmjs.org/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.0.0.tgz",
+				"fileCount": 4,
+				"unpackedSize": 3165,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbX5z8CRA9TVsSAnZWagAAUDkP/Ro/2dcFBrsl23+OfCX8\n8gOwLj9jGw7A4rGIwqUc2LWyR1LFiweQQKQezKqH/ZYBKQqoac/l8vjCO4+x\n62egm2Ts+fvgO0Q5ArcydB0zwjmhF3fsWKUFqh3I9odtyF145JaXP3wC+FNK\n5tZLo6no6d2RbnlGiIIdDORPM2MI8T9Oxu4EavV+ztGp+DN/NU437FH+8/UP\nN7Ms51OpXpISUBGNRADu4qT0sTb1bO/k66BbTOQ9M7aXoTTKG8jGsRP2ImrP\nDistYCHPuUCKxxce2ADkpXFqIiGMpdcdYpPYZZB8QXOXZVJlbYx7Z2ccZPKI\nvy3VahrsW393mw8t8lCVUIqapGFGRIb6jel7H6dJY6JT575O1pVoFW0/a8I6\niVTZdzWihI4fNaChzLkdl8vvQDE5qnU5DRp2v2ebyVG8a4sKslVIRKrFal06\nWTtQQP7AlK4BOELKMwu/qJfh5YO75zMOChs+eLnk26dKTs2sXGsUPBOKedGF\n68Mgp48p93KYf+7jqZU0rsPoulptEplRCoaqDHpeqICcXXbcP9KZ7k4xqOUU\nuy3Z3V2wU+Y9INolmGIVgePvG4WjPYKAsTEj6q8/AXWowC5nUwrWP4W3L2rl\nox+B6L2AMSqWjZ6niA0jakI1kwcEv9ujJVBz+HkoGXQCvbaysBmTq2h8pXKQ\np1vR\r\n=DTsp\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCBOQW+8uF54yTM4tFNTL2NvWNCBUaCzpof87COZkOd5QIhAOeBZbK84MWasItyx7iogtDEBq6u48kpIrjqQ3anACfG"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/hoist-non-react-statics_3.0.0_1532992763947_0.15533477100439663"
+			},
+			"_hasShrinkwrap": false
+		},
+		"3.0.1": {
+			"name": "@types/hoist-non-react-statics",
+			"version": "3.0.1",
+			"description": "TypeScript definitions for hoist-non-react-statics",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "JounQin",
+					"url": "https://github.com/JounQin",
+					"githubUsername": "JounQin"
+				}
+			],
+			"main": "",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git"
+			},
+			"scripts": {},
+			"dependencies": {
+				"@types/react": "*"
+			},
+			"typesPublisherContentHash": "6178f226c44e51550f9d101aa14838771dc27fe597199c9c1052a91d64656f1f",
+			"typeScriptVersion": "2.8",
+			"_id": "@types/hoist-non-react-statics@3.0.1",
+			"dist": {
+				"integrity": "sha512-3wTz66vV+WatOAjMST+hKCmo01KYPFgnsu+QeLcn0FuwPCoymX6aj1a4RvFCdVsfh2m0hfTPhE/zTv4M28ho1Q==",
+				"shasum": "dde7c53101912dae8f45a1807f9857a59ddf3919",
+				"tarball": "https://registry.npmjs.org/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.0.1.tgz",
+				"fileCount": 4,
+				"unpackedSize": 3634,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbYmAcCRA9TVsSAnZWagAAO5IP/R+PVRjD3tehUwaGbbhs\nQB3q46oPYporsm1gtKerjWJX89N7tYNlt4Go3huqM9JGTWYByA2sKjVt+mnV\nZ9948N5dafx39bsEVHW/+QRddLyDfdS/SzBevdmIj8I4Xykdf2enu86DLUXl\nYfSbGmu69gJURIJSiv3FjHECezWRb7vy9PYefqUCq35JK9sn4oHzx0cwsgO9\nPsIDUkKo+NotKNciTeUUl4AX0qNJ6KQtT9QEBGuLTUoGU8xvQbRrqvY3x3Fh\nuSR/OylrorhnT5y4oiYcTh+hpnB6Rxr6dGnY8c/T6+teS+slHuZf0qfyeT9Z\niXQTzs7426vQUtDQaPPwWeI+58ACsXLoHFrXfCbDDkyN5KDYcn+XUfE6WPC8\n6eOhMCeL5H0cO1sB/chg3Fz89uNNvYYQ9uGE4ltCZPzSJMC44bwdFZbRwSn6\nUV55MioOMg5pNMi+Rzo0pVOyzU13r+Q+ca25VKBizXuLo4moxcV/5Wwfc1fn\n1R21M6ydNI8jXfSFeS2wKanaWmqc33zU+AuSRiq8DOLT3iD8XWmTmbhd5H6e\ngO9O4G+0RaJv4jbUNiR0gEfplpAo8Ua1zuxKR4jyhdgIptGlD/PMHxEVGhNL\nUHuvQGPcha9XRLGQT4jy7NHa+RZ/F12P9b+LnghxnefjPM0ifd0PFDD1WFM0\nWDtq\r\n=ZTU3\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQCVR29akhAqhKAFOw6RN+xkpAsWiHHf2eUFl5UtUQAriQIgN5rr85xbJIX47dX6DLt3h0wRW2OZNRb2StA+2dbSJzE="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/hoist-non-react-statics_3.0.1_1533173788383_0.4767758970664686"
+			},
+			"_hasShrinkwrap": false
+		},
+		"3.3.0": {
+			"name": "@types/hoist-non-react-statics",
+			"version": "3.3.0",
+			"description": "TypeScript definitions for hoist-non-react-statics",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "JounQin",
+					"url": "https://github.com/JounQin",
+					"githubUsername": "JounQin"
+				},
+				{
+					"name": "James Reggio",
+					"url": "https://github.com/jamesreggio",
+					"githubUsername": "jamesreggio"
+				}
+			],
+			"main": "",
+			"types": "index",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/hoist-non-react-statics"
+			},
+			"scripts": {},
+			"dependencies": {
+				"@types/react": "*"
+			},
+			"typesPublisherContentHash": "d074910372938383f7172eca39df8a7a15f3b55a7bc42debe7119fb34a5e7925",
+			"typeScriptVersion": "2.8",
+			"_id": "@types/hoist-non-react-statics@3.3.0",
+			"dist": {
+				"integrity": "sha512-O2OGyW9wlO2bbDmZRH17MecArQfsIa1g//ve2IJk6BnmwEglFz5kdhP1BlgeqjVNH5IHIhsc83DWFo8StCe8+Q==",
+				"shasum": "a59c0c995cc885bef1b8ec2241b114f9b35b517b",
+				"tarball": "https://registry.npmjs.org/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.0.tgz",
+				"fileCount": 4,
+				"unpackedSize": 4698,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJcfpTUCRA9TVsSAnZWagAAfr0P/2+VgH30ewDjMA2C+WMT\npswYNPEkvandomwLHMdoB6vmX0SnW1YUITboTAOW0ZI6oohvi39qxdrqEKv+\nUUefYYgkFHDbsTmgcIUx8Y5F1z5S4b4K6DySTr1JXHxeH/k/NF9bCw5E17nC\nt/k/hLBcffTQrbbgYG2NvxisPsU1XJV7U586CYflJpetBNcOvkFEXI/wpEIc\niICgVZD4g/HvHjABaMkRJ27LY4LRsX1ETQHVX1pCfdPpv3WKAt79sBo1TOdw\nVhkWkinDeInbjQJLk2tlRC3JhyEcNZWAxq0bnVKQl+GKCwW5lBLGOM/LC4MW\nocAuU7EFIE7wN+zoGIJD3M55Mblxux2vsRsYltEGMz5/oyyifDW7iHR2GFZn\nrxZADOrLqnnu07cA5O/EQ68b0QoB1udWXE7SHEU7bbwe2TFCp6qzvbXLU49r\n6E0zNSEhkIFPLcd7ys5592TzGGxAK5WDLIGCf3Zce71bTms6adhPAYiGbObi\nGA+kU3Yns55AT3TtxB+fYRISJQmAInQMtpOoTsEq991aDgdOEDaocfqtdE/x\n1ZpzNH/CfzDOyBMjBt8aX4pDcofPh3y7KCNeebe7NYDaw/H8OrAtal5xTeLf\neVPRpPoKlqQbLNf4pJI+9x6kRALR4MZXxzUTIgowMhA2RD0YFEAea5kHjCxg\nlWhk\r\n=zZEq\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCICOYrS1V2bUhl5/ypsNbp+ee5dfzbQdb/F9PF7I+wnE6AiBpKEcFPbuCQWyGpxASpCE6W0WxUQlTmfemIg4zgYYAGg=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/hoist-non-react-statics_3.3.0_1551799507575_0.11775293468728498"
+			},
+			"_hasShrinkwrap": false
+		},
+		"3.3.1": {
+			"name": "@types/hoist-non-react-statics",
+			"version": "3.3.1",
+			"description": "TypeScript definitions for hoist-non-react-statics",
+			"license": "MIT",
+			"contributors": [
+				{
+					"name": "JounQin",
+					"url": "https://github.com/JounQin",
+					"githubUsername": "JounQin"
+				},
+				{
+					"name": "James Reggio",
+					"url": "https://github.com/jamesreggio",
+					"githubUsername": "jamesreggio"
+				}
+			],
+			"main": "",
+			"types": "index",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+				"directory": "types/hoist-non-react-statics"
+			},
+			"scripts": {},
+			"dependencies": {
+				"@types/react": "*",
+				"hoist-non-react-statics": "^3.3.0"
+			},
+			"typesPublisherContentHash": "666e47d028495104f280da8e5a0caa7bfd4d6ecc4f113c4b60bec065e6e4c5f2",
+			"typeScriptVersion": "2.8",
+			"_id": "@types/hoist-non-react-statics@3.3.1",
+			"dist": {
+				"integrity": "sha512-iMIqiko6ooLrTh1joXodJK5X9xeEALT1kM5G3ZLhD3hszxBdIEd5C75U834D9mLcINgD4OyZf5uQXjkuYydWvA==",
+				"shasum": "1124aafe5118cb591977aeb1ceaaed1070eb039f",
+				"tarball": "https://registry.npmjs.org/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.1.tgz",
+				"fileCount": 4,
+				"unpackedSize": 4743,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJcplAVCRA9TVsSAnZWagAAm/AP/2rllqBs9U+cLUU3L1+F\nqSUAk6PSd39CCIFiEnHpOu4EvPiv9kjFvNRJa9BenOKK61+rCukSWLcRp0Tc\nwc90BZsjOvftLU4MihBbPvOo371fqe/+Z1ER+AtC87BF+335WkQUa5edRSmV\neXhKh3oQD9fp3NYe6ja4HcdUhvkAUx81lk2b+A2pY22mLdkh7Ya1jDdUYAQ+\nD9AIjAP6qU9JG55n4dY0v8GI/XFjgB/iw72Ux0zk+WN6PYuJGGBr4qNb9nJF\n5AbYBmk82I+ZtOCNvRVzmlH1WRygJGsvud1ie+GzLOoVR45TaqaFcmZGNMgH\n/q4UJY2HRzI5MHmdgrswosQnsYynsUag1mKhtYXZ4G88Ml9E035fA72ZdM30\nc05QOplDRgVopmraGWjE0Ntzr2/hjOTmtAjcU0j3h5Z8JCB3sz8a7mQR5gxT\nvEh8QAXwbM+Buo/StTe9gXY0YyDcu448+aUMcCyYklKZGPS8VA6+VBqGih6y\n/rovssjBqm9UIRVzOMGCAcQ0nwX5PCJCCOYtM058b86B3WlBqTaiVCc2Cvo6\nmWfAuCJu/+rI85IQjr5kfs1E945TyrVmKsrAAoQ6JYsul9uR8RYuDxVJVbDF\n4I+JKRgoUlGb2H88nonRr/LmvVnjvvSHhJ4D0w6pvp8pHQT5GZbBoZ0/dNWa\nrTzO\r\n=7CBT\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQClW9UFCkJs1xJqAg5a1HG21tE8pKHtMgB+YdAY8vHF8wIhALxeuP+DU4xXBUlpvmWZQZwSYvn6xhH5pZlRL48no8VO"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "types",
+					"email": "ts-npm-types@microsoft.com"
+				}
+			],
+			"_npmUser": {
+				"name": "types",
+				"email": "ts-npm-types@microsoft.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/hoist-non-react-statics_3.3.1_1554403348338_0.566346718427164"
+			},
+			"_hasShrinkwrap": false
+		}
+	},
+	"time": {
+		"created": "2018-07-30T23:19:23.677Z",
+		"3.0.0": "2018-07-30T23:19:24.029Z",
+		"modified": "2022-08-15T08:28:57.656Z",
+		"3.0.1": "2018-08-02T01:36:28.467Z",
+		"3.3.0": "2019-03-05T15:25:07.703Z",
+		"3.3.1": "2019-04-04T18:42:28.500Z"
+	},
+	"users": {},
+	"dist-tags": {
+		"latest": "3.3.1",
+		"ts2.8": "3.3.1",
+		"ts2.9": "3.3.1",
+		"ts3.0": "3.3.1",
+		"ts3.1": "3.3.1",
+		"ts3.2": "3.3.1",
+		"ts3.3": "3.3.1",
+		"ts3.4": "3.3.1",
+		"ts3.5": "3.3.1",
+		"ts3.6": "3.3.1",
+		"ts3.7": "3.3.1",
+		"ts3.8": "3.3.1",
+		"ts3.9": "3.3.1",
+		"ts4.0": "3.3.1",
+		"ts4.1": "3.3.1",
+		"ts4.2": "3.3.1",
+		"ts4.3": "3.3.1",
+		"ts4.4": "3.3.1",
+		"ts4.5": "3.3.1",
+		"ts4.6": "3.3.1",
+		"ts4.7": "3.3.1",
+		"ts4.8": "3.3.1",
+		"ts4.9": "3.3.1"
+	},
+	"_uplinks": {
+		"npmjs": {
+			"etag": "W/\"63e5bdbcbef1bf9ea2acb3a3abc58451\"",
+			"fetched": 1663961201296
+		}
+	},
+	"_distfiles": {
+		"hoist-non-react-statics-3.0.0.tgz": {
+			"url": "https://registry.npmjs.org/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.0.0.tgz",
+			"sha": "1c6a0869d9769f189f4932d1a64ec7c7a2c8fdbc",
+			"registry": "npmjs"
+		},
+		"hoist-non-react-statics-3.0.1.tgz": {
+			"url": "https://registry.npmjs.org/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.0.1.tgz",
+			"sha": "dde7c53101912dae8f45a1807f9857a59ddf3919",
+			"registry": "npmjs"
+		},
+		"hoist-non-react-statics-3.3.0.tgz": {
+			"url": "https://registry.npmjs.org/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.0.tgz",
+			"sha": "a59c0c995cc885bef1b8ec2241b114f9b35b517b",
+			"registry": "npmjs"
+		},
+		"hoist-non-react-statics-3.3.1.tgz": {
+			"url": "https://registry.npmjs.org/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.1.tgz",
+			"sha": "1124aafe5118cb591977aeb1ceaaed1070eb039f",
+			"registry": "npmjs"
+		}
+	},
+	"_attachments": {},
+	"_rev": "1-bad7a3418ae6a9f0",
+	"_id": "@types/hoist-non-react-statics",
+	"readme": "# Installation\r\n> `npm install --save @types/hoist-non-react-statics`\r\n\r\n# Summary\r\nThis package contains type definitions for hoist-non-react-statics ( https://github.com/mridgway/hoist-non-react-statics#readme ).\r\n\r\n# Details\r\nFiles were exported from https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/hoist-non-react-statics\r\n\r\nAdditional Details\r\n * Last updated: Thu, 04 Apr 2019 18:42:22 GMT\r\n * Dependencies: @types/react\r\n * Global values: none\r\n\r\n# Credits\r\nThese definitions were written by JounQin <https://github.com/JounQin>, James Reggio <https://github.com/jamesreggio>."
+}

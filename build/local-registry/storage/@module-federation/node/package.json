@@ -1,0 +1,240 @@
+{
+	"name": "@module-federation/node",
+	"versions": {
+		"0.0.1": {
+			"name": "@module-federation/node",
+			"version": "0.0.1",
+			"description": "Module Federation for Node.js",
+			"main": "index.js",
+			"peerDependencies": {
+				"webpack": "5.40.0",
+				"node-fetch": "^3.2.10"
+			},
+			"licenseText": "MIT License\n\nCopyright (c) 2020 ScriptedAlchemy LLC (Zack Jackson)\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n",
+			"license": "MIT",
+			"_id": "@module-federation/node@0.0.1",
+			"dist": {
+				"shasum": "e37ef6515cae0ea37d2a86dabed18b91dff341aa",
+				"integrity": "sha512-YQW2w5Knh9L95sOK6oRUDqlpf0U+IdYah3Rqmmeee2+Ny7XTPUdqOGwKgjKIGz3PnD4dLva2q94eUmuawBAtYg==",
+				"tarball": "https://registry.npmjs.org/@module-federation/node/-/node-0.0.1.tgz",
+				"fileCount": 11,
+				"unpackedSize": 38184,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCICG0DeZkQZ77Jpdj4BlhuOaLWZ7YwqO3M6AKDhJ1NiMMAiEAmLH6Mka8lnCT/GCAwNciVpYxRGUK5Ll4ZXEn7cZipRA="
+					}
+				],
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v4.10.10\r\nComment: https://openpgpjs.org\r\n\r\nwsFzBAEBCAAGBQJjI0RAACEJED1NWxICdlZqFiEECWMYAoorWMhJKdjhPU1b\r\nEgJ2VmoeeQ//eIJNG3479L6MnziS8L3CR9WkdtKfJ6/FY89HLzXd+mek+S63\r\n89If1rH3RjRPKaa86HO/MjKMRFoGAL+CNesdjkY7WPSegsGAavk3zT4CbxqT\r\nVionbYT913yAe3EFzO86yLZmneQ1q9vG6nbmQykfgooJ8a0VRXlYIFgj7Gxu\r\nrOf6WR79SxVIvahT/iFXNasxTb41mS8o1zrTn7oEjdpi5ZKe078Ck0iHqqt7\r\noseuYP9irQGtuNNqFP6aRcum7k6Jg05P3Kei6JNJmramBZs5DpRdHuRT7PvD\r\nyrr2YXZ16XFvccFN0qPtv5lsXPbLYNEQyjsbcmNolEnd30jYX5VWYQFSEXgD\r\n5/ZpxUVp/Dw4ACFtcnkaYCUXuEiD/M7fEc1p56Tjvcj7k/+MYOIUMpowjIcG\r\nobiK8crJTiBI57F2LJ0yuEd4nq84uyQHgBATlHVliIcBMkDtbXvgtuGt7EXW\r\no7lLVXFqof810DySJpqrqUPp/4AdtRtnlz873pzrlqQHiT1w2Lo6dtTpnRcP\r\nF8G0wpLbvceYR9x/DdHk3BeFHRUgpzrAs2oizuELxdth1CQTT+vbg1tiKEbM\r\nvk66uDvO+KrkxyQ4aiqj0h2QfbYIFeMiWhD1sXatvzDUpZJC8fMiaDhjsjxD\r\naV/PJFZRJpAvPBLOExzWYbODQs63Ds3MwpU=\r\n=ktcO\r\n-----END PGP SIGNATURE-----\r\n"
+			},
+			"_npmUser": {
+				"name": "zackljackson",
+				"email": "zackary.l.jackson@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "alexg53090",
+					"email": "alexandergraybennett@gmail.com"
+				},
+				{
+					"name": "zackljackson",
+					"email": "zackary.l.jackson@gmail.com"
+				},
+				{
+					"name": "marais",
+					"email": "me@marais.co"
+				},
+				{
+					"name": "tysonrm",
+					"email": "tyson.midboe@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/node_0.0.1_1663255616550_0.0590561731893533"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"0.1.0": {
+			"name": "@module-federation/node",
+			"version": "0.1.0",
+			"description": "Module Federation for Node.js",
+			"main": "index.js",
+			"peerDependencies": {
+				"webpack": "5.40.0",
+				"node-fetch": "^3.2.10"
+			},
+			"licenseText": "MIT License\n\nCopyright (c) 2020 ScriptedAlchemy LLC (Zack Jackson)\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n",
+			"license": "MIT",
+			"_id": "@module-federation/node@0.1.0",
+			"dist": {
+				"shasum": "81680625e36af6560482e2bbb099f64d12ff9085",
+				"integrity": "sha512-2cQlg+Jf8mTSNXXD6LVV0a/gHpB1fbg0GXBEumSrjTsaSsLhjFyoRRJafVHxI3hPw50fSrnjabKuQCDzu7RAeQ==",
+				"tarball": "https://registry.npmjs.org/@module-federation/node/-/node-0.1.0.tgz",
+				"fileCount": 12,
+				"unpackedSize": 39276,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIBGw8jGfnXEyCxQb88QDLtEI3MlBJC5wutiTmMxdTmbhAiEAliHVusmhTzvOzs2MhoDni67M7stUJ8mnnQ76YdrIq+M="
+					}
+				],
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v4.10.10\r\nComment: https://openpgpjs.org\r\n\r\nwsFzBAEBCAAGBQJjKkNVACEJED1NWxICdlZqFiEECWMYAoorWMhJKdjhPU1b\r\nEgJ2VmorWg//USKfYpzy0ODtquvHVoat65mUe3axwL50o2fwa4myQnSLUD9V\r\nutlTmiltuukOL9pSbsTPim1nAYBEgzZ60cBte4bM53M4HslN3LbYfNqw6ACz\r\nEf6PcpX6h5c7mOhlwSclf7bLMXGVxrsonwpzA5y0Z5J6fLtg0eZ3VYGoh68F\r\nfZafghuxu5q3BaNwbDxCj4RYSiOeQ1dw2t0j6ZAhZQ+Ic7uG+9tdjHa7C8RX\r\nLleKmi+lpRrjDM5Q/71xK08aSqiNFAjzgwPkM/t7/4brMSQspKHeiEOOTuHF\r\nHYJHTVd4Y0iUyI6dKh0w6TNfMa4pDYhnNnpAPdcBrnaKImphuF/AD4mpIpir\r\nMmmPs5OD5oKN6hUkkDxO55fXXAM4kVRpw+i0xISXGyfS7TPjyxLQGvBcfUXx\r\nFKDmbtoTqW9KZA13aPrkjWcZ90m5LBFFxURWLGeD6GBgHpM4IYt5LU8e7ODF\r\nRRfY5/A7He62bzxm9BokcMq+vg0EG7ioLez2CLW9JGQDe/cJMeLZXbdEKHsS\r\nY5fbIKMLtQ/0LqOLe7UV9Oi+H27gBdX7J9CMYwAH0vAvf/lNRy+EGuCl0OtH\r\nS6S/dO6jGUVnBeO9EdFvrmBnFf22kW1D5/aCusXLctLH0M3czWNEQGG6kC92\r\nHDum3NOt5z61oUNTQbmCG8NvvtNwS/zUroI=\r\n=2QIQ\r\n-----END PGP SIGNATURE-----\r\n"
+			},
+			"_npmUser": {
+				"name": "zackljackson",
+				"email": "zackary.l.jackson@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "alexg53090",
+					"email": "alexandergraybennett@gmail.com"
+				},
+				{
+					"name": "zackljackson",
+					"email": "zackary.l.jackson@gmail.com"
+				},
+				{
+					"name": "marais",
+					"email": "me@marais.co"
+				},
+				{
+					"name": "tysonrm",
+					"email": "tyson.midboe@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/node_0.1.0_1663714132944_0.4750762386115026"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"0.0.2": {
+			"public": true,
+			"name": "@module-federation/node",
+			"version": "0.0.2",
+			"type": "commonjs",
+			"description": "Module Federation helper for Node",
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/module-federation/nextjs-mf.git"
+			},
+			"author": {
+				"name": "Zack Jackson",
+				"email": "zackary.l.jackson@gmail.com"
+			},
+			"license": "MIT",
+			"main": "./src/index.js",
+			"typings": "./src/index.d.ts",
+			"dependencies": {
+				"webpack": "^5.74.0",
+				"tslib": "^2.3.0"
+			},
+			"peerDependencies": {},
+			"readmeFilename": "README.md",
+			"gitHead": "d3333bd88d4650aec1b4e201440bf8de40482547",
+			"bugs": {
+				"url": "https://github.com/module-federation/nextjs-mf/issues"
+			},
+			"homepage": "https://github.com/module-federation/nextjs-mf#readme",
+			"_id": "@module-federation/node@0.0.2",
+			"_nodeVersion": "16.16.0",
+			"_npmVersion": "8.11.0",
+			"dist": {
+				"integrity": "sha512-GfWJVWFqTjSoD13vYXFLKNAEpnpumbCj1qVcobUuClS1O9CZro1w6ZrJnnyrDM5y76WPq9aRLFqCJRoiY24+ZQ==",
+				"shasum": "df5bd2c0552d7a4b0fd777485a994c88e072f5f9",
+				"tarball": "http://localhost:4873/@module-federation/node/-/@module-federation/node-0.0.2.tgz"
+			},
+			"contributors": []
+		},
+		"0.0.3": {
+			"public": true,
+			"name": "@module-federation/node",
+			"version": "0.0.3",
+			"type": "commonjs",
+			"main": "src/index.js",
+			"types": "src/index.d.ts",
+			"description": "Module Federation helper for Node",
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/module-federation/nextjs-mf.git"
+			},
+			"author": {
+				"name": "Zack Jackson",
+				"email": "zackary.l.jackson@gmail.com"
+			},
+			"license": "MIT",
+			"typings": "./src/index.d.ts",
+			"dependencies": {
+				"webpack": "^5.74.0",
+				"tslib": "^2.3.0"
+			},
+			"peerDependencies": {},
+			"readmeFilename": "README.md",
+			"gitHead": "d3333bd88d4650aec1b4e201440bf8de40482547",
+			"bugs": {
+				"url": "https://github.com/module-federation/nextjs-mf/issues"
+			},
+			"homepage": "https://github.com/module-federation/nextjs-mf#readme",
+			"_id": "@module-federation/node@0.0.3",
+			"_nodeVersion": "16.16.0",
+			"_npmVersion": "8.11.0",
+			"dist": {
+				"integrity": "sha512-5LIyW3IopPECrOsUra3QJe7yvxmUnrgqUFrW4O/oT3OqyJieMf60eeTzbKfZwLj9iMNIZQN7JqSwJ5ev+TiKhQ==",
+				"shasum": "dbb04edcf2c4fa7340c0c7bd546aef3f2c8ab927",
+				"tarball": "http://localhost:4873/@module-federation/node/-/@module-federation/node-0.0.3.tgz"
+			},
+			"contributors": []
+		}
+	},
+	"time": {
+		"created": "2022-09-15T15:26:56.430Z",
+		"0.0.1": "2022-09-15T15:26:56.737Z",
+		"modified": "2022-09-23T19:32:09.490Z",
+		"0.1.0": "2022-09-20T22:48:53.147Z",
+		"0.0.2": "2022-09-23T19:22:14.316Z",
+		"0.0.3": "2022-09-23T19:32:09.490Z"
+	},
+	"users": {},
+	"dist-tags": {
+		"latest": "0.0.3"
+	},
+	"_uplinks": {
+		"npmjs": {
+			"etag": "W/\"6ddbad7e76d2e1eae5838685b0005774\"",
+			"fetched": 1663961553803
+		}
+	},
+	"_distfiles": {
+		"node-0.0.1.tgz": {
+			"url": "https://registry.npmjs.org/@module-federation/node/-/node-0.0.1.tgz",
+			"sha": "e37ef6515cae0ea37d2a86dabed18b91dff341aa",
+			"registry": "npmjs"
+		},
+		"node-0.1.0.tgz": {
+			"url": "https://registry.npmjs.org/@module-federation/node/-/node-0.1.0.tgz",
+			"sha": "81680625e36af6560482e2bbb099f64d12ff9085",
+			"registry": "npmjs"
+		}
+	},
+	"_attachments": {
+		"node-0.0.1.tgz": {
+			"shasum": "984793fa99b38c43dcd2957316e6313f9f8ac577"
+		},
+		"node-0.0.2.tgz": {
+			"shasum": "df5bd2c0552d7a4b0fd777485a994c88e072f5f9",
+			"version": "0.0.2"
+		},
+		"node-0.0.3.tgz": {
+			"shasum": "dbb04edcf2c4fa7340c0c7bd546aef3f2c8ab927",
+			"version": "0.0.3"
+		}
+	},
+	"_rev": "10-9469de70468307dc",
+	"_id": "@module-federation/node",
+	"readme": "# node\r\n\r\nThis library was generated with [Nx](https://nx.dev).\r\n\r\n## Building\r\n\r\nRun `nx build node` to build the library."
+}
