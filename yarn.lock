@@ -1484,11 +1484,7 @@
   version "0.0.0"
   uid ""
 
-"@module-federation/utils@0.0.1":
-  version "0.0.0"
-  uid ""
-
-"@module-federation/utils@link:./dist/packages/utils":
+"@module-federation/utilities@link:./dist/packages/utilities":
   version "0.0.0"
   uid ""
 

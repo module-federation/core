@@ -1,1 +1,1 @@
-export { extractUrlAndGlobal, injectScript } from '@module-federation/utils';
+export { extractUrlAndGlobal, injectScript } from '@module-federation/utilities';

@@ -8,8 +8,8 @@ import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
-} from '@module-federation/utils';
-import { createRuntimeVariables } from '@module-federation/utils';
+} from '@module-federation/utilities';
+import { createRuntimeVariables } from '@module-federation/utilities';
 
 import path from 'path';
 import type { Compiler } from 'webpack';

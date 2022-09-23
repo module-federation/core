@@ -19,7 +19,7 @@
   "dependencies": {
     "@module-federation/nextjs-mf": "link:./dist/packages/nextjs-mf",
     "@module-federation/node": "link:./dist/packages/node",
-    "@module-federation/utils": "link:./dist/packages/utils",
+    "@module-federation/utilities": "link:./dist/packages/utilities",
     "@swc/helpers": "~0.3.3",
     "core-js": "^3.6.5",
     "fast-glob": "^3.2.12",
@@ -70,7 +70,7 @@
   },
   "resolutions": {
     "@module-federation/nextjs-mf": "link:./dist/packages/nextjs-mf",
-    "@module-federation/utils": "link:./dist/packages/utils",
+    "@module-federation/utilities": "link:./dist/packages/utilities",
     "@module-federation/node": "link:./dist/packages/node"
   },
   "workspaces": {

@@ -7,6 +7,6 @@
     "3002-checkout": "apps/3002-checkout",
     "nextjs-mf": "packages/nextjs-mf",
     "node": "packages/node",
-    "utils": "packages/utils"
+    "utils": "packages/utilities"
   }
 }

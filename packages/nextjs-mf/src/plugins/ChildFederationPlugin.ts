@@ -2,7 +2,7 @@ import type { Compiler, WebpackError, WebpackPluginInstance } from 'webpack';
 import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
-} from '@module-federation/utils';
+} from '@module-federation/utilities';
 
 import path from 'path';
 import fs from 'fs';
@@ -20,7 +20,7 @@ import {
   computeRemoteFilename,
   createRuntimeVariables,
   toDisplayErrors,
-} from '@module-federation/utils';
+} from '@module-federation/utilities';
 
 import ChildFriendlyModuleFederationPlugin from './ModuleFederationPlugin';
 import RemoveRRRuntimePlugin from './RemoveRRRuntimePlugin';

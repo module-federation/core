@@ -1,4 +1,4 @@
-import type { RuleSetRuleUnion, Loader } from '@module-federation/utils';
+import type { RuleSetRuleUnion, Loader } from '@module-federation/utilities';
 
 /**
  * Inject a loader into the current module rule.
