@@ -1,0 +1,24 @@
+{
+  "version": "5.5.3",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "contributors": [
+    "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
+  ],
+  "public": true,
+  "name": "@module-federation/nextjs-mf",
+  "type": "commonjs",
+  "description": "Module Federation helper for NextJS",
+  "repository": "https://github.com/module-federation/nextjs-mf",
+  "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.0.0",
+    "fast-glob": "^3.2.11",
+    "webpack-sources": "^3.2.3"
+  },
+  "peerDependencies": {
+    "webpack": "5.45.1",
+    "next": "11.0.1"
+  }
+}
