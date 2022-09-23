@@ -1,6 +1,7 @@
 import Template from './Template';
 import { parseRemoteSyntax } from '../src/internal';
 import { WebpackRemoteContainer } from '@module-federation/utilities';
+import path from "path";
 
 const swc = require('@swc/core');
 
@@ -23,6 +24,13 @@ const transformInput = (code: string) => {
   }).code;
 };
 
+export const computeRemoteFilename = (isServer: boolean, filename: string) => {
+  if (isServer && filename) {
+    return path.basename(filename);
+  }
+  return filename;
+};
+
 // // To satisfy Typescript.
 declare const urlAndGlobal: string;
 //remote is defined in the template wrapper
@@ -37,11 +45,6 @@ const remoteTemplate = function () {
     global: urlAndGlobal.substring(0, index) as unknown as number, // this casting to satisfy TS
   };
 
-  const remoteGlobal = window[
-    remote.global
-  ] as unknown as WebpackRemoteContainer & {
-    __initialized: boolean;
-  };
 
   return new Promise<void>(function (resolve, reject) {
     const __webpack_error__ = new Error() as Error & {
@@ -49,7 +52,7 @@ const remoteTemplate = function () {
       request: string | null;
     };
 
-    if (typeof remoteGlobal !== 'undefined') {
+    if (typeof window[remote.global] !== 'undefined') {
       return resolve();
     }
 
@@ -58,6 +61,7 @@ const remoteTemplate = function () {
       function (event: Event) {
         if (typeof window[remote.global] !== 'undefined') {
           return resolve();
+
         }
 
         var errorType =
@@ -83,6 +87,11 @@ const remoteTemplate = function () {
       remote.global
     );
   }).then(function () {
+    const remoteGlobal = window[
+      remote.global
+      ] as unknown as WebpackRemoteContainer & {
+      __initialized: boolean;
+    };
     const proxy: WebpackRemoteContainer = {
       get: remoteGlobal.get,
       //@ts-ignore
@@ -176,7 +185,7 @@ export const promiseTemplate = (
 
     remoteFactory = (remoteSyntax) => {
       return Template.asString([
-        `${remoteSyntax}.then(function(remote) {`,
+        `${remoteSyntax}.then(function(urlAndGlobal) {`,
         Template.indent([Template.getFunctionContent(remoteTemplate)]),
         '})',
       ]);

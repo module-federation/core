@@ -17,10 +17,11 @@ import {
   removePlugins,
 } from '../internal';
 import {
-  computeRemoteFilename,
   createRuntimeVariables,
   toDisplayErrors,
 } from '@module-federation/utilities';
+
+import {computeRemoteFilename} from "../../utils/build-utils";
 
 import ChildFriendlyModuleFederationPlugin from './ModuleFederationPlugin';
 import RemoveRRRuntimePlugin from './RemoveRRRuntimePlugin';
