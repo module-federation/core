@@ -1476,11 +1476,15 @@
   version "0.0.0"
   uid ""
 
-"@module-federation/node@0.0.1":
+"@module-federation/node@0.0.3":
   version "0.0.0"
   uid ""
 
 "@module-federation/node@link:./dist/packages/node":
+  version "0.0.0"
+  uid ""
+
+"@module-federation/utilities@0.0.2":
   version "0.0.0"
   uid ""
 
