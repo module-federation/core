@@ -126,7 +126,7 @@ export class ChildFederationPlugin {
       } else if (compiler.options.name === 'server') {
         const {
           NodeFederationPlugin,
-          StreamingFederationPlugin,
+          StreamingTargetPlugin,
         } = require('@module-federation/node');
 
         plugins = [
@@ -144,7 +144,7 @@ export class ChildFederationPlugin {
             'react/jsx-dev-runtime',
           ]),
           // new LoaderTargetPlugin('async-node'),
-          new StreamingFederationPlugin(federationPluginOptions, {
+          new StreamingTargetPlugin(federationPluginOptions, {
             ModuleFederationPlugin: webpack.container.ModuleFederationPlugin,
           }),
           new LibraryPlugin(federationPluginOptions.library?.type as string),

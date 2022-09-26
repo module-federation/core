@@ -36,21 +36,25 @@ interface Context {
 
 //TODO: should use extractUrlAndGlobal from internal.js
 //TODO: should use Template system like LoadFileChunk runtime does.
-//TODO: should use vm.runInThisContext instead of eval
+//TODO: should use Template system like LoadFileChunk runtime does.
 //TODO: global.webpackChunkLoad could use a better convention? I have to use a special http client to get out of my infra firewall
 const executeLoadTemplate = `
     function executeLoad(remoteUrl) {
     console.log('remoteUrl',remoteUrl)
-        const scriptUrl = remoteUrl.split("@")[1];
-        const moduleName = remoteUrl.split("@")[0];
+        const extractUrlAndGlobal = require('webpack/lib/util/extractUrlAndGlobal');
+        const [scriptUrl, moduleName] = extractUrlAndGlobal(remoteUrl);
         console.log("executing remote load", scriptUrl);
+        const vm = require('vm');
         return new Promise(function (resolve, reject) {
 
-         (global.webpackChunkLoad || fetch)(scriptUrl).then(function(res){
+         (global.webpackChunkLoad || global.fetch || require("node-fetch"))(scriptUrl).then(function(res){
             return res.text();
           }).then(function(scriptContent){
             try {
-              const remote = eval(scriptContent + 'module.exports');
+              const vmContext = { exports, require, module, global, __filename, __dirname, URL };
+
+              const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, { filename: 'node-federation-loader-' + moduleName + '.vm' });
+
               /* TODO: need something like a chunk loading queue, this can lead to async issues
                if two containers load the same remote, they can overwrite global scope
                should check someone is already loading remote and await that */
@@ -234,7 +238,7 @@ function buildRemotes(
   );
 }
 
-class StreamingFederationPlugin {
+class StreamingTargetPlugin {
   private options: ModuleFederationPluginOptions;
   private context: Context;
   private experiments: StreamingFederationOptions['experiments'];
@@ -278,4 +282,4 @@ class StreamingFederationPlugin {
   }
 }
 
-export default StreamingFederationPlugin;
+export default StreamingTargetPlugin;
