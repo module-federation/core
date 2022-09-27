@@ -12,11 +12,9 @@ interface StreamingTargetContext {}
 
 class StreamingTargetPlugin {
   private options: StreamingTargetOptions;
-  private context: StreamingTargetContext;
 
-  constructor(options: StreamingTargetOptions, context: StreamingTargetContext) {
+  constructor(options: StreamingTargetOptions) {
     this.options = options || {};
-    this.context = context || {};
   }
 
   apply(compiler: Compiler) {
