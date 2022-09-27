@@ -10,7 +10,7 @@ interface StreamingFederationOptions extends ModuleFederationPluginOptions {
 }
 
 interface Context {
-  ModuleFederationPlugin: typeof container.ModuleFederationPlugin;
+  ModuleFederationPlugin?: typeof container.ModuleFederationPlugin;
 }
 
 // possible remote evaluators

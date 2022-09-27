@@ -1,8 +1,7 @@
-import NodeFederationPlugin from "./NodeFederationPlugin";
-import StreamingTargetPlugin from "./StreamingTargetPlugin";
-import {ModuleFederationPluginOptions} from "../types";
-import type { Compiler, container} from 'webpack';
-
+import NodeFederationPlugin from './NodeFederationPlugin';
+import StreamingTargetPlugin from './StreamingTargetPlugin';
+import { ModuleFederationPluginOptions } from '../types';
+import type { Compiler, container } from 'webpack';
 
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
   isServer: boolean;
@@ -12,7 +11,6 @@ interface NodeFederationOptions extends ModuleFederationPluginOptions {
 interface NodeFederationContext {
   ModuleFederationPlugin?: typeof container.ModuleFederationPlugin;
 }
-
 
 class UniversalFederationPlugin {
   private options: NodeFederationOptions;
@@ -24,15 +22,16 @@ class UniversalFederationPlugin {
   }
 
   apply(compiler: Compiler) {
-    const isServer = this.options.isServer || compiler.options.name === 'server';
-    const {webpack} = compiler;
+    const isServer =
+      this.options.isServer || compiler.options.name === 'server';
+    const { webpack } = compiler;
 
-    if(isServer) {
-      new NodeFederationPlugin(this.options, this.context).apply(compiler);
-      // @ts-ignore
+    if (isServer) {
       new StreamingTargetPlugin(this.options, this.context).apply(compiler);
+      new NodeFederationPlugin(this.options, this.context).apply(compiler);
     } else {
-      new (this.context.ModuleFederationPlugin || (webpack && webpack.container.ModuleFederationPlugin) ||
+      new (this.context.ModuleFederationPlugin ||
+        (webpack && webpack.container.ModuleFederationPlugin) ||
         require('webpack/lib/container/ModuleFederationPlugin'))(
         this.options
       ).apply(compiler);
