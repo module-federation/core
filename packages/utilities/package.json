@@ -3,5 +3,6 @@
   "version": "0.0.2",
   "type": "commonjs",
   "main": "src/index.js",
-  "types": "src/index.d.ts"
+  "types": "src/index.d.ts",
+  "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/utilities",
 }
