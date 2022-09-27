@@ -13,7 +13,8 @@
   "license": "MIT",
   "scripts": {
     "build": "nx build",
-    "start": "nx build && nx run-many --target=serve"
+    "start": "nx build && nx run-many --target=serve --verbose",
+    "prod": "nx build && nx run-many --target=build --verbose"
   },
   "private": true,
   "dependencies": {

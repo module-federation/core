@@ -55,10 +55,10 @@ export class NextFederationPlugin {
       // target false because we use our own target for node env
       compiler.options.target = false;
 
-      const StreamingFederationPlugin =
-        require('@module-federation/node').StreamingFederationPlugin;
+      const StreamingTargetPlugin =
+        require('@module-federation/node').StreamingTargetPlugin;
 
-      new StreamingFederationPlugin(this._options, {
+      new StreamingTargetPlugin(this._options, {
         ModuleFederationPlugin: webpack.container.ModuleFederationPlugin,
       }).apply(compiler);
 

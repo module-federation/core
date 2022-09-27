@@ -16,7 +16,6 @@ const nextConfig = {
   },
   webpack(config, options) {
     const { isServer } = options;
-    if (!options.isServer) {
       const remotes = {
         shop: `shop@http://localhost:3001/_next/static/${
           isServer ? 'ssr' : 'chunks'
@@ -31,18 +30,7 @@ const nextConfig = {
           name: 'home_app',
           filename: 'static/chunks/remoteEntry.js',
           remotes: {
-            shop: promiseTemplate(
-              // can also be a string if it needs to be computed in scope
-              `(resolve, reject) => {
-                resolve("${remotes.shop}");
-              }`,
-              (resolve,reject)=>{
-                console.log('runing other promise');
-                setTimeout(() => {
-                  console.log('resolving promise');
-                  resolve();
-                } , 1000);
-              }),
+            shop: remotes.shop,
             checkout: remotes.checkout,
           },
           exposes: {
@@ -61,7 +49,6 @@ const nextConfig = {
           },
         })
       );
-    }
     return config;
   },
 };

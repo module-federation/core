@@ -5,7 +5,6 @@ import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
 
 import ChunkLoadingRuntimeModule from './LoadFileChunkLoadingRuntimeModule';
-// const ChunkLoadingRuntimeModule = require('webpack/lib/node/ReadFileChunkLoadingRuntimeModule')
 
 interface CommonJsChunkLoadingOptions extends ModuleFederationPluginOptions {
   baseURI: Compiler['options']['output']['publicPath'];

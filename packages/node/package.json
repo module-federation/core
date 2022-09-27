@@ -8,5 +8,8 @@
   "description": "Module Federation helper for Node",
   "repository": "https://github.com/module-federation/nextjs-mf",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  }
 }

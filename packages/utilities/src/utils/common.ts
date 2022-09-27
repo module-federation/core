@@ -40,7 +40,8 @@ export const runtimeRemotes = Object.entries(remoteVars).reduce(function (
   }
   // we dont know or currently support this type
   else {
-    console.log('remotes process', process.env['REMOTES']);
+    //@ts-ignore
+    console.log('remotes process', process.env.REMOTES);
     throw new Error(`[mf] Invalid value received for runtime_remote "${key}"`);
   }
   return acc;

@@ -6,18 +6,19 @@ import { Layout, version } from 'antd';
 import { useMFClient } from '@module-federation/nextjs-mf/client';
 
 import HostAppMenu from './_menu';
+console.log(import('home/SharedNav').then(console.log))
 
 import 'antd/dist/antd.css';
-
 const SharedNav = dynamic(
   () => {
     const mod = import('home/SharedNav');
     return mod;
   },
-  { ssr: false }
+  { ssr: true }
 );
 
 function MyApp({ Component, pageProps }) {
+  console.log('in app')
   const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
 
   useMFClient({

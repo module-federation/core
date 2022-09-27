@@ -15,7 +15,6 @@ const nextConfig = {
   webpack(config, options) {
     const { isServer } = options;
 
-    if (!options.isServer) {
       config.plugins.push(
         new NextFederationPlugin({
           name: 'shop',
@@ -47,7 +46,6 @@ const nextConfig = {
           },
         })
       );
-    }
     return config;
   },
 };
