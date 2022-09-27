@@ -39,4 +39,4 @@ class UniversalFederationPlugin {
   }
 }
 
-module.exports = UniversalFederationPlugin;
+export default UniversalFederationPlugin;

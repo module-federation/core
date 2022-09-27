@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "0.0.3",
+  "version": "0.2.0",
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -11,5 +11,8 @@
   "license": "MIT",
   "dependencies": {
     "node-fetch": "^2.6.7"
+  },
+  "peerDependencies": {
+   "webpack": "^5.46.0"
   }
 }
