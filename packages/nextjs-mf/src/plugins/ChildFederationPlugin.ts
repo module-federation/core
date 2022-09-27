@@ -130,7 +130,7 @@ export class ChildFederationPlugin {
         } = require('@module-federation/node');
 
         plugins = [
-          new NodeFederationPlugin(federationPluginOptions, {
+          new StreamingFederationPlugin(federationPluginOptions, {
             ModuleFederationPlugin: FederationPlugin,
           }),
           new webpack.node.NodeTemplatePlugin(childOutput),
@@ -144,7 +144,7 @@ export class ChildFederationPlugin {
             'react/jsx-dev-runtime',
           ]),
           // new LoaderTargetPlugin('async-node'),
-          new StreamingFederationPlugin(federationPluginOptions, {
+          new NodeFederationPlugin(federationPluginOptions, {
             ModuleFederationPlugin: webpack.container.ModuleFederationPlugin,
           }),
           new LibraryPlugin(federationPluginOptions.library?.type as string),
