@@ -3,18 +3,18 @@ import type { ModuleFederationPluginOptions } from '../types';
 
 import CommonJsChunkLoadingPlugin from './CommonJsChunkLoadingPlugin';
 
-interface NodeFederationOptions extends ModuleFederationPluginOptions {
+interface StreamingTargetOptions extends ModuleFederationPluginOptions {
   promiseBaseURI?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface NodeFederationContext {}
+interface StreamingTargetContext {}
 
 class StreamingTargetPlugin {
-  private options: NodeFederationOptions;
-  private context: NodeFederationContext;
+  private options: StreamingTargetOptions;
+  private context: StreamingTargetContext;
 
-  constructor(options: NodeFederationOptions, context: NodeFederationContext) {
+  constructor(options: StreamingTargetOptions, context: StreamingTargetContext) {
     this.options = options || {};
     this.context = context || {};
   }

@@ -5,7 +5,7 @@ import type { ModuleFederationPluginOptions } from '../types';
 
 type EmptyObject = Record<string, unknown>;
 
-interface StreamingFederationOptions extends ModuleFederationPluginOptions {
+interface NodeFederationOptions extends ModuleFederationPluginOptions {
   experiments?: Record<string, unknown>;
 }
 
@@ -241,10 +241,10 @@ function buildRemotes(
 class NodeFederationPlugin {
   private options: ModuleFederationPluginOptions;
   private context: Context;
-  private experiments: StreamingFederationOptions['experiments'];
+  private experiments: NodeFederationOptions['experiments'];
 
   constructor(
-    { experiments, ...options }: StreamingFederationOptions,
+    { experiments, ...options }: NodeFederationOptions,
     context: Context
   ) {
     this.options = options || ({} as ModuleFederationPluginOptions);
