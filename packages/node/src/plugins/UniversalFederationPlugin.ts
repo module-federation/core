@@ -28,7 +28,7 @@ class UniversalFederationPlugin {
 
     if (isServer) {
       new NodeFederationPlugin(this.options, this.context).apply(compiler);
-      new StreamingTargetPlugin(this.options, this.context).apply(compiler);
+      new StreamingTargetPlugin(this.options).apply(compiler);
     } else {
       new (this.context.ModuleFederationPlugin ||
         (webpack && webpack.container.ModuleFederationPlugin) ||

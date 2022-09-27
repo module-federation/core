@@ -29,11 +29,13 @@
       "configurations": {
         "development": {
           "buildTarget": "3000-home:build:development",
-          "dev": true
+          "dev": true,
+          "port": 3000
         },
         "production": {
           "buildTarget": "3000-home:build:production",
-          "dev": false
+          "dev": false,
+          "port": 3000
         }
       }
     },

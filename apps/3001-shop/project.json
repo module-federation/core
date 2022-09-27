@@ -29,11 +29,13 @@
       "configurations": {
         "development": {
           "buildTarget": "3001-shop:build:development",
-          "dev": true
+          "dev": true,
+          "port": 3001
         },
         "production": {
           "buildTarget": "3001-shop:build:production",
-          "dev": false
+          "dev": false,
+          "port": 3001
         }
       }
     },

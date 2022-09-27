@@ -29,11 +29,13 @@
       "configurations": {
         "development": {
           "buildTarget": "3002-checkout:build:development",
-          "dev": true
+          "dev": true,
+          "port": 3002
         },
         "production": {
           "buildTarget": "3002-checkout:build:production",
-          "dev": false
+          "dev": false,
+          "port": 3002
         }
       }
     },
