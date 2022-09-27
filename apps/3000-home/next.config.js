@@ -16,7 +16,6 @@ const nextConfig = {
   },
   webpack(config, options) {
     const { isServer } = options;
-    if (!options.isServer) {
       const remotes = {
         shop: `shop@http://localhost:3001/_next/static/${
           isServer ? 'ssr' : 'chunks'
@@ -61,7 +60,6 @@ const nextConfig = {
           },
         })
       );
-    }
     return config;
   },
 };

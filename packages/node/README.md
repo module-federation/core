@@ -20,9 +20,9 @@ There are two approaches to using the plugins exported from this package, depend
 
 ### UniversalFederationPlugin
 
-This plugin is an abstraction over both `NodeFederationPlugin` and `ModuleFederationPlugin`. It will alternate between which it uses based on where the build is intended to be used.
+This plugin is an abstraction over both `StreamingTargetPlugin` and `ModuleFederationPlugin`. It will alternate between which it uses based on where the build is intended to be used.
 
-If the build is intended to be used on the `browser`, it will use the standard `ModuleFederationPlugin` and bundle your code accordingly, however, if it is intended for `server` usage, it will use `NodeFederationPlugin` to create the bundle.
+If the build is intended to be used on the `browser`, it will use the standard `ModuleFederationPlugin` and bundle your code accordingly, however, if it is intended for `server` usage, it will use `StreamingTargetPlugin` to create the bundle.
 
 This simplifies the code required in your `webpack.config.js` to enable SSR Module Federation. It determines which platform it needs to build for based on two things:
 
@@ -51,24 +51,24 @@ const config = {
 }
 ```
 
-### NodeFederationPlugin and StreamingTargetPlugin
+### StreamingTargetPlugin and NodeFederationPlugin
 
 You can also use each of the underlying plugins individually if you need more control over when they are used.
 
 At build time, you need to be aware if you're building for the `server` or for the `browser`.
 If it's building for server, we need to set `target: false` to allow the plugins to function correctly.
 
-The `NodeFederationPlugin` follows the same API as the [Module Federation Plugin](https://webpack.js.org/plugins/module-federation-plugin) and therefore should be a drop-in replacement if you already have it set up in your `webpack.config.js`.
+The `StreamingTargetPlugin` follows the same API as the [Module Federation Plugin](https://webpack.js.org/plugins/module-federation-plugin) and therefore should be a drop-in replacement if you already have it set up in your `webpack.config.js`.
 
 An example configuration is presented below:
 ```js
 
-const {NodeFederationPlugin, StreamingTargetPlugin} = require("@module-federation/node");
+const {StreamingTargetPlugin, NodeFederationPlugin} = require("@module-federation/node");
 
 const config = {
   target: isServer ? false : "web",
   plugins: [
-    new NodeFederationPlugin({
+    new StreamingTargetPlugin({
       name: 'website2',
       library: {type: 'commonjs-module'},
       remotes: {},
@@ -77,7 +77,7 @@ const config = {
         './SharedComponent': './remoteServer/SharedComponent',
       },
     }),
-    new StreamingTargetPlugin({
+    new NodeFederationPlugin({
       name: 'website2',
       library: {type: 'commonjs-module'},
       remotes: {},

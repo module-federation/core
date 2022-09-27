@@ -1,5 +1,5 @@
-import NodeFederationPlugin from './NodeFederationPlugin';
 import StreamingTargetPlugin from './StreamingTargetPlugin';
+import NodeFederationPlugin from './NodeFederationPlugin';
 import { ModuleFederationPluginOptions } from '../types';
 import type { Compiler, container } from 'webpack';
 
@@ -27,8 +27,8 @@ class UniversalFederationPlugin {
     const { webpack } = compiler;
 
     if (isServer) {
-      new StreamingTargetPlugin(this.options, this.context).apply(compiler);
       new NodeFederationPlugin(this.options, this.context).apply(compiler);
+      new StreamingTargetPlugin(this.options, this.context).apply(compiler);
     } else {
       new (this.context.ModuleFederationPlugin ||
         (webpack && webpack.container.ModuleFederationPlugin) ||
