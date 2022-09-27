@@ -4,5 +4,5 @@
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
-  "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/utilities",
+  "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/utilities"
 }

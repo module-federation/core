@@ -40,8 +40,14 @@ interface Context {
 //TODO: global.webpackChunkLoad could use a better convention? I have to use a special http client to get out of my infra firewall
 const executeLoadTemplate = `
     function executeLoad(remoteUrl) {
-    console.log('remoteUrl',remoteUrl)
-        const extractUrlAndGlobal = require('webpack/lib/util/extractUrlAndGlobal');
+      function extractUrlAndGlobal(urlAndGlobal) {
+        var index = urlAndGlobal.indexOf("@");
+        if (index <= 0 || index === urlAndGlobal.length - 1) {
+                throw new Error("Invalid request " + urlAndGlobal);
+        }
+        return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
+      }
+      console.log('remoteUrl',remoteUrl)
         const [scriptUrl, moduleName] = extractUrlAndGlobal(remoteUrl);
         console.log("executing remote load", scriptUrl);
         const vm = require('vm');
