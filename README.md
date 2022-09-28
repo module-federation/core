@@ -1,5 +1,10 @@
 # ModuleFederation
 
+# Documentation
+
+[module-federaiont/nextjs-mf](./packages/nextjs-mf)
+[module-federaiont/node](./packages/node)
+[module-federation/utilities](./packages/utilities)
 ## Generate an application
 
 Run `nx g @nrwl/next:app my-app` to generate an application.
