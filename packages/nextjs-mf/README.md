@@ -1,3 +1,11 @@
+<div align="center">
+	<!--  for version -->
+  <img src="https://img.shields.io/npm/v/@module-federation/nextjs-mf" alt="version" >
+	<img src="https://img.shields.io/apm/l/atomic-design-ui.svg?" alt="license" >
+  <!-- for downloads -->
+  <img src="https://img.shields.io/npm/dt/@module-federation/nextjs-mf" alt="downloads">
+ </div>
+
 # Module Federation For Next.js
 
 This plugin enables Module Federation on Next.js
