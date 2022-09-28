@@ -80,10 +80,10 @@ export class ChildFederationPlugin {
         },
         chunkFilename: (
           compiler.options.output.chunkFilename as string
-        )?.replace('.js', '-fed.js'),
+        )?.replace('.js', isDev ? '-fed.js' : '[contenthash]-fed.js'),
         filename: (compiler.options.output.filename as string)?.replace(
           '.js',
-          '-fed.js'
+          isDev ? '-fed.js':'[contenthash]-fed.js'
         ),
       };
 
@@ -95,6 +95,9 @@ export class ChildFederationPlugin {
           this._options.filename as string
         ),
         exposes: {
+          // in development we do not hash chunks, so we need some way to cache bust the server container when remote changes
+          // in prod we hash the chunk so we can use [contenthash] which changes the overall hash of the remote container
+          ...(isServer && isDev ? {'./buildHash': `data:text/javascript,export default ${JSON.stringify(Date.now())}`} : {}),
           ...this._options.exposes,
           ...(this._extraOptions.exposePages
             ? exposeNextjsPages(compiler.options.context as string)

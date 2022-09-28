@@ -115,7 +115,7 @@ Used to "hot reload" the federated application.
 - Also useful for production environments where you want to be able to update the federated application without having to restart the server.
 
 ```js
-import {revalidate} from "@module-federation/node";
+import {revalidate} from "@module-federation/node/utils";
 
 // we automatically reset require cache, so the reload callback is only if you need to do something else
 revalidate().then((shouldReload) => {

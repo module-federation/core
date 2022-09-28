@@ -128,8 +128,6 @@ export class NextFederationPlugin {
         },
       };
 
-      compiler.options.optimization.chunkIds = 'named';
-
       new ModuleFederationPlugin(hostFederationPluginOptions, {
         ModuleFederationPlugin,
       }).apply(compiler);

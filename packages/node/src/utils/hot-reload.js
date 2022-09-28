@@ -1,4 +1,6 @@
 const hashmap = {};
+import crypto from "crypto";
+
 export const revalidate = (options) => {
   if (global.__remote_scope__) {
     const remoteScope = global.__remote_scope__;
@@ -9,10 +11,15 @@ export const revalidate = (options) => {
         if (typeof remote === "function") {
           remote = await remote();
         }
-        console.log("flush chunks: ", remote);
-        const [name, url] = remote.split("@");
+        const name = property;
+        const url = remote;
         (global.webpackChunkLoad || fetch)(url)
-          .then((re) => re.text())
+          .then((re) => {
+            if(!re.ok) {
+              throw new Error(`Error loading remote: status: ${re.status}, content-type: ${re.headers.get("content-type")}`);
+            }
+            return re.text()
+          })
           .then((contents) => {
             var hash = crypto.createHash("md5").update(contents).digest("hex");
             if (hashmap[name]) {
@@ -34,7 +41,7 @@ export const revalidate = (options) => {
               "Failed to load or is not online",
               e
             );
-            res(true);
+            res(false);
           });
       }
     }).then((shouldReload) => {
@@ -48,16 +55,15 @@ export const revalidate = (options) => {
         req = __non_webpack_require__;
       }
 
-      if (global.hotLoad) {
-        global.hotLoad();
-      }
-      global.loadedRemotes = {};
+      global.__remote_scope__ = {
+        _config: {},
+      };
       Object.keys(req.cache).forEach((k) => {
         if (
           k.includes("remote") ||
           k.includes("runtime") ||
           k.includes("server") ||
-          k.includes("flushChunks") ||
+          k.includes("hot-reload") ||
           k.includes("react-loadable-manifest")
         ) {
           delete req.cache[k];
@@ -65,5 +71,5 @@ export const revalidate = (options) => {
       });
     });
   }
-  return true;
+  return Promise.resolve(false);
 };
