@@ -1,12 +1,11 @@
 import Document, { Html, Head, Main, NextScript } from 'next/document'
-import {revalidate} from "@module-federation/node/utils";
+import {revalidate} from "@module-federation/nextjs-mf/utils";
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
     const initialProps = await Document.getInitialProps(ctx);
 
     ctx?.res?.on('finish', () => {
-      console.log(global.__remote_scope__);
       revalidate().then((shouldUpdate) => {
         console.log('finished sending response', shouldUpdate);
       })
