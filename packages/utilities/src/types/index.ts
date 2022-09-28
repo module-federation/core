@@ -12,8 +12,8 @@ declare const __webpack_share_scopes__: Record<
   Record<
     string,
     { loaded?: 1; get: () => Promise<unknown>; from: string; eager: boolean }
-    >
-  >;
+  >
+>;
 
 export interface NextFederationPluginExtraOptions {
   enableImageLoaderFix?: boolean;
@@ -51,6 +51,7 @@ export type AsyncContainer = Promise<WebpackRemoteContainer>;
 export type RemoteData = {
   global: string;
   url: string;
+  uniqueKey?: string;
 };
 
 export type RuntimeRemote = Partial<RemoteData> & {

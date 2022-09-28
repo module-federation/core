@@ -2,7 +2,7 @@ import type {
   AsyncContainer,
   Remotes,
   RuntimeRemotesMap,
-  RuntimeRemote
+  RuntimeRemote,
 } from '../types';
 
 // @ts-ignore
@@ -74,6 +74,12 @@ export const injectScript = (
     // This casting is just to satisfy typescript,
     // In reality remoteGlobal will always be a string;
     const remoteGlobal = reference.global as unknown as number;
+
+    // Check if theres an ovveride for container key if not use remote global
+    const containerKey = reference.uniqueKey
+      ? (reference.uniqueKey as unknown as number)
+      : remoteGlobal;
+
     const __webpack_error__ = new Error() as Error & {
       type: string;
       request: string | null;
@@ -82,19 +88,19 @@ export const injectScript = (
     asyncContainer = new Promise(function (resolve, reject) {
       function resolveRemoteGlobal() {
         const asyncContainer = window[
-          remoteGlobal
+          containerKey
         ] as unknown as AsyncContainer;
         return resolve(asyncContainer);
       }
 
-      if (typeof window[remoteGlobal] !== 'undefined') {
+      if (typeof window[containerKey] !== 'undefined') {
         return resolveRemoteGlobal();
       }
 
       (__webpack_require__ as any).l(
         reference.url,
         function (event: Event) {
-          if (typeof window[remoteGlobal] !== 'undefined') {
+          if (typeof window[containerKey] !== 'undefined') {
             return resolveRemoteGlobal();
           }
 
@@ -109,7 +115,7 @@ export const injectScript = (
             ': ' +
             realSrc +
             ' or global var ' +
-            remoteGlobal +
+            containerKey +
             ')';
 
           __webpack_error__.name = 'ScriptExternalLoadError';
@@ -118,7 +124,7 @@ export const injectScript = (
 
           reject(__webpack_error__);
         },
-        remoteGlobal
+        containerKey
       );
     });
   }
