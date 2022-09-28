@@ -1,8 +1,25 @@
-# Module Federation Support for Node Environments
+<p align="center">
+  <img src="https://github.com/module-federation/nextjs-mf/blob/main/packages/node/assets/banner.png" width="800"/>
+</p>
+<div align="center">
+	<!--  for version -->
+  <img src="https://img.shields.io/npm/v/@module-federation/node" alt="version" >
+	<img src="https://img.shields.io/apm/l/atomic-design-ui.svg?" alt="license" >
+  <!-- for downloads -->
+  <img src="https://img.shields.io/npm/dt/@module-federation/node" alt="downloads">
+ </div>
 
-This package exposes three Webpack Plugins to bring the concept and power of Module Federation to NodeJS. This will allow your server to fetch chunks across the network allowing for distributed deployments of federated applications.
+<p align="center">
+<strong>A package to bring the concept and power of module federation to NodeJS.</strong>
+</p>
 
-## Installation
+## ⚡ Features
+- Exposes two Webpack Plugins to enable Module Federation.
+- Can exported as UniversalFederationPlugin or NodeFederationPlugin with StreamingTargetPlugin
+- Allows server to fetch chunks across the network.
+- Allow distributed deployments of federated applications.
+
+## 📦 Installation
 
 To install the plugin run one of the following commands in your terminal for your application.
 
@@ -14,15 +31,15 @@ npm install @module-federation/node
 yarn add @module-federation/node
 ```
 
-## Usage
+## 🚀 Usage
 
 There are two approaches to using the plugins exported from this package, dependent on your use case.
 
 ### UniversalFederationPlugin
 
-This plugin is an abstraction over both `StreamingTargetPlugin` and `ModuleFederationPlugin`. It will alternate between which it uses based on where the build is intended to be used.
+This plugin is an abstraction over both `NodeFederationPlugin` and `ModuleFederationPlugin`. It will alternate between which it uses based on where the build is intended to be used.
 
-If the build is intended to be used on the `browser`, it will use the standard `ModuleFederationPlugin` and bundle your code accordingly, however, if it is intended for `server` usage, it will use `StreamingTargetPlugin` to create the bundle.
+If the build is intended to be used on the `browser`, it will use the standard `ModuleFederationPlugin` and bundle your code accordingly, however, if it is intended for `server` usage, it will use `NodeFederationPlugin` to create the bundle.
 
 This simplifies the code required in your `webpack.config.js` to enable SSR Module Federation. It determines which platform it needs to build for based on two things:
 
@@ -51,24 +68,25 @@ const config = {
 }
 ```
 
-### StreamingTargetPlugin and NodeFederationPlugin
+### NodeFederationPlugin and StreamingTargetPlugin
 
 You can also use each of the underlying plugins individually if you need more control over when they are used.
 
 At build time, you need to be aware if you're building for the `server` or for the `browser`.
 If it's building for server, we need to set `target: false` to allow the plugins to function correctly.
 
-The `StreamingTargetPlugin` follows the same API as the [Module Federation Plugin](https://webpack.js.org/plugins/module-federation-plugin) and therefore should be a drop-in replacement if you already have it set up in your `webpack.config.js`.
+The `NodeFederationPlugin` follows the same API as the [Module Federation Plugin](https://webpack.js.org/plugins/module-federation-plugin) and therefore should be a drop-in replacement if you already have it set up in your `webpack.config.js`.
 
+### 🔧 Config Example
 An example configuration is presented below:
 ```js
 
-const {StreamingTargetPlugin, NodeFederationPlugin} = require("@module-federation/node");
+const {NodeFederationPlugin, StreamingTargetPlugin} = require("@module-federation/node");
 
 const config = {
   target: isServer ? false : "web",
   plugins: [
-    new StreamingTargetPlugin({
+    new NodeFederationPlugin({
       name: 'website2',
       library: {type: 'commonjs-module'},
       remotes: {},
@@ -77,7 +95,7 @@ const config = {
         './SharedComponent': './remoteServer/SharedComponent',
       },
     }),
-    new NodeFederationPlugin({
+    new StreamingTargetPlugin({
       name: 'website2',
       library: {type: 'commonjs-module'},
       remotes: {},
@@ -92,7 +110,7 @@ This package also exposes a few utilities to help with the setup of your federat
 
 ### revalidate
 
-Used to "hot reload" the federated application. 
+Used to "hot reload" the federated application.
 - This is useful when you're developing your federated application and want to see changes without having to restart the server.
 - Also useful for production environments where you want to be able to update the federated application without having to restart the server.
 
@@ -131,3 +149,14 @@ revalidate().then((shouldReload) => {
 });
 
 ```
+
+## 🔑 License
+- MIT @[ScriptedAlchemy](https://github.com/ScriptedAlchemy)
+
+## 👨‍💻 Contributors
+List of our amazing contributors 💥
+
+<a href="https://github.com/module-federation/nextjs-mf/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=module-federation/node" />
+</a>
+

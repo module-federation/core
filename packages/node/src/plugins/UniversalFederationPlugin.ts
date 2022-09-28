@@ -22,19 +22,18 @@ class UniversalFederationPlugin {
   }
 
   apply(compiler: Compiler) {
-    const isServer =
-      this.options.isServer || compiler.options.name === 'server';
+    const { isServer, ...options } = this.options;
     const { webpack } = compiler;
 
-    if (isServer) {
-      new NodeFederationPlugin(this.options, this.context).apply(compiler);
-      new StreamingTargetPlugin(this.options).apply(compiler);
+    if (isServer || compiler.options.name === 'server') {
+      new NodeFederationPlugin(options, this.context).apply(compiler);
+      new StreamingTargetPlugin(options).apply(compiler);
     } else {
       new (this.context.ModuleFederationPlugin ||
         (webpack && webpack.container.ModuleFederationPlugin) ||
-        require('webpack/lib/container/ModuleFederationPlugin'))(
-        this.options
-      ).apply(compiler);
+        require('webpack/lib/container/ModuleFederationPlugin'))(options).apply(
+        compiler
+      );
     }
   }
 }
