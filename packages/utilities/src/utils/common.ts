@@ -115,7 +115,7 @@ export const injectScript = (
             ': ' +
             realSrc +
             ' or global var ' +
-            containerKey +
+            remoteGlobal +
             ')';
 
           __webpack_error__.name = 'ScriptExternalLoadError';
