@@ -1,4 +1,6 @@
-![banner image](./assets/banner.png)
+<p align="center">
+  <img src="https://github.com/module-federation/nextjs-mf/blob/main/packages/node/assets/banner.png" width="800"/>
+</p>
 <div align="center">
 	<!--  for version -->
   <img src="https://img.shields.io/npm/v/@module-federation/node" alt="version" >
