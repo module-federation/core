@@ -69,6 +69,8 @@ export const revalidate = (options) => {
           delete req.cache[k];
         }
       });
+
+      return true
     });
   }
   return Promise.resolve(false);
