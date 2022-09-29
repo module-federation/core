@@ -35,7 +35,7 @@ const childCompilers = {} as Record<string, Compiler>;
 export class ChildFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
-  private watching: Boolean | undefined;
+  private watching?: Boolean;
 
   constructor(
     options: ModuleFederationPluginOptions,
