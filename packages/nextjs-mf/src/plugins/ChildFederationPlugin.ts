@@ -1,4 +1,6 @@
-import type { Compiler, WebpackError, WebpackPluginInstance } from 'webpack';
+import type {Compiler, Stats, WebpackError, WebpackPluginInstance} from 'webpack';
+import type {CallbackFunction, WatchOptions} from '../types';
+
 import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
@@ -7,8 +9,8 @@ import type {
 import path from 'path';
 import fs from 'fs';
 
-import { exposeNextjsPages } from '../loaders/nextPageMapLoader';
-import { hasLoader, injectRuleLoader } from '../loaders/helpers';
+import {exposeNextjsPages} from '../loaders/nextPageMapLoader';
+import {hasLoader, injectRuleLoader} from '../loaders/helpers';
 
 import {
   DEFAULT_SHARE_SCOPE,
@@ -33,6 +35,7 @@ const childCompilers = {} as Record<string, Compiler>;
 export class ChildFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
+  private watching: Boolean | undefined;
 
   constructor(
     options: ModuleFederationPluginOptions,
@@ -83,7 +86,7 @@ export class ChildFederationPlugin {
         )?.replace('.js', isDev ? '-fed.js' : '[contenthash]-fed.js'),
         filename: (compiler.options.output.filename as string)?.replace(
           '.js',
-          isDev ? '-fed.js':'[contenthash]-fed.js'
+          isDev ? '-fed.js' : '[contenthash]-fed.js'
         ),
       };
 
@@ -302,8 +305,18 @@ export class ChildFederationPlugin {
       }
 
       if (isDev) {
+        const compilerWithCallback = (watchOptions: WatchOptions, callback: any) => {
+          if (childCompiler.watch) {
+            if (!this.watching) {
+              this.watching = true
+              childCompiler.watch(watchOptions, callback);
+            }
+          } else {
+            childCompiler.run(callback);
+          }
+        }
         // in dev, run the compilers in the order they are created (client, server)
-        childCompiler.run((err, stats) => {
+        compilerWithCallback(compiler.options.watchOptions, (err: WebpackError, stats: Stats) => {
           if (err) {
             compilation.errors.push(err as WebpackError);
           }
