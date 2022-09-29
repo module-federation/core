@@ -14,7 +14,7 @@ export default function patchNextClientPageLoader(
   const {
     automaticPageStitching,
   } = this.getOptions();
-  if (content.includes('MFClient')) {
+  if (content.includes('include-defaults')) {
     // If MFClient already applied then skip patch
     return content;
   }
