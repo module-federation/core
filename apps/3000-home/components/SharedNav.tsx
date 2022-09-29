@@ -6,7 +6,6 @@ import { useMFRemote } from '@module-federation/nextjs-mf/client';
 
 const SharedNav = () => {
   const { asPath, push } = useRouter();
-
   // is used here as a demo for tracking loading status of remote container
   const homeRemote = useMFRemote('home_app');
   const shopRemote = useMFRemote('shop');
