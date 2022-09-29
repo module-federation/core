@@ -1,7 +1,7 @@
 {
   "name": "module-federation",
   "version": "0.0.0",
-  "public": true,
+  "private": true,
   "description": "Module Federation helper for NextJS",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -16,7 +16,6 @@
     "start": "nx build && nx run-many --target=serve --verbose --output-style=stream",
     "prod": "nx build && nx run-many --target=build --verbose --output-style=stream"
   },
-  "private": true,
   "dependencies": {
     "@module-federation/nextjs-mf": "link:./dist/packages/nextjs-mf",
     "@module-federation/node": "link:./dist/packages/node",
