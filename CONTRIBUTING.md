@@ -6,7 +6,7 @@
 ## version release
 * to release a version, please follow this command:
   * `nx run PROJECT-NAME:version --releaseAs=MAJOR/MINOR/PATCH`
-    * for more options, follow https://github.com/jscutlery/semver#specify-the-level-of-change
+    * find more options [here](https://github.com/jscutlery/semver#specify-the-level-of-change)
 * this command will perform couple of operations.
   * tag your commit with the relevant version.
   * create changelog using semantic commits.
