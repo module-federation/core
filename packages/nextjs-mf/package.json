@@ -1,5 +1,5 @@
 {
-  "version": "5.6.1",
+  "version": "5.6.2",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "contributors": [
@@ -14,7 +14,8 @@
   "license": "MIT",
   "dependencies": {
     "fast-glob": "^3.2.11",
-    "webpack-sources": "^3.2.3"
+    "webpack-sources": "^3.2.3",
+    "eventemitter3": "^4.0.7"
   },
   "peerDependencies": {
     "webpack": "5.45.1",
