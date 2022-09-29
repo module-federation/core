@@ -251,7 +251,7 @@ More info here: https://github.com/module-federation/nextjs-mf/tree/main/package
 ```js
 // __document.js
 
-import { revalidate } from '@module-federation/nextjs-mf/lib/utils';
+import { revalidate } from '@module-federation/nextjs-mf/utils';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 class MyDocument extends Document {
   static async getInitialProps(ctx) {

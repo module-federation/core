@@ -45,6 +45,10 @@ export class NextFederationPlugin {
       throw new Error('filename is not defined in NextFederation options');
     }
 
+    if(!['server','client'].includes(compiler.options.name)) {
+      return
+    }
+
     const isServer = compiler.options.name === 'server';
     const webpack = compiler.webpack;
 
