@@ -2,9 +2,9 @@
 
 # Documentation
 
-[module-federaiont/nextjs-mf](./packages/nextjs-mf)
+[module-federation/nextjs-mf](./packages/nextjs-mf)
 
-[module-federaiont/node](./packages/node)
+[module-federation/node](./packages/node)
 
 [module-federation/utilities](./packages/utilities)
 

@@ -1,4 +1,6 @@
-import type { Compiler, WebpackError, WebpackPluginInstance } from 'webpack';
+import type {Compiler, Stats, WebpackError, WebpackPluginInstance} from 'webpack';
+import type {CallbackFunction, WatchOptions} from '../types';
+
 import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
@@ -7,8 +9,8 @@ import type {
 import path from 'path';
 import fs from 'fs';
 
-import { exposeNextjsPages } from '../loaders/nextPageMapLoader';
-import { hasLoader, injectRuleLoader } from '../loaders/helpers';
+import {exposeNextjsPages} from '../loaders/nextPageMapLoader';
+import {hasLoader, injectRuleLoader} from '../loaders/helpers';
 
 import {
   DEFAULT_SHARE_SCOPE,
@@ -33,6 +35,7 @@ const childCompilers = {} as Record<string, Compiler>;
 export class ChildFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
+  private watching?: Boolean;
 
   constructor(
     options: ModuleFederationPluginOptions,
@@ -78,12 +81,20 @@ export class ChildFederationPlugin {
           name: buildName,
           type: library?.type as string,
         },
+        // chunkFilename: (
+        //   compiler.options.output.chunkFilename as string
+        // )?.replace('.js', isDev ? '-fed.js' : '[contenthash]-fed.js'),
+        // filename: (compiler.options.output.filename as string)?.replace(
+        //   '.js',
+        //   isDev ? '-fed.js' : '[contenthash]-fed.js'
+        // ),
+        //TODO: find a better solution for dev mode thats not as slow as hashing the chunks.
         chunkFilename: (
           compiler.options.output.chunkFilename as string
-        )?.replace('.js', '-fed.js'),
+        )?.replace('.js', '[contenthash]-fed.js'),
         filename: (compiler.options.output.filename as string)?.replace(
           '.js',
-          '-fed.js'
+          '[contenthash]-fed.js'
         ),
       };
 
@@ -95,6 +106,10 @@ export class ChildFederationPlugin {
           this._options.filename as string
         ),
         exposes: {
+          // in development we do not hash chunks, so we need some way to cache bust the server container when remote changes
+          // in prod we hash the chunk so we can use [contenthash] which changes the overall hash of the remote container
+          // doesnt work as intended for dev mode
+          // ...(isServer && isDev ? {'./buildHash': `data:text/javascript,export default ${JSON.stringify(Date.now())}`} : {}),
           ...this._options.exposes,
           ...(this._extraOptions.exposePages
             ? exposeNextjsPages(compiler.options.context as string)
@@ -299,8 +314,32 @@ export class ChildFederationPlugin {
       }
 
       if (isDev) {
-        // in dev, run the compilers in the order they are created (client, server)
-        childCompiler.run((err, stats) => {
+        const compilerWithCallback = (watchOptions: WatchOptions, callback: any) => {
+          if (childCompiler.watch) {
+            if (isServer) {
+              childCompiler.watch(watchOptions, callback);
+            }
+          } else {
+            childCompiler.run(callback);
+          }
+        }
+
+        const compilerCallback = (err: Error | null | undefined, stats: Stats | undefined) => {
+          //workaround due to watch mode not running unless youve hit a page on the remote itself
+          if(isServer && isDev && childCompilers['client']) {
+            childCompilers['client'].run((err,stats)=>{
+              if (err) {
+                compilation.errors.push(err as WebpackError);
+              }
+              if (stats && stats.hasErrors()) {
+                compilation.errors.push(
+                  new Error(
+                    toDisplayErrors(stats.compilation.errors)
+                  ) as WebpackError
+                );
+              }
+            });
+          }
           if (err) {
             compilation.errors.push(err as WebpackError);
           }
@@ -311,7 +350,9 @@ export class ChildFederationPlugin {
               ) as WebpackError
             );
           }
-        });
+        }
+        // in dev, run the compilers in the order they are created (client, server)
+        compilerWithCallback(compiler.options.watchOptions, compilerCallback);
         // in prod, if client
       } else if (!isServer) {
         // if ssr enabled and server in compiler cache

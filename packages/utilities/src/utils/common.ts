@@ -2,7 +2,7 @@ import type {
   AsyncContainer,
   Remotes,
   RuntimeRemotesMap,
-  RuntimeRemote
+  RuntimeRemote,
 } from '../types';
 
 // @ts-ignore
@@ -74,6 +74,12 @@ export const injectScript = (
     // This casting is just to satisfy typescript,
     // In reality remoteGlobal will always be a string;
     const remoteGlobal = reference.global as unknown as number;
+
+    // Check if theres an ovveride for container key if not use remote global
+    const containerKey = reference.uniqueKey
+      ? (reference.uniqueKey as unknown as number)
+      : remoteGlobal;
+
     const __webpack_error__ = new Error() as Error & {
       type: string;
       request: string | null;
@@ -118,7 +124,7 @@ export const injectScript = (
 
           reject(__webpack_error__);
         },
-        remoteGlobal
+        containerKey
       );
     });
   }
