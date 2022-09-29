@@ -75,15 +75,17 @@ export class NextFederationPlugin {
       // should this be a plugin that we apply to the compiler?
       internalizeSharedPackages(this._options, compiler);
     } else {
-      if (this._extraOptions.automaticPageStitching) {
-        compiler.options.module.rules.push({
-          test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
-          loader: path.resolve(
-            __dirname,
-            '../loaders/patchNextClientPageLoader'
-          ),
-        });
-      }
+      compiler.options.module.rules.push({
+        test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
+        loader: path.resolve(
+          __dirname,
+          '../loaders/patchNextClientPageLoader'
+        ),
+        options: {
+          automaticPageStitching: this._extraOptions.automaticPageStitching,
+        }
+      });
+
 
       if (this._options.remotes) {
         this._options.remotes = parseRemotes(this._options.remotes);
