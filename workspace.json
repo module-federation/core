@@ -9,5 +9,4 @@
     "node": "packages/node",
     "utils": "packages/utilities"
   }
-  
 }
