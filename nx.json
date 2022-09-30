@@ -52,5 +52,13 @@
         "linter": "eslint"
       }
     }
+  },
+  "targetDependencies": {
+    "version": [
+      {
+        "target": "version",
+        "projects": "dependencies"
+      }
+    ]
   }
 }
