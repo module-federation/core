@@ -8,7 +8,7 @@ import get from 'lodash.get';
 import axios from 'axios';
 import { Compilation, Compiler } from 'webpack';
 
-export default class FederatedTypesPlugin {
+export class FederatedTypesPlugin {
   private options: ModuleFederationPluginOptions;
   private exposedComponents!: ModuleFederationPluginOptions['exposes'];
   private remoteComponents!: ModuleFederationPluginOptions['remotes'];
@@ -194,3 +194,5 @@ export default class FederatedTypesPlugin {
     }
   }
 }
+
+export default FederatedTypesPlugin;
