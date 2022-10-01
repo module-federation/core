@@ -1105,18 +1105,6 @@
     resolve-global "1.0.0"
     yargs "^17.0.0"
 
-"@commitlint/config-angular-type-enum@^17.0.0":
-  version "17.0.0"
-  resolved "https://registry.yarnpkg.com/@commitlint/config-angular-type-enum/-/config-angular-type-enum-17.0.0.tgz#4487ea0f2b97e255ad306316152a0b9b0b7fcf38"
-  integrity sha512-OJrxpzszJ+jF0RvqLjsM/iZ94IfJ33NVCFFGVmkzuHjKxPt/i/+yJKJ5lzGhlsp5YV2F2Ui5ECIf5Sor2/OZvQ==
-
-"@commitlint/config-angular@^17.0.0":
-  version "17.1.0"
-  resolved "https://registry.yarnpkg.com/@commitlint/config-angular/-/config-angular-17.1.0.tgz#5a8a3bbddeeaeb665813f059d0b73668304eb5e2"
-  integrity sha512-icTZHZlKUSkAhNk0qX2KGAKVTsuhP8XnSLLusoKHZHPqbz2fX7DzjzsTU/Llr3J7v+XBv04ml2Rw4ZAvcIhcxQ==
-  dependencies:
-    "@commitlint/config-angular-type-enum" "^17.0.0"
-
 "@commitlint/config-conventional@^17.1.0":
   version "17.1.0"
   resolved "https://registry.yarnpkg.com/@commitlint/config-conventional/-/config-conventional-17.1.0.tgz#9bd852766e08842bfe0fe4deb40e152eb718ec1b"
@@ -1663,6 +1651,10 @@
   uid ""
 
 "@module-federation/node@link:./dist/packages/node":
+  version "0.0.0"
+  uid ""
+
+"@module-federation/typescript@link:dist/packages/typescript":
   version "0.0.0"
   uid ""
 

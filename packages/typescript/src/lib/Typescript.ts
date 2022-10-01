@@ -15,6 +15,7 @@ export class FederatedTypesPlugin {
   private distDir!: string;
   private typesIndexJsonFilePath!: string;
   private tsCompilerOptions!: ts.CompilerOptions;
+  private webpackCompilerOptions!: Compiler['options'];
 
   private tsDefinitionFilesObj: Record<string, string> = {};
   private typescriptFolderName = '@mf-typescript';
@@ -31,11 +32,11 @@ export class FederatedTypesPlugin {
 
   apply(compiler: Compiler) {
     let recompileInterval: NodeJS.Timer;
-    const compilerOptions = compiler.options;
+    this.webpackCompilerOptions = compiler.options;
 
     const distPath =
-      get(compilerOptions, 'devServer.static.directory') ||
-      get(compilerOptions, 'output.path') ||
+      get(this.webpackCompilerOptions, 'devServer.static.directory') ||
+      get(this.webpackCompilerOptions, 'output.path') ||
       'dist';
 
     this.distDir = path.join(distPath, this.typescriptFolderName);
@@ -45,11 +46,14 @@ export class FederatedTypesPlugin {
       this.typesIndexJsonFileName
     );
 
+    // The '/' at the end is necessary for TS Compiler to emit files to the output dir.
     this.tsCompilerOptions.outDir = path.join(this.distDir, '/');
 
-    const federationOptions = compilerOptions.plugins.find((plugin) => {
-      return plugin.constructor.name === 'ModuleFederationPlugin';
-    });
+    const federationOptions = this.webpackCompilerOptions.plugins.find(
+      (plugin) => {
+        return plugin.constructor.name === 'ModuleFederationPlugin';
+      }
+    );
     const inheritedPluginOptions = get(federationOptions, '_options') || null;
 
     this.exposedComponents =
@@ -120,9 +124,15 @@ export class FederatedTypesPlugin {
       const normalizedFileNames = Object.values(this.exposedComponents)
         .map((exposed) => {
           const [rootDir, entry] = exposed.split(/\/(?=[^/]+$)/);
-          const ext = this.getExtension(rootDir, entry);
 
-          return path.resolve(process.cwd(), rootDir, ext);
+          const cwd = this.webpackCompilerOptions.context || process.cwd();
+          const normalizedRootDir = path.resolve(cwd, rootDir);
+          const filenameWithExt = this.resolveFilenameWithExtension(
+            normalizedRootDir,
+            entry
+          );
+
+          return path.resolve(cwd, rootDir, filenameWithExt);
         })
         .filter((entry) => /\.tsx?$/.test(entry));
 
@@ -163,7 +173,12 @@ export class FederatedTypesPlugin {
     }
   }
 
-  private getExtension(rootDir: string, entry: string) {
+  // TODO: this method can be improved for performance
+  // For every exposedComponents this method traverse through the directories
+  // to automatically resolve the extension.
+  // We can cache the already traversed directories which can be used to resolve
+  // other 'exposedComponents' falling in the same directory that's already have been traversed.
+  private resolveFilenameWithExtension(rootDir: string, entry: string) {
     // Check path exists and it's a directory
     if (!fs.existsSync(rootDir) || !fs.lstatSync(rootDir).isDirectory()) {
       throw new Error('rootDir must be a directory');
@@ -194,5 +209,3 @@ export class FederatedTypesPlugin {
     }
   }
 }
-
-export default FederatedTypesPlugin;
