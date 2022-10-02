@@ -123,30 +123,54 @@ export class FederatedTypesPlugin {
 
   private extractTypes() {
     if (this.exposedComponents) {
-      const normalizedFileNames = Object.values(this.exposedComponents)
-        .map((exposed) => {
-          const [rootDir, entry] = exposed.split(/\/(?=[^/]+$)/);
-
+      const exposeSrcToDestMap: Record<string, string> = {};
+      const normalizedFileNames = Object.entries(this.exposedComponents)
+        // './Component': 'path/to/component' -> ['./Component', 'path/to/component']
+        .map(([exposeDest, exposeSrc]) => {
+          const [rootDir, entry] = exposeSrc.split(/\/(?=[^/]+$)/);
           const cwd = this.webpackCompilerOptions.context || process.cwd();
           const normalizedRootDir = path.resolve(cwd, rootDir);
           const filenameWithExt = this.resolveFilenameWithExtension(
             normalizedRootDir,
             entry
           );
-
-          return path.resolve(cwd, rootDir, filenameWithExt);
+          const pathWithExt = path.resolve(cwd, rootDir, filenameWithExt);
+          exposeSrcToDestMap[pathWithExt] = exposeDest;
+          return pathWithExt;
         })
         .filter((entry) => /\.tsx?$/.test(entry));
 
       const host = ts.createCompilerHost(this.tsCompilerOptions);
       const originalWriteFileFn = host.writeFile;
 
-      host.writeFile = (...args) => {
-        const [filename, data] = args;
+      host.writeFile = (
+        filename,
+        text,
+        writeOrderByteMark,
+        onError,
+        sourceFiles,
+        data
+      ) => {
+        // for exposes: { "./expose/path": "path/to/file" }
+        // force typescript to write compiled output to "@mf-typescript/expose/path"
+        const newFileName = `${
+          exposeSrcToDestMap[sourceFiles?.[0].fileName || '']
+        }.d.ts`;
+        const newFilePath = path.join(
+          this.tsCompilerOptions.outDir!, // we define it in #apply
+          newFileName
+        );
 
-        this.tsDefinitionFilesObj[filename] = data;
+        this.tsDefinitionFilesObj[newFilePath] = text;
 
-        originalWriteFileFn(...args);
+        originalWriteFileFn(
+          newFilePath,
+          text,
+          writeOrderByteMark,
+          onError,
+          sourceFiles,
+          data
+        );
       };
 
       const program = ts.createProgram(
