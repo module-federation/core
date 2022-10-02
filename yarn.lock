@@ -1654,10 +1654,6 @@
   version "0.0.0"
   uid ""
 
-"@module-federation/typescript@link:dist/packages/typescript":
-  version "0.0.0"
-  uid ""
-
 "@module-federation/utilities@0.0.2":
   version "0.0.0"
   uid ""

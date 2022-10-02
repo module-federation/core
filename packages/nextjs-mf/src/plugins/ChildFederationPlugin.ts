@@ -1,6 +1,6 @@
 import type {Compiler, Stats, WebpackError, WebpackPluginInstance} from 'webpack';
 import type {CallbackFunction, WatchOptions} from '../types';
-
+import ChunkCorrelationPlugin from './ChunkCorrelationPlugin';
 import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
@@ -177,6 +177,8 @@ export class ChildFederationPlugin {
         plugins
       );
 
+      // @ts-ignore
+      new ChunkCorrelationPlugin(federationPluginOptions).apply(childCompiler)
       childCompiler.outputPath = outputPath;
 
       childCompiler.options.module.rules.forEach((rule) => {
