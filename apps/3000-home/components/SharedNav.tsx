@@ -88,4 +88,6 @@ const SharedNav = () => {
   );
 };
 
-export default SharedNav;
+export const chunkId = !process.browser ? exports.id : null
+export default SharedNav
+

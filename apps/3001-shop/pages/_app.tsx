@@ -9,12 +9,14 @@ import HostAppMenu from './_menu';
 
 import 'antd/dist/antd.css';
 const SharedNav = dynamic(
-  () => {
-    const mod = import('home/SharedNav');
+  async () => {
+    const mod = await import('home/SharedNav');
+    console.log(mod);
     return mod;
   },
   { ssr: true }
 );
+
 
 function MyApp({ Component, pageProps }) {
   console.log('in app')

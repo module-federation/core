@@ -4,13 +4,14 @@ import crypto from "crypto";
 export const revalidate = (options) => {
   if (global.__remote_scope__) {
     const remoteScope = global.__remote_scope__;
-    console.log('global.__remote_scope__',global.__remote_scope__);
+
     return new Promise(async (res) => {
       for (const property in remoteScope._config) {
         let remote = remoteScope._config[property];
         if (typeof remote === "function") {
           remote = await remote();
         }
+
         const name = property;
         const url = remote;
         (global.webpackChunkLoad || fetch)(url)
