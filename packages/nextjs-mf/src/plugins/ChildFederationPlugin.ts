@@ -145,7 +145,10 @@ export class ChildFederationPlugin {
         } = require('@module-federation/node');
 
         plugins = [
-          new NodeFederationPlugin(federationPluginOptions, {
+          new NodeFederationPlugin({...federationPluginOptions, exposes: {
+            ...federationPluginOptions.exposes,
+          './chunkMap': path.join(getOutputPath(compiler) , '/federated-stats.json')
+            }}, {
             ModuleFederationPlugin: FederationPlugin,
           }),
           new webpack.node.NodeTemplatePlugin(childOutput),
@@ -177,8 +180,10 @@ export class ChildFederationPlugin {
         plugins
       );
 
-      // @ts-ignore
-      new ChunkCorrelationPlugin(federationPluginOptions).apply(childCompiler)
+      if(!isServer) {
+        // @ts-ignore
+        new ChunkCorrelationPlugin({filename: 'federated-stats.json'}).apply(childCompiler);
+      }
       childCompiler.outputPath = outputPath;
 
       childCompiler.options.module.rules.forEach((rule) => {
