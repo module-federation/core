@@ -56,9 +56,9 @@ export const revalidate = (options) => {
         req = __non_webpack_require__;
       }
 
-      // global.__remote_scope__ = {
-      //   _config: {},
-      // };
+      global.__remote_scope__ = {
+        _config: {},
+      };
       Object.keys(req.cache).forEach((k) => {
         if (
           k.includes("remote") ||
