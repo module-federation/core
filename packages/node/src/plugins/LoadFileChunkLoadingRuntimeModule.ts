@@ -138,8 +138,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       ? `${RuntimeGlobals.hmrRuntimeStatePrefix}_readFileVm`
       : undefined;
 
-    // @ts-ignore
-    // @ts-ignore
     return Template.asString([
       withBaseURI
         ? this._generateBaseUri(chunk, rootOutputDir)
@@ -277,8 +275,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                               name
                             )}]`,
                          */
-                            //@ts-ignore
-                            `console.log('about to derive remote making request 123', ${JSON.stringify(name || 'nothing')} )`,
                             `var requestedRemote = remoteRegistry[${JSON.stringify(
                               name
                             )}]`,
