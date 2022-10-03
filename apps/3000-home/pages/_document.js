@@ -1,9 +1,11 @@
 import Document, { Html, Head, Main, NextScript } from 'next/document'
 import {revalidate} from "@module-federation/nextjs-mf/utils";
-
+import {usedChunks} from '@module-federation/node/utils'
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
     // global.__remote_scope__._path = ctx.pathname;
+
+    console.log('used chunks', usedChunks)
     const initialProps = await Document.getInitialProps(ctx);
     ctx?.res?.on('finish', () => {
       revalidate().then((shouldUpdate) => {

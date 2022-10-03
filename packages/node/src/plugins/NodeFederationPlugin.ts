@@ -131,15 +131,20 @@ function buildRemotes(
           const m = f();
           return ()=>new Proxy(m, {
             get: (target, prop)=>{
-              console.log('proxying', target.chunkId);
+global.usedChunks.add(${JSON.stringify(global)} + "->" + arg);
               return target[prop];
             }
           })
         })
       },
         init: (args)=> {
-          console.log(args)
-          return remote.init(args)
+          return remote.init(new Proxy(args, {
+            set: (target, prop, value)=>{
+              global.usedChunks.add(${JSON.stringify(global)} + "->" + prop);
+              target[prop] = value;
+              return true;
+            }
+          }))
         }
     }
 

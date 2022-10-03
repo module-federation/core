@@ -1,22 +1,31 @@
+import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document'
-import {revalidate} from "@module-federation/nextjs-mf/utils";
+import {revalidate, FlushedChunksHead} from "@module-federation/nextjs-mf/utils";
+import {usedChunks, flushChunks} from '@module-federation/node/utils'
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
-    const initialProps = await Document.getInitialProps(ctx);
+    // global.__remote_scope__._path = ctx.pathname;
 
+    console.log('used chunks', usedChunks)
+    const initialProps = await Document.getInitialProps(ctx);
+    const chunks = await flushChunks()
     ctx?.res?.on('finish', () => {
       revalidate().then((shouldUpdate) => {
         console.log('finished sending response', shouldUpdate);
       })
     })
 
-    return initialProps
+    return {
+      ...initialProps,
+      chunks
+    }
   }
 
   render() {
     return (
       <Html>
+        <FlushedChunksHead chunks={this.props.chunks}/>
         <Head />
         <body>
         <Main />

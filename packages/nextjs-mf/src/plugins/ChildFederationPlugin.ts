@@ -37,6 +37,7 @@ export class ChildFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
   private watching?: Boolean;
+  private initalRun: Boolean;
 
   constructor(
     options: ModuleFederationPluginOptions,
@@ -44,6 +45,7 @@ export class ChildFederationPlugin {
   ) {
     this._options = options;
     this._extraOptions = extraOptions;
+    this.initalRun = false;
   }
 
   apply(compiler: Compiler) {
@@ -145,12 +147,20 @@ export class ChildFederationPlugin {
           StreamingTargetPlugin,
           NodeFederationPlugin,
         } = require('@module-federation/node');
-
+        let chunkMap = {
+          './chunkMap': 'data:text/javascript,export default process.env.CHUNK_MAP',
+        }
+        //TODO: need to embed chunk map in remote somehow
+        if (fs.existsSync(path.join(getOutputPath(compiler), '/static/ssr/federated-stats.json'))) {
+          // chunkMap = {'./chunkMap': path.join(getOutputPath(compiler), '/federated-stats.json')}
+        }
         plugins = [
-          new NodeFederationPlugin({...federationPluginOptions, exposes: {
-            ...federationPluginOptions.exposes,
-          './chunkMap': path.join(getOutputPath(compiler) , '/federated-stats.json')
-            }}, {
+          new NodeFederationPlugin({
+            ...federationPluginOptions, exposes: {
+              ...federationPluginOptions.exposes,
+              ...chunkMap
+            }
+          }, {
             ModuleFederationPlugin: FederationPlugin,
           }),
           new webpack.node.NodeTemplatePlugin(childOutput),
@@ -182,12 +192,24 @@ export class ChildFederationPlugin {
         plugins
       );
 
-      if(!isServer) {
+      if (!isServer) {
         // @ts-ignore
-        new ChunkCorrelationPlugin({filename: 'federated-stats.json'}).apply(childCompiler);
+        new ChunkCorrelationPlugin({filename: 'static/ssr/federated-stats.json'}).apply(childCompiler);
       }
-      childCompiler.outputPath = outputPath;
 
+
+      childCompiler.outputPath = outputPath;
+      // if (isServer) {
+      //   const jsLoader = childCompiler.options.module.rules.find((r) => {
+      //     //@ts-ignore
+      //     if (!r.test) return
+      //     //@ts-ignore
+      //     return '.tsx'.match(r.test)
+      //   })
+      //
+      //   //@ts-ignore
+      //   jsLoader.use.push(path.resolve(__dirname, '../loaders/exportChunkId.js'))
+      // }
       childCompiler.options.module.rules.forEach((rule) => {
         // next-image-loader fix which adds remote's hostname to the assets url
         if (
@@ -253,67 +275,6 @@ export class ChildFederationPlugin {
         }).apply(childCompiler);
       }
 
-      // TODO: this can likely be deleted now, if running server child compiler under client is the best way to go
-      // help wanted for all asset pipeline stuff below
-      // let childAssets
-      // if (isServer) {
-      //   childAssets = new Promise((resolve) => {
-      //     childCompiler.hooks.afterEmit.tap(
-      //       CHILD_PLUGIN_NAME,
-      //       (childCompilation) => {
-      //         console.log('after emit assets server');
-      //         resolve(childCompilation.assets);
-      //       }
-      //     );
-      //   });
-      // } else {
-      //   if(isDev) {
-      //     childAssets = new Promise((resolve) => {
-      //       childCompiler.hooks.afterEmit.tap(
-      //         CHILD_PLUGIN_NAME,
-      //         (childCompilation) => {
-      //           resolve(childCompilation.assets);
-      //         }
-      //       );
-      //     });
-      //
-      //   } else {
-      //
-      //       TODO: improve this
-      //       childAssets = new Promise((resolve, reject) => {
-      //         fs.readdir(
-      //           path.join(childCompiler.context, '.next/ssr'),
-      //           function (err, files) {
-      //             if (err) {
-      //               reject('Unable to scan directory: ' + err);
-      //               return;
-      //             }
-      //
-      //             const allFiles = files.map(function (file) {
-      //               return new Promise((res, rej) => {
-      //                 fs.readFile(
-      //                   path.join(childCompiler.context, '.next/ssr', file),
-      //                   (err, data) => {
-      //                     if (err) rej(err);
-      //                     compilation.assets[path.join('static/ssr', file)] = new compiler.webpack.sources.RawSource(data)
-      //                     res();
-      //                   }
-      //                 );
-      //               });
-      //             });
-      //             Promise.all(allFiles).then(resolve).catch(reject)
-      //           }
-      //         );
-      //       });
-      //   }
-      // }
-      // on main compiler add extra assets from server output to browser build
-      // compilation.hooks.additionalAssets.tapPromise(CHILD_PLUGIN_NAME, () => {
-      //   console.log('additional hooks', compiler.options.name);
-      //   console.log('in additional assets hook for main build');
-      //   return childAssets
-      // });
-
       // cache the serer compiler instance, we will run the server child compiler during the client main compilation
       // we need to do this because i need access to data from the client build to inject into the server build
       // in prod builds, server build runs first, followed by client build
@@ -325,7 +286,7 @@ export class ChildFederationPlugin {
       if (isDev) {
         const compilerWithCallback = (watchOptions: WatchOptions, callback: any) => {
           if (childCompiler.watch) {
-            if (!this.watching) {
+            if (isServer && !this.watching) {
               this.watching = true;
               childCompiler.watch(watchOptions, callback);
             }
@@ -336,8 +297,8 @@ export class ChildFederationPlugin {
 
         const compilerCallback = (err: Error | null | undefined, stats: Stats | undefined) => {
           //workaround due to watch mode not running unless youve hit a page on the remote itself
-          if(isServer && isDev && childCompilers['client']) {
-            childCompilers['client'].run((err,stats)=>{
+          if (isServer && isDev && childCompilers['client']) {
+            childCompilers['client'].run((err, stats) => {
               if (err) {
                 compilation.errors.push(err as WebpackError);
               }
@@ -361,8 +322,10 @@ export class ChildFederationPlugin {
             );
           }
         }
-        // in dev, run the compilers in the order they are created (client, server)
+
         compilerWithCallback(compiler.options.watchOptions, compilerCallback);
+
+
         // in prod, if client
       } else if (!isServer) {
         // if ssr enabled and server in compiler cache
