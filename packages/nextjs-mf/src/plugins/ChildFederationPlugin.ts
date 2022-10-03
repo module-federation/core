@@ -1,6 +1,7 @@
 import type {Compiler, Stats, WebpackError, WebpackPluginInstance} from 'webpack';
+import {Compilation} from "webpack";
 import type {CallbackFunction, WatchOptions} from '../types';
-import ChunkCorrelationPlugin from './ChunkCorrelationPlugin';
+import {ChunkCorrelationPlugin} from '@module-federation/node';
 import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
@@ -110,6 +111,7 @@ export class ChildFederationPlugin {
           // in prod we hash the chunk so we can use [contenthash] which changes the overall hash of the remote container
           // doesnt work as intended for dev mode
           // ...(isServer && isDev ? {'./buildHash': `data:text/javascript,export default ${JSON.stringify(Date.now())}`} : {}),
+
           ...this._options.exposes,
           ...(this._extraOptions.exposePages
             ? exposeNextjsPages(compiler.options.context as string)
@@ -323,7 +325,8 @@ export class ChildFederationPlugin {
       if (isDev) {
         const compilerWithCallback = (watchOptions: WatchOptions, callback: any) => {
           if (childCompiler.watch) {
-            if (isServer) {
+            if (!this.watching) {
+              this.watching = true;
               childCompiler.watch(watchOptions, callback);
             }
           } else {
@@ -366,8 +369,12 @@ export class ChildFederationPlugin {
         if (childCompilers['server']) {
           //wrong hook for this
           // add hook for additional assets to prevent compile from sealing.
-          compilation.hooks.afterSeal.tapPromise(
-            CHILD_PLUGIN_NAME,
+
+          compilation.hooks.processAssets.tapPromise(
+            {
+              name: CHILD_PLUGIN_NAME,
+              stage: Compilation.PROCESS_ASSETS_STAGE_REPORT,
+            },
             () => {
               console.log('additional assets')
               return new Promise((res, rej) => {

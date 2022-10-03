@@ -50,12 +50,12 @@ const flatMap = (xs, f) => xs.map(f).reduce(concat, []);
  * @returns {}
  */
 function getRemoteModules(stats) {
-  return stats.modules.filter((mod)=>{
+  return stats.modules.filter((mod) => {
     return mod.moduleType === 'remote-module'
-  }).reduce((acc,remoteModule) => {
+  }).reduce((acc, remoteModule) => {
     acc[remoteModule.nameForCondition] = remoteModule.id
     return acc
-  },{})
+  }, {})
 }
 
 /**
@@ -103,12 +103,21 @@ function getExposed(stats, mod) {
         .filter((f) => !!f),
     }));
 
-  const flatChunks = new Set([...flatMap(chunks, (chunk) =>
-    chunk.files.map(
-      (f) =>
-        `${stats.publicPath !== "auto" ? stats.publicPath || "" : ""}${f}`
-    )
-  )])
+  const flatChunks = flatMap(chunks, (chunk) => {
+      return {
+        [chunk.id]: chunk.files.map(
+          (f) =>
+            `${stats.publicPath !== "auto" ? stats.publicPath || "" : ""}${f}`
+        )
+      }
+    }
+  );
+
+  return flatChunks.reduce((acc, chunk) => {
+    Object.assign(acc, chunk);
+    return acc;
+  }, {})
+
 
   return {
     chunks: Array.from(flatChunks),
@@ -380,7 +389,7 @@ class FederationStatsPlugin {
       compilation.hooks.processAssets.tapPromise(
         {
           name: PLUGIN_NAME,
-          stage: compilation.constructor.PROCESS_ASSETS_STAGE_REPORT,
+          stage: compilation.constructor.PROCESS_ASSETS_STAGE_ANALYSE,
         },
         async () => {
           console.log('getting stats')

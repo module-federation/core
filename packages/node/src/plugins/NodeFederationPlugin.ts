@@ -57,10 +57,10 @@ const executeLoadTemplate = `
             return res.text();
           }).then(function(scriptContent){
             try {
-              const vmContext = { exports, require, module, global, __filename, __dirname, URL };
+              // const vmContext = { exports, require, module, global, __filename, __dirname, URL};
+              // const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, { filename: 'node-federation-loader-' + moduleName + '.vm' });
 
-              const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, { filename: 'node-federation-loader-' + moduleName + '.vm' });
-
+              const remote = eval(scriptContent + '\\nmodule.exports');
               /* TODO: need something like a chunk loading queue, this can lead to async issues
                if two containers load the same remote, they can overwrite global scope
                should check someone is already loading remote and await that */
@@ -112,6 +112,8 @@ function buildRemotes(
       // create a global scope for container, similar to how remotes are set on window in the browser
       global.__remote_scope__ = {
         _config: {},
+        _chunks: {},
+        _path: ''
       }
     }
 
@@ -123,117 +125,27 @@ function buildRemotes(
     resolve(executeLoad(${JSON.stringify(config)}))
     }).then(remote=>{
       console.log(remote);
-
-      return {
-      get: remote.get,
-      init: (args)=> {
-        console.log(args)
-        return remote.init(args)
-      }
+   return {
+      get: (arg)=>{
+        return remote.get(arg).then((f)=>{
+          const m = f();
+          return ()=>new Proxy(m, {
+            get: (target, prop)=>{
+              console.log('proxying', target.chunkId);
+              return target[prop];
+            }
+          })
+        })
+      },
+        init: (args)=> {
+          console.log(args)
+          return remote.init(args)
+        }
     }
+
   });
   `;
       acc.buildTime[name] = loadTemplate;
-      return acc;
-    },
-    { runtime: {}, buildTime: {}, hot: {} } as {
-      runtime: EmptyObject;
-      buildTime: EmptyObject;
-      hot: EmptyObject;
-    }
-  );
-
-  //old design
-  return Object.entries(mfConf.remotes || {}).reduce(
-    (acc, [name, config]) => {
-      const hasMiddleware = config.startsWith('middleware ');
-      let middleware;
-      if (hasMiddleware) {
-        middleware = config.split('middleware ')[1];
-      } else {
-        middleware = `Promise.resolve(${JSON.stringify(config)})`;
-      }
-
-      const templateStart = `
-              var ${webpack.RuntimeGlobals.require} = ${
-        webpack.RuntimeGlobals.require
-      } ? ${
-        webpack.RuntimeGlobals.require
-      } : typeof arguments !== 'undefined' ? arguments[2] : false;
-               ${executeLoadTemplate}
-        global.loadedRemotes = global.loadedRemotes || {};
-        if (global.loadedRemotes[${JSON.stringify(name)}]) {
-          return global.loadedRemotes[${JSON.stringify(name)}]
-        }
-        // if using modern output, then there are no arguments on the parent function scope, thus we need to get it via a window global.
-
-      var shareScope = (${webpack.RuntimeGlobals.require} && ${
-        webpack.RuntimeGlobals.shareScopeMap
-      }) ? ${
-        webpack.RuntimeGlobals.shareScopeMap
-      } : global.__webpack_share_scopes__
-      var name = ${JSON.stringify(name)}
-      `;
-      const template = `(remotesConfig) => new Promise((res) => {
-      console.log('in template promise',JSON.stringify(remotesConfig))
-        executeLoad(remotesConfig).then((remote) => {
-
-          return Promise.resolve(remote.init(shareScope.default)).then(() => {
-            return remote
-          })
-        })
-          .then(function (remote) {
-            const proxy = {
-              get: remote.get,
-              chunkMap: remote.chunkMap,
-              path: remotesConfig.toString(),
-              init: (arg) => {
-                try {
-                  return remote.init(shareScope.default)
-                } catch (e) {
-                  console.log('remote container already initialized')
-                }
-              }
-            }
-            if (remote.fake) {
-              res(proxy);
-              return null
-            }
-
-            Object.assign(global.loadedRemotes, {
-              [name]: proxy
-            });
-
-            res(global.loadedRemotes[name])
-          })
-
-
-      })`;
-
-      acc.runtime[name] = `()=> ${middleware}.then((remoteConfig)=>{
-    console.log('remoteConfig runtime',remoteConfig);
-    if(!global.REMOTE_CONFIG) {
-        global.REMOTE_CONFIG = {};
-    }
-    global.REMOTE_CONFIG[${JSON.stringify(name)}] = remoteConfig;
-    ${templateStart}
-    const loadTemplate = ${template};
-    return loadTemplate(remoteConfig)
-    })`;
-
-      acc.buildTime[name] = `promise ${middleware}.then((remoteConfig)=>{
-            if(!global.REMOTE_CONFIG) {
-        global.REMOTE_CONFIG = {};
-    }
-    console.log('remoteConfig buildtime',remoteConfig);
-    global.REMOTE_CONFIG[${JSON.stringify(name)}] = remoteConfig;
-    ${templateStart};
-    const loadTemplate = ${template};
-    return loadTemplate(remoteConfig)
-    })`;
-
-      acc.hot[name] = `()=> ${middleware}`;
-
       return acc;
     },
     { runtime: {}, buildTime: {}, hot: {} } as {
@@ -257,6 +169,8 @@ class NodeFederationPlugin {
     this.context = context || ({} as Context);
     this.experiments = experiments || {};
   }
+
+
 
   apply(compiler: Compiler) {
     // When used with Next.js, context is needed to use Next.js webpack
