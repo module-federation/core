@@ -149,7 +149,7 @@ export class ChildFederationPlugin {
         plugins = [
           new NodeFederationPlugin({...federationPluginOptions, exposes: {
             ...federationPluginOptions.exposes,
-          // './chunkMap': path.join(getOutputPath(compiler) , '/federated-stats.json')
+          './chunkMap': path.join(getOutputPath(compiler) , '/federated-stats.json')
             }}, {
             ModuleFederationPlugin: FederationPlugin,
           }),
