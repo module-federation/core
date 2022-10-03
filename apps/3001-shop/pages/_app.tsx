@@ -15,7 +15,7 @@ const SharedNav = dynamic(
   },
   { ssr: true }
 );
-
+// import('home/SharedNav').then(console.log)
 function MyApp({ Component, pageProps }) {
   console.log('in app')
   const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);

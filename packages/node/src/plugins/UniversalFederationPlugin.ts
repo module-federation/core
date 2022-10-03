@@ -17,8 +17,8 @@ class UniversalFederationPlugin {
   private context: NodeFederationContext;
 
   constructor(options: NodeFederationOptions, context: NodeFederationContext) {
-    this.options = options || {};
-    this.context = context || {};
+    this.options = options || {} as NodeFederationOptions;
+    this.context = context || {} as NodeFederationContext;
   }
 
   apply(compiler: Compiler) {

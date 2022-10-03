@@ -138,6 +138,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       ? `${RuntimeGlobals.hmrRuntimeStatePrefix}_readFileVm`
       : undefined;
 
+    // @ts-ignore
+    // @ts-ignore
     return Template.asString([
       withBaseURI
         ? this._generateBaseUri(chunk, rootOutputDir)
@@ -257,6 +259,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             `console.log('remotes keyed by global name',remotes)`,
                             `console.log('remote scope configs',global.__remote_scope__._config)`,
 
+                            "console.log('before remote scope')",
                             `console.log('global.__remote_scope__',global.__remote_scope__)`,
                             `console.log('global.__remote_scope__[${JSON.stringify(
                               name
@@ -274,7 +277,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                               name
                             )}]`,
                          */
-                            "console.log('about to derive remote making request')",
+                            //@ts-ignore
+                            `console.log('about to derive remote making request 123', ${JSON.stringify(name || 'nothing')} )`,
                             `var requestedRemote = remoteRegistry[${JSON.stringify(
                               name
                             )}]`,
@@ -296,7 +300,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             // since im looping over remote and creating global at build time, i dont need to split string at runtime
                             // there may still be a use case for that with promise new promise, depending on how we design it.
                             `var scriptUrl = new URL(requestedRemote);`,
-
+'global.__remote_scope__._config = remotes',
+                            "console.log('global.__remote_scope__',global.__remote_scope__)",
                             `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
 
                             `console.log('chunkname to request',chunkName);`,

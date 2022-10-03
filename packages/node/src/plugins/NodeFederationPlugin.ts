@@ -57,7 +57,7 @@ const executeLoadTemplate = `
             return res.text();
           }).then(function(scriptContent){
             try {
-              const vmContext = { exports, require, module, global, __filename, __dirname, URL };
+              const vmContext = { exports, require, module, global, __filename, __dirname, URL, ...global };
 
               const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, { filename: 'node-federation-loader-' + moduleName + '.vm' });
 
@@ -112,6 +112,8 @@ function buildRemotes(
       // create a global scope for container, similar to how remotes are set on window in the browser
       global.__remote_scope__ = {
         _config: {},
+        _chunks: {},
+        _path: ''
       }
     }
 
