@@ -94,10 +94,10 @@ export class ChildFederationPlugin {
         //TODO: find a better solution for dev mode thats not as slow as hashing the chunks.
         chunkFilename: (
           compiler.options.output.chunkFilename as string
-        )?.replace('.js', '[contenthash]-fed.js'),
+        )?.replace('.js', '-[contenthash]-fed.js'),
         filename: (compiler.options.output.filename as string)?.replace(
           '.js',
-          '[contenthash]-fed.js'
+          '-[contenthash]-fed.js'
         ),
       };
 
@@ -112,8 +112,6 @@ export class ChildFederationPlugin {
           // in development we do not hash chunks, so we need some way to cache bust the server container when remote changes
           // in prod we hash the chunk so we can use [contenthash] which changes the overall hash of the remote container
           // doesnt work as intended for dev mode
-          // ...(isServer && isDev ? {'./buildHash': `data:text/javascript,export default ${JSON.stringify(Date.now())}`} : {}),
-
           ...this._options.exposes,
           ...(this._extraOptions.exposePages
             ? exposeNextjsPages(compiler.options.context as string)
@@ -147,20 +145,9 @@ export class ChildFederationPlugin {
           StreamingTargetPlugin,
           NodeFederationPlugin,
         } = require('@module-federation/node');
-        let chunkMap = {
-          './chunkMap': 'data:text/javascript,export default process.env.CHUNK_MAP',
-        }
-        //TODO: need to embed chunk map in remote somehow
-        if (fs.existsSync(path.join(getOutputPath(compiler), '/static/ssr/federated-stats.json'))) {
-          // chunkMap = {'./chunkMap': path.join(getOutputPath(compiler), '/federated-stats.json')}
-        }
+
         plugins = [
-          new NodeFederationPlugin({
-            ...federationPluginOptions, exposes: {
-              ...federationPluginOptions.exposes,
-              ...chunkMap
-            }
-          }, {
+          new NodeFederationPlugin(federationPluginOptions, {
             ModuleFederationPlugin: FederationPlugin,
           }),
           new webpack.node.NodeTemplatePlugin(childOutput),
@@ -193,23 +180,11 @@ export class ChildFederationPlugin {
       );
 
       if (!isServer) {
-        // @ts-ignore
         new ChunkCorrelationPlugin({filename: 'static/ssr/federated-stats.json'}).apply(childCompiler);
       }
 
 
       childCompiler.outputPath = outputPath;
-      // if (isServer) {
-      //   const jsLoader = childCompiler.options.module.rules.find((r) => {
-      //     //@ts-ignore
-      //     if (!r.test) return
-      //     //@ts-ignore
-      //     return '.tsx'.match(r.test)
-      //   })
-      //
-      //   //@ts-ignore
-      //   jsLoader.use.push(path.resolve(__dirname, '../loaders/exportChunkId.js'))
-      // }
       childCompiler.options.module.rules.forEach((rule) => {
         // next-image-loader fix which adds remote's hostname to the assets url
         if (
