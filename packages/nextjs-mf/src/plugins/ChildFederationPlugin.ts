@@ -37,6 +37,7 @@ export class ChildFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
   private watching?: Boolean;
+  private initalRun: Boolean;
 
   constructor(
     options: ModuleFederationPluginOptions,
@@ -44,6 +45,7 @@ export class ChildFederationPlugin {
   ) {
     this._options = options;
     this._extraOptions = extraOptions;
+    this.initalRun = false;
   }
 
   apply(compiler: Compiler) {
@@ -145,9 +147,12 @@ export class ChildFederationPlugin {
           StreamingTargetPlugin,
           NodeFederationPlugin,
         } = require('@module-federation/node');
-        let chunkMap = {}
-        if (fs.existsSync(path.join(getOutputPath(compiler), '/federated-stats.json'))) {
-          chunkMap = {'./chunkMap': path.join(getOutputPath(compiler), '/federated-stats.json')}
+        let chunkMap = {
+          './chunkMap': 'data:text/javascript,export default process.env.CHUNK_MAP',
+        }
+        //TODO: need to embed chunk map in remote somehow
+        if (fs.existsSync(path.join(getOutputPath(compiler), '/static/ssr/federated-stats.json'))) {
+          // chunkMap = {'./chunkMap': path.join(getOutputPath(compiler), '/federated-stats.json')}
         }
         plugins = [
           new NodeFederationPlugin({
@@ -189,20 +194,22 @@ export class ChildFederationPlugin {
 
       if (!isServer) {
         // @ts-ignore
-        new ChunkCorrelationPlugin({filename: 'federated-stats.json'}).apply(childCompiler);
+        new ChunkCorrelationPlugin({filename: 'static/ssr/federated-stats.json'}).apply(childCompiler);
       }
-      childCompiler.outputPath = outputPath;
-      if (isServer) {
-        const jsLoader = childCompiler.options.module.rules.find((r) => {
-          //@ts-ignore
-          if (!r.test) return
-          //@ts-ignore
-          return '.tsx'.match(r.test)
-        })
 
-        //@ts-ignore
-        jsLoader.use.unshift(path.resolve(__dirname, '../loaders/exportChunkId.js'))
-      }
+
+      childCompiler.outputPath = outputPath;
+      // if (isServer) {
+      //   const jsLoader = childCompiler.options.module.rules.find((r) => {
+      //     //@ts-ignore
+      //     if (!r.test) return
+      //     //@ts-ignore
+      //     return '.tsx'.match(r.test)
+      //   })
+      //
+      //   //@ts-ignore
+      //   jsLoader.use.push(path.resolve(__dirname, '../loaders/exportChunkId.js'))
+      // }
       childCompiler.options.module.rules.forEach((rule) => {
         // next-image-loader fix which adds remote's hostname to the assets url
         if (
@@ -279,7 +286,7 @@ export class ChildFederationPlugin {
       if (isDev) {
         const compilerWithCallback = (watchOptions: WatchOptions, callback: any) => {
           if (childCompiler.watch) {
-            if (!this.watching) {
+            if (isServer && !this.watching) {
               this.watching = true;
               childCompiler.watch(watchOptions, callback);
             }
@@ -315,8 +322,10 @@ export class ChildFederationPlugin {
             );
           }
         }
-        // in dev, run the compilers in the order they are created (client, server)
+
         compilerWithCallback(compiler.options.watchOptions, compilerCallback);
+
+
         // in prod, if client
       } else if (!isServer) {
         // if ssr enabled and server in compiler cache

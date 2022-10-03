@@ -1,6 +1,5 @@
-
 const exportChunkId = (content) => {
-  [content,'export const chunkId = exports.id'].join('\n')
+  return content;
 }
 
 export default exportChunkId
