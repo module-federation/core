@@ -366,9 +366,10 @@ export class ChildFederationPlugin {
         if (childCompilers['server']) {
           //wrong hook for this
           // add hook for additional assets to prevent compile from sealing.
-          compilation.hooks.additionalAssets.tapPromise(
+          compilation.hooks.afterSeal.tapPromise(
             CHILD_PLUGIN_NAME,
             () => {
+              console.log('additional assets')
               return new Promise((res, rej) => {
                 // run server child compilation during client main compilation
                 childCompilers['server'].run((err, stats) => {

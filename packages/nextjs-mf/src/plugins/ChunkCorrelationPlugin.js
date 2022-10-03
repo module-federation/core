@@ -363,7 +363,6 @@ class FederationStatsPlugin {
    * @param {import("webpack").Compiler} compiler
    */
   apply(compiler) {
-    console.log(compiler.options.plugins)
     const federationPlugins =
       compiler.options.plugins &&
       compiler.options.plugins.filter(
@@ -384,6 +383,7 @@ class FederationStatsPlugin {
           stage: compilation.constructor.PROCESS_ASSETS_STAGE_REPORT,
         },
         async () => {
+          console.log('getting stats')
           const stats = compilation.getStats().toJson({});
 
           const federatedModules = federationPlugins.map((federationPlugin) =>
