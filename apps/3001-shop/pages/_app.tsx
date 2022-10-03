@@ -9,13 +9,15 @@ import HostAppMenu from './_menu';
 
 import 'antd/dist/antd.css';
 const SharedNav = dynamic(
-  () => {
-    const mod = import('home/SharedNav');
+  async () => {
+    const mod = await import('home/SharedNav');
+    console.log(mod);
     return mod;
   },
   { ssr: true }
 );
-// import('home/SharedNav').then(console.log)
+
+
 function MyApp({ Component, pageProps }) {
   console.log('in app')
   const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);

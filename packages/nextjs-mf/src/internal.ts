@@ -89,12 +89,12 @@ export const reKeyHostShared = (
 export const generateRemoteTemplate = (url: string, global: any) => {
   return `new Promise(function (resolve, reject) {
   console.log('URL TO PARSE', '${url}');
-    var url = new URL(${JSON.stringify(url)});
-    url.searchParams.set('t', Date.now());
+    // var url = new URL(${JSON.stringify(url)});
+    // url.searchParams.set('t', Date.now());
     var __webpack_error__ = new Error();
     if (typeof ${global} !== 'undefined') return resolve();
     __webpack_require__.l(
-      url.href,
+      ${JSON.stringify(url)},
       function (event) {
         if (typeof ${global} !== 'undefined') return resolve();
         var errorType = event && (event.type === 'load' ? 'missing' : event.type);

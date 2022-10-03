@@ -300,10 +300,13 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             // since im looping over remote and creating global at build time, i dont need to split string at runtime
                             // there may still be a use case for that with promise new promise, depending on how we design it.
                             `var scriptUrl = new URL(requestedRemote);`,
-'global.__remote_scope__._config = remotes',
+
                             "console.log('global.__remote_scope__',global.__remote_scope__)",
                             `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
-
+                            `if(!Array.isArray(global.__remote_scope__._chunks[${JSON.stringify(name)}])) {
+                             global.__remote_scope__._chunks[${JSON.stringify(name)}] = []
+                            }`,
+                            `global.__remote_scope__._chunks[${JSON.stringify(name)}].push(chunkId)`,
                             `console.log('chunkname to request',chunkName);`,
                             `var fileToReplace = require('path').basename(scriptUrl.pathname);`,
                             `scriptUrl.pathname = scriptUrl.pathname.replace(fileToReplace, chunkName);`,
