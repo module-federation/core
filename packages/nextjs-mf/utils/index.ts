@@ -1,6 +1,8 @@
 import {createElement} from "react";
 import Head from 'next/head';
 export { extractUrlAndGlobal, injectScript } from '@module-federation/utilities';
+// @ts-ignore
+export {flushChunks} from '@module-federation/node/utils';
 
 export const revalidate = () => {
   if(typeof window !== 'undefined') {
