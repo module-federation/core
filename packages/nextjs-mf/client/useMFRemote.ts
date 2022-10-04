@@ -23,7 +23,7 @@ export function useMFRemote(global: string): UseMFRemoteResult {
 
   if (isBrowser) {
     // on client (we get instances from global variable because webpack breaks Singletons)
-    const MFClient: MFClient = (window as any).mf_client;
+    const MFClient: MFClient = window && (window as any).mf_client;
     remote = MFClient.remotes[global] || MFClient.registerRemote(global);
   } else {
     // on server side

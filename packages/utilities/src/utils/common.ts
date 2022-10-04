@@ -87,20 +87,20 @@ export const injectScript = (
 
     asyncContainer = new Promise(function (resolve, reject) {
       function resolveRemoteGlobal() {
-        const asyncContainer = window[
+        const asyncContainer = window && window[
           remoteGlobal
         ] as unknown as AsyncContainer;
         return resolve(asyncContainer);
       }
 
-      if (typeof window[remoteGlobal] !== 'undefined') {
+      if (window && typeof window[remoteGlobal] !== 'undefined') {
         return resolveRemoteGlobal();
       }
 
       (__webpack_require__ as any).l(
         reference.url,
         function (event: Event) {
-          if (typeof window[remoteGlobal] !== 'undefined') {
+          if (window && typeof window[remoteGlobal] !== 'undefined') {
             return resolveRemoteGlobal();
           }
 

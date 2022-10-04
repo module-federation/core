@@ -30,14 +30,14 @@ type InnerState = {
   remote: RemoteContainer | undefined;
 };
 
-const isBrowser = typeof window !== 'undefined';
+const isBrowser = window && typeof window !== 'undefined';
 
 /**
  * React hook which provides convenient way for working with ModuleFederation runtime changes in runtime;
  */
 export function useMFClient(opts: MFClientHookOptions): MFClient {
   const MFClient: MFClient = isBrowser
-    ? (window as any).mf_client
+    ? window && (window as any).mf_client
     : /* TODO: inject here SSR version of MFClient if it will be needed in future */ ({} as any);
 
   const innerState = React.useRef<InnerState>({
@@ -65,8 +65,8 @@ export function useMFClient(opts: MFClientHookOptions): MFClient {
     };
 
     // Step 2: run bootstrap logic
-    const initialRemote = MFClient.isFederatedPathname(window.location.pathname)
-      ? MFClient.remotePages.routeToRemote(window.location.pathname)
+    const initialRemote = MFClient.isFederatedPathname(window && window.location.pathname)
+      ? MFClient.remotePages.routeToRemote(window && window.location.pathname)
       : undefined;
 
     if (initialRemote) {

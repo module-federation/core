@@ -175,7 +175,7 @@ export class MFClient {
     routeLoader.whenEntrypoint = async (route: string) => {
       if (route === '/_error') {
         try {
-          let route = await this.pathnameToRoute(window.location.pathname);
+          let route = await this.pathnameToRoute(window && window.location.pathname);
           if (!route) {
             // if route not found then try to load all non-downloaded remoteEntries
             // and try to find route again
@@ -191,7 +191,7 @@ export class MFClient {
               }
             });
             await Promise.all(awaitRemotes);
-            route = await this.pathnameToRoute(window.location.pathname);
+            route = await this.pathnameToRoute(window && window.location.pathname);
           }
           if (route) {
             // TODO: fix router properties for the first page load of federated page http://localhost:3000/shop/products/B

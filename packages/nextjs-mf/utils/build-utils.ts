@@ -52,14 +52,14 @@ const remoteTemplate = function () {
       request: string | null;
     };
 
-    if (typeof window[remote.global] !== 'undefined') {
+    if (window && typeof window[remote.global] !== 'undefined') {
       return resolve();
     }
 
     (__webpack_require__ as any).l(
       remote.url,
       function (event: Event) {
-        if (typeof window[remote.global] !== 'undefined') {
+        if (window && typeof window[remote.global] !== 'undefined') {
           return resolve();
 
         }

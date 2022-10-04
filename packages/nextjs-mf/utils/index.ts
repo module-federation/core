@@ -1,6 +1,6 @@
 export { extractUrlAndGlobal, injectScript } from '@module-federation/utilities';
 export const revalidate = () => {
-  if(typeof window !== 'undefined') {
+  if(window && typeof window !== 'undefined') {
     console.error('revalidate should only be called server-side');
     return Promise.resolve(false);
   }
