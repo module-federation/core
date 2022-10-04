@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/nextjs-mf",
-  "version": "0.1.0",
+  "version": "5.6.4",
   "license": "MIT",
   "main": "src/index.js",
   "types": "src/index.d.ts",
