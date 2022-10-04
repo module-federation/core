@@ -1876,6 +1876,16 @@
     webpack "^4 || ^5"
     webpack-node-externals "^3.0.0"
 
+"@nrwl/devkit@14.7.17":
+  version "14.7.17"
+  resolved "https://registry.yarnpkg.com/@nrwl/devkit/-/devkit-14.7.17.tgz#0dd914d0596e793264cd117c77bb1a3a0d9de2f2"
+  integrity sha512-flTV8BuC7oacWGHseoKsyOAYmWsMSP6iYGRjrCaV0MyRbDkNy0P07elXXFUW01er+l7x/awZYQR9/n/eNyqfXA==
+  dependencies:
+    "@phenomnomnominal/tsquery" "4.1.1"
+    ejs "^3.1.7"
+    ignore "^5.0.4"
+    tslib "^2.3.0"
+
 "@nrwl/devkit@14.7.3":
   version "14.7.3"
   resolved "https://registry.yarnpkg.com/@nrwl/devkit/-/devkit-14.7.3.tgz#aceb726d527a5ece1a97548dc7eb22f85083a391"
@@ -9003,6 +9013,13 @@ next@12.3.0:
     "@next/swc-win32-arm64-msvc" "12.3.0"
     "@next/swc-win32-ia32-msvc" "12.3.0"
     "@next/swc-win32-x64-msvc" "12.3.0"
+
+ngx-deploy-npm@^4.2.5:
+  version "4.2.5"
+  resolved "https://registry.yarnpkg.com/ngx-deploy-npm/-/ngx-deploy-npm-4.2.5.tgz#0a85b73520c6b041240fa83bac0f04cb6b7a2e40"
+  integrity sha512-RNGAaGlRyFyVqCgEdR6gn47ZJWbD6SapoLfHIbjeHwzuUSrJbvnSc5FDBORQJ+uCZOn4pkd4ZSna/vQDun1Vjg==
+  dependencies:
+    "@nrwl/devkit" "14.7.17"
 
 node-abort-controller@^3.0.1:
   version "3.0.1"
