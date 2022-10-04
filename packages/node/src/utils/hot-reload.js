@@ -14,7 +14,7 @@ export const revalidate = (options) => {
 
         const name = property;
         const url = remote;
-        (global.webpackChunkLoad || fetch)(url)
+        (global.webpackChunkLoad || global.fetch || require('node-fetch'))(url)
           .then((re) => {
             if(!re.ok) {
               throw new Error(`Error loading remote: status: ${re.status}, content-type: ${re.headers.get("content-type")}`);
