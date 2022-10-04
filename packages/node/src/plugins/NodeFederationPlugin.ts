@@ -134,9 +134,6 @@ function buildRemotes(
 
    return {
       get: (arg)=>{
-      try {
-        remote.init(__webpack_require__.S.default);
-      } catch(e) {}
         return remote.get(arg).then((f)=>{
           const m = f();
           return ()=>new Proxy(m, {
