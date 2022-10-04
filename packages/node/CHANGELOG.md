@@ -17,6 +17,16 @@ This file was generated using [@jscutlery/semver](https://github.com/jscutlery/s
 
 ### Bug Fixes
 
+* improve hot reloading, fix hung promises ([30918fe](https://github.com/module-federation/nextjs-mf/commit/30918fe61a6850b20271f8b72f786fd8a610de2a))
+* **update versions:** bumping versions ([f72209a](https://github.com/module-federation/nextjs-mf/commit/f72209ae070fb50c9d317e764caf872facd4b887))
+
+
+
+## [0.4.1](https://github.com/module-federation/nextjs-mf/compare/node-0.4.0...node-0.4.1) (2022-10-04)
+
+
+### Bug Fixes
+
 * **fix hot reload:** prod reload fails due to old chunk flushing ([d552afa](https://github.com/module-federation/nextjs-mf/commit/d552afa4c254da1e3c43b9e8c70e945880eee897))
 * **update versions:** bumping versions ([f72209a](https://github.com/module-federation/nextjs-mf/commit/f72209ae070fb50c9d317e764caf872facd4b887))
 
