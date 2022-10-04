@@ -6,6 +6,7 @@ export const revalidate = (options) => {
     const remoteScope = global.__remote_scope__;
 
     return new Promise(async (res) => {
+      const fetches = []
       for (const property in remoteScope._config) {
         let remote = remoteScope._config[property];
         if (typeof remote === "function") {
@@ -14,7 +15,7 @@ export const revalidate = (options) => {
 
         const name = property;
         const url = remote;
-        (global.webpackChunkLoad || global.fetch || require('node-fetch'))(url)
+        const fetcher = (global.webpackChunkLoad || global.fetch || require('node-fetch'))(url)
           .then((re) => {
             if(!re.ok) {
               throw new Error(`Error loading remote: status: ${re.status}, content-type: ${re.headers.get("content-type")}`);
@@ -31,7 +32,6 @@ export const revalidate = (options) => {
               }
             } else {
               hashmap[name] = hash;
-              res(false);
             }
           })
           .catch((e) => {
@@ -42,9 +42,11 @@ export const revalidate = (options) => {
               "Failed to load or is not online",
               e
             );
-            res(false);
           });
+
+        fetches.push(fetcher)
       }
+      Promise.all(fetches).then(() => res(false))
     }).then((shouldReload) => {
       if (!shouldReload) {
         return false;

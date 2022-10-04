@@ -5,6 +5,9 @@ export const flushChunks = async () => {
   const allFlushed = await Promise.all(Array.from(usedChunks).map(async (chunk) => {
     const chunks = new Set();
     const [remote, request] = chunk.split('->');
+    if(!global.__remote_scope__._config[remote]) {
+      return
+    }
     const statsFile = global.__remote_scope__._config[remote].replace('remoteEntry.js', 'federated-stats.json')
     const stats = await fetch(statsFile).then(async (res) => {
       return await res.json()
@@ -30,5 +33,5 @@ export const flushChunks = async () => {
   const dedupe = Array.from(new Set([...allFlushed.flat()]))
 
   usedChunks.clear()
-  return dedupe
+  return dedupe.filter(Boolean)
 }

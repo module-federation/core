@@ -2,6 +2,45 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.4.2](https://github.com/module-federation/nextjs-mf/compare/node-0.4.1...node-0.4.2) (2022-10-04)
+
+
+### Bug Fixes
+
+* removing loggers from flush chunks ([cde40ab](https://github.com/module-federation/nextjs-mf/commit/cde40ab3cccc8635cfca5fa37f07388b698e6de6))
+
+
+
+## [0.4.1](https://github.com/module-federation/nextjs-mf/compare/node-0.4.0...node-0.4.1) (2022-10-04)
+
+
+### Bug Fixes
+
+* improve hot reloading, fix hung promises ([30918fe](https://github.com/module-federation/nextjs-mf/commit/30918fe61a6850b20271f8b72f786fd8a610de2a))
+* **update versions:** bumping versions ([f72209a](https://github.com/module-federation/nextjs-mf/commit/f72209ae070fb50c9d317e764caf872facd4b887))
+
+
+
+## [0.4.1](https://github.com/module-federation/nextjs-mf/compare/node-0.4.0...node-0.4.1) (2022-10-04)
+
+
+### Bug Fixes
+
+* improve hot reloading, fix hung promises ([30918fe](https://github.com/module-federation/nextjs-mf/commit/30918fe61a6850b20271f8b72f786fd8a610de2a))
+* **update versions:** bumping versions ([f72209a](https://github.com/module-federation/nextjs-mf/commit/f72209ae070fb50c9d317e764caf872facd4b887))
+
+
+
+## [0.4.1](https://github.com/module-federation/nextjs-mf/compare/node-0.4.0...node-0.4.1) (2022-10-04)
+
+
+### Bug Fixes
+
+* improve hot reloading, fix hung promises ([30918fe](https://github.com/module-federation/nextjs-mf/commit/30918fe61a6850b20271f8b72f786fd8a610de2a))
+* **update versions:** bumping versions ([f72209a](https://github.com/module-federation/nextjs-mf/commit/f72209ae070fb50c9d317e764caf872facd4b887))
+
+
+
 ## [0.4.1](https://github.com/module-federation/nextjs-mf/compare/node-0.4.0...node-0.4.1) (2022-10-04)
 
 

@@ -314,7 +314,6 @@ export class ChildFederationPlugin {
               stage: Compilation.PROCESS_ASSETS_STAGE_REPORT,
             },
             () => {
-              console.log('additional assets')
               return new Promise((res, rej) => {
                 // run server child compilation during client main compilation
                 childCompilers['server'].run((err, stats) => {
