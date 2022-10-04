@@ -2,6 +2,24 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.4.1](https://github.com/module-federation/nextjs-mf/compare/node-0.4.0...node-0.4.1) (2022-10-04)
+
+
+### Bug Fixes
+
+* **update versions:** bumping versions ([f72209a](https://github.com/module-federation/nextjs-mf/commit/f72209ae070fb50c9d317e764caf872facd4b887))
+
+
+
+## [0.4.1](https://github.com/module-federation/nextjs-mf/compare/node-0.4.0...node-0.4.1) (2022-10-04)
+
+
+### Bug Fixes
+
+* **update versions:** bumping versions ([f72209a](https://github.com/module-federation/nextjs-mf/commit/f72209ae070fb50c9d317e764caf872facd4b887))
+
+
+
 ## [0.4.2](https://github.com/module-federation/nextjs-mf/compare/node-0.4.1...node-0.4.2) (2022-10-04)
 
 
