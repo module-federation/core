@@ -57,10 +57,9 @@ const executeLoadTemplate = `
             return res.text();
           }).then(function(scriptContent){
             try {
-              // const vmContext = { exports, require, module, global, __filename, __dirname, URL};
-              // const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, { filename: 'node-federation-loader-' + moduleName + '.vm' });
+              const vmContext = { exports, require, module, global, __filename, __dirname, URL, ...global};
+              const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, { filename: 'node-federation-loader-' + moduleName + '.vm' });
 
-              const remote = eval(scriptContent + '\\nmodule.exports');
               /* TODO: need something like a chunk loading queue, this can lead to async issues
                if two containers load the same remote, they can overwrite global scope
                should check someone is already loading remote and await that */
@@ -112,8 +111,6 @@ function buildRemotes(
       // create a global scope for container, similar to how remotes are set on window in the browser
       global.__remote_scope__ = {
         _config: {},
-        _chunks: {},
-        _path: ''
       }
     }
 
