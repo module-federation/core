@@ -299,10 +299,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 
                             "console.log('global.__remote_scope__',global.__remote_scope__)",
                             `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
-                            `if(!Array.isArray(global.__remote_scope__._chunks[${JSON.stringify(name)}])) {
-                             global.__remote_scope__._chunks[${JSON.stringify(name)}] = []
-                            }`,
-                            `global.__remote_scope__._chunks[${JSON.stringify(name)}].push(chunkId)`,
                             `console.log('chunkname to request',chunkName);`,
                             `var fileToReplace = require('path').basename(scriptUrl.pathname);`,
                             `scriptUrl.pathname = scriptUrl.pathname.replace(fileToReplace, chunkName);`,
