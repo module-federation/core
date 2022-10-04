@@ -103,6 +103,53 @@ const config = {
   ]
 }
 ```
+
+## Utilities
+
+This package also exposes a few utilities to help with the setup of your federated application.
+
+### revalidate
+
+Used to "hot reload" the federated application.
+- This is useful when you're developing your federated application and want to see changes without having to restart the server.
+- Also useful for production environments where you want to be able to update the federated application without having to restart the server.
+
+```js
+import {revalidate} from "@module-federation/node/utils";
+
+// we automatically reset require cache, so the reload callback is only if you need to do something else
+revalidate().then((shouldReload) => {
+  // do something extra after revalidation
+  if(shouldReload) { 
+    // reload the server
+  }
+});
+```
+
+**Hot reloading Express.js**
+
+Express has its own route stack, so reloading require cache will not be enough to reload the routes inside express.
+
+```js
+//express.js
+const app = express();
+
+global.clearRoutes = () => {
+  app._router.stack = app._router.stack.filter(
+    k => !(k && k.route && k.route.path)
+  )
+}
+
+// in some other file (within the scope of webpack build)
+// wherever you have your revalidation logic
+revalidate().then((shouldReload) => {
+  if(shouldReload) {
+    global.clearRoutes();
+  }
+});
+
+```
+
 ## 🔑 License
 - MIT @[ScriptedAlchemy](https://github.com/ScriptedAlchemy)
 
@@ -112,3 +159,4 @@ List of our amazing contributors 💥
 <a href="https://github.com/module-federation/nextjs-mf/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=module-federation/node" />
 </a>
+

@@ -7,7 +7,7 @@
   },
   "include": ["**/*.ts", "**/*.js"],
   "exclude": [
-    "jest.config.ts",
+    "jest.config.js",
     "**/*.spec.ts",
     "**/*.test.ts",
     "**/*.spec.js",

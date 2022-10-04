@@ -1,10 +1,18 @@
+<div align="center">
+	<!--  for version -->
+  <img src="https://img.shields.io/npm/v/@module-federation/nextjs-mf" alt="version" >
+	<img src="https://img.shields.io/apm/l/atomic-design-ui.svg?" alt="license" >
+  <!-- for downloads -->
+  <img src="https://img.shields.io/npm/dt/@module-federation/nextjs-mf" alt="downloads">
+ </div>
+
 # Module Federation For Next.js
 
 This plugin enables Module Federation on Next.js
 
 ## Supports
 
-- next ^11.x.x || ^12.x.x
+- next ^11.x.x (with limitations) || ^12.x.x
 - Client side only, SSR has a PR open. Help needed
 
 I highly recommend referencing this application which takes advantage of the best capabilities:
@@ -118,6 +126,7 @@ new NextFederationPlugin({
 - `enableImageLoaderFix` – adds public hostname to all assets bundled by `nextjs-image-loader`. So if you serve remoteEntry from `http://example.com` then all bundled assets will get this hostname in runtime. It's something like Base URL in HTML but for federated modules.
 - `enableUrlLoaderFix` – adds public hostname to all assets bundled by `url-loader`.
 
+
 ## Demo
 
 You can see it in action here: https://github.com/module-federation/module-federation-examples/pull/2147
@@ -214,6 +223,8 @@ const SampleComponent = dynamic(() => import('next2/sampleComponent'), {
 
 Ive added a util for dynamic chunk loading, in the event you need to load remote containers dynamically.
 
+**InjectScript**
+
 ```js
 import { injectScript } from '@module-federation/nextjs-mf/lib/utils';
 // if i have remotes in my federation plugin, i can pass the name of the remote
@@ -228,6 +239,45 @@ injectScript({
 }).then((remoteContainer) => {
   remoteContainer.get('./exposedModule');
 });
+```
+
+**revalidate**
+
+Enables hot reloading of node server (not client) in production. 
+This is recommended, without it - servers will not be able to pull remote updates without a full restart.
+
+More info here: https://github.com/module-federation/nextjs-mf/tree/main/packages/node#utilities
+
+```js
+// __document.js
+
+import { revalidate } from '@module-federation/nextjs-mf/utils';
+import Document, { Html, Head, Main, NextScript } from 'next/document';
+class MyDocument extends Document {
+  static async getInitialProps(ctx) {
+    const initialProps = await Document.getInitialProps(ctx);
+
+    // can be any lifecycle or implementation you want
+    ctx?.res?.on('finish', () => {
+      revalidate().then((shouldUpdate) => {
+        console.log('finished sending response', shouldUpdate);
+      })
+    })
+
+    return initialProps
+  }
+  render() {
+    return (
+      <Html>
+        <Head />
+        <body>
+          <Main />
+          <NextScript />
+        </body>
+      </Html>
+    );
+  }
+}
 ```
 
 ## Contact

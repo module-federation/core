@@ -6,7 +6,6 @@ import { Layout, version } from 'antd';
 import { useMFClient } from '@module-federation/nextjs-mf/client';
 
 import HostAppMenu from './_menu';
-console.log(import('home/SharedNav').then(console.log))
 
 import 'antd/dist/antd.css';
 const SharedNav = dynamic(

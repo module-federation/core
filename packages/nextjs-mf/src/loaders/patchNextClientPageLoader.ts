@@ -11,7 +11,10 @@ export default function patchNextClientPageLoader(
   this: LoaderContext<Record<string, unknown>>,
   content: string
 ) {
-  if (content.includes('MFClient')) {
+  const {
+    automaticPageStitching,
+  } = this.getOptions();
+  if (content.includes('include-defaults')) {
     // If MFClient already applied then skip patch
     return content;
   }
@@ -22,6 +25,13 @@ export default function patchNextClientPageLoader(
     this.context,
     path.resolve(__dirname, '../include-defaults.js')
   );
+
+  if (!automaticPageStitching) {
+    return [
+      `require(${JSON.stringify(pathIncludeDefaults)});`,
+      content
+    ].join("\n")
+  }
 
   const pathMFClient = path.relative(
     this.context,

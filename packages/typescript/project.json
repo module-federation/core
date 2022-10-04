@@ -1,24 +1,24 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/nextjs-mf/src",
+  "sourceRoot": "packages/typescript/src",
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nrwl/js:swc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/nextjs-mf",
-        "main": "packages/nextjs-mf/src/index.js",
-        "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
+        "outputPath": "dist/packages/typescript",
+        "main": "packages/typescript/src/index.ts",
+        "tsConfig": "packages/typescript/tsconfig.lib.json",
+        "assets": ["packages/typescript/*.md"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true,
-        "assets": ["packages/nextjs-mf/*.md"]
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "publish": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "command": "node tools/scripts/publish.mjs nextjs-mf {args.ver} {args.tag}"
+        "command": "node tools/scripts/publish.mjs typescript {args.ver} {args.tag}"
       },
       "dependsOn": [
         {
@@ -31,21 +31,13 @@
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/nextjs-mf/**/*.js"]
-      }
-    },
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/nextjs-mf"],
-      "options": {
-        "jestConfig": "packages/nextjs-mf/jest.config.js",
-        "passWithNoTests": true
+        "lintFilePatterns": ["packages/typescript/**/*.ts"]
       }
     },
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": ["nextjs-mf:npm", "nextjs-mf:github"],
+        "postTargets": ["typescript:npm", "typescript:github"],
         "trackDeps": true
       }
     },
@@ -63,6 +55,5 @@
       }
     }
   },
-  "tags": [],
-  "implicitDependencies": ["node"]
+  "tags": []
 }
