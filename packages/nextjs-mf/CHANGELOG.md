@@ -19,6 +19,19 @@ This file was generated using [@jscutlery/semver](https://github.com/jscutlery/s
 
 ### Dependency Updates
 
+* `node` updated to version `0.4.2`
+* `utils` updated to version `0.0.4`
+
+### Bug Fixes
+
+* **update versions:** bumping versions ([f72209a](https://github.com/module-federation/nextjs-mf/commit/f72209ae070fb50c9d317e764caf872facd4b887))
+
+
+
+## [5.7.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.7.0...nextjs-mf-5.7.1) (2022-10-04)
+
+### Dependency Updates
+
 * `node` updated to version `0.4.1`
 * `utils` updated to version `0.0.4`
 
