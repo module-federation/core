@@ -6,7 +6,6 @@ export const flushChunks = async () => {
     const chunks = new Set();
     const [remote, request] = chunk.split('->');
     if(!global.__remote_scope__._config[remote]) {
-      console.log(global.__remote_scope__)
       return
     }
     const statsFile = global.__remote_scope__._config[remote].replace('remoteEntry.js', 'federated-stats.json')
