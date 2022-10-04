@@ -29,6 +29,7 @@
     "fast-glob": "^3.2.12",
     "lodash.get": "^4.4.2",
     "next": "12.2.5",
+    "ngx-deploy-npm": "^4.2.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "regenerator-runtime": "0.13.7",
