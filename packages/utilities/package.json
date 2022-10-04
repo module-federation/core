@@ -4,5 +4,9 @@
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
-  "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/utilities"
+  "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/utilities",
+  "peerDependencies": {
+    "react": "18.2.0",
+    "next": "12.3.0"
+  }
 }
