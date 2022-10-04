@@ -1,6 +1,4 @@
-// react -> peer dep
-// next  -> peer dep
-import React, { useMemo, ComponentType, Component } from 'react';
+import React, { useMemo } from 'react';
 import dynamic from 'next/dynamic';
 
 class ErrorBoundary extends React.Component<any, any> {
