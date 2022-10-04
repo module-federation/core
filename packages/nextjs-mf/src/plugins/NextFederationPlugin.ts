@@ -81,7 +81,7 @@ export class NextFederationPlugin {
 
       //patch next
       compiler.options.module.rules.push({
-        test: /next[\\/]dist[\\/]server/,
+        test: /next[\\/]dist/,
         loader: path.resolve(
           __dirname,
           '../loaders/patchDefaultSharedLoader'
