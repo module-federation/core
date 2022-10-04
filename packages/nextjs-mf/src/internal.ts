@@ -111,6 +111,7 @@ export const generateRemoteTemplate = (url: string, global: any) => {
     const proxy = {
       get: ${global}.get,
       init: function(shareScope) {
+
         const handler = {
           get(target, prop) {
             if (target[prop]) {
@@ -139,7 +140,7 @@ export const generateRemoteTemplate = (url: string, global: any) => {
       }
     }
     if (!${global}.__initialized) {
-      proxy.init()
+      proxy.init(__webpack_require__.S.default)
     }
     return proxy
   })`;
