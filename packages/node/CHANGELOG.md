@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.4.2](https://github.com/module-federation/nextjs-mf/compare/node-0.4.1...node-0.4.2) (2022-10-04)
+
+
+### Bug Fixes
+
+* removing loggers from flush chunks ([cde40ab](https://github.com/module-federation/nextjs-mf/commit/cde40ab3cccc8635cfca5fa37f07388b698e6de6))
+
+
+
 ## [0.4.1](https://github.com/module-federation/nextjs-mf/compare/node-0.4.0...node-0.4.1) (2022-10-04)
 
 
