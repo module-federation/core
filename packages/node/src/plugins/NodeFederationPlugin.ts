@@ -39,7 +39,7 @@ interface Context {
 //TODO: should use Template system like LoadFileChunk runtime does.
 //TODO: global.webpackChunkLoad could use a better convention? I have to use a special http client to get out of my infra firewall
 const executeLoadTemplate = `
-    function executeLoad(remoteUrl) {
+    function executeLoad(remoteUrl, retry) {
       function extractUrlAndGlobal(urlAndGlobal) {
         var index = urlAndGlobal.indexOf("@");
         if (index <= 0 || index === urlAndGlobal.length - 1) {
@@ -75,14 +75,20 @@ const executeLoadTemplate = `
             reject(null)
           })
         }).catch((e)=>{
-        console.error('error',e);
+          console.error('error',e);
+
+          if(!retry) {
+            return executeLoad(remoteUrl, true);
+          }
           console.warn(moduleName,'is offline, returning fake remote')
           return {
             fake: true,
             get:(arg)=>{
               console.log('faking', arg,'module on', moduleName);
 
-              return ()=> Promise.resolve();
+              return Promise.resolve(()=>{
+              return ()=>null
+              });
             },
             init:()=>{}
           }
@@ -121,14 +127,21 @@ function buildRemotes(
     ${executeLoadTemplate}
     resolve(executeLoad(${JSON.stringify(config)}))
     }).then(remote=>{
-      console.log(remote);
+      if(!global.usedChunks || remote.fake) {
+        return remote;
+      }
+
+
    return {
       get: (arg)=>{
+      try {
+        remote.init(__webpack_require__.S.default);
+      } catch(e) {}
         return remote.get(arg).then((f)=>{
           const m = f();
           return ()=>new Proxy(m, {
             get: (target, prop)=>{
-global.usedChunks.add(${JSON.stringify(global)} + "->" + arg);
+            global.usedChunks.add(${JSON.stringify(global)} + "->" + arg);
               return target[prop];
             }
           })
