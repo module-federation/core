@@ -5,7 +5,10 @@ import type {
   RuntimeRemote,
 } from '../types';
 
-// @ts-ignore
+import fs from 'fs';
+import fg from 'fast-glob';
+
+// @ts-expect-error - because process.env.REMOTES is not typed
 const remoteVars = (process.env.REMOTES || {}) as Record<
   string,
   Promise<any> | string | (() => Promise<any>)
@@ -40,7 +43,7 @@ export const runtimeRemotes = Object.entries(remoteVars).reduce(function (
   }
   // we dont know or currently support this type
   else {
-    //@ts-ignore
+    // @ts-expect-error - because process.env.REMOTES is not typed
     console.log('remotes process', process.env.REMOTES);
     throw new Error(`[mf] Invalid value received for runtime_remote "${key}"`);
   }
@@ -182,3 +185,53 @@ export const createRuntimeVariables = (remotes: Remotes) => {
     return acc;
   }, {} as Record<string, string>);
 };
+
+/**
+ * From provided ROOT_DIR `scan` pages directory
+ * and return list of user defined pages
+ * (except special ones, like _app, _document, _error)
+ */
+export function getNextPages(rootDir: string) {
+  const [cwd, pagesDir] = getNextPagesRoot(rootDir);
+
+  // scan all files in pages folder except pages/api
+  let pageList = fg.sync('**/*.{ts,tsx,js,jsx}', {
+    cwd,
+    onlyFiles: true,
+    ignore: ['api/**'],
+  });
+
+  // remove specific nextjs pages
+  const exclude = [
+    /^_app\..*/, // _app.tsx
+    /^_document\..*/, // _document.tsx
+    /^_error\..*/, // _error.tsx
+    /^404\..*/, // 404.tsx
+    /^500\..*/, // 500.tsx
+    /^\[\.\.\..*\]\..*/, // /[...federationPage].tsx
+  ];
+  pageList = pageList.filter((page) => {
+    return !exclude.some((r) => r.test(page));
+  });
+
+  pageList = pageList.map((page) => `${pagesDir}${page}`);
+
+  return pageList;
+}
+
+export function sanitizePagePath(item: string) {
+  return item
+    .replace(/^src\/pages\//i, 'pages/')
+    .replace(/\.(ts|tsx|js|jsx)$/, '');
+}
+
+function getNextPagesRoot(appRoot: string) {
+  let pagesDir = 'src/pages/';
+  let absPageDir = `${appRoot}/${pagesDir}`;
+  if (!fs.existsSync(absPageDir)) {
+    pagesDir = 'pages/';
+    absPageDir = `${appRoot}/${pagesDir}`;
+  }
+
+  return [absPageDir, pagesDir];
+}

@@ -1,7 +1,6 @@
-import type { LoaderContext } from 'webpack';
+import { getNextPages, sanitizePagePath } from '@module-federation/utilities';
 
-import fg from 'fast-glob';
-import fs from 'fs';
+import type { LoaderContext } from 'webpack';
 
 import { UrlNode } from '../../client/UrlNode';
 
@@ -54,56 +53,6 @@ export function exposeNextjsPages(cwd: string) {
   };
 
   return exposesWithPageMap;
-}
-
-function getNextPagesRoot(appRoot: string) {
-  let pagesDir = 'src/pages/';
-  let absPageDir = `${appRoot}/${pagesDir}`;
-  if (!fs.existsSync(absPageDir)) {
-    pagesDir = 'pages/';
-    absPageDir = `${appRoot}/${pagesDir}`;
-  }
-
-  return [absPageDir, pagesDir];
-}
-
-/**
- * From provided ROOT_DIR `scan` pages directory
- * and return list of user defined pages
- * (except special ones, like _app, _document, _error)
- */
-function getNextPages(rootDir: string) {
-  const [cwd, pagesDir] = getNextPagesRoot(rootDir);
-
-  // scan all files in pages folder except pages/api
-  let pageList = fg.sync('**/*.{ts,tsx,js,jsx}', {
-    cwd,
-    onlyFiles: true,
-    ignore: ['api/**'],
-  });
-
-  // remove specific nextjs pages
-  const exclude = [
-    /^_app\..*/, // _app.tsx
-    /^_document\..*/, // _document.tsx
-    /^_error\..*/, // _error.tsx
-    /^404\..*/, // 404.tsx
-    /^500\..*/, // 500.tsx
-    /^\[\.\.\..*\]\..*/, // /[...federationPage].tsx
-  ];
-  pageList = pageList.filter((page) => {
-    return !exclude.some((r) => r.test(page));
-  });
-
-  pageList = pageList.map((page) => `${pagesDir}${page}`);
-
-  return pageList;
-}
-
-function sanitizePagePath(item: string) {
-  return item
-    .replace(/^src\/pages\//i, 'pages/')
-    .replace(/\.(ts|tsx|js|jsx)$/, '');
 }
 
 /**
