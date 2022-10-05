@@ -17,11 +17,23 @@ export const revalidate = () => {
 //@ts-ignore
 export const FlushedChunks = ({ chunks })=>{
   //@ts-ignore
-  const scripts = chunks.filter((c)=>c.endsWith(".js")).map((chunk)=>/*#__PURE__*/ React.createElement("script", {
-    src: chunk,
-    async: true
-  }, null));
-  return scripts;
+  const scripts = chunks.filter((c)=>c.endsWith(".js")).map((chunk)=> {
+    if(!chunk.includes('?') && chunk.includes('remoteEntry')) {
+      chunk = chunk + '?t=' + Date.now();
+    }
+    return React.createElement("script", {
+      src: chunk,
+      async: true
+    }, null)
+  });
+  //@ts-ignore
+  const css = chunks.filter((c)=>c.endsWith(".css")).map((chunk)=> {
+    return React.createElement("link", {
+      href: chunk,
+      rel: "stylesheet"
+    }, null)
+  });
+  return [css,scripts];
 };
 FlushedChunks.defaultProps = {
   chunks: []
