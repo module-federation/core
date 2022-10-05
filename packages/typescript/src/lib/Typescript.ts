@@ -1,4 +1,9 @@
-import type { ModuleFederationPluginOptions } from '@module-federation/utilities';
+import {
+  getNextPages,
+  ModuleFederationPluginOptions,
+  NextFederationPluginOptions,
+  sanitizePagePath,
+} from '@module-federation/utilities';
 
 import ts from 'typescript';
 import download from 'download';
@@ -9,7 +14,7 @@ import axios from 'axios';
 import { Compilation, Compiler } from 'webpack';
 
 export class FederatedTypesPlugin {
-  private options: ModuleFederationPluginOptions;
+  private options: ModuleFederationPluginOptions | NextFederationPluginOptions;
   private exposedComponents!: ModuleFederationPluginOptions['exposes'];
   private remoteComponents!: ModuleFederationPluginOptions['remotes'];
   private distDir!: string;
@@ -21,7 +26,9 @@ export class FederatedTypesPlugin {
   private typescriptFolderName = '@mf-typescript';
   private typesIndexJsonFileName = '__types_index.json';
 
-  constructor(options: ModuleFederationPluginOptions) {
+  constructor(
+    options: ModuleFederationPluginOptions | NextFederationPluginOptions
+  ) {
     this.options = options;
 
     this.tsCompilerOptions = {
@@ -60,6 +67,28 @@ export class FederatedTypesPlugin {
       this.options?.exposes || inheritedPluginOptions.exposes;
     this.remoteComponents =
       this.options?.remotes || inheritedPluginOptions.remotes;
+
+    if (
+      'extraOptions' in this.options &&
+      this.options.extraOptions.exposePages
+    ) {
+      const pages = getNextPages(
+        this.webpackCompilerOptions.context || process.cwd()
+      );
+
+      const pageModulesMap = {} as Record<string, string>;
+      pages.forEach((page) => {
+        // Creating a map of pages to modules
+        //   './pages/storage/index': './pages/storage/index.tsx',
+        //   './pages/storage/[...slug]': './pages/storage/[...slug].tsx',
+        pageModulesMap['./' + sanitizePagePath(page)] = `./${page}`;
+      });
+
+      this.exposedComponents = {
+        ...this.exposedComponents,
+        ...pageModulesMap,
+      };
+    }
 
     compiler.hooks.afterCompile.tap('FederatedTypes', (compilation) => {
       // Reset and create an Interval to refetch types every 60 seconds
