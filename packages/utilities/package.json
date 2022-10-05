@@ -4,6 +4,17 @@
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "require": "./src/index.js"
+    },
+    "./package.json": "./package.json",
+    "./react": {
+      "import": "./src/utils/react.js",
+      "require": "./src/utils/react.js"
+    }
+  },
   "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/utilities",
   "peerDependencies": {
     "react": "^12 || ^18",
