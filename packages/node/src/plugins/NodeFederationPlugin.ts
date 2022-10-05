@@ -132,11 +132,11 @@ function buildRemotes(
       }
 
 
-   return {
+   const proxy =  {
       get: (arg)=>{
-      try {
-        remote.init(__webpack_require__.S.default);
-      } catch(e) {}
+        if(!global.__remote_scope__[${JSON.stringify(global)}].__initialized) {
+          try {proxy.init(__webpack_require__.S.default);} catch(e) {}
+        }
         return remote.get(arg).then((f)=>{
           const m = f();
           return ()=>new Proxy(m, {
@@ -148,6 +148,7 @@ function buildRemotes(
         })
       },
         init: (args)=> {
+        global.__remote_scope__[${JSON.stringify(global)}].__initialized = true;
           return remote.init(new Proxy(args, {
             set: (target, prop, value)=>{
               global.usedChunks.add(${JSON.stringify(global)} + "->" + prop);
@@ -157,6 +158,8 @@ function buildRemotes(
           }))
         }
     }
+
+    return proxy;
 
   });
   `;
