@@ -1,5 +1,4 @@
-import {createElement} from "react";
-import Head from 'next/head';
+import * as React from "react";
 export { extractUrlAndGlobal, injectScript } from '@module-federation/utilities';
 // @ts-ignore
 export {flushChunks} from '@module-federation/node/utils';
@@ -15,22 +14,15 @@ export const revalidate = () => {
   })
 }
 
-
-export const FlushedChunksHead = (props: { chunks: string[]; }) => {
-  const chunks = props.chunks || [];
-  const scripts = chunks.filter((c) => c.endsWith('.js')).map((chunk) => {
-    return /*#__PURE__*/createElement("script", {
-      key: chunk,
-      src: chunk,
-      async: true
-    });
-  });
-  const css = chunks.filter((c) => c.endsWith('.css')).map((chunk) => {
-    return /*#__PURE__*/createElement("link", {
-      key: chunk,
-      href: chunk,
-      rel: "stylesheet"
-    });
-  });
-  return /*#__PURE__*/createElement(Head, null, scripts, css);
+//@ts-ignore
+export const FlushedChunks = ({ chunks })=>{
+  //@ts-ignore
+  const scripts = chunks.filter((c)=>c.endsWith(".js")).map((chunk)=>/*#__PURE__*/ React.createElement("script", {
+    src: chunk,
+    async: true
+  }, null));
+  return scripts;
+};
+FlushedChunks.defaultProps = {
+  chunks: []
 };

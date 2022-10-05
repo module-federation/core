@@ -7,6 +7,14 @@ export const revalidate = (options) => {
 
     return new Promise(async (res) => {
       const fetches = []
+console.log(remoteScope)
+      for (const property in remoteScope) {
+        if(remoteScope[property].fake) {
+          console.log('unreachable remote found', property, 'hot reloading to refetch')
+          res(true)
+        }
+      }
+
       for (const property in remoteScope._config) {
         let remote = remoteScope._config[property];
         if (typeof remote === "function") {
@@ -47,7 +55,13 @@ export const revalidate = (options) => {
         fetches.push(fetcher)
       }
       Promise.all(fetches).then(() => res(false))
-    }).then((shouldReload) => {
+    }).
+
+
+
+
+
+    then((shouldReload) => {
       if (!shouldReload) {
         return false;
       }
