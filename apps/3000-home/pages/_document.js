@@ -1,6 +1,6 @@
 import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document'
-import {revalidate, FlushedChunksHead} from "@module-federation/nextjs-mf/utils";
+import {revalidate, FlushedChunks} from "@module-federation/nextjs-mf/utils";
 import {usedChunks, flushChunks} from '@module-federation/node/utils'
 
 class MyDocument extends Document {
@@ -22,8 +22,9 @@ class MyDocument extends Document {
   render() {
     return (
       <Html>
-        <FlushedChunksHead chunks={this.props.chunks}/>
-        <Head />
+        <Head>
+          <FlushedChunks chunks={this.props.chunks}/>
+        </Head>
         <body>
         <Main />
         <NextScript />

@@ -12,6 +12,7 @@ export const flushChunks = async () => {
     const stats = await fetch(statsFile).then(async (res) => {
       return await res.json()
     })
+
     chunks.add(global.__remote_scope__._config[remote].replace('ssr', 'chunks'))
     const [prefix] = global.__remote_scope__._config[remote].split('static/')
     if (stats.federatedModules) {

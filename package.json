@@ -15,7 +15,10 @@
     "build": "nx build",
     "start": "nx build && nx run-many --target=serve --verbose --output-style=stream",
     "prod": "nx build && nx run-many --target=build --verbose --output-style=stream",
-    "commit": "cz"
+    "commit": "cz",
+    "release:node": "nx run node:version --releaseAs=minor",
+    "release:next": "nx run nextjs-mf:version --releaseAs=patch",
+    "release:utils": "nx run utils:version --releaseAs=minor"
   },
   "dependencies": {
     "@module-federation/nextjs-mf": "link:./dist/packages/nextjs-mf",

@@ -155,7 +155,7 @@ export class ChildFederationPlugin {
           new webpack.ExternalsPlugin(compiler.options.externalsType, [
             // next dynamic needs to be within webpack, cannot be externalized
             ...Object.keys(DEFAULT_SHARE_SCOPE).filter(
-              (k) => k !== 'next/dynamic'
+              (k) => (k !== 'next/dynamic' && k !== 'next/link' && k !== 'next/script')
             ),
             'react/jsx-runtime',
             'react/jsx-dev-runtime',

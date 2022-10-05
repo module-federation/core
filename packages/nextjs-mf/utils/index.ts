@@ -1,5 +1,4 @@
-import {createElement} from "react";
-import Head from 'next/head';
+import * as React from "react";
 export { extractUrlAndGlobal, injectScript } from '@module-federation/utilities';
 // @ts-ignore
 export {flushChunks} from '@module-federation/node/utils';
@@ -15,22 +14,27 @@ export const revalidate = () => {
   })
 }
 
-
-export const FlushedChunksHead = (props: { chunks: string[]; }) => {
-  const chunks = props.chunks || [];
-  const scripts = chunks.filter((c) => c.endsWith('.js')).map((chunk) => {
-    return /*#__PURE__*/createElement("script", {
-      key: chunk,
+//@ts-ignore
+export const FlushedChunks = ({ chunks })=>{
+  //@ts-ignore
+  const scripts = chunks.filter((c)=>c.endsWith(".js")).map((chunk)=> {
+    if(!chunk.includes('?') && chunk.includes('remoteEntry')) {
+      chunk = chunk + '?t=' + Date.now();
+    }
+    return React.createElement("script", {
       src: chunk,
       async: true
-    });
+    }, null)
   });
-  const css = chunks.filter((c) => c.endsWith('.css')).map((chunk) => {
-    return /*#__PURE__*/createElement("link", {
-      key: chunk,
+  //@ts-ignore
+  const css = chunks.filter((c)=>c.endsWith(".css")).map((chunk)=> {
+    return React.createElement("link", {
       href: chunk,
       rel: "stylesheet"
-    });
+    }, null)
   });
-  return /*#__PURE__*/createElement(Head, null, scripts, css);
+  return [css,scripts];
+};
+FlushedChunks.defaultProps = {
+  chunks: []
 };
