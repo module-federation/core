@@ -1,36 +1,42 @@
+import type { ComponentType } from 'react';
 import React, { useMemo } from 'react';
 import dynamic from 'next/dynamic';
 
+
+type BoundaryProps = {
+  children: React.ReactNode; // 👈️ type children
+};
+
+
 class ErrorBoundary extends React.Component<any, any> {
-  constructor(props: any) {
+  constructor(props: BoundaryProps) {
     super(props);
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
+  override componentDidCatch(error: Error, errorInfo: any) {
     // You can also log the error to an error reporting service
     console.error(error, errorInfo);
   }
 
-  render() {
-    return this.props.children;
+  override render() {
+    return this.props['children'];
   }
 }
 
 /**
  * Wrapper around dynamic import.
  * Adds error boundaries and fallback options
- * @param {{
- *  dynamicImporter: function(string): Promise,
- *  fallback: function(string): Promise,
- *  customBoundary: ComponentType
- * }} props
  */
-const FederationBoundary = ({
+export const FederationBoundary = ({
   dynamicImporter,
   fallback = () => null,
   customBoundary: CustomBoundary,
   ...rest
-}) => {
+}: {
+        dynamicImporter: () => Promise<any>;
+        fallback: () => Promise<any> | null;
+        customBoundary: ComponentType;
+    }) => {
   return useMemo(() => {
     const ImportResult = dynamic(
       () =>
@@ -52,4 +58,3 @@ const FederationBoundary = ({
   }, [dynamicImporter, fallback]);
 };
 
-module.exports.federationBoundary = FederationBoundary;
