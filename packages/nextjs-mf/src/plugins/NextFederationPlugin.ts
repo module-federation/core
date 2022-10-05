@@ -78,17 +78,35 @@ export class NextFederationPlugin {
 
       // should this be a plugin that we apply to the compiler?
       internalizeSharedPackages(this._options, compiler);
-    } else {
+
+      //patch next
       compiler.options.module.rules.push({
-        test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
+        test: /next[\\/]dist/,
         loader: path.resolve(
           __dirname,
-          '../loaders/patchNextClientPageLoader'
+          '../loaders/patchDefaultSharedLoader'
         ),
-        options: {
-          automaticPageStitching: this._extraOptions.automaticPageStitching,
-        }
       });
+    } else {
+
+      //patch next
+      compiler.options.module.rules.push({
+        test: /next[\\/]dist[\\/]client/,
+        loader: path.resolve(
+          __dirname,
+          '../loaders/patchDefaultSharedLoader'
+        ),
+      });
+
+      if(this._extraOptions.automaticPageStitching) {
+        compiler.options.module.rules.push({
+          test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
+          loader: path.resolve(
+            __dirname,
+            '../loaders/patchNextClientPageLoader'
+          ),
+        });
+      }
 
 
       if (this._options.remotes) {
@@ -105,6 +123,7 @@ export class NextFederationPlugin {
         name: this._options.name,
       };
     }
+
 
     //todo runtime variable creation needs to be applied for server as well. this is just for client
     // TODO: this needs to be refactored into something more comprehensive. this is just a quick fix
