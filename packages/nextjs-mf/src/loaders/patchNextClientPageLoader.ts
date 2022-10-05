@@ -11,26 +11,9 @@ export default function patchNextClientPageLoader(
   this: LoaderContext<Record<string, unknown>>,
   content: string
 ) {
-  const {
-    automaticPageStitching,
-  } = this.getOptions();
-  if (content.includes('include-defaults')) {
+  if (content.includes('MFClient')) {
     // If MFClient already applied then skip patch
     return content;
-  }
-
-  // avoid absolute paths as they break hashing when the root for the project is moved
-  // @see https://webpack.js.org/contribute/writing-a-loader/#absolute-paths
-  const pathIncludeDefaults = path.relative(
-    this.context,
-    path.resolve(__dirname, '../include-defaults.js')
-  );
-
-  if (!automaticPageStitching) {
-    return [
-      `require(${JSON.stringify(pathIncludeDefaults)});`,
-      content
-    ].join("\n")
   }
 
   const pathMFClient = path.relative(
@@ -41,7 +24,6 @@ export default function patchNextClientPageLoader(
   const patchedContent = content.replace(
     'exports.default = PageLoader;',
     `
-      require(${JSON.stringify(pathIncludeDefaults)});
       const MFClient = require(${JSON.stringify(pathMFClient)}).MFClient;
 
       class PageLoaderExtended extends PageLoader {

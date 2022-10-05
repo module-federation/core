@@ -1,7 +1,8 @@
 import React from 'react';
 import { Menu, Layout, Badge } from 'antd';
 import { useRouter } from 'next/router';
-
+// @ts-ignore
+import {tjhin} from './thing.module.css'
 import { useMFRemote } from '@module-federation/nextjs-mf/client';
 
 const SharedNav = () => {
@@ -25,7 +26,7 @@ const SharedNav = () => {
 
   return (
     <Layout.Header>
-      <div className="header-logo">nextjs-mf</div>
+      <div className={tjhin}>nextjs-mf</div>
       <Menu
         theme="dark"
         mode="horizontal"
@@ -87,4 +88,5 @@ const SharedNav = () => {
   );
 };
 
-export default SharedNav;
+export default SharedNav
+
