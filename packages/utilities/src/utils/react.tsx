@@ -20,13 +20,13 @@ class ErrorBoundary extends React.Component<any, any> {
  * Wrapper around dynamic import.
  * Adds error boundaries and fallback options
  * @param {{
- *  importer: function(string): Promise,
+ *  dynamicImporter: function(string): Promise,
  *  fallback: function(string): Promise,
  *  customBoundary: ComponentType
  * }} props
  */
 const FederationBoundary = ({
-  importer,
+  dynamicImporter,
   fallback = () => null,
   customBoundary: CustomBoundary,
   ...rest
@@ -34,7 +34,7 @@ const FederationBoundary = ({
   return useMemo(() => {
     const ImportResult = dynamic(
       () =>
-        importer().catch((e: Error) => {
+        dynamicImporter().catch((e: Error) => {
           console.error(e);
           return fallback();
         }),
@@ -49,7 +49,7 @@ const FederationBoundary = ({
         <ImportResult {...rest} />
       </Boundary>
     );
-  }, [importer, fallback]);
+  }, [dynamicImporter, fallback]);
 };
 
 module.exports.federationBoundary = FederationBoundary;
