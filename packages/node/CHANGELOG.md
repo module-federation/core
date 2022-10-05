@@ -2,6 +2,18 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [0.5.0](https://github.com/module-federation/nextjs-mf/compare/node-0.4.0...node-0.5.0) (2022-10-05)
+
+
+### Bug Fixes
+
+* improve handling of offline remotes ([3ae596e](https://github.com/module-federation/nextjs-mf/commit/3ae596ee82d2ccf0d828d7928cbdc4fbec509d55))
+* improve handling of offline remotes ([#263](https://github.com/module-federation/nextjs-mf/issues/263)) ([e0eb437](https://github.com/module-federation/nextjs-mf/commit/e0eb437bbc0259a8f263ededa505a397fa59b97b))
+* patch share scope on client server ([272c110](https://github.com/module-federation/nextjs-mf/commit/272c110a9cd3a194d2fdeaf1d620b14b29330b30))
+* **update versions:** bumping versions ([f72209a](https://github.com/module-federation/nextjs-mf/commit/f72209ae070fb50c9d317e764caf872facd4b887))
+
+
+
 ## [0.4.1](https://github.com/module-federation/nextjs-mf/compare/node-0.4.0...node-0.4.1) (2022-10-04)
 
 
