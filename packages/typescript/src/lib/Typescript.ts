@@ -13,6 +13,7 @@ export class FederatedTypesPlugin {
   private exposedComponents!: ModuleFederationPluginOptions['exposes'];
   private remoteComponents!: ModuleFederationPluginOptions['remotes'];
   private distDir!: string;
+  private fsCache: Map<string, string[]>;
   private typesIndexJsonFilePath!: string;
   private tsCompilerOptions!: ts.CompilerOptions;
   private webpackCompilerOptions!: Compiler['options'];
@@ -23,7 +24,7 @@ export class FederatedTypesPlugin {
 
   constructor(options: ModuleFederationPluginOptions) {
     this.options = options;
-
+    this.fsCache = new Map();
     this.tsCompilerOptions = {
       declaration: true,
       emitDeclarationOnly: true,
@@ -175,11 +176,18 @@ export class FederatedTypesPlugin {
     }
   }
 
-  // TODO: this method can be improved for performance
-  // For every exposedComponents this method traverse through the directories
-  // to automatically resolve the extension.
-  // We can cache the already traversed directories which can be used to resolve
-  // other 'exposedComponents' falling in the same directory that's already have been traversed.
+  private getFiles(dir: string) {
+    // Simple caching mechanism to improve performance reading the file system
+    if (this.fsCache.has(dir)) {
+      return this.fsCache.get(dir)
+    }
+    
+    const files = fs.readdirSync(dir);
+    this.fsCache.set(dir, files);
+    
+    return files;
+  }
+
   private resolveFilenameWithExtension(rootDir: string, entry: string) {
     // Check path exists and it's a directory
     if (!fs.existsSync(rootDir) || !fs.lstatSync(rootDir).isDirectory()) {
@@ -190,17 +198,17 @@ export class FederatedTypesPlugin {
 
     try {
       // Try to resolve exposed component using index
-      const files = fs.readdirSync(path.join(rootDir, entry));
+      const files = this.getFiles(path.join(rootDir, entry));
 
-      filename = files.find((file) => file.split('.')[0] === 'index');
+      filename = files?.find((file) => file.split('.')[0] === 'index');
 
       return `${entry}/${filename}`;
     } catch (err) {
-      const files = fs.readdirSync(rootDir);
+      const files = this.getFiles(rootDir);
 
       // Handle case where directory contains similar filenames
       // or where a filename like `Component.base.tsx` is used
-      filename = files.find((file) => {
+      filename = files?.find((file) => {
         const baseFile = path.basename(file, path.extname(file));
         const baseEntry = path.basename(entry, path.extname(entry));
 
