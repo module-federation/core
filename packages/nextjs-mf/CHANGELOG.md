@@ -13,6 +13,17 @@ This file was generated using [@jscutlery/semver](https://github.com/jscutlery/s
 
 
 
+## [5.7.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.7.0...nextjs-mf-5.7.1) (2022-10-06)
+
+
+### Bug Fixes
+
+* flush CSS chunks, cache bust remote entry on render ([#269](https://github.com/module-federation/nextjs-mf/issues/269)) ([85a216a](https://github.com/module-federation/nextjs-mf/commit/85a216a8fd34ae849630ff5b42bacb26c855a9ce))
+* improve handling of offline remotes ([#263](https://github.com/module-federation/nextjs-mf/issues/263)) ([e0eb437](https://github.com/module-federation/nextjs-mf/commit/e0eb437bbc0259a8f263ededa505a397fa59b97b))
+* **update versions:** bumping versions ([f72209a](https://github.com/module-federation/nextjs-mf/commit/f72209ae070fb50c9d317e764caf872facd4b887))
+
+
+
 # [5.8.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.7.0...nextjs-mf-5.8.0) (2022-10-05)
 
 
