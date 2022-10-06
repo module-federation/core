@@ -1,7 +1,7 @@
 import Template from './Template';
-import { parseRemoteSyntax } from '../src/internal';
 import { WebpackRemoteContainer } from '@module-federation/utilities';
-import path from "path";
+import { parseRemoteSyntax } from '../src/internal';
+import path from 'path';
 
 const swc = require('@swc/core');
 
@@ -45,7 +45,6 @@ const remoteTemplate = function () {
     global: urlAndGlobal.substring(0, index) as unknown as number, // this casting to satisfy TS
   };
 
-
   return new Promise<void>(function (resolve, reject) {
     const __webpack_error__ = new Error() as Error & {
       type: string;
@@ -61,7 +60,6 @@ const remoteTemplate = function () {
       function (event: Event) {
         if (typeof window[remote.global] !== 'undefined') {
           return resolve();
-
         }
 
         var errorType =
@@ -89,7 +87,7 @@ const remoteTemplate = function () {
   }).then(function () {
     const remoteGlobal = window[
       remote.global
-      ] as unknown as WebpackRemoteContainer & {
+    ] as unknown as WebpackRemoteContainer & {
       __initialized: boolean;
     };
     const proxy: WebpackRemoteContainer = {
