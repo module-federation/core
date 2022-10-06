@@ -43,7 +43,7 @@
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": ["utils:github"],
+        "postTargets": ["utils:github", "utils:npm"],
         "trackDeps": true,
         "push": true
       }
@@ -53,6 +53,12 @@
       "options": {
         "tag": "${tag}",
         "notes": "${notes}"
+      }
+    },
+    "npm": {
+      "executor": "ngx-deploy-npm:deploy",
+      "options": {
+        "access": "public"
       }
     }
   },
