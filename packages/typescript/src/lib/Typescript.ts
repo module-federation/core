@@ -13,7 +13,7 @@ export class FederatedTypesPlugin {
   private exposedComponents!: ModuleFederationPluginOptions['exposes'];
   private remoteComponents!: ModuleFederationPluginOptions['remotes'];
   private distDir!: string;
-  private fsCache: Map<string, string[]>;
+  private fsCache: Map<string, string[]> = new Map();
   private typesIndexJsonFilePath!: string;
   private tsCompilerOptions!: ts.CompilerOptions;
   private webpackCompilerOptions!: Compiler['options'];
@@ -24,7 +24,6 @@ export class FederatedTypesPlugin {
 
   constructor(options: ModuleFederationPluginOptions) {
     this.options = options;
-    this.fsCache = new Map();
     this.tsCompilerOptions = {
       declaration: true,
       emitDeclarationOnly: true,
@@ -201,6 +200,10 @@ export class FederatedTypesPlugin {
       const files = this.getFiles(path.join(rootDir, entry));
 
       filename = files?.find((file) => file.split('.')[0] === 'index');
+      
+      if(!filename) {
+        throw new Error(`filename ${filename} not found`);
+      }
 
       return `${entry}/${filename}`;
     } catch (err) {
@@ -214,6 +217,10 @@ export class FederatedTypesPlugin {
 
         return baseFile === baseEntry;
       });
+      
+      if(!filename) {
+        throw new Error(`filename ${filename} not found`);
+      }
 
       return filename as string;
     }
