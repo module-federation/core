@@ -23,11 +23,6 @@ jobs:
       - run: yarn install --frozen-lockfile
       - name: Version
         shell: bash
-        run: yarn nx affected --base=last-release --target=version
+        run: yarn nx affected --base=main --head=HEAD~1 --target=version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Tag last-release
-        shell: bash
-        run: |
-          git tag -f last-release
-          git push origin last-release --force
