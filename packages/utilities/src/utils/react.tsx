@@ -27,6 +27,7 @@ class ErrorBoundary extends React.Component<any, any> {
  * Wrapper around dynamic import.
  * Adds error boundaries and fallback options
  */
+
 export const FederationBoundary = ({
   dynamicImporter,
   fallback = () => null,
