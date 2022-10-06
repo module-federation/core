@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.5.7](https://github.com/module-federation/nextjs-mf/compare/node-0.5.6...node-0.5.7) (2022-10-06)
+
+
+### Bug Fixes
+
+* fix node plugin fs augments when outside next child compiler ([#284](https://github.com/module-federation/nextjs-mf/issues/284)) ([dfa99c8](https://github.com/module-federation/nextjs-mf/commit/dfa99c86fdd8d73091764532d52be5f81b89a508))
+
+
+
 ## [0.5.6](https://github.com/module-federation/nextjs-mf/compare/node-0.5.5...node-0.5.6) (2022-10-06)
 
 
