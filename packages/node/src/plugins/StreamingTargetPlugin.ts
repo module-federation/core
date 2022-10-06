@@ -37,8 +37,7 @@ class StreamingTargetPlugin {
     // Can't use the 'false' value as it isn't the right format,
     // Perhaps delete the option might solve our use case.
 
-    // compiler.options.output.enabledChunkLoadingTypes = false;
-    delete compiler.options.output.enabledChunkLoadingTypes;
+    compiler.options.output.enabledChunkLoadingTypes = [];
 
     new ((webpack && webpack.node && webpack.node.NodeEnvironmentPlugin) ||
       require('webpack/lib/node/NodeEnvironmentPlugin'))({

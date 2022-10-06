@@ -5,9 +5,15 @@ import type {
   RuntimeRemote,
 } from '../types';
 
-// @ts-ignore
-const remoteVars = (process.env.REMOTES || {}) as Record<string,
+let remoteVars = {} as Record<string,
   Promise<any> | string | (() => Promise<any>)>;
+try {
+  // @ts-ignore
+  remoteVars = (process.env.REMOTES || {}) as Record<string,
+    Promise<any> | string | (() => Promise<any>)>;
+} catch (e) {
+  console.error('Error parsing REMOTES environment variable', e);
+}
 
 // split the @ syntax into url and global
 export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
