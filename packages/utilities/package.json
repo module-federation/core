@@ -8,7 +8,7 @@
     ".": "./src/index.js",
     "./package.json": "./package.json",
     "./react": "./src/utils/react.js",
-    "./*": "./src/"
+    "./src/": "./src/"
   },
   "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/utilities",
   "peerDependencies": {
