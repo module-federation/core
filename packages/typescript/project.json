@@ -37,8 +37,9 @@
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": ["typescript:npm", "typescript:github"],
-        "trackDeps": true
+        "postTargets": ["typescript:github", "typescript:npm"],
+        "trackDeps": true,
+        "push": true
       }
     },
     "github": {
