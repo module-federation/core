@@ -1,6 +1,6 @@
 import Template from './Template';
-import { WebpackRemoteContainer } from '@module-federation/utilities';
 import { parseRemoteSyntax } from '../src/internal';
+import { WebpackRemoteContainer } from '@module-federation/utilities';
 import path from 'path';
 
 const swc = require('@swc/core');
