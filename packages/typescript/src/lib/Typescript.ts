@@ -110,7 +110,9 @@ export class FederatedTypesPlugin {
             indexFileResp.data?.forEach((file) =>
               download(
                 `${origin}/${this.typescriptFolderName}/${file}`,
-                `${this.typescriptFolderName}/${remote}`
+                `${this.typescriptFolderName}/${remote}`, {
+                  filename: file
+                }
               )
             );
           })
