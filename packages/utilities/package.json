@@ -5,15 +5,10 @@
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "exports": {
-    ".": {
-      "import": "./src/index.js",
-      "require": "./src/index.js"
-    },
+    ".": "./src/index.js",
     "./package.json": "./package.json",
-    "./react": {
-      "import": "./src/utils/react.js",
-      "require": "./src/utils/react.js"
-    }
+    "./react": "./src/utils/react.js",
+    "./*": "./src/"
   },
   "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/utilities",
   "peerDependencies": {

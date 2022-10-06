@@ -81,6 +81,7 @@ const executeLoadTemplate = `
             return executeLoad(remoteUrl, true);
           }
           console.warn(moduleName,'is offline, returning fake remote')
+
           return {
             fake: true,
             get:(arg)=>{
@@ -127,7 +128,7 @@ function buildRemotes(
     ${executeLoadTemplate}
     resolve(executeLoad(${JSON.stringify(config)}))
     }).then(remote=>{
-      if(!global.usedChunks || remote.fake) {
+      if(remote.fake) {
         return remote;
       }
 
@@ -141,7 +142,7 @@ function buildRemotes(
           const m = f();
           return ()=>new Proxy(m, {
             get: (target, prop)=>{
-            global.usedChunks.add(${JSON.stringify(global)} + "->" + arg);
+            if(global.usedChunks) global.usedChunks.add(${JSON.stringify(global)} + "->" + arg);
               return target[prop];
             }
           })
@@ -151,7 +152,7 @@ function buildRemotes(
         global.__remote_scope__[${JSON.stringify(global)}].__initialized = true;
           return remote.init(new Proxy(args, {
             set: (target, prop, value)=>{
-              global.usedChunks.add(${JSON.stringify(global)} + "->" + prop);
+              if(global.usedChunks) global.usedChunks.add(${JSON.stringify(global)} + "->" + prop);
               target[prop] = value;
               return true;
             }
