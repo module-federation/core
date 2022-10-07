@@ -1,7 +1,9 @@
 const { withNx } = require('@nrwl/next/plugins/with-nx');
 
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
-
+const {
+  promiseTemplate,
+} = require('@module-federation/nextjs-mf/utils/build-utils');
 /**
  * @type {import('@nrwl/next/plugins/with-nx').WithNxOptions}
  **/
@@ -20,9 +22,25 @@ const nextConfig = {
           name: 'shop',
           filename: 'static/chunks/remoteEntry.js',
           remotes: {
-            home: `home_app@http://localhost:3000/_next/static/${
-              isServer ? 'ssr' : 'chunks'
-            }/remoteEntry.js`,
+
+  // shop: promiseTemplate('global@url', (resolve,reject) => {}),
+    home: promiseTemplate(
+    // can also be a string if it needs to be computed in scope
+    `(resolve, reject) => {
+                resolve("home_app@http://localhost:3000/_next/static/${
+      isServer ? 'ssr' : 'chunks'
+    }/remoteEntry.js");
+              }`,
+    (resolve,reject)=>{
+      console.log('runing other promise');
+      setTimeout(() => {
+        console.log('resolving promise');
+        resolve();
+      } , 1000);
+    }),
+            // home: `home_app@http://localhost:3000/_next/static/${
+            //   isServer ? 'ssr' : 'chunks'
+            // }/remoteEntry.js`,
             shop: `shop@http://localhost:3001/_next/static/${
               isServer ? 'ssr' : 'chunks'
             }/remoteEntry.js`,

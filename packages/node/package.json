@@ -15,6 +15,7 @@
       "require": "./src/utils/index.js"
     }
   },
+  "tags": ["module-federation", "node", "webpack", "node-federation", "node-module-federation","ssr"],
   "types": "src/index.d.ts",
   "description": "Module Federation helper for Node",
   "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/node",
