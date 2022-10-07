@@ -125,8 +125,36 @@ function buildRemotes(
       global
     )}] = ${JSON.stringify(url)};
 
-    ${executeLoadTemplate}
-    resolve(executeLoad(${JSON.stringify(config)}))
+     var __webpack_error__ = new Error();
+    if (typeof global.__remote_scope__[${JSON.stringify(global)}] !== 'undefined') return resolve(global.__remote_scope__[${JSON.stringify(global)}]);
+    __webpack_require__.l(
+      ${JSON.stringify(url)},
+      function (event) {
+        if (typeof global.__remote_scope__[${JSON.stringify(global)}] !== 'undefined') return resolve(global.__remote_scope__[${JSON.stringify(global)}]);
+        var realSrc = event && event.target && event.target.src;
+        __webpack_error__.message =
+          'Loading script failed.\\n(' + event.message + ': ' + realSrc + ')';
+        __webpack_error__.name = 'ScriptExternalLoadError';
+        __webpack_error__.stack = event.stack;
+        reject(__webpack_error__);
+      },
+      ${JSON.stringify(global)},
+    );
+    }).catch(()=>{
+        console.warn(${JSON.stringify(global)},'is offline, returning fake remote')
+
+          return {
+            fake: true,
+            get:(arg)=>{
+              console.log('faking', arg,'module on', ${JSON.stringify(global)});
+
+              return Promise.resolve(()=>{
+              return ()=>null
+              });
+            },
+            init:()=>{}
+          }
+
     }).then(remote=>{
       if(remote.fake) {
         return remote;
@@ -136,7 +164,10 @@ function buildRemotes(
    const proxy =  {
       get: (arg)=>{
         if(!global.__remote_scope__[${JSON.stringify(global)}].__initialized) {
-          try {proxy.init(__webpack_require__.S.default);} catch(e) {}
+          try {
+            global.__remote_scope__[${JSON.stringify(global)}].__initialized = true;
+            proxy.init(__webpack_require__.S.default);
+          } catch(e) {}
         }
         return remote.get(arg).then((f)=>{
           const m = f();
@@ -149,6 +180,7 @@ function buildRemotes(
         })
       },
         init: (args)=> {
+        if(global.__remote_scope__[${JSON.stringify(global)}].__initialized) return Promise.resolve();
         global.__remote_scope__[${JSON.stringify(global)}].__initialized = true;
           return remote.init(new Proxy(args, {
             set: (target, prop, value)=>{

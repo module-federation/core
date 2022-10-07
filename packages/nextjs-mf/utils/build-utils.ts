@@ -34,7 +34,7 @@ export const computeRemoteFilename = (isServer: boolean, filename: string) => {
 // // To satisfy Typescript.
 declare const urlAndGlobal: string;
 //remote is defined in the template wrapper
-const remoteTemplate = function () {
+const IsomorphicRemoteTemplate = function () {
   const index = urlAndGlobal.indexOf('@');
 
   if (index <= 0 || index === urlAndGlobal.length - 1) {
@@ -45,20 +45,23 @@ const remoteTemplate = function () {
     global: urlAndGlobal.substring(0, index) as unknown as number, // this casting to satisfy TS
   };
 
+  //@ts-ignore
+  const globalScope = typeof window !== 'undefined' ? window : global.__remote_scope__; //todo fix types
+
   return new Promise<void>(function (resolve, reject) {
     const __webpack_error__ = new Error() as Error & {
       type: string;
       request: string | null;
     };
 
-    if (typeof window[remote.global] !== 'undefined') {
+    if (typeof globalScope[remote.global] !== 'undefined') {
       return resolve();
     }
 
     (__webpack_require__ as any).l(
       remote.url,
       function (event: Event) {
-        if (typeof window[remote.global] !== 'undefined') {
+        if (typeof globalScope[remote.global] !== 'undefined') {
           return resolve();
         }
 
@@ -85,7 +88,7 @@ const remoteTemplate = function () {
       remote.global
     );
   }).then(function () {
-    const remoteGlobal = window[
+    const remoteGlobal = globalScope[
       remote.global
     ] as unknown as WebpackRemoteContainer & {
       __initialized: boolean;
@@ -130,6 +133,7 @@ const remoteTemplate = function () {
     return proxy;
   });
 };
+
 
 export const promiseFactory = (factory: string | Function) => {
   const wrapper = `new Promise(${factory.toString()})`;
@@ -184,7 +188,7 @@ export const promiseTemplate = (
     remoteFactory = (remoteSyntax) => {
       return Template.asString([
         `${remoteSyntax}.then(function(urlAndGlobal) {`,
-        Template.indent([Template.getFunctionContent(remoteTemplate)]),
+        Template.indent([Template.getFunctionContent(IsomorphicRemoteTemplate)]),
         '})',
       ]);
     };

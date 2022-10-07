@@ -14,6 +14,7 @@ const nextConfig = {
     // See: https://github.com/gregberge/svgr
     svgr: false,
   },
+
   webpack(config, options) {
     const { isServer } = options;
       const remotes = {
@@ -23,6 +24,7 @@ const nextConfig = {
         checkout: `checkout@http://localhost:3002/_next/static/${
           isServer ? 'ssr' : 'chunks'
         }/remoteEntry.js`,
+
       };
 
       config.plugins.push(
