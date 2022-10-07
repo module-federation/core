@@ -89,22 +89,25 @@ export const injectScript = (
       request: string | null;
     };
 
+    //@ts-ignore
+    const globalScope = typeof window !== 'undefined' ? window : global.__remote_scope__; //todo fix types
+
     asyncContainer = new Promise(function (resolve, reject) {
       function resolveRemoteGlobal() {
-        const asyncContainer = window[
+        const asyncContainer = globalScope[
           remoteGlobal
           ] as unknown as AsyncContainer;
         return resolve(asyncContainer);
       }
 
-      if (typeof window[remoteGlobal] !== 'undefined') {
+      if (typeof globalScope[remoteGlobal] !== 'undefined') {
         return resolveRemoteGlobal();
       }
 
       (__webpack_require__ as any).l(
         reference.url,
         function (event: Event) {
-          if (typeof window[remoteGlobal] !== 'undefined') {
+          if (typeof globalScope[remoteGlobal] !== 'undefined') {
             return resolveRemoteGlobal();
           }
 
