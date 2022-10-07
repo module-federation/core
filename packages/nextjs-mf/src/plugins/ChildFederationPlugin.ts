@@ -259,33 +259,7 @@ export class ChildFederationPlugin {
       }
 
       if (isDev) {
-        const compilerWithCallback = (watchOptions: WatchOptions, callback: any) => {
-          if (childCompiler.watch) {
-            if (isServer && !this.watching) {
-              this.watching = true;
-              childCompiler.watch(watchOptions, callback);
-            }
-          } else {
-            childCompiler.run(callback);
-          }
-        }
-
         const compilerCallback = (err: Error | null | undefined, stats: Stats | undefined) => {
-          //workaround due to watch mode not running unless youve hit a page on the remote itself
-          if (isServer && isDev && childCompilers['client']) {
-            childCompilers['client'].run((err, stats) => {
-              if (err) {
-                compilation.errors.push(err as WebpackError);
-              }
-              if (stats && stats.hasErrors()) {
-                compilation.errors.push(
-                  new Error(
-                    toDisplayErrors(stats.compilation.errors)
-                  ) as WebpackError
-                );
-              }
-            });
-          }
           if (err) {
             compilation.errors.push(err as WebpackError);
           }
@@ -298,7 +272,7 @@ export class ChildFederationPlugin {
           }
         }
 
-        compilerWithCallback(compiler.options.watchOptions, compilerCallback);
+        childCompiler.watch(compiler.options.watchOptions, compilerCallback);
 
 
         // in prod, if client
