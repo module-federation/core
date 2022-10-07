@@ -26,7 +26,7 @@ const SharedNav = () => {
 
   return (
     <Layout.Header>
-      <div className={tjhin}>nextjs-mf</div>
+      <div className="header-logo">nextjs-mf 1234</div>
       <Menu
         theme="dark"
         mode="horizontal"
