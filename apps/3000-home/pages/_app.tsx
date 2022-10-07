@@ -6,7 +6,6 @@ import { useMFClient } from '@module-federation/nextjs-mf/client';
 
 import SharedNav from '../components/SharedNav';
 import HostAppMenu from './_menu';
-
 import 'antd/dist/antd.css';
 
 function MyApp({ Component, pageProps }) {

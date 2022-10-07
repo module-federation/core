@@ -32,11 +32,8 @@ const nextConfig = {
           name: 'home_app',
           filename: 'static/chunks/remoteEntry.js',
           remotes: {
-            checkout: `internal ./my-custom-logic-for-load-remoteEntry.js`,
-            home: `internal ./my-custom-logic-for-load-remoteEntry.js`,
-            shop: `internal ./my-custom-logic-for-load-remoteEntry.js`,
-            a: `internal ./my-custom-logic-for-load-remoteEntry.js`,
-            b: `internal ./my-custom-logic-for-load-remoteEntry.js`,
+            shop: remotes.shop,
+            checkout: remotes.checkout,
           },
           exposes: {
             './SharedNav': './components/SharedNav',
