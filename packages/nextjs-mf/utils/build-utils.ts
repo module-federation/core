@@ -34,7 +34,7 @@ export const computeRemoteFilename = (isServer: boolean, filename: string) => {
 // // To satisfy Typescript.
 declare const urlAndGlobal: string;
 //remote is defined in the template wrapper
-const remoteTemplate = function () {
+const BrowserRemoteTemplate = function () {
   const index = urlAndGlobal.indexOf('@');
 
   if (index <= 0 || index === urlAndGlobal.length - 1) {
@@ -131,6 +131,10 @@ const remoteTemplate = function () {
   });
 };
 
+export const ServerRemoteTemplate = function (){
+
+}
+
 export const promiseFactory = (factory: string | Function) => {
   const wrapper = `new Promise(${factory.toString()})`;
 
@@ -184,7 +188,7 @@ export const promiseTemplate = (
     remoteFactory = (remoteSyntax) => {
       return Template.asString([
         `${remoteSyntax}.then(function(urlAndGlobal) {`,
-        Template.indent([Template.getFunctionContent(remoteTemplate)]),
+        Template.indent([Template.getFunctionContent(BrowserRemoteTemplate)]),
         '})',
       ]);
     };

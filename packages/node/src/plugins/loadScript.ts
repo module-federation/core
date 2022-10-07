@@ -49,3 +49,36 @@ export default `
       }
     }
 `;
+
+export const executeLoadTemplate = `
+    function executeLoad(url, callback, moduleName) {
+      console.log('remoteUrl',remoteUrl)
+        const [scriptUrl, moduleName] = extractUrlAndGlobal(remoteUrl);
+        console.log("executing remote load", scriptUrl);
+        const vm = require('vm');
+        return new Promise(function (resolve, reject) {
+          if(global.__remote_scope__[moduleName]) resolve(global.__remote_scope__[moduleName]);
+         (global.webpackChunkLoad || global.fetch || require("node-fetch"))(scriptUrl).then(function(res){
+            return res.text();
+          }).then(function(scriptContent){
+            try {
+              const vmContext = { exports, require, module, global, __filename, __dirname, URL, ...global};
+              const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, { filename: 'node-federation-loader-' + moduleName + '.vm' });
+
+              /* TODO: need something like a chunk loading queue, this can lead to async issues
+               if two containers load the same remote, they can overwrite global scope
+               should check someone is already loading remote and await that */
+              global.__remote_scope__[moduleName] = remote[moduleName] || remote
+              resolve(global.__remote_scope__[moduleName])
+            } catch(e) {
+              console.error('problem executing remote module', moduleName);
+              reject(e);
+            }
+          }).catch((e)=>{
+            console.error('failed to fetch remote', moduleName, scriptUrl);
+            console.error(e);
+            reject(null)
+          })
+        })
+    }
+`;

@@ -9,6 +9,7 @@ export const flushChunks = async () => {
       return
     }
     const statsFile = global.__remote_scope__._config[remote].replace('remoteEntry.js', 'federated-stats.json')
+    // fetch the json file
     const stats = await fetch(statsFile).then(async (res) => {
       return await res.json()
     })

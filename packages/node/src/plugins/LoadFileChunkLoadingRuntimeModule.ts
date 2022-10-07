@@ -14,7 +14,7 @@ import { RuntimeModule, RuntimeGlobals, Template } from 'webpack';
 import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
 import { getUndoPath } from 'webpack/lib/util/identifier';
 
-import loadScriptTemplate from './loadScript';
+import loadScriptTemplate, {executeLoadTemplate} from './loadScript';
 
 interface ReadFileChunkLoadingRuntimeModuleOptions {
   baseURI: Compiler['options']['output']['publicPath'];
@@ -189,6 +189,25 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
           ])};`
         : '// no chunk install function needed',
       '',
+      withLoading ?
+        Template.asString([
+          "// load script equivalent for server side",
+          `${fn}.l = ${runtimeTemplate.basicFunction('url,callback,global', [
+            'return new Promise(function(resolve, reject) {',
+            Template.indent([
+              "if(!global.__remote_scope__) {",
+              Template.indent(["// create a global scope for container, similar to how remotes are set on window in the browser",
+                "global.__remote_scope__ = {",
+                  "_config: {},",
+                "}",
+              ]),
+              "}",
+            ]),
+            Template.indent([
+              executeLoadTemplate,
+              `executeLoad(url,callback,global).then(resolve).catch(reject);`,
+            ]),
+        ]),
       withLoading
         ? Template.asString([
             '// ReadFile + VM.run chunk loading for javascript',

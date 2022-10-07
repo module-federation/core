@@ -14,6 +14,7 @@ const nextConfig = {
     // See: https://github.com/gregberge/svgr
     svgr: false,
   },
+
   webpack(config, options) {
     const { isServer } = options;
       const remotes = {
@@ -23,6 +24,7 @@ const nextConfig = {
         checkout: `checkout@http://localhost:3002/_next/static/${
           isServer ? 'ssr' : 'chunks'
         }/remoteEntry.js`,
+
       };
 
       config.plugins.push(
@@ -30,8 +32,11 @@ const nextConfig = {
           name: 'home_app',
           filename: 'static/chunks/remoteEntry.js',
           remotes: {
-            shop: remotes.shop,
-            checkout: remotes.checkout,
+            checkout: `internal ./my-custom-logic-for-load-remoteEntry.js`,
+            home: `internal ./my-custom-logic-for-load-remoteEntry.js`,
+            shop: `internal ./my-custom-logic-for-load-remoteEntry.js`,
+            a: `internal ./my-custom-logic-for-load-remoteEntry.js`,
+            b: `internal ./my-custom-logic-for-load-remoteEntry.js`,
           },
           exposes: {
             './SharedNav': './components/SharedNav',
