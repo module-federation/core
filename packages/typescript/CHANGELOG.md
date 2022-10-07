@@ -2,6 +2,13 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.2.7](https://github.com/module-federation/nextjs-mf/compare/typescript-0.2.6...typescript-0.2.7) (2022-10-07)
+
+### Dependency Updates
+
+* `utils` updated to version `0.2.1`
+
+
 ## [0.2.6](https://github.com/module-federation/nextjs-mf/compare/typescript-0.2.5...typescript-0.2.6) (2022-10-06)
 
 

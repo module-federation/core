@@ -2,6 +2,26 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.2.1](https://github.com/module-federation/nextjs-mf/compare/utils-0.2.0...utils-0.2.1) (2022-10-07)
+
+
+### Bug Fixes
+
+* fix node plugin fs augments when outside next child compiler ([#284](https://github.com/module-federation/nextjs-mf/issues/284)) ([dfa99c8](https://github.com/module-federation/nextjs-mf/commit/dfa99c86fdd8d73091764532d52be5f81b89a508))
+* **package.json:** fix package export fields for utils ([#285](https://github.com/module-federation/nextjs-mf/issues/285)) ([99d6b77](https://github.com/module-federation/nextjs-mf/commit/99d6b779696b5dbebea9cf3c870a5caa5d9d7c6f))
+
+
+
+## [0.2.1](https://github.com/module-federation/nextjs-mf/compare/utils-0.2.0...utils-0.2.1) (2022-10-07)
+
+
+### Bug Fixes
+
+* fix node plugin fs augments when outside next child compiler ([#284](https://github.com/module-federation/nextjs-mf/issues/284)) ([dfa99c8](https://github.com/module-federation/nextjs-mf/commit/dfa99c86fdd8d73091764532d52be5f81b89a508))
+* **package.json:** fix package export fields for utils ([#285](https://github.com/module-federation/nextjs-mf/issues/285)) ([99d6b77](https://github.com/module-federation/nextjs-mf/commit/99d6b779696b5dbebea9cf3c870a5caa5d9d7c6f))
+
+
+
 ## [0.2.1](https://github.com/module-federation/nextjs-mf/compare/utils-0.2.0...utils-0.2.1) (2022-10-06)
 
 
