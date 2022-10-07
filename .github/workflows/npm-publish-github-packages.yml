@@ -26,6 +26,7 @@ jobs:
         run: yarn nx affected --base=last-release --target=version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Tag last-release
         shell: bash
         run: |
