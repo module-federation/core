@@ -7,7 +7,6 @@ export const revalidate = (options) => {
 
     return new Promise(async (res) => {
       const fetches = []
-console.log(remoteScope)
       for (const property in remoteScope) {
         if(remoteScope[property].fake) {
           console.log('unreachable remote found', property, 'hot reloading to refetch')
@@ -20,7 +19,10 @@ console.log(remoteScope)
         if (typeof remote === "function") {
           remote = await remote();
         }
-
+        if(remote.fake) {
+          console.log('fake remote found', property, 'hot reloading to refetch')
+          res(true)
+        }
         const name = property;
         const url = remote;
         const fetcher = (global.webpackChunkLoad || global.fetch || require('node-fetch'))(url)

@@ -164,7 +164,10 @@ function buildRemotes(
    const proxy =  {
       get: (arg)=>{
         if(!global.__remote_scope__[${JSON.stringify(global)}].__initialized) {
-          try {proxy.init(__webpack_require__.S.default);} catch(e) {}
+          try {
+            global.__remote_scope__[${JSON.stringify(global)}].__initialized = true;
+            proxy.init(__webpack_require__.S.default);
+          } catch(e) {}
         }
         return remote.get(arg).then((f)=>{
           const m = f();
@@ -177,6 +180,7 @@ function buildRemotes(
         })
       },
         init: (args)=> {
+        if(global.__remote_scope__[${JSON.stringify(global)}].__initialized) return Promise.resolve();
         global.__remote_scope__[${JSON.stringify(global)}].__initialized = true;
           return remote.init(new Proxy(args, {
             set: (target, prop, value)=>{
