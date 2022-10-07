@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [0.6.0](https://github.com/module-federation/nextjs-mf/compare/node-0.5.7...node-0.6.0) (2022-10-07)
+
+
+### Features
+
+* implement __webpack_require__.l functionality in server builds ([99d1231](https://github.com/module-federation/nextjs-mf/commit/99d12314f68ac526000fa5410a14072a11b260a4))
+
+
+
 ## [0.5.7](https://github.com/module-federation/nextjs-mf/compare/node-0.5.6...node-0.5.7) (2022-10-06)
 
 
