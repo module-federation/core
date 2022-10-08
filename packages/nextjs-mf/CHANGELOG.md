@@ -2,6 +2,32 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [5.9.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.8.5...nextjs-mf-5.9.0) (2022-10-08)
+
+### Dependency Updates
+
+* `node` updated to version `0.6.0`
+* `utils` updated to version `0.3.0`
+
+### Features
+
+* implement __webpack_require__.l functionality in server builds ([99d1231](https://github.com/module-federation/nextjs-mf/commit/99d12314f68ac526000fa5410a14072a11b260a4))
+
+
+
+# [5.9.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.8.5...nextjs-mf-5.9.0) (2022-10-08)
+
+### Dependency Updates
+
+* `node` updated to version `0.6.0`
+* `utils` updated to version `0.3.0`
+
+### Features
+
+* implement __webpack_require__.l functionality in server builds ([99d1231](https://github.com/module-federation/nextjs-mf/commit/99d12314f68ac526000fa5410a14072a11b260a4))
+
+
+
 ## [5.8.5](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.8.4...nextjs-mf-5.8.5) (2022-10-07)
 
 ### Dependency Updates

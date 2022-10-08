@@ -2,6 +2,18 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [1.0.0](https://github.com/module-federation/nextjs-mf/compare/typescript-0.2.8...typescript-1.0.0) (2022-10-08)
+
+
+* feat(typescript)!: Use expose public path as basis for @mf-typescript output structure (#252) ([ae4e6f9](https://github.com/module-federation/nextjs-mf/commit/ae4e6f993ee7293250cd9bac94d5076c0800aebc)), closes [#252](https://github.com/module-federation/nextjs-mf/issues/252)
+
+
+### BREAKING CHANGES
+
+* Updates to @mf-typescript folder structure, references to imported types need updating
+
+
+
 ## [0.2.8](https://github.com/module-federation/nextjs-mf/compare/typescript-0.2.7...typescript-0.2.8) (2022-10-07)
 
 ### Dependency Updates
