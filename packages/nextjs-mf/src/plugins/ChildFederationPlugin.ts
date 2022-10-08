@@ -178,6 +178,8 @@ export class ChildFederationPlugin {
         childOutput,
         plugins
       );
+console.log('childCompiler', childCompiler.options.externals)
+      //remote next.js externals function from build
 
       if (!isServer) {
         new ChunkCorrelationPlugin({filename: 'static/ssr/federated-stats.json'}).apply(childCompiler);
