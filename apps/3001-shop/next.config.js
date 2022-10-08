@@ -22,25 +22,9 @@ const nextConfig = {
           name: 'shop',
           filename: 'static/chunks/remoteEntry.js',
           remotes: {
-
-  // shop: promiseTemplate('global@url', (resolve,reject) => {}),
-    home: promiseTemplate(
-    // can also be a string if it needs to be computed in scope
-    `(resolve, reject) => {
-                resolve("home_app@http://localhost:3000/_next/static/${
-      isServer ? 'ssr' : 'chunks'
-    }/remoteEntry.js");
-              }`,
-    (resolve,reject)=>{
-      console.log('runing other promise');
-      setTimeout(() => {
-        console.log('resolving promise');
-        resolve();
-      } , 1000);
-    }),
-            // home: `home_app@http://localhost:3000/_next/static/${
-            //   isServer ? 'ssr' : 'chunks'
-            // }/remoteEntry.js`,
+            home: `home_app@http://localhost:3000/_next/static/${
+              isServer ? 'ssr' : 'chunks'
+            }/remoteEntry.js`,
             shop: `shop@http://localhost:3001/_next/static/${
               isServer ? 'ssr' : 'chunks'
             }/remoteEntry.js`,
