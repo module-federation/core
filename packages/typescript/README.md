@@ -34,13 +34,16 @@ plugins: [
 
 You need to register this plugin in both remote and host apps. The plugin will automatically create a directory named `@mf-typescript` in the host app - that contains all the types exported by the remote apps.
 
-In your file:
-```typescript
-import RemoteButtonType from "../@mf-typescript/Button";
+To have the type definitions automatically found for imports, add `paths` in `tsconfig.json`:
 
-const RemoteButton = React.lazy(
-  () => import("app2/Button")
-) as unknown as typeof RemoteButtonType;
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "*": ["./@mf-typescript/*"]
+    }
+  },
+}
 ```
 
 ### Usage in Next.js
