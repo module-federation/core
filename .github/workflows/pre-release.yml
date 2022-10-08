@@ -1,4 +1,4 @@
-name: pre-release
+name: PR-Workflow
 
 on:
   pull_request:
@@ -6,7 +6,8 @@ on:
       - opened
 
 jobs:
-  checks:
+  build_checks:
+    name: Build Checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
