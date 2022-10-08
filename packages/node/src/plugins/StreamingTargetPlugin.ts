@@ -35,18 +35,12 @@ class StreamingTargetPlugin {
     // Disable default config
     // FIXME: enabledChunkLoadingTypes is of type 'string[] | undefined'
     // Can't use the 'false' value as it isn't the right format,
-    // Emptying it out ensures theres no other readFileVm added to webpac kruntime
+    // Emptying it out ensures theres no other readFileVm added to webpack runtime
     compiler.options.output.enabledChunkLoadingTypes = [];
     compiler.options.output.environment = {
       ...compiler.options.output.environment,
       dynamicImport: true,
-      // module: true,
     }
-    // compiler.options.output.asyncChunks = true;
-    // compiler.options.output.enabledChunkLoadingTypes = [ 'require','async-node' ]
-    // compiler.options.output.enabledLibraryTypes= [ 'commonjs2', 'commonjs-module' ],
-    //   compiler.options.output.enabledWasmLoadingTypes= [ 'async-node' ],
-    //   compiler.options.output.importFunctionName= 'import',
 
     new ((webpack && webpack.node && webpack.node.NodeEnvironmentPlugin) ||
       require('webpack/lib/node/NodeEnvironmentPlugin'))({
