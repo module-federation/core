@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.6.1](https://github.com/module-federation/nextjs-mf/compare/node-0.6.0...node-0.6.1) (2022-10-10)
+
+
+### Bug Fixes
+
+* support dynamic import of esm modules ([#296](https://github.com/module-federation/nextjs-mf/issues/296)) ([cf28356](https://github.com/module-federation/nextjs-mf/commit/cf28356728354e1f63c0d588035dd115398f8641))
+
+
+
 # [0.6.0](https://github.com/module-federation/nextjs-mf/compare/node-0.5.7...node-0.6.0) (2022-10-07)
 
 

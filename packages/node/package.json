@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "type": "commonjs",
   "main": "src/index.js",
   "exports": {
@@ -15,7 +15,14 @@
       "require": "./src/utils/index.js"
     }
   },
-  "tags": ["module-federation", "node", "webpack", "node-federation", "node-module-federation","ssr"],
+  "tags": [
+    "module-federation",
+    "node",
+    "webpack",
+    "node-federation",
+    "node-module-federation",
+    "ssr"
+  ],
   "types": "src/index.d.ts",
   "description": "Module Federation helper for Node",
   "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/node",
