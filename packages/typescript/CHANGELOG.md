@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.0.1](https://github.com/module-federation/nextjs-mf/compare/typescript-1.0.0...typescript-1.0.1) (2022-10-10)
+
+
+### Bug Fixes
+
+* get types on remote url with subdirectory ([#302](https://github.com/module-federation/nextjs-mf/issues/302)) ([d3f9060](https://github.com/module-federation/nextjs-mf/commit/d3f9060586b671ce1dd18ab5ef45e1fb5f7d5172))
+
+
+
 # [1.0.0](https://github.com/module-federation/nextjs-mf/compare/typescript-0.2.8...typescript-1.0.0) (2022-10-08)
 
 
