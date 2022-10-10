@@ -91,11 +91,12 @@ export class FederatedTypesPlugin {
     if (this.remoteComponents) {
       const remoteUrls = Object.entries(this.remoteComponents).map(
         ([remote, entry]) => {
-          const [, url] = entry.split('@');
-
+          const remoteUrl = entry.substring(0, entry.lastIndexOf('/'))
+          const [, url] = remoteUrl.split('@');
+      
           return {
-            origin: new URL(url ?? entry).origin,
-            remote,
+            origin: url ?? remoteUrl,
+            remote
           };
         }
       );
