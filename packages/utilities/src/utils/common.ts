@@ -161,9 +161,7 @@ export const injectScript = (
       }
     })
     .then(function (container) {
-      console.log('dynamic init for share scope')
       try {
-        console.log('in try',__webpack_share_scopes__['default'])
         // WARNING: here might be a potential BUG.
         //   `container.init` does not return a Promise, and here we do not call `then` on it.
         // But according to [docs](https://webpack.js.org/concepts/module-federation/#dynamic-remote-containers)
