@@ -8,6 +8,8 @@
 
 [module-federation/utilities](./packages/utilities)
 
+[module-federation/typescript](./packages/typescript)
+
 ## Generate an application
 
 Run `nx g @nrwl/next:app my-app` to generate an application.
