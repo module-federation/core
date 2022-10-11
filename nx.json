@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "npmScope": "module-federation",
+  "defaultProject": "3000-home",
   "affected": {
     "defaultBase": "main"
   },
