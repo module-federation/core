@@ -41,7 +41,8 @@ export const runtimeRemotes = Object.entries(remoteVars).reduce(function (
   }
   // if its a function that must be called (lazily executing function)
   else if (typeof value === 'function') {
-    acc[key] = { asyncContainer: value() };
+    // @ts-ignore
+    acc[key] = { asyncContainer: value };
   }
   // if its just a string (global@url)
   else if (typeof value === 'string') {
@@ -79,7 +80,8 @@ export const injectScript = (
       : keyOrRuntimeRemoteItem;
 
   if (reference.asyncContainer) {
-    asyncContainer = reference.asyncContainer;
+    // @ts-ignore
+    asyncContainer = typeof reference.asyncContainer.then === 'function' ? reference.asyncContainer : reference.asyncContainer();
   } else {
     // This casting is just to satisfy typescript,
     // In reality remoteGlobal will always be a string;
@@ -144,6 +146,7 @@ export const injectScript = (
   }
 
   // 2) Initialize remote container
+  // @ts-ignore
   return asyncContainer
     .then(function (container) {
       if (!__webpack_share_scopes__['default']) {
