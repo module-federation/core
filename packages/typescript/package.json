@@ -10,6 +10,9 @@
     "remote types",
     "federated types"
   ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "author": "Prasanna Mestha <prasanna@privjs.com> (https://github.com/prasannamestha)",
   "contributors": [
     "Zack Jackson <zackary.l.jackson@gmail.com> (https://github.com/ScriptedAlchemy)",

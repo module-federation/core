@@ -15,6 +15,9 @@
       "require": "./src/utils/index.js"
     }
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "tags": [
     "module-federation",
     "node",

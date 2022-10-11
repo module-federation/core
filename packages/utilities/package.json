@@ -4,6 +4,9 @@
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "exports": {
     ".": "./src/index.js",
     "./package.json": "./package.json",
