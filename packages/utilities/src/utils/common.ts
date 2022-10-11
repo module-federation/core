@@ -146,6 +146,7 @@ export const injectScript = (
   }
 
   // 2) Initialize remote container
+  // @ts-ignore
   return asyncContainer
     .then(function (container) {
       if (!__webpack_share_scopes__['default']) {
