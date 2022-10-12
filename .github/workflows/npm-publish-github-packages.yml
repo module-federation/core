@@ -1,4 +1,4 @@
-name: release
+name: Release
 
 on:
   push:
@@ -25,7 +25,8 @@ jobs:
         shell: bash
         run: |
           npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
-          yarn nx affected --base=last-release --target=version
+          PROJECTS=$($(npm bin)/nx print-affected --type=lib --select=projects --base=origin/main)
+          yarn nx run-many  --base=last-release --target=version --projects="$PROJECTS"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
