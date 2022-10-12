@@ -20,17 +20,10 @@ jobs:
         run: |
           git config user.name "GitHub Bot"
           git config user.email "gituser@example.com"
-      - uses: actions/cache@v2
-        id: yarn-cache
+      - uses: actions/setup-node@v3
         with:
-          path: |
-            **/node_modules
-            **/.eslintcache
-            ${{ steps.yarn-cache-dir-path.outputs.dir }}
-
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          node-version: '14'
+          cache: 'yarn'
       - name: Install packages
         run: yarn install --frozen-lockfile
       - name: Version
@@ -38,6 +31,7 @@ jobs:
         run: |
           npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
           PROJECTS=$($(npm bin)/nx print-affected --type=lib --select=projects --base=origin/main)
+          yarn nx run-many --base=last-release --target=build --projects="$PROJECTS" --parallel=1
           yarn nx run-many --base=last-release --target=version --projects="$PROJECTS" --parallel=1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
