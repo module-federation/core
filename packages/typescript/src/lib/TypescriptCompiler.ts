@@ -23,10 +23,6 @@ export class TypescriptCompiler {
     ) => {
       // for exposes: { "./expose/path": "path/to/file" }
       // force typescript to write compiled output to "@mf-typescript/expose/path"
-      // const newFileName = `${
-      //   exposeSrcToDestMap[sourceFiles?.[0].fileName || '']
-      // }.d.ts`;
-
       const newFileName = createFilenameFn(sourceFiles?.[0].fileName || '');
 
       const newFilePath = path.join(

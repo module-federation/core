@@ -5,9 +5,10 @@
  **/
 const moduleFederationConfig = {
   name: 'react-ts-host',
-  // remotes: ['react-ts-remote'],
+  remotes: ['react-ts-remote'],
   exposes: {
     './Component': './src/app/nx-welcome.tsx',
+    './ab/c/Component': './src/app/App.tsx',
   },
 };
 

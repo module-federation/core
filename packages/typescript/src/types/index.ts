@@ -5,3 +5,7 @@ export { ModuleFederationPluginOptions };
 export interface FederatedTypesPluginOptions {
   federationConfig: ModuleFederationPluginOptions;
 }
+
+export interface TypesStatsJson {
+  files: Record<string, string>;
+}

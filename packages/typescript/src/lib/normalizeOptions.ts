@@ -37,12 +37,19 @@ export const normalizeOptions = (
         : webpackPublicPath
       : '';
 
+  const remoteEntryFilename = options.federationConfig.filename;
+
+  const typesStatsFileName = remoteEntryFilename
+    ? remoteEntryFilename.replace('remoteEntry.js', typesIndexJsonFileName)
+    : typesIndexJsonFileName;
+
   return {
     distDir,
     publicPath,
     tsCompilerOptions,
     typesIndexJsonFileName,
     typesIndexJsonFilePath,
+    typesStatsFileName,
     typescriptFolderName,
   };
 };

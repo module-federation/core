@@ -1,19 +1,16 @@
-import { isObjectEmpty } from '@module-federation/utilities';
-
-import ts from 'typescript';
 import download from 'download';
 import fs from 'fs';
 import path from 'path';
-import get from 'lodash.get';
 import axios from 'axios';
-import { Compilation, Compiler } from 'webpack';
-import crypto from 'crypto';
+import { Compiler } from 'webpack';
 
-import { FederatedTypesPluginOptions } from '../types';
-import { TypescriptCompiler } from '../lib/Typescript';
+import { TypescriptCompiler } from '../lib/TypescriptCompiler';
 import { normalizeOptions } from '../lib/normalizeOptions';
-import { FederatedTypesStatsPlugin } from './FederatedTypesStatsPlugin';
 import { generateTypesStats } from '../lib/generateTypesStats';
+import { FederatedTypesPluginOptions, TypesStatsJson } from '../types';
+
+import { FederatedTypesStatsPlugin } from './FederatedTypesStatsPlugin';
+import { TypesCache } from '../lib/Caching';
 
 const PLUGIN_NAME = 'FederatedTypesPlugin';
 
@@ -65,19 +62,22 @@ export class FederatedTypesPlugin {
     ).apply(compiler);
 
     new FederatedTypesStatsPlugin({
-      filename: this.normalizeOptions.typesIndexJsonFileName,
+      filename: this.normalizeOptions.typesStatsFileName,
       statsResult: stats,
     }).apply(compiler);
+
+    this.importRemoteTypes();
   }
 
-  private extractTypes() {
+  private extractTypes(): TypesStatsJson {
     const exposedComponents = this.options.federationConfig.exposes;
+    const exposeSrcToDestMap: Record<string, string> = {};
 
     if (!exposedComponents) {
-      return {};
+      return {
+        files: {},
+      };
     }
-
-    const exposeSrcToDestMap: Record<string, string> = {};
 
     // './Component': 'path/to/component' -> ['./Component', 'path/to/component']
     const normalizedFileNames = Object.entries(exposedComponents)
@@ -87,81 +87,18 @@ export class FederatedTypesPlugin {
         const [rootDir, entry] = exposeSrc.split(/\/(?=[^/]+$)/);
 
         const normalizedRootDir = path.resolve(cwd, rootDir);
-        const filenameWithExt = this.resolveFilenameWithExtension(
+        const filenameWithExt = this.getFilenameWithExtension(
           normalizedRootDir,
           entry
         );
 
-        const pathWithExt = path.resolve(cwd, rootDir, filenameWithExt);
+        const pathWithExt = path.resolve(normalizedRootDir, filenameWithExt);
 
         exposeSrcToDestMap[pathWithExt] = exposeDest;
 
         return pathWithExt;
       })
       .filter((entry) => /\.tsx?$/.test(entry));
-
-    // const host = ts.createCompilerHost(this.tsCompilerOptions);
-    // const originalWriteFileFn = host.writeFile;
-
-    // host.writeFile = (
-    //   filename,
-    //   text,
-    //   writeOrderByteMark,
-    //   onError,
-    //   sourceFiles,
-    //   data
-    // ) => {
-    //   // for exposes: { "./expose/path": "path/to/file" }
-    //   // force typescript to write compiled output to "@mf-typescript/expose/path"
-    //   const newFileName = `${
-    //     exposeSrcToDestMap[sourceFiles?.[0].fileName || '']
-    //   }.d.ts`;
-
-    //   const newFilePath = path.join(
-    //     this.tsCompilerOptions.outDir as string,
-    //     newFileName
-    //   );
-
-    //   this.tsDefinitionFilesObj[newFilePath] = text;
-
-    //   originalWriteFileFn(
-    //     newFilePath,
-    //     text,
-    //     writeOrderByteMark,
-    //     onError,
-    //     sourceFiles,
-    //     data
-    //   );
-    // };
-
-    // const program = ts.createProgram(
-    //   normalizedFileNames,
-    //   this.tsCompilerOptions,
-    //   host
-    // );
-
-    // const emitResult = program.emit();
-
-    // if (!emitResult.emitSkipped) {
-    //   const files = Object.keys(this.tsDefinitionFilesObj).map((file) =>
-    //     file.slice(`${this.distDir}/`.length)
-    //   );
-
-    //   console.log({
-    //     path: '',
-    //     files,
-    //   });
-
-    //   fs.writeFile(
-    //     this.typesIndexJsonFilePath,
-    //     JSON.stringify(files),
-    //     (e) => {
-    //       if (e) {
-    //         console.log('Error saving the types index', e);
-    //       }
-    //     }
-    //   );
-    // }
 
     const program = new TypescriptCompiler(
       this.normalizeOptions.tsCompilerOptions,
@@ -178,45 +115,59 @@ export class FederatedTypesPlugin {
     return statsJson;
   }
 
-  // private importRemoteTypes() {
-  //   const remoteComponents = this.federationConfig.remotes;
+  private importRemoteTypes() {
+    const remoteComponents = this.options.federationConfig.remotes;
 
-  //   if (remoteComponents) {
-  //     const remoteUrls = Object.entries(remoteComponents).map(
-  //       ([remote, entry]) => {
-  //         const remoteUrl = entry.substring(0, entry.lastIndexOf('/'));
-  //         const [, url] = remoteUrl.split('@');
+    if (!remoteComponents) {
+      return;
+    }
 
-  //         return {
-  //           origin: url ?? remoteUrl,
-  //           remote,
-  //         };
-  //       }
-  //     );
+    const remoteUrls = Object.entries(remoteComponents).map(
+      ([remote, entry]) => {
+        const remoteUrl = entry.substring(0, entry.lastIndexOf('/'));
+        const [, url] = remoteUrl.split('@');
 
-  //     remoteUrls.forEach(({ origin, remote }) => {
-  //       axios
-  //         .get<string[]>(
-  //           `${origin}/${this.typescriptFolderName}/${this.typesIndexJsonFileName}`
-  //         )
-  //         .then((indexFileResp) => {
-  //           // Download all the d.ts files mentioned in the index file
-  //           indexFileResp.data?.forEach((file) =>
-  //             download(
-  //               `${origin}/${this.typescriptFolderName}/${file}`,
-  //               `${this.typescriptFolderName}/${remote}`,
-  //               {
-  //                 filename: file,
-  //               }
-  //             )
-  //           );
-  //         })
-  //         .catch((e) => console.log('ERROR fetching/writing types', e));
-  //     });
-  //   }
-  // }
+        return {
+          origin: url ?? remoteUrl,
+          remote,
+        };
+      }
+    );
 
-  private resolveFilenameWithExtension(rootDir: string, entry: string) {
+    remoteUrls.forEach(({ origin, remote }) => {
+      const { typescriptFolderName } = this.normalizeOptions;
+
+      axios
+        .get<TypesStatsJson>(
+          `${origin}/${this.normalizeOptions.typesStatsFileName}`
+        )
+        .then((resp) => {
+          const statsJson = resp.data;
+
+          const { filesToCacheBust, filesToDelete } =
+            TypesCache.getCacheBustedFiles(remote, statsJson);
+
+          filesToCacheBust.forEach((file) =>
+            download(
+              `${origin}/${typescriptFolderName}/${file}`,
+              `${typescriptFolderName}/${remote}`,
+              {
+                filename: file,
+              }
+            )
+          );
+
+          if (filesToDelete.length > 0) {
+            filesToDelete.forEach((file) => {
+              fs.unlinkSync(path.resolve(typescriptFolderName, remote, file));
+            });
+          }
+        })
+        .catch((e) => console.log('ERROR fetching/writing types', e));
+    });
+  }
+
+  private getFilenameWithExtension(rootDir: string, entry: string) {
     // Check path exists and it's a directory
     if (!fs.existsSync(rootDir) || !fs.lstatSync(rootDir).isDirectory()) {
       throw new Error('rootDir must be a directory');
@@ -226,7 +177,7 @@ export class FederatedTypesPlugin {
 
     try {
       // Try to resolve exposed component using index
-      const files = this.getFiles(path.join(rootDir, entry));
+      const files = TypesCache.getFsFiles(path.join(rootDir, entry));
 
       filename = files?.find((file) => file.split('.')[0] === 'index');
 
@@ -236,7 +187,7 @@ export class FederatedTypesPlugin {
 
       return `${entry}/${filename}`;
     } catch (err) {
-      const files = this.getFiles(rootDir);
+      const files = TypesCache.getFsFiles(rootDir);
 
       // Handle case where directory contains similar filenames
       // or where a filename like `Component.base.tsx` is used
@@ -253,17 +204,5 @@ export class FederatedTypesPlugin {
 
       return filename as string;
     }
-  }
-
-  private getFiles(dir: string) {
-    // Simple caching mechanism to improve performance reading the file system
-    if (this.fsCache.has(dir)) {
-      return this.fsCache.get(dir);
-    }
-
-    const files = fs.readdirSync(dir);
-    this.fsCache.set(dir, files);
-
-    return files;
   }
 }

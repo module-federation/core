@@ -1,10 +1,11 @@
 import { Compilation, Compiler, sources } from 'webpack';
+import { TypesStatsJson } from '../types';
 
 const PLUGIN_NAME = 'FederatedTypesStatsPlugin';
 
 interface FederatedTypesStatsPluginOptions {
   filename: string;
-  statsResult: Record<string, unknown>;
+  statsResult: TypesStatsJson;
 }
 
 export class FederatedTypesStatsPlugin {
