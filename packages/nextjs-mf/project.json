@@ -47,7 +47,7 @@
       "options": {
         "postTargets": ["nextjs-mf:npm"],
         "trackDeps": true,
-        "push": true
+        "push": false
       }
     },
     "github": {
