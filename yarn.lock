@@ -1646,7 +1646,7 @@
   version "0.0.0"
   uid ""
 
-"@module-federation/node@link:./dist/packages/node":
+"@module-federation/node@0.6.1":
   version "0.0.0"
   uid ""
 
