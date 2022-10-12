@@ -45,7 +45,7 @@
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": ["nextjs-mf:github", "nextjs-mf:npm"],
+        "postTargets": ["nextjs-mf:npm", "nextjs-mf:github"],
         "trackDeps": true,
         "push": true
       }
