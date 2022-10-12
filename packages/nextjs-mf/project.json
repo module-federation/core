@@ -45,7 +45,7 @@
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": ["nextjs-mf:npm"],
+        "postTargets": ["nextjs-mf:npm", "nextjs-mf:github"],
         "trackDeps": true,
         "push": true
       }
@@ -60,7 +60,8 @@
     "npm": {
       "executor": "ngx-deploy-npm:deploy",
       "options": {
-        "access": "public"
+        "access": "public",
+        "noBuild": true
       }
     }
   },
