@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [5.9.11](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.10...nextjs-mf-5.9.11) (2022-10-12)
+
+
+### Bug Fixes
+
+* revert prettier ([cef32b8](https://github.com/module-federation/nextjs-mf/commit/cef32b82ca124e8d707193ddd70371a009641665))
+
+
+
 ## [5.9.10](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.9...nextjs-mf-5.9.10) (2022-10-12)
 
 
