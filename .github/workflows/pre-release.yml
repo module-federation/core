@@ -21,19 +21,15 @@ jobs:
           git config user.email "gituser@example.com"
       - run: git fetch --no-tags --prune --depth=5 origin main
         name: Fetch Main branch
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '14'
-          cache: 'yarn'
-      - name: Install packages
-        run: yarn install --frozen-lockfile
+      - run: yarn install --frozen-lockfile
+        name: Yarn Install
       - name: Lint
         shell: bash
         run: |
-          PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)
+          PROJECTS=$($(npm bin)/nx print-affected --type=lib --select=projects --base=origin/main)
           yarn nx run-many --target=lint --projects="$PROJECTS"
       - name: Build
         shell: bash
         run: |
-          PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)
+          PROJECTS=$($(npm bin)/nx print-affected --type=lib --select=projects --base=origin/main)
           yarn nx run-many --target=build --projects="$PROJECTS"
