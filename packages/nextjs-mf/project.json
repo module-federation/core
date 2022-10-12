@@ -60,9 +60,10 @@
     "npm": {
       "executor": "ngx-deploy-npm:deploy",
       "options": {
-        "access": "public",
+        "noBuild": true
       }
     }
   },
   "tags": [],
+  "implicitDependencies": ["node", "utils"]
 }
