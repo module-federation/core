@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [5.9.10](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.9...nextjs-mf-5.9.10) (2022-10-12)
+
+
+### Bug Fixes
+
+* do not push tags ([ba8a811](https://github.com/module-federation/nextjs-mf/commit/ba8a811592329b78eac0c3d1c9dae07927a804b1))
+
+
+
 ## [5.9.9](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.8...nextjs-mf-5.9.9) (2022-10-12)
 
 
