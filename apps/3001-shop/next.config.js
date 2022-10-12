@@ -1,7 +1,9 @@
 const { withNx } = require('@nrwl/next/plugins/with-nx');
 
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
-
+const {
+  promiseTemplate,
+} = require('@module-federation/nextjs-mf/utils/build-utils');
 /**
  * @type {import('@nrwl/next/plugins/with-nx').WithNxOptions}
  **/
