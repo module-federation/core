@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - pipeline-checks
+      - main
 
 jobs:
   release:
