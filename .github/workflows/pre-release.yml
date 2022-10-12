@@ -1,9 +1,6 @@
-name: Release
+name: PR-Workflow
 
-# on:
-#   push:
-#     branches:
-#       - main
+on: pull_request
 
 jobs:
   build_checks:
