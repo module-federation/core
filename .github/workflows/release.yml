@@ -26,7 +26,7 @@ jobs:
         run: |
           npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
           PROJECTS=$($(npm bin)/nx print-affected --type=lib --select=projects --base=origin/main)
-          yarn nx run-many  --base=last-release --target=version --projects="$PROJECTS"
+          yarn nx run-many --base=last-release --target=version --projects="$PROJECTS" --parallel=1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
