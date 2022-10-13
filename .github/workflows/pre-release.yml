@@ -15,23 +15,34 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
+          cache: 'yarn'
       - name: Setup Git
         run: |
           git config user.name "GitHub Bot"
           git config user.email "gituser@example.com"
       - run: git fetch --no-tags --prune --depth=5 origin main
         name: Fetch Main branch
+      # - uses: actions/setup-node@v3
+      #   with:
+      #     node-version: '14'
+      #     cache: 'yarn'
       - name: Install packages
         run: yarn install --frozen-lockfile
       - name: Lint
         shell: bash
         run: |
-          PROJECTS=$($(npm bin)/nx print-affected --type=lib --select=projects --base=origin/main)
-          echo "$PROJECTS"
-          # yarn nx run-many --target=lint --projects="$PROJECTS"
-
-      # - name: Build
-      #   shell: bash
-      #   run: |
-      #     PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)
-      #     yarn nx run-many --target=build --projects="$PROJECTS"
+          PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)
+          if [[ "$PROJECTS" ]]; then
+            yarn nx run-many --target=lint --projects="$PROJECTS"
+          else
+            echo "No changes, Skipping lint check."
+          fi
+      - name: Build
+        shell: bash
+        run: |
+          PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)
+          if [[ "$PROJECTS" ]]; then
+            yarn nx run-many --target=build --projects="$PROJECTS"
+          else
+            echo "No changes, Skipping lint check."
+          fi
