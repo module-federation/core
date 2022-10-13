@@ -40,12 +40,6 @@ jobs:
           echo "========= npm output"
           $(npm bin)/nx print-affected --type=lib --select=projects --base=origin/main
 
-          echo "========= yarn output without origin/base"
-          $(yarn bin)/nx print-affected --type=lib --select=projects
-
-          echo "========= npm output without origin/base"
-          $(npm bin)/nx print-affected --type=lib --select=projects
-
           echo "========= yarn output without origin"
           $(yarn bin)/nx print-affected --type=lib --select=projects --base=main
 
