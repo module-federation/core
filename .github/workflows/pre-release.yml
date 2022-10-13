@@ -31,9 +31,10 @@ jobs:
         shell: bash
         run: |
           PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)
-          yarn nx run-many --target=lint --projects="$PROJECTS"
-      - name: Build
-        shell: bash
-        run: |
-          PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)
-          yarn nx run-many --target=build --projects="$PROJECTS"
+          echo "$PROJECTS"
+          # yarn nx run-many --target=lint --projects="$PROJECTS"
+      # - name: Build
+      #   shell: bash
+      #   run: |
+      #     PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)
+      #     yarn nx run-many --target=build --projects="$PROJECTS"
