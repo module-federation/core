@@ -11,10 +11,10 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
+      # - name: Use Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: '16'
       - name: Setup Git
         run: |
           git config user.name "GitHub Bot"
@@ -23,7 +23,7 @@ jobs:
         name: Fetch Main branch
       - uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '16'
           cache: 'yarn'
       - name: Install packages
         run: yarn install --frozen-lockfile
