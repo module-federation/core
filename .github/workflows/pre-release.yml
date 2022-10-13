@@ -26,25 +26,10 @@ jobs:
       - name: Lint
         shell: bash
         run: |
-          PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)
+          PROJECTS=$($(npm bin)/nx print-affected --type=lib --select=projects --base=origin/main)
           echo "$PROJECTS"
           # yarn nx run-many --target=lint --projects="$PROJECTS"
 
-          echo "from NPM"
-          $(npm bin)/nx print-affected --type=lib --select=projects --base=origin/main
-          echo "$PROJECTS_NPM"
-
-          echo "========= yarn output"
-          $(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main
-
-          echo "========= npm output"
-          $(npm bin)/nx print-affected --type=lib --select=projects --base=origin/main
-
-          echo "========= yarn output without origin"
-          $(yarn bin)/nx print-affected --type=lib --select=projects --base=main
-
-          echo "========= npm output without origin"
-          $(npm bin)/nx print-affected --type=lib --select=projects --base=main
       # - name: Build
       #   shell: bash
       #   run: |
