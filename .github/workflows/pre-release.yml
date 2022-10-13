@@ -11,20 +11,16 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
-      # - name: Use Node.js
-      #   uses: actions/setup-node@v3
-      #   with:
-      #     node-version: '16'
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
       - name: Setup Git
         run: |
           git config user.name "GitHub Bot"
           git config user.email "gituser@example.com"
       - run: git fetch --no-tags --prune --depth=5 origin main
         name: Fetch Main branch
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-          cache: 'yarn'
       - name: Install packages
         run: yarn install --frozen-lockfile
       - name: Lint
@@ -35,7 +31,7 @@ jobs:
           # yarn nx run-many --target=lint --projects="$PROJECTS"
 
           echo "from NPM"
-          PROJECTS_NPM=$($(npm bin)/nx print-affected --type=lib --select=projects --base=origin/main)
+          $(npm bin)/nx print-affected --type=lib --select=projects --base=origin/main
           echo "$PROJECTS_NPM"
 
           echo "========= yarn output"
