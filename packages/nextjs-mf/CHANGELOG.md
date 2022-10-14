@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [5.9.14](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.13...nextjs-mf-5.9.14) (2022-10-14)
+
+
+### Bug Fixes
+
+* isolate loader scope to just js files ([#317](https://github.com/module-federation/nextjs-mf/issues/317)) ([ac56950](https://github.com/module-federation/nextjs-mf/commit/ac56950cba8f23fcb58ac83fed29766608aaabc8))
+
+
+
 ## [5.9.13](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.12...nextjs-mf-5.9.13) (2022-10-14)
 
 
