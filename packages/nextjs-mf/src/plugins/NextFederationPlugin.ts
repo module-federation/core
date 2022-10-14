@@ -108,8 +108,9 @@ export class NextFederationPlugin {
     //patch next
     compiler.options.module.rules.push({
       test(req) {
-        return req.includes('/pages/') || req.includes('/app/');
+        return (req.includes('/pages/') || req.includes('/app/') && (req.includes('.js') || req.includes('.ts') || req.includes('.mjs')));
       },
+      include: compiler.context,
       exclude: /node_modules/,
       loader: path.resolve(
         __dirname,
