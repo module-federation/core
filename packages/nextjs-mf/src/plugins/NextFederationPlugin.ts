@@ -78,26 +78,7 @@ export class NextFederationPlugin {
 
       // should this be a plugin that we apply to the compiler?
       internalizeSharedPackages(this._options, compiler);
-
-      //patch next
-      compiler.options.module.rules.push({
-        test: /next[\\/]dist/,
-        loader: path.resolve(
-          __dirname,
-          '../loaders/patchDefaultSharedLoader'
-        ),
-      });
     } else {
-
-      //patch next
-      compiler.options.module.rules.push({
-        test: /next[\\/]dist[\\/]client/,
-        loader: path.resolve(
-          __dirname,
-          '../loaders/patchDefaultSharedLoader'
-        ),
-      });
-
       if(this._extraOptions.automaticPageStitching) {
         compiler.options.module.rules.push({
           test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
@@ -124,6 +105,17 @@ export class NextFederationPlugin {
       };
     }
 
+    //patch next
+    compiler.options.module.rules.push({
+      test(req) {
+        return req.includes('/pages/') || req.includes('/app/');
+      },
+      exclude: /node_modules/,
+      loader: path.resolve(
+        __dirname,
+        '../loaders/patchDefaultSharedLoader'
+      ),
+    });
 
     //todo runtime variable creation needs to be applied for server as well. this is just for client
     // TODO: this needs to be refactored into something more comprehensive. this is just a quick fix
