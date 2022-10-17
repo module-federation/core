@@ -6,6 +6,9 @@
 /out-tsc
 /build
 
+# lerna
+lerna-debug.log
+
 # dependencies
 node_modules
 

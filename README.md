@@ -37,3 +37,51 @@ Run `nx build my-app` to build the project. The build artifacts will be stored i
 Run `nx test my-app` to execute the unit tests via [Jest](https://jestjs.io).
 
 Run `nx affected:test` to execute the unit tests affected by a change.
+
+## Publishing packages to local registry
+
+Run local npm registry, please refer to local-registry scripts related document [scripts/README.md](./scripts/README.md)
+
+First, you need to enable local registry. To do so, run:
+
+```bash
+# npm
+npm run local-registry enable
+# yarn
+yarn local-registry enable
+```
+
+Then, you need to start local registry. To do so, run:
+
+```bash
+# npm
+npm run local-registry start
+# yarn
+yarn local-registry start
+```
+
+After that, you can publish packages to local registry. To do so, run:
+
+```bash
+# npm
+npm run force-publish
+# yarn
+yarn force-publish
+```
+
+After all done, you can disable local registry. To do so, run:
+
+```bash
+# npm
+npm run local-registry disable
+# yarn
+yarn local-registry disable
+```
+
+## Publishing
+
+On a local machine run `yarn lerna version` or `npm run lerna version` and follow prompts.
+
+This will bump the version of all packages and create a git tag.
+
+Then run `yarn lerna publish from-git` or `npm run lerna publish from-git` to publish the packages to npm.
