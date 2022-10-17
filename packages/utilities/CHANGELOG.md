@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.3.3](https://github.com/module-federation/nextjs-mf/compare/utils-0.3.2...utils-0.3.3) (2022-10-13)
+
+
+### Bug Fixes
+
+* **typescript:** fix exposePages type ([#309](https://github.com/module-federation/nextjs-mf/issues/309)) ([c0be839](https://github.com/module-federation/nextjs-mf/commit/c0be839787f97c5e23cea3d7cf501caaa469972f))
+
+
+
 ## [0.3.2](https://github.com/module-federation/nextjs-mf/compare/utils-0.3.1...utils-0.3.2) (2022-10-12)
 
 
