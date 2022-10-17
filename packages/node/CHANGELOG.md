@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.6.6](https://github.com/module-federation/nextjs-mf/compare/node-0.6.5...node-0.6.6) (2022-10-17)
+
+
+### Bug Fixes
+
+* add missing reject to promise new promise ([#319](https://github.com/module-federation/nextjs-mf/issues/319)) ([550a71a](https://github.com/module-federation/nextjs-mf/commit/550a71a2043f97fb5aae0e9fed5a63023db17b11))
+
+
+
 ## [0.6.5](https://github.com/module-federation/nextjs-mf/compare/node-0.6.4...node-0.6.5) (2022-10-17)
 
 ### Dependency Updates
