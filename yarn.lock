@@ -1646,7 +1646,7 @@
   version "0.0.0"
   uid ""
 
-"@module-federation/node@0.5.7":
+"@module-federation/node@0.6.0":
   version "0.0.0"
   uid ""
 
@@ -1654,7 +1654,7 @@
   version "0.0.0"
   uid ""
 
-"@module-federation/utilities@0.2.1":
+"@module-federation/utilities@0.3.0":
   version "0.0.0"
   uid ""
 
@@ -9014,6 +9014,11 @@ next@12.3.0:
     "@next/swc-win32-ia32-msvc" "12.3.0"
     "@next/swc-win32-x64-msvc" "12.3.0"
 
+nextjs-mf@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/nextjs-mf/-/nextjs-mf-0.0.1.tgz#d28180dd32982afab75a9e77dbcf00a7cfc51c21"
+  integrity sha512-vhAoPzK92G+Smpx/RSrHGwHuykkiws+LUSpzj0JvuQvQ3vI0wmzBYqfENpYvmbUBdEx92D98HQE8WApxlh+s6g==
+
 ngx-deploy-npm@^4.2.5:
   version "4.2.5"
   resolved "https://registry.yarnpkg.com/ngx-deploy-npm/-/ngx-deploy-npm-4.2.5.tgz#0a85b73520c6b041240fa83bac0f04cb6b7a2e40"
@@ -11168,6 +11173,11 @@ run-parallel@^1.1.9:
   integrity sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==
   dependencies:
     queue-microtask "^1.2.2"
+
+run-script-os@^1.1.6:
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/run-script-os/-/run-script-os-1.1.6.tgz#8b0177fb1b54c99a670f95c7fdc54f18b9c72347"
+  integrity sha512-ql6P2LzhBTTDfzKts+Qo4H94VUKpxKDFz6QxxwaUZN0mwvi7L3lpOI7BqPCq7lgDh3XLl0dpeXwfcVIitlrYrw==
 
 rxjs@7.5.6:
   version "7.5.6"
