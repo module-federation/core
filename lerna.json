@@ -1,0 +1,8 @@
+{
+  "packages": ["packages/*"],
+  "ignoreChanges": ["**"],
+  "forcePublish": true,
+  "useWorkspaces": false,
+  "noGitReset": true,
+  "version": "6.0.0"
+}
