@@ -113,7 +113,7 @@ function buildRemotes(
         this can be done by referencing my LoadFile, CommonJs plugins in this directory.
       */
       const [global, url] = config.split('@');
-      const loadTemplate = `promise new Promise((resolve)=>{
+      const loadTemplate = `promise new Promise((resolve, reject)=>{
     if(!global.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser
       global.__remote_scope__ = {
