@@ -18,7 +18,7 @@ yarn local-registry OPTIONS
 - linux/macOS
 
 ```bash
-./scripts/local-registry.bat OPTIONS
+./scripts/local-registry.sh OPTIONS
 # or
 git bash + ./scripts/local-registry.sh OPTIONS
 ```
