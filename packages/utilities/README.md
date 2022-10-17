@@ -22,7 +22,7 @@ Any extra props will be passed directly to the imported module.
 
 Usage looks something like this:
 ```js
-import { FederationBoundary } from "@module-federation/utilities/react";
+import { FederationBoundary } from "@module-federation/utilities/src/react";
 
 const MyPage = () => {
   return (
