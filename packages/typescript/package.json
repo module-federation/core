@@ -1,10 +1,6 @@
 {
   "name": "@module-federation/typescript",
-<<<<<<< HEAD
   "version": "0.1.0",
-=======
-  "version": "1.0.4",
->>>>>>> f265158cdfc8ff4dc86ea9c5b52f9ac571b4601f
   "description": "Webpack plugin to stream typescript for module federation apps/components",
   "license": "MIT",
   "type": "commonjs",
