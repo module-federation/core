@@ -2340,7 +2340,11 @@
   version "0.0.0"
   uid ""
 
+<<<<<<< HEAD
 "@module-federation/node@0.6.0":
+=======
+"@module-federation/node@0.6.1":
+>>>>>>> f265158cdfc8ff4dc86ea9c5b52f9ac571b4601f
   version "0.0.0"
   uid ""
 
@@ -9404,6 +9408,11 @@ jest@28.1.1:
     "@jest/types" "^28.1.1"
     import-local "^3.0.2"
     jest-cli "^28.1.1"
+
+js-cookie@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/js-cookie/-/js-cookie-3.0.1.tgz#9e39b4c6c2f56563708d7d31f6f5f21873a92414"
+  integrity sha512-+0rgsUXZu4ncpPxRL+lNEptWMOWl9etvPHc/koSRp6MPwpRYAhmk0dUG00J4bxVV3r9uUzfo24wW0knS07SKSw==
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"

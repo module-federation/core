@@ -35,9 +35,12 @@ class StreamingTargetPlugin {
     // Disable default config
     // FIXME: enabledChunkLoadingTypes is of type 'string[] | undefined'
     // Can't use the 'false' value as it isn't the right format,
-    // Perhaps delete the option might solve our use case.
-
+    // Emptying it out ensures theres no other readFileVm added to webpack runtime
     compiler.options.output.enabledChunkLoadingTypes = [];
+    compiler.options.output.environment = {
+      ...compiler.options.output.environment,
+      dynamicImport: true,
+    }
 
     new ((webpack && webpack.node && webpack.node.NodeEnvironmentPlugin) ||
       require('webpack/lib/node/NodeEnvironmentPlugin'))({

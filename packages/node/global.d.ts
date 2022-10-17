@@ -9,3 +9,13 @@ declare module 'webpack/lib/RuntimeModule';
 declare module 'webpack/lib/Template';
 declare module 'webpack/lib/util/compileBooleanMatcher';
 declare module 'webpack/lib/util/identifier';
+
+declare const global: typeof globalThis & {
+  __remote_scope__: {
+    _config: Record<string, any>;
+    [K: string]: {
+      fake?: boolean;
+    };
+  };
+  webpackChunkLoad;
+};

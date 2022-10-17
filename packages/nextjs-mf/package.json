@@ -1,6 +1,10 @@
 {
   "name": "@module-federation/nextjs-mf",
+<<<<<<< HEAD
   "version": "0.1.0",
+=======
+  "version": "5.9.14",
+>>>>>>> f265158cdfc8ff4dc86ea9c5b52f9ac571b4601f
   "license": "MIT",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -12,6 +16,9 @@
   "contributors": [
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
   ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "dependencies": {
     "fast-glob": "^3.2.11",
     "webpack-sources": "^3.2.3",

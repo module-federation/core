@@ -1,6 +1,6 @@
 import Template from './Template';
-import { WebpackRemoteContainer } from '@module-federation/utilities';
 import { parseRemoteSyntax } from '../src/internal';
+import { WebpackRemoteContainer } from '@module-federation/utilities';
 import path from 'path';
 
 const swc = require('@swc/core');
@@ -45,24 +45,35 @@ const IsomorphicRemoteTemplate = function () {
     global: urlAndGlobal.substring(0, index) as unknown as number, // this casting to satisfy TS
   };
 
-  //@ts-ignore
-  const globalScope = typeof window !== 'undefined' ? window : global.__remote_scope__; //todo fix types
-
   return new Promise<void>(function (resolve, reject) {
     const __webpack_error__ = new Error() as Error & {
       type: string;
       request: string | null;
     };
 
-    if (typeof globalScope[remote.global] !== 'undefined') {
-      return resolve();
+    if (typeof window !== 'undefined') {
+      if (typeof window[remote.global] !== 'undefined') {
+        return resolve();
+      }
+    } else {
+      // @ts-ignore
+      if (typeof global.__remote_scope__[remote.global] !== 'undefined') {
+        return resolve();
+      }
     }
 
     (__webpack_require__ as any).l(
       remote.url,
       function (event: Event) {
-        if (typeof globalScope[remote.global] !== 'undefined') {
-          return resolve();
+        if (typeof window !== 'undefined') {
+          if (typeof window[remote.global] !== 'undefined') {
+            return resolve();
+          }
+        } else {
+          // @ts-ignore
+          if (typeof global.__remote_scope__[remote.global] !== 'undefined') {
+            return resolve();
+          }
         }
 
         var errorType =
@@ -88,6 +99,8 @@ const IsomorphicRemoteTemplate = function () {
       remote.global
     );
   }).then(function () {
+    //@ts-ignore
+    const globalScope = typeof window !== 'undefined' ? window : global.__remote_scope__;
     const remoteGlobal = globalScope[
       remote.global
     ] as unknown as WebpackRemoteContainer & {
@@ -133,7 +146,6 @@ const IsomorphicRemoteTemplate = function () {
     return proxy;
   });
 };
-
 
 export const promiseFactory = (factory: string | Function) => {
   const wrapper = `new Promise(${factory.toString()})`;
@@ -188,7 +200,9 @@ export const promiseTemplate = (
     remoteFactory = (remoteSyntax) => {
       return Template.asString([
         `${remoteSyntax}.then(function(urlAndGlobal) {`,
-        Template.indent([Template.getFunctionContent(IsomorphicRemoteTemplate)]),
+        Template.indent([
+          Template.getFunctionContent(IsomorphicRemoteTemplate),
+        ]),
         '})',
       ]);
     };

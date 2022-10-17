@@ -1,9 +1,16 @@
 {
   "name": "@module-federation/utilities",
+<<<<<<< HEAD
   "version": "0.1.0",
+=======
+  "version": "0.3.3",
+>>>>>>> f265158cdfc8ff4dc86ea9c5b52f9ac571b4601f
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "exports": {
     ".": "./src/index.js",
     "./package.json": "./package.json",
