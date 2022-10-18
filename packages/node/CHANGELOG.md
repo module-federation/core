@@ -2,6 +2,31 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.6.7](https://github.com/module-federation/nextjs-mf/compare/node-0.6.6...node-0.6.7) (2022-10-18)
+
+
+### Bug Fixes
+
+* reduce stats serialization ([#322](https://github.com/module-federation/nextjs-mf/issues/322)) ([c7ab66d](https://github.com/module-federation/nextjs-mf/commit/c7ab66dce01ac4509f16b0e8f20b43134376f841))
+
+
+
+## [0.6.6](https://github.com/module-federation/nextjs-mf/compare/node-0.6.5...node-0.6.6) (2022-10-17)
+
+
+### Bug Fixes
+
+* add missing reject to promise new promise ([#319](https://github.com/module-federation/nextjs-mf/issues/319)) ([550a71a](https://github.com/module-federation/nextjs-mf/commit/550a71a2043f97fb5aae0e9fed5a63023db17b11))
+
+
+
+## [0.6.5](https://github.com/module-federation/nextjs-mf/compare/node-0.6.4...node-0.6.5) (2022-10-17)
+
+### Dependency Updates
+
+* `utils` updated to version `0.3.4`
+
+
 ## [0.6.4](https://github.com/module-federation/nextjs-mf/compare/node-0.6.3...node-0.6.4) (2022-10-13)
 
 ### Dependency Updates

@@ -3,9 +3,13 @@ import { parseRemoteSyntax } from '../src/internal';
 import { WebpackRemoteContainer } from '@module-federation/utilities';
 import path from 'path';
 
-const swc = require('@swc/core');
-
 const transformInput = (code: string) => {
+  let swc
+  try {
+    swc = require('@swc/core');
+  } catch (e) {
+    return code;
+  }
   return swc.transformSync(code, {
     // Some options cannot be specified in .swcrc
     sourceMaps: false,
