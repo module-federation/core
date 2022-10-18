@@ -386,7 +386,6 @@ class FederationStatsPlugin {
           stage: compilation.constructor.PROCESS_ASSETS_STAGE_ANALYSE,
         },
         async () => {
-          console.log('getting stats');
           const stats = compilation.getStats().toJson({
             performance:false,
             time:false,
