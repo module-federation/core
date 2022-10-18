@@ -387,7 +387,21 @@ class FederationStatsPlugin {
         },
         async () => {
           console.log('getting stats');
-          const stats = compilation.getStats().toJson({});
+          const stats = compilation.getStats().toJson({
+            performance:false,
+            time:false,
+            logging: "none",
+            loggingDebug: false,
+            loggingTrace: false,
+            source: false,
+            children:false,
+            errors: false,
+            warnings: false,
+            errorsCount: false,
+            warningsCount: false,
+            builtAt: false,
+            timings: false
+          });
 
           const federatedModules = federationPlugins.map((federationPlugin) =>
             getFederationStats(stats, federationPlugin)
