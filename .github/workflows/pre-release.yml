@@ -1,0 +1,48 @@
+name: PR-Workflow
+
+on: pull_request
+
+jobs:
+  build_checks:
+    name: Build Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'yarn'
+      - name: Setup Git
+        run: |
+          git config user.name "GitHub Bot"
+          git config user.email "gituser@example.com"
+      - run: git fetch --no-tags --prune --depth=5 origin main
+        name: Fetch Main branch
+      # - uses: actions/setup-node@v3
+      #   with:
+      #     node-version: '14'
+      #     cache: 'yarn'
+      - name: Install packages
+        run: yarn install --frozen-lockfile
+      - name: Lint
+        shell: bash
+        run: |
+          PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)
+          if [[ "$PROJECTS" ]]; then
+            yarn nx run-many --target=lint --projects="$PROJECTS"
+          else
+            echo "No changes, Skipping lint check."
+          fi
+      - name: Build
+        shell: bash
+        run: |
+          PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)
+          if [[ "$PROJECTS" ]]; then
+            yarn nx run-many --target=build --projects="$PROJECTS"
+          else
+            echo "No changes, Skipping lint check."
+          fi

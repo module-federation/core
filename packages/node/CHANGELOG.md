@@ -2,6 +2,68 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.6.7](https://github.com/module-federation/nextjs-mf/compare/node-0.6.6...node-0.6.7) (2022-10-18)
+
+
+### Bug Fixes
+
+* reduce stats serialization ([#322](https://github.com/module-federation/nextjs-mf/issues/322)) ([c7ab66d](https://github.com/module-federation/nextjs-mf/commit/c7ab66dce01ac4509f16b0e8f20b43134376f841))
+
+
+
+## [0.6.6](https://github.com/module-federation/nextjs-mf/compare/node-0.6.5...node-0.6.6) (2022-10-17)
+
+
+### Bug Fixes
+
+* add missing reject to promise new promise ([#319](https://github.com/module-federation/nextjs-mf/issues/319)) ([550a71a](https://github.com/module-federation/nextjs-mf/commit/550a71a2043f97fb5aae0e9fed5a63023db17b11))
+
+
+
+## [0.6.5](https://github.com/module-federation/nextjs-mf/compare/node-0.6.4...node-0.6.5) (2022-10-17)
+
+### Dependency Updates
+
+* `utils` updated to version `0.3.4`
+
+
+## [0.6.4](https://github.com/module-federation/nextjs-mf/compare/node-0.6.3...node-0.6.4) (2022-10-13)
+
+### Dependency Updates
+
+* `utils` updated to version `0.3.3`
+
+
+## [0.6.3](https://github.com/module-federation/nextjs-mf/compare/node-0.6.2...node-0.6.3) (2022-10-12)
+
+### Dependency Updates
+
+* `utils` updated to version `0.3.2`
+
+
+## [0.6.3](https://github.com/module-federation/nextjs-mf/compare/node-0.6.2...node-0.6.3) (2022-10-12)
+
+### Dependency Updates
+
+* `utils` updated to version `0.3.2`
+
+
+## [0.6.2](https://github.com/module-federation/nextjs-mf/compare/node-0.6.1...node-0.6.2) (2022-10-11)
+
+### Dependency Updates
+
+* `utils` updated to version `0.3.1`
+
+
+## [0.6.1](https://github.com/module-federation/nextjs-mf/compare/node-0.6.0...node-0.6.1) (2022-10-10)
+
+
+### Bug Fixes
+
+* support dynamic import of esm modules ([#296](https://github.com/module-federation/nextjs-mf/issues/296)) ([cf28356](https://github.com/module-federation/nextjs-mf/commit/cf28356728354e1f63c0d588035dd115398f8641))
+
+
+
 # [0.6.0](https://github.com/module-federation/nextjs-mf/compare/node-0.5.7...node-0.6.0) (2022-10-07)
 
 

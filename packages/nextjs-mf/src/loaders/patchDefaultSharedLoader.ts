@@ -12,7 +12,7 @@ export default function patchDefaultSharedLoader(
   content: string
 ) {
   if (content.includes('include-defaults')) {
-    // If MFClient already applied then skip patch
+    // If already patched, return
     return content;
   }
 
@@ -24,8 +24,10 @@ export default function patchDefaultSharedLoader(
   );
 
   return [
+    '',
     `require(${JSON.stringify(pathIncludeDefaults)});`,
     content
   ].join("\n")
+
 }
 

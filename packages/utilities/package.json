@@ -1,14 +1,11 @@
 {
   "name": "@module-federation/utilities",
-  "version": "0.3.0",
+  "version": "0.3.4",
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
-  "exports": {
-    ".": "./src/index.js",
-    "./package.json": "./package.json",
-    "./react": "./src/utils/react.js",
-    "./src/": "./src/"
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
   },
   "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/utilities",
   "peerDependencies": {

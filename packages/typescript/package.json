@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/typescript",
-  "version": "1.0.0",
+  "version": "1.0.6",
   "description": "Webpack plugin to stream typescript for module federation apps/components",
   "license": "MIT",
   "type": "commonjs",
@@ -10,8 +10,12 @@
     "remote types",
     "federated types"
   ],
-  "author": "Pavan Divi <pavan.divi@outlook.com> (https://github.com/pavandv)",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "author": "Prasanna Mestha <prasanna@privjs.com> (https://github.com/prasannamestha)",
   "contributors": [
-    "Zack Jackson <zackary.l.jackson@gmail.com> (https://github.com/ScriptedAlchemy)"
+    "Zack Jackson <zackary.l.jackson@gmail.com> (https://github.com/ScriptedAlchemy)",
+    "Pavan Divi <pavan.divi@outlook.com> (https://github.com/pavandv)"
   ]
 }

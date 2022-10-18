@@ -1,4 +1,4 @@
-const PLUGIN_NAME = "FederationStatsPlugin";
+const PLUGIN_NAME = 'FederationStatsPlugin';
 
 /** @typedef {import("./webpack-stats-types").WebpackStats} WebpackStats */
 /** @typedef {import(  "./webpack-stats-types").WebpackStatsChunk} WebpackStatsChunk */
@@ -50,12 +50,14 @@ const flatMap = (xs, f) => xs.map(f).reduce(concat, []);
  * @returns {}
  */
 function getRemoteModules(stats) {
-  return stats.modules.filter((mod) => {
-    return mod.moduleType === 'remote-module'
-  }).reduce((acc, remoteModule) => {
-    acc[remoteModule.nameForCondition] = remoteModule.id
-    return acc
-  }, {})
+  return stats.modules
+    .filter((mod) => {
+      return mod.moduleType === 'remote-module';
+    })
+    .reduce((acc, remoteModule) => {
+      acc[remoteModule.nameForCondition] = remoteModule.id;
+      return acc;
+    }, {});
 }
 
 /**
@@ -84,7 +86,7 @@ function getExposed(stats, mod) {
       flatMap(chunk.siblings, (id) =>
         stats.chunks.filter((c) => c.id === id)
       ).filter((c) =>
-        c.modules.some((m) => m.moduleType === "consume-shared-module")
+        c.modules.some((m) => m.moduleType === 'consume-shared-module')
       ),
       (c) =>
         flatMap(c.children, (id) => stats.chunks.filter((c2) => c2.id === id))
@@ -96,7 +98,7 @@ function getExposed(stats, mod) {
     .map((chunk) => ({
       chunks: chunk.files.map(
         (f) =>
-          `${stats.publicPath !== "auto" ? stats.publicPath || "" : ""}${f}`
+          `${stats.publicPath !== 'auto' ? stats.publicPath || '' : ''}${f}`
       ),
       provides: chunk.modules
         .map((mod) => parseFederatedIssuer(mod.issuer))
@@ -104,25 +106,18 @@ function getExposed(stats, mod) {
     }));
 
   const flatChunks = flatMap(chunks, (chunk) => {
-      return {
-        [chunk.id]: chunk.files.map(
-          (f) =>
-            `${stats.publicPath !== "auto" ? stats.publicPath || "" : ""}${f}`
-        )
-      }
-    }
-  );
+    return {
+      [chunk.id]: chunk.files.map(
+        (f) =>
+          `${stats.publicPath !== 'auto' ? stats.publicPath || '' : ''}${f}`
+      ),
+    };
+  });
 
   return flatChunks.reduce((acc, chunk) => {
     Object.assign(acc, chunk);
     return acc;
-  }, {})
-
-
-  return {
-    chunks: Array.from(flatChunks),
-    sharedModules,
-  };
+  }, {});
 }
 
 /**
@@ -161,8 +156,8 @@ function getIssuers(mod, check) {
  * @returns {SharedDependency}
  */
 function parseFederatedIssuer(issuer) {
-  const split = (issuer && issuer.split("|")) || [];
-  if (split.length !== 8 || split[0] !== "consume-shared-module") {
+  const split = (issuer && issuer.split('|')) || [];
+  if (split.length !== 8 || split[0] !== 'consume-shared-module') {
     return null;
   }
   const [
@@ -195,14 +190,13 @@ function parseFederatedIssuer(issuer) {
 function getSharedModules(stats, federationPlugin) {
   return flatMap(
     stats.chunks.filter((chunk) => {
-        if (!stats.entrypoints[federationPlugin._options.name]) {
-          return false;
-        }
-        return stats.entrypoints[federationPlugin._options.name].chunks.some(
-          (id) => chunk.id === id
-        );
+      if (!stats.entrypoints[federationPlugin._options.name]) {
+        return false;
       }
-    ),
+      return stats.entrypoints[federationPlugin._options.name].chunks.some(
+        (id) => chunk.id === id
+      );
+    }),
     (chunk) =>
       flatMap(chunk.children, (id) =>
         stats.chunks.filter(
@@ -217,7 +211,7 @@ function getSharedModules(stats, federationPlugin) {
             c.modules.some((m) =>
               searchIssuer(
                 m,
-                (issuer) => issuer && issuer.startsWith("consume-shared-module")
+                (issuer) => issuer && issuer.startsWith('consume-shared-module')
               )
             )
         )
@@ -226,19 +220,19 @@ function getSharedModules(stats, federationPlugin) {
     .map((chunk) => ({
       chunks: chunk.files.map(
         (f) =>
-          `${stats.publicPath !== "auto" ? stats.publicPath || "" : ""}${f}`
+          `${stats.publicPath !== 'auto' ? stats.publicPath || '' : ''}${f}`
       ),
       provides: flatMap(
         chunk.modules.filter((m) =>
           searchIssuer(
             m,
-            (issuer) => issuer && issuer.startsWith("consume-shared-module")
+            (issuer) => issuer && issuer.startsWith('consume-shared-module')
           )
         ),
         (m) =>
           getIssuers(
             m,
-            (issuer) => issuer && issuer.startsWith("consume-shared-module")
+            (issuer) => issuer && issuer.startsWith('consume-shared-module')
           )
       )
         .map(parseFederatedIssuer)
@@ -252,10 +246,10 @@ function getSharedModules(stats, federationPlugin) {
  * @returns {SharedModule[]}
  */
 function getMainSharedModules(stats) {
-  const chunks = stats.namedChunkGroups["main"]
-    ? flatMap(stats.namedChunkGroups["main"].chunks, (c) =>
-      stats.chunks.filter((chunk) => chunk.id === c)
-    )
+  const chunks = stats.namedChunkGroups['main']
+    ? flatMap(stats.namedChunkGroups['main'].chunks, (c) =>
+        stats.chunks.filter((chunk) => chunk.id === c)
+      )
     : [];
 
   return flatMap(chunks, (chunk) =>
@@ -267,7 +261,7 @@ function getMainSharedModules(stats) {
           c.modules.some((m) =>
             searchIssuer(
               m,
-              (issuer) => issuer && issuer.startsWith("consume-shared-module")
+              (issuer) => issuer && issuer.startsWith('consume-shared-module')
             )
           )
       )
@@ -276,19 +270,19 @@ function getMainSharedModules(stats) {
     .map((chunk) => ({
       chunks: chunk.files.map(
         (f) =>
-          `${stats.publicPath !== "auto" ? stats.publicPath || "" : ""}${f}`
+          `${stats.publicPath !== 'auto' ? stats.publicPath || '' : ''}${f}`
       ),
       provides: flatMap(
         chunk.modules.filter((m) =>
           searchIssuer(
             m,
-            (issuer) => issuer && issuer.startsWith("consume-shared-module")
+            (issuer) => issuer && issuer.startsWith('consume-shared-module')
           )
         ),
         (m) =>
           getIssuers(
             m,
-            (issuer) => issuer && issuer.startsWith("consume-shared-module")
+            (issuer) => issuer && issuer.startsWith('consume-shared-module')
           )
       )
         .map(parseFederatedIssuer)
@@ -334,7 +328,7 @@ function getFederationStats(stats, federationPlugin) {
   const remoteModules = getRemoteModules(stats);
   return {
     remote,
-    entry: `${stats.publicPath !== "auto" ? stats.publicPath || "" : ""}${
+    entry: `${stats.publicPath !== 'auto' ? stats.publicPath || '' : ''}${
       stats.assetsByChunkName[remote] &&
       stats.assetsByChunkName[remote].length === 1
         ? stats.assetsByChunkName[remote][0]
@@ -361,7 +355,7 @@ class FederationStatsPlugin {
    */
   constructor(options) {
     if (!options || !options.filename) {
-      throw new Error("filename option is required.");
+      throw new Error('filename option is required.');
     }
 
     this._options = options;
@@ -376,12 +370,12 @@ class FederationStatsPlugin {
       compiler.options.plugins &&
       compiler.options.plugins.filter(
         (plugin) =>
-          plugin.constructor.name === "NextFederationPlugin" &&
+          plugin.constructor.name === 'NextFederationPlugin' &&
           plugin._options.exposes
       );
 
     if (!federationPlugins || federationPlugins.length === 0) {
-      console.error("No ModuleFederationPlugin(s) found.");
+      console.error('No ModuleFederationPlugin(s) found.');
       return;
     }
 
@@ -392,8 +386,21 @@ class FederationStatsPlugin {
           stage: compilation.constructor.PROCESS_ASSETS_STAGE_ANALYSE,
         },
         async () => {
-          console.log('getting stats')
-          const stats = compilation.getStats().toJson({});
+          const stats = compilation.getStats().toJson({
+            performance:false,
+            time:false,
+            logging: "none",
+            loggingDebug: false,
+            loggingTrace: false,
+            source: false,
+            children:false,
+            errors: false,
+            warnings: false,
+            errorsCount: false,
+            warningsCount: false,
+            builtAt: false,
+            timings: false
+          });
 
           const federatedModules = federationPlugins.map((federationPlugin) =>
             getFederationStats(stats, federationPlugin)
@@ -407,7 +414,7 @@ class FederationStatsPlugin {
           };
 
           const statsJson = JSON.stringify(statsResult);
-          const statsBuffer = Buffer.from(statsJson, "utf-8");
+          const statsBuffer = Buffer.from(statsJson, 'utf-8');
           const statsSource = {
             source: () => statsBuffer,
             size: () => statsBuffer.length,

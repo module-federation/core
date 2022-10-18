@@ -69,7 +69,7 @@ module.exports = {
 ```
 
 ### Support
-Drop me a message on twitter for support/feedback, or maybe just say Hi at [@pavan_divi](https://twitter.com/pavan_divi)
+Drop me a message on twitter for support/feedback, or maybe just say Hi at [@prasannamestha](https://twitter.com/prasannamestha)
 
 ### Credits
 Shoutout to [@ScriptedAlchemy](https://twitter.com/ScriptedAlchemy) for helping with the development of this plugin.

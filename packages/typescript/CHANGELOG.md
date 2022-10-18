@@ -2,6 +2,54 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.0.6](https://github.com/module-federation/nextjs-mf/compare/typescript-1.0.5...typescript-1.0.6) (2022-10-18)
+
+
+
+## [1.0.5](https://github.com/module-federation/nextjs-mf/compare/typescript-1.0.4...typescript-1.0.5) (2022-10-17)
+
+### Dependency Updates
+
+* `utils` updated to version `0.3.4`
+
+
+## [1.0.4](https://github.com/module-federation/nextjs-mf/compare/typescript-1.0.3...typescript-1.0.4) (2022-10-13)
+
+### Dependency Updates
+
+* `utils` updated to version `0.3.3`
+
+
+## [1.0.3](https://github.com/module-federation/nextjs-mf/compare/typescript-1.0.2...typescript-1.0.3) (2022-10-12)
+
+### Dependency Updates
+
+* `utils` updated to version `0.3.2`
+
+
+## [1.0.2](https://github.com/module-federation/nextjs-mf/compare/typescript-1.0.1...typescript-1.0.2) (2022-10-11)
+
+### Dependency Updates
+
+* `utils` updated to version `0.3.1`
+
+
+## [1.0.2](https://github.com/module-federation/nextjs-mf/compare/typescript-1.0.1...typescript-1.0.2) (2022-10-11)
+
+### Dependency Updates
+
+* `utils` updated to version `0.3.1`
+
+
+## [1.0.1](https://github.com/module-federation/nextjs-mf/compare/typescript-1.0.0...typescript-1.0.1) (2022-10-10)
+
+
+### Bug Fixes
+
+* get types on remote url with subdirectory ([#302](https://github.com/module-federation/nextjs-mf/issues/302)) ([d3f9060](https://github.com/module-federation/nextjs-mf/commit/d3f9060586b671ce1dd18ab5ef45e1fb5f7d5172))
+
+
+
 # [1.0.0](https://github.com/module-federation/nextjs-mf/compare/typescript-0.2.8...typescript-1.0.0) (2022-10-08)
 
 

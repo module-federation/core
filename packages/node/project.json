@@ -37,7 +37,7 @@
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": ["node:github", "node:npm"],
+        "postTargets": ["node:npm", "node:github"],
         "trackDeps": true,
         "push": true
       }
@@ -56,5 +56,6 @@
       }
     }
   },
-  "tags": []
+  "tags": [],
+  "implicitDependencies": ["utils"]
 }
