@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.6.7](https://github.com/module-federation/nextjs-mf/compare/node-0.6.6...node-0.6.7) (2022-10-18)
+
+
+### Bug Fixes
+
+* reduce stats serialization ([#322](https://github.com/module-federation/nextjs-mf/issues/322)) ([c7ab66d](https://github.com/module-federation/nextjs-mf/commit/c7ab66dce01ac4509f16b0e8f20b43134376f841))
+
+
+
 ## [0.6.6](https://github.com/module-federation/nextjs-mf/compare/node-0.6.5...node-0.6.6) (2022-10-17)
 
 
