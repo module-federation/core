@@ -2,6 +2,18 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [5.10.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.17...nextjs-mf-5.10.0) (2022-10-19)
+
+### Dependency Updates
+
+* `node` updated to version `0.7.0`
+
+### Features
+
+* consolidate promise factories in server ([#297](https://github.com/module-federation/nextjs-mf/issues/297)) ([55387ee](https://github.com/module-federation/nextjs-mf/commit/55387eeb952fb3164900d73ddcb0007f644c766f))
+
+
+
 ## [5.9.17](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.16...nextjs-mf-5.9.17) (2022-10-18)
 
 ### Dependency Updates
