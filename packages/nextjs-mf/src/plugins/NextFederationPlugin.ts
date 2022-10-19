@@ -108,7 +108,7 @@ compiler.options.devtool = 'source-map';
     //patch next
     compiler.options.module.rules.push({
       test(req) {
-        return (req.includes('/pages/') || req.includes('/app/') && (req.includes('.js') || req.includes('.ts') || req.includes('.mjs')));
+        return (req.includes('/pages/') || req.includes('/app/') && (req.endsWith('.js') || req.endsWith('.jsx') || req.endsWith('.ts') || req.endsWith('.tsx') || req.endsWith('.mjs')));
       },
       include: compiler.context,
       exclude: /node_modules/,
