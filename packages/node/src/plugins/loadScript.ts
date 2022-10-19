@@ -6,6 +6,7 @@
 //language=JS
 export default `
   function loadScript(url, cb, chunkID) {
+  console.log('calling loadScipt', url, chunkID);
     var url;
     var cb = arguments[arguments.length - 1];
     if (typeof cb !== "function") {
@@ -58,19 +59,19 @@ export const executeLoadTemplate = `
     if(!name) {
       throw new Error('__webpack_require__.l name is required for ' + url);
     }
-    console.log("server require.l remote load", url);
     if (typeof global.__remote_scope__[name] !== 'undefined') return callback(global.__remote_scope__[name]);
     const vm = require('vm');
     (global.webpackChunkLoad || global.fetch || require("node-fetch"))(url).then(function (res) {
       return res.text();
     }).then(function (scriptContent) {
       try {
-        const vmContext = {exports, require, module, global, __filename, __dirname, URL, ...global};
+        const vmContext = {exports, require, module, global, __filename, __dirname, URL,console, ...global};
         const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, {filename: 'node-federation-loader-' + name + '.vm'});
         global.__remote_scope__[name] = remote[name] || remote;
-        global.__remote_scope__[name]._config[name] = url;
+        global.__remote_scope__._config[name] = url;
         callback(global.__remote_scope__[name])
       } catch (e) {
+        console.error('executeLoad hit catch block');
         e.target = {src: url};
         callback(e);
       }

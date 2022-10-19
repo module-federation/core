@@ -58,7 +58,7 @@ export class NextFederationPlugin {
       );
       // target false because we use our own target for node env
       compiler.options.target = false;
-
+compiler.options.devtool = 'source-map';
       const StreamingTargetPlugin =
         require('@module-federation/node').StreamingTargetPlugin;
 
