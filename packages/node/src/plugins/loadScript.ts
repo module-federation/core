@@ -6,7 +6,6 @@
 //language=JS
 export default `
   function loadScript(url, cb, chunkID) {
-  console.log('calling loadScipt', url, chunkID);
     var url;
     var cb = arguments[arguments.length - 1];
     if (typeof cb !== "function") {
@@ -65,7 +64,7 @@ export const executeLoadTemplate = `
       return res.text();
     }).then(function (scriptContent) {
       try {
-        const vmContext = {exports, require, module, global, __filename, __dirname, URL,console, ...global};
+        const vmContext = {exports, require, module, global, __filename, __dirname, URL,console,process,Buffer,  ...global};
         const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, {filename: 'node-federation-loader-' + name + '.vm'});
         global.__remote_scope__[name] = remote[name] || remote;
         global.__remote_scope__._config[name] = url;

@@ -210,7 +210,7 @@ export const generateRemoteTemplate = (url: string, global: any) => {
   })`;
 };
 
-export const parseRemoteSyntax = (remote: string) => {
+export const parseRemoteSyntax = (remote: any) => {
   if (typeof remote === 'string' && remote.includes('@')) {
     const [url, global] = extractUrlAndGlobal(remote);
     return generateRemoteTemplate(url, global);
