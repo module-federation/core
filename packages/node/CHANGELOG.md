@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [0.7.0](https://github.com/module-federation/nextjs-mf/compare/node-0.6.7...node-0.7.0) (2022-10-19)
+
+
+### Features
+
+* consolidate promise factories in server ([#297](https://github.com/module-federation/nextjs-mf/issues/297)) ([55387ee](https://github.com/module-federation/nextjs-mf/commit/55387eeb952fb3164900d73ddcb0007f644c766f))
+
+
+
 ## [0.6.7](https://github.com/module-federation/nextjs-mf/compare/node-0.6.6...node-0.6.7) (2022-10-18)
 
 
