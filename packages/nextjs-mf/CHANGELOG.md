@@ -2,6 +2,10 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [5.10.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.10.0...nextjs-mf-5.10.1) (2022-10-19)
+
+
+
 # [5.10.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.17...nextjs-mf-5.10.0) (2022-10-19)
 
 ### Dependency Updates
