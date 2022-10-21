@@ -27,7 +27,7 @@
     "@module-federation/nextjs-mf": "link:./dist/packages/nextjs-mf",
     "@module-federation/node": "link:./dist/packages/node",
     "@module-federation/utilities": "link:./dist/packages/utilities",
-    "@swc/core": "^1.3.3",
+    "@swc/core": "1.3.10",
     "@swc/helpers": "~0.3.3",
     "axios": "^0.27.2",
     "core-js": "^3.6.5",
