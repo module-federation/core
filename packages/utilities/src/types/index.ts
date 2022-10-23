@@ -18,7 +18,7 @@ declare const __webpack_share_scopes__: Record<
 export interface NextFederationPluginExtraOptions {
   enableImageLoaderFix?: boolean;
   enableUrlLoaderFix?: boolean;
-  exposePages?: Record<string, unknown>;
+  exposePages?: boolean;
   skipSharingNextInternals?: boolean;
   automaticPageStitching?: boolean;
 }

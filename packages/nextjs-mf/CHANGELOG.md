@@ -2,6 +2,113 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [5.10.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.10.0...nextjs-mf-5.10.1) (2022-10-19)
+
+
+
+# [5.10.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.17...nextjs-mf-5.10.0) (2022-10-19)
+
+### Dependency Updates
+
+* `node` updated to version `0.7.0`
+
+### Features
+
+* consolidate promise factories in server ([#297](https://github.com/module-federation/nextjs-mf/issues/297)) ([55387ee](https://github.com/module-federation/nextjs-mf/commit/55387eeb952fb3164900d73ddcb0007f644c766f))
+
+
+
+## [5.9.17](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.16...nextjs-mf-5.9.17) (2022-10-18)
+
+### Dependency Updates
+
+* `node` updated to version `0.6.7`
+
+### Bug Fixes
+
+* reduce stats serialization ([#322](https://github.com/module-federation/nextjs-mf/issues/322)) ([c7ab66d](https://github.com/module-federation/nextjs-mf/commit/c7ab66dce01ac4509f16b0e8f20b43134376f841))
+
+
+
+## [5.9.16](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.15...nextjs-mf-5.9.16) (2022-10-17)
+
+### Dependency Updates
+
+* `node` updated to version `0.6.6`
+
+
+## [5.9.15](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.14...nextjs-mf-5.9.15) (2022-10-17)
+
+### Dependency Updates
+
+* `node` updated to version `0.6.5`
+* `utils` updated to version `0.3.4`
+
+
+## [5.9.14](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.13...nextjs-mf-5.9.14) (2022-10-14)
+
+
+### Bug Fixes
+
+* isolate loader scope to just js files ([#317](https://github.com/module-federation/nextjs-mf/issues/317)) ([ac56950](https://github.com/module-federation/nextjs-mf/commit/ac56950cba8f23fcb58ac83fed29766608aaabc8))
+
+
+
+## [5.9.13](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.12...nextjs-mf-5.9.13) (2022-10-14)
+
+
+### Bug Fixes
+
+* improve include defaults loader ([#315](https://github.com/module-federation/nextjs-mf/issues/315)) ([f228e49](https://github.com/module-federation/nextjs-mf/commit/f228e49afbbe54950b4187b72aabaef8174d0758))
+
+
+
+## [5.9.12](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.11...nextjs-mf-5.9.12) (2022-10-13)
+
+### Dependency Updates
+
+* `node` updated to version `0.6.4`
+* `utils` updated to version `0.3.3`
+
+
+## [5.9.11](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.10...nextjs-mf-5.9.11) (2022-10-12)
+
+
+### Bug Fixes
+
+* revert prettier ([cef32b8](https://github.com/module-federation/nextjs-mf/commit/cef32b82ca124e8d707193ddd70371a009641665))
+
+
+
+## [5.9.10](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.9...nextjs-mf-5.9.10) (2022-10-12)
+
+
+### Bug Fixes
+
+* do not push tags ([ba8a811](https://github.com/module-federation/nextjs-mf/commit/ba8a811592329b78eac0c3d1c9dae07927a804b1))
+
+
+
+## [5.9.9](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.8...nextjs-mf-5.9.9) (2022-10-12)
+
+
+
+## [5.9.8](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.7...nextjs-mf-5.9.8) (2022-10-12)
+
+
+
+## [5.9.7](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.6...nextjs-mf-5.9.7) (2022-10-12)
+
+
+
+## [5.9.6](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.5...nextjs-mf-5.9.6) (2022-10-12)
+
+
+
+## [5.9.5](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.4...nextjs-mf-5.9.5) (2022-10-12)
+
+
+
 ## [5.9.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.9.1...nextjs-mf-5.9.2) (2022-10-11)
 
 ### Dependency Updates

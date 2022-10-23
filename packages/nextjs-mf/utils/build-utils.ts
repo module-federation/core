@@ -1,11 +1,15 @@
 import Template from './Template';
-import { WebpackRemoteContainer } from '@module-federation/utilities';
 import { parseRemoteSyntax } from '../src/internal';
+import { WebpackRemoteContainer } from '@module-federation/utilities';
 import path from 'path';
 
-const swc = require('@swc/core');
-
 const transformInput = (code: string) => {
+  let swc
+  try {
+    swc = require('@swc/core');
+  } catch (e) {
+    return code;
+  }
   return swc.transformSync(code, {
     // Some options cannot be specified in .swcrc
     sourceMaps: false,
@@ -51,11 +55,20 @@ const IsomorphicRemoteTemplate = function () {
       request: string | null;
     };
 
-    if(typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
       if (typeof window[remote.global] !== 'undefined') {
         return resolve();
       }
     } else {
+      // @ts-ignore
+      if(!global.__remote_scope__) {
+        // create a global scope for container, similar to how remotes are set on window in the browser
+        // @ts-ignore
+        global.__remote_scope__ = {
+          _config: {},
+        }
+      }
+
       // @ts-ignore
       if (typeof global.__remote_scope__[remote.global] !== 'undefined') {
         return resolve();
@@ -65,7 +78,7 @@ const IsomorphicRemoteTemplate = function () {
     (__webpack_require__ as any).l(
       remote.url,
       function (event: Event) {
-        if(typeof window !== 'undefined') {
+        if (typeof window !== 'undefined') {
           if (typeof window[remote.global] !== 'undefined') {
             return resolve();
           }
@@ -147,7 +160,6 @@ const IsomorphicRemoteTemplate = function () {
   });
 };
 
-
 export const promiseFactory = (factory: string | Function) => {
   const wrapper = `new Promise(${factory.toString()})`;
 
@@ -201,7 +213,9 @@ export const promiseTemplate = (
     remoteFactory = (remoteSyntax) => {
       return Template.asString([
         `${remoteSyntax}.then(function(urlAndGlobal) {`,
-        Template.indent([Template.getFunctionContent(IsomorphicRemoteTemplate)]),
+        Template.indent([
+          Template.getFunctionContent(IsomorphicRemoteTemplate),
+        ]),
         '})',
       ]);
     };
