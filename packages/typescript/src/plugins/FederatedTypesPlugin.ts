@@ -7,10 +7,15 @@ import { Compiler } from 'webpack';
 import { TypescriptCompiler } from '../lib/TypescriptCompiler';
 import { normalizeOptions } from '../lib/normalizeOptions';
 import { generateTypesStats } from '../lib/generateTypesStats';
-import { FederatedTypesPluginOptions, TypesStatsJson } from '../types';
+import {
+  CompilationParams,
+  FederatedTypesPluginOptions,
+  TypesStatsJson,
+} from '../types';
 
 import { FederatedTypesStatsPlugin } from './FederatedTypesStatsPlugin';
 import { TypesCache } from '../lib/Caching';
+import { Logger, LoggerInstance } from '@module-federation/utilities';
 
 const PLUGIN_NAME = 'FederatedTypesPlugin';
 
@@ -18,8 +23,7 @@ export class FederatedTypesPlugin {
   private options: FederatedTypesPluginOptions;
   private normalizeOptions!: ReturnType<typeof normalizeOptions>;
   private webpackCompilerOptions!: Compiler['options'];
-
-  private fsCache: Map<string, string[]> = new Map();
+  private logger!: LoggerInstance;
 
   constructor(options: FederatedTypesPluginOptions) {
     this.options = options;
@@ -27,8 +31,12 @@ export class FederatedTypesPlugin {
 
   apply(compiler: Compiler) {
     let recompileInterval: NodeJS.Timer;
-
     const { webpack } = compiler;
+
+    this.logger = Logger.setLogger(
+      compiler.getInfrastructureLogger(PLUGIN_NAME)
+    );
+
     this.webpackCompilerOptions = compiler.options;
 
     this.normalizeOptions = normalizeOptions(this.options, compiler);
@@ -43,76 +51,48 @@ export class FederatedTypesPlugin {
       );
     }
 
-    // compiler.hooks.thisCompilation.tap('FederatedTypes', () => {
-    //   console.log('thisCompilation');
-    // });
+    compiler.hooks.beforeRun.tap(PLUGIN_NAME, () => {
+      // download remotes here
+      // this.importRemoteTypes();
+    });
 
-    // compiler.hooks.compile.tap('FederatedTypes', () => {
-    //   console.log('compilation');
-    // });
+    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (_, params) => {
+      const filesMap = this.compileTypes();
 
-    // compiler.hooks.afterCompile.tap('FederatedTypes', (compilation) => {
-    //   console.log('afterCompile');
-    // });
+      const statsJson = {
+        publicPath: this.normalizeOptions.publicPath,
+        files: generateTypesStats(filesMap, this.normalizeOptions),
+      };
 
-    const stats = this.extractTypes();
+      (params as CompilationParams).federated_types_stats = statsJson;
+    });
+
+    new FederatedTypesStatsPlugin({
+      filename: this.normalizeOptions.typesStatsFileName,
+    }).apply(compiler);
 
     new webpack.container.ModuleFederationPlugin(
       this.options.federationConfig
     ).apply(compiler);
-
-    new FederatedTypesStatsPlugin({
-      filename: this.normalizeOptions.typesStatsFileName,
-      statsResult: stats,
-    }).apply(compiler);
-
-    this.importRemoteTypes();
   }
 
-  private extractTypes(): TypesStatsJson {
+  private compileTypes() {
     const exposedComponents = this.options.federationConfig.exposes;
-    const exposeSrcToDestMap: Record<string, string> = {};
 
     if (!exposedComponents) {
-      return {
-        files: {},
-      };
+      return {};
     }
 
     // './Component': 'path/to/component' -> ['./Component', 'path/to/component']
-    const normalizedFileNames = Object.entries(exposedComponents)
-      .map(([exposeDest, exposeSrc]) => {
-        const cwd = this.webpackCompilerOptions.context || process.cwd();
+    const compiler = new TypescriptCompiler(this.normalizeOptions);
 
-        const [rootDir, entry] = exposeSrc.split(/\/(?=[^/]+$)/);
-
-        const normalizedRootDir = path.resolve(cwd, rootDir);
-        const filenameWithExt = this.getFilenameWithExtension(
-          normalizedRootDir,
-          entry
-        );
-
-        const pathWithExt = path.resolve(normalizedRootDir, filenameWithExt);
-
-        exposeSrcToDestMap[pathWithExt] = exposeDest;
-
-        return pathWithExt;
-      })
-      .filter((entry) => /\.tsx?$/.test(entry));
-
-    const program = new TypescriptCompiler(
-      this.normalizeOptions.tsCompilerOptions,
-      (filename) => `${exposeSrcToDestMap[filename]}.d.ts`
-    );
-
-    const filesMap = program.generateDeclarationFiles(normalizedFileNames);
-
-    const statsJson = {
-      publicPath: this.normalizeOptions.publicPath,
-      files: generateTypesStats(filesMap, this.normalizeOptions),
-    };
-
-    return statsJson;
+    try {
+      const filesMap = compiler.generateDeclarationFiles(exposedComponents);
+      return filesMap;
+    } catch (error) {
+      this.logger.error(error);
+      throw new Error();
+    }
   }
 
   private importRemoteTypes() {

@@ -51,5 +51,6 @@ export const normalizeOptions = (
     typesIndexJsonFilePath,
     typesStatsFileName,
     typescriptFolderName,
+    webpackCompilerOptions,
   };
 };

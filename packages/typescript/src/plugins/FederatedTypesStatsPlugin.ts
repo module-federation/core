@@ -1,18 +1,20 @@
 import { Compilation, Compiler, sources } from 'webpack';
-import { TypesStatsJson } from '../types';
+import { CompilationParams, TypesStatsJson } from '../types';
 
 const PLUGIN_NAME = 'FederatedTypesStatsPlugin';
 
 interface FederatedTypesStatsPluginOptions {
   filename: string;
-  statsResult: TypesStatsJson;
+  // statsResult: TypesStatsJson;
 }
 
 export class FederatedTypesStatsPlugin {
   constructor(private options: FederatedTypesStatsPluginOptions) {}
 
   apply(compiler: Compiler) {
-    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
+    compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation, params) => {
+      const statsResult = (params as CompilationParams).federated_types_stats;
+
       compilation.hooks.processAssets.tapPromise(
         {
           name: PLUGIN_NAME,
@@ -21,9 +23,7 @@ export class FederatedTypesStatsPlugin {
         async () => {
           const { filename } = this.options;
 
-          const source = new sources.RawSource(
-            JSON.stringify(this.options.statsResult)
-          );
+          const source = new sources.RawSource(JSON.stringify(statsResult));
 
           const asset = compilation.getAsset(filename);
 
