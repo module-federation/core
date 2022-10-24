@@ -25,7 +25,7 @@ export default function patchDefaultSharedLoader(
 
   return [
     '',
-    `require(${JSON.stringify(pathIncludeDefaults)});`,
+    `require(${JSON.stringify('./' + pathIncludeDefaults)});`,
     content
   ].join("\n")
 
