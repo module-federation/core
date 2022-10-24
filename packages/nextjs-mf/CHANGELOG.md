@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [5.10.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.10.1...nextjs-mf-5.10.2) (2022-10-24)
+
+
+### Bug Fixes
+
+* support include defaults for windows ([#327](https://github.com/module-federation/nextjs-mf/issues/327)) ([059db4e](https://github.com/module-federation/nextjs-mf/commit/059db4eb604368e14eef464caca6d16463a6d706))
+
+
+
 ## [5.10.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.10.0...nextjs-mf-5.10.1) (2022-10-19)
 
 
