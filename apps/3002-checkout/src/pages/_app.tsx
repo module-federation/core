@@ -5,7 +5,7 @@ import { Layout, version } from 'antd';
 
 import { useMFClient } from '@module-federation/nextjs-mf/client';
 
-import HostAppMenu from './_menu';
+import HostAppMenu from '../components/menu';
 
 import 'antd/dist/antd.css';
 
@@ -23,7 +23,7 @@ function MyApp({ Component, pageProps }) {
     onChangeRemote: async (remote) => {
       if (remote) {
         const RemoteAppMenu =
-          (await remote.getModule('./pages/_menu', 'default')) ||
+          (await remote.getModule('./menu', 'default')) ||
           (() => null); /* or Empty menu component if undefined */
         setMenuComponent(() => RemoteAppMenu);
       } else {

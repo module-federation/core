@@ -26,15 +26,19 @@ const nextConfig = {
         }/remoteEntry.js`,
 
       };
-      if(isServer) {
-        config.module.rules.push({
-          test: /pages/,
-          exclude: [/node_modules/,/_document/,/_middleware/],
-          use: [
-            '@module-federation/nextjs-mf/src/loaders/async-boundary-loader',
-          ]
-        });
-      }
+
+
+      config.module.rules.push({
+        test: [/pages/],
+        exclude: [/node_modules/,/_document/,/_middleware/],
+        resourceQuery: (query)=>{
+          return !query.includes('hasBoundary')
+        },
+        use: [
+          '@module-federation/nextjs-mf/src/loaders/async-boundary-loader',
+        ]
+      });
+
       config.plugins.push(
         new NextFederationPlugin({
           name: 'home_app',
@@ -45,6 +49,7 @@ const nextConfig = {
           },
           exposes: {
             './SharedNav': './components/SharedNav',
+            './menu': './components/menu',
           },
           shared: {
             lodash: {},

@@ -29,6 +29,7 @@ export const flushChunks = async () => {
         }
       })
     }
+
     return Array.from(chunks)
   }))
 

@@ -1,20 +1,27 @@
 import { NextPage } from 'next';
-import dynamic from 'next/dynamic';
 
-const page = import('./test-remote-hook.real');
+let useCustomRemoteHook;
 
-const Page = dynamic(() => import('./test-remote-hook.real'), {
-  ssr: false,
-}) as NextPage;
+if (process.browser) {
+  useCustomRemoteHook = require('shop/useCustomRemoteHook');
+}
 
-Page.getInitialProps = async (ctx) => {
-  const getInitialProps = (await page).default?.getInitialProps;
+const TestRemoteHook: NextPage = () => {
+  let text;
 
-  if (getInitialProps) {
-    return getInitialProps(ctx);
+  if (process.browser) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    text = useCustomRemoteHook.default();
   }
 
-  return {};
+  return (
+    <>
+      <div>
+        Page with custom remote hook. You must see text in red box below:
+      </div>
+      <div style={{ border: '1px solid red', padding: 5 }}>{text}</div>
+    </>
+  );
 };
 
-export default Page;
+export default TestRemoteHook;

@@ -108,10 +108,9 @@ export const parseRemotes = (remotes: Record<string, any>) => {
     return acc;
   }, {} as Record<string, string>);
 };
-
 // server template to convert remote into promise new promise and use require.loadChunk to load the chunk
 export const generateRemoteTemplate = (url: string, global: any) => {
-  //language=JS
+
   return `new Promise(function (resolve, reject) {
     if(!global.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser

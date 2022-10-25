@@ -118,6 +118,7 @@ export const pitch = function( this: LoaderContext<Record<string, unknown>>, rem
     //   }
     // )
     // return
+
     this.loadModule(
       `${this.resourcePath}.webpack[javascript/auto]` + `!=!${loaderWithoutBoundaryOrShared}`,
       /**
@@ -137,27 +138,34 @@ export const pitch = function( this: LoaderContext<Record<string, unknown>>, rem
         const hasGSPT = !!source.includes('getStaticPaths');
         console.log({hasGIP, hasGSP, hasGSSP, hasGSPT, file: this.resourcePath})
 
+        const relativeResource = this.utils.contextify(
+          this.context,
+          this.resource
+        );
+
+        console.log(relativeResource);
+
+        console.log(this.request, this.resource, this.resourcePath)
+
         var result = [
-          pageTemplate(`!!${loaderWithoutBoundary}`)
+          pageTemplate(`${this.resource}?hasBoundary`)
         ];
 
         if(hasGIP) {
-          result.push(getInitialPropsTemplate(`!!${loaderWithoutBoundary}`))
+          result.push(getInitialPropsTemplate(`${relativeResource}?hasBoundary`))
         }
 
         if(hasGSP) {
-          result.push(getStaticPropsTemplate(`!!${loaderWithoutBoundary}`))
+          result.push(getStaticPropsTemplate(`${relativeResource}?hasBoundary`))
         }
 
         if(hasGSSP) {
-          result.push(getServerSidePropsTemplate(`!!${loaderWithoutBoundary}`))
+          result.push(getServerSidePropsTemplate(`${relativeResource}?hasBoundary`))
         }
 
         if(hasGSPT) {
-          result.push(getStaticPathsTemplate(`!!${loaderWithoutBoundary}`))
+          result.push(getStaticPathsTemplate(`${relativeResource}?hasBoundary`))
         }
-
-        console.log(result)
 
         callback(null,result.join("\n"))
       }
