@@ -1,0 +1,8 @@
+{
+  "name": "@module-federation/async-boundary-loader",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "dependencies": {
+    "loader-utils": "^3.2.0"
+  }
+}
