@@ -26,7 +26,15 @@ const nextConfig = {
         }/remoteEntry.js`,
 
       };
-
+      if(isServer) {
+        config.module.rules.push({
+          test: /pages/,
+          exclude: [/node_modules/,/_document/],
+          use: [
+            '@module-federation/async-boundary-loader',
+          ]
+        });
+      }
       config.plugins.push(
         new NextFederationPlugin({
           name: 'home_app',

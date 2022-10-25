@@ -16,6 +16,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@module-federation/async-boundary-loader": [
+        "packages/async-boundary-loader/src/index.ts"
+      ],
       "@module-federation/nextjs-mf": ["packages/nextjs-mf/src/index.ts"],
       "@module-federation/node": ["packages/node/src/index.ts"],
       "@module-federation/typescript": ["packages/typescript/src/index.ts"],
