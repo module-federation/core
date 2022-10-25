@@ -29,9 +29,9 @@ const nextConfig = {
       if(isServer) {
         config.module.rules.push({
           test: /pages/,
-          exclude: [/node_modules/,/_document/],
+          exclude: [/node_modules/,/_document/,/_middleware/],
           use: [
-            '@module-federation/async-boundary-loader',
+            '@module-federation/nextjs-mf/src/loaders/async-boundary-loader',
           ]
         });
       }

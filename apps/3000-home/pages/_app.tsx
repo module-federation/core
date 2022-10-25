@@ -8,9 +8,11 @@ import SharedNav from '../components/SharedNav';
 import HostAppMenu from './_menu';
 import 'antd/dist/antd.css';
 
-function MyApp({ Component, pageProps }) {
-  const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
+function MyApp(props) {
 
+  const { Component, pageProps } = props
+  const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
+console.log('props',props)
   useMFClient({
     onChangeRemote: async (remote) => {
       if (remote) {
