@@ -77,6 +77,7 @@ export class ChildFederationPlugin {
         ...compiler.options.output,
         path: outputPath,
         // path: deriveOutputPath(isServer, compiler.options.output.path),
+        name: 'child-'+compiler.options.name,
         publicPath: 'auto',
         chunkLoadingGlobal: buildName + 'chunkLoader',
         uniqueName: buildName,

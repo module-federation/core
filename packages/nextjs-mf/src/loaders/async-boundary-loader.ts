@@ -118,6 +118,8 @@ export const pitch = function( this: LoaderContext<Record<string, unknown>>, rem
     // )
     // return
 
+  console.log(this._compilation.name)
+
     this.loadModule(
       `${this.resourcePath}.webpack[javascript/auto]` + `!=!${loaderWithoutBoundaryOrShared}`,
       /**
