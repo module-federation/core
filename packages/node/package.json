@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "0.8.0",
+  "version": "0.8.2",
   "type": "commonjs",
   "main": "src/index.js",
   "exports": {
@@ -36,6 +36,14 @@
     "encoding": "^0.1.13"
   },
   "peerDependencies": {
-    "webpack": "^5.46.0"
+    "webpack": "^5.40.0"
+  },
+  "devDependencies": {
+    "react": "^18",
+    "next": "^13"
+  },
+  "optionalDependencies": {
+    "react": "^17 || ^18",
+    "next": "^12 || ^13"
   }
 }
