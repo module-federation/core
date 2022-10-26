@@ -8,9 +8,9 @@
     "registry": "https://registry.npmjs.org/"
   },
   "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/utilities",
-  "peerDependencies": {
-    "react": "^12 || ^18",
-    "next": "^11 || ^12 || ^13"
+  "optionalDependencies": {
+    "react": "^17 || ^18",
+    "next": "^12 || ^13"
   },
   "devDependencies": {
     "react": "18.2.0",
