@@ -12,7 +12,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "nx build -verbose --output-style=stream",
+    "build": "nx build --verbose --output-style=stream",
     "start": "nx build && nx run-many --target=serve --verbose --output-style=stream",
     "prod": "nx build && nx run-many --target=build --verbose --output-style=stream",
     "commit": "cz",
@@ -34,7 +34,7 @@
     "download": "^8.0.0",
     "fast-glob": "^3.2.12",
     "lodash.get": "^4.4.2",
-    "next": "12.2.5",
+    "next": "13.0.0",
     "ngx-deploy-npm": "^4.2.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",

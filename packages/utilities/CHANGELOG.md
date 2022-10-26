@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [0.4.0](https://github.com/module-federation/nextjs-mf/compare/utils-0.3.4...utils-0.4.0) (2022-10-26)
+
+
+### Features
+
+*  Automatic Async boundary loader ([#330](https://github.com/module-federation/nextjs-mf/issues/330)) ([7e3c08c](https://github.com/module-federation/nextjs-mf/commit/7e3c08cf7835c0407bdce7ed6865b864153074a4))
+
+
+
 ## [0.3.4](https://github.com/module-federation/nextjs-mf/compare/utils-0.3.3...utils-0.3.4) (2022-10-17)
 
 

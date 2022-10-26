@@ -52,6 +52,7 @@ const nextConfig = {
             './useCustomRemoteHook': './components/useCustomRemoteHook',
             './WebpackSvg': './components/WebpackSvg',
             './WebpackPng': './components/WebpackPng',
+            './menu': './components/menu',
           },
           shared: {
             lodash: {},

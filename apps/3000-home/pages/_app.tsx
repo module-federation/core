@@ -5,17 +5,19 @@ import { Layout, version } from 'antd';
 import { useMFClient } from '@module-federation/nextjs-mf/client';
 
 import SharedNav from '../components/SharedNav';
-import HostAppMenu from './_menu';
+import HostAppMenu from '../components/menu';
 import 'antd/dist/antd.css';
 
-function MyApp({ Component, pageProps }) {
-  const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
+function MyApp(props) {
 
+  const { Component, pageProps } = props
+  const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
+console.log('props',props)
   useMFClient({
     onChangeRemote: async (remote) => {
       if (remote) {
         const RemoteAppMenu =
-          (await remote.getModule('./pages/_menu', 'default')) ||
+          (await remote.getModule('./menu', 'default')) ||
           (() => null); /* or Empty menu component if undefined */
         setMenuComponent(() => RemoteAppMenu);
       } else {
