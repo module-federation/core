@@ -32,6 +32,7 @@ const nextConfig = {
         exposes: {
           './CheckoutTitle': './src/components/CheckoutTitle',
           './ButtonOldAnt': './src/components/ButtonOldAnt',
+          './menu': './src/components/menu',
         },
         shared: {
           lodash: {},

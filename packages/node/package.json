@@ -32,7 +32,8 @@
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.7",
+    "encoding": "^0.1.13"
   },
   "peerDependencies": {
     "webpack": "^5.46.0"

@@ -37,12 +37,14 @@ const nextConfig = {
           },
           exposes: {
             './SharedNav': './components/SharedNav',
+            './menu': './components/menu',
           },
           shared: {
             lodash: {},
             antd: {},
           },
           extraOptions: {
+            automaticAsyncBoundary: true,
             exposePages: true,
             enableImageLoaderFix: true,
             enableUrlLoaderFix: true,

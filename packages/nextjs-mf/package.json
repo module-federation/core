@@ -22,7 +22,7 @@
   },
   "peerDependencies": {
     "webpack": "5.45.1",
-    "next": "^12",
+    "next": "^12 || ^13",
     "react": "^17 || ^18",
     "react-dom": "^17 || ^18"
   }
