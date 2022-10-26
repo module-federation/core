@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "antd": "^4.22.3",
+    "antd": "4.23.2",
     "lodash": "4.17.21",
     "next": "12.3.0",
     "react": "18.2.0",
