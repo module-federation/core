@@ -20,7 +20,7 @@ const getInitialPropsTemplate = (request: string) => {
   return (
     `
     AsyncBoundary.getInitialProps = async (ctx) => {
-      return await import("${request}").then((mod) => {
+      return import("${request}").then((mod) => {
         const page = mod.default || mod;
         return page.getInitialProps(ctx)
       })
@@ -33,7 +33,7 @@ const getStaticPropsTemplate = (request: string) => {
   return (
     `
     export const getStaticProps = async (ctx) => {
-      return await import("${request}").then((mod) => {
+      return import("${request}").then((mod) => {
         return mod.getStaticProps(ctx)
       })
     }
@@ -45,7 +45,7 @@ const getServerSidePropsTemplate = (request: string) => {
   return (
     `
     export const getServerSideProps = async (ctx) => {
-      return await import("${request}").then((mod) => {
+      return import("${request}").then((mod) => {
         return mod.getServerSideProps(ctx)
       })
     }
@@ -57,7 +57,7 @@ const getStaticPathsTemplate = (request: string) => {
   return (
     `
     export const getStaticPaths = async (ctx) => {
-      return await import("${request}").then((mod) => {
+      return import("${request}").then((mod) => {
         return mod.getStaticPaths(ctx)
       })
     }
@@ -76,50 +76,6 @@ export const pitch = function( this: LoaderContext<Record<string, unknown>>, rem
     return !loader.includes('async-boundary-loader')
   }).join('!');
 
-  //@ts-ignore
-  // if(this.target === 'web') {
-  //   this.importModule(
-  //     `${this.resourcePath}.webpack[javascript/auto]` + `!=!${loaderWithoutBoundary}`,
-  //     {},
-  //     /**
-  //      * @param {Error | null | undefined} error
-  //      * @param {object} exports
-  //      */
-  //     (error: Error | null | undefined, exports: {}) => {
-  //       if (error) {
-  //         callback(error);
-  //
-  //         return;
-  //       }
-  //       //@ts-ignore
-  //       const hasGIP = !!exports?.default?.getInitialProps;
-  //       console.log({hasGIP, file: this.resourcePath})
-  //       var result = [
-  //         "module.exports = {}"];
-  //
-  //       callback(null,result.join(""))
-  //     }
-  //   );
-  // } else {
-    //@ts-ignore
-    // this.loaders[0].options.isServer = false
-    //
-    // this.importModule(
-    //   `${this.resourcePath}.webpack[javascript/auto]` + `!=!${loaderWithoutBoundary}`,
-    //   {},
-    //   (error: Error | null | undefined, exports: {}) => {
-    //     if (error) {
-    //       callback(error);
-    //
-    //       return;
-    //     }
-    //     console.log({exports, file: this.resourcePath})
-    //   }
-    // )
-    // return
-
-  console.log(this._compilation.name)
-
     this.loadModule(
       `${this.resourcePath}.webpack[javascript/auto]` + `!=!${loaderWithoutBoundaryOrShared}`,
       /**
@@ -132,7 +88,12 @@ export const pitch = function( this: LoaderContext<Record<string, unknown>>, rem
 
           return;
         }
-//@ts-ignore
+        //@ts-ignore
+        if(this._compilation.name === 'ChildFederationPlugin') {
+          callback(null, source, sourceMap);
+          return;
+        }
+
         const hasGIP = !!source.includes('getInitialProps');
         const hasGSP = !!source.includes('getStaticProps');
         const hasGSSP = !!source.includes('getServerSideProps');
