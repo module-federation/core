@@ -105,7 +105,7 @@ export class NextFederationPlugin {
     //patch next
     compiler.options.module.rules.push({
       test(req) {
-        return (req.includes('/pages/') || req.includes('/app/') && (req.endsWith('.js') || req.endsWith('.jsx') || req.endsWith('.ts') || req.endsWith('.tsx') || req.endsWith('.mjs')));
+        return (req.includes(path.join(compiler.context,'pages')) || req.includes(path.join(compiler.context,'app'))) && (req.endsWith('.js') || req.endsWith('.jsx') || req.endsWith('.ts') || req.endsWith('.tsx') || req.endsWith('.mjs'));
       },
       include: compiler.context,
       exclude: /node_modules/,
