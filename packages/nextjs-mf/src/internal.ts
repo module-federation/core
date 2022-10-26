@@ -36,6 +36,10 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     requiredVersion: false,
     singleton: true,
   },
+  'styled-jsx/style': {
+    requiredVersion: false,
+    singleton: true,
+  },
   'next/link': {
     requiredVersion: false,
     singleton: true,
