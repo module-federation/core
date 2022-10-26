@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [5.10.5](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.10.4...nextjs-mf-5.10.5) (2022-10-26)
+
+
+### Bug Fixes
+
+* improve loader paths for including defaults ([#338](https://github.com/module-federation/nextjs-mf/issues/338)) ([a99fe97](https://github.com/module-federation/nextjs-mf/commit/a99fe977eeaecce54e5241b42aabd552c52b8129))
+
+
+
 ## [5.10.4](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.10.3...nextjs-mf-5.10.4) (2022-10-26)
 
 
