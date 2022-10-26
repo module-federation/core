@@ -68,7 +68,6 @@ const getStaticPathsTemplate = (request: string) => {
 export const pitch = function( this: LoaderContext<Record<string, unknown>>, remainingRequest: string) {
   this.cacheable && this.cacheable();
   const callback = this.async();
-// console.log('pitch', this.resourcePath, remainingRequest)
   const loaderWithoutBoundaryOrShared = this.request.split('!').filter((loader) => {
     return !loader.includes('async-boundary-loader') && !loader.includes('patchDefaultSharedLoader')
   }).join('!');
@@ -136,16 +135,12 @@ export const pitch = function( this: LoaderContext<Record<string, unknown>>, rem
         const hasGSP = !!source.includes('getStaticProps');
         const hasGSSP = !!source.includes('getServerSideProps');
         const hasGSPT = !!source.includes('getStaticPaths');
-        console.log({hasGIP, hasGSP, hasGSSP, hasGSPT, file: this.resourcePath})
 
         const relativeResource = this.utils.contextify(
           this.context,
           this.resource
         );
 
-        console.log(relativeResource);
-
-        console.log(this.request, this.resource, this.resourcePath)
 
         var result = [
           pageTemplate(`${this.resource}?hasBoundary`)

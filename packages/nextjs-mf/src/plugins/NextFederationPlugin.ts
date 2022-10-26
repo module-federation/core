@@ -32,6 +32,7 @@ export class NextFederationPlugin {
       enableImageLoaderFix: false,
       enableUrlLoaderFix: false,
       skipSharingNextInternals: false,
+      automaticAsyncBoundary: false,
       ...extraOptions,
     };
   }
@@ -117,6 +118,19 @@ compiler.options.devtool = 'source-map';
         '../loaders/patchDefaultSharedLoader'
       ),
     });
+    if(this._extraOptions.automaticAsyncBoundary) {
+      compiler.options.module.rules.push({
+        test: [/pages/],
+        exclude: [/node_modules/, /_document/, /_middleware/],
+        resourceQuery: (query) => {
+          return !query.includes('hasBoundary')
+        },
+        loader: path.resolve(
+          __dirname,
+          '../loaders/async-boundary-loader'
+        )
+      });
+    }
 
     //todo runtime variable creation needs to be applied for server as well. this is just for client
     // TODO: this needs to be refactored into something more comprehensive. this is just a quick fix
