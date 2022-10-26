@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [5.11.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.11.2...nextjs-mf-5.11.3) (2022-10-26)
+
+
+### Bug Fixes
+
+* Fix peer deps ([#343](https://github.com/module-federation/nextjs-mf/issues/343)) ([8e7b087](https://github.com/module-federation/nextjs-mf/commit/8e7b0871507911bb81161b9786901877259edaed))
+
+
+
 ## [5.11.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.11.1...nextjs-mf-5.11.2) (2022-10-26)
 
 ### Dependency Updates
