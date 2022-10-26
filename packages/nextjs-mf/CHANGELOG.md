@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [5.10.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.10.2...nextjs-mf-5.10.3) (2022-10-26)
+
+
+### Bug Fixes
+
+* share styled-jsx/style as singleton ([#333](https://github.com/module-federation/nextjs-mf/issues/333)) ([dd2c2d1](https://github.com/module-federation/nextjs-mf/commit/dd2c2d173000e7f89ecc7961255c6a29b769f278))
+
+
+
 ## [5.10.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.10.1...nextjs-mf-5.10.2) (2022-10-24)
 
 
