@@ -308,7 +308,6 @@ export class ChildFederationPlugin {
         if (childCompilers['server']) {
           //wrong hook for this
           // add hook for additional assets to prevent compile from sealing.
-
           compilation.hooks.processAssets.tapPromise(
             {
               name: CHILD_PLUGIN_NAME,
@@ -321,6 +320,13 @@ export class ChildFederationPlugin {
                   if (err) {
                     compilation.errors.push(err as WebpackError);
                     rej();
+                  }
+                  if(stats && stats.hasWarnings()) {
+                    compilation.warnings.push(
+                      new Error(
+                        toDisplayErrors(stats.compilation.warnings)
+                      ) as WebpackError
+                    );
                   }
                   if (stats && stats.hasErrors()) {
                     compilation.errors.push(
@@ -340,6 +346,13 @@ export class ChildFederationPlugin {
         childCompiler.run((err, stats) => {
           if (err) {
             compilation.errors.push(err as WebpackError);
+          }
+          if(stats && stats.hasWarnings()) {
+            compilation.warnings.push(
+              new Error(
+                toDisplayErrors(stats.compilation.warnings)
+              ) as WebpackError
+            );
           }
           if (stats && stats.hasErrors()) {
             compilation.errors.push(
