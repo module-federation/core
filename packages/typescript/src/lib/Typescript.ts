@@ -8,6 +8,17 @@ import get from 'lodash.get';
 import axios from 'axios';
 import { Compilation, Compiler } from 'webpack';
 
+namespace FederatedTypesPlugin {
+  export interface FederatedTypesPluginOptions {
+    /**
+     * Any additional files to be included (besides `ModuleFederationPluginOptions.remotes`) in the emission of Typescript types.
+     * I.e. `"files"` in your tsconfig.json.
+     * This is useful for global .d.ts files not directly referenced.
+     */
+    typescriptFilesInclude?: string[];
+  }
+}
+
 export class FederatedTypesPlugin {
   private options: ModuleFederationPluginOptions;
   private exposedComponents!: ModuleFederationPluginOptions['exposes'];
@@ -19,15 +30,20 @@ export class FederatedTypesPlugin {
   private webpackCompilerOptions!: Compiler['options'];
 
   private tsDefinitionFilesObj: Record<string, string> = {};
+  private federatedTypesPluginOptions?: FederatedTypesPlugin.FederatedTypesPluginOptions;
   private typescriptFolderName = '@mf-typescript';
   private typesIndexJsonFileName = '__types_index.json';
 
-  constructor(options: ModuleFederationPluginOptions) {
+  constructor(
+    options: ModuleFederationPluginOptions,
+    federatedTypesPluginOptions?: FederatedTypesPlugin.FederatedTypesPluginOptions
+  ) {
     this.options = options;
     this.tsCompilerOptions = {
       declaration: true,
       emitDeclarationOnly: true,
     };
+    this.federatedTypesPluginOptions = federatedTypesPluginOptions;
   }
 
   apply(compiler: Compiler) {
@@ -175,7 +191,10 @@ export class FederatedTypesPlugin {
       };
 
       const program = ts.createProgram(
-        normalizedFileNames,
+        [
+          ...(this.federatedTypesPluginOptions?.typescriptFilesInclude ?? []),
+          ...normalizedFileNames,
+        ],
         this.tsCompilerOptions,
         host
       );
@@ -195,6 +214,15 @@ export class FederatedTypesPlugin {
               console.log('Error saving the types index', e);
             }
           }
+        );
+      } else {
+        const shortformErrors = emitResult.diagnostics.map((result) => ({
+          fileName: result.file?.fileName,
+          error: `TS${result.code}: ${result.messageText}`,
+        }));
+        console.error(
+          '[FederatedTypesPlugin]: Declaration emit failed. The following files are erroneous:\n',
+          shortformErrors
         );
       }
     }
