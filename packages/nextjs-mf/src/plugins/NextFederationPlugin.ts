@@ -9,12 +9,12 @@ import type {
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
 } from '@module-federation/utilities';
-import { createRuntimeVariables } from '@module-federation/utilities';
+import {createRuntimeVariables} from '@module-federation/utilities';
 
 import path from 'path';
-import type { Compiler } from 'webpack';
+import type {Compiler} from 'webpack';
 
-import { internalizeSharedPackages, parseRemotes, reKeyHostShared, } from '../internal';
+import {internalizeSharedPackages, parseRemotes, reKeyHostShared,} from '../internal';
 import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
 import ChildFederationPlugin from './ChildFederationPlugin';
 
@@ -25,7 +25,7 @@ export class NextFederationPlugin {
   private _extraOptions: NextFederationPluginExtraOptions;
 
   constructor(options: NextFederationPluginOptions) {
-    const { extraOptions, ...mainOpts } = options;
+    const {extraOptions, ...mainOpts} = options;
     this._options = mainOpts;
     this._extraOptions = {
       automaticPageStitching: false,
@@ -46,7 +46,7 @@ export class NextFederationPlugin {
       throw new Error('filename is not defined in NextFederation options');
     }
 
-    if(!['server','client'].includes(compiler.options.name)) {
+    if (!['server', 'client'].includes(compiler.options.name)) {
       return
     }
 
@@ -76,7 +76,7 @@ export class NextFederationPlugin {
       // should this be a plugin that we apply to the compiler?
       internalizeSharedPackages(this._options, compiler);
     } else {
-      if(this._extraOptions.automaticPageStitching) {
+      if (this._extraOptions.automaticPageStitching) {
         compiler.options.module.rules.push({
           test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
           loader: path.resolve(
@@ -104,8 +104,11 @@ export class NextFederationPlugin {
 
     //patch next
     compiler.options.module.rules.push({
-      test(req) {
-        return (req.includes(path.join(compiler.context,'pages')) || req.includes(path.join(compiler.context,'app'))) && (req.endsWith('.js') || req.endsWith('.jsx') || req.endsWith('.ts') || req.endsWith('.tsx') || req.endsWith('.mjs'));
+      test(req: string) {
+        if (req.includes(path.join(compiler.context, 'pages')) || req.includes(path.join(compiler.context, 'app'))) {
+          return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req)
+        }
+        return false
       },
       include: compiler.context,
       exclude: /node_modules/,
@@ -114,9 +117,14 @@ export class NextFederationPlugin {
         '../loaders/patchDefaultSharedLoader'
       ),
     });
-    if(this._extraOptions.automaticAsyncBoundary) {
+    if (this._extraOptions.automaticAsyncBoundary) {
       compiler.options.module.rules.push({
-        test: [/pages/],
+        test: (request: string) => {
+          if (request.includes(path.join(compiler.context, 'pages')) || request.includes(path.join(compiler.context, 'app'))) {
+            return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
+          }
+          return false
+        },
         exclude: [/node_modules/, /_document/, /_middleware/],
         resourceQuery: (query) => {
           return !query.includes('hasBoundary')
