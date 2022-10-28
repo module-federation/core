@@ -28,7 +28,7 @@ export default function patchDefaultSharedLoader(
     path.resolve(__dirname, '../include-defaults-sc.js')
   );
 
-  if(content.includes('use client')) {
+  if(/^['"]use client['"]/.test(content)) {
     return [
       '',
       `require(${JSON.stringify('./' + pathIncludeDefaults)});`,

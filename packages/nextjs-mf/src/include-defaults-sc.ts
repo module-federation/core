@@ -5,6 +5,9 @@ require('next/link');
 require('next/head');
 require('next/script');
 require('next/dynamic');
+require('next/navigation');
+// require('next/dist/shared/lib/app-router-context');
+
 //@ts-ignore
 if (process.env.NODE_ENV === 'development') {
   require('react/jsx-dev-runtime');

@@ -16,11 +16,27 @@ import { extractUrlAndGlobal } from '@module-federation/utilities';
 // in hosts we re-key them to prevent webpack moving the modules into their own chunks (cause eager error)
 // in remote these are marked as import:false as we always expect the host to prove them
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
-  react: {
+  "react/": {
+    singleton: true,
+    requiredVersion: false,
+  },
+  "react": {
     singleton: true,
     requiredVersion: false,
   },
   'react/jsx-runtime': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  "next/dist/shared/lib/app-router-context": {
+    singleton: true,
+    requiredVersion: false,
+  },
+  "next/navigation": {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'next/': {
     singleton: true,
     requiredVersion: false,
   },

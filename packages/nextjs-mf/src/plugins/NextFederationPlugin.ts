@@ -50,6 +50,9 @@ export class NextFederationPlugin {
       return
     }
 
+    compiler.options.devtool = 'source-map'
+
+
     const isServer = compiler.options.name === 'server';
     const webpack = compiler.webpack;
 

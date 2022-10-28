@@ -127,6 +127,8 @@ export class ChildFederationPlugin {
         },
       };
 
+      console.log(externalizedShares);
+
       if (compiler.options.name === 'client') {
         plugins = [
           new FederationPlugin(federationPluginOptions),
@@ -152,14 +154,12 @@ export class ChildFederationPlugin {
             ModuleFederationPlugin: FederationPlugin,
           }),
           new webpack.node.NodeTemplatePlugin(childOutput),
-          //TODO: Externals function needs to internalize any shared module for host and remote build
+          //TODO: check if app directory exists, if so share react and react dom in the scope, dont externalize it
           new webpack.ExternalsPlugin(compiler.options.externalsType, [
             // next dynamic needs to be within webpack, cannot be externalized
             ...Object.keys(DEFAULT_SHARE_SCOPE).filter(
-              (k) => (k !== 'next/dynamic' && k !== 'next/link' && k !== 'next/script')
+              (k) => (k !== 'next/dynamic' && k !== 'next/link' && k !== 'next/script' && k !== 'next/head'&& k !== 'react' && k !== 'react-dom' && k !== 'next/' && k !== 'react/' )
             ),
-            'react/jsx-runtime',
-            'react/jsx-dev-runtime',
           ]),
           // new LoaderTargetPlugin('async-node'),
           new StreamingTargetPlugin(federationPluginOptions, {
@@ -186,6 +186,8 @@ export class ChildFederationPlugin {
 
 
       childCompiler.outputPath = outputPath;
+      childCompiler.options.resolve = compiler.options.resolve;
+
       childCompiler.options.module.rules.forEach((rule) => {
         // next-image-loader fix which adds remote's hostname to the assets url
         if (

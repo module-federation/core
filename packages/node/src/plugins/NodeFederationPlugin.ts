@@ -163,6 +163,8 @@ export const generateRemoteTemplate = (url: string, global: any) => {
         //     proxy.init(__webpack_require__.S.default);
         //   } catch(e) {}
         // }
+
+        console.log('remote',remote);
         return remote.get(arg).then((f)=>{
           const m = f();
           return ()=>new Proxy(m, {
