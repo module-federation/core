@@ -40,12 +40,9 @@ export const revalidate = () => {
 
         const name = property;
         const url = remote;
+        const fetchModule = getFetchModule()
 
-        const fetcher = (
-          global.webpackChunkLoad ||
-          global.fetch ||
-          require('node-fetch')
-        )(url)
+        const fetcher = fetchModule(url)
           .then((re: Response) => {
             if (!re.ok) {
               throw new Error(
@@ -118,3 +115,12 @@ export const revalidate = () => {
 
   return Promise.resolve(false);
 };
+
+function getFetchModule() {
+  const loadedModule = global.webpackChunkLoad || global.fetch
+  if (loadedModule) {
+    return loadedModule
+  }
+  const nodeFetch = require('node-fetch')
+  return nodeFetch.default || nodeFetch
+}
