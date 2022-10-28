@@ -102,11 +102,11 @@ export class NextFederationPlugin {
       };
     }
 
-    //patch next
+    // patch next
     compiler.options.module.rules.push({
-      test(req: string) {
-        if (req.includes(path.join(compiler.context, 'pages')) || req.includes(path.join(compiler.context, 'app'))) {
-          return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req)
+      test(request: string) {
+        if (request.includes(path.join(compiler.context, 'pages'))) {
+          return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
         }
         return false
       },
@@ -117,11 +117,29 @@ export class NextFederationPlugin {
         '../loaders/patchDefaultSharedLoader'
       ),
     });
+    //patch server components
+    compiler.options.module.rules.push({
+      test(request: string) {
+        if(request.includes(path.join(compiler.context, 'app'))) {
+          return /(page|layout)\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
+        }
+        return false
+      },
+      include: compiler.context,
+      exclude: /node_modules/,
+      loader: path.resolve(
+        __dirname,
+        '../loaders/patchDefaultSharedLoaderSc'
+      ),
+    });
     if (this._extraOptions.automaticAsyncBoundary) {
       compiler.options.module.rules.push({
         test: (request: string) => {
-          if (request.includes(path.join(compiler.context, 'pages')) || request.includes(path.join(compiler.context, 'app'))) {
+          if (request.includes(path.join(compiler.context, 'pages'))) {
             return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
+          }
+          if(request.includes(path.join(compiler.context, 'app'))) {
+            return /(page|layout)\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
           }
           return false
         },
@@ -149,6 +167,7 @@ export class NextFederationPlugin {
 
     // ignore edge runtime and middleware builds
     if (ModuleFederationPlugin) {
+      console.log('FEDERATION ACTIVE')
       const internalShare = reKeyHostShared(this._options.shared);
       const hostFederationPluginOptions: ModuleFederationPluginOptions = {
         ...this._options,
