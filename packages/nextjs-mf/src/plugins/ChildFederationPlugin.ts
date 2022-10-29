@@ -127,8 +127,6 @@ export class ChildFederationPlugin {
         },
       };
 
-      console.log(externalizedShares);
-
       if (compiler.options.name === 'client') {
         plugins = [
           new FederationPlugin(federationPluginOptions),

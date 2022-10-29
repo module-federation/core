@@ -7,6 +7,7 @@ require('next/head');
 require('next/script');
 require('next/dynamic');
 require('styled-jsx');
+require('next/navigation');
 
 if (process.env['NODE_ENV'] === 'development') {
   require('react/jsx-dev-runtime');
