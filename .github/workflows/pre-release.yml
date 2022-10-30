@@ -22,10 +22,6 @@ jobs:
           git config user.email "gituser@example.com"
       - run: git fetch --no-tags --prune --depth=5 origin main
         name: Fetch Main branch
-      # - uses: actions/setup-node@v3
-      #   with:
-      #     node-version: '14'
-      #     cache: 'yarn'
       - name: Install packages
         run: yarn install --frozen-lockfile
       - name: Lint
