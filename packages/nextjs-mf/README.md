@@ -112,7 +112,7 @@ new NextFederationPlugin({
     exposePages: true, // `false` by default
     enableImageLoaderFix: true, // `false` by default
     enableUrlLoaderFix: true, // `false` by default
-    automaticAsyncBoundary: true // `false` by default
+    automaticAsyncBoundary: true, // `false` by default
     skipSharingNextInternals: false // `false` by default
   },
 });
@@ -134,29 +134,30 @@ You can see it in action here: https://github.com/module-federation/module-feder
 
 ```js
 // next.config.js
-const NextFederationPlugin = require('@module-federation/nextjs-mf/NextFederationPlugin');
+// either from default
+const NextFederationPlugin = require('@module-federation/nextjs-mf').default;
+// or named export
+const NextFederationPlugin = require('@module-federation/nextjs-mf').NextFederationPlugin;
 
 module.exports = {
   webpack(config, options) {
-    if (!options.isServer) {
-      config.plugins.push(
-        new NextFederationPlugin({
-          name: 'next2',
-          remotes: {
-            next1: `next1@http://localhost:3001/_next/static/chunks/remoteEntry.js`,
-          },
-          filename: 'static/chunks/remoteEntry.js',
-          exposes: {
-            './title': './components/exposedTitle.js',
-            './checkout': './pages/checkout',
-            './pages-map': './pages-map.js',
-          },
-          shared: {
-            // whatever else
-          },
-        })
-      );
-    }
+    config.plugins.push(
+      new NextFederationPlugin({
+        name: 'next2',
+        remotes: {
+          next1: `next1@http://localhost:3001/_next/static/chunks/remoteEntry.js`,
+        },
+        filename: 'static/chunks/remoteEntry.js',
+        exposes: {
+          './title': './components/exposedTitle.js',
+          './checkout': './pages/checkout',
+          './pages-map': './pages-map.js',
+        },
+        shared: {
+          // whatever else
+        },
+      })
+    );
 
     return config;
   },
@@ -173,20 +174,18 @@ import '@module-federation/nextjs-mf/lib/include-defaults';
 ```js
 // next.config.js
 
-const NextFederationPlugin = require('@module-federation/nextjs-mf/NextFederationPlugin');
+const NextFederationPlugin = require('@module-federation/nextjs-mf/NextFederationPlugin').default;
 
 module.exports = {
   webpack(config, options) {
-    if (!options.isServer) {
-      config.plugins.push(
-        new NextFederationPlugin({
-          name: 'next1',
-          remotes: {
-            next2: `next2@http://localhost:3000/_next/static/chunks/remoteEntry.js`,
-          },
-        })
-      );
-    }
+    config.plugins.push(
+      new NextFederationPlugin({
+        name: 'next1',
+        remotes: {
+          next2: `next2@http://localhost:3000/_next/static/chunks/remoteEntry.js`,
+        },
+      })
+    );
 
     return config;
   },
