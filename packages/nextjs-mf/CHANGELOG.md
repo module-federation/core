@@ -2,6 +2,79 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [5.11.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.11.2...nextjs-mf-5.11.3) (2022-10-26)
+
+
+### Bug Fixes
+
+* Fix peer deps ([#343](https://github.com/module-federation/nextjs-mf/issues/343)) ([8e7b087](https://github.com/module-federation/nextjs-mf/commit/8e7b0871507911bb81161b9786901877259edaed))
+
+
+
+## [5.11.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.11.1...nextjs-mf-5.11.2) (2022-10-26)
+
+### Dependency Updates
+
+* `node` updated to version `0.8.2`
+
+
+## [5.11.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.11.0...nextjs-mf-5.11.1) (2022-10-26)
+
+### Dependency Updates
+
+* `node` updated to version `0.8.1`
+* `utils` updated to version `0.4.1`
+
+
+# [5.11.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.10.5...nextjs-mf-5.11.0) (2022-10-26)
+
+### Dependency Updates
+
+* `node` updated to version `0.8.0`
+* `utils` updated to version `0.4.0`
+
+### Features
+
+*  Automatic Async boundary loader ([#330](https://github.com/module-federation/nextjs-mf/issues/330)) ([7e3c08c](https://github.com/module-federation/nextjs-mf/commit/7e3c08cf7835c0407bdce7ed6865b864153074a4))
+
+
+
+## [5.10.5](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.10.4...nextjs-mf-5.10.5) (2022-10-26)
+
+
+### Bug Fixes
+
+* improve loader paths for including defaults ([#338](https://github.com/module-federation/nextjs-mf/issues/338)) ([a99fe97](https://github.com/module-federation/nextjs-mf/commit/a99fe977eeaecce54e5241b42aabd552c52b8129))
+
+
+
+## [5.10.4](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.10.3...nextjs-mf-5.10.4) (2022-10-26)
+
+
+### Bug Fixes
+
+* update next peer dep to 12.3.0 ([#328](https://github.com/module-federation/nextjs-mf/issues/328)) ([841be9d](https://github.com/module-federation/nextjs-mf/commit/841be9d027b6b33cca27b884f87f27dd7a9bdee5))
+
+
+
+## [5.10.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.10.2...nextjs-mf-5.10.3) (2022-10-26)
+
+
+### Bug Fixes
+
+* share styled-jsx/style as singleton ([#333](https://github.com/module-federation/nextjs-mf/issues/333)) ([dd2c2d1](https://github.com/module-federation/nextjs-mf/commit/dd2c2d173000e7f89ecc7961255c6a29b769f278))
+
+
+
+## [5.10.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.10.1...nextjs-mf-5.10.2) (2022-10-24)
+
+
+### Bug Fixes
+
+* support include defaults for windows ([#327](https://github.com/module-federation/nextjs-mf/issues/327)) ([059db4e](https://github.com/module-federation/nextjs-mf/commit/059db4eb604368e14eef464caca6d16463a6d706))
+
+
+
 ## [5.10.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.10.0...nextjs-mf-5.10.1) (2022-10-19)
 
 

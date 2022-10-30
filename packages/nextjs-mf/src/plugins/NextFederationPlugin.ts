@@ -9,12 +9,12 @@ import type {
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
 } from '@module-federation/utilities';
-import { createRuntimeVariables } from '@module-federation/utilities';
+import {createRuntimeVariables} from '@module-federation/utilities';
 
 import path from 'path';
-import type { Compiler } from 'webpack';
+import type {Compiler} from 'webpack';
 
-import { internalizeSharedPackages, parseRemotes, reKeyHostShared, } from '../internal';
+import {internalizeSharedPackages, parseRemotes, reKeyHostShared,} from '../internal';
 import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
 import ChildFederationPlugin from './ChildFederationPlugin';
 
@@ -25,13 +25,14 @@ export class NextFederationPlugin {
   private _extraOptions: NextFederationPluginExtraOptions;
 
   constructor(options: NextFederationPluginOptions) {
-    const { extraOptions, ...mainOpts } = options;
+    const {extraOptions, ...mainOpts} = options;
     this._options = mainOpts;
     this._extraOptions = {
       automaticPageStitching: false,
       enableImageLoaderFix: false,
       enableUrlLoaderFix: false,
       skipSharingNextInternals: false,
+      automaticAsyncBoundary: false,
       ...extraOptions,
     };
   }
@@ -45,7 +46,7 @@ export class NextFederationPlugin {
       throw new Error('filename is not defined in NextFederation options');
     }
 
-    if(!['server','client'].includes(compiler.options.name)) {
+    if (!['server', 'client'].includes(compiler.options.name)) {
       return
     }
 
@@ -53,12 +54,8 @@ export class NextFederationPlugin {
     const webpack = compiler.webpack;
 
     if (isServer) {
-      console.error(
-        '[nextjs-mf] WARNING: SSR IS NOT FULLY SUPPORTED YET, Only use pluign on client builds'
-      );
       // target false because we use our own target for node env
       compiler.options.target = false;
-compiler.options.devtool = 'source-map';
       const StreamingTargetPlugin =
         require('@module-federation/node').StreamingTargetPlugin;
 
@@ -79,7 +76,7 @@ compiler.options.devtool = 'source-map';
       // should this be a plugin that we apply to the compiler?
       internalizeSharedPackages(this._options, compiler);
     } else {
-      if(this._extraOptions.automaticPageStitching) {
+      if (this._extraOptions.automaticPageStitching) {
         compiler.options.module.rules.push({
           test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
           loader: path.resolve(
@@ -107,8 +104,11 @@ compiler.options.devtool = 'source-map';
 
     //patch next
     compiler.options.module.rules.push({
-      test(req) {
-        return (req.includes('/pages/') || req.includes('/app/') && (req.endsWith('.js') || req.endsWith('.jsx') || req.endsWith('.ts') || req.endsWith('.tsx') || req.endsWith('.mjs')));
+      test(req: string) {
+        if (req.includes(path.join(compiler.context, 'pages')) || req.includes(path.join(compiler.context, 'app'))) {
+          return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req)
+        }
+        return false
       },
       include: compiler.context,
       exclude: /node_modules/,
@@ -117,6 +117,24 @@ compiler.options.devtool = 'source-map';
         '../loaders/patchDefaultSharedLoader'
       ),
     });
+    if (this._extraOptions.automaticAsyncBoundary) {
+      compiler.options.module.rules.push({
+        test: (request: string) => {
+          if (request.includes(path.join(compiler.context, 'pages')) || request.includes(path.join(compiler.context, 'app'))) {
+            return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
+          }
+          return false
+        },
+        exclude: [/node_modules/, /_document/, /_middleware/],
+        resourceQuery: (query) => {
+          return !query.includes('hasBoundary')
+        },
+        loader: path.resolve(
+          __dirname,
+          '../loaders/async-boundary-loader'
+        )
+      });
+    }
 
     //todo runtime variable creation needs to be applied for server as well. this is just for client
     // TODO: this needs to be refactored into something more comprehensive. this is just a quick fix

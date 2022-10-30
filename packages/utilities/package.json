@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/utilities",
-  "version": "0.3.4",
+  "version": "0.4.1",
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -8,12 +8,12 @@
     "registry": "https://registry.npmjs.org/"
   },
   "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/utilities",
-  "peerDependencies": {
-    "react": "^12 || ^18",
-    "next": "^11 || ^12"
+  "optionalDependencies": {
+    "react": "^17 || ^18",
+    "next": "^12 || ^13"
   },
   "devDependencies": {
     "react": "18.2.0",
-    "next": "12.3.0"
+    "next": "13.0.0"
   }
 }

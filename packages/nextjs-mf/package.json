@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/nextjs-mf",
-  "version": "5.10.1",
+  "version": "5.11.5",
   "license": "MIT",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -21,8 +21,8 @@
     "eventemitter3": "^4.0.7"
   },
   "peerDependencies": {
-    "webpack": "5.45.1",
-    "next": "12.2.0",
+    "webpack": "^5.40.0",
+    "next": "^12 || ^13",
     "react": "^17 || ^18",
     "react-dom": "^17 || ^18"
   }
