@@ -34,5 +34,10 @@ module.exports = async (config, context) => {
     }),
   ];
 
+  parsedConfig.infrastructureLogging = {
+    level: 'verbose',
+    colors: true,
+  };
+
   return parsedConfig;
 };

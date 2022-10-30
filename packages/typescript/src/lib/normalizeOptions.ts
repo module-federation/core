@@ -3,7 +3,10 @@ import { Compiler } from 'webpack';
 import get from 'lodash.get';
 import path from 'path';
 
-import { typescriptFolderName, typesIndexJsonFileName } from '../constants';
+import {
+  TYPESCRIPT_FOLDER_NAME,
+  TYPES_INDEX_JSON_FILE_NAME,
+} from '../constants';
 import { FederatedTypesPluginOptions } from '../types';
 
 export type NormalizeOptions = ReturnType<typeof normalizeOptions>;
@@ -12,6 +15,7 @@ export const normalizeOptions = (
   options: FederatedTypesPluginOptions,
   compiler: Compiler
 ) => {
+  const { typescriptFolderName = TYPESCRIPT_FOLDER_NAME } = options;
   const webpackCompilerOptions = compiler.options;
 
   const distPath =
@@ -20,7 +24,7 @@ export const normalizeOptions = (
     'dist';
 
   const distDir = path.join(distPath, typescriptFolderName);
-  const typesIndexJsonFilePath = path.join(distDir, typesIndexJsonFileName);
+  const typesIndexJsonFilePath = path.join(distDir, TYPES_INDEX_JSON_FILE_NAME);
 
   const tsCompilerOptions: ts.CompilerOptions = {
     declaration: true,
@@ -40,14 +44,14 @@ export const normalizeOptions = (
   const remoteEntryFilename = options.federationConfig.filename;
 
   const typesStatsFileName = remoteEntryFilename
-    ? remoteEntryFilename.replace('remoteEntry.js', typesIndexJsonFileName)
-    : typesIndexJsonFileName;
+    ? remoteEntryFilename.replace('remoteEntry.js', TYPES_INDEX_JSON_FILE_NAME)
+    : TYPES_INDEX_JSON_FILE_NAME;
 
   return {
     distDir,
     publicPath,
     tsCompilerOptions,
-    typesIndexJsonFileName,
+    typesIndexJsonFileName: TYPES_INDEX_JSON_FILE_NAME,
     typesIndexJsonFilePath,
     typesStatsFileName,
     typescriptFolderName,

@@ -1,19 +1,17 @@
 import { Compilation, Compiler, sources } from 'webpack';
+import { generateTypesStats } from '../lib/generateTypesStats';
+
+import { NormalizeOptions } from '../lib/normalizeOptions';
 import { CompilationParams, TypesStatsJson } from '../types';
 
 const PLUGIN_NAME = 'FederatedTypesStatsPlugin';
 
-interface FederatedTypesStatsPluginOptions {
-  filename: string;
-  // statsResult: TypesStatsJson;
-}
-
 export class FederatedTypesStatsPlugin {
-  constructor(private options: FederatedTypesStatsPluginOptions) {}
+  constructor(private options: NormalizeOptions) {}
 
   apply(compiler: Compiler) {
     compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation, params) => {
-      const statsResult = (params as CompilationParams).federated_types_stats;
+      const federatedTypesMap = (params as CompilationParams).federated_types;
 
       compilation.hooks.processAssets.tapPromise(
         {
@@ -21,16 +19,21 @@ export class FederatedTypesStatsPlugin {
           stage: Compilation.PROCESS_ASSETS_STAGE_ANALYSE,
         },
         async () => {
-          const { filename } = this.options;
+          const { typesStatsFileName, publicPath } = this.options;
 
-          const source = new sources.RawSource(JSON.stringify(statsResult));
+          const statsJson: TypesStatsJson = {
+            publicPath,
+            files: generateTypesStats(federatedTypesMap, this.options),
+          };
 
-          const asset = compilation.getAsset(filename);
+          const source = new sources.RawSource(JSON.stringify(statsJson));
+
+          const asset = compilation.getAsset(typesStatsFileName);
 
           if (asset) {
-            compilation.updateAsset(filename, source);
+            compilation.updateAsset(typesStatsFileName, source);
           } else {
-            compilation.emitAsset(filename, source);
+            compilation.emitAsset(typesStatsFileName, source);
           }
         }
       );

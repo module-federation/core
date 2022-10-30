@@ -29,7 +29,7 @@ export class TypescriptCompiler {
   ) {
     const exposeSrcToDestMap: Record<string, string> = {};
 
-    const files = Object.entries(exposedComponents!)
+    const rootNames = Object.entries(exposedComponents!)
       .map(([exposeDest, exposeSrc]) => {
         const cwd =
           this.options.webpackCompilerOptions.context || process.cwd();
@@ -51,7 +51,8 @@ export class TypescriptCompiler {
       .filter((entry) => /\.tsx?$/.test(entry));
 
     const host = this.createHost(exposeSrcToDestMap);
-    const program = ts.createProgram(files, this.compilerOptions, host);
+
+    const program = ts.createProgram(rootNames, this.compilerOptions, host);
 
     const { diagnostics, emitSkipped } = program.emit();
 
@@ -70,7 +71,7 @@ export class TypescriptCompiler {
     const originalWriteFile = host.writeFile;
 
     host.writeFile = (
-      _,
+      filepath,
       text,
       writeOrderByteMark,
       onError,
@@ -79,19 +80,20 @@ export class TypescriptCompiler {
     ) => {
       // for exposes: { "./expose/path": "path/to/file" }
       // force typescript to write compiled output to "@mf-typescript/expose/path"
-      const newFileName = `${
-        exposeSrcToDestMap[sourceFiles?.[0].fileName || '']
-      }.d.ts`;
+      const sourceFilename = sourceFiles?.[0].fileName || '';
+      const newFileName = exposeSrcToDestMap[sourceFilename];
 
-      const newFilePath = path.join(
-        this.compilerOptions.outDir as string,
-        newFileName
-      );
+      const normalizedFilepath = newFileName
+        ? path.join(
+            this.compilerOptions.outDir as string,
+            `${newFileName}.d.ts`
+          )
+        : filepath;
 
-      this.tsDefinitionFilesObj[newFilePath] = text;
+      this.tsDefinitionFilesObj[normalizedFilepath] = text;
 
       originalWriteFile(
-        newFilePath,
+        normalizedFilepath,
         text,
         writeOrderByteMark,
         onError,

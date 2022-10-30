@@ -1,3 +1,3 @@
-export const typescriptFolderName = '@mf-typescript';
+export const TYPESCRIPT_FOLDER_NAME = '@mf-types';
 
-export const typesIndexJsonFileName = '__types_index.json';
+export const TYPES_INDEX_JSON_FILE_NAME = '__types_index.json';

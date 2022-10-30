@@ -43,8 +43,10 @@ export class TypesCache {
     Object.entries(cachedFiles).forEach(([filename, hash]) => {
       const remoteFileHash = files[filename];
 
-      if (remoteFileHash && remoteFileHash !== hash) {
-        filesToCacheBust.push(filename);
+      if (remoteFileHash) {
+        if (remoteFileHash !== hash) {
+          filesToCacheBust.push(filename);
+        }
       } else {
         filesToDelete.push(filename);
       }

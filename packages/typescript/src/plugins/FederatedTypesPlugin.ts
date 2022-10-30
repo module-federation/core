@@ -4,9 +4,15 @@ import path from 'path';
 import axios from 'axios';
 import { Compiler } from 'webpack';
 
+import {
+  isObjectEmpty,
+  Logger,
+  LoggerInstance,
+} from '@module-federation/utilities';
+
 import { TypescriptCompiler } from '../lib/TypescriptCompiler';
 import { normalizeOptions } from '../lib/normalizeOptions';
-import { generateTypesStats } from '../lib/generateTypesStats';
+import { TypesCache } from '../lib/Caching';
 import {
   CompilationParams,
   FederatedTypesPluginOptions,
@@ -14,23 +20,27 @@ import {
 } from '../types';
 
 import { FederatedTypesStatsPlugin } from './FederatedTypesStatsPlugin';
-import { TypesCache } from '../lib/Caching';
-import { Logger, LoggerInstance } from '@module-federation/utilities';
 
 const PLUGIN_NAME = 'FederatedTypesPlugin';
 
 export class FederatedTypesPlugin {
-  private options: FederatedTypesPluginOptions;
   private normalizeOptions!: ReturnType<typeof normalizeOptions>;
   private webpackCompilerOptions!: Compiler['options'];
   private logger!: LoggerInstance;
 
-  constructor(options: FederatedTypesPluginOptions) {
-    this.options = options;
-  }
+  constructor(private options: FederatedTypesPluginOptions) {}
 
   apply(compiler: Compiler) {
-    let recompileInterval: NodeJS.Timer;
+    const {
+      disableDownloadingRemoteTypes = false,
+      disableTypeCompilation = false,
+    } = this.options;
+
+    // Bail if both 'disableDownloadingRemoteTypes' & 'disableTypeCompilation' are 'truthy'
+    if (disableDownloadingRemoteTypes && disableTypeCompilation) {
+      return;
+    }
+
     const { webpack } = compiler;
 
     this.logger = Logger.setLogger(
@@ -51,25 +61,47 @@ export class FederatedTypesPlugin {
       );
     }
 
-    compiler.hooks.beforeRun.tap(PLUGIN_NAME, () => {
-      // download remotes here
-      // this.importRemoteTypes();
-    });
+    const { context, watchOptions } =
+      this.normalizeOptions.webpackCompilerOptions;
 
-    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (_, params) => {
-      const filesMap = this.compileTypes();
+    const ignoredWatchOptions = watchOptions.ignored;
 
-      const statsJson = {
-        publicPath: this.normalizeOptions.publicPath,
-        files: generateTypesStats(filesMap, this.normalizeOptions),
-      };
+    const watchOptionsToIgnore = [
+      path.join(
+        context as string,
+        this.normalizeOptions.typescriptFolderName,
+        '**',
+        '*'
+      ),
+    ];
 
-      (params as CompilationParams).federated_types_stats = statsJson;
-    });
+    compiler.options.watchOptions.ignored = Array.isArray(ignoredWatchOptions)
+      ? [...ignoredWatchOptions, ...watchOptionsToIgnore]
+      : watchOptionsToIgnore;
 
-    new FederatedTypesStatsPlugin({
-      filename: this.normalizeOptions.typesStatsFileName,
-    }).apply(compiler);
+    if (!disableDownloadingRemoteTypes) {
+      compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, async (_, callback) => {
+        this.logger.log('Preparing to download types from remotes on startup');
+        await this.importRemoteTypes(callback);
+      });
+
+      compiler.hooks.watchRun.tapAsync(PLUGIN_NAME, async (_, callback) => {
+        this.logger.log('Preparing to download types from remotes');
+        await this.importRemoteTypes(callback);
+      });
+    }
+
+    if (!disableTypeCompilation) {
+      compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (_, params) => {
+        this.logger.log('Preparing to Generate types');
+
+        const filesMap = this.compileTypes();
+
+        (params as CompilationParams).federated_types = filesMap;
+      });
+
+      new FederatedTypesStatsPlugin(this.normalizeOptions).apply(compiler);
+    }
 
     new webpack.container.ModuleFederationPlugin(
       this.options.federationConfig
@@ -95,13 +127,18 @@ export class FederatedTypesPlugin {
     }
   }
 
-  private importRemoteTypes() {
+  private async importRemoteTypes(callback: any) {
     const remoteComponents = this.options.federationConfig.remotes;
 
-    if (!remoteComponents) {
-      return;
+    if (
+      !remoteComponents ||
+      (remoteComponents && isObjectEmpty(remoteComponents))
+    ) {
+      this.logger.log('No Remote components configured');
+      return callback();
     }
 
+    this.logger.log('Normalizing remote URLs');
     const remoteUrls = Object.entries(remoteComponents).map(
       ([remote, entry]) => {
         const remoteUrl = entry.substring(0, entry.lastIndexOf('/'));
@@ -114,75 +151,60 @@ export class FederatedTypesPlugin {
       }
     );
 
-    remoteUrls.forEach(({ origin, remote }) => {
+    remoteUrls.forEach(async ({ origin, remote }) => {
       const { typescriptFolderName } = this.normalizeOptions;
 
-      axios
-        .get<TypesStatsJson>(
+      try {
+        this.logger.log(`Getting types index for remote '${remote}'`);
+        const resp = await axios.get<TypesStatsJson>(
           `${origin}/${this.normalizeOptions.typesStatsFileName}`
-        )
-        .then((resp) => {
-          const statsJson = resp.data;
+        );
 
-          const { filesToCacheBust, filesToDelete } =
-            TypesCache.getCacheBustedFiles(remote, statsJson);
+        const statsJson = resp.data;
 
-          filesToCacheBust.forEach((file) =>
-            download(
-              `${origin}/${typescriptFolderName}/${file}`,
-              `${typescriptFolderName}/${remote}`,
-              {
+        this.logger.log(`Checking with Cache entries`);
+        const { filesToCacheBust, filesToDelete } =
+          TypesCache.getCacheBustedFiles(remote, statsJson);
+
+        this.logger.log('filesToCacheBust', filesToCacheBust);
+        this.logger.log('filesToDelete', filesToDelete);
+
+        if (filesToDelete.length > 0) {
+          filesToDelete.forEach((file) => {
+            fs.unlinkSync(
+              path.resolve(
+                this.normalizeOptions.webpackCompilerOptions.context as string,
+                typescriptFolderName,
+                remote,
+                file
+              )
+            );
+          });
+        }
+
+        if (filesToCacheBust.length > 0) {
+          await Promise.all(
+            filesToCacheBust.map((file) => {
+              const url = `${origin}/${typescriptFolderName}/${file}`;
+              const destination = path.join(
+                this.normalizeOptions.webpackCompilerOptions.context as string,
+                typescriptFolderName,
+                remote
+              );
+
+              this.logger.log('Downloading types...');
+              return download(url, destination, {
                 filename: file,
-              }
-            )
+              });
+            })
           );
 
-          if (filesToDelete.length > 0) {
-            filesToDelete.forEach((file) => {
-              fs.unlinkSync(path.resolve(typescriptFolderName, remote, file));
-            });
-          }
-        })
-        .catch((e) => console.log('ERROR fetching/writing types', e));
+          this.logger.log('downloading complete');
+        }
+        callback();
+      } catch (error) {
+        callback(error);
+      }
     });
-  }
-
-  private getFilenameWithExtension(rootDir: string, entry: string) {
-    // Check path exists and it's a directory
-    if (!fs.existsSync(rootDir) || !fs.lstatSync(rootDir).isDirectory()) {
-      throw new Error('rootDir must be a directory');
-    }
-
-    let filename;
-
-    try {
-      // Try to resolve exposed component using index
-      const files = TypesCache.getFsFiles(path.join(rootDir, entry));
-
-      filename = files?.find((file) => file.split('.')[0] === 'index');
-
-      if (!filename) {
-        throw new Error(`filename ${filename} not found`);
-      }
-
-      return `${entry}/${filename}`;
-    } catch (err) {
-      const files = TypesCache.getFsFiles(rootDir);
-
-      // Handle case where directory contains similar filenames
-      // or where a filename like `Component.base.tsx` is used
-      filename = files?.find((file) => {
-        const baseFile = path.basename(file, path.extname(file));
-        const baseEntry = path.basename(entry, path.extname(entry));
-
-        return baseFile === baseEntry;
-      });
-
-      if (!filename) {
-        throw new Error(`filename ${filename} not found`);
-      }
-
-      return filename as string;
-    }
   }
 }
