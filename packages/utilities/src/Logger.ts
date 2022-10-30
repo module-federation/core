@@ -10,7 +10,7 @@ export class Logger {
   }
 
   static setLogger(logger: Compilation['logger']): LoggerInstance {
-    this.loggerInstance = logger;
+    this.loggerInstance = logger || console;
     return logger;
   }
 }
