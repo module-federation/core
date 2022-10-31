@@ -8,15 +8,13 @@ import get from 'lodash.get';
 import axios from 'axios';
 import { Compilation, Compiler } from 'webpack';
 
-namespace FederatedTypesPlugin {
-  export interface FederatedTypesPluginOptions {
-    /**
-     * Any additional files to be included (besides `ModuleFederationPluginOptions.remotes`) in the emission of Typescript types.
-     * I.e. `"files"` in your tsconfig.json.
-     * This is useful for global .d.ts files not directly referenced.
-     */
-    typescriptFilesInclude?: string[];
-  }
+export interface FederatedTypesPluginOptions {
+  /**
+   * Any additional files to be included (besides `ModuleFederationPluginOptions.remotes`) in the emission of Typescript types.
+   * I.e. `"files"` in your tsconfig.json.
+   * This is useful for global .d.ts files not directly referenced.
+   */
+  typescriptFilesInclude?: string[];
 }
 
 export class FederatedTypesPlugin {
@@ -30,13 +28,13 @@ export class FederatedTypesPlugin {
   private webpackCompilerOptions!: Compiler['options'];
 
   private tsDefinitionFilesObj: Record<string, string> = {};
-  private federatedTypesPluginOptions?: FederatedTypesPlugin.FederatedTypesPluginOptions;
+  private federatedTypesPluginOptions?: FederatedTypesPluginOptions;
   private typescriptFolderName = '@mf-typescript';
   private typesIndexJsonFileName = '__types_index.json';
 
   constructor(
     options: ModuleFederationPluginOptions,
-    federatedTypesPluginOptions?: FederatedTypesPlugin.FederatedTypesPluginOptions
+    federatedTypesPluginOptions?: FederatedTypesPluginOptions
   ) {
     this.options = options;
     this.tsCompilerOptions = {
