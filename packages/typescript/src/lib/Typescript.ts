@@ -213,15 +213,6 @@ export class FederatedTypesPlugin {
             }
           }
         );
-      } else {
-        const shortformErrors = emitResult.diagnostics.map((result) => ({
-          fileName: result.file?.fileName,
-          error: `TS${result.code}: ${result.messageText}`,
-        }));
-        console.error(
-          '[FederatedTypesPlugin]: Declaration emit failed. The following files are erroneous:\n',
-          shortformErrors
-        );
       }
     }
   }
