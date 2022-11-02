@@ -15,6 +15,7 @@ import {hasLoader, injectRuleLoader} from '../loaders/helpers';
 
 import {
   DEFAULT_SHARE_SCOPE,
+  EXTERNAL_NEXT_DEPS,
   getOutputPath,
   externalizedShares,
   removePlugins,
@@ -155,8 +156,9 @@ export class ChildFederationPlugin {
           //TODO: check if app directory exists, if so share react and react dom in the scope, dont externalize it
           new webpack.ExternalsPlugin(compiler.options.externalsType, [
             // next dynamic needs to be within webpack, cannot be externalized
+              ...EXTERNAL_NEXT_DEPS,
             ...Object.keys(DEFAULT_SHARE_SCOPE).filter(
-              (k) => (k !== 'next/dynamic' && k !== 'next/link' && k !== 'next/script' && k !== 'next/head'&& k !== 'react' && k !== 'react-dom' && k !== 'next/' && k !== 'react/' )
+              (k) => (k !== 'next/dynamic' && k !== 'next/link' && k !== 'next/script' && k !== 'next/head' && k !== 'react-dom' && k !== 'next/' && k !== 'react/' )
             ),
           ]),
           // new LoaderTargetPlugin('async-node'),

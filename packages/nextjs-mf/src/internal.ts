@@ -20,30 +20,16 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     requiredVersion: false,
   },
-  // "next/dist/compiled/react/": {
+
+  // "react": {
   //   singleton: true,
   //   requiredVersion: false,
   // },
-  // "private-next-rsc-mod-ref-proxy": {
-  //   singleton:true,
-  //   requiredVersion: false,
-  // },
-  "react": {
-    singleton: true,
-    requiredVersion: false,
-  },
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: false,
   },
-  // "next/dist/shared/lib/app-router-context": {
-  //   singleton: true,
-  //   requiredVersion: false,
-  // },
-  // "next/navigation": {
-  //   singleton: true,
-  //   requiredVersion: false,
-  // },
+
   // 'next/': {
   //   singleton: true,
   //   requiredVersion: false,
@@ -64,16 +50,6 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     requiredVersion: false,
     singleton: true,
   },
-  // 'next/dist/client/link': {
-  //   shareKey: 'next/link',
-  //   requiredVersion: false,
-  //   singleton: true,
-  // },
-  // 'next/dist/shared/lib/head': {
-  //   shareKey: 'next/head',
-  //   requiredVersion: false,
-  //   singleton: true,
-  // },
   'next/router': {
     requiredVersion: false,
     singleton: true,
@@ -97,26 +73,89 @@ export const RSC_SHARE_SCOPE: SharedObject = {
     import: "next/link?shared",
     singleton: true,
     requiredVersion: false,
-    packageName: "next/link",
+    shareKey: "next/link",
   },
-  "next/dist/client/link":{
+  "next/headers": {
+    requiredVersion: false,
+    singleton: true,
+  },
+  "next/dist/client/components/layout-router":{
+    requiredVersion: false,
+    singleton: true,
+    import: "next/dist/client/components/layout-router?shared",
+    shareKey: "next/dist/client/components/layout-router",
+  },
+  "next/dist/client/components/app-router":{
+    requiredVersion: false,
+    singleton: true,
+    import: "next/dist/client/components/app-router?shared",
+    shareKey: "next/dist/client/components/app-router",
+  },
+  "next/dist/client/components/hooks-server-context":{
+    requiredVersion: false,
+    singleton: true,
+  },
+  "next/dist/client/components/render-from-template-context":{
+    requiredVersion: false,
+    singleton: true,
+    import: "next/dist/client/components/render-from-template-context?shared",
+    shareKey: "next/dist/client/components/render-from-template-context",
+  },
+  "next/dist/client/components/request-async-storage":{
+    requiredVersion: false,
+    singleton: true,
+    import: "next/dist/client/components/request-async-storage?shared",
+    shareKey: "next/dist/client/components/request-async-storage",
+  },
+  "next/dist/client/components/static-generation-async-storage":{
+    import: "next/dist/client/components/static-generation-async-storage?shared",
+    shareKey: "next/dist/client/components/static-generation-async-storage",
+    requiredVersion: false,
+    singleton: true,
+  },
+  "next/dist/compiled/react-server-dom-webpack/server.browser":{
+    requiredVersion: false,
+    singleton: true,
+    import: "next/dist/compiled/react-server-dom-webpack/server.browser?shared",
+    shareKey: "next/dist/compiled/react-server-dom-webpack/server.browser",
+  },
+  "next/dist/compiled/react/react.shared-subset":{
+    requiredVersion: false,
+    singleton: true,
+    import: "next/dist/compiled/react/react.shared-subset?shared",
+    shareKey: "next/dist/compiled/react/react.shared-subset",
+  },
+  // "next/": {
+  //   singleton: true,
+  //   requiredVersion: false,
+  // },
+  // 'next/dynamic': {
+  //   import: "next/dynamic?shared",
+  //   requiredVersion: false,
+  //   singleton: true,
+  // },
+  // "private-next-rsc-mod-ref-proxy": {
+  //   singleton:true,
+  //   requiredVersion: false,
+  // },
+  "next/script": {
+    import: "next/script?shared",
+    shareKey: "next/script",
     singleton: true,
     requiredVersion: false,
   },
-  // "next/script": {
-  //   singleton: true,
-  //   requiredVersion: false,
-  //   packageName: "next/script",
-  // },
-  // "next/dist/shared/lib/app-router-context": {
-  //   singleton: true,
-  //   requiredVersion: false,
-  // },
-  // "next/navigation": {
-  //   singleton: true,
-  //   requiredVersion: false,
-  // },
+  "next/navigation": {
+    import: "next/dist/client/components/navigation?shared",
+    packageName: "next/navigation",
+    shareKey: "next/navigation",
+    singleton: true,
+    requiredVersion: false,
+  },
 }
+
+export const EXTERNAL_NEXT_DEPS = [
+  'next/dist/shared/lib/app-router-context'
+]
 
 // put host in-front of any shared module key, so "hostreact"
 export const reKeyHostShared = (
@@ -127,7 +166,7 @@ export const reKeyHostShared = (
 ): Record<string, SharedConfig> => {
   const shared = {
     ...options,
-    // ...DEFAULT_SHARE_SCOPE,
+    ...DEFAULT_SHARE_SCOPE,
     // if react server components / has app dir
     ...((hasAppDir && isServer) ? RSC_SHARE_SCOPE : {})
   } as Record<string, SharedConfig>;
@@ -139,6 +178,9 @@ export const reKeyHostShared = (
 
 
     acc[shareKey] = shareOptions;
+
+    acc[shareKey].eager = true;
+
 
     if (!shareOptions.import) {
       acc[shareKey].import = itemKey;
@@ -277,11 +319,11 @@ export const internalizeSharedPackages = (
 };
 
 export const externalizedShares: SharedObject = Object.entries(
-  DEFAULT_SHARE_SCOPE
+  {...DEFAULT_SHARE_SCOPE,...RSC_SHARE_SCOPE}
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
 
-  acc[key] = { ...value};
+  acc[key] = { ...value, import: false };
 
   if (key === 'react/jsx-runtime') {
     delete (acc[key] as SharedConfig).import;

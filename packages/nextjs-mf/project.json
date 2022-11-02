@@ -15,6 +15,24 @@
         "assets": ["packages/nextjs-mf/*.md"]
       }
     },
+    "buildLib": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/nextjs-mf",
+        "main": "packages/nextjs-mf/src/index.js",
+        "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true,
+        "assets": ["packages/nextjs-mf/*.md"]
+      },
+      "dependsOn": [
+        {
+          "projects": "dependencies",
+          "target": "buildLib"
+        }
+      ]
+    },
     "publish": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
@@ -22,7 +40,7 @@
       },
       "dependsOn": [
         {
-          "projects": "self",
+          "projects": "dependencies",
           "target": "build"
         }
       ]

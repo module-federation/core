@@ -12,6 +12,7 @@
   ],
   "license": "MIT",
   "scripts": {
+    "buildLibs": "nx run-many --target=buildLib --maxParallel=1",
     "build": "nx build --verbose --output-style=stream",
     "start": "nx build && nx run-many --target=serve --verbose --output-style=stream",
     "prod": "nx build && nx run-many --target=build --verbose --output-style=stream",
