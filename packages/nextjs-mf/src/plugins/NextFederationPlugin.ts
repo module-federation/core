@@ -19,7 +19,7 @@ import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPro
 import ChildFederationPlugin from './ChildFederationPlugin';
 
 import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
-
+import fs from 'fs';
 export class NextFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
@@ -45,12 +45,14 @@ export class NextFederationPlugin {
     if (!this._options.filename) {
       throw new Error('filename is not defined in NextFederation options');
     }
+    compiler.options.devtool = 'source-map';
 
     if (!['server', 'client'].includes(compiler.options.name)) {
       return
     }
 
-    compiler.options.devtool = 'source-map'
+    const hasAppDir = fs.existsSync(path.join(compiler.context, 'app'))
+
 
 
     const isServer = compiler.options.name === 'server';
@@ -123,6 +125,27 @@ export class NextFederationPlugin {
         '../loaders/patchDefaultSharedLoader'
       ),
     });
+
+    if(isServer && hasAppDir) {
+      //@ts-ignore
+      const originalSwcServerLoader = compiler.options.module.rules[7].oneOf[2];
+      console.log(originalSwcServerLoader)
+      //@ts-ignore
+      // compiler.options.module.rules[7].oneOf[4].resourceQuery = /!shared/
+      //@ts-ignore
+      compiler.options.module.rules.unshift({
+          resourceQuery: /shared/,
+          layer: originalSwcServerLoader.issuerLayer,
+        })
+      // compiler.options.module.rules[7].oneOf.push({
+      //   resourceQuery: /shared/,
+      //   //@ts-ignore
+      //   layer: originalSwcServerLoader.layer,
+      // });
+      //@ts-ignore
+      // orinignalSwcServerLoader.resourceQuery = /!shared/;
+      // compiler.options.module.rules[7].oneOf[2].use.options
+    }
     //patch server components
     compiler.options.module.rules.push({
       test(request: string) {
@@ -174,7 +197,14 @@ export class NextFederationPlugin {
     // ignore edge runtime and middleware builds
     if (ModuleFederationPlugin) {
       console.log('FEDERATION ACTIVE')
-      const internalShare = reKeyHostShared(this._options.shared);
+      //@ts-ignore
+      const internalShare = reKeyHostShared(
+         this._options.shared,
+        //@ts-ignore
+        compiler.options,
+        hasAppDir,
+        isServer
+      );
       const hostFederationPluginOptions: ModuleFederationPluginOptions = {
         ...this._options,
         exposes: {},

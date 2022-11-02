@@ -20,6 +20,14 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     requiredVersion: false,
   },
+  // "next/dist/compiled/react/": {
+  //   singleton: true,
+  //   requiredVersion: false,
+  // },
+  // "private-next-rsc-mod-ref-proxy": {
+  //   singleton:true,
+  //   requiredVersion: false,
+  // },
   "react": {
     singleton: true,
     requiredVersion: false,
@@ -28,18 +36,18 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     requiredVersion: false,
   },
-  "next/dist/shared/lib/app-router-context": {
-    singleton: true,
-    requiredVersion: false,
-  },
-  "next/navigation": {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'next/': {
-    singleton: true,
-    requiredVersion: false,
-  },
+  // "next/dist/shared/lib/app-router-context": {
+  //   singleton: true,
+  //   requiredVersion: false,
+  // },
+  // "next/navigation": {
+  //   singleton: true,
+  //   requiredVersion: false,
+  // },
+  // 'next/': {
+  //   singleton: true,
+  //   requiredVersion: false,
+  // },
   'react-dom': {
     singleton: true,
     requiredVersion: false,
@@ -56,10 +64,16 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     requiredVersion: false,
     singleton: true,
   },
-  'next/link': {
-    requiredVersion: false,
-    singleton: true,
-  },
+  // 'next/dist/client/link': {
+  //   shareKey: 'next/link',
+  //   requiredVersion: false,
+  //   singleton: true,
+  // },
+  // 'next/dist/shared/lib/head': {
+  //   shareKey: 'next/head',
+  //   requiredVersion: false,
+  //   singleton: true,
+  // },
   'next/router': {
     requiredVersion: false,
     singleton: true,
@@ -72,21 +86,58 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     requiredVersion: false,
     singleton: true,
   },
+  'next/link': {
+    requiredVersion: false,
+    singleton: true,
+  },
 };
+
+export const RSC_SHARE_SCOPE: SharedObject = {
+  "next/link": {
+    import: "next/link?shared",
+    singleton: true,
+    requiredVersion: false,
+    packageName: "next/link",
+  },
+  "next/dist/client/link":{
+    singleton: true,
+    requiredVersion: false,
+  },
+  // "next/script": {
+  //   singleton: true,
+  //   requiredVersion: false,
+  //   packageName: "next/script",
+  // },
+  // "next/dist/shared/lib/app-router-context": {
+  //   singleton: true,
+  //   requiredVersion: false,
+  // },
+  // "next/navigation": {
+  //   singleton: true,
+  //   requiredVersion: false,
+  // },
+}
 
 // put host in-front of any shared module key, so "hostreact"
 export const reKeyHostShared = (
-  options: Shared = {}
+  options: Shared = {},
+  compilerOptions: object,
+  hasAppDir: boolean,
+  isServer: boolean
 ): Record<string, SharedConfig> => {
   const shared = {
     ...options,
-    ...DEFAULT_SHARE_SCOPE,
+    // ...DEFAULT_SHARE_SCOPE,
+    // if react server components / has app dir
+    ...((hasAppDir && isServer) ? RSC_SHARE_SCOPE : {})
   } as Record<string, SharedConfig>;
 
   return Object.entries(shared).reduce((acc, item) => {
     const [itemKey, shareOptions] = item;
 
-    const shareKey = 'host' + ((item as any).shareKey || itemKey);
+    const shareKey = 'host'+((item as any).shareKey || itemKey);
+
+
     acc[shareKey] = shareOptions;
 
     if (!shareOptions.import) {
@@ -99,6 +150,23 @@ export const reKeyHostShared = (
 
     if (DEFAULT_SHARE_SCOPE[itemKey]) {
       acc[shareKey].packageName = itemKey;
+    }
+// console.log('reKeyHostShared', {hasAppDir,isServer, itemKey, inScope: RSC_SHARE_SCOPE[itemKey]})
+    if(hasAppDir && isServer && RSC_SHARE_SCOPE[itemKey]) {
+      //@ts-ignore
+      // const {rootDir,hasServerComponents,isServerLayer} = compilerOptions.module.rules[7].oneOf[2].use.options
+      // //@ts-ignore
+      // console.log(compilerOptions.module.rules[7].oneOf[2].use.options)
+      // //@ts-ignore
+      // console.log(compilerOptions.module.rules[7].oneOf[4].use.options)
+      // //@ts-ignore
+      // const flightLoader = compilerOptions.resolveLoader.alias['next-flight-loader'];
+      // //@ts-ignore
+      // const swcLoader = compilerOptions.resolveLoader.alias['next-swc-loader'] + `?${JSON.stringify({rootDir,hasServerComponents,isServer,isServerLayer, isServer})}`
+      // //@ts-ignore
+      // const appLoader = compilerOptions.resolveLoader.alias['next-app-loader'];
+      // acc[shareKey].import = `${flightLoader}!${swcLoader}!${shareOptions.import || itemKey}`;
+      // console.log(acc[shareKey]);
     }
 
     return acc;
@@ -213,7 +281,7 @@ export const externalizedShares: SharedObject = Object.entries(
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
 
-  acc[key] = { ...value, import: false };
+  acc[key] = { ...value};
 
   if (key === 'react/jsx-runtime') {
     delete (acc[key] as SharedConfig).import;

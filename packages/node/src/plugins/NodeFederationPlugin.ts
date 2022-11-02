@@ -58,7 +58,7 @@ const executeLoadTemplate = `
             return res.text();
           }).then(function(scriptContent){
             try {
-              const vmContext = { exports, require, module, global, __filename, __dirname, URL, ...global};
+              const vmContext = {exports, require, module, global, __filename, __dirname, URL,console,process,Buffer,  ...global, globalThis, ...globalThis, Error};
               const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, { filename: 'node-federation-loader-' + moduleName + '.vm' });
 
               /* TODO: need something like a chunk loading queue, this can lead to async issues
@@ -115,6 +115,12 @@ export const generateRemoteTemplate = (url: string, global: any) => {
     if(!global.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser
       global.__remote_scope__ = {
+        _config: {},
+      }
+    }
+
+    if(globalThis && !globalThis.__remote_scope__) {
+      globalThis.__remote_scope__ = {
         _config: {},
       }
     }

@@ -59,6 +59,7 @@ export const runtimeRemotes = Object.entries(remoteVars).reduce(function (
 },
 {} as RuntimeRemotesMap);
 
+
 export const remotes = runtimeRemotes;
 
 /**
@@ -78,7 +79,7 @@ export const injectScript = (
     typeof keyOrRuntimeRemoteItem === 'string'
       ? runtimeRemotes[keyOrRuntimeRemoteItem]
       : keyOrRuntimeRemoteItem;
-
+console.log({reference});
   if (reference.asyncContainer) {
     // @ts-ignore
     asyncContainer = typeof reference.asyncContainer.then === 'function' ? reference.asyncContainer : reference.asyncContainer();
@@ -100,7 +101,10 @@ export const injectScript = (
     const globalScope =
       //@ts-ignore
       typeof window !== 'undefined' ? window : global.__remote_scope__; // TODO: fix types
-
+    // @ts-ignore
+    console.log(eval('global.__remote_scope__'));
+    // @ts-ignore
+    console.log({globalScope: __webpack_require__.g});
     asyncContainer = new Promise(function (resolve, reject) {
       function resolveRemoteGlobal() {
         const asyncContainer = globalScope[

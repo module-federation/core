@@ -203,6 +203,15 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
               "}",
             ]),
             Template.indent([
+              `if(globalThis && !globalThis.__remote_scope__) {`,
+              Template.indent(["// create a global scope for container, similar to how remotes are set on window in the browser",
+                `globalThis.__remote_scope__ = {`,
+                  "_config: {},",
+                "}",
+              ]),
+              "}",
+            ]),
+            Template.indent([
               executeLoadTemplate,
               `executeLoad(url,callback,chunkId)`,
             ]),
@@ -270,6 +279,11 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         )};`,
                         'Object.assign(global.__remote_scope__._config, remotes)',
                         'const remoteRegistry = global.__remote_scope__._config',
+                        `if(globalThis.__remote_scope__) {`,
+                          Template.indent([
+                            `Object.assign(globalThis.__remote_scope__._config, remotes)`,
+                          ]),
+                        '}',
                         /*
                       TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise() global will/should still exist - but can only be known at runtime
                     */

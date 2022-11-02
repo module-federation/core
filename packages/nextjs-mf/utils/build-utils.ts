@@ -60,6 +60,7 @@ const IsomorphicRemoteTemplate = function () {
         return resolve();
       }
     } else {
+
       // @ts-ignore
       if(!global.__remote_scope__) {
         // create a global scope for container, similar to how remotes are set on window in the browser
@@ -68,10 +69,22 @@ const IsomorphicRemoteTemplate = function () {
           _config: {},
         }
       }
+//@ts-ignore
+      if(globalThis && !globalThis.__remote_scope__) {
+        //@ts-ignore
+        globalThis.__remote_scope__ = global.__remote_scope__;
+      }
 
       // @ts-ignore
       if (typeof global.__remote_scope__[remote.global] !== 'undefined') {
         return resolve();
+      }
+      // @ts-ignore
+      if(globalThis) {
+        // @ts-ignore
+        if (typeof globalThis.__remote_scope__[remote.global] !== 'undefined') {
+          return resolve();
+        }
       }
     }
 
@@ -86,6 +99,13 @@ const IsomorphicRemoteTemplate = function () {
           // @ts-ignore
           if (typeof global.__remote_scope__[remote.global] !== 'undefined') {
             return resolve();
+          }
+          // @ts-ignore
+          if(globalThis) {
+            // @ts-ignore
+            if (typeof globalThis.__remote_scope__[remote.global] !== 'undefined') {
+              return resolve();
+            }
           }
         }
 
@@ -113,7 +133,7 @@ const IsomorphicRemoteTemplate = function () {
     );
   }).then(function () {
     //@ts-ignore
-    const globalScope = typeof window !== 'undefined' ? window : global.__remote_scope__;
+    const globalScope = typeof window !== 'undefined' ? window : global.__remote_scope__ || globalThis.__remote_scope__;
     const remoteGlobal = globalScope[
       remote.global
     ] as unknown as WebpackRemoteContainer & {

@@ -10,7 +10,7 @@ const pageTemplate = (request: string) => {
   return (
     `
     import dynamic from "next/dynamic"
-    const AsyncBoundary = dynamic(() => import("${request}"), {suspense:true});
+    const AsyncBoundary = dynamic(() => import("${request}"));
     export default AsyncBoundary;
     `
   )

@@ -370,14 +370,25 @@ class FederationStatsPlugin {
       compiler.options.plugins &&
       compiler.options.plugins.filter(
         (plugin) =>
-          plugin.constructor.name === 'NextFederationPlugin' &&
-          plugin._options.exposes
+          plugin.constructor.name === 'NextFederationPlugin'
       );
-
     if (!federationPlugins || federationPlugins.length === 0) {
       console.error('No ModuleFederationPlugin(s) found.');
       return;
     }
+
+    const hasExposes =
+      compiler.options.plugins &&
+      compiler.options.plugins.filter(
+        (plugin) =>
+          plugin.constructor.name === 'NextFederationPlugin' &&
+          plugin._options.exposes
+      );
+
+    if (!hasExposes || hasExposes.length === 0) {
+      return;
+    }
+
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
       compilation.hooks.processAssets.tapPromise(
