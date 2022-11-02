@@ -48,7 +48,7 @@ jobs:
           if [[ "$PROJECTS" ]]; then
             yarn nx run-many --target=build --projects="$PROJECTS"
           else
-            echo "No changes, Skipping lint check."
+            echo "No changes, Skipping build check."
           fi
       - name: Version
         shell: bash
