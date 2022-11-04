@@ -10,6 +10,8 @@
 
 [module-federation/typescript](./packages/typescript)
 
+[module-federation/import-remote](./packages/import-remote)
+
 ## Generate an application
 
 Run `nx g @nrwl/next:app my-app` to generate an application.

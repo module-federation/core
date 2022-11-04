@@ -1,0 +1,27 @@
+{
+  "name": "@module-federation/import-remote",
+  "version": "1.0.16",
+  "description": "Allow Dynamic Imports of Remotely Exposed Modules Using Webpack Module Federation",
+  "module": "src/index.js",
+  "types": "src/index.d.ts",
+  "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/import-remote",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "keywords": [
+    "module",
+    "federation",
+    "importRemote",
+    "webpack",
+    "microfrontend",
+    "micro-frontend"
+  ],
+  "author": "Alexander Vukov <alexvukov@gmail.com> (https://github.com/alex-vukov)",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "webpack": "^5.0.0"
+  }
+}

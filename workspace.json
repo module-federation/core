@@ -5,6 +5,7 @@
     "3000-home": "apps/3000-home",
     "3001-shop": "apps/3001-shop",
     "3002-checkout": "apps/3002-checkout",
+    "import-remote": "packages/import-remote",
     "nextjs-mf": "packages/nextjs-mf",
     "node": "packages/node",
     "typescript": "packages/typescript",
