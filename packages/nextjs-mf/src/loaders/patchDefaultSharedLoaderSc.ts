@@ -31,12 +31,34 @@ export default function patchDefaultSharedLoader(
   if(/^['"]use client['"]/.test(content)) {
     return [
       '',
+      'if(typeof window === "undefined"){',
+      `async function patchShareScope() {
+      __webpack_share_scopes__.rsc = {
+        // "next/link": ()=>()=>require("next/link"),
+       // "next/navigation": ()=>()=>require("next/navigation?shared"),
+       //  "next/dist/client/components/hooks-server-context": ()=>()=>require("next/dist/client/components/hooks-server-context"),
+        // "react": ()=>()=>require("react"),
+      }
+      };`,
+      'await patchShareScope();',
+      '}',
       `require(${JSON.stringify('./' + pathIncludeDefaults)});`,
       content
     ]
   }
   return [
     '',
+    'if(typeof window === "undefined"){',
+    `async function patchShareScope() {
+      __webpack_share_scopes__.rsc = {
+        // "next/link": ()=>()=>require("next/link"),
+        // "next/navigation": ()=>()=>require("next/navigation?shared"),
+        // "next/dist/client/components/hooks-server-context": ()=>()=>require("next/dist/client/components/hooks-server-context"),
+      //  "react": ()=>()=>require("react?shared"),
+      }
+      };`,
+    'await patchShareScope();',
+    '}',
     `require(${JSON.stringify('./' + pathIncludeDefaultsServerComponents)});`,
     content
   ].join("\n")

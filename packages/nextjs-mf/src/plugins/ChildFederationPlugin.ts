@@ -123,10 +123,11 @@ export class ChildFederationPlugin {
         shared: {
           ...(this._extraOptions.skipSharingNextInternals
             ? {}
-            : externalizedShares),
+            : externalizedShares(isServer)),
           ...this._options.shared,
         },
       };
+
 
       if (compiler.options.name === 'client') {
         plugins = [
@@ -157,9 +158,9 @@ export class ChildFederationPlugin {
           new webpack.ExternalsPlugin(compiler.options.externalsType, [
             // next dynamic needs to be within webpack, cannot be externalized
               ...EXTERNAL_NEXT_DEPS,
-            ...Object.keys(DEFAULT_SHARE_SCOPE).filter(
-              (k) => (k !== 'next/dynamic' && k !== 'next/link' && k !== 'next/script' && k !== 'next/head' && k !== 'react-dom' && k !== 'next/' && k !== 'react/' )
-            ),
+            // ...Object.keys(DEFAULT_SHARE_SCOPE).filter(
+            //   (k) => (k !== 'next/dynamic' && k !== 'next/link' && k !== 'next/script' && k !== 'next/head' && k !== 'react-dom' && k !== 'next/' && k !== 'react/' )
+            // ),
           ]),
           // new LoaderTargetPlugin('async-node'),
           new StreamingTargetPlugin(federationPluginOptions, {

@@ -184,13 +184,23 @@ export const generateRemoteTemplate = (url: string, global: any) => {
       init: function(shareScope) {
         const handler = {
           get(target, prop) {
+
             if (target[prop]) {
-              Object.values(target[prop]).forEach(function(o) {
-                if(o.from === '_N_E') {
-                  o.loaded = 1
-                }
-              })
-            }
+              console.log('rsc share scope', __webpack_require__.S.rsc);
+              if(__webpack_require__.S.rsc && __webpack_require__.S.rsc[prop]) {
+                  console.log('server component', __webpack_require__.S.rsc[prop]);
+                  console.log('targeted prop', target[prop])
+                  const moduleKey = Object.keys(target[prop])[0]
+                  console.log('found module key',target[prop][moduleKey]);
+                  target[prop][moduleKey].get = __webpack_require__.S.rsc[prop];
+              }
+                Object.values(target[prop]).forEach(function(o) {
+                  if(o.from === '_N_E') {
+                    o.loaded = 1
+                  }
+                })
+              }
+
             return target[prop]
           },
           set(target, property, value) {

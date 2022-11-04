@@ -20,6 +20,7 @@ import ChildFederationPlugin from './ChildFederationPlugin';
 
 import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
 import fs from 'fs';
+import * as NextConstants from 'next/dist/lib/constants'
 export class NextFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
@@ -36,7 +37,6 @@ export class NextFederationPlugin {
       ...extraOptions,
     };
   }
-
   apply(compiler: Compiler) {
     if (!compiler.options.name) {
       throw new Error('name is not defined in Compiler options');
@@ -50,6 +50,7 @@ export class NextFederationPlugin {
     if (!['server', 'client'].includes(compiler.options.name)) {
       return
     }
+
 
     const hasAppDir = fs.existsSync(path.join(compiler.context, 'app'))
 
@@ -108,35 +109,42 @@ export class NextFederationPlugin {
     }
 
     // patch next
-    compiler.options.module.rules.push({
-      test(request: string) {
-        if (request.includes(path.join(compiler.context, 'pages'))) {
-          return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
-        }
-        if(compiler.options.name === 'client') {
-          return /app-router/.test(request)
-        }
-        return false
-      },
-      // include: compiler.context,
-      // exclude: /node_modules/,
-      loader: path.resolve(
-        __dirname,
-        '../loaders/patchDefaultSharedLoader'
-      ),
-    });
+    // compiler.options.module.rules.push({
+    //   test(request: string) {
+    //     if (request.includes(path.join(compiler.context, 'pages'))) {
+    //       return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
+    //     }
+    //     if(compiler.options.name === 'client') {
+    //       return /app-router/.test(request)
+    //     }
+    //     return false
+    //   },
+    //   // include: compiler.context,
+    //   // exclude: /node_modules/,
+    //   loader: path.resolve(
+    //     __dirname,
+    //     '../loaders/patchDefaultSharedLoader'
+    //   ),
+    // });
 
     if(isServer && hasAppDir) {
       //@ts-ignore
       const originalSwcServerLoader = compiler.options.module.rules[7].oneOf[2];
-      console.log(originalSwcServerLoader)
       //@ts-ignore
       // compiler.options.module.rules[7].oneOf[4].resourceQuery = /!shared/
       //@ts-ignore
-      compiler.options.module.rules.unshift({
+      if(NextConstants.WEBPACK_LAYERS) {
+        compiler.options.module.rules.unshift({
           resourceQuery: /shared/,
-          layer: originalSwcServerLoader.issuerLayer,
+          //@ts-ignore
+          layer: NextConstants.WEBPACK_LAYERS.server,
         })
+        compiler.options.module.rules.unshift({
+          resourceQuery: /client/,
+          //@ts-ignore
+          layer: NextConstants.WEBPACK_LAYERS.client,
+        })
+      }
       // compiler.options.module.rules[7].oneOf.push({
       //   resourceQuery: /shared/,
       //   //@ts-ignore
@@ -150,7 +158,7 @@ export class NextFederationPlugin {
     compiler.options.module.rules.push({
       test(request: string) {
         if(request.includes(path.join(compiler.context, 'app'))) {
-          return /(page)\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
+          return /(page|layout)\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
         }
         return false
       },
@@ -222,6 +230,7 @@ export class NextFederationPlugin {
       new ModuleFederationPlugin(hostFederationPluginOptions, {
         ModuleFederationPlugin,
       }).apply(compiler);
+
 
       new ChildFederationPlugin(this._options, this._extraOptions).apply(
         compiler
