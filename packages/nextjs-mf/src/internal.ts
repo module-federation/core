@@ -1,16 +1,16 @@
-import type { Compiler } from 'webpack';
+import type { Compiler } from "webpack";
 import type {
   ModuleFederationPluginOptions,
   Shared,
   SharedConfig,
-  SharedObject,
-} from '@module-federation/utilities';
+  SharedObject
+} from "@module-federation/utilities";
 
-import path from 'path';
-import { parseOptions } from 'webpack/lib/container/options';
-import { isRequiredVersion } from 'webpack/lib/sharing/utils';
+import path from "path";
+import { parseOptions } from "webpack/lib/container/options";
+import { isRequiredVersion } from "webpack/lib/sharing/utils";
 
-import { extractUrlAndGlobal } from '@module-federation/utilities';
+import { extractUrlAndGlobal } from "@module-federation/utilities";
 
 // the share scope we attach by default
 // in hosts we re-key them to prevent webpack moving the modules into their own chunks (cause eager error)
@@ -18,7 +18,7 @@ import { extractUrlAndGlobal } from '@module-federation/utilities';
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
   "react/": {
     singleton: true,
-    requiredVersion: false,
+    requiredVersion: false
   },
 
   // "react": {
@@ -30,46 +30,50 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   //   singleton: true,
   //   requiredVersion: false,
   // },
-  'react-dom': {
-    singleton: true,
+  // 'react-dom': {
+  //   singleton: true,
+  //   requiredVersion: false,
+  // },
+  "next/dynamic": {
     requiredVersion: false,
+    singleton: true
   },
-  'next/dynamic': {
+  "styled-jsx": {
     requiredVersion: false,
-    singleton: true,
+    singleton: true
   },
-  'styled-jsx': {
+  "styled-jsx/style": {
     requiredVersion: false,
-    singleton: true,
+    singleton: true
   },
-  'styled-jsx/style': {
+  "next/router": {
     requiredVersion: false,
-    singleton: true,
+    singleton: true
   },
-  'next/router': {
+  "next/script": {
     requiredVersion: false,
-    singleton: true,
+    singleton: true
   },
-  'next/script': {
+  "next/head": {
     requiredVersion: false,
-    singleton: true,
+    singleton: true
   },
-  'next/head': {
+  "next/link": {
     requiredVersion: false,
-    singleton: true,
-  },
-  'next/link': {
-    requiredVersion: false,
-    singleton: true,
-  },
+    singleton: true
+  }
 };
 
 export const RSC_SHARE_SCOPE: SharedObject = {
   "next/link": {
-    import: "next/link?shared",
+    import: "next/link",
     singleton: true,
     requiredVersion: false,
-    shareKey: "next/link",
+    shareKey: "next/link"
+  },
+  "next/dist/compiled/react/": {
+    singleton: true,
+    requiredVersion: false
   },
   // "next/headers": {
   //   requiredVersion: false,
@@ -154,19 +158,18 @@ export const RSC_SHARE_SCOPE: SharedObject = {
   // //   singleton: true,
   // //   requiredVersion: false,
   // // },
-  // "next/navigation": {
-  //   shareKey: "next/navigation",
-  //   packageName: "next/navigation",
-  //   import: "next/navigation?shared",
-  //   singleton: true,
-  //   requiredVersion: false,
-  // },
-}
+  "next/navigation": {
+    shareKey: "next/navigation",
+    import: "next/navigation",
+    singleton: true,
+    requiredVersion: false
+  }
+};
 
 export const EXTERNAL_NEXT_DEPS = [
-  'next/dist/shared/lib/app-router-context',
-  'react/jsx-dev-runtime',
-]
+  "next/dist/shared/lib/app-router-context",
+  "react/jsx-dev-runtime"
+];
 
 // put host in-front of any shared module key, so "hostreact"
 export const reKeyHostShared = (
@@ -179,13 +182,13 @@ export const reKeyHostShared = (
     ...options,
     ...DEFAULT_SHARE_SCOPE,
     // if react server components / has app dir
-    ...((hasAppDir && isServer) ? RSC_SHARE_SCOPE : {})
+    ...((hasAppDir) ? RSC_SHARE_SCOPE : {})
   } as Record<string, SharedConfig>;
 
   return Object.entries(shared).reduce((acc, item) => {
     const [itemKey, shareOptions] = item;
 
-    const shareKey = 'host'+((item as any).shareKey || itemKey);
+    const shareKey = "host" + ((item as any).shareKey || itemKey);
 
 
     acc[shareKey] = shareOptions;
@@ -205,7 +208,13 @@ export const reKeyHostShared = (
       acc[shareKey].packageName = itemKey;
     }
 // console.log('reKeyHostShared', {hasAppDir,isServer, itemKey, inScope: RSC_SHARE_SCOPE[itemKey]})
-    if(hasAppDir && isServer && RSC_SHARE_SCOPE[itemKey]) {
+    if (hasAppDir && RSC_SHARE_SCOPE[itemKey]) {
+      const layer = !isServer ? "shared" : "client";
+      // if(!['next/link'].includes(itemKey)) {
+      //   if (shareOptions.import && !shareOptions.import.includes("?")) {
+      //     acc[shareKey].import = `${acc[shareKey].import}?${layer}`;
+      //   }
+      // }
       //@ts-ignore
       // const {rootDir,hasServerComponents,isServerLayer} = compilerOptions.module.rules[7].oneOf[2].use.options
       // //@ts-ignore
@@ -316,7 +325,7 @@ export const internalizeSharedPackages = (
     // take original externals regex
     const backupExternals = compiler.options.externals[0];
     // if externals is a function (like when you're not running in serverless mode or creating a single build)
-    if (typeof backupExternals === 'function') {
+    if (typeof backupExternals === "function") {
       // replace externals function with short-circuit, or fall back to original algo
       compiler.options.externals[0] = (mod, callback) => {
         if (!internalizableKeys.some((v) => mod.request?.includes(v))) {
@@ -329,16 +338,16 @@ export const internalizeSharedPackages = (
   }
 };
 
-export const externalizedShares =(isServer:boolean):SharedObject=> Object.entries(
-  {...DEFAULT_SHARE_SCOPE,...RSC_SHARE_SCOPE}
+export const externalizedShares = (isServer: boolean): SharedObject => Object.entries(
+  { ...DEFAULT_SHARE_SCOPE, ...RSC_SHARE_SCOPE }
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
-  if(!isServer) {
-    if(key.includes('next/navigation')) return acc
-  }
+  // if (!isServer) {
+  //   if (key.includes("next/navigation")) return acc;
+  // }
   acc[key] = { ...value, import: false };
 
-  if (key === 'react/jsx-runtime') {
+  if (key === "react/jsx-runtime") {
     delete (acc[key] as SharedConfig).import;
   }
 
@@ -347,12 +356,12 @@ export const externalizedShares =(isServer:boolean):SharedObject=> Object.entrie
 
 // determine output base path, derives .next folder location
 export const getOutputPath = (compiler: Compiler) => {
-  const isServer = compiler.options.target !== 'client';
+  const isServer = compiler.options.target !== "client";
   let outputPath: string | string[] | undefined =
     compiler.options.output.path?.split(path.sep);
 
   const foundIndex = outputPath?.findIndex((i) => {
-    return i === (isServer ? 'server' : 'static');
+    return i === (isServer ? "server" : "static");
   });
 
   outputPath = outputPath
@@ -363,21 +372,21 @@ export const getOutputPath = (compiler: Compiler) => {
 };
 
 export const removePlugins = [
-  'NextJsRequireCacheHotReloader',
-  'BuildManifestPlugin',
-  'WellKnownErrorsPlugin',
-  'WebpackBuildEventsPlugin',
-  'HotModuleReplacementPlugin',
-  'NextMiniCssExtractPlugin',
-  'NextFederationPlugin',
-  'CopyFilePlugin',
-  'ProfilingPlugin',
-  'DropClientPage',
-  'ReactFreshWebpackPlugin',
+  "NextJsRequireCacheHotReloader",
+  "BuildManifestPlugin",
+  "WellKnownErrorsPlugin",
+  "WebpackBuildEventsPlugin",
+  "HotModuleReplacementPlugin",
+  "NextMiniCssExtractPlugin",
+  "NextFederationPlugin",
+  "CopyFilePlugin",
+  "ProfilingPlugin",
+  "DropClientPage",
+  "ReactFreshWebpackPlugin"
 ];
 
 export const parseRemoteSyntax = (remote: string) => {
-  if (typeof remote === 'string' && remote.includes('@')) {
+  if (typeof remote === "string" && remote.includes("@")) {
     const [url, global] = extractUrlAndGlobal(remote);
     return generateRemoteTemplate(url, global);
   }
@@ -387,8 +396,8 @@ export const parseRemoteSyntax = (remote: string) => {
 
 export const parseRemotes = (remotes: Record<string, any>) => {
   return Object.entries(remotes).reduce((acc, remote) => {
-    if (!remote[1].startsWith('promise ') && remote[1].includes('@')) {
-      acc[remote[0]] = 'promise ' + parseRemoteSyntax(remote[1]);
+    if (!remote[1].startsWith("promise ") && remote[1].includes("@")) {
+      acc[remote[0]] = "promise " + parseRemoteSyntax(remote[1]);
       return acc;
     }
     acc[remote[0]] = remote[1];
@@ -400,19 +409,19 @@ const parseShareOptions = (options: ModuleFederationPluginOptions) => {
   const sharedOptions: [string, SharedConfig][] = parseOptions(
     options.shared,
     (item: string, key: string) => {
-      if (typeof item !== 'string')
-        throw new Error('Unexpected array in shared');
+      if (typeof item !== "string")
+        throw new Error("Unexpected array in shared");
 
       /** @type {SharedConfig} */
       const config =
         item === key || !isRequiredVersion(item)
           ? {
-              import: item,
-            }
+            import: item
+          }
           : {
-              import: key,
-              requiredVersion: item,
-            };
+            import: key,
+            requiredVersion: item
+          };
       return config;
     },
     (item: any) => item
@@ -427,7 +436,7 @@ const parseShareOptions = (options: ModuleFederationPluginOptions) => {
       strictVersion: options.strictVersion,
       singleton: options.singleton,
       packageName: options.packageName,
-      eager: options.eager,
+      eager: options.eager
     };
     return acc;
   }, {} as Record<string, SharedConfig>);
@@ -438,9 +447,9 @@ export const toDisplayErrors = (err: Error[]) => {
     .map((error) => {
       let message = error.message;
       if (error.stack) {
-        message += '\n' + error.stack;
+        message += "\n" + error.stack;
       }
       return message;
     })
-    .join('\n');
+    .join("\n");
 };

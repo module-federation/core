@@ -109,23 +109,23 @@ export class NextFederationPlugin {
     }
 
     // patch next
-    // compiler.options.module.rules.push({
-    //   test(request: string) {
-    //     if (request.includes(path.join(compiler.context, 'pages'))) {
-    //       return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
-    //     }
-    //     if(compiler.options.name === 'client') {
-    //       return /app-router/.test(request)
-    //     }
-    //     return false
-    //   },
-    //   // include: compiler.context,
-    //   // exclude: /node_modules/,
-    //   loader: path.resolve(
-    //     __dirname,
-    //     '../loaders/patchDefaultSharedLoader'
-    //   ),
-    // });
+    compiler.options.module.rules.push({
+      test(request: string) {
+        if (request.includes(path.join(compiler.context, 'pages'))) {
+          return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
+        }
+        if(compiler.options.name === 'client') {
+          return /app-router/.test(request)
+        }
+        return false
+      },
+      // include: compiler.context,
+      // exclude: /node_modules/,
+      loader: path.resolve(
+        __dirname,
+        '../loaders/patchDefaultSharedLoader'
+      ),
+    });
 
     if(isServer && hasAppDir) {
       //@ts-ignore

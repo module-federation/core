@@ -144,10 +144,28 @@ export class ChildFederationPlugin {
           new AddRuntimeRequirementToPromiseExternal(),
         ];
       } else if (compiler.options.name === 'server') {
+        async function handleExternals(
+          context: string,
+          request: string,
+          dependencyType: string,
+          layer: string | null,
+          getResolve: (
+            options: any
+          ) => (
+            resolveContext: string,
+            resolveRequest: string
+          ) => Promise<[string | null, boolean]>
+        ) {
+          //@ts-ignore
+          const externalResult = await compiler.options.externals[0](context, request, dependencyType, layer, getResolve)
+          console.log(externalResult)
+          return externalResult
+        }
         const {
           StreamingTargetPlugin,
           NodeFederationPlugin,
         } = require('@module-federation/node');
+
 
         plugins = [
           new NodeFederationPlugin(federationPluginOptions, {
@@ -157,7 +175,10 @@ export class ChildFederationPlugin {
           //TODO: check if app directory exists, if so share react and react dom in the scope, dont externalize it
           new webpack.ExternalsPlugin(compiler.options.externalsType, [
             // next dynamic needs to be within webpack, cannot be externalized
+            //@ts-ignore
               ...EXTERNAL_NEXT_DEPS,
+            // @ts-ignore
+             // handleExternals,
             // ...Object.keys(DEFAULT_SHARE_SCOPE).filter(
             //   (k) => (k !== 'next/dynamic' && k !== 'next/link' && k !== 'next/script' && k !== 'next/head' && k !== 'react-dom' && k !== 'next/' && k !== 'react/' )
             // ),
