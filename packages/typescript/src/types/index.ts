@@ -8,6 +8,7 @@ export interface FederatedTypesPluginOptions {
   disableDownloadingRemoteTypes?: boolean;
   federationConfig: ModuleFederationPluginOptions;
   typescriptFolderName?: string;
+  additionalFilesToCompile?: string[];
 }
 
 export interface TypesStatsJson {

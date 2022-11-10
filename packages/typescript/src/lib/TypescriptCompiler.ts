@@ -5,7 +5,10 @@ import fs from 'fs';
 
 import { Logger } from '@module-federation/utilities';
 
-import { ModuleFederationPluginOptions } from '../types';
+import {
+  FederatedTypesPluginOptions,
+  ModuleFederationPluginOptions,
+} from '../types';
 
 import { NormalizeOptions } from './normalizeOptions';
 import { TypesCache } from './Caching';
@@ -25,34 +28,32 @@ export class TypescriptCompiler {
   }
 
   generateDeclarationFiles(
-    exposedComponents: ModuleFederationPluginOptions['exposes']
+    exposedComponents: ModuleFederationPluginOptions['exposes'],
+    additionalFilesToCompile: FederatedTypesPluginOptions['additionalFilesToCompile'] = []
   ) {
     const exposeSrcToDestMap: Record<string, string> = {};
 
-    const rootNames = Object.entries(exposedComponents!)
-      .map(([exposeDest, exposeSrc]) => {
-        const cwd =
-          this.options.webpackCompilerOptions.context || process.cwd();
-
-        const [rootDir, entry] = exposeSrc.split(/\/(?=[^/]+$)/);
-
-        const normalizedRootDir = path.resolve(cwd, rootDir);
-        const filenameWithExt = this.getFilenameWithExtension(
-          normalizedRootDir,
-          entry
-        );
-
-        const pathWithExt = path.resolve(normalizedRootDir, filenameWithExt);
-
+    const normalizedExposedComponents = this.normalizeFiles(
+      Object.entries(exposedComponents!),
+      ([exposeDest, exposeSrc]) => {
+        const pathWithExt = this.getNormalizedPathWithExt(exposeSrc);
         exposeSrcToDestMap[pathWithExt] = exposeDest;
-
         return pathWithExt;
-      })
-      .filter((entry) => /\.tsx?$/.test(entry));
+      }
+    );
+
+    const normalizedAdditionalFiles = this.normalizeFiles(
+      additionalFilesToCompile,
+      this.getNormalizedPathWithExt
+    );
 
     const host = this.createHost(exposeSrcToDestMap);
 
-    const program = ts.createProgram(rootNames, this.compilerOptions, host);
+    const program = ts.createProgram(
+      [...normalizedAdditionalFiles, ...normalizedExposedComponents],
+      this.compilerOptions,
+      host
+    );
 
     const { diagnostics, emitSkipped } = program.emit();
 
@@ -65,10 +66,43 @@ export class TypescriptCompiler {
     throw new Error('something went wrong generating declaration files');
   }
 
+  private normalizeFiles<T, U extends string>(
+    files: T[],
+    mapFn: (value: T, index: number, array: T[]) => U
+  ) {
+    return files.map(mapFn).filter((entry) => /\.tsx?$/.test(entry));
+  }
+
+  private getNormalizedPathWithExt(exposeSrc: string) {
+    const cwd = this.options.webpackCompilerOptions.context || process.cwd();
+
+    const [rootDir, entry] = exposeSrc.split(/\/(?=[^/]+$)/);
+
+    const normalizedRootDir = path.resolve(cwd, rootDir);
+    const filenameWithExt = this.getFilenameWithExtension(
+      normalizedRootDir,
+      entry
+    );
+
+    const pathWithExt = path.resolve(normalizedRootDir, filenameWithExt);
+    return pathWithExt;
+  }
+
   private createHost(exposeSrcToDestMap: Record<string, string>) {
     const host = ts.createCompilerHost(this.compilerOptions);
 
     const originalWriteFile = host.writeFile;
+
+    const rewritePathsWithExposedFederatedModules = (
+      sourceFilename: string
+    ) => {
+      const destFile = exposeSrcToDestMap[sourceFilename];
+
+      return (
+        destFile &&
+        path.join(this.compilerOptions.outDir as string, `${destFile}.d.ts`)
+      );
+    };
 
     host.writeFile = (
       filepath,
@@ -81,14 +115,12 @@ export class TypescriptCompiler {
       // for exposes: { "./expose/path": "path/to/file" }
       // force typescript to write compiled output to "@mf-typescript/expose/path"
       const sourceFilename = sourceFiles?.[0].fileName || '';
-      const newFileName = exposeSrcToDestMap[sourceFilename];
 
-      const normalizedFilepath = newFileName
-        ? path.join(
-            this.compilerOptions.outDir as string,
-            `${newFileName}.d.ts`
-          )
-        : filepath;
+      // Try to rewrite the path with exposed federated modules,
+      // failing so, use the default filepath emitted by TS Compiler.
+      // This second case is valid for 'additionalFileToCompiler' added through Plugin Options.
+      const normalizedFilepath =
+        rewritePathsWithExposedFederatedModules(sourceFilename) ?? filepath;
 
       this.tsDefinitionFilesObj[normalizedFilepath] = text;
 
