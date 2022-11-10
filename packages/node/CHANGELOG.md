@@ -2,6 +2,22 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.8.4](https://github.com/module-federation/nextjs-mf/compare/node-0.8.3...node-0.8.4) (2022-11-02)
+
+
+### Bug Fixes
+
+* hot-reload not working when node-fetch is imported from require() ([#352](https://github.com/module-federation/nextjs-mf/issues/352)) ([74c35e6](https://github.com/module-federation/nextjs-mf/commit/74c35e6cf41fe69af6c17c44885663d46e9a1fbf))
+
+
+
+## [0.8.3](https://github.com/module-federation/nextjs-mf/compare/node-0.8.2...node-0.8.3) (2022-10-31)
+
+### Dependency Updates
+
+* `utils` updated to version `0.5.0`
+
+
 ## [0.8.2](https://github.com/module-federation/nextjs-mf/compare/node-0.8.1...node-0.8.2) (2022-10-26)
 
 

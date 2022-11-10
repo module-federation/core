@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [0.5.0](https://github.com/module-federation/nextjs-mf/compare/utils-0.4.1...utils-0.5.0) (2022-10-31)
+
+
+### Features
+
+* **utils:** configurable logger using webpack infrastructure logger ([#355](https://github.com/module-federation/nextjs-mf/issues/355)) ([d6ffcd0](https://github.com/module-federation/nextjs-mf/commit/d6ffcd0de1662c410f33a7742db1fd02aba24aef)), closes [#243](https://github.com/module-federation/nextjs-mf/issues/243)
+
+
+
 ## [0.4.1](https://github.com/module-federation/nextjs-mf/compare/utils-0.4.0...utils-0.4.1) (2022-10-26)
 
 

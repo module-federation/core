@@ -2,6 +2,22 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [1.1.0](https://github.com/module-federation/nextjs-mf/compare/typescript-1.0.9...typescript-1.1.0) (2022-11-02)
+
+
+### Features
+
+* **typescript:** provide additional files for the typescript compiler ([#349](https://github.com/module-federation/nextjs-mf/issues/349)) ([a4d9d97](https://github.com/module-federation/nextjs-mf/commit/a4d9d976c4cf1c51352a266cadccf966c3f19fd3))
+
+
+
+## [1.0.9](https://github.com/module-federation/nextjs-mf/compare/typescript-1.0.8...typescript-1.0.9) (2022-10-31)
+
+### Dependency Updates
+
+* `utils` updated to version `0.5.0`
+
+
 ## [1.0.8](https://github.com/module-federation/nextjs-mf/compare/typescript-1.0.7...typescript-1.0.8) (2022-10-26)
 
 ### Dependency Updates
