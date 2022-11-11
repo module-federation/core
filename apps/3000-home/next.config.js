@@ -17,15 +17,15 @@ const nextConfig = {
 
   webpack(config, options) {
     const { isServer } = options;
-      const remotes = {
-        shop: `shop@http://localhost:3001/_next/static/${
-          isServer ? 'ssr' : 'chunks'
-        }/remoteEntry.js`,
-        checkout: `checkout@http://localhost:3002/_next/static/${
-          isServer ? 'ssr' : 'chunks'
-        }/remoteEntry.js`,
 
-      };
+    const remotes = {
+      shop: `shop@http://localhost:3001/_next/static/${
+        isServer ? 'ssr' : 'chunks'
+      }/remoteEntry.js`,
+      checkout: `checkout@http://localhost:3002/_next/static/${
+        isServer ? 'ssr' : 'chunks'
+      }/remoteEntry.js`,
+    };
 
       config.plugins.push(
         new NextFederationPlugin({

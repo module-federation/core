@@ -43,7 +43,11 @@
   "generators": {
     "@nrwl/react": {
       "application": {
+        "linter": "eslint",
         "babel": true
+      },
+      "library": {
+        "linter": "eslint"
       }
     },
     "@nrwl/next": {

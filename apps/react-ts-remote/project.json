@@ -1,0 +1,93 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/react-ts-remote/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/web:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "swc",
+        "outputPath": "dist/apps/react-ts-remote",
+        "index": "apps/react-ts-remote/src/index.html",
+        "baseHref": "/",
+        "main": "apps/react-ts-remote/src/main.ts",
+        "polyfills": "apps/react-ts-remote/src/polyfills.ts",
+        "tsConfig": "apps/react-ts-remote/tsconfig.app.json",
+        "assets": [
+          "apps/react-ts-remote/src/favicon.ico",
+          "apps/react-ts-remote/src/assets"
+        ],
+        "styles": ["apps/react-ts-remote/src/styles.css"],
+        "scripts": [],
+        "webpackConfig": "apps/react-ts-remote/webpack.config.js"
+      },
+      "configurations": {
+        "development": {
+          "extractLicenses": false,
+          "optimization": false,
+          "sourceMap": true,
+          "vendorChunk": true
+        },
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/react-ts-remote/src/environments/environment.ts",
+              "with": "apps/react-ts-remote/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false,
+          "webpackConfig": "apps/react-ts-remote/webpack.config.prod.js"
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/react:module-federation-dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "react-ts-remote:build",
+        "hmr": true,
+        "port": 3004
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "react-ts-remote:build:development"
+        },
+        "production": {
+          "buildTarget": "react-ts-remote:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/react-ts-remote/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "serve-static": {
+      "executor": "@nrwl/web:file-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "react-ts-remote:build",
+        "port": 3004
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "react-ts-remote:build:development"
+        },
+        "production": {
+          "buildTarget": "react-ts-remote:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}

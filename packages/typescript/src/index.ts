@@ -1,4 +1,4 @@
-import { FederatedTypesPlugin } from './lib/Typescript';
+import { FederatedTypesPlugin } from './plugins/FederatedTypesPlugin';
 
 export { FederatedTypesPlugin };
 
