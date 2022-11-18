@@ -40,7 +40,9 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
   ) {
     super('readFile chunk loading', RuntimeModule.STAGE_ATTACH);
     this.runtimeRequirements = runtimeRequirements;
-    this.options = {...options, verbose: options.verbose ?? false};
+
+    options.verbose ??= false;
+    this.options = options;
     this.chunkLoadingContext = chunkLoadingContext;
   }
 

@@ -20,7 +20,8 @@ class CommonJsChunkLoadingPlugin {
   private _asyncChunkLoading: boolean;
 
   constructor(options: CommonJsChunkLoadingOptions) {
-    this.options = {...(options || ({} as CommonJsChunkLoadingOptions)), verbose: options?.verbose ?? false};
+    options.verbose ??= false;
+    this.options = options || ({} as CommonJsChunkLoadingOptions);
     this._asyncChunkLoading = this.options.asyncChunkLoading;
   }
 
