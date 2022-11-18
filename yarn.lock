@@ -1645,9 +1645,11 @@
 
 "@module-federation/nextjs-mf@link:./dist/packages/nextjs-mf":
   version "0.0.0"
+  uid ""
 
 "@module-federation/nextjs-mf@link:dist/packages/nextjs-mf":
   version "0.0.0"
+  uid ""
 
 "@module-federation/node@link:./dist/packages/node":
   version "0.0.0"
@@ -1657,12 +1659,9 @@
   version "0.0.0"
   uid ""
 
-"@module-federation/utilities@0.3.0":
-  version "0.0.0"
-  uid ""
-
 "@module-federation/utilities@link:./dist/packages/utilities":
   version "0.0.0"
+  uid ""
 
 "@next/env@13.0.0":
   version "13.0.0"

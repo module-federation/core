@@ -12,6 +12,7 @@ interface CommonJsChunkLoadingOptions extends ModuleFederationPluginOptions {
   remotes: Record<string, string>;
   name?: string;
   asyncChunkLoading: boolean;
+  verbose?: boolean;
 }
 
 class CommonJsChunkLoadingPlugin {
@@ -19,7 +20,7 @@ class CommonJsChunkLoadingPlugin {
   private _asyncChunkLoading: boolean;
 
   constructor(options: CommonJsChunkLoadingOptions) {
-    this.options = options || ({} as CommonJsChunkLoadingOptions);
+    this.options = {...(options || ({} as CommonJsChunkLoadingOptions)), verbose: options?.verbose ?? false};
     this._asyncChunkLoading = this.options.asyncChunkLoading;
   }
 

@@ -21,6 +21,7 @@ interface ReadFileChunkLoadingRuntimeModuleOptions {
   promiseBaseURI?: string;
   remotes: Record<string, string>;
   name?: string;
+  verbose?: boolean;
 }
 
 interface ChunkLoadingContext {
@@ -39,7 +40,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
   ) {
     super('readFile chunk loading', RuntimeModule.STAGE_ATTACH);
     this.runtimeRequirements = runtimeRequirements;
-    this.options = options;
+    this.options = {...options, verbose: options.verbose ?? false};
     this.chunkLoadingContext = chunkLoadingContext;
   }
 
@@ -253,12 +254,12 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                       Template.indent([
                         loadScriptTemplate,
 
-                        `console.log('needs to load remote module from', ${JSON.stringify(
+                        this.options.verbose ? `console.log('needs to load remote module from', ${JSON.stringify(
                           name
-                        )});`,
-                        `console.log('remotes known to', ${JSON.stringify(
+                        )});` : ``,
+                        this.options.verbose ? `console.log('remotes known to', ${JSON.stringify(
                           name
-                        )}, ${JSON.stringify(remotes)})`,
+                        )}, ${JSON.stringify(remotes)})` : ``,
                         // keys are mostly useless here, we want to find remote by its global (unique name)
                         `var remotes = ${JSON.stringify(
                           Object.values(remotes).reduce((acc, remote) => {
@@ -273,16 +274,16 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         /*
                       TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise() global will/should still exist - but can only be known at runtime
                     */
-                        `console.log('remotes keyed by global name',remotes)`,
-                        `console.log('remote scope configs',global.__remote_scope__._config)`,
+                        this.options.verbose ? `console.log('remotes keyed by global name',remotes)` : ``,
+                        this.options.verbose ? `console.log('remote scope configs',global.__remote_scope__._config)` : ``,
 
-                        "console.log('before remote scope')",
-                        `console.log('global.__remote_scope__',global.__remote_scope__)`,
-                        `console.log('global.__remote_scope__[${JSON.stringify(
+                        this.options.verbose ? "console.log('before remote scope')" : "",
+                        this.options.verbose ? `console.log('global.__remote_scope__',global.__remote_scope__)` : "",
+                        this.options.verbose ? `console.log('global.__remote_scope__[${JSON.stringify(
                           name
                         )}]',global.__remote_scope__[${JSON.stringify(
                           name
-                        )}])`,
+                        )}])` : ``,
 
                         /*   TODO: this global.REMOTE_CONFIG doesnt work in this v5 core, not sure if i need to keep it or not
                          not deleting it yet since i might need this for tracking all the remote entries across systems
@@ -297,7 +298,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         `var requestedRemote = remoteRegistry[${JSON.stringify(
                           name
                         )}]`,
-                        "console.log('requested remote', requestedRemote)",
+                        this.options.verbose ? "console.log('requested remote', requestedRemote)" : "",
                         /*TODO: we need to support when user implements own promise new promise function
                             for example i have my own promise remotes, not global@remotename
                             so there could be cases where remote may be function still - not sure */
@@ -308,7 +309,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         `if(typeof requestedRemote === 'function'){
                     requestedRemote = await requestedRemote()
                   }`,
-                        `console.log('var requestedRemote',requestedRemote);`,
+                        this.options.verbose ? `console.log('var requestedRemote',requestedRemote);` : ``,
 
                         // example: uncomment this and server will never reply
                         // `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
@@ -316,22 +317,22 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         // there may still be a use case for that with promise new promise, depending on how we design it.
                         `var scriptUrl = new URL(requestedRemote);`,
 
-                        "console.log('global.__remote_scope__',global.__remote_scope__)",
+                        this.options.verbose ? "console.log('global.__remote_scope__',global.__remote_scope__)" : "",
                         `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
-                        `console.log('chunkname to request',chunkName);`,
+                        this.options.verbose ? `console.log('chunkname to request',chunkName);` : ``,
                         `var fileToReplace = require('path').basename(scriptUrl.pathname);`,
                         `scriptUrl.pathname = scriptUrl.pathname.replace(fileToReplace, chunkName);`,
-                        `console.log('will load remote chunk', scriptUrl.toString());`,
+                        this.options.verbose ? `console.log('will load remote chunk', scriptUrl.toString());` : ``,
                         `loadScript(scriptUrl.toString(), function(err, content) {`,
                         Template.indent([
-                          "console.log('load script callback fired')",
+                          this.options.verbose ? "console.log('load script callback fired')" : "",
                           "if(err) {console.error('error loading remote chunk', scriptUrl.toString(),'got',content); return reject(err);}",
                           'var chunk = {};',
                           'try {',
                           "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
                           "(chunk, require, require('path').dirname(filename), filename);",
                           '} catch (e) {',
-                          "console.log('runInThisContext thew', e)",
+                          "console.error('runInThisContext threw', e)",
                           '}',
                           'installChunk(chunk);',
                         ]),
