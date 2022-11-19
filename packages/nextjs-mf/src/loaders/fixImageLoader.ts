@@ -20,7 +20,6 @@ export async function fixImageLoader(
   this: LoaderContext<Record<string, unknown>>,
   remaining: string
 ) {
-  this._module?.parserOptions.javascript.url = 'relative';
   this.cacheable(true);
 
   const publicPath = this._compiler?.webpack.RuntimeGlobals.publicPath;
