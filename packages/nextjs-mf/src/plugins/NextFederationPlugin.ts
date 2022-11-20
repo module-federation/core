@@ -11,8 +11,8 @@ import type {
 } from '@module-federation/utilities';
 import {createRuntimeVariables} from '@module-federation/utilities';
 
-import path from 'path';
 import type {Compiler} from 'webpack';
+import path from 'path';
 
 import {internalizeSharedPackages, parseRemotes, reKeyHostShared,} from '../internal';
 import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
