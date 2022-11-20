@@ -2,6 +2,28 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [5.12.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.11.2...nextjs-mf-5.12.0) (2022-11-20)
+
+### Dependency Updates
+
+* `node` updated to version `0.9.0`
+* `utils` updated to version `1.0.0`
+
+### Bug Fixes
+
+* Better page regex ([#346](https://github.com/module-federation/nextjs-mf/issues/346)) ([b525d3b](https://github.com/module-federation/nextjs-mf/commit/b525d3b579af2ac3a8b502f3c996de8726dbcadd))
+* better page regex for adding loaders ([72fef27](https://github.com/module-federation/nextjs-mf/commit/72fef2792dc39c7605f8b9f8136f5d18a46a3fe5))
+* Fix peer deps ([#343](https://github.com/module-federation/nextjs-mf/issues/343)) ([8e7b087](https://github.com/module-federation/nextjs-mf/commit/8e7b0871507911bb81161b9786901877259edaed))
+* include styled-jsx/style in defaults share ([#347](https://github.com/module-federation/nextjs-mf/issues/347)) ([cb0675b](https://github.com/module-federation/nextjs-mf/commit/cb0675be8e3a4fe0ec89ef7f190610392bb16b6d))
+* update version ([70bda37](https://github.com/module-federation/nextjs-mf/commit/70bda37744f55af849bd5c28684f42851bbf7d1f))
+
+
+### Features
+
+* support ssr remote entry images ([9ab2afa](https://github.com/module-federation/nextjs-mf/commit/9ab2afaef5115ae6677641cb9d021273dafebf86))
+
+
+
 ## [5.11.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.11.2...nextjs-mf-5.11.3) (2022-10-26)
 
 
