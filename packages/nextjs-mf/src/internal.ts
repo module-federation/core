@@ -7,6 +7,7 @@ import type {
 } from '@module-federation/utilities';
 
 import path from 'path';
+
 import { parseOptions } from 'webpack/lib/container/options';
 import { isRequiredVersion } from 'webpack/lib/sharing/utils';
 
