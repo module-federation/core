@@ -8,8 +8,8 @@ import type {
 
 import path from 'path';
 
-import { parseOptions } from 'webpack/lib/container/options';
 import { isRequiredVersion } from 'webpack/lib/sharing/utils';
+import { parseOptions } from 'webpack/lib/container/options';
 
 import { extractUrlAndGlobal } from '@module-federation/utilities';
 

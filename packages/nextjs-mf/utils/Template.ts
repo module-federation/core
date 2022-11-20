@@ -7,8 +7,8 @@
 
 import { ConcatSource, PrefixSource } from "webpack-sources"
 
-/** @typedef {import("webpack-sources").Source} Source */
 /** @typedef {import("../declarations/WebpackOptions").Output} OutputOptions */
+/** @typedef {import("webpack-sources").Source} Source */
 /** @typedef {import("./Chunk")} Chunk */
 /** @typedef {import("./ChunkGraph")} ChunkGraph */
 /** @typedef {import("./CodeGenerationResults")} CodeGenerationResults */
