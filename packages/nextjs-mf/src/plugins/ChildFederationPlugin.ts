@@ -1,6 +1,6 @@
 import type {Compiler, Stats, WebpackError, WebpackPluginInstance} from 'webpack';
 import {Compilation} from "webpack";
-import type {CallbackFunction, WatchOptions} from '../types';
+import type { WatchOptions} from '../types';
 import {ChunkCorrelationPlugin} from '@module-federation/node';
 import type {
   ModuleFederationPluginOptions,
@@ -36,8 +36,8 @@ const childCompilers = {} as Record<string, Compiler>;
 export class ChildFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
-  private watching?: Boolean;
-  private initalRun: Boolean;
+  private watching?: boolean;
+  private initalRun: boolean;
 
   constructor(
     options: ModuleFederationPluginOptions,
@@ -192,6 +192,7 @@ export class ChildFederationPlugin {
           this._extraOptions.enableImageLoaderFix &&
           hasLoader(rule, 'next-image-loader')
         ) {
+          // childCompiler.options.module.parser.javascript?.url = 'relative';
           injectRuleLoader(rule, {
             loader: path.resolve(__dirname, '../loaders/fixImageLoader'),
           });
