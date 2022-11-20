@@ -2,6 +2,31 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [2.0.0](https://github.com/module-federation/nextjs-mf/compare/typescript-1.1.0...typescript-2.0.0) (2022-11-20)
+
+### Dependency Updates
+
+* `utils` updated to version `1.0.0`
+
+### Features
+
+* **typescript:** excessive recompilation prevention ([#306](https://github.com/module-federation/nextjs-mf/issues/306)) ([6e1967f](https://github.com/module-federation/nextjs-mf/commit/6e1967f019afb25dfbcfe83627b08ae8b1fe97b2))
+
+
+### BREAKING CHANGES
+
+* **typescript:** Reimplemented the whole plugin from round-up to enhance performance, prevent excessive recompilation and other issues.
+
+Some key changes to the plugin includes:
+
+- Downloading remote types before compilation starts.
+- Caching remote types for better performance.
+- Ability to provide Plugin options.
+
+Please go through plugin `readme.md` file to understand what's changed and how to use the plugin.
+
+
+
 # [1.1.0](https://github.com/module-federation/nextjs-mf/compare/typescript-1.0.9...typescript-1.1.0) (2022-11-02)
 
 
