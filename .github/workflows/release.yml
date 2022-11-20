@@ -44,12 +44,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)
-          if [[ "$PROJECTS" ]]; then
-            yarn nx run-many --target=build --projects="$PROJECTS"
-          else
-            echo "No changes, Skipping build check."
-          fi
+          yarn nx run-many --target=build --projects=nextjs-mf,node,typescript,utils
       - name: Version
         shell: bash
         run: |
