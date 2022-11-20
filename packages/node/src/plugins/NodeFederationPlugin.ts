@@ -8,6 +8,7 @@ type EmptyObject = Record<string, unknown>;
 
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
   experiments?: Record<string, unknown>;
+  verbose?: boolean;
 }
 
 interface Context {
@@ -224,7 +225,7 @@ class NodeFederationPlugin {
   private experiments: NodeFederationOptions['experiments'];
 
   constructor(
-    { experiments, ...options }: NodeFederationOptions,
+    { experiments, verbose, ...options }: NodeFederationOptions,
     context: Context
   ) {
     this.options = options || ({} as ModuleFederationPluginOptions);
@@ -246,9 +247,8 @@ class NodeFederationPlugin {
     // new ((webpack && webpack.DefinePlugin) || require("webpack").DefinePlugin)(
     //     defs
     // ).apply(compiler);
-    const {verbose, ...options} = this.options;
     const pluginOptions = {
-      ...options,
+      ...this.options,
       remotes: parseRemotes(this.options.remotes || {}) as ModuleFederationPluginOptions['remotes'],
     };
 
