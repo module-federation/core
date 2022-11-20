@@ -2,6 +2,18 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.9.1](https://github.com/module-federation/nextjs-mf/compare/node-0.9.0...node-0.9.1) (2022-11-20)
+
+### Dependency Updates
+
+* `utils` updated to version `1.0.1`
+
+### Bug Fixes
+
+* stringify error ([a7c20f9](https://github.com/module-federation/nextjs-mf/commit/a7c20f9d989c1f27a0b72b9157fc3243020fd252))
+
+
+
 # [0.9.0](https://github.com/module-federation/nextjs-mf/compare/node-0.8.4...node-0.9.0) (2022-11-20)
 
 ### Dependency Updates
