@@ -288,7 +288,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         /*
                       TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise() global will/should still exist - but can only be known at runtime
                     */
-                        this._getLogger(`'remotes keyed by global name'`,remotes),
+                        this._getLogger(`'remotes keyed by global name'`,JSON.stringify(remotes)),
                         this._getLogger(`'remote scope configs'`,'global.__remote_scope__._config'),
 
                         this._getLogger(`'before remote scope'`),
