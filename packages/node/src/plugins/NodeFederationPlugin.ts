@@ -246,9 +246,9 @@ class NodeFederationPlugin {
     // new ((webpack && webpack.DefinePlugin) || require("webpack").DefinePlugin)(
     //     defs
     // ).apply(compiler);
-
+    const {verbose, ...options} = this.options;
     const pluginOptions = {
-      ...this.options,
+      ...options,
       remotes: parseRemotes(this.options.remotes || {}) as ModuleFederationPluginOptions['remotes'],
     };
 
