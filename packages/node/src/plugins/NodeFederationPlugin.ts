@@ -58,7 +58,7 @@ const executeLoadTemplate = `
             return res.text();
           }).then(function(scriptContent){
             try {
-              const vmContext = { exports, require, module, global, __filename, __dirname, URL, ...global};
+              const vmContext = { exports, require, module, global, __filename, __dirname, URL, ...global, remoteEntryName: name};
               const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, { filename: 'node-federation-loader-' + moduleName + '.vm' });
 
               /* TODO: need something like a chunk loading queue, this can lead to async issues

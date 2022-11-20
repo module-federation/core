@@ -32,7 +32,7 @@ export async function fixImageLoader(
   const content = (result.default || result) as Record<string, string>;
 
   const computedAssetPrefix = isServer
-    ? `''`
+    ? `new URL(global.__remote_scope__._config[global.remoteEntryName]).origin`
     : `(${publicPath} && ${publicPath}.indexOf('://') > 0 ? new URL(${publicPath}).origin : '')`;
 
   const constructedObject = Object.entries(content).reduce(
