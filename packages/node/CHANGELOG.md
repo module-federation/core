@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.9.3](https://github.com/module-federation/nextjs-mf/compare/node-0.9.2...node-0.9.3) (2022-11-20)
+
+
+### Bug Fixes
+
+* verbose types ([8f21b2a](https://github.com/module-federation/nextjs-mf/commit/8f21b2a4724c64da551fa11e2aad99dcbab75b28))
+
+
+
 ## [0.9.2](https://github.com/module-federation/nextjs-mf/compare/node-0.9.1...node-0.9.2) (2022-11-20)
 
 
