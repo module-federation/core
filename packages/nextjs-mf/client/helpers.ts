@@ -54,7 +54,7 @@ export function getRouteRegex(normalizedRoute: string) {
   const { parameterizedRoute, groups } = getParametrizedRoute(normalizedRoute);
   return {
     re: new RegExp(`^${parameterizedRoute}(?:/)?$`),
-    groups: groups,
+    groups,
   };
 }
 

@@ -2,23 +2,19 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Zack Jackson @ScriptedAlchemy
 */
-// @ts-ignore
-import loaderUtils from "loader-utils";
+
 import type { LoaderContext , NormalModule} from 'webpack';
 
-const pageTemplate = (request: string) => {
-  return (
-    `
+const pageTemplate = (request: string) => (
+  `
     import dynamic from "next/dynamic"
     const AsyncBoundary = dynamic(() => import("${request}"), {suspense:true});
     export default AsyncBoundary;
     `
-  )
-}
+)
 
-const getInitialPropsTemplate = (request: string) => {
-  return (
-    `
+const getInitialPropsTemplate = (request: string) => (
+  `
     AsyncBoundary.getInitialProps = async (ctx) => {
       return import("${request}").then((mod) => {
         const page = mod.default || mod;
@@ -26,58 +22,45 @@ const getInitialPropsTemplate = (request: string) => {
       })
     }
     `
-  )
-}
+)
 
-const getStaticPropsTemplate = (request: string) => {
-  return (
-    `
+const getStaticPropsTemplate = (request: string) => (
+  `
     export const getStaticProps = async (ctx) => {
       return import("${request}").then((mod) => {
         return mod.getStaticProps(ctx)
       })
     }
     `
-  )
-}
+)
 
-const getServerSidePropsTemplate = (request: string) => {
-  return (
-    `
+const getServerSidePropsTemplate = (request: string) => (
+  `
     export const getServerSideProps = async (ctx) => {
       return import("${request}").then((mod) => {
         return mod.getServerSideProps(ctx)
       })
     }
     `
-  )
-}
+)
 
-const getStaticPathsTemplate = (request: string) => {
-  return (
-    `
+const getStaticPathsTemplate = (request: string) => (
+  `
     export const getStaticPaths = async (ctx) => {
       return import("${request}").then((mod) => {
         return mod.getStaticPaths(ctx)
       })
     }
     `
-  )
-}
+)
 
 export const pitch = function( this: LoaderContext<Record<string, unknown>>, remainingRequest: string) {
-  this.cacheable && this.cacheable();
+  this.cacheable?.();
   const callback = this.async();
-  const loaderWithoutBoundaryOrShared = this.request.split('!').filter((loader) => {
-    return !loader.includes('async-boundary-loader') && !loader.includes('patchDefaultSharedLoader')
-  }).join('!');
-
-  const loaderWithoutBoundary = this.request.split('!').filter((loader) => {
-    return !loader.includes('async-boundary-loader')
-  }).join('!');
+  const loaderWithoutBoundaryOrShared = this.request.split('!').filter((loader) => !loader.includes('async-boundary-loader') && !loader.includes('patchDefaultSharedLoader')).join('!');
 
     this.loadModule(
-      `${this.resourcePath}.webpack[javascript/auto]` + `!=!${loaderWithoutBoundaryOrShared}`,
+      `${this.resourcePath}.webpack[javascript/auto]!=!${loaderWithoutBoundaryOrShared}`,
       /**
        * @param {Error | null | undefined} error
        * @param {object} exports
@@ -88,8 +71,8 @@ export const pitch = function( this: LoaderContext<Record<string, unknown>>, rem
 
           return;
         }
-        //@ts-ignore
-        if(this._compilation.name === 'ChildFederationPlugin') {
+        
+        if(this._compilation && this._compilation.name === 'ChildFederationPlugin') {
           callback(null, source, sourceMap);
           return;
         }
@@ -105,7 +88,7 @@ export const pitch = function( this: LoaderContext<Record<string, unknown>>, rem
         );
 
 
-        var result = [
+        const result = [
           pageTemplate(`${this.resource}?hasBoundary`)
         ];
 

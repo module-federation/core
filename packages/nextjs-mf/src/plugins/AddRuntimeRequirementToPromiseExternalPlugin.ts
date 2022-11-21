@@ -5,7 +5,7 @@ export class AddRuntimeRequirementToPromiseExternal {
     compiler.hooks.compilation.tap(
       'AddRuntimeRequirementToPromiseExternal',
       (compilation) => {
-        const RuntimeGlobals = compiler.webpack.RuntimeGlobals;
+        const { RuntimeGlobals } = compiler.webpack;
         compilation.hooks.additionalModuleRuntimeRequirements.tap(
           'AddRuntimeRequirementToPromiseExternal',
           (module, set) => {
