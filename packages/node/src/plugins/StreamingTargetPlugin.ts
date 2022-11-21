@@ -15,7 +15,6 @@ class StreamingTargetPlugin {
   private options: StreamingTargetOptions;
 
   constructor(options: StreamingTargetOptions) {
-    options.verbose ??= false;
     this.options = options || {};
   }
 
