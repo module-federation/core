@@ -370,8 +370,12 @@ class FederationStatsPlugin {
       compiler.options.plugins &&
       compiler.options.plugins.filter(
         (plugin) =>
-          plugin.constructor.name === 'NextFederationPlugin' &&
-          plugin._options.exposes
+          (
+            plugin.constructor.name === 'NextFederationPlugin' ||
+            plugin.constructor.name === 'UniversalFederationPlugin' ||
+            plugin.constructor.name === 'NodeFederationPlugin' ||
+            plugin.constructor.name === 'ModuleFederationPlugin'
+          ) && plugin._options.exposes
       );
 
     if (!federationPlugins || federationPlugins.length === 0) {
