@@ -57,7 +57,10 @@ const getStaticPathsTemplate = (request: string) => (
 export const pitch = function( this: LoaderContext<Record<string, unknown>>, remainingRequest: string) {
   this.cacheable?.();
   const callback = this.async();
-  const loaderWithoutBoundaryOrShared = this.request.split('!').filter((loader) => !loader.includes('async-boundary-loader') && !loader.includes('patchDefaultSharedLoader')).join('!');
+  const loaderWithoutBoundaryOrShared = this.request
+    .split('!')
+    .filter(loader => loader.includes('async-boundary-loader') || loader.includes('patchDefaultSharedLoader'))
+    .join('!');
 
     this.loadModule(
       `${this.resourcePath}.webpack[javascript/auto]!=!${loaderWithoutBoundaryOrShared}`,
@@ -65,13 +68,13 @@ export const pitch = function( this: LoaderContext<Record<string, unknown>>, rem
        * @param {Error | null | undefined} error
        * @param {object} exports
        */
-      (error: Error | null | undefined, source:string, sourceMap: string, module:NormalModule ) => {
+      (error: Error | null | undefined, source: string, sourceMap: string, module: NormalModule) => {
         if (error) {
           callback(error);
 
           return;
         }
-        
+
         if(this._compilation && this._compilation.name === 'ChildFederationPlugin') {
           callback(null, source, sourceMap);
           return;
@@ -86,7 +89,6 @@ export const pitch = function( this: LoaderContext<Record<string, unknown>>, rem
           this.context,
           this.resource
         );
-
 
         const result = [
           pageTemplate(`${this.resource}?hasBoundary`)
