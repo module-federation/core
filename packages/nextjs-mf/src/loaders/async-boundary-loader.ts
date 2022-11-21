@@ -55,12 +55,12 @@ const getStaticPathsTemplate = (request: string) => (
 )
 
 export const pitch = function( this: LoaderContext<Record<string, unknown>>, remainingRequest: string) {
-  this.cacheable?.();
+  this.cacheable && this.cacheable();
   const callback = this.async();
-  const loaderWithoutBoundaryOrShared = this.request
-    .split('!')
-    .filter(loader => loader.includes('async-boundary-loader') || loader.includes('patchDefaultSharedLoader'))
-    .join('!');
+  const loaderWithoutBoundaryOrShared = this.request.split('!').filter((loader) => {
+    return !loader.includes('async-boundary-loader') && !loader.includes('patchDefaultSharedLoader')
+  }).join('!');
+
 
     this.loadModule(
       `${this.resourcePath}.webpack[javascript/auto]!=!${loaderWithoutBoundaryOrShared}`,
@@ -113,6 +113,4 @@ export const pitch = function( this: LoaderContext<Record<string, unknown>>, rem
         callback(null,result.join("\n"))
       }
     );
-  // }
-
 }
