@@ -51,9 +51,7 @@ const flatMap = (xs, f) => xs.map(f).reduce(concat, []);
  */
 function getRemoteModules(stats) {
   return stats.modules
-    .filter((mod) => {
-      return mod.moduleType === 'remote-module';
-    })
+    .filter((mod) => mod.moduleType === 'remote-module')
     .reduce((acc, remoteModule) => {
       acc[remoteModule.nameForCondition] = remoteModule.id;
       return acc;
@@ -77,42 +75,14 @@ function getExposedModules(stats, exposedFile) {
  * @returns {Exposed}
  */
 function getExposed(stats, mod) {
-  const chunks = stats.chunks.filter((chunk) => {
-    return mod.chunks.some((id) => id === chunk.id);
-  });
+  const chunks = stats.chunks.filter((chunk) => mod.chunks.some((id) => id === chunk.id));
 
-  const sharedModules = flatMap(chunks, (chunk) =>
-    flatMap(
-      flatMap(chunk.siblings, (id) =>
-        stats.chunks.filter((c) => c.id === id)
-      ).filter((c) =>
-        c.modules.some((m) => m.moduleType === 'consume-shared-module')
-      ),
-      (c) =>
-        flatMap(c.children, (id) => stats.chunks.filter((c2) => c2.id === id))
-    )
-  )
-    .filter((chunk) =>
-      chunk.parents.some((parent) => chunks.some((c) => c.id === parent))
-    )
-    .map((chunk) => ({
-      chunks: chunk.files.map(
-        (f) =>
-          `${stats.publicPath !== 'auto' ? stats.publicPath || '' : ''}${f}`
-      ),
-      provides: chunk.modules
-        .map((mod) => parseFederatedIssuer(mod.issuer))
-        .filter((f) => !!f),
-    }));
-
-  const flatChunks = flatMap(chunks, (chunk) => {
-    return {
-      [chunk.id]: chunk.files.map(
-        (f) =>
-          `${stats.publicPath !== 'auto' ? stats.publicPath || '' : ''}${f}`
-      ),
-    };
-  });
+  const flatChunks = flatMap(chunks, (chunk) => ({
+    [chunk.id]: chunk.files.map(
+      (f) =>
+        `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
+    ),
+  }));
 
   return flatChunks.reduce((acc, chunk) => {
     Object.assign(acc, chunk);
@@ -156,17 +126,16 @@ function getIssuers(mod, check) {
  * @returns {SharedDependency}
  */
 function parseFederatedIssuer(issuer) {
-  const split = (issuer && issuer.split('|')) || [];
+  const split = (issuer?.split('|')) || [];
   if (split.length !== 8 || split[0] !== 'consume-shared-module') {
     return null;
   }
   const [
-    _,
+    ,
     shareScope,
     shareKey,
     requiredVersion,
-    strictVersion,
-    __,
+    strictVersion, ,
     singleton,
     eager,
   ] = split;
@@ -211,7 +180,7 @@ function getSharedModules(stats, federationPlugin) {
             c.modules.some((m) =>
               searchIssuer(
                 m,
-                (issuer) => issuer && issuer.startsWith('consume-shared-module')
+                (issuer) => issuer?.startsWith('consume-shared-module')
               )
             )
         )
@@ -220,19 +189,19 @@ function getSharedModules(stats, federationPlugin) {
     .map((chunk) => ({
       chunks: chunk.files.map(
         (f) =>
-          `${stats.publicPath !== 'auto' ? stats.publicPath || '' : ''}${f}`
+          `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
       ),
       provides: flatMap(
         chunk.modules.filter((m) =>
           searchIssuer(
             m,
-            (issuer) => issuer && issuer.startsWith('consume-shared-module')
+            (issuer) => issuer?.startsWith('consume-shared-module')
           )
         ),
         (m) =>
           getIssuers(
             m,
-            (issuer) => issuer && issuer.startsWith('consume-shared-module')
+            (issuer) => issuer?.startsWith('consume-shared-module')
           )
       )
         .map(parseFederatedIssuer)
@@ -261,7 +230,7 @@ function getMainSharedModules(stats) {
           c.modules.some((m) =>
             searchIssuer(
               m,
-              (issuer) => issuer && issuer.startsWith('consume-shared-module')
+              (issuer) => issuer?.startsWith('consume-shared-module')
             )
           )
       )
@@ -270,19 +239,19 @@ function getMainSharedModules(stats) {
     .map((chunk) => ({
       chunks: chunk.files.map(
         (f) =>
-          `${stats.publicPath !== 'auto' ? stats.publicPath || '' : ''}${f}`
+          `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
       ),
       provides: flatMap(
         chunk.modules.filter((m) =>
           searchIssuer(
             m,
-            (issuer) => issuer && issuer.startsWith('consume-shared-module')
+            (issuer) => issuer?.startsWith('consume-shared-module')
           )
         ),
         (m) =>
           getIssuers(
             m,
-            (issuer) => issuer && issuer.startsWith('consume-shared-module')
+            (issuer) => issuer?.startsWith('consume-shared-module')
           )
       )
         .map(parseFederatedIssuer)
@@ -300,35 +269,28 @@ function getMainSharedModules(stats) {
 function getFederationStats(stats, federationPlugin) {
   const exposedModules = Object.entries(
     federationPlugin._options.exposes
-  ).reduce((exposedModules, [exposedAs, exposedFile]) => {
-    return Object.assign(exposedModules, {
-      [exposedAs]: getExposedModules(stats, exposedFile),
-    });
-  }, {});
+  ).reduce((exposedModules, [exposedAs, exposedFile]) => Object.assign(exposedModules, {
+    [exposedAs]: getExposedModules(stats, exposedFile),
+  }), {});
 
   /** @type {{ [key: string]: Exposed }} */
   const exposes = Object.entries(exposedModules).reduce(
-    (exposedChunks, [exposedAs, exposedModules]) => {
-      return Object.assign(exposedChunks, {
-        [exposedAs]: flatMap(exposedModules, (mod) => {
-          return getExposed(stats, mod);
-        }),
-      });
-    },
+    (exposedChunks, [exposedAs, exposedModules]) => Object.assign(exposedChunks, {
+      [exposedAs]: flatMap(exposedModules, (mod) => getExposed(stats, mod)),
+    }),
     {}
   );
 
   /** @type {string} */
   const remote =
-    (federationPlugin._options.library &&
-      federationPlugin._options.library.name) ||
+    (federationPlugin._options.library?.name) ||
     federationPlugin._options.name;
 
   const sharedModules = getSharedModules(stats, federationPlugin);
   const remoteModules = getRemoteModules(stats);
   return {
     remote,
-    entry: `${stats.publicPath !== 'auto' ? stats.publicPath || '' : ''}${
+    entry: `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${
       stats.assetsByChunkName[remote] &&
       stats.assetsByChunkName[remote].length === 1
         ? stats.assetsByChunkName[remote][0]
@@ -367,12 +329,10 @@ class FederationStatsPlugin {
    */
   apply(compiler) {
     const federationPlugins =
-      compiler.options.plugins &&
-      compiler.options.plugins.filter(
-        (plugin) =>
-          plugin.constructor.name === 'NextFederationPlugin' &&
-          plugin._options.exposes
-      );
+      compiler.options.plugins?.filter((plugin) =>
+      (
+        ['NextFederationPlugin', 'UniversalFederationPlugin', 'NodeFederationPlugin', 'ModuleFederationPlugin'].includes(plugin.constructor.name)
+      ) && plugin._options.exposes);
 
     if (!federationPlugins || federationPlugins.length === 0) {
       console.error('No ModuleFederationPlugin(s) found.');
@@ -420,7 +380,7 @@ class FederationStatsPlugin {
             size: () => statsBuffer.length,
           };
 
-          const filename = this._options.filename;
+          const { filename } = this._options;
 
           const asset = compilation.getAsset(filename);
           if (asset) {
