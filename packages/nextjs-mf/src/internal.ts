@@ -71,7 +71,7 @@ export const reKeyHostShared = (
   return Object.entries(shared).reduce((acc, item) => {
     const [itemKey, shareOptions] = item;
 
-    const shareKey = 'host' + ((item as any).shareKey || itemKey);
+    const shareKey = `host${(item as any).shareKey || itemKey}`;
     acc[shareKey] = shareOptions;
 
     if (!shareOptions.import) {
@@ -91,8 +91,7 @@ export const reKeyHostShared = (
 };
 
 // browser template to convert remote into promise new promise and use require.loadChunk to load the chunk
-export const generateRemoteTemplate = (url: string, global: any) => {
-  return `new Promise(function (resolve, reject) {
+export const generateRemoteTemplate = (url: string, global: any) => `new Promise(function (resolve, reject) {
     var url = new URL(${JSON.stringify(url)});
     url.searchParams.set('t', Date.now());
     var __webpack_error__ = new Error();
@@ -149,7 +148,6 @@ export const generateRemoteTemplate = (url: string, global: any) => {
     }
     return proxy
   })`;
-};
 
 // shared packages must be compiled into webpack bundle, not require() pass through
 export const internalizeSharedPackages = (
@@ -213,9 +211,7 @@ export const getOutputPath = (compiler: Compiler) => {
   let outputPath: string | string[] | undefined =
     compiler.options.output.path?.split(path.sep);
 
-  const foundIndex = outputPath?.findIndex((i) => {
-    return i === (isServer ? 'server' : 'static');
-  });
+  const foundIndex = outputPath?.findIndex((i) => i === (isServer ? 'server' : 'static'));
 
   outputPath = outputPath
     ?.slice(0, foundIndex && foundIndex > 0 ? foundIndex : outputPath.length)
@@ -247,16 +243,14 @@ export const parseRemoteSyntax = (remote: string) => {
   return remote;
 };
 
-export const parseRemotes = (remotes: Record<string, any>) => {
-  return Object.entries(remotes).reduce((acc, remote) => {
-    if (!remote[1].startsWith('promise ') && remote[1].includes('@')) {
-      acc[remote[0]] = 'promise ' + parseRemoteSyntax(remote[1]);
-      return acc;
-    }
-    acc[remote[0]] = remote[1];
+export const parseRemotes = (remotes: Record<string, any>) => Object.entries(remotes).reduce((acc, remote) => {
+  if (!remote[1].startsWith('promise ') && remote[1].includes('@')) {
+    acc[remote[0]] = `promise ${parseRemoteSyntax(remote[1])}`;
     return acc;
-  }, {} as Record<string, string>);
-};
+  }
+  acc[remote[0]] = remote[1];
+  return acc;
+}, {} as Record<string, string>);
 
 const parseShareOptions = (options: ModuleFederationPluginOptions) => {
   const sharedOptions: [string, SharedConfig][] = parseOptions(
@@ -265,17 +259,14 @@ const parseShareOptions = (options: ModuleFederationPluginOptions) => {
       if (typeof item !== 'string')
         throw new Error('Unexpected array in shared');
 
-      /** @type {SharedConfig} */
-      const config =
-        item === key || !isRequiredVersion(item)
-          ? {
-              import: item,
-            }
-          : {
-              import: key,
-              requiredVersion: item,
-            };
-      return config;
+      return item === key || !isRequiredVersion(item)
+      ? {
+          import: item,
+        }
+      : {
+          import: key,
+          requiredVersion: item,
+        };
     },
     (item: any) => item
   );
@@ -295,14 +286,12 @@ const parseShareOptions = (options: ModuleFederationPluginOptions) => {
   }, {} as Record<string, SharedConfig>);
 };
 
-export const toDisplayErrors = (err: Error[]) => {
-  return err
-    .map((error) => {
-      let message = error.message;
-      if (error.stack) {
-        message += '\n' + error.stack;
-      }
-      return message;
-    })
-    .join('\n');
-};
+export const toDisplayErrors = (err: Error[]) => err
+.map((error) => {
+  let { message } = error;
+  if (error.stack) {
+    message += `\n${error.stack}`;
+  }
+  return message;
+})
+.join('\n');

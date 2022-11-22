@@ -2,7 +2,7 @@ import { Compilation, Compiler } from 'webpack';
 
 export class RemoveRRRuntimePlugin {
   apply(compiler: Compiler) {
-    const webpack = compiler.webpack;
+    const { webpack } = compiler;
 
     // only impacts dev mode - dont waste the memory during prod build
     if (compiler.options.mode === 'development') {
@@ -19,20 +19,21 @@ export class RemoveRRRuntimePlugin {
             (assets) => {
               //can this be improved? I need react refresh not to cause global collision in dev mode
               Object.keys(assets).forEach((filename) => {
-                if (filename.endsWith('.js') || filename.endsWith('.mjs')) {
-                  const asset = compilation.getAsset(filename);
-                  // easiest way to solve it is to prevent react refresh helpers from running when its a federated module chunk
-                  const newSource = (asset?.source.source() as string).replace(
-                    /RefreshHelpers/g,
-                    'NoExist'
-                  );
-                  const updatedAsset = new webpack.sources.RawSource(newSource);
+                if (!(filename.endsWith('.js') || filename.endsWith('.mjs'))) {
+                  return;
+                }
+                const asset = compilation.getAsset(filename);
+                // easiest way to solve it is to prevent react refresh helpers from running when its a federated module chunk
+                const newSource = (asset?.source.source() as string).replace(
+                  /RefreshHelpers/g,
+                  'NoExist'
+                );
+                const updatedAsset = new webpack.sources.RawSource(newSource);
 
-                  if (asset) {
-                    compilation.updateAsset(filename, updatedAsset);
-                  } else {
-                    compilation.emitAsset(filename, updatedAsset);
-                  }
+                if (asset) {
+                  compilation.updateAsset(filename, updatedAsset);
+                } else {
+                  compilation.emitAsset(filename, updatedAsset);
                 }
               });
             }

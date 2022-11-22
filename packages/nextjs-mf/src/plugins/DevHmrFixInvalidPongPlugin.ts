@@ -22,7 +22,7 @@ if (!String.prototype.replaceAll) {
  */
 export class DevHmrFixInvalidPongPlugin {
   apply(compiler: Compiler) {
-    const webpack = compiler.webpack;
+    const { webpack } = compiler;
 
     compiler.hooks.thisCompilation.tap(
       'DevHmrFixInvalidPongPlugin',
@@ -36,27 +36,28 @@ export class DevHmrFixInvalidPongPlugin {
           },
           (assets) => {
             Object.keys(assets).forEach((filename) => {
-              if (filename.endsWith('/main.js')) {
-                const asset = compilation.getAsset(filename);
-                const newSource = (asset?.source.source() as string).replace(
-                  new RegExp(
-                    escapeRegExp(
-                      'if (payload.event === \\"pong\\" && payload.invalid && !self.__NEXT_DATA__.err) {'
-                    ),
-                    'g'
+              if (!filename.endsWith('/main.js')) {
+                return;
+              }
+              const asset = compilation.getAsset(filename);
+              const newSource = (asset?.source.source() as string).replace(
+                new RegExp(
+                  escapeRegExp(
+                    'if (payload.event === \\"pong\\" && payload.invalid && !self.__NEXT_DATA__.err) {'
                   ),
-                  `if (payload.event === \\"pong\\" && payload.invalid && !self.__NEXT_DATA__.err) {
+                  'g'
+                ),
+                `if (payload.event === \\"pong\\" && payload.invalid && !self.__NEXT_DATA__.err) {
                     if (window.mf_client &&  window.mf_client.isFederatedPathname(window.location.pathname)) return;
                   `.replaceAll('\n', '\\n')
-                );
+              );
 
-                const updatedAsset = new webpack.sources.RawSource(newSource);
+              const updatedAsset = new webpack.sources.RawSource(newSource);
 
-                if (asset) {
-                  compilation.updateAsset(filename, updatedAsset);
-                } else {
-                  compilation.emitAsset(filename, updatedAsset);
-                }
+              if (asset) {
+                compilation.updateAsset(filename, updatedAsset);
+              } else {
+                compilation.emitAsset(filename, updatedAsset);
               }
             });
           }

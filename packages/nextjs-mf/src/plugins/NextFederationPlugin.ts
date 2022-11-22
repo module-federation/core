@@ -51,13 +51,13 @@ export class NextFederationPlugin {
     }
 
     const isServer = compiler.options.name === 'server';
-    const webpack = compiler.webpack;
+    const { webpack } = compiler;
 
     if (isServer) {
       // target false because we use our own target for node env
       compiler.options.target = false;
-      const StreamingTargetPlugin =
-        require('@module-federation/node').StreamingTargetPlugin;
+      const { StreamingTargetPlugin } =
+        require('@module-federation/node');
 
       new StreamingTargetPlugin(this._options, {
         ModuleFederationPlugin: webpack.container.ModuleFederationPlugin,
@@ -126,9 +126,7 @@ export class NextFederationPlugin {
           return false
         },
         exclude: [/node_modules/, /_document/, /_middleware/],
-        resourceQuery: (query) => {
-          return !query.includes('hasBoundary')
-        },
+        resourceQuery: (query) => !query.includes('hasBoundary'),
         loader: path.resolve(
           __dirname,
           '../loaders/async-boundary-loader'
@@ -148,34 +146,35 @@ export class NextFederationPlugin {
       : webpack.container.ModuleFederationPlugin;
 
     // ignore edge runtime and middleware builds
-    if (ModuleFederationPlugin) {
-      const internalShare = reKeyHostShared(this._options.shared);
-      const hostFederationPluginOptions: ModuleFederationPluginOptions = {
-        ...this._options,
-        exposes: {},
-        shared: {
-          noop: {
-            import: 'data:text/javascript,module.exports = {};',
-            requiredVersion: false,
-            eager: true,
-            version: '0',
-          },
-          ...internalShare,
+    if (!ModuleFederationPlugin) {
+      return;
+    }
+    const internalShare = reKeyHostShared(this._options.shared);
+    const hostFederationPluginOptions: ModuleFederationPluginOptions = {
+      ...this._options,
+      exposes: {},
+      shared: {
+        noop: {
+          import: 'data:text/javascript,module.exports = {};',
+          requiredVersion: false,
+          eager: true,
+          version: '0',
         },
-      };
+        ...internalShare,
+      },
+    };
 
-      new ModuleFederationPlugin(hostFederationPluginOptions, {
-        ModuleFederationPlugin,
-      }).apply(compiler);
+    new ModuleFederationPlugin(hostFederationPluginOptions, {
+      ModuleFederationPlugin,
+    }).apply(compiler);
 
-      new ChildFederationPlugin(this._options, this._extraOptions).apply(
-        compiler
-      );
-      new AddRuntimeRequirementToPromiseExternal().apply(compiler);
+    new ChildFederationPlugin(this._options, this._extraOptions).apply(
+      compiler
+    );
+    new AddRuntimeRequirementToPromiseExternal().apply(compiler);
 
-      if (compiler.options.mode === 'development') {
-        new DevHmrFixInvalidPongPlugin().apply(compiler);
-      }
+    if (compiler.options.mode === 'development') {
+      new DevHmrFixInvalidPongPlugin().apply(compiler);
     }
   }
 }

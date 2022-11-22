@@ -15,7 +15,6 @@ class StreamingTargetPlugin {
   private options: StreamingTargetOptions;
 
   constructor(options: StreamingTargetOptions) {
-    options.verbose ??= false;
     this.options = options || {};
   }
 
@@ -44,12 +43,12 @@ class StreamingTargetPlugin {
       dynamicImport: true,
     }
 
-    new ((webpack && webpack.node && webpack.node.NodeEnvironmentPlugin) ||
+    new ((webpack?.node?.NodeEnvironmentPlugin) ||
       require('webpack/lib/node/NodeEnvironmentPlugin'))({
       infrastructureLogging: compiler.options.infrastructureLogging,
     }).apply(compiler);
 
-    new ((webpack && webpack.node && webpack.node.NodeTargetPlugin) ||
+    new ((webpack?.node?.NodeTargetPlugin) ||
       require('webpack/lib/node/NodeTargetPlugin'))().apply(compiler);
 
     new CommonJsChunkLoadingPlugin({

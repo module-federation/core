@@ -18,7 +18,6 @@ class UniversalFederationPlugin {
   private context: NodeFederationContext;
 
   constructor(options: NodeFederationOptions, context: NodeFederationContext) {
-    options.verbose ??= false;
     this.options = options || {} as NodeFederationOptions;
     this.context = context || {} as NodeFederationContext;
   }
