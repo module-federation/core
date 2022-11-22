@@ -8,29 +8,30 @@ export const flushChunks = async () => {
     if(!global.__remote_scope__._config[remote]) {
       return
     }
-    const statsFile = global.__remote_scope__._config[remote].replace('remoteEntry.js', 'federated-stats.json')
     // fetch the json file
-    const stats = await fetch(statsFile).then(async (res) => {
-      return await res.json()
-    })
-
-    chunks.add(global.__remote_scope__._config[remote].replace('ssr', 'chunks'))
-    const [prefix] = global.__remote_scope__._config[remote].split('static/')
-    if (stats.federatedModules) {
-      stats.federatedModules.forEach((modules) => {
-        if (modules.exposes && modules.exposes[request]) {
-          modules.exposes[request].forEach((chunk) => {
-            Object.values(chunk).forEach((chunk) => {
-              chunk.forEach((chunk) => {
-                chunks.add(prefix + chunk)
+    try {
+      const statsFile = global.__remote_scope__._config[remote].replace('remoteEntry.js', 'federated-stats.json')
+      const stats = await fetch(statsFile).then(async (res) => await res.json())
+      chunks.add(global.__remote_scope__._config[remote].replace('ssr', 'chunks'))
+      const [prefix] = global.__remote_scope__._config[remote].split('static/')
+      if (stats.federatedModules) {
+        stats.federatedModules.forEach((modules) => {
+          if (modules.exposes?.[request]) {
+            modules.exposes[request].forEach((chunk) => {
+              Object.values(chunk).forEach((chunk) => {
+                chunk.forEach((chunk) => {
+                  chunks.add(prefix + chunk)
+                })
               })
             })
-          })
-        }
-      })
-    }
+          }
+        })
+      }
 
-    return Array.from(chunks)
+      return Array.from(chunks)
+    } catch (e) {
+      console.log(e);
+    }
   }))
 
   const dedupe = Array.from(new Set([...allFlushed.flat()]))

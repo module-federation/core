@@ -11,6 +11,8 @@ declare module 'webpack/lib/util/compileBooleanMatcher';
 declare module 'webpack/lib/util/identifier';
 
 declare const global: typeof globalThis & {
+  usedChunks: Set<string>;
+  flushChunks: () => Promise<Array<string>>;
   __remote_scope__: {
     _config: Record<string, any>;
     [K: string]: {
