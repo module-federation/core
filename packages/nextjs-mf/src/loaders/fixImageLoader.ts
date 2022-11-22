@@ -8,12 +8,17 @@ import path from 'path';
  *   see https://github.com/vercel/next.js/blob/canary/packages/next/build/webpack/loaders/next-image-loader.js
  * It takes regular string
  *   `export default {"src":"/_next/static/media/ssl.e3019f0e.svg","height":20,"width":20};`
- * And injects PUBLIC_PATH to it from webpack
- *   `export default {"src":__webpack_require__.p+"/static/media/ssl.e3019f0e.svg","height":20,"width":20};`
+ * And injects the following code:
+ * for ssr:
+ * remote scope of specific remote url
+ * for csr:
+ * document.currentScript.src
+ * after that, it will choose the full uri before _next
  *
- *
- * __webpack_require__.p - is a global variable in webpack container which contains publicPath
- *   For example:  http://localhost:3000/_next
+ * for example:
+ * http://localhost:1234/test/test2/_next/static/media/ssl.e3019f0e.svg
+ * will become
+ * http://localhost:1234/test/test2
  *
  */
 export async function fixImageLoader(
@@ -22,7 +27,6 @@ export async function fixImageLoader(
 ) {
   this.cacheable(true);
 
-  const publicPath = this._compiler?.webpack.RuntimeGlobals.publicPath;
   const isServer = this._compiler?.options.name !== 'client';
 
   const result = await this.importModule(
@@ -37,19 +41,37 @@ export async function fixImageLoader(
         Template.asString([
           'try {',
           Template.indent([
-            'const remoteEntry = global.__remote_scope__._config[global.remoteEntryName];',
-            "return remoteEntry.split('/').slice(0, remoteEntry.split('/').length - 4).join('/');",
+            'const remoteEntry = global.__remote_scope__ && global.remoteEntryName && global.__remote_scope__._config[global.remoteEntryName];',
+            `const splitted = remoteEntry.split('/_next')`,
+            `return splitted.length === 2 ? splitted[0] : '';`,
           ]),
           '} catch (e) {',
           Template.indent([
-            "console.error('failed loading SSR images', e);",
+            `console.error('failed generating SSR image path', e);`,
             'return "";',
           ]),
           '}',
         ]),
-        Template.asString('}()'),
+        '}()',
       ])}`
-    : `(${publicPath} && ${publicPath}.indexOf('://') > 0 ? new URL(${publicPath}).origin : '')`;
+    : `${Template.asString([
+        'function getCSRImagePath(){',
+        Template.indent([
+          'try {',
+          Template.indent([
+            `const path = document.currentScript && document.currentScript.src;`,
+            `const splitted = path.split('/_next')`,
+            `return splitted.length === 2 ? splitted[0] : '';`,
+          ]),
+          '} catch (e) {',
+          Template.indent([
+            `console.error('failed generating CSR image path', e);`,
+            'return "";',
+          ]),
+          '}',
+        ]),
+        '}()',
+      ])}`;
 
   const constructedObject = Object.entries(content).reduce(
     (acc, [key, value]) => {
