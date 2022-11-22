@@ -24,6 +24,10 @@
         {
           "projects": "self",
           "target": "build"
+        },
+        {
+          "projects": "dependencies",
+          "target": "build"
         }
       ]
     },

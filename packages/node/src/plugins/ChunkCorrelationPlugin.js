@@ -329,10 +329,7 @@ class FederationStatsPlugin {
    */
   apply(compiler) {
     const federationPlugins =
-      compiler.options.plugins?.filter((plugin) =>
-      (
-        ['NextFederationPlugin', 'UniversalFederationPlugin', 'NodeFederationPlugin', 'ModuleFederationPlugin'].includes(plugin.constructor.name)
-      ) && plugin._options.exposes);
+      compiler.options.plugins?.filter((plugin) => ['NextFederationPlugin', 'UniversalFederationPlugin', 'NodeFederationPlugin', 'ModuleFederationPlugin'].includes(plugin.constructor.name) && plugin?._options?.exposes);
 
     if (!federationPlugins || federationPlugins.length === 0) {
       console.error('No ModuleFederationPlugin(s) found.');

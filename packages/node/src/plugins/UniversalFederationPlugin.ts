@@ -14,16 +14,16 @@ interface NodeFederationContext {
 }
 
 class UniversalFederationPlugin {
-  private options: NodeFederationOptions;
+  private _options: NodeFederationOptions;
   private context: NodeFederationContext;
 
   constructor(options: NodeFederationOptions, context: NodeFederationContext) {
-    this.options = options || {} as NodeFederationOptions;
+    this._options = options || {} as NodeFederationOptions;
     this.context = context || {} as NodeFederationContext;
   }
 
   apply(compiler: Compiler) {
-    const { isServer, verbose, ...options } = this.options;
+    const { isServer, verbose, ...options } = this._options;
     const { webpack } = compiler;
 
     if (isServer || compiler.options.name === 'server') {
