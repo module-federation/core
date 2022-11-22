@@ -2,6 +2,17 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.9.5](https://github.com/module-federation/nextjs-mf/compare/node-0.9.4...node-0.9.5) (2022-11-22)
+
+
+### Bug Fixes
+
+*  increase chunk corrolation plugin scope ([#386](https://github.com/module-federation/nextjs-mf/issues/386)) ([ba567c3](https://github.com/module-federation/nextjs-mf/commit/ba567c37ec9d1b1aa9f457f8e9b4152ed5747e81))
+*  try catch on chunk flushing ([#388](https://github.com/module-federation/nextjs-mf/issues/388)) ([71cc898](https://github.com/module-federation/nextjs-mf/commit/71cc8984a2e6e0b26957d782dcb517d0c7fdc566))
+* Improve logic ([#387](https://github.com/module-federation/nextjs-mf/issues/387)) ([0eb7f1b](https://github.com/module-federation/nextjs-mf/commit/0eb7f1bb77ef0a72ad26adeea1b508fbae60656f))
+
+
+
 ## [0.9.4](https://github.com/module-federation/nextjs-mf/compare/node-0.9.3...node-0.9.4) (2022-11-20)
 
 
