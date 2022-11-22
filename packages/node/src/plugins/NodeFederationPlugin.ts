@@ -220,7 +220,7 @@ export const parseRemoteSyntax = (remote: any) => {
 };
 
 class NodeFederationPlugin {
-  private options: ModuleFederationPluginOptions;
+  private _options: ModuleFederationPluginOptions;
   private context: Context;
   private experiments: NodeFederationOptions['experiments'];
 
@@ -228,7 +228,7 @@ class NodeFederationPlugin {
     { experiments, verbose, ...options }: NodeFederationOptions,
     context: Context
   ) {
-    this.options = options || ({} as ModuleFederationPluginOptions);
+    this._options = options || ({} as ModuleFederationPluginOptions);
     this.context = context || ({} as Context);
     this.experiments = experiments || {};
   }
@@ -248,8 +248,8 @@ class NodeFederationPlugin {
     //     defs
     // ).apply(compiler);
     const pluginOptions = {
-      ...this.options,
-      remotes: parseRemotes(this.options.remotes || {}) as ModuleFederationPluginOptions['remotes'],
+      ...this._options,
+      remotes: parseRemotes(this._options.remotes || {}) as ModuleFederationPluginOptions['remotes'],
     };
 
     new (this.context.ModuleFederationPlugin ||
