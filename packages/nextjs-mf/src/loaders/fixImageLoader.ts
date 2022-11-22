@@ -26,7 +26,7 @@ export async function fixImageLoader(
   const isServer = this._compiler?.options.name !== 'client';
 
   const result = await this.importModule(
-    `${this.resourcePath}.webpack[javascript/auto]` + `!=!${remaining}`
+    `${this.resourcePath}.webpack[javascript/auto]!=!${remaining}`
   );
 
   const content = (result.default || result) as Record<string, string>;
@@ -38,7 +38,7 @@ export async function fixImageLoader(
   const constructedObject = Object.entries(content).reduce(
     (acc, [key, value]) => {
       if (key === 'src') {
-        if (value && value.indexOf('://') < 0) {
+        if (value && !value.includes('://')) {
           value = path.join(value);
         }
         acc.push(
@@ -52,7 +52,7 @@ export async function fixImageLoader(
     [] as string[]
   );
 
-  const updated = Template.asString([
+  return Template.asString([
     "let computedAssetsPrefixReference = '';",
     'try {',
     Template.indent(`computedAssetsPrefixReference = ${computedAssetPrefix};`),
@@ -61,8 +61,6 @@ export async function fixImageLoader(
     Template.indent(constructedObject.join(',\n')),
     '}',
   ]);
-
-  return updated;
 }
 
 export const pitch = fixImageLoader;
