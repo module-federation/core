@@ -4,8 +4,6 @@ import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import {extractUrlAndGlobal} from "@module-federation/utilities";
 
-type EmptyObject = Record<string, unknown>;
-
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
   experiments?: Record<string, unknown>;
   verbose?: boolean;
@@ -24,95 +22,17 @@ interface Context {
 // commonjs-module, ideal since it returns a commonjs module format
 // const remote = eval(scriptContent + 'module.exports')
 
-// Note on ESM.
-// Its possible to use ESM import, but its impossible to invalidate the module cache
-// So once something is imported, its stuck. This is problematic with at-runtime since we want to hot reload node
-// if ESM were used, youd be forced to restart the process to re-import modules or use a worker pool
-// Workaround is possible with query string on end of request, but this leaks memory badly
-// with commonjs, we can at least reset the require cache to "reboot" webpack runtime
-// It *can* leak memory, but ive not been able to replicate this to an extent that would be concerning.
-// ESM WILL leak memory, big difference.
-// Im talking with TC39 about a proposal around "virtual module trees" which would solve many problems.
-// VMT is like Realms but better - easiest analogy would be like forking the main thread, without going off main thread
-// VMT allows for scope isolation, but still allows reflection and non-primitive memory pointers to be shared - perfect for MFP
 
-//TODO: should use extractUrlAndGlobal from internal.js
-//TODO: should use Template system like LoadFileChunk runtime does.
-//TODO: should use Template system like LoadFileChunk runtime does.
-//TODO: global.webpackChunkLoad could use a better convention? I have to use a special http client to get out of my infra firewall
-const executeLoadTemplate = `
-    function executeLoad(remoteUrl, retry) {
-      function extractUrlAndGlobal(urlAndGlobal) {
-        var index = urlAndGlobal.indexOf("@");
-        if (index <= 0 || index === urlAndGlobal.length - 1) {
-                throw new Error("Invalid request " + urlAndGlobal);
-        }
-        return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
-      }
-      console.log('remoteUrl',remoteUrl)
-        const [scriptUrl, moduleName] = extractUrlAndGlobal(remoteUrl);
-        console.log("executing remote load", scriptUrl);
-        const vm = require('vm');
-        return new Promise(function (resolve, reject) {
-
-         (global.webpackChunkLoad || global.fetch || require("node-fetch"))(scriptUrl).then(function(res){
-            return res.text();
-          }).then(function(scriptContent){
-            try {
-              const vmContext = { exports, require, module, global, __filename, __dirname, URL, ...global, remoteEntryName: name};
-              const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, { filename: 'node-federation-loader-' + moduleName + '.vm' });
-
-              /* TODO: need something like a chunk loading queue, this can lead to async issues
-               if two containers load the same remote, they can overwrite global scope
-               should check someone is already loading remote and await that */
-              global.__remote_scope__[moduleName] = remote[moduleName] || remote
-              resolve(global.__remote_scope__[moduleName])
-            } catch(e) {
-              console.error('problem executing remote module', moduleName);
-              reject(e);
-            }
-          }).catch((e)=>{
-            console.error('failed to fetch remote', moduleName, scriptUrl);
-            console.error(e);
-            reject(null)
-          })
-        }).catch((e)=>{
-          console.error('error',e);
-
-          if(!retry) {
-            return executeLoad(remoteUrl, true);
-          }
-          console.warn(moduleName,'is offline, returning fake remote')
-
-          return {
-            fake: true,
-            get:(arg)=>{
-              console.log('faking', arg,'module on', moduleName);
-
-              return Promise.resolve(()=>{
-              return ()=>null
-              });
-            },
-            init:()=>{}
-          }
-        })
-    }
-`;
-
-export const parseRemotes = (remotes: Record<string, any>) => {
-  return Object.entries(remotes).reduce((acc, remote) => {
-    if (!remote[1].startsWith('promise ') && remote[1].includes('@')) {
-      acc[remote[0]] = 'promise ' + parseRemoteSyntax(remote[1]);
-      return acc;
-    }
-    acc[remote[0]] = remote[1];
+export const parseRemotes = (remotes: Record<string, any>) => Object.entries(remotes).reduce((acc, remote) => {
+  if (!remote[1].startsWith('promise ') && remote[1].includes('@')) {
+    acc[remote[0]] = `promise ${parseRemoteSyntax(remote[1])}`;
     return acc;
-  }, {} as Record<string, string>);
-};
+  }
+  acc[remote[0]] = remote[1];
+  return acc;
+}, {} as Record<string, string>);
 // server template to convert remote into promise new promise and use require.loadChunk to load the chunk
-export const generateRemoteTemplate = (url: string, global: any) => {
-
-  return `new Promise(function (resolve, reject) {
+export const generateRemoteTemplate = (url: string, global: any) => `new Promise(function (resolve, reject) {
     if(!global.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser
       global.__remote_scope__ = {
@@ -208,7 +128,6 @@ export const generateRemoteTemplate = (url: string, global: any) => {
     }
     return proxy
   })`;
-};
 
 export const parseRemoteSyntax = (remote: any) => {
   if (typeof remote === 'string' && remote.includes('@')) {
@@ -259,5 +178,6 @@ class NodeFederationPlugin {
     ).apply(compiler);
   }
 }
+
 
 export default NodeFederationPlugin;
