@@ -26,7 +26,7 @@ export async function fixImageLoader(
   const isServer = this._compiler?.options.name !== 'client';
 
   const result = await this.importModule(
-    `${this.resourcePath}.webpack[javascript/auto]` + `!=!${remaining}`
+    `${this.resourcePath}.webpack[javascript/auto]!=!${remaining}`
   );
 
   const content = (result.default || result) as Record<string, string>;
