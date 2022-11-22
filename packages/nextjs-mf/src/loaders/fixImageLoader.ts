@@ -31,8 +31,26 @@ export async function fixImageLoader(
 
   const content = (result.default || result) as Record<string, string>;
 
+  // `function getSSRImagePath(){const remoteEntry = global.__remote_scope__._config[global.remoteEntryName];return remoteEntry.split('/').slice(0, remoteEntry.split('/').length - 4).join('/');}()`
+
   const computedAssetPrefix = isServer
-    ? `new URL(global.__remote_scope__._config[global.remoteEntryName]).origin`
+    ? `${Template.asString([
+        'function getSSRImagePath(){',
+        Template.asString([
+          'try {',
+          Template.indent([
+            'const remoteEntry = global.__remote_scope__._config[global.remoteEntryName];',
+            "return remoteEntry.split('/').slice(0, remoteEntry.split('/').length - 4).join('/');",
+          ]),
+          '} catch (e) {',
+          Template.indent([
+            "console.error('failed loading SSR images', e);",
+            'return "";',
+          ]),
+          '}',
+        ]),
+        Template.asString('}()'),
+      ])}`
     : `(${publicPath} && ${publicPath}.indexOf('://') > 0 ? new URL(${publicPath}).origin : '')`;
 
   const constructedObject = Object.entries(content).reduce(
