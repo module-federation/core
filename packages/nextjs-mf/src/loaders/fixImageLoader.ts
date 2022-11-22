@@ -31,8 +31,6 @@ export async function fixImageLoader(
 
   const content = (result.default || result) as Record<string, string>;
 
-  // `function getSSRImagePath(){const remoteEntry = global.__remote_scope__._config[global.remoteEntryName];return remoteEntry.split('/').slice(0, remoteEntry.split('/').length - 4).join('/');}()`
-
   const computedAssetPrefix = isServer
     ? `${Template.asString([
         'function getSSRImagePath(){',
