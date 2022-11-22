@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.9.6](https://github.com/module-federation/nextjs-mf/compare/node-0.9.5...node-0.9.6) (2022-11-22)
+
+
+### Bug Fixes
+
+* normalize options private variable on plugin constructors ([#390](https://github.com/module-federation/nextjs-mf/issues/390)) ([5654acd](https://github.com/module-federation/nextjs-mf/commit/5654acdf8e79f0b10f34bb58c6eb09c1b83675cb))
+
+
+
 ## [0.9.5](https://github.com/module-federation/nextjs-mf/compare/node-0.9.4...node-0.9.5) (2022-11-22)
 
 
