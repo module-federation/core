@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [5.12.10](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.12.9...nextjs-mf-5.12.10) (2022-11-23)
+
+
+### Bug Fixes
+
+* next images when debugging locally ([#395](https://github.com/module-federation/nextjs-mf/issues/395)) ([0379baa](https://github.com/module-federation/nextjs-mf/commit/0379baaae14960d0e7c7353e7d2b0aa1a4a02aa4))
+
+
+
 ## [5.12.9](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.12.8...nextjs-mf-5.12.9) (2022-11-23)
 
 
