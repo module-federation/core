@@ -28,6 +28,7 @@ export async function fixImageLoader(
   this.cacheable(true);
 
   const isServer = this._compiler?.options.name !== 'client';
+  const publicPath = this._compiler?.webpack.RuntimeGlobals.publicPath;
 
   const result = await this.importModule(
     `${this.resourcePath}.webpack[javascript/auto]!=!${remaining}`
@@ -42,8 +43,13 @@ export async function fixImageLoader(
           'try {',
           Template.indent([
             'const remoteEntry = global.__remote_scope__ && global.remoteEntryName && global.__remote_scope__._config[global.remoteEntryName];',
-            `const splitted = remoteEntry.split('/_next')`,
-            `return splitted.length === 2 ? splitted[0] : '';`,
+            `if (remoteEntry) {`,
+            Template.indent([
+              `const splitted = remoteEntry.split('/_next')`,
+              `return splitted.length === 2 ? splitted[0] : '';`,
+            ]),
+            `}`,
+            `return '';`,
           ]),
           '} catch (e) {',
           Template.indent([
@@ -59,6 +65,10 @@ export async function fixImageLoader(
         Template.indent([
           'try {',
           Template.indent([
+            `if(typeof document === 'undefined')`,
+            Template.indent(
+              `return ${publicPath} && ${publicPath}.indexOf('://') > 0 ? new URL(${publicPath}).origin : ''`
+            ),
             `const path = document.currentScript && document.currentScript.src;`,
             `const splitted = path.split('/_next')`,
             `return splitted.length === 2 ? splitted[0] : '';`,
