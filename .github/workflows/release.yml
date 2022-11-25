@@ -53,12 +53,13 @@ jobs:
           PROJECTS=${{ inputs.projects }}
 
           if [[ $PROJECTS == "all" ]]; then
+            yarn nx affected --target=version
+          else
             PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=last-release)
+            yarn nx run-many --target=version --projects="$PROJECTS" --parallel=1
           fi;
 
           echo $PROJECTS
-
-          yarn nx run-many --target=version --projects="$PROJECTS" --parallel=1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
