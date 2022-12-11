@@ -53,7 +53,7 @@ jobs:
           PROJECTS=${{ inputs.projects }}
 
           if [[ $PROJECTS == "all" ]]; then
-            yarn nx affected --target=version
+            yarn nx affected --target=version --base=last-release
           else
             PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=last-release)
             yarn nx run-many --target=version --projects="$PROJECTS" --parallel=1
