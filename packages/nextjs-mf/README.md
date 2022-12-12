@@ -165,7 +165,7 @@ module.exports = {
 
 // _app.js or some other file in as high up in the app (like next's new layouts)
 // this ensures various parts of next.js are imported and "used" somewhere so that they wont be tree shaken out
-import '@module-federation/nextjs-mf/lib/include-defaults';
+import '@module-federation/nextjs-mf/src/include-defaults';
 ```
 
 2. For the consuming application, we'll call it "next1", add an instance of the ModuleFederationPlugin to your webpack config, and ensure you have a [custom Next.js App](https://nextjs.org/docs/advanced-features/custom-app) `pages/_app.js` (or `.tsx`):
@@ -194,7 +194,7 @@ module.exports = {
 
 // _app.js or some other file in as high up in the app (like next's new layouts)
 // this ensures various parts of next.js are imported and "used" somewhere so that they wont be tree shaken out
-import '@module-federation/nextjs-mf/lib/include-defaults';
+import '@module-federation/nextjs-mf/src/include-defaults';
 ```
 
 4. Use next/dynamic or low level api to import remotes.
