@@ -94,7 +94,8 @@
   "resolutions": {
     "@module-federation/nextjs-mf": "link:./dist/packages/nextjs-mf",
     "@module-federation/utilities": "link:./dist/packages/utilities",
-    "@module-federation/node": "link:./dist/packages/node"
+    "@module-federation/node": "link:./dist/packages/node",
+    "@module-federation/typescript": "link:./dist/packages/typescript"
   },
   "config": {
     "commitizen": {

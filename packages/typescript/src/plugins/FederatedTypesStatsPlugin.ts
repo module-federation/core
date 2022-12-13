@@ -10,7 +10,7 @@ export class FederatedTypesStatsPlugin {
   constructor(private options: NormalizeOptions) {}
 
   apply(compiler: Compiler) {
-    compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation, params) => {
+    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation, params) => {
       const federatedTypesMap = (params as CompilationParams).federated_types;
 
       compilation.hooks.processAssets.tapPromise(
