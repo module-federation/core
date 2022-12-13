@@ -64,7 +64,7 @@
     "@types/jest": "28.1.1",
     "@types/lodash.get": "^4.4.7",
     "@types/node": "^18.7.16",
-    "@types/react": "18.0.21",
+    "@types/react": "18.0.26",
     "@types/react-dom": "18.0.6",
     "@types/react-router-dom": "5.3.3",
     "@types/webpack-sources": "^3.2.0",
