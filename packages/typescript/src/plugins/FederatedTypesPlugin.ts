@@ -126,7 +126,7 @@ export class FederatedTypesPlugin {
       return filesMap;
     } catch (error) {
       this.logger.error(error);
-      throw new Error();
+      throw error;
     }
   }
 
