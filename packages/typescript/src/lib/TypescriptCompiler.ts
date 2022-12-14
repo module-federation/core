@@ -28,19 +28,16 @@ export class TypescriptCompiler {
   }
 
   generateDeclarationFiles(
-    exposedComponents: ModuleFederationPluginOptions['exposes'],
+    exposeDest: string,
+    exposeSrc: string,
     additionalFilesToCompile: FederatedTypesPluginOptions['additionalFilesToCompile'] = []
   ) {
-    const exposeSrcToDestMap: Record<string, string> = {};
+    const exposeSrcToDestMap: Record<string, string> = {
+      [this.getNormalizedPathWithExt(exposeSrc)]: exposeDest,
+    };
 
-    const normalizedExposedComponents = this.normalizeFiles(
-      Object.entries(exposedComponents!),
-      ([exposeDest, exposeSrc]) => {
-        const pathWithExt = this.getNormalizedPathWithExt(exposeSrc);
-        exposeSrcToDestMap[pathWithExt] = exposeDest;
-        return pathWithExt;
-      }
-    );
+    const normalizedExposedComponents = this.normalizeFiles(Object.keys(exposeSrcToDestMap), value => value);
+    this.compilerOptions.outDir = path.join(this.compilerOptions.outDir, exposeDest)
 
     const normalizedAdditionalFiles = this.normalizeFiles(
       additionalFilesToCompile,
@@ -100,7 +97,7 @@ export class TypescriptCompiler {
 
       return (
         destFile &&
-        path.join(this.compilerOptions.outDir as string, `${destFile}.d.ts`)
+        path.join(this.compilerOptions.outDir as string, 'index.d.ts')
       );
     };
 
