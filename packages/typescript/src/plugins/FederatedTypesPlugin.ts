@@ -120,8 +120,7 @@ export class FederatedTypesPlugin {
 
     try {
       return Object.entries(exposedComponents).reduce((accumulator, [exposeDest, exposeSrc]) => {
-        accumulator = {...accumulator, ...compiler.generateDeclarationFiles(exposeDest, exposeSrc, this.options.additionalFilesToCompile)}
-        return accumulator
+        return {...accumulator, ...compiler.generateDeclarationFiles(exposeDest, exposeSrc, this.options.additionalFilesToCompile)}
       }, {})
     } catch (error) {
       this.logger.error(error);
