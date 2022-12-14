@@ -81,8 +81,7 @@ export class TypescriptCompiler {
       entry
     );
 
-    const pathWithExt = path.resolve(normalizedRootDir, filenameWithExt);
-    return pathWithExt;
+    return path.resolve(normalizedRootDir, filenameWithExt);
   }
 
   private createHost(exposeSrcToDestMap: Record<string, string>) {

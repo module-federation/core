@@ -119,9 +119,10 @@ export class FederatedTypesPlugin {
     const compiler = new TypescriptCompiler(this.normalizeOptions);
 
     try {
-      return Object.entries(exposedComponents).reduce((accumulator, [exposeDest, exposeSrc]) => {
-        return {...accumulator, ...compiler.generateDeclarationFiles(exposeDest, exposeSrc, this.options.additionalFilesToCompile)}
-      }, {})
+      return Object.entries(exposedComponents).reduce((accumulator, [exposeDest, exposeSrc]) => ({
+        ...accumulator, 
+        ...compiler.generateDeclarationFiles(exposeDest, exposeSrc, this.options.additionalFilesToCompile)
+      }), {})
     } catch (error) {
       this.logger.error(error);
       throw error;
