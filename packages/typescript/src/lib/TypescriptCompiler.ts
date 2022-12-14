@@ -48,7 +48,7 @@ export class TypescriptCompiler {
 
     const program = ts.createProgram(
       [...normalizedAdditionalFiles, ...normalizedExposedComponents],
-      this.compilerOptions,
+      {...this.compilerOptions, outDir: path.join(this.compilerOptions.outDir, exposeDest)},
       host
     );
 
