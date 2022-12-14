@@ -37,7 +37,6 @@ export class TypescriptCompiler {
     };
 
     const normalizedExposedComponents = this.normalizeFiles(Object.keys(exposeSrcToDestMap), value => value);
-    this.compilerOptions.outDir = path.join(this.compilerOptions.outDir, exposeDest)
 
     const normalizedAdditionalFiles = this.normalizeFiles(
       additionalFilesToCompile,
