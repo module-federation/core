@@ -24,7 +24,6 @@ export const normalizeOptions = (
     'dist';
 
   const distDir = path.join(distPath, typescriptFolderName);
-  const typesIndexJsonFilePath = path.join(distDir, TYPES_INDEX_JSON_FILE_NAME);
 
   const tsCompilerOptions: ts.CompilerOptions = {
     declaration: true,
@@ -41,14 +40,11 @@ export const normalizeOptions = (
         : webpackPublicPath
       : '';
 
-  const typesStatsFileName = TYPES_INDEX_JSON_FILE_NAME;
-
   return {
     distDir,
     publicPath,
     tsCompilerOptions,
     typesIndexJsonFileName: TYPES_INDEX_JSON_FILE_NAME,
-    typesStatsFileName,
     typescriptFolderName,
     webpackCompilerOptions,
   };
