@@ -119,11 +119,10 @@ export class FederatedTypesPlugin {
     const compiler = new TypescriptCompiler(this.normalizeOptions);
 
     try {
-      const filesMap = compiler.generateDeclarationFiles(
+      return compiler.generateDeclarationFiles(
         exposedComponents,
         this.options.additionalFilesToCompile
       );
-      return filesMap;
     } catch (error) {
       this.logger.error(error);
       throw error;
