@@ -18,16 +18,16 @@ export default `
     } else {
       throw new Error("invalid number of arguments");
     }
-    if (global.webpackChunkLoad) {
-      global.webpackChunkLoad(url).then(function (resp) {
+    if (globalThis.webpackChunkLoad) {
+      globalThis.webpackChunkLoad(url).then(function (resp) {
         return resp.text();
       }).then(function (rawData) {
         cb(null, rawData);
       }).catch(function (err) {
-        console.error('Federated Chunk load failed', error);
-        return cb(error)
+        console.error('Federated Chunk load failed', err);
+        return cb(err)
       });
-    } else {
+    } else if (typeof process !== 'undefined') {
       //TODO https support
       let request = (url.startsWith('https') ? require('https') : require('http')).get(url, function (resp) {
         if (resp.statusCode === 200) {
@@ -47,6 +47,15 @@ export default `
         console.error('Federated Chunk load failed', error);
         return cb(error)
       });
+    } else {
+      fetch(url).then(function (resp) {
+        return resp.text();
+      }).then(function (rawData) {
+        cb(null, rawData);
+      }).catch(function (err) {
+        console.error('Federated Chunk load failed', err);
+        return cb(err)
+      })
     }
   }
 `;
@@ -55,28 +64,59 @@ export default `
 //language=JS
 export const executeLoadTemplate = `
   function executeLoad(url, callback, name) {
-    if(!name) {
+    if (!name) {
       throw new Error('__webpack_require__.l name is required for ' + url);
     }
-    if (typeof global.__remote_scope__[name] !== 'undefined') return callback(global.__remote_scope__[name]);
-    const vm = require('vm');
-    (global.webpackChunkLoad || global.fetch || require("node-fetch"))(url).then(function (res) {
-      return res.text();
-    }).then(function (scriptContent) {
-      try {
-        const vmContext = {exports, require, module, global, __filename, __dirname, URL,console,process,Buffer, ...global, remoteEntryName: name};
-        const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, {filename: 'node-federation-loader-' + name + '.vm'});
-        global.__remote_scope__[name] = remote[name] || remote;
-        global.__remote_scope__._config[name] = url;
-        callback(global.__remote_scope__[name])
-      } catch (e) {
-        console.error('executeLoad hit catch block');
+    if (typeof globalThis.__remote_scope__[name] !== 'undefined') return callback(globalThis.__remote_scope__[name]);
+    // if its a worker or node
+    if (typeof process !== 'undefined') {
+      const vm = require('vm');
+      (globalThis.webpackChunkLoad || globalThis.fetch || require("node-fetch"))(url).then(function (res) {
+        return res.text();
+      }).then(function (scriptContent) {
+        try {
+          const vmContext = {
+            exports,
+            require,
+            module,
+            global,
+            __filename,
+            __dirname,
+            URL,
+            console,
+            process,
+            Buffer, ...global,
+            remoteEntryName: name
+          };
+          const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, {filename: 'node-federation-loader-' + name + '.vm'});
+          globalThis.__remote_scope__[name] = remote[name] || remote;
+          globalThis.__remote_scope__._config[name] = url;
+          callback(globalThis.__remote_scope__[name])
+        } catch (e) {
+          console.error('executeLoad hit catch block');
+          e.target = {src: url};
+          callback(e);
+        }
+      }).catch((e) => {
         e.target = {src: url};
         callback(e);
-      }
-    }).catch((e) => {
-      e.target = {src: url};
-      callback(e);
-    });
+      });
+    } else {
+      fetch(url).then(function (res) {
+        return res.text();
+      }).then(function (scriptContent) {
+        try {
+          const remote = eval('let module = {};' + scriptContent + '\\nmodule.exports')
+          // const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, {filename: 'node-federation-loader-' + name + '.vm'});
+          globalThis.__remote_scope__[name] = remote[name] || remote;
+          globalThis.__remote_scope__._config[name] = url;
+          callback(globalThis.__remote_scope__[name])
+        } catch (e) {
+          console.error('executeLoad hit catch block',e);
+          e.target = {src: url};
+          callback(e);
+        }
+      });
+    }
   }
 `;

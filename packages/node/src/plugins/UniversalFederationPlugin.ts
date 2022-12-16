@@ -18,7 +18,7 @@ class UniversalFederationPlugin {
   private context: NodeFederationContext;
 
   constructor(options: NodeFederationOptions, context: NodeFederationContext) {
-    this._options = options || {} as NodeFederationOptions;
+    this._options = Object.assign({remotes: {}, exposes: {}, shared: {}},options) as NodeFederationOptions;
     this.context = context || {} as NodeFederationContext;
   }
 

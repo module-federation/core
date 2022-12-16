@@ -33,21 +33,21 @@ export const parseRemotes = (remotes: Record<string, any>) => Object.entries(rem
 }, {} as Record<string, string>);
 // server template to convert remote into promise new promise and use require.loadChunk to load the chunk
 export const generateRemoteTemplate = (url: string, global: any) => `new Promise(function (resolve, reject) {
-    if(!global.__remote_scope__) {
+    if(!globalThis.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser
-      global.__remote_scope__ = {
+      globalThis.__remote_scope__ = {
         _config: {},
       }
     }
 
-    if (typeof global.__remote_scope__[${JSON.stringify(global)}] !== 'undefined') return resolve(global.__remote_scope__[${JSON.stringify(global)}]);
-    global.__remote_scope__._config[${JSON.stringify(global)}] = ${JSON.stringify(url)};
+    if (typeof globalThis.__remote_scope__[${JSON.stringify(global)}] !== 'undefined') return resolve(globalThis.__remote_scope__[${JSON.stringify(global)}]);
+    globalThis.__remote_scope__._config[${JSON.stringify(global)}] = ${JSON.stringify(url)};
     var __webpack_error__ = new Error();
 
     __webpack_require__.l(
       ${JSON.stringify(url)},
       function (event) {
-        if (typeof global.__remote_scope__[${JSON.stringify(global)}] !== 'undefined') return resolve(global.__remote_scope__[${JSON.stringify(global)}]);
+        if (typeof globalThis.__remote_scope__[${JSON.stringify(global)}] !== 'undefined') return resolve(globalThis.__remote_scope__[${JSON.stringify(global)}]);
          var realSrc = event && event.target && event.target.src;
         __webpack_error__.message = 'Loading script failed.\\n(' + event.message + ': ' + realSrc + ')';
         __webpack_error__.name = 'ScriptExternalLoadError';
@@ -78,9 +78,9 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
     }
     const proxy = {
       get: (arg)=>{
-        // if(!global.__remote_scope__[${JSON.stringify(global)}].__initialized) {
+        // if(!globalThis.__remote_scope__[${JSON.stringify(global)}].__initialized) {
         //   try {
-        //     global.__remote_scope__[${JSON.stringify(global)}].__initialized = true;
+        //     globalThis.__remote_scope__[${JSON.stringify(global)}].__initialized = true;
         //     proxy.init(__webpack_require__.S.default);
         //   } catch(e) {}
         // }
@@ -88,7 +88,7 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
           const m = f();
           return ()=>new Proxy(m, {
             get: (target, prop)=>{
-              if(global.usedChunks) global.usedChunks.add(${JSON.stringify(global)} + "->" + arg);
+              if(globalThis.usedChunks) globalThis.usedChunks.add(${JSON.stringify(global)} + "->" + arg);
               return target[prop];
             }
           })
@@ -107,7 +107,7 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
             return target[prop]
           },
           set(target, property, value) {
-            if(global.usedChunks) global.usedChunks.add(${JSON.stringify(global)} + "->" + property);
+            if(globalThis.usedChunks) globalThis.usedChunks.add(${JSON.stringify(global)} + "->" + property);
             if (target[property]) {
               return target[property]
             }
@@ -116,14 +116,14 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
           }
         }
         try {
-          global.__remote_scope__[${JSON.stringify(global)}].init(new Proxy(shareScope, handler))
+          globalThis.__remote_scope__[${JSON.stringify(global)}].init(new Proxy(shareScope, handler))
         } catch (e) {
 
         }
-        global.__remote_scope__[${JSON.stringify(global)}].__initialized = true
+        globalThis.__remote_scope__[${JSON.stringify(global)}].__initialized = true
       }
     }
-    if (!global.__remote_scope__[${JSON.stringify(global)}].__initialized) {
+    if (!globalThis.__remote_scope__[${JSON.stringify(global)}].__initialized) {
       proxy.init(__webpack_require__.S.default)
     }
     return proxy

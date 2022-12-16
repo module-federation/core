@@ -1,19 +1,19 @@
 export const usedChunks = new Set()
-global.usedChunks = usedChunks
+globalThis.usedChunks = usedChunks
 
 export const flushChunks = async () => {
   const allFlushed = await Promise.all(Array.from(usedChunks).map(async (chunk) => {
     const chunks = new Set();
     const [remote, request] = chunk.split('->');
-    if(!global.__remote_scope__._config[remote]) {
+    if(!globalThis.__remote_scope__._config[remote]) {
       return
     }
     // fetch the json file
     try {
-      const statsFile = global.__remote_scope__._config[remote].replace('remoteEntry.js', 'federated-stats.json')
+      const statsFile = globalThis.__remote_scope__._config[remote].replace('remoteEntry.js', 'federated-stats.json')
       const stats = await fetch(statsFile).then(async (res) => await res.json())
-      chunks.add(global.__remote_scope__._config[remote].replace('ssr', 'chunks'))
-      const [prefix] = global.__remote_scope__._config[remote].split('static/')
+      chunks.add(globalThis.__remote_scope__._config[remote].replace('ssr', 'chunks'))
+      const [prefix] = globalThis.__remote_scope__._config[remote].split('static/')
       if (stats.federatedModules) {
         stats.federatedModules.forEach((modules) => {
           if (modules.exposes?.[request]) {

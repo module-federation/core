@@ -2,8 +2,8 @@ const hashmap = {} as Record<string, string>;
 import crypto from 'crypto';
 
 export const revalidate = () => {
-  if (global.__remote_scope__) {
-    const remoteScope = global.__remote_scope__;
+  if (globalThis.__remote_scope__) {
+    const remoteScope = globalThis.__remote_scope__;
 
     return new Promise((res) => {
       const fetches = [];
@@ -93,7 +93,7 @@ export const revalidate = () => {
         req = __non_webpack_require__ as NodeRequire;
       }
 
-      global.__remote_scope__ = {
+      globalThis.__remote_scope__ = {
         _config: {},
       };
 
@@ -117,7 +117,7 @@ export const revalidate = () => {
 };
 
 function getFetchModule() {
-  const loadedModule = global.webpackChunkLoad || global.fetch
+  const loadedModule = globalThis.webpackChunkLoad || globalThis.fetch
   if (loadedModule) {
     return loadedModule
   }
