@@ -10,7 +10,7 @@ export class FederatedTypesStatsPlugin {
   constructor(private options: NormalizeOptions) {}
 
   apply(compiler: Compiler) {
-    compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation, params) => {
+    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation, params) => {
       const federatedTypesMap = (params as CompilationParams).federated_types;
 
       compilation.hooks.processAssets.tapPromise(
@@ -19,7 +19,7 @@ export class FederatedTypesStatsPlugin {
           stage: Compilation.PROCESS_ASSETS_STAGE_ANALYSE,
         },
         async () => {
-          const { typesStatsFileName, publicPath } = this.options;
+          const { typesIndexJsonFileName, publicPath } = this.options;
 
           const statsJson: TypesStatsJson = {
             publicPath,
@@ -28,12 +28,12 @@ export class FederatedTypesStatsPlugin {
 
           const source = new sources.RawSource(JSON.stringify(statsJson));
 
-          const asset = compilation.getAsset(typesStatsFileName);
+          const asset = compilation.getAsset(typesIndexJsonFileName);
 
           if (asset) {
-            compilation.updateAsset(typesStatsFileName, source);
+            compilation.updateAsset(typesIndexJsonFileName, source);
           } else {
-            compilation.emitAsset(typesStatsFileName, source);
+            compilation.emitAsset(typesIndexJsonFileName, source);
           }
         }
       );

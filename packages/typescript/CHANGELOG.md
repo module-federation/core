@@ -2,6 +2,25 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.0.2](https://github.com/module-federation/nextjs-mf/compare/typescript-2.0.1...typescript-2.0.2) (2022-12-18)
+
+
+### Bug Fixes
+
+* **typescript:** fix parsing of tsconfig options for compiler ([#414](https://github.com/module-federation/nextjs-mf/issues/414)) ([5673452](https://github.com/module-federation/nextjs-mf/commit/56734522df3f1b568f8a6e7e661efb72b9894aff))
+
+
+
+## [2.0.1](https://github.com/module-federation/nextjs-mf/compare/typescript-2.0.0...typescript-2.0.1) (2022-12-18)
+
+
+### Bug Fixes
+
+* cannot convert undefined object ([#406](https://github.com/module-federation/nextjs-mf/issues/406)) ([f049bc9](https://github.com/module-federation/nextjs-mf/commit/f049bc93c987f0ba918ecb345d1b3ee824715672))
+* throw correct error object instead of an empty error in FederatedTypesPlugin ([#407](https://github.com/module-federation/nextjs-mf/issues/407)) ([1ee9ffe](https://github.com/module-federation/nextjs-mf/commit/1ee9ffe46534f854aecbde8cc20bcd3e8866274a))
+
+
+
 # [2.0.0](https://github.com/module-federation/nextjs-mf/compare/typescript-1.1.0...typescript-2.0.0) (2022-11-20)
 
 ### Dependency Updates
