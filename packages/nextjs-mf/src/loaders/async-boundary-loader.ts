@@ -91,7 +91,7 @@ export const pitch = function( this: LoaderContext<Record<string, unknown>>, rem
         );
 
         const result = [
-          pageTemplate(`${this.resource}?hasBoundary`)
+          pageTemplate(`${relativeResource}?hasBoundary`)
         ];
 
         if(hasGIP) {
