@@ -2,6 +2,16 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.0.3](https://github.com/module-federation/nextjs-mf/compare/typescript-2.0.2...typescript-2.0.3) (2022-12-20)
+
+
+### Bug Fixes
+
+* Typescript - Allow custom remote filename ([#413](https://github.com/module-federation/nextjs-mf/issues/413)) ([7eda5d8](https://github.com/module-federation/nextjs-mf/commit/7eda5d8172a6e77ff4a8db13b6ec4d7c88003840))
+* **typescript:** set noEmit: false when compiling types ([#416](https://github.com/module-federation/nextjs-mf/issues/416)) ([ec420d8](https://github.com/module-federation/nextjs-mf/commit/ec420d83b5ce5bc62b4245310510a6024cf718e9))
+
+
+
 ## [2.0.2](https://github.com/module-federation/nextjs-mf/compare/typescript-2.0.1...typescript-2.0.2) (2022-12-18)
 
 
