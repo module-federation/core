@@ -24,7 +24,6 @@ export const normalizeOptions = (
     'dist';
 
   const distDir = path.join(distPath, typescriptFolderName);
-  const typesIndexJsonFilePath = path.join(distDir, TYPES_INDEX_JSON_FILE_NAME);
 
   const tsCompilerOptions: ts.CompilerOptions = {
     declaration: true,
@@ -42,19 +41,11 @@ export const normalizeOptions = (
         : webpackPublicPath
       : '';
 
-  const remoteEntryFilename = options.federationConfig.filename;
-
-  const typesStatsFileName = remoteEntryFilename
-    ? remoteEntryFilename.replace('remoteEntry.js', TYPES_INDEX_JSON_FILE_NAME)
-    : TYPES_INDEX_JSON_FILE_NAME;
-
   return {
     distDir,
     publicPath,
     tsCompilerOptions,
     typesIndexJsonFileName: TYPES_INDEX_JSON_FILE_NAME,
-    typesIndexJsonFilePath,
-    typesStatsFileName,
     typescriptFolderName,
     webpackCompilerOptions,
   };

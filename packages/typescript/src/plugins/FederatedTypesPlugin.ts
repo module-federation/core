@@ -119,11 +119,10 @@ export class FederatedTypesPlugin {
     const compiler = new TypescriptCompiler(this.normalizeOptions);
 
     try {
-      const filesMap = compiler.generateDeclarationFiles(
+      return compiler.generateDeclarationFiles(
         exposedComponents,
         this.options.additionalFilesToCompile
       );
-      return filesMap;
     } catch (error) {
       this.logger.error(error);
       throw error;
@@ -160,7 +159,7 @@ export class FederatedTypesPlugin {
       try {
         this.logger.log(`Getting types index for remote '${remote}'`);
         const resp = await axios.get<TypesStatsJson>(
-          `${origin}/${this.normalizeOptions.typesStatsFileName}`
+          `${origin}/${this.normalizeOptions.typesIndexJsonFileName}`
         );
 
         const statsJson = resp.data;
