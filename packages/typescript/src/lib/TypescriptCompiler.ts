@@ -158,15 +158,25 @@ export class TypescriptCompiler {
   private getTSConfigCompilerOptions(): ts.CompilerOptions {
     const context = this.options.webpackCompilerOptions.context!;
 
-    const tsconfigPath = path.resolve(context, 'tsconfig.json');
+    const tsconfigPath = ts.findConfigFile(
+      context,
+      ts.sys.fileExists,
+      'tsconfig.json'
+    );
 
     if (!tsconfigPath) {
       this.logger.error('ERROR: Could not find a valid tsconfig.json');
       process.exit(1);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    return require(tsconfigPath).compilerOptions;
+    const readResult = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
+    const configContent = ts.parseJsonConfigFileContent(
+      readResult.config,
+      ts.sys,
+      context
+    );
+
+    return configContent.options;
   }
 
   private getFilenameWithExtension(rootDir: string, entry: string) {

@@ -29,6 +29,7 @@ export const normalizeOptions = (
     declaration: true,
     emitDeclarationOnly: true,
     outDir: path.join(distDir, '/'),
+    noEmit: false,
   };
 
   const webpackPublicPath = webpackCompilerOptions.output.publicPath;
