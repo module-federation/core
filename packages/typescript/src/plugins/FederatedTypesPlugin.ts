@@ -67,12 +67,12 @@ export class FederatedTypesPlugin {
     const ignoredWatchOptions = watchOptions.ignored;
 
     const watchOptionsToIgnore = [
-      path.join(
+      path.normalize(path.join(
         context as string,
         this.normalizeOptions.typescriptFolderName,
         '**',
         '*'
-      ),
+      )),
     ];
 
     compiler.options.watchOptions.ignored = Array.isArray(ignoredWatchOptions)
