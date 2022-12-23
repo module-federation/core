@@ -262,8 +262,8 @@ export class ChildFederationPlugin {
 
       if (isDev) {
         const compilerWithCallback = (watchOptions: WatchOptions, callback: any) => {
-          if (childCompiler.watch) {
-            if (isServer && !this.watching) {
+          if (childCompiler.watch && isServer) {
+            if (!this.watching) {
               this.watching = true;
               childCompiler.watch(watchOptions, callback);
             }
