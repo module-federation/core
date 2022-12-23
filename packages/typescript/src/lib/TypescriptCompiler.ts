@@ -44,7 +44,7 @@ export class TypescriptCompiler {
 
     const normalizedAdditionalFiles = this.normalizeFiles(
       additionalFilesToCompile,
-      this.getNormalizedPathWithExt
+      this.getNormalizedPathWithExt.bind(this)
     );
 
     const host = this.createHost(exposeSrcToDestMap);
@@ -61,7 +61,7 @@ export class TypescriptCompiler {
       return this.tsDefinitionFilesObj;
     }
 
-    diagnostics.forEach(this.reportCompileDiagnostic);
+    diagnostics.forEach(this.reportCompileDiagnostic.bind(this));
 
     throw new Error('something went wrong generating declaration files');
   }
