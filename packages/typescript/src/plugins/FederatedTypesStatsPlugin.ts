@@ -3,6 +3,7 @@ import { generateTypesStats } from '../lib/generateTypesStats';
 
 import { NormalizeOptions } from '../lib/normalizeOptions';
 import { CompilationParams, TypesStatsJson } from '../types';
+import path from 'path';
 
 const PLUGIN_NAME = 'FederatedTypesStatsPlugin';
 
@@ -21,6 +22,11 @@ export class FederatedTypesStatsPlugin {
         async () => {
           const { typesIndexJsonFileName, publicPath } = this.options;
 
+          const typesIndexJsonFilePath = path.join(
+            this.options.typesIndexJsonFilePath,
+            typesIndexJsonFileName
+          );
+
           const statsJson: TypesStatsJson = {
             publicPath,
             files: generateTypesStats(federatedTypesMap, this.options),
@@ -28,12 +34,12 @@ export class FederatedTypesStatsPlugin {
 
           const source = new sources.RawSource(JSON.stringify(statsJson));
 
-          const asset = compilation.getAsset(typesIndexJsonFileName);
+          const asset = compilation.getAsset(typesIndexJsonFilePath);
 
           if (asset) {
-            compilation.updateAsset(typesIndexJsonFileName, source);
+            compilation.updateAsset(typesIndexJsonFilePath, source);
           } else {
-            compilation.emitAsset(typesIndexJsonFileName, source);
+            compilation.emitAsset(typesIndexJsonFilePath, source);
           }
         }
       );
