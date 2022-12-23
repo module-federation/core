@@ -2,6 +2,22 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [5.12.12](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.12.11...nextjs-mf-5.12.12) (2022-12-20)
+
+
+### Bug Fixes
+
+* **async-boundary-loader:** use relativeResource instead of this.resouce ([#421](https://github.com/module-federation/nextjs-mf/issues/421)) ([e1f4402](https://github.com/module-federation/nextjs-mf/commit/e1f4402a9c77709a4d3cd0ae87a28b961e1483d3))
+
+
+
+## [5.12.11](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.12.10...nextjs-mf-5.12.11) (2022-12-18)
+
+### Dependency Updates
+
+* `node` updated to version `0.9.7`
+
+
 ## [5.12.10](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.12.9...nextjs-mf-5.12.10) (2022-11-23)
 
 
