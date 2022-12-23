@@ -29,6 +29,11 @@ export const normalizeOptions = (
     federationFileName.lastIndexOf('/')
   );
 
+  const typesIndexJsonFilePath = path.join(
+    typesPath,
+    TYPES_INDEX_JSON_FILE_NAME
+  );
+
   const distDir = path.join(distPath, typesPath, typescriptFolderName);
 
   const tsCompilerOptions: ts.CompilerOptions = {
@@ -52,7 +57,7 @@ export const normalizeOptions = (
     publicPath,
     tsCompilerOptions,
     typesIndexJsonFileName: TYPES_INDEX_JSON_FILE_NAME,
-    typesIndexJsonFilePath: typesPath,
+    typesIndexJsonFilePath,
     typescriptFolderName,
     webpackCompilerOptions,
   };

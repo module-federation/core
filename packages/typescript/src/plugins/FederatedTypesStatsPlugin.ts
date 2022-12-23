@@ -20,12 +20,7 @@ export class FederatedTypesStatsPlugin {
           stage: Compilation.PROCESS_ASSETS_STAGE_ANALYSE,
         },
         async () => {
-          const { typesIndexJsonFileName, publicPath } = this.options;
-
-          const typesIndexJsonFilePath = path.join(
-            this.options.typesIndexJsonFilePath,
-            typesIndexJsonFileName
-          );
+          const { typesIndexJsonFilePath, publicPath } = this.options;
 
           const statsJson: TypesStatsJson = {
             publicPath,
