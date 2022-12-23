@@ -39,7 +39,7 @@ export const normalizeOptions = (
   const tsCompilerOptions: ts.CompilerOptions = {
     declaration: true,
     emitDeclarationOnly: true,
-    outDir: path.join(distDir, '/'),
+    outDir: path.join(distDir, '/_compiled/'),
     noEmit: false,
   };
 

@@ -93,17 +93,6 @@ export class TypescriptCompiler {
 
     const originalWriteFile = host.writeFile;
 
-    const rewritePathsWithExposedFederatedModules = (
-      sourceFilename: string
-    ) => {
-      const destFile = exposeSrcToDestMap[sourceFilename];
-
-      return (
-        destFile &&
-        path.join(this.compilerOptions.outDir as string, `${destFile}.d.ts`)
-      );
-    };
-
     host.writeFile = (
       filepath,
       text,
@@ -112,26 +101,49 @@ export class TypescriptCompiler {
       sourceFiles,
       data
     ) => {
-      // for exposes: { "./expose/path": "path/to/file" }
-      // force typescript to write compiled output to "@mf-typescript/expose/path"
-      const sourceFilename = sourceFiles?.[0].fileName || '';
+      // todo update comments, test cases for exposes, for files compiled as a result of imports, and additionalFilesToCompile
+      // todo additional files to compile should be invluded in expose src to dest so that we can also
+      // create a reexport file for them
 
-      // Try to rewrite the path with exposed federated modules,
-      // failing so, use the default filepath emitted by TS Compiler.
-      // This second case is valid for 'additionalFileToCompiler' added through Plugin Options.
-      const normalizedFilepath =
-        rewritePathsWithExposedFederatedModules(sourceFilename) ?? filepath;
-
-      this.tsDefinitionFilesObj[normalizedFilepath] = text;
-
+      this.tsDefinitionFilesObj[filepath] = text;
       originalWriteFile(
-        normalizedFilepath,
+        filepath,
         text,
         writeOrderByteMark,
         onError,
         sourceFiles,
         data
       );
+
+      // write the true imports
+      const sourceFilename = sourceFiles?.[0].fileName || '';
+      const exposedDestFilePath = exposeSrcToDestMap[sourceFilename];
+
+      // create reexport file if the file was marked for exposing
+      if (exposedDestFilePath) {
+        // Try to rewrite the path with exposed federated modules,
+        // failing so, use the default filepath emitted by TS Compiler.
+        // This second case is valid for 'additionalFileToCompiler' added through Plugin Options.
+        const normalizedExposedDestFilePath = path.join(
+          this.options.distDir,
+          `${exposedDestFilePath}.d.ts`
+        );
+
+        const relativePathToCompiledFile =
+          './' +
+          path
+            .relative(
+              path.join(normalizedExposedDestFilePath, '../'), // import relative to the folder which contains this file
+              filepath
+            )
+            .replace(/\.d\.ts$/, '');
+        const reexport = `export * from '${relativePathToCompiledFile}';\nexport { default } from '${relativePathToCompiledFile}';`;
+        originalWriteFile(
+          normalizedExposedDestFilePath,
+          reexport,
+          writeOrderByteMark
+        );
+      }
     };
 
     return host;
