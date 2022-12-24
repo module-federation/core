@@ -10,7 +10,10 @@
         "outputPath": "dist/packages/webpack-graph-ql",
         "main": "packages/webpack-graph-ql/src/index.ts",
         "tsConfig": "packages/webpack-graph-ql/tsconfig.lib.json",
-        "assets": ["packages/webpack-graph-ql/*.md"]
+        "assets": [
+          "packages/webpack-graph-ql/*.md",
+          "packages/webpack-graph-ql/*/*.json"
+        ]
       }
     },
     "lint": {

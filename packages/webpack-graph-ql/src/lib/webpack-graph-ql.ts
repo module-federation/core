@@ -16,15 +16,9 @@ query {
       optional
       prefetched
       chunkIds
-      chunks
-      issuer
       issuerId
       issuerName
-      profile
       failed
-      errors
-      warnings
-      reasons
       usedExports
       providedExports
       depth

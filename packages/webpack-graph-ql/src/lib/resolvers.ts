@@ -11,7 +11,7 @@ const Query = {
   stats: (parent:any, args:any, context:any) => {
     // Read and parse the stats file
     const statsObject = getStatsObject(context.statsFile);
-
+console.log(statsObject);
     // Return the stats object
     return statsObject;
   },
