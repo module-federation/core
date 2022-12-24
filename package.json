@@ -73,7 +73,7 @@
     "commitizen": "^4.2.5",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "~8.30.0",
-    "eslint-config-next": "12.2.5",
+    "eslint-config-next": "13.1.1",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-jsx-a11y": "6.6.1",
