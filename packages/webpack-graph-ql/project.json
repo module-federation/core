@@ -1,0 +1,33 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/webpack-graph-ql/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/webpack-graph-ql",
+        "main": "packages/webpack-graph-ql/src/index.ts",
+        "tsConfig": "packages/webpack-graph-ql/tsconfig.lib.json",
+        "assets": ["packages/webpack-graph-ql/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/webpack-graph-ql/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/webpack-graph-ql"],
+      "options": {
+        "jestConfig": "packages/webpack-graph-ql/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

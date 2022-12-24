@@ -10,6 +10,7 @@
     "react-ts-host": "apps/react-ts-host",
     "react-ts-remote": "apps/react-ts-remote",
     "typescript": "packages/typescript",
-    "utils": "packages/utilities"
+    "utils": "packages/utilities",
+    "webpack-graph-ql": "packages/webpack-graph-ql"
   }
 }

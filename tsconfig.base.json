@@ -19,7 +19,10 @@
       "@module-federation/nextjs-mf": ["packages/nextjs-mf/src/index.ts"],
       "@module-federation/node": ["packages/node/src/index.ts"],
       "@module-federation/typescript": ["packages/typescript/src/index.ts"],
-      "@module-federation/utilities": ["packages/utilities/src/index.ts"]
+      "@module-federation/utilities": ["packages/utilities/src/index.ts"],
+      "@module-federation/webpack-graph-ql": [
+        "packages/webpack-graph-ql/src/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]
