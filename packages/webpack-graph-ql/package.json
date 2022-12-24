@@ -1,5 +1,12 @@
 {
   "name": "@module-federation/webpack-graph-ql",
   "version": "0.0.1",
-  "type": "commonjs"
+  "type": "commonjs",
+  "files": [
+    "src/RAW_GRAPH_DATA.json"
+  ],
+
+  "devDependencies": {
+    "@types/node": "^18.11.17"
+  }
 }

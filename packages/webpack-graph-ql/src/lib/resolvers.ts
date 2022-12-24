@@ -1,14 +1,14 @@
 const fs = require('fs');
 
 // A helper function to read and parse the stats file
-function getStatsObject(statsFile) {
+function getStatsObject(statsFile:any) {
   const stats = fs.readFileSync(statsFile, 'utf8');
   return JSON.parse(stats);
 }
 
 // The root query resolver
 const Query = {
-  stats: (parent, args, context) => {
+  stats: (parent:any, args:any, context:any) => {
     // Read and parse the stats file
     const statsObject = getStatsObject(context.statsFile);
 
@@ -19,186 +19,187 @@ const Query = {
 
 // Resolvers for the "assets" field
 const Assets = {
-  name: (parent) => parent.name,
-  size: (parent) => parent.size,
-  chunkNames: (parent) => parent.chunkNames,
+  name: (parent: any) => parent.name,
+  size: (parent: any) => parent.size,
+  chunkNames: (parent: any) => parent.chunkNames,
 };
 
 // Resolvers for the "chunks" field
 const Chunks = {
-  id: (parent) => parent.id,
-  names: (parent) => parent.names,
-  modules: (parent) => parent.modules,
-  origins: (parent) => parent.origins,
+  id: (parent: any) => parent.id,
+  names: (parent: any) => parent.names,
+  modules: (parent: any) => parent.modules,
+  origins: (parent: any) => parent.origins,
 };
 
 // Resolvers for the "module" field
 const Module = {
-  id: (parent) => parent.id,
-  identifier: (parent) => parent.identifier,
-  name: (parent) => parent.name,
-  size: (parent) => parent.size,
-  cacheable: (parent) => parent.cacheable,
-  built: (parent) => parent.built,
-  optional: (parent) => parent.optional,
-  prefetched: (parent) => parent.prefetched,
-  chunkIds: (parent) => parent.chunkIds,
-  chunks: (parent) => parent.chunks,
-  issuer: (parent) => parent.issuer,
-  issuerId: (parent) => parent.issuerId,
-  issuerName: (parent) => parent.issuerName,
-  profile: (parent) => parent.profile,
-  failed: (parent) => parent.failed,
-  errors: (parent) => parent.errors,
-  warnings: (parent) => parent.warnings,
-  reasons: (parent) => parent.reasons,
-  usedExports: (parent) => parent.usedExports,
-  providedExports: (parent) => parent.providedExports,
-  depth: (parent) => parent.depth,
-  source: (parent) => parent.source,
-  index: (parent) => parent.index,
+  id: (parent: any) => parent.id,
+  identifier: (parent: any) => parent.identifier,
+  name: (parent: any) => parent.name,
+  size: (parent: any) => parent.size,
+  cacheable: (parent: any) => parent.cacheable,
+  built: (parent: any) => parent.built,
+  optional: (parent: any) => parent.optional,
+  prefetched: (parent: any) => parent.prefetched,
+  chunkIds: (parent: any) => parent.chunkIds,
+  chunks: (parent: any) => parent.chunks,
+  issuer: (parent: any) => parent.issuer,
+  issuerId: (parent: any) => parent.issuerId,
+  issuerName: (parent: any) => parent.issuerName,
+  profile: (parent: any) => parent.profile,
+  failed: (parent: any) => parent.failed,
+  errors: (parent: any) => parent.errors,
+  warnings: (parent: any) => parent.warnings,
+  reasons: (parent: any) => parent.reasons,
+  usedExports: (parent: any) => parent.usedExports,
+  providedExports: (parent: any) => parent.providedExports,
+  depth: (parent: any) => parent.depth,
+  source: (parent: any) => parent.source,
+  index: (parent: any) => parent.index,
 };
 
 // Resolvers for the "origin" field
 const Origin = {
-  moduleId: (parent) => parent.moduleId,
-  module: (parent, args, context) => {
+  moduleId: (parent: any) => parent.moduleId,
+  module: (parent:any, args:any, context:any) => {
     // Get the module with the specified ID from the stats object
     const statsObject = getStatsObject(context.statsFile);
-    const module = statsObject.modules.find((m) => m.id === parent.moduleId);
+    const module = statsObject.modules.find((m:any) => m.id === parent.moduleId);
     return module;
   },
-  moduleIdentifier: (parent) => parent.moduleIdentifier,
-  moduleName: (parent) => parent.moduleName,
-  loc: (parent) => parent.loc,
-  name: (parent) => parent.name,
+  moduleIdentifier: (parent: any) => parent.moduleIdentifier,
+  moduleName: (parent: any) => parent.moduleName,
+  loc: (parent: any) => parent.loc,
+  name: (parent: any) => parent.name,
 };
 // Resolvers for the "error" field
 const Error = {
-  message: (parent) => parent.message,
-  moduleId: (parent) => parent.moduleId,
-  module: (parent, args, context) => {
+  message: (parent: any) => parent.message,
+  moduleId: (parent: any) => parent.moduleId,
+  module: (parent:any, args:any, context:any) => {
     // Get the module with the specified ID from the stats object
     const statsObject = getStatsObject(context.statsFile);
-    const module = statsObject.modules.find((m) => m.id === parent.moduleId);
+    const module = statsObject.modules.find((m:any) => m.id === parent.moduleId);
     return module;
   },
-  moduleIdentifier: (parent) => parent.moduleIdentifier,
-  moduleName: (parent) => parent.moduleName,
-  loc: (parent) => parent.loc,
-  name: (parent) => parent.name,
-  error: (parent) => parent.error,
+  moduleIdentifier: (parent: any) => parent.moduleIdentifier,
+  moduleName: (parent: any) => parent.moduleName,
+  loc: (parent: any) => parent.loc,
+  name: (parent: any) => parent.name,
+  error: (parent: any) => parent.error,
 };
 
 // Resolvers for the "warning" field
 const Warning = {
-  message: (parent) => parent.message,
-  moduleId: (parent) => parent.moduleId,
-  module: (parent, args, context) => {
+  message: (parent: any) => parent.message,
+  moduleId: (parent: any) => parent.moduleId,
+  module: (parent: any, args: any, context: any) => {
     // Get the module with the specified ID from the stats object
     const statsObject = getStatsObject(context.statsFile);
-    const module = statsObject.modules.find((m) => m.id === parent.moduleId);
+    const module = statsObject.modules.find((m:any) => m.id === parent.moduleId);
     return module;
   },
-  moduleIdentifier: (parent) => parent.moduleIdentifier,
-  moduleName: (parent) => parent.moduleName,
-  loc: (parent) => parent.loc,
-  name: (parent) => parent.name,
-  warning: (parent) => parent.warning,
+  moduleIdentifier: (parent: any) => parent.moduleIdentifier,
+  moduleName: (parent: any) => parent.moduleName,
+  loc: (parent: any) => parent.loc,
+  name: (parent: any) => parent.name,
+  warning: (parent: any) => parent.warning,
 };
+
 
 // Resolvers for the "reason" field
 const Reason = {
-  moduleId: (parent) => parent.moduleId,
-  module: (parent, args, context) => {
+  moduleId: (parent: any) => parent.moduleId,
+  module: (parent:any, args:any, context:any) => {
     // Get the module with the specified ID from the stats object
     const statsObject = getStatsObject(context.statsFile);
-    const module = statsObject.modules.find((m) => m.id === parent.moduleId);
+    const module = statsObject.modules.find((m:any) => m.id === parent.moduleId);
     return module;
   },
-  moduleIdentifier: (parent) => parent.moduleIdentifier,
-  moduleName: (parent) => parent.moduleName,
-  loc: (parent) => parent.loc,
-  name: (parent) => parent.name,
-  reason: (parent) => parent.reason,
+  moduleIdentifier: (parent: any) => parent.moduleIdentifier,
+  moduleName: (parent: any) => parent.moduleName,
+  loc: (parent: any) => parent.loc,
+  name: (parent: any) => parent.name,
+  reason: (parent: any) => parent.reason,
 };
 
 // Resolvers for the "dependency" field
 const Dependency = {
-  moduleId: (parent) => parent.moduleId,
-  module: (parent, args, context) => {
+  moduleId: (parent: any) => parent.moduleId,
+  module: (parent: any, args: any, context: any) => {
     // Get the module with the specified ID from the stats object
     const statsObject = getStatsObject(context.statsFile);
-    const module = statsObject.modules.find((m) => m.id === parent.moduleId);
+    const module = statsObject.modules.find((m: any) => m.id === parent.moduleId);
     return module;
   },
-  moduleIdentifier: (parent) => parent.moduleIdentifier,
-  moduleName: (parent) => parent.moduleName,
-  loc: (parent) => parent.loc,
-  name: (parent) => parent.name,
-  dependency: (parent) => parent.dependency,
+  moduleIdentifier: (parent: any) => parent.moduleIdentifier,
+  moduleName: (parent: any) => parent.moduleName,
+  loc: (parent: any) => parent.loc,
+  name: (parent: any) => parent.name,
+  dependency: (parent: any) => parent.dependency,
 };
 
 // Resolvers for the "children" field
 const Children = {
-  id: (parent) => parent.id,
-  identifier: (parent) => parent.identifier,
-  name: (parent) => parent.name,
-  size: (parent) => parent.size,
-  cacheable: (parent) => parent.cacheable,
-  built: (parent) => parent.built,
-  optional: (parent) => parent.optional,
-  prefetched: (parent) => parent.prefetched,
-  chunkIds: (parent) => parent.chunkIds,
-  chunks: (parent) => parent.chunks,
-  issuer: (parent) => parent.issuer,
-  issuerId: (parent) => parent.issuerId,
-  issuerName: (parent) => parent.issuerName,
-  profile: (parent) => parent.profile,
-  failed: (parent) => parent.failed,
-  errors: (parent) => parent.errors,
-  warnings: (parent) => parent.warnings,
-  reasons: (parent) => parent.reasons,
-  usedExports: (parent) => parent.usedExports,
-  providedExports: (parent) => parent.providedExports,
-  depth: (parent) => parent.depth,
-  source: (parent) => parent.source,
-  index: (parent) => parent.index,
+  id: (parent: any) => parent.id,
+  identifier: (parent: any) => parent.identifier,
+  name: (parent: any) => parent.name,
+  size: (parent: any) => parent.size,
+  cacheable: (parent: any) => parent.cacheable,
+  built: (parent: any) => parent.built,
+  optional: (parent: any) => parent.optional,
+  prefetched: (parent: any) => parent.prefetched,
+  chunkIds: (parent: any) => parent.chunkIds,
+  chunks: (parent: any) => parent.chunks,
+  issuer: (parent: any) => parent.issuer,
+  issuerId: (parent: any) => parent.issuerId,
+  issuerName: (parent: any) => parent.issuerName,
+  profile: (parent: any) => parent.profile,
+  failed: (parent: any) => parent.failed,
+  errors: (parent: any) => parent.errors,
+  warnings: (parent: any) => parent.warnings,
+  reasons: (parent: any) => parent.reasons,
+  usedExports: (parent: any) => parent.usedExports,
+  providedExports: (parent: any) => parent.providedExports,
+  depth: (parent: any) => parent.depth,
+  source: (parent: any) => parent.source,
+  index: (parent: any) => parent.index,
 };
 
 
 
 // Resolvers for the "issuer" field
 const Issuer = {
-  id: (parent) => parent.id,
-  identifier: (parent) => parent.identifier,
-  name: (parent) => parent.name,
-  size: (parent) => parent.size,
-  cacheable: (parent) => parent.cacheable,
-  built: (parent) => parent.built,
-  optional: (parent) => parent.optional,
-  prefetched: (parent) => parent.prefetched,
-  chunkIds: (parent) => parent.chunkIds,
-  chunks: (parent) => parent.chunks,
-  issuer: (parent) => parent.issuer,
-  issuerId: (parent) => parent.issuerId,
-  issuerName: (parent) => parent.issuerName,
-  profile: (parent) => parent.profile,
-  failed: (parent) => parent.failed,
-  errors: (parent) => parent.errors,
-  warnings: (parent) => parent.warnings,
-  reasons: (parent) => parent.reasons,
-  usedExports: (parent) => parent.usedExports,
-  providedExports: (parent) => parent.providedExports,
-  depth: (parent) => parent.depth,
-  source: (parent) => parent.source,
-  index: (parent) => parent.index,
+  id: (parent: any) => parent.id,
+  identifier: (parent: any) => parent.identifier,
+  name: (parent: any) => parent.name,
+  size: (parent: any) => parent.size,
+  cacheable: (parent: any) => parent.cacheable,
+  built: (parent: any) => parent.built,
+  optional: (parent: any) => parent.optional,
+  prefetched: (parent: any) => parent.prefetched,
+  chunkIds: (parent: any) => parent.chunkIds,
+  chunks: (parent: any) => parent.chunks,
+  issuer: (parent: any) => parent.issuer,
+  issuerId: (parent: any) => parent.issuerId,
+  issuerName: (parent: any) => parent.issuerName,
+  profile: (parent: any) => parent.profile,
+  failed: (parent: any) => parent.failed,
+  errors: (parent: any) => parent.errors,
+  warnings: (parent: any) => parent.warnings,
+  reasons: (parent: any) => parent.reasons,
+  usedExports: (parent: any) => parent.usedExports,
+  providedExports: (parent: any) => parent.providedExports,
+  depth: (parent: any) => parent.depth,
+  source: (parent: any) => parent.source,
+  index: (parent: any) => parent.index,
 };
 
 
 
 // The resolver map
-const resolvers = {
+export default {
   Query,
   Assets,
   Chunks,

@@ -1,27 +1,48 @@
-import graphql from 'graphql';
+import {graphql, GraphQLArgs,buildSchema} from 'graphql';
 import resolvers from './resolvers';
+import schema from './schema';
+import path from 'path';
 
 const query = `
-  query {
-    stats {
-      assets {
-        name
-        size
-      }
-      chunks {
-        ids
-        names
-      }
+query {
+  stats {
+    modules {
+      id
+      identifier
+      name
+      size
+      cacheable
+      built
+      optional
+      prefetched
+      chunkIds
+      chunks
+      issuer
+      issuerId
+      issuerName
+      profile
+      failed
+      errors
+      warnings
+      reasons
+      usedExports
+      providedExports
+      depth
+      source
+      index
     }
   }
+}
+
 `;
 
-
-export function webpackGraphQl(): string {
-  return graphql(resolvers, query, null, { statsFile: 'path/to/stats.json' }).then((result) => {
-    console.log(result);
-  });
+function runquery (str: string) {
+  return graphql({schema:buildSchema(schema), rootValue: resolvers, source: str, contextValue: {statsFile: path.resolve(__dirname, 'stats.json')}});
 }
+
+runquery(query).then(data => {
+  console.log(data);
+})
 
 
 //example query
