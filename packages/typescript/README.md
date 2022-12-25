@@ -59,12 +59,15 @@ To have the type definitions automatically found for imports, add `paths` in `ts
 ```json
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "paths": {
       "*": ["./@mf-types/*"]
     }
   }
 }
 ```
+
+`baseUrl` must also be set for `paths` to work properly
 
 ## Plugin Options
 
