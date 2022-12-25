@@ -101,10 +101,6 @@ export class TypescriptCompiler {
       sourceFiles,
       data
     ) => {
-      // todo update comments, test cases for exposes, for files compiled as a result of imports, and additionalFilesToCompile
-      // todo additional files to compile should be invluded in expose src to dest so that we can also
-      // create a reexport file for them
-
       this.tsDefinitionFilesObj[filepath] = text;
       originalWriteFile(
         filepath,
@@ -115,15 +111,12 @@ export class TypescriptCompiler {
         data
       );
 
-      // write the true imports
+      // create exports matching the `exposes` config
       const sourceFilename = sourceFiles?.[0].fileName || '';
       const exposedDestFilePath = exposeSrcToDestMap[sourceFilename];
 
-      // create reexport file if the file was marked for exposing
+      // create reexport file only if the file was marked for exposing
       if (exposedDestFilePath) {
-        // Try to rewrite the path with exposed federated modules,
-        // failing so, use the default filepath emitted by TS Compiler.
-        // This second case is valid for 'additionalFileToCompiler' added through Plugin Options.
         const normalizedExposedDestFilePath = path.join(
           this.options.distDir,
           `${exposedDestFilePath}.d.ts`
@@ -137,7 +130,9 @@ export class TypescriptCompiler {
               filepath
             )
             .replace(/\.d\.ts$/, '');
+
         const reexport = `export * from '${relativePathToCompiledFile}';\nexport { default } from '${relativePathToCompiledFile}';`;
+        // reuse originalWriteFile as it creates folders if they don't exist
         originalWriteFile(
           normalizedExposedDestFilePath,
           reexport,

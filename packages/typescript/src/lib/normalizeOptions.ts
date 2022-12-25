@@ -4,6 +4,7 @@ import get from 'lodash.get';
 import path from 'path';
 
 import {
+  TYPESCRIPT_COMPILED_FOLDER_NAME,
   TYPESCRIPT_FOLDER_NAME,
   TYPES_INDEX_JSON_FILE_NAME,
 } from '../constants';
@@ -15,7 +16,10 @@ export const normalizeOptions = (
   options: FederatedTypesPluginOptions,
   compiler: Compiler
 ) => {
-  const { typescriptFolderName = TYPESCRIPT_FOLDER_NAME } = options;
+  const {
+    typescriptFolderName = TYPESCRIPT_FOLDER_NAME,
+    typescriptCompiledFolderName = TYPESCRIPT_COMPILED_FOLDER_NAME,
+  } = options;
   const webpackCompilerOptions = compiler.options;
 
   const distPath =
@@ -39,7 +43,7 @@ export const normalizeOptions = (
   const tsCompilerOptions: ts.CompilerOptions = {
     declaration: true,
     emitDeclarationOnly: true,
-    outDir: path.join(distDir, '/_compiled/'),
+    outDir: path.join(distDir, `/${typescriptCompiledFolderName}/`),
     noEmit: false,
   };
 
