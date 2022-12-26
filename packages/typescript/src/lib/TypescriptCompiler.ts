@@ -122,16 +122,14 @@ export class TypescriptCompiler {
           `${exposedDestFilePath}.d.ts`
         );
 
-        const relativePathToCompiledFile =
-          './' +
-          path
-            .relative(
-              path.join(normalizedExposedDestFilePath, '../'), // import relative to the folder which contains this file
-              filepath
-            )
-            .replace(/\.d\.ts$/, '');
-
-        const reexport = `export * from '${relativePathToCompiledFile}';\nexport { default } from '${relativePathToCompiledFile}';`;
+        const relativePathToCompiledFile = path.relative(
+          path.dirname(normalizedExposedDestFilePath),
+          filepath
+        );
+        // add ./ so it's always relative, remove d.ts because it's not needed and can throw warnings
+        const importPath =
+          './' + relativePathToCompiledFile.replace(/\.d\.ts$/, '');
+        const reexport = `export * from '${importPath}';\nexport { default } from '${importPath}';`;
         // reuse originalWriteFile as it creates folders if they don't exist
         originalWriteFile(
           normalizedExposedDestFilePath,
