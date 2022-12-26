@@ -1,4 +1,4 @@
-import type { WebpackRequire, WebpackShareScopes } from '../types/index';
+import type { WebpackRequire, WebpackShareScopes } from '../types';
 
 export interface ImportRemoteOptions {
   url: string;
