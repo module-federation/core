@@ -117,7 +117,7 @@ export class TypescriptCompiler {
 
       // create reexport file only if the file was marked for exposing
       if (exposedDestFilePath) {
-        const normalizedExposedDestFilePath = path.join(
+        const normalizedExposedDestFilePath = path.resolve(
           this.options.distDir,
           `${exposedDestFilePath}.d.ts`
         );
