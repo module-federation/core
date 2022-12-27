@@ -6,8 +6,8 @@ require('next/router');
 require('next/head');
 require('next/script');
 require('next/dynamic');
-require('styled-jsx');
-require('styled-jsx/style');
+const styledJsx = ()=>import("styled-jsx");
+const styledStyle = ()=>import('styled-jsx/style');
 
 if (process.env['NODE_ENV'] === 'development') {
   require('react/jsx-dev-runtime');
