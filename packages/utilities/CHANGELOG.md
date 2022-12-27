@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.0.3](https://github.com/module-federation/nextjs-mf/compare/utils-1.0.2...utils-1.0.3) (2022-12-27)
+
+
+### Bug Fixes
+
+* bad references to webpack globals ([#458](https://github.com/module-federation/nextjs-mf/issues/458)) ([8ef224b](https://github.com/module-federation/nextjs-mf/commit/8ef224bd08f1e39475cac3795f09debae50bbc0f))
+
+
+
 ## [1.0.2](https://github.com/module-federation/nextjs-mf/compare/utils-1.0.1...utils-1.0.2) (2022-12-27)
 
 
