@@ -2,6 +2,24 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [2.1.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.0.3...typescript-2.1.0) (2022-12-27)
+
+### Dependency Updates
+
+* `utils` updated to version `1.0.2`
+
+### Bug Fixes
+
+* **typescript:** nextJs host can't resolve Types index file ([#449](https://github.com/module-federation/nextjs-mf/issues/449)) ([116690e](https://github.com/module-federation/nextjs-mf/commit/116690eafeadbdd3ca8ebeb46288cd3d964a0362)), closes [#435](https://github.com/module-federation/nextjs-mf/issues/435)
+* **typescript:** typescript compiler is losing `this` reference ([#452](https://github.com/module-federation/nextjs-mf/issues/452)) ([a4b437a](https://github.com/module-federation/nextjs-mf/commit/a4b437a4402db95f9da5871e53e9cd3b686761d8)), closes [#432](https://github.com/module-federation/nextjs-mf/issues/432)
+
+
+### Features
+
+* normalize paths for watch options ([#441](https://github.com/module-federation/nextjs-mf/issues/441)) ([be191e1](https://github.com/module-federation/nextjs-mf/commit/be191e160c370d282a72b81343340f7df59b0a4c)), closes [#394](https://github.com/module-federation/nextjs-mf/issues/394)
+
+
+
 ## [2.0.3](https://github.com/module-federation/nextjs-mf/compare/typescript-2.0.2...typescript-2.0.3) (2022-12-20)
 
 
