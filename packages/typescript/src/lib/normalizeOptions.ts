@@ -22,8 +22,19 @@ export const normalizeOptions = (
     get(webpackCompilerOptions, 'devServer.static.directory') ||
     get(webpackCompilerOptions, 'output.path') ||
     'dist';
+  const federationFileName = options.federationConfig.filename as string;
 
-  const distDir = path.join(distPath, typescriptFolderName);
+  const typesPath = federationFileName.substring(
+    0,
+    federationFileName.lastIndexOf('/')
+  );
+
+  const typesIndexJsonFilePath = path.join(
+    typesPath,
+    TYPES_INDEX_JSON_FILE_NAME
+  );
+
+  const distDir = path.join(distPath, typesPath, typescriptFolderName);
 
   const tsCompilerOptions: ts.CompilerOptions = {
     declaration: true,
@@ -46,6 +57,7 @@ export const normalizeOptions = (
     publicPath,
     tsCompilerOptions,
     typesIndexJsonFileName: TYPES_INDEX_JSON_FILE_NAME,
+    typesIndexJsonFilePath,
     typescriptFolderName,
     webpackCompilerOptions,
   };
