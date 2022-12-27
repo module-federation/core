@@ -100,7 +100,11 @@ importRemote({
 
 // If Bar is a React component you can use it with lazy and Suspense just like a dynamic import:
 const Bar = lazy(() =>
-  importRemote({ url: 'http://localhost:3001', scope: 'Foo', module: 'Bar' })
+  importRemote({
+    url: () => MyAsyncMethod('remote_name'),
+    scope: 'Foo',
+    module: 'Bar',
+  })
 );
 
 return (
