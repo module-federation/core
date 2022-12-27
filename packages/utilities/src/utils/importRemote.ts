@@ -1,7 +1,9 @@
 import type { WebpackRequire, WebpackShareScopes } from '../types';
 
+type RemoteUrl = string | (() => Promise<string>);
+
 export interface ImportRemoteOptions {
-  url: string;
+  url: RemoteUrl;
   scope: string;
   module: string;
   remoteEntryFileName?: string;
@@ -70,9 +72,21 @@ export const importRemote = async <T>({
   bustRemoteEntryCache = true,
 }: ImportRemoteOptions): Promise<T> => {
   if (!window[scope]) {
+    let remoteUrl = '';
+
+    if (typeof url === 'string') {
+      remoteUrl = url;
+    } else {
+      remoteUrl = await url();
+    }
+
     // Load the remote and initialize the share scope if it's empty
     await Promise.all([
-      loadRemote(`${url}/${remoteEntryFileName}`, scope, bustRemoteEntryCache),
+      loadRemote(
+        `${remoteUrl}/${remoteEntryFileName}`,
+        scope,
+        bustRemoteEntryCache
+      ),
       initSharing(),
     ]);
     if (!window[scope]) {
