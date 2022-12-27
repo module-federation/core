@@ -12,10 +12,6 @@ export interface ImportRemoteOptions {
 
 const REMOTE_ENTRY_FILE = 'remoteEntry.js';
 
-const webpackRequire = __webpack_require__ as unknown as WebpackRequire;
-const webpackShareScopes =
-  __webpack_share_scopes__ as unknown as WebpackShareScopes;
-
 const loadRemote = (
   url: ImportRemoteOptions['url'],
   scope: ImportRemoteOptions['scope'],
@@ -23,6 +19,7 @@ const loadRemote = (
 ) =>
   new Promise<void>((resolve, reject) => {
     const timestamp = bustRemoteEntryCache ? `?t=${new Date().getTime()}` : '';
+    const webpackRequire = __webpack_require__ as unknown as WebpackRequire;
     webpackRequire.l(
       `${url}${timestamp}`,
       (event) => {
@@ -41,6 +38,8 @@ const loadRemote = (
   });
 
 const initSharing = async () => {
+  const webpackShareScopes =
+    __webpack_share_scopes__ as unknown as WebpackShareScopes;
   if (!webpackShareScopes?.default) {
     await __webpack_init_sharing__('default');
   }
@@ -49,6 +48,8 @@ const initSharing = async () => {
 // __initialized and __initializing flags prevent some concurrent re-initialization corner cases
 const initContainer = async (containerScope: any) => {
   try {
+    const webpackShareScopes =
+      __webpack_share_scopes__ as unknown as WebpackShareScopes;
     if (!containerScope.__initialized && !containerScope.__initializing) {
       containerScope.__initializing = true;
       await containerScope.init(webpackShareScopes.default);
