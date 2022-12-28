@@ -1,4 +1,5 @@
 {
+  "name": "3002-checkout",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/3002-checkout",
   "projectType": "application",
