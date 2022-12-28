@@ -7,7 +7,10 @@ export interface FederatedTypesPluginOptions {
   disableTypeCompilation?: boolean;
   disableDownloadingRemoteTypes?: boolean;
   federationConfig: ModuleFederationPluginOptions;
+  /** @default '@mf-types'*/
   typescriptFolderName?: string;
+  /** @default '_types' */
+  typescriptCompiledFolderName?: string;
   additionalFilesToCompile?: string[];
 }
 
