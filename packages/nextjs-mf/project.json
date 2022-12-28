@@ -1,4 +1,5 @@
 {
+  "name": "nextjs-mf",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/nextjs-mf/src",
   "projectType": "library",
@@ -16,7 +17,7 @@
       }
     },
     "publish": {
-      "executor": "@nrwl/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "command": "node tools/scripts/publish.mjs nextjs-mf {args.ver} {args.tag}"
       },
@@ -40,7 +41,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/nextjs-mf"],
+      "outputs": ["{workspaceRoot}/coverage/packages/nextjs-mf"],
       "options": {
         "jestConfig": "packages/nextjs-mf/jest.config.js",
         "passWithNoTests": true

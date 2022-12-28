@@ -1,4 +1,5 @@
 {
+  "name": "3000-home",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/3000-home",
   "projectType": "application",
