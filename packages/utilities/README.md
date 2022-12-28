@@ -51,7 +51,7 @@ This function will allow you to provide a static url or an async method to retri
 Usage looks something like this:
 
 ```js
-import { importRemote } from 'module-federation-import-remote';
+import { importRemote } from '@module-federation/utilities';
 
 // If it's a regular js module:
 importRemote({
@@ -81,7 +81,7 @@ return (
 ```
 
 ```js
-import { importRemote } from 'module-federation-import-remote';
+import { importRemote } from '@module-federation/utilities';
 
 // If it's a regular js module:
 importRemote({
