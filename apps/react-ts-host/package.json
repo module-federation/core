@@ -1,0 +1,7 @@
+{
+  "name": "react-ts-host",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10"
+  }
+}
