@@ -64,11 +64,11 @@ export const reKeyHostShared = (
   options: Shared = {}
 ): Record<string, SharedConfig> => {
   const shared = {
-    ...options,
+    // ...options, causes multiple copies of a package to be loaded into a graph, dangerous for singletons
     ...DEFAULT_SHARE_SCOPE,
   } as Record<string, SharedConfig>;
 
-  return Object.entries(shared).reduce((acc, item) => {
+  const reKeyedInternalModules = Object.entries(shared).reduce((acc, item) => {
     const [itemKey, shareOptions] = item;
 
     const shareKey = `host${(item as any).shareKey || itemKey}`;
@@ -88,6 +88,11 @@ export const reKeyHostShared = (
 
     return acc;
   }, {} as Record<string, SharedConfig>);
+
+  return {
+    ...options, // pass through undoctored shared modules from the user config
+    ...reKeyedInternalModules
+  } as Record<string, SharedConfig>
 };
 
 // browser template to convert remote into promise new promise and use require.loadChunk to load the chunk

@@ -2,6 +2,41 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [6.0.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.12.14...nextjs-mf-6.0.0) (2022-12-29)
+
+### Dependency Updates
+
+* `node` updated to version `0.9.10`
+* `utils` updated to version `1.0.4`
+
+### Features
+
+* change module sharing strategy ([#469](https://github.com/module-federation/nextjs-mf/issues/469)) ([5fecf86](https://github.com/module-federation/nextjs-mf/commit/5fecf867f34b20e2c7cea3909a1f306d46d92bf3))
+
+
+### BREAKING CHANGES
+
+* Previously, we used to "rekey" all shared packages used in a host in order to prevent eager consumption issues. However, this caused unforeseen issues when trying to share a singleton package, as the package would end up being bundled multiple times per page.
+
+As a result, we have had to stop rekeying shared modules in userland and only do so on internal Next packages themselves.
+
+If you need to dangerously share a package using the old method, you can do so by using the following code:
+
+                 const shared = {
+                   fakeLodash: {
+                     import: "lodash",
+                     shareKey: "lodash",
+                   }
+                 }
+
+Please note that this method is now considered dangerous and should be used with caution.
+
+* update build release
+
+* update build release
+
+
+
 ## [5.12.14](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.12.13...nextjs-mf-5.12.14) (2022-12-27)
 
 ### Dependency Updates

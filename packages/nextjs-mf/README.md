@@ -47,6 +47,10 @@ const DEFAULT_SHARE_SCOPE = {
     requiredVersion: false,
     singleton: true,
   },
+  'styled-jsx/style': {
+    requiredVersion: false,
+    singleton: true,
+  },
   'next/link': {
     requiredVersion: false,
     singleton: true,
@@ -123,6 +127,25 @@ new NextFederationPlugin({
 - `enableUrlLoaderFix` – adds public hostname to all assets bundled by `url-loader`.
 - `automaticAsyncBoundary` – adds automatic async boundary for all federated modules. It's required for sync imports to work.
 - `skipSharingNextInternals` – disables sharing of next internals. You can use it if you want to share next internals yourself or want to use this plugin on non next applications
+
+### BREAKING CHANGE ABOUT SHARED MODULES:
+
+Previously, we used to "rekey" all shared packages used in a host in order to prevent eager consumption issues. However, this caused unforeseen issues when trying to share a singleton package, as the package would end up being bundled multiple times per page.
+
+As a result, we have had to stop rekeying shared modules in userland and only do so on internal Next packages themselves.
+
+If you need to dangerously share a package using the old method, you can do so by using the following code:
+
+```js
+const shared = {
+  fakeLodash: {
+    import: "lodash",
+    shareKey: "lodash",
+  }
+}
+```
+
+Please note that this method is now considered dangerous and should be used with caution.
 
 ## Demo
 

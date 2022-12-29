@@ -2,6 +2,18 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.1.2](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.1...typescript-2.1.2) (2022-12-29)
+
+### Dependency Updates
+
+* `utils` updated to version `1.0.4`
+
+### Bug Fixes
+
+* **typescript:** compiler host re-writes compiled files in case-insensitive file systems ([#451](https://github.com/module-federation/nextjs-mf/issues/451)) ([448bab5](https://github.com/module-federation/nextjs-mf/commit/448bab571779a193ee7d333a0c2619008f999831))
+
+
+
 ## [2.1.1](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.0...typescript-2.1.1) (2022-12-27)
 
 ### Dependency Updates
