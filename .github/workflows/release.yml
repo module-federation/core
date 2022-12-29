@@ -44,12 +44,11 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          yarn nx run-many --target=build --projects=nextjs-mf,node,typescript,utils
+          yarn nx run-many --target=build --projects=typescript,utils,nextjs-mf,node
       - name: Version
         shell: bash
         run: |
           npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
-
           PROJECTS=${{ inputs.projects }}
 
           if [[ $PROJECTS == "all" ]]; then
