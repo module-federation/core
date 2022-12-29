@@ -13,7 +13,8 @@
   "license": "MIT",
   "scripts": {
     "build": "nx build --verbose --output-style=stream",
-    "start": "nx build && nx run-many --target=serve --verbose --output-style=stream",
+    "start:next": "nx build && concurrently 'nx run 3000-home:serve:development --output-style=stream' 'nx run 3001-shop:serve:development --output-style=stream' 'nx run 3002-checkout:serve:development --output-style=stream'",
+    "serve:next": "nx build && concurrently 'nx run 3000-home:serve:production --output-style=stream' 'nx run 3001-shop:serve:production --output-style=stream' 'nx run 3002-checkout:serve:production --output-style=stream'",
     "prod": "nx build && nx run-many --target=build --verbose --output-style=stream",
     "commit": "cz",
     "release:node": "nx run node:version --releaseAs=minor",
