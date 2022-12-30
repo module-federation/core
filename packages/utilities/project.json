@@ -11,6 +11,8 @@
         "outputPath": "dist/packages/utilities",
         "main": "packages/utilities/src/index.ts",
         "tsConfig": "packages/utilities/tsconfig.lib.json",
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true,
         "assets": ["packages/utilities/*.md"]
       }
     },
