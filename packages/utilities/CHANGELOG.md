@@ -2,6 +2,21 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [1.1.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.0.4...utils-1.1.0) (2022-12-30)
+
+
+### Bug Fixes
+
+* **utilities:** move tslib from peer deps into deps ([#474](https://github.com/module-federation/nextjs-mf/issues/474)) ([792806c](https://github.com/module-federation/nextjs-mf/commit/792806c805c746cd681d6345bec88a47462cb26f))
+* **utilities:** set webpack peer dep to ^5.40.0 ([#473](https://github.com/module-federation/nextjs-mf/issues/473)) ([d1ae77e](https://github.com/module-federation/nextjs-mf/commit/d1ae77e63993b6f67d329bce5a30d04776a02b76))
+
+
+### Features
+
+* Utilities - Add async callback to importRemote ([#459](https://github.com/module-federation/nextjs-mf/issues/459)) ([508d83c](https://github.com/module-federation/nextjs-mf/commit/508d83ca1060e1fcc80cde44978b186bdf1feefc)), closes [#461](https://github.com/module-federation/nextjs-mf/issues/461) [#451](https://github.com/module-federation/nextjs-mf/issues/451) [#463](https://github.com/module-federation/nextjs-mf/issues/463)
+
+
+
 ## [1.0.4](https://github.com/module-federation/nextjs-mf/compare/utils-1.0.3...utils-1.0.4) (2022-12-29)
 
 
