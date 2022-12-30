@@ -13,7 +13,7 @@ This plugin enables Module Federation on Next.js
 ## Supports
 
 - next ^12 || ^13
-- Client side only, SSR has a PR open. Help needed
+- SSR included! 
 
 I highly recommend referencing this application which takes advantage of the best capabilities:
 https://github.com/module-federation/module-federation-examples
