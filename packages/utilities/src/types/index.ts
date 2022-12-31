@@ -85,3 +85,9 @@ export type Loader = Extract<RuleSetRule['use'], { loader?: string }>;
 export type EventTypes = 'loadStart' | 'loadComplete' | 'loadError';
 type NextRoute = string;
 export type PageMap = Record<NextRoute, ModulePath>;
+
+export type GetModuleOptions = {
+  modulePath: string
+  exportName?: string
+  remoteContainer: string | RemoteData
+}
