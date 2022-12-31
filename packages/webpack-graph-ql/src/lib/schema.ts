@@ -27,34 +27,35 @@ const buildField = ({ receiver, propertyName, descriptor }: any) => {
   return { type: returns, args, resolve };
 };
 
+const buildFieldsForReceiver = (aggPropsMethod: string) => (receiver) =>
+  Array.from(
+    receiver.aggPropsMethod(),
+    ([ propertyName, descriptor ]) => ({
+      [descriptor.name({ receiver })]: buildField({
+        receiver,
+        propertyName,
+        descriptor
+      })
+    })
+  );
+
 /**
  * Returns a function that aggregates fields from a list of classes.
  *
  * The returned function takes a list of classes as input and returns a map of
  * fields that are created by iterating over the list of classes and reducing
  * the fields of each class into a single map. The fields of each class are
- * extracted using the `fieldsGetter` function, which should return an array of
+ * extracted using the `attrsGetter` function, which should return an array of
  * field descriptors for the class.
  *
- * @param {function} fieldsGetter A function that returns an array of field 
+ * @param {function} attrsGetter A function that returns an array of field 
  * descriptors for a given class.
  * @return {function} A function that aggregates fields from a list of classes.
  */
-const makeFieldAggregator = (fieldsGetter: any) => (types: any) => {
-  return types.reduce((fields: any, Class: any) => {
-    return [...fieldsGetter(Class)].reduce((
-      fields: any,
-      [ propertyName, descriptor ]: any[]
-    ) => {
-      const name = descriptor.name({ receiver: Class });
-      fields[name] = buildResolver({
-        receiver: Class,
-        propertyName, descriptor
-      }); 
-      return fields;
-    }, fields);
-  }, {});
-};
+const makeFieldAggregator = (aggPropsMethod: string) => (types: any) =>
+  types
+    .flatmap(buildFieldArgsForReceiver(attrsGetter))
+    .reduce(Object.assign, {})
 
 /**
  * Returns a root type object for a given root type name and field getter
@@ -68,33 +69,34 @@ const makeFieldAggregator = (fieldsGetter: any) => (types: any) => {
  * field.
  *
  * @param {string} rootTypeName The name of the root type.
- * @param {function} getFields A function that returns an array of field
+ * @param {function} attrsGetter A function that returns an array of field
  * descriptors for the root type.
  * @return {object} A root type object for the given root type name and field
  * getter function.
  */
-const createRootType = ({ rootTypeName: string, getFields: any }) => {
-  const fields = makeFieldAggregator(getFields)(types);
+const createRootType = (
+  rootTypeName: string,
+  aggPropsMethodName: string
+) => {
+  const fields = makeFieldAggregator(aggPropsMethodName)(types);
   if (Object.keys(fields).length > 0) {
     return {
       [rootTypeName.toLowercase()]: new GraphQLObjectType({
-        name rootTypeName,
+        name: rootTypeName,
         fields
       })
     };
   }
 };
 
-export const schema = new GraphQLSchema([
-  "Query",
-  "Mutation",
-  "Subscription"
-].map((rootTypeName) => ({
-  rootTypeName,
-  getFields: (Class: any) => Class[`get${rootTypeName}`]()
-}).reduce((rootTypes, rootType) => ({
-  ...rootTypes,
-  ...createRootType(rootType)
-}), {}));
+export const schema = new GraphQLSchema(
+  Object.entries({
+    Query: "getQueryProps",
+    Mutation: "getMutationProps",
+    Subscription: "getSubscriptionProps"
+  })
+    .map((args) => createRootType(...args))
+    .reduce(Object.assign, {})
+);
 
 export default schema;
