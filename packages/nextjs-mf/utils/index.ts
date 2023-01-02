@@ -51,9 +51,7 @@ export const FlushedChunks = ({ chunks }: FlushedChunksProps) => {
       );
     });
 
-  return React.createElement(React.Fragment, {
-    children: [css, scripts],
-  });
+  return React.createElement(React.Fragment, null, css, scripts);
 };
 
 FlushedChunks.defaultProps = {
