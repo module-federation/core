@@ -130,6 +130,9 @@ export class TypescriptCompiler {
         const importPath =
           './' + relativePathToCompiledFile.replace(/\.d\.ts$/, '');
         const reexport = `export * from '${importPath}';\nexport { default } from '${importPath}';`;
+
+        this.tsDefinitionFilesObj[`${this.options.distDir}/${exposedDestFilePath.replace('./', '')}.d.ts`] = reexport;
+        
         // reuse originalWriteFile as it creates folders if they don't exist
         originalWriteFile(
           normalizedExposedDestFilePath,
