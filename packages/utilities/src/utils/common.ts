@@ -7,19 +7,7 @@ import type {
   RuntimeRemote,
 } from '../types';
 
-let remoteVars = {} as Record<
-  string,
-  Promise<any> | string | (() => Promise<any>)
->;
-try {
-  // @ts-ignore
-  remoteVars = (process.env.REMOTES || {}) as Record<
-    string,
-    Promise<any> | string | (() => Promise<any>)
-  >;
-} catch (e) {
-  console.error('Error parsing REMOTES environment variable', e);
-}
+type RemoteVars = Record<string, Promise<any> | string | (() => Promise<any>)>;
 
 // split the @ syntax into url and global
 export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
@@ -30,36 +18,45 @@ export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
   return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
 };
 
-export const runtimeRemotes = Object.entries(remoteVars).reduce(function (
-  acc,
-  item
-) {
-  const [key, value] = item;
-  // if its an object with a thenable (eagerly executing function)
-  if (typeof value === 'object' && typeof value.then === 'function') {
-    acc[key] = { asyncContainer: value };
-  }
-  // if its a function that must be called (lazily executing function)
-  else if (typeof value === 'function') {
-    // @ts-ignore
-    acc[key] = { asyncContainer: value };
-  }
-  // if its just a string (global@url)
-  else if (typeof value === 'string') {
-    const [url, global] = extractUrlAndGlobal(value);
-    acc[key] = { global, url };
-  }
-  // we dont know or currently support this type
-  else {
-    //@ts-ignore
-    console.log('remotes process', process.env.REMOTES);
-    throw new Error(`[mf] Invalid value received for runtime_remote "${key}"`);
-  }
-  return acc;
-},
-{} as RuntimeRemotesMap);
+let runtimeRemotes: RuntimeRemotesMap;
 
-export const remotes = runtimeRemotes;
+const getRuntimeRemotes = () => {
+  if (runtimeRemotes) return runtimeRemotes;
+
+  //@ts-ignore
+  const remoteVars = (process.env.REMOTES || {}) as RemoteVars;
+
+  runtimeRemotes = Object.entries(remoteVars).reduce(function (acc, item) {
+    const [key, value] = item;
+    // if its an object with a thenable (eagerly executing function)
+    if (typeof value === 'object' && typeof value.then === 'function') {
+      acc[key] = { asyncContainer: value };
+    }
+    // if its a function that must be called (lazily executing function)
+    else if (typeof value === 'function') {
+      // @ts-ignore
+      acc[key] = { asyncContainer: value };
+    }
+    // if its just a string (global@url)
+    else if (typeof value === 'string') {
+      const [url, global] = extractUrlAndGlobal(value);
+      acc[key] = { global, url };
+    }
+    // we dont know or currently support this type
+    else {
+      //@ts-ignore
+      console.log('remotes process', process.env.REMOTES);
+      throw new Error(
+        `[mf] Invalid value received for runtime_remote "${key}"`
+      );
+    }
+    return acc;
+  }, {} as RuntimeRemotesMap);
+
+  return runtimeRemotes;
+};
+
+//export const remotes = runtimeRemotes;
 
 /**
  * Return initialized remote container by remote's key or its runtime remote item data.
@@ -72,6 +69,8 @@ export const remotes = runtimeRemotes;
 export const injectScript = (
   keyOrRuntimeRemoteItem: string | RuntimeRemote
 ) => {
+  const runtimeRemotes = getRuntimeRemotes();
+
   // 1) Load remote container if needed
   let asyncContainer: RuntimeRemote['asyncContainer'];
   const reference =
@@ -80,8 +79,11 @@ export const injectScript = (
       : keyOrRuntimeRemoteItem;
 
   if (reference.asyncContainer) {
-    // @ts-ignore
-    asyncContainer = typeof reference.asyncContainer.then === 'function' ? reference.asyncContainer : reference.asyncContainer();
+    asyncContainer =
+      typeof reference.asyncContainer.then === 'function'
+        ? reference.asyncContainer
+        : // @ts-ignore
+          reference.asyncContainer();
   } else {
     // This casting is just to satisfy typescript,
     // In reality remoteGlobal will always be a string;

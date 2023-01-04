@@ -72,6 +72,7 @@
     "@typescript-eslint/eslint-plugin": "5.47.1",
     "@typescript-eslint/parser": "5.47.1",
     "commitizen": "^4.2.5",
+    "concurrently": "7.6.0",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "~8.30.0",
     "eslint-config-next": "13.0.0",
@@ -109,4 +110,3 @@
     ]
   }
 }
-
