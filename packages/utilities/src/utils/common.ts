@@ -5,9 +5,15 @@ import type {
   Remotes,
   RuntimeRemotesMap,
   RuntimeRemote,
+  WebpackRemoteContainer,
 } from '../types';
 
-type RemoteVars = Record<string, Promise<any> | string | (() => Promise<any>)>;
+type RemoteVars = Record<
+  string,
+  | Promise<WebpackRemoteContainer>
+  | string
+  | (() => Promise<WebpackRemoteContainer>)
+>;
 
 // split the @ syntax into url and global
 export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
@@ -18,15 +24,14 @@ export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
   return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
 };
 
-let runtimeRemotes: RuntimeRemotesMap;
-
 const getRuntimeRemotes = () => {
-  if (runtimeRemotes) return runtimeRemotes;
-
   //@ts-ignore
   const remoteVars = (process.env.REMOTES || {}) as RemoteVars;
 
-  runtimeRemotes = Object.entries(remoteVars).reduce(function (acc, item) {
+  const runtimeRemotes = Object.entries(remoteVars).reduce(function (
+    acc,
+    item
+  ) {
     const [key, value] = item;
     // if its an object with a thenable (eagerly executing function)
     if (typeof value === 'object' && typeof value.then === 'function') {
@@ -51,12 +56,11 @@ const getRuntimeRemotes = () => {
       );
     }
     return acc;
-  }, {} as RuntimeRemotesMap);
+  },
+  {} as RuntimeRemotesMap);
 
   return runtimeRemotes;
 };
-
-//export const remotes = runtimeRemotes;
 
 /**
  * Return initialized remote container by remote's key or its runtime remote item data.
