@@ -1,4 +1,8 @@
-import {graphql, GraphQLArgs,buildSchema} from 'graphql';
+import { graphql } from 'graphql';
+import {
+  makeExecutableSchema,
+  addResolveFunctionsToSchema
+} from "graphql-tools";
 import resolvers from './resolvers';
 import schema from './schema';
 import path from 'path';
@@ -31,7 +35,14 @@ query {
 `;
 
 function runquery (str: string) {
-  return graphql({schema:buildSchema(schema), rootValue: resolvers, source: str, contextValue: {statsFile: path.resolve(__dirname, 'stats.json')}});
+  return graphql({
+    schema,
+    rootValue: resolvers,
+    source: str,
+    contextValue: {
+      statsFile: path.resolve(__dirname, 'stats.json')
+    }
+  });
 }
 
 runquery(query).then(data => {
