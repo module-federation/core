@@ -111,6 +111,22 @@ const IsomorphicRemoteTemplate = function () {
       },
       remote.global
     );
+  }).catch((e)=> {
+    console.error(remote.global, 'is offline, returning fake remote');
+    console.error(e);
+
+    return {
+      fake: true,
+      get: (arg: any) => {
+        console.log('faking', arg, 'module on', remote.global);
+
+        return Promise.resolve(() => {
+          return () => null
+        });
+      },
+      init: () => {
+      }
+    }
   }).then(function () {
     //@ts-ignore
     const globalScope = typeof window !== 'undefined' ? window : global.__remote_scope__;
