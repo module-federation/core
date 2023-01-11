@@ -67,12 +67,14 @@ export class FederatedTypesPlugin {
     const ignoredWatchOptions = watchOptions.ignored;
 
     const watchOptionsToIgnore = [
-      path.normalize(path.join(
-        context as string,
-        this.normalizeOptions.typescriptFolderName,
-        '**',
-        '*'
-      )),
+      path.normalize(
+        path.join(
+          context as string,
+          this.normalizeOptions.typescriptFolderName,
+          '**',
+          '*'
+        )
+      ),
     ];
 
     compiler.options.watchOptions.ignored = Array.isArray(ignoredWatchOptions)
@@ -144,7 +146,8 @@ export class FederatedTypesPlugin {
     const remoteUrls = Object.entries(remoteComponents).map(
       ([remote, entry]) => {
         const remoteUrl = entry.substring(0, entry.lastIndexOf('/'));
-        const [, url] = remoteUrl.split('@');
+        const splitIndex = remoteUrl.indexOf('@');
+        const url = remoteUrl.substring(splitIndex + 1);
 
         return {
           origin: url ?? remoteUrl,
