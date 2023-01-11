@@ -115,9 +115,9 @@ export class FederatedTypesPlugin {
         const filesMap = this.compileTypes();
 
         (params as CompilationParams).federated_types = filesMap;
-
-        new FederatedTypesStatsPlugin(this.normalizeOptions).apply(compiler);
       });
+
+      new FederatedTypesStatsPlugin(this.normalizeOptions).apply(compiler);
     }
 
     new webpack.container.ModuleFederationPlugin(
@@ -170,7 +170,7 @@ export class FederatedTypesPlugin {
       }
     );
 
-    remoteUrls.forEach(async ({ origin, remote }) => {
+    for await (const { origin, remote } of remoteUrls) {
       const { typescriptFolderName } = this.normalizeOptions;
 
       this.logger.log(`Getting types index for remote '${remote}'`);
@@ -219,6 +219,6 @@ export class FederatedTypesPlugin {
 
         this.logger.log('downloading complete');
       }
-    });
+    }
   }
 }
