@@ -7,10 +7,6 @@
 
 import type {Chunk, ChunkGraph, Compiler} from 'webpack';
 import {RuntimeModule, RuntimeGlobals, Template} from 'webpack';
-
-// import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-// import RuntimeModule from 'webpack/lib/RuntimeModule';
-// import Template from 'webpack/lib/Template';
 import {getUndoPath} from 'webpack/lib/util/identifier';
 import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
 
