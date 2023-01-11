@@ -161,7 +161,8 @@ export class FederatedTypesPlugin {
     const remoteUrls = Object.entries(remoteComponents).map(
       ([remote, entry]) => {
         const remoteUrl = entry.substring(0, entry.lastIndexOf('/'));
-        const [, url] = remoteUrl.split('@');
+        const splitIndex = remoteUrl.indexOf('@');
+        const url = remoteUrl.substring(splitIndex + 1);
 
         return {
           origin: url ?? remoteUrl,
