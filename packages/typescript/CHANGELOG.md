@@ -2,6 +2,20 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.1.4](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.3...typescript-2.1.4) (2023-01-11)
+
+### Dependency Updates
+
+* `utils` updated to version `1.1.1`
+
+### Bug Fixes
+
+* **federatedtypesplugin:** modify remote url used to import remote types ([#496](https://github.com/module-federation/nextjs-mf/issues/496)) ([e91a68a](https://github.com/module-federation/nextjs-mf/commit/e91a68a96bb2c374f3a0e84eba73baeeb2913698)), closes [#495](https://github.com/module-federation/nextjs-mf/issues/495)
+* **typescript:** generated types doesn't get included in types index ([#487](https://github.com/module-federation/nextjs-mf/issues/487)) ([e79eb88](https://github.com/module-federation/nextjs-mf/commit/e79eb884c1898b64254c2907c459499dd2f6ea58))
+* **typescript:** unable to download types from multiple remotes ([#492](https://github.com/module-federation/nextjs-mf/issues/492)) ([c598b41](https://github.com/module-federation/nextjs-mf/commit/c598b4197fb4fcf1a7f8baff19051c39f03a9aa0)), closes [#455](https://github.com/module-federation/nextjs-mf/issues/455)
+
+
+
 ## [2.1.3](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.2...typescript-2.1.3) (2022-12-30)
 
 ### Dependency Updates
