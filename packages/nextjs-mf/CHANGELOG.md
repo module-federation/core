@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.0.4](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.0.3...nextjs-mf-6.0.4) (2023-01-11)
+
+
+### Bug Fixes
+
+* resolve fake remote if offline ([#503](https://github.com/module-federation/nextjs-mf/issues/503)) ([536243d](https://github.com/module-federation/nextjs-mf/commit/536243dac1f697f2b6b0718f4767988b10ce5344))
+
+
+
 ## [6.0.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.0.2...nextjs-mf-6.0.3) (2023-01-11)
 
 ### Dependency Updates
