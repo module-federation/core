@@ -30,6 +30,11 @@ export class FederatedTypesPlugin {
 
   constructor(private options: FederatedTypesPluginOptions) {}
 
+  getError(error: unknown): Error {
+    if (error instanceof Error) return error;
+    return new Error(error as string);
+  }
+
   apply(compiler: Compiler) {
     const {
       disableDownloadingRemoteTypes = false,
@@ -67,12 +72,14 @@ export class FederatedTypesPlugin {
     const ignoredWatchOptions = watchOptions.ignored;
 
     const watchOptionsToIgnore = [
-      path.normalize(path.join(
-        context as string,
-        this.normalizeOptions.typescriptFolderName,
-        '**',
-        '*'
-      )),
+      path.normalize(
+        path.join(
+          context as string,
+          this.normalizeOptions.typescriptFolderName,
+          '**',
+          '*'
+        )
+      ),
     ];
 
     compiler.options.watchOptions.ignored = Array.isArray(ignoredWatchOptions)
@@ -82,12 +89,22 @@ export class FederatedTypesPlugin {
     if (!disableDownloadingRemoteTypes) {
       compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, async (_, callback) => {
         this.logger.log('Preparing to download types from remotes on startup');
-        await this.importRemoteTypes(callback);
+        try {
+          await this.importRemoteTypes();
+          callback();
+        } catch (error) {
+          callback(this.getError(error));
+        }
       });
 
       compiler.hooks.watchRun.tapAsync(PLUGIN_NAME, async (_, callback) => {
         this.logger.log('Preparing to download types from remotes');
-        await this.importRemoteTypes(callback);
+        try {
+          await this.importRemoteTypes();
+          callback();
+        } catch (error) {
+          callback(this.getError(error));
+        }
       });
     }
 
@@ -129,7 +146,7 @@ export class FederatedTypesPlugin {
     }
   }
 
-  private async importRemoteTypes(callback: any) {
+  private async importRemoteTypes() {
     const remoteComponents = this.options.federationConfig.remotes;
 
     if (
@@ -137,14 +154,15 @@ export class FederatedTypesPlugin {
       (remoteComponents && isObjectEmpty(remoteComponents))
     ) {
       this.logger.log('No Remote components configured');
-      return callback();
+      return;
     }
 
     this.logger.log('Normalizing remote URLs');
     const remoteUrls = Object.entries(remoteComponents).map(
       ([remote, entry]) => {
         const remoteUrl = entry.substring(0, entry.lastIndexOf('/'));
-        const [, url] = remoteUrl.split('@');
+        const splitIndex = remoteUrl.indexOf('@');
+        const url = remoteUrl.substring(splitIndex + 1);
 
         return {
           origin: url ?? remoteUrl,
@@ -153,60 +171,55 @@ export class FederatedTypesPlugin {
       }
     );
 
-    remoteUrls.forEach(async ({ origin, remote }) => {
+    for await (const { origin, remote } of remoteUrls) {
       const { typescriptFolderName } = this.normalizeOptions;
 
-      try {
-        this.logger.log(`Getting types index for remote '${remote}'`);
-        const resp = await axios.get<TypesStatsJson>(
-          `${origin}/${this.normalizeOptions.typesIndexJsonFileName}`
+      this.logger.log(`Getting types index for remote '${remote}'`);
+      const resp = await axios.get<TypesStatsJson>(
+        `${origin}/${this.normalizeOptions.typesIndexJsonFileName}`
+      );
+
+      const statsJson = resp.data;
+
+      this.logger.log(`Checking with Cache entries`);
+      const { filesToCacheBust, filesToDelete } =
+        TypesCache.getCacheBustedFiles(remote, statsJson);
+
+      this.logger.log('filesToCacheBust', filesToCacheBust);
+      this.logger.log('filesToDelete', filesToDelete);
+
+      if (filesToDelete.length > 0) {
+        filesToDelete.forEach((file) => {
+          fs.unlinkSync(
+            path.resolve(
+              this.normalizeOptions.webpackCompilerOptions.context as string,
+              typescriptFolderName,
+              remote,
+              file
+            )
+          );
+        });
+      }
+
+      if (filesToCacheBust.length > 0) {
+        await Promise.all(
+          filesToCacheBust.map((file) => {
+            const url = `${origin}/${typescriptFolderName}/${file}`;
+            const destination = path.join(
+              this.normalizeOptions.webpackCompilerOptions.context as string,
+              typescriptFolderName,
+              remote
+            );
+
+            this.logger.log('Downloading types...');
+            return download(url, destination, {
+              filename: file,
+            });
+          })
         );
 
-        const statsJson = resp.data;
-
-        this.logger.log(`Checking with Cache entries`);
-        const { filesToCacheBust, filesToDelete } =
-          TypesCache.getCacheBustedFiles(remote, statsJson);
-
-        this.logger.log('filesToCacheBust', filesToCacheBust);
-        this.logger.log('filesToDelete', filesToDelete);
-
-        if (filesToDelete.length > 0) {
-          filesToDelete.forEach((file) => {
-            fs.unlinkSync(
-              path.resolve(
-                this.normalizeOptions.webpackCompilerOptions.context as string,
-                typescriptFolderName,
-                remote,
-                file
-              )
-            );
-          });
-        }
-
-        if (filesToCacheBust.length > 0) {
-          await Promise.all(
-            filesToCacheBust.map((file) => {
-              const url = `${origin}/${typescriptFolderName}/${file}`;
-              const destination = path.join(
-                this.normalizeOptions.webpackCompilerOptions.context as string,
-                typescriptFolderName,
-                remote
-              );
-
-              this.logger.log('Downloading types...');
-              return download(url, destination, {
-                filename: file,
-              });
-            })
-          );
-
-          this.logger.log('downloading complete');
-        }
-        callback();
-      } catch (error) {
-        callback(error);
+        this.logger.log('downloading complete');
       }
-    });
+    }
   }
 }
