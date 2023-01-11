@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.9.12](https://github.com/module-federation/nextjs-mf/compare/node-0.9.11...node-0.9.12) (2023-01-11)
+
+
+### Bug Fixes
+
+* [node] build error when no remotes are used ([#500](https://github.com/module-federation/nextjs-mf/issues/500)) ([189f3f9](https://github.com/module-federation/nextjs-mf/commit/189f3f95091684ac73a772d9bfd17a1e06ec1d65))
+
+
+
 ## [0.9.11](https://github.com/module-federation/nextjs-mf/compare/node-0.9.10...node-0.9.11) (2022-12-30)
 
 ### Dependency Updates
