@@ -3,7 +3,6 @@ import { generateTypesStats } from '../lib/generateTypesStats';
 
 import { NormalizeOptions } from '../lib/normalizeOptions';
 import { CompilationParams, TypesStatsJson } from '../types';
-import path from 'path';
 
 const PLUGIN_NAME = 'FederatedTypesStatsPlugin';
 
@@ -14,12 +13,12 @@ export class FederatedTypesStatsPlugin {
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation, params) => {
       const federatedTypesMap = (params as CompilationParams).federated_types;
 
-      compilation.hooks.processAssets.tapPromise(
+      compilation.hooks.processAssets.tap(
         {
           name: PLUGIN_NAME,
           stage: Compilation.PROCESS_ASSETS_STAGE_ANALYSE,
         },
-        async () => {
+        () => {
           const { typesIndexJsonFilePath, publicPath } = this.options;
 
           const statsJson: TypesStatsJson = {

@@ -4,6 +4,7 @@
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
+  "license": "MIT",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
