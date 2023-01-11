@@ -87,7 +87,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     // remotes only use fs.readFile if we were to cache the chunks on disk after fetching - otherwise its always using http
     // so for example, if im in hostA and require(remoteb/module) --> console.log of name in runtime code will return remoteb
 
-    const {remotes, name} = this.options;
+    const {remotes = {}, name} = this.options;
     const {webpack} = this.chunkLoadingContext;
     const chunkHasJs =
       (webpack && webpack.javascript.JavascriptModulesPlugin.chunkHasJs) ||
