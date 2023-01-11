@@ -2,6 +2,20 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.0.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.0.2...nextjs-mf-6.0.3) (2023-01-11)
+
+### Dependency Updates
+
+* `node` updated to version `0.10.1`
+* `utils` updated to version `1.1.1`
+
+### Bug Fixes
+
+* **nextjs-mf:** fix FlushedChunks TS declaration ([#477](https://github.com/module-federation/nextjs-mf/issues/477)) ([afd5a93](https://github.com/module-federation/nextjs-mf/commit/afd5a93af63cb9e79ba424eecabf9f51f76e2ac1))
+* resolve fake remote if offline ([#501](https://github.com/module-federation/nextjs-mf/issues/501)) ([004e14d](https://github.com/module-federation/nextjs-mf/commit/004e14df1a6b87d8cca63dceadf9d30805c8d285))
+
+
+
 ## [6.0.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.0.1...nextjs-mf-6.0.2) (2023-01-11)
 
 ### Dependency Updates
