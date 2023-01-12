@@ -59,7 +59,7 @@
     "@nrwl/web": "15.4.2",
     "@nrwl/workspace": "15.4.2",
     "@swc/cli": "~0.1.55",
-    "@swc/jest": "0.2.23",
+    "@swc/jest": "0.2.24",
     "@testing-library/react": "13.4.0",
     "@types/download": "^8.0.1",
     "@types/jest": "28.1.1",
