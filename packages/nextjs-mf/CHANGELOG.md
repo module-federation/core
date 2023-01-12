@@ -2,6 +2,114 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.0.4](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.0.3...nextjs-mf-6.0.4) (2023-01-11)
+
+
+### Bug Fixes
+
+* resolve fake remote if offline ([#503](https://github.com/module-federation/nextjs-mf/issues/503)) ([536243d](https://github.com/module-federation/nextjs-mf/commit/536243dac1f697f2b6b0718f4767988b10ce5344))
+
+
+
+## [6.0.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.0.2...nextjs-mf-6.0.3) (2023-01-11)
+
+### Dependency Updates
+
+* `node` updated to version `0.10.1`
+* `utils` updated to version `1.1.1`
+
+### Bug Fixes
+
+* **nextjs-mf:** fix FlushedChunks TS declaration ([#477](https://github.com/module-federation/nextjs-mf/issues/477)) ([afd5a93](https://github.com/module-federation/nextjs-mf/commit/afd5a93af63cb9e79ba424eecabf9f51f76e2ac1))
+* resolve fake remote if offline ([#501](https://github.com/module-federation/nextjs-mf/issues/501)) ([004e14d](https://github.com/module-federation/nextjs-mf/commit/004e14df1a6b87d8cca63dceadf9d30805c8d285))
+
+
+
+## [6.0.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.0.1...nextjs-mf-6.0.2) (2023-01-11)
+
+### Dependency Updates
+
+* `node` updated to version `0.10.0`
+
+
+## [6.0.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.0.0...nextjs-mf-6.0.1) (2022-12-30)
+
+### Dependency Updates
+
+* `node` updated to version `0.9.11`
+* `utils` updated to version `1.1.0`
+
+### Bug Fixes
+
+* dont apply async boundary loader to api routes ([#472](https://github.com/module-federation/nextjs-mf/issues/472)) ([52d0b6b](https://github.com/module-federation/nextjs-mf/commit/52d0b6bf453ca775c4f4e50bd645a28cbe341aa0))
+
+
+
+# [6.0.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.12.14...nextjs-mf-6.0.0) (2022-12-29)
+
+### Dependency Updates
+
+* `node` updated to version `0.9.10`
+* `utils` updated to version `1.0.4`
+
+### Features
+
+* change module sharing strategy ([#469](https://github.com/module-federation/nextjs-mf/issues/469)) ([5fecf86](https://github.com/module-federation/nextjs-mf/commit/5fecf867f34b20e2c7cea3909a1f306d46d92bf3))
+
+
+### BREAKING CHANGES
+
+* Previously, we used to "rekey" all shared packages used in a host in order to prevent eager consumption issues. However, this caused unforeseen issues when trying to share a singleton package, as the package would end up being bundled multiple times per page.
+
+As a result, we have had to stop rekeying shared modules in userland and only do so on internal Next packages themselves.
+
+If you need to dangerously share a package using the old method, you can do so by using the following code:
+
+                 const shared = {
+                   fakeLodash: {
+                     import: "lodash",
+                     shareKey: "lodash",
+                   }
+                 }
+
+Please note that this method is now considered dangerous and should be used with caution.
+
+* update build release
+
+* update build release
+
+
+
+## [5.12.14](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.12.13...nextjs-mf-5.12.14) (2022-12-27)
+
+### Dependency Updates
+
+* `node` updated to version `0.9.9`
+* `utils` updated to version `1.0.3`
+
+
+## [5.12.13](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.12.12...nextjs-mf-5.12.13) (2022-12-27)
+
+### Dependency Updates
+
+* `node` updated to version `0.9.8`
+* `utils` updated to version `1.0.2`
+
+### Bug Fixes
+
+* **nextjs-mf:** fix client-side compilation ([#453](https://github.com/module-federation/nextjs-mf/issues/453)) ([d97d764](https://github.com/module-federation/nextjs-mf/commit/d97d764ded8d3cb1b5e04829eaf226f0c5a3baa3))
+
+
+
+## [5.12.12](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.12.11...nextjs-mf-5.12.12) (2022-12-20)
+
+
+### Bug Fixes
+
+* **async-boundary-loader:** use relativeResource instead of this.resouce ([#421](https://github.com/module-federation/nextjs-mf/issues/421)) ([e1f4402](https://github.com/module-federation/nextjs-mf/commit/e1f4402a9c77709a4d3cd0ae87a28b961e1483d3))
+
+
+
 ## [5.12.11](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-5.12.10...nextjs-mf-5.12.11) (2022-12-18)
 
 ### Dependency Updates

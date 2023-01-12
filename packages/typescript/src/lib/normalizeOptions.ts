@@ -4,6 +4,7 @@ import get from 'lodash.get';
 import path from 'path';
 
 import {
+  TYPESCRIPT_COMPILED_FOLDER_NAME,
   TYPESCRIPT_FOLDER_NAME,
   TYPES_INDEX_JSON_FILE_NAME,
 } from '../constants';
@@ -15,20 +16,34 @@ export const normalizeOptions = (
   options: FederatedTypesPluginOptions,
   compiler: Compiler
 ) => {
-  const { typescriptFolderName = TYPESCRIPT_FOLDER_NAME } = options;
+  const {
+    typescriptFolderName = TYPESCRIPT_FOLDER_NAME,
+    typescriptCompiledFolderName = TYPESCRIPT_COMPILED_FOLDER_NAME,
+  } = options;
   const webpackCompilerOptions = compiler.options;
 
   const distPath =
     get(webpackCompilerOptions, 'devServer.static.directory') ||
     get(webpackCompilerOptions, 'output.path') ||
     'dist';
+  const federationFileName = options.federationConfig.filename as string;
 
-  const distDir = path.join(distPath, typescriptFolderName);
+  const typesPath = federationFileName.substring(
+    0,
+    federationFileName.lastIndexOf('/')
+  );
+
+  const typesIndexJsonFilePath = path.join(
+    typesPath,
+    TYPES_INDEX_JSON_FILE_NAME
+  );
+
+  const distDir = path.join(distPath, typesPath, typescriptFolderName);
 
   const tsCompilerOptions: ts.CompilerOptions = {
     declaration: true,
     emitDeclarationOnly: true,
-    outDir: path.join(distDir, '/'),
+    outDir: path.join(distDir, `/${typescriptCompiledFolderName}/`),
     noEmit: false,
   };
 
@@ -46,6 +61,7 @@ export const normalizeOptions = (
     publicPath,
     tsCompilerOptions,
     typesIndexJsonFileName: TYPES_INDEX_JSON_FILE_NAME,
+    typesIndexJsonFilePath,
     typescriptFolderName,
     webpackCompilerOptions,
   };

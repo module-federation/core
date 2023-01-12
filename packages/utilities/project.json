@@ -1,4 +1,5 @@
 {
+  "name": "utils",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/utilities/src",
   "projectType": "library",
@@ -10,11 +11,13 @@
         "outputPath": "dist/packages/utilities",
         "main": "packages/utilities/src/index.ts",
         "tsConfig": "packages/utilities/tsconfig.lib.json",
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true,
         "assets": ["packages/utilities/*.md"]
       }
     },
     "publish": {
-      "executor": "@nrwl/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "command": "node tools/scripts/publish.mjs utils {args.ver} {args.tag}"
       },
@@ -34,7 +37,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/utilities"],
+      "outputs": ["{workspaceRoot}/coverage/packages/utilities"],
       "options": {
         "jestConfig": "packages/utilities/jest.config.ts",
         "passWithNoTests": true

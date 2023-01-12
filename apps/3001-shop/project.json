@@ -1,4 +1,5 @@
 {
+  "name": "3001-shop",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/3001-shop",
   "projectType": "application",

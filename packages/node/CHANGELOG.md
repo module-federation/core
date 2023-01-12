@@ -2,6 +2,55 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.10.1](https://github.com/module-federation/nextjs-mf/compare/node-0.10.0...node-0.10.1) (2023-01-11)
+
+### Dependency Updates
+
+* `utils` updated to version `1.1.1`
+
+
+# [0.10.0](https://github.com/module-federation/nextjs-mf/compare/node-0.9.11...node-0.10.0) (2023-01-11)
+
+
+### Bug Fixes
+
+* [node] build error when no remotes are used ([#500](https://github.com/module-federation/nextjs-mf/issues/500)) ([189f3f9](https://github.com/module-federation/nextjs-mf/commit/189f3f95091684ac73a772d9bfd17a1e06ec1d65))
+
+
+### Features
+
+* [node] build error when no remotes are used ([dc73262](https://github.com/module-federation/nextjs-mf/commit/dc732621b1ede2bd761abaa766c6384ba041b502))
+
+
+
+## [0.9.11](https://github.com/module-federation/nextjs-mf/compare/node-0.9.10...node-0.9.11) (2022-12-30)
+
+### Dependency Updates
+
+* `utils` updated to version `1.1.0`
+
+
+## [0.9.10](https://github.com/module-federation/nextjs-mf/compare/node-0.9.9...node-0.9.10) (2022-12-29)
+
+### Dependency Updates
+
+* `utils` updated to version `1.0.4`
+
+
+## [0.9.9](https://github.com/module-federation/nextjs-mf/compare/node-0.9.8...node-0.9.9) (2022-12-27)
+
+### Dependency Updates
+
+* `utils` updated to version `1.0.3`
+
+
+## [0.9.8](https://github.com/module-federation/nextjs-mf/compare/node-0.9.7...node-0.9.8) (2022-12-27)
+
+### Dependency Updates
+
+* `utils` updated to version `1.0.2`
+
+
 ## [0.9.7](https://github.com/module-federation/nextjs-mf/compare/node-0.9.6...node-0.9.7) (2022-12-18)
 
 

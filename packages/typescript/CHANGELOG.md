@@ -2,6 +2,74 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.1.4](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.3...typescript-2.1.4) (2023-01-11)
+
+### Dependency Updates
+
+* `utils` updated to version `1.1.1`
+
+### Bug Fixes
+
+* **federatedtypesplugin:** modify remote url used to import remote types ([#496](https://github.com/module-federation/nextjs-mf/issues/496)) ([e91a68a](https://github.com/module-federation/nextjs-mf/commit/e91a68a96bb2c374f3a0e84eba73baeeb2913698)), closes [#495](https://github.com/module-federation/nextjs-mf/issues/495)
+* **typescript:** generated types doesn't get included in types index ([#487](https://github.com/module-federation/nextjs-mf/issues/487)) ([e79eb88](https://github.com/module-federation/nextjs-mf/commit/e79eb884c1898b64254c2907c459499dd2f6ea58))
+* **typescript:** unable to download types from multiple remotes ([#492](https://github.com/module-federation/nextjs-mf/issues/492)) ([c598b41](https://github.com/module-federation/nextjs-mf/commit/c598b4197fb4fcf1a7f8baff19051c39f03a9aa0)), closes [#455](https://github.com/module-federation/nextjs-mf/issues/455)
+
+
+
+## [2.1.3](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.2...typescript-2.1.3) (2022-12-30)
+
+### Dependency Updates
+
+* `utils` updated to version `1.1.0`
+
+
+## [2.1.2](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.1...typescript-2.1.2) (2022-12-29)
+
+### Dependency Updates
+
+* `utils` updated to version `1.0.4`
+
+### Bug Fixes
+
+* **typescript:** compiler host re-writes compiled files in case-insensitive file systems ([#451](https://github.com/module-federation/nextjs-mf/issues/451)) ([448bab5](https://github.com/module-federation/nextjs-mf/commit/448bab571779a193ee7d333a0c2619008f999831))
+
+
+
+## [2.1.1](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.0...typescript-2.1.1) (2022-12-27)
+
+### Dependency Updates
+
+* `utils` updated to version `1.0.3`
+
+
+# [2.1.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.0.3...typescript-2.1.0) (2022-12-27)
+
+### Dependency Updates
+
+* `utils` updated to version `1.0.2`
+
+### Bug Fixes
+
+* **typescript:** nextJs host can't resolve Types index file ([#449](https://github.com/module-federation/nextjs-mf/issues/449)) ([116690e](https://github.com/module-federation/nextjs-mf/commit/116690eafeadbdd3ca8ebeb46288cd3d964a0362)), closes [#435](https://github.com/module-federation/nextjs-mf/issues/435)
+* **typescript:** typescript compiler is losing `this` reference ([#452](https://github.com/module-federation/nextjs-mf/issues/452)) ([a4b437a](https://github.com/module-federation/nextjs-mf/commit/a4b437a4402db95f9da5871e53e9cd3b686761d8)), closes [#432](https://github.com/module-federation/nextjs-mf/issues/432)
+
+
+### Features
+
+* normalize paths for watch options ([#441](https://github.com/module-federation/nextjs-mf/issues/441)) ([be191e1](https://github.com/module-federation/nextjs-mf/commit/be191e160c370d282a72b81343340f7df59b0a4c)), closes [#394](https://github.com/module-federation/nextjs-mf/issues/394)
+
+
+
+## [2.0.3](https://github.com/module-federation/nextjs-mf/compare/typescript-2.0.2...typescript-2.0.3) (2022-12-20)
+
+
+### Bug Fixes
+
+* Typescript - Allow custom remote filename ([#413](https://github.com/module-federation/nextjs-mf/issues/413)) ([7eda5d8](https://github.com/module-federation/nextjs-mf/commit/7eda5d8172a6e77ff4a8db13b6ec4d7c88003840))
+* **typescript:** set noEmit: false when compiling types ([#416](https://github.com/module-federation/nextjs-mf/issues/416)) ([ec420d8](https://github.com/module-federation/nextjs-mf/commit/ec420d83b5ce5bc62b4245310510a6024cf718e9))
+
+
+
 ## [2.0.2](https://github.com/module-federation/nextjs-mf/compare/typescript-2.0.1...typescript-2.0.2) (2022-12-18)
 
 

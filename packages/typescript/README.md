@@ -59,12 +59,15 @@ To have the type definitions automatically found for imports, add `paths` in `ts
 ```json
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "paths": {
       "*": ["./@mf-types/*"]
     }
   }
 }
 ```
+
+`baseUrl` must also be set for `paths` to work properly
 
 ## Plugin Options
 
@@ -74,6 +77,7 @@ To have the type definitions automatically found for imports, add `paths` in `ts
 | disableTypeCompilation        | boolean  | No       | false       | Disable compiling types for exposed components                                                                                                                                             |
 | disableDownloadingRemoteTypes | boolean  | No       | false       | Disable downloading types from remote apps                                                                                                                                                 |
 | typescriptFolderName          | string   | No       | `@mf-types` | The folder name to download remote types and output compiled types                                                                                                                         |
+| typescriptCompiledFolderName          | string   | No       | `_types` | The folder name to output the raw output from the ts compiler                                                                                                                         |
 | additionalFilesToCompile      | string[] | No       | []          | Any additional files to be included (besides `ModuleFederationPluginOptions.remotes`) in the emission of Typescript types. This is useful for `global.d.ts` files not directly referenced. |
 
 ## Usage in Next.js

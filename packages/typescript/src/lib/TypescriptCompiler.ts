@@ -44,7 +44,7 @@ export class TypescriptCompiler {
 
     const normalizedAdditionalFiles = this.normalizeFiles(
       additionalFilesToCompile,
-      this.getNormalizedPathWithExt
+      this.getNormalizedPathWithExt.bind(this)
     );
 
     const host = this.createHost(exposeSrcToDestMap);
@@ -61,7 +61,7 @@ export class TypescriptCompiler {
       return this.tsDefinitionFilesObj;
     }
 
-    diagnostics.forEach(this.reportCompileDiagnostic);
+    diagnostics.forEach(this.reportCompileDiagnostic.bind(this));
 
     throw new Error('something went wrong generating declaration files');
   }
@@ -93,17 +93,6 @@ export class TypescriptCompiler {
 
     const originalWriteFile = host.writeFile;
 
-    const rewritePathsWithExposedFederatedModules = (
-      sourceFilename: string
-    ) => {
-      const destFile = exposeSrcToDestMap[sourceFilename];
-
-      return (
-        destFile &&
-        path.join(this.compilerOptions.outDir as string, `${destFile}.d.ts`)
-      );
-    };
-
     host.writeFile = (
       filepath,
       text,
@@ -112,26 +101,45 @@ export class TypescriptCompiler {
       sourceFiles,
       data
     ) => {
-      // for exposes: { "./expose/path": "path/to/file" }
-      // force typescript to write compiled output to "@mf-typescript/expose/path"
-      const sourceFilename = sourceFiles?.[0].fileName || '';
-
-      // Try to rewrite the path with exposed federated modules,
-      // failing so, use the default filepath emitted by TS Compiler.
-      // This second case is valid for 'additionalFileToCompiler' added through Plugin Options.
-      const normalizedFilepath =
-        rewritePathsWithExposedFederatedModules(sourceFilename) ?? filepath;
-
-      this.tsDefinitionFilesObj[normalizedFilepath] = text;
-
+      this.tsDefinitionFilesObj[filepath] = text;
       originalWriteFile(
-        normalizedFilepath,
+        filepath,
         text,
         writeOrderByteMark,
         onError,
         sourceFiles,
         data
       );
+
+      // create exports matching the `exposes` config
+      const sourceFilename = sourceFiles?.[0].fileName || '';
+      const exposedDestFilePath = exposeSrcToDestMap[sourceFilename];
+
+      // create reexport file only if the file was marked for exposing
+      if (exposedDestFilePath) {
+        const normalizedExposedDestFilePath = path.resolve(
+          this.options.distDir,
+          `${exposedDestFilePath}.d.ts`
+        );
+
+        const relativePathToCompiledFile = path.relative(
+          path.dirname(normalizedExposedDestFilePath),
+          filepath
+        );
+        // add ./ so it's always relative, remove d.ts because it's not needed and can throw warnings
+        const importPath =
+          './' + relativePathToCompiledFile.replace(/\.d\.ts$/, '');
+        const reexport = `export * from '${importPath}';\nexport { default } from '${importPath}';`;
+
+        this.tsDefinitionFilesObj[normalizedExposedDestFilePath] = reexport;
+        
+        // reuse originalWriteFile as it creates folders if they don't exist
+        originalWriteFile(
+          normalizedExposedDestFilePath,
+          reexport,
+          writeOrderByteMark
+        );
+      }
     };
 
     return host;
