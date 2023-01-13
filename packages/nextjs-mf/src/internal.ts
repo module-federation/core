@@ -240,7 +240,7 @@ export const removePlugins = [
 ];
 
 export const parseRemoteSyntax = (remote: string) => {
-  if (typeof remote === 'string' && remote.includes('@')) {
+  if (typeof remote === 'string' && remote.includes('@') && !remote.startsWith('internal ')) {
     const [url, global] = extractUrlAndGlobal(remote);
     return generateRemoteTemplate(url, global);
   }
@@ -248,14 +248,35 @@ export const parseRemoteSyntax = (remote: string) => {
   return remote;
 };
 
-export const parseRemotes = (remotes: Record<string, any>) => Object.entries(remotes).reduce((acc, remote) => {
-  if (!remote[1].startsWith('promise ') && remote[1].includes('@')) {
-    acc[remote[0]] = `promise ${parseRemoteSyntax(remote[1])}`;
-    return acc;
-  }
-  acc[remote[0]] = remote[1];
-  return acc;
-}, {} as Record<string, string>);
+export const parseRemotes = (remotes: Record<string, any>) =>
+  Object.entries(remotes).reduce(
+    (acc, [key, value]) => {
+      // check if user is passing a internal "delegate module" reference
+      if (value.startsWith("internal ")) {
+        return { ...acc, [key]: value };
+      }
+      // check if user is passing custom promise template
+      if (!value.startsWith("promise ") && value.includes("@")) {
+        return { ...acc, [key]: `promise ${parseRemoteSyntax(value)}` };
+      }
+      // return standard template otherwise
+      return { ...acc, [key]: value };
+    },
+    {} as Record<string, string>
+  );
+
+export const getDelegates = (remotes: Record<string, any>)=> {
+  return Object.entries(remotes).reduce(
+    (acc, [key, value]) => {
+      // check if user is passing a internal "delegate module" reference
+      if (value.startsWith("internal ")) {
+        return { ...acc, [key]: value };
+      }
+      return acc
+    },
+    {} as Record<string, string>
+  );
+}
 
 const parseShareOptions = (options: ModuleFederationPluginOptions) => {
   const sharedOptions: [string, SharedConfig][] = parseOptions(

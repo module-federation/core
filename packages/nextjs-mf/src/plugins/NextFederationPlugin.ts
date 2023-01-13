@@ -14,7 +14,7 @@ import {createRuntimeVariables} from '@module-federation/utilities';
 import type {Compiler} from 'webpack';
 import path from 'path';
 
-import {internalizeSharedPackages, parseRemotes, reKeyHostShared,} from '../internal';
+import {internalizeSharedPackages, parseRemotes, reKeyHostShared,getDelegates} from '../internal';
 import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
 import ChildFederationPlugin from './ChildFederationPlugin';
 
@@ -86,7 +86,6 @@ export class NextFederationPlugin {
         });
       }
 
-
       if (this._options.remotes) {
         this._options.remotes = parseRemotes(this._options.remotes);
       }
@@ -117,6 +116,29 @@ export class NextFederationPlugin {
         '../loaders/patchDefaultSharedLoader'
       ),
     });
+
+    if(this._options.remotes) {
+      const delegates = getDelegates(this._options.remotes)
+
+      compiler.options.module.rules.push({
+        test(req: string) {
+          if (req.includes(path.join(compiler.context, 'pages')) || req.includes(path.join(compiler.context, 'app'))) {
+            return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req)
+          }
+          return false
+        },
+        include: compiler.context,
+        exclude: /node_modules/,
+        loader: path.resolve(
+          __dirname,
+          '../loaders/delegateLoader'
+        ),
+        options: {
+          delegates
+        }
+      });
+    }
+
     if (this._extraOptions.automaticAsyncBoundary) {
       compiler.options.module.rules.push({
         test: (request: string) => {
