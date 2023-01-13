@@ -24,6 +24,10 @@ interface Context {
 
 
 export const parseRemotes = (remotes: Record<string, any>) => Object.entries(remotes).reduce((acc, remote) => {
+  if(remote[1].startsWith('internal ')) {
+    acc[remote[0]] = remote[1];
+    return acc;
+  }
   if (!remote[1].startsWith('promise ') && remote[1].includes('@')) {
     acc[remote[0]] = `promise ${parseRemoteSyntax(remote[1])}`;
     return acc;

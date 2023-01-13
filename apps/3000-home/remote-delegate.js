@@ -1,8 +1,17 @@
 module.exports = new Promise((resolve, reject) => {
+  if(!global.__remote_scope__) {
+    // create a global scope for container, similar to how remotes are set on window in the browser
+    global.__remote_scope__ = {
+      _config: {},
+    }
+  }
   console.log('Delegate being called for', __resourceQuery)
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote')
   console.log(currentRequest)
   const [containerGlobal, url] = currentRequest.split('@');
+  if(typeof window === 'undefined') {
+    global.__remote_scope__._config[global] = url
+  }
   const __webpack_error__ = new Error()
   __webpack_require__.l(
     url,

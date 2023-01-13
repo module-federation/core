@@ -1,9 +1,8 @@
 import React from 'react';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
-console.log(import('checkout/CheckoutTitle'));
 const CheckoutTitle = dynamic(() => import('checkout/CheckoutTitle'), {
-  ssr: false,
+  ssr: true,
 });
 const ButtonOldAnt = dynamic(() => import('checkout/ButtonOldAnt'), {
   ssr: false,

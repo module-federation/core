@@ -12,7 +12,7 @@ function MyApp(props) {
 
   const { Component, pageProps } = props
   const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
-console.log('props',props)
+
   useMFClient({
     onChangeRemote: async (remote) => {
       if (remote) {
