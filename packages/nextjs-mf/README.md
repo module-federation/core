@@ -24,6 +24,8 @@ https://github.com/module-federation/module-federation-examples
 
 Under the hood we share some next internals automatically
 You do not need to share these packages, sharing next internals yourself will cause errors.
+<details>
+<summary> See DEFAULT_SHARE_SCOPE:</summary>
 
 ```js
 const DEFAULT_SHARE_SCOPE = {
@@ -69,6 +71,8 @@ const DEFAULT_SHARE_SCOPE = {
   },
 };
 ```
+
+</details>
 
 ## Usage
 
