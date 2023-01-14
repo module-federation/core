@@ -241,6 +241,137 @@ const SampleComponent = dynamic(() => import('next2/sampleComponent'), {
 });
 ```
 
+
+## Beta: Delegate modules
+
+Delegate modules are a new concept to module federation. They allow you to delegate the loading of a remote to a internal file bundled by webpack. 
+Its similar to `promise new Promise`, but instead of a string in webpack config, you get a bundled module that can be used to load the remote, works with imports, and goes through the normal webpack processing.
+
+### Use of delegate modules
+
+Delegate modules are a new feature in module federation that allow you to delegate the loading of a remote to an internal file bundled by webpack. 
+This differs from the default remote entry loading mechanism in webpack and allows for more control over the loading process.
+
+To use delegate modules, the delegate file must export a Promise that resolves to a remote/container interface. 
+A container interface is the low-level {get,init} API that remote entries expose to a consuming app. 
+In the browser, a remote container would be window.app1, and in Node, it would be global.__remote_scope__.app1.
+
+Since the delegate is responsible for loading the remote entry, a method for script loading must be implemented. 
+One common method is to use webpack's built-in __webpack_require__.l method, but any method can be used. 
+This method is exposed to the runtime and is the same method that webpack uses internally to load remotes.
+
+An example of using a delegate module with __webpack_require__.l is shown below:
+
+
+```js
+// This module exports a new promise
+module.exports = new Promise((resolve, reject) => {
+  // The URL of the script that needs to be loaded
+  const url = "http://localhost:3000/_next/static/chunks/remoteEntry.js";
+  // The name of the container in which the script will be loaded
+  const containerName = "app1";
+  // Creating a new error object
+  const __webpack_error__ = new Error()
+  // Asynchronous loading of the script using webpack's require method
+  __webpack_require__.l(
+    url,
+    // This function is called when the script is loaded or an error occurs
+    function (event) {
+      // If the script has been successfully loaded, resolve the promise
+      if (typeof window[containerName] !== 'undefined') return resolve(window[containerName]);
+      // If an error occurred, create a custom error object and reject the promise
+      var realSrc = event && event.target && event.target.src;
+      __webpack_error__.message = 'Loading script failed.\\n(' + event.message + ': ' + realSrc + ')';
+      __webpack_error__.name = 'ScriptExternalLoadError';
+      __webpack_error__.stack = event.stack;
+      reject(__webpack_error__);
+    },
+    // the unique id of the script, helps webpack track if the script is already loaded, loading, or failed.
+    containerName,
+  );
+})
+```
+
+### Configuring a delegate module
+
+Inside next.config.js, where remotes are configured in module federation plugin. 
+Instead of the typical `global@url` syntax, you'd use the `internal ` hint to tell webpack to use the internal file as the remote entry.
+
+Webpack has several hint types: 
+- `internal `
+- `promise `
+- `import ` 
+- `external `
+- `script `
+
+The `global@url` syntax is actually `script` hint: `script global@url`
+
+For internal modules, we would just reference the path relative to the next.config.js file: `internal ./path/to/module`.
+
+Since i do not want to create multiple files, i want to use the same file for handling all my remote entries.
+I need to pass information to this delegate module so that it knows what webpack is currently asking for. 
+
+You can use query paramaters to pass data to a module, webpack will pass the query parameters to the module as a string.
+
+This is known as `__resourceQuery` : https://webpack.js.org/api/module-variables/#__resourcequery-webpack-specific
+
+
+```js
+// next.config.js
+
+const remotes = {
+  // pass pointer to remote-delegate, pass deletae remote name as query param, 
+  // at runtime webpack will pass this as __resourceQuery
+  shop: `internal ./remote-delegate.js?remote=shop@http://localhost:3001/_next/static/${
+    isServer ? 'ssr' : 'chunks'
+  }/remoteEntry.js`,
+  checkout: `internal ./remote-delegate.js?remote=checkout@http://localhost:3002/_next/static/${
+    isServer ? 'ssr' : 'chunks'
+  }/remoteEntry.js`,
+};
+
+// remote-delegate.js
+module.exports = new Promise((resolve, reject) => {
+  // some node specific for NodeFederation 
+  if(!global.__remote_scope__) {
+    // create a global scope for container, similar to how remotes are set on window in the browser
+    global.__remote_scope__ = {
+      _config: {},
+    }
+  }
+  console.log('Delegate being called for', __resourceQuery)
+  // get "remote" off resource query, returns url@global
+  const currentRequest = new URLSearchParams(__resourceQuery).get('remote')
+  console.log(currentRequest)
+  // parse syntax
+  const [containerGlobal, url] = currentRequest.split('@');
+  // if node server, register the containers known origins
+  if(typeof window === 'undefined') {
+    global.__remote_scope__._config[global] = url
+  }
+  const __webpack_error__ = new Error()
+  // if you use NodeFederationPlugin, ive build a server-side version of __webpack_require__.l, with the same api. 
+  // this is how module federation works on the server, i wrote server-side chunk loading.
+  __webpack_require__.l(
+    url,
+    function (event) {
+      // resolve promise with container, for browser env or node env. 
+      const container = typeof window === 'undefined' ? global.__remote_scope__[containerGlobal] : window[containerGlobal];
+      console.log('delegate resolving', container)
+      if (typeof container !== 'undefined') return resolve(container);
+      var realSrc = event && event.target && event.target.src;
+      __webpack_error__.message = 'Loading script failed.\\n(' + event.message + ': ' + realSrc + ')';
+      __webpack_error__.name = 'ScriptExternalLoadError';
+      __webpack_error__.stack = event.stack;
+      reject(__webpack_error__);
+    },
+    containerGlobal,
+  );
+})
+
+```
+
+
 ## Utilities
 
 Ive added a util for dynamic chunk loading, in the event you need to load remote containers dynamically.
