@@ -244,76 +244,90 @@ const SampleComponent = dynamic(() => import('next2/sampleComponent'), {
 
 ## Beta: Delegate modules
 
-Delegate modules are a new concept to module federation. They allow you to delegate the loading of a remote to a internal file bundled by webpack. 
-Its similar to `promise new Promise`, but instead of a string in webpack config, you get a bundled module that can be used to load the remote, works with imports, and goes through the normal webpack processing.
+Delegate modules are a new feature in module federation that allow you to control the
+loading process of remote modules by delegating it to an internal file bundled by webpack.
+This is done by exporting a promise in the delegate file that resolves to a remote/container interface.
 
-### Use of delegate modules
-
-Delegate modules are a new feature in module federation that allow you to delegate the loading of a remote to an internal file bundled by webpack. 
-This differs from the default remote entry loading mechanism in webpack and allows for more control over the loading process.
-
-To use delegate modules, the delegate file must export a Promise that resolves to a remote/container interface. 
-A container interface is the low-level {get,init} API that remote entries expose to a consuming app. 
+A container interface is the low-level {get, init} API that remote entries expose to a consuming app. 
 In the browser, a remote container would be window.app1, and in Node, it would be global.__remote_scope__.app1.
 
-Since the delegate is responsible for loading the remote entry, a method for script loading must be implemented. 
-One common method is to use webpack's built-in __webpack_require__.l method, but any method can be used. 
+To use delegate modules, a method for script loading must be implemented in the delegate file. 
+A common method is to use webpack's built-in __webpack_require__.l method, but any method can be used. 
 This method is exposed to the runtime and is the same method that webpack uses internally to load remotes.
 
-An example of using a delegate module with __webpack_require__.l is shown below:
+Here's an example of using a delegate module with __webpack_require__.l:
 
+<details>
+  <summary>See Example: (click)  </summary>
+In this example, the delegate module exports a promise that
+loads the remote entry script located at "http://localhost:3000/_next/static/chunks/remoteEntry.js"
+and assigns it to the container "app1". If the script is successfully loaded,
+the promise is resolved with the value of window[containerName].
+If an error occurs while loading the script, a custom error object is created and the promise is rejected with this error.
 
 ```js
-// This module exports a new promise
 module.exports = new Promise((resolve, reject) => {
-  // The URL of the script that needs to be loaded
   const url = "http://localhost:3000/_next/static/chunks/remoteEntry.js";
-  // The name of the container in which the script will be loaded
   const containerName = "app1";
-  // Creating a new error object
   const __webpack_error__ = new Error()
-  // Asynchronous loading of the script using webpack's require method
   __webpack_require__.l(
     url,
-    // This function is called when the script is loaded or an error occurs
     function (event) {
-      // If the script has been successfully loaded, resolve the promise
       if (typeof window[containerName] !== 'undefined') return resolve(window[containerName]);
-      // If an error occurred, create a custom error object and reject the promise
       var realSrc = event && event.target && event.target.src;
       __webpack_error__.message = 'Loading script failed.\\n(' + event.message + ': ' + realSrc + ')';
       __webpack_error__.name = 'ScriptExternalLoadError';
       __webpack_error__.stack = event.stack;
       reject(__webpack_error__);
     },
-    // the unique id of the script, helps webpack track if the script is already loaded, loading, or failed.
     containerName,
   );
 })
+
 ```
+</details>
 
-### Configuring a delegate module
+In the next.config.js file, where remotes are configured in the module federation plugin, 
+you can use the internal hint to tell webpack to use an internal file as the remote entry. 
+This is done by replacing the typical global@url syntax with `internal ./path/to/module`.
 
-Inside next.config.js, where remotes are configured in module federation plugin. 
-Instead of the typical `global@url` syntax, you'd use the `internal ` hint to tell webpack to use the internal file as the remote entry.
+Webpack has several hint types:
 
-Webpack has several hint types: 
 - `internal `
 - `promise `
-- `import ` 
+- `import `
 - `external `
 - `script `
 
-The `global@url` syntax is actually `script` hint: `script global@url`
+The global@url syntax is actually script hint: script `global@url`
 
-For internal modules, we would just reference the path relative to the next.config.js file: `internal ./path/to/module`.
+If you want to use the same file for handling all remote entries, you can pass information to the delegate module using query parameters.
+Webpack will pass the query parameters to the module as a string, this is known as `__resourceQuery`.
+It allows you to pass information to the delegate module, so it knows what webpack is currently asking for.
 
-Since i do not want to create multiple files, i want to use the same file for handling all my remote entries.
-I need to pass information to this delegate module so that it knows what webpack is currently asking for. 
+You can use query parameters to pass data to a module, webpack will pass the query parameters to the module as a string.
 
-You can use query paramaters to pass data to a module, webpack will pass the query parameters to the module as a string.
+For more information on `__resourceQuery` visit: https://webpack.js.org/api/module-variables/#__resourcequery-webpack-specific.
 
-This is known as `__resourceQuery` : https://webpack.js.org/api/module-variables/#__resourcequery-webpack-specific
+```js
+// next.config.js
+
+const remotes = {
+  // pass pointer to remote-delegate, pass deletae remote name as query param, 
+  // at runtime webpack will pass this as __resourceQuery
+  shop: `internal ./remote-delegate.js?remote=shop@http://localhost:3001/_next/static/${
+    isServer ? 'ssr' : 'chunks'
+  }/remoteEntry.js`,
+  checkout: `internal ./remote-delegate.js?remote=checkout@http://localhost:3002/_next/static/${
+    isServer ? 'ssr' : 'chunks'
+  }/remoteEntry.js`,
+};
+```
+
+
+#### Expand below to see a full example: 
+<details>
+  <summary>See Full configuration: (click) </summary>
 
 
 ```js
@@ -370,6 +384,7 @@ module.exports = new Promise((resolve, reject) => {
 })
 
 ```
+</details>
 
 
 ## Utilities
