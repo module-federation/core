@@ -111,11 +111,11 @@ Also NextFederationPlugin has own optional argument `extraOptions` where you can
 
 ```js
 new NextFederationPlugin({
-  name: ...,
-  filename: ...,
-  remotes: ...,
-  exposes: ...,
-  shared: ...,
+  name: '',
+  filename: '',
+  remotes: {},
+  exposes: {},
+  shared: {},
   extraOptions: {
     exposePages: true, // `false` by default
     enableImageLoaderFix: true, // `false` by default
