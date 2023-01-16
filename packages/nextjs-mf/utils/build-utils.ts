@@ -157,6 +157,22 @@ const IsomorphicRemoteTemplate = function () {
       proxy.init();
     }
     return proxy;
+  }).catch((e)=> {
+    console.error(remote.global, 'is offline, returning fake remote');
+    console.error(e);
+
+    return {
+      fake: true,
+      get: (arg: any) => {
+        console.log('faking', arg, 'module on', remote.global);
+
+        return Promise.resolve(() => {
+          return () => null
+        });
+      },
+      init: () => {
+      }
+    }
   });
 };
 
