@@ -15,7 +15,15 @@ export default function patchDefaultSharedLoader(
 
   const resolvedDelegates = Object.values(delegates).map((delegate) => {
     const [request, query] = delegate.replace('internal ','').split('?')
-    return path.resolve(this._compiler?.context || '',request) + '?remote=' + new URLSearchParams(query).get('remote')
+    if(query) {
+      let queries = [];
+      for (const [key, value] of new URLSearchParams(query).entries()) {
+        queries.push(`${key}=${value}`)
+      }
+      return path.resolve(this._compiler?.context || '', request) + '?' + queries.join('&')
+    } else {
+      return path.resolve(this._compiler?.context || '', request)
+    }
   })
 
 
@@ -23,22 +31,11 @@ export default function patchDefaultSharedLoader(
     return `require('${delegate}')`
   })
 
-  // console.log(requiredDelegates);
-
-  // avoid absolute paths as they break hashing when the root for the project is moved
-  // @see https://webpack.js.org/contribute/writing-a-loader/#absolute-paths
-  // const pathIncludeDefaults = path.relative(
-  //   this.context,
-  //   path.resolve(__dirname, '../include-defaults.js')
-  // );
-  //
   return [
     '',
     ...requiredDelegates,
     '',
     content
   ].join("\n")
-
-  return content
 }
 
