@@ -270,24 +270,25 @@ the promise is resolved with the value of window[containerName].
 If an error occurs while loading the script, a custom error object is created and the promise is rejected with this error.
 
 ```js
-module.exports = new Promise((resolve, reject) => {
-  const url = "http://localhost:3000/_next/static/chunks/remoteEntry.js";
-  const containerName = "app1";
-  const __webpack_error__ = new Error()
-  __webpack_require__.l(
-    url,
-    function (event) {
-      if (typeof window[containerName] !== 'undefined') return resolve(window[containerName]);
-      var realSrc = event && event.target && event.target.src;
-      __webpack_error__.message = 'Loading script failed.\\n(' + event.message + ': ' + realSrc + ')';
-      __webpack_error__.name = 'ScriptExternalLoadError';
-      __webpack_error__.stack = event.stack;
-      reject(__webpack_error__);
-    },
-    containerName,
-  );
-})
 
+import { importDelegatedModule } from '@module-federation/utilities';
+
+module.exports = new Promise((resolve, reject) => {
+  console.log('Delegate being called for', __resourceQuery);
+  const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
+  console.log(currentRequest);
+
+  const [global, url] = currentRequest.split('@');
+
+  importDelegatedModule({
+    global,
+    url,
+  })
+    .then((container) => {
+      resolve(container);
+    })
+    .catch((err) => reject(err));
+});
 ```
 </details>
 
