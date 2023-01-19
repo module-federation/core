@@ -12,6 +12,11 @@ import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
 
 import loadScriptTemplate, {executeLoadTemplate} from './loadScript';
 
+interface RemotesByType {
+  functional: string[];
+  normal: string[];
+}
+
 interface ReadFileChunkLoadingRuntimeModuleOptions {
   baseURI: Compiler['options']['output']['publicPath'];
   promiseBaseURI?: string;
@@ -84,6 +89,16 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     // so for example, if im in hostA and require(remoteb/module) --> console.log of name in runtime code will return remoteb
 
     const {remotes = {}, name} = this.options;
+
+    const remotesByType: RemotesByType = Object.values(remotes).reduce((acc:RemotesByType, remote:string) => {
+      if (remote.startsWith('promise ') || remote.startsWith('internal ') || remote.startsWith('external ')) {
+        acc.functional.push(remote);
+      } else {
+        acc.normal.push(remote);
+      }
+      return acc;
+    }, {functional: [], normal: []});
+
     const {webpack} = this.chunkLoadingContext;
     const chunkHasJs =
       (webpack && webpack.javascript.JavascriptModulesPlugin.chunkHasJs) ||
@@ -269,9 +284,11 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         this._getLogger(`'remotes known to'`, JSON.stringify(
                           name
                         ), JSON.stringify(remotes)),
+
+
                         // keys are mostly useless here, we want to find remote by its global (unique name)
                         `var remotes = ${JSON.stringify(
-                          Object.values(remotes).reduce((acc, remote) => {
+                          Object.values(remotesByType.normal).reduce((acc, remote) => {
                             //TODO: need to handle all other cases like when remote is not a @ syntax string
                             const [global, url] = remote.split('@');
                             acc[global] = url;
@@ -283,14 +300,14 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         /*
                       TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise() global will/should still exist - but can only be known at runtime
                     */
-                        this._getLogger(`'remotes keyed by global name'`,JSON.stringify(remotes)),
-                        this._getLogger(`'remote scope configs'`,'global.__remote_scope__._config'),
+                        this._getLogger(`'remotes keyed by global name'`, JSON.stringify(remotes)),
+                        this._getLogger(`'remote scope configs'`, 'global.__remote_scope__._config'),
 
                         this._getLogger(`'before remote scope'`),
-                        this._getLogger(`'global.__remote_scope__'`,`global.__remote_scope__`),
+                        this._getLogger(`'global.__remote_scope__'`, `global.__remote_scope__`),
                         this._getLogger(`'global.__remote_scope__[${JSON.stringify(
                           name
-                        )}]'`,`global.__remote_scope__[${JSON.stringify(
+                        )}]'`, `global.__remote_scope__[${JSON.stringify(
                           name
                         )}]`),
 
@@ -318,7 +335,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         `if(typeof requestedRemote === 'function'){
                     requestedRemote = await requestedRemote()
                   }`,
-                        this._getLogger(`'var requestedRemote'`,`requestedRemote`),
+                        this._getLogger(`'var requestedRemote'`, `requestedRemote`),
 
                         // example: uncomment this and server will never reply
                         // `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
@@ -326,9 +343,9 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         // there may still be a use case for that with promise new promise, depending on how we design it.
                         `var scriptUrl = new URL(requestedRemote);`,
 
-                        this._getLogger(`'global.__remote_scope__'`,`global.__remote_scope__`),
+                        this._getLogger(`'global.__remote_scope__'`, `global.__remote_scope__`),
                         `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
-                        this._getLogger(`'chunkname to request'`,`chunkName`),
+                        this._getLogger(`'chunkname to request'`, `chunkName`),
                         `var fileToReplace = require('path').basename(scriptUrl.pathname);`,
                         `scriptUrl.pathname = scriptUrl.pathname.replace(fileToReplace, chunkName);`,
                         this._getLogger(`'will load remote chunk'`, `scriptUrl.toString()`),
