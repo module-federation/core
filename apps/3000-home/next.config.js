@@ -1,5 +1,5 @@
 const { withNx } = require('@nrwl/next/plugins/with-nx');
-
+const {createDelegatedModule} = require('@module-federation/utilities');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 
 /**
@@ -14,17 +14,17 @@ const nextConfig = {
 
   webpack(config, options) {
     const { isServer } = options;
-
+;
     const remotes = {
-      shop: `internal ./remote-delegate.js?remote=shop@http://localhost:3001/_next/static/${
+      // shop: createDelegatedModule(require.resolve('./remote-delegate.js'), {
+      //   remote: `shop@http://localhost:3001/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+      // }),
+      checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
+        remote: `checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+      }),
+      shop: `shop@http://localhost:3001/_next/static/${
         isServer ? 'ssr' : 'chunks'
       }/remoteEntry.js`,
-      checkout: `internal ./remote-delegate.js?remote=checkout@http://localhost:3002/_next/static/${
-        isServer ? 'ssr' : 'chunks'
-      }/remoteEntry.js`,
-      // shop: `shop@http://localhost:3001/_next/static/${
-      //   isServer ? 'ssr' : 'chunks'
-      // }/remoteEntry.js`,
       // checkout: `checkout@http://localhost:3002/_next/static/${
       //   isServer ? 'ssr' : 'chunks'
       // }/remoteEntry.js`,

@@ -90,6 +90,7 @@ export class NextFederationPlugin {
         this._options.remotes = parseRemotes(this._options.remotes);
       }
 
+      console.log('this._options', this._options);
       if (this._options.library) {
         console.error('[mf] you cannot set custom library');
       }

@@ -8,14 +8,14 @@ export default function TestBrokenRemotes() {
       <p>
         Check unresolved host –{' '}
         <Link href="/unresolved-host">
-          <a>/unresolved-host</a>
+          /unresolved-host
         </Link>{' '}
         (on http://localhost:<b>3333</b>/_next/static/chunks/remoteEntry.js)
       </p>
       <p>
         Check wrong response for remoteEntry –{' '}
         <Link href="/wrong-entry">
-          <a>/wrong-entry</a>
+          /wrong-entry
         </Link>{' '}
         (on http://localhost:3000/_next/static/chunks/remoteEntry<b>Wrong</b>
         .js)

@@ -74,6 +74,14 @@ export const importDelegatedModule = async (
   return loadScript(keyOrRuntimeRemoteItem);
 };
 
+export const createDelegatedModule = (delegate:string, params: { [key: string]: any } ) => {
+  let queries: string[] = [];
+  for (const [key, value] of Object.entries(params)) {
+    queries.push(`${key}=${value}`);
+  }
+  return `internal ${delegate}?${queries.join('&')}`;
+}
+
 const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
 
@@ -128,6 +136,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         const asyncContainer = globalScope[
           remoteGlobal
         ] as unknown as AsyncContainer;
+        globalScope[remoteGlobal].__initialized = true;
         return resolve(asyncContainer);
       }
 
@@ -135,6 +144,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         reference.url,
         function (event: Event) {
           if (typeof globalScope[remoteGlobal] !== 'undefined') {
+            globalScope[remoteGlobal].__initialized = true;
             return resolveRemoteGlobal();
           }
 

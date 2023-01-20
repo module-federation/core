@@ -1,6 +1,6 @@
 import Template from './Template';
-import { parseRemoteSyntax } from '../src/internal';
-import { WebpackRemoteContainer } from '@module-federation/utilities';
+import {parseRemoteSyntax} from '../src/internal';
+import {WebpackRemoteContainer} from '@module-federation/utilities';
 import path from 'path';
 
 const transformInput = (code: string) => {
@@ -62,7 +62,7 @@ const IsomorphicRemoteTemplate = function () {
       }
     } else {
       // @ts-ignore
-      if(!global.__remote_scope__) {
+      if (!global.__remote_scope__) {
         // create a global scope for container, similar to how remotes are set on window in the browser
         // @ts-ignore
         global.__remote_scope__ = {
@@ -117,7 +117,7 @@ const IsomorphicRemoteTemplate = function () {
     const globalScope = typeof window !== 'undefined' ? window : global.__remote_scope__;
     const remoteGlobal = globalScope[
       remote.global
-    ] as unknown as WebpackRemoteContainer & {
+      ] as unknown as WebpackRemoteContainer & {
       __initialized: boolean;
     };
     const proxy: WebpackRemoteContainer = {
@@ -148,17 +148,23 @@ const IsomorphicRemoteTemplate = function () {
           remoteGlobal.init(
             new Proxy(shareScope as typeof __webpack_share_scopes__, handler)
           );
-        } catch (e) {}
+        } catch (e) {
+
+        }
 
         remoteGlobal.__initialized = true;
       },
     };
 
     if (!remoteGlobal.__initialized) {
-      proxy.init();
+      try {
+        proxy.init();
+      } catch (e) {
+
+      }
     }
     return proxy;
-  }).catch((e)=> {
+  }).catch((e) => {
     console.error(remote.global, 'is offline, returning fake remote');
     console.error(e);
 
