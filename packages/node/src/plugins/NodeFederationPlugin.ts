@@ -140,6 +140,7 @@ export const parseRemoteSyntax = (remote: any) => {
   return remote;
 };
 
+
 class NodeFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private context: Context;
