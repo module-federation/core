@@ -3,7 +3,7 @@ import path from 'path';
 
 /**
  *
- * Requires `include-defaults.js` with required shared libs
+ * Requires either the default delegate module or a custom one
  *
  */
 export default function patchDefaultSharedLoader(
