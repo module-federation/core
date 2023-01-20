@@ -155,7 +155,11 @@ const IsomorphicRemoteTemplate = function () {
     };
 
     if (!remoteGlobal.__initialized) {
-      proxy.init();
+      try {
+        proxy.init();
+      } catch (e) {
+
+      }
     }
     return proxy;
   }).catch((e)=> {
