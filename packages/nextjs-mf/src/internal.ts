@@ -3,7 +3,7 @@ import type {
   ModuleFederationPluginOptions,
   Shared,
   SharedConfig,
-  SharedObject,
+  SharedObject
 } from '@module-federation/utilities';
 
 import path from 'path';
@@ -11,7 +11,7 @@ import path from 'path';
 import { isRequiredVersion } from 'webpack/lib/sharing/utils';
 import { parseOptions } from 'webpack/lib/container/options';
 
-import { extractUrlAndGlobal } from '@module-federation/utilities';
+import { extractUrlAndGlobal, createDelegatedModule } from '@module-federation/utilities';
 
 // the share scope we attach by default
 // in hosts we re-key them to prevent webpack moving the modules into their own chunks (cause eager error)
@@ -149,7 +149,11 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
       }
     }
     if (!${global}.__initialized) {
+    try {
       proxy.init(__webpack_require__.S.default)
+      } catch (e) {
+        ${global}.__initialized = true
+      }
     }
     return proxy
   })`;
