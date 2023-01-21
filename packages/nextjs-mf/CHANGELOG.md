@@ -2,6 +2,19 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.0.5](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.0.4...nextjs-mf-6.0.5) (2023-01-21)
+
+### Dependency Updates
+
+* `node` updated to version `0.10.2`
+* `utils` updated to version `1.1.2`
+
+### Bug Fixes
+
+* **nextjs-mf:** fix list key warning in FlushedChunks ([#508](https://github.com/module-federation/nextjs-mf/issues/508)) ([7694c93](https://github.com/module-federation/nextjs-mf/commit/7694c9350f59e4f626d7fd4da9f3ca42803326ca))
+
+
+
 ## [6.0.4](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.0.3...nextjs-mf-6.0.4) (2023-01-11)
 
 
