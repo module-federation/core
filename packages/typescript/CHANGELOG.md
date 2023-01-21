@@ -2,6 +2,18 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.1.5](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.4...typescript-2.1.5) (2023-01-21)
+
+### Dependency Updates
+
+* `utils` updated to version `1.1.2`
+
+### Bug Fixes
+
+* **typescript:** webpack bails out when `statsJson` isn't found ([#507](https://github.com/module-federation/nextjs-mf/issues/507)) ([eb5e002](https://github.com/module-federation/nextjs-mf/commit/eb5e0022381b525e8bcc6dbfa95d23ef9a414cfb)), closes [#498](https://github.com/module-federation/nextjs-mf/issues/498)
+
+
+
 ## [2.1.4](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.3...typescript-2.1.4) (2023-01-11)
 
 ### Dependency Updates

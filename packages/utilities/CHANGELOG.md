@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.1.2](https://github.com/module-federation/nextjs-mf/compare/utils-1.1.1...utils-1.1.2) (2023-01-21)
+
+
+### Bug Fixes
+
+* Utilities - Remove module side effect ([#488](https://github.com/module-federation/nextjs-mf/issues/488)) ([3554de7](https://github.com/module-federation/nextjs-mf/commit/3554de7912eaf7b379a6a863677c4b01da0ccf2c)), closes [#487](https://github.com/module-federation/nextjs-mf/issues/487) [#500](https://github.com/module-federation/nextjs-mf/issues/500) [#496](https://github.com/module-federation/nextjs-mf/issues/496) [#495](https://github.com/module-federation/nextjs-mf/issues/495) [#492](https://github.com/module-federation/nextjs-mf/issues/492) [#455](https://github.com/module-federation/nextjs-mf/issues/455) [#491](https://github.com/module-federation/nextjs-mf/issues/491) [#496](https://github.com/module-federation/nextjs-mf/issues/496) [#495](https://github.com/module-federation/nextjs-mf/issues/495)
+
+
+
 ## [1.1.1](https://github.com/module-federation/nextjs-mf/compare/utils-1.1.0...utils-1.1.1) (2023-01-11)
 
 
