@@ -73,12 +73,7 @@ export class FederatedTypesPlugin {
 
     const watchOptionsToIgnore = [
       path.normalize(
-        path.join(
-          context as string,
-          this.normalizeOptions.typescriptFolderName,
-          '**',
-          '*'
-        )
+        path.join(context as string, this.normalizeOptions.typescriptFolderName)
       ),
     ];
 
@@ -183,13 +178,13 @@ export class FederatedTypesPlugin {
 
       if (statsJson?.files) {
         this.logger.log(`Checking with Cache entries`);
-        
+
         const { filesToCacheBust, filesToDelete } =
           TypesCache.getCacheBustedFiles(remote, statsJson);
-  
+
         this.logger.log('filesToCacheBust', filesToCacheBust);
         this.logger.log('filesToDelete', filesToDelete);
-  
+
         if (filesToDelete.length > 0) {
           filesToDelete.forEach((file) => {
             fs.unlinkSync(
@@ -202,7 +197,7 @@ export class FederatedTypesPlugin {
             );
           });
         }
-  
+
         if (filesToCacheBust.length > 0) {
           await Promise.all(
             filesToCacheBust.map((file) => {
@@ -212,18 +207,18 @@ export class FederatedTypesPlugin {
                 typescriptFolderName,
                 remote
               );
-  
+
               this.logger.log('Downloading types...');
               return download(url, destination, {
                 filename: file,
               });
             })
           );
-  
+
           this.logger.log('downloading complete');
         }
       } else {
-        this.logger.log(`No types index found for remote '${remote}'`)
+        this.logger.log(`No types index found for remote '${remote}'`);
       }
     }
   }
