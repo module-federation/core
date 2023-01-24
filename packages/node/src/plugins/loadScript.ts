@@ -68,7 +68,7 @@ export const executeLoadTemplate = `
         const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, {filename: 'node-federation-loader-' + name + '.vm'});
         global.__remote_scope__[name] = remote[name] || remote;
         global.__remote_scope__._config[name] = url;
-        callback(global.__remote_scope__[name])
+        callback(remote[name] || remote);
       } catch (e) {
         console.error('executeLoad hit catch block');
         e.target = {src: url};

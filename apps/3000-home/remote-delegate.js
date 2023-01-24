@@ -3,7 +3,6 @@ import { importDelegatedModule } from '@module-federation/utilities';
 module.exports = new Promise((resolve, reject) => {
   console.log('Delegate being called for', __resourceQuery);
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
-  console.log(currentRequest);
 
   const [global, url] = currentRequest.split('@');
 
@@ -11,8 +10,8 @@ module.exports = new Promise((resolve, reject) => {
     global,
     url,
   })
-    .then((container) => {
-      resolve(container);
+    .then((remote) => {
+      resolve(remote);
     })
     .catch((err) => reject(err));
 });

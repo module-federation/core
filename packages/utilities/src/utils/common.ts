@@ -71,7 +71,65 @@ const getRuntimeRemotes = () => {
 export const importDelegatedModule = async (
   keyOrRuntimeRemoteItem: string | RuntimeRemote
 ) => {
-  return loadScript(keyOrRuntimeRemoteItem);
+  // @ts-ignore
+  return loadScript(keyOrRuntimeRemoteItem).then((asyncContainer) => {
+    // for legacy reasons, we must mark container a initialized
+    // here otherwise older promise based implementation will try to init again with diff object
+    // asyncContainer.__initialized = true;
+    return asyncContainer
+  }).then((asyncContainer) => {
+    // most of this is only needed because of legacy promise based implementation
+    if(typeof window === 'undefined') {
+      const proxy = {
+        get: asyncContainer.get,
+        init: function (shareScope: any, initScope: any) {
+          const handler = {
+            get: async (target: { [x: string]: any; }, prop: string | number) => {
+              // if (target[prop]) {
+              //   Object.values(target[prop]).forEach(function (o) {
+              //     if (o.from === '_N_E') {
+              //       o.loaded = 1
+              //     }
+              //   })
+              // }
+              return target[prop]
+            },
+            set(target: { [x: string]: any; }, property: string, value: any) {
+              //@ts-ignore
+              if (global.usedChunks) global.usedChunks.add(global + "->" + property);
+              if (target[property]) {
+                return target[property]
+              }
+              target[property] = value
+              return true
+            }
+          }
+          try {
+            // @ts-ignore
+            return asyncContainer.init(new Proxy(shareScope, handler), initScope)
+          } catch (e) {
+          }
+          asyncContainer.__initialized = true
+        }
+      }
+     return proxy
+    } else {
+      console.log('returning delegate module', keyOrRuntimeRemoteItem)
+      return {
+        get: asyncContainer.get,
+        init: function (shareScope: any, initScope: any) {
+          console.log('init', shareScope, initScope)
+
+          try {
+            // @ts-ignore
+            return asyncContainer.init(shareScope, initScope);
+          } catch (e) {
+          }
+          asyncContainer.__initialized = true;
+        }
+      }
+    }
+  });
 };
 
 export const createDelegatedModule = (delegate:string, params: { [key: string]: any } ) => {
@@ -143,6 +201,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       (__webpack_require__ as any).l(
         reference.url,
         function (event: Event) {
+          console.log("event",event)
           if (typeof globalScope[remoteGlobal] !== 'undefined') {
             globalScope[remoteGlobal].__initialized = true;
             return resolveRemoteGlobal();
@@ -154,7 +213,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
             event && event.target && (event.target as HTMLScriptElement).src;
 
           __webpack_error__.message =
-            'Loading script failed.\n(' +
+            'common Loading script failed.\n(' +
             errorType +
             ': ' +
             realSrc +
