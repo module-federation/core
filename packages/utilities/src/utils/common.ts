@@ -78,6 +78,7 @@ export const importDelegatedModule = async (
     // asyncContainer.__initialized = true;
     return asyncContainer
   }).then((asyncContainer) => {
+    console.log('in thennable', asyncContainer.__initialized);
     // most of this is only needed because of legacy promise based implementation
     if(typeof window === 'undefined') {
       const proxy = {
@@ -109,25 +110,40 @@ export const importDelegatedModule = async (
             return asyncContainer.init(new Proxy(shareScope, handler), initScope)
           } catch (e) {
           }
-          asyncContainer.__initialized = true
+          //@ts-ignore
+          proxy.__initialized = true
         }
+      }
+      // @ts-ignore
+      if(!proxy.__initialized) {
+        //@ts-ignore
+        proxy.init(__webpack_share_scopes__.default);
       }
      return proxy
     } else {
       console.log('returning delegate module', keyOrRuntimeRemoteItem)
-      return {
+      const proxy ={
         get: asyncContainer.get,
         init: function (shareScope: any, initScope: any) {
-          console.log('init', shareScope, initScope)
+          console.log('init', shareScope, initScope, proxy)
 
           try {
             // @ts-ignore
             return asyncContainer.init(shareScope, initScope);
           } catch (e) {
           }
-          asyncContainer.__initialized = true;
+          //@ts-ignore
+          proxy.__initialized = true;
         }
       }
+      console.log('in thennable 2', asyncContainer.__initialized);
+      console.log('returning proxy', proxy)
+      // @ts-ignore
+      if(!proxy.__initialized) {
+        //@ts-ignore
+        proxy.init(__webpack_share_scopes__.default);
+      }
+      return proxy
     }
   });
 };
@@ -194,7 +210,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         const asyncContainer = globalScope[
           remoteGlobal
         ] as unknown as AsyncContainer;
-        globalScope[remoteGlobal].__initialized = true;
+        // globalScope[remoteGlobal].__initialized = true;
         return resolve(asyncContainer);
       }
 
@@ -203,7 +219,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         function (event: Event) {
           console.log("event",event)
           if (typeof globalScope[remoteGlobal] !== 'undefined') {
-            globalScope[remoteGlobal].__initialized = true;
+            // globalScope[remoteGlobal].__initialized = true;
             return resolveRemoteGlobal();
           }
 
