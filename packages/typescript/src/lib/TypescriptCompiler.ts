@@ -85,7 +85,7 @@ export class TypescriptCompiler {
     );
 
     const pathWithExt = path.resolve(normalizedRootDir, filenameWithExt);
-    return pathWithExt;
+    return pathWithExt.replace(/\\/g, '/');
   }
 
   private createHost(exposeSrcToDestMap: Record<string, string>) {
@@ -132,7 +132,7 @@ export class TypescriptCompiler {
         const reexport = `export * from '${importPath}';\nexport { default } from '${importPath}';`;
 
         this.tsDefinitionFilesObj[normalizedExposedDestFilePath] = reexport;
-        
+
         // reuse originalWriteFile as it creates folders if they don't exist
         originalWriteFile(
           normalizedExposedDestFilePath,
