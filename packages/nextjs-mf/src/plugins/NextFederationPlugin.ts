@@ -75,6 +75,18 @@ export class NextFederationPlugin {
 
       // should this be a plugin that we apply to the compiler?
       internalizeSharedPackages(this._options, compiler);
+
+      // module-federation/utilities uses internal webpack methods and must by bundled into runtime code.
+      if(Array.isArray(compiler.options.externals)) {
+        const originalExternals = compiler.options.externals[0];
+        compiler.options.externals[0] = function (ctx, callback) {
+          if (ctx.request && ctx.request.includes('@module-federation/utilities')) {
+            return callback()
+          }
+          // @ts-ignore
+          return originalExternals(ctx, callback);
+        }
+      }
     } else {
       if (this._extraOptions.automaticPageStitching) {
         compiler.options.module.rules.push({
@@ -104,7 +116,7 @@ export class NextFederationPlugin {
     //patch next
     compiler.options.module.rules.push({
       test(req: string) {
-        if (req.includes(path.join(compiler.context, 'pages')) || req.includes(path.join(compiler.context, 'app'))) {
+        if (req.includes(path.join(compiler.context, 'pages/')) || req.includes(path.join(compiler.context, 'app/'))) {
           return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req)
         }
         return false
@@ -122,11 +134,12 @@ export class NextFederationPlugin {
 
       compiler.options.module.rules.push({
         test(req: string) {
-          if (req.includes(path.join(compiler.context, 'pages')) || req.includes(path.join(compiler.context, 'app'))) {
-            return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req)
+          if (req.includes(path.join(compiler.context, 'pages/')) || req.includes(path.join(compiler.context, 'app/'))) {
+            return /_app\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req)
           }
           return false
         },
+        resourceQuery: this._extraOptions.automaticAsyncBoundary ? (query) => !query.includes('hasBoundary') : undefined,
         include: compiler.context,
         exclude: /node_modules/,
         loader: path.resolve(
@@ -142,7 +155,7 @@ export class NextFederationPlugin {
     if (this._extraOptions.automaticAsyncBoundary) {
       compiler.options.module.rules.push({
         test: (request: string) => {
-          if (request.includes(path.join(compiler.context, 'pages')) || request.includes(path.join(compiler.context, 'app'))) {
+          if (request.includes(path.join(compiler.context, 'pages/')) || request.includes(path.join(compiler.context, 'app/'))) {
             return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
           }
           return false
@@ -185,7 +198,7 @@ export class NextFederationPlugin {
         ...internalShare,
       },
     };
-
+compiler.options.devtool = 'source-map'
     new ModuleFederationPlugin(hostFederationPluginOptions, {
       ModuleFederationPlugin,
     }).apply(compiler);

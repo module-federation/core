@@ -119,7 +119,7 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
   }).then(function () {
     const proxy = {
       get: ${global}.get,
-      init: function(shareScope, initScope) {
+      init: function(shareScope, initToken) {
 
         const handler = {
           get(target, prop) {
@@ -140,24 +140,16 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
             return true
           }
         }
-        if (!${global}.__initialized) {
-          try {
-            ${global}.init(new Proxy(shareScope, handler), initScope)
-          } catch (e) {
+        try {
+          ${global}.init(new Proxy(shareScope, handler), initToken)
+        } catch (e) {
 
-          }
-          ${global}.__initialized = true
         }
+        ${global}.__initialized = true
       }
     }
     if (!${global}.__initialized) {
-    try {
       proxy.init(__webpack_require__.S.default)
-      } catch (e) {
-      }
-
-     ${global}.__initialized = true
-
     }
     return proxy
   })`;
