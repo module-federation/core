@@ -1,5 +1,5 @@
 import type {
-  AsyncContainer,
+  WebpackRemoteContainer,
   WebpackRequire,
   WebpackShareScopes,
 } from '../types';
@@ -103,14 +103,14 @@ export const importRemote = async <T>({
     // Initialize the container to get shared modules and get the module factory:
     const [, moduleFactory] = await Promise.all([
       initContainer(window[remoteScope]),
-      (
-        await (window[remoteScope] as unknown as AsyncContainer)
-      ).get(module.startsWith('./') ? module : `./${module}`),
+      (window[remoteScope] as unknown as WebpackRemoteContainer).get(
+        module.startsWith('./') ? module : `./${module}`
+      ),
     ]);
     return moduleFactory();
   } else {
-    const moduleFactory = (
-      await (window[remoteScope] as unknown as AsyncContainer)
+    const moduleFactory = await (
+      window[remoteScope] as unknown as WebpackRemoteContainer
     ).get(module.startsWith('./') ? module : `./${module}`);
     return moduleFactory();
   }
