@@ -80,10 +80,7 @@ export const importDelegatedModule = async (
   }).then((asyncContainer) => {
     // most of this is only needed because of legacy promise based implementation
     if(typeof window === 'undefined') {
-      return {
-        get:asyncContainer.get,
-        init:asyncContainer.init,
-      };
+      return asyncContainer
 //       return {
 //         get: asyncContainer.get,
 //         init: function() {
@@ -232,9 +229,6 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         return resolve(asyncContainer);
       }
 
-      if (globalScope[remoteGlobal]) {
-        return resolveRemoteGlobal();
-      }
 
       (__webpack_require__ as any).l(
         reference.url,
