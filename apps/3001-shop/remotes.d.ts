@@ -1,1 +1,1 @@
-declare module 'home_app/SharedNav';
+declare module 'home/SharedNav';
