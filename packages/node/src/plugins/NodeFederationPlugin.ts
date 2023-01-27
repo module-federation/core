@@ -82,12 +82,6 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
     }
     const proxy = {
       get: (arg)=>{
-        // if(!global.__remote_scope__[${JSON.stringify(global)}].__initialized) {
-        //   try {
-        //     global.__remote_scope__[${JSON.stringify(global)}].__initialized = true;
-        //     proxy.init(__webpack_require__.S.default);
-        //   } catch(e) {}
-        // }
         return remote.get(arg).then((f)=>{
           const m = f();
           return ()=>new Proxy(m, {
