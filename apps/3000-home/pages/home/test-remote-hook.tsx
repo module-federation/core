@@ -1,18 +1,17 @@
 import { NextPage } from 'next';
 
-let useCustomRemoteHook;
-
-if (process.browser) {
-  useCustomRemoteHook = require('shop/useCustomRemoteHook');
-}
-
+let useCustomRemoteHook = import('shop/useCustomRemoteHook');
+console.log('useCustomRemoteHook', useCustomRemoteHook);
+console.log('useCustomRemoteHook resolve', useCustomRemoteHook.then(console.log));
 const TestRemoteHook: NextPage = () => {
   let text;
 
-  if (process.browser) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    text = useCustomRemoteHook.default();
-  }
+  // if (process.browser) {
+  //   // eslint-disable-next-line react-hooks/rules-of-hooks
+  //   text = useCustomRemoteHook.default();
+  // }
+
+
 
   return (
     <>

@@ -16,6 +16,9 @@ const nextConfig = {
     const { isServer } = options;
 ;
     const remotes = {
+      home: createDelegatedModule(require.resolve('./remote-delegate.js'), {
+        remote: `home_app@http://localhost:3000/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+      }),
       shop: createDelegatedModule(require.resolve('./remote-delegate.js'), {
         remote: `shop@http://localhost:3001/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
       }),
@@ -25,9 +28,9 @@ const nextConfig = {
       // shop: `shop@http://localhost:3001/_next/static/${
       //   isServer ? 'ssr' : 'chunks'
       // }/remoteEntry.js`,
-      checkout: `checkout@http://localhost:3002/_next/static/${
-        isServer ? 'ssr' : 'chunks'
-      }/remoteEntry.js`,
+      // checkout: `checkout@http://localhost:3002/_next/static/${
+      //   isServer ? 'ssr' : 'chunks'
+      // }/remoteEntry.js`,
     };
 
     config.plugins.push(
@@ -47,6 +50,7 @@ const nextConfig = {
           antd: {},
         },
         extraOptions: {
+          verbose: true,
           automaticAsyncBoundary: true,
           exposePages: true,
           enableImageLoaderFix: true,

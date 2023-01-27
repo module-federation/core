@@ -11,9 +11,8 @@ export default function patchDefaultSharedLoader(
   this: LoaderContext<Record<string, unknown>>,
   content: string
 ) {
-  if (content.includes('include-defaults')) {
-    // If already patched, return
-    return content;
+  if(content.includes('include-defaults')) {
+    return content
   }
 
   // avoid absolute paths as they break hashing when the root for the project is moved

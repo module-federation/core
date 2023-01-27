@@ -78,54 +78,74 @@ export const importDelegatedModule = async (
     // asyncContainer.__initialized = true;
     return asyncContainer
   }).then((asyncContainer) => {
-    console.log('in thennable', asyncContainer.__initialized);
     // most of this is only needed because of legacy promise based implementation
     if(typeof window === 'undefined') {
-      const proxy = {
-        get: asyncContainer.get,
-        init: function (shareScope: any, initScope: any) {
-          const handler = {
-            get: async (target: { [x: string]: any; }, prop: string | number) => {
-              // if (target[prop]) {
-              //   Object.values(target[prop]).forEach(function (o) {
-              //     if (o.from === '_N_E') {
-              //       o.loaded = 1
-              //     }
-              //   })
-              // }
-              return target[prop]
-            },
-            set(target: { [x: string]: any; }, property: string, value: any) {
-              //@ts-ignore
-              if (global.usedChunks) global.usedChunks.add(global + "->" + property);
-              if (target[property]) {
-                return target[property]
-              }
-              target[property] = value
-              return true
-            }
-          }
-          try {
-            // @ts-ignore
-            return asyncContainer.init(new Proxy(shareScope, handler), initScope)
-          } catch (e) {
-          }
-          //@ts-ignore
-          proxy.__initialized = true
-        }
-      }
-      // @ts-ignore
-      if(!proxy.__initialized) {
-        //@ts-ignore
-        proxy.init(__webpack_share_scopes__.default);
-      }
-     return proxy
+      return {
+        get:asyncContainer.get,
+        init:asyncContainer.init,
+      };
+//       return {
+//         get: asyncContainer.get,
+//         init: function() {
+// console.log('has inited', asyncContainer.__initialized);
+// // @ts-ignore
+//           console.log('global remote scope', global.__remote_scope__)
+// if(asyncContainer.__initialized) {
+//   return 1;
+// }
+// console.log(Object.keys(arguments[0]));
+// // @ts-ignore
+//           console.log(asyncContainer.init(arguments))
+//           asyncContainer.__initialized = true;
+//           // @ts-ignore
+//           return asyncContainer.init(arguments)
+//         },
+//       }
+//       const proxy = {
+//         get: (arg: string)=>{
+//           return asyncContainer.get(arg)
+//         },
+//         init: function (shareScope: any, initScope: any) {
+//           const handler = {
+//             get: async (target: { [x: string]: any; }, prop: string | number) => {
+//               // if (target[prop]) {
+//               //   Object.values(target[prop]).forEach(function (o) {
+//               //     if (o.from === '_N_E') {
+//               //       o.loaded = 1
+//               //     }
+//               //   })
+//               // }
+//               return target[prop]
+//             },
+//             set(target: { [x: string]: any; }, property: string, value: any) {
+//               //@ts-ignore
+//               if (global.usedChunks) global.usedChunks.add(global + "->" + property);
+//               if (target[property]) {
+//                 return target[property]
+//               }
+//               target[property] = value
+//               return true
+//             }
+//           }
+//           try {
+//             // @ts-ignore
+//             return asyncContainer.init(new Proxy(shareScope, handler), initScope)
+//           } catch (e) {
+//           }
+//           //@ts-ignore
+//           proxy.__initialized = true
+//         }
+//       }
+//       // @ts-ignore
+//       if(!proxy.__initialized) {
+//         //@ts-ignore
+//         proxy.init(__webpack_share_scopes__.default);
+//       }
+//      return proxy
     } else {
-      console.log('returning delegate module', keyOrRuntimeRemoteItem)
       const proxy ={
         get: asyncContainer.get,
         init: function (shareScope: any, initScope: any) {
-          console.log('init', shareScope, initScope, proxy)
 
           try {
             // @ts-ignore
@@ -136,8 +156,6 @@ export const importDelegatedModule = async (
           proxy.__initialized = true;
         }
       }
-      console.log('in thennable 2', asyncContainer.__initialized);
-      console.log('returning proxy', proxy)
       // @ts-ignore
       if(!proxy.__initialized) {
         //@ts-ignore
@@ -202,7 +220,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
 
     if (typeof window === 'undefined') {
       //@ts-ignore
-      globalScope._config[global] = reference.url;
+      globalScope._config[containerKey] = reference.url;
     }
 
     asyncContainer = new Promise(function (resolve, reject) {
@@ -212,6 +230,10 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         ] as unknown as AsyncContainer;
         // globalScope[remoteGlobal].__initialized = true;
         return resolve(asyncContainer);
+      }
+
+      if (globalScope[remoteGlobal]) {
+        return resolveRemoteGlobal();
       }
 
       (__webpack_require__ as any).l(
@@ -229,7 +251,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
             event && event.target && (event.target as HTMLScriptElement).src;
 
           __webpack_error__.message =
-            'common Loading script failed.\n(' +
+            'Loading script failed.\n(' +
             errorType +
             ': ' +
             realSrc +

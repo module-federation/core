@@ -125,6 +125,7 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
           get(target, prop) {
             if (target[prop]) {
               Object.values(target[prop]).forEach(function(o) {
+              console.log('OOOO',o);
                 if(o.from === '_N_E') {
                   o.loaded = 1
                 }
@@ -140,17 +141,17 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
             return true
           }
         }
-        if (!${global}.__initialized) {
+        // if (!${global}.__initialized) {
           try {
             ${global}.init(new Proxy(shareScope, handler), initScope)
           } catch (e) {
 
           }
           ${global}.__initialized = true
-        }
+        // }
       }
     }
-    if (!${global}.__initialized) {
+    // if (!${global}.__initialized) {
     try {
       proxy.init(__webpack_require__.S.default)
       } catch (e) {
@@ -158,7 +159,7 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
 
      ${global}.__initialized = true
 
-    }
+    // }
     return proxy
   })`;
 
