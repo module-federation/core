@@ -11,9 +11,6 @@ module.exports = new Promise((resolve, reject) => {
     url,
   })
     .then(async (remote) => {
-      // remote.get('/.')
-
-      console.log('custom hooks',await remote.get('./useCustomRemoteHook'));
       resolve(remote)
     })
     .catch((err) => reject(err));
