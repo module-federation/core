@@ -24,14 +24,8 @@ const SharedNav = () => {
     activeMenu = '/checkout';
   }
 
-  const badgeColor = (remoteData) => {
-    return "red"
-    // try {
-    //   // return remoteData.error ? 'red' : remoteData.loaded ? 'green' : 'yellow';
-    // } catch (e) {
-    //   return 'red';
-    // }
-  }
+  const badgeColor = (remoteData) =>
+    remoteData.error ? 'red' : remoteData.loaded ? 'green' : 'yellow';
 
   return (
     <Layout.Header>

@@ -50,7 +50,6 @@ const nextConfig = {
           antd: {},
         },
         extraOptions: {
-          verbose: true,
           automaticAsyncBoundary: true,
           exposePages: true,
           enableImageLoaderFix: true,

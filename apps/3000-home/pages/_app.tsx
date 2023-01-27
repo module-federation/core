@@ -2,7 +2,7 @@ import { useState } from 'react';
 import App from 'next/app';
 import { Layout, version } from 'antd';
 
-// import { useMFClient } from '@module-federation/nextjs-mf/client';
+import { useMFClient } from '@module-federation/nextjs-mf/client';
 
 import SharedNav from '../components/SharedNav';
 import HostAppMenu from '../components/menu';
@@ -12,19 +12,18 @@ function MyApp(props) {
 
   const { Component, pageProps } = props
   const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
-
-  // useMFClient({
-  //   onChangeRemote: async (remote) => {
-  //     if (remote) {
-  //       const RemoteAppMenu =
-  //         (await remote.getModule('./menu', 'default')) ||
-  //         (() => null); /* or Empty menu component if undefined */
-  //       setMenuComponent(() => RemoteAppMenu);
-  //     } else {
-  //       setMenuComponent(() => HostAppMenu);
-  //     }
-  //   },
-  // });
+  useMFClient({
+    onChangeRemote: async (remote) => {
+      if (remote) {
+        const RemoteAppMenu =
+          (await remote.getModule('./menu', 'default')) ||
+          (() => null); /* or Empty menu component if undefined */
+        setMenuComponent(() => RemoteAppMenu);
+      } else {
+        setMenuComponent(() => HostAppMenu);
+      }
+    },
+  });
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
