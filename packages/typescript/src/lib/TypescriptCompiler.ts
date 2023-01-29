@@ -73,7 +73,7 @@ export class TypescriptCompiler {
   }
 
   private getCompilerProgram(programOptions: ts.CreateProgramOptions) {
-    const { compiler = 'tsc' } = this.options;
+    const { compiler } = this.options;
 
     switch (compiler) {
       case 'vue-tsc':
