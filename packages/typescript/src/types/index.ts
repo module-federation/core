@@ -12,6 +12,8 @@ export interface FederatedTypesPluginOptions {
   /** @default '_types' */
   typescriptCompiledFolderName?: string;
   additionalFilesToCompile?: string[];
+  /** @default 'tsc' */
+  compiler: 'tsc' | 'vue-tsc';
 }
 
 export interface TypesStatsJson {

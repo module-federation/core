@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/nextjs-mf",
-  "version": "6.0.4",
+  "version": "6.0.5",
   "license": "MIT",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -18,7 +18,7 @@
   "dependencies": {
     "fast-glob": "^3.2.11",
     "webpack-sources": "^3.2.3",
-    "eventemitter3": "^4.0.7"
+    "eventemitter3": "^5.0.0"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",
