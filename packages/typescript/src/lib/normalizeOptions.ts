@@ -12,21 +12,35 @@ import { FederatedTypesPluginOptions } from '../types';
 
 export type NormalizeOptions = ReturnType<typeof normalizeOptions>;
 
+const defaultOptions: Required<
+  Omit<FederatedTypesPluginOptions, 'federationConfig'>
+> = {
+  compiler: 'tsc',
+  disableDownloadingRemoteTypes: false,
+  disableTypeCompilation: false,
+  typescriptFolderName: TYPESCRIPT_FOLDER_NAME,
+  typescriptCompiledFolderName: TYPESCRIPT_COMPILED_FOLDER_NAME,
+  additionalFilesToCompile: [],
+};
+
 export const normalizeOptions = (
   options: FederatedTypesPluginOptions,
   compiler: Compiler
 ) => {
-  const {
-    typescriptFolderName = TYPESCRIPT_FOLDER_NAME,
-    typescriptCompiledFolderName = TYPESCRIPT_COMPILED_FOLDER_NAME,
-  } = options;
   const webpackCompilerOptions = compiler.options;
+  const federationFileName = options.federationConfig.filename as string;
+
+  const { context, watchOptions } = webpackCompilerOptions;
+  const { typescriptFolderName, typescriptCompiledFolderName, ...restOptions } =
+    {
+      ...defaultOptions,
+      ...options,
+    };
 
   const distPath =
     get(webpackCompilerOptions, 'devServer.static.directory') ||
     get(webpackCompilerOptions, 'output.path') ||
     'dist';
-  const federationFileName = options.federationConfig.filename as string;
 
   const typesPath = federationFileName.substring(
     0,
@@ -56,7 +70,16 @@ export const normalizeOptions = (
         : webpackPublicPath
       : '';
 
+  const watchOptionsToIgnore = [
+    path.normalize(path.join(context as string, typescriptFolderName)),
+  ];
+
+  const ignoredWatchOptions = Array.isArray(watchOptions.ignored)
+    ? [...watchOptions.ignored, ...watchOptionsToIgnore]
+    : watchOptionsToIgnore;
+
   return {
+    ...restOptions,
     distDir,
     publicPath,
     tsCompilerOptions,
@@ -64,5 +87,6 @@ export const normalizeOptions = (
     typesIndexJsonFilePath,
     typescriptFolderName,
     webpackCompilerOptions,
+    ignoredWatchOptions,
   };
 };

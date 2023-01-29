@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import ts from 'typescript';
+import vueTs from 'vue-tsc';
 import path from 'path';
 import fs from 'fs';
 
@@ -49,11 +50,16 @@ export class TypescriptCompiler {
 
     const host = this.createHost(exposeSrcToDestMap);
 
-    const program = ts.createProgram(
-      [...normalizedAdditionalFiles, ...normalizedExposedComponents],
-      this.compilerOptions,
-      host
-    );
+    const rootNames = [
+      ...normalizedAdditionalFiles,
+      ...normalizedExposedComponents,
+    ];
+
+    const program = this.getCompilerProgram({
+      rootNames,
+      options: this.compilerOptions,
+      host,
+    });
 
     const { diagnostics, emitSkipped } = program.emit();
 
@@ -64,6 +70,20 @@ export class TypescriptCompiler {
     diagnostics.forEach(this.reportCompileDiagnostic.bind(this));
 
     throw new Error('something went wrong generating declaration files');
+  }
+
+  private getCompilerProgram(programOptions: ts.CreateProgramOptions) {
+    const { compiler = 'tsc' } = this.options;
+
+    switch (compiler) {
+      case 'vue-tsc':
+        return vueTs.createProgram(programOptions);
+        break;
+
+      case 'tsc':
+      default:
+        return ts.createProgram(programOptions);
+    }
   }
 
   private normalizeFiles<T, U extends string>(
