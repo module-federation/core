@@ -30,31 +30,22 @@ export class FederatedTypesPlugin {
 
   constructor(private options: FederatedTypesPluginOptions) {}
 
-  getError(error: unknown): Error {
-    if (error instanceof Error) return error;
-    return new Error(error as string);
-  }
-
   apply(compiler: Compiler) {
-    const {
-      disableDownloadingRemoteTypes = false,
-      disableTypeCompilation = false,
-    } = this.options;
+    this.normalizeOptions = normalizeOptions(this.options, compiler);
+    this.webpackCompilerOptions = compiler.options;
+
+    const { webpack } = compiler;
+    const { disableDownloadingRemoteTypes, disableTypeCompilation } =
+      this.normalizeOptions;
 
     // Bail if both 'disableDownloadingRemoteTypes' & 'disableTypeCompilation' are 'truthy'
     if (disableDownloadingRemoteTypes && disableTypeCompilation) {
       return;
     }
 
-    const { webpack } = compiler;
-
     this.logger = Logger.setLogger(
       compiler.getInfrastructureLogger(PLUGIN_NAME)
     );
-
-    this.webpackCompilerOptions = compiler.options;
-
-    this.normalizeOptions = normalizeOptions(this.options, compiler);
 
     const isMFPluginExists = this.webpackCompilerOptions.plugins.some(
       (plugin) => plugin.constructor.name === 'ModuleFederationPlugin'
@@ -66,20 +57,8 @@ export class FederatedTypesPlugin {
       );
     }
 
-    const { context, watchOptions } =
-      this.normalizeOptions.webpackCompilerOptions;
-
-    const ignoredWatchOptions = watchOptions.ignored;
-
-    const watchOptionsToIgnore = [
-      path.normalize(
-        path.join(context as string, this.normalizeOptions.typescriptFolderName)
-      ),
-    ];
-
-    compiler.options.watchOptions.ignored = Array.isArray(ignoredWatchOptions)
-      ? [...ignoredWatchOptions, ...watchOptionsToIgnore]
-      : watchOptionsToIgnore;
+    compiler.options.watchOptions.ignored =
+      this.normalizeOptions.ignoredWatchOptions;
 
     if (!disableDownloadingRemoteTypes) {
       compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, async (_, callback) => {
@@ -221,5 +200,10 @@ export class FederatedTypesPlugin {
         this.logger.log(`No types index found for remote '${remote}'`);
       }
     }
+  }
+
+  private getError(error: unknown): Error {
+    if (error instanceof Error) return error;
+    return new Error(error as string);
   }
 }
