@@ -3,12 +3,13 @@ import { Compiler } from 'webpack';
 import get from 'lodash.get';
 import path from 'path';
 
+import type { FederatedTypesPluginOptions } from '../types';
+
 import {
   TYPESCRIPT_COMPILED_FOLDER_NAME,
   TYPESCRIPT_FOLDER_NAME,
   TYPES_INDEX_JSON_FILE_NAME,
 } from '../constants';
-import { FederatedTypesPluginOptions } from '../types';
 
 export type NormalizeOptions = ReturnType<typeof normalizeOptions>;
 
@@ -28,15 +29,19 @@ export const normalizeOptions = (
   compiler: Compiler
 ) => {
   const webpackCompilerOptions = compiler.options;
-  const federationFileName = options.federationConfig.filename as string;
 
   const { context, watchOptions } = webpackCompilerOptions;
-  const { typescriptFolderName, typescriptCompiledFolderName, ...restOptions } =
-    {
-      ...defaultOptions,
-      ...options,
-    };
+  const {
+    federationConfig,
+    typescriptFolderName,
+    typescriptCompiledFolderName,
+    ...restOptions
+  } = {
+    ...defaultOptions,
+    ...options,
+  };
 
+  const federationFileName = federationConfig.filename as string;
   const distPath =
     get(webpackCompilerOptions, 'devServer.static.directory') ||
     get(webpackCompilerOptions, 'output.path') ||
