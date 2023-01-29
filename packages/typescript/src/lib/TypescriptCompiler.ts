@@ -85,7 +85,7 @@ export class TypescriptCompiler {
     );
 
     const pathWithExt = path.resolve(normalizedRootDir, filenameWithExt);
-    return pathWithExt;
+    return path.normalize(pathWithExt);
   }
 
   private createHost(exposeSrcToDestMap: Record<string, string>) {
@@ -112,7 +112,7 @@ export class TypescriptCompiler {
       );
 
       // create exports matching the `exposes` config
-      const sourceFilename = sourceFiles?.[0].fileName || '';
+      const sourceFilename = path.normalize(sourceFiles?.[0].fileName || '');
       const exposedDestFilePath = exposeSrcToDestMap[sourceFilename];
 
       // create reexport file only if the file was marked for exposing
@@ -132,7 +132,7 @@ export class TypescriptCompiler {
         const reexport = `export * from '${importPath}';\nexport { default } from '${importPath}';`;
 
         this.tsDefinitionFilesObj[normalizedExposedDestFilePath] = reexport;
-        
+
         // reuse originalWriteFile as it creates folders if they don't exist
         originalWriteFile(
           normalizedExposedDestFilePath,
