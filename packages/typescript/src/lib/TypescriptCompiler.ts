@@ -1,8 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import ts from 'typescript';
-import vueTs from 'vue-tsc';
 import path from 'path';
 import fs from 'fs';
+
+import type { _Program } from 'vue-tsc'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let vueTs: any;
+try {
+  vueTs = require('vue-tsc');
+} catch {
+  // vue-tsc is an optional dependency.
+}
 
 import { Logger } from '@module-federation/utilities';
 
@@ -77,9 +85,13 @@ export class TypescriptCompiler {
 
     switch (compiler) {
       case 'vue-tsc':
-        return vueTs.createProgram(programOptions);
-        break;
-
+        if (!vueTs) {
+          this.logger.error(
+            'ERROR: vue-tsc must be installed when using the vue-tsc compiler option'
+          );
+          process.exit(1);
+        }
+        return vueTs.createProgram(programOptions) as _Program;
       case 'tsc':
       default:
         return ts.createProgram(programOptions);
