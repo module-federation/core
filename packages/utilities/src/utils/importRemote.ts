@@ -1,4 +1,8 @@
-import type { WebpackRequire, WebpackShareScopes } from '../types';
+import type {
+  WebpackRemoteContainer,
+  WebpackRequire,
+  WebpackShareScopes,
+} from '../types';
 
 type RemoteUrl = string | (() => Promise<string>);
 
@@ -72,7 +76,8 @@ export const importRemote = async <T>({
   remoteEntryFileName = REMOTE_ENTRY_FILE,
   bustRemoteEntryCache = true,
 }: ImportRemoteOptions): Promise<T> => {
-  if (!window[scope]) {
+  const remoteScope = scope as unknown as number;
+  if (!window[remoteScope]) {
     let remoteUrl = '';
 
     if (typeof url === 'string') {
@@ -90,21 +95,23 @@ export const importRemote = async <T>({
       ),
       initSharing(),
     ]);
-    if (!window[scope]) {
+    if (!window[remoteScope]) {
       throw new Error(
         `Remote loaded successfully but ${scope} could not be found! Verify that the name is correct in the Webpack configuration!`
       );
     }
     // Initialize the container to get shared modules and get the module factory:
     const [, moduleFactory] = await Promise.all([
-      initContainer(window[scope]),
-      window[scope].get(module.startsWith('./') ? module : `./${module}`),
+      initContainer(window[remoteScope]),
+      (window[remoteScope] as unknown as WebpackRemoteContainer).get(
+        module.startsWith('./') ? module : `./${module}`
+      ),
     ]);
     return moduleFactory();
   } else {
-    const moduleFactory = await window[scope].get(
-      module.startsWith('./') ? module : `./${module}`
-    );
+    const moduleFactory = await (
+      window[remoteScope] as unknown as WebpackRemoteContainer
+    ).get(module.startsWith('./') ? module : `./${module}`);
     return moduleFactory();
   }
 };
