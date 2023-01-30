@@ -5,6 +5,7 @@
     "3000-home": "apps/3000-home",
     "3001-shop": "apps/3001-shop",
     "3002-checkout": "apps/3002-checkout",
+    "docs": "apps/docs",
     "nextjs-mf": "packages/nextjs-mf",
     "node": "packages/node",
     "react-ts-host": "apps/react-ts-host",

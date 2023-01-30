@@ -41,6 +41,11 @@
     "regenerator-runtime": "0.13.7"
   },
   "devDependencies": {
+    "@antora/cli": "^3.1.0",
+"@antora/site-generator": "^3.1.0",
+"@asciidoctor/tabs": "^1.0.0-alpha.12",
+"antora-navigator-extension": "git+https://gitlab.com/opendevise/oss/antora-navigator-extension",
+"asciidoctor-kroki": "^0.14.0",
     "@commitlint/cli": "^17.1.2",
     "@commitlint/config-conventional": "^17.1.0",
     "@jscutlery/semver": "^2.27.1",

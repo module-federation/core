@@ -1,0 +1,39 @@
+{
+  "name": "docs",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/docs/src",
+  "tags": [],
+  "targets": {
+    "serve": {
+      "executor": "@nrwl/web:file-server",
+      "options": {
+        "buildTarget": "docs:build-docs"
+      },
+      "configurations": {
+        "local": {
+          "buildTarget": "docs:build-docs:local"
+        }
+      }
+    },
+    "build-docs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx antora --fetch apps/docs/mf-antora-playbook.yml",
+        "outputPath": "dist/apps/docs"
+      },
+      "configurations": {
+        "local": {
+          "command": "npx antora --fetch apps/docs/mf-antora-playbook-local.yml"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/docs/**/*.ts"]
+      }
+    }
+  }
+}
