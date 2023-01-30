@@ -70,9 +70,9 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
    * @param {unknown[]} items item to log
    */
   _getLogger(...items: unknown[]) {
-    // if (!this.options.verbose) {
-    //   return "";
-    // }
+    if (!this.options.verbose) {
+      return "";
+    }
 
     return `console.log(${items.join(',')});`
   }
