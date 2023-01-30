@@ -1,5 +1,6 @@
 import { importDelegatedModule } from '@module-federation/utilities';
 
+// Delegates are currently not used in this example, but are left here for testing.
 module.exports = new Promise((resolve, reject) => {
   //eslint-disable-next-line
   console.log('Delegate being called for', __resourceQuery);

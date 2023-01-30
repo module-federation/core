@@ -260,6 +260,9 @@ To use delegate modules, a method for script loading must be implemented in the 
 A common method is to use webpack's built-in `__webpack_require__.l` method, but any method can be used. 
 This method is exposed to the runtime and is the same method that webpack uses internally to load remotes.
 
+**Delegate modules will require a minimum version of 6.1.x across all apps, 
+since consumers will need to be able to handle the new container interface.**
+
 Here's an example of using a delegate module with `__webpack_require__.l`:
 
 <details>
