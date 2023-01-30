@@ -61,24 +61,27 @@ export class FederatedTypesPlugin {
       this.normalizeOptions.ignoredWatchOptions;
 
     if (!disableDownloadingRemoteTypes) {
-      compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, async (_, callback) => {
-        this.logger.log('Preparing to download types from remotes on startup');
+      const importRemotes = async (
+        callback: Parameters<
+          Parameters<typeof compiler.hooks.beforeRun.tapAsync>['1']
+        >['1']
+      ) => {
         try {
           await this.importRemoteTypes();
           callback();
         } catch (error) {
           callback(this.getError(error));
         }
+      };
+
+      compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, async (_, callback) => {
+        this.logger.log('Preparing to download types from remotes on startup');
+        await importRemotes(callback);
       });
 
       compiler.hooks.watchRun.tapAsync(PLUGIN_NAME, async (_, callback) => {
         this.logger.log('Preparing to download types from remotes');
-        try {
-          await this.importRemoteTypes();
-          callback();
-        } catch (error) {
-          callback(this.getError(error));
-        }
+        await importRemotes(callback);
       });
     }
 
@@ -203,7 +206,10 @@ export class FederatedTypesPlugin {
           this.logger.log(`No types index found for remote '${remote}'`);
         }
       } catch (error) {
-        this.logger.error(`Unable to download '${remote}' remote types index file`, error);
+        this.logger.error(
+          `Unable to download '${remote}' remote types index file`,
+          error
+        );
       }
     }
   }
