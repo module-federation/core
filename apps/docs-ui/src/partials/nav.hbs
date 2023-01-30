@@ -1,0 +1,11 @@
+<aside class="nav-container nav-sidebar">
+    <nav class="nav" aria-label="Docs">
+        <div class="context">
+            <span class="version
+      {{~#if (and (eq .. @root.page.component) (eq this @root.page.componentVersion))}} is-current{{/if~}}
+                {{~#if (eq this ../latest)}} is-latest{{/if}}">
+                {{./displayVersion}}
+            </span>
+        </div>
+    </nav>
+</aside>

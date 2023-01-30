@@ -15,7 +15,7 @@ content:
       start_path: apps/docs/src
 ui:
   bundle:
-    url: https://github.com/omfgnuts/mf-docs-site-ui/releases/download/release-7/ui-bundle.zip
+    url: ./../../dist/apps/docs-ui/build/ui-bundle.zip
     snapshot: false
   supplemental_files: ./../../node_modules/antora-navigator-extension/data/
 output:

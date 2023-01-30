@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/docs/src",
+  "implicitDependencies": ["docs-ui"],
   "tags": [],
   "targets": {
     "serve": {
@@ -14,7 +15,8 @@
         "local": {
           "buildTarget": "docs:build-docs:local"
         }
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "build-docs": {
       "executor": "nx:run-commands",
@@ -26,14 +28,8 @@
         "local": {
           "command": "npx antora --fetch apps/docs/mf-antora-playbook-local.yml"
         }
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["apps/docs/**/*.ts"]
-      }
+      },
+      "dependsOn": ["^build"]
     }
   }
 }
