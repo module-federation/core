@@ -7,7 +7,7 @@ import type {
   RuntimeRemote,
   WebpackRemoteContainer,
   RemoteData,
-  GetModuleOptions
+  GetModuleOptions,
 } from '../types';
 
 type RemoteVars = Record<
@@ -59,7 +59,7 @@ const getRuntimeRemotes = () => {
     }
     return acc;
   },
-    {} as RuntimeRemotesMap);
+  {} as RuntimeRemotesMap);
 
   return runtimeRemotes;
 };
@@ -89,7 +89,7 @@ export const injectScript = (
       typeof reference.asyncContainer.then === 'function'
         ? reference.asyncContainer
         : // @ts-ignore
-        reference.asyncContainer();
+          reference.asyncContainer();
   } else {
     // This casting is just to satisfy typescript,
     // In reality remoteGlobal will always be a string;
@@ -209,22 +209,27 @@ export const createRuntimeVariables = (remotes: Remotes) => {
 };
 
 /**
-   * Returns initialized webpack RemoteContainer.
-   * If its' script does not loaded - then load & init it firstly.
-   */
-export const getContainer = async (remoteContainer: string | RemoteData): Promise<WebpackRemoteContainer | undefined> => {
-
+ * Returns initialized webpack RemoteContainer.
+ * If its' script does not loaded - then load & init it firstly.
+ */
+export const getContainer = async (
+  remoteContainer: string | RemoteData
+): Promise<WebpackRemoteContainer | undefined> => {
   if (!remoteContainer) {
     throw Error(`Remote container options is empty`);
   }
+
   if (typeof remoteContainer === 'string') {
     if (window[remoteContainer]) {
       return window[remoteContainer];
     }
+
+    return;
   } else {
     if (window['uniqueKey' as keyof typeof remoteContainer]) {
       return window['uniqueKey' as keyof typeof remoteContainer];
     }
+
     const container = await injectScript({
       global: remoteContainer.global,
       url: remoteContainer.url,
@@ -233,18 +238,23 @@ export const getContainer = async (remoteContainer: string | RemoteData): Promis
     if (container) {
       return container;
     }
+
     throw Error(`Remote container ${remoteContainer.url} is empty`);
   }
-}
+};
 
 /**
-* Return remote module from container.
-* If you provide `exportName` it automatically return exact property value from module.
-*
-* @example
-*   remote.getModule('./pages/index', 'default')
-*/
-export const getModule = async ({ remoteContainer, modulePath, exportName }: GetModuleOptions) => {
+ * Return remote module from container.
+ * If you provide `exportName` it automatically return exact property value from module.
+ *
+ * @example
+ *   remote.getModule('./pages/index', 'default')
+ */
+export const getModule = async ({
+  remoteContainer,
+  modulePath,
+  exportName,
+}: GetModuleOptions) => {
   const container = await getContainer(remoteContainer);
   try {
     const modFactory = await container?.get(modulePath);
@@ -256,7 +266,7 @@ export const getModule = async ({ remoteContainer, modulePath, exportName }: Get
       return mod;
     }
   } catch (error) {
-    console.log(error)
-    return undefined
+    console.log(error);
+    return undefined;
   }
-}
+};
