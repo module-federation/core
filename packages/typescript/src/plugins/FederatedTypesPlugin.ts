@@ -30,31 +30,22 @@ export class FederatedTypesPlugin {
 
   constructor(private options: FederatedTypesPluginOptions) {}
 
-  getError(error: unknown): Error {
-    if (error instanceof Error) return error;
-    return new Error(error as string);
-  }
-
   apply(compiler: Compiler) {
-    const {
-      disableDownloadingRemoteTypes = false,
-      disableTypeCompilation = false,
-    } = this.options;
+    this.normalizeOptions = normalizeOptions(this.options, compiler);
+    this.webpackCompilerOptions = compiler.options;
+
+    const { webpack } = compiler;
+    const { disableDownloadingRemoteTypes, disableTypeCompilation } =
+      this.normalizeOptions;
 
     // Bail if both 'disableDownloadingRemoteTypes' & 'disableTypeCompilation' are 'truthy'
     if (disableDownloadingRemoteTypes && disableTypeCompilation) {
       return;
     }
 
-    const { webpack } = compiler;
-
     this.logger = Logger.setLogger(
       compiler.getInfrastructureLogger(PLUGIN_NAME)
     );
-
-    this.webpackCompilerOptions = compiler.options;
-
-    this.normalizeOptions = normalizeOptions(this.options, compiler);
 
     const isMFPluginExists = this.webpackCompilerOptions.plugins.some(
       (plugin) => plugin.constructor.name === 'ModuleFederationPlugin'
@@ -66,20 +57,8 @@ export class FederatedTypesPlugin {
       );
     }
 
-    const { context, watchOptions } =
-      this.normalizeOptions.webpackCompilerOptions;
-
-    const ignoredWatchOptions = watchOptions.ignored;
-
-    const watchOptionsToIgnore = [
-      path.normalize(
-        path.join(context as string, this.normalizeOptions.typescriptFolderName)
-      ),
-    ];
-
-    compiler.options.watchOptions.ignored = Array.isArray(ignoredWatchOptions)
-      ? [...ignoredWatchOptions, ...watchOptionsToIgnore]
-      : watchOptionsToIgnore;
+    compiler.options.watchOptions.ignored =
+      this.normalizeOptions.ignoredWatchOptions;
 
     if (!disableDownloadingRemoteTypes) {
       compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, async (_, callback) => {
@@ -169,57 +148,68 @@ export class FederatedTypesPlugin {
     for await (const { origin, remote } of remoteUrls) {
       const { typescriptFolderName } = this.normalizeOptions;
 
-      this.logger.log(`Getting types index for remote '${remote}'`);
-      const resp = await axios.get<TypesStatsJson>(
-        `${origin}/${this.normalizeOptions.typesIndexJsonFileName}`
-      );
+      try {
+        this.logger.log(`Getting types index for remote '${remote}'`);
+        const resp = await axios.get<TypesStatsJson>(
+          `${origin}/${this.normalizeOptions.typesIndexJsonFileName}`
+        );
 
-      const statsJson = resp.data;
+        const statsJson = resp.data;
 
-      if (statsJson?.files) {
-        this.logger.log(`Checking with Cache entries`);
+        if (statsJson?.files) {
+          this.logger.log(`Checking with Cache entries`);
 
-        const { filesToCacheBust, filesToDelete } =
-          TypesCache.getCacheBustedFiles(remote, statsJson);
+          const { filesToCacheBust, filesToDelete } =
+            TypesCache.getCacheBustedFiles(remote, statsJson);
 
-        this.logger.log('filesToCacheBust', filesToCacheBust);
-        this.logger.log('filesToDelete', filesToDelete);
+          this.logger.log('filesToCacheBust', filesToCacheBust);
+          this.logger.log('filesToDelete', filesToDelete);
 
-        if (filesToDelete.length > 0) {
-          filesToDelete.forEach((file) => {
-            fs.unlinkSync(
-              path.resolve(
-                this.normalizeOptions.webpackCompilerOptions.context as string,
-                typescriptFolderName,
-                remote,
-                file
-              )
-            );
-          });
-        }
-
-        if (filesToCacheBust.length > 0) {
-          await Promise.all(
-            filesToCacheBust.map((file) => {
-              const url = `${origin}/${typescriptFolderName}/${file}`;
-              const destination = path.join(
-                this.normalizeOptions.webpackCompilerOptions.context as string,
-                typescriptFolderName,
-                remote
+          if (filesToDelete.length > 0) {
+            filesToDelete.forEach((file) => {
+              fs.unlinkSync(
+                path.resolve(
+                  this.normalizeOptions.webpackCompilerOptions
+                    .context as string,
+                  typescriptFolderName,
+                  remote,
+                  file
+                )
               );
+            });
+          }
 
-              this.logger.log('Downloading types...');
-              return download(url, destination, {
-                filename: file,
-              });
-            })
-          );
+          if (filesToCacheBust.length > 0) {
+            await Promise.all(
+              filesToCacheBust.map((file) => {
+                const url = `${origin}/${typescriptFolderName}/${file}`;
+                const destination = path.join(
+                  this.normalizeOptions.webpackCompilerOptions
+                    .context as string,
+                  typescriptFolderName,
+                  remote
+                );
 
-          this.logger.log('downloading complete');
+                this.logger.log('Downloading types...');
+                return download(url, destination, {
+                  filename: file,
+                });
+              })
+            );
+
+            this.logger.log('downloading complete');
+          }
+        } else {
+          this.logger.log(`No types index found for remote '${remote}'`);
         }
-      } else {
-        this.logger.log(`No types index found for remote '${remote}'`);
+      } catch (error) {
+        this.logger.error(`Unable to download '${remote}' remote types index file`, error);
       }
     }
+  }
+
+  private getError(error: unknown): Error {
+    if (error instanceof Error) return error;
+    return new Error(error as string);
   }
 }
