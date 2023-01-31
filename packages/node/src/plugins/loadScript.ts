@@ -6,12 +6,6 @@
 //language=JS
 export default `
   function loadScript(url, cb, chunkID) {
-  console.log('loadScript', {
-    url,
-    cb,
-    chunkID
-  });
-
     if (global.webpackChunkLoad) {
       global.webpackChunkLoad(url).then(function (resp) {
         return resp.text();
@@ -52,16 +46,13 @@ export const executeLoadTemplate = `
     if(!name) {
       throw new Error('__webpack_require__.l name is required for ' + url);
     }
-    console.log('executeLoad: loading chunk', {
-      url,callback,name
-    });
+
     if (typeof global.__remote_scope__[name] !== 'undefined') return callback(global.__remote_scope__[name]);
 
     const vm = require('vm');
     (global.webpackChunkLoad || global.fetch || require("node-fetch"))(url).then(function (res) {
       return res.text();
     }).then(function (scriptContent) {
-      console.log('in script loading promise for', name);
       try {
         const vmContext = {exports, require, module, global, __filename, __dirname, URL,console,process,Buffer, ...global, remoteEntryName: name};
         const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, {filename: 'node-federation-loader-' + name + '.vm'});
