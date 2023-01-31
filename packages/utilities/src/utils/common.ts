@@ -80,6 +80,7 @@ export const importDelegatedModule = async (
   }).then((asyncContainer) => {
     // most of this is only needed because of legacy promise based implementation
     if(typeof window === 'undefined') {
+      //TODO: need to solve chunk flushing with delegated modules
       return asyncContainer
     } else {
       const proxy ={
