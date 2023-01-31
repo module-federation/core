@@ -216,7 +216,7 @@ export const getOutputPath = (compiler: Compiler) => {
   let outputPath: string | string[] | undefined =
     compiler.options.output.path?.split(path.sep);
 
-  const foundIndex = outputPath?.findIndex((i) => i === (isServer ? 'server' : 'static'));
+  const foundIndex = outputPath?.lastIndexOf(isServer ? 'server' : 'static');
 
   outputPath = outputPath
     ?.slice(0, foundIndex && foundIndex > 0 ? foundIndex : outputPath.length)
