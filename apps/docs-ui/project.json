@@ -6,23 +6,54 @@
   "tags": [],
   "targets": {
     "build": {
-      "builder": "nx:run-commands",
-      "outputs": ["dist/apps/docs-ui"],
+      "executor": "@nrwl/webpack:webpack",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "defaultConfiguration": "production",
       "options": {
-        "command": "npx gulp --gulpfile apps/docs-ui/gulpfile.js bundle"
-      }
-    },
-    "serve": {
-      "builder": "nx:run-commands",
-      "options": {
-        "command": "npx gulp --gulpfile apps/docs-ui/gulpfile.js preview"
+        "outputPath": "dist/apps/docs-ui",
+        "compiler": "babel",
+        "main": "apps/docs-ui/src/main.ts",
+        "tsConfig": "apps/docs-ui/tsconfig.app.json",
+        "webpackConfig": "apps/docs-ui/webpack.config.js",
+        "assets": [
+          "apps/docs-ui/src/favicon.ico",
+          "apps/docs-ui/src/assets"
+        ],
+        "index": "apps/docs-ui/src/index.html",
+        "baseHref": "/",
+        "styles": [
+          "apps/docs-ui/src/styles.scss"
+        ],
+        "scripts": []
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "outputHashing": "none",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": false,
+          "vendorChunk": false,
+          "fileReplacements": [
+            {
+              "replace": "apps/docs-ui/src/environments/environment.ts",
+              "with": "apps/docs-ui/src/environments/environment.prod.ts"
+            }
+          ]
+        }
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["apps/docs-ui/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": [
+          "apps/docs-ui/**/*.ts"
+        ]
       }
     }
   }

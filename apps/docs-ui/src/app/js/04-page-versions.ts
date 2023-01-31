@@ -1,10 +1,9 @@
-(function () {
-  'use strict';
+export default function () {
 
-  var toggle = document.querySelector('.page-versions .version-menu-toggle');
+  const toggle = document.querySelector('.page-versions .version-menu-toggle');
   if (!toggle) return;
 
-  var selector = document.querySelector('.page-versions');
+  const selector = document.querySelector('.page-versions');
 
   toggle.addEventListener('click', function (e) {
     selector.classList.toggle('is-active');
@@ -14,4 +13,4 @@
   document.documentElement.addEventListener('click', function () {
     selector.classList.remove('is-active');
   });
-})();
+}

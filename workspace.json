@@ -6,12 +6,12 @@
     "3001-shop": "apps/3001-shop",
     "3002-checkout": "apps/3002-checkout",
     "docs": "apps/docs",
-    "docs-ui": "apps/docs-ui",
     "nextjs-mf": "packages/nextjs-mf",
     "node": "packages/node",
     "react-ts-host": "apps/react-ts-host",
     "react-ts-remote": "apps/react-ts-remote",
     "typescript": "packages/typescript",
-    "utils": "packages/utilities"
+    "utils": "packages/utilities",
+    "docs-ui": "apps/docs-ui"
   }
 }

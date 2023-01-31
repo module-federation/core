@@ -16,10 +16,11 @@
     </svg>
 </div>
 <script src="{{{siteRootPath}}}/site-navigation-data.js"></script>
-<script src="{{{uiRootPath}}}/js/nav.js"></script>
-<script src="{{{uiRootPath}}}/js/site.js"></script>
-<script async src="{{{uiRootPath}}}/js/vendor/highlight.js"></script>
+<script src="{{{uiRootPath}}}/js/nav.js"></script> 
+<script src="{{{uiRootPath}}}/runtime.js" type="module"></script>
+<script src="{{{uiRootPath}}}/styles.js" type="module"></script>
+<script src="{{{uiRootPath}}}/main.js" type="module"></script>
+
 {{#if env.SITE_SEARCH_PROVIDER}}
     {{> search-scripts}}
 {{/if}}
-<script async src="{{{uiRootPath}}}/js/vendor/tabs.js"></script>

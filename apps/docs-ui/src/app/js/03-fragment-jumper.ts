@@ -1,8 +1,7 @@
-(function () {
-  'use strict';
+export default function() {
 
-  var article = document.querySelector('article.doc');
-  var toolbar = document.querySelector('.toolbar');
+  const article = document.querySelector('article.doc');
+  const toolbar = document.querySelector('.toolbar');
 
   function decodeFragment(hash) {
     return (
@@ -29,7 +28,7 @@
   }
 
   window.addEventListener('load', function jumpOnLoad() {
-    var fragment, target;
+    let fragment, target;
     if (
       (fragment = decodeFragment(window.location.hash)) &&
       (target = document.getElementById(fragment))
@@ -43,7 +42,7 @@
   Array.prototype.slice
     .call(document.querySelectorAll('a[href^="#"]'))
     .forEach(function (el) {
-      var fragment, target;
+      let fragment, target;
       if (
         (fragment = decodeFragment(el.hash)) &&
         (target = document.getElementById(fragment))
@@ -51,4 +50,5 @@
         el.addEventListener('click', jumpToAnchor.bind(target));
       }
     });
-})();
+}
+

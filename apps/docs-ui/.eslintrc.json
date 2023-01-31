@@ -1,12 +1,24 @@
 {
-  "extends": ["../../.eslintrc.json"],
-  "ignorePatterns": ["!**/*"],
+  "extends": [
+    "../../.eslintrc.json"
+  ],
+  "ignorePatterns": [
+    "!**/*"
+  ],
   "overrides": [
     {
-      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "files": [
+        "*.ts",
+        "*.tsx",
+        "*.js",
+        "*.jsx"
+      ],
       "rules": {
         "array-callback-return": "off",
-        "arrow-parens": ["error", "always"],
+        "arrow-parens": [
+          "error",
+          "always"
+        ],
         "comma-dangle": [
           "error",
           {
@@ -26,15 +38,24 @@
         "no-cond-assign": "off",
         "prefer-regex-literals": "off",
         "spaced-comment": "off",
-        "radix": ["error", "always"]
+        "radix": [
+          "error",
+          "always"
+        ]
       }
     },
     {
-      "files": ["*.ts", "*.tsx"],
+      "files": [
+        "*.ts",
+        "*.tsx"
+      ],
       "rules": {}
     },
     {
-      "files": ["*.js", "*.jsx"],
+      "files": [
+        "*.js",
+        "*.jsx"
+      ],
       "rules": {}
     }
   ]
