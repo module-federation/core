@@ -81,64 +81,6 @@ export const importDelegatedModule = async (
     // most of this is only needed because of legacy promise based implementation
     if(typeof window === 'undefined') {
       return asyncContainer
-//       return {
-//         get: asyncContainer.get,
-//         init: function() {
-// console.log('has inited', asyncContainer.__initialized);
-// // @ts-ignore
-//           console.log('global remote scope', global.__remote_scope__)
-// if(asyncContainer.__initialized) {
-//   return 1;
-// }
-// console.log(Object.keys(arguments[0]));
-// // @ts-ignore
-//           console.log(asyncContainer.init(arguments))
-//           asyncContainer.__initialized = true;
-//           // @ts-ignore
-//           return asyncContainer.init(arguments)
-//         },
-//       }
-//       const proxy = {
-//         get: (arg: string)=>{
-//           return asyncContainer.get(arg)
-//         },
-//         init: function (shareScope: any, initScope: any) {
-//           const handler = {
-//             get: async (target: { [x: string]: any; }, prop: string | number) => {
-//               // if (target[prop]) {
-//               //   Object.values(target[prop]).forEach(function (o) {
-//               //     if (o.from === '_N_E') {
-//               //       o.loaded = 1
-//               //     }
-//               //   })
-//               // }
-//               return target[prop]
-//             },
-//             set(target: { [x: string]: any; }, property: string, value: any) {
-//               //@ts-ignore
-//               if (global.usedChunks) global.usedChunks.add(global + "->" + property);
-//               if (target[property]) {
-//                 return target[property]
-//               }
-//               target[property] = value
-//               return true
-//             }
-//           }
-//           try {
-//             // @ts-ignore
-//             return asyncContainer.init(new Proxy(shareScope, handler), initScope)
-//           } catch (e) {
-//           }
-//           //@ts-ignore
-//           proxy.__initialized = true
-//         }
-//       }
-//       // @ts-ignore
-//       if(!proxy.__initialized) {
-//         //@ts-ignore
-//         proxy.init(__webpack_share_scopes__.default);
-//       }
-//      return proxy
     } else {
       const proxy ={
         get: asyncContainer.get,
