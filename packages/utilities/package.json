@@ -15,9 +15,10 @@
   },
   "devDependencies": {
     "react": "18.2.0",
-    "next": "13.1.2"
+    "next": "13.1.6"
   },
   "peerDependencies": {
-    "webpack": "^5.40.0"
+    "webpack": "^5.40.0",
+    "next": "13.1.6"
   }
 }
