@@ -200,7 +200,7 @@ export class NextFederationPlugin {
         ...internalShare,
       },
     };
-compiler.options.devtool = 'source-map'
+
     new ModuleFederationPlugin(hostFederationPluginOptions, {
       ModuleFederationPlugin,
     }).apply(compiler);
