@@ -173,7 +173,6 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         const asyncContainer = globalScope[
           remoteGlobal
         ] as unknown as AsyncContainer;
-        // globalScope[remoteGlobal].__initialized = true;
         return resolve(asyncContainer);
       }
 
