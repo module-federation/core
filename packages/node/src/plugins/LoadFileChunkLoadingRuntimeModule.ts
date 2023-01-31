@@ -89,7 +89,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     // so for example, if im in hostA and require(remoteb/module) --> console.log of name in runtime code will return remoteb
 
     const {remotes = {}, name} = this.options;
-
+    // for delegate modules, we need to avoid serializing internal modules, only register primitive configs in the runtime
+    // delegates have their own registration code, so we dont need to handle them here.
     const remotesByType: RemotesByType = Object.values(remotes).reduce((acc:RemotesByType, remote:string) => {
       if (remote.startsWith('promise ') || remote.startsWith('internal ') || remote.startsWith('external ')) {
         acc.functional.push(remote);
