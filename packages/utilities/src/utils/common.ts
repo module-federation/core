@@ -179,9 +179,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       (__webpack_require__ as any).l(
         reference.url,
         function (event: Event) {
-          console.log("event",event)
           if (typeof globalScope[remoteGlobal] !== 'undefined') {
-            // globalScope[remoteGlobal].__initialized = true;
             return resolveRemoteGlobal();
           }
 
