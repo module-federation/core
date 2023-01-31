@@ -10,10 +10,10 @@ urls:
   html_extension_style: drop
 content:
   sources:
-    - url: ./../../
-      start_path: apps/docs/src
+    - url: https://github.com/module-federation/universe
+      branches: main
     - url: https://github.com/omfgnuts/test-component-a.git
-      branches: HEAD
+      branches: main
 ui:
   bundle:
     url: ./../../dist/apps/docs-ui
