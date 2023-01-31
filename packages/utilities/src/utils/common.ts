@@ -166,6 +166,9 @@ export const importDelegatedModule = async (
 export const createDelegatedModule = (delegate:string, params: { [key: string]: any } ) => {
   let queries: string[] = [];
   for (const [key, value] of Object.entries(params)) {
+    if(Array.isArray(value) || typeof value === 'object') {
+      throw new Error(`[Module Federation] Delegated module params cannot be an array or object. Key "${key}" should be a string or number`);
+    }
     queries.push(`${key}=${value}`);
   }
   return `internal ${delegate}?${queries.join('&')}`;
