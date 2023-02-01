@@ -119,14 +119,6 @@ export const createDelegatedModule = (delegate:string, params: { [key: string]: 
   return `internal ${delegate}?${queries.join('&')}`;
 }
 
-export const createDelegatedModule = (delegate:string, params: { [key: string]: any } ) => {
-  let queries: string[] = [];
-  for (const [key, value] of Object.entries(params)) {
-    queries.push(`${key}=${value}`);
-  }
-  return `internal ${delegate}?${queries.join('&')}`;
-}
-
 const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
 
