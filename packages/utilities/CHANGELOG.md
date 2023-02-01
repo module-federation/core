@@ -2,6 +2,30 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [1.2.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.1.2...utils-1.2.0) (2023-01-31)
+
+
+### Bug Fixes
+
+* **typescript:** throw error when `vue-tsc` is requested and is not available ([#547](https://github.com/module-federation/nextjs-mf/issues/547)) ([c6f7998](https://github.com/module-federation/nextjs-mf/commit/c6f79981f84fd0042447037c1323fa750566ac0d))
+
+
+### Features
+
+* add getModule and getContainer to utilities ([#476](https://github.com/module-federation/nextjs-mf/issues/476)) ([fe381e3](https://github.com/module-federation/nextjs-mf/commit/fe381e33cfb20b3b723daffca2f5c4fb4b843cfb))
+* **typescript:** support vue typescript compiler ([#542](https://github.com/module-federation/nextjs-mf/issues/542)) ([cde5952](https://github.com/module-federation/nextjs-mf/commit/cde5952c42ec19f87c5bc4dddb8d8be6f97c1c55)), closes [#502](https://github.com/module-federation/nextjs-mf/issues/502)
+
+
+
+## [1.1.2](https://github.com/module-federation/nextjs-mf/compare/utils-1.1.1...utils-1.1.2) (2023-01-21)
+
+
+### Bug Fixes
+
+* Utilities - Remove module side effect ([#488](https://github.com/module-federation/nextjs-mf/issues/488)) ([3554de7](https://github.com/module-federation/nextjs-mf/commit/3554de7912eaf7b379a6a863677c4b01da0ccf2c)), closes [#487](https://github.com/module-federation/nextjs-mf/issues/487) [#500](https://github.com/module-federation/nextjs-mf/issues/500) [#496](https://github.com/module-federation/nextjs-mf/issues/496) [#495](https://github.com/module-federation/nextjs-mf/issues/495) [#492](https://github.com/module-federation/nextjs-mf/issues/492) [#455](https://github.com/module-federation/nextjs-mf/issues/455) [#491](https://github.com/module-federation/nextjs-mf/issues/491) [#496](https://github.com/module-federation/nextjs-mf/issues/496) [#495](https://github.com/module-federation/nextjs-mf/issues/495)
+
+
+
 ## [1.1.1](https://github.com/module-federation/nextjs-mf/compare/utils-1.1.0...utils-1.1.1) (2023-01-11)
 
 

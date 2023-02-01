@@ -117,11 +117,12 @@ new NextFederationPlugin({
   exposes: {},
   shared: {},
   extraOptions: {
-    exposePages: true, // `false` by default
-    enableImageLoaderFix: true, // `false` by default
-    enableUrlLoaderFix: true, // `false` by default
-    automaticAsyncBoundary: true, // `false` by default
-    skipSharingNextInternals: false // `false` by default
+    verbose: boolean, // `false` by default
+    exposePages: boolean, // `false` by default
+    enableImageLoaderFix: boolean, // `false` by default
+    enableUrlLoaderFix: boolean, // `false` by default
+    automaticAsyncBoundary: boolean, // `false` by default
+    skipSharingNextInternals: boolean // `false` by default
   },
 });
 ```
@@ -253,13 +254,16 @@ loading process of remote modules by delegating it to an internal file bundled b
 This is done by exporting a promise in the delegate file that resolves to a remote/container interface.
 
 A container interface is the low-level {get, init} API that remote entries expose to a consuming app. 
-In the browser, a remote container would be window.app1, and in Node, it would be global.__remote_scope__.app1.
+In the browser, a remote container would be window.app1, and in Node, it would be `global.__remote_scope__.app1`.
 
 To use delegate modules, a method for script loading must be implemented in the delegate file. 
-A common method is to use webpack's built-in __webpack_require__.l method, but any method can be used. 
+A common method is to use webpack's built-in `__webpack_require__.l` method, but any method can be used. 
 This method is exposed to the runtime and is the same method that webpack uses internally to load remotes.
 
-Here's an example of using a delegate module with __webpack_require__.l:
+**Delegate modules will require a minimum version of 6.1.x across all apps, 
+since consumers will need to be able to handle the new container interface.**
+
+Here's an example of using a delegate module with `__webpack_require__.l`:
 
 <details>
   <summary>See Example: (click)  </summary>
@@ -270,7 +274,16 @@ the promise is resolved with the value of window[containerName].
 If an error occurs while loading the script, a custom error object is created and the promise is rejected with this error.
 
 ```js
+//next.config.js 
 
+const remotes = {
+  checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
+    remote: `checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+  }),
+}
+
+
+//remote-delegate.js
 import { importDelegatedModule } from '@module-federation/utilities';
 
 module.exports = new Promise((resolve, reject) => {

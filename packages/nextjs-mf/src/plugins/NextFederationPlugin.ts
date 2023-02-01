@@ -75,6 +75,18 @@ export class NextFederationPlugin {
 
       // should this be a plugin that we apply to the compiler?
       internalizeSharedPackages(this._options, compiler);
+
+      // module-federation/utilities uses internal webpack methods and must be bundled into runtime code.
+      if(Array.isArray(compiler.options.externals)) {
+        const originalExternals = compiler.options.externals[0];
+        compiler.options.externals[0] = function (ctx, callback) {
+          if (ctx.request && ctx.request.includes('@module-federation/utilities')) {
+            return callback()
+          }
+          // @ts-ignore
+          return originalExternals(ctx, callback);
+        }
+      }
     } else {
       if (this._extraOptions.automaticPageStitching) {
         compiler.options.module.rules.push({
@@ -105,7 +117,7 @@ export class NextFederationPlugin {
     //patch next
     compiler.options.module.rules.push({
       test(req: string) {
-        if (req.includes(path.join(compiler.context, 'pages')) || req.includes(path.join(compiler.context, 'app'))) {
+        if (req.includes(path.join(compiler.context, 'pages/')) || req.includes(path.join(compiler.context, 'app/'))) {
           return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req)
         }
         return false
@@ -119,31 +131,34 @@ export class NextFederationPlugin {
     });
 
     if(this._options.remotes) {
-      const delegates = getDelegates(this._options.remotes)
-
-      compiler.options.module.rules.push({
-        test(req: string) {
-          if (req.includes(path.join(compiler.context, 'pages')) || req.includes(path.join(compiler.context, 'app'))) {
-            return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req)
+      const delegates = getDelegates(this._options.remotes);
+      // only apply loader if delegates are present
+      if(delegates && Object.keys(delegates).length > 0) {
+        compiler.options.module.rules.push({
+          test(req: string) {
+            if (req.includes(path.join(compiler.context, 'pages/')) || req.includes(path.join(compiler.context, 'app/'))) {
+              return /_app\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req)
+            }
+            return false
+          },
+          resourceQuery: this._extraOptions.automaticAsyncBoundary ? (query) => !query.includes('hasBoundary') : undefined,
+          include: compiler.context,
+          exclude: /node_modules/,
+          loader: path.resolve(
+            __dirname,
+            '../loaders/delegateLoader'
+          ),
+          options: {
+            delegates
           }
-          return false
-        },
-        include: compiler.context,
-        exclude: /node_modules/,
-        loader: path.resolve(
-          __dirname,
-          '../loaders/delegateLoader'
-        ),
-        options: {
-          delegates
-        }
-      });
+        });
+      }
     }
 
     if (this._extraOptions.automaticAsyncBoundary) {
       compiler.options.module.rules.push({
         test: (request: string) => {
-          if (request.includes(path.join(compiler.context, 'pages')) || request.includes(path.join(compiler.context, 'app'))) {
+          if (request.includes(path.join(compiler.context, 'pages/')) || request.includes(path.join(compiler.context, 'app/'))) {
             return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
           }
           return false

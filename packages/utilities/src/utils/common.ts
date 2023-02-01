@@ -6,6 +6,8 @@ import type {
   RuntimeRemotesMap,
   RuntimeRemote,
   WebpackRemoteContainer,
+  RemoteData,
+  GetModuleOptions,
 } from '../types';
 
 type RemoteVars = Record<
@@ -71,8 +73,51 @@ const getRuntimeRemotes = () => {
 export const importDelegatedModule = async (
   keyOrRuntimeRemoteItem: string | RuntimeRemote
 ) => {
-  return loadScript(keyOrRuntimeRemoteItem);
+  // @ts-ignore
+  return loadScript(keyOrRuntimeRemoteItem).then((asyncContainer) => {
+    // for legacy reasons, we must mark container a initialized
+    // here otherwise older promise based implementation will try to init again with diff object
+    // asyncContainer.__initialized = true;
+    return asyncContainer
+  }).then((asyncContainer) => {
+    // most of this is only needed because of legacy promise based implementation
+    if(typeof window === 'undefined') {
+      //TODO: need to solve chunk flushing with delegated modules
+      return asyncContainer
+    } else {
+      const proxy ={
+        get: asyncContainer.get,
+        init: function (shareScope: any, initScope: any) {
+
+          try {
+            // @ts-ignore
+            return asyncContainer.init(shareScope, initScope);
+          } catch (e) {
+          }
+          //@ts-ignore
+          proxy.__initialized = true;
+        }
+      }
+      // @ts-ignore
+      if(!proxy.__initialized) {
+        //@ts-ignore
+        proxy.init(__webpack_share_scopes__.default);
+      }
+      return proxy
+    }
+  });
 };
+
+export const createDelegatedModule = (delegate:string, params: { [key: string]: any } ) => {
+  let queries: string[] = [];
+  for (const [key, value] of Object.entries(params)) {
+    if(Array.isArray(value) || typeof value === 'object') {
+      throw new Error(`[Module Federation] Delegated module params cannot be an array or object. Key "${key}" should be a string or number`);
+    }
+    queries.push(`${key}=${value}`);
+  }
+  return `internal ${delegate}?${queries.join('&')}`;
+}
 
 export const createDelegatedModule = (delegate:string, params: { [key: string]: any } ) => {
   let queries: string[] = [];
@@ -128,7 +173,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
 
     if (typeof window === 'undefined') {
       //@ts-ignore
-      globalScope._config[global] = reference.url;
+      globalScope._config[containerKey] = reference.url;
     }
 
     asyncContainer = new Promise(function (resolve, reject) {
@@ -139,6 +184,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         globalScope[remoteGlobal].__initialized = true;
         return resolve(asyncContainer);
       }
+
 
       (__webpack_require__ as any).l(
         reference.url,
@@ -246,4 +292,67 @@ export const createRuntimeVariables = (remotes: Remotes) => {
 
     return acc;
   }, {} as Record<string, string>);
+};
+
+/**
+ * Returns initialized webpack RemoteContainer.
+ * If its' script does not loaded - then load & init it firstly.
+ */
+export const getContainer = async (
+  remoteContainer: string | RemoteData
+): Promise<WebpackRemoteContainer | undefined> => {
+  if (!remoteContainer) {
+    throw Error(`Remote container options is empty`);
+  }
+
+  if (typeof remoteContainer === 'string') {
+    if (window[remoteContainer]) {
+      return window[remoteContainer];
+    }
+
+    return;
+  } else {
+    if (window['uniqueKey' as keyof typeof remoteContainer]) {
+      return window['uniqueKey' as keyof typeof remoteContainer];
+    }
+
+    const container = await injectScript({
+      global: remoteContainer.global,
+      url: remoteContainer.url,
+    });
+
+    if (container) {
+      return container;
+    }
+
+    throw Error(`Remote container ${remoteContainer.url} is empty`);
+  }
+};
+
+/**
+ * Return remote module from container.
+ * If you provide `exportName` it automatically return exact property value from module.
+ *
+ * @example
+ *   remote.getModule('./pages/index', 'default')
+ */
+export const getModule = async ({
+  remoteContainer,
+  modulePath,
+  exportName,
+}: GetModuleOptions) => {
+  const container = await getContainer(remoteContainer);
+  try {
+    const modFactory = await container?.get(modulePath);
+    if (!modFactory) return undefined;
+    const mod = modFactory();
+    if (exportName) {
+      return mod && typeof mod === 'object' ? mod[exportName] : undefined;
+    } else {
+      return mod;
+    }
+  } catch (error) {
+    console.log(error);
+    return undefined;
+  }
 };

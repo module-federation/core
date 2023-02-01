@@ -121,12 +121,10 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
         global.__remote_scope__[${JSON.stringify(global)}].__initialized = true
       }
     }
-    try {
-        if (!global.__remote_scope__[${JSON.stringify(global)}].__initialized) {
+    try  {
       proxy.init(__webpack_require__.S.default)
-      }
-    } catch (e) {
-      console.log("already initialized", ${JSON.stringify(global)})
+    } catch(e) {
+      console.error('failed to init', ${JSON.stringify(global)}, e)
     }
     return proxy
   })`;

@@ -2,6 +2,47 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [2.2.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.6...typescript-2.2.0) (2023-01-31)
+
+### Dependency Updates
+
+* `utils` updated to version `1.2.0`
+
+### Bug Fixes
+
+* **typescript:** ensure consistent file paths ([#528](https://github.com/module-federation/nextjs-mf/issues/528)) ([209d346](https://github.com/module-federation/nextjs-mf/commit/209d346035d91c39bc00be0fb21fea521d221665))
+* **typescript:** set vue-tsc as optional peer dep ([#546](https://github.com/module-federation/nextjs-mf/issues/546)) ([5b34bfa](https://github.com/module-federation/nextjs-mf/commit/5b34bfab879ba7d97c4fc5081eb4906b3c607597))
+* **typescript:** throw error when `vue-tsc` is requested and is not available ([#547](https://github.com/module-federation/nextjs-mf/issues/547)) ([c6f7998](https://github.com/module-federation/nextjs-mf/commit/c6f79981f84fd0042447037c1323fa750566ac0d))
+* **typescript:** webpack bails when remote is unavailable ([#544](https://github.com/module-federation/nextjs-mf/issues/544)) ([61539c3](https://github.com/module-federation/nextjs-mf/commit/61539c3af14a9ecd34b485a73f0ba3a6f3718df2)), closes [#516](https://github.com/module-federation/nextjs-mf/issues/516)
+
+
+### Features
+
+* **typescript:** support vue typescript compiler ([#542](https://github.com/module-federation/nextjs-mf/issues/542)) ([cde5952](https://github.com/module-federation/nextjs-mf/commit/cde5952c42ec19f87c5bc4dddb8d8be6f97c1c55)), closes [#502](https://github.com/module-federation/nextjs-mf/issues/502)
+
+
+
+## [2.1.6](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.5...typescript-2.1.6) (2023-01-26)
+
+
+### Bug Fixes
+
+* **typescript:** wildcards from regex watch options ([#521](https://github.com/module-federation/nextjs-mf/issues/521)) ([c8d75c8](https://github.com/module-federation/nextjs-mf/commit/c8d75c8f66950a7d42f7d8679038a521670b322a))
+
+
+
+## [2.1.5](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.4...typescript-2.1.5) (2023-01-21)
+
+### Dependency Updates
+
+* `utils` updated to version `1.1.2`
+
+### Bug Fixes
+
+* **typescript:** webpack bails out when `statsJson` isn't found ([#507](https://github.com/module-federation/nextjs-mf/issues/507)) ([eb5e002](https://github.com/module-federation/nextjs-mf/commit/eb5e0022381b525e8bcc6dbfa95d23ef9a414cfb)), closes [#498](https://github.com/module-federation/nextjs-mf/issues/498)
+
+
+
 ## [2.1.4](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.3...typescript-2.1.4) (2023-01-11)
 
 ### Dependency Updates

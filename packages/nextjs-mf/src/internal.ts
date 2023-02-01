@@ -100,11 +100,11 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
     var url = new URL(${JSON.stringify(url)});
     url.searchParams.set('t', Date.now());
     var __webpack_error__ = new Error();
-    if (typeof ${global} !== 'undefined') return resolve();
+    if (typeof ${global} !== 'undefined') return resolve(${global});
     __webpack_require__.l(
       url.href,
       function (event) {
-        if (typeof ${global} !== 'undefined') return resolve();
+        if (typeof ${global} !== 'undefined') return resolve(${global});
         var errorType = event && (event.type === 'load' ? 'missing' : event.type);
         var realSrc = event && event.target && event.target.src;
         __webpack_error__.message =
@@ -119,7 +119,7 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
   }).then(function () {
     const proxy = {
       get: ${global}.get,
-      init: function(shareScope) {
+      init: function(shareScope, initToken) {
 
         const handler = {
           get(target, prop) {
@@ -141,7 +141,7 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
           }
         }
         try {
-          ${global}.init(new Proxy(shareScope, handler))
+          ${global}.init(new Proxy(shareScope, handler), initToken)
         } catch (e) {
 
         }
@@ -220,7 +220,7 @@ export const getOutputPath = (compiler: Compiler) => {
   let outputPath: string | string[] | undefined =
     compiler.options.output.path?.split(path.sep);
 
-  const foundIndex = outputPath?.findIndex((i) => i === (isServer ? 'server' : 'static'));
+  const foundIndex = outputPath?.lastIndexOf(isServer ? 'server' : 'static');
 
   outputPath = outputPath
     ?.slice(0, foundIndex && foundIndex > 0 ? foundIndex : outputPath.length)

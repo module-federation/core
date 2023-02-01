@@ -31,6 +31,7 @@ export const FlushedChunks = ({ chunks }: FlushedChunksProps) => {
       return React.createElement(
         'script',
         {
+          key: chunk,
           src: chunk,
           async: true,
         },
@@ -44,6 +45,7 @@ export const FlushedChunks = ({ chunks }: FlushedChunksProps) => {
       return React.createElement(
         'link',
         {
+          key: chunk,
           href: chunk,
           rel: 'stylesheet',
         },

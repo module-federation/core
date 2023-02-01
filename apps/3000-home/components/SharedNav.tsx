@@ -1,8 +1,6 @@
 import React from 'react';
 import { Menu, Layout, Badge } from 'antd';
 import { useRouter } from 'next/router';
-// @ts-ignore
-import {tjhin} from './thing.module.css'
 import { useMFRemote } from '@module-federation/nextjs-mf/client';
 import cookie from 'js-cookie'
 

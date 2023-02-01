@@ -3,14 +3,13 @@ import path from 'path';
 
 /**
  *
- * Requires `include-defaults.js` with required shared libs
+ * Requires either the default delegate module or a custom one
  *
  */
 export default function patchDefaultSharedLoader(
   this: LoaderContext<Record<string, unknown>>,
   content: string
 ) {
-
   const {delegates} = this.getOptions() as Record<string, string>;
 
   const resolvedDelegates = Object.values(delegates).map((delegate) => {
@@ -26,6 +25,10 @@ export default function patchDefaultSharedLoader(
     }
   })
 
+  if(content.includes('hasDelegateMarkers') || (this._compilation && this._compilation.name === 'ChildFederationPlugin')) {
+    return content
+  }
+
 
   const requiredDelegates = resolvedDelegates.map((delegate) => {
     return `require('${delegate}')`
@@ -34,7 +37,7 @@ export default function patchDefaultSharedLoader(
   return [
     '',
     ...requiredDelegates,
-    '',
+    '//hasDelegateMarkers',
     content
   ].join("\n")
 }
