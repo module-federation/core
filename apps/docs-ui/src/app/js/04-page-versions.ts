@@ -5,12 +5,12 @@ export default function () {
 
   const selector = document.querySelector('.page-versions');
 
-  toggle.addEventListener('click', function (e) {
+  toggle.addEventListener('click', (e) => {
     selector.classList.toggle('is-active');
     e.stopPropagation(); // trap event
   });
 
-  document.documentElement.addEventListener('click', function () {
+  document.documentElement.addEventListener('click', () => {
     selector.classList.remove('is-active');
   });
 }

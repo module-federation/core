@@ -14,7 +14,7 @@ export default function () {
     .call(
       document.querySelectorAll('.doc pre.highlight, .doc .literalblock pre')
     )
-    .forEach(function (pre) {
+    .forEach((pre) => {
       let code, language, lang, copy, toast, toolbox;
       if (pre.classList.contains('highlight')) {
         code = pre.querySelector('code');
@@ -86,13 +86,13 @@ export default function () {
     if (code.dataset.lang === 'console' && text.startsWith('$ '))
       text = extractCommands(text);
     window.navigator.clipboard.writeText(text).then(
-      function () {
+      () => {
         this.classList.add('clicked');
         this.offsetHeight; // eslint-disable-line no-unused-expressions
         this.classList.remove('clicked');
-      }.bind(this),
+      },
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      function () {}
+      () => {}
     );
   }
 }

@@ -41,7 +41,7 @@ export default function() {
 
   Array.prototype.slice
     .call(document.querySelectorAll('a[href^="#"]'))
-    .forEach(function (el) {
+    .forEach((el) => {
       let fragment, target;
       if (
         (fragment = decodeFragment(el.hash)) &&

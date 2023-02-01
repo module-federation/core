@@ -14,7 +14,7 @@
         "*.jsx"
       ],
       "rules": {
-        "array-callback-return": "off",
+        "prefer-arrow-callback":"error",
         "arrow-parens": [
           "error",
           "always"
@@ -35,9 +35,7 @@
             "ignoreUrls": true
           }
         ],
-        "no-cond-assign": "off",
         "prefer-regex-literals": "off",
-        "spaced-comment": "off",
         "radix": [
           "error",
           "always"

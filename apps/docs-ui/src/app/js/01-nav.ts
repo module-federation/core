@@ -21,7 +21,7 @@ export default function () {
     menuPanel.scrollTop = 0;
   }
 
-  find(menuPanel, '.nav-item-toggle').forEach(function (btn) {
+  find(menuPanel, '.nav-item-toggle').forEach((btn) => {
     const li = btn.parentElement;
     btn.addEventListener('click', toggleActive.bind(li));
     const navItemSpan = findNextElement(btn, '.nav-text');
@@ -34,16 +34,16 @@ export default function () {
   if (explorePanel) {
     explorePanel
       .querySelector('.context')
-      .addEventListener('click', function () {
+      .addEventListener('click', () => {
         // NOTE logic assumes there are only two panels
-        find(nav, '[data-panel]').forEach(function (panel) {
+        find(nav, '[data-panel]').forEach((panel) => {
           panel.classList.toggle('is-active');
         });
       });
   }
 
   // NOTE prevent text from being selected by double click
-  menuPanel.addEventListener('mousedown', function (e: MouseEvent) {
+  menuPanel.addEventListener('mousedown', (e: MouseEvent) => {
     if (e.detail > 1) e.preventDefault();
   });
 
@@ -83,7 +83,7 @@ export default function () {
       return;
     }
     if (navItem === currentPageItem) return;
-    find(menuPanel, '.nav-item.is-active').forEach(function (el) {
+    find(menuPanel, '.nav-item.is-active').forEach((el) => {
       el.classList.remove('is-active', 'is-current-path', 'is-current-page');
     });
     navItem.classList.add('is-current-page');

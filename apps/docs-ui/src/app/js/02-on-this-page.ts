@@ -25,7 +25,7 @@ export default function () {
 
   let lastActiveFragment;
   const links = {};
-  const list = headings.reduce(function (accum, heading) {
+  const list = headings.reduce((accum, heading) => {
     const link = document.createElement('a');
     link.textContent = heading.textContent;
     links[(link.href = '#' + heading.id)] = link;
@@ -54,7 +54,7 @@ export default function () {
     startOfContent.parentNode.insertBefore(embeddedToc, startOfContent);
   }
 
-  window.addEventListener('load', function () {
+  window.addEventListener('load', () => {
     onScroll();
     window.addEventListener('scroll', onScroll);
   });
@@ -74,7 +74,7 @@ export default function () {
         : Array(lastActiveFragment || 0);
       const activeFragments = [];
       const lastIdx = headings.length - 1;
-      headings.forEach(function (heading, idx) {
+      headings.forEach((heading, idx) => {
         const fragment = '#' + heading.id;
         if (
           idx === lastIdx ||
@@ -83,7 +83,7 @@ export default function () {
             ceil
         ) {
           activeFragments.push(fragment);
-          if (lastActiveFragment.indexOf(fragment) < 0)
+          if (!lastActiveFragment.includes(fragment))
             links[fragment].classList.add('is-active');
         } else if (~lastActiveFragment.indexOf(fragment)) {
           links[lastActiveFragment.shift()].classList.remove('is-active');
@@ -95,13 +95,13 @@ export default function () {
       return;
     }
     if (Array.isArray(lastActiveFragment)) {
-      lastActiveFragment.forEach(function (fragment) {
+      lastActiveFragment.forEach((fragment) => {
         links[fragment].classList.remove('is-active');
       });
       lastActiveFragment = undefined;
     }
     let activeFragment;
-    headings.some(function (heading) {
+    headings.some((heading) => {
       if (
         heading.getBoundingClientRect().top +
           getNumericStyleVal(heading, 'paddingTop') -
