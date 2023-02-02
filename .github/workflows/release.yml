@@ -44,7 +44,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          yarn nx run-many --target=build --projects=typescript,utils,nextjs-mf,node
+          yarn nx run-many --target=build --projects=typescript,utils,node,nextjs-mf
       - name: Version
         shell: bash
         run: |
