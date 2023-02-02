@@ -27,32 +27,32 @@ const nextConfig = {
       }/remoteEntry.js`,
     };
 
-      config.plugins.push(
-        new NextFederationPlugin({
-          name: 'home_app',
-          filename: 'static/chunks/remoteEntry.js',
-          remotes: {
-            shop: remotes.shop,
-            checkout: remotes.checkout,
-          },
-          exposes: {
-            './SharedNav': './components/SharedNav',
-            './menu': './components/menu',
-          },
-          shared: {
-            lodash: {},
-            antd: {},
-          },
-          extraOptions: {
-            automaticAsyncBoundary: true,
-            exposePages: true,
-            enableImageLoaderFix: true,
-            enableUrlLoaderFix: true,
-            skipSharingNextInternals: false,
-            automaticPageStitching: true,
-          },
-        })
-      );
+    config.plugins.push(
+      new NextFederationPlugin({
+        name: 'home_app',
+        filename: 'static/chunks/remoteEntry.js',
+        remotes: {
+          shop: remotes.shop,
+          checkout: remotes.checkout,
+        },
+        exposes: {
+          './SharedNav': './components/SharedNav',
+          './menu': './components/menu',
+        },
+        shared: {
+          lodash: {},
+          antd: {},
+        },
+        extraOptions: {
+          automaticAsyncBoundary: true,
+          exposePages: true,
+          enableImageLoaderFix: true,
+          enableUrlLoaderFix: true,
+          skipSharingNextInternals: false,
+          automaticPageStitching: false,
+        },
+      })
+    );
     return config;
   },
 };

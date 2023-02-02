@@ -2,6 +2,37 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.10.5](https://github.com/module-federation/nextjs-mf/compare/node-0.10.4...node-0.10.5) (2023-02-02)
+
+
+
+## [0.10.4](https://github.com/module-federation/nextjs-mf/compare/node-0.10.3...node-0.10.4) (2023-02-02)
+
+
+
+## [0.10.4](https://github.com/module-federation/nextjs-mf/compare/node-0.10.3...node-0.10.4) (2023-02-02)
+
+
+
+## [0.10.4](https://github.com/module-federation/nextjs-mf/compare/node-0.10.3...node-0.10.4) (2023-02-02)
+
+
+
+## [0.10.4](https://github.com/module-federation/nextjs-mf/compare/node-0.10.3...node-0.10.4) (2023-02-02)
+
+
+
+## [0.10.4](https://github.com/module-federation/nextjs-mf/compare/node-0.10.3...node-0.10.4) (2023-02-02)
+
+
+
+## [0.10.3](https://github.com/module-federation/nextjs-mf/compare/node-0.10.2...node-0.10.3) (2023-01-31)
+
+### Dependency Updates
+
+* `utils` updated to version `1.2.0`
+
+
 ## [0.10.2](https://github.com/module-federation/nextjs-mf/compare/node-0.10.1...node-0.10.2) (2023-01-21)
 
 ### Dependency Updates

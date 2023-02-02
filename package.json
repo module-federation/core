@@ -37,7 +37,7 @@
     "fast-glob": "^3.2.12",
     "lodash.get": "^4.4.2",
     "next": "13.1.6",
-    "ngx-deploy-npm": "^4.2.5",
+    "ngx-deploy-npm": "^4.3.11",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-router-dom": "6.8.0",

@@ -75,7 +75,8 @@ export async function fixImageLoader(
           ]),
           '} catch (e) {',
           Template.indent([
-            `console.error('failed generating CSR image path', e);`,
+            `const path = document.currentScript && document.currentScript.src;`,
+            `console.error('failed generating CSR image path', e, path);`,
             'return "";',
           ]),
           '}',

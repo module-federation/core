@@ -2,6 +2,27 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.0.7](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.0.6...nextjs-mf-6.0.7) (2023-02-02)
+
+### Dependency Updates
+
+* `node` updated to version `0.10.5`
+
+
+## [6.0.6](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.0.5...nextjs-mf-6.0.6) (2023-01-31)
+
+### Dependency Updates
+
+* `node` updated to version `0.10.3`
+* `utils` updated to version `1.2.0`
+
+### Bug Fixes
+
+* **deps:** update dependency eventemitter3 to v5 ([#539](https://github.com/module-federation/nextjs-mf/issues/539)) ([f2d634a](https://github.com/module-federation/nextjs-mf/commit/f2d634ab0f186467120acaac662a13dbeaf3e56e))
+* getOutputPath to find if endsWith server ([#555](https://github.com/module-federation/nextjs-mf/issues/555)) ([d5386c4](https://github.com/module-federation/nextjs-mf/commit/d5386c475bc53a28e2348d10d8280714560ccc4b))
+
+
+
 ## [6.0.5](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.0.4...nextjs-mf-6.0.5) (2023-01-21)
 
 ### Dependency Updates
