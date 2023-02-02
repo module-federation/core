@@ -49,7 +49,10 @@ jobs:
         shell: bash
         run: |
           npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
-          PROJECTS=${{ inputs.projects }}
+          PROJECTS=${{ inputs.package }}
+
+          echo "projects before"
+          echo $PROJECTS
 
           if [[ $PROJECTS == "all" ]]; then
             PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=last-release)
