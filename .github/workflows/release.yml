@@ -55,6 +55,8 @@ jobs:
             PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=last-release)
           fi;
 
+          echo "Projects to version: $PROJECTS"
+
           yarn nx run-many --target=version --projects="$PROJECTS" --parallel=1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
