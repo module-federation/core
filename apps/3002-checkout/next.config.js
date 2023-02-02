@@ -1,4 +1,4 @@
-const {withNx} = require('@nrwl/next/plugins/with-nx');
+const { withNx } = require('@nrwl/next/plugins/with-nx');
 
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 
@@ -6,20 +6,13 @@ const NextFederationPlugin = require('@module-federation/nextjs-mf');
  * @type {import('@nrwl/next/plugins/with-nx').WithNxOptions}
  **/
 const nextConfig = {
-  async redirects() {
-    return [{
-      source: '/',
-      destination: '/checkout',
-      permanent: true
-    }];
-  },
   nx: {
     // Set this to true if you would like to to use SVGR
     // See: https://github.com/gregberge/svgr
     svgr: false,
   },
   webpack(config, options) {
-    const {webpack, isServer} = options;
+    const { webpack, isServer } = options;
 
     config.plugins.push(
       new NextFederationPlugin({
@@ -37,18 +30,19 @@ const nextConfig = {
           }/remoteEntry.js`,
         },
         exposes: {
-          './CheckoutTitle': './src/components/CheckoutTitle',
-          './ButtonOldAnt': './src/components/ButtonOldAnt',
-          './menu': './src/components/menu',
+          './CheckoutTitle': './components/CheckoutTitle',
+          './ButtonOldAnt': './components/ButtonOldAnt',
+          './menu': './components/menu',
         },
         shared: {
           lodash: {},
         },
         extraOptions: {
+          automaticAsyncBoundary: true,
           exposePages: true,
           enableImageLoaderFix: true,
           enableUrlLoaderFix: true,
-          automaticPageStitching: true,
+          automaticPageStitching: false,
         },
       })
     );
