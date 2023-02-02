@@ -44,18 +44,18 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          yarn nx run-many --target=build --projects=typescript,utils,nextjs-mf,node
+          yarn nx run-many --target=build --projects=typescript,utils,node,nextjs-mf
       - name: Version
         shell: bash
         run: |
           npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
-          PROJECTS=${{ inputs.projects }}
+          PROJECTS=${{ inputs.package }}
 
           if [[ $PROJECTS == "all" ]]; then
             PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=last-release)
           fi;
 
-          echo $PROJECTS
+          echo "Projects to version: $PROJECTS"
 
           yarn nx run-many --target=version --projects="$PROJECTS" --parallel=1
         env:
