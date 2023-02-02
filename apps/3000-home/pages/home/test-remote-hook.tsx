@@ -1,9 +1,8 @@
 import { NextPage } from 'next';
-
-let useCustomRemoteHook = require('shop/useCustomRemoteHook');
+import useCustomRemoteHook from 'shop/useCustomRemoteHook';
 
 const TestRemoteHook: NextPage = () => {
-  let text = useCustomRemoteHook.default();
+  const text = useCustomRemoteHook.default();
 
   return (
     <>
