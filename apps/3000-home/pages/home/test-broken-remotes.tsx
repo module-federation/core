@@ -7,13 +7,13 @@ export default function TestBrokenRemotes() {
 
       <p>
         Check unresolved host –{' '}
-        <Link href="/unresolved-host">/unresolved-host</Link>{' '}
-        (on http://localhost:<b>3333</b>/_next/static/chunks/remoteEntry.js)
+        <Link href="/unresolved-host">/unresolved-host</Link> (on
+        http://localhost:<b>3333</b>/_next/static/chunks/remoteEntry.js)
       </p>
       <p>
         Check wrong response for remoteEntry –{' '}
-        <Link href="/wrong-entry">/wrong-entry</Link>{' '}
-        (on http://localhost:3000/_next/static/chunks/remoteEntry<b>Wrong</b>
+        <Link href="/wrong-entry">/wrong-entry</Link> (on
+        http://localhost:3000/_next/static/chunks/remoteEntry<b>Wrong</b>
         .js)
       </p>
     </div>

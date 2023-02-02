@@ -1,18 +1,9 @@
 import { NextPage } from 'next';
 
-let useCustomRemoteHook;
-
-if (process.browser) {
-  useCustomRemoteHook = require('shop/useCustomRemoteHook');
-}
+let useCustomRemoteHook = require('shop/useCustomRemoteHook');
 
 const TestRemoteHook: NextPage = () => {
-  let text;
-
-  if (process.browser) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    text = useCustomRemoteHook.default();
-  }
+  let text = useCustomRemoteHook.default();
 
   return (
     <>
