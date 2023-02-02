@@ -1779,17 +1779,9 @@
   version "0.0.0"
   uid ""
 
-"@module-federation/utilities@1.1.1":
+"@module-federation/utilities@1.2.0":
   version "0.0.0"
   uid ""
-
-"@module-federation/utilities@1.2.0":
-  version "1.1.1"
-  dependencies:
-    tslib "2.4.0"
-  optionalDependencies:
-    next "^12 || ^13"
-    react "^17 || ^18"
 
 "@module-federation/utilities@link:./dist/packages/utilities":
   version "0.0.0"
