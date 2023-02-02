@@ -100,11 +100,32 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
     var url = new URL(${JSON.stringify(url)});
     url.searchParams.set('t', Date.now());
     var __webpack_error__ = new Error();
-    if (typeof ${global} !== 'undefined') return resolve(${global});
-    __webpack_require__.l(
+    if(!window.remoteLoading) {
+        window.remoteLoading = {};
+    };
+
+    if(window.remoteLoading[${JSON.stringify(global)}]) {
+      return window.remoteLoading[${JSON.stringify(global)}].then(resolve).catch(reject);
+    }
+
+    var res, rej;
+    window.remoteLoading[${JSON.stringify(global)}] = new Promise(function(rs,rj){
+      res = rs;
+      rej = rj;
+    })
+
+    if (typeof window[${JSON.stringify(global)}] !== 'undefined') {
+      res(${global});
+      return resolve(${global});
+    }
+
+     __webpack_require__.l(
       url.href,
       function (event) {
-        if (typeof ${global} !== 'undefined') return resolve(${global});
+        if (typeof window[${JSON.stringify(global)}] !== 'undefined') {
+          res(${global});
+          return resolve(${global});
+        }
         var errorType = event && (event.type === 'load' ? 'missing' : event.type);
         var realSrc = event && event.target && event.target.src;
         __webpack_error__.message =
@@ -112,9 +133,10 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
         __webpack_error__.name = 'ScriptExternalLoadError';
         __webpack_error__.type = errorType;
         __webpack_error__.request = realSrc;
+        rej(__webpack_error__);
         reject(__webpack_error__);
       },
-      ${JSON.stringify(global)},
+      ${JSON.stringify(global)}
     );
   }).then(function () {
     const proxy = {

@@ -55,7 +55,7 @@ const nextConfig = {
           enableImageLoaderFix: true,
           enableUrlLoaderFix: true,
           skipSharingNextInternals: false,
-          automaticPageStitching: true,
+          automaticPageStitching: false,
         },
       })
     );

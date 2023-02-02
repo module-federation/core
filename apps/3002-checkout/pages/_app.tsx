@@ -5,7 +5,6 @@ import { Layout, version } from 'antd';
 import Router, { useRouter } from 'next/router';
 
 import HostAppMenu from '../components/menu';
-
 import 'antd/dist/antd.css';
 
 const SharedNav = dynamic(() => import('home/SharedNav'), { ssr: true });
@@ -18,9 +17,9 @@ function MyApp({ Component, pageProps }) {
       // @ts-ignore
       const RemoteAppMenu = (await import('home/menu')).default;
       setMenuComponent(() => RemoteAppMenu);
-    } else if (url.startsWith('/checkout')) {
+    } else if (url.startsWith('/shop')) {
       // @ts-ignore
-      const RemoteAppMenu = (await import('checkout/menu')).default;
+      const RemoteAppMenu = (await import('shop/menu')).default;
       setMenuComponent(() => RemoteAppMenu);
     } else {
       setMenuComponent(() => HostAppMenu);

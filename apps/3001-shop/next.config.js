@@ -1,21 +1,12 @@
 const { withNx } = require('@nrwl/next/plugins/with-nx');
 
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
-const {
-  promiseTemplate,
-} = require('@module-federation/nextjs-mf/utils/build-utils');
 const {createDelegatedModule} = require("@module-federation/utilities");
+
 /**
  * @type {import('@nrwl/next/plugins/with-nx').WithNxOptions}
  **/
 const nextConfig = {
-  async redirects() {
-    return [{
-      source: '/',
-      destination: '/shop',
-      permanent: true
-    }];
-  },
   nx: {
     // Set this to true if you would like to to use SVGR
     // See: https://github.com/gregberge/svgr

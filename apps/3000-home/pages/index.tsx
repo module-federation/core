@@ -1,18 +1,18 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
 
 const CheckoutTitle = dynamic(() => import('checkout/CheckoutTitle'), {
-  ssr: false,
+  ssr: true,
 });
 const ButtonOldAnt = dynamic(() => import('checkout/ButtonOldAnt'), {
-  ssr: false,
+  ssr: true,
 });
 const WebpackSvgRemote = dynamic(() => import('shop/WebpackSvg'), {
-  ssr: false,
+  ssr: true,
 });
 const WebpackPngRemote = dynamic(() => import('shop/WebpackPng'), {
-  ssr: false,
+  ssr: true,
 });
 
 const Home = () => {
@@ -88,7 +88,9 @@ const Home = () => {
               <h3>This title came from checkout with hooks data!!!</h3>
             </td>
             <td>
-              <CheckoutTitle />
+              <Suspense fallback="loading CheckoutTitle">
+                <CheckoutTitle />
+              </Suspense>
             </td>
           </tr>
           <tr>
@@ -98,7 +100,9 @@ const Home = () => {
             </td>
             <td>[Button from antd@4.20.0]</td>
             <td>
-              <ButtonOldAnt />
+              <Suspense fallback="loading ButtonOldAnt">
+                <ButtonOldAnt />
+              </Suspense>
             </td>
           </tr>
           <tr>
@@ -112,7 +116,9 @@ const Home = () => {
               <img src="./webpack.png" />
             </td>
             <td>
-              <WebpackPngRemote />
+              <Suspense fallback="loading WebpackPngRemote">
+                <WebpackPngRemote />
+              </Suspense>
             </td>
           </tr>
           <tr>
@@ -126,7 +132,9 @@ const Home = () => {
               <img src="./webpack.svg" />
             </td>
             <td>
-              <WebpackSvgRemote />
+              <Suspense fallback="loading WebpackSvgRemote">
+                <WebpackSvgRemote />
+              </Suspense>
             </td>
           </tr>
         </tbody>
