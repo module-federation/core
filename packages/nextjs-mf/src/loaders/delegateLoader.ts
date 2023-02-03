@@ -19,8 +19,18 @@ export default function patchDefaultSharedLoader(
       for (const [key, value] of new URLSearchParams(query).entries()) {
         queries.push(`${key}=${value}`)
       }
+      const delegatePath = this.utils.contextify(
+        this.context,
+        this.utils.absolutify(this._compiler?.context || '', request) + '?' + queries.join('&')
+      )
+      return delegatePath
       return path.resolve(this._compiler?.context || '', request) + '?' + queries.join('&')
     } else {
+      const delegatePath = this.utils.contextify(
+        this.context,
+        this.utils.absolutify(this._compiler?.context || '', request)
+      )
+      return delegatePath
       return path.resolve(this._compiler?.context || '', request)
     }
   })
