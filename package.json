@@ -8,7 +8,8 @@
   "repository": "https://github.com/module-federation/nextjs-mf",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "contributors": [
-    "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
+    "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)",
+    "Kyle Tsang (https://github.com/kyletsang)"
   ],
   "license": "MIT",
   "scripts": {
@@ -33,7 +34,6 @@
     "@swc/helpers": "~0.4.0",
     "axios": "^1.0.0",
     "core-js": "^3.6.5",
-    "download": "^8.0.0",
     "fast-glob": "^3.2.12",
     "lodash.get": "^4.4.2",
     "next": "13.1.6",
@@ -66,6 +66,7 @@
     "@types/jest": "29.4.0",
     "@types/lodash.get": "^4.4.7",
     "@types/node": "18.11.18",
+    "@types/node-fetch": "^2.6.2",
     "@types/react": "18.0.27",
     "@types/react-dom": "18.0.10",
     "@types/react-router-dom": "5.3.3",

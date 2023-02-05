@@ -1,4 +1,3 @@
-import download from 'download';
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
@@ -20,6 +19,7 @@ import {
 } from '../types';
 
 import { FederatedTypesStatsPlugin } from './FederatedTypesStatsPlugin';
+import download from '../lib/download';
 
 const PLUGIN_NAME = 'FederatedTypesPlugin';
 
@@ -194,7 +194,9 @@ export class FederatedTypesPlugin {
                 );
 
                 this.logger.log('Downloading types...');
-                return download(url, destination, {
+                return download({
+                  url,
+                  destination,
                   filename: file,
                 });
               })
