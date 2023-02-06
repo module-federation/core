@@ -1,5 +1,8 @@
 import type { Compiler } from 'webpack';
-import type { ModuleFederationPluginOptions, ExternalsType } from '@module-federation/utilities';
+import type {
+  ModuleFederationPluginOptions,
+  ExternalsType,
+} from '@module-federation/utilities';
 
 export default class ModuleFederationPlugin {
   private _options!: ModuleFederationPluginOptions;
