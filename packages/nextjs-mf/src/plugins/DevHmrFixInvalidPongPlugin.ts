@@ -1,16 +1,16 @@
 import { Compilation, Compiler } from 'webpack';
 
 if (!String.prototype.replaceAll) {
-  String.prototype.replaceAll = function(str, newStr){
-
+  String.prototype.replaceAll = function (str, newStr) {
     // If a regex pattern
-    if (Object.prototype.toString.call(str).toLowerCase() === '[object regexp]') {
+    if (
+      Object.prototype.toString.call(str).toLowerCase() === '[object regexp]'
+    ) {
       return this.replace(str, <string>newStr);
     }
 
     // If a string
     return this.replace(new RegExp(str, 'g'), <string>newStr);
-
   };
 }
 

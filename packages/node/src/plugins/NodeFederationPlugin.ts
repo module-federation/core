@@ -2,7 +2,7 @@
 
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
-import {extractUrlAndGlobal} from "@module-federation/utilities";
+import { extractUrlAndGlobal } from '@module-federation/utilities';
 
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
   experiments?: Record<string, unknown>;
@@ -22,21 +22,24 @@ interface Context {
 // commonjs-module, ideal since it returns a commonjs module format
 // const remote = eval(scriptContent + 'module.exports')
 
-
-export const parseRemotes = (remotes: Record<string, any>) => Object.entries(remotes).reduce((acc, remote) => {
-  if(remote[1].startsWith('internal ')) {
+export const parseRemotes = (remotes: Record<string, any>) =>
+  Object.entries(remotes).reduce((acc, remote) => {
+    if (remote[1].startsWith('internal ')) {
+      acc[remote[0]] = remote[1];
+      return acc;
+    }
+    if (!remote[1].startsWith('promise ') && remote[1].includes('@')) {
+      acc[remote[0]] = `promise ${parseRemoteSyntax(remote[1])}`;
+      return acc;
+    }
     acc[remote[0]] = remote[1];
     return acc;
-  }
-  if (!remote[1].startsWith('promise ') && remote[1].includes('@')) {
-    acc[remote[0]] = `promise ${parseRemoteSyntax(remote[1])}`;
-    return acc;
-  }
-  acc[remote[0]] = remote[1];
-  return acc;
-}, {} as Record<string, string>);
+  }, {} as Record<string, string>);
 // server template to convert remote into promise new promise and use require.loadChunk to load the chunk
-export const generateRemoteTemplate = (url: string, global: any) => `new Promise(function (resolve, reject) {
+export const generateRemoteTemplate = (
+  url: string,
+  global: any
+) => `new Promise(function (resolve, reject) {
     if(!global.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser
       global.__remote_scope__ = {
@@ -44,14 +47,24 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
       }
     }
 
-    if (typeof global.__remote_scope__[${JSON.stringify(global)}] !== 'undefined') return resolve(global.__remote_scope__[${JSON.stringify(global)}]);
-    global.__remote_scope__._config[${JSON.stringify(global)}] = ${JSON.stringify(url)};
+    if (typeof global.__remote_scope__[${JSON.stringify(
+      global
+    )}] !== 'undefined') return resolve(global.__remote_scope__[${JSON.stringify(
+  global
+)}]);
+    global.__remote_scope__._config[${JSON.stringify(
+      global
+    )}] = ${JSON.stringify(url)};
     var __webpack_error__ = new Error();
 
     __webpack_require__.l(
       ${JSON.stringify(url)},
       function (event) {
-        if (typeof global.__remote_scope__[${JSON.stringify(global)}] !== 'undefined') return resolve(global.__remote_scope__[${JSON.stringify(global)}]);
+        if (typeof global.__remote_scope__[${JSON.stringify(
+          global
+        )}] !== 'undefined') return resolve(global.__remote_scope__[${JSON.stringify(
+  global
+)}]);
          var realSrc = event && event.target && event.target.src;
         __webpack_error__.message = 'Loading script failed.\\n(' + event.message + ': ' + realSrc + ')';
         __webpack_error__.name = 'ScriptExternalLoadError';
@@ -61,7 +74,9 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
       ${JSON.stringify(global)},
     );
   }).catch((e)=> {
-    console.error(${JSON.stringify(global)}, 'is offline, returning fake remote');
+    console.error(${JSON.stringify(
+      global
+    )}, 'is offline, returning fake remote');
     console.error(e);
 
     return {
@@ -86,7 +101,9 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
           const m = f();
           return ()=>new Proxy(m, {
             get: (target, prop)=>{
-              if(global.usedChunks) global.usedChunks.add(${JSON.stringify(global)} + "->" + arg);
+              if(global.usedChunks) global.usedChunks.add(${JSON.stringify(
+                global
+              )} + "->" + arg);
               return target[prop];
             }
           })
@@ -105,7 +122,9 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
             return target[prop]
           },
           set(target, property, value) {
-            if(global.usedChunks) global.usedChunks.add(${JSON.stringify(global)} + "->" + property);
+            if(global.usedChunks) global.usedChunks.add(${JSON.stringify(
+              global
+            )} + "->" + property);
             if (target[property]) {
               return target[property]
             }
@@ -114,7 +133,9 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
           }
         }
         try {
-          global.__remote_scope__[${JSON.stringify(global)}].init(new Proxy(shareScope, handler))
+          global.__remote_scope__[${JSON.stringify(
+            global
+          )}].init(new Proxy(shareScope, handler))
         } catch (e) {
 
         }
@@ -152,8 +173,6 @@ class NodeFederationPlugin {
     this.experiments = experiments || {};
   }
 
-
-
   apply(compiler: Compiler) {
     // When used with Next.js, context is needed to use Next.js webpack
     const { webpack } = compiler;
@@ -168,7 +187,9 @@ class NodeFederationPlugin {
     // ).apply(compiler);
     const pluginOptions = {
       ...this._options,
-      remotes: parseRemotes(this._options.remotes || {}) as ModuleFederationPluginOptions['remotes'],
+      remotes: parseRemotes(
+        this._options.remotes || {}
+      ) as ModuleFederationPluginOptions['remotes'],
     };
 
     new (this.context.ModuleFederationPlugin ||
@@ -178,6 +199,5 @@ class NodeFederationPlugin {
     ).apply(compiler);
   }
 }
-
 
 export default NodeFederationPlugin;

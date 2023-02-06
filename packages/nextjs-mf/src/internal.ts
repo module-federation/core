@@ -3,7 +3,7 @@ import type {
   ModuleFederationPluginOptions,
   Shared,
   SharedConfig,
-  SharedObject
+  SharedObject,
 } from '@module-federation/utilities';
 
 import path from 'path';
@@ -11,7 +11,10 @@ import path from 'path';
 import { isRequiredVersion } from 'webpack/lib/sharing/utils';
 import { parseOptions } from 'webpack/lib/container/options';
 
-import { extractUrlAndGlobal, createDelegatedModule } from '@module-federation/utilities';
+import {
+  extractUrlAndGlobal,
+  createDelegatedModule,
+} from '@module-federation/utilities';
 
 // the share scope we attach by default
 // in hosts we re-key them to prevent webpack moving the modules into their own chunks (cause eager error)
@@ -91,12 +94,15 @@ export const reKeyHostShared = (
 
   return {
     ...options, // pass through undoctored shared modules from the user config
-    ...reKeyedInternalModules
-  } as Record<string, SharedConfig>
+    ...reKeyedInternalModules,
+  } as Record<string, SharedConfig>;
 };
 
 // browser template to convert remote into promise new promise and use require.loadChunk to load the chunk
-export const generateRemoteTemplate = (url: string, global: any) => `new Promise(function (resolve, reject) {
+export const generateRemoteTemplate = (
+  url: string,
+  global: any
+) => `new Promise(function (resolve, reject) {
     var url = new URL(${JSON.stringify(url)});
     url.searchParams.set('t', Date.now());
     var __webpack_error__ = new Error();
@@ -105,11 +111,15 @@ export const generateRemoteTemplate = (url: string, global: any) => `new Promise
     };
 
     if(window.remoteLoading[${JSON.stringify(global)}]) {
-      return window.remoteLoading[${JSON.stringify(global)}].then(resolve).catch(reject);
+      return window.remoteLoading[${JSON.stringify(
+        global
+      )}].then(resolve).catch(reject);
     }
 
     var res, rej;
-    window.remoteLoading[${JSON.stringify(global)}] = new Promise(function(rs,rj){
+    window.remoteLoading[${JSON.stringify(
+      global
+    )}] = new Promise(function(rs,rj){
       res = rs;
       rej = rj;
     })
@@ -262,7 +272,11 @@ export const removePlugins = [
 ];
 
 export const parseRemoteSyntax = (remote: string) => {
-  if (typeof remote === 'string' && remote.includes('@') && !remote.startsWith('internal ')) {
+  if (
+    typeof remote === 'string' &&
+    remote.includes('@') &&
+    !remote.startsWith('internal ')
+  ) {
     const [url, global] = extractUrlAndGlobal(remote);
     return generateRemoteTemplate(url, global);
   }
@@ -271,34 +285,28 @@ export const parseRemoteSyntax = (remote: string) => {
 };
 
 export const parseRemotes = (remotes: Record<string, any>) =>
-  Object.entries(remotes).reduce(
-    (acc, [key, value]) => {
-      // check if user is passing a internal "delegate module" reference
-      if (value.startsWith("internal ")) {
-        return { ...acc, [key]: value };
-      }
-      // check if user is passing custom promise template
-      if (!value.startsWith("promise ") && value.includes("@")) {
-        return { ...acc, [key]: `promise ${parseRemoteSyntax(value)}` };
-      }
-      // return standard template otherwise
+  Object.entries(remotes).reduce((acc, [key, value]) => {
+    // check if user is passing a internal "delegate module" reference
+    if (value.startsWith('internal ')) {
       return { ...acc, [key]: value };
-    },
-    {} as Record<string, string>
-  );
+    }
+    // check if user is passing custom promise template
+    if (!value.startsWith('promise ') && value.includes('@')) {
+      return { ...acc, [key]: `promise ${parseRemoteSyntax(value)}` };
+    }
+    // return standard template otherwise
+    return { ...acc, [key]: value };
+  }, {} as Record<string, string>);
 
-export const getDelegates = (remotes: Record<string, any>)=> {
-  return Object.entries(remotes).reduce(
-    (acc, [key, value]) => {
-      // check if user is passing a internal "delegate module" reference
-      if (value.startsWith("internal ")) {
-        return { ...acc, [key]: value };
-      }
-      return acc
-    },
-    {} as Record<string, string>
-  );
-}
+export const getDelegates = (remotes: Record<string, any>) => {
+  return Object.entries(remotes).reduce((acc, [key, value]) => {
+    // check if user is passing a internal "delegate module" reference
+    if (value.startsWith('internal ')) {
+      return { ...acc, [key]: value };
+    }
+    return acc;
+  }, {} as Record<string, string>);
+};
 
 const parseShareOptions = (options: ModuleFederationPluginOptions) => {
   const sharedOptions: [string, SharedConfig][] = parseOptions(
@@ -308,13 +316,13 @@ const parseShareOptions = (options: ModuleFederationPluginOptions) => {
         throw new Error('Unexpected array in shared');
 
       return item === key || !isRequiredVersion(item)
-      ? {
-          import: item,
-        }
-      : {
-          import: key,
-          requiredVersion: item,
-        };
+        ? {
+            import: item,
+          }
+        : {
+            import: key,
+            requiredVersion: item,
+          };
     },
     (item: any) => item
   );
@@ -334,12 +342,13 @@ const parseShareOptions = (options: ModuleFederationPluginOptions) => {
   }, {} as Record<string, SharedConfig>);
 };
 
-export const toDisplayErrors = (err: Error[]) => err
-.map((error) => {
-  let { message } = error;
-  if (error.stack) {
-    message += `\n${error.stack}`;
-  }
-  return message;
-})
-.join('\n');
+export const toDisplayErrors = (err: Error[]) =>
+  err
+    .map((error) => {
+      let { message } = error;
+      if (error.stack) {
+        message += `\n${error.stack}`;
+      }
+      return message;
+    })
+    .join('\n');

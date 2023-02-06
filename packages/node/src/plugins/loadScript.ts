@@ -54,9 +54,10 @@ export const executeLoadTemplate = `
       return res.text();
     }).then(function (scriptContent) {
       try {
-        const vmContext = {exports, require, module, global, __filename, __dirname, URL,console,process,Buffer, ...global, remoteEntryName: name};
+        const vmContext = {exports, require, module, global, __filename, __dirname, URL, URLSearchParams, console, process,Buffer, ...global, remoteEntryName: name};
         const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, {filename: 'node-federation-loader-' + name + '.vm'});
         const foundContainer = remote[name] || remote
+
         if(!global.__remote_scope__[name]) {
           global.__remote_scope__[name] = {
             get: foundContainer.get,

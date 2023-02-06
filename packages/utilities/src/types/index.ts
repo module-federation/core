@@ -9,9 +9,9 @@ export type ModuleFederationPluginOptions = ConstructorParameters<
 
 export type WebpackRequire = {
   l: (
-    url: string,
+    url: string | undefined,
     cb: (event: any) => void,
-    id: string
+    id: string | number
   ) => Record<string, unknown>;
 };
 
@@ -60,7 +60,6 @@ export type WebpackRemoteContainer = {
   __initialized?: boolean;
   get(modulePath: ModulePath): () => any;
   init: (obj?: typeof __webpack_share_scopes__) => void;
-
 };
 
 export type AsyncContainer = Promise<WebpackRemoteContainer>;
@@ -89,7 +88,7 @@ type NextRoute = string;
 export type PageMap = Record<NextRoute, ModulePath>;
 
 export type GetModuleOptions = {
-  modulePath: string
-  exportName?: string
-  remoteContainer: string | RemoteData
-}
+  modulePath: string;
+  exportName?: string;
+  remoteContainer: string | RemoteData;
+};

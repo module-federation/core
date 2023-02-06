@@ -74,50 +74,55 @@ export const importDelegatedModule = async (
   keyOrRuntimeRemoteItem: string | RuntimeRemote
 ) => {
   // @ts-ignore
-  return loadScript(keyOrRuntimeRemoteItem).then((asyncContainer) => {
-    // for legacy reasons, we must mark container a initialized
-    // here otherwise older promise based implementation will try to init again with diff object
-    // asyncContainer.__initialized = true;
-    return asyncContainer
-  }).then((asyncContainer) => {
-    // most of this is only needed because of legacy promise based implementation
-    if(typeof window === 'undefined') {
-      //TODO: need to solve chunk flushing with delegated modules
-      return asyncContainer
-    } else {
-      const proxy ={
-        get: asyncContainer.get,
-        init: function (shareScope: any, initScope: any) {
-
-          try {
-            // @ts-ignore
-            return asyncContainer.init(shareScope, initScope);
-          } catch (e) {
-          }
+  return loadScript(keyOrRuntimeRemoteItem)
+    .then((asyncContainer) => {
+      // for legacy reasons, we must mark container a initialized
+      // here otherwise older promise based implementation will try to init again with diff object
+      // asyncContainer.__initialized = true;
+      return asyncContainer;
+    })
+    .then((asyncContainer) => {
+      // most of this is only needed because of legacy promise based implementation
+      if (typeof window === 'undefined') {
+        //TODO: need to solve chunk flushing with delegated modules
+        return asyncContainer;
+      } else {
+        const proxy = {
+          get: asyncContainer.get,
+          init: function (shareScope: any, initScope: any) {
+            try {
+              // @ts-ignore
+              return asyncContainer.init(shareScope, initScope);
+            } catch (e) {}
+            //@ts-ignore
+            proxy.__initialized = true;
+          },
+        };
+        // @ts-ignore
+        if (!proxy.__initialized) {
           //@ts-ignore
-          proxy.__initialized = true;
+          proxy.init(__webpack_share_scopes__.default);
         }
+        return proxy;
       }
-      // @ts-ignore
-      if(!proxy.__initialized) {
-        //@ts-ignore
-        proxy.init(__webpack_share_scopes__.default);
-      }
-      return proxy
-    }
-  });
+    });
 };
 
-export const createDelegatedModule = (delegate:string, params: { [key: string]: any } ) => {
+export const createDelegatedModule = (
+  delegate: string,
+  params: { [key: string]: any }
+) => {
   let queries: string[] = [];
   for (const [key, value] of Object.entries(params)) {
-    if(Array.isArray(value) || typeof value === 'object') {
-      throw new Error(`[Module Federation] Delegated module params cannot be an array or object. Key "${key}" should be a string or number`);
+    if (Array.isArray(value) || typeof value === 'object') {
+      throw new Error(
+        `[Module Federation] Delegated module params cannot be an array or object. Key "${key}" should be a string or number`
+      );
     }
     queries.push(`${key}=${value}`);
   }
   return `internal ${delegate}?${queries.join('&')}`;
-}
+};
 
 const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
@@ -176,6 +181,9 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         return resolve(asyncContainer);
       }
 
+      if (typeof globalScope[remoteGlobal] !== 'undefined') {
+        return resolveRemoteGlobal();
+      }
 
       (__webpack_require__ as any).l(
         reference.url,

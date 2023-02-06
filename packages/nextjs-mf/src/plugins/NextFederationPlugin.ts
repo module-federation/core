@@ -9,12 +9,17 @@ import type {
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
 } from '@module-federation/utilities';
-import {createRuntimeVariables} from '@module-federation/utilities';
+import { createRuntimeVariables } from '@module-federation/utilities';
 
-import type {Compiler} from 'webpack';
+import type { Compiler } from 'webpack';
 import path from 'path';
 
-import {internalizeSharedPackages, parseRemotes, reKeyHostShared,getDelegates} from '../internal';
+import {
+  internalizeSharedPackages,
+  parseRemotes,
+  reKeyHostShared,
+  getDelegates,
+} from '../internal';
 import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
 import ChildFederationPlugin from './ChildFederationPlugin';
 
@@ -25,7 +30,7 @@ export class NextFederationPlugin {
   private _extraOptions: NextFederationPluginExtraOptions;
 
   constructor(options: NextFederationPluginOptions) {
-    const {extraOptions, ...mainOpts} = options;
+    const { extraOptions, ...mainOpts } = options;
     this._options = mainOpts;
     this._extraOptions = {
       automaticPageStitching: false,
@@ -47,7 +52,7 @@ export class NextFederationPlugin {
     }
 
     if (!['server', 'client'].includes(compiler.options.name)) {
-      return
+      return;
     }
 
     const isServer = compiler.options.name === 'server';
@@ -56,8 +61,7 @@ export class NextFederationPlugin {
     if (isServer) {
       // target false because we use our own target for node env
       compiler.options.target = false;
-      const { StreamingTargetPlugin } =
-        require('@module-federation/node');
+      const { StreamingTargetPlugin } = require('@module-federation/node');
 
       new StreamingTargetPlugin(this._options, {
         ModuleFederationPlugin: webpack.container.ModuleFederationPlugin,
@@ -77,17 +81,26 @@ export class NextFederationPlugin {
       internalizeSharedPackages(this._options, compiler);
 
       // module-federation/utilities uses internal webpack methods and must be bundled into runtime code.
-      if(Array.isArray(compiler.options.externals)) {
+      if (Array.isArray(compiler.options.externals)) {
         const originalExternals = compiler.options.externals[0];
         compiler.options.externals[0] = function (ctx, callback) {
-          if (ctx.request && ctx.request.includes('@module-federation/utilities')) {
-            return callback()
+          if (
+            ctx.request &&
+            ctx.request.includes('@module-federation/utilities')
+          ) {
+            return callback();
           }
           // @ts-ignore
           return originalExternals(ctx, callback);
-        }
+        };
       }
     } else {
+      new webpack.EntryPlugin(
+        compiler.context,
+        require.resolve('../internal-delegate-share'),
+        'main'
+      ).apply(compiler);
+
       if (this._extraOptions.automaticPageStitching) {
         compiler.options.module.rules.push({
           test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
@@ -116,40 +129,52 @@ export class NextFederationPlugin {
     //patch next
     compiler.options.module.rules.push({
       test(req: string) {
-        if (req.includes(path.join(compiler.context, 'pages/')) || req.includes(path.join(compiler.context, 'app/'))) {
-          return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req)
+        if (
+          req.includes(path.join(compiler.context, 'pages/')) ||
+          req.includes(path.join(compiler.context, 'app/'))
+        ) {
+          return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
         }
-        return false
+        return false;
       },
       include: compiler.context,
       exclude: /node_modules/,
-      loader: path.resolve(
-        __dirname,
-        '../loaders/patchDefaultSharedLoader'
-      ),
+      loader: path.resolve(__dirname, '../loaders/patchDefaultSharedLoader'),
     });
-
-    if(this._options.remotes) {
+    compiler.options.devtool = 'source-map';
+    if (this._options.remotes) {
       const delegates = getDelegates(this._options.remotes);
       // only apply loader if delegates are present
-      if(delegates && Object.keys(delegates).length > 0) {
+      if (delegates && Object.keys(delegates).length > 0) {
         compiler.options.module.rules.push({
           test(req: string) {
-            if (req.includes(path.join(compiler.context, 'pages/')) || req.includes(path.join(compiler.context, 'app/'))) {
-              return /_app\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req)
+            if (isServer) {
+              if (
+                req.includes(path.join(compiler.context, 'pages/')) ||
+                req.includes(path.join(compiler.context, 'app/'))
+              ) {
+                return /_app\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
+              }
             }
-            return false
+            if (req.includes('internal-delegate-share')) {
+              return true;
+            }
+            return false;
           },
-          resourceQuery: this._extraOptions.automaticAsyncBoundary ? (query) => !query.includes('hasBoundary') : undefined,
-          include: compiler.context,
-          exclude: /node_modules/,
-          loader: path.resolve(
-            __dirname,
-            '../loaders/delegateLoader'
-          ),
+          resourceQuery: this._extraOptions.automaticAsyncBoundary
+            ? (query) => !query.includes('hasBoundary')
+            : undefined,
+          include: [compiler.context, /internal-delegate-share/],
+          exclude: (request: string) => {
+            if (request.includes('internal-delegate-share')) {
+              return false;
+            }
+            return /node_modules/.test(request);
+          },
+          loader: path.resolve(__dirname, '../loaders/delegateLoader'),
           options: {
-            delegates
-          }
+            delegates,
+          },
         });
       }
     }
@@ -157,17 +182,17 @@ export class NextFederationPlugin {
     if (this._extraOptions.automaticAsyncBoundary) {
       compiler.options.module.rules.push({
         test: (request: string) => {
-          if (request.includes(path.join(compiler.context, 'pages/')) || request.includes(path.join(compiler.context, 'app/'))) {
-            return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
+          if (
+            request.includes(path.join(compiler.context, 'pages/')) ||
+            request.includes(path.join(compiler.context, 'app/'))
+          ) {
+            return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request);
           }
-          return false
+          return false;
         },
-        exclude: [/node_modules/, /_document/, /_middleware/,/pages\/api/],
+        exclude: [/node_modules/, /_document/, /_middleware/, /pages\/api/],
         resourceQuery: (query) => !query.includes('hasBoundary'),
-        loader: path.resolve(
-          __dirname,
-          '../loaders/async-boundary-loader'
-        )
+        loader: path.resolve(__dirname, '../loaders/async-boundary-loader'),
       });
     }
 
