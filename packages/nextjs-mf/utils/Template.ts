@@ -3,9 +3,9 @@
 	Author Tobias Koppers @sokra
 */
 
-"use strict";
+'use strict';
 
-import { ConcatSource, PrefixSource } from "webpack-sources"
+import { ConcatSource, PrefixSource } from 'webpack-sources';
 
 /** @typedef {import("../declarations/WebpackOptions").Output} OutputOptions */
 /** @typedef {import("webpack-sources").Source} Source */
@@ -23,9 +23,9 @@ import { ConcatSource, PrefixSource } from "webpack-sources"
 /** @typedef {import("./javascript/JavascriptModulesPlugin").ChunkRenderContext} ChunkRenderContext */
 /** @typedef {import("./javascript/JavascriptModulesPlugin").RenderContext} RenderContext */
 
-const START_LOWERCASE_ALPHABET_CODE = "a".charCodeAt(0);
-const START_UPPERCASE_ALPHABET_CODE = "A".charCodeAt(0);
-const DELTA_A_TO_Z = "z".charCodeAt(0) - START_LOWERCASE_ALPHABET_CODE + 1;
+const START_LOWERCASE_ALPHABET_CODE = 'a'.charCodeAt(0);
+const START_UPPERCASE_ALPHABET_CODE = 'A'.charCodeAt(0);
+const DELTA_A_TO_Z = 'z'.charCodeAt(0) - START_LOWERCASE_ALPHABET_CODE + 1;
 export const NUMBER_OF_IDENTIFIER_START_CHARS = DELTA_A_TO_Z * 2 + 2; // a-z A-Z _ $
 export const NUMBER_OF_IDENTIFIER_CONTINUATION_CHARS =
   NUMBER_OF_IDENTIFIER_START_CHARS + 10; // a-z A-Z _ $ 0-9
@@ -90,12 +90,12 @@ class Template {
    * @param {Function} fn a runtime function (.runtime.js) "template"
    * @returns {string} the updated and normalized function string
    */
-  static getFunctionContent(fn: { toString: () => string; }) {
+  static getFunctionContent(fn: { toString: () => string }) {
     return fn
       .toString()
-      .replace(FUNCTION_CONTENT_REGEX, "")
-      .replace(INDENT_MULTILINE_REGEX, "")
-      .replace(LINE_SEPARATOR_REGEX, "\n");
+      .replace(FUNCTION_CONTENT_REGEX, '')
+      .replace(INDENT_MULTILINE_REGEX, '')
+      .replace(LINE_SEPARATOR_REGEX, '\n');
   }
 
   /**
@@ -103,10 +103,10 @@ class Template {
    * @returns {string} created identifier
    */
   static toIdentifier(str: string) {
-    if (typeof str !== "string") return "";
+    if (typeof str !== 'string') return '';
     return str
-      .replace(IDENTIFIER_NAME_REPLACE_REGEX, "_$1")
-      .replace(IDENTIFIER_ALPHA_NUMERIC_NAME_REPLACE_REGEX, "_");
+      .replace(IDENTIFIER_NAME_REPLACE_REGEX, '_$1')
+      .replace(IDENTIFIER_ALPHA_NUMERIC_NAME_REPLACE_REGEX, '_');
   }
   /**
    *
@@ -114,8 +114,8 @@ class Template {
    * @returns {string} returns a commented version of string
    */
   static toComment(str: string) {
-    if (!str) return "";
-    return `/*! ${str.replace(COMMENT_END_REGEX, "* /")} */`;
+    if (!str) return '';
+    return `/*! ${str.replace(COMMENT_END_REGEX, '* /')} */`;
   }
 
   /**
@@ -124,8 +124,8 @@ class Template {
    * @returns {string} returns a commented version of string
    */
   static toNormalComment(str: string) {
-    if (!str) return "";
-    return `/* ${str.replace(COMMENT_END_REGEX, "* /")} */`;
+    if (!str) return '';
+    return `/* ${str.replace(COMMENT_END_REGEX, '* /')} */`;
   }
 
   /**
@@ -133,10 +133,10 @@ class Template {
    * @returns {string} normalized bundle-safe path
    */
   static toPath(str: string) {
-    if (typeof str !== "string") return "";
+    if (typeof str !== 'string') return '';
     return str
-      .replace(PATH_NAME_NORMALIZE_REPLACE_REGEX, "-")
-      .replace(MATCH_PADDED_HYPHENS_REPLACE_REGEX, "");
+      .replace(PATH_NAME_NORMALIZE_REPLACE_REGEX, '-')
+      .replace(MATCH_PADDED_HYPHENS_REPLACE_REGEX, '');
   }
 
   // map number to a single character a-z, A-Z or multiple characters if number is too big
@@ -144,7 +144,7 @@ class Template {
    * @param {number} n number to convert to ident
    * @returns {string} returns single character ident
    */
-  static numberToIdentifier(n: number):string {
+  static numberToIdentifier(n: number): string {
     if (n >= NUMBER_OF_IDENTIFIER_START_CHARS) {
       // use multiple letters
       return (
@@ -166,15 +166,15 @@ class Template {
       return String.fromCharCode(START_UPPERCASE_ALPHABET_CODE + n);
     }
 
-    if (n === DELTA_A_TO_Z) return "_";
-    return "$";
+    if (n === DELTA_A_TO_Z) return '_';
+    return '$';
   }
 
   /**
    * @param {number} n number to convert to ident
    * @returns {string} returns single character ident
    */
-  static numberToIdentifierContinuation(n: number):string {
+  static numberToIdentifierContinuation(n: number): string {
     if (n >= NUMBER_OF_IDENTIFIER_CONTINUATION_CHARS) {
       // use multiple letters
       return (
@@ -204,8 +204,8 @@ class Template {
       return `${n}`;
     }
 
-    if (n === 10) return "_";
-    return "$";
+    if (n === 10) return '_';
+    return '$';
   }
 
   /**
@@ -213,14 +213,14 @@ class Template {
    * @param {string | string[]} s string to convert to identity
    * @returns {string} converted identity
    */
-  static indent(s: string | string[]):string {
+  static indent(s: string | string[]): string {
     if (Array.isArray(s)) {
-      return s.map(Template.indent).join("\n");
+      return s.map(Template.indent).join('\n');
     } else {
       const str = s.trimRight();
-      if (!str) return "";
-      const ind = str[0] === "\n" ? "" : "\t";
-      return ind + str.replace(/\n([^\n])/g, "\n\t$1");
+      if (!str) return '';
+      const ind = str[0] === '\n' ? '' : '\t';
+      return ind + str.replace(/\n([^\n])/g, '\n\t$1');
     }
   }
 
@@ -232,9 +232,9 @@ class Template {
    */
   static prefix(s: any, prefix: string) {
     const str = Template.asString(s).trim();
-    if (!str) return "";
-    const ind = str[0] === "\n" ? "" : prefix;
-    return ind + str.replace(/\n([^\n])/g, "\n" + prefix + "$1");
+    if (!str) return '';
+    const ind = str[0] === '\n' ? '' : prefix;
+    return ind + str.replace(/\n([^\n])/g, '\n' + prefix + '$1');
   }
 
   /**
@@ -244,7 +244,7 @@ class Template {
    */
   static asString(str: any[]) {
     if (Array.isArray(str)) {
-      return str.join("\n");
+      return str.join('\n');
     }
     return str;
   }
@@ -264,11 +264,11 @@ class Template {
     let minId = Infinity;
     for (const module of modules) {
       const moduleId = module.id;
-      if (typeof moduleId !== "number") return false;
+      if (typeof moduleId !== 'number') return false;
       if (maxId < moduleId) maxId = moduleId;
       if (minId > moduleId) minId = moduleId;
     }
-    if (minId < 16 + ("" + minId).length) {
+    if (minId < 16 + ('' + minId).length) {
       // add minId x ',' instead of 'Array(minId).concat(…)'
       minId = 0;
     }
@@ -290,17 +290,22 @@ class Template {
    * @param {string=} prefix applying prefix strings
    * @returns {Source} rendered chunk modules in a Source object
    */
-  static renderChunkModules(renderContext: { chunkGraph: any; }, modules: any[], renderModule: (arg0: any) => any, prefix = "") {
+  static renderChunkModules(
+    renderContext: { chunkGraph: any },
+    modules: any[],
+    renderModule: (arg0: any) => any,
+    prefix = ''
+  ) {
     const { chunkGraph } = renderContext;
     var source = new ConcatSource();
     if (modules.length === 0) {
       return null;
     }
     /** @type {{id: string|number, source: Source|string}[]} */
-    const allModules = modules.map(module => {
+    const allModules = modules.map((module) => {
       return {
         id: chunkGraph.getModuleId(module),
-        source: renderModule(module) || "false"
+        source: renderModule(module) || 'false',
       };
     });
     const bounds = Template.getModulesArrayBounds(allModules);
@@ -311,7 +316,7 @@ class Template {
       if (minId !== 0) {
         source.add(`Array(${minId}).concat(`);
       }
-      source.add("[\n");
+      source.add('[\n');
       /** @type {Map<string|number, {id: string|number, source: Source|string}>} */
       const modules = new Map();
       for (const module of allModules) {
@@ -320,25 +325,25 @@ class Template {
       for (let idx = minId; idx <= maxId; idx++) {
         const module = modules.get(idx);
         if (idx !== minId) {
-          source.add(",\n");
+          source.add(',\n');
         }
         source.add(`/* ${idx} */`);
         if (module) {
-          source.add("\n");
+          source.add('\n');
           source.add(module.source);
         }
       }
-      source.add("\n" + prefix + "]");
+      source.add('\n' + prefix + ']');
       if (minId !== 0) {
-        source.add(")");
+        source.add(')');
       }
     } else {
       // Render an object
-      source.add("{\n");
+      source.add('{\n');
       for (let i = 0; i < allModules.length; i++) {
         const module = allModules[i];
         if (i !== 0) {
-          source.add(",\n");
+          source.add(',\n');
         }
         source.add(`\n/***/ ${JSON.stringify(module.id)}:\n`);
         source.add(module.source);
@@ -353,7 +358,17 @@ class Template {
    * @param {RenderContext & { codeGenerationResults?: CodeGenerationResults }} renderContext render context
    * @returns {Source} rendered runtime modules in a Source object
    */
-  static renderRuntimeModules(runtimeModules: any, renderContext: { codeGenerationResults: any; chunk: { runtime: any; }; chunkGraph: any; dependencyTemplates: any; moduleGraph: any; runtimeTemplate: { supportsArrowFunction: () => any; }; }) {
+  static renderRuntimeModules(
+    runtimeModules: any,
+    renderContext: {
+      codeGenerationResults: any;
+      chunk: { runtime: any };
+      chunkGraph: any;
+      dependencyTemplates: any;
+      moduleGraph: any;
+      runtimeTemplate: { supportsArrowFunction: () => any };
+    }
+  ) {
     const source = new ConcatSource();
     for (const module of runtimeModules) {
       const codeGenerationResults = renderContext.codeGenerationResults;
@@ -362,7 +377,7 @@ class Template {
         runtimeSource = codeGenerationResults.getSource(
           module,
           renderContext.chunk.runtime,
-          "runtime"
+          'runtime'
         );
       } else {
         const codeGenResult = module.codeGeneration({
@@ -371,24 +386,24 @@ class Template {
           moduleGraph: renderContext.moduleGraph,
           runtimeTemplate: renderContext.runtimeTemplate,
           runtime: renderContext.chunk.runtime,
-          codeGenerationResults
+          codeGenerationResults,
         });
         if (!codeGenResult) continue;
-        runtimeSource = codeGenResult.sources.get("runtime");
+        runtimeSource = codeGenResult.sources.get('runtime');
       }
       if (runtimeSource) {
-        source.add(Template.toNormalComment(module.identifier()) + "\n");
+        source.add(Template.toNormalComment(module.identifier()) + '\n');
         if (!module.shouldIsolate()) {
           source.add(runtimeSource);
-          source.add("\n\n");
+          source.add('\n\n');
         } else if (renderContext.runtimeTemplate.supportsArrowFunction()) {
-          source.add("(() => {\n");
-          source.add(new PrefixSource("\t", runtimeSource));
-          source.add("\n})();\n\n");
+          source.add('(() => {\n');
+          source.add(new PrefixSource('\t', runtimeSource));
+          source.add('\n})();\n\n');
         } else {
-          source.add("!function() {\n");
-          source.add(new PrefixSource("\t", runtimeSource));
-          source.add("\n}();\n\n");
+          source.add('!function() {\n');
+          source.add(new PrefixSource('\t', runtimeSource));
+          source.add('\n}();\n\n');
         }
       }
     }
@@ -402,11 +417,11 @@ class Template {
    */
   static renderChunkRuntimeModules(runtimeModules: any, renderContext: any) {
     return new PrefixSource(
-      "/******/ ",
+      '/******/ ',
       new ConcatSource(
-        "function(__webpack_require__) { // webpackRuntimeModules\n",
+        'function(__webpack_require__) { // webpackRuntimeModules\n',
         this.renderRuntimeModules(runtimeModules, renderContext),
-        "}\n"
+        '}\n'
       )
     );
   }

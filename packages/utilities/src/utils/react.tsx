@@ -2,11 +2,9 @@ import type { ComponentType } from 'react';
 import React, { useMemo } from 'react';
 import dynamic from 'next/dynamic';
 
-
 type BoundaryProps = {
   children: React.ReactNode; // 👈️ type children
 };
-
 
 class ErrorBoundary extends React.Component<any, any> {
   constructor(props: BoundaryProps) {
@@ -34,10 +32,10 @@ export const FederationBoundary = ({
   customBoundary: CustomBoundary,
   ...rest
 }: {
-        dynamicImporter: () => Promise<any>;
-        fallback: () => Promise<any> | null;
-        customBoundary: ComponentType;
-    }) => {
+  dynamicImporter: () => Promise<any>;
+  fallback: () => Promise<any> | null;
+  customBoundary: ComponentType;
+}) => {
   return useMemo(() => {
     const ImportResult = dynamic(
       () =>
@@ -58,4 +56,3 @@ export const FederationBoundary = ({
     );
   }, [dynamicImporter, fallback]);
 };
-

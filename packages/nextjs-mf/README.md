@@ -13,7 +13,7 @@ This plugin enables Module Federation on Next.js
 ## Supports
 
 - next ^12 || ^13
-- SSR included! 
+- SSR included!
 
 I highly recommend referencing this application which takes advantage of the best capabilities:
 https://github.com/module-federation/module-federation-examples
@@ -139,10 +139,10 @@ If you need to dangerously share a package using the old method, you can do so b
 ```js
 const shared = {
   fakeLodash: {
-    import: "lodash",
-    shareKey: "lodash",
-  }
-}
+    import: 'lodash',
+    shareKey: 'lodash',
+  },
+};
 ```
 
 Please note that this method is now considered dangerous and should be used with caution.
@@ -169,7 +169,9 @@ module.exports = {
       new NextFederationPlugin({
         name: 'next2',
         remotes: {
-          next1: `next1@http://localhost:3001/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+          next1: `next1@http://localhost:3001/_next/static/${
+            isServer ? 'ssr' : 'chunks'
+          }/remoteEntry.js`,
         },
         filename: 'static/chunks/remoteEntry.js',
         exposes: {
@@ -193,7 +195,7 @@ import '@module-federation/nextjs-mf/src/include-defaults';
 ```
 
 2. For the consuming application, we'll call it "next1", add an instance of the ModuleFederationPlugin to your webpack config, and ensure you have a [custom Next.js App](https://nextjs.org/docs/advanced-features/custom-app) `pages/_app.js` (or `.tsx`):
-   Inside that \_app.js or layout.js file, ensure you import `include-defaults` file (this is now optional as include-defaults is auto injected into _app)
+   Inside that \_app.js or layout.js file, ensure you import `include-defaults` file (this is now optional as include-defaults is auto injected into \_app)
 
 ```js
 // next.config.js
@@ -207,7 +209,9 @@ module.exports = {
       new NextFederationPlugin({
         name: 'next1',
         remotes: {
-          next2: `next2@http://localhost:3000/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+          next2: `next2@http://localhost:3000/_next/static/${
+            isServer ? 'ssr' : 'chunks'
+          }/remoteEntry.js`,
         },
       })
     );
@@ -265,7 +269,7 @@ injectScript({
 
 **revalidate**
 
-Enables hot reloading of node server (not client) in production. 
+Enables hot reloading of node server (not client) in production.
 This is recommended, without it - servers will not be able to pull remote updates without a full restart.
 
 More info here: https://github.com/module-federation/nextjs-mf/tree/main/packages/node#utilities
@@ -283,10 +287,10 @@ class MyDocument extends Document {
     ctx?.res?.on('finish', () => {
       revalidate().then((shouldUpdate) => {
         console.log('finished sending response', shouldUpdate);
-      })
-    })
+      });
+    });
 
-    return initialProps
+    return initialProps;
   }
   render() {
     return (

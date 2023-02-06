@@ -40,7 +40,7 @@ export const revalidate = () => {
 
         const name = property;
         const url = remote;
-        const fetchModule = getFetchModule()
+        const fetchModule = getFetchModule();
 
         const fetcher = fetchModule(url)
           .then((re: Response) => {
@@ -117,10 +117,10 @@ export const revalidate = () => {
 };
 
 function getFetchModule() {
-  const loadedModule = global.webpackChunkLoad || global.fetch
+  const loadedModule = global.webpackChunkLoad || global.fetch;
   if (loadedModule) {
-    return loadedModule
+    return loadedModule;
   }
-  const nodeFetch = require('node-fetch')
-  return nodeFetch.default || nodeFetch
+  const nodeFetch = require('node-fetch');
+  return nodeFetch.default || nodeFetch;
 }

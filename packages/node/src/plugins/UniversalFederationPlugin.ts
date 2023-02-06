@@ -18,8 +18,8 @@ class UniversalFederationPlugin {
   private context: NodeFederationContext;
 
   constructor(options: NodeFederationOptions, context: NodeFederationContext) {
-    this._options = options || {} as NodeFederationOptions;
-    this.context = context || {} as NodeFederationContext;
+    this._options = options || ({} as NodeFederationOptions);
+    this.context = context || ({} as NodeFederationContext);
   }
 
   apply(compiler: Compiler) {
@@ -28,7 +28,7 @@ class UniversalFederationPlugin {
 
     if (isServer || compiler.options.name === 'server') {
       new NodeFederationPlugin(options, this.context).apply(compiler);
-      new StreamingTargetPlugin({...options, verbose}).apply(compiler);
+      new StreamingTargetPlugin({ ...options, verbose }).apply(compiler);
     } else {
       new (this.context.ModuleFederationPlugin ||
         (webpack && webpack.container.ModuleFederationPlugin) ||

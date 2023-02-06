@@ -87,7 +87,7 @@ type NextRoute = string;
 export type PageMap = Record<NextRoute, ModulePath>;
 
 export type GetModuleOptions = {
-  modulePath: string
-  exportName?: string
-  remoteContainer: string | RemoteData
-}
+  modulePath: string;
+  exportName?: string;
+  remoteContainer: string | RemoteData;
+};
