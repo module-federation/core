@@ -294,7 +294,6 @@ import { importDelegatedModule } from '@module-federation/utilities';
 module.exports = new Promise((resolve, reject) => {
   console.log('Delegate being called for', __resourceQuery);
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
-  console.log(currentRequest);
 
   const [global, url] = currentRequest.split('@');
 
@@ -379,7 +378,6 @@ module.exports = new Promise((resolve, reject) => {
   console.log('Delegate being called for', __resourceQuery);
   // get "remote" off resource query, returns url@global
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
-  console.log(currentRequest);
   // parse syntax
   const [containerGlobal, url] = currentRequest.split('@');
   // if node server, register the containers known origins

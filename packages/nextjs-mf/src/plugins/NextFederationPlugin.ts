@@ -97,7 +97,7 @@ export class NextFederationPlugin {
     } else {
       new webpack.EntryPlugin(
         compiler.context,
-        require.resolve('../internal-delegate-share'),
+        require.resolve('../internal-delegate-hoist'),
         'main'
       ).apply(compiler);
 
@@ -149,6 +149,7 @@ export class NextFederationPlugin {
         compiler.options.module.rules.push({
           test(req: string) {
             if (isServer) {
+              // server has no common chunk or entry to hoist into
               if (
                 req.includes(path.join(compiler.context, 'pages/')) ||
                 req.includes(path.join(compiler.context, 'app/'))
@@ -156,7 +157,7 @@ export class NextFederationPlugin {
                 return /_app\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
               }
             }
-            if (req.includes('internal-delegate-share')) {
+            if (req.includes('internal-delegate-hoist')) {
               return true;
             }
             return false;
@@ -164,9 +165,9 @@ export class NextFederationPlugin {
           resourceQuery: this._extraOptions.automaticAsyncBoundary
             ? (query) => !query.includes('hasBoundary')
             : undefined,
-          include: [compiler.context, /internal-delegate-share/],
+          include: [compiler.context, /internal-delegate-hoist/],
           exclude: (request: string) => {
-            if (request.includes('internal-delegate-share')) {
+            if (request.includes('internal-delegate-hoist')) {
               return false;
             }
             return /node_modules/.test(request);

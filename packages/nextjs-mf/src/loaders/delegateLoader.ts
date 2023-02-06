@@ -25,19 +25,13 @@ export default function patchDefaultSharedLoader(
           '?' +
           queries.join('&')
       );
-      // return delegatePath
-      return (
-        path.resolve(this._compiler?.context || '', request) +
-        '?' +
-        queries.join('&')
-      );
+      return delegatePath;
     } else {
       const delegatePath = this.utils.contextify(
         this.context,
         this.utils.absolutify(this._compiler?.context || '', request)
       );
-      // return delegatePath
-      return path.resolve(this._compiler?.context || '', request);
+      return delegatePath;
     }
   });
 
@@ -46,10 +40,6 @@ export default function patchDefaultSharedLoader(
     // || (this._compilation && this._compilation.name === 'ChildFederationPlugin')
   ) {
     return content;
-  }
-
-  if (this._compilation && this._compilation.name === 'ChildFederationPlugin') {
-    console.log('child compiler', this.resourcePath);
   }
 
   const requiredDelegates = resolvedDelegates.map((delegate) => {

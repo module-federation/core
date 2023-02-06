@@ -134,7 +134,7 @@ export class ChildFederationPlugin {
         plugins = [
           new webpack.EntryPlugin(
             compiler.context,
-            require.resolve('../internal-delegate-share'),
+            require.resolve('../internal-delegate-hoist'),
             buildName
           ),
           new FederationPlugin(federationPluginOptions),
@@ -158,7 +158,7 @@ export class ChildFederationPlugin {
         plugins = [
           new webpack.EntryPlugin(
             compiler.context,
-            require.resolve('../internal-delegate-share'),
+            require.resolve('../internal-delegate-hoist'),
             buildName
           ),
           new NodeFederationPlugin(federationPluginOptions, {
@@ -199,9 +199,6 @@ export class ChildFederationPlugin {
           filename: 'static/ssr/federated-stats.json',
         }).apply(childCompiler);
       }
-      console.log(require.resolve('../internal-delegate-share'));
-
-      // new webpack.EntryPlugin(childCompiler.context,  require.resolve('../internal-delegate-share'), buildName).apply(childCompiler);
 
       childCompiler.outputPath = outputPath;
       childCompiler.options.module.rules.forEach((rule) => {
