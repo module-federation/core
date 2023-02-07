@@ -159,8 +159,15 @@ export class TypescriptCompiler {
           filepath
         );
         // add ./ so it's always relative, remove d.ts because it's not needed and can throw warnings
-        const importPath =
+        let importPath =
           './' + relativePathToCompiledFile.replace(/\.d\.ts$/, '');
+
+        // If we're on Windows, need to convert "\" to "/" in the import path since it
+        // was derived from platform-specific file system path.
+        if (path.sep === '\\') {
+          importPath = importPath.replaceAll(path.sep, '/');
+        }
+
         const reexport = `export * from '${importPath}';\nexport { default } from '${importPath}';`;
 
         this.tsDefinitionFilesObj[normalizedExposedDestFilePath] = reexport;
