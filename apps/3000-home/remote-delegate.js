@@ -11,9 +11,11 @@ module.exports = new Promise((resolve, reject) => {
 
   importDelegatedModule({
     global,
-    url,
+    url: url + '?' + Date.now()
   })
     .then(async (remote) => {
+      console.log(__resourceQuery, 'resolved remote from', __webpack_runtime_id__)
+
       resolve(remote)
     })
     .catch((err) => reject(err));

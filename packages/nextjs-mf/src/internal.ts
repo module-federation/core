@@ -111,9 +111,7 @@ export const generateRemoteTemplate = (
     };
 
     if(window.remoteLoading[${JSON.stringify(global)}]) {
-      return window.remoteLoading[${JSON.stringify(
-        global
-      )}].then(resolve).catch(reject);
+      return resolve(window.remoteLoading[${JSON.stringify(global)}])
     }
 
     var res, rej;
@@ -125,16 +123,16 @@ export const generateRemoteTemplate = (
     })
 
     if (typeof window[${JSON.stringify(global)}] !== 'undefined') {
-      res(${global});
-      return resolve(${global});
+      res(window[${JSON.stringify(global)}]);
+      return resolve(window[${JSON.stringify(global)}]);
     }
 
      __webpack_require__.l(
       url.href,
       function (event) {
         if (typeof window[${JSON.stringify(global)}] !== 'undefined') {
-          res(${global});
-          return resolve(${global});
+          res(window[${JSON.stringify(global)}]);
+          return resolve(window[${JSON.stringify(global)}]);
         }
         var errorType = event && (event.type === 'load' ? 'missing' : event.type);
         var realSrc = event && event.target && event.target.src;

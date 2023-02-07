@@ -21,15 +21,15 @@ const nextConfig = {
           name: 'shop',
           filename: 'static/chunks/remoteEntry.js',
           remotes: {
-            // home: createDelegatedModule(require.resolve('./remote-delegate.js'), {
-            //   remote: `home_app@http://localhost:3000/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
-            // }),
-            // shop: createDelegatedModule(require.resolve('./remote-delegate.js'), {
-            //   remote: `shop@http://localhost:3001/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
-            // }),
-            // checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
-            //   remote: `checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
-            // }),
+            home: createDelegatedModule(require.resolve('./remote-delegate.js'), {
+              remote: `home_app@http://localhost:3000/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+            }),
+            shop: createDelegatedModule(require.resolve('./remote-delegate.js'), {
+              remote: `shop@http://localhost:3001/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+            }),
+            checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
+              remote: `checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+            }),
             home: `home_app@http://localhost:3000/_next/static/${
               isServer ? 'ssr' : 'chunks'
             }/remoteEntry.js`,
@@ -54,7 +54,7 @@ const nextConfig = {
             automaticAsyncBoundary: true,
             enableImageLoaderFix: true,
             enableUrlLoaderFix: true,
-            automaticPageStitching: true,
+            automaticPageStitching: false,
           },
         })
       );

@@ -75,27 +75,31 @@ export const importDelegatedModule = async (
 ) => {
   // @ts-ignore
   return loadScript(keyOrRuntimeRemoteItem)
-    .then((asyncContainer) => {
-      // for legacy reasons, we must mark container a initialized
-      // here otherwise older promise based implementation will try to init again with diff object
-      // asyncContainer.__initialized = true;
+    .then((asyncContainer: WebpackRemoteContainer) => {
       return asyncContainer;
     })
-    .then((asyncContainer) => {
+    .then((asyncContainer: WebpackRemoteContainer) => {
       // most of this is only needed because of legacy promise based implementation
+      // can remove proxies once we remove promise based implementations
       if (typeof window === 'undefined') {
         //TODO: need to solve chunk flushing with delegated modules
         return asyncContainer;
       } else {
         const proxy = {
           get: asyncContainer.get,
+          //@ts-ignore
           init: function (shareScope: any, initScope: any) {
             try {
-              // @ts-ignore
-              return asyncContainer.init(shareScope, initScope);
-            } catch (e) {}
-            //@ts-ignore
-            proxy.__initialized = true;
+              //@ts-ignore
+              asyncContainer.init(shareScope, initScope);
+              // for legacy reasons, we must mark container a initialized
+              // here otherwise older promise based implementation will try to init again with diff object
+              //@ts-ignore
+              proxy.__initialized = true;
+            } catch (e) {
+              return 1
+            }
+
           },
         };
         // @ts-ignore
@@ -171,6 +175,14 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
     if (typeof window === 'undefined') {
       //@ts-ignore
       globalScope._config[containerKey] = reference.url;
+    } else {
+      // to match promise template system, can be removed once promise template is gone
+      if(!globalScope.remoteLoading) {
+        globalScope.remoteLoading = {};
+      }
+      if(globalScope.remoteLoading[containerKey]) {
+        return globalScope.remoteLoading[containerKey]
+      }
     }
 
     asyncContainer = new Promise(function (resolve, reject) {
@@ -215,6 +227,9 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         containerKey
       );
     });
+    if(typeof window !== 'undefined') {
+      globalScope.remoteLoading[containerKey] = asyncContainer;
+    }
   }
 
   return asyncContainer;
