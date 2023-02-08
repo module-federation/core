@@ -24,6 +24,12 @@
     "webpack": "^5.40.0",
     "next": "^12 || ^13",
     "react": "^17 || ^18",
-    "react-dom": "^17 || ^18"
+    "react-dom": "^17 || ^18",
+    "styled-jsx": "*"
+  },
+  "peerDependenciesMeta": {
+    "styled-jsx": {
+      "optional": true
+    }
   }
 }
