@@ -35,7 +35,7 @@ const fallback = () => import('@npm/backup').then((m) => m.Component)
 const MyPage = () => {
   return (
     <FederationBoundary
-      dynamicImport={dynamicImport}
+      dynamicImporter={dynamicImport}
       fallback={fallback}
       customBoundary={CustomErrorBoundary}
     />
