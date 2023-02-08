@@ -34,7 +34,7 @@ export const FederationBoundary = ({
 }: {
   dynamicImporter: () => Promise<any>;
   fallback: () => Promise<any> | null;
-  customBoundary: ComponentType;
+  customBoundary?: ComponentType<any>;
 }) => {
   return useMemo(() => {
     const ImportResult = dynamic(

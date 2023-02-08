@@ -25,15 +25,18 @@ Any extra props will be passed directly to the imported module.
 Usage looks something like this:
 
 ```js
-import { FederationBoundary } from '@module-federation/utilities/src/react';
+import { FederationBoundary } from '@module-federation/utilities/src/utils/react';
+
+// defining dynamicImport and fallback outside the Component to keep the component identity
+// another alternative would be to use useMemo
+const dynamicImport = () => import('some_remote_host_name').then((m) => m.Component)
+const fallback = () => import('@npm/backup').then((m) => m.Component)
 
 const MyPage = () => {
   return (
     <FederationBoundary
-      dynamicImport={() =>
-        import('some_remote_host_name').then((m) => m.Component)
-      }
-      fallback={() => import('@npm/backup').then((m) => m.Component)}
+      dynamicImport={dynamicImport}
+      fallback={fallback}
       customBoundary={CustomErrorBoundary}
     />
   );
@@ -112,6 +115,28 @@ return (
     <Bar />
   </Suspense>
 );
+```
+
+```js
+// You can also combine importRemote and FederationBoundary to have a dynamic remote URL and a fallback when there is an error on the remote
+
+const dynamicImporter = () => (
+  importRemote({
+    url: 'http://localhost:3001',
+    scope: 'Foo',
+    module: 'Bar',
+  })
+)
+const fallback = () => import('@npm/backup').then((m) => m.Component)
+
+const Bar = () => {
+  return (
+    <FederationBoundary
+      dynamicImporter={dynamicImporter}
+      fallback={fallback}
+    />
+  )
+}
 ```
 
 Apart from **url**, **scope** and **module** you can also pass additional options to the **importRemote()** function:
