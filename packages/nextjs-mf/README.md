@@ -257,7 +257,7 @@ Delegate modules are a new feature in module federation that allow you to contro
 loading process of remote modules by delegating it to an internal file bundled by webpack.
 This is done by exporting a promise in the delegate file that resolves to a remote/container interface.
 
-A container interface is the low-level {get, init} API that remote entries expose to a consuming app.
+A container interface is the low-level `{get, init}` API that remote entries expose to a consuming app.
 In the browser, a remote container would be window.app1, and in Node, it would be `global.__remote_scope__.app1`.
 
 To use delegate modules, a method for script loading must be implemented in the delegate file.
@@ -267,19 +267,20 @@ This method is exposed to the runtime and is the same method that webpack uses i
 **Delegate modules will require a minimum version of 6.1.x across all apps,
 since consumers will need to be able to handle the new container interface.**
 
+The beta does not currently support chunk flushing, this will be added in a future release.
+
 Here's an example of using a delegate module with `__webpack_require__.l`:
 
 <details>
   <summary>See Example: (click)  </summary>
 In this example, the delegate module exports a promise that
-loads the remote entry script located at "http://localhost:3000/_next/static/chunks/remoteEntry.js"
-and assigns it to the container "app1". If the script is successfully loaded,
-the promise is resolved with the value of window[containerName].
+loads the remote entry script located at "http://localhost:3000/_next/static/chunks/remoteEntry.js" 
+based on the `__resourceQuery` variable, which is set by webpack at runtime.
 If an error occurs while loading the script, a custom error object is created and the promise is rejected with this error.
 
 ```js
 //next.config.js
-
+const {createDelegatedModule} = require('@module-federation/utilities');
 const remotes = {
   checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
     remote: `checkout@http://localhost:3002/_next/static/${
@@ -310,7 +311,7 @@ module.exports = new Promise((resolve, reject) => {
 
 </details>
 
-In the next.config.js file, where remotes are configured in the module federation plugin,
+In the `next.config.js` file, where remotes are configured in the module federation plugin,
 you can use the internal hint to tell webpack to use an internal file as the remote entry.
 This is done by replacing the typical global@url syntax with `internal ./path/to/module`.
 
@@ -322,7 +323,7 @@ Webpack has several hint types:
 - `external `
 - `script `
 
-The global@url syntax is actually script hint: script `global@url`
+The `global@url` syntax is actually script hint: `script global@url`
 
 If you want to use the same file for handling all remote entries, you can pass information to the delegate module using query parameters.
 Webpack will pass the query parameters to the module as a string, this is known as `__resourceQuery`.
@@ -350,7 +351,7 @@ const remotes = {
 #### Expand below to see a full example:
 
 <details>
-  <summary>See Full configuration: (click) </summary>
+  <summary>See Full configuration with no helpers: (click) </summary>
 
 ```js
 // next.config.js
