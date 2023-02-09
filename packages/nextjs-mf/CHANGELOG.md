@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.1.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.1.0...nextjs-mf-6.1.1) (2023-02-09)
+
+
+### Bug Fixes
+
+* resolve NX build version issues ([c5f7274](https://github.com/module-federation/nextjs-mf/commit/c5f7274265ce325dda3c324074c808cce95699fd))
+
+
+
 # [6.1.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.0.8...nextjs-mf-6.1.0) (2023-02-09)
 
 ### Dependency Updates
