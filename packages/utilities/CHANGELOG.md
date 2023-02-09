@@ -2,6 +2,16 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.2.1](https://github.com/module-federation/nextjs-mf/compare/utils-1.2.0...utils-1.2.1) (2023-02-09)
+
+
+### Bug Fixes
+
+* **federation-boundary:** make custom boundary optional ([#570](https://github.com/module-federation/nextjs-mf/issues/570)) ([e43a387](https://github.com/module-federation/nextjs-mf/commit/e43a387f90587d62a78c40584ed9104328202f8e))
+* **utilities:** fix FederationBoundary implementation ([#575](https://github.com/module-federation/nextjs-mf/issues/575)) ([b94fc28](https://github.com/module-federation/nextjs-mf/commit/b94fc282503c4f5ce2ae267518f7d6f5d4746c24))
+
+
+
 # [1.2.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.1.2...utils-1.2.0) (2023-01-31)
 
 ### Bug Fixes
