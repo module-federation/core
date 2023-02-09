@@ -2,6 +2,19 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.2.1](https://github.com/module-federation/nextjs-mf/compare/typescript-2.2.0...typescript-2.2.1) (2023-02-09)
+
+### Dependency Updates
+
+* `utils` updated to version `1.2.1`
+
+### Bug Fixes
+
+* **typescript:** fix import path for generated dts in Windows ([#566](https://github.com/module-federation/nextjs-mf/issues/566)) ([80d09c4](https://github.com/module-federation/nextjs-mf/commit/80d09c40a4ca8f72a4dd0077936959c9f9bdddd2))
+* **typescript:** use node-fetch to download TS types ([#565](https://github.com/module-federation/nextjs-mf/issues/565)) ([f668b1f](https://github.com/module-federation/nextjs-mf/commit/f668b1fa11f05ff5d15e6581c27b5da9ad454ed2))
+
+
+
 # [2.2.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.6...typescript-2.2.0) (2023-01-31)
 
 ### Dependency Updates
