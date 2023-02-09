@@ -1755,6 +1755,32 @@
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
+"@module-federation/nextjs-mf@*":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@module-federation/nextjs-mf/-/nextjs-mf-6.1.0.tgz#9b431e03e7377adafe0710af943c306e6ac3e343"
+  integrity sha512-T4egb8m8R88mAPGujjwYuXVhvp40OotG/Ip5EehFMsJBWcrKSS77rgl8/DrFHpHsfqi1kdI6mi0w9Lru4cgV6Q==
+  dependencies:
+    "@module-federation/node" "link:../../../Library/Caches/Yarn/v6/npm-@module-federation-nextjs-mf-6.1.0-9b431e03e7377adafe0710af943c306e6ac3e343-integrity/node_modules/@module-federation/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/node"
+    "@module-federation/utilities" "1.3.0"
+    encoding "0.1.13"
+    eventemitter3 "4.0.7"
+    fast-glob "3.2.12"
+    node-fetch "2.6.7"
+    webpack-sources "3.2.3"
+
+"@module-federation/node@*":
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/@module-federation/node/-/node-0.11.0.tgz#05f2adec0898efff6123f10e9f1a1761e014d32b"
+  integrity sha512-I/Xd+oodjqcMY9UH2bmMcknBAp7gvRwpQefeQU8OSJDxxZfajUeg/opSs9Tabq1yMDZWWrCKRTSwQzieYr77gg==
+  dependencies:
+    "@module-federation/utilities" "1.3.0"
+    encoding "0.1.13"
+    node-fetch "2.6.7"
+
+"@module-federation/node@link:./dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/node":
+  version "0.0.0"
+  uid ""
+
 "@module-federation/typescript@*":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@module-federation/typescript/-/typescript-2.2.1.tgz#eb1c757723158142fa935fa6c09b40d7330bd59e"
@@ -1770,6 +1796,11 @@
 "@module-federation/typescript@link:./apps/react-ts-remote/dist/packages/typescript":
   version "0.0.0"
   uid ""
+
+"@module-federation/utilities@*", "@module-federation/utilities@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@module-federation/utilities/-/utilities-1.3.0.tgz#018071b630cb000f79397ad458bfd7d4dd9104fe"
+  integrity sha512-GGSuC0t5BsoXa58dSiP8MxXItMixWT5FbzWMndhtqLQMmJVdLpVFROiIH4eKXpfjOkKViRri7CfQ8MaNUn8JqQ==
 
 "@module-federation/utilities@1.2.1":
   version "1.2.1"
@@ -5586,7 +5617,7 @@ encodeurl@~1.0.2:
   resolved "https://registry.yarnpkg.com/encodeurl/-/encodeurl-1.0.2.tgz#ad3ff4c86ec2d029322f5a02c3a9a606c95b3f59"
   integrity sha512-TPJXq8JqFaVYm2CWmPvnP2Iyo4ZSM7/QKcSmuMLDObfpH5fi7RUGmd/rTDf+rut/saiDiQEeVTNgAmJEdAOx0w==
 
-encoding@^0.1.13:
+encoding@0.1.13:
   version "0.1.13"
   resolved "https://registry.yarnpkg.com/encoding/-/encoding-0.1.13.tgz#56574afdd791f54a8e9b2785c0582a2d26210fa9"
   integrity sha512-ETBauow1T35Y/WZMkio9jiM0Z5xjHHmJ4XmjZOq1l/dXz3lr2sRn87nJy20RupqSh1F2m3HHPSp8ShIPQJrJ3A==
@@ -9318,13 +9349,6 @@ node-fetch@2.6.8:
   version "2.6.8"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.8.tgz#a68d30b162bc1d8fd71a367e81b997e1f4d4937e"
   integrity sha512-RZ6dBYuj8dRSfxpUSu+NsdF1dpPpluJxwOp+6IoDp/sH2QNDSvurYsAa+F1WxY2RjA1iP93xhcsUoYbF2XBqVg==
-  dependencies:
-    whatwg-url "^5.0.0"
-
-node-fetch@^2.6.7:
-  version "2.6.9"
-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.9.tgz#7c7f744b5cc6eb5fd404e0c7a9fec630a55657e6"
-  integrity sha512-DJm/CJkZkRjKKj4Zi4BsKVZh3ValV5IR5s7LVZnW+6YMh0W1BfNA8XSs6DLMGYlId5F3KnA70uu2qepcR08Qqg==
   dependencies:
     whatwg-url "^5.0.0"
 
