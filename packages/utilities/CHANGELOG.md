@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [1.3.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.2.1...utils-1.3.0) (2023-02-09)
+
+
+### Features
+
+* Delegate Modules ([#509](https://github.com/module-federation/nextjs-mf/issues/509)) ([1a085e7](https://github.com/module-federation/nextjs-mf/commit/1a085e7e03ca0afd5c64389b4b169f3db3382f6b))
+
+
+
 ## [1.2.1](https://github.com/module-federation/nextjs-mf/compare/utils-1.2.0...utils-1.2.1) (2023-02-09)
 
 
