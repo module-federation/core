@@ -113,8 +113,8 @@ const IsomorphicRemoteTemplate = function () {
     );
   })
     .then(function () {
-      //@ts-ignore
       const globalScope =
+        //@ts-ignore
         typeof window !== 'undefined' ? window : global.__remote_scope__;
       const remoteGlobal = globalScope[
         remote.global

@@ -8,7 +8,7 @@ export interface DownloadOptions {
    * URL of the file.
    */
   url: string;
-  
+
   /**
    * Path to where the file will be saved.
    */
@@ -22,7 +22,7 @@ export interface DownloadOptions {
 
 /**
  * Downloads a file from a URL and saves it to disk.
- * 
+ *
  * @param options Download options.
  */
 export default async function download(options: DownloadOptions) {
