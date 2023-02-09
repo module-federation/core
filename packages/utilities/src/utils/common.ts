@@ -101,13 +101,14 @@ export const importDelegatedModule = async (
                   console.log('typeof',prop, typeof target[prop]);
 
                   if(typeof target[prop] === "function") {
-                    return (()=>{
-                      console.log('calling method');
-                      return target[prop]
-                    })();
+                    return function() {
+                      //@ts-ignore
+                      if(global.usedChunks) global.usedChunks.add("adding-" + arg);
+                      // eslint-disable-next-line prefer-rest-params
+                      return target[prop](arguments)
+                    }
                   }
                   //@ts-ignore
-                  if(global.usedChunks) global.usedChunks.add("adding-" + arg);
                   return target[prop];
                 }
               })
