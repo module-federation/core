@@ -2,6 +2,7 @@ export const usedChunks = new Set();
 global.usedChunks = usedChunks;
 
 export const flushChunks = async () => {
+  console.log('flushing chunks', usedChunks);
   const allFlushed = await Promise.all(
     Array.from(usedChunks).map(async (chunk) => {
       const chunks = new Set();

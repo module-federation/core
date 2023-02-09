@@ -83,7 +83,56 @@ export const importDelegatedModule = async (
       // can remove proxies once we remove promise based implementations
       if (typeof window === 'undefined') {
         //TODO: need to solve chunk flushing with delegated modules
-        return asyncContainer;
+
+        return {
+          get: function(arg: string) {
+//@ts-ignore
+            return asyncContainer.get(arg).then((f)=>{
+              const m = f();
+
+
+
+              return ()=>new Proxy(m, {
+                get: (target, prop)=>{
+
+                  if(prop == '__esModule' || prop == 'then') {
+                    return target[prop];
+                  }
+                  console.log('typeof',prop, typeof target[prop]);
+
+                  if(typeof target[prop] === "function") {
+                    return (()=>{
+                      console.log('calling method');
+                      return target[prop]
+                    })();
+                  }
+                  //@ts-ignore
+                  if(global.usedChunks) global.usedChunks.add("adding-" + arg);
+                  return target[prop];
+                }
+              })
+            })
+
+            // @ts-ignore
+            return asyncContainer.get(arg).then((factory)=>{
+              const trueExports = factory();
+
+              return (anyArg: any)=> {
+                // @ts-ignore
+                return Object.defineProperty({}, 'exports', {
+                  get: function() {
+                    // @ts-ignore
+                    global.usedChunks.add('onget' + arg)
+                    console.log(trueExports);
+                    return factory(anyArg)
+                  }
+                });
+                return factory(anyArg)
+              }
+            })
+          },
+          init: asyncContainer.init
+        };
       } else {
         const proxy = {
           get: asyncContainer.get,
