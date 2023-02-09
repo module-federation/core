@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.11.1](https://github.com/module-federation/nextjs-mf/compare/node-0.11.0...node-0.11.1) (2023-02-09)
+
+
+### Bug Fixes
+
+* backward compatability with older versions pre 6.1.x ([f27b57a](https://github.com/module-federation/nextjs-mf/commit/f27b57a36a61280124bab4a309edaa1c3fd04ced))
+
+
+
 # [0.11.0](https://github.com/module-federation/nextjs-mf/compare/node-0.10.5...node-0.11.0) (2023-02-09)
 
 ### Dependency Updates
