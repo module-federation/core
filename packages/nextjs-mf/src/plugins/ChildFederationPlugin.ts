@@ -132,6 +132,11 @@ export class ChildFederationPlugin {
 
       if (compiler.options.name === 'client') {
         plugins = [
+          new webpack.EntryPlugin(
+            compiler.context,
+            require.resolve('../internal-delegate-hoist'),
+            buildName
+          ),
           new FederationPlugin(federationPluginOptions),
           new webpack.web.JsonpTemplatePlugin(),
           new LoaderTargetPlugin('web'),
@@ -151,6 +156,11 @@ export class ChildFederationPlugin {
         } = require('@module-federation/node');
 
         plugins = [
+          new webpack.EntryPlugin(
+            compiler.context,
+            require.resolve('../internal-delegate-hoist'),
+            buildName
+          ),
           new NodeFederationPlugin(federationPluginOptions, {
             ModuleFederationPlugin: FederationPlugin,
           }),

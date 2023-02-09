@@ -2,7 +2,6 @@ import { useState } from 'react';
 import App from 'next/app';
 import { Layout, version } from 'antd';
 import { useRouter } from 'next/router';
-import { useMFClient } from '@module-federation/nextjs-mf/client';
 
 import SharedNav from '../components/SharedNav';
 import HostAppMenu from '../components/menu';
@@ -63,28 +62,6 @@ function MyApp(props) {
 
 MyApp.getInitialProps = async (ctx) => {
   return App.getInitialProps(ctx);
-
-  // return {
-  //   ...appProps,
-  //   mfRoutes: {
-  //     'home_app@http://localhost:3000/_next/static/chunks/remoteEntry.js': [
-  //       '/',
-  //       '/home',
-  //     ],
-  //     'shop@http://localhost:3001/_next/static/chunks/remoteEntry.js': [
-  //       '/shop',
-  //       '/shop/products/[...slug]',
-  //     ],
-  //     'checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js': [
-  //       '/checkout',
-  //       '/checkout/exposed-pages',
-  //     ],
-  //     'unresolvedHost@http://localhost:3333/_next/static/chunks/remoteEntry.js':
-  //       ['/unresolved-host'],
-  //     'wrongEntry@http://localhost:3000/_next/static/chunks/remoteEntryWrong.js':
-  //       ['/wrong-entry'],
-  //   },
-  // };
 };
 
 export default MyApp;

@@ -9,9 +9,9 @@ export type ModuleFederationPluginOptions = ConstructorParameters<
 
 export type WebpackRequire = {
   l: (
-    url: string,
+    url: string | undefined,
     cb: (event: any) => void,
-    id: string
+    id: string | number
   ) => Record<string, unknown>;
 };
 
@@ -57,6 +57,7 @@ export type ExternalsType = Required<
 type ModulePath = string;
 
 export type WebpackRemoteContainer = {
+  __initialized?: boolean;
   get(modulePath: ModulePath): () => any;
   init: (obj?: typeof __webpack_share_scopes__) => void;
 };

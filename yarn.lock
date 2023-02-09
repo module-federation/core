@@ -1757,22 +1757,27 @@
 
 "@module-federation/nextjs-mf@link:./dist/packages/nextjs-mf":
   version "0.0.0"
+  uid ""
 
 "@module-federation/nextjs-mf@link:dist/packages/nextjs-mf":
   version "0.0.0"
+  uid ""
 
-"@module-federation/node@link:./dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/node":
+"@module-federation/node@link:./dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/node":
   version "0.0.0"
   uid ""
 
 "@module-federation/node@link:./dist/packages/node":
   version "0.0.0"
+  uid ""
 
 "@module-federation/typescript@link:./apps/react-ts-remote/dist/packages/typescript":
   version "0.0.0"
+  uid ""
 
 "@module-federation/typescript@link:./dist/packages/typescript":
   version "0.0.0"
+  uid ""
 
 "@module-federation/utilities@1.2.0":
   version "0.0.0"
@@ -1780,6 +1785,7 @@
 
 "@module-federation/utilities@link:./dist/packages/utilities":
   version "0.0.0"
+  uid ""
 
 "@next/env@13.1.6":
   version "13.1.6"
@@ -9561,7 +9567,7 @@ next-tick@1, next-tick@^1.1.0:
   resolved "https://registry.yarnpkg.com/next-tick/-/next-tick-1.1.0.tgz#1836ee30ad56d67ef281b22bd199f709449b35eb"
   integrity sha512-CXdUiJembsNjuToQvxayPZF9Vqht7hewsvy2sOWafLvi2awflj9mOC6bHIg50orX8IJvWKY9wYQ/zB2kogPslQ==
 
-next@13.1.6:
+next@13.1.6, "next@^12 || ^13":
   version "13.1.6"
   resolved "https://registry.yarnpkg.com/next/-/next-13.1.6.tgz#054babe20b601f21f682f197063c9b0b32f1a27c"
   integrity sha512-hHlbhKPj9pW+Cymvfzc15lvhaOZ54l+8sXDXJWm3OBNBzgrVj6hwGPmqqsXg40xO1Leq+kXpllzRPuncpC0Phw==
@@ -11179,7 +11185,7 @@ react-test-renderer@18.2.0:
     react-shallow-renderer "^16.15.0"
     scheduler "^0.23.0"
 
-react@18.2.0:
+react@18.2.0, "react@^17 || ^18":
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==

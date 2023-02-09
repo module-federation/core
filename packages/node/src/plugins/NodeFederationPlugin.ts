@@ -24,6 +24,10 @@ interface Context {
 
 export const parseRemotes = (remotes: Record<string, any>) =>
   Object.entries(remotes).reduce((acc, remote) => {
+    if (remote[1].startsWith('internal ')) {
+      acc[remote[0]] = remote[1];
+      return acc;
+    }
     if (!remote[1].startsWith('promise ') && remote[1].includes('@')) {
       acc[remote[0]] = `promise ${parseRemoteSyntax(remote[1])}`;
       return acc;
@@ -93,16 +97,6 @@ export const generateRemoteTemplate = (
     }
     const proxy = {
       get: (arg)=>{
-        // if(!global.__remote_scope__[${JSON.stringify(
-          global
-        )}].__initialized) {
-        //   try {
-        //     global.__remote_scope__[${JSON.stringify(
-          global
-        )}].__initialized = true;
-        //     proxy.init(__webpack_require__.S.default);
-        //   } catch(e) {}
-        // }
         return remote.get(arg).then((f)=>{
           const m = f();
           return ()=>new Proxy(m, {
@@ -148,8 +142,10 @@ export const generateRemoteTemplate = (
         global.__remote_scope__[${JSON.stringify(global)}].__initialized = true
       }
     }
-    if (!global.__remote_scope__[${JSON.stringify(global)}].__initialized) {
+    try  {
       proxy.init(__webpack_require__.S.default)
+    } catch(e) {
+      console.error('failed to init', ${JSON.stringify(global)}, e)
     }
     return proxy
   })`;

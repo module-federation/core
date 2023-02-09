@@ -27,54 +27,108 @@ export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
 };
 
 const getRuntimeRemotes = () => {
-  //@ts-ignore
-  const remoteVars = (process.env.REMOTES || {}) as RemoteVars;
+  try {
+    //@ts-ignore
+    const remoteVars = (process.env.REMOTES || {}) as RemoteVars;
 
-  const runtimeRemotes = Object.entries(remoteVars).reduce(function (
-    acc,
-    item
-  ) {
-    const [key, value] = item;
-    // if its an object with a thenable (eagerly executing function)
-    if (typeof value === 'object' && typeof value.then === 'function') {
-      acc[key] = { asyncContainer: value };
-    }
-    // if its a function that must be called (lazily executing function)
-    else if (typeof value === 'function') {
-      // @ts-ignore
-      acc[key] = { asyncContainer: value };
-    }
-    // if its just a string (global@url)
-    else if (typeof value === 'string') {
-      const [url, global] = extractUrlAndGlobal(value);
-      acc[key] = { global, url };
-    }
-    // we dont know or currently support this type
-    else {
-      //@ts-ignore
-      console.log('remotes process', process.env.REMOTES);
-      throw new Error(
-        `[mf] Invalid value received for runtime_remote "${key}"`
-      );
-    }
-    return acc;
-  },
-  {} as RuntimeRemotesMap);
+    const runtimeRemotes = Object.entries(remoteVars).reduce(function (
+      acc,
+      item
+    ) {
+      const [key, value] = item;
+      // if its an object with a thenable (eagerly executing function)
+      if (typeof value === 'object' && typeof value.then === 'function') {
+        acc[key] = { asyncContainer: value };
+      }
+      // if its a function that must be called (lazily executing function)
+      else if (typeof value === 'function') {
+        // @ts-ignore
+        acc[key] = { asyncContainer: value };
+      }
+      // if its just a string (global@url)
+      else if (typeof value === 'string') {
+        const [url, global] = extractUrlAndGlobal(value);
+        acc[key] = { global, url };
+      }
+      // we dont know or currently support this type
+      else {
+        //@ts-ignore
+        console.log('remotes process', process.env.REMOTES);
+        throw new Error(
+          `[mf] Invalid value received for runtime_remote "${key}"`
+        );
+      }
+      return acc;
+    },
+    {} as RuntimeRemotesMap);
 
-  return runtimeRemotes;
+    return runtimeRemotes;
+  } catch (err) {
+    console.warn('Unable to retrieve runtime remotes: ', err);
+  }
+
+  return {} as RuntimeRemotesMap;
 };
 
-/**
- * Return initialized remote container by remote's key or its runtime remote item data.
- *
- * `runtimeRemoteItem` might be
- *    { global, url } - values obtained from webpack remotes option `global@url`
- * or
- *    { asyncContainer } - async container is a promise that resolves to the remote container
- */
-export const injectScript = (
+export const importDelegatedModule = async (
   keyOrRuntimeRemoteItem: string | RuntimeRemote
 ) => {
+  // @ts-ignore
+  return loadScript(keyOrRuntimeRemoteItem)
+    .then((asyncContainer: WebpackRemoteContainer) => {
+      return asyncContainer;
+    })
+    .then((asyncContainer: WebpackRemoteContainer) => {
+      // most of this is only needed because of legacy promise based implementation
+      // can remove proxies once we remove promise based implementations
+      if (typeof window === 'undefined') {
+        //TODO: need to solve chunk flushing with delegated modules
+        return asyncContainer;
+      } else {
+        const proxy = {
+          get: asyncContainer.get,
+          //@ts-ignore
+          init: function (shareScope: any, initScope: any) {
+            try {
+              //@ts-ignore
+              asyncContainer.init(shareScope, initScope);
+              // for legacy reasons, we must mark container a initialized
+              // here otherwise older promise based implementation will try to init again with diff object
+              //@ts-ignore
+              proxy.__initialized = true;
+            } catch (e) {
+              return 1
+            }
+
+          },
+        };
+        // @ts-ignore
+        if (!proxy.__initialized) {
+          //@ts-ignore
+          proxy.init(__webpack_share_scopes__.default);
+        }
+        return proxy;
+      }
+    });
+};
+
+export const createDelegatedModule = (
+  delegate: string,
+  params: { [key: string]: any }
+) => {
+  let queries: string[] = [];
+  for (const [key, value] of Object.entries(params)) {
+    if (Array.isArray(value) || typeof value === 'object') {
+      throw new Error(
+        `[Module Federation] Delegated module params cannot be an array or object. Key "${key}" should be a string or number`
+      );
+    }
+    queries.push(`${key}=${value}`);
+  }
+  return `internal ${delegate}?${queries.join('&')}`;
+};
+
+const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
 
   // 1) Load remote container if needed
@@ -105,9 +159,31 @@ export const injectScript = (
       request: string | null;
     };
 
+    //@ts-ignore
+    if (!global.__remote_scope__) {
+      // create a global scope for container, similar to how remotes are set on window in the browser
+      //@ts-ignore
+      global.__remote_scope__ = {
+        _config: {},
+      };
+    }
+
     const globalScope =
       //@ts-ignore
       typeof window !== 'undefined' ? window : global.__remote_scope__; // TODO: fix types
+
+    if (typeof window === 'undefined') {
+      //@ts-ignore
+      globalScope._config[containerKey] = reference.url;
+    } else {
+      // to match promise template system, can be removed once promise template is gone
+      if(!globalScope.remoteLoading) {
+        globalScope.remoteLoading = {};
+      }
+      if(globalScope.remoteLoading[containerKey]) {
+        return globalScope.remoteLoading[containerKey]
+      }
+    }
 
     asyncContainer = new Promise(function (resolve, reject) {
       function resolveRemoteGlobal() {
@@ -151,9 +227,17 @@ export const injectScript = (
         containerKey
       );
     });
+    if(typeof window !== 'undefined') {
+      globalScope.remoteLoading[containerKey] = asyncContainer;
+    }
   }
 
-  // 2) Initialize remote container
+  return asyncContainer;
+};
+
+const createContainerSharingScope = (
+  asyncContainer: AsyncContainer | undefined
+) => {
   // @ts-ignore
   return asyncContainer
     .then(function (container) {
@@ -183,6 +267,21 @@ export const injectScript = (
       }
       return container;
     });
+};
+
+/**
+ * Return initialized remote container by remote's key or its runtime remote item data.
+ *
+ * `runtimeRemoteItem` might be
+ *    { global, url } - values obtained from webpack remotes option `global@url`
+ * or
+ *    { asyncContainer } - async container is a promise that resolves to the remote container
+ */
+export const injectScript = (
+  keyOrRuntimeRemoteItem: string | RuntimeRemote
+) => {
+  const asyncContainer = loadScript(keyOrRuntimeRemoteItem);
+  return createContainerSharingScope(asyncContainer);
 };
 
 export const createRuntimeVariables = (remotes: Remotes) => {

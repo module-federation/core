@@ -11,7 +11,10 @@ import path from 'path';
 import { isRequiredVersion } from 'webpack/lib/sharing/utils';
 import { parseOptions } from 'webpack/lib/container/options';
 
-import { extractUrlAndGlobal } from '@module-federation/utilities';
+import {
+  extractUrlAndGlobal,
+  createDelegatedModule,
+} from '@module-federation/utilities';
 
 // the share scope we attach by default
 // in hosts we re-key them to prevent webpack moving the modules into their own chunks (cause eager error)
@@ -108,9 +111,7 @@ export const generateRemoteTemplate = (
     };
 
     if(window.remoteLoading[${JSON.stringify(global)}]) {
-      return window.remoteLoading[${JSON.stringify(
-        global
-      )}].then(resolve).catch(reject);
+      return resolve(window.remoteLoading[${JSON.stringify(global)}])
     }
 
     var res, rej;
@@ -122,16 +123,16 @@ export const generateRemoteTemplate = (
     })
 
     if (typeof window[${JSON.stringify(global)}] !== 'undefined') {
-      res();
-      return resolve();
+      res(window[${JSON.stringify(global)}]);
+      return resolve(window[${JSON.stringify(global)}]);
     }
 
      __webpack_require__.l(
       url.href,
       function (event) {
         if (typeof window[${JSON.stringify(global)}] !== 'undefined') {
-          res();
-          return resolve();
+          res(window[${JSON.stringify(global)}]);
+          return resolve(window[${JSON.stringify(global)}]);
         }
         var errorType = event && (event.type === 'load' ? 'missing' : event.type);
         var realSrc = event && event.target && event.target.src;
@@ -148,7 +149,7 @@ export const generateRemoteTemplate = (
   }).then(function () {
     const proxy = {
       get: ${global}.get,
-      init: function(shareScope) {
+      init: function(shareScope, initToken) {
 
         const handler = {
           get(target, prop) {
@@ -170,7 +171,7 @@ export const generateRemoteTemplate = (
           }
         }
         try {
-          ${global}.init(new Proxy(shareScope, handler))
+          ${global}.init(new Proxy(shareScope, handler), initToken)
         } catch (e) {
 
         }
@@ -269,7 +270,11 @@ export const removePlugins = [
 ];
 
 export const parseRemoteSyntax = (remote: string) => {
-  if (typeof remote === 'string' && remote.includes('@')) {
+  if (
+    typeof remote === 'string' &&
+    remote.includes('@') &&
+    !remote.startsWith('internal ')
+  ) {
     const [url, global] = extractUrlAndGlobal(remote);
     return generateRemoteTemplate(url, global);
   }
@@ -278,14 +283,28 @@ export const parseRemoteSyntax = (remote: string) => {
 };
 
 export const parseRemotes = (remotes: Record<string, any>) =>
-  Object.entries(remotes).reduce((acc, remote) => {
-    if (!remote[1].startsWith('promise ') && remote[1].includes('@')) {
-      acc[remote[0]] = `promise ${parseRemoteSyntax(remote[1])}`;
-      return acc;
+  Object.entries(remotes).reduce((acc, [key, value]) => {
+    // check if user is passing a internal "delegate module" reference
+    if (value.startsWith('internal ')) {
+      return { ...acc, [key]: value };
     }
-    acc[remote[0]] = remote[1];
+    // check if user is passing custom promise template
+    if (!value.startsWith('promise ') && value.includes('@')) {
+      return { ...acc, [key]: `promise ${parseRemoteSyntax(value)}` };
+    }
+    // return standard template otherwise
+    return { ...acc, [key]: value };
+  }, {} as Record<string, string>);
+
+export const getDelegates = (remotes: Record<string, any>) => {
+  return Object.entries(remotes).reduce((acc, [key, value]) => {
+    // check if user is passing a internal "delegate module" reference
+    if (value.startsWith('internal ')) {
+      return { ...acc, [key]: value };
+    }
     return acc;
   }, {} as Record<string, string>);
+};
 
 const parseShareOptions = (options: ModuleFederationPluginOptions) => {
   const sharedOptions: [string, SharedConfig][] = parseOptions(

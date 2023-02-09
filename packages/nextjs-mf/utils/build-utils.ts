@@ -38,6 +38,7 @@ export const computeRemoteFilename = (isServer: boolean, filename: string) => {
 // // To satisfy Typescript.
 declare const urlAndGlobal: string;
 //remote is defined in the template wrapper
+
 const IsomorphicRemoteTemplate = function () {
   const index = urlAndGlobal.indexOf('@');
 
@@ -149,14 +150,20 @@ const IsomorphicRemoteTemplate = function () {
             remoteGlobal.init(
               new Proxy(shareScope as typeof __webpack_share_scopes__, handler)
             );
-          } catch (e) {}
+          } catch (e) {
+            // already initialized
+          }
 
           remoteGlobal.__initialized = true;
         },
       };
 
       if (!remoteGlobal.__initialized) {
-        proxy.init();
+        try {
+          proxy.init();
+        } catch (e) {
+          // already initialized
+        }
       }
       return proxy;
     })
@@ -178,6 +185,9 @@ const IsomorphicRemoteTemplate = function () {
     });
 };
 
+/**
+ * @deprecated This function is being deprecated in favor of delegate modules
+ */
 export const promiseFactory = (factory: string | Function) => {
   const wrapper = `new Promise(${factory.toString()})`;
 
@@ -202,10 +212,16 @@ export const promiseFactory = (factory: string | Function) => {
   return template;
 };
 
+/**
+ * @deprecated This function is being deprecated in favor of delegate modules
+ */
 export const promiseTemplate = (
   remote: string,
   ...otherPromises: Function[]
 ) => {
+  console.warn(
+    '[nextjs-mf]: promiseTemplate is being deprecated in favor of delegate modules'
+  );
   let promises: string[] = [];
 
   if (otherPromises) {

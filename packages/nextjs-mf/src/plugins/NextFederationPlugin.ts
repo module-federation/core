@@ -18,6 +18,7 @@ import {
   internalizeSharedPackages,
   parseRemotes,
   reKeyHostShared,
+  getDelegates,
 } from '../internal';
 import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
 import ChildFederationPlugin from './ChildFederationPlugin';
@@ -78,7 +79,28 @@ export class NextFederationPlugin {
 
       // should this be a plugin that we apply to the compiler?
       internalizeSharedPackages(this._options, compiler);
+
+      // module-federation/utilities uses internal webpack methods and must be bundled into runtime code.
+      if (Array.isArray(compiler.options.externals)) {
+        const originalExternals = compiler.options.externals[0];
+        compiler.options.externals[0] = function (ctx, callback) {
+          if (
+            ctx.request &&
+            ctx.request.includes('@module-federation/utilities')
+          ) {
+            return callback();
+          }
+          // @ts-ignore
+          return originalExternals(ctx, callback);
+        };
+      }
     } else {
+      new webpack.EntryPlugin(
+        compiler.context,
+        require.resolve('../internal-delegate-hoist'),
+        'main'
+      ).apply(compiler);
+
       if (this._extraOptions.automaticPageStitching) {
         compiler.options.module.rules.push({
           test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
@@ -108,8 +130,8 @@ export class NextFederationPlugin {
     compiler.options.module.rules.push({
       test(req: string) {
         if (
-          req.includes(path.join(compiler.context, 'pages')) ||
-          req.includes(path.join(compiler.context, 'app'))
+          req.includes(path.join(compiler.context, 'pages/')) ||
+          req.includes(path.join(compiler.context, 'app/'))
         ) {
           return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
         }
@@ -119,12 +141,51 @@ export class NextFederationPlugin {
       exclude: /node_modules/,
       loader: path.resolve(__dirname, '../loaders/patchDefaultSharedLoader'),
     });
+
+    if (this._options.remotes) {
+      const delegates = getDelegates(this._options.remotes);
+      // only apply loader if delegates are present
+      if (delegates && Object.keys(delegates).length > 0) {
+        compiler.options.module.rules.push({
+          test(req: string) {
+            if (isServer) {
+              // server has no common chunk or entry to hoist into
+              if (
+                req.includes(path.join(compiler.context, 'pages/')) ||
+                req.includes(path.join(compiler.context, 'app/'))
+              ) {
+                return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
+              }
+            }
+            if (req.includes('internal-delegate-hoist')) {
+              return true;
+            }
+            return false;
+          },
+          resourceQuery: this._extraOptions.automaticAsyncBoundary
+            ? (query) => !query.includes('hasBoundary')
+            : undefined,
+          include: [compiler.context, /internal-delegate-hoist/],
+          exclude: (request: string) => {
+            if (request.includes('internal-delegate-hoist')) {
+              return false;
+            }
+            return /node_modules/.test(request);
+          },
+          loader: path.resolve(__dirname, '../loaders/delegateLoader'),
+          options: {
+            delegates,
+          },
+        });
+      }
+    }
+
     if (this._extraOptions.automaticAsyncBoundary) {
       compiler.options.module.rules.push({
         test: (request: string) => {
           if (
-            request.includes(path.join(compiler.context, 'pages')) ||
-            request.includes(path.join(compiler.context, 'app'))
+            request.includes(path.join(compiler.context, 'pages/')) ||
+            request.includes(path.join(compiler.context, 'app/'))
           ) {
             return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request);
           }
