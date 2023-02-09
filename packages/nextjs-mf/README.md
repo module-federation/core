@@ -280,7 +280,7 @@ If an error occurs while loading the script, a custom error object is created an
 
 ```js
 //next.config.js
-const {createDelegatedModule} = require('@module-federation/utilities');
+const { createDelegatedModule } = require('@module-federation/utilities');
 const remotes = {
   checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
     remote: `checkout@http://localhost:3002/_next/static/${

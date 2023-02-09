@@ -54,7 +54,11 @@ export const executeLoadTemplate = `
       return res.text();
     }).then(function (scriptContent) {
       try {
-        const vmContext = {exports, require, module, global, __filename, __dirname, URL, URLSearchParams, console, process,Buffer, ...global, remoteEntryName: name};
+        // TODO: remove conditional in v7, this is to prevent breaking change between v6.0.x and v6.1.x
+        const vmContext = typeof URLSearchParams === 'undefined' ?
+          {exports, require, module, global, __filename, __dirname, URL, console, process,Buffer, ...global, remoteEntryName: name} :
+          {exports, require, module, global, __filename, __dirname, URL, URLSearchParams, console, process,Buffer, ...global, remoteEntryName: name};
+
         const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, {filename: 'node-federation-loader-' + name + '.vm'});
         const foundContainer = remote[name] || remote
 
