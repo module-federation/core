@@ -1757,11 +1757,9 @@
 
 "@module-federation/nextjs-mf@link:./dist/packages/nextjs-mf":
   version "0.0.0"
-  uid ""
 
 "@module-federation/nextjs-mf@link:dist/packages/nextjs-mf":
   version "0.0.0"
-  uid ""
 
 "@module-federation/node@link:./dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/node":
   version "0.0.0"
@@ -1769,15 +1767,12 @@
 
 "@module-federation/node@link:./dist/packages/node":
   version "0.0.0"
-  uid ""
 
 "@module-federation/typescript@link:./apps/react-ts-remote/dist/packages/typescript":
   version "0.0.0"
-  uid ""
 
 "@module-federation/typescript@link:./dist/packages/typescript":
   version "0.0.0"
-  uid ""
 
 "@module-federation/utilities@1.2.0":
   version "0.0.0"
@@ -1785,7 +1780,6 @@
 
 "@module-federation/utilities@link:./dist/packages/utilities":
   version "0.0.0"
-  uid ""
 
 "@next/env@13.1.6":
   version "13.1.6"
@@ -1903,17 +1897,6 @@
     "@phenomnomnominal/tsquery" "4.1.1"
     dotenv "~10.0.0"
     semver "7.3.4"
-
-"@nrwl/devkit@15.6.2":
-  version "15.6.2"
-  resolved "https://registry.yarnpkg.com/@nrwl/devkit/-/devkit-15.6.2.tgz#954b0dab1639011bbc872e421917ce7140f201a4"
-  integrity sha512-RcPwjr1btr16wz/ZTnLeKMLu4zATWoh5E94qrFxw3n8hXbC5cIW0Hs/D3ho7cuJQCtQmItTD21M7akjvgHsniA==
-  dependencies:
-    "@phenomnomnominal/tsquery" "4.1.1"
-    ejs "^3.1.7"
-    ignore "^5.0.4"
-    semver "7.3.4"
-    tslib "^2.3.0"
 
 "@nrwl/devkit@15.6.3":
   version "15.6.3"
@@ -9603,12 +9586,10 @@ next@13.1.6:
     "@next/swc-win32-ia32-msvc" "13.1.6"
     "@next/swc-win32-x64-msvc" "13.1.6"
 
-ngx-deploy-npm@^4.3.11:
-  version "4.3.11"
-  resolved "https://registry.yarnpkg.com/ngx-deploy-npm/-/ngx-deploy-npm-4.3.11.tgz#2138b4186cafc35d5fa464cc2d7a45e00c6978a3"
-  integrity sha512-2fvT7+u9iIdzlgkM3iMiQeQyl275RYG7REj7pW/Whve5reoKfkvQn3MLfxAYg/86QZrahHYR4TOhlKr/ccy/VQ==
-  dependencies:
-    "@nrwl/devkit" "15.6.2"
+ngx-deploy-npm@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/ngx-deploy-npm/-/ngx-deploy-npm-5.0.0.tgz#df702a8e342d4be2549ed40238893d2af9a71378"
+  integrity sha512-woaoAalDYiWNQqFNm3hORITEzhtd5xiyA3bImIxFHdgl/DXG/YfGBxP0TAMciGYxhVx5f18IFUfcnz5WRtav8w==
 
 nice-try@^1.0.4:
   version "1.0.5"

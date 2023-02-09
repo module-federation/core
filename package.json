@@ -82,7 +82,7 @@
     "husky": "^8.0.1",
     "jest": "29.4.1",
     "jest-environment-jsdom": "29.4.1",
-    "ngx-deploy-npm": "^4.3.11",
+    "ngx-deploy-npm": "^5.0.0",
     "nx": "15.6.3",
     "prettier": "^2.6.2",
     "react-test-renderer": "18.2.0",
