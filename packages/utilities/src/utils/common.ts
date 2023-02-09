@@ -86,12 +86,9 @@ export const importDelegatedModule = async (
 
         return {
           get: function(arg: string) {
-//@ts-ignore
+            //@ts-ignore
             return asyncContainer.get(arg).then((f)=>{
               const m = f();
-
-
-
               return ()=>new Proxy(m, {
                 get: (target, prop)=>{
 
