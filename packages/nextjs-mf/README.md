@@ -337,7 +337,7 @@ For more information on `__resourceQuery` visit: https://webpack.js.org/api/modu
 // next.config.js
 
 const remotes = {
-  // pass pointer to remote-delegate, pass deletae remote name as query param,
+  // pass pointer to remote-delegate, pass delegate remote name as query param,
   // at runtime webpack will pass this as __resourceQuery
   shop: `internal ./remote-delegate.js?remote=shop@http://localhost:3001/_next/static/${
     isServer ? 'ssr' : 'chunks'
