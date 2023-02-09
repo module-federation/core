@@ -63,9 +63,9 @@ export const executeLoadTemplate = `
             get: foundContainer.get,
             init: function(initScope, initToken) {
               try {
-                return foundContainer.init(initScope, initToken)
+                foundContainer.init(initScope, initToken)
               } catch (e) {
-                return 1
+                // already initialized
               }
             }
           };
