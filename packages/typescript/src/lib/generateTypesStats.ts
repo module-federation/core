@@ -7,7 +7,8 @@ export const generateTypesStats = (
 ) => {
   return Object.entries(filesMap).reduce((acc, [path, contents]) => {
     const filename = path.slice(
-      path.indexOf(normalizeOptions.distDir) + `${normalizeOptions.distDir}/`.length
+      path.indexOf(normalizeOptions.distDir) +
+        `${normalizeOptions.distDir}/`.length
     );
     return {
       ...acc,

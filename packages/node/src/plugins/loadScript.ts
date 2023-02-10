@@ -6,12 +6,6 @@
 //language=JS
 export default `
   function loadScript(url, cb, chunkID) {
-  console.log('loadScript', {
-    url,
-    cb,
-    chunkID
-  });
-
     if (global.webpackChunkLoad) {
       global.webpackChunkLoad(url).then(function (resp) {
         return resp.text();
@@ -52,9 +46,7 @@ export const executeLoadTemplate = `
     if(!name) {
       throw new Error('__webpack_require__.l name is required for ' + url);
     }
-    console.log('executeLoad: loading chunk', {
-      url,callback,name
-    });
+
     if (typeof global.__remote_scope__[name] !== 'undefined') return callback(global.__remote_scope__[name]);
 
     const vm = require('vm');
@@ -63,17 +55,22 @@ export const executeLoadTemplate = `
     }).then(function (scriptContent) {
       console.log('in script loading promise for', name);
       try {
-        const vmContext = {exports, require, module, global, __filename, __dirname, URL,console,process,Buffer, ...global, remoteEntryName: name};
+        // TODO: remove conditional in v7, this is to prevent breaking change between v6.0.x and v6.1.x
+        const vmContext = typeof URLSearchParams === 'undefined' ?
+          {exports, require, module, global, __filename, __dirname, URL, console, process,Buffer, ...global, remoteEntryName: name} :
+          {exports, require, module, global, __filename, __dirname, URL, URLSearchParams, console, process,Buffer, ...global, remoteEntryName: name};
+
         const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, {filename: 'node-federation-loader-' + name + '.vm'});
         const foundContainer = remote[name] || remote
+
         if(!global.__remote_scope__[name]) {
           global.__remote_scope__[name] = {
             get: foundContainer.get,
             init: function(initScope, initToken) {
               try {
-                return foundContainer.init(initScope, initToken)
+                foundContainer.init(initScope, initToken)
               } catch (e) {
-                return 1
+                // already initialized
               }
             }
           };

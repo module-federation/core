@@ -4,5 +4,4 @@ export type ModuleFederationPluginOptions = ConstructorParameters<
   typeof container.ModuleFederationPlugin
 >['0'];
 
-
-export type RemotesObject = ModuleFederationPluginOptions['remotes']
+export type RemotesObject = ModuleFederationPluginOptions['remotes'];

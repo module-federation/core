@@ -41,14 +41,14 @@ class StreamingTargetPlugin {
     compiler.options.output.environment = {
       ...compiler.options.output.environment,
       dynamicImport: true,
-    }
+    };
 
-    new ((webpack?.node?.NodeEnvironmentPlugin) ||
+    new (webpack?.node?.NodeEnvironmentPlugin ||
       require('webpack/lib/node/NodeEnvironmentPlugin'))({
       infrastructureLogging: compiler.options.infrastructureLogging,
     }).apply(compiler);
 
-    new ((webpack?.node?.NodeTargetPlugin) ||
+    new (webpack?.node?.NodeTargetPlugin ||
       require('webpack/lib/node/NodeTargetPlugin'))().apply(compiler);
 
     new CommonJsChunkLoadingPlugin({
@@ -57,7 +57,7 @@ class StreamingTargetPlugin {
       remotes: this.options.remotes as Record<string, string>,
       baseURI: compiler.options.output.publicPath,
       promiseBaseURI: this.options.promiseBaseURI,
-      verbose: this.options.verbose
+      verbose: this.options.verbose,
     }).apply(compiler);
   }
 }

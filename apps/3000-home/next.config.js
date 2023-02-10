@@ -1,5 +1,5 @@
 const { withNx } = require('@nrwl/next/plugins/with-nx');
-const {createDelegatedModule} = require('@module-federation/utilities');
+const { createDelegatedModule } = require('@module-federation/utilities');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 
 /**
@@ -16,18 +16,17 @@ const nextConfig = {
     const { isServer } = options;
 ;
     const remotes = {
-      // home: createDelegatedModule(require.resolve('./remote-delegate.js'), {
-      //   remote: `home_app@http://localhost:3000/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
-      // }),
-      // shop: createDelegatedModule(require.resolve('./remote-delegate.js'), {
-      //   remote: `shop@http://localhost:3001/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
-      // }),
+      shop: createDelegatedModule(require.resolve('./remote-delegate.js'), {
+        remote: `shop@http://localhost:3001/_next/static/${
+          isServer ? 'ssr' : 'chunks'
+        }/remoteEntry.js`,
+      }),
       // checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
       //   remote: `checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
       // }),
-      shop: `shop@http://localhost:3001/_next/static/${
-        isServer ? 'ssr' : 'chunks'
-      }/remoteEntry.js`,
+      // shop: `shop@http://localhost:3001/_next/static/${
+      //   isServer ? 'ssr' : 'chunks'
+      // }/remoteEntry.js`,
       checkout: `checkout@http://localhost:3002/_next/static/${
         isServer ? 'ssr' : 'chunks'
       }/remoteEntry.js`,
@@ -55,7 +54,7 @@ const nextConfig = {
           enableImageLoaderFix: true,
           enableUrlLoaderFix: true,
           skipSharingNextInternals: false,
-          automaticPageStitching: true,
+          automaticPageStitching: false,
         },
       })
     );

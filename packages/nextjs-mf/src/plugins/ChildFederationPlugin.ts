@@ -1,7 +1,12 @@
-import type {Compiler, Stats, WebpackError, WebpackPluginInstance} from 'webpack';
-import {Compilation} from "webpack";
-import type { WatchOptions} from '../types';
-import {ChunkCorrelationPlugin} from '@module-federation/node';
+import type {
+  Compiler,
+  Stats,
+  WebpackError,
+  WebpackPluginInstance,
+} from 'webpack';
+import { Compilation } from 'webpack';
+import type { WatchOptions } from '../types';
+import { ChunkCorrelationPlugin } from '@module-federation/node';
 import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
@@ -10,21 +15,19 @@ import type {
 import path from 'path';
 import fs from 'fs';
 
-import {exposeNextjsPages} from '../loaders/nextPageMapLoader';
-import {hasLoader, injectRuleLoader} from '../loaders/helpers';
+import { exposeNextjsPages } from '../loaders/nextPageMapLoader';
+import { hasLoader, injectRuleLoader } from '../loaders/helpers';
 
 import {
   DEFAULT_SHARE_SCOPE,
   getOutputPath,
   externalizedShares,
   removePlugins,
-  toDisplayErrors
+  toDisplayErrors,
 } from '../internal';
-import {
-  createRuntimeVariables,
-} from '@module-federation/utilities';
+import { createRuntimeVariables } from '@module-federation/utilities';
 
-import {computeRemoteFilename} from "../../utils/build-utils";
+import { computeRemoteFilename } from '../../utils/build-utils';
 
 import ChildFriendlyModuleFederationPlugin from './ModuleFederationPlugin';
 import RemoveRRRuntimePlugin from './RemoveRRRuntimePlugin';
@@ -77,7 +80,7 @@ export class ChildFederationPlugin {
         ...compiler.options.output,
         path: outputPath,
         // path: deriveOutputPath(isServer, compiler.options.output.path),
-        name: 'child-'+compiler.options.name,
+        name: 'child-' + compiler.options.name,
         publicPath: 'auto',
         chunkLoadingGlobal: buildName + 'chunkLoader',
         uniqueName: buildName,
@@ -129,6 +132,11 @@ export class ChildFederationPlugin {
 
       if (compiler.options.name === 'client') {
         plugins = [
+          new webpack.EntryPlugin(
+            compiler.context,
+            require.resolve('../internal-delegate-hoist'),
+            buildName
+          ),
           new FederationPlugin(federationPluginOptions),
           new webpack.web.JsonpTemplatePlugin(),
           new LoaderTargetPlugin('web'),
@@ -148,6 +156,11 @@ export class ChildFederationPlugin {
         } = require('@module-federation/node');
 
         plugins = [
+          new webpack.EntryPlugin(
+            compiler.context,
+            require.resolve('../internal-delegate-hoist'),
+            buildName
+          ),
           new NodeFederationPlugin(federationPluginOptions, {
             ModuleFederationPlugin: FederationPlugin,
           }),
@@ -156,7 +169,8 @@ export class ChildFederationPlugin {
           new webpack.ExternalsPlugin(compiler.options.externalsType, [
             // next dynamic needs to be within webpack, cannot be externalized
             ...Object.keys(DEFAULT_SHARE_SCOPE).filter(
-              (k) => (k !== 'next/dynamic' && k !== 'next/link' && k !== 'next/script')
+              (k) =>
+                k !== 'next/dynamic' && k !== 'next/link' && k !== 'next/script'
             ),
             'react/jsx-runtime',
             'react/jsx-dev-runtime',
@@ -181,9 +195,10 @@ export class ChildFederationPlugin {
       );
 
       if (!isServer) {
-        new ChunkCorrelationPlugin({filename: 'static/ssr/federated-stats.json'}).apply(childCompiler);
+        new ChunkCorrelationPlugin({
+          filename: 'static/ssr/federated-stats.json',
+        }).apply(childCompiler);
       }
-
 
       childCompiler.outputPath = outputPath;
       childCompiler.options.module.rules.forEach((rule) => {
@@ -261,7 +276,10 @@ export class ChildFederationPlugin {
       }
 
       if (isDev) {
-        const compilerWithCallback = (watchOptions: WatchOptions, callback: any) => {
+        const compilerWithCallback = (
+          watchOptions: WatchOptions,
+          callback: any
+        ) => {
           if (childCompiler.watch && isServer) {
             if (!this.watching) {
               this.watching = true;
@@ -270,9 +288,12 @@ export class ChildFederationPlugin {
           } else {
             childCompiler.run(callback);
           }
-        }
+        };
 
-        const compilerCallback = (err: Error | null | undefined, stats: Stats | undefined) => {
+        const compilerCallback = (
+          err: Error | null | undefined,
+          stats: Stats | undefined
+        ) => {
           //workaround due to watch mode not running unless youve hit a page on the remote itself
           if (isServer && isDev && childCompilers['client']) {
             childCompilers['client'].run((err, stats) => {
@@ -298,10 +319,9 @@ export class ChildFederationPlugin {
               ) as WebpackError
             );
           }
-        }
+        };
 
         compilerWithCallback(compiler.options.watchOptions, compilerCallback);
-
 
         // in prod, if client
       } else if (!isServer) {
@@ -322,7 +342,7 @@ export class ChildFederationPlugin {
                     compilation.errors.push(err as WebpackError);
                     rej();
                   }
-                  if(stats && stats.hasWarnings()) {
+                  if (stats && stats.hasWarnings()) {
                     compilation.warnings.push(
                       new Error(
                         toDisplayErrors(stats.compilation.warnings)
@@ -348,7 +368,7 @@ export class ChildFederationPlugin {
           if (err) {
             compilation.errors.push(err as WebpackError);
           }
-          if(stats && stats.hasWarnings()) {
+          if (stats && stats.hasWarnings()) {
             compilation.warnings.push(
               new Error(
                 toDisplayErrors(stats.compilation.warnings)

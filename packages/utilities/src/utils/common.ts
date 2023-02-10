@@ -6,6 +6,8 @@ import type {
   RuntimeRemotesMap,
   RuntimeRemote,
   WebpackRemoteContainer,
+  RemoteData,
+  GetModuleOptions,
 } from '../types';
 
 type RemoteVars = Record<
@@ -72,104 +74,59 @@ export const importDelegatedModule = async (
   keyOrRuntimeRemoteItem: string | RuntimeRemote
 ) => {
   // @ts-ignore
-  return loadScript(keyOrRuntimeRemoteItem).then((asyncContainer) => {
-    // for legacy reasons, we must mark container a initialized
-    // here otherwise older promise based implementation will try to init again with diff object
-    // asyncContainer.__initialized = true;
-    return asyncContainer
-  }).then((asyncContainer) => {
-    // most of this is only needed because of legacy promise based implementation
-    if(typeof window === 'undefined') {
-      return asyncContainer
-//       return {
-//         get: asyncContainer.get,
-//         init: function() {
-// console.log('has inited', asyncContainer.__initialized);
-// // @ts-ignore
-//           console.log('global remote scope', global.__remote_scope__)
-// if(asyncContainer.__initialized) {
-//   return 1;
-// }
-// console.log(Object.keys(arguments[0]));
-// // @ts-ignore
-//           console.log(asyncContainer.init(arguments))
-//           asyncContainer.__initialized = true;
-//           // @ts-ignore
-//           return asyncContainer.init(arguments)
-//         },
-//       }
-//       const proxy = {
-//         get: (arg: string)=>{
-//           return asyncContainer.get(arg)
-//         },
-//         init: function (shareScope: any, initScope: any) {
-//           const handler = {
-//             get: async (target: { [x: string]: any; }, prop: string | number) => {
-//               // if (target[prop]) {
-//               //   Object.values(target[prop]).forEach(function (o) {
-//               //     if (o.from === '_N_E') {
-//               //       o.loaded = 1
-//               //     }
-//               //   })
-//               // }
-//               return target[prop]
-//             },
-//             set(target: { [x: string]: any; }, property: string, value: any) {
-//               //@ts-ignore
-//               if (global.usedChunks) global.usedChunks.add(global + "->" + property);
-//               if (target[property]) {
-//                 return target[property]
-//               }
-//               target[property] = value
-//               return true
-//             }
-//           }
-//           try {
-//             // @ts-ignore
-//             return asyncContainer.init(new Proxy(shareScope, handler), initScope)
-//           } catch (e) {
-//           }
-//           //@ts-ignore
-//           proxy.__initialized = true
-//         }
-//       }
-//       // @ts-ignore
-//       if(!proxy.__initialized) {
-//         //@ts-ignore
-//         proxy.init(__webpack_share_scopes__.default);
-//       }
-//      return proxy
-    } else {
-      const proxy ={
-        get: asyncContainer.get,
-        init: function (shareScope: any, initScope: any) {
-
-          try {
-            // @ts-ignore
-            return asyncContainer.init(shareScope, initScope);
-          } catch (e) {
-          }
+  return loadScript(keyOrRuntimeRemoteItem)
+    .then((asyncContainer: WebpackRemoteContainer) => {
+      return asyncContainer;
+    })
+    .then((asyncContainer: WebpackRemoteContainer) => {
+      // most of this is only needed because of legacy promise based implementation
+      // can remove proxies once we remove promise based implementations
+      if (typeof window === 'undefined') {
+        //TODO: need to solve chunk flushing with delegated modules
+        return asyncContainer;
+      } else {
+        const proxy = {
+          get: asyncContainer.get,
           //@ts-ignore
-          proxy.__initialized = true;
+          init: function (shareScope: any, initScope: any) {
+            try {
+              //@ts-ignore
+              asyncContainer.init(shareScope, initScope);
+              // for legacy reasons, we must mark container a initialized
+              // here otherwise older promise based implementation will try to init again with diff object
+              //@ts-ignore
+              proxy.__initialized = true;
+            } catch (e) {
+              return 1
+            }
+
+          },
+        };
+        // @ts-ignore
+        if (!proxy.__initialized) {
+          //@ts-ignore
+          proxy.init(__webpack_share_scopes__.default);
         }
+        return proxy;
       }
-      // @ts-ignore
-      if(!proxy.__initialized) {
-        //@ts-ignore
-        proxy.init(__webpack_share_scopes__.default);
-      }
-      return proxy
-    }
-  });
+    });
 };
 
-export const createDelegatedModule = (delegate:string, params: { [key: string]: any } ) => {
+export const createDelegatedModule = (
+  delegate: string,
+  params: { [key: string]: any }
+) => {
   let queries: string[] = [];
   for (const [key, value] of Object.entries(params)) {
+    if (Array.isArray(value) || typeof value === 'object') {
+      throw new Error(
+        `[Module Federation] Delegated module params cannot be an array or object. Key "${key}" should be a string or number`
+      );
+    }
     queries.push(`${key}=${value}`);
   }
   return `internal ${delegate}?${queries.join('&')}`;
-}
+};
 
 const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
@@ -218,6 +175,14 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
     if (typeof window === 'undefined') {
       //@ts-ignore
       globalScope._config[containerKey] = reference.url;
+    } else {
+      // to match promise template system, can be removed once promise template is gone
+      if(!globalScope.remoteLoading) {
+        globalScope.remoteLoading = {};
+      }
+      if(globalScope.remoteLoading[containerKey]) {
+        return globalScope.remoteLoading[containerKey]
+      }
     }
 
     asyncContainer = new Promise(function (resolve, reject) {
@@ -262,6 +227,9 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         containerKey
       );
     });
+    if(typeof window !== 'undefined') {
+      globalScope.remoteLoading[containerKey] = asyncContainer;
+    }
   }
 
   return asyncContainer;
@@ -337,4 +305,67 @@ export const createRuntimeVariables = (remotes: Remotes) => {
 
     return acc;
   }, {} as Record<string, string>);
+};
+
+/**
+ * Returns initialized webpack RemoteContainer.
+ * If its' script does not loaded - then load & init it firstly.
+ */
+export const getContainer = async (
+  remoteContainer: string | RemoteData
+): Promise<WebpackRemoteContainer | undefined> => {
+  if (!remoteContainer) {
+    throw Error(`Remote container options is empty`);
+  }
+
+  if (typeof remoteContainer === 'string') {
+    if (window[remoteContainer]) {
+      return window[remoteContainer];
+    }
+
+    return;
+  } else {
+    if (window['uniqueKey' as keyof typeof remoteContainer]) {
+      return window['uniqueKey' as keyof typeof remoteContainer];
+    }
+
+    const container = await injectScript({
+      global: remoteContainer.global,
+      url: remoteContainer.url,
+    });
+
+    if (container) {
+      return container;
+    }
+
+    throw Error(`Remote container ${remoteContainer.url} is empty`);
+  }
+};
+
+/**
+ * Return remote module from container.
+ * If you provide `exportName` it automatically return exact property value from module.
+ *
+ * @example
+ *   remote.getModule('./pages/index', 'default')
+ */
+export const getModule = async ({
+  remoteContainer,
+  modulePath,
+  exportName,
+}: GetModuleOptions) => {
+  const container = await getContainer(remoteContainer);
+  try {
+    const modFactory = await container?.get(modulePath);
+    if (!modFactory) return undefined;
+    const mod = modFactory();
+    if (exportName) {
+      return mod && typeof mod === 'object' ? mod[exportName] : undefined;
+    } else {
+      return mod;
+    }
+  } catch (error) {
+    console.log(error);
+    return undefined;
+  }
 };

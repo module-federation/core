@@ -70,5 +70,5 @@
     }
   },
   "tags": [],
-  "implicitDependencies": ["node", "utils"]
+  "implicitDependencies": ["utils", "node"]
 }

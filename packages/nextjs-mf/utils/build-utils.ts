@@ -4,7 +4,7 @@ import { WebpackRemoteContainer } from '@module-federation/utilities';
 import path from 'path';
 
 const transformInput = (code: string) => {
-  let swc
+  let swc;
   try {
     swc = require('@swc/core');
   } catch (e) {
@@ -62,12 +62,12 @@ const IsomorphicRemoteTemplate = function () {
       }
     } else {
       // @ts-ignore
-      if(!global.__remote_scope__) {
+      if (!global.__remote_scope__) {
         // create a global scope for container, similar to how remotes are set on window in the browser
         // @ts-ignore
         global.__remote_scope__ = {
           _config: {},
-        }
+        };
       }
 
       // @ts-ignore
@@ -112,73 +112,77 @@ const IsomorphicRemoteTemplate = function () {
       },
       remote.global
     );
-  }).then(function () {
-    //@ts-ignore
-    const globalScope = typeof window !== 'undefined' ? window : global.__remote_scope__;
-    const remoteGlobal = globalScope[
-      remote.global
-    ] as unknown as WebpackRemoteContainer & {
-      __initialized: boolean;
-    };
-    const proxy: WebpackRemoteContainer = {
-      get: remoteGlobal.get,
-      //@ts-ignore
-      init: function (shareScope) {
-        const handler: ProxyHandler<typeof __webpack_share_scopes__> = {
-          get(target, prop: string) {
-            if (target[prop]) {
-              Object.values(target[prop]).forEach(function (o) {
-                if (o.from === '_N_E') {
-                  o.loaded = 1;
-                }
-              });
-            }
-            return target[prop];
-          },
-          set(target, property: string, value, receiver) {
-            if (target[property]) {
-              return target[property] as unknown as boolean;
-            }
-            target[property] = value;
-            return true;
-          },
-        };
+  })
+    .then(function () {
+      const globalScope =
+        //@ts-ignore
+        typeof window !== 'undefined' ? window : global.__remote_scope__;
+      const remoteGlobal = globalScope[
+        remote.global
+      ] as unknown as WebpackRemoteContainer & {
+        __initialized: boolean;
+      };
+      const proxy: WebpackRemoteContainer = {
+        get: remoteGlobal.get,
+        //@ts-ignore
+        init: function (shareScope) {
+          const handler: ProxyHandler<typeof __webpack_share_scopes__> = {
+            get(target, prop: string) {
+              if (target[prop]) {
+                Object.values(target[prop]).forEach(function (o) {
+                  if (o.from === '_N_E') {
+                    o.loaded = 1;
+                  }
+                });
+              }
+              return target[prop];
+            },
+            set(target, property: string, value, receiver) {
+              if (target[property]) {
+                return target[property] as unknown as boolean;
+              }
+              target[property] = value;
+              return true;
+            },
+          };
 
+          try {
+            remoteGlobal.init(
+              new Proxy(shareScope as typeof __webpack_share_scopes__, handler)
+            );
+          } catch (e) {
+            // already initialized
+          }
+
+          remoteGlobal.__initialized = true;
+        },
+      };
+
+      if (!remoteGlobal.__initialized) {
         try {
-          remoteGlobal.init(
-            new Proxy(shareScope as typeof __webpack_share_scopes__, handler)
-          );
-        } catch (e) {}
-
-        remoteGlobal.__initialized = true;
-      },
-    };
-
-    if (!remoteGlobal.__initialized) {
-      try {
-        proxy.init();
-      } catch (e) {
-
+          proxy.init();
+        } catch (e) {
+          // already initialized
+        }
       }
-    }
-    return proxy;
-  }).catch((e)=> {
-    console.error(remote.global, 'is offline, returning fake remote');
-    console.error(e);
+      return proxy;
+    })
+    .catch((e) => {
+      console.error(remote.global, 'is offline, returning fake remote');
+      console.error(e);
 
-    return {
-      fake: true,
-      get: (arg: any) => {
-        console.log('faking', arg, 'module on', remote.global);
+      return {
+        fake: true,
+        get: (arg: any) => {
+          console.log('faking', arg, 'module on', remote.global);
 
-        return Promise.resolve(() => {
-          return () => null
-        });
-      },
-      init: () => {
-      }
-    }
-  });
+          return Promise.resolve(() => {
+            return () => null;
+          });
+        },
+        init: () => {},
+      };
+    });
 };
 
 /**
@@ -215,7 +219,9 @@ export const promiseTemplate = (
   remote: string,
   ...otherPromises: Function[]
 ) => {
-  console.warn('[nextjs-mf]: promiseTemplate is being deprecated in favor of delegate modules');
+  console.warn(
+    '[nextjs-mf]: promiseTemplate is being deprecated in favor of delegate modules'
+  );
   let promises: string[] = [];
 
   if (otherPromises) {

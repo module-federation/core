@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import type VueTs from 'vue-tsc';
+import type { _Program } from 'vue-tsc';
+
 import ts from 'typescript';
 import path from 'path';
 import fs from 'fs';
@@ -12,6 +15,13 @@ import {
 
 import { NormalizeOptions } from './normalizeOptions';
 import { TypesCache } from './Caching';
+
+let vueTs: typeof VueTs;
+try {
+  vueTs = require('vue-tsc');
+} catch {
+  // vue-tsc is an optional dependency.
+}
 
 export class TypescriptCompiler {
   private compilerOptions!: ts.CompilerOptions;
@@ -49,11 +59,16 @@ export class TypescriptCompiler {
 
     const host = this.createHost(exposeSrcToDestMap);
 
-    const program = ts.createProgram(
-      [...normalizedAdditionalFiles, ...normalizedExposedComponents],
-      this.compilerOptions,
-      host
-    );
+    const rootNames = [
+      ...normalizedAdditionalFiles,
+      ...normalizedExposedComponents,
+    ];
+
+    const program = this.getCompilerProgram({
+      rootNames,
+      options: this.compilerOptions,
+      host,
+    });
 
     const { diagnostics, emitSkipped } = program.emit();
 
@@ -64,6 +79,23 @@ export class TypescriptCompiler {
     diagnostics.forEach(this.reportCompileDiagnostic.bind(this));
 
     throw new Error('something went wrong generating declaration files');
+  }
+
+  private getCompilerProgram(programOptions: ts.CreateProgramOptions) {
+    const { compiler } = this.options;
+
+    switch (compiler) {
+      case 'vue-tsc':
+        if (!vueTs) {
+          throw new Error(
+            'vue-tsc must be installed when using the vue-tsc compiler option'
+          );
+        }
+        return vueTs.createProgram(programOptions) as _Program;
+      case 'tsc':
+      default:
+        return ts.createProgram(programOptions);
+    }
   }
 
   private normalizeFiles<T, U extends string>(
@@ -85,7 +117,7 @@ export class TypescriptCompiler {
     );
 
     const pathWithExt = path.resolve(normalizedRootDir, filenameWithExt);
-    return pathWithExt;
+    return path.normalize(pathWithExt);
   }
 
   private createHost(exposeSrcToDestMap: Record<string, string>) {
@@ -112,7 +144,7 @@ export class TypescriptCompiler {
       );
 
       // create exports matching the `exposes` config
-      const sourceFilename = sourceFiles?.[0].fileName || '';
+      const sourceFilename = path.normalize(sourceFiles?.[0].fileName || '');
       const exposedDestFilePath = exposeSrcToDestMap[sourceFilename];
 
       // create reexport file only if the file was marked for exposing
@@ -127,12 +159,19 @@ export class TypescriptCompiler {
           filepath
         );
         // add ./ so it's always relative, remove d.ts because it's not needed and can throw warnings
-        const importPath =
+        let importPath =
           './' + relativePathToCompiledFile.replace(/\.d\.ts$/, '');
+
+        // If we're on Windows, need to convert "\" to "/" in the import path since it
+        // was derived from platform-specific file system path.
+        if (path.sep === '\\') {
+          importPath = importPath.replaceAll(path.sep, '/');
+        }
+
         const reexport = `export * from '${importPath}';\nexport { default } from '${importPath}';`;
 
         this.tsDefinitionFilesObj[normalizedExposedDestFilePath] = reexport;
-        
+
         // reuse originalWriteFile as it creates folders if they don't exist
         originalWriteFile(
           normalizedExposedDestFilePath,

@@ -1,2 +1,2 @@
-export * from './hot-reload'
-export * from './flush-chunks'
+export * from './hot-reload';
+export * from './flush-chunks';

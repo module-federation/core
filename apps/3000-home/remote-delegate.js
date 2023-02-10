@@ -1,5 +1,6 @@
 import { importDelegatedModule } from '@module-federation/utilities';
 
+// Delegates are currently not used in this example, but are left here for testing.
 module.exports = new Promise((resolve, reject) => {
   //eslint-disable-next-line
   console.log('Delegate being called for', __resourceQuery);
@@ -10,10 +11,16 @@ module.exports = new Promise((resolve, reject) => {
 
   importDelegatedModule({
     global,
-    url,
+    url: url + '?' + Date.now(),
   })
     .then(async (remote) => {
-      resolve(remote)
+      console.log(
+        __resourceQuery,
+        'resolved remote from',
+        __webpack_runtime_id__
+      );
+
+      resolve(remote);
     })
     .catch((err) => reject(err));
 });

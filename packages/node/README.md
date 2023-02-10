@@ -4,7 +4,7 @@
 <div align="center">
 	<!--  for version -->
   <img src="https://img.shields.io/npm/v/@module-federation/node" alt="version" >
-	<img src="https://img.shields.io/apm/l/atomic-design-ui.svg?" alt="license" >
+	<img src="https://img.shields.io/npm/l/@module-federation/node.svg?" alt="license" >
   <!-- for downloads -->
   <img src="https://img.shields.io/npm/dt/@module-federation/node" alt="downloads">
  </div>
@@ -14,6 +14,7 @@
 </p>
 
 ## ⚡ Features
+
 - Exposes two Webpack Plugins to enable Module Federation.
 - Can exported as UniversalFederationPlugin or NodeFederationPlugin with StreamingTargetPlugin
 - Allows server to fetch chunks across the network.
@@ -49,14 +50,14 @@ This simplifies the code required in your `webpack.config.js` to enable SSR Modu
 It accepts the other standard options from `ModuleFederationPlugin` as well. You can see an example usage below:
 
 ```js
-const {UniversalFederationPlugin} = require("@module-federation/node");
+const { UniversalFederationPlugin } = require('@module-federation/node');
 
 const config = {
-  target: isServer ? false : "web",
+  target: isServer ? false : 'web',
   plugins: [
     new UniversalFederationPlugin({
       name: 'website2',
-      library: {type: 'commonjs-module'}, 
+      library: { type: 'commonjs-module' },
       isServer: true, // or false
       remotes: {},
       filename: 'remoteEntry.js',
@@ -64,8 +65,8 @@ const config = {
         './SharedComponent': './remoteServer/SharedComponent',
       },
     }),
-  ]
-}
+  ],
+};
 ```
 
 ### NodeFederationPlugin and StreamingTargetPlugin
@@ -78,17 +79,21 @@ If it's building for server, we need to set `target: false` to allow the plugins
 The `NodeFederationPlugin` follows the same API as the [Module Federation Plugin](https://webpack.js.org/plugins/module-federation-plugin) and therefore should be a drop-in replacement if you already have it set up in your `webpack.config.js`.
 
 ### 🔧 Config Example
-An example configuration is presented below:
-```js
 
-const {NodeFederationPlugin, StreamingTargetPlugin} = require("@module-federation/node");
+An example configuration is presented below:
+
+```js
+const {
+  NodeFederationPlugin,
+  StreamingTargetPlugin,
+} = require('@module-federation/node');
 
 const config = {
-  target: isServer ? false : "web",
+  target: isServer ? false : 'web',
   plugins: [
     new NodeFederationPlugin({
       name: 'website2',
-      library: {type: 'commonjs-module'},
+      library: { type: 'commonjs-module' },
       remotes: {},
       filename: 'remoteEntry.js',
       exposes: {
@@ -97,11 +102,11 @@ const config = {
     }),
     new StreamingTargetPlugin({
       name: 'website2',
-      library: {type: 'commonjs-module'},
+      library: { type: 'commonjs-module' },
       remotes: {},
     }),
-  ]
-}
+  ],
+};
 ```
 
 ## Utilities
@@ -111,16 +116,17 @@ This package also exposes a few utilities to help with the setup of your federat
 ### revalidate
 
 Used to "hot reload" the federated application.
+
 - This is useful when you're developing your federated application and want to see changes without having to restart the server.
 - Also useful for production environments where you want to be able to update the federated application without having to restart the server.
 
 ```js
-import {revalidate} from "@module-federation/node/utils";
+import { revalidate } from '@module-federation/node/utils';
 
 // we automatically reset require cache, so the reload callback is only if you need to do something else
 revalidate().then((shouldReload) => {
   // do something extra after revalidation
-  if(shouldReload) { 
+  if (shouldReload) {
     // reload the server
   }
 });
@@ -136,27 +142,27 @@ const app = express();
 
 global.clearRoutes = () => {
   app._router.stack = app._router.stack.filter(
-    k => !(k && k.route && k.route.path)
-  )
-}
+    (k) => !(k && k.route && k.route.path)
+  );
+};
 
 // in some other file (within the scope of webpack build)
 // wherever you have your revalidation logic
 revalidate().then((shouldReload) => {
-  if(shouldReload) {
+  if (shouldReload) {
     global.clearRoutes();
   }
 });
-
 ```
 
 ## 🔑 License
+
 - MIT @[ScriptedAlchemy](https://github.com/ScriptedAlchemy)
 
 ## 👨‍💻 Contributors
+
 List of our amazing contributors 💥
 
 <a href="https://github.com/module-federation/nextjs-mf/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=module-federation/node" />
 </a>
-

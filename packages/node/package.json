@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "0.10.1",
+  "version": "0.11.1",
   "type": "commonjs",
   "main": "src/index.js",
   "exports": {
@@ -36,14 +36,20 @@
     "encoding": "^0.1.13"
   },
   "peerDependencies": {
-    "webpack": "^5.40.0"
+    "webpack": "^5.40.0",
+    "react": "^16||^17||^18",
+    "react-dom": "^16||^17||^18",
+    "next": "^12||^13"
   },
-  "devDependencies": {
-    "react": "^18",
-    "next": "^13"
-  },
-  "optionalDependencies": {
-    "react": "^17 || ^18",
-    "next": "^12 || ^13"
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    }
   }
 }

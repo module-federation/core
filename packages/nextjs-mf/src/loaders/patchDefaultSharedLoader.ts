@@ -1,4 +1,4 @@
-import type {LoaderContext} from 'webpack';
+import type { LoaderContext } from 'webpack';
 
 import path from 'path';
 
@@ -26,8 +26,6 @@ export default function patchDefaultSharedLoader(
   return [
     '',
     `require(${JSON.stringify('./' + pathIncludeDefaults)});`,
-    content
-  ].join("\n")
-
+    content,
+  ].join('\n');
 }
-
