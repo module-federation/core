@@ -82,54 +82,58 @@ export const importDelegatedModule = async (
       // most of this is only needed because of legacy promise based implementation
       // can remove proxies once we remove promise based implementations
       if (typeof window === 'undefined') {
+
+        if(!Object.hasOwnProperty.call(keyOrRuntimeRemoteItem, 'global')) {
+          return asyncContainer;
+        }
+
         //TODO: need to solve chunk flushing with delegated modules
-
         return {
-          get: function(arg: string) {
+          get: function (arg: string) {
             //@ts-ignore
-            return asyncContainer.get(arg).then((f)=>{
+            return asyncContainer.get(arg).then((f) => {
               const m = f();
-              return ()=>new Proxy(m, {
-                get: (target, prop)=>{
-
-                  if(prop == '__esModule' || prop == 'then') {
-                    return target[prop];
-                  }
-                  console.log('typeof',prop, typeof target[prop]);
-
-                  if(typeof target[prop] === "function") {
-                    return function() {
+              const result = {
+                __esModule: m.__esModule,
+              };
+              for (const prop in m) {
+                if (typeof m[prop] === 'function') {
+                  Object.defineProperty(result, prop, {
+                    get: function () {
+                      return function () {
+                        //@ts-ignore
+                        if (global.usedChunks)
+                          //@ts-ignore
+                          global.usedChunks.add(`${keyOrRuntimeRemoteItem.global}->${arg}`);
+                        // eslint-disable-next-line prefer-rest-params
+                        return m[prop](arguments);
+                      };
+                    },
+                    enumerable: true,
+                  });
+                } else {
+                  Object.defineProperty(result, prop, {
+                    get: () => {
                       //@ts-ignore
-                      if(global.usedChunks) global.usedChunks.add("adding-" + arg);
-                      // eslint-disable-next-line prefer-rest-params
-                      return target[prop](arguments)
-                    }
-                  }
-                  //@ts-ignore
-                  return target[prop];
+                      if (global.usedChunks)
+                        //@ts-ignore
+                        global.usedChunks.add(`${keyOrRuntimeRemoteItem.global}->${arg}`);
+
+                      return m[prop];
+                    },
+                    enumerable: true,
+                  });
                 }
-              })
-            })
-
-            // @ts-ignore
-            return asyncContainer.get(arg).then((factory)=>{
-              const trueExports = factory();
-
-              return (anyArg: any)=> {
-                // @ts-ignore
-                return Object.defineProperty({}, 'exports', {
-                  get: function() {
-                    // @ts-ignore
-                    global.usedChunks.add('onget' + arg)
-                    console.log(trueExports);
-                    return factory(anyArg)
-                  }
-                });
-                return factory(anyArg)
               }
-            })
+
+              if (m.then) {
+                return Promise.resolve(() => result);
+              }
+
+              return () => result;
+            });
           },
-          init: asyncContainer.init
+          init: asyncContainer.init,
         };
       } else {
         const proxy = {
@@ -144,9 +148,8 @@ export const importDelegatedModule = async (
               //@ts-ignore
               proxy.__initialized = true;
             } catch (e) {
-              return 1
+              return 1;
             }
-
           },
         };
         // @ts-ignore
@@ -224,11 +227,11 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       globalScope._config[containerKey] = reference.url;
     } else {
       // to match promise template system, can be removed once promise template is gone
-      if(!globalScope.remoteLoading) {
+      if (!globalScope.remoteLoading) {
         globalScope.remoteLoading = {};
       }
-      if(globalScope.remoteLoading[containerKey]) {
-        return globalScope.remoteLoading[containerKey]
+      if (globalScope.remoteLoading[containerKey]) {
+        return globalScope.remoteLoading[containerKey];
       }
     }
 
@@ -240,6 +243,9 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         return resolve(asyncContainer);
       }
 
+      if (typeof globalScope[remoteGlobal] !== 'undefined') {
+        return resolveRemoteGlobal();
+      }
 
       (__webpack_require__ as any).l(
         reference.url,
@@ -271,7 +277,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         containerKey
       );
     });
-    if(typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
       globalScope.remoteLoading[containerKey] = asyncContainer;
     }
   }

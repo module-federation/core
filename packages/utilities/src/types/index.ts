@@ -72,6 +72,8 @@ export type RemoteData = {
 
 export type RuntimeRemote = Partial<RemoteData> & {
   asyncContainer?: AsyncContainer;
+  global?: string;
+  url?: string;
 };
 
 export type RuntimeRemotesMap = Record<string, RuntimeRemote>;
