@@ -240,9 +240,6 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         return resolve(asyncContainer);
       }
 
-      if (typeof globalScope[remoteGlobal] !== 'undefined') {
-        return resolveRemoteGlobal();
-      }
 
       (__webpack_require__ as any).l(
         reference.url,

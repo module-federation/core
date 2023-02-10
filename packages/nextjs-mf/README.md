@@ -28,6 +28,9 @@ You do not need to share these packages, sharing next internals yourself will ca
 <details>
 <summary> See DEFAULT_SHARE_SCOPE:</summary>
 
+<details>
+<summary> See DEFAULT_SHARE_SCOPE:</summary>
+
 ```js
 const DEFAULT_SHARE_SCOPE = {
   react: {
@@ -280,7 +283,7 @@ If an error occurs while loading the script, a custom error object is created an
 
 ```js
 //next.config.js
-const {createDelegatedModule} = require('@module-federation/utilities');
+const { createDelegatedModule } = require('@module-federation/utilities');
 const remotes = {
   checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
     remote: `checkout@http://localhost:3002/_next/static/${
@@ -337,7 +340,7 @@ For more information on `__resourceQuery` visit: https://webpack.js.org/api/modu
 // next.config.js
 
 const remotes = {
-  // pass pointer to remote-delegate, pass deletae remote name as query param,
+  // pass pointer to remote-delegate, pass delegate remote name as query param,
   // at runtime webpack will pass this as __resourceQuery
   shop: `internal ./remote-delegate.js?remote=shop@http://localhost:3001/_next/static/${
     isServer ? 'ssr' : 'chunks'

@@ -141,7 +141,7 @@ export class NextFederationPlugin {
       exclude: /node_modules/,
       loader: path.resolve(__dirname, '../loaders/patchDefaultSharedLoader'),
     });
-    compiler.options.devtool = 'source-map';
+
     if (this._options.remotes) {
       const delegates = getDelegates(this._options.remotes);
       // only apply loader if delegates are present
@@ -154,7 +154,7 @@ export class NextFederationPlugin {
                 req.includes(path.join(compiler.context, 'pages/')) ||
                 req.includes(path.join(compiler.context, 'app/'))
               ) {
-                return /_app\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
+                return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
               }
             }
             if (req.includes('internal-delegate-hoist')) {
@@ -226,7 +226,7 @@ export class NextFederationPlugin {
         ...internalShare,
       },
     };
-
+compiler.options.devtool = 'source-map'
     new ModuleFederationPlugin(hostFederationPluginOptions, {
       ModuleFederationPlugin,
     }).apply(compiler);

@@ -2,6 +2,34 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.11.1](https://github.com/module-federation/nextjs-mf/compare/node-0.11.0...node-0.11.1) (2023-02-09)
+
+
+### Bug Fixes
+
+* backward compatability with older versions pre 6.1.x ([f27b57a](https://github.com/module-federation/nextjs-mf/commit/f27b57a36a61280124bab4a309edaa1c3fd04ced))
+
+
+
+# [0.11.0](https://github.com/module-federation/nextjs-mf/compare/node-0.10.5...node-0.11.0) (2023-02-09)
+
+### Dependency Updates
+
+* `utils` updated to version `1.3.0`
+
+### Features
+
+* Delegate Modules ([#509](https://github.com/module-federation/nextjs-mf/issues/509)) ([1a085e7](https://github.com/module-federation/nextjs-mf/commit/1a085e7e03ca0afd5c64389b4b169f3db3382f6b))
+
+
+
+## [0.10.5](https://github.com/module-federation/nextjs-mf/compare/node-0.10.4...node-0.10.5) (2023-02-09)
+
+### Dependency Updates
+
+* `utils` updated to version `1.2.1`
+
+
 ## [0.10.4](https://github.com/module-federation/nextjs-mf/compare/node-0.10.3...node-0.10.4) (2023-02-02)
 
 ## [0.10.5](https://github.com/module-federation/nextjs-mf/compare/node-0.10.4...node-0.10.5) (2023-02-02)

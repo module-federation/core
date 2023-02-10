@@ -150,7 +150,9 @@ const IsomorphicRemoteTemplate = function () {
             remoteGlobal.init(
               new Proxy(shareScope as typeof __webpack_share_scopes__, handler)
             );
-          } catch (e) {}
+          } catch (e) {
+            // already initialized
+          }
 
           remoteGlobal.__initialized = true;
         },
@@ -159,7 +161,9 @@ const IsomorphicRemoteTemplate = function () {
       if (!remoteGlobal.__initialized) {
         try {
           proxy.init();
-        } catch (e) {}
+        } catch (e) {
+          // already initialized
+        }
       }
       return proxy;
     })
