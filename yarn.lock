@@ -1777,9 +1777,8 @@
     encoding "0.1.13"
     node-fetch "2.6.7"
 
-"@module-federation/node@link:./dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/node":
+"@module-federation/node@link:../../../Library/Caches/Yarn/v6/npm-@module-federation-nextjs-mf-6.1.0-9b431e03e7377adafe0710af943c306e6ac3e343-integrity/node_modules/@module-federation/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/nextjs-mf/dist/packages/node":
   version "0.0.0"
-  uid ""
 
 "@module-federation/typescript@*":
   version "2.2.1"
@@ -1795,7 +1794,6 @@
 
 "@module-federation/typescript@link:./apps/react-ts-remote/dist/packages/typescript":
   version "0.0.0"
-  uid ""
 
 "@module-federation/utilities@*", "@module-federation/utilities@1.3.0":
   version "1.3.0"
@@ -2966,10 +2964,19 @@
     "@types/history" "^4.7.11"
     "@types/react" "*"
 
-"@types/react@*", "@types/react@18.0.27":
+"@types/react@*":
   version "18.0.27"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.27.tgz#d9425abe187a00f8a5ec182b010d4fd9da703b71"
   integrity sha512-3vtRKHgVxu3Jp9t718R9BuzoD4NcQ8YJ5XRzsSKxNDiDonD2MXIT1TmSkenxuCycZJoQT5d2vE8LwWJxBC1gmA==
+  dependencies:
+    "@types/prop-types" "*"
+    "@types/scheduler" "*"
+    csstype "^3.0.2"
+
+"@types/react@18.0.28":
+  version "18.0.28"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.28.tgz#accaeb8b86f4908057ad629a26635fe641480065"
+  integrity sha512-RD0ivG1kEztNBdoAK7lekI9M+azSnitIn85h4iOiaLjaTrMjzslhaqCGaI4IyCJ1RljWiLCEu4jyrLLgqxBTew==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
