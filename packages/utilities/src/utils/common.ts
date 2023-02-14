@@ -32,35 +32,35 @@ const getRuntimeRemotes = () => {
     const remoteVars = (process.env.REMOTES || {}) as RemoteVars;
 
     const runtimeRemotes = Object.entries(remoteVars).reduce(function (
-      acc,
-      item
-    ) {
-      const [key, value] = item;
-      // if its an object with a thenable (eagerly executing function)
-      if (typeof value === 'object' && typeof value.then === 'function') {
-        acc[key] = { asyncContainer: value };
-      }
-      // if its a function that must be called (lazily executing function)
-      else if (typeof value === 'function') {
-        // @ts-ignore
-        acc[key] = { asyncContainer: value };
-      }
-      // if its just a string (global@url)
-      else if (typeof value === 'string') {
-        const [url, global] = extractUrlAndGlobal(value);
-        acc[key] = { global, url };
-      }
-      // we dont know or currently support this type
-      else {
-        //@ts-ignore
-        console.log('remotes process', process.env.REMOTES);
-        throw new Error(
-          `[mf] Invalid value received for runtime_remote "${key}"`
-        );
-      }
-      return acc;
-    },
-    {} as RuntimeRemotesMap);
+        acc,
+        item
+      ) {
+        const [key, value] = item;
+        // if its an object with a thenable (eagerly executing function)
+        if (typeof value === 'object' && typeof value.then === 'function') {
+          acc[key] = {asyncContainer: value};
+        }
+        // if its a function that must be called (lazily executing function)
+        else if (typeof value === 'function') {
+          // @ts-ignore
+          acc[key] = {asyncContainer: value};
+        }
+        // if its just a string (global@url)
+        else if (typeof value === 'string') {
+          const [url, global] = extractUrlAndGlobal(value);
+          acc[key] = {global, url};
+        }
+        // we dont know or currently support this type
+        else {
+          //@ts-ignore
+          console.log('remotes process', process.env.REMOTES);
+          throw new Error(
+            `[mf] Invalid value received for runtime_remote "${key}"`
+          );
+        }
+        return acc;
+      },
+      {} as RuntimeRemotesMap);
 
     return runtimeRemotes;
   } catch (err) {
@@ -83,7 +83,7 @@ export const importDelegatedModule = async (
       // can remove proxies once we remove promise based implementations
       if (typeof window === 'undefined') {
 
-        if(!Object.hasOwnProperty.call(keyOrRuntimeRemoteItem, 'global')) {
+        if (!Object.hasOwnProperty.call(keyOrRuntimeRemoteItem, 'global')) {
           return asyncContainer;
         }
 
@@ -134,6 +134,45 @@ export const importDelegatedModule = async (
             });
           },
           init: asyncContainer.init,
+          // init: function (shareScope: any, initScope: any) {
+          //
+          //   const trackedScope = new Proxy(shareScope, {
+          //     get: function (target, prop) {
+          //       // @ts-ignore
+          //       return target[prop];
+          //     },
+          //     set(target, property, value) {
+          //       //@ts-ignore
+          //       console.log('calling setters', `${keyOrRuntimeRemoteItem.global}->${property}`);
+          //       //@ts-ignore
+          //       global.usedChunks.add(`${keyOrRuntimeRemoteItem.global}->${property}`);
+          //       if (target[property]) {
+          //         return target[property]
+          //       }
+          //       target[property] = value
+          //       return true
+          //     }
+          //     // set: function (target, prop, value) {
+          //     //   console.log('setting module on scope', prop, value);
+          //     //   const scope = {}
+          //     //   for (const version in value) {
+          //     //     console.log(version);
+          //     //     // @ts-ignore
+          //     //     scope[version] = value[version];
+          //     //     // @ts-ignore
+          //     //     console.log('scope[version]', scope[version].get)
+          //     //     // scope[version].get = function () {
+          //     //     //   console.log('getting module', prop, 'version', version);
+          //     //     // }
+          //     //   }
+          //     //   target[prop] = scope;
+          //     //   return true;
+          //     // }
+          //   })
+          //
+          //   //@ts-ignore
+          //   return asyncContainer.init(trackedScope, initScope);
+          // }
         };
       } else {
         const proxy = {
@@ -193,7 +232,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       typeof reference.asyncContainer.then === 'function'
         ? reference.asyncContainer
         : // @ts-ignore
-          reference.asyncContainer();
+        reference.asyncContainer();
   } else {
     // This casting is just to satisfy typescript,
     // In reality remoteGlobal will always be a string;
@@ -239,7 +278,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       function resolveRemoteGlobal() {
         const asyncContainer = globalScope[
           remoteGlobal
-        ] as unknown as AsyncContainer;
+          ] as unknown as AsyncContainer;
         return resolve(asyncContainer);
       }
 
@@ -400,10 +439,10 @@ export const getContainer = async (
  *   remote.getModule('./pages/index', 'default')
  */
 export const getModule = async ({
-  remoteContainer,
-  modulePath,
-  exportName,
-}: GetModuleOptions) => {
+                                  remoteContainer,
+                                  modulePath,
+                                  exportName,
+                                }: GetModuleOptions) => {
   const container = await getContainer(remoteContainer);
   try {
     const modFactory = await container?.get(modulePath);
