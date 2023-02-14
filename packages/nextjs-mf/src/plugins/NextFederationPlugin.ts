@@ -58,6 +58,10 @@ export class NextFederationPlugin {
     const isServer = compiler.options.name === 'server';
     const { webpack } = compiler;
 
+    if (this._options.remotes) {
+      this._options.remotes = parseRemotes(this._options.remotes);
+    }
+
     if (isServer) {
       // target false because we use our own target for node env
       compiler.options.target = false;
@@ -109,10 +113,6 @@ export class NextFederationPlugin {
             '../loaders/patchNextClientPageLoader'
           ),
         });
-      }
-
-      if (this._options.remotes) {
-        this._options.remotes = parseRemotes(this._options.remotes);
       }
 
       if (this._options.library) {

@@ -269,28 +269,17 @@ export const removePlugins = [
   'ReactFreshWebpackPlugin',
 ];
 
-export const parseRemoteSyntax = (remote: string) => {
-  if (
-    typeof remote === 'string' &&
-    remote.includes('@') &&
-    !remote.startsWith('internal ')
-  ) {
-    const [url, global] = extractUrlAndGlobal(remote);
-    return generateRemoteTemplate(url, global);
-  }
-
-  return remote;
-};
-
 export const parseRemotes = (remotes: Record<string, any>) =>
   Object.entries(remotes).reduce((acc, [key, value]) => {
     // check if user is passing a internal "delegate module" reference
-    if (value.startsWith('internal ')) {
+    if (value.startsWith('internal ') || value.startsWith('promise ')) {
       return { ...acc, [key]: value };
     }
     // check if user is passing custom promise template
-    if (!value.startsWith('promise ') && value.includes('@')) {
-      return { ...acc, [key]: `promise ${parseRemoteSyntax(value)}` };
+    if (value.includes('@')) {
+      return { ...acc, [key]: createDelegatedModule(require.resolve('./default-delegate.js'), {
+        remote: value,
+        })};
     }
     // return standard template otherwise
     return { ...acc, [key]: value };
