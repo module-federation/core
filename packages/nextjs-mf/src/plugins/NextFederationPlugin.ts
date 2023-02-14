@@ -18,7 +18,7 @@ import {
   internalizeSharedPackages,
   parseRemotes,
   reKeyHostShared,
-  getDelegates,
+  getDelegates, DEFAULT_SHARE_SCOPE,
 } from '../internal';
 import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
 import ChildFederationPlugin from './ChildFederationPlugin';
@@ -80,6 +80,20 @@ export class NextFederationPlugin {
         '/chunks',
         '/ssr'
       );
+
+      if (this._options.shared) {
+        const warnings: string[] = Object.keys(this._options.shared).reduce((acc: string[], key: string) => {
+          if (DEFAULT_SHARE_SCOPE[key]) {
+            acc.push(`You are sharing ${key} from the default share scope. This is not necessary and can be removed.`);
+            // @ts-ignore
+            delete this._options.shared[key];
+          }
+          return acc;
+        }, []);
+        if (warnings.length > 0) {
+          console.warn('%c' + warnings.join('\n'), 'color: red');
+        }
+      }
 
       // should this be a plugin that we apply to the compiler?
       internalizeSharedPackages(this._options, compiler);
