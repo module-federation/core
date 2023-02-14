@@ -1,8 +1,7 @@
-export const usedChunks = new Set();
+export const usedChunks = global.usedChunks || new Set();
 global.usedChunks = usedChunks;
 
 export const flushChunks = async () => {
-  console.log('flushing chunks', usedChunks);
   const allFlushed = await Promise.all(
     Array.from(usedChunks).map(async (chunk) => {
       const chunks = new Set();
@@ -12,8 +11,9 @@ export const flushChunks = async () => {
       }
       // fetch the json file
       try {
+        const remoteName = new URL(global.__remote_scope__._config[remote]).pathname.split('/').pop();
         const statsFile = global.__remote_scope__._config[remote].replace(
-          'remoteEntry.js',
+          remoteName,
           'federated-stats.json'
         );
         const stats = await fetch(statsFile).then(
@@ -35,6 +35,15 @@ export const flushChunks = async () => {
                 });
               });
             }
+            // todo: come back to this later
+            // if(modules.sharedModules?.[0]) {
+            //   const sharedModules = modules.sharedModules.find((sharedModule) => {
+            //     return sharedModule.provides.find((provide) => {return provide.shareKey === request})
+            //   });
+            //   sharedModules.chunks.forEach((chunk) => {
+            //     chunks.add(prefix + chunk);
+            //   });
+            // }
           });
         }
 
@@ -47,6 +56,6 @@ export const flushChunks = async () => {
 
   const dedupe = Array.from(new Set([...allFlushed.flat()]));
 
-  usedChunks.clear();
+  // usedChunks.clear();
   return dedupe.filter(Boolean);
 };
