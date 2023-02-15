@@ -62,6 +62,20 @@ export class NextFederationPlugin {
       this._options.remotes = parseRemotes(this._options.remotes);
     }
 
+    if (this._options.shared) {
+      const warnings: string[] = Object.keys(this._options.shared).reduce((acc: string[], key: string) => {
+        if (DEFAULT_SHARE_SCOPE[key]) {
+          acc.push(`[nextjs-mf] You are sharing ${key} from the default share scope. This is not necessary and can be removed.`);
+          // @ts-ignore
+          delete this._options.shared[key];
+        }
+        return acc;
+      }, []);
+      if (warnings.length > 0) {
+        console.warn('%c' + warnings.join('\n'), 'color: red');
+      }
+    }
+
     if (isServer) {
       // target false because we use our own target for node env
       compiler.options.target = false;
@@ -80,20 +94,6 @@ export class NextFederationPlugin {
         '/chunks',
         '/ssr'
       );
-
-      if (this._options.shared) {
-        const warnings: string[] = Object.keys(this._options.shared).reduce((acc: string[], key: string) => {
-          if (DEFAULT_SHARE_SCOPE[key]) {
-            acc.push(`You are sharing ${key} from the default share scope. This is not necessary and can be removed.`);
-            // @ts-ignore
-            delete this._options.shared[key];
-          }
-          return acc;
-        }, []);
-        if (warnings.length > 0) {
-          console.warn('%c' + warnings.join('\n'), 'color: red');
-        }
-      }
 
       // should this be a plugin that we apply to the compiler?
       internalizeSharedPackages(this._options, compiler);
@@ -130,7 +130,7 @@ export class NextFederationPlugin {
       }
 
       if (this._options.library) {
-        console.error('[mf] you cannot set custom library');
+        console.error('[nextjs-mf] you cannot set custom library');
       }
 
       this._options.library = {
@@ -160,31 +160,32 @@ export class NextFederationPlugin {
       const delegates = getDelegates(this._options.remotes);
       // only apply loader if delegates are present
       if (delegates && Object.keys(delegates).length > 0) {
+        const pagesPath = path.join(compiler.context, 'pages/');
+        const appPath = path.join(compiler.context, 'app/');
+        const pageAppPathRegex = new RegExp(`${pagesPath}|${appPath}`);
+        const internalHoist = /internal-delegate-hoist/;
+        const nodeModules = /node_modules/;
         compiler.options.module.rules.push({
-          test(req: string) {
-            if (isServer) {
-              // server has no common chunk or entry to hoist into
-              if (
-                req.includes(path.join(compiler.context, 'pages/')) ||
-                req.includes(path.join(compiler.context, 'app/'))
-              ) {
-                return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
-              }
-            }
+          test: (req) => {
             if (req.includes('internal-delegate-hoist')) {
               return true;
+            }
+            if (isServer) {
+              if (pageAppPathRegex.test(req)) {
+                return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
+              }
             }
             return false;
           },
           resourceQuery: this._extraOptions.automaticAsyncBoundary
-            ? (query) => !query.includes('hasBoundary')
+            ? /(?<!\bhasBoundary\b).*/
             : undefined,
-          include: [compiler.context, /internal-delegate-hoist/],
+          include: [compiler.context, internalHoist],
           exclude: (request: string) => {
-            if (request.includes('internal-delegate-hoist')) {
+            if (internalHoist.test(request)) {
               return false;
             }
-            return /node_modules/.test(request);
+            return nodeModules.test(request);
           },
           loader: path.resolve(__dirname, '../loaders/delegateLoader'),
           options: {
@@ -240,7 +241,7 @@ export class NextFederationPlugin {
         ...internalShare,
       },
     };
-    compiler.options.devtool = 'source-map';
+    // compiler.options.devtool = 'source-map';
     new ModuleFederationPlugin(hostFederationPluginOptions, {
       ModuleFederationPlugin,
     }).apply(compiler);
