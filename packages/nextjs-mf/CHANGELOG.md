@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.1.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.1.2...nextjs-mf-6.1.3) (2023-02-17)
+
+
+### Bug Fixes
+
+* Don't apply async boundary loader for api routes on Windows ([#587](https://github.com/module-federation/nextjs-mf/issues/587)) ([5173845](https://github.com/module-federation/nextjs-mf/commit/5173845aca15509c363e52e71836303d25c09135))
+
+
+
 ## [6.1.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.1.1...nextjs-mf-6.1.2) (2023-02-09)
 
 ### Dependency Updates
