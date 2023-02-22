@@ -10,6 +10,7 @@ import type {
   NextFederationPluginOptions,
 } from '@module-federation/utilities';
 import { createRuntimeVariables } from '@module-federation/utilities';
+import { ChunkCorrelationPlugin } from '@module-federation/node';
 
 import type { Compiler } from 'webpack';
 import path from 'path';
@@ -77,6 +78,11 @@ export class NextFederationPlugin {
     }
 
     if (isServer) {
+
+      if(this._options.name) {
+        compiler.options.output.uniqueName = 'host__'+this._options.name;
+      }
+
       // target false because we use our own target for node env
       compiler.options.target = false;
       const { StreamingTargetPlugin } = require('@module-federation/node');
@@ -113,6 +119,17 @@ export class NextFederationPlugin {
         };
       }
     } else {
+      //@ts-ignore
+      const backupChunkLogic = compiler.options.optimization?.splitChunks?.chunks
+      if(backupChunkLogic) {
+
+        compiler.options.optimization.moduleIds = 'named';
+        compiler.options.optimization.chunkIds = 'named';
+        //@ts-ignore
+        compiler.options.optimization.splitChunks.chunks = function (chunk: any) {
+          return backupChunkLogic(chunk);
+        }
+      }
       new webpack.EntryPlugin(
         compiler.context,
         require.resolve('../internal-delegate-hoist'),
@@ -249,6 +266,13 @@ export class NextFederationPlugin {
     new ChildFederationPlugin(this._options, this._extraOptions).apply(
       compiler
     );
+
+    if(isServer) {
+      // apply after child compiler
+      new ChunkCorrelationPlugin({
+        filename: 'server/host-stats.json',
+      }).apply(compiler);
+    }
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
 
     if (compiler.options.mode === 'development') {

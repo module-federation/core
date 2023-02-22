@@ -134,45 +134,6 @@ export const importDelegatedModule = async (
             });
           },
           init: asyncContainer.init,
-          // init: function (shareScope: any, initScope: any) {
-          //
-          //   const trackedScope = new Proxy(shareScope, {
-          //     get: function (target, prop) {
-          //       // @ts-ignore
-          //       return target[prop];
-          //     },
-          //     set(target, property, value) {
-          //       //@ts-ignore
-          //       console.log('calling setters', `${keyOrRuntimeRemoteItem.global}->${property}`);
-          //       //@ts-ignore
-          //       global.usedChunks.add(`${keyOrRuntimeRemoteItem.global}->${property}`);
-          //       if (target[property]) {
-          //         return target[property]
-          //       }
-          //       target[property] = value
-          //       return true
-          //     }
-          //     // set: function (target, prop, value) {
-          //     //   console.log('setting module on scope', prop, value);
-          //     //   const scope = {}
-          //     //   for (const version in value) {
-          //     //     console.log(version);
-          //     //     // @ts-ignore
-          //     //     scope[version] = value[version];
-          //     //     // @ts-ignore
-          //     //     console.log('scope[version]', scope[version].get)
-          //     //     // scope[version].get = function () {
-          //     //     //   console.log('getting module', prop, 'version', version);
-          //     //     // }
-          //     //   }
-          //     //   target[prop] = scope;
-          //     //   return true;
-          //     // }
-          //   })
-          //
-          //   //@ts-ignore
-          //   return asyncContainer.init(trackedScope, initScope);
-          // }
         };
       } else {
         const proxy = {

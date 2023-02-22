@@ -46,6 +46,7 @@ const nextConfig = {
         },
         shared: {
           lodash: {},
+          antd: {},
         },
         extraOptions: {
           automaticAsyncBoundary: true,

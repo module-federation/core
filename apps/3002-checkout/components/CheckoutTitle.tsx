@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-
+import lodash from 'lodash';
 const CheckoutTitle = () => {
   const [hookData, setHookData] = useState('');
 

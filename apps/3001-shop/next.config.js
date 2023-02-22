@@ -57,6 +57,7 @@ const nextConfig = {
         },
         shared: {
           lodash: {},
+          antd: {},
         },
         extraOptions: {
           exposePages: true,
