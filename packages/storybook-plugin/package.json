@@ -1,0 +1,21 @@
+{
+  "name": "@module-federation/storybook-plugin",
+  "version": "0.0.1",
+  "description": "Storybook plugin to consume remote module federated apps/components",
+  "license": "MIT",
+  "keywords": [
+    "module-federation",
+    "typescript",
+    "storybook",
+    "addon"
+  ],
+  "author": "Fiodorov Andrei <hello@fyodorovandrei.com> (https://github.com/fyodorovandrei)",
+  "devDependencies": {
+    "@storybook/node-logger": "^6.5.16",
+    "webpack": "^5.75.0"
+  },
+  "peerDependencies": {
+    "@storybook/node-logger": "^6.5.16",
+    "webpack": "^5.75.0"
+  }
+}
