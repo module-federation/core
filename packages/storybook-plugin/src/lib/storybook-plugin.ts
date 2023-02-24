@@ -44,9 +44,3 @@ export const webpack = async (
     plugins,
   };
 };
-
-export const config = (entry: string[] = []): string[] => {
-  logger.info(`=> Load Module Federation plugin preview file`);
-
-  return [...entry, require.resolve('./mf-preview')];
-};
