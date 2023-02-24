@@ -15,6 +15,8 @@ import type {
 import path from 'path';
 import fs from 'fs';
 
+//@ts-ignore
+import DashboardPlugin from '@module-federation/dashboard-plugin';
 import { exposeNextjsPages } from '../loaders/nextPageMapLoader';
 import { hasLoader, injectRuleLoader } from '../loaders/helpers';
 
@@ -39,15 +41,18 @@ const childCompilers = {} as Record<string, Compiler>;
 export class ChildFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
+  private _medusa: any;
   private watching?: boolean;
   private initalRun: boolean;
 
   constructor(
     options: ModuleFederationPluginOptions,
-    extraOptions: NextFederationPluginExtraOptions
+    extraOptions: NextFederationPluginExtraOptions,
+    medusa: any
   ) {
     this._options = options;
     this._extraOptions = extraOptions;
+    this._medusa = medusa;
     this.initalRun = false;
   }
 
@@ -76,14 +81,23 @@ export class ChildFederationPlugin {
       // using ModuleFederationPlugin does not work, i had to fork because of afterPlugins hook on containerPlugin.
       const FederationPlugin = ChildFriendlyModuleFederationPlugin;
 
+      const MedusaPlugin = compiler.options.plugins.find((p) => {
+        return p.constructor.name === 'NextMedusaPlugin';
+      })
+
+      let uniqueName = buildName;
+      if (MedusaPlugin && compiler.options.output.uniqueName !== '_N_E') {
+        uniqueName = compiler.options.output.uniqueName;
+      }
+
       const childOutput = {
         ...compiler.options.output,
         path: outputPath,
         // path: deriveOutputPath(isServer, compiler.options.output.path),
         name: 'child-' + compiler.options.name,
         publicPath: 'auto',
-        chunkLoadingGlobal: buildName + 'chunkLoader',
-        uniqueName: buildName,
+        chunkLoadingGlobal: uniqueName + 'chunkLoader',
+        uniqueName: uniqueName,
         library: {
           name: buildName,
           type: library?.type as string,
@@ -108,6 +122,11 @@ export class ChildFederationPlugin {
       const federationPluginOptions: ModuleFederationPluginOptions = {
         // library: {type: 'var', name: buildName},
         ...this._options,
+        name: this._medusa ? '__REMOTE_VERSION__' + this._options.name : this._options.name,
+        library: {
+          type: this._options.library?.type as string,
+          name: this._medusa ? '__REMOTE_VERSION__' + this._options.name : this._options.name,
+        },
         filename: computeRemoteFilename(
           isServer,
           this._options.filename as string
@@ -129,7 +148,6 @@ export class ChildFederationPlugin {
           ...this._options.shared,
         },
       };
-
       if (compiler.options.name === 'client') {
         plugins = [
           new webpack.EntryPlugin(
@@ -149,6 +167,12 @@ export class ChildFederationPlugin {
           }),
           new AddRuntimeRequirementToPromiseExternal(),
         ];
+        if(this._medusa) {
+          console.log(this._medusa)
+          plugins.push(
+            this._medusa
+          )
+        }
       } else if (compiler.options.name === 'server') {
         const {
           StreamingTargetPlugin,
@@ -250,6 +274,18 @@ export class ChildFederationPlugin {
       const MiniCss = childCompiler.options.plugins.find((p) => {
         return p.constructor.name === 'NextMiniCssExtractPlugin';
       }) as any;
+
+
+
+    if(MedusaPlugin) {
+      console.log('MedusaPlugin', MedusaPlugin)
+      //@ts-ignore
+      new MedusaPlugin.constructor({
+        //@ts-ignore
+        ...MedusaPlugin._options,
+        filename: 'dashboard-child.json'
+      }).apply(childCompiler);
+    }
 
       childCompiler.options.plugins = childCompiler.options.plugins.filter(
         (plugin) => !removePlugins.includes(plugin.constructor.name)

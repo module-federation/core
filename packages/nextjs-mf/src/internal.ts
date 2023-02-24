@@ -267,6 +267,7 @@ export const removePlugins = [
   'ProfilingPlugin',
   'DropClientPage',
   'ReactFreshWebpackPlugin',
+  "NextMedusaPlugin"
 ];
 
 export const parseRemoteSyntax = (remote: string) => {
