@@ -1,0 +1,63 @@
+nav.pagination {
+  display: flex;
+  border-top: 1px solid var(--toolbar-border-color);
+  line-height: 1;
+  margin: 2rem -1rem -1rem;
+  padding: 0.75rem 1rem 0;
+}
+
+nav.pagination span {
+  display: flex;
+  flex: 50%;
+  flex-direction: column;
+}
+
+nav.pagination .prev {
+  padding-right: 0.5rem;
+}
+
+nav.pagination .next {
+  margin-left: auto;
+  padding-left: 0.5rem;
+  text-align: right;
+}
+
+nav.pagination span::before {
+  color: var(--toolbar-muted-color);
+  font-size: 0.75em;
+  padding-bottom: 0.1em;
+}
+
+nav.pagination .prev::before {
+  content: 'Prev';
+}
+
+nav.pagination .next::before {
+  content: 'Next';
+}
+
+nav.pagination a {
+  font-weight: var(--body-font-weight-bold);
+  line-height: 1.3;
+  position: relative;
+}
+
+nav.pagination a::before,
+nav.pagination a::after {
+  color: var(--toolbar-muted-color);
+  font-weight: normal;
+  font-size: 1.5em;
+  line-height: 0.75;
+  position: absolute;
+  top: 0;
+  width: 1rem;
+}
+
+nav.pagination .prev a::before {
+  content: '\2039';
+  transform: translateX(-100%);
+}
+
+nav.pagination .next a::after {
+  content: '\203a';
+}
