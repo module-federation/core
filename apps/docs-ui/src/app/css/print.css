@@ -1,0 +1,88 @@
+@page {
+  margin: 0.5in;
+}
+
+@media print {
+  .hide-for-print {
+    display: none !important;
+  }
+
+  html {
+    font-size: var(--body-font-size--print);
+  }
+
+  a {
+    color: inherit !important;
+    text-decoration: underline;
+  }
+
+  a.bare,
+  a[href^='#'],
+  a[href^='mailto:'] {
+    text-decoration: none;
+  }
+
+  tr,
+  img,
+  object,
+  svg {
+    page-break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  pre {
+    hyphens: none;
+    white-space: pre-wrap;
+  }
+
+  body {
+    padding-top: 2rem;
+  }
+
+  .navbar {
+    background: none;
+    color: inherit;
+    position: absolute;
+  }
+
+  .navbar * {
+    color: inherit !important;
+  }
+
+  .navbar > :not(.navbar-brand),
+  .nav-container,
+  .toolbar,
+  aside.toc,
+  nav.pagination {
+    display: none;
+  }
+
+  .doc {
+    color: inherit;
+    margin: auto;
+    max-width: none;
+    padding-bottom: 2rem;
+  }
+
+  .doc .admonitionblock td.icon {
+    color-adjust: exact;
+  }
+
+  .doc .listingblock code[data-lang]::before {
+    display: block;
+  }
+
+  footer.footer {
+    background: none;
+    border-top: 1px solid var(--panel-border-color);
+    color: var(--quote-attribution-font-color);
+    padding: 0.25rem 0.5rem 0;
+  }
+
+  .footer * {
+    color: inherit;
+  }
+}

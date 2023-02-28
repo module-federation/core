@@ -1,0 +1,35 @@
+@media screen and (max-width: 1023.5px) {
+  aside.toc.sidebar {
+    display: none;
+  }
+
+  main > .content {
+    overflow-x: auto;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  main {
+    flex: auto;
+    min-width: 0; /* min-width: 0 required for flexbox to constrain overflowing elements */
+  }
+
+  main > .content {
+    display: flex;
+  }
+
+  aside.toc.embedded {
+    display: none;
+  }
+
+  aside.toc.sidebar {
+    flex: 0 0 var(--toc-width);
+    order: 1;
+  }
+}
+
+@media screen and (min-width: 1216px) {
+  aside.toc.sidebar {
+    flex-basis: var(--toc-width--widescreen);
+  }
+}
