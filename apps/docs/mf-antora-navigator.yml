@@ -1,0 +1,5 @@
+nav:
+  subcomponents:
+    - parent: component-xyx
+      components: [component-a, component-b]
+output_file: site-navigation-data.js
