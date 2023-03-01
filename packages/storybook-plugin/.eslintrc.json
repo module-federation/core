@@ -8,7 +8,7 @@
         "@nrwl/nx/enforce-module-boundaries": [
           "error",
           {
-            "allow": ["@storybook/**"]
+            "allow": ["@storybook/**", "fs", "os", "path", "webpack-virtual-modules"]
           }
         ]
       }
