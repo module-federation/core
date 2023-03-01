@@ -66,7 +66,7 @@ export const webpack = async (
 
     /* eslint-disable  @typescript-eslint/no-explicit-any */
     const plugin = plugins[index] as any;
-    const currenEntryFiles: string[] = Array.isArray(entry) ? entry : []; // TODO: Why if is not array of strings ????
+    const currenEntryFiles: string[] = Array.isArray(entry) ? entry : []; // TODO: If is not array of strings ????
 
     const virtualModules = plugin._staticModules; // TODO: Exist another way to get virtual modules? Or maybe it's good idea to open a PR adding a method to get modules?
     const virtualModulePaths: string[] = Object.keys(virtualModules);
