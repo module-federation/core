@@ -20,9 +20,8 @@ export const webpack = async (
   webpackConfig: Configuration,
   options: Options
 ): Promise<Configuration> => {
-  const { plugins = [], entry: webpackEntry, context } = webpackConfig;
+  const { plugins = [], context } = webpackConfig;
   const { moduleFederationConfig, presets } = options;
-  let entry = webpackEntry;
 
   // Detect webpack version. More about storybook webpack config https://storybook.js.org/docs/react/addons/writing-presets#webpack
   const webpackVersion = await presets.apply('webpackVersion');
@@ -37,6 +36,12 @@ export const webpack = async (
   logger.info(`=> [MF] Push Module Federation plugin`);
   plugins.push(new ModuleFederationPlugin(moduleFederationConfig));
 
+  const entries = await presets.apply<string[]>('entries');
+  const bootstrap: string[] = entries.map(
+    (entryFile: string) =>
+      `import '${correctImportPath(context || process.cwd(), entryFile)}';`
+  );
+
   const index = plugins.findIndex(
     (plugin) => plugin.constructor.name === 'VirtualModulesPlugin'
   );
@@ -46,51 +51,46 @@ export const webpack = async (
 
     /* eslint-disable  @typescript-eslint/no-explicit-any */
     const plugin = plugins[index] as any;
-    const currenEntryFiles: string[] = Array.isArray(entry) ? entry : []; // TODO: If is not array of strings ????
 
-    const virtualModules = plugin._staticModules; // TODO: Exist another way to get virtual modules? Or maybe it's good idea to open a PR adding a method to get modules?
-    const virtualModulePaths: string[] = Object.keys(virtualModules);
-
-    // Get modules that are not virtual
-    const filteredEntry = currenEntryFiles.filter(
-      (path: string) => !virtualModulePaths.includes(path)
-    );
-    const bootstrap: string[] = filteredEntry.map(
-      (entryFile: string) =>
-        `import '${correctImportPath(context || process.cwd(), entryFile)}';`
-    );
+    const virtualEntries = plugin._staticModules; // TODO: Exist another way to get virtual modules? Or maybe it's good idea to open a PR adding a method to get modules?
+    const virtualEntriesPaths: string[] = Object.keys(virtualEntries);
 
     logger.info(`=> [MF] Write files from VirtualModulesPlugin`);
-    virtualModulePaths.forEach((virtualModulePath) => {
-      fs.writeFileSync(virtualModulePath, virtualModules[virtualModulePath]);
+    virtualEntriesPaths.forEach((virtualEntryPath) => {
+      fs.writeFileSync(virtualEntryPath, virtualEntries[virtualEntryPath]);
       bootstrap.push(
         `import '${correctImportPath(
           context || process.cwd(),
-          virtualModulePath
+          virtualEntryPath
         )}';`
       );
     });
-
-    /**
-     * Rewrite VirtualModulesPlugin plugin to fix error "Shared module is not available for eager consumption"
-     * Entry file content is moved in bootstrap file. More details in the webpack documentation:
-     * https://webpack.js.org/concepts/module-federation/#uncaught-error-shared-module-is-not-available-for-eager-consumption
-     * */
-    logger.info(
-      `=> [MF] Rewrite plugin VirtualModulesPlugin to bootstrap entry point`
-    );
-    plugins[index] = new VirtualModulesPlugin({
-      './__entry.js': `import('./__bootstrap.js');`,
-      './__bootstrap.js': bootstrap.join('\n'),
-    });
-
-    // replace webpack entry file
-    entry = ['./__entry.js'];
   }
+
+  /**
+   * Create a new VirtualModulesPlugin plugin to fix error "Shared module is not available for eager consumption"
+   * Entry file content is moved in bootstrap file. More details in the webpack documentation:
+   * https://webpack.js.org/concepts/module-federation/#uncaught-error-shared-module-is-not-available-for-eager-consumption
+   * */
+  const virtualModulePlugin = new VirtualModulesPlugin({
+    './__entry.js': `import('./__bootstrap.js');`,
+    './__bootstrap.js': bootstrap.join('\n'),
+  });
+
+  let action = 'Push';
+  if (index === -1) {
+    plugins.push(virtualModulePlugin);
+  } else {
+    plugins[index] = virtualModulePlugin;
+    action = 'Replace';
+  }
+  logger.info(
+    `=> [MF] ${action} plugin VirtualModulesPlugin to bootstrap entry point`
+  );
 
   return {
     ...webpackConfig,
-    entry,
+    entry: ['./__entry.js'],
     plugins,
   };
 };
