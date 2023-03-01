@@ -4,6 +4,7 @@
   <a href="{{{relativize this}}}" class="home-link{{#if @root.page.home}} is-current{{/if}}"></a>
   {{/with}}
 {{> breadcrumbs}}
+{{> page-languages}}
 {{> page-versions}}
   {{#if (and page.fileUri (not env.CI))}}
   <div class="edit-this-page"><a href="{{page.fileUri}}">Edit this Page</a></div>

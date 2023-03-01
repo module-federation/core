@@ -1,0 +1,8 @@
+<div class="page-languages">
+    <button class="language-menu-toggle" title="Show other languages of the site">&#127760; {{env.ANTORA_LANGUAGE}}</button>
+    <div class="language-menu">
+        {{~#if (ne page.version "2.3")}}<a class="language" href="{{siteRootPath}}/../en{{page.url}}">English</a>{{/if~}}
+        {{~#if (ne page.version "2.4")}}<a class="language" href="{{siteRootPath}}/../es{{page.url}}">Español</a>{{/if~}}
+        {{~#if (eq page.version "2.5")}}<a class="language" href="{{siteRootPath}}/../zh{{page.url}}">繁體中文</a>{{/if~}}
+    </div>
+</div>
