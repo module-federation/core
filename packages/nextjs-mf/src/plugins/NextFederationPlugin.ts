@@ -74,10 +74,7 @@ export class NextFederationPlugin {
         name: this._options.name,
       };
       // output remote to ssr if server
-      this._options.filename = this._options.filename.replace(
-        '/chunks',
-        '/ssr'
-      );
+      this._options.filename = path.basename(this._options.filename);
 
       // should this be a plugin that we apply to the compiler?
       internalizeSharedPackages(this._options, compiler);
@@ -217,6 +214,7 @@ export class NextFederationPlugin {
     const internalShare = reKeyHostShared(this._options.shared);
     const hostFederationPluginOptions: ModuleFederationPluginOptions = {
       ...this._options,
+      filename: this._options.filename.replace('.js', '-void.js'),
       exposes: {},
       shared: {
         noop: {

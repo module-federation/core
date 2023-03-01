@@ -122,10 +122,10 @@ export class ChildFederationPlugin {
       const federationPluginOptions: ModuleFederationPluginOptions = {
         // library: {type: 'var', name: buildName},
         ...this._options,
-        name: this._medusa ? '__REMOTE_VERSION__' + this._options.name : this._options.name,
+        name: MedusaPlugin ? '__REMOTE_VERSION__' + this._options.name : this._options.name,
         library: {
           type: this._options.library?.type as string,
-          name: this._medusa ? '__REMOTE_VERSION__' + this._options.name : this._options.name,
+          name: MedusaPlugin ? '__REMOTE_VERSION__' + this._options.name : this._options.name,
         },
         filename: computeRemoteFilename(
           isServer,
@@ -167,12 +167,6 @@ export class ChildFederationPlugin {
           }),
           new AddRuntimeRequirementToPromiseExternal(),
         ];
-        if(this._medusa) {
-          console.log(this._medusa)
-          plugins.push(
-            this._medusa
-          )
-        }
       } else if (compiler.options.name === 'server') {
         const {
           StreamingTargetPlugin,
@@ -276,20 +270,24 @@ export class ChildFederationPlugin {
       }) as any;
 
 
-
-    if(MedusaPlugin) {
-      console.log('MedusaPlugin', MedusaPlugin)
-      //@ts-ignore
-      new MedusaPlugin.constructor({
-        //@ts-ignore
-        ...MedusaPlugin._options,
-        filename: 'dashboard-child.json'
-      }).apply(childCompiler);
-    }
+      console.log('plugins child compiler has')
+      childCompiler.options.plugins.map((p) => {
+        console.log(p.constructor.name)
+      })
 
       childCompiler.options.plugins = childCompiler.options.plugins.filter(
         (plugin) => !removePlugins.includes(plugin.constructor.name)
       );
+
+      if(MedusaPlugin) {
+        console.log("child compiler found medusa plugin")
+        //@ts-ignore
+        new MedusaPlugin.constructor({
+          //@ts-ignore
+          // ...MedusaPlugin._options,
+          filename: compiler.options.name + '-dashboard-child.json'
+        }).apply(childCompiler);
+      }
 
       if (MiniCss) {
         // grab mini-css and reconfigure it to avoid conflicts with host
