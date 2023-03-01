@@ -28,12 +28,10 @@ import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
 export class NextFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
-  private _medusa: any;
 
   constructor(options: NextFederationPluginOptions) {
-    const { extraOptions, medusa, ...mainOpts } = options;
+    const { extraOptions, ...mainOpts } = options;
     this._options = mainOpts;
-    this._medusa = medusa;
     this._extraOptions = {
       automaticPageStitching: false,
       enableImageLoaderFix: false,
@@ -231,7 +229,7 @@ export class NextFederationPlugin {
       ModuleFederationPlugin,
     }).apply(compiler);
 
-    new ChildFederationPlugin(this._options, this._extraOptions, this._medusa).apply(
+    new ChildFederationPlugin(this._options, this._extraOptions).apply(
       compiler
     );
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);

@@ -41,18 +41,15 @@ const childCompilers = {} as Record<string, Compiler>;
 export class ChildFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
-  private _medusa: any;
   private watching?: boolean;
   private initalRun: boolean;
 
   constructor(
     options: ModuleFederationPluginOptions,
     extraOptions: NextFederationPluginExtraOptions,
-    medusa: any
   ) {
     this._options = options;
     this._extraOptions = extraOptions;
-    this._medusa = medusa;
     this.initalRun = false;
   }
 
@@ -269,25 +266,20 @@ export class ChildFederationPlugin {
         return p.constructor.name === 'NextMiniCssExtractPlugin';
       }) as any;
 
-
-      console.log('plugins child compiler has')
-      childCompiler.options.plugins.map((p) => {
-        console.log(p.constructor.name)
-      })
+      if(MedusaPlugin) {
+        //@ts-ignore
+        new MedusaPlugin.constructor({
+          //@ts-ignore
+          ...MedusaPlugin._options,
+          filename: compiler.options.name + '-dashboard-child.json'
+        }).apply(childCompiler);
+      }
 
       childCompiler.options.plugins = childCompiler.options.plugins.filter(
         (plugin) => !removePlugins.includes(plugin.constructor.name)
       );
 
-      if(MedusaPlugin) {
-        console.log("child compiler found medusa plugin")
-        //@ts-ignore
-        new MedusaPlugin.constructor({
-          //@ts-ignore
-          // ...MedusaPlugin._options,
-          filename: compiler.options.name + '-dashboard-child.json'
-        }).apply(childCompiler);
-      }
+
 
       if (MiniCss) {
         // grab mini-css and reconfigure it to avoid conflicts with host
