@@ -7,7 +7,7 @@
 @import 'main.css';
 @import 'toolbar.css';
 @import 'breadcrumbs.css';
-@import "page-languages.css";
+@import 'page-languages.css';
 @import 'page-versions.css';
 @import 'toc.css';
 @import 'doc.css';
@@ -16,4 +16,3 @@
 @import 'footer.css';
 @import 'highlight.css';
 @import 'print.css';
-@import 'search.css';

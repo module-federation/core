@@ -1,7 +1,5 @@
-import '@asciidoctor/tabs/dist/js/tabs'
-import './vendor/highlight.bundle.js'
-import './vendor/lunr.js'
-import './vendor/search.js'
+import '@asciidoctor/tabs/dist/js/tabs';
+import './vendor/highlight.bundle.js';
 
 import initNav from './01-nav';
 import initOnThisPage from './02-on-this-page';
@@ -18,4 +16,3 @@ initPageVersions();
 initMobileNavbar();
 initCopyToClipboard();
 pageLanguages();
-
