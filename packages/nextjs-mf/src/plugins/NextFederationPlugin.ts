@@ -28,12 +28,10 @@ import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
 export class NextFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
-  private _medusa: any;
 
   constructor(options: NextFederationPluginOptions) {
-    const { extraOptions, medusa, ...mainOpts } = options;
+    const { extraOptions, ...mainOpts } = options;
     this._options = mainOpts;
-    this._medusa = medusa;
     this._extraOptions = {
       automaticPageStitching: false,
       enableImageLoaderFix: false,
@@ -74,10 +72,7 @@ export class NextFederationPlugin {
         name: this._options.name,
       };
       // output remote to ssr if server
-      this._options.filename = this._options.filename.replace(
-        '/chunks',
-        '/ssr'
-      );
+      this._options.filename = path.basename(this._options.filename);
 
       // should this be a plugin that we apply to the compiler?
       internalizeSharedPackages(this._options, compiler);
@@ -217,6 +212,7 @@ export class NextFederationPlugin {
     const internalShare = reKeyHostShared(this._options.shared);
     const hostFederationPluginOptions: ModuleFederationPluginOptions = {
       ...this._options,
+      filename: this._options.filename.replace('.js', '-void.js'),
       exposes: {},
       shared: {
         noop: {
@@ -233,7 +229,7 @@ export class NextFederationPlugin {
       ModuleFederationPlugin,
     }).apply(compiler);
 
-    new ChildFederationPlugin(this._options, this._extraOptions, this._medusa).apply(
+    new ChildFederationPlugin(this._options, this._extraOptions).apply(
       compiler
     );
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);

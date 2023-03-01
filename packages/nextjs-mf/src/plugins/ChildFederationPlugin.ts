@@ -41,18 +41,15 @@ const childCompilers = {} as Record<string, Compiler>;
 export class ChildFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
-  private _medusa: any;
   private watching?: boolean;
   private initalRun: boolean;
 
   constructor(
     options: ModuleFederationPluginOptions,
     extraOptions: NextFederationPluginExtraOptions,
-    medusa: any
   ) {
     this._options = options;
     this._extraOptions = extraOptions;
-    this._medusa = medusa;
     this.initalRun = false;
   }
 
@@ -122,10 +119,10 @@ export class ChildFederationPlugin {
       const federationPluginOptions: ModuleFederationPluginOptions = {
         // library: {type: 'var', name: buildName},
         ...this._options,
-        name: this._medusa ? '__REMOTE_VERSION__' + this._options.name : this._options.name,
+        name: MedusaPlugin ? '__REMOTE_VERSION__' + this._options.name : this._options.name,
         library: {
           type: this._options.library?.type as string,
-          name: this._medusa ? '__REMOTE_VERSION__' + this._options.name : this._options.name,
+          name: MedusaPlugin ? '__REMOTE_VERSION__' + this._options.name : this._options.name,
         },
         filename: computeRemoteFilename(
           isServer,
@@ -167,12 +164,6 @@ export class ChildFederationPlugin {
           }),
           new AddRuntimeRequirementToPromiseExternal(),
         ];
-        if(this._medusa) {
-          console.log(this._medusa)
-          plugins.push(
-            this._medusa
-          )
-        }
       } else if (compiler.options.name === 'server') {
         const {
           StreamingTargetPlugin,
@@ -275,21 +266,20 @@ export class ChildFederationPlugin {
         return p.constructor.name === 'NextMiniCssExtractPlugin';
       }) as any;
 
-
-
-    if(MedusaPlugin) {
-      console.log('MedusaPlugin', MedusaPlugin)
-      //@ts-ignore
-      new MedusaPlugin.constructor({
+      if(MedusaPlugin) {
         //@ts-ignore
-        ...MedusaPlugin._options,
-        filename: 'dashboard-child.json'
-      }).apply(childCompiler);
-    }
+        new MedusaPlugin.constructor({
+          //@ts-ignore
+          ...MedusaPlugin._options,
+          filename: compiler.options.name + '-dashboard-child.json'
+        }).apply(childCompiler);
+      }
 
       childCompiler.options.plugins = childCompiler.options.plugins.filter(
         (plugin) => !removePlugins.includes(plugin.constructor.name)
       );
+
+
 
       if (MiniCss) {
         // grab mini-css and reconfigure it to avoid conflicts with host
