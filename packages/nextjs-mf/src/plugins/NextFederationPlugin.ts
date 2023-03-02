@@ -212,7 +212,6 @@ export class NextFederationPlugin {
     const internalShare = reKeyHostShared(this._options.shared);
     const hostFederationPluginOptions: ModuleFederationPluginOptions = {
       ...this._options,
-      filename: this._options.filename.replace('.js', '-void.js'),
       exposes: {},
       shared: {
         noop: {

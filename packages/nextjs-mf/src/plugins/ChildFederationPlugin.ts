@@ -15,8 +15,6 @@ import type {
 import path from 'path';
 import fs from 'fs';
 
-//@ts-ignore
-import DashboardPlugin from '@module-federation/dashboard-plugin';
 import { exposeNextjsPages } from '../loaders/nextPageMapLoader';
 import { hasLoader, injectRuleLoader } from '../loaders/helpers';
 
