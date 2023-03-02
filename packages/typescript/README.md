@@ -44,9 +44,9 @@ module.exports = {
 
 To enable verbose logging add folowing in webpack config:
 
-```
+```javascript
 infrastructureLogging: {
-  level: 'log'
+  level: 'log';
 }
 ```
 
