@@ -41,7 +41,6 @@ export interface NextFederationPluginExtraOptions {
 export interface NextFederationPluginOptions
   extends ModuleFederationPluginOptions {
   extraOptions: NextFederationPluginExtraOptions;
-  medusa: any;
 }
 
 export type Shared = ModuleFederationPluginOptions['shared'];
