@@ -7,7 +7,7 @@ import { correctImportPath } from '../utils';
 
 const { ModuleFederationPlugin } = container;
 
-type Preset = string | { name: string };
+export type Preset = string | { name: string };
 
 type Options = {
   moduleFederationConfig: ModuleFederationPluginOptions;

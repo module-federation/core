@@ -1,5 +1,6 @@
-import { webpack } from './storybook-addon';
+import { Preset, webpack } from './storybook-addon';
 import { Configuration, container } from 'webpack';
+import VirtualModulesPlugin from 'webpack-virtual-modules';
 
 const { ModuleFederationPlugin } = container;
 
@@ -39,7 +40,17 @@ describe('webpack()', () => {
   });
 
   it('should return config for webpack 5 version', async () => {
-    const apply = jest.fn().mockResolvedValue(Promise.resolve('5'));
+    const apply = jest.fn().mockImplementation(async (preset: Preset) => {
+      if (preset === 'webpackVersion') {
+        return '5';
+      }
+
+      if (preset === 'entries') {
+        return [webpackConfig.entry];
+      }
+
+      return undefined;
+    });
 
     const presets = {
       apply,
@@ -47,7 +58,14 @@ describe('webpack()', () => {
 
     const matchObject = {
       ...webpackConfig,
-      plugins: [new ModuleFederationPlugin(moduleFederationConfig)],
+      entry: ['./__entry.js'],
+      plugins: [
+        new ModuleFederationPlugin(moduleFederationConfig),
+        new VirtualModulesPlugin({
+          './__entry.js': `import('./__bootstrap.js');`,
+          './__bootstrap.js': `import '${webpackConfig.entry}';`,
+        }),
+      ],
     };
 
     await expect(
