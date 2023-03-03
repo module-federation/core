@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'storybook-plugin',
+  displayName: 'storybook-addon',
   preset: '../../jest.preset.js',
   globals: {
     'ts-jest': {
@@ -11,5 +11,5 @@ export default {
     '^.+\\.[tj]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/packages/storybook-plugin',
+  coverageDirectory: '../../coverage/packages/storybook-addon',
 };

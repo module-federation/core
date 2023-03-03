@@ -1,31 +1,31 @@
 {
-  "name": "storybook-plugin",
+  "name": "storybook-addon",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/storybook-plugin/src",
+  "sourceRoot": "packages/storybook-addon/src",
   "projectType": "library",
   "targets": {
     "build": {
       "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/storybook-plugin",
-        "main": "packages/storybook-plugin/src/index.ts",
-        "tsConfig": "packages/storybook-plugin/tsconfig.lib.json",
-        "assets": ["packages/storybook-plugin/*.md"]
+        "outputPath": "dist/packages/storybook-addon",
+        "main": "packages/storybook-addon/src/index.ts",
+        "tsConfig": "packages/storybook-addon/tsconfig.lib.json",
+        "assets": ["packages/storybook-addon/*.md"]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/storybook-plugin/**/*.ts"]
+        "lintFilePatterns": ["packages/storybook-addon/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/storybook-plugin/jest.config.ts",
+        "jestConfig": "packages/storybook-addon/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {

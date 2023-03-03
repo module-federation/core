@@ -1,4 +1,4 @@
-import { webpack } from './storybook-plugin';
+import { webpack } from './storybook-addon';
 import { Configuration, container } from 'webpack';
 
 const { ModuleFederationPlugin } = container;

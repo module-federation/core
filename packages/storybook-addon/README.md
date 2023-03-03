@@ -6,10 +6,10 @@ This addon enables to consume remote Module Federated apps/components
 
 ```shell
 # with NPM
-npm install @module-federation/storybook-plugin
+npm install @module-federation/storybook-addon
 
 # with Yarn
-yarn add @module-federation/storybook-plugin
+yarn add @module-federation/storybook-addon
 ```
 
 ## Configuration
@@ -28,7 +28,7 @@ const storybookConfig = {
   "addons": [
     // other addons,
     {
-      name: "@module-federation/storybook-plugin",
+      name: "@module-federation/storybook-addon",
       options: {
         moduleFederationConfig
       }

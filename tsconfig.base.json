@@ -18,8 +18,8 @@
     "paths": {
       "@module-federation/nextjs-mf": ["packages/nextjs-mf/src/index.ts"],
       "@module-federation/node": ["packages/node/src/index.ts"],
-      "@module-federation/storybook-plugin": [
-        "packages/storybook-plugin/src/index.ts"
+      "@module-federation/storybook-addon": [
+        "packages/storybook-addon/src/index.ts"
       ],
       "@module-federation/typescript": ["packages/typescript/src/index.ts"],
       "@module-federation/utilities": ["packages/utilities/src/index.ts"]

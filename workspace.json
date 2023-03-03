@@ -10,7 +10,7 @@
     "node": "packages/node",
     "react-ts-host": "apps/react-ts-host",
     "react-ts-remote": "apps/react-ts-remote",
-    "storybook-plugin": "packages/storybook-plugin",
+    "storybook-addon": "packages/storybook-addon",
     "typescript": "packages/typescript",
     "utils": "packages/utilities",
     "docs-ui": "apps/docs-ui"

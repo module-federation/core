@@ -1,8 +1,9 @@
 {
-  "name": "@module-federation/storybook-plugin",
+  "name": "@module-federation/storybook-addon",
   "version": "0.0.1",
   "description": "Storybook addon to consume remote module federated apps/components",
   "license": "MIT",
+  "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/storybook-addon",
   "keywords": [
     "module-federation",
     "typescript",
