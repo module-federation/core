@@ -4,6 +4,7 @@ import { container, Configuration } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import { logger } from '@storybook/node-logger';
 import { correctImportPath } from '../utils';
+import * as process from 'process';
 
 const { ModuleFederationPlugin } = container;
 
@@ -20,8 +21,9 @@ export const webpack = async (
   webpackConfig: Configuration,
   options: Options
 ): Promise<Configuration> => {
-  const { plugins = [], context } = webpackConfig;
+  const { plugins = [], context: webpackContext } = webpackConfig;
   const { moduleFederationConfig, presets } = options;
+  const context = webpackContext || process.cwd();
 
   // Detect webpack version. More about storybook webpack config https://storybook.js.org/docs/react/addons/writing-presets#webpack
   const webpackVersion = await presets.apply('webpackVersion');
@@ -38,8 +40,7 @@ export const webpack = async (
 
   const entries = await presets.apply<string[]>('entries');
   const bootstrap: string[] = entries.map(
-    (entryFile: string) =>
-      `import '${correctImportPath(context || process.cwd(), entryFile)}';`
+    (entryFile: string) => `import '${correctImportPath(context, entryFile)}';`
   );
 
   const index = plugins.findIndex(
@@ -59,10 +60,7 @@ export const webpack = async (
     virtualEntriesPaths.forEach((virtualEntryPath) => {
       fs.writeFileSync(virtualEntryPath, virtualEntries[virtualEntryPath]);
       bootstrap.push(
-        `import '${correctImportPath(
-          context || process.cwd(),
-          virtualEntryPath
-        )}';`
+        `import '${correctImportPath(context, virtualEntryPath)}';`
       );
     });
   }
