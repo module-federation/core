@@ -11,6 +11,7 @@ on:
           - all
           - nextjs-mf
           - node
+          - storybook-addon
           - typescript
           - utils
 
@@ -44,7 +45,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          yarn nx run-many --target=build --projects=typescript,utils,node,nextjs-mf
+          yarn nx run-many --target=build --projects=typescript,utils,node,storybook-addon,nextjs-mf
       - name: Version
         shell: bash
         run: |
