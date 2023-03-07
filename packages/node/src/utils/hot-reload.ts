@@ -1,8 +1,7 @@
 const hashmap = {} as Record<string, string>;
 import crypto from 'crypto';
 
-
- /*
+/*
  This code is doing two things First it checks if there are any fake remotes in the 
  global scope If so then we need to reload the server because a remote has changed 
  and needs to be fetched again Second it checks for each remote that was loaded by 
@@ -123,7 +122,7 @@ export const revalidate = () => {
   return Promise.resolve(false);
 };
 
- /*
+/*
  This code is importing the nodefetch module and assigning it to a variable named 
  node Fetch The code then checks if there\'s an existing global object called webpack 
  Chunk Load which is used by webpack If so we use that instead of nodefetch This 

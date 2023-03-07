@@ -22,7 +22,7 @@ interface Context {
 // commonjs-module, ideal since it returns a commonjs module format
 // const remote = eval(scriptContent + 'module.exports')
 
- /*
+/*
  This code is doing the following It iterates over all remotes and checks if they 
  are internal or not If it\'s an internal remote then we add it to our new object 
  with a key of the name of the remote and value as internal If it\'s not an internal 
@@ -157,7 +157,7 @@ export const generateRemoteTemplate = (
     return proxy
   })`;
 
- /*
+/*
  This code is taking the remote string and splitting it into two parts The first 
  part of the split is going to be a url which will be used in generate Remote Template 
  function The second part of the split is going to be a global variable name which 

@@ -97,9 +97,8 @@ export const importDelegatedModule = async (
               //@ts-ignore
               proxy.__initialized = true;
             } catch (e) {
-              return 1
+              return 1;
             }
-
           },
         };
         // @ts-ignore
@@ -177,11 +176,11 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       globalScope._config[containerKey] = reference.url;
     } else {
       // to match promise template system, can be removed once promise template is gone
-      if(!globalScope.remoteLoading) {
+      if (!globalScope.remoteLoading) {
         globalScope.remoteLoading = {};
       }
-      if(globalScope.remoteLoading[containerKey]) {
-        return globalScope.remoteLoading[containerKey]
+      if (globalScope.remoteLoading[containerKey]) {
+        return globalScope.remoteLoading[containerKey];
       }
     }
 
@@ -227,7 +226,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         containerKey
       );
     });
-    if(typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
       globalScope.remoteLoading[containerKey] = asyncContainer;
     }
   }

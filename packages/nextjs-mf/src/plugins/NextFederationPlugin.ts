@@ -83,8 +83,11 @@ export class NextFederationPlugin {
         compiler.options.externals[0] = function (ctx, callback) {
           if (
             ctx.request &&
-            ctx.request.includes('@module-federation/utilities')
+            (ctx.request.includes('@module-federation/utilities') ||
+              ctx.request.includes('@module-federation/dashboard-plugin'))
           ) {
+
+            console.log(ctx.request)
             return callback();
           }
           // @ts-ignore

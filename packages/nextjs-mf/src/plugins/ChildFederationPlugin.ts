@@ -44,7 +44,7 @@ export class ChildFederationPlugin {
 
   constructor(
     options: ModuleFederationPluginOptions,
-    extraOptions: NextFederationPluginExtraOptions,
+    extraOptions: NextFederationPluginExtraOptions
   ) {
     this._options = options;
     this._extraOptions = extraOptions;
@@ -78,7 +78,7 @@ export class ChildFederationPlugin {
 
       const MedusaPlugin = compiler.options.plugins.find((p) => {
         return p.constructor.name === 'NextMedusaPlugin';
-      })
+      });
 
       let uniqueName = buildName;
       if (MedusaPlugin && compiler.options.output.uniqueName !== '_N_E') {
@@ -117,10 +117,14 @@ export class ChildFederationPlugin {
       const federationPluginOptions: ModuleFederationPluginOptions = {
         // library: {type: 'var', name: buildName},
         ...this._options,
-        name: MedusaPlugin ? '__REMOTE_VERSION__' + this._options.name : this._options.name,
+        name: MedusaPlugin
+          ? '__REMOTE_VERSION__' + this._options.name
+          : this._options.name,
         library: {
           type: this._options.library?.type as string,
-          name: MedusaPlugin ? '__REMOTE_VERSION__' + this._options.name : this._options.name,
+          name: MedusaPlugin
+            ? '__REMOTE_VERSION__' + this._options.name
+            : this._options.name,
         },
         filename: computeRemoteFilename(
           isServer,
@@ -264,20 +268,18 @@ export class ChildFederationPlugin {
         return p.constructor.name === 'NextMiniCssExtractPlugin';
       }) as any;
 
-      if(MedusaPlugin) {
+      if (MedusaPlugin) {
         //@ts-ignore
         new MedusaPlugin.constructor({
           //@ts-ignore
           ...MedusaPlugin._options,
-          filename: compiler.options.name + '-dashboard-child.json'
+          filename: compiler.options.name + '-dashboard-child.json',
         }).apply(childCompiler);
       }
 
       childCompiler.options.plugins = childCompiler.options.plugins.filter(
         (plugin) => !removePlugins.includes(plugin.constructor.name)
       );
-
-
 
       if (MiniCss) {
         // grab mini-css and reconfigure it to avoid conflicts with host

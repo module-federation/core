@@ -267,10 +267,10 @@ export const removePlugins = [
   'ProfilingPlugin',
   'DropClientPage',
   'ReactFreshWebpackPlugin',
-  "NextMedusaPlugin"
+  'NextMedusaPlugin',
 ];
 
- /*
+/*
  This code is checking if the remote is a string and that it includes an symbol If 
  both of these conditions are met then we extract the url and global from the remote
   */
@@ -284,7 +284,6 @@ export const parseRemoteSyntax = (remote: string) => {
     return generateRemoteTemplate(url, global);
   }
 
-
   return remote;
 };
 /*
@@ -296,7 +295,6 @@ export const parseRemotes = (remotes: Record<string, any>) =>
   Object.entries(remotes).reduce((acc, [key, value]) => {
     // check if user is passing a internal "delegate module" reference
     if (value.startsWith('internal ')) {
-
       return { ...acc, [key]: value };
     }
     // check if user is passing custom promise template
@@ -318,7 +316,7 @@ export const getDelegates = (remotes: Record<string, any>) => {
   }, {} as Record<string, string>);
 };
 
- /*
+/*
  This code is parsing the options shared object and creating a new object with all 
  of the shared configs Then it is iterating over each key in this new object and 
  assigning them to an array that will be returned by this function This array contains 
