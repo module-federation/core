@@ -2,6 +2,18 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [2.3.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.2.1...typescript-2.3.0) (2023-03-07)
+
+### Dependency Updates
+
+* `utils` updated to version `1.3.0`
+
+### Features
+
+* Remove MF plugin from Typescript plugin ([#607](https://github.com/module-federation/nextjs-mf/issues/607)) ([94e9149](https://github.com/module-federation/nextjs-mf/commit/94e9149c4be12cc3e2627da7d7a9e11289cab894)), closes [#608](https://github.com/module-federation/nextjs-mf/issues/608) [#608](https://github.com/module-federation/nextjs-mf/issues/608)
+
+
+
 ## [2.2.1](https://github.com/module-federation/nextjs-mf/compare/typescript-2.2.0...typescript-2.2.1) (2023-02-09)
 
 ### Dependency Updates
