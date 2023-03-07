@@ -4,7 +4,8 @@ import Navbar from '../components/navbar/navbar';
 export default component$(() => {
   return (
     <>
-      <main>
+      {/* TODO: Remove this! */}
+      <main style="background: #F6F6FA">
         <Navbar />
         <section>
           <Slot />
