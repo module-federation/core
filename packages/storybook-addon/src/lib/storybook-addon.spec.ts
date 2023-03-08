@@ -13,6 +13,8 @@ const webpackConfig: Configuration = {
   },
 };
 
+const configDir = '';
+
 const moduleFederationConfig = {
   name: 'host',
   remotes: {
@@ -33,6 +35,7 @@ describe('webpack()', () => {
       webpack(webpackConfig, {
         moduleFederationConfig,
         presets,
+        configDir,
       })
     ).rejects.toThrow(
       'Webpack 5 required: Configure Storybook to use the webpack5 builder'
@@ -72,6 +75,7 @@ describe('webpack()', () => {
       webpack(webpackConfig, {
         moduleFederationConfig,
         presets,
+        configDir,
       })
     ).resolves.toMatchObject(matchObject);
   });
