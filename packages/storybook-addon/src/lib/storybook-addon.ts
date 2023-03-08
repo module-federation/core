@@ -1,10 +1,12 @@
 import fs from 'fs';
+import { dirname, join } from 'path';
+import * as process from 'process';
 import VirtualModulesPlugin from 'webpack-virtual-modules';
 import { container, Configuration } from 'webpack';
-import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import { logger } from '@storybook/node-logger';
+import { normalizeStories } from '@storybook/core-common';
+import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import { correctImportPath } from '../utils';
-import * as process from 'process';
 
 const { ModuleFederationPlugin } = container;
 
@@ -15,6 +17,7 @@ type Options = {
   presets: {
     apply<T>(preset: Preset): Promise<T>;
   };
+  configDir: string;
 };
 
 export const webpack = async (
@@ -57,12 +60,51 @@ export const webpack = async (
     const virtualEntriesPaths: string[] = Object.keys(virtualEntries);
 
     logger.info(`=> [MF] Write files from VirtualModulesPlugin`);
-    virtualEntriesPaths.forEach((virtualEntryPath) => {
-      fs.writeFileSync(virtualEntryPath, virtualEntries[virtualEntryPath]);
-      bootstrap.push(
-        `import '${correctImportPath(context, virtualEntryPath)}';`
-      );
-    });
+    for (const virtualEntryPath of virtualEntriesPaths) {
+      const nodeModulesPath = '/node_modules/';
+      const filePathFromProjectRootDir = virtualEntryPath.replace(context, '');
+      let sourceCode = virtualEntries[virtualEntryPath];
+      let finalPath = virtualEntryPath;
+      let finalDir = dirname(virtualEntryPath);
+
+      // If virtual file is not in directory node_modules, move file in directory node_modules/.cache/storybook
+      if (!filePathFromProjectRootDir.startsWith(nodeModulesPath)) {
+        finalPath = join(
+          context,
+          nodeModulesPath,
+          '.cache',
+          'storybook',
+          filePathFromProjectRootDir
+        );
+        finalDir = dirname(finalPath);
+
+        // Fix storybook stories' path in virtual module `generated-stories-entry.cjs`
+        if (filePathFromProjectRootDir === '/generated-stories-entry.cjs') {
+          const nonNormalizedStories = await presets.apply<string[]>('stories');
+          const stories = normalizeStories(nonNormalizedStories, {
+            configDir: options.configDir,
+            workingDir: context,
+          });
+
+          // For each story fix the import path
+          stories.forEach((story) => {
+            // Go up 3 times because the file was moved in /node_modules/.cache/storybook
+            const newDirectory = join('..', '..', '..', story.directory);
+            sourceCode = sourceCode.replace(
+              `'${story.directory}'`,
+              `'${newDirectory}'`
+            );
+          });
+        }
+      }
+
+      if (!fs.existsSync(finalDir)) {
+        fs.mkdirSync(finalDir);
+      }
+
+      fs.writeFileSync(finalPath, sourceCode);
+      bootstrap.push(`import '${correctImportPath(context, finalPath)}';`);
+    }
   }
 
   /**

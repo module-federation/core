@@ -12,12 +12,15 @@
   ],
   "author": "Fiodorov Andrei <hello@fyodorovandrei.com> (https://github.com/fyodorovandrei)",
   "devDependencies": {
+    "@storybook/core-common": "^6.5.16",
     "@storybook/node-logger": "^6.5.16",
     "webpack": "^5.75.0",
     "webpack-virtual-modules": "^0.5.0"
   },
   "peerDependencies": {
+    "@storybook/core-common": "^6.5.16",
     "@storybook/node-logger": "^6.5.16",
-    "webpack": "^5.75.0"
+    "webpack": "^5.75.0",
+    "webpack-virtual-modules": "^0.5.0"
   }
 }
