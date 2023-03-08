@@ -184,7 +184,7 @@ export class NextFederationPlugin {
           }
           return false;
         },
-        exclude: [/node_modules/, /_document/, /_middleware/, /pages[\\/]api/],
+        exclude: [/node_modules/, /_document/, /_middleware/,/pages[\\/]middleware/, /pages[\\/]api/],
         resourceQuery: (query) => !query.includes('hasBoundary'),
         loader: path.resolve(__dirname, '../loaders/async-boundary-loader'),
       });

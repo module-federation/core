@@ -44,13 +44,13 @@ module.exports = {
 
 To enable verbose logging add folowing in webpack config:
 
-```
+```javascript
 infrastructureLogging: {
-  level: 'log'
+  level: 'log';
 }
 ```
 
-> NOTE: Do Not register 'ModuleFederationPlugin' in your webpack configuration. This plugin packs 'ModuleFederationPlugin' under the hood.
+The Module Federation plugin is required to be registered separately from this plugin. The federation configuration provided to the Typescript plugin or Module Federation plugin can be different, as an example - to discern pure javascript remotes from Typescript remotes.
 
 You need to register this plugin in both remote and host apps. The plugin will automatically create a directory named `@mf-types` in the host app - that contains all the types exported by the remote apps.
 
