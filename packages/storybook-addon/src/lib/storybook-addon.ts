@@ -99,7 +99,7 @@ export const webpack = async (
       }
 
       if (!fs.existsSync(finalDir)) {
-        fs.mkdirSync(finalDir);
+        fs.mkdirSync(finalDir, { recursive: true });
       }
 
       fs.writeFileSync(finalPath, sourceCode);
