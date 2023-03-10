@@ -1,4 +1,4 @@
-import { correctImportPath } from './path';
+import { correctImportPath } from './correctImportPath';
 import os from 'os';
 
 jest.mock('os', () => ({

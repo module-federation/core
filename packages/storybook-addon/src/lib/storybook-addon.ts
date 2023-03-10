@@ -6,7 +6,7 @@ import { container, Configuration } from 'webpack';
 import { logger } from '@storybook/node-logger';
 import { normalizeStories } from '@storybook/core-common';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
-import { correctImportPath } from '../utils';
+import { correctImportPath } from '@module-federation/utilities';
 
 const { ModuleFederationPlugin } = container;
 
