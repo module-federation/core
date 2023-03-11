@@ -15,7 +15,7 @@ module.exports = async (config, context) => {
   const mf = await withModuleFederation(defaultConfig);
 
   /** @type {import('webpack').Configuration} */
-  const parsedConfig = mf(config);
+  const parsedConfig = mf(config, context);
 
   let moduleFederationPlugin;
 
