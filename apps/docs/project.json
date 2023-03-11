@@ -1,0 +1,43 @@
+{
+  "name": "docs",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/docs/src",
+  "implicitDependencies": ["docs-ui"],
+  "tags": [],
+  "targets": {
+    "serve": {
+      "executor": "@nrwl/web:file-server",
+      "options": {
+        "buildTarget": "docs:build-docs"
+      },
+      "configurations": {
+        "local": {
+          "buildTarget": "docs:build-docs:local"
+        }
+      },
+      "dependsOn": ["^build"]
+    },
+    "build-docs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npx antora --fetch apps/docs/configs/docs-en.yml",
+          "npx antora --fetch apps/docs/configs/docs-es.yml",
+          "npx antora --fetch apps/docs/configs/docs-zh.yml"
+        ],
+        "outputPath": "dist/apps/docs"
+      },
+      "configurations": {
+        "local": {
+          "commands": [
+            "npx antora --fetch apps/docs/configs/docs-en.local.yml",
+            "npx antora --fetch apps/docs/configs/docs-es.local.yml",
+            "npx antora --fetch apps/docs/configs/docs-zh.local.yml"
+          ]
+        }
+      },
+      "dependsOn": ["^build", "prepare-antora-configs"]
+    }
+  }
+}

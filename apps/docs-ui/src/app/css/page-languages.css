@@ -1,0 +1,56 @@
+.page-languages {
+  margin: 0 0.2rem 0 auto;
+  position: relative;
+  line-height: 1;
+}
+
+@media screen and (min-width: 1024px) {
+  .page-languages {
+    margin-right: 0.7rem;
+  }
+}
+
+.page-languages .language-menu-toggle {
+  color: inherit;
+  background: url(../img/chevron.svg) no-repeat;
+  background-position: right 0.5rem top 50%;
+  background-size: auto 0.75em;
+  border: none;
+  outline: none;
+  line-height: inherit;
+  padding: 0.5rem 1.5rem 0.5rem 0.5rem;
+  position: relative;
+  z-index: var(--z-index-page-version-menu);
+}
+
+.page-languages .language-menu {
+  display: flex;
+  min-width: 100%;
+  flex-direction: column;
+  align-items: flex-end;
+  background: linear-gradient(to bottom, var(--page-version-menu-background) 0%, var(--page-version-menu-background) 100%) no-repeat;
+  padding: 1.375rem 1.5rem 0.5rem 0.5rem;
+  position: absolute;
+  top: 0;
+  right: 0;
+  white-space: nowrap;
+}
+
+.page-languages:not(.is-active) .language-menu {
+  display: none;
+}
+
+.page-languages .language {
+  display: block;
+  padding-top: 0.5rem;
+}
+
+.page-languages .language.is-current {
+  display: none;
+}
+
+.page-languages .language.is-missing {
+  color: var(--page-version-missing-font-color);
+  font-style: italic;
+  text-decoration: none;
+}

@@ -323,14 +323,19 @@ export const getContainer = async (
   }
 
   if (typeof remoteContainer === 'string') {
-    if (window[remoteContainer]) {
-      return window[remoteContainer];
+    if (window[remoteContainer as unknown as number]) {
+      return window[
+        remoteContainer as unknown as number
+      ] as unknown as WebpackRemoteContainer;
     }
 
     return;
   } else {
-    if (window['uniqueKey' as keyof typeof remoteContainer]) {
-      return window['uniqueKey' as keyof typeof remoteContainer];
+    const uniqueKey = remoteContainer.uniqueKey;
+    if (window[uniqueKey as unknown as number]) {
+      return window[
+        uniqueKey as unknown as number
+      ] as unknown as WebpackRemoteContainer;
     }
 
     const container = await injectScript({

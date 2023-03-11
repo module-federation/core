@@ -2,6 +2,16 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.1.4](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.1.3...nextjs-mf-6.1.4) (2023-03-08)
+
+
+### Bug Fixes
+
+* exclude next middleware from async boundary loader ([#615](https://github.com/module-federation/nextjs-mf/issues/615)) ([9560d92](https://github.com/module-federation/nextjs-mf/commit/9560d926de176e08b6e1b7a32488f5036cb04be3))
+* include src folder in paths validation ([#605](https://github.com/module-federation/nextjs-mf/issues/605)) ([89a9417](https://github.com/module-federation/nextjs-mf/commit/89a9417faaad50533c4bca1683ea94406ca6f532))
+
+
+
 ## [6.1.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.1.2...nextjs-mf-6.1.3) (2023-02-17)
 
 

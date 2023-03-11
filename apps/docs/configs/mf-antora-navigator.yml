@@ -1,0 +1,8 @@
+groups:
+  - root: true
+    components: ipt
+  - title: Demo
+    components: 'component-*'
+  - title: Test
+    components: ['*']
+output_file: site-navigation-data.js
