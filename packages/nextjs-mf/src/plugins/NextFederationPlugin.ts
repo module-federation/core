@@ -124,12 +124,14 @@ export class NextFederationPlugin {
       };
     }
 
-    const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/']
+    const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];
 
     //patch next
     compiler.options.module.rules.push({
       test(req: string) {
-        if (allowedPaths.some(p => req.includes(path.join(compiler.context, p)))) {
+        if (
+          allowedPaths.some((p) => req.includes(path.join(compiler.context, p)))
+        ) {
           return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
         }
         return false;
@@ -147,7 +149,11 @@ export class NextFederationPlugin {
           test(req: string) {
             if (isServer) {
               // server has no common chunk or entry to hoist into
-              if (allowedPaths.some(p => req.includes(path.join(compiler.context, p)))) {
+              if (
+                allowedPaths.some((p) =>
+                  req.includes(path.join(compiler.context, p))
+                )
+              ) {
                 return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
               }
             }
@@ -177,12 +183,22 @@ export class NextFederationPlugin {
     if (this._extraOptions.automaticAsyncBoundary) {
       compiler.options.module.rules.push({
         test: (request: string) => {
-          if (allowedPaths.some(p => request.includes(path.join(compiler.context, p)))) {
+          if (
+            allowedPaths.some((p) =>
+              request.includes(path.join(compiler.context, p))
+            )
+          ) {
             return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request);
           }
           return false;
         },
-        exclude: [/node_modules/, /_document/, /_middleware/,/pages[\\/]middleware/, /pages[\\/]api/],
+        exclude: [
+          /node_modules/,
+          /_document/,
+          /_middleware/,
+          /pages[\\/]middleware/,
+          /pages[\\/]api/,
+        ],
         resourceQuery: (query) => !query.includes('hasBoundary'),
         loader: path.resolve(__dirname, '../loaders/async-boundary-loader'),
       });
