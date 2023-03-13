@@ -79,7 +79,7 @@
     "@typescript-eslint/eslint-plugin": "5.50.0",
     "@typescript-eslint/parser": "5.50.0",
     "antora-navigator-extension": "git+https://gitlab.com/opendevise/oss/antora-navigator-extension",
-    "asciidoctor-kroki": "^0.14.0",
+    "asciidoctor-kroki": "^0.17.0",
     "commitizen": "^4.2.5",
     "concurrently": "7.6.0",
     "cz-conventional-changelog": "^3.3.0",
