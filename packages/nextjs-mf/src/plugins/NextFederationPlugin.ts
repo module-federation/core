@@ -137,7 +137,12 @@ export class NextFederationPlugin {
         return false;
       },
       include: compiler.context,
-      exclude: /node_modules/,
+      exclude: [
+        /node_modules/,
+        /_middleware/,
+        /pages[\\/]middleware/,
+        /pages[\\/]api/,
+      ],
       loader: path.resolve(__dirname, '../loaders/patchDefaultSharedLoader'),
     });
 
