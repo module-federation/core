@@ -1984,9 +1984,52 @@
     semver "^7.3.5"
     tar "^6.1.11"
 
-"@module-federation/typescript@link:./apps/react-ts-remote/dist/packages/typescript":
+"@module-federation/nextjs-mf@*":
+  version "6.1.4"
+  resolved "https://registry.yarnpkg.com/@module-federation/nextjs-mf/-/nextjs-mf-6.1.4.tgz#82fba9d26ccbebfbaf953afb3a72faf2f87c3968"
+  integrity sha512-XTt/ZPzubJ/ucplE+QheAJgcfCmWTiej78kmWZasGbs40tdHaag9UtuDDKqBUcg8LZBl4c43VCnOMc/UXoSU8A==
+  dependencies:
+    "@module-federation/node" "*"
+    "@module-federation/utilities" "1.3.0"
+    encoding "0.1.13"
+    eventemitter3 "4.0.7"
+    fast-glob "^3.2.12"
+    node-fetch "2.6.7"
+    webpack-sources "3.2.3"
+
+"@module-federation/node@*":
+  version "0.11.1"
+  resolved "https://registry.yarnpkg.com/@module-federation/node/-/node-0.11.1.tgz#5e1d5717fba25570b5d51d70200676ba52e89f0b"
+  integrity sha512-xkGp6TvpeJcDAXjqRruqxZEz855QjughB+I6cgAbO8uuSe7W58vYGEdkRKaJP8RSoqukM969jBVQjBGZQW5ojA==
+  dependencies:
+    "@module-federation/utilities" "1.3.0"
+    encoding "0.1.13"
+    node-fetch "2.6.7"
+
+"@module-federation/typescript@*":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@module-federation/typescript/-/typescript-2.3.0.tgz#bd8db571f3a0b89663b7ef8a3b722bd820f7bcba"
+  integrity sha512-oE7as7b9ZmMTGXamqUF8dPsnM72DT6nuQIWA+Yqc7xQU67p2gR9zm33p9zCKrW8yrKAHARcje5hgTbD1eLGTmg==
+  dependencies:
+    "@module-federation/utilities" "1.3.0"
+    axios "^1.0.0"
+    lodash.get "^4.4.2"
+    next "13.1.6"
+    node-fetch "2.6.7"
+    react "18.2.0"
+    react-dom "18.2.0"
+
+"@module-federation/typescript@link:./apps/react-ts-host/dist/packages/typescript":
   version "0.0.0"
   uid ""
+
+"@module-federation/typescript@link:./apps/react-ts-remote/dist/packages/typescript":
+  version "0.0.0"
+
+"@module-federation/utilities@*", "@module-federation/utilities@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@module-federation/utilities/-/utilities-1.3.0.tgz#018071b630cb000f79397ad458bfd7d4dd9104fe"
+  integrity sha512-GGSuC0t5BsoXa58dSiP8MxXItMixWT5FbzWMndhtqLQMmJVdLpVFROiIH4eKXpfjOkKViRri7CfQ8MaNUn8JqQ==
 
 "@mole-inc/bin-wrapper@^8.0.1":
   version "8.0.1"
