@@ -100,7 +100,7 @@
     "nodejieba": "^2.6.0",
     "nx": "15.7.1",
     "postcss-calc": "~7.0",
-    "postcss-custom-properties": "~9.1",
+    "postcss-custom-properties": "~9.2.0",
     "postcss-import": "~12.0",
     "postcss-url": "~8.0",
     "prettier": "^2.6.2",
