@@ -86,8 +86,6 @@ export class NextFederationPlugin {
             (ctx.request.includes('@module-federation/utilities') ||
               ctx.request.includes('@module-federation/dashboard-plugin'))
           ) {
-
-            console.log(ctx.request)
             return callback();
           }
           // @ts-ignore
