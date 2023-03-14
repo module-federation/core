@@ -2001,12 +2001,38 @@
     semver "^7.3.5"
     tar "^6.1.11"
 
+"@module-federation/nextjs-mf@*":
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/@module-federation/nextjs-mf/-/nextjs-mf-6.2.0.tgz#a03e1ec8cc22d9187dd911a9ae88dd747a30b777"
+  integrity sha512-TpUJJcxHFz4ZUKfTuIxe7DaJvFbzyAa2IqbqzMsBtpMV03ofECjScci8+exQN1O0utOVDAvP5Oz9lA2drPSHxw==
+  dependencies:
+    "@module-federation/node" "*"
+    "@module-federation/utilities" "1.4.0"
+    encoding "0.1.13"
+    eventemitter3 "4.0.7"
+    fast-glob "^3.2.12"
+    node-fetch "2.6.7"
+    webpack-sources "3.2.3"
+
+"@module-federation/node@*":
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/@module-federation/node/-/node-0.12.0.tgz#27f04c81815ff8f5f69cc52ac1850c710f12ed13"
+  integrity sha512-S0RyWSqMxQ6UwnkVKQ0h37CaJkcRv4iWtJo3RkddZCNQ/n3gMKElVgJ5vx81mRwK5eEtIRU6bfb6G/M/utEkqw==
+  dependencies:
+    "@module-federation/utilities" "1.4.0"
+    encoding "0.1.13"
+    node-fetch "2.6.7"
+
 "@module-federation/typescript@link:./apps/react-ts-host/dist/packages/typescript":
   version "0.0.0"
-  uid ""
 
 "@module-federation/typescript@link:./apps/react-ts-remote/dist/packages/typescript":
   version "0.0.0"
+
+"@module-federation/utilities@1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@module-federation/utilities/-/utilities-1.4.0.tgz#c7b8c6e08262af6377714d94557929a3df67e64e"
+  integrity sha512-J4KISJvLmFhZEgBhdntn6MWqElWU6vMC/JuQT7MdNe8Apc8qoYis0FKGp4gp8YkIPPhplkQExy2vS14+3KxoJA==
 
 "@mole-inc/bin-wrapper@^8.0.1":
   version "8.0.1"
@@ -11374,22 +11400,13 @@ portfinder@^1.0.28:
     debug "^3.2.7"
     mkdirp "^0.5.6"
 
-postcss-calc@^8.2.3:
+postcss-calc@^8.2.3, postcss-calc@~8.2.0:
   version "8.2.4"
   resolved "https://registry.yarnpkg.com/postcss-calc/-/postcss-calc-8.2.4.tgz#77b9c29bfcbe8a07ff6693dc87050828889739a5"
   integrity sha512-SmWMSJmB8MRnnULldx0lQIyhSNvuDl9HfrZkaqqE/WHAhToYsAvDq+yAsA/kIyINDszOp3Rh0GFoNuH5Ypsm3Q==
   dependencies:
     postcss-selector-parser "^6.0.9"
     postcss-value-parser "^4.2.0"
-
-postcss-calc@~7.0:
-  version "7.0.5"
-  resolved "https://registry.yarnpkg.com/postcss-calc/-/postcss-calc-7.0.5.tgz#f8a6e99f12e619c2ebc23cf6c486fdc15860933e"
-  integrity sha512-1tKHutbGtLtEZF6PT4JSihCHfIVldU72mZ8SdZHIYriIZ9fh9k9aWSppaT8rHsyI3dX+KSR+W+Ix9BMY3AODrg==
-  dependencies:
-    postcss "^7.0.27"
-    postcss-selector-parser "^6.0.2"
-    postcss-value-parser "^4.0.2"
 
 postcss-colormin@^5.3.1:
   version "5.3.1"
@@ -11690,7 +11707,7 @@ postcss-value-parser@^3.2.3:
   resolved "https://registry.yarnpkg.com/postcss-value-parser/-/postcss-value-parser-3.3.1.tgz#9ff822547e2893213cf1c30efa51ac5fd1ba8281"
   integrity sha512-pISE66AbVkp4fDQ7VHBwRNXzAAKJjw4Vw7nWI/+Q3vuly7SNfgYXvm6i5IgFylHGK5sP/xHAbB7N49OS4gWNyQ==
 
-postcss-value-parser@^4.0.0, postcss-value-parser@^4.0.2, postcss-value-parser@^4.1.0, postcss-value-parser@^4.2.0:
+postcss-value-parser@^4.0.0, postcss-value-parser@^4.1.0, postcss-value-parser@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/postcss-value-parser/-/postcss-value-parser-4.2.0.tgz#723c09920836ba6d3e5af019f92bc0971c02e514"
   integrity sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==
@@ -11714,7 +11731,7 @@ postcss@8.4.14:
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
 
-postcss@^7.0.1, postcss@^7.0.17, postcss@^7.0.2, postcss@^7.0.27, postcss@^7.0.5:
+postcss@^7.0.1, postcss@^7.0.17, postcss@^7.0.2, postcss@^7.0.5:
   version "7.0.39"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-7.0.39.tgz#9624375d965630e2e1f2c02a935c82a59cb48309"
   integrity sha512-yioayjNbHn6z1/Bywyb2Y4s3yvDAeXGOyxqD+LnVOinq6Mdmd++SW2wUNVzavyyHxd6+DxzWGIuosg6P1Rj8uA==
