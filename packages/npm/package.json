@@ -1,0 +1,26 @@
+{
+  "name": "@module-federation/npm",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "description": "Webpack plugin to federate any packages from npm into share scope",
+  "license": "MIT",
+  "repository": "https://github.com/module-federation/universe/tree/main/packages/npm",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "keywords": [
+    "module-federation",
+    "typescript",
+    "npm",
+    "federated npm",
+    "federate npm",
+    "Delegate modules"
+  ],
+  "author": "Pavan Divi <takto@pavandivi.com> (https://github.com/pavandv)",
+  "devDependencies": {
+    "webpack": "^5.75.0"
+  },
+  "peerDependencies": {
+    "webpack": "^5.75.0"
+  }
+}

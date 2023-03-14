@@ -8,6 +8,7 @@ import type {
   WebpackRemoteContainer,
   RemoteData,
   GetModuleOptions,
+  RemoteError,
 } from '../types';
 
 type RemoteVars = Record<
@@ -116,29 +117,35 @@ export const importDelegatedModule = async (
 
 export const createDelegatedModule = (
   delegate: string,
-  params: { [key: string]: any }
+  params: { [key: string]: string | number }
 ) => {
-  const queries: string[] = [];
-  for (const [key, value] of Object.entries(params)) {
-    if (Array.isArray(value) || typeof value === 'object') {
-      throw new Error(
-        `[Module Federation] Delegated module params cannot be an array or object. Key "${key}" should be a string or number`
-      );
-    }
-    queries.push(`${key}=${value}`);
-  }
-  return `internal ${delegate}?${queries.join('&')}`;
+  const queryParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([k, v]) =>
+    queryParams.append(k, v.toString())
+  );
+
+  const queryString = queryParams.toString();
+
+  return `internal ${delegate}?${queryString}`;
 };
 
-const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
-  const runtimeRemotes = getRuntimeRemotes();
-
+export const loadScript = (
+  keyOrRuntimeRemoteItem: string | RuntimeRemote,
+  ignoreRuntimeRemotes = false
+) => {
   // 1) Load remote container if needed
   let asyncContainer: RuntimeRemote['asyncContainer'];
-  const reference =
-    typeof keyOrRuntimeRemoteItem === 'string'
-      ? runtimeRemotes[keyOrRuntimeRemoteItem]
-      : keyOrRuntimeRemoteItem;
+  let reference: RuntimeRemote = keyOrRuntimeRemoteItem as RuntimeRemote;
+
+  if (typeof keyOrRuntimeRemoteItem === 'string') {
+    let runtimeRemotes = {} as RuntimeRemotesMap;
+
+    if (!ignoreRuntimeRemotes) {
+      runtimeRemotes = getRuntimeRemotes();
+    }
+    reference = runtimeRemotes[keyOrRuntimeRemoteItem];
+  }
 
   if (reference.asyncContainer) {
     asyncContainer =
@@ -156,10 +163,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       ? (reference.uniqueKey as unknown as number)
       : remoteGlobal;
 
-    const __webpack_error__ = new Error() as Error & {
-      type: string;
-      request: string | null;
-    };
+    const __remote_error__ = new Error() as RemoteError;
 
     //@ts-ignore
     if (!global.__remote_scope__) {
@@ -174,14 +178,15 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       //@ts-ignore
       typeof window !== 'undefined' ? window : global.__remote_scope__; // TODO: fix types
 
+    // to match promise template system, can be removed once promise template is gone
+    if (!globalScope.remoteLoading) {
+      globalScope.remoteLoading = {};
+    }
+
     if (typeof window === 'undefined') {
       //@ts-ignore
       globalScope._config[containerKey] = reference.url;
     } else {
-      // to match promise template system, can be removed once promise template is gone
-      if (!globalScope.remoteLoading) {
-        globalScope.remoteLoading = {};
-      }
       if (globalScope.remoteLoading[containerKey]) {
         return globalScope.remoteLoading[containerKey];
       }
@@ -211,7 +216,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
           const realSrc =
             event && event.target && (event.target as HTMLScriptElement).src;
 
-          __webpack_error__.message =
+          __remote_error__.message =
             'Loading script failed.\n(' +
             errorType +
             ': ' +
@@ -220,11 +225,11 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
             remoteGlobal +
             ')';
 
-          __webpack_error__.name = 'ScriptExternalLoadError';
-          __webpack_error__.type = errorType;
-          __webpack_error__.request = realSrc;
+          __remote_error__.name = 'ScriptExternalLoadError';
+          __remote_error__.type = errorType;
+          __remote_error__.request = realSrc;
 
-          reject(__webpack_error__);
+          reject(__remote_error__);
         },
         containerKey
       );

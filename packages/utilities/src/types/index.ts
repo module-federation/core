@@ -7,6 +7,11 @@ export type ModuleFederationPluginOptions = ConstructorParameters<
   typeof container.ModuleFederationPlugin
 >['0'];
 
+export type RemoteError = Error & {
+  type: string;
+  request: string | null;
+};
+
 export type WebpackRequire = {
   l: (
     url: string | undefined,
@@ -63,6 +68,18 @@ export type WebpackRemoteContainer = {
 };
 
 export type AsyncContainer = Promise<WebpackRemoteContainer>;
+
+type RemoteScopeLoading = Record<
+  string,
+  Promise<WebpackRemoteContainer> | undefined
+>;
+
+type RemoteScopeConfig = Record<string, string>;
+
+export type RemoteScope = {
+  remoteLoading?: RemoteScopeLoading;
+  _config?: RemoteScopeConfig;
+} & Record<string, WebpackRemoteContainer | RemoteScopeConfig>;
 
 export type RemoteData = {
   global: string;
