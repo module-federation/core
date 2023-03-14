@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [1.4.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.3.0...utils-1.4.0) (2023-03-14)
+
+
+### Features
+
+* Medusa Support in NextFederationPlugin ([#609](https://github.com/module-federation/nextjs-mf/issues/609)) ([0bbba38](https://github.com/module-federation/nextjs-mf/commit/0bbba384c45b7d149b7a6be2dfbe9851b541b528)), closes [#606](https://github.com/module-federation/nextjs-mf/issues/606)
+
+
+
 # [1.3.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.2.1...utils-1.3.0) (2023-02-09)
 
 
