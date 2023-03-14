@@ -2038,6 +2038,7 @@
 
 "@module-federation/typescript@link:./apps/react-ts-host/dist/packages/typescript":
   version "0.0.0"
+  uid ""
 
 "@module-federation/typescript@link:./apps/react-ts-remote/dist/packages/typescript":
   version "0.0.0"
