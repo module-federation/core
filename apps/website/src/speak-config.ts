@@ -7,13 +7,13 @@ import type {
   SpeakLocale,
 } from 'qwik-speak';
 
-const LOCALES: Record<string, SpeakLocale> = {
+export const LOCALES: Record<string, SpeakLocale> = {
   'en-US': { lang: 'en-US', currency: 'USD', timeZone: 'America/Los_Angeles' },
   'pt-BR': { lang: 'pt-BR', currency: 'BRL', timeZone: 'America/Sao_Paulo' },
 };
 
 export const config: SpeakConfig = {
-  defaultLocale: LOCALES['en-US'],
+  defaultLocale: LOCALES['pt-BR'],
   supportedLocales: Object.values(LOCALES),
   assets: [
     'app', // Translations shared by the pages

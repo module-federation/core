@@ -1,4 +1,8 @@
 import { component$, useStylesScoped$ } from '@builder.io/qwik';
+import Button, { ButtonTheme } from '../../button/button';
+import Card from '../../card/card';
+import Section, { SectionHeader } from '../../section/section';
+
 import styles from './doc-summary.css?inline';
 
 export const cards = [
@@ -38,32 +42,43 @@ export default component$(() => {
   useStylesScoped$(styles);
 
   return (
-    <section>
-      <h2>Scalability with Module Federation</h2>
-      <p>
-        Scalability with Module Federation" for a title, and "Module Federation
-        brings scalability to not only code but also individual and
-        organizational productivity
-      </p>
+    <Section>
+      <SectionHeader
+        q:slot="header"
+        title="Scalability with Module Federation"
+        subtitle='Scalability with Module Federation" for a title, and "Module Federation brings scalability to not only code but also individual and organizational productivity'
+      />
 
-      <div>
+      <div class="flex flex-col items-center gap-10">
         {cards.map((card) => {
           return (
-            <div>
-              <div>
-                <h3>{card.title}</h3>
-                <p>{card.desc}</p>
-              </div>
+            <div class="w-full">
+              <Card>
+                <div class="flex items-center p-10">
+                  <div class="flex flex-col gap-4 w-full">
+                    <h3 class="text-blue-grey-900 font-bold text-xl">{card.title}</h3>
+                    <p class="font-medium text-blue-grey-900 text-lg max-w-3xl">{card.desc}</p>
+                  </div>
 
-              <div>
-                <a href={card.actionHref}>{card.actionTitle}</a>
-              </div>
+                  <div>
+                    <Button
+                      theme={ButtonTheme.NAKED}
+                      href={card.actionHref}
+                      type="link"
+                    >
+                      {card.actionTitle}
+                    </Button>
+                  </div>
+                </div>
+              </Card>
             </div>
           );
         })}
-      </div>
 
-      <a href="#">Start using module federation</a>
-    </section>
+        <Button theme={ButtonTheme.SOLID} href="#" type="link">
+          Start using module federation
+        </Button>
+      </div>
+    </Section>
   );
 });

@@ -2,3 +2,10 @@
 @tailwind base;
 @tailwind utilities;
 
+/* TODO: Check if we need to import fonts here */
+
+@layer base {
+  html {
+    font-family: 'Avenir Next';
+  }
+}

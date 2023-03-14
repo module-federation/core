@@ -4,8 +4,14 @@ const { join } = require('path');
 module.exports = {
   content: [join(__dirname, 'src/**/*.{js,ts,jsx,tsx,mdx}')],
   theme: {
-    extend: {},
+    extend: {
+      width: {
+        1225: '1225px',
+      },
+    },
     colors: {
+      transparent: 'transparent',
+      white: '#FFFFFF',
       'deep-purple': {
         300: '#9589EA',
         700: '#9589EA',
@@ -27,5 +33,8 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms'),
+    // ...
+  ],
 };
