@@ -45,6 +45,9 @@ const getRuntimeRemotes = () => {
         // @ts-ignore
         acc[key] = { asyncContainer: value };
       }
+      // if its a delegate module, skip it
+      else if (typeof value === 'string' && value.startsWith('internal ')) {
+      }
       // if its just a string (global@url)
       else if (typeof value === 'string') {
         const [url, global] = extractUrlAndGlobal(value);
@@ -97,9 +100,8 @@ export const importDelegatedModule = async (
               //@ts-ignore
               proxy.__initialized = true;
             } catch (e) {
-              return 1
+              return 1;
             }
-
           },
         };
         // @ts-ignore
@@ -116,7 +118,7 @@ export const createDelegatedModule = (
   delegate: string,
   params: { [key: string]: any }
 ) => {
-  let queries: string[] = [];
+  const queries: string[] = [];
   for (const [key, value] of Object.entries(params)) {
     if (Array.isArray(value) || typeof value === 'object') {
       throw new Error(
@@ -177,11 +179,11 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       globalScope._config[containerKey] = reference.url;
     } else {
       // to match promise template system, can be removed once promise template is gone
-      if(!globalScope.remoteLoading) {
+      if (!globalScope.remoteLoading) {
         globalScope.remoteLoading = {};
       }
-      if(globalScope.remoteLoading[containerKey]) {
-        return globalScope.remoteLoading[containerKey]
+      if (globalScope.remoteLoading[containerKey]) {
+        return globalScope.remoteLoading[containerKey];
       }
     }
 
@@ -227,7 +229,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         containerKey
       );
     });
-    if(typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
       globalScope.remoteLoading[containerKey] = asyncContainer;
     }
   }
@@ -319,14 +321,19 @@ export const getContainer = async (
   }
 
   if (typeof remoteContainer === 'string') {
-    if (window[remoteContainer]) {
-      return window[remoteContainer];
+    if (window[remoteContainer as unknown as number]) {
+      return window[
+        remoteContainer as unknown as number
+      ] as unknown as WebpackRemoteContainer;
     }
 
     return;
   } else {
-    if (window['uniqueKey' as keyof typeof remoteContainer]) {
-      return window['uniqueKey' as keyof typeof remoteContainer];
+    const uniqueKey = remoteContainer.uniqueKey;
+    if (window[uniqueKey as unknown as number]) {
+      return window[
+        uniqueKey as unknown as number
+      ] as unknown as WebpackRemoteContainer;
     }
 
     const container = await injectScript({
