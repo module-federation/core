@@ -26,10 +26,6 @@
     "release:node:manual": "nx build && cd dist/packages/node && yarn publish --non-interactive --access public"
   },
   "dependencies": {
-    "@module-federation/nextjs-mf": "*",
-    "@module-federation/node": "*",
-    "@module-federation/typescript": "*",
-    "@module-federation/utilities": "*",
     "axios": "^1.0.0",
     "core-js": "^3.6.5",
     "fast-glob": "^3.2.12",
