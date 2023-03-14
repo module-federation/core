@@ -11,9 +11,6 @@ const nextConfig = {
     // See: https://github.com/gregberge/svgr
     svgr: false,
   },
-  // only required for this repo, not for your own
-  transpilePackages: ['@module-federation/nextjs-mf', '@module-federation/utilities', '@module-federation/node'],
-
   webpack(config, options) {
     const { isServer } = options;
 
