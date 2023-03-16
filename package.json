@@ -64,7 +64,7 @@
     "@swc/jest": "0.2.24",
     "@testing-library/react": "14.0.0",
     "@types/download": "^8.0.1",
-    "@types/jest": "29.4.1",
+    "@types/jest": "29.5.0",
     "@types/lodash.get": "^4.4.7",
     "@types/node": "18.11.18",
     "@types/node-fetch": "^2.6.2",
