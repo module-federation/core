@@ -152,7 +152,7 @@ export class ChildFederationPlugin {
           new webpack.EntryPlugin(
             compiler.context,
             require.resolve('../internal-delegate-hoist'),
-            buildName
+            federationPluginOptions.name
           ),
           new FederationPlugin(federationPluginOptions),
           new webpack.web.JsonpTemplatePlugin(),
@@ -176,7 +176,7 @@ export class ChildFederationPlugin {
           new webpack.EntryPlugin(
             compiler.context,
             require.resolve('../internal-delegate-hoist'),
-            buildName
+            federationPluginOptions.name
           ),
           new NodeFederationPlugin(federationPluginOptions, {
             ModuleFederationPlugin: FederationPlugin,
