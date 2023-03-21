@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.2.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.2.0...nextjs-mf-6.2.1) (2023-03-18)
+
+
+### Bug Fixes
+
+* hoist delegate glue code into container when medusa is used ([#642](https://github.com/module-federation/nextjs-mf/issues/642)) ([a63cd94](https://github.com/module-federation/nextjs-mf/commit/a63cd944546a6e5d62055fcec4d7e1f04f618ded))
+
+
+
 # [6.2.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.1.4...nextjs-mf-6.2.0) (2023-03-14)
 
 ### Dependency Updates
