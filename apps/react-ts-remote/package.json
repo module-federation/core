@@ -4,6 +4,6 @@
   "devDependencies": {
     "@module-federation/typescript": "link:./dist/packages/typescript",
     "react-refresh": "^0.14.0",
-    "file-loader": "^6.2.0"
+    "file-loader": "6.2.0"
   }
 }
