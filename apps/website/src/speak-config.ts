@@ -30,6 +30,7 @@ export const config: SpeakConfig = {
     'showcase',
     'sponsor',
     'subscribe',
+    'showcase-page',
   ],
 };
 

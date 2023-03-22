@@ -4,6 +4,23 @@
       "action": "Privacy & Policy",
       "text": "By submitting this form, I confirm that I have read and understood the"
     },
+    "form": {
+      "": {
+        "action": "Submit"
+      },
+      "company-email": {
+        "label": "Company email"
+      },
+      "company-website": {
+        "label": "Company website"
+      },
+      "how-can-we-help-you": {
+        "label": "How can we help you?"
+      },
+      "name": {
+        "label": "Your name"
+      }
+    },
     "quote": {
       "author": {
         "name": "Zack Jackson",

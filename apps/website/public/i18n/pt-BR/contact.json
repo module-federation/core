@@ -4,6 +4,23 @@
       "action": "Politica de privacidade",
       "text": "Ao enviar este formulário, confirmo que li e compreendi a nossa"
     },
+    "form": {
+      "": {
+        "action": "Submit"
+      },
+      "company-email": {
+        "label": "Company email"
+      },
+      "company-website": {
+        "label": "Company website"
+      },
+      "how-can-we-help-you": {
+        "label": "How can we help you?"
+      },
+      "name": {
+        "label": "Your name"
+      }
+    },
     "quote": {
       "author": {
         "name": "Zack Jackson",
