@@ -19,6 +19,7 @@ export default component$(() => {
    * Don't remove the `<head>` and `<body>` elements.
    */
   useStyles$(globalStyles);
+  
 
   return (
     <QwikSpeak config={config} translationFn={translationFn}>
@@ -28,8 +29,8 @@ export default component$(() => {
           <link rel="manifest" href="/manifest.json" />
           <RouterHead />
         </head>
-        <body>
-          <RouterOutlet />
+        <body class="relative w-full bg-[#F6F6FA] overflow-y-scroll">
+          <div class="w-full overflow-x-hidden"><RouterOutlet /></div>
           <ServiceWorkerRegister />
         </body>
       </QwikCityProvider>

@@ -1,0 +1,16 @@
+{
+  "contact": {
+    "disclaimer": {
+      "action": "Politica de privacidade",
+      "text": "Ao enviar este formulário, confirmo que li e compreendi a nossa"
+    },
+    "quote": {
+      "author": {
+        "name": "Zack Jackson",
+        "title": "criador do Module Federation"
+      },
+      "text": "Existem agora 4.000 empresas usando o Module Federation de forma detectável. Provavelmente muitos mais que não podemos rastrear, mas 4000 ainda é um número impressionante de entidades conhecidas."
+    },
+    "title": "Fale com nossos especialistas"
+  }
+}

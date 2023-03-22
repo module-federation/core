@@ -5,8 +5,14 @@ module.exports = {
   content: [join(__dirname, 'src/**/*.{js,ts,jsx,tsx,mdx}')],
   theme: {
     extend: {
-      width: {
+      backgroundImage: {
+        pattern: `url('/pattern_4.png')`,
+      },
+      maxWidth: {
         1225: '1225px',
+      },
+      opacity: {
+        ['2.5']: 0.025,
       },
     },
     colors: {

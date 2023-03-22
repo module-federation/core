@@ -1,9 +1,10 @@
 {
   "app": {
-    "hero": {
-      "subtitle": "Module Federation aims to solve the sharing of modules in a distributed system. It allows you to ship those critical shared pieces as macro or as micro as you would like. It does this by pulling them out of the build pipeline and out of your apps",
-      "title": "Module Federation: simplifique seus microfrontends"
-    },
-    "title": "Module Federation: simplifique seus microfrontends"
+    "index": {
+      "title": "Module Federation: simplifique seus microfrontends",
+      "meta": {
+        "description": "Module Federation visa resolver o compartilhamento de módulos em um sistema distribuído. Ele permite que você envie essas partes críticas compartilhadas como macro ou micro, conforme desejar. Ele faz isso puxando-os para fora do pipeline de construção e de seus aplicativos"
+      }
+    }
   }
 }

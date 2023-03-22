@@ -1,10 +1,11 @@
 import { $ } from '@builder.io/qwik';
 import { isServer } from '@builder.io/qwik/build';
-import type {
+import {
   LoadTranslationFn,
   SpeakConfig,
   TranslationFn,
   SpeakLocale,
+  useSpeakContext,
 } from 'qwik-speak';
 
 export const LOCALES: Record<string, SpeakLocale> = {
@@ -13,10 +14,22 @@ export const LOCALES: Record<string, SpeakLocale> = {
 };
 
 export const config: SpeakConfig = {
-  defaultLocale: LOCALES['pt-BR'],
+  defaultLocale: LOCALES['en-US'],
   supportedLocales: Object.values(LOCALES),
   assets: [
-    'app', // Translations shared by the pages
+    'app', // Translations shared by the pages,
+    'contact',
+    'discord',
+    'doc-summary',
+    'evolving',
+    'explore',
+    'footer',
+    'hero',
+    'medusa',
+    'navbar',
+    'showcase',
+    'sponsor',
+    'subscribe',
   ],
 };
 
@@ -41,4 +54,24 @@ export const loadTranslation$: LoadTranslationFn = $(
 
 export const translationFn: TranslationFn = {
   loadTranslation$: loadTranslation$,
+};
+
+export const useLocalizedUrl = () => {
+  const speakState = useSpeakContext();
+
+  return (url: string) => {
+    const starturl = url.startsWith('/') ? url : `/${url}`;
+    const endurl = starturl.endsWith('/') ? starturl : `${starturl}/`;
+
+    const handledLang = config.defaultLocale.lang === speakState.locale.lang ? '' : `/${speakState.locale.lang}`;
+    const finalUrl = `${handledLang}${endurl}`;
+    
+    const isAnchor = finalUrl.includes('/#');
+
+    if(isAnchor){
+      return finalUrl.slice(0, -1);
+    }
+
+    return finalUrl;
+  };
 };

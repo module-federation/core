@@ -16,7 +16,7 @@ export interface ButtonProps {
   href?: string;
   disabled?: boolean;
   loading?: boolean;
-  width?: string;
+  class?: string;
   small?: boolean;
   onClick?: QRL<() => void>;
 }
@@ -73,7 +73,7 @@ export default component$((props: ButtonProps) => {
 
   const content = (
     <div class={`flex justify-center items-center gap-3`}>
-      <div class="empty:hidden">
+      <div class="flex empty:hidden">
         <Slot name="prefix" />
       </div>
       <div class="text-lg font-medium leading-[1.125rem]">
@@ -86,26 +86,24 @@ export default component$((props: ButtonProps) => {
           </div>
         )}
       </div>
-      <div class="empty:hidden">
+      <div class="flex empty:hidden">
         <Slot name="suffix" />
       </div>
     </div>
   );
 
-  const widthStyle = !!props.width ? `width: ${props.width}` : '';
-
   return props.type === 'link' ? (
     <a
-      class={`inline-block border-solid border ${themeClasses[props.theme]}`}
-      style={widthStyle}
+      class={`inline-block border-solid border ${themeClasses[props.theme]} ${props.class || ''}`}
+
       href={props.href}
     >
       {content}
     </a>
   ) : (
     <button
-      class={`inline-block border-solid border ${themeClasses[props.theme]}`}
-      style={widthStyle}
+      class={`inline-block border-solid border ${themeClasses[props.theme]} ${props.class || ''}`}
+
       type={props.type}
       onClick$={props.onClick}
     >

@@ -1,0 +1,16 @@
+{
+  "contact": {
+    "disclaimer": {
+      "action": "Privacy & Policy",
+      "text": "By submitting this form, I confirm that I have read and understood the"
+    },
+    "quote": {
+      "author": {
+        "name": "Zack Jackson",
+        "title": "the сreator of Module Federation"
+      },
+      "text": "There are now 4000 companies using Module Federation in a detectable way. Likely many more who we cannot trace, but 4000 is still an impressive number of known entities."
+    },
+    "title": "Talk to our experts"
+  }
+}

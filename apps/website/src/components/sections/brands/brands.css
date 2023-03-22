@@ -23,8 +23,8 @@
 }
 
 .animated--0 {
-  animation: slide 20s linear infinite;
+  animation: slide 30s linear infinite;
 }
 .animated--1 {
-  animation: slide 30s linear infinite;
+  animation: slide 40s linear infinite;
 }

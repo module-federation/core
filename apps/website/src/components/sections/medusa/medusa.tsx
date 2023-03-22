@@ -1,19 +1,27 @@
 import { component$, useStylesScoped$ } from '@builder.io/qwik';
+import { $translate as t } from 'qwik-speak';
+
 import Button, { ButtonTheme } from '../../button/button';
-import Container from '../../container/container';
+import Section from '../../section/section';
 import styles from './medusa.css?inline';
+import { centerShape, leftShape, rightShape } from './shapes';
 
 export default component$(() => {
   useStylesScoped$(styles);
 
   return (
-    <Container>
-      <div class="flex flex-col items-center p-28 gap-8">
-        <h2 class="text-3xl text-blue-grey-900 font-bold mx-auto text-center">
-          Start using Module Federation with
+    <Section id="medusa">
+      <div class="flex flex-col items-center gap-8">
+        <h2 class="text-3xl text-blue-gray-900 font-bold mx-auto text-center leading-tight md:leading-none">
+          {t('medusa.title@@Start using Module Federation with')}
         </h2>
 
-        <Button theme={ButtonTheme.SOLID} href="#" type="link">
+        <Button
+          class="w-full md:w-auto"
+          theme={ButtonTheme.SOLID}
+          href="#"
+          type="link"
+        >
           <div class="flex items-center gap-3">
             <svg
               width="33"
@@ -46,6 +54,21 @@ export default component$(() => {
           </div>
         </Button>
       </div>
-    </Container>
+
+      <div
+        q:slot="background"
+        class="relative w-11/12 h-full max-w-1225 mx-auto hidden md:block"
+      >
+        <div class="w-44 absolute top-0 left-0 -translate-y-2/3 blur-lg">
+          {leftShape}
+        </div>
+        <div class="w-80 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 blur-lg">
+          {centerShape}
+        </div>
+        <div class="w-44 absolute bottom-0 right-0 translate-y-2/3 blur-lg">
+          {rightShape}
+        </div>
+      </div>
+    </Section>
   );
 });

@@ -1,51 +1,64 @@
 import { component$, useStylesScoped$ } from '@builder.io/qwik';
+import { $translate as t } from 'qwik-speak';
+
 import Button, { ButtonTheme } from '../../button/button';
 import Card from '../../card/card';
+import { ContainerTheme } from '../../container/container';
+import { IconName } from '../../icon/data';
+import Icon from '../../icon/icon';
 import Section from '../../section/section';
 import styles from './explore.css?inline';
-
-export const cards = [
-  {
-    iconSrc: 'illustrations/pratical-module-federation.svg',
-    title: 'Practical Module Federation',
-    actionText: 'Get the book',
-    actionHref: '#',
-  },
-  {
-    iconSrc: 'illustrations/implementing-module-federation.svg',
-    title: 'Implementing Module Federation',
-    actionText: 'Learn more',
-    actionHref: '#',
-  },
-  {
-    iconSrc: 'illustrations/conference-talks.svg',
-    title: 'Conference talks',
-    actionText: 'Watch now',
-    actionHref: '#',
-  },
-  {
-    iconSrc: 'illustrations/community-content.svg',
-    title: 'Community content',
-    actionText: 'Find out more',
-    actionHref: '#',
-  },
-];
 
 export default component$(() => {
   useStylesScoped$(styles);
 
+  const cards = [
+    {
+      iconSrc: '/illustrations/pratical-module-federation.svg',
+      title: t(
+        'explore.cards.practical-module-federation.title@@Practical Module Federation'
+      ),
+      actionText: t(
+        'explore.cards.practical-module-federation.action@@Get the book'
+      ),
+      actionHref: '#',
+    },
+    {
+      iconSrc: '/illustrations/implementing-module-federation.svg',
+      title: t(
+        'explore.cards.implementing-module-federation.title@@Implementing Module Federation'
+      ),
+      actionText: t(
+        'explore.cards.implementing-module-federation.action@@Learn more'
+      ),
+      actionHref: '#',
+    },
+    {
+      iconSrc: '/illustrations/conference-talks.svg',
+      title: t('explore.cards.conference-talks.title@@Conference talks'),
+      actionText: t('explore.cards.conference-talks.action@@Watch now'),
+      actionHref: '#',
+    },
+    {
+      iconSrc: '/illustrations/community-content.svg',
+      title: t('explore.cards.community-content.title@@Community content'),
+      actionText: t('explore.cards.community-content.action@@Find out more'),
+      actionHref: '#',
+    },
+  ];
+
   return (
-    <Section>
+    <Section id="discover" theme={ContainerTheme.OPAQUE}>
       <div class="flex flex-col gap-3">
-        <div class="grid grid-rows-2 grid-flow-col gap-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           {cards.map((card) => {
             return (
-              <Card>
-                <div class="flex items-center p-12 gap-6">
+              <Card key={card.title}>
+                <div class="flex items-center px-6 py-8 md:p-12 gap-6">
                   <img class="h-16 w-16" src={card.iconSrc} alt={card.title} />
 
-                  <div class="flex flex-col items-start gap-1">
-                    <h3 class="text-blue-grey-900 font-semibold text-xl">
+                  <div class="flex flex-col items-start gap-2 md:gap-1">
+                    <h3 class="text-blue-gray-900 font-semibold text-xl">
                       {card.title}
                     </h3>
                     <Button
@@ -54,6 +67,12 @@ export default component$(() => {
                       type="link"
                     >
                       {card.actionText}
+
+                      <Icon
+                        q:slot="suffix"
+                        name={IconName.ARROW_NARROW_RIGHT}
+                        size="24px"
+                      />
                     </Button>
                   </div>
                 </div>
@@ -62,29 +81,73 @@ export default component$(() => {
           })}
         </div>
 
-        <div class="last-row">
+        <div class="flex">
           <Card>
-            <div class="flex items-start p-12 gap-6 max-w-2xl mx-auto">
+            <div class="items-start p-12 gap-6 max-w-2xl mx-auto hidden md:flex">
               <img
-                class="h-24 w-24"
-                src="illustrations/module-federation-courses.svg"
+                class="h-16 w-16 md:h-24 md:w-24"
+                src="/illustrations/module-federation-courses.svg"
                 alt="Module Federation courses"
               />
 
               <div class="flex flex-col items-start gap-6">
                 <div class="flex flex-col items-start gap-1">
-                  <h3 class="text-blue-grey-900 font-semibold text-xl">
-                    Module Federation courses
+                  <h3 class="text-blue-gray-900 font-semibold text-xl">
+                    {t(
+                      'explore.cards.module-federation-courses.title@@Module Federation courses'
+                    )}
                   </h3>
-                  <p class="font-medium text-blue-grey-900 text-lg">
-                    Gain expertise in Module Federation and enhance your skills
-                    now
+                  <p class="font-medium text-blue-gray-900 text-lg">
+                    {t(
+                      'explore.cards.module-federation-courses.subtitle@@Gain expertise in Module Federation and enhance your skills now'
+                    )}
                   </p>
                 </div>
                 <Button theme={ButtonTheme.SOLID} href="#" type="link">
-                  Start exploring
+                  {t(
+                    'explore.cards.module-federation-courses.action@@Start exploring'
+                  )}
+
+                  <Icon
+                    q:slot="suffix"
+                    name={IconName.ARROW_NARROW_RIGHT}
+                    size="24px"
+                  />
                 </Button>
               </div>
+            </div>
+            <div class="flex flex-col md:hidden px-6 py-8 gap-6">
+              <div class="flex items-start gap-6">
+                <img
+                  class="h-16 w-16"
+                  src="/illustrations/module-federation-courses.svg"
+                  alt="Module Federation courses"
+                />
+
+                <div class="flex flex-col items-start gap-2 md:gap-1">
+                  <h3 class="text-blue-gray-900 font-semibold text-xl">
+                    {t(
+                      'explore.cards.module-federation-courses.title@@Module Federation courses'
+                    )}
+                  </h3>
+                  <p class="font-medium text-blue-gray-900 text-lg">
+                    {t(
+                      'explore.cards.module-federation-courses.subtitle@@Gain expertise in Module Federation and enhance your skills now'
+                    )}
+                  </p>
+                </div>
+              </div>
+              <Button theme={ButtonTheme.SOLID} href="#" type="link">
+                {t(
+                  'explore.cards.module-federation-courses.action@@Start exploring'
+                )}
+
+                <Icon
+                  q:slot="suffix"
+                  name={IconName.ARROW_NARROW_RIGHT}
+                  size="24px"
+                />
+              </Button>
             </div>
           </Card>
         </div>

@@ -1,48 +1,37 @@
 import { component$, useStylesScoped$ } from '@builder.io/qwik';
+import { $translate as t } from 'qwik-speak';
+
 import Button, { ButtonTheme } from '../../button/button';
 import Card from '../../card/card';
+import { ContainerTheme } from '../../container/container';
+import { IconName } from '../../icon/data';
+import Icon from '../../icon/icon';
 import Section, { SectionHeader } from '../../section/section';
 import styles from './evolving.css?inline';
 
-export const cards = [
-  {
-    title: 'RFCs',
-    subtitle:
-      'Participate in the community discussions to decide on what features are coming next',
-    actionText: 'Get the book!',
-    actionHref: '#',
-  },
-  {
-    title: 'Module Federation Roadmap',
-    subtitle: 'Discover the future of Module Federation',
-    actionText: 'Get the book!',
-    actionHref: '#',
-  },
-];
-
 export const bundlers = [
   {
-    logo: 'bundlers/webpack.svg',
+    logo: '/bundlers/webpack.svg',
     name: 'Webpack',
     actionHref: '#',
   },
   {
-    logo: 'bundlers/rspack.svg',
+    logo: '/bundlers/rspack.svg',
     name: 'Rspack',
     actionHref: '#',
   },
   {
-    logo: 'bundlers/vite.svg',
+    logo: '/bundlers/vite.svg',
     name: 'Vite',
     actionHref: '#',
   },
   {
-    logo: 'bundlers/rollup.svg',
+    logo: '/bundlers/rollup.svg',
     name: 'Rollup',
     actionHref: '#',
   },
   {
-    logo: 'bundlers/esbuild.svg',
+    logo: '/bundlers/esbuild.svg',
     name: 'esBuild',
     actionHref: '#',
   },
@@ -52,34 +41,62 @@ export const bundlers = [
 export default component$(() => {
   useStylesScoped$(styles);
 
+  const cards = [
+    {
+      title: t('evolving.rfcs.title@@RFCs'),
+      subtitle: t(
+        'evolving.rfcs.subtitle@@Participate in the community discussions to decide on what features are coming next'
+      ),
+      actionText: t('evolving.rfcs.action@@Get the book!'),
+      actionHref: '#',
+    },
+    {
+      title: t('evolving.roadmap.title@@Module Federation Roadmap'),
+      subtitle: t(
+        'evolving.roadmap.subtitle@@Discover the future of Module Federation'
+      ),
+      actionText: t('evolving.roadmap.action@@Get the book!'),
+      actionHref: '#',
+    },
+  ];
+
   return (
-    <Section>
+    <Section theme={ContainerTheme.OPAQUE}>
       <SectionHeader
         q:slot="header"
-        title="Evolving Module Federation"
-        subtitle="The world of Module Federation is constantly evolving and growing based on the feedback from the community. The RFCs are open for all to participate in the discussion and the roadmap is published."
+        title={t('evolving.title@@Evolving Module Federation')}
+        subtitle={t(
+          'evolving.subtitle@@The world of Module Federation is constantly evolving and growing based on the feedback from the community. The RFCs are open for all to participate in the discussion and the roadmap is published.'
+        )}
       />
       <div class="flex flex-col gap-3">
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid grid-cols-1 md:grid-cols-2 gap-3">
           {cards.map((card) => {
             return (
-              <Card>
+              <Card key={card.title}>
                 <div class="flex flex-col h-full p-10 gap-6">
-                  <h3 class="text-blue-grey-900 font-semibold text-3xl">
+                  <h3 class="text-blue-gray-900 font-semibold text-3xl">
                     {card.title}
                   </h3>
-                  <p class="font-medium text-blue-grey-900 text-lg">
+                  <p class="font-medium text-blue-gray-900 text-lg">
                     {card.subtitle}
                   </p>
 
                   <div class="mt-auto">
                     <Button
+                    class="w-full md:w-auto"
                       theme={ButtonTheme.SOLID}
                       href={card.actionHref}
                       type="link"
                       small
                     >
                       {card.actionText}
+
+                      <Icon
+                        q:slot="suffix"
+                        name={IconName.ARROW_NARROW_RIGHT}
+                        size="24px"
+                      />
                     </Button>
                   </div>
                 </div>
@@ -89,17 +106,22 @@ export default component$(() => {
         </div>
         <Card>
           <div class="flex flex-col justify-center items-center p-10 gap-6">
-            <h3 class="text-blue-grey-900 font-semibold text-3xl">
-              Supported bundlers
+            <h3 class="text-blue-gray-900 font-semibold text-3xl">
+              {t('evolving.supported-bundlers.title@@Supported bundlers')}
             </h3>
-            <div class="flex justify-center w-full gap-24">
+            <div class="flex justify-center flex-wrap w-full gap-y-12 gap-x-24">
               {bundlers.map((bundler) => {
                 return (
                   <a
+                    key={bundler.name}
                     class="flex flex-col items-center "
                     href={bundler.actionHref}
                   >
-                    <img class="w-24 h-24" src={bundler.logo} alt={bundler.name} />
+                    <img
+                      class="w-24 h-24"
+                      src={bundler.logo}
+                      alt={bundler.name}
+                    />
                     <div class="text-2xl font-semibold text-[#00B9FF] underline decoration-solid decoration-1 underline-offset-2">
                       {bundler.name}
                     </div>
