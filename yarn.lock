@@ -2029,25 +2029,12 @@
     node-fetch "2.6.7"
     webpack-sources "3.2.3"
 
-"@module-federation/node@*":
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/@module-federation/node/-/node-0.12.0.tgz#27f04c81815ff8f5f69cc52ac1850c710f12ed13"
-  integrity sha512-S0RyWSqMxQ6UwnkVKQ0h37CaJkcRv4iWtJo3RkddZCNQ/n3gMKElVgJ5vx81mRwK5eEtIRU6bfb6G/M/utEkqw==
-  dependencies:
-    "@module-federation/utilities" "1.4.0"
-    encoding "0.1.13"
-    node-fetch "2.6.7"
-
 "@module-federation/typescript@link:./apps/react-ts-host/dist/packages/typescript":
   version "0.0.0"
+  uid ""
 
 "@module-federation/typescript@link:./apps/react-ts-remote/dist/packages/typescript":
   version "0.0.0"
-
-"@module-federation/utilities@1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@module-federation/utilities/-/utilities-1.4.0.tgz#c7b8c6e08262af6377714d94557929a3df67e64e"
-  integrity sha512-J4KISJvLmFhZEgBhdntn6MWqElWU6vMC/JuQT7MdNe8Apc8qoYis0FKGp4gp8YkIPPhplkQExy2vS14+3KxoJA==
 
 "@mole-inc/bin-wrapper@^8.0.1":
   version "8.0.1"

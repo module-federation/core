@@ -2,14 +2,15 @@ const hashmap = {} as Record<string, string>;
 import crypto from 'crypto';
 
 /*
- This code is doing two things First it checks if there are any fake remotes in the 
- global scope If so then we need to reload the server because a remote has changed 
- and needs to be fetched again Second it checks for each remote that was loaded by 
+ This code is doing two things First it checks if there are any fake remotes in the
+ global scope If so then we need to reload the server because a remote has changed
+ and needs to be fetched again Second it checks for each remote that was loaded by
  webpack whether its hash has changed since last time or not
   */
 export const revalidate = () => {
   if (global.__remote_scope__) {
     const remoteScope = global.__remote_scope__;
+
 
     return new Promise((res) => {
       const fetches = [];
@@ -21,6 +22,12 @@ export const revalidate = () => {
             'hot reloading to refetch'
           );
           res(true);
+        }
+      }
+
+      if(remoteScope._medusa) {
+        for (const property in remoteScope._config) {
+          console.log(property)
         }
       }
 
@@ -123,9 +130,9 @@ export const revalidate = () => {
 };
 
 /*
- This code is importing the nodefetch module and assigning it to a variable named 
- node Fetch The code then checks if there\'s an existing global object called webpack 
- Chunk Load which is used by webpack If so we use that instead of nodefetch This 
+ This code is importing the nodefetch module and assigning it to a variable named
+ node Fetch The code then checks if there\'s an existing global object called webpack
+ Chunk Load which is used by webpack If so we use that instead of nodefetch This
  allows us to use fetch in our tests without having to mock out nodefetch
   */
 function getFetchModule() {
