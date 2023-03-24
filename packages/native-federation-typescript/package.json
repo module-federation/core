@@ -43,18 +43,10 @@
   },
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "prepare": "npm run build",
-    "build": "tsup",
-    "lint": "eslint src --ext .ts",
-    "test": "vitest --coverage"
-  },
   "author": "Matteo Pietro Dazzi <matteopietro.dazzi@gmail.com> (https://github.com/ilteoood)",
   "license": "MIT",
   "peerDependencies": {
-    "typescript": "^4.9.0 || ^5.0.0"
+    "typescript": "^4.9.0 || ^5.0.0",
+    "vue-tsc": "^1.0.24"
   }
 }
