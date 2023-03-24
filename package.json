@@ -130,8 +130,7 @@
   },
   "workspaces": {
     "packages": [
-      "apps/**",
-      "dist/packages/**"
+      "apps/**"
     ]
   }
 }
