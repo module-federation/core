@@ -1,7 +1,13 @@
 {
-  "name": "native-federation-typescript",
+  "name": "@module-federation/native-federation-typescript",
   "version": "0.1.0",
   "description": "Bundler agnostic unplugin to share federated types",
+  "keywords": [
+    "module-federation",
+    "typescript",
+    "remote types",
+    "federated types"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -38,8 +44,7 @@
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "scripts": {
     "prepare": "npm run build",
@@ -47,7 +52,6 @@
     "lint": "eslint src --ext .ts",
     "test": "vitest --coverage"
   },
-  "keywords": [],
   "author": "Matteo Pietro Dazzi <matteopietro.dazzi@gmail.com> (https://github.com/ilteoood)",
   "license": "MIT",
   "dependencies": {
@@ -60,19 +64,19 @@
   },
   "devDependencies": {
     "@types/adm-zip": "^0.5.0",
-    "@types/node": "^18.15.3",
-    "@typescript-eslint/eslint-plugin": "^5.55.0",
-    "@typescript-eslint/parser": "^5.55.0",
-    "@vitest/coverage-c8": "^0.29.3",
+    "@types/node": "^18.15.7",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@typescript-eslint/parser": "^5.56.0",
+    "@vitest/coverage-c8": "^0.29.7",
     "directory-tree": "^3.5.1",
     "eslint": "^8.36.0",
-    "eslint-config-prettier": "^8.7.0",
+    "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-simple-import-sort": "^10.0.0",
-    "prettier": "^2.8.4",
+    "prettier": "^2.8.7",
     "tsup": "^6.7.0",
     "typescript": "^5.0.2",
-    "vitest": "^0.29.3"
+    "vitest": "^0.29.7"
   },
   "peerDependencies": {
     "typescript": "^4.9.0 || ^5.0.0"
