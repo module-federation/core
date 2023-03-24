@@ -56,7 +56,6 @@ export const revalidate = () => {
 
       if(remoteScope._medusa) {
         for (const property in remoteScope._medusa) {
-          console.log(property)
           fetch(property).then(res=>res.json()).then((medusaResponse) => {
             //@ts-ignore
             if(medusaResponse.version !== remoteScope._medusa[property].version) {
