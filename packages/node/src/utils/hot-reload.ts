@@ -1,6 +1,35 @@
 const hashmap = {} as Record<string, string>;
 import crypto from 'crypto';
+const performReload = (shouldReload: any) => {
+  console.log('shoudlReplace perform', shouldReload);
+  if (!shouldReload) {
+    return false;
+  }
+  let req: NodeRequire;
+  if (typeof __non_webpack_require__ === 'undefined') {
+    req = require;
+  } else {
+    req = __non_webpack_require__ as NodeRequire;
+  }
 
+  global.__remote_scope__ = {
+    _config: {},
+  };
+
+  Object.keys(req.cache).forEach((k) => {
+    if (
+      k.includes('remote') ||
+      k.includes('runtime') ||
+      k.includes('server') ||
+      k.includes('hot-reload') ||
+      k.includes('react-loadable-manifest')
+    ) {
+      delete req.cache[k];
+    }
+  });
+
+  return true;
+}
 /*
  This code is doing two things First it checks if there are any fake remotes in the
  global scope If so then we need to reload the server because a remote has changed
@@ -26,8 +55,24 @@ export const revalidate = () => {
       }
 
       if(remoteScope._medusa) {
-        for (const property in remoteScope._config) {
+        for (const property in remoteScope._medusa) {
           console.log(property)
+          fetch(property).then(res=>res.json()).then((medusaResponse) => {
+            //@ts-ignore
+            if(medusaResponse.version !== remoteScope._medusa[property].version) {
+              console.log(
+                'medusa config changed',
+                property,
+                'hot reloading to refetch'
+              );
+              global.__remote_scope__ = {
+                _config: {},
+                _medusa: {}
+              };
+              performReload(true);
+              return res(true);
+            }
+          });
         }
       }
 
@@ -96,33 +141,7 @@ export const revalidate = () => {
       }
       Promise.all(fetches).then(() => res(false));
     }).then((shouldReload) => {
-      if (!shouldReload) {
-        return false;
-      }
-      let req: NodeRequire;
-      if (typeof __non_webpack_require__ === 'undefined') {
-        req = require;
-      } else {
-        req = __non_webpack_require__ as NodeRequire;
-      }
-
-      global.__remote_scope__ = {
-        _config: {},
-      };
-
-      Object.keys(req.cache).forEach((k) => {
-        if (
-          k.includes('remote') ||
-          k.includes('runtime') ||
-          k.includes('server') ||
-          k.includes('hot-reload') ||
-          k.includes('react-loadable-manifest')
-        ) {
-          delete req.cache[k];
-        }
-      });
-
-      return true;
+      return performReload(shouldReload);
     });
   }
 
