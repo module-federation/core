@@ -1,5 +1,7 @@
 const hashmap = {} as Record<string, string>;
 import crypto from 'crypto';
+const requireCacheRegex = /(remote|runtime|server|hot-reload|react-loadable-manifest)/;
+
 const performReload = (shouldReload: any) => {
   if (!shouldReload) {
     return false;
@@ -16,15 +18,9 @@ const performReload = (shouldReload: any) => {
     _medusa: {}
   };
 
-  Object.keys(req.cache).forEach((k) => {
-    if (
-      k.includes('remote') ||
-      k.includes('runtime') ||
-      k.includes('server') ||
-      k.includes('hot-reload') ||
-      k.includes('react-loadable-manifest')
-    ) {
-      delete req.cache[k];
+  Object.keys(req.cache).forEach((key) => {
+    if (requireCacheRegex.test(key)) {
+      delete req.cache[key];
     }
   });
 
@@ -51,6 +47,7 @@ export const revalidate = () => {
             'hot reloading to refetch'
           );
           res(true);
+          break;
         }
       }
 
@@ -58,7 +55,7 @@ export const revalidate = () => {
 
       if(remoteScope._medusa) {
         for (const property in remoteScope._medusa) {
-          fetch(property).then(res=>res.json()).then((medusaResponse) => {
+          fetchModule(property).then((res:Response)=>res.json()).then((medusaResponse: any) => {
             //@ts-ignore
             if(medusaResponse.version !== remoteScope._medusa[property].version) {
               console.log(
