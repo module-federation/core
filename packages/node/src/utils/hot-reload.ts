@@ -1,7 +1,6 @@
 const hashmap = {} as Record<string, string>;
 import crypto from 'crypto';
 const performReload = (shouldReload: any) => {
-  console.log('shoudlReplace perform', shouldReload);
   if (!shouldReload) {
     return false;
   }
@@ -14,6 +13,7 @@ const performReload = (shouldReload: any) => {
 
   global.__remote_scope__ = {
     _config: {},
+    _medusa: {}
   };
 
   Object.keys(req.cache).forEach((k) => {
@@ -54,6 +54,8 @@ export const revalidate = () => {
         }
       }
 
+      const fetchModule = getFetchModule();
+
       if(remoteScope._medusa) {
         for (const property in remoteScope._medusa) {
           fetch(property).then(res=>res.json()).then((medusaResponse) => {
@@ -64,10 +66,6 @@ export const revalidate = () => {
                 property,
                 'hot reloading to refetch'
               );
-              global.__remote_scope__ = {
-                _config: {},
-                _medusa: {}
-              };
               performReload(true);
               return res(true);
             }
@@ -97,7 +95,6 @@ export const revalidate = () => {
 
         const name = property;
         const url = remote;
-        const fetchModule = getFetchModule();
 
         const fetcher = fetchModule(url)
           .then((re: Response) => {
@@ -158,6 +155,7 @@ function getFetchModule() {
   if (loadedModule) {
     return loadedModule;
   }
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const nodeFetch = require('node-fetch');
   return nodeFetch.default || nodeFetch;
 }
