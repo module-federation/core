@@ -83,10 +83,7 @@ The `NodeFederationPlugin` follows the same API as the [Module Federation Plugin
 An example configuration is presented below:
 
 ```js
-const {
-  NodeFederationPlugin,
-  StreamingTargetPlugin,
-} = require('@module-federation/node');
+const { NodeFederationPlugin, StreamingTargetPlugin } = require('@module-federation/node');
 
 const config = {
   target: isServer ? false : 'web',
@@ -141,9 +138,7 @@ Express has its own route stack, so reloading require cache will not be enough t
 const app = express();
 
 global.clearRoutes = () => {
-  app._router.stack = app._router.stack.filter(
-    (k) => !(k && k.route && k.route.path)
-  );
+  app._router.stack = app._router.stack.filter((k) => !(k && k.route && k.route.path));
 };
 
 // in some other file (within the scope of webpack build)

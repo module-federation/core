@@ -23,10 +23,10 @@ interface Context {
 // const remote = eval(scriptContent + 'module.exports')
 
 /*
- This code is doing the following It iterates over all remotes and checks if they 
- are internal or not If it\'s an internal remote then we add it to our new object 
- with a key of the name of the remote and value as internal If it\'s not an internal 
- remote then we check if there is a in that string which means that this is probably 
+ This code is doing the following It iterates over all remotes and checks if they
+ are internal or not If it\'s an internal remote then we add it to our new object
+ with a key of the name of the remote and value as internal If it\'s not an internal
+ remote then we check if there is a in that string which means that this is probably
  a github repo
   */
 export const parseRemotes = (remotes: Record<string, any>) =>
@@ -158,10 +158,10 @@ export const generateRemoteTemplate = (
   })`;
 
 /*
- This code is taking the remote string and splitting it into two parts The first 
- part of the split is going to be a url which will be used in generate Remote Template 
- function The second part of the split is going to be a global variable name which 
- will also be used in generate Remote Template function If there\'s no global variable 
+ This code is taking the remote string and splitting it into two parts The first
+ part of the split is going to be a url which will be used in generate Remote Template
+ function The second part of the split is going to be a global variable name which
+ will also be used in generate Remote Template function If there\'s no global variable
  name then we\'ll use default as default value for that parameter
   */
 export const parseRemoteSyntax = (remote: any) => {
@@ -205,6 +205,18 @@ class NodeFederationPlugin {
         this._options.remotes || {}
       ) as ModuleFederationPluginOptions['remotes'],
     };
+
+    const chunkFileName = compiler.options?.output?.chunkFilename;
+    if (
+      typeof chunkFileName === 'string' &&
+      !chunkFileName.includes('[hash]') &&
+      !chunkFileName.includes('[contenthash]')
+    ) {
+      compiler.options.output.chunkFilename = chunkFileName.replace(
+        '.js',
+        '.[contenthash].js'
+      );
+    }
 
     new (this.context.ModuleFederationPlugin ||
       (webpack && webpack.container.ModuleFederationPlugin) ||
