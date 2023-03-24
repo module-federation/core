@@ -15,6 +15,7 @@ declare const global: typeof globalThis & {
   flushChunks: () => Promise<Array<string>>;
   __remote_scope__: {
     _config: Record<string, any>;
+    _medusa?: Record<string, any>;
     [K: string]: {
       fake?: boolean;
     };
