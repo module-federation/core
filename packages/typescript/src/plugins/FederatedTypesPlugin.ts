@@ -193,9 +193,10 @@ export class FederatedTypesPlugin {
         }
       } catch (error) {
         this.logger.error(
-          `Unable to download '${remote}' remote types index file`,
-          error
+          `Unable to download '${remote}' remote types index file: `,
+          (error as Error).message
         );
+        this.logger.log(error);
       }
     }
   }
