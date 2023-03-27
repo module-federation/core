@@ -25,6 +25,18 @@ import ChildFederationPlugin from './ChildFederationPlugin';
 
 import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
 
+// @ts-ignore
+const regexEqual = (x, y) => {
+  return (
+    x instanceof RegExp &&
+    y instanceof RegExp &&
+    x.source === y.source &&
+    x.global === y.global &&
+    x.ignoreCase === y.ignoreCase &&
+    x.multiline === y.multiline
+  );
+};
+
 export class NextFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
@@ -186,6 +198,21 @@ export class NextFederationPlugin {
     }
 
     if (this._extraOptions.automaticAsyncBoundary) {
+      const jsRules = compiler.options.module.rules.find(r=>{
+        //@ts-ignore
+        console.log(r.oneOf)
+        //@ts-ignore
+        return (r && r.oneOf)
+      });
+
+      //@ts-ignore
+      if(jsRules && jsRules.oneOf) {
+        //@ts-ignore
+        const foundJsLayer = jsRules.oneOf.find(r => {
+          return regexEqual(r.test, /\.(tsx|ts|js|cjs|mjs|jsx)$/) && !r.issuerLayer
+        })
+        console.log(foundJsLayer);
+      }
       compiler.options.module.rules.push({
         test: (request: string) => {
           if (
