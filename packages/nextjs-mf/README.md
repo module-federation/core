@@ -175,9 +175,7 @@ module.exports = {
       new NextFederationPlugin({
         name: 'next2',
         remotes: {
-          next1: `next1@http://localhost:3001/_next/static/${
-            isServer ? 'ssr' : 'chunks'
-          }/remoteEntry.js`,
+          next1: `next1@http://localhost:3001/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
         },
         filename: 'static/chunks/remoteEntry.js',
         exposes: {
@@ -215,9 +213,7 @@ module.exports = {
       new NextFederationPlugin({
         name: 'next1',
         remotes: {
-          next2: `next2@http://localhost:3000/_next/static/${
-            isServer ? 'ssr' : 'chunks'
-          }/remoteEntry.js`,
+          next2: `next2@http://localhost:3000/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
         },
       })
     );
@@ -237,12 +233,9 @@ import '@module-federation/nextjs-mf/src/include-defaults';
 ```js
 import dynamic from 'next/dynamic';
 
-const SampleComponent = dynamic(
-  () => window.next2.get('./sampleComponent').then((factory) => factory()),
-  {
-    ssr: false,
-  }
-);
+const SampleComponent = dynamic(() => window.next2.get('./sampleComponent').then((factory) => factory()), {
+  ssr: false,
+});
 
 // or
 
@@ -283,9 +276,7 @@ If an error occurs while loading the script, a custom error object is created an
 const { createDelegatedModule } = require('@module-federation/utilities');
 const remotes = {
   checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
-    remote: `checkout@http://localhost:3002/_next/static/${
-      isServer ? 'ssr' : 'chunks'
-    }/remoteEntry.js`,
+    remote: `checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
   }),
 };
 
@@ -339,12 +330,8 @@ For more information on `__resourceQuery` visit: https://webpack.js.org/api/modu
 const remotes = {
   // pass pointer to remote-delegate, pass delegate remote name as query param,
   // at runtime webpack will pass this as __resourceQuery
-  shop: `internal ./remote-delegate.js?remote=shop@http://localhost:3001/_next/static/${
-    isServer ? 'ssr' : 'chunks'
-  }/remoteEntry.js`,
-  checkout: `internal ./remote-delegate.js?remote=checkout@http://localhost:3002/_next/static/${
-    isServer ? 'ssr' : 'chunks'
-  }/remoteEntry.js`,
+  shop: `internal ./remote-delegate.js?remote=shop@http://localhost:3001/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+  checkout: `internal ./remote-delegate.js?remote=checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
 };
 ```
 
@@ -359,12 +346,8 @@ const remotes = {
 const remotes = {
   // pass pointer to remote-delegate, pass deletae remote name as query param,
   // at runtime webpack will pass this as __resourceQuery
-  shop: `internal ./remote-delegate.js?remote=shop@http://localhost:3001/_next/static/${
-    isServer ? 'ssr' : 'chunks'
-  }/remoteEntry.js`,
-  checkout: `internal ./remote-delegate.js?remote=checkout@http://localhost:3002/_next/static/${
-    isServer ? 'ssr' : 'chunks'
-  }/remoteEntry.js`,
+  shop: `internal ./remote-delegate.js?remote=shop@http://localhost:3001/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+  checkout: `internal ./remote-delegate.js?remote=checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
 };
 
 // remote-delegate.js
@@ -392,15 +375,11 @@ module.exports = new Promise((resolve, reject) => {
     url,
     function (event) {
       // resolve promise with container, for browser env or node env.
-      const container =
-        typeof window === 'undefined'
-          ? global.__remote_scope__[containerGlobal]
-          : window[containerGlobal];
+      const container = typeof window === 'undefined' ? global.__remote_scope__[containerGlobal] : window[containerGlobal];
       console.log('delegate resolving', container);
       if (typeof container !== 'undefined') return resolve(container);
       var realSrc = event && event.target && event.target.src;
-      __webpack_error__.message =
-        'Loading script failed.\\n(' + event.message + ': ' + realSrc + ')';
+      __webpack_error__.message = 'Loading script failed.\\n(' + event.message + ': ' + realSrc + ')';
       __webpack_error__.name = 'ScriptExternalLoadError';
       __webpack_error__.stack = event.stack;
       reject(__webpack_error__);
