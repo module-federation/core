@@ -37,7 +37,7 @@ export default extendConfig(modified, () => {
       rollupOptions: {
         input: ['apps/website/src/entry.netlify-edge.tsx', '@qwik-city-plan'],
       },
-      outDir: 'dist/apps/website/.netlify/edge-functions/entry.netlify-edge',
+      outDir: 'dist/apps/website/.netlify/edge-functions',
     },
     plugins: [
       netlifyEdgeAdapter(),
