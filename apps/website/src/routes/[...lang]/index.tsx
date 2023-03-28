@@ -30,7 +30,7 @@ export default component$(() => {
       <MedusaSection />
       <ContactSection />
       <SponsorSection />
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 });

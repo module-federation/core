@@ -6,6 +6,7 @@ import {
   TranslationFn,
   SpeakLocale,
   useSpeakContext,
+  SpeakState,
 } from 'qwik-speak';
 
 export const LOCALES: Record<string, SpeakLocale> = {
@@ -64,12 +65,15 @@ export const useLocalizedUrl = () => {
     const starturl = url.startsWith('/') ? url : `/${url}`;
     const endurl = starturl.endsWith('/') ? starturl : `${starturl}/`;
 
-    const handledLang = config.defaultLocale.lang === speakState.locale.lang ? '' : `/${speakState.locale.lang}`;
+    const handledLang =
+      config.defaultLocale.lang === speakState.locale.lang
+        ? ''
+        : `/${speakState.locale.lang}`;
     const finalUrl = `${handledLang}${endurl}`;
-    
+
     const isAnchor = finalUrl.includes('/#');
 
-    if(isAnchor){
+    if (isAnchor) {
       return finalUrl.slice(0, -1);
     }
 
