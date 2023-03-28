@@ -2,5 +2,5 @@
 edge_functions = "dist/apps/website/.netlify/edge-functions"
 
 [[edge_functions]]
-path = "/*"
-function = "entry.netlify-edge"
+  path = "/*"
+  function = "entry.netlify-edge"
