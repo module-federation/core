@@ -14,7 +14,7 @@ Register the plugin in `webpack configuration (webpack.config.js)` file
 
 ```typescript
 import webpack from 'webpack';
-const FederatedTypesPlugin = require('@module-federation/typescript');
+const { FederatedTypesPlugin } = require('@module-federation/typescript');
 
 const federationConfig = {
   name: 'my-app',
