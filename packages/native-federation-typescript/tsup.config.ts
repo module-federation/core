@@ -1,5 +1,5 @@
+import {join} from 'path'
 import {defineConfig} from 'tsup'
-import { join } from 'path'
 
 const SUPPORTED_BUNDLERS = ['esbuild', 'rollup', 'vite', 'webpack', 'rspack']
 

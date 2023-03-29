@@ -31,6 +31,12 @@
         "lintFilePatterns": ["packages/native-federation-typescript/**/*.ts"]
       }
     },
+    "test": {
+      "executor": "@nrwl/vite:test",
+      "outputs": [
+        "{workspaceRoot}/coverage/packages/native-federation-typescript"
+      ],
+    },
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
