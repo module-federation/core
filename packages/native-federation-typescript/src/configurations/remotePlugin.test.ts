@@ -1,7 +1,7 @@
-import { join } from 'path'
-import { describe, expect, it } from 'vitest'
+import {join} from 'path'
+import {describe, expect, it} from 'vitest'
 
-import { retrieveRemoteConfig } from './remotePlugin'
+import {retrieveRemoteConfig} from './remotePlugin'
 
 describe('hostPlugin', () => {
     const moduleFederationConfig = {
