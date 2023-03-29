@@ -9,6 +9,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } from './index'
 
 describe('index', () => {
+    const projectRoot = join(__dirname, '..', '..', '..')
+
     describe('NativeFederationTypeScriptRemote', () => {
         it('throws for missing moduleFederationConfig', () => {
             // @ts-expect-error missing moduleFederationConfig
@@ -22,7 +24,7 @@ describe('index', () => {
                     name: 'moduleFederationTypescript',
                     filename: 'remoteEntry.js',
                     exposes: {
-                        './index': './src/index.ts',
+                        './index': join(__dirname, './index.ts'),
                     },
                     shared: {
                         react: {singleton: true, eager: true},
@@ -36,7 +38,7 @@ describe('index', () => {
                 additionalFilesToCompile: []
             }
 
-            const distFolder = join('./dist', options.typesFolder)
+            const distFolder = join(projectRoot, 'dist', options.typesFolder)
 
             const unplugin = NativeFederationTypeScriptRemote.rollup(options) as UnpluginOptions
             await unplugin.writeBundle?.()
@@ -71,6 +73,7 @@ describe('index', () => {
                             },
                         ],
                     },
+                    {name: 'index.d.ts'}
                 ],
             })
         })
@@ -81,7 +84,7 @@ describe('index', () => {
                     name: 'moduleFederationTypescript',
                     filename: 'remoteEntry.js',
                     exposes: {
-                        './index': './src/index.ts',
+                      './index': join(__dirname, './index.ts'),
                     },
                     shared: {
                         react: {singleton: true, eager: true},
@@ -139,7 +142,7 @@ describe('index', () => {
                 typesFolder: '@mf-types'
             }
 
-            const distFolder = join('./dist', options.typesFolder)
+            const distFolder = join(projectRoot, 'dist', options.typesFolder)
             const zip = new AdmZip()
             await zip.addLocalFolderPromise(distFolder, {})
 
@@ -148,7 +151,9 @@ describe('index', () => {
             const unplugin = NativeFederationTypeScriptHost.rollup(options) as UnpluginOptions
             await expect(unplugin.writeBundle?.()).resolves.not.toThrow()
 
-            expect(dirTree(options.typesFolder)).toMatchObject({
+            const typesFolder = join(projectRoot, options.typesFolder)
+
+            expect(dirTree(typesFolder)).toMatchObject({
                 name: '@mf-types',
                 children: [
                     {
@@ -183,8 +188,9 @@ describe('index', () => {
                                     },
                                 ],
                             },
+                            {name: "index.d.ts"}
                         ],
-                    },
+                    }
                 ],
             })
 
