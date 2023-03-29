@@ -7,8 +7,8 @@ export default component$(() => {
   return <Slot />;
 });
 
-export const onRequest: RequestHandler = ({ params, locale }) => {
-  const lang = params.lang;
+// export const onRequest: RequestHandler = ({ params, locale }) => {
+//   const lang = params.lang;
   
-  locale(lang || config.defaultLocale.lang);
-};
+//   locale(lang || config.defaultLocale.lang);
+// };
