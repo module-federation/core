@@ -1,2 +1,3 @@
 [build]
+publish = "dist/apps/website"
 edge_functions = "dist/apps/website/.netlify/edge-functions"
