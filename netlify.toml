@@ -1,7 +1,3 @@
 [build]
 publish = "dist/apps/website/client"
 edge_functions = "dist/apps/website/.netlify/edge-functions"
-
-[[edge_functions]]
-  path = "/*"
-  function = "entry.netlify-edge"
