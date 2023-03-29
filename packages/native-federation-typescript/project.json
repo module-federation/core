@@ -36,7 +36,6 @@
       "outputs": [
         "{workspaceRoot}/coverage/packages/native-federation-typescript"
       ],
-      "options": {"watch": true}
     },
     "version": {
       "executor": "@jscutlery/semver:version",
