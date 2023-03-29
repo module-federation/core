@@ -40,7 +40,7 @@ export default extendConfig(modified, () => {
       outDir: 'dist/apps/website/.netlify/edge-functions',
     },
     plugins: [
-      netlifyEdgeAdapter(),
+      // netlifyEdgeAdapter(),
       qwikVite({
         ssr: {
           outDir: join('../../', outDir),
