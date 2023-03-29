@@ -32,6 +32,7 @@ const modified: UserConfig = {
 export default extendConfig(modified, () => {
   const outDir = 'dist/apps/website/.netlify/edge-functions/entry.netlify-edge';
   return {
+
     build: {
       ssr: true,
       rollupOptions: {

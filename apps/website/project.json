@@ -5,13 +5,24 @@
   "sourceRoot": "apps/website/src",
   "targets": {
     "build": {
+      "executor": "qwik-nx:build",
+      "options": {
+        "runSequence": ["website:build.client", "website:build.ssr"],
+        "outputPath": "dist/apps/website"
+      },
+      "configurations": {
+        "preview": {},
+        "netlify":{}
+      }
+    },
+    "build.client": {
       "executor": "@nrwl/vite:build",
       "options": {
         "outputPath": "dist/apps/website",
-        "configFile": "apps/website/adapters/netlify-edge/vite.config.ts"
+        "configFile": "apps/website/vite.config.ts"
       }
     },
-    "build-ssr": {
+    "build.ssr": {
       "executor": "@nrwl/vite:build",
       "defaultConfiguration": "preview",
       "options": {
@@ -21,17 +32,18 @@
         "preview": {
           "ssr": "src/entry.preview.tsx",
           "mode": "production"
+        },
+        "netlify": {
+          "configFile": "apps/website/adapters/netlify-edge/vite.config.ts"
         }
-      },
-      "dependsOn": ["build"]
+      }
     },
     "preview": {
-      "executor": "nx:run-commands",
+      "executor": "@nrwl/vite:preview-server",
       "options": {
-        "command": "vite preview",
-        "cwd": "apps/website"
-      },
-      "dependsOn": ["build-ssr"]
+        "buildTarget": "website:build",
+        "port": 4300
+      }
     },
     "test": {
       "executor": "@nrwl/vite:test",
@@ -43,26 +55,16 @@
     },
     "serve": {
       "executor": "@nrwl/vite:dev-server",
-      "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "website:build",
-        "mode": "ssr"
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "website:build:development",
-          "hmr": true
-        },
-        "production": {
-          "buildTarget": "website:build:production",
-          "hmr": false
-        }
+        "buildTarget": "website:build.client",
+        "mode": "ssr",
+        "port": 4200
       }
     },
-    "serveDebug": {
+    "serve.debug": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node --inspect-brk ../..//node_modules/vite/bin/vite.js --mode ssr --force",
+        "command": "node --inspect-brk ../../node_modules/vite/bin/vite.js --mode ssr --force",
         "cwd": "apps/website"
       }
     },
@@ -72,17 +74,6 @@
       "options": {
         "lintFilePatterns": ["apps/website/**/*.{ts,tsx,js,jsx}"]
       }
-    },
-    "extract-i18n": {
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": [
-          "qwik-speak-extract --sourceFilesPath=apps/website/src --assetsPath=apps/website/public/i18n --supportedLangs=en-US,pt-BR"
-        ]
-      },
-      "configurations": {
-      },
-      "dependsOn": []
     }
   },
   "tags": []

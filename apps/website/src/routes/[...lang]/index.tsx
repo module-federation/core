@@ -18,7 +18,7 @@ import SponsorSection from '../../components/sections/sponsor/sponsor';
 export default component$(() => {
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
       <HeroSection />
       <ExploreSection />
       <DiscordSection />
@@ -30,7 +30,7 @@ export default component$(() => {
       <MedusaSection />
       <ContactSection />
       <SponsorSection />
-      {/* <Footer /> */}
+      <Footer />
     </>
   );
 });
