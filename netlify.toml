@@ -1,5 +1,5 @@
 [build]
-edge_functions = "dist/apps/website/.netlify/edge-functions/entry.netlify-edge"
+edge_functions = "dist/apps/website/.netlify/edge-functions"
 
 [[edge_functions]]
   path = "/*"

@@ -1,20 +1,3 @@
-// import { netlifyEdgeAdapter } from '@builder.io/qwik-city/adapters/netlify-edge/vite';
-// import { extendConfig } from '@builder.io/qwik-city/vite';
-// import baseConfig from '../../vite.config';
-
-// export default extendConfig(baseConfig, () => {
-//   return {
-//     build: {
-//       ssr: true,
-//       rollupOptions: {
-//         input: ['apps/website/src/entry.netlify-edge.tsx', '@qwik-city-plan'],
-//       },
-//       outDir: 'dist/apps/website/edge-functions/entry.netlify-edge',
-//     },
-//     plugins: [netlifyEdgeAdapter()],
-//   };
-// });
-
 import { netlifyEdgeAdapter } from '@builder.io/qwik-city/adapters/netlify-edge/vite';
 import { extendConfig } from '@builder.io/qwik-city/vite';
 import { qwikVite } from '@builder.io/qwik/optimizer';

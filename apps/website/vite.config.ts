@@ -12,7 +12,10 @@ export default defineConfig({
     qwikVite({
       client: {
         outDir: '../../dist/apps/website/client',
-      }
+      },
+      ssr: {
+        outDir: '../../dist/apps/website/server',
+      },
     }),
     tsconfigPaths({ root: '../../' }),
   ],
