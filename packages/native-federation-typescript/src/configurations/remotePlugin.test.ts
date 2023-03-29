@@ -1,7 +1,7 @@
-import {join} from 'path'
-import {describe, expect, it} from 'vitest'
+import { join } from 'path'
+import { describe, expect, it } from 'vitest'
 
-import {retrieveRemoteConfig} from './remotePlugin'
+import { retrieveRemoteConfig } from './remotePlugin'
 
 describe('hostPlugin', () => {
     const moduleFederationConfig = {
@@ -26,8 +26,11 @@ describe('hostPlugin', () => {
 
         describe('correctly intersect with default options', () => {
             it('only moduleFederationConfig provided', () => {
+                const tsConfigPath = join(__dirname, '..', '..', './tsconfig.json')
+
                 const {tsConfig, mapComponentsToExpose, remoteOptions} = retrieveRemoteConfig({
-                    moduleFederationConfig
+                    moduleFederationConfig,
+                    tsConfigPath
                 })
 
                 expect(tsConfig).toStrictEqual({
@@ -53,7 +56,7 @@ describe('hostPlugin', () => {
 
                 expect(remoteOptions).toStrictEqual({
                     additionalFilesToCompile: [],
-                    tsConfigPath: './tsconfig.json',
+                    tsConfigPath,
                     typesFolder: '@mf-types',
                     compiledTypesFolder: 'compiled-types',
                     deleteTypesFolder: true,

@@ -1,12 +1,12 @@
 import AdmZip from 'adm-zip'
 import axios from 'axios'
 import dirTree from 'directory-tree'
-import {rm} from 'fs/promises'
-import {join, resolve} from 'path'
-import {UnpluginOptions} from 'unplugin'
-import {describe, expect, it, vi} from 'vitest'
+import { rm } from 'fs/promises'
+import { join, resolve } from 'path'
+import { UnpluginOptions } from 'unplugin'
+import { describe, expect, it, vi } from 'vitest'
 
-import {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} from './index'
+import { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } from './index'
 
 describe('index', () => {
     describe('NativeFederationTypeScriptRemote', () => {
@@ -29,7 +29,7 @@ describe('index', () => {
                         'react-dom': {singleton: true, eager: true}
                     },
                 },
-                tsConfigPath: './tsconfig.json',
+                tsConfigPath: join(__dirname, '..', './tsconfig.json'),
                 typesFolder: '@mf-types',
                 compiledTypesFolder: 'compiled-types',
                 deleteTypesFolder: false,
