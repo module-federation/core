@@ -1275,7 +1275,7 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@commitlint/cli@^17.1.2":
+"@commitlint/cli@17.4.4":
   version "17.4.4"
   resolved "https://registry.yarnpkg.com/@commitlint/cli/-/cli-17.4.4.tgz#36df08bfa31dbb9a2b6b1d7187a31e578f001a06"
   integrity sha512-HwKlD7CPVMVGTAeFZylVNy14Vm5POVY0WxPkZr7EXLC/os0LH/obs6z4HRvJtH/nHCMYBvUBQhGwnufKfTjd5g==
@@ -1291,7 +1291,7 @@
     resolve-global "1.0.0"
     yargs "^17.0.0"
 
-"@commitlint/config-conventional@^17.1.0":
+"@commitlint/config-conventional@17.4.4":
   version "17.4.4"
   resolved "https://registry.yarnpkg.com/@commitlint/config-conventional/-/config-conventional-17.4.4.tgz#f30b1e5b2e48ce5799a483c200c52f218a98efcc"
   integrity sha512-u6ztvxqzi6NuhrcEDR7a+z0yrh11elY66nRrQIpqsqW6sZmpxYkDLtpRH8jRML+mmxYQ8s4qqF06Q/IQx5aJeQ==
@@ -2574,6 +2574,19 @@
   dependencies:
     nx "15.8.8"
 
+"@nrwl/vite@15.8.8":
+  version "15.8.8"
+  resolved "https://registry.yarnpkg.com/@nrwl/vite/-/vite-15.8.8.tgz#466cdfa4857b58ea9cd66d7f73a72907a4103106"
+  integrity sha512-WFKdv5jyx2Zu1cHmuOewhM0URR1gwGrc1zOGM3eGCSN28EFvIWh9V1ygA3swoPiZCHdjhxGlaZGxEyhT4SYXdQ==
+  dependencies:
+    "@nrwl/devkit" "15.8.8"
+    "@nrwl/js" "15.8.8"
+    "@nrwl/workspace" "15.8.8"
+    "@phenomnomnominal/tsquery" "4.1.1"
+    "@swc/helpers" "^0.4.11"
+    dotenv "~10.0.0"
+    enquirer "~2.3.6"
+
 "@nrwl/web@15.8.8":
   version "15.8.8"
   resolved "https://registry.yarnpkg.com/@nrwl/web/-/web-15.8.8.tgz#6bd9c08a855c8ccb6d9516f8222df7a8fa433a6c"
@@ -3019,7 +3032,7 @@
     "@swc/core-win32-ia32-msvc" "1.3.42"
     "@swc/core-win32-x64-msvc" "1.3.42"
 
-"@swc/helpers@0.4.14", "@swc/helpers@~0.4.0":
+"@swc/helpers@0.4.14", "@swc/helpers@^0.4.11", "@swc/helpers@~0.4.0":
   version "0.4.14"
   resolved "https://registry.yarnpkg.com/@swc/helpers/-/helpers-0.4.14.tgz#1352ac6d95e3617ccb7c1498ff019654f1e12a74"
   integrity sha512-4C7nX/dvpzB7za4Ql9K81xK3HPxCpHMgwTZVyf+9JQ6VUbn9jjZVN7/Nkdz/Ugzs2CSjqnL/UPXroiVBVHUWUw==

@@ -5,7 +5,7 @@ Bundler agnostic plugins to share federated types.
 ## Install
 
 ```bash
-npm i -D https://github.com/ilteoood/native-federation-typescript
+npm i -D @module-federation/native-federation-typescript
 ```
 
 This module provides two plugins:
@@ -27,7 +27,8 @@ This plugin is used to build the federated types.
 ```
 
 #### Additional configuration
-Note that, for Webpack, the plugin automatically inject the `devServer.static.directory` configuration.
+Note that, for Webpack, the plugin automatically inject the `devServer.static.directory` configuration.  
+For the other bundlers, you should configure it by yourself.
 
 ### NativeFederationTypeScriptHost
 This plugin is used to download the federated types.

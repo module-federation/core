@@ -25,7 +25,7 @@ export const NativeFederationTypeScriptRemote = createUnplugin((options: RemoteO
           await rm(retrieveMfTypesPath(tsConfig, remoteOptions), {recursive: true, force: true})
         }
         console.log(ansiColors.green('Federated types created correctly'))
-      } catch(error) {
+      } catch (error) {
         console.error(ansiColors.red(`Unable to compile federated types, ${error}`))
       }
     },
