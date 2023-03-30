@@ -1,5 +1,5 @@
 import ansiColors from 'ansi-colors'
-import {join, normalize, relative} from 'path'
+import {dirname, join, normalize, relative} from 'path'
 import typescript from 'typescript'
 import vueTypescript from 'vue-tsc'
 
@@ -32,7 +32,8 @@ const createHost = (mapComponentsToExpose: Record<string, string>, tsConfig: typ
       const sourceEntry = mapExposeToEntry[sourceFile.fileName]
       if (sourceEntry) {
         const mfeTypeEntry = join(mfTypePath, `${sourceEntry}${DEFINITION_FILE_EXTENSION}`)
-        const relativePathToOutput = relative(mfTypePath, filepath).replace(DEFINITION_FILE_EXTENSION, '').replace(STARTS_WITH_SLASH, '')
+        const mfeTypeEntryDirectory = dirname(mfeTypeEntry)
+        const relativePathToOutput = relative(mfeTypeEntryDirectory, filepath).replace(DEFINITION_FILE_EXTENSION, '').replace(STARTS_WITH_SLASH, '')
         originalWriteFile(mfeTypeEntry, `export * from './${relativePathToOutput}';\nexport { default } from './${relativePathToOutput}';`, writeOrderByteMark)
       }
     }
