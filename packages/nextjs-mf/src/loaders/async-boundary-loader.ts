@@ -61,13 +61,12 @@ export default function (
     callback(null, source, sourceMap);
     return;
   }
-  const hasGIP = !!source.includes('getInitialProps');
-  const hasGSP = !!source.includes('getStaticProps');
-  const hasGSSP = !!source.includes('getServerSideProps');
-  const hasGSPT = !!source.includes('getStaticPaths');
+  const hasGIP = source.includes('getInitialProps');
+  const hasGSP = source.includes('getStaticProps');
+  const hasGSSP = source.includes('getServerSideProps');
+  const hasGSPT = source.includes('getStaticPaths');
 
   const relativeResource = this.utils.contextify(this.context, this.resource);
-  console.log(relativeResource);
 
   const result = [pageTemplate(`${relativeResource}?hasBoundary`)];
 
