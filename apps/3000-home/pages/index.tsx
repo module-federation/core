@@ -1,18 +1,15 @@
 import React, { Suspense } from 'react';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
-
-const CheckoutTitle = dynamic(() => import('checkout/CheckoutTitle'), {
-  ssr: true,
-});
+import FederationBoundary from '@module-federation/utilities/src/components/FederationBoundary';
 const ButtonOldAnt = dynamic(() => import('checkout/ButtonOldAnt'), {
-  ssr: true,
+  suspense: true,
 });
 const WebpackSvgRemote = dynamic(() => import('shop/WebpackSvg'), {
-  ssr: true,
+  suspense: true,
 });
 const WebpackPngRemote = dynamic(() => import('shop/WebpackPng'), {
-  ssr: true,
+  suspense: true,
 });
 
 const Home = () => {
@@ -88,9 +85,14 @@ const Home = () => {
               <h3>This title came from checkout with hooks data!!!</h3>
             </td>
             <td>
-              <Suspense fallback="loading CheckoutTitle">
-                <CheckoutTitle />
-              </Suspense>
+              {/*<Suspense fallback="loading CheckoutTitle">*/}
+              {/*<FederationBoundary*/}
+              {/*  dynamicImporter={() => import('checkout/CheckoutTitle')}*/}
+              {/*/>*/}
+              {/*</Suspense>*/}
+              {/*<Suspense fallback="loading CheckoutTitle">*/}
+              {/*  <CheckoutTitle />*/}
+              {/*</Suspense>*/}
             </td>
           </tr>
           <tr>

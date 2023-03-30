@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, Suspense, lazy } from 'react';
 import type { ComponentClass, ComponentType, PropsWithChildren } from 'react';
 import dynamic from 'next/dynamic';
 import ErrorBoundary from './ErrorBoundary';
@@ -32,22 +32,21 @@ const FederationBoundary: React.FC<FederationBoundaryProps> = ({
   ...rest
 }) => {
   const ImportResult = useMemo(() => {
-    return dynamic(
+    console.log('memoized import');
+    return lazy(
       () =>
+        // @ts-ignore
         dynamicImporter().catch((e: Error) => {
           console.error(e);
           return fallback();
-        }),
-      {
-        ssr: false,
-      }
+        })
     );
   }, [dynamicImporter, fallback]);
-
+console.log('suspended import 1234');
   return (
-    <CustomBoundary>
-      <ImportResult {...rest} />
-    </CustomBoundary>
+      <Suspense fallback="loading">
+        <ImportResult {...rest} />
+      </Suspense>
   );
 };
 
