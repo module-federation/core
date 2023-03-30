@@ -81,7 +81,6 @@ To have the type definitions automatically found for imports, add `paths` in `ts
 | federationConfig              |                  | Yes      | -           | Configuration for `ModuleFederationPlugin`                                                                                                                                                 |
 | typescriptFolderName          | string           | No       | `@mf-types` | The folder name to download remote types and output compiled types                                                                                                                         |
 | typescriptCompiledFolderName  | string           | No       | `_types`    | The folder name to output the raw output from the ts compiler                                                                                                                              |
-downloadRemoteTypesTimeout
 
 ## Usage in Next.js
 
