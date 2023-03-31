@@ -7,7 +7,7 @@ It aims to work for both [`vitest`](https://vitest.dev/) and [`jest`](https://je
 ## Install
 
 ```bash
-npm i -D https://github.com/ilteoood/native-federation-tests
+npm i -D @module-federation/native-federation-tests
 ```
 
 This module provides two plugins:
