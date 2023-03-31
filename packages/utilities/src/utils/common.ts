@@ -47,6 +47,7 @@ const getRuntimeRemotes = () => {
       }
       // if its a delegate module, skip it
       else if (typeof value === 'string' && value.startsWith('internal ')) {
+        // do nothing to internal modules
       }
       // if its just a string (global@url)
       else if (typeof value === 'string') {
