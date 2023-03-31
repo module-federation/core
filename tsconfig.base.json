@@ -20,7 +20,10 @@
       "@module-federation/node": ["packages/node/src/index.ts"],
       "@module-federation/typescript": ["packages/typescript/src/index.ts"],
       "@module-federation/utilities": ["packages/utilities/src/index.ts"],
-      "@module-federation/native-federation-typescript": ["packages/native-federation-typescript/src/index.ts"]
+      "@module-federation/native-federation-typescript": ["packages/native-federation-typescript/src/index.ts"],
+      "@module-federation/native-federation-tests": [
+        "packages/native-federation-tests/src/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]
