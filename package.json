@@ -84,7 +84,7 @@
     "antora-navigator-extension": "git+https://gitlab.com/opendevise/oss/antora-navigator-extension",
     "asciidoctor-kroki": "^0.17.0",
     "commitizen": "^4.2.5",
-    "concurrently": "7.6.0",
+    "concurrently": "8.0.1",
     "cz-conventional-changelog": "^3.3.0",
     "directory-tree": "^3.5.1",
     "eslint": "~8.36.0",
