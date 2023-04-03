@@ -4,8 +4,7 @@ export default function () {
   const LINE_CONTINUATION_RX = /( ) *\\\n *|\\\n( ?) */g;
   const TRAILING_SPACE_RX = / +$/gm;
 
-  const config = (document.getElementById('site-script') || { dataset: {} })
-    .dataset;
+  const config: Record<string, string | null> = (document.getElementById('site-script') || { dataset: {} }).dataset;
   const uiRootPath = config.uiRootPath == null ? '.' : config.uiRootPath;
   const svgAs = config.svgAs;
   const supportsCopy = window.navigator.clipboard;
