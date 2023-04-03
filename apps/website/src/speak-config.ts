@@ -18,7 +18,7 @@ export const config: SpeakConfig = {
   defaultLocale: LOCALES['en-US'],
   supportedLocales: Object.values(LOCALES),
   assets: [
-    'app', // Translations shared by the pages,
+    'app',
     'contact',
     'discord',
     'doc-summary',
@@ -37,6 +37,8 @@ export const config: SpeakConfig = {
 
 export const loadTranslation$: LoadTranslationFn = $(
   async (lang: string, asset: string, origin?: string) => {
+    console.log('origin', origin);
+
     let url = '';
     // Absolute urls on server
     if (isServer && origin) {

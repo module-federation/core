@@ -19,9 +19,7 @@ export default component$(() => {
         <div class="flex flex-col items-center gap-4 flex-1 w-50">
           <form
             name="contact"
-            method="POST"
             data-netlify="true"
-            {...{netlify: true}}
             class="flex-1 w-50 bg-[#EFEFFF] w-full flex flex-col md:grid md:grid-cols-2 gap-4 p-6"
           >
             <div class="flex flex-col gap-1">

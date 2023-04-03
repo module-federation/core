@@ -8,6 +8,8 @@ export default component$(() => {
 });
 
 export const onRequest: RequestHandler = ({ params, locale }) => {
+  console.log(params);
+
   const lang = params.lang;
   
   locale(lang || config.defaultLocale.lang);
