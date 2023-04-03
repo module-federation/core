@@ -33,11 +33,12 @@ export const config: SpeakConfig = {
   ],
 };
 
-const translationData = import.meta.glob('/public/i18n/**/*.json');
+const translationData = import.meta.glob('/public/i18n/**/*.json', { as: 'raw', eager: true });
 
-const loadTranslation$: LoadTranslationFn = server$(async (lang: string, asset: string) =>
-  await translationData[`/public/i18n/${lang}/${asset}.json`]()
+const loadTranslation$: LoadTranslationFn = server$((lang: string, asset: string) =>
+  JSON.parse(translationData[`/public/i18n/${lang}/${asset}.json`])
 );
+
 
 export const translationFn: TranslationFn = {
   loadTranslation$: loadTranslation$,
