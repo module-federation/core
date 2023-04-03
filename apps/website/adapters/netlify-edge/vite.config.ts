@@ -25,6 +25,9 @@ export default extendConfig(modified, () => {
     plugins: [
       netlifyEdgeAdapter(),
       qwikVite({
+        client: {
+          outDir: '../../dist/apps/website/client',
+        },
         ssr: {
           outDir: join('../../', outDir),
         },
