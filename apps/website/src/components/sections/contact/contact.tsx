@@ -22,6 +22,7 @@ export default component$(() => {
             data-netlify="true"
             class="flex-1 w-50 bg-[#EFEFFF] w-full flex flex-col md:grid md:grid-cols-2 gap-4 p-6"
           >
+            <input type="hidden" name="form-name" value="contact" />
             <div class="flex flex-col gap-1">
               <label class="text-blue-gray-500" for="companyEmail">
                 {t('contact.form.company-email.label@@Company email')}

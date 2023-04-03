@@ -39,7 +39,6 @@ const loadTranslation$: LoadTranslationFn = server$((lang: string, asset: string
   JSON.parse(translationData[`/public/i18n/${lang}/${asset}.json`])
 );
 
-
 export const translationFn: TranslationFn = {
   loadTranslation$: loadTranslation$,
 };
