@@ -9,6 +9,19 @@ import styles from './contact.css?inline';
 export default component$(() => {
   useStylesScoped$(styles);
 
+  const handleSubmit = (event: any) => {
+    event.preventDefault();
+
+    const myForm = event.target;
+    const formData = new FormData(myForm);
+
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(formData as any).toString(),
+    }).catch((error) => alert(error));
+  };
+
   return (
     <Section theme={ContainerTheme.OPAQUE}>
       <SectionHeader
@@ -19,9 +32,10 @@ export default component$(() => {
         <div class="flex flex-col items-center gap-4 flex-1 w-50">
           <form
             name="contact"
-            method="POST"
+            target="post"
             data-netlify="true"
             class="flex-1 w-50 bg-[#EFEFFF] w-full flex flex-col md:grid md:grid-cols-2 gap-4 p-6"
+            onSubmit$={handleSubmit}
           >
             <input type="hidden" name="form-name" value="contact" />
             <div class="flex flex-col gap-1">
@@ -35,7 +49,7 @@ export default component$(() => {
                 id="companyEmail"
               />
             </div>
-            {/* <div class="flex flex-col gap-1">
+            <div class="flex flex-col gap-1">
               <label class="text-blue-gray-500" for="companyEmail">
                 {t('contact.form.name.label@@Your name')}
               </label>
@@ -80,7 +94,7 @@ export default component$(() => {
                 id="howCanWeHelp"
                 rows={4}
               ></textarea>
-            </div> */}
+            </div>
 
             <div class="flex justify-end col-span-2">
               <Button
