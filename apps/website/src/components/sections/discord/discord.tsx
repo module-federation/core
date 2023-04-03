@@ -16,7 +16,7 @@ export default component$(() => {
           {t('discord.title@@Join to Module Federation community in')}{' '}
           <a
             class="text-[#00B9FF] underline decoration-solid decoration-1 underline-offset-2"
-            href="#"
+            href="https://discord.gg/T8c6yAxkbv"
           >
             {t('discord.action@@Discord')}
           </a>

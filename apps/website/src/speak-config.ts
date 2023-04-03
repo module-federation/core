@@ -58,25 +58,21 @@ export const translationFn: TranslationFn = {
   loadTranslation$: loadTranslation$,
 };
 
-export const useLocalizedUrl = () => {
-  const speakState = useSpeakContext();
+export const localizedUrl = (url: string, speakState: SpeakState) => {
+  const starturl = url.startsWith('/') ? url : `/${url}`;
+  const endurl = starturl.endsWith('/') ? starturl : `${starturl}/`;
 
-  return (url: string) => {
-    const starturl = url.startsWith('/') ? url : `/${url}`;
-    const endurl = starturl.endsWith('/') ? starturl : `${starturl}/`;
+  const handledLang =
+    config.defaultLocale.lang === speakState.locale.lang
+      ? ''
+      : `/${speakState.locale.lang}`;
+  const finalUrl = `${handledLang}${endurl}`;
 
-    const handledLang =
-      config.defaultLocale.lang === speakState.locale.lang
-        ? ''
-        : `/${speakState.locale.lang}`;
-    const finalUrl = `${handledLang}${endurl}`;
+  const isAnchor = finalUrl.includes('/#');
 
-    const isAnchor = finalUrl.includes('/#');
+  if (isAnchor) {
+    return finalUrl.slice(0, -1);
+  }
 
-    if (isAnchor) {
-      return finalUrl.slice(0, -1);
-    }
-
-    return finalUrl;
-  };
+  return finalUrl;
 };

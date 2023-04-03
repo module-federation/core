@@ -1,6 +1,5 @@
 import { component$, useStylesScoped$ } from '@builder.io/qwik';
-import { $translate as t } from 'qwik-speak';
-import { useLocalizedUrl } from '../../speak-config';
+import { $translate as t, useSpeakContext } from 'qwik-speak';
 import Container, { ContainerTheme } from '../container/container';
 
 import styles from './footer.css?inline';
@@ -11,22 +10,29 @@ export interface FooterProps {
 
 export default component$((props: FooterProps) => {
   useStylesScoped$(styles);
-  const localizedUrl = useLocalizedUrl();
+
+  const speakState = useSpeakContext();
 
   const links = [
     {
       label: t('footer.menu.examples@@Examples'),
-      href: localizedUrl('/showcase'),
+      href: 'https://github.com/module-federation/module-federation-examples',
     },
-    // { label: t('footer.menu.practical-guide@@Practical guide'), href: '#' },
+    {
+      label: t('footer.menu.practical-guide@@Practical guide'),
+      href: 'https://module-federation.myshopify.com/products/practical-module-federation',
+    },
     {
       label: t('footer.menu.medusa@@Try Medusa'),
-      href: localizedUrl('/#medusa'),
+      href: 'https://app.medusa.codes/',
     },
-    { label: t('footer.menu.documentation@@Documentation'), href: '#' },
+    {
+      label: t('footer.menu.documentation@@Documentation'),
+      href: 'https://module-federation.io/en/ipt/2.5/',
+    },
     {
       label: t('footer.menu.sponsor@@Become a sponsor'),
-      href: localizedUrl('/#sponsor'),
+      href: 'https://opencollective.com/module-federation-universe',
     },
   ];
 

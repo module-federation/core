@@ -19,7 +19,7 @@ export default component$(() => {
         <Button
           class="w-full md:w-auto"
           theme={ButtonTheme.SOLID}
-          href="#"
+          href="https://www.medusa.codes"
           type="link"
         >
           <div class="flex items-center gap-3">

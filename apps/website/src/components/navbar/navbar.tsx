@@ -1,7 +1,7 @@
 import { component$, useSignal, useStylesScoped$, $ } from '@builder.io/qwik';
-import { useLocation, useNavigate } from '@builder.io/qwik-city';
-import { useSpeakContext, $translate as t } from 'qwik-speak';
-import { config, LOCALES, useLocalizedUrl } from '../../speak-config';
+import { useLocation } from '@builder.io/qwik-city';
+import { useSpeakContext, $translate as t, } from 'qwik-speak';
+import { config, LOCALES, localizedUrl as locUrl } from '../../speak-config';
 import Card from '../card/card';
 import Container, { ContainerTheme } from '../container/container';
 import { IconName } from '../icon/data';
@@ -26,12 +26,14 @@ export interface NavbarProps {
 // TODO: Extract links to components
 export default component$((props: NavbarProps) => {
   useStylesScoped$(styles);
-  const localizedUrl = useLocalizedUrl();
-
   const navbarOpen = useSignal(false);
   const loc = useLocation();
   const speakState = useSpeakContext();
 
+  const localizedUrl = (url: string) => {
+    return locUrl(url, speakState)
+  }
+  
   const changeLocale$ = $((locale: string) => {
     const newLocale = LOCALES[locale];
     const url = new URL(location.href);
@@ -54,15 +56,15 @@ export default component$((props: NavbarProps) => {
   const navLis = [
     {
       label: t('navbar.menu.documentation@@Documentation'),
-      href: localizedUrl('/')
+      href: localizedUrl('/'),
     },
     {
       label: t('navbar.menu.discover@@Discover'),
-      href: localizedUrl('/#discover')
+      href: localizedUrl('/#discover'),
     },
     {
       label: t('navbar.menu.showcase@@Showcase'),
-      href: localizedUrl('showcase')
+      href: localizedUrl('showcase'),
     },
     // {
     //   label: t('navbar.menu.enterprise@@Enterprise'),
@@ -70,8 +72,8 @@ export default component$((props: NavbarProps) => {
     // },
     {
       label: t('navbar.menu.medusa@@Medusa'),
-      href: localizedUrl('#medusa')
-    }
+      href: localizedUrl('#medusa'),
+    },
   ];
 
   return (
@@ -174,7 +176,7 @@ export default component$((props: NavbarProps) => {
       >
         <Card>
           <ul class="flex flex-col p-4 gap-8">
-          {navLis.map((link) => {
+            {navLis.map((link) => {
               return (
                 <li>
                   <a
@@ -185,7 +187,8 @@ export default component$((props: NavbarProps) => {
                   </a>
                 </li>
               );
-            })}</ul>
+            })}
+          </ul>
         </Card>
       </div>
     </>

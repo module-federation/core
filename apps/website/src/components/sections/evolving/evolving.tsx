@@ -13,27 +13,27 @@ export const bundlers = [
   {
     logo: '/bundlers/webpack.svg',
     name: 'Webpack',
-    actionHref: '#',
+    actionHref: 'https://webpack.js.org/concepts/module-federation',
   },
   {
     logo: '/bundlers/rspack.svg',
     name: 'Rspack',
-    actionHref: '#',
+    actionHref: 'https://www.rspack.dev',
   },
   {
     logo: '/bundlers/vite.svg',
     name: 'Vite',
-    actionHref: '#',
+    actionHref: 'https://vitejs.dev',
   },
   {
     logo: '/bundlers/rollup.svg',
     name: 'Rollup',
-    actionHref: '#',
+    actionHref: 'https://rollupjs.org',
   },
   {
     logo: '/bundlers/esbuild.svg',
     name: 'esBuild',
-    actionHref: '#',
+    actionHref: 'https://esbuild.github.io',
   },
 ];
 
@@ -48,7 +48,7 @@ export default component$(() => {
         'evolving.rfcs.subtitle@@Participate in the community discussions to decide on what features are coming next'
       ),
       actionText: t('evolving.rfcs.action@@Get the book!'),
-      actionHref: '#',
+      actionHref: 'https://github.com/module-federation/universe/discussions/categories/rfc',
     },
     {
       title: t('evolving.roadmap.title@@Module Federation Roadmap'),
@@ -56,7 +56,7 @@ export default component$(() => {
         'evolving.roadmap.subtitle@@Discover the future of Module Federation'
       ),
       actionText: t('evolving.roadmap.action@@Get the book!'),
-      actionHref: '#',
+      actionHref: 'https://miro.com/app/board/uXjVPvdfG2I=/?share_link_id=45887343083',
     },
   ];
 

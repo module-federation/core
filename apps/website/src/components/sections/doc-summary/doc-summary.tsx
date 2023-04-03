@@ -22,7 +22,7 @@ export default component$(() => {
       desc: t(
         'doc-summary.cards.decentralized.desc@@Module Federation allows developers to share code between multiple projects in a decentralized manner, making it easier to manage complex applications.'
       ),
-      actionHref: '#',
+      actionHref: 'https://module-federation.io/en/mf-docs/2.5/setup',
       actionTitle: t('doc-summary.cards.decentralized.action@@Documentation'),
     },
     {

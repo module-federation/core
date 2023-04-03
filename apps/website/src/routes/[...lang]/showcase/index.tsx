@@ -65,7 +65,7 @@ export default component$(() => {
   const theme = ContainerTheme.OPAQUE;
   return (
     <>
-      {/* <Navbar theme={theme} /> */}
+      <Navbar theme={theme} />
       <Section theme={theme}>
         <SectionHeader
           q:slot="header"

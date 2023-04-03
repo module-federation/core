@@ -18,7 +18,7 @@ import SponsorSection from '../../components/sections/sponsor/sponsor';
 export default component$(() => {
   return (
     <>
-      {/* <Navbar /> */}
+      <Navbar />
       <HeroSection />
       <ExploreSection />
       <DiscordSection />

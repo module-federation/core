@@ -21,7 +21,7 @@ export default component$(() => {
       actionText: t(
         'explore.cards.practical-module-federation.action@@Get the book'
       ),
-      actionHref: '#',
+      actionHref: 'https://module-federation.myshopify.com/products/practical-module-federation',
     },
     {
       iconSrc: '/illustrations/implementing-module-federation.svg',
@@ -31,7 +31,7 @@ export default component$(() => {
       actionText: t(
         'explore.cards.implementing-module-federation.action@@Learn more'
       ),
-      actionHref: '#',
+      actionHref: 'https://module-federation.io/en/mf-docs/2.5/setup',
     },
     {
       iconSrc: '/illustrations/conference-talks.svg',

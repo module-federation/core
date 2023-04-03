@@ -24,7 +24,7 @@ export default component$(() => {
           <Button
             class="w-full md:w-[196px]"
             theme={ButtonTheme.SOLID}
-            href="#"
+            href="https://module-federation.io/en/mf-docs/2.5/setup"
             type="link"
           >
             {t('hero.actions.documentation@@Documentation')}
@@ -32,7 +32,7 @@ export default component$(() => {
           <Button
             class="w-full md:w-[196px]"
             theme={ButtonTheme.OUTLINE}
-            href="#"
+            href="https://module-federation.io/en/mf-docs/2.5/getting-started"
             type="link"
           >
             {t('hero.actions.learn@@Learn')}
