@@ -20,6 +20,8 @@ export default component$(() => {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams(formData as any).toString(),
     }).catch((error) => alert(error));
+
+    return false;
   });
 
   return (
