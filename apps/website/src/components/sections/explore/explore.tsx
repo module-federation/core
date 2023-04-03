@@ -70,7 +70,7 @@ export default component$(() => {
                       disabled={card.actionDisabled}
                       type="link"
                     >
-                      {card.actionText}
+                      {card.actionDisabled ? t('explore.disabled') : card.actionText }
 
                       {!card.actionDisabled && (
                         <Icon
