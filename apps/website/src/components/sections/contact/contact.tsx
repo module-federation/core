@@ -19,6 +19,7 @@ export default component$(() => {
         <div class="flex flex-col items-center gap-4 flex-1 w-50">
           <form
             name="contact"
+            method="POST"
             data-netlify="true"
             class="flex-1 w-50 bg-[#EFEFFF] w-full flex flex-col md:grid md:grid-cols-2 gap-4 p-6"
           >
@@ -34,7 +35,7 @@ export default component$(() => {
                 id="companyEmail"
               />
             </div>
-            <div class="flex flex-col gap-1">
+            {/* <div class="flex flex-col gap-1">
               <label class="text-blue-gray-500" for="companyEmail">
                 {t('contact.form.name.label@@Your name')}
               </label>
@@ -79,7 +80,7 @@ export default component$(() => {
                 id="howCanWeHelp"
                 rows={4}
               ></textarea>
-            </div>
+            </div> */}
 
             <div class="flex justify-end col-span-2">
               <Button
