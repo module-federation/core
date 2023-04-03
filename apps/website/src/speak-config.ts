@@ -1,11 +1,9 @@
-import { $ } from '@builder.io/qwik';
-import { isServer } from '@builder.io/qwik/build';
+import { server$ } from '@builder.io/qwik-city';
 import {
   LoadTranslationFn,
   SpeakConfig,
   TranslationFn,
   SpeakLocale,
-  useSpeakContext,
   SpeakState,
 } from 'qwik-speak';
 
@@ -35,25 +33,10 @@ export const config: SpeakConfig = {
   ],
 };
 
-export const loadTranslation$: LoadTranslationFn = $(
-  async (lang: string, asset: string, origin?: string) => {
-    console.log('origin', origin);
+const translationData = import.meta.glob('/public/i18n/**/*.json');
 
-    let url = '';
-    // Absolute urls on server
-    if (isServer && origin) {
-      url = origin;
-    }
-    url += `/i18n/${lang}/${asset}.json`;
-
-    const response = await fetch(url);
-
-    if (response.ok) {
-      return response.json();
-    } else if (response.status === 404) {
-      console.warn(`loadTranslation$: ${url} not found`);
-    }
-  }
+const loadTranslation$: LoadTranslationFn = server$(async (lang: string, asset: string) =>
+  await translationData[`/public/i18n/${lang}/${asset}.json`]()
 );
 
 export const translationFn: TranslationFn = {
