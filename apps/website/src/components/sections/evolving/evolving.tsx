@@ -47,7 +47,7 @@ export default component$(() => {
       subtitle: t(
         'evolving.rfcs.subtitle@@Participate in the community discussions to decide on what features are coming next'
       ),
-      actionText: t('evolving.rfcs.action@@Get the book!'),
+      actionText: t('evolving.rfcs.action@@Take part now!'),
       actionHref: 'https://github.com/module-federation/universe/discussions/categories/rfc',
     },
     {
@@ -55,7 +55,7 @@ export default component$(() => {
       subtitle: t(
         'evolving.roadmap.subtitle@@Discover the future of Module Federation'
       ),
-      actionText: t('evolving.roadmap.action@@Get the book!'),
+      actionText: t('evolving.roadmap.action@@Explore it!'),
       actionHref: 'https://miro.com/app/board/uXjVPvdfG2I=/?share_link_id=45887343083',
     },
   ];

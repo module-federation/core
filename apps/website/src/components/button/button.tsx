@@ -67,6 +67,9 @@ export default component$((props: ButtonProps) => {
       'p-0',
       // TODO: Check why #00B9FF is not on collor pallete
       'relative bg-transparent text-[#00B9FF] !border-transparent',
+      props.disabled
+        ? 'opacity-40 !pointer-events-none'
+        : '',
       '',
     ].join(' '),
   };
@@ -78,7 +81,7 @@ export default component$((props: ButtonProps) => {
       </div>
       <div class="text-lg font-medium leading-[1.125rem]">
         <div class={props.loading ? 'invisible' : ''}>
-          <Slot />
+          <Slot /> 
         </div>
         {props.loading && (
           <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -94,20 +97,22 @@ export default component$((props: ButtonProps) => {
 
   return props.type === 'link' ? (
     <a
-      class={`inline-block border-solid border ${themeClasses[props.theme]} ${props.class || ''}`}
-
+      class={`inline-block border-solid border ${themeClasses[props.theme]} ${
+        props.class || ''
+      }`}
       href={props.href}
     >
       {content}
     </a>
   ) : (
     <button
-      class={`inline-block border-solid border ${themeClasses[props.theme]} ${props.class || ''}`}
-
+      class={`inline-block border-solid border ${themeClasses[props.theme]} ${
+        props.class || ''
+      }`}
       type={props.type}
       onClick$={props.onClick}
     >
-      {content}
+      {content} 
     </button>
   );
 });

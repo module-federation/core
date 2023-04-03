@@ -21,7 +21,8 @@ export default component$(() => {
       actionText: t(
         'explore.cards.practical-module-federation.action@@Get the book'
       ),
-      actionHref: 'https://module-federation.myshopify.com/products/practical-module-federation',
+      actionHref:
+        'https://module-federation.myshopify.com/products/practical-module-federation',
     },
     {
       iconSrc: '/illustrations/implementing-module-federation.svg',
@@ -38,12 +39,14 @@ export default component$(() => {
       title: t('explore.cards.conference-talks.title@@Conference talks'),
       actionText: t('explore.cards.conference-talks.action@@Watch now'),
       actionHref: '#',
+      actionDisabled: true,
     },
     {
       iconSrc: '/illustrations/community-content.svg',
       title: t('explore.cards.community-content.title@@Community content'),
       actionText: t('explore.cards.community-content.action@@Find out more'),
       actionHref: '#',
+      actionDisabled: true,
     },
   ];
 
@@ -64,15 +67,18 @@ export default component$(() => {
                     <Button
                       theme={ButtonTheme.NAKED}
                       href={card.actionHref}
+                      disabled={card.actionDisabled}
                       type="link"
                     >
                       {card.actionText}
 
-                      <Icon
-                        q:slot="suffix"
-                        name={IconName.ARROW_NARROW_RIGHT}
-                        size="24px"
-                      />
+                      {!card.actionDisabled && (
+                        <Icon
+                          q:slot="suffix"
+                          name={IconName.ARROW_NARROW_RIGHT}
+                          size="24px"
+                        />
+                      )}
                     </Button>
                   </div>
                 </div>

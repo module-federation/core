@@ -25,7 +25,7 @@ export default component$(() => {
         <Button
           class="w-full md:w-auto"
           theme={ButtonTheme.SOLID}
-          href="#"
+          href="https://opencollective.com/module-federation-universe"
           type="link"
         >
           {t('sponsor.action@@Become a sponsor')}

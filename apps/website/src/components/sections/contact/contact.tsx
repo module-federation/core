@@ -1,4 +1,4 @@
-import { component$, useStylesScoped$, $ } from '@builder.io/qwik';
+import { component$, useStylesScoped$ } from '@builder.io/qwik';
 import { $translate as t } from 'qwik-speak';
 import Button, { ButtonTheme } from '../../button/button';
 import { ContainerTheme } from '../../container/container';
@@ -8,21 +8,6 @@ import styles from './contact.css?inline';
 // TODO: Check why #EFEFFF is not in the color scheme
 export default component$(() => {
   useStylesScoped$(styles);
-
-  const handleSubmit = $((event: any) => {
-    event.preventDefault();
-
-    const myForm = event.target;
-    const formData = new FormData(myForm);
-
-    fetch('/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(formData as any).toString(),
-    }).catch((error) => alert(error));
-
-    return false;
-  });
 
   return (
     <Section theme={ContainerTheme.OPAQUE}>
@@ -37,9 +22,7 @@ export default component$(() => {
             method="post"
             data-netlify="true"
             class="flex-1 w-50 bg-[#EFEFFF] w-full flex flex-col md:grid md:grid-cols-2 gap-4 p-6"
-            onSubmit$={handleSubmit}
           >
-            <input type="hidden" name="form-name" value="contact" />
             <div class="flex flex-col gap-1">
               <label class="text-blue-gray-500" for="companyEmail">
                 {t('contact.form.company-email.label@@Company email')}

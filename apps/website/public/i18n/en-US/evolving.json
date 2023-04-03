@@ -1,12 +1,12 @@
 {
   "evolving": {
     "rfcs": {
-      "action": "Get the book!",
+      "action": "Take part now!",
       "subtitle": "Participate in the community discussions to decide on what features are coming next",
       "title": "RFCs"
     },
     "roadmap": {
-      "action": "Get the book!",
+      "action": "Explore it!",
       "subtitle": "Discover the future of Module Federation",
       "title": "Module Federation Roadmap"
     },

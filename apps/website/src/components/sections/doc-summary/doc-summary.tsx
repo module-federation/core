@@ -114,7 +114,7 @@ export default component$(() => {
         <Button
           class="w-full md:w-auto"
           theme={ButtonTheme.SOLID}
-          href="#"
+          href="https://module-federation.io/en/mf-docs/2.5/setup"
           type="link"
         >
           {t('doc-summary.action@@Scalability with Module Federation')}

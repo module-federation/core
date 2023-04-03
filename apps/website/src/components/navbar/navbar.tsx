@@ -56,7 +56,7 @@ export default component$((props: NavbarProps) => {
   const navLis = [
     {
       label: t('navbar.menu.documentation@@Documentation'),
-      href: localizedUrl('/'),
+      href: 'https://module-federation.io/en/mf-docs/2.5/setup',
     },
     {
       label: t('navbar.menu.discover@@Discover'),
