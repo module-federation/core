@@ -1,4 +1,4 @@
-import { component$, useStylesScoped$ } from '@builder.io/qwik';
+import { component$, useStylesScoped$, $ } from '@builder.io/qwik';
 import { $translate as t } from 'qwik-speak';
 import Button, { ButtonTheme } from '../../button/button';
 import { ContainerTheme } from '../../container/container';
@@ -9,7 +9,7 @@ import styles from './contact.css?inline';
 export default component$(() => {
   useStylesScoped$(styles);
 
-  const handleSubmit = (event: any) => {
+  const handleSubmit = $((event: any) => {
     event.preventDefault();
 
     const myForm = event.target;
@@ -20,7 +20,7 @@ export default component$(() => {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams(formData as any).toString(),
     }).catch((error) => alert(error));
-  };
+  });
 
   return (
     <Section theme={ContainerTheme.OPAQUE}>
