@@ -13,5 +13,5 @@ export default defineConfig({
   clean: true,
   minify: true,
   format: ['cjs', 'esm'],
-  outDir: 'dist/packages/native-federation-typescript'
+  outDir: 'dist/packages/native-federation-tests'
 })
