@@ -2,40 +2,39 @@
   "name": "native-federation-tests",
   "version": "0.1.0",
   "description": "Bundler agnostic unplugin to share federated tests",
-  "type": "module",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs",
+      "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./rollup": {
       "types": "./dist/rollup.d.ts",
-      "require": "./dist/rollup.cjs",
-      "import": "./dist/rollup.js"
+      "require": "./dist/rollup.js",
+      "import": "./dist/rollup.mjs"
     },
     "./vite": {
       "types": "./dist/vite.d.ts",
-      "require": "./dist/vite.cjs",
-      "import": "./dist/vite.js"
+      "require": "./dist/vite.js",
+      "import": "./dist/vite.mjs"
     },
     "./webpack": {
       "types": "./dist/webpack.d.ts",
-      "require": "./dist/webpack.cjs",
-      "import": "./dist/webpack.js"
+      "require": "./dist/webpack.js",
+      "import": "./dist/webpack.mjs"
     },
     "./esbuild": {
       "types": "./dist/esbuild.d.ts",
-      "require": "./dist/esbuild.cjs",
-      "import": "./dist/esbuild.js"
+      "require": "./dist/esbuild.js",
+      "import": "./dist/esbuild.mjs"
     },
     "./rspack": {
       "types": "./dist/rspack.d.ts",
-      "require": "./dist/rspack.cjs",
-      "import": "./dist/rspack.js"
+      "require": "./dist/rspack.js",
+      "import": "./dist/rspack.mjs"
     }
   },
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "keywords": [
     "module federation",
