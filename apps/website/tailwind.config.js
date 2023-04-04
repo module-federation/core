@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage: {
-        pattern: `url('/pattern_4.png')`,
+        pattern: `url('/pattern_5.png')`,
       },
       maxWidth: {
         1225: '1225px',
@@ -18,10 +18,6 @@ module.exports = {
     colors: {
       transparent: 'transparent',
       white: '#FFFFFF',
-      'deep-purple': {
-        300: '#9589EA',
-        700: '#9589EA',
-      },
       cyan: {
         500: '#71BEDB',
       },
@@ -36,6 +32,10 @@ module.exports = {
         700: '#2F3858',
         800: '#262D47',
         900: '#1C2135',
+      },
+      'deep-purple': {
+        300: '#9589EA',
+        700: '#6559A2',
       },
     },
   },

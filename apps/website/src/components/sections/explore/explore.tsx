@@ -91,7 +91,7 @@ export default component$(() => {
           <Card>
             <div class="items-start p-12 gap-6 max-w-2xl mx-auto hidden md:flex">
               <img
-                class="h-16 w-16 md:h-24 md:w-24"
+                class="h-14 w-14 md:h-24 md:w-24"
                 src="/illustrations/module-federation-courses.svg"
                 alt="Module Federation courses"
               />
@@ -109,7 +109,7 @@ export default component$(() => {
                     )}
                   </p>
                 </div>
-                <Button theme={ButtonTheme.SOLID} href="#" type="link">
+                <Button class="mt-2" theme={ButtonTheme.SOLID} href="#" type="link">
                   {t(
                     'explore.cards.module-federation-courses.action@@Start exploring'
                   )}

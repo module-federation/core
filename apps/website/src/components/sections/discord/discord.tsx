@@ -12,7 +12,7 @@ export default component$(() => {
   return (
     <Section>
       <div class="flex flex-col items-center">
-        <p class="text-3xl text-blue-gray-900 font-bold max-w-lg mx-auto text-center leading-tight md:leading-none">
+        <p class="text-3xl text-blue-gray-900 font-bold max-w-lg mx-auto text-center leading-tight">
           {t('discord.title@@Join to Module Federation community in')}{' '}
           <a
             class="text-[#00B9FF] underline decoration-solid decoration-1 underline-offset-2"

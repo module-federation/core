@@ -95,7 +95,7 @@ export default component$((props: NavbarProps) => {
               return (
                 <li>
                   <a
-                    class="text-blue-gray-900 hover:text-blue-gray-700 text-lg"
+                    class="font-medium text-blue-gray-900 hover:text-deep-purple-700 active:text-deep-purple-300 active:font-semibold text-lg"
                     href={link.href}
                   >
                     {link.label}
