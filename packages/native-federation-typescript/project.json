@@ -11,7 +11,8 @@
         "outputPath": "dist/packages/native-federation-typescript",
         "commands": [
           "tsup --config packages/native-federation-typescript/tsup.config.ts",
-          "cp packages/native-federation-typescript/package.json dist/packages/native-federation-typescript/package.json"
+          "cp packages/native-federation-typescript/package.json dist/packages/native-federation-typescript",
+          "cp packages/native-federation-typescript/README.md dist/packages/native-federation-typescript"
         ]
       }
     },
