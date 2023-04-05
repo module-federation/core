@@ -4,6 +4,23 @@ This file was generated using [@jscutlery/semver](https://github.com/jscutlery/s
 
 # [2.3.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.2.1...typescript-2.3.0) (2023-04-05)
 
+
+### Bug Fixes
+
+* Add timeout to `importRemoteTypes`, reduce error log ([#695](https://github.com/module-federation/nextjs-mf/issues/695)) ([85563ef](https://github.com/module-federation/nextjs-mf/commit/85563efaffb041abe02bf6704ec7ac254634f9d0))
+* release typescript ([946c052](https://github.com/module-federation/nextjs-mf/commit/946c052d1b3268e27a221ce49453e94aa0e98fbd))
+* remove unused dependencies nx added to typescript package ([#690](https://github.com/module-federation/nextjs-mf/issues/690)) ([c87e7d7](https://github.com/module-federation/nextjs-mf/commit/c87e7d74226f060bbd2aff7e65df691e69f6f82a))
+* safely build url to download type files ([#694](https://github.com/module-federation/nextjs-mf/issues/694)) ([ee5429d](https://github.com/module-federation/nextjs-mf/commit/ee5429dea3469ff1bf020f84d88e96caf1075d07))
+
+
+### Features
+
+* Remove MF plugin from Typescript plugin ([#607](https://github.com/module-federation/nextjs-mf/issues/607)) ([94e9149](https://github.com/module-federation/nextjs-mf/commit/94e9149c4be12cc3e2627da7d7a9e11289cab894)), closes [#608](https://github.com/module-federation/nextjs-mf/issues/608) [#608](https://github.com/module-federation/nextjs-mf/issues/608)
+
+
+
+# [2.3.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.2.1...typescript-2.3.0) (2023-04-05)
+
 ### Dependency Updates
 
 * `utils` updated to version `1.4.1`
