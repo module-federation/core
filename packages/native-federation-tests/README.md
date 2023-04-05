@@ -51,7 +51,7 @@ This plugin is used to download the concatenated components mock that will be us
 
 ```ts
 // vite.config.ts
-import {NativeFederationTestsHost, NativeFederationTestsRemote} from 'native-federation-tests/vite'
+import {NativeFederationTestsHost, NativeFederationTestsRemote} from '@module-federation/native-federation-tests/vite'
 
 export default defineConfig({
   plugins: [
@@ -84,7 +84,7 @@ export default defineConfig({
 
 ```ts
 // rollup.config.js
-import {NativeFederationTestsHost, NativeFederationTestsRemote} from 'native-federation-tests/rollup'
+import {NativeFederationTestsHost, NativeFederationTestsRemote} from '@module-federation/native-federation-tests/rollup'
 
 export default {
   plugins: [
@@ -101,7 +101,7 @@ export default {
 
 ```ts
 // webpack.config.js
-const {NativeFederationTestsHost, NativeFederationTestsRemote} = require('native-federation-tests/webpack')
+const {NativeFederationTestsHost, NativeFederationTestsRemote} = require('@module-federation/native-federation-tests/webpack')
 module.exports = {
   /* ... */
   plugins: [
@@ -119,7 +119,7 @@ module.exports = {
 ```ts
 // esbuild.config.js
 import { build } from 'esbuild'
-import {NativeFederationTestsHost, NativeFederationTestsRemote} from 'native-federation-tests/esbuild'
+import {NativeFederationTestsHost, NativeFederationTestsRemote} from '@module-federation/native-federation-tests/esbuild'
 
 build({
   plugins: [
@@ -137,7 +137,7 @@ build({
 
 ```ts
 // rspack.config.js
-const {NativeFederationTestsHost, NativeFederationTestsRemote} = require('native-federation-tests/rspack')
+const {NativeFederationTestsHost, NativeFederationTestsRemote} = require('@module-federation/native-federation-tests/rspack')
 
 module.exports = {
   /* ... */

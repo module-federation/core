@@ -9,7 +9,12 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/native-federation-typescript",
-        "command": "tsup --config packages/native-federation-typescript/tsup.config.ts"
+        "parallel": false,
+        "commands": [
+          "tsup --config packages/native-federation-typescript/tsup.config.ts",
+          "cp packages/native-federation-typescript/package.json dist/packages/native-federation-typescript",
+          "cp packages/native-federation-typescript/*.md dist/packages/native-federation-typescript"
+        ]
       }
     },
     "publish": {
@@ -35,7 +40,7 @@
       "executor": "@nrwl/vite:test",
       "outputs": [
         "{workspaceRoot}/coverage/packages/native-federation-typescript"
-      ],
+      ]
     },
     "version": {
       "executor": "@jscutlery/semver:version",

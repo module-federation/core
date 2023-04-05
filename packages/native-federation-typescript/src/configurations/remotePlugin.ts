@@ -10,7 +10,7 @@ const defaultOptions = {
   compiledTypesFolder: 'compiled-types',
   deleteTypesFolder: true,
   additionalFilesToCompile: [],
-  compilerInstance: 'tsc'
+  compilerInstance: 'tsc' as const
 }
 
 const readTsConfig = ({tsConfigPath, typesFolder, compiledTypesFolder}: Required<RemoteOptions>): typescript.CompilerOptions => {
