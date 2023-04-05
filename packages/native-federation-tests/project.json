@@ -14,7 +14,7 @@
         "commands": [
           "tsup --config packages/native-federation-tests/tsup.config.ts",
           "cp packages/native-federation-tests/package.json dist/packages/native-federation-tests",
-          "cp packages/native-federation-tests/README.md dist/packages/native-federation-tests"
+          "cp packages/native-federation-tests/*.md dist/packages/native-federation-tests"
         ]
       }
     },

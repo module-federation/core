@@ -12,7 +12,7 @@
         "commands": [
           "tsup --config packages/native-federation-typescript/tsup.config.ts",
           "cp packages/native-federation-typescript/package.json dist/packages/native-federation-typescript",
-          "cp packages/native-federation-typescript/README.md dist/packages/native-federation-typescript"
+          "cp packages/native-federation-typescript/*.md dist/packages/native-federation-typescript"
         ]
       }
     },
@@ -39,7 +39,7 @@
       "executor": "@nrwl/vite:test",
       "outputs": [
         "{workspaceRoot}/coverage/packages/native-federation-typescript"
-      ],
+      ]
     },
     "version": {
       "executor": "@jscutlery/semver:version",
