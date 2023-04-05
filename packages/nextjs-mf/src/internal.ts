@@ -181,8 +181,30 @@ export const removePlugins = [
   'ProfilingPlugin',
   'DropClientPage',
   'ReactFreshWebpackPlugin',
+  'NextMedusaPlugin',
 ];
 
+/*
+ This code is checking if the remote is a string and that it includes an symbol If
+ both of these conditions are met then we extract the url and global from the remote
+  */
+export const parseRemoteSyntax = (remote: string) => {
+  if (
+    typeof remote === 'string' &&
+    remote.includes('@') &&
+    !remote.startsWith('internal ')
+  ) {
+    const [url, global] = extractUrlAndGlobal(remote);
+    return generateRemoteTemplate(url, global);
+  }
+
+  return remote;
+};
+/*
+ This code is doing the following It\'s iterating over all remotes and checking if
+ they are using a custom promise template or not If it\'s a custom promise template
+ we\'re parsing the remote syntax to get the module name and version number
+  */
 export const parseRemotes = (remotes: Record<string, any>) =>
   Object.entries(remotes).reduce((acc, [key, value]) => {
     // check if user is passing a internal "delegate module" reference
@@ -205,10 +227,20 @@ export const getDelegates = (remotes: Record<string, any>) => {
     if (value.startsWith('internal ')) {
       return { ...acc, [key]: value };
     }
+
     return acc;
   }, {} as Record<string, string>);
 };
 
+/*
+ This code is parsing the options shared object and creating a new object with all
+ of the shared configs Then it is iterating over each key in this new object and
+ assigning them to an array that will be returned by this function This array contains
+ objects that are used as values for the shared property of Module Federation Plugin
+ Options The first thing we do here is check if the item passed into shared was a
+ string or not if it\'s an array If it wasn\'t then throw an error because there should
+ only be strings in there Otherwise continue on with our code below
+  */
 const parseShareOptions = (options: ModuleFederationPluginOptions) => {
   const sharedOptions: [string, SharedConfig][] = parseOptions(
     options.shared,

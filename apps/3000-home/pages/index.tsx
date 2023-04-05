@@ -14,7 +14,6 @@ const WebpackSvgRemote = dynamic(() => import('shop/WebpackSvg'), {
 const WebpackPngRemote = dynamic(() => import('shop/WebpackPng'), {
   ssr: true,
 });
-console.log('loaded home app', import('shop/WebpackPng'), import('checkout/ButtonOldAnt'));
 
 const Home = () => {
   return (

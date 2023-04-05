@@ -294,7 +294,7 @@ const remotes = {
 
 //remote-delegate.js
 import { importDelegatedModule } from '@module-federation/utilities';
-
+//Delegate MUST use module.exports, not export default - this is a webpack limitation
 module.exports = new Promise((resolve, reject) => {
   console.log('Delegate being called for', __resourceQuery);
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');

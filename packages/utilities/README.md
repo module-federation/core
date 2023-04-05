@@ -29,18 +29,11 @@ import { FederationBoundary } from '@module-federation/utilities/src/utils/react
 
 // defining dynamicImport and fallback outside the Component to keep the component identity
 // another alternative would be to use useMemo
-const dynamicImport = () =>
-  import('some_remote_host_name').then((m) => m.Component);
+const dynamicImport = () => import('some_remote_host_name').then((m) => m.Component);
 const fallback = () => import('@npm/backup').then((m) => m.Component);
 
 const MyPage = () => {
-  return (
-    <FederationBoundary
-      dynamicImporter={dynamicImport}
-      fallback={fallback}
-      customBoundary={CustomErrorBoundary}
-    />
-  );
+  return <FederationBoundary dynamicImporter={dynamicImport} fallback={fallback} customBoundary={CustomErrorBoundary} />;
 };
 ```
 
@@ -73,9 +66,7 @@ importRemote({
 );
 
 // If Bar is a React component you can use it with lazy and Suspense just like a dynamic import:
-const Bar = lazy(() =>
-  importRemote({ url: 'http://localhost:3001', scope: 'Foo', module: 'Bar' })
-);
+const Bar = lazy(() => importRemote({ url: 'http://localhost:3001', scope: 'Foo', module: 'Bar' }));
 
 return (
   <Suspense fallback={<div>Loading Bar...</div>}>
@@ -130,9 +121,7 @@ const dynamicImporter = () =>
 const fallback = () => import('@npm/backup').then((m) => m.Component);
 
 const Bar = () => {
-  return (
-    <FederationBoundary dynamicImporter={dynamicImporter} fallback={fallback} />
-  );
+  return <FederationBoundary dynamicImporter={dynamicImporter} fallback={fallback} />;
 };
 ```
 

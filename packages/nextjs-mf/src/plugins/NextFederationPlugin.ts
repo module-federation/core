@@ -96,10 +96,7 @@ export class NextFederationPlugin {
         name: this._options.name,
       };
       // output remote to ssr if server
-      this._options.filename = this._options.filename.replace(
-        '/chunks',
-        '/ssr'
-      );
+      this._options.filename = path.basename(this._options.filename);
 
       // should this be a plugin that we apply to the compiler?
       internalizeSharedPackages(this._options, compiler);
@@ -110,7 +107,8 @@ export class NextFederationPlugin {
         compiler.options.externals[0] = function (ctx, callback) {
           if (
             ctx.request &&
-            ctx.request.includes('@module-federation/utilities')
+            (ctx.request.includes('@module-federation/utilities') ||
+              ctx.request.includes('@module-federation/dashboard-plugin'))
           ) {
             return callback();
           }
@@ -157,19 +155,25 @@ export class NextFederationPlugin {
       };
     }
 
+    const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];
+
     //patch next
     compiler.options.module.rules.push({
       test(req: string) {
         if (
-          req.includes(path.join(compiler.context, 'pages/')) ||
-          req.includes(path.join(compiler.context, 'app/'))
+          allowedPaths.some((p) => req.includes(path.join(compiler.context, p)))
         ) {
           return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
         }
         return false;
       },
       include: compiler.context,
-      exclude: /node_modules/,
+      exclude: [
+        /node_modules/,
+        /_middleware/,
+        /pages[\\/]middleware/,
+        /pages[\\/]api/,
+      ],
       loader: path.resolve(__dirname, '../loaders/patchDefaultSharedLoader'),
     });
 
@@ -183,7 +187,17 @@ export class NextFederationPlugin {
         const internalHoist = /internal-delegate-hoist/;
         const nodeModules = /node_modules/;
         compiler.options.module.rules.push({
-          test: (req) => {
+          test(req: string) {
+            if (isServer) {
+              // server has no common chunk or entry to hoist into
+              if (
+                allowedPaths.some((p) =>
+                  req.includes(path.join(compiler.context, p))
+                )
+              ) {
+                return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
+              }
+            }
             if (req.includes('internal-delegate-hoist')) {
               return true;
             }
@@ -216,14 +230,21 @@ export class NextFederationPlugin {
       compiler.options.module.rules.push({
         test: (request: string) => {
           if (
-            request.includes(path.join(compiler.context, 'pages/')) ||
-            request.includes(path.join(compiler.context, 'app/'))
+            allowedPaths.some((p) =>
+              request.includes(path.join(compiler.context, p))
+            )
           ) {
             return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request);
           }
           return false;
         },
-        exclude: [/node_modules/, /_document/, /_middleware/, /pages\/api/],
+        exclude: [
+          /node_modules/,
+          /_document/,
+          /_middleware/,
+          /pages[\\/]middleware/,
+          /pages[\\/]api/,
+        ],
         resourceQuery: (query) => !query.includes('hasBoundary'),
         loader: path.resolve(__dirname, '../loaders/async-boundary-loader'),
       });

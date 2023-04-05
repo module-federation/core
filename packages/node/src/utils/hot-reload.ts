@@ -1,9 +1,41 @@
 const hashmap = {} as Record<string, string>;
 import crypto from 'crypto';
+const requireCacheRegex = /(remote|runtime|server|hot-reload|react-loadable-manifest)/;
 
+const performReload = (shouldReload: any) => {
+  if (!shouldReload) {
+    return false;
+  }
+  let req: NodeRequire;
+  if (typeof __non_webpack_require__ === 'undefined') {
+    req = require;
+  } else {
+    req = __non_webpack_require__ as NodeRequire;
+  }
+
+  global.__remote_scope__ = {
+    _config: {},
+    _medusa: {}
+  };
+
+  Object.keys(req.cache).forEach((key) => {
+    if (requireCacheRegex.test(key)) {
+      delete req.cache[key];
+    }
+  });
+
+  return true;
+}
+/*
+ This code is doing two things First it checks if there are any fake remotes in the
+ global scope If so then we need to reload the server because a remote has changed
+ and needs to be fetched again Second it checks for each remote that was loaded by
+ webpack whether its hash has changed since last time or not
+  */
 export const revalidate = () => {
   if (global.__remote_scope__) {
     const remoteScope = global.__remote_scope__;
+
 
     return new Promise((res) => {
       const fetches = [];
@@ -15,6 +47,26 @@ export const revalidate = () => {
             'hot reloading to refetch'
           );
           res(true);
+          break;
+        }
+      }
+
+      const fetchModule = getFetchModule();
+
+      if(remoteScope._medusa) {
+        for (const property in remoteScope._medusa) {
+          fetchModule(property).then((res:Response)=>res.json()).then((medusaResponse: any) => {
+            //@ts-ignore
+            if(medusaResponse.version !== remoteScope._medusa[property].version) {
+              console.log(
+                'medusa config changed',
+                property,
+                'hot reloading to refetch'
+              );
+              performReload(true);
+              return res(true);
+            }
+          });
         }
       }
 
@@ -40,7 +92,6 @@ export const revalidate = () => {
 
         const name = property;
         const url = remote;
-        const fetchModule = getFetchModule();
 
         const fetcher = fetchModule(url)
           .then((re: Response) => {
@@ -83,44 +134,25 @@ export const revalidate = () => {
       }
       Promise.all(fetches).then(() => res(false));
     }).then((shouldReload) => {
-      if (!shouldReload) {
-        return false;
-      }
-      let req: NodeRequire;
-      if (typeof __non_webpack_require__ === 'undefined') {
-        req = require;
-      } else {
-        req = __non_webpack_require__ as NodeRequire;
-      }
-
-      global.__remote_scope__ = {
-        _config: {},
-      };
-
-      Object.keys(req.cache).forEach((k) => {
-        if (
-          k.includes('remote') ||
-          k.includes('runtime') ||
-          k.includes('server') ||
-          k.includes('hot-reload') ||
-          k.includes('react-loadable-manifest')
-        ) {
-          delete req.cache[k];
-        }
-      });
-
-      return true;
+      return performReload(shouldReload);
     });
   }
 
   return Promise.resolve(false);
 };
 
+/*
+ This code is importing the nodefetch module and assigning it to a variable named
+ node Fetch The code then checks if there\'s an existing global object called webpack
+ Chunk Load which is used by webpack If so we use that instead of nodefetch This
+ allows us to use fetch in our tests without having to mock out nodefetch
+  */
 function getFetchModule() {
   const loadedModule = global.webpackChunkLoad || global.fetch;
   if (loadedModule) {
     return loadedModule;
   }
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const nodeFetch = require('node-fetch');
   return nodeFetch.default || nodeFetch;
 }

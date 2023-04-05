@@ -32,35 +32,39 @@ const getRuntimeRemotes = () => {
     const remoteVars = (process.env.REMOTES || {}) as RemoteVars;
 
     const runtimeRemotes = Object.entries(remoteVars).reduce(function (
-        acc,
-        item
-      ) {
-        const [key, value] = item;
-        // if its an object with a thenable (eagerly executing function)
-        if (typeof value === 'object' && typeof value.then === 'function') {
-          acc[key] = {asyncContainer: value};
-        }
-        // if its a function that must be called (lazily executing function)
-        else if (typeof value === 'function') {
-          // @ts-ignore
-          acc[key] = {asyncContainer: value};
-        }
-        // if its just a string (global@url)
-        else if (typeof value === 'string') {
-          const [url, global] = extractUrlAndGlobal(value);
-          acc[key] = {global, url};
-        }
-        // we dont know or currently support this type
-        else {
-          //@ts-ignore
-          console.log('remotes process', process.env.REMOTES);
-          throw new Error(
-            `[mf] Invalid value received for runtime_remote "${key}"`
-          );
-        }
-        return acc;
-      },
-      {} as RuntimeRemotesMap);
+      acc,
+      item
+    ) {
+      const [key, value] = item;
+      // if its an object with a thenable (eagerly executing function)
+      if (typeof value === 'object' && typeof value.then === 'function') {
+        acc[key] = { asyncContainer: value };
+      }
+      // if its a function that must be called (lazily executing function)
+      else if (typeof value === 'function') {
+        // @ts-ignore
+        acc[key] = { asyncContainer: value };
+      }
+      // if its a delegate module, skip it
+      else if (typeof value === 'string' && value.startsWith('internal ')) {
+        // do nothing to internal modules
+      }
+      // if its just a string (global@url)
+      else if (typeof value === 'string') {
+        const [url, global] = extractUrlAndGlobal(value);
+        acc[key] = { global, url };
+      }
+      // we dont know or currently support this type
+      else {
+        //@ts-ignore
+        console.log('remotes process', process.env.REMOTES);
+        throw new Error(
+          `[mf] Invalid value received for runtime_remote "${key}"`
+        );
+      }
+      return acc;
+    },
+    {} as RuntimeRemotesMap);
 
     return runtimeRemotes;
   } catch (err) {
@@ -166,7 +170,7 @@ export const createDelegatedModule = (
   delegate: string,
   params: { [key: string]: any }
 ) => {
-  let queries: string[] = [];
+  const queries: string[] = [];
   for (const [key, value] of Object.entries(params)) {
     if (Array.isArray(value) || typeof value === 'object') {
       throw new Error(
@@ -369,14 +373,19 @@ export const getContainer = async (
   }
 
   if (typeof remoteContainer === 'string') {
-    if (window[remoteContainer]) {
-      return window[remoteContainer];
+    if (window[remoteContainer as unknown as number]) {
+      return window[
+        remoteContainer as unknown as number
+      ] as unknown as WebpackRemoteContainer;
     }
 
     return;
   } else {
-    if (window['uniqueKey' as keyof typeof remoteContainer]) {
-      return window['uniqueKey' as keyof typeof remoteContainer];
+    const uniqueKey = remoteContainer.uniqueKey;
+    if (window[uniqueKey as unknown as number]) {
+      return window[
+        uniqueKey as unknown as number
+      ] as unknown as WebpackRemoteContainer;
     }
 
     const container = await injectScript({

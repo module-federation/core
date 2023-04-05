@@ -2,6 +2,36 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.12.2](https://github.com/module-federation/nextjs-mf/compare/node-0.12.1...node-0.12.2) (2023-03-24)
+
+
+### Bug Fixes
+
+* Medusa hot reloading ([#685](https://github.com/module-federation/nextjs-mf/issues/685)) ([6f14306](https://github.com/module-federation/nextjs-mf/commit/6f143068252eefec7a717ea0b8fef51a709ba539))
+
+
+
+## [0.12.1](https://github.com/module-federation/nextjs-mf/compare/node-0.12.0...node-0.12.1) (2023-03-24)
+
+
+### Bug Fixes
+
+* enable chunk hashing all the time ([#669](https://github.com/module-federation/nextjs-mf/issues/669)) ([7417bc2](https://github.com/module-federation/nextjs-mf/commit/7417bc2acead56aa066a6b14ddb57a2474ea72e0))
+
+
+
+# [0.12.0](https://github.com/module-federation/nextjs-mf/compare/node-0.11.1...node-0.12.0) (2023-03-14)
+
+### Dependency Updates
+
+* `utils` updated to version `1.4.0`
+
+### Features
+
+* Medusa Support in NextFederationPlugin ([#609](https://github.com/module-federation/nextjs-mf/issues/609)) ([0bbba38](https://github.com/module-federation/nextjs-mf/commit/0bbba384c45b7d149b7a6be2dfbe9851b541b528)), closes [#606](https://github.com/module-federation/nextjs-mf/issues/606)
+
+
+
 ## [0.11.1](https://github.com/module-federation/nextjs-mf/compare/node-0.11.0...node-0.11.1) (2023-02-09)
 
 

@@ -76,14 +76,23 @@ export class ChildFederationPlugin {
       // using ModuleFederationPlugin does not work, i had to fork because of afterPlugins hook on containerPlugin.
       const FederationPlugin = ChildFriendlyModuleFederationPlugin;
 
+      const MedusaPlugin = compiler.options.plugins.find((p) => {
+        return p.constructor.name === 'NextMedusaPlugin';
+      });
+
+      let uniqueName = buildName;
+      if (MedusaPlugin && compiler.options.output.uniqueName !== '_N_E') {
+        uniqueName = compiler.options.output.uniqueName;
+      }
+
       const childOutput = {
         ...compiler.options.output,
         path: outputPath,
         // path: deriveOutputPath(isServer, compiler.options.output.path),
         name: 'child-' + compiler.options.name,
         publicPath: 'auto',
-        chunkLoadingGlobal: buildName + 'chunkLoader',
-        uniqueName: buildName,
+        chunkLoadingGlobal: uniqueName + 'chunkLoader',
+        uniqueName: uniqueName,
         library: {
           name: buildName,
           type: library?.type as string,
@@ -108,6 +117,15 @@ export class ChildFederationPlugin {
       const federationPluginOptions: ModuleFederationPluginOptions = {
         // library: {type: 'var', name: buildName},
         ...this._options,
+        name: MedusaPlugin
+          ? '__REMOTE_VERSION__' + this._options.name
+          : this._options.name,
+        library: {
+          type: this._options.library?.type as string,
+          name: MedusaPlugin
+            ? '__REMOTE_VERSION__' + this._options.name
+            : this._options.name,
+        },
         filename: computeRemoteFilename(
           isServer,
           this._options.filename as string
@@ -129,13 +147,12 @@ export class ChildFederationPlugin {
           ...this._options.shared,
         },
       };
-
       if (compiler.options.name === 'client') {
         plugins = [
           new webpack.EntryPlugin(
             compiler.context,
             require.resolve('../internal-delegate-hoist'),
-            buildName
+            federationPluginOptions.name
           ),
           new FederationPlugin(federationPluginOptions),
           new webpack.web.JsonpTemplatePlugin(),
@@ -159,7 +176,7 @@ export class ChildFederationPlugin {
           new webpack.EntryPlugin(
             compiler.context,
             require.resolve('../internal-delegate-hoist'),
-            buildName
+            federationPluginOptions.name
           ),
           new NodeFederationPlugin(federationPluginOptions, {
             ModuleFederationPlugin: FederationPlugin,
@@ -250,6 +267,15 @@ export class ChildFederationPlugin {
       const MiniCss = childCompiler.options.plugins.find((p) => {
         return p.constructor.name === 'NextMiniCssExtractPlugin';
       }) as any;
+
+      if (MedusaPlugin) {
+        //@ts-ignore
+        new MedusaPlugin.constructor({
+          //@ts-ignore
+          ...MedusaPlugin._options,
+          filename: compiler.options.name + '-dashboard-child.json',
+        }).apply(childCompiler);
+      }
 
       childCompiler.options.plugins = childCompiler.options.plugins.filter(
         (plugin) => !removePlugins.includes(plugin.constructor.name)

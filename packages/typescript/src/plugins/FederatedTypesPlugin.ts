@@ -25,16 +25,13 @@ const PLUGIN_NAME = 'FederatedTypesPlugin';
 
 export class FederatedTypesPlugin {
   private normalizeOptions!: ReturnType<typeof normalizeOptions>;
-  private webpackCompilerOptions!: Compiler['options'];
   private logger!: LoggerInstance;
 
   constructor(private options: FederatedTypesPluginOptions) {}
 
   apply(compiler: Compiler) {
     this.normalizeOptions = normalizeOptions(this.options, compiler);
-    this.webpackCompilerOptions = compiler.options;
 
-    const { webpack } = compiler;
     const { disableDownloadingRemoteTypes, disableTypeCompilation } =
       this.normalizeOptions;
 
@@ -46,16 +43,6 @@ export class FederatedTypesPlugin {
     this.logger = Logger.setLogger(
       compiler.getInfrastructureLogger(PLUGIN_NAME)
     );
-
-    const isMFPluginExists = this.webpackCompilerOptions.plugins.some(
-      (plugin) => plugin.constructor.name === 'ModuleFederationPlugin'
-    );
-
-    if (isMFPluginExists) {
-      throw new Error(
-        `${PLUGIN_NAME} by default packs 'ModuleFederationPlugin' under the hood. Please remove 'ModuleFederation' Plugin from your configuration`
-      );
-    }
 
     compiler.options.watchOptions.ignored =
       this.normalizeOptions.ignoredWatchOptions;
@@ -96,10 +83,6 @@ export class FederatedTypesPlugin {
 
       new FederatedTypesStatsPlugin(this.normalizeOptions).apply(compiler);
     }
-
-    new webpack.container.ModuleFederationPlugin(
-      this.options.federationConfig
-    ).apply(compiler);
   }
 
   private compileTypes() {
@@ -185,7 +168,9 @@ export class FederatedTypesPlugin {
           if (filesToCacheBust.length > 0) {
             await Promise.all(
               filesToCacheBust.map((file) => {
-                const url = `${origin}/${typescriptFolderName}/${file}`;
+                const url = new URL(
+                  path.join(origin, typescriptFolderName, file)
+                ).toString();
                 const destination = path.join(
                   this.normalizeOptions.webpackCompilerOptions
                     .context as string,

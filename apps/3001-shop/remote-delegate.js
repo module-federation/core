@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+
 import { importDelegatedModule } from '@module-federation/utilities';
 
 // Delegates are currently not used in this example, but are left here for testing.

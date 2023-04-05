@@ -2,6 +2,55 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.2.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.2.1...nextjs-mf-6.2.2) (2023-03-24)
+
+### Dependency Updates
+
+* `node` updated to version `0.12.2`
+* `node` updated to version `0.12.2`
+
+
+## [6.2.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.2.0...nextjs-mf-6.2.1) (2023-03-18)
+
+
+### Bug Fixes
+
+* hoist delegate glue code into container when medusa is used ([#642](https://github.com/module-federation/nextjs-mf/issues/642)) ([a63cd94](https://github.com/module-federation/nextjs-mf/commit/a63cd944546a6e5d62055fcec4d7e1f04f618ded))
+
+
+
+# [6.2.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.1.4...nextjs-mf-6.2.0) (2023-03-14)
+
+### Dependency Updates
+
+* `utils` updated to version `1.4.0`
+* `node` updated to version `0.12.0`
+
+### Features
+
+* Medusa Support in NextFederationPlugin ([#609](https://github.com/module-federation/nextjs-mf/issues/609)) ([0bbba38](https://github.com/module-federation/nextjs-mf/commit/0bbba384c45b7d149b7a6be2dfbe9851b541b528)), closes [#606](https://github.com/module-federation/nextjs-mf/issues/606)
+
+
+
+## [6.1.4](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.1.3...nextjs-mf-6.1.4) (2023-03-08)
+
+
+### Bug Fixes
+
+* exclude next middleware from async boundary loader ([#615](https://github.com/module-federation/nextjs-mf/issues/615)) ([9560d92](https://github.com/module-federation/nextjs-mf/commit/9560d926de176e08b6e1b7a32488f5036cb04be3))
+* include src folder in paths validation ([#605](https://github.com/module-federation/nextjs-mf/issues/605)) ([89a9417](https://github.com/module-federation/nextjs-mf/commit/89a9417faaad50533c4bca1683ea94406ca6f532))
+
+
+
+## [6.1.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.1.2...nextjs-mf-6.1.3) (2023-02-17)
+
+
+### Bug Fixes
+
+* Don't apply async boundary loader for api routes on Windows ([#587](https://github.com/module-federation/nextjs-mf/issues/587)) ([5173845](https://github.com/module-federation/nextjs-mf/commit/5173845aca15509c363e52e71836303d25c09135))
+
+
+
 ## [6.1.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.1.1...nextjs-mf-6.1.2) (2023-02-09)
 
 ### Dependency Updates
