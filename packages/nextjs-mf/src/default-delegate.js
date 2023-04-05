@@ -1,4 +1,4 @@
-import { importDelegatedModule } from '@module-federation/utilities';
+const { importDelegatedModule } = require('@module-federation/utilities');
 
 module.exports = new Promise((resolve, reject) => {
   // eslint-disable-next-line no-undef
@@ -10,7 +10,7 @@ module.exports = new Promise((resolve, reject) => {
     global,
     url: url + '?' + Date.now(),
   })
-    .then(async (remote) => {
+    .then((remote) => {
       resolve(remote);
     })
     .catch((err) => reject(err));

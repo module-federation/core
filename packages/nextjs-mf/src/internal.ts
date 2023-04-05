@@ -185,22 +185,6 @@ export const removePlugins = [
 ];
 
 /*
- This code is checking if the remote is a string and that it includes an symbol If
- both of these conditions are met then we extract the url and global from the remote
-  */
-export const parseRemoteSyntax = (remote: string) => {
-  if (
-    typeof remote === 'string' &&
-    remote.includes('@') &&
-    !remote.startsWith('internal ')
-  ) {
-    const [url, global] = extractUrlAndGlobal(remote);
-    return generateRemoteTemplate(url, global);
-  }
-
-  return remote;
-};
-/*
  This code is doing the following It\'s iterating over all remotes and checking if
  they are using a custom promise template or not If it\'s a custom promise template
  we\'re parsing the remote syntax to get the module name and version number
