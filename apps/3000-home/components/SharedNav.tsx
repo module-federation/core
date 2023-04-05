@@ -1,7 +1,7 @@
 import React from 'react';
 import { Menu, Layout } from 'antd';
 import { useRouter } from 'next/router';
-import './menu.tsx'
+import './menu'
 
 const SharedNav = () => {
   const { asPath, push } = useRouter();

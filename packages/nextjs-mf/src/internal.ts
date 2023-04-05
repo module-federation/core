@@ -185,9 +185,9 @@ export const removePlugins = [
 ];
 
 /*
- This code is doing the following It\'s iterating over all remotes and checking if
- they are using a custom promise template or not If it\'s a custom promise template
- we\'re parsing the remote syntax to get the module name and version number
+ This code is doing the following It's iterating over all remotes and checking if
+ they are using a custom promise template or not If it's a custom promise template
+ we're parsing the remote syntax to get the module name and version number
   */
 export const parseRemotes = (remotes: Record<string, any>) =>
   Object.entries(remotes).reduce((acc, [key, value]) => {

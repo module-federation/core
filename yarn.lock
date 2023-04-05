@@ -2139,6 +2139,14 @@
     node-fetch "2.6.7"
     webpack-sources "3.2.3"
 
+"@module-federation/nextjs-mf@link:dist/packages/dist/packages/nextjs-mf":
+  version "0.0.0"
+  uid ""
+
+"@module-federation/nextjs-mf@link:dist/packages/nextjs-mf":
+  version "0.0.0"
+  uid ""
+
 "@module-federation/node@0.12.2":
   version "0.12.2"
   resolved "https://registry.yarnpkg.com/@module-federation/node/-/node-0.12.2.tgz#9abf138ef579692ffd316e0b44e7bd69bb512fd2"
