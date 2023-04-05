@@ -9,6 +9,7 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/native-federation-typescript",
+        "parallel": false,
         "commands": [
           "tsup --config packages/native-federation-typescript/tsup.config.ts",
           "cp packages/native-federation-typescript/package.json dist/packages/native-federation-typescript",
