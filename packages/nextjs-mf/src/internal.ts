@@ -195,7 +195,7 @@ export const parseRemotes = (remotes: Record<string, any>) =>
     if (value.startsWith('internal ') || value.startsWith('promise ')) {
       return { ...acc, [key]: value };
     }
-    // check if user is passing custom promise template
+    // check if user is passing standard remote syntax, if so use default delegate
     if (value.includes('@')) {
       return { ...acc, [key]: createDelegatedModule(require.resolve('./default-delegate.js'), {
         remote: value,
