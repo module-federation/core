@@ -320,23 +320,20 @@ export const getContainer = async (
   if (!remoteContainer) {
     throw Error(`Remote container options is empty`);
   }
-  // @ts-ignore
-  const containerScope = typeof window !== 'undefined' ? window : global.__remote_scope__;
+
+  const containerScope =
+    typeof window !== 'undefined' ? window : global.__remote_scope__;
 
   if (typeof remoteContainer === 'string') {
-    if (containerScope[remoteContainer as unknown as number]) {
-      return containerScope[
-        remoteContainer as unknown as number
-      ] as unknown as WebpackRemoteContainer;
+    if (containerScope[remoteContainer]) {
+      return containerScope[remoteContainer];
     }
 
     return;
   } else {
-    const uniqueKey = remoteContainer.uniqueKey;
-    if (containerScope[uniqueKey as unknown as number]) {
-      return containerScope[
-        uniqueKey as unknown as number
-      ] as unknown as WebpackRemoteContainer;
+    const uniqueKey = remoteContainer.uniqueKey as string;
+    if (containerScope[uniqueKey]) {
+      return containerScope[uniqueKey];
     }
 
     const container = await injectScript({
