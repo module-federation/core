@@ -1,12 +1,12 @@
 import { component$, useStylesScoped$ } from '@builder.io/qwik';
 import { $translate as t } from 'qwik-speak';
 
-import Button, { ButtonTheme } from '../../button/button';
+import Button, { ButtonPropsTarget, ButtonTheme } from '../../button/button';
 import Card from '../../card/card';
 import { ContainerTheme } from '../../container/container';
 import { IconName } from '../../icon/data';
 import Icon from '../../icon/icon';
-import Section from '../../section/section';
+import Section, { SectionPadding } from '../../section/section';
 import styles from './explore.css?inline';
 
 export default component$(() => {
@@ -23,6 +23,7 @@ export default component$(() => {
       ),
       actionHref:
         'https://module-federation.myshopify.com/products/practical-module-federation',
+      target: '_blank' as ButtonPropsTarget,
     },
     {
       iconSrc: '/illustrations/implementing-module-federation.svg',
@@ -33,6 +34,7 @@ export default component$(() => {
         'explore.cards.implementing-module-federation.action@@Learn more'
       ),
       actionHref: 'https://module-federation.io/en/mf-docs/2.5/setup',
+      target: '_blank' as ButtonPropsTarget,
     },
     {
       iconSrc: '/illustrations/conference-talks.svg',
@@ -40,6 +42,7 @@ export default component$(() => {
       actionText: t('explore.cards.conference-talks.action@@Watch now'),
       actionHref: '#',
       actionDisabled: true,
+      target: '_blank' as ButtonPropsTarget,
     },
     {
       iconSrc: '/illustrations/community-content.svg',
@@ -47,16 +50,17 @@ export default component$(() => {
       actionText: t('explore.cards.community-content.action@@Find out more'),
       actionHref: '#',
       actionDisabled: true,
+      target: '_blank' as ButtonPropsTarget,
     },
   ];
 
   return (
-    <Section id="discover" theme={ContainerTheme.OPAQUE}>
+    <Section padding={SectionPadding.BOTTOM} id="discover" theme={ContainerTheme.OPAQUE}>
       <div class="flex flex-col gap-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           {cards.map((card) => {
             return (
-              <Card key={card.title}>
+              <Card hover key={card.title}>
                 <div class="flex items-center px-6 py-8 md:p-12 gap-6">
                   <img class="h-16 w-16" src={card.iconSrc} alt={card.title} />
 
@@ -67,10 +71,13 @@ export default component$(() => {
                     <Button
                       theme={ButtonTheme.NAKED}
                       href={card.actionHref}
+                      target={card.target}
                       disabled={card.actionDisabled}
                       type="link"
                     >
-                      {card.actionDisabled ? t('explore.disabled') : card.actionText }
+                      {card.actionDisabled
+                        ? t('explore.disabled')
+                        : card.actionText}
 
                       {!card.actionDisabled && (
                         <Icon
@@ -88,7 +95,7 @@ export default component$(() => {
         </div>
 
         <div class="flex">
-          <Card>
+          <Card hover>
             <div class="items-start p-12 gap-6 max-w-2xl mx-auto hidden md:flex">
               <img
                 class="h-14 w-14 md:h-24 md:w-24"
@@ -109,7 +116,13 @@ export default component$(() => {
                     )}
                   </p>
                 </div>
-                <Button class="mt-2" theme={ButtonTheme.SOLID} href="#" type="link">
+                <Button
+                  class="mt-2"
+                  theme={ButtonTheme.SOLID}
+                  href="#"
+                  target='_blank'
+                  type="link"
+                >
                   {t(
                     'explore.cards.module-federation-courses.action@@Start exploring'
                   )}
@@ -143,7 +156,7 @@ export default component$(() => {
                   </p>
                 </div>
               </div>
-              <Button theme={ButtonTheme.SOLID} href="#" type="link">
+              <Button theme={ButtonTheme.SOLID} href="#" type="link" target='_blank'>
                 {t(
                   'explore.cards.module-federation-courses.action@@Start exploring'
                 )}

@@ -19,7 +19,7 @@ export default component$(() => {
 
           <div class="flex items-center w-full gap-4">
             <input
-              class="min-h-[44px] w-full border-blue-gray-900 px-4 py-1.5 pr-8 bg-white  focus:border-[#00B9FF]"
+              class="min-h-[44px] w-full border-blue-gray-900 px-4 py-1.5 pr-8 bg-white  focus:border-ui-blue"
               type="email"
               name="email"
               id="email"

@@ -100,7 +100,7 @@ export default component$(() => {
                           </h2>
                           <a
                             href={`https://${card.url}`}
-                            class="text-xl text-[#00B9FF] font-semibold"
+                            class="text-xl text-ui-blue font-semibold"
                           >
                             {card.url}
                           </a>

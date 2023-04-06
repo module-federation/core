@@ -10,7 +10,7 @@ export default component$(() => {
   useStylesScoped$(styles);
 
   return (
-    <Section theme={ContainerTheme.OPAQUE}>
+    <Section id="contact" theme={ContainerTheme.OPAQUE}>
       <SectionHeader
         q:slot="header"
         title={t('contact.title@@Talk to our experts')}
@@ -28,7 +28,7 @@ export default component$(() => {
                 {t('contact.form.company-email.label@@Company email')}
               </label>
               <input
-                class="min-h-[44px] w-full border-blue-gray-500 px-4 py-1.5 pr-8 bg-white  focus:border-[#00B9FF]"
+                class="min-h-[44px] w-full border-blue-gray-500 px-4 py-1.5 pr-8 bg-white  focus:border-ui-blue"
                 type="text"
                 name="companyEmail"
                 id="companyEmail"
@@ -39,7 +39,7 @@ export default component$(() => {
                 {t('contact.form.name.label@@Your name')}
               </label>
               <input
-                class="min-h-[44px] w-full border-blue-gray-500 px-4 py-1.5 pr-8 bg-white  focus:border-[#00B9FF]"
+                class="min-h-[44px] w-full border-blue-gray-500 px-4 py-1.5 pr-8 bg-white  focus:border-ui-blue"
                 type="text"
                 name="name"
                 id="name"
@@ -50,7 +50,7 @@ export default component$(() => {
                 {t('contact.form.company-website.label@@Company size')}
               </label>
               <input
-                class="min-h-[44px] w-full border-blue-gray-500 px-4 py-1.5 pr-8 bg-white  focus:border-[#00B9FF]"
+                class="min-h-[44px] w-full border-blue-gray-500 px-4 py-1.5 pr-8 bg-white  focus:border-ui-blue"
                 type="text"
                 name="companyWebsite"
                 id="companyWebsite"
@@ -61,7 +61,7 @@ export default component$(() => {
                 {t('contact.form.company-website.label@@Company website')}
               </label>
               <input
-                class="min-h-[44px] w-full border-blue-gray-500 px-4 py-1.5 pr-8 bg-white  focus:border-[#00B9FF]"
+                class="min-h-[44px] w-full border-blue-gray-500 px-4 py-1.5 pr-8 bg-white  focus:border-ui-blue"
                 type="text"
                 name="companySize"
                 id="companySize"
@@ -74,7 +74,7 @@ export default component$(() => {
                 )}
               </label>
               <textarea
-                class="min-h-[44px] w-full border-blue-gray-500 px-4 py-1.5 pr-8 bg-white  focus:border-[#00B9FF]"
+                class="min-h-[44px] w-full border-blue-gray-500 px-4 py-1.5 pr-8 bg-white  focus:border-ui-blue"
                 name="howCanWeHelp"
                 id="howCanWeHelp"
                 rows={4}
@@ -97,7 +97,7 @@ export default component$(() => {
             {t(
               'contact.disclaimer.text@@By submitting this form, I confirm that I have read and understood the'
             )}{' '}
-            <a class="text-[#00B9FF]" href="#">
+            <a class="text-ui-blue" href="#">
               {t('contact.disclaimer.action@@Privacy & Policy')}
             </a>
             .

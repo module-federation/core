@@ -5,7 +5,7 @@ import Section from '../../section/section';
 import styles from './discord.css?inline';
 import { centerShape, leftShape, rightShape } from './shapes';
 
-// TODO: Check why #00B9FF is not on collor pallete
+
 export default component$(() => {
   useStylesScoped$(styles);
 
@@ -15,8 +15,9 @@ export default component$(() => {
         <p class="text-3xl text-blue-gray-900 font-bold max-w-lg mx-auto text-center leading-tight">
           {t('discord.title@@Join to Module Federation community in')}{' '}
           <a
-            class="text-[#00B9FF] underline decoration-solid decoration-1 underline-offset-2"
+            class="text-ui-blue underline decoration-solid decoration-1 underline-offset-2"
             href="https://discord.gg/T8c6yAxkbv"
+            target='_blank'
           >
             {t('discord.action@@Discord')}
           </a>

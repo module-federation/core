@@ -1,12 +1,12 @@
 import { component$, useStylesScoped$ } from '@builder.io/qwik';
 import { $translate as t } from 'qwik-speak';
 
-import Button, { ButtonTheme } from '../../button/button';
+import Button, { ButtonPropsTarget, ButtonTheme } from '../../button/button';
 import Card from '../../card/card';
 import { ContainerTheme } from '../../container/container';
 import { IconName } from '../../icon/data';
 import Icon from '../../icon/icon';
-import Section, { SectionHeader } from '../../section/section';
+import Section, { SectionHeader, SectionPadding } from '../../section/section';
 import styles from './evolving.css?inline';
 
 export const bundlers = [
@@ -14,30 +14,34 @@ export const bundlers = [
     logo: '/bundlers/webpack.svg',
     name: 'Webpack',
     actionHref: 'https://webpack.js.org/concepts/module-federation',
+    target: '_blank' as ButtonPropsTarget,
   },
   {
     logo: '/bundlers/rspack.svg',
     name: 'Rspack',
     actionHref: 'https://www.rspack.dev',
+    target: '_blank' as ButtonPropsTarget,
   },
   {
     logo: '/bundlers/vite.svg',
     name: 'Vite',
     actionHref: 'https://vitejs.dev',
+    target: '_blank' as ButtonPropsTarget,
   },
   {
     logo: '/bundlers/rollup.svg',
     name: 'Rollup',
     actionHref: 'https://rollupjs.org',
+    target: '_blank' as ButtonPropsTarget,
   },
   {
     logo: '/bundlers/esbuild.svg',
     name: 'esBuild',
     actionHref: 'https://esbuild.github.io',
+    target: '_blank' as ButtonPropsTarget,
   },
 ];
 
-// TODO: Check why #00B9FF is not on collor pallete
 export default component$(() => {
   useStylesScoped$(styles);
 
@@ -48,7 +52,9 @@ export default component$(() => {
         'evolving.rfcs.subtitle@@Participate in the community discussions to decide on what features are coming next'
       ),
       actionText: t('evolving.rfcs.action@@Take part now!'),
-      actionHref: 'https://github.com/module-federation/universe/discussions/categories/rfc',
+      actionHref:
+        'https://github.com/module-federation/universe/discussions/categories/rfc',
+      target: '_blank' as ButtonPropsTarget,
     },
     {
       title: t('evolving.roadmap.title@@Module Federation Roadmap'),
@@ -56,12 +62,14 @@ export default component$(() => {
         'evolving.roadmap.subtitle@@Discover the future of Module Federation'
       ),
       actionText: t('evolving.roadmap.action@@Explore it!'),
-      actionHref: 'https://miro.com/app/board/uXjVPvdfG2I=/?share_link_id=45887343083',
+      actionHref:
+        'https://miro.com/app/board/uXjVPvdfG2I=/?share_link_id=45887343083',
+      target: '_blank' as ButtonPropsTarget,
     },
   ];
 
   return (
-    <Section theme={ContainerTheme.OPAQUE}>
+    <Section padding={SectionPadding.BOTTOM} theme={ContainerTheme.OPAQUE}>
       <SectionHeader
         q:slot="header"
         title={t('evolving.title@@Evolving Module Federation')}
@@ -73,7 +81,7 @@ export default component$(() => {
         <div class="grid grid grid-cols-1 md:grid-cols-2 gap-3">
           {cards.map((card) => {
             return (
-              <Card key={card.title}>
+              <Card hover key={card.title}>
                 <div class="flex flex-col h-full p-10 gap-6">
                   <h3 class="text-blue-gray-900 font-semibold text-3xl">
                     {card.title}
@@ -84,9 +92,10 @@ export default component$(() => {
 
                   <div class="mt-auto">
                     <Button
-                    class="w-full md:w-auto"
+                      class="w-full md:w-auto"
                       theme={ButtonTheme.SOLID}
                       href={card.actionHref}
+                      target={card.target}
                       type="link"
                       small
                     >
@@ -116,13 +125,14 @@ export default component$(() => {
                     key={bundler.name}
                     class="flex flex-col items-center "
                     href={bundler.actionHref}
+                    target={bundler.target}
                   >
                     <img
                       class="w-24 h-24"
                       src={bundler.logo}
                       alt={bundler.name}
                     />
-                    <div class="text-2xl font-semibold text-[#00B9FF] underline decoration-solid decoration-1 underline-offset-2">
+                    <div class="text-2xl font-semibold text-ui-blue underline decoration-solid decoration-1 underline-offset-2">
                       {bundler.name}
                     </div>
                   </a>

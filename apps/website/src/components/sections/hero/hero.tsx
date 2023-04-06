@@ -11,6 +11,7 @@ export default component$(() => {
 
   return (
     <Container theme={ContainerTheme.OPAQUE}>
+            <div class="block h-[88px] z-[999]"></div>
       <header class="flex flex-col items-center text-center gap-4 py-16 md:gap-8 md:py-32 w-full overflow-x-hidden">
         <h1 class="text-5xl leading-tight md:text-6xl md:leading-none font-bold text-blue-gray-900">
           {t('hero.title@@Module Federation: streamline your microfrontends')}
@@ -41,13 +42,13 @@ export default component$(() => {
       </header>
 
       <div q:slot="background" class="hidden md:block">
-        <div class="inline-block w-64 absolute top-0 left-0 -translate-x-1/2 blur-lg">
+        <div class="inline-block w-64 absolute top-[88px] left-0 -translate-x-1/2 blur-lg">
           {leftShape}
         </div>
         <div class="inline-block w-1/3 absolute top-2/4 left-1/2 -translate-x-1/2 blur-lg">
           {centerShape}
         </div>
-        <div class="inline-block w-72 absolute top-0 right-0 translate-x-1/3 blur-lg">
+        <div class="inline-block w-72 absolute top-[88px] right-0 translate-x-1/3 blur-lg">
           {rightShape}
         </div>
       </div>

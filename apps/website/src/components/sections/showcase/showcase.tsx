@@ -2,7 +2,7 @@ import { component$, useStylesScoped$ } from '@builder.io/qwik';
 import { $translate as t } from 'qwik-speak';
 import Button, { ButtonTheme } from '../../button/button';
 import { ContainerTheme } from '../../container/container';
-import Section, { SectionHeader } from '../../section/section';
+import Section, { SectionHeader, SectionPadding } from '../../section/section';
 import styles from './showcase.css?inline';
 
 export const cards = [
@@ -53,12 +53,11 @@ export const cards = [
   },
 ];
 
-// TODO: Check why #00B9FF is not on collor pallete
 export default component$(() => {
   useStylesScoped$(styles);
 
   return (
-    <Section theme={ContainerTheme.OPAQUE}>
+    <Section padding={SectionPadding.BOTTOM} theme={ContainerTheme.OPAQUE}>
       <SectionHeader q:slot="header" title={t('showcase.title@@Showcase')} />
 
       <div class="flex flex-col gap-10 items-center">
@@ -76,12 +75,12 @@ export default component$(() => {
                     {card.name}
                   </div>
                   <div class="max-w-full truncate">
-                  <a
-                    class="text-xl font-semibold text-[#00B9FF]"
-                    href={`https://${card.url}`}
-                  >
-                    {card.url}
-                  </a>
+                    <a
+                      class="text-xl font-semibold text-ui-blue"
+                      href={`https://${card.url}`}
+                    >
+                      {card.url}
+                    </a>
                   </div>
                 </div>
               </div>
@@ -89,7 +88,12 @@ export default component$(() => {
           })}
         </div>
 
-        <Button class="w-full md:w-auto" theme={ButtonTheme.SOLID} href="#" type="link">
+        <Button
+          class="w-full md:w-auto"
+          theme={ButtonTheme.SOLID}
+          href="#"
+          type="link"
+        >
           {t('showcase.action@@See more showcases')}
         </Button>
       </div>

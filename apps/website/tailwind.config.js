@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage: {
-        pattern: `url('/pattern_5.png')`,
+        pattern: `url('/pattern_7.png')`,
       },
       maxWidth: {
         1225: '1225px',
@@ -14,8 +14,13 @@ module.exports = {
       opacity: {
         ['2.5']: 0.025,
       },
+      boxShadow: {
+        outline: '0 0 0 2px #00B9FF',
+        card: '0px 0px 32px 0px #201E3726'
+      },
     },
     colors: {
+      'ui-blue': '#00B9FF',
       transparent: 'transparent',
       white: '#FFFFFF',
       cyan: {

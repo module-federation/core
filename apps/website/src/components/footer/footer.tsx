@@ -3,6 +3,7 @@ import { $translate as t, useSpeakContext } from 'qwik-speak';
 import Container, { ContainerTheme } from '../container/container';
 
 import styles from './footer.css?inline';
+import Button, { ButtonPropsTarget, ButtonTheme } from '../button/button';
 
 export interface FooterProps {
   theme?: ContainerTheme;
@@ -17,22 +18,27 @@ export default component$((props: FooterProps) => {
     {
       label: t('footer.menu.examples@@Examples'),
       href: 'https://github.com/module-federation/module-federation-examples',
+      target: '_blank' as ButtonPropsTarget,
     },
     {
       label: t('footer.menu.practical-guide@@Practical guide'),
       href: 'https://module-federation.myshopify.com/products/practical-module-federation',
+      target: '_blank' as ButtonPropsTarget,
     },
     {
       label: t('footer.menu.medusa@@Try Medusa'),
       href: 'https://app.medusa.codes/',
+      target: '_blank' as ButtonPropsTarget,
     },
     {
       label: t('footer.menu.documentation@@Documentation'),
       href: 'https://module-federation.io/en/ipt/2.5/',
+      target: '_blank' as ButtonPropsTarget,
     },
     {
       label: t('footer.menu.sponsor@@Become a sponsor'),
       href: 'https://opencollective.com/module-federation-universe',
+      target: '_blank' as ButtonPropsTarget,
     },
   ];
 
@@ -48,9 +54,13 @@ export default component$((props: FooterProps) => {
         <div class="flex items-center justify-center flex-wrap gap-y-4 gap-x-10">
           {links.map((link) => {
             return (
-              <a class="font-medium text-lg" href={link.href}>
+              <Button
+                href={link.href}
+                type="link"
+                theme={ButtonTheme.NAKED_ALT}
+              >
                 {link.label}
-              </a>
+              </Button>
             );
           })}
         </div>

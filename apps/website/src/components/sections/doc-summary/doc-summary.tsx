@@ -1,7 +1,7 @@
 import { component$, useStylesScoped$ } from '@builder.io/qwik';
 import { $translate as t } from 'qwik-speak';
 
-import Button, { ButtonTheme } from '../../button/button';
+import Button, { ButtonPropsTarget, ButtonTheme } from '../../button/button';
 import Card from '../../card/card';
 import { ContainerTheme } from '../../container/container';
 import { IconName } from '../../icon/data';
@@ -24,6 +24,7 @@ export default component$(() => {
       ),
       actionHref: 'https://module-federation.io/en/mf-docs/2.5/setup',
       actionTitle: t('doc-summary.cards.decentralized.action@@Documentation'),
+      target: '_blank' as ButtonPropsTarget
     },
     {
       title: t(
@@ -36,6 +37,7 @@ export default component$(() => {
       actionTitle: t(
         'doc-summary.cards.modular-architecture.action@@Documentation'
       ),
+      target: '_blank' as ButtonPropsTarget
     },
     {
       title: t('doc-summary.cards.federated-runtime.title@@Federated runtime'),
@@ -46,6 +48,7 @@ export default component$(() => {
       actionTitle: t(
         'doc-summary.cards.federated-runtime.action@@Documentation'
       ),
+      target: '_blank' as ButtonPropsTarget
     },
     {
       title: t('doc-summary.cards.flexibility.title@@Flexibility'),
@@ -54,6 +57,7 @@ export default component$(() => {
       ),
       actionHref: '#',
       actionTitle: t('doc-summary.cards.flexibility.action@@Documentation'),
+      target: '_blank' as ButtonPropsTarget
     },
     {
       title: t('doc-summary.cards.team-colaboration.title@@Team collaboration'),
@@ -64,6 +68,7 @@ export default component$(() => {
       actionTitle: t(
         'doc-summary.cards.team-colaboration.action@@Documentation'
       ),
+      target: '_blank' as ButtonPropsTarget
     },
   ];
 
@@ -80,8 +85,8 @@ export default component$(() => {
       <div class="flex flex-col items-center gap-3 md:gap-10">
         {cards.map((card) => {
           return (
-            <div class="w-full">
-              <Card>
+            <div key={card.title} class="w-full">
+              <Card hover>
                 <div class="flex flex-col gap-6 items-start md:flex-row md:items-center p-10">
                   <div class="flex flex-col gap-4 w-full">
                     <h3 class="text-blue-gray-900 font-bold text-xl">
@@ -95,6 +100,7 @@ export default component$(() => {
                   <Button
                     theme={ButtonTheme.NAKED}
                     href={card.actionHref}
+                    target={card.target}
                     type="link"
                   >
                     {card.actionTitle}
@@ -115,6 +121,7 @@ export default component$(() => {
           class="w-full md:w-auto"
           theme={ButtonTheme.SOLID}
           href="https://module-federation.io/en/mf-docs/2.5/setup"
+          target='_blank'
           type="link"
         >
           {t('doc-summary.action@@Scalability with Module Federation')}
