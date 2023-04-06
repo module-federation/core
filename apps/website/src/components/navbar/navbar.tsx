@@ -21,10 +21,10 @@ export const locales = [
     name: 'Eng',
     lang: 'en-US',
   },
-  {
-    name: 'Port',
-    lang: 'pt-BR',
-  },
+  // {
+  //   name: 'Port',
+  //   lang: 'pt-BR',
+  // },
 ];
 
 export interface NavbarProps {
@@ -33,12 +33,6 @@ export interface NavbarProps {
 
 function useScrollPosition() {
   const position = useStore({ x: 0, y: 0 });
-
-  if (typeof window !== 'undefined') {
-    position.x = window.scrollX;
-    position.y = window.scrollY;
-  }
-
   useOnDocument(
     'scroll',
     $((event: Event) => {
@@ -50,7 +44,6 @@ function useScrollPosition() {
   return position;
 }
 
-// TODO: Extract links to components
 export default component$((props: NavbarProps) => {
   useStylesScoped$(styles);
   const navbarOpen = useSignal(false);
@@ -125,7 +118,7 @@ export default component$((props: NavbarProps) => {
               <img
                 src="/module-federation-logo.svg"
                 class="h-10"
-                alt="Flowbite Logo"
+                alt="Module Federation Logo"
               />
             </a>
             <ul class="hidden xl:flex w-full justify-center gap-8">

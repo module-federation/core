@@ -22,10 +22,9 @@ export default component$(() => {
           href="https://www.medusa.codes"
           type="link"
         >
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3 h-[18px]">
             <svg
-              width="33"
-              height="34"
+              class="h-full"
               viewBox="0 0 33 34"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -38,8 +37,7 @@ export default component$(() => {
               />
             </svg>
             <svg
-              width="78"
-              height="24"
+            class="h-full"
               viewBox="0 0 78 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"

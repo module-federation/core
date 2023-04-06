@@ -1,7 +1,7 @@
 import { component$ } from '@builder.io/qwik';
 import { $translate as t } from 'qwik-speak';
 import type { DocumentHead } from '@builder.io/qwik-city';
-import Section, { SectionHeader } from '../../../components/section/section';
+import Section, { SectionHeader, SectionPadding } from '../../../components/section/section';
 import { ContainerTheme } from '../../../components/container/container';
 import Button, { ButtonTheme } from '../../../components/button/button';
 import Navbar from '../../../components/navbar/navbar';
@@ -66,7 +66,8 @@ export default component$(() => {
   return (
     <>
       <Navbar theme={theme} />
-      <Section theme={theme}>
+      <div class="block h-[20px] z-[999]"></div>
+      <Section padding={SectionPadding.TOP} theme={theme}>
         <SectionHeader
           q:slot="header"
           title={t('showcase-page.title@@Showcase')}
@@ -87,7 +88,7 @@ export default component$(() => {
                   return (
                     <div class="relative">
                       <img
-                        class="border border-blue-gray-400 border-2 bg-white w-full aspect-[97/66]"
+                        class="border border-blue-gray-400 border-2 bg-white w-full aspect-[97/66] transition-shadow hover:shadow-card"
                         src={card.previewSrc}
                         alt={card.name}
                       />

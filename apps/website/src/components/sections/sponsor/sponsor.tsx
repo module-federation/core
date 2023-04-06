@@ -16,11 +16,12 @@ export default component$(() => {
           {t('sponsor.title@@Sponsor Module Federation!')}
         </h2>
 
-        <p class="text-blue-gray-900 font-medium text-lg text-center">
-          {t(
-            'sponsor.subtitle@@Sponsoring Module Federation offers the chance to be part of a technology community making a positive impact and receive benefits and recognition opportunities in return.'
+        <p
+          class="text-blue-gray-900 font-medium text-lg text-center"
+          dangerouslySetInnerHTML={t(
+            'sponsor.subtitle@@Module Federation offers the chance to be part of a technology community making a positive impact<br> and receive benefits and recognition opportunities in return.'
           )}
-        </p>
+        ></p>
 
         <Button
           class="w-full md:w-auto"

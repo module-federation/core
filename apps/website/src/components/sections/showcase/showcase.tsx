@@ -1,9 +1,10 @@
 import { component$, useStylesScoped$ } from '@builder.io/qwik';
-import { $translate as t } from 'qwik-speak';
+import { $translate as t, useSpeakContext } from 'qwik-speak';
 import Button, { ButtonTheme } from '../../button/button';
 import { ContainerTheme } from '../../container/container';
 import Section, { SectionHeader, SectionPadding } from '../../section/section';
 import styles from './showcase.css?inline';
+import { localizedUrl as locUrl } from '../../../speak-config';
 
 export const cards = [
   {
@@ -56,6 +57,12 @@ export const cards = [
 export default component$(() => {
   useStylesScoped$(styles);
 
+  const speakState = useSpeakContext();
+  
+  const localizedUrl = (url: string) => {
+    return locUrl(url, speakState);
+  };
+
   return (
     <Section padding={SectionPadding.BOTTOM} theme={ContainerTheme.OPAQUE}>
       <SectionHeader q:slot="header" title={t('showcase.title@@Showcase')} />
@@ -66,7 +73,7 @@ export default component$(() => {
             return (
               <div class="flex flex-col gap-4">
                 <img
-                  class="border border-blue-gray-400 border-2 bg-white w-full aspect-[97/66]"
+                  class="border border-blue-gray-400 border-2 bg-white w-full aspect-[97/66] transition-shadow hover:shadow-card"
                   src={card.previewSrc}
                   alt={card.name}
                 />
@@ -91,7 +98,7 @@ export default component$(() => {
         <Button
           class="w-full md:w-auto"
           theme={ButtonTheme.SOLID}
-          href="#"
+          href={localizedUrl('/showcase')}
           type="link"
         >
           {t('showcase.action@@See more showcases')}

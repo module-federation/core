@@ -9,7 +9,7 @@ import {
 
 export const LOCALES: Record<string, SpeakLocale> = {
   'en-US': { lang: 'en-US', currency: 'USD', timeZone: 'America/Los_Angeles' },
-  'pt-BR': { lang: 'pt-BR', currency: 'BRL', timeZone: 'America/Sao_Paulo' },
+  // 'pt-BR': { lang: 'pt-BR', currency: 'BRL', timeZone: 'America/Sao_Paulo' },
 };
 
 export const config: SpeakConfig = {
@@ -33,10 +33,10 @@ export const config: SpeakConfig = {
   ],
 };
 
-const translationData = import.meta.glob('/public/i18n/**/*.json', { as: 'raw', eager: true });
+const translationData = import.meta.glob('/src/i18n/**/*.json', { as: 'raw', eager: true });
 
 const loadTranslation$: LoadTranslationFn = server$((lang: string, asset: string) =>
-  JSON.parse(translationData[`/public/i18n/${lang}/${asset}.json`])
+  JSON.parse(translationData[`/src/i18n/${lang}/${asset}.json`])
 );
 
 export const translationFn: TranslationFn = {

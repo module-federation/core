@@ -48,7 +48,7 @@ export default component$((props: FooterProps) => {
         <img
           src="/module-federation-logo.svg"
           class="h-10"
-          alt="Flowbite Logo"
+          alt="Module Federation Logo"
         />
 
         <div class="flex items-center justify-center flex-wrap gap-y-4 gap-x-10">

@@ -113,7 +113,7 @@ export default component$(() => {
             );
           })}
         </div>
-        <Card>
+        <Card hover>
           <div class="flex flex-col justify-center items-center p-10 gap-6">
             <h3 class="text-blue-gray-900 font-semibold text-3xl">
               {t('evolving.supported-bundlers.title@@Supported bundlers')}
