@@ -64,8 +64,8 @@ const IsomorphicRemoteTemplate = function () {
       // @ts-ignore
       if (!global.__remote_scope__) {
         // create a global scope for container, similar to how remotes are set on window in the browser
-        // @ts-ignore
         global.__remote_scope__ = {
+          // @ts-ignore
           _config: {},
         };
       }
@@ -84,7 +84,6 @@ const IsomorphicRemoteTemplate = function () {
             return resolve();
           }
         } else {
-          // @ts-ignore
           if (typeof global.__remote_scope__[remote.global] !== 'undefined') {
             return resolve();
           }
