@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.1.1](https://github.com/module-federation/nextjs-mf/compare/native-federation-typescript-0.1.0...native-federation-typescript-0.1.1) (2023-04-06)
+
+
+### Bug Fixes
+
+* native build chunks ([d6c9f8a](https://github.com/module-federation/nextjs-mf/commit/d6c9f8a957ed00a8d92332ccc38ed9780f01d54e))
+
+
+
 # 0.1.0 (2023-04-05)
 
 
