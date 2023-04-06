@@ -14,10 +14,7 @@ declare global {
   }
 
   interface Window {
-    __remote_scope__: Record<string, WebpackRemoteContainer>;
-  }
-
-  interface Window {
     [index: string | number]: any;
+    __remote_scope__: Record<string, WebpackRemoteContainer>;
   }
 }

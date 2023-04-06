@@ -10,6 +10,8 @@ import type {
   GetModuleOptions,
 } from '../types';
 
+import '../types/global';
+
 type RemoteVars = Record<
   string,
   | Promise<WebpackRemoteContainer>
@@ -162,29 +164,26 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       request: string | null;
     };
 
-    //@ts-ignore
     if (!global.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser
-      //@ts-ignore
       global.__remote_scope__ = {
+        // @ts-ignore
         _config: {},
       };
     }
 
     const globalScope =
-      //@ts-ignore
-      typeof window !== 'undefined' ? window : global.__remote_scope__; // TODO: fix types
+      typeof window !== 'undefined' ? window : global.__remote_scope__;
 
     if (typeof window === 'undefined') {
-      //@ts-ignore
-      globalScope._config[containerKey] = reference.url;
+      globalScope['_config'][containerKey] = reference.url;
     } else {
       // to match promise template system, can be removed once promise template is gone
-      if (!globalScope.remoteLoading) {
-        globalScope.remoteLoading = {};
+      if (!globalScope['remoteLoading']) {
+        globalScope['remoteLoading'] = {};
       }
-      if (globalScope.remoteLoading[containerKey]) {
-        return globalScope.remoteLoading[containerKey];
+      if (globalScope['remoteLoading'][containerKey]) {
+        return globalScope['remoteLoading'][containerKey];
       }
     }
 
@@ -231,7 +230,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       );
     });
     if (typeof window !== 'undefined') {
-      globalScope.remoteLoading[containerKey] = asyncContainer;
+      globalScope['remoteLoading'][containerKey] = asyncContainer;
     }
   }
 
