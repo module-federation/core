@@ -74,6 +74,17 @@
       "options": {
         "lintFilePatterns": ["apps/website/**/*.{ts,tsx,js,jsx}"]
       }
+    },
+    "extract-i18n": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "qwik-speak-extract --sourceFilesPaths=./apps/website/src --assetsPath=./apps/website/src/i18n --supportedLangs=en-US,pt-BR"
+        ]
+      },
+      "configurations": {
+      },
+      "dependsOn": []
     }
   },
   "tags": []

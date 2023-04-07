@@ -103,7 +103,7 @@ export default component$((props: ButtonProps) => {
       <div class="flex empty:hidden">
         <Slot name="prefix" />
       </div>
-      <div class="flex text-lg font-medium leading-[1.125rem]">
+      <div class="flex text-lg font-medium leading-snug text-center">
         <div class={props.loading ? 'invisible' : ''}>
           <Slot />
         </div>

@@ -1,19 +1,19 @@
 {
   "evolving": {
     "rfcs": {
-      "action": "Take part now!",
-      "subtitle": "Participe das discussões da comunidade para decidir quais recursos virão a seguir",
+      "action": "Participe agora!",
+      "subtitle": "Participe das discussões comunitárias para decidir quais recursos virão a seguir",
       "title": "RFCs"
     },
     "roadmap": {
-      "action": "Compre o livro!",
-      "subtitle": "Descubra o futuro de Module Federation",
-      "title": "Module Federation Roadmap"
+      "action": "Explore!",
+      "subtitle": "Descubra o futuro do Module Federation",
+      "title": "Roadmap do Module Federation"
     },
-    "subtitle": "O mundo do Module Federation está em constante evolução e crescimento com base no feedback da comunidade. Os RFCs são abertos para que todos possam participar da discussão e o roteiro é publicado.",
+    "subtitle": "O mundo do Module Federation está em constante evolução e crescimento com base nos feedbacks da comunidade. Os RFCs estão abertos para que todos possam participar da discussão e o roadmap é publicado.",
     "supported-bundlers": {
-      "title": "Bundlers suportados"
+      "title": "Empacotadores suportados"
     },
-    "title": "Evoluíndo Module Federation"
+    "title": "Evolução do Module Federation"
   }
 }

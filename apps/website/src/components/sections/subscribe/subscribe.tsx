@@ -26,7 +26,7 @@ export default component$(() => {
               placeholder={t('subscribe.input.placeholder@@Enter your email')}
             />
 
-            <Button theme={ButtonTheme.SOLID} type="button" small>
+            <Button class="whitespace-nowrap" theme={ButtonTheme.SOLID} type="button" small>
               {t('subscribe.action@@Subscribe')}
             </Button>
           </div>

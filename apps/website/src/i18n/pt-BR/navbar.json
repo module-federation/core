@@ -1,9 +1,9 @@
 {
   "navbar": {
     "menu": {
-      "discover": "Descubra",
+      "discover": "Descobrir",
       "documentation": "Documentação",
-      "enterprise": "Enterprise",
+      "enterprise": "Empresarial",
       "medusa": "Medusa",
       "showcase": "Exemplos"
     }

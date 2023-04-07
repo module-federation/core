@@ -9,7 +9,7 @@ import {
 
 export const LOCALES: Record<string, SpeakLocale> = {
   'en-US': { lang: 'en-US', currency: 'USD', timeZone: 'America/Los_Angeles' },
-  // 'pt-BR': { lang: 'pt-BR', currency: 'BRL', timeZone: 'America/Sao_Paulo' },
+  'pt-BR': { lang: 'pt-BR', currency: 'BRL', timeZone: 'America/Sao_Paulo' },
 };
 
 export const config: SpeakConfig = {

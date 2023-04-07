@@ -1,9 +1,9 @@
 {
   "subscribe": {
-    "action": "Assinar",
+    "action": "Inscreva-se",
     "input": {
-      "placeholder": "Enter your email"
+      "placeholder": "Digite seu e-mail"
     },
-    "title": "Assine nossa newsletter!"
+    "title": "Inscreva-se em nossa newsletter!"
   }
 }

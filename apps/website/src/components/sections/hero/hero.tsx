@@ -12,11 +12,11 @@ export default component$(() => {
   return (
     <Container theme={ContainerTheme.OPAQUE}>
             <div class="block h-[88px] z-[999]"></div>
-      <header class="flex flex-col items-center text-center gap-4 py-16 md:gap-8 md:py-32 w-full overflow-x-hidden">
-        <h1 class="text-5xl leading-tight md:text-6xl md:leading-none font-bold text-blue-gray-900">
+      <header class="flex flex-col items-center text-center gap-4 pt-10 pb-24 md:gap-8 md:py-32 w-full overflow-x-hidden">
+        <h1 class="text-4xl leading-tight md:text-6xl md:leading-none font-bold text-blue-gray-900">
           {t('hero.title@@Module Federation: streamline your microfrontends')}
         </h1>
-        <p class="font-medium text-lg text-blue-gray-900">
+        <p class="font-medium text-base md:text-lg text-blue-gray-900 break-words">
           {t(
             'hero.subtitle@@Module Federation aims to solve the sharing of modules in a distributed system. It allows you to ship those critical shared pieces as macro or as micro as you would like. It does this by pulling them out of the build pipeline and out of your apps'
           )}

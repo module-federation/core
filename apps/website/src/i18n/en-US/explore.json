@@ -1,6 +1,5 @@
 {
   "explore": {
-    "disabled": "Coming soon",
     "cards": {
       "community-content": {
         "action": "Find out more",
@@ -23,6 +22,7 @@
         "action": "Get the book",
         "title": "Practical Module Federation"
       }
-    }
+    },
+    "disabled": "Coming soon"
   }
 }

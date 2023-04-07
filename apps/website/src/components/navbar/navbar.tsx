@@ -21,10 +21,10 @@ export const locales = [
     name: 'Eng',
     lang: 'en-US',
   },
-  // {
-  //   name: 'Port',
-  //   lang: 'pt-BR',
-  // },
+  {
+    name: 'Port',
+    lang: 'pt-BR',
+  },
 ];
 
 export interface NavbarProps {

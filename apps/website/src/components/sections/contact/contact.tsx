@@ -17,7 +17,7 @@ export default component$(() => {
       />
       <div class="flex flex-col lg:flex-row gap-10 ">
         <div class="flex flex-col items-center gap-4 flex-1 w-50">
-          {/* <form
+          <form
             name="contact"
             method="post"
             data-netlify
@@ -88,10 +88,10 @@ export default component$(() => {
                 type="submit"
                 small
               >
-                {t('contact.form..action@@Submit')}
+                {t('contact.form.action@@Submit')}
               </Button>
             </div>
-          </form> */}
+          </form>
 
           <form name="contact" method="POST" data-netlify="true">
             <p>

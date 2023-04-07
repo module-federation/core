@@ -5,7 +5,7 @@
       "decentralized": {
         "action": "Documentação",
         "desc": "Module Federation permite que os desenvolvedores compartilhem código entre vários projetos de maneira descentralizada, facilitando o gerenciamento de aplicativos complexos.",
-        "title": "Decentralized code sharing"
+        "title": "Compartilhamento de código descentralizado"
       },
       "federated-runtime": {
         "action": "Documentação",
@@ -20,7 +20,7 @@
       "modular-architecture": {
         "action": "Documentação",
         "desc": "Os aplicativos podem ser divididos em módulos menores e independentes que podem ser desenvolvidos, testados e implantados de forma independente.",
-        "title": "Arquitetura modular"
+        "title": "Modular architecture"
       },
       "team-colaboration": {
         "action": "Documentação",
