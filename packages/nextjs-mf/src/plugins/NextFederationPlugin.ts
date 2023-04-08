@@ -105,57 +105,6 @@ export class NextFederationPlugin {
         return;
       }
 
-
-      // new webpack.EntryPlugin(
-      //   compiler.context,
-      //   // "main",
-      //   // "react",
-      //   require.resolve('../internal-delegate-hoist'),
-      //   // "promise new Promise((resolve) => { console.log('eager'); resolve(); })\n",
-      //   'main'
-      // ).apply(compiler);
-
-      // new webpack.EntryPlugin(
-      //   compiler.context,
-      //   // "main",
-      //   "react",
-      //   // require.resolve('../internal-delegate-hoist'),
-      //   // "promise new Promise((resolve) => { console.log('eager'); resolve(); })\n",
-      //   'main'
-      // ).apply(compiler);
-
-      // compiler.hooks.entryOption.tap(
-      //   'UpdateEntryDependOnPlugin',
-      //   // @ts-ignore
-      //   (context, entry) => {
-      //     // entry[this.entryName].dependOn = this.newDependOn;
-      //     for (const key in entry) {
-      //       if(key === 'main') {
-      //         // @ts-ignore
-      //         console.log(entry[key])
-      //         // @ts-ignore
-      //         entry[key].import = [require.resolve('./init.js')]
-      //       }
-      //       // if (!key.includes('eager')) {
-      //         // @ts-ignore
-      //         // entry[key].asyncChunks = 'initup';
-      //         // @ts-ignore
-      //         // entry[key].import.unshift(require.resolve('./init.js'));
-      //         // @ts-ignore
-      //         if (!entry[key].dependOn) {
-      //           // @ts-ignore
-      //           //@ts-ignore
-      //           // entry[key].dependOn = ["boot"];
-      //         } else {
-      //           // @ts-ignore
-      //           // entry[key].dependOn.unshift('boot');
-      //         }
-      //       }
-      //     // }
-      //     console.log(entry)
-      //   }
-      // );
-
       if (this._extraOptions.automaticPageStitching) {
         compiler.options.module.rules.push({
           test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
@@ -190,20 +139,7 @@ export class NextFederationPlugin {
         compiler.context,
         require.resolve('../internal-delegate-hoist'),
       'main').apply(compiler);
-      compiler.options.optimization = {
-        ...compiler.options.optimization,
-        splitChunks: {
-          ...compiler.options.optimization?.splitChunks,
-// chunks: 'all',
-          cacheGroups: {
-// 'hoiser': {
-//               test: /react/,
-//   name: 'webpack',
-//   enforce: true,
-// }
-          }
-        }
-      }
+
       return
 
       if (this._options.library) {
