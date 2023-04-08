@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-
+console.log(__webpack_share_scopes__, React)
 const CheckoutTitle = () => {
   const [hookData, setHookData] = useState('');
 

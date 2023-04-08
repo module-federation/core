@@ -10,6 +10,6 @@
     "react-dom": "18.2.0"
   },
   "devDependencies": {
-    "@module-federation/nextjs-mf": "*"
+    "@module-federation/nextjs-mf": "link:../../dist/packages/nextjs-mf"
   }
 }

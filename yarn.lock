@@ -2126,18 +2126,9 @@
     semver "^7.3.5"
     tar "^6.1.11"
 
-"@module-federation/nextjs-mf@*":
-  version "6.2.2"
-  resolved "https://registry.yarnpkg.com/@module-federation/nextjs-mf/-/nextjs-mf-6.2.2.tgz#1e08645a30fafd6d661c860136eee5df87f7c1df"
-  integrity sha512-H+FTwBw7p8xRF7/5sMNLNbXlaxGu7KE5MTFViklS0Eh0ot8zXbCqwzj+tybPNnjsa+eS+k2RkNy5jjnLoadvWg==
-  dependencies:
-    "@module-federation/node" "0.12.2"
-    "@module-federation/utilities" "1.4.0"
-    encoding "0.1.13"
-    eventemitter3 "4.0.7"
-    fast-glob "3.2.12"
-    node-fetch "2.6.7"
-    webpack-sources "3.2.3"
+"@module-federation/nextjs-mf@link:dist/packages/nextjs-mf":
+  version "0.0.0"
+  uid ""
 
 "@module-federation/node@0.12.2":
   version "0.12.2"
