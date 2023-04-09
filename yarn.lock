@@ -54,12 +54,12 @@
     "@asciidoctor/core" "~2.2"
 
 "@antora/cli@^3.1.0":
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/@antora/cli/-/cli-3.1.2.tgz#7be31f376aafd2d2ac4bdf8af1367b52f8690633"
-  integrity sha512-/0ddoM9ZsY41LPmow8ic6IG+PIiTik82YJTHCM8CHRme2oNHU1ZBaXbH6ClS9yBwwPzVzwt4Bc6A/yQ/5+2XCA==
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/@antora/cli/-/cli-3.1.3.tgz#7363409c43d51d39105f1647929bb63b13909e2c"
+  integrity sha512-ABngPywk4yZfUE/gaej7ApFeB/0cr5bkW7S4wqObzU5m29q2wDcvrtn/c2mrzFSeSDNAf9y7RCRnudAV5SteBA==
   dependencies:
-    "@antora/logger" "3.1.2"
-    "@antora/playbook-builder" "3.1.2"
+    "@antora/logger" "3.1.3"
+    "@antora/playbook-builder" "3.1.3"
     "@antora/user-require-helper" "~2.0"
     commander "~9.4"
 
@@ -127,6 +127,16 @@
     pino-pretty "~9.1"
     sonic-boom "~3.2"
 
+"@antora/logger@3.1.3":
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/@antora/logger/-/logger-3.1.3.tgz#794b48d78913394481d8fbbb5e675af1a87a7efc"
+  integrity sha512-6h0PTYHF9C/I9CiYJmlTME7H9dEkMI1luGMQdYhPL9OicbZ5/HsUPKOvGfLNHzw2iyG0yp5bLVvcr9K69ArgtQ==
+  dependencies:
+    "@antora/expand-path-helper" "~2.0"
+    pino "~8.7"
+    pino-pretty "~9.1"
+    sonic-boom "~3.2"
+
 "@antora/lunr-extension@^1.0.0-alpha.8":
   version "1.0.0-alpha.8"
   resolved "https://registry.yarnpkg.com/@antora/lunr-extension/-/lunr-extension-1.0.0-alpha.8.tgz#7a72afd3e890caebd6cfcb6933370a558a1d8b9f"
@@ -157,6 +167,16 @@
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/@antora/playbook-builder/-/playbook-builder-3.1.2.tgz#714f3c47c07adb2d4ec5569e1c1c0a051a247965"
   integrity sha512-hfQom+UDFXdfDZVscGLtSBHZzkoi2HL8mt2Iiu+xh/6FFiAwCpU8eAlFzYHz2+yf8OpaMytvVNavvJXe3uo3qw==
+  dependencies:
+    "@iarna/toml" "~2.2"
+    convict "~6.2"
+    js-yaml "~4.1"
+    json5 "~2.2"
+
+"@antora/playbook-builder@3.1.3":
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/@antora/playbook-builder/-/playbook-builder-3.1.3.tgz#2aeff503f5d2f8adfaa80d840b3ed3792c1c4af1"
+  integrity sha512-EjkTrXwFAhFxDFU6eHRuExqvuvoHxyR1IbCAgjyj6Pi6hvGIZoGbH9cu1Gy1sWE6XmZl5yA5Gwi++LMyQPmuuA==
   dependencies:
     "@iarna/toml" "~2.2"
     convict "~6.2"
@@ -11331,9 +11351,9 @@ pino-std-serializers@^4.0.0:
   integrity sha512-cK0pekc1Kjy5w9V2/n+8MkZwusa6EyyxfeQCB799CQRhRt/CqYKiWs5adeu8Shve2ZNffvfC/7J64A2PJo1W/Q==
 
 pino-std-serializers@^6.0.0:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/pino-std-serializers/-/pino-std-serializers-6.1.0.tgz#307490fd426eefc95e06067e85d8558603e8e844"
-  integrity sha512-KO0m2f1HkrPe9S0ldjx7za9BJjeHqBku5Ch8JyxETxT8dEFGz1PwgrHaOQupVYitpzbFSYm7nnljxD8dik2c+g==
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/pino-std-serializers/-/pino-std-serializers-6.2.0.tgz#169048c0df3f61352fce56aeb7fb962f1b66ab43"
+  integrity sha512-IWgSzUL8X1w4BIWTwErRgtV8PyOGOOi60uqv0oKuS/fOA8Nco/OeI6lBuc4dyP8MMfdFwyHqTMcBIA7nDiqEqA==
 
 pino@7.11.0:
   version "7.11.0"
@@ -11804,9 +11824,9 @@ process-warning@1.0.0, process-warning@^1.0.0:
   integrity sha512-du4wfLyj4yCZq1VupnVSZmRsPJsNuxoDQFdCFHLaYiEbFBD7QE0a+I4D7hOxrVnh78QE/YipFAj9lXHiXocV+Q==
 
 process-warning@^2.0.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/process-warning/-/process-warning-2.1.0.tgz#1e60e3bfe8183033bbc1e702c2da74f099422d1a"
-  integrity sha512-9C20RLxrZU/rFnxWncDkuF6O999NdIf3E1ws4B0ZeY3sRVPzWBMsYDE2lxjxhiXxg464cQTgKUGm8/i6y2YGXg==
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/process-warning/-/process-warning-2.2.0.tgz#008ec76b579820a8e5c35d81960525ca64feb626"
+  integrity sha512-/1WZ8+VQjR6avWOgHeEPd7SDQmFQ1B5mC1eRXsCm5TarlNmx/wCsa5GEaxGm05BORRtyG/Ex/3xq3TuRvq57qg==
 
 process@^0.11.10:
   version "0.11.10"
@@ -12486,7 +12506,7 @@ read-pkg@^5.2.0:
     parse-json "^5.0.0"
     type-fest "^0.6.0"
 
-readable-stream@3, readable-stream@^3.0.0, readable-stream@^3.0.2, readable-stream@^3.0.6, readable-stream@^3.1.1, readable-stream@^3.4.0, readable-stream@^3.6.0:
+readable-stream@3, readable-stream@^3.0.0, readable-stream@^3.0.2, readable-stream@^3.0.6, readable-stream@^3.1.1, readable-stream@^3.4.0:
   version "3.6.1"
   resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-3.6.1.tgz#f9f9b5f536920253b3d26e7660e7da4ccff9bb62"
   integrity sha512-+rQmrWMYGA90yenhTYsLWAsLsqVC8osOw6PKE1HDYiO0gdPeKe/xDHNzIAIn4C91YQ6oenEhfYqqc1883qHbjQ==
@@ -12507,6 +12527,15 @@ readable-stream@^2.0.0, readable-stream@^2.0.1, readable-stream@^2.0.5, readable
     safe-buffer "~5.1.1"
     string_decoder "~1.1.1"
     util-deprecate "~1.0.1"
+
+readable-stream@^3.6.0:
+  version "3.6.2"
+  resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-3.6.2.tgz#56a9b36ea965c00c5a93ef31eb111a0f11056967"
+  integrity sha512-9u/sniCrY3D5WdsERHzHE4G2YCXqoG5FTHUiCC4SIbr6XcLZBY05ya9EKjYek9O5xOAwjGq+1JdGBAS7Q9ScoA==
+  dependencies:
+    inherits "^2.0.3"
+    string_decoder "^1.1.1"
+    util-deprecate "^1.0.1"
 
 readable-stream@^4.0.0:
   version "4.3.0"
@@ -12863,10 +12892,15 @@ safe-regex-test@^1.0.0:
     get-intrinsic "^1.1.3"
     is-regex "^1.1.4"
 
-safe-stable-stringify@^2.1.0, safe-stable-stringify@^2.3.1:
+safe-stable-stringify@^2.1.0:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/safe-stable-stringify/-/safe-stable-stringify-2.4.2.tgz#ec7b037768098bf65310d1d64370de0dc02353aa"
   integrity sha512-gMxvPJYhP0O9n2pvcfYfIuYgbledAOJFcqRThtPRmjscaipiwcwPPKLytpVzMkG2HAN87Qmo2d4PtGiri1dSLA==
+
+safe-stable-stringify@^2.3.1:
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/safe-stable-stringify/-/safe-stable-stringify-2.4.3.tgz#138c84b6f6edb3db5f8ef3ef7115b8f55ccbf886"
+  integrity sha512-e2bDA2WJT0wxseVd4lsDP4+3ONX6HpMXQa1ZhFQ7SU+GjvORCmShbCMltrtIDfkYhVHrOcPtj+KhmDBdPdZD1g==
 
 "safer-buffer@>= 2.1.2 < 3", "safer-buffer@>= 2.1.2 < 3.0.0", safer-buffer@^2.0.2, safer-buffer@^2.1.0, safer-buffer@^2.1.2, safer-buffer@~2.1.0:
   version "2.1.2"
@@ -13176,7 +13210,7 @@ sockjs@^0.3.24:
     uuid "^8.3.2"
     websocket-driver "^0.7.4"
 
-sonic-boom@3.2.1, sonic-boom@^3.0.0, sonic-boom@^3.1.0, sonic-boom@~3.2:
+sonic-boom@3.2.1, sonic-boom@~3.2:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/sonic-boom/-/sonic-boom-3.2.1.tgz#972ceab831b5840a08a002fa95a672008bda1c38"
   integrity sha512-iITeTHxy3B9FGu8aVdiDXUVAcHMF9Ss0cCsAOo2HfCrmVGT3/DT5oYaeu0M/YKZDlKTvChEyPq0zI9Hf33EX6A==
@@ -13187,6 +13221,13 @@ sonic-boom@^2.2.1:
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/sonic-boom/-/sonic-boom-2.8.0.tgz#c1def62a77425090e6ad7516aad8eb402e047611"
   integrity sha512-kuonw1YOYYNOve5iHdSahXPOK49GqwA+LZhI6Wz/l0rP57iKyXXIHaRagOBHAPmGwJC6od2Z9zgvZ5loSgMlVg==
+  dependencies:
+    atomic-sleep "^1.0.0"
+
+sonic-boom@^3.0.0, sonic-boom@^3.1.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/sonic-boom/-/sonic-boom-3.3.0.tgz#cffab6dafee3b2bcb88d08d589394198bee1838c"
+  integrity sha512-LYxp34KlZ1a2Jb8ZQgFCK3niIHzibdwtwNUWKg0qQRzsDoJ3Gfgkf8KdBTFU3SkejDEIlWwnSnpVdOZIhFMl/g==
   dependencies:
     atomic-sleep "^1.0.0"
 
@@ -13334,9 +13375,9 @@ split2@^3.0.0:
     readable-stream "^3.0.0"
 
 split2@^4.0.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/split2/-/split2-4.1.0.tgz#101907a24370f85bb782f08adaabe4e281ecf809"
-  integrity sha512-VBiJxFkxiXRlUIeyMQi8s4hgvKCSjtknJv/LVYbrgALPwf5zSKmEwV9Lst25AkvMDnvxODugjdl6KZgwKM1WYQ==
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/split2/-/split2-4.2.0.tgz#c9c5920904d148bab0b9f67145f245a86aadbfa4"
+  integrity sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg==
 
 split@^1.0.0:
   version "1.0.1"
