@@ -1,3 +1,4 @@
+import dynamic from 'next/dynamic';
 // @ts-ignore
-import SlugRoute from 'checkout/pages/checkout/[...slug]';
+const SlugRoute = dynamic(()=>import('checkout/pages/checkout/[...slug]'));
 export default SlugRoute;

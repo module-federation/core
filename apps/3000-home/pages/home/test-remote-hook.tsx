@@ -1,9 +1,10 @@
 import { NextPage } from 'next';
-import useCustomRemoteHook from 'shop/useCustomRemoteHook';
+
+// import useCustomRemoteHook from 'shop/useCustomRemoteHook';
 
 const TestRemoteHook: NextPage = () => {
-  const text = useCustomRemoteHook();
-
+  // const text = useCustomRemoteHook();
+  const text = 'test';
   return (
     <>
       <div>

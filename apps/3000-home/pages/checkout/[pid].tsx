@@ -1,3 +1,4 @@
+import dynamic from 'next/dynamic';
 // @ts-ignore
-import Pid from 'checkout/pages/checkout/[pid]';
+const Pid = dynamic(() => import('shop/pages/shop/index'));
 export default Pid;

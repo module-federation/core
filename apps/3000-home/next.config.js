@@ -20,9 +20,6 @@ const nextConfig = {
           isServer ? 'ssr' : 'chunks'
         }/remoteEntry.js`,
       }),
-      bootcycle: createDelegatedModule(require.resolve('./remote-delegate.js'), {
-        remote: 'boot@http://localhost:3000/_next/static/chunks/boot.js'
-      }),
       checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
         remote: `checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
       }),
@@ -51,8 +48,8 @@ const nextConfig = {
           antd: {},
         },
         extraOptions: {
-          automaticAsyncBoundary: true,
-          exposePages: true,
+          automaticAsyncBoundary: false,
+          exposePages: false,
           enableImageLoaderFix: true,
           enableUrlLoaderFix: true,
           skipSharingNextInternals: false,

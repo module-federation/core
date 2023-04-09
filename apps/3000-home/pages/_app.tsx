@@ -61,6 +61,7 @@ function MyApp(props) {
 }
 
 MyApp.getInitialProps = async (ctx) => {
+  const {req,res,...rest} = ctx;
   return App.getInitialProps(ctx);
 };
 

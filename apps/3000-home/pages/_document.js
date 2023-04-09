@@ -4,8 +4,10 @@ import { revalidate, FlushedChunks } from '@module-federation/nextjs-mf/utils';
 import { usedChunks, flushChunks } from '@module-federation/node/utils';
 
 class MyDocument extends Document {
-  static async getInitialProps(ctx) {
-    const initialProps = await Document.getInitialProps(ctx);
+  static async getInitialProps({req,res,...ctx}) {
+    console.log(ctx)
+    await import('./_app');
+    const initialProps = await Document.getInitialProps({req,res,...ctx});
     const chunks = await flushChunks();
     ctx?.res?.on('finish', () => {
       revalidate().then((shouldUpdate) => {

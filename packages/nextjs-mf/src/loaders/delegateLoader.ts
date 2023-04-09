@@ -15,7 +15,7 @@ export default function patchDefaultSharedLoader(
   const resolvedDelegates = Object.values(delegates).map((delegate) => {
     const [request, query] = delegate.replace('internal ', '').split('?');
     if (query) {
-      let queries = [];
+      const queries = [];
       for (const [key, value] of new URLSearchParams(query).entries()) {
         queries.push(`${key}=${value}`);
       }

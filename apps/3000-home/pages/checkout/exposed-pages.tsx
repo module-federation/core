@@ -1,3 +1,4 @@
+import dynamic from 'next/dynamic';
 // @ts-ignore
-import ExposedPages from 'checkout/pages/checkout/exposed-pages';
+const ExposedPages = dynamic(()=>import('checkout/pages/checkout/exposed-pages'));
 export default ExposedPages;

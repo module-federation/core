@@ -1,7 +1,9 @@
+import dynamic from 'next/dynamic';
 // @ts-ignore
-import Page from 'checkout/pages/checkout/index';
+const Page = dynamic(()=>import('checkout/pages/checkout/index'));
 
 const Checkout = Page;
-Checkout.getInitialProps = Page.getInitialProps;
+//@ts-ignore
+Checkout.getInitialProps = async (ctx) => import('checkout/pages/checkout/index').then((mod) => mod?.getInitialProps(ctx));
 
 export default Checkout;

@@ -1,4 +1,5 @@
+import dynamic from 'next/dynamic';
 // @ts-ignore
-import CheckButtonPage from 'checkout/pages/checkout/test-check-button';
+const CheckButtonPage = dynamic(()=>import('checkout/pages/checkout/test-check-button'));
 
 export default CheckButtonPage;
