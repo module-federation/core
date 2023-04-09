@@ -6,6 +6,9 @@ export { ModuleFederationPluginOptions };
 export interface FederatedTypesPluginOptions {
   disableTypeCompilation?: boolean;
   disableDownloadingRemoteTypes?: boolean;
+  /** The maximum time to wait for downloading remote types.
+   * @default 2000  */
+  downloadRemoteTypesTimeout?: number;
   federationConfig: ModuleFederationPluginOptions;
   /** @default '@mf-types'*/
   typescriptFolderName?: string;

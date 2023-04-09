@@ -30,7 +30,7 @@ export const NativeFederationTypeScriptRemote = createUnplugin((options: RemoteO
       }
     },
     webpack: compiler => {
-      compiler.options.devServer = mergeDeepRight(compiler.options.devServer, {
+      compiler.options.devServer = mergeDeepRight(compiler.options.devServer || {}, {
         static: {
           directory: resolve(retrieveOriginalOutDir(tsConfig, remoteOptions))
         }

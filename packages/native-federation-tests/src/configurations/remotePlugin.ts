@@ -1,33 +1,20 @@
 import {existsSync} from 'fs'
-import {dirname, join, resolve} from 'path'
-import typescript from 'typescript'
+import {join} from 'path'
 
 import {RemoteOptions} from '../interfaces/RemoteOptions'
 
 const defaultOptions = {
-  tsConfigPath: './tsconfig.json',
-  typesFolder: '@mf-types',
-  compiledTypesFolder: 'compiled-types',
-  deleteTypesFolder: true,
-  additionalFilesToCompile: [],
-  compilerInstance: 'tsc' as const
+  testsFolder: '@mf-tests',
+  distFolder: './dist',
+  deleteTestsFolder: true,
+  additionalBundlerConfig: {}
 }
 
-const readTsConfig = ({tsConfigPath, typesFolder, compiledTypesFolder}: Required<RemoteOptions>): typescript.CompilerOptions => {
-  const resolvedTsConfigPath = resolve(tsConfigPath)
-
-  const readResult = typescript.readConfigFile(resolvedTsConfigPath, typescript.sys.readFile)
-  const configContent = typescript.parseJsonConfigFileContent(readResult.config, typescript.sys, dirname(resolvedTsConfigPath))
-  const outDir = join(configContent.options.outDir || 'dist', typesFolder, compiledTypesFolder)
-
-  return {...configContent.options, emitDeclarationOnly: true, noEmit: false, declaration: true, outDir}
-}
-
-const TS_EXTENSIONS = ['ts', 'tsx', 'vue', 'svelte']
+const EXTENSIONS = ['ts', 'tsx', 'js', 'jsx', 'mjs']
 
 const resolveWithExtension = (exposedPath: string) => {
   const cwd = process.cwd()
-  for (const extension of TS_EXTENSIONS) {
+  for (const extension of EXTENSIONS) {
     const exposedPathWithExtension = join(cwd, `${exposedPath}.${extension}`)
     if (existsSync(exposedPathWithExtension)) return exposedPathWithExtension
   }
@@ -49,11 +36,13 @@ export const retrieveRemoteConfig = (options: RemoteOptions) => {
 
   const remoteOptions: Required<RemoteOptions> = {...defaultOptions, ...options}
   const mapComponentsToExpose = resolveExposes(remoteOptions)
-  const tsConfig = readTsConfig(remoteOptions)
+  const externalDeps = Object.keys(options.moduleFederationConfig.shared || {}).concat(Object.keys(options.moduleFederationConfig.remotes || {}))
+  const compiledFilesFolder = join(remoteOptions.distFolder, remoteOptions.testsFolder)
 
   return {
-    tsConfig,
-    mapComponentsToExpose,
-    remoteOptions
+    remoteOptions,
+    externalDeps,
+    compiledFilesFolder,
+    mapComponentsToExpose
   }
 }
