@@ -322,6 +322,7 @@ export const getContainer = async (
   }
 
   const containerScope =
+    //@ts-ignore
     typeof window !== 'undefined' ? window : global.__remote_scope__;
 
   if (typeof remoteContainer === 'string') {
