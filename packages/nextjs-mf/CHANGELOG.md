@@ -2,6 +2,21 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.2.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.2.2...nextjs-mf-6.2.3) (2023-04-09)
+
+### Dependency Updates
+
+* `utils` updated to version `1.4.1`
+* `utils` updated to version `1.4.1`
+* `node` updated to version `0.12.3`
+* `node` updated to version `0.12.3`
+
+### Bug Fixes
+
+* loader handling of getServerProps ([#697](https://github.com/module-federation/nextjs-mf/issues/697)) ([aade75c](https://github.com/module-federation/nextjs-mf/commit/aade75c450c5773c9c21fe4f3d29ed4c1409a532))
+
+
+
 ## [6.2.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.2.1...nextjs-mf-6.2.2) (2023-03-24)
 
 ### Dependency Updates
