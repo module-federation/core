@@ -13,6 +13,7 @@ const performReload = (shouldReload: any) => {
     req = __non_webpack_require__ as NodeRequire;
   }
 
+  //@ts-ignore
   global.__remote_scope__ = {
     _config: {},
     _medusa: {}
