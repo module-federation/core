@@ -22,6 +22,7 @@ const defaultOptions: Required<
   typescriptFolderName: TYPESCRIPT_FOLDER_NAME,
   typescriptCompiledFolderName: TYPESCRIPT_COMPILED_FOLDER_NAME,
   additionalFilesToCompile: [],
+  downloadRemoteTypesTimeout: 2000,
 };
 
 export const normalizeOptions = (

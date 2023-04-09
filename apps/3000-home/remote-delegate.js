@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const { importDelegatedModule } = require('@module-federation/utilities');
 
 // Delegates are currently not used in this example, but are left here for testing.

@@ -1,26 +1,28 @@
 {
-  "name": "native-federation-typescript",
+  "name": "native-federation-tests",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/native-federation-typescript/src",
+  "sourceRoot": "packages/native-federation-tests/src",
   "projectType": "library",
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
-        "outputPath": "dist/packages/native-federation-typescript",
+        "outputPath": "dist/packages/native-federation-tests",
         "parallel": false,
         "commands": [
-          "tsup --config packages/native-federation-typescript/tsup.config.ts",
-          "cp packages/native-federation-typescript/package.json dist/packages/native-federation-typescript",
-          "cp packages/native-federation-typescript/*.md dist/packages/native-federation-typescript"
+          "tsup --config packages/native-federation-tests/tsup.config.ts",
+          "cp packages/native-federation-tests/package.json dist/packages/native-federation-tests",
+          "cp packages/native-federation-tests/*.md dist/packages/native-federation-tests"
         ]
       }
     },
     "publish": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node tools/scripts/publish.mjs native-federation-typescript {args.ver} {args.tag}"
+        "command": "node tools/scripts/publish.mjs native-federation-tests {args.ver} {args.tag}"
       },
       "dependsOn": [
         {
@@ -31,21 +33,28 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["packages/native-federation-typescript/**/*.ts"]
+        "lintFilePatterns": [
+          "packages/native-federation-tests/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nrwl/vite:test",
       "outputs": [
-        "{workspaceRoot}/coverage/packages/native-federation-typescript"
-      ]
+        "{workspaceRoot}/coverage/packages/native-federation-tests"
+      ],
     },
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": ["native-federation-typescript:npm", "native-federation-typescript:github"],
+        "postTargets": [
+          "native-federation-tests:npm",
+          "native-federation-tests:github"
+        ],
         "trackDeps": true,
         "push": true
       }
