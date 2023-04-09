@@ -49,79 +49,42 @@ const getStaticPathsTemplate = (request: string) =>
     }
     `;
 
-export const pitch = function (
+export default function (
   this: LoaderContext<Record<string, unknown>>,
-  remainingRequest: string
+  source: string,
+  sourceMap: string
 ) {
   this.cacheable && this.cacheable();
   const callback = this.async();
-  const loaderWithoutBoundaryOrShared = this.request
-    .split('!')
-    .filter((loader) => {
-      return (
-        !loader.includes('async-boundary-loader') &&
-        !loader.includes('patchDefaultSharedLoader')
-      );
-    })
-    .join('!');
 
-  this.loadModule(
-    `${this.resourcePath}.webpack[javascript/auto]!=!${loaderWithoutBoundaryOrShared}`,
-    /**
-     * @param {Error | null | undefined} error
-     * @param {object} exports
-     */
-    (
-      error: Error | null | undefined,
-      source: string,
-      sourceMap: string,
-      module: NormalModule
-    ) => {
-      if (error) {
-        callback(error);
+  if (this._compilation && this._compilation.name === 'ChildFederationPlugin') {
+    callback(null, source, sourceMap);
+    return;
+  }
+  const hasGIP = source.includes('getInitialProps');
+  const hasGSP = source.includes('getStaticProps');
+  const hasGSSP = source.includes('getServerSideProps');
+  const hasGSPT = source.includes('getStaticPaths');
 
-        return;
-      }
+  const relativeResource = this.utils.contextify(this.context, this.resource);
 
-      if (
-        this._compilation &&
-        this._compilation.name === 'ChildFederationPlugin'
-      ) {
-        callback(null, source, sourceMap);
-        return;
-      }
+  const result = [pageTemplate(`${relativeResource}?hasBoundary`)];
 
-      const hasGIP = !!source.includes('getInitialProps');
-      const hasGSP = !!source.includes('getStaticProps');
-      const hasGSSP = !!source.includes('getServerSideProps');
-      const hasGSPT = !!source.includes('getStaticPaths');
+  if (hasGIP) {
+    result.push(getInitialPropsTemplate(`${relativeResource}?hasBoundary`));
+  }
 
-      const relativeResource = this.utils.contextify(
-        this.context,
-        this.resource
-      );
+  if (hasGSP) {
+    result.push(getStaticPropsTemplate(`${relativeResource}?hasBoundary`));
+  }
 
-      const result = [pageTemplate(`${relativeResource}?hasBoundary`)];
+  if (hasGSSP) {
+    result.push(getServerSidePropsTemplate(`${relativeResource}?hasBoundary`));
+  }
 
-      if (hasGIP) {
-        result.push(getInitialPropsTemplate(`${relativeResource}?hasBoundary`));
-      }
+  if (hasGSPT) {
+    result.push(getStaticPathsTemplate(`${relativeResource}?hasBoundary`));
+  }
 
-      if (hasGSP) {
-        result.push(getStaticPropsTemplate(`${relativeResource}?hasBoundary`));
-      }
-
-      if (hasGSSP) {
-        result.push(
-          getServerSidePropsTemplate(`${relativeResource}?hasBoundary`)
-        );
-      }
-
-      if (hasGSPT) {
-        result.push(getStaticPathsTemplate(`${relativeResource}?hasBoundary`));
-      }
-
-      callback(null, result.join('\n'));
-    }
-  );
-};
+  callback(null, result.join('\n'));
+}
