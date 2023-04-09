@@ -10,7 +10,8 @@ import type {
   NextFederationPluginOptions,
 } from '@module-federation/utilities';
 import {createRuntimeVariables, createDelegatedModule} from '@module-federation/utilities';
-
+import CopyFederationPlugin from './CopyFederationPlugin';
+import AddModulesPlugin from './AddModulesToRuntime';
 import type {Compiler} from 'webpack';
 import path from 'path';
 
@@ -60,10 +61,51 @@ export class NextFederationPlugin {
     const isServer = compiler.options.name === 'server';
     const {webpack} = compiler;
 
+    new CopyFederationPlugin(isServer).apply(compiler);
+
     if (isServer) {
       // target false because we use our own target for node env
       compiler.options.target = false;
       const {StreamingTargetPlugin} = require('@module-federation/node');
+      // add hoist to main entry for sync avaliability.
+      // new webpack.EntryPlugin(
+      //   compiler.context,
+      //   require.resolve('../internal-delegate-hoist'),
+      //   {
+      //     name: undefined,
+      //     runtime: 'webpack-runtime',
+      //   }).apply(compiler);
+
+      new AddModulesPlugin().apply(compiler);
+      compiler.options.optimization = {
+        ...compiler.options.optimization,
+        splitChunks: {
+          ...compiler.options.optimization?.splitChunks,
+          cacheGroups: {
+            //@ts-ignore
+            ...compiler.options.optimization?.splitChunks?.cacheGroups,
+            hoist: {
+              name: function (arg1: any, arg2: any) {
+                  console.log(arg2.map((a: any) => {return arg2.runtime}))
+              },
+              enforce: true,
+              priority: -1,
+              test: function (module: any, chunks: any) {
+                return false;
+                if(module?.resource?.includes('hoist')){
+                  console.log(module.resource)
+                }
+                if (/internal-delegate-hoist/.test(module.resource)) {
+                  return true
+                }
+                return (
+                  /server-hoist/.test(module.resource)
+                );
+              }
+            }
+          },
+        },
+      };
 
       new StreamingTargetPlugin(this._options, {
         ModuleFederationPlugin: webpack.container.ModuleFederationPlugin,
@@ -77,7 +119,7 @@ export class NextFederationPlugin {
       this._options.filename = path.basename(this._options.filename);
 
       // should this be a plugin that we apply to the compiler?
-      internalizeSharedPackages(this._options, compiler);
+      // internalizeSharedPackages(this._options, compiler);
 
       // module-federation/utilities uses internal webpack methods and must be bundled into runtime code.
       if (Array.isArray(compiler.options.externals)) {
@@ -118,29 +160,7 @@ export class NextFederationPlugin {
       if (this._options.remotes) {
         this._options.remotes = parseRemotes(this._options.remotes);
       }
-      //@ts-ignore
-      compiler.options.output.publicPath = 'auto';
-      compiler.options.output.uniqueName = this._options.name;
 
-      new webpack.container.ModuleFederationPlugin({
-        ...this._options,
-        shareScope: 'default',
-        runtime: false,
-        shared: {
-          react: {
-            import: false,
-            requiredVersion: false,
-            singleton: true,
-          }
-        }
-      }).apply(compiler);
-
-      new webpack.EntryPlugin(
-        compiler.context,
-        require.resolve('../internal-delegate-hoist'),
-      'main').apply(compiler);
-
-      return
 
       if (this._options.library) {
         console.error('[mf] you cannot set custom library');
@@ -151,29 +171,35 @@ export class NextFederationPlugin {
         type: 'window',
         name: this._options.name,
       };
+
+      // add hoist to main entry for sync avaliability.
+      new webpack.EntryPlugin(
+        compiler.context,
+        require.resolve('../internal-delegate-hoist'),
+        'main').apply(compiler);
     }
 
     const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];
 
     //patch next
-    compiler.options.module.rules.push({
-      test(req: string) {
-        if (
-          allowedPaths.some((p) => req.includes(path.join(compiler.context, p)))
-        ) {
-          return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
-        }
-        return false;
-      },
-      include: compiler.context,
-      exclude: [
-        /node_modules/,
-        /_middleware/,
-        /pages[\\/]middleware/,
-        /pages[\\/]api/,
-      ],
-      loader: path.resolve(__dirname, '../loaders/patchDefaultSharedLoader'),
-    });
+    // compiler.options.module.rules.push({
+    //   test(req: string) {
+    //     if (
+    //       allowedPaths.some((p) => req.includes(path.join(compiler.context, p)))
+    //     ) {
+    //       return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
+    //     }
+    //     return false;
+    //   },
+    //   include: compiler.context,
+    //   exclude: [
+    //     /node_modules/,
+    //     /_middleware/,
+    //     /pages[\\/]middleware/,
+    //     /pages[\\/]api/,
+    //   ],
+    //   loader: path.resolve(__dirname, '../loaders/patchDefaultSharedLoader'),
+    // });
 
     if (this._options.remotes) {
       const delegates = getDelegates(this._options.remotes);
@@ -182,6 +208,7 @@ export class NextFederationPlugin {
         compiler.options.module.rules.push({
           test(req: string) {
             if (isServer) {
+
               // server has no common chunk or entry to hoist into
               if (
                 allowedPaths.some((p) =>
@@ -257,249 +284,104 @@ export class NextFederationPlugin {
     if (!ModuleFederationPlugin) {
       return;
     }
-    const existingGroups =
-      //@ts-ignore
-      compiler.options.optimization?.splitChunks?.cacheGroups || {};
-    // @ts-ignore
-    delete compiler.options.optimization?.splitChunks?.cacheGroups?.framework;
-    console.log(existingGroups);
-    // @ts-ignore
-    compiler.options.optimization = {
-      ...compiler.options.optimization,
-      splitChunks: {
-        ...compiler.options.optimization?.splitChunks,
+    //@ts-ignore
+    if(false) {
+      const existingGroups =
+        //@ts-ignore
+        compiler.options.optimization?.splitChunks?.cacheGroups || {};
+      // @ts-ignore
+      delete compiler.options.optimization?.splitChunks?.cacheGroups?.framework;
+      console.log(existingGroups);
+      // @ts-ignore
+      compiler.options.optimization = {
+        ...compiler.options.optimization,
+        splitChunks: {
+          ...compiler.options.optimization?.splitChunks,
 
-        cacheGroups: {
-          // ...existingGroups,
-          // containerHousing: {
-          //   test: /\/react\//,
-          //   priority: 10,
-          //   reuseExistingChunk: false,
-          //   name: 'webpack',
-          //   enforce: true,
-          // },
-          // delegateHousing: {
-          //   name: 'webpack',
-          //   enforce: true,
-          //   test: function (module: any, chunks: any) {
-          //     // console.log(module.resource);
-          //     return (
-          //       /remote-delegate/.test(module.resource)
-          //     );
-          //   }
-          // },
-          hoist: {
-            name: 'webpack',
-            enforce: true,
-            priority: -1,
-            test: function (module: any, chunks: any) {
-              // console.log(module.resource);
-              if (/internal-delegate-hoist/.test(module.resource)) {
-                console.log(module.resource)
+          cacheGroups: {
+            hoist: {
+              name: 'webpack',
+              enforce: true,
+              priority: -1,
+              test: function (module: any, chunks: any) {
+                if (/internal-delegate-hoist/.test(module.resource)) {
+                  console.log(module.resource)
+                }
+                return (
+                  /internal-delegate-hoist/.test(module.resource)
+                );
               }
-              return (
-                /internal-delegate-hoist/.test(module.resource)
-              );
             }
-          }
-//           vendorReact: {
-//             reuseExistingChunk: false,
-//             priority: 1,
-//             test: (module: any, chunks: any) => {
-//               // return  /node_modules\/react\//.test(module.resource);
-//               const tes =
-//                 /remote-delegate/.test(module.resource) ||
-//                 /node_modules\/react\//.test(module.resource);
-//
-//               // if(tes)   console.log('test',module.resource,tes);
-//               return tes;
-//             },
-//             // test: /internal-delegate-hoist/,
-//             // name: 'webpack',
-//             //@ts-ignore
-//             name: function (module: any, chunks: any, cacheGroupKey: any) {
-// console.log(module.resource);
-//               if(chunks.some((c: any) => c.runtime === 'home_app')){
-//                 return false
-//               }
-// return 'webpack'
-//
-//               if (
-//                 (module.resource.includes('remote-delegate') ||
-//                   module.resource.includes('react')) &&
-//                 chunks[0].name === null &&
-//
-//                 // @ts-ignore
-//                 chunks.find((c) => c.runtime === 'webpack')
-//               ) {
-//                 return 'webpack';
-//               }
-//               // @ts-ignore
-//               // if(chunks[0].runtime !== 'webpack-runtime') {
-//               //   console.log(chunks);
-//               // }
-//               if(chunks.some((c: any) => (c.name === 'main'||c.name === "eager"))){
-//                 return 'webpack'
-//               }
-//
-//               return false;
-//               console.log('thiung');
-//               console.log(module.resource);
-//               console.log(
-//                 chunks.map((chunk: any) => ({
-//                   name: chunk.name,
-//                   runtime: chunk.runtime,
-//                 }))
-//               );
-//               console.log('end');
-//
-//               // @ts-ignore
-//               if (chunks.find((c) => c.runtime === 'webpack') && chunks.every((c) => c.name === null)) {
-//
-//                 return 'webpack';
-//               }
-//
-//               return undefined;
-//
-//               // @ts-ignore
-//               if (
-//                 module.resource.includes('react') &&
-//                 // @ts-ignore
-//                 chunks.find((c) => c.runtime === 'webpack')
-//               ) {
-//                 if (chunks[0].name === 'main') {
-//                   return 'webpack';
-//                 }
-//                 // console.log(module)
-//                 return undefined;
-//               }
-//               if (chunks[0].runtime === 'home_app') {
-//                 return undefined;
-//               }
-//               return undefined;
-//               if (chunks[0].runtime === 'webpack-runtime') {
-//                 return 'eager';
-//               }
-//
-//               return false;
-//               // if(chunks[0].runtime === 'webpack') {
-//               //   // console.log('module',chunks);
-//               //   // console.log('module',module);
-//               //   return 'eager';
-//               // }
-//               // return chunks[0].runtime
-//               // chunks.map((chunk: any) => {
-//               //   console.log(chunk.name, chunk.runtime);
-//               // })
-//             },
-//             // runtime: 'webpack',
-//             enforce: true,
-//             //@ts-ignore
-//             // chunks(chunk) {
-//             //   console.log(chunk.name)
-//             //   if(typeof chunk.runtime !== 'string') {
-//             //     chunk.runtime = 'webpack'
-//             //     // exclude `my-excluded-chunk`
-//             //   }
-//             //   return chunk.name === 'webpack';
-//             //
-//             // },
-//           },
+          },
         },
-      },
-    };
-    compiler.options.devtool = 'source-map';
-    // @ts-ignore
-    compiler.options.externals.push({
-      initup: 'script boot@http://localhost:3000/_next/static/chunks/boot.js', // no properties here
-//       boot: `promise new Promise((resolve) => {
-// // resolve();
-// __webpack_require__.I('default');
-// console.log('boot');
-//       })`,
-    });
+      };
+      compiler.options.devtool = 'source-map';
 
+      compiler.options.output.publicPath = 'auto';
+      compiler.options.output.uniqueName = this._options.name;
+      const internalShare = reKeyHostShared(this._options.shared);
+      //@ts-ignore
+      delete internalShare.hostreact;
+
+      const hostFederationPluginOptions: ModuleFederationPluginOptions = {
+        ...this._options,
+        runtime: false,
+        shared: {
+          noop: {
+            import: 'data:text/javascript,module.exports = {};',
+            requiredVersion: false,
+            eager: true,
+            version: '0',
+          },
+          // ...internalShare,
+          hostreact: {
+            import: 'react',
+            packageName: 'react',
+            shareKey: 'react',
+            singleton: true,
+            eager: false,
+            version: '0',
+            requiredVersion: false,
+          },
+          hostreactdom: {
+            import: 'react-dom',
+            packageName: 'react-dom',
+            shareKey: 'react-dom',
+            singleton: true,
+            eager: false,
+            version: '0',
+            requiredVersion: false,
+          },
+        },
+      };
+    }
+    //@ts-ignore
     compiler.options.output.publicPath = 'auto';
     compiler.options.output.uniqueName = this._options.name;
-    const internalShare = reKeyHostShared(this._options.shared);
-    //@ts-ignore
-    delete internalShare.hostreact;
-    const hostFederationPluginOptions: ModuleFederationPluginOptions = {
-      ...this._options,
-      runtime: false,
-      // exposes: {},
-      remotes: {
-        ...this._options.remotes,
-        // "boot": `promise new Promise((resolve) => {
-        // console.log('boot');
-        // __webpack_require__.I('default');
-        // __webpack_require__.S.default.react[0].loaded = true
-        // __webpack_require__.S.default['react-dom'][0].loaded = true
-        // console.log(__webpack_require__.S.default.react[0].get);
-        // console.log(__webpack_require__.S.default);
-        // resolve({
-        // get:__webpack_require__.S.default.react[0].get,
-        // init: function(){
-        //        return __webpack_require__.S.default.react[0].get()
-        // },
-        // });
-        // });`
-      },
-      shared: {
-        noop: {
-          import: 'data:text/javascript,module.exports = {};',
-          requiredVersion: false,
-          eager: true,
-          version: '0',
-        },
-        // ...internalShare,
-        hostreact: {
-          import: 'react',
-          packageName: 'react',
-          shareKey: 'react',
-          singleton: true,
-          eager: false,
-          version: '0',
-          requiredVersion: false,
-        },
-        hostreactdom: {
-          import: 'react-dom',
-          packageName: 'react-dom',
-          shareKey: 'react-dom',
-          singleton: true,
-          eager: false,
-          version: '0',
-          requiredVersion: false,
-        },
-      },
-    };
-    // new ModuleFederationPlugin({
-    //   shared: {
-    //     react: {
-    //       eager: true,
-    //     }
-    //   }
-    // }, {
-    //   ModuleFederationPlugin,
-    // }).apply(compiler);
-    new ModuleFederationPlugin(hostFederationPluginOptions, {
-      ModuleFederationPlugin,
-    }).apply(compiler);
 
     new ModuleFederationPlugin({
-      name: 'boot',
-      filename: 'static/chunks/boot.js',
-      exposes: {
-        "./react": 'react',
-      },
+      ...this._options,
+      runtime: false,
       shared: {
         react: {
+          import: false,
+          requiredVersion: false,
+          singleton: true,
+        },
+        'react-dom': {
+          import: false,
+          requiredVersion: false,
           singleton: true,
         }
       }
-    }, {
-      ModuleFederationPlugin,
-    }).apply(compiler);
+    },{ModuleFederationPlugin}).apply(compiler);
+
+
+
+    // new ModuleFederationPlugin(hostFederationPluginOptions, {
+    //   ModuleFederationPlugin,
+    // }).apply(compiler);
+
 
     // new ChildFederationPlugin(this._options, this._extraOptions).apply(
     //   compiler
