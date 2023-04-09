@@ -10,8 +10,6 @@ import type {
   GetModuleOptions,
 } from '../types';
 
-import '../types/global';
-
 type RemoteVars = Record<
   string,
   | Promise<WebpackRemoteContainer>
@@ -164,8 +162,10 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       request: string | null;
     };
 
+    // @ts-ignore
     if (!global.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser
+      // @ts-ignore
       global.__remote_scope__ = {
         // @ts-ignore
         _config: {},
@@ -173,6 +173,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
     }
 
     const globalScope =
+      // @ts-ignore
       typeof window !== 'undefined' ? window : global.__remote_scope__;
 
     if (typeof window === 'undefined') {
