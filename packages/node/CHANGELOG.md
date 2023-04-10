@@ -2,6 +2,27 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [0.13.0](https://github.com/module-federation/nextjs-mf/compare/node-0.12.3...node-0.13.0) (2023-04-09)
+
+### Dependency Updates
+
+* `utils` updated to version `1.5.0`
+* `utils` updated to version `1.5.0`
+
+### Features
+
+* Allow Container Utils to work Server Side ([#723](https://github.com/module-federation/nextjs-mf/issues/723)) ([232ba24](https://github.com/module-federation/nextjs-mf/commit/232ba24072f19bd32d1f745d4edf1518e548df50))
+
+
+
+## [0.12.3](https://github.com/module-federation/nextjs-mf/compare/node-0.12.2...node-0.12.3) (2023-04-09)
+
+### Dependency Updates
+
+* `utils` updated to version `1.4.1`
+* `utils` updated to version `1.4.1`
+
+
 ## [0.12.2](https://github.com/module-federation/nextjs-mf/compare/node-0.12.1...node-0.12.2) (2023-03-24)
 
 

@@ -26,6 +26,18 @@ import ChildFederationPlugin from './ChildFederationPlugin';
 
 import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
 
+// @ts-ignore
+const regexEqual = (x, y) => {
+  return (
+    x instanceof RegExp &&
+    y instanceof RegExp &&
+    x.source === y.source &&
+    x.global === y.global &&
+    x.ignoreCase === y.ignoreCase &&
+    x.multiline === y.multiline
+  );
+};
+
 export class NextFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
@@ -246,27 +258,59 @@ export class NextFederationPlugin {
     }
 
     if (this._extraOptions.automaticAsyncBoundary) {
-      compiler.options.module.rules.push({
-        test: (request: string) => {
-          if (
-            allowedPaths.some((p) =>
-              request.includes(path.join(compiler.context, p))
-            )
-          ) {
-            return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request);
-          }
-          return false;
-        },
-        exclude: [
-          /node_modules/,
-          /_document/,
-          /_middleware/,
-          /pages[\\/]middleware/,
-          /pages[\\/]api/,
-        ],
-        resourceQuery: (query) => !query.includes('hasBoundary'),
-        loader: path.resolve(__dirname, '../loaders/async-boundary-loader'),
+      const jsRules = compiler.options.module.rules.find((r) => {
+        //@ts-ignore
+        return r && r.oneOf;
       });
+
+      //@ts-ignore
+      if (jsRules && jsRules.oneOf) {
+        //@ts-ignore
+        const foundJsLayer = jsRules.oneOf.find((r) => {
+          return (
+            regexEqual(r.test, /\.(tsx|ts|js|cjs|mjs|jsx)$/) && !r.issuerLayer
+          );
+        });
+
+        if (foundJsLayer) {
+          let loaderChain = [];
+          if (Array.isArray(foundJsLayer.use)) {
+            loaderChain = [...foundJsLayer.use];
+          } else {
+            loaderChain = [foundJsLayer.use];
+          }
+          //@ts-ignore
+          jsRules.oneOf.unshift({
+            test: (request: string) => {
+              if (
+                allowedPaths.some((p) =>
+                  request.includes(path.join(compiler.context, p))
+                )
+              ) {
+                return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request);
+              }
+              return false;
+            },
+            exclude: [
+              /node_modules/,
+              /_document/,
+              /_middleware/,
+              /pages[\\/]middleware/,
+              /pages[\\/]api/,
+            ],
+            resourceQuery: (query: string) => !query.includes('hasBoundary'),
+            use: [
+              ...loaderChain,
+              {
+                loader: path.resolve(
+                  __dirname,
+                  '../loaders/async-boundary-loader'
+                ),
+              },
+            ],
+          });
+        }
+      }
     }
 
     //todo runtime variable creation needs to be applied for server as well. this is just for client
