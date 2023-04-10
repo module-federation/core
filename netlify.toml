@@ -1,2 +1,8 @@
 [build]
 publish = "dist/apps/website/client"
+
+[[redirects]]
+from = "/forms"
+to = "/forms.html"
+status = 200
+force = true
