@@ -44,37 +44,42 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     import: false
   },
-  // 'styled-jsx': {
-  //   requiredVersion: false,
-  //   singleton: true,
-  //   import: false
-  // },
-  // 'styled-jsx/style': {
-  //   requiredVersion: false,
-  //   singleton: true,
-  //   import: false
-  // },
-  // 'next/link': {
-  //   requiredVersion: false,
-  //   singleton: true,
-  //   import: false
-  // },
+  'styled-jsx': {
+    requiredVersion: false,
+    singleton: true,
+    import: false,
+    eager:true
+  },
+  'styled-jsx/style': {
+    requiredVersion: false,
+    singleton: true,
+    import: false,
+    eager: true
+  },
+  'next/link': {
+    requiredVersion: false,
+    singleton: true,
+    import: false,
+    eager: true
+  },
   'next/router': {
     requiredVersion: false,
     singleton: true,
     import: false,
     eager:true,
   },
-  // 'next/script': {
-  //   requiredVersion: false,
-  //   singleton: true,
-  //   import: false
-  // },
-  // 'next/head': {
-  //   requiredVersion: false,
-  //   singleton: true,
-  //   import: false
-  // },
+  'next/script': {
+    requiredVersion: false,
+    singleton: true,
+    import: false,
+    eager:true
+  },
+  'next/head': {
+    requiredVersion: false,
+    singleton: true,
+    import: false,
+    eager: true
+  },
 };
 
 // put host in-front of any shared module key, so "hostreact"

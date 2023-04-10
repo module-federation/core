@@ -48,7 +48,7 @@ const nextConfig = {
           antd: {},
         },
         extraOptions: {
-          automaticAsyncBoundary: false,
+          automaticAsyncBoundary: true,
           exposePages: true,
           enableImageLoaderFix: true,
           enableUrlLoaderFix: true,

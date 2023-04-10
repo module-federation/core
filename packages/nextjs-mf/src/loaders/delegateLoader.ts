@@ -89,11 +89,9 @@ export default function patchDefaultSharedLoader(
       return acc
     }, {scope: '', sideload: ''});
 
-    console.log(eagerShared);
-
      shareScopes = `
   const eager = {` + eagerShared.scope + `};
-  __webpack_share_scopes__.default = __webpack_share_scopes__.default || Object.assign(__webpack_share_scopes__.default || {}, eager);
+  __webpack_share_scopes__.default = Object.assign(__webpack_share_scopes__.default || {}, eager);
   `;
   }
 

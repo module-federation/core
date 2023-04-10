@@ -82,41 +82,11 @@ export class NextFederationPlugin {
       compiler.options.target = false;
       const {StreamingTargetPlugin} = require('@module-federation/node');
       // add hoist to main entry for sync avaliability.
-
+compiler.options.optimization.chunkIds = 'named';
       new AddModulesPlugin({
         runtime: 'webpack-runtime',
         eager:true,
       }).apply(compiler);
-      // compiler.options.optimization = {
-      //   ...compiler.options.optimization,
-      //   splitChunks: {
-      //     ...compiler.options.optimization?.splitChunks,
-      //     cacheGroups: {
-      //       //@ts-ignore
-      //       ...compiler.options.optimization?.splitChunks?.cacheGroups,
-      //       hoist: {
-      //         name: function (arg1: any, arg2: any) {
-      //             console.log(arg2.map((a: any) => {return arg2.runtime}))
-      //         },
-      //         enforce: true,
-      //         priority: -1,
-      //         test: function (module: any, chunks: any) {
-      //           return false;
-      //           if(module?.resource?.includes('hoist')){
-      //             console.log(module.resource)
-      //           }
-      //           if (/internal-delegate-hoist/.test(module.resource)) {
-      //             return true
-      //           }
-      //           return (
-      //             /server-hoist/.test(module.resource)
-      //           );
-      //         }
-      //       }
-      //     },
-      //   },
-      // };
-
       new StreamingTargetPlugin(this._options, {
         ModuleFederationPlugin: webpack.container.ModuleFederationPlugin,
       }).apply(compiler);
@@ -194,10 +164,10 @@ compiler.options.plugins= compiler.options.plugins.filter((p: any) => {return p.
         compiler.context,
         require.resolve('../internal-delegate-hoist'),
         'main').apply(compiler);
-      new webpack.EntryPlugin(
-        compiler.context,
-        require.resolve('../delegate-hoist'),
-        'main').apply(compiler);
+      // new webpack.EntryPlugin(
+      //   compiler.context,
+      //   require.resolve('../delegate-hoist'),
+      //   'main').apply(compiler);
 
 
       // if(this._options.name) {
@@ -216,6 +186,7 @@ compiler.options.plugins= compiler.options.plugins.filter((p: any) => {return p.
       ...this._options,
       runtime: false,
       exposes: {
+        "__hoist":require.resolve('../delegate-hoist'),
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)
           : {}),
@@ -280,9 +251,9 @@ compiler.options.plugins= compiler.options.plugins.filter((p: any) => {return p.
             }
             return false;
           },
-          resourceQuery: this._extraOptions.automaticAsyncBoundary
-            ? (query) => !query.includes('hasBoundary')
-            : undefined,
+          // resourceQuery: this._extraOptions.automaticAsyncBoundary
+          //   ? (query) => !query.includes('hasBoundary')
+          //   : undefined,
           include: [
             compiler.context,
             /internal-delegate-hoist/,
@@ -445,19 +416,16 @@ compiler.options.plugins= compiler.options.plugins.filter((p: any) => {return p.
 
     new ModuleFederationPlugin(hostFederationPluginOptions,{ModuleFederationPlugin}).apply(compiler);
 
-if(!isServer) {
-  new ModuleFederationPlugin({
-    ...hostFederationPluginOptions,
-    filename: undefined,
-    runtime: undefined,
-    name: 'home_app_single',
-    remotes: {}
-  },{ModuleFederationPlugin}).apply(compiler);
-}
-    // new ModuleFederationPlugin(hostFederationPluginOptions, {
-    //   ModuleFederationPlugin,
-    // }).apply(compiler);
-
+    if(!isServer && this._options.remotes && Object.keys(this._options.remotes).length > 0) {
+      // single runtime chunk if host or circular remote uses remote of current host.
+      new ModuleFederationPlugin({
+        ...hostFederationPluginOptions,
+        filename: undefined,
+        runtime: undefined,
+        name: this._options.name + '_single',
+        remotes: {}
+      },{ModuleFederationPlugin}).apply(compiler);
+    }
 
     // new ChildFederationPlugin(this._options, this._extraOptions).apply(
     //   compiler

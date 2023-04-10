@@ -10,7 +10,6 @@ class CopyBuildOutputPlugin {
     compiler.hooks.afterEmit.tapAsync('CopyBuildOutputPlugin', (compilation, callback) => {
       const { outputPath } = compiler;
       const outputString = outputPath.split('.next')[0] + '.next';
-      console.log('outputString', outputString)
       const isProd = compiler.options.mode === 'production';
       let serverLoc;
       let servingLoc;
@@ -29,11 +28,8 @@ class CopyBuildOutputPlugin {
         fs.mkdirSync(serverLoc, { recursive: true });
       }
 
-      console.log('isServer', this.isServer)
       const copyFiles = (source, destination) => {
-        console.log('before read')
         const files = fs.readdirSync(source);
-        console.log('files')
 
         files.forEach((file) => {
           const sourcePath = path.join(source, file);
@@ -50,9 +46,7 @@ class CopyBuildOutputPlugin {
         });
       };
       if(fs.existsSync(this.isServer ? outputPath : servingLoc)) {
-        console.log('before copy')
         copyFiles(this.isServer ? outputPath : servingLoc, serverLoc);
-        console.log('after copy')
       }
       callback();
     });
