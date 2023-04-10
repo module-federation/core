@@ -9,18 +9,18 @@ import styles from './contact.css?inline';
 export default component$(() => {
   useStylesScoped$(styles);
 
-  const handleSubmit = $((event: QwikSubmitEvent<HTMLFormElement>) => {
-    const myForm = event.target as any;
-    const formData = new FormData(myForm) as any;
+  // const handleSubmit = $((event: QwikSubmitEvent<HTMLFormElement>) => {
+  //   const myForm = event.target as any;
+  //   const formData = new FormData(myForm) as any;
 
-    fetch('/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(formData).toString(),
-    })
-      .then(() => alert('Submit!'))
-      .catch((error) => alert(error));
-  });
+  //   fetch('/', {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  //     body: new URLSearchParams(formData).toString(),
+  //   })
+  //     .then(() => alert('Submit!'))
+  //     .catch((error) => alert(error));
+  // });
 
   return (
     <Section id="contact" theme={ContainerTheme.OPAQUE}>
@@ -31,9 +31,12 @@ export default component$(() => {
       <div class="flex flex-col lg:flex-row gap-10 ">
         <div class="flex flex-col items-center gap-4 flex-1 w-50">
           <form
+            name="contactForm2"
+            method="POST"
+            data-netlify="true"
             class="flex-1 w-50 bg-[#EFEFFF] w-full flex flex-col md:grid md:grid-cols-2 gap-4 p-6"
-            onSubmit$={async (e) => handleSubmit(e as any)}
-            preventdefault:submit
+            // onSubmit$={async (e) => handleSubmit(e as any)}
+            // preventdefault:submit
           >
             <input type="hidden" name="form-name" value="contactForm2" />
 
