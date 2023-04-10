@@ -35,7 +35,7 @@ export default component$(() => {
             onSubmit$={async (e) => handleSubmit(e as any)}
             preventdefault:submit
           >
-            <input type="hidden" name="form-name" value="contactForm" />
+            <input type="hidden" name="form-name" value="contactForm2" />
 
             <div class="flex flex-col gap-1">
               <label class="text-blue-gray-500" for="companyEmail">
