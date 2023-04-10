@@ -23,7 +23,9 @@ export default extendConfig(modified, () => {
       outDir: 'dist/apps/website/.netlify/edge-functions/entry.netlify-edge',
     },
     plugins: [
-      netlifyEdgeAdapter(),
+      netlifyEdgeAdapter({
+        staticPaths: ['/form']
+      }),
       qwikVite({
         client: {
           outDir: '../../dist/apps/website/client',

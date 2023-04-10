@@ -1,7 +1,7 @@
 {
   "functions": [
     {
-      "path": "/*!(form)",
+      "path": "/*",
       "function": "entry.netlify-edge",
       "cache": "manual"
     }
