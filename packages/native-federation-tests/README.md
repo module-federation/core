@@ -153,5 +153,5 @@ module.exports = {
 
 ## Examples
 
-To use it in a `host` module, refer to [this example](https://github.com/ilteoood/module-federation-typescript/tree/host).  
-To use it in a `remote` module, refer to [this example](https://github.com/ilteoood/module-federation-typescript/tree/remote).
+To use it in a `host` module, refer to [this example](https://github.com/module-federation/module-federation-examples/tree/master/native-federation-tests-typescript-plugins/host).  
+To use it in a `remote` module, refer to [this example](https://github.com/module-federation/module-federation-examples/tree/master/native-federation-tests-typescript-plugins/remote).
