@@ -34,6 +34,7 @@ export default component$(() => {
             name="contactForm2"
             method="POST"
             data-netlify="true"
+            action="/forms.html"
             class="flex-1 w-50 bg-[#EFEFFF] w-full flex flex-col md:grid md:grid-cols-2 gap-4 p-6"
             // onSubmit$={async (e) => handleSubmit(e as any)}
             // preventdefault:submit
