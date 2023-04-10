@@ -1,12 +1,12 @@
 {
   "functions": [
     {
-      "path": "/forms",
-      "function": "none",
+      "path": "/",
+      "function": "entry.netlify-edge",
       "cache": "manual"
     },
     {
-      "path": "/*",
+      "path": "/showcase",
       "function": "entry.netlify-edge",
       "cache": "manual"
     }
