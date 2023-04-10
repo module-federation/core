@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage: {
-        pattern: `url('/pattern_7.png')`,
+        pattern: `url('/pattern_9.png')`,
       },
       maxWidth: {
         1225: '1225px',
