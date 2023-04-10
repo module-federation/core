@@ -1,4 +1,4 @@
-import { component$, useStylesScoped$ } from '@builder.io/qwik';
+import { component$, useStylesScoped$, $, QwikSubmitEvent } from '@builder.io/qwik';
 import { $translate as t } from 'qwik-speak';
 import Button, { ButtonTheme } from '../../button/button';
 import { ContainerTheme } from '../../container/container';
@@ -9,6 +9,19 @@ import styles from './contact.css?inline';
 export default component$(() => {
   useStylesScoped$(styles);
 
+  const handleSubmit = $((event: QwikSubmitEvent<HTMLFormElement>) => {
+    const myForm = event.target as any;
+    const formData = new FormData(myForm) as any;
+
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(formData).toString(),
+    })
+      .then(() => alert('Submit!'))
+      .catch((error) => alert(error));
+  });
+
   return (
     <Section id="contact" theme={ContainerTheme.OPAQUE}>
       <SectionHeader
@@ -18,11 +31,12 @@ export default component$(() => {
       <div class="flex flex-col lg:flex-row gap-10 ">
         <div class="flex flex-col items-center gap-4 flex-1 w-50">
           <form
-            name="contact"
-            method="post"
-            data-netlify
             class="flex-1 w-50 bg-[#EFEFFF] w-full flex flex-col md:grid md:grid-cols-2 gap-4 p-6"
+            onSubmit$={async (e) => handleSubmit(e as any)}
+            preventdefault:submit
           >
+            <input type="hidden" name="form-name" value="contactForm" />
+
             <div class="flex flex-col gap-1">
               <label class="text-blue-gray-500" for="companyEmail">
                 {t('contact.form.company-email.label@@Company email')}
@@ -91,36 +105,6 @@ export default component$(() => {
                 {t('contact.form.action@@Submit')}
               </Button>
             </div>
-          </form>
-
-          <form name="contact" method="POST" data-netlify="true">
-            <p>
-              <label>
-                Your Name: <input type="text" name="name" />
-              </label>
-            </p>
-            <p>
-              <label>
-                Your Email: <input type="email" name="email" />
-              </label>
-            </p>
-            <p>
-              <label>
-                Your Role:{' '}
-                <select name="role[]" multiple>
-                  <option value="leader">Leader</option>
-                  <option value="follower">Follower</option>
-                </select>
-              </label>
-            </p>
-            <p>
-              <label>
-                Message: <textarea name="message"></textarea>
-              </label>
-            </p>
-            <p>
-              <button type="submit">Send</button>
-            </p>
           </form>
 
           <div class="text-blue-gray-900 font-normal max-w-sm text-center text-lg">
