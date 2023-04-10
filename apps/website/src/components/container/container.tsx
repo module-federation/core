@@ -33,11 +33,11 @@ export default component$((props: ContainerProps) => {
 
   const patternClasses = {
     [ContainerTheme.PINK]:
-      props.pattern === false ? 'opacity-0' : 'bg-pattern bg-repeat opacity-20',
+      props.pattern === false ? 'opacity-0' : 'bg-pattern bg-repeat opacity-40',
     [ContainerTheme.OPAQUE]:
-      props.pattern === false ? 'opacity-0' : 'bg-pattern bg-repeat opacity-20',
+      props.pattern === false ? 'opacity-0' : 'bg-pattern bg-repeat opacity-40',
     [ContainerTheme.GRAY]:
-      props.pattern === false ? 'opacity-0' : 'bg-pattern bg-repeat opacity-20',
+      props.pattern === false ? 'opacity-0' : 'bg-pattern bg-repeat opacity-40',
     [ContainerTheme.NONE]: '',
   }[props.theme || ContainerTheme.PINK];
 
