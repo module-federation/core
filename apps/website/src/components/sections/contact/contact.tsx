@@ -1,15 +1,24 @@
-import { component$, useStylesScoped$, $, QwikSubmitEvent } from '@builder.io/qwik';
+import {
+  component$,
+  useStylesScoped$,
+  $,
+  QwikSubmitEvent,
+  useSignal,
+} from '@builder.io/qwik';
 import { $translate as t } from 'qwik-speak';
 import Button, { ButtonTheme } from '../../button/button';
 import { ContainerTheme } from '../../container/container';
 import Section, { SectionHeader } from '../../section/section';
 import styles from './contact.css?inline';
 
-// TODO: Check why #EFEFFF is not in the color scheme
 export default component$(() => {
+  const loading = useSignal(false);
+  const success = useSignal(false);
+
   useStylesScoped$(styles);
 
   const handleSubmit = $((event: QwikSubmitEvent<HTMLFormElement>) => {
+    loading.value = true;
     const myForm = event.target as any;
     const formData = new FormData(myForm) as any;
 
@@ -18,8 +27,11 @@ export default component$(() => {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams(formData).toString(),
     })
-      .then(() => alert('Submit!'))
-      .catch((error) => alert(error));
+      .then(() => {
+        success.value = true;
+        loading.value = false;
+      })
+      .catch((error) => (loading.value = false));
   });
 
   return (
@@ -95,11 +107,18 @@ export default component$(() => {
               ></textarea>
             </div>
 
-            <div class="flex justify-end col-span-2">
+            <div class="flex justify-end items-center col-span-2">
+              {success.value && (
+                <div class="text-sm pr-6 text-green-700">
+                  Form submitted successfully!
+                </div>
+              )}
+
               <Button
                 class="w-full md:w-auto md:min-w-[200px]"
                 theme={ButtonTheme.SOLID}
                 type="submit"
+                loading={loading.value}
                 small
               >
                 {t('contact.form.action@@Submit')}

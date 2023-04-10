@@ -18,31 +18,32 @@ module.exports = {
         outline: '0 0 0 2px #00B9FF',
         card: '0px 0px 32px 0px #201E3726'
       },
+      colors: {
+        'ui-blue': '#00B9FF',
+        transparent: 'transparent',
+        white: '#FFFFFF',
+        cyan: {
+          500: '#71BEDB',
+        },
+        teal: {
+          100: '#B4E6D9',
+        },
+        'blue-gray': {
+          300: '#CAD1EA',
+          400: '#949FC5',
+          500: '#7B84A3',
+          600: '#465380',
+          700: '#2F3858',
+          800: '#262D47',
+          900: '#1C2135',
+        },
+        'deep-purple': {
+          300: '#9589EA',
+          700: '#6559A2',
+        },
+      },
     },
-    colors: {
-      'ui-blue': '#00B9FF',
-      transparent: 'transparent',
-      white: '#FFFFFF',
-      cyan: {
-        500: '#71BEDB',
-      },
-      teal: {
-        100: '#B4E6D9',
-      },
-      'blue-gray': {
-        300: '#CAD1EA',
-        400: '#949FC5',
-        500: '#7B84A3',
-        600: '#465380',
-        700: '#2F3858',
-        800: '#262D47',
-        900: '#1C2135',
-      },
-      'deep-purple': {
-        300: '#9589EA',
-        700: '#6559A2',
-      },
-    },
+
   },
   plugins: [
     require('@tailwindcss/forms'),
