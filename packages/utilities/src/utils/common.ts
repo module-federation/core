@@ -89,10 +89,12 @@ export const importDelegatedModule = async (
         //TODO: need to solve chunk flushing with delegated modules
         return asyncContainer;
       } else {
+        return asyncContainer;
         const proxy = {
           get: asyncContainer.get,
           //@ts-ignore
           init: function (shareScope: any, initScope: any) {
+            console.log('init', shareScope, initScope);
             try {
               //@ts-ignore
               asyncContainer.init(shareScope, initScope);
@@ -131,7 +133,7 @@ export const createDelegatedModule = (
   return `internal ${delegate}?${queries.join('&')}`;
 };
 
-const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
+export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
 
   // 1) Load remote container if needed
@@ -199,7 +201,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       if (typeof globalScope[remoteGlobal] !== 'undefined') {
         return resolveRemoteGlobal();
       }
-
+console.log('loadScript', reference.url, containerKey);
       (__webpack_require__ as any).l(
         reference.url,
         function (event: Event) {
@@ -322,10 +324,6 @@ export const getContainer = async (
   }
   // @ts-ignore
   const containerScope = typeof window !== 'undefined' ? window : global.__remote_scope__;
-
-  const containerScope =
-    //@ts-ignore
-    typeof window !== 'undefined' ? window : global.__remote_scope__;
 
   if (typeof remoteContainer === 'string') {
     if (containerScope[remoteContainer]) {

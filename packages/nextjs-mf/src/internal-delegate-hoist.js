@@ -1,28 +1,18 @@
 // placeholder file for delegate module injection
-console.log('hoist')
-console.log(__webpack_modules__[require.resolveWeak('!!react?pop')])
-console.log(require.resolveWeak('react'))
-__webpack_share_scopes__.default = __webpack_share_scopes__.default || {
-  ...__webpack_share_scopes__.default,
-  'react':{
-    ['0'] : {
-      get: () =>()=> require('!!react?pop'),
-      eager:true,
-      loaded:true
-    }
-  },
-  'react-dom':{
-    ['0'] : {
-      get: () =>()=> require('!!react-dom?pop'),
-      eager:true,
-      loaded:true
-    }
-  }
+// placeholder for module hoist injection, precursor to startup inversion
+
+if(typeof window !== 'undefined') {
+  console.log(document.currentScript.src);
+  const { loadScript } =  require('@module-federation/utilities')
+console.log(__webpack_require__.p)
+  console.log(__webpack_get_script_filename__('home_app'))
+  // const container = loadScript({
+  //   global: 'home_app',
+  //   // url: "http://localhost:",
+  // });
+
+
+  // console.log(__webpack_require__(require.resolve('home_app_single')))
+
 }
-console.log('sideloading react')
-__webpack_modules__[require.resolveWeak('react')] = __webpack_modules__[require.resolveWeak('!!react?pop')]
-console.log('sideloading react-dom')
-__webpack_modules__[require.resolveWeak('react-dom')] = __webpack_modules__[require.resolveWeak('!!react-dom?pop')]
-
-
-console.log('still in hoist',__webpack_share_scopes__)
+console.log('still in hoist, share scope bound to hoist',__webpack_share_scopes__)

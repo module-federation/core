@@ -49,7 +49,7 @@ const nextConfig = {
         },
         extraOptions: {
           automaticAsyncBoundary: false,
-          exposePages: false,
+          exposePages: true,
           enableImageLoaderFix: true,
           enableUrlLoaderFix: true,
           skipSharingNextInternals: false,

@@ -20,11 +20,13 @@ import {
   parseRemotes,
   reKeyHostShared,
   getDelegates,
+  DEFAULT_SHARE_SCOPE
 } from '../internal';
 import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
 import ChildFederationPlugin from './ChildFederationPlugin';
 
 import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
+import {exposeNextjsPages} from "../loaders/nextPageMapLoader";
 
 // @ts-ignore
 const regexEqual = (x, y) => {
@@ -80,44 +82,40 @@ export class NextFederationPlugin {
       compiler.options.target = false;
       const {StreamingTargetPlugin} = require('@module-federation/node');
       // add hoist to main entry for sync avaliability.
-      // new webpack.EntryPlugin(
-      //   compiler.context,
-      //   require.resolve('../internal-delegate-hoist'),
-      //   {
-      //     name: undefined,
-      //     runtime: 'webpack-runtime',
-      //   }).apply(compiler);
 
-      new AddModulesPlugin().apply(compiler);
-      compiler.options.optimization = {
-        ...compiler.options.optimization,
-        splitChunks: {
-          ...compiler.options.optimization?.splitChunks,
-          cacheGroups: {
-            //@ts-ignore
-            ...compiler.options.optimization?.splitChunks?.cacheGroups,
-            hoist: {
-              name: function (arg1: any, arg2: any) {
-                  console.log(arg2.map((a: any) => {return arg2.runtime}))
-              },
-              enforce: true,
-              priority: -1,
-              test: function (module: any, chunks: any) {
-                return false;
-                if(module?.resource?.includes('hoist')){
-                  console.log(module.resource)
-                }
-                if (/internal-delegate-hoist/.test(module.resource)) {
-                  return true
-                }
-                return (
-                  /server-hoist/.test(module.resource)
-                );
-              }
-            }
-          },
-        },
-      };
+      new AddModulesPlugin({
+        runtime: 'webpack-runtime',
+        eager:true,
+      }).apply(compiler);
+      // compiler.options.optimization = {
+      //   ...compiler.options.optimization,
+      //   splitChunks: {
+      //     ...compiler.options.optimization?.splitChunks,
+      //     cacheGroups: {
+      //       //@ts-ignore
+      //       ...compiler.options.optimization?.splitChunks?.cacheGroups,
+      //       hoist: {
+      //         name: function (arg1: any, arg2: any) {
+      //             console.log(arg2.map((a: any) => {return arg2.runtime}))
+      //         },
+      //         enforce: true,
+      //         priority: -1,
+      //         test: function (module: any, chunks: any) {
+      //           return false;
+      //           if(module?.resource?.includes('hoist')){
+      //             console.log(module.resource)
+      //           }
+      //           if (/internal-delegate-hoist/.test(module.resource)) {
+      //             return true
+      //           }
+      //           return (
+      //             /server-hoist/.test(module.resource)
+      //           );
+      //         }
+      //       }
+      //     },
+      //   },
+      // };
 
       new StreamingTargetPlugin(this._options, {
         ModuleFederationPlugin: webpack.container.ModuleFederationPlugin,
@@ -149,7 +147,7 @@ export class NextFederationPlugin {
         };
       }
     } else {
-
+compiler.options.plugins= compiler.options.plugins.filter((p: any) => {return p.constructor.name === 'ReactFreshWebpackPlugin'})
       const ModuleFederationPlugin = isServer
         ? require('@module-federation/node').NodeFederationPlugin
         : webpack.container.ModuleFederationPlugin;
@@ -158,6 +156,13 @@ export class NextFederationPlugin {
       if (!ModuleFederationPlugin) {
         return;
       }
+
+      // hoist modules into remote runtime
+      new AddModulesPlugin({
+        runtime: this._options.name,
+        eager:false
+      }).apply(compiler);
+
 
       if (this._extraOptions.automaticPageStitching) {
         compiler.options.module.rules.push({
@@ -189,7 +194,47 @@ export class NextFederationPlugin {
         compiler.context,
         require.resolve('../internal-delegate-hoist'),
         'main').apply(compiler);
+      new webpack.EntryPlugin(
+        compiler.context,
+        require.resolve('../delegate-hoist'),
+        'main').apply(compiler);
+
+
+      // if(this._options.name) {
+      //   console.log(this._options.name);
+      //   new webpack.EntryPlugin(
+      //     compiler.context,
+      //     require.resolve('../internal-delegate-hoist'),
+      //     {
+      //       runtime:this._options.name,
+      //       // runtime:require.resolve('../internal-delegate-hoist')
+      //     }).apply(compiler);
+      // }
     }
+
+    const hostFederationPluginOptions: ModuleFederationPluginOptions = {
+      ...this._options,
+      runtime: false,
+      exposes: {
+        ...(this._extraOptions.exposePages
+          ? exposeNextjsPages(compiler.options.context as string)
+          : {}),
+        ...this._options.exposes,
+      },
+      remotes: {
+        ...this._options.remotes,
+      },
+      shared: {
+        ...DEFAULT_SHARE_SCOPE,
+        // noop: {
+        //   import: 'data:text/javascript,module.exports = {};',
+        //   requiredVersion: false,
+        //   eager: true,
+        //   version: '0',
+        // },
+        // ...this._options.shared,
+      },
+    };
 
     const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];
 
@@ -252,6 +297,34 @@ export class NextFederationPlugin {
           loader: path.resolve(__dirname, '../loaders/delegateLoader'),
           options: {
             delegates,
+            shared: hostFederationPluginOptions.shared,
+          },
+        });
+        compiler.options.module.rules.push({
+          test(req: string) {
+            if (!req.includes('internal-delegate-hoist') && req.includes('delegate-hoist')) {
+              return true;
+            }
+            return false;
+          },
+          resourceQuery: this._extraOptions.automaticAsyncBoundary
+            ? (query) => !query.includes('hasBoundary')
+            : undefined,
+          include: [
+            compiler.context,
+            /delegate-hoist/,
+            /next[\\/]dist/,
+          ],
+          exclude: (request: string) => {
+            if (request.includes('delegate-hoist')) {
+              return false;
+            }
+            return !/node_modules/.test(request);
+          },
+          loader: path.resolve(__dirname, '../loaders/delegateLoader'),
+          options: {
+            delegates,
+            shared: false,
           },
         });
       }
@@ -348,9 +421,6 @@ export class NextFederationPlugin {
               enforce: true,
               priority: -1,
               test: function (module: any, chunks: any) {
-                if (/internal-delegate-hoist/.test(module.resource)) {
-                  console.log(module.resource)
-                }
                 return (
                   /internal-delegate-hoist/.test(module.resource)
                 );
@@ -359,7 +429,6 @@ export class NextFederationPlugin {
           },
         },
       };
-      compiler.options.devtool = 'source-map';
 
       compiler.options.output.publicPath = 'auto';
       compiler.options.output.uniqueName = this._options.name;
@@ -367,61 +436,24 @@ export class NextFederationPlugin {
       //@ts-ignore
       delete internalShare.hostreact;
 
-      const hostFederationPluginOptions: ModuleFederationPluginOptions = {
-        ...this._options,
-        runtime: false,
-        shared: {
-          noop: {
-            import: 'data:text/javascript,module.exports = {};',
-            requiredVersion: false,
-            eager: true,
-            version: '0',
-          },
-          // ...internalShare,
-          hostreact: {
-            import: 'react',
-            packageName: 'react',
-            shareKey: 'react',
-            singleton: true,
-            eager: false,
-            version: '0',
-            requiredVersion: false,
-          },
-          hostreactdom: {
-            import: 'react-dom',
-            packageName: 'react-dom',
-            shareKey: 'react-dom',
-            singleton: true,
-            eager: false,
-            version: '0',
-            requiredVersion: false,
-          },
-        },
-      };
     }
+    compiler.options.devtool = 'source-map';
+
     //@ts-ignore
     compiler.options.output.publicPath = 'auto';
     compiler.options.output.uniqueName = this._options.name;
 
-    new ModuleFederationPlugin({
-      ...this._options,
-      runtime: false,
-      shared: {
-        react: {
-          import: false,
-          requiredVersion: false,
-          singleton: true,
-        },
-        'react-dom': {
-          import: false,
-          requiredVersion: false,
-          singleton: true,
-        }
-      }
-    },{ModuleFederationPlugin}).apply(compiler);
+    new ModuleFederationPlugin(hostFederationPluginOptions,{ModuleFederationPlugin}).apply(compiler);
 
-
-
+if(!isServer) {
+  new ModuleFederationPlugin({
+    ...hostFederationPluginOptions,
+    filename: undefined,
+    runtime: undefined,
+    name: 'home_app_single',
+    remotes: {}
+  },{ModuleFederationPlugin}).apply(compiler);
+}
     // new ModuleFederationPlugin(hostFederationPluginOptions, {
     //   ModuleFederationPlugin,
     // }).apply(compiler);
