@@ -1,4 +1,10 @@
-import { component$, useStylesScoped$ } from '@builder.io/qwik';
+import {
+  QwikSubmitEvent,
+  component$,
+  useSignal,
+  useStylesScoped$,
+  $,
+} from '@builder.io/qwik';
 import { $translate as t } from 'qwik-speak';
 
 import Button, { ButtonTheme } from '../../button/button';
@@ -9,6 +15,28 @@ import styles from './subscribe.css?inline';
 export default component$(() => {
   useStylesScoped$(styles);
 
+  const loading = useSignal(false);
+  const success = useSignal(false);
+
+  const handleSubmit = $((event: QwikSubmitEvent<HTMLFormElement>) => {
+    loading.value = true;
+    success.value = false;
+    const form = event.target as any;
+    const formData = new FormData(form) as any;
+
+    fetch('/form', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(formData).toString(),
+    })
+      .then(() => {
+        success.value = true;
+        loading.value = false;
+        form.reset();
+      })
+      .catch((error) => (loading.value = false));
+  });
+
   return (
     <Section>
       <div class="flex flex-col items-center">
@@ -17,19 +45,38 @@ export default component$(() => {
             {t('subscribe.title@@Subscribe to our email newsletter!')}
           </h2>
 
-          <div class="flex items-center w-full gap-4">
-            <input
-              class="min-h-[44px] w-full border-blue-gray-900 px-4 py-1.5 pr-8 bg-white  focus:border-ui-blue"
-              type="email"
-              name="email"
-              id="email"
-              placeholder={t('subscribe.input.placeholder@@Enter your email')}
-            />
+          {success.value && (
+            <div class="text-sm text-green-700 text-center">
+              Subscribed successfully!
+            </div>
+          )}
 
-            <Button class="whitespace-nowrap" theme={ButtonTheme.SOLID} type="button" small>
-              {t('subscribe.action@@Subscribe')}
-            </Button>
-          </div>
+          {!success.value && (
+            <form
+              onSubmit$={async (e) => handleSubmit(e as any)}
+              preventdefault:submit
+              class="flex flex-col md:flex-row items-center w-full gap-4"
+            >
+              <input
+                class="min-h-[44px] w-full border-blue-gray-900 px-4 py-1.5 pr-8 bg-white  focus:border-ui-blue"
+                type="email"
+                name="email"
+                id="email"
+                placeholder={t('subscribe.input.placeholder@@Enter your email')}
+              />
+
+              <Button
+                class="whitespace-nowrap w-full md:w-auto"
+                theme={ButtonTheme.SOLID}
+                type="submit"
+                small
+                loading={loading.value}
+                
+              >
+                {t('subscribe.action@@Subscribe')}
+              </Button>
+            </form>
+          )}
         </div>
       </div>
 

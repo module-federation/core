@@ -12,15 +12,16 @@ import Section, { SectionHeader } from '../../section/section';
 import styles from './contact.css?inline';
 
 export default component$(() => {
+  useStylesScoped$(styles);
+
   const loading = useSignal(false);
   const success = useSignal(false);
 
-  useStylesScoped$(styles);
-
   const handleSubmit = $((event: QwikSubmitEvent<HTMLFormElement>) => {
     loading.value = true;
-    const myForm = event.target as any;
-    const formData = new FormData(myForm) as any;
+    success.value = false;
+    const form = event.target as any;
+    const formData = new FormData(form) as any;
 
     fetch('/form', {
       method: 'POST',
@@ -30,6 +31,7 @@ export default component$(() => {
       .then(() => {
         success.value = true;
         loading.value = false;
+        form.reset();
       })
       .catch((error) => (loading.value = false));
   });
@@ -47,7 +49,7 @@ export default component$(() => {
             onSubmit$={async (e) => handleSubmit(e as any)}
             preventdefault:submit
           >
-            <input type="hidden" name="form-name" value="contactForm" />
+            <input type="hidden" name="form-name" value="contact" />
 
             <div class="flex flex-col gap-1">
               <label class="text-blue-gray-500" for="companyEmail">

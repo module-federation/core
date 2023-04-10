@@ -49,9 +49,9 @@ export default component$((props: ContainerProps) => {
       <div
         class={`absolute h-full w-full top-0 left-0 z-20 ${overlayClasses}`}
       ></div>
-      <div
+      {/* <div
         class={`absolute h-full w-full top-0 left-0 z-20 ${patternClasses}`}
-      ></div>
+      ></div> */}
       <div
         class={`relative mx-auto z-20 ${
           props.fullWidth ? 'w-full' : 'w-11/12 max-w-1225'
