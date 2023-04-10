@@ -2,7 +2,7 @@ import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import { revalidate, FlushedChunks } from '@module-federation/nextjs-mf/utils';
 import { usedChunks, flushChunks } from '@module-federation/node/utils';
-require('@module-federation/nextjs-mf/src/internal-delegate-hoist')
+// require('@module-federation/nextjs-mf/src/internal-delegate-hoist')
 
 class MyDocument extends Document {
   static async getInitialProps({req,res,...ctx}) {
