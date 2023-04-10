@@ -43,7 +43,7 @@ export default component$(() => {
               </label>
               <input
                 class="min-h-[44px] w-full border-blue-gray-500 px-4 py-1.5 pr-8 bg-white  focus:border-ui-blue"
-                type="text"
+                type="email"
                 name="companyEmail"
                 id="companyEmail"
               />
@@ -61,24 +61,24 @@ export default component$(() => {
             </div>
             <div class="flex flex-col gap-1">
               <label class="text-blue-gray-500" for="companySize">
-                {t('contact.form.company-website.label@@Company size')}
-              </label>
-              <input
-                class="min-h-[44px] w-full border-blue-gray-500 px-4 py-1.5 pr-8 bg-white  focus:border-ui-blue"
-                type="text"
-                name="companyWebsite"
-                id="companyWebsite"
-              />
-            </div>
-            <div class="flex flex-col gap-1 text-blue-gray-500">
-              <label class="text-blue-gray-500" for="companySize">
-                {t('contact.form.company-website.label@@Company website')}
+                {t('contact.form.company-size.label@@Company size')}
               </label>
               <input
                 class="min-h-[44px] w-full border-blue-gray-500 px-4 py-1.5 pr-8 bg-white  focus:border-ui-blue"
                 type="text"
                 name="companySize"
                 id="companySize"
+              />
+            </div>
+            <div class="flex flex-col gap-1 text-blue-gray-500">
+              <label class="text-blue-gray-500" for="companyWebsite">
+                {t('contact.form.company-website.label@@Company website')}
+              </label>
+              <input
+                class="min-h-[44px] w-full border-blue-gray-500 px-4 py-1.5 pr-8 bg-white  focus:border-ui-blue"
+                type="text"
+                name="companyWebsite"
+                id="companyWebsite"
               />
             </div>
             <div class="flex flex-col gap-1 col-span-2">

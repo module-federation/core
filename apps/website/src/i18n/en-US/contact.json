@@ -17,6 +17,9 @@
       },
       "name": {
         "label": "Your name"
+      },
+      "company-size": {
+        "label": "Company size"
       }
     },
     "quote": {
