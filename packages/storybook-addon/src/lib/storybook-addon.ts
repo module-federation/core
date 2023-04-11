@@ -9,7 +9,6 @@ import { normalizeStories } from '@storybook/core-common';
 import { correctImportPath } from '@module-federation/utilities';
 import type { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import type { ModuleFederationConfig } from '@nrwl/devkit';
-import type { NxWebpackExecutionContext } from '@nrwl/webpack';
 
 const { ModuleFederationPlugin } = container;
 
@@ -42,20 +41,24 @@ export const webpack = async (
     );
   }
 
-  if (nxMfConfig && moduleFederationConfig) {
+  if (nxMfConfig) {
     logger.info(`=> [MF] Detect NX configuration`);
     const wmf = await withModuleFederation(nxMfConfig);
-
     // @ts-ignore
     webpackConfig = await wmf(
       // @ts-ignore
-      webpackConfig,
+      {
+        ...webpackConfig,
+      },
       options
     );
 
     // The suggested workaround not work:
     // for (const plugin of webpackConfig.plugins || []) {
     //   if (plugin instanceof ModuleFederationPlugin) {
+    //     // plugin._options is the ModuleFederation Config
+    //     // If you need to change the library type, you can by doing this.
+    //     // But I can't guarantee that the rest of the plugin will work
     //     // @ts-ignore
     //     plugin._options.library = { type: 'var' };
     //   }
