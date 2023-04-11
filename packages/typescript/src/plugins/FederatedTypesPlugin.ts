@@ -132,12 +132,14 @@ export class FederatedTypesPlugin {
     );
 
     for await (const { origin, remote } of remoteUrls) {
-      const { typescriptFolderName } = this.normalizeOptions;
+      const { typescriptFolderName, downloadRemoteTypesTimeout } =
+        this.normalizeOptions;
 
       try {
         this.logger.log(`Getting types index for remote '${remote}'`);
         const resp = await axios.get<TypesStatsJson>(
-          `${origin}/${this.normalizeOptions.typesIndexJsonFileName}`
+          `${origin}/${this.normalizeOptions.typesIndexJsonFileName}`,
+          { timeout: downloadRemoteTypesTimeout }
         );
 
         const statsJson = resp.data;
@@ -168,7 +170,9 @@ export class FederatedTypesPlugin {
           if (filesToCacheBust.length > 0) {
             await Promise.all(
               filesToCacheBust.map((file) => {
-                const url = `${origin}/${typescriptFolderName}/${file}`;
+                const url = new URL(
+                  path.join(origin, typescriptFolderName, file)
+                ).toString();
                 const destination = path.join(
                   this.normalizeOptions.webpackCompilerOptions
                     .context as string,
@@ -192,9 +196,10 @@ export class FederatedTypesPlugin {
         }
       } catch (error) {
         this.logger.error(
-          `Unable to download '${remote}' remote types index file`,
-          error
+          `Unable to download '${remote}' remote types index file: `,
+          (error as Error).message
         );
+        this.logger.log(error);
       }
     }
   }

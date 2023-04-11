@@ -1,7 +1,8 @@
-import { importDelegatedModule } from '@module-federation/utilities';
+/* eslint-disable no-undef */
+const { importDelegatedModule } = require('@module-federation/utilities');
 
 // Delegates are currently not used in this example, but are left here for testing.
-export default new Promise((resolve, reject) => {
+module.exports = new Promise((resolve, reject) => {
   //eslint-disable-next-line
   console.log('Delegate being called for', __resourceQuery);
   //eslint-disable-next-line

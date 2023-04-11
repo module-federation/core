@@ -2,6 +2,45 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [0.13.0](https://github.com/module-federation/nextjs-mf/compare/node-0.12.3...node-0.13.0) (2023-04-09)
+
+### Dependency Updates
+
+* `utils` updated to version `1.5.0`
+* `utils` updated to version `1.5.0`
+
+### Features
+
+* Allow Container Utils to work Server Side ([#723](https://github.com/module-federation/nextjs-mf/issues/723)) ([232ba24](https://github.com/module-federation/nextjs-mf/commit/232ba24072f19bd32d1f745d4edf1518e548df50))
+
+
+
+## [0.12.3](https://github.com/module-federation/nextjs-mf/compare/node-0.12.2...node-0.12.3) (2023-04-09)
+
+### Dependency Updates
+
+* `utils` updated to version `1.4.1`
+* `utils` updated to version `1.4.1`
+
+
+## [0.12.2](https://github.com/module-federation/nextjs-mf/compare/node-0.12.1...node-0.12.2) (2023-03-24)
+
+
+### Bug Fixes
+
+* Medusa hot reloading ([#685](https://github.com/module-federation/nextjs-mf/issues/685)) ([6f14306](https://github.com/module-federation/nextjs-mf/commit/6f143068252eefec7a717ea0b8fef51a709ba539))
+
+
+
+## [0.12.1](https://github.com/module-federation/nextjs-mf/compare/node-0.12.0...node-0.12.1) (2023-03-24)
+
+
+### Bug Fixes
+
+* enable chunk hashing all the time ([#669](https://github.com/module-federation/nextjs-mf/issues/669)) ([7417bc2](https://github.com/module-federation/nextjs-mf/commit/7417bc2acead56aa066a6b14ddb57a2474ea72e0))
+
+
+
 # [0.12.0](https://github.com/module-federation/nextjs-mf/compare/node-0.11.1...node-0.12.0) (2023-03-14)
 
 ### Dependency Updates
