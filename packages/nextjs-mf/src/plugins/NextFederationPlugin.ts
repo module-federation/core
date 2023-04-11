@@ -232,30 +232,15 @@ export class NextFederationPlugin {
     //   loader: path.resolve(__dirname, '../loaders/patchDefaultSharedLoader'),
     // });
 
-    // inject module hoisting system
-    compiler.options.module.rules.unshift(
-      // inject hoist dependency into upper scope of application
-      {
-        enforce: 'pre',
-        test: /_document/,
-        include: [
-          compiler.context,
-          /next[\\/]dist/,
-        ],
-        loader: path.resolve(__dirname, '../loaders/inject-hoist'),
-      },
-      // populate hoist dependency with shared modules
-      {
-      test: /internal-delegate-hoist/,
+    // inject module hoisting system into _document
+    compiler.options.module.rules.unshift({
+      enforce: 'pre',
+      test: /_document/,
       include: [
-        /internal-delegate-hoist/,
         compiler.context,
         /next[\\/]dist/,
       ],
-      loader: path.resolve(__dirname, '../loaders/share-scope-hoist'),
-      options: {
-        shared: hostFederationPluginOptions.shared,
-      }
+      loader: path.resolve(__dirname, '../loaders/inject-hoist')
     });
 
 
@@ -264,36 +249,33 @@ export class NextFederationPlugin {
       // only apply loader if delegates are present
       if (delegates && Object.keys(delegates).length > 0) {
         compiler.options.module.rules.push({
-          enforce: 'pre',
-          test: /internal-delegate-hoist/,
-          // test(req: string) {
-          //   if (req.includes('internal-delegate-hoist')) {
-          //     return true;
-          //   }
-          //   return false;
-          // },
-          // resourceQuery: this._extraOptions.automaticAsyncBoundary
-          //   ? (query) => !query.includes('hasBoundary')
-          //   : undefined,
+          test(req: string) {
+            if (req.includes('internal-delegate-hoist')) {
+              return true;
+            }
+            return false;
+          },
+          resourceQuery: this._extraOptions.automaticAsyncBoundary
+            ? (query) => !query.includes('hasBoundary')
+            : undefined,
           include: [
             compiler.context,
             /internal-delegate-hoist/,
             /next[\\/]dist/,
           ],
-          // exclude: (request: string) => {
-          //   if (request.includes('internal-delegate-hoist')) {
-          //     return false;
-          //   }
-          //   return !/node_modules/.test(request);
-          // },
+          exclude: (request: string) => {
+            if (request.includes('internal-delegate-hoist')) {
+              return false;
+            }
+            return !/node_modules/.test(request);
+          },
           loader: path.resolve(__dirname, '../loaders/delegateLoader'),
           options: {
             delegates,
-            // shared: hostFederationPluginOptions.shared,
+            shared: hostFederationPluginOptions.shared,
           },
         });
         compiler.options.module.rules.push({
-          enforce: 'pre',
           test(req: string) {
             if (!req.includes('internal-delegate-hoist') && req.includes('delegate-hoist')) {
               return true;

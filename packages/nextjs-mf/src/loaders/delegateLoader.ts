@@ -8,7 +8,7 @@ export default function patchDefaultSharedLoader(
   this: LoaderContext<Record<string, unknown>>,
   content: string
 ) {
-  const { delegates, shared } = this.getOptions() as Record<string, string>;
+  const { delegates } = this.getOptions() as Record<string, string>;
 
   const resolvedDelegates = Object.values(delegates).map((delegate) => {
     const [request, query] = delegate.replace('internal ', '').split('?');
