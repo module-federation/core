@@ -68,6 +68,14 @@ function getExposedModules(stats, exposedFile) {
   return stats.modules.filter((mod) => mod.name.startsWith(exposedFile));
 }
 
+function getDependenciesOfChunk(stats, chunk) {
+  return stats.chunks
+    .filter((c) => c.children.includes(chunk.id))
+    .reduce((acc, c) => {
+      return acc.concat(c.modules);
+    }, []);
+}
+
 /**
  *
  * @param {WebpackStats} stats
@@ -75,15 +83,27 @@ function getExposedModules(stats, exposedFile) {
  * @returns {Exposed}
  */
 function getExposed(stats, mod) {
-  const chunks = stats.chunks.filter((chunk) =>
-    mod.chunks.some((id) => id === chunk.id)
-  );
+  const chunks = stats.chunks.filter((chunk) => {
+    return chunk.modules.find((modsInChunk) => {
+      return modsInChunk.id === mod.id && !modsInChunk.dependent
+    })
+  })
+  const dependencies = stats.modules.filter((sharedModule) => {
+    if(sharedModule.moduleType !== 'consume-shared-module') return false;
+    return sharedModule.issuerId === mod.id
+  }).map((sharedModule)=>{
+    return sharedModule.identifier.split('|')[2]
+  })
 
   const flatChunks = flatMap(chunks, (chunk) => ({
-    [chunk.id]: chunk.files.map(
-      (f) => `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
-    ),
+    [chunk.id]: {
+      files: chunk.files.map(
+        (f) => `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
+      ),
+      requiredModules: dependencies
+    }
   }));
+
 
   return flatChunks.reduce((acc, chunk) => {
     Object.assign(acc, chunk);

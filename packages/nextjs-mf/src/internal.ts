@@ -118,92 +118,6 @@ export const reKeyHostShared = (
   } as Record<string, SharedConfig>;
 };
 
-// browser template to convert remote into promise new promise and use require.loadChunk to load the chunk
-export const generateRemoteTemplate = (
-  url: string,
-  global: any
-) => `new Promise(function (resolve, reject) {
-    var url = new URL(${JSON.stringify(url)});
-    url.searchParams.set('t', Date.now());
-    var __webpack_error__ = new Error();
-    if(!window.remoteLoading) {
-        window.remoteLoading = {};
-    };
-
-    if(window.remoteLoading[${JSON.stringify(global)}]) {
-      return resolve(window.remoteLoading[${JSON.stringify(global)}])
-    }
-
-    var res, rej;
-    window.remoteLoading[${JSON.stringify(
-      global
-    )}] = new Promise(function(rs,rj){
-      res = rs;
-      rej = rj;
-    })
-
-    if (typeof window[${JSON.stringify(global)}] !== 'undefined') {
-      res(window[${JSON.stringify(global)}]);
-      return resolve(window[${JSON.stringify(global)}]);
-    }
-
-     __webpack_require__.l(
-      url.href,
-      function (event) {
-        if (typeof window[${JSON.stringify(global)}] !== 'undefined') {
-          res(window[${JSON.stringify(global)}]);
-          return resolve(window[${JSON.stringify(global)}]);
-        }
-        var errorType = event && (event.type === 'load' ? 'missing' : event.type);
-        var realSrc = event && event.target && event.target.src;
-        __webpack_error__.message =
-          'Loading script failed.\\n(' + errorType + ': ' + realSrc + ')';
-        __webpack_error__.name = 'ScriptExternalLoadError';
-        __webpack_error__.type = errorType;
-        __webpack_error__.request = realSrc;
-        rej(__webpack_error__);
-        reject(__webpack_error__);
-      },
-      ${JSON.stringify(global)}
-    );
-  }).then(function () {
-    const proxy = {
-      get: ${global}.get,
-      init: function(shareScope, initToken) {
-
-        const handler = {
-          get(target, prop) {
-            if (target[prop]) {
-              Object.values(target[prop]).forEach(function(o) {
-                if(o.from === '_N_E') {
-                  o.loaded = 1
-                }
-              })
-            }
-            return target[prop]
-          },
-          set(target, property, value, receiver) {
-            if (target[property]) {
-              return target[property]
-            }
-            target[property] = value
-            return true
-          }
-        }
-        try {
-          ${global}.init(new Proxy(shareScope, handler), initToken)
-        } catch (e) {
-
-        }
-        ${global}.__initialized = true
-      }
-    }
-    if (!${global}.__initialized) {
-      proxy.init(__webpack_require__.S.default)
-    }
-    return proxy
-  })`;
-
 // shared packages must be compiled into webpack bundle, not require() pass through
 export const internalizeSharedPackages = (
   options: ModuleFederationPluginOptions,
@@ -291,35 +205,21 @@ export const removePlugins = [
 ];
 
 /*
- This code is checking if the remote is a string and that it includes an symbol If
- both of these conditions are met then we extract the url and global from the remote
-  */
-export const parseRemoteSyntax = (remote: string) => {
-  if (
-    typeof remote === 'string' &&
-    remote.includes('@') &&
-    !remote.startsWith('internal ')
-  ) {
-    const [url, global] = extractUrlAndGlobal(remote);
-    return generateRemoteTemplate(url, global);
-  }
-
-  return remote;
-};
-/*
- This code is doing the following It\'s iterating over all remotes and checking if
- they are using a custom promise template or not If it\'s a custom promise template
- we\'re parsing the remote syntax to get the module name and version number
+ This code is doing the following It's iterating over all remotes and checking if
+ they are using a custom promise template or not If it's a custom promise template
+ we're parsing the remote syntax to get the module name and version number
   */
 export const parseRemotes = (remotes: Record<string, any>) =>
   Object.entries(remotes).reduce((acc, [key, value]) => {
     // check if user is passing a internal "delegate module" reference
-    if (value.startsWith('internal ')) {
+    if (value.startsWith('internal ') || value.startsWith('promise ')) {
       return { ...acc, [key]: value };
     }
-    // check if user is passing custom promise template
-    if (!value.startsWith('promise ') && value.includes('@')) {
-      return { ...acc, [key]: `promise ${parseRemoteSyntax(value)}` };
+    // check if user is passing standard remote syntax, if so use default delegate
+    if (value.includes('@')) {
+      return { ...acc, [key]: createDelegatedModule(require.resolve('./default-delegate.js'), {
+        remote: value,
+        })};
     }
     // return standard template otherwise
     return { ...acc, [key]: value };

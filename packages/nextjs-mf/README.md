@@ -28,6 +28,9 @@ You do not need to share these packages, sharing next internals yourself will ca
 <details>
 <summary> See DEFAULT_SHARE_SCOPE:</summary>
 
+<details>
+<summary> See DEFAULT_SHARE_SCOPE:</summary>
+
 ```js
 const DEFAULT_SHARE_SCOPE = {
   react: {

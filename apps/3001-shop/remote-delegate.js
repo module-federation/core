@@ -6,7 +6,7 @@ module.exports = new Promise(async (resolve, reject) => {
   const { importDelegatedModule } = await import('@module-federation/utilities')
 
   //eslint-disable-next-line
-  console.log('Delegate being called for', __resourceQuery, __webpack_runtime_id__);
+  // console.log('Delegate being called for', __resourceQuery, __webpack_runtime_id__);
   //eslint-disable-next-line
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
 
@@ -17,11 +17,11 @@ module.exports = new Promise(async (resolve, reject) => {
     url: url + '?' + Date.now(),
   })
     .then(async (remote) => {
-      console.log(
-        __resourceQuery,
-        'resolved remote from',
-        __webpack_runtime_id__
-      );
+      // console.log(
+      //   __resourceQuery,
+      //   'resolved remote from',
+      //   __webpack_runtime_id__
+      // );
 
       resolve(remote);
     })

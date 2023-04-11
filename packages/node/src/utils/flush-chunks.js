@@ -1,7 +1,27 @@
-export const usedChunks = new Set();
+export const usedChunks = global.usedChunks || new Set();
 global.usedChunks = usedChunks;
-
 export const flushChunks = async () => {
+  let hostStats = {};
+  try {
+     hostStats = __non_webpack_require__('../host-stats.json');
+  } catch (e) {
+
+  }
+// console.log(hostStats)
+  let shareMap = {};
+  if(__webpack_share_scopes__?.default) {
+     shareMap = Object.keys(__webpack_share_scopes__.default).reduce((acc, key) => {
+      const loadedModules = Object.values(__webpack_share_scopes__.default[key]).filter((sharedModule) => {
+        return sharedModule.loaded
+      }).map((sharedModule) => {
+        return sharedModule.from;
+      })
+      if (loadedModules.length > 0) {
+        acc[key] = loadedModules;
+      }
+      return acc
+    }, {});
+  }
   const allFlushed = await Promise.all(
     Array.from(usedChunks).map(async (chunk) => {
       const chunks = new Set();
@@ -11,8 +31,9 @@ export const flushChunks = async () => {
       }
       // fetch the json file
       try {
+        const remoteName = new URL(global.__remote_scope__._config[remote]).pathname.split('/').pop();
         const statsFile = global.__remote_scope__._config[remote].replace(
-          'remoteEntry.js',
+          remoteName,
           'federated-stats.json'
         );
         const stats = await fetch(statsFile).then(
@@ -24,16 +45,45 @@ export const flushChunks = async () => {
         const [prefix] =
           global.__remote_scope__._config[remote].split('static/');
         if (stats.federatedModules) {
+
+          // console.log(shareMap)
           stats.federatedModules.forEach((modules) => {
             if (modules.exposes?.[request]) {
               modules.exposes[request].forEach((chunk) => {
                 Object.values(chunk).forEach((chunk) => {
-                  chunk.forEach((chunk) => {
-                    chunks.add(prefix + chunk);
+                  if(chunk.files) chunk.files.forEach((file) => {
+                    chunks.add(prefix + file)
                   });
+                  if(chunk.requiredModules) {
+                    console.log('chunk.requiredModules',request, chunk.requiredModules)
+                    chunk.requiredModules.forEach((module) => {
+                      console.log('shareMap[module]', module, shareMap[module])
+
+                      if (shareMap[module]) {
+
+                        if(shareMap[module][0].startsWith('host__')) {
+                          console.log('host',hostStats)
+                        }
+                        console.log('shareMap[module]', module, shareMap[module])
+                        // shareMap[module].forEach((file) => {
+                        //   chunks.add(prefix + file)
+                        // })
+                      }
+                    })
+                  }
                 });
               });
             }
+
+            // todo: come back to this later
+            // if(modules.sharedModules?.[0]) {
+            //   const sharedModules = modules.sharedModules.find((sharedModule) => {
+            //     return sharedModule.provides.find((provide) => {return provide.shareKey === request})
+            //   });
+            //   sharedModules.chunks.forEach((chunk) => {
+            //     chunks.add(prefix + chunk);
+            //   });
+            // }
           });
         }
 
@@ -46,6 +96,6 @@ export const flushChunks = async () => {
 
   const dedupe = Array.from(new Set([...allFlushed.flat()]));
 
-  usedChunks.clear();
+  // usedChunks.clear();
   return dedupe.filter(Boolean);
 };

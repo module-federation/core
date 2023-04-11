@@ -86,8 +86,59 @@ export const importDelegatedModule = async (
       // most of this is only needed because of legacy promise based implementation
       // can remove proxies once we remove promise based implementations
       if (typeof window === 'undefined') {
+
+        if (!Object.hasOwnProperty.call(keyOrRuntimeRemoteItem, 'global')) {
+          return asyncContainer;
+        }
+
         //TODO: need to solve chunk flushing with delegated modules
-        return asyncContainer;
+        return {
+          get: function (arg: string) {
+            //@ts-ignore
+            return asyncContainer.get(arg).then((f) => {
+              const m = f();
+              const result = {
+                __esModule: m.__esModule,
+              };
+              for (const prop in m) {
+                if (typeof m[prop] === 'function') {
+                  Object.defineProperty(result, prop, {
+                    get: function () {
+                      return function () {
+                        //@ts-ignore
+                        if (global.usedChunks)
+                          //@ts-ignore
+                          global.usedChunks.add(`${keyOrRuntimeRemoteItem.global}->${arg}`);
+                        // eslint-disable-next-line prefer-rest-params
+                        return m[prop](arguments);
+                      };
+                    },
+                    enumerable: true,
+                  });
+                } else {
+                  Object.defineProperty(result, prop, {
+                    get: () => {
+                      //@ts-ignore
+                      if (global.usedChunks)
+                        //@ts-ignore
+                        global.usedChunks.add(`${keyOrRuntimeRemoteItem.global}->${arg}`);
+
+                      return m[prop];
+                    },
+                    enumerable: true,
+                  });
+                }
+              }
+
+              if (m.then) {
+                return Promise.resolve(() => result);
+              }
+
+              return () => result;
+            });
+          },
+          init: asyncContainer.init,
+        };
       } else {
         return asyncContainer;
         const proxy = {
@@ -148,7 +199,7 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       typeof reference.asyncContainer.then === 'function'
         ? reference.asyncContainer
         : // @ts-ignore
-          reference.asyncContainer();
+        reference.asyncContainer();
   } else {
     // This casting is just to satisfy typescript,
     // In reality remoteGlobal will always be a string;
@@ -194,7 +245,7 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       function resolveRemoteGlobal() {
         const asyncContainer = globalScope[
           remoteGlobal
-        ] as unknown as AsyncContainer;
+          ] as unknown as AsyncContainer;
         return resolve(asyncContainer);
       }
 
@@ -358,10 +409,10 @@ export const getContainer = async (
  *   remote.getModule('./pages/index', 'default')
  */
 export const getModule = async ({
-  remoteContainer,
-  modulePath,
-  exportName,
-}: GetModuleOptions) => {
+                                  remoteContainer,
+                                  modulePath,
+                                  exportName,
+                                }: GetModuleOptions) => {
   const container = await getContainer(remoteContainer);
   try {
     const modFactory = await container?.get(modulePath);
