@@ -4,16 +4,20 @@ import * as process from 'process';
 import VirtualModulesPlugin from 'webpack-virtual-modules';
 import { container, Configuration } from 'webpack';
 import { logger } from '@storybook/node-logger';
+import { withModuleFederation } from '@nrwl/react/module-federation';
 import { normalizeStories } from '@storybook/core-common';
-import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import { correctImportPath } from '@module-federation/utilities';
+import type { ModuleFederationPluginOptions } from '@module-federation/utilities';
+import type { ModuleFederationConfig } from '@nrwl/devkit';
+import type { NxWebpackExecutionContext } from '@nrwl/webpack';
 
 const { ModuleFederationPlugin } = container;
 
 export type Preset = string | { name: string };
 
 type Options = {
-  moduleFederationConfig: ModuleFederationPluginOptions;
+  moduleFederationConfig?: ModuleFederationPluginOptions;
+  nxMfConfig?: ModuleFederationConfig;
   presets: {
     apply<T>(preset: Preset): Promise<T>;
   };
@@ -25,7 +29,7 @@ export const webpack = async (
   options: Options
 ): Promise<Configuration> => {
   const { plugins = [], context: webpackContext } = webpackConfig;
-  const { moduleFederationConfig, presets } = options;
+  const { moduleFederationConfig, presets, nxMfConfig } = options;
   const context = webpackContext || process.cwd();
 
   // Detect webpack version. More about storybook webpack config https://storybook.js.org/docs/react/addons/writing-presets#webpack
@@ -38,8 +42,28 @@ export const webpack = async (
     );
   }
 
-  logger.info(`=> [MF] Push Module Federation plugin`);
-  plugins.push(new ModuleFederationPlugin(moduleFederationConfig));
+  if (nxMfConfig && moduleFederationConfig) {
+    logger.info(`=> [MF] Detect NX configuration`);
+    const wmf = await withModuleFederation(nxMfConfig);
+
+    webpackConfig = (await wmf(
+      moduleFederationConfig,
+      options as unknown as NxWebpackExecutionContext
+    )) as Configuration;
+
+    // The suggested workaround not work:
+    // for (const plugin of webpackConfig.plugins || []) {
+    //   if (plugin instanceof ModuleFederationPlugin) {
+    //     // @ts-ignore
+    //     plugin._options.library = { type: 'var' };
+    //   }
+    // }
+  }
+
+  if (moduleFederationConfig) {
+    logger.info(`=> [MF] Push Module Federation plugin`);
+    plugins.push(new ModuleFederationPlugin(moduleFederationConfig));
+  }
 
   const entries = await presets.apply<string[]>('entries');
   const bootstrap: string[] = entries.map(
