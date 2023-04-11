@@ -46,10 +46,12 @@ export const webpack = async (
     logger.info(`=> [MF] Detect NX configuration`);
     const wmf = await withModuleFederation(nxMfConfig);
 
-    webpackConfig = (await wmf(
-      moduleFederationConfig,
-      options as unknown as NxWebpackExecutionContext
-    )) as Configuration;
+    // @ts-ignore
+    webpackConfig = await wmf(
+      // @ts-ignore
+      webpackConfig,
+      options
+    );
 
     // The suggested workaround not work:
     // for (const plugin of webpackConfig.plugins || []) {
