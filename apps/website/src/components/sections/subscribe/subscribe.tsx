@@ -57,6 +57,7 @@ export default component$(() => {
               preventdefault:submit
               class="flex flex-col md:flex-row items-center w-full gap-4"
             >
+              <input type="hidden" name="form-name" value="subscribe" />
               <input
                 class="min-h-[44px] w-full border-blue-gray-900 px-4 py-1.5 pr-8 bg-white  focus:border-ui-blue"
                 type="email"
@@ -71,7 +72,6 @@ export default component$(() => {
                 type="submit"
                 small
                 loading={loading.value}
-                
               >
                 {t('subscribe.action@@Subscribe')}
               </Button>
