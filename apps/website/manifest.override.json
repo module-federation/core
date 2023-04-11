@@ -2,7 +2,7 @@
   "functions": [
     {
       "path": "/*",
-      "excludePath": ["/form"],
+      "excludedPath": ["/form"],
       "function": "entry.netlify-edge",
       "cache": "manual"
     }
