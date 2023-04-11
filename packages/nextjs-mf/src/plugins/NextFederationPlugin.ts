@@ -167,31 +167,15 @@ export class NextFederationPlugin {
         compiler.context,
         require.resolve('../internal-delegate-hoist'),
         'main').apply(compiler);
-      // new webpack.EntryPlugin(
-      //   compiler.context,
-      //   require.resolve('../delegate-hoist'),
-      //   'main').apply(compiler);
-
-
-      // if(this._options.name) {
-      //   console.log(this._options.name);
-      //   new webpack.EntryPlugin(
-      //     compiler.context,
-      //     require.resolve('../internal-delegate-hoist'),
-      //     {
-      //       runtime:this._options.name,
-      //       // runtime:require.resolve('../internal-delegate-hoist')
-      //     }).apply(compiler);
-      // }
     }
 
     const hostFederationPluginOptions: ModuleFederationPluginOptions = {
       ...this._options,
       runtime: false,
       exposes: {
-        "__hoist": require.resolve('../delegate-hoist'),
+        "__hoist": require.resolve('../delegate-hoist-container'),
         ...(this._extraOptions.exposePages
-          ? exposeNextjsPages(compiler.options.context as string)
+          ? exposeNextjsPages(compiler.options.context as string, this._extraOptions.automaticAsyncBoundary as boolean)
           : {}),
         ...this._options.exposes,
       },
@@ -265,59 +249,16 @@ export class NextFederationPlugin {
       if (delegates && Object.keys(delegates).length > 0) {
         compiler.options.module.rules.push({
           enforce: 'pre',
-          test: /internal-delegate-hoist/,
-          // test(req: string) {
-          //   if (req.includes('internal-delegate-hoist')) {
-          //     return true;
-          //   }
-          //   return false;
-          // },
-          // resourceQuery: this._extraOptions.automaticAsyncBoundary
-          //   ? (query) => !query.includes('hasBoundary')
-          //   : undefined,
+          test: [/internal-delegate-hoist/, /delegate-hoist-container/],
           include: [
             compiler.context,
             /internal-delegate-hoist/,
+            /delegate-hoist-container/,
             /next[\\/]dist/,
           ],
-          // exclude: (request: string) => {
-          //   if (request.includes('internal-delegate-hoist')) {
-          //     return false;
-          //   }
-          //   return !/node_modules/.test(request);
-          // },
           loader: path.resolve(__dirname, '../loaders/delegateLoader'),
           options: {
             delegates,
-            // shared: hostFederationPluginOptions.shared,
-          },
-        });
-        compiler.options.module.rules.push({
-          enforce: 'pre',
-          test(req: string) {
-            if (!req.includes('internal-delegate-hoist') && req.includes('delegate-hoist')) {
-              return true;
-            }
-            return false;
-          },
-          resourceQuery: this._extraOptions.automaticAsyncBoundary
-            ? (query) => !query.includes('hasBoundary')
-            : undefined,
-          include: [
-            compiler.context,
-            /delegate-hoist/,
-            /next[\\/]dist/,
-          ],
-          exclude: (request: string) => {
-            if (request.includes('delegate-hoist')) {
-              return false;
-            }
-            return !/node_modules/.test(request);
-          },
-          loader: path.resolve(__dirname, '../loaders/delegateLoader'),
-          options: {
-            delegates,
-            shared: false,
           },
         });
       }
@@ -445,7 +386,7 @@ export class NextFederationPlugin {
         filename: undefined,
         runtime: undefined,
         name: this._options.name + '_single',
-        remotes: {}
+        remotes: {},
       }, {ModuleFederationPlugin}).apply(compiler);
     }
 

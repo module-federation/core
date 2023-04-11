@@ -136,7 +136,7 @@ export class ChildFederationPlugin {
           // doesnt work as intended for dev mode
           ...this._options.exposes,
           ...(this._extraOptions.exposePages
-            ? exposeNextjsPages(compiler.options.context as string)
+            ? exposeNextjsPages(compiler.options.context as string, this._extraOptions.automaticAsyncBoundary as boolean)
             : {}),
         },
         runtime: false,
