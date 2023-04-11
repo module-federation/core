@@ -30,7 +30,6 @@ import { createRuntimeVariables } from '@module-federation/utilities';
 import { computeRemoteFilename } from '../../utils/build-utils';
 
 import ChildFriendlyModuleFederationPlugin from './ModuleFederationPlugin';
-import RemoveRRRuntimePlugin from './RemoveRRRuntimePlugin';
 import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
 
 const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
@@ -261,7 +260,6 @@ export class ChildFederationPlugin {
         }
       }
 
-      new RemoveRRRuntimePlugin().apply(childCompiler);
 
       // TODO: Provide better types for MiniCss Plugin for ChildCompiler in ChildFederationPlugin
       const MiniCss = childCompiler.options.plugins.find((p) => {

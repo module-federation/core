@@ -45,7 +45,7 @@ export function exposeNextjsPages(cwd: string, asyncBoundary: boolean) {
     //   './pages/storage/index': './pages/storage/index.tsx',
     //   './pages/storage/[...slug]': './pages/storage/[...slug].tsx',
     if(asyncBoundary) {
-      pageModulesMap['./' + sanitizePagePath(page)] = `./${page}?hasBoundary`;
+      pageModulesMap['./' + sanitizePagePath(page)] = `./${page}`;
     } else {
       pageModulesMap['./' + sanitizePagePath(page)] = `./${page}`;
     }

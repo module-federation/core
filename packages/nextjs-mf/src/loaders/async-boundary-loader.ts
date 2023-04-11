@@ -7,8 +7,14 @@ import type { LoaderContext, NormalModule } from 'webpack';
 
 const pageTemplate = (request: string) =>
   `
-    import dynamic from "next/dynamic"
-    const AsyncBoundary = dynamic(() => import("${request}"), {suspense:true});
+    import dynamic from "next/dynamic";
+    const AsyncBoundary = dynamic(() => import("${request}").then(async(mod)=>{
+      let innerModule = await mod?.default?.Underlying;
+      innerModule = innerModule?.default || innerModule;
+      return innerModule || mod;
+    }), {suspense:true});
+
+    AsyncBoundary.Underlying = import("${request}");
     export default AsyncBoundary;
     `;
 
@@ -61,6 +67,7 @@ export default function (
     callback(null, source, sourceMap);
     return;
   }
+
   const hasGIP = source.includes('getInitialProps');
   const hasGSP = source.includes('getStaticProps');
   const hasGSSP = source.includes('getServerSideProps');

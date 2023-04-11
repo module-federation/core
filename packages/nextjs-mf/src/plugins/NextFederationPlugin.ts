@@ -184,37 +184,11 @@ export class NextFederationPlugin {
       },
       shared: {
         ...DEFAULT_SHARE_SCOPE,
-        // noop: {
-        //   import: 'data:text/javascript,module.exports = {};',
-        //   requiredVersion: false,
-        //   eager: true,
-        //   version: '0',
-        // },
-        // ...this._options.shared,
+        ...this._options.shared,
       },
     };
 
     const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];
-
-    //patch next
-    // compiler.options.module.rules.push({
-    //   test(req: string) {
-    //     if (
-    //       allowedPaths.some((p) => req.includes(path.join(compiler.context, p)))
-    //     ) {
-    //       return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(req);
-    //     }
-    //     return false;
-    //   },
-    //   include: compiler.context,
-    //   exclude: [
-    //     /node_modules/,
-    //     /_middleware/,
-    //     /pages[\\/]middleware/,
-    //     /pages[\\/]api/,
-    //   ],
-    //   loader: path.resolve(__dirname, '../loaders/patchDefaultSharedLoader'),
-    // });
 
     // inject module hoisting system
     compiler.options.module.rules.unshift(
@@ -241,7 +215,6 @@ export class NextFederationPlugin {
         shared: hostFederationPluginOptions.shared,
       }
     });
-
 
     if (this._options.remotes) {
       const delegates = getDelegates(this._options.remotes);
@@ -335,50 +308,14 @@ export class NextFederationPlugin {
     if (!ModuleFederationPlugin) {
       return;
     }
-    //@ts-ignore
-    if (false) {
-      const existingGroups =
-        //@ts-ignore
-        compiler.options.optimization?.splitChunks?.cacheGroups || {};
-      // @ts-ignore
-      delete compiler.options.optimization?.splitChunks?.cacheGroups?.framework;
-      console.log(existingGroups);
-      // @ts-ignore
-      compiler.options.optimization = {
-        ...compiler.options.optimization,
-        splitChunks: {
-          ...compiler.options.optimization?.splitChunks,
-
-          cacheGroups: {
-            hoist: {
-              name: 'webpack',
-              enforce: true,
-              priority: -1,
-              test: function (module: any, chunks: any) {
-                return (
-                  /internal-delegate-hoist/.test(module.resource)
-                );
-              }
-            }
-          },
-        },
-      };
-
-      compiler.options.output.publicPath = 'auto';
-      compiler.options.output.uniqueName = this._options.name;
-      const internalShare = reKeyHostShared(this._options.shared);
-      //@ts-ignore
-      delete internalShare.hostreact;
-
-    }
     compiler.options.devtool = 'source-map';
 
     //@ts-ignore
     compiler.options.output.publicPath = 'auto';
     compiler.options.output.uniqueName = this._options.name;
 
-    new ModuleFederationPlugin(hostFederationPluginOptions, {ModuleFederationPlugin}).apply(compiler);
 
+    new ModuleFederationPlugin(hostFederationPluginOptions, {ModuleFederationPlugin}).apply(compiler);
     if (!isServer && this._options.remotes && Object.keys(this._options.remotes).length > 0) {
       // single runtime chunk if host or circular remote uses remote of current host.
       new ModuleFederationPlugin({
