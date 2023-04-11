@@ -8,6 +8,9 @@
     "remote types",
     "federated types"
   ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
