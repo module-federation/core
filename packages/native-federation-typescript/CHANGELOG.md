@@ -2,20 +2,6 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
-## [0.1.1](https://github.com/module-federation/nextjs-mf/compare/native-federation-typescript-0.1.0...native-federation-typescript-0.1.1) (2023-04-09)
-
-
-### Bug Fixes
-
-* native build chunks ([d6c9f8a](https://github.com/module-federation/nextjs-mf/commit/d6c9f8a957ed00a8d92332ccc38ed9780f01d54e))
-
-
-### Reverts
-
-* Revert "chore(native-federation-typescript): release version 0.1.1" ([097f188](https://github.com/module-federation/nextjs-mf/commit/097f188458835457a2713d98bf3eaf291d5ad102))
-
-
-
 # 0.1.0 (2023-04-05)
 
 
