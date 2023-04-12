@@ -110,6 +110,7 @@ export class NextFederationPlugin {
       new AddModulesPlugin({
         runtime: 'webpack-runtime',
         eager: true,
+        remotes: this._options.remotes,
       }).apply(compiler);
       new StreamingTargetPlugin(this._options, {
         ModuleFederationPlugin: webpack.container.ModuleFederationPlugin,
@@ -156,7 +157,8 @@ export class NextFederationPlugin {
       // hoist modules into remote runtime
       new AddModulesPlugin({
         runtime: this._options.name,
-        eager: false
+        eager: false,
+        remotes: this._options.remotes
       }).apply(compiler);
 
 
@@ -238,12 +240,26 @@ export class NextFederationPlugin {
       const delegates = getDelegates(this._options.remotes);
       // only apply loader if delegates are present
       if (delegates && Object.keys(delegates).length > 0) {
-        const pagesPath = path.join(compiler.context, 'pages/');
-        const appPath = path.join(compiler.context, 'app/');
-        const pageAppPathRegex = new RegExp(`${pagesPath}|${appPath}`);
-        const internalHoist = /internal-delegate-hoist/;
-        const nodeModules = /node_modules/;
-        compiler.options.module.rules.push({
+        const knownDelegates = Object.entries(delegates).map(([name, remote]) => {
+          const delegate = remote.replace('internal ','').split('?')[0]
+          return delegate;
+        })
+        compiler.options.module.rules.push(
+          {
+            enforce: 'pre',
+            test(request: string) {
+              const found =  knownDelegates.some((delegate) => {
+                return request.includes(delegate);
+              });
+
+              return found
+            },
+            loader: path.resolve(__dirname, '../loaders/inject-single-host'),
+            options: {
+              name: this._options.name,
+            }
+          },
+          {
           enforce: 'pre',
           test: [/internal-delegate-hoist/, /delegate-hoist-container/],
           include: [
@@ -346,7 +362,6 @@ export class NextFederationPlugin {
         filename: undefined,
         runtime: undefined,
         name: this._options.name + '_single',
-        remotes: {},
       }, {ModuleFederationPlugin}).apply(compiler);
     }
 

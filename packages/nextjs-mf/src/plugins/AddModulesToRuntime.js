@@ -9,6 +9,11 @@ constructor(options) {
         const runtimeChunk = chunks.find((chunk) => chunk.name === this.options.runtime && chunk.hasRuntime());
         if (!runtimeChunk) return;
 
+        const knownDelegates = Object.entries(this.options.remotes).map(([name, remote]) => {
+          const delegate = remote.replace('internal ','').split('?')[1]
+          return delegate;
+        })
+
         for (const chunk of chunks) {
           if (chunk === runtimeChunk) continue;
 
@@ -16,16 +21,10 @@ constructor(options) {
 
           for (const module of chunk.modulesIterable) {
             //TODO: get this from config, not hardcoded
-            if (module?.rawRequest?.includes('remote-delegate')) {
-              console.log('moving module', module.rawRequest, 'to runtime chunk');
-              modulesToMove.push(module);
-            } else if(this.options.eager && module?.userRequest?.includes('next') && module?.userRequest?.includes('dynamic')) {
-              // console.log(module.request,module.userRequest);
+            if (knownDelegates.some((delegate) => module?.rawRequest?.includes(delegate))) {
               modulesToMove.push(module);
             } else if(module?.userRequest?.includes('internal-delegate-hoist')) {
               modulesToMove.push(module);
-            } else if(!this.options.eager) {
-              // console.log(module);
             }
           }
 
