@@ -118,7 +118,7 @@
     "ts-node": "10.9.1",
     "tslib": "^2.3.0",
     "tsup": "^6.7.0",
-    "typescript": "5.0.2",
+    "typescript": "5.0.4",
     "verdaccio": "5.23.2",
     "vinyl-fs": "~3.0",
     "vitest": "^0.29.7",
