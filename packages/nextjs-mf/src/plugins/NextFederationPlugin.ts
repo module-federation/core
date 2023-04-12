@@ -99,7 +99,8 @@ export class NextFederationPlugin {
       // target false because we use our own target for node env
       compiler.options.target = false;
       const {StreamingTargetPlugin} = require('@module-federation/node');
-
+      // @ts-ignore
+      const backupExternals =compiler.options.externals[0]
       // add hoist to main entry for sync avaliability.
       compiler.options.optimization.chunkIds = 'named';
       new AddModulesPlugin({
@@ -120,7 +121,7 @@ export class NextFederationPlugin {
 
       // should this be a plugin that we apply to the compiler?
       // internalizeSharedPackages(this._options, compiler);
-
+compiler.options.optimization.minimize = false;
       // module-federation/utilities uses internal webpack methods and must be bundled into runtime code.
       if (Array.isArray(compiler.options.externals)) {
         const originalExternals = compiler.options.externals[0];
@@ -128,7 +129,8 @@ export class NextFederationPlugin {
           if (
             ctx.request &&
             (ctx.request.includes('@module-federation/utilities') ||
-              ctx.request.includes('@module-federation/dashboard-plugin'))
+              ctx.request.includes('@module-federation/dashboard-plugin') ||
+              ctx.request.includes('@module-federation/nextjs-mf/src/default-delegate'))
           ) {
             return callback();
           }
@@ -153,7 +155,7 @@ export class NextFederationPlugin {
       new AddModulesPlugin({
         runtime: this._options.name,
         eager: false,
-        remotes:this._options.remotes
+        remotes: this._options.remotes
       }).apply(compiler);
 
 
@@ -213,6 +215,7 @@ export class NextFederationPlugin {
         test: /_document/,
         include: [
           compiler.context,
+          /@module-federation/,
           /next[\\/]dist/,
         ],
         loader: path.resolve(__dirname, '../loaders/inject-hoist'),
@@ -222,6 +225,7 @@ export class NextFederationPlugin {
       test: /internal-delegate-hoist/,
       include: [
         /internal-delegate-hoist/,
+        /@module-federation/,
         compiler.context,
         /next[\\/]dist/,
       ],
@@ -240,6 +244,7 @@ export class NextFederationPlugin {
           test: [/internal-delegate-hoist/, /delegate-hoist-container/],
           include: [
             compiler.context,
+            /@module-federation/,
             /internal-delegate-hoist/,
             /delegate-hoist-container/,
             /next[\\/]dist/,
@@ -331,14 +336,14 @@ export class NextFederationPlugin {
 
 
     new ModuleFederationPlugin(hostFederationPluginOptions, {ModuleFederationPlugin}).apply(compiler);
-    if (!isServer && this._options.remotes && Object.keys(this._options.remotes).length > 0) {
+    if (!isServer && this._options.exposes && Object.keys(this._options.exposes).length > 0) {
       // single runtime chunk if host or circular remote uses remote of current host.
       new ModuleFederationPlugin({
         ...hostFederationPluginOptions,
         filename: undefined,
         runtime: undefined,
         name: this._options.name + '_single',
-        remotes: {},
+        // remotes: {},
       }, {ModuleFederationPlugin}).apply(compiler);
     }
 

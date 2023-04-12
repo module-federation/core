@@ -19,20 +19,23 @@ constructor(options) {
 
           const modulesToMove = [];
 
+          // add delegates last to graph
           for (const module of chunk.modulesIterable) {
-            //TODO: get this from config, not hardcoded
             if (knownDelegates.some((delegate) => module?.rawRequest?.includes(delegate))) {
-              console.log('moving module', module.rawRequest, 'to runtime chunk');
               modulesToMove.push(module);
-            } else if(this.options.eager && module?.userRequest?.includes('next') && module?.userRequest?.includes('dynamic')) {
-              // console.log(module.request,module.userRequest);
+            }
+          }
+
+          for (const module of chunk.modulesIterable) {
+             if(this.options.eager && module?.userRequest?.includes('next') && module?.userRequest?.includes('dynamic')) {
+              console.log(module.request,module.userRequest);
               modulesToMove.push(module);
             } else if(module?.userRequest?.includes('internal-delegate-hoist')) {
               modulesToMove.push(module);
-            } else if(!this.options.eager) {
-              // console.log(module);
             }
           }
+
+
 
           for (const module of modulesToMove) {
             runtimeChunk.addModule(module);

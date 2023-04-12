@@ -3,6 +3,8 @@
   "compilerOptions": {
     "module": "commonjs",
     "allowJs": true,
+    "moduleResolution": "Node16",
+    "dynamicImport": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitOverride": true,
