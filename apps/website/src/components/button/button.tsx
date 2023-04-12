@@ -28,6 +28,7 @@ export interface ButtonProps {
   loading?: boolean;
   class?: string;
   small?: boolean;
+  active?: boolean;
   onClick?: QRL<() => void>;
 }
 
@@ -86,6 +87,7 @@ export default component$((props: ButtonProps) => {
       'relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue',
       'hover:text-blue-gray-600',
       'active:text-blue-gray-700',
+      props.active ? '!text-blue-gray-700' : '',
       props.disabled ? '' : '',
       props.loading ? '' : '',
     ].join(' '),
@@ -93,6 +95,7 @@ export default component$((props: ButtonProps) => {
       'relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue',
       'hover:text-deep-purple-700',
       'active:text-deep-purple-300',
+      props.active ? '!text-deep-purple-300' : '',
       props.disabled ? '' : '',
       props.loading ? '' : '',
     ].join(' '),
@@ -104,7 +107,7 @@ export default component$((props: ButtonProps) => {
         <Slot name="prefix" />
       </div>
       <div class="flex text-lg font-medium leading-snug text-center">
-        <div class={props.loading ? 'invisible' : ''}>
+        <div class={`flex ${props.loading ? 'invisible' : ''}`}>
           <Slot />
         </div>
         {props.loading && (

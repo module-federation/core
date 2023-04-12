@@ -55,7 +55,11 @@ export default component$(() => {
   ];
 
   return (
-    <Section padding={SectionPadding.BOTTOM} id="discover" theme={ContainerTheme.OPAQUE}>
+    <Section
+      padding={SectionPadding.BOTTOM}
+      id="discover"
+      theme={ContainerTheme.OPAQUE}
+    >
       <div class="flex flex-col gap-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           {cards.map((card) => {
@@ -116,14 +120,17 @@ export default component$(() => {
                     )}
                   </p>
                 </div>
+
                 <Button
                   class="mt-2"
-                  theme={ButtonTheme.SOLID}
+                  theme={ButtonTheme.NAKED}
                   href="#"
-                  target='_blank'
+                  target="_blank"
                   type="link"
+                  disabled
                 >
-                  {t(
+                  {t('explore.disabled')}
+                  {/* {t(
                     'explore.cards.module-federation-courses.action@@Start exploring'
                   )}
 
@@ -131,7 +138,7 @@ export default component$(() => {
                     q:slot="suffix"
                     name={IconName.ARROW_NARROW_RIGHT}
                     size="24px"
-                  />
+                  /> */}
                 </Button>
               </div>
             </div>
@@ -156,7 +163,12 @@ export default component$(() => {
                   </p>
                 </div>
               </div>
-              <Button theme={ButtonTheme.SOLID} href="#" type="link" target='_blank'>
+              <Button
+                theme={ButtonTheme.SOLID}
+                href="#"
+                type="link"
+                target="_blank"
+              >
                 {t(
                   'explore.cards.module-federation-courses.action@@Start exploring'
                 )}

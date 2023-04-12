@@ -44,6 +44,34 @@ function useScrollPosition() {
   return position;
 }
 
+function useIsElementOnView(selector: string) {
+  const onView = useSignal(false);
+  useOnDocument(
+    'scroll',
+    $((event: Event) => {
+      const el = document.querySelector(selector);
+      if (!el) {
+        onView.value = false;
+        return;
+      }
+
+      const rect = el.getBoundingClientRect();
+
+      const elTop = rect.top + 100;
+      const elBottom = rect.bottom - 100;
+      const elHeight = rect.height;
+      const wHeight =
+        window.innerHeight || document.documentElement.clientHeight;
+      const isFullyVisible = elTop >= 0 && elBottom <= wHeight;
+      const partiallyVisible = elTop + elHeight >= 0 && elBottom <= wHeight;
+
+      onView.value = isFullyVisible || partiallyVisible;
+    })
+  );
+
+  return onView;
+}
+
 export default component$((props: NavbarProps) => {
   useStylesScoped$(styles);
   const navbarOpen = useSignal(false);
@@ -56,6 +84,9 @@ export default component$((props: NavbarProps) => {
 
   const pos = useScrollPosition();
   const position = pos.y;
+
+  const discoverOnView = useIsElementOnView('#discover');
+  const enterpriseOnView = useIsElementOnView('#contact');
 
   const changeLocale$ = $((locale: string) => {
     const newLocale = LOCALES[locale];
@@ -85,6 +116,7 @@ export default component$((props: NavbarProps) => {
     {
       label: t('navbar.menu.discover@@Discover'),
       href: localizedUrl('/#discover'),
+      active: discoverOnView.value,
     },
     {
       label: t('navbar.menu.showcase@@Showcase'),
@@ -93,6 +125,7 @@ export default component$((props: NavbarProps) => {
     {
       label: t('navbar.menu.enterprise@@Enterprise'),
       href: localizedUrl('/#contact'),
+      active: enterpriseOnView.value,
     },
     {
       label: t('navbar.menu.medusa@@Medusa'),
@@ -124,12 +157,13 @@ export default component$((props: NavbarProps) => {
             <ul class="hidden xl:flex w-full justify-center gap-8">
               {navLis.map((link) => {
                 return (
-                  <li>
+                  <li key={link.label}>
                     <Button
                       href={link.href}
                       target={link.target}
                       type="link"
                       theme={ButtonTheme.NAV}
+                      active={link.active || false}
                     >
                       {link.label}
                     </Button>
@@ -213,7 +247,7 @@ export default component$((props: NavbarProps) => {
         ></div>
 
         <div
-          class={`navbar inline-block xl:hidden absolute left-4 top-[88px] w-[350px] z-[60] transition-opacity duration-300 ${
+          class={`navbar inline-block xl:hidden absolute left-0 px-4 top-[88px] w-full z-[60] transition-opacity duration-300 ${
             navbarOpen.value ? 'visible opacity-100' : 'invisible opacity-0'
           }`}
         >
@@ -221,17 +255,60 @@ export default component$((props: NavbarProps) => {
             <ul class="flex flex-col p-4 gap-8">
               {navLis.map((link) => {
                 return (
-                  <li>
+                  <li key={link.label}>
                     <Button
                       href={link.href}
                       type="link"
                       theme={ButtonTheme.NAKED_ALT}
+                      active={link.active}
                     >
                       {link.label}
                     </Button>
                   </li>
                 );
               })}
+
+              <li class="flex gap-8">
+                <Button
+                  href="https://github.com/module-federation"
+                  target="_blank"
+                  type="link"
+                  theme={ButtonTheme.NAKED_ALT}
+                >
+                  <Icon name={IconName.GITHUB} size="36px" />
+                </Button>
+
+                <Button
+                  href="https://discord.gg/T8c6yAxkbv"
+                  target="_blank"
+                  type="link"
+                  theme={ButtonTheme.NAKED_ALT}
+                >
+                  <Icon name={IconName.DISCORD} size="36px" />
+                </Button>
+              </li>
+              <li>
+                <select
+                  class="border-blue-gray-900 w-full px-4 py-1.5 pr-8 bg-[#F6F6FA] hover:bg-white focus:bg-[#F6F6FA] text-lg focus:border-ui-blue"
+                  name="language"
+                  id="language"
+                  onChange$={async (event, el) => {
+                    await changeLocale$(event.target.value as any);
+                  }}
+                >
+                  {locales.map((locale) => {
+                    return (
+                      <option
+                        key={locale.lang}
+                        value={locale.lang}
+                        selected={speakState.locale.lang === locale.lang}
+                      >
+                        {locale.name}
+                      </option>
+                    );
+                  })}
+                </select>
+              </li>
             </ul>
           </Card>
         </div>
