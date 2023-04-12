@@ -1,5 +1,4 @@
 module.exports = new Promise(async (resolve, reject) => {
-  console.log('in default delegate', __resourceQuery);
   const { importDelegatedModule } = await import('@module-federation/utilities/src/utils/common')
 
   // eslint-disable-next-line no-undef
