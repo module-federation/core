@@ -222,10 +222,10 @@ compiler.options.optimization.minimize = false;
       },
       // populate hoist dependency with shared modules
       {
+      enforce: 'pre',
       test: /internal-delegate-hoist/,
       include: [
         /internal-delegate-hoist/,
-        /@module-federation/,
         compiler.context,
         /next[\\/]dist/,
       ],
@@ -244,7 +244,6 @@ compiler.options.optimization.minimize = false;
           test: [/internal-delegate-hoist/, /delegate-hoist-container/],
           include: [
             compiler.context,
-            /@module-federation/,
             /internal-delegate-hoist/,
             /delegate-hoist-container/,
             /next[\\/]dist/,
