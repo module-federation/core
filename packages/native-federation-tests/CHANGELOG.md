@@ -2,6 +2,10 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.1.1](https://github.com/module-federation/nextjs-mf/compare/native-federation-tests-0.1.0...native-federation-tests-0.1.1) (2023-04-12)
+
+
+
 # 0.1.0 (2023-04-11)
 
 
