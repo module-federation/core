@@ -28,6 +28,10 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     requiredVersion: false,
   },
+  'react/jsx-dev-runtime': {
+    singleton: true,
+    requiredVersion: false,
+  },
   'react-dom': {
     singleton: true,
     requiredVersion: false,
