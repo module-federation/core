@@ -11,6 +11,7 @@ import Button, { ButtonTheme } from '../../button/button';
 import Section from '../../section/section';
 import { centerShape, leftShape, rightShape } from './shapes';
 import styles from './subscribe.css?inline';
+import Line from '../../line/line';
 
 export default component$(() => {
   useStylesScoped$(styles);
@@ -41,7 +42,7 @@ export default component$(() => {
     <Section>
       <div class="flex flex-col items-center">
         <div class="flex flex-col items-center gap-8">
-          <h2 class="text-3xl text-blue-gray-900 font-bold max-w-lg mx-auto text-center">
+          <h2 class="text-4xl leading-normal md:text-3xl text-blue-gray-900 font-bold max-w-lg mx-auto text-center leading-tight">
             {t('subscribe.title@@Subscribe to our email newsletter!')}
           </h2>
 
@@ -82,17 +83,22 @@ export default component$(() => {
 
       <div
         q:slot="background"
-        class="relative w-11/12 h-full max-w-1225 mx-auto hidden md:block"
+        class="relative w-11/12 h-full max-w-1225 mx-auto"
       >
-        <div class="w-48 absolute bottom-0 left-0 translate-y-1/2 ">
+        <div class="absolute w-36 md:w-48 bottom-0 left-0 translate-y-1/2 ">
           {leftShape}
         </div>
-        <div class="w-72 absolute top-0 left-[20%] -translate-y-1/3 ">
+        <div class="absolute w-56 md:w-72 top-0 left-[5%] md:left-[20%] -translate-y-1/2  md:-translate-y-1/3 ">
           {centerShape}
         </div>
-        <div class="w-56 absolute top-1/2 right-0 -translate-x-1/3 -translate-y-1/2 ">
+        <div class="absolute w-36 md:w-56 top-1/2 right-0 -translate-x-1/3 md:-translate-y-1/2 ">
           {rightShape}
         </div>
+      </div>
+
+      <div q:slot="background-no-overlay">
+        <Line showEnd={false} class="absolute w-12 md:w-1/4 top-[25%] md:top-[60%] right-0" />
+        <Line showStart={false} class="absolute w-24 md:w-52 top-0 left-[12%] md:left-[14%] rotate-90 origin-left -translate-y-1/2" />
       </div>
     </Section>
   );

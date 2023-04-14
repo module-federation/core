@@ -36,7 +36,10 @@
     "release:utils": "nx run utils:version --releaseAs=minor",
     "release:utils:manual": "nx build && cd dist/packages/utilities && yarn publish --non-interactive --access public",
     "release:next:manual": "nx build && cd dist/packages/nextjs-mf && yarn publish --non-interactive --access public",
-    "release:node:manual": "nx build && cd dist/packages/node && yarn publish --non-interactive --access public"
+    "release:node:manual": "nx build && cd dist/packages/node && yarn publish --non-interactive --access public",
+    "serve:website": "nx run website:serve",
+    "build:website": "nx run website:build:netlify && npx move-cli dist/apps/website/.netlify/edge-functions .netlify/edge-functions --mkdirp && npx move-cli apps/website/manifest.override.json .netlify/edge-functions/manifest.json",
+    "extract-i18n:website": "nx run website:extract-i18n"
   },
   "dependencies": {
     "adm-zip": "^0.5.10",
@@ -52,7 +55,8 @@
     "react-router-dom": "6.11.1",
     "regenerator-runtime": "0.13.11",
     "tsup": "^6.7.0",
-    "unplugin": "^1.3.1"
+    "unplugin": "^1.3.1",
+    "undici": "^5.21.0"
   },
   "devDependencies": {
     "comment-parser": "^1.3.1",
@@ -67,6 +71,13 @@
     "command-join": "^3.0.0",
     "marked-terminal": "^5.2.0",
     "@antora/cli": "^3.1.3",
+    "@builder.io/qwik": "0.24.0",
+    "@builder.io/qwik-city": "~0.7.0",
+    "vite-tsconfig-paths": "4.0.3",
+    "qwik-nx": "0.14.0",
+    "tailwindcss": "3.1.8",
+    "qwik-speak": "0.9.0",
+    "@tailwindcss/forms": "^0.5.3",
     "@antora/lunr-extension": "^1.0.0-alpha.8",
     "@antora/site-generator": "^3.1.3",
     "@asciidoctor/core": "~2.2.6",

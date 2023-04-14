@@ -49,6 +49,9 @@ export default component$((props: ContainerProps) => {
       <div
         class={`absolute h-full w-full top-0 left-0 z-20 ${overlayClasses} `}
       ></div>
+      <div class="block absolute h-full w-full top-0 left-0 z-20">
+        <Slot name="background-no-overlay" />
+      </div>
       {/* <div
         class={`absolute h-full w-full top-0 left-0 z-20 ${patternClasses}`}
       ></div> */}

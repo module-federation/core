@@ -37,6 +37,7 @@ export default component$((props: NavbarProps) => {
   const navbarOpen = useSignal(false);
   const discoverOnView = useSignal(false);
   const enterpriseOnView = useSignal(false);
+  const position = useSignal(1);
   const loc = useLocation();
   const speakState = useSpeakContext();
 
@@ -44,26 +45,6 @@ export default component$((props: NavbarProps) => {
     return locUrl(url, speakState);
   };
 
-  const pos = useStore({ x: 1, y: 1 });
-  const position = pos.y;
-
-  useVisibleTask$(
-    () => {
-      const listener = () => {
-        pos.x = window.scrollX;
-        pos.y = window.scrollY;
-      };
-
-      listener();
-
-      document.addEventListener('scroll', listener);
-
-      return () => {
-        document.removeEventListener('scroll', listener);
-      };
-    },
-    { strategy: 'document-ready' }
-  );
 
   useVisibleTask$(
     () => {
@@ -87,6 +68,8 @@ export default component$((props: NavbarProps) => {
       };
 
       const listener = () => {
+        position.value = window.scrollY;
+
         discoverOnView.value = isElementOnView('#discover');
         enterpriseOnView.value = isElementOnView('#contact');
       };
@@ -149,12 +132,12 @@ export default component$((props: NavbarProps) => {
   ];
 
   const theme =
-    position === 0 ? props.theme || ContainerTheme.NONE : ContainerTheme.GRAY;
+    position.value === 0 ? props.theme || ContainerTheme.NONE : ContainerTheme.GRAY;
 
   return (
     <div>
       <div class={`fixed w-full top-0 z-[999]`}>
-        <Container pattern={position === 0} fullWidth theme={theme}>
+        <Container pattern={position.value === 0} fullWidth theme={theme}>
           <nav
             class={`max-w-7xl mx-auto flex flex-row-reverse xl:flex-row  items-center justify-between px-4 py-6`}
           >

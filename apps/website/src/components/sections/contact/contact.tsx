@@ -128,7 +128,7 @@ export default component$(() => {
             </div>
           </form>
 
-          <div class="text-blue-gray-900 font-normal max-w-sm text-center text-lg">
+          <div class="text-blue-gray-900 font-normal max-w-sm text-center text-lg leading-tight">
             {t(
               'contact.disclaimer.text@@By submitting this form, I confirm that I have read and understood the'
             )}{' '}
@@ -139,7 +139,7 @@ export default component$(() => {
           </div>
         </div>
         <div class="flex flex-col gap-10 flex-1 w-50">
-          <div class="text-blue-gray-900 text-3xl font-medium text-center md:text-left">
+          <div class="text-blue-gray-900 text-3xl font-medium text-center md:text-left leading-normal">
             {t(
               'contact.quote.text@@There are now 4000 companies using Module Federation in a detectable way. Likely many more who we cannot trace, but 4000 is still an impressive number of known entities.'
             )}

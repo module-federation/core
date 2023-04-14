@@ -1,7 +1,6 @@
 import { component$, useStylesScoped$ } from '@builder.io/qwik';
 import styles from './loader.css?inline';
 
-// TODO: Loader needs theme because it's going to be used on different backgrounds (button)
 export default component$(() => {
   useStylesScoped$(styles);
 

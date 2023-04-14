@@ -35,7 +35,7 @@ export const leftShape = (
         gradientUnits="userSpaceOnUse"
         gradientTransform="translate(122.869 107.3) rotate(79.398) scale(174.74 151.365)"
       >
-        <stop offset="0.5" stop-color="#004FC7" />
+        <stop offset="0.1" stop-color="#004FC7" />
         <stop offset="1" stop-color="#00F3B4" />
       </radialGradient>
     </defs>

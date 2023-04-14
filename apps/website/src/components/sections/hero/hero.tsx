@@ -17,7 +17,7 @@ export default component$(() => {
         <h1 class="text-4xl leading-tight md:text-6xl md:leading-none font-bold text-blue-gray-900">
           {t('hero.title@@Module Federation: streamline your microfrontends')}
         </h1>
-        <p class="font-medium text-base md:text-lg text-blue-gray-900 break-words max-w-4xl">
+        <p class="font-medium text-lg  text-blue-gray-900 break-words max-w-4xl">
           {t(
             'hero.subtitle@@Module Federation aims to solve the sharing of modules in a distributed system. It allows you to ship those critical shared pieces as macro or as micro as you would like. It does this by pulling them out of the build pipeline and out of your apps'
           )}
@@ -42,23 +42,28 @@ export default component$(() => {
         </div>
       </header>
 
-      <div q:slot="background" class="hidden md:block">
-        <div class="inline-block w-72 absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 ">
+      <div q:slot="background">
+        <div class="inline-block absolute w-40 top-1/3 left-0 -translate-x-1/2 -translate-y-1/2 md:w-72 md:top-1/2">
           {leftShape}
         </div>
 
-        {/* <div class="inline-block w-72 absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 rotate-[30deg]">
-          <Line />
-        </div> */}
-
-        <div class="inline-block w-5/12 absolute top-[60%] left-1/2 -translate-x-1/2 ">
+        <div class="inline-block absolute bottom-0 w-[90%] left-1/2 translate-y-1/2 -translate-x-1/2 md:w-5/12 md:top-[60%] md:translate-y-0">
           {centerShape}
         </div>
 
-        <div class="inline-block w-72 absolute top-1/2 right-0 translate-x-1/3 -translate-y-1/2 ">
+        <div class="inline-block absolute w-40 top-1/3 right-0 translate-x-1/3 -translate-y-1/2 md:w-72 md:top-1/2">
           {rightShape}
         </div>
+      </div>
+
+      <div q:slot="background-no-overlay">
+        <Line showStart={false} class="absolute w-20 md:w-40 top-1/3 md:top-1/2 left-0 rotate-[30deg] origin-left" />
+        <Line class="absolute bottom-[12%] left-[-2px] md:left-1/2 w-3/12 md:w-5/12 md:-translate-x-1/2 rotate-[30deg] origin-left" />
+        <Line class="absolute bottom-[12%] right-[-2px] md:left-1/2 w-3/12 md:w-5/12 md:-translate-x-1/2 -rotate-[30deg] origin-right" />
+        <Line class="absolute w-32 md:w-64 top-[25%] md:top-1/3 right-[5%] translate-x-1/2 rotate-90 " />
       </div>
     </Container>
   );
 });
+
+// inline-block absolute  w-3/4 left-1/2 -translate-x-1/2 md:w-5/12

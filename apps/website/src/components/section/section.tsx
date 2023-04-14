@@ -43,6 +43,10 @@ export default component$((props: SectionProps) => {
       <span q:slot="background">
         <Slot name="background" />
       </span>
+
+      <span q:slot="background-no-overlay">
+        <Slot name="background-no-overlay" />
+      </span>
     </Container>
   );
 });

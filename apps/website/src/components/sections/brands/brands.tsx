@@ -62,11 +62,10 @@ export const rows = [
   ],
 ];
 
-// TODO: This component is not ready! This is just a prototype!
 export default component$(() => {
   useStylesScoped$(styles);
   return (
-    <Section fullWidth topPadding theme={ContainerTheme.OPAQUE}>
+    <Section fullWidth theme={ContainerTheme.OPAQUE}>
       <div class="flex flex-col gap-8">
         {rows.map((row, index) => {
           return (

@@ -56,7 +56,9 @@ export default component$(() => {
       actionHref:
         'https://github.com/module-federation/universe/discussions/categories/rfc',
       target: '_blank' as ButtonPropsTarget,
-      lineClass: ''
+      lineClass: 'absolute w-24 bottom-[20%] left-full -translate-x-full',
+      lineShowStart: true,
+      lineShowEnd: false,
     },
     {
       title: t('evolving.roadmap.title@@Module Federation Roadmap'),
@@ -67,6 +69,9 @@ export default component$(() => {
       actionHref:
         'https://miro.com/app/board/uXjVPvdfG2I=/?share_link_id=45887343083',
       target: '_blank' as ButtonPropsTarget,
+      lineClass: 'absolute w-24 top-0 rotate-90 right-[10%] origin-left translate-x-full -translate-y-1/2',
+      lineShowStart: false,
+      lineShowEnd: true,
     },
   ];
 
@@ -111,6 +116,9 @@ export default component$(() => {
                     </Button>
                   </div>
                 </div>
+
+
+                { card.lineClass && <Line class={card.lineClass} showEnd={card.lineShowEnd} showStart={card.lineShowStart} /> }
               </Card>
             );
           })}
@@ -142,6 +150,8 @@ export default component$(() => {
               })}
             </div>
           </div>
+
+          <Line showEnd={false} class="absolute w-6 bottom-0 rotate-90 left-1/2 origin-right translate-y-1/2 -translate-x-full" />
         </Card>
       </div>
     </Section>

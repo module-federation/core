@@ -32,8 +32,6 @@ export interface ButtonProps {
   onClick?: QRL<() => void>;
 }
 
-// TODO: Add support for icons on prefix, suffix and main
-
 export default component$((props: ButtonProps) => {
   useStylesScoped$(styles);
 

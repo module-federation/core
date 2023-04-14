@@ -5,6 +5,7 @@ import Button, { ButtonTheme } from '../../button/button';
 import Section from '../../section/section';
 import styles from './medusa.css?inline';
 import { centerShape, leftShape, rightShape } from './shapes';
+import Line from '../../line/line';
 
 export default component$(() => {
   useStylesScoped$(styles);
@@ -12,7 +13,7 @@ export default component$(() => {
   return (
     <Section id="medusa">
       <div class="flex flex-col items-center gap-8">
-        <h2 class="text-3xl text-blue-gray-900 font-bold mx-auto text-center leading-tight md:leading-none">
+        <h2 class="text-4xl leading-normal md:text-3xl text-blue-gray-900 font-bold max-w-lg mx-auto text-center leading-tight">
           {t('medusa.title@@Start using Module Federation with')}
         </h2>
 
@@ -48,17 +49,22 @@ export default component$(() => {
 
       <div
         q:slot="background"
-        class="relative w-11/12 h-full max-w-1225 mx-auto hidden md:block"
+        class="relative w-11/12 h-full max-w-1225 mx-auto"
       >
-        <div class="w-44 absolute top-0 left-0 -translate-y-2/3 ">
+        <div class="absolute w-32 md:w-44 top-0 left-0 -translate-y-2/3 ">
           {leftShape}
         </div>
-        <div class="w-80 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ">
+        <div class="absolute w-48 md:w-80 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ">
           {centerShape}
         </div>
-        <div class="w-44 absolute bottom-0 right-0 translate-y-2/3 ">
+        <div class="absolute w-32 md:w-44 bottom-0 right-0 translate-y-2/3 ">
           {rightShape}
         </div>
+      </div>
+
+      <div q:slot="background-no-overlay">
+        <Line showStart={false} class="absolute w-1/4 top-[55%] md:top-[60%] left-0" />
+        <Line showStart={false} class="absolute w-24 md:w-64 top-0 right-[26px] md:right-[14%] rotate-90 origin-left translate-x-full  md:translate-x-1/2 -translate-y-1/2" />
       </div>
     </Section>
   );
