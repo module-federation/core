@@ -9,10 +9,13 @@ import type {
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
 } from '@module-federation/utilities';
-import {createRuntimeVariables, createDelegatedModule} from '@module-federation/utilities';
+import {
+  createRuntimeVariables,
+  createDelegatedModule,
+} from '@module-federation/utilities';
 import CopyFederationPlugin from './CopyFederationPlugin';
 import AddModulesPlugin from './AddModulesToRuntime';
-import type {Compiler} from 'webpack';
+import type { Compiler } from 'webpack';
 import path from 'path';
 
 import {
@@ -20,13 +23,13 @@ import {
   parseRemotes,
   reKeyHostShared,
   getDelegates,
-  DEFAULT_SHARE_SCOPE
+  DEFAULT_SHARE_SCOPE,
 } from '../internal';
 import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
 import ChildFederationPlugin from './ChildFederationPlugin';
 
 import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
-import {exposeNextjsPages} from "../loaders/nextPageMapLoader";
+import { exposeNextjsPages } from '../loaders/nextPageMapLoader';
 
 // @ts-ignore
 const regexEqual = (x, y) => {
@@ -45,7 +48,7 @@ export class NextFederationPlugin {
   private _extraOptions: NextFederationPluginExtraOptions;
 
   constructor(options: NextFederationPluginOptions) {
-    const {extraOptions, ...mainOpts} = options;
+    const { extraOptions, ...mainOpts } = options;
     this._options = mainOpts;
 
     this._extraOptions = {
@@ -73,7 +76,7 @@ export class NextFederationPlugin {
     }
 
     const isServer = compiler.options.name === 'server';
-    const {webpack} = compiler;
+    const { webpack } = compiler;
 
     new CopyFederationPlugin(isServer).apply(compiler);
 
@@ -82,24 +85,28 @@ export class NextFederationPlugin {
     }
 
     if (this._options.shared) {
-      const warnings: string[] = Object.keys(this._options.shared).reduce((acc: string[], key: string) => {
-        if (DEFAULT_SHARE_SCOPE[key]) {
-          acc.push(`[nextjs-mf] You are sharing ${key} from the default share scope. This is not necessary and can be removed.`);
-          // @ts-ignore
-          delete this._options.shared[key];
-        }
-        return acc;
-      }, []);
+      const warnings: string[] = Object.keys(this._options.shared).reduce(
+        (acc: string[], key: string) => {
+          if (DEFAULT_SHARE_SCOPE[key]) {
+            acc.push(
+              `[nextjs-mf] You are sharing ${key} from the default share scope. This is not necessary and can be removed.`
+            );
+            // @ts-ignore
+            delete this._options.shared[key];
+          }
+          return acc;
+        },
+        []
+      );
       if (warnings.length > 0) {
         console.warn('%c' + warnings.join('\n'), 'color: red');
       }
     }
 
     if (isServer) {
-
       // target false because we use our own target for node env
       compiler.options.target = false;
-      const {StreamingTargetPlugin} = require('@module-federation/node');
+      const { StreamingTargetPlugin } = require('@module-federation/node');
 
       // add hoist to main entry for sync avaliability.
       compiler.options.optimization.chunkIds = 'named';
@@ -159,7 +166,7 @@ export class NextFederationPlugin {
       new AddModulesPlugin({
         runtime: this._options.name,
         eager: false,
-        remotes: this._options.remotes
+        remotes: this._options.remotes,
       }).apply(compiler);
 
       new AddModulesPlugin({
@@ -168,7 +175,6 @@ export class NextFederationPlugin {
         remotes: this._options.remotes,
         shared: DEFAULT_SHARE_SCOPE,
       }).apply(compiler);
-
 
       if (this._extraOptions.automaticPageStitching) {
         compiler.options.module.rules.push({
@@ -194,16 +200,20 @@ export class NextFederationPlugin {
       new webpack.EntryPlugin(
         compiler.context,
         require.resolve('../internal-delegate-hoist'),
-        'main').apply(compiler);
+        'main'
+      ).apply(compiler);
     }
 
     const hostFederationPluginOptions: ModuleFederationPluginOptions = {
       ...this._options,
       runtime: false,
       exposes: {
-        "__hoist": require.resolve('../delegate-hoist-container'),
+        __hoist: require.resolve('../delegate-hoist-container'),
         ...(this._extraOptions.exposePages
-          ? exposeNextjsPages(compiler.options.context as string, this._extraOptions.automaticAsyncBoundary as boolean)
+          ? exposeNextjsPages(
+              compiler.options.context as string,
+              this._extraOptions.automaticAsyncBoundary as boolean
+            )
           : {}),
         ...this._options.exposes,
       },
@@ -224,63 +234,60 @@ export class NextFederationPlugin {
       {
         enforce: 'pre',
         test: /_document/,
-        include: [
-          compiler.context,
-          /next[\\/]dist/,
-        ],
+        include: [compiler.context, /next[\\/]dist/],
         loader: path.resolve(__dirname, '../loaders/inject-hoist'),
       },
       // populate hoist dependency with shared modules
       {
-      test: /internal-delegate-hoist/,
-      include: [
-        /internal-delegate-hoist/,
-        compiler.context,
-        /next[\\/]dist/,
-      ],
-      loader: path.resolve(__dirname, '../loaders/share-scope-hoist'),
-      options: {
-        shared: DEFAULT_SHARE_SCOPE,
+        test: /internal-delegate-hoist/,
+        include: [/internal-delegate-hoist/, compiler.context, /next[\\/]dist/],
+        loader: path.resolve(__dirname, '../loaders/share-scope-hoist'),
+        options: {
+          shared: DEFAULT_SHARE_SCOPE,
+        },
       }
-    });
+    );
 
     if (this._options.remotes) {
       const delegates = getDelegates(this._options.remotes);
       // only apply loader if delegates are present
       if (delegates && Object.keys(delegates).length > 0) {
-        const knownDelegates = Object.entries(delegates).map(([name, remote]) => {
-          const delegate = remote.replace('internal ','').split('?')[0]
-          return delegate;
-        })
+        const knownDelegates = Object.entries(delegates).map(
+          ([name, remote]) => {
+            const delegate = remote.replace('internal ', '').split('?')[0];
+            return delegate;
+          }
+        );
         compiler.options.module.rules.push(
           {
             enforce: 'pre',
             test(request: string) {
-              const found =  knownDelegates.some((delegate) => {
+              const found = knownDelegates.some((delegate) => {
                 return request.includes(delegate);
               });
 
-              return found
+              return found;
             },
             loader: path.resolve(__dirname, '../loaders/inject-single-host'),
             options: {
               name: this._options.name,
-            }
+            },
           },
           {
-          enforce: 'pre',
-          test: [/internal-delegate-hoist/, /delegate-hoist-container/],
-          include: [
-            compiler.context,
-            /internal-delegate-hoist/,
-            /delegate-hoist-container/,
-            /next[\\/]dist/,
-          ],
-          loader: path.resolve(__dirname, '../loaders/delegateLoader'),
-          options: {
-            delegates,
-          },
-        });
+            enforce: 'pre',
+            test: [/internal-delegate-hoist/, /delegate-hoist-container/],
+            include: [
+              compiler.context,
+              /internal-delegate-hoist/,
+              /delegate-hoist-container/,
+              /next[\\/]dist/,
+            ],
+            loader: path.resolve(__dirname, '../loaders/delegateLoader'),
+            options: {
+              delegates,
+            },
+          }
+        );
       }
     }
 
@@ -361,16 +368,24 @@ export class NextFederationPlugin {
     compiler.options.output.publicPath = 'auto';
     compiler.options.output.uniqueName = this._options.name;
 
-
-    new ModuleFederationPlugin(hostFederationPluginOptions, {ModuleFederationPlugin}).apply(compiler);
-    if (!isServer && this._options.remotes && Object.keys(this._options.remotes).length > 0) {
+    new ModuleFederationPlugin(hostFederationPluginOptions, {
+      ModuleFederationPlugin,
+    }).apply(compiler);
+    if (
+      !isServer &&
+      this._options.remotes &&
+      Object.keys(this._options.remotes).length > 0
+    ) {
       // single runtime chunk if host or circular remote uses remote of current host.
-      new ModuleFederationPlugin({
-        ...hostFederationPluginOptions,
-        filename: undefined,
-        runtime: undefined,
-        name: this._options.name + '_single',
-      }, {ModuleFederationPlugin}).apply(compiler);
+      new ModuleFederationPlugin(
+        {
+          ...hostFederationPluginOptions,
+          filename: undefined,
+          runtime: undefined,
+          name: this._options.name + '_single',
+        },
+        { ModuleFederationPlugin }
+      ).apply(compiler);
     }
 
     // new ChildFederationPlugin(this._options, this._extraOptions).apply(

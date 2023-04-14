@@ -33,9 +33,7 @@ export default function patchDefaultSharedLoader(
     }
   });
 
-  if (
-    content.includes('hasDelegateMarkers')
-  ) {
+  if (content.includes('hasDelegateMarkers')) {
     return content;
   }
 

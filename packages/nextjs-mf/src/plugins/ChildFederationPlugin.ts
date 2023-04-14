@@ -135,7 +135,10 @@ export class ChildFederationPlugin {
           // doesnt work as intended for dev mode
           ...this._options.exposes,
           ...(this._extraOptions.exposePages
-            ? exposeNextjsPages(compiler.options.context as string, this._extraOptions.automaticAsyncBoundary as boolean)
+            ? exposeNextjsPages(
+                compiler.options.context as string,
+                this._extraOptions.automaticAsyncBoundary as boolean
+              )
             : {}),
         },
         runtime: false,
@@ -259,7 +262,6 @@ export class ChildFederationPlugin {
           }
         }
       }
-
 
       // TODO: Provide better types for MiniCss Plugin for ChildCompiler in ChildFederationPlugin
       const MiniCss = childCompiler.options.plugins.find((p) => {

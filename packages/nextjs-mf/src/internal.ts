@@ -23,68 +23,68 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   react: {
     singleton: true,
     requiredVersion: false,
-    eager:true,
+    eager: true,
     import: false,
   },
-  // reactPop: {
-  //   singleton: true,
-  //   requiredVersion: false,
-  //   import: '!!react?pop',
-  //   // eager:true,
-  // },
+  reactPop: {
+    singleton: true,
+    requiredVersion: false,
+    import: '!!react?pop',
+    // eager:true,
+  },
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: false,
     import: false,
-    eager:true,
+    eager: true,
   },
   'react-dom': {
     singleton: true,
     requiredVersion: false,
-    eager:true,
+    eager: true,
     import: false,
   },
   'next/dynamic': {
-    eager:true,
+    eager: true,
     requiredVersion: false,
     singleton: true,
-    import: false
+    import: false,
   },
   'styled-jsx': {
     requiredVersion: false,
     singleton: true,
     import: false,
-    eager:true
+    eager: true,
   },
   'styled-jsx/style': {
     requiredVersion: false,
     singleton: true,
     import: false,
-    eager: true
+    eager: true,
   },
   'next/link': {
     requiredVersion: false,
     singleton: true,
     import: false,
-    eager: true
+    eager: true,
   },
   'next/router': {
     requiredVersion: false,
     singleton: true,
     import: false,
-    eager:true,
+    eager: true,
   },
   'next/script': {
     requiredVersion: false,
     singleton: true,
     import: false,
-    eager:true
+    eager: true,
   },
   'next/head': {
     requiredVersion: false,
     singleton: true,
     import: false,
-    eager: true
+    eager: true,
   },
 };
 
@@ -223,9 +223,12 @@ export const parseRemotes = (remotes: Record<string, any>) =>
     }
     // check if user is passing standard remote syntax, if so use default delegate
     if (value.includes('@')) {
-      return { ...acc, [key]: createDelegatedModule(require.resolve('./default-delegate.js'), {
-        remote: value,
-        })};
+      return {
+        ...acc,
+        [key]: createDelegatedModule(require.resolve('./default-delegate.js'), {
+          remote: value,
+        }),
+      };
     }
     // return standard template otherwise
     return { ...acc, [key]: value };
