@@ -162,6 +162,13 @@ export class NextFederationPlugin {
         remotes: this._options.remotes
       }).apply(compiler);
 
+      new AddModulesPlugin({
+        runtime: 'webpack',
+        eager: false,
+        remotes: this._options.remotes,
+        shared: DEFAULT_SHARE_SCOPE,
+      }).apply(compiler);
+
 
       if (this._extraOptions.automaticPageStitching) {
         compiler.options.module.rules.push({
@@ -233,7 +240,7 @@ export class NextFederationPlugin {
       ],
       loader: path.resolve(__dirname, '../loaders/share-scope-hoist'),
       options: {
-        shared: hostFederationPluginOptions.shared,
+        shared: DEFAULT_SHARE_SCOPE,
       }
     });
 

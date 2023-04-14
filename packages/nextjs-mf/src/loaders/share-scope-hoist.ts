@@ -28,10 +28,11 @@ export default function patchDefaultSharedLoader(
      eagerShared = Object.entries(shared).reduce((acc, sharedPackage) => {
       const name = sharedPackage[0];
       const params = sharedPackage[1];
+
       //@ts-ignore
-      if (params.eager === true) {
-        //@ts-ignore
-        acc.scope += `
+      if (params.eager === true &&  (params.import ? !params.import.startsWith('!!'): true)) {
+          //@ts-ignore
+          acc.scope += `
        ${JSON.stringify(name)}: {
          "0": {
           eager: true,
@@ -41,6 +42,7 @@ export default function patchDefaultSharedLoader(
         },`
         acc.sideload += `
       console.log('sideloading ${name}');
+
       __webpack_modules__[require.resolveWeak(${JSON.stringify(name)})] = __webpack_modules__[require.resolveWeak(${JSON.stringify("!!" + name + "?pop")})];
       `
       }

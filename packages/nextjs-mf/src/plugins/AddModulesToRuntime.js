@@ -1,4 +1,9 @@
 // AddModulesToRuntimeChunkPlugin.js
+
+const modulesToHoist = [
+  /\/react\//
+]
+
 class AddModulesToRuntimeChunkPlugin {
 constructor(options) {
   this.options = options;
@@ -16,7 +21,7 @@ constructor(options) {
           return delegate;
         })
 
-        const internalSharedModules = this.options.shared ? Object.keys(this.options.shared) : false
+        const internalSharedModules = this.options.shared ? Object.entries(this.options.shared).map(([k,v])=>v.import || k) : false
 
         for (const chunk of chunks) {
           if (chunk === runtimeChunk) continue;
@@ -27,7 +32,9 @@ constructor(options) {
             //TODO: get this from config, not hardcoded
             if (knownDelegates && knownDelegates.some((delegate) => module?.rawRequest?.includes(delegate))) {
               containers.push(module);
-            } else if(internalSharedModules && internalSharedModules.some((share) => module?.request?.includes(share) ||  module?.userRequest?.includes(share))) {
+            } else if(internalSharedModules && internalSharedModules.some((share) => (module?.rawRequest === share) || modulesToHoist.some((regex) => module?.request?.match(regex)))) {
+              console.log('moving internal', module?.userRequest, 'to', runtimeChunk.name)
+              console.log(module.rawRequest)
               modulesToMove.push(module);
             } else if(module?.userRequest?.includes('internal-delegate-hoist')) {
               modulesToMove.push(module);
