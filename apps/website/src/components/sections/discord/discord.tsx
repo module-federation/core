@@ -28,11 +28,11 @@ export default component$(() => {
         q:slot="background"
         class="relative w-11/12 h-full max-w-1225 mx-auto hidden md:block"
       >
-        <div class="w-64 absolute top-1/4 left-0 blur-lg">{leftShape}</div>
-        <div class="w-52 absolute bottom-0 right-1/4 translate-x-1/2 translate-y-1/2 blur-lg">
+        <div class="w-64 absolute top-1/4 left-0 ">{leftShape}</div>
+        <div class="w-52 absolute bottom-0 right-1/4 translate-x-1/2 translate-y-1/2 ">
           {centerShape}
         </div>
-        <div class="w-48 absolute top-6 right-0 -translate-y-1/2 blur-lg">
+        <div class="w-48 absolute top-6 right-0 -translate-y-1/2 ">
           {rightShape}
         </div>
       </div>

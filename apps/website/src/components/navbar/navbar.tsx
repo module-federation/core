@@ -5,6 +5,7 @@ import {
   $,
   useStore,
   useOnDocument,
+  useVisibleTask$,
 } from '@builder.io/qwik';
 import { useLocation } from '@builder.io/qwik-city';
 import { useSpeakContext, $translate as t } from 'qwik-speak';
@@ -31,50 +32,11 @@ export interface NavbarProps {
   theme?: ContainerTheme;
 }
 
-function useScrollPosition() {
-  const position = useStore({ x: 0, y: 0 });
-  useOnDocument(
-    'scroll',
-    $((event: Event) => {
-      position.x = window.scrollX;
-      position.y = window.scrollY;
-    })
-  );
-
-  return position;
-}
-
-function useIsElementOnView(selector: string) {
-  const onView = useSignal(false);
-  useOnDocument(
-    'scroll',
-    $((event: Event) => {
-      const el = document.querySelector(selector);
-      if (!el) {
-        onView.value = false;
-        return;
-      }
-
-      const rect = el.getBoundingClientRect();
-
-      const elTop = rect.top + 100;
-      const elBottom = rect.bottom - 100;
-      const elHeight = rect.height;
-      const wHeight =
-        window.innerHeight || document.documentElement.clientHeight;
-      const isFullyVisible = elTop >= 0 && elBottom <= wHeight;
-      const partiallyVisible = elTop + elHeight >= 0 && elBottom <= wHeight;
-
-      onView.value = isFullyVisible || partiallyVisible;
-    })
-  );
-
-  return onView;
-}
-
 export default component$((props: NavbarProps) => {
   useStylesScoped$(styles);
   const navbarOpen = useSignal(false);
+  const discoverOnView = useSignal(false);
+  const enterpriseOnView = useSignal(false);
   const loc = useLocation();
   const speakState = useSpeakContext();
 
@@ -82,11 +44,63 @@ export default component$((props: NavbarProps) => {
     return locUrl(url, speakState);
   };
 
-  const pos = useScrollPosition();
+  const pos = useStore({ x: 1, y: 1 });
   const position = pos.y;
 
-  const discoverOnView = useIsElementOnView('#discover');
-  const enterpriseOnView = useIsElementOnView('#contact');
+  useVisibleTask$(
+    () => {
+      const listener = () => {
+        pos.x = window.scrollX;
+        pos.y = window.scrollY;
+      };
+
+      listener();
+
+      document.addEventListener('scroll', listener);
+
+      return () => {
+        document.removeEventListener('scroll', listener);
+      };
+    },
+    { strategy: 'document-ready' }
+  );
+
+  useVisibleTask$(
+    () => {
+      const isElementOnView = (selector: string) => {
+        const el = document.querySelector(selector);
+        if (!el) {
+          return false;
+        }
+
+        const rect = el.getBoundingClientRect();
+
+        const elTop = rect.top + 100;
+        const elBottom = rect.bottom - 100;
+        const elHeight = rect.height;
+        const wHeight =
+          window.innerHeight || document.documentElement.clientHeight;
+        const isFullyVisible = elTop >= 0 && elBottom <= wHeight;
+        const partiallyVisible = elTop + elHeight >= 0 && elBottom <= wHeight;
+
+        return isFullyVisible || partiallyVisible;
+      };
+
+      const listener = () => {
+        discoverOnView.value = isElementOnView('#discover');
+        enterpriseOnView.value = isElementOnView('#contact');
+      };
+
+      listener();
+
+      document.addEventListener('scroll', listener);
+
+      return () => {
+        document.removeEventListener('scroll', listener);
+      };
+    },
+    { strategy: 'document-ready' }
+  );
 
   const changeLocale$ = $((locale: string) => {
     const newLocale = LOCALES[locale];

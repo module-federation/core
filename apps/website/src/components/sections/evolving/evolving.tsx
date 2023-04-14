@@ -8,6 +8,7 @@ import { IconName } from '../../icon/data';
 import Icon from '../../icon/icon';
 import Section, { SectionHeader, SectionPadding } from '../../section/section';
 import styles from './evolving.css?inline';
+import Line from '../../line/line';
 
 export const bundlers = [
   {
@@ -55,6 +56,7 @@ export default component$(() => {
       actionHref:
         'https://github.com/module-federation/universe/discussions/categories/rfc',
       target: '_blank' as ButtonPropsTarget,
+      lineClass: ''
     },
     {
       title: t('evolving.roadmap.title@@Module Federation Roadmap'),

@@ -37,13 +37,13 @@ export default component$(() => {
         q:slot="background"
         class="relative w-11/12 h-full max-w-1225 mx-auto hidden md:block"
       >
-        <div class="w-40 absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 blur-lg">
+        <div class="w-40 absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 ">
           {leftShape}
         </div>
-        <div class="w-56 absolute bottom-0 left-[60%] translate-y-1/3 blur-lg">
+        <div class="w-56 absolute bottom-0 left-[60%] translate-y-1/3 ">
           {centerShape}
         </div>
-        <div class="w-36 absolute top-0 right-0 -translate-x-1/3 -translate-y-1/2 blur-lg">
+        <div class="w-36 absolute top-0 right-0 -translate-x-1/3 -translate-y-1/2 ">
           {rightShape}
         </div>
       </div>

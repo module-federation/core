@@ -129,7 +129,7 @@ export default component$(() => {
       </div>
 
       <div q:slot="background">
-        <div class="w-2/6 absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/3 blur-lg hidden md:block">
+        <div class="w-2/6 absolute bottom-6 left-1/2 -translate-x-1/2 translate-y-1/3  hidden md:block">
           {centerShape}
         </div>
       </div>

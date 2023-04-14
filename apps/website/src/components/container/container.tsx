@@ -19,14 +19,14 @@ export default component$((props: ContainerProps) => {
 
   const containerClasses = {
     [ContainerTheme.PINK]: 'bg-[#EFEFFF]',
-    [ContainerTheme.OPAQUE]: 'bg-white',
+    [ContainerTheme.OPAQUE]: 'bg-[#F6F6FA]',
     [ContainerTheme.GRAY]: 'bg-[#F6F6FA]',
     [ContainerTheme.NONE]: 'bg-transparent',
   }[props.theme || ContainerTheme.PINK];
 
   const overlayClasses = {
-    [ContainerTheme.PINK]: 'bg-transparent',
-    [ContainerTheme.OPAQUE]: 'bg-white opacity-10',
+    [ContainerTheme.PINK]: 'backdrop-blur-md bg-transparent',
+    [ContainerTheme.OPAQUE]: 'backdrop-blur-xl bg-white/10',
     [ContainerTheme.GRAY]: 'bg-transparent',
     [ContainerTheme.NONE]: 'bg-transparent',
   }[props.theme || ContainerTheme.PINK];
@@ -47,7 +47,7 @@ export default component$((props: ContainerProps) => {
         <Slot name="background" />
       </div>
       <div
-        class={`absolute h-full w-full top-0 left-0 z-20 ${overlayClasses}`}
+        class={`absolute h-full w-full top-0 left-0 z-20 ${overlayClasses} `}
       ></div>
       {/* <div
         class={`absolute h-full w-full top-0 left-0 z-20 ${patternClasses}`}

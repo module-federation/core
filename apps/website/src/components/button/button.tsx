@@ -80,7 +80,7 @@ export default component$((props: ButtonProps) => {
       'relative bg-transparent text-ui-blue !border-transparent outline-none',
       // Focus
       'focus-visible:shadow-outline',
-      props.disabled ? 'opacity-40 !pointer-events-none' : '',
+      props.disabled ? 'text-deep-purple-700 !pointer-events-none' : '',
       '',
     ].join(' '),
     [ButtonTheme.NAKED_ALT]: [
