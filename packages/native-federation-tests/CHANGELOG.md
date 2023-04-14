@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.1.2](https://github.com/module-federation/nextjs-mf/compare/native-federation-tests-0.1.1...native-federation-tests-0.1.2) (2023-04-14)
+
+
+### Bug Fixes
+
+* tests regex, external deps should be removed using the startsWith strategy ([5d1c0f5](https://github.com/module-federation/nextjs-mf/commit/5d1c0f5b947ec7690fbe69ec8cc23701f975bae9))
+
+
+
 ## [0.1.1](https://github.com/module-federation/nextjs-mf/compare/native-federation-tests-0.1.0...native-federation-tests-0.1.1) (2023-04-12)
 
 
