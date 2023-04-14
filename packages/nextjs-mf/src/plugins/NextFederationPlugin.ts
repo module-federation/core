@@ -97,19 +97,23 @@ export class NextFederationPlugin {
 
     if (isServer) {
 
-      if(this._options.name) {
-        compiler.options.output.uniqueName = 'host__'+this._options.name;
-      }
-
       // target false because we use our own target for node env
       compiler.options.target = false;
       const {StreamingTargetPlugin} = require('@module-federation/node');
 
       // add hoist to main entry for sync avaliability.
       compiler.options.optimization.chunkIds = 'named';
+      compiler.options.optimization.splitChunks = false;
+      // add eager modules to main runtime
       new AddModulesPlugin({
         runtime: 'webpack-runtime',
         eager: true,
+        remotes: this._options.remotes,
+      }).apply(compiler);
+      // add delegate modules to remoteEntry
+      new AddModulesPlugin({
+        runtime: this._options.name,
+        eager: false,
         remotes: this._options.remotes,
       }).apply(compiler);
       new StreamingTargetPlugin(this._options, {
@@ -142,9 +146,6 @@ export class NextFederationPlugin {
         };
       }
     } else {
-      compiler.options.plugins = compiler.options.plugins.filter((p: any) => {
-        return p.constructor.name === 'ReactFreshWebpackPlugin'
-      })
       const ModuleFederationPlugin = isServer
         ? require('@module-federation/node').NodeFederationPlugin
         : webpack.container.ModuleFederationPlugin;
