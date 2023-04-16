@@ -9,7 +9,7 @@ import type {
   RemoteData,
   GetModuleOptions,
 } from '../types';
-import { RemoteScope, RemoteScopeConfig } from '../types/global';
+import { RemoteScope } from '../types/global';
 
 type RemoteVars = Record<
   string,
@@ -177,7 +177,10 @@ const loadScript = (
       remoteScope['_config'] = {};
     }
 
-    const remoteScopeConfig = remoteScope['_config'] as RemoteScopeConfig;
+    const remoteScopeConfig = remoteScope['_config'] as Record<
+      string,
+      string | undefined
+    >;
 
     remoteScopeConfig[containerKey] = reference.url;
   } else {
