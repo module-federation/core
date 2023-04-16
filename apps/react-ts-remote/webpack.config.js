@@ -16,26 +16,29 @@ module.exports = async (config, context) => {
   /** @type {import('webpack').Configuration} */
   const parsedConfig = mf(config, context);
 
-  let moduleFederationPlugin;
+  if (!parsedConfig.plugins) {
+    parsedConfig.plugins = [];
+  }
 
-  const plugins = parsedConfig.plugins?.filter((p) => {
-    if (p.constructor.name === 'ModuleFederationPlugin') {
-      moduleFederationPlugin = p;
-      return false;
-    }
-    return true;
-  });
-
-  parsedConfig.plugins = [
-    ...(plugins || []),
+  parsedConfig.plugins.push(
     new FederatedTypesPlugin({
-      federationConfig: moduleFederationPlugin._options,
-    }),
-  ];
+      federationConfig: {
+        ...baseConfig,
+        filename: 'remoteEntry.js',
+      },
+    })
+  );
 
   parsedConfig.infrastructureLogging = {
     level: 'verbose',
     colors: true,
+  };
+
+  parsedConfig.devServer = {
+    ...(parsedConfig.devServer || {}),
+    historyApiFallback: {
+      disableDotRule: true,
+    },
   };
 
   return parsedConfig;

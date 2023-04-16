@@ -54,7 +54,8 @@
       "options": {
         "buildTarget": "react-ts-host:build",
         "hmr": true,
-        "port": 3003
+        "port": 3003,
+        "devRemotes": ["react-ts-remote"]
       },
       "configurations": {
         "development": {
@@ -64,7 +65,8 @@
           "buildTarget": "react-ts-host:build:production",
           "hmr": false
         }
-      }
+      },
+      "dependsOn": ["build"]
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",

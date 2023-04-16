@@ -23,7 +23,8 @@
     "release:utils": "nx run utils:version --releaseAs=minor",
     "release:utils:manual": "nx build && cd dist/packages/utilities && yarn publish --non-interactive --access public",
     "release:next:manual": "nx build && cd dist/packages/nextjs-mf && yarn publish --non-interactive --access public",
-    "release:node:manual": "nx build && cd dist/packages/node && yarn publish --non-interactive --access public"
+    "release:node:manual": "nx build && cd dist/packages/node && yarn publish --non-interactive --access public",
+    "docs": "typedoc"
   },
   "dependencies": {
     "adm-zip": "^0.5.10",
@@ -118,6 +119,7 @@
     "ts-node": "10.9.1",
     "tslib": "^2.3.0",
     "tsup": "^6.7.0",
+    "typedoc": "^0.24.2",
     "typescript": "5.0.4",
     "verdaccio": "5.23.2",
     "vinyl-fs": "~3.0",
@@ -136,4 +138,3 @@
     ]
   }
 }
-

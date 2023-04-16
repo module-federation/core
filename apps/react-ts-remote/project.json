@@ -64,7 +64,8 @@
           "buildTarget": "react-ts-remote:build:production",
           "hmr": false
         }
-      }
+      },
+      "dependsOn": ["build"]
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",

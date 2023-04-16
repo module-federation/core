@@ -17,22 +17,25 @@ module.exports = async (config, context) => {
   /** @type {import('webpack').Configuration} */
   const parsedConfig = mf(config, context);
 
-  let moduleFederationPlugin;
+  if (!parsedConfig.plugins) {
+    parsedConfig.plugins = [];
+  }
 
-  const plugins = parsedConfig.plugins?.filter((p) => {
-    if (p.constructor.name === 'ModuleFederationPlugin') {
-      moduleFederationPlugin = p;
-      return false;
-    }
-    return true;
-  });
+  const remotes = baseConfig.remotes.reduce((remotes, remote) => {
+    const [name, url] = remote;
+    remotes[name] = url;
+    return remotes;
+  }, {});
 
-  parsedConfig.plugins = [
-    ...(plugins || []),
+  parsedConfig.plugins.push(
     new FederatedTypesPlugin({
-      federationConfig: moduleFederationPlugin._options,
-    }),
-  ];
+      federationConfig: {
+        ...baseConfig,
+        filename: 'remoteEntry.js',
+        remotes,
+      },
+    })
+  );
 
   parsedConfig.infrastructureLogging = {
     level: 'verbose',
