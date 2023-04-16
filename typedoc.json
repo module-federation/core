@@ -1,0 +1,9 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": ["packages/node", "packages/utilities"],
+    "externalPattern": ["**/node_modules/**"],
+    "entryPointStrategy": "packages",
+    "out": "docs",
+    "excludeExternals": true,
+    "includeVersion": true
+}

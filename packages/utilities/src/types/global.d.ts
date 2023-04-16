@@ -5,14 +5,8 @@ import type { AsyncContainer, WebpackRemoteContainer } from '../types';
 export {};
 
 export type RemoteScope = {
-  [index: string]: AsyncContainer | string | RemoteScopeConfig | undefined;
+  [index: string]: AsyncContainer | string | undefined | Record<string, string>;
 };
-
-export type RemoteScopeConfig = {
-  [index: string]: string | undefined;
-};
-
-export type Test = keyof RemoteScope;
 
 declare global {
   var __remote_scope__: RemoteScope;
