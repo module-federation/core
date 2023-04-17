@@ -88,11 +88,11 @@ export default component$(() => {
             <div key={card.title} class="w-full">
               <Card hover>
                 <div class="flex flex-col gap-6 items-start md:flex-row md:items-center p-10">
-                  <div class="flex flex-col gap-4 w-full">
+                  <div class="flex flex-col gap-4 w-full pr-4">
                     <h3 class="text-blue-gray-900 font-bold text-xl">
                       {card.title}
                     </h3>
-                    <p class="font-medium text-blue-gray-900 text-lg max-w-3xl">
+                    <p class="font-medium text-blue-gray-900 text-lg">
                       {card.desc}
                     </p>
                   </div>
@@ -124,7 +124,7 @@ export default component$(() => {
           target='_blank'
           type="link"
         >
-          {t('doc-summary.action@@Scalability with Module Federation')}
+          {t('doc-summary.action@@Start using module federation')}
         </Button>
       </div>
 

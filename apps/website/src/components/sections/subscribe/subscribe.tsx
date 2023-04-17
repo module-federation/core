@@ -56,11 +56,11 @@ export default component$(() => {
             <form
               onSubmit$={async (e) => handleSubmit(e as any)}
               preventdefault:submit
-              class="flex flex-col md:flex-row items-center w-full gap-4"
+              class="flex flex-col md:grid md:grid-cols-[1fr_auto] items-center w-full gap-4"
             >
               <input type="hidden" name="form-name" value="subscribe" />
               <input
-                class="min-h-[44px] w-full border-blue-gray-900 px-4 py-1.5 pr-8 bg-white  focus:border-ui-blue"
+                class="min-h-[44px] h-full w-full border-blue-gray-900 px-4 py-1.5 pr-8 bg-white  focus:border-ui-blue"
                 type="email"
                 name="email"
                 id="email"

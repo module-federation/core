@@ -37,7 +37,7 @@ export default component$(() => {
   });
 
   return (
-    <Section id="contact" theme={ContainerTheme.OPAQUE}>
+    <Section id="contact" class="scroll-mt-32" theme={ContainerTheme.OPAQUE}>
       <SectionHeader
         q:slot="header"
         title={t('contact.title@@Talk to our experts')}

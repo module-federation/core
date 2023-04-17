@@ -58,6 +58,7 @@ export default component$(() => {
     <Section
       padding={SectionPadding.BOTTOM}
       id="discover"
+      class="scroll-mt-32"
       theme={ContainerTheme.OPAQUE}
     >
       <div class="flex flex-col gap-3">
@@ -164,12 +165,14 @@ export default component$(() => {
                 </div>
               </div>
               <Button
-                theme={ButtonTheme.SOLID}
+                theme={ButtonTheme.NAKED}
                 href="#"
                 type="link"
                 target="_blank"
+                disabled
               >
-                {t(
+                {t('explore.disabled')}
+                {/* {t(
                   'explore.cards.module-federation-courses.action@@Start exploring'
                 )}
 
@@ -177,7 +180,7 @@ export default component$(() => {
                   q:slot="suffix"
                   name={IconName.ARROW_NARROW_RIGHT}
                   size="24px"
-                />
+                /> */}
               </Button>
             </div>
           </Card>

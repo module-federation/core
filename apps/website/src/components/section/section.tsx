@@ -14,6 +14,7 @@ export interface SectionProps {
   theme?: ContainerTheme;
   fullWidth?: boolean;
   padding?: SectionPadding;
+  class?: string;
 }
 
 export default component$((props: SectionProps) => {
@@ -30,7 +31,7 @@ export default component$((props: SectionProps) => {
     <Container fullWidth={props.fullWidth} theme={props.theme}>
       <section
         id={props.id}
-        class={`flex flex-col items-center gap-10 ${paddingClasses}`}
+        class={`flex flex-col items-center gap-10 ${paddingClasses} ${props.class || ''}`}
       >
         <div class="empty:hidden">
           <Slot name="header" />

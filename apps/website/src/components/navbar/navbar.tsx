@@ -45,7 +45,6 @@ export default component$((props: NavbarProps) => {
     return locUrl(url, speakState);
   };
 
-
   useVisibleTask$(
     () => {
       const isElementOnView = (selector: string) => {
@@ -132,7 +131,9 @@ export default component$((props: NavbarProps) => {
   ];
 
   const theme =
-    position.value === 0 ? props.theme || ContainerTheme.NONE : ContainerTheme.GRAY;
+    position.value === 0
+      ? props.theme || ContainerTheme.NONE
+      : ContainerTheme.GRAY;
 
   return (
     <div>
@@ -192,7 +193,7 @@ export default component$((props: NavbarProps) => {
               </li>
               <li>
                 <select
-                  class="border-blue-gray-900 px-4 py-1.5 pr-8 bg-[#F6F6FA] hover:bg-white focus:bg-[#F6F6FA] text-lg focus:border-ui-blue"
+                  class="border-blue-gray-900 px-4 py-1.5 pr-8 bg-mf-gray hover:bg-white focus:bg-mf-gray text-lg focus:border-ui-blue"
                   name="language"
                   id="language"
                   onChange$={async (event, el) => {
@@ -237,6 +238,7 @@ export default component$((props: NavbarProps) => {
         </Container>
 
         <div
+        
           onClick$={() => (navbarOpen.value = false)}
           class={`absolute w-screen z-50 h-screen top-0 right-0 bg-transparent ${
             navbarOpen.value ? 'visible' : 'invisible'
@@ -244,70 +246,68 @@ export default component$((props: NavbarProps) => {
         ></div>
 
         <div
-          class={`navbar inline-block xl:hidden absolute left-0 px-4 top-[88px] w-full z-[60] transition-opacity duration-300 ${
+          class={`navbar bg-mf-gray inline-block xl:hidden absolute left-0 px-4 top-[88px] w-full h-screen z-[60] transition-opacity duration-300 ${
             navbarOpen.value ? 'visible opacity-100' : 'invisible opacity-0'
           }`}
         >
-          <Card>
-            <ul class="flex flex-col p-4 gap-8">
-              {navLis.map((link) => {
-                return (
-                  <li key={link.label}>
-                    <Button
-                      href={link.href}
-                      type="link"
-                      theme={ButtonTheme.NAKED_ALT}
-                      active={link.active}
+          <ul class="flex flex-col gap-8">
+            {navLis.map((link) => {
+              return (
+                <li key={link.label}>
+                  <Button
+                    href={link.href}
+                    type="link"
+                    theme={ButtonTheme.NAKED_ALT}
+                    active={link.active}
+                  >
+                    {link.label}
+                  </Button>
+                </li>
+              );
+            })}
+
+            <li class="flex gap-8">
+              <Button
+                href="https://github.com/module-federation"
+                target="_blank"
+                type="link"
+                theme={ButtonTheme.NAKED_ALT}
+              >
+                <Icon name={IconName.GITHUB} size="36px" />
+              </Button>
+
+              <Button
+                href="https://discord.gg/T8c6yAxkbv"
+                target="_blank"
+                type="link"
+                theme={ButtonTheme.NAKED_ALT}
+              >
+                <Icon name={IconName.DISCORD} size="36px" />
+              </Button>
+            </li>
+            <li>
+              <select
+                class="border-blue-gray-900 w-1/2 px-4 py-1.5 pr-8 bg-mf-gray hover:bg-white focus:bg-mf-gray text-lg focus:border-ui-blue"
+                name="language"
+                id="language"
+                onChange$={async (event, el) => {
+                  await changeLocale$(event.target.value as any);
+                }}
+              >
+                {locales.map((locale) => {
+                  return (
+                    <option
+                      key={locale.lang}
+                      value={locale.lang}
+                      selected={speakState.locale.lang === locale.lang}
                     >
-                      {link.label}
-                    </Button>
-                  </li>
-                );
-              })}
-
-              <li class="flex gap-8">
-                <Button
-                  href="https://github.com/module-federation"
-                  target="_blank"
-                  type="link"
-                  theme={ButtonTheme.NAKED_ALT}
-                >
-                  <Icon name={IconName.GITHUB} size="36px" />
-                </Button>
-
-                <Button
-                  href="https://discord.gg/T8c6yAxkbv"
-                  target="_blank"
-                  type="link"
-                  theme={ButtonTheme.NAKED_ALT}
-                >
-                  <Icon name={IconName.DISCORD} size="36px" />
-                </Button>
-              </li>
-              <li>
-                <select
-                  class="border-blue-gray-900 w-full px-4 py-1.5 pr-8 bg-[#F6F6FA] hover:bg-white focus:bg-[#F6F6FA] text-lg focus:border-ui-blue"
-                  name="language"
-                  id="language"
-                  onChange$={async (event, el) => {
-                    await changeLocale$(event.target.value as any);
-                  }}
-                >
-                  {locales.map((locale) => {
-                    return (
-                      <option
-                        key={locale.lang}
-                        value={locale.lang}
-                        selected={speakState.locale.lang === locale.lang}
-                      >
-                        {locale.name}
-                      </option>
-                    );
-                  })}
-                </select>
-              </li>
-            </ul>
-          </Card>
+                      {locale.name}
+                    </option>
+                  );
+                })}
+              </select>
+            </li>
+          </ul>
         </div>
       </div>
     </div>

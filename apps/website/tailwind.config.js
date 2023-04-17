@@ -22,6 +22,7 @@ module.exports = {
         'ui-blue': '#00B9FF',
         transparent: 'transparent',
         white: '#FFFFFF',
+        ['mf-gray']: '#F6F6FA',
         cyan: {
           500: '#71BEDB',
         },

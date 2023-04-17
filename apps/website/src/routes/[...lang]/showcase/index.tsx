@@ -66,7 +66,7 @@ export default component$(() => {
   return (
     <>
       <Navbar theme={theme} />
-      <div class="block h-[20px] z-[999]"></div>
+      <div class="block  h-[80px] md:h-[20px] z-[999]"></div>
       <Section padding={SectionPadding.TOP} theme={theme}>
         <SectionHeader
           q:slot="header"
@@ -76,7 +76,7 @@ export default component$(() => {
           )}
         />
 
-        <div class="flex flex-col items-center gap-y-4">
+        <div class="flex flex-col items-center gap-y-8">
           {cardRows.map((cards, row) => {
             return (
               <div
@@ -88,7 +88,7 @@ export default component$(() => {
                   return (
                     <div class="relative">
                       <img
-                        class="border border-blue-gray-400 border-2 bg-white w-full aspect-[97/66] transition-shadow hover:shadow-card"
+                        class="border border-blue-gray-400 border bg-white w-full aspect-[97/66] transition-shadow hover:shadow-card"
                         src={card.previewSrc}
                         alt={card.name}
                       />
@@ -136,6 +136,10 @@ export const head: DocumentHead = {
       name: 'description',
       content:
         'app.showcase.meta.description@@Meet leading companies embracing Module Federation for their web development needs.',
+    },
+    {
+      property: 'og:image',
+      content: '/default-og.png',
     },
   ],
 };

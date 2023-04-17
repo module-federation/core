@@ -73,7 +73,7 @@ export default component$(() => {
             return (
               <div class="flex flex-col gap-4">
                 <img
-                  class="border border-blue-gray-400 border-2 bg-white w-full aspect-[97/66] transition-shadow hover:shadow-card"
+                  class="border border-blue-gray-400 border bg-white w-full aspect-[97/66] transition-shadow hover:shadow-card"
                   src={card.previewSrc}
                   alt={card.name}
                 />

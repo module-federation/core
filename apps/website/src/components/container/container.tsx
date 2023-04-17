@@ -19,8 +19,8 @@ export default component$((props: ContainerProps) => {
 
   const containerClasses = {
     [ContainerTheme.PINK]: 'bg-[#EFEFFF]',
-    [ContainerTheme.OPAQUE]: 'bg-[#F6F6FA]',
-    [ContainerTheme.GRAY]: 'bg-[#F6F6FA]',
+    [ContainerTheme.OPAQUE]: 'bg-mf-gray',
+    [ContainerTheme.GRAY]: 'bg-mf-gray',
     [ContainerTheme.NONE]: 'bg-transparent',
   }[props.theme || ContainerTheme.PINK];
 

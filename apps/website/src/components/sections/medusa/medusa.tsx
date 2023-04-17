@@ -13,7 +13,7 @@ export default component$(() => {
   return (
     <Section id="medusa">
       <div class="flex flex-col items-center gap-8">
-        <h2 class="text-4xl leading-normal md:text-3xl text-blue-gray-900 font-bold max-w-lg mx-auto text-center leading-tight">
+        <h2 class="text-4xl leading-normal md:text-3xl text-blue-gray-900 font-bold mx-auto text-center leading-tight">
           {t('medusa.title@@Start using Module Federation with')}
         </h2>
 

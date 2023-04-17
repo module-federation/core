@@ -44,5 +44,9 @@ export const head: DocumentHead = {
       name: 'description',
       content: 'app.index.meta.description',
     },
+    {
+      property: 'og:image',
+      content: '/default-og.png',
+    },
   ],
 };

@@ -29,7 +29,7 @@ export default component$(() => {
           <link rel="manifest" href="/manifest.json" />
           <RouterHead />
         </head>
-        <body class="relative w-full bg-[#F6F6FA] overflow-y-scroll">
+        <body class="relative w-full bg-mf-gray overflow-y-scroll">
           <div class="w-full overflow-x-hidden"><RouterOutlet /></div>
           <ServiceWorkerRegister />
         </body>
