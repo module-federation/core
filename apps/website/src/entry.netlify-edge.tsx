@@ -16,6 +16,7 @@ import { manifest } from '@qwik-client-manifest';
 import render from './entry.ssr';
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface QwikCityPlatform extends PlatformNetlify {}
 }
 

@@ -71,6 +71,7 @@
     "command-join": "^3.0.0",
     "marked-terminal": "^5.2.0",
     "@antora/cli": "^3.1.3",
+    "eslint-plugin-qwik": "0.24.0",
     "@builder.io/qwik": "0.24.0",
     "@builder.io/qwik-city": "~0.7.0",
     "vite-tsconfig-paths": "4.0.3",
