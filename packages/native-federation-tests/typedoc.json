@@ -1,6 +1,6 @@
 {
     "extends": ["../../typedoc.base.json"],
-    "entryPoints": ["src/index.ts"],
+    "entryPoints": ["src/esbuild.ts", "src/index.ts", "src/rollup.ts", "src/rspack.ts", "src/vite.ts", "src/webpack.ts"],
     "excludeExternals": true,
     "tsconfig": "tsconfig.lib.json",
   }
