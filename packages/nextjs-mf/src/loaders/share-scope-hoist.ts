@@ -28,13 +28,7 @@ export default function patchDefaultSharedLoader(
         const params = sharedPackage[1];
 
         // @ts-ignore
-        // @ts-ignore
-        if (
-          //@ts-ignore
-          params.eager === true &&
-          // @ts-ignore
-          (params.import ? !params.import.startsWith('!!') : true)
-        ) {
+        if (params.eager === true) {
           //@ts-ignore
           acc.scope += `
        ${JSON.stringify(name)}: {
@@ -45,8 +39,6 @@ export default function patchDefaultSharedLoader(
         }
         },`;
           acc.sideload += `
-      console.log('sideloading ${name}');
-
       __webpack_modules__[require.resolveWeak(${JSON.stringify(
         name
       )})] = __webpack_modules__[require.resolveWeak(${JSON.stringify(
