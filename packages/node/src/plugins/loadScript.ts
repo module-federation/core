@@ -53,7 +53,6 @@ export const executeLoadTemplate = `
     (global.webpackChunkLoad || global.fetch || require("node-fetch"))(url).then(function (res) {
       return res.text();
     }).then(function (scriptContent) {
-      console.log('in script loading promise for', name);
       try {
         // TODO: remove conditional in v7, this is to prevent breaking change between v6.0.x and v6.1.x
         const vmContext = typeof URLSearchParams === 'undefined' ?{exports, require, module, global, __filename, __dirname, URL, URLSearchParams, console, process,Buffer, ...global, remoteEntryName: name}:

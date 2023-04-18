@@ -191,21 +191,6 @@ class NodeFederationPlugin {
     // When used with Next.js, context is needed to use Next.js webpack
     const { webpack } = compiler;
 
-    // compiler.options.module.rules.push({
-    //   test: /\.(js|jsx|ts|tsx|md|mdx|mjs)$/,
-    //   exclude: [/node_modules/,/_document/],
-    //   loader: require.resolve('../loaders/chunk-marker-loader'),
-    //   options: this._options,
-    // });
-
-    // const defs = {
-    //   'process.env.REMOTES': runtime,
-    //   'process.env.REMOTE_CONFIG': hot,
-    // };
-
-    // new ((webpack && webpack.DefinePlugin) || require("webpack").DefinePlugin)(
-    //     defs
-    // ).apply(compiler);
     const pluginOptions = {
       ...this._options,
       remotes: parseRemotes(

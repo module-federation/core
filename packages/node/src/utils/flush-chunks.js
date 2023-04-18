@@ -93,17 +93,15 @@ console.error("flush errer",e);
           });
         }
 
-        console.log(chunks);
-
         return Array.from(chunks);
       } catch (e) {
-        // console.log(e);
+        console.log(e);
       }
     })
   );
 
   const dedupe = Array.from(new Set([...allFlushed.flat()]));
 
-  // usedChunks.clear();
+  usedChunks.clear();
   return dedupe.filter(Boolean);
 };

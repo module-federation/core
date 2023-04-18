@@ -86,7 +86,6 @@ export const importDelegatedModule = async (
       // most of this is only needed because of legacy promise based implementation
       // can remove proxies once we remove promise based implementations
       if (typeof window === 'undefined') {
-console.log('returning async container')
         if (!Object.hasOwnProperty.call(keyOrRuntimeRemoteItem, 'global')) {
           return asyncContainer;
         }
@@ -104,10 +103,7 @@ console.log('returning async container')
                 if (typeof m[prop] === 'function') {
                   Object.defineProperty(result, prop, {
                     get: function () {
-                      console.log('calling getter')
                       return function () {
-                        //@ts-ignore
-                        console.log('returning dunction', `${keyOrRuntimeRemoteItem.global}->${arg}`)
                         //@ts-ignore
                         if (global.usedChunks)
                           //@ts-ignore
