@@ -282,8 +282,8 @@ export class NextFederationPlugin {
             return delegate;
           }
         );
-        compiler.options.module.rules.push(
-          {
+        if(this._options.exposes) {
+          compiler.options.module.rules.push({
             enforce: 'pre',
             test(request: string) {
               const found = knownDelegates.some((delegate) => {
@@ -296,23 +296,25 @@ export class NextFederationPlugin {
             options: {
               name: this._options.name,
             },
-          },
-          {
-            enforce: 'pre',
-            test: [/internal-delegate-hoist/, /delegate-hoist-container/],
-            include: [
-              compiler.context,
-              /internal-delegate-hoist/,
-              /delegate-hoist-container/,
-              /next[\\/]dist/,
-            ],
-            loader: path.resolve(__dirname, '../loaders/delegateLoader'),
-            options: {
-              delegates,
-            },
-          }
-        );
+          });
+        }
       }
+      compiler.options.module.rules.push(
+        {
+          enforce: 'pre',
+          test: [/internal-delegate-hoist/, /delegate-hoist-container/],
+          include: [
+            compiler.context,
+            /internal-delegate-hoist/,
+            /delegate-hoist-container/,
+            /next[\\/]dist/,
+          ],
+          loader: path.resolve(__dirname, '../loaders/delegateLoader'),
+          options: {
+            delegates,
+          },
+        }
+      );
     }
 
     if (this._extraOptions.automaticAsyncBoundary) {
