@@ -141,17 +141,32 @@ export class NextFederationPlugin {
 
       // module-federation/utilities uses internal webpack methods and must be bundled into runtime code.
       if (Array.isArray(compiler.options.externals)) {
+        const opts = this._options;
         const originalExternals = compiler.options.externals[0];
-        compiler.options.externals[0] = function (ctx, callback) {
+
+        compiler.options.externals[0] = async function (ctx, callback) {
           if (
             ctx.request &&
             (ctx.request.includes('@module-federation/utilities') ||
+              ctx.request.includes('internal-delegate-hoist') ||
+              // @ts-ignore
+              Object.keys(opts.shared || {}).some((key) => opts.shared?.[key]?.import !== false && ctx.request.includes(key)) ||
+              ctx.request.includes('internal-delegate-hoist') ||
               ctx.request.includes('@module-federation/dashboard-plugin'))
           ) {
-            return callback();
+            return
           }
+
           // @ts-ignore
-          return originalExternals(ctx, callback);
+          const fromNext = await originalExternals(ctx, callback)
+          if(!fromNext) {
+            return
+          }
+          const req = fromNext.split(' ')[1]
+          if(req.startsWith('next') || req.startsWith('react')) {
+            return fromNext
+          }
+          return
         };
       }
     } else {

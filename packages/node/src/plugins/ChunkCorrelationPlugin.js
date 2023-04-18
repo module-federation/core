@@ -135,11 +135,12 @@ function searchReason(mod, check) {
   return !!mod.reasons && mod.reasons.some((m) => searchReason(m, check));
 }
 
-
 function searchIssuerAndReason(mod, check) {
   const foundIssuer = searchIssuer(mod, (issuer) => check(issuer));
   if (foundIssuer) return foundIssuer;
-  return searchReason(mod, (reason) => reason.some((r) => check(r?.moduleIdentifier)));
+  return searchReason(mod, (reason) =>
+    reason.some((r) => check(r?.moduleIdentifier))
+  );
 }
 
 /**
@@ -159,23 +160,35 @@ function getIssuers(mod, check) {
   );
 }
 
-function getIssuersAndReasons(mod,check) {
+function getIssuersAndReasons(mod, check) {
   if (mod.issuer && check(mod.issuer)) {
     return [mod.issuer];
   }
-  if (mod.reasons && searchReason(mod, (reason) => reason.some((r) => check(r?.moduleIdentifier)))) {
-    return mod.reasons.filter((r)=>{
-      return r.moduleIdentifier && check(r.moduleIdentifier)
-    }).map((r)=>r.moduleIdentifier)
+  if (
+    mod.reasons &&
+    searchReason(mod, (reason) =>
+      reason.some((r) => check(r?.moduleIdentifier))
+    )
+  ) {
+    return mod.reasons
+      .filter((r) => {
+        return r.moduleIdentifier && check(r.moduleIdentifier);
+      })
+      .map((r) => r.moduleIdentifier);
   }
 
   return (
     (mod.modules &&
-      mod.modules.filter((m) => searchIssuerAndReason(m, check)).map((m) => {
-        return m.issuer || (m.reasons.find((r)=>check(r?.moduleIdentifier))).moduleIdentifier;
-      })) || []
+      mod.modules
+        .filter((m) => searchIssuerAndReason(m, check))
+        .map((m) => {
+          return (
+            m.issuer ||
+            m.reasons.find((r) => check(r?.moduleIdentifier)).moduleIdentifier
+          );
+        })) ||
+    []
   );
-
 }
 
 /**
@@ -281,28 +294,34 @@ function getMainSharedModules(stats) {
           c.id === id &&
           c.files.length > 0 &&
           c.modules.some((m) => {
-            return searchIssuerAndReason(m, (check) => check?.startsWith('consume-shared-module'))
+            return searchIssuerAndReason(m, (check) =>
+              check?.startsWith('consume-shared-module')
+            );
           })
         );
       })
     )
   )
     .map((chunk) => {
-      return ({
+      return {
         chunks: chunk.files.map(
           (f) =>
             `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
         ),
         provides: flatMap(
           chunk.modules.filter((m) =>
-            searchIssuerAndReason(m, (check) => check?.startsWith('consume-shared-module'))
+            searchIssuerAndReason(m, (check) =>
+              check?.startsWith('consume-shared-module')
+            )
           ),
           (m) =>
-            getIssuersAndReasons(m, (issuer) => issuer?.startsWith('consume-shared-module'))
+            getIssuersAndReasons(m, (issuer) =>
+              issuer?.startsWith('consume-shared-module')
+            )
         )
           .map(parseFederatedIssuer)
           .filter((f) => !!f),
-      })
+      };
     })
     .filter((c) => c.provides.length > 0);
 }
@@ -394,17 +413,7 @@ class FederationStatsPlugin {
       return;
     }
     let alreadyRun = false;
-    // compiler.hooks.watchRun.tap(PLUGIN_NAME, (compiler,params) => {
-    //   require('fs').writeFileSync(require('path').join(compiler.outputPath ,this._options.filename), JSON.stringify({}));
-    // })
-    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation,params) => {
-
-
-      // compiler.hooks.afterEmit.tapPromise(PLUGIN_NAME, async (compilation) => {
-
-
-      // })
-      //
+    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
       compilation.hooks.processAssets.tapPromise(
         {
           name: PLUGIN_NAME,
@@ -412,12 +421,11 @@ class FederationStatsPlugin {
         },
         // PLUGIN_NAME,
         async () => {
-          console.log("after  emit")
-          if(alreadyRun){
+          console.log('after  emit');
+          if (alreadyRun) {
             return;
           }
-        alreadyRun = true;
-
+          alreadyRun = true;
 
           const stats = compilation.getStats().toJson({
             all: false,
@@ -437,24 +445,22 @@ class FederationStatsPlugin {
             outputPath: true,
             publicPath: true,
           });
-      console.log("should find stats")
           const federatedModules = federationPlugins.map((federationPlugin) =>
             getFederationStats(stats, federationPlugin)
           );
 
-           const sharedModules = getMainSharedModules(stats);
-          const vendorChunks = new Set()
-          sharedModules.forEach((share)=>{
-            share?.chunks?.forEach((file)=>{
+          const sharedModules = getMainSharedModules(stats);
+          const vendorChunks = new Set();
+          sharedModules.forEach((share) => {
+            share?.chunks?.forEach((file) => {
               vendorChunks.add(file);
-            })
-          })
-          console.log(federatedModules[0].exposes,"federatedModules")
+            });
+          });
 
           const enhancedModuleLookup = federatedModules.map((mod) => {
             const remapped = Object.entries(mod.exposes).reduce(
               (acc, [key, value]) => {
-                acc[key] = acc[key] || []
+                acc[key] = acc[key] || [];
                 value.map((chunk) => {
                   return Object.keys(chunk).map((chunkId) => {
                     const foundRootChunk = compilation.chunks.find((chunk) => {
@@ -471,13 +477,13 @@ class FederationStatsPlugin {
                           }
                         );
 
-                        if (!isSharedModuleChunk && !trueChunk.files.every((f)=>vendorChunks.has(f))) {
-                        acc[key].push({[trueChunk.id]: {files:trueChunk.files}})
-                          // trueChunk.files.forEach((f)=>{
-                          //   if(!acc[key].includes(f)) {
-                          //     acc[key][trueChunk.id].push({files:f});
-                          //   }
-                          // })
+                        if (
+                          !isSharedModuleChunk &&
+                          !trueChunk.files.every((f) => vendorChunks.has(f))
+                        ) {
+                          acc[key].push({
+                            [trueChunk.id]: { files: trueChunk.files },
+                          });
                         }
                       }
                     );
@@ -487,15 +493,14 @@ class FederationStatsPlugin {
               },
               {}
             );
-            return {...mod, exposes: remapped};
+            return { ...mod, exposes: remapped };
           });
-          const exposeKey =Object.keys(enhancedModuleLookup[0].exposes)
-          console.log(enhancedModuleLookup[0].exposes)
-
+          const exposeKey = Object.keys(enhancedModuleLookup[0].exposes);
+          console.log(enhancedModuleLookup[0].exposes);
 
           const statsResult = {
             sharedModules,
-            federatedModules:enhancedModuleLookup,
+            federatedModules: enhancedModuleLookup,
           };
 
           const statsJson = JSON.stringify(statsResult);
@@ -512,7 +517,8 @@ class FederationStatsPlugin {
           } else {
             compilation.emitAsset(filename, statsSource);
           }
-        });
+        }
+      );
     });
   }
 }
