@@ -21,14 +21,11 @@ import type { Compiler } from 'webpack';
 import path from 'path';
 
 import {
-  internalizeSharedPackages,
   parseRemotes,
-  reKeyHostShared,
   getDelegates,
   DEFAULT_SHARE_SCOPE,
 } from '../internal';
 import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
-import ChildFederationPlugin from './ChildFederationPlugin';
 
 import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
 import { exposeNextjsPages } from '../loaders/nextPageMapLoader';
@@ -136,9 +133,6 @@ export class NextFederationPlugin {
       // output remote to ssr if server
       this._options.filename = path.basename(this._options.filename);
 
-      // should this be a plugin that we apply to the compiler?
-      // internalizeSharedPackages(this._options, compiler);
-
       // module-federation/utilities uses internal webpack methods and must be bundled into runtime code.
       if (Array.isArray(compiler.options.externals)) {
         const opts = this._options;
@@ -230,8 +224,7 @@ export class NextFederationPlugin {
         __hoist: require.resolve('../delegate-hoist-container'),
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(
-              compiler.options.context as string,
-              this._extraOptions.automaticAsyncBoundary as boolean
+              compiler.options.context as string
             )
           : {}),
         ...this._options.exposes,
