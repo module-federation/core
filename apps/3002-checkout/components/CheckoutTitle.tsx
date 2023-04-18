@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+// @ts-ignore
 console.log(import('home/menu'));
 const CheckoutTitle = () => {
   const [hookData, setHookData] = useState('');
