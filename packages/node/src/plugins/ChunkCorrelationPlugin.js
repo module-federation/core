@@ -394,17 +394,18 @@ class FederationStatsPlugin {
       return;
     }
     let alreadyRun = false;
+    // compiler.hooks.watchRun.tap(PLUGIN_NAME, (compiler,params) => {
+    //   require('fs').writeFileSync(require('path').join(compiler.outputPath ,this._options.filename), JSON.stringify({}));
+    // })
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation,params) => {
-      // console.log("after  emit", compilation,params)
-      console.log(compiler.watchMode,"watch");
 
-      compiler.hooks.afterEmit.tap(PLUGIN_NAME, () => {
-        console.log("this compilation")
-        alreadyRun = true;
 
-      })
+      // compiler.hooks.afterEmit.tapPromise(PLUGIN_NAME, async (compilation) => {
 
-      compilation.hooks.processAssets.tap(
+
+      // })
+      //
+      compilation.hooks.processAssets.tapPromise(
         {
           name: PLUGIN_NAME,
           stage: compilation.constructor.PROCESS_ASSETS_STAGE_SUMMARIZE,
@@ -415,6 +416,7 @@ class FederationStatsPlugin {
           if(alreadyRun){
             return;
           }
+        alreadyRun = true;
 
 
           const stats = compilation.getStats().toJson({
@@ -470,11 +472,12 @@ class FederationStatsPlugin {
                         );
 
                         if (!isSharedModuleChunk && !trueChunk.files.every((f)=>vendorChunks.has(f))) {
-                          trueChunk.files.forEach((f)=>{
-                            if(!acc[key].includes(f)) {
-                              acc[key].push({files:f});
-                            }
-                          })
+                        acc[key].push({[trueChunk.id]: {files:trueChunk.files}})
+                          // trueChunk.files.forEach((f)=>{
+                          //   if(!acc[key].includes(f)) {
+                          //     acc[key][trueChunk.id].push({files:f});
+                          //   }
+                          // })
                         }
                       }
                     );
@@ -488,7 +491,6 @@ class FederationStatsPlugin {
           });
           const exposeKey =Object.keys(enhancedModuleLookup[0].exposes)
           console.log(enhancedModuleLookup[0].exposes)
-          console.log(compilation.getAsset(this._options.filename))
 
 
           const statsResult = {
@@ -504,15 +506,13 @@ class FederationStatsPlugin {
           };
 
           const { filename } = this._options;
-
           const asset = compilation.getAsset(filename);
           if (asset) {
             compilation.updateAsset(filename, statsSource);
           } else {
             compilation.emitAsset(filename, statsSource);
           }
-        }
-      );
+        });
     });
   }
 }

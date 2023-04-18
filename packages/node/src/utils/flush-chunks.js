@@ -54,10 +54,10 @@ console.error("flush errer",e);
           // console.log(shareMap)
           stats.federatedModules.forEach((modules) => {
             if (modules.exposes?.[request]) {
-              console.log('modules.exposes[request]', request, modules.exposes[request])
               modules.exposes[request].forEach((chunk) => {
                 Object.values(chunk).forEach((chunk) => {
                   if(chunk.files) chunk.files.forEach((file) => {
+                    console.log('adding', prefix + file)
                     chunks.add(prefix + file)
                   });
                   if(chunk.requiredModules) {
@@ -92,6 +92,8 @@ console.error("flush errer",e);
             // }
           });
         }
+
+        console.log(chunks);
 
         return Array.from(chunks);
       } catch (e) {

@@ -23,7 +23,12 @@ export interface FlushedChunksProps {
 
 export const FlushedChunks = ({ chunks }: FlushedChunksProps) => {
   const scripts = chunks
-    .filter((c) => c.endsWith('.js'))
+    .filter((c) => {
+      if(c.includes('?')) {
+        return c.split('?')[0].endsWith('.js')
+      }
+      return c.endsWith('.js')
+    })
     .map((chunk) => {
       if (!chunk.includes('?') && chunk.includes('remoteEntry')) {
         chunk = chunk + '?t=' + Date.now();
@@ -38,6 +43,8 @@ export const FlushedChunks = ({ chunks }: FlushedChunksProps) => {
         null
       );
     });
+
+  console.log(scripts)
 
   const css = chunks
     .filter((c) => c.endsWith('.css'))
