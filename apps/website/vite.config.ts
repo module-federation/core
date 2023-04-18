@@ -1,6 +1,7 @@
 import { qwikVite } from '@builder.io/qwik/optimizer';
 import { qwikCity } from '@builder.io/qwik-city/vite';
 import { partytownVite } from '@builder.io/partytown/utils';
+
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { qwikNxVite } from 'qwik-nx/plugins';
@@ -20,7 +21,7 @@ export default defineConfig({
       },
     }),
     tsconfigPaths({ root: '../../' }),
-    partytownVite({ dest: join(__dirname, 'dist', '~partytown') }),
+    partytownVite({ dest: join(__dirname, '../../', 'dist', '~partytown') }),
   ],
   server: {
     fs: {
