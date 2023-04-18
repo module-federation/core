@@ -10,12 +10,12 @@ import {
 import { useLocation } from '@builder.io/qwik-city';
 import { useSpeakContext, $translate as t } from 'qwik-speak';
 import { config, LOCALES, localizedUrl as locUrl } from '../../speak-config';
-import Card from '../card/card';
 import Container, { ContainerTheme } from '../container/container';
 import { IconName } from '../icon/data';
 import Icon from '../icon/icon';
 import styles from './navbar.css?inline';
 import Button, { ButtonPropsTarget, ButtonTheme } from '../button/button';
+import Select, { SelectOption } from '../forms/select/select';
 
 export const locales = [
   {
@@ -40,6 +40,7 @@ export default component$((props: NavbarProps) => {
   const position = useSignal(1);
   const loc = useLocation();
   const speakState = useSpeakContext();
+  const locale = locales.find((l) => l.lang === speakState.locale.lang);
 
   const localizedUrl = (url: string) => {
     return locUrl(url, speakState);
@@ -191,28 +192,23 @@ export default component$((props: NavbarProps) => {
                   <Icon name={IconName.DISCORD} size="36px" />
                 </Button>
               </li>
+
               <li>
-                <select
-                  class="border-blue-gray-900 px-4 py-1.5 pr-8 bg-mf-gray hover:bg-white focus:bg-mf-gray text-lg focus:border-ui-blue"
-                  name="language"
-                  id="language"
-                  onChange$={async (event, el) => {
-                    await changeLocale$(event.target.value as any);
-                  }}
-                >
+                <Select name="language" value={locale?.name}>
                   {locales.map((locale) => {
                     return (
-                      <option
+                      <SelectOption
                         key={locale.lang}
                         value={locale.lang}
-                        selected={speakState.locale.lang === locale.lang}
+                        onClick$={async () => await changeLocale$(locale.lang)}
                       >
                         {locale.name}
-                      </option>
+                      </SelectOption>
                     );
                   })}
-                </select>
+                </Select>
               </li>
+
             </ul>
 
             <div class="flex xl:hidden relative">
@@ -238,7 +234,6 @@ export default component$((props: NavbarProps) => {
         </Container>
 
         <div
-        
           onClick$={() => (navbarOpen.value = false)}
           class={`absolute w-screen z-50 h-screen top-0 right-0 bg-transparent ${
             navbarOpen.value ? 'visible' : 'invisible'
