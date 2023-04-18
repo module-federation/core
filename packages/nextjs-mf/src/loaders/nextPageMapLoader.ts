@@ -36,7 +36,7 @@ export default function nextPageMapLoader(
  *   - automatically create `./pages-map` module
  *   - automatically add all page modules
  */
-export function exposeNextjsPages(cwd: string, asyncBoundary: boolean) {
+export function exposeNextjsPages(cwd: string) {
   const pages = getNextPages(cwd);
 
   const pageModulesMap = {} as Record<string, string>;
@@ -44,11 +44,7 @@ export function exposeNextjsPages(cwd: string, asyncBoundary: boolean) {
     // Creating a map of pages to modules
     //   './pages/storage/index': './pages/storage/index.tsx',
     //   './pages/storage/[...slug]': './pages/storage/[...slug].tsx',
-    if (asyncBoundary) {
-      pageModulesMap['./' + sanitizePagePath(page)] = `./${page}`;
-    } else {
-      pageModulesMap['./' + sanitizePagePath(page)] = `./${page}`;
-    }
+    pageModulesMap['./' + sanitizePagePath(page)] = `./${page}`;
   });
 
   const exposesWithPageMap = {
@@ -177,6 +173,3 @@ function preparePageMapV2(pages: string[]) {
 
   return result;
 }
-
-// module.exports = nextPageMapLoader;
-// module.exports.exposeNextjsPages = exposeNextjsPages;
