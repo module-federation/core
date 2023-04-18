@@ -26,12 +26,6 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     eager: true,
     import: false,
   },
-  reactPop: {
-    singleton: true,
-    requiredVersion: false,
-    import: '!!react?pop',
-    // eager:true,
-  },
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: false,

@@ -59,13 +59,6 @@ class AddModulesToRuntimeChunkPlugin {
                       )
                   )
                 ) {
-                  console.log(
-                    'moving internal',
-                    module?.userRequest,
-                    'to',
-                    runtimeChunk.name
-                  );
-                  console.log(module.rawRequest);
                   modulesToMove.push(module);
                 } else if (
                   module?.userRequest?.includes('internal-delegate-hoist')

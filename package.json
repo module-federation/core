@@ -13,8 +13,9 @@
   ],
   "license": "MIT",
   "scripts": {
-    "debug": "nx run 3000-home:build:production",
+    "debug": "nx run 3000-home:build",
     "build": "nx build --verbose --output-style=stream",
+    "start:next:debug": "concurrently 'nx run 3000-home:serve:development --output-style=stream'",
     "start:next": "nx build && concurrently 'nx run 3000-home:serve:development --output-style=stream' 'nx run 3001-shop:serve:development --output-style=stream' 'nx run 3002-checkout:serve:development --output-style=stream'",
     "serve:next": "nx build && concurrently 'nx run 3000-home:serve:production --output-style=stream' 'nx run 3001-shop:serve:production --output-style=stream' 'nx run 3002-checkout:serve:production --output-style=stream'",
     "prod": "nx build && nx run-many --target=build --verbose --output-style=stream",
@@ -127,6 +128,11 @@
     "webpack": "5.76.3",
     "react-dom": "18.2.0",
     "react-router-dom": "6.8.0"
+  },
+  "resolutions": {
+    "@module-federation/utilities": "link:./dist/packages/utilities",
+    "@module-federation/node": "link:./dist/packages/node",
+    "@module-federation/nextjs-mf": "link:./dist/packages/nextjs-mf"
   },
   "config": {
     "commitizen": {

@@ -7,7 +7,7 @@ export const flushChunks = async () => {
   } catch (e) {
 
   }
-// console.log(hostStats)
+
   let shareMap = {};
   if(__webpack_share_scopes__?.default) {
      shareMap = Object.keys(__webpack_share_scopes__.default).reduce((acc, key) => {
@@ -36,9 +36,7 @@ export const flushChunks = async () => {
           remoteName,
           'federated-stats.json'
         );
-        const stats = await fetch(statsFile).then(
-          async (res) => await res.json()
-        );
+        const stats = false
         chunks.add(
           global.__remote_scope__._config[remote].replace('ssr', 'chunks')
         );
@@ -89,7 +87,7 @@ export const flushChunks = async () => {
 
         return Array.from(chunks);
       } catch (e) {
-        console.log(e);
+        // console.log(e);
       }
     })
   );

@@ -65,7 +65,7 @@ function getRemoteModules(stats) {
  * @returns {WebpackStatsModule[]}
  */
 function getExposedModules(stats, exposedFile) {
-  return stats.modules.filter((mod) => mod.name.startsWith(exposedFile));
+  return stats.modules.filter((mod) => mod.name?.startsWith(exposedFile));
 }
 
 function getDependenciesOfChunk(stats, chunk) {
@@ -85,25 +85,27 @@ function getDependenciesOfChunk(stats, chunk) {
 function getExposed(stats, mod) {
   const chunks = stats.chunks.filter((chunk) => {
     return chunk.modules.find((modsInChunk) => {
-      return modsInChunk.id === mod.id && !modsInChunk.dependent
+      return modsInChunk.id === mod.id && !modsInChunk.dependent;
+    });
+  });
+  const dependencies = stats.modules
+    .filter((sharedModule) => {
+      if (sharedModule.moduleType !== 'consume-shared-module') return false;
+      return sharedModule.issuerId === mod.id;
     })
-  })
-  const dependencies = stats.modules.filter((sharedModule) => {
-    if(sharedModule.moduleType !== 'consume-shared-module') return false;
-    return sharedModule.issuerId === mod.id
-  }).map((sharedModule)=>{
-    return sharedModule.identifier.split('|')[2]
-  })
+    .map((sharedModule) => {
+      return sharedModule.identifier.split('|')[2];
+    });
 
   const flatChunks = flatMap(chunks, (chunk) => ({
     [chunk.id]: {
       files: chunk.files.map(
-        (f) => `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
+        (f) =>
+          `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
       ),
-      requiredModules: dependencies
-    }
+      requiredModules: dependencies,
+    },
   }));
-
 
   return flatChunks.reduce((acc, chunk) => {
     Object.assign(acc, chunk);
@@ -125,6 +127,21 @@ function searchIssuer(mod, check) {
   return !!mod.modules && mod.modules.some((m) => searchIssuer(m, check));
 }
 
+function searchReason(mod, check) {
+  if (mod.reasons && check(mod.reasons)) {
+    return true;
+  }
+
+  return !!mod.reasons && mod.reasons.some((m) => searchReason(m, check));
+}
+
+
+function searchIssuerAndReason(mod, check) {
+  const foundIssuer = searchIssuer(mod, (issuer) => check(issuer));
+  if (foundIssuer) return foundIssuer;
+  return searchReason(mod, (reason) => reason.some((r) => check(r?.moduleIdentifier)));
+}
+
 /**
  * @param {import("webpack").Module} mod
  * @param {(issuer: string) => boolean} check
@@ -140,6 +157,25 @@ function getIssuers(mod, check) {
       mod.modules.filter((m) => searchIssuer(m, check)).map((m) => m.issuer)) ||
     []
   );
+}
+
+function getIssuersAndReasons(mod,check) {
+  if (mod.issuer && check(mod.issuer)) {
+    return [mod.issuer];
+  }
+  if (mod.reasons && searchReason(mod, (reason) => reason.some((r) => check(r?.moduleIdentifier)))) {
+    return mod.reasons.filter((r)=>{
+      return r.moduleIdentifier && check(r.moduleIdentifier)
+    }).map((r)=>r.moduleIdentifier)
+  }
+
+  return (
+    (mod.modules &&
+      mod.modules.filter((m) => searchIssuerAndReason(m, check)).map((m) => {
+        return m.issuer || (m.reasons.find((r)=>check(r?.moduleIdentifier))).moduleIdentifier;
+      })) || []
+  );
+
 }
 
 /**
@@ -240,35 +276,35 @@ function getMainSharedModules(stats) {
 
   return flatMap(chunks, (chunk) =>
     flatMap(chunk.children, (id) =>
-      stats.chunks.filter(
-        (c) =>
+      stats.chunks.filter((c) => {
+        return (
           c.id === id &&
           c.files.length > 0 &&
-          c.modules.some((m) =>
-            searchIssuer(m, (issuer) =>
-              issuer?.startsWith('consume-shared-module')
-            )
-          )
-      )
+          c.modules.some((m) => {
+            return searchIssuerAndReason(m, (check) => check?.startsWith('consume-shared-module'))
+          })
+        );
+      })
     )
   )
-    .map((chunk) => ({
-      chunks: chunk.files.map(
-        (f) =>
-          `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
-      ),
-      provides: flatMap(
-        chunk.modules.filter((m) =>
-          searchIssuer(m, (issuer) =>
-            issuer?.startsWith('consume-shared-module')
-          )
+    .map((chunk) => {
+      console.log('chunk', chunk)
+      return ({
+        chunks: chunk.files.map(
+          (f) =>
+            `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
         ),
-        (m) =>
-          getIssuers(m, (issuer) => issuer?.startsWith('consume-shared-module'))
-      )
-        .map(parseFederatedIssuer)
-        .filter((f) => !!f),
-    }))
+        provides: flatMap(
+          chunk.modules.filter((m) =>
+            searchIssuerAndReason(m, (check) => check?.startsWith('consume-shared-module'))
+          ),
+          (m) =>
+            getIssuersAndReasons(m, (issuer) => issuer?.startsWith('consume-shared-module'))
+        )
+          .map(parseFederatedIssuer)
+          .filter((f) => !!f),
+      })
+    })
     .filter((c) => c.provides.length > 0);
 }
 
@@ -367,30 +403,75 @@ class FederationStatsPlugin {
         },
         async () => {
           const stats = compilation.getStats().toJson({
-            performance: false,
-            time: false,
-            logging: 'none',
-            loggingDebug: false,
-            loggingTrace: false,
-            source: false,
-            children: false,
-            errors: false,
-            warnings: false,
-            errorsCount: false,
-            warningsCount: false,
-            builtAt: false,
-            timings: false,
+            all: false,
+            assets: true,
+            reasons: true,
+            modules: true,
+            children: true,
+            chunkGroups: true,
+            chunkModules: true,
+            chunkOrigins: false,
+            entrypoints: true,
+            namedChunkGroups: false,
+            chunkRelations: true,
+            chunks: true,
+            ids: true,
+            nestedModules: false,
+            outputPath: true,
+            publicPath: true,
           });
-
           const federatedModules = federationPlugins.map((federationPlugin) =>
             getFederationStats(stats, federationPlugin)
           );
-
           const sharedModules = getMainSharedModules(stats);
+          const vendorChunks = new Set()
+          sharedModules.forEach((share)=>{
+            share?.chunks?.forEach((file)=>{
+              vendorChunks.add(file);
+            })
+          })
+          const enhancedModuleLookup = federatedModules.map((mod) => {
+            const remapped = Object.entries(mod.exposes).reduce(
+              (acc, [key, value]) => {
+                acc[key] = acc[key] || []
+                value.map((chunk) => {
+                  return Object.keys(chunk).map((chunkId) => {
+                    const foundRootChunk = compilation.chunks.find((chunk) => {
+                      return chunk.id == chunkId;
+                    });
+                    Array.from(foundRootChunk.getAllReferencedChunks()).forEach(
+                      (c) => {
+                        const trueChunk = stats.chunks.find((chunkStats) => {
+                          return chunkStats.id == c.id;
+                        });
+                        const isSharedModuleChunk = trueChunk.modules.every(
+                          (m) => {
+                            return m.moduleType === 'consume-shared-module';
+                          }
+                        );
+
+                        if (!isSharedModuleChunk && !trueChunk.files.every((f)=>vendorChunks.has(f))) {
+                          trueChunk.files.forEach((f)=>{
+                            if(!acc[key].includes(f)) {
+                              acc[key].push(f);
+                            }
+                          })
+                        }
+                      }
+                    );
+                  });
+                });
+                return acc;
+              },
+              {}
+            );
+            return {...mod, exposes: remapped};
+          });
+
 
           const statsResult = {
             sharedModules,
-            federatedModules,
+            federatedModules:enhancedModuleLookup,
           };
 
           const statsJson = JSON.stringify(statsResult);

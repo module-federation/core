@@ -15,6 +15,8 @@ import {
 } from '@module-federation/utilities';
 import CopyFederationPlugin from './CopyFederationPlugin';
 import AddModulesPlugin from './AddModulesToRuntime';
+import ContainerStatsPlugin from './ContainerStatsPlugin';
+import { ChunkCorrelationPlugin } from "@module-federation/node";
 import type { Compiler } from 'webpack';
 import path from 'path';
 
@@ -176,6 +178,8 @@ export class NextFederationPlugin {
         shared: DEFAULT_SHARE_SCOPE,
       }).apply(compiler);
 
+
+
       if (this._extraOptions.automaticPageStitching) {
         compiler.options.module.rules.push({
           test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
@@ -225,6 +229,11 @@ export class NextFederationPlugin {
         ...this._options.shared,
       },
     };
+
+    if(!isServer) {
+      new ContainerStatsPlugin(hostFederationPluginOptions).apply(compiler);
+      new ChunkCorrelationPlugin({filename: 'remote-stats.json'}).apply(compiler);
+    }
 
     const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];
 
