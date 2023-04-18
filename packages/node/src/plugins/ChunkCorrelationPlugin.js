@@ -288,7 +288,6 @@ function getMainSharedModules(stats) {
     )
   )
     .map((chunk) => {
-      console.log('chunk', chunk)
       return ({
         chunks: chunk.files.map(
           (f) =>
@@ -394,14 +393,30 @@ class FederationStatsPlugin {
       console.error('No ModuleFederationPlugin(s) found.');
       return;
     }
+    let alreadyRun = false;
+    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation,params) => {
+      // console.log("after  emit", compilation,params)
+      console.log(compiler.watchMode,"watch");
 
-    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
-      compilation.hooks.processAssets.tapPromise(
+      compiler.hooks.afterEmit.tap(PLUGIN_NAME, () => {
+        console.log("this compilation")
+        alreadyRun = true;
+
+      })
+
+      compilation.hooks.processAssets.tap(
         {
           name: PLUGIN_NAME,
-          stage: compilation.constructor.PROCESS_ASSETS_STAGE_ANALYSE,
+          stage: compilation.constructor.PROCESS_ASSETS_STAGE_SUMMARIZE,
         },
+        // PLUGIN_NAME,
         async () => {
+          console.log("after  emit")
+          if(alreadyRun){
+            return;
+          }
+
+
           const stats = compilation.getStats().toJson({
             all: false,
             assets: true,
@@ -420,16 +435,20 @@ class FederationStatsPlugin {
             outputPath: true,
             publicPath: true,
           });
+      console.log("should find stats")
           const federatedModules = federationPlugins.map((federationPlugin) =>
             getFederationStats(stats, federationPlugin)
           );
-          const sharedModules = getMainSharedModules(stats);
+
+           const sharedModules = getMainSharedModules(stats);
           const vendorChunks = new Set()
           sharedModules.forEach((share)=>{
             share?.chunks?.forEach((file)=>{
               vendorChunks.add(file);
             })
           })
+          console.log(federatedModules[0].exposes,"federatedModules")
+
           const enhancedModuleLookup = federatedModules.map((mod) => {
             const remapped = Object.entries(mod.exposes).reduce(
               (acc, [key, value]) => {
@@ -453,7 +472,7 @@ class FederationStatsPlugin {
                         if (!isSharedModuleChunk && !trueChunk.files.every((f)=>vendorChunks.has(f))) {
                           trueChunk.files.forEach((f)=>{
                             if(!acc[key].includes(f)) {
-                              acc[key].push(f);
+                              acc[key].push({files:f});
                             }
                           })
                         }
@@ -467,6 +486,9 @@ class FederationStatsPlugin {
             );
             return {...mod, exposes: remapped};
           });
+          const exposeKey =Object.keys(enhancedModuleLookup[0].exposes)
+          console.log(enhancedModuleLookup[0].exposes)
+          console.log(compilation.getAsset(this._options.filename))
 
 
           const statsResult = {

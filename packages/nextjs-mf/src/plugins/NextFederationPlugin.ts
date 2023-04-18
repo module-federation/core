@@ -231,8 +231,8 @@ export class NextFederationPlugin {
     };
 
     if(!isServer) {
-      new ContainerStatsPlugin(hostFederationPluginOptions).apply(compiler);
-      new ChunkCorrelationPlugin({filename: 'remote-stats.json'}).apply(compiler);
+      //new ContainerStatsPlugin(hostFederationPluginOptions).apply(compiler);
+      new ChunkCorrelationPlugin({filename: 'static/chunks/federated-stats.json'}).apply(compiler);
     }
 
     const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];

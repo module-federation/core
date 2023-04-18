@@ -35,18 +35,26 @@ export const flushChunks = async () => {
         const statsFile = global.__remote_scope__._config[remote].replace(
           remoteName,
           'federated-stats.json'
-        );
-        const stats = false
+        ).replace('ssr','chunks');
+
+        let stats = {}
+        try {
+          await fetch(global.__remote_scope__._config[remote])
+           stats = await fetch(statsFile).then((res)=>res.json());
+        } catch (e) {
+console.error("flush errer",e);
+        }
+
         chunks.add(
           global.__remote_scope__._config[remote].replace('ssr', 'chunks')
         );
         const [prefix] =
           global.__remote_scope__._config[remote].split('static/');
         if (stats.federatedModules) {
-
           // console.log(shareMap)
           stats.federatedModules.forEach((modules) => {
             if (modules.exposes?.[request]) {
+              console.log('modules.exposes[request]', request, modules.exposes[request])
               modules.exposes[request].forEach((chunk) => {
                 Object.values(chunk).forEach((chunk) => {
                   if(chunk.files) chunk.files.forEach((file) => {

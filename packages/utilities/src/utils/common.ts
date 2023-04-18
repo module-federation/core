@@ -253,7 +253,7 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       if (typeof globalScope[remoteGlobal] !== 'undefined') {
         return resolveRemoteGlobal();
       }
-console.log('loadScript', reference.url, containerKey);
+
       (__webpack_require__ as any).l(
         reference.url,
         function (event: Event) {
