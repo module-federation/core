@@ -21,6 +21,9 @@
     "release:node": "nx run node:version --releaseAs=minor",
     "release:next": "nx run nextjs-mf:version --releaseAs=patch",
     "release:utils": "nx run utils:version --releaseAs=minor",
+    "prerelease:node": "nx run node:version --releaseAs=prerelease --preid=beta",
+    "prerelease:next": "nx run nextjs-mf:version --releaseAs=prerelease --preid=beta",
+    "prerelease:utils": "nx run utils:version --releaseAs=prerelease --preid=beta",
     "release:utils:manual": "nx build && cd dist/packages/utilities && yarn publish --non-interactive --access public",
     "release:next:manual": "nx build && cd dist/packages/nextjs-mf && yarn publish --non-interactive --access public",
     "release:node:manual": "nx build && cd dist/packages/node && yarn publish --non-interactive --access public"
