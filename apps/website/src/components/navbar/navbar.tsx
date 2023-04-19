@@ -40,7 +40,7 @@ export default component$((props: NavbarProps) => {
   const position = useSignal(1);
   const loc = useLocation();
   const speakState = useSpeakContext();
-  const locale = locales.find((l) => l.lang === speakState.locale.lang);
+  const selectedLocale = locales.find((l) => l.lang === speakState.locale.lang);
 
   const localizedUrl = (url: string) => {
     return locUrl(url, speakState);
@@ -194,12 +194,12 @@ export default component$((props: NavbarProps) => {
               </li>
 
               <li>
-                <Select name="language" value={locale?.name}>
+                <Select name="language" value={selectedLocale?.name}>
                   {locales.map((locale) => {
                     return (
                       <SelectOption
                         key={locale.lang}
-                        value={locale.lang}
+                        selected={speakState.locale.lang === locale.lang}
                         onClick$={async () => await changeLocale$(locale.lang)}
                       >
                         {locale.name}

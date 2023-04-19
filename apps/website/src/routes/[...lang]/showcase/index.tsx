@@ -1,7 +1,10 @@
 import { component$ } from '@builder.io/qwik';
 import { $translate as t } from 'qwik-speak';
 import type { DocumentHead } from '@builder.io/qwik-city';
-import Section, { SectionHeader, SectionPadding } from '../../../components/section/section';
+import Section, {
+  SectionHeader,
+  SectionPadding,
+} from '../../../components/section/section';
 import { ContainerTheme } from '../../../components/container/container';
 import Button, { ButtonTheme } from '../../../components/button/button';
 import Navbar from '../../../components/navbar/navbar';
@@ -76,43 +79,45 @@ export default component$(() => {
           )}
         />
 
-        <div class="flex flex-col items-center gap-y-8">
-          {cardRows.map((cards, row) => {
-            return (
-              <div
-                class={`w-full grid gap-x-2 gap-y-4 grid-cols-1 ${
-                  row > 1 && 'md:grid-cols-3'
-                }  ${row === 1 && 'md:grid-cols-2'} `}
-              >
-                {cards.map((card) => {
-                  return (
-                    <div class="relative">
-                      <img
-                        class="border border-blue-gray-400 border bg-white w-full aspect-[97/66] transition-shadow hover:shadow-card"
-                        src={card.previewSrc}
-                        alt={card.name}
-                      />
+        <div class="flex flex-col items-center gap-y-10">
+          <div class="flex flex-col items-center gap-y-8">
+            {cardRows.map((cards, row) => {
+              return (
+                <div
+                  class={`w-full grid gap-x-2 gap-y-4 grid-cols-1 ${
+                    row > 1 && 'md:grid-cols-3'
+                  }  ${row === 1 && 'md:grid-cols-2'} `}
+                >
+                  {cards.map((card) => {
+                    return (
+                      <div class="relative">
+                        <img
+                          class="border border-blue-gray-400 border bg-white w-full aspect-[97/66] transition-shadow hover:shadow-card"
+                          src={card.previewSrc}
+                          alt={card.name}
+                        />
 
-                      <div class="absolute block w-full bottom-0 left-0">
-                        <div class="block absolute top-0 left-0 w-full h-full bg-blue-gray-900 opacity-70 z-10"></div>
-                        <div class="flex relative flex-col p-4 z-20">
-                          <h2 class="text-2xl font-semibold text-white">
-                            {card.name}
-                          </h2>
-                          <a
-                            href={`https://${card.url}`}
-                            class="text-xl text-ui-blue font-semibold"
-                          >
-                            {card.url}
-                          </a>
+                        <div class="absolute block w-full bottom-0 left-0">
+                          <div class="block absolute top-0 left-0 w-full h-full bg-blue-gray-900 opacity-70 z-10"></div>
+                          <div class="flex relative flex-col p-4 z-20">
+                            <h2 class="text-2xl font-semibold text-white">
+                              {card.name}
+                            </h2>
+                            <a
+                              href={`https://${card.url}`}
+                              class="text-xl text-ui-blue font-semibold"
+                            >
+                              {card.url}
+                            </a>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
 
           <Button
             class="w-full md:w-auto"

@@ -71,7 +71,7 @@ export default component$((props: SelectProps) => {
 });
 
 export interface SelectOptionProps {
-  value: string;
+  selected?: boolean;
 
   onClick$?: QRL<() => void>;
 }
@@ -80,7 +80,7 @@ export const SelectOption = component$((props: SelectOptionProps) => {
   return (
     <button
       onClick$={props.onClick$}
-      class={`flex w-full ${styleClass} border-0 text-left hover:bg-blue-gray-300`}
+      class={`flex w-full ${styleClass} border-0 text-left hover:bg-blue-gray-300 ${props.selected && 'bg-blue-gray-300'}`}
     >
       <Slot />
     </button>
