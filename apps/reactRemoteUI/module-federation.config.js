@@ -1,5 +1,5 @@
 module.exports = {
-  name: 'react-remote-ui',
+  name: 'reactRemoteUI',
   exposes: {
     './Button': './src/Button',
   },

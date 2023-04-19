@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const ReactRemoteUiButton = React.lazy(() => import('react-remote-ui/Button'));
+const ReactRemoteUiButton = React.lazy(() => import('reactRemoteUI/Button'));
 
 export function App() {
   return (

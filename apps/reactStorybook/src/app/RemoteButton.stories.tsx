@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import { Meta, Story } from '@storybook/react';
 
 // @ts-ignore
-const LazyButton = React.lazy(() => import('react-remote-ui/Button'));
+const LazyButton = React.lazy(() => import('reactRemoteUI/Button'));
 
 const Button = (props: any) => (
   <Suspense fallback={<p>Please wait...</p>}>

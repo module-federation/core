@@ -1,7 +1,7 @@
 {
-  "name": "react-storybook",
+  "name": "reactStorybook",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/react-storybook/src",
+  "sourceRoot": "apps/reactStorybook/src",
   "projectType": "application",
   "targets": {
     "build": {
@@ -10,19 +10,19 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "babel",
-        "outputPath": "dist/apps/react-storybook",
-        "index": "apps/react-storybook/src/index.html",
+        "outputPath": "dist/apps/reactStorybook",
+        "index": "apps/reactStorybook/src/index.html",
         "baseHref": "/",
-        "main": "apps/react-storybook/src/main.ts",
-        "tsConfig": "apps/react-storybook/tsconfig.app.json",
+        "main": "apps/reactStorybook/src/main.ts",
+        "tsConfig": "apps/reactStorybook/tsconfig.app.json",
         "assets": [
-          "apps/react-storybook/src/favicon.ico",
-          "apps/react-storybook/src/assets"
+          "apps/reactStorybook/src/favicon.ico",
+          "apps/reactStorybook/src/assets"
         ],
-        "styles": ["apps/react-storybook/src/styles.scss"],
+        "styles": ["apps/reactStorybook/src/styles.scss"],
         "scripts": [],
         "isolatedConfig": true,
-        "webpackConfig": "apps/react-storybook/webpack.config.js"
+        "webpackConfig": "apps/reactStorybook/webpack.config.js"
       },
       "configurations": {
         "development": {
@@ -34,8 +34,8 @@
         "production": {
           "fileReplacements": [
             {
-              "replace": "apps/react-storybook/src/environments/environment.ts",
-              "with": "apps/react-storybook/src/environments/environment.prod.ts"
+              "replace": "apps/reactStorybook/src/environments/environment.ts",
+              "with": "apps/reactStorybook/src/environments/environment.prod.ts"
             }
           ],
           "optimization": true,
@@ -44,7 +44,7 @@
           "namedChunks": false,
           "extractLicenses": true,
           "vendorChunk": false,
-          "webpackConfig": "apps/react-storybook/webpack.config.prod.js"
+          "webpackConfig": "apps/reactStorybook/webpack.config.prod.js"
         }
       }
     },
@@ -52,16 +52,16 @@
       "executor": "@nrwl/react:module-federation-dev-server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "react-storybook:build",
+        "buildTarget": "reactStorybook:build",
         "hmr": true,
         "port": 4200
       },
       "configurations": {
         "development": {
-          "buildTarget": "react-storybook:build:development"
+          "buildTarget": "reactStorybook:build:development"
         },
         "production": {
-          "buildTarget": "react-storybook:build:production",
+          "buildTarget": "reactStorybook:build:production",
           "hmr": false
         }
       }
@@ -70,14 +70,14 @@
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/react-storybook/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": ["apps/reactStorybook/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/react-storybook/jest.config.ts",
+        "jestConfig": "apps/reactStorybook/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {
@@ -91,15 +91,15 @@
       "executor": "@nrwl/web:file-server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "react-storybook:build",
+        "buildTarget": "reactStorybook:build",
         "port": 4200
       },
       "configurations": {
         "development": {
-          "buildTarget": "react-storybook:build:development"
+          "buildTarget": "reactStorybook:build:development"
         },
         "production": {
-          "buildTarget": "react-storybook:build:production"
+          "buildTarget": "reactStorybook:build:production"
         }
       }
     },
@@ -108,7 +108,7 @@
       "options": {
         "uiFramework": "@storybook/react",
         "port": 4400,
-        "configDir": "apps/react-storybook/.storybook"
+        "configDir": "apps/reactStorybook/.storybook"
       },
       "configurations": {
         "ci": {
@@ -121,8 +121,8 @@
       "outputs": ["{options.outputDir}"],
       "options": {
         "uiFramework": "@storybook/react",
-        "outputDir": "dist/storybook/react-storybook",
-        "configDir": "apps/react-storybook/.storybook"
+        "outputDir": "dist/storybook/reactStorybook",
+        "configDir": "apps/reactStorybook/.storybook"
       },
       "configurations": {
         "ci": {

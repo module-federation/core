@@ -54,13 +54,13 @@
     "@jscutlery/semver": "^2.27.1",
     "@node-rs/jieba": "^1.6.2",
     "@nrwl/cli": "15.9.2",
-    "@nrwl/storybook": "^15.9.2",
     "@nrwl/eslint-plugin-nx": "15.9.2",
     "@nrwl/jest": "15.9.2",
     "@nrwl/js": "15.9.2",
     "@nrwl/linter": "15.9.2",
     "@nrwl/next": "15.9.2",
     "@nrwl/react": "15.9.2",
+    "@nrwl/storybook": "^15.9.2",
     "@nrwl/vite": "15.9.2",
     "@nrwl/web": "15.9.2",
     "@nrwl/webpack": "15.9.2",
@@ -133,8 +133,8 @@
     "tslib": "^2.3.0",
     "tsup": "^6.7.0",
     "typescript": "5.0.2",
-    "verdaccio": "5.23.1",
     "url-loader": "^4.1.1",
+    "verdaccio": "5.23.1",
     "vinyl-fs": "~3.0",
     "vitest": "^0.29.7",
     "vue-tsc": "^1.0.24",
@@ -152,4 +152,3 @@
     ]
   }
 }
-

@@ -12,7 +12,7 @@ module.exports = {
     {
       name: '@module-federation/storybook-addon',
       options: {
-        nxMfConfig: { ...nxModuleFederationConfig },
+        nxModuleFederationConfig: { ...nxModuleFederationConfig },
       },
     },
   ],

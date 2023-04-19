@@ -4,11 +4,13 @@ import * as process from 'process';
 import VirtualModulesPlugin from 'webpack-virtual-modules';
 import { container, Configuration } from 'webpack';
 import { logger } from '@storybook/node-logger';
-import { withModuleFederation } from '@nrwl/react/module-federation';
 import { normalizeStories } from '@storybook/core-common';
-import { correctImportPath } from '@module-federation/utilities';
-import type { ModuleFederationPluginOptions } from '@module-federation/utilities';
+import {
+  correctImportPath,
+  ModuleFederationPluginOptions,
+} from '@module-federation/utilities';
 import type { ModuleFederationConfig } from '@nrwl/devkit';
+import withModuleFederation from '../utils/with-module-federation';
 
 const { ModuleFederationPlugin } = container;
 
@@ -16,19 +18,21 @@ export type Preset = string | { name: string };
 
 type Options = {
   moduleFederationConfig?: ModuleFederationPluginOptions;
-  nxMfConfig?: ModuleFederationConfig;
+  nxModuleFederationConfig?: ModuleFederationConfig;
   presets: {
     apply<T>(preset: Preset): Promise<T>;
   };
   configDir: string;
 };
 
+export { withModuleFederation };
+
 export const webpack = async (
   webpackConfig: Configuration,
   options: Options
 ): Promise<Configuration> => {
   const { plugins = [], context: webpackContext } = webpackConfig;
-  const { moduleFederationConfig, presets, nxMfConfig } = options;
+  const { moduleFederationConfig, presets, nxModuleFederationConfig } = options;
   const context = webpackContext || process.cwd();
 
   // Detect webpack version. More about storybook webpack config https://storybook.js.org/docs/react/addons/writing-presets#webpack
@@ -41,28 +45,15 @@ export const webpack = async (
     );
   }
 
-  if (nxMfConfig) {
+  if (nxModuleFederationConfig) {
     logger.info(`=> [MF] Detect NX configuration`);
-    const wmf = await withModuleFederation(nxMfConfig);
-    // @ts-ignore
-    webpackConfig = await wmf(
-      // @ts-ignore
-      {
-        ...webpackConfig,
-      },
-      options
-    );
 
-    // The suggested workaround not work:
-    // for (const plugin of webpackConfig.plugins || []) {
-    //   if (plugin instanceof ModuleFederationPlugin) {
-    //     // plugin._options is the ModuleFederation Config
-    //     // If you need to change the library type, you can by doing this.
-    //     // But I can't guarantee that the rest of the plugin will work
-    //     // @ts-ignore
-    //     plugin._options.library = { type: 'var' };
-    //   }
-    // }
+    const wmf = await withModuleFederation(nxModuleFederationConfig);
+
+    webpackConfig = {
+      ...webpackConfig,
+      ...wmf(webpackConfig),
+    };
   }
 
   if (moduleFederationConfig) {

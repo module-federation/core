@@ -1,0 +1,7 @@
+{
+  "name": "react-storybook",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@module-federation/storybook-addon": "*"
+  }
+}
