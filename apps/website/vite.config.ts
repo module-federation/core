@@ -21,7 +21,7 @@ export default defineConfig({
       },
     }),
     tsconfigPaths({ root: '../../' }),
-    partytownVite({ dest: join(__dirname, '../../', 'dist', 'client', '~partytown') }),
+    partytownVite({ dest: join(__dirname, '../../', 'dist', 'website', 'client', '~partytown') }),
   ],
   server: {
     fs: {
