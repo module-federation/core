@@ -16,13 +16,13 @@
     "@storybook/node-logger": "^6.5.16",
     "webpack": "^5.75.0",
     "webpack-virtual-modules": "^0.5.0",
-    "@module-federation/utilities": "*"
+    "@module-federation/utilities": "1.6.1"
   },
   "peerDependencies": {
     "@storybook/core-common": "^6.5.16",
     "@storybook/node-logger": "^6.5.16",
     "webpack": "^5.75.0",
     "webpack-virtual-modules": "^0.5.0",
-    "@module-federation/utilities": "*"
+    "@module-federation/utilities": "1.6.1"
   }
 }
