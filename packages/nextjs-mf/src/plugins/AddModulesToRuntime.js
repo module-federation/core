@@ -77,12 +77,12 @@ class AddModulesToRuntimeChunkPlugin {
                     module
                   );
                 }
-                // if (this.options.eager) {
-                //   compilation.chunkGraph.disconnectChunkAndModule(
-                //     chunk,
-                //     module
-                //   );
-                // }
+                if (this.options.eager) {
+                  compilation.chunkGraph.disconnectChunkAndModule(
+                    chunk,
+                    module
+                  );
+                }
               }
               for (const module of containers) {
                 if (

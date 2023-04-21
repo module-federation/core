@@ -456,8 +456,6 @@ class FederationStatsPlugin {
               vendorChunks.add(file);
             });
           });
-          //
-          // console.log(compilation.moduleGraph);
 
           const enhancedModuleLookup = federatedModules.map((mod) => {
             const remapped = Object.entries(mod.exposes).reduce(

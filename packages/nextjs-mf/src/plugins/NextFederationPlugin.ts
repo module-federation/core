@@ -186,7 +186,7 @@ export class NextFederationPlugin {
         eager: true,
         remotes: this._options.remotes,
         shared: DEFAULT_SHARE_SCOPE_BROWSER,
-        container: this._options.name
+       container: this._options.name
       }).apply(compiler);
 
 
@@ -260,8 +260,6 @@ export class NextFederationPlugin {
       //   verbose: true,
       // }).apply(compiler);
     }
-
-
 
     const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];
 
