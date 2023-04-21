@@ -11,12 +11,12 @@ import type {
   SharedObject,
 } from '@module-federation/utilities';
 import { createRuntimeVariables } from '@module-federation/utilities';
-import CopyFederationPlugin from './CopyFederationPlugin';
-import AddModulesPlugin from './AddModulesToRuntime';
+import CopyFederationPlugin from '../CopyFederationPlugin';
+import AddModulesPlugin from '../AddModulesToRuntime';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
-import CommonJsChunkLoadingPlugin from './container/CommonJsChunkLoadingPlugin';
+import CommonJsChunkLoadingPlugin from '../container/CommonJsChunkLoadingPlugin';
 import type { Compiler, container } from 'webpack';
-import { RuleSetConditionAbsolute } from 'webpack';
+import { regexEqual } from './next-fragments';
 import path from 'path';
 
 import {
@@ -24,32 +24,13 @@ import {
   DEFAULT_SHARE_SCOPE_BROWSER,
   getDelegates,
   parseRemotes,
-} from '../internal';
-import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
-import { exposeNextjsPages } from '../loaders/nextPageMapLoader';
+} from '../../internal';
+import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
+import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
 
 type ConstructableModuleFederationPlugin = new (
   options: ModuleFederationPluginOptions
 ) => container.ModuleFederationPlugin;
-
-const regexEqual = (
-  x:
-    | string
-    | RegExp
-    | ((value: string) => boolean)
-    | RuleSetConditionAbsolute[]
-    | undefined,
-  y: RegExp
-): boolean => {
-  return (
-    x instanceof RegExp &&
-    y instanceof RegExp &&
-    x.source === y.source &&
-    x.global === y.global &&
-    x.ignoreCase === y.ignoreCase &&
-    x.multiline === y.multiline
-  );
-};
 
 // Utility function to set the main and extra options
 function setOptions(options: NextFederationPluginOptions): {
@@ -221,12 +202,12 @@ function applyClientPlugins(
   const { webpack } = compiler;
   const { remotes, name } = options;
 
-  new AddModulesPlugin({
-    runtime: name,
-    eager: false,
-    remotes,
-  }).apply(compiler);
-
+  // new AddModulesPlugin({
+  //   runtime: name,
+  //   eager: false,
+  //   remotes,
+  // }).apply(compiler);
+  //
   new AddModulesPlugin({
     runtime: 'webpack',
     eager: true,
@@ -238,7 +219,10 @@ function applyClientPlugins(
   if (extraOptions.automaticPageStitching) {
     compiler.options.module.rules.push({
       test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
-      loader: path.resolve(__dirname, '../loaders/patchNextClientPageLoader'),
+      loader: path.resolve(
+        __dirname,
+        '../../loaders/patchNextClientPageLoader'
+      ),
     });
   }
 
@@ -253,7 +237,7 @@ function applyClientPlugins(
 
   new webpack.EntryPlugin(
     compiler.context,
-    require.resolve('../internal-delegate-hoist'),
+    require.resolve('../../internal-delegate-hoist'),
     'main'
   ).apply(compiler);
 
@@ -311,14 +295,14 @@ function injectModuleHoistingSystem(
     enforce: 'pre',
     test: /_document/,
     include: [compiler.context, /next[\\/]dist/],
-    loader: path.resolve(__dirname, '../loaders/inject-hoist'),
+    loader: path.resolve(__dirname, '../../loaders/inject-hoist'),
   };
 
   // Populate hoist dependency with shared modules
   const populateHoistDependency = {
     test: /internal-delegate-hoist/,
     include: [/internal-delegate-hoist/, compiler.context, /next[\\/]dist/],
-    loader: path.resolve(__dirname, '../loaders/share-scope-hoist'),
+    loader: path.resolve(__dirname, '../../loaders/share-scope-hoist'),
     options: {
       shared: defaultShared,
       name: !isServer && options.name,
@@ -330,15 +314,6 @@ function injectModuleHoistingSystem(
     injectHoistDependency,
     populateHoistDependency
   );
-
-  return {
-    applyAutomaticAsyncBoundary: () => {
-      // Implementation of applyAutomaticAsyncBoundary
-    },
-    applyRemoteDelegates: () => {
-      // Implementation of applyRemoteDelegates
-    },
-  };
 }
 
 /**
@@ -397,7 +372,10 @@ function applyAutomaticAsyncBoundary(
           ...loaderChain,
           //@ts-ignore
           {
-            loader: path.resolve(__dirname, '../loaders/async-boundary-loader'),
+            loader: path.resolve(
+              __dirname,
+              '../../loaders/async-boundary-loader'
+            ),
           },
         ],
       });
@@ -424,7 +402,7 @@ function applyRemoteDelegates(
         /delegate-hoist-container/,
         /next[\\/]dist/,
       ],
-      loader: path.resolve(__dirname, '../loaders/delegateLoader'),
+      loader: path.resolve(__dirname, '../../loaders/delegateLoader'),
       options: {
         delegates,
       },
@@ -446,7 +424,7 @@ function applyRemoteDelegates(
 
             return found;
           },
-          loader: path.resolve(__dirname, '../loaders/inject-single-host'),
+          loader: path.resolve(__dirname, '../../loaders/inject-single-host'),
           options: {
             name: options.name,
           },
@@ -506,25 +484,28 @@ export class NextFederationPlugin {
     if (!ModuleFederationPlugin) {
       return;
     }
+    const defaultShared = setDefaultShared(isServer);
 
+    console.log(compiler.options.name);
     if (isServer) {
       // Refactored server condition
       configureServerCompilerOptions(compiler);
       applyServerPlugins(compiler, this._options);
       configureServerLibraryAndFilename(this._options);
-      handleServerExternals(compiler, this._options);
+      handleServerExternals(compiler, {
+        ...this._options,
+        shared: { ...defaultShared, ...this._options.shared },
+      });
     } else {
       applyClientPlugins(compiler, this._options, this._extraOptions);
     }
-
-    const defaultShared = setDefaultShared(isServer);
 
     // @ts-ignore
     const hostFederationPluginOptions: ModuleFederationPluginOptions = {
       ...this._options,
       runtime: false,
       exposes: {
-        __hoist: require.resolve('../delegate-hoist-container'),
+        __hoist: require.resolve('../../delegate-hoist-container'),
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)
           : {}),

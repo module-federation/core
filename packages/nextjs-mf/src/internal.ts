@@ -1,20 +1,15 @@
 import type { Compiler } from 'webpack';
 import type {
   ModuleFederationPluginOptions,
-  Shared,
   SharedConfig,
   SharedObject,
 } from '@module-federation/utilities';
+import { createDelegatedModule } from '@module-federation/utilities';
 
 import path from 'path';
 
 import { isRequiredVersion } from 'webpack/lib/sharing/utils';
 import { parseOptions } from 'webpack/lib/container/options';
-
-import {
-  extractUrlAndGlobal,
-  createDelegatedModule,
-} from '@module-federation/utilities';
 
 // the share scope we attach by default
 // in hosts we re-key them to prevent webpack moving the modules into their own chunks (cause eager error)
@@ -36,7 +31,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     requiredVersion: false,
     import: false,
-    eager: false,
+    eager: true,
   },
   'react-dom': {
     singleton: true,

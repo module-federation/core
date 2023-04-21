@@ -36,7 +36,9 @@ class AddModulesToRuntimeChunkPlugin {
                 )
               : null;
             const partialContainerModules = partialEntry
-              ? compilation.chunkGraph.getChunkModulesIterable(partialEntry)
+              ? compilation.chunkGraph.getOrderedChunkModulesIterable(
+                  partialEntry
+                )
               : null;
 
             for (const chunk of chunks) {
@@ -68,28 +70,84 @@ class AddModulesToRuntimeChunkPlugin {
                   modulesToMove.push(module);
                 }
               }
-
               if (partialContainerModules) {
-                containers.push(...partialContainerModules);
-              }
-
-              for (const module of [...modulesToMove, ...containers]) {
-                if (
-                  !compilation.chunkGraph.isModuleInChunk(module, runtimeChunk)
-                ) {
-                  compilation.chunkGraph.connectChunkAndModule(
-                    runtimeChunk,
-                    module
-                  );
+                for (const module of partialContainerModules) {
+                  if (module.rawRequest) {
+                    modulesToMove.push(module);
+                  } else {
+                    containers.push(module);
+                  }
                 }
+                //
+              }
+              for (const module of [...modulesToMove, ...containers]) {
+                // if (
+                //   !compilation.chunkGraph.isModuleInChunk(module, runtimeChunk)
+                // ) {
+                compilation.chunkGraph.connectChunkAndModule(
+                  runtimeChunk,
+                  module
+                );
+                // }
                 if (eager && modulesToMove.includes(module)) {
+                  // if (runtime !== 'webpack-runtime') {
+                  //   console.log(
+                  //     'removing',
+                  //     module.id || module.identifier(),
+                  //     'from',
+                  //     chunk.name,
+                  //     'to',
+                  //     runtimeChunk.name
+                  //   );
+                  // }
                   compilation.chunkGraph.disconnectChunkAndModule(
                     chunk,
                     module
                   );
                 }
               }
+
+              if (runtime !== 'webpack-runtime') {
+                if (chunk.name || chunk.id) {
+                  if (
+                    !(chunk.name || chunk.id).startsWith('pages') &&
+                    !(chunk.name || chunk.id).startsWith('main')
+                  ) {
+                    runtimeChunk.getModules().forEach((module) => {
+                      if (
+                        knownDelegates &&
+                        knownDelegates.some((delegate) =>
+                          module?.rawRequest?.includes(delegate)
+                        )
+                      ) {
+                        compilation.chunkGraph.connectChunkAndModule(
+                          chunk,
+                          module
+                        );
+
+                        console.log(
+                          'adding',
+                          module.rawRequest,
+                          'to',
+                          chunk.name,
+                          'from',
+                          runtimeChunk.name,
+                          'not removing it'
+                        );
+                        // console.log(
+                        //   module.id || module.identifier(),
+                        //   module.type,
+                        //   module.moduleType,
+                        //   module
+                        // );
+                      }
+                    });
+                  }
+                }
+              }
             }
+
+            // console.log(chunks);
           }
         );
       }
