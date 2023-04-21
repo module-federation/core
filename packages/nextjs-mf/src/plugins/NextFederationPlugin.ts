@@ -24,8 +24,6 @@ import {
   parseRemotes,
 } from '../internal';
 import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
-
-import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
 import { exposeNextjsPages } from '../loaders/nextPageMapLoader';
 
 // @ts-ignore
@@ -435,9 +433,9 @@ export class NextFederationPlugin {
     // );
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
 
-    if (compiler.options.mode === 'development') {
-      new DevHmrFixInvalidPongPlugin().apply(compiler);
-    }
+    // if (compiler.options.mode === 'development') {
+    //   new DevHmrFixInvalidPongPlugin().apply(compiler);
+    // }
   }
 }
 

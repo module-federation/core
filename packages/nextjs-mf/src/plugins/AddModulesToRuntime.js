@@ -6,50 +6,47 @@ class AddModulesToRuntimeChunkPlugin {
   constructor(options) {
     this.options = options;
   }
+
   apply(compiler) {
     compiler.options.optimization.minimize = false;
+
     compiler.hooks.compilation.tap(
       'AddModulesToRuntimeChunkPlugin',
       (compilation) => {
         compilation.hooks.optimizeChunks.tap(
           'AddModulesToRuntimeChunkPlugin',
           (chunks) => {
-            const { runtime, container, remotes, shared } = this.options;
+            const { runtime, container, remotes, shared, eager } = this.options;
 
             const getChunkByName = (name) =>
-              Array.from(chunks).find((chunk) => chunk.name === name);
-            const runtimeChunk = getChunkByName(runtime);
+              chunks.find((chunk) => chunk.name === name);
 
-            if (!runtimeChunk) return;
+            const runtimeChunk = getChunkByName(runtime);
+            if (!runtimeChunk || !runtimeChunk.hasRuntime()) return;
 
             const partialEntry = container ? getChunkByName(container) : null;
-
             const knownDelegates = remotes
               ? Object.values(remotes).map(
                   (remote) => remote.replace('internal ', '').split('?')[1]
                 )
               : null;
-
             const internalSharedModules = shared
               ? Object.entries(shared).map(
                   ([key, value]) => value.import || key
                 )
               : null;
-
             const partialContainerModules = partialEntry
               ? compilation.chunkGraph.getChunkModulesIterable(partialEntry)
               : null;
 
             for (const chunk of chunks) {
               if (chunk === runtimeChunk) continue;
+
               const modulesToMove = [];
               const containers = [];
-
               const modulesIterable =
-                compilation.chunkGraph.getOrderedChunkModulesIterable(
-                  chunk,
-                  undefined
-                );
+                compilation.chunkGraph.getOrderedChunkModulesIterable(chunk);
+
               for (const module of modulesIterable) {
                 if (
                   knownDelegates &&
@@ -61,11 +58,7 @@ class AddModulesToRuntimeChunkPlugin {
                 } else if (
                   internalSharedModules &&
                   internalSharedModules.some(
-                    (share) =>
-                      module?.rawRequest === share ||
-                      modulesToHoist.some((regex) =>
-                        module?.request?.match(regex)
-                      )
+                    (share) => module?.rawRequest === share
                   )
                 ) {
                   modulesToMove.push(module);
@@ -75,13 +68,12 @@ class AddModulesToRuntimeChunkPlugin {
                   modulesToMove.push(module);
                 }
               }
+
               if (partialContainerModules) {
-                for (const module of partialContainerModules) {
-                  containers.push(module);
-                }
+                containers.push(...partialContainerModules);
               }
 
-              for (const module of modulesToMove) {
+              for (const module of [...modulesToMove, ...containers]) {
                 if (
                   !compilation.chunkGraph.isModuleInChunk(module, runtimeChunk)
                 ) {
@@ -90,19 +82,9 @@ class AddModulesToRuntimeChunkPlugin {
                     module
                   );
                 }
-                if (this.options.eager) {
+                if (eager && modulesToMove.includes(module)) {
                   compilation.chunkGraph.disconnectChunkAndModule(
                     chunk,
-                    module
-                  );
-                }
-              }
-              for (const module of containers) {
-                if (
-                  !compilation.chunkGraph.isModuleInChunk(module, runtimeChunk)
-                ) {
-                  compilation.chunkGraph.connectChunkAndModule(
-                    runtimeChunk,
                     module
                   );
                 }
