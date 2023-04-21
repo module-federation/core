@@ -17,14 +17,15 @@ import CopyFederationPlugin from './CopyFederationPlugin';
 import AddModulesPlugin from './AddModulesToRuntime';
 import ContainerStatsPlugin from './ContainerStatsPlugin';
 import { ChunkCorrelationPlugin } from "@module-federation/node";
+import CommonJsChunkLoadingPlugin from './container/CommonJsChunkLoadingPlugin';
 import type { Compiler } from 'webpack';
 import path from 'path';
 
 import {
   parseRemotes,
   getDelegates,
-  DEFAULT_SHARE_SCOPE,
-} from '../internal';
+  DEFAULT_SHARE_SCOPE, DEFAULT_SHARE_SCOPE_BROWSER
+} from "../internal";
 import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
 
 import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
@@ -182,11 +183,11 @@ export class NextFederationPlugin {
 
       new AddModulesPlugin({
         runtime: 'webpack',
-        eager: false,
+        eager: true,
         remotes: this._options.remotes,
-        shared: DEFAULT_SHARE_SCOPE,
+        shared: DEFAULT_SHARE_SCOPE_BROWSER,
+        container: this._options.name
       }).apply(compiler);
-
 
 
       if (this._extraOptions.automaticPageStitching) {
@@ -217,6 +218,9 @@ export class NextFederationPlugin {
       ).apply(compiler);
     }
 
+    const defaultShared = isServer ? DEFAULT_SHARE_SCOPE : DEFAULT_SHARE_SCOPE_BROWSER;
+
+    // @ts-ignore
     const hostFederationPluginOptions: ModuleFederationPluginOptions = {
       ...this._options,
       runtime: false,
@@ -230,10 +234,11 @@ export class NextFederationPlugin {
         ...this._options.exposes,
       },
       remotes: {
-        ...this._options.remotes,
+        //@ts-ignore
+        ...this._options.remotes
       },
       shared: {
-        ...DEFAULT_SHARE_SCOPE,
+        ...defaultShared,
         ...this._options.shared,
       },
     };
@@ -241,7 +246,22 @@ export class NextFederationPlugin {
     if(!isServer) {
       //new ContainerStatsPlugin(hostFederationPluginOptions).apply(compiler);
       new ChunkCorrelationPlugin({filename: 'static/chunks/federated-stats.json'}).apply(compiler);
+      // new AddRuntimeModulePlugin({
+      //   runtimeChunkName: 'webpack',
+      //   customModulePath: '../inverse-self-formation',
+      //   entryName: 'invertStart',
+      //   entryPath: '../inverse-self-formation'
+      // }).apply(compiler);
+      // new CommonJsChunkLoadingPlugin({
+      //   asyncChunkLoading: true,
+      //   name: this._options.name,
+      //   remotes: this._options.remotes as Record<string, string>,
+      //   baseURI: compiler.options.output.publicPath,
+      //   verbose: true,
+      // }).apply(compiler);
     }
+
+
 
     const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];
 
@@ -260,10 +280,12 @@ export class NextFederationPlugin {
         include: [/internal-delegate-hoist/, compiler.context, /next[\\/]dist/],
         loader: path.resolve(__dirname, '../loaders/share-scope-hoist'),
         options: {
-          shared: DEFAULT_SHARE_SCOPE,
+          shared: defaultShared,
+          name: !isServer && this._options.name,
         },
       }
     );
+
 
     if (this._options.remotes) {
       const delegates = getDelegates(this._options.remotes);
@@ -402,6 +424,10 @@ export class NextFederationPlugin {
           filename: undefined,
           runtime: undefined,
           name: this._options.name + '_single',
+          library: {
+            ...hostFederationPluginOptions.library,
+            name: this._options.name + '_single',
+          }
         },
         { ModuleFederationPlugin }
       ).apply(compiler);

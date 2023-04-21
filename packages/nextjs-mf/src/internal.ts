@@ -23,19 +23,25 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   react: {
     singleton: true,
     requiredVersion: false,
-    eager: true,
+    eager: false,
     import: false,
   },
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: false,
     import: false,
-    eager: true,
+    eager: false,
+  },
+  'react/jsx-dev-runtime': {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+    eager: false,
   },
   'react-dom': {
     singleton: true,
     requiredVersion: false,
-    eager: true,
+    eager: false,
     import: false,
   },
   'next/dynamic': {
@@ -82,83 +88,15 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   },
 };
 
-// put host in-front of any shared module key, so "hostreact"
-export const reKeyHostShared = (
-  options: Shared = {}
-): Record<string, SharedConfig> => {
-  const shared = {
-    // ...options, causes multiple copies of a package to be loaded into a graph, dangerous for singletons
-    ...DEFAULT_SHARE_SCOPE,
-  } as Record<string, SharedConfig>;
+export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
+  DEFAULT_SHARE_SCOPE
+).reduce((acc, item) => {
+  const [key, value] = item as [string, SharedConfig];
 
-  const reKeyedInternalModules = Object.entries(shared).reduce((acc, item) => {
-    const [itemKey, shareOptions] = item;
+  acc[key] = { ...value, eager: true };
 
-    const shareKey = `host${(item as any).shareKey || itemKey}`;
-    acc[shareKey] = shareOptions;
-
-    if (!shareOptions.import) {
-      acc[shareKey].import = itemKey;
-    }
-
-    if (!shareOptions.shareKey) {
-      acc[shareKey].shareKey = itemKey;
-    }
-
-    if (DEFAULT_SHARE_SCOPE[itemKey]) {
-      acc[shareKey].packageName = itemKey;
-    }
-
-    return acc;
-  }, {} as Record<string, SharedConfig>);
-
-  return {
-    ...options, // pass through undoctored shared modules from the user config
-    ...reKeyedInternalModules,
-  } as Record<string, SharedConfig>;
-};
-
-// shared packages must be compiled into webpack bundle, not require() pass through
-export const internalizeSharedPackages = (
-  options: ModuleFederationPluginOptions,
-  compiler: Compiler
-) => {
-  //TODO: should use this util for other areas where we read MF options from userland
-  if (!options.shared) {
-    return;
-  }
-  const sharedOptions = parseShareOptions(options);
-  // get share keys from user, filter out ones that need to be external
-  const internalizableKeys = Object.keys(sharedOptions).filter((key) => {
-    if (!DEFAULT_SHARE_SCOPE[key]) {
-      return true;
-    }
-
-    const index = sharedOptions[key].import;
-
-    if (index && !DEFAULT_SHARE_SCOPE[index]) {
-      return true;
-    }
-
-    return false;
-  });
-
-  if (Array.isArray(compiler.options.externals)) {
-    // take original externals regex
-    const backupExternals = compiler.options.externals[0];
-    // if externals is a function (like when you're not running in serverless mode or creating a single build)
-    if (typeof backupExternals === 'function') {
-      // replace externals function with short-circuit, or fall back to original algo
-      compiler.options.externals[0] = (mod, callback) => {
-        if (!internalizableKeys.some((v) => mod.request?.includes(v))) {
-          return backupExternals(mod, callback);
-        }
-        // bundle it
-        return Promise.resolve();
-      };
-    }
-  }
-};
+  return acc;
+}, {} as SharedObject);
 
 export const externalizedShares: SharedObject = Object.entries(
   DEFAULT_SHARE_SCOPE

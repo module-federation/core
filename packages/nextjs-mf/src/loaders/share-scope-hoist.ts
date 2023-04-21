@@ -10,8 +10,8 @@ export default function patchDefaultSharedLoader(
   this: LoaderContext<Record<string, unknown>>,
   content: string
 ) {
-  const { shared } = this.getOptions() as Record<string, string>;
 
+  const { shared,name } = this.getOptions() as Record<string, string>;
   if (content.includes('hasShareHoist')) {
     return content;
   }
