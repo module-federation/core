@@ -16,6 +16,7 @@ import AddModulesPlugin from './AddModulesToRuntime';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import CommonJsChunkLoadingPlugin from './container/CommonJsChunkLoadingPlugin';
 import type { Compiler, container } from 'webpack';
+import { RuleSetConditionAbsolute } from 'webpack';
 import path from 'path';
 
 import {
@@ -31,7 +32,16 @@ type ConstructableModuleFederationPlugin = new (
   options: ModuleFederationPluginOptions
 ) => container.ModuleFederationPlugin;
 
-const regexEqual = (x: RegExp, y: RegExp): boolean => {
+const regexEqual = (
+  x:
+    | string
+    | RegExp
+    | ((value: string) => boolean)
+    | RuleSetLogicalConditionsAbsolute
+    | RuleSetConditionAbsolute[]
+    | undefined,
+  y: RegExp
+): boolean => {
   return (
     x instanceof RegExp &&
     y instanceof RegExp &&
@@ -247,6 +257,18 @@ function applyClientPlugins(
     require.resolve('../internal-delegate-hoist'),
     'main'
   ).apply(compiler);
+
+  new ChunkCorrelationPlugin({
+    filename: 'static/chunks/federated-stats.json',
+  }).apply(compiler);
+
+  new CommonJsChunkLoadingPlugin({
+    asyncChunkLoading: true,
+    name: options.name,
+    remotes: options.remotes as Record<string, string>,
+    baseURI: compiler.options.output.publicPath,
+    verbose: true,
+  }).apply(compiler);
 }
 
 /**
@@ -266,6 +288,170 @@ function getModuleFederationPluginConstructor(
     return compiler.webpack.container
       .ModuleFederationPlugin as unknown as ConstructableModuleFederationPlugin;
   }
+}
+
+/**
+ * Set up default shared values based on the environment.
+ * @param isServer - Boolean indicating if the code is running on the server.
+ */
+const setDefaultShared = (isServer: boolean) => {
+  return isServer ? DEFAULT_SHARE_SCOPE : DEFAULT_SHARE_SCOPE_BROWSER;
+};
+
+/**
+ * Inject module hoisting system.
+ */
+function injectModuleHoistingSystem(isServer: boolean, compiler: Compiler) {
+  const defaultShared = setDefaultShared(isServer);
+  // Inject hoist dependency into the upper scope of the application
+  const injectHoistDependency = {
+    enforce: 'pre',
+    test: /_document/,
+    include: [compiler.context, /next[\\/]dist/],
+    loader: path.resolve(__dirname, '../loaders/inject-hoist'),
+  };
+
+  // Populate hoist dependency with shared modules
+  const populateHoistDependency = {
+    test: /internal-delegate-hoist/,
+    include: [/internal-delegate-hoist/, compiler.context, /next[\\/]dist/],
+    loader: path.resolve(__dirname, '../loaders/share-scope-hoist'),
+    options: {
+      shared: defaultShared,
+      name: !isServer && options.name,
+    },
+  };
+
+  compiler.options.module.rules.unshift(
+    //@ts-ignore
+    injectHoistDependency,
+    populateHoistDependency
+  );
+
+  return {
+    applyAutomaticAsyncBoundary: () => {
+      // Implementation of applyAutomaticAsyncBoundary
+    },
+    applyRemoteDelegates: () => {
+      // Implementation of applyRemoteDelegates
+    },
+  };
+}
+
+/**
+ * Apply automatic async boundary.
+ */
+function applyAutomaticAsyncBoundary(compiler: Compiler) {
+  const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];
+
+  const jsRules = compiler.options.module.rules.find((r) => {
+    //@ts-ignore
+    return r && r.oneOf;
+  });
+
+  //@ts-ignore
+  if (jsRules && 'oneOf' in jsRules) {
+    // @ts-ignore
+    const foundJsLayer = jsRules.oneOf.find((r) => {
+      return regexEqual(r.test, /\.(tsx|ts|js|cjs|mjs|jsx)$/) && !r.issuerLayer;
+    });
+
+    if (foundJsLayer) {
+      let loaderChain = [];
+      if (Array.isArray(foundJsLayer.use)) {
+        loaderChain = [...foundJsLayer.use];
+      } else {
+        loaderChain = [foundJsLayer.use];
+      }
+      //@ts-ignore
+      // @ts-ignore
+      jsRules.oneOf.unshift({
+        test: (request: string) => {
+          if (
+            allowedPaths.some((p) =>
+              request.includes(path.join(compiler.context, p))
+            )
+          ) {
+            return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request);
+          }
+          return false;
+        },
+        exclude: [
+          /node_modules/,
+          /_document/,
+          /_middleware/,
+          /pages[\\/]middleware/,
+          /pages[\\/]api/,
+        ],
+        resourceQuery: (query: string) => !query.includes('hasBoundary'),
+        use: [
+          //@ts-ignore
+          ...loaderChain,
+          //@ts-ignore
+          {
+            loader: path.resolve(__dirname, '../loaders/async-boundary-loader'),
+          },
+        ],
+      });
+    }
+  }
+}
+
+/**
+ * Apply remote delegates.
+ */
+function applyRemoteDelegates(options, compiler) {
+  if (options.remotes) {
+    const delegates = getDelegates(options.remotes);
+
+    compiler.options.module.rules.push({
+      enforce: 'pre',
+      test: [/internal-delegate-hoist/, /delegate-hoist-container/],
+      include: [
+        compiler.context,
+        /internal-delegate-hoist/,
+        /delegate-hoist-container/,
+        /next[\\/]dist/,
+      ],
+      loader: path.resolve(__dirname, '../loaders/delegateLoader'),
+      options: {
+        delegates,
+      },
+    });
+
+    if (delegates && Object.keys(delegates).length > 0) {
+      const knownDelegates = Object.entries(delegates).map(([name, remote]) => {
+        const delegate = remote.replace('internal ', '').split('?')[0];
+        return delegate;
+      });
+
+      if (this._options.exposes) {
+        compiler.options.module.rules.push({
+          enforce: 'pre',
+          test(request: string) {
+            const found = knownDelegates.some((delegate) => {
+              return request.includes(delegate);
+            });
+
+            return found;
+          },
+          loader: path.resolve(__dirname, '../loaders/inject-single-host'),
+          options: {
+            name: this._options.name,
+          },
+        });
+      }
+    }
+  }
+}
+
+// Create runtime variables.
+//@ts-ignore
+function createRuntimeVariables(webpack) {
+  new webpack.DefinePlugin({
+    'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
+    'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
+  }).apply(compiler);
 }
 
 /**
@@ -329,65 +515,7 @@ export class NextFederationPlugin {
       applyClientPlugins(compiler, this._options, this._extraOptions);
     }
 
-    const defaultShared = isServer
-      ? DEFAULT_SHARE_SCOPE
-      : DEFAULT_SHARE_SCOPE_BROWSER;
-
-    //   const ModuleFederationPlugin = isServer
-    //     ? require('@module-federation/node').NodeFederationPlugin
-    //     : webpack.container.ModuleFederationPlugin;
-    //
-    //   // ignore edge runtime and middleware builds
-    //   if (!ModuleFederationPlugin) {
-    //     return;
-    //   }
-    //
-    //   // hoist modules into remote runtime
-    //   new AddModulesPlugin({
-    //     runtime: this._options.name,
-    //     eager: false,
-    //     remotes: this._options.remotes,
-    //   }).apply(compiler);
-    //
-    //   new AddModulesPlugin({
-    //     runtime: 'webpack',
-    //     eager: true,
-    //     remotes: this._options.remotes,
-    //     shared: DEFAULT_SHARE_SCOPE_BROWSER,
-    //     container: this._options.name + '_single',
-    //   }).apply(compiler);
-    //
-    //   if (this._extraOptions.automaticPageStitching) {
-    //     compiler.options.module.rules.push({
-    //       test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
-    //       loader: path.resolve(
-    //         __dirname,
-    //         '../loaders/patchNextClientPageLoader'
-    //       ),
-    //     });
-    //   }
-    //
-    //   if (this._options.library) {
-    //     console.error('[nextjs-mf] you cannot set custom library');
-    //   }
-    //
-    //   this._options.library = {
-    //     // assign remote name to object to avoid SWC mangling top level variable
-    //     type: 'window',
-    //     name: this._options.name,
-    //   };
-    //
-    //   // add hoist to main entry for sync avaliability.
-    //   new webpack.EntryPlugin(
-    //     compiler.context,
-    //     require.resolve('../internal-delegate-hoist'),
-    //     'main'
-    //   ).apply(compiler);
-    // }
-    //
-    // const defaultShared = isServer
-    //   ? DEFAULT_SHARE_SCOPE
-    //   : DEFAULT_SHARE_SCOPE_BROWSER;
+    const defaultShared = setDefaultShared(isServer);
 
     // @ts-ignore
     const hostFederationPluginOptions: ModuleFederationPluginOptions = {
@@ -410,146 +538,17 @@ export class NextFederationPlugin {
       },
     };
 
-    if (!isServer) {
-      //new ContainerStatsPlugin(hostFederationPluginOptions).apply(compiler);
-      new ChunkCorrelationPlugin({
-        filename: 'static/chunks/federated-stats.json',
-      }).apply(compiler);
-      // new AddRuntimeModulePlugin({
-      //   runtimeChunkName: 'webpack',
-      //   customModulePath: '../inverse-self-formation',
-      //   entryName: 'invertStart',
-      //   entryPath: '../inverse-self-formation'
-      // }).apply(compiler);
-      new CommonJsChunkLoadingPlugin({
-        asyncChunkLoading: true,
-        name: this._options.name,
-        remotes: this._options.remotes as Record<string, string>,
-        baseURI: compiler.options.output.publicPath,
-        verbose: true,
-      }).apply(compiler);
-    }
+    compiler.options.devtool = 'source-map';
 
-    const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];
+    //@ts-ignore
+    compiler.options.output.publicPath = 'auto';
+    compiler.options.output.uniqueName = this._options.name;
 
     // inject module hoisting system
-    compiler.options.module.rules.unshift(
-      // inject hoist dependency into upper scope of application
-      {
-        enforce: 'pre',
-        test: /_document/,
-        include: [compiler.context, /next[\\/]dist/],
-        loader: path.resolve(__dirname, '../loaders/inject-hoist'),
-      },
-      // populate hoist dependency with shared modules
-      {
-        test: /internal-delegate-hoist/,
-        include: [/internal-delegate-hoist/, compiler.context, /next[\\/]dist/],
-        loader: path.resolve(__dirname, '../loaders/share-scope-hoist'),
-        options: {
-          shared: defaultShared,
-          name: !isServer && this._options.name,
-        },
-      }
-    );
-
-    if (this._options.remotes) {
-      const delegates = getDelegates(this._options.remotes);
-      // only apply loader if delegates are present
-      if (delegates && Object.keys(delegates).length > 0) {
-        const knownDelegates = Object.entries(delegates).map(
-          ([name, remote]) => {
-            const delegate = remote.replace('internal ', '').split('?')[0];
-            return delegate;
-          }
-        );
-        if (this._options.exposes) {
-          compiler.options.module.rules.push({
-            enforce: 'pre',
-            test(request: string) {
-              const found = knownDelegates.some((delegate) => {
-                return request.includes(delegate);
-              });
-
-              return found;
-            },
-            loader: path.resolve(__dirname, '../loaders/inject-single-host'),
-            options: {
-              name: this._options.name,
-            },
-          });
-        }
-      }
-      compiler.options.module.rules.push({
-        enforce: 'pre',
-        test: [/internal-delegate-hoist/, /delegate-hoist-container/],
-        include: [
-          compiler.context,
-          /internal-delegate-hoist/,
-          /delegate-hoist-container/,
-          /next[\\/]dist/,
-        ],
-        loader: path.resolve(__dirname, '../loaders/delegateLoader'),
-        options: {
-          delegates,
-        },
-      });
-    }
+    applyRemoteDelegates(this._options, compiler);
 
     if (this._extraOptions.automaticAsyncBoundary) {
-      const jsRules = compiler.options.module.rules.find((r) => {
-        //@ts-ignore
-        return r && r.oneOf;
-      });
-
-      //@ts-ignore
-      if (jsRules && jsRules.oneOf) {
-        //@ts-ignore
-        const foundJsLayer = jsRules.oneOf.find((r) => {
-          return (
-            regexEqual(r.test, /\.(tsx|ts|js|cjs|mjs|jsx)$/) && !r.issuerLayer
-          );
-        });
-
-        if (foundJsLayer) {
-          let loaderChain = [];
-          if (Array.isArray(foundJsLayer.use)) {
-            loaderChain = [...foundJsLayer.use];
-          } else {
-            loaderChain = [foundJsLayer.use];
-          }
-          //@ts-ignore
-          jsRules.oneOf.unshift({
-            test: (request: string) => {
-              if (
-                allowedPaths.some((p) =>
-                  request.includes(path.join(compiler.context, p))
-                )
-              ) {
-                return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request);
-              }
-              return false;
-            },
-            exclude: [
-              /node_modules/,
-              /_document/,
-              /_middleware/,
-              /pages[\\/]middleware/,
-              /pages[\\/]api/,
-            ],
-            resourceQuery: (query: string) => !query.includes('hasBoundary'),
-            use: [
-              ...loaderChain,
-              {
-                loader: path.resolve(
-                  __dirname,
-                  '../loaders/async-boundary-loader'
-                ),
-              },
-            ],
-          });
-        }
-      }
+      applyAutomaticAsyncBoundary(this._options, compiler);
     }
 
     //todo runtime variable creation needs to be applied for server as well. this is just for client
@@ -559,15 +558,6 @@ export class NextFederationPlugin {
       'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
     }).apply(compiler);
 
-    // ignore edge runtime and middleware builds
-    if (!ModuleFederationPlugin) {
-      return;
-    }
-    compiler.options.devtool = 'source-map';
-
-    //@ts-ignore
-    compiler.options.output.publicPath = 'auto';
-    compiler.options.output.uniqueName = this._options.name;
     if (ModuleFederationPlugin) {
       // @ts-ignore
       new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
