@@ -266,7 +266,7 @@ function applyClientPlugins(
     name: options.name,
     remotes: options.remotes as Record<string, string>,
     baseURI: compiler.options.output.publicPath,
-    verbose: true,
+    verbose: false,
   }).apply(compiler);
 }
 
