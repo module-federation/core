@@ -14,35 +14,43 @@ class AddModulesToRuntimeChunkPlugin {
         compilation.hooks.optimizeChunks.tap(
           'AddModulesToRuntimeChunkPlugin',
           (chunks) => {
-            const runtimeChunk = Array.from(chunks).find((chunk) => {
-              return chunk.name === this.options.runtime && chunk.hasRuntime();
-            });
+            const { runtime, container, remotes, shared } = this.options;
+
+            const getChunkByName = (name) =>
+              Array.from(chunks).find((chunk) => chunk.name === name);
+            const runtimeChunk = getChunkByName(runtime);
+
             if (!runtimeChunk) return;
 
-            const knownDelegates =
-              this.options.remotes &&
-              Object.entries(this.options.remotes).map(([name, remote]) => {
-                const delegate = remote.replace('internal ', '').split('?')[1];
-                return delegate;
-              });
+            const partialEntry = container ? getChunkByName(container) : null;
 
-            const internalSharedModules = this.options.shared
-              ? Object.entries(this.options.shared).map(
-                  ([k, v]) => v.import || k
+            const knownDelegates = remotes
+              ? Object.values(remotes).map(
+                  (remote) => remote.replace('internal ', '').split('?')[1]
                 )
-              : false;
+              : null;
+
+            const internalSharedModules = shared
+              ? Object.entries(shared).map(
+                  ([key, value]) => value.import || key
+                )
+              : null;
+
+            const partialContainerModules = partialEntry
+              ? compilation.chunkGraph.getChunkModulesIterable(partialEntry)
+              : null;
 
             for (const chunk of chunks) {
               if (chunk === runtimeChunk) continue;
               const modulesToMove = [];
               const containers = [];
+
               const modulesIterable =
                 compilation.chunkGraph.getOrderedChunkModulesIterable(
                   chunk,
                   undefined
                 );
               for (const module of modulesIterable) {
-                //TODO: get this from config, not hardcoded
                 if (
                   knownDelegates &&
                   knownDelegates.some((delegate) =>
@@ -65,6 +73,11 @@ class AddModulesToRuntimeChunkPlugin {
                   module?.userRequest?.includes('internal-delegate-hoist')
                 ) {
                   modulesToMove.push(module);
+                }
+              }
+              if (partialContainerModules) {
+                for (const module of partialContainerModules) {
+                  containers.push(module);
                 }
               }
 

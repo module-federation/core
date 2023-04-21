@@ -6,7 +6,7 @@
 'use strict';
 
 import type { Chunk, ChunkGraph, Compiler } from 'webpack';
-import { RuntimeModule, RuntimeGlobals, Template, debug } from "webpack";
+import { RuntimeGlobals, RuntimeModule, Template } from 'webpack';
 //@ts-ignore
 import { getUndoPath } from 'webpack/lib/util/identifier';
 //@ts-ignore
@@ -152,20 +152,30 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     const ccm = chunkGraph.getChunkModules(chunk);
     // check if module type is in chunk
     if (chunk.name !== 'webpack') return Template.asString('');
-    const containerEntry = ccm.filter((module) => {
-      return module.constructor.name === 'ContainerEntryModule';
-    }).map((module) => {
-      return Template.asString(
-        //@ts-ignore
-        `try {window[${JSON.stringify(module._name || name)}] = __webpack_require__(${JSON.stringify(
+    const containerEntry = ccm
+      .filter((module) => {
+        return module.constructor.name === 'ContainerEntryModule';
+      })
+      .map((module) => {
+        return `
+        try {
+        console.log('should set from host', document.currentScript.src);
+        window[${JSON.stringify(
+          //@ts-ignore
+          module._name || name
+        )}] = __webpack_require__(${JSON.stringify(
           module?.id || module?.debugId
         )})
         } catch (e) {
           console.error('host runtime was unable to initialize its own remote',e);
-        }`
+        }`;
+      });
+    if (containerEntry) {
+      console.log(
+        'found container entry module for inverse boot',
+        containerEntry
       );
-    })
-
+    }
     return Template.asString(containerEntry);
 
     const outputName = this.compilation.getPath(
