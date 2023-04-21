@@ -37,7 +37,6 @@ const regexEqual = (
     | string
     | RegExp
     | ((value: string) => boolean)
-    | RuleSetLogicalConditionsAbsolute
     | RuleSetConditionAbsolute[]
     | undefined,
   y: RegExp
@@ -301,7 +300,11 @@ const setDefaultShared = (isServer: boolean) => {
 /**
  * Inject module hoisting system.
  */
-function injectModuleHoistingSystem(isServer: boolean, compiler: Compiler) {
+function injectModuleHoistingSystem(
+  isServer: boolean,
+  options: ModuleFederationPluginOptions,
+  compiler: Compiler
+) {
   const defaultShared = setDefaultShared(isServer);
   // Inject hoist dependency into the upper scope of the application
   const injectHoistDependency = {
@@ -341,7 +344,11 @@ function injectModuleHoistingSystem(isServer: boolean, compiler: Compiler) {
 /**
  * Apply automatic async boundary.
  */
-function applyAutomaticAsyncBoundary(compiler: Compiler) {
+function applyAutomaticAsyncBoundary(
+  options: ModuleFederationPluginOptions,
+  extraOptions: NextFederationPluginExtraOptions,
+  compiler: Compiler
+) {
   const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];
 
   const jsRules = compiler.options.module.rules.find((r) => {
@@ -353,6 +360,7 @@ function applyAutomaticAsyncBoundary(compiler: Compiler) {
   if (jsRules && 'oneOf' in jsRules) {
     // @ts-ignore
     const foundJsLayer = jsRules.oneOf.find((r) => {
+      //@ts-ignore
       return regexEqual(r.test, /\.(tsx|ts|js|cjs|mjs|jsx)$/) && !r.issuerLayer;
     });
 
@@ -400,7 +408,10 @@ function applyAutomaticAsyncBoundary(compiler: Compiler) {
 /**
  * Apply remote delegates.
  */
-function applyRemoteDelegates(options, compiler) {
+function applyRemoteDelegates(
+  options: ModuleFederationPluginOptions,
+  compiler: Compiler
+) {
   if (options.remotes) {
     const delegates = getDelegates(options.remotes);
 
@@ -425,7 +436,7 @@ function applyRemoteDelegates(options, compiler) {
         return delegate;
       });
 
-      if (this._options.exposes) {
+      if (options.exposes) {
         compiler.options.module.rules.push({
           enforce: 'pre',
           test(request: string) {
@@ -437,21 +448,12 @@ function applyRemoteDelegates(options, compiler) {
           },
           loader: path.resolve(__dirname, '../loaders/inject-single-host'),
           options: {
-            name: this._options.name,
+            name: options.name,
           },
         });
       }
     }
   }
-}
-
-// Create runtime variables.
-//@ts-ignore
-function createRuntimeVariables(webpack) {
-  new webpack.DefinePlugin({
-    'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
-    'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
-  }).apply(compiler);
 }
 
 /**
@@ -548,8 +550,10 @@ export class NextFederationPlugin {
     applyRemoteDelegates(this._options, compiler);
 
     if (this._extraOptions.automaticAsyncBoundary) {
-      applyAutomaticAsyncBoundary(this._options, compiler);
+      applyAutomaticAsyncBoundary(this._options, this._extraOptions, compiler);
     }
+
+    injectModuleHoistingSystem(isServer, this._options, compiler);
 
     //todo runtime variable creation needs to be applied for server as well. this is just for client
     // TODO: this needs to be refactored into something more comprehensive. this is just a quick fix
