@@ -42,6 +42,57 @@ const storybookConfig = {
 
 module.exports = storybookConfig;
 ```
+---
+### For the [NX](https://nx.dev/getting-started/intro) projects:
+
+Replace NX utils `withModuleFederation` in `webpack.config.js` with our utils `withModuleFederation`.
+Example:
+```javascript
+const { composePlugins, withNx } = require('@nrwl/webpack');
+const { withReact } = require('@nrwl/react');
+const { withModuleFederation } = require('@module-federation/storybook-addon');
+
+const baseConfig = require('./module-federation.config');
+
+const config = {
+  ...baseConfig,
+};
+
+module.exports = composePlugins(
+  withNx(),
+  withReact(),
+  withModuleFederation(config)
+);
+```
+
+In file `./storybook/main.js`:
+```js
+const nxModuleFederationConfig = {
+    // Module Federation config
+};
+
+const storybookConfig = {
+  "stories": [
+    "../src/**/*.stories.mdx",
+    "../src/**/*.stories.@(js|jsx|ts|tsx)"
+  ],
+  "addons": [
+    // other addons,
+    {
+      name: "@module-federation/storybook-addon",
+      options: {
+        nxModuleFederationConfig
+      }
+    }
+  ],
+  "framework": "@storybook/react",
+  "core": {
+    "builder": "@storybook/builder-webpack5" // is required webpack 5 builder
+  }
+};
+
+module.exports = storybookConfig;
+```
 
 ## Usage
 
