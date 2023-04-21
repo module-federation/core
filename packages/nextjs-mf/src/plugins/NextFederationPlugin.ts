@@ -23,8 +23,8 @@ import path from 'path';
 import {
   parseRemotes,
   getDelegates,
-  DEFAULT_SHARE_SCOPE,
-} from '../internal';
+  DEFAULT_SHARE_SCOPE, DEFAULT_SHARE_SCOPE_BROWSER
+} from "../internal";
 import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
 
 import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
@@ -182,11 +182,10 @@ export class NextFederationPlugin {
 
       new AddModulesPlugin({
         runtime: 'webpack',
-        eager: false,
+        eager: true,
         remotes: this._options.remotes,
-        shared: DEFAULT_SHARE_SCOPE,
+        shared: DEFAULT_SHARE_SCOPE_BROWSER,
       }).apply(compiler);
-
 
 
       if (this._extraOptions.automaticPageStitching) {
@@ -217,6 +216,9 @@ export class NextFederationPlugin {
       ).apply(compiler);
     }
 
+    const defaultShared = isServer ? DEFAULT_SHARE_SCOPE : DEFAULT_SHARE_SCOPE_BROWSER;
+
+    // @ts-ignore
     const hostFederationPluginOptions: ModuleFederationPluginOptions = {
       ...this._options,
       runtime: false,
@@ -233,7 +235,7 @@ export class NextFederationPlugin {
         ...this._options.remotes,
       },
       shared: {
-        ...DEFAULT_SHARE_SCOPE,
+        ...defaultShared,
         ...this._options.shared,
       },
     };
@@ -260,10 +262,12 @@ export class NextFederationPlugin {
         include: [/internal-delegate-hoist/, compiler.context, /next[\\/]dist/],
         loader: path.resolve(__dirname, '../loaders/share-scope-hoist'),
         options: {
-          shared: DEFAULT_SHARE_SCOPE,
+          shared: defaultShared,
+          name: !isServer && this._options.name,
         },
       }
     );
+
 
     if (this._options.remotes) {
       const delegates = getDelegates(this._options.remotes);

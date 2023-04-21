@@ -24,9 +24,9 @@ export interface FlushedChunksProps {
 export const FlushedChunks = ({ chunks }: FlushedChunksProps) => {
   const scripts = chunks
     .filter((c) => {
-      if(c.includes('?')) {
-        return c.split('?')[0].endsWith('.js')
-      }
+      // if(c.includes('?')) {
+      //   return c.split('?')[0].endsWith('.js')
+      // }
       return c.endsWith('.js')
     })
     .map((chunk) => {
@@ -43,8 +43,6 @@ export const FlushedChunks = ({ chunks }: FlushedChunksProps) => {
         null
       );
     });
-
-  console.log(scripts)
 
   const css = chunks
     .filter((c) => c.endsWith('.css'))

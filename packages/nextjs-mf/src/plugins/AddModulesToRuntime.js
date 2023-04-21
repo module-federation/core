@@ -7,6 +7,7 @@ class AddModulesToRuntimeChunkPlugin {
     this.options = options;
   }
   apply(compiler) {
+    compiler.options.optimization.minimize = false;
     compiler.hooks.compilation.tap(
       'AddModulesToRuntimeChunkPlugin',
       (compilation) => {
