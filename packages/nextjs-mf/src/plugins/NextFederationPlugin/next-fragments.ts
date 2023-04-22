@@ -9,7 +9,7 @@ import type {
 } from "@module-federation/utilities";
 import { ChunkCorrelationPlugin } from "@module-federation/node";
 
-import CommonJsChunkLoadingPlugin from "../container/CommonJsChunkLoadingPlugin";
+import InvertedContainerPlugin from "../container/InvertedContainerPlugin";
 import { DEFAULT_SHARE_SCOPE, DEFAULT_SHARE_SCOPE_BROWSER, getDelegates } from "../../internal";
 import AddModulesPlugin from "../AddModulesToRuntime";
 
@@ -316,6 +316,7 @@ export function handleServerExternals(
  @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
  @param {NextFederationPluginExtraOptions} extraOptions - The NextFederationPluginExtraOptions instance.
  @param {Compiler} compiler - The Webpack compiler instance.
+ @remarks This function applies an automatic async boundary to the Next.js application.
  */
 export function applyAutomaticAsyncBoundary(
   options: ModuleFederationPluginOptions,
@@ -395,7 +396,7 @@ export function applyAutomaticAsyncBoundary(
  * - AddModulesPlugin: Adds modules to the webpack container runtime that can be streamed to other runtimes.
  * - EntryPlugin: Creates an entry point for the application that delegates module loading to the container runtime.
  * - ChunkCorrelationPlugin: Collects metadata on chunks to enable proper module loading across different runtimes.
- * - CommonJsChunkLoadingPlugin: Adds custom runtime modules to the container runtime to allow a host to expose its
+ * - InvertedContainerPlugin: Adds custom runtime modules to the container runtime to allow a host to expose its
  *   own remote interface at startup.
  *
  * If automatic page stitching is enabled, a loader is added to process the `next/dist/client/page-loader.js`
@@ -458,11 +459,9 @@ export function applyClientPlugins(
   }).apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler
-  new CommonJsChunkLoadingPlugin({
-    asyncChunkLoading: true,
+  new InvertedContainerPlugin({
     name: options.name,
     remotes: options.remotes as Record<string, string>,
-    baseURI: compiler.options.output.publicPath,
     verbose: false,
   }).apply(compiler);
 }
