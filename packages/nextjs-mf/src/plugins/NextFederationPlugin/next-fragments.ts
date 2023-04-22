@@ -412,11 +412,14 @@ export function applyClientPlugins(
 
   // Add a new plugin to hoist modules into remote runtime
   new AddModulesPlugin({
+    debug: false,
     runtime: 'webpack',
     eager: true,
     remotes,
+    // @ts-ignore
     shared: DEFAULT_SHARE_SCOPE_BROWSER,
     container: name + '_single',
+    // @ts-ignore
     applicationName: name,
   }).apply(compiler);
 
