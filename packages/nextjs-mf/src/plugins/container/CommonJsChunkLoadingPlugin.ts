@@ -1,4 +1,4 @@
-import type { Chunk, Compiler } from 'webpack';
+import type { Chunk, Compiler,Compilation } from 'webpack';
 //@ts-ignore
 import type { ModuleFederationPluginOptions } from '../types';
 //@ts-ignore

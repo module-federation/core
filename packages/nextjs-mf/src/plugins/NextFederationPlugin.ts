@@ -284,6 +284,7 @@ export class NextFederationPlugin {
       }
     );
 
+
     if (this._options.remotes) {
       const delegates = getDelegates(this._options.remotes);
       // only apply loader if delegates are present
