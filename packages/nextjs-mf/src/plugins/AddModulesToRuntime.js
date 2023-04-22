@@ -1,61 +1,85 @@
-// AddModulesToRuntimeChunkPlugin.js
-
-const modulesToHoist = [/\/react\//];
-
+/**
+ * A webpack plugin that moves specified modules from chunks to runtime chunk.
+ * @class AddModulesToRuntimeChunkPlugin
+ */
 class AddModulesToRuntimeChunkPlugin {
   constructor(options) {
-    this.options = options;
+    this.options = { debug: false, ...options };
   }
 
+  /**
+   * Applies the plugin to the webpack compiler.
+   * @param {Object} compiler - The webpack compiler instance.
+   */
   apply(compiler) {
-    compiler.options.optimization.minimize = false;
+    // Check if the target is the server
+    const isServer = compiler.options.name === 'server';
 
+    // Tap into compilation hooks
     compiler.hooks.compilation.tap(
       'AddModulesToRuntimeChunkPlugin',
       (compilation) => {
+        // Tap into optimizeChunks hook
         compilation.hooks.optimizeChunks.tap(
           'AddModulesToRuntimeChunkPlugin',
           (chunks) => {
-            const { runtime, container, remotes, shared, eager } = this.options;
+            const {
+              runtime,
+              container,
+              remotes,
+              shared,
+              eager,
+              applicationName,
+            } = this.options;
 
+            // Helper function to find a chunk by its name
             const getChunkByName = (name) =>
               chunks.find((chunk) => chunk.name === name);
 
+            // Get the runtime chunk and return if it's not found or has no runtime
             const runtimeChunk = getChunkByName(runtime);
             if (!runtimeChunk || !runtimeChunk.hasRuntime()) return;
 
+            // Get the container chunk if specified
             const partialEntry = container ? getChunkByName(container) : null;
+
+            // Get the delegate module names for remote chunks if specified
             const knownDelegates = remotes
               ? Object.values(remotes).map(
                   (remote) => remote.replace('internal ', '').split('?')[1]
                 )
               : null;
+
+            // Get the shared module names to their imports if specified
             const internalSharedModules = shared
               ? Object.entries(shared).map(
                   ([key, value]) => value.import || key
                 )
               : null;
+
+            // Get the modules of the container chunk if specified
             const partialContainerModules = partialEntry
               ? compilation.chunkGraph.getOrderedChunkModulesIterable(
                   partialEntry
                 )
               : null;
 
-            for (const chunk of chunks) {
-              if (chunk === runtimeChunk) continue;
-
+            // Iterate over each chunk
+            for (const chunk of chunks.filter(
+              (chunk) =>
+                chunk !== runtimeChunk &&
+                (chunk.name || chunk.id) &&
+                applicationName &&
+                (chunk.name || chunk.id).startsWith(applicationName)
+            )) {
               const modulesToMove = [];
               const containers = [];
               const modulesIterable =
                 compilation.chunkGraph.getOrderedChunkModulesIterable(chunk);
+              const delegateSet = new Set(knownDelegates || []);
 
               for (const module of modulesIterable) {
-                if (
-                  knownDelegates &&
-                  knownDelegates.some((delegate) =>
-                    module?.rawRequest?.includes(delegate)
-                  )
-                ) {
+                if (delegateSet.has(module?.rawRequest)) {
                   containers.push(module);
                 } else if (
                   internalSharedModules &&
@@ -70,6 +94,7 @@ class AddModulesToRuntimeChunkPlugin {
                   modulesToMove.push(module);
                 }
               }
+
               if (partialContainerModules) {
                 for (const module of partialContainerModules) {
                   if (module.rawRequest) {
@@ -78,76 +103,44 @@ class AddModulesToRuntimeChunkPlugin {
                     containers.push(module);
                   }
                 }
-                //
               }
-              for (const module of [...modulesToMove, ...containers]) {
-                // if (
-                //   !compilation.chunkGraph.isModuleInChunk(module, runtimeChunk)
-                // ) {
-                compilation.chunkGraph.connectChunkAndModule(
-                  runtimeChunk,
-                  module
-                );
-                // }
+
+              const modulesToConnect = modulesToMove.concat(containers);
+              const { chunkGraph } = compilation;
+              const runtimeChunkModules =
+                chunkGraph.getOrderedChunkModulesIterable(runtimeChunk);
+
+              for (const module of modulesToConnect) {
+                if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
+                  chunkGraph.connectChunkAndModule(runtimeChunk, module);
+                }
+
                 if (eager && modulesToMove.includes(module)) {
-                  // if (runtime !== 'webpack-runtime') {
-                  //   console.log(
-                  //     'removing',
-                  //     module.id || module.identifier(),
-                  //     'from',
-                  //     chunk.name,
-                  //     'to',
-                  //     runtimeChunk.name
-                  //   );
-                  // }
-                  compilation.chunkGraph.disconnectChunkAndModule(
-                    chunk,
-                    module
-                  );
+                  if (!isServer && this.options.debug) {
+                    console.log(
+                      `removing ${module.id || module.identifier()} from ${
+                        chunk.name
+                      } to ${runtimeChunk.name}`
+                    );
+                  }
+                  chunkGraph.disconnectChunkAndModule(chunk, module);
                 }
               }
 
-              if (runtime !== 'webpack-runtime') {
-                if (chunk.name || chunk.id) {
-                  if (
-                    !(chunk.name || chunk.id).startsWith('pages') &&
-                    !(chunk.name || chunk.id).startsWith('main')
-                  ) {
-                    runtimeChunk.getModules().forEach((module) => {
-                      if (
-                        knownDelegates &&
-                        knownDelegates.some((delegate) =>
-                          module?.rawRequest?.includes(delegate)
-                        )
-                      ) {
-                        compilation.chunkGraph.connectChunkAndModule(
-                          chunk,
-                          module
-                        );
-
-                        console.log(
-                          'adding',
-                          module.rawRequest,
-                          'to',
-                          chunk.name,
-                          'from',
-                          runtimeChunk.name,
-                          'not removing it'
-                        );
-                        // console.log(
-                        //   module.id || module.identifier(),
-                        //   module.type,
-                        //   module.moduleType,
-                        //   module
-                        // );
-                      }
-                    });
+              for (const module of runtimeChunkModules) {
+                const { rawRequest } = module || {};
+                if (!chunkGraph.isModuleInChunk(module, chunk)) {
+                  if (delegateSet.has(rawRequest)) {
+                    chunkGraph.connectChunkAndModule(chunk, module);
+                    if (this.options.debug) {
+                      console.log(
+                        `adding ${module.rawRequest} to ${chunk.name} from ${runtimeChunk.name} not removing it`
+                      );
+                    }
                   }
                 }
               }
             }
-
-            // console.log(chunks);
           }
         );
       }
