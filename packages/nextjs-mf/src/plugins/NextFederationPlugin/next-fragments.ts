@@ -417,6 +417,7 @@ export function applyClientPlugins(
     remotes,
     shared: DEFAULT_SHARE_SCOPE_BROWSER,
     container: name + '_single',
+    applicationName: name,
   }).apply(compiler);
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
