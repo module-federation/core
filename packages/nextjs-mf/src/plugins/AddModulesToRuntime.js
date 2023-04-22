@@ -22,7 +22,7 @@ class AddModulesToRuntimeChunkPlugin {
               chunks.find((chunk) => chunk.name === name);
 
             const runtimeChunk = getChunkByName(runtime);
-            if (!runtimeChunk || !runtimeChunk.hasRuntime()) return;
+            if (!runtimeChunk?.hasRuntime()) return;
 
             const partialEntry = container ? getChunkByName(container) : null;
             const knownDelegates = remotes
