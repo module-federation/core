@@ -68,9 +68,8 @@ class AddModulesToRuntimeChunkPlugin {
             for (const chunk of chunks.filter(
               (chunk) =>
                 chunk !== runtimeChunk &&
-                (chunk.name || chunk.id) &&
                 applicationName &&
-                (chunk.name || chunk.id).startsWith(applicationName)
+                (chunk.name || chunk.id)?.startsWith(applicationName)
             )) {
               const modulesToMove = [];
               const containers = [];
