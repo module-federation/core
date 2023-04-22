@@ -81,8 +81,7 @@ class AddModulesToRuntimeChunkPlugin {
                 if (delegateSet.has(module?.rawRequest)) {
                   containers.push(module);
                 } else if (
-                  internalSharedModules &&
-                  internalSharedModules.some(
+                  internalSharedModules?.some(
                     (share) => module?.rawRequest === share
                   )
                 ) {
