@@ -97,11 +97,8 @@ class AddModulesToRuntimeChunkPlugin {
 
               if (partialContainerModules) {
                 for (const module of partialContainerModules) {
-                  if (module.rawRequest) {
-                    modulesToMove.push(module);
-                  } else {
-                    containers.push(module);
-                  }
+                 const destinationArray = module.rawRequest ? modulesToMove : containers
+                 destinationArray.push(module)
                 }
               }
 
