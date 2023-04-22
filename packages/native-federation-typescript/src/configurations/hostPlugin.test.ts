@@ -69,7 +69,6 @@ describe('hostPlugin', () => {
       expect(mapRemotesToDownload).toStrictEqual({
         moduleFederationTypescript: 'http://localhost:3000/subpatha/subpathb/@mf-types.zip'
       })
-
     })
   })
 })
