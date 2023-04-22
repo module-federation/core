@@ -123,8 +123,8 @@ class AddModulesToRuntimeChunkPlugin {
               }
 
               for (const module of runtimeChunkModules) {
-                const { rawRequest } = module || {};
                 if (!chunkGraph.isModuleInChunk(module, chunk)) {
+                  const { rawRequest } = module || {};
                   if (delegateSet.has(rawRequest)) {
                     chunkGraph.connectChunkAndModule(chunk, module);
                     if (this.options.debug) {
