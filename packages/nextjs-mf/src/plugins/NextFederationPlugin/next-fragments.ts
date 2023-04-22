@@ -338,8 +338,9 @@ export function applyAutomaticAsyncBoundary(
     });
 
     if (foundJsLayer) {
-      const loaderChain = Array.isArray(foundJsLayer.use) ?  foundJsLayer.use : [foundJsLayer.use];
-
+      const loaderChain = Array.isArray(foundJsLayer.use)
+        ? foundJsLayer.use
+        : [foundJsLayer.use];
 
       // Add a new rule for pages that need async boundaries
       //@ts-ignore
@@ -480,7 +481,8 @@ export function getModuleFederationPluginConstructor(
     return require('@module-federation/node')
       .NodeFederationPlugin as ConstructableModuleFederationPlugin;
   }
-  return compiler.webpack.container.ModuleFederationPlugin as unknown as ConstructableModuleFederationPlugin;
+  return compiler.webpack.container
+    .ModuleFederationPlugin as unknown as ConstructableModuleFederationPlugin;
 }
 
 /**
@@ -595,7 +597,7 @@ export function applyRemoteDelegates(
         compiler.options.module.rules.push({
           enforce: 'pre',
           test(request: string) {
-            return knownDelegates.some(request.includes.bind(request))
+            return knownDelegates.some(request.includes.bind(request));
           },
           loader: path.resolve(__dirname, '../../loaders/inject-single-host'),
           options: {
