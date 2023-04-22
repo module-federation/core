@@ -18,7 +18,7 @@ export const createTypesArchive = async (tsConfig: typescript.CompilerOptions, r
   return zip.writeZipPromise(retrieveTypesZipPath(mfTypesPath, remoteOptions))
 }
 
-const downloadErrorLogger = (destinationFolder: string, fileToDownload: string) => (reason: any) => {
+const downloadErrorLogger = (destinationFolder: string, fileToDownload: string) => (reason: Error) => {
   console.error(ansiColors.red(`Unable to download federated types for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}', skipping...`))
   throw reason
 }
