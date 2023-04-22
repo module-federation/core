@@ -6,43 +6,46 @@ class AddModulesToRuntimeChunkPlugin {
   constructor(options) {
     this.options = options;
   }
+
   apply(compiler) {
-    compiler.options.optimization.minimize = false;
     compiler.hooks.compilation.tap(
       'AddModulesToRuntimeChunkPlugin',
       (compilation) => {
         compilation.hooks.optimizeChunks.tap(
           'AddModulesToRuntimeChunkPlugin',
           (chunks) => {
-            const runtimeChunk = Array.from(chunks).find((chunk) => {
-              return chunk.name === this.options.runtime && chunk.hasRuntime();
-            });
-            if (!runtimeChunk) return;
+            const { runtime, container, remotes, shared, eager } = this.options;
 
-            const knownDelegates =
-              this.options.remotes &&
-              Object.entries(this.options.remotes).map(([name, remote]) => {
-                const delegate = remote.replace('internal ', '').split('?')[1];
-                return delegate;
-              });
+            const getChunkByName = (name) =>
+              chunks.find((chunk) => chunk.name === name);
 
-            const internalSharedModules = this.options.shared
-              ? Object.entries(this.options.shared).map(
-                  ([k, v]) => v.import || k
+            const runtimeChunk = getChunkByName(runtime);
+            if (!runtimeChunk?.hasRuntime()) return;
+
+            const partialEntry = container ? getChunkByName(container) : null;
+            const knownDelegates = remotes
+              ? Object.values(remotes).map(
+                  (remote) => remote.replace('internal ', '').split('?')[1]
                 )
-              : false;
+              : null;
+            const internalSharedModules = shared
+              ? Object.entries(shared).map(
+                  ([key, value]) => value.import || key
+                )
+              : null;
+            const partialContainerModules = partialEntry
+              ? compilation.chunkGraph.getChunkModulesIterable(partialEntry)
+              : null;
 
             for (const chunk of chunks) {
               if (chunk === runtimeChunk) continue;
+
               const modulesToMove = [];
               const containers = [];
               const modulesIterable =
-                compilation.chunkGraph.getOrderedChunkModulesIterable(
-                  chunk,
-                  undefined
-                );
+                compilation.chunkGraph.getOrderedChunkModulesIterable(chunk);
+
               for (const module of modulesIterable) {
-                //TODO: get this from config, not hardcoded
                 if (
                   knownDelegates &&
                   knownDelegates.some((delegate) =>
@@ -53,11 +56,7 @@ class AddModulesToRuntimeChunkPlugin {
                 } else if (
                   internalSharedModules &&
                   internalSharedModules.some(
-                    (share) =>
-                      module?.rawRequest === share ||
-                      modulesToHoist.some((regex) =>
-                        module?.request?.match(regex)
-                      )
+                    (share) => module?.rawRequest === share
                   )
                 ) {
                   modulesToMove.push(module);
@@ -68,7 +67,11 @@ class AddModulesToRuntimeChunkPlugin {
                 }
               }
 
-              for (const module of modulesToMove) {
+              if (partialContainerModules) {
+                containers.push(...partialContainerModules);
+              }
+
+              for (const module of [].concat(modulesToMove, containers)) {
                 if (
                   !compilation.chunkGraph.isModuleInChunk(module, runtimeChunk)
                 ) {
@@ -77,19 +80,9 @@ class AddModulesToRuntimeChunkPlugin {
                     module
                   );
                 }
-                if (this.options.eager) {
+                if (eager && modulesToMove.includes(module)) {
                   compilation.chunkGraph.disconnectChunkAndModule(
                     chunk,
-                    module
-                  );
-                }
-              }
-              for (const module of containers) {
-                if (
-                  !compilation.chunkGraph.isModuleInChunk(module, runtimeChunk)
-                ) {
-                  compilation.chunkGraph.connectChunkAndModule(
-                    runtimeChunk,
                     module
                   );
                 }

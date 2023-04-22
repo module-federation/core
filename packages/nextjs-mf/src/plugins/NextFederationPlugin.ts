@@ -9,25 +9,21 @@ import type {
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
 } from '@module-federation/utilities';
-import {
-  createRuntimeVariables,
-  createDelegatedModule,
-} from '@module-federation/utilities';
+import { createRuntimeVariables } from '@module-federation/utilities';
 import CopyFederationPlugin from './CopyFederationPlugin';
 import AddModulesPlugin from './AddModulesToRuntime';
-import ContainerStatsPlugin from './ContainerStatsPlugin';
-import { ChunkCorrelationPlugin } from "@module-federation/node";
+import { ChunkCorrelationPlugin } from '@module-federation/node';
+import CommonJsChunkLoadingPlugin from './container/CommonJsChunkLoadingPlugin';
 import type { Compiler } from 'webpack';
 import path from 'path';
 
 import {
-  parseRemotes,
+  DEFAULT_SHARE_SCOPE,
+  DEFAULT_SHARE_SCOPE_BROWSER,
   getDelegates,
-  DEFAULT_SHARE_SCOPE, DEFAULT_SHARE_SCOPE_BROWSER
-} from "../internal";
+  parseRemotes,
+} from '../internal';
 import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
-
-import DevHmrFixInvalidPongPlugin from './DevHmrFixInvalidPongPlugin';
 import { exposeNextjsPages } from '../loaders/nextPageMapLoader';
 
 // @ts-ignore
@@ -143,24 +139,28 @@ export class NextFederationPlugin {
             ctx.request &&
             (ctx.request.includes('@module-federation/utilities') ||
               ctx.request.includes('internal-delegate-hoist') ||
-              // @ts-ignore
-              Object.keys(opts.shared || {}).some((key) => opts.shared?.[key]?.import !== false && ctx.request.includes(key)) ||
+              Object.keys(opts.shared || {}).some(
+                (key) =>
+                  // @ts-ignore
+                  opts?.shared?.[key]?.import !== false &&
+                  ctx?.request?.includes(key)
+              ) ||
               ctx.request.includes('internal-delegate-hoist') ||
               ctx.request.includes('@module-federation/dashboard-plugin'))
           ) {
-            return
+            return;
           }
 
           // @ts-ignore
-          const fromNext = await originalExternals(ctx, callback)
-          if(!fromNext) {
-            return
+          const fromNext = await originalExternals(ctx, callback);
+          if (!fromNext) {
+            return;
           }
-          const req = fromNext.split(' ')[1]
-          if(req.startsWith('next') || req.startsWith('react')) {
-            return fromNext
+          const req = fromNext.split(' ')[1];
+          if (req.startsWith('next') || req.startsWith('react')) {
+            return fromNext;
           }
-          return
+          return;
         };
       }
     } else {
@@ -185,8 +185,8 @@ export class NextFederationPlugin {
         eager: true,
         remotes: this._options.remotes,
         shared: DEFAULT_SHARE_SCOPE_BROWSER,
+        container: this._options.name + '_single',
       }).apply(compiler);
-
 
       if (this._extraOptions.automaticPageStitching) {
         compiler.options.module.rules.push({
@@ -216,7 +216,9 @@ export class NextFederationPlugin {
       ).apply(compiler);
     }
 
-    const defaultShared = isServer ? DEFAULT_SHARE_SCOPE : DEFAULT_SHARE_SCOPE_BROWSER;
+    const defaultShared = isServer
+      ? DEFAULT_SHARE_SCOPE
+      : DEFAULT_SHARE_SCOPE_BROWSER;
 
     // @ts-ignore
     const hostFederationPluginOptions: ModuleFederationPluginOptions = {
@@ -225,13 +227,12 @@ export class NextFederationPlugin {
       exposes: {
         __hoist: require.resolve('../delegate-hoist-container'),
         ...(this._extraOptions.exposePages
-          ? exposeNextjsPages(
-              compiler.options.context as string
-            )
+          ? exposeNextjsPages(compiler.options.context as string)
           : {}),
         ...this._options.exposes,
       },
       remotes: {
+        //@ts-ignore
         ...this._options.remotes,
       },
       shared: {
@@ -240,9 +241,24 @@ export class NextFederationPlugin {
       },
     };
 
-    if(!isServer) {
+    if (!isServer) {
       //new ContainerStatsPlugin(hostFederationPluginOptions).apply(compiler);
-      new ChunkCorrelationPlugin({filename: 'static/chunks/federated-stats.json'}).apply(compiler);
+      new ChunkCorrelationPlugin({
+        filename: 'static/chunks/federated-stats.json',
+      }).apply(compiler);
+      // new AddRuntimeModulePlugin({
+      //   runtimeChunkName: 'webpack',
+      //   customModulePath: '../inverse-self-formation',
+      //   entryName: 'invertStart',
+      //   entryPath: '../inverse-self-formation'
+      // }).apply(compiler);
+      new CommonJsChunkLoadingPlugin({
+        asyncChunkLoading: true,
+        name: this._options.name,
+        remotes: this._options.remotes as Record<string, string>,
+        baseURI: compiler.options.output.publicPath,
+        verbose: true,
+      }).apply(compiler);
     }
 
     const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];
@@ -279,7 +295,7 @@ export class NextFederationPlugin {
             return delegate;
           }
         );
-        if(this._options.exposes) {
+        if (this._options.exposes) {
           compiler.options.module.rules.push({
             enforce: 'pre',
             test(request: string) {
@@ -296,22 +312,20 @@ export class NextFederationPlugin {
           });
         }
       }
-      compiler.options.module.rules.push(
-        {
-          enforce: 'pre',
-          test: [/internal-delegate-hoist/, /delegate-hoist-container/],
-          include: [
-            compiler.context,
-            /internal-delegate-hoist/,
-            /delegate-hoist-container/,
-            /next[\\/]dist/,
-          ],
-          loader: path.resolve(__dirname, '../loaders/delegateLoader'),
-          options: {
-            delegates,
-          },
-        }
-      );
+      compiler.options.module.rules.push({
+        enforce: 'pre',
+        test: [/internal-delegate-hoist/, /delegate-hoist-container/],
+        include: [
+          compiler.context,
+          /internal-delegate-hoist/,
+          /delegate-hoist-container/,
+          /next[\\/]dist/,
+        ],
+        loader: path.resolve(__dirname, '../loaders/delegateLoader'),
+        options: {
+          delegates,
+        },
+      });
     }
 
     if (this._extraOptions.automaticAsyncBoundary) {
@@ -406,6 +420,10 @@ export class NextFederationPlugin {
           filename: undefined,
           runtime: undefined,
           name: this._options.name + '_single',
+          library: {
+            ...hostFederationPluginOptions.library,
+            name: this._options.name + '_single',
+          },
         },
         { ModuleFederationPlugin }
       ).apply(compiler);
@@ -416,9 +434,9 @@ export class NextFederationPlugin {
     // );
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
 
-    if (compiler.options.mode === 'development') {
-      new DevHmrFixInvalidPongPlugin().apply(compiler);
-    }
+    // if (compiler.options.mode === 'development') {
+    //   new DevHmrFixInvalidPongPlugin().apply(compiler);
+    // }
   }
 }
 
