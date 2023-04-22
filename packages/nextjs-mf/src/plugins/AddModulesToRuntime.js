@@ -73,7 +73,7 @@ class AddModulesToRuntimeChunkPlugin {
                 containers.push(...partialContainerModules);
               }
 
-              for (const module of [...modulesToMove, ...containers]) {
+              for (const module of [].concat(modulesToMove, containers)) {
                 if (
                   !compilation.chunkGraph.isModuleInChunk(module, runtimeChunk)
                 ) {
