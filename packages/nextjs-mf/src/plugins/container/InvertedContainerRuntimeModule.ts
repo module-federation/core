@@ -87,7 +87,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     const initialChunkIds = getInitialChunkIds(chunk, chunkGraph);
     const ccm = chunkGraph.getChunkModules(chunk);
 
-    // check if module type is in chunk
+    // find the main webpack runtime, skip all other chunks
     if (chunk.name !== 'webpack') return Template.asString('');
     const containerEntry = ccm
       .filter((module) => {
