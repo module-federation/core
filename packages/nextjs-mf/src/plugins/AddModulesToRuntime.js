@@ -12,9 +12,6 @@ class AddModulesToRuntimeChunkPlugin {
    * @param {Object} compiler - The webpack compiler instance.
    */
   apply(compiler) {
-    // Disable minimization for the entire compilation
-    compiler.options.optimization.minimize = false;
-
     // Check if the target is the server
     const isServer = compiler.options.name === 'server';
 
