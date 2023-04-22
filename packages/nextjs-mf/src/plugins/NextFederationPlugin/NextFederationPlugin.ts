@@ -8,11 +8,11 @@ import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
-  SharedObject,
-} from '@module-federation/utilities';
-import { createRuntimeVariables } from '@module-federation/utilities';
-import CopyFederationPlugin from '../CopyFederationPlugin';
-import type { Compiler, container } from 'webpack';
+  SharedObject
+} from "@module-federation/utilities";
+import { createRuntimeVariables } from "@module-federation/utilities";
+import type { Compiler, container } from "webpack";
+import CopyFederationPlugin from "../CopyFederationPlugin";
 import {
   applyAutomaticAsyncBoundary,
   applyClientPlugins,
@@ -24,15 +24,15 @@ import {
   handleServerExternals,
   injectModuleHoistingSystem,
   removeUnnecessarySharedKeys,
-  setDefaultShared,
+  retrieveDefaultShared,
   setOptions,
   validateCompilerOptions,
-  validatePluginOptions,
-} from './next-fragments';
+  validatePluginOptions
+} from "./next-fragments";
 
-import { parseRemotes } from '../../internal';
-import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
-import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
+import { parseRemotes } from "../../internal";
+import AddRuntimeRequirementToPromiseExternal from "../AddRuntimeRequirementToPromiseExternalPlugin";
+import { exposeNextjsPages } from "../../loaders/nextPageMapLoader";
 
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application
@@ -80,11 +80,7 @@ export class NextFederationPlugin {
     const ModuleFederationPlugin: container.ModuleFederationPlugin =
       getModuleFederationPluginConstructor(isServer, compiler);
 
-    // Ignore edge runtime and middleware builds.
-    if (!ModuleFederationPlugin) {
-      return;
-    }
-    const defaultShared = setDefaultShared(isServer);
+    const defaultShared = retrieveDefaultShared(isServer);
 
     console.log(compiler.options.name);
     if (isServer) {
@@ -143,28 +139,26 @@ export class NextFederationPlugin {
       'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
     }).apply(compiler);
 
-    if (ModuleFederationPlugin) {
-      // @ts-ignore
-      new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
+    // @ts-ignore
+    new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
 
-      if (
-        !isServer &&
-        this._options.remotes &&
-        Object.keys(this._options.remotes).length > 0
-      ) {
-        // single runtime chunk if host or circular remote uses remote of current host.
-        // @ts-ignore
-        new ModuleFederationPlugin({
-          ...hostFederationPluginOptions,
-          filename: undefined,
-          runtime: undefined,
+    if (
+      !isServer &&
+      this._options.remotes &&
+      Object.keys(this._options.remotes).length > 0
+    ) {
+      // single runtime chunk if host or circular remote uses remote of current host.
+      // @ts-ignore
+      new ModuleFederationPlugin({
+        ...hostFederationPluginOptions,
+        filename: undefined,
+        runtime: undefined,
+        name: this._options.name + '_single',
+        library: {
+          ...hostFederationPluginOptions.library,
           name: this._options.name + '_single',
-          library: {
-            ...hostFederationPluginOptions.library,
-            name: this._options.name + '_single',
-          },
-        }).apply(compiler);
-      }
+        },
+      }).apply(compiler);
     }
 
     // new ChildFederationPlugin(this._options, this._extraOptions).apply(

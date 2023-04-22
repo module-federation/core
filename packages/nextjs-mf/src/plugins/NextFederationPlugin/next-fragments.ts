@@ -1,21 +1,17 @@
-import type { Compiler, RuleSetConditionAbsolute } from 'webpack';
-import { container } from 'webpack';
-import path from 'path';
+import type { Compiler, RuleSetConditionAbsolute } from "webpack";
+import { container } from "webpack";
+import path from "path";
 import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
-  SharedObject,
-} from '@module-federation/utilities';
-import { ChunkCorrelationPlugin } from '@module-federation/node';
+  SharedObject
+} from "@module-federation/utilities";
+import { ChunkCorrelationPlugin } from "@module-federation/node";
 
-import CommonJsChunkLoadingPlugin from '../container/CommonJsChunkLoadingPlugin';
-import {
-  DEFAULT_SHARE_SCOPE,
-  DEFAULT_SHARE_SCOPE_BROWSER,
-  getDelegates,
-} from '../../internal';
-import AddModulesPlugin from '../AddModulesToRuntime';
+import CommonJsChunkLoadingPlugin from "../container/CommonJsChunkLoadingPlugin";
+import { DEFAULT_SHARE_SCOPE, DEFAULT_SHARE_SCOPE_BROWSER, getDelegates } from "../../internal";
+import AddModulesPlugin from "../AddModulesToRuntime";
 
 /**
  * Compares two regular expressions to see if they are equal.
@@ -125,11 +121,7 @@ export function validateCompilerOptions(compiler: Compiler): boolean {
   }
 
   // Only apply Module Federation to the main server and client builds in Next.js
-  if (!['server', 'client'].includes(compiler.options.name)) {
-    return false;
-  }
-
-  return true;
+  return ['server', 'client'].includes(compiler.options.name);
 }
 
 /**
@@ -330,28 +322,24 @@ export function applyAutomaticAsyncBoundary(
   extraOptions: NextFederationPluginExtraOptions,
   compiler: Compiler
 ) {
-  // Define the allowed paths for page and app folders
   const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];
-  // Find the JavaScript rules
+
   const jsRules = compiler.options.module.rules.find((r) => {
     //@ts-ignore
     return r && r.oneOf;
   });
+
   //@ts-ignore
   if (jsRules && 'oneOf' in jsRules) {
-    // Find the JavaScript layer
-    //@ts-ignore
+    // @ts-ignore
     const foundJsLayer = jsRules.oneOf.find((r) => {
       //@ts-ignore
-      return regexEqual(r.test, /.(tsx|ts|js|cjs|mjs|jsx)$/) && !r.issuerLayer;
+      return regexEqual(r.test, /\.(tsx|ts|js|cjs|mjs|jsx)$/) && !r.issuerLayer;
     });
+
     if (foundJsLayer) {
-      let loaderChain = [];
-      if (Array.isArray(foundJsLayer.use)) {
-        loaderChain = [...foundJsLayer.use];
-      } else {
-        loaderChain = [foundJsLayer.use];
-      }
+      const loaderChain = Array.isArray(foundJsLayer.use) ?  foundJsLayer.use : [foundJsLayer.use];
+
 
       // Add a new rule for pages that need async boundaries
       //@ts-ignore
@@ -491,10 +479,8 @@ export function getModuleFederationPluginConstructor(
   if (isServer) {
     return require('@module-federation/node')
       .NodeFederationPlugin as ConstructableModuleFederationPlugin;
-  } else {
-    return compiler.webpack.container
-      .ModuleFederationPlugin as unknown as ConstructableModuleFederationPlugin;
   }
+  return compiler.webpack.container.ModuleFederationPlugin as unknown as ConstructableModuleFederationPlugin;
 }
 
 /**
@@ -503,7 +489,7 @@ export function getModuleFederationPluginConstructor(
  @param isServer - Boolean indicating if the code is running on the server.
  @returns The default share scope based on the environment.
  */
-export const setDefaultShared = (isServer: boolean): SharedObject => {
+export const retrieveDefaultShared = (isServer: boolean): SharedObject => {
   // If the code is running on the server, treat some Next.js internals as import false to make them external
   // This is because they will be provided by the server environment and not by the remote container
   if (isServer) {
@@ -529,7 +515,7 @@ export function injectModuleHoistingSystem(
   compiler: Compiler
 ) {
   // Set the default shared values based on the environment
-  const defaultShared = setDefaultShared(isServer);
+  const defaultShared = retrieveDefaultShared(isServer);
   // Inject hoist dependency into the upper scope of the application
   const injectHoistDependency = {
     enforce: 'pre',
@@ -601,8 +587,7 @@ export function applyRemoteDelegates(
     if (delegates && Object.keys(delegates).length > 0) {
       // Get the names of the available delegates
       const knownDelegates = Object.entries(delegates).map(([name, remote]) => {
-        const delegate = remote.replace('internal ', '').split('?')[0];
-        return delegate;
+        return remote.replace('internal ', '').split('?')[0];
       });
 
       if (options.exposes) {
@@ -610,10 +595,7 @@ export function applyRemoteDelegates(
         compiler.options.module.rules.push({
           enforce: 'pre',
           test(request: string) {
-            const found = knownDelegates.some((delegate) => {
-              return request.includes(delegate);
-            });
-            return found;
+            return knownDelegates.some(request.includes.bind(request))
           },
           loader: path.resolve(__dirname, '../../loaders/inject-single-host'),
           options: {
