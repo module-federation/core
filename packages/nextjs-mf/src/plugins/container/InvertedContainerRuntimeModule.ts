@@ -85,11 +85,11 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     const conditionMap = chunkGraph.getChunkConditionMap(chunk, chunkHasJs);
     const hasJsMatcher = compileBooleanMatcher(conditionMap);
     const initialChunkIds = getInitialChunkIds(chunk, chunkGraph);
-    const ccm = chunkGraph.getChunkModules(chunk);
+    const containerChunkModules = chunkGraph.getChunkModules(chunk);
 
     // find the main webpack runtime, skip all other chunks
     if (chunk.name !== 'webpack') return Template.asString('');
-    const containerEntry = ccm
+    const containerEntry = containerChunkModules
       .filter((module) => {
         return module.constructor.name === 'ContainerEntryModule';
       })
