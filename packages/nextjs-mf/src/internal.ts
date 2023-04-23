@@ -13,13 +13,6 @@ import { parseOptions } from "webpack/lib/container/options";
  * @property {boolean} key.eager - Whether the shared object should be eagerly loaded.
  * @property {boolean} key.import - Whether the shared object should be imported or not.
  */
-
-/**
- * A default share scope attached to shared objects.
- * For server, they are marked as import:false, as the host is always expected to provide them as externals.
- *
- * @type {SharedObject}
- */
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
   react: {
     singleton: true,
