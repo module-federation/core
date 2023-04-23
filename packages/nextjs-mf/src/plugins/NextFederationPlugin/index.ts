@@ -161,14 +161,7 @@ export class NextFederationPlugin {
       }).apply(compiler);
     }
 
-    // new ChildFederationPlugin(this._options, this._extraOptions).apply(
-    //   compiler
-    // );
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
-
-    // if (compiler.options.mode === 'development') {
-    //   new DevHmrFixInvalidPongPlugin().apply(compiler);
-    // }
   }
 }
 
