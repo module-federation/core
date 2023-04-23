@@ -242,7 +242,7 @@ class Template {
    * @param {string|string[]} str string or string collection
    * @returns {string} returns a single string from array
    */
-  static asString(str: never[]) {
+  static asString(str: any[]) {
     if (Array.isArray(str)) {
       return str.join('\n');
     }
