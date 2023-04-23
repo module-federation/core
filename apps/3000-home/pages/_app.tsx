@@ -1,13 +1,12 @@
-import { useState } from 'react';
-import App from 'next/app';
-import { Layout, version } from 'antd';
-import { useRouter } from 'next/router';
+import * as React from "react";
+import { useState } from "react";
+import App from "next/app";
+import { Layout, version } from "antd";
+import Router, { useRouter } from "next/router";
 
-import SharedNav from '../components/SharedNav';
-import HostAppMenu from '../components/menu';
-import 'antd/dist/antd.css';
-import * as React from 'react';
-import Router from 'next/router';
+import SharedNav from "../components/SharedNav";
+import HostAppMenu from "../components/menu";
+import "antd/dist/antd.css";
 
 function MyApp(props) {
   const { Component, pageProps } = props;
@@ -27,7 +26,7 @@ function MyApp(props) {
     }
   };
   // handle first route hit.
-  React.useMemo(() => handleRouteChange(asPath), []);
+  React.useMemo(() => handleRouteChange(asPath), [asPath]);
 
   //handle route change
   React.useEffect(() => {

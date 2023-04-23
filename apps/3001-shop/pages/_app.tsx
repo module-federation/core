@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import App from 'next/app';
-import dynamic from 'next/dynamic';
-import { Layout, version } from 'antd';
-import Router, { useRouter } from 'next/router';
+import React, { useState } from "react";
+import App from "next/app";
+import dynamic from "next/dynamic";
+import { Layout, version } from "antd";
+import Router, { useRouter } from "next/router";
 
-import HostAppMenu from '../components/menu';
+import HostAppMenu from "../components/menu";
 
-import 'antd/dist/antd.css';
+import "antd/dist/antd.css";
 
 const SharedNav = dynamic(() => import('home/SharedNav'), { ssr: true });
 
@@ -27,7 +27,7 @@ function MyApp({ Component, pageProps }) {
     }
   };
   // handle first route hit.
-  React.useMemo(() => handleRouteChange(asPath), []);
+  React.useMemo(() => handleRouteChange(asPath), [asPath]);
 
   //handle route change
   React.useEffect(() => {

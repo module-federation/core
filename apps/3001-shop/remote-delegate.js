@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 
-
 // Delegates are currently not used in this example, but are left here for testing.
+// eslint-disable-next-line no-async-promise-executor
 module.exports = new Promise(async (resolve, reject) => {
   const { importDelegatedModule } = await import('@module-federation/utilities')
 

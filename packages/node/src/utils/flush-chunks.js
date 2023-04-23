@@ -3,14 +3,18 @@ global.usedChunks = usedChunks;
 export const flushChunks = async () => {
   let hostStats = {};
   try {
+    // eslint-disable-next-line no-undef
      hostStats = __non_webpack_require__('../host-stats.json');
   } catch (e) {
-
+// cant find host file
   }
 
   let shareMap = {};
+  // eslint-disable-next-line no-undef
   if(__webpack_share_scopes__?.default) {
+    // eslint-disable-next-line no-undef
      shareMap = Object.keys(__webpack_share_scopes__.default).reduce((acc, key) => {
+       // eslint-disable-next-line no-undef
       const loadedModules = Object.values(__webpack_share_scopes__.default[key]).filter((sharedModule) => {
         return sharedModule.loaded
       }).map((sharedModule) => {
