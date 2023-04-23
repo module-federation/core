@@ -1,13 +1,12 @@
+import * as React from 'react';
 import { useState } from 'react';
 import App from 'next/app';
 import { Layout, version } from 'antd';
-import { useRouter } from 'next/router';
+import Router, { useRouter } from 'next/router';
 
 import SharedNav from '../components/SharedNav';
 import HostAppMenu from '../components/menu';
 import 'antd/dist/antd.css';
-import * as React from 'react';
-import Router from 'next/router';
 
 function MyApp(props) {
   const { Component, pageProps } = props;

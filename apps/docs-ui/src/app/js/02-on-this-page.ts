@@ -30,7 +30,9 @@ export default function () {
     link.textContent = heading.textContent;
     links[(link.href = '#' + heading.id)] = link;
     const listItem = document.createElement('li') as HTMLElement;
-    listItem.dataset.level = (parseInt(heading.nodeName.slice(1), 10) - 1).toString();
+    listItem.dataset.level = (
+      parseInt(heading.nodeName.slice(1), 10) - 1
+    ).toString();
     listItem.appendChild(link);
     accum.appendChild(listItem);
     return accum;
