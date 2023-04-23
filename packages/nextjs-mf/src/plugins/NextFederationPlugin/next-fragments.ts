@@ -558,7 +558,10 @@ export function injectModuleHoistingSystem(
 
  Apply remote delegates.
 
- This function adds the remote delegates feature by configuring and injecting the appropriate loader that will look for internal delegate hoist or delegate hoist container and load it using a custom delegateLoader. Once loaded, it will then look for the available delegates that will be used to configure the remote that the hoisted module will be dependent upon.
+ This function adds the remote delegates feature by configuring and injecting the appropriate loader that will look
+ for internal delegate hoist or delegate hoist container and load it using a custom delegateLoader.
+ Once loaded, it will then look for the available delegates that will be used to configure the remote
+ that the hoisted module will be dependent upon.
 
  @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
 
@@ -587,27 +590,5 @@ export function applyRemoteDelegates(
         delegates,
       },
     });
-
-    // If there are available delegates, add the inject-single-host loader
-    if (delegates && Object.keys(delegates).length > 0) {
-      // Get the names of the available delegates
-      const knownDelegates = Object.entries(delegates).map(([name, remote]) => {
-        return remote.replace('internal ', '').split('?')[0];
-      });
-
-      if (options.exposes) {
-        // Add the inject-single-host loader to the module rules
-        compiler.options.module.rules.push({
-          enforce: 'pre',
-          test(request: string) {
-            return knownDelegates.some(request.includes.bind(request));
-          },
-          loader: path.resolve(__dirname, '../../loaders/inject-single-host'),
-          options: {
-            name: options.name,
-          },
-        });
-      }
-    }
   }
 }
