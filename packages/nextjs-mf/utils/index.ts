@@ -1,4 +1,5 @@
-import * as React from 'react';
+import * as React from "react";
+
 export {
   extractUrlAndGlobal,
   injectScript,
@@ -27,7 +28,7 @@ export const FlushedChunks = ({ chunks }: FlushedChunksProps) => {
       // if(c.includes('?')) {
       //   return c.split('?')[0].endsWith('.js')
       // }
-      return c.endsWith('.js')
+      return c.endsWith('.js');
     })
     .map((chunk) => {
       if (!chunk.includes('?') && chunk.includes('remoteEntry')) {
