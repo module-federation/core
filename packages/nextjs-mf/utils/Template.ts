@@ -230,7 +230,7 @@ class Template {
    * @param {string} prefix prefix to compose
    * @returns {string} returns new prefix string
    */
-  static prefix(s: never, prefix: string) {
+  static prefix(s: any, prefix: string) {
     const str = Template.asString(s).trim();
     if (!str) return '';
     const ind = str[0] === '\n' ? '' : prefix;
