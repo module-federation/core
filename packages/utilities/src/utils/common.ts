@@ -2,13 +2,13 @@
 
 import type {
   AsyncContainer,
-  Remotes,
-  RuntimeRemotesMap,
-  RuntimeRemote,
-  WebpackRemoteContainer,
-  RemoteData,
   GetModuleOptions,
-} from '../types';
+  RemoteData,
+  Remotes,
+  RuntimeRemote,
+  RuntimeRemotesMap,
+  WebpackRemoteContainer
+} from "../types";
 
 type RemoteVars = Record<
   string,

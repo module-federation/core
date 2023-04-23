@@ -24,6 +24,7 @@ const dynamicContainer = injectScript({
 });
 const DynamicComponent = React.lazy(() => dynamicContainer);
 
+// eslint-disable-next-line react/display-name
 export default (props) => {
   return (
     <>

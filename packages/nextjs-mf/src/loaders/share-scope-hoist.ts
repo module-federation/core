@@ -30,7 +30,7 @@ export default function patchDefaultSharedLoader(
   ].join('\n');
 
   // Cache the generated result
-this.cacheable?.();
+  this.cacheable?.();
 
   return result;
 }

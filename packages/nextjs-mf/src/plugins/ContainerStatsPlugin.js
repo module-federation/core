@@ -1,7 +1,4 @@
-const fs = require('fs');
 const path = require('path');
-
-
 
 class ModuleChunkDependencyPlugin {
   constructor(federationOptions) {
@@ -9,50 +6,54 @@ class ModuleChunkDependencyPlugin {
   }
 
   apply(compiler) {
+    compiler.hooks.emit.tapAsync(
+      'ModuleChunkInfoPlugin',
+      (compilation, callback) => {
+        const moduleChunkInfo = {};
 
-    compiler.hooks.emit.tapAsync('ModuleChunkInfoPlugin', (compilation, callback) => {
-      const moduleChunkInfo = {};
+        compilation.chunks.forEach((chunk) => {
+          chunk.getModules().forEach((module) => {
+            if (module?.request?.includes('menu.tsx')) {
+              const identifier = module.identifier();
+              const relativePath = path.relative(compiler.context, identifier);
 
-      compilation.chunks.forEach(chunk => {
-        chunk.getModules().forEach(module => {
-          if(module?.request?.includes('menu.tsx')) {
-            const identifier = module.identifier();
-            const relativePath = path.relative(compiler.context, identifier);
+              if (!moduleChunkInfo[relativePath]) {
+                moduleChunkInfo[relativePath] = [];
+              }
 
-            if (!moduleChunkInfo[relativePath]) {
-              moduleChunkInfo[relativePath] = [];
+              moduleChunkInfo[relativePath].push(chunk.id);
             }
-
-            moduleChunkInfo[relativePath].push(chunk.id);
-          }
+          });
         });
-      });
-console.log('moduleChunkInfo',moduleChunkInfo);
-      // const jsonContent = JSON.stringify(moduleChunkInfo, null, 2);
-      // compilation.assets[this.outputFile] = {
-      //   source: () => jsonContent,
-      //   size: () => jsonContent.length,
-      // };
+        console.log('moduleChunkInfo', moduleChunkInfo);
+        // const jsonContent = JSON.stringify(moduleChunkInfo, null, 2);
+        // compilation.assets[this.outputFile] = {
+        //   source: () => jsonContent,
+        //   size: () => jsonContent.length,
+        // };
 
-      callback();
-    });
-return
+        callback();
+      }
+    );
+    return;
 
+    // eslint-disable-next-line no-unreachable
     compiler.hooks.afterEmit.tapAsync(
       'ModuleChunkDependencyPlugin',
       (compilation, callback) => {
-
-        const {entrypoints, chunkGraph} = compilation;
+        const { entrypoints, chunkGraph } = compilation;
         const container = entrypoints.get(this.federationOptions.name);
         const entryChunk = container.getEntrypointChunk();
         const modulesInChunk = chunkGraph.getChunkModulesIterable(entryChunk);
-        const gotChunks = chunkGraph.getChunkModules(entryChunk)
+        const gotChunks = chunkGraph.getChunkModules(entryChunk);
 
         const findExposed = gotChunks.find((module) => {
-          return module._exposes
+          return module._exposes;
         });
-        const containerChunk = findExposed.getChunks().find((chunk) => {return chunk.name === this.federationOptions.name})
-        if(!containerChunk) return;
+        const containerChunk = findExposed.getChunks().find((chunk) => {
+          return chunk.name === this.federationOptions.name;
+        });
+        if (!containerChunk) return;
         // console.log('entryChunk',entryChunk);
         // console.log('gotChunks', gotChunks)
         // console.log('modulesInChunk', modulesInChunk);
@@ -151,11 +152,11 @@ return
           // moduleChunkDependencyMap[exposedKey] = Array.from(dependentChunksSet);
 
           const moduleId = chunkGraph.getModuleId(module);
-          if(module.request && module.request.includes('menu')) {
-            const containerd = Array.from(referencedChunks).filter((c)=>{
-              return c.containsModule(module)
-            })
-            console.log({containerd});
+          if (module.request && module.request.includes('menu')) {
+            const containerd = Array.from(referencedChunks).filter((c) => {
+              return c.containsModule(module);
+            });
+            console.log({ containerd });
           }
           // console.log({req: module.request, getChunks:module.getChunks(), getModuleChunks: chunkGraph.getModuleChunks(module)});
           // module.getChunks().forEach((chunk) => {
@@ -172,7 +173,7 @@ return
               // chunk.runtime === this.federationOptions.name ||
               // (chunk.runtime.toJSON && chunk.runtime.toJSON().includes(this.federationOptions.name))
             ) {
-              if(exposedKey === './menu') {
+              if (exposedKey === './menu') {
                 // console.log(chunk);
               }
               // console.log(chunk.files,chunk.runtime.toJSON().includes(this.federationOptions.name))

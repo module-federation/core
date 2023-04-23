@@ -1,4 +1,5 @@
-import * as React from 'react';
+import * as React from "react";
+
 export {
   extractUrlAndGlobal,
   injectScript,
@@ -24,10 +25,11 @@ export interface FlushedChunksProps {
 export const FlushedChunks = ({ chunks }: FlushedChunksProps) => {
   const scripts = chunks
     .filter((c) => {
+      // TODO: host shouldnt flush its own remote out
       // if(c.includes('?')) {
       //   return c.split('?')[0].endsWith('.js')
       // }
-      return c.endsWith('.js')
+      return c.endsWith('.js');
     })
     .map((chunk) => {
       if (!chunk.includes('?') && chunk.includes('remoteEntry')) {
