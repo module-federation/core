@@ -1,9 +1,10 @@
 /* eslint-disable no-undef */
 
-
 // Delegates are currently not used in this example, but are left here for testing.
 module.exports = new Promise(async (resolve, reject) => {
-  const { importDelegatedModule } = await import('@module-federation/utilities')
+  const { importDelegatedModule } = await import(
+    '@module-federation/utilities'
+  );
 
   //eslint-disable-next-line
   // console.log('Delegate being called for', __resourceQuery, __webpack_runtime_id__);

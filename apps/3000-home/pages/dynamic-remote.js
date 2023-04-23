@@ -1,5 +1,5 @@
-import React from 'react'
-import {injectScript} from "@module-federation/utilities";
+import React from 'react';
+import { injectScript } from '@module-federation/utilities';
 // example of dynamic remote import on server and client
 const isServer = typeof window === 'undefined';
 //could also use
@@ -14,30 +14,32 @@ const isServer = typeof window === 'undefined';
 // });
 const dynamicContainer = injectScript({
   global: 'checkout',
-  url: `http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+  url: `http://localhost:3002/_next/static/${
+    isServer ? 'ssr' : 'chunks'
+  }/remoteEntry.js`,
 }).then((container) => {
   return container.get('./CheckoutTitle').then((factory) => {
-    return factory()
-  })
-})
+    return factory();
+  });
+});
 const DynamicComponent = React.lazy(() => dynamicContainer);
 
-export default (props)=> {
+export default (props) => {
   return (
     <>
-    <React.Suspense>
-      <DynamicComponent/>
-    </React.Suspense>
+      <React.Suspense>
+        <DynamicComponent />
+      </React.Suspense>
       <p>Code from GSSP:</p>
       <pre>{props.code}</pre>
     </>
-  )
-}
+  );
+};
 
 export async function getServerSideProps() {
   return {
     props: {
-      code: (await dynamicContainer).default.toString()
-    }
-  }
+      code: (await dynamicContainer).default.toString(),
+    },
+  };
 }
