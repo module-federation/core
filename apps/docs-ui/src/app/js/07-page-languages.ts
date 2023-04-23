@@ -1,6 +1,7 @@
-export default function() {
-
-  const toggle = document.querySelector('.page-languages .language-menu-toggle');
+export default function () {
+  const toggle = document.querySelector(
+    '.page-languages .language-menu-toggle'
+  );
   if (!toggle) return;
 
   const selector = document.querySelector('.page-languages');

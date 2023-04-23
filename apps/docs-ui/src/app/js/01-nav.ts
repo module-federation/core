@@ -32,14 +32,12 @@ export default function () {
   });
 
   if (explorePanel) {
-    explorePanel
-      .querySelector('.context')
-      .addEventListener('click', () => {
-        // NOTE logic assumes there are only two panels
-        find(nav, '[data-panel]').forEach((panel) => {
-          panel.classList.toggle('is-active');
-        });
+    explorePanel.querySelector('.context').addEventListener('click', () => {
+      // NOTE logic assumes there are only two panels
+      find(nav, '[data-panel]').forEach((panel) => {
+        panel.classList.toggle('is-active');
       });
+    });
   }
 
   // NOTE prevent text from being selected by double click
@@ -58,10 +56,16 @@ export default function () {
         if (targetNode) {
           let current = targetNode;
           const ceiling = document.querySelector('article.doc');
-          while ((current = current.parentNode as HTMLElement) && current !== ceiling) {
+          while (
+            (current = current.parentNode as HTMLElement) &&
+            current !== ceiling
+          ) {
             let id = current.id;
             // NOTE: look for section heading
-            if (!id && ((id as unknown) = SECT_CLASS_RX.test(current.className)))
+            if (
+              !id &&
+              ((id as unknown) = SECT_CLASS_RX.test(current.className))
+            )
               id = (current.firstElementChild || {}).id;
             if (
               id &&
