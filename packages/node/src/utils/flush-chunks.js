@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /**
  * Initialize usedChunks and share it globally.
  * @type {Set}

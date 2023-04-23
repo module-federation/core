@@ -2,6 +2,7 @@
 
 
 // Delegates are currently not used in this example, but are left here for testing.
+// eslint-disable-next-line no-async-promise-executor
 module.exports = new Promise(async(resolve, reject) => {
   //eslint-disable-next-line
   // console.log('Delegate being called for', __resourceQuery);

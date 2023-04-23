@@ -5,7 +5,7 @@
 
 'use strict';
 
-import { ConcatSource, PrefixSource } from 'webpack-sources';
+import { ConcatSource, PrefixSource } from "webpack-sources";
 
 /** @typedef {import("../declarations/WebpackOptions").Output} OutputOptions */
 /** @typedef {import("webpack-sources").Source} Source */
@@ -230,7 +230,7 @@ class Template {
    * @param {string} prefix prefix to compose
    * @returns {string} returns new prefix string
    */
-  static prefix(s: any, prefix: string) {
+  static prefix(s: never, prefix: string) {
     const str = Template.asString(s).trim();
     if (!str) return '';
     const ind = str[0] === '\n' ? '' : prefix;
@@ -242,7 +242,7 @@ class Template {
    * @param {string|string[]} str string or string collection
    * @returns {string} returns a single string from array
    */
-  static asString(str: any[]) {
+  static asString(str: never[]) {
     if (Array.isArray(str)) {
       return str.join('\n');
     }
@@ -297,7 +297,7 @@ class Template {
     prefix = ''
   ) {
     const { chunkGraph } = renderContext;
-    var source = new ConcatSource();
+    const source = new ConcatSource();
     if (modules.length === 0) {
       return null;
     }

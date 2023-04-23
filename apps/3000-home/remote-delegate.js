@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+// eslint-disable-next-line no-async-promise-executor
 module.exports =new Promise( async (resolve, reject) => {
   //eslint-disable-next-line
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');

@@ -38,6 +38,7 @@ class ModuleChunkDependencyPlugin {
     );
     return;
 
+    // eslint-disable-next-line no-unreachable
     compiler.hooks.afterEmit.tapAsync(
       'ModuleChunkDependencyPlugin',
       (compilation, callback) => {

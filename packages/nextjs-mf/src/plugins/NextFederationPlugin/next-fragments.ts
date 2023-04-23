@@ -583,6 +583,7 @@ export function applyRemoteDelegates(
         compiler.context,
         /internal-delegate-hoist/,
         /delegate-hoist-container/,
+        //eslint-disable-next-line
         /next[\/]dist/,
       ],
       loader: path.resolve(__dirname, '../../loaders/delegateLoader'),
