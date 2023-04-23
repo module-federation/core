@@ -2,6 +2,19 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [6.4.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.3.1...nextjs-mf-6.4.0) (2023-04-19)
+
+
+
+## [6.3.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.3.0...nextjs-mf-6.3.1) (2023-04-13)
+
+
+### Bug Fixes
+
+* Add 'react/jsx-dev-runtime' to share scope ([#748](https://github.com/module-federation/nextjs-mf/issues/748)) ([73e870d](https://github.com/module-federation/nextjs-mf/commit/73e870d60e6498e4adcb0e96dfd6b790e079d4ff))
+
+
+
 ## [6.3.1-beta.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.3.0...nextjs-mf-6.3.1-beta.0) (2023-04-19)
 
 

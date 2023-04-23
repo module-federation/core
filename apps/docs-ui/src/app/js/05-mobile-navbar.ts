@@ -1,5 +1,4 @@
 export default function () {
-
   const navbarBurger = document.querySelector('.navbar-burger');
   if (!navbarBurger) return;
   navbarBurger.addEventListener('click', toggleNavbarMenu.bind(navbarBurger));
