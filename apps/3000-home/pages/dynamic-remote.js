@@ -1,5 +1,5 @@
-import React from 'react'
-import {injectScript} from "@module-federation/utilities";
+import React from "react";
+import { injectScript } from "@module-federation/utilities";
 // example of dynamic remote import on server and client
 const isServer = typeof window === 'undefined';
 //could also use
@@ -22,6 +22,7 @@ const dynamicContainer = injectScript({
 })
 const DynamicComponent = React.lazy(() => dynamicContainer);
 
+// eslint-disable-next-line react/display-name
 export default (props)=> {
   return (
     <>
