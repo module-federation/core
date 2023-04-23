@@ -1,5 +1,4 @@
-export default function() {
-
+export default function () {
   const article = document.querySelector('article.doc');
   const toolbar = document.querySelector('.toolbar');
 
@@ -51,4 +50,3 @@ export default function() {
       }
     });
 }
-
