@@ -1,36 +1,22 @@
-import type {
-  Compiler,
-  Stats,
-  WebpackError,
-  WebpackPluginInstance,
-} from 'webpack';
-import { Compilation } from 'webpack';
-import type { WatchOptions } from '../types';
-import { ChunkCorrelationPlugin } from '@module-federation/node';
-import type {
-  ModuleFederationPluginOptions,
-  NextFederationPluginExtraOptions,
-} from '@module-federation/utilities';
+import type { Compiler, Stats, WebpackError, WebpackPluginInstance } from "webpack";
+import { Compilation } from "webpack";
+import type { WatchOptions } from "../types";
+import { ChunkCorrelationPlugin } from "@module-federation/node";
+import type { ModuleFederationPluginOptions, NextFederationPluginExtraOptions } from "@module-federation/utilities";
+import { createRuntimeVariables } from "@module-federation/utilities";
 
-import path from 'path';
-import fs from 'fs';
+import path from "path";
+import fs from "fs";
 
-import { exposeNextjsPages } from '../loaders/nextPageMapLoader';
-import { hasLoader, injectRuleLoader } from '../loaders/helpers';
+import { exposeNextjsPages } from "../loaders/nextPageMapLoader";
+import { hasLoader, injectRuleLoader } from "../loaders/helpers";
 
-import {
-  DEFAULT_SHARE_SCOPE,
-  getOutputPath,
-  externalizedShares,
-  removePlugins,
-  toDisplayErrors,
-} from '../internal';
-import { createRuntimeVariables } from '@module-federation/utilities';
+import { DEFAULT_SHARE_SCOPE, externalizedShares, getOutputPath, removePlugins, toDisplayErrors } from "../internal";
 
-import { computeRemoteFilename } from '../../utils/build-utils';
+import { computeRemoteFilename } from "../../utils/build-utils";
 
-import ChildFriendlyModuleFederationPlugin from './ModuleFederationPlugin';
-import AddRuntimeRequirementToPromiseExternal from './AddRuntimeRequirementToPromiseExternalPlugin';
+import ChildFriendlyModuleFederationPlugin from "./ModuleFederationPlugin";
+import AddRuntimeRequirementToPromiseExternal from "./AddRuntimeRequirementToPromiseExternalPlugin";
 
 const CHILD_PLUGIN_NAME = 'ChildFederationPlugin';
 const childCompilers = {} as Record<string, Compiler>;
@@ -135,9 +121,7 @@ export class ChildFederationPlugin {
           // doesnt work as intended for dev mode
           ...this._options.exposes,
           ...(this._extraOptions.exposePages
-            ? exposeNextjsPages(
-                compiler.options.context as string
-              )
+            ? exposeNextjsPages(compiler.options.context as string)
             : {}),
         },
         runtime: false,
