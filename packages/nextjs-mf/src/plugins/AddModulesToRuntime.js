@@ -102,7 +102,7 @@ class AddModulesToRuntimeChunkPlugin {
                 }
               }
 
-              const modulesToConnect = modulesToMove.concat(containers);
+              const modulesToConnect = [].concat(modulesToMove, containers)
               const { chunkGraph } = compilation;
               const runtimeChunkModules =
                 chunkGraph.getOrderedChunkModulesIterable(runtimeChunk);
