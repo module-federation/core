@@ -14,7 +14,6 @@ import { createRuntimeVariables } from "@module-federation/utilities";
 import type { Compiler, container } from "webpack";
 import CopyFederationPlugin from "../CopyFederationPlugin";
 import {
-  applyAutomaticAsyncBoundary,
   applyClientPlugins,
   applyRemoteDelegates,
   applyServerPlugins,
@@ -23,16 +22,16 @@ import {
   getModuleFederationPluginConstructor,
   handleServerExternals,
   injectModuleHoistingSystem,
-  removeUnnecessarySharedKeys,
-  retrieveDefaultShared,
-  setOptions,
-  validateCompilerOptions,
-  validatePluginOptions
+  retrieveDefaultShared
 } from "./next-fragments";
 
 import { parseRemotes } from "../../internal";
 import AddRuntimeRequirementToPromiseExternal from "../AddRuntimeRequirementToPromiseExternalPlugin";
 import { exposeNextjsPages } from "../../loaders/nextPageMapLoader";
+import { removeUnnecessarySharedKeys } from "./remove-unnecessary-shared-keys";
+import { setOptions } from "./set-options";
+import { validateCompilerOptions, validatePluginOptions } from "./validate-options";
+import { applyAutomaticAsyncBoundary } from "./apply-automatic-async-boundary";
 
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application

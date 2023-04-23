@@ -1,10 +1,9 @@
-import type { Compiler, RuleSetConditionAbsolute } from "webpack";
+import type { Compiler } from "webpack";
 import { container } from "webpack";
 import path from "path";
 import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
-  NextFederationPluginOptions,
   SharedObject
 } from "@module-federation/utilities";
 import { ChunkCorrelationPlugin } from "@module-federation/node";
@@ -12,142 +11,6 @@ import { ChunkCorrelationPlugin } from "@module-federation/node";
 import InvertedContainerPlugin from "../container/InvertedContainerPlugin";
 import { DEFAULT_SHARE_SCOPE, DEFAULT_SHARE_SCOPE_BROWSER, getDelegates } from "../../internal";
 import AddModulesPlugin from "../AddModulesToRuntime";
-
-/**
- * Compares two regular expressions to see if they are equal.
- *
- * @param x - The first regular expression to compare.
- * @param y - The second regular expression to compare.
- * @returns True if the regular expressions are equal, false otherwise.
- *
- * @remarks
- * This function compares two regular expressions to see if they are equal in terms of their source,
- * global, ignoreCase, and multiline properties. It is used to check if two regular expressions match
- * the same pattern.
- */
-export const regexEqual = (
-  x:
-    | string
-    | RegExp
-    | ((value: string) => boolean)
-    | RuleSetConditionAbsolute[]
-    | undefined,
-  y: RegExp
-): boolean => {
-  return (
-    x instanceof RegExp &&
-    y instanceof RegExp &&
-    x.source === y.source &&
-    x.global === y.global &&
-    x.ignoreCase === y.ignoreCase &&
-    x.multiline === y.multiline
-  );
-};
-
-// Utility function to remove unnecessary shared keys from the default share scope
-export function removeUnnecessarySharedKeys(
-  shared: Record<string, unknown>
-): void {
-  const warnings: string[] = Object.keys(shared).reduce(
-    (acc: string[], key: string) => {
-      if (DEFAULT_SHARE_SCOPE[key]) {
-        acc.push(
-          `[nextjs-mf] You are sharing ${key} from the default share scope. This is not necessary and can be removed.`
-        );
-        // Use a type assertion to inform TypeScript that 'key' can be used as an index for the 'shared' object
-        delete (shared as { [key: string]: unknown })[key];
-      }
-      return acc;
-    },
-    []
-  );
-
-  if (warnings.length > 0) {
-    console.warn('%c' + warnings.join('\n'), 'color: red');
-  }
-}
-
-/**
- * Utility function to set the main and extra options.
- *
- * @param options - The NextFederationPluginOptions instance.
- * @returns An object containing the main options and extra options.
- *
- * @remarks
- * This function sets the main and extra options for NextFederationPlugin. It splits the options object into
- * the main options and extra options, and sets default values for any options that are not defined. The default
- * extra options are:
- * - automaticPageStitching: false
- * - enableImageLoaderFix: false
- * - enableUrlLoaderFix: false
- * - skipSharingNextInternals: false
- * - automaticAsyncBoundary: false
- */
-export function setOptions(options: NextFederationPluginOptions): {
-  mainOptions: ModuleFederationPluginOptions;
-  extraOptions: NextFederationPluginExtraOptions;
-} {
-  const { extraOptions, ...mainOpts } = options;
-
-  const defaultExtraOptions: NextFederationPluginExtraOptions = {
-    automaticPageStitching: false,
-    enableImageLoaderFix: false,
-    enableUrlLoaderFix: false,
-    skipSharingNextInternals: false,
-    automaticAsyncBoundary: false,
-  };
-
-  return {
-    mainOptions: mainOpts,
-    extraOptions: { ...defaultExtraOptions, ...extraOptions },
-  };
-}
-
-/**
- * Utility function to validate compiler options.
- *
- * @param compiler - The Webpack compiler instance.
- * @returns True if the compiler options are valid, false otherwise.
- *
- * @remarks
- * This function validates the options passed to the Webpack compiler. It throws an error if the name
- * option is not defined in the options. It also checks if the name option is set to either "server" or
- * "client", as Module Federation is only applied to the main server and client builds in Next.js.
- */
-export function validateCompilerOptions(compiler: Compiler): boolean {
-  // Throw an error if the name option is not defined in the options
-  if (!compiler.options.name) {
-    throw new Error('name is not defined in Compiler options');
-  }
-
-  // Only apply Module Federation to the main server and client builds in Next.js
-  return ['server', 'client'].includes(compiler.options.name);
-}
-
-/**
- * Utility function to validate NextFederationPlugin options.
- *
- * @param options - The ModuleFederationPluginOptions instance.
- *
- * @remarks
- * This function validates the options passed to NextFederationPlugin. It throws an error if the filename
- * option is not defined in the options.
- *
- * A requirement for using Module Federation is that a name must be specified.
- */
-export function validatePluginOptions(
-  options: ModuleFederationPluginOptions
-): void {
-  // Throw an error if the filename option is not defined in the options
-  if (!options.filename) {
-    throw new Error('filename is not defined in NextFederation options');
-  }
-
-  // A requirement for using Module Federation is that a name must be specified
-  if (!options.name) {
-    throw new Error('Module federation "name" option must be specified');
-  }
-}
 
 /**
  * Configures server-specific compiler options.
@@ -307,78 +170,6 @@ export function handleServerExternals(
       // Otherwise, return null
       return;
     };
-  }
-}
-
-/**
-
- Apply automatic async boundary.
- @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
- @param {NextFederationPluginExtraOptions} extraOptions - The NextFederationPluginExtraOptions instance.
- @param {Compiler} compiler - The Webpack compiler instance.
- @remarks This function applies an automatic async boundary to the Next.js application.
- */
-export function applyAutomaticAsyncBoundary(
-  options: ModuleFederationPluginOptions,
-  extraOptions: NextFederationPluginExtraOptions,
-  compiler: Compiler
-) {
-  const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];
-
-  const jsRules = compiler.options.module.rules.find((r) => {
-    //@ts-ignore
-    return r && r.oneOf;
-  });
-
-  //@ts-ignore
-  if (jsRules && 'oneOf' in jsRules) {
-    // @ts-ignore
-    const foundJsLayer = jsRules.oneOf.find((r) => {
-      //@ts-ignore
-      return regexEqual(r.test, /\.(tsx|ts|js|cjs|mjs|jsx)$/) && !r.issuerLayer;
-    });
-
-    if (foundJsLayer) {
-      const loaderChain = Array.isArray(foundJsLayer.use)
-        ? foundJsLayer.use
-        : [foundJsLayer.use];
-
-      // Add a new rule for pages that need async boundaries
-      //@ts-ignore
-      jsRules.oneOf.unshift({
-        test: (request: string) => {
-          if (
-            allowedPaths.some((p) =>
-              request.includes(path.join(compiler.context, p))
-            )
-          ) {
-            return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request);
-          }
-          return false;
-        },
-        exclude: [
-          /node_modules/,
-          /_document/,
-          /_middleware/,
-          /pages[\\/]middleware/,
-          /pages[\\/]api/,
-        ],
-        resourceQuery: (query: string) => !query.includes('hasBoundary'),
-        use: [
-          //@ts-ignore
-          ...loaderChain,
-          //@ts-ignore
-          {
-            // This loader auto-wraps page entrypoints
-            // and re-exports them as a dynamic import so module sharing works without eager issues.
-            loader: path.resolve(
-              __dirname,
-              '../../loaders/async-boundary-loader'
-            ),
-          },
-        ],
-      });
-    }
   }
 }
 
