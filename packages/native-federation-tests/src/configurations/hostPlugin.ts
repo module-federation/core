@@ -9,7 +9,9 @@ const defaultOptions = {
 const buildZipUrl = (hostOptions: Required<HostOptions>, remote: string) => {
   const remoteStringUrl = remote.split('@').at(-1)!
   const remoteUrl = new URL(remoteStringUrl)
-  remoteUrl.pathname = `${hostOptions.testsFolder}.zip`
+
+  const pathnameWithoutEntry = remoteUrl.pathname.split('/').slice(0, -1).join('/')
+  remoteUrl.pathname = `${pathnameWithoutEntry}/${hostOptions.testsFolder}.zip`
 
   return remoteUrl.href
 }

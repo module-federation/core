@@ -1,7 +1,10 @@
 {
   "name": "@module-federation/native-federation-tests",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Bundler agnostic unplugin to share federated tests",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.mjs",

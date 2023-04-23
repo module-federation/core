@@ -28,7 +28,12 @@
   min-width: 100%;
   flex-direction: column;
   align-items: flex-end;
-  background: linear-gradient(to bottom, var(--page-version-menu-background) 0%, var(--page-version-menu-background) 100%) no-repeat;
+  background: linear-gradient(
+      to bottom,
+      var(--page-version-menu-background) 0%,
+      var(--page-version-menu-background) 100%
+    )
+    no-repeat;
   padding: 1.375rem 1.5rem 0.5rem 0.5rem;
   position: absolute;
   top: 0;
