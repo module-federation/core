@@ -55,5 +55,20 @@ describe('hostPlugin', () => {
         })
       })
     })
+
+    it('correctly resolve subpath remotes', () => {
+      const subpathModuleFederationConfig = {
+        ...moduleFederationConfig,
+        remotes: {
+          moduleFederationTypescript: 'http://localhost:3000/subpatha/subpathb/remoteEntry.js',
+        }
+      }
+
+      const {mapRemotesToDownload} = retrieveHostConfig({moduleFederationConfig: subpathModuleFederationConfig})
+
+      expect(mapRemotesToDownload).toStrictEqual({
+        moduleFederationTypescript: 'http://localhost:3000/subpatha/subpathb/@mf-types.zip'
+      })
+    })
   })
 })

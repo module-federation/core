@@ -134,7 +134,7 @@
     "tsup": "^6.7.0",
     "typescript": "5.0.4",
     "url-loader": "^4.1.1",
-    "verdaccio": "5.23.2",
+    "verdaccio": "5.24.0",
     "vinyl-fs": "~3.0",
     "vitest": "^0.30.0",
     "vue-tsc": "^1.0.24",

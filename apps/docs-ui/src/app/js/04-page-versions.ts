@@ -1,5 +1,4 @@
 export default function () {
-
   const toggle = document.querySelector('.page-versions .version-menu-toggle');
   if (!toggle) return;
 
