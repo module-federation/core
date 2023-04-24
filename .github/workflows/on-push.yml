@@ -31,10 +31,10 @@ jobs:
         id: cache
         with:
           path: ${{ env.CACHE_NODE_MODULES_PATH }}
-          key: build-${{ hashFiles('**/yarn.lock') }}
+          key: build-${{ hashFiles('**/package-lock.json') }}
       - name: Install Dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: yarn install --frozen-lockfile
+        run: npm install
       - name: Check changes "docs"
         id: docs-changed
         run: echo "docs-changed=$(node tools/scripts/ci-is-affected.mjs --appName=docs --base=${{ env.BASE_REF}} --head=HEAD)" >> $GITHUB_OUTPUT
@@ -53,7 +53,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_NODE_MODULES_PATH }}
-          key: build-${{ hashFiles('**/yarn.lock') }}
+          key: build-${{ hashFiles('**/package-lock.json') }}
       - run: npx nx run docs:build-docs
       - uses: nwtgck/actions-netlify@v2.0.0
         with:
@@ -64,7 +64,7 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         timeout-minutes: 1
-          
+
   preview-docs:
     name: 'Deploy Netlify Preview'
     permissions:
@@ -77,7 +77,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_NODE_MODULES_PATH }}
-          key: build-${{ hashFiles('**/yarn.lock') }}
+          key: build-${{ hashFiles('**/package-lock.json') }}
       - run: npx nx run docs:build-docs:local
       # Sets the branch name as environment variable
       - uses: nelonoel/branch-name@v1.0.1
