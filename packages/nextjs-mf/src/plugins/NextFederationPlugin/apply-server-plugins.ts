@@ -1,7 +1,8 @@
-import { Compiler } from "webpack";
-import { ModuleFederationPluginOptions } from "@module-federation/utilities";
-import AddModulesPlugin from "../AddModulesToRuntime";
-import path from "path";
+import { Compiler } from 'webpack';
+import { ModuleFederationPluginOptions } from '@module-federation/utilities';
+import AddModulesPlugin from '../AddModulesToRuntime';
+import path from 'path';
+import { DEFAULT_SHARE_SCOPE_BROWSER } from '../../internal';
 
 /**
  * Applies server-specific plugins.
@@ -23,25 +24,37 @@ export function applyServerPlugins(
   options: ModuleFederationPluginOptions
 ): void {
   // Import the StreamingTargetPlugin from @module-federation/node
-  const { StreamingTargetPlugin } = require("@module-federation/node");
-
+  const { StreamingTargetPlugin } = require('@module-federation/node');
   // Add the AddModulesPlugin for the webpack runtime with eager loading and remote configuration
   new AddModulesPlugin({
-    runtime: "webpack-runtime",
+    debug: false,
+    runtime: 'webpack-runtime',
     eager: true,
-    remotes: options.remotes
+    remotes: options.remotes,
+    // @ts-ignore
+    // shared: DEFAULT_SHARE_SCOPE_BROWSER,
+    container: options.name,
+    // @ts-ignore
+    applicationName: options.name,
   }).apply(compiler);
 
-  // Add the AddModulesPlugin for the server with lazy loading and remote configuration
-  new AddModulesPlugin({
-    runtime: options.name,
-    eager: false,
-    remotes: options.remotes
-  }).apply(compiler);
+  // new AddModulesPlugin({
+  //   runtime: 'webpack-runtime',
+  //   eager: true,
+  //   remotes: options.remotes,
+  // }).apply(compiler);
+  //
+  // // Add the AddModulesPlugin for the server with lazy loading and remote configuration
+  // new AddModulesPlugin({
+  //   runtime: options.name,
+  //   eager: false,
+  //   remotes: options.remotes,
+  // }).apply(compiler);
 
+  console.log(options);
   // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
   new StreamingTargetPlugin(options, {
-    ModuleFederationPlugin: compiler.webpack.container.ModuleFederationPlugin
+    ModuleFederationPlugin: compiler.webpack.container.ModuleFederationPlugin,
   }).apply(compiler);
 }
 
@@ -61,8 +74,8 @@ export function configureServerLibraryAndFilename(
 ): void {
   // Configure the library option with type "commonjs-module" and the name from the options
   options.library = {
-    type: "commonjs-module",
-    name: options.name
+    type: 'commonjs-module',
+    name: options.name,
   };
 
   // Set the filename option to the basename of the current filename
@@ -100,12 +113,12 @@ export function handleServerExternals(
     const originalExternals = compiler.options.externals[0];
 
     // Replace the original externals function with a new asynchronous function
-    compiler.options.externals[0] = async function(ctx, callback) {
+    compiler.options.externals[0] = async function (ctx, callback) {
       // Check if the module should not be treated as external
       if (
         ctx.request &&
-        (ctx.request.includes("@module-federation/utilities") ||
-          ctx.request.includes("internal-delegate-hoist") ||
+        (ctx.request.includes('@module-federation/utilities') ||
+          ctx.request.includes('internal-delegate-hoist') ||
           Object.keys(options.shared || {}).some((key) => {
             return (
               //@ts-ignore
@@ -113,7 +126,7 @@ export function handleServerExternals(
               ctx?.request?.includes(key)
             );
           }) ||
-          ctx.request.includes("@module-federation/dashboard-plugin"))
+          ctx.request.includes('@module-federation/dashboard-plugin'))
       ) {
         // If the module should not be treated as external, return without calling the original externals function
         return;
@@ -129,8 +142,8 @@ export function handleServerExternals(
       }
 
       // If the module is from Next.js or React, return the original result
-      const req = fromNext.split(" ")[1];
-      if (req.startsWith("next") || req.startsWith("react")) {
+      const req = fromNext.split(' ')[1];
+      if (req.startsWith('next') || req.startsWith('react')) {
         return fromNext;
       }
 

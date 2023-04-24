@@ -5,12 +5,12 @@
 
 'use strict';
 
-import type { Chunk, ChunkGraph, Compiler } from "webpack";
-import { RuntimeModule, Template } from "webpack";
+import type { Chunk, ChunkGraph, Compiler } from 'webpack';
+import { RuntimeModule, Template } from 'webpack';
 // @ts-ignore
-import { getUndoPath } from "webpack/lib/util/identifier";
+import { getUndoPath } from 'webpack/lib/util/identifier';
 // @ts-ignore
-import compileBooleanMatcher from "webpack/lib/util/compileBooleanMatcher";
+import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
 
 /**
  * Interface for InvertedContainerRuntimeModuleOptions, containing
@@ -107,12 +107,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         console.error('host runtime was unable to initialize its own remote', e);
       }`;
       });
-    if (containerEntry) {
-      console.log(
-        'found container entry module for inverse boot',
-        containerEntry
-      );
-    }
     return Template.asString(containerEntry);
   }
 }

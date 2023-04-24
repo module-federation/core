@@ -8,28 +8,35 @@ import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
-  SharedObject
-} from "@module-federation/utilities";
-import { createRuntimeVariables } from "@module-federation/utilities";
-import type { Compiler, container } from "webpack";
-import CopyFederationPlugin from "../CopyFederationPlugin";
+  SharedObject,
+} from '@module-federation/utilities';
+import { createRuntimeVariables } from '@module-federation/utilities';
+import type { Compiler, container } from 'webpack';
+import CopyFederationPlugin from '../CopyFederationPlugin';
 import {
   applyClientPlugins,
   applyRemoteDelegates,
   configureServerCompilerOptions,
   getModuleFederationPluginConstructor,
   injectModuleHoistingSystem,
-  retrieveDefaultShared
-} from "./next-fragments";
+  retrieveDefaultShared,
+} from './next-fragments';
 
-import { parseRemotes } from "../../internal";
-import AddRuntimeRequirementToPromiseExternal from "../AddRuntimeRequirementToPromiseExternalPlugin";
-import { exposeNextjsPages } from "../../loaders/nextPageMapLoader";
-import { removeUnnecessarySharedKeys } from "./remove-unnecessary-shared-keys";
-import { setOptions } from "./set-options";
-import { validateCompilerOptions, validatePluginOptions } from "./validate-options";
-import { applyAutomaticAsyncBoundary } from "./apply-automatic-async-boundary";
-import { applyServerPlugins, configureServerLibraryAndFilename, handleServerExternals } from "./apply-server-plugins";
+import { parseRemotes } from '../../internal';
+import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
+import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
+import { removeUnnecessarySharedKeys } from './remove-unnecessary-shared-keys';
+import { setOptions } from './set-options';
+import {
+  validateCompilerOptions,
+  validatePluginOptions,
+} from './validate-options';
+import { applyAutomaticAsyncBoundary } from './apply-automatic-async-boundary';
+import {
+  applyServerPlugins,
+  configureServerLibraryAndFilename,
+  handleServerExternals,
+} from './apply-server-plugins';
 
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application
@@ -83,8 +90,9 @@ export class NextFederationPlugin {
     if (isServer) {
       // Refactored server condition
       configureServerCompilerOptions(compiler);
-      applyServerPlugins(compiler, this._options);
       configureServerLibraryAndFilename(this._options);
+
+      applyServerPlugins(compiler, this._options);
       handleServerExternals(compiler, {
         ...this._options,
         shared: { ...defaultShared, ...this._options.shared },
@@ -116,8 +124,6 @@ export class NextFederationPlugin {
 
     compiler.options.devtool = 'source-map';
 
-    //@ts-ignore
-    compiler.options.output.publicPath = 'auto';
     compiler.options.output.uniqueName = this._options.name;
 
     // inject module hoisting system

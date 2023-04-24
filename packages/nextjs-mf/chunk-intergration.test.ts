@@ -3,7 +3,7 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
-xdescribe('Next.js build output', () => {
+describe('Next.js build output', () => {
   beforeAll(() => {
     // Run the build programmatically
     // console.log('buildOutputDir', buildOutputDir);

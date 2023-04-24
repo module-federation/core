@@ -1,16 +1,20 @@
-import type { Compiler } from "webpack";
-import { container } from "webpack";
-import path from "path";
+import type { Compiler } from 'webpack';
+import { container } from 'webpack';
+import path from 'path';
 import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
-  SharedObject
-} from "@module-federation/utilities";
-import { ChunkCorrelationPlugin } from "@module-federation/node";
+  SharedObject,
+} from '@module-federation/utilities';
+import { ChunkCorrelationPlugin } from '@module-federation/node';
 
-import InvertedContainerPlugin from "../container/InvertedContainerPlugin";
-import { DEFAULT_SHARE_SCOPE, DEFAULT_SHARE_SCOPE_BROWSER, getDelegates } from "../../internal";
-import AddModulesPlugin from "../AddModulesToRuntime";
+import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
+import {
+  DEFAULT_SHARE_SCOPE,
+  DEFAULT_SHARE_SCOPE_BROWSER,
+  getDelegates,
+} from '../../internal';
+import AddModulesPlugin from '../AddModulesToRuntime';
 
 /**
  * Configures server-specific compiler options.
@@ -64,6 +68,8 @@ export function applyClientPlugins(
 ): void {
   const { webpack } = compiler;
   const { remotes, name } = options;
+  //@ts-ignore
+  compiler.options.output.publicPath = 'auto';
 
   // Add a new plugin to hoist modules into remote runtime
   new AddModulesPlugin({

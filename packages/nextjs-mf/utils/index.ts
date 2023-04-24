@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 
 export {
   extractUrlAndGlobal,
@@ -23,12 +23,14 @@ export interface FlushedChunksProps {
 }
 
 export const FlushedChunks = ({ chunks }: FlushedChunksProps) => {
+  //@ts-ignore
+  console.log(global.__remote_scope__);
   const scripts = chunks
     .filter((c) => {
       // TODO: host shouldnt flush its own remote out
-      // if(c.includes('?')) {
-      //   return c.split('?')[0].endsWith('.js')
-      // }
+      if (c.includes('?')) {
+        return c.split('?')[0].endsWith('.js');
+      }
       return c.endsWith('.js');
     })
     .map((chunk) => {

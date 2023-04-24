@@ -4,7 +4,8 @@
  */
 class AddModulesToRuntimeChunkPlugin {
   constructor(options) {
-    this.options = { debug: false, ...options };
+    this.options = { debug: true, ...options };
+    this._delegateModules = new Set();
   }
 
   /**
@@ -19,6 +20,38 @@ class AddModulesToRuntimeChunkPlugin {
     compiler.hooks.compilation.tap(
       'AddModulesToRuntimeChunkPlugin',
       (compilation) => {
+        // Tap into the 'finish-modules' hook to access the module list after they are all processed
+        compilation.hooks.finishModules.tapAsync(
+          'ModuleIDFinderPlugin',
+          (modules, callback) => {
+            const {
+              runtime,
+              container,
+              remotes,
+              shared,
+              eager,
+              applicationName,
+            } = this.options;
+
+            // Get the delegate module names for remote chunks if specified
+            const knownDelegates = new Set(
+              remotes
+                ? Object.values(remotes).map((remote) =>
+                    remote.replace('internal ', '')
+                  )
+                : []
+            );
+
+            for (const module of modules) {
+              if (module.resource && knownDelegates.has(module.resource)) {
+                this._delegateModules.add(module);
+              }
+            }
+            // Continue the process
+            callback();
+          }
+        );
+
         // Tap into optimizeChunks hook
         compilation.hooks.optimizeChunks.tap(
           'AddModulesToRuntimeChunkPlugin',
@@ -43,13 +76,6 @@ class AddModulesToRuntimeChunkPlugin {
             // Get the container chunk if specified
             const partialEntry = container ? getChunkByName(container) : null;
 
-            // Get the delegate module names for remote chunks if specified
-            const knownDelegates = remotes
-              ? Object.values(remotes).map(
-                  (remote) => remote.replace('internal ', '').split('?')[1]
-                )
-              : null;
-
             // Get the shared module names to their imports if specified
             const internalSharedModules = shared
               ? Object.entries(shared).map(
@@ -64,20 +90,31 @@ class AddModulesToRuntimeChunkPlugin {
                 )
               : null;
 
-            // Iterate over each chunk
-            for (const chunk of chunks.filter(
-              (chunk) =>
+            const foundChunks = chunks.filter((chunk) => {
+              const hasMatch = chunk !== runtimeChunk;
+              if (isServer) {
+                return hasMatch;
+              }
+              return (
                 chunk !== runtimeChunk &&
                 applicationName &&
                 (chunk.name || chunk.id)?.startsWith(applicationName)
-            )) {
+              );
+            });
+
+            // Iterate over each chunk
+            for (const chunk of foundChunks) {
               const modulesToMove = [];
               const containers = [];
               const modulesIterable =
                 compilation.chunkGraph.getOrderedChunkModulesIterable(chunk);
-              const delegateSet = new Set(knownDelegates || []);
               for (const module of modulesIterable) {
-                this.classifyModule(module, knownDelegates, internalSharedModules, modulesToMove, containers)
+                this.classifyModule(
+                  module,
+                  internalSharedModules,
+                  modulesToMove,
+                  containers
+                );
               }
 
               if (partialContainerModules) {
@@ -89,7 +126,8 @@ class AddModulesToRuntimeChunkPlugin {
                 }
               }
 
-              const modulesToConnect = [].concat(modulesToMove, containers)
+              const modulesToConnect = [].concat(modulesToMove, containers);
+
               const { chunkGraph } = compilation;
               const runtimeChunkModules =
                 chunkGraph.getOrderedChunkModulesIterable(runtimeChunk);
@@ -100,7 +138,7 @@ class AddModulesToRuntimeChunkPlugin {
                 }
 
                 if (eager && modulesToMove.includes(module)) {
-                  if (!isServer && this.options.debug) {
+                  if (this.options.debug) {
                     console.log(
                       `removing ${module.id || module.identifier()} from ${
                         chunk.name
@@ -113,8 +151,7 @@ class AddModulesToRuntimeChunkPlugin {
 
               for (const module of runtimeChunkModules) {
                 if (!chunkGraph.isModuleInChunk(module, chunk)) {
-                  const { rawRequest } = module || {};
-                  if (delegateSet.has(rawRequest)) {
+                  if (this._delegateModules.has(module)) {
                     chunkGraph.connectChunkAndModule(chunk, module);
                     if (this.options.debug) {
                       console.log(
@@ -130,15 +167,19 @@ class AddModulesToRuntimeChunkPlugin {
       }
     );
   }
-  classifyModule(module, knownDelegates, internalSharedModules, modulesToMove, containers) {
-    //todo: this is duplicated from the above function, need to refactor
-    const delegateSet = new Set(knownDelegates || []);
-
-    if (delegateSet.has(module?.rawRequest)) {
+  classifyModule(module, internalSharedModules, modulesToMove, containers) {
+    //TODO: i dont need to classify delegate modules anymore, delete this (and refactor)
+    // i added a new hook to resolve config requests to modules in the graph, so i already have the modules as this._delegateModules
+    if (this._delegateModules.has(module)) {
       containers.push(module);
-    } else if (internalSharedModules?.some((share) => module?.rawRequest === share)) {
+    } else if (
+      //TODO: do the same for shared modules, resolve them in the afterFinishModules hook
+      internalSharedModules?.some((share) => module?.rawRequest === share)
+    ) {
       modulesToMove.push(module);
     } else if (module?.userRequest?.includes('internal-delegate-hoist')) {
+      // TODO: can probably move the whole classification part to afterFinishModules,
+      //  track all modules i want to move, then just search the chunks
       modulesToMove.push(module);
     }
   }
