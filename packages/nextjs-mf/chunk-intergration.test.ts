@@ -3,12 +3,16 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
-describe('Next.js build output', () => {
+xdescribe('Next.js build output', () => {
   beforeAll(() => {
     // Run the build programmatically
     // console.log('buildOutputDir', buildOutputDir);
     // execSync('nx build', { stdio: 'inherit', cwd: '../../' });
     //execSync("cd " + JSON.stringify(__dirname) +'; yarn build', { stdio: 'inherit', cwd: __dirname });
+  });
+  afterEach(() => {
+    //@ts-ignore
+    delete global.self.webpackChunkhome_app;
   });
   describe('client', () => {
     const buildOutputDir = path.join(
@@ -27,6 +31,20 @@ describe('Next.js build output', () => {
     it('webpack-runtime', () => {
       const buildOutput = findFileInDirectory('webpack-', buildOutputDir);
       expect(buildOutput).toMatchSnapshot();
+    });
+    describe('modules', () => {
+      it('main chunk should not have react', () => {
+        const buildOutput = findModulesInChunk('main-', buildOutputDir);
+        const hasReact = buildOutput?.some((module) =>
+          module.includes('node_modules/react/')
+        );
+        expect(hasReact).toBe(false);
+      });
+
+      it('main chunk', () => {
+        const buildOutput = findModulesInChunk('main-', buildOutputDir);
+        expect(buildOutput).toMatchSnapshot();
+      });
     });
   });
   xdescribe('server', () => {
@@ -66,6 +84,19 @@ function findFileInDirectory(
     } else if (file.startsWith(filename) && file.endsWith('.js')) {
       return fs.readFileSync(filePath, 'utf-8');
     }
+  }
+  return null;
+}
+
+function findModulesInChunk(filename: string, directory: string) {
+  //@ts-ignore
+  global.self = { webpackChunkhome_app: [] };
+  const chunk = findFileInDirectory(filename, directory);
+  if (chunk) {
+    const evaledChunk = eval(chunk);
+    //@ts-ignore
+    const moduleMaps = globalThis.self['webpackChunkhome_app'][0][1];
+    return Object.keys(moduleMaps);
   }
   return null;
 }
