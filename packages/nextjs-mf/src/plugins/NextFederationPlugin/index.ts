@@ -112,10 +112,10 @@ export class NextFederationPlugin {
           : {}),
         ...this._options.exposes,
       },
-      remotes: {
-        //@ts-ignore
-        ...this._options.remotes,
-      },
+      // remotes: {
+      //   //@ts-ignore
+      //   ...this._options.remotes,
+      // },
       shared: {
         ...defaultShared,
         ...this._options.shared,
