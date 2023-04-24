@@ -3,7 +3,7 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
-xdescribe('Next.js build output', () => {
+describe('Next.js build output', () => {
   beforeAll(() => {
     // Run the build programmatically
     // console.log('buildOutputDir', buildOutputDir);
@@ -11,8 +11,10 @@ xdescribe('Next.js build output', () => {
     //execSync("cd " + JSON.stringify(__dirname) +'; yarn build', { stdio: 'inherit', cwd: __dirname });
   });
   afterEach(() => {
-    //@ts-ignore
-    delete global.self.webpackChunkhome_app;
+    if (global.self) {
+      //@ts-ignore
+      delete global.self.webpackChunkhome_app;
+    }
   });
   describe('client', () => {
     const buildOutputDir = path.join(
