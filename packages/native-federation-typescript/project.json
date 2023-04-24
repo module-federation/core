@@ -45,7 +45,10 @@
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": ["native-federation-typescript:npm", "native-federation-typescript:github"],
+        "postTargets": [
+          "native-federation-typescript:npm",
+          "native-federation-typescript:github"
+        ],
         "trackDeps": true,
         "push": true
       }

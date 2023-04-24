@@ -131,6 +131,7 @@
     "react-dom": "18.2.0",
     "react-router-dom": "6.8.0"
   },
+
   "config": {
     "commitizen": {
       "path": "cz-conventional-changelog"

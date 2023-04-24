@@ -55,5 +55,5 @@
     }
   },
   "tags": [],
-  "implicitDependencies": []
+  "implicitDependencies": ["nextjs-mf"]
 }
