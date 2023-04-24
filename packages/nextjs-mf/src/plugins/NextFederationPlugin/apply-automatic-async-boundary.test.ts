@@ -63,6 +63,7 @@ describe('applyAutomaticAsyncBoundary', () => {
     expect(newRule.exclude).toBeDefined();
     expect(newRule.resourceQuery).toBeDefined();
     expect(newRule.use).toBeDefined();
+    expect(newRule.use[1].loader).toContain('async-boundary-loader');
   });
 
   it('should not modify webpack configuration if there is no js rule', () => {
