@@ -180,7 +180,7 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         _config: {},
       };
     }
-
+    // @ts-ignore
     const globalScope =
       // @ts-ignore
       typeof window !== 'undefined' ? window : global.__remote_scope__;
