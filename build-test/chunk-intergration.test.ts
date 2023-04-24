@@ -1,0 +1,36 @@
+// __tests__/build.test.ts
+import { execSync } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
+
+describe('Next.js build output', () => {
+  const buildOutputDir = path.join(__dirname, '..', 'dist/apps/3000-home/.next');
+
+  beforeAll(() => {
+    // Run the build programmatically
+    // execSync("nx build",{ stdio: 'inherit', cwd: "../" });
+    //execSync("cd " + JSON.stringify(__dirname) +'; yarn build', { stdio: 'inherit', cwd: __dirname });
+  });
+
+  it('matches the snapshot', () => {
+    const buildOutput = getBuildOutput(buildOutputDir);
+    expect(buildOutput).toMatchSnapshot();
+  });
+});
+
+function getBuildOutput(dir: string): Record<string, string> {
+  const output: Record<string, string> = {};
+
+  const files = fs.readdirSync(dir, { withFileTypes: true });
+  files.forEach((file) => {
+    const filePath = path.join(dir, file.name);
+    if (file.isDirectory()) {
+      // @ts-ignore
+      output[file.name] = getBuildOutput(filePath);
+    } else {
+      output[file.name] = fs.readFileSync(filePath, 'utf8');
+    }
+  });
+
+  return output;
+}
