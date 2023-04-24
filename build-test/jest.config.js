@@ -1,7 +1,7 @@
 /* eslint-disable */
 module.exports = {
-  displayName: 'nextjs-mf',
-  preset: '../../jest.preset.js',
+  displayName: 'build',
+  preset: '../jest.preset.js',
   globals: {
     'ts-jest': {
       tsconfig: '<rootDir>/tsconfig.spec.json',
@@ -12,5 +12,5 @@ module.exports = {
     '^.+\\.[tj]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/packages/nextjs-mf',
+  coverageDirectory: '../coverage/packages/build',
 };

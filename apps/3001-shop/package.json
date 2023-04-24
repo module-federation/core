@@ -8,8 +8,5 @@
     "next": "13.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"
-  },
-  "devDependencies": {
-    "@module-federation/nextjs-mf": "link:../../dist/packages/nextjs-mf"
   }
 }

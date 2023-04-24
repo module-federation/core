@@ -131,11 +131,7 @@
     "react-dom": "18.2.0",
     "react-router-dom": "6.8.0"
   },
-  "resolutions": {
-    "@module-federation/utilities": "link:./dist/packages/utilities",
-    "@module-federation/node": "link:./dist/packages/node",
-    "@module-federation/nextjs-mf": "link:./dist/packages/nextjs-mf"
-  },
+
   "config": {
     "commitizen": {
       "path": "cz-conventional-changelog"
