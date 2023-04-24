@@ -13,7 +13,7 @@ import { RemoteVars } from '../types';
 let remotesFromProcess = {} as RemoteVars;
 try {
   // @ts-ignore
-  remotesFromProcess = process.env['REMOTES'];
+  remotesFromProcess = process.env['REMOTES'] || {};
 } catch (e) {
   // not in webpack bundle
 }
