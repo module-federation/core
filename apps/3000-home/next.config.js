@@ -13,6 +13,8 @@ const nextConfig = {
   },
   webpack(config, options) {
     const { isServer } = options;
+    // used for testing build output snapshots
+    config.optimization.minimize = false;
 
     const remotes = {
       // shop: createDelegatedModule(require.resolve('./remote-delegate.js'), {
