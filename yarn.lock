@@ -2294,21 +2294,18 @@
     semver "^7.3.5"
     tar "^6.1.11"
 
-"@module-federation/nextjs-mf@link:./dist/packages/nextjs-mf":
-  version "0.0.0"
-  uid ""
-
 "@module-federation/nextjs-mf@link:dist/packages/nextjs-mf":
   version "0.0.0"
   uid ""
 
 "@module-federation/node@0.0.0":
-  version "0.0.0"
-  uid ""
-
-"@module-federation/node@link:./dist/packages/node":
-  version "0.0.0"
-  uid ""
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/@module-federation/node/-/node-0.14.0.tgz#414cfb6393c6c14ec54b56f37a1efba67ee2e5e1"
+  integrity sha512-ry46SxNi9QMOR2Z2l0LBh1eL6fOow41AfGF54Ir7oOUaBr4N9RHdR0CTeMCLLtw4dTUO4LmSDh83/vr2AXEpRQ==
+  dependencies:
+    "@module-federation/utilities" "1.6.0"
+    encoding "0.1.13"
+    node-fetch "2.6.7"
 
 "@module-federation/typescript@*":
   version "2.2.2"
@@ -2320,21 +2317,15 @@
     lodash.get "4.4.2"
     node-fetch "2.6.7"
 
-"@module-federation/utilities@0.0.0":
-  version "0.0.0"
-  uid ""
+"@module-federation/utilities@0.0.0", "@module-federation/utilities@1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@module-federation/utilities/-/utilities-1.6.0.tgz#582b9a8a87f3f39b6bf56eb6fa109bb23aa59990"
+  integrity sha512-WB9A18cX9dkUQCnJmOXFn4HdCAN2wcl1z4ZmI6NG31ZV0EvxIBkcdeTd++F4uV6rpVUzNmvUbOTPABN5yT6MsQ==
 
 "@module-federation/utilities@1.4.1":
-  version "0.0.0"
-  uid ""
-
-"@module-federation/utilities@1.6.1":
-  version "0.0.0"
-  uid ""
-
-"@module-federation/utilities@link:./dist/packages/utilities":
-  version "0.0.0"
-  uid ""
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@module-federation/utilities/-/utilities-1.4.1.tgz#fa3226d05de2f7d638e4d7936f88220f14274452"
+  integrity sha512-brZPY5+C97qjAIcVkix5/fPexC0GFrjpQ5NiXri3fPQ+5Jq1j/wqho998rW2f2kg394OUGXfKfALugRR4BHpeg==
 
 "@mole-inc/bin-wrapper@^8.0.1":
   version "8.0.1"

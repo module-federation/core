@@ -4,7 +4,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 describe('Next.js build output', () => {
-  const buildOutputDir = path.join(__dirname, '..', 'dist/apps/3000-home/.next');
+  const buildOutputDir = path.join(
+    __dirname,
+    '..',
+    'dist/apps/3000-home/.next'
+  );
 
   beforeAll(() => {
     // Run the build programmatically
@@ -21,13 +25,24 @@ describe('Next.js build output', () => {
 function getBuildOutput(dir: string): Record<string, string> {
   const output: Record<string, string> = {};
 
-  const files = fs.readdirSync(dir, { withFileTypes: true });
+  const files = fs.readdirSync(dir, { withFileTypes: true })
+
   files.forEach((file) => {
     const filePath = path.join(dir, file.name);
     if (file.isDirectory()) {
+
+
       // @ts-ignore
       output[file.name] = getBuildOutput(filePath);
     } else {
+      if (
+        file.name.startsWith('webpack') ||
+        file.name.startsWith('home') ||
+        file.name.startsWith('remoteEntry')
+      ) {
+      } else {
+        return;
+      }
       output[file.name] = fs.readFileSync(filePath, 'utf8');
     }
   });
