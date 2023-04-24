@@ -40,14 +40,9 @@ export function applyAutomaticAsyncBoundary(
       //@ts-ignore
       jsRules.oneOf.unshift({
         test: (request: string) => {
-          if (
-            allowedPaths.some((p) =>
-              request.includes(path.join(compiler.context, p))
-            )
-          ) {
-            return /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request);
-          }
-          return false;
+          return allowedPaths.some((p) =>
+              request.includes(path.join(compiler.context, p)) &&
+              /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request);
         },
         exclude: [
           /node_modules/,
