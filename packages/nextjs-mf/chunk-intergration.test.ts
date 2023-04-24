@@ -11,8 +11,10 @@ xdescribe('Next.js build output', () => {
     //execSync("cd " + JSON.stringify(__dirname) +'; yarn build', { stdio: 'inherit', cwd: __dirname });
   });
   afterEach(() => {
-    //@ts-ignore
-    delete global.self.webpackChunkhome_app;
+    if (global.self) {
+      //@ts-ignore
+      delete global.self.webpackChunkhome_app;
+    }
   });
   describe('client', () => {
     const buildOutputDir = path.join(
@@ -47,7 +49,7 @@ xdescribe('Next.js build output', () => {
       });
     });
   });
-  xdescribe('server', () => {
+  describe('server', () => {
     const buildOutputDir = path.join(
       __dirname,
       '../../',

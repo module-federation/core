@@ -1,7 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Next.js build output client main chunk 1`] = `undefined`;
-
 exports[`Next.js build output client modules main chunk 1`] = `
 [
   "../../node_modules/@swc/helpers/lib/_async_to_generator.js",
@@ -108,77 +106,77 @@ exports[`Next.js build output client modules main chunk 1`] = `
 
 exports[`Next.js build output client partial remote 1`] = `
 ""use strict";
-(self["webpackChunkhome_app"] = self["webpackChunkhome_app"] || []).push([[4437],{
+(self["webpackChunkhome_app"] = self["webpackChunkhome_app"] || []).push([["home_app_single"],{
 
-/***/ 5091:
+/***/ "webpack/container/entry/home_app":
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 var moduleMap = {
 	"__hoist": function() {
-		return __webpack_require__.e(680).then(function() { return function() { return (__webpack_require__(680)); }; });
+		return __webpack_require__.e("node_modules_module-federation_nextjs-mf_src_delegate-hoist-container_js").then(function() { return function() { return (__webpack_require__("../../node_modules/@module-federation/nextjs-mf/src/delegate-hoist-container.js")); }; });
 	},
 	"./pages-map": function() {
-		return __webpack_require__.e(5153).then(function() { return function() { return (__webpack_require__(5153)); }; });
+		return __webpack_require__.e("node_modules_module-federation_nextjs-mf_src_loaders_nextPageMapLoader_js_node_modules_module-c206cf").then(function() { return function() { return (__webpack_require__("../../node_modules/@module-federation/nextjs-mf/src/loaders/nextPageMapLoader.js!../../node_modules/@module-federation/nextjs-mf/src/loaders/nextPageMapLoader.js")); }; });
 	},
 	"./pages-map-v2": function() {
-		return __webpack_require__.e(8477).then(function() { return function() { return (__webpack_require__(8477)); }; });
+		return __webpack_require__.e("node_modules_module-federation_nextjs-mf_src_loaders_nextPageMapLoader_js_v2_node_modules_mod-e440a1").then(function() { return function() { return (__webpack_require__("../../node_modules/@module-federation/nextjs-mf/src/loaders/nextPageMapLoader.js?v2!../../node_modules/@module-federation/nextjs-mf/src/loaders/nextPageMapLoader.js")); }; });
 	},
 	"./pages/dynamic-remote": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(2042)]).then(function() { return function() { return (__webpack_require__(2042)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_dynamic-remote_js")]).then(function() { return function() { return (__webpack_require__("./pages/dynamic-remote.js")); }; });
 	},
 	"./pages/index": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(8377)]).then(function() { return function() { return (__webpack_require__(8377)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_index_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/index.tsx")); }; });
 	},
 	"./pages/checkout/[...slug]": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(1199)]).then(function() { return function() { return (__webpack_require__(1199)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_checkout_slug_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/checkout/[...slug].tsx")); }; });
 	},
 	"./pages/checkout/[pid]": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(8628)]).then(function() { return function() { return (__webpack_require__(8628)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_checkout_pid_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/checkout/[pid].tsx")); }; });
 	},
 	"./pages/checkout/exposed-pages": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(3161)]).then(function() { return function() { return (__webpack_require__(3161)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_checkout_exposed-pages_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/checkout/exposed-pages.tsx")); }; });
 	},
 	"./pages/checkout/index": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(1434)]).then(function() { return function() { return (__webpack_require__(1434)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_checkout_index_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/checkout/index.tsx")); }; });
 	},
 	"./pages/checkout/test-check-button": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(8642)]).then(function() { return function() { return (__webpack_require__(8642)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_checkout_test-check-button_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/checkout/test-check-button.tsx")); }; });
 	},
 	"./pages/checkout/test-title": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(2041)]).then(function() { return function() { return (__webpack_require__(2041)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_checkout_test-title_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/checkout/test-title.tsx")); }; });
 	},
 	"./pages/home/exposed-pages": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(3362)]).then(function() { return function() { return (__webpack_require__(3362)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_home_exposed-pages_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/home/exposed-pages.tsx")); }; });
 	},
 	"./pages/home/test-broken-remotes": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(4790)]).then(function() { return function() { return (__webpack_require__(4790)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_home_test-broken-remotes_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/home/test-broken-remotes.tsx")); }; });
 	},
 	"./pages/home/test-remote-hook": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(6271)]).then(function() { return function() { return (__webpack_require__(6271)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_home_test-remote-hook_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/home/test-remote-hook.tsx")); }; });
 	},
 	"./pages/home/test-shared-nav": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(1438)]).then(function() { return function() { return (__webpack_require__(1438)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_home_test-shared-nav_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/home/test-shared-nav.tsx")); }; });
 	},
 	"./pages/shop/exposed-pages": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(9318)]).then(function() { return function() { return (__webpack_require__(9318)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_shop_exposed-pages_js")]).then(function() { return function() { return (__webpack_require__("./pages/shop/exposed-pages.js")); }; });
 	},
 	"./pages/shop/index": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(4134)]).then(function() { return function() { return (__webpack_require__(4134)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_shop_index_js")]).then(function() { return function() { return (__webpack_require__("./pages/shop/index.js")); }; });
 	},
 	"./pages/shop/test-webpack-png": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(9570)]).then(function() { return function() { return (__webpack_require__(9570)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_shop_test-webpack-png_js")]).then(function() { return function() { return (__webpack_require__("./pages/shop/test-webpack-png.js")); }; });
 	},
 	"./pages/shop/test-webpack-svg": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(6769)]).then(function() { return function() { return (__webpack_require__(6769)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_shop_test-webpack-svg_js")]).then(function() { return function() { return (__webpack_require__("./pages/shop/test-webpack-svg.js")); }; });
 	},
 	"./pages/shop/products/[...slug]": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(8074)]).then(function() { return function() { return (__webpack_require__(8074)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_shop_products_slug_js")]).then(function() { return function() { return (__webpack_require__("./pages/shop/products/[...slug].js")); }; });
 	},
 	"./SharedNav": function() {
-		return Promise.all([__webpack_require__.e(6890), __webpack_require__.e(9850), __webpack_require__.e(6968), __webpack_require__.e(1439), __webpack_require__.e(8399)]).then(function() { return function() { return (__webpack_require__(8399)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_react_jsx-runtime"), __webpack_require__.e("webpack_sharing_consume_default_react"), __webpack_require__.e("webpack_sharing_consume_default_antd_antd-webpack_sharing_consume_default_next_router"), __webpack_require__.e("webpack_sharing_consume_default_styled-jsx_style"), __webpack_require__.e("components_SharedNav_tsx")]).then(function() { return function() { return (__webpack_require__("./components/SharedNav.tsx")); }; });
 	},
 	"./menu": function() {
-		return Promise.all([__webpack_require__.e(6890), __webpack_require__.e(6968), __webpack_require__.e(8261)]).then(function() { return function() { return (__webpack_require__(8261)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_react_jsx-runtime"), __webpack_require__.e("webpack_sharing_consume_default_antd_antd-webpack_sharing_consume_default_next_router"), __webpack_require__.e("components_menu_tsx")]).then(function() { return function() { return (__webpack_require__("./components/menu.tsx")); }; });
 	}
 };
 var get = function(module, getScope) {
@@ -213,88 +211,88 @@ __webpack_require__.d(exports, {
 },
 /******/ function(__webpack_require__) { // webpackRuntimeModules
 /******/ var __webpack_exec__ = function(moduleId) { return __webpack_require__(__webpack_require__.s = moduleId); }
-/******/ __webpack_require__.O(0, [9774,4634], function() { return __webpack_exec__(5091); });
+/******/ __webpack_require__.O(0, ["framework","webpack_sharing_provide_default_antd"], function() { return __webpack_exec__("webpack/container/entry/home_app"); });
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ window.home_app = __webpack_exports__;
 /******/ }
 ]);
-//# sourceMappingURL=home_app_single-fb29f4858d07d1e2.js.map"
+//# sourceMappingURL=home_app_single-d065a78de2069863.js.map"
 `;
 
 exports[`Next.js build output client remoteEntry.js 1`] = `
 "/******/ (function() { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 5091:
+/***/ "webpack/container/entry/home_app":
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
 var moduleMap = {
 	"__hoist": function() {
-		return __webpack_require__.e(680).then(function() { return function() { return (__webpack_require__(680)); }; });
+		return __webpack_require__.e("node_modules_module-federation_nextjs-mf_src_delegate-hoist-container_js").then(function() { return function() { return (__webpack_require__("../../node_modules/@module-federation/nextjs-mf/src/delegate-hoist-container.js")); }; });
 	},
 	"./pages-map": function() {
-		return __webpack_require__.e(5153).then(function() { return function() { return (__webpack_require__(5153)); }; });
+		return __webpack_require__.e("node_modules_module-federation_nextjs-mf_src_loaders_nextPageMapLoader_js_node_modules_module-c206cf").then(function() { return function() { return (__webpack_require__("../../node_modules/@module-federation/nextjs-mf/src/loaders/nextPageMapLoader.js!../../node_modules/@module-federation/nextjs-mf/src/loaders/nextPageMapLoader.js")); }; });
 	},
 	"./pages-map-v2": function() {
-		return __webpack_require__.e(8477).then(function() { return function() { return (__webpack_require__(8477)); }; });
+		return __webpack_require__.e("node_modules_module-federation_nextjs-mf_src_loaders_nextPageMapLoader_js_v2_node_modules_mod-e440a1").then(function() { return function() { return (__webpack_require__("../../node_modules/@module-federation/nextjs-mf/src/loaders/nextPageMapLoader.js?v2!../../node_modules/@module-federation/nextjs-mf/src/loaders/nextPageMapLoader.js")); }; });
 	},
 	"./pages/dynamic-remote": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(2042)]).then(function() { return function() { return (__webpack_require__(2042)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_dynamic-remote_js")]).then(function() { return function() { return (__webpack_require__("./pages/dynamic-remote.js")); }; });
 	},
 	"./pages/index": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(8377)]).then(function() { return function() { return (__webpack_require__(8377)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_index_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/index.tsx")); }; });
 	},
 	"./pages/checkout/[...slug]": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(1199)]).then(function() { return function() { return (__webpack_require__(1199)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_checkout_slug_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/checkout/[...slug].tsx")); }; });
 	},
 	"./pages/checkout/[pid]": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(8628)]).then(function() { return function() { return (__webpack_require__(8628)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_checkout_pid_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/checkout/[pid].tsx")); }; });
 	},
 	"./pages/checkout/exposed-pages": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(3161)]).then(function() { return function() { return (__webpack_require__(3161)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_checkout_exposed-pages_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/checkout/exposed-pages.tsx")); }; });
 	},
 	"./pages/checkout/index": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(1434)]).then(function() { return function() { return (__webpack_require__(1434)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_checkout_index_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/checkout/index.tsx")); }; });
 	},
 	"./pages/checkout/test-check-button": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(8642)]).then(function() { return function() { return (__webpack_require__(8642)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_checkout_test-check-button_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/checkout/test-check-button.tsx")); }; });
 	},
 	"./pages/checkout/test-title": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(2041)]).then(function() { return function() { return (__webpack_require__(2041)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_checkout_test-title_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/checkout/test-title.tsx")); }; });
 	},
 	"./pages/home/exposed-pages": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(3362)]).then(function() { return function() { return (__webpack_require__(3362)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_home_exposed-pages_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/home/exposed-pages.tsx")); }; });
 	},
 	"./pages/home/test-broken-remotes": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(4790)]).then(function() { return function() { return (__webpack_require__(4790)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_home_test-broken-remotes_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/home/test-broken-remotes.tsx")); }; });
 	},
 	"./pages/home/test-remote-hook": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(6271)]).then(function() { return function() { return (__webpack_require__(6271)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_home_test-remote-hook_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/home/test-remote-hook.tsx")); }; });
 	},
 	"./pages/home/test-shared-nav": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(1438)]).then(function() { return function() { return (__webpack_require__(1438)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_home_test-shared-nav_tsx")]).then(function() { return function() { return (__webpack_require__("./pages/home/test-shared-nav.tsx")); }; });
 	},
 	"./pages/shop/exposed-pages": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(9318)]).then(function() { return function() { return (__webpack_require__(9318)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_shop_exposed-pages_js")]).then(function() { return function() { return (__webpack_require__("./pages/shop/exposed-pages.js")); }; });
 	},
 	"./pages/shop/index": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(4134)]).then(function() { return function() { return (__webpack_require__(4134)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_shop_index_js")]).then(function() { return function() { return (__webpack_require__("./pages/shop/index.js")); }; });
 	},
 	"./pages/shop/test-webpack-png": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(9570)]).then(function() { return function() { return (__webpack_require__(9570)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_shop_test-webpack-png_js")]).then(function() { return function() { return (__webpack_require__("./pages/shop/test-webpack-png.js")); }; });
 	},
 	"./pages/shop/test-webpack-svg": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(6769)]).then(function() { return function() { return (__webpack_require__(6769)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_shop_test-webpack-svg_js")]).then(function() { return function() { return (__webpack_require__("./pages/shop/test-webpack-svg.js")); }; });
 	},
 	"./pages/shop/products/[...slug]": function() {
-		return Promise.all([__webpack_require__.e(6592), __webpack_require__.e(8074)]).then(function() { return function() { return (__webpack_require__(8074)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_next_dynamic"), __webpack_require__.e("pages_shop_products_slug_js")]).then(function() { return function() { return (__webpack_require__("./pages/shop/products/[...slug].js")); }; });
 	},
 	"./SharedNav": function() {
-		return Promise.all([__webpack_require__.e(6890), __webpack_require__.e(9850), __webpack_require__.e(6968), __webpack_require__.e(1439), __webpack_require__.e(8399)]).then(function() { return function() { return (__webpack_require__(8399)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_react_jsx-runtime"), __webpack_require__.e("webpack_sharing_consume_default_react"), __webpack_require__.e("webpack_sharing_consume_default_antd_antd-webpack_sharing_consume_default_next_router"), __webpack_require__.e("webpack_sharing_consume_default_styled-jsx_style"), __webpack_require__.e("components_SharedNav_tsx")]).then(function() { return function() { return (__webpack_require__("./components/SharedNav.tsx")); }; });
 	},
 	"./menu": function() {
-		return Promise.all([__webpack_require__.e(6890), __webpack_require__.e(6968), __webpack_require__.e(8261)]).then(function() { return function() { return (__webpack_require__(8261)); }; });
+		return Promise.all([__webpack_require__.e("webpack_sharing_consume_default_react_jsx-runtime"), __webpack_require__.e("webpack_sharing_consume_default_antd_antd-webpack_sharing_consume_default_next_router"), __webpack_require__.e("components_menu_tsx")]).then(function() { return function() { return (__webpack_require__("./components/menu.tsx")); }; });
 	}
 };
 var get = function(module, getScope) {
@@ -326,7 +324,7 @@ __webpack_require__.d(exports, {
 
 /***/ }),
 
-/***/ 3374:
+/***/ "../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js":
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var __resourceQuery = "?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js";
@@ -338,7 +336,7 @@ if(typeof window !== 'undefined') {
 };
 "use strict";
 module.exports = new Promise(async (resolve, reject) => {
-    const { importDelegatedModule } = await __webpack_require__.e(/* import() */ 6285).then(__webpack_require__.bind(__webpack_require__, 6285));
+    const { importDelegatedModule } = await __webpack_require__.e(/* import() */ "vendors-node_modules_module-federation_utilities_src_utils_common_js").then(__webpack_require__.bind(__webpack_require__, "../../node_modules/@module-federation/utilities/src/utils/common.js"));
     // eslint-disable-next-line no-undef
     const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
     const [global, url] = currentRequest.split('@');
@@ -355,7 +353,7 @@ module.exports = new Promise(async (resolve, reject) => {
 
 /***/ }),
 
-/***/ 4857:
+/***/ "../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js":
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var __resourceQuery = "?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js";
@@ -367,7 +365,7 @@ if(typeof window !== 'undefined') {
 };
 "use strict";
 module.exports = new Promise(async (resolve, reject) => {
-    const { importDelegatedModule } = await __webpack_require__.e(/* import() */ 6285).then(__webpack_require__.bind(__webpack_require__, 6285));
+    const { importDelegatedModule } = await __webpack_require__.e(/* import() */ "vendors-node_modules_module-federation_utilities_src_utils_common_js").then(__webpack_require__.bind(__webpack_require__, "../../node_modules/@module-federation/utilities/src/utils/common.js"));
     // eslint-disable-next-line no-undef
     const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
     const [global, url] = currentRequest.split('@');
@@ -384,7 +382,7 @@ module.exports = new Promise(async (resolve, reject) => {
 
 /***/ }),
 
-/***/ 5018:
+/***/ "../../node_modules/@module-federation/nextjs-mf/src/internal-delegate-hoist.js":
 /***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
 
 console.log('initializing internal-module-hoist for:', __webpack_require__.j)
@@ -394,100 +392,100 @@ console.log('initializing internal-module-hoist for:', __webpack_require__.j)
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(8733),
+          get: () => () => __webpack_require__("../../node_modules/react/index.js?pop"),
         }
         },
        "react/jsx-runtime": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(4154),
+          get: () => () => __webpack_require__("../../node_modules/react/jsx-runtime.js?pop"),
         }
         },
        "react-dom": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(4345),
+          get: () => () => __webpack_require__("../../node_modules/react-dom/index.js?pop"),
         }
         },
        "next/dynamic": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(8454),
+          get: () => () => __webpack_require__("../../node_modules/next/dynamic.js?pop"),
         }
         },
        "styled-jsx": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(8094),
+          get: () => () => __webpack_require__("../../node_modules/styled-jsx/index.js?pop"),
         }
         },
        "styled-jsx/style": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(1708),
+          get: () => () => __webpack_require__("../../node_modules/styled-jsx/style.js?pop"),
         }
         },
        "next/link": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(1766),
+          get: () => () => __webpack_require__("../../node_modules/next/link.js?pop"),
         }
         },
        "next/router": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(726),
+          get: () => () => __webpack_require__("../../node_modules/next/router.js?pop"),
         }
         },
        "next/script": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(7226),
+          get: () => () => __webpack_require__("../../node_modules/next/script.js?pop"),
         }
         },
        "next/head": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(3865),
+          get: () => () => __webpack_require__("../../node_modules/next/head.js?pop"),
         }
         },};
   __webpack_require__.S.default = __webpack_require__.S.default || {};
   Object.assign(__webpack_require__.S.default || {}, eager);
   
 
-      __webpack_require__.m[/*require.resolve*/(9850)] = __webpack_require__.m[/*require.resolve*/(8733)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/react")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/react/index.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(6890)] = __webpack_require__.m[/*require.resolve*/(4154)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/react/jsx-runtime")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/react/jsx-runtime.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(9040)] = __webpack_require__.m[/*require.resolve*/(4345)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/react-dom")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/react-dom/index.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(6592)] = __webpack_require__.m[/*require.resolve*/(8454)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/next/dynamic")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/next/dynamic.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(null /* weak dependency, without id */)] = __webpack_require__.m[/*require.resolve*/(8094)];
+      __webpack_require__.m[/*require.resolve*/(null /* weak dependency, without id */)] = __webpack_require__.m[/*require.resolve*/("../../node_modules/styled-jsx/index.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(1439)] = __webpack_require__.m[/*require.resolve*/(1708)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/styled-jsx/style")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/styled-jsx/style.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(1765)] = __webpack_require__.m[/*require.resolve*/(1766)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/next/link")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/next/link.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(770)] = __webpack_require__.m[/*require.resolve*/(726)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/next/router")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/next/router.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(null /* weak dependency, without id */)] = __webpack_require__.m[/*require.resolve*/(7226)];
+      __webpack_require__.m[/*require.resolve*/(null /* weak dependency, without id */)] = __webpack_require__.m[/*require.resolve*/("../../node_modules/next/script.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(7410)] = __webpack_require__.m[/*require.resolve*/(3865)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/next/head")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/next/head.js?pop")];
       
 //hasShareHoist
 
-__webpack_require__(4857)
-__webpack_require__(3374)
+__webpack_require__("../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js")
+__webpack_require__("../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js")
 //hasDelegateMarkers
 "use strict";
 // placeholder file for delegate module injection
@@ -644,7 +642,7 @@ __webpack_require__(3374)
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = function(chunkId) {
 /******/ 			// return url for filenames based on template
-/******/ 			return "static/chunks/" + ({"3661":"a29ae703","8934":"e893f787"}[chunkId] || chunkId) + "." + {"103":"d6e2daaec787b95e","193":"5c9ff69d7e25f135","558":"559b179fbfd08878","609":"e62b09eeb77b6b0d","680":"544ad5153e4951e5","1111":"ca5f73fc3b496a03","1195":"c693890cd3cb8697","1199":"20618376039032b7","1377":"342efc8b56012a04","1434":"847962fe2b650466","1438":"96b7e62034cfa6e0","1439":"c52aff035eef9881","1884":"1df6ea61b9d6a2a8","2041":"e66c2c536f68bfdb","2042":"4568deff073b2ced","2538":"f7602986c0a77415","2572":"c28be202431a5197","3161":"caa08e276936c5b9","3232":"cee7ee89e382f8ae","3362":"d19279a28fa28277","3654":"dd4d8bdc041c5f5d","3661":"eca190a4e1959f4a","4134":"3de6a02fcbd2544a","4283":"8753f48635d12472","4743":"c86995eb9d3fc632","4790":"5603781902ae39f5","5074":"93c24a69206e1b65","5153":"881efa9bb3d1dbff","6271":"9cbaa86db73f728a","6285":"533f685180442c59","6520":"c3a0ed0f66185d6a","6592":"98c88e9d343c2570","6769":"0a33033a6e3a18cf","6890":"9eb946fe1d2dfcae","6947":"0fb47dc3f42d3c49","6968":"31b33632f32b98ef","7404":"58f4d83e2da2cb6d","7998":"592751754d59f81a","8074":"4074165149c308c3","8151":"d3e01de5945225ea","8261":"2df848241ef520e4","8377":"07fffcd0e4bf440a","8399":"67081b93f2884723","8477":"6596ff93bf1c0ee2","8498":"112c4cefd0bccd00","8628":"a50adf1a50bdfdf1","8642":"16adf14ba95435fd","8698":"847917e8008e3bce","8934":"1f7d9ff11c96d095","9040":"35c0ffc22420a26f","9263":"20bfff8c3289944d","9318":"76c57f42e03b2be4","9570":"f374ac4db829a7ab","9850":"08d9a7ea93417981"}[chunkId] + ".js";
+/******/ 			return "static/chunks/" + chunkId + "." + {"a29ae703":"7393232a92631e1c","vendors-node_modules_antd_es_index_js":"3b69884161b5e947","webpack_sharing_consume_default_react":"2d161c4b8df5a587","webpack_sharing_consume_default_react-dom":"070d35d4379771b3","node_modules_module-federation_nextjs-mf_src_delegate-hoist-container_js":"607fa081843ce6ef","node_modules_module-federation_nextjs-mf_src_loaders_nextPageMapLoader_js_node_modules_module-c206cf":"d3cb9ff18651e21f","node_modules_module-federation_nextjs-mf_src_loaders_nextPageMapLoader_js_v2_node_modules_mod-e440a1":"50e5031b68c8a40e","webpack_sharing_consume_default_next_dynamic":"b26782242381bfd9","pages_dynamic-remote_js":"b76ed50487f9be08","pages_index_tsx":"b821059c0d56336f","pages_checkout_slug_tsx":"2fbcaccd3d40c18b","pages_checkout_pid_tsx":"7d90364d70078510","pages_checkout_exposed-pages_tsx":"fc77ae0a2f2d5122","pages_checkout_index_tsx":"30f2e7e1f7a0ccd6","pages_checkout_test-check-button_tsx":"3e22ef6a9697e115","pages_checkout_test-title_tsx":"ad3005c52940b72a","pages_home_exposed-pages_tsx":"a8a0186091e517f4","pages_home_test-broken-remotes_tsx":"99eab0dda163db49","pages_home_test-remote-hook_tsx":"2308701d3fe50abc","pages_home_test-shared-nav_tsx":"4959ed7b27de0d66","pages_shop_exposed-pages_js":"9c39d0d8043dcc0e","pages_shop_index_js":"0bdd0c56aa4f13ab","pages_shop_test-webpack-png_js":"87777c7ed7fa2149","pages_shop_test-webpack-svg_js":"0efc48ba9d409ab9","pages_shop_products_slug_js":"4b791aef23896374","webpack_sharing_consume_default_react_jsx-runtime":"f7da0fab6f04a8f9","webpack_sharing_consume_default_antd_antd-webpack_sharing_consume_default_next_router":"f3abd54ffe7e7a60","webpack_sharing_consume_default_styled-jsx_style":"8a7c780c6010655c","components_SharedNav_tsx":"2ae2843e812edcc5","components_menu_tsx":"427e2a23ce32fcc0","vendors-node_modules_module-federation_utilities_src_utils_common_js":"3589aa62a1fafd7d","pages_dynamic-remote_js_hasBoundary":"1104bdb8b0ada750","pages_index_tsx_hasBoundary":"42d434eb049990c0","pages_checkout_slug_tsx_hasBoundary":"a375c28652c4b54c","pages_checkout_pid_tsx_hasBoundary":"81a441b1ef0e5609","pages_checkout_exposed-pages_tsx_hasBoundary":"5cf628b5e4838424","pages_checkout_index_tsx_hasBoundary":"7325391a10ddead1","pages_checkout_test-check-button_tsx_hasBoundary":"a2e84b3c08408963","pages_checkout_test-title_tsx_hasBoundary":"5d42427c9227bdd6","e893f787":"d77b21d17d20a0e5","vendors-node_modules_next_dist_compiled_stream-browserify_index_js-node_modules_next_dist_com-c0cd11":"9d16906c904a6198","pages_home_exposed-pages_tsx_hasBoundary-packages_utilities_src_index_ts":"59573c21b399d88c","pages_home_test-broken-remotes_tsx_hasBoundary":"1e19a547a7372e65","pages_home_test-remote-hook_tsx_hasBoundary":"ad46e1f067073e11","pages_home_test-shared-nav_tsx_hasBoundary":"1d6b97a82a0c75fe","pages_shop_exposed-pages_js_hasBoundary":"0d1046e69589d627","pages_shop_index_js_hasBoundary":"358de7b774fc26a8","pages_shop_test-webpack-png_js_hasBoundary":"0a84a8ddd71aaeed","pages_shop_test-webpack-svg_js_hasBoundary":"56bf8c9529b11b2b","pages_shop_products_slug_js_hasBoundary":"a116dc51b1f04741","webpack_container_remote_checkout_CheckoutTitle":"294513ccf8a1d8d8","webpack_container_remote_checkout_ButtonOldAnt":"2b37569c5301f81d","webpack_container_remote_shop_WebpackSvg":"912fa3da5515df7c","webpack_container_remote_shop_WebpackPng":"7506b99ec6a3fd99"}[chunkId] + ".js";
 /******/ 		};
 /******/ 	}();
 /******/ 	
@@ -743,135 +741,135 @@ __webpack_require__(3374)
 /******/ 	/* webpack/runtime/remotes loading */
 /******/ 	!function() {
 /******/ 		var chunkMapping = {
-/******/ 			"193": [
-/******/ 				1473
+/******/ 			"pages_checkout_slug_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[...slug]"
 /******/ 			],
-/******/ 			"609": [
-/******/ 				9428
+/******/ 			"pages_checkout_pid_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[pid]"
 /******/ 			],
-/******/ 			"1195": [
-/******/ 				9437
+/******/ 			"pages_checkout_exposed-pages_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/exposed-pages"
 /******/ 			],
-/******/ 			"1884": [
-/******/ 				3087
+/******/ 			"pages_checkout_index_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/index"
 /******/ 			],
-/******/ 			"2538": [
-/******/ 				6143
+/******/ 			"pages_checkout_test-check-button_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-check-button"
 /******/ 			],
-/******/ 			"2572": [
-/******/ 				6413
+/******/ 			"pages_checkout_test-title_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-title"
 /******/ 			],
-/******/ 			"4283": [
-/******/ 				4283
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/useCustomRemoteHook"
 /******/ 			],
-/******/ 			"4743": [
-/******/ 				5609
+/******/ 			"pages_shop_exposed-pages_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/exposed-pages"
 /******/ 			],
-/******/ 			"5074": [
-/******/ 				5074
+/******/ 			"pages_shop_index_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/index"
 /******/ 			],
-/******/ 			"6520": [
-/******/ 				6520
+/******/ 			"pages_shop_test-webpack-png_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-png"
 /******/ 			],
-/******/ 			"6947": [
-/******/ 				7753
+/******/ 			"pages_shop_test-webpack-svg_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-svg"
 /******/ 			],
-/******/ 			"7404": [
-/******/ 				6434
+/******/ 			"pages_shop_products_slug_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/products/[...slug]"
 /******/ 			],
-/******/ 			"8151": [
-/******/ 				8739
+/******/ 			"webpack_container_remote_checkout_CheckoutTitle": [
+/******/ 				"webpack/container/remote/checkout/CheckoutTitle"
 /******/ 			],
-/******/ 			"8498": [
-/******/ 				224
+/******/ 			"webpack_container_remote_checkout_ButtonOldAnt": [
+/******/ 				"webpack/container/remote/checkout/ButtonOldAnt"
 /******/ 			],
-/******/ 			"8698": [
-/******/ 				8698
+/******/ 			"webpack_container_remote_shop_WebpackSvg": [
+/******/ 				"webpack/container/remote/shop/WebpackSvg"
 /******/ 			],
-/******/ 			"9263": [
-/******/ 				9567
+/******/ 			"webpack_container_remote_shop_WebpackPng": [
+/******/ 				"webpack/container/remote/shop/WebpackPng"
 /******/ 			]
 /******/ 		};
 /******/ 		var idToExternalAndNameMapping = {
-/******/ 			"224": [
-/******/ 				"default",
-/******/ 				"./pages/shop/test-webpack-png",
-/******/ 				4857
-/******/ 			],
-/******/ 			"1473": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/index",
-/******/ 				3374
-/******/ 			],
-/******/ 			"3087": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/[pid]",
-/******/ 				3374
-/******/ 			],
-/******/ 			"4283": [
-/******/ 				"default",
-/******/ 				"./WebpackPng",
-/******/ 				4857
-/******/ 			],
-/******/ 			"5074": [
-/******/ 				"default",
-/******/ 				"./CheckoutTitle",
-/******/ 				3374
-/******/ 			],
-/******/ 			"5609": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/exposed-pages",
-/******/ 				3374
-/******/ 			],
-/******/ 			"6143": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/test-check-button",
-/******/ 				3374
-/******/ 			],
-/******/ 			"6413": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/test-title",
-/******/ 				3374
-/******/ 			],
-/******/ 			"6434": [
-/******/ 				"default",
-/******/ 				"./useCustomRemoteHook",
-/******/ 				4857
-/******/ 			],
-/******/ 			"6520": [
-/******/ 				"default",
-/******/ 				"./WebpackSvg",
-/******/ 				4857
-/******/ 			],
-/******/ 			"7753": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[...slug]": [
 /******/ 				"default",
 /******/ 				"./pages/checkout/[...slug]",
-/******/ 				3374
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"8698": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[pid]": [
 /******/ 				"default",
-/******/ 				"./ButtonOldAnt",
-/******/ 				3374
+/******/ 				"./pages/checkout/[pid]",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"8739": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/exposed-pages": [
 /******/ 				"default",
-/******/ 				"./pages/shop/products/[...slug]",
-/******/ 				4857
+/******/ 				"./pages/checkout/exposed-pages",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"9428": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/index": [
 /******/ 				"default",
-/******/ 				"./pages/shop/test-webpack-svg",
-/******/ 				4857
+/******/ 				"./pages/checkout/index",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"9437": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-check-button": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/test-check-button",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-title": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/test-title",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/useCustomRemoteHook": [
+/******/ 				"default",
+/******/ 				"./useCustomRemoteHook",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/exposed-pages": [
 /******/ 				"default",
 /******/ 				"./pages/shop/exposed-pages",
-/******/ 				4857
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"9567": [
+/******/ 			"webpack/container/remote/shop/pages/shop/index": [
 /******/ 				"default",
 /******/ 				"./pages/shop/index",
-/******/ 				4857
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-png": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-png",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-svg": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-svg",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/products/[...slug]": [
+/******/ 				"default",
+/******/ 				"./pages/shop/products/[...slug]",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/CheckoutTitle": [
+/******/ 				"default",
+/******/ 				"./CheckoutTitle",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/ButtonOldAnt": [
+/******/ 				"default",
+/******/ 				"./ButtonOldAnt",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/WebpackSvg": [
+/******/ 				"default",
+/******/ 				"./WebpackSvg",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/WebpackPng": [
+/******/ 				"default",
+/******/ 				"./WebpackPng",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.remotes = function(chunkId, promises) {
@@ -922,135 +920,135 @@ __webpack_require__(3374)
 /******/ 	/* webpack/runtime/remotes loading */
 /******/ 	!function() {
 /******/ 		var chunkMapping = {
-/******/ 			"193": [
-/******/ 				1473
+/******/ 			"pages_checkout_slug_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[...slug]"
 /******/ 			],
-/******/ 			"609": [
-/******/ 				9428
+/******/ 			"pages_checkout_pid_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[pid]"
 /******/ 			],
-/******/ 			"1195": [
-/******/ 				9437
+/******/ 			"pages_checkout_exposed-pages_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/exposed-pages"
 /******/ 			],
-/******/ 			"1884": [
-/******/ 				3087
+/******/ 			"pages_checkout_index_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/index"
 /******/ 			],
-/******/ 			"2538": [
-/******/ 				6143
+/******/ 			"pages_checkout_test-check-button_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-check-button"
 /******/ 			],
-/******/ 			"2572": [
-/******/ 				6413
+/******/ 			"pages_checkout_test-title_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-title"
 /******/ 			],
-/******/ 			"4283": [
-/******/ 				4283
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/useCustomRemoteHook"
 /******/ 			],
-/******/ 			"4743": [
-/******/ 				5609
+/******/ 			"pages_shop_exposed-pages_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/exposed-pages"
 /******/ 			],
-/******/ 			"5074": [
-/******/ 				5074
+/******/ 			"pages_shop_index_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/index"
 /******/ 			],
-/******/ 			"6520": [
-/******/ 				6520
+/******/ 			"pages_shop_test-webpack-png_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-png"
 /******/ 			],
-/******/ 			"6947": [
-/******/ 				7753
+/******/ 			"pages_shop_test-webpack-svg_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-svg"
 /******/ 			],
-/******/ 			"7404": [
-/******/ 				6434
+/******/ 			"pages_shop_products_slug_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/products/[...slug]"
 /******/ 			],
-/******/ 			"8151": [
-/******/ 				8739
+/******/ 			"webpack_container_remote_checkout_CheckoutTitle": [
+/******/ 				"webpack/container/remote/checkout/CheckoutTitle"
 /******/ 			],
-/******/ 			"8498": [
-/******/ 				224
+/******/ 			"webpack_container_remote_checkout_ButtonOldAnt": [
+/******/ 				"webpack/container/remote/checkout/ButtonOldAnt"
 /******/ 			],
-/******/ 			"8698": [
-/******/ 				8698
+/******/ 			"webpack_container_remote_shop_WebpackSvg": [
+/******/ 				"webpack/container/remote/shop/WebpackSvg"
 /******/ 			],
-/******/ 			"9263": [
-/******/ 				9567
+/******/ 			"webpack_container_remote_shop_WebpackPng": [
+/******/ 				"webpack/container/remote/shop/WebpackPng"
 /******/ 			]
 /******/ 		};
 /******/ 		var idToExternalAndNameMapping = {
-/******/ 			"224": [
-/******/ 				"default",
-/******/ 				"./pages/shop/test-webpack-png",
-/******/ 				4857
-/******/ 			],
-/******/ 			"1473": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/index",
-/******/ 				3374
-/******/ 			],
-/******/ 			"3087": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/[pid]",
-/******/ 				3374
-/******/ 			],
-/******/ 			"4283": [
-/******/ 				"default",
-/******/ 				"./WebpackPng",
-/******/ 				4857
-/******/ 			],
-/******/ 			"5074": [
-/******/ 				"default",
-/******/ 				"./CheckoutTitle",
-/******/ 				3374
-/******/ 			],
-/******/ 			"5609": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/exposed-pages",
-/******/ 				3374
-/******/ 			],
-/******/ 			"6143": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/test-check-button",
-/******/ 				3374
-/******/ 			],
-/******/ 			"6413": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/test-title",
-/******/ 				3374
-/******/ 			],
-/******/ 			"6434": [
-/******/ 				"default",
-/******/ 				"./useCustomRemoteHook",
-/******/ 				4857
-/******/ 			],
-/******/ 			"6520": [
-/******/ 				"default",
-/******/ 				"./WebpackSvg",
-/******/ 				4857
-/******/ 			],
-/******/ 			"7753": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[...slug]": [
 /******/ 				"default",
 /******/ 				"./pages/checkout/[...slug]",
-/******/ 				3374
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"8698": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[pid]": [
 /******/ 				"default",
-/******/ 				"./ButtonOldAnt",
-/******/ 				3374
+/******/ 				"./pages/checkout/[pid]",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"8739": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/exposed-pages": [
 /******/ 				"default",
-/******/ 				"./pages/shop/products/[...slug]",
-/******/ 				4857
+/******/ 				"./pages/checkout/exposed-pages",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"9428": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/index": [
 /******/ 				"default",
-/******/ 				"./pages/shop/test-webpack-svg",
-/******/ 				4857
+/******/ 				"./pages/checkout/index",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"9437": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-check-button": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/test-check-button",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-title": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/test-title",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/useCustomRemoteHook": [
+/******/ 				"default",
+/******/ 				"./useCustomRemoteHook",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/exposed-pages": [
 /******/ 				"default",
 /******/ 				"./pages/shop/exposed-pages",
-/******/ 				4857
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"9567": [
+/******/ 			"webpack/container/remote/shop/pages/shop/index": [
 /******/ 				"default",
 /******/ 				"./pages/shop/index",
-/******/ 				4857
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-png": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-png",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-svg": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-svg",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/products/[...slug]": [
+/******/ 				"default",
+/******/ 				"./pages/shop/products/[...slug]",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/CheckoutTitle": [
+/******/ 				"default",
+/******/ 				"./CheckoutTitle",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/ButtonOldAnt": [
+/******/ 				"default",
+/******/ 				"./ButtonOldAnt",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/WebpackSvg": [
+/******/ 				"default",
+/******/ 				"./WebpackSvg",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/WebpackPng": [
+/******/ 				"default",
+/******/ 				"./WebpackPng",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.remotes = function(chunkId, promises) {
@@ -1100,7 +1098,7 @@ __webpack_require__(3374)
 /******/ 	
 /******/ 	/* webpack/runtime/runtimeId */
 /******/ 	!function() {
-/******/ 		__webpack_require__.j = 7873;
+/******/ 		__webpack_require__.j = "home_app";
 /******/ 	}();
 /******/ 	
 /******/ 	/* webpack/runtime/sharing */
@@ -1142,9 +1140,9 @@ __webpack_require__(3374)
 /******/ 			var promises = [];
 /******/ 			switch(name) {
 /******/ 				case "default": {
-/******/ 					register("antd", "4.24.9", function() { return Promise.all([__webpack_require__.e(3661), __webpack_require__.e(1111), __webpack_require__.e(9850), __webpack_require__.e(9040)]).then(function() { return function() { return __webpack_require__(1111); }; }); });
-/******/ 					initExternal(3374);
-/******/ 					initExternal(4857);
+/******/ 					register("antd", "4.24.9", function() { return Promise.all([__webpack_require__.e("a29ae703"), __webpack_require__.e("vendors-node_modules_antd_es_index_js"), __webpack_require__.e("webpack_sharing_consume_default_react"), __webpack_require__.e("webpack_sharing_consume_default_react-dom")]).then(function() { return function() { return __webpack_require__("../../node_modules/antd/es/index.js"); }; }); });
+/******/ 					initExternal("../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js");
+/******/ 					initExternal("../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js");
 /******/ 				}
 /******/ 				break;
 /******/ 			}
@@ -1330,42 +1328,42 @@ __webpack_require__(3374)
 /******/ 		});
 /******/ 		var installedModules = {};
 /******/ 		var moduleToHandlerMapping = {
-/******/ 			9850: function() { return loadSingleton("default", "react"); },
-/******/ 			9040: function() { return loadSingleton("default", "react-dom"); },
-/******/ 			6592: function() { return loadSingleton("default", "next/dynamic"); },
-/******/ 			6890: function() { return loadSingleton("default", "react/jsx-runtime"); },
-/******/ 			1036: function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return Promise.all([__webpack_require__.e(3661), __webpack_require__.e(1111), __webpack_require__.e(9850), __webpack_require__.e(9040)]).then(function() { return function() { return __webpack_require__(1111); }; }); }); },
-/******/ 			770: function() { return loadSingleton("default", "next/router"); },
-/******/ 			1439: function() { return loadSingleton("default", "styled-jsx/style"); },
-/******/ 			7410: function() { return loadSingleton("default", "next/head"); },
-/******/ 			1765: function() { return loadSingleton("default", "next/link"); }
+/******/ 			"webpack/sharing/consume/default/react": function() { return loadSingleton("default", "react"); },
+/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
+/******/ 			"webpack/sharing/consume/default/next/dynamic": function() { return loadSingleton("default", "next/dynamic"); },
+/******/ 			"webpack/sharing/consume/default/react/jsx-runtime": function() { return loadSingleton("default", "react/jsx-runtime"); },
+/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
+/******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return Promise.all([__webpack_require__.e("a29ae703"), __webpack_require__.e("vendors-node_modules_antd_es_index_js"), __webpack_require__.e("webpack_sharing_consume_default_react"), __webpack_require__.e("webpack_sharing_consume_default_react-dom")]).then(function() { return function() { return __webpack_require__("../../node_modules/antd/es/index.js"); }; }); }); },
+/******/ 			"webpack/sharing/consume/default/styled-jsx/style": function() { return loadSingleton("default", "styled-jsx/style"); },
+/******/ 			"webpack/sharing/consume/default/next/head": function() { return loadSingleton("default", "next/head"); },
+/******/ 			"webpack/sharing/consume/default/next/link": function() { return loadSingleton("default", "next/link"); }
 /******/ 		};
 /******/ 		// no consumes in initial chunks
 /******/ 		var chunkMapping = {
-/******/ 			"103": [
-/******/ 				7410
+/******/ 			"webpack_sharing_consume_default_react": [
+/******/ 				"webpack/sharing/consume/default/react"
 /******/ 			],
-/******/ 			"558": [
-/******/ 				1765
+/******/ 			"webpack_sharing_consume_default_react-dom": [
+/******/ 				"webpack/sharing/consume/default/react-dom"
 /******/ 			],
-/******/ 			"1439": [
-/******/ 				1439
+/******/ 			"webpack_sharing_consume_default_next_dynamic": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
-/******/ 			"6592": [
-/******/ 				6592
+/******/ 			"webpack_sharing_consume_default_react_jsx-runtime": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-runtime"
 /******/ 			],
-/******/ 			"6890": [
-/******/ 				6890
+/******/ 			"webpack_sharing_consume_default_antd_antd-webpack_sharing_consume_default_next_router": [
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/antd/antd"
 /******/ 			],
-/******/ 			"6968": [
-/******/ 				1036,
-/******/ 				770
+/******/ 			"webpack_sharing_consume_default_styled-jsx_style": [
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
 /******/ 			],
-/******/ 			"9040": [
-/******/ 				9040
+/******/ 			"pages_index_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/next/head"
 /******/ 			],
-/******/ 			"9850": [
-/******/ 				9850
+/******/ 			"pages_home_test-broken-remotes_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/next/link"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.consumes = function(chunkId, promises) {
@@ -1532,42 +1530,42 @@ __webpack_require__(3374)
 /******/ 		});
 /******/ 		var installedModules = {};
 /******/ 		var moduleToHandlerMapping = {
-/******/ 			9850: function() { return loadSingleton("default", "react"); },
-/******/ 			9040: function() { return loadSingleton("default", "react-dom"); },
-/******/ 			6592: function() { return loadSingleton("default", "next/dynamic"); },
-/******/ 			6890: function() { return loadSingleton("default", "react/jsx-runtime"); },
-/******/ 			1036: function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return Promise.all([__webpack_require__.e(3661), __webpack_require__.e(1111), __webpack_require__.e(9850), __webpack_require__.e(9040)]).then(function() { return function() { return __webpack_require__(1111); }; }); }); },
-/******/ 			770: function() { return loadSingleton("default", "next/router"); },
-/******/ 			1439: function() { return loadSingleton("default", "styled-jsx/style"); },
-/******/ 			7410: function() { return loadSingleton("default", "next/head"); },
-/******/ 			1765: function() { return loadSingleton("default", "next/link"); }
+/******/ 			"webpack/sharing/consume/default/react": function() { return loadSingleton("default", "react"); },
+/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
+/******/ 			"webpack/sharing/consume/default/next/dynamic": function() { return loadSingleton("default", "next/dynamic"); },
+/******/ 			"webpack/sharing/consume/default/react/jsx-runtime": function() { return loadSingleton("default", "react/jsx-runtime"); },
+/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
+/******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return Promise.all([__webpack_require__.e("a29ae703"), __webpack_require__.e("vendors-node_modules_antd_es_index_js"), __webpack_require__.e("webpack_sharing_consume_default_react"), __webpack_require__.e("webpack_sharing_consume_default_react-dom")]).then(function() { return function() { return __webpack_require__("../../node_modules/antd/es/index.js"); }; }); }); },
+/******/ 			"webpack/sharing/consume/default/styled-jsx/style": function() { return loadSingleton("default", "styled-jsx/style"); },
+/******/ 			"webpack/sharing/consume/default/next/head": function() { return loadSingleton("default", "next/head"); },
+/******/ 			"webpack/sharing/consume/default/next/link": function() { return loadSingleton("default", "next/link"); }
 /******/ 		};
 /******/ 		// no consumes in initial chunks
 /******/ 		var chunkMapping = {
-/******/ 			"103": [
-/******/ 				7410
+/******/ 			"webpack_sharing_consume_default_react": [
+/******/ 				"webpack/sharing/consume/default/react"
 /******/ 			],
-/******/ 			"558": [
-/******/ 				1765
+/******/ 			"webpack_sharing_consume_default_react-dom": [
+/******/ 				"webpack/sharing/consume/default/react-dom"
 /******/ 			],
-/******/ 			"1439": [
-/******/ 				1439
+/******/ 			"webpack_sharing_consume_default_next_dynamic": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
-/******/ 			"6592": [
-/******/ 				6592
+/******/ 			"webpack_sharing_consume_default_react_jsx-runtime": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-runtime"
 /******/ 			],
-/******/ 			"6890": [
-/******/ 				6890
+/******/ 			"webpack_sharing_consume_default_antd_antd-webpack_sharing_consume_default_next_router": [
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/antd/antd"
 /******/ 			],
-/******/ 			"6968": [
-/******/ 				1036,
-/******/ 				770
+/******/ 			"webpack_sharing_consume_default_styled-jsx_style": [
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
 /******/ 			],
-/******/ 			"9040": [
-/******/ 				9040
+/******/ 			"pages_index_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/next/head"
 /******/ 			],
-/******/ 			"9850": [
-/******/ 				9850
+/******/ 			"pages_home_test-broken-remotes_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/next/link"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.consumes = function(chunkId, promises) {
@@ -1607,10 +1605,10 @@ __webpack_require__(3374)
 /******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
 /******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
 /******/ 		var installedChunks = {
-/******/ 			7873: 0,
-/******/ 			4437: 0,
-/******/ 			2272: 0,
-/******/ 			4634: 0
+/******/ 			"home_app": 0,
+/******/ 			"home_app_single": 0,
+/******/ 			"webpack": 0,
+/******/ 			"webpack_sharing_provide_default_antd": 0
 /******/ 		};
 /******/ 		
 /******/ 		__webpack_require__.f.j = function(chunkId, promises) {
@@ -1622,7 +1620,7 @@ __webpack_require__(3374)
 /******/ 					if(installedChunkData) {
 /******/ 						promises.push(installedChunkData[2]);
 /******/ 					} else {
-/******/ 						if(!/^(6(592|890|968)|1439|4634|9040|9850)$/.test(chunkId)) {
+/******/ 						if(!/^webpack_sharing_(consume_default_(react(|\\-dom|_jsx\\-runtime)|antd_antd\\-webpack_sharing_consume_default_next_router|next_dynamic|styled\\-jsx_style)|provide_default_antd)$/.test(chunkId)) {
 /******/ 							// setup Promise in chunk cache
 /******/ 							var promise = new Promise(function(resolve, reject) { installedChunkData = installedChunks[chunkId] = [resolve, reject]; });
 /******/ 							promises.push(installedChunkData[2] = promise);
@@ -1699,7 +1697,7 @@ __webpack_require__(3374)
 /******/ 	// module factories are used so entry inlining is disabled
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, [4634], function() { return __webpack_require__(5091); })
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["webpack_sharing_provide_default_antd"], function() { return __webpack_require__("webpack/container/entry/home_app"); })
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	window.home_app = __webpack_exports__;
 /******/ 	
@@ -1712,7 +1710,7 @@ exports[`Next.js build output client webpack-runtime 1`] = `
 "/******/ (function() { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 3374:
+/***/ "../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js":
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var __resourceQuery = "?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js";
@@ -1724,7 +1722,7 @@ if(typeof window !== 'undefined') {
 };
 "use strict";
 module.exports = new Promise(async (resolve, reject) => {
-    const { importDelegatedModule } = await __webpack_require__.e(/* import() */ 6285).then(__webpack_require__.bind(__webpack_require__, 6285));
+    const { importDelegatedModule } = await __webpack_require__.e(/* import() */ "vendors-node_modules_module-federation_utilities_src_utils_common_js").then(__webpack_require__.bind(__webpack_require__, "../../node_modules/@module-federation/utilities/src/utils/common.js"));
     // eslint-disable-next-line no-undef
     const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
     const [global, url] = currentRequest.split('@');
@@ -1741,7 +1739,7 @@ module.exports = new Promise(async (resolve, reject) => {
 
 /***/ }),
 
-/***/ 4857:
+/***/ "../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js":
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var __resourceQuery = "?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js";
@@ -1753,7 +1751,7 @@ if(typeof window !== 'undefined') {
 };
 "use strict";
 module.exports = new Promise(async (resolve, reject) => {
-    const { importDelegatedModule } = await __webpack_require__.e(/* import() */ 6285).then(__webpack_require__.bind(__webpack_require__, 6285));
+    const { importDelegatedModule } = await __webpack_require__.e(/* import() */ "vendors-node_modules_module-federation_utilities_src_utils_common_js").then(__webpack_require__.bind(__webpack_require__, "../../node_modules/@module-federation/utilities/src/utils/common.js"));
     // eslint-disable-next-line no-undef
     const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
     const [global, url] = currentRequest.split('@');
@@ -1770,7 +1768,7 @@ module.exports = new Promise(async (resolve, reject) => {
 
 /***/ }),
 
-/***/ 5018:
+/***/ "../../node_modules/@module-federation/nextjs-mf/src/internal-delegate-hoist.js":
 /***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
 
 console.log('initializing internal-module-hoist for:', __webpack_require__.j)
@@ -1780,100 +1778,100 @@ console.log('initializing internal-module-hoist for:', __webpack_require__.j)
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(8733),
+          get: () => () => __webpack_require__("../../node_modules/react/index.js?pop"),
         }
         },
        "react/jsx-runtime": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(4154),
+          get: () => () => __webpack_require__("../../node_modules/react/jsx-runtime.js?pop"),
         }
         },
        "react-dom": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(4345),
+          get: () => () => __webpack_require__("../../node_modules/react-dom/index.js?pop"),
         }
         },
        "next/dynamic": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(8454),
+          get: () => () => __webpack_require__("../../node_modules/next/dynamic.js?pop"),
         }
         },
        "styled-jsx": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(8094),
+          get: () => () => __webpack_require__("../../node_modules/styled-jsx/index.js?pop"),
         }
         },
        "styled-jsx/style": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(1708),
+          get: () => () => __webpack_require__("../../node_modules/styled-jsx/style.js?pop"),
         }
         },
        "next/link": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(1766),
+          get: () => () => __webpack_require__("../../node_modules/next/link.js?pop"),
         }
         },
        "next/router": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(726),
+          get: () => () => __webpack_require__("../../node_modules/next/router.js?pop"),
         }
         },
        "next/script": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(7226),
+          get: () => () => __webpack_require__("../../node_modules/next/script.js?pop"),
         }
         },
        "next/head": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(3865),
+          get: () => () => __webpack_require__("../../node_modules/next/head.js?pop"),
         }
         },};
   __webpack_require__.S.default = __webpack_require__.S.default || {};
   Object.assign(__webpack_require__.S.default || {}, eager);
   
 
-      __webpack_require__.m[/*require.resolve*/(9850)] = __webpack_require__.m[/*require.resolve*/(8733)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/react")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/react/index.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(6890)] = __webpack_require__.m[/*require.resolve*/(4154)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/react/jsx-runtime")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/react/jsx-runtime.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(9040)] = __webpack_require__.m[/*require.resolve*/(4345)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/react-dom")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/react-dom/index.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(6592)] = __webpack_require__.m[/*require.resolve*/(8454)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/next/dynamic")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/next/dynamic.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(null /* weak dependency, without id */)] = __webpack_require__.m[/*require.resolve*/(8094)];
+      __webpack_require__.m[/*require.resolve*/(null /* weak dependency, without id */)] = __webpack_require__.m[/*require.resolve*/("../../node_modules/styled-jsx/index.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(1439)] = __webpack_require__.m[/*require.resolve*/(1708)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/styled-jsx/style")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/styled-jsx/style.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(1765)] = __webpack_require__.m[/*require.resolve*/(1766)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/next/link")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/next/link.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(770)] = __webpack_require__.m[/*require.resolve*/(726)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/next/router")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/next/router.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(null /* weak dependency, without id */)] = __webpack_require__.m[/*require.resolve*/(7226)];
+      __webpack_require__.m[/*require.resolve*/(null /* weak dependency, without id */)] = __webpack_require__.m[/*require.resolve*/("../../node_modules/next/script.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(7410)] = __webpack_require__.m[/*require.resolve*/(3865)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/next/head")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/next/head.js?pop")];
       
 //hasShareHoist
 
-__webpack_require__(4857)
-__webpack_require__(3374)
+__webpack_require__("../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js")
+__webpack_require__("../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js")
 //hasDelegateMarkers
 "use strict";
 // placeholder file for delegate module injection
@@ -2030,7 +2028,7 @@ __webpack_require__(3374)
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = function(chunkId) {
 /******/ 			// return url for filenames based on template
-/******/ 			return "static/chunks/" + ({"3661":"a29ae703","7243":"b14b6c9a","8934":"e893f787"}[chunkId] || chunkId) + "." + {"103":"d6e2daaec787b95e","193":"5c9ff69d7e25f135","558":"559b179fbfd08878","609":"e62b09eeb77b6b0d","680":"544ad5153e4951e5","1111":"ca5f73fc3b496a03","1195":"c693890cd3cb8697","1199":"20618376039032b7","1377":"342efc8b56012a04","1434":"847962fe2b650466","1438":"96b7e62034cfa6e0","1439":"c52aff035eef9881","1884":"1df6ea61b9d6a2a8","2041":"e66c2c536f68bfdb","2042":"4568deff073b2ced","2538":"f7602986c0a77415","2572":"c28be202431a5197","3161":"caa08e276936c5b9","3232":"cee7ee89e382f8ae","3362":"d19279a28fa28277","3654":"dd4d8bdc041c5f5d","3661":"eca190a4e1959f4a","4134":"3de6a02fcbd2544a","4283":"8753f48635d12472","4743":"c86995eb9d3fc632","4790":"5603781902ae39f5","5074":"93c24a69206e1b65","5153":"881efa9bb3d1dbff","6271":"9cbaa86db73f728a","6285":"533f685180442c59","6520":"c3a0ed0f66185d6a","6592":"98c88e9d343c2570","6769":"0a33033a6e3a18cf","6890":"9eb946fe1d2dfcae","6947":"0fb47dc3f42d3c49","6968":"31b33632f32b98ef","7243":"0f0dea8c35d08dc2","7298":"595b53a4327fa79a","7393":"9c5f8fe41edd748a","7404":"58f4d83e2da2cb6d","7998":"592751754d59f81a","8059":"30e9afd25225feec","8074":"4074165149c308c3","8151":"d3e01de5945225ea","8261":"2df848241ef520e4","8377":"07fffcd0e4bf440a","8399":"67081b93f2884723","8477":"6596ff93bf1c0ee2","8498":"112c4cefd0bccd00","8628":"a50adf1a50bdfdf1","8642":"16adf14ba95435fd","8698":"847917e8008e3bce","8934":"1f7d9ff11c96d095","9040":"35c0ffc22420a26f","9263":"20bfff8c3289944d","9318":"76c57f42e03b2be4","9570":"f374ac4db829a7ab","9850":"08d9a7ea93417981"}[chunkId] + ".js";
+/******/ 			return "static/chunks/" + chunkId + "." + {"vendors-node_modules_module-federation_utilities_src_utils_common_js":"3589aa62a1fafd7d","a29ae703":"7393232a92631e1c","vendors-node_modules_antd_es_index_js":"3b69884161b5e947","webpack_sharing_consume_default_react":"2d161c4b8df5a587","webpack_sharing_consume_default_react-dom":"070d35d4379771b3","node_modules_module-federation_nextjs-mf_src_delegate-hoist-container_js":"607fa081843ce6ef","node_modules_module-federation_nextjs-mf_src_loaders_nextPageMapLoader_js_node_modules_module-c206cf":"d3cb9ff18651e21f","node_modules_module-federation_nextjs-mf_src_loaders_nextPageMapLoader_js_v2_node_modules_mod-e440a1":"50e5031b68c8a40e","webpack_sharing_consume_default_next_dynamic":"b26782242381bfd9","pages_dynamic-remote_js":"b76ed50487f9be08","pages_index_tsx":"b821059c0d56336f","pages_checkout_slug_tsx":"2fbcaccd3d40c18b","pages_checkout_pid_tsx":"7d90364d70078510","pages_checkout_exposed-pages_tsx":"fc77ae0a2f2d5122","pages_checkout_index_tsx":"30f2e7e1f7a0ccd6","pages_checkout_test-check-button_tsx":"3e22ef6a9697e115","pages_checkout_test-title_tsx":"ad3005c52940b72a","pages_home_exposed-pages_tsx":"a8a0186091e517f4","pages_home_test-broken-remotes_tsx":"99eab0dda163db49","pages_home_test-remote-hook_tsx":"2308701d3fe50abc","pages_home_test-shared-nav_tsx":"4959ed7b27de0d66","pages_shop_exposed-pages_js":"9c39d0d8043dcc0e","pages_shop_index_js":"0bdd0c56aa4f13ab","pages_shop_test-webpack-png_js":"87777c7ed7fa2149","pages_shop_test-webpack-svg_js":"0efc48ba9d409ab9","pages_shop_products_slug_js":"4b791aef23896374","webpack_sharing_consume_default_react_jsx-runtime":"f7da0fab6f04a8f9","webpack_sharing_consume_default_antd_antd-webpack_sharing_consume_default_next_router":"f3abd54ffe7e7a60","webpack_sharing_consume_default_styled-jsx_style":"8a7c780c6010655c","components_SharedNav_tsx":"2ae2843e812edcc5","components_menu_tsx":"427e2a23ce32fcc0","b14b6c9a":"d298ccef0084ffce","pages__app_tsx_hasBoundary":"5dfa189a3b458c06","pages_checkout_pid_tsx_hasBoundary":"81a441b1ef0e5609","pages_checkout_slug_tsx_hasBoundary":"a375c28652c4b54c","pages_checkout_exposed-pages_tsx_hasBoundary":"5cf628b5e4838424","pages_checkout_index_tsx_hasBoundary":"7325391a10ddead1","pages_checkout_test-check-button_tsx_hasBoundary":"a2e84b3c08408963","pages_checkout_test-title_tsx_hasBoundary":"5d42427c9227bdd6","e893f787":"d77b21d17d20a0e5","vendors-node_modules_next_dist_compiled_stream-browserify_index_js-node_modules_next_dist_com-c0cd11":"9d16906c904a6198","pages_home_exposed-pages_tsx_hasBoundary-packages_utilities_src_index_ts":"59573c21b399d88c","pages_home_test-broken-remotes_tsx_hasBoundary":"1e19a547a7372e65","pages_home_test-remote-hook_tsx_hasBoundary":"ad46e1f067073e11","pages_shop_exposed-pages_js_hasBoundary":"0d1046e69589d627","pages_home_test-shared-nav_tsx_hasBoundary":"1d6b97a82a0c75fe","pages_shop_products_slug_js_hasBoundary":"a116dc51b1f04741","pages_shop_index_js_hasBoundary":"358de7b774fc26a8","pages_shop_test-webpack-svg_js_hasBoundary":"56bf8c9529b11b2b","pages_shop_test-webpack-png_js_hasBoundary":"0a84a8ddd71aaeed","pages_dynamic-remote_js_hasBoundary":"1104bdb8b0ada750","pages_index_tsx_hasBoundary":"42d434eb049990c0","webpack_container_remote_shop_menu":"fc10690cf6517e30","webpack_container_remote_checkout_menu":"9895415613cde1b2","webpack_container_remote_checkout_CheckoutTitle":"294513ccf8a1d8d8","webpack_container_remote_checkout_ButtonOldAnt":"2b37569c5301f81d","webpack_container_remote_shop_WebpackSvg":"912fa3da5515df7c","webpack_container_remote_shop_WebpackPng":"7506b99ec6a3fd99"}[chunkId] + ".js";
 /******/ 		};
 /******/ 	}();
 /******/ 	
@@ -2129,151 +2127,151 @@ __webpack_require__(3374)
 /******/ 	/* webpack/runtime/remotes loading */
 /******/ 	!function() {
 /******/ 		var chunkMapping = {
-/******/ 			"193": [
-/******/ 				1473
+/******/ 			"pages_checkout_pid_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[pid]"
 /******/ 			],
-/******/ 			"609": [
-/******/ 				9428
+/******/ 			"pages_checkout_slug_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[...slug]"
 /******/ 			],
-/******/ 			"1195": [
-/******/ 				9437
+/******/ 			"pages_checkout_exposed-pages_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/exposed-pages"
 /******/ 			],
-/******/ 			"1884": [
-/******/ 				3087
+/******/ 			"pages_checkout_index_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/index"
 /******/ 			],
-/******/ 			"2538": [
-/******/ 				6143
+/******/ 			"pages_checkout_test-check-button_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-check-button"
 /******/ 			],
-/******/ 			"2572": [
-/******/ 				6413
+/******/ 			"pages_checkout_test-title_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-title"
 /******/ 			],
-/******/ 			"4283": [
-/******/ 				4283
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/useCustomRemoteHook"
 /******/ 			],
-/******/ 			"4743": [
-/******/ 				5609
+/******/ 			"pages_shop_exposed-pages_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/exposed-pages"
 /******/ 			],
-/******/ 			"5074": [
-/******/ 				5074
+/******/ 			"pages_shop_products_slug_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/products/[...slug]"
 /******/ 			],
-/******/ 			"6520": [
-/******/ 				6520
+/******/ 			"pages_shop_index_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/index"
 /******/ 			],
-/******/ 			"6947": [
-/******/ 				7753
+/******/ 			"pages_shop_test-webpack-svg_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-svg"
 /******/ 			],
-/******/ 			"7393": [
-/******/ 				7393
+/******/ 			"pages_shop_test-webpack-png_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-png"
 /******/ 			],
-/******/ 			"7404": [
-/******/ 				6434
+/******/ 			"webpack_container_remote_shop_menu": [
+/******/ 				"webpack/container/remote/shop/menu"
 /******/ 			],
-/******/ 			"8059": [
-/******/ 				8059
+/******/ 			"webpack_container_remote_checkout_menu": [
+/******/ 				"webpack/container/remote/checkout/menu"
 /******/ 			],
-/******/ 			"8151": [
-/******/ 				8739
+/******/ 			"webpack_container_remote_checkout_CheckoutTitle": [
+/******/ 				"webpack/container/remote/checkout/CheckoutTitle"
 /******/ 			],
-/******/ 			"8498": [
-/******/ 				224
+/******/ 			"webpack_container_remote_checkout_ButtonOldAnt": [
+/******/ 				"webpack/container/remote/checkout/ButtonOldAnt"
 /******/ 			],
-/******/ 			"8698": [
-/******/ 				8698
+/******/ 			"webpack_container_remote_shop_WebpackSvg": [
+/******/ 				"webpack/container/remote/shop/WebpackSvg"
 /******/ 			],
-/******/ 			"9263": [
-/******/ 				9567
+/******/ 			"webpack_container_remote_shop_WebpackPng": [
+/******/ 				"webpack/container/remote/shop/WebpackPng"
 /******/ 			]
 /******/ 		};
 /******/ 		var idToExternalAndNameMapping = {
-/******/ 			"224": [
-/******/ 				"default",
-/******/ 				"./pages/shop/test-webpack-png",
-/******/ 				4857
-/******/ 			],
-/******/ 			"1473": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/index",
-/******/ 				3374
-/******/ 			],
-/******/ 			"3087": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[pid]": [
 /******/ 				"default",
 /******/ 				"./pages/checkout/[pid]",
-/******/ 				3374
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"4283": [
-/******/ 				"default",
-/******/ 				"./WebpackPng",
-/******/ 				4857
-/******/ 			],
-/******/ 			"5074": [
-/******/ 				"default",
-/******/ 				"./CheckoutTitle",
-/******/ 				3374
-/******/ 			],
-/******/ 			"5609": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/exposed-pages",
-/******/ 				3374
-/******/ 			],
-/******/ 			"6143": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/test-check-button",
-/******/ 				3374
-/******/ 			],
-/******/ 			"6413": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/test-title",
-/******/ 				3374
-/******/ 			],
-/******/ 			"6434": [
-/******/ 				"default",
-/******/ 				"./useCustomRemoteHook",
-/******/ 				4857
-/******/ 			],
-/******/ 			"6520": [
-/******/ 				"default",
-/******/ 				"./WebpackSvg",
-/******/ 				4857
-/******/ 			],
-/******/ 			"7393": [
-/******/ 				"default",
-/******/ 				"./menu",
-/******/ 				4857
-/******/ 			],
-/******/ 			"7753": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[...slug]": [
 /******/ 				"default",
 /******/ 				"./pages/checkout/[...slug]",
-/******/ 				3374
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"8059": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/exposed-pages": [
 /******/ 				"default",
-/******/ 				"./menu",
-/******/ 				3374
+/******/ 				"./pages/checkout/exposed-pages",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"8698": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/index": [
 /******/ 				"default",
-/******/ 				"./ButtonOldAnt",
-/******/ 				3374
+/******/ 				"./pages/checkout/index",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"8739": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-check-button": [
 /******/ 				"default",
-/******/ 				"./pages/shop/products/[...slug]",
-/******/ 				4857
+/******/ 				"./pages/checkout/test-check-button",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"9428": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-title": [
 /******/ 				"default",
-/******/ 				"./pages/shop/test-webpack-svg",
-/******/ 				4857
+/******/ 				"./pages/checkout/test-title",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"9437": [
+/******/ 			"webpack/container/remote/shop/useCustomRemoteHook": [
+/******/ 				"default",
+/******/ 				"./useCustomRemoteHook",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/exposed-pages": [
 /******/ 				"default",
 /******/ 				"./pages/shop/exposed-pages",
-/******/ 				4857
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"9567": [
+/******/ 			"webpack/container/remote/shop/pages/shop/products/[...slug]": [
+/******/ 				"default",
+/******/ 				"./pages/shop/products/[...slug]",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/index": [
 /******/ 				"default",
 /******/ 				"./pages/shop/index",
-/******/ 				4857
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-svg": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-svg",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-png": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-png",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/menu": [
+/******/ 				"default",
+/******/ 				"./menu",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/menu": [
+/******/ 				"default",
+/******/ 				"./menu",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/CheckoutTitle": [
+/******/ 				"default",
+/******/ 				"./CheckoutTitle",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/ButtonOldAnt": [
+/******/ 				"default",
+/******/ 				"./ButtonOldAnt",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/WebpackSvg": [
+/******/ 				"default",
+/******/ 				"./WebpackSvg",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/WebpackPng": [
+/******/ 				"default",
+/******/ 				"./WebpackPng",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.remotes = function(chunkId, promises) {
@@ -2324,151 +2322,151 @@ __webpack_require__(3374)
 /******/ 	/* webpack/runtime/remotes loading */
 /******/ 	!function() {
 /******/ 		var chunkMapping = {
-/******/ 			"193": [
-/******/ 				1473
+/******/ 			"pages_checkout_pid_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[pid]"
 /******/ 			],
-/******/ 			"609": [
-/******/ 				9428
+/******/ 			"pages_checkout_slug_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[...slug]"
 /******/ 			],
-/******/ 			"1195": [
-/******/ 				9437
+/******/ 			"pages_checkout_exposed-pages_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/exposed-pages"
 /******/ 			],
-/******/ 			"1884": [
-/******/ 				3087
+/******/ 			"pages_checkout_index_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/index"
 /******/ 			],
-/******/ 			"2538": [
-/******/ 				6143
+/******/ 			"pages_checkout_test-check-button_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-check-button"
 /******/ 			],
-/******/ 			"2572": [
-/******/ 				6413
+/******/ 			"pages_checkout_test-title_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-title"
 /******/ 			],
-/******/ 			"4283": [
-/******/ 				4283
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/useCustomRemoteHook"
 /******/ 			],
-/******/ 			"4743": [
-/******/ 				5609
+/******/ 			"pages_shop_exposed-pages_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/exposed-pages"
 /******/ 			],
-/******/ 			"5074": [
-/******/ 				5074
+/******/ 			"pages_shop_products_slug_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/products/[...slug]"
 /******/ 			],
-/******/ 			"6520": [
-/******/ 				6520
+/******/ 			"pages_shop_index_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/index"
 /******/ 			],
-/******/ 			"6947": [
-/******/ 				7753
+/******/ 			"pages_shop_test-webpack-svg_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-svg"
 /******/ 			],
-/******/ 			"7393": [
-/******/ 				7393
+/******/ 			"pages_shop_test-webpack-png_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-png"
 /******/ 			],
-/******/ 			"7404": [
-/******/ 				6434
+/******/ 			"webpack_container_remote_shop_menu": [
+/******/ 				"webpack/container/remote/shop/menu"
 /******/ 			],
-/******/ 			"8059": [
-/******/ 				8059
+/******/ 			"webpack_container_remote_checkout_menu": [
+/******/ 				"webpack/container/remote/checkout/menu"
 /******/ 			],
-/******/ 			"8151": [
-/******/ 				8739
+/******/ 			"webpack_container_remote_checkout_CheckoutTitle": [
+/******/ 				"webpack/container/remote/checkout/CheckoutTitle"
 /******/ 			],
-/******/ 			"8498": [
-/******/ 				224
+/******/ 			"webpack_container_remote_checkout_ButtonOldAnt": [
+/******/ 				"webpack/container/remote/checkout/ButtonOldAnt"
 /******/ 			],
-/******/ 			"8698": [
-/******/ 				8698
+/******/ 			"webpack_container_remote_shop_WebpackSvg": [
+/******/ 				"webpack/container/remote/shop/WebpackSvg"
 /******/ 			],
-/******/ 			"9263": [
-/******/ 				9567
+/******/ 			"webpack_container_remote_shop_WebpackPng": [
+/******/ 				"webpack/container/remote/shop/WebpackPng"
 /******/ 			]
 /******/ 		};
 /******/ 		var idToExternalAndNameMapping = {
-/******/ 			"224": [
-/******/ 				"default",
-/******/ 				"./pages/shop/test-webpack-png",
-/******/ 				4857
-/******/ 			],
-/******/ 			"1473": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/index",
-/******/ 				3374
-/******/ 			],
-/******/ 			"3087": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[pid]": [
 /******/ 				"default",
 /******/ 				"./pages/checkout/[pid]",
-/******/ 				3374
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"4283": [
-/******/ 				"default",
-/******/ 				"./WebpackPng",
-/******/ 				4857
-/******/ 			],
-/******/ 			"5074": [
-/******/ 				"default",
-/******/ 				"./CheckoutTitle",
-/******/ 				3374
-/******/ 			],
-/******/ 			"5609": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/exposed-pages",
-/******/ 				3374
-/******/ 			],
-/******/ 			"6143": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/test-check-button",
-/******/ 				3374
-/******/ 			],
-/******/ 			"6413": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/test-title",
-/******/ 				3374
-/******/ 			],
-/******/ 			"6434": [
-/******/ 				"default",
-/******/ 				"./useCustomRemoteHook",
-/******/ 				4857
-/******/ 			],
-/******/ 			"6520": [
-/******/ 				"default",
-/******/ 				"./WebpackSvg",
-/******/ 				4857
-/******/ 			],
-/******/ 			"7393": [
-/******/ 				"default",
-/******/ 				"./menu",
-/******/ 				4857
-/******/ 			],
-/******/ 			"7753": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[...slug]": [
 /******/ 				"default",
 /******/ 				"./pages/checkout/[...slug]",
-/******/ 				3374
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"8059": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/exposed-pages": [
 /******/ 				"default",
-/******/ 				"./menu",
-/******/ 				3374
+/******/ 				"./pages/checkout/exposed-pages",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"8698": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/index": [
 /******/ 				"default",
-/******/ 				"./ButtonOldAnt",
-/******/ 				3374
+/******/ 				"./pages/checkout/index",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"8739": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-check-button": [
 /******/ 				"default",
-/******/ 				"./pages/shop/products/[...slug]",
-/******/ 				4857
+/******/ 				"./pages/checkout/test-check-button",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"9428": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-title": [
 /******/ 				"default",
-/******/ 				"./pages/shop/test-webpack-svg",
-/******/ 				4857
+/******/ 				"./pages/checkout/test-title",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"9437": [
+/******/ 			"webpack/container/remote/shop/useCustomRemoteHook": [
+/******/ 				"default",
+/******/ 				"./useCustomRemoteHook",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/exposed-pages": [
 /******/ 				"default",
 /******/ 				"./pages/shop/exposed-pages",
-/******/ 				4857
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
 /******/ 			],
-/******/ 			"9567": [
+/******/ 			"webpack/container/remote/shop/pages/shop/products/[...slug]": [
+/******/ 				"default",
+/******/ 				"./pages/shop/products/[...slug]",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/index": [
 /******/ 				"default",
 /******/ 				"./pages/shop/index",
-/******/ 				4857
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-svg": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-svg",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-png": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-png",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/menu": [
+/******/ 				"default",
+/******/ 				"./menu",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/menu": [
+/******/ 				"default",
+/******/ 				"./menu",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/CheckoutTitle": [
+/******/ 				"default",
+/******/ 				"./CheckoutTitle",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/ButtonOldAnt": [
+/******/ 				"default",
+/******/ 				"./ButtonOldAnt",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/WebpackSvg": [
+/******/ 				"default",
+/******/ 				"./WebpackSvg",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/WebpackPng": [
+/******/ 				"default",
+/******/ 				"./WebpackPng",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.remotes = function(chunkId, promises) {
@@ -2518,7 +2516,7 @@ __webpack_require__(3374)
 /******/ 	
 /******/ 	/* webpack/runtime/runtimeId */
 /******/ 	!function() {
-/******/ 		__webpack_require__.j = 2272;
+/******/ 		__webpack_require__.j = "webpack";
 /******/ 	}();
 /******/ 	
 /******/ 	/* webpack/runtime/sharing */
@@ -2560,9 +2558,9 @@ __webpack_require__(3374)
 /******/ 			var promises = [];
 /******/ 			switch(name) {
 /******/ 				case "default": {
-/******/ 					register("antd", "4.24.9", function() { return Promise.all([__webpack_require__.e(3661), __webpack_require__.e(1111), __webpack_require__.e(9850), __webpack_require__.e(9040)]).then(function() { return function() { return __webpack_require__(1111); }; }); });
-/******/ 					initExternal(3374);
-/******/ 					initExternal(4857);
+/******/ 					register("antd", "4.24.9", function() { return Promise.all([__webpack_require__.e("a29ae703"), __webpack_require__.e("vendors-node_modules_antd_es_index_js"), __webpack_require__.e("webpack_sharing_consume_default_react"), __webpack_require__.e("webpack_sharing_consume_default_react-dom")]).then(function() { return function() { return __webpack_require__("../../node_modules/antd/es/index.js"); }; }); });
+/******/ 					initExternal("../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js");
+/******/ 					initExternal("../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js");
 /******/ 				}
 /******/ 				break;
 /******/ 			}
@@ -2748,17 +2746,17 @@ __webpack_require__(3374)
 /******/ 		});
 /******/ 		var installedModules = {};
 /******/ 		var moduleToHandlerMapping = {
-/******/ 			9850: function() { return loadSingleton("default", "react"); },
-/******/ 			9040: function() { return loadSingleton("default", "react-dom"); },
-/******/ 			6592: function() { return loadSingleton("default", "next/dynamic"); },
-/******/ 			6890: function() { return loadSingleton("default", "react/jsx-runtime"); },
-/******/ 			770: function() { return loadSingleton("default", "next/router"); },
-/******/ 			1036: function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return Promise.all([__webpack_require__.e(3661), __webpack_require__.e(1111), __webpack_require__.e(9850), __webpack_require__.e(9040)]).then(function() { return function() { return __webpack_require__(1111); }; }); }); },
-/******/ 			1439: function() { return loadSingleton("default", "styled-jsx/style"); },
-/******/ 			1765: function() { return loadSingleton("default", "next/link"); },
-/******/ 			7410: function() { return loadSingleton("default", "next/head"); }
+/******/ 			"webpack/sharing/consume/default/react": function() { return loadSingleton("default", "react"); },
+/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
+/******/ 			"webpack/sharing/consume/default/next/dynamic": function() { return loadSingleton("default", "next/dynamic"); },
+/******/ 			"webpack/sharing/consume/default/react/jsx-runtime": function() { return loadSingleton("default", "react/jsx-runtime"); },
+/******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return Promise.all([__webpack_require__.e("a29ae703"), __webpack_require__.e("vendors-node_modules_antd_es_index_js"), __webpack_require__.e("webpack_sharing_consume_default_react"), __webpack_require__.e("webpack_sharing_consume_default_react-dom")]).then(function() { return function() { return __webpack_require__("../../node_modules/antd/es/index.js"); }; }); }); },
+/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
+/******/ 			"webpack/sharing/consume/default/styled-jsx/style": function() { return loadSingleton("default", "styled-jsx/style"); },
+/******/ 			"webpack/sharing/consume/default/next/link": function() { return loadSingleton("default", "next/link"); },
+/******/ 			"webpack/sharing/consume/default/next/head": function() { return loadSingleton("default", "next/head"); }
 /******/ 		};
-/******/ 		var initialConsumes = [9850,9040,6592];
+/******/ 		var initialConsumes = ["webpack/sharing/consume/default/react","webpack/sharing/consume/default/react-dom","webpack/sharing/consume/default/next/dynamic"];
 /******/ 		initialConsumes.forEach(function(id) {
 /******/ 			__webpack_require__.m[id] = function(module) {
 /******/ 				// Handle case when module is used sync
@@ -2770,30 +2768,30 @@ __webpack_require__(3374)
 /******/ 			}
 /******/ 		});
 /******/ 		var chunkMapping = {
-/******/ 			"103": [
-/******/ 				7410
+/******/ 			"webpack_sharing_consume_default_react": [
+/******/ 				"webpack/sharing/consume/default/react"
 /******/ 			],
-/******/ 			"558": [
-/******/ 				1765
+/******/ 			"webpack_sharing_consume_default_react-dom": [
+/******/ 				"webpack/sharing/consume/default/react-dom"
 /******/ 			],
-/******/ 			"1439": [
-/******/ 				1439
+/******/ 			"webpack_sharing_consume_default_next_dynamic": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
-/******/ 			"6592": [
-/******/ 				6592
+/******/ 			"webpack_sharing_consume_default_react_jsx-runtime": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-runtime"
 /******/ 			],
-/******/ 			"6890": [
-/******/ 				6890
+/******/ 			"webpack_sharing_consume_default_antd_antd-webpack_sharing_consume_default_next_router": [
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router"
 /******/ 			],
-/******/ 			"6968": [
-/******/ 				770,
-/******/ 				1036
+/******/ 			"webpack_sharing_consume_default_styled-jsx_style": [
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
 /******/ 			],
-/******/ 			"9040": [
-/******/ 				9040
+/******/ 			"pages_home_test-broken-remotes_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/next/link"
 /******/ 			],
-/******/ 			"9850": [
-/******/ 				9850
+/******/ 			"pages_index_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/next/head"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.consumes = function(chunkId, promises) {
@@ -2960,17 +2958,17 @@ __webpack_require__(3374)
 /******/ 		});
 /******/ 		var installedModules = {};
 /******/ 		var moduleToHandlerMapping = {
-/******/ 			9850: function() { return loadSingleton("default", "react"); },
-/******/ 			9040: function() { return loadSingleton("default", "react-dom"); },
-/******/ 			6592: function() { return loadSingleton("default", "next/dynamic"); },
-/******/ 			6890: function() { return loadSingleton("default", "react/jsx-runtime"); },
-/******/ 			770: function() { return loadSingleton("default", "next/router"); },
-/******/ 			1036: function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return Promise.all([__webpack_require__.e(3661), __webpack_require__.e(1111), __webpack_require__.e(9850), __webpack_require__.e(9040)]).then(function() { return function() { return __webpack_require__(1111); }; }); }); },
-/******/ 			1439: function() { return loadSingleton("default", "styled-jsx/style"); },
-/******/ 			1765: function() { return loadSingleton("default", "next/link"); },
-/******/ 			7410: function() { return loadSingleton("default", "next/head"); }
+/******/ 			"webpack/sharing/consume/default/react": function() { return loadSingleton("default", "react"); },
+/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
+/******/ 			"webpack/sharing/consume/default/next/dynamic": function() { return loadSingleton("default", "next/dynamic"); },
+/******/ 			"webpack/sharing/consume/default/react/jsx-runtime": function() { return loadSingleton("default", "react/jsx-runtime"); },
+/******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return Promise.all([__webpack_require__.e("a29ae703"), __webpack_require__.e("vendors-node_modules_antd_es_index_js"), __webpack_require__.e("webpack_sharing_consume_default_react"), __webpack_require__.e("webpack_sharing_consume_default_react-dom")]).then(function() { return function() { return __webpack_require__("../../node_modules/antd/es/index.js"); }; }); }); },
+/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
+/******/ 			"webpack/sharing/consume/default/styled-jsx/style": function() { return loadSingleton("default", "styled-jsx/style"); },
+/******/ 			"webpack/sharing/consume/default/next/link": function() { return loadSingleton("default", "next/link"); },
+/******/ 			"webpack/sharing/consume/default/next/head": function() { return loadSingleton("default", "next/head"); }
 /******/ 		};
-/******/ 		var initialConsumes = [9850,9040,6592];
+/******/ 		var initialConsumes = ["webpack/sharing/consume/default/react","webpack/sharing/consume/default/react-dom","webpack/sharing/consume/default/next/dynamic"];
 /******/ 		initialConsumes.forEach(function(id) {
 /******/ 			__webpack_require__.m[id] = function(module) {
 /******/ 				// Handle case when module is used sync
@@ -2982,30 +2980,30 @@ __webpack_require__(3374)
 /******/ 			}
 /******/ 		});
 /******/ 		var chunkMapping = {
-/******/ 			"103": [
-/******/ 				7410
+/******/ 			"webpack_sharing_consume_default_react": [
+/******/ 				"webpack/sharing/consume/default/react"
 /******/ 			],
-/******/ 			"558": [
-/******/ 				1765
+/******/ 			"webpack_sharing_consume_default_react-dom": [
+/******/ 				"webpack/sharing/consume/default/react-dom"
 /******/ 			],
-/******/ 			"1439": [
-/******/ 				1439
+/******/ 			"webpack_sharing_consume_default_next_dynamic": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
-/******/ 			"6592": [
-/******/ 				6592
+/******/ 			"webpack_sharing_consume_default_react_jsx-runtime": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-runtime"
 /******/ 			],
-/******/ 			"6890": [
-/******/ 				6890
+/******/ 			"webpack_sharing_consume_default_antd_antd-webpack_sharing_consume_default_next_router": [
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router"
 /******/ 			],
-/******/ 			"6968": [
-/******/ 				770,
-/******/ 				1036
+/******/ 			"webpack_sharing_consume_default_styled-jsx_style": [
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
 /******/ 			],
-/******/ 			"9040": [
-/******/ 				9040
+/******/ 			"pages_home_test-broken-remotes_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/next/link"
 /******/ 			],
-/******/ 			"9850": [
-/******/ 				9850
+/******/ 			"pages_index_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/next/head"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.consumes = function(chunkId, promises) {
@@ -3090,11 +3088,11 @@ __webpack_require__(3374)
 /******/ 		}
 /******/ 		// object to store loaded CSS chunks
 /******/ 		var installedCssChunks = {
-/******/ 			2272: 0
+/******/ 			"webpack": 0
 /******/ 		};
 /******/ 		
 /******/ 		__webpack_require__.f.miniCss = function(chunkId, promises) {
-/******/ 			var cssChunks = {"7243":1};
+/******/ 			var cssChunks = {"b14b6c9a":1};
 /******/ 			if(installedCssChunks[chunkId]) promises.push(installedCssChunks[chunkId]);
 /******/ 			else if(installedCssChunks[chunkId] !== 0 && cssChunks[chunkId]) {
 /******/ 				promises.push(installedCssChunks[chunkId] = loadStylesheet(chunkId).then(function() {
@@ -3117,8 +3115,8 @@ __webpack_require__(3374)
 /******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
 /******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
 /******/ 		var installedChunks = {
-/******/ 			2272: 0,
-/******/ 			4634: 0
+/******/ 			"webpack": 0,
+/******/ 			"webpack_sharing_provide_default_antd": 0
 /******/ 		};
 /******/ 		
 /******/ 		__webpack_require__.f.j = function(chunkId, promises) {
@@ -3130,7 +3128,7 @@ __webpack_require__(3374)
 /******/ 					if(installedChunkData) {
 /******/ 						promises.push(installedChunkData[2]);
 /******/ 					} else {
-/******/ 						if(!/^(6(592|890|968)|1439|4634|7243|7393|8059|9040|9850)$/.test(chunkId)) {
+/******/ 						if(!/^(webpack_(container_remote_(checkout|shop)_menu|sharing_(consume_default_(react(|\\-dom|_jsx\\-runtime)|antd_antd\\-webpack_sharing_consume_default_next_router|next_dynamic|styled\\-jsx_style)|provide_default_antd))|b14b6c9a)$/.test(chunkId)) {
 /******/ 							// setup Promise in chunk cache
 /******/ 							var promise = new Promise(function(resolve, reject) { installedChunkData = installedChunks[chunkId] = [resolve, reject]; });
 /******/ 							promises.push(installedChunkData[2] = promise);
@@ -3208,7 +3206,7 @@ __webpack_require__(3374)
 /******/ 	
 /******/ })()
 ;
-//# sourceMappingURL=webpack-d93120674c71a4a8.js.map"
+//# sourceMappingURL=webpack-f671e4b64f66234f.js.map"
 `;
 
 exports[`Next.js build output server partial remote 1`] = `null`;
@@ -4431,7 +4429,7 @@ exports[`Next.js build output server webpack-runtime 1`] = `
 "/******/ (function() { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 37218:
+/***/ "../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js":
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var __resourceQuery = "?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js";
@@ -4443,7 +4441,7 @@ if(typeof window !== 'undefined') {
 };
 "use strict";
 module.exports = new Promise(async (resolve, reject) => {
-    const { importDelegatedModule } = await __webpack_require__.e(/* import() */ "node_modules_module-federation_utilities_src_utils_common_js").then(__webpack_require__.bind(__webpack_require__, 26285));
+    const { importDelegatedModule } = await __webpack_require__.e(/* import() */ "node_modules_module-federation_utilities_src_utils_common_js").then(__webpack_require__.bind(__webpack_require__, "../../node_modules/@module-federation/utilities/src/utils/common.js"));
     // eslint-disable-next-line no-undef
     const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
     const [global, url] = currentRequest.split('@');
@@ -4460,7 +4458,7 @@ module.exports = new Promise(async (resolve, reject) => {
 
 /***/ }),
 
-/***/ 26751:
+/***/ "../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js":
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var __resourceQuery = "?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js";
@@ -4472,7 +4470,7 @@ if(typeof window !== 'undefined') {
 };
 "use strict";
 module.exports = new Promise(async (resolve, reject) => {
-    const { importDelegatedModule } = await __webpack_require__.e(/* import() */ "node_modules_module-federation_utilities_src_utils_common_js").then(__webpack_require__.bind(__webpack_require__, 26285));
+    const { importDelegatedModule } = await __webpack_require__.e(/* import() */ "node_modules_module-federation_utilities_src_utils_common_js").then(__webpack_require__.bind(__webpack_require__, "../../node_modules/@module-federation/utilities/src/utils/common.js"));
     // eslint-disable-next-line no-undef
     const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
     const [global, url] = currentRequest.split('@');
@@ -4489,7 +4487,7 @@ module.exports = new Promise(async (resolve, reject) => {
 
 /***/ }),
 
-/***/ 74646:
+/***/ "../../node_modules/@module-federation/nextjs-mf/src/internal-delegate-hoist.js":
 /***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
 
 console.log('initializing internal-module-hoist for:', __webpack_require__.j)
@@ -4499,100 +4497,100 @@ console.log('initializing internal-module-hoist for:', __webpack_require__.j)
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(8733),
+          get: () => () => __webpack_require__("../../node_modules/react/index.js?pop"),
         }
         },
        "react/jsx-runtime": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(24154),
+          get: () => () => __webpack_require__("../../node_modules/react/jsx-runtime.js?pop"),
         }
         },
        "react-dom": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(94345),
+          get: () => () => __webpack_require__("../../node_modules/react-dom/index.js?pop"),
         }
         },
        "next/dynamic": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(88454),
+          get: () => () => __webpack_require__("../../node_modules/next/dynamic.js?pop"),
         }
         },
        "styled-jsx": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(48094),
+          get: () => () => __webpack_require__("../../node_modules/styled-jsx/index.js?pop"),
         }
         },
        "styled-jsx/style": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(91708),
+          get: () => () => __webpack_require__("../../node_modules/styled-jsx/style.js?pop"),
         }
         },
        "next/link": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(61766),
+          get: () => () => __webpack_require__("../../node_modules/next/link.js?pop"),
         }
         },
        "next/router": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(30726),
+          get: () => () => __webpack_require__("../../node_modules/next/router.js?pop"),
         }
         },
        "next/script": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(37226),
+          get: () => () => __webpack_require__("../../node_modules/next/script.js?pop"),
         }
         },
        "next/head": {
          "0": {
           eager: true,
           loaded: true,
-          get: () => () => __webpack_require__(33865),
+          get: () => () => __webpack_require__("../../node_modules/next/head.js?pop"),
         }
         },};
   __webpack_require__.S.default = __webpack_require__.S.default || {};
   Object.assign(__webpack_require__.S.default || {}, eager);
   
 
-      __webpack_require__.m[/*require.resolve*/(16689)] = __webpack_require__.m[/*require.resolve*/(8733)];
+      __webpack_require__.m[/*require.resolve*/("react")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/react/index.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(20997)] = __webpack_require__.m[/*require.resolve*/(24154)];
+      __webpack_require__.m[/*require.resolve*/("react/jsx-runtime")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/react/jsx-runtime.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(66405)] = __webpack_require__.m[/*require.resolve*/(94345)];
+      __webpack_require__.m[/*require.resolve*/("react-dom")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/react-dom/index.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(6592)] = __webpack_require__.m[/*require.resolve*/(88454)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/next/dynamic")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/next/dynamic.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(null /* weak dependency, without id */)] = __webpack_require__.m[/*require.resolve*/(48094)];
+      __webpack_require__.m[/*require.resolve*/(null /* weak dependency, without id */)] = __webpack_require__.m[/*require.resolve*/("../../node_modules/styled-jsx/index.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(51439)] = __webpack_require__.m[/*require.resolve*/(91708)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/styled-jsx/style")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/styled-jsx/style.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(71765)] = __webpack_require__.m[/*require.resolve*/(61766)];
+      __webpack_require__.m[/*require.resolve*/("webpack/sharing/consume/default/next/link")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/next/link.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(71853)] = __webpack_require__.m[/*require.resolve*/(30726)];
+      __webpack_require__.m[/*require.resolve*/("next/router")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/next/router.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(null /* weak dependency, without id */)] = __webpack_require__.m[/*require.resolve*/(37226)];
+      __webpack_require__.m[/*require.resolve*/(null /* weak dependency, without id */)] = __webpack_require__.m[/*require.resolve*/("../../node_modules/next/script.js?pop")];
       
-      __webpack_require__.m[/*require.resolve*/(40968)] = __webpack_require__.m[/*require.resolve*/(33865)];
+      __webpack_require__.m[/*require.resolve*/("next/head")] = __webpack_require__.m[/*require.resolve*/("../../node_modules/next/head.js?pop")];
       
 //hasShareHoist
 
-__webpack_require__(26751)
-__webpack_require__(37218)
+__webpack_require__("../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js")
+__webpack_require__("../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js")
 //hasDelegateMarkers
 "use strict";
 // placeholder file for delegate module injection
@@ -4715,7 +4713,7 @@ __webpack_require__(37218)
 /******/ 		// This function allow to reference async chunks and sibling chunks for the entrypoint
 /******/ 		__webpack_require__.u = function(chunkId) {
 /******/ 			// return url for filenames based on template
-/******/ 			return "" + chunkId + "." + {"node_modules_antd_lib_index_js":"da97be2f74ae8ad1","pages__app_tsx_hasBoundary":"456b91f2ca2ff7b1","node_modules_module-federation_utilities_src_utils_common_js":"4958d74c55f7b525","pages_checkout_pid_tsx_hasBoundary":"1767e45716b872d6","pages_checkout_exposed-pages_tsx_hasBoundary":"ba419f320de68590","pages_checkout_slug_tsx_hasBoundary":"c1fb0d26766f4042","pages_checkout_index_tsx_hasBoundary":"0018a708b17fda56","pages_checkout_test-title_tsx_hasBoundary":"622332331833b157","pages_checkout_test-check-button_tsx_hasBoundary":"33a38191873562b3","pages_home_exposed-pages_tsx_hasBoundary":"df64907b9cc4fc5d","pages_home_test-broken-remotes_tsx_hasBoundary":"cbb93facb05e4c46","pages_home_test-remote-hook_tsx_hasBoundary":"29a6d091d308f971","pages_home_test-shared-nav_tsx_hasBoundary":"f1def980509c1d78","pages_shop_exposed-pages_js_hasBoundary":"b0cc6d646a65b286","pages_shop_products_slug_js_hasBoundary":"c74d1b4f35329f6e","pages_shop_index_js_hasBoundary":"71acd8bcb9bcef94","pages_shop_test-webpack-png_js_hasBoundary":"5de4abae25529e2c","pages_shop_test-webpack-svg_js_hasBoundary":"a6ec37545212e147","pages_dynamic-remote_js_hasBoundary":"4a9623c7124bf702","pages_index_tsx_hasBoundary":"1a654819c41cade4","webpack_container_remote_shop_menu":"cd36be888c036cfa","webpack_container_remote_checkout_menu":"0d86ff35ce3ee175","webpack_container_remote_checkout_CheckoutTitle":"3b2feff1b4ec1767","webpack_container_remote_checkout_ButtonOldAnt":"121a993dd5cf86e7","webpack_container_remote_shop_WebpackSvg":"aad3e999f60d5e6b","webpack_container_remote_shop_WebpackPng":"ddfc1f150f4a8d1d"}[chunkId] + ".js";
+/******/ 			return "" + chunkId + "." + {"pages__app_tsx_hasBoundary":"75b1efab5d5dba54","node_modules_antd_lib_index_js":"3b6ad051e29a477b","pages_checkout_pid_tsx_hasBoundary":"efbf4f9dd4edf7f1","pages_checkout_slug_tsx_hasBoundary":"266b43fccaef7bd9","node_modules_module-federation_utilities_src_utils_common_js":"29a4647a2428a301","pages_checkout_exposed-pages_tsx_hasBoundary":"6dc1ec4be26f024e","pages_checkout_index_tsx_hasBoundary":"6862eb431cea9ae2","pages_checkout_test-check-button_tsx_hasBoundary":"4d54b512acf19c00","pages_checkout_test-title_tsx_hasBoundary":"46f202adaf5a7b5b","pages_home_exposed-pages_tsx_hasBoundary":"afb13da1ad764463","pages_home_test-broken-remotes_tsx_hasBoundary":"b9509e43d4f9bb68","pages_home_test-remote-hook_tsx_hasBoundary":"9b0042bcc1e70181","pages_shop_exposed-pages_js_hasBoundary":"3215e4e77fa2dcde","pages_home_test-shared-nav_tsx_hasBoundary":"5711e9adc6b1bece","pages_shop_products_slug_js_hasBoundary":"30b4d076a8175df8","pages_shop_index_js_hasBoundary":"bdf874c46c12870a","pages_shop_test-webpack-svg_js_hasBoundary":"a82e33a3cdb69f05","pages_shop_test-webpack-png_js_hasBoundary":"cef84ed4a950ca58","pages_dynamic-remote_js_hasBoundary":"ae90e7f99ab61484","pages_index_tsx_hasBoundary":"08174cc628bb4ca1","webpack_container_remote_shop_menu":"748bc29324538dd4","webpack_container_remote_checkout_menu":"5777ab21eb8c859a","webpack_container_remote_checkout_CheckoutTitle":"be26a26e93428a14","webpack_container_remote_checkout_ButtonOldAnt":"d05b4e8297ace459","webpack_container_remote_shop_WebpackSvg":"688d406480d6f2e4","webpack_container_remote_shop_WebpackPng":"52cb06f1ac6c5a98"}[chunkId] + ".js";
 /******/ 		};
 /******/ 	}();
 /******/ 	
@@ -4760,150 +4758,150 @@ __webpack_require__(37218)
 /******/ 	!function() {
 /******/ 		var chunkMapping = {
 /******/ 			"pages_checkout_pid_tsx_hasBoundary": [
-/******/ 				64778
-/******/ 			],
-/******/ 			"pages_checkout_exposed-pages_tsx_hasBoundary": [
-/******/ 				27320
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[pid]"
 /******/ 			],
 /******/ 			"pages_checkout_slug_tsx_hasBoundary": [
-/******/ 				85851
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[...slug]"
+/******/ 			],
+/******/ 			"pages_checkout_exposed-pages_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/exposed-pages"
 /******/ 			],
 /******/ 			"pages_checkout_index_tsx_hasBoundary": [
-/******/ 				7489
-/******/ 			],
-/******/ 			"pages_checkout_test-title_tsx_hasBoundary": [
-/******/ 				30554
+/******/ 				"webpack/container/remote/checkout/pages/checkout/index"
 /******/ 			],
 /******/ 			"pages_checkout_test-check-button_tsx_hasBoundary": [
-/******/ 				28015
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-check-button"
+/******/ 			],
+/******/ 			"pages_checkout_test-title_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-title"
 /******/ 			],
 /******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
-/******/ 				77560
+/******/ 				"webpack/container/remote/shop/useCustomRemoteHook"
 /******/ 			],
 /******/ 			"pages_shop_exposed-pages_js_hasBoundary": [
-/******/ 				75772
+/******/ 				"webpack/container/remote/shop/pages/shop/exposed-pages"
 /******/ 			],
 /******/ 			"pages_shop_products_slug_js_hasBoundary": [
-/******/ 				59720
+/******/ 				"webpack/container/remote/shop/pages/shop/products/[...slug]"
 /******/ 			],
 /******/ 			"pages_shop_index_js_hasBoundary": [
-/******/ 				77470
-/******/ 			],
-/******/ 			"pages_shop_test-webpack-png_js_hasBoundary": [
-/******/ 				38777
+/******/ 				"webpack/container/remote/shop/pages/shop/index"
 /******/ 			],
 /******/ 			"pages_shop_test-webpack-svg_js_hasBoundary": [
-/******/ 				65318
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-svg"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-png_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-png"
 /******/ 			],
 /******/ 			"webpack_container_remote_shop_menu": [
-/******/ 				93669
+/******/ 				"webpack/container/remote/shop/menu"
 /******/ 			],
 /******/ 			"webpack_container_remote_checkout_menu": [
-/******/ 				1972
+/******/ 				"webpack/container/remote/checkout/menu"
 /******/ 			],
 /******/ 			"webpack_container_remote_checkout_CheckoutTitle": [
-/******/ 				86718
+/******/ 				"webpack/container/remote/checkout/CheckoutTitle"
 /******/ 			],
 /******/ 			"webpack_container_remote_checkout_ButtonOldAnt": [
-/******/ 				51386
+/******/ 				"webpack/container/remote/checkout/ButtonOldAnt"
 /******/ 			],
 /******/ 			"webpack_container_remote_shop_WebpackSvg": [
-/******/ 				63956
+/******/ 				"webpack/container/remote/shop/WebpackSvg"
 /******/ 			],
 /******/ 			"webpack_container_remote_shop_WebpackPng": [
-/******/ 				34317
+/******/ 				"webpack/container/remote/shop/WebpackPng"
 /******/ 			]
 /******/ 		};
 /******/ 		var idToExternalAndNameMapping = {
-/******/ 			"1972": [
-/******/ 				"default",
-/******/ 				"./menu",
-/******/ 				37218
-/******/ 			],
-/******/ 			"7489": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/index",
-/******/ 				37218
-/******/ 			],
-/******/ 			"27320": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/exposed-pages",
-/******/ 				37218
-/******/ 			],
-/******/ 			"28015": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/test-check-button",
-/******/ 				37218
-/******/ 			],
-/******/ 			"30554": [
-/******/ 				"default",
-/******/ 				"./pages/checkout/test-title",
-/******/ 				37218
-/******/ 			],
-/******/ 			"34317": [
-/******/ 				"default",
-/******/ 				"./WebpackPng",
-/******/ 				26751
-/******/ 			],
-/******/ 			"38777": [
-/******/ 				"default",
-/******/ 				"./pages/shop/test-webpack-png",
-/******/ 				26751
-/******/ 			],
-/******/ 			"51386": [
-/******/ 				"default",
-/******/ 				"./ButtonOldAnt",
-/******/ 				37218
-/******/ 			],
-/******/ 			"59720": [
-/******/ 				"default",
-/******/ 				"./pages/shop/products/[...slug]",
-/******/ 				26751
-/******/ 			],
-/******/ 			"63956": [
-/******/ 				"default",
-/******/ 				"./WebpackSvg",
-/******/ 				26751
-/******/ 			],
-/******/ 			"64778": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[pid]": [
 /******/ 				"default",
 /******/ 				"./pages/checkout/[pid]",
-/******/ 				37218
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
 /******/ 			],
-/******/ 			"65318": [
-/******/ 				"default",
-/******/ 				"./pages/shop/test-webpack-svg",
-/******/ 				26751
-/******/ 			],
-/******/ 			"75772": [
-/******/ 				"default",
-/******/ 				"./pages/shop/exposed-pages",
-/******/ 				26751
-/******/ 			],
-/******/ 			"77470": [
-/******/ 				"default",
-/******/ 				"./pages/shop/index",
-/******/ 				26751
-/******/ 			],
-/******/ 			"77560": [
-/******/ 				"default",
-/******/ 				"./useCustomRemoteHook",
-/******/ 				26751
-/******/ 			],
-/******/ 			"85851": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[...slug]": [
 /******/ 				"default",
 /******/ 				"./pages/checkout/[...slug]",
-/******/ 				37218
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
 /******/ 			],
-/******/ 			"86718": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/exposed-pages": [
 /******/ 				"default",
-/******/ 				"./CheckoutTitle",
-/******/ 				37218
+/******/ 				"./pages/checkout/exposed-pages",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
 /******/ 			],
-/******/ 			"93669": [
+/******/ 			"webpack/container/remote/checkout/pages/checkout/index": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/index",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-check-button": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/test-check-button",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-title": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/test-title",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/useCustomRemoteHook": [
+/******/ 				"default",
+/******/ 				"./useCustomRemoteHook",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/exposed-pages": [
+/******/ 				"default",
+/******/ 				"./pages/shop/exposed-pages",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/products/[...slug]": [
+/******/ 				"default",
+/******/ 				"./pages/shop/products/[...slug]",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/index": [
+/******/ 				"default",
+/******/ 				"./pages/shop/index",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-svg": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-svg",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-png": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-png",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/menu": [
 /******/ 				"default",
 /******/ 				"./menu",
-/******/ 				26751
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/menu": [
+/******/ 				"default",
+/******/ 				"./menu",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/CheckoutTitle": [
+/******/ 				"default",
+/******/ 				"./CheckoutTitle",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/ButtonOldAnt": [
+/******/ 				"default",
+/******/ 				"./ButtonOldAnt",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/WebpackSvg": [
+/******/ 				"default",
+/******/ 				"./WebpackSvg",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/WebpackPng": [
+/******/ 				"default",
+/******/ 				"./WebpackPng",
+/******/ 				"../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.remotes = function(chunkId, promises) {
@@ -4995,9 +4993,9 @@ __webpack_require__(37218)
 /******/ 			var promises = [];
 /******/ 			switch(name) {
 /******/ 				case "default": {
-/******/ 					register("antd", "4.24.9", function() { return __webpack_require__.e("node_modules_antd_lib_index_js").then(function() { return function() { return __webpack_require__(71328); }; }); });
-/******/ 					initExternal(37218);
-/******/ 					initExternal(26751);
+/******/ 					register("antd", "4.24.9", function() { return __webpack_require__.e("node_modules_antd_lib_index_js").then(function() { return function() { return __webpack_require__("../../node_modules/antd/lib/index.js"); }; }); });
+/******/ 					initExternal("../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js");
+/******/ 					initExternal("../../node_modules/@module-federation/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js");
 /******/ 				}
 /******/ 				break;
 /******/ 			}
@@ -5154,12 +5152,12 @@ __webpack_require__(37218)
 /******/ 		});
 /******/ 		var installedModules = {};
 /******/ 		var moduleToHandlerMapping = {
-/******/ 			3700: function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return __webpack_require__.e("node_modules_antd_lib_index_js").then(function() { return function() { return __webpack_require__(71328); }; }); }); },
-/******/ 			51439: function() { return loadSingleton("default", "styled-jsx/style"); },
-/******/ 			71765: function() { return loadSingleton("default", "next/link"); },
-/******/ 			6592: function() { return loadSingleton("default", "next/dynamic"); }
+/******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return __webpack_require__.e("node_modules_antd_lib_index_js").then(function() { return function() { return __webpack_require__("../../node_modules/antd/lib/index.js"); }; }); }); },
+/******/ 			"webpack/sharing/consume/default/styled-jsx/style": function() { return loadSingleton("default", "styled-jsx/style"); },
+/******/ 			"webpack/sharing/consume/default/next/link": function() { return loadSingleton("default", "next/link"); },
+/******/ 			"webpack/sharing/consume/default/next/dynamic": function() { return loadSingleton("default", "next/dynamic"); }
 /******/ 		};
-/******/ 		var initialConsumes = [6592,6592,6592,6592,6592,6592,6592,6592,6592,6592,6592,6592,6592,6592,6592,6592,6592,6592];
+/******/ 		var initialConsumes = ["webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic","webpack/sharing/consume/default/next/dynamic"];
 /******/ 		initialConsumes.forEach(function(id) {
 /******/ 			__webpack_require__.m[id] = function(module) {
 /******/ 				// Handle case when module is used sync
@@ -5172,15 +5170,15 @@ __webpack_require__(37218)
 /******/ 		});
 /******/ 		var chunkMapping = {
 /******/ 			"pages__app_tsx_hasBoundary": [
-/******/ 				3700,
-/******/ 				51439
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
 /******/ 			],
 /******/ 			"pages_home_test-broken-remotes_tsx_hasBoundary": [
-/******/ 				71765
+/******/ 				"webpack/sharing/consume/default/next/link"
 /******/ 			],
 /******/ 			"pages_home_test-shared-nav_tsx_hasBoundary": [
-/******/ 				3700,
-/******/ 				51439
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.consumes = function(chunkId, promises) {
