@@ -1,8 +1,7 @@
 import { getRuntimeRemotes } from './getRuntimeRemotes';
-import {remoteVars} from './common'
+import { remoteVars } from './common';
 
 describe('getRuntimeRemotes', () => {
-
   afterEach(() => {
     Object.keys(remoteVars).forEach((key) => {
       delete remoteVars[key];
@@ -26,7 +25,7 @@ describe('getRuntimeRemotes', () => {
     const lazyFunction = () =>
       Promise.resolve({ get: () => true, init: () => true });
     // @ts-ignore
-    remoteVars['lazyFunction'] = lazyFunction
+    remoteVars['lazyFunction'] = lazyFunction;
 
     const remotes = getRuntimeRemotes();
     expect(remotes).toHaveProperty('lazyFunction.asyncContainer');
@@ -50,7 +49,7 @@ describe('getRuntimeRemotes', () => {
 
   test('parses global@url string', () => {
     // @ts-ignore
-    remoteVars["remote"] =  'remoteGlobal@https://example.com/remoteEntry.js'
+    remoteVars['remote'] = 'remoteGlobal@https://example.com/remoteEntry.js';
     const remotes = getRuntimeRemotes();
     expect(remotes).toEqual({
       remote: {
@@ -60,11 +59,22 @@ describe('getRuntimeRemotes', () => {
     });
   });
 
-  test('throws an error for unsupported types', () => {
+  test('console.warn should be called for unsupported types', () => {
+    console.warn = jest.fn();
     // @ts-ignore
-    remoteVars["unsupported"] = 42
-    expect(() => getRuntimeRemotes()).toThrow(
-      '[mf] Invalid value received for runtime_remote "unsupported"'
+    remoteVars['unsupported'] = 42;
+    // Call the function that triggers the warning message
+    getRuntimeRemotes();
+    // Check that console.warn was called with the correct message
+    //@ts-ignore
+    expect(console.warn.mock.calls[0][0]).toMatch(
+      /Unable to retrieve runtime remotes/
     );
+    //@ts-ignore
+    console.log(console.warn.mock.calls[0][1].message);
+    //@ts-ignore
+    expect(console.warn.mock.calls[0][1].message).toMatch(/runtime_remote/);
+    //@ts-ignore
+    expect(console.warn.mock.calls[0][1].message).toMatch(/unsupported/);
   });
 });
