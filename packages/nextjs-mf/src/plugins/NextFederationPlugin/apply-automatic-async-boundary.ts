@@ -1,7 +1,10 @@
-import { ModuleFederationPluginOptions, NextFederationPluginExtraOptions } from "@module-federation/utilities";
-import { Compiler } from "webpack";
-import { regexEqual } from "./regex-equal";
-import path from "path";
+import {
+  ModuleFederationPluginOptions,
+  NextFederationPluginExtraOptions,
+} from '@module-federation/utilities';
+import { Compiler } from 'webpack';
+import { regexEqual } from './regex-equal';
+import path from 'path';
 
 /**
 
@@ -16,7 +19,7 @@ export function applyAutomaticAsyncBoundary(
   extraOptions: NextFederationPluginExtraOptions,
   compiler: Compiler
 ) {
-  const allowedPaths = ["pages/", "app/", "src/pages/", "src/app/"];
+  const allowedPaths = ['pages/', 'app/', 'src/pages/', 'src/app/'];
 
   const jsRules = compiler.options.module.rules.find((r) => {
     //@ts-ignore
@@ -40,18 +43,20 @@ export function applyAutomaticAsyncBoundary(
       //@ts-ignore
       jsRules.oneOf.unshift({
         test: (request: string) => {
-          return allowedPaths.some((p) =>
-              request.includes(path.join(compiler.context, p)) &&
-              /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request);
+          return (
+            allowedPaths.some((p) =>
+              request.includes(path.join(compiler.context, p))
+            ) && /\.(js|jsx|ts|tsx|md|mdx|mjs)$/i.test(request)
+          );
         },
         exclude: [
           /node_modules/,
           /_document/,
           /_middleware/,
           /pages[\\/]middleware/,
-          /pages[\\/]api/
+          /pages[\\/]api/,
         ],
-        resourceQuery: (query: string) => !query.includes("hasBoundary"),
+        resourceQuery: (query: string) => !query.includes('hasBoundary'),
         use: [
           //@ts-ignore
           ...loaderChain,
@@ -61,10 +66,10 @@ export function applyAutomaticAsyncBoundary(
             // and re-exports them as a dynamic import so module sharing works without eager issues.
             loader: path.resolve(
               __dirname,
-              "../../loaders/async-boundary-loader"
-            )
-          }
-        ]
+              '../../loaders/async-boundary-loader'
+            ),
+          },
+        ],
       });
     }
   }

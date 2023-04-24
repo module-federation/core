@@ -13,7 +13,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "nx build --verbose --output-style=stream",
+    "build": "nx run-many --target=build --projects=nextjs-mf,utils,node,3000-home --verbose --output-style=stream",
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
     "start:next": "nx build && concurrently 'nx run 3000-home:serve:development --output-style=stream' 'nx run 3001-shop:serve:development --output-style=stream' 'nx run 3002-checkout:serve:development --output-style=stream'",
