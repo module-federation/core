@@ -94,3 +94,10 @@ export type GetModuleOptions = {
   exportName?: string;
   remoteContainer: string | RemoteData;
 };
+
+export type RemoteVars = Record<
+  string,
+  | Promise<WebpackRemoteContainer>
+  | string
+  | (() => Promise<WebpackRemoteContainer>)
+>;

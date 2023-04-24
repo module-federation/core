@@ -16,11 +16,8 @@ import CopyFederationPlugin from "../CopyFederationPlugin";
 import {
   applyClientPlugins,
   applyRemoteDelegates,
-  applyServerPlugins,
   configureServerCompilerOptions,
-  configureServerLibraryAndFilename,
   getModuleFederationPluginConstructor,
-  handleServerExternals,
   injectModuleHoistingSystem,
   retrieveDefaultShared
 } from "./next-fragments";
@@ -32,6 +29,7 @@ import { removeUnnecessarySharedKeys } from "./remove-unnecessary-shared-keys";
 import { setOptions } from "./set-options";
 import { validateCompilerOptions, validatePluginOptions } from "./validate-options";
 import { applyAutomaticAsyncBoundary } from "./apply-automatic-async-boundary";
+import { applyServerPlugins, configureServerLibraryAndFilename, handleServerExternals } from "./apply-server-plugins";
 
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application

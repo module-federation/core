@@ -5,6 +5,7 @@ import {
 } from '@module-federation/utilities';
 import path from 'path';
 import webpack from 'webpack';
+
 import { regexEqual } from './regex-equal';
 describe('applyAutomaticAsyncBoundary', () => {
   const mockCompiler: webpack.Compiler = {
