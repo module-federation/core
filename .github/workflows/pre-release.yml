@@ -15,7 +15,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-          cache: 'yarn'
+          cache: 'npm'
       - name: Setup Git
         run: |
           git config user.name "GitHub Bot"
@@ -23,15 +23,15 @@ jobs:
       - run: git fetch --no-tags --prune --depth=5 origin main
         name: Fetch Main branch
       - name: Install packages
-        run: yarn install --frozen-lockfile
+        run: npm install
       - name: Retrieve effected projects
         id: effected-projects
-        run: echo "projects=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)" >> $GITHUB_OUTPUT
+        run: echo "projects=$($(npm bin)/nx print-affected --type=lib --select=projects --base=origin/main)" >> $GITHUB_OUTPUT
       - name: Lint
         shell: bash
         run: |
           if [[ "${{ steps.effected-projects.outputs.projects }}" ]]; then
-            yarn nx run-many --target=lint --projects="$PROJECTS"
+             nx run-many --target=lint --projects="$PROJECTS"
           else
             echo "No changes, Skipping lint check."
           fi
@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ steps.effected-projects.outputs.projects }}" ]]; then
-            yarn nx run-many --target=test --projects="$PROJECTS"
+             nx run-many --target=test --projects="$PROJECTS"
           else
             echo "No changes, Skipping lint check."
           fi
@@ -47,7 +47,7 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ steps.effected-projects.outputs.projects }}" ]]; then
-            yarn nx run-many --target=build --projects="$PROJECTS"
+             nx run-many --target=build --projects="$PROJECTS"
           else
             echo "No changes, Skipping lint check."
           fi

@@ -27,26 +27,26 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-          cache: 'yarn'
+          cache: 'npm'
       - name: Setup Git
         run: |
           git config user.name "GitHub Bot"
           git config user.email "gituser@example.com"
       - name: Install packages
-        run: yarn install --frozen-lockfile
+        run: npm install
       - name: Lint
         shell: bash
         run: |
-          PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)
+          PROJECTS=$($(npm bin)/nx print-affected --type=lib --select=projects --base=origin/main)
           if [[ "$PROJECTS" ]]; then
-            yarn nx run-many --target=lint --projects="$PROJECTS"
+             nx run-many --target=lint --projects="$PROJECTS"
           else
             echo "No changes, Skipping lint check."
           fi
       - name: Build
         shell: bash
         run: |
-          yarn nx run-many --target=build --projects=typescript,utils,node,nextjs-mf,native-federation-typescript,native-federation-tests
+           nx run-many --target=build --projects=typescript,utils,node,nextjs-mf,native-federation-typescript,native-federation-tests
       - name: Version
         shell: bash
         run: |
@@ -54,12 +54,12 @@ jobs:
           PROJECTS=${{ inputs.package }}
 
           if [[ $PROJECTS == "all" ]]; then
-            PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=last-release)
+            PROJECTS=$($(npm bin)/nx print-affected --type=lib --select=projects --base=last-release)
           fi;
 
           echo "Projects to version: $PROJECTS"
 
-          yarn nx run-many --target=version --projects="$PROJECTS" --parallel=1
+           nx run-many --target=version --projects="$PROJECTS" --parallel=1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
