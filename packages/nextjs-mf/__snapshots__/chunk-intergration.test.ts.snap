@@ -4609,7 +4609,7 @@ __webpack_require__(37218)
 /******/ 		// This function allow to reference async chunks and sibling chunks for the entrypoint
 /******/ 		__webpack_require__.u = function(chunkId) {
 /******/ 			// return url for filenames based on template
-/******/ 			return "" + chunkId + "." + {"pages__app_tsx_hasBoundary":"456b91f2ca2ff7b1","node_modules_antd_lib_index_js":"da97be2f74ae8ad1","node_modules_module-federation_utilities_src_utils_common_js":"4958d74c55f7b525","pages_checkout_exposed-pages_tsx_hasBoundary":"ba419f320de68590","pages_checkout_slug_tsx_hasBoundary":"c1fb0d26766f4042","pages_checkout_test-check-button_tsx_hasBoundary":"33a38191873562b3","pages_checkout_pid_tsx_hasBoundary":"1767e45716b872d6","pages_checkout_test-title_tsx_hasBoundary":"622332331833b157","pages_checkout_index_tsx_hasBoundary":"0018a708b17fda56","pages_home_exposed-pages_tsx_hasBoundary":"df64907b9cc4fc5d","pages_home_test-remote-hook_tsx_hasBoundary":"29a6d091d308f971","pages_home_test-broken-remotes_tsx_hasBoundary":"cbb93facb05e4c46","pages_home_test-shared-nav_tsx_hasBoundary":"f1def980509c1d78","pages_shop_exposed-pages_js_hasBoundary":"b0cc6d646a65b286","pages_shop_index_js_hasBoundary":"71acd8bcb9bcef94","pages_shop_test-webpack-png_js_hasBoundary":"5de4abae25529e2c","pages_shop_products_slug_js_hasBoundary":"c74d1b4f35329f6e","pages_shop_test-webpack-svg_js_hasBoundary":"a6ec37545212e147","pages_dynamic-remote_js_hasBoundary":"4a9623c7124bf702","pages_index_tsx_hasBoundary":"1a654819c41cade4","webpack_container_remote_shop_menu":"cd36be888c036cfa","webpack_container_remote_checkout_menu":"0d86ff35ce3ee175","webpack_container_remote_checkout_CheckoutTitle":"3b2feff1b4ec1767","webpack_container_remote_checkout_ButtonOldAnt":"121a993dd5cf86e7","webpack_container_remote_shop_WebpackSvg":"aad3e999f60d5e6b","webpack_container_remote_shop_WebpackPng":"ddfc1f150f4a8d1d"}[chunkId] + ".js";
+/******/ 			return "" + chunkId + "." + {"node_modules_antd_lib_index_js":"da97be2f74ae8ad1","pages__app_tsx_hasBoundary":"456b91f2ca2ff7b1","node_modules_module-federation_utilities_src_utils_common_js":"4958d74c55f7b525","pages_checkout_pid_tsx_hasBoundary":"1767e45716b872d6","pages_checkout_exposed-pages_tsx_hasBoundary":"ba419f320de68590","pages_checkout_slug_tsx_hasBoundary":"c1fb0d26766f4042","pages_checkout_index_tsx_hasBoundary":"0018a708b17fda56","pages_checkout_test-title_tsx_hasBoundary":"622332331833b157","pages_checkout_test-check-button_tsx_hasBoundary":"33a38191873562b3","pages_home_exposed-pages_tsx_hasBoundary":"df64907b9cc4fc5d","pages_home_test-broken-remotes_tsx_hasBoundary":"cbb93facb05e4c46","pages_home_test-remote-hook_tsx_hasBoundary":"29a6d091d308f971","pages_home_test-shared-nav_tsx_hasBoundary":"f1def980509c1d78","pages_shop_exposed-pages_js_hasBoundary":"b0cc6d646a65b286","pages_shop_products_slug_js_hasBoundary":"c74d1b4f35329f6e","pages_shop_index_js_hasBoundary":"71acd8bcb9bcef94","pages_shop_test-webpack-png_js_hasBoundary":"5de4abae25529e2c","pages_shop_test-webpack-svg_js_hasBoundary":"a6ec37545212e147","pages_dynamic-remote_js_hasBoundary":"4a9623c7124bf702","pages_index_tsx_hasBoundary":"1a654819c41cade4","webpack_container_remote_shop_menu":"cd36be888c036cfa","webpack_container_remote_checkout_menu":"0d86ff35ce3ee175","webpack_container_remote_checkout_CheckoutTitle":"3b2feff1b4ec1767","webpack_container_remote_checkout_ButtonOldAnt":"121a993dd5cf86e7","webpack_container_remote_shop_WebpackSvg":"aad3e999f60d5e6b","webpack_container_remote_shop_WebpackPng":"ddfc1f150f4a8d1d"}[chunkId] + ".js";
 /******/ 		};
 /******/ 	}();
 /******/ 	
@@ -4653,23 +4653,23 @@ __webpack_require__(37218)
 /******/ 	/* webpack/runtime/remotes loading */
 /******/ 	!function() {
 /******/ 		var chunkMapping = {
+/******/ 			"pages_checkout_pid_tsx_hasBoundary": [
+/******/ 				64778
+/******/ 			],
 /******/ 			"pages_checkout_exposed-pages_tsx_hasBoundary": [
 /******/ 				27320
 /******/ 			],
 /******/ 			"pages_checkout_slug_tsx_hasBoundary": [
 /******/ 				85851
 /******/ 			],
-/******/ 			"pages_checkout_test-check-button_tsx_hasBoundary": [
-/******/ 				28015
-/******/ 			],
-/******/ 			"pages_checkout_pid_tsx_hasBoundary": [
-/******/ 				64778
+/******/ 			"pages_checkout_index_tsx_hasBoundary": [
+/******/ 				7489
 /******/ 			],
 /******/ 			"pages_checkout_test-title_tsx_hasBoundary": [
 /******/ 				30554
 /******/ 			],
-/******/ 			"pages_checkout_index_tsx_hasBoundary": [
-/******/ 				7489
+/******/ 			"pages_checkout_test-check-button_tsx_hasBoundary": [
+/******/ 				28015
 /******/ 			],
 /******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
 /******/ 				77560
@@ -4677,14 +4677,14 @@ __webpack_require__(37218)
 /******/ 			"pages_shop_exposed-pages_js_hasBoundary": [
 /******/ 				75772
 /******/ 			],
+/******/ 			"pages_shop_products_slug_js_hasBoundary": [
+/******/ 				59720
+/******/ 			],
 /******/ 			"pages_shop_index_js_hasBoundary": [
 /******/ 				77470
 /******/ 			],
 /******/ 			"pages_shop_test-webpack-png_js_hasBoundary": [
 /******/ 				38777
-/******/ 			],
-/******/ 			"pages_shop_products_slug_js_hasBoundary": [
-/******/ 				59720
 /******/ 			],
 /******/ 			"pages_shop_test-webpack-svg_js_hasBoundary": [
 /******/ 				65318

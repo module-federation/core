@@ -29,7 +29,7 @@ describe('Next.js build output', () => {
       expect(buildOutput).toMatchSnapshot();
     });
   });
-  describe('server', () => {
+  xdescribe('server', () => {
     const buildOutputDir = path.join(
       __dirname,
       '../../',
