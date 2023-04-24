@@ -24,7 +24,7 @@ export function applyAutomaticAsyncBoundary(
   });
 
   //@ts-ignore
-  if (jsRules && "oneOf" in jsRules) {
+  if (jsRules?.oneOf) {
     // @ts-ignore
     const foundJsLayer = jsRules.oneOf.find((r) => {
       //@ts-ignore
