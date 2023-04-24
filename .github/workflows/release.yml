@@ -37,16 +37,16 @@ jobs:
       - name: Lint
         shell: bash
         run: |
-          PROJECTS=$($(npm bin)/nx print-affected --type=lib --select=projects --base=origin/main)
+          PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)
           if [[ "$PROJECTS" ]]; then
-             nx run-many --target=lint --projects="$PROJECTS"
+            yarn nx run-many --target=lint --projects="$PROJECTS"
           else
             echo "No changes, Skipping lint check."
           fi
       - name: Build
         shell: bash
         run: |
-           nx run-many --target=build --projects=typescript,utils,node,nextjs-mf,native-federation-typescript,native-federation-tests
+          yarn nx run-many --target=build --projects=typescript,utils,node,nextjs-mf,native-federation-typescript,native-federation-tests
       - name: Version
         shell: bash
         run: |
@@ -54,12 +54,12 @@ jobs:
           PROJECTS=${{ inputs.package }}
 
           if [[ $PROJECTS == "all" ]]; then
-            PROJECTS=$($(npm bin)/nx print-affected --type=lib --select=projects --base=last-release)
+            PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=last-release)
           fi;
 
           echo "Projects to version: $PROJECTS"
 
-           nx run-many --target=version --projects="$PROJECTS" --parallel=1
+          yarn nx run-many --target=version --projects="$PROJECTS" --parallel=1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
