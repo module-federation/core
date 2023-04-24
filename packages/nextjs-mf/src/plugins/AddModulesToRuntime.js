@@ -79,22 +79,6 @@ class AddModulesToRuntimeChunkPlugin {
               for (const module of modulesIterable) {
                 this.classifyModule(module, knownDelegates, internalSharedModules, modulesToMove, containers)
               }
-              // for (const module of modulesIterable) {
-              //   if (delegateSet.has(module?.rawRequest)) {
-              //     containers.push(module);
-              //   } else if (
-              //     internalSharedModules?.some(
-              //       (share) => module?.rawRequest === share
-              //     )
-              //   ) {
-              //     modulesToMove.push(module);
-              //   } else if (
-              //     module?.userRequest?.includes('internal-delegate-hoist')
-              //   ) {
-              //     modulesToMove.push(module);
-              //   }
-              // }
-
 
               if (partialContainerModules) {
                 for (const module of partialContainerModules) {
@@ -147,6 +131,7 @@ class AddModulesToRuntimeChunkPlugin {
     );
   }
   classifyModule(module, knownDelegates, internalSharedModules, modulesToMove, containers) {
+    //todo: this is duplicated from the above function, need to refactor
     const delegateSet = new Set(knownDelegates || []);
 
     if (delegateSet.has(module?.rawRequest)) {
