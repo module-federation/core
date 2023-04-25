@@ -39,7 +39,7 @@ class AddModulesToRuntimeChunkPlugin {
     compiler.hooks.compilation.tap(
       'AddModulesToRuntimeChunkPlugin',
       (compilation) => {
-        if (isServer) return;
+        return;
         // Tap into optimizeChunks hook
         compilation.hooks.optimizeChunks.tap(
           'AddModulesToRuntimeChunkPlugin',

@@ -17,9 +17,11 @@ import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
  * options for the InvertedContainerRuntimeModule class.
  */
 interface InvertedContainerRuntimeModuleOptions {
+  runtime: string;
   remotes: Record<string, string>; // A map of remote modules to their URLs.
   name?: string; // The name of the current module.
   verbose?: boolean; // A flag to enable verbose logging.
+  container?: string; // The name of the container module.
 }
 
 /**
@@ -56,6 +58,13 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     this.chunkLoadingContext = chunkLoadingContext;
   }
 
+  resolveContainerModule() {
+    const container = this.compilation.entrypoints
+      .get(this.options.container as string)
+      ?.getRuntimeChunk?.();
+    const entryModule = container?.entryModule;
+    return entryModule;
+  }
   /**
    * Generate method for the runtime module, producing the runtime code.
    * @returns {string} runtime code
@@ -68,45 +77,48 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       (webpack && webpack.javascript.JavascriptModulesPlugin.chunkHasJs) ||
       require('webpack/lib/javascript/JavascriptModulesPlugin').chunkHasJs;
 
-    // workaround for next.js
-    const getInitialChunkIds = (chunk: Chunk, chunkGraph: ChunkGraph) => {
-      const initialChunkIds = new Set(chunk.ids);
-      for (const c of chunk.getAllInitialChunks()) {
-        if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
-        if (c.ids) {
-          for (const id of c.ids) initialChunkIds.add(id);
-        }
-      }
-      return initialChunkIds;
-    };
-
+    const containerEntryModule = this.resolveContainerModule();
     const { chunkGraph, chunk } = this;
 
     const conditionMap = chunkGraph.getChunkConditionMap(chunk, chunkHasJs);
-    const hasJsMatcher = compileBooleanMatcher(conditionMap);
-    const initialChunkIds = getInitialChunkIds(chunk, chunkGraph);
-    const containerChunkModules = chunkGraph.getChunkModules(chunk);
+    // const hasJsMatcher = compileBooleanMatcher(conditionMap);
 
     // find the main webpack runtime, skip all other chunks
-    if (chunk.name !== 'webpack') return Template.asString('');
-    const containerEntry = containerChunkModules
-      .filter((module) => {
-        return module.constructor.name === 'ContainerEntryModule';
-      })
-      .map((module) => {
-        return `
+    if (chunk.name != this.options.runtime && containerEntryModule) {
+      return Template.asString('');
+    }
+
+    console.log(containerEntryModule?.id || containerEntryModule?.debugId);
+    const containerEntry = [containerEntryModule].map((module) => {
+      //@ts-ignore
+      const containerName = module?._name || name;
+      const containerModuleId = module?.id || module?.debugId;
+
+      if (!(containerName && containerName)) {
+        return '';
+      }
+      // const globalRef = this.compilation.options.output?.globalObject;
+      //@ts-ignore
+      const nodeGlobal = this.compilation.options?.node?.global;
+
+      const globalObject = nodeGlobal
+        ? webpack.RuntimeGlobals.global
+        : 'global';
+      return `
+        if(typeof window === 'undefined') {
+          ${globalObject}['__remote_scope__'] = ${globalObject}['__remote_scope__'] || {_config: {}};
+        }
         try {
-        console.log('should set from host', document.currentScript.src);
-        window[${JSON.stringify(
+        // var containerAttachSpace = ${globalObject}['__remote_scope__'] || ${globalObject};
+        var containerAttachObject = typeof window !== 'undefined' ? window : ${globalObject}['__remote_scope__']
+        containerAttachObject[${JSON.stringify(
           //@ts-ignore
-          module._name || name
-        )}] = __webpack_require__(${JSON.stringify(
-          module?.id || module?.debugId
-        )})
+          containerName
+        )}] = __webpack_require__(${JSON.stringify(containerModuleId)})
       } catch (e) {
         console.error('host runtime was unable to initialize its own remote', e);
       }`;
-      });
+    });
     return Template.asString(containerEntry);
   }
 }

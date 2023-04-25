@@ -2,6 +2,7 @@ import { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import AddModulesPlugin from '../AddModulesToRuntime';
 import path from 'path';
+import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 
 /**
  * Applies server-specific plugins.
@@ -44,6 +45,14 @@ export function applyServerPlugins(
   // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
   new StreamingTargetPlugin(options, {
     ModuleFederationPlugin: compiler.webpack.container.ModuleFederationPlugin,
+  }).apply(compiler);
+
+  // Add a new commonjs chunk loading plugin to the compiler
+  new InvertedContainerPlugin({
+    runtime: 'webpack-runtime',
+    container: options.name,
+    remotes: options.remotes as Record<string, string>,
+    debug: true,
   }).apply(compiler);
 }
 
@@ -140,4 +149,31 @@ export function handleServerExternals(
       return;
     };
   }
+}
+
+/**
+ * Configures server-specific compiler options.
+ *
+ * @param compiler - The Webpack compiler instance.
+ *
+ * @remarks
+ * This function configures the compiler options for server builds. It turns off the compiler target on node
+ * builds because it adds its own chunk loading runtime module with NodeFederationPlugin and StreamingTargetPlugin.
+ * It also disables split chunks to prevent conflicts from occurring in the graph.
+ *
+ */
+export function configureServerCompilerOptions(compiler: Compiler): void {
+  // Turn off the compiler target on node builds because we add our own chunk loading runtime module
+  // with NodeFederationPlugin and StreamingTargetPlugin
+  compiler.options.target = false;
+  compiler.options.node = {
+    ...compiler.options.node,
+    global: false,
+  };
+  // Set chunkIds optimization to 'named'
+  compiler.options.optimization.chunkIds = 'named'; // for debugging
+
+  // Disable split chunks to prevent conflicts from occurring in the graph
+  // TODO on the `compiler.options.optimization.splitChunks` line would be to find a way to only opt out chunks/modules related to module federation from chunk splitting logic.
+  compiler.options.optimization.splitChunks = false;
 }

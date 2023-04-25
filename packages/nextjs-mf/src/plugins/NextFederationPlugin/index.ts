@@ -14,9 +14,7 @@ import { createRuntimeVariables } from '@module-federation/utilities';
 import type { Compiler, container } from 'webpack';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import {
-  applyClientPlugins,
   applyRemoteDelegates,
-  configureServerCompilerOptions,
   getModuleFederationPluginConstructor,
   injectModuleHoistingSystem,
   retrieveDefaultShared,
@@ -34,9 +32,11 @@ import {
 import { applyAutomaticAsyncBoundary } from './apply-automatic-async-boundary';
 import {
   applyServerPlugins,
+  configureServerCompilerOptions,
   configureServerLibraryAndFilename,
   handleServerExternals,
 } from './apply-server-plugins';
+import { applyClientPlugins } from './apply-client-plugins';
 
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application
@@ -145,24 +145,24 @@ export class NextFederationPlugin {
     // @ts-ignore
     new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
 
-    if (
-      !isServer &&
-      this._options.remotes &&
-      Object.keys(this._options.remotes).length > 0
-    ) {
-      // single runtime chunk if host or circular remote uses remote of current host.
-      // @ts-ignore
-      new ModuleFederationPlugin({
-        ...hostFederationPluginOptions,
-        filename: undefined,
-        runtime: undefined,
-        name: this._options.name + '_single',
-        library: {
-          ...hostFederationPluginOptions.library,
-          name: this._options.name + '_single',
-        },
-      }).apply(compiler);
-    }
+    // if (
+    //   !isServer &&
+    //   this._options.remotes &&
+    //   Object.keys(this._options.remotes).length > 0
+    // ) {
+    //   // single runtime chunk if host or circular remote uses remote of current host.
+    //   // @ts-ignore
+    //   new ModuleFederationPlugin({
+    //     ...hostFederationPluginOptions,
+    //     filename: undefined,
+    //     runtime: undefined,
+    //     name: this._options.name + '_single',
+    //     library: {
+    //       ...hostFederationPluginOptions.library,
+    //       name: this._options.name + '_single',
+    //     },
+    //   }).apply(compiler);
+    // }
 
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
   }
