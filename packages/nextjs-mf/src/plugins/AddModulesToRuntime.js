@@ -1,3 +1,4 @@
+import DelegateModulesPlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 /**
  * A webpack plugin that moves specified modules from chunks to runtime chunk.
  * @class AddModulesToRuntimeChunkPlugin
@@ -53,6 +54,14 @@ class AddModulesToRuntimeChunkPlugin {
   apply(compiler) {
     // Check if the target is the server
     const isServer = compiler.options.name === 'server';
+    const { runtime, container, remotes, shared, eager, applicationName } =
+      this.options;
+
+    new DelegateModulesPlugin({
+      runtime,
+      container,
+      remotes,
+    }).apply(compiler);
 
     // Tap into compilation hooks
     compiler.hooks.compilation.tap(
@@ -63,14 +72,6 @@ class AddModulesToRuntimeChunkPlugin {
         compilation.hooks.optimizeChunks.tap(
           'AddModulesToRuntimeChunkPlugin',
           (chunks) => {
-            const {
-              runtime,
-              container,
-              remotes,
-              shared,
-              eager,
-              applicationName,
-            } = this.options;
             const runtimeChunk = this.getChunkByName(chunks, runtime);
             if (!runtimeChunk || !runtimeChunk.hasRuntime()) return;
             // Get the container chunk if specified
@@ -97,15 +98,6 @@ class AddModulesToRuntimeChunkPlugin {
         compilation.hooks.optimizeChunks.tap(
           'AddModulesToRuntimeChunkPlugin',
           (chunks) => {
-            const {
-              runtime,
-              container,
-              remotes,
-              shared,
-              eager,
-              applicationName,
-            } = this.options;
-
             // Helper function to find a chunk by its name
             const getChunkByName = (name) =>
               chunks.find((chunk) => chunk.name === name);
