@@ -92,11 +92,9 @@ class AddModulesToRuntimeChunkPlugin {
 
             const foundChunks = chunks.filter((chunk) => {
               const hasMatch = chunk !== runtimeChunk;
-              if (isServer) {
-                return hasMatch;
-              }
+              if (isServer) return hasMatch;
               return (
-                chunk !== runtimeChunk &&
+                hasMatch &&
                 applicationName &&
                 (chunk.name || chunk.id)?.startsWith(applicationName)
               );
@@ -141,7 +139,7 @@ class AddModulesToRuntimeChunkPlugin {
                   if (this.options.debug) {
                     console.log(
                       `removing ${module.id || module.identifier()} from ${
-                        chunk.name
+                        chunk.name || chunk.id
                       } to ${runtimeChunk.name}`
                     );
                   }
@@ -174,7 +172,9 @@ class AddModulesToRuntimeChunkPlugin {
       containers.push(module);
     } else if (
       //TODO: do the same for shared modules, resolve them in the afterFinishModules hook
-      internalSharedModules?.some((share) => module?.rawRequest === share)
+      internalSharedModules?.some((share) =>
+        module?.rawRequest?.includes(share)
+      )
     ) {
       modulesToMove.push(module);
     } else if (module?.userRequest?.includes('internal-delegate-hoist')) {
