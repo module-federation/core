@@ -3,7 +3,7 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
-xdescribe('Next.js build output', () => {
+describe('Next.js build output', () => {
   beforeAll(() => {
     // Run the build programmatically
     // console.log('buildOutputDir', buildOutputDir);
@@ -31,20 +31,28 @@ xdescribe('Next.js build output', () => {
       expect(buildOutput).toMatchSnapshot();
     });
     it('webpack-runtime', () => {
-      const buildOutput = findFileInDirectory('webpack-', buildOutputDir);
+      const buildOutput = findFileInDirectory('webpack', buildOutputDir);
       expect(buildOutput).toMatchSnapshot();
     });
     describe('modules', () => {
       it('main chunk should not have react', () => {
-        const buildOutput = findModulesInChunk('main-', buildOutputDir);
+        const buildOutput = findModulesInChunk('main', buildOutputDir);
         const hasReact = buildOutput?.some((module) =>
           module.includes('node_modules/react/')
         );
         expect(hasReact).toBe(false);
       });
 
+      it('main chunk should not have styled-jsx', () => {
+        const buildOutput = findModulesInChunk('main', buildOutputDir);
+        const hasReact = buildOutput?.some((module) =>
+          module.includes('node_modules/styled-jsx/')
+        );
+        expect(hasReact).toBe(false);
+      });
+
       it('main chunk', () => {
-        const buildOutput = findModulesInChunk('main-', buildOutputDir);
+        const buildOutput = findModulesInChunk('main', buildOutputDir);
         expect(buildOutput).toMatchSnapshot();
       });
     });
@@ -66,6 +74,30 @@ xdescribe('Next.js build output', () => {
     it('webpack-runtime', () => {
       const buildOutput = findFileInDirectory('webpack-', buildOutputDir);
       expect(buildOutput).toMatchSnapshot();
+    });
+    describe('modules', () => {
+      xit('page partial doesnt contain react', () => {
+        const buildOutput = findModulesInChunk('pages_', buildOutputDir);
+        const hasReact = buildOutput?.some(
+          (module) =>
+            module.includes('node_modules/react/') || module === 'react'
+        );
+        expect(hasReact).toBe(false);
+      });
+
+      xit('main chunk', () => {
+        const buildOutput = findModulesInChunk('main-', buildOutputDir);
+        expect(buildOutput).toMatchSnapshot();
+      });
+
+      it('doesnt have shared modules in main chunks', () => {
+        // @ant-design
+        const buildOutput = findModulesInChunk('pages__app', buildOutputDir);
+        const hasReact = buildOutput?.some(
+          (module) => module.includes('/@ant-design/') || module === 'react'
+        );
+        expect(hasReact).toBe(false);
+      });
     });
   });
 });
@@ -96,8 +128,13 @@ function findModulesInChunk(filename: string, directory: string) {
   const chunk = findFileInDirectory(filename, directory);
   if (chunk) {
     const evaledChunk = eval(chunk);
+    if (typeof evaledChunk === 'object') {
+      return Object.keys(evaledChunk);
+    }
+    console.log(evaledChunk);
     //@ts-ignore
     const moduleMaps = globalThis.self['webpackChunkhome_app'][0][1];
+
     return Object.keys(moduleMaps);
   }
   return null;
