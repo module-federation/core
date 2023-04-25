@@ -2,5 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-@import 'app/css/site.css';
 @import '~@asciidoctor/tabs/dist/css/tabs.css';
+
+@layer base {
+  html {
+    font-family: 'Avenir Next';
+  }
+}

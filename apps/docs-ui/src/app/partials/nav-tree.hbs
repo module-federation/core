@@ -9,7 +9,7 @@
     {{#if ./url}}
     <a class="nav-link" href="
       {{~#if (eq ./urlType 'internal')}}{{{relativize ./url}}}
-      {{~else}}{{{./url}}}{{~/if}}">{{{./content}}}</a>
+      {{~else}}{{{./url}}}{{~/if}}">{{{./content}}} TODO</a>
     {{else}}
     <span class="nav-text">{{{./content}}}</span>
     {{/if}}

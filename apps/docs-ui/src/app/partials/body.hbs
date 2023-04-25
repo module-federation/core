@@ -1,4 +1,15 @@
-<div class="body">
-{{> nav}}
-{{> main}}
+<div class="flex items-center w-full bg-mf-gray">
+    <div class="max-w-7xl w-full mx-auto flex">
+        <div class="min-w-[300px]">
+            {{> nav}}
+        </div>
+
+        <div>
+            {{> main}}
+        </div>
+
+        <div class="min-w-[300px]">
+            {{> article-nav}}
+        </div>
+    </div>
 </div>

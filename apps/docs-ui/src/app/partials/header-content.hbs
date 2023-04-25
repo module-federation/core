@@ -1,45 +1,61 @@
-<header class="header">
-  <nav class="navbar">
-    <div class="navbar-brand">
-      <a class="navbar-item" href="{{{or site.url siteRootPath}}}">{{site.title}}</a>
-      {{#if env.SITE_SEARCH_PROVIDER}}
-      <div class="navbar-item search hide-for-print">
-        <div id="search-field" class="field">
-          <input id="search-input" type="text" placeholder="Search the docs"{{#if page.home}} autofocus{{/if}}>
-        </div>
-      </div>
-      {{/if}}
-      <button class="navbar-burger" data-target="topbar-nav">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-    <div id="topbar-nav" class="navbar-menu">
-      <div class="navbar-end">
-        <a class="navbar-item" href="#">Home</a>
-        <div class="navbar-item has-dropdown is-hoverable">
-          <a class="navbar-link" href="#">Products</a>
-          <div class="navbar-dropdown">
-            <a class="navbar-item" href="#">Product A</a>
-            <a class="navbar-item" href="#">Product B</a>
-            <a class="navbar-item" href="#">Product C</a>
-          </div>
-        </div>
-        <div class="navbar-item has-dropdown is-hoverable">
-          <a class="navbar-link" href="#">Services</a>
-          <div class="navbar-dropdown">
-            <a class="navbar-item" href="#">Service A</a>
-            <a class="navbar-item" href="#">Service B</a>
-            <a class="navbar-item" href="#">Service C</a>
-          </div>
-        </div>
-        <div class="navbar-item">
-          <span class="control">
-            <a class="button is-primary" href="#">Download</a>
-          </span>
-        </div>
-      </div>
-    </div>
+<header class="flex items-center w-full bg-mf-gray">
+
+  <nav class="max-w-7xl w-full mx-auto flex flex-row-reverse xl:flex-row items-center justify-between px-4 py-6">
+    <a href="#"
+       class="flex w-full items-center justify-end xl:justify-start">
+      <img class="h-10"
+           src="{{{uiRootPath}}}/img/module-federation-logo.svg"
+           alt="Module Federation Logo">
+    </a>
+
+
+    <ul class="hidden xl:flex xl:flex w-full justify-center gap-8">
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+           href="#">Documentation</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+           href="#">Discover</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+           href="#">Showcase</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+           href="#">Enterprise</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+           href="#">Medusa</a>
+      </li>
+    </ul>
+
+
+    <ul class="hidden xl:flex w-full justify-end items-center gap-5">
+      <li class="flex">
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue hover:text-blue-gray-600 active:text-blue-gray-700"
+           href="https://github.com/module-federation"
+           target="_blank">
+          {{> social-icon-github size="36px" }}
+        </a>
+      </li>
+
+      <li class="flex">
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue hover:text-blue-gray-600 active:text-blue-gray-700"
+           href="https://discord.gg/T8c6yAxkbv"
+           target="_blank">
+          {{> social-icon-discord size="36px" }}
+        </a>
+      </li>
+    </ul>
+
+
   </nav>
+
 </header>
