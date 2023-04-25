@@ -31,20 +31,28 @@ describe('Next.js build output', () => {
       expect(buildOutput).toMatchSnapshot();
     });
     it('webpack-runtime', () => {
-      const buildOutput = findFileInDirectory('webpack-', buildOutputDir);
+      const buildOutput = findFileInDirectory('webpack', buildOutputDir);
       expect(buildOutput).toMatchSnapshot();
     });
     describe('modules', () => {
       it('main chunk should not have react', () => {
-        const buildOutput = findModulesInChunk('main-', buildOutputDir);
+        const buildOutput = findModulesInChunk('main', buildOutputDir);
         const hasReact = buildOutput?.some((module) =>
           module.includes('node_modules/react/')
         );
         expect(hasReact).toBe(false);
       });
 
+      it('main chunk should not have styled-jsx', () => {
+        const buildOutput = findModulesInChunk('main', buildOutputDir);
+        const hasReact = buildOutput?.some((module) =>
+          module.includes('node_modules/styled-jsx/')
+        );
+        expect(hasReact).toBe(false);
+      });
+
       it('main chunk', () => {
-        const buildOutput = findModulesInChunk('main-', buildOutputDir);
+        const buildOutput = findModulesInChunk('main', buildOutputDir);
         expect(buildOutput).toMatchSnapshot();
       });
     });
@@ -123,6 +131,7 @@ function findModulesInChunk(filename: string, directory: string) {
     if (typeof evaledChunk === 'object') {
       return Object.keys(evaledChunk);
     }
+    console.log(evaledChunk);
     //@ts-ignore
     const moduleMaps = globalThis.self['webpackChunkhome_app'][0][1];
 
