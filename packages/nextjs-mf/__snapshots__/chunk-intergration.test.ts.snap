@@ -4259,7 +4259,7 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 		// This function allow to reference async chunks and sibling chunks for the entrypoint
 /******/ 		__webpack_require__.u = function(chunkId) {
 /******/ 			// return url for filenames based on template
-/******/ 			return "" + chunkId + "." + {"pages__app_tsx_hasBoundary":"1c5a717492038f26","dist_packages_utilities_src_utils_common_js":"b4949507e980d347","pages_index_tsx_hasBoundary":"4957e1c339151557","webpack_container_remote_shop_WebpackSvg":"c3b32803d7ca349c"}[chunkId] + ".js";
+/******/ 			return "" + chunkId + "." + {"pages__app_tsx_hasBoundary":"1c5a717492038f26","dist_packages_utilities_src_utils_common_js":"b4949507e980d347","pages_index_tsx_hasBoundary":"523f4a9bf8d942ae","webpack_container_remote_shop_WebpackSvg":"c3b32803d7ca349c"}[chunkId] + ".js";
 /******/ 		};
 /******/ 	}();
 /******/ 	
