@@ -1,11 +1,56 @@
+import DelegateModulesPlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
+import { Chunk } from 'webpack';
 /**
  * A webpack plugin that moves specified modules from chunks to runtime chunk.
  * @class AddModulesToRuntimeChunkPlugin
  */
 class AddModulesToRuntimeChunkPlugin {
   constructor(options) {
-    this.options = { debug: true, ...options };
+    this.options = { debug: false, ...options };
     this._delegateModules = new Set();
+  }
+
+  getChunkByName(chunks, name) {
+    for (const chunk of chunks) {
+      if (chunk.name == name) {
+        return chunk;
+      }
+    }
+    return undefined;
+  }
+
+  addDelegatesToChunks(compilation, chunks) {
+    for (const chunk of chunks) {
+      this._delegateModules.forEach((module) => {
+        if (!compilation.chunkGraph.isModuleInChunk(module, chunk)) {
+          this.debug &&
+            console.log(
+              'adding ',
+              module.identifier(),
+              ' to chunk',
+              chunk.name
+            );
+          compilation.chunkGraph.connectChunkAndModule(chunk, module);
+        }
+      });
+    }
+  }
+
+  removeDelegatesNonRuntimeChunks(compilation, chunks) {
+    for (const chunk of chunks) {
+      if (!chunk.hasRuntime()) {
+        this.debug &&
+          console.log(
+            'non-runtime chunk:',
+            chunk.debugId,
+            chunk.id,
+            chunk.name
+          );
+        this._delegateModules.forEach((module) => {
+          compilation.chunkGraph.disconnectChunkAndModule(chunk, module);
+        });
+      }
+    }
   }
 
   /**
@@ -15,66 +60,32 @@ class AddModulesToRuntimeChunkPlugin {
   apply(compiler) {
     // Check if the target is the server
     const isServer = compiler.options.name === 'server';
+    const { runtime, container, remotes, shared, eager, applicationName } =
+      this.options;
+
+    new DelegateModulesPlugin({
+      runtime,
+      container,
+      remotes,
+    }).apply(compiler);
 
     // Tap into compilation hooks
     compiler.hooks.compilation.tap(
       'AddModulesToRuntimeChunkPlugin',
       (compilation) => {
-        // Tap into the 'finish-modules' hook to access the module list after they are all processed
-        compilation.hooks.finishModules.tapAsync(
-          'ModuleIDFinderPlugin',
-          (modules, callback) => {
-            const {
-              runtime,
-              container,
-              remotes,
-              shared,
-              eager,
-              applicationName,
-            } = this.options;
-
-            // Get the delegate module names for remote chunks if specified
-            const knownDelegates = new Set(
-              remotes
-                ? Object.values(remotes).map((remote) =>
-                    remote.replace('internal ', '')
-                  )
-                : []
-            );
-
-            for (const module of modules) {
-              if (module.resource && knownDelegates.has(module.resource)) {
-                this._delegateModules.add(module);
-              }
-            }
-            // Continue the process
-            callback();
-          }
-        );
-
+        if (isServer) return;
         // Tap into optimizeChunks hook
         compilation.hooks.optimizeChunks.tap(
           'AddModulesToRuntimeChunkPlugin',
           (chunks) => {
-            const {
-              runtime,
-              container,
-              remotes,
-              shared,
-              eager,
-              applicationName,
-            } = this.options;
-
-            // Helper function to find a chunk by its name
-            const getChunkByName = (name) =>
-              chunks.find((chunk) => chunk.name === name);
-
             // Get the runtime chunk and return if it's not found or has no runtime
-            const runtimeChunk = getChunkByName(runtime);
+            const runtimeChunk = this.getChunkByName(chunks, runtime);
             if (!runtimeChunk || !runtimeChunk.hasRuntime()) return;
 
             // Get the container chunk if specified
-            const partialEntry = container ? getChunkByName(container) : null;
+            const partialEntry = container
+              ? this.getChunkByName(chunks, container)
+              : null;
 
             // Get the shared module names to their imports if specified
             const internalSharedModules = shared
@@ -92,7 +103,6 @@ class AddModulesToRuntimeChunkPlugin {
 
             const foundChunks = chunks.filter((chunk) => {
               const hasMatch = chunk !== runtimeChunk;
-              if (isServer) return hasMatch;
               return (
                 hasMatch &&
                 applicationName &&
@@ -166,11 +176,7 @@ class AddModulesToRuntimeChunkPlugin {
     );
   }
   classifyModule(module, internalSharedModules, modulesToMove, containers) {
-    //TODO: i dont need to classify delegate modules anymore, delete this (and refactor)
-    // i added a new hook to resolve config requests to modules in the graph, so i already have the modules as this._delegateModules
-    if (this._delegateModules.has(module)) {
-      containers.push(module);
-    } else if (
+    if (
       //TODO: do the same for shared modules, resolve them in the afterFinishModules hook
       internalSharedModules?.some((share) =>
         module?.rawRequest?.includes(share)

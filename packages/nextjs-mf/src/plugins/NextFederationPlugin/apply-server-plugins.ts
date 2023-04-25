@@ -2,10 +2,6 @@ import { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import AddModulesPlugin from '../AddModulesToRuntime';
 import path from 'path';
-import {
-  DEFAULT_SHARE_SCOPE,
-  DEFAULT_SHARE_SCOPE_BROWSER,
-} from '../../internal';
 
 /**
  * Applies server-specific plugins.
@@ -28,33 +24,23 @@ export function applyServerPlugins(
 ): void {
   // Import the StreamingTargetPlugin from @module-federation/node
   const { StreamingTargetPlugin } = require('@module-federation/node');
+
   // Add the AddModulesPlugin for the webpack runtime with eager loading and remote configuration
   new AddModulesPlugin({
-    debug: true,
     runtime: 'webpack-runtime',
     eager: true,
     remotes: options.remotes,
-    // @ts-ignore
-    shared: DEFAULT_SHARE_SCOPE,
+    isServer: true,
     container: options.name,
-    // @ts-ignore
-    applicationName: options.name,
   }).apply(compiler);
 
+  // Add the AddModulesPlugin for the server with lazy loading and remote configuration
   // new AddModulesPlugin({
-  //   runtime: 'webpack-runtime',
-  //   eager: true,
-  //   remotes: options.remotes,
+  //   runtime: options.name,
+  //   eager: false,
+  //   remotes: options.remotes
   // }).apply(compiler);
-  //
-  // // Add the AddModulesPlugin for the server with lazy loading and remote configuration
-  new AddModulesPlugin({
-    runtime: options.name,
-    eager: false,
-    remotes: options.remotes,
-  }).apply(compiler);
 
-  console.log(options);
   // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
   new StreamingTargetPlugin(options, {
     ModuleFederationPlugin: compiler.webpack.container.ModuleFederationPlugin,
