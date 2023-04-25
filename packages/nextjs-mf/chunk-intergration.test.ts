@@ -67,6 +67,21 @@ describe('Next.js build output', () => {
       const buildOutput = findFileInDirectory('webpack-', buildOutputDir);
       expect(buildOutput).toMatchSnapshot();
     });
+    xdescribe('modules', () => {
+      it('page partial doesnt contain react', () => {
+        const buildOutput = findModulesInChunk('pages_', buildOutputDir);
+        const hasReact = buildOutput?.some(
+          (module) =>
+            module.includes('node_modules/react/') || module === 'react'
+        );
+        expect(hasReact).toBe(false);
+      });
+
+      xit('main chunk', () => {
+        const buildOutput = findModulesInChunk('main-', buildOutputDir);
+        expect(buildOutput).toMatchSnapshot();
+      });
+    });
   });
 });
 
