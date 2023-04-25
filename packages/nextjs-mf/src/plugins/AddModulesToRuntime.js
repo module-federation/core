@@ -19,40 +19,6 @@ class AddModulesToRuntimeChunkPlugin {
     return undefined;
   }
 
-  addDelegatesToChunks(compilation, chunks) {
-    for (const chunk of chunks) {
-      this._delegateModules.forEach((module) => {
-        if (!compilation.chunkGraph.isModuleInChunk(module, chunk)) {
-          this.debug &&
-            console.log(
-              'adding ',
-              module.identifier(),
-              ' to chunk',
-              chunk.name
-            );
-          compilation.chunkGraph.connectChunkAndModule(chunk, module);
-        }
-      });
-    }
-  }
-
-  removeDelegatesNonRuntimeChunks(compilation, chunks) {
-    for (const chunk of chunks) {
-      if (!chunk.hasRuntime()) {
-        this.debug &&
-          console.log(
-            'non-runtime chunk:',
-            chunk.debugId,
-            chunk.id,
-            chunk.name
-          );
-        this._delegateModules.forEach((module) => {
-          compilation.chunkGraph.disconnectChunkAndModule(chunk, module);
-        });
-      }
-    }
-  }
-
   /**
    * Applies the plugin to the webpack compiler.
    * @param {Object} compiler - The webpack compiler instance.
@@ -175,7 +141,7 @@ class AddModulesToRuntimeChunkPlugin {
       }
     );
   }
-  classifyModule(module, internalSharedModules, modulesToMove, containers) {
+  classifyModule(module, internalSharedModules, modulesToMove) {
     if (
       //TODO: do the same for shared modules, resolve them in the afterFinishModules hook
       internalSharedModules?.some((share) =>
