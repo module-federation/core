@@ -78,11 +78,12 @@ class AddModulesToRuntimeChunkPlugin {
               ? this.getChunkByName(chunks, container)
               : null;
 
-            console.log(
-              partialEntry.name,
-              runtimeChunk.name,
-              this._delegateModules.size
-            );
+            this.options.debug &&
+              console.log(
+                partialEntry.name,
+                runtimeChunk.name,
+                this._delegateModules.size
+              );
             this.addDelegatesToChunks(compilation, [
               partialEntry,
               runtimeChunk,
