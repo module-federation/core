@@ -1,9 +1,10 @@
 import { component$, useStylesScoped$ } from '@builder.io/qwik';
 import { $translate as t, useSpeakContext } from 'qwik-speak';
 import Container, { ContainerTheme } from '../container/container';
+import Button, { ButtonPropsTarget, ButtonTheme } from '../button/button';
+import { localizedUrl as locUrl } from '../../speak-config';
 
 import styles from './footer.css?inline';
-import Button, { ButtonPropsTarget, ButtonTheme } from '../button/button';
 
 export interface FooterProps {
   theme?: ContainerTheme;
@@ -13,6 +14,9 @@ export default component$((props: FooterProps) => {
   useStylesScoped$(styles);
 
   const speakState = useSpeakContext();
+  const localizedUrl = (url: string) => {
+    return locUrl(url, speakState);
+  };
 
   const links = [
     {
@@ -40,10 +44,14 @@ export default component$((props: FooterProps) => {
       href: 'https://opencollective.com/module-federation-universe',
       target: '_blank' as ButtonPropsTarget,
     },
+    {
+      label: t('footer.menu.privacy-policy@@Privacy Policy'),
+      href: localizedUrl('/privacy-policy')
+    },
   ];
 
   return (
-    <Container theme={props.theme || ContainerTheme.OPAQUE}>
+    <Container theme={props.theme || ContainerTheme.NONE}>
       <footer class="flex flex-col items-center py-28 gap-10">
         <img
           src="/module-federation-logo.svg"

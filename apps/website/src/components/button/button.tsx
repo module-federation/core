@@ -9,7 +9,8 @@ export enum ButtonTheme {
   OUTLINE = 'outline',
   NAKED = 'naked',
   NAKED_ALT = 'naked-alt',
-  NAV = 'nav'
+  NAV = 'nav',
+  SUB_NAV = 'sub-nav',
 }
 
 export type ButtonPropsTarget =
@@ -19,9 +20,12 @@ export type ButtonPropsTarget =
   | '_top'
   | 'framename';
 
+export type ButtonPropsAlign = 'left' | 'center' | 'right';
+
 export interface ButtonProps {
   type: ButtonType;
   theme: ButtonTheme;
+  align?: ButtonPropsAlign;
   target?: ButtonPropsTarget;
   href?: string;
   disabled?: boolean;
@@ -29,9 +33,11 @@ export interface ButtonProps {
   class?: string;
   small?: boolean;
   active?: boolean;
+  bold?: boolean;
   onClick?: QRL<() => void>;
 }
 
+// Note: Not all options are fully implemented
 export default component$((props: ButtonProps) => {
   useStylesScoped$(styles);
 
@@ -40,14 +46,13 @@ export default component$((props: ButtonProps) => {
   const themeClasses = {
     [ButtonTheme.SOLID]: [
       defaultPadding,
-      'relative bg-blue-gray-900 text-white border-blue-gray-900 border outline-none',
-      // Hover
+      'relative bg-blue-gray-900 text-white border-blue-gray-900 border outline-none font-medium leading-snug text-lg',
+
       'hover:bg-blue-gray-600 hover:border-blue-gray-600',
-      // Focus
+
       'focus-visible:shadow-outline',
-      // Selected,
+
       'active:bg-blue-gray-700 active:border-blue-gray-700',
-      // Disabled,
       props.disabled
         ? '!bg-blue-gray-400 !border-blue-gray-400 !pointer-events-none'
         : '',
@@ -57,7 +62,7 @@ export default component$((props: ButtonProps) => {
     ].join(' '),
     [ButtonTheme.OUTLINE]: [
       defaultPadding,
-      'relative bg-transparent text-blue-gray-900 border-blue-gray-900 border outline-none',
+      'relative bg-transparent text-blue-gray-900 border-blue-gray-900 border outline-none font-medium leading-snug text-lg',
       // Hover
       'hover:bg-blue-gray-700 hover:text-white hover:border-blue-gray-700',
       // Focus
@@ -74,15 +79,15 @@ export default component$((props: ButtonProps) => {
     ].join(' '),
     [ButtonTheme.NAKED]: [
       'p-0',
-      
-      'relative bg-transparent text-ui-blue !border-transparent outline-none',
+
+      'relative bg-transparent text-ui-blue !border-transparent outline-none font-medium leading-snug text-lg',
       // Focus
       'focus-visible:shadow-outline',
       props.disabled ? 'text-deep-purple-700 !pointer-events-none' : '',
       '',
     ].join(' '),
     [ButtonTheme.NAKED_ALT]: [
-      'relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue',
+      'relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug',
       'hover:text-blue-gray-600',
       'active:text-blue-gray-700',
       props.active ? '!text-blue-gray-700' : '',
@@ -90,21 +95,38 @@ export default component$((props: ButtonProps) => {
       props.loading ? '' : '',
     ].join(' '),
     [ButtonTheme.NAV]: [
-      'relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue',
+      'relative text-blue-gray-900 border-transparent text-lg outline-ui-blue font-medium leading-snug',
+      'active:font-semibold',
       'hover:text-deep-purple-700',
       'active:text-deep-purple-300',
       props.active ? '!text-deep-purple-300' : '',
       props.disabled ? '' : '',
       props.loading ? '' : '',
     ].join(' '),
+    [ButtonTheme.SUB_NAV]: [
+      'relative text-blue-gray-900 border-transparent text-base outline-ui-blue font-medium leading-snug',
+      'active:font-semibold',
+      'hover:text-deep-purple-700',
+      'active:text-deep-purple-300',
+      props.active ? '!text-deep-purple-300' : '',
+      props.disabled ? '' : '',
+      props.loading ? '' : '',
+      props.bold ? 'font-semibold' : '',
+    ].join(' '),
   };
+
+  const textAlign = {
+    ['center']: 'text-center',
+    ['left']: 'text-left',
+    ['right']: 'text-right',
+  }[props.align || 'center'];
 
   const content = (
     <div class={`flex justify-center items-center gap-3`}>
       <div class="flex empty:hidden">
         <Slot name="prefix" />
       </div>
-      <div class="flex text-lg font-medium leading-snug text-center">
+      <div class={`flex ${textAlign}`}>
         <div class={`flex ${props.loading ? 'invisible' : ''}`}>
           <Slot />
         </div>

@@ -7,3 +7,23 @@
     font-family: 'Avenir Next';
   }
 }
+
+.article {
+  @apply text-blue-gray-900;
+}
+
+.article h2 {
+  @apply mb-6 text-3xl font-semibold;
+}
+
+.article p, .article ul {
+  @apply mb-6
+}
+
+.article ul li {
+  @apply list-disc list-inside mb-4 pl-2
+}
+
+.article a {
+  @apply text-ui-blue
+}

@@ -35,14 +35,12 @@ export default component$(() => {
   );
 });
 
-// Note: head translations are not extracted automatically.
-// Don't forget to change all app.json after changing this file
 export const head: DocumentHead = {
-  title: 'app.index.title',
+  title: 'app.title',
   meta: [
     {
       name: 'description',
-      content: 'app.index.meta.description',
+      content: 'app.meta.description',
     },
     {
       property: 'og:image',

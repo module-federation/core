@@ -5,17 +5,23 @@ import {
   QwikSubmitEvent,
   useSignal,
 } from '@builder.io/qwik';
-import { $translate as t } from 'qwik-speak';
+import { $translate as t, useSpeakContext } from 'qwik-speak';
 import Button, { ButtonTheme } from '../../button/button';
 import { ContainerTheme } from '../../container/container';
 import Section, { SectionHeader } from '../../section/section';
 import styles from './contact.css?inline';
+import { localizedUrl as locUrl } from '../../../speak-config';
 
 export default component$(() => {
   useStylesScoped$(styles);
 
   const loading = useSignal(false);
   const success = useSignal(false);
+
+  const speakState = useSpeakContext();
+  const localizedUrl = (url: string) => {
+    return locUrl(url, speakState);
+  };
 
   const handleSubmit = $((event: QwikSubmitEvent<HTMLFormElement>) => {
     loading.value = true;
@@ -132,7 +138,7 @@ export default component$(() => {
             {t(
               'contact.disclaimer.text@@By submitting this form, I confirm that I have read and understood the'
             )}{' '}
-            <a class="text-ui-blue" href="#">
+            <a class="text-ui-blue" href={localizedUrl('/privacy-policy')}>
               {t('contact.disclaimer.action@@Privacy & Policy')}
             </a>
             .

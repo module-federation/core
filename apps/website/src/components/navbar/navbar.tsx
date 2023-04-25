@@ -30,6 +30,7 @@ export const locales = [
 
 export interface NavbarProps {
   theme?: ContainerTheme;
+  activeHref?: string;
 }
 
 export default component$((props: NavbarProps) => {
@@ -162,7 +163,7 @@ export default component$((props: NavbarProps) => {
                       target={link.target}
                       type="link"
                       theme={ButtonTheme.NAV}
-                      active={link.active || false}
+                      active={link.active || props.activeHref === link.href || false}
                     >
                       {link.label}
                     </Button>

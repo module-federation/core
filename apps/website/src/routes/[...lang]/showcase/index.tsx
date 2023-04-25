@@ -1,5 +1,5 @@
 import { component$ } from '@builder.io/qwik';
-import { $translate as t } from 'qwik-speak';
+import { $translate as t, useSpeakContext } from 'qwik-speak';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import Section, {
   SectionHeader,
@@ -9,6 +9,7 @@ import { ContainerTheme } from '../../../components/container/container';
 import Button, { ButtonTheme } from '../../../components/button/button';
 import Navbar from '../../../components/navbar/navbar';
 import Footer from '../../../components/footer/footer';
+import { localizedUrl as locUrl } from '../../../speak-config';
 
 export const cardRows = [
   [
@@ -65,10 +66,16 @@ export const cardRows = [
 ];
 
 export default component$(() => {
-  const theme = ContainerTheme.OPAQUE;
+  const theme = ContainerTheme.NONE;
+
+  const speakState = useSpeakContext();
+  const localizedUrl = (url: string) => {
+    return locUrl(url, speakState);
+  };
+
   return (
     <>
-      <Navbar theme={theme} />
+      <Navbar theme={theme} activeHref={localizedUrl('showcase')} />
       <div class="block  h-[80px] md:h-[20px] z-[999]"></div>
       <Section padding={SectionPadding.TOP} theme={theme}>
         <SectionHeader
@@ -135,12 +142,11 @@ export default component$(() => {
 });
 
 export const head: DocumentHead = {
-  title: 'app.showcase.title@@Showcase',
+  title: 'app.title',
   meta: [
     {
       name: 'description',
-      content:
-        'app.showcase.meta.description@@Meet leading companies embracing Module Federation for their web development needs.',
+      content: 'app.meta.description',
     },
     {
       property: 'og:image',
