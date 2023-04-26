@@ -7,6 +7,8 @@ import type { LoaderContext, NormalModule } from 'webpack';
 
 const pageTemplate = (request: string) =>
   `
+console.log(__webpack_share_scopes__);
+
     import dynamic from "next/dynamic";
     const AsyncBoundary = dynamic(() => import("${request}").then(async(mod)=>{
       let innerModule = await mod?.default?.Underlying;

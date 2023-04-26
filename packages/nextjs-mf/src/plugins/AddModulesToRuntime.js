@@ -39,15 +39,61 @@ class AddModulesToRuntimeChunkPlugin {
     compiler.hooks.compilation.tap(
       'AddModulesToRuntimeChunkPlugin',
       (compilation) => {
-        return;
         // Tap into optimizeChunks hook
         compilation.hooks.optimizeChunks.tap(
           'AddModulesToRuntimeChunkPlugin',
           (chunks) => {
             // Get the runtime chunk and return if it's not found or has no runtime
-            const runtimeChunk = this.getChunkByName(chunks, runtime);
-            if (!runtimeChunk || !runtimeChunk.hasRuntime()) return;
+            const mainChunk = this.getChunkByName(chunks, 'main');
+            const runtimeChunk = this.getChunkByName(chunks, 'webpack');
 
+            if (mainChunk) {
+              const mainModules =
+                compilation.chunkGraph.getOrderedChunkModulesIterable(
+                  mainChunk
+                );
+              // Get the shared module names to their imports if specified
+              const internalSharedModules = shared
+                ? Object.entries(shared).map(
+                    ([key, value]) => value.import || key
+                  )
+                : null;
+
+              let hoister;
+
+              for (const module of mainModules) {
+                if (module?.userRequest?.includes('internal-delegate-hoist')) {
+                  hoister = module;
+                  console.log('found internal module', module.rawRequest);
+                  compilation.chunkGraph.connectChunkAndModule(
+                    runtimeChunk,
+                    module
+                  );
+                  compilation.chunkGraph.disconnectChunkAndModule(
+                    mainChunk,
+                    module
+                  );
+                } else if (
+                  internalSharedModules?.some((share) =>
+                    module?.rawRequest?.includes(share)
+                  )
+                ) {
+                  console.log('moce shared module', module.rawRequest);
+                  compilation.chunkGraph.connectChunkAndModule(
+                    runtimeChunk,
+                    module
+                  );
+                }
+              }
+
+              for (const chunk of chunks) {
+                compilation.chunkGraph.connectChunkAndModule(chunk, hoister);
+              }
+            }
+            return;
+
+            if (!runtimeChunk || !runtimeChunk.hasRuntime()) return;
+            return;
             // Get the container chunk if specified
             const partialEntry = container
               ? this.getChunkByName(chunks, container)
@@ -148,11 +194,11 @@ class AddModulesToRuntimeChunkPlugin {
         module?.rawRequest?.includes(share)
       )
     ) {
-      modulesToMove.push(module);
+      // modulesToMove.push(module);
     } else if (module?.userRequest?.includes('internal-delegate-hoist')) {
       // TODO: can probably move the whole classification part to afterFinishModules,
       //  track all modules i want to move, then just search the chunks
-      modulesToMove.push(module);
+      // modulesToMove.push(module);
     }
   }
 }

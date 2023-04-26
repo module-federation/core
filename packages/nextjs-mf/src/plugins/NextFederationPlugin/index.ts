@@ -106,7 +106,7 @@ export class NextFederationPlugin {
       ...this._options,
       runtime: false,
       exposes: {
-        __hoist: require.resolve('../../delegate-hoist-container'),
+        // __hoist: require.resolve('../../delegate-hoist-container'),
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)
           : {}),
@@ -117,6 +117,10 @@ export class NextFederationPlugin {
         ...this._options.remotes,
       },
       shared: {
+        __hoist: {
+          import: require.resolve('../../internal-delegate-hoist'),
+          eager: true,
+        },
         ...defaultShared,
         ...this._options.shared,
       },
