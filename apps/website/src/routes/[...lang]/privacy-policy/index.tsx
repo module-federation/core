@@ -250,7 +250,7 @@ export default component$(() => {
                 Security Cookies. We use Security Cookies for security purposes.
               </li>
             </ul>
-            <h2>Use of data</h2>
+            <h2 id="use-of-data">Use of data</h2>
             <p>Valor Labs Inc. uses the collected data for various purposes:</p>
             <ul>
               <li>To provide and maintain our Site</li>
@@ -274,7 +274,7 @@ export default component$(() => {
                 information
               </li>
             </ul>
-            <h2>
+            <h2 id="legal-bassis-GDPR">
               Legal basis for processing personal data under the General Data
               Protection Regulation (GDPR)
             </h2>
@@ -296,7 +296,7 @@ export default component$(() => {
               <li>For payment processing purposes</li>
               <li>To comply with the law</li>
             </ul>
-            <h2>Retention of data</h2>
+            <h2 id="retention-of-data">Retention of data</h2>
             <p>
               Valor Labs Inc.<strong> </strong>will retain your Personal Data
               only for as long as is necessary for the purposes set out in this
@@ -313,7 +313,7 @@ export default component$(() => {
               the functionality of our Site, or we are legally obligated to
               retain this data for longer.
             </p>
-            <h2>Transfer of data</h2>
+            <h2 id="transfer-of-data">Transfer of data</h2>
             <p>
               Your information, including Personal Data, may be transferred to
               &mdash; and maintained on &mdash; computers located outside your
@@ -337,7 +337,7 @@ export default component$(() => {
               unless there are adequate controls in place including the security
               of your data and other personal information.
             </p>
-            <h2>Disclosure of data</h2>
+            <h2 id="disclosure-of-data">Disclosure of data</h2>
             <p>
               <strong>Business Transaction</strong>
             </p>
@@ -378,7 +378,7 @@ export default component$(() => {
               </li>
               <li>To protect against legal liability</li>
             </ul>
-            <h2>Security of data</h2>
+            <h2 id="disclosure-of-data">Security of data</h2>
             <p>
               The security of your data is important to us but remember that no
               method of transmission over the Internet or method of electronic
@@ -386,7 +386,7 @@ export default component$(() => {
               acceptable means to protect your Personal Data, we cannot
               guarantee its absolute security.
             </p>
-            <h2>
+            <h2 id="do-not-track-CalOPPA">
               Our policy on "Do Not Track" signals under the California Online
               Protection Act (CalOPPA)
             </h2>
@@ -397,7 +397,7 @@ export default component$(() => {
               Track by visiting the Preferences or Settings page of your web
               browser.
             </p>
-            <h2>
+            <h2 id="data-protection-regulation-GDPR">
               Your data protection rights under the General Data Protection
               Regulation (GDPR)
             </h2>
@@ -449,7 +449,7 @@ export default component$(() => {
               Personal Data. For more information, please contact your local
               data protection authority in the European Economic Area (EEA).
             </p>
-            <h2>Service providers</h2>
+            <h2 id="service-providers">Service providers</h2>
             <p>
               <strong>Business Transaction</strong>
             </p>
@@ -526,7 +526,7 @@ export default component$(() => {
                 </a>
               </li>
             </ul>
-            <h2>Links to other sites</h2>
+            <h2 id="links-to-other-sites">Links to other sites</h2>
             <p>
               Our Service may contain links to other sites that we do not
               operate. If you click a third-party link, you will be directed to
@@ -535,7 +535,7 @@ export default component$(() => {
               assume no responsibility for the content, privacy policies, or
               practices of any third-party sites or services.
             </p>
-            <h2>Children's privacy</h2>
+            <h2 id="childrens-privacy">Children's privacy</h2>
             <p>
               Our Site does not address anyone under the age of 18
               ("Children").We do not knowingly collect personally identifiable
@@ -546,14 +546,14 @@ export default component$(() => {
               parental consent, we take steps to remove that information from
               our servers.
             </p>
-            <h2>Changes to this privacy policy</h2>
+            <h2 id="changes-to-privacy-policy">Changes to this privacy policy</h2>
             <p>
               We may update our Privacy policy from time to time. You are
               advised to review this Privacy policy periodically for any
               changes. Changes to this Privacy policy are effective when they
               are posted on this page.
             </p>
-            <h2>Contact us</h2>
+            <h2 id="contact-us">Contact us</h2>
             <p>
               If you have any questions about this Privacy policy, please
               contact us:
