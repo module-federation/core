@@ -2,6 +2,16 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [1.7.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.6.0...utils-1.7.0) (2023-04-27)
+
+
+### Features
+
+* add storybook addon that supports Module Federation remote containers ([#598](https://github.com/module-federation/nextjs-mf/issues/598)) ([7547b02](https://github.com/module-federation/nextjs-mf/commit/7547b02937fdef2831060d6a7bfd337d2cc3355c))
+* release to npm with next tag to not ruine latest one ([#763](https://github.com/module-federation/nextjs-mf/issues/763)) ([f2d199b](https://github.com/module-federation/nextjs-mf/commit/f2d199b3b3fbbd428514b1ce1f139efc82f7fff0))
+
+
+
 # [1.6.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.5.0...utils-1.6.0) (2023-04-19)
 
 
