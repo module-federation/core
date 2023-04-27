@@ -1,6 +1,6 @@
 const { withNx } = require('@nrwl/next/plugins/with-nx');
-const { createDelegatedModule } = require('@module-federation/utilities');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
+const { createDelegatedModule } = require('@module-federation/utilities');
 
 /**
  * @type {import('@nrwl/next/plugins/with-nx').WithNxOptions}
@@ -27,6 +27,7 @@ const nextConfig = {
       // checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
       //   remote: `checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
       // }),
+
       shop: `shop@http://localhost:3001/_next/static/${
         isServer ? 'ssr' : 'chunks'
       }/remoteEntry.js`,

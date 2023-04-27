@@ -46,7 +46,6 @@ const createShareMap = () => {
   return {};
 };
 
-
 /**
  * Process a single chunk and return an array of updated chunks.
  * @param {string} chunk - A chunk string containing remote and request data.

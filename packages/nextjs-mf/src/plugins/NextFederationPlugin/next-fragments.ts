@@ -1,124 +1,15 @@
-import type { Compiler } from "webpack";
-import { container } from "webpack";
-import path from "path";
+import type { Compiler } from 'webpack';
+import { container } from 'webpack';
+import path from 'path';
 import type {
   ModuleFederationPluginOptions,
-  NextFederationPluginExtraOptions,
-  SharedObject
-} from "@module-federation/utilities";
-import { ChunkCorrelationPlugin } from "@module-federation/node";
-
-import InvertedContainerPlugin from "../container/InvertedContainerPlugin";
-import { DEFAULT_SHARE_SCOPE, DEFAULT_SHARE_SCOPE_BROWSER, getDelegates } from "../../internal";
-import AddModulesPlugin from "../AddModulesToRuntime";
-
-/**
- * Configures server-specific compiler options.
- *
- * @param compiler - The Webpack compiler instance.
- *
- * @remarks
- * This function configures the compiler options for server builds. It turns off the compiler target on node
- * builds because it adds its own chunk loading runtime module with NodeFederationPlugin and StreamingTargetPlugin.
- * It also disables split chunks to prevent conflicts from occurring in the graph.
- *
- */
-export function configureServerCompilerOptions(compiler: Compiler): void {
-  // Turn off the compiler target on node builds because we add our own chunk loading runtime module
-  // with NodeFederationPlugin and StreamingTargetPlugin
-  compiler.options.target = false;
-
-  // Set chunkIds optimization to 'named'
-  compiler.options.optimization.chunkIds = 'named'; // for debugging
-
-  // Disable split chunks to prevent conflicts from occurring in the graph
-  // TODO on the `compiler.options.optimization.splitChunks` line would be to find a way to only opt out chunks/modules related to module federation from chunk splitting logic.
-  compiler.options.optimization.splitChunks = false;
-}
-
-/**
- * Applies client-specific plugins.
- *
- * @param compiler - The Webpack compiler instance.
- * @param options - The ModuleFederationPluginOptions instance.
- * @param extraOptions - The NextFederationPluginExtraOptions instance.
- *
- * @remarks
- * This function applies plugins to the Webpack compiler instance that are specific to the client build of
- * a Next.js application with Module Federation enabled. These plugins include the following:
- *
- * - AddModulesPlugin: Adds modules to the webpack container runtime that can be streamed to other runtimes.
- * - EntryPlugin: Creates an entry point for the application that delegates module loading to the container runtime.
- * - ChunkCorrelationPlugin: Collects metadata on chunks to enable proper module loading across different runtimes.
- * - InvertedContainerPlugin: Adds custom runtime modules to the container runtime to allow a host to expose its
- *   own remote interface at startup.
- *
- * If automatic page stitching is enabled, a loader is added to process the `next/dist/client/page-loader.js`
- * file. If a custom library is specified in the options, an error is thrown. The options.library property is
- * also set to `{ type: 'window', name: options.name }`.
- */
-export function applyClientPlugins(
-  compiler: Compiler,
-  options: ModuleFederationPluginOptions,
-  extraOptions: NextFederationPluginExtraOptions
-): void {
-  const { webpack } = compiler;
-  const { remotes, name } = options;
-
-  // Add a new plugin to hoist modules into remote runtime
-  new AddModulesPlugin({
-    debug: false,
-    runtime: 'webpack',
-    eager: true,
-    remotes,
-    // @ts-ignore
-    shared: DEFAULT_SHARE_SCOPE_BROWSER,
-    container: name + '_single',
-    // @ts-ignore
-    applicationName: name,
-  }).apply(compiler);
-
-  // If automatic page stitching is enabled, add a new rule to the compiler's module rules
-  if (extraOptions.automaticPageStitching) {
-    compiler.options.module.rules.push({
-      test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
-      loader: path.resolve(
-        __dirname,
-        '../../loaders/patchNextClientPageLoader'
-      ),
-    });
-  }
-
-  // If a custom library is set, log an error message
-  if (options.library) {
-    console.error('[nextjs-mf] you cannot set custom library');
-  }
-
-  // Set the library option to be a window object with the name of the module federation plugin
-  options.library = {
-    type: 'window',
-    name,
-  };
-
-  // Add a new entry plugin to the compiler to delegate hoisting
-  new webpack.EntryPlugin(
-    compiler.context,
-    require.resolve('../../internal-delegate-hoist'),
-    'main'
-  ).apply(compiler);
-
-  // Add a new chunk correlation plugin to the compiler
-  new ChunkCorrelationPlugin({
-    filename: 'static/chunks/federated-stats.json',
-  }).apply(compiler);
-
-  // Add a new commonjs chunk loading plugin to the compiler
-  new InvertedContainerPlugin({
-    name: options.name,
-    remotes: options.remotes as Record<string, string>,
-    verbose: false,
-  }).apply(compiler);
-}
+  SharedObject,
+} from '@module-federation/utilities';
+import {
+  DEFAULT_SHARE_SCOPE,
+  DEFAULT_SHARE_SCOPE_BROWSER,
+  getDelegates,
+} from '../../internal';
 
 type ConstructableModuleFederationPlugin = new (
   options: ModuleFederationPluginOptions

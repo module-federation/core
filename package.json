@@ -13,12 +13,14 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "nx run-many --target=build --projects=nextjs-mf,utils,node,3000-home --verbose --output-style=stream",
+    "build": "yarn build:libs && nx run-many --target=build --projects=3000-home --verbose --output-style=stream",
+    "oldbuuild": "nx build",
+    "build:libs": "nx run-many --target=build --projects=utils,node,nextjs-mf --verbose --output-style=stream --maxParallel=1",
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
-    "start:next": "nx build && concurrently 'nx run 3000-home:serve:development --output-style=stream' 'nx run 3001-shop:serve:development --output-style=stream' 'nx run 3002-checkout:serve:development --output-style=stream'",
-    "serve:next": "nx build && concurrently 'nx run 3000-home:serve:production --output-style=stream' 'nx run 3001-shop:serve:production --output-style=stream' 'nx run 3002-checkout:serve:production --output-style=stream'",
-    "prod": "nx build && nx run-many --target=build --verbose --output-style=stream",
+    "start:next": "yarn build:libs && concurrently 'nx run 3000-home:serve:development --output-style=stream' 'nx run 3001-shop:serve:development --output-style=stream' 'nx run 3002-checkout:serve:development --output-style=stream'",
+    "serve:next": "yarn build:libs && concurrently 'nx run 3000-home:serve:production --output-style=stream' 'nx run 3001-shop:serve:production --output-style=stream' 'nx run 3002-checkout:serve:production --output-style=stream'",
+    "prod": "nx build:libs && nx run-many --target=build --verbose --output-style=stream",
     "commit": "cz",
     "release:node": "nx run node:version --releaseAs=minor",
     "release:next": "nx run nextjs-mf:version --releaseAs=patch",
@@ -138,10 +140,9 @@
       "path": "cz-conventional-changelog"
     }
   },
-  "workspaces": {
-    "packages": [
-      "apps/**"
-    ]
-  }
+  "workspaces": [
+      "apps/**",
+      "dist/packages/**"
+  ]
 }
 
