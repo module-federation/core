@@ -52,7 +52,6 @@ function buildEagerShared(shared: Record<string, any>): EagerShared {
           }
         },`;
         acc.sideload += `
-      console.log(require(${JSON.stringify('!!' + name + '?pop')}))
         __webpack_modules__[require.resolveWeak(${JSON.stringify(
           name
         )})] = __webpack_modules__[require.resolveWeak(${JSON.stringify(
