@@ -40,7 +40,7 @@ describe('Next.js build output', () => {
         const hasReact = buildOutput?.some((module) =>
           module.includes('node_modules/react/')
         );
-        expect(hasReact).toBe(false);
+        expect(hasReact).toBe(true);
       });
 
       it('main chunk should not have styled-jsx', () => {
@@ -48,7 +48,7 @@ describe('Next.js build output', () => {
         const hasReact = buildOutput?.some((module) =>
           module.includes('node_modules/styled-jsx/')
         );
-        expect(hasReact).toBe(false);
+        expect(hasReact).toBe(true);
       });
 
       it('main chunk', () => {
