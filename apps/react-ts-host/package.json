@@ -2,7 +2,7 @@
   "name": "react-ts-host",
   "version": "1.0.0",
   "devDependencies": {
-    "@module-federation/typescript": "1.1.0",
+    "@module-federation/typescript": "2.3.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10",
     "react-refresh": "0.14.0"
   }
