@@ -2355,6 +2355,17 @@
     encoding "0.1.13"
     node-fetch "2.6.7"
 
+"@module-federation/storybook-addon@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@module-federation/storybook-addon/-/storybook-addon-0.1.0.tgz#d4f5e002a0f75005144aedd4430a9f9892c3a609"
+  integrity sha512-J+4/l0ONjVIA4kXbVpWJgsWr2oxOcO7jU2//Uj8tTrpTwGLW5JHpBhIeNnYV0OrYBDzzh/PG+fdL2IRnWIIsuQ==
+  dependencies:
+    "@nrwl/devkit" "15.9.2"
+    next "13.3.0"
+    process "0.11.10"
+    react "18.2.0"
+    react-dom "18.2.0"
+
 "@module-federation/typescript@2.3.0":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@module-federation/typescript/-/typescript-2.3.0.tgz#bd8db571f3a0b89663b7ef8a3b722bd820f7bcba"
@@ -16020,7 +16031,7 @@ process-warning@^2.0.0:
   resolved "https://registry.yarnpkg.com/process-warning/-/process-warning-2.2.0.tgz#008ec76b579820a8e5c35d81960525ca64feb626"
   integrity sha512-/1WZ8+VQjR6avWOgHeEPd7SDQmFQ1B5mC1eRXsCm5TarlNmx/wCsa5GEaxGm05BORRtyG/Ex/3xq3TuRvq57qg==
 
-process@^0.11.10:
+process@0.11.10, process@^0.11.10:
   version "0.11.10"
   resolved "https://registry.yarnpkg.com/process/-/process-0.11.10.tgz#7332300e840161bda3e69a1d1d91a7d4bc16f182"
   integrity sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==
