@@ -8,6 +8,7 @@ class AddModulesToRuntimeChunkPlugin {
   constructor(options) {
     this.options = { debug: false, ...options };
     this._delegateModules = new Set();
+    this._eagerModules = new Set();
   }
 
   getChunkByName(chunks, name) {
@@ -17,6 +18,37 @@ class AddModulesToRuntimeChunkPlugin {
       }
     }
     return undefined;
+  }
+
+  resolveSharedModules(compilation) {
+    // Tap into the 'finish-modules' hook to access the module list after they are all processed
+    compilation.hooks.finishModules.tapAsync(
+      'ModuleIDFinderPlugin',
+      (modules, callback) => {
+        const { shared } = this.options;
+
+        if (shared) {
+          const shareKey = Object.keys(shared);
+
+          for (const module of modules) {
+            if (
+              shareKey.some((share) => {
+                if (module?.rawRequest === share) {
+                  return true;
+                } else if (share.endsWith('/')) {
+                  return module?.rawRequest?.startsWith(share);
+                } else {
+                  return false;
+                }
+              })
+            ) {
+              this._sharedModules.add(module);
+            }
+          }
+        }
+        callback();
+      }
+    );
   }
 
   /**
@@ -29,11 +61,46 @@ class AddModulesToRuntimeChunkPlugin {
     const { runtime, container, remotes, shared, eager, applicationName } =
       this.options;
 
-    new DelegateModulesPlugin({
-      runtime,
-      container,
-      remotes,
-    }).apply(compiler);
+    isServer &&
+      new DelegateModulesPlugin({
+        runtime,
+        container,
+        remotes,
+      }).apply(compiler);
+
+    if (!isServer) {
+      // next-client-pages-loade
+    }
+    if (typeof compiler.options.entry === 'function' && !isServer) {
+      const backupEntries = compiler.options.entry;
+      compiler.options.entry = () =>
+        backupEntries().then((entries) => {
+          //loop over object with for
+          if (entries) {
+            for (const [key, value] of Object.entries(entries)) {
+              if (key === 'main') {
+                value.import[0] =
+                  require.resolve('./async-pages-loader') +
+                  '!' +
+                  value.import[0];
+              }
+              // if (key === 'pages/_app') {
+              //   value.import[1] =
+              //     require.resolve('./async-pages-loader') +
+              //     '!' +
+              //     value.import[1];
+              // }
+              if (value.import[0].startsWith('next-client-pages-loader')) {
+                value.import[0] =
+                  require.resolve('./async-pages-loader') +
+                  '!' +
+                  value.import[0];
+              }
+            }
+          }
+          return entries;
+        });
+    }
 
     // Tap into compilation hooks
     compiler.hooks.compilation.tap(
@@ -43,53 +110,101 @@ class AddModulesToRuntimeChunkPlugin {
         compilation.hooks.optimizeChunks.tap(
           'AddModulesToRuntimeChunkPlugin',
           (chunks) => {
+            console.log('running optimize chunks action');
             // Get the runtime chunk and return if it's not found or has no runtime
             const mainChunk = this.getChunkByName(chunks, 'main');
             const runtimeChunk = this.getChunkByName(chunks, 'webpack');
 
-            if (mainChunk) {
-              const mainModules =
-                compilation.chunkGraph.getOrderedChunkModulesIterable(
-                  mainChunk
-                );
-              // Get the shared module names to their imports if specified
-              const internalSharedModules = shared
-                ? Object.entries(shared).map(
-                    ([key, value]) => value.import || key
-                  )
-                : null;
+            if (true) {
+              // const mainModules =
+              //   compilation.chunkGraph.getOrderedChunkModulesIterable(
+              //     mainChunk
+              //   );
+              // // Get the shared module names to their imports if specified
+              // const internalSharedModules = shared
+              //   ? Object.entries(shared).map(
+              //       ([key, value]) => value.import || key
+              //     )
+              //   : null;
+              //
+              // let hoister;
 
-              let hoister;
-
-              for (const module of mainModules) {
-                if (module?.userRequest?.includes('internal-delegate-hoist')) {
-                  hoister = module;
-                  console.log('found internal module', module.rawRequest);
-                  compilation.chunkGraph.connectChunkAndModule(
-                    runtimeChunk,
-                    module
-                  );
-                  compilation.chunkGraph.disconnectChunkAndModule(
-                    mainChunk,
-                    module
-                  );
-                } else if (
-                  internalSharedModules?.some((share) =>
-                    module?.rawRequest?.includes(share)
-                  )
-                ) {
-                  console.log('moce shared module', module.rawRequest);
-                  compilation.chunkGraph.connectChunkAndModule(
-                    runtimeChunk,
-                    module
-                  );
-                }
-              }
+              // for (const module of mainModules) {
+              //   if (module?.userRequest?.includes('internal-delegate-hoist')) {
+              //     hoister = module;
+              //     console.log('found internal module', module.rawRequest);
+              //     compilation.chunkGraph.connectChunkAndModule(
+              //       runtimeChunk,
+              //       module
+              //     );
+              //     compilation.chunkGraph.disconnectChunkAndModule(
+              //       mainChunk,
+              //       module
+              //     );
+              //   } else if (
+              //     internalSharedModules?.some((share) =>
+              //       module?.rawRequest?.includes(share)
+              //     )
+              //   ) {
+              //     compilation.chunkGraph.connectChunkAndModule(
+              //       runtimeChunk,
+              //       module
+              //     );
+              //   }
+              // }
 
               for (const chunk of chunks) {
-                compilation.chunkGraph.connectChunkAndModule(chunk, hoister);
+                if (this.options.container === 'home_app' && !isServer) {
+                  for (const module of chunk.modulesIterable) {
+                    if (
+                      module.identifier().includes('webpack/runtime') ||
+                      module.identifier().includes('webpack/runtime')
+                      // chunk.debugId !== runtimeChunk.debugId
+                    ) {
+                      console.log(
+                        'already in runtime',
+                        module.identifier(),
+                        chunk.debugId,
+                        runtimeChunk.debugId
+                      );
+
+                      compilation.chunkGraph.disconnectChunkAndModule(
+                        chunk,
+                        module
+                      );
+                    }
+                  }
+                }
               }
             }
+            compilation.hooks.additionalChunkAssets.tap(
+              'RemoveModuleFromHotUpdatePlugin',
+              (chunks) => {
+                chunks.forEach((chunk) => {
+                  // Check if the chunk is a hot update chunk.
+                  if (chunk.name && chunk.name.startsWith('webpack')) {
+                    // Iterate over the modules in the chunk.
+                    for (const module of chunk.modulesIterable) {
+                      if (
+                        module &&
+                        runtimeChunk &&
+                        compilation.chunkGraph.isModuleInChunk(
+                          module,
+                          runtimeChunk
+                        )
+                        // chunk.debugId !== runtimeChunk.debugId
+                      ) {
+                        // compilation.chunkGraph.disconnectChunkAndModule(
+                        //   chunk,
+                        //   module
+                        // );
+                        // console.log('already in runtime', module.identifier());
+                      }
+                    }
+                  }
+                });
+              }
+            );
             return;
 
             if (!runtimeChunk || !runtimeChunk.hasRuntime()) return;

@@ -68,7 +68,7 @@ function buildEagerShared(shared: Record<string, any>): EagerShared {
 function buildShareScopes(eagerSharedScope: string): string {
   return `
   const eager = {${eagerSharedScope}};
-  __webpack_share_scopes__.default = __webpack_share_scopes__.default || {};
+  // __webpack_share_scopes__.default = __webpack_share_scopes__.default || {};
   Object.assign(__webpack_share_scopes__.default || {}, eager);
   `;
 }

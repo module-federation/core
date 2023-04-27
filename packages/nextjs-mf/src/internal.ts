@@ -1,8 +1,12 @@
-import type { ModuleFederationPluginOptions, SharedConfig, SharedObject } from "@module-federation/utilities";
-import { createDelegatedModule } from "@module-federation/utilities";
+import type {
+  ModuleFederationPluginOptions,
+  SharedConfig,
+  SharedObject,
+} from '@module-federation/utilities';
+import { createDelegatedModule } from '@module-federation/utilities';
 
-import { isRequiredVersion } from "webpack/lib/sharing/utils";
-import { parseOptions } from "webpack/lib/container/options";
+import { isRequiredVersion } from 'webpack/lib/sharing/utils';
+import { parseOptions } from 'webpack/lib/container/options';
 
 /**
  * @typedef SharedObject
@@ -94,7 +98,7 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
 
-  acc[key] = { ...value, eager: true };
+  acc[key] = { ...value, eager: true, import: undefined };
 
   return acc;
 }, {} as SharedObject);
@@ -126,7 +130,9 @@ const isStandardRemoteSyntax = (value: string): boolean => {
  * @param {Record<string, any>} remotes - The remotes object to be parsed.
  * @returns {Record<string, string>} - The parsed remotes object.
  */
-export const parseRemotes = (remotes: Record<string, any>): Record<string, string> => {
+export const parseRemotes = (
+  remotes: Record<string, any>
+): Record<string, string> => {
   return Object.entries(remotes).reduce((acc, [key, value]) => {
     if (isInternalOrPromise(value)) {
       return { ...acc, [key]: value };
@@ -161,7 +167,9 @@ const isInternalDelegate = (value: string): boolean => {
  * @param {Record<string, any>} remotes - The remotes object containing delegates.
  * @returns {Record<string, string>} - The delegate modules from the remotes object.
  */
-export const getDelegates = (remotes: Record<string, any>): Record<string, string> => {
+export const getDelegates = (
+  remotes: Record<string, any>
+): Record<string, string> => {
   return Object.entries(remotes).reduce((acc, [key, value]) => {
     if (isInternalDelegate(value)) {
       return { ...acc, [key]: value };
@@ -186,12 +194,12 @@ const getSharedConfig = (item: string, key: string) => {
 
   return item === key || !isRequiredVersion(item)
     ? {
-      import: item,
-    }
+        import: item,
+      }
     : {
-      import: key,
-      requiredVersion: item,
-    };
+        import: key,
+        requiredVersion: item,
+      };
 };
 
 /**

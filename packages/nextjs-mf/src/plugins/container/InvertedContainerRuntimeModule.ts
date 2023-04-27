@@ -88,7 +88,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       return Template.asString('');
     }
 
-    console.log(containerEntryModule?.id || containerEntryModule?.debugId);
     const containerEntry = [containerEntryModule].map((module) => {
       //@ts-ignore
       const containerName = module?._name || name;
@@ -108,6 +107,12 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         if(typeof window === 'undefined') {
           ${globalObject}['__remote_scope__'] = ${globalObject}['__remote_scope__'] || {_config: {}};
         }
+
+        ${webpack.RuntimeGlobals.shareScopeMap}['default'] = ${
+        webpack.RuntimeGlobals.shareScopeMap
+      }['default'] || {default:{}};
+
+        console.log('webpack startup function called');
         try {
         // var containerAttachSpace = ${globalObject}['__remote_scope__'] || ${globalObject};
         var containerAttachObject = typeof window !== 'undefined' ? window : ${globalObject}['__remote_scope__']

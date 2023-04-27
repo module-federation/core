@@ -39,7 +39,7 @@ export function applyClientPlugins(
   const { remotes, name } = options;
   //@ts-ignore
   compiler.options.output.publicPath = 'auto';
-
+  compiler.options.experiments.topLevelAwait = true;
   // Add a new plugin to hoist modules into remote runtime
   new AddModulesPlugin({
     debug: false,
