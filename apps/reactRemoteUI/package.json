@@ -2,9 +2,7 @@
   "name": "react-remote-ui",
   "version": "1.0.0",
   "devDependencies": {
-    "@module-federation/utilities": "1.6.0"
-  },
-  "optionalPeerDependencies": {
-    "@module-federation/storybook-addon": "0.0.1"
+    "@module-federation/utilities": "1.6.0",
+    "@module-federation/storybook-addon": "0.1.0"
   }
 }

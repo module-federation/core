@@ -4,7 +4,7 @@
   "sourceRoot": "apps/reactStorybook/src",
   "projectType": "application",
   "targets": {
-    "xbuild": {
+    "build": {
       "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
