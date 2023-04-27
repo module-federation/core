@@ -163,7 +163,7 @@ export class NextFederationPlugin {
         },
         shared: {
           ...hostFederationPluginOptions.shared,
-          ...DEFAULT_SHARE_SCOPE_BROWSER_LAZY,
+          ...defaultShared,
         },
       }).apply(compiler);
     }
