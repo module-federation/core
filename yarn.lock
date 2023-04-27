@@ -2394,6 +2394,11 @@
   resolved "https://registry.yarnpkg.com/@module-federation/utilities/-/utilities-1.6.0.tgz#582b9a8a87f3f39b6bf56eb6fa109bb23aa59990"
   integrity sha512-WB9A18cX9dkUQCnJmOXFn4HdCAN2wcl1z4ZmI6NG31ZV0EvxIBkcdeTd++F4uV6rpVUzNmvUbOTPABN5yT6MsQ==
 
+"@module-federation/utilities@1.7.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@module-federation/utilities/-/utilities-1.7.0.tgz#6e58aa7fa6cfbd5164a0f58b5b94d5bf35017441"
+  integrity sha512-iAwKk+IxvRfD1BqjbSD5Z+5YSiBeSPSF/M8F2m6dBUXkLuNlKSLpq7Yv/1Bap6v1iURkmWL0EJZI6YmQ57tVFw==
+
 "@mole-inc/bin-wrapper@^8.0.1":
   version "8.0.1"
   resolved "https://registry.yarnpkg.com/@mole-inc/bin-wrapper/-/bin-wrapper-8.0.1.tgz#d7fd0ceb1cfa8a855293a3ed9d7d135f4d442f0e"
