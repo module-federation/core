@@ -106,7 +106,7 @@ export class NextFederationPlugin {
       ...this._options,
       runtime: false,
       exposes: {
-        __hoist: require.resolve('../../delegate-hoist-container'),
+        // __hoist: require.resolve('../../delegate-hoist-container'),
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)
           : {}),
@@ -145,24 +145,28 @@ export class NextFederationPlugin {
     // @ts-ignore
     new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
 
-    // if (
-    //   !isServer &&
-    //   this._options.remotes &&
-    //   Object.keys(this._options.remotes).length > 0
-    // ) {
-    //   // single runtime chunk if host or circular remote uses remote of current host.
-    //   // @ts-ignore
-    //   new ModuleFederationPlugin({
-    //     ...hostFederationPluginOptions,
-    //     filename: undefined,
-    //     runtime: undefined,
-    //     name: this._options.name + '_single',
-    //     library: {
-    //       ...hostFederationPluginOptions.library,
-    //       name: this._options.name + '_single',
-    //     },
-    //   }).apply(compiler);
-    // }
+    if (
+      !isServer &&
+      this._options.remotes &&
+      Object.keys(this._options.remotes).length > 0
+    ) {
+      // single runtime chunk if host or circular remote uses remote of current host.
+      // @ts-ignore
+      new ModuleFederationPlugin({
+        ...hostFederationPluginOptions,
+        filename: undefined,
+        runtime: undefined,
+        name: this._options.name + '_single',
+        library: {
+          ...hostFederationPluginOptions.library,
+          name: this._options.name + '_single',
+        },
+        shared: {
+          ...hostFederationPluginOptions.shared,
+          ...defaultShared,
+        },
+      }).apply(compiler);
+    }
 
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
   }
