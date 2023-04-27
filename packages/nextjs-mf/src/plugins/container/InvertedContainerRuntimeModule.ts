@@ -110,7 +110,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
         ${webpack.RuntimeGlobals.shareScopeMap}['default'] = ${
         webpack.RuntimeGlobals.shareScopeMap
-      }['default'] || {default:{}};
+      }['default'] || {};
 
         console.log('webpack startup function called');
         try {
