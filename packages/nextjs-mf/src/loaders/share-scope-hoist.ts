@@ -42,7 +42,7 @@ function buildEagerShared(shared: Record<string, any>): EagerShared {
 
   return Object.entries(shared).reduce(
     (acc: EagerShared, [name, params]) => {
-      if (params.eager === true) {
+      if (params.eager === true && params.import === false) {
         acc.scope += `
         ${JSON.stringify(name)}: {
           "0": {
@@ -68,7 +68,6 @@ function buildEagerShared(shared: Record<string, any>): EagerShared {
 function buildShareScopes(eagerSharedScope: string): string {
   return `
   const eager = {${eagerSharedScope}};
-  __webpack_share_scopes__.default = __webpack_share_scopes__.default || {};
   Object.assign(__webpack_share_scopes__.default || {}, eager);
   `;
 }

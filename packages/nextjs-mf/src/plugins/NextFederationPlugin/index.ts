@@ -14,9 +14,7 @@ import { createRuntimeVariables } from '@module-federation/utilities';
 import type { Compiler, container } from 'webpack';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import {
-  applyClientPlugins,
   applyRemoteDelegates,
-  configureServerCompilerOptions,
   getModuleFederationPluginConstructor,
   injectModuleHoistingSystem,
   retrieveDefaultShared,
@@ -34,9 +32,11 @@ import {
 import { applyAutomaticAsyncBoundary } from './apply-automatic-async-boundary';
 import {
   applyServerPlugins,
+  configureServerCompilerOptions,
   configureServerLibraryAndFilename,
   handleServerExternals,
 } from './apply-server-plugins';
+import { applyClientPlugins } from './apply-client-plugins';
 
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application
@@ -106,7 +106,7 @@ export class NextFederationPlugin {
       ...this._options,
       runtime: false,
       exposes: {
-        __hoist: require.resolve('../../delegate-hoist-container'),
+        // __hoist: require.resolve('../../delegate-hoist-container'),
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)
           : {}),
@@ -160,6 +160,10 @@ export class NextFederationPlugin {
         library: {
           ...hostFederationPluginOptions.library,
           name: this._options.name + '_single',
+        },
+        shared: {
+          ...hostFederationPluginOptions.shared,
+          ...defaultShared,
         },
       }).apply(compiler);
     }
