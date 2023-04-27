@@ -35,18 +35,32 @@ describe('Next.js build output', () => {
       expect(buildOutput).toMatchSnapshot();
     });
     describe('modules', () => {
-      it('main chunk should not have react', () => {
+      it('main chunk should have react', () => {
         const buildOutput = findModulesInChunk('main', buildOutputDir);
         const hasReact = buildOutput?.some((module) =>
           module.includes('node_modules/react/')
         );
-        expect(hasReact).toBe(false);
+        expect(hasReact).toBe(true);
+      });
+      it('main chunk should have delegate hoist', () => {
+        const buildOutput = findModulesInChunk('main', buildOutputDir);
+        const hasReact = buildOutput?.some((module) =>
+          module.includes('internal-delegate-hoist')
+        );
+        expect(hasReact).toBe(true);
       });
 
-      it('main chunk should not have styled-jsx', () => {
+      it('main chunk should have styled-jsx', () => {
         const buildOutput = findModulesInChunk('main', buildOutputDir);
         const hasReact = buildOutput?.some((module) =>
           module.includes('node_modules/styled-jsx/')
+        );
+        expect(hasReact).toBe(true);
+      });
+      it('main chunk should NOT have delegate modules', () => {
+        const buildOutput = findModulesInChunk('main', buildOutputDir);
+        const hasReact = buildOutput?.some((module) =>
+          module.includes('remote=')
         );
         expect(hasReact).toBe(false);
       });
