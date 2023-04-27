@@ -2,30 +2,48 @@
 
 exports[`Next.js build output client modules main chunk 1`] = `
 [
-  "../../dist/packages/nextjs-mf/src/plugins/async-pages-loader.js!../../node_modules/next/dist/client/next-dev.js",
   "../../node_modules/@swc/helpers/lib/_async_to_generator.js",
   "../../node_modules/@swc/helpers/lib/_extends.js",
   "../../node_modules/@swc/helpers/lib/_interop_require_default.js",
   "../../node_modules/@swc/helpers/lib/_interop_require_wildcard.js",
   "../../node_modules/@swc/helpers/lib/_object_without_properties_loose.js",
   "../../node_modules/client-only/index.js",
+  "../../node_modules/next/dist/build/polyfills/polyfill-module.js",
+  "../../node_modules/next/dist/compiled/@next/react-dev-overlay/dist/client.js",
   "../../node_modules/next/dist/client/add-base-path.js",
   "../../node_modules/next/dist/client/add-locale.js",
   "../../node_modules/next/dist/client/detect-domain-locale.js",
+  "../../node_modules/next/dist/client/dev/dev-build-watcher.js",
+  "../../node_modules/next/dist/client/dev/error-overlay/format-webpack-messages.js",
+  "../../node_modules/next/dist/client/dev/error-overlay/hot-dev-client.js",
+  "../../node_modules/next/dist/client/dev/error-overlay/websocket.js",
+  "../../node_modules/next/dist/client/dev/fouc.js",
+  "../../node_modules/next/dist/client/dev/on-demand-entries-client.js",
+  "../../node_modules/next/dist/client/dev/webpack-hot-middleware-client.js",
   "../../node_modules/next/dist/client/get-domain-locale.js",
   "../../node_modules/next/dist/client/has-base-path.js",
   "../../node_modules/next/dist/client/head-manager.js",
+  "../../node_modules/next/dist/client/index.js",
   "../../node_modules/next/dist/client/link.js",
+  "../../node_modules/next/dist/client/next-dev.js",
   "../../node_modules/next/dist/client/normalize-trailing-slash.js",
+  "../../node_modules/next/dist/client/on-recoverable-error.js",
+  "../../node_modules/next/dist/client/page-loader.js",
+  "../../node_modules/next/dist/client/performance-relayer.js",
+  "../../node_modules/next/dist/client/portal/index.js",
   "../../node_modules/next/dist/client/remove-base-path.js",
   "../../node_modules/next/dist/client/remove-locale.js",
   "../../node_modules/next/dist/client/request-idle-callback.js",
+  "../../node_modules/next/dist/client/route-announcer.js",
   "../../node_modules/next/dist/client/route-loader.js",
   "../../node_modules/next/dist/client/router.js",
   "../../node_modules/next/dist/client/script.js",
   "../../node_modules/next/dist/client/trusted-types.js",
   "../../node_modules/next/dist/client/use-intersection.js",
   "../../node_modules/next/dist/client/with-router.js",
+  "../../node_modules/next/dist/compiled/strip-ansi/index.js",
+  "../../node_modules/next/dist/pages/_app.js",
+  "../../node_modules/next/dist/pages/_error.js",
   "../../node_modules/next/dist/shared/lib/amp-context.js",
   "../../node_modules/next/dist/shared/lib/amp-mode.js",
   "../../node_modules/next/dist/shared/lib/app-router-context.js",
@@ -33,14 +51,19 @@ exports[`Next.js build output client modules main chunk 1`] = `
   "../../node_modules/next/dist/shared/lib/escape-regexp.js",
   "../../node_modules/next/dist/shared/lib/head-manager-context.js",
   "../../node_modules/next/dist/shared/lib/head.js",
+  "../../node_modules/next/dist/shared/lib/hooks-client-context.js",
   "../../node_modules/next/dist/shared/lib/i18n/normalize-locale-path.js",
+  "../../node_modules/next/dist/shared/lib/image-config-context.js",
+  "../../node_modules/next/dist/shared/lib/image-config.js",
   "../../node_modules/next/dist/shared/lib/is-plain-object.js",
+  "../../node_modules/next/dist/shared/lib/lazy-dynamic/no-ssr-error.js",
   "../../node_modules/next/dist/shared/lib/loadable-context.js",
   "../../node_modules/next/dist/shared/lib/loadable.js",
   "../../node_modules/next/dist/shared/lib/mitt.js",
   "../../node_modules/next/dist/shared/lib/page-path/denormalize-page-path.js",
   "../../node_modules/next/dist/shared/lib/page-path/normalize-path-sep.js",
   "../../node_modules/next/dist/shared/lib/router-context.js",
+  "../../node_modules/next/dist/shared/lib/router/adapters.js",
   "../../node_modules/next/dist/shared/lib/router/router.js",
   "../../node_modules/next/dist/shared/lib/router/utils/add-locale.js",
   "../../node_modules/next/dist/shared/lib/router/utils/add-path-prefix.js",
@@ -67,38 +90,34 @@ exports[`Next.js build output client modules main chunk 1`] = `
   "../../node_modules/next/dist/shared/lib/router/utils/route-matcher.js",
   "../../node_modules/next/dist/shared/lib/router/utils/route-regex.js",
   "../../node_modules/next/dist/shared/lib/router/utils/sorted-routes.js",
+  "../../node_modules/next/dist/shared/lib/runtime-config.js",
   "../../node_modules/next/dist/shared/lib/side-effect.js",
   "../../node_modules/next/dist/shared/lib/utils.js",
   "../../node_modules/next/dist/shared/lib/utils/warn-once.js",
   "../../node_modules/styled-jsx/dist/index/index.js",
-  "../../node_modules/styled-jsx/index.js",
-  "../../node_modules/styled-jsx/style.js",
+  "../../node_modules/next/dist/compiled/anser/index.js",
+  "../../node_modules/next/dist/compiled/css.escape/css.escape.js",
+  "../../node_modules/next/dist/compiled/platform/platform.js",
   "../../node_modules/next/dist/compiled/react-is/cjs/react-is.development.js",
   "../../node_modules/next/dist/compiled/react-is/index.js",
+  "../../node_modules/next/dist/compiled/stacktrace-parser/stack-trace-parser.cjs.js",
+  "../../node_modules/next/dist/compiled/web-vitals/web-vitals.js",
   "../../node_modules/next/dist/lib/is-api-route.js",
   "../../node_modules/next/dist/lib/is-error.js",
-  "../../node_modules/next/dynamic.js",
   "../../node_modules/next/dynamic.js?pop",
-  "../../node_modules/next/head.js",
   "../../node_modules/next/head.js?pop",
-  "../../node_modules/next/link.js",
   "../../node_modules/next/link.js?pop",
-  "../../node_modules/next/router.js",
   "../../node_modules/next/router.js?pop",
-  "../../node_modules/next/script.js",
   "../../node_modules/next/script.js?pop",
   "../../node_modules/process/browser.js",
   "../../node_modules/react-dom/cjs/react-dom.development.js",
-  "../../node_modules/react-dom/index.js",
+  "../../node_modules/react-dom/client.js",
   "../../node_modules/react-dom/index.js?pop",
   "../../node_modules/react/cjs/react-jsx-dev-runtime.development.js",
   "../../node_modules/react/cjs/react-jsx-runtime.development.js",
   "../../node_modules/react/cjs/react.development.js",
-  "../../node_modules/react/index.js",
   "../../node_modules/react/index.js?pop",
-  "../../node_modules/react/jsx-dev-runtime.js",
   "../../node_modules/react/jsx-dev-runtime.js?pop",
-  "../../node_modules/react/jsx-runtime.js",
   "../../node_modules/react/jsx-runtime.js?pop",
   "../../node_modules/scheduler/cjs/scheduler.development.js",
   "../../node_modules/scheduler/index.js",
@@ -120,9 +139,6 @@ exports[`Next.js build output client partial remote 1`] = `
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 var moduleMap = {
-	"__hoist": function() {
-		return __webpack_require__.e("dist_packages_nextjs-mf_src_delegate-hoist-container_js").then(function() { return function() { return (__webpack_require__(/*! ../../dist/packages/nextjs-mf/src/delegate-hoist-container.js */ "../../dist/packages/nextjs-mf/src/delegate-hoist-container.js")); }; });
-	},
 	"./pages-map": function() {
 		return __webpack_require__.e("dist_packages_nextjs-mf_src_loaders_nextPageMapLoader_js_dist_packages_nextjs-mf_src_loaders_-50dce4").then(function() { return function() { return (__webpack_require__(/*! ../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js!../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js */ "../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js!../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js")); }; });
 	},
@@ -135,6 +151,24 @@ var moduleMap = {
 	"./pages/index": function() {
 		return __webpack_require__.e("pages_index_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/index.tsx */ "./pages/index.tsx")); }; });
 	},
+	"./pages/checkout/[...slug]": function() {
+		return __webpack_require__.e("pages_checkout_slug_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/[...slug].tsx */ "./pages/checkout/[...slug].tsx")); }; });
+	},
+	"./pages/checkout/[pid]": function() {
+		return __webpack_require__.e("pages_checkout_pid_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/[pid].tsx */ "./pages/checkout/[pid].tsx")); }; });
+	},
+	"./pages/checkout/exposed-pages": function() {
+		return __webpack_require__.e("pages_checkout_exposed-pages_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/exposed-pages.tsx */ "./pages/checkout/exposed-pages.tsx")); }; });
+	},
+	"./pages/checkout/index": function() {
+		return __webpack_require__.e("pages_checkout_index_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/index.tsx */ "./pages/checkout/index.tsx")); }; });
+	},
+	"./pages/checkout/test-check-button": function() {
+		return __webpack_require__.e("pages_checkout_test-check-button_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/test-check-button.tsx */ "./pages/checkout/test-check-button.tsx")); }; });
+	},
+	"./pages/checkout/test-title": function() {
+		return __webpack_require__.e("pages_checkout_test-title_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/test-title.tsx */ "./pages/checkout/test-title.tsx")); }; });
+	},
 	"./pages/home/exposed-pages": function() {
 		return __webpack_require__.e("pages_home_exposed-pages_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/home/exposed-pages.tsx */ "./pages/home/exposed-pages.tsx")); }; });
 	},
@@ -146,6 +180,21 @@ var moduleMap = {
 	},
 	"./pages/home/test-shared-nav": function() {
 		return __webpack_require__.e("pages_home_test-shared-nav_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/home/test-shared-nav.tsx */ "./pages/home/test-shared-nav.tsx")); }; });
+	},
+	"./pages/shop/exposed-pages": function() {
+		return __webpack_require__.e("pages_shop_exposed-pages_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/shop/exposed-pages.js */ "./pages/shop/exposed-pages.js")); }; });
+	},
+	"./pages/shop/index": function() {
+		return __webpack_require__.e("pages_shop_index_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/shop/index.js */ "./pages/shop/index.js")); }; });
+	},
+	"./pages/shop/test-webpack-png": function() {
+		return __webpack_require__.e("pages_shop_test-webpack-png_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/shop/test-webpack-png.js */ "./pages/shop/test-webpack-png.js")); }; });
+	},
+	"./pages/shop/test-webpack-svg": function() {
+		return __webpack_require__.e("pages_shop_test-webpack-svg_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/shop/test-webpack-svg.js */ "./pages/shop/test-webpack-svg.js")); }; });
+	},
+	"./pages/shop/products/[...slug]": function() {
+		return __webpack_require__.e("pages_shop_products_slug_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/shop/products/[...slug].js */ "./pages/shop/products/[...slug].js")); }; });
 	},
 	"./SharedNav": function() {
 		return __webpack_require__.e("components_SharedNav_tsx").then(function() { return function() { return (__webpack_require__(/*! ./components/SharedNav */ "./components/SharedNav.tsx")); }; });
@@ -180,33 +229,6 @@ __webpack_require__.d(exports, {
 	get: function() { return get; },
 	init: function() { return init; }
 });
-
-/***/ }),
-
-/***/ "../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js":
-/*!**********************************************************************************************************************************!*\\
-  !*** ../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js ***!
-  \\**********************************************************************************************************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var __resourceQuery = "?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js";
-
-// eslint-disable-next-line no-async-promise-executor
-module.exports = new Promise(async (resolve, reject) => {
-    const { importDelegatedModule } = await __webpack_require__.e(/*! import() */ "dist_packages_utilities_src_utils_common_js").then(__webpack_require__.bind(__webpack_require__, /*! @module-federation/utilities/src/utils/common */ "../../dist/packages/utilities/src/utils/common.js"));
-    // eslint-disable-next-line no-undef
-    const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
-    const [global, url] = currentRequest.split('@');
-    importDelegatedModule({
-        global,
-        url: url + '?' + Date.now(),
-    })
-        .then((remote) => {
-        resolve(remote);
-    })
-        .catch((err) => reject(err));
-});
-//# sourceMappingURL=default-delegate.js.map
 
 /***/ })
 
@@ -520,7 +542,7 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	!function() {
-/******/ 		__webpack_require__.h = function() { return "0c85a3c3cd0ffbb3"; }
+/******/ 		__webpack_require__.h = function() { return "c6d0590d6188f6e7"; }
 /******/ 	}();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
@@ -1616,21 +1638,21 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 		});
 /******/ 		var installedModules = {};
 /******/ 		var moduleToHandlerMapping = {
-/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
 /******/ 			"webpack/sharing/consume/default/react": function() { return loadSingleton("default", "react"); },
+/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
 /******/ 			"webpack/sharing/consume/default/next/dynamic": function() { return loadSingleton("default", "next/dynamic"); },
-/******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return __webpack_require__.e("node_modules_antd_es_index_js").then(function() { return function() { return __webpack_require__(/*! antd */ "../../node_modules/antd/es/index.js"); }; }); }); },
-/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
 /******/ 			"webpack/sharing/consume/default/react/jsx-dev-runtime": function() { return loadSingleton("default", "react/jsx-dev-runtime"); },
 /******/ 			"webpack/sharing/consume/default/styled-jsx/style": function() { return loadSingleton("default", "styled-jsx/style"); },
+/******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return __webpack_require__.e("node_modules_antd_es_index_js").then(function() { return function() { return __webpack_require__(/*! antd */ "../../node_modules/antd/es/index.js"); }; }); }); },
+/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
 /******/ 			"webpack/sharing/consume/default/next/head": function() { return loadSingleton("default", "next/head"); },
 /******/ 			"webpack/sharing/consume/default/next/link": function() { return loadSingleton("default", "next/link"); }
 /******/ 		};
 /******/ 		// no consumes in initial chunks
 /******/ 		var chunkMapping = {
 /******/ 			"node_modules_antd_es_index_js": [
-/******/ 				"webpack/sharing/consume/default/react-dom",
-/******/ 				"webpack/sharing/consume/default/react"
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/react-dom"
 /******/ 			],
 /******/ 			"pages_dynamic-remote_js": [
 /******/ 				"webpack/sharing/consume/default/next/dynamic"
@@ -1684,43 +1706,43 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"components_SharedNav_tsx": [
-/******/ 				"webpack/sharing/consume/default/antd/antd",
-/******/ 				"webpack/sharing/consume/default/next/router",
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style",
 /******/ 				"webpack/sharing/consume/default/react",
-/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router"
 /******/ 			],
 /******/ 			"components_menu_tsx": [
-/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/next/router",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
+/******/ 				"webpack/sharing/consume/default/antd/antd"
 /******/ 			],
 /******/ 			"pages_dynamic-remote_js_hasBoundary": [
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/react"
 /******/ 			],
 /******/ 			"pages_index_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/next/head",
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
-/******/ 				"webpack/sharing/consume/default/react"
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/next/head"
 /******/ 			],
 /******/ 			"pages_home_exposed-pages_tsx_hasBoundary": [
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/react"
 /******/ 			],
 /******/ 			"pages_home_test-broken-remotes_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/next/link",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/next/link"
 /******/ 			],
 /******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
 /******/ 			],
 /******/ 			"pages_home_test-shared-nav_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/antd/antd",
-/******/ 				"webpack/sharing/consume/default/next/router",
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style",
 /******/ 				"webpack/sharing/consume/default/react",
-/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.consumes = function(chunkId, promises) {
@@ -1887,21 +1909,21 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 		});
 /******/ 		var installedModules = {};
 /******/ 		var moduleToHandlerMapping = {
-/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
 /******/ 			"webpack/sharing/consume/default/react": function() { return loadSingleton("default", "react"); },
+/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
 /******/ 			"webpack/sharing/consume/default/next/dynamic": function() { return loadSingleton("default", "next/dynamic"); },
-/******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return __webpack_require__.e("node_modules_antd_es_index_js").then(function() { return function() { return __webpack_require__(/*! antd */ "../../node_modules/antd/es/index.js"); }; }); }); },
-/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
 /******/ 			"webpack/sharing/consume/default/react/jsx-dev-runtime": function() { return loadSingleton("default", "react/jsx-dev-runtime"); },
 /******/ 			"webpack/sharing/consume/default/styled-jsx/style": function() { return loadSingleton("default", "styled-jsx/style"); },
+/******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return __webpack_require__.e("node_modules_antd_es_index_js").then(function() { return function() { return __webpack_require__(/*! antd */ "../../node_modules/antd/es/index.js"); }; }); }); },
+/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
 /******/ 			"webpack/sharing/consume/default/next/head": function() { return loadSingleton("default", "next/head"); },
 /******/ 			"webpack/sharing/consume/default/next/link": function() { return loadSingleton("default", "next/link"); }
 /******/ 		};
 /******/ 		// no consumes in initial chunks
 /******/ 		var chunkMapping = {
 /******/ 			"node_modules_antd_es_index_js": [
-/******/ 				"webpack/sharing/consume/default/react-dom",
-/******/ 				"webpack/sharing/consume/default/react"
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/react-dom"
 /******/ 			],
 /******/ 			"pages_dynamic-remote_js": [
 /******/ 				"webpack/sharing/consume/default/next/dynamic"
@@ -1955,43 +1977,43 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"components_SharedNav_tsx": [
-/******/ 				"webpack/sharing/consume/default/antd/antd",
-/******/ 				"webpack/sharing/consume/default/next/router",
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style",
 /******/ 				"webpack/sharing/consume/default/react",
-/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router"
 /******/ 			],
 /******/ 			"components_menu_tsx": [
-/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/next/router",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
+/******/ 				"webpack/sharing/consume/default/antd/antd"
 /******/ 			],
 /******/ 			"pages_dynamic-remote_js_hasBoundary": [
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/react"
 /******/ 			],
 /******/ 			"pages_index_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/next/head",
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
-/******/ 				"webpack/sharing/consume/default/react"
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/next/head"
 /******/ 			],
 /******/ 			"pages_home_exposed-pages_tsx_hasBoundary": [
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/react"
 /******/ 			],
 /******/ 			"pages_home_test-broken-remotes_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/next/link",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/next/link"
 /******/ 			],
 /******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
 /******/ 			],
 /******/ 			"pages_home_test-shared-nav_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/antd/antd",
-/******/ 				"webpack/sharing/consume/default/next/router",
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style",
 /******/ 				"webpack/sharing/consume/default/react",
-/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.consumes = function(chunkId, promises) {
@@ -2951,7 +2973,7 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	!function() {
-/******/ 		__webpack_require__.h = function() { return "0c85a3c3cd0ffbb3"; }
+/******/ 		__webpack_require__.h = function() { return "c6d0590d6188f6e7"; }
 /******/ 	}();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
@@ -3040,8 +3062,8 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 	/* webpack/runtime/remotes loading */
 /******/ 	!function() {
 /******/ 		var chunkMapping = {
-/******/ 			"pages_checkout_index_tsx_hasBoundary": [
-/******/ 				"webpack/container/remote/checkout/pages/checkout/index"
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/useCustomRemoteHook"
 /******/ 			],
 /******/ 			"pages_checkout_slug_tsx_hasBoundary": [
 /******/ 				"webpack/container/remote/checkout/pages/checkout/[...slug]"
@@ -3052,14 +3074,14 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 			"pages_checkout_exposed-pages_tsx_hasBoundary": [
 /******/ 				"webpack/container/remote/checkout/pages/checkout/exposed-pages"
 /******/ 			],
+/******/ 			"pages_checkout_index_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/index"
+/******/ 			],
 /******/ 			"pages_checkout_test-check-button_tsx_hasBoundary": [
 /******/ 				"webpack/container/remote/checkout/pages/checkout/test-check-button"
 /******/ 			],
 /******/ 			"pages_checkout_test-title_tsx_hasBoundary": [
 /******/ 				"webpack/container/remote/checkout/pages/checkout/test-title"
-/******/ 			],
-/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
-/******/ 				"webpack/container/remote/shop/useCustomRemoteHook"
 /******/ 			],
 /******/ 			"pages_shop_exposed-pages_js_hasBoundary": [
 /******/ 				"webpack/container/remote/shop/pages/shop/exposed-pages"
@@ -3096,10 +3118,10 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 			]
 /******/ 		};
 /******/ 		var idToExternalAndNameMapping = {
-/******/ 			"webpack/container/remote/checkout/pages/checkout/index": [
+/******/ 			"webpack/container/remote/shop/useCustomRemoteHook": [
 /******/ 				"default",
-/******/ 				"./pages/checkout/index",
-/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 				"./useCustomRemoteHook",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
 /******/ 			],
 /******/ 			"webpack/container/remote/checkout/pages/checkout/[...slug]": [
 /******/ 				"default",
@@ -3116,6 +3138,11 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 				"./pages/checkout/exposed-pages",
 /******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/index": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/index",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
 /******/ 			"webpack/container/remote/checkout/pages/checkout/test-check-button": [
 /******/ 				"default",
 /******/ 				"./pages/checkout/test-check-button",
@@ -3125,11 +3152,6 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 				"default",
 /******/ 				"./pages/checkout/test-title",
 /******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
-/******/ 			],
-/******/ 			"webpack/container/remote/shop/useCustomRemoteHook": [
-/******/ 				"default",
-/******/ 				"./useCustomRemoteHook",
-/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
 /******/ 			],
 /******/ 			"webpack/container/remote/shop/pages/shop/exposed-pages": [
 /******/ 				"default",
@@ -3235,8 +3257,8 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 	/* webpack/runtime/remotes loading */
 /******/ 	!function() {
 /******/ 		var chunkMapping = {
-/******/ 			"pages_checkout_index_tsx_hasBoundary": [
-/******/ 				"webpack/container/remote/checkout/pages/checkout/index"
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/useCustomRemoteHook"
 /******/ 			],
 /******/ 			"pages_checkout_slug_tsx_hasBoundary": [
 /******/ 				"webpack/container/remote/checkout/pages/checkout/[...slug]"
@@ -3247,14 +3269,14 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 			"pages_checkout_exposed-pages_tsx_hasBoundary": [
 /******/ 				"webpack/container/remote/checkout/pages/checkout/exposed-pages"
 /******/ 			],
+/******/ 			"pages_checkout_index_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/index"
+/******/ 			],
 /******/ 			"pages_checkout_test-check-button_tsx_hasBoundary": [
 /******/ 				"webpack/container/remote/checkout/pages/checkout/test-check-button"
 /******/ 			],
 /******/ 			"pages_checkout_test-title_tsx_hasBoundary": [
 /******/ 				"webpack/container/remote/checkout/pages/checkout/test-title"
-/******/ 			],
-/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
-/******/ 				"webpack/container/remote/shop/useCustomRemoteHook"
 /******/ 			],
 /******/ 			"pages_shop_exposed-pages_js_hasBoundary": [
 /******/ 				"webpack/container/remote/shop/pages/shop/exposed-pages"
@@ -3291,10 +3313,10 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 			]
 /******/ 		};
 /******/ 		var idToExternalAndNameMapping = {
-/******/ 			"webpack/container/remote/checkout/pages/checkout/index": [
+/******/ 			"webpack/container/remote/shop/useCustomRemoteHook": [
 /******/ 				"default",
-/******/ 				"./pages/checkout/index",
-/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 				"./useCustomRemoteHook",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
 /******/ 			],
 /******/ 			"webpack/container/remote/checkout/pages/checkout/[...slug]": [
 /******/ 				"default",
@@ -3311,6 +3333,11 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 				"./pages/checkout/exposed-pages",
 /******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
 /******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/index": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/index",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
 /******/ 			"webpack/container/remote/checkout/pages/checkout/test-check-button": [
 /******/ 				"default",
 /******/ 				"./pages/checkout/test-check-button",
@@ -3320,11 +3347,6 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 				"default",
 /******/ 				"./pages/checkout/test-title",
 /******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
-/******/ 			],
-/******/ 			"webpack/container/remote/shop/useCustomRemoteHook": [
-/******/ 				"default",
-/******/ 				"./useCustomRemoteHook",
-/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
 /******/ 			],
 /******/ 			"webpack/container/remote/shop/pages/shop/exposed-pages": [
 /******/ 				"default",
@@ -4084,17 +4106,17 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 		});
 /******/ 		var installedModules = {};
 /******/ 		var moduleToHandlerMapping = {
-/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
 /******/ 			"webpack/sharing/consume/default/react": function() { return loadSingleton("default", "react"); },
+/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
 /******/ 			"webpack/sharing/consume/default/next/dynamic": function() { return loadSingleton("default", "next/dynamic"); },
-/******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return __webpack_require__.e("node_modules_antd_es_index_js").then(function() { return function() { return __webpack_require__(/*! antd */ "../../node_modules/antd/es/index.js"); }; }); }); },
-/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
 /******/ 			"webpack/sharing/consume/default/react/jsx-dev-runtime": function() { return loadSingleton("default", "react/jsx-dev-runtime"); },
 /******/ 			"webpack/sharing/consume/default/styled-jsx/style": function() { return loadSingleton("default", "styled-jsx/style"); },
+/******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return __webpack_require__.e("node_modules_antd_es_index_js").then(function() { return function() { return __webpack_require__(/*! antd */ "../../node_modules/antd/es/index.js"); }; }); }); },
+/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
 /******/ 			"webpack/sharing/consume/default/next/head": function() { return loadSingleton("default", "next/head"); },
 /******/ 			"webpack/sharing/consume/default/next/link": function() { return loadSingleton("default", "next/link"); }
 /******/ 		};
-/******/ 		var initialConsumes = ["webpack/sharing/consume/default/react-dom","webpack/sharing/consume/default/react","webpack/sharing/consume/default/react-dom","webpack/sharing/consume/default/react","webpack/sharing/consume/default/next/dynamic"];
+/******/ 		var initialConsumes = ["webpack/sharing/consume/default/react","webpack/sharing/consume/default/react-dom","webpack/sharing/consume/default/react","webpack/sharing/consume/default/react-dom","webpack/sharing/consume/default/next/dynamic"];
 /******/ 		initialConsumes.forEach(function(id) {
 /******/ 			__webpack_require__.m[id] = function(module) {
 /******/ 				// Handle case when module is used sync
@@ -4107,8 +4129,8 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 		});
 /******/ 		var chunkMapping = {
 /******/ 			"node_modules_antd_es_index_js": [
-/******/ 				"webpack/sharing/consume/default/react-dom",
-/******/ 				"webpack/sharing/consume/default/react"
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/react-dom"
 /******/ 			],
 /******/ 			"pages_dynamic-remote_js": [
 /******/ 				"webpack/sharing/consume/default/next/dynamic"
@@ -4162,49 +4184,49 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"components_SharedNav_tsx": [
-/******/ 				"webpack/sharing/consume/default/antd/antd",
-/******/ 				"webpack/sharing/consume/default/next/router",
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style",
 /******/ 				"webpack/sharing/consume/default/react",
-/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router"
 /******/ 			],
 /******/ 			"components_menu_tsx": [
-/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/next/router",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
+/******/ 				"webpack/sharing/consume/default/antd/antd"
 /******/ 			],
 /******/ 			"pages__app_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/antd/antd",
 /******/ 				"webpack/sharing/consume/default/next/router",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/styled-jsx/style"
 /******/ 			],
-/******/ 			"pages_index_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/next/head",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
-/******/ 				"webpack/sharing/consume/default/react"
-/******/ 			],
-/******/ 			"pages_home_exposed-pages_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
-/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
 /******/ 			],
 /******/ 			"pages_dynamic-remote_js_hasBoundary": [
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/react"
 /******/ 			],
-/******/ 			"pages_home_test-broken-remotes_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/next/link",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
-/******/ 			],
-/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
-/******/ 			],
-/******/ 			"pages_home_test-shared-nav_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/antd/antd",
-/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 			"pages_index_tsx_hasBoundary": [
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/react",
-/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
+/******/ 				"webpack/sharing/consume/default/next/head"
+/******/ 			],
+/******/ 			"pages_home_exposed-pages_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			],
+/******/ 			"pages_home_test-broken-remotes_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/next/link"
+/******/ 			],
+/******/ 			"pages_home_test-shared-nav_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style",
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.consumes = function(chunkId, promises) {
@@ -4371,17 +4393,17 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 		});
 /******/ 		var installedModules = {};
 /******/ 		var moduleToHandlerMapping = {
-/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
 /******/ 			"webpack/sharing/consume/default/react": function() { return loadSingleton("default", "react"); },
+/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
 /******/ 			"webpack/sharing/consume/default/next/dynamic": function() { return loadSingleton("default", "next/dynamic"); },
-/******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return __webpack_require__.e("node_modules_antd_es_index_js").then(function() { return function() { return __webpack_require__(/*! antd */ "../../node_modules/antd/es/index.js"); }; }); }); },
-/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
 /******/ 			"webpack/sharing/consume/default/react/jsx-dev-runtime": function() { return loadSingleton("default", "react/jsx-dev-runtime"); },
 /******/ 			"webpack/sharing/consume/default/styled-jsx/style": function() { return loadSingleton("default", "styled-jsx/style"); },
+/******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return __webpack_require__.e("node_modules_antd_es_index_js").then(function() { return function() { return __webpack_require__(/*! antd */ "../../node_modules/antd/es/index.js"); }; }); }); },
+/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
 /******/ 			"webpack/sharing/consume/default/next/head": function() { return loadSingleton("default", "next/head"); },
 /******/ 			"webpack/sharing/consume/default/next/link": function() { return loadSingleton("default", "next/link"); }
 /******/ 		};
-/******/ 		var initialConsumes = ["webpack/sharing/consume/default/react-dom","webpack/sharing/consume/default/react","webpack/sharing/consume/default/react-dom","webpack/sharing/consume/default/react","webpack/sharing/consume/default/next/dynamic"];
+/******/ 		var initialConsumes = ["webpack/sharing/consume/default/react","webpack/sharing/consume/default/react-dom","webpack/sharing/consume/default/react","webpack/sharing/consume/default/react-dom","webpack/sharing/consume/default/next/dynamic"];
 /******/ 		initialConsumes.forEach(function(id) {
 /******/ 			__webpack_require__.m[id] = function(module) {
 /******/ 				// Handle case when module is used sync
@@ -4394,8 +4416,8 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 		});
 /******/ 		var chunkMapping = {
 /******/ 			"node_modules_antd_es_index_js": [
-/******/ 				"webpack/sharing/consume/default/react-dom",
-/******/ 				"webpack/sharing/consume/default/react"
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/react-dom"
 /******/ 			],
 /******/ 			"pages_dynamic-remote_js": [
 /******/ 				"webpack/sharing/consume/default/next/dynamic"
@@ -4449,49 +4471,49 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"components_SharedNav_tsx": [
-/******/ 				"webpack/sharing/consume/default/antd/antd",
-/******/ 				"webpack/sharing/consume/default/next/router",
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style",
 /******/ 				"webpack/sharing/consume/default/react",
-/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router"
 /******/ 			],
 /******/ 			"components_menu_tsx": [
-/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/next/router",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
+/******/ 				"webpack/sharing/consume/default/antd/antd"
 /******/ 			],
 /******/ 			"pages__app_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/antd/antd",
 /******/ 				"webpack/sharing/consume/default/next/router",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/styled-jsx/style"
 /******/ 			],
-/******/ 			"pages_index_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/next/head",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
-/******/ 				"webpack/sharing/consume/default/react"
-/******/ 			],
-/******/ 			"pages_home_exposed-pages_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
-/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
 /******/ 			],
 /******/ 			"pages_dynamic-remote_js_hasBoundary": [
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/react"
 /******/ 			],
-/******/ 			"pages_home_test-broken-remotes_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/next/link",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
-/******/ 			],
-/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
-/******/ 			],
-/******/ 			"pages_home_test-shared-nav_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/antd/antd",
-/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 			"pages_index_tsx_hasBoundary": [
 /******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
 /******/ 				"webpack/sharing/consume/default/react",
-/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
+/******/ 				"webpack/sharing/consume/default/next/head"
+/******/ 			],
+/******/ 			"pages_home_exposed-pages_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			],
+/******/ 			"pages_home_test-broken-remotes_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/next/link"
+/******/ 			],
+/******/ 			"pages_home_test-shared-nav_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style",
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.consumes = function(chunkId, promises) {
@@ -5151,9 +5173,6 @@ exports[`Next.js build output server remoteEntry.js 1`] = `
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 var moduleMap = {
-	"__hoist": function() {
-		return __webpack_require__.e("dist_packages_nextjs-mf_src_delegate-hoist-container_js").then(function() { return function() { return (__webpack_require__(/*! ../../dist/packages/nextjs-mf/src/delegate-hoist-container.js */ "../../dist/packages/nextjs-mf/src/delegate-hoist-container.js")); }; });
-	},
 	"./pages-map": function() {
 		return __webpack_require__.e("dist_packages_nextjs-mf_src_loaders_nextPageMapLoader_js_dist_packages_nextjs-mf_src_loaders_-50dce4").then(function() { return function() { return (__webpack_require__(/*! ../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js!../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js */ "../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js!../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js")); }; });
 	},
@@ -5166,6 +5185,24 @@ var moduleMap = {
 	"./pages/index": function() {
 		return __webpack_require__.e("pages_index_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/index.tsx */ "./pages/index.tsx")); }; });
 	},
+	"./pages/checkout/[...slug]": function() {
+		return __webpack_require__.e("pages_checkout_slug_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/[...slug].tsx */ "./pages/checkout/[...slug].tsx")); }; });
+	},
+	"./pages/checkout/[pid]": function() {
+		return __webpack_require__.e("pages_checkout_pid_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/[pid].tsx */ "./pages/checkout/[pid].tsx")); }; });
+	},
+	"./pages/checkout/exposed-pages": function() {
+		return __webpack_require__.e("pages_checkout_exposed-pages_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/exposed-pages.tsx */ "./pages/checkout/exposed-pages.tsx")); }; });
+	},
+	"./pages/checkout/index": function() {
+		return __webpack_require__.e("pages_checkout_index_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/index.tsx */ "./pages/checkout/index.tsx")); }; });
+	},
+	"./pages/checkout/test-check-button": function() {
+		return __webpack_require__.e("pages_checkout_test-check-button_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/test-check-button.tsx */ "./pages/checkout/test-check-button.tsx")); }; });
+	},
+	"./pages/checkout/test-title": function() {
+		return __webpack_require__.e("pages_checkout_test-title_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/test-title.tsx */ "./pages/checkout/test-title.tsx")); }; });
+	},
 	"./pages/home/exposed-pages": function() {
 		return __webpack_require__.e("pages_home_exposed-pages_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/home/exposed-pages.tsx */ "./pages/home/exposed-pages.tsx")); }; });
 	},
@@ -5177,6 +5214,21 @@ var moduleMap = {
 	},
 	"./pages/home/test-shared-nav": function() {
 		return __webpack_require__.e("pages_home_test-shared-nav_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/home/test-shared-nav.tsx */ "./pages/home/test-shared-nav.tsx")); }; });
+	},
+	"./pages/shop/exposed-pages": function() {
+		return __webpack_require__.e("pages_shop_exposed-pages_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/shop/exposed-pages.js */ "./pages/shop/exposed-pages.js")); }; });
+	},
+	"./pages/shop/index": function() {
+		return __webpack_require__.e("pages_shop_index_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/shop/index.js */ "./pages/shop/index.js")); }; });
+	},
+	"./pages/shop/test-webpack-png": function() {
+		return __webpack_require__.e("pages_shop_test-webpack-png_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/shop/test-webpack-png.js */ "./pages/shop/test-webpack-png.js")); }; });
+	},
+	"./pages/shop/test-webpack-svg": function() {
+		return __webpack_require__.e("pages_shop_test-webpack-svg_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/shop/test-webpack-svg.js */ "./pages/shop/test-webpack-svg.js")); }; });
+	},
+	"./pages/shop/products/[...slug]": function() {
+		return __webpack_require__.e("pages_shop_products_slug_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/shop/products/[...slug].js */ "./pages/shop/products/[...slug].js")); }; });
 	},
 	"./SharedNav": function() {
 		return __webpack_require__.e("components_SharedNav_tsx").then(function() { return function() { return (__webpack_require__(/*! ./components/SharedNav */ "./components/SharedNav.tsx")); }; });
@@ -5354,6 +5406,33 @@ module.exports = require("zlib");
 
 /***/ }),
 
+/***/ "../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js":
+/*!***********************************************************************************************************************************!*\\
+  !*** ../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js ***!
+  \\***********************************************************************************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var __resourceQuery = "?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js";
+
+// eslint-disable-next-line no-async-promise-executor
+module.exports = new Promise(async (resolve, reject) => {
+    const { importDelegatedModule } = await __webpack_require__.e(/*! import() */ "dist_packages_utilities_src_utils_common_js").then(__webpack_require__.bind(__webpack_require__, /*! @module-federation/utilities/src/utils/common */ "../../dist/packages/utilities/src/utils/common.js"));
+    // eslint-disable-next-line no-undef
+    const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
+    const [global, url] = currentRequest.split('@');
+    importDelegatedModule({
+        global,
+        url: url + '?' + Date.now(),
+    })
+        .then((remote) => {
+        resolve(remote);
+    })
+        .catch((err) => reject(err));
+});
+//# sourceMappingURL=default-delegate.js.map
+
+/***/ }),
+
 /***/ "../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js":
 /*!*******************************************************************************************************************************!*\\
   !*** ../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js ***!
@@ -5495,7 +5574,7 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = function(chunkId) {
 /******/ 			// return url for filenames based on template
-/******/ 			return "" + chunkId + "." + {"dist_packages_nextjs-mf_src_delegate-hoist-container_js":"1d1de09cb24e1e60","dist_packages_nextjs-mf_src_loaders_nextPageMapLoader_js_dist_packages_nextjs-mf_src_loaders_-50dce4":"7d2d824918b40c08","dist_packages_nextjs-mf_src_loaders_nextPageMapLoader_js_v2_dist_packages_nextjs-mf_src_loade-8dd7f8":"db2c87a63ef0c195","pages_dynamic-remote_js":"eb6f1dddaf20b570","pages_index_tsx":"9dbf163775c7e3f2","pages_home_exposed-pages_tsx":"ace4469adf8a5078","pages_home_test-broken-remotes_tsx":"2d3509b1bd765d2a","pages_home_test-remote-hook_tsx":"cd1e9f2b1cfa26ed","pages_home_test-shared-nav_tsx":"58849445921c5b1e","components_SharedNav_tsx":"a9e4f4646c622dac","components_menu_tsx":"29b60afaaf3c4268","node_modules_antd_lib_index_js":"f0aa773b434ca3a1","dist_packages_utilities_src_utils_common_js":"5806829f7cb42345","pages_dynamic-remote_js_hasBoundary":"2301311053a3ca26","pages_index_tsx_hasBoundary":"523f4a9bf8d942ae","pages_home_exposed-pages_tsx_hasBoundary":"f6eeb8451f68e913","pages_home_test-broken-remotes_tsx_hasBoundary":"5661d7ed4ba0684a","pages_home_test-remote-hook_tsx_hasBoundary":"e83b074f0f170764","pages_home_test-shared-nav_tsx_hasBoundary":"8d5c2fdb38ab31a6","webpack_container_remote_shop_WebpackSvg":"c3b32803d7ca349c"}[chunkId] + ".js";
+/******/ 			return "" + chunkId + "." + {"dist_packages_nextjs-mf_src_loaders_nextPageMapLoader_js_dist_packages_nextjs-mf_src_loaders_-50dce4":"b0222bcf399214ce","dist_packages_nextjs-mf_src_loaders_nextPageMapLoader_js_v2_dist_packages_nextjs-mf_src_loade-8dd7f8":"6c51adaecae0ecd9","pages_dynamic-remote_js":"43dce907bc07a62a","pages_index_tsx":"eb32deceb20cf708","pages_checkout_slug_tsx":"9fc95859b513c47d","pages_checkout_pid_tsx":"fc6e1f39e1fb2b20","pages_checkout_exposed-pages_tsx":"c427553829547697","pages_checkout_index_tsx":"12ff80e79b855b50","pages_checkout_test-check-button_tsx":"27e47d9c82163286","pages_checkout_test-title_tsx":"e4f91667ab8b419b","pages_home_exposed-pages_tsx":"9fa1711f7f18a5ee","pages_home_test-broken-remotes_tsx":"9eaf7c44c79237ce","pages_home_test-remote-hook_tsx":"426f9a36561325aa","pages_home_test-shared-nav_tsx":"2ea34137c2dfcc10","pages_shop_exposed-pages_js":"851e41583cc25dca","pages_shop_index_js":"005f5c72caf7006f","pages_shop_test-webpack-png_js":"80f216354ec55c12","pages_shop_test-webpack-svg_js":"136a09b3439a339a","pages_shop_products_slug_js":"632d54759244a213","components_SharedNav_tsx":"a9e4f4646c622dac","components_menu_tsx":"29b60afaaf3c4268","node_modules_antd_lib_index_js":"f0aa773b434ca3a1","pages_dynamic-remote_js_hasBoundary":"4983b5f1d37e2ba3","pages_index_tsx_hasBoundary":"56b2a2cf727b3d26","pages_checkout_slug_tsx_hasBoundary":"1488473868a535ee","pages_checkout_pid_tsx_hasBoundary":"6331d4516d4aa25b","pages_checkout_exposed-pages_tsx_hasBoundary":"f1c1bc7ab0c51736","pages_checkout_index_tsx_hasBoundary":"e8b4f01146216368","pages_checkout_test-check-button_tsx_hasBoundary":"580130c93ab9590f","pages_checkout_test-title_tsx_hasBoundary":"bb66783ac7eb895e","pages_home_exposed-pages_tsx_hasBoundary":"dc4800efa068e571","pages_home_test-broken-remotes_tsx_hasBoundary":"5661d7ed4ba0684a","pages_home_test-remote-hook_tsx_hasBoundary":"1b395b00a9bb2836","pages_home_test-shared-nav_tsx_hasBoundary":"8d5c2fdb38ab31a6","pages_shop_exposed-pages_js_hasBoundary":"780473c61978dba3","pages_shop_index_js_hasBoundary":"8f28a0080e3651ab","pages_shop_test-webpack-png_js_hasBoundary":"3f6fe04a4908fe10","pages_shop_test-webpack-svg_js_hasBoundary":"2e3855b2bf359f58","pages_shop_products_slug_js_hasBoundary":"fac7e3dd6cbb66cb","webpack_container_remote_checkout_CheckoutTitle":"6568162a9bb34138","webpack_container_remote_checkout_ButtonOldAnt":"b7f1ea1ea9115221","webpack_container_remote_shop_WebpackSvg":"c3b32803d7ca349c","webpack_container_remote_shop_WebpackPng":"3c024093f0258f13","dist_packages_utilities_src_utils_common_js":"233f2235573ec801"}[chunkId] + ".js";
 /******/ 		};
 /******/ 	}();
 /******/ 	
@@ -5527,14 +5606,134 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 	/* webpack/runtime/remotes loading */
 /******/ 	!function() {
 /******/ 		var chunkMapping = {
+/******/ 			"pages_checkout_slug_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[...slug]"
+/******/ 			],
+/******/ 			"pages_checkout_pid_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[pid]"
+/******/ 			],
+/******/ 			"pages_checkout_exposed-pages_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/exposed-pages"
+/******/ 			],
+/******/ 			"pages_checkout_index_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/index"
+/******/ 			],
+/******/ 			"pages_checkout_test-check-button_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-check-button"
+/******/ 			],
+/******/ 			"pages_checkout_test-title_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-title"
+/******/ 			],
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/useCustomRemoteHook"
+/******/ 			],
+/******/ 			"pages_shop_exposed-pages_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/exposed-pages"
+/******/ 			],
+/******/ 			"pages_shop_index_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/index"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-png_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-png"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-svg_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-svg"
+/******/ 			],
+/******/ 			"pages_shop_products_slug_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/products/[...slug]"
+/******/ 			],
+/******/ 			"webpack_container_remote_checkout_CheckoutTitle": [
+/******/ 				"webpack/container/remote/checkout/CheckoutTitle"
+/******/ 			],
+/******/ 			"webpack_container_remote_checkout_ButtonOldAnt": [
+/******/ 				"webpack/container/remote/checkout/ButtonOldAnt"
+/******/ 			],
 /******/ 			"webpack_container_remote_shop_WebpackSvg": [
 /******/ 				"webpack/container/remote/shop/WebpackSvg"
+/******/ 			],
+/******/ 			"webpack_container_remote_shop_WebpackPng": [
+/******/ 				"webpack/container/remote/shop/WebpackPng"
 /******/ 			]
 /******/ 		};
 /******/ 		var idToExternalAndNameMapping = {
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[...slug]": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/[...slug]",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[pid]": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/[pid]",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/exposed-pages": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/exposed-pages",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/index": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/index",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-check-button": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/test-check-button",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-title": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/test-title",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/useCustomRemoteHook": [
+/******/ 				"default",
+/******/ 				"./useCustomRemoteHook",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/exposed-pages": [
+/******/ 				"default",
+/******/ 				"./pages/shop/exposed-pages",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/index": [
+/******/ 				"default",
+/******/ 				"./pages/shop/index",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-png": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-png",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-svg": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-svg",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/products/[...slug]": [
+/******/ 				"default",
+/******/ 				"./pages/shop/products/[...slug]",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/CheckoutTitle": [
+/******/ 				"default",
+/******/ 				"./CheckoutTitle",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/ButtonOldAnt": [
+/******/ 				"default",
+/******/ 				"./ButtonOldAnt",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
+/******/ 			],
 /******/ 			"webpack/container/remote/shop/WebpackSvg": [
 /******/ 				"default",
 /******/ 				"./WebpackSvg",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/WebpackPng": [
+/******/ 				"default",
+/******/ 				"./WebpackPng",
 /******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
 /******/ 			]
 /******/ 		};
@@ -5623,6 +5822,7 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 			switch(name) {
 /******/ 				case "default": {
 /******/ 					register("antd", "4.24.9", function() { return __webpack_require__.e("node_modules_antd_lib_index_js").then(function() { return function() { return __webpack_require__(/*! ../../node_modules/antd/lib/index.js */ "../../node_modules/antd/lib/index.js"); }; }); });
+/******/ 					initExternal("../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js");
 /******/ 					initExternal("../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js");
 /******/ 				}
 /******/ 				break;
@@ -5780,6 +5980,24 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 			"pages_index_tsx": [
 /******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
+/******/ 			"pages_checkout_slug_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_pid_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_exposed-pages_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_index_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_test-check-button_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_test-title_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
 /******/ 			"pages_home_exposed-pages_tsx": [
 /******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
@@ -5790,6 +6008,21 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_home_test-shared-nav_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_exposed-pages_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_index_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-png_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-svg_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_products_slug_js": [
 /******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"components_SharedNav_tsx": [
@@ -5927,7 +6160,7 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 				if(installedChunkData) {
 /******/ 					promises.push(installedChunkData[2]);
 /******/ 				} else {
-/******/ 					if("webpack_container_remote_shop_WebpackSvg" != chunkId) {
+/******/ 					if(!/^webpack_container_remote_(checkout_(ButtonOldAnt|CheckoutTitle)|shop_Webpack(Pn|Sv)g)$/.test(chunkId)) {
 /******/ 						// load the chunk and return promise to it
 /******/ 						var promise = new Promise(async function(resolve, reject) {
 /******/ 							installedChunkData = installedChunks[chunkId] = [resolve, reject];
@@ -6040,6 +6273,133 @@ exports[`Next.js build output server webpack-runtime 1`] = `
 "/******/ (function() { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
+
+/***/ "webpack/container/entry/home_app":
+/*!***********************!*\\
+  !*** container entry ***!
+  \\***********************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+var moduleMap = {
+	"./pages-map": function() {
+		return __webpack_require__.e("dist_packages_nextjs-mf_src_loaders_nextPageMapLoader_js_dist_packages_nextjs-mf_src_loaders_-50dce4").then(function() { return function() { return (__webpack_require__(/*! ../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js!../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js */ "../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js!../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js")); }; });
+	},
+	"./pages-map-v2": function() {
+		return __webpack_require__.e("dist_packages_nextjs-mf_src_loaders_nextPageMapLoader_js_v2_dist_packages_nextjs-mf_src_loade-8dd7f8").then(function() { return function() { return (__webpack_require__(/*! ../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js?v2!../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js */ "../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js?v2!../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js")); }; });
+	},
+	"./pages/dynamic-remote": function() {
+		return __webpack_require__.e("pages_dynamic-remote_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/dynamic-remote.js */ "./pages/dynamic-remote.js")); }; });
+	},
+	"./pages/index": function() {
+		return __webpack_require__.e("pages_index_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/index.tsx */ "./pages/index.tsx")); }; });
+	},
+	"./pages/checkout/[...slug]": function() {
+		return __webpack_require__.e("pages_checkout_slug_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/[...slug].tsx */ "./pages/checkout/[...slug].tsx")); }; });
+	},
+	"./pages/checkout/[pid]": function() {
+		return __webpack_require__.e("pages_checkout_pid_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/[pid].tsx */ "./pages/checkout/[pid].tsx")); }; });
+	},
+	"./pages/checkout/exposed-pages": function() {
+		return __webpack_require__.e("pages_checkout_exposed-pages_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/exposed-pages.tsx */ "./pages/checkout/exposed-pages.tsx")); }; });
+	},
+	"./pages/checkout/index": function() {
+		return __webpack_require__.e("pages_checkout_index_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/index.tsx */ "./pages/checkout/index.tsx")); }; });
+	},
+	"./pages/checkout/test-check-button": function() {
+		return __webpack_require__.e("pages_checkout_test-check-button_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/test-check-button.tsx */ "./pages/checkout/test-check-button.tsx")); }; });
+	},
+	"./pages/checkout/test-title": function() {
+		return __webpack_require__.e("pages_checkout_test-title_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/checkout/test-title.tsx */ "./pages/checkout/test-title.tsx")); }; });
+	},
+	"./pages/home/exposed-pages": function() {
+		return __webpack_require__.e("pages_home_exposed-pages_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/home/exposed-pages.tsx */ "./pages/home/exposed-pages.tsx")); }; });
+	},
+	"./pages/home/test-broken-remotes": function() {
+		return __webpack_require__.e("pages_home_test-broken-remotes_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/home/test-broken-remotes.tsx */ "./pages/home/test-broken-remotes.tsx")); }; });
+	},
+	"./pages/home/test-remote-hook": function() {
+		return __webpack_require__.e("pages_home_test-remote-hook_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/home/test-remote-hook.tsx */ "./pages/home/test-remote-hook.tsx")); }; });
+	},
+	"./pages/home/test-shared-nav": function() {
+		return __webpack_require__.e("pages_home_test-shared-nav_tsx").then(function() { return function() { return (__webpack_require__(/*! ./pages/home/test-shared-nav.tsx */ "./pages/home/test-shared-nav.tsx")); }; });
+	},
+	"./pages/shop/exposed-pages": function() {
+		return __webpack_require__.e("pages_shop_exposed-pages_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/shop/exposed-pages.js */ "./pages/shop/exposed-pages.js")); }; });
+	},
+	"./pages/shop/index": function() {
+		return __webpack_require__.e("pages_shop_index_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/shop/index.js */ "./pages/shop/index.js")); }; });
+	},
+	"./pages/shop/test-webpack-png": function() {
+		return __webpack_require__.e("pages_shop_test-webpack-png_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/shop/test-webpack-png.js */ "./pages/shop/test-webpack-png.js")); }; });
+	},
+	"./pages/shop/test-webpack-svg": function() {
+		return __webpack_require__.e("pages_shop_test-webpack-svg_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/shop/test-webpack-svg.js */ "./pages/shop/test-webpack-svg.js")); }; });
+	},
+	"./pages/shop/products/[...slug]": function() {
+		return __webpack_require__.e("pages_shop_products_slug_js").then(function() { return function() { return (__webpack_require__(/*! ./pages/shop/products/[...slug].js */ "./pages/shop/products/[...slug].js")); }; });
+	},
+	"./SharedNav": function() {
+		return __webpack_require__.e("components_SharedNav_tsx").then(function() { return function() { return (__webpack_require__(/*! ./components/SharedNav */ "./components/SharedNav.tsx")); }; });
+	},
+	"./menu": function() {
+		return __webpack_require__.e("components_menu_tsx").then(function() { return function() { return (__webpack_require__(/*! ./components/menu */ "./components/menu.tsx")); }; });
+	}
+};
+var get = function(module, getScope) {
+	__webpack_require__.R = getScope;
+	getScope = (
+		__webpack_require__.o(moduleMap, module)
+			? moduleMap[module]()
+			: Promise.resolve().then(function() {
+				throw new Error('Module "' + module + '" does not exist in container.');
+			})
+	);
+	__webpack_require__.R = undefined;
+	return getScope;
+};
+var init = function(shareScope, initScope) {
+	if (!__webpack_require__.S) return;
+	var name = "default"
+	var oldScope = __webpack_require__.S[name];
+	if(oldScope && oldScope !== shareScope) throw new Error("Container initialization failed as it has already been initialized with a different share scope");
+	__webpack_require__.S[name] = shareScope;
+	return __webpack_require__.I(name, initScope);
+};
+
+// This exports getters to disallow modifications
+__webpack_require__.d(exports, {
+	get: function() { return get; },
+	init: function() { return init; }
+});
+
+/***/ }),
+
+/***/ "../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js":
+/*!***********************************************************************************************************************************!*\\
+  !*** ../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js ***!
+  \\***********************************************************************************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var __resourceQuery = "?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js";
+
+// eslint-disable-next-line no-async-promise-executor
+module.exports = new Promise(async (resolve, reject) => {
+    const { importDelegatedModule } = await __webpack_require__.e(/*! import() */ "dist_packages_utilities_src_utils_common_js").then(__webpack_require__.bind(__webpack_require__, /*! @module-federation/utilities/src/utils/common */ "../../dist/packages/utilities/src/utils/common.js"));
+    // eslint-disable-next-line no-undef
+    const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
+    const [global, url] = currentRequest.split('@');
+    importDelegatedModule({
+        global,
+        url: url + '?' + Date.now(),
+    })
+        .then((remote) => {
+        resolve(remote);
+    })
+        .catch((err) => reject(err));
+});
+//# sourceMappingURL=default-delegate.js.map
+
+/***/ }),
 
 /***/ "../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js":
 /*!*******************************************************************************************************************************!*\\
@@ -6182,7 +6542,7 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 		// This function allow to reference async chunks and sibling chunks for the entrypoint
 /******/ 		__webpack_require__.u = function(chunkId) {
 /******/ 			// return url for filenames based on template
-/******/ 			return "" + chunkId + "." + {"node_modules_antd_lib_index_js":"f0aa773b434ca3a1","pages__app_tsx_hasBoundary":"1d819e4d3ee01cbe","dist_packages_utilities_src_utils_common_js":"5806829f7cb42345","pages_index_tsx_hasBoundary":"523f4a9bf8d942ae","webpack_container_remote_shop_WebpackSvg":"c3b32803d7ca349c"}[chunkId] + ".js";
+/******/ 			return "" + chunkId + "." + {"node_modules_antd_lib_index_js":"f0aa773b434ca3a1","pages__app_tsx_hasBoundary":"0217cba3fea8fd66","dist_packages_utilities_src_utils_common_js":"233f2235573ec801","pages_home_test-remote-hook_tsx_hasBoundary":"1b395b00a9bb2836","webpack_container_remote_shop_menu":"e46d262796465990","webpack_container_remote_checkout_menu":"68ddd540c9d2f002"}[chunkId] + ".js";
 /******/ 		};
 /******/ 	}();
 /******/ 	
@@ -6214,15 +6574,31 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 	/* webpack/runtime/remotes loading */
 /******/ 	!function() {
 /******/ 		var chunkMapping = {
-/******/ 			"webpack_container_remote_shop_WebpackSvg": [
-/******/ 				"webpack/container/remote/shop/WebpackSvg"
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/useCustomRemoteHook"
+/******/ 			],
+/******/ 			"webpack_container_remote_shop_menu": [
+/******/ 				"webpack/container/remote/shop/menu"
+/******/ 			],
+/******/ 			"webpack_container_remote_checkout_menu": [
+/******/ 				"webpack/container/remote/checkout/menu"
 /******/ 			]
 /******/ 		};
 /******/ 		var idToExternalAndNameMapping = {
-/******/ 			"webpack/container/remote/shop/WebpackSvg": [
+/******/ 			"webpack/container/remote/shop/useCustomRemoteHook": [
 /******/ 				"default",
-/******/ 				"./WebpackSvg",
+/******/ 				"./useCustomRemoteHook",
 /******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/menu": [
+/******/ 				"default",
+/******/ 				"./menu",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/menu": [
+/******/ 				"default",
+/******/ 				"./menu",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.remotes = function(chunkId, promises) {
@@ -6316,6 +6692,7 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 				case "default": {
 /******/ 					register("antd", "4.24.9", function() { return __webpack_require__.e("node_modules_antd_lib_index_js").then(function() { return function() { return __webpack_require__(/*! ../../node_modules/antd/lib/index.js */ "../../node_modules/antd/lib/index.js"); }; }); });
 /******/ 					initExternal("../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/ssr/remoteEntry.js");
+/******/ 					initExternal("../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/ssr/remoteEntry.js");
 /******/ 				}
 /******/ 				break;
 /******/ 			}
@@ -6522,6 +6899,25 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 		}
 /******/ 	}();
 /******/ 	
+/******/ 	/* webpack/runtime/inverted container startup */
+/******/ 	!function() {
+/******/ 		
+/******/ 		        if(typeof window === 'undefined') {
+/******/ 		          global['__remote_scope__'] = global['__remote_scope__'] || {_config: {}};
+/******/ 		        }
+/******/ 		
+/******/ 		        __webpack_require__.S['default'] = __webpack_require__.S['default'] || {};
+/******/ 		
+/******/ 		        console.log('webpack startup function called');
+/******/ 		        try {
+/******/ 		        // var containerAttachSpace = global['__remote_scope__'] || global;
+/******/ 		        var containerAttachObject = typeof window !== 'undefined' ? window : global['__remote_scope__']
+/******/ 		        containerAttachObject["home_app"] = __webpack_require__("webpack/container/entry/home_app")
+/******/ 		      } catch (e) {
+/******/ 		        console.error('host runtime was unable to initialize its own remote', e);
+/******/ 		      }
+/******/ 	}();
+/******/ 	
 /******/ 	/* webpack/runtime/readFile chunk loading */
 /******/ 	!function() {
 /******/ 		// no baseURI
@@ -6613,7 +7009,7 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 				if(installedChunkData) {
 /******/ 					promises.push(installedChunkData[2]);
 /******/ 				} else {
-/******/ 					if("webpack_container_remote_shop_WebpackSvg" != chunkId) {
+/******/ 					if(!/^webpack_container_remote_(checkout|shop)_menu$/.test(chunkId)) {
 /******/ 						// load the chunk and return promise to it
 /******/ 						var promise = new Promise(async function(resolve, reject) {
 /******/ 							installedChunkData = installedChunks[chunkId] = [resolve, reject];

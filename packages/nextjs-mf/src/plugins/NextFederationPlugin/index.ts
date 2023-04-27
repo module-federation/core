@@ -20,7 +20,7 @@ import {
   retrieveDefaultShared,
 } from './next-fragments';
 
-import { parseRemotes, DEFAULT_SHARE_SCOPE_BROWSER_LAZY } from '../../internal';
+import { parseRemotes } from '../../internal';
 import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
 import { removeUnnecessarySharedKeys } from './remove-unnecessary-shared-keys';

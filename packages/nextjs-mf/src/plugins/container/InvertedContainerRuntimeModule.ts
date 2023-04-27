@@ -112,9 +112,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         webpack.RuntimeGlobals.shareScopeMap
       }['default'] || {};
 
-        console.log('webpack startup function called');
         try {
-        // var containerAttachSpace = ${globalObject}['__remote_scope__'] || ${globalObject};
         var containerAttachObject = typeof window !== 'undefined' ? window : ${globalObject}['__remote_scope__']
         containerAttachObject[${JSON.stringify(
           //@ts-ignore

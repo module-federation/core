@@ -26,7 +26,7 @@ describe('Next.js build output', () => {
       const buildOutput = findFileInDirectory('remoteEntry', buildOutputDir);
       expect(buildOutput).toMatchSnapshot();
     });
-    xit('partial remote', () => {
+    it('partial remote', () => {
       const buildOutput = findFileInDirectory('home_app', buildOutputDir);
       expect(buildOutput).toMatchSnapshot();
     });
