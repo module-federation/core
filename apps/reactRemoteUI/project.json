@@ -4,7 +4,7 @@
   "sourceRoot": "apps/reactRemoteUI/src",
   "projectType": "application",
   "targets": {
-    "build": {
+    "xbuild": {
       "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
