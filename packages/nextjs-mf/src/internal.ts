@@ -98,11 +98,19 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
 
-  acc[key] = { ...value, eager: true, import: undefined };
+  acc[key] = { ...value, eager: true };
 
   return acc;
 }, {} as SharedObject);
+export const DEFAULT_SHARE_SCOPE_BROWSER_LAZY: SharedObject = Object.entries(
+  DEFAULT_SHARE_SCOPE
+).reduce((acc, item) => {
+  const [key, value] = item as [string, SharedConfig];
 
+  acc[key] = { ...value, eager: false, import: undefined };
+
+  return acc;
+}, {} as SharedObject);
 /**
  * Checks if the remote value is an internal or promise delegate module reference.
  *

@@ -20,7 +20,7 @@ import {
   retrieveDefaultShared,
 } from './next-fragments';
 
-import { parseRemotes } from '../../internal';
+import { parseRemotes, DEFAULT_SHARE_SCOPE_BROWSER_LAZY } from '../../internal';
 import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
 import { removeUnnecessarySharedKeys } from './remove-unnecessary-shared-keys';
@@ -117,10 +117,6 @@ export class NextFederationPlugin {
         ...this._options.remotes,
       },
       shared: {
-        __hoist: {
-          import: require.resolve('../../internal-delegate-hoist'),
-          eager: true,
-        },
         ...defaultShared,
         ...this._options.shared,
       },
@@ -149,24 +145,28 @@ export class NextFederationPlugin {
     // @ts-ignore
     new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
 
-    // if (
-    //   !isServer &&
-    //   this._options.remotes &&
-    //   Object.keys(this._options.remotes).length > 0
-    // ) {
-    //   // single runtime chunk if host or circular remote uses remote of current host.
-    //   // @ts-ignore
-    //   new ModuleFederationPlugin({
-    //     ...hostFederationPluginOptions,
-    //     filename: undefined,
-    //     runtime: undefined,
-    //     name: this._options.name + '_single',
-    //     library: {
-    //       ...hostFederationPluginOptions.library,
-    //       name: this._options.name + '_single',
-    //     },
-    //   }).apply(compiler);
-    // }
+    if (
+      !isServer &&
+      this._options.remotes &&
+      Object.keys(this._options.remotes).length > 0
+    ) {
+      // single runtime chunk if host or circular remote uses remote of current host.
+      // @ts-ignore
+      new ModuleFederationPlugin({
+        ...hostFederationPluginOptions,
+        filename: undefined,
+        runtime: undefined,
+        name: this._options.name + '_single',
+        library: {
+          ...hostFederationPluginOptions.library,
+          name: this._options.name + '_single',
+        },
+        shared: {
+          ...hostFederationPluginOptions.shared,
+          ...DEFAULT_SHARE_SCOPE_BROWSER_LAZY,
+        },
+      }).apply(compiler);
+    }
 
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
   }

@@ -61,17 +61,20 @@ class AddModulesToRuntimeChunkPlugin {
     const { runtime, container, remotes, shared, eager, applicationName } =
       this.options;
 
-    isServer &&
-      new DelegateModulesPlugin({
-        runtime,
-        container,
-        remotes,
-      }).apply(compiler);
+    new DelegateModulesPlugin({
+      runtime,
+      container,
+      remotes,
+    }).apply(compiler);
 
     if (!isServer) {
       // next-client-pages-loade
     }
-    if (typeof compiler.options.entry === 'function' && !isServer) {
+    if (
+      compiler.options.mode === 'development' &&
+      typeof compiler.options.entry === 'function' &&
+      !isServer
+    ) {
       const backupEntries = compiler.options.entry;
       compiler.options.entry = () =>
         backupEntries().then((entries) => {
@@ -84,12 +87,12 @@ class AddModulesToRuntimeChunkPlugin {
                   '!' +
                   value.import[0];
               }
-              // if (key === 'pages/_app') {
-              //   value.import[1] =
-              //     require.resolve('./async-pages-loader') +
-              //     '!' +
-              //     value.import[1];
-              // }
+              if (key === 'pages/_app') {
+                value.import[1] =
+                  require.resolve('./async-pages-loader') +
+                  '!' +
+                  value.import[1];
+              }
               if (value.import[0].startsWith('next-client-pages-loader')) {
                 value.import[0] =
                   require.resolve('./async-pages-loader') +
@@ -114,7 +117,29 @@ class AddModulesToRuntimeChunkPlugin {
             // Get the runtime chunk and return if it's not found or has no runtime
             const mainChunk = this.getChunkByName(chunks, 'main');
             const runtimeChunk = this.getChunkByName(chunks, 'webpack');
+            const container = this.getChunkByName(
+              chunks,
+              this.options.container
+            );
 
+            if (container && !isServer) {
+              compilation.chunkGraph
+                .getChunkModulesIterable(container)
+                .forEach((module) => {
+                  if (
+                    // module.type === 'provide-module' ||
+                    module.type === 'javascript/auto'
+                  ) {
+                    compilation.chunkGraph.disconnectChunkAndModule(
+                      container,
+                      module
+                    );
+                    return;
+                  }
+
+                  // console.log(module.identifier(), module.type);
+                });
+            }
             if (true) {
               // const mainModules =
               //   compilation.chunkGraph.getOrderedChunkModulesIterable(
@@ -154,7 +179,7 @@ class AddModulesToRuntimeChunkPlugin {
               // }
 
               for (const chunk of chunks) {
-                if (this.options.container === 'home_app' && !isServer) {
+                if (!isServer) {
                   for (const module of chunk.modulesIterable) {
                     if (
                       module.identifier().includes('webpack/runtime') ||
@@ -168,10 +193,10 @@ class AddModulesToRuntimeChunkPlugin {
                         runtimeChunk.debugId
                       );
 
-                      compilation.chunkGraph.disconnectChunkAndModule(
-                        chunk,
-                        module
-                      );
+                      // compilation.chunkGraph.disconnectChunkAndModule(
+                      //   chunk,
+                      //   module
+                      // );
                     }
                   }
                 }

@@ -42,7 +42,7 @@ function buildEagerShared(shared: Record<string, any>): EagerShared {
 
   return Object.entries(shared).reduce(
     (acc: EagerShared, [name, params]) => {
-      if (params.eager === true) {
+      if (params.eager === true && params.import === false) {
         acc.scope += `
         ${JSON.stringify(name)}: {
           "0": {
@@ -52,6 +52,7 @@ function buildEagerShared(shared: Record<string, any>): EagerShared {
           }
         },`;
         acc.sideload += `
+      console.log(require(${JSON.stringify('!!' + name + '?pop')}))
         __webpack_modules__[require.resolveWeak(${JSON.stringify(
           name
         )})] = __webpack_modules__[require.resolveWeak(${JSON.stringify(
