@@ -222,6 +222,7 @@ module.exports = new Promise(async (resolve, reject) => {
 
 exports[`Next.js build output client remoteEntry.js 1`] = `
 "/******/ (function() { // webpackBootstrap
+/******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
 /***/ "webpack/container/entry/home_app":
@@ -230,7 +231,6 @@ exports[`Next.js build output client remoteEntry.js 1`] = `
   \\***********************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-"use strict";
 var moduleMap = {
 	"./pages-map": function() {
 		return __webpack_require__.e("dist_packages_nextjs-mf_src_loaders_nextPageMapLoader_js_dist_packages_nextjs-mf_src_loaders_-50dce4").then(function() { return function() { return (__webpack_require__(/*! ../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js!../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js */ "../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js!../../dist/packages/nextjs-mf/src/loaders/nextPageMapLoader.js")); }; });
@@ -325,23 +325,12 @@ __webpack_require__.d(exports, {
 
 /***/ }),
 
-/***/ "?d22b":
-/*!******************************************!*\\
-  !*** ./utils/resolve-rewrites (ignored) ***!
-  \\******************************************/
-/***/ (function() {
-
-/* (ignored) */
-
-/***/ }),
-
 /***/ "../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js":
 /*!**************************************************************************************************************************************!*\\
   !*** ../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js ***!
   \\**************************************************************************************************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-"use strict";
 var __resourceQuery = "?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js";
 
 // eslint-disable-next-line no-async-promise-executor
@@ -369,7 +358,6 @@ module.exports = new Promise(async (resolve, reject) => {
   \\**********************************************************************************************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-"use strict";
 var __resourceQuery = "?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js";
 
 // eslint-disable-next-line no-async-promise-executor
@@ -532,7 +520,7 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	!function() {
-/******/ 		__webpack_require__.h = function() { return "a65013142236e35e"; }
+/******/ 		__webpack_require__.h = function() { return "0c85a3c3cd0ffbb3"; }
 /******/ 	}();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
@@ -797,6 +785,185 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 		}
 /******/ 	}();
 /******/ 	
+/******/ 	/* webpack/runtime/remotes loading */
+/******/ 	!function() {
+/******/ 		var chunkMapping = {
+/******/ 			"pages_checkout_slug_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[...slug]"
+/******/ 			],
+/******/ 			"pages_checkout_pid_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[pid]"
+/******/ 			],
+/******/ 			"pages_checkout_exposed-pages_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/exposed-pages"
+/******/ 			],
+/******/ 			"pages_checkout_index_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/index"
+/******/ 			],
+/******/ 			"pages_checkout_test-check-button_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-check-button"
+/******/ 			],
+/******/ 			"pages_checkout_test-title_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-title"
+/******/ 			],
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/useCustomRemoteHook"
+/******/ 			],
+/******/ 			"pages_shop_exposed-pages_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/exposed-pages"
+/******/ 			],
+/******/ 			"pages_shop_index_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/index"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-png_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-png"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-svg_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-svg"
+/******/ 			],
+/******/ 			"pages_shop_products_slug_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/products/[...slug]"
+/******/ 			],
+/******/ 			"webpack_container_remote_checkout_CheckoutTitle": [
+/******/ 				"webpack/container/remote/checkout/CheckoutTitle"
+/******/ 			],
+/******/ 			"webpack_container_remote_checkout_ButtonOldAnt": [
+/******/ 				"webpack/container/remote/checkout/ButtonOldAnt"
+/******/ 			],
+/******/ 			"webpack_container_remote_shop_WebpackSvg": [
+/******/ 				"webpack/container/remote/shop/WebpackSvg"
+/******/ 			],
+/******/ 			"webpack_container_remote_shop_WebpackPng": [
+/******/ 				"webpack/container/remote/shop/WebpackPng"
+/******/ 			]
+/******/ 		};
+/******/ 		var idToExternalAndNameMapping = {
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[...slug]": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/[...slug]",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[pid]": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/[pid]",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/exposed-pages": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/exposed-pages",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/index": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/index",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-check-button": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/test-check-button",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-title": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/test-title",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/useCustomRemoteHook": [
+/******/ 				"default",
+/******/ 				"./useCustomRemoteHook",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/exposed-pages": [
+/******/ 				"default",
+/******/ 				"./pages/shop/exposed-pages",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/index": [
+/******/ 				"default",
+/******/ 				"./pages/shop/index",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-png": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-png",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-svg": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-svg",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/products/[...slug]": [
+/******/ 				"default",
+/******/ 				"./pages/shop/products/[...slug]",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/CheckoutTitle": [
+/******/ 				"default",
+/******/ 				"./CheckoutTitle",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/ButtonOldAnt": [
+/******/ 				"default",
+/******/ 				"./ButtonOldAnt",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/WebpackSvg": [
+/******/ 				"default",
+/******/ 				"./WebpackSvg",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/WebpackPng": [
+/******/ 				"default",
+/******/ 				"./WebpackPng",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			]
+/******/ 		};
+/******/ 		__webpack_require__.f.remotes = function(chunkId, promises) {
+/******/ 			if(__webpack_require__.o(chunkMapping, chunkId)) {
+/******/ 				chunkMapping[chunkId].forEach(function(id) {
+/******/ 					var getScope = __webpack_require__.R;
+/******/ 					if(!getScope) getScope = [];
+/******/ 					var data = idToExternalAndNameMapping[id];
+/******/ 					if(getScope.indexOf(data) >= 0) return;
+/******/ 					getScope.push(data);
+/******/ 					if(data.p) return promises.push(data.p);
+/******/ 					var onError = function(error) {
+/******/ 						if(!error) error = new Error("Container missing");
+/******/ 						if(typeof error.message === "string")
+/******/ 							error.message += '\\nwhile loading "' + data[1] + '" from ' + data[2];
+/******/ 						__webpack_require__.m[id] = function() {
+/******/ 							throw error;
+/******/ 						}
+/******/ 						data.p = 0;
+/******/ 					};
+/******/ 					var handleFunction = function(fn, arg1, arg2, d, next, first) {
+/******/ 						try {
+/******/ 							var promise = fn(arg1, arg2);
+/******/ 							if(promise && promise.then) {
+/******/ 								var p = promise.then(function(result) { return next(result, d); }, onError);
+/******/ 								if(first) promises.push(data.p = p); else return p;
+/******/ 							} else {
+/******/ 								return next(promise, d, first);
+/******/ 							}
+/******/ 						} catch(error) {
+/******/ 							onError(error);
+/******/ 						}
+/******/ 					}
+/******/ 					var onExternal = function(external, _, first) { return external ? handleFunction(__webpack_require__.I, data[0], 0, external, onInitialized, first) : onError(); };
+/******/ 					var onInitialized = function(_, external, first) { return handleFunction(external.get, data[1], getScope, 0, onFactory, first); };
+/******/ 					var onFactory = function(factory) {
+/******/ 						data.p = 1;
+/******/ 						__webpack_require__.m[id] = function(module) {
+/******/ 							module.exports = factory();
+/******/ 						}
+/******/ 					};
+/******/ 					handleFunction(__webpack_require__, data[2], 0, 0, onExternal, 1);
+/******/ 				});
+/******/ 			}
+/******/ 		}
+/******/ 	}();
+/******/ 	
 /******/ 	/* webpack/runtime/sharing */
 /******/ 	!function() {
 /******/ 		__webpack_require__.S = {};
@@ -837,17 +1004,6 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 			switch(name) {
 /******/ 				case "default": {
 /******/ 					register("antd", "4.24.9", function() { return __webpack_require__.e("node_modules_antd_es_index_js").then(function() { return function() { return __webpack_require__(/*! ../../node_modules/antd/es/index.js */ "../../node_modules/antd/es/index.js"); }; }); });
-/******/ 					register("next/dynamic", "13.3.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/next/dynamic.js */ "../../node_modules/next/dynamic.js"); }; }, 1);
-/******/ 					register("next/head", "13.3.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/next/head.js */ "../../node_modules/next/head.js"); }; }, 1);
-/******/ 					register("next/link", "13.3.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/next/link.js */ "../../node_modules/next/link.js"); }; }, 1);
-/******/ 					register("next/router", "13.3.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/next/router.js */ "../../node_modules/next/router.js"); }; }, 1);
-/******/ 					register("next/script", "13.3.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/next/script.js */ "../../node_modules/next/script.js"); }; }, 1);
-/******/ 					register("react-dom", "18.2.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/react-dom/index.js */ "../../node_modules/react-dom/index.js"); }; }, 1);
-/******/ 					register("react/jsx-dev-runtime", "18.2.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/react/jsx-dev-runtime.js */ "../../node_modules/react/jsx-dev-runtime.js"); }; }, 1);
-/******/ 					register("react/jsx-runtime", "18.2.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/react/jsx-runtime.js */ "../../node_modules/react/jsx-runtime.js"); }; }, 1);
-/******/ 					register("react", "18.2.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/react/index.js */ "../../node_modules/react/index.js"); }; }, 1);
-/******/ 					register("styled-jsx/style", "5.1.1", function() { return function() { return __webpack_require__(/*! ../../node_modules/styled-jsx/style.js */ "../../node_modules/styled-jsx/style.js"); }; }, 1);
-/******/ 					register("styled-jsx", "5.1.1", function() { return function() { return __webpack_require__(/*! ../../node_modules/styled-jsx/index.js */ "../../node_modules/styled-jsx/index.js"); }; }, 1);
 /******/ 					initExternal("../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js");
 /******/ 					initExternal("../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js");
 /******/ 				}
@@ -1460,112 +1616,382 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 		});
 /******/ 		var installedModules = {};
 /******/ 		var moduleToHandlerMapping = {
-/******/ 			"webpack/sharing/consume/default/next/dynamic/next/dynamic": function() { return loadSingletonFallback("default", "next/dynamic", function() { return function() { return __webpack_require__(/*! next/dynamic */ "../../node_modules/next/dynamic.js"); }; }); },
+/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
+/******/ 			"webpack/sharing/consume/default/react": function() { return loadSingleton("default", "react"); },
+/******/ 			"webpack/sharing/consume/default/next/dynamic": function() { return loadSingleton("default", "next/dynamic"); },
 /******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return __webpack_require__.e("node_modules_antd_es_index_js").then(function() { return function() { return __webpack_require__(/*! antd */ "../../node_modules/antd/es/index.js"); }; }); }); },
-/******/ 			"webpack/sharing/consume/default/next/router/next/router": function() { return loadSingletonFallback("default", "next/router", function() { return function() { return __webpack_require__(/*! next/router */ "../../node_modules/next/router.js"); }; }); },
-/******/ 			"webpack/sharing/consume/default/react/jsx-dev-runtime/react/jsx-dev-runtime": function() { return loadSingletonFallback("default", "react/jsx-dev-runtime", function() { return function() { return __webpack_require__(/*! react/jsx-dev-runtime */ "../../node_modules/react/jsx-dev-runtime.js"); }; }); },
-/******/ 			"webpack/sharing/consume/default/styled-jsx/style/styled-jsx/style": function() { return loadSingletonFallback("default", "styled-jsx/style", function() { return function() { return __webpack_require__(/*! styled-jsx/style */ "../../node_modules/styled-jsx/style.js"); }; }); },
-/******/ 			"webpack/sharing/consume/default/next/head/next/head": function() { return loadSingletonFallback("default", "next/head", function() { return function() { return __webpack_require__(/*! next/head */ "../../node_modules/next/head.js"); }; }); },
-/******/ 			"webpack/sharing/consume/default/next/link/next/link": function() { return loadSingletonFallback("default", "next/link", function() { return function() { return __webpack_require__(/*! next/link */ "../../node_modules/next/link.js"); }; }); },
-/******/ 			"webpack/sharing/consume/default/react-dom/react-dom": function() { return loadSingletonFallback("default", "react-dom", function() { return function() { return __webpack_require__(/*! react-dom */ "../../node_modules/react-dom/index.js"); }; }); },
-/******/ 			"webpack/sharing/consume/default/react/react": function() { return loadSingletonFallback("default", "react", function() { return function() { return __webpack_require__(/*! react */ "../../node_modules/react/index.js"); }; }); }
+/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
+/******/ 			"webpack/sharing/consume/default/react/jsx-dev-runtime": function() { return loadSingleton("default", "react/jsx-dev-runtime"); },
+/******/ 			"webpack/sharing/consume/default/styled-jsx/style": function() { return loadSingleton("default", "styled-jsx/style"); },
+/******/ 			"webpack/sharing/consume/default/next/head": function() { return loadSingleton("default", "next/head"); },
+/******/ 			"webpack/sharing/consume/default/next/link": function() { return loadSingleton("default", "next/link"); }
 /******/ 		};
-/******/ 		var initialConsumes = ["webpack/sharing/consume/default/react-dom/react-dom","webpack/sharing/consume/default/react/react"];
-/******/ 		initialConsumes.forEach(function(id) {
-/******/ 			__webpack_require__.m[id] = function(module) {
-/******/ 				// Handle case when module is used sync
-/******/ 				installedModules[id] = 0;
-/******/ 				delete __webpack_require__.c[id];
-/******/ 				var factory = moduleToHandlerMapping[id]();
-/******/ 				if(typeof factory !== "function") throw new Error("Shared module is not available for eager consumption: " + id);
-/******/ 				module.exports = factory();
-/******/ 			}
-/******/ 		});
+/******/ 		// no consumes in initial chunks
 /******/ 		var chunkMapping = {
+/******/ 			"node_modules_antd_es_index_js": [
+/******/ 				"webpack/sharing/consume/default/react-dom",
+/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			],
 /******/ 			"pages_dynamic-remote_js": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_index_tsx": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_checkout_slug_tsx": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_checkout_pid_tsx": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_checkout_exposed-pages_tsx": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_checkout_index_tsx": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_checkout_test-check-button_tsx": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_checkout_test-title_tsx": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_home_exposed-pages_tsx": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_home_test-broken-remotes_tsx": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_home_test-remote-hook_tsx": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_home_test-shared-nav_tsx": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_shop_exposed-pages_js": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_shop_index_js": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_shop_test-webpack-png_js": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_shop_test-webpack-svg_js": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"pages_shop_products_slug_js": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
 /******/ 			],
 /******/ 			"components_SharedNav_tsx": [
 /******/ 				"webpack/sharing/consume/default/antd/antd",
-/******/ 				"webpack/sharing/consume/default/next/router/next/router",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime/react/jsx-dev-runtime",
-/******/ 				"webpack/sharing/consume/default/styled-jsx/style/styled-jsx/style"
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
 /******/ 			],
 /******/ 			"components_menu_tsx": [
 /******/ 				"webpack/sharing/consume/default/antd/antd",
-/******/ 				"webpack/sharing/consume/default/next/router/next/router",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime/react/jsx-dev-runtime"
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
 /******/ 			],
 /******/ 			"pages_dynamic-remote_js_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime/react/jsx-dev-runtime"
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react"
 /******/ 			],
 /******/ 			"pages_index_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/next/head/next/head",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime/react/jsx-dev-runtime"
+/******/ 				"webpack/sharing/consume/default/next/head",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react"
 /******/ 			],
 /******/ 			"pages_home_exposed-pages_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime/react/jsx-dev-runtime"
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react"
 /******/ 			],
 /******/ 			"pages_home_test-broken-remotes_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/next/link/next/link",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime/react/jsx-dev-runtime"
+/******/ 				"webpack/sharing/consume/default/next/link",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
 /******/ 			],
 /******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime/react/jsx-dev-runtime"
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
 /******/ 			],
 /******/ 			"pages_home_test-shared-nav_tsx_hasBoundary": [
 /******/ 				"webpack/sharing/consume/default/antd/antd",
-/******/ 				"webpack/sharing/consume/default/next/router/next/router",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime/react/jsx-dev-runtime",
-/******/ 				"webpack/sharing/consume/default/styled-jsx/style/styled-jsx/style"
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
+/******/ 			]
+/******/ 		};
+/******/ 		__webpack_require__.f.consumes = function(chunkId, promises) {
+/******/ 			if(__webpack_require__.o(chunkMapping, chunkId)) {
+/******/ 				chunkMapping[chunkId].forEach(function(id) {
+/******/ 					if(__webpack_require__.o(installedModules, id)) return promises.push(installedModules[id]);
+/******/ 					var onFactory = function(factory) {
+/******/ 						installedModules[id] = 0;
+/******/ 						__webpack_require__.m[id] = function(module) {
+/******/ 							delete __webpack_require__.c[id];
+/******/ 							module.exports = factory();
+/******/ 						}
+/******/ 					};
+/******/ 					var onError = function(error) {
+/******/ 						delete installedModules[id];
+/******/ 						__webpack_require__.m[id] = function(module) {
+/******/ 							delete __webpack_require__.c[id];
+/******/ 							throw error;
+/******/ 						}
+/******/ 					};
+/******/ 					try {
+/******/ 						var promise = moduleToHandlerMapping[id]();
+/******/ 						if(promise.then) {
+/******/ 							promises.push(installedModules[id] = promise.then(onFactory)['catch'](onError));
+/******/ 						} else onFactory(promise);
+/******/ 					} catch(e) { onError(e); }
+/******/ 				});
+/******/ 			}
+/******/ 		}
+/******/ 	}();
+/******/ 	
+/******/ 	/* webpack/runtime/consumes */
+/******/ 	!function() {
+/******/ 		var parseVersion = function(str) {
+/******/ 			// see webpack/lib/util/semver.js for original code
+/******/ 			var p=function(p){return p.split(".").map((function(p){return+p==p?+p:p}))},n=/^([^-+]+)?(?:-([^+]+))?(?:\\+(.+))?$/.exec(str),r=n[1]?p(n[1]):[];return n[2]&&(r.length++,r.push.apply(r,p(n[2]))),n[3]&&(r.push([]),r.push.apply(r,p(n[3]))),r;
+/******/ 		}
+/******/ 		var versionLt = function(a, b) {
+/******/ 			// see webpack/lib/util/semver.js for original code
+/******/ 			a=parseVersion(a),b=parseVersion(b);for(var r=0;;){if(r>=a.length)return r<b.length&&"u"!=(typeof b[r])[0];var e=a[r],n=(typeof e)[0];if(r>=b.length)return"u"==n;var t=b[r],f=(typeof t)[0];if(n!=f)return"o"==n&&"n"==f||("s"==f||"u"==n);if("o"!=n&&"u"!=n&&e!=t)return e<t;r++}
+/******/ 		}
+/******/ 		var rangeToString = function(range) {
+/******/ 			// see webpack/lib/util/semver.js for original code
+/******/ 			var r=range[0],n="";if(1===range.length)return"*";if(r+.5){n+=0==r?">=":-1==r?"<":1==r?"^":2==r?"~":r>0?"=":"!=";for(var e=1,a=1;a<range.length;a++){e--,n+="u"==(typeof(t=range[a]))[0]?"-":(e>0?".":"")+(e=2,t)}return n}var g=[];for(a=1;a<range.length;a++){var t=range[a];g.push(0===t?"not("+o()+")":1===t?"("+o()+" || "+o()+")":2===t?g.pop()+" "+g.pop():rangeToString(t))}return o();function o(){return g.pop().replace(/^\\((.+)\\)$/,"$1")}
+/******/ 		}
+/******/ 		var satisfy = function(range, version) {
+/******/ 			// see webpack/lib/util/semver.js for original code
+/******/ 			if(0 in range){version=parseVersion(version);var e=range[0],r=e<0;r&&(e=-e-1);for(var n=0,i=1,a=!0;;i++,n++){var f,s,g=i<range.length?(typeof range[i])[0]:"";if(n>=version.length||"o"==(s=(typeof(f=version[n]))[0]))return!a||("u"==g?i>e&&!r:""==g!=r);if("u"==s){if(!a||"u"!=g)return!1}else if(a)if(g==s)if(i<=e){if(f!=range[i])return!1}else{if(r?f>range[i]:f<range[i])return!1;f!=range[i]&&(a=!1)}else if("s"!=g&&"n"!=g){if(r||i<=e)return!1;a=!1,i--}else{if(i<=e||s<g!=r)return!1;a=!1}else"s"!=g&&"n"!=g&&(a=!1,i--)}}var t=[],o=t.pop.bind(t);for(n=1;n<range.length;n++){var u=range[n];t.push(1==u?o()|o():2==u?o()&o():u?satisfy(u,version):!o())}return!!o();
+/******/ 		}
+/******/ 		var ensureExistence = function(scopeName, key) {
+/******/ 			var scope = __webpack_require__.S[scopeName];
+/******/ 			if(!scope || !__webpack_require__.o(scope, key)) throw new Error("Shared module " + key + " doesn't exist in shared scope " + scopeName);
+/******/ 			return scope;
+/******/ 		};
+/******/ 		var findVersion = function(scope, key) {
+/******/ 			var versions = scope[key];
+/******/ 			var key = Object.keys(versions).reduce(function(a, b) {
+/******/ 				return !a || versionLt(a, b) ? b : a;
+/******/ 			}, 0);
+/******/ 			return key && versions[key]
+/******/ 		};
+/******/ 		var findSingletonVersionKey = function(scope, key) {
+/******/ 			var versions = scope[key];
+/******/ 			return Object.keys(versions).reduce(function(a, b) {
+/******/ 				return !a || (!versions[a].loaded && versionLt(a, b)) ? b : a;
+/******/ 			}, 0);
+/******/ 		};
+/******/ 		var getInvalidSingletonVersionMessage = function(scope, key, version, requiredVersion) {
+/******/ 			return "Unsatisfied version " + version + " from " + (version && scope[key][version].from) + " of shared singleton module " + key + " (required " + rangeToString(requiredVersion) + ")"
+/******/ 		};
+/******/ 		var getSingleton = function(scope, scopeName, key, requiredVersion) {
+/******/ 			var version = findSingletonVersionKey(scope, key);
+/******/ 			return get(scope[key][version]);
+/******/ 		};
+/******/ 		var getSingletonVersion = function(scope, scopeName, key, requiredVersion) {
+/******/ 			var version = findSingletonVersionKey(scope, key);
+/******/ 			if (!satisfy(requiredVersion, version)) typeof console !== "undefined" && console.warn && console.warn(getInvalidSingletonVersionMessage(scope, key, version, requiredVersion));
+/******/ 			return get(scope[key][version]);
+/******/ 		};
+/******/ 		var getStrictSingletonVersion = function(scope, scopeName, key, requiredVersion) {
+/******/ 			var version = findSingletonVersionKey(scope, key);
+/******/ 			if (!satisfy(requiredVersion, version)) throw new Error(getInvalidSingletonVersionMessage(scope, key, version, requiredVersion));
+/******/ 			return get(scope[key][version]);
+/******/ 		};
+/******/ 		var findValidVersion = function(scope, key, requiredVersion) {
+/******/ 			var versions = scope[key];
+/******/ 			var key = Object.keys(versions).reduce(function(a, b) {
+/******/ 				if (!satisfy(requiredVersion, b)) return a;
+/******/ 				return !a || versionLt(a, b) ? b : a;
+/******/ 			}, 0);
+/******/ 			return key && versions[key]
+/******/ 		};
+/******/ 		var getInvalidVersionMessage = function(scope, scopeName, key, requiredVersion) {
+/******/ 			var versions = scope[key];
+/******/ 			return "No satisfying version (" + rangeToString(requiredVersion) + ") of shared module " + key + " found in shared scope " + scopeName + ".\\n" +
+/******/ 				"Available versions: " + Object.keys(versions).map(function(key) {
+/******/ 				return key + " from " + versions[key].from;
+/******/ 			}).join(", ");
+/******/ 		};
+/******/ 		var getValidVersion = function(scope, scopeName, key, requiredVersion) {
+/******/ 			var entry = findValidVersion(scope, key, requiredVersion);
+/******/ 			if(entry) return get(entry);
+/******/ 			throw new Error(getInvalidVersionMessage(scope, scopeName, key, requiredVersion));
+/******/ 		};
+/******/ 		var warnInvalidVersion = function(scope, scopeName, key, requiredVersion) {
+/******/ 			typeof console !== "undefined" && console.warn && console.warn(getInvalidVersionMessage(scope, scopeName, key, requiredVersion));
+/******/ 		};
+/******/ 		var get = function(entry) {
+/******/ 			entry.loaded = 1;
+/******/ 			return entry.get()
+/******/ 		};
+/******/ 		var init = function(fn) { return function(scopeName, a, b, c) {
+/******/ 			var promise = __webpack_require__.I(scopeName);
+/******/ 			if (promise && promise.then) return promise.then(fn.bind(fn, scopeName, __webpack_require__.S[scopeName], a, b, c));
+/******/ 			return fn(scopeName, __webpack_require__.S[scopeName], a, b, c);
+/******/ 		}; };
+/******/ 		
+/******/ 		var load = /*#__PURE__*/ init(function(scopeName, scope, key) {
+/******/ 			ensureExistence(scopeName, key);
+/******/ 			return get(findVersion(scope, key));
+/******/ 		});
+/******/ 		var loadFallback = /*#__PURE__*/ init(function(scopeName, scope, key, fallback) {
+/******/ 			return scope && __webpack_require__.o(scope, key) ? get(findVersion(scope, key)) : fallback();
+/******/ 		});
+/******/ 		var loadVersionCheck = /*#__PURE__*/ init(function(scopeName, scope, key, version) {
+/******/ 			ensureExistence(scopeName, key);
+/******/ 			return get(findValidVersion(scope, key, version) || warnInvalidVersion(scope, scopeName, key, version) || findVersion(scope, key));
+/******/ 		});
+/******/ 		var loadSingleton = /*#__PURE__*/ init(function(scopeName, scope, key) {
+/******/ 			ensureExistence(scopeName, key);
+/******/ 			return getSingleton(scope, scopeName, key);
+/******/ 		});
+/******/ 		var loadSingletonVersionCheck = /*#__PURE__*/ init(function(scopeName, scope, key, version) {
+/******/ 			ensureExistence(scopeName, key);
+/******/ 			return getSingletonVersion(scope, scopeName, key, version);
+/******/ 		});
+/******/ 		var loadStrictVersionCheck = /*#__PURE__*/ init(function(scopeName, scope, key, version) {
+/******/ 			ensureExistence(scopeName, key);
+/******/ 			return getValidVersion(scope, scopeName, key, version);
+/******/ 		});
+/******/ 		var loadStrictSingletonVersionCheck = /*#__PURE__*/ init(function(scopeName, scope, key, version) {
+/******/ 			ensureExistence(scopeName, key);
+/******/ 			return getStrictSingletonVersion(scope, scopeName, key, version);
+/******/ 		});
+/******/ 		var loadVersionCheckFallback = /*#__PURE__*/ init(function(scopeName, scope, key, version, fallback) {
+/******/ 			if(!scope || !__webpack_require__.o(scope, key)) return fallback();
+/******/ 			return get(findValidVersion(scope, key, version) || warnInvalidVersion(scope, scopeName, key, version) || findVersion(scope, key));
+/******/ 		});
+/******/ 		var loadSingletonFallback = /*#__PURE__*/ init(function(scopeName, scope, key, fallback) {
+/******/ 			if(!scope || !__webpack_require__.o(scope, key)) return fallback();
+/******/ 			return getSingleton(scope, scopeName, key);
+/******/ 		});
+/******/ 		var loadSingletonVersionCheckFallback = /*#__PURE__*/ init(function(scopeName, scope, key, version, fallback) {
+/******/ 			if(!scope || !__webpack_require__.o(scope, key)) return fallback();
+/******/ 			return getSingletonVersion(scope, scopeName, key, version);
+/******/ 		});
+/******/ 		var loadStrictVersionCheckFallback = /*#__PURE__*/ init(function(scopeName, scope, key, version, fallback) {
+/******/ 			var entry = scope && __webpack_require__.o(scope, key) && findValidVersion(scope, key, version);
+/******/ 			return entry ? get(entry) : fallback();
+/******/ 		});
+/******/ 		var loadStrictSingletonVersionCheckFallback = /*#__PURE__*/ init(function(scopeName, scope, key, version, fallback) {
+/******/ 			if(!scope || !__webpack_require__.o(scope, key)) return fallback();
+/******/ 			return getStrictSingletonVersion(scope, scopeName, key, version);
+/******/ 		});
+/******/ 		var installedModules = {};
+/******/ 		var moduleToHandlerMapping = {
+/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
+/******/ 			"webpack/sharing/consume/default/react": function() { return loadSingleton("default", "react"); },
+/******/ 			"webpack/sharing/consume/default/next/dynamic": function() { return loadSingleton("default", "next/dynamic"); },
+/******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return __webpack_require__.e("node_modules_antd_es_index_js").then(function() { return function() { return __webpack_require__(/*! antd */ "../../node_modules/antd/es/index.js"); }; }); }); },
+/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
+/******/ 			"webpack/sharing/consume/default/react/jsx-dev-runtime": function() { return loadSingleton("default", "react/jsx-dev-runtime"); },
+/******/ 			"webpack/sharing/consume/default/styled-jsx/style": function() { return loadSingleton("default", "styled-jsx/style"); },
+/******/ 			"webpack/sharing/consume/default/next/head": function() { return loadSingleton("default", "next/head"); },
+/******/ 			"webpack/sharing/consume/default/next/link": function() { return loadSingleton("default", "next/link"); }
+/******/ 		};
+/******/ 		// no consumes in initial chunks
+/******/ 		var chunkMapping = {
+/******/ 			"node_modules_antd_es_index_js": [
+/******/ 				"webpack/sharing/consume/default/react-dom",
+/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			],
+/******/ 			"pages_dynamic-remote_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_index_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_slug_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_pid_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_exposed-pages_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_index_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_test-check-button_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_test-title_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_home_exposed-pages_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_home_test-broken-remotes_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_home_test-remote-hook_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_home_test-shared-nav_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_exposed-pages_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_index_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-png_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-svg_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_products_slug_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"components_SharedNav_tsx": [
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
+/******/ 			],
+/******/ 			"components_menu_tsx": [
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
+/******/ 			],
+/******/ 			"pages_dynamic-remote_js_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			],
+/******/ 			"pages_index_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/next/head",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			],
+/******/ 			"pages_home_exposed-pages_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			],
+/******/ 			"pages_home_test-broken-remotes_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/next/link",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
+/******/ 			],
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
+/******/ 			],
+/******/ 			"pages_home_test-shared-nav_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.consumes = function(chunkId, promises) {
@@ -2399,75 +2825,6 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 	__webpack_require__.i = [];
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/async module */
-/******/ 	!function() {
-/******/ 		var webpackQueues = typeof Symbol === "function" ? Symbol("webpack queues") : "__webpack_queues__";
-/******/ 		var webpackExports = typeof Symbol === "function" ? Symbol("webpack exports") : "__webpack_exports__";
-/******/ 		var webpackError = typeof Symbol === "function" ? Symbol("webpack error") : "__webpack_error__";
-/******/ 		var resolveQueue = function(queue) {
-/******/ 			if(queue && !queue.d) {
-/******/ 				queue.d = 1;
-/******/ 				queue.forEach(function(fn) { fn.r--; });
-/******/ 				queue.forEach(function(fn) { fn.r-- ? fn.r++ : fn(); });
-/******/ 			}
-/******/ 		}
-/******/ 		var wrapDeps = function(deps) { return deps.map(function(dep) {
-/******/ 			if(dep !== null && typeof dep === "object") {
-/******/ 				if(dep[webpackQueues]) return dep;
-/******/ 				if(dep.then) {
-/******/ 					var queue = [];
-/******/ 					queue.d = 0;
-/******/ 					dep.then(function(r) {
-/******/ 						obj[webpackExports] = r;
-/******/ 						resolveQueue(queue);
-/******/ 					}, function(e) {
-/******/ 						obj[webpackError] = e;
-/******/ 						resolveQueue(queue);
-/******/ 					});
-/******/ 					var obj = {};
-/******/ 					obj[webpackQueues] = function(fn) { fn(queue); };
-/******/ 					return obj;
-/******/ 				}
-/******/ 			}
-/******/ 			var ret = {};
-/******/ 			ret[webpackQueues] = function() {};
-/******/ 			ret[webpackExports] = dep;
-/******/ 			return ret;
-/******/ 		}); };
-/******/ 		__webpack_require__.a = function(module, body, hasAwait) {
-/******/ 			var queue;
-/******/ 			hasAwait && ((queue = []).d = 1);
-/******/ 			var depQueues = new Set();
-/******/ 			var exports = module.exports;
-/******/ 			var currentDeps;
-/******/ 			var outerResolve;
-/******/ 			var reject;
-/******/ 			var promise = new Promise(function(resolve, rej) {
-/******/ 				reject = rej;
-/******/ 				outerResolve = resolve;
-/******/ 			});
-/******/ 			promise[webpackExports] = exports;
-/******/ 			promise[webpackQueues] = function(fn) { queue && fn(queue), depQueues.forEach(fn), promise["catch"](function() {}); };
-/******/ 			module.exports = promise;
-/******/ 			body(function(deps) {
-/******/ 				currentDeps = wrapDeps(deps);
-/******/ 				var fn;
-/******/ 				var getResult = function() { return currentDeps.map(function(d) {
-/******/ 					if(d[webpackError]) throw d[webpackError];
-/******/ 					return d[webpackExports];
-/******/ 				}); }
-/******/ 				var promise = new Promise(function(resolve) {
-/******/ 					fn = function() { resolve(getResult); };
-/******/ 					fn.r = 0;
-/******/ 					var fnQueue = function(q) { q !== queue && !depQueues.has(q) && (depQueues.add(q), q && !q.d && (fn.r++, q.push(fn))); };
-/******/ 					currentDeps.map(function(dep) { dep[webpackQueues](fnQueue); });
-/******/ 				});
-/******/ 				return fn.r ? promise : getResult();
-/******/ 			}, function(err) { (err ? reject(promise[webpackError] = err) : outerResolve(exports)), resolveQueue(queue); });
-/******/ 			queue && (queue.d = 0);
-/******/ 		};
-/******/ 	}();
-/******/ 	
 /******/ 	/* webpack/runtime/chunk loaded */
 /******/ 	!function() {
 /******/ 		var deferred = [];
@@ -2594,7 +2951,7 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	!function() {
-/******/ 		__webpack_require__.h = function() { return "a65013142236e35e"; }
+/******/ 		__webpack_require__.h = function() { return "0c85a3c3cd0ffbb3"; }
 /******/ 	}();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
@@ -2683,6 +3040,42 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 	/* webpack/runtime/remotes loading */
 /******/ 	!function() {
 /******/ 		var chunkMapping = {
+/******/ 			"pages_checkout_index_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/index"
+/******/ 			],
+/******/ 			"pages_checkout_slug_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[...slug]"
+/******/ 			],
+/******/ 			"pages_checkout_pid_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[pid]"
+/******/ 			],
+/******/ 			"pages_checkout_exposed-pages_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/exposed-pages"
+/******/ 			],
+/******/ 			"pages_checkout_test-check-button_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-check-button"
+/******/ 			],
+/******/ 			"pages_checkout_test-title_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-title"
+/******/ 			],
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/useCustomRemoteHook"
+/******/ 			],
+/******/ 			"pages_shop_exposed-pages_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/exposed-pages"
+/******/ 			],
+/******/ 			"pages_shop_index_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/index"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-png_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-png"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-svg_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-svg"
+/******/ 			],
+/******/ 			"pages_shop_products_slug_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/products/[...slug]"
+/******/ 			],
 /******/ 			"webpack_container_remote_shop_menu": [
 /******/ 				"webpack/container/remote/shop/menu"
 /******/ 			],
@@ -2703,6 +3096,261 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 			]
 /******/ 		};
 /******/ 		var idToExternalAndNameMapping = {
+/******/ 			"webpack/container/remote/checkout/pages/checkout/index": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/index",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[...slug]": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/[...slug]",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[pid]": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/[pid]",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/exposed-pages": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/exposed-pages",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-check-button": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/test-check-button",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-title": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/test-title",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/useCustomRemoteHook": [
+/******/ 				"default",
+/******/ 				"./useCustomRemoteHook",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/exposed-pages": [
+/******/ 				"default",
+/******/ 				"./pages/shop/exposed-pages",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/index": [
+/******/ 				"default",
+/******/ 				"./pages/shop/index",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-png": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-png",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-svg": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-svg",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/products/[...slug]": [
+/******/ 				"default",
+/******/ 				"./pages/shop/products/[...slug]",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/menu": [
+/******/ 				"default",
+/******/ 				"./menu",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/menu": [
+/******/ 				"default",
+/******/ 				"./menu",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/CheckoutTitle": [
+/******/ 				"default",
+/******/ 				"./CheckoutTitle",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/ButtonOldAnt": [
+/******/ 				"default",
+/******/ 				"./ButtonOldAnt",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/WebpackSvg": [
+/******/ 				"default",
+/******/ 				"./WebpackSvg",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/WebpackPng": [
+/******/ 				"default",
+/******/ 				"./WebpackPng",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			]
+/******/ 		};
+/******/ 		__webpack_require__.f.remotes = function(chunkId, promises) {
+/******/ 			if(__webpack_require__.o(chunkMapping, chunkId)) {
+/******/ 				chunkMapping[chunkId].forEach(function(id) {
+/******/ 					var getScope = __webpack_require__.R;
+/******/ 					if(!getScope) getScope = [];
+/******/ 					var data = idToExternalAndNameMapping[id];
+/******/ 					if(getScope.indexOf(data) >= 0) return;
+/******/ 					getScope.push(data);
+/******/ 					if(data.p) return promises.push(data.p);
+/******/ 					var onError = function(error) {
+/******/ 						if(!error) error = new Error("Container missing");
+/******/ 						if(typeof error.message === "string")
+/******/ 							error.message += '\\nwhile loading "' + data[1] + '" from ' + data[2];
+/******/ 						__webpack_require__.m[id] = function() {
+/******/ 							throw error;
+/******/ 						}
+/******/ 						data.p = 0;
+/******/ 					};
+/******/ 					var handleFunction = function(fn, arg1, arg2, d, next, first) {
+/******/ 						try {
+/******/ 							var promise = fn(arg1, arg2);
+/******/ 							if(promise && promise.then) {
+/******/ 								var p = promise.then(function(result) { return next(result, d); }, onError);
+/******/ 								if(first) promises.push(data.p = p); else return p;
+/******/ 							} else {
+/******/ 								return next(promise, d, first);
+/******/ 							}
+/******/ 						} catch(error) {
+/******/ 							onError(error);
+/******/ 						}
+/******/ 					}
+/******/ 					var onExternal = function(external, _, first) { return external ? handleFunction(__webpack_require__.I, data[0], 0, external, onInitialized, first) : onError(); };
+/******/ 					var onInitialized = function(_, external, first) { return handleFunction(external.get, data[1], getScope, 0, onFactory, first); };
+/******/ 					var onFactory = function(factory) {
+/******/ 						data.p = 1;
+/******/ 						__webpack_require__.m[id] = function(module) {
+/******/ 							module.exports = factory();
+/******/ 						}
+/******/ 					};
+/******/ 					handleFunction(__webpack_require__, data[2], 0, 0, onExternal, 1);
+/******/ 				});
+/******/ 			}
+/******/ 		}
+/******/ 	}();
+/******/ 	
+/******/ 	/* webpack/runtime/remotes loading */
+/******/ 	!function() {
+/******/ 		var chunkMapping = {
+/******/ 			"pages_checkout_index_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/index"
+/******/ 			],
+/******/ 			"pages_checkout_slug_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[...slug]"
+/******/ 			],
+/******/ 			"pages_checkout_pid_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/[pid]"
+/******/ 			],
+/******/ 			"pages_checkout_exposed-pages_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/exposed-pages"
+/******/ 			],
+/******/ 			"pages_checkout_test-check-button_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-check-button"
+/******/ 			],
+/******/ 			"pages_checkout_test-title_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/checkout/pages/checkout/test-title"
+/******/ 			],
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/useCustomRemoteHook"
+/******/ 			],
+/******/ 			"pages_shop_exposed-pages_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/exposed-pages"
+/******/ 			],
+/******/ 			"pages_shop_index_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/index"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-png_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-png"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-svg_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/test-webpack-svg"
+/******/ 			],
+/******/ 			"pages_shop_products_slug_js_hasBoundary": [
+/******/ 				"webpack/container/remote/shop/pages/shop/products/[...slug]"
+/******/ 			],
+/******/ 			"webpack_container_remote_shop_menu": [
+/******/ 				"webpack/container/remote/shop/menu"
+/******/ 			],
+/******/ 			"webpack_container_remote_checkout_menu": [
+/******/ 				"webpack/container/remote/checkout/menu"
+/******/ 			],
+/******/ 			"webpack_container_remote_checkout_CheckoutTitle": [
+/******/ 				"webpack/container/remote/checkout/CheckoutTitle"
+/******/ 			],
+/******/ 			"webpack_container_remote_checkout_ButtonOldAnt": [
+/******/ 				"webpack/container/remote/checkout/ButtonOldAnt"
+/******/ 			],
+/******/ 			"webpack_container_remote_shop_WebpackSvg": [
+/******/ 				"webpack/container/remote/shop/WebpackSvg"
+/******/ 			],
+/******/ 			"webpack_container_remote_shop_WebpackPng": [
+/******/ 				"webpack/container/remote/shop/WebpackPng"
+/******/ 			]
+/******/ 		};
+/******/ 		var idToExternalAndNameMapping = {
+/******/ 			"webpack/container/remote/checkout/pages/checkout/index": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/index",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[...slug]": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/[...slug]",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/[pid]": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/[pid]",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/exposed-pages": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/exposed-pages",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-check-button": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/test-check-button",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/checkout/pages/checkout/test-title": [
+/******/ 				"default",
+/******/ 				"./pages/checkout/test-title",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/useCustomRemoteHook": [
+/******/ 				"default",
+/******/ 				"./useCustomRemoteHook",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/exposed-pages": [
+/******/ 				"default",
+/******/ 				"./pages/shop/exposed-pages",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/index": [
+/******/ 				"default",
+/******/ 				"./pages/shop/index",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-png": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-png",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/test-webpack-svg": [
+/******/ 				"default",
+/******/ 				"./pages/shop/test-webpack-svg",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
+/******/ 			"webpack/container/remote/shop/pages/shop/products/[...slug]": [
+/******/ 				"default",
+/******/ 				"./pages/shop/products/[...slug]",
+/******/ 				"../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js"
+/******/ 			],
 /******/ 			"webpack/container/remote/shop/menu": [
 /******/ 				"default",
 /******/ 				"./menu",
@@ -2824,19 +3472,8 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 			switch(name) {
 /******/ 				case "default": {
 /******/ 					register("antd", "4.24.9", function() { return __webpack_require__.e("node_modules_antd_es_index_js").then(function() { return function() { return __webpack_require__(/*! ../../node_modules/antd/es/index.js */ "../../node_modules/antd/es/index.js"); }; }); });
-/******/ 					register("next/dynamic", "13.3.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/next/dynamic.js */ "../../node_modules/next/dynamic.js"); }; }, 1);
-/******/ 					register("next/head", "13.3.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/next/head.js */ "../../node_modules/next/head.js"); }; }, 1);
-/******/ 					register("next/link", "13.3.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/next/link.js */ "../../node_modules/next/link.js"); }; }, 1);
-/******/ 					register("next/router", "13.3.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/next/router.js */ "../../node_modules/next/router.js"); }; }, 1);
-/******/ 					register("next/script", "13.3.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/next/script.js */ "../../node_modules/next/script.js"); }; }, 1);
-/******/ 					register("react-dom", "18.2.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/react-dom/index.js */ "../../node_modules/react-dom/index.js"); }; }, 1);
-/******/ 					register("react/jsx-dev-runtime", "18.2.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/react/jsx-dev-runtime.js */ "../../node_modules/react/jsx-dev-runtime.js"); }; }, 1);
-/******/ 					register("react/jsx-runtime", "18.2.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/react/jsx-runtime.js */ "../../node_modules/react/jsx-runtime.js"); }; }, 1);
-/******/ 					register("react", "18.2.0", function() { return function() { return __webpack_require__(/*! ../../node_modules/react/index.js */ "../../node_modules/react/index.js"); }; }, 1);
-/******/ 					register("styled-jsx/style", "5.1.1", function() { return function() { return __webpack_require__(/*! ../../node_modules/styled-jsx/style.js */ "../../node_modules/styled-jsx/style.js"); }; }, 1);
-/******/ 					register("styled-jsx", "5.1.1", function() { return function() { return __webpack_require__(/*! ../../node_modules/styled-jsx/index.js */ "../../node_modules/styled-jsx/index.js"); }; }, 1);
-/******/ 					initExternal("../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js");
 /******/ 					initExternal("../../dist/packages/nextjs-mf/src/default-delegate.js?remote=checkout@http://localhost:3002/_next/static/chunks/remoteEntry.js");
+/******/ 					initExternal("../../dist/packages/nextjs-mf/src/default-delegate.js?remote=shop@http://localhost:3001/_next/static/chunks/remoteEntry.js");
 /******/ 				}
 /******/ 				break;
 /******/ 			}
@@ -3447,16 +4084,17 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 		});
 /******/ 		var installedModules = {};
 /******/ 		var moduleToHandlerMapping = {
-/******/ 			"webpack/sharing/consume/default/next/dynamic/next/dynamic": function() { return loadSingletonFallback("default", "next/dynamic", function() { return function() { return __webpack_require__(/*! next/dynamic */ "../../node_modules/next/dynamic.js"); }; }); },
+/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
+/******/ 			"webpack/sharing/consume/default/react": function() { return loadSingleton("default", "react"); },
+/******/ 			"webpack/sharing/consume/default/next/dynamic": function() { return loadSingleton("default", "next/dynamic"); },
 /******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return __webpack_require__.e("node_modules_antd_es_index_js").then(function() { return function() { return __webpack_require__(/*! antd */ "../../node_modules/antd/es/index.js"); }; }); }); },
-/******/ 			"webpack/sharing/consume/default/next/router/next/router": function() { return loadSingletonFallback("default", "next/router", function() { return function() { return __webpack_require__(/*! next/router */ "../../node_modules/next/router.js"); }; }); },
-/******/ 			"webpack/sharing/consume/default/react/jsx-dev-runtime/react/jsx-dev-runtime": function() { return loadSingletonFallback("default", "react/jsx-dev-runtime", function() { return function() { return __webpack_require__(/*! react/jsx-dev-runtime */ "../../node_modules/react/jsx-dev-runtime.js"); }; }); },
-/******/ 			"webpack/sharing/consume/default/styled-jsx/style/styled-jsx/style": function() { return loadSingletonFallback("default", "styled-jsx/style", function() { return function() { return __webpack_require__(/*! styled-jsx/style */ "../../node_modules/styled-jsx/style.js"); }; }); },
-/******/ 			"webpack/sharing/consume/default/next/head/next/head": function() { return loadSingletonFallback("default", "next/head", function() { return function() { return __webpack_require__(/*! next/head */ "../../node_modules/next/head.js"); }; }); },
-/******/ 			"webpack/sharing/consume/default/react-dom/react-dom": function() { return loadSingletonFallback("default", "react-dom", function() { return function() { return __webpack_require__(/*! react-dom */ "../../node_modules/react-dom/index.js"); }; }); },
-/******/ 			"webpack/sharing/consume/default/react/react": function() { return loadSingletonFallback("default", "react", function() { return function() { return __webpack_require__(/*! react */ "../../node_modules/react/index.js"); }; }); }
+/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
+/******/ 			"webpack/sharing/consume/default/react/jsx-dev-runtime": function() { return loadSingleton("default", "react/jsx-dev-runtime"); },
+/******/ 			"webpack/sharing/consume/default/styled-jsx/style": function() { return loadSingleton("default", "styled-jsx/style"); },
+/******/ 			"webpack/sharing/consume/default/next/head": function() { return loadSingleton("default", "next/head"); },
+/******/ 			"webpack/sharing/consume/default/next/link": function() { return loadSingleton("default", "next/link"); }
 /******/ 		};
-/******/ 		var initialConsumes = ["webpack/sharing/consume/default/react-dom/react-dom","webpack/sharing/consume/default/react/react","webpack/sharing/consume/default/react-dom/react-dom","webpack/sharing/consume/default/react/react","webpack/sharing/consume/default/react-dom/react-dom","webpack/sharing/consume/default/react/react"];
+/******/ 		var initialConsumes = ["webpack/sharing/consume/default/react-dom","webpack/sharing/consume/default/react","webpack/sharing/consume/default/react-dom","webpack/sharing/consume/default/react","webpack/sharing/consume/default/next/dynamic"];
 /******/ 		initialConsumes.forEach(function(id) {
 /******/ 			__webpack_require__.m[id] = function(module) {
 /******/ 				// Handle case when module is used sync
@@ -3468,21 +4106,392 @@ module.exports = new Promise(async (resolve, reject) => {
 /******/ 			}
 /******/ 		});
 /******/ 		var chunkMapping = {
-/******/ 			"node_modules_next_dist_build_webpack_loaders_next-client-pages-loader_js_absolutePagePath_pri-22a160": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 			"node_modules_antd_es_index_js": [
+/******/ 				"webpack/sharing/consume/default/react-dom",
+/******/ 				"webpack/sharing/consume/default/react"
 /******/ 			],
-/******/ 			"node_modules_next_dist_build_webpack_loaders_next-client-pages-loader_js_absolutePagePath_2FU-48cb27": [
-/******/ 				"webpack/sharing/consume/default/next/dynamic/next/dynamic"
+/******/ 			"pages_dynamic-remote_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_index_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_slug_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_pid_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_exposed-pages_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_index_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_test-check-button_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_test-title_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_home_exposed-pages_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_home_test-broken-remotes_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_home_test-remote-hook_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_home_test-shared-nav_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_exposed-pages_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_index_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-png_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-svg_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_products_slug_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"components_SharedNav_tsx": [
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
+/******/ 			],
+/******/ 			"components_menu_tsx": [
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
 /******/ 			],
 /******/ 			"pages__app_tsx_hasBoundary": [
 /******/ 				"webpack/sharing/consume/default/antd/antd",
-/******/ 				"webpack/sharing/consume/default/next/router/next/router",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime/react/jsx-dev-runtime",
-/******/ 				"webpack/sharing/consume/default/styled-jsx/style/styled-jsx/style"
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
 /******/ 			],
 /******/ 			"pages_index_tsx_hasBoundary": [
-/******/ 				"webpack/sharing/consume/default/next/head/next/head",
-/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime/react/jsx-dev-runtime"
+/******/ 				"webpack/sharing/consume/default/next/head",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			],
+/******/ 			"pages_home_exposed-pages_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			],
+/******/ 			"pages_dynamic-remote_js_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			],
+/******/ 			"pages_home_test-broken-remotes_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/next/link",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
+/******/ 			],
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
+/******/ 			],
+/******/ 			"pages_home_test-shared-nav_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
+/******/ 			]
+/******/ 		};
+/******/ 		__webpack_require__.f.consumes = function(chunkId, promises) {
+/******/ 			if(__webpack_require__.o(chunkMapping, chunkId)) {
+/******/ 				chunkMapping[chunkId].forEach(function(id) {
+/******/ 					if(__webpack_require__.o(installedModules, id)) return promises.push(installedModules[id]);
+/******/ 					var onFactory = function(factory) {
+/******/ 						installedModules[id] = 0;
+/******/ 						__webpack_require__.m[id] = function(module) {
+/******/ 							delete __webpack_require__.c[id];
+/******/ 							module.exports = factory();
+/******/ 						}
+/******/ 					};
+/******/ 					var onError = function(error) {
+/******/ 						delete installedModules[id];
+/******/ 						__webpack_require__.m[id] = function(module) {
+/******/ 							delete __webpack_require__.c[id];
+/******/ 							throw error;
+/******/ 						}
+/******/ 					};
+/******/ 					try {
+/******/ 						var promise = moduleToHandlerMapping[id]();
+/******/ 						if(promise.then) {
+/******/ 							promises.push(installedModules[id] = promise.then(onFactory)['catch'](onError));
+/******/ 						} else onFactory(promise);
+/******/ 					} catch(e) { onError(e); }
+/******/ 				});
+/******/ 			}
+/******/ 		}
+/******/ 	}();
+/******/ 	
+/******/ 	/* webpack/runtime/consumes */
+/******/ 	!function() {
+/******/ 		var parseVersion = function(str) {
+/******/ 			// see webpack/lib/util/semver.js for original code
+/******/ 			var p=function(p){return p.split(".").map((function(p){return+p==p?+p:p}))},n=/^([^-+]+)?(?:-([^+]+))?(?:\\+(.+))?$/.exec(str),r=n[1]?p(n[1]):[];return n[2]&&(r.length++,r.push.apply(r,p(n[2]))),n[3]&&(r.push([]),r.push.apply(r,p(n[3]))),r;
+/******/ 		}
+/******/ 		var versionLt = function(a, b) {
+/******/ 			// see webpack/lib/util/semver.js for original code
+/******/ 			a=parseVersion(a),b=parseVersion(b);for(var r=0;;){if(r>=a.length)return r<b.length&&"u"!=(typeof b[r])[0];var e=a[r],n=(typeof e)[0];if(r>=b.length)return"u"==n;var t=b[r],f=(typeof t)[0];if(n!=f)return"o"==n&&"n"==f||("s"==f||"u"==n);if("o"!=n&&"u"!=n&&e!=t)return e<t;r++}
+/******/ 		}
+/******/ 		var rangeToString = function(range) {
+/******/ 			// see webpack/lib/util/semver.js for original code
+/******/ 			var r=range[0],n="";if(1===range.length)return"*";if(r+.5){n+=0==r?">=":-1==r?"<":1==r?"^":2==r?"~":r>0?"=":"!=";for(var e=1,a=1;a<range.length;a++){e--,n+="u"==(typeof(t=range[a]))[0]?"-":(e>0?".":"")+(e=2,t)}return n}var g=[];for(a=1;a<range.length;a++){var t=range[a];g.push(0===t?"not("+o()+")":1===t?"("+o()+" || "+o()+")":2===t?g.pop()+" "+g.pop():rangeToString(t))}return o();function o(){return g.pop().replace(/^\\((.+)\\)$/,"$1")}
+/******/ 		}
+/******/ 		var satisfy = function(range, version) {
+/******/ 			// see webpack/lib/util/semver.js for original code
+/******/ 			if(0 in range){version=parseVersion(version);var e=range[0],r=e<0;r&&(e=-e-1);for(var n=0,i=1,a=!0;;i++,n++){var f,s,g=i<range.length?(typeof range[i])[0]:"";if(n>=version.length||"o"==(s=(typeof(f=version[n]))[0]))return!a||("u"==g?i>e&&!r:""==g!=r);if("u"==s){if(!a||"u"!=g)return!1}else if(a)if(g==s)if(i<=e){if(f!=range[i])return!1}else{if(r?f>range[i]:f<range[i])return!1;f!=range[i]&&(a=!1)}else if("s"!=g&&"n"!=g){if(r||i<=e)return!1;a=!1,i--}else{if(i<=e||s<g!=r)return!1;a=!1}else"s"!=g&&"n"!=g&&(a=!1,i--)}}var t=[],o=t.pop.bind(t);for(n=1;n<range.length;n++){var u=range[n];t.push(1==u?o()|o():2==u?o()&o():u?satisfy(u,version):!o())}return!!o();
+/******/ 		}
+/******/ 		var ensureExistence = function(scopeName, key) {
+/******/ 			var scope = __webpack_require__.S[scopeName];
+/******/ 			if(!scope || !__webpack_require__.o(scope, key)) throw new Error("Shared module " + key + " doesn't exist in shared scope " + scopeName);
+/******/ 			return scope;
+/******/ 		};
+/******/ 		var findVersion = function(scope, key) {
+/******/ 			var versions = scope[key];
+/******/ 			var key = Object.keys(versions).reduce(function(a, b) {
+/******/ 				return !a || versionLt(a, b) ? b : a;
+/******/ 			}, 0);
+/******/ 			return key && versions[key]
+/******/ 		};
+/******/ 		var findSingletonVersionKey = function(scope, key) {
+/******/ 			var versions = scope[key];
+/******/ 			return Object.keys(versions).reduce(function(a, b) {
+/******/ 				return !a || (!versions[a].loaded && versionLt(a, b)) ? b : a;
+/******/ 			}, 0);
+/******/ 		};
+/******/ 		var getInvalidSingletonVersionMessage = function(scope, key, version, requiredVersion) {
+/******/ 			return "Unsatisfied version " + version + " from " + (version && scope[key][version].from) + " of shared singleton module " + key + " (required " + rangeToString(requiredVersion) + ")"
+/******/ 		};
+/******/ 		var getSingleton = function(scope, scopeName, key, requiredVersion) {
+/******/ 			var version = findSingletonVersionKey(scope, key);
+/******/ 			return get(scope[key][version]);
+/******/ 		};
+/******/ 		var getSingletonVersion = function(scope, scopeName, key, requiredVersion) {
+/******/ 			var version = findSingletonVersionKey(scope, key);
+/******/ 			if (!satisfy(requiredVersion, version)) typeof console !== "undefined" && console.warn && console.warn(getInvalidSingletonVersionMessage(scope, key, version, requiredVersion));
+/******/ 			return get(scope[key][version]);
+/******/ 		};
+/******/ 		var getStrictSingletonVersion = function(scope, scopeName, key, requiredVersion) {
+/******/ 			var version = findSingletonVersionKey(scope, key);
+/******/ 			if (!satisfy(requiredVersion, version)) throw new Error(getInvalidSingletonVersionMessage(scope, key, version, requiredVersion));
+/******/ 			return get(scope[key][version]);
+/******/ 		};
+/******/ 		var findValidVersion = function(scope, key, requiredVersion) {
+/******/ 			var versions = scope[key];
+/******/ 			var key = Object.keys(versions).reduce(function(a, b) {
+/******/ 				if (!satisfy(requiredVersion, b)) return a;
+/******/ 				return !a || versionLt(a, b) ? b : a;
+/******/ 			}, 0);
+/******/ 			return key && versions[key]
+/******/ 		};
+/******/ 		var getInvalidVersionMessage = function(scope, scopeName, key, requiredVersion) {
+/******/ 			var versions = scope[key];
+/******/ 			return "No satisfying version (" + rangeToString(requiredVersion) + ") of shared module " + key + " found in shared scope " + scopeName + ".\\n" +
+/******/ 				"Available versions: " + Object.keys(versions).map(function(key) {
+/******/ 				return key + " from " + versions[key].from;
+/******/ 			}).join(", ");
+/******/ 		};
+/******/ 		var getValidVersion = function(scope, scopeName, key, requiredVersion) {
+/******/ 			var entry = findValidVersion(scope, key, requiredVersion);
+/******/ 			if(entry) return get(entry);
+/******/ 			throw new Error(getInvalidVersionMessage(scope, scopeName, key, requiredVersion));
+/******/ 		};
+/******/ 		var warnInvalidVersion = function(scope, scopeName, key, requiredVersion) {
+/******/ 			typeof console !== "undefined" && console.warn && console.warn(getInvalidVersionMessage(scope, scopeName, key, requiredVersion));
+/******/ 		};
+/******/ 		var get = function(entry) {
+/******/ 			entry.loaded = 1;
+/******/ 			return entry.get()
+/******/ 		};
+/******/ 		var init = function(fn) { return function(scopeName, a, b, c) {
+/******/ 			var promise = __webpack_require__.I(scopeName);
+/******/ 			if (promise && promise.then) return promise.then(fn.bind(fn, scopeName, __webpack_require__.S[scopeName], a, b, c));
+/******/ 			return fn(scopeName, __webpack_require__.S[scopeName], a, b, c);
+/******/ 		}; };
+/******/ 		
+/******/ 		var load = /*#__PURE__*/ init(function(scopeName, scope, key) {
+/******/ 			ensureExistence(scopeName, key);
+/******/ 			return get(findVersion(scope, key));
+/******/ 		});
+/******/ 		var loadFallback = /*#__PURE__*/ init(function(scopeName, scope, key, fallback) {
+/******/ 			return scope && __webpack_require__.o(scope, key) ? get(findVersion(scope, key)) : fallback();
+/******/ 		});
+/******/ 		var loadVersionCheck = /*#__PURE__*/ init(function(scopeName, scope, key, version) {
+/******/ 			ensureExistence(scopeName, key);
+/******/ 			return get(findValidVersion(scope, key, version) || warnInvalidVersion(scope, scopeName, key, version) || findVersion(scope, key));
+/******/ 		});
+/******/ 		var loadSingleton = /*#__PURE__*/ init(function(scopeName, scope, key) {
+/******/ 			ensureExistence(scopeName, key);
+/******/ 			return getSingleton(scope, scopeName, key);
+/******/ 		});
+/******/ 		var loadSingletonVersionCheck = /*#__PURE__*/ init(function(scopeName, scope, key, version) {
+/******/ 			ensureExistence(scopeName, key);
+/******/ 			return getSingletonVersion(scope, scopeName, key, version);
+/******/ 		});
+/******/ 		var loadStrictVersionCheck = /*#__PURE__*/ init(function(scopeName, scope, key, version) {
+/******/ 			ensureExistence(scopeName, key);
+/******/ 			return getValidVersion(scope, scopeName, key, version);
+/******/ 		});
+/******/ 		var loadStrictSingletonVersionCheck = /*#__PURE__*/ init(function(scopeName, scope, key, version) {
+/******/ 			ensureExistence(scopeName, key);
+/******/ 			return getStrictSingletonVersion(scope, scopeName, key, version);
+/******/ 		});
+/******/ 		var loadVersionCheckFallback = /*#__PURE__*/ init(function(scopeName, scope, key, version, fallback) {
+/******/ 			if(!scope || !__webpack_require__.o(scope, key)) return fallback();
+/******/ 			return get(findValidVersion(scope, key, version) || warnInvalidVersion(scope, scopeName, key, version) || findVersion(scope, key));
+/******/ 		});
+/******/ 		var loadSingletonFallback = /*#__PURE__*/ init(function(scopeName, scope, key, fallback) {
+/******/ 			if(!scope || !__webpack_require__.o(scope, key)) return fallback();
+/******/ 			return getSingleton(scope, scopeName, key);
+/******/ 		});
+/******/ 		var loadSingletonVersionCheckFallback = /*#__PURE__*/ init(function(scopeName, scope, key, version, fallback) {
+/******/ 			if(!scope || !__webpack_require__.o(scope, key)) return fallback();
+/******/ 			return getSingletonVersion(scope, scopeName, key, version);
+/******/ 		});
+/******/ 		var loadStrictVersionCheckFallback = /*#__PURE__*/ init(function(scopeName, scope, key, version, fallback) {
+/******/ 			var entry = scope && __webpack_require__.o(scope, key) && findValidVersion(scope, key, version);
+/******/ 			return entry ? get(entry) : fallback();
+/******/ 		});
+/******/ 		var loadStrictSingletonVersionCheckFallback = /*#__PURE__*/ init(function(scopeName, scope, key, version, fallback) {
+/******/ 			if(!scope || !__webpack_require__.o(scope, key)) return fallback();
+/******/ 			return getStrictSingletonVersion(scope, scopeName, key, version);
+/******/ 		});
+/******/ 		var installedModules = {};
+/******/ 		var moduleToHandlerMapping = {
+/******/ 			"webpack/sharing/consume/default/react-dom": function() { return loadSingleton("default", "react-dom"); },
+/******/ 			"webpack/sharing/consume/default/react": function() { return loadSingleton("default", "react"); },
+/******/ 			"webpack/sharing/consume/default/next/dynamic": function() { return loadSingleton("default", "next/dynamic"); },
+/******/ 			"webpack/sharing/consume/default/antd/antd": function() { return loadStrictVersionCheckFallback("default", "antd", [1,4,22,3], function() { return __webpack_require__.e("node_modules_antd_es_index_js").then(function() { return function() { return __webpack_require__(/*! antd */ "../../node_modules/antd/es/index.js"); }; }); }); },
+/******/ 			"webpack/sharing/consume/default/next/router": function() { return loadSingleton("default", "next/router"); },
+/******/ 			"webpack/sharing/consume/default/react/jsx-dev-runtime": function() { return loadSingleton("default", "react/jsx-dev-runtime"); },
+/******/ 			"webpack/sharing/consume/default/styled-jsx/style": function() { return loadSingleton("default", "styled-jsx/style"); },
+/******/ 			"webpack/sharing/consume/default/next/head": function() { return loadSingleton("default", "next/head"); },
+/******/ 			"webpack/sharing/consume/default/next/link": function() { return loadSingleton("default", "next/link"); }
+/******/ 		};
+/******/ 		var initialConsumes = ["webpack/sharing/consume/default/react-dom","webpack/sharing/consume/default/react","webpack/sharing/consume/default/react-dom","webpack/sharing/consume/default/react","webpack/sharing/consume/default/next/dynamic"];
+/******/ 		initialConsumes.forEach(function(id) {
+/******/ 			__webpack_require__.m[id] = function(module) {
+/******/ 				// Handle case when module is used sync
+/******/ 				installedModules[id] = 0;
+/******/ 				delete __webpack_require__.c[id];
+/******/ 				var factory = moduleToHandlerMapping[id]();
+/******/ 				if(typeof factory !== "function") throw new Error("Shared module is not available for eager consumption: " + id);
+/******/ 				module.exports = factory();
+/******/ 			}
+/******/ 		});
+/******/ 		var chunkMapping = {
+/******/ 			"node_modules_antd_es_index_js": [
+/******/ 				"webpack/sharing/consume/default/react-dom",
+/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			],
+/******/ 			"pages_dynamic-remote_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_index_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_slug_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_pid_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_exposed-pages_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_index_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_test-check-button_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_checkout_test-title_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_home_exposed-pages_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_home_test-broken-remotes_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_home_test-remote-hook_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_home_test-shared-nav_tsx": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_exposed-pages_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_index_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-png_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_test-webpack-svg_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"pages_shop_products_slug_js": [
+/******/ 				"webpack/sharing/consume/default/next/dynamic"
+/******/ 			],
+/******/ 			"components_SharedNav_tsx": [
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
+/******/ 			],
+/******/ 			"components_menu_tsx": [
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
+/******/ 			],
+/******/ 			"pages__app_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
+/******/ 			],
+/******/ 			"pages_index_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/next/head",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			],
+/******/ 			"pages_home_exposed-pages_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			],
+/******/ 			"pages_dynamic-remote_js_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react"
+/******/ 			],
+/******/ 			"pages_home_test-broken-remotes_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/next/link",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
+/******/ 			],
+/******/ 			"pages_home_test-remote-hook_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime"
+/******/ 			],
+/******/ 			"pages_home_test-shared-nav_tsx_hasBoundary": [
+/******/ 				"webpack/sharing/consume/default/antd/antd",
+/******/ 				"webpack/sharing/consume/default/next/router",
+/******/ 				"webpack/sharing/consume/default/react/jsx-dev-runtime",
+/******/ 				"webpack/sharing/consume/default/react",
+/******/ 				"webpack/sharing/consume/default/styled-jsx/style"
 /******/ 			]
 /******/ 		};
 /******/ 		__webpack_require__.f.consumes = function(chunkId, promises) {

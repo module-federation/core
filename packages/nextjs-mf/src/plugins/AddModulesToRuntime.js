@@ -67,9 +67,6 @@ class AddModulesToRuntimeChunkPlugin {
       remotes,
     }).apply(compiler);
 
-    if (!isServer) {
-      // next-client-pages-loade
-    }
     //TODO: investigate further and see if this can be used to add async boundries
 
     // if (
@@ -115,7 +112,6 @@ class AddModulesToRuntimeChunkPlugin {
         compilation.hooks.optimizeChunks.tap(
           'AddModulesToRuntimeChunkPlugin',
           (chunks) => {
-            console.log('running optimize chunks action');
             // Get the runtime chunk and return if it's not found or has no runtime
             const mainChunk = this.getChunkByName(chunks, 'main');
             const runtimeChunk = this.getChunkByName(chunks, 'webpack');
