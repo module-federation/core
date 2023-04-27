@@ -1,5 +1,5 @@
 import Link from 'next/link';
-console.log(__webpack_share_scopes__);
+
 export default function TestBrokenRemotes() {
   return (
     <div>
