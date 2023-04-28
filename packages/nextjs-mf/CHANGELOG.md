@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.4.1-beta.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.1-beta.1...nextjs-mf-6.4.1-beta.2) (2023-04-28)
+
+
+### Bug Fixes
+
+* disable next chunk splits ([2f731ee](https://github.com/module-federation/nextjs-mf/commit/2f731eee497c0f4d3057600f22bc2556e8b32410))
+
+
+
 ## [6.4.1-beta.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.1-beta.0...nextjs-mf-6.4.1-beta.1) (2023-04-28)
 
 
