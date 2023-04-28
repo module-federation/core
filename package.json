@@ -22,6 +22,7 @@
     "serve:next": "yarn build:libs && concurrently 'nx run 3000-home:serve:production --output-style=stream' 'nx run 3001-shop:serve:production --output-style=stream' 'nx run 3002-checkout:serve:production --output-style=stream'",
     "prod": "nx build:libs && nx run-many --target=build --verbose --output-style=stream",
     "commit": "cz",
+    "git:pruneTags": "git tag -l | xargs git tag -d && git fetch --all --prune --tags",
     "prerelease:node": "nx run node:version --releaseAs=prerelease --preid=beta",
     "prerelease:next": "nx run nextjs-mf:version --releaseAs=prerelease --preid=beta",
     "prerelease:utils": "nx run utils:version --releaseAs=prerelease --preid=beta",
