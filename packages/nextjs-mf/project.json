@@ -14,7 +14,13 @@
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true,
         "assets": ["packages/nextjs-mf/*.md"]
-      }
+      },
+      "dependsOn": [
+        {
+          "projects": "dependencies",
+          "target": "build"
+        }
+      ]
     },
     "publish": {
       "executor": "nx:run-commands",

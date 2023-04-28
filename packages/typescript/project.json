@@ -14,7 +14,13 @@
         "assets": ["packages/typescript/*.md"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true
-      }
+      },
+      "dependsOn": [
+        {
+          "projects": "dependencies",
+          "target": "build"
+        }
+      ]
     },
     "publish": {
       "executor": "nx:run-commands",

@@ -12,7 +12,13 @@
         "main": "packages/storybook-addon/src/index.ts",
         "tsConfig": "packages/storybook-addon/tsconfig.lib.json",
         "assets": ["packages/storybook-addon/*.md"]
-      }
+      },
+      "dependsOn": [
+        {
+          "projects": "dependencies",
+          "target": "build"
+        }
+      ]
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
