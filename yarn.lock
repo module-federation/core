@@ -19584,10 +19584,10 @@ verdaccio-htpasswd@11.0.0-6-next.38:
     http-errors "1.8.1"
     unix-crypt-td-js "1.1.4"
 
-verdaccio@5.24.0:
-  version "5.24.0"
-  resolved "https://registry.yarnpkg.com/verdaccio/-/verdaccio-5.24.0.tgz#4deeaa8365e8514902a86863ad07c4d9a76ed604"
-  integrity sha512-1dMFv11yhEZv6AHOB0y/tRtK55D2W0vRqyT3g0c7kJ7w1jsD0WFG/bVSRoTEdl8+praW77gLIf7UC15KNWwo7g==
+verdaccio@5.24.1:
+  version "5.24.1"
+  resolved "https://registry.yarnpkg.com/verdaccio/-/verdaccio-5.24.1.tgz#6989726cec39fc0d0a280660bad7d3484a37ac35"
+  integrity sha512-PxJClisu2KvNi+L5QG3vaTje3hpS0Ow8/xAzvVzVeO/QFFbNG/mQ6EVUfSewSprrTsFcx1ERCEBSJLQt1RP3HQ==
   dependencies:
     "@verdaccio/config" "6.0.0-6-next.68"
     "@verdaccio/core" "6.0.0-6-next.68"
