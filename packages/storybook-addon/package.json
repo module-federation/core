@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/storybook-addon",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Storybook addon to consume remote module federated apps/components",
   "license": "MIT",
   "repository": "https://github.com/module-federation/universe/tree/main/packages/storybook-addon",
