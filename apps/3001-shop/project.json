@@ -17,7 +17,13 @@
           "outputPath": "dist/apps/3001-shop"
         },
         "production": {}
-      }
+      },
+      "dependsOn": [
+        {
+          "projects": "dependencies",
+          "target": "build"
+        }
+      ]
     },
     "serve": {
       "executor": "@nrwl/next:server",

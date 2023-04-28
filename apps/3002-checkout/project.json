@@ -17,7 +17,13 @@
           "outputPath": "dist/apps/3002-checkout"
         },
         "production": {}
-      }
+      },
+      "dependsOn": [
+        {
+          "projects": "dependencies",
+          "target": "build"
+        }
+      ]
     },
     "serve": {
       "executor": "@nrwl/next:server",

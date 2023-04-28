@@ -45,7 +45,13 @@
           "vendorChunk": false,
           "webpackConfig": "apps/reactRemoteUI/webpack.config.prod.js"
         }
-      }
+      },
+      "dependsOn": [
+        {
+          "projects": "dependencies",
+          "target": "build"
+        }
+      ]
     },
     "serve": {
       "executor": "@nrwl/react:module-federation-dev-server",
