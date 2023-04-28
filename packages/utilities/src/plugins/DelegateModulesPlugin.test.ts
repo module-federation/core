@@ -87,6 +87,7 @@ describe('DelegateModulesPlugin', () => {
         createMockModule('/path/to/remote2'),
         createMockModule('/path/to/non-delegate-module'),
       ],
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       () => {}
     );
 
