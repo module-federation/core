@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.14.2-beta.0](https://github.com/module-federation/nextjs-mf/compare/node-0.14.1...node-0.14.2-beta.0) (2023-04-28)
+
+
+### Bug Fixes
+
+* use [fullhash] if no hash exists / in development mode. ([dfa7fb3](https://github.com/module-federation/nextjs-mf/commit/dfa7fb3a49b81b87dae43ec57ff2f86f5c2b7501))
+
+
+
 ## [0.14.1](https://github.com/module-federation/nextjs-mf/compare/node-0.14.1-beta.0...node-0.14.1) (2023-04-28)
 
 ### Dependency Updates
