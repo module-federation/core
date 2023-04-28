@@ -52,6 +52,8 @@ export function applyClientPlugins(
     applicationName: name,
   }).apply(compiler);
 
+  compiler.options.optimization.splitChunks = false;
+
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
   if (extraOptions.automaticPageStitching) {
     compiler.options.module.rules.push({
