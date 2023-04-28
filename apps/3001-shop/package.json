@@ -7,6 +7,8 @@
     "lodash": "4.17.21",
     "next": "13.3.0",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "@module-federation/nextjs-mf": "^6.4.0",
+    "@module-federation/utilities": "^1.7.0"
   }
 }
