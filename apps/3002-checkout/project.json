@@ -60,6 +60,5 @@
       }
     }
   },
-  "tags": [],
-  "implicitDependencies": ["nextjs-mf", "utils"]
+  "tags": []
 }
