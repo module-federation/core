@@ -2,6 +2,21 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [0.2.0](https://github.com/module-federation/nextjs-mf/compare/native-federation-tests-0.1.2...native-federation-tests-0.2.0) (2023-04-29)
+
+
+### Bug Fixes
+
+* removed any from error logger type ([fb9fcc3](https://github.com/module-federation/nextjs-mf/commit/fb9fcc3a54a13be36335830f076a86557b75bb4a))
+* subpath ([1548501](https://github.com/module-federation/nextjs-mf/commit/1548501bb4679c0c534c02609cb6bc5459f224a4))
+
+
+### Features
+
+* release to npm with next tag to not ruine latest one ([#763](https://github.com/module-federation/nextjs-mf/issues/763)) ([f2d199b](https://github.com/module-federation/nextjs-mf/commit/f2d199b3b3fbbd428514b1ce1f139efc82f7fff0))
+
+
+
 ## [0.1.2](https://github.com/module-federation/nextjs-mf/compare/native-federation-tests-0.1.1...native-federation-tests-0.1.2) (2023-04-14)
 
 
