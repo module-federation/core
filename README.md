@@ -10,6 +10,8 @@
 
 [module-federation/typescript](./packages/typescript)
 
+[module-federation/storybook-addon](./packages/storybook-addon)
+
 ## Generate an application
 
 Run `nx g @nrwl/next:app my-app` to generate an application.
