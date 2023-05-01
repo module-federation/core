@@ -97,7 +97,17 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
   DEFAULT_SHARE_SCOPE
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
-
+  if (
+    key.startsWith('next/dynamic') ||
+    key.startsWith('styled-jsx') ||
+    key.startsWith('next/link') ||
+    key.startsWith('next/head') ||
+    key.startsWith('react') ||
+    key.startsWith('next/router')
+  ) {
+    acc[key] = { ...value, eager: false, import: undefined };
+    return acc;
+  }
   acc[key] = { ...value, eager: true };
 
   return acc;
