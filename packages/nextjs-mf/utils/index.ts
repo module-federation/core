@@ -5,6 +5,7 @@ export {
 } from '@module-federation/utilities';
 // @ts-ignore
 export { flushChunks } from '@module-federation/node/utils';
+export { createDynamicFederatedPage } from './createDynamicFederatedPage';
 
 export const revalidate = () => {
   if (typeof window !== 'undefined') {
