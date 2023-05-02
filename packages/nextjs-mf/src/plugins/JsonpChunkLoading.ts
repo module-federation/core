@@ -43,12 +43,13 @@ function asyncOperationTemplate(
 ): Template {
   return Template.asString([
     `var initialConsumes = ${JSON.stringify(moduleArray)}`,
-    'function asyncOperation() {',
+    'var asyncInFlight = false;',
+    'function asyncOperation(originalPush) {',
     Template.indent([
+      'if(asyncInFlight) return asyncInFlight;',
       '// This is just an example; replace it with your own logic.',
-      'return new Promise(function (resolve) {',
+      'asyncInFlight =  new Promise(function (resolve) {',
       Template.indent([
-        "console.log('init operation completed');",
         `var prom = ${RuntimeGlobals.initializeSharing}('default', []);`,
         `initialConsumes.forEach(function (lib) {`,
         Template.indent(['setEagerLoading(lib[0], lib[1], cnn);']),
@@ -58,18 +59,8 @@ function asyncOperationTemplate(
       '})',
       '.then(function () {',
       Template.indent([
+        "console.log('init operation completed');",
         `console.log(${RuntimeGlobals.shareScopeMap}.default);`,
-        `var libKeys = Object.keys(${RuntimeGlobals.shareScopeMap}.default)`,
-        'var reactAndNextLibKeys = libKeys.filter(function (libKey) {',
-        Template.indent([
-          "return libKey.startsWith('react') || libKey.startsWith('next');",
-        ]),
-        '});',
-        'var otherLibKeys = libKeys.filter(function (libKey) {',
-        Template.indent([
-          "return !libKey.startsWith('react') && !libKey.startsWith('next');",
-        ]),
-        '});',
         `loadDependencies(initialConsumes, cnn);`,
         'return Promise.all(asyncQueue);',
       ]),
@@ -79,14 +70,24 @@ function asyncOperationTemplate(
         "console.log('webpack is done negotiating dependency trees', cnn);",
         "console.log('number of entry points to invert startup', chunkQueue.length);",
         "console.log('startup inversion in progress', chunkQueue);",
+        'asyncInFlight = false;',
         'while (chunkQueue.length > 0) {',
-        Template.indent(['chunkLoadingGlobal.push(chunkQueue.shift());']),
+        // 'originalPush.apply(chunkLoadingGlobal, arguments);',
+        'const queueArgs = chunkQueue.shift();',
+        "console.log('pushing deffered chunk into runtime', queueArgs[0]);",
+        'webpackJsonpCallback.apply(',
+        Template.indent([
+          'null,',
+          '[null].concat(Array.prototype.slice.call([queueArgs]))',
+        ]),
+        ');',
+        Template.indent(['originalPush.apply(originalPush,[queueArgs]);']),
         '}',
       ]),
       '});',
     ]),
+    'return asyncInFlight;',
     '}',
-    'var kickstart = asyncOperation();',
   ]);
 }
 
@@ -127,16 +128,18 @@ function getCustomJsonpCode(
     Template.asString([
       'function shouldDeferLoading(args) {',
       Template.indent([
+        'if(resport.length === 0) return true;',
+        'if(resport.length !== 0 && chunkQueue.length === 0) return false;',
         'var matchesOrStartsWith = args[0].some(function (item) {',
         Template.indent([
           'return resport.some(function (resportItem) {',
           Template.indent([
-            "console.log('testing chunk to defer:',item === resportItem || item.indexOf(resportItem) === 0, item, resportItem);",
             'return item === resportItem || item.indexOf(resportItem) === 0;',
           ]),
           '});',
         ]),
         '});',
+        "console.log('shouldDeferLoading', !matchesOrStartsWith, args[0], resport);",
         'return !matchesOrStartsWith;',
       ]),
       '}',
@@ -145,48 +148,27 @@ function getCustomJsonpCode(
     asyncOperationTemplate(moduleArray, RuntimeGlobals),
     // chunkLoadingGlobal.push
     Template.asString([
+      'asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));',
       'chunkLoadingGlobal.push = (function (originalPush) {',
       Template.indent([
         'return function () {',
+        "console.log('share', __webpack_require__.S.default)",
+        "console.log('chunk was pushed', arguments[0][0]);",
+        "if (arguments[0][0].includes('main') || arguments[0][0].some(function (item) { return item.startsWith('pages/'); })) {",
+        'resport = Array.prototype.concat.apply(resport, arguments[0][0]);',
+        'var pushEvent =  Array.prototype.push.apply(chunkQueue, arguments);',
+        'return asyncOperation(originalPush);',
+        '}',
+        'if(!__webpack_require__.S.default) {asyncOperation(originalPush);}',
         "console.log('queue size:', chunkQueue.length);",
+        "console.log('pushing chunk into webpack runtime:', arguments[0][0]);",
+        'webpackJsonpCallback.apply(',
         Template.indent([
-          'if (shouldDeferLoading(arguments[0])) {',
-          Template.indent([
-            "if (arguments[0][0].includes('main') || arguments[0][0].some(function (item) { return item.startsWith('pages/'); })) {",
-            "console.log('pushing chunk to inverted boot queue', arguments[0][0]);",
-            Template.indent([
-              'resport = Array.prototype.concat.apply(resport, arguments[0][0]);',
-              'return Array.prototype.push.apply(chunkQueue, arguments);',
-            ]),
-            '}',
-          ]),
-          '}',
-          'if(chunkQueue.length === 0) {',
-          "console.log('chunk queue is empty, pushing as normal', arguments[0][0]);",
-          Template.indent([
-            'webpackJsonpCallback.apply(',
-            Template.indent([
-              'null,',
-              '[null].concat(Array.prototype.slice.call(arguments))',
-            ]),
-            ');',
-            'return originalPush.apply(chunkLoadingGlobal, arguments);',
-          ]),
-          '}',
-          // Template.indent([
-          //   "console.log('current push args', arguments[0][0]);",
-          //   "console.log('whole queue', chunkQueue);",
-          //   "console.log('report queue', resport);",
-          // ]),
-          "console.log('pushing chunk into webpack runtime:', arguments[0][0]);",
-          'webpackJsonpCallback.apply(',
-          Template.indent([
-            'null,',
-            '[null].concat(Array.prototype.slice.call(arguments))',
-          ]),
-          ');',
-          'return originalPush.apply(chunkLoadingGlobal, arguments);',
+          'null,',
+          '[null].concat(Array.prototype.slice.call(arguments))',
         ]),
+        ');',
+        'return originalPush.apply(chunkLoadingGlobal, arguments);',
         '};',
       ]),
       '})(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));',
