@@ -152,8 +152,8 @@ function getCustomJsonpCode(
         Template.indent([
           'if (shouldDeferLoading(arguments[0])) {',
           Template.indent([
-            "console.log('pushing chunk to inverted boot queue', arguments[0][0]);",
             "if (arguments[0][0].includes('main') || arguments[0][0].some(function (item) { return item.startsWith('pages/'); })) {",
+            "console.log('pushing chunk to inverted boot queue', arguments[0][0]);",
             Template.indent([
               'resport = Array.prototype.concat.apply(resport, arguments[0][0]);',
               'return Array.prototype.push.apply(chunkQueue, arguments);',
