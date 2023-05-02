@@ -1,5 +1,6 @@
 import DelegateModulesPlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import { Chunk } from 'webpack';
+
 /**
  * A webpack plugin that moves specified modules from chunks to runtime chunk.
  * @class AddModulesToRuntimeChunkPlugin
@@ -42,7 +43,7 @@ class AddModulesToRuntimeChunkPlugin {
                 }
               })
             ) {
-              this._sharedModules.add(module);
+              this._eagerModules.add(module);
             }
           }
         }
@@ -60,7 +61,12 @@ class AddModulesToRuntimeChunkPlugin {
     const isServer = compiler.options.name === 'server';
     const { runtime, container, remotes, shared, eager, applicationName } =
       this.options;
-
+    compiler.hooks.thisCompilation.tap(
+      'AddModulesToRuntimeChunkPlugin',
+      (compilation) => {
+        this.resolveSharedModules(compilation);
+      }
+    );
     new DelegateModulesPlugin({
       runtime,
       container,
@@ -104,162 +110,185 @@ class AddModulesToRuntimeChunkPlugin {
     //   });
     // }
 
+    const chunkToModuleMapping = {};
+    /** @type {Map<string | number, Source>} */
+    const moduleIdToSourceMapping = new Map();
+    const initialConsumes = [];
+
     // Tap into compilation hooks
-    // compiler.hooks.compilation.tap(
-    //   'AddModulesToRuntimeChunkPlugin',
-    //   (compilation) => {
-    //     // Tap into optimizeChunks hook
-    //     compilation.hooks.optimizeChunks.tap(
-    //       'AddModulesToRuntimeChunkPlugin',
-    //       (chunks) => {
-    //         return;
-    //         // Get the runtime chunk and return if it's not found or has no runtime
-    //         const mainChunk = this.getChunkByName(chunks, 'main');
-    //         const runtimeChunk = this.getChunkByName(chunks, 'webpack');
-    //         const container = this.getChunkByName(
-    //           chunks,
-    //           this.options.container
-    //         );
-    //
-    //         if (container && !isServer) {
-    //           compilation.chunkGraph
-    //             .getChunkModulesIterable(container)
-    //             .forEach((module) => {
-    //               if (
-    //                 // module.type === 'provide-module' ||
-    //                 module.type === 'javascript/auto'
-    //               ) {
-    //                 compilation.chunkGraph.disconnectChunkAndModule(
-    //                   container,
-    //                   module
-    //                 );
-    //                 return;
-    //               }
-    //
-    //               // console.log(module.identifier(), module.type);
-    //             });
-    //         }
-    //
-    //         for (const chunk of chunks) {
-    //           if (!isServer) {
-    //             for (const module of chunk.modulesIterable) {
-    //               if (
-    //                 module.identifier().includes('webpack/runtime') ||
-    //                 module.identifier().includes('webpack/runtime')
-    //                 // chunk.debugId !== runtimeChunk.debugId
-    //               ) {
-    //                 console.log(
-    //                   'already in runtime',
-    //                   module.identifier(),
-    //                   chunk.debugId,
-    //                   runtimeChunk.debugId
-    //                 );
-    //
-    //                 // compilation.chunkGraph.disconnectChunkAndModule(
-    //                 //   chunk,
-    //                 //   module
-    //                 // );
-    //               }
-    //             }
-    //           }
-    //         }
-    //
-    //         return;
-    //
-    //         if (!runtimeChunk || !runtimeChunk.hasRuntime()) return;
-    //         return;
-    //         // Get the container chunk if specified
-    //         const partialEntry = container
-    //           ? this.getChunkByName(chunks, container)
-    //           : null;
-    //
-    //         // Get the shared module names to their imports if specified
-    //         const internalSharedModules = shared
-    //           ? Object.entries(shared).map(
-    //               ([key, value]) => value.import || key
-    //             )
-    //           : null;
-    //
-    //         // Get the modules of the container chunk if specified
-    //         const partialContainerModules = partialEntry
-    //           ? compilation.chunkGraph.getOrderedChunkModulesIterable(
-    //               partialEntry
-    //             )
-    //           : null;
-    //
-    //         const foundChunks = chunks.filter((chunk) => {
-    //           const hasMatch = chunk !== runtimeChunk;
-    //           return (
-    //             hasMatch &&
-    //             applicationName &&
-    //             (chunk.name || chunk.id)?.startsWith(applicationName)
-    //           );
-    //         });
-    //
-    //         // Iterate over each chunk
-    //         for (const chunk of foundChunks) {
-    //           const modulesToMove = [];
-    //           const containers = [];
-    //           const modulesIterable =
-    //             compilation.chunkGraph.getOrderedChunkModulesIterable(chunk);
-    //           for (const module of modulesIterable) {
-    //             this.classifyModule(
-    //               module,
-    //               internalSharedModules,
-    //               modulesToMove,
-    //               containers
-    //             );
-    //           }
-    //
-    //           if (partialContainerModules) {
-    //             for (const module of partialContainerModules) {
-    //               const destinationArray = module.rawRequest
-    //                 ? modulesToMove
-    //                 : containers;
-    //               destinationArray.push(module);
-    //             }
-    //           }
-    //
-    //           const modulesToConnect = [].concat(modulesToMove, containers);
-    //
-    //           const { chunkGraph } = compilation;
-    //           const runtimeChunkModules =
-    //             chunkGraph.getOrderedChunkModulesIterable(runtimeChunk);
-    //
-    //           for (const module of modulesToConnect) {
-    //             if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
-    //               chunkGraph.connectChunkAndModule(runtimeChunk, module);
-    //             }
-    //
-    //             if (eager && modulesToMove.includes(module)) {
-    //               if (this.options.debug) {
-    //                 console.log(
-    //                   `removing ${module.id || module.identifier()} from ${
-    //                     chunk.name || chunk.id
-    //                   } to ${runtimeChunk.name}`
-    //                 );
-    //               }
-    //               chunkGraph.disconnectChunkAndModule(chunk, module);
-    //             }
-    //           }
-    //
-    //           for (const module of runtimeChunkModules) {
-    //             if (!chunkGraph.isModuleInChunk(module, chunk)) {
-    //               if (this._delegateModules.has(module)) {
-    //                 chunkGraph.connectChunkAndModule(chunk, module);
-    //                 if (this.options.debug) {
-    //                   console.log(
-    //                     `adding ${module.rawRequest} to ${chunk.name} from ${runtimeChunk.name} not removing it`
-    //                   );
-    //                 }
-    //               }
-    //             }
-    //           }
-    //         }
-    //       }
-    //     );
-    //   }
-    // );
+    compiler.hooks.compilation.tap(
+      'AddModulesToRuntimeChunkPlugin',
+      (compilation) => {
+        // Tap into optimizeChunks hook
+        compilation.hooks.optimizeChunks.tap(
+          'AddModulesToRuntimeChunkPlugin',
+          (chunks) => {
+            return;
+            // Get the runtime chunk and return if it's not found or has no runtime
+            const mainChunk = this.getChunkByName(chunks, 'main');
+            const runtimeChunk = this.getChunkByName(chunks, 'webpack');
+            const container = this.getChunkByName(
+              chunks,
+              this.options.container
+            );
+
+            // console.log('initial consumes', initialConsumes);
+
+            // const mainInitial = mainChunk.getAllInitialChunks();
+            // const ich = [];
+            // for (const mi of mainInitial) {
+            //   ich.push(...mi.getAllInitialChunks());
+            // }
+            // const runtimeInitial = runtimeChunk.getAllInitialChunks();
+            // for (const mi of runtimeInitial) {
+            //   ich.push(...mi.getAllInitialChunks());
+            // }
+            // const initialmain = compilation.chunkGraph.getAllInitialChunks();
+            // const initialRuntoime =
+            //   compilation.chunkGraph.getAllInitialChunks();
+
+            // console.log(mainInitial);
+            return;
+
+            if (container && !isServer) {
+              compilation.chunkGraph
+                .getChunkModulesIterable(container)
+                .forEach((module) => {
+                  if (
+                    // module.type === 'provide-module' ||
+                    module.type === 'javascript/auto'
+                  ) {
+                    compilation.chunkGraph.disconnectChunkAndModule(
+                      container,
+                      module
+                    );
+                    return;
+                  }
+
+                  // console.log(module.identifier(), module.type);
+                });
+            }
+
+            for (const chunk of chunks) {
+              if (!isServer) {
+                for (const module of chunk.modulesIterable) {
+                  if (
+                    module.identifier().includes('webpack/runtime') ||
+                    module.identifier().includes('webpack/runtime')
+                    // chunk.debugId !== runtimeChunk.debugId
+                  ) {
+                    console.log(
+                      'already in runtime',
+                      module.identifier(),
+                      chunk.debugId,
+                      runtimeChunk.debugId
+                    );
+
+                    // compilation.chunkGraph.disconnectChunkAndModule(
+                    //   chunk,
+                    //   module
+                    // );
+                  }
+                }
+              }
+            }
+
+            return;
+
+            if (!runtimeChunk || !runtimeChunk.hasRuntime()) return;
+            return;
+            // Get the container chunk if specified
+            const partialEntry = container
+              ? this.getChunkByName(chunks, container)
+              : null;
+
+            // Get the shared module names to their imports if specified
+            const internalSharedModules = shared
+              ? Object.entries(shared).map(
+                  ([key, value]) => value.import || key
+                )
+              : null;
+
+            // Get the modules of the container chunk if specified
+            const partialContainerModules = partialEntry
+              ? compilation.chunkGraph.getOrderedChunkModulesIterable(
+                  partialEntry
+                )
+              : null;
+
+            const foundChunks = chunks.filter((chunk) => {
+              const hasMatch = chunk !== runtimeChunk;
+              return (
+                hasMatch &&
+                applicationName &&
+                (chunk.name || chunk.id)?.startsWith(applicationName)
+              );
+            });
+
+            // Iterate over each chunk
+            for (const chunk of foundChunks) {
+              const modulesToMove = [];
+              const containers = [];
+              const modulesIterable =
+                compilation.chunkGraph.getOrderedChunkModulesIterable(chunk);
+              for (const module of modulesIterable) {
+                this.classifyModule(
+                  module,
+                  internalSharedModules,
+                  modulesToMove,
+                  containers
+                );
+              }
+
+              if (partialContainerModules) {
+                for (const module of partialContainerModules) {
+                  const destinationArray = module.rawRequest
+                    ? modulesToMove
+                    : containers;
+                  destinationArray.push(module);
+                }
+              }
+
+              const modulesToConnect = [].concat(modulesToMove, containers);
+
+              const { chunkGraph } = compilation;
+              const runtimeChunkModules =
+                chunkGraph.getOrderedChunkModulesIterable(runtimeChunk);
+
+              for (const module of modulesToConnect) {
+                if (!chunkGraph.isModuleInChunk(module, runtimeChunk)) {
+                  chunkGraph.connectChunkAndModule(runtimeChunk, module);
+                }
+
+                if (eager && modulesToMove.includes(module)) {
+                  if (this.options.debug) {
+                    console.log(
+                      `removing ${module.id || module.identifier()} from ${
+                        chunk.name || chunk.id
+                      } to ${runtimeChunk.name}`
+                    );
+                  }
+                  chunkGraph.disconnectChunkAndModule(chunk, module);
+                }
+              }
+
+              for (const module of runtimeChunkModules) {
+                if (!chunkGraph.isModuleInChunk(module, chunk)) {
+                  if (this._delegateModules.has(module)) {
+                    chunkGraph.connectChunkAndModule(chunk, module);
+                    if (this.options.debug) {
+                      console.log(
+                        `adding ${module.rawRequest} to ${chunk.name} from ${runtimeChunk.name} not removing it`
+                      );
+                    }
+                  }
+                }
+              }
+            }
+          }
+        );
+      }
+    );
   }
   classifyModule(module, internalSharedModules, modulesToMove) {
     if (
