@@ -163,7 +163,7 @@ function getCustomJsonpCode(
         '.then(function () {',
         Template.indent([
           `console.log(${RuntimeGlobals.shareScopeMap}.default);`,
-          `var libKeys = Object.keys(${RuntimeGlobals.shareScopeMap}.default).reverse();`,
+          `var libKeys = Object.keys(${RuntimeGlobals.shareScopeMap}.default)`,
           'var reactAndNextLibKeys = libKeys.filter(function (libKey) {',
           Template.indent([
             "return libKey.startsWith('react') || libKey.startsWith('next');",
@@ -254,6 +254,7 @@ class CustomWebpackPlugin {
               module.id ||
               module.debugId;
             this._initialModules.add(module);
+            this._initialModulesFound.add(module.options.shareKey);
           }
         };
 
@@ -266,6 +267,7 @@ class CustomWebpackPlugin {
                 continue;
 
               for (const chunk of entrypoint.getAllInitialChunks()) {
+                console.log(chunk.name, this._initialModulesFound);
                 const modules =
                   compilation.chunkGraph.getChunkModulesIterableBySourceType(
                     chunk,
@@ -282,8 +284,23 @@ class CustomWebpackPlugin {
                     'consume-shared'
                   );
                 if (!modules) continue;
+                // @ts-ignore
+                modules.forEach((m) => {
+                  if (
+                    m.options &&
+                    !this._initialModulesFound.has(m.options.shareKey)
+                  ) {
+                    if (m.options.shareKey === 'next/router') {
+                      // only add specific modules with side effects for next
+                      // these are not eager modules, they have a import boundary.
+                      // but i need them to always negoticate and come from host
+                      addModules([m], chunk);
+                      this._initialModulesFound.add(m.options.shareKey);
+                    }
+                  }
+                });
                 //@ts-ignore
-                addModules(modules, chunk);
+                // addModules(modules, chunk);
               }
             }
           }

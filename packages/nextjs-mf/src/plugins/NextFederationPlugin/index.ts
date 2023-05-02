@@ -152,20 +152,20 @@ export class NextFederationPlugin {
     ) {
       // single runtime chunk if host or circular remote uses remote of current host.
       // @ts-ignore
-      new ModuleFederationPlugin({
-        ...hostFederationPluginOptions,
-        filename: undefined,
-        runtime: undefined,
-        name: this._options.name + '_single',
-        library: {
-          ...hostFederationPluginOptions.library,
-          name: this._options.name + '_single',
-        },
-        shared: {
-          ...hostFederationPluginOptions.shared,
-          ...defaultShared,
-        },
-      }).apply(compiler);
+      // new ModuleFederationPlugin({
+      //   ...hostFederationPluginOptions,
+      //   filename: undefined,
+      //   runtime: undefined,
+      //   name: this._options.name + '_single',
+      //   library: {
+      //     ...hostFederationPluginOptions.library,
+      //     name: this._options.name + '_single',
+      //   },
+      //   shared: {
+      //     ...hostFederationPluginOptions.shared,
+      //     ...defaultShared,
+      //   },
+      // }).apply(compiler);
     }
 
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
