@@ -98,6 +98,7 @@ export const importDelegatedModule = async (
           init: asyncContainer.init,
         };
       } else {
+        return asyncContainer;
         const proxy = {
           get: asyncContainer.get,
           //@ts-ignore

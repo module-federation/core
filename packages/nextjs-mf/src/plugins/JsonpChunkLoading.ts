@@ -152,7 +152,13 @@ function getCustomJsonpCode(
       'chunkLoadingGlobal.push = (function (originalPush) {',
       Template.indent([
         'return function () {',
-        "console.log('share', __webpack_require__.S.default)",
+        `if (!__webpack_require__.S.default) {
+          console.log(
+            '%cshare is blank: %s',
+            'color: red; font-size: 20px;',
+           !__webpack_require__.S.default
+          );
+        }`,
         "console.log('chunk was pushed', arguments[0][0]);",
         "if (arguments[0][0].includes('main') || arguments[0][0].some(function (item) { return item.startsWith('pages/'); })) {",
         'resport = Array.prototype.concat.apply(resport, arguments[0][0]);',
