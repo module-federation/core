@@ -58,7 +58,6 @@
     "@fontsource/roboto-mono": "4.5.10",
     "@jscutlery/semver": "^2.27.1",
     "@node-rs/jieba": "^1.6.2",
-    "@nrwl/cli": "15.9.3",
     "@nrwl/eslint-plugin-nx": "16.0.3",
     "@nrwl/jest": "16.0.3",
     "@nrwl/js": "16.0.3",
