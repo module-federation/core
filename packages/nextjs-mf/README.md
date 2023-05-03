@@ -468,7 +468,7 @@ export default Page;
 
 You can customize the behavior of the `createDynamicFederatedPage` function by passing an options object with the following properties:
 
-- `pathResolver`: A function that takes the current path as an argument and returns an object containing the remote container name, module path, and resolved path. The default implementation simply splits the path.
+- `pathResolver`: A function that takes the current path as an argument and returns an object containing the remote container name and module path. The default implementation simply splits the path.
 - `errorHandler`: A function that takes an error as an argument and returns an object containing either a redirect or a notFound property. The default implementation logs the error and returns a 404 page.
 - `suspenseFallback`: A React node to render while the remote module is loading.
 - `injectScriptReplacement`: A replacement for the injectScript function from `@module-federation/utilities`, useful if the import is broken in your specific version of `@module-federation/nextjs-mf`.

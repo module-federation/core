@@ -1,23 +1,15 @@
 import * as React from 'react'
-import { injectScript, getModule } from '@module-federation/utilities'
-import type { RemoteData } from '@module-federation/utilities'
+import { importDelegatedModule } from '@module-federation/utilities'
+import type { RuntimeRemote, WebpackRemoteContainer } from '@module-federation/utilities'
 import { useRouter } from 'next/router'
 import { GetServerSideProps, Redirect } from 'next/types'
 
-export type ResolvedPathObject = {
-  remoteContainer: string | RemoteData,
-  modulePath: string,
-  /**
-   * In case of custom path resolver for parametrized routes,
-   * this is the key to the remote module.
-   * Example: path = '/storage/123', resolvedPath = '/storage/*'
-   */
-  resolvedPath: string
+export type PathResolver = (path: string) => {
+  remoteContainer: string | RuntimeRemote,
+  modulePath: string
 }
 
-export type PathResolver = (path: string) => ResolvedPathObject
-
-function defaultPathResolver(path: string): ResolvedPathObject {
+function defaultPathResolver(path: string) {
   const trimmedPath = path.replace(/^\/+/, '')
   const slashIndex = trimmedPath.indexOf('/')
   const remoteContainer = slashIndex > -1 ? trimmedPath.substring(0, slashIndex) : trimmedPath
@@ -25,18 +17,24 @@ function defaultPathResolver(path: string): ResolvedPathObject {
 
   return {
     remoteContainer,
-    modulePath: `.${modulePath}`,
-    resolvedPath: path,
+    modulePath: `.${modulePath}`
   }
 }
 
 export type ErrorHandler = (error: unknown) => { redirect: Redirect } | { notFound: true }
 
-function defaultErrorHandler(error: unknown): { redirect: Redirect } | { notFound: true } {
+function defaultErrorHandler(error: unknown) {
   console.error(error)
   return {
     notFound: true,
-  }
+  } as const
+}
+
+function removeQueryParams(path: string) {
+  // is this better than "path.split('?')[0]" ?
+  const fakeBaseURL = 'https://example.com';
+  const url = new URL(path, fakeBaseURL);
+  return url.pathname;
 }
 
 /**
@@ -44,39 +42,28 @@ function defaultErrorHandler(error: unknown): { redirect: Redirect } | { notFoun
  * @typedef {Object} CreateDynamicFederatedPageOptions
  * @property pathResolver - function to obtain remote container name and module path from the page path, by default it's a simple path splitting
  * @property errorHandler - function to handle errors, by default it just logs the error and returns 404
- * @property suspenseFallback - fallback to render while remote module is loading
- * TODO: remove injectScriptReplacement when it's fixed in @module-federation/utilities
- * @property injectScriptReplacement - replacement for @module-federation/utilities/injectScript, which import is broken in @module-federation/nextjs-mf v6.4.0
+ * @property suspenseFallback - fallback to render while remote module is loading, by default it's null
+ * @property getContainer - function to load remote container, by default it's importDelegatedModule
  */
 interface CreateDynamicFederatedPageOptions {
   pathResolver?: PathResolver,
   errorHandler?: ErrorHandler,
   suspenseFallback?: React.ReactNode
-  injectScriptReplacement?: typeof injectScript,
+  getContainer?: (remote: string | RuntimeRemote) => Promise<WebpackRemoteContainer | any>
 }
 
 export function createDynamicFederatedPage({
   pathResolver = defaultPathResolver,
   errorHandler = defaultErrorHandler,
   suspenseFallback = null,
-  injectScriptReplacement = injectScript,
+  getContainer = importDelegatedModule,
 }: CreateDynamicFederatedPageOptions = {}) {
   const getRemoteModule = async (path: string) => {
     const { remoteContainer, modulePath } = pathResolver(path)
-    const remoteContainerGlobal = typeof remoteContainer === 'string' ? remoteContainer : remoteContainer.global
 
-    // getModule() doesn't work on server-side
-    // and doesn't work on first render on client-side
-    if (typeof window === 'undefined' || !(window as any)[remoteContainerGlobal]) {
-      const container = await injectScriptReplacement(remoteContainer)
-      // @ts-ignore
-      return await container.get(modulePath)?.then((factory) => factory())
-    } else {
-      return await getModule({
-        remoteContainer,
-        modulePath,
-      })
-    }
+    const container = await getContainer(remoteContainer)
+    // @ts-ignore
+    return await container.get(modulePath)?.then((factory) => factory())
   }
 
   const DynamicComponent = ({ props, path }: { props: React.Attributes, path: string }) => {
@@ -92,7 +79,7 @@ export function createDynamicFederatedPage({
 
   const Page = (props: React.Attributes) => {
     const router = useRouter()
-    const path = router.asPath.split('?')[0]
+    const path = removeQueryParams(router.asPath)
 
     // this is a hack to prevent infinity re-rendering
     // when navigating between pages with the same path and different slug
@@ -109,7 +96,7 @@ export function createDynamicFederatedPage({
   }
 
   const getServerSideProps: GetServerSideProps = async (ctx) => {
-    const path = ctx.resolvedUrl.split('?')[0]
+    const path = removeQueryParams(ctx.resolvedUrl)
 
     try {
       const remoteModule = await getRemoteModule(path)
