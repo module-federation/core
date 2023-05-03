@@ -2,6 +2,19 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [0.2.0](https://github.com/module-federation/nextjs-mf/compare/storybook-addon-0.1.0...storybook-addon-0.2.0) (2023-05-03)
+
+### Dependency Updates
+
+* `utils` updated to version `1.7.0`
+* `utils` updated to version `1.7.0`
+
+### Features
+
+* **storybook-addon:** upgrade nx and refactor util `withModuleFederation` ([#829](https://github.com/module-federation/nextjs-mf/issues/829)) ([5eeab46](https://github.com/module-federation/nextjs-mf/commit/5eeab46861fa1e444b772cdd15ba5472414e5dd8))
+
+
+
 # 0.1.0 (2023-04-27)
 
 ### Dependency Updates
