@@ -11,7 +11,6 @@ import { RuntimeModule, Template } from 'webpack';
 import { getUndoPath } from 'webpack/lib/util/identifier';
 // @ts-ignore
 import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
-import customRuntime from './custom-jsonp';
 /**
  * Interface for InvertedContainerRuntimeModuleOptions, containing
  * options for the InvertedContainerRuntimeModule class.

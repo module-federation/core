@@ -11,214 +11,49 @@ import { ConcatSource } from 'webpack-sources';
 import JsonpChunkLoadingRuntimeModule from 'webpack/lib/web/JsonpChunkLoadingRuntimeModule';
 import Template from '../../utils/Template';
 import { DEFAULT_SHARE_SCOPE_BROWSER } from '../internal';
-import { loadDependenciesTemplate } from './LoadDependenciesTemplate';
-
-// @ts-ignore
-export const setEagerLoading = (RuntimeGlobals) => {
-  return Template.asString([
-    'function setEagerLoading(libraryName, version, fromValue) {',
-    Template.indent([
-      'var library = ' +
-        RuntimeGlobals.shareScopeMap +
-        '.default[libraryName];',
-      'var shareScopeMap = ' + RuntimeGlobals.shareScopeMap + '.default;',
-      'var alternativeVersion = Object.keys(shareScopeMap[libraryName])[0];',
-      'if(!library) return;',
-      'var pickedVersion = library[version] || library[alternativeVersion];',
-      'if ((pickedVersion && pickedVersion.from === fromValue) && preferredModules.includes(libraryName)) {',
-      Template.indent([
-        "console.log('setting eager', libraryName, pickedVersion, fromValue);",
-        'pickedVersion.eager = true;',
-      ]),
-      '}',
-    ]),
-    '}',
-  ]);
-};
-
-function asyncOperationTemplate(
-  moduleArray: any[],
-  //@ts-ignore
-  RuntimeGlobals: any
-): Template {
-  return Template.asString([
-    `var initialConsumes = ${JSON.stringify(moduleArray)}`,
-    'var asyncInFlight = false;',
-    'function asyncOperation(originalPush) {',
-    Template.indent([
-      'if(asyncInFlight) return asyncInFlight;',
-      '// This is just an example; replace it with your own logic.',
-      'asyncInFlight =  new Promise(function (resolve) {',
-      Template.indent([
-        `var prom = ${RuntimeGlobals.initializeSharing}('default', []);`,
-        `initialConsumes.forEach(function (lib) {`,
-        Template.indent(['setEagerLoading(lib[0], lib[1], cnn);']),
-        '});',
-        'resolve(prom);',
-      ]),
-      '})',
-      '.then(function () {',
-      Template.indent([
-        "console.log('init operation completed');",
-        `console.log(${RuntimeGlobals.shareScopeMap}.default);`,
-        `loadDependencies(initialConsumes, cnn);`,
-        'return Promise.all(asyncQueue);',
-      ]),
-      '})',
-      '.then(function () {',
-      Template.indent([
-        "console.log('webpack is done negotiating dependency trees', cnn);",
-        "console.log('number of entry points to invert startup', chunkQueue.length);",
-        "console.log('startup inversion in progress', chunkQueue);",
-        'asyncInFlight = false;',
-        'while (chunkQueue.length > 0) {',
-        // 'originalPush.apply(chunkLoadingGlobal, arguments);',
-        'const queueArgs = chunkQueue.shift();',
-        "console.log('pushing deffered chunk into runtime', queueArgs[0]);",
-        'webpackJsonpCallback.apply(',
-        Template.indent([
-          'null,',
-          '[null].concat(Array.prototype.slice.call([queueArgs]))',
-        ]),
-        ');',
-        Template.indent(['originalPush.apply(originalPush,[queueArgs]);']),
-        '}',
-      ]),
-      '});',
-    ]),
-    'return asyncInFlight;',
-    '}',
-  ]);
-}
+// import { loadDependenciesTemplate } from './LoadDependenciesTemplate';
+import template from './container/custom-jsonp';
 
 function getCustomJsonpCode(
   appName: string,
   RuntimeGlobals: any,
   initialModules: Iterable<Module>,
-  initialModulesResolved: Map<any, string>
+  initialModulesResolved: Map<any, any>
 ): string {
-  const moduleMaps = [...initialModules].reduce((acc, module) => {
+  const moduleMaps = new Map();
+  for (const module of initialModules) {
     //@ts-ignore
-    console.log('module', module?.options?.importResolved);
-    console.log(
-      'initialModulesResolved',
-      //@ts-ignore
-      initialModulesResolved.get(module.options.importResolved)?.version
-    );
-
-    const version = initialModulesResolved.get(
-      //@ts-ignore
-      module?.options?.importResolved
-      //@ts-ignore
-    )?.version;
-    if (
-      !acc.some(
-        //@ts-ignore
-        (item) => item[1] === version && item[0] === module?.options?.shareKey
-      )
-    ) {
-      //@ts-ignore
-      acc.push([module?.options?.shareKey, version]);
+    const importResolved = module?.options?.importResolved;
+    const version = initialModulesResolved.get(importResolved)?.version;
+    //@ts-ignore
+    const shareKey = module?.options?.shareKey;
+    if (importResolved && version && shareKey && !moduleMaps.has(shareKey)) {
+      moduleMaps.set(shareKey, version);
     }
+  }
 
-    return acc;
-  }, []);
-
-  const moduleArray = Array.from(moduleMaps);
-
+  const moduleArray = Array.from(moduleMaps.entries());
   const code = [
     'var chunkQueue = [];',
     'var resport = [];',
     `var cnn = ${JSON.stringify(appName)};`,
     "var chunkLoadingGlobal = self['webpackChunk' + cnn] || [];",
-    `var preferredModules = ${JSON.stringify(
+    `var preferredModules = new Set(${JSON.stringify(
       Object.keys(DEFAULT_SHARE_SCOPE_BROWSER)
-    )};`,
+    )});`,
+    `var initialConsumes = ${JSON.stringify(moduleArray)}`,
     'var asyncQueue = [];',
-    // setEagerLoading function
-    setEagerLoading(RuntimeGlobals),
-    // loadDependencies function
-    loadDependenciesTemplate(RuntimeGlobals),
-    // shouldDeferLoading function
-    Template.asString([
-      'function shouldDeferLoading(args) {',
-      Template.indent([
-        'if(resport.length === 0) return true;',
-        'if(resport.length !== 0 && chunkQueue.length === 0) return false;',
-        'var matchesOrStartsWith = args[0].some(function (item) {',
-        Template.indent([
-          'return resport.some(function (resportItem) {',
-          Template.indent([
-            'return item === resportItem || item.indexOf(resportItem) === 0;',
-          ]),
-          '});',
-        ]),
-        '});',
-        "console.log('shouldDeferLoading', !matchesOrStartsWith, args[0], resport);",
-        'return !matchesOrStartsWith;',
-      ]),
-      '}',
-    ]),
-    // asyncOperation function
-    asyncOperationTemplate(moduleArray, RuntimeGlobals),
-    // chunkLoadingGlobal.push
-    Template.asString([
-      'asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));',
-      'chunkLoadingGlobal.push = (function (originalPush) {',
-      Template.indent([
-        'return function () {',
-        `if (!__webpack_require__.S.default) {
-          console.log(
-            '%cshare is blank: %s',
-            'color: red; font-size: 20px;',
-           !__webpack_require__.S.default
-          );
-        }`,
-        "console.log('chunk was pushed', arguments[0][0]);",
-        "if (arguments[0][0].includes('main') || arguments[0][0].some(function (item) { return item.startsWith('pages/'); })) {",
-        'resport = Array.prototype.concat.apply(resport, arguments[0][0]);',
-        'var pushEvent =  Array.prototype.push.apply(chunkQueue, arguments);',
-        'return asyncOperation(originalPush);',
-        '}',
-        'if(!__webpack_require__.S.default) {asyncOperation(originalPush);}',
-        "console.log('queue size:', chunkQueue.length);",
-        "console.log('pushing chunk into webpack runtime:', arguments[0][0]);",
-        'webpackJsonpCallback.apply(',
-        Template.indent([
-          'null,',
-          '[null].concat(Array.prototype.slice.call(arguments))',
-        ]),
-        ');',
-        'return originalPush.apply(chunkLoadingGlobal, arguments);',
-        '};',
-      ]),
-      '})(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));',
-    ]),
+    template,
   ];
-
   return Template.asString(code);
-}
-
-function buildOutputString(dependencies: Record<string, any>): string[] {
-  const output: string[] = [];
-  for (const [key, version] of Object.entries(dependencies)) {
-    output.push(
-      `__webpack_require__.S.default[${JSON.stringify(key)}][${JSON.stringify(
-        version
-      )}]`
-    );
-  }
-  return output;
 }
 
 class CustomWebpackPlugin {
   private initialModules: Set<any>;
-  private initialModulesFound: Set<any>;
   private initialModulesResolved: Map<any, any>;
 
   constructor() {
     this.initialModules = new Set();
-    this.initialModulesFound = new Set();
     this.initialModulesResolved = new Map();
   }
 
@@ -226,11 +61,9 @@ class CustomWebpackPlugin {
     compiler.hooks.compilation.tap(
       'CustomWebpackPlugin',
       (compilation: Compilation) => {
-        const addModules = (modules: Iterable<Module>, chunk: Chunk): void => {
+        const addModules = (modules: Iterable<Module>): void => {
           for (const module of modules) {
             this.initialModules.add(module);
-            // @ts-ignore
-            this.initialModulesFound.add(module?.options?.shareKey);
           }
         };
 
@@ -239,12 +72,11 @@ class CustomWebpackPlugin {
           (chunks) => {
             for (const entrypointModule of compilation.entrypoints.values()) {
               const entrypoint = entrypointModule.getEntrypointChunk();
-
               if (entrypoint.hasRuntime()) continue;
 
               const processChunks = (
                 chunks: Set<Chunk>,
-                callback: (modules: Iterable<Module>, chunk: any) => void
+                callback: (modules: Iterable<Module>) => void
               ): void => {
                 for (const chunk of chunks) {
                   const modules =
@@ -252,31 +84,11 @@ class CustomWebpackPlugin {
                       chunk,
                       'consume-shared'
                     );
-                  if (modules) callback(modules, chunk);
+                  if (modules) callback(modules);
                 }
               };
-              processChunks(
-                entrypoint.getAllAsyncChunks(),
-                (modules, chunk) => {
-                  return addModules(modules, chunk);
 
-                  for (const m of modules) {
-                    if (
-                      // @ts-ignore
-                      m?.options &&
-                      true
-                      // @ts-ignore
-                      // !this.initialModulesFound.has(m?.options?.shareKey) &&
-                      // @ts-ignore
-                      // m?.options?.shareKey === 'next/router'
-                    ) {
-                      addModules([m], chunk);
-                      // @ts-ignore
-                      this.initialModulesFound.add(m?.options?.shareKey);
-                    }
-                  }
-                }
-              );
+              processChunks(entrypoint.getAllAsyncChunks(), addModules);
               processChunks(entrypoint.getAllInitialChunks(), addModules);
             }
 
@@ -284,14 +96,10 @@ class CustomWebpackPlugin {
               const modules =
                 compilation.chunkGraph.getChunkModulesIterable(chunk);
               for (const m of modules) {
-                // @ts-ignore
                 const foundTrueShare = Array.from(this.initialModules).some(
-                  (mod) => {
-                    //@ts-ignore
-                    return mod?.options?.importResolved === m?.resource;
-                  }
+                  //@ts-ignore
+                  (mod) => mod?.options?.importResolved === m?.resource
                 );
-                // @ts-ignore
                 if (foundTrueShare) {
                   this.initialModulesResolved.set(
                     //@ts-ignore
@@ -314,7 +122,6 @@ class CustomWebpackPlugin {
               chunk.name === 'webpack'
             ) {
               const originalSource = runtimeModule.getGeneratedCode();
-              // @ts-ignore
               const modifiedSource = new ConcatSource(
                 originalSource,
                 '\n',
@@ -323,9 +130,7 @@ class CustomWebpackPlugin {
                   //@ts-ignore
                   compiler.options.output.uniqueName,
                   compiler.webpack.RuntimeGlobals,
-                  // @ts-ignore
                   this.initialModules,
-                  // @ts-ignore
                   this.initialModulesResolved
                 )
               );
