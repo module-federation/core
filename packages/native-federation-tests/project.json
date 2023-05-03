@@ -26,7 +26,6 @@
       },
       "dependsOn": [
         {
-          "projects": "self",
           "target": "build"
         }
       ]
@@ -46,7 +45,7 @@
       "executor": "@nrwl/vite:test",
       "outputs": [
         "{workspaceRoot}/coverage/packages/native-federation-tests"
-      ],
+      ]
     },
     "version": {
       "executor": "@jscutlery/semver:version",
