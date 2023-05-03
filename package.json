@@ -121,7 +121,7 @@
     "ngx-deploy-npm": "^5.0.0",
     "nodejieba": "^2.6.0",
     "nx": "16.0.3",
-    "postcss-calc": "~8.2.0",
+    "postcss-calc": "~9.0.0",
     "postcss-custom-properties": "~13.1.0",
     "postcss-import": "~15.1.0",
     "postcss-url": "~10.1.0",
