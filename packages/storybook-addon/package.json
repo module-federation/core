@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/storybook-addon",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Storybook addon to consume remote module federated apps/components",
   "license": "MIT",
   "repository": "https://github.com/module-federation/universe/tree/main/packages/storybook-addon",
@@ -15,8 +15,8 @@
   ],
   "author": "Fiodorov Andrei <hello@fyodorovandrei.com> (https://github.com/fyodorovandrei)",
   "devDependencies": {
-    "@storybook/core-common": "^6.5.16",
-    "@storybook/node-logger": "^6.5.16",
+    "@storybook/core-common": "^7.0.0",
+    "@storybook/node-logger": "^7.0.0",
     "webpack": "^5.75.0",
     "webpack-virtual-modules": "^0.5.0",
     "@module-federation/utilities": "1.7.0"
