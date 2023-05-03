@@ -15,9 +15,7 @@
         "baseHref": "/",
         "main": "apps/reactRemoteUI/src/main.ts",
         "tsConfig": "apps/reactRemoteUI/tsconfig.app.json",
-        "assets": [
-          "apps/reactRemoteUI/src/favicon.ico"
-        ],
+        "assets": ["apps/reactRemoteUI/src/favicon.ico"],
         "styles": ["apps/reactRemoteUI/src/styles.scss"],
         "scripts": [],
         "isolatedConfig": true,
