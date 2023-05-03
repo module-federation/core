@@ -6,7 +6,9 @@
   "targets": {
     "build": {
       "executor": "@nrwl/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "defaultConfiguration": "production",
       "options": {
         "compiler": "babel",
@@ -18,7 +20,9 @@
         "assets": [
           "apps/reactRemoteUI/src/favicon.ico"
         ],
-        "styles": ["apps/reactRemoteUI/src/styles.scss"],
+        "styles": [
+          "apps/reactRemoteUI/src/styles.scss"
+        ],
         "scripts": [],
         "isolatedConfig": true,
         "webpackConfig": "apps/reactRemoteUI/webpack.config.js"
@@ -48,8 +52,8 @@
       },
       "dependsOn": [
         {
-          "projects": "dependencies",
-          "target": "build"
+          "target": "build",
+          "dependencies": true
         }
       ]
     },
@@ -73,14 +77,20 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["apps/reactRemoteUI/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": [
+          "apps/reactRemoteUI/**/*.{ts,tsx,js,jsx}"
+        ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "apps/reactRemoteUI/jest.config.ts",
         "passWithNoTests": true

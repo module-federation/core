@@ -6,7 +6,9 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/packages/native-federation-typescript",
         "parallel": false,
@@ -24,16 +26,19 @@
       },
       "dependsOn": [
         {
-          "projects": "self",
           "target": "build"
         }
       ]
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["packages/native-federation-typescript/**/*.ts"]
+        "lintFilePatterns": [
+          "packages/native-federation-typescript/**/*.ts"
+        ]
       }
     },
     "test": {
