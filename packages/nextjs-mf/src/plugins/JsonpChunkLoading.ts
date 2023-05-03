@@ -94,22 +94,37 @@ function asyncOperationTemplate(
 function getCustomJsonpCode(
   appName: string,
   RuntimeGlobals: any,
-  initialModules: Iterable<Module>
+  initialModules: Iterable<Module>,
+  initialModulesResolved: Map<any, string>
 ): string {
-  const moduleMaps = [...initialModules]
-    .map((module) => [
-      // @ts-ignore
-      module?.options?.shareKey,
-      // @ts-ignore
-      module?.options?.requiredVersion,
-    ])
-    .filter(([key], i, arr) => arr.findIndex(([k]) => k === key) === i);
+  const moduleMaps = [...initialModules].reduce((acc, module) => {
+    //@ts-ignore
+    console.log('module', module?.options?.importResolved);
+    console.log(
+      'initialModulesResolved',
+      //@ts-ignore
+      initialModulesResolved.get(module.options.importResolved)?.version
+    );
 
-  const moduleArray = moduleMaps.map(([key, version]) => {
-    if (!Array.isArray(version)) return [key, undefined];
-    const trueVersion = version.slice(1);
-    return [key, trueVersion.join('.')];
-  });
+    const version = initialModulesResolved.get(
+      //@ts-ignore
+      module?.options?.importResolved
+      //@ts-ignore
+    )?.version;
+    if (
+      !acc.some(
+        //@ts-ignore
+        (item) => item[1] === version && item[0] === module?.options?.shareKey
+      )
+    ) {
+      //@ts-ignore
+      acc.push([module?.options?.shareKey, version]);
+    }
+
+    return acc;
+  }, []);
+
+  const moduleArray = Array.from(moduleMaps);
 
   const code = [
     'var chunkQueue = [];',
@@ -199,10 +214,12 @@ function buildOutputString(dependencies: Record<string, any>): string[] {
 class CustomWebpackPlugin {
   private initialModules: Set<any>;
   private initialModulesFound: Set<any>;
+  private initialModulesResolved: Map<any, any>;
 
   constructor() {
     this.initialModules = new Set();
     this.initialModulesFound = new Set();
+    this.initialModulesResolved = new Map();
   }
 
   apply(compiler: Compiler): void {
@@ -211,10 +228,6 @@ class CustomWebpackPlugin {
       (compilation: Compilation) => {
         const addModules = (modules: Iterable<Module>, chunk: Chunk): void => {
           for (const module of modules) {
-            // const id =
-            //   compilation.chunkGraph.getModuleId(module) ||
-            //   module.id ||
-            //   module.debugId;
             this.initialModules.add(module);
             // @ts-ignore
             this.initialModulesFound.add(module?.options?.shareKey);
@@ -226,8 +239,8 @@ class CustomWebpackPlugin {
           (chunks) => {
             for (const entrypointModule of compilation.entrypoints.values()) {
               const entrypoint = entrypointModule.getEntrypointChunk();
-              if (entrypoint.name === compiler.options.output.uniqueName)
-                continue;
+
+              if (entrypoint.hasRuntime()) continue;
 
               const processChunks = (
                 chunks: Set<Chunk>,
@@ -242,19 +255,20 @@ class CustomWebpackPlugin {
                   if (modules) callback(modules, chunk);
                 }
               };
-
-              processChunks(entrypoint.getAllInitialChunks(), addModules);
               processChunks(
                 entrypoint.getAllAsyncChunks(),
                 (modules, chunk) => {
+                  return addModules(modules, chunk);
+
                   for (const m of modules) {
                     if (
                       // @ts-ignore
                       m?.options &&
+                      true
                       // @ts-ignore
-                      !this.initialModulesFound.has(m?.options?.shareKey) &&
+                      // !this.initialModulesFound.has(m?.options?.shareKey) &&
                       // @ts-ignore
-                      m?.options?.shareKey === 'next/router'
+                      // m?.options?.shareKey === 'next/router'
                     ) {
                       addModules([m], chunk);
                       // @ts-ignore
@@ -263,6 +277,30 @@ class CustomWebpackPlugin {
                   }
                 }
               );
+              processChunks(entrypoint.getAllInitialChunks(), addModules);
+            }
+
+            for (const chunk of chunks) {
+              const modules =
+                compilation.chunkGraph.getChunkModulesIterable(chunk);
+              for (const m of modules) {
+                // @ts-ignore
+                const foundTrueShare = Array.from(this.initialModules).some(
+                  (mod) => {
+                    //@ts-ignore
+                    return mod?.options?.importResolved === m?.resource;
+                  }
+                );
+                // @ts-ignore
+                if (foundTrueShare) {
+                  this.initialModulesResolved.set(
+                    //@ts-ignore
+                    m.resource,
+                    //@ts-ignore
+                    m?.resourceResolveData?.descriptionFileData
+                  );
+                }
+              }
             }
           }
         );
@@ -286,11 +324,12 @@ class CustomWebpackPlugin {
                   compiler.options.output.uniqueName,
                   compiler.webpack.RuntimeGlobals,
                   // @ts-ignore
-                  this.initialModules
+                  this.initialModules,
+                  // @ts-ignore
+                  this.initialModulesResolved
                 )
               );
               runtimeModule.getGeneratedCode = () => modifiedSource.source();
-              console.log('adding updated runtime source');
             }
           }
         );
