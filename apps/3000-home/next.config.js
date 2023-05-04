@@ -14,9 +14,6 @@ const nextConfig = {
   webpack(config, options) {
     const { isServer } = options;
     // used for testing build output snapshots
-    config.optimization.minimize = false;
-    config.optimization.chunkIds = 'named';
-    config.optimization.moduleIds = 'named';
 
     const remotes = {
       // shop: createDelegatedModule(require.resolve('./remote-delegate.js'), {
@@ -53,7 +50,7 @@ const nextConfig = {
           antd: {},
         },
         extraOptions: {
-          automaticAsyncBoundary: true,
+          automaticAsyncBoundary: false,
           exposePages: true,
           enableImageLoaderFix: true,
           enableUrlLoaderFix: true,

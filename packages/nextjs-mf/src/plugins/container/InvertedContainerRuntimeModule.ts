@@ -105,13 +105,16 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       return `
         if(typeof window === 'undefined') {
           ${globalObject}['__remote_scope__'] = ${globalObject}['__remote_scope__'] || {_config: {}};
-        }
+          if(!__webpack_require__.S.default) {
+__webpack_require__.S = __webpack_require__.S || global.webpackShareScope
+}
+        } else {
 
 
         ${webpack.RuntimeGlobals.shareScopeMap}['default'] = ${
         webpack.RuntimeGlobals.shareScopeMap
       }['default'] || {};
-
+}
         try {
         var containerAttachObject = typeof window !== 'undefined' ? window : ${globalObject}['__remote_scope__']
         containerAttachObject[${JSON.stringify(

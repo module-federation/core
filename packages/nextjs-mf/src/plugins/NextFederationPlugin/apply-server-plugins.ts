@@ -3,6 +3,7 @@ import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import AddModulesPlugin from '../AddModulesToRuntime';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
+import JsonpChunkLoading from '../JsonpChunkLoading';
 
 /**
  * Applies server-specific plugins.
@@ -25,11 +26,12 @@ export function applyServerPlugins(
 ): void {
   // Import the StreamingTargetPlugin from @module-federation/node
   const { StreamingTargetPlugin } = require('@module-federation/node');
+  new JsonpChunkLoading({ server: true }).apply(compiler);
 
-  // Add the AddModulesPlugin for the webpack runtime with eager loading and remote configuration
+  // Add the AddModulesPl`ugin for the webpack runtime with eager loading and remote configuration
   new AddModulesPlugin({
     runtime: 'webpack-runtime',
-    eager: true,
+    eager: false,
     remotes: options.remotes,
     isServer: true,
     container: options.name,
@@ -48,12 +50,12 @@ export function applyServerPlugins(
   }).apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler
-  new InvertedContainerPlugin({
-    runtime: 'webpack-runtime',
-    container: options.name,
-    remotes: options.remotes as Record<string, string>,
-    debug: true,
-  }).apply(compiler);
+  // new InvertedContainerPlugin({
+  //   runtime: 'webpack-runtime',
+  //   container: options.name,
+  //   remotes: options.remotes as Record<string, string>,
+  //   debug: true,
+  // }).apply(compiler);
 }
 
 /**

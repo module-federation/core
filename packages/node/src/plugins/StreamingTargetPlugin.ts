@@ -50,7 +50,6 @@ class StreamingTargetPlugin {
 
     new (webpack?.node?.NodeTargetPlugin ||
       require('webpack/lib/node/NodeTargetPlugin'))().apply(compiler);
-
     new CommonJsChunkLoadingPlugin({
       asyncChunkLoading: true,
       name: this.options.name,
@@ -58,6 +57,7 @@ class StreamingTargetPlugin {
       baseURI: compiler.options.output.publicPath,
       promiseBaseURI: this.options.promiseBaseURI,
       verbose: this.options.verbose,
+      invertedBoot: true,
     }).apply(compiler);
   }
 }

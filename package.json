@@ -155,6 +155,7 @@
     }
   },
   "workspaces": [
-    "apps/**"
+    "apps/**",
+    "dist/packages/**"
   ]
 }

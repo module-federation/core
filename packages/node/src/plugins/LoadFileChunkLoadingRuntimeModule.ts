@@ -23,6 +23,7 @@ interface ReadFileChunkLoadingRuntimeModuleOptions {
   remotes: Record<string, string>;
   name?: string;
   verbose?: boolean;
+  invertedBoot?: boolean;
 }
 
 interface ChunkLoadingContext {
@@ -131,6 +132,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     const withExternalInstallChunk = this.runtimeRequirements.has(
       RuntimeGlobals.externalInstallChunk
     );
+
     const withOnChunkLoad = this.runtimeRequirements.has(
       RuntimeGlobals.onChunksLoaded
     );
@@ -246,13 +248,39 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
             )}`,
           ])
         : '// no remote script loader needed',
+      `
+      if(${
+        name === 'home_app'
+      } && !__webpack_require__.S.default && global.__remote_scope__) {
+      console.log('share scope is missing, trying to restore?', !!global.webpackShareScope);
+      console.log('share scope missing, resetting containers');
+console.log('remoet scope',global.__remote_scope__);
+      global.__remote_scope__ = { _config: global.__remote_scope__._config, ${JSON.stringify(
+        name
+      )}: global.__remote_scope__['${JSON.stringify(name)}'] };
+      global.hostInit = false;
+// __webpack_require__.S = __webpack_require__.S || global.webpackShareScope
+}
+    global.exportCounter = global.exportCounter || {};
+global.exportCounter[__filename] = global.exportCounter[__filename] || 0;
+global.exportCounter[__filename]++;
+    `,
       withLoading
         ? Template.asString([
             '// ReadFile + VM.run chunk loading for javascript',
             `${fn}.readFileVm = function(chunkId, promises) {`,
             hasJsMatcher !== false
               ? Template.indent([
-                  '',
+                  // 'console.log("readFileVm", chunkId, promises);',
+                  // this.options.invertedBoot
+                  //   ? Template.asString([
+                  //       'return new Promise(function(resolve, reject) {',
+                  //       Template.indent([
+                  //         'console.log("sitting on promise", chunkId);',
+                  //       ]),
+                  //       '});',
+                  //     ])
+                  //   : '',
                   'var installedChunkData = installedChunks[chunkId];',
                   'if(installedChunkData !== 0) { // 0 means "already installed".',
                   Template.indent([
@@ -424,10 +452,18 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
           ])
         : '// no chunk loading',
       '',
+      // "console.log('starting share init in runtime');",
+      'if(!__webpack_require__.S)__webpack_require__.I("default",__webpack_require__.S);',
       withExternalInstallChunk
         ? Template.asString([
             'module.exports = __webpack_require__;',
-            `${RuntimeGlobals.externalInstallChunk} = installChunk;`,
+            `${RuntimeGlobals.externalInstallChunk} = function(){
+            console.log('node: webpack installing to install chunk id:', arguments['0'].id);
+            // console.log('node: [startup inversion], boot sequence inverted');
+            // console.log('node: [startup inversion], holding next');
+            // return console.log
+            return installChunk.apply(this, arguments)
+            };`,
           ])
         : '// no external install chunk',
       '',

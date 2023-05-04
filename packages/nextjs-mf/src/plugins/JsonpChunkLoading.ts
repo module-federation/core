@@ -51,8 +51,10 @@ function getCustomJsonpCode(
 class CustomWebpackPlugin {
   private initialModules: Set<any>;
   private initialModulesResolved: Map<any, any>;
+  private options: any;
 
-  constructor() {
+  constructor(options?: any) {
+    this.options = options || {};
     this.initialModules = new Set();
     this.initialModulesResolved = new Map();
   }
@@ -73,7 +75,6 @@ class CustomWebpackPlugin {
             for (const entrypointModule of compilation.entrypoints.values()) {
               const entrypoint = entrypointModule.getEntrypointChunk();
               if (entrypoint.hasRuntime()) continue;
-
               const processChunks = (
                 chunks: Set<Chunk>,
                 callback: (modules: Iterable<Module>) => void
@@ -116,6 +117,16 @@ class CustomWebpackPlugin {
         compilation.hooks.runtimeModule.tap(
           'CustomWebpackPlugin',
           (runtimeModule: RuntimeModule, chunk: any) => {
+            if (this.options.server && false) {
+              if (runtimeModule.constructor.name) {
+                console.log(
+                  'found runtime module',
+                  runtimeModule.constructor.name,
+                  'in chunk:',
+                  chunk.name
+                );
+              }
+            }
             if (
               runtimeModule.constructor.name ===
                 'JsonpChunkLoadingRuntimeModule' &&

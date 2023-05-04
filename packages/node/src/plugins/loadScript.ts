@@ -61,16 +61,7 @@ export const executeLoadTemplate = `
         const foundContainer = remote[name] || remote
 
         if(!global.__remote_scope__[name]) {
-          global.__remote_scope__[name] = {
-            get: foundContainer.get,
-            init: function(initScope, initToken) {
-              try {
-                foundContainer.init(initScope, initToken)
-              } catch (e) {
-                return 1
-              }
-            }
-          };
+          global.__remote_scope__[name] = foundContainer;
           global.__remote_scope__._config[name] = url;
         }
         callback(global.__remote_scope__[name]);
