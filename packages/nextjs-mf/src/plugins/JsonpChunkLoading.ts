@@ -55,6 +55,7 @@ class CustomWebpackPlugin {
 
   constructor(options?: any) {
     this.options = options || {};
+    // eager imports of shared modules
     this.initialModules = new Set();
     this.initialModulesResolved = new Map();
   }
@@ -75,6 +76,7 @@ class CustomWebpackPlugin {
             for (const entrypointModule of compilation.entrypoints.values()) {
               const entrypoint = entrypointModule.getEntrypointChunk();
               if (entrypoint.hasRuntime()) continue;
+
               const processChunks = (
                 chunks: Set<Chunk>,
                 callback: (modules: Iterable<Module>) => void
@@ -85,10 +87,53 @@ class CustomWebpackPlugin {
                       chunk,
                       'consume-shared'
                     );
+
                   if (modules) callback(modules);
                 }
               };
 
+              const processChunksEagerRemote = (
+                chunks: Set<Chunk>,
+                callback: (modules: Iterable<Module>, chunk?: Chunk) => void
+              ): void => {
+                for (const chunk of chunks) {
+                  const modules =
+                    compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                      chunk,
+                      'remote'
+                    );
+                  //@ts-ignore
+                  if (modules) callback(modules, chunk);
+                }
+              };
+              // if (
+              //   this.options.server &&
+              //   compiler.options.output.uniqueName === 'home_app'
+              // ) {
+              //   if (entrypoint.name.includes('pages')) {
+              //     const remoteModule =
+              //       compilation.chunkGraph.getChunkModulesIterableBySourceType(
+              //         entrypoint,
+              //         'remote'
+              //       );
+              //     const initalRemotes = this.initialRemoteModules;
+              //     const allReferencedChunks =
+              //       entrypoint.getAllReferencedChunks();
+              //     const ename = entrypoint.name;
+              //     const asyncEntryChunks = entrypoint.getAllAsyncChunks();
+              //     const initialEntryChunks = entrypoint.getAllInitialChunks();
+              //     const founds = [];
+              //     initialEntryChunks.forEach((chunk) => {
+              //       const foun =
+              //         compilation.chunkGraph.getChunkModulesIterableBySourceType(
+              //           chunk,
+              //           'remote'
+              //         );
+              //
+              //       if (foun) founds.push([...(foun || [])]);
+              //     });
+              //   }
+              // }
               processChunks(entrypoint.getAllAsyncChunks(), addModules);
               processChunks(entrypoint.getAllInitialChunks(), addModules);
             }
@@ -96,6 +141,7 @@ class CustomWebpackPlugin {
             for (const chunk of chunks) {
               const modules =
                 compilation.chunkGraph.getChunkModulesIterable(chunk);
+              // just use module type provide-module to find shared modules.
               for (const m of modules) {
                 const foundTrueShare = Array.from(this.initialModules).some(
                   //@ts-ignore
@@ -117,15 +163,16 @@ class CustomWebpackPlugin {
         compilation.hooks.runtimeModule.tap(
           'CustomWebpackPlugin',
           (runtimeModule: RuntimeModule, chunk: any) => {
-            if (this.options.server && false) {
-              if (runtimeModule.constructor.name) {
-                console.log(
-                  'found runtime module',
-                  runtimeModule.constructor.name,
-                  'in chunk:',
-                  chunk.name
-                );
-              }
+            if (this.options.server && chunk.name === 'webpack-runtime') {
+              // console.log(this.initialModules);
+              // if (runtimeModule.constructor.name) {
+              //   console.log(
+              //     'found runtime module',
+              //     runtimeModule.constructor.name,
+              //     'in chunk:',
+              //     chunk.name
+              //   );
+              // }
             }
             if (
               runtimeModule.constructor.name ===

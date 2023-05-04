@@ -48,7 +48,7 @@ export const executeLoadTemplate = `
     }
 
     if (typeof global.__remote_scope__[name] !== 'undefined') return callback(global.__remote_scope__[name]);
-
+    console.log('executeLoad', url, name);
     const vm = require('vm');
     (global.webpackChunkLoad || global.fetch || require("node-fetch"))(url).then(function (res) {
       return res.text();

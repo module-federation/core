@@ -146,7 +146,7 @@ export class NextFederationPlugin {
     new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
 
     if (
-      // !isServer &&
+      !isServer &&
       this._options.remotes &&
       Object.keys(this._options.remotes).length > 0
     ) {

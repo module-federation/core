@@ -128,7 +128,7 @@ const fname = __filename.split('/server/')[1];
 global.exportCounter = global.exportCounter || {};
 global.exportCounter[fname] = global.exportCounter[fname] || 0;
 global.exportCounter[fname]++;
-console.log('exportCounter', global.exportCounter);
+//console.log('exportCounter', global.exportCounter);
 global.webpackShareScope = global.webpackShareScope  || __webpack_require__.S;
 var asyncInFlight = false;
  // console.log('PROM', prom);
@@ -183,37 +183,4 @@ console.log('webpackShareScope', global.webpackShareScope);
     });
   return global.hostInit;
 }
-// asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
-// chunkLoadingGlobal.push = (function (originalPush) {
-//   return function () {
-//     if (!__webpack_require__.S.default) {
-//       console.log(
-//         '%cshare is blank: %s',
-//         'color: red; font-size: 20px;',
-//         !__webpack_require__.S.default
-//       );
-//     }
-//     console.log('chunk was pushed', arguments[0][0]);
-//     if (
-//       arguments[0][0].includes('main') ||
-//       arguments[0][0].some(function (item) {
-//         return item.startsWith('pages/');
-//       })
-//     ) {
-//       resport = Array.prototype.concat.apply(resport, arguments[0][0]);
-//       var pushEvent = Array.prototype.push.apply(chunkQueue, arguments);
-//       return asyncOperation(originalPush);
-//     }
-//     if (!__webpack_require__.S.default) {
-//       asyncOperation(originalPush);
-//     }
-//     console.log('queue size:', chunkQueue.length);
-//     console.log('pushing chunk into webpack runtime:', arguments[0][0]);
-//     webpackJsonpCallback.apply(
-//       null,
-//       [null].concat(Array.prototype.slice.call(arguments))
-//     );
-//     return originalPush.apply(chunkLoadingGlobal, arguments);
-//   };
-// })(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
 `;

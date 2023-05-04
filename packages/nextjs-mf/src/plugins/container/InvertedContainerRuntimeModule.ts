@@ -108,6 +108,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           if(!__webpack_require__.S.default) {
 __webpack_require__.S = __webpack_require__.S || global.webpackShareScope
 }
+console.log('in invert container', __webpack_require__(${JSON.stringify(
+        containerModuleId
+      )}))
         } else {
 
 
@@ -117,10 +120,13 @@ __webpack_require__.S = __webpack_require__.S || global.webpackShareScope
 }
         try {
         var containerAttachObject = typeof window !== 'undefined' ? window : ${globalObject}['__remote_scope__']
+
         containerAttachObject[${JSON.stringify(
           //@ts-ignore
           containerName
         )}] = __webpack_require__(${JSON.stringify(containerModuleId)})
+        console.log('containerAttachObject', containerAttachObject)
+
       } catch (e) {
         console.error('host runtime was unable to initialize its own remote', e);
       }`;
