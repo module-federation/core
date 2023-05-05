@@ -2,6 +2,7 @@ import type { Chunk, Compilation, Compiler } from 'webpack';
 //@ts-ignore
 import type { ModuleFederationPluginOptions } from '../types';
 import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
+import { RuntimeGlobals } from 'webpack';
 
 /**
  * Interface for InvertedContainerOptions, extending ModuleFederationPluginOptions.
@@ -61,7 +62,7 @@ class InvertedContainerPlugin {
         const handler = (chunk: Chunk, set: Set<string>) => {
           // If the chunk has already been processed, skip it.
           if (onceForChunkSet.has(chunk)) return;
-
+          set.add(RuntimeGlobals.onChunksLoaded);
           // Mark the chunk as processed by adding it to the WeakSet.
           onceForChunkSet.add(chunk);
 
@@ -105,10 +106,10 @@ class InvertedContainerPlugin {
                       'to',
                       chunk.name
                     );
-                  compilation.chunkGraph.connectChunkAndModule(
-                    chunk,
-                    containerEntryModule
-                  );
+                  // compilation.chunkGraph.connectChunkAndModule(
+                  //   chunk,
+                  //   containerEntryModule
+                  // );
                 }
               }
             }

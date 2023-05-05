@@ -22,7 +22,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     requiredVersion: false,
     eager: false,
-    import: false,
+    import: undefined,
   },
   'react/jsx-runtime': {
     singleton: true,
@@ -70,7 +70,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     requiredVersion: false,
     singleton: true,
     import: undefined,
-    eager: false,
+    eager: undefined,
   },
   'next/script': {
     requiredVersion: false,
@@ -82,7 +82,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     requiredVersion: false,
     singleton: true,
     import: undefined,
-    eager: false,
+    eager: undefined,
   },
 };
 

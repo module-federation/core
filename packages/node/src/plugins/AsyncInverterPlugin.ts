@@ -27,6 +27,354 @@ class AsyncInverterPlugin {
     // eager imports of remote container modules
     this.initialRemoteModules = new Map();
   }
+
+  mapShared(compilation: Compilation) {
+    const { runtimeTemplate, chunkGraph, codeGenerationResults } = compilation;
+    const chunkToModuleMapping = {};
+    /** @type {Map<string | number, Source>} */
+    const moduleIdToSourceMapping = new Map();
+    // @ts-ignore
+    const initialConsumes = [];
+
+    /**
+     *
+     * @param {Iterable<Module>} modules modules
+     * @param {Chunk} chunk the chunk
+     * @param {(string | number)[]} list list of ids
+     */
+    // @ts-ignore
+    const addModules = (modules, chunk, list) => {
+      for (const m of modules) {
+        const module = /** @type {ConsumeSharedModule} */ m;
+        const id = chunkGraph.getModuleId(module);
+        list.push(id);
+        const moduleOrigin = module.options.importResolved;
+        const filter = chunkGraph.getChunkModuleIdMap(
+          chunk,
+          (module) => {
+            // @ts-ignore
+            return module?.resource === moduleOrigin;
+          },
+          true
+        );
+
+        moduleIdToSourceMapping.set(id, filter);
+      }
+    };
+    for (const entrypointModule of compilation.entrypoints.values()) {
+      const entrypoint = entrypointModule.getEntrypointChunk();
+      if (entrypoint.hasRuntime()) continue;
+
+      // for (const entryChunks of entrypoint.getAllInitialChunks()) {}
+      // @ts-ignore
+      for (const chunk of entrypoint.getAllAsyncChunks()) {
+        const modules = chunkGraph.getChunkModulesIterableBySourceType(
+          chunk,
+          'consume-shared'
+        );
+        if (!modules) continue;
+
+        //@ts-ignore
+        addModules(modules, chunk, (chunkToModuleMapping[chunk.id] = []));
+      }
+      // @ts-ignore
+      for (const chunk of entrypoint.getAllInitialChunks()) {
+        const modules = chunkGraph.getChunkModulesIterableBySourceType(
+          chunk,
+          'consume-shared'
+        );
+        if (!modules) continue;
+        // @ts-ignore
+        addModules(modules, chunk, initialConsumes);
+      }
+    }
+    if (moduleIdToSourceMapping.size === 0) return null;
+
+    return Template.asString([
+      // parseVersionRuntimeCode(runtimeTemplate),
+      // versionLtRuntimeCode(runtimeTemplate),
+      // rangeToStringRuntimeCode(runtimeTemplate),
+      // // satisfyRuntimeCode(runtimeTemplate),
+      // `var ensureExistence = ${runtimeTemplate.basicFunction('scopeName, key', [
+      //   `var scope = ${RuntimeGlobals.shareScopeMap}[scopeName];`,
+      //   `if(!scope || !${RuntimeGlobals.hasOwnProperty}(scope, key)) throw new Error("Shared module " + key + " doesn't exist in shared scope " + scopeName);`,
+      //   'return scope;',
+      // ])};`,
+      // `var findVersion = ${runtimeTemplate.basicFunction('scope, key', [
+      //   'var versions = scope[key];',
+      //   `var key = Object.keys(versions).reduce(${runtimeTemplate.basicFunction(
+      //     'a, b',
+      //     ['return !a || versionLt(a, b) ? b : a;']
+      //   )}, 0);`,
+      //   'return key && versions[key]',
+      // ])};`,
+      // `var findSingletonVersionKey = ${runtimeTemplate.basicFunction(
+      //   'scope, key',
+      //   [
+      //     'var versions = scope[key];',
+      //     `return Object.keys(versions).reduce(${runtimeTemplate.basicFunction(
+      //       'a, b',
+      //       [
+      //         'return !a || (!versions[a].loaded && versionLt(a, b)) ? b : a;',
+      //       ]
+      //     )}, 0);`,
+      //   ]
+      // )};`,
+      // `var getInvalidSingletonVersionMessage = ${runtimeTemplate.basicFunction(
+      //   'scope, key, version, requiredVersion',
+      //   [
+      //     `return "Unsatisfied version " + version + " from " + (version && scope[key][version].from) + " of shared singleton module " + key + " (required " + rangeToString(requiredVersion) + ")"`,
+      //   ]
+      // )};`,
+      // `var getSingleton = ${runtimeTemplate.basicFunction(
+      //   'scope, scopeName, key, requiredVersion',
+      //   [
+      //     'var version = findSingletonVersionKey(scope, key);',
+      //     'return get(scope[key][version]);',
+      //   ]
+      // )};`,
+      // `var getSingletonVersion = ${runtimeTemplate.basicFunction(
+      //   'scope, scopeName, key, requiredVersion',
+      //   [
+      //     'var version = findSingletonVersionKey(scope, key);',
+      //     'if (!satisfy(requiredVersion, version)) ' +
+      //       'typeof console !== "undefined" && console.warn && console.warn(getInvalidSingletonVersionMessage(scope, key, version, requiredVersion));',
+      //     'return get(scope[key][version]);',
+      //   ]
+      // )};`,
+      // `var getStrictSingletonVersion = ${runtimeTemplate.basicFunction(
+      //   'scope, scopeName, key, requiredVersion',
+      //   [
+      //     'var version = findSingletonVersionKey(scope, key);',
+      //     'if (!satisfy(requiredVersion, version)) ' +
+      //       'throw new Error(getInvalidSingletonVersionMessage(scope, key, version, requiredVersion));',
+      //     'return get(scope[key][version]);',
+      //   ]
+      // )};`,
+      // `var findValidVersion = ${runtimeTemplate.basicFunction(
+      //   'scope, key, requiredVersion',
+      //   [
+      //     'var versions = scope[key];',
+      //     `var key = Object.keys(versions).reduce(${runtimeTemplate.basicFunction(
+      //       'a, b',
+      //       [
+      //         'if (!satisfy(requiredVersion, b)) return a;',
+      //         'return !a || versionLt(a, b) ? b : a;',
+      //       ]
+      //     )}, 0);`,
+      //     'return key && versions[key]',
+      //   ]
+      // )};`,
+      // `var getInvalidVersionMessage = ${runtimeTemplate.basicFunction(
+      //   'scope, scopeName, key, requiredVersion',
+      //   [
+      //     'var versions = scope[key];',
+      //     'return "No satisfying version (" + rangeToString(requiredVersion) + ") of shared module " + key + " found in shared scope " + scopeName + ".\\n" +',
+      //     `"Available versions: " + Object.keys(versions).map(${runtimeTemplate.basicFunction(
+      //       'key',
+      //       ['return key + " from " + versions[key].from;']
+      //     )}).join(", ");`,
+      //   ]
+      // )};`,
+      // `var getValidVersion = ${runtimeTemplate.basicFunction(
+      //   'scope, scopeName, key, requiredVersion',
+      //   [
+      //     'var entry = findValidVersion(scope, key, requiredVersion);',
+      //     'if(entry) return get(entry);',
+      //     'throw new Error(getInvalidVersionMessage(scope, scopeName, key, requiredVersion));',
+      //   ]
+      // )};`,
+      // `var warnInvalidVersion = ${runtimeTemplate.basicFunction(
+      //   'scope, scopeName, key, requiredVersion',
+      //   [
+      //     'typeof console !== "undefined" && console.warn && console.warn(getInvalidVersionMessage(scope, scopeName, key, requiredVersion));',
+      //   ]
+      // )};`,
+      // `var get = ${runtimeTemplate.basicFunction('entry', [
+      //   'entry.loaded = 1;',
+      //   'return entry.get()',
+      // ])};`,
+      // `var init = ${runtimeTemplate.returningFunction(
+      //   Template.asString([
+      //     'function(scopeName, a, b, c) {',
+      //     Template.indent([
+      //       `var promise = ${RuntimeGlobals.initializeSharing}(scopeName);`,
+      //       `if (promise && promise.then) return promise.then(fn.bind(fn, scopeName, ${RuntimeGlobals.shareScopeMap}[scopeName], a, b, c));`,
+      //       `return fn(scopeName, ${RuntimeGlobals.shareScopeMap}[scopeName], a, b, c);`,
+      //     ]),
+      //     '}',
+      //   ]),
+      //   'fn'
+      // )};`,
+      // '',
+      // `var load = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
+      //   'scopeName, scope, key',
+      //   [
+      //     'ensureExistence(scopeName, key);',
+      //     'return get(findVersion(scope, key));',
+      //   ]
+      // )});`,
+      // `var loadFallback = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
+      //   'scopeName, scope, key, fallback',
+      //   [
+      //     `return scope && ${RuntimeGlobals.hasOwnProperty}(scope, key) ? get(findVersion(scope, key)) : fallback();`,
+      //   ]
+      // )});`,
+      // `var loadVersionCheck = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
+      //   'scopeName, scope, key, version',
+      //   [
+      //     'ensureExistence(scopeName, key);',
+      //     'return get(findValidVersion(scope, key, version) || warnInvalidVersion(scope, scopeName, key, version) || findVersion(scope, key));',
+      //   ]
+      // )});`,
+      // `var loadSingleton = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
+      //   'scopeName, scope, key',
+      //   [
+      //     'ensureExistence(scopeName, key);',
+      //     'return getSingleton(scope, scopeName, key);',
+      //   ]
+      // )});`,
+      // `var loadSingletonVersionCheck = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
+      //   'scopeName, scope, key, version',
+      //   [
+      //     'ensureExistence(scopeName, key);',
+      //     'return getSingletonVersion(scope, scopeName, key, version);',
+      //   ]
+      // )});`,
+      // `var loadStrictVersionCheck = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
+      //   'scopeName, scope, key, version',
+      //   [
+      //     'ensureExistence(scopeName, key);',
+      //     'return getValidVersion(scope, scopeName, key, version);',
+      //   ]
+      // )});`,
+      // `var loadStrictSingletonVersionCheck = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
+      //   'scopeName, scope, key, version',
+      //   [
+      //     'ensureExistence(scopeName, key);',
+      //     'return getStrictSingletonVersion(scope, scopeName, key, version);',
+      //   ]
+      // )});`,
+      // `var loadVersionCheckFallback = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
+      //   'scopeName, scope, key, version, fallback',
+      //   [
+      //     `if(!scope || !${RuntimeGlobals.hasOwnProperty}(scope, key)) return fallback();`,
+      //     'return get(findValidVersion(scope, key, version) || warnInvalidVersion(scope, scopeName, key, version) || findVersion(scope, key));',
+      //   ]
+      // )});`,
+      // `var loadSingletonFallback = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
+      //   'scopeName, scope, key, fallback',
+      //   [
+      //     `if(!scope || !${RuntimeGlobals.hasOwnProperty}(scope, key)) return fallback();`,
+      //     'return getSingleton(scope, scopeName, key);',
+      //   ]
+      // )});`,
+      // `var loadSingletonVersionCheckFallback = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
+      //   'scopeName, scope, key, version, fallback',
+      //   [
+      //     `if(!scope || !${RuntimeGlobals.hasOwnProperty}(scope, key)) return fallback();`,
+      //     'return getSingletonVersion(scope, scopeName, key, version);',
+      //   ]
+      // )});`,
+      // `var loadStrictVersionCheckFallback = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
+      //   'scopeName, scope, key, version, fallback',
+      //   [
+      //     `var entry = scope && ${RuntimeGlobals.hasOwnProperty}(scope, key) && findValidVersion(scope, key, version);`,
+      //     `return entry ? get(entry) : fallback();`,
+      //   ]
+      // )});`,
+      // `var loadStrictSingletonVersionCheckFallback = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
+      //   'scopeName, scope, key, version, fallback',
+      //   [
+      //     `if(!scope || !${RuntimeGlobals.hasOwnProperty}(scope, key)) return fallback();`,
+      //     'return getStrictSingletonVersion(scope, scopeName, key, version);',
+      //   ]
+      // )});`,
+      'var installedModules = {};',
+      'var moduleToHandlerMapping = {',
+      Template.indent(
+        Array.from(
+          moduleIdToSourceMapping,
+          ([key, source]) => `${JSON.stringify(key)}: ()=>{}`
+        ).join(',\n')
+      ),
+      '};',
+      'var listOfInitialIds = {',
+      Template.indent(
+        Array.from(moduleIdToSourceMapping, ([key, chunkIds]) => {
+          return `${JSON.stringify(key)}: ${JSON.stringify(
+            Object.keys(chunkIds)
+          )}`;
+        }).join(',\n')
+      ),
+      '};',
+
+      initialConsumes.length > 0
+        ? Template.asString([
+            //@ts-ignore
+            `var initialConsumes = ${JSON.stringify(initialConsumes)};`,
+            // `initialConsumes.forEach(${runtimeTemplate.basicFunction('id', [
+            //   `${
+            //     RuntimeGlobals.moduleFactories
+            //   }[id] = ${runtimeTemplate.basicFunction('module', [
+            //     '// Handle case when module is used sync',
+            //     'installedModules[id] = 0;',
+            //     `delete ${RuntimeGlobals.moduleCache}[id];`,
+            //     'var factory = moduleToHandlerMapping[id]();',
+            //     'if(typeof factory !== "function") throw new Error("Shared module is not available for eager consumption: " + id);',
+            //     `module.exports = factory();`,
+            //   ])}`,
+            // ])});`,
+          ])
+        : '// no consumes in initial chunks',
+      // this._runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers)
+      Template.asString([
+        `var chunkMapping = ${JSON.stringify(chunkToModuleMapping, null, '')};`,
+        `${
+          RuntimeGlobals.ensureChunkHandlers
+        }.consumes1 = ${runtimeTemplate.basicFunction('chunkId, promises', [
+          `if(${RuntimeGlobals.hasOwnProperty}(chunkMapping, chunkId)) {`,
+          Template.indent([
+            `chunkMapping[chunkId].forEach(${runtimeTemplate.basicFunction(
+              'id',
+              [
+                `if(${RuntimeGlobals.hasOwnProperty}(installedModules, id)) return promises.push(installedModules[id]);`,
+                `var onFactory = ${runtimeTemplate.basicFunction('factory', [
+                  'installedModules[id] = 0;',
+                  `${
+                    RuntimeGlobals.moduleFactories
+                  }[id] = ${runtimeTemplate.basicFunction('module', [
+                    `delete ${RuntimeGlobals.moduleCache}[id];`,
+                    'module.exports = factory();',
+                  ])}`,
+                ])};`,
+                `var onError = ${runtimeTemplate.basicFunction('error', [
+                  'delete installedModules[id];',
+                  `${
+                    RuntimeGlobals.moduleFactories
+                  }[id] = ${runtimeTemplate.basicFunction('module', [
+                    `delete ${RuntimeGlobals.moduleCache}[id];`,
+                    'throw error;',
+                  ])}`,
+                ])};`,
+                'try {',
+                Template.indent([
+                  'var promise = moduleToHandlerMapping[id]();',
+                  'if(promise.then) {',
+                  Template.indent(
+                    "promises.push(installedModules[id] = promise.then(onFactory)['catch'](onError));"
+                  ),
+                  '} else onFactory(promise);',
+                ]),
+                '} catch(e) { onError(e); }',
+              ]
+            )});`,
+          ]),
+          '}',
+        ])}`,
+      ]),
+    ]);
+  }
   //@ts-ignore
   mapChunks(compilation) {
     // @ts-ignore
@@ -61,39 +409,27 @@ class AsyncInverterPlugin {
           //@ts-ignore
           idToExternalAndNameMapping[id] = [shareScope, name, externalModuleId];
         }
-
-        // console.log('idToExternalAndNameMapping', idToExternalAndNameMapping);
-        // console.log('chunkToRemotesMapping', chunkToRemotesMapping);
-        // console.log('remotes', remotes);
       }
     }
 
     return Template.asString([
-      `var chunkMapping = ${JSON.stringify(
-        chunkToRemotesMapping,
-        null,
-        '\t'
-      )};`,
+      `var chunkMapping = ${JSON.stringify(chunkToRemotesMapping, null, '')};`,
       `var idToExternalAndNameMapping = ${JSON.stringify(
         idToExternalAndNameMapping,
         null,
-        '\t'
+        ''
       )};`,
     ]);
     return Template.asString([
-      `var chunkMapping = ${JSON.stringify(
-        chunkToRemotesMapping,
-        null,
-        '\t'
-      )};`,
+      `var chunkMapping = ${JSON.stringify(chunkToRemotesMapping, null, '')};`,
       `var idToExternalAndNameMapping = ${JSON.stringify(
         idToExternalAndNameMapping,
         null,
-        '\t'
+        ''
       )};`,
       `${
         RuntimeGlobals.ensureChunkHandlers
-      }.remotes = ${runtimeTemplate.basicFunction('chunkId, promises', [
+      }.remotes1 = ${runtimeTemplate.basicFunction('chunkId, promises', [
         `if(${RuntimeGlobals.hasOwnProperty}(chunkMapping, chunkId)) {`,
         Template.indent([
           `chunkMapping[chunkId].forEach(${runtimeTemplate.basicFunction('id', [
@@ -213,6 +549,7 @@ class AsyncInverterPlugin {
           // }
 
           const initialChunkMaps = this.mapChunks(compilation);
+          const initialShareMaps = this.mapShared(compilation);
           //@ts-ignore
           const replaceSource = source.source().split('\n');
           const searchString = '__webpack_exec__';
@@ -227,16 +564,41 @@ class AsyncInverterPlugin {
             replaceSource[2] = replaceSource[1];
             replaceSource[1] = `
               var cnn = ${JSON.stringify(compiler.options.output.uniqueName)};
-              var cnn = ${JSON.stringify(compiler.options.output.uniqueName)};
 
-              ${template}
-console.log('chunkModuleMaps', chunkModuleMaps);
+              ${
+                // @ts-ignore
+                false ? template : initialShareMaps
+              }
+
+          const onChunksLoaded = __webpack_require__.O;
+
+const chunkIds = Object.values(listOfInitialIds).reduce((acc, val) => acc.concat(val), []);
+
+// Create the function you want to execute when the specified chunks are loaded
+const myFunction = (args) => {
+  console.log("All required chunks have been loaded!",args);
+  console.log(global.__remote_scope__);
+  console.log(__webpack_require__.S.default);
+
+  // Perform any other operations related to the loaded chunks here
+};
+
+console.log('modules',chunkIds);
+
             var ${searchString} = function(moduleId) {
               console.log('[node]: next attempting to call', moduleId);
               console.log('[node]: intercepting', moduleId,'instantiation');
               console.log('checking if', exports.id, 'has eager remotes');
 
-               return asyncOperation().then(() => {
+
+
+              // Register the function with onChunksLoaded, specifying the chunkIds and priority (optional)
+              return new Promise((resolve, reject) => {
+              onChunksLoaded((thing)=>{
+              console.log('result',thing)
+              }, chunkIds, myFunction, 0);
+              });
+               return Promise.resolve().then(() => {
              console.log('after init, before callback');
                     // console.log('before callback',Object.keys(__webpack_require__.S.default|| {'EMPTY': 'EMPTY'}));
               //console.log('preheating entry, but not returning', moduleId);
@@ -278,7 +640,6 @@ console.log('chunkModuleMaps', chunkModuleMaps);
                 'in chunk:',
                 chunk.name
               );
-              console.log('runtimeModule', runtimeModule);
             }
           }
         }

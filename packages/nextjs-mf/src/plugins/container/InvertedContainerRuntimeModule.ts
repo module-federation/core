@@ -104,13 +104,8 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         : 'global';
       return `
         if(typeof window === 'undefined') {
-          ${globalObject}['__remote_scope__'] = ${globalObject}['__remote_scope__'] || {_config: {}};
-          if(!__webpack_require__.S.default) {
-__webpack_require__.S = __webpack_require__.S || global.webpackShareScope
-}
-console.log('in invert container', __webpack_require__(${JSON.stringify(
-        containerModuleId
-      )}))
+          if(global.__remote_scope__ === undefined) { global.__remote_scope__ = {_config: {}} };
+
         } else {
 
 
@@ -119,13 +114,44 @@ console.log('in invert container', __webpack_require__(${JSON.stringify(
       }['default'] || {};
 }
         try {
-        var containerAttachObject = typeof window !== 'undefined' ? window : ${globalObject}['__remote_scope__']
+        // install custom module into webpack modules from runtime
 
-        containerAttachObject[${JSON.stringify(
-          //@ts-ignore
-          containerName
-        )}] = __webpack_require__(${JSON.stringify(containerModuleId)})
-        console.log('containerAttachObject', containerAttachObject)
+
+console.log('INVERT RUNNING AGAIN')
+        var containerAttachObject = typeof window !== 'undefined' ? window : ${globalObject}['__remote_scope__']
+__webpack_require__.X(console.log,[${JSON.stringify(containerName)}], (cd)=>{
+const innerRemtote = __webpack_require__(${JSON.stringify(containerModuleId)})
+              global.__remote_scope__[${JSON.stringify(
+                //@ts-ignore
+                containerName
+              )}] = {
+              get: innerRemtote.get,
+              init: function(initScope,initToken){
+              console.log('in host init')
+
+              console.log(__webpack_require__);
+              console.log(__webpack_require__.S['default'])
+              console.log(initScope,initToken)
+              delete __webpack_require__.S['default']['next/head']
+
+              innerRemtote.init(initScope,[])
+              console.log('holding');
+              console.log(__webpack_require__.S['default'])
+
+              return new Promise((resolve,reject)=>{});
+               return innerRemtote.init(initScope,initToken)
+                }
+              }
+
+              console.log(__webpack_require__.S['default'])
+              Promise.resolve(__webpack_require__.I('default', [__webpack_require__.S])).then(()=>{
+              console.log('all containers have initialized');
+              console.log(__webpack_require__.S['default'])
+              })
+
+       console.log(__webpack_require__.S['default'])
+      })
+
 
       } catch (e) {
         console.error('host runtime was unable to initialize its own remote', e);

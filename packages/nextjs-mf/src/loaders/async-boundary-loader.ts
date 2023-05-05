@@ -65,11 +65,8 @@ export default function (
   this.cacheable && this.cacheable();
   const callback = this.async();
 
-  if (this._compilation && this._compilation.name === 'ChildFederationPlugin') {
-    callback(null, source, sourceMap);
-    return;
-  }
-
+  callback(null, source, sourceMap);
+  return;
   const hasGIP = source.includes('getInitialProps');
   const hasGSP = source.includes('getStaticProps');
   const hasGSSP = source.includes('getServerSideProps');
