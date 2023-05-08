@@ -659,14 +659,14 @@ return global.__remote_scope__.home_app.get('./'+exports.id)
 }
 console.log('consumes ready forr:',exports.id);
 console.log(__webpack_require__.S.default);
-console.loog('waitint gor init remote')
+console.log('waitint gor init remote');
 
 return Promise.all(__webpack_require__.initRemotes);
 
 }).then(()=>{
 console.log('constinaer ready forr:',exports.id);
 console.log('waiting ro container init');
-return Promise.all(__webpack_require__.initConsume s);
+return Promise.all(__webpack_require__.initConsumes);
 
 }).then(()=>{
 console.log('async startup for entrypoint done');
