@@ -164,9 +164,7 @@ You can see it in action here: https://github.com/module-federation/module-feder
 ```js
 // next.config.js
 // either from default
-const NextFederationPlugin = require('@module-federation/nextjs-mf').default;
-// or named export
-const { NextFederationPlugin } = require('@module-federation/nextjs-mf');
+const NextFederationPlugin = require('@module-federation/nextjs-mf');
 
 module.exports = {
   webpack(config, options) {
@@ -204,7 +202,7 @@ import '@module-federation/nextjs-mf/src/include-defaults';
 ```js
 // next.config.js
 
-const { NextFederationPlugin } = require('@module-federation/nextjs-mf');
+const NextFederationPlugin = require('@module-federation/nextjs-mf');
 
 module.exports = {
   webpack(config, options) {
