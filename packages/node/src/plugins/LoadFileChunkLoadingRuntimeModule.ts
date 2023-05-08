@@ -256,6 +256,12 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
               ? Template.indent([
                   'console.log("readFileVm", chunkId);',
                   'var installedChunkData = installedChunks[chunkId];',
+                  `console.log('checkinf it should load loadl shunk', __filename, ${hasJsMatcher(
+                    'chunkId'
+                  )});`,
+                  `console.log('installed chunk data', installedChunkData, ${JSON.stringify(
+                    name
+                  )});`,
                   'if(installedChunkData !== 0) { // 0 means "already installed".',
                   Template.indent([
                     '// array of [resolve, reject, promise] means "currently loading"',
@@ -378,6 +384,9 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             // `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
                             // since im looping over remote and creating global at build time, i dont need to split string at runtime
                             // there may still be a use case for that with promise new promise, depending on how we design it.
+                            `console.log('requestedRemote',requestedRemote, "CURRENT NAME",${JSON.stringify(
+                              name
+                            )});`,
                             `var scriptUrl = new URL(requestedRemote);`,
 
                             this._getLogger(

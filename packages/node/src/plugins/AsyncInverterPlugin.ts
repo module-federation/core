@@ -387,7 +387,6 @@ class AsyncInverterPlugin {
         `const getEagerSharedForChunkId = ${runtimeTemplate.basicFunction(
           'chunkId, promises',
           [
-            `console.log("####consumes", chunkId,${RuntimeGlobals.hasOwnProperty}(chunkMapping, chunkId), chunkMapping[chunkId]);`,
             `if(${RuntimeGlobals.hasOwnProperty}(chunkMapping, chunkId)) {`,
             Template.indent([
               `chunkMapping[chunkId].forEach(${runtimeTemplate.basicFunction(
@@ -632,15 +631,21 @@ class AsyncInverterPlugin {
           const onChunksLoaded = __webpack_require__.O;
 
 const chunkIds = Object.values(listOfInitialIds).reduce((acc, val) => acc.concat(val), []);
-if(exports.id) getEagerSharedForChunkId(exports.id,__webpack_require__.initRemotes)
-if(exports.id) getEagerRemotesForChunkID(exports.id,__webpack_require__.initConsumes)
+// if(exports.id && exports.id === 'pages/_document') {
+//  // getEagerSharedForChunkId(exports.id,__webpack_require__.initRemotes)
+//  // getEagerSharedForChunkId('pages/_app',__webpack_require__.initRemotes)
+//  // getEagerSharedForChunkId('pages/index',__webpack_require__.initRemotes)
+// }
+// //  getEagerSharedForChunkId(exports.id,__webpack_require__.initRemotes)
+// // getEagerRemotesForChunkID(exports.id,__webpack_require__.initConsumes)
 
-console.log(exports.id, __webpack_require__.S.default);
 
-
+console.log("OM CHUNNKS", exports.id);
     __webpack_require__.O((thing)=>{
               console.log('result',thing)
               }, chunkIds, ()=>console.log('LOADEDEDEDED'), 0);
+
+
             var ${searchString} = function(moduleId) {
               console.log('[node]: next attempting to call', moduleId);
               console.log('[node]: intercepting', moduleId,'instantiation');
@@ -648,19 +653,25 @@ console.log(exports.id, __webpack_require__.S.default);
 
 
 return waitForContainer.then((thing)=>{
+console.log('got container')
+if(chunkMapping[exports.id]) {
+return global.__remote_scope__.home_app.get('./'+exports.id)
+}
 console.log('consumes ready forr:',exports.id);
 console.log(__webpack_require__.S.default);
+console.loog('waitint gor init remote')
+
 return Promise.all(__webpack_require__.initRemotes);
 
 }).then(()=>{
 console.log('constinaer ready forr:',exports.id);
-
+console.log('waiting ro container init');
 return Promise.all(__webpack_require__.initConsumes);
 
 }).then(()=>{
 console.log('async startup for entrypoint done');
 //__webpack_require__.O(['pages/document'],()=>${replaceString}(moduleId), 0);
-
+console.log('SUOULD REQUIRE PAged,m', moduleId);
 return ${replaceString}(moduleId);
 })
 

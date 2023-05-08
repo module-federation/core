@@ -87,6 +87,26 @@ class InvertedContainerPlugin {
           handler
         );
 
+        compilation.hooks.afterOptimizeChunks.tap(
+          'InvertedContainerPlugin',
+          (chunks) => {
+            for (const chunk of chunks) {
+              if (chunk.hasRuntime()) {
+                //@ts-ignore
+                if (chunk.name === this.options?.container) {
+                  for (const mod of chunk.getModules()) {
+                    if (mod.type === 'provide-shared') {
+                      compilation.chunkGraph.disconnectChunkAndModule(
+                        chunk,
+                        mod
+                      );
+                    }
+                  }
+                }
+              }
+            }
+          }
+        );
         compilation.hooks.optimizeChunks.tap(
           'AddModulesToRuntimeChunkPlugin',
           (chunks) => {
@@ -95,6 +115,50 @@ class InvertedContainerPlugin {
             if (!containerEntryModule) return;
             for (const chunk of chunks) {
               if (chunk.hasRuntime()) {
+                //@ts-ignore
+
+                if (chunk.name === this.options?.container) {
+                  const eagerModulesInRemote =
+                    compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                      chunk,
+                      'provide-module'
+                    );
+
+                  const moduels = chunk.getModules();
+                  for (const module of moduels) {
+                    if (module.type === 'provide-module') {
+                      compilation.chunkGraph.disconnectChunkAndModule(
+                        chunk,
+                        module
+                      );
+                    }
+                  }
+                  //
+                  // for (const eagerModule of eagerModulesInRemote) {
+                  //   console.log(eagerModule);
+                  //   if (
+                  //     !compilation.chunkGraph.isModuleInChunk(
+                  //       eagerModule,
+                  //       chunk
+                  //     )
+                  //   ) {
+                  //     this.options.debug &&
+                  //       console.log(
+                  //         'adding',
+                  //         //@ts-ignore
+                  //         eagerModule._name,
+                  //         'to',
+                  //         chunk.name
+                  //       );
+                  //     // compilation.chunkGraph.connectChunkAndModule(
+                  //     //   chunk,
+                  //     //   eagerModule
+                  //     // );
+                  //   }
+                  // }
+                  // console.log(eagerChunksInRemote);
+                }
+                console.log('chunk', chunk.name);
                 if (
                   !compilation.chunkGraph.isModuleInChunk(
                     containerEntryModule,

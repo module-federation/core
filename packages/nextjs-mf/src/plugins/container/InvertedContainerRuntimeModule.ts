@@ -81,7 +81,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
     const conditionMap = chunkGraph.getChunkConditionMap(chunk, chunkHasJs);
     // const hasJsMatcher = compileBooleanMatcher(conditionMap);
-
+    console.log('chunk name;', chunk.name);
     // find the main webpack runtime, skip all other chunks
     if (chunk.name != this.options.runtime && containerEntryModule) {
       return Template.asString('');
@@ -139,7 +139,7 @@ const handler = {
 
 // Create a Proxy for the sharedScope.default object
 
-__webpack_require__.S = {default: new Proxy({}, handler)}
+//__webpack_require__.S = {default: new Proxy({}, handler)}
         } else {
 
 
@@ -164,7 +164,7 @@ __webpack_require__.S = {default: new Proxy({}, handler)}
       )}] = innerRemote
          console.log('host inner ctn loaded')
 
-     __webpack_require__.I('default',[__webpack_require__.S]);
+     // __webpack_require__.I('default',[__webpack_require__.S]);
           })
 
 

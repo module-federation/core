@@ -21,8 +21,8 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   react: {
     singleton: true,
     requiredVersion: false,
-    eager: false,
-    import: undefined,
+    eager: true,
+    import: false,
   },
   'react/jsx-runtime': {
     singleton: true,
@@ -39,8 +39,8 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'react-dom': {
     singleton: true,
     requiredVersion: false,
-    eager: false,
-    import: undefined,
+    eager: true,
+    import: false,
   },
   'next/dynamic': {
     eager: false,
