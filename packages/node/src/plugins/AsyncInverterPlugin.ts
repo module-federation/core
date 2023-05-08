@@ -666,7 +666,7 @@ return Promise.all(__webpack_require__.initRemotes);
 }).then(()=>{
 console.log('constinaer ready forr:',exports.id);
 console.log('waiting ro container init');
-return Promise.all(__webpack_require__.initConsumes);
+return Promise.all(__webpack_require__.initConsume s);
 
 }).then(()=>{
 console.log('async startup for entrypoint done');
