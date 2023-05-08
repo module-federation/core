@@ -1,7 +1,6 @@
 import ansiColors from 'ansi-colors'
 import {dirname, join, normalize, relative} from 'path'
 import typescript from 'typescript'
-import vueTypescript from 'vue-tsc'
 
 import {RemoteOptions} from '../interfaces/RemoteOptions'
 
@@ -42,10 +41,15 @@ const createHost = (mapComponentsToExpose: Record<string, string>, tsConfig: typ
   return host
 }
 
+const createVueTscProgram = (programOptions: typescript.CreateProgramOptions) => {
+  const vueTypescript = require('vue-tsc')
+  return vueTypescript.createProgram(programOptions)
+}
+
 const createProgram = (remoteOptions: Required<RemoteOptions>, programOptions: typescript.CreateProgramOptions) => {
   switch (remoteOptions.compilerInstance) {
     case 'vue-tsc':
-      return vueTypescript.createProgram(programOptions)
+      return createVueTscProgram(programOptions)
     case 'tsc':
     default:
       return typescript.createProgram(programOptions)
