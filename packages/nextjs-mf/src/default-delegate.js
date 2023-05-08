@@ -4,6 +4,7 @@ module.exports = new Promise(async (resolve, reject) => {
     '@module-federation/utilities/src/utils/common'
   );
   console.log('in delegate module', __resourceQuery);
+  // console.log('in delegate module', __webpack_require__.S);
   // eslint-disable-next-line no-undef
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
   const [global, url] = currentRequest.split('@');

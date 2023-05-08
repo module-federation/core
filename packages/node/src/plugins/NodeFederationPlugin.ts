@@ -204,11 +204,14 @@ class NodeFederationPlugin {
     if (
       typeof chunkFileName === 'string' &&
       !chunkFileName.includes('[chunkhash]') &&
-      !chunkFileName.includes('[contenthash]')
+      !chunkFileName.includes('[contenthash]') &&
+      !chunkFileName.includes('[contenthashfullhash]')
     ) {
       compiler.options.output.chunkFilename = chunkFileName.replace(
         '.js',
-        `.[fullhash].js`
+        compiler.options.mode === 'development'
+          ? `${compiler?.options?.output?.uniqueName || this._options.name}.js`
+          : `.[chunkhash].js`
       );
     }
 

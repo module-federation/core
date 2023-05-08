@@ -13,7 +13,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "yarn build:libs && nx run-many --target=build --projects=3000-home --verbose --output-style=stream",
+    "build": "nx run-many --target=build --projects=3000-home --verbose --output-style=stream",
     "oldbuuild": "nx build",
     "build:libs": "nx run-many --target=build --projects=utils,node,nextjs-mf --verbose --output-style=stream --maxParallel=1",
     "lint": "nx run-many --target=lint",
@@ -55,6 +55,10 @@
     "@antora/site-generator": "^3.1.0",
     "@asciidoctor/core": "~2.2",
     "@asciidoctor/tabs": "^1.0.0-alpha.12",
+    "@babel/core": "^7.21.8",
+    "@babel/generator": "^7.21.5",
+    "@babel/parser": "^7.21.8",
+    "@babel/template": "^7.20.7",
     "@commitlint/cli": "17.6.1",
     "@commitlint/config-conventional": "17.6.1",
     "@fontsource/roboto": "4.5.8",
@@ -131,7 +135,9 @@
     "postcss-url": "~10.1.0",
     "prettier": "^2.6.2",
     "prettier-eslint": "~15.0.0",
+    "react-dom": "18.2.0",
     "react-refresh": "^0.14.0",
+    "react-router-dom": "6.8.0",
     "react-test-renderer": "18.2.0",
     "swc-loader": "0.2.3",
     "ts-jest": "29.1.0",
@@ -145,8 +151,6 @@
     "vitest": "^0.30.0",
     "vue-tsc": "^1.0.24",
     "webpack": "5.81.0",
-    "react-dom": "18.2.0",
-    "react-router-dom": "6.8.0",
     "webpack-virtual-modules": "^0.5.0"
   },
   "config": {

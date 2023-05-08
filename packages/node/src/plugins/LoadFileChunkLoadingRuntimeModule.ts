@@ -117,7 +117,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     const getInitialChunkIds = (chunk: Chunk, chunkGraph: ChunkGraph) => {
       const initialChunkIds = new Set(chunk.ids);
       for (const c of chunk.getAllInitialChunks()) {
-        console.log('looping through initial chunks', c.ids);
         if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
         if (c.ids) {
           for (const id of c.ids) initialChunkIds.add(id);
@@ -173,7 +172,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     const stateExpression = withHmr
       ? `${RuntimeGlobals.hmrRuntimeStatePrefix}_readFileVm`
       : undefined;
-    console.log('initialChunkIds', initialChunkIds);
     return Template.asString([
       withBaseURI
         ? this._generateBaseUri(chunk, rootOutputDir)
@@ -202,8 +200,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       '',
       withLoading || withExternalInstallChunk
         ? `var installChunk = ${runtimeTemplate.basicFunction('chunk', [
-            'console.log("installing chunk", chunk.id);',
-            "console.log('installed chunks', installedChunks);",
+            "console.log('installed chunks', Object.keys(installedChunks), __webpack_require__.j);",
             'var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;',
             'for(var moduleId in moreModules) {',
             Template.indent([
@@ -257,16 +254,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
             `${fn}.readFileVm = function(chunkId, promises) {`,
             hasJsMatcher !== false
               ? Template.indent([
-                  // 'console.log("readFileVm", chunkId, promises);',
-                  // this.options.invertedBoot
-                  //   ? Template.asString([
-                  //       'return new Promise(function(resolve, reject) {',
-                  //       Template.indent([
-                  //         'console.log("sitting on promise", chunkId);',
-                  //       ]),
-                  //       '});',
-                  //     ])
-                  //   : '',
                   'console.log("readFileVm", chunkId);',
                   'var installedChunkData = installedChunks[chunkId];',
                   'if(installedChunkData !== 0) { // 0 means "already installed".',

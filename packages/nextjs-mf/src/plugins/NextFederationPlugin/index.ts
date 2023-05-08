@@ -86,7 +86,6 @@ export class NextFederationPlugin {
 
     const defaultShared = retrieveDefaultShared(isServer);
 
-    console.log(compiler.options.name);
     if (isServer) {
       // Refactored server condition
       configureServerCompilerOptions(compiler);
@@ -146,7 +145,7 @@ export class NextFederationPlugin {
     new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
 
     if (
-      !isServer &&
+      // isServer &&
       this._options.remotes &&
       Object.keys(this._options.remotes).length > 0
     ) {
@@ -155,11 +154,12 @@ export class NextFederationPlugin {
       new ModuleFederationPlugin({
         ...hostFederationPluginOptions,
         filename: undefined,
-        runtime: undefined,
-        name: this._options.name + '_single',
+        runtime: isServer ? 'webpack-runtime' : undefined,
+        // name: undefined,
+        name: 'host_inner_ctn',
         library: {
           ...hostFederationPluginOptions.library,
-          name: this._options.name + '_single',
+          name: this._options.name,
         },
         shared: {
           ...hostFederationPluginOptions.shared,

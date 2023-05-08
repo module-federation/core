@@ -63,6 +63,9 @@ class InvertedContainerPlugin {
           // If the chunk has already been processed, skip it.
           if (onceForChunkSet.has(chunk)) return;
           set.add(RuntimeGlobals.onChunksLoaded);
+          set.add(RuntimeGlobals.startupOnlyAfter);
+          set.add(RuntimeGlobals.asyncModule);
+
           // Mark the chunk as processed by adding it to the WeakSet.
           onceForChunkSet.add(chunk);
 

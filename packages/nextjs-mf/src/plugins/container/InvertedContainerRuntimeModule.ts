@@ -103,54 +103,71 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         ? webpack.RuntimeGlobals.global
         : 'global';
       return `
+
+      __webpack_require__.initConsumes = [];
+      __webpack_require__.initRemotes = [];
+      __webpack_require__.installedModules = {};
+
         if(typeof window === 'undefined') {
           if(global.__remote_scope__ === undefined) { global.__remote_scope__ = {_config: {}} };
+// Define a custom setter for the sharedScope.default object
+const handler = {
+  set: function (target, property, value) {
 
+    if(target[property]) { return true }
+    // Check if the property being set is "react"
+      // Perform additional actions for the "react" property
+      // For example, set an additional property on the "react" object
+      console.log('react set', property, value)
+      for (const key in value) {
+        if (Object.hasOwnProperty.call(value, key)) {
+        console.log(value[key].from)
+        if(value[key].from !== 'home_app') { return true } else {
+ target[property] = value;
+         value[key].eager = true
+        }
+      }
+    }
+
+    // Set the property on the target object
+    // target[property] = value;
+
+    // Indicate success
+    return true;
+  }
+};
+
+// Create a Proxy for the sharedScope.default object
+
+__webpack_require__.S = {default: new Proxy({}, handler)}
         } else {
 
 
         ${webpack.RuntimeGlobals.shareScopeMap}['default'] = ${
         webpack.RuntimeGlobals.shareScopeMap
-      }['default'] || {};
-}
+      }['default'] || {};}
         try {
         // install custom module into webpack modules from runtime
 
 
-console.log('INVERT RUNNING AGAIN')
         var containerAttachObject = typeof window !== 'undefined' ? window : ${globalObject}['__remote_scope__']
-__webpack_require__.X(console.log,[${JSON.stringify(containerName)}], (cd)=>{
-const innerRemtote = __webpack_require__(${JSON.stringify(containerModuleId)})
-              global.__remote_scope__[${JSON.stringify(
-                //@ts-ignore
+         __webpack_require__.O(0, ["webpack-runtime"], function() { return require("./host_inner_ctn"); })
+         __webpack_require__.O(0, ["host_inner_ctn"], function() {
+        const innerRemote = __webpack_require__(${JSON.stringify(
+          containerModuleId
+        )})
+
+              if(!global.__remote_scope__[${JSON.stringify(
                 containerName
-              )}] = {
-              get: innerRemtote.get,
-              init: function(initScope,initToken){
-              console.log('in host init')
+              )}]) global.__remote_scope__[${JSON.stringify(
+        containerName
+      )}] = innerRemote
+         console.log('host inner ctn loaded')
 
-              console.log(__webpack_require__);
-              console.log(__webpack_require__.S['default'])
-              console.log(initScope,initToken)
-              delete __webpack_require__.S['default']['next/head']
+     __webpack_require__.I('default',[__webpack_require__.S]);
+          })
 
-              innerRemtote.init(initScope,[])
-              console.log('holding');
-              console.log(__webpack_require__.S['default'])
 
-              return new Promise((resolve,reject)=>{});
-               return innerRemtote.init(initScope,initToken)
-                }
-              }
-
-              console.log(__webpack_require__.S['default'])
-              Promise.resolve(__webpack_require__.I('default', [__webpack_require__.S])).then(()=>{
-              console.log('all containers have initialized');
-              console.log(__webpack_require__.S['default'])
-              })
-
-       console.log(__webpack_require__.S['default'])
-      })
 
 
       } catch (e) {

@@ -23,8 +23,8 @@ export default function patchDefaultSharedLoader(
 
   const result = [
     "console.log('initializing internal-module-hoist for:', __webpack_runtime_id__)",
-    shareScopes,
-    eagerShared.sideload,
+    // shareScopes,
+    // eagerShared.sideload,
     '//hasShareHoist',
     content,
   ].join('\n');
