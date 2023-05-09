@@ -200,7 +200,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       '',
       withLoading || withExternalInstallChunk
         ? `var installChunk = ${runtimeTemplate.basicFunction('chunk', [
-            "console.log('installed chunks', Object.keys(installedChunks), __webpack_require__.j);",
+            //"console.log('installed chunks', Object.keys(installedChunks));",
             'var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;',
             'for(var moduleId in moreModules) {',
             Template.indent([
@@ -256,9 +256,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
               ? Template.indent([
                   'console.log("readFileVm", chunkId);',
                   'var installedChunkData = installedChunks[chunkId];',
-                  `console.log('checkinf it should load loadl shunk', __filename, ${hasJsMatcher(
-                    'chunkId'
-                  )});`,
+                  `console.log(${hasJsMatcher('chunkId')}, chunkId);`,
                   `console.log('installed chunk data', installedChunkData, ${JSON.stringify(
                     name
                   )});`,
@@ -266,8 +264,11 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                   Template.indent([
                     '// array of [resolve, reject, promise] means "currently loading"',
                     'if(installedChunkData) {',
+                    "console.log('already loading','##', chunkId,'##', installedChunkData);",
                     Template.indent(['promises.push(installedChunkData[2]);']),
                     '} else {',
+                    "console.log('NEEDS to load','##', chunkId);",
+                    "console.log('Promise', promises);",
                     Template.indent([
                       hasJsMatcher === true
                         ? 'if(true) { // all chunks have JS'
@@ -282,6 +283,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           )} + ${
                             RuntimeGlobals.getChunkScriptFilename
                           }(chunkId));`,
+                          "console.log('chunk filename', filename);",
                           "var fs = require('fs');",
                           'if(fs.existsSync(filename)) {',
                           Template.indent([

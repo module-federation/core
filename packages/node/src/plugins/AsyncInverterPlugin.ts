@@ -631,47 +631,54 @@ class AsyncInverterPlugin {
           const onChunksLoaded = __webpack_require__.O;
 
 const chunkIds = Object.values(listOfInitialIds).reduce((acc, val) => acc.concat(val), []);
+
 // if(exports.id && exports.id === 'pages/_document') {
-//  // getEagerSharedForChunkId(exports.id,__webpack_require__.initRemotes)
+ getEagerSharedForChunkId(exports.id,__webpack_require__.initRemotes)
 //  // getEagerSharedForChunkId('pages/_app',__webpack_require__.initRemotes)
 //  // getEagerSharedForChunkId('pages/index',__webpack_require__.initRemotes)
 // }
-// //  getEagerSharedForChunkId(exports.id,__webpack_require__.initRemotes)
-// // getEagerRemotesForChunkID(exports.id,__webpack_require__.initConsumes)
+ getEagerSharedForChunkId(exports.id,__webpack_require__.initRemotes)
+getEagerRemotesForChunkID(exports.id,__webpack_require__.initConsumes)
 
 
 console.log("OM CHUNNKS", exports.id);
     __webpack_require__.O((thing)=>{
               console.log('result',thing)
-              }, chunkIds, ()=>console.log('LOADEDEDEDED'), 0);
+              }, chunkIds, ()=>{
+
+              // console.log('######################################')
+              // console.log('######################################')
+              // console.log('######################################')
+              console.log('LOADED', exports.id)
+              // console.log('######################################')
+              // console.log('######################################')
+              // console.log('######################################')
+
+              }, 0);
 
 
             var ${searchString} = function(moduleId) {
-              console.log('[node]: next attempting to call', moduleId);
-              console.log('[node]: intercepting', moduleId,'instantiation');
-              console.log('checking if', exports.id, 'has eager --','number of eager:', listOfInitialIds.length);
-
-
 return waitForContainer.then((thing)=>{
-console.log('got container')
+console.log('got container', exports.id)
 if(chunkMapping[exports.id]) {
-return global.__remote_scope__.home_app.get('./'+exports.id)
+// return global.__remote_scope__.home_app.get('./'+exports.id)
 }
-console.log('consumes ready forr:',exports.id);
-console.log(__webpack_require__.S.default);
+console.log('loaded pages remote if exists:',exports.id);
+console.log(__webpack_require__.S.default === globalThis.sh);
 console.log('waitint gor init remote');
 
 return Promise.all(__webpack_require__.initRemotes);
 
 }).then(()=>{
-console.log('constinaer ready forr:',exports.id);
-console.log('waiting ro container init');
+console.log('loaded pages remote if exists:',exports.id);
+// console.log(__webpack_require__.S.default);
 return Promise.all(__webpack_require__.initConsumes);
 
 }).then(()=>{
 console.log('async startup for entrypoint done');
-//__webpack_require__.O(['pages/document'],()=>${replaceString}(moduleId), 0);
 console.log('SUOULD REQUIRE PAged,m', moduleId);
+console.log('SCOPE MEMORY CHECK',__webpack_require__.S === globalThis.backupScope);
+console.log('SCOPE MEMORY CHECK',Object.keys(__webpack_require__.S), Object.keys(globalThis.backupScope))
 return ${replaceString}(moduleId);
 })
 
@@ -680,22 +687,7 @@ console.log('EVERYTHON IS LOADED');
 }
 
 
-               return Promise.resolve().then(() => {
-             console.log('after init, before callback');
-                    // console.log('before callback',Object.keys(__webpack_require__.S.default|| {'EMPTY': 'EMPTY'}));
-              //console.log('preheating entry, but not returning', moduleId);
-              const entrypoint = ${replaceString}(moduleId);
-              //console.log('preheat:',entrypoint);
-               return new Promise((resolve, reject) => {
-             // console.log('after callback',Object.keys(__webpack_require__.S.default|| {'EMPTY': 'EMPTY'}));
-              console.log('after callback',__webpack_require__.S.default['react/jsx-dev-runtime']['18.2.0'].get());
-              setTimeout(() => {
-              console.log('resolving entry to next', moduleId);
-              resolve(${replaceString}(moduleId))
-              },2000)
-               });
-               // return ${replaceString}(moduleId);
-               })
+
               };
               `;
             return Template.asString([
@@ -704,7 +696,41 @@ console.log('EVERYTHON IS LOADED');
 
               initialChunkMaps,
 
-              `const waitForContainer = __webpack_require__.e("host_inner_ctn")`,
+              `
+              __webpack_require__.own_remote.then(function(){
+
+              console.log('hosts own remote is ready');
+
+
+              })
+
+
+           const waitForContainer = __webpack_require__.e("host_inner_ctn");
+           waitForContainer.then((thing)=>{
+           console.log('###container promise resolveed');
+           })
+ __webpack_require__.O(0,["host_inner_ctn"],()=>{
+ console.log('###waiting for container should load becuase on on load event');
+ },0);
+// Promise.race([waitForContainer, new Promise((resolve, reject) => {
+//   setTimeout(() => {
+//
+//   const noNeedToWait = Object.keys(listOfInitialIds).some((key)=>{
+//   return __webpack_require__.m[key] || __webpack_require__.c[key]
+//   })
+//   console.log("no need to wait", noNeedToWait);
+//     // console.log('some error', __webpack_require__.S, __webpack_require__.m, __webpack_require__.c);
+//     resolve(); // You might want to call resolve or reject here to end the promise
+//   }, 5);
+// })])
+// .then(() => {
+//   console.log('container loaded');
+// })
+// .then(() => {
+//   console.log('FINALLY HIT');
+// });
+
+`,
               ...replaceSource,
               '',
             ]);

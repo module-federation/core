@@ -143,19 +143,9 @@ export class NextFederationPlugin {
 
     // @ts-ignore
     new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
-
-    if (
-      isServer &&
-      this._options.remotes &&
-      Object.keys(this._options.remotes).length > 0
-    ) {
-      // single runtime chunk if host or circular remote uses remote of current host.
-      // @ts-ignore
-      new ModuleFederationPlugin({
+    if (isServer && Object.keys(this._options?.remotes || {}).length > 0) {
+      const commonOptions = {
         ...hostFederationPluginOptions,
-        filename: undefined,
-        runtime: isServer ? 'webpack-runtime' : undefined,
-        // name: undefined,
         name: 'host_inner_ctn',
         library: {
           ...hostFederationPluginOptions.library,
@@ -165,6 +155,19 @@ export class NextFederationPlugin {
           ...hostFederationPluginOptions.shared,
           ...defaultShared,
         },
+      };
+
+      const serverOptions = isServer
+        ? {
+            runtime: 'webpack-runtime',
+            filename: `host_inner_ctn${this._options.name}.js`,
+          }
+        : {};
+
+      // @ts-ignore
+      new ModuleFederationPlugin({
+        ...commonOptions,
+        ...serverOptions,
       }).apply(compiler);
     }
 

@@ -1,22 +1,17 @@
-// import React, { useEffect, useState } from 'react';
-//
-// const CheckoutTitle = () => {
-//   const [hookData, setHookData] = useState('');
-//
-//   useEffect(() => {
-//     setHookData('with hooks data');
-//   }, []);
-//
-//   return (
-//     <h3 className="title">
-//       This title came from <code>checkout</code> {hookData}!!!
-//     </h3>
-//   );
-// };
-//
-// export default CheckoutTitle;
+import React, { useEffect, useState } from 'react';
+const CheckoutTitle = () => {
+  console.log('CheckoutTitle');
+  const [hookData, setHookData] = useState('');
 
-export default () => {
-  console.log('made it to file invocation');
-  return 'test';
+  useEffect(() => {
+    setHookData('with hooks data');
+  }, []);
+
+  return (
+    <h3 className="title">
+      This title came from <code>checkout</code> {hookData}!!!
+    </h3>
+  );
 };
+
+export default CheckoutTitle;
