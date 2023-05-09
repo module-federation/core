@@ -308,7 +308,12 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                                 (acc, remote) => {
                                   //TODO: need to handle all other cases like when remote is not a @ syntax string
                                   const [global, url] = remote.split('@');
-                                  acc[global] = url;
+                                  // In case of being a relative url add the base
+                                  if (url.charAt(0)=='/') {
+                                    acc[global] = 'window.location.href + url';
+                                  } else {
+                                    acc[global] = url;
+                                  }
                                   return acc;
                                 },
                                 {} as Record<string, string>

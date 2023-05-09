@@ -73,7 +73,12 @@ export const executeLoadTemplate = `
               }
             }
           };
-          global.__remote_scope__._config[name] = url;
+          // In case of being a relative url add the base
+          if (url.charAt(0)=='/') {
+            global.__remote_scope__._config[name] = 'window.location.href + url';
+          } else {
+            global.__remote_scope__._config[name] = url;
+          }
         }
         callback(global.__remote_scope__[name]);
       } catch (e) {

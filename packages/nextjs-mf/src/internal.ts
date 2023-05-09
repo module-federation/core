@@ -107,7 +107,13 @@ export const generateRemoteTemplate = (
   url: string,
   global: any
 ) => `new Promise(function (resolve, reject) {
-    var url = new URL(${JSON.stringify(url)});
+    // In case of being a relative url add the base
+    var url_s = ${JSON.stringify(url)};
+    if (url_s.charAt(0)=='/') {
+      var url = new URL(url_s, window.location.href);
+    } else {
+      var url = new URL(url_s);
+    }
     url.searchParams.set('t', Date.now());
     var __webpack_error__ = new Error();
     if(!window.remoteLoading) {
