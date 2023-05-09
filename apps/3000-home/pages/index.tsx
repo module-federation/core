@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import Head from 'next/head';
-// import cc from 'checkout/CheckoutTitle';
-// console.log('cc', cc);
+import cc from 'checkout/CheckoutTitle';
+console.log('cc', cc);
 const CheckoutTitle = lazy(() => import('checkout/CheckoutTitle'));
 const ButtonOldAnt = lazy(() => import('checkout/ButtonOldAnt'));
 const WebpackSvgRemote = lazy(() => import('shop/WebpackSvg'));

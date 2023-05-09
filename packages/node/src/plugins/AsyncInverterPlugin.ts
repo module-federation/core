@@ -637,7 +637,7 @@ const chunkIds = Object.values(listOfInitialIds).reduce((acc, val) => acc.concat
 //  // getEagerSharedForChunkId('pages/_app',__webpack_require__.initRemotes)
 //  // getEagerSharedForChunkId('pages/index',__webpack_require__.initRemotes)
 // }
-// //  getEagerSharedForChunkId(exports.id,__webpack_require__.initRemotes)
+ getEagerSharedForChunkId(exports.id,__webpack_require__.initRemotes)
 getEagerRemotesForChunkID(exports.id,__webpack_require__.initConsumes)
 
 
@@ -661,7 +661,7 @@ console.log("OM CHUNNKS", exports.id);
 return waitForContainer.then((thing)=>{
 console.log('got container', exports.id)
 if(chunkMapping[exports.id]) {
-return global.__remote_scope__.home_app.get('./'+exports.id)
+// return global.__remote_scope__.home_app.get('./'+exports.id)
 }
 console.log('loaded pages remote if exists:',exports.id);
 console.log(__webpack_require__.S.default === globalThis.sh);
@@ -687,22 +687,7 @@ console.log('EVERYTHON IS LOADED');
 }
 
 
-               return Promise.resolve().then(() => {
-             console.log('after init, before callback');
-                    // console.log('before callback',Object.keys(__webpack_require__.S.default|| {'EMPTY': 'EMPTY'}));
-              //console.log('preheating entry, but not returning', moduleId);
-              const entrypoint = ${replaceString}(moduleId);
-              //console.log('preheat:',entrypoint);
-               return new Promise((resolve, reject) => {
-             // console.log('after callback',Object.keys(__webpack_require__.S.default|| {'EMPTY': 'EMPTY'}));
-              console.log('after callback',__webpack_require__.S.default['react/jsx-dev-runtime']['18.2.0'].get());
-              setTimeout(() => {
-              console.log('resolving entry to next', moduleId);
-              resolve(${replaceString}(moduleId))
-              },2000)
-               });
-               // return ${replaceString}(moduleId);
-               })
+
               };
               `;
             return Template.asString([
