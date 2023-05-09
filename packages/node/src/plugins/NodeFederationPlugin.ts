@@ -201,18 +201,33 @@ class NodeFederationPlugin {
     };
 
     const chunkFileName = compiler.options?.output?.chunkFilename;
-    if (
-      typeof chunkFileName === 'string' &&
-      !chunkFileName.includes('[chunkhash]') &&
-      !chunkFileName.includes('[contenthash]') &&
-      !chunkFileName.includes('[contenthashfullhash]')
-    ) {
-      compiler.options.output.chunkFilename = chunkFileName.replace(
-        '.js',
-        compiler.options.mode === 'development'
-          ? `${compiler?.options?.output?.uniqueName || this._options.name}.js`
-          : `.[chunkhash].js`
-      );
+    const uniqueName =
+      compiler?.options?.output?.uniqueName || this._options.name;
+
+    if (typeof chunkFileName === 'string') {
+      const requiredSubstrings = [
+        '[chunkhash]',
+        '[contenthash]',
+        '[fullHash]',
+        uniqueName,
+      ];
+
+      if (
+        //@ts-ignore
+        !requiredSubstrings.some((substring) =>
+          //@ts-ignore
+          chunkFileName.includes(substring)
+        )
+      ) {
+        const suffix =
+          compiler.options.mode === 'development'
+            ? `${uniqueName}.js`
+            : `.[chunkhash].js`;
+        compiler.options.output.chunkFilename = chunkFileName.replace(
+          '.js',
+          suffix
+        );
+      }
     }
 
     new (this.context.ModuleFederationPlugin ||
