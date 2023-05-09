@@ -590,42 +590,46 @@ class AsyncInverterPlugin {
         compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
           compilation
         );
+
       hooks.renderStartup.tap(
         'AddCommentWebpackPlugin',
         //@ts-ignore
         (source, renderContext) => {
-          // for (const entrypointModule of compilation.entrypoints.values()) {
-          //   const entrypoint = entrypointModule.getEntrypointChunk();
-          //   if (entrypoint.hasRuntime()) continue;
-          //
-          //   // search chunks for eager remote imports
-          //   // processChunksEagerRemote(
-          //   //   // get all the initial chunks (non async) of the entrypoint
-          //   //   entrypoint.getAllInitialChunks()
-          //   // );
-          //   this.mapChunks(compilation);
-          // }
-
-          const initialChunkMaps = this.mapChunks(compilation);
-          const initialShareMaps = this.mapShared(compilation);
-          //@ts-ignore
-          const replaceSource = source.source().split('\n');
-          const searchString = '__webpack_exec__';
-          const replaceString = '__webpack_exec_proxy__';
-          //@ts-ignore
-          // replaceSource = replaceSource.replace(searchString, replaceString);
           if (
             renderContext &&
-            renderContext.constructor.name === 'NormalModule'
+            renderContext.constructor.name !== 'NormalModule'
           ) {
-            replaceSource[0] = replaceSource[0].replace(
-              searchString,
-              replaceString
-            );
-            replaceSource[2] = replaceSource[1];
-            replaceSource[1] = `
-              var cnn = ${JSON.stringify(compiler.options.output.uniqueName)};
+            return source;
+          }
 
+          const newSource = [];
+          const initialChunkMaps = this.mapChunks(compilation);
+          const initialShareMaps = this.mapShared(compilation);
+          const replaceSource = source.source().toString().split('\n');
+
+          const searchString = '__webpack_exec__';
+          const replaceString = '__webpack_exec_proxy__';
+
+          const originalExec = replaceSource.findIndex((s: string) =>
+            s.includes(searchString)
+          );
+
+          if (originalExec === -1) {
+            return source;
+          }
+
+          const firstHalf = replaceSource.slice(0, originalExec + 1);
+          const secondHalf = replaceSource.slice(
+            originalExec + 1,
+            replaceSource.length
+          );
+
+          // Push renamed exec pack into new source
+          newSource.push(
+            firstHalf.join('\n').replace(searchString, replaceString)
+          );
+
+          newSource.push(`
 
 
           const onChunksLoaded = __webpack_require__.O;
@@ -689,14 +693,14 @@ console.log('EVERYTHON IS LOADED');
 
 
               };
-              `;
-            return Template.asString([
-              '',
-              initialShareMaps,
+              `);
+          return Template.asString([
+            '',
+            initialShareMaps,
 
-              initialChunkMaps,
+            initialChunkMaps,
 
-              `
+            `
               __webpack_require__.own_remote.then(function(){
 
               console.log('hosts own remote is ready');
@@ -706,38 +710,17 @@ console.log('EVERYTHON IS LOADED');
 
 
            const waitForContainer = __webpack_require__.e("host_inner_ctn");
-           waitForContainer.then((thing)=>{
+           __webpack_require__.own_remote.then((thing)=>{
            console.log('###container promise resolveed');
            })
  __webpack_require__.O(0,["host_inner_ctn"],()=>{
  console.log('###waiting for container should load becuase on on load event');
  },0);
-// Promise.race([waitForContainer, new Promise((resolve, reject) => {
-//   setTimeout(() => {
-//
-//   const noNeedToWait = Object.keys(listOfInitialIds).some((key)=>{
-//   return __webpack_require__.m[key] || __webpack_require__.c[key]
-//   })
-//   console.log("no need to wait", noNeedToWait);
-//     // console.log('some error', __webpack_require__.S, __webpack_require__.m, __webpack_require__.c);
-//     resolve(); // You might want to call resolve or reject here to end the promise
-//   }, 5);
-// })])
-// .then(() => {
-//   console.log('container loaded');
-// })
-// .then(() => {
-//   console.log('FINALLY HIT');
-// });
-
 `,
-              ...replaceSource,
-              '',
-            ]);
-          }
-          const comment = `/* This is an entrypoint chunk: */\n`;
-          //@ts-ignore
-          return new ConcatSource(source, comment);
+            ...newSource,
+            ...secondHalf,
+            '',
+          ]);
         }
       );
       compilation.hooks.optimizeChunks.tap(

@@ -81,7 +81,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
     const conditionMap = chunkGraph.getChunkConditionMap(chunk, chunkHasJs);
     // const hasJsMatcher = compileBooleanMatcher(conditionMap);
-    console.log('chunk name;', chunk.name);
     // find the main webpack runtime, skip all other chunks
     if (chunk.name != this.options.runtime && containerEntryModule) {
       return Template.asString('');
@@ -109,52 +108,35 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       __webpack_require__.installedModules = {};
 
 
-// create objext it doesnt exist yet
         globalThis.backupScope = globalThis.backupScope || {};
 
         if(typeof window === 'undefined') {
-          // if(__webpack_require__.S) Object.assign(globalThis.backupScope, global.__remote_scope__);
-__webpack_require__.S = globalThis.backupScope
+          __webpack_require__.S = globalThis.backupScope
           if(global.__remote_scope__ === undefined) { global.__remote_scope__ = {_config: {}} };
 
 
           __webpack_require__.own_remote = new Promise(function(resolve,reject){
           var containerAttachObject = typeof window !== 'undefined' ? window : ${globalObject}['__remote_scope__']
-console.log('normal back up scope', globalThis.backupScope);
 
-console.log('GLOBAL ASCIPR, ', global.__remote_scope__)
-
-       function attachRemote (resolve) {
-       console.log('BACKUP SCOP IN ATRTACH', globalThis.backupScope)
+           function attachRemote (resolve) {
               const innerRemote = __webpack_require__(${JSON.stringify(
                 containerModuleId
               )})
                    global.__remote_scope__[${JSON.stringify(
                      containerName
                    )}] = innerRemote
-         console.log('host inner ctn loaded')
-                console.log('searching module tree for ${containerName}', __webpack_require__.m[${JSON.stringify(
-        containerModuleId
-      )}])
-              console.log('searching module cache for ${containerName}', __webpack_require__.c[${JSON.stringify(
-        containerModuleId
-      )}])
-      console.log('scope attach', global.__remote_scope__)
          resolve(innerRemote)
       }
 
 __webpack_require__.O.bind(__webpack_require__.O, 0, ["host_inner_ctn"], function() {
-       console.log('####host inner loaded')
               attachRemote(resolve)
         },1)
 
 
 
              __webpack_require__.O(0, ["webpack-runtime"], function() {
-             console.log('####runtime loaded');
 
              __webpack_require__.O(0, ["host_inner_ctn"], function() {
-               console.log('####host inner loaded')
                       attachRemote(resolve)
                 },1)
                console.log(__webpack_require__.m[${JSON.stringify(
@@ -165,14 +147,15 @@ __webpack_require__.O.bind(__webpack_require__.O, 0, ["host_inner_ctn"], functio
 
               //            __webpack_require__.f.readFileVm('host_inner_ctn',promises).then(()=>console.log('ENSURE CHUNK'))
               // console.log(promises);
-                        require.cache[require.resolve("./host_inner_ctnhome_app")] = undefined
-                         require("./host_inner_ctnhome_app");
+                        require.cache[require.resolve("./host_inner_ctn" +${JSON.stringify(
+                          containerName
+                        )})] = undefined
+                         require("./host_inner_ctn" + ${JSON.stringify(
+                           containerName
+                         )});
                       } else {
                       attachRemote(resolve)
                 }
-
-               console.log('## status of host',__webpack_require__.O.readFileVm("host_inner_ctn"))
-
         },0)
 
 
@@ -186,34 +169,6 @@ __webpack_require__.O.bind(__webpack_require__.O, 0, ["host_inner_ctn"], functio
       }['default'] || {};}
         try {
         // install custom module into webpack modules from runtime
-
-if(false) {
-console.log('###')
-console.log('###')
-console.log('#n# #')
-console.log('# # #')
-console.log('# # #')
-console.log('###')
-        var containerAttachObject = typeof window !== 'undefined' ? window : ${globalObject}['__remote_scope__']
-         __webpack_require__.O(0, ["webpack-runtime"], function() { return require("./host_inner_ctn"); })
-         __webpack_require__.O(0, ["host_inner_ctn"], function() {
-        const innerRemote = __webpack_require__(${JSON.stringify(
-          containerModuleId
-        )})
-
-              if(!global.__remote_scope__[${JSON.stringify(
-                containerName
-              )}]) global.__remote_scope__[${JSON.stringify(
-        containerName
-      )}] = innerRemote
-         console.log('host inner ctn loaded')
-
-     // __webpack_require__.I('default',[__webpack_require__.S]);
-          })
-          }
-
-
-
 
       } catch (e) {
         console.error('host runtime was unable to initialize its own remote', e);
