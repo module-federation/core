@@ -81,11 +81,15 @@ if (resportSet.size === 0 || chunkQueue.length === 0) return true;
   return !matchesOrStartsWith;
 }
 
-console.log(__webpack_require__.getEagerSharedForChunkId);
+function promiseState(p) {
+  const t = {};
+  return Promise.race([p, t]).then(v => (v === t)? "pending" : "fulfilled", () => "rejected");
+}
+
+
 
 function asyncOperation(originalPush) {
   // This is just an example; replace it with your own logic.
-
 
   return new Promise(function (resolve) {
    // var prom = __webpack_require__.I('default', []);
@@ -108,6 +112,11 @@ function asyncOperation(originalPush) {
       return Promise.all((()=>__webpack_require__.initRemotes)());
     })
     .then(function () {
+
+    __webpack_require__.initRemotes.forEach(function (lib) {
+
+    console.log('promise all', lib);
+    });
       console.log('webpack is done negotiating dependency trees', cnn);
       console.log(
         'number of entry points to invert startup',
@@ -138,13 +147,33 @@ __webpack_require__.getEagerSharedForChunkId('pages/_app',__webpack_require__.in
 console.log('m',__webpack_require__.m);
 console.log('c',__webpack_require__.c);
 asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
+
+
+
 chunkLoadingGlobal.push = (function (originalPush) {
   return function () {
-      console.log('original push', arguments[0][0]);
-       __webpack_require__.getEagerSharedForChunkId(arguments[0][0],__webpack_require__.initConsumes)
-       __webpack_require__.getEagerRemotesForChunkId(arguments[0][0],__webpack_require__.initRemotes)
-
-console.log('init consumes', __webpack_require__.initConsumes);
+  const chunkID = arguments[0][0];
+      console.log('original push', chunkID);
+   __webpack_require__.getEagerSharedForChunkId(chunkID,__webpack_require__.initConsumes)
+   __webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRemotes)
+__webpack_require__.O(null, [chunkID], function () {
+console.log('clearing resolved', chunkID)
+   __webpack_require__.initConsumes.forEach(function (item,index) {
+      promiseState(item).then((status)=>{
+      console.log(status)
+      if(status === 'fulfilled'){
+      __webpack_require__.initConsumes.splice(index,1)
+      }
+    })
+    console.log('async chunk load length',__webpack_require__.initConsumes.length)
+  })
+},2)
+__webpack_require__.O(null, ['webpack'], function () {
+console.log('webpack runtime loaded freom entry signal;', chunkID)
+},0)
+__webpack_require__.O(null, [chunkID], function () {
+  console.log('init consumes', __webpack_require__.initConsumes);
+},1);
     if (!__webpack_require__.S.default) {
       console.log(
         '%cshare is blank: %s',

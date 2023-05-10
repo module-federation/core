@@ -636,13 +636,11 @@ class AsyncInverterPlugin {
 
 const chunkIds = Object.values(listOfInitialIds).reduce((acc, val) => acc.concat(val), []);
 
-// if(exports.id && exports.id === 'pages/_document') {
- getEagerSharedForChunkId(exports.id,__webpack_require__.initRemotes)
-//  // getEagerSharedForChunkId('pages/_app',__webpack_require__.initRemotes)
-//  // getEagerSharedForChunkId('pages/index',__webpack_require__.initRemotes)
-// }
- getEagerSharedForChunkId(exports.id,__webpack_require__.initRemotes)
+if(exports.id) {
+getEagerSharedForChunkId(exports.id,__webpack_require__.initRemotes);
 getEagerRemotesForChunkId(exports.id,__webpack_require__.initConsumes)
+
+}
 
 
 console.log("OM CHUNNKS", exports.id);

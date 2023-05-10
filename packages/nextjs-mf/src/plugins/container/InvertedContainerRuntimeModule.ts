@@ -26,7 +26,7 @@ interface InvertedContainerRuntimeModuleOptions {
   runtime: string;
   remotes: Record<string, string>; // A map of remote modules to their URLs.
   name?: string; // The name of the current module.
-  verbose?: boolean; // A flag to enable verbose logging.
+  debug?: boolean; // A flag to enable verbose logging.
   container?: string; // The name of the container module.
 }
 
@@ -35,6 +35,7 @@ interface InvertedContainerRuntimeModuleOptions {
  */
 interface ChunkLoadingContext {
   webpack: Compiler['webpack'];
+  debug?: boolean;
 }
 
 /**
@@ -412,7 +413,8 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
               `chunkMapping[chunkId].forEach(${runtimeTemplate.basicFunction(
                 'id',
                 [
-                  `console.log('checking if installed', id, ${RuntimeGlobals.hasOwnProperty}(installedModules, id));`,
+                  this.options.debug &&
+                    `console.log('checking if installed', id, ${RuntimeGlobals.hasOwnProperty}(installedModules, id));`,
                   `if(${RuntimeGlobals.hasOwnProperty}(installedModules, id)) return promises.push(installedModules[id]);`,
                   `var onFactory = ${runtimeTemplate.basicFunction('factory', [
                     'installedModules[id] = 0;',
@@ -425,7 +427,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                   ])};`,
                   `var onError = ${runtimeTemplate.basicFunction('error', [
                     'delete installedModules[id];',
-                    "console.log('on error',id, error)",
+                    this.options.debug && "console.log('on error',id, error)",
                     `${
                       RuntimeGlobals.moduleFactories
                     }[id] = ${runtimeTemplate.basicFunction('module', [
@@ -503,7 +505,8 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       `__webpack_require__.getEagerRemotesForChunkId  = ${runtimeTemplate.basicFunction(
         'chunkId, promises',
         [
-          "console.log('getEagerRemotesForChunkId', chunkId, remoteMapping[chunkId], remoteMapping);",
+          this.options.debug &&
+            "console.log('getEagerRemotesForChunkId', chunkId, remoteMapping[chunkId], remoteMapping);",
           `if(${RuntimeGlobals.hasOwnProperty}(remoteMapping, chunkId)) {`,
           Template.indent([
             `remoteMapping[chunkId].forEach(${runtimeTemplate.basicFunction(
@@ -511,11 +514,12 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
               [
                 `var getScope = ${RuntimeGlobals.currentRemoteGetScope};`,
                 'if(!getScope) getScope = [];',
-                "console.log('idtoexternalandnamemapping', idToExternalAndNameMapping,id);",
+                this.options.debug &&
+                  "console.log('idtoexternalandnamemapping', idToExternalAndNameMapping,id);",
                 'var data = idToExternalAndNameMapping[id];',
                 'if(getScope.indexOf(data) >= 0) return;',
                 'getScope.push(data);',
-                'console.log("data", data);',
+                this.options.debug && 'console.log("data", data);',
                 `if(data.p) return promises.push(data.p);`,
                 `var onError = ${runtimeTemplate.basicFunction('error', [
                   'if(!error) error = new Error("Container missing");',

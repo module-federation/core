@@ -76,6 +76,7 @@ class InvertedContainerPlugin {
               chunk,
               new InvertedContainerRuntimeModule(set, this.options, {
                 webpack: compiler.webpack,
+                debug: this.options.debug,
               })
             );
           }
