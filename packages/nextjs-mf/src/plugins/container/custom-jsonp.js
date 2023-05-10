@@ -133,7 +133,9 @@ function asyncOperation(originalPush) {
       }
     });
 }
-console.log(__webpack_require__.m);
+__webpack_require__.getEagerSharedForChunkId('pages/_app',__webpack_require__.initConsumes)
+
+console.log('m',__webpack_require__.m);
 console.log('c',__webpack_require__.c);
 asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
 chunkLoadingGlobal.push = (function (originalPush) {

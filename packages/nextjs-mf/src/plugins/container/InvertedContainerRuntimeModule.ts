@@ -610,6 +610,8 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         return '';
       }
 
+      const remoteFileName = './host_inner_ctn' + containerName;
+
       // const globalRef = this.compilation.options.output?.globalObject;
       //@ts-ignore
       const nodeGlobal = this.compilation.options?.node?.global;
@@ -620,83 +622,60 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       const containerScope = isServer
         ? [globalObject, "['__remote_scope__']"].join('')
         : 'window';
+      const attachOnMount = Template.indent([
+        `__webpack_require__.O.bind(__webpack_require__.O, 0, ["host_inner_ctn"], function() {`,
+        'attachRemote(resolve)',
+        '},1)',
+      ]);
+      const serverContainerKickstart = Template.asString([
+        `if(${containerScope} === undefined) { ${containerScope} = {_config: {}} };`,
+        '__webpack_require__.own_remote = new Promise(function(resolve,reject){',
+        Template.indent([
+          attachOnMount,
+          `__webpack_require__.O(0, ["webpack-runtime"], function() {`,
+          attachOnMount,
+          `if(!__webpack_require__.m[${JSON.stringify(containerModuleId)}]) {`,
+          Template.indent([
+            `var promises = [];`,
+            `require.cache[require.resolve(${JSON.stringify(
+              remoteFileName
+            )})] = undefined`,
+            `require("./host_inner_ctn" + ${JSON.stringify(containerName)});`,
+          ]),
+          `} else { attachRemote(resolve) } `,
+          '},0)',
+        ]),
+        '})',
+      ]);
 
+      const browserContainerKickstart = Template.asString([
+        "__webpack_require__.O(0, ['webpack'], function() {",
+        "console.log('runtime loaded');",
+        "console.log('m',__webpack_require__.m)",
+        "console.log('c',__webpack_require__.c)",
+        'attachRemote()',
+        '},0)',
+      ]);
+
+      // __webpack_require__.O(0, ["webpack-runtime"], function() {
       return Template.asString([
+        '__webpack_require__.initConsumes = [];',
+        '__webpack_require__.initRemotes = [];',
+        '__webpack_require__.installedModules = {};',
+        `var containerAttachObject = ${containerScope}`,
         `
-
-      __webpack_require__.initConsumes = [];
-      __webpack_require__.initRemotes = [];
-      __webpack_require__.installedModules = {};
-      var containerAttachObject = ${containerScope}
-
 function attachRemote (resolve) {
   const innerRemote = __webpack_require__(${JSON.stringify(containerModuleId)});
   containerAttachObject[${JSON.stringify(containerName)}] = innerRemote
   if(resolve) resolve(innerRemote)
 }
-
         globalThis.backupScope = globalThis.backupScope || {};
-          __webpack_require__.S = globalThis.backupScope;
-
-        if(typeof window === 'undefined') {
-          if(global.__remote_scope__ === undefined) { global.__remote_scope__ = {_config: {}} };
-
-
-          __webpack_require__.own_remote = new Promise(function(resolve,reject){
-          var containerAttachObject = typeof window !== 'undefined' ? window : ${globalObject}['__remote_scope__']
-
-__webpack_require__.O.bind(__webpack_require__.O, 0, ["host_inner_ctn"], function() {
-              attachRemote(resolve)
-        },1)
-
-
-
-             __webpack_require__.O(0, ["webpack-runtime"], function() {
-
-             __webpack_require__.O(0, ["host_inner_ctn"], function() {
-                      attachRemote(resolve)
-                },1)
-               console.log(__webpack_require__.m[${JSON.stringify(
-                 containerModuleId
-               )}]);
-              if(!__webpack_require__.m[${JSON.stringify(containerModuleId)}]) {
-            let promises = []
-
-              //            __webpack_require__.f.readFileVm('host_inner_ctn',promises).then(()=>console.log('ENSURE CHUNK'))
-              // console.log(promises);
-                        require.cache[require.resolve("./host_inner_ctn" +${JSON.stringify(
-                          containerName
-                        )})] = undefined
-                         require("./host_inner_ctn" + ${JSON.stringify(
-                           containerName
-                         )});
-                      } else {
-                      attachRemote(resolve)
-                }
-        },0)
-
-
-
-      })
-        } else {
-
-
-        ${webpack.RuntimeGlobals.shareScopeMap}['default'] = ${
-          webpack.RuntimeGlobals.shareScopeMap
-        }['default'] || {};}
-        try {
-         __webpack_require__.O(0, ["webpack"], function() {
-         console.log('runtime loaded');
-         console.log('m',__webpack_require__.m)
-         console.log('c',__webpack_require__.c)
-        attachRemote()
-
-         },0)
-        // install custom module into webpack modules from runtime
-
-      } catch (e) {
-        console.error('host runtime was unable to initialize its own remote', e);
-      }`,
+          __webpack_require__.S = globalThis.backupScope;`,
+        'try {',
+        isServer ? serverContainerKickstart : browserContainerKickstart,
+        '} catch (e) {',
+        "console.error('host runtime was unable to initialize its own remote', e);",
+        '}',
         this.mapChunks(),
         this.mapShared(),
       ]);
