@@ -413,8 +413,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
               `chunkMapping[chunkId].forEach(${runtimeTemplate.basicFunction(
                 'id',
                 [
-                  this.options.debug &&
-                    `console.log('checking if installed', id, ${RuntimeGlobals.hasOwnProperty}(installedModules, id));`,
+                  this.options.debug
+                    ? `console.log('checking if installed', id, ${RuntimeGlobals.hasOwnProperty}(installedModules, id));`
+                    : '',
                   `if(${RuntimeGlobals.hasOwnProperty}(installedModules, id)) return promises.push(installedModules[id]);`,
                   `var onFactory = ${runtimeTemplate.basicFunction('factory', [
                     'installedModules[id] = 0;',
@@ -427,7 +428,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                   ])};`,
                   `var onError = ${runtimeTemplate.basicFunction('error', [
                     'delete installedModules[id];',
-                    this.options.debug && "console.log('on error',id, error)",
+                    this.options.debug
+                      ? "console.log('on error',id, error)"
+                      : '',
                     `${
                       RuntimeGlobals.moduleFactories
                     }[id] = ${runtimeTemplate.basicFunction('module', [
@@ -505,8 +508,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       `__webpack_require__.getEagerRemotesForChunkId  = ${runtimeTemplate.basicFunction(
         'chunkId, promises',
         [
-          this.options.debug &&
-            "console.log('getEagerRemotesForChunkId', chunkId, remoteMapping[chunkId], remoteMapping);",
+          this.options.debug
+            ? "console.log('getEagerRemotesForChunkId', chunkId, remoteMapping[chunkId], remoteMapping);"
+            : '',
           `if(${RuntimeGlobals.hasOwnProperty}(remoteMapping, chunkId)) {`,
           Template.indent([
             `remoteMapping[chunkId].forEach(${runtimeTemplate.basicFunction(
@@ -514,12 +518,13 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
               [
                 `var getScope = ${RuntimeGlobals.currentRemoteGetScope};`,
                 'if(!getScope) getScope = [];',
-                this.options.debug &&
-                  "console.log('idtoexternalandnamemapping', idToExternalAndNameMapping,id);",
+                this.options.debug
+                  ? "console.log('idtoexternalandnamemapping', idToExternalAndNameMapping,id);"
+                  : '',
                 'var data = idToExternalAndNameMapping[id];',
                 'if(getScope.indexOf(data) >= 0) return;',
                 'getScope.push(data);',
-                this.options.debug && 'console.log("data", data);',
+                this.options.debug ? 'console.log("data", data);' : '',
                 `if(data.p) return promises.push(data.p);`,
                 `var onError = ${runtimeTemplate.basicFunction('error', [
                   'if(!error) error = new Error("Container missing");',
@@ -614,8 +619,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         return '';
       }
 
-      const remoteFileName = './host_inner_ctn' + containerName;
-
       // const globalRef = this.compilation.options.output?.globalObject;
       //@ts-ignore
       const nodeGlobal = this.compilation.options?.node?.global;
@@ -626,27 +629,25 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       const containerScope = isServer
         ? [globalObject, "['__remote_scope__']"].join('')
         : 'window';
-      const attachOnMount = Template.indent([
-        `__webpack_require__.O.bind(__webpack_require__.O, 0, ["host_inner_ctn"], function() {`,
-        'attachRemote(resolve)',
-        '},1)',
-      ]);
+
       const serverContainerKickstart = Template.asString([
-        `if(${containerScope} === undefined) { ${containerScope} = {_config: {}} };`,
+        `console.log('FOUND m',__webpack_require__.m[${JSON.stringify(
+          containerModuleId
+        )}]);`,
+        `console.log('FOUND c:',__webpack_require__.c[${JSON.stringify(
+          containerModuleId
+        )}]);`,
         '__webpack_require__.own_remote = new Promise(function(resolve,reject){',
         Template.indent([
-          attachOnMount,
+          // attachOnMount,
           `__webpack_require__.O(0, ["webpack-runtime"], function() {`,
-          attachOnMount,
+          "console.log('webpack-runtime loaded');",
+          // attachOnMount,
           `if(!__webpack_require__.m[${JSON.stringify(containerModuleId)}]) {`,
-          Template.indent([
-            `var promises = [];`,
-            `require.cache[require.resolve(${JSON.stringify(
-              remoteFileName
-            )})] = undefined`,
-            `require("./host_inner_ctn" + ${JSON.stringify(containerName)});`,
-          ]),
-          `} else { attachRemote(resolve) } `,
+          `console.error('container does not exist in host runtime graph', ${JSON.stringify(
+            containerModuleId
+          )});`,
+          `} else { console.log('SHOULD ATTACH CONTAINER'); attachRemote(resolve) } `,
           '},0)',
         ]),
         '})',
@@ -669,15 +670,18 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         '__webpack_require__.initConsumes = [];',
         '__webpack_require__.initRemotes = [];',
         '__webpack_require__.installedModules = {};',
-        `var containerAttachObject = ${containerScope}`,
+        `if(${containerScope} === undefined) { ${containerScope} = {_config: {}} };`,
         `
-        function attachRemote (resolve) {
-          const innerRemote = __webpack_require__(${JSON.stringify(
-            containerModuleId
-          )});
-          containerAttachObject[${JSON.stringify(containerName)}] = innerRemote
-          if(resolve) resolve(innerRemote)
-        }
+  function attachRemote (resolve) {
+    const innerRemote = __webpack_require__(${JSON.stringify(
+      containerModuleId
+    )});
+
+    ${containerScope}[${JSON.stringify(containerName)}] = innerRemote
+
+    console.log('remote attached', innerRemote);
+    if(resolve) resolve(innerRemote)
+  }
         globalThis.backupScope = globalThis.backupScope || {};
           __webpack_require__.S = globalThis.backupScope;`,
         'try {',
