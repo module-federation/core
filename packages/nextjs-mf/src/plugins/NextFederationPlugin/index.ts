@@ -127,9 +127,10 @@ export class NextFederationPlugin {
 
     // inject module hoisting system
     applyRemoteDelegates(this._options, compiler);
-
+    //@ts-ignore
     if (this._extraOptions.automaticAsyncBoundary) {
-      applyAutomaticAsyncBoundary(this._options, this._extraOptions, compiler);
+      console.warn('[nextjs-mf]: automaticAsyncBoundary is deprecated');
+      // applyAutomaticAsyncBoundary(this._options, this._extraOptions, compiler);
     }
 
     injectModuleHoistingSystem(isServer, this._options, compiler);
@@ -143,33 +144,33 @@ export class NextFederationPlugin {
 
     // @ts-ignore
     new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
-    if (isServer && Object.keys(this._options?.remotes || {}).length > 0) {
-      const commonOptions = {
-        ...hostFederationPluginOptions,
-        name: 'host_inner_ctn',
-        library: {
-          ...hostFederationPluginOptions.library,
-          name: this._options.name,
-        },
-        shared: {
-          ...hostFederationPluginOptions.shared,
-          ...defaultShared,
-        },
-      };
-
-      const serverOptions = isServer
-        ? {
-            runtime: 'webpack-runtime',
-            filename: `host_inner_ctn${this._options.name}.js`,
-          }
-        : {};
-
-      // @ts-ignore
-      new ModuleFederationPlugin({
-        ...commonOptions,
-        ...serverOptions,
-      }).apply(compiler);
-    }
+    // if (isServer && Object.keys(this._options?.remotes || {}).length > 0) {
+    //   const commonOptions = {
+    //     ...hostFederationPluginOptions,
+    //     name: 'host_inner_ctn',
+    //     library: {
+    //       ...hostFederationPluginOptions.library,
+    //       name: this._options.name,
+    //     },
+    //     shared: {
+    //       ...hostFederationPluginOptions.shared,
+    //       ...defaultShared,
+    //     },
+    //   };
+    //
+    //   const serverOptions = isServer
+    //     ? {
+    //         runtime: 'webpack-runtime',
+    //         filename: `host_inner_ctn${this._options.name}.js`,
+    //       }
+    //     : {};
+    //
+    //   // @ts-ignore
+    //   new ModuleFederationPlugin({
+    //     ...commonOptions,
+    //     ...serverOptions,
+    //   }).apply(compiler);
+    // }
 
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
   }
