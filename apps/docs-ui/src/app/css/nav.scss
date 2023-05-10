@@ -1,0 +1,21 @@
+.nav {
+    .subnav-item,
+    .nav-item {
+      &.is-active,
+      &.has-active {
+        @apply text-blue-gray-900 font-medium;
+      }
+    }
+  
+    .subnav-item {
+      &.closed {
+        .icon {
+          @apply -rotate-90;
+        }
+  
+        .subnav {
+          display: none;
+        }
+      }
+    }
+  }

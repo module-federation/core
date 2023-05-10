@@ -1,17 +1,11 @@
 export default function () {
-  const toggle = document.querySelector(
-    '.page-languages .language-menu-toggle'
-  );
-  if (!toggle) return;
+  const toggle = document.getElementById('language-toggle');
+  const dropdown = document.getElementById('language-dropdown');
 
-  const selector = document.querySelector('.page-languages');
+  if (!toggle || !dropdown) return;
 
   toggle.addEventListener('click', (e) => {
-    selector.classList.toggle('is-active');
-    e.stopPropagation(); // trap event
-  });
-
-  document.documentElement.addEventListener('click', () => {
-    selector.classList.remove('is-active');
+    dropdown.classList.toggle('hidden');
+    e.stopPropagation();
   });
 }

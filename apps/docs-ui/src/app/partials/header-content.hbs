@@ -1,4 +1,4 @@
-<header class="flex items-center w-full bg-mf-gray">
+<header class="flex items-center w-full bg-mf-gray sticky top-0 z-50">
 
   <nav class="max-w-7xl w-full mx-auto flex flex-row-reverse xl:flex-row items-center justify-between px-4 py-6">
     <a href="#"
@@ -11,27 +11,27 @@
 
     <ul class="hidden xl:flex xl:flex w-full justify-center gap-8">
       <li>
-        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700 !text-deep-purple-300"
            href="#">Documentation</a>
       </li>
 
       <li>
-        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
            href="#">Discover</a>
       </li>
 
       <li>
-        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
            href="#">Showcase</a>
       </li>
 
       <li>
-        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
            href="#">Enterprise</a>
       </li>
 
       <li>
-        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
            href="#">Medusa</a>
       </li>
     </ul>
@@ -53,9 +53,75 @@
           {{> social-icon-discord size="36px" }}
         </a>
       </li>
+
+      <li class="flex">
+        {{>page-languages}}
+      </li>
     </ul>
+
+    
+    <div class="flex xl:hidden relative">
+      <button id="mobile-nav-toggle">
+        <span class="relative my-1.5 block h-0.5 w-[30px] bg-blue-gray-900 transition-all duration-300"></span>
+        <span class="relative my-1.5 block h-0.5 w-[30px] bg-blue-gray-900 transition-all duration-300"></span>
+        <span class="relative my-1.5 block h-0.5 w-[30px] bg-blue-gray-900 transition-all duration-300"></span>
+      </button>
+    </div>
+
+
+    <div id="mobile-nav"
+         class="hidden bg-mf-gray inline-block xl:hidden absolute left-0 px-4 top-[88px] w-full h-screen z-[60] transition-opacity duration-300 visible opacity-100">
+
+      <ul class="flex flex-col w-full gap-8">
+        <li>
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="#">Documentation</a>
+        </li>
+
+        <li>
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="#">Discover</a>
+        </li>
+
+        <li>
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="#">Showcase</a>
+        </li>
+
+        <li>
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="#">Enterprise</a>
+        </li>
+
+        <li>
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="#">Medusa</a>
+        </li>
+
+
+
+        <li class="flex gap-8">
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="https://github.com/module-federation"
+             target="_blank">
+            {{> social-icon-github size="36px" }}
+          </a>
+
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="https://discord.gg/T8c6yAxkbv"
+             target="_blank">
+            {{> social-icon-discord size="36px" }}
+          </a>
+        </li>
+      </ul>
+
+
+    </div>
 
 
   </nav>
 
 </header>
+
+{{!-- Note: We need this dummy element so Tailwind generates the classes used on the burger menu --}}
+<div class="hidden top-[7px] rotate-45 opacity-0 top-[-8px] -rotate-45"></div>

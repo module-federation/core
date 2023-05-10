@@ -2,7 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-@import '~@asciidoctor/tabs/dist/css/tabs.css';
+@import './app/css/toc-menu.scss';
+@import './app/css/doc.scss';
+@import './app/css/nav.scss';
+@import './app/css/search.scss';
+@import './app/css/highlight.scss';
 
 @layer base {
   html {

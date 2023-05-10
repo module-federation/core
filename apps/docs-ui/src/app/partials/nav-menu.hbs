@@ -1,8 +1,12 @@
 {{#with page.navigation}}
-<div class="nav-panel-menu is-active" data-panel="menu">
-  <nav class="nav-menu">
-{{> nav-tree navigation=this}}
-  </nav>
-</div>
-{{/with}}
+<nav class="flex flex-col gap-10">
+  <div id="search-field" class="flex items-center w-full px-3 py-2 bg-white border border-blue-gray-400 relative focus-within:border-ui-blue">
+    <input id="search-input" class="w-full bg-transparent p-0 border-0 outline-none focus:border-0 focus:outline-none text-blue-gray-400 text-base" type="text" placeholder="Search"{{#if page.home}} autofocus{{/if}}>
+    
 
+    <div class="text-blue-gray-900">{{>"icon" name="search" size="20px"}}</div>
+  </div>
+
+  {{> nav-tree navigation=this}}
+</nav>
+{{/with}}
