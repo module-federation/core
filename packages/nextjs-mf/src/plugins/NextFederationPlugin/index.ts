@@ -29,7 +29,6 @@ import {
   validateCompilerOptions,
   validatePluginOptions,
 } from './validate-options';
-import { applyAutomaticAsyncBoundary } from './apply-automatic-async-boundary';
 import {
   applyServerPlugins,
   configureServerCompilerOptions,
@@ -130,7 +129,6 @@ export class NextFederationPlugin {
     //@ts-ignore
     if (this._extraOptions.automaticAsyncBoundary) {
       console.warn('[nextjs-mf]: automaticAsyncBoundary is deprecated');
-      // applyAutomaticAsyncBoundary(this._options, this._extraOptions, compiler);
     }
 
     injectModuleHoistingSystem(isServer, this._options, compiler);
