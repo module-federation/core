@@ -174,6 +174,7 @@ class CustomWebpackPlugin {
               //   );
               // }
             }
+
             if (
               runtimeModule.constructor.name ===
                 'JsonpChunkLoadingRuntimeModule' &&

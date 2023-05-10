@@ -476,10 +476,10 @@ class AsyncInverterPlugin {
         null,
         ''
       )};`,
-      `const getEagerRemotesForChunkID  = ${runtimeTemplate.basicFunction(
+      `const getEagerRemotesForChunkId  = ${runtimeTemplate.basicFunction(
         'chunkId, promises',
         [
-          "console.log('getEagerRemotesForChunkID', chunkId, remoteMapping[chunkId], remoteMapping);",
+          "console.log('getEagerRemotesForChunkId', chunkId, remoteMapping[chunkId], remoteMapping);",
           `if(${RuntimeGlobals.hasOwnProperty}(remoteMapping, chunkId)) {`,
           Template.indent([
             `remoteMapping[chunkId].forEach(${runtimeTemplate.basicFunction(
@@ -642,7 +642,7 @@ const chunkIds = Object.values(listOfInitialIds).reduce((acc, val) => acc.concat
 //  // getEagerSharedForChunkId('pages/index',__webpack_require__.initRemotes)
 // }
  getEagerSharedForChunkId(exports.id,__webpack_require__.initRemotes)
-getEagerRemotesForChunkID(exports.id,__webpack_require__.initConsumes)
+getEagerRemotesForChunkId(exports.id,__webpack_require__.initConsumes)
 
 
 console.log("OM CHUNNKS", exports.id);

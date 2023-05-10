@@ -81,22 +81,32 @@ if (resportSet.size === 0 || chunkQueue.length === 0) return true;
   return !matchesOrStartsWith;
 }
 
-var asyncInFlight = false;
+console.log(__webpack_require__.getEagerSharedForChunkId);
+
 function asyncOperation(originalPush) {
-  if (asyncInFlight) return asyncInFlight;
   // This is just an example; replace it with your own logic.
-  asyncInFlight = new Promise(function (resolve) {
-    var prom = __webpack_require__.I('default', []);
+
+
+  return new Promise(function (resolve) {
+   // var prom = __webpack_require__.I('default', []);
     initialConsumes.forEach(function (lib) {
-      setEagerLoading(lib[0], lib[1], cnn);
+     // setEagerLoading(lib[0], lib[1], cnn);
     });
-    resolve(prom);
+    resolve(true);
   })
     .then(function () {
       console.log('init operation completed');
       console.log(__webpack_require__.S.default);
-      loadDependencies(initialConsumes, cnn);
-      return Promise.all(asyncQueue);
+      // loadDependencies(initialConsumes, cnn);
+        for (let q in chunkQueue) {
+console.log(chunkQueue[q][0],__webpack_require__.initConsumes);
+
+        console.log('qq',chunkQueue[q][0]);
+       __webpack_require__.getEagerSharedForChunkId(chunkQueue[q][0],__webpack_require__.initConsumes)
+       __webpack_require__.getEagerRemotesForChunkId(chunkQueue[q][0],__webpack_require__.initRemotes)
+      }
+
+      return Promise.all((()=>__webpack_require__.initConsumes)());
     })
     .then(function () {
       console.log('webpack is done negotiating dependency trees', cnn);
@@ -105,22 +115,34 @@ function asyncOperation(originalPush) {
         chunkQueue.length
       );
       console.log('startup inversion in progress', chunkQueue);
-      asyncInFlight = false;
+
+
       while (chunkQueue.length > 0) {
         const queueArgs = chunkQueue.shift();
+
+      __webpack_require__.getEagerSharedForChunkId(queueArgs[0],__webpack_require__.initConsumes)
+       __webpack_require__.getEagerRemotesForChunkId(queueArgs[0],__webpack_require__.initRemotes)
+
+       Promise.all(__webpack_require__.initConsumes).then(function () {
         console.log('pushing deffered chunk into runtime', queueArgs[0]);
         webpackJsonpCallback.apply(
           null,
           [null].concat(Array.prototype.slice.call([queueArgs]))
         );
         originalPush.apply(originalPush, [queueArgs]);
+        });
       }
     });
-  return asyncInFlight;
 }
+console.log(__webpack_require__.m);
+console.log('c',__webpack_require__.c);
 asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
 chunkLoadingGlobal.push = (function (originalPush) {
   return function () {
+      console.log('original push', arguments[0][0]);
+
+
+console.log('init consumes', __webpack_require__.initConsumes);
     if (!__webpack_require__.S.default) {
       console.log(
         '%cshare is blank: %s',
