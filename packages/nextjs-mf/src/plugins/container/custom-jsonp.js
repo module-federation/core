@@ -92,21 +92,20 @@ function asyncOperation(originalPush) {
     initialConsumes.forEach(function (lib) {
      // setEagerLoading(lib[0], lib[1], cnn);
     });
-    resolve(true);
+    Promise.all(__webpack_require__.initConsumes).then(resolve)
+    // resolve(true);
   })
     .then(function () {
       console.log('init operation completed');
       console.log(__webpack_require__.S.default);
       // loadDependencies(initialConsumes, cnn);
         for (let q in chunkQueue) {
-console.log(chunkQueue[q][0],__webpack_require__.initConsumes);
-
         console.log('qq',chunkQueue[q][0]);
        __webpack_require__.getEagerSharedForChunkId(chunkQueue[q][0],__webpack_require__.initConsumes)
        __webpack_require__.getEagerRemotesForChunkId(chunkQueue[q][0],__webpack_require__.initRemotes)
       }
 
-      return Promise.all((()=>__webpack_require__.initConsumes)());
+      return Promise.all((()=>__webpack_require__.initRemotes)());
     })
     .then(function () {
       console.log('webpack is done negotiating dependency trees', cnn);
@@ -140,7 +139,8 @@ asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
 chunkLoadingGlobal.push = (function (originalPush) {
   return function () {
       console.log('original push', arguments[0][0]);
-
+       __webpack_require__.getEagerSharedForChunkId(arguments[0][0],__webpack_require__.initConsumes)
+       __webpack_require__.getEagerRemotesForChunkId(arguments[0][0],__webpack_require__.initRemotes)
 
 console.log('init consumes', __webpack_require__.initConsumes);
     if (!__webpack_require__.S.default) {

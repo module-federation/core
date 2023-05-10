@@ -173,10 +173,14 @@ class InvertedContainerPlugin {
                       'to',
                       chunk.name
                     );
-                  // compilation.chunkGraph.connectChunkAndModule(
-                  //   chunk,
-                  //   containerEntryModule
-                  // );
+                  // if its the browser runtime, inject the container module into the host runtime
+                  // TODO: try and do the same on the server,
+                  if (this.options.runtime !== 'webpack-runtime') {
+                    compilation.chunkGraph.connectChunkAndModule(
+                      chunk,
+                      containerEntryModule
+                    );
+                  }
                 }
               }
             }
