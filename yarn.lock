@@ -2250,17 +2250,17 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
-"@jscutlery/semver@^2.30.1":
-  version "2.30.1"
-  resolved "https://registry.yarnpkg.com/@jscutlery/semver/-/semver-2.30.1.tgz#daaaf223a6536a339ad98bee92c872205a5c0191"
-  integrity sha512-Adnlu/kEOaikxNJLi3Ll4UfgEW4VG0dvf5zm7Ere7vT/udHhPs6CTO6B7PCFLzKsLgM0vqSrVk/nKYFWri83Ww==
+"@jscutlery/semver@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@jscutlery/semver/-/semver-3.0.0.tgz#af9d52132402de5db470b3d351e05cc199fe93a0"
+  integrity sha512-HihMZSDZRxXm9j9uKyV791Hm1BpIS55NrQx5H0yuc2/GHtWaKm86/Cpqp74q98f47XL7aZgRiYdS5+J1Vh1hww==
   dependencies:
     chalk "4.1.2"
     conventional-changelog "^3.1.25"
     conventional-recommended-bump "^6.1.0"
     detect-indent "6.1.0"
     inquirer "8.2.5"
-    rxjs "7.8.0"
+    rxjs "7.8.1"
 
 "@juggle/resize-observer@^3.3.1":
   version "3.4.0"
@@ -16477,10 +16477,10 @@ rusha@0.8.14:
   resolved "https://registry.yarnpkg.com/rusha/-/rusha-0.8.14.tgz#a977d0de9428406138b7bb90d3de5dcd024e2f68"
   integrity sha512-cLgakCUf6PedEu15t8kbsjnwIFFR2D4RfL+W3iWFJ4iac7z4B0ZI8fxy4R3J956kAI68HclCFGL8MPoUVC3qVA==
 
-rxjs@7.8.0:
-  version "7.8.0"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.0.tgz#90a938862a82888ff4c7359811a595e14e1e09a4"
-  integrity sha512-F2+gxDshqmIub1KdvZkaEfGDwLNpPvk9Fs6LD/MyQxNgMds/WH9OdDDXOmxUZpME+iSK3rQCctkL0DYyytUqMg==
+rxjs@7.8.1, rxjs@^7.5.5, rxjs@^7.8.0:
+  version "7.8.1"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.1.tgz#6f6f3d99ea8044291efd92e7c7fcf562c4057543"
+  integrity sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==
   dependencies:
     tslib "^2.1.0"
 
@@ -16490,13 +16490,6 @@ rxjs@^6.5.4:
   integrity sha512-hTdwr+7yYNIT5n4AMYp85KA6yw2Va0FLa3Rguvbpa4W3I5xynaBZo41cM3XM+4Q6fRMj3sBYIR1VAmZMXYJvRQ==
   dependencies:
     tslib "^1.9.0"
-
-rxjs@^7.5.5, rxjs@^7.8.0:
-  version "7.8.1"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.1.tgz#6f6f3d99ea8044291efd92e7c7fcf562c4057543"
-  integrity sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==
-  dependencies:
-    tslib "^2.1.0"
 
 safe-array-concat@^1.0.0:
   version "1.0.0"
