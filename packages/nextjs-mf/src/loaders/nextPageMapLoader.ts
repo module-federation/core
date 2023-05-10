@@ -84,8 +84,8 @@ function getNextPages(rootDir: string) {
 
   // remove specific nextjs pages
   const exclude = [
-    // /^_app\..*/, // _app.tsx
-    // /^_document\..*/, // _document.tsx
+    /^_app\..*/, // _app.tsx
+    /^_document\..*/, // _document.tsx
     /^_error\..*/, // _error.tsx
     /^404\..*/, // 404.tsx
     /^500\..*/, // 500.tsx
