@@ -649,6 +649,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       ]);
 
       const browserContainerKickstart = Template.asString([
+        `__webpack_require__.O(0, null, function() {
+        console.log('some chunk loaded');
+        },2);`,
         "__webpack_require__.O(0, ['webpack'], function() {",
         "console.log('runtime loaded');",
         "console.log('m',__webpack_require__.m)",
