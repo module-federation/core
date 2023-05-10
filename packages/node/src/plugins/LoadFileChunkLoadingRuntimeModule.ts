@@ -256,7 +256,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
               ? Template.indent([
                   'console.log("readFileVm", chunkId);',
                   'var installedChunkData = installedChunks[chunkId];',
-                  `console.log(${hasJsMatcher('chunkId')}, chunkId);`,
                   `console.log('installed chunk data', installedChunkData, ${JSON.stringify(
                     name
                   )});`,
