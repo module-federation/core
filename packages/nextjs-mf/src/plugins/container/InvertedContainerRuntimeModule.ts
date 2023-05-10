@@ -671,11 +671,13 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         '__webpack_require__.installedModules = {};',
         `var containerAttachObject = ${containerScope}`,
         `
-function attachRemote (resolve) {
-  const innerRemote = __webpack_require__(${JSON.stringify(containerModuleId)});
-  containerAttachObject[${JSON.stringify(containerName)}] = innerRemote
-  if(resolve) resolve(innerRemote)
-}
+        function attachRemote (resolve) {
+          const innerRemote = __webpack_require__(${JSON.stringify(
+            containerModuleId
+          )});
+          containerAttachObject[${JSON.stringify(containerName)}] = innerRemote
+          if(resolve) resolve(innerRemote)
+        }
         globalThis.backupScope = globalThis.backupScope || {};
           __webpack_require__.S = globalThis.backupScope;`,
         'try {',
