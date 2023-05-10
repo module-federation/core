@@ -1,8 +1,8 @@
 import {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
-  NextFederationPluginOptions
-} from "@module-federation/utilities";
+  NextFederationPluginOptions,
+} from '@module-federation/utilities';
 
 /**
  * Utility function to set the main and extra options.
@@ -18,7 +18,6 @@ import {
  * - enableImageLoaderFix: false
  * - enableUrlLoaderFix: false
  * - skipSharingNextInternals: false
- * - automaticAsyncBoundary: false
  */
 export function setOptions(options: NextFederationPluginOptions): {
   mainOptions: ModuleFederationPluginOptions;
@@ -31,11 +30,10 @@ export function setOptions(options: NextFederationPluginOptions): {
     enableImageLoaderFix: false,
     enableUrlLoaderFix: false,
     skipSharingNextInternals: false,
-    automaticAsyncBoundary: false
   };
 
   return {
     mainOptions: mainOpts,
-    extraOptions: { ...defaultExtraOptions, ...extraOptions }
+    extraOptions: { ...defaultExtraOptions, ...extraOptions },
   };
 }
