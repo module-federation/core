@@ -18,7 +18,8 @@ function getCustomJsonpCode(
   appName: string,
   RuntimeGlobals: any,
   initialModules: Iterable<Module>,
-  initialModulesResolved: Map<any, any>
+  initialModulesResolved: Map<any, any>,
+  chunk: Chunk
 ): string {
   const moduleMaps = new Map();
   for (const module of initialModules) {
@@ -43,6 +44,7 @@ function getCustomJsonpCode(
     )});`,
     `var initialConsumes = ${JSON.stringify(moduleArray)}`,
     'var asyncQueue = [];',
+    `var currentChunkID = ${JSON.stringify(chunk.id)};`,
     template,
   ];
   return Template.asString(code);
@@ -190,7 +192,8 @@ class CustomWebpackPlugin {
                   compiler.options.output.uniqueName,
                   compiler.webpack.RuntimeGlobals,
                   this.initialModules,
-                  this.initialModulesResolved
+                  this.initialModulesResolved,
+                  chunk
                 )
               );
               runtimeModule.getGeneratedCode = () => modifiedSource.source();

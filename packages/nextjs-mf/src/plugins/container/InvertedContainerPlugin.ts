@@ -1,9 +1,10 @@
 import type { Chunk, Compilation, Compiler } from 'webpack';
+import { RawSource } from 'webpack-sources';
 //@ts-ignore
 import type { ModuleFederationPluginOptions } from '../types';
 import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
 import { RuntimeGlobals } from 'webpack';
-
+import Template from '../../../utils/Template';
 /**
  * Interface for InvertedContainerOptions, extending ModuleFederationPluginOptions.
  * This interface includes additional fields specific to the plugin's behavior.
@@ -109,7 +110,7 @@ class InvertedContainerPlugin {
           }
         );
         compilation.hooks.optimizeChunks.tap(
-          'AddModulesToRuntimeChunkPlugin',
+          'InvertedContainerPlugin',
           (chunks) => {
             const containerEntryModule =
               this.resolveContainerModule(compilation);
@@ -185,6 +186,116 @@ class InvertedContainerPlugin {
                 }
               }
             }
+          }
+        );
+
+        const hooks =
+          compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
+            compilation
+          );
+        compilation.hooks.afterOptimizeChunkAssets.tap(
+          'ChunkIdPlugin',
+          (chunks) => {
+            chunks.forEach((chunk) => {
+              chunk.files.forEach((file) => {
+                const asset = compilation.getAsset(file);
+                if (asset) {
+                  let source = asset.source.source();
+
+                  // Inject the chunk name at the beginning of the file
+                  source = source
+                    .toString()
+                    //@ts-ignore
+                    .replace('__INSERT_CH_ID__MF__', chunk.id);
+                  const sourceBuffer = Buffer.from(source, 'utf-8');
+                  //@ts-ignore
+                  const sourceObj = {
+                    source: () => sourceBuffer,
+                    size: () => sourceBuffer.length,
+                  };
+                  // @ts-ignore
+                  compilation.updateAsset(file, sourceObj);
+                }
+              });
+            });
+          }
+        );
+
+        hooks.renderStartup.tap(
+          'InvertedContainerPlugin',
+          //@ts-ignore
+          (source, renderContext) => {
+            if (
+              renderContext &&
+              renderContext.constructor.name !== 'NormalModule'
+            ) {
+              return source;
+            }
+
+            const newSource = [];
+            const replaceSource = source.source().toString().split('\n');
+
+            const searchString = '__webpack_exec__';
+            const replaceString = '__webpack_exec_proxy__';
+
+            const originalExec = replaceSource.findIndex((s: string) =>
+              s.includes(searchString)
+            );
+
+            if (originalExec === -1) {
+              return source;
+            }
+
+            const firstHalf = replaceSource.slice(0, originalExec + 1);
+            const secondHalf = replaceSource.slice(
+              originalExec + 1,
+              replaceSource.length
+            );
+            let currentChunkID: string | number | null = null;
+            for (const chunk of compilation.chunks) {
+              if (
+                chunk.isOnlyInitial() &&
+                compilation.chunkGraph.isModuleInChunk(renderContext, chunk)
+              ) {
+                currentChunkID = chunk.id;
+              }
+            }
+            // Push renamed exec pack into new source
+            newSource.push(
+              firstHalf.join('\n').replace(searchString, replaceString)
+            );
+
+            newSource.push(`
+            var ${searchString} = function(moduleId) {
+return __webpack_require__.own_remote.then((thing)=>{
+console.log('loaded pages remote if exists:',currentChunkId);
+return Promise.all(__webpack_require__.initRemotes);
+}).then(()=>{
+console.log('loaded pages remote if exists:',currentChunkId);
+return Promise.all(__webpack_require__.initConsumes);
+}).then(()=>{
+console.log('async startup for entrypoint done');
+console.log('SUOULD REQUIRE PAged,m', moduleId);
+console.log('SCOPE MEMORY CHECK',__webpack_require__.S === globalThis.backupScope);
+console.log('SCOPE MEMORY CHECK',Object.keys(__webpack_require__.S), Object.keys(globalThis.backupScope))
+return ${replaceString}(moduleId);
+})
+             };
+              `);
+
+            return Template.asString([
+              '',
+              'var currentChunkId = "__INSERT_CH_ID__MF__";',
+              `if(currentChunkId) {`,
+              Template.indent([
+                `__webpack_require__.getEagerSharedForChunkId(currentChunkId,__webpack_require__.initRemotes);`,
+                `__webpack_require__.getEagerRemotesForChunkId(currentChunkId,__webpack_require__.initConsumes)`,
+              ]),
+              '}',
+              ...newSource,
+              ...secondHalf,
+              '',
+            ]);
           }
         );
       }

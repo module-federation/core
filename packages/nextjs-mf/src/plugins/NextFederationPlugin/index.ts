@@ -120,7 +120,7 @@ export class NextFederationPlugin {
       },
     };
 
-    compiler.options.devtool = 'source-map';
+    compiler.options.devtool = false;
 
     compiler.options.output.uniqueName = this._options.name;
 

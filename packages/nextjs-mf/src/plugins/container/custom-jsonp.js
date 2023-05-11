@@ -109,7 +109,11 @@ function asyncOperation(originalPush) {
        __webpack_require__.getEagerRemotesForChunkId(chunkQueue[q][0],__webpack_require__.initRemotes)
       }
 
-      return Promise.all((()=>__webpack_require__.initRemotes)());
+      return Promise.all([
+      Promise.all((()=>__webpack_require__.initConsumes)()),
+      Promise.all((()=>__webpack_require__.initRemotes)()),
+      ]);
+
     })
     .then(function () {
 
@@ -124,7 +128,8 @@ function asyncOperation(originalPush) {
       );
       console.log('startup inversion in progress', chunkQueue);
 
-
+      console.log(__webpack_require__.initConsumes);
+      console.log(__webpack_require__.initRemotes);
       while (chunkQueue.length > 0) {
         const queueArgs = chunkQueue.shift();
 
@@ -142,32 +147,36 @@ function asyncOperation(originalPush) {
       }
     });
 }
-__webpack_require__.getEagerSharedForChunkId('pages/_app',__webpack_require__.initConsumes)
 
 console.log('m',__webpack_require__.m);
 console.log('c',__webpack_require__.c);
 asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
+// __webpack_require__.getEagerSharedForChunkId(chunkID,__webpack_require__.initConsumes)
+// __webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRemotes)
 
 
+var currentChunkId = "__INSERT_CH_ID__MF__";
 
 chunkLoadingGlobal.push = (function (originalPush) {
   return function () {
   const chunkID = arguments[0][0];
       console.log('original push', chunkID);
-   __webpack_require__.getEagerSharedForChunkId(chunkID,__webpack_require__.initConsumes)
-   __webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRemotes)
-__webpack_require__.O(null, [chunkID], function () {
-console.log('clearing resolved', chunkID)
-   __webpack_require__.initConsumes.forEach(function (item,index) {
-      promiseState(item).then((status)=>{
-      console.log(status)
-      if(status === 'fulfilled'){
-      __webpack_require__.initConsumes.splice(index,1)
-      }
-    })
-    console.log('async chunk load length',__webpack_require__.initConsumes.length)
-  })
-},2)
+      console.log('invoke push', chunkID);
+
+   chunkLoadingGlobal.forEach(function (item) {
+   console.log('webpackChunkhome_app', item[0]);
+   })
+// __webpack_require__.O(null, [chunkID], function () {
+// console.log('clearing resolved', chunkID)
+//    __webpack_require__.initConsumes.forEach(function (item,index) {
+//       promiseState(item).then((status)=>{
+//       console.log(status)
+//       if(status === 'fulfilled'){
+//       __webpack_require__.initConsumes.splice(index,1)
+//       }
+//     })
+//   })
+// },2)
 __webpack_require__.O(null, ['webpack'], function () {
 console.log('webpack runtime loaded freom entry signal;', chunkID)
 },0)
@@ -181,13 +190,9 @@ __webpack_require__.O(null, [chunkID], function () {
         !__webpack_require__.S.default
       );
     }
-    console.log('chunk was pushed', arguments[0][0]);
-    if (
-      arguments[0][0].includes('main') ||
-      arguments[0][0].some(function (item) {
-        return item.startsWith('pages/');
-      })
-    ) {
+
+    if (typeof arguments[0][2] === 'function') {
+    console.log('queueing chunk', arguments[0][0]);
       resport = Array.prototype.concat.apply(resport, arguments[0][0]);
       var pushEvent = Array.prototype.push.apply(chunkQueue, arguments);
       return asyncOperation(originalPush);

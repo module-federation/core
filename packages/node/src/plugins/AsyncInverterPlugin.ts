@@ -73,25 +73,7 @@ class AsyncInverterPlugin {
   apply(compiler: Compiler) {
     this.compiler = compiler;
     compiler.hooks.thisCompilation.tap('AsyncInverterPlugin', (compilation) => {
-      const processChunksEagerRemote = (chunks: Set<Chunk>): void => {
-        console.log('process chunks eager remote');
-        for (const chunk of chunks) {
-          if (chunk.hasRuntime()) continue;
-          const modules =
-            compilation.chunkGraph.getChunkModulesIterableBySourceType(
-              chunk,
-              'remote'
-            ); //@ts-ignore
-
-          // console.log(chunk.name, 'has eager remotes');
-          if (modules) this.addRemoteModules(modules, chunk);
-        }
-      };
-      // Always enabled
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const isEnabledForChunk = (_: Chunk) => true;
-      const onceForChunkSet = new WeakSet();
-
+      return;
       const hooks =
         compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
           compilation
