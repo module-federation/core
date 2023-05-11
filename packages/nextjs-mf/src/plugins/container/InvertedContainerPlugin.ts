@@ -196,7 +196,6 @@ class InvertedContainerPlugin {
 
               const runtimeRequirementsInChunk =
                 compilation.chunkGraph.getChunkRuntimeRequirements(chunk);
-              // console.log(chunkModules);
 
               chunk.files.forEach((file) => {
                 const asset = compilation.getAsset(file);

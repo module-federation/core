@@ -622,6 +622,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       // const globalRef = this.compilation.options.output?.globalObject;
       //@ts-ignore
       const nodeGlobal = this.compilation.options?.node?.global;
+
       const globalObject = nodeGlobal
         ? webpack.RuntimeGlobals.global || 'global'
         : 'global';
@@ -658,7 +659,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         "__webpack_require__.O(0, ['webpack'], function() {",
         "console.log('runtime loaded', webpackChunkhome_app);",
         "console.log('replaying all installed chunk requirements');",
-        'webpackChunkhome_app.forEach(function(chunkId) {',
+        `self[${JSON.stringify(
+          this.compilation.outputOptions.chunkLoadingGlobal
+        )}].forEach(function(chunkId) {`,
         `__webpack_require__.getEagerSharedForChunkId(chunkId[0],__webpack_require__.initConsumes)
         __webpack_require__.getEagerRemotesForChunkId(chunkId[0],__webpack_require__.initRemotes)`,
         '});',

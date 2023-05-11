@@ -16,24 +16,8 @@ import template from './container/custom-jsonp';
 
 function getCustomJsonpCode(
   chunkLoadingGlobal: string,
-  appName: string,
-  RuntimeGlobals: any,
-  initialModules: Iterable<Module>,
-  initialModulesResolved: Map<any, any>,
-  chunk: Chunk
+  RuntimeGlobals: any
 ): string {
-  const moduleMaps = new Map();
-  for (const module of initialModules) {
-    //@ts-ignore
-    const importResolved = module?.options?.importResolved;
-    const version = initialModulesResolved.get(importResolved)?.version;
-    //@ts-ignore
-    const shareKey = module?.options?.shareKey;
-    if (importResolved && version && shareKey && !moduleMaps.has(shareKey)) {
-      moduleMaps.set(shareKey, version);
-    }
-  }
-
   const code = [
     'var chunkQueue = [];',
     'var resport = [];',
@@ -67,9 +51,6 @@ class CustomWebpackPlugin {
             this.initialModules.add(module);
           }
         };
-
-        //@ts-ignore
-        const clg = compiler.options.output.chunkLoadingGlobal;
 
         compilation.hooks.optimizeChunks.tap(
           'AddModulesToRuntimeChunkPlugin',
@@ -123,18 +104,8 @@ class CustomWebpackPlugin {
           'CustomWebpackPlugin',
           (runtimeModule: RuntimeModule, chunk: any) => {
             if (this.options.server && chunk.name === 'webpack-runtime') {
-              // console.log(this.initialModules);
-              // if (runtimeModule.constructor.name) {
-              //   console.log(
-              //     'found runtime module',
-              //     runtimeModule.constructor.name,
-              //     'in chunk:',
-              //     chunk.name
-              //   );
-              // }
+              // if server runtime module
             }
-
-            compiler.options;
 
             if (
               runtimeModule.constructor.name ===
@@ -145,16 +116,10 @@ class CustomWebpackPlugin {
               const modifiedSource = new ConcatSource(
                 originalSource,
                 '\n',
-                '// Custom code here\n',
                 getCustomJsonpCode(
                   //@ts-ignore
-                  compiler.options.output.chunkLoadingGlobal,
-                  //@ts-ignore
-                  compiler.options.output.uniqueName,
-                  compiler.webpack.RuntimeGlobals,
-                  this.initialModules,
-                  this.initialModulesResolved,
-                  chunk
+                  compilation.outputOptions.chunkLoadingGlobal,
+                  compiler.webpack.RuntimeGlobals
                 )
               );
               runtimeModule.getGeneratedCode = () => modifiedSource.source();
