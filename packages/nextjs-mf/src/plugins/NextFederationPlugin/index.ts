@@ -16,7 +16,6 @@ import CopyFederationPlugin from '../CopyFederationPlugin';
 import {
   applyRemoteDelegates,
   getModuleFederationPluginConstructor,
-  injectModuleHoistingSystem,
   retrieveDefaultShared,
 } from './next-fragments';
 
@@ -130,8 +129,6 @@ export class NextFederationPlugin {
     if (this._extraOptions.automaticAsyncBoundary) {
       console.warn('[nextjs-mf]: automaticAsyncBoundary is deprecated');
     }
-
-    injectModuleHoistingSystem(isServer, this._options, compiler);
 
     //todo runtime variable creation needs to be applied for server as well. this is just for client
     // TODO: this needs to be refactored into something more comprehensive. this is just a quick fix
