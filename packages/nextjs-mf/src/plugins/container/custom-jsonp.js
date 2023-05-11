@@ -4,6 +4,16 @@ function promiseState(p) {
   return Promise.race([p, t]).then(v => (v === t)? "pending" : "fulfilled", () => "rejected");
 }
 
+function cleanInitArrays(array) {
+  array.forEach(function (item,index) {
+      promiseState(item).then((status)=>{
+      if(status === 'fulfilled'){
+        __webpack_require__.initConsumes.splice(index,1)
+      }
+    })
+  })
+}
+
 function asyncOperation(originalPush) {
   return Promise.all(__webpack_require__.initConsumes)
     .then(function () {
@@ -50,30 +60,24 @@ console.log('c',__webpack_require__.c);
 asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
 
 var currentChunkId = "__INSERT_CH_ID__MF__";
+__webpack_require__.O(null, [currentChunkId], function () {
+  console.log('clearing resolved', currentChunkId)
+  cleanInitArrays(__webpack_require__.initConsumes);
+},5);
 
 chunkLoadingGlobal.push = (function (originalPush) {
   return function () {
   const chunkID = arguments[0][0];
-      console.log('original push', chunkID);
+  console.log('original push', chunkID);
 
 
-   chunkLoadingGlobal.forEach(function (item) {
-   console.log('webpackChunkhome_app', item[0]);
-   })
-// __webpack_require__.O(null, [chunkID], function () {
-// console.log('clearing resolved', chunkID)
-//    __webpack_require__.initConsumes.forEach(function (item,index) {
-//       promiseState(item).then((status)=>{
-//       console.log(status)
-//       if(status === 'fulfilled'){
-//       __webpack_require__.initConsumes.splice(index,1)
-//       }
-//     })
-//   })
-// },2)
+   // chunkLoadingGlobal.forEach(function (item) {
+   // console.log('webpackChunkhome_app', item[0]);
+   // })
+
 __webpack_require__.O(null, ['webpack'], function () {
       __webpack_require__.getEagerSharedForChunkId(chunkID,__webpack_require__.initConsumes)
-__webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRemotes)
+      __webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRemotes)
 console.log('webpack runtime loaded freom entry signal;', chunkID)
 },0)
 __webpack_require__.O(null, [chunkID], function () {
