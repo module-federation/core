@@ -654,12 +654,14 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       ]);
 
       const browserContainerKickstart = Template.asString([
-        `__webpack_require__.O(0, null, function() {
-        console.log('some chunk loaded');
-        },2);`,
         '__webpack_require__.own_remote = new Promise(function(resolve,reject){',
         "__webpack_require__.O(0, ['webpack'], function() {",
-        "console.log('runtime loaded');",
+        "console.log('runtime loaded', webpackChunkhome_app);",
+        "console.log('replaying all installed chunk requirements');",
+        'webpackChunkhome_app.forEach(function(chunkId) {',
+        `__webpack_require__.getEagerSharedForChunkId(chunkId[0],__webpack_require__.initConsumes)
+        __webpack_require__.getEagerRemotesForChunkId(chunkId[0],__webpack_require__.initRemotes)`,
+        '});',
         "console.log('m',__webpack_require__.m)",
         "console.log('c',__webpack_require__.c)",
         'attachRemote(resolve)',
@@ -669,8 +671,8 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
       // __webpack_require__.O(0, ["webpack-runtime"], function() {
       return Template.asString([
-        '__webpack_require__.initConsumes = __webpack_require__.initConsumes || [];',
-        '__webpack_require__.initRemotes = __webpack_require__.initRemotes || [];',
+        '__webpack_require__.initConsumes = [];',
+        '__webpack_require__.initRemotes = [];',
         '__webpack_require__.installedModules = {};',
         `if(${containerScope} === undefined) { ${containerScope} = {_config: {}} };`,
         `
@@ -684,6 +686,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     console.log('remote attached', innerRemote);
     if(resolve) resolve(innerRemote)
   }
+  console.log('backup scope',globalThis.backupScope);
         globalThis.backupScope = globalThis.backupScope || {};
           __webpack_require__.S = globalThis.backupScope;`,
         'try {',

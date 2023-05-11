@@ -135,60 +135,54 @@ class InvertedContainerPlugin {
                       );
                     }
                   }
-                  //
-                  // for (const eagerModule of eagerModulesInRemote) {
-                  //   console.log(eagerModule);
-                  //   if (
-                  //     !compilation.chunkGraph.isModuleInChunk(
-                  //       eagerModule,
-                  //       chunk
-                  //     )
-                  //   ) {
-                  //     this.options.debug &&
-                  //       console.log(
-                  //         'adding',
-                  //         //@ts-ignore
-                  //         eagerModule._name,
-                  //         'to',
-                  //         chunk.name
-                  //       );
-                  //     // compilation.chunkGraph.connectChunkAndModule(
-                  //     //   chunk,
-                  //     //   eagerModule
-                  //     // );
-                  //   }
-                  // }
-                  // console.log(eagerChunksInRemote);
                 }
-                console.log('chunk', chunk.name);
+                console.log(
+                  'chunk',
+                  chunk.name,
+                  !compilation.chunkGraph.isModuleInChunk(
+                    containerEntryModule,
+                    chunk
+                  )
+                );
                 if (
                   !compilation.chunkGraph.isModuleInChunk(
                     containerEntryModule,
                     chunk
                   )
                 ) {
-                  this.options.debug &&
-                    console.log(
-                      'adding',
-                      //@ts-ignore
-                      containerEntryModule._name,
-                      'to',
-                      chunk.name
+                  const chunkModules =
+                    compilation.chunkGraph.getChunkRuntimeRequirements(chunk);
+                  const chunkModulesirt =
+                    compilation.chunkGraph.getChunkRuntimeModulesIterable(
+                      chunk
                     );
+
+                  const modzise =
+                    compilation.chunkGraph.getChunkModulesSize(chunk);
+
+                  const numbermod = chunk.getNumberOfModules();
+
                   // if its the browser runtime, inject the container module into the host runtime
                   // TODO: try and do the same on the server,
-                  // if (this.options.runtime !== 'webpack-runtime') {
+                  // if (this.options.runtime === 'webpack-runtime') {
                   compilation.chunkGraph.connectChunkAndModule(
                     chunk,
                     containerEntryModule
                   );
+                  // } else {
+                  const hasruntime = chunk.hasRuntime();
+                  const canBEinitial = chunk.canBeInitial();
+                  const initialOnly = chunk.isOnlyInitial();
+                  const hasEntry = chunk.hasEntryModule();
+                  console.log(chunkModules, chunkModulesirt);
+
                   // }
                 }
               }
             }
           }
         );
-
+        // if (compiler.options.name === 'client') return;
         const hooks =
           compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
             compilation
@@ -197,6 +191,13 @@ class InvertedContainerPlugin {
           'ChunkIdPlugin',
           (chunks) => {
             chunks.forEach((chunk) => {
+              const chunkModules =
+                compilation.chunkGraph.getChunkRuntimeModulesIterable(chunk);
+
+              const runtimeRequirementsInChunk =
+                compilation.chunkGraph.getChunkRuntimeRequirements(chunk);
+              // console.log(chunkModules);
+
               chunk.files.forEach((file) => {
                 const asset = compilation.getAsset(file);
                 if (asset) {

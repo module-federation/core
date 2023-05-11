@@ -116,11 +116,6 @@ function asyncOperation(originalPush) {
 
     })
     .then(function () {
-
-    __webpack_require__.initRemotes.forEach(function (lib) {
-
-    console.log('promise all', lib);
-    });
       console.log('webpack is done negotiating dependency trees', cnn);
       console.log(
         'number of entry points to invert startup',
@@ -151,8 +146,7 @@ function asyncOperation(originalPush) {
 console.log('m',__webpack_require__.m);
 console.log('c',__webpack_require__.c);
 asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
-// __webpack_require__.getEagerSharedForChunkId(chunkID,__webpack_require__.initConsumes)
-// __webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRemotes)
+
 
 
 var currentChunkId = "__INSERT_CH_ID__MF__";
@@ -161,7 +155,7 @@ chunkLoadingGlobal.push = (function (originalPush) {
   return function () {
   const chunkID = arguments[0][0];
       console.log('original push', chunkID);
-      console.log('invoke push', chunkID);
+
 
    chunkLoadingGlobal.forEach(function (item) {
    console.log('webpackChunkhome_app', item[0]);
@@ -178,11 +172,15 @@ chunkLoadingGlobal.push = (function (originalPush) {
 //   })
 // },2)
 __webpack_require__.O(null, ['webpack'], function () {
+      __webpack_require__.getEagerSharedForChunkId(chunkID,__webpack_require__.initConsumes)
+__webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRemotes)
 console.log('webpack runtime loaded freom entry signal;', chunkID)
 },0)
 __webpack_require__.O(null, [chunkID], function () {
+      __webpack_require__.getEagerSharedForChunkId(chunkID,__webpack_require__.initConsumes)
+__webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRemotes)
   console.log('init consumes', __webpack_require__.initConsumes);
-},1);
+},0);
     if (!__webpack_require__.S.default) {
       console.log(
         '%cshare is blank: %s',
