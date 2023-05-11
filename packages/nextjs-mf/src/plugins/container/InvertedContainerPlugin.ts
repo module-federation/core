@@ -268,16 +268,16 @@ class InvertedContainerPlugin {
             newSource.push(`
             var ${searchString} = function(moduleId) {
 return __webpack_require__.own_remote.then((thing)=>{
-console.log('loaded pages remote if exists:',currentChunkId);
+// console.log('loaded pages remote if exists:',currentChunkId);
 return Promise.all(__webpack_require__.initRemotes);
 }).then(()=>{
-console.log('loaded pages remote if exists:',currentChunkId);
+// console.log('loaded pages remote if exists:',currentChunkId);
 return Promise.all(__webpack_require__.initConsumes);
 }).then(()=>{
-console.log('async startup for entrypoint done');
-console.log('SUOULD REQUIRE PAged,m', moduleId);
-console.log('SCOPE MEMORY CHECK',__webpack_require__.S === globalThis.backupScope);
-console.log('SCOPE MEMORY CHECK',Object.keys(__webpack_require__.S), Object.keys(globalThis.backupScope))
+// console.log('async startup for entrypoint done');
+// console.log('SUOULD REQUIRE PAged,m', moduleId);
+// console.log('SCOPE MEMORY CHECK',__webpack_require__.S === globalThis.backupScope);
+// console.log('SCOPE MEMORY CHECK',Object.keys(__webpack_require__.S), Object.keys(globalThis.backupScope))
 return ${replaceString}(moduleId);
 })
              };
