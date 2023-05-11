@@ -3,7 +3,6 @@ import type { ModuleFederationPluginOptions } from '../types';
 import { ConcatSource, RawSource, ReplaceSource } from 'webpack-sources';
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
-import template from './custom-jsonp';
 import ChunkLoadingRuntimeModule from './LoadFileChunkLoadingRuntimeModule';
 
 interface CommonJsChunkLoadingOptions extends ModuleFederationPluginOptions {

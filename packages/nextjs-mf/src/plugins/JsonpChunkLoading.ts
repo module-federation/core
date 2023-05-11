@@ -15,6 +15,7 @@ import { DEFAULT_SHARE_SCOPE_BROWSER } from '../internal';
 import template from './container/custom-jsonp';
 
 function getCustomJsonpCode(
+  chunkLoadingGlobal: string,
   appName: string,
   RuntimeGlobals: any,
   initialModules: Iterable<Module>,
@@ -33,18 +34,13 @@ function getCustomJsonpCode(
     }
   }
 
-  const moduleArray = Array.from(moduleMaps.entries());
   const code = [
     'var chunkQueue = [];',
     'var resport = [];',
-    `var cnn = ${JSON.stringify(appName)};`,
-    "var chunkLoadingGlobal = self['webpackChunk' + cnn] || [];",
-    `var preferredModules = new Set(${JSON.stringify(
-      Object.keys(DEFAULT_SHARE_SCOPE_BROWSER)
-    )});`,
-    `var initialConsumes = ${JSON.stringify(moduleArray)}`,
+    `var chunkLoadingGlobal = self[${JSON.stringify(
+      chunkLoadingGlobal
+    )}] || [];`,
     'var asyncQueue = [];',
-    `var currentChunkID = ${JSON.stringify(chunk.id)};`,
     template,
   ];
   return Template.asString(code);
@@ -72,6 +68,9 @@ class CustomWebpackPlugin {
           }
         };
 
+        //@ts-ignore
+        const clg = compiler.options.output.chunkLoadingGlobal;
+
         compilation.hooks.optimizeChunks.tap(
           'AddModulesToRuntimeChunkPlugin',
           (chunks) => {
@@ -94,48 +93,6 @@ class CustomWebpackPlugin {
                 }
               };
 
-              const processChunksEagerRemote = (
-                chunks: Set<Chunk>,
-                callback: (modules: Iterable<Module>, chunk?: Chunk) => void
-              ): void => {
-                for (const chunk of chunks) {
-                  const modules =
-                    compilation.chunkGraph.getChunkModulesIterableBySourceType(
-                      chunk,
-                      'remote'
-                    );
-                  //@ts-ignore
-                  if (modules) callback(modules, chunk);
-                }
-              };
-              // if (
-              //   this.options.server &&
-              //   compiler.options.output.uniqueName === 'home_app'
-              // ) {
-              //   if (entrypoint.name.includes('pages')) {
-              //     const remoteModule =
-              //       compilation.chunkGraph.getChunkModulesIterableBySourceType(
-              //         entrypoint,
-              //         'remote'
-              //       );
-              //     const initalRemotes = this.initialRemoteModules;
-              //     const allReferencedChunks =
-              //       entrypoint.getAllReferencedChunks();
-              //     const ename = entrypoint.name;
-              //     const asyncEntryChunks = entrypoint.getAllAsyncChunks();
-              //     const initialEntryChunks = entrypoint.getAllInitialChunks();
-              //     const founds = [];
-              //     initialEntryChunks.forEach((chunk) => {
-              //       const foun =
-              //         compilation.chunkGraph.getChunkModulesIterableBySourceType(
-              //           chunk,
-              //           'remote'
-              //         );
-              //
-              //       if (foun) founds.push([...(foun || [])]);
-              //     });
-              //   }
-              // }
               processChunks(entrypoint.getAllAsyncChunks(), addModules);
               processChunks(entrypoint.getAllInitialChunks(), addModules);
             }
@@ -177,6 +134,8 @@ class CustomWebpackPlugin {
               // }
             }
 
+            compiler.options;
+
             if (
               runtimeModule.constructor.name ===
                 'JsonpChunkLoadingRuntimeModule' &&
@@ -188,6 +147,8 @@ class CustomWebpackPlugin {
                 '\n',
                 '// Custom code here\n',
                 getCustomJsonpCode(
+                  //@ts-ignore
+                  compiler.options.output.chunkLoadingGlobal,
                   //@ts-ignore
                   compiler.options.output.uniqueName,
                   compiler.webpack.RuntimeGlobals,
