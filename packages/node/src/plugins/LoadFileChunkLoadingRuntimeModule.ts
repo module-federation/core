@@ -273,9 +273,9 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           )} + ${
                             RuntimeGlobals.getChunkScriptFilename
                           }(chunkId));`,
-                          "console.log('chunk filename', filename);",
                           "var fs = require('fs');",
                           'if(fs.existsSync(filename)) {',
+                          "console.log('chunk filename local load', chunkId);",
                           Template.indent([
                             "fs.readFile(filename, 'utf-8', function(err, content) {",
                             Template.indent([
@@ -288,6 +288,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             '});',
                           ]),
                           '} else {',
+                          "console.log('chunk filename remote load', chunkId);",
                           Template.indent([
                             loadScriptTemplate,
 
