@@ -1,10 +1,10 @@
 export default function () {
-  const toggles = document.querySelectorAll('.language-toggle');
+  const toggles = document.querySelectorAll('.version-toggle');
 
   if (!toggles) return;
 
   toggles.forEach((toggle) => {
-    const dropdown = toggle.querySelector('.language-dropdown');
+    const dropdown = toggle.querySelector('.version-dropdown');
 
     if (!dropdown) return;
 

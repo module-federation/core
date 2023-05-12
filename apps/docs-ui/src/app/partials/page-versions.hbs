@@ -1,12 +1,30 @@
-{{#with page.versions}}
-<div class="page-versions">
-  <button class="version-menu-toggle" title="Show other versions of page">{{@root.page.componentVersion.displayVersion}}</button>
-  <div class="version-menu">
-    {{#each this}}
-    <a class="version
-      {{~#if (eq ./version @root.page.version)}} is-current{{/if~}}
-      {{~#if ./missing}} is-missing{{/if}}" href="{{{relativize ./url}}}">{{./displayVersion}}</a>
-    {{/each}}
+
+<button class="version-toggle relative border-blue-gray-900 border p-1 bg-mf-gray hover:bg-white focus:bg-mf-gray text-sm ">
+
+  <div class="flex gap-2 items-center">
+    <div>
+      {{@root.page.componentVersion.displayVersion}}
+    </div>
+    <svg width="12"
+         height="8"
+         viewBox="0 0 12 8"
+         fill="none"
+         xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M0.410826 0.910826C0.736263 0.585389 1.2639 0.585389 1.58934 0.910826L6.00008 5.32157L10.4108 0.910826C10.7363 0.585389 11.2639 0.585389 11.5893 0.910826C11.9148 1.23626 11.9148 1.7639 11.5893 2.08934L6.58934 7.08934C6.2639 7.41477 5.73626 7.41477 5.41083 7.08934L0.410826 2.08934C0.0853888 1.7639 0.0853888 1.23626 0.410826 0.910826Z"
+            fill="#1C2135"></path>
+    </svg>
   </div>
-</div>
-{{/with}}
+
+
+  <div class="version-dropdown hidden absolute bottom-[-6px] left-[-1px] translate-y-full p-0 border-blue-gray-900 border z-[60]">
+
+    {{#each @root.page.component.versions}}
+    <a class="flex w-full p-1 bg-mf-gray hover:bg-white focus:bg-mf-gray text-sm border-0 text-left hover:bg-blue-gray-300 bg-blue-gray-300"
+       href="{{{relativize ./url}}}">{{./displayVersion}}</a>
+    {{/each}}
+
+  </div>
+
+</button>
