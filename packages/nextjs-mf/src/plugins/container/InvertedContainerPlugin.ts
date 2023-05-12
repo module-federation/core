@@ -149,18 +149,6 @@ class InvertedContainerPlugin {
                     chunk
                   )
                 ) {
-                  const chunkModules =
-                    compilation.chunkGraph.getChunkRuntimeRequirements(chunk);
-                  const chunkModulesirt =
-                    compilation.chunkGraph.getChunkRuntimeModulesIterable(
-                      chunk
-                    );
-
-                  const modzise =
-                    compilation.chunkGraph.getChunkModulesSize(chunk);
-
-                  const numbermod = chunk.getNumberOfModules();
-
                   // if its the browser runtime, inject the container module into the host runtime
                   // TODO: try and do the same on the server,
                   // if (this.options.runtime === 'webpack-runtime') {
@@ -168,13 +156,6 @@ class InvertedContainerPlugin {
                     chunk,
                     containerEntryModule
                   );
-                  // } else {
-                  const hasruntime = chunk.hasRuntime();
-                  const canBEinitial = chunk.canBeInitial();
-                  const initialOnly = chunk.isOnlyInitial();
-                  const hasEntry = chunk.hasEntryModule();
-                  console.log(chunkModules, chunkModulesirt);
-
                   // }
                 }
               }
