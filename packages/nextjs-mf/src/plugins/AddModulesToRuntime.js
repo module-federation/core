@@ -8,48 +8,6 @@ import { Chunk } from 'webpack';
 class AddModulesToRuntimeChunkPlugin {
   constructor(options) {
     this.options = { debug: false, ...options };
-    this._delegateModules = new Set();
-    this._eagerModules = new Set();
-  }
-
-  getChunkByName(chunks, name) {
-    for (const chunk of chunks) {
-      if (chunk.name == name) {
-        return chunk;
-      }
-    }
-    return undefined;
-  }
-
-  resolveSharedModules(compilation) {
-    // Tap into the 'finish-modules' hook to access the module list after they are all processed
-    compilation.hooks.finishModules.tapAsync(
-      'AddModulesToRuntimeChunkPlugin',
-      (modules, callback) => {
-        const { shared } = this.options;
-
-        if (shared) {
-          const shareKey = Object.keys(shared);
-
-          for (const module of modules) {
-            if (
-              shareKey.some((share) => {
-                if (module?.rawRequest === share) {
-                  return true;
-                } else if (share.endsWith('/')) {
-                  return module?.rawRequest?.startsWith(share);
-                } else {
-                  return false;
-                }
-              })
-            ) {
-              this._eagerModules.add(module);
-            }
-          }
-        }
-        callback();
-      }
-    );
   }
 
   /**

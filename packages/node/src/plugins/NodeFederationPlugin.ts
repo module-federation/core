@@ -102,7 +102,6 @@ export const generateRemoteTemplate = (
     if(remote.fake) {
       return remote;
     }
-    console.log('got remote interface');
     return remote;
     const proxy = {
       get: (arg)=>{
