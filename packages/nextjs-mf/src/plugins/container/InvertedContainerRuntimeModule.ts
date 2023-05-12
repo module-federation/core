@@ -520,7 +520,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
               'id',
               [
                 `if(typeof ${RuntimeGlobals.moduleCache}[id] === 'object') {
-                // ${RuntimeGlobals.moduleCache}[id].hot.removeDisposeHandler(console.log)
+                ${RuntimeGlobals.moduleCache}[id].hot.removeDisposeHandler()
                 ${RuntimeGlobals.moduleCache}[id].hot.addDisposeHandler(function (args){
 
                 ${RuntimeGlobals.moduleCache}[id] = globalThis.factoryTracker[id];
