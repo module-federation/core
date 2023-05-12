@@ -56,15 +56,16 @@ export function applyClientPlugins(
   compiler.options.optimization.splitChunks = false;
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
-  // if (extraOptions.automaticPageStitching) {
-  //   compiler.options.module.rules.push({
-  //     test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
-  //     loader: path.resolve(
-  //       __dirname,
-  //       '../../loaders/patchNextClientPageLoader'
-  //     ),
-  //   });
-  // }
+  if (extraOptions.automaticPageStitching) {
+    console.warn('[nextjs-mf]', 'automatic page stitching is disabled in v7');
+    //   compiler.options.module.rules.push({
+    //     test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
+    //     loader: path.resolve(
+    //       __dirname,
+    //       '../../loaders/patchNextClientPageLoader'
+    //     ),
+    //   });
+  }
 
   // If a custom library is set, log an error message
   if (options.library) {
