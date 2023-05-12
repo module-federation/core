@@ -2,4 +2,3 @@ export { default as StreamingTargetPlugin } from './plugins/StreamingTargetPlugi
 export { default as NodeFederationPlugin } from './plugins/NodeFederationPlugin';
 export { default as UniversalFederationPlugin } from './plugins/UniversalFederationPlugin';
 export { default as ChunkCorrelationPlugin } from './plugins/ChunkCorrelationPlugin';
-export { default as AsyncInverterPlugin } from './plugins/AsyncInverterPlugin';

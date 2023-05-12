@@ -535,8 +535,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
                 ${RuntimeGlobals.moduleCache}[id] = globalThis.factoryTracker[id];
                 ${RuntimeGlobals.moduleFactories}[id] = function(module) {
-                console.log('module factorues', module);
-                return Object.assign(module,globalThis.factoryTracker[id]);
+                return module.exports = globalThis.factoryTracker[id]
                 }
                 })
 

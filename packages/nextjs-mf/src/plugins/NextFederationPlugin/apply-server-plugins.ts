@@ -4,7 +4,6 @@ import AddModulesPlugin from '../AddModulesToRuntime';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import JsonpChunkLoading from '../JsonpChunkLoading';
-import { AsyncInverterPlugin } from '@module-federation/node';
 
 /**
  * Applies server-specific plugins.
@@ -56,10 +55,6 @@ export function applyServerPlugins(
     container: options.name,
     remotes: options.remotes as Record<string, string>,
     debug: true,
-  }).apply(compiler);
-  //@ts-ignore
-  new AsyncInverterPlugin({
-    runtime: 'webpack-runtime',
   }).apply(compiler);
 }
 
