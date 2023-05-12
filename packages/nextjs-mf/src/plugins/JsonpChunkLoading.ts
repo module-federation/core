@@ -11,7 +11,6 @@ import { ConcatSource } from 'webpack-sources';
 import JsonpChunkLoadingRuntimeModule from 'webpack/lib/web/JsonpChunkLoadingRuntimeModule';
 import Template from '../../utils/Template';
 import { DEFAULT_SHARE_SCOPE_BROWSER } from '../internal';
-// import { loadDependenciesTemplate } from './LoadDependenciesTemplate';
 import template from './container/custom-jsonp';
 
 //might be usefule later
