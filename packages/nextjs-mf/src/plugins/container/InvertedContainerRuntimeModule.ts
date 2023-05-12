@@ -413,17 +413,26 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
               `chunkMapping[chunkId].forEach(${runtimeTemplate.basicFunction(
                 'id',
                 [
-                  this.options.debug
-                    ? `console.log('checking if installed', id, ${RuntimeGlobals.hasOwnProperty}(installedModules, id));`
-                    : '',
                   `if(${RuntimeGlobals.hasOwnProperty}(installedModules, id)) return promises.push(installedModules[id]);`,
+                  `if(typeof ${RuntimeGlobals.moduleCache}[id] === 'object') {
+                ${RuntimeGlobals.moduleCache}[id].hot.removeDisposeHandler()
+                ${RuntimeGlobals.moduleCache}[id].hot.addDisposeHandler(function (args){
+
+                ${RuntimeGlobals.moduleCache}[id] = globalThis.factoryTracker[id];
+                // 'globalThis.factoryTracker[id] = module.exports = (globalThis.factoryTracker[id] || factory());',
+
+
+                ${RuntimeGlobals.moduleFactories}[id] = function(module) {module.exports = globalThis.factoryTracker[id]}
+                })
+
+                }`,
                   `var onFactory = ${runtimeTemplate.basicFunction('factory', [
                     'installedModules[id] = 0;',
                     `${
                       RuntimeGlobals.moduleFactories
                     }[id] = ${runtimeTemplate.basicFunction('module', [
                       `delete ${RuntimeGlobals.moduleCache}[id];`,
-                      'module.exports = factory();',
+                      'globalThis.factoryTracker[id] = module.exports = factory();',
                     ])}`,
                   ])};`,
                   `var onError = ${runtimeTemplate.basicFunction('error', [
@@ -524,7 +533,10 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                 ${RuntimeGlobals.moduleCache}[id].hot.addDisposeHandler(function (args){
 
                 ${RuntimeGlobals.moduleCache}[id] = globalThis.factoryTracker[id];
-                ${RuntimeGlobals.moduleFactories}[id] = function(module) {Object.assign(module,globalThis.factoryTracker[id]);}
+                ${RuntimeGlobals.moduleFactories}[id] = function(module) {
+                console.log('module factorues', module);
+                return Object.assign(module,globalThis.factoryTracker[id]);
+                }
                 })
 
                 }`,
@@ -583,12 +595,11 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                 `var onFactory = ${runtimeTemplate.basicFunction('factory', [
                   'data.p = 1;',
                   "console.log('onFactory incom', factory);",
-                  "console.log('onFactory incom calling', factory());",
                   `console.log('onFactory M before', ${RuntimeGlobals.moduleFactories}[id])`,
                   `${
                     RuntimeGlobals.moduleFactories
                   }[id] = ${runtimeTemplate.basicFunction('module', [
-                    'globalThis.factoryTracker[id] = module.exports = factory();',
+                    'globalThis.factoryTracker[id] = module.exports = (globalThis.factoryTracker[id] || factory());',
                   ])}`,
                   `console.log('onFactory M after', ${RuntimeGlobals.moduleFactories}[id])`,
                 ])};`,
