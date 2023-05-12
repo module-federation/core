@@ -12,7 +12,6 @@ const WebpackSvgRemote = lazy(() =>
     return m;
   })
 );
-
 const WebpackPngRemote = lazy(() => import('shop/WebpackPng'));
 
 const Home = () => {
@@ -22,10 +21,15 @@ const Home = () => {
         <title>Home</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
       <h1 style={{ fontSize: '2em' }}>
-        This is SPA combined fr om 3 different
+        This is SPA combined from 3 different nextjs applications.
       </h1>
-      <p>kojhlkojihugyftpkoijuhiugy johuigyf</p>oijhuygfth
+      <p className="description">
+        They utilize omnidirectional routing and pages or components are able to
+        be federated between applications.
+      </p>
+      <p>You may open any application by clicking on the links below:</p>
       <ul>
         <li>
           <a
@@ -111,15 +115,15 @@ const Home = () => {
             </td>
             <td>
               <Suspense fallback="loading WebpackPngRemote">
-                {/*<WebpackPngRemote />*/}
+                <WebpackPngRemote />
               </Suspense>
             </td>
           </tr>
           <tr>
             <td>✅</td>
             <td>
+              Loading remote component with SVG from localhost:3001
               <br />
-              okpjoihugyughbijnokl
               <blockquote>(check publicPath fix in url-loader)</blockquote>
             </td>
             <td>
@@ -133,6 +137,7 @@ const Home = () => {
           </tr>
         </tbody>
       </table>
+
       <h2 style={{ marginTop: '30px' }}>Other problems to fix:</h2>
       <ul>
         <li>
