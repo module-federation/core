@@ -21,68 +21,68 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   react: {
     singleton: true,
     requiredVersion: false,
-    eager: false,
+    eager: true,
     import: false,
   },
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: false,
-    import: false,
+    import: undefined,
     eager: false,
   },
   'react/jsx-dev-runtime': {
     singleton: true,
     requiredVersion: false,
-    import: false,
+    import: undefined,
     eager: false,
   },
   'react-dom': {
     singleton: true,
     requiredVersion: false,
-    eager: false,
+    eager: true,
     import: false,
   },
   'next/dynamic': {
-    eager: true,
+    eager: false,
     requiredVersion: false,
     singleton: true,
-    import: false,
+    import: undefined,
   },
   'styled-jsx': {
     requiredVersion: false,
     singleton: true,
-    import: false,
-    eager: true,
+    import: undefined,
+    eager: false,
   },
   'styled-jsx/style': {
     requiredVersion: false,
     singleton: true,
-    import: false,
-    eager: true,
+    import: undefined,
+    eager: false,
   },
   'next/link': {
     requiredVersion: false,
     singleton: true,
-    import: false,
-    eager: true,
+    import: undefined,
+    eager: false,
   },
   'next/router': {
     requiredVersion: false,
     singleton: true,
-    import: false,
-    eager: true,
+    import: undefined,
+    eager: undefined,
   },
   'next/script': {
     requiredVersion: false,
     singleton: true,
-    import: false,
-    eager: true,
+    import: undefined,
+    eager: false,
   },
   'next/head': {
     requiredVersion: false,
     singleton: true,
-    import: false,
-    eager: true,
+    import: undefined,
+    eager: undefined,
   },
 };
 
@@ -102,15 +102,7 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
 
   return acc;
 }, {} as SharedObject);
-export const DEFAULT_SHARE_SCOPE_BROWSER_LAZY: SharedObject = Object.entries(
-  DEFAULT_SHARE_SCOPE
-).reduce((acc, item) => {
-  const [key, value] = item as [string, SharedConfig];
 
-  acc[key] = { ...value, eager: false, import: undefined };
-
-  return acc;
-}, {} as SharedObject);
 /**
  * Checks if the remote value is an internal or promise delegate module reference.
  *

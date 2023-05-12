@@ -43,6 +43,8 @@ export const importDelegatedModule = async (
           return asyncContainer;
         }
 
+        return asyncContainer;
+
         //TODO: need to solve chunk flushing with delegated modules
         return {
           get: function (arg: string) {

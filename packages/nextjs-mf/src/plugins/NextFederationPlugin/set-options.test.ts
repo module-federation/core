@@ -13,14 +13,13 @@ describe('setOptions', () => {
       filename: 'remoteEntry.js',
       exposes: {},
       shared: {},
-      extraOptions: {
-      }
+      extraOptions: {},
     };
 
     const { mainOptions, extraOptions } = setOptions(options);
 
     const expectedMainOptions: ModuleFederationPluginOptions = {
-      ...mainOptions
+      ...mainOptions,
     };
 
     const expectedExtraOptions: NextFederationPluginExtraOptions = {
@@ -28,7 +27,6 @@ describe('setOptions', () => {
       enableImageLoaderFix: false,
       enableUrlLoaderFix: false,
       skipSharingNextInternals: false,
-      automaticAsyncBoundary: false
     };
 
     expect(mainOptions).toEqual(expectedMainOptions);
@@ -47,8 +45,7 @@ describe('setOptions', () => {
         enableImageLoaderFix: true,
         enableUrlLoaderFix: true,
         skipSharingNextInternals: true,
-        automaticAsyncBoundary: true
-      }
+      },
     };
 
     const { mainOptions, extraOptions } = setOptions(options);
@@ -58,7 +55,7 @@ describe('setOptions', () => {
       library: { type: 'var', name: 'mockApp' },
       filename: 'remoteEntry.js',
       exposes: {},
-      shared: {}
+      shared: {},
     };
 
     const expectedExtraOptions: NextFederationPluginExtraOptions = {
@@ -66,7 +63,6 @@ describe('setOptions', () => {
       enableImageLoaderFix: true,
       enableUrlLoaderFix: true,
       skipSharingNextInternals: true,
-      automaticAsyncBoundary: true
     };
 
     expect(mainOptions).toEqual(expectedMainOptions);

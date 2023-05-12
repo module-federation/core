@@ -102,6 +102,8 @@ export const generateRemoteTemplate = (
     if(remote.fake) {
       return remote;
     }
+    console.log('got remote interface');
+    return remote;
     const proxy = {
       get: (arg)=>{
         return remote.get(arg).then((f)=>{
@@ -199,15 +201,33 @@ class NodeFederationPlugin {
     };
 
     const chunkFileName = compiler.options?.output?.chunkFilename;
-    if (
-      typeof chunkFileName === 'string' &&
-      !chunkFileName.includes('[chunkhash]') &&
-      !chunkFileName.includes('[contenthash]')
-    ) {
-      compiler.options.output.chunkFilename = chunkFileName.replace(
-        '.js',
-        `.[fullhash].js`
-      );
+    const uniqueName =
+      compiler?.options?.output?.uniqueName || this._options.name;
+
+    if (typeof chunkFileName === 'string') {
+      const requiredSubstrings = [
+        '[chunkhash]',
+        '[contenthash]',
+        '[fullHash]',
+        uniqueName,
+      ];
+
+      if (
+        //@ts-ignore
+        !requiredSubstrings.some((substring) =>
+          //@ts-ignore
+          chunkFileName.includes(substring)
+        )
+      ) {
+        const suffix =
+          compiler.options.mode === 'development'
+            ? `${uniqueName}.js`
+            : `.[chunkhash].js`;
+        compiler.options.output.chunkFilename = chunkFileName.replace(
+          '.js',
+          suffix
+        );
+      }
     }
 
     new (this.context.ModuleFederationPlugin ||

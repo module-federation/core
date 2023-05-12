@@ -16,7 +16,6 @@ import CopyFederationPlugin from '../CopyFederationPlugin';
 import {
   applyRemoteDelegates,
   getModuleFederationPluginConstructor,
-  injectModuleHoistingSystem,
   retrieveDefaultShared,
 } from './next-fragments';
 
@@ -29,7 +28,6 @@ import {
   validateCompilerOptions,
   validatePluginOptions,
 } from './validate-options';
-import { applyAutomaticAsyncBoundary } from './apply-automatic-async-boundary';
 import {
   applyServerPlugins,
   configureServerCompilerOptions,
@@ -86,7 +84,6 @@ export class NextFederationPlugin {
 
     const defaultShared = retrieveDefaultShared(isServer);
 
-    console.log(compiler.options.name);
     if (isServer) {
       // Refactored server condition
       configureServerCompilerOptions(compiler);
@@ -122,18 +119,16 @@ export class NextFederationPlugin {
       },
     };
 
-    compiler.options.devtool = 'source-map';
+    compiler.options.devtool = false;
 
     compiler.options.output.uniqueName = this._options.name;
 
     // inject module hoisting system
     applyRemoteDelegates(this._options, compiler);
-
+    //@ts-ignore
     if (this._extraOptions.automaticAsyncBoundary) {
-      applyAutomaticAsyncBoundary(this._options, this._extraOptions, compiler);
+      console.warn('[nextjs-mf]: automaticAsyncBoundary is deprecated');
     }
-
-    injectModuleHoistingSystem(isServer, this._options, compiler);
 
     //todo runtime variable creation needs to be applied for server as well. this is just for client
     // TODO: this needs to be refactored into something more comprehensive. this is just a quick fix
@@ -144,29 +139,33 @@ export class NextFederationPlugin {
 
     // @ts-ignore
     new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
-
-    if (
-      !isServer &&
-      this._options.remotes &&
-      Object.keys(this._options.remotes).length > 0
-    ) {
-      // single runtime chunk if host or circular remote uses remote of current host.
-      // @ts-ignore
-      new ModuleFederationPlugin({
-        ...hostFederationPluginOptions,
-        filename: undefined,
-        runtime: undefined,
-        name: this._options.name + '_single',
-        library: {
-          ...hostFederationPluginOptions.library,
-          name: this._options.name + '_single',
-        },
-        shared: {
-          ...hostFederationPluginOptions.shared,
-          ...defaultShared,
-        },
-      }).apply(compiler);
-    }
+    // if (isServer && Object.keys(this._options?.remotes || {}).length > 0) {
+    //   const commonOptions = {
+    //     ...hostFederationPluginOptions,
+    //     name: 'host_inner_ctn',
+    //     library: {
+    //       ...hostFederationPluginOptions.library,
+    //       name: this._options.name,
+    //     },
+    //     shared: {
+    //       ...hostFederationPluginOptions.shared,
+    //       ...defaultShared,
+    //     },
+    //   };
+    //
+    //   const serverOptions = isServer
+    //     ? {
+    //         runtime: 'webpack-runtime',
+    //         filename: `host_inner_ctn${this._options.name}.js`,
+    //       }
+    //     : {};
+    //
+    //   // @ts-ignore
+    //   new ModuleFederationPlugin({
+    //     ...commonOptions,
+    //     ...serverOptions,
+    //   }).apply(compiler);
+    // }
 
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
   }

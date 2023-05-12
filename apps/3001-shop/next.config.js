@@ -60,7 +60,6 @@ const nextConfig = {
         },
         extraOptions: {
           exposePages: true,
-          automaticAsyncBoundary: true,
           enableImageLoaderFix: true,
           enableUrlLoaderFix: true,
           automaticPageStitching: false,

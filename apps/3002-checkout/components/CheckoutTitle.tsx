@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-
 const CheckoutTitle = () => {
+  console.log('CheckoutTitle');
   const [hookData, setHookData] = useState('');
 
   useEffect(() => {
