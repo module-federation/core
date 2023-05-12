@@ -19,7 +19,7 @@ import {
   retrieveDefaultShared,
 } from './next-fragments';
 
-import { DEFAULT_SHARE_SCOPE_BROWSER_LAZY, parseRemotes } from '../../internal';
+import { parseRemotes } from '../../internal';
 import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
 import { removeUnnecessarySharedKeys } from './remove-unnecessary-shared-keys';
@@ -114,7 +114,7 @@ export class NextFederationPlugin {
         ...this._options.remotes,
       },
       shared: {
-        ...DEFAULT_SHARE_SCOPE_BROWSER_LAZY,
+        ...defaultShared,
         ...this._options.shared,
       },
     };
