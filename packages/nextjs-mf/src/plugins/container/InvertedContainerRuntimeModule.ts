@@ -499,32 +499,40 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     }
 
     return Template.asString([
-      `var remoteMapping = ${JSON.stringify(chunkToRemotesMapping, null, '')};`,
-      `var idToExternalAndNameMapping = ${JSON.stringify(
+      `var remoteMapping = Object.assign(__webpack_require__.rMap,${JSON.stringify(
+        chunkToRemotesMapping,
+        null,
+        ''
+      )});`,
+      `var idToExternalAndNameMapping =  Object.assign(__webpack_require__.reMap, ${JSON.stringify(
         idToExternalAndNameMapping,
         null,
         ''
-      )};`,
+      )});`,
+      'globalThis.factoryTracker = globalThis.factoryTracker  || {}',
       `__webpack_require__.getEagerRemotesForChunkId  = ${runtimeTemplate.basicFunction(
         'chunkId, promises',
         [
-          this.options.debug
-            ? "console.log('getEagerRemotesForChunkId', chunkId, remoteMapping[chunkId], remoteMapping);"
-            : '',
-          `if(${RuntimeGlobals.hasOwnProperty}(remoteMapping, chunkId)) {`,
+          `
+          if(${RuntimeGlobals.hasOwnProperty}(remoteMapping, chunkId)) {`,
           Template.indent([
             `remoteMapping[chunkId].forEach(${runtimeTemplate.basicFunction(
               'id',
               [
+                `if(typeof ${RuntimeGlobals.moduleCache}[id] === 'object') {
+                // ${RuntimeGlobals.moduleCache}[id].hot.removeDisposeHandler(console.log)
+                ${RuntimeGlobals.moduleCache}[id].hot.addDisposeHandler(function (args){
+
+                ${RuntimeGlobals.moduleCache}[id] = globalThis.factoryTracker[id];
+                ${RuntimeGlobals.moduleFactories}[id] = function(module) {Object.assign(module,globalThis.factoryTracker[id]);}
+                })
+
+                }`,
                 `var getScope = ${RuntimeGlobals.currentRemoteGetScope};`,
                 'if(!getScope) getScope = [];',
-                this.options.debug
-                  ? "console.log('idtoexternalandnamemapping', idToExternalAndNameMapping,id);"
-                  : '',
                 'var data = idToExternalAndNameMapping[id];',
                 'if(getScope.indexOf(data) >= 0) return;',
                 'getScope.push(data);',
-                this.options.debug ? 'console.log("data", data);' : '',
                 `if(data.p) return promises.push(data.p);`,
                 `var onError = ${runtimeTemplate.basicFunction('error', [
                   'if(!error) error = new Error("Container missing");',
@@ -562,9 +570,11 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                     '}',
                   ]
                 )}`,
-                `var onExternal = ${runtimeTemplate.returningFunction(
-                  `external ? handleFunction(${RuntimeGlobals.initializeSharing}, data[0], 0, external, onInitialized, first) : onError()`,
-                  'external, _, first'
+                `var onExternal = ${runtimeTemplate.basicFunction(
+                  ['external', '_', 'first'],
+                  `
+                  console.log('EXTERNAL', external, chunkId, id);
+                  return external ? handleFunction(${RuntimeGlobals.initializeSharing}, data[0], 0, external, onInitialized, first) : onError()`
                 )};`,
                 `var onInitialized = ${runtimeTemplate.returningFunction(
                   `handleFunction(external.get, data[1], getScope, 0, onFactory, first)`,
@@ -572,11 +582,15 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                 )};`,
                 `var onFactory = ${runtimeTemplate.basicFunction('factory', [
                   'data.p = 1;',
+                  "console.log('onFactory incom', factory);",
+                  "console.log('onFactory incom calling', factory());",
+                  `console.log('onFactory M before', ${RuntimeGlobals.moduleFactories}[id])`,
                   `${
                     RuntimeGlobals.moduleFactories
                   }[id] = ${runtimeTemplate.basicFunction('module', [
-                    'module.exports = factory();',
+                    'globalThis.factoryTracker[id] = module.exports = factory();',
                   ])}`,
+                  `console.log('onFactory M after', ${RuntimeGlobals.moduleFactories}[id])`,
                 ])};`,
                 'handleFunction(__webpack_require__, data[2], 0, 0, onExternal, 1);',
               ]
@@ -654,17 +668,29 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         '})',
       ]);
 
+      const checkForAsyncChunkRequirements = Template.asString([
+        `__webpack_require__.checkAsyncReqs = function() {`,
+        Template.indent([
+          `self[${JSON.stringify(
+            this.compilation.outputOptions.chunkLoadingGlobal
+          )}].forEach(function(chunkId) {`,
+          'console.log(chunkId)',
+
+          // "console.log('installed chunks to search', chunkId[0]);",
+          `__webpack_require__.getEagerSharedForChunkId(chunkId[0],__webpack_require__.initConsumes)
+        __webpack_require__.getEagerRemotesForChunkId(chunkId[0],__webpack_require__.initRemotes)`,
+          '});',
+        ]),
+        '}',
+      ]);
+
       const browserContainerKickstart = Template.asString([
         '__webpack_require__.own_remote = new Promise(function(resolve,reject){',
+        'console.log("O keys",Object.keys(__webpack_require__.O))',
         "__webpack_require__.O(0, ['webpack'], function() {",
         "console.log('runtime loaded', webpackChunkhome_app);",
         "console.log('replaying all installed chunk requirements');",
-        `self[${JSON.stringify(
-          this.compilation.outputOptions.chunkLoadingGlobal
-        )}].forEach(function(chunkId) {`,
-        `__webpack_require__.getEagerSharedForChunkId(chunkId[0],__webpack_require__.initConsumes)
-        __webpack_require__.getEagerRemotesForChunkId(chunkId[0],__webpack_require__.initRemotes)`,
-        '});',
+        '__webpack_require__.checkAsyncReqs();',
         "console.log('m',__webpack_require__.m)",
         "console.log('c',__webpack_require__.c)",
         'attachRemote(resolve)',
@@ -674,10 +700,13 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
       // __webpack_require__.O(0, ["webpack-runtime"], function() {
       return Template.asString([
-        '__webpack_require__.initConsumes = [];',
-        '__webpack_require__.initRemotes = [];',
+        '__webpack_require__.initConsumes = __webpack_require__.initConsumes || [];',
+        '__webpack_require__.initRemotes = __webpack_require__.initRemotes || [];',
+        '__webpack_require__.rMap = __webpack_require__.rMap || {};',
+        '__webpack_require__.reMap = __webpack_require__.reMap || {};',
         '__webpack_require__.installedModules = {};',
         `if(${containerScope} === undefined) { ${containerScope} = {_config: {}} };`,
+        checkForAsyncChunkRequirements,
         `
   function attachRemote (resolve) {
     const innerRemote = __webpack_require__(${JSON.stringify(

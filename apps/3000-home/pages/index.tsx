@@ -1,10 +1,18 @@
 import React, { Suspense, lazy } from 'react';
 import Head from 'next/head';
-import cc from 'checkout/CheckoutTitle';
-console.log('cc', cc);
-const CheckoutTitle = lazy(() => import('checkout/CheckoutTitle'));
-const ButtonOldAnt = lazy(() => import('checkout/ButtonOldAnt'));
-const WebpackSvgRemote = lazy(() => import('shop/WebpackSvg'));
+import CheckoutTitle from 'checkout/CheckoutTitle';
+import ButtonOldAnt from 'checkout/ButtonOldAnt';
+console.log(ButtonOldAnt);
+// console.log('cc', cc);
+// const CheckoutTitle = lazy(() => import('checkout/CheckoutTitle'));
+// const ButtonOldAnt = lazy(() => import('checkout/ButtonOldAnt'));
+const WebpackSvgRemote = lazy(() =>
+  import('shop/WebpackSvg').then((m) => {
+    console.log(m);
+    return m;
+  })
+);
+
 const WebpackPngRemote = lazy(() => import('shop/WebpackPng'));
 
 const Home = () => {
@@ -14,15 +22,10 @@ const Home = () => {
         <title>Home</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
       <h1 style={{ fontSize: '2em' }}>
-        This is SPA combined from 3 different nextjs applications.
+        This is SPA combined fr om 3 different
       </h1>
-      <p className="description">
-        They utilize omnidirectional routing and pages or components are able to
-        be federated between applications.
-      </p>
-      <p>You may open any application by clicking on the links below:</p>
+      <p>kojhlkojihugyftpkoijuhiugy johuigyf</p>oijhuygfth
       <ul>
         <li>
           <a
@@ -55,7 +58,6 @@ const Home = () => {
           <b>checkout</b>
         </li>
       </ul>
-
       <h2 style={{ marginTop: '30px' }}>Federation test cases</h2>
       <table border={1} cellPadding={5}>
         <thead>
@@ -109,15 +111,15 @@ const Home = () => {
             </td>
             <td>
               <Suspense fallback="loading WebpackPngRemote">
-                <WebpackPngRemote />
+                {/*<WebpackPngRemote />*/}
               </Suspense>
             </td>
           </tr>
           <tr>
             <td>✅</td>
             <td>
-              Loading remote component with SVG from localhost:3001
               <br />
+              okpjoihugyughbijnokl
               <blockquote>(check publicPath fix in url-loader)</blockquote>
             </td>
             <td>
@@ -131,7 +133,6 @@ const Home = () => {
           </tr>
         </tbody>
       </table>
-
       <h2 style={{ marginTop: '30px' }}>Other problems to fix:</h2>
       <ul>
         <li>
