@@ -418,11 +418,12 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                 ${RuntimeGlobals.moduleCache}[id].hot.removeDisposeHandler()
                 ${RuntimeGlobals.moduleCache}[id].hot.addDisposeHandler(function (args){
 
-                ${RuntimeGlobals.moduleCache}[id] = globalThis.factoryTracker[id];
-                // 'globalThis.factoryTracker[id] = module.exports = (globalThis.factoryTracker[id] || factory());',
+                delete ${RuntimeGlobals.moduleCache}[id]
 
 
-                ${RuntimeGlobals.moduleFactories}[id] = function(module) {module.exports = globalThis.factoryTracker[id]}
+                ${RuntimeGlobals.moduleFactories}[id] = function(module) {
+                return module.exports = globalThis.factoryTracker[id]
+                }
                 })
 
                 }`,
