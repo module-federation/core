@@ -43,6 +43,8 @@ export const importDelegatedModule = async (
           return asyncContainer;
         }
 
+        // return asyncContainer;
+
         //TODO: need to solve chunk flushing with delegated modules
         return {
           get: function (arg: string) {
@@ -98,28 +100,7 @@ export const importDelegatedModule = async (
           init: asyncContainer.init,
         };
       } else {
-        const proxy = {
-          get: asyncContainer.get,
-          //@ts-ignore
-          init: function (shareScope: any, initScope: any) {
-            try {
-              //@ts-ignore
-              asyncContainer.init(shareScope, initScope);
-              // for legacy reasons, we must mark container a initialized
-              // here otherwise older promise based implementation will try to init again with diff object
-              //@ts-ignore
-              proxy.__initialized = true;
-            } catch (e) {
-              return 1;
-            }
-          },
-        };
-        // @ts-ignore
-        if (!proxy.__initialized) {
-          //@ts-ignore
-          proxy.init(__webpack_share_scopes__.default);
-        }
-        return proxy;
+        return asyncContainer;
       }
     });
 };

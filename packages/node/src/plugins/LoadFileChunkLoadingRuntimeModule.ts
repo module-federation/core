@@ -131,6 +131,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     const withExternalInstallChunk = this.runtimeRequirements.has(
       RuntimeGlobals.externalInstallChunk
     );
+
     const withOnChunkLoad = this.runtimeRequirements.has(
       RuntimeGlobals.onChunksLoaded
     );
@@ -170,7 +171,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     const stateExpression = withHmr
       ? `${RuntimeGlobals.hmrRuntimeStatePrefix}_readFileVm`
       : undefined;
-
     return Template.asString([
       withBaseURI
         ? this._generateBaseUri(chunk, rootOutputDir)
@@ -252,7 +252,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
             `${fn}.readFileVm = function(chunkId, promises) {`,
             hasJsMatcher !== false
               ? Template.indent([
-                  '',
                   'var installedChunkData = installedChunks[chunkId];',
                   'if(installedChunkData !== 0) { // 0 means "already installed".',
                   Template.indent([
@@ -276,6 +275,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           }(chunkId));`,
                           "var fs = require('fs');",
                           'if(fs.existsSync(filename)) {',
+                          "console.log('chunk filename local load', chunkId);",
                           Template.indent([
                             "fs.readFile(filename, 'utf-8', function(err, content) {",
                             Template.indent([
@@ -288,6 +288,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             '});',
                           ]),
                           '} else {',
+                          "console.log('chunk filename remote load', chunkId);",
                           Template.indent([
                             loadScriptTemplate,
 
@@ -376,6 +377,9 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             // `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
                             // since im looping over remote and creating global at build time, i dont need to split string at runtime
                             // there may still be a use case for that with promise new promise, depending on how we design it.
+                            `console.log('requestedRemote',requestedRemote, "CURRENT NAME",${JSON.stringify(
+                              name
+                            )});`,
                             `var scriptUrl = new URL(requestedRemote);`,
 
                             this._getLogger(
@@ -427,7 +431,10 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       withExternalInstallChunk
         ? Template.asString([
             'module.exports = __webpack_require__;',
-            `${RuntimeGlobals.externalInstallChunk} = installChunk;`,
+            `${RuntimeGlobals.externalInstallChunk} = function(){
+            console.log('node: webpack installing to install chunk id:', arguments['0'].id);
+            return installChunk.apply(this, arguments)
+            };`,
           ])
         : '// no external install chunk',
       '',

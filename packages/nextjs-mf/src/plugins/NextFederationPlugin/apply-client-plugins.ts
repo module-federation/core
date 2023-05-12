@@ -8,7 +8,7 @@ import { DEFAULT_SHARE_SCOPE_BROWSER } from '../../internal';
 import path from 'path';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-
+import JsonpChunkLoading from '../JsonpChunkLoading';
 /**
  * Applies client-specific plugins.
  *
@@ -40,6 +40,7 @@ export function applyClientPlugins(
   //@ts-ignore
   compiler.options.output.publicPath = 'auto';
   // Add a new plugin to hoist modules into remote runtime
+  new JsonpChunkLoading().apply(compiler);
   new AddModulesPlugin({
     debug: false,
     runtime: 'webpack',
@@ -56,13 +57,14 @@ export function applyClientPlugins(
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
   if (extraOptions.automaticPageStitching) {
-    compiler.options.module.rules.push({
-      test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
-      loader: path.resolve(
-        __dirname,
-        '../../loaders/patchNextClientPageLoader'
-      ),
-    });
+    console.warn('[nextjs-mf]', 'automatic page stitching is disabled in v7');
+    //   compiler.options.module.rules.push({
+    //     test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
+    //     loader: path.resolve(
+    //       __dirname,
+    //       '../../loaders/patchNextClientPageLoader'
+    //     ),
+    //   });
   }
 
   // If a custom library is set, log an error message
@@ -77,11 +79,11 @@ export function applyClientPlugins(
   };
 
   // Add a new entry plugin to the compiler to delegate hoisting
-  new webpack.EntryPlugin(
-    compiler.context,
-    require.resolve('../../internal-delegate-hoist'),
-    'main'
-  ).apply(compiler);
+  // new webpack.EntryPlugin(
+  //   compiler.context,
+  //   require.resolve('../../internal-delegate-hoist'),
+  //   'main'
+  // ).apply(compiler);
 
   // Add a new chunk correlation plugin to the compiler
   new ChunkCorrelationPlugin({

@@ -1,9 +1,17 @@
 import React, { Suspense, lazy } from 'react';
 import Head from 'next/head';
-
-const CheckoutTitle = lazy(() => import('checkout/CheckoutTitle'));
-const ButtonOldAnt = lazy(() => import('checkout/ButtonOldAnt'));
-const WebpackSvgRemote = lazy(() => import('shop/WebpackSvg'));
+import CheckoutTitle from 'checkout/CheckoutTitle';
+import ButtonOldAnt from 'checkout/ButtonOldAnt';
+console.log(ButtonOldAnt);
+// console.log('cc', cc);
+// const CheckoutTitle = lazy(() => import('checkout/CheckoutTitle'));
+// const ButtonOldAnt = lazy(() => import('checkout/ButtonOldAnt'));
+const WebpackSvgRemote = lazy(() =>
+  import('shop/WebpackSvg').then((m) => {
+    console.log(m);
+    return m;
+  })
+);
 const WebpackPngRemote = lazy(() => import('shop/WebpackPng'));
 
 const Home = () => {
@@ -54,7 +62,6 @@ const Home = () => {
           <b>checkout</b>
         </li>
       </ul>
-
       <h2 style={{ marginTop: '30px' }}>Federation test cases</h2>
       <table border={1} cellPadding={5}>
         <thead>

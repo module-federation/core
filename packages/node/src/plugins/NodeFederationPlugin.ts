@@ -102,59 +102,7 @@ export const generateRemoteTemplate = (
     if(remote.fake) {
       return remote;
     }
-    const proxy = {
-      get: (arg)=>{
-        return remote.get(arg).then((f)=>{
-          const m = f();
-          return ()=>new Proxy(m, {
-            get: (target, prop)=>{
-              if(global.usedChunks) global.usedChunks.add(${JSON.stringify(
-                global
-              )} + "->" + arg);
-              return target[prop];
-            }
-          })
-        })
-      },
-      init: function(shareScope) {
-        const handler = {
-          get(target, prop) {
-            if (target[prop]) {
-              Object.values(target[prop]).forEach(function(o) {
-                if(o.from === '_N_E') {
-                  o.loaded = 1
-                }
-              })
-            }
-            return target[prop]
-          },
-          set(target, property, value) {
-            if(global.usedChunks) global.usedChunks.add(${JSON.stringify(
-              global
-            )} + "->" + property);
-            if (target[property]) {
-              return target[property]
-            }
-            target[property] = value
-            return true
-          }
-        }
-        try {
-          global.__remote_scope__[${JSON.stringify(
-            global
-          )}].init(new Proxy(shareScope, handler))
-        } catch (e) {
-
-        }
-        global.__remote_scope__[${JSON.stringify(global)}].__initialized = true
-      }
-    }
-    try  {
-      proxy.init(__webpack_require__.S.default)
-    } catch(e) {
-      console.error('failed to init', ${JSON.stringify(global)}, e)
-    }
-    return proxy
+    return remote;
   })`;
 
 /*
@@ -199,15 +147,33 @@ class NodeFederationPlugin {
     };
 
     const chunkFileName = compiler.options?.output?.chunkFilename;
-    if (
-      typeof chunkFileName === 'string' &&
-      !chunkFileName.includes('[chunkhash]') &&
-      !chunkFileName.includes('[contenthash]')
-    ) {
-      compiler.options.output.chunkFilename = chunkFileName.replace(
-        '.js',
-        `.[fullhash].js`
-      );
+    const uniqueName =
+      compiler?.options?.output?.uniqueName || this._options.name;
+
+    if (typeof chunkFileName === 'string') {
+      const requiredSubstrings = [
+        '[chunkhash]',
+        '[contenthash]',
+        '[fullHash]',
+        uniqueName,
+      ];
+
+      if (
+        //@ts-ignore
+        !requiredSubstrings.some((substring) =>
+          //@ts-ignore
+          chunkFileName.includes(substring)
+        )
+      ) {
+        const suffix =
+          compiler.options.mode === 'development'
+            ? `${uniqueName}.js`
+            : `.[chunkhash].js`;
+        compiler.options.output.chunkFilename = chunkFileName.replace(
+          '.js',
+          suffix
+        );
+      }
     }
 
     new (this.context.ModuleFederationPlugin ||

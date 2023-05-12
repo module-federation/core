@@ -51,56 +51,6 @@ export const retrieveDefaultShared = (isServer: boolean): SharedObject => {
 
 /**
 
- Inject module hoisting system.
- This function injects the module hoisting system into the webpack build process. The module hoisting system is a way to
- optimize the build process by hoisting dependencies into specific files that are hoisted into the webpack runtimes. This
- function is used by the NextFederationPlugin to optimize the build process when using module federation with Next.js.
- @param {boolean} isServer - A boolean indicating whether the code is running on the server.
- @param {ModuleFederationPluginOptions} options - The options for the ModuleFederationPlugin.
- @param {Compiler} compiler - The webpack compiler instance.
- */
-export function injectModuleHoistingSystem(
-  isServer: boolean,
-  options: ModuleFederationPluginOptions,
-  compiler: Compiler
-) {
-  // Set the default shared values based on the environment
-  const defaultShared = retrieveDefaultShared(isServer);
-  // Inject hoist dependency into the upper scope of the application
-  const injectHoistDependency = {
-    enforce: 'pre',
-    test: /_document/,
-    include: [compiler.context, /next\/dist/],
-    loader: path.resolve(__dirname, '../../loaders/inject-hoist'),
-  };
-
-  // Populate hoist dependency with shared modules
-  const populateHoistDependency = {
-    test: /internal-delegate-hoist/,
-    include: [/internal-delegate-hoist/, compiler.context, /next\/dist/],
-    loader: path.resolve(__dirname, '../../loaders/share-scope-hoist'),
-    options: {
-      shared: defaultShared,
-      name: !isServer && options.name,
-    },
-  };
-
-  // Unshift the injectHoistDependency and populateHoistDependency to the front of the module.rules array
-  compiler.options.module.rules.unshift(
-    //@ts-ignore
-    injectHoistDependency,
-    populateHoistDependency
-  );
-
-  // The module hoisting system is a way to optimize the build process by hoisting dependencies into specific files that
-  // are hoisted into the webpack runtimes. This function is used by the NextFederationPlugin to optimize the build process
-  // when using module federation with Next.js. The function takes a boolean isServer, which is used to set the default
-  // shared values based on the environment. The options argument is an object with options for the ModuleFederationPlugin.
-  // The compiler argument is the webpack compiler instance.
-}
-
-/**
-
  Apply remote delegates.
 
  This function adds the remote delegates feature by configuring and injecting the appropriate loader that will look
