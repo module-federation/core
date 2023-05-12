@@ -199,7 +199,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       '',
       withLoading || withExternalInstallChunk
         ? `var installChunk = ${runtimeTemplate.basicFunction('chunk', [
-            //"console.log('installed chunks', Object.keys(installedChunks));",
             'var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;',
             'for(var moduleId in moreModules) {',
             Template.indent([
@@ -253,20 +252,13 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
             `${fn}.readFileVm = function(chunkId, promises) {`,
             hasJsMatcher !== false
               ? Template.indent([
-                  'console.log("readFileVm", chunkId);',
                   'var installedChunkData = installedChunks[chunkId];',
-                  `console.log('installed chunk data', installedChunkData, ${JSON.stringify(
-                    name
-                  )});`,
                   'if(installedChunkData !== 0) { // 0 means "already installed".',
                   Template.indent([
                     '// array of [resolve, reject, promise] means "currently loading"',
                     'if(installedChunkData) {',
-                    "console.log('already loading','##', chunkId,'##', installedChunkData);",
                     Template.indent(['promises.push(installedChunkData[2]);']),
                     '} else {',
-                    "console.log('NEEDS to load','##', chunkId);",
-                    "console.log('Promise', promises);",
                     Template.indent([
                       hasJsMatcher === true
                         ? 'if(true) { // all chunks have JS'
@@ -435,15 +427,11 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
           ])
         : '// no chunk loading',
       '',
-      // "console.log('starting share init in runtime');",
       withExternalInstallChunk
         ? Template.asString([
             'module.exports = __webpack_require__;',
             `${RuntimeGlobals.externalInstallChunk} = function(){
             console.log('node: webpack installing to install chunk id:', arguments['0'].id);
-            // console.log('node: [startup inversion], boot sequence inverted');
-            // console.log('node: [startup inversion], holding next');
-            // return console.log
             return installChunk.apply(this, arguments)
             };`,
           ])
