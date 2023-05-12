@@ -1,6 +1,5 @@
 import type { Chunk, Compiler } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
-import { ConcatSource, RawSource, ReplaceSource } from 'webpack-sources';
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
 import ChunkLoadingRuntimeModule from './LoadFileChunkLoadingRuntimeModule';
