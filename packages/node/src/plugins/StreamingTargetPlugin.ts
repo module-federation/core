@@ -57,7 +57,6 @@ class StreamingTargetPlugin {
       baseURI: compiler.options.output.publicPath,
       promiseBaseURI: this.options.promiseBaseURI,
       verbose: this.options.verbose,
-      invertedBoot: true,
     }).apply(compiler);
   }
 }

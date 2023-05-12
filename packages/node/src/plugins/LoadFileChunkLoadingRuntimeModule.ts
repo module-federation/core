@@ -23,7 +23,6 @@ interface ReadFileChunkLoadingRuntimeModuleOptions {
   remotes: Record<string, string>;
   name?: string;
   verbose?: boolean;
-  invertedBoot?: boolean;
 }
 
 interface ChunkLoadingContext {

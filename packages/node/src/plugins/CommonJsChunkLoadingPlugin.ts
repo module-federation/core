@@ -12,7 +12,6 @@ interface CommonJsChunkLoadingOptions extends ModuleFederationPluginOptions {
   name?: string;
   asyncChunkLoading: boolean;
   verbose?: boolean;
-  invertedBoot?: boolean;
 }
 
 class CommonJsChunkLoadingPlugin {
