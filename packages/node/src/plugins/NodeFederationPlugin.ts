@@ -103,59 +103,6 @@ export const generateRemoteTemplate = (
       return remote;
     }
     return remote;
-    const proxy = {
-      get: (arg)=>{
-        return remote.get(arg).then((f)=>{
-          const m = f();
-          return ()=>new Proxy(m, {
-            get: (target, prop)=>{
-              if(global.usedChunks) global.usedChunks.add(${JSON.stringify(
-                global
-              )} + "->" + arg);
-              return target[prop];
-            }
-          })
-        })
-      },
-      init: function(shareScope) {
-        const handler = {
-          get(target, prop) {
-            if (target[prop]) {
-              Object.values(target[prop]).forEach(function(o) {
-                if(o.from === '_N_E') {
-                  o.loaded = 1
-                }
-              })
-            }
-            return target[prop]
-          },
-          set(target, property, value) {
-            if(global.usedChunks) global.usedChunks.add(${JSON.stringify(
-              global
-            )} + "->" + property);
-            if (target[property]) {
-              return target[property]
-            }
-            target[property] = value
-            return true
-          }
-        }
-        try {
-          global.__remote_scope__[${JSON.stringify(
-            global
-          )}].init(new Proxy(shareScope, handler))
-        } catch (e) {
-
-        }
-        global.__remote_scope__[${JSON.stringify(global)}].__initialized = true
-      }
-    }
-    try  {
-      proxy.init(__webpack_require__.S.default)
-    } catch(e) {
-      console.error('failed to init', ${JSON.stringify(global)}, e)
-    }
-    return proxy
   })`;
 
 /*
