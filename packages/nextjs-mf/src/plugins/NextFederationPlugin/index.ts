@@ -71,6 +71,7 @@ export class NextFederationPlugin {
 
     // If remotes are provided, parse them
     if (this._options.remotes) {
+      // @ts-ignore
       this._options.remotes = parseRemotes(this._options.remotes);
     }
 
@@ -97,6 +98,8 @@ export class NextFederationPlugin {
     } else {
       applyClientPlugins(compiler, this._options, this._extraOptions);
     }
+    //@ts-ignore
+    compiler.options.module.parser.javascript.importMeta = false;
 
     // @ts-ignore
     const hostFederationPluginOptions: ModuleFederationPluginOptions = {
@@ -166,6 +169,7 @@ export class NextFederationPlugin {
     //     ...serverOptions,
     //   }).apply(compiler);
     // }
+    console.log(compiler.options);
 
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
   }

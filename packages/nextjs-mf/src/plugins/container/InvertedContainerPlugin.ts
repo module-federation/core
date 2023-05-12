@@ -96,6 +96,7 @@ class InvertedContainerPlugin {
                 //@ts-ignore
                 if (chunk.name === this.options?.container) {
                   for (const mod of chunk.getModules()) {
+                    //@ts-ignore
                     if (mod.type === 'provide-shared') {
                       compilation.chunkGraph.disconnectChunkAndModule(
                         chunk,
@@ -119,12 +120,6 @@ class InvertedContainerPlugin {
                 //@ts-ignore
 
                 if (chunk.name === this.options?.container) {
-                  const eagerModulesInRemote =
-                    compilation.chunkGraph.getChunkModulesIterableBySourceType(
-                      chunk,
-                      'provide-module'
-                    );
-
                   const moduels = chunk.getModules();
                   for (const module of moduels) {
                     if (module.type === 'provide-module') {
@@ -171,12 +166,6 @@ class InvertedContainerPlugin {
           'ChunkIdPlugin',
           (chunks) => {
             chunks.forEach((chunk) => {
-              const chunkModules =
-                compilation.chunkGraph.getChunkRuntimeModulesIterable(chunk);
-
-              const runtimeRequirementsInChunk =
-                compilation.chunkGraph.getChunkRuntimeRequirements(chunk);
-
               chunk.files.forEach((file) => {
                 const asset = compilation.getAsset(file);
                 if (asset) {
