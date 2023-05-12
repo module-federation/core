@@ -14,6 +14,31 @@ import { DEFAULT_SHARE_SCOPE_BROWSER } from '../internal';
 // import { loadDependenciesTemplate } from './LoadDependenciesTemplate';
 import template from './container/custom-jsonp';
 
+//might be usefule later
+// compilation.hooks.optimizeChunks.tap(
+//   'AddModulesToRuntimeChunkPlugin',
+//   (chunks) => {
+//     for (const chunk of chunks) {
+//       const modules =
+//         compilation.chunkGraph.getChunkModulesIterable(chunk);
+//       // just use module type provide-module to find shared modules.
+//       for (const m of modules) {
+//         const foundTrueShare = Array.from(this.initialModules).some(
+//           //@ts-ignore
+//           (mod) => mod?.options?.importResolved === m?.resource
+//         );
+//         if (foundTrueShare) {
+//           this.initialModulesResolved.set(
+//             //@ts-ignore
+//             m.resource,
+//             //@ts-ignore
+//             m?.resourceResolveData?.descriptionFileData
+//           );
+//         }
+//       }
+//     }
+//   }
+// );
 function getCustomJsonpCode(
   chunkLoadingGlobal: string,
   RuntimeGlobals: any
@@ -31,75 +56,16 @@ function getCustomJsonpCode(
 }
 
 class CustomWebpackPlugin {
-  private initialModules: Set<any>;
-  private initialModulesResolved: Map<any, any>;
   private options: any;
 
   constructor(options?: any) {
     this.options = options || {};
-    // eager imports of shared modules
-    this.initialModules = new Set();
-    this.initialModulesResolved = new Map();
   }
 
   apply(compiler: Compiler): void {
     compiler.hooks.compilation.tap(
       'CustomWebpackPlugin',
       (compilation: Compilation) => {
-        const addModules = (modules: Iterable<Module>): void => {
-          for (const module of modules) {
-            this.initialModules.add(module);
-          }
-        };
-
-        compilation.hooks.optimizeChunks.tap(
-          'AddModulesToRuntimeChunkPlugin',
-          (chunks) => {
-            for (const entrypointModule of compilation.entrypoints.values()) {
-              const entrypoint = entrypointModule.getEntrypointChunk();
-              if (entrypoint.hasRuntime()) continue;
-
-              const processChunks = (
-                chunks: Set<Chunk>,
-                callback: (modules: Iterable<Module>) => void
-              ): void => {
-                for (const chunk of chunks) {
-                  const modules =
-                    compilation.chunkGraph.getChunkModulesIterableBySourceType(
-                      chunk,
-                      'consume-shared'
-                    );
-
-                  if (modules) callback(modules);
-                }
-              };
-
-              processChunks(entrypoint.getAllAsyncChunks(), addModules);
-              processChunks(entrypoint.getAllInitialChunks(), addModules);
-            }
-
-            for (const chunk of chunks) {
-              const modules =
-                compilation.chunkGraph.getChunkModulesIterable(chunk);
-              // just use module type provide-module to find shared modules.
-              for (const m of modules) {
-                const foundTrueShare = Array.from(this.initialModules).some(
-                  //@ts-ignore
-                  (mod) => mod?.options?.importResolved === m?.resource
-                );
-                if (foundTrueShare) {
-                  this.initialModulesResolved.set(
-                    //@ts-ignore
-                    m.resource,
-                    //@ts-ignore
-                    m?.resourceResolveData?.descriptionFileData
-                  );
-                }
-              }
-            }
-          }
-        );
-
         compilation.hooks.runtimeModule.tap(
           'CustomWebpackPlugin',
           (runtimeModule: RuntimeModule, chunk: any) => {
