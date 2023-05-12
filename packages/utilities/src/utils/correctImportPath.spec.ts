@@ -1,17 +1,14 @@
 import { correctImportPath } from './correctImportPath';
-import os from 'os';
-
-jest.mock('os', () => ({
-  platform: jest.fn(),
-}));
 
 describe(`${correctImportPath.name}()`, () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should return correct path on non-windows systems', () => {
-    (os.platform as jest.Mock).mockReturnValueOnce('non-win32');
+  it.each(['linux', undefined])('should return correct path on non-windows systems: %s', platform => {
+    Object.defineProperty(process, 'platform', {
+      value: platform
+    })
 
     const actual = correctImportPath('/context/path', '/path/to/file.js');
 
@@ -32,7 +29,9 @@ describe(`${correctImportPath.name}()`, () => {
   ])(
     'should return correct path on windows systems - %s',
     (entryFile: string, output: string) => {
-      (os.platform as jest.Mock).mockReturnValueOnce('win32');
+      Object.defineProperty(process, 'platform', {
+        value: 'win32'
+      })
 
       const actual = correctImportPath('C:\\path\\to\\dir', entryFile);
 

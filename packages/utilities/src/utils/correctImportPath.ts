@@ -1,8 +1,5 @@
-import os from 'os';
-import path from 'path';
-
 export const correctImportPath = (context: string, entryFile: string) => {
-  if (os.platform() !== 'win32') {
+  if (process?.platform !== 'win32') {
     return entryFile;
   }
 
@@ -10,6 +7,8 @@ export const correctImportPath = (context: string, entryFile: string) => {
     return entryFile.replace(/\\/g, '/');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const path = require('path');
   const joint = path.win32.relative(context, entryFile);
   const relative = joint.replace(/\\/g, '/');
 
