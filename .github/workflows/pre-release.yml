@@ -23,7 +23,7 @@ jobs:
       - run: git fetch --no-tags --prune --depth=5 origin main
         name: Fetch Main branch
       - name: Install packages
-        run: npm install
+        run: npm install --legacy-peer-deps
       - name: Retrieve effected projects
         id: effected-projects
         run: echo "projects=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)" >> $GITHUB_OUTPUT
