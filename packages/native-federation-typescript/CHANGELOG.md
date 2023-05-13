@@ -2,6 +2,17 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.2.1](https://github.com/module-federation/nextjs-mf/compare/native-federation-typescript-0.2.0...native-federation-typescript-0.2.1) (2023-05-13)
+
+
+### Bug Fixes
+
+* [#857](https://github.com/module-federation/nextjs-mf/issues/857) ([#859](https://github.com/module-federation/nextjs-mf/issues/859)) ([2fb609e](https://github.com/module-federation/nextjs-mf/commit/2fb609efb9a3c8f3e6740e0159510d649c1d229d))
+* downgrade next to v13.3.1 ([0032452](https://github.com/module-federation/nextjs-mf/commit/0032452980c70b211b6c04332326b7973f7c8446))
+* removed lock ([82f578e](https://github.com/module-federation/nextjs-mf/commit/82f578e713734f7f6b06e09b794fab4f66af248a))
+
+
+
 # [0.2.0](https://github.com/module-federation/nextjs-mf/compare/native-federation-typescript-0.1.1...native-federation-typescript-0.2.0) (2023-04-29)
 
 
