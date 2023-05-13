@@ -39,7 +39,6 @@ describe('InvertedContainerRuntimeModule', () => {
         container: 'testContainer',
         runtime: 'testRuntime',
         remotes: { testRemote: 'http://localhost/testRemote' },
-        verbose: false,
       },
       {
         webpack: compiler.webpack,
