@@ -653,6 +653,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         : 'window';
 
       const serverContainerKickstart = Template.asString([
+        "console.log('backup scope',globalThis.backupScope);",
         `console.log('FOUND m',__webpack_require__.m[${JSON.stringify(
           containerModuleId
         )}]);`,
@@ -701,17 +702,22 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         "console.log('m',__webpack_require__.m)",
         "console.log('c',__webpack_require__.c)",
         'attachRemote(resolve)',
+        'globalThis.buscp = globalThis.buscp || {};',
+        '__webpack_require__.I("default",[globalThis.buscp]);',
         '},0)',
         '})',
       ]);
 
       // __webpack_require__.O(0, ["webpack-runtime"], function() {
       return Template.asString([
+        'globalThis.backupScope = globalThis.backupScope || {};',
+        '__webpack_require__.S = globalThis.backupScope;',
         '__webpack_require__.initConsumes = __webpack_require__.initConsumes || [];',
         '__webpack_require__.initRemotes = __webpack_require__.initRemotes || [];',
         '__webpack_require__.rMap = __webpack_require__.rMap || {};',
         '__webpack_require__.reMap = __webpack_require__.reMap || {};',
         '__webpack_require__.installedModules = {};',
+        "console.log('share scope', __webpack_require__.S);",
         `if(${containerScope} === undefined) { ${containerScope} = {_config: {}} };`,
         checkForAsyncChunkRequirements,
         `
@@ -724,10 +730,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
     console.log('remote attached', innerRemote);
     if(resolve) resolve(innerRemote)
-  }
-  console.log('backup scope',globalThis.backupScope);
-        globalThis.backupScope = globalThis.backupScope || {};
-          __webpack_require__.S = globalThis.backupScope;`,
+  }`,
         'try {',
         isServer ? serverContainerKickstart : browserContainerKickstart,
         '} catch (e) {',

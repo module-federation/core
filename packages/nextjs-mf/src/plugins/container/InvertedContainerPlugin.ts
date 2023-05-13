@@ -1,4 +1,4 @@
-import type { Chunk, Compilation, Compiler } from 'webpack';
+import type { Chunk, Compilation, Compiler, Module } from 'webpack';
 import { RawSource } from 'webpack-sources';
 //@ts-ignore
 import type { ModuleFederationPluginOptions } from '../types';
@@ -86,6 +86,142 @@ class InvertedContainerPlugin {
           'InvertedContainerPlugin',
           handler
         );
+        compilation.hooks.afterOptimizeChunks.tap(
+          'InvertedContainerPlugin',
+          (chunks) => {}
+        );
+
+        if (this.options.debug) {
+          compilation.hooks.afterOptimizeChunkModules.tap(
+            'InvertedContainerPlugin',
+            (chunks, modules) => {
+              for (const chunk of chunks) {
+                if (
+                  chunk.hasRuntime() &&
+                  chunk.name === this.options?.container
+                ) {
+                  const getmodules = chunk.getModules();
+
+                  console.log(getmodules.length, chunk.name);
+                }
+              }
+            }
+          );
+        }
+
+        compilation.hooks.optimizeChunkModules.tap(
+          'InvertedContainerPlugin',
+          (chunks, modules) => {
+            // Create a Set to store dependent modules
+            const dependentModules: Set<Module> = new Set();
+
+            // Create a Set to track visited modules during traversal
+            const visitedModules: Set<Module> = new Set();
+
+            // Function to traverse the module graph recursively
+            function traverseModuleGraph(module: Module) {
+              // Check if module has been visited before
+              if (visitedModules.has(module)) {
+                return; // Skip traversal if module has been visited
+              }
+
+              visitedModules.add(module); // Mark module as visited
+
+              // Skip traversal for certain module types
+              if (
+                module.type === 'provide-module' ||
+                module.type === 'consume-shared-module'
+              ) {
+                return;
+              }
+
+              dependentModules.add(module); // Add module to dependent modules set
+
+              module.dependencies.forEach((dependency) => {
+                // Get the dependent module using moduleGraph
+                const dependentModule =
+                  compilation.moduleGraph.getModule(dependency);
+
+                // If dependent module exists and is not already in dependentModules set, traverse it
+                if (dependentModule && !dependentModules.has(dependentModule)) {
+                  traverseModuleGraph(dependentModule);
+                }
+              });
+            }
+
+            // Iterate over chunks and modules
+            for (const chunk of chunks) {
+              // Check if the chunk has a runtime and matches the specified container name
+              if (
+                chunk.hasRuntime() &&
+                chunk.name === this.options?.container
+              ) {
+                // get all provide-shared modules
+                const eagerModulesInRemote =
+                  compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                    chunk,
+                    'share-init'
+                  ) || [];
+
+                // Loop through modules in the chunk
+                for (const module of eagerModulesInRemote) {
+                  // If the module is eager, add it to eagerModulesInRemote set
+                  //@ts-ignore
+                  if (module._eager) {
+                    //@ts-ignore
+                    eagerModulesInRemote.add(module._request);
+                  }
+
+                  // If the module is eager or has a name starting with 'next', disconnect it from the chunk
+                  //@ts-ignore
+                  if (module?._eager || module?._name?.startsWith('next')) {
+                    compilation.chunkGraph.disconnectChunkAndModule(
+                      chunk,
+                      module
+                    );
+                  }
+                }
+
+                // Loop through modules again
+                for (const module of modules) {
+                  // Skip module if it is not in the chunk
+                  if (!compilation.chunkGraph.isModuleInChunk(module, chunk)) {
+                    continue;
+                  }
+
+                  // Process module if it is a NormalModule and its resource is in eagerModulesInRemote set
+                  if (module.constructor.name === 'NormalModule') {
+                    //@ts-ignore
+                    if (eagerModulesInRemote.has(module.resource)) {
+                      // Traverse the module graph recursively
+                      traverseModuleGraph(module);
+                    }
+                  }
+                }
+
+                // Loop through dependentModules set and disconnect them from the chunk
+                for (const moduleToRemove of dependentModules) {
+                  if (this.options.debug) {
+                    //@ts-ignore
+                    console.log('removing', moduleToRemove?.resource);
+                  }
+
+                  if (
+                    compilation.chunkGraph.isModuleInChunk(
+                      moduleToRemove,
+                      chunk
+                    )
+                  ) {
+                    compilation.chunkGraph.disconnectChunkAndModule(
+                      chunk,
+                      moduleToRemove
+                    );
+                  }
+                }
+              }
+            }
+          }
+        );
 
         compilation.hooks.afterOptimizeChunks.tap(
           'InvertedContainerPlugin',
@@ -95,6 +231,7 @@ class InvertedContainerPlugin {
                 chunk.hasRuntime() &&
                 chunk.name === this.options?.container
               ) {
+                console.log('CONTAINER', this.options.container);
                 // const eagerModulesInRemote =
                 //   compilation.chunkGraph.getChunkModulesIterableBySourceType(
                 //     chunk,
@@ -102,11 +239,15 @@ class InvertedContainerPlugin {
                 //   );
                 const modules = chunk.getModules();
                 for (const module of modules) {
-                  if (module.type === 'provide-module') {
-                    compilation.chunkGraph.disconnectChunkAndModule(
-                      chunk,
-                      module
-                    );
+                  if (
+                    module.type === 'provide-module' ||
+                    module.type === 'consume-shared-module'
+                  ) {
+                    // console.log(module.id);
+                    // compilation.chunkGraph.disconnectChunkAndModule(
+                    //   chunk,
+                    //   module
+                    // );
                   }
                 }
               }
@@ -127,11 +268,11 @@ class InvertedContainerPlugin {
               ) {
                 const modules = chunk.getModules();
                 for (const module of modules) {
-                  if (module.type === 'provide-module') {
-                    compilation.chunkGraph.disconnectChunkAndModule(
-                      chunk,
-                      module
-                    );
+                  if (module.constructor.name === 'NormalModule') {
+                    // compilation.chunkGraph.disconnectChunkAndModule(
+                    //   chunk,
+                    //   module
+                    // );
                   }
                 }
               }

@@ -19,6 +19,7 @@
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
     "start:next": "yarn build:libs && concurrently 'nx run 3000-home:serve:development --output-style=stream' 'nx run 3001-shop:serve:development --output-style=stream' 'nx run 3002-checkout:serve:development --output-style=stream'",
+    "start:nextho": "yarn build:libs && concurrently 'nx run 3000-home:serve:development --output-style=stream'",
     "serve:next": "yarn build:libs && concurrently 'nx run 3000-home:serve:production --output-style=stream' 'nx run 3001-shop:serve:production --output-style=stream' 'nx run 3002-checkout:serve:production --output-style=stream'",
     "prod": "nx build:libs && nx run-many --target=build --verbose --output-style=stream",
     "commit": "cz",

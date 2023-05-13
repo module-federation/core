@@ -64,13 +64,14 @@ __webpack_require__.checkAsyncReqs();
     });
 }
 
-asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
+asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal))
 
 var currentChunkId = "__INSERT_CH_ID__MF__";
-// __webpack_require__.O(null, [currentChunkId], function () {
-//   console.log('clearing resolved', currentChunkId)
-//   cleanInitArrays(__webpack_require__.initConsumes);
-// },5);
+__webpack_require__.O(null, [currentChunkId], function () {
+  console.log('clearing resolved', currentChunkId)
+  cleanInitArrays(__webpack_require__.initConsumes);
+  cleanInitArrays(__webpack_require__.initRemotes);
+},5);
 
 chunkLoadingGlobal.push = (function (originalPush) {
   return function () {

@@ -19,13 +19,13 @@ import { parseOptions } from 'webpack/lib/container/options';
  */
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/dynamic': {
-    eager: true,
+    eager: false,
     requiredVersion: false,
     singleton: true,
     import: undefined,
   },
   'next/head': {
-    eager: undefined,
+    eager: false,
     requiredVersion: false,
     singleton: true,
     import: undefined,
@@ -39,7 +39,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/router': {
     requiredVersion: false,
     singleton: true,
-    import: undefined,
+    import: false,
     eager: true,
   },
   'next/script': {
@@ -69,7 +69,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: false,
-    import: undefined,
+    import: false,
     eager: true,
   },
   'styled-jsx': {
@@ -98,8 +98,13 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
 
-  acc[key] = { ...value, import: undefined };
+  acc[key] = { ...value, eager: undefined, import: undefined };
+
   // @ts-ignore
+  if (key === 'react' || key === 'react-dom' || key === 'next/router') {
+    //@ts-ignore
+    acc[key].eager = true;
+  }
   return acc;
 }, {} as SharedObject);
 
