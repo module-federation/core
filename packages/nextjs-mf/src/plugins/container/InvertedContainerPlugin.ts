@@ -64,7 +64,7 @@ class InvertedContainerPlugin {
           // If the chunk has already been processed, skip it.
           if (onceForChunkSet.has(chunk)) return;
           set.add(RuntimeGlobals.onChunksLoaded);
-          set.add(RuntimeGlobals.startupOnlyAfter);
+          // set.add(RuntimeGlobals.startupOnlyAfter);
 
           // Mark the chunk as processed by adding it to the WeakSet.
           onceForChunkSet.add(chunk);
@@ -85,10 +85,6 @@ class InvertedContainerPlugin {
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           'InvertedContainerPlugin',
           handler
-        );
-        compilation.hooks.afterOptimizeChunks.tap(
-          'InvertedContainerPlugin',
-          (chunks) => {}
         );
 
         if (this.options.debug) {
@@ -223,38 +219,6 @@ class InvertedContainerPlugin {
           }
         );
 
-        compilation.hooks.afterOptimizeChunks.tap(
-          'InvertedContainerPlugin',
-          (chunks) => {
-            for (const chunk of chunks) {
-              if (
-                chunk.hasRuntime() &&
-                chunk.name === this.options?.container
-              ) {
-                console.log('CONTAINER', this.options.container);
-                // const eagerModulesInRemote =
-                //   compilation.chunkGraph.getChunkModulesIterableBySourceType(
-                //     chunk,
-                //     'provide-module'
-                //   );
-                const modules = chunk.getModules();
-                for (const module of modules) {
-                  if (
-                    module.type === 'provide-module' ||
-                    module.type === 'consume-shared-module'
-                  ) {
-                    // console.log(module.id);
-                    // compilation.chunkGraph.disconnectChunkAndModule(
-                    //   chunk,
-                    //   module
-                    // );
-                  }
-                }
-              }
-            }
-          }
-        );
-
         compilation.hooks.optimizeChunks.tap(
           'InvertedContainerPlugin',
           (chunks) => {
@@ -276,14 +240,7 @@ class InvertedContainerPlugin {
                   }
                 }
               }
-              // console.log(
-              //   'chunk',
-              //   chunk.name || chunk.id || chunk.debugId,
-              //   !compilation.chunkGraph.isModuleInChunk(
-              //     containerEntryModule,
-              //     chunk
-              //   )
-              // );
+
               if (
                 !compilation.chunkGraph.isModuleInChunk(
                   containerEntryModule,
