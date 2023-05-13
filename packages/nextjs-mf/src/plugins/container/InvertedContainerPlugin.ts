@@ -131,9 +131,9 @@ class InvertedContainerPlugin {
                       'provide-module'
                     );
 
-                  // const moduels = chunk.getModules();
-                  if (eagerModulesInRemote) {
-                    for (const module of eagerModulesInRemote) {
+                  const moduels = chunk.getModules();
+                  for (const module of moduels) {
+                    if (module.type === 'provide-module') {
                       compilation.chunkGraph.disconnectChunkAndModule(
                         chunk,
                         module
