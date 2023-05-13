@@ -18,23 +18,41 @@ import { parseOptions } from 'webpack/lib/container/options';
  * @property {boolean} key.import - Whether the shared object should be imported or not.
  */
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
+  'next/dynamic': {
+    eager: true,
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+  },
+  'next/head': {
+    eager: undefined,
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+  },
+  'next/link': {
+    eager: false,
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+  },
+  'next/router': {
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+    eager: true,
+  },
+  'next/script': {
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+    eager: false,
+  },
   react: {
     singleton: true,
     requiredVersion: false,
     eager: true,
     import: false,
-  },
-  'react/jsx-runtime': {
-    singleton: true,
-    requiredVersion: false,
-    import: undefined,
-    eager: false,
-  },
-  'react/jsx-dev-runtime': {
-    singleton: true,
-    requiredVersion: false,
-    import: undefined,
-    eager: false,
   },
   'react-dom': {
     singleton: true,
@@ -42,11 +60,17 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     eager: true,
     import: false,
   },
-  'next/dynamic': {
-    eager: false,
-    requiredVersion: false,
+  'react/jsx-dev-runtime': {
     singleton: true,
+    requiredVersion: false,
     import: undefined,
+    eager: false,
+  },
+  'react/jsx-runtime': {
+    singleton: true,
+    requiredVersion: false,
+    import: undefined,
+    eager: true,
   },
   'styled-jsx': {
     requiredVersion: false,
@@ -59,30 +83,6 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     import: undefined,
     eager: false,
-  },
-  'next/link': {
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-    eager: false,
-  },
-  'next/router': {
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-    eager: undefined,
-  },
-  'next/script': {
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-    eager: false,
-  },
-  'next/head': {
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-    eager: undefined,
   },
 };
 
@@ -98,8 +98,8 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
 
-  acc[key] = { ...value, eager: false, import: undefined };
-
+  acc[key] = { ...value, import: undefined };
+  // @ts-ignore
   return acc;
 }, {} as SharedObject);
 
