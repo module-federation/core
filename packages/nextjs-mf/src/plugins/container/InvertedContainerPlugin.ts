@@ -206,12 +206,13 @@ class InvertedContainerPlugin {
               return source;
             }
 
+            const newSource = [];
             const replaceSource = source.source().toString().split('\n');
 
             const searchString = '__webpack_exec__';
             const replaceString = '__webpack_exec_proxy__';
 
-            const originalExec = replaceSource.findIndex((s) =>
+            const originalExec = replaceSource.findIndex((s: string) =>
               s.includes(searchString)
             );
 
@@ -224,47 +225,36 @@ class InvertedContainerPlugin {
               originalExec + 1,
               replaceSource.length
             );
-            let currentChunkID = null;
-            for (const chunk of compilation.chunks) {
-              if (
-                chunk.isOnlyInitial() &&
-                compilation.chunkGraph.isModuleInChunk(renderContext, chunk)
-              ) {
-                currentChunkID = chunk.id;
-              }
-            }
-            const newSource = [
-              ...firstHalf,
+            // Push renamed exec pack into new source
+            newSource.push(
+              firstHalf.join('\n').replace(searchString, replaceString)
+            );
+
+            newSource.push(`
+            var ${searchString} = function(moduleId) {
+return __webpack_require__.own_remote.then(function(thing){
+return Promise.all(__webpack_require__.initRemotes);
+}).then(function(){
+return Promise.all(__webpack_require__.initConsumes);
+}).then(function(){
+return ${replaceString}(moduleId);
+})
+             };
+              `);
+
+            return Template.asString([
               '',
-              `var currentChunkId = "${currentChunkID}";`,
-              'if (currentChunkId) {',
+              'var currentChunkId = "__INSERT_CH_ID__MF__";',
+              `if(currentChunkId) {`,
               Template.indent([
-                '__webpack_require__.getEagerSharedForChunkId(currentChunkId, __webpack_require__.initRemotes);',
-                '__webpack_require__.getEagerRemotesForChunkId(currentChunkId, __webpack_require__.initConsumes);',
+                `__webpack_require__.getEagerSharedForChunkId(currentChunkId,__webpack_require__.initRemotes);`,
+                `__webpack_require__.getEagerRemotesForChunkId(currentChunkId,__webpack_require__.initConsumes)`,
               ]),
               '}',
-              '',
-              `var ${searchString} = function(moduleId) {`,
-              Template.indent([
-                'return __webpack_require__.own_remote.then((thing) => {',
-                Template.indent([
-                  'return Promise.all(__webpack_require__.initRemotes);',
-                ]),
-                '}).then(function() {',
-                Template.indent([
-                  '// console.log("loaded pages remote if exists:", currentChunkId);',
-                  'return Promise.all(__webpack_require__.initConsumes);',
-                ]),
-                '}).then(function() {',
-                Template.indent([`return ${replaceString}(moduleId);`]),
-                '})',
-              ]),
-              '};',
-              '',
+              ...newSource,
               ...secondHalf,
-            ];
-
-            return Template.asString(newSource);
+              '',
+            ]);
           }
         );
       }
