@@ -79,9 +79,6 @@ chunkLoadingGlobal.push = (function (originalPush) {
 
    __webpack_require__.getEagerSharedForChunkId(chunkID,__webpack_require__.initConsumes)
       __webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRemotes)
-   // chunkLoadingGlobal.forEach(function (item) {
-   // console.log('webpackChunkhome_app', item[0]);
-   // })
 
 __webpack_require__.O(null, ['webpack'], function () {
       __webpack_require__.getEagerSharedForChunkId(chunkID,__webpack_require__.initConsumes)

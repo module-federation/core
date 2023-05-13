@@ -695,7 +695,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         '__webpack_require__.own_remote = new Promise(function(resolve,reject){',
         'console.log("O keys",Object.keys(__webpack_require__.O))',
         "__webpack_require__.O(0, ['webpack'], function() {",
-        "console.log('runtime loaded', webpackChunkhome_app);",
+        "console.log('runtime loaded');",
         "console.log('replaying all installed chunk requirements');",
         '__webpack_require__.checkAsyncReqs();',
         "console.log('m',__webpack_require__.m)",
