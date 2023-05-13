@@ -1,21 +1,20 @@
 export default `
 function promiseState(p) {
   var t = {};
-  return Promise.race([p, t]).then(function(v) {
-    return (v === t) ? "pending" : "fulfilled";
-  }, function() {
+  return Promise.race([p, t]).then(function (v) {
+    return v === t ? "pending" : "fulfilled";
+  }, function () {
     return "rejected";
   });
 }
-
 function cleanInitArrays(array) {
-  array.forEach(function (item,index) {
-      promiseState(item).then((status)=>{
-      if(status === 'fulfilled'){
-        __webpack_require__.initConsumes.splice(index,1)
+  array.forEach(function (item, index) {
+    promiseState(item).then(function (status) {
+      if (status === 'fulfilled') {
+        __webpack_require__.initConsumes.splice(index, 1);
       }
-    })
-  })
+    });
+  });
 }
 
 function asyncOperation(originalPush) {
@@ -23,20 +22,22 @@ __webpack_require__.checkAsyncReqs();
     return Promise.all(__webpack_require__.initConsumes).then(function(){
       return Promise.all(__webpack_require__.initRemotes)
     }).then(function () {
-      console.log('init operation completed');
-      for (let q in chunkQueue) {
-       __webpack_require__.getEagerSharedForChunkId(chunkQueue[q][0],__webpack_require__.initConsumes)
-       __webpack_require__.getEagerRemotesForChunkId(chunkQueue[q][0],__webpack_require__.initRemotes)
-      }
+        console.log('init operation completed');
+        for (let q in chunkQueue) {
+         __webpack_require__.getEagerSharedForChunkId(chunkQueue[q][0],__webpack_require__.initConsumes)
+         __webpack_require__.getEagerRemotesForChunkId(chunkQueue[q][0],__webpack_require__.initRemotes)
+        }
 
-    return Promise.all([
-      (function () {
-        return Promise.all(__webpack_require__.initConsumes);
-      })(),
-      (function () {
-        return Promise.all(__webpack_require__.initRemotes);
-      })()
-    ])
+      return Promise.all([
+        Promise.all((function () {
+          return __webpack_require__.initConsumes;
+        })()),
+        Promise.all((function () {
+          return __webpack_require__.initRemotes;
+        })())
+      ]);
+
+    })
     .then(function () {
       console.log('webpack is done negotiating dependency trees');
       console.log(
@@ -45,20 +46,20 @@ __webpack_require__.checkAsyncReqs();
       );
       console.log('startup inversion in progress', chunkQueue);
 
-      while (chunkQueue.length > 0) {
-        var queueArgs = chunkQueue.shift();
-
-       //__webpack_require__.getEagerSharedForChunkId(queueArgs[0],__webpack_require__.initConsumes)
-       //__webpack_require__.getEagerRemotesForChunkId(queueArgs[0],__webpack_require__.initRemotes)
-
-       Promise.all(__webpack_require__.initConsumes).then(function () {
-        console.log('pushing deffered chunk into runtime', queueArgs[0]);
-        webpackJsonpCallback.apply(
-          null,
-          [null].concat(Array.prototype.slice.call([queueArgs]))
-        );
-        originalPush.apply(originalPush, [queueArgs]);
+      function runCallback(queueArgs) {
+         Promise.all(__webpack_require__.initConsumes).then(function() {
+          console.log('Pushing deferred chunk into runtime:', queueArgs[0]);
+          webpackJsonpCallback.apply(null, [null].concat(Array.prototype.slice.call([queueArgs])));
+          originalPush.apply(originalPush, [queueArgs]);
+          if(chunkQueue.length === 0) {
+            cleanInitArrays(__webpack_require__.initConsumes)
+            cleanInitArrays(__webpack_require__.initRemotes)
+          }
         });
+      }
+
+      while (chunkQueue.length > 0) {
+       runCallback(chunkQueue.shift());
       }
     });
 }
@@ -66,14 +67,14 @@ __webpack_require__.checkAsyncReqs();
 asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
 
 var currentChunkId = "__INSERT_CH_ID__MF__";
-__webpack_require__.O(null, [currentChunkId], function () {
-  console.log('clearing resolved', currentChunkId)
-  // cleanInitArrays(__webpack_require__.initConsumes);
-},5);
+// __webpack_require__.O(null, [currentChunkId], function () {
+//   console.log('clearing resolved', currentChunkId)
+//   cleanInitArrays(__webpack_require__.initConsumes);
+// },5);
 
 chunkLoadingGlobal.push = (function (originalPush) {
   return function () {
-  var chunkID = arguments[0][0];
+  const chunkID = arguments[0][0];
   console.log('original push', chunkID);
 
    __webpack_require__.getEagerSharedForChunkId(chunkID,__webpack_require__.initConsumes)
