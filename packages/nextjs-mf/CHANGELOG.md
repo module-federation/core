@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.4.1-beta.5](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.1-beta.4...nextjs-mf-6.4.1-beta.5) (2023-05-13)
+
+
+### Bug Fixes
+
+* remove debugging runtime variable ([d15dc2d](https://github.com/module-federation/nextjs-mf/commit/d15dc2dc6f6297532d89295690c6f561fee7955f))
+
+
+
 ## [6.4.1-beta.4](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.1-beta.3...nextjs-mf-6.4.1-beta.4) (2023-05-13)
 
 
