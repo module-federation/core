@@ -82,7 +82,6 @@ class InvertedContainerPlugin {
           }
         };
 
-        // Hook the handler function into the compilation process.
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           'InvertedContainerPlugin',
           handler
@@ -92,23 +91,29 @@ class InvertedContainerPlugin {
           'InvertedContainerPlugin',
           (chunks) => {
             for (const chunk of chunks) {
-              if (chunk.hasRuntime()) {
-                //@ts-ignore
-                if (chunk.name === this.options?.container) {
-                  for (const mod of chunk.getModules()) {
-                    //@ts-ignore
-                    if (mod.type === 'provide-shared') {
-                      compilation.chunkGraph.disconnectChunkAndModule(
-                        chunk,
-                        mod
-                      );
-                    }
+              if (
+                chunk.hasRuntime() &&
+                chunk.name === this.options?.container
+              ) {
+                // const eagerModulesInRemote =
+                //   compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                //     chunk,
+                //     'provide-module'
+                //   );
+                const modules = chunk.getModules();
+                for (const module of modules) {
+                  if (module.type === 'provide-module') {
+                    compilation.chunkGraph.disconnectChunkAndModule(
+                      chunk,
+                      module
+                    );
                   }
                 }
               }
             }
           }
         );
+
         compilation.hooks.optimizeChunks.tap(
           'InvertedContainerPlugin',
           (chunks) => {
@@ -116,56 +121,57 @@ class InvertedContainerPlugin {
               this.resolveContainerModule(compilation);
             if (!containerEntryModule) return;
             for (const chunk of chunks) {
-              if (chunk.hasRuntime()) {
-                //@ts-ignore
-
-                if (chunk.name === this.options?.container) {
-                  const moduels = chunk.getModules();
-                  for (const module of moduels) {
-                    if (module.type === 'provide-module') {
-                      compilation.chunkGraph.disconnectChunkAndModule(
-                        chunk,
-                        module
-                      );
-                    }
+              if (
+                chunk.hasRuntime() &&
+                chunk.name === this.options?.container
+              ) {
+                const modules = chunk.getModules();
+                for (const module of modules) {
+                  if (module.type === 'provide-module') {
+                    compilation.chunkGraph.disconnectChunkAndModule(
+                      chunk,
+                      module
+                    );
                   }
                 }
-                console.log(
-                  'chunk',
-                  chunk.name,
-                  !compilation.chunkGraph.isModuleInChunk(
-                    containerEntryModule,
-                    chunk
-                  )
+              }
+              // console.log(
+              //   'chunk',
+              //   chunk.name || chunk.id || chunk.debugId,
+              //   !compilation.chunkGraph.isModuleInChunk(
+              //     containerEntryModule,
+              //     chunk
+              //   )
+              // );
+              if (
+                !compilation.chunkGraph.isModuleInChunk(
+                  containerEntryModule,
+                  chunk
+                )
+              ) {
+                compilation.chunkGraph.connectChunkAndModule(
+                  chunk,
+                  containerEntryModule
                 );
-                if (
-                  !compilation.chunkGraph.isModuleInChunk(
-                    containerEntryModule,
-                    chunk
-                  )
-                ) {
-                  // if its the browser runtime, inject the container module into the host runtime
-                  // TODO: try and do the same on the server,
-                  // if (this.options.runtime === 'webpack-runtime') {
-                  compilation.chunkGraph.connectChunkAndModule(
-                    chunk,
-                    containerEntryModule
-                  );
-                  // }
-                }
               }
             }
           }
         );
-        // if (compiler.options.name === 'client') return;
+
         const hooks =
           compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
             compilation
           );
+
         compilation.hooks.afterOptimizeChunkAssets.tap(
-          'ChunkIdPlugin',
+          'InvertedContainerPlugin',
           (chunks) => {
             chunks.forEach((chunk) => {
+              const chunkModules =
+                compilation.chunkGraph.getChunkRuntimeModulesIterable(chunk);
+              const runtimeRequirementsInChunk =
+                compilation.chunkGraph.getChunkRuntimeRequirements(chunk);
+
               chunk.files.forEach((file) => {
                 const asset = compilation.getAsset(file);
                 if (asset) {
@@ -177,12 +183,11 @@ class InvertedContainerPlugin {
                     //@ts-ignore
                     .replace('__INSERT_CH_ID__MF__', chunk.id);
                   const sourceBuffer = Buffer.from(source, 'utf-8');
-                  //@ts-ignore
                   const sourceObj = {
                     source: () => sourceBuffer,
                     size: () => sourceBuffer.length,
                   };
-                  // @ts-ignore
+                  //@ts-ignore
                   compilation.updateAsset(file, sourceObj);
                 }
               });
@@ -220,15 +225,6 @@ class InvertedContainerPlugin {
               originalExec + 1,
               replaceSource.length
             );
-            let currentChunkID: string | number | null = null;
-            for (const chunk of compilation.chunks) {
-              if (
-                chunk.isOnlyInitial() &&
-                compilation.chunkGraph.isModuleInChunk(renderContext, chunk)
-              ) {
-                currentChunkID = chunk.id;
-              }
-            }
             // Push renamed exec pack into new source
             newSource.push(
               firstHalf.join('\n').replace(searchString, replaceString)
@@ -236,17 +232,11 @@ class InvertedContainerPlugin {
 
             newSource.push(`
             var ${searchString} = function(moduleId) {
-return __webpack_require__.own_remote.then((thing)=>{
-// console.log('loaded pages remote if exists:',currentChunkId);
+return __webpack_require__.own_remote.then(function(thing){
 return Promise.all(__webpack_require__.initRemotes);
-}).then(()=>{
-// console.log('loaded pages remote if exists:',currentChunkId);
+}).then(function(){
 return Promise.all(__webpack_require__.initConsumes);
-}).then(()=>{
-// console.log('async startup for entrypoint done');
-// console.log('SUOULD REQUIRE PAged,m', moduleId);
-// console.log('SCOPE MEMORY CHECK',__webpack_require__.S === globalThis.backupScope);
-// console.log('SCOPE MEMORY CHECK',Object.keys(__webpack_require__.S), Object.keys(globalThis.backupScope))
+}).then(function(){
 return ${replaceString}(moduleId);
 })
              };

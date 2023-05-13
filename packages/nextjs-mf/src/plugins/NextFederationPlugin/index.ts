@@ -169,7 +169,6 @@ export class NextFederationPlugin {
     //     ...serverOptions,
     //   }).apply(compiler);
     // }
-    console.log(compiler.options);
 
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
   }

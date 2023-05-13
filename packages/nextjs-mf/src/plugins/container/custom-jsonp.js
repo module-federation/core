@@ -1,17 +1,20 @@
 export default `
 function promiseState(p) {
-  const t = {};
-  return Promise.race([p, t]).then(v => (v === t)? "pending" : "fulfilled", () => "rejected");
+  var t = {};
+  return Promise.race([p, t]).then(function (v) {
+    return v === t ? "pending" : "fulfilled";
+  }, function () {
+    return "rejected";
+  });
 }
-
 function cleanInitArrays(array) {
-  array.forEach(function (item,index) {
-      promiseState(item).then((status)=>{
-      if(status === 'fulfilled'){
-        __webpack_require__.initConsumes.splice(index,1)
+  array.forEach(function (item, index) {
+    promiseState(item).then(function (status) {
+      if (status === 'fulfilled') {
+        __webpack_require__.initConsumes.splice(index, 1);
       }
-    })
-  })
+    });
+  });
 }
 
 function asyncOperation(originalPush) {
@@ -19,19 +22,19 @@ __webpack_require__.checkAsyncReqs();
     return Promise.all(__webpack_require__.initConsumes).then(function(){
       return Promise.all(__webpack_require__.initRemotes)
     }).then(function () {
-const cachem = __webpack_require__.m['webpack/container/remote/checkout/CheckoutTitle']
-const cachec = __webpack_require__.c['webpack/container/remote/checkout/CheckoutTitle']
-    if(cachem)console.log('base checkoutTitle M',cachem, (Object.prototype.hasOwnProperty.call(cachem, "exports")) ? cachem.exports : null)
-    if(cachec)console.log('base checkoutTitle C',cachec, Object.prototype.hasOwnProperty.call(cachec, "exports") ? cachec.exports : null)
-      console.log('init operation completed');
+        console.log('init operation completed');
         for (let q in chunkQueue) {
-       __webpack_require__.getEagerSharedForChunkId(chunkQueue[q][0],__webpack_require__.initConsumes)
-       __webpack_require__.getEagerRemotesForChunkId(chunkQueue[q][0],__webpack_require__.initRemotes)
-      }
+         __webpack_require__.getEagerSharedForChunkId(chunkQueue[q][0],__webpack_require__.initConsumes)
+         __webpack_require__.getEagerRemotesForChunkId(chunkQueue[q][0],__webpack_require__.initRemotes)
+        }
 
       return Promise.all([
-      Promise.all((()=>__webpack_require__.initConsumes)()),
-      Promise.all((()=>__webpack_require__.initRemotes)()),
+        Promise.all((function () {
+          return __webpack_require__.initConsumes;
+        })()),
+        Promise.all((function () {
+          return __webpack_require__.initRemotes;
+        })())
       ]);
 
     })
@@ -43,35 +46,31 @@ const cachec = __webpack_require__.c['webpack/container/remote/checkout/Checkout
       );
       console.log('startup inversion in progress', chunkQueue);
 
-      console.log(__webpack_require__.c)
+      function runCallback(queueArgs) {
+         Promise.all(__webpack_require__.initConsumes).then(function() {
+          console.log('Pushing deferred chunk into runtime:', queueArgs[0]);
+          webpackJsonpCallback.apply(null, [null].concat(Array.prototype.slice.call([queueArgs])));
+          originalPush.apply(originalPush, [queueArgs]);
+          if(chunkQueue.length === 0) {
+            cleanInitArrays(__webpack_require__.initConsumes)
+            cleanInitArrays(__webpack_require__.initRemotes)
+          }
+        });
+      }
 
       while (chunkQueue.length > 0) {
-        const queueArgs = chunkQueue.shift();
-
-       //__webpack_require__.getEagerSharedForChunkId(queueArgs[0],__webpack_require__.initConsumes)
-       //__webpack_require__.getEagerRemotesForChunkId(queueArgs[0],__webpack_require__.initRemotes)
-
-       Promise.all(__webpack_require__.initConsumes).then(function () {
-        console.log('pushing deffered chunk into runtime', queueArgs[0]);
-        webpackJsonpCallback.apply(
-          null,
-          [null].concat(Array.prototype.slice.call([queueArgs]))
-        );
-        originalPush.apply(originalPush, [queueArgs]);
-        });
+       runCallback(chunkQueue.shift());
       }
     });
 }
 
-console.log('m',__webpack_require__.m);
-console.log('c',__webpack_require__.c);
 asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
 
 var currentChunkId = "__INSERT_CH_ID__MF__";
-__webpack_require__.O(null, [currentChunkId], function () {
-  console.log('clearing resolved', currentChunkId)
-  // cleanInitArrays(__webpack_require__.initConsumes);
-},5);
+// __webpack_require__.O(null, [currentChunkId], function () {
+//   console.log('clearing resolved', currentChunkId)
+//   cleanInitArrays(__webpack_require__.initConsumes);
+// },5);
 
 chunkLoadingGlobal.push = (function (originalPush) {
   return function () {

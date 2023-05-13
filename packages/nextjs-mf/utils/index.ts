@@ -1,9 +1,9 @@
-import * as React from "react";
+import * as React from 'react';
 
 export {
   extractUrlAndGlobal,
   injectScript,
-} from '@module-federation/utilities';
+} from '@module-federation/utilities/src/utils/common';
 // @ts-ignore
 export { flushChunks } from '@module-federation/node/utils';
 
