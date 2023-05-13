@@ -95,8 +95,14 @@ class InvertedContainerPlugin {
               if (chunk.hasRuntime()) {
                 //@ts-ignore
                 if (chunk.name === this.options?.container) {
-                  for (const mod of chunk.getModules()) {
-                    if (mod.type === 'provide-shared') {
+                  const eagerModulesInRemote =
+                    compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                      chunk,
+                      'provide-module'
+                    );
+                  if (eagerModulesInRemote) {
+                    for (const mod of eagerModulesInRemote) {
+                      console.log('found type', mod.type);
                       compilation.chunkGraph.disconnectChunkAndModule(
                         chunk,
                         mod

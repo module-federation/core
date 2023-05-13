@@ -5,12 +5,8 @@
 
 'use strict';
 
-import type { Chunk, ChunkGraph, Compiler } from 'webpack';
-import { Compilation, RuntimeModule, Template } from 'webpack';
-// @ts-ignore
-import { getUndoPath } from 'webpack/lib/util/identifier';
-// @ts-ignore
-import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
+import type { Chunk, Compiler } from 'webpack';
+import { RuntimeModule } from 'webpack';
 import {
   parseVersionRuntimeCode,
   versionLtRuntimeCode,
@@ -81,7 +77,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       entrypoints,
       compiler,
     } = this.compilation;
-    const { RuntimeGlobals } = compiler.webpack;
+    const { RuntimeGlobals, Template } = compiler.webpack;
     const chunkToModuleMapping = {};
     /** @type {Map<string | number, Source>} */
     const moduleIdToSourceMapping = new Map();
@@ -472,7 +468,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     // @ts-ignore
     const { chunkGraph, compilation } = this;
     const { runtimeTemplate, moduleGraph, entrypoints, compiler } = compilation;
-    const { RuntimeGlobals } = compiler.webpack;
+    const { RuntimeGlobals, Template } = compiler.webpack;
     const chunkToRemotesMapping = {};
     const idToExternalAndNameMapping = {};
 
@@ -618,14 +614,14 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
    */
   override generate() {
     const { name } = this.options;
-
-    const { webpack } = this.chunkLoadingContext;
+    const { chunkGraph, compilation, chunk } = this;
+    const { runtimeTemplate, moduleGraph, entrypoints, compiler } = compilation;
+    const { RuntimeGlobals, Template, javascript } = compiler.webpack || {};
     const chunkHasJs =
-      (webpack && webpack.javascript.JavascriptModulesPlugin.chunkHasJs) ||
+      (javascript && javascript.JavascriptModulesPlugin.chunkHasJs) ||
       require('webpack/lib/javascript/JavascriptModulesPlugin').chunkHasJs;
 
     const containerEntryModule = this.resolveContainerModule();
-    const { chunkGraph, chunk } = this;
     //server runtime is always called webpack-runtime
     const isServer = chunk.name === 'webpack-runtime';
     const conditionMap = chunkGraph.getChunkConditionMap(chunk, chunkHasJs);
@@ -649,7 +645,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       const nodeGlobal = this.compilation.options?.node?.global;
 
       const globalObject = nodeGlobal
-        ? webpack.RuntimeGlobals.global || 'global'
+        ? RuntimeGlobals.global || 'global'
         : 'global';
 
       const containerScope = isServer
