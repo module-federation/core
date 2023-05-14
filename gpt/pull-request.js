@@ -85,7 +85,8 @@ Return it as markdown format:\n
  - [commit message]
    - [explanation]
    - [explanation]
-
+\n
+__gpt__ \n
 ${
   userFeedback
     ? `The user has also provided the following context, which you may find useful: ${userFeedback}`
