@@ -1,7 +1,14 @@
 const { execSync } = require('child_process');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
-const { MAX_CHAR_COUNT, sendPromptToGPT, readline } = require('./ai');
+const {
+  MAX_TOKENS,
+  MAX_CHAR_COUNT,
+  model,
+  chatHistory,
+} = require('./constants');
+const { completionStream } = require('./services/openai');
+const readline = require('readline');
 const chalk = require('chalk');
 const { get_encoding, encoding_for_model } = require('@dqbd/tiktoken');
 const renderMarkdown = require('./markdown');
@@ -14,95 +21,48 @@ const schema = `
     {{"filename": "[filename]", "description": ["[description]", "[description]"]}},
     {{"filename": "[filename]", "description": ["[description]", "[description]"]}}
   ]
-}
-`;
-/**
- * Creates a string prompt for the GPT-3 model.
- *
- * @param {string} input - The input string that will be included in the prompt.
- *
- * @returns {string} The created prompt.
- */
-function createPrompt(input, userFeedback) {
-  return `
-I'm an AI and I'm here to help you create a commit message. Please respond only with a message in the following JSON format, and do not include any additional text.\n
-Please suggest one detailed commit message for the code changes.\n
-Each commit message should be composed of a title and a description.\n
-In the description list overall summary of changes, and list changes for each file and the change sets for them.\n
-ALWAYS Return it as a JSON object with the following format:\n
+}'
+END_OF_JSON`;
 
-${schema}
-\n\n
-${
-  userFeedback
-    ? `The user has also provided the following context, which you may find useful: ${userFeedback}`
-    : ''
-}\n
-Here are the changes: ${input.slice(0, MAX_CHAR_COUNT)}`;
-}
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
-/**
- * Tries to get a valid JSON response from the AI.
- *
- * This function will send the prompt to the AI and try to parse the response.
- * If the response is not valid JSON, it will send a new prompt asking the AI to respond correctly.
- *
- * @param {string} prompt - The initial prompt to send to the AI.
- * @param {string} userFeedback - The feedback to send to the AI if the response is not valid JSON.
- * @returns {Object} The parsed commit message from the AI's response.
- *
- * @throws {Error} If the API response cannot be parsed into JSON.
- *
- * @async
- */
-async function getValidJsonResponse(prompt, userFeedback) {
+async function* getValidJsonResponse(prompt, userFeedback) {
+  const stream = completionStream({ prompt });
+  let answer = '';
+  for await (const data of stream) {
+    answer += data;
+  }
+
   try {
-    const aiReply = await sendPromptToGPT({
-      prompt: userFeedback ? '' : prompt,
-      userFeedback: userFeedback
-        ? [
-            userFeedback,
-            'Please provide a response strictly in the following JSON format, without any additional text:',
-            schema,
-          ].join('\n')
-        : '',
-    });
+    let enc = encoding_for_model(model);
+    let encoded = enc.encode(prompt);
+    enc.free();
 
-    try {
-      const jsonResponse = JSON.parse(aiReply);
-      console.log('ai use', aiReply.usage);
-      // Check if response was likely truncated
-      if (aiReply.usage && aiReply.usage.total_tokens >= MAX_TOKENS) {
-        // Rephrase your request to get the rest of the information
-        const followUpPrompt = 'Can you continue where you left off?';
-        const followUpResponse = await sendPromptToGPT({
-          prompt: followUpPrompt,
-          userFeedback: '',
-        });
+    const jsonResponse = JSON.parse(answer);
 
-        // Append follow-up response to original response
-        jsonResponse.Changes.push(...JSON.parse(followUpResponse).Changes);
+    console.log(jsonResponse);
+
+    // Check if response was likely truncated
+    if ((answer?.usage?.total_tokens || encoded.length) >= MAX_TOKENS) {
+      // Rephrase your request to get the rest of the information
+      const followUpPrompt = 'Can you continue where you left off?';
+      chatHistory.add({ role: 'user', content: followUpPrompt });
+      const followUpStream = completionStream({ prompt: followUpPrompt });
+      let followUpResponse = '';
+      for await (const data of followUpStream) {
+        followUpResponse += data;
       }
 
-      return jsonResponse;
-    } catch (error) {
-      console.error('Error parsing JSON response: ', error);
+      // Append follow-up response to original response
+      jsonResponse.Changes.push(...JSON.parse(followUpResponse).Changes);
     }
+
+    yield jsonResponse;
   } catch (error) {
-    console.error(
-      `The response from the AI was not in the expected format: ${error}`
-    );
-    console.error('Retrying with format consistency prompt...');
-    const aiReply = await sendPromptToGPT({
-      undefined,
-      userFeedback: [
-        'Please provide a response strictly in the following JSON format, without any additional text:',
-        schema,
-        'Try again with the following prompt:',
-        userFeedback,
-      ].join('\n'),
-    });
-    return JSON.parse(aiReply);
+    console.error('Error parsing JSON response: ', error);
   }
 }
 
@@ -139,20 +99,27 @@ async function generateCommitMsg(userFeedback) {
     ].join('\n');
   }
 
-  // let userCommitMsg = yargs(hideBin(process.argv)).argv.message;
-
   let prompt = createPrompt(diff);
-  // if (userCommitMsg) {
-  //   prompt += `\nThe user has already specified this commit message: ${userCommitMsg}\n`;
-  // }
 
-  try {
-    return await getValidJsonResponse(prompt, userFeedback);
-  } catch (error) {
-    console.error(
-      `Unexpected response from the API: ${JSON.stringify(error, null, 2)}`
-    );
+  let commitMsg;
+  for await (const msg of getValidJsonResponse(prompt, userFeedback)) {
+    commitMsg = msg;
   }
+
+  return commitMsg;
+}
+
+function createPrompt(input, userFeedback) {
+  return `I'm an AI assistant, and I'm here to assist you in creating a commit message. To ensure the process goes smoothly, please respond with a message in the JSON format specified below, and refrain from including any additional text. Your task is to suggest a detailed commit message for the given code changes.
+In the description, provide an overall summary of the changes, and detail the changes for each file along with their respective change sets. The commit message should adhere to the following JSON format:
+
+${schema}
+
+${
+  userFeedback ? `Additional context provided by the user: ${userFeedback}` : ''
+}
+
+Here's the git diff for your reference: ${input.slice(0, MAX_CHAR_COUNT)}`;
 }
 
 /**
@@ -173,6 +140,10 @@ async function generateCommitMsg(userFeedback) {
  * @returns {string} The markdown-formatted commit message.
  */
 function createMarkdownCommit(commitMsg = {}) {
+  console.log('commitMsg', commitMsg);
+  if (!commitMsg.Changes) {
+    console.log('commit message is empty', commitMsg);
+  }
   const markdownCommitMsg = `# ${commitMsg.Title}\n\n${
     commitMsg.Description
   }\n\n${commitMsg.Changes.map(
@@ -213,9 +184,9 @@ const runGenerativeCommit = async (userFeedback) => {
   let files = execSync('git diff --name-only --cached').toString().trim();
   console.log(files.length);
   if (!files.length > 0) {
-    readline.write('No files to commit');
-    readline.write('\n');
-    readline.close();
+    rl.write('No files to commit');
+    rl.write('\n');
+    rl.close();
     return;
   }
   const commitMsg = await generateCommitMsg(userFeedback);
@@ -227,12 +198,12 @@ const runGenerativeCommit = async (userFeedback) => {
 
   console.log(renderMarkdown(markdown));
 
-  readline.question(
+  rl.question(
     'Accept this suggestion? (y/n) or provide user context:',
     (answer) => {
       if (answer.toLowerCase() === 'y') {
         gitCommit(title, body);
-        readline.close();
+        rl.close();
       } else if (answer.toLowerCase() === 'n') {
         console.log('Generating a new suggestion...');
         runGenerativeCommit('I did not like this suggestion, try again.');
