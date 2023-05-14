@@ -57,7 +57,7 @@ class InvertedContainerPlugin {
       container: this.options.container,
       debug: this.options.debug,
     }).apply(compiler);
-
+    const { Template, javascript } = compiler.webpack;
     // Hook into the compilation process.
     compiler.hooks.thisCompilation.tap(
       'InvertedContainerPlugin',
@@ -134,9 +134,7 @@ class InvertedContainerPlugin {
         );
 
         const hooks =
-          compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
-            compilation
-          );
+          javascript.JavascriptModulesPlugin.getCompilationHooks(compilation);
 
         compilation.hooks.afterOptimizeChunkAssets.tap(
           'InvertedContainerPlugin',
@@ -176,6 +174,8 @@ class InvertedContainerPlugin {
               return source;
             }
 
+            const { runtimeTemplate } = compilation;
+
             const newSource = [];
             const replaceSource = source.source().toString().split('\n');
 
@@ -196,21 +196,44 @@ class InvertedContainerPlugin {
               replaceSource.length
             );
 
-            const part1 = firstHalf
+            const originalRuntimeCode = firstHalf
               .join('\n')
               .replace(searchString, replaceString);
 
-            const part2 = `
-            var ${searchString} = function(moduleId) {
-return __webpack_require__.own_remote.then(function(thing){
-return Promise.all(__webpack_require__.initRemotes);
-}).then(function(){
-return Promise.all(__webpack_require__.initConsumes);
-}).then(function(){
-return ${replaceString}(moduleId);
-})
-             };
-              `;
+            const fancyTemplate = Template.asString([
+              runtimeTemplate.returningFunction(
+                Template.asString(
+                  [
+                    '__webpack_require__.own_remote.then(',
+                    runtimeTemplate.returningFunction(
+                      Template.asString([
+                        'Promise.all([',
+                        Template.indent(
+                          [
+                            'Promise.all(__webpack_require__.initRemotes)',
+                            'Promise.all(__webpack_require__.initConsumes)',
+                          ].join(',\n')
+                        ),
+                        '])',
+                      ])
+                    ),
+                    ').then(',
+                    runtimeTemplate.returningFunction(
+                      Template.asString([`${replaceString}(moduleId)`])
+                    ),
+                    ')',
+                  ].join('')
+                ),
+                'moduleId'
+              ),
+            ]);
+
+            const wholeTem = Template.asString([
+              `var ${searchString} =`,
+              fancyTemplate,
+            ]);
+
+            console.log(wholeTem);
 
             return Template.asString([
               '',
@@ -221,8 +244,8 @@ return ${replaceString}(moduleId);
                 `__webpack_require__.getEagerRemotesForChunkId(currentChunkId,__webpack_require__.initConsumes)`,
               ]),
               '}',
-              part1,
-              part2,
+              originalRuntimeCode,
+              wholeTem,
               ...secondHalf,
               '',
             ]);
