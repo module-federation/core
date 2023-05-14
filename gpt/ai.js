@@ -5,7 +5,8 @@ const fetch = require('node-fetch');
 const { pipeline, Transform } = require('stream');
 const { TextDecoder } = require('util');
 const { get_encoding, encoding_for_model } = require('@dqbd/tiktoken');
-const { streamGPT, chatHistory, model } = require('./generate');
+const { chatHistory, MAX_CHAR_COUNT, model } = require('./constants');
+const { streamGPT } = require('./generate');
 const readline = require('readline');
 const rl = readline.createInterface({
   input: process.stdin,
@@ -14,7 +15,6 @@ const rl = readline.createInterface({
 
 const chatgptApiEndpoint = 'https://api.openai.com/v1/chat/completions';
 const chatgptApiKey = process.env.OPENAI_API_KEY;
-const MAX_CHAR_COUNT = 10000;
 const historyLength = 5; // Change this value to set the desired chat history length
 async function sendPromptToGPT({ role = 'assistant', prompt, userFeedback }) {
   console.log('Sending Prompt to GPT...');
@@ -55,7 +55,6 @@ async function sendPromptToGPT({ role = 'assistant', prompt, userFeedback }) {
 
 module.exports = {
   sendPromptToGPT,
-  MAX_CHAR_COUNT,
   readline: rl,
   chatHistory,
 };
