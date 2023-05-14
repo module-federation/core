@@ -56,7 +56,7 @@ async function promptFile(filePaths, question) {
       chunkMaps[filePath] = chunkMaps[filePath].concat(result.chunks);
     } catch (err) {
       console.error('Error processing file:', filePath);
-      // throw err;
+      throw err;
     }
   }
 
