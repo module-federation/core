@@ -5,7 +5,7 @@ const { MAX_CHAR_COUNT, sendPromptToGPT, readline } = require('./ai');
 const chalk = require('chalk');
 const { get_encoding, encoding_for_model } = require('@dqbd/tiktoken');
 const renderMarkdown = require('./markdown');
-
+const { commandJoin } = require('command-join');
 const schema = `
 {
   "Title": "[title]",
@@ -174,12 +174,9 @@ function createMarkdownCommit(commitMsg = {}) {
  * @returns {Buffer} - The output of the execSync command, usually an empty Buffer unless an error occurred.
  */
 function gitCommit(title, body) {
-  return execSync(
-    `git commit -m "${title}" -m "${body
-      .replace(/"/g, '\\"')
-      .replace(/\n/g, '\\n')}"`,
-    { stdio: 'inherit' }
-  );
+  const gitCmd = commandJoin(['git', 'commit', '-m', title, '-m', body]);
+  console.log('Committing changes...', gitCmd);
+  return execSync(gitCmd, { stdio: 'inherit' });
 }
 
 const runGenerativeCommit = async (userFeedback) => {
