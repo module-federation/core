@@ -67,10 +67,30 @@ async function getValidJsonResponse(prompt, userFeedback) {
           ].join('\n')
         : '',
     });
-    return JSON.parse(aiReply);
+
+    try {
+      const jsonResponse = JSON.parse(aiReply);
+      console.log('ai use', aiReply.usage);
+      // Check if response was likely truncated
+      if (aiReply.usage && aiReply.usage.total_tokens >= MAX_TOKENS) {
+        // Rephrase your request to get the rest of the information
+        const followUpPrompt = 'Can you continue where you left off?';
+        const followUpResponse = await sendPromptToGPT({
+          prompt: followUpPrompt,
+          userFeedback: '',
+        });
+
+        // Append follow-up response to original response
+        jsonResponse.Changes.push(...JSON.parse(followUpResponse).Changes);
+      }
+
+      return jsonResponse;
+    } catch (error) {
+      console.error('Error parsing JSON response: ', error);
+    }
   } catch (error) {
     console.error(
-      `The response from the AI was not in the expected format: ${error.message}`
+      `The response from the AI was not in the expected format: ${error}`
     );
     console.error('Retrying with format consistency prompt...');
     const aiReply = await sendPromptToGPT({
@@ -82,7 +102,6 @@ async function getValidJsonResponse(prompt, userFeedback) {
         userFeedback,
       ].join('\n'),
     });
-    debugger;
     return JSON.parse(aiReply);
   }
 }
@@ -106,7 +125,7 @@ async function generateCommitMsg(userFeedback) {
 
   let diff = execSync('git diff -U10 --staged').toString();
   let files = execSync('git diff --name-only --cached').toString().trim();
-
+  console.log('files', files);
   if (!files) {
     console.error('No files to commit');
     return;
