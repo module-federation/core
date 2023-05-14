@@ -80,7 +80,7 @@ async function* getValidJsonResponse(prompt, userFeedback) {
  *
  * @async
  */
-async function generateCommitMsg(userFeedback) {
+async function generateCommitMsg() {
   console.log('Generating commit message for staged changes...');
 
   let diff = execSync('git diff -U10 --staged').toString();
@@ -91,18 +91,28 @@ async function generateCommitMsg(userFeedback) {
     return;
   }
 
+  console.log('tokens', diff.length, MAX_CHAR_COUNT);
+
   if (diff.length > MAX_CHAR_COUNT) {
-    console.warn('over max char count, truncating diff', diff.length);
+    let oldDiff = diff.length;
     diff = [
       execSync('git diff --staged --stat').toString(),
       execSync('git diff -U5 --staged').toString(),
     ].join('\n');
+
+    console.warn(
+      'over max char count, reducing diff fidelity',
+      'from:',
+      oldDiff.length,
+      'to:',
+      diff.length
+    );
   }
 
   let prompt = createPrompt(diff);
 
   let commitMsg;
-  for await (const msg of getValidJsonResponse(prompt, userFeedback)) {
+  for await (const msg of getValidJsonResponse(prompt)) {
     commitMsg = msg;
   }
 
@@ -140,7 +150,6 @@ Here's the git diff for your reference: ${input.slice(0, MAX_CHAR_COUNT)}`;
  * @returns {string} The markdown-formatted commit message.
  */
 function createMarkdownCommit(commitMsg = {}) {
-  console.log('commitMsg', commitMsg);
   if (!commitMsg.Changes) {
     console.log('commit message is empty', commitMsg);
   }
@@ -180,7 +189,7 @@ function gitCommit(title, body) {
   return execSync(gitCmd, { stdio: 'inherit' });
 }
 
-const runGenerativeCommit = async (userFeedback) => {
+const runGenerativeCommit = async () => {
   let files = execSync('git diff --name-only --cached').toString().trim();
   console.log(files.length);
   if (!files.length > 0) {
@@ -189,7 +198,7 @@ const runGenerativeCommit = async (userFeedback) => {
     rl.close();
     return;
   }
-  const commitMsg = await generateCommitMsg(userFeedback);
+  const commitMsg = await generateCommitMsg();
 
   const markdown = createMarkdownCommit(commitMsg);
 
@@ -206,10 +215,15 @@ const runGenerativeCommit = async (userFeedback) => {
         rl.close();
       } else if (answer.toLowerCase() === 'n') {
         console.log('Generating a new suggestion...');
-        runGenerativeCommit('I did not like this suggestion, try again.');
+        chatHistory.add({
+          role: 'user',
+          content: 'I did not like this suggestion, try again.',
+        });
+        runGenerativeCommit();
       } else {
         console.log('Generating a new suggestion with user context...', answer);
-        runGenerativeCommit(answer);
+        chatHistory.add({ role: 'user', content: answer });
+        runGenerativeCommit();
       }
     }
   );
