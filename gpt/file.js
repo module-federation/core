@@ -1,52 +1,73 @@
-const fs = require('fs');
-import { Configuration, OpenAIApi } from 'openai';
+const path = require('path');
+const processFile = require('./process-file');
+const getAnswer = require('./get-answer-from-files');
+const { parseGptResponse } = require('./services/utils');
+const { chatHistory } = require('./constants');
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+let prompt = `
+Given the files provided, please perform the following tasks as needed:
+1. Improve the runtime complexity of the code. Analyze the current time complexity and identify any bottlenecks or inefficient operations. Implement optimizations to improve the efficiency of the code.
+2. Add thorough JSDoc comments to all functions, variables, and classes in the code. The comments should provide detailed descriptions of the purpose and functionality of each element, the types and descriptions of all parameters and return values, and any side effects or exceptions. The comments should be formatted correctly for use with autocomplete features in code editors.
+3. Refactor the code as needed for easier maintainability. This may include simplifying complex code, breaking down large functions into smaller ones, removing redundant or unnecessary code, improving the organization and structure of the code, and renaming variables and functions for clarity.
+4. Ensure that the user feedback is taken into consideration, if it exists.
+5. Ensure that the updated code is returned in the response, with no additional text or formatting. The code should be ready to use as-is.
+6. Do not include any presentational text in responses. No markdown, code blocks, or other formatting should be included in the response.
 
-async function uploadFile(filePath) {
-  const fileContent = fs.readFileSync(filePath, 'utf8');
-  const file = await openai.createFile(fileContent, 'fine-tuning', {});
-  console.log('f', file);
+Please provide the updated code as the answer to this objective.
 
-  return file.data.id;
-}
+The response should follow this template:
 
-async function getFileStatus(fileId) {
-  const file = await openai.getFile(fileId);
-  return file.data.status;
-}
+__BLOCK_START__
+[filename 1]
+__CODE_START__
+[code changes for file 1]
+__BLOCK_END__
+__BLOCK_START__
+[filename 2]
+__CODE_START__
+[code changes for file 2]
+__BLOCK_END__
+__END_OF_RESPONSE__
 
-async function useFileInCompletion(fileId) {
-  const completion = await openai.createCompletion({
-    model: 'text-davinci-003',
-    prompt: 'Translate the following English text to French: "{documents}"',
-    max_tokens: 60,
-    documents: [fileId],
+For each file, start with '__BLOCK_START__', followed by the filename, then '__CODE_START__', then the updated content of the file, and end with '__BLOCK_END__'. Separate the sections for different files with a newline. The very last line should be __END_OF_RESPONSE__
+`;
+
+async function promptFile(filePaths, question) {
+  if (!filePaths || !Array.isArray(filePaths) || filePaths.length === 0) {
+    throw new Error('Missing or invalid argument: filePaths');
+  }
+
+  if (!question) {
+    throw new Error('Missing argument: question');
+  }
+
+  chatHistory.add({
+    role: 'user',
+    content: `Primary Objective/User Feedback: ${question}`,
   });
 
-  return completion.data.choices[0].text;
-}
-
-async function main() {
-  const filePath = './OpenAIStream.js'; // Replace with your file path
-  const fileId = await uploadFile(filePath);
-  console.log(`Uploaded file with ID: ${fileId}`);
-
-  let status = await getFileStatus(fileId);
-  while (status !== 'processed') {
-    console.log(
-      `File status: ${status}, waiting for processing to complete...`
-    );
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
-    status = await getFileStatus(fileId);
+  let chunkMaps = {};
+  for (let filePath of filePaths) {
+    console.log('Processing file:', filePath);
+    filePath = path.resolve(process.cwd(), filePath);
+    try {
+      const result = await processFile(filePath);
+      if (!chunkMaps[filePath]) chunkMaps[filePath] = [];
+      chunkMaps[filePath] = chunkMaps[filePath].concat(result.chunks);
+    } catch (err) {
+      console.error('Error processing file:', filePath);
+      // throw err;
+    }
   }
-  console.log(`File status: ${status}`);
 
-  const completion = await useFileInCompletion(fileId);
-  console.log(`Completion: ${completion}`);
+  console.log('Asking questions...');
+
+  const answer = await getAnswer(chunkMaps, prompt);
+  console.log('Parsing response...');
+  const parsedResposne = parseGptResponse(answer);
+  console.log('Response parsed successfully.');
+
+  return parsedResposne;
 }
 
-main().catch(console.error);
+module.exports = promptFile;

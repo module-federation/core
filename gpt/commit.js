@@ -6,6 +6,7 @@ const {
   MAX_CHAR_COUNT,
   model,
   chatHistory,
+  MAIN_BRANCH,
 } = require('./constants');
 const { completionStream } = require('./services/openai');
 const { readline } = require('./terminal');
