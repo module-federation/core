@@ -8,7 +8,7 @@ const {
 const renderMarkdown = require('./markdown');
 const fs = require('fs');
 
-const mainbranch = 'kill_child_compilers';
+const mainbranch = 'quantum_modules';
 
 function getCommitMessages(branchName) {
   const commitMessages = execSync(
@@ -153,11 +153,7 @@ const generatePullRequestSummary = async (userFeedback) => {
   );
   const summary = await sendToGPTForSummary(prompt, userFeedback);
 
-  console.log('ch', chatHistory);
-  await new Promise((resolve) => setTimeout(resolve, 10000));
-  // console.log('Got summary from AI', summary);
-  // const markdown = createMarkdownSummary(summary);
-  // console.log(renderMarkdown(summary));
+  console.log(renderMarkdown(summary));
 
   readline.question(
     'Accept this suggestion? (y/n) or type additional user feedback ',

@@ -67,8 +67,6 @@ const handler = async (prompt, userFeedback, blocking = false, onChunk) => {
     stream: true,
   };
 
-  console.log('history', chatHistory);
-
   const aiResponse = blocking
     ? await readChunksBlocking(payload, onChunk)
     : await readChunks(payload, onChunk);

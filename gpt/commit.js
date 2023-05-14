@@ -174,7 +174,18 @@ function createMarkdownCommit(commitMsg = {}) {
  * @returns {Buffer} - The output of the execSync command, usually an empty Buffer unless an error occurred.
  */
 function gitCommit(title, body) {
-  const gitCmd = commandJoin(['git', 'commit', '-m', title, '-m', body]);
+  // Split the body by newline characters to get an array of strings
+  const bodyLines = body.split('\n');
+
+  // Create an array for the git command
+  let gitCmdArray = ['git', 'commit', '-m', title];
+
+  // Iterate over the bodyLines array and add a "-m" followed by each line
+  bodyLines.forEach((line) => {
+    gitCmdArray.push('-m');
+    gitCmdArray.push(line);
+  });
+  const gitCmd = commandJoin(gitCmdArray);
   console.log('Committing changes...');
   return execSync(gitCmd, { stdio: 'inherit' });
 }
