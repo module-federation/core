@@ -22,31 +22,31 @@ const schema = `
     {{"filename": "[filename]", "description": ["[description]", "[description]"]}},
     {{"filename": "[filename]", "description": ["[description]", "[description]"]}}
   ]
-}'
-END_OF_JSON`;
+}
+\n
+__END_OF_RESPONSE__`;
 
 async function* getValidJsonResponse(prompt, userFeedback) {
-  const stream = completionStream({ prompt });
-  let answer = '';
-  for await (const data of stream) {
-    answer += data;
-  }
-
   try {
+    const stream = completionStream({ prompt });
+    let answer = '';
+    for await (const data of stream) {
+      answer += data;
+    }
+
     let enc = encoding_for_model(model);
     let encoded = enc.encode(prompt);
     enc.free();
 
+    console.log(answer);
     const jsonResponse = JSON.parse(answer);
-
-    console.log(jsonResponse);
 
     // Check if response was likely truncated
     if ((answer?.usage?.total_tokens || encoded.length) >= MAX_TOKENS) {
       // Rephrase your request to get the rest of the information
       const followUpPrompt = 'Can you continue where you left off?';
       chatHistory.add({ role: 'user', content: followUpPrompt });
-      const followUpStream = completionStream({ prompt: followUpPrompt });
+      const followUpStream = completionStream({ prompt: prompt });
       let followUpResponse = '';
       for await (const data of followUpStream) {
         followUpResponse += data;
@@ -59,6 +59,11 @@ async function* getValidJsonResponse(prompt, userFeedback) {
     yield jsonResponse;
   } catch (error) {
     console.error('Error parsing JSON response: ', error);
+    chatHistory.add({
+      role: 'user',
+      content: 'There was an error, please try again.',
+    });
+    yield* getValidJsonResponse(prompt, userFeedback);
   }
 }
 
@@ -88,9 +93,9 @@ async function generateCommitMsg() {
   }
 
   console.log('tokens', diff.length, MAX_CHAR_COUNT);
+  let oldDiff = diff.length;
 
   if (diff.length > MAX_CHAR_COUNT) {
-    let oldDiff = diff.length;
     diff = [
       execSync('git diff --staged --stat').toString(),
       execSync('git diff -U5 --staged').toString(),

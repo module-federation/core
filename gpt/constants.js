@@ -7,3 +7,4 @@ module.exports.MAX_TOKENS = 4500; // 4000 if gpt3
 module.exports.showProgress = false;
 module.exports.MAX_CHAR_COUNT = 10000;
 module.exports.MAIN_BRANCH = 'quantum_modules';
+module.exports.filterStopwords = false;

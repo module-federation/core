@@ -13,7 +13,9 @@
   ],
   "license": "MIT",
   "scripts": {
+    "gpt:file:example": "yarn gpt:file --file ./gpt/services/openai.js --file ./gpt/commit.js --question \"Make commit.js use completionStream from instead of sendPromptToGPT. Make as few alterations as possible.\"",
     "gpt:commit":"node ./gpt --commit",
+    "gpt:file":"node ./gpt",
     "gpt:pr":"node ./gpt --pr",
     "build": "nx run-many --target=build --projects=3000-home --verbose --output-style=stream",
     "oldbuuild": "nx build",
@@ -53,7 +55,13 @@
     "unplugin": "^1.3.1"
   },
   "devDependencies": {
+    "stopword": "^2.0.8",
+    "mime-types": "2.1.35",
+    "mammoth": "^1.5.1",
+    "pdf-parse": "^1.1.1",
+    "node-html-markdown": "^1.3.0",
     "@dqbd/tiktoken": "^1.0.7",
+    "form-data": "^4.0.0",
     "marked": "^1.0.7",
     "command-join": "^3.0.0",
     "marked-terminal": "^5.2.0",
