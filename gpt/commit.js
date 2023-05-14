@@ -175,7 +175,7 @@ function createMarkdownCommit(commitMsg = {}) {
  */
 function gitCommit(title, body) {
   const gitCmd = commandJoin(['git', 'commit', '-m', title, '-m', body]);
-  console.log('Committing changes...', gitCmd);
+  console.log('Committing changes...');
   return execSync(gitCmd, { stdio: 'inherit' });
 }
 
