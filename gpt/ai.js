@@ -19,7 +19,7 @@ const historyLength = 5; // Change this value to set the desired chat history le
 async function sendPromptToGPT({ role = 'assistant', prompt, userFeedback }) {
   console.log('Sending Prompt to GPT...');
   const argv = yargs(hideBin(process.argv)).argv;
-  if (!prompt) {
+  if (!prompt && !userFeedback) {
     console.error('No prompt to send');
     return;
   }
@@ -48,7 +48,7 @@ async function sendPromptToGPT({ role = 'assistant', prompt, userFeedback }) {
     'usage',
     // data.usage,
     'predicted tokens:',
-    encoded.length
+    encoded && encoded.length
   );
 
   return content;
