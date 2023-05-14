@@ -8,7 +8,7 @@ const {
   chatHistory,
 } = require('./constants');
 const { completionStream } = require('./services/openai');
-const readline = require('readline');
+const { readline } = require('./terminal');
 const chalk = require('chalk');
 const { get_encoding, encoding_for_model } = require('@dqbd/tiktoken');
 const renderMarkdown = require('./markdown');
@@ -23,11 +23,6 @@ const schema = `
   ]
 }'
 END_OF_JSON`;
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
 
 async function* getValidJsonResponse(prompt, userFeedback) {
   const stream = completionStream({ prompt });
@@ -193,9 +188,9 @@ const runGenerativeCommit = async () => {
   let files = execSync('git diff --name-only --cached').toString().trim();
   console.log(files.length);
   if (!files.length > 0) {
-    rl.write('No files to commit');
-    rl.write('\n');
-    rl.close();
+    readline.write('No files to commit');
+    readline.write('\n');
+    readline.close();
     return;
   }
   const commitMsg = await generateCommitMsg();
@@ -207,18 +202,19 @@ const runGenerativeCommit = async () => {
 
   console.log(renderMarkdown(markdown));
 
-  rl.question(
+  readline.question(
     'Accept this suggestion? (y/n) or provide user context:',
     (answer) => {
       if (answer.toLowerCase() === 'y') {
         gitCommit(title, body);
-        rl.close();
+        readline.close();
       } else if (answer.toLowerCase() === 'n') {
         console.log('Generating a new suggestion...');
         chatHistory.add({
           role: 'user',
           content: 'I did not like this suggestion, try again.',
         });
+        readline.close();
         runGenerativeCommit();
       } else {
         console.log('Generating a new suggestion with user context...', answer);
