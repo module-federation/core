@@ -1,18 +1,18 @@
 const { execSync } = require('child_process');
+const { completionStream } = require('./services/openai');
+const { readline } = require('./terminal');
 const {
   MAX_CHAR_COUNT,
-  sendPromptToGPT,
-  readline,
+  MAIN_BRANCH,
   chatHistory,
-} = require('./ai');
+  MAX_TOKENS,
+} = require('./constants');
 const renderMarkdown = require('./markdown');
 const fs = require('fs');
 
-const mainbranch = 'quantum_modules';
-
 function getCommitMessages(branchName) {
   const commitMessages = execSync(
-    `git log ${mainbranch}..${branchName} --pretty=format:"%B"`
+    `git log ${MAIN_BRANCH}..${branchName} --pretty=format:"%B"`
   ).toString();
   return commitMessages;
 }
@@ -23,10 +23,10 @@ function getCurrentBranch() {
 
 function createLogJSONPrompt(input) {
   return `
-Please suggest one detailed summary for the series of commit messages.\n
-The summary should be composed of a title and a description.\n
-In the description, provide an overall summary of the changes reflected in the commits, and list each commit with a brief explanation of its content.\n
-Return it as a JSON object with the following format:\n
+Please suggest one detailed summary for the series of commit messages.
+The summary should be composed of a title and a description.
+In the description, provide an overall summary of the changes reflected in the commits, and list each commit with a brief explanation of its content.
+Return it as a JSON object with the following format:
 {{
 "Title": "[summary title]",
 "Description": "[summary description]",
@@ -35,7 +35,8 @@ Return it as a JSON object with the following format:\n
 {{"commit": "[commit message]", "explanation": ["[explanation]", "[explanation]"]}}
 ]
 }}
-Here are the commit messages: ${input.slice(0, MAX_CHAR_COUNT)}`;
+Here are the commit messages: ${input.slice(0, MAX_CHAR_COUNT)}
+__END_OF_RESPONSE__`;
 }
 
 /**
@@ -69,13 +70,12 @@ Here are the commit messages: ${input.slice(0, MAX_CHAR_COUNT)}`;
  * // The user has also provided the following context, which you may find useful: These commits are related to feature X\n
  * // Here are the commit messages: commit1: message1\ncommit2: message2"
  */
-function createLogMarkdownPrompt(input, userFeedback) {
+function createLogMarkdownPrompt(input) {
   return `
-Please suggest one detailed summary for the series of commit messages.\n
-The summary should be composed of a title and a description.\n
-In the description, provide an overall summary of the changes reflected in the commits, and list each commit with a brief explanation of its content.\n
-Reply in multiple seperate messages:\n
-Return it as markdown format:\n
+Please suggest one detailed summary for the series of commit messages.
+The summary should be composed of a title and a description.
+In the description, provide an overall summary of the changes reflected in the commits, and list each commit with a brief explanation of its content.
+Return it as markdown format:
 # [summary title]
 [summary description]
 ## Commits
@@ -85,21 +85,26 @@ Return it as markdown format:\n
  - [commit message]
    - [explanation]
    - [explanation]
-\n
-__gpt__ \n
-${
-  userFeedback
-    ? `The user has also provided the following context, which you may find useful: ${userFeedback}`
-    : ''
-}\n
+
+__END_OF_RESPONSE__
+
 Here are the commit messages: ${input.slice(0, MAX_CHAR_COUNT)}`;
 }
-async function sendToGPTForSummary(commitMessages, userFeedback) {
-  const markdownResponse = await sendPromptToGPT({
+async function sendToGPTForSummary(commitMessages) {
+  const responseChunks = [];
+  const completionStreamGenerator = completionStream({
     prompt: commitMessages,
-    userFeedback: userFeedback,
+    temperature: 0.9,
+    max_tokens: MAX_TOKENS ?? 800, // Adjust max_tokens based on your needs
   });
+  console.log('Waiting for response from GPT...');
 
+  for await (let chunk of completionStreamGenerator) {
+    responseChunks.push(chunk);
+    // Here, you can add additional logic to handle each chunk as it arrives
+  }
+
+  const markdownResponse = responseChunks.join('');
   return markdownResponse;
 }
 
@@ -144,15 +149,14 @@ function createMarkdownSummary(summaryMsg = {}) {
 }
 
 const generatePullRequestSummary = async (userFeedback) => {
+  if (userFeedback) chatHistory.add({ role: 'user', content: userFeedback });
   const currentBranch = getCurrentBranch();
   console.log('Generating pull request summary for...', currentBranch);
   const commitMessages = getCommitMessages(currentBranch);
   console.log('Got commit messages, creating prompt...');
-  const prompt = createLogMarkdownPrompt(
-    commitMessages
-    // userFeedback
-  );
-  const summary = await sendToGPTForSummary(prompt, userFeedback);
+  const prompt = createLogMarkdownPrompt(commitMessages);
+  console.log('Prompt created, sending to GPT...');
+  const summary = await sendToGPTForSummary(prompt);
 
   console.log(renderMarkdown(summary));
 
@@ -173,9 +177,6 @@ const generatePullRequestSummary = async (userFeedback) => {
       }
     }
   );
-
-  // console.log('generated summary', summary);
-  // return summary;
 };
 
 module.exports = {
