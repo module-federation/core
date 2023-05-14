@@ -5,7 +5,7 @@ const fetch = require('node-fetch');
 const { pipeline, Transform } = require('stream');
 const { TextDecoder } = require('util');
 const { get_encoding, encoding_for_model } = require('@dqbd/tiktoken');
-const { streamGPT, chatHistory } = require('./generate');
+const { streamGPT, chatHistory, model } = require('./generate');
 const readline = require('readline');
 const rl = readline.createInterface({
   input: process.stdin,
@@ -24,7 +24,7 @@ async function sendPromptToGPT({ role = 'assistant', prompt, userFeedback }) {
     return;
   }
 
-  let enc = encoding_for_model('gpt-3.5-turbo');
+  let enc = encoding_for_model(model);
   let encoded = enc.encode(prompt);
   enc.free();
 
@@ -40,16 +40,15 @@ async function sendPromptToGPT({ role = 'assistant', prompt, userFeedback }) {
   // });
 
   console.log('Sending prompt to OpenAI API...');
-  const gptStream = await streamGPT(prompt, userFeedback, true);
-
-  let content = gptStream;
-
   console.log(
     'usage',
     // data.usage,
     'predicted tokens:',
     encoded && encoded.length
   );
+  const gptStream = await streamGPT(prompt, userFeedback, true);
+
+  let content = gptStream;
 
   return content;
 }
