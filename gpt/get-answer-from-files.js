@@ -1,5 +1,6 @@
 const { ChatCompletionRequestMessageRoleEnum } = require('openai');
 const { completionStream } = require('./services/openai');
+const fs = require('fs');
 const {
   showProgress,
   chatHistory,
@@ -8,6 +9,7 @@ const {
   response,
   model,
 } = require('./constants');
+const { normalizedFileName, parseGptResponse } = require('./services/utils');
 
 async function getAnswer(chunkMaps, question) {
   let filesString = '';
@@ -30,7 +32,6 @@ async function getAnswer(chunkMaps, question) {
     let newChunk = currentChunk + fileChunks[i] + '\n';
     if (newChunk.length > MAX_FILES_LENGTH) {
       console.log('hitting openapi again');
-      // Send the current chunk and start a new one
       let prompt = basePrompt + currentChunk + responsePrompt;
       if (prompt) {
         chatHistory.add({
@@ -39,10 +40,9 @@ async function getAnswer(chunkMaps, question) {
         });
         console.log(prompt);
       }
-      answer += await getAnswerFromStream(prompt, chunkMaps); // pass question here
+      answer += await getAnswerFromStream(prompt, chunkMaps);
       currentChunk = fileChunks[i] + '\n';
     } else {
-      // Otherwise, add the current line to the chunk
       currentChunk = newChunk;
     }
   }
@@ -53,15 +53,13 @@ async function getAnswer(chunkMaps, question) {
       role: ChatCompletionRequestMessageRoleEnum.System,
       content: prompt,
     });
-    answer += await getAnswerFromStream(prompt, chunkMaps, question); // pass question here
+    answer += await getAnswerFromStream(prompt, chunkMaps);
   }
-
-  console.log(currentChunk);
 
   return answer;
 }
 
-async function getAnswerFromStream(prompt, chunkMaps, question) {
+async function getAnswerFromStream(prompt, chunks) {
   let answer = '';
   const stream = completionStream({
     prompt,
@@ -70,39 +68,51 @@ async function getAnswerFromStream(prompt, chunkMaps, question) {
     model,
   });
 
-  // Create a write stream
-  const writeStream = fs.createWriteStream('output.txt', { encoding: 'utf8' });
+  let writeStreams = {};
+
+  for (let path in chunks) {
+    writeStreams[path + '.gpt.js'] = {
+      stream: fs.createWriteStream(path + '.gpt.js', { encoding: 'utf8' }),
+      lastWrittenPos: 0,
+    };
+  }
 
   for await (const data of stream) {
     answer += data;
-    writeStream.write(data); // Write data to file
+
+    const response = parseGptResponse(data);
+
+    for (let fileName in response) {
+      const tempname = fileName + '.gpt.js';
+      if (!writeStreams[tempname]) {
+        writeStreams[tempname] = {
+          stream: fs.createWriteStream(tempname, { encoding: 'utf8' }),
+          lastWrittenPos: 0,
+        };
+      }
+      const newContent = response[fileName].slice(
+        writeStreams[tempname].lastWrittenPos
+      );
+      console.log('writing to file', tempname, newContent);
+      writeStreams[tempname].stream.write(newContent);
+      writeStreams[tempname].lastWrittenPos = response[fileName].length;
+    }
 
     if (showProgress) {
-      const lines = answer.split('\n');
-      const lastLines = lines.slice(-5); // Adjust this number to the number of lines you want to tail
-      process.stdout.clearLine();
-      console.clear();
-      process.stdout.cursorTo(0);
-      process.stdout.write(lastLines.join('\n'));
+      // const lines = answer.split('\n');
+      // process.stdout.clearLine();
+      // process.stdout.cursorTo(0);
+      // process.stdout.write(lines.join('\n'));
     }
   }
 
-  writeStream.end(); // Close the write stream
-
-  if (!answer.endsWith(response.end)) {
-    console.log(
-      '\x1b[31m%s\x1b[0m',
-      `ERROR: ${response.end} not found in answer`
-    );
-    console.log(answer);
-    chatHistory.add({
-      role: 'user',
-      content: 'Can you continue where you left off?',
-    });
-    return getAnswer(chunkMaps, question);
+  for (let fileName in writeStreams) {
+    const tempname = fileName;
+    writeStreams[tempname].stream.end();
+    delete writeStreams[tempname];
   }
 
   return answer;
 }
 
-module.exports = getAnswer;
+module.exports.getAnswer = getAnswer;

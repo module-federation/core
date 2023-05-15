@@ -54,20 +54,46 @@ const isFileNameInString = (fileName, str) => {
   return normalizedStr.includes(normalizedFileName);
 };
 
-function parseGptResponse(response) {
-  console.log('Parsing GPT response...');
-  const blocks = response.split('__BLOCK_START__').slice(1); // Ignore everything before the first block
-  const parsed = {};
-  blocks.forEach((block) => {
-    const [filePath, code] = block.split('__CODE_START__');
+const parsed = {};
+const chunkAggregator = [];
 
-    const cleanedFilePath = filePath.trim();
-    console.log('Parsing block:', cleanedFilePath);
+function parseGptResponse(incoming) {
+  chunkAggregator.push(incoming);
 
-    const cleanedCode = code.split('__BLOCK_END__')[0].trim(); // Ignore everything after the block end
-    parsed[cleanedFilePath] = cleanedCode;
-  });
+  if (chunkAggregator.length < 5) {
+    console.log(chunkAggregator.length);
+    console.log('not enough chunks to parse');
+    return parsed;
+  }
+  let response = chunkAggregator.join('');
+  if (response.startsWith('__BLOCK_START__')) {
+    response = response.substring(
+      response.indexOf('__BLOCK_START__') + '__BLOCK_START__'.length
+    );
+    console.log('startswith', response);
+    response = response.replace('__BLOCK_START__', '');
+  }
 
+  if (response.indexOf('__CODE_START__') === -1) {
+    return parsed;
+  }
+
+  const [filename, body] = response.split('__CODE_START__');
+  if (!isFileNameInString(filename, response)) {
+    return parsed;
+  }
+  // console.log('filename', filename, body);
+
+  const cleanedFilePath = filename.trim();
+
+  if (body.indexOf('__BLOCK_END__') === -1) {
+    parsed[cleanedFilePath] = body.trim();
+    return parsed;
+  }
+
+  const cleanedCode = code.split('__BLOCK_END__')[0].trim(); // Ignore everything after the block end
+
+  console.log('cleanedCode', cleanedCode);
   console.log(Object.keys(parsed).length, 'files parsed');
 
   return parsed;

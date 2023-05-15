@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const processFile = require('./process-file');
-const getAnswer = require('./get-answer-from-files');
+const { getAnswer } = require('./get-answer-from-files');
 const { parseGptResponse } = require('./services/utils');
 const { chatHistory, response } = require('./constants');
 
@@ -52,7 +52,6 @@ async function promptFile(filePaths, question) {
     console.log('Processing file:', filePath);
     filePath = path.resolve(process.cwd(), filePath);
     try {
-      console.log(chatHistory);
       const result = await processFile(filePath);
       if (!chunkMaps[filePath]) chunkMaps[filePath] = [];
       chunkMaps[filePath] = chunkMaps[filePath].concat(result.chunks);
