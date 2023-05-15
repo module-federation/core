@@ -6,6 +6,7 @@ const {
   MAX_FILES_LENGTH,
   MAX_TOKENS,
   response,
+  model,
 } = require('./constants');
 
 async function getAnswer(chunkMaps, question) {
@@ -60,18 +61,22 @@ async function getAnswer(chunkMaps, question) {
   return answer;
 }
 
-async function getAnswerFromStream(prompt, chunkMaps) {
+async function getAnswerFromStream(prompt, chunkMaps, question) {
   let answer = '';
-  const stream = completionStream(
-    {
-      prompt,
-      temperature: 0.5,
-      max_tokens: MAX_TOKENS,
-    },
-    { responseType: 'stream' }
-  );
+  const stream = completionStream({
+    prompt,
+    temperature: 0.5,
+    max_tokens: MAX_TOKENS,
+    model,
+  });
+
+  // Create a write stream
+  const writeStream = fs.createWriteStream('output.txt', { encoding: 'utf8' });
+
   for await (const data of stream) {
     answer += data;
+    writeStream.write(data); // Write data to file
+
     if (showProgress) {
       const lines = answer.split('\n');
       const lastLines = lines.slice(-5); // Adjust this number to the number of lines you want to tail
@@ -82,8 +87,9 @@ async function getAnswerFromStream(prompt, chunkMaps) {
     }
   }
 
+  writeStream.end(); // Close the write stream
+
   if (!answer.endsWith(response.end)) {
-    //console.log in red and big
     console.log(
       '\x1b[31m%s\x1b[0m',
       `ERROR: ${response.end} not found in answer`
@@ -93,7 +99,7 @@ async function getAnswerFromStream(prompt, chunkMaps) {
       role: 'user',
       content: 'Can you continue where you left off?',
     });
-    return getAnswer(chunkMaps); // use question here
+    return getAnswer(chunkMaps, question);
   }
 
   return answer;

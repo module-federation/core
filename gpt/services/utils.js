@@ -1,7 +1,6 @@
+const fs = require('fs');
 const { embedding } = require('./openai');
-// This is the minimum cosine similarity score that a file must have with the search query to be considered relevant
-// This is an arbitrary value, and you should vary/ remove this depending on the diversity of your dataset
-const COSINE_SIM_THRESHOLD = 0.72;
+const { COSINE_SIM_THRESHOLD } = require('../constants');
 // This function takes a search query and a list of files, and returns the chunks of text that are most semantically similar to the query
 async function searchFileChunks({ searchQuery, files, maxResults }) {
   // Get the search query embedding
@@ -54,7 +53,6 @@ const isFileNameInString = (fileName, str) => {
   // Return true if the normalized file name is included in the normalized string
   return normalizedStr.includes(normalizedFileName);
 };
-const fs = require('fs');
 
 function parseGptResponse(response) {
   console.log('Parsing GPT response...');
@@ -69,13 +67,12 @@ function parseGptResponse(response) {
     const cleanedCode = code.split('__BLOCK_END__')[0].trim(); // Ignore everything after the block end
     parsed[cleanedFilePath] = cleanedCode;
   });
-  Object.entries(parsed).forEach(([filePath, code]) => {
-    fs.writeFileSync(filePath + '.new', code, 'utf8');
-  });
+
   console.log(Object.keys(parsed).length, 'files parsed');
 
   return parsed;
 }
+
 module.exports = {
   parseGptResponse,
   isFileNameInString,

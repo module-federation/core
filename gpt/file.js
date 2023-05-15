@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const processFile = require('./process-file');
 const getAnswer = require('./get-answer-from-files');
@@ -29,7 +30,7 @@ __CODE_START__
 __BLOCK_END__
 ${response.end}
 
-For each file, start with '__BLOCK_START__', followed by the filename, then '__CODE_START__', then the updated content of the file, and end with '__BLOCK_END__'. Separate the sections for different files with a newline. The very last line should be END_OF_RESPONSE mark
+For each file, start with '__BLOCK_START__', followed by the filename, then '__CODE_START__', then the updated content of the file, and end with '__BLOCK_END__'. Separate the sections for different files with a newline. The very last line should be ${response.end} mark
 `;
 
 async function promptFile(filePaths, question) {
