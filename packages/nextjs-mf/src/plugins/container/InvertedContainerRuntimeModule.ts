@@ -581,7 +581,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                 `var onExternal = ${runtimeTemplate.basicFunction(
                   ['external', '_', 'first'],
                   `
-                  console.log('EXTERNAL', external, chunkId, id);
                   return external ? handleFunction(${RuntimeGlobals.initializeSharing}, data[0], 0, external, onInitialized, first) : onError()`
                 )};`,
                 `var onInitialized = ${runtimeTemplate.returningFunction(
@@ -590,8 +589,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                 )};`,
                 `var onFactory = ${runtimeTemplate.basicFunction('factory', [
                   'data.p = 1;',
-                  "console.log('onFactory incom', factory);",
-                  `console.log('onFactory M before', ${RuntimeGlobals.moduleFactories}[id])`,
                   `${
                     RuntimeGlobals.moduleFactories
                   }[id] = ${runtimeTemplate.basicFunction('module', [
@@ -653,12 +650,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         : 'window';
 
       const serverContainerKickstart = Template.asString([
-        `console.log('FOUND m',__webpack_require__.m[${JSON.stringify(
-          containerModuleId
-        )}]);`,
-        `console.log('FOUND c:',__webpack_require__.c[${JSON.stringify(
-          containerModuleId
-        )}]);`,
+        "console.log('backup scope',globalThis.backupScope);",
         '__webpack_require__.own_remote = new Promise(function(resolve,reject){',
         Template.indent([
           // attachOnMount,
@@ -707,6 +699,8 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
       // __webpack_require__.O(0, ["webpack-runtime"], function() {
       return Template.asString([
+        'globalThis.backupScope = globalThis.backupScope || {};',
+        '__webpack_require__.S = globalThis.backupScope;',
         '__webpack_require__.initConsumes = __webpack_require__.initConsumes || [];',
         '__webpack_require__.initRemotes = __webpack_require__.initRemotes || [];',
         '__webpack_require__.rMap = __webpack_require__.rMap || {};',
@@ -724,10 +718,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
     console.log('remote attached', innerRemote);
     if(resolve) resolve(innerRemote)
-  }
-  console.log('backup scope',globalThis.backupScope);
-        globalThis.backupScope = globalThis.backupScope || {};
-          __webpack_require__.S = globalThis.backupScope;`,
+  }`,
         'try {',
         isServer ? serverContainerKickstart : browserContainerKickstart,
         '} catch (e) {',

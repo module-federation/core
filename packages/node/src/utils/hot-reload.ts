@@ -1,6 +1,7 @@
 const hashmap = {} as Record<string, string>;
 import crypto from 'crypto';
-const requireCacheRegex = /(remote|runtime|server|hot-reload|react-loadable-manifest)/;
+const requireCacheRegex =
+  /(remote|runtime|server|hot-reload|react-loadable-manifest)/;
 
 const performReload = (shouldReload: any) => {
   if (!shouldReload) {
@@ -16,7 +17,7 @@ const performReload = (shouldReload: any) => {
   //@ts-ignore
   global.__remote_scope__ = {
     _config: {},
-    _medusa: {}
+    _medusa: {},
   };
 
   Object.keys(req.cache).forEach((key) => {
@@ -26,7 +27,7 @@ const performReload = (shouldReload: any) => {
   });
 
   return true;
-}
+};
 /*
  This code is doing two things First it checks if there are any fake remotes in the
  global scope If so then we need to reload the server because a remote has changed
@@ -36,7 +37,6 @@ const performReload = (shouldReload: any) => {
 export const revalidate = () => {
   if (global.__remote_scope__) {
     const remoteScope = global.__remote_scope__;
-
 
     return new Promise((res) => {
       const fetches = [];
@@ -54,20 +54,26 @@ export const revalidate = () => {
 
       const fetchModule = getFetchModule();
 
-      if(remoteScope._medusa) {
+      if (remoteScope._medusa) {
         for (const property in remoteScope._medusa) {
-          fetchModule(property).then((res:Response)=>res.json()).then((medusaResponse: any) => {
-            //@ts-ignore
-            if(medusaResponse.version !== remoteScope._medusa[property].version) {
-              console.log(
-                'medusa config changed',
-                property,
-                'hot reloading to refetch'
-              );
-              performReload(true);
-              return res(true);
-            }
-          });
+          fetchModule(property)
+            .then((res: Response) => res.json())
+            .then((medusaResponse: any) => {
+              //@ts-ignore
+              if (
+                medusaResponse.version !==
+                //@ts-ignore
+                remoteScope?._medusa[property].version
+              ) {
+                console.log(
+                  'medusa config changed',
+                  property,
+                  'hot reloading to refetch'
+                );
+                performReload(true);
+                return res(true);
+              }
+            });
         }
       }
 

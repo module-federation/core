@@ -177,5 +177,4 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
 
   // Disable split chunks to prevent conflicts from occurring in the graph
   // TODO on the `compiler.options.optimization.splitChunks` line would be to find a way to only opt out chunks/modules related to module federation from chunk splitting logic.
-  compiler.options.optimization.splitChunks = false;
 }

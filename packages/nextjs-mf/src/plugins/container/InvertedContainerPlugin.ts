@@ -1,10 +1,11 @@
-import type { Chunk, Compilation, Compiler } from 'webpack';
+import type { Chunk, Compilation, Compiler, Module } from 'webpack';
 import { RawSource } from 'webpack-sources';
 //@ts-ignore
 import type { ModuleFederationPluginOptions } from '../types';
 import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
 import { RuntimeGlobals } from 'webpack';
 import Template from '../../../utils/Template';
+import RemoveEagerModulesFromRuntimePlugin from './RemoveEagerModulesFromRuntimePlugin';
 /**
  * Interface for InvertedContainerOptions, extending ModuleFederationPluginOptions.
  * This interface includes additional fields specific to the plugin's behavior.
@@ -52,6 +53,11 @@ class InvertedContainerPlugin {
    * @param {Compiler} compiler - Webpack compiler instance.
    */
   apply(compiler: Compiler) {
+    new RemoveEagerModulesFromRuntimePlugin({
+      container: this.options.container,
+      debug: this.options.debug,
+    }).apply(compiler);
+    const { Template, javascript } = compiler.webpack;
     // Hook into the compilation process.
     compiler.hooks.thisCompilation.tap(
       'InvertedContainerPlugin',
@@ -64,7 +70,7 @@ class InvertedContainerPlugin {
           // If the chunk has already been processed, skip it.
           if (onceForChunkSet.has(chunk)) return;
           set.add(RuntimeGlobals.onChunksLoaded);
-          set.add(RuntimeGlobals.startupOnlyAfter);
+          // set.add(RuntimeGlobals.startupOnlyAfter);
 
           // Mark the chunk as processed by adding it to the WeakSet.
           onceForChunkSet.add(chunk);
@@ -87,32 +93,23 @@ class InvertedContainerPlugin {
           handler
         );
 
-        compilation.hooks.afterOptimizeChunks.tap(
-          'InvertedContainerPlugin',
-          (chunks) => {
-            for (const chunk of chunks) {
-              if (
-                chunk.hasRuntime() &&
-                chunk.name === this.options?.container
-              ) {
-                // const eagerModulesInRemote =
-                //   compilation.chunkGraph.getChunkModulesIterableBySourceType(
-                //     chunk,
-                //     'provide-module'
-                //   );
-                const modules = chunk.getModules();
-                for (const module of modules) {
-                  if (module.type === 'provide-module') {
-                    compilation.chunkGraph.disconnectChunkAndModule(
-                      chunk,
-                      module
-                    );
-                  }
+        if (this.options.debug) {
+          compilation.hooks.afterOptimizeChunkModules.tap(
+            'InvertedContainerPlugin',
+            (chunks, modules) => {
+              for (const chunk of chunks) {
+                if (
+                  chunk.hasRuntime() &&
+                  chunk.name === this.options?.container
+                ) {
+                  const getmodules = chunk.getModules();
+
+                  console.log(getmodules.length, chunk.name);
                 }
               }
             }
-          }
-        );
+          );
+        }
 
         compilation.hooks.optimizeChunks.tap(
           'InvertedContainerPlugin',
@@ -121,28 +118,6 @@ class InvertedContainerPlugin {
               this.resolveContainerModule(compilation);
             if (!containerEntryModule) return;
             for (const chunk of chunks) {
-              if (
-                chunk.hasRuntime() &&
-                chunk.name === this.options?.container
-              ) {
-                const modules = chunk.getModules();
-                for (const module of modules) {
-                  if (module.type === 'provide-module') {
-                    compilation.chunkGraph.disconnectChunkAndModule(
-                      chunk,
-                      module
-                    );
-                  }
-                }
-              }
-              // console.log(
-              //   'chunk',
-              //   chunk.name || chunk.id || chunk.debugId,
-              //   !compilation.chunkGraph.isModuleInChunk(
-              //     containerEntryModule,
-              //     chunk
-              //   )
-              // );
               if (
                 !compilation.chunkGraph.isModuleInChunk(
                   containerEntryModule,
@@ -159,19 +134,12 @@ class InvertedContainerPlugin {
         );
 
         const hooks =
-          compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
-            compilation
-          );
+          javascript.JavascriptModulesPlugin.getCompilationHooks(compilation);
 
         compilation.hooks.afterOptimizeChunkAssets.tap(
           'InvertedContainerPlugin',
           (chunks) => {
             chunks.forEach((chunk) => {
-              const chunkModules =
-                compilation.chunkGraph.getChunkRuntimeModulesIterable(chunk);
-              const runtimeRequirementsInChunk =
-                compilation.chunkGraph.getChunkRuntimeRequirements(chunk);
-
               chunk.files.forEach((file) => {
                 const asset = compilation.getAsset(file);
                 if (asset) {
@@ -206,6 +174,8 @@ class InvertedContainerPlugin {
               return source;
             }
 
+            const { runtimeTemplate } = compilation;
+
             const newSource = [];
             const replaceSource = source.source().toString().split('\n');
 
@@ -225,22 +195,45 @@ class InvertedContainerPlugin {
               originalExec + 1,
               replaceSource.length
             );
-            // Push renamed exec pack into new source
-            newSource.push(
-              firstHalf.join('\n').replace(searchString, replaceString)
-            );
 
-            newSource.push(`
-            var ${searchString} = function(moduleId) {
-return __webpack_require__.own_remote.then(function(thing){
-return Promise.all(__webpack_require__.initRemotes);
-}).then(function(){
-return Promise.all(__webpack_require__.initConsumes);
-}).then(function(){
-return ${replaceString}(moduleId);
-})
-             };
-              `);
+            const originalRuntimeCode = firstHalf
+              .join('\n')
+              .replace(searchString, replaceString);
+
+            const fancyTemplate = Template.asString([
+              runtimeTemplate.returningFunction(
+                Template.asString(
+                  [
+                    '__webpack_require__.own_remote.then(',
+                    runtimeTemplate.returningFunction(
+                      Template.asString([
+                        'Promise.all([',
+                        Template.indent(
+                          [
+                            'Promise.all(__webpack_require__.initRemotes)',
+                            'Promise.all(__webpack_require__.initConsumes)',
+                          ].join(',\n')
+                        ),
+                        '])',
+                      ])
+                    ),
+                    ').then(',
+                    runtimeTemplate.returningFunction(
+                      Template.asString([`${replaceString}(moduleId)`])
+                    ),
+                    ')',
+                  ].join('')
+                ),
+                'moduleId'
+              ),
+            ]);
+
+            const wholeTem = Template.asString([
+              `var ${searchString} =`,
+              fancyTemplate,
+            ]);
+
+            console.log(wholeTem);
 
             return Template.asString([
               '',
@@ -251,7 +244,8 @@ return ${replaceString}(moduleId);
                 `__webpack_require__.getEagerRemotesForChunkId(currentChunkId,__webpack_require__.initConsumes)`,
               ]),
               '}',
-              ...newSource,
+              originalRuntimeCode,
+              wholeTem,
               ...secondHalf,
               '',
             ]);

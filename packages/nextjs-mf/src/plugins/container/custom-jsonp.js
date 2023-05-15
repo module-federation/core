@@ -11,7 +11,7 @@ function cleanInitArrays(array) {
   array.forEach(function (item, index) {
     promiseState(item).then(function (status) {
       if (status === 'fulfilled') {
-        __webpack_require__.initConsumes.splice(index, 1);
+        array.splice(index, 1);
       }
     });
   });
@@ -52,8 +52,8 @@ __webpack_require__.checkAsyncReqs();
           webpackJsonpCallback.apply(null, [null].concat(Array.prototype.slice.call([queueArgs])));
           originalPush.apply(originalPush, [queueArgs]);
           if(chunkQueue.length === 0) {
-            cleanInitArrays(__webpack_require__.initConsumes)
-            cleanInitArrays(__webpack_require__.initRemotes)
+            // cleanInitArrays(__webpack_require__.initConsumes)
+            // cleanInitArrays(__webpack_require__.initRemotes)
           }
         });
       }
@@ -64,13 +64,14 @@ __webpack_require__.checkAsyncReqs();
     });
 }
 
-asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
+asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal))
 
 var currentChunkId = "__INSERT_CH_ID__MF__";
-// __webpack_require__.O(null, [currentChunkId], function () {
-//   console.log('clearing resolved', currentChunkId)
-//   cleanInitArrays(__webpack_require__.initConsumes);
-// },5);
+__webpack_require__.O(null, [currentChunkId], function () {
+  console.log('clearing resolved', currentChunkId)
+  // cleanInitArrays(__webpack_require__.initConsumes);
+  // cleanInitArrays(__webpack_require__.initRemotes);
+},5);
 
 chunkLoadingGlobal.push = (function (originalPush) {
   return function () {
@@ -88,9 +89,10 @@ console.log('webpack runtime loaded freom entry signal;', chunkID)
 __webpack_require__.O(null, [chunkID], function () {
       __webpack_require__.getEagerSharedForChunkId(chunkID,__webpack_require__.initConsumes)
 __webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRemotes)
-  console.log('init consumes', __webpack_require__.initConsumes);
-  console.log('init remotes', __webpack_require__.initRemotes);
+  cleanInitArrays(__webpack_require__.initConsumes);
+  cleanInitArrays(__webpack_require__.initRemotes);
 },0);
+
     if (!__webpack_require__.S.default) {
       console.log(
         '%cshare is blank: %s',
