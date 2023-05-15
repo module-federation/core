@@ -34,7 +34,7 @@ jobs:
           key: build-${{ hashFiles('**/package-lock.json') }}
       - name: Install Dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: npm install --legacy-peer-deps
+        run: yarn --frozen-lock-file
       - name: Check changes "docs"
         id: docs-changed
         run: echo "docs-changed=$(node tools/scripts/ci-is-affected.mjs --appName=docs --base=${{ env.BASE_REF}} --head=HEAD)" >> $GITHUB_OUTPUT
