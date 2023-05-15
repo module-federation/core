@@ -24,7 +24,7 @@ export default component$(() => {
       ),
       actionHref: 'https://module-federation.io/en/mf-docs/2.5/setup',
       actionTitle: t('doc-summary.cards.decentralized.action@@Documentation'),
-      target: '_blank' as ButtonPropsTarget
+      target: '_blank' as ButtonPropsTarget,
     },
     {
       title: t(
@@ -37,7 +37,7 @@ export default component$(() => {
       actionTitle: t(
         'doc-summary.cards.modular-architecture.action@@Documentation'
       ),
-      target: '_blank' as ButtonPropsTarget
+      target: '_blank' as ButtonPropsTarget,
     },
     {
       title: t('doc-summary.cards.federated-runtime.title@@Federated runtime'),
@@ -48,7 +48,7 @@ export default component$(() => {
       actionTitle: t(
         'doc-summary.cards.federated-runtime.action@@Documentation'
       ),
-      target: '_blank' as ButtonPropsTarget
+      target: '_blank' as ButtonPropsTarget,
     },
     {
       title: t('doc-summary.cards.flexibility.title@@Flexibility'),
@@ -57,7 +57,7 @@ export default component$(() => {
       ),
       actionHref: '#',
       actionTitle: t('doc-summary.cards.flexibility.action@@Documentation'),
-      target: '_blank' as ButtonPropsTarget
+      target: '_blank' as ButtonPropsTarget,
     },
     {
       title: t('doc-summary.cards.team-colaboration.title@@Team collaboration'),
@@ -68,19 +68,18 @@ export default component$(() => {
       actionTitle: t(
         'doc-summary.cards.team-colaboration.action@@Documentation'
       ),
-      target: '_blank' as ButtonPropsTarget
+      target: '_blank' as ButtonPropsTarget,
     },
   ];
 
+  const title = t('doc-summary.title@@Scalability with Module Federation');
+  const subtitle = t(
+    'doc-summary.subtitle@@Module Federation brings scalability to not only code but also individual and organizational productivity'
+  );
+
   return (
     <Section theme={ContainerTheme.OPAQUE}>
-      <SectionHeader
-        q:slot="header"
-        title={t('doc-summary.title@@Scalability with Module Federation')}
-        subtitle={t(
-          'doc-summary.subtitle@@Module Federation brings scalability to not only code but also individual and organizational productivity'
-        )}
-      />
+      <SectionHeader q:slot="header" title={title} subtitle={subtitle} />
 
       <div class="flex flex-col items-center gap-3 md:gap-10">
         {cards.map((card) => {
@@ -121,7 +120,7 @@ export default component$(() => {
           class="w-full md:w-auto"
           theme={ButtonTheme.SOLID}
           href="https://module-federation.io/en/mf-docs/2.5/setup"
-          target='_blank'
+          target="_blank"
           type="link"
         >
           {t('doc-summary.action@@Start using module federation')}

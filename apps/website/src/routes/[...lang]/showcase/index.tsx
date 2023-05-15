@@ -73,6 +73,11 @@ export default component$(() => {
     return locUrl(url, speakState);
   };
 
+  const title = t('showcase-page.title@@Showcase');
+  const subtitle = t(
+    'showcase-page.subtitle@@Meet leading companies embracing Module Federation for their web development needs.'
+  );
+
   return (
     <>
       <Navbar theme={theme} activeHref={localizedUrl('showcase')} />
@@ -80,10 +85,8 @@ export default component$(() => {
       <Section padding={SectionPadding.TOP} theme={theme}>
         <SectionHeader
           q:slot="header"
-          title={t('showcase-page.title@@Showcase')}
-          subtitle={t(
-            'showcase-page.subtitle@@Meet leading companies embracing Module Federation for their web development needs.'
-          )}
+          title={title}
+          subtitle={subtitle}
         />
 
         <div class="flex flex-col items-center gap-y-10">

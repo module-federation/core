@@ -56,7 +56,8 @@ export default component$(() => {
       actionHref:
         'https://github.com/module-federation/universe/discussions/categories/rfc',
       target: '_blank' as ButtonPropsTarget,
-      lineClass: 'absolute w-24 bottom-[5%] md:bottom-[20%] left-full -translate-x-full',
+      lineClass:
+        'absolute w-24 bottom-[5%] md:bottom-[20%] left-full -translate-x-full',
       lineShowStart: true,
       lineShowEnd: false,
     },
@@ -69,21 +70,21 @@ export default component$(() => {
       actionHref:
         'https://miro.com/app/board/uXjVPvdfG2I=/?share_link_id=45887343083',
       target: '_blank' as ButtonPropsTarget,
-      lineClass: 'absolute w-24 top-0 rotate-90 right-[10%] origin-left translate-x-full -translate-y-1/2',
+      lineClass:
+        'absolute w-24 top-0 rotate-90 right-[10%] origin-left translate-x-full -translate-y-1/2',
       lineShowStart: false,
       lineShowEnd: true,
     },
   ];
 
+  const title = t('evolving.title@@Evolving Module Federation');
+  const subtitle = t(
+    'evolving.subtitle@@The world of Module Federation is constantly evolving and growing based on the feedback from the community. The RFCs are open for all to participate in the discussion and the roadmap is published.'
+  );
+
   return (
     <Section padding={SectionPadding.BOTTOM} theme={ContainerTheme.OPAQUE}>
-      <SectionHeader
-        q:slot="header"
-        title={t('evolving.title@@Evolving Module Federation')}
-        subtitle={t(
-          'evolving.subtitle@@The world of Module Federation is constantly evolving and growing based on the feedback from the community. The RFCs are open for all to participate in the discussion and the roadmap is published.'
-        )}
-      />
+      <SectionHeader q:slot="header" title={title} subtitle={subtitle} />
       <div class="flex flex-col gap-3">
         <div class="grid grid grid-cols-1 md:grid-cols-2 gap-3">
           {cards.map((card) => {
@@ -117,8 +118,13 @@ export default component$(() => {
                   </div>
                 </div>
 
-
-                { card.lineClass && <Line class={card.lineClass} showEnd={card.lineShowEnd} showStart={card.lineShowStart} /> }
+                {card.lineClass && (
+                  <Line
+                    class={card.lineClass}
+                    showEnd={card.lineShowEnd}
+                    showStart={card.lineShowStart}
+                  />
+                )}
               </Card>
             );
           })}
@@ -151,7 +157,10 @@ export default component$(() => {
             </div>
           </div>
 
-          <Line showEnd={false} class="absolute w-6 bottom-0 rotate-90 left-1/2 origin-right translate-y-1/2 -translate-x-full" />
+          <Line
+            showEnd={false}
+            class="absolute w-6 bottom-0 rotate-90 left-1/2 origin-right translate-y-1/2 -translate-x-full"
+          />
         </Card>
       </div>
     </Section>

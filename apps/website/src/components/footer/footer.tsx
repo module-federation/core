@@ -23,25 +23,30 @@ export default component$((props: FooterProps) => {
       label: t('footer.menu.examples@@Examples'),
       href: 'https://github.com/module-federation/module-federation-examples',
       target: '_blank' as ButtonPropsTarget,
+      rel: 'noopener noreferrer'
     },
     {
       label: t('footer.menu.practical-guide@@Practical guide'),
       href: 'https://module-federation.myshopify.com/products/practical-module-federation',
       target: '_blank' as ButtonPropsTarget,
+      rel: 'noopener noreferrer'
     },
     {
       label: t('footer.menu.medusa@@Try Medusa'),
       href: 'https://app.medusa.codes/',
       target: '_blank' as ButtonPropsTarget,
+      rel: 'noopener noreferrer'
     },
     {
       label: t('footer.menu.documentation@@Documentation'),
       href: 'https://caiorolla-mf-doc-tw--earnest-sunburst-6f47dc.netlify.app/mf-docs/2.5/getting-started/',
+      rel: 'noopener noreferrer'
     },
     {
       label: t('footer.menu.sponsor@@Become a sponsor'),
       href: 'https://opencollective.com/module-federation-universe',
       target: '_blank' as ButtonPropsTarget,
+      rel: 'noopener noreferrer'
     },
     {
       label: t('footer.menu.privacy-policy@@Privacy Policy'),
@@ -65,6 +70,7 @@ export default component$((props: FooterProps) => {
                 href={link.href}
                 type="link"
                 theme={ButtonTheme.NAKED_ALT}
+                rel={link.rel}
               >
                 {link.label}
               </Button>

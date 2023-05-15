@@ -35,6 +35,7 @@ export interface ButtonProps {
   active?: boolean;
   bold?: boolean;
   onClick?: QRL<() => void>;
+  rel?: string;
 }
 
 // Note: Not all options are fully implemented
@@ -149,6 +150,7 @@ export default component$((props: ButtonProps) => {
       }`}
       href={props.href}
       target={props.target}
+      rel={props.rel}
     >
       {content}
     </a>

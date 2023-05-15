@@ -42,11 +42,13 @@ export default component$(() => {
       .catch((error) => (loading.value = false));
   });
 
+  const title = t('contact.title@@Talk to our experts');
+
   return (
     <Section id="contact" class="scroll-mt-32" theme={ContainerTheme.OPAQUE}>
       <SectionHeader
         q:slot="header"
-        title={t('contact.title@@Talk to our experts')}
+        title={title}
       />
       <div class="flex flex-col lg:flex-row gap-10 ">
         <div class="flex flex-col items-center gap-4 flex-1 w-50">

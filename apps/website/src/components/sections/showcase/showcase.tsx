@@ -63,9 +63,11 @@ export default component$(() => {
     return locUrl(url, speakState);
   };
 
+  const title = t('showcase.title@@Showcase');
+
   return (
     <Section padding={SectionPadding.BOTTOM} theme={ContainerTheme.OPAQUE}>
-      <SectionHeader q:slot="header" title={t('showcase.title@@Showcase')} />
+      <SectionHeader q:slot="header" title={title} />
 
       <div class="flex flex-col gap-10 items-center">
         <div class="grid gap-x-3 gap-y-10 showcase-grid w-full">

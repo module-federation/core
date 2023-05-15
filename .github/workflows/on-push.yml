@@ -38,10 +38,14 @@ jobs:
       - name: Check changes "docs"
         id: docs-changed
         run: echo "docs-changed=$(node tools/scripts/ci-is-affected.mjs --appName=docs --base=${{ env.BASE_REF}} --head=HEAD)" >> $GITHUB_OUTPUT
+      - name: Check changes "website"
+        id: website-changed
+        run: echo "website-changed=$(node tools/scripts/ci-is-affected.mjs --appName=website --base=${{ env.BASE_REF}} --head=HEAD)" >> $GITHUB_OUTPUT
       - name: Log variables
         run: |
           echo "steps.cache.outputs.cache-hit:" ${{ steps.cache.outputs.cache-hit }}
           echo "steps.docs-changed.outputs.docs-changed:" ${{ steps.docs-changed.outputs.docs-changed }}
+          echo "steps.docs-changed.outputs.website-changed:" ${{ steps.website-changed.outputs.website-changed }}
 
   deploy-docs:
     name: 'Deploy to Netlify'
@@ -93,4 +97,55 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         timeout-minutes: 1
+  
+  # Website related steps
+  deploy-website:
+    name: 'Deploy Website to Netlify'
+    runs-on: ubuntu-latest
+    needs: setup
+    if: ${{ needs.setup.outputs.website-changed == 'true' && github.event_name == 'push' }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.CACHE_NODE_MODULES_PATH }}
+          key: build-${{ hashFiles('**/yarn.lock') }}
+      - run: npm run build:website
+      - uses: nwtgck/actions-netlify@v2.0.0
+        with:
+          publish-dir: ./dist/apps/website/client
+          deploy-message: "Deploy from GitHub Actions"
+          production-deploy: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_WEBSITE_SITE_ID }}
+        timeout-minutes: 1
 
+  preview-website:
+    name: 'Deploy Website Netlify Preview'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    needs: setup
+    if: ${{ needs.setup.outputs.website-changed == 'true' && github.event_name == 'pull_request' }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.CACHE_NODE_MODULES_PATH }}
+          key: build-${{ hashFiles('**/yarn.lock') }}
+      - run: npm run build:website
+      # Sets the branch name as environment variable
+      - uses: nelonoel/branch-name@v1.0.1
+      - uses: nwtgck/actions-netlify@v2.0.0
+        id: publish-preview
+        with:
+          publish-dir: ./dist/apps/website/client
+          deploy-message: "Deploy Website Preview from GitHub Actions"
+          production-deploy: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          alias: ${{ env.BRANCH_NAME }}
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_WEBSITE_SITE_ID }}
+        timeout-minutes: 1
