@@ -2,6 +2,19 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.14.5](https://github.com/module-federation/nextjs-mf/compare/node-0.14.5-beta.0...node-0.14.5) (2023-05-15)
+
+
+
+## [0.14.5-beta.0](https://github.com/module-federation/nextjs-mf/compare/node-0.14.4...node-0.14.5-beta.0) (2023-05-15)
+
+
+### Features
+
+* Quantum Modules ([#872](https://github.com/module-federation/nextjs-mf/issues/872)) ([2991039](https://github.com/module-federation/nextjs-mf/commit/299103932b4e0aa6d8017be588ffa5272f519260))
+
+
+
 ## [0.14.4](https://github.com/module-federation/nextjs-mf/compare/node-0.14.4-beta.0...node-0.14.4) (2023-05-13)
 
 ### Dependency Updates
