@@ -2,7 +2,7 @@ const path = require('path');
 const processFile = require('./process-file');
 const getAnswer = require('./get-answer-from-files');
 const { parseGptResponse } = require('./services/utils');
-const { chatHistory } = require('./constants');
+const { chatHistory, response } = require('./constants');
 
 let prompt = `
 Given the files provided, please perform the following tasks as needed:
@@ -27,9 +27,9 @@ __BLOCK_START__
 __CODE_START__
 [code changes for file 2]
 __BLOCK_END__
-__END_OF_RESPONSE__
+${response.end}
 
-For each file, start with '__BLOCK_START__', followed by the filename, then '__CODE_START__', then the updated content of the file, and end with '__BLOCK_END__'. Separate the sections for different files with a newline. The very last line should be __END_OF_RESPONSE__
+For each file, start with '__BLOCK_START__', followed by the filename, then '__CODE_START__', then the updated content of the file, and end with '__BLOCK_END__'. Separate the sections for different files with a newline. The very last line should be END_OF_RESPONSE mark
 `;
 
 async function promptFile(filePaths, question) {
@@ -51,9 +51,13 @@ async function promptFile(filePaths, question) {
     console.log('Processing file:', filePath);
     filePath = path.resolve(process.cwd(), filePath);
     try {
+      console.log(chatHistory);
       const result = await processFile(filePath);
       if (!chunkMaps[filePath]) chunkMaps[filePath] = [];
       chunkMaps[filePath] = chunkMaps[filePath].concat(result.chunks);
+      //getLastItemInArray
+      // const lastItem = result.chunks[result.chunks.length - 1];
+      // console.log(lastItem.text);
     } catch (err) {
       console.error('Error processing file:', filePath);
       throw err;

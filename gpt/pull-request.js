@@ -6,6 +6,7 @@ const {
   MAIN_BRANCH,
   chatHistory,
   MAX_TOKENS,
+  response,
 } = require('./constants');
 const renderMarkdown = require('./markdown');
 const fs = require('fs');
@@ -36,7 +37,7 @@ Return it as a JSON object with the following format:
 ]
 }}
 Here are the commit messages: ${input.slice(0, MAX_CHAR_COUNT)}
-__END_OF_RESPONSE__`;
+${response.end}`;
 }
 
 /**
@@ -86,7 +87,7 @@ Return it as markdown format:
    - [explanation]
    - [explanation]
 
-__END_OF_RESPONSE__
+${response.end}
 
 Here are the commit messages: ${input.slice(0, MAX_CHAR_COUNT)}`;
 }
