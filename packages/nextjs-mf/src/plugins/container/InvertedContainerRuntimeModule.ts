@@ -693,6 +693,8 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         "console.log('m',__webpack_require__.m)",
         "console.log('c',__webpack_require__.c)",
         'attachRemote(resolve)',
+        'globalThis.buscp = globalThis.buscp || {};',
+        '__webpack_require__.I("default",[globalThis.buscp]);',
         '},0)',
         '})',
       ]);
@@ -706,6 +708,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         '__webpack_require__.rMap = __webpack_require__.rMap || {};',
         '__webpack_require__.reMap = __webpack_require__.reMap || {};',
         '__webpack_require__.installedModules = {};',
+        "console.log('share scope', __webpack_require__.S);",
         `if(${containerScope} === undefined) { ${containerScope} = {_config: {}} };`,
         checkForAsyncChunkRequirements,
         `
