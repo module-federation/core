@@ -581,7 +581,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                 `var onExternal = ${runtimeTemplate.basicFunction(
                   ['external', '_', 'first'],
                   `
-                  console.log('EXTERNAL', external, chunkId, id);
                   return external ? handleFunction(${RuntimeGlobals.initializeSharing}, data[0], 0, external, onInitialized, first) : onError()`
                 )};`,
                 `var onInitialized = ${runtimeTemplate.returningFunction(
@@ -590,8 +589,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                 )};`,
                 `var onFactory = ${runtimeTemplate.basicFunction('factory', [
                   'data.p = 1;',
-                  "console.log('onFactory incom', factory);",
-                  `console.log('onFactory M before', ${RuntimeGlobals.moduleFactories}[id])`,
                   `${
                     RuntimeGlobals.moduleFactories
                   }[id] = ${runtimeTemplate.basicFunction('module', [
@@ -654,12 +651,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
       const serverContainerKickstart = Template.asString([
         "console.log('backup scope',globalThis.backupScope);",
-        `console.log('FOUND m',__webpack_require__.m[${JSON.stringify(
-          containerModuleId
-        )}]);`,
-        `console.log('FOUND c:',__webpack_require__.c[${JSON.stringify(
-          containerModuleId
-        )}]);`,
         '__webpack_require__.own_remote = new Promise(function(resolve,reject){',
         Template.indent([
           // attachOnMount,

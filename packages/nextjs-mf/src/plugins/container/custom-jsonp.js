@@ -89,8 +89,6 @@ console.log('webpack runtime loaded freom entry signal;', chunkID)
 __webpack_require__.O(null, [chunkID], function () {
       __webpack_require__.getEagerSharedForChunkId(chunkID,__webpack_require__.initConsumes)
 __webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRemotes)
-  console.log('init consumes', __webpack_require__.initConsumes);
-  console.log('init remotes', __webpack_require__.initRemotes);
   cleanInitArrays(__webpack_require__.initConsumes);
   cleanInitArrays(__webpack_require__.initRemotes);
 },0);
