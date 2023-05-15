@@ -702,8 +702,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         "console.log('m',__webpack_require__.m)",
         "console.log('c',__webpack_require__.c)",
         'attachRemote(resolve)',
-        'globalThis.buscp = globalThis.buscp || {};',
-        '__webpack_require__.I("default",[globalThis.buscp]);',
         '},0)',
         '})',
       ]);
