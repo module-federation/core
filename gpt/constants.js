@@ -6,7 +6,7 @@ module.exports.MAX_FILES_LENGTH = 2000 * 3;
 module.exports.MAX_TOKENS = Infinity; // 4000 if gpt3
 module.exports.showProgress = true;
 module.exports.MAX_CHAR_COUNT = 10000;
-module.exports.MAIN_BRANCH = 'quantum_modules';
+module.exports.MAIN_BRANCH = 'kill_child_compilers';
 module.exports.filterStopwords = false;
 module.exports.response = {
   end: ['_', 'END', 'OF', 'RESPONSE', '_'].join('_'),
