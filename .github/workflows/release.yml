@@ -34,7 +34,7 @@ jobs:
           git config user.name "GitHub Bot"
           git config user.email "gituser@example.com"
       - name: Install packages
-        run: yarn --frozen-lock-file
+        run: npm install --legacy-peer-deps
       - name: Lint
         shell: bash
         run: |
