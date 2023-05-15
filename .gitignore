@@ -6,7 +6,6 @@
 /out-tsc
 /build
 /@mf-types
-/gpt
 
 # dependencies
 node_modules
