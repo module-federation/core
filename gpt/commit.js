@@ -7,6 +7,7 @@ const {
   model,
   chatHistory,
   MAIN_BRANCH,
+  response,
 } = require('./constants');
 const { completionStream } = require('./services/openai');
 const { readline } = require('./terminal');
@@ -24,7 +25,7 @@ const schema = `
   ]
 }
 \n
-__END_OF_RESPONSE__`;
+${response.end}`;
 
 async function* getValidJsonResponse(prompt, userFeedback) {
   try {
@@ -93,7 +94,7 @@ async function generateCommitMsg() {
   }
 
   console.log('tokens', diff.length, MAX_CHAR_COUNT);
-  let oldDiff = diff.length;
+  const oldDiff = diff.length;
 
   if (diff.length > MAX_CHAR_COUNT) {
     diff = [
@@ -125,10 +126,6 @@ function createPrompt(input, userFeedback) {
 In the description, provide an overall summary of the changes, and detail the changes for each file along with their respective change sets. The commit message should adhere to the following JSON format:
 
 ${schema}
-
-${
-  userFeedback ? `Additional context provided by the user: ${userFeedback}` : ''
-}
 
 Here's the git diff for your reference: ${input.slice(0, MAX_CHAR_COUNT)}`;
 }
@@ -224,7 +221,7 @@ const runGenerativeCommit = async () => {
         runGenerativeCommit();
       } else {
         console.log('Generating a new suggestion with user context...', answer);
-        chatHistory.add({ role: 'user', content: answer });
+        if (answer) chatHistory.add({ role: 'user', content: answer });
         runGenerativeCommit();
       }
     }

@@ -9,6 +9,7 @@ const {
   MAX_TOKENS,
   chatHistory,
   filterStopwords,
+  response,
 } = require('../constants');
 
 if (!process.env.OPENAI_API_KEY) {
@@ -45,6 +46,7 @@ async function completion({
     },
     ...Array.from(chatHistory),
   ];
+
   let result;
   try {
     result = await openai.createChatCompletion({
@@ -52,7 +54,7 @@ async function completion({
       messages,
       temperature,
       max_tokens: max_tokens ?? 800,
-      stop: ['__END_OF_RESPONSE__'],
+      stop: [response.end],
     });
   } catch (error) {
     console.error('Error in createChatCompletion:', error);
@@ -69,7 +71,7 @@ async function completion({
   const messageContent = result.data.choices[0].message.content;
 
   chatHistory.add({
-    role: rChatCompletionRequestMessageRoleEnum.Assistant,
+    role: ChatCompletionRequestMessageRoleEnum.Assistant,
     content: messageContent,
   });
 
@@ -109,7 +111,7 @@ async function* completionStream({
         temperature,
         max_tokens: max_tokens ?? 800,
         stream: true,
-        stop: ['__END_OF_RESPONSE__'],
+        stop: [response.end],
       },
       {
         responseType: 'stream',
@@ -157,7 +159,7 @@ async function* completionStream({
       }
     }
   }
-  // console.log('buffer', buffer);
+
   if (buffer) {
     chatHistory.add({
       role: ChatCompletionRequestMessageRoleEnum.Assistant,
