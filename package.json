@@ -38,7 +38,7 @@
     "release:next:manual": "nx build && cd dist/packages/nextjs-mf && yarn publish --non-interactive --access public",
     "release:node:manual": "nx build && cd dist/packages/node && yarn publish --non-interactive --access public",
     "serve:website": "nx run website:serve",
-    "build:website": "nx run website:build:netlify && npx move-cli dist/apps/website/.netlify/edge-functions .netlify/edge-functions --mkdirp && npx move-cli apps/website/manifest.override.json .netlify/edge-functions/manifest.json",
+    "build:website": "nx run website:build.netlify",
     "extract-i18n:website": "nx run website:extract-i18n"
   },
   "dependencies": {
