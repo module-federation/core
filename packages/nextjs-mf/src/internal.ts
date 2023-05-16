@@ -64,25 +64,25 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     requiredVersion: false,
     import: undefined,
-    eager: true,
+    eager: false,
   },
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: false,
-    eager: true,
     import: undefined,
+    eager: true,
   },
   'styled-jsx': {
     requiredVersion: false,
     singleton: true,
     import: undefined,
-    eager: true,
+    eager: false,
   },
   'styled-jsx/style': {
     requiredVersion: false,
     singleton: true,
     import: undefined,
-    eager: true,
+    eager: false,
   },
 };
 
@@ -93,21 +93,20 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
  *
  * @type {SharedObject}
  */
+
 export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
-  DEFAULT_SHARE_SCOPE
+  JSON.parse(JSON.stringify(DEFAULT_SHARE_SCOPE))
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
 
   acc[key] = { ...value, eager: undefined, import: undefined };
 
-  // @ts-ignore
   if (key === 'react' || key === 'react-dom' || key === 'next/router') {
     //@ts-ignore
     acc[key].eager = true;
   }
   return acc;
 }, {} as SharedObject);
-
 /**
  * Checks if the remote value is an internal or promise delegate module reference.
  *

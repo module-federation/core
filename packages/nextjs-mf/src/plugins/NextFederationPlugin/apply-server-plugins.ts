@@ -28,7 +28,7 @@ export function applyServerPlugins(
   const { StreamingTargetPlugin } = require('@module-federation/node');
   new JsonpChunkLoading({ server: true }).apply(compiler);
 
-  delete compiler.options.optimization.splitChunks;
+  compiler.options.optimization.splitChunks = false;
   // Add the AddModulesPlugin for the webpack runtime with eager loading and remote configuration
   new AddModulesPlugin({
     runtime: 'webpack-runtime',

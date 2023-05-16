@@ -177,7 +177,7 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         return globalScope['remoteLoading'][containerKey];
       }
     }
-
+    // @ts-ignore
     asyncContainer = new Promise(function (resolve, reject) {
       function resolveRemoteGlobal() {
         const asyncContainer = globalScope[
@@ -219,6 +219,27 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         },
         containerKey
       );
+    }).catch(function (err) {
+      console.error('container is offline, returning fake remote');
+      //console.error(err);
+
+      return {
+        fake: true,
+        // @ts-ignore
+        get: (arg) => {
+          console.log('faking', arg, 'module on, its offline');
+
+          return Promise.resolve(() => {
+            return {
+              __esModule: true,
+              default: () => {
+                return null;
+              },
+            };
+          });
+        },
+        init: () => {},
+      };
     });
     if (typeof window !== 'undefined') {
       globalScope['remoteLoading'][containerKey] = asyncContainer;

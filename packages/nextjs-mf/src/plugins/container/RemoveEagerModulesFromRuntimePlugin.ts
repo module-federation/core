@@ -59,6 +59,7 @@ class RemoveEagerModulesFromRuntimePlugin {
 
     // Skip traversal for certain module types
     if (
+      module.constructor.name === 'ExternalModule' ||
       module.type === 'provide-module' ||
       module.type === 'consume-shared-module'
     ) {
@@ -88,6 +89,7 @@ class RemoveEagerModulesFromRuntimePlugin {
 
     for (const module of iterableModules) {
       if ((module as any)._eager) {
+        //@ts-ignore
         eagerModulesInRemote.add((module as any)._request);
       }
 
@@ -123,8 +125,16 @@ class RemoveEagerModulesFromRuntimePlugin {
 
   private removeDependentModules(compilation: Compilation, chunk: Chunk) {
     for (const moduleToRemove of this.dependentModules) {
-      if (this.debug) {
-        console.log('removing', (moduleToRemove as any)?.resource);
+      if (this.debug && compilation.compiler.options.name === 'server') {
+        //@ts-ignore
+        console.log(
+          'removing',
+          (moduleToRemove as any)?.resource,
+          //@ts-ignore
+          moduleToRemove?.request,
+          chunk.name,
+          moduleToRemove.constructor.name
+        );
       }
 
       if (compilation.chunkGraph.isModuleInChunk(moduleToRemove, chunk)) {
