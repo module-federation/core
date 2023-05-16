@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.7.5-beta.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.7.4...utils-1.7.5-beta.0) (2023-05-16)
+
+
+### Bug Fixes
+
+* Improved Share Scope Properties and Fixed Production Build Issues ([#884](https://github.com/module-federation/nextjs-mf/issues/884)) ([de7b2ce](https://github.com/module-federation/nextjs-mf/commit/de7b2cec7518f6b069818a511275e359c616bb73))
+
+
+
 ## [1.7.4](https://github.com/module-federation/nextjs-mf/compare/utils-1.7.3...utils-1.7.4) (2023-05-16)
 
 
