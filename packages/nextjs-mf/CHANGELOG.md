@@ -14,6 +14,15 @@ This file was generated using [@jscutlery/semver](https://github.com/jscutlery/s
 ## [6.4.1-beta.8](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.1-beta.7...nextjs-mf-6.4.1-beta.8) (2023-05-16)
 
 
+### Bug Fixes
+
+* Improved Share Scope Properties and Fixed Production Build Issues ([#884](https://github.com/module-federation/nextjs-mf/issues/884)) ([de7b2ce](https://github.com/module-federation/nextjs-mf/commit/de7b2cec7518f6b069818a511275e359c616bb73))
+
+
+
+## [6.4.1-beta.8](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.1-beta.7...nextjs-mf-6.4.1-beta.8) (2023-05-16)
+
+
 
 ## [6.4.1-beta.7](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.1-beta.6...nextjs-mf-6.4.1-beta.7) (2023-05-16)
 
