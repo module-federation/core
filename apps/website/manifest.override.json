@@ -2,7 +2,7 @@
   "functions": [
     {
       "path": "/*",
-      "excludedPath": "/docs",
+      "excludedPath": "/docs/*",
       "function": "entry.netlify-edge",
       "cache": "manual"
     }
