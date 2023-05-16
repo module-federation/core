@@ -57,7 +57,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'react-dom': {
     singleton: true,
     requiredVersion: false,
-    eager: true,
+    eager: false,
     import: false,
   },
   'react/jsx-dev-runtime': {
@@ -69,8 +69,8 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: false,
-    import: undefined,
     eager: true,
+    import: undefined,
   },
   'styled-jsx': {
     requiredVersion: false,
@@ -95,7 +95,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
  */
 
 export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
-  JSON.parse(JSON.stringify(DEFAULT_SHARE_SCOPE))
+  DEFAULT_SHARE_SCOPE
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
 
