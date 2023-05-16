@@ -8,6 +8,16 @@ This file was generated using [@jscutlery/semver](https://github.com/jscutlery/s
 ### Bug Fixes
 
 * Improved Share Scope Properties and Fixed Production Build Issues ([#884](https://github.com/module-federation/nextjs-mf/issues/884)) ([de7b2ce](https://github.com/module-federation/nextjs-mf/commit/de7b2cec7518f6b069818a511275e359c616bb73))
+* remove old files ([fa281ec](https://github.com/module-federation/nextjs-mf/commit/fa281ecf0a5486bcf995f548deaef993f437c068))
+
+
+
+## [6.4.1-beta.8](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.1-beta.7...nextjs-mf-6.4.1-beta.8) (2023-05-16)
+
+
+### Bug Fixes
+
+* Improved Share Scope Properties and Fixed Production Build Issues ([#884](https://github.com/module-federation/nextjs-mf/issues/884)) ([de7b2ce](https://github.com/module-federation/nextjs-mf/commit/de7b2cec7518f6b069818a511275e359c616bb73))
 
 
 
