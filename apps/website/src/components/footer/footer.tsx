@@ -39,8 +39,7 @@ export default component$((props: FooterProps) => {
     },
     {
       label: t('footer.menu.documentation@@Documentation'),
-      href: 'https://caiorolla-mf-doc-tw--earnest-sunburst-6f47dc.netlify.app/mf-docs/2.5/getting-started/',
-      rel: 'noopener noreferrer'
+      href: '/docs/mf-docs/2.5/getting-started/',
     },
     {
       label: t('footer.menu.sponsor@@Become a sponsor'),

@@ -25,7 +25,7 @@ export default component$(() => {
     const form = event.target as any;
     const formData = new FormData(form) as any;
 
-    fetch('/form', {
+    fetch('/docs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams(formData).toString(),

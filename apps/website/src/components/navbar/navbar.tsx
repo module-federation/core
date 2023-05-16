@@ -108,7 +108,7 @@ export default component$((props: NavbarProps) => {
   const navLis = [
     {
       label: t('navbar.menu.documentation@@Documentation'),
-      href: 'https://caiorolla-mf-doc-tw--earnest-sunburst-6f47dc.netlify.app/mf-docs/2.5/getting-started/',
+      href: '/mf-docs/2.5/getting-started/',
     },
     {
       label: t('navbar.menu.discover@@Discover'),
