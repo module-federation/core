@@ -17,6 +17,7 @@
     "gpt:commit":"node ./gpt --commit",
     "gpt:file":"node ./gpt",
     "gpt:pr":"node ./gpt --pr",
+    "build:prod": "nx run-many --target=build --projects=3000-home --verbose --output-style=stream",
     "build": "nx run-many --target=build --projects=3000-home --verbose --output-style=stream",
     "oldbuuild": "nx build",
     "build:libs": "nx run-many --target=build --projects=utils,node,nextjs-mf --verbose --output-style=stream --maxParallel=1",

@@ -61,7 +61,6 @@ class InvertedContainerPlugin {
       debug: this.options.debug,
     }).apply(compiler);
     const { Template, javascript } = compiler.webpack;
-
     // Hook into the compilation process.
     compiler.hooks.thisCompilation.tap(
       'InvertedContainerPlugin',
@@ -74,6 +73,7 @@ class InvertedContainerPlugin {
           // If the chunk has already been processed, skip it.
           if (onceForChunkSet.has(chunk)) return;
           set.add(RuntimeGlobals.onChunksLoaded);
+          // set.add(RuntimeGlobals.startupOnlyAfter);
 
           // Mark the chunk as processed by adding it to the WeakSet.
           onceForChunkSet.add(chunk);
@@ -99,7 +99,7 @@ class InvertedContainerPlugin {
         if (this.options.debug) {
           compilation.hooks.afterOptimizeChunkModules.tap(
             'InvertedContainerPlugin',
-            (chunks) => {
+            (chunks, modules) => {
               for (const chunk of chunks) {
                 if (
                   chunk.hasRuntime() &&
@@ -142,7 +142,7 @@ class InvertedContainerPlugin {
         compilation.hooks.processAssets.tap(
           {
             name: 'InvertedContainerPlugin',
-            stage: Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_COUNT,
+            stage: Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
           },
           (assets) => {
             for (const chunk of compilation.chunks) {
