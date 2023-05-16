@@ -594,7 +594,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                   }[id] = ${runtimeTemplate.basicFunction('module', [
                     'globalThis.factoryTracker[id] = module.exports = (globalThis.factoryTracker[id] || factory());',
                   ])}`,
-                  `console.log('onFactory M after', ${RuntimeGlobals.moduleFactories}[id])`,
                 ])};`,
                 'handleFunction(__webpack_require__, data[2], 0, 0, onExternal, 1);',
               ]
@@ -650,12 +649,10 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         : 'window';
 
       const serverContainerKickstart = Template.asString([
-        "console.log('backup scope',globalThis.backupScope);",
         '__webpack_require__.own_remote = new Promise(function(resolve,reject){',
         Template.indent([
           // attachOnMount,
           `__webpack_require__.O(0, ["webpack-runtime"], function() {`,
-          "console.log('webpack-runtime loaded');",
           // attachOnMount,
           `if(!__webpack_require__.m[${JSON.stringify(containerModuleId)}]) {`,
           `console.error('container does not exist in host runtime graph', ${JSON.stringify(
@@ -673,9 +670,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           `self[${JSON.stringify(
             this.compilation.outputOptions.chunkLoadingGlobal
           )}].forEach(function(chunkId) {`,
-          'console.log(chunkId)',
-
-          // "console.log('installed chunks to search', chunkId[0]);",
           `__webpack_require__.getEagerSharedForChunkId(chunkId[0],__webpack_require__.initConsumes)
         __webpack_require__.getEagerRemotesForChunkId(chunkId[0],__webpack_require__.initRemotes)`,
           '});',
@@ -690,8 +684,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         "console.log('runtime loaded');",
         "console.log('replaying all installed chunk requirements');",
         '__webpack_require__.checkAsyncReqs();',
-        "console.log('m',__webpack_require__.m)",
-        "console.log('c',__webpack_require__.c)",
         'attachRemote(resolve)',
         'globalThis.buscp = globalThis.buscp || {};',
         '__webpack_require__.I("default",[globalThis.buscp]);',
