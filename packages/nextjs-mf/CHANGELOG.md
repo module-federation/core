@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.4.1-beta.7](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.1-beta.6...nextjs-mf-6.4.1-beta.7) (2023-05-16)
+
+
+### Bug Fixes
+
+* ensure eager modules always exist in host (inject dependent modules somewhere in build pipeline) ([12bb896](https://github.com/module-federation/nextjs-mf/commit/12bb896d37324b4f3d0d59da04463b1d04428a01))
+
+
+
 ## [6.4.1-beta.6](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.1-beta.5...nextjs-mf-6.4.1-beta.6) (2023-05-15)
 
 
