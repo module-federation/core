@@ -421,7 +421,6 @@ class FederationStatsPlugin {
         },
         // PLUGIN_NAME,
         async () => {
-          console.log('after  emit');
           if (alreadyRun) {
             return;
           }
