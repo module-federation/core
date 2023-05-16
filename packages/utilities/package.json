@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/utilities",
-  "version": "1.7.6-beta.3",
+  "version": "1.7.6-beta.4",
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
