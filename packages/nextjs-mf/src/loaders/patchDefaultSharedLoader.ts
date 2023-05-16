@@ -6,7 +6,7 @@ export default function patchDefaultSharedLoader(
   this: LoaderContext<Record<string, unknown>>,
   content: string
 ) {
-  if (content.includes('placeholderModuleEnsurepat')) {
+  if (content.includes('placeholderModuleEnsure')) {
     // If already patched, return
     return content;
   }
