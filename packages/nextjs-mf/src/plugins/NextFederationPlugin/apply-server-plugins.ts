@@ -27,8 +27,44 @@ export function applyServerPlugins(
   // Import the StreamingTargetPlugin from @module-federation/node
   const { StreamingTargetPlugin } = require('@module-federation/node');
   new JsonpChunkLoading({ server: true }).apply(compiler);
-
+  compiler.options.optimization.moduleIds = 'named';
+  compiler.options.optimization.mergeDuplicateChunks = true;
   compiler.options.optimization.splitChunks = false;
+  //@ts-ignore
+  // compiler.options.optimization.splitChunks = {
+  //   chunks: 'all',
+  //   maxAsyncRequests: 5,
+  //   cacheGroups: {
+  //     default: {
+  //       priority: -20,
+  //       minChunks: 2,
+  //       minSize: 5000,
+  //     },
+  //     federation: {  
+  //       test: function (module: any, chunks: any) {
+  //         if(module.type && module.type.includes('remote')) {
+  //           console.log('remote',module.type,module.id)
+  //           return module.type === 'remote-module'
+  //         //empty
+  //         }
+  //         return false
+  //       },
+  //       name: 'federation',
+  //       reuseExistingChunk: true,
+  //       minChunks: 3,
+  //       priority:78
+  //     },
+  //     vendors: {
+  //       test: /[\\/]node_modules[\\/]/,
+  //       name: 'vendors',
+  //       maxAsyncRequests: 5,
+  //       priority: 10,
+  //       minSize: 5000,
+  //       enforce:true,
+  //       reuseExistingChunk: true,
+  //     }
+  //   },
+  // };
   // Add the AddModulesPlugin for the webpack runtime with eager loading and remote configuration
   new AddModulesPlugin({
     runtime: 'webpack-runtime',

@@ -65,6 +65,7 @@ export class NextFederationPlugin {
     // Check if the compiler is for the server or client
     const isServer = compiler.options.name === 'server';
     const { webpack } = compiler;
+    
 
     // Apply the CopyFederationPlugin
     new CopyFederationPlugin(isServer).apply(compiler);

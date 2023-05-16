@@ -120,7 +120,14 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
         if (c.ids) {
           for (const id of c.ids) initialChunkIds.add(id);
         }
+        for (const c of chunk.getAllAsyncChunks()) {
+          if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
+          if (c.ids) {
+            for (const id of c.ids) initialChunkIds.add(id);
+          }
+        }
       }
+      console.log('initialChunkIds', initialChunkIds);
       return initialChunkIds;
     };
 
@@ -162,6 +169,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
         contentHashType: 'javascript',
       }
     );
+    
+
     const rootOutputDir = getUndoPath(
       outputName,
       this.compilation.outputOptions.path,

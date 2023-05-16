@@ -121,14 +121,17 @@ class InvertedContainerPlugin {
               this.resolveContainerModule(compilation);
             if (!containerEntryModule) return;
             for (const chunk of chunks) {
+              
               if (
                 !compilation.chunkGraph.isModuleInChunk(
                   containerEntryModule,
                   chunk
-                )
+                ) && chunk.hasRuntime()
               ) {
+              
                 compilation.chunkGraph.connectChunkAndModule(
                   chunk,
+                
                   containerEntryModule
                 );
               }

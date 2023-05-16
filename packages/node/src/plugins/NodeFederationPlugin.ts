@@ -146,6 +146,7 @@ class NodeFederationPlugin {
       ) as ModuleFederationPluginOptions['remotes'],
     };
 
+
     const chunkFileName = compiler.options?.output?.chunkFilename;
     const uniqueName =
       compiler?.options?.output?.uniqueName || this._options.name;
@@ -175,6 +176,7 @@ class NodeFederationPlugin {
         );
       }
     }
+
 
     new (this.context.ModuleFederationPlugin ||
       (webpack && webpack.container.ModuleFederationPlugin) ||

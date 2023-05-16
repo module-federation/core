@@ -40,7 +40,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     requiredVersion: false,
     singleton: true,
     import: false,
-    eager: true,
+    eager: false,
   },
   'next/script': {
     requiredVersion: false,
@@ -69,8 +69,8 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: false,
-    eager: true,
-    import: undefined,
+    eager: false,
+    import: false,
   },
   'styled-jsx': {
     requiredVersion: false,
@@ -103,7 +103,7 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
 
   if (key === 'react' || key === 'react-dom' || key === 'next/router') {
     //@ts-ignore
-    acc[key].eager = true;
+    //acc[key].eager = true;
   }
   return acc;
 }, {} as SharedObject);
