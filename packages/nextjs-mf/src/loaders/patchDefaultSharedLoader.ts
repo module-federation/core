@@ -25,6 +25,7 @@ export default function patchDefaultSharedLoader(
   const patch = `
 (globalThis || self).placeholderModuleEnsure = () => {
   import('react');
+  import('react/jsx-runtime');
   import('react-dom');
   import('next/link');
   import('next/router');

@@ -51,7 +51,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   react: {
     singleton: true,
     requiredVersion: false,
-    eager: true,
+    eager: false,
     import: false,
   },
   'react-dom': {
@@ -64,25 +64,25 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     requiredVersion: false,
     import: undefined,
-    eager: false,
+    eager: true,
   },
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: false,
-    import: false,
     eager: true,
+    import: undefined,
   },
   'styled-jsx': {
     requiredVersion: false,
     singleton: true,
     import: undefined,
-    eager: false,
+    eager: true,
   },
   'styled-jsx/style': {
     requiredVersion: false,
     singleton: true,
     import: undefined,
-    eager: false,
+    eager: true,
   },
 };
 
