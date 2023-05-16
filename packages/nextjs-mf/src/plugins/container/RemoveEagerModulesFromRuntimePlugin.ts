@@ -125,7 +125,7 @@ class RemoveEagerModulesFromRuntimePlugin {
 
   private removeDependentModules(compilation: Compilation, chunk: Chunk) {
     for (const moduleToRemove of this.dependentModules) {
-      if (this.debug && compilation.compiler.options.name === 'server') {
+      if (this.debug) {
         //@ts-ignore
         console.log(
           'removing',

@@ -69,16 +69,11 @@ export function applyRemoteDelegates(
   if (options.remotes) {
     // Get the available delegates
     const delegates = getDelegates(options.remotes);
-    if (compiler.options.name === 'client' || true) {
-      compiler.options.module.rules.push({
-        enforce: 'pre',
-        test: [/_app/],
-        loader: path.resolve(
-          __dirname,
-          '../../loaders/patchDefaultSharedLoader'
-        ),
-      });
-    }
+    compiler.options.module.rules.push({
+      enforce: 'pre',
+      test: [/_app/],
+      loader: path.resolve(__dirname, '../../loaders/patchDefaultSharedLoader'),
+    });
     // Add the delegate loader for hoist and container to the module rules
     compiler.options.module.rules.push({
       enforce: 'pre',
