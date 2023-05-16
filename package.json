@@ -32,7 +32,7 @@
     "prerelease:node": "nx run node:version --releaseAs=prerelease --preid=beta",
     "prerelease:next": "nx run nextjs-mf:version --releaseAs=prerelease --preid=beta",
     "prerelease:utils": "nx run utils:version --releaseAs=prerelease --preid=beta",
-    "prerelease:all": "nx run-many --target=version --projects=nextjs-mf,node,utils --releaseAs=prerelease --preid=beta",
+    "prerelease:all": "nx run-many --target=version --projects=nextjs-mf,node,utils --releaseAs=prerelease --preid=rc",
     "release:node": "nx run node:version --releaseAs=minor",
     "release:next": "nx run nextjs-mf:version --releaseAs=patch",
     "release:utils": "nx run utils:version --releaseAs=minor",
