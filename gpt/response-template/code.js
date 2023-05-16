@@ -1,4 +1,4 @@
-const { response } = require('../constants');
+const { chatHistory } = require('../constants');
 const responseTemplate = `
 The response should follow this template:
 \n

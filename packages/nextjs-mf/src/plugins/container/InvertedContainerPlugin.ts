@@ -1,12 +1,13 @@
-import type { Chunk, Compiler, Module } from 'webpack';
+import type { Chunk, Compilation, Compiler, Module } from 'webpack';
 import { RawSource } from 'webpack-sources';
 //@ts-ignore
 import type { ModuleFederationPluginOptions } from '../types';
 import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
-import { RuntimeGlobals, Compilation } from 'webpack';
+import { RuntimeGlobals } from 'webpack';
 import Template from '../../../utils/Template';
 import RemoveEagerModulesFromRuntimePlugin from './RemoveEagerModulesFromRuntimePlugin';
 /**
+ * Interface for InvertedContainerOptions, extending ModuleFederationPluginOptions.
  * This interface includes additional fields specific to the plugin's behavior.
  */
 interface InvertedContainerOptions extends ModuleFederationPluginOptions {
@@ -18,6 +19,7 @@ interface InvertedContainerOptions extends ModuleFederationPluginOptions {
 
 /**
  * InvertedContainerPlugin is a Webpack plugin that handles loading of chunks in a federated module.
+ * It sets up runtime modules for each chunk, ensuring the proper loading of remote modules.
  */
 class InvertedContainerPlugin {
   private options: InvertedContainerOptions;
@@ -35,11 +37,6 @@ class InvertedContainerPlugin {
     this.options = options || ({} as InvertedContainerOptions);
   }
 
-  /**
-   * Resolves the container module for the given compilation.
-   * @param {Compilation} compilation - Webpack compilation instance.
-   * @returns {Module | undefined} - The container module or undefined if not found.
-   */
   resolveContainerModule(compilation: Compilation) {
     if (!this.options.container) {
       return undefined;
@@ -61,7 +58,6 @@ class InvertedContainerPlugin {
       debug: this.options.debug,
     }).apply(compiler);
     const { Template, javascript } = compiler.webpack;
-
     // Hook into the compilation process.
     compiler.hooks.thisCompilation.tap(
       'InvertedContainerPlugin',
@@ -74,6 +70,7 @@ class InvertedContainerPlugin {
           // If the chunk has already been processed, skip it.
           if (onceForChunkSet.has(chunk)) return;
           set.add(RuntimeGlobals.onChunksLoaded);
+          // set.add(RuntimeGlobals.startupOnlyAfter);
 
           // Mark the chunk as processed by adding it to the WeakSet.
           onceForChunkSet.add(chunk);
@@ -99,7 +96,7 @@ class InvertedContainerPlugin {
         if (this.options.debug) {
           compilation.hooks.afterOptimizeChunkModules.tap(
             'InvertedContainerPlugin',
-            (chunks) => {
+            (chunks, modules) => {
               for (const chunk of chunks) {
                 if (
                   chunk.hasRuntime() &&
@@ -139,29 +136,30 @@ class InvertedContainerPlugin {
         const hooks =
           javascript.JavascriptModulesPlugin.getCompilationHooks(compilation);
 
-        compilation.hooks.processAssets.tap(
-          {
-            name: 'InvertedContainerPlugin',
-            stage: Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_COUNT,
-          },
-          (assets) => {
-            for (const chunk of compilation.chunks) {
-              for (const file of chunk.files) {
+        compilation.hooks.afterOptimizeChunkAssets.tap(
+          'InvertedContainerPlugin',
+          (chunks) => {
+            chunks.forEach((chunk) => {
+              chunk.files.forEach((file) => {
                 const asset = compilation.getAsset(file);
                 if (asset) {
                   let source = asset.source.source();
+
                   // Inject the chunk name at the beginning of the file
                   source = source
                     .toString()
                     //@ts-ignore
                     .replace('__INSERT_CH_ID__MF__', chunk.id);
-                  const updatedSource = new RawSource(source);
-
+                  const sourceBuffer = Buffer.from(source, 'utf-8');
+                  const sourceObj = {
+                    source: () => sourceBuffer,
+                    size: () => sourceBuffer.length,
+                  };
                   //@ts-ignore
-                  compilation.updateAsset(file, updatedSource);
+                  compilation.updateAsset(file, sourceObj);
                 }
-              }
-            }
+              });
+            });
           }
         );
 
@@ -234,6 +232,8 @@ class InvertedContainerPlugin {
               `var ${searchString} =`,
               fancyTemplate,
             ]);
+
+            console.log(wholeTem);
 
             return Template.asString([
               '',

@@ -121,101 +121,112 @@ export const createDelegatedModule = (
   return `internal ${delegate}?${queries.join('&')}`;
 };
 
-export const loadScript = async (
-  keyOrRuntimeRemoteItem: string | RuntimeRemote
-) => {
+export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
 
-  let reference =
+  // 1) Load remote container if needed
+  let asyncContainer: RuntimeRemote['asyncContainer'];
+  const reference =
     typeof keyOrRuntimeRemoteItem === 'string'
       ? runtimeRemotes[keyOrRuntimeRemoteItem]
       : keyOrRuntimeRemoteItem;
 
-  let asyncContainer = reference.asyncContainer;
+  if (reference.asyncContainer) {
+    asyncContainer =
+      typeof reference.asyncContainer.then === 'function'
+        ? reference.asyncContainer
+        : // @ts-ignore
+          reference.asyncContainer();
+  } else {
+    // This casting is just to satisfy typescript,
+    // In reality remoteGlobal will always be a string;
+    const remoteGlobal = reference.global as unknown as number;
 
-  if (!asyncContainer) {
-    const remoteGlobal = reference.global as unknown as string;
+    // Check if theres an override for container key if not use remote global
     const containerKey = reference.uniqueKey
-      ? (reference.uniqueKey as unknown as string)
+      ? (reference.uniqueKey as unknown as number)
       : remoteGlobal;
 
+    const __webpack_error__ = new Error() as Error & {
+      type: string;
+      request: string | null;
+    };
+
+    // @ts-ignore
+    if (!global.__remote_scope__) {
+      // create a global scope for container, similar to how remotes are set on window in the browser
+      // @ts-ignore
+      global.__remote_scope__ = {
+        // @ts-ignore
+        _config: {},
+      };
+    }
+    // @ts-ignore
     const globalScope =
-      typeof window !== 'undefined' ? window : global.__remote_scope__ || {};
+      // @ts-ignore
+      typeof window !== 'undefined' ? window : global.__remote_scope__;
 
     if (typeof window === 'undefined') {
-      globalScope['_config'] = globalScope['_config'] || {};
       globalScope['_config'][containerKey] = reference.url;
     } else {
-      globalScope['remoteLoading'] = globalScope['remoteLoading'] || {};
+      // to match promise template system, can be removed once promise template is gone
+      if (!globalScope['remoteLoading']) {
+        globalScope['remoteLoading'] = {};
+      }
       if (globalScope['remoteLoading'][containerKey]) {
         return globalScope['remoteLoading'][containerKey];
       }
     }
-    // @ts-ignore
-    asyncContainer = loadRemoteContainer(
-      globalScope,
-      remoteGlobal,
-      //@ts-ignore
-      reference.url,
-      containerKey
-    );
+
+    asyncContainer = new Promise(function (resolve, reject) {
+      function resolveRemoteGlobal() {
+        const asyncContainer = globalScope[
+          remoteGlobal
+        ] as unknown as AsyncContainer;
+        return resolve(asyncContainer);
+      }
+
+      if (typeof globalScope[remoteGlobal] !== 'undefined') {
+        return resolveRemoteGlobal();
+      }
+
+      (__webpack_require__ as any).l(
+        reference.url,
+        function (event: Event) {
+          if (typeof globalScope[remoteGlobal] !== 'undefined') {
+            return resolveRemoteGlobal();
+          }
+
+          const errorType =
+            event && (event.type === 'load' ? 'missing' : event.type);
+          const realSrc =
+            event && event.target && (event.target as HTMLScriptElement).src;
+
+          __webpack_error__.message =
+            'Loading script failed.\n(' +
+            errorType +
+            ': ' +
+            realSrc +
+            ' or global var ' +
+            remoteGlobal +
+            ')';
+
+          __webpack_error__.name = 'ScriptExternalLoadError';
+          __webpack_error__.type = errorType;
+          __webpack_error__.request = realSrc;
+
+          reject(__webpack_error__);
+        },
+        containerKey
+      );
+    });
     if (typeof window !== 'undefined') {
       globalScope['remoteLoading'][containerKey] = asyncContainer;
     }
   }
 
-  try {
-    const container = await asyncContainer;
-    return container;
-  } catch (error) {
-    console.error(`Failed to load script: ${error}`);
-    return {
-      fake: true,
-      init: () => {},
-      get: () => {
-        const factory = () => {
-          return {
-            __esModule: true,
-            default: () => null,
-          };
-        };
-        return Promise.resolve(factory);
-      },
-    };
-  }
+  return asyncContainer;
 };
-
-function loadRemoteContainer(
-  globalScope: any,
-  remoteGlobal: string,
-  url: string,
-  containerKey: string
-) {
-  return new Promise((resolve, reject) => {
-    (__webpack_require__ as any).l(
-      url,
-      (event: Event) => {
-        if (globalScope[remoteGlobal]) {
-          return resolve(
-            globalScope[remoteGlobal] as unknown as AsyncContainer
-          );
-        }
-
-        const errorType =
-          event && (event.type === 'load' ? 'missing' : event.type);
-        const realSrc =
-          event && event.target && (event.target as HTMLScriptElement).src;
-        const error = new Error(
-          `Loading script failed.\n(${errorType}: ${realSrc} or global var ${remoteGlobal})`
-        );
-        error.name = 'ScriptExternalLoadError';
-
-        reject(error);
-      },
-      containerKey
-    );
-  });
-}
 
 const createContainerSharingScope = (
   asyncContainer: AsyncContainer | undefined
