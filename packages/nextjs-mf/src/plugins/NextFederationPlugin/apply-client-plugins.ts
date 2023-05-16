@@ -5,7 +5,6 @@ import {
 } from '@module-federation/utilities';
 import AddModulesPlugin from '../AddModulesToRuntime';
 import { DEFAULT_SHARE_SCOPE_BROWSER } from '../../internal';
-import path from 'path';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import JsonpChunkLoading from '../JsonpChunkLoading';
@@ -75,13 +74,6 @@ export function applyClientPlugins(
     type: 'window',
     name,
   };
-
-  // Add a new entry plugin to the compiler to delegate hoisting
-  // new webpack.EntryPlugin(
-  //   compiler.context,
-  //   require.resolve('../../internal-delegate-hoist'),
-  //   'main'
-  // ).apply(compiler);
 
   // Add a new chunk correlation plugin to the compiler
   new ChunkCorrelationPlugin({
