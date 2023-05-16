@@ -140,11 +140,11 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   } else {
     // This casting is just to satisfy typescript,
     // In reality remoteGlobal will always be a string;
-    const remoteGlobal = reference.global as unknown as number;
+    const remoteGlobal = reference.global as unknown as string;
 
     // Check if theres an override for container key if not use remote global
     const containerKey = reference.uniqueKey
-      ? (reference.uniqueKey as unknown as number)
+      ? (reference.uniqueKey as unknown as string)
       : remoteGlobal;
 
     const __webpack_error__ = new Error() as Error & {
@@ -221,7 +221,7 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       );
     }).catch(function (err) {
       console.error('container is offline, returning fake remote');
-      //console.error(err);
+      console.error(err);
 
       return {
         fake: true,
