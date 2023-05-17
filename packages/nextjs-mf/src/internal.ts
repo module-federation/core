@@ -69,7 +69,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: false,
-    eager: false,
+    eager: true,
     import: undefined,
   },
   'styled-jsx': {
