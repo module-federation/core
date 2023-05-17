@@ -20,15 +20,20 @@ export default component$(() => {
   const success = useSignal(false);
 
   const handleSubmit = $((event: QwikSubmitEvent<HTMLFormElement>) => {
+    const form = event.target as any;
+    const formData = new FormData(form);
+
+    if (!formData.get('email')) {
+      return;
+    }
+
     loading.value = true;
     success.value = false;
-    const form = event.target as any;
-    const formData = new FormData(form) as any;
 
     fetch('/docs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(formData).toString(),
+      body: new URLSearchParams(formData as any).toString(),
     })
       .then(() => {
         success.value = true;
@@ -97,8 +102,14 @@ export default component$(() => {
       </div>
 
       <div q:slot="background-no-overlay">
-        <Line showEnd={false} class="absolute w-12 md:w-1/4 top-[25%] md:top-[60%] right-0" />
-        <Line showStart={false} class="absolute w-24 md:w-52 top-0 left-[12%] md:left-[14%] rotate-90 origin-left -translate-y-1/2" />
+        <Line
+          showEnd={false}
+          class="absolute w-12 md:w-1/4 top-[25%] md:top-[60%] right-0"
+        />
+        <Line
+          showStart={false}
+          class="absolute w-24 md:w-52 top-0 left-[12%] md:left-[14%] rotate-90 origin-left -translate-y-1/2"
+        />
       </div>
     </Section>
   );

@@ -24,15 +24,28 @@ export default component$(() => {
   };
 
   const handleSubmit = $((event: QwikSubmitEvent<HTMLFormElement>) => {
+    const form = event.target as any;
+    const formData = new FormData(form);
+
+    if (!formData.get('companyEmail')) {
+      return;
+    }
+
+    if (!formData.get('name')) {
+      return;
+    }
+
+    if (!formData.get('howCanWeHelp')) {
+      return;
+    }
+
     loading.value = true;
     success.value = false;
-    const form = event.target as any;
-    const formData = new FormData(form) as any;
 
     fetch('/docs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(formData).toString(),
+      body: new URLSearchParams(formData as any).toString(),
     })
       .then(() => {
         success.value = true;
