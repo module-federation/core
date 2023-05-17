@@ -5,6 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "command": "npm run start:next",
+            "name": "Run npm start:next",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
             "type": "node",
             "request": "launch",
             "name": "gpt:pr",
@@ -13,7 +19,7 @@
             ],
             "program": "${workspaceFolder}/gpt/index.js",
             "args": ["--pr"]
-        },  
+        },
          {
             "type": "node",
             "request": "launch",
