@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.14.7-rc.1](https://github.com/module-federation/nextjs-mf/compare/node-0.14.7-rc.0...node-0.14.7-rc.1) (2023-05-17)
+
+
+### Bug Fixes
+
+* **chunk-module-duplication:** prevent runtime reset and share scope loss ([14bfc38](https://github.com/module-federation/nextjs-mf/commit/14bfc38515a4da3be7321d4b6d876905d45ad20b))
+
+
+
 ## [0.14.7-rc.0](https://github.com/module-federation/nextjs-mf/compare/node-0.14.7-beta.3...node-0.14.7-rc.0) (2023-05-16)
 
 
