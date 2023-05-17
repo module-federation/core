@@ -20,7 +20,13 @@ export function applyServerPlugins(
   const { StreamingTargetPlugin } = require('@module-federation/node');
   new JsonpChunkLoading({ server: true }).apply(compiler);
 
-  compiler.options.optimization.splitChunks = false;
+  compiler.options.optimization.splitChunks = undefined;
+
+  // solves strange issues where next doesnt create a runtime chunk
+  // might be related to if an api route exists or not
+  compiler.options.optimization.runtimeChunk = {
+    name: 'webpack-runtime',
+  };
 
   new DelegatesModulePlugin({
     runtime: 'webpack-runtime',

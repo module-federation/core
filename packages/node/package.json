@@ -13,6 +13,10 @@
     "./utils": {
       "import": "./src/utils/index.js",
       "require": "./src/utils/index.js"
+    },
+    "./src/": {
+      "import": "./src/",
+      "require": "./src/"
     }
   },
   "publishConfig": {
