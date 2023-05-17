@@ -99,7 +99,7 @@ export class NextFederationPlugin {
       applyClientPlugins(compiler, this._options, this._extraOptions);
     }
     //@ts-ignore
-    compiler.options.module.parser.javascript.importMeta = false;
+    //compiler.options.module.parser.javascript.importMeta = false;
 
     // @ts-ignore
     const hostFederationPluginOptions: ModuleFederationPluginOptions = {

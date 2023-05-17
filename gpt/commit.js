@@ -17,7 +17,7 @@ const renderMarkdown = require('./markdown');
 const { commandJoin } = require('command-join');
 const schema = `
 {
-  "Title": "[title]",
+  "Title": "[fix|feat|chore|refactor][title]",
   "Description": "[description]",
   "Changes": [
     {{"filename": "[filename]", "description": ["[description]", "[description]"]}},

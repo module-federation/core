@@ -10,41 +10,15 @@ import { ConcatSource } from 'webpack-sources';
 // @ts-ignore
 import JsonpChunkLoadingRuntimeModule from 'webpack/lib/web/JsonpChunkLoadingRuntimeModule';
 import Template from '../../utils/Template';
-import { DEFAULT_SHARE_SCOPE_BROWSER } from '../internal';
 import template from './container/custom-jsonp';
 
-//might be usefule later
-// compilation.hooks.optimizeChunks.tap(
-//   'AddModulesToRuntimeChunkPlugin',
-//   (chunks) => {
-//     for (const chunk of chunks) {
-//       const modules =
-//         compilation.chunkGraph.getChunkModulesIterable(chunk);
-//       // just use module type provide-module to find shared modules.
-//       for (const m of modules) {
-//         const foundTrueShare = Array.from(this.initialModules).some(
-//           //@ts-ignore
-//           (mod) => mod?.options?.importResolved === m?.resource
-//         );
-//         if (foundTrueShare) {
-//           this.initialModulesResolved.set(
-//             //@ts-ignore
-//             m.resource,
-//             //@ts-ignore
-//             m?.resourceResolveData?.descriptionFileData
-//           );
-//         }
-//       }
-//     }
-//   }
-// );
 function getCustomJsonpCode(
   chunkLoadingGlobal: string,
   RuntimeGlobals: any
 ): string {
   const code = [
     'var chunkQueue = [];',
-    'var resport = [];',
+    'var chunkTracker = [];',
     `var chunkLoadingGlobal = self[${JSON.stringify(
       chunkLoadingGlobal
     )}] || [];`,

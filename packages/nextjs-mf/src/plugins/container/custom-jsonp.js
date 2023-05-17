@@ -103,7 +103,7 @@ __webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRe
 
     if (typeof arguments[0][2] === 'function') {
     console.log('queueing chunk', arguments[0][0]);
-      resport = Array.prototype.concat.apply(resport, arguments[0][0]);
+      chunkTracker = Array.prototype.concat.apply(chunkTracker, arguments[0][0]);
       var pushEvent = Array.prototype.push.apply(chunkQueue, arguments);
       return asyncOperation(originalPush);
     }

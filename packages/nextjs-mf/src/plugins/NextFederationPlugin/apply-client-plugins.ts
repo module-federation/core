@@ -3,7 +3,7 @@ import {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
 } from '@module-federation/utilities';
-import AddModulesPlugin from '../AddModulesToRuntime';
+import DelegateModulesPlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import { DEFAULT_SHARE_SCOPE_BROWSER } from '../../internal';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
@@ -40,16 +40,10 @@ export function applyClientPlugins(
   compiler.options.output.publicPath = 'auto';
   // Add a new plugin to hoist modules into remote runtime
   new JsonpChunkLoading().apply(compiler);
-  new AddModulesPlugin({
-    debug: false,
-    runtime: 'webpack',
-    eager: true,
-    remotes,
-    // @ts-ignore
-    shared: DEFAULT_SHARE_SCOPE_BROWSER,
+  new DelegateModulesPlugin({
     container: name,
-    // @ts-ignore
-    applicationName: name,
+    runtime: 'webpack',
+    remotes,
   }).apply(compiler);
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules

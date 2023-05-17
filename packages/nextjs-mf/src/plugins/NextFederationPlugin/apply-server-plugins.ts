@@ -1,6 +1,6 @@
 import { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
-import AddModulesPlugin from '../AddModulesToRuntime';
+import DelegatesModulePlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import JsonpChunkLoading from '../JsonpChunkLoading';
@@ -11,14 +11,6 @@ import JsonpChunkLoading from '../JsonpChunkLoading';
  * @param compiler - The Webpack compiler instance.
  * @param options - The ModuleFederationPluginOptions instance.
  *
- * @remarks
- * The AddModulesPlugin lets us move modules between webpack chunks. In this case,
- * we are moving modules into the runtime chunks of the host and removing eager shared
- * modules from the remote container runtimes. This works around Next.js' lack of async
- * boundary, allowing us to execute the code more efficiently and with better performance.
- * By removing eager shared modules from the remote container runtimes, we can also improve
- * the load time of the application by reducing the amount of unnecessary code that needs
- * to be loaded.
  */
 export function applyServerPlugins(
   compiler: Compiler,
@@ -29,21 +21,12 @@ export function applyServerPlugins(
   new JsonpChunkLoading({ server: true }).apply(compiler);
 
   compiler.options.optimization.splitChunks = false;
-  // Add the AddModulesPlugin for the webpack runtime with eager loading and remote configuration
-  new AddModulesPlugin({
+
+  new DelegatesModulePlugin({
     runtime: 'webpack-runtime',
-    eager: false,
     remotes: options.remotes,
-    isServer: true,
     container: options.name,
   }).apply(compiler);
-
-  // Add the AddModulesPlugin for the server with lazy loading and remote configuration
-  // new AddModulesPlugin({
-  //   runtime: options.name,
-  //   eager: false,
-  //   remotes: options.remotes
-  // }).apply(compiler);
 
   // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
   new StreamingTargetPlugin(options, {
