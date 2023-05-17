@@ -106,7 +106,8 @@ export class NextFederationPlugin {
       ...this._options,
       runtime: false,
       exposes: {
-        // __hoist: require.resolve('../../delegate-hoist-container'),
+        //something must be exposed in order to generate a remote entry, which is needed to kickstart runtime
+        './noop': require.resolve('../../noop.js'),
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)
           : {}),

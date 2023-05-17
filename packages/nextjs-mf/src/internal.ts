@@ -40,7 +40,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     requiredVersion: false,
     singleton: true,
     import: false,
-    eager: true,
+    eager: false,
   },
   'next/script': {
     requiredVersion: false,

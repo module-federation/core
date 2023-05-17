@@ -125,10 +125,12 @@ class InvertedContainerPlugin {
                 !compilation.chunkGraph.isModuleInChunk(
                   containerEntryModule,
                   chunk
-                )
+                ) &&
+                chunk.hasRuntime()
               ) {
                 compilation.chunkGraph.connectChunkAndModule(
                   chunk,
+
                   containerEntryModule
                 );
               }

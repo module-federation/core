@@ -55,7 +55,7 @@ export function applyServerPlugins(
     runtime: 'webpack-runtime',
     container: options.name,
     remotes: options.remotes as Record<string, string>,
-    debug: true,
+    debug: false,
   }).apply(compiler);
 }
 
