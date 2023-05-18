@@ -238,6 +238,7 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
             };
           });
         },
+        //eslint-disable-next-line
         init: () => {},
       };
     });
