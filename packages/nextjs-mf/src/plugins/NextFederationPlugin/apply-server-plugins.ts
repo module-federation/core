@@ -177,10 +177,8 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     ...compiler.options.node,
     global: false,
   };
-  // Set chunkIds optimization to 'named'
-  // compiler.options.optimization.chunkIds = 'named'; // for debugging
-  // compiler.options.optimization.minimize = false;
-  // compiler.options.optimization.moduleIds = 'named';
+  // Build will hang without this. Likely something in my plugin
+  compiler.options.optimization.chunkIds = 'named'; // for debugging
 
   // Disable split chunks to prevent conflicts from occurring in the graph
   // TODO on the `compiler.options.optimization.splitChunks` line would be to find a way to only opt out chunks/modules related to module federation from chunk splitting logic.
