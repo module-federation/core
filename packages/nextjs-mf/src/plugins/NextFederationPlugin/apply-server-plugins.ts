@@ -145,7 +145,9 @@ export function handleServerExternals(
         // make sure we dont screw up package names that start with react
         // like react-carousel or react-spring
         req.startsWith('react/') ||
-        req === 'react'
+        req.startsWith('react-dom/') ||
+        req === 'react' ||
+        req === 'react-dom'
       ) {
         return fromNext;
       }
