@@ -70,7 +70,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     requiredVersion: false,
     eager: true,
-    import: undefined,
+    import: false,
   },
   'styled-jsx': {
     requiredVersion: false,
