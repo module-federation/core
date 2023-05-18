@@ -122,6 +122,13 @@ export function handleServerExternals(
         return;
       }
 
+      // seems to cause build issues at lululemon
+      // nobody else seems to run into this issue
+      // #JobSecurity
+      if (ctx.request && ctx.request.includes('react/jsx-runtime')) {
+        return 'commonjs ' + ctx.request;
+      }
+
       // Call the original externals function and retrieve the result
       // @ts-ignore
       const fromNext = await originalExternals(ctx, callback);
@@ -133,11 +140,17 @@ export function handleServerExternals(
 
       // If the module is from Next.js or React, return the original result
       const req = fromNext.split(' ')[1];
-      if (req.startsWith('next') || req.startsWith('react')) {
+      if (
+        req.startsWith('next') ||
+        // make sure we dont screw up package names that start with react
+        // like react-carousel or react-spring
+        req.startsWith('react/') ||
+        req === 'react'
+      ) {
         return fromNext;
       }
 
-      // Otherwise, return null
+      // Otherwise, return (null) to treat the module as internalizable
       return;
     };
   }
@@ -163,7 +176,9 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     global: false,
   };
   // Set chunkIds optimization to 'named'
-  compiler.options.optimization.chunkIds = 'named'; // for debugging
+  // compiler.options.optimization.chunkIds = 'named'; // for debugging
+  // compiler.options.optimization.minimize = false;
+  // compiler.options.optimization.moduleIds = 'named';
 
   // Disable split chunks to prevent conflicts from occurring in the graph
   // TODO on the `compiler.options.optimization.splitChunks` line would be to find a way to only opt out chunks/modules related to module federation from chunk splitting logic.
