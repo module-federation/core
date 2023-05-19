@@ -3,7 +3,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 // Nx plugins for webpack.
 module.exports = composePlugins(withNx(), withWeb(), (config) => {
-  const staticAssets = ['helpers', 'layouts', 'partials'];
+  const staticAssets = ['helpers', 'layouts', 'partials', 'img'];
   config.plugins.push(
     new CopyWebpackPlugin({
       patterns: staticAssets.map((a) => ({ from: `src/app/${a}`, to: a })),

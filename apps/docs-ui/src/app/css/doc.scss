@@ -1,0 +1,167 @@
+.doc {
+  @apply text-blue-gray-900;
+
+  /**
+      Header Styles
+    */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold mb-6;
+  }
+
+  h1 {
+    @apply text-4xl;
+  }
+
+  h2 {
+    @apply text-3xl;
+  }
+
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-2xl;
+  }
+
+  /**
+      Paragraph Styles
+    */
+  .paragraph {
+    @apply mb-6 text-lg font-normal;
+  }
+
+  /**
+      List Styles
+    */
+  ol,
+  ul {
+    @apply list-inside mb-6 ml-2;
+  }
+
+  ol {
+    @apply list-decimal;
+  }
+
+  ul {
+    @apply list-disc;
+  }
+  ul li,
+  ol li {
+    @apply mb-2;
+  }
+
+  ul li p,
+  ol li p {
+    @apply inline m-0;
+  }
+
+  .listingblock {
+    @apply mb-6;
+  }
+
+  /**
+      Text highlight Styles
+      TODO: Check why this color is not on scheme!
+    */
+  p code:not(.highlight) {
+    @apply bg-[#DDE3F9] text-blue-gray-900 font-normal px-1 py-0.5 text-sm;
+  }
+
+  /**
+      Link Styles
+    */
+  a {
+    @apply text-ui-blue underline;
+  }
+
+  /**
+      Table Styles
+    */
+  table.tableblock {
+    @apply bg-white border border-blue-gray-400 mb-6;
+
+    p {
+      @apply m-0;
+    }
+
+    tr {
+      @apply border-b border-blue-gray-400;
+    }
+
+    tr td,
+    tr th {
+      @apply px-6 py-4 text-base text-left;
+    }
+
+    // TODO: Check if the design really wants font 500
+    tr td {
+      @apply font-normal;
+    }
+
+    tr th {
+      @apply font-semibold;
+    }
+
+    tr td:not(:first-child),
+    tr th:not(:first-child) {
+      @apply border-l border-blue-gray-400;
+    }
+  }
+
+  /**
+      Tabs Styles
+    */
+  .tabs {
+    @apply mb-6;
+
+    .tablist ul {
+      @apply m-0 list-none flex;
+    }
+
+    .tab {
+      @apply m-0 px-4 py-1.5 font-medium text-base border border-blue-gray-400 bg-white border-l-0 border-b-0 cursor-pointer;
+    }
+
+    .tab:first-child {
+      @apply border-l;
+    }
+
+    .tab[aria-selected='true'] {
+      @apply bg-blue-gray-400 text-white;
+    }
+
+    .tabpanel {
+      @apply border border-blue-gray-400 bg-white p-6;
+    }
+
+    .tabpanel .paragraph:last-child {
+      @apply mb-0;
+    }
+  }
+
+  /**
+      Notes Styles
+    */
+  .note {
+    @apply mb-6;
+
+    .icon {
+      @apply hidden;
+    }
+
+    .content {
+      @apply bg-deep-purple-100 border-0 border-l-2 border-deep-purple-300 px-6 py-4;
+    }
+
+    .paragraph {
+      &:only-child {
+        @apply mb-0;
+      }
+    }
+  }
+}

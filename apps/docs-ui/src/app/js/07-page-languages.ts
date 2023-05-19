@@ -1,17 +1,16 @@
 export default function () {
-  const toggle = document.querySelector(
-    '.page-languages .language-menu-toggle'
-  );
-  if (!toggle) return;
+  const toggles = document.querySelectorAll('.language-toggle');
 
-  const selector = document.querySelector('.page-languages');
+  if (!toggles) return;
 
-  toggle.addEventListener('click', (e) => {
-    selector.classList.toggle('is-active');
-    e.stopPropagation(); // trap event
-  });
+  toggles.forEach((toggle) => {
+    const dropdown = toggle.querySelector('.language-dropdown');
 
-  document.documentElement.addEventListener('click', () => {
-    selector.classList.remove('is-active');
+    if (!dropdown) return;
+
+    toggle.addEventListener('click', (e) => {
+      dropdown.classList.toggle('hidden');
+      e.stopPropagation();
+    });
   });
 }

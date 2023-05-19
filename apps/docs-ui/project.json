@@ -19,7 +19,8 @@
         "index": "apps/docs-ui/src/index.html",
         "baseHref": "/",
         "styles": ["apps/docs-ui/src/styles.scss"],
-        "scripts": []
+        "scripts": [],
+        "postcssConfig": "apps/docs-ui/postcss.config.js"
       },
       "configurations": {
         "production": {

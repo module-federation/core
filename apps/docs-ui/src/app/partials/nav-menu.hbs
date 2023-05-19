@@ -1,10 +1,16 @@
-{{#with page.navigation}}
-<div class="nav-panel-menu is-active" data-panel="menu">
-  <nav class="nav-menu">
-    {{#with @root.page.componentVersion}}
-    <h3 class="title"><a href="{{{relativize ./url}}}">{{./title}}</a></h3>
-    {{/with}}
-{{> nav-tree navigation=this}}
-  </nav>
-</div>
+{{#with page}}
+<nav class="flex flex-col gap-8">
+  
+  <div id="search-field" class="flex items-center w-full px-3 py-2 bg-white border border-blue-gray-400 relative focus-within:border-ui-blue">
+    <input id="search-input" class="w-full bg-transparent p-0 border-0 outline-none focus:border-0 focus:outline-none text-blue-gray-900 text-base" type="text" placeholder="Search"{{#if page.home}} autofocus{{/if}}>
+        <div class="text-blue-gray-900">{{>"icon" name="search" size="20px"}}</div>
+  </div>
+
+  <div class="flex items-center justify-between w-full">
+    <div class="font-medium text-blue-gray-900">{{this.component.title}}</div>
+    {{>page-versions}}
+  </div>
+  
+  {{> nav-tree navigation=this.navigation}}
+</nav>
 {{/with}}
