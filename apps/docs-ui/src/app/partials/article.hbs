@@ -1,7 +1,12 @@
-<article class="doc">
-{{#with page.title}}
-<h1 class="page">{{{this}}}</h1>
-{{/with}}
-{{{page.contents}}}
-{{> pagination}}
-</article>
+<div class="flex flex-col">
+    <article class="doc">
+        {{#with page.title}}
+        <h1>{{{this}}}</h1>
+        {{/with}}
+        {{{page.contents}}}
+    </article>
+
+    <div class="mt-10">
+        {{> pagination}}
+    </div>
+</div>

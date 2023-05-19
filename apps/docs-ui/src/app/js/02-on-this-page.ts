@@ -42,7 +42,7 @@ export default function () {
   if (!menu) (menu = document.createElement('div')).className = 'toc-menu';
 
   const title = document.createElement('h3');
-  title.textContent = sidebar.dataset.title || 'Contents';
+  title.textContent = sidebar.dataset.title || 'On this page';
   menu.appendChild(title);
   menu.appendChild(list);
 

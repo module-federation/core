@@ -1,0 +1,22 @@
+/**
+  Toc Menu
+*/
+.toc-menu {
+  @apply flex flex-col gap-2;
+
+  h3 {
+    @apply text-blue-gray-900 font-semibold text-base;
+  }
+
+  ul {
+    @apply flex flex-col;
+  }
+
+  li a {
+    @apply block border-l border-blue-gray-200 text-blue-gray-600 font-normal py-2 px-3 text-sm;
+  }
+
+  li .is-active {
+    @apply border-cyan-700 text-cyan-700 font-normal;
+  }
+}

@@ -1,23 +1,22 @@
 export default function () {
-  const navbarBurger = document.querySelector('.navbar-burger');
-  if (!navbarBurger) return;
-  navbarBurger.addEventListener('click', toggleNavbarMenu.bind(navbarBurger));
+  const toggleEl = document.querySelector('#mobile-nav-toggle');
+  const nav = document.querySelector('#mobile-nav');
+  if (!toggleEl || !nav) return;
 
-  function toggleNavbarMenu(e) {
-    e.stopPropagation(); // trap event
-    document.documentElement.classList.toggle('is-clipped--navbar');
-    this.classList.toggle('is-active');
-    const menu = document.getElementById(this.dataset.target);
-    if (menu.classList.toggle('is-active')) {
-      menu.style.maxHeight = '';
-      const expectedMaxHeight =
-        window.innerHeight - Math.round(menu.getBoundingClientRect().top);
-      const actualMaxHeight = parseInt(
-        window.getComputedStyle(menu).maxHeight,
-        10
-      );
-      if (actualMaxHeight !== expectedMaxHeight)
-        menu.style.maxHeight = expectedMaxHeight + 'px';
-    }
-  }
+  toggleEl.addEventListener('click', (event) => {
+    nav.classList.toggle('hidden');
+
+    const spanEls = toggleEl.querySelectorAll('span');
+
+    // First burger line
+    spanEls[0].classList.toggle('top-[7px]');
+    spanEls[0].classList.toggle('rotate-45');
+
+    // Second burger line
+    spanEls[1].classList.toggle('opacity-0');
+
+    // Third burger line
+    spanEls[2].classList.toggle('top-[-8px]');
+    spanEls[2].classList.toggle('-rotate-45');
+  });
 }
