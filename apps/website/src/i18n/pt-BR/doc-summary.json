@@ -1,0 +1,34 @@
+{
+  "doc-summary": {
+    "action": "Comece a usar Module Federation",
+    "cards": {
+      "decentralized": {
+        "action": "Documentação",
+        "desc": "Module Federation permite que os desenvolvedores compartilhem código entre vários projetos de maneira descentralizada, facilitando o gerenciamento de aplicativos complexos.",
+        "title": "Compartilhamento de código descentralizado"
+      },
+      "federated-runtime": {
+        "action": "Documentação",
+        "desc": "Os módulos podem ser combinados e federados em tempo de execução, permitindo maior colaboração e tempos de desenvolvimento mais rápidos.",
+        "title": "Tempo de execução federado"
+      },
+      "flexibility": {
+        "action": "Documentação",
+        "desc": "Module Federation dá aos desenvolvedores a liberdade de escolher e implementar a arquitetura que melhor se adapta às suas necessidades, promovendo uma abordagem modular e escalável para o desenvolvimento de aplicativos.",
+        "title": "Flexibilidade"
+      },
+      "modular-architecture": {
+        "action": "Documentação",
+        "desc": "Os aplicativos podem ser divididos em módulos menores e independentes que podem ser desenvolvidos, testados e implantados de forma independente.",
+        "title": "Modular architecture"
+      },
+      "team-colaboration": {
+        "action": "Documentação",
+        "desc": "Equipes independentes podem ser responsáveis por microfrontends específicos, facilitando o gerenciamento do processo de desenvolvimento e promovendo a colaboração entre os membros da equipe.",
+        "title": "Colaboração em equipe"
+      }
+    },
+    "subtitle": "Module Federation traz escalabilidade não apenas para o código, mas também para a produtividade individual e organizacional",
+    "title": "Escalabilidade com Module Federation"
+  }
+}

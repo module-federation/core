@@ -1,0 +1,9 @@
+{
+  "subscribe": {
+    "action": "Subscribe",
+    "input": {
+      "placeholder": "Enter your email"
+    },
+    "title": "Subscribe to our email newsletter!"
+  }
+}

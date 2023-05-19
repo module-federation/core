@@ -1,0 +1,11 @@
+{
+  "navbar": {
+    "menu": {
+      "discover": "Discover",
+      "documentation": "Documentation",
+      "enterprise": "Enterprise",
+      "medusa": "Medusa",
+      "showcase": "Showcase"
+    }
+  }
+}

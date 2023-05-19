@@ -1,0 +1,39 @@
+{
+  "doc-summary": {
+    "action": "Start using module federation",
+    "cards": {
+      "decentralized": {
+        "action": "Documentation",
+        "desc": "Module Federation allows developers to share code between multiple projects in a decentralized manner, making it easier to manage complex applications.",
+        "title": "Decentralized code sharing"
+      },
+      "federated-runtime": {
+        "action": "Documentation",
+        "desc": "The modules can be combined and federated at runtime, allowing for greater collaboration and faster development times.",
+        "title": "Federated runtime"
+      },
+      "flexibility": {
+        "action": "Documentation",
+        "desc": "Module Federation gives developers the freedom to choose and implement the architecture that best suits their needs, promoting a modular and scalable approach to application development.",
+        "title": "Flexibility"
+      },
+      "modular-architecture": {
+        "action": "Documentation",
+        "desc": "Applications can be split into smaller, self-contained modules that can be developed, tested, and deployed independently.",
+        "title": "Modular architecture"
+      },
+      "scalability": {
+        "action": "Documentation",
+        "desc": "Module Federation brings scalability to not only code but also individual and organizational productivity",
+        "title": "Scalability with Module Federation"
+      },
+      "team-colaboration": {
+        "action": "Documentation",
+        "desc": "Independent teams can be assigned responsibility for specific microfrontends, making it easier to manage the development process and promote collaboration between team members.",
+        "title": "Team collaboration"
+      }
+    },
+    "subtitle": "Module Federation brings scalability to not only code but also individual and organizational productivity",
+    "title": "Scalability with Module Federation"
+  }
+}
