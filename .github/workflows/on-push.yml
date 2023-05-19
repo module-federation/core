@@ -37,7 +37,7 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: Check changes "website"
         id: website-changed
-        run: echo "website-changed=$(node tools/scripts/ci-is-affected.mjs --appName=website,docs,docs-ui --base=${{ env.BASE_REF}} --head=HEAD)" >> $GITHUB_OUTPUT
+        run: echo "website-changed=$(node tools/scripts/ci-is-affected.mjs --appName=website --base=${{ env.BASE_REF}} --head=HEAD)" >> $GITHUB_OUTPUT
       - name: Log variables
         run: |
           echo "steps.cache.outputs.cache-hit:" ${{ steps.cache.outputs.cache-hit }}
