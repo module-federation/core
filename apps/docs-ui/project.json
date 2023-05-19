@@ -20,7 +20,8 @@
         "baseHref": "/",
         "styles": ["apps/docs-ui/src/styles.scss"],
         "scripts": [],
-        "postcssConfig": "apps/docs-ui/postcss.config.js"
+        "postcssConfig": "apps/docs-ui/postcss.config.js",
+        "babelUpwardRootMode": true
       },
       "configurations": {
         "production": {

@@ -1,0 +1,74 @@
+@tailwind components;
+@tailwind base;
+@tailwind utilities;
+
+/* Fonts! */
+@font-face {
+  font-family: "Avenir Local";
+  font-style: normal;
+  font-weight: 100;
+  src: url("/fonts/AvenirNextLTPro-UltLt.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Avenir Local";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/AvenirNextLTPro-Regular.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Avenir Local";
+  font-style: normal;
+  font-weight: 500;
+  src: url("/fonts/AvenirNextLTPro-Medium.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Avenir Local";
+  font-style: normal;
+  font-weight: 600;
+  src: url("/fonts/AvenirNextLTPro-Demi.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Avenir Local";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/AvenirNextLTPro-Bold.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Avenir Local";
+  font-style: normal;
+  font-weight: 800;
+  src: url("/fonts/AvenirNextLTPro-Heavy.otf") format("opentype");
+}
+
+@layer base {
+  html {
+    font-family: 'Avenir Next', 'Avenir Local';
+  }
+}
+
+/* Common article styling */
+.article {
+  @apply text-blue-gray-900;
+}
+
+.article h2 {
+  @apply mb-6 text-3xl font-semibold;
+}
+
+.article p,
+.article ul {
+  @apply mb-6;
+}
+
+.article ul li {
+  @apply list-disc list-inside mb-4 pl-2;
+}
+
+.article a {
+  @apply text-ui-blue;
+}

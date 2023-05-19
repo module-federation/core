@@ -22,7 +22,8 @@
         ],
         "styles": [],
         "scripts": [],
-        "webpackConfig": "apps/react-ts-host/webpack.config.js"
+        "webpackConfig": "apps/react-ts-host/webpack.config.js",
+        "babelUpwardRootMode": true
       },
       "configurations": {
         "development": {

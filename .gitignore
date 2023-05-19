@@ -44,3 +44,4 @@ Thumbs.db
 
 # Next.js
 .next
+.netlify
