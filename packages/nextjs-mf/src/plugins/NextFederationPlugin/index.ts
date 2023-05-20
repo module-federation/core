@@ -84,7 +84,15 @@ export class NextFederationPlugin {
       getModuleFederationPluginConstructor(isServer, compiler);
 
     const defaultShared = retrieveDefaultShared(isServer);
-
+    if (compiler.options.output.chunkFilename) {
+      // @ts-ignore
+      compiler.options.output.chunkFilename =
+        // @ts-ignore
+        compiler.options.output.chunkFilename.replace(
+          'contenthash',
+          'fullhash'
+        );
+    }
     if (isServer) {
       // Refactored server condition
       configureServerCompilerOptions(compiler);
@@ -107,7 +115,7 @@ export class NextFederationPlugin {
       runtime: false,
       exposes: {
         //something must be exposed in order to generate a remote entry, which is needed to kickstart runtime
-        './noop': require.resolve('../../noop.js'),
+        './noop': require.resolve('../../federation-noop.js'),
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)
           : {}),
