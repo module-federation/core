@@ -74,10 +74,10 @@ jobs:
           key: build-${{ hashFiles('**/yarn.lock') }}
       - uses: nelonoel/branch-name@v1.0.1
       - run: npm run build:website
-      - uses: South-Paw/action-netlify-cli@1.0.1
+      - uses: netlify/actions/cli@master
         id: netlify
         with: 
-          args: "'deploy --json --build --message \"Deploy Preview from GitHub Actions\" --alias \"${{ env.BRANCH_NAME }}\"'"
+          args: deploy --json --build --message \"Deploy Preview from GitHub Actions\" --alias \"${{ env.BRANCH_NAME }}\"
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
@@ -104,5 +104,5 @@ jobs:
             | Name          | Link          |
             | ------------- | ------------- |
             | 🔨 Latest commit  | ${{ github.sha }}            |
-            | 😎 Deploy Preview | ${{ steps.netlify.outputs.NETLIFY_DRAFT_URL }}  |
+            | 😎 Deploy Preview | ${{ steps.netlify.outputs.NETLIFY_URL }}  |
           edit-mode: replace
