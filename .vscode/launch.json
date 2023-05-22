@@ -19,7 +19,7 @@
             ],
             "program": "${workspaceFolder}/gpt/index.js",
             "args": ["--pr"]
-        },  
+        },
          {
             "type": "node",
             "request": "launch",

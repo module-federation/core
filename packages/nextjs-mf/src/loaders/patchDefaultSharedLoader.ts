@@ -13,8 +13,8 @@ export default function patchDefaultSharedLoader(
 
   const patch = `
 (globalThis || self).placeholderModuleEnsure = () => {
+throw new Error('should not exec');
   import('react');
-  import('react/jsx-runtime');
   import('react-dom');
   import('next/link');
   import('next/router');
@@ -23,9 +23,11 @@ export default function patchDefaultSharedLoader(
   import('next/dynamic');
   import('styled-jsx');
   import('styled-jsx/style');
-};
-if (process.env['NODE_ENV'] === 'development') {
-  import('react/jsx-dev-runtime');
-}`;
+  if (process.env['NODE_ENV'] === 'development') {
+    import('react/jsx-dev-runtime');
+  } else {
+    import('react/jsx-runtime');
+  }
+};`;
   return ['', patch, content].join('\n');
 }

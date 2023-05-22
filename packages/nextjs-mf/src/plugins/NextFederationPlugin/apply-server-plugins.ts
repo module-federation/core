@@ -1,6 +1,6 @@
 import { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
-import AddModulesPlugin from '../AddModulesToRuntime';
+import DelegatesModulePlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import JsonpChunkLoading from '../JsonpChunkLoading';
@@ -11,14 +11,6 @@ import JsonpChunkLoading from '../JsonpChunkLoading';
  * @param compiler - The Webpack compiler instance.
  * @param options - The ModuleFederationPluginOptions instance.
  *
- * @remarks
- * The AddModulesPlugin lets us move modules between webpack chunks. In this case,
- * we are moving modules into the runtime chunks of the host and removing eager shared
- * modules from the remote container runtimes. This works around Next.js' lack of async
- * boundary, allowing us to execute the code more efficiently and with better performance.
- * By removing eager shared modules from the remote container runtimes, we can also improve
- * the load time of the application by reducing the amount of unnecessary code that needs
- * to be loaded.
  */
 export function applyServerPlugins(
   compiler: Compiler,
@@ -29,61 +21,19 @@ export function applyServerPlugins(
   new JsonpChunkLoading({ server: true }).apply(compiler);
   compiler.options.optimization.splitChunks = undefined;
 
+  compiler.options.optimization.splitChunks = undefined;
+
   // solves strange issues where next doesnt create a runtime chunk
   // might be related to if an api route exists or not
   compiler.options.optimization.runtimeChunk = {
     name: 'webpack-runtime',
   };
-  //@ts-ignore
-  // compiler.options.optimization.splitChunks = {
-  //   chunks: 'all',
-  //   maxAsyncRequests: 5,
-  //   cacheGroups: {
-  //     default: {
-  //       priority: -20,
-  //       minChunks: 2,
-  //       minSize: 5000,
-  //     },
-  //     federation: {
-  //       test: function (module: any, chunks: any) {
-  //         if(module.type && module.type.includes('remote')) {
-  //           console.log('remote',module.type,module.id)
-  //           return module.type === 'remote-module'
-  //         //empty
-  //         }
-  //         return false
-  //       },
-  //       name: 'federation',
-  //       reuseExistingChunk: true,
-  //       minChunks: 3,
-  //       priority:78
-  //     },
-  //     vendors: {
-  //       test: /[\\/]node_modules[\\/]/,
-  //       name: 'vendors',
-  //       maxAsyncRequests: 5,
-  //       priority: 10,
-  //       minSize: 5000,
-  //       enforce:true,
-  //       reuseExistingChunk: true,
-  //     }
-  //   },
-  // };
-  // Add the AddModulesPlugin for the webpack runtime with eager loading and remote configuration
-  new AddModulesPlugin({
+
+  new DelegatesModulePlugin({
     runtime: 'webpack-runtime',
-    eager: false,
     remotes: options.remotes,
-    isServer: true,
     container: options.name,
   }).apply(compiler);
-
-  // Add the AddModulesPlugin for the server with lazy loading and remote configuration
-  // new AddModulesPlugin({
-  //   runtime: options.name,
-  //   eager: false,
-  //   remotes: options.remotes
-  // }).apply(compiler);
 
   // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
   new StreamingTargetPlugin(options, {
@@ -95,7 +45,7 @@ export function applyServerPlugins(
     runtime: 'webpack-runtime',
     container: options.name,
     remotes: options.remotes as Record<string, string>,
-    debug: true,
+    debug: false,
   }).apply(compiler);
 }
 
@@ -173,6 +123,13 @@ export function handleServerExternals(
         return;
       }
 
+      // seems to cause build issues at lululemon
+      // nobody else seems to run into this issue
+      // #JobSecurity
+      if (ctx.request && ctx.request.includes('react/jsx-runtime')) {
+        return 'commonjs ' + ctx.request;
+      }
+
       // Call the original externals function and retrieve the result
       // @ts-ignore
       const fromNext = await originalExternals(ctx, callback);
@@ -184,11 +141,19 @@ export function handleServerExternals(
 
       // If the module is from Next.js or React, return the original result
       const req = fromNext.split(' ')[1];
-      if (req.startsWith('next') || req.startsWith('react')) {
+      if (
+        req.startsWith('next') ||
+        // make sure we dont screw up package names that start with react
+        // like react-carousel or react-spring
+        req.startsWith('react/') ||
+        req.startsWith('react-dom/') ||
+        req === 'react' ||
+        req === 'react-dom'
+      ) {
         return fromNext;
       }
 
-      // Otherwise, return null
+      // Otherwise, return (null) to treat the module as internalizable
       return;
     };
   }
@@ -213,7 +178,7 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     ...compiler.options.node,
     global: false,
   };
-  // Set chunkIds optimization to 'named'
+  // Build will hang without this. Likely something in my plugin
   compiler.options.optimization.chunkIds = 'named'; // for debugging
 
   // Disable split chunks to prevent conflicts from occurring in the graph

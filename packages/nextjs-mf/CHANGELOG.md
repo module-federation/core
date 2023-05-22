@@ -2,6 +2,32 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.4.1-rc.4](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.1-rc.3...nextjs-mf-6.4.1-rc.4) (2023-05-18)
+
+
+### Bug Fixes
+
+* resolve build hanging issue ([e352e7e](https://github.com/module-federation/nextjs-mf/commit/e352e7e88a050857d1500025313518956ee11d08))
+
+
+
+## [6.4.1-rc.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.1-rc.2...nextjs-mf-6.4.1-rc.3) (2023-05-18)
+
+
+
+## [6.4.1-rc.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.1-rc.1...nextjs-mf-6.4.1-rc.2) (2023-05-17)
+
+
+
+## [6.4.1-rc.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.1-rc.0...nextjs-mf-6.4.1-rc.1) (2023-05-17)
+
+
+### Bug Fixes
+
+* **chunk-module-duplication:** prevent runtime reset and share scope loss ([14bfc38](https://github.com/module-federation/nextjs-mf/commit/14bfc38515a4da3be7321d4b6d876905d45ad20b))
+
+
+
 ## [6.4.1-rc.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.1-beta.7...nextjs-mf-6.4.1-rc.0) (2023-05-16)
 
 

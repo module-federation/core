@@ -169,7 +169,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
         contentHashType: 'javascript',
       }
     );
-    
 
     const rootOutputDir = getUndoPath(
       outputName,

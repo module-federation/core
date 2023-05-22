@@ -47,8 +47,13 @@ class InvertedContainerPlugin {
     const container = compilation.entrypoints
       .get(this.options.container as string)
       ?.getRuntimeChunk?.();
-    const entryModule = container?.entryModule;
-    return entryModule;
+    if (!container) return undefined;
+    const entrymodule =
+      compilation.chunkGraph.getChunkEntryModulesIterable(container);
+    for (const module of entrymodule) {
+      return module;
+    }
+    return undefined;
   }
 
   /**
@@ -119,19 +124,20 @@ class InvertedContainerPlugin {
           (chunks) => {
             const containerEntryModule =
               this.resolveContainerModule(compilation);
+
             if (!containerEntryModule) return;
             for (const chunk of chunks) {
-              
+
               if (
                 !compilation.chunkGraph.isModuleInChunk(
                   containerEntryModule,
                   chunk
                 ) && chunk.hasRuntime()
               ) {
-              
+
                 compilation.chunkGraph.connectChunkAndModule(
                   chunk,
-                
+
                   containerEntryModule
                 );
               }

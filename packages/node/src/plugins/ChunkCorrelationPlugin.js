@@ -230,10 +230,10 @@ function parseFederatedIssuer(issuer) {
 function getSharedModules(stats, federationPlugin) {
   return flatMap(
     stats.chunks.filter((chunk) => {
-      if (!stats.entrypoints[federationPlugin._options.name]) {
+      if (!stats.entrypoints[federationPlugin.name]) {
         return false;
       }
-      return stats.entrypoints[federationPlugin._options.name].chunks.some(
+      return stats.entrypoints[federationPlugin.name].chunks.some(
         (id) => chunk.id === id
       );
     }),
@@ -244,7 +244,7 @@ function getSharedModules(stats, federationPlugin) {
             c.id === id &&
             c.files.length > 0 &&
             c.parents.some((p) =>
-              stats.entrypoints[federationPlugin._options.name].chunks.some(
+              stats.entrypoints[federationPlugin.name].chunks.some(
                 (c) => c === p
               )
             ) &&
@@ -332,10 +332,8 @@ function getMainSharedModules(stats) {
  * @param {import("webpack").container.ModuleFederationPlugin} federationPlugin
  * @returns {FederatedStats}
  */
-function getFederationStats(stats, federationPlugin) {
-  const exposedModules = Object.entries(
-    federationPlugin._options.exposes
-  ).reduce(
+function getFederationStats(stats, federationPluginOptions) {
+  const exposedModules = Object.entries(federationPluginOptions.exposes).reduce(
     (exposedModules, [exposedAs, exposedFile]) =>
       Object.assign(exposedModules, {
         [exposedAs]: getExposedModules(stats, exposedFile),
@@ -354,9 +352,9 @@ function getFederationStats(stats, federationPlugin) {
 
   /** @type {string} */
   const remote =
-    federationPlugin._options.library?.name || federationPlugin._options.name;
+    federationPluginOptions.library?.name || federationPluginOptions.name;
 
-  const sharedModules = getSharedModules(stats, federationPlugin);
+  const sharedModules = getSharedModules(stats, federationPluginOptions);
   const remoteModules = getRemoteModules(stats);
   return {
     remote,
@@ -364,7 +362,7 @@ function getFederationStats(stats, federationPlugin) {
       stats.assetsByChunkName[remote] &&
       stats.assetsByChunkName[remote].length === 1
         ? stats.assetsByChunkName[remote][0]
-        : federationPlugin._options.filename
+        : federationPluginOptions.filename
     }`,
     sharedModules,
     exposes,
@@ -414,17 +412,70 @@ class FederationStatsPlugin {
     }
     let alreadyRun = false;
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
-      compilation.hooks.processAssets.tapPromise(
+      compilation.hooks.processAssets.tap(
         {
           name: PLUGIN_NAME,
-          stage: compilation.constructor.PROCESS_ASSETS_STAGE_SUMMARIZE,
+          stage: compilation.constructor.PROCESS_ASSETS_STAGE_REPORT,
         },
         // PLUGIN_NAME,
         async () => {
-          if (alreadyRun) {
-            return;
+          const [federationOpts] = federationPlugins.map((federationPlugin) => {
+            return federationPlugin?._options;
+          });
+          let container;
+          for (const [name, entry] of compilation.entrypoints) {
+            if (container) break;
+            federationOpts.name.includes(name) && (container = entry);
           }
-          alreadyRun = true;
+          if (!container) return;
+
+          container = container?.getEntrypointChunk();
+
+          const [containerEntryModule] = Array.from(
+            compilation.chunkGraph.getChunkEntryModulesIterable(container)
+          );
+          const exposedObj = Object.fromEntries(containerEntryModule._exposes);
+          const moduleMap = {};
+          for (let mod of compilation.modules) {
+            if (mod.rawRequest) moduleMap[mod.rawRequest] = mod;
+          }
+          const exposedResolved = {};
+
+          for (let exposed in exposedObj) {
+            exposedResolved[exposed] = moduleMap[exposedObj[exposed].import];
+          }
+
+          const builtExposes = {};
+
+          container.getAllAsyncChunks().forEach((chunk) => {
+            for (let expose in exposedResolved) {
+              const rootModulesInChunk =
+                compilation.chunkGraph.getChunkRootModules(chunk);
+
+              if (rootModulesInChunk.includes(exposedResolved[expose])) {
+                const referencedChunks = chunk.getAllReferencedChunks();
+
+                const currentModule = exposedResolved[expose];
+
+                if (!builtExposes[expose]) builtExposes[expose] = [];
+
+                referencedChunks.forEach((chunk) => {
+                  const rootReferencesInChunk =
+                    compilation.chunkGraph.getChunkRootModules(chunk);
+                  const isNodeModule = rootReferencesInChunk.some((mod) => {
+                    if (mod.rootModule) mod = mod.rootModule;
+                    return mod?.resource?.includes('node_modules');
+                  });
+
+                  if (isNodeModule) return;
+                  builtExposes[expose] = [
+                    ...builtExposes[expose],
+                    ...Array.from(chunk.files),
+                  ];
+                });
+              }
+            }
+          });
 
           const stats = compilation.getStats().toJson({
             all: false,
@@ -444,9 +495,10 @@ class FederationStatsPlugin {
             outputPath: true,
             publicPath: true,
           });
-          const federatedModules = federationPlugins.map((federationPlugin) =>
-            getFederationStats(stats, federationPlugin)
-          );
+
+          const federatedModules = getFederationStats(stats, federationOpts);
+
+          federatedModules.exposes = builtExposes;
 
           const sharedModules = getMainSharedModules(stats);
           const vendorChunks = new Set();
@@ -455,51 +507,9 @@ class FederationStatsPlugin {
               vendorChunks.add(file);
             });
           });
-
-          const enhancedModuleLookup = federatedModules.map((mod) => {
-            const remapped = Object.entries(mod.exposes).reduce(
-              (acc, [key, value]) => {
-                acc[key] = acc[key] || [];
-                value.map((chunk) => {
-                  return Object.keys(chunk).map((chunkId) => {
-                    const foundRootChunk = compilation.chunks.find((chunk) => {
-                      return chunk.id == chunkId;
-                    });
-                    Array.from(foundRootChunk.getAllReferencedChunks()).forEach(
-                      (c) => {
-                        const trueChunk = stats.chunks.find((chunkStats) => {
-                          return chunkStats.id == c.id;
-                        });
-                        const isSharedModuleChunk = trueChunk.modules.every(
-                          (m) => {
-                            return m.moduleType === 'consume-shared-module';
-                          }
-                        );
-
-                        if (
-                          !isSharedModuleChunk &&
-                          !trueChunk.files.every((f) => vendorChunks.has(f))
-                        ) {
-                          acc[key].push({
-                            [trueChunk.id]: { files: trueChunk.files },
-                          });
-                        }
-                      }
-                    );
-                  });
-                });
-                return acc;
-              },
-              {}
-            );
-            return { ...mod, exposes: remapped };
-          });
-          const exposeKey = Object.keys(enhancedModuleLookup[0].exposes);
-          console.log(enhancedModuleLookup[0].exposes);
-
           const statsResult = {
             sharedModules,
-            federatedModules: enhancedModuleLookup,
+            federatedModules: [federatedModules],
           };
 
           const statsJson = JSON.stringify(statsResult);

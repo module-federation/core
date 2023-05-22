@@ -2,6 +2,22 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.7.6-rc.4](https://github.com/module-federation/nextjs-mf/compare/utils-1.7.6-rc.3...utils-1.7.6-rc.4) (2023-05-18)
+
+
+
+## [1.7.6-rc.3](https://github.com/module-federation/nextjs-mf/compare/utils-1.7.6-rc.2...utils-1.7.6-rc.3) (2023-05-18)
+
+
+
+## [1.7.6-rc.2](https://github.com/module-federation/nextjs-mf/compare/utils-1.7.6-rc.1...utils-1.7.6-rc.2) (2023-05-17)
+
+
+
+## [1.7.6-rc.1](https://github.com/module-federation/nextjs-mf/compare/utils-1.7.6-rc.0...utils-1.7.6-rc.1) (2023-05-17)
+
+
+
 ## [1.7.6-rc.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.7.6-beta.2...utils-1.7.6-rc.0) (2023-05-16)
 
 

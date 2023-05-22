@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "0.14.7-rc.0",
+  "version": "0.14.7-rc.4",
   "type": "commonjs",
   "main": "src/index.js",
   "exports": {
@@ -13,6 +13,10 @@
     "./utils": {
       "import": "./src/utils/index.js",
       "require": "./src/utils/index.js"
+    },
+    "./src/": {
+      "import": "./src/",
+      "require": "./src/"
     }
   },
   "publishConfig": {
