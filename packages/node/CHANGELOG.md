@@ -2,6 +2,19 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [0.15.0](https://github.com/module-federation/nextjs-mf/compare/node-0.14.0...node-0.15.0) (2023-05-22)
+
+### Dependency Updates
+
+* `utils` updated to version `1.8.0`
+* `utils` updated to version `1.8.0`
+
+### Features
+
+* release to npm with next tag to not ruine latest one ([#763](https://github.com/module-federation/nextjs-mf/issues/763)) ([f2d199b](https://github.com/module-federation/nextjs-mf/commit/f2d199b3b3fbbd428514b1ce1f139efc82f7fff0))
+
+
+
 # [0.14.0](https://github.com/module-federation/nextjs-mf/compare/node-0.13.0...node-0.14.0) (2023-04-19)
 
 
