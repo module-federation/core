@@ -61,7 +61,7 @@ jobs:
           path: ${{ env.CACHE_NODE_MODULES_PATH }}
           key: build-${{ hashFiles('**/yarn.lock') }}
       - run: npm run build:website
-      - run: "npm install -g netlify-cli && npx netlify deploy --prod --message \"Deploy from GitHub Actions\""
+      - run: "npm install -g netlify-cli && npx netlify deploy --build --prod --message \"Deploy from GitHub Actions\""
         
           
   # preview-website:
