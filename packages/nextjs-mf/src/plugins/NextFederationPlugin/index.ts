@@ -142,11 +142,11 @@ export class NextFederationPlugin {
 
     // @ts-ignore
     new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
-    if (Object.keys(this._options?.remotes || {}).length > 0) {
+    if (isServer && Object.keys(this._options?.remotes || {}).length > 0) {
       const commonOptions = {
         ...hostFederationPluginOptions,
         name: 'host_inner_ctn',
-        runtime: undefined,
+        runtime: 'webpack-runtime',
         filename: `host_inner_ctn.js`,
         library: {
           ...hostFederationPluginOptions.library,
@@ -159,9 +159,9 @@ export class NextFederationPlugin {
       };
 
       // @ts-ignore
-      // new ModuleFederationPlugin({
-      //   ...commonOptions,
-      // }).apply(compiler);
+      new ModuleFederationPlugin({
+        ...commonOptions,
+      }).apply(compiler);
     }
 
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);

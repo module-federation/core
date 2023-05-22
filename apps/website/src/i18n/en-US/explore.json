@@ -1,0 +1,28 @@
+{
+  "explore": {
+    "cards": {
+      "community-content": {
+        "action": "Find out more",
+        "title": "Community content"
+      },
+      "conference-talks": {
+        "action": "Watch now",
+        "title": "Conference talks"
+      },
+      "implementing-module-federation": {
+        "action": "Learn more",
+        "title": "Implementing Module Federation"
+      },
+      "module-federation-courses": {
+        "action": "Start exploring",
+        "subtitle": "Gain expertise in Module Federation and enhance your skills now",
+        "title": "Module Federation courses"
+      },
+      "practical-module-federation": {
+        "action": "Get the book",
+        "title": "Practical Module Federation"
+      }
+    },
+    "disabled": "Coming soon"
+  }
+}

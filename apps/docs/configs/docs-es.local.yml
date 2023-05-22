@@ -20,7 +20,7 @@ ui:
   bundle:
     url: ./../../../dist/apps/docs-ui
     snapshot: false
-  supplemental_files: ./../../../node_modules/antora-navigator-extension/data/
+  # supplemental_files: ./../../../node_modules/antora-navigator-extension/data/
 output:
   clean: true
   dir: ./../../../dist/apps/docs/es

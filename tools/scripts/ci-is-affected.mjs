@@ -10,13 +10,16 @@ if (!appName) {
   process.exit(1);
 }
 
+const appNames = appName.split(',')
+
 const isAffected = execSync(
   `npx nx print-affected --type=app --select=projects --base=${base} --head=${head}`
 )
   .toString()
   .split(',')
   .map((p) => p.trim())
-  .includes(appName)
+  .map(p => appNames.includes(p))
+  .some(included => !!included)
   .toString();
 
 console.log(isAffected);

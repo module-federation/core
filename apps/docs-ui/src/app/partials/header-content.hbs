@@ -1,45 +1,129 @@
-<header class="header">
-  <nav class="navbar">
-    <div class="navbar-brand">
-      <a class="navbar-item" href="{{{or site.url siteRootPath}}}">{{site.title}}</a>
-      {{#if env.SITE_SEARCH_PROVIDER}}
-      <div class="navbar-item search hide-for-print">
-        <div id="search-field" class="field">
-          <input id="search-input" type="text" placeholder="Search the docs"{{#if page.home}} autofocus{{/if}}>
-        </div>
-      </div>
-      {{/if}}
-      <button class="navbar-burger" data-target="topbar-nav">
-        <span></span>
-        <span></span>
-        <span></span>
+<header class="flex items-center w-full bg-mf-gray sticky top-0 z-50">
+
+  <nav class="max-w-7xl w-full mx-auto flex flex-row-reverse xl:flex-row items-center justify-between px-4 py-6">
+    <a href="/"
+       class="flex w-full items-center justify-end xl:justify-start">
+      <img class="h-10"
+           src="{{{uiRootPath}}}/img/module-federation-logo.svg"
+           alt="Module Federation Logo">
+    </a>
+
+
+    <ul class="hidden xl:flex xl:flex w-full justify-center gap-8">
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700 !text-deep-purple-300"
+           href="{{{or site.url siteRootPath}}}">Documentation</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+           href="/#discover">Discover</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+           href="/showcase/">Showcase</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+           href="/#contact">Enterprise</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+          target="_blank" href="https://app.medusa.codes/">Medusa</a>
+      </li>
+    </ul>
+
+
+    <ul class="hidden xl:flex w-full justify-end items-center gap-5">
+      <li class="flex">
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue hover:text-blue-gray-600 active:text-blue-gray-700"
+           href="https://github.com/module-federation"
+           target="_blank">
+          {{> social-icon-github size="36px" }}
+        </a>
+      </li>
+
+      <li class="flex">
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue hover:text-blue-gray-600 active:text-blue-gray-700"
+           href="https://discord.gg/T8c6yAxkbv"
+           target="_blank">
+          {{> social-icon-discord size="36px" }}
+        </a>
+      </li>
+
+      {{!-- <li class="flex">
+        {{>page-languages}}
+      </li> --}}
+    </ul>
+
+    
+    <div class="flex xl:hidden relative">
+      <button id="mobile-nav-toggle">
+        <span class="relative my-1.5 block h-0.5 w-[30px] bg-blue-gray-900 transition-all duration-300"></span>
+        <span class="relative my-1.5 block h-0.5 w-[30px] bg-blue-gray-900 transition-all duration-300"></span>
+        <span class="relative my-1.5 block h-0.5 w-[30px] bg-blue-gray-900 transition-all duration-300"></span>
       </button>
     </div>
-    <div id="topbar-nav" class="navbar-menu">
-      <div class="navbar-end">
-        <a class="navbar-item" href="#">Home</a>
-        <div class="navbar-item has-dropdown is-hoverable">
-          <a class="navbar-link" href="#">Products</a>
-          <div class="navbar-dropdown">
-            <a class="navbar-item" href="#">Product A</a>
-            <a class="navbar-item" href="#">Product B</a>
-            <a class="navbar-item" href="#">Product C</a>
-          </div>
-        </div>
-        <div class="navbar-item has-dropdown is-hoverable">
-          <a class="navbar-link" href="#">Services</a>
-          <div class="navbar-dropdown">
-            <a class="navbar-item" href="#">Service A</a>
-            <a class="navbar-item" href="#">Service B</a>
-            <a class="navbar-item" href="#">Service C</a>
-          </div>
-        </div>
-        <div class="navbar-item">
-          <span class="control">
-            <a class="button is-primary" href="#">Download</a>
-          </span>
-        </div>
-      </div>
+
+
+    <div id="mobile-nav"
+         class="hidden bg-mf-gray inline-block xl:hidden absolute left-0 px-4 top-[88px] w-full h-screen z-[60] transition-opacity duration-300 visible opacity-100">
+
+      <ul class="flex flex-col w-full gap-8">
+        <li>
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="{{{or site.url siteRootPath}}}">Documentation</a>
+        </li>
+
+        <li>
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="/#discover">Discover</a>
+        </li>
+
+        <li>
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="/showcase/">Showcase</a>
+        </li>
+
+        <li>
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="/#contact">Enterprise</a>
+        </li>
+
+        <li>
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+             target="_blank" href="https://app.medusa.codes/">Medusa</a>
+        </li>
+
+
+
+        <li class="flex gap-8">
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="https://github.com/module-federation"
+             target="_blank">
+            {{> social-icon-github size="36px" }}
+          </a>
+
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="https://discord.gg/T8c6yAxkbv"
+             target="_blank">
+            {{> social-icon-discord size="36px" }}
+          </a>
+        </li>
+
+        {{!-- <li>{{>page-languages}}</li> --}}
+      </ul>
+
+
     </div>
+
+
   </nav>
+
 </header>
+
+{{!-- Note: We need this dummy element so Tailwind generates the classes used on the burger menu --}}
+<div class="hidden top-[7px] rotate-45 opacity-0 top-[-8px] -rotate-45"></div>

@@ -26,7 +26,8 @@
           "apps/react-ts-remote/src/styles.css"
         ],
         "scripts": [],
-        "webpackConfig": "apps/react-ts-remote/webpack.config.js"
+        "webpackConfig": "apps/react-ts-remote/webpack.config.js",
+        "babelUpwardRootMode": true
       },
       "configurations": {
         "development": {
