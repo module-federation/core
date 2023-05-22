@@ -65,7 +65,6 @@ export class NextFederationPlugin {
     // Check if the compiler is for the server or client
     const isServer = compiler.options.name === 'server';
     const { webpack } = compiler;
-    
 
     // Apply the CopyFederationPlugin
     new CopyFederationPlugin(isServer).apply(compiler);
@@ -143,33 +142,27 @@ export class NextFederationPlugin {
 
     // @ts-ignore
     new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
-    // if (isServer && Object.keys(this._options?.remotes || {}).length > 0) {
-    //   const commonOptions = {
-    //     ...hostFederationPluginOptions,
-    //     name: 'host_inner_ctn',
-    //     library: {
-    //       ...hostFederationPluginOptions.library,
-    //       name: this._options.name,
-    //     },
-    //     shared: {
-    //       ...hostFederationPluginOptions.shared,
-    //       ...defaultShared,
-    //     },
-    //   };
-    //
-    //   const serverOptions = isServer
-    //     ? {
-    //         runtime: 'webpack-runtime',
-    //         filename: `host_inner_ctn${this._options.name}.js`,
-    //       }
-    //     : {};
-    //
-    //   // @ts-ignore
-    //   new ModuleFederationPlugin({
-    //     ...commonOptions,
-    //     ...serverOptions,
-    //   }).apply(compiler);
-    // }
+    if (isServer && Object.keys(this._options?.remotes || {}).length > 0) {
+      const commonOptions = {
+        ...hostFederationPluginOptions,
+        name: 'host_inner_ctn',
+        runtime: 'webpack-runtime',
+        filename: `host_inner_ctn.js`,
+        library: {
+          ...hostFederationPluginOptions.library,
+          name: this._options.name,
+        },
+        shared: {
+          ...hostFederationPluginOptions.shared,
+          ...defaultShared,
+        },
+      };
+
+      // @ts-ignore
+      new ModuleFederationPlugin({
+        ...commonOptions,
+      }).apply(compiler);
+    }
 
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
   }

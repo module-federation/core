@@ -27,9 +27,13 @@ export function applyServerPlugins(
   // Import the StreamingTargetPlugin from @module-federation/node
   const { StreamingTargetPlugin } = require('@module-federation/node');
   new JsonpChunkLoading({ server: true }).apply(compiler);
-  compiler.options.optimization.moduleIds = 'named';
-  compiler.options.optimization.mergeDuplicateChunks = true;
-  compiler.options.optimization.splitChunks = false;
+  compiler.options.optimization.splitChunks = undefined;
+
+  // solves strange issues where next doesnt create a runtime chunk
+  // might be related to if an api route exists or not
+  compiler.options.optimization.runtimeChunk = {
+    name: 'webpack-runtime',
+  };
   //@ts-ignore
   // compiler.options.optimization.splitChunks = {
   //   chunks: 'all',
@@ -40,7 +44,7 @@ export function applyServerPlugins(
   //       minChunks: 2,
   //       minSize: 5000,
   //     },
-  //     federation: {  
+  //     federation: {
   //       test: function (module: any, chunks: any) {
   //         if(module.type && module.type.includes('remote')) {
   //           console.log('remote',module.type,module.id)
