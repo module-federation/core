@@ -350,3 +350,17 @@ ____
 == Fin
 
 That's all, folks!
+
+
+[,js]
+----
+
+(async () => { // Initializes the shared scope. Fills it with known provided modules from this build 
+  await __webpack_init_sharing__('defaxult'); 
+  const container = window.someContainer; // or get the container somewhere else 
+  // Initialize the container, it may provide shared modules 
+  await container.init(__webpack_share_scopes__.default); 
+  const module = await container.get('./module');
+})();
+
+----

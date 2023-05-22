@@ -1,0 +1,28 @@
+{
+  "explore": {
+    "cards": {
+      "community-content": {
+        "action": "Saiba mais",
+        "title": "Conteúdo da comunidade"
+      },
+      "conference-talks": {
+        "action": "Assista agora",
+        "title": "Palestras em conferências"
+      },
+      "implementing-module-federation": {
+        "action": "Saiba mais",
+        "title": "Implementando o Module Federation"
+      },
+      "module-federation-courses": {
+        "action": "Comece a explorar",
+        "subtitle": "Ganhe especialização em Module Federation e aprimore suas habilidades agora",
+        "title": "Cursos de Module Federation"
+      },
+      "practical-module-federation": {
+        "action": "Adquira o livro",
+        "title": "Module Federation na prática"
+      }
+    },
+    "disabled": "Em breve"
+  }
+}
