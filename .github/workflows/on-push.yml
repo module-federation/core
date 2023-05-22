@@ -76,7 +76,7 @@ jobs:
       - run: npm run build:website
       - uses: South-Paw/action-netlify-cli@1.0.1
         id: netlify
-        with: "deploy --build --message \"Deploy Preview from GitHub Actions\" --alias \"${{ env.BRANCH_NAME }}\""
+        with: "'deploy --build --message \"Deploy Preview from GitHub Actions\" --alias \"${{ env.BRANCH_NAME }}\"'"
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
