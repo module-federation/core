@@ -51,10 +51,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup
     # if: ${{ needs.setup.outputs.website-changed == 'true' && github.event_name == 'push' }}
-    env:
-      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-      NETLIFY_NEXT_PLUGIN_SKIP: true
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
@@ -62,7 +58,13 @@ jobs:
           path: ${{ env.CACHE_NODE_MODULES_PATH }}
           key: build-${{ hashFiles('**/yarn.lock') }}
       - run: npm run build:website
-      - run: "npm install -g netlify-cli && npx netlify deploy --build --prod --message \"Deploy from GitHub Actions\""
+      - uses: netlify/actions/cli@master
+        with:
+          args: deploy deploy --build --prod --message="Deploy from GitHub Actions"
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_NEXT_PLUGIN_SKIP: true
 
   preview-website:
     name: 'Deploy Netlify Preview'
@@ -81,33 +83,10 @@ jobs:
           key: build-${{ hashFiles('**/yarn.lock') }}
       - uses: nelonoel/branch-name@v1.0.1
       - run: npm run build:website
-      - run: "npm install -g netlify-cli && npx netlify deploy --build --message \"Deploy from GitHub Actions\" --alias \"${{ env.BRANCH_NAME }}\""      
-          
-  # preview-website:
-  #   name: 'Deploy Netlify Preview'
-  #   permissions:
-  #     contents: write
-  #   runs-on: ubuntu-latest
-  #   needs: setup
-  #   if: ${{ needs.setup.outputs.website-changed == 'true' && github.event_name == 'pull_request' }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/cache@v3
-  #       with:
-  #         path: ${{ env.CACHE_NODE_MODULES_PATH }}
-  #         key: build-${{ hashFiles('**/yarn.lock') }}
-  #     - run: npm run build:website
-  #     # Sets the branch name as environment variable
-  #     - uses: nelonoel/branch-name@v1.0.1
-  #     - uses: nwtgck/actions-netlify@v2.0.0
-  #       id: publish-preview
-  #       with:
-  #         publish-dir: ./dist/apps/website/client
-  #         deploy-message: "Deploy Preview from GitHub Actions"
-  #         production-deploy: false
-  #         github-token: ${{ secrets.GITHUB_TOKEN }}
-  #         alias: ${{ env.BRANCH_NAME }}
-  #       env:
-  #         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-  #         NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-  #       timeout-minutes: 1
+      - uses: netlify/actions/cli@master
+        with:
+          args: deploy deploy --build --prod --message="Deploy from GitHub Actions" --alias="${{ env.BRANCH_NAME }}"
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_NEXT_PLUGIN_SKIP: true
