@@ -2,6 +2,27 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [6.5.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.4.0...nextjs-mf-6.5.0) (2023-05-22)
+
+### Dependency Updates
+
+* `utils` updated to version `1.8.0`
+* `node` updated to version `0.15.0`
+* `utils` updated to version `1.8.0`
+* `node` updated to version `0.15.0`
+
+### Bug Fixes
+
+* doc ([#860](https://github.com/module-federation/nextjs-mf/issues/860)) ([cb88646](https://github.com/module-federation/nextjs-mf/commit/cb886469b7d8eddbd2c94c2de88010366bb207d7))
+
+
+### Features
+
+* release to npm with next tag to not ruine latest one ([#763](https://github.com/module-federation/nextjs-mf/issues/763)) ([f2d199b](https://github.com/module-federation/nextjs-mf/commit/f2d199b3b3fbbd428514b1ce1f139efc82f7fff0))
+* **website:** initial version of module federation website ([#751](https://github.com/module-federation/nextjs-mf/issues/751)) ([9b4ec04](https://github.com/module-federation/nextjs-mf/commit/9b4ec048652f0d2237e9401912ead7c5bbe060c4))
+
+
+
 # [6.4.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.3.1...nextjs-mf-6.4.0) (2023-04-19)
 
 
