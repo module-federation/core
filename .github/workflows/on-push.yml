@@ -65,9 +65,7 @@ jobs:
     name: 'Deploy Netlify Preview'
     runs-on: ubuntu-latest
     needs: setup
-    permissions:
-      contents: write
-    # if: ${{ needs.setup.outputs.website-changed == 'true' && github.event_name == 'pull_request' }}
+    if: ${{ needs.setup.outputs.website-changed == 'true' && github.event_name == 'pull_request' }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
@@ -76,35 +74,8 @@ jobs:
           key: build-${{ hashFiles('**/yarn.lock') }}
       - uses: nelonoel/branch-name@v1.0.1
       - run: npm run build:website
-      - uses: netlify/actions/cli@master
-        id: netlify
-        with: 
-          args: deploy --json --build --message \"Deploy Preview from GitHub Actions\" --alias \"${{ env.BRANCH_NAME }}\"
+      - run: "npx netlify deploy --build --message \"Deploy Preview from GitHub Actions\" --alias \"${{ env.BRANCH_NAME }}\""
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_NEXT_PLUGIN_SKIP: true
-
-      # Handle PR commenting
-      - name: Find Relevant Comment
-        uses: peter-evans/find-comment@v2
-        id: find-comment
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: 'Deploy Preview is ready!'
-
-      - name: Create or update comment
-        uses: peter-evans/create-or-update-comment@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          comment-id: ${{ steps.find-comment.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            ## ✅ Deploy Preview is ready!
-            | Name          | Link          |
-            | ------------- | ------------- |
-            | 🔨 Latest commit  | ${{ github.sha }}            |
-            | 😎 Deploy Preview | ${{ steps.netlify.outputs.NETLIFY_URL }}  |
-          edit-mode: replace
