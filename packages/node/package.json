@@ -13,7 +13,8 @@
     "./utils": {
       "import": "./src/utils/index.js",
       "require": "./src/utils/index.js"
-    }
+    },
+    "./src/": "./src/"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
