@@ -1,7 +1,7 @@
 name: deploy-website
 
 on: 
-  workflow_dispatch:
+  push:
 
 # on:
 #   pull_request:
