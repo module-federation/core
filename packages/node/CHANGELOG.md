@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.15.1](https://github.com/module-federation/nextjs-mf/compare/node-0.15.0...node-0.15.1) (2023-05-22)
+
+
+### Bug Fixes
+
+* Add ./src/ export to package.json ([#898](https://github.com/module-federation/nextjs-mf/issues/898)) ([acbdda6](https://github.com/module-federation/nextjs-mf/commit/acbdda6c5dd499828f9e65ed3b774b50048f9021))
+
+
+
 # [0.15.0](https://github.com/module-federation/nextjs-mf/compare/node-0.14.0...node-0.15.0) (2023-05-22)
 
 ### Dependency Updates
