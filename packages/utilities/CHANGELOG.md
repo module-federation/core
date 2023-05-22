@@ -2,6 +2,20 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [1.8.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.7.0...utils-1.8.0) (2023-05-22)
+
+
+### Bug Fixes
+
+* [#827](https://github.com/module-federation/nextjs-mf/issues/827) ([3e4268f](https://github.com/module-federation/nextjs-mf/commit/3e4268fc6c9719f993037de42784e426ddb5305a))
+
+
+### Features
+
+* **website:** initial version of module federation website ([#751](https://github.com/module-federation/nextjs-mf/issues/751)) ([9b4ec04](https://github.com/module-federation/nextjs-mf/commit/9b4ec048652f0d2237e9401912ead7c5bbe060c4))
+
+
+
 # [1.7.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.6.0...utils-1.7.0) (2023-04-27)
 
 
