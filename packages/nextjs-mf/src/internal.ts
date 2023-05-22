@@ -103,7 +103,7 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
 
   if (key === 'react' || key === 'react-dom' || key === 'next/router') {
     //@ts-ignore
-    //acc[key].eager = true;
+    acc[key].eager = true;
   }
   return acc;
 }, {} as SharedObject);
