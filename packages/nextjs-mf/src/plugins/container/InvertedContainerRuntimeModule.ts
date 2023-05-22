@@ -134,6 +134,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       // for (const entryChunks of entrypoint.getAllInitialChunks()) {}
       // @ts-ignore
       for (const chunk of entrypoint.getAllAsyncChunks()) {
+        //if(chunk.hasEntryModule()) continue
         const modules = chunkGraph.getChunkModulesIterableBySourceType(
           chunk,
           'consume-shared'
@@ -145,6 +146,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       }
       // @ts-ignore
       for (const chunk of entrypoint.getAllInitialChunks()) {
+       // if(chunk.hasEntryModule()) continue
         const modules = chunkGraph.getChunkModulesIterableBySourceType(
           chunk,
           'consume-shared'
@@ -710,7 +712,8 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     )});
 
     ${containerScope}[${JSON.stringify(containerName)}] = innerRemote
-
+__webpack_require__.I('default')
+console.log(__webpack_require__.S)
     console.log('remote attached', innerRemote);
     if(resolve) resolve(innerRemote)
   }`,

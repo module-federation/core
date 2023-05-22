@@ -19,6 +19,7 @@ export function applyServerPlugins(
   // Import the StreamingTargetPlugin from @module-federation/node
   const { StreamingTargetPlugin } = require('@module-federation/node');
   new JsonpChunkLoading({ server: true }).apply(compiler);
+  compiler.options.optimization.splitChunks = undefined;
 
   compiler.options.optimization.splitChunks = undefined;
 
