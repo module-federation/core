@@ -19,6 +19,8 @@ const performReload = (shouldReload: any) => {
     _config: {},
     _medusa: {},
   };
+  //@ts-ignore
+  globalThis.backupScope = {};
 
   Object.keys(req.cache).forEach((key) => {
     if (requireCacheRegex.test(key)) {

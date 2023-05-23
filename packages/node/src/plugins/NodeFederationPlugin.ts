@@ -6,7 +6,7 @@ import { extractUrlAndGlobal } from '@module-federation/utilities';
 
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
   experiments?: Record<string, unknown>;
-  verbose?: boolean;
+  debug?: boolean;
 }
 
 interface Context {
@@ -127,7 +127,7 @@ class NodeFederationPlugin {
   private experiments: NodeFederationOptions['experiments'];
 
   constructor(
-    { experiments, verbose, ...options }: NodeFederationOptions,
+    { experiments, debug, ...options }: NodeFederationOptions,
     context: Context
   ) {
     this._options = options || ({} as ModuleFederationPluginOptions);
@@ -145,7 +145,6 @@ class NodeFederationPlugin {
         this._options.remotes || {}
       ) as ModuleFederationPluginOptions['remotes'],
     };
-
 
     const chunkFileName = compiler.options?.output?.chunkFilename;
     const uniqueName =
@@ -176,7 +175,6 @@ class NodeFederationPlugin {
         );
       }
     }
-
 
     new (this.context.ModuleFederationPlugin ||
       (webpack && webpack.container.ModuleFederationPlugin) ||

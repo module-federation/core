@@ -6,7 +6,8 @@ export {
 } from '@module-federation/utilities/src/utils/common';
 // @ts-ignore
 export { flushChunks } from '@module-federation/node/utils';
-export { FlushedChunks, FlushedChunksProps } from './flushedChunks';
+export { FlushedChunks } from './flushedChunks';
+export type { FlushedChunksProps } from './flushedChunks';
 
 export const revalidate = () => {
   if (typeof window !== 'undefined') {

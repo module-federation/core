@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "module": "commonjs",
+    "target": "es2021",
     "allowJs": true,
     "moduleResolution": "Node16",
     "forceConsistentCasingInFileNames": true,
@@ -10,7 +11,10 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "declaration": true,
+    "sourceMap": true,
+    "isolatedModules": true,
   },
   "files": [],
   "include": [],
