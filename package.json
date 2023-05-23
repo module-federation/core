@@ -183,10 +183,9 @@
       "path": "cz-conventional-changelog"
     }
   },
-  "workspaces": {
-    "packages": [
-      "apps/**"
-    ]
-  }
+  "workspaces": [
+    "apps/**",
+    "dist/packages/**"
+  ]
 }
 
