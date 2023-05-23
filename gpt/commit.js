@@ -99,13 +99,13 @@ async function generateCommitMsg() {
   if (diff.length > MAX_CHAR_COUNT) {
     diff = [
       execSync('git diff --staged --stat').toString(),
-      execSync('git diff -U5 --staged').toString(),
+      execSync('git diff -U4 --staged').toString(),
     ].join('\n');
 
     console.warn(
       'over max char count, reducing diff fidelity',
       'from:',
-      oldDiff.length,
+      oldDiff,
       'to:',
       diff.length
     );

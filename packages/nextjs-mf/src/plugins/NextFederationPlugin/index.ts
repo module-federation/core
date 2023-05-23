@@ -84,15 +84,6 @@ export class NextFederationPlugin {
       getModuleFederationPluginConstructor(isServer, compiler);
 
     const defaultShared = retrieveDefaultShared(isServer);
-    if (compiler.options.output.chunkFilename) {
-      // @ts-ignore
-      compiler.options.output.chunkFilename =
-        // @ts-ignore
-        compiler.options.output.chunkFilename.replace(
-          'contenthash',
-          'fullhash'
-        );
-    }
     if (isServer) {
       // Refactored server condition
       configureServerCompilerOptions(compiler);
@@ -151,11 +142,14 @@ export class NextFederationPlugin {
 
     // @ts-ignore
     new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
-    if (isServer && Object.keys(this._options?.remotes || {}).length > 0) {
+    if (
+      Object.keys(this._options?.remotes || {}).length > 0 ||
+      Object.keys(this._options?.exposes || {}).length > 0
+    ) {
       const commonOptions = {
         ...hostFederationPluginOptions,
         name: 'host_inner_ctn',
-        runtime: 'webpack-runtime',
+        runtime: isServer ? 'webpack-runtime' : 'webpack',
         filename: `host_inner_ctn.js`,
         library: {
           ...hostFederationPluginOptions.library,

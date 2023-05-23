@@ -168,8 +168,8 @@ class NodeFederationPlugin {
       ) {
         const suffix =
           compiler.options.mode === 'development'
-            ? `${uniqueName}.js`
-            : `.[fullhash].js`;
+            ? `.[chunkhash].js`
+            : `.[chunkhash].js`;
         compiler.options.output.chunkFilename = chunkFileName.replace(
           '.js',
           suffix
