@@ -19,15 +19,6 @@ export function applyServerPlugins(
   // Import the StreamingTargetPlugin from @module-federation/node
   const { StreamingTargetPlugin } = require('@module-federation/node');
   new JsonpChunkLoading({ server: true }).apply(compiler);
-  compiler.options.optimization.splitChunks = undefined;
-
-  compiler.options.optimization.splitChunks = undefined;
-
-  // solves strange issues where next doesnt create a runtime chunk
-  // might be related to if an api route exists or not
-  compiler.options.optimization.runtimeChunk = {
-    name: 'webpack-runtime',
-  };
 
   new DelegatesModulePlugin({
     runtime: 'webpack-runtime',
@@ -179,8 +170,13 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     global: false,
   };
   // Build will hang without this. Likely something in my plugin
-  compiler.options.optimization.chunkIds = 'named'; // for debugging
+  compiler.options.optimization.chunkIds = 'named';
+  // no custom chunk rules
+  compiler.options.optimization.splitChunks = undefined;
 
-  // Disable split chunks to prevent conflicts from occurring in the graph
-  // TODO on the `compiler.options.optimization.splitChunks` line would be to find a way to only opt out chunks/modules related to module federation from chunk splitting logic.
+  // solves strange issues where next doesnt create a runtime chunk
+  // might be related to if an api route exists or not
+  compiler.options.optimization.runtimeChunk = {
+    name: 'webpack-runtime',
+  };
 }

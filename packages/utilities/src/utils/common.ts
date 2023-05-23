@@ -60,9 +60,9 @@ export const importDelegatedModule = async (
                     get: function () {
                       return function () {
                         //@ts-ignore
-                        if (global.usedChunks)
+                        if (globalThis.usedChunks)
                           //@ts-ignore
-                          global.usedChunks.add(
+                          globalThis.usedChunks.add(
                             //@ts-ignore
                             `${keyOrRuntimeRemoteItem.global}->${arg}`
                           );
@@ -76,9 +76,9 @@ export const importDelegatedModule = async (
                   Object.defineProperty(result, prop, {
                     get: () => {
                       //@ts-ignore
-                      if (global.usedChunks)
+                      if (globalThis.usedChunks)
                         //@ts-ignore
-                        global.usedChunks.add(
+                        globalThis.usedChunks.add(
                           //@ts-ignore
                           `${keyOrRuntimeRemoteItem.global}->${arg}`
                         );

@@ -1,11 +1,13 @@
 /* eslint-disable no-undef */
+
+if (!globalThis.usedChunks) {
+  globalThis.usedChunks = new Set();
+}
 /**
  * Initialize usedChunks and share it globally.
  * @type {Set}
  */
-export const usedChunks = global.usedChunks || new Set();
-global.usedChunks = usedChunks;
-
+export const usedChunks = globalThis.usedChunks;
 /**
  * Load hostStats from the JSON file.
  * @returns {object} hostStats - An object containing host stats data.
@@ -62,6 +64,10 @@ const processChunk = async (chunk, shareMap, hostStats) => {
 
   // If the remote is not defined in the global config, return
   if (!global.__remote_scope__._config[remote]) {
+    console.error(
+      `flush chunks:`,
+      `Remote ${remote} is not defined in the global config`
+    );
     return;
   }
 
@@ -79,7 +85,6 @@ const processChunk = async (chunk, shareMap, hostStats) => {
     let stats = {};
     try {
       // Fetch the remote config and stats file
-      await fetch(global.__remote_scope__._config[remote]);
       stats = await fetch(statsFile).then((res) => res.json());
     } catch (e) {
       console.error('flush error', e);
@@ -99,6 +104,9 @@ const processChunk = async (chunk, shareMap, hostStats) => {
         // Process exposed modules
         if (modules.exposes?.[request]) {
           modules.exposes[request].forEach((chunk) => {
+            chunks.add([prefix, chunk].join(''));
+
+            //TODO: reimplement this
             Object.values(chunk).forEach((chunk) => {
               // Add files to the chunks set
               if (chunk.files) {
@@ -127,7 +135,7 @@ const processChunk = async (chunk, shareMap, hostStats) => {
     // Return the array of chunks
     return Array.from(chunks);
   } catch (e) {
-    console.log(e);
+    console.error('flush error:', e);
   }
 };
 

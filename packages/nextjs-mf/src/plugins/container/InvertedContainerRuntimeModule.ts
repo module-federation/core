@@ -146,7 +146,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       }
       // @ts-ignore
       for (const chunk of entrypoint.getAllInitialChunks()) {
-       // if(chunk.hasEntryModule()) continue
+        // if(chunk.hasEntryModule()) continue
         const modules = chunkGraph.getChunkModulesIterableBySourceType(
           chunk,
           'consume-shared'
@@ -687,14 +687,14 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         "console.log('replaying all installed chunk requirements');",
         '__webpack_require__.checkAsyncReqs();',
         'attachRemote(resolve)',
-        'globalThis.buscp = globalThis.buscp || {};',
-        '__webpack_require__.I("default",[globalThis.buscp]);',
+        '__webpack_require__.I("default",[globalThis.backupScope]);',
         '},0)',
         '})',
       ]);
 
       // __webpack_require__.O(0, ["webpack-runtime"], function() {
       return Template.asString([
+        'globalThis.usedChunks = globalThis.usedChunks || new Set();',
         'globalThis.backupScope = globalThis.backupScope || {};',
         '__webpack_require__.S = globalThis.backupScope;',
         '__webpack_require__.initConsumes = __webpack_require__.initConsumes || [];',

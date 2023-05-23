@@ -6,6 +6,7 @@ export {
 } from '@module-federation/utilities/src/utils/common';
 // @ts-ignore
 export { flushChunks } from '@module-federation/node/utils';
+export { FlushedChunks, FlushedChunksProps } from './flushedChunks';
 
 export const revalidate = () => {
   if (typeof window !== 'undefined') {
@@ -17,52 +18,3 @@ export const revalidate = () => {
     return utils.revalidate();
   });
 };
-
-export interface FlushedChunksProps {
-  chunks: string[];
-}
-
-export const FlushedChunks = ({ chunks }: FlushedChunksProps) => {
-  const scripts = chunks
-    .filter((c) => {
-      // TODO: host shouldnt flush its own remote out
-      // if(c.includes('?')) {
-      //   return c.split('?')[0].endsWith('.js')
-      // }
-      return c.endsWith('.js');
-    })
-    .map((chunk) => {
-      if (!chunk.includes('?') && chunk.includes('remoteEntry')) {
-        chunk = chunk + '?t=' + Date.now();
-      }
-      return React.createElement(
-        'script',
-        {
-          key: chunk,
-          src: chunk,
-          async: true,
-        },
-        null
-      );
-    });
-
-  const css = chunks
-    .filter((c) => c.endsWith('.css'))
-    .map((chunk) => {
-      return React.createElement(
-        'link',
-        {
-          key: chunk,
-          href: chunk,
-          rel: 'stylesheet',
-        },
-        null
-      );
-    });
-
-  return React.createElement(React.Fragment, null, css, scripts);
-};
-
-FlushedChunks.defaultProps = {
-  chunks: [],
-} as FlushedChunksProps;
