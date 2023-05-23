@@ -78,7 +78,7 @@ export default component$(() => {
   );
 
   return (
-    <Section theme={ContainerTheme.OPAQUE}>
+    <Section id="learn" theme={ContainerTheme.OPAQUE}>
       <SectionHeader q:slot="header" title={title} subtitle={subtitle} />
 
       <div class="flex flex-col items-center gap-3 md:gap-10">

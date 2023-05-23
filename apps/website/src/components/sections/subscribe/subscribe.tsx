@@ -30,7 +30,7 @@ export default component$(() => {
     loading.value = true;
     success.value = false;
 
-    fetch('/docs', {
+    fetch('/docs/submit-form', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams(formData as any).toString(),

@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "0.14.0",
+  "version": "0.15.1",
   "type": "commonjs",
   "main": "src/index.js",
   "exports": {
@@ -13,7 +13,8 @@
     "./utils": {
       "import": "./src/utils/index.js",
       "require": "./src/utils/index.js"
-    }
+    },
+    "./src/": "./src/"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
