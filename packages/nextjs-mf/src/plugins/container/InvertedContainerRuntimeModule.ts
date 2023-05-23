@@ -5,7 +5,7 @@
 
 'use strict';
 
-import type { Chunk, Compiler } from 'webpack';
+import type { Chunk, Compiler, Module } from 'webpack';
 import { RuntimeModule } from 'webpack';
 import {
   parseVersionRuntimeCode,
@@ -471,9 +471,12 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     const { chunkGraph, compilation } = this;
     const { runtimeTemplate, moduleGraph, entrypoints, compiler } = compilation;
     const { RuntimeGlobals, Template } = compiler.webpack;
-    const chunkToRemotesMapping = {};
-    const idToExternalAndNameMapping = {};
+    const chunkToRemotesMapping: { [key: string]: number[] } = {};
+    const idToExternalAndNameMapping: {
+      [key: string]: [string, string, number];
+    } = {};
 
+    //@ts-ignore
     for (const entrypointModule of entrypoints.values()) {
       const entrypoint = entrypointModule.getEntrypointChunk();
       if (entrypoint.hasRuntime()) continue;
@@ -482,15 +485,18 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         const modules = chunkGraph.getChunkModulesIterableBySourceType(
           chunk,
           'remote'
-        );
+        ) as Module[];
         if (!modules) continue;
+
+        const remotes: (string | number)[] = (chunkToRemotesMapping[
+          chunk.id || chunk.name
+        ] = []);
         //@ts-ignore
-        const remotes = (chunkToRemotesMapping[chunk.id || chunk.name] = []);
         for (const m of modules) {
-          const module = /** @type {RemoteModule} */ m;
+          const module = m;
           //@ts-ignore
           const name = module.internalRequest;
-          //@ts-ignore
+
           const id = chunkGraph.getModuleId(module);
           //@ts-ignore
           const shareScope = module.shareScope;
@@ -498,7 +504,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           const externalModule = moduleGraph.getModule(dep);
           const externalModuleId =
             externalModule && chunkGraph.getModuleId(externalModule);
-          //@ts-ignore
           remotes.push(id);
           //@ts-ignore
           idToExternalAndNameMapping[id] = [shareScope, name, externalModuleId];
@@ -687,7 +692,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         "console.log('replaying all installed chunk requirements');",
         '__webpack_require__.checkAsyncReqs();',
         'attachRemote(resolve)',
-        '__webpack_require__.I("default",[globalThis.backupScope]);',
         '},0)',
         '})',
       ]);
@@ -703,20 +707,26 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         '__webpack_require__.reMap = __webpack_require__.reMap || {};',
         '__webpack_require__.installedModules = {};',
         "console.log('share scope', __webpack_require__.S);",
-        `if(${containerScope} === undefined) { ${containerScope} = {_config: {}} };`,
+        `if(${containerScope} === undefined) {
+        console.log('container scope is empty, initializing');
+        ${containerScope} = {_config: {}}
+        };`,
         checkForAsyncChunkRequirements,
-        `
-  function attachRemote (resolve) {
-    const innerRemote = __webpack_require__(${JSON.stringify(
-      containerModuleId
-    )});
-
-    ${containerScope}[${JSON.stringify(containerName)}] = innerRemote
-__webpack_require__.I('default')
-console.log(__webpack_require__.S)
-    console.log('remote attached', innerRemote);
-    if(resolve) resolve(innerRemote)
-  }`,
+        Template.asString([
+          'function attachRemote (resolve) {',
+          Template.indent([
+            `const innerRemote = __webpack_require__(${JSON.stringify(
+              containerModuleId
+            )});`,
+            `${containerScope}[${JSON.stringify(
+              containerName
+            )}] = innerRemote;`,
+            "__webpack_require__.I('default',[globalThis.backupScope]);",
+            "console.log('remote attached', innerRemote);",
+            'if(resolve) resolve(innerRemote)',
+          ]),
+          '}',
+        ]),
         'try {',
         isServer ? serverContainerKickstart : browserContainerKickstart,
         '} catch (e) {',

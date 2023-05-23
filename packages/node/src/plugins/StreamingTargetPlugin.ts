@@ -5,7 +5,7 @@ import CommonJsChunkLoadingPlugin from './CommonJsChunkLoadingPlugin';
 
 interface StreamingTargetOptions extends ModuleFederationPluginOptions {
   promiseBaseURI?: string;
-  verbose?: boolean;
+  debug?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -56,7 +56,7 @@ class StreamingTargetPlugin {
       remotes: this.options.remotes as Record<string, string>,
       baseURI: compiler.options.output.publicPath,
       promiseBaseURI: this.options.promiseBaseURI,
-      verbose: this.options.verbose,
+      debug: this.options.debug,
     }).apply(compiler);
   }
 }

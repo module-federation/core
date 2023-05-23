@@ -22,7 +22,7 @@ interface ReadFileChunkLoadingRuntimeModuleOptions {
   promiseBaseURI?: string;
   remotes: Record<string, string>;
   name?: string;
-  verbose?: boolean;
+  debug?: boolean;
 }
 
 interface ChunkLoadingContext {
@@ -70,7 +70,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
    * @param {unknown[]} items item to log
    */
   _getLogger(...items: unknown[]) {
-    if (!this.options.verbose) {
+    if (!this.options.debug) {
       return '';
     }
 
@@ -120,12 +120,12 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
         if (c.ids) {
           for (const id of c.ids) initialChunkIds.add(id);
         }
-        for (const c of chunk.getAllAsyncChunks()) {
-          if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
-          if (c.ids) {
-            for (const id of c.ids) initialChunkIds.add(id);
-          }
-        }
+        // for (const c of chunk.getAllAsyncChunks()) {
+        //   if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
+        //   if (c.ids) {
+        //     for (const id of c.ids) initialChunkIds.add(id);
+        //   }
+        // }
       }
       console.log('initialChunkIds', initialChunkIds);
       return initialChunkIds;
@@ -332,6 +332,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             /*
                       TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise() global will/should still exist - but can only be known at runtime
                     */
+                            "console.log('global.__remote_scope__', global.__remote_scope__['checkout'])",
                             this._getLogger(
                               `'remotes keyed by global name'`,
                               JSON.stringify(remotesByType.normal)
