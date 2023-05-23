@@ -89,7 +89,7 @@ export default component$(() => {
         <div class="grid grid grid-cols-1 md:grid-cols-2 gap-3">
           {cards.map((card) => {
             return (
-              <Card hover key={card.title}>
+              <Card key={card.title}>
                 <div class="flex flex-col h-full p-10 gap-6">
                   <h3 class="text-blue-gray-900 font-semibold text-3xl">
                     {card.title}
@@ -129,7 +129,7 @@ export default component$(() => {
             );
           })}
         </div>
-        <Card hover>
+        <Card>
           <div class="flex flex-col justify-center items-center p-10 gap-6">
             <h3 class="text-blue-gray-900 font-semibold text-3xl">
               {t('evolving.supported-bundlers.title@@Supported bundlers')}
