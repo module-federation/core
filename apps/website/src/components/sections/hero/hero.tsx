@@ -1,14 +1,21 @@
 import { component$, useStylesScoped$ } from '@builder.io/qwik';
-import { $translate as t } from 'qwik-speak';
+import { $translate as t, useSpeakContext } from 'qwik-speak';
 
 import styles from './hero.css?inline';
 import Container, { ContainerTheme } from '../../container/container';
 import Button, { ButtonTheme } from '../../button/button';
 import { centerShape, leftShape, rightShape } from './shapes';
+import { localizedUrl as locUrl } from '../../../speak-config';
 import Line from '../../line/line';
 
 export default component$(() => {
   useStylesScoped$(styles);
+
+  const speakState = useSpeakContext();
+
+  const localizedUrl = (url: string) => {
+    return locUrl(url, speakState);
+  };
 
   return (
     <Container theme={ContainerTheme.OPAQUE}>
@@ -26,7 +33,7 @@ export default component$(() => {
           <Button
             class="w-full md:w-[196px]"
             theme={ButtonTheme.SOLID}
-            href="https://module-federation.io/en/mf-docs/2.5/setup"
+            href="/docs/en/mf-docs/2.5/setup"
             type="link"
           >
             {t('hero.actions.documentation@@Documentation')}
@@ -34,7 +41,7 @@ export default component$(() => {
           <Button
             class="w-full md:w-[196px]"
             theme={ButtonTheme.OUTLINE}
-            href="https://module-federation.io/en/mf-docs/2.5/getting-started"
+            href={localizedUrl('/#learn')}
             type="link"
           >
             {t('hero.actions.learn@@Learn')}
