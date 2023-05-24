@@ -6,11 +6,8 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{workspaceRoot}/dist/packages/native-federation-tests"],
       "options": {
-        "outputPath": "dist/packages/native-federation-tests",
         "parallel": false,
         "commands": [
           "tsup --config packages/native-federation-tests/tsup.config.ts",
@@ -32,20 +29,14 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/native-federation-tests/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/native-federation-tests/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/vite:test",
-      "outputs": [
-        "{workspaceRoot}/coverage/packages/native-federation-tests"
-      ]
+      "outputs": ["{workspaceRoot}/coverage/packages/native-federation-tests"]
     },
     "version": {
       "executor": "@jscutlery/semver:version",
