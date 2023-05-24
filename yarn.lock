@@ -14766,10 +14766,10 @@ next@13.3.1:
     "@next/swc-win32-ia32-msvc" "13.3.1"
     "@next/swc-win32-x64-msvc" "13.3.1"
 
-ngx-deploy-npm@^5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/ngx-deploy-npm/-/ngx-deploy-npm-5.2.0.tgz#723500ab44fa9e804c681fc51752a2bc1dac481e"
-  integrity sha512-+lsBNlDQ6Lr0fBN2eV+kbiExnPJwmuTK0cz1HBzvi+13DWu/AgAwy5o7bA+IkZL5pS6f4alJpjqY+TDMfGpubw==
+ngx-deploy-npm@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/ngx-deploy-npm/-/ngx-deploy-npm-6.0.0.tgz#860675a7f08efd9058ed2be62ce031ab2c7ae9c2"
+  integrity sha512-gfj4ZIAguZ4JJF/WOIGYktwi1BKtHRYz1TUJV4a5qBwRaBunSu1/oW9K+sApwGfegMtrblDjMoLl10OZWgqx+A==
 
 no-case@^3.0.4:
   version "3.0.4"

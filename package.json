@@ -152,7 +152,7 @@
     "jest-environment-jsdom": "29.5.0",
     "js-yaml": "^4.1.0",
     "merge-stream": "~2.0",
-    "ngx-deploy-npm": "^5.2.0",
+    "ngx-deploy-npm": "^6.0.0",
     "nodejieba": "^2.6.0",
     "nx": "16.1.4",
     "openai": "^3.2.1",
