@@ -21,6 +21,8 @@ const performReload = (shouldReload: any) => {
   };
   //@ts-ignore
   globalThis.backupScope = {};
+  //@ts-ignore
+  globalThis.factoryTracker = {};
 
   Object.keys(req.cache).forEach((key) => {
     if (requireCacheRegex.test(key)) {

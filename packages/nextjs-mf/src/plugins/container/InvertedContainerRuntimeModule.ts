@@ -162,9 +162,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     if (
       moduleIdToSourceMapping.size === 0 ||
       moduleIdToSourceChunkID.size === 0
-    )
+    ) {
       return '';
-
+    }
     return Template.asString([
       parseVersionRuntimeCode(runtimeTemplate),
       versionLtRuntimeCode(runtimeTemplate),
