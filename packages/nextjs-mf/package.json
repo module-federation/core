@@ -5,7 +5,6 @@
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "public": true,
-  "type": "commonjs",
   "description": "Module Federation helper for NextJS",
   "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/nextjs-mf",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
