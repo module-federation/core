@@ -25,8 +25,7 @@
           "npx antora --fetch apps/docs/configs/docs-en.yml",
           "npx antora --fetch apps/docs/configs/docs-es.yml",
           "npx antora --fetch apps/docs/configs/docs-zh.yml"
-        ],
-        "outputPath": "dist/apps/docs"
+        ]
       },
       "configurations": {
         "local": {
@@ -37,7 +36,8 @@
           ]
         }
       },
-      "dependsOn": ["^build", "prepare-antora-configs"]
+      "dependsOn": ["^build", "prepare-antora-configs"],
+      "outputs": ["{workspaceRoot}/dist/apps/docs"]
     }
   }
 }
