@@ -1375,10 +1375,10 @@
     vfile "5.3.7"
     zod "^3.21.4"
 
-"@builder.io/qwik@1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@builder.io/qwik/-/qwik-1.1.2.tgz#195465e89166a23d5d762cbe6a883f877086214d"
-  integrity sha512-oOif/cXd0EYi+lFprWkGeRoI+9MiUKpdwTqjk19L8OYzTo8XQ+X2OhgBzOkCKjGF32eJdRWYWFXKZyHlhHlg/g==
+"@builder.io/qwik@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@builder.io/qwik/-/qwik-1.1.4.tgz#8109b294ff23ca615ffc79deee405bc3df16c4cf"
+  integrity sha512-FSbe2GcUBptAXMAHfN+oGUpnb3nZXzup2EYlza61bAfgWSx9SryOwNULyROis3mu7Ywdua3w6VKvCWOFdovz2w==
 
 "@colors/colors@1.5.0":
   version "1.5.0"
