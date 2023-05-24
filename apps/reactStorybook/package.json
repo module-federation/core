@@ -2,7 +2,7 @@
   "name": "react-storybook",
   "version": "1.0.0",
   "devDependencies": {
-    "@module-federation/utilities": "1.7.0",
+    "@module-federation/utilities": "1.8.0",
     "@module-federation/storybook-addon": "0.2.0"
   }
 }
