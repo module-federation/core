@@ -9,7 +9,7 @@ import {
   correctImportPath,
   ModuleFederationPluginOptions,
 } from '@module-federation/utilities';
-import type { ModuleFederationConfig } from '@nrwl/devkit';
+import type { ModuleFederationConfig } from '@nx/devkit';
 import withModuleFederation from '../utils/with-module-federation';
 
 const { ModuleFederationPlugin } = container;

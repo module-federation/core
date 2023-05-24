@@ -31,10 +31,10 @@ jobs:
         id: cache
         with:
           path: ${{ env.CACHE_NODE_MODULES_PATH }}
-          key: build-${{ hashFiles('**/yarn.lock') }}
+          key: build-${{ hashFiles('**/package-lock.json') }}
       - name: Install Dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: yarn install --frozen-lockfile
+        run: npm ci --legacy-peer-deps
       - name: Check changes "website"
         id: website-changed
         run: echo "website-changed=$(node tools/scripts/ci-is-affected.mjs --appName=website --base=${{ env.BASE_REF}} --head=HEAD)" >> $GITHUB_OUTPUT
@@ -53,7 +53,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_NODE_MODULES_PATH }}
-          key: build-${{ hashFiles('**/yarn.lock') }}
+          key: build-${{ hashFiles('**/package-lock.json') }}
       - run: npm run build:website
       - run: "npx netlify deploy --build --prod --message \"Deploy from GitHub Actions\""
         env:
@@ -71,7 +71,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_NODE_MODULES_PATH }}
-          key: build-${{ hashFiles('**/yarn.lock') }}
+          key: build-${{ hashFiles('**/package-lock.json') }}
       - uses: nelonoel/branch-name@v1.0.1
       - run: npm run build:website
       - run: "npx netlify deploy --build --message \"Deploy Preview from GitHub Actions\" --alias \"${{ env.BRANCH_NAME }}\""
