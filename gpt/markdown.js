@@ -13,4 +13,4 @@ marked.setOptions({
   }),
 });
 
-module.exports = marked;
+module.exports = marked.parse;
