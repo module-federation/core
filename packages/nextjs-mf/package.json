@@ -7,7 +7,7 @@
   "public": true,
   "type": "commonjs",
   "description": "Module Federation helper for NextJS",
-  "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/nextjs-mf",
+  "repository": "https://github.com/module-federation/universe/tree/main/packages/nextjs-mf",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "contributors": [
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
