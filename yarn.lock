@@ -242,10 +242,10 @@
     asciidoctor-opal-runtime "0.3.3"
     unxhr "1.0.1"
 
-"@asciidoctor/tabs@1.0.0-beta.3":
-  version "1.0.0-beta.3"
-  resolved "https://registry.yarnpkg.com/@asciidoctor/tabs/-/tabs-1.0.0-beta.3.tgz#00c5eab7733e8fddb16eb0c7d8a2cfa133102386"
-  integrity sha512-Cx6LQCLl703BwuejZZSwBy1s7CuJxD9AVY2mAgE0UDXfPmFsY3Il3JMGQ+1JAwHH0hd7htLEq+yG5EiiLdCJeg==
+"@asciidoctor/tabs@1.0.0-beta.4":
+  version "1.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/@asciidoctor/tabs/-/tabs-1.0.0-beta.4.tgz#c2af38d3f03dbf21d7414ac6db2eb81d97cb64f7"
+  integrity sha512-TQfqr/g6fquuvXKOhiIavfj/VCGmgpWZw7ezlAUPp5e3RR7hC64KyteHs4DTvZP8703pujVnRAqFMLgT7JTMFQ==
 
 "@aw-web-design/x-default-browser@1.4.88":
   version "1.4.88"
