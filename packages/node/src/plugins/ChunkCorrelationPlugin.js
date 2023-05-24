@@ -492,23 +492,25 @@ class FederationStatsPlugin {
             }
           });
 
-          const sharedModulesInContainer =
-            compilation.chunkGraph.getChunkModulesIterableBySourceType(
-              container,
-              'consume-shared'
-            );
+          container.getAllReferencedChunks().forEach((chunk) => {
+            const sharedModulesInContainer =
+              compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                chunk,
+                'consume-shared'
+              );
 
-          const arrayOfShare = Array.from(sharedModulesInContainer);
-          debugger;
+            const arrayOfShare = Array.from(sharedModulesInContainer);
+            debugger;
+          });
 
-          if (sharedModulesInContainer) {
-            sharedModulesInContainer.forEach((mod) => {
-              const sharedModuleDepModule = mod.dependencies.map((dep) => {
-                return compilation.moduleGraph.getModule(dep);
-              });
-              // debugger;
-            });
-          }
+          // if (sharedModulesInContainer) {
+          //   sharedModulesInContainer.forEach((mod) => {
+          //     const sharedModuleDepModule = mod.dependencies.map((dep) => {
+          //       return compilation.moduleGraph.getModule(dep);
+          //     });
+          //     // debugger;
+          //   });
+          // }
 
           const stats = compilation.getStats().toJson({
             all: false,
