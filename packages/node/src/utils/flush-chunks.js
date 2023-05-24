@@ -103,30 +103,13 @@ const processChunk = async (chunk, shareMap, hostStats) => {
       stats.federatedModules.forEach((modules) => {
         // Process exposed modules
         if (modules.exposes?.[request]) {
-          modules.exposes[request].forEach((chunk) => {
+          const shared = shareMap;
+          debugger;
+          modules.exposes[request].files.forEach((chunk) => {
             chunks.add([prefix, chunk].join(''));
-
-            //TODO: reimplement this
-            Object.values(chunk).forEach((chunk) => {
-              // Add files to the chunks set
-              if (chunk.files) {
-                chunk.files.forEach((file) => {
-                  chunks.add(prefix + file);
-                });
-              }
-              // Process required modules
-              if (chunk.requiredModules) {
-                chunk.requiredModules.forEach((module) => {
-                  // Check if the module is in the shareMap
-                  if (shareMap[module]) {
-                    // If the module is from the host, log the host stats
-                    if (shareMap[module][0].startsWith('host__')) {
-                      console.log('host', hostStats);
-                    }
-                  }
-                });
-              }
-            });
+          });
+          modules.exposes[request].requires.forEach((shareKey) => {
+            //deal with shared module lookup
           });
         }
       });

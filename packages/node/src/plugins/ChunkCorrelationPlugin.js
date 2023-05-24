@@ -454,11 +454,24 @@ class FederationStatsPlugin {
 
               if (rootModulesInChunk.includes(exposedResolved[expose])) {
                 const referencedChunks = chunk.getAllReferencedChunks();
+                const sharedModulesInChunk =
+                  compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                    chunk,
+                    'consume-shared'
+                  );
 
                 const currentModule = exposedResolved[expose];
 
-                if (!builtExposes[expose]) builtExposes[expose] = [];
-
+                if (!builtExposes[expose])
+                  builtExposes[expose] = { files: [], requires: [] };
+                if (sharedModulesInChunk) {
+                  builtExposes[expose].requires = [
+                    ...builtExposes[expose].requires,
+                    ...Array.from(sharedModulesInChunk)
+                      .map((m) => m?.options?.shareKey)
+                      .filter((i) => i),
+                  ];
+                }
                 referencedChunks.forEach((chunk) => {
                   const rootReferencesInChunk =
                     compilation.chunkGraph.getChunkRootModules(chunk);
@@ -467,15 +480,35 @@ class FederationStatsPlugin {
                     return mod?.resource?.includes('node_modules');
                   });
 
-                  if (isNodeModule) return;
-                  builtExposes[expose] = [
-                    ...builtExposes[expose],
+                  if (isNodeModule) {
+                    return;
+                  }
+                  builtExposes[expose].files = [
+                    ...builtExposes[expose].files,
                     ...Array.from(chunk.files),
                   ];
                 });
               }
             }
           });
+
+          const sharedModulesInContainer =
+            compilation.chunkGraph.getChunkModulesIterableBySourceType(
+              container,
+              'consume-shared'
+            );
+
+          const arrayOfShare = Array.from(sharedModulesInContainer);
+          debugger;
+
+          if (sharedModulesInContainer) {
+            sharedModulesInContainer.forEach((mod) => {
+              const sharedModuleDepModule = mod.dependencies.map((dep) => {
+                return compilation.moduleGraph.getModule(dep);
+              });
+              // debugger;
+            });
+          }
 
           const stats = compilation.getStats().toJson({
             all: false,
