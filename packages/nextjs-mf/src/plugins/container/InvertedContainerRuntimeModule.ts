@@ -65,7 +65,16 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     const container = this.compilation.entrypoints
       .get(this.options.container as string)
       ?.getRuntimeChunk?.();
-    const entryModule = container?.entryModule;
+    if (!container) return;
+    const entryModules =
+      this.compilation.chunkGraph.getChunkEntryModulesIterable(container);
+
+    let entryModule;
+    for (const module of entryModules) {
+      entryModule = module;
+      break;
+    }
+
     return entryModule;
   }
 
