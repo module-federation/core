@@ -47,7 +47,7 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ steps.effected-projects.outputs.projects }}" ]]; then
-           yarn build:libs && yarn nx run-many --target=build --projects="$PROJECTS"
+           yarn nx run-many --target=build --projects="$PROJECTS"
           else
             echo "No changes, Skipping lint check."
           fi
