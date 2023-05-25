@@ -6,7 +6,7 @@ antora:
       languages: [en, es, zh]
 site:
   title: Module Federation Documentation
-  start_page: ipt::index.adoc
+  start_page: ROOT:getting-started.adoc
 urls:
   html_extension_style: indexify
 content:
@@ -14,11 +14,6 @@ content:
     - url: https://github.com/module-federation/universe
       branches: main
       start_path: apps/docs/src
-    - url: https://github.com/omfgnuts/mf-translations-test.git
-      branches: [main, translated-main]
-      start_path: docs/en
-    - url: https://github.com/omfgnuts/test-component-a.git
-      branches: HEAD
 ui:
   bundle:
     url: ./../../../dist/apps/docs-ui
