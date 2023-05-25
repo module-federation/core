@@ -1,0 +1,158 @@
+= Module Federation Shared API
+
+This documentation page provides an in-depth explanation of the Module Federation Shared API, its configuration options, use cases, and benefits as well as potential downsides. This guide is intended for users looking to optimize the performance of their distributed applications.
+
+== Overview of the Shared API
+
+The Shared API is a part of the Module Federation plugin configuration options. It allows you to pass an array or object called shared containing a list of dependencies that can be shared and used by other federated apps (aka "remotes").
+
+Here's an example of how to use the Shared API in Module Federation:
+
+[,json]
+----
+new ModuleFederationPlugin({
+  name: "host",
+  filename: "remoteEntry.js",
+  remotes: {},
+  exposes: {},
+  shared: [],
+});
+----
+
+== API Definition
+
+- `shared (object | [string])`: An object or Array of strings containing a list of dependencies that can be shared and consumed by other federated apps.
+- `eager (boolean)`: If `true`, the dependency will be eagerly loaded and made available to other federated apps as soon as the host application starts. If `false`, the dependency will be lazily loaded when it is first requested by a federated app.
+- `singleton (boolean)`: If `true`, the dependency will be treated as a singleton, and only a single instance of it will be shared among all federated apps.
+- `requiredVersion (string)`: Specifies the required version of the dependency. If a federated app tries to load an incompatible version of the dependency, two copies will be loaded. If the `singleton` option is set to `true`, a warning will be printed in the console.
+
+== Benefits of Using the Shared API
+
+When using federated modules, they are bundled separately and include all the dependencies they need to function. However, when they're used in a host application, it's possible for multiple copies of the same dependency to be downloaded. This can hurt performance and make users download more JavaScript than necessary.
+
+The Shared API helps prevent this issue by enabling you to avoid downloading multiple copies of the same dependency, ultimately improving the performance of your application.
+
+== Avoiding Duplication
+Consider the following example: you have two modules, Module A and Module B, both of which require lodash to function independently.
+
+When these modules are used in a host application that brings both modules together, the Shared API comes into play. If a preloaded, shared copy of lodash is available, Module A and Module B will use that copy instead of loading their own independent copies. This copy could be loaded by the host or another remote application inside it.
+
+NOTE: Both the remote and host have to add the same dependency in "shared" for it to be available for consumption.
+
+[,js]
+----
+new ModuleFederationPlugin({
+  ...
+  shared: ["lodash"],
+});
+----
+
+== How the Shared API Works
+
+If you are familiar with Dynamic Imports, Module Federation operates similarly; it requests a module and returns a promise that resolves with an object containing all exports from the moduleName declared in the `exposes` object.
+
+The asynchronous nature of Module Federation makes the Shared API highly flexible.
+
+=== Async Dependency Loading
+
+When a module is required, it will load a file called `remoteEntry.js`, listing all the dependencies the module needs. Since this operation is asynchronous, the container can check all the `remoteEntry` files and list all the dependencies that each module has declared in `shared`. Then, the host can load a single copy and share it with all the modules that need it.
+
+Because `shared` relies on an asynchronous operation to inspect and resolve the dependencies, if your application or module loads synchronously and declares a dependency in `shared`, you might encounter the following error:
+
+[,bash]
+----
+Uncaught Error: Shared module is not available for eager consumption
+----
+
+To solve the error above, there are two options:
+
+==== Eager Consumption
+
+[, js]
+----
+new ModuleFederationPlugin({
+  ...
+  shared: { 
+      lodash: {
+          eager: true,
+        },
+  },
+});
+----
+
+Individual dependencies can be marked as `eager: true`. This option doesn't put the dependencies in an async chunk, so they can be provided synchronously. However, this means that those dependencies will always be downloaded, potentially impacting bundle size. The recommended solution is to load your module asynchronously by wrapping it into an async boundary:
+
+==== Using an Async Boundary
+
+NOTE: This only applies to the application's entry point; remote modules consumed via module federation are automatically wrapped in an Async Boundary.
+
+To create an async boundary, use a dynamic import to ensure your entry point runs asynchronously:
+
+`index.js`:
+
+[,js]
+----
+import('./bootstrap.js');
+----
+
+`bootstrap.js`:
+
+[,js]
+----
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+ReactDOM.render(<App />, document.getElementById('root'));
+----
+
+=== Versioning
+
+What happens if two remote modules use different versions of the same dependency?
+
+Module Federation is capable of handling this situation by default. If the semantic version ranges for those dependencies don't match, Module Federation can identify them and provide separate copies. This ensures that you don't accidentally load the wrong version containing breaking changes. While this can cause performance issues due to downloading different versions of a dependency, it prevents your app from breaking.
+
+=== Singleton Loading
+
+To guarantee that only one copy of a given dependency is loaded at all times (e.g., React), pass `singleton: true` to the dependency object:
+
+[, js]
+----
+shared: {
+  react: {
+    singleton: true,
+    requiredVersion: "^18.0.0",
+  },
+  "react-dom": {
+    singleton: true,
+    requiredVersion: "^18.0.0"
+  },
+},
+----
+
+If one of your remote modules tries to load an incompatible dependency version that has been marked as a singleton, Webpack will print a warning in the console. The build will not break, and Webpack will continue to bundle and load your applications. However, the warning serves as a reminder to align your dependencies to avoid potential issues.
+
+== Drawbacks and Compromises
+
+While the Shared API is a powerful tool, it's important to be aware of some potential issues and trade-offs associated with its use.
+
+Here are some issues that you might encounter using the Shared API:
+
+=== Inconsistencies in Dependencies at Runtime
+
+As applications are compiled at different times by distinct Webpack processes, they lack a common dependency graph. As a result, you must depend on Semantic Versioning ranges for deduplication and providing identical dependency versions.
+
+There might be a situation where your remote has been built and tested with version `1.0.0` of a library. However, when the host loads it, the Semantic Versioning Range `^1.0.0` satisfies `1.1.0`, causing the `1.1.0` version to load at runtime in production. This could lead to compatibility issues.
+
+One way to mitigate this risk is by aligning versions to the greatest extent possible (using a monorepo with a single package JSON could be beneficial).
+
+This challenge pertains to our reliance on Semantic Versioning ranges, rather than the Module Federation and Shared API themselves. In distributed systems (akin to microservices), a contract is necessary to ensure system stability and dependability. In the context of the Shared API, the Semantic Version Range serves as the contract (though it may not be the most reliable one).
+
+From our experience, there is no superior alternative for shared dependencies in a distributed frontend application. Despite the Shared API's imperfections, it remains the most effective option currently available.
+
+== Conclusion
+
+In summary, the Module Federation Shared API is a potent instrument for enhancing the performance of distributed applications. It enables dependency sharing across modules, preventing redundant duplication and leading to quicker load times and superior overall performance. Nevertheless, it's crucial to be cognizant of potential issues and compromises, such as inconsistencies in dependencies at runtime. By recognizing these potential challenges and actively working to address them, you can effectively employ the Shared API to optimize your distributed applications.
+
+To make the most of the Shared API, ensure that your team understands its features, limitations, and best practices. Regularly review and update dependencies, align versions, and monitor for potential compatibility issues. By staying proactive in managing these aspects, you can continue to improve the performance and reliability of your distributed applications while minimizing risks associated with dependency management.
+
+In conclusion, while the Module Federation Shared API isn't without its drawbacks, it remains a powerful and valuable tool for developers working with distributed applications. By being aware of its limitations and working diligently to mitigate potential issues, you can harness the full potential of the Shared API to create efficient, high-performance distributed systems.
