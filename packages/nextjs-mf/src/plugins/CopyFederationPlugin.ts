@@ -32,7 +32,7 @@ class CopyBuildOutputPlugin {
       'CopyBuildOutputPlugin',
       (compilation: Compilation, callback: () => void) => {
         const { outputPath } = compiler;
-        const outputString = outputPath.split('.next')[0] + '.next';
+        const outputString = outputPath.split('server')[0];
         const isProd = compiler.options.mode === 'production';
 
         if (!isProd && !this.isServer) {

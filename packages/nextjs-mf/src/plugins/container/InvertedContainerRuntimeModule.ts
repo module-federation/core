@@ -446,7 +446,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                   `var onError = ${runtimeTemplate.basicFunction('error', [
                     'delete installedModules[id];',
                     this.options.debug
-                      ? "console.log('on error',id, error)"
+                      ? "console.error('on error',id, error)"
                       : '',
                     `${
                       RuntimeGlobals.moduleFactories
@@ -674,7 +674,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           `console.error('container does not exist in host runtime graph', ${JSON.stringify(
             containerModuleId
           )});`,
-          `} else { console.log('SHOULD ATTACH CONTAINER'); attachRemote(resolve) } `,
+          `} else { console.debug('SHOULD ATTACH CONTAINER'); attachRemote(resolve) } `,
           '},0)',
         ]),
         '})',
@@ -695,10 +695,10 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
       const browserContainerKickstart = Template.asString([
         '__webpack_require__.own_remote = new Promise(function(resolve,reject){',
-        'console.log("O keys",Object.keys(__webpack_require__.O))',
+        'console.debug("O keys",Object.keys(__webpack_require__.O))',
         "__webpack_require__.O(0, ['webpack'], function() {",
-        "console.log('runtime loaded');",
-        "console.log('replaying all installed chunk requirements');",
+        "console.debug('runtime loaded');",
+        "console.debug('replaying all installed chunk requirements');",
         '__webpack_require__.checkAsyncReqs();',
         'attachRemote(resolve)',
         '},0)',
@@ -715,9 +715,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         '__webpack_require__.rMap = __webpack_require__.rMap || {};',
         '__webpack_require__.reMap = __webpack_require__.reMap || {};',
         '__webpack_require__.installedModules = {};',
-        "console.log('share scope', __webpack_require__.S);",
+        "console.debug('share scope', __webpack_require__.S);",
         `if(${containerScope} === undefined) {
-        console.log('container scope is empty, initializing');
+        console.debug('container scope is empty, initializing');
         ${containerScope} = {_config: {}}
         };`,
         checkForAsyncChunkRequirements,
