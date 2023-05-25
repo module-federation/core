@@ -23,7 +23,7 @@ jobs:
       - run: git fetch --no-tags --prune --depth=5 origin main
         name: Fetch Main branch
       - name: Install packages
-        run: npm i && npm run build:libs && npm i
+        run: npm i && npm run build:libs && cp -rf ./dist/packages/* ./node_modules/@module-federation
       - name: Retrieve effected projects
         id: effected-projects
         run: echo "projects=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)" >> $GITHUB_OUTPUT
