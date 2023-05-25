@@ -34,7 +34,7 @@ jobs:
           key: build-${{ hashFiles('**/package-lock.json') }}
       - name: Install Dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci --legacy-peer-deps
+        run: npm ci
       - name: Check changes "website"
         id: website-changed
         run: echo "website-changed=$(node tools/scripts/ci-is-affected.mjs --appName=website --base=${{ env.BASE_REF}} --head=HEAD)" >> $GITHUB_OUTPUT

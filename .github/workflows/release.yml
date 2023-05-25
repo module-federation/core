@@ -34,7 +34,7 @@ jobs:
           git config user.name "GitHub Bot"
           git config user.email "gituser@example.com"
       - name: Install packages
-        run: npm ci --legacy-peer-deps
+        run: npm ci
       - name: Lint
         shell: bash
         run: |
