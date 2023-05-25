@@ -2,6 +2,16 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.5.2-rc1.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.5.2-rc.0...nextjs-mf-6.5.2-rc1.0) (2023-05-25)
+
+
+### Bug Fixes
+
+*  Improved Entrypoint Module Detection and Refactoring ([#932](https://github.com/module-federation/nextjs-mf/issues/932)) ([d09e841](https://github.com/module-federation/nextjs-mf/commit/d09e841fb2e01300e61c046e18b9d02842920b4a))
+* remove specific module type from package ([ad8caf7](https://github.com/module-federation/nextjs-mf/commit/ad8caf7df575a67a866e882e515d9a4e249f5ad8))
+
+
+
 ## [6.5.2-rc.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.5.1...nextjs-mf-6.5.2-rc.0) (2023-05-23)
 
 
