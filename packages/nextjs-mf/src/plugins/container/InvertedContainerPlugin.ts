@@ -176,15 +176,18 @@ class InvertedContainerPlugin {
           //@ts-ignore
           (source, renderContext) => {
             if (
-              renderContext &&
-              renderContext.constructor.name !== 'NormalModule'
+              !renderContext ||
+              //@ts-ignore
+              renderContext?._name ||
+              !renderContext?.debugId ||
+              !compilation.chunkGraph.isEntryModule(renderContext)
             ) {
+              // skip empty modules, container entry, and anything that doesnt have a moduleid or is not an entrypoint module.
               return source;
             }
 
             const { runtimeTemplate } = compilation;
 
-            const newSource = [];
             const replaceSource = source.source().toString().split('\n');
 
             const searchString = '__webpack_exec__';
