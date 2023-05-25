@@ -9,7 +9,7 @@
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "repository": "https://github.com/module-federation/nextjs-mf",
-  "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
+  "author": "Zack Jackson <zackary.l.jackson@gmail.com> (@ScriptedAlchemy)",
   "contributors": [
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)",
     "Kyle Tsang (https://github.com/kyletsang)"
