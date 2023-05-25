@@ -23,7 +23,7 @@ jobs:
       - run: git fetch --no-tags --prune --depth=5 origin main
         name: Fetch Main branch
       - name: Install packages
-        run: npm i && npm run build:libs && ls && for dir in dist/*/; do cd "$dir" && npm link && cd -; done && cd ../../ && npm install
+        run: npm i && npm run build:libs && ls && for dir in dist/*/; do cd "$dir" && npm link && cd -; done && cd ../../ && ls && npm install
       - name: Retrieve effected projects
         id: effected-projects
         run: echo "projects=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)" >> $GITHUB_OUTPUT
