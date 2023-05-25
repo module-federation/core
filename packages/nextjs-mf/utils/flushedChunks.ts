@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export const FlushedChunks = ({ chunks }: FlushedChunksProps) => {
+export const FlushedChunks = ({ chunks = [] }: FlushedChunksProps) => {
   const scripts = chunks
     .filter((c) => {
       // TODO: host shouldnt flush its own remote out
@@ -40,10 +40,6 @@ export const FlushedChunks = ({ chunks }: FlushedChunksProps) => {
 
   return React.createElement(React.Fragment, null, css, scripts);
 };
-
-FlushedChunks.defaultProps = {
-  chunks: [],
-} as FlushedChunksProps;
 
 export interface FlushedChunksProps {
   chunks: string[];
