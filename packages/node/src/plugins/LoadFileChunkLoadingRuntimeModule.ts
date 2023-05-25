@@ -127,7 +127,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
           }
         }
       }
-      console.log('initialChunkIds', initialChunkIds);
       return initialChunkIds;
     };
 
