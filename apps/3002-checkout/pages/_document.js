@@ -1,8 +1,10 @@
 import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import { revalidate, FlushedChunks } from '@module-federation/nextjs-mf/utils';
-import { usedChunks, flushChunks } from '@module-federation/node/utils';
+import {
+  revalidate,
+  FlushedChunks,
+  flushChunks,
+} from '@module-federation/nextjs-mf/utils';
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
