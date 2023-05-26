@@ -494,9 +494,6 @@ class FederationStatsPlugin {
                   ...(exposedChunk.files || []),
                 ];
               }
-
-              // Add the module to the 'exposedResolved' object under the name of the exposed module.
-              exposedResolved[dep.exposedName] = module;
             }
           }
 
