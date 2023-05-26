@@ -102,40 +102,49 @@ export function calculateCircleArea(radius) {
 
 - Avoid using default exports for your modules. Default exports are anonymous and can be imported with any name. This can lead to confusion and inconsistency when importing modules from different sources. For example, if you have a module that exports a React component as the default export, you can import it like this:
 
+
+[tabs]
+======
+Approach 1::
++
 [source, javascript]
 -----
 import MyComponent from "my-app/components";
 -----
 
-Or like this:
-
+Approach 2::
++
 [source, javascript]
 -----
 import Foo from "my-app/components";
 -----
 
-Or like this:
-
+Approach 3::
++
 [source, javascript]
 -----
 import Bar from "my-app/components";
 -----
+======
 
-As you can see, the name of the import does not match the name of the module or the component. This can make it hard to track where the component comes from and what it does. Instead, use named exports for your modules and import them with the same name. For example, if you have a module that exports a React component as a named export, you can export it like this:
+As you can see, the name of the import does not match the name of the module or the component. This can make it hard to track where the component comes from and what it does. Instead, use named exports for your modules and import them with the same name. For example, if you have a module that exports a React component as a named export, you can export and import it like the following:
 
+[tabs]
+======
+Export::
++
 [source, javascript]
 -----
-export function MyComponent(props) {
-  // ...
-}
+import MyComponent from "my-app/components";
 -----
 
-And import it like this:
-
+Import::
++
 [source, javascript]
 -----
 import { MyComponent } from "my-app/components";
 -----
+======
 
 This way, the name of the import matches the name of the module and the component. This will make your code more readable and maintainable.
 
@@ -147,19 +156,24 @@ Webpack provides some options to handle naming collisions and resolve them in a 
 
 - Use aliases to rename modules or exports when importing them. Aliases are alternative names that you can assign to modules or exports when importing them. This can help you avoid conflicts and confusion when dealing with modules or exports that have the same or similar names. For example, suppose you want to import two modules that both expose a `utils` module. You can use aliases to rename one of them when importing it, like this:
 
+[tabs]
+======
+Approach 1::
++
 [source, javascript]
 -----
 import utils from "my-app/utils"; // Import utils from my-app
 import otherUtils as "other-app/utils"; // Import utils from other-app and rename it as otherUtils
 -----
 
-Or like this:
-
+Approach 2::
++
 [source, javascript]
 -----
 import { utils as myUtils } from "my-app/utils"; // Import utils from my-app and rename it as myUtils
 import { utils as otherUtils } from "other-app/utils"; // Import utils from other-app and rename it as otherUtils
 -----
+======
 
 This way, you can avoid naming collisions and use both modules without confusion.
 

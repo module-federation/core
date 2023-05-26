@@ -72,8 +72,11 @@ In this scenario, there are two aspects to test:
 
 To enable federated unit testing, create test builds for each repository involved in the federation. In this example, we create test builds for both the `form_app` and the `dsl` repositories:
 
-==== // form_app repository
-[, javascript]
+[tabs]
+======
+form_app repository::
++
+[source, javascript]
 ----
 new ModuleFederationPlugin({
   name: "form_app",
@@ -95,8 +98,9 @@ new ModuleFederationPlugin({
 });
 ----
 
-==== // dsl repository
-[, javascript]
+dsl repository::
++
+[source, javascript]
 ----
 new ModuleFederationPlugin({
   name: "dsl",
@@ -111,6 +115,7 @@ new ModuleFederationPlugin({
   },
 });
 ----
+=====
 
 Both Button and Form are exposed for liability testing.
 
