@@ -46,7 +46,7 @@ export const revalidate = () => {
       const fetches = [];
       for (const property in remoteScope) {
         if (remoteScope[property].fake) {
-          console.log(
+          console.error(
             'unreachable remote found',
             property,
             'hot reloading to refetch'
