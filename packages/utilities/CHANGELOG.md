@@ -11,6 +11,15 @@ This file was generated using [@jscutlery/semver](https://github.com/jscutlery/s
 
 
 
+## [1.8.1-rc.2](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.1-rc1.0...utils-1.8.1-rc.2) (2023-05-26)
+
+
+### Bug Fixes
+
+* Improve chunk correlation ([#936](https://github.com/module-federation/nextjs-mf/issues/936)) ([4dad1eb](https://github.com/module-federation/nextjs-mf/commit/4dad1eb370feacd6ecb4c1726c435d5c579f424d))
+
+
+
 ## [1.8.1-rc1.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.1-rc.1...utils-1.8.1-rc1.0) (2023-05-25)
 
 
