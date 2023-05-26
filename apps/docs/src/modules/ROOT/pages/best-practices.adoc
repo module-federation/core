@@ -68,36 +68,6 @@ To more easily use Module Federation, it is important to document shared modules
 
 By designing clear and comprehensive documentation for shared modules, developers can more easily understand how different modules communicate with each other, and how data is passed between different applications. This can help to reduce errors and improve maintainability.
 
-[tabs]
-====
-Angular::
-+
---
-[tabs]
-======
-XML::
-+
-[,xml]
-----
-<root/>
-----
-
-TS::
-+
-[,ts]
-----
-loadData()
-----
-======
---
-Plain::
-+
-[,ts]
-----
-loadData()
-----
-====
-
 == Conclusion
 
 Designing an application to more easily use Module Federation requires careful planning and consideration. By adopting a modular architecture, establishing clear versioning and compatibility strategies, organizing code effectively, and managing dependencies, developers can create applications that are well-suited for sharing modules between different applications using Module Federation. By following these best practices and tips, developers can take full advantage of the power and flexibility of Module Federation to create more modular and flexible web applications.
