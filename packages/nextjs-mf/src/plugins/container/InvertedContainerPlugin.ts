@@ -100,24 +100,6 @@ class InvertedContainerPlugin {
           handler
         );
 
-        if (this.options.debug) {
-          compilation.hooks.afterOptimizeChunkModules.tap(
-            'InvertedContainerPlugin',
-            (chunks, modules) => {
-              for (const chunk of chunks) {
-                if (
-                  chunk.hasRuntime() &&
-                  chunk.name === this.options?.container
-                ) {
-                  const getmodules = chunk.getModules();
-
-                  console.log(getmodules.length, chunk.name);
-                }
-              }
-            }
-          );
-        }
-
         compilation.hooks.optimizeChunks.tap(
           'InvertedContainerPlugin',
           (chunks) => {

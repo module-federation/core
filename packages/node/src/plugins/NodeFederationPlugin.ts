@@ -89,7 +89,7 @@ export const generateRemoteTemplate = (
     return {
       fake: true,
       get: (arg) => {
-        console.log('faking', arg, 'module on', ${JSON.stringify(global)});
+        console.warn('faking', arg, 'module on', ${JSON.stringify(global)});
 
         return Promise.resolve(() => {
           return () => null

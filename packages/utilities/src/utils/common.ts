@@ -227,7 +227,7 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         fake: true,
         // @ts-ignore
         get: (arg) => {
-          console.log('faking', arg, 'module on, its offline');
+          console.warn('faking', arg, 'module on, its offline');
 
           return Promise.resolve(() => {
             return {
@@ -385,7 +385,7 @@ export const getModule = async ({
       return mod;
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return undefined;
   }
 };

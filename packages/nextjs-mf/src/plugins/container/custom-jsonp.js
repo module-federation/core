@@ -22,7 +22,7 @@ __webpack_require__.checkAsyncReqs();
     return Promise.all(__webpack_require__.initConsumes).then(function(){
       return Promise.all(__webpack_require__.initRemotes)
     }).then(function () {
-        console.log('init operation completed');
+        console.debug('init operation completed');
         for (let q in chunkQueue) {
          __webpack_require__.getEagerSharedForChunkId(chunkQueue[q][0],__webpack_require__.initConsumes)
          __webpack_require__.getEagerRemotesForChunkId(chunkQueue[q][0],__webpack_require__.initRemotes)
@@ -39,16 +39,15 @@ __webpack_require__.checkAsyncReqs();
 
     })
     .then(function () {
-      console.log('webpack is done negotiating dependency trees');
-      console.log(
+      console.debug(
         'number of entry points to invert startup',
         chunkQueue.length
       );
-      console.log('startup inversion in progress', chunkQueue);
+      console.debug('startup inversion in progress', chunkQueue);
 
       function runCallback(queueArgs) {
          Promise.all(__webpack_require__.initConsumes).then(function() {
-          console.log('Pushing deferred chunk into runtime:', queueArgs[0]);
+          console.debug('Pushing deferred chunk into runtime:', queueArgs[0]);
           webpackJsonpCallback.apply(null, [null].concat(Array.prototype.slice.call([queueArgs])));
           originalPush.apply(originalPush, [queueArgs]);
           if(chunkQueue.length === 0) {
@@ -68,7 +67,7 @@ asyncOperation(chunkLoadingGlobal.push.bind(chunkLoadingGlobal))
 
 var currentChunkId = "__INSERT_CH_ID__MF__";
 __webpack_require__.O(null, [currentChunkId], function () {
-  console.log('clearing resolved', currentChunkId)
+  console.debug('clearing resolved', currentChunkId)
   // cleanInitArrays(__webpack_require__.initConsumes);
   // cleanInitArrays(__webpack_require__.initRemotes);
 },5);
@@ -76,7 +75,7 @@ __webpack_require__.O(null, [currentChunkId], function () {
 chunkLoadingGlobal.push = (function (originalPush) {
   return function () {
   const chunkID = arguments[0][0];
-  console.log('original push', chunkID);
+  console.debug('original push', chunkID);
 
    __webpack_require__.getEagerSharedForChunkId(chunkID,__webpack_require__.initConsumes)
       __webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRemotes)
@@ -84,7 +83,7 @@ chunkLoadingGlobal.push = (function (originalPush) {
 __webpack_require__.O(null, ['webpack'], function () {
       __webpack_require__.getEagerSharedForChunkId(chunkID,__webpack_require__.initConsumes)
       __webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRemotes)
-console.log('webpack runtime loaded freom entry signal;', chunkID)
+console.debug('webpack runtime loaded freom entry signal;', chunkID)
 },0)
 __webpack_require__.O(null, [chunkID], function () {
       __webpack_require__.getEagerSharedForChunkId(chunkID,__webpack_require__.initConsumes)
@@ -94,7 +93,7 @@ __webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRe
 },0);
 
     if (!__webpack_require__.S.default) {
-      console.log(
+      console.debug(
         '%cshare is blank: %s',
         'color: red; font-size: 20px;',
         !__webpack_require__.S.default
@@ -102,14 +101,14 @@ __webpack_require__.getEagerRemotesForChunkId(chunkID,__webpack_require__.initRe
     }
 
     if (typeof arguments[0][2] === 'function') {
-    console.log('queueing chunk', arguments[0][0]);
+    console.debug('queueing chunk', arguments[0][0]);
       chunkTracker = Array.prototype.concat.apply(chunkTracker, arguments[0][0]);
       var pushEvent = Array.prototype.push.apply(chunkQueue, arguments);
       return asyncOperation(originalPush);
     }
 
-    console.log('queue size:', chunkQueue.length);
-    console.log('pushing chunk into webpack runtime:', arguments[0][0]);
+    console.debug('queue size:', chunkQueue.length);
+    console.debug('pushing chunk into webpack runtime:', arguments[0][0]);
     webpackJsonpCallback.apply(
       null,
       [null].concat(Array.prototype.slice.call(arguments))
