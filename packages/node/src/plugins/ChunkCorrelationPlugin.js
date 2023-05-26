@@ -415,7 +415,7 @@ class FederationStatsPlugin {
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
       // 'processAssets' is a hook that gets triggered when Webpack has finished the compilation
       // and is about to generate the final assets. It allows plugins to do additional processing on the assets.
-      compilation.hooks.processAssets.tapAsync(
+      compilation.hooks.processAssets.tap(
         {
           name: PLUGIN_NAME,
           stage: compilation.constructor.PROCESS_ASSETS_STAGE_REPORT,
@@ -463,9 +463,10 @@ class FederationStatsPlugin {
             for (const dep of blockmodule.dependencies) {
               // Get the module that corresponds to the dependency.
               const { module } = compilation.moduleGraph.getConnection(dep);
-
+              const moduleChunks =
+                compilation.chunkGraph.getModuleChunksIterable(module);
               // Iterate over each chunk associated with the module.
-              for (let exposedChunk of module.chunksIterable) {
+              for (let exposedChunk of moduleChunks) {
                 // Determine the runtime for the chunk.
                 const runtime =
                   typeof exposedChunk.runtime === 'string'
@@ -492,9 +493,6 @@ class FederationStatsPlugin {
                   ...(builtExposes[dep.exposedName] || []),
                   ...(exposedChunk.files || []),
                 ];
-
-                // Once a file is found, we can break out of the loop as we're only interested in the first file.
-                break;
               }
 
               // Add the module to the 'exposedResolved' object under the name of the exposed module.
