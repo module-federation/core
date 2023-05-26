@@ -33,7 +33,11 @@ Another way to set the public path dynamically is to use a custom entry point in
 
 For example:
 
-[, js]
+[tabs]
+======
+entry.js::
++
+[source, js]
 ----
 // entry.js
 // Import a module that sets the public path
@@ -42,14 +46,18 @@ import "./set-public-path.js";
 import "./app.js";
 ----
 
-[, js]
+set-public-path.js::
++
+[source, js]
 ----
 // set-public-path.js
 // Set the public path based on some logic or environment variables
 __webpack_public_path__ = process.env.PUBLIC_PATH || "https://example.com/remote/";
 ----
 
-[, js]
+webpack.config.js::
++
+[source, js]
 ----
 // webpack.config.js
 module.exports = {
@@ -58,6 +66,7 @@ module.exports = {
   // Other configuration options...
 };
 ----
+======
 
 This approach has the advantage of being more flexible and robust, as it allows setting the public path based on any logic or environment variables. It also works well with code splitting or lazy loading, as the public path is set before any remote module is loaded. However, it has some drawbacks:
 
@@ -76,7 +85,11 @@ To use startup code, we need to do the following steps:
 
 For example, let's say we have a remote container named "app1" that exposes some modules. We want to set its public path based on an environment variable called `PUBLIC_PATH`. Here is how we can use startup code to achieve this:
 
-[, js]
+[tabs]
+======
+entry.js::
++
+[source, js]
 ----
 // entry.js
 // Import a module that sets the public path
@@ -84,14 +97,18 @@ import "./set-public-path.js";
 // Import other modules as usual import "./app.js";
 ----
 
-[, js]
+set-public-path.js::
++
+[source, js]
 ----
 // set-public-path.js
 // Set the public path based on an environment variable
 __webpack_public_path__ = process.env.PUBLIC_PATH || "https://example.com/remote/";
 ----
 
-[, js]
+webpack.config.js::
++
+[source, js]
 ----
 // webpack.config.js
 module.exports = {
@@ -132,6 +149,7 @@ module.exports = {
   ],
 };
 ----
+======
 
 This way, we can set the public path of app1 dynamically at runtime based on the PUBLIC_PATH environment variable. If it is not defined, we fall back to a default value of "https://example.com/remote/".
 

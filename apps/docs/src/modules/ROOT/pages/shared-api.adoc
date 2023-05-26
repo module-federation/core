@@ -8,7 +8,7 @@ The Shared API is a part of the Module Federation plugin configuration options. 
 
 Here's an example of how to use the Shared API in Module Federation:
 
-[,json]
+[source, json]
 ----
 new ModuleFederationPlugin({
   name: "host",
@@ -39,7 +39,7 @@ When these modules are used in a host application that brings both modules toget
 
 NOTE: Both the remote and host have to add the same dependency in "shared" for it to be available for consumption.
 
-[,js]
+[source, js]
 ----
 new ModuleFederationPlugin({
   ...
@@ -59,7 +59,7 @@ When a module is required, it will load a file called `remoteEntry.js`, listing 
 
 Because `shared` relies on an asynchronous operation to inspect and resolve the dependencies, if your application or module loads synchronously and declares a dependency in `shared`, you might encounter the following error:
 
-[,bash]
+[source, bash]
 ----
 Uncaught Error: Shared module is not available for eager consumption
 ----
@@ -68,7 +68,7 @@ To solve the error above, there are two options:
 
 ==== Eager Consumption
 
-[, js]
+[source,  js]
 ----
 new ModuleFederationPlugin({
   ...
@@ -88,22 +88,25 @@ NOTE: This only applies to the application's entry point; remote modules consume
 
 To create an async boundary, use a dynamic import to ensure your entry point runs asynchronously:
 
-`index.js`:
-
-[,js]
+[tabs]
+======
+index.js::
++
+[source, js]
 ----
 import('./bootstrap.js');
 ----
 
-`bootstrap.js`:
-
-[,js]
+bootstrap.js::
++
+[source, js]
 ----
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 ReactDOM.render(<App />, document.getElementById('root'));
 ----
+=====
 
 === Versioning
 
@@ -115,7 +118,7 @@ Module Federation is capable of handling this situation by default. If the seman
 
 To guarantee that only one copy of a given dependency is loaded at all times (e.g., React), pass `singleton: true` to the dependency object:
 
-[, js]
+[source,  js]
 ----
 shared: {
   react: {
