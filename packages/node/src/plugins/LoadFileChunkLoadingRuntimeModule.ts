@@ -331,7 +331,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             /*
                       TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise() global will/should still exist - but can only be known at runtime
                     */
-                            "console.log('global.__remote_scope__', global.__remote_scope__['checkout'])",
+                            "console.debug('global.__remote_scope__', global.__remote_scope__['checkout'])",
                             this._getLogger(
                               `'remotes keyed by global name'`,
                               JSON.stringify(remotesByType.normal)
@@ -389,7 +389,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             // `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
                             // since im looping over remote and creating global at build time, i dont need to split string at runtime
                             // there may still be a use case for that with promise new promise, depending on how we design it.
-                            `console.log('requestedRemote',requestedRemote, "CURRENT NAME",${JSON.stringify(
+                            `console.debug('requestedRemote',requestedRemote, "CURRENT NAME",${JSON.stringify(
                               name
                             )});`,
                             `var scriptUrl = new URL(requestedRemote);`,
@@ -444,7 +444,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
         ? Template.asString([
             'module.exports = __webpack_require__;',
             `${RuntimeGlobals.externalInstallChunk} = function(){
-            console.log('node: webpack installing to install chunk id:', arguments['0'].id);
+            console.debug('node: webpack installing to install chunk id:', arguments['0'].id);
             return installChunk.apply(this, arguments)
             };`,
           ])

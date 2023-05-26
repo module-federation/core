@@ -36,7 +36,7 @@ export const getRuntimeRemotes = () => {
       // we dont know or currently support this type
       else {
         //@ts-ignore
-        console.log('remotes process', process.env.REMOTES);
+        console.warn('remotes process', process.env.REMOTES);
         throw new Error(
           `[mf] Invalid value received for runtime_remote "${key}"`
         );
