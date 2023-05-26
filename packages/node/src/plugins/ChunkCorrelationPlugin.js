@@ -410,73 +410,99 @@ class FederationStatsPlugin {
       console.error('No ModuleFederationPlugin(s) found.');
       return;
     }
-    let alreadyRun = false;
+    // This is where the plugin is tapping into the Webpack compilation lifecycle.
+    // It's listening to the 'thisCompilation' event, which is triggered once for each new compilation.
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
-      compilation.hooks.processAssets.tap(
+      // 'processAssets' is a hook that gets triggered when Webpack has finished the compilation
+      // and is about to generate the final assets. It allows plugins to do additional processing on the assets.
+      compilation.hooks.processAssets.tapAsync(
         {
           name: PLUGIN_NAME,
           stage: compilation.constructor.PROCESS_ASSETS_STAGE_REPORT,
         },
-        // PLUGIN_NAME,
         async () => {
-          const [federationOpts] = federationPlugins.map((federationPlugin) => {
-            return federationPlugin?._options;
-          });
+          // Extract the options from the federation plugins.
+          const [federationOpts] = federationPlugins.map(
+            (federationPlugin) => federationPlugin?._options
+          );
+
           let container;
+          // Loop through all entry points and if one matches the name of a federation plugin,
+          // store the entry point in the 'container' variable.
           for (const [name, entry] of compilation.entrypoints) {
             if (container) break;
             federationOpts.name.includes(name) && (container = entry);
           }
+
+          // If no matching entry point was found, exit the function early.
           if (!container) return;
 
+          // Get the chunk associated with the entry point.
           container = container?.getEntrypointChunk();
 
+          // Get the module associated with the chunk.
           const [containerEntryModule] = Array.from(
             compilation.chunkGraph.getChunkEntryModulesIterable(container)
           );
+
+          // Construct an object where the keys are the names of the exposed modules and the values are their options.
           const exposedObj = Object.fromEntries(containerEntryModule._exposes);
+
           const moduleMap = {};
-          for (let mod of compilation.modules) {
-            if (mod.rawRequest) moduleMap[mod.rawRequest] = mod;
-          }
+
+          const blocks = containerEntryModule.blocks;
+
           const exposedResolved = {};
-
-          for (let exposed in exposedObj) {
-            exposedResolved[exposed] = moduleMap[exposedObj[exposed].import];
-          }
-
           const builtExposes = {};
 
-          container.getAllAsyncChunks().forEach((chunk) => {
-            for (let expose in exposedResolved) {
-              const rootModulesInChunk =
-                compilation.chunkGraph.getChunkRootModules(chunk);
+          // Iterate over each dependency block associated with the entry module.
+          for (let block of blocks) {
+            const blockmodule = block;
 
-              if (rootModulesInChunk.includes(exposedResolved[expose])) {
-                const referencedChunks = chunk.getAllReferencedChunks();
+            // Iterate over each dependency within the block.
+            for (const dep of blockmodule.dependencies) {
+              // Get the module that corresponds to the dependency.
+              const { module } = compilation.moduleGraph.getConnection(dep);
 
-                const currentModule = exposedResolved[expose];
+              // Iterate over each chunk associated with the module.
+              for (let exposedChunk of module.chunksIterable) {
+                // Determine the runtime for the chunk.
+                const runtime =
+                  typeof exposedChunk.runtime === 'string'
+                    ? new Set([exposedChunk.runtime])
+                    : exposedChunk.runtime;
 
-                if (!builtExposes[expose]) builtExposes[expose] = [];
+                // Check if the chunk is meant for the same runtime as the entry module.
+                const isForThisRuntime = runtime.has(
+                  containerEntryModule._name
+                );
 
-                referencedChunks.forEach((chunk) => {
-                  const rootReferencesInChunk =
-                    compilation.chunkGraph.getChunkRootModules(chunk);
-                  const isNodeModule = rootReferencesInChunk.some((mod) => {
-                    if (mod.rootModule) mod = mod.rootModule;
-                    return mod?.resource?.includes('node_modules');
-                  });
+                // Get the root modules for the chunk.
+                const rootModules =
+                  compilation.chunkGraph.getChunkRootModules(exposedChunk);
 
-                  if (isNodeModule) return;
-                  builtExposes[expose] = [
-                    ...builtExposes[expose],
-                    ...Array.from(chunk.files),
-                  ];
-                });
+                // Check if the module associated with the dependency is one of the root modules for the chunk.
+                const moduleActuallyNeedsChunk = rootModules.includes(module);
+
+                // If the chunk is not meant for this runtime or the module doesn't need the chunk, skip the rest of this iteration.
+                if (!isForThisRuntime || !moduleActuallyNeedsChunk) continue;
+
+                // Add the files associated with the chunk to the 'builtExposes' object under the name of the exposed module.
+                builtExposes[dep.exposedName] = [
+                  ...(builtExposes[dep.exposedName] || []),
+                  ...(exposedChunk.files || []),
+                ];
+
+                // Once a file is found, we can break out of the loop as we're only interested in the first file.
+                break;
               }
-            }
-          });
 
+              // Add the module to the 'exposedResolved' object under the name of the exposed module.
+              exposedResolved[dep.exposedName] = module;
+            }
+          }
+
+          // Generate a JSON object that contains detailed information about the compilation.
           const stats = compilation.getStats().toJson({
             all: false,
             assets: true,
@@ -496,31 +522,53 @@ class FederationStatsPlugin {
             publicPath: true,
           });
 
+          // Apply a function 'getFederationStats' on the stats with the federation plugin options as the second argument.
           const federatedModules = getFederationStats(stats, federationOpts);
 
+          // Assign the 'builtExposes' object to the 'exposes' property of the 'federatedModules' object.
           federatedModules.exposes = builtExposes;
 
+          // Apply a function 'getMainSharedModules' on the stats.
           const sharedModules = getMainSharedModules(stats);
+
+          // Create a Set to hold the vendor chunks.
           const vendorChunks = new Set();
-          sharedModules.forEach((share) => {
-            share?.chunks?.forEach((file) => {
-              vendorChunks.add(file);
-            });
-          });
+
+          // Iterate over the shared modules.
+          for (const share of sharedModules) {
+            if (share?.chunks) {
+              // If a shared module has chunks, add them to the 'vendorChunks' Set.
+              for (const file of share.chunks) {
+                vendorChunks.add(file);
+              }
+            }
+          }
+
+          // Construct an object that contains the shared and federated modules.
           const statsResult = {
             sharedModules,
             federatedModules: [federatedModules],
           };
 
+          // Convert the 'statsResult' object to a JSON string.
           const statsJson = JSON.stringify(statsResult);
+
+          // Convert the JSON string to a buffer.
           const statsBuffer = Buffer.from(statsJson, 'utf-8');
+
+          // Construct an object that represents the source of the final asset.
           const statsSource = {
             source: () => statsBuffer,
             size: () => statsBuffer.length,
           };
 
+          // Get the filename of the final asset from the plugin options.
           const { filename } = this._options;
+
+          // Check if an asset with the same filename already exists.
           const asset = compilation.getAsset(filename);
+
+          // If an asset with the same filename already exists, update it. Otherwise, create a new asset.
           if (asset) {
             compilation.updateAsset(filename, statsSource);
           } else {
