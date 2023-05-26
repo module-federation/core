@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.15.2-beta.0](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-rc1.0...node-0.15.2-beta.0) (2023-05-26)
+
+
+### Bug Fixes
+
+* Improve chunk correlation ([#936](https://github.com/module-federation/nextjs-mf/issues/936)) ([4dad1eb](https://github.com/module-federation/nextjs-mf/commit/4dad1eb370feacd6ecb4c1726c435d5c579f424d))
+
+
+
 ## [0.15.2-rc1.0](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-rc.0...node-0.15.2-rc1.0) (2023-05-25)
 
 

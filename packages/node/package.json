@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "0.15.2-rc1.0",
+  "version": "0.15.2-beta.0",
   "main": "src/index.js",
   "exports": {
     ".": {
