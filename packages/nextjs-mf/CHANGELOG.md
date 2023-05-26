@@ -2,6 +2,21 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.5.2-beta.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.5.2-rc1.0...nextjs-mf-6.5.2-beta.0) (2023-05-26)
+
+
+### Bug Fixes
+
+* Improve chunk correlation ([#936](https://github.com/module-federation/nextjs-mf/issues/936)) ([4dad1eb](https://github.com/module-federation/nextjs-mf/commit/4dad1eb370feacd6ecb4c1726c435d5c579f424d))
+* remove default props deprecation on flush chunks ([103fa91](https://github.com/module-federation/nextjs-mf/commit/103fa910d39e25d283076755a2eedf4e926ba242))
+
+
+### Features
+
+* support custom distDir ([3d8d540](https://github.com/module-federation/nextjs-mf/commit/3d8d5408f73be9b8798f02fbd2382457510fdc3f))
+
+
+
 ## [6.5.2-rc1.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.5.2-rc.0...nextjs-mf-6.5.2-rc1.0) (2023-05-25)
 
 
