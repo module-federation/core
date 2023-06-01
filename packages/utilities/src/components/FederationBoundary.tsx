@@ -1,6 +1,5 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, lazy } from 'react';
 import type { ComponentClass, ComponentType, PropsWithChildren } from 'react';
-import dynamic from 'next/dynamic';
 import ErrorBoundary from './ErrorBoundary';
 
 /**
@@ -32,15 +31,18 @@ const FederationBoundary: React.FC<FederationBoundaryProps> = ({
   ...rest
 }) => {
   const ImportResult = useMemo(() => {
-    return dynamic(
-      () =>
-        dynamicImporter().catch((e: Error) => {
+    return lazy(() =>
+      dynamicImporter()
+        .catch((e: Error) => {
           console.error(e);
           return fallback();
-        }),
-      {
-        ssr: false,
-      }
+        })
+        .then((m) => {
+          return {
+            //@ts-ignore
+            default: m.default || m,
+          };
+        })
     );
   }, [dynamicImporter, fallback]);
 
