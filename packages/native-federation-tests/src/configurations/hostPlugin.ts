@@ -6,8 +6,13 @@ const defaultOptions = {
   deleteTestsFolder: true
 }
 
+const retrieveRemoteStringUrl = (remote: string) => {
+  const splittedRemote = remote.split('@')
+  return splittedRemote[splittedRemote.length - 1]
+}
+
 const buildZipUrl = (hostOptions: Required<HostOptions>, remote: string) => {
-  const remoteStringUrl = remote.split('@').at(-1)!
+  const remoteStringUrl = retrieveRemoteStringUrl(remote)
   const remoteUrl = new URL(remoteStringUrl)
 
   const pathnameWithoutEntry = remoteUrl.pathname.split('/').slice(0, -1).join('/')
