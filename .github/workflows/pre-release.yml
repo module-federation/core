@@ -41,7 +41,7 @@ jobs:
           if [[ "${{ steps.effected-projects.outputs.projects }}" ]]; then
             yarn nx run-many --target=test --projects="$PROJECTS"
           else
-            echo "No changes, Skipping lint check."
+            echo "No changes, Skipping tests."
           fi
       - name: Build
         shell: bash
@@ -49,5 +49,5 @@ jobs:
           if [[ "${{ steps.effected-projects.outputs.projects }}" ]]; then
             yarn nx run-many --target=build --projects="$PROJECTS"
           else
-            echo "No changes, Skipping lint check."
+            echo "No changes, Skipping build."
           fi
