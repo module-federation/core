@@ -331,7 +331,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             /*
                       TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise() global will/should still exist - but can only be known at runtime
                     */
-                            "console.debug('global.__remote_scope__', global.__remote_scope__['checkout'])",
                             this._getLogger(
                               `'remotes keyed by global name'`,
                               JSON.stringify(remotesByType.normal)
@@ -389,9 +388,12 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             // `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
                             // since im looping over remote and creating global at build time, i dont need to split string at runtime
                             // there may still be a use case for that with promise new promise, depending on how we design it.
-                            `console.debug('requestedRemote',requestedRemote, "CURRENT NAME",${JSON.stringify(
-                              name
-                            )});`,
+                            this._getLogger(
+                              '"requestedRemote"',
+                              'requestedRemote',
+                              'current name',
+                              JSON.stringify(name)
+                            ),
                             `var scriptUrl = new URL(requestedRemote);`,
 
                             this._getLogger(
