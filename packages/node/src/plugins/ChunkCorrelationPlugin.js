@@ -420,7 +420,7 @@ class FederationStatsPlugin {
           name: PLUGIN_NAME,
           stage: compilation.constructor.PROCESS_ASSETS_STAGE_REPORT,
         },
-        async () => {
+        () => {
           // Extract the options from the federation plugins.
           const [federationOpts] = federationPlugins.map(
             (federationPlugin) => federationPlugin?._options

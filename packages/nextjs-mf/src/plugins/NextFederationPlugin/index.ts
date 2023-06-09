@@ -17,6 +17,7 @@ import {
   applyRemoteDelegates,
   getModuleFederationPluginConstructor,
   retrieveDefaultShared,
+  applyPathFixes,
 } from './next-fragments';
 
 import { parseRemotes } from '../../internal';
@@ -97,8 +98,8 @@ export class NextFederationPlugin {
     } else {
       applyClientPlugins(compiler, this._options, this._extraOptions);
     }
-    //@ts-ignore
-    //compiler.options.module.parser.javascript.importMeta = false;
+
+    applyPathFixes(compiler, this._extraOptions);
 
     // @ts-ignore
     const hostFederationPluginOptions: ModuleFederationPluginOptions = {
@@ -122,8 +123,9 @@ export class NextFederationPlugin {
       },
     };
 
-    compiler.options.devtool = false;
-
+    if (this._extraOptions.debug) {
+      compiler.options.devtool = false;
+    }
     compiler.options.output.uniqueName = this._options.name;
 
     // inject module hoisting system

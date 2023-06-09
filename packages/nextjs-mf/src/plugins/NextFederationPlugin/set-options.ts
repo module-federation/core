@@ -30,6 +30,7 @@ export function setOptions(options: NextFederationPluginOptions): {
     enableImageLoaderFix: false,
     enableUrlLoaderFix: false,
     skipSharingNextInternals: false,
+    debug: false,
   };
 
   return {
