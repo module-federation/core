@@ -674,7 +674,12 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           `console.error('container does not exist in host runtime graph', ${JSON.stringify(
             containerModuleId
           )});`,
-          `} else { console.debug('SHOULD ATTACH CONTAINER'); attachRemote(resolve) } `,
+          `} else { `,
+          this.options.debug
+            ? `console.debug('SHOULD ATTACH CONTAINER'); `
+            : '',
+          'attachRemote(resolve)',
+          `} `,
           '},0)',
         ]),
         '})',
@@ -695,10 +700,13 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
       const browserContainerKickstart = Template.asString([
         '__webpack_require__.own_remote = new Promise(function(resolve,reject){',
-        'console.debug("O keys",Object.keys(__webpack_require__.O))',
+        this.options.debug
+          ? 'console.debug("O keys",Object.keys(__webpack_require__.O))'
+          : '',
         "__webpack_require__.O(0, ['webpack'], function() {",
-        "console.debug('runtime loaded');",
-        "console.debug('replaying all installed chunk requirements');",
+        this.options.debug
+          ? "console.debug('runtime loaded, replaying all installed chunk requirements');"
+          : '',
         '__webpack_require__.checkAsyncReqs();',
         'attachRemote(resolve)',
         '},0)',
@@ -715,10 +723,14 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         '__webpack_require__.rMap = __webpack_require__.rMap || {};',
         '__webpack_require__.reMap = __webpack_require__.reMap || {};',
         '__webpack_require__.installedModules = {};',
-        "console.debug('share scope', __webpack_require__.S);",
-        `if(${containerScope} === undefined) {
-        console.debug('container scope is empty, initializing');
-        ${containerScope} = {_config: {}}
+        this.options.debug
+          ? "console.debug('share scope', __webpack_require__.S);"
+          : '',
+        `if(${containerScope} === undefined) {`,
+        this.options.debug
+          ? `console.debug('container scope is empty, initializing');`
+          : '',
+        `${containerScope} = {_config: {}}
         };`,
         checkForAsyncChunkRequirements,
         Template.asString([
@@ -731,7 +743,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
               containerName
             )}] = innerRemote;`,
             "__webpack_require__.I('default',[globalThis.backupScope]);",
-            "console.log('remote attached', innerRemote);",
+            this.options.debug
+              ? "console.debug('remote attached', innerRemote);"
+              : '',
             'if(resolve) resolve(innerRemote)',
           ]),
           '}',
