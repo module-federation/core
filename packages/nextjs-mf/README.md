@@ -121,7 +121,7 @@ new NextFederationPlugin({
   exposes: {},
   shared: {},
   extraOptions: {
-    verbose: boolean, // `false` by default
+    debug: boolean, // `false` by default
     exposePages: boolean, // `false` by default
     enableImageLoaderFix: boolean, // `false` by default
     enableUrlLoaderFix: boolean, // `false` by default

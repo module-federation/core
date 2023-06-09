@@ -10,6 +10,7 @@ import {
   DEFAULT_SHARE_SCOPE_BROWSER,
   getDelegates,
 } from '../../internal';
+import { hasLoader, injectRuleLoader } from '../../loaders/helpers';
 
 type ConstructableModuleFederationPlugin = new (
   options: ModuleFederationPluginOptions
@@ -92,3 +93,24 @@ export function applyRemoteDelegates(
     });
   }
 }
+
+// @ts-ignore
+export const applyPathFixes = (compiler, options) => {
+  //@ts-ignore
+  compiler.options.module.rules.forEach((rule) => {
+    // next-image-loader fix which adds remote's hostname to the assets url
+    if (options.enableImageLoaderFix && hasLoader(rule, 'next-image-loader')) {
+      // childCompiler.options.module.parser.javascript?.url = 'relative';
+      injectRuleLoader(rule, {
+        loader: path.resolve(__dirname, '../../loaders/fixImageLoader'),
+      });
+    }
+
+    // url-loader fix for which adds remote's hostname to the assets url
+    if (options.enableUrlLoaderFix && hasLoader(rule, 'url-loader')) {
+      injectRuleLoader({
+        loader: path.resolve(__dirname, '../../loaders/fixUrlLoader'),
+      });
+    }
+  });
+};

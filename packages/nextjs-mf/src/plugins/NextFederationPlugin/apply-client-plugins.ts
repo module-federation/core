@@ -43,23 +43,24 @@ export function applyClientPlugins(
   compiler.options.optimization.splitChunks = undefined;
 
   // Add a new plugin to hoist modules into remote runtime
-  new JsonpChunkLoading().apply(compiler);
+  new JsonpChunkLoading({ debug: extraOptions.debug }).apply(compiler);
   new DelegateModulesPlugin({
     container: name,
     runtime: 'webpack',
     remotes,
+    debug: extraOptions.debug,
   }).apply(compiler);
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
   if (extraOptions.automaticPageStitching) {
     console.warn('[nextjs-mf]', 'automatic page stitching is disabled in v7');
-    //   compiler.options.module.rules.push({
-    //     test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
-    //     loader: path.resolve(
-    //       __dirname,
-    //       '../../loaders/patchNextClientPageLoader'
-    //     ),
-    //   });
+    // compiler.options.module.rules.push({
+    //   test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
+    //   loader: path.resolve(
+    //     __dirname,
+    //     '../../loaders/patchNextClientPageLoader'
+    //   ),
+    // });
   }
 
   // If a custom library is set, log an error message
@@ -83,6 +84,6 @@ export function applyClientPlugins(
     runtime: 'webpack',
     container: options.name,
     remotes: options.remotes as Record<string, string>,
-    debug: false,
+    debug: extraOptions.debug,
   }).apply(compiler);
 }
