@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.5.2-rc3.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.5.2-beta.0...nextjs-mf-6.5.2-rc3.0) (2023-06-09)
+
+
+### Bug Fixes
+
+* remove logs or wrap in debug flag ([#959](https://github.com/module-federation/nextjs-mf/issues/959)) ([5ea321a](https://github.com/module-federation/nextjs-mf/commit/5ea321a6ee4323456f9ad1e62bb2e765df612017))
+
+
+
 ## [6.5.2-beta.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.5.2-rc1.0...nextjs-mf-6.5.2-beta.0) (2023-05-26)
 
 
