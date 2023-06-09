@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.8.2-rc3.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-beta.0...utils-1.8.2-rc3.0) (2023-06-09)
+
+
+### Bug Fixes
+
+* use react.lazy instead of next/dynamic ([#951](https://github.com/module-federation/nextjs-mf/issues/951)) ([a27ff6e](https://github.com/module-federation/nextjs-mf/commit/a27ff6eb28acd93a7fcd8a011f76bd65e18d6b1f))
+
+
+
 ## [1.8.2-beta.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.1...utils-1.8.2-beta.0) (2023-05-26)
 
 
