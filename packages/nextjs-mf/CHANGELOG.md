@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.5.2-rc3.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.5.2-rc3.0...nextjs-mf-6.5.2-rc3.1) (2023-06-09)
+
+
+### Bug Fixes
+
+* Path loader patches ([#960](https://github.com/module-federation/nextjs-mf/issues/960)) ([d362a77](https://github.com/module-federation/nextjs-mf/commit/d362a7752c4364cc499a27f2b6eeb5399543cb29))
+
+
+
 ## [6.5.2-rc3.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.5.2-beta.0...nextjs-mf-6.5.2-rc3.0) (2023-06-09)
 
 
