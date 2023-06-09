@@ -12,6 +12,10 @@
 
 [module-federation/storybook-addon](./packages/storybook-addon)
 
+[module-federation/native-federation-typescript](./packages/native-federation-typescript)
+
+[module-federation/native-federation-tests](./packages/native-federation-tests)
+
 ## Generate an application
 
 Run `nx g @nrwl/next:app my-app` to generate an application.
