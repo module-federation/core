@@ -445,10 +445,11 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       withExternalInstallChunk
         ? Template.asString([
             'module.exports = __webpack_require__;',
-            `${RuntimeGlobals.externalInstallChunk} = function(){
-            console.debug('node: webpack installing to install chunk id:', arguments['0'].id);
-            return installChunk.apply(this, arguments)
-            };`,
+            `${RuntimeGlobals.externalInstallChunk} = function(){`,
+            this.options.debug
+              ? `console.debug('node: webpack installing to install chunk id:', arguments['0'].id);`
+              : '',
+            `return installChunk.apply(this, arguments)};`,
           ])
         : '// no external install chunk',
       '',
