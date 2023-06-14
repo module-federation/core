@@ -692,8 +692,8 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
             this.compilation.outputOptions.chunkLoadingGlobal
           )}].forEach(function(chunkId) {`,
           Template.indent([
-            `if(_webpack_require__.getEagerSharedForChunkId) {__webpack_require__.getEagerSharedForChunkId(chunkId[0],__webpack_require__.initConsumes)}`,
-            `if(_webpack_require__.getEagerRemotesForChunkId) {__webpack_require__.getEagerRemotesForChunkId(chunkId[0],__webpack_require__.initRemotes)}`,
+            `if(__webpack_require__.getEagerSharedForChunkId) {__webpack_require__.getEagerSharedForChunkId(chunkId[0],__webpack_require__.initConsumes)}`,
+            `if(__webpack_require__.getEagerRemotesForChunkId) {__webpack_require__.getEagerRemotesForChunkId(chunkId[0],__webpack_require__.initRemotes)}`,
           ]),
           '});',
         ]),
