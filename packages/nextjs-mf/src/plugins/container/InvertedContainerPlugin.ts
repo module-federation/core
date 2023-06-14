@@ -235,8 +235,8 @@ class InvertedContainerPlugin {
               'var currentChunkId = __INSERT_CH_ID__MF__;',
               `if(currentChunkId) {`,
               Template.indent([
-                `if(__webpack_require__.getEagerSharedForChunkId) {__webpack_require__.getEagerSharedForChunkId(currentChunkId,__webpack_require__.initRemotes)}`,
-                `if(__webpack_require__.getEagerRemotesForChunkId) {__webpack_require__.getEagerRemotesForChunkId(currentChunkId,__webpack_require__.initConsumes)}`,
+                `if(__webpack_require__.getEagerSharedForChunkId) {__webpack_require__.getEagerSharedForChunkId(currentChunkId,__webpack_require__.initConsumes)}`,
+                `if(__webpack_require__.getEagerRemotesForChunkId) {__webpack_require__.getEagerRemotesForChunkId(currentChunkId,__webpack_require__.initRemotes)}`,
               ]),
               '}',
               originalRuntimeCode,
