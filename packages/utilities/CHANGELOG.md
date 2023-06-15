@@ -2,6 +2,16 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.8.2-rc3.2](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc3.1...utils-1.8.2-rc3.2) (2023-06-15)
+
+
+### Bug Fixes
+
+* eager share link to prevent stalled boots ([7cd7771](https://github.com/module-federation/nextjs-mf/commit/7cd7771b84f33ec91e44e60efc9ab7de6a847106))
+* safety checks for getEagerSharedForChunkId ([1f4a238](https://github.com/module-federation/nextjs-mf/commit/1f4a238dbf20589b61f01850a56dad9a44e245b4))
+
+
+
 ## [1.8.2-rc3.1](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc3.0...utils-1.8.2-rc3.1) (2023-06-09)
 
 
