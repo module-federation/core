@@ -143,13 +143,6 @@ export function handleServerExternals(
       ) {
         return fromNext;
       }
-
-      if (fromNext.includes('uuid')) {
-        console.log(fromNext);
-        console.log(ctx.request);
-        return 'module uuid';
-      }
-
       // Otherwise, return (null) to treat the module as internalizable
       return;
     };
