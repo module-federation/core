@@ -2,6 +2,21 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.5.2-rc3.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.5.2-rc3.1...nextjs-mf-6.5.2-rc3.2) (2023-06-15)
+
+
+### Bug Fixes
+
+* dont force named chunkids on client ([d9c806a](https://github.com/module-federation/nextjs-mf/commit/d9c806ab6c330fd1ebb161a36e3491ff97d3eab0))
+* eager share link to prevent stalled boots ([7cd7771](https://github.com/module-federation/nextjs-mf/commit/7cd7771b84f33ec91e44e60efc9ab7de6a847106))
+* resolve conditional exports ([1520b01](https://github.com/module-federation/nextjs-mf/commit/1520b01ca77b5bc648625fc293bccde3419f4436))
+* resolve conditional exports ([45bc380](https://github.com/module-federation/nextjs-mf/commit/45bc380cb8c5c041d7dcc1358f74212ceabe1c81))
+* safety checks for getEagerSharedForChunkId ([a5c378b](https://github.com/module-federation/nextjs-mf/commit/a5c378b97e9728a5e12273fc6793e9d52e836e8f))
+* safety checks for getEagerSharedForChunkId ([5b23677](https://github.com/module-federation/nextjs-mf/commit/5b23677109697d757dd5541ea4ad8975e06f4975))
+* safety checks for getEagerSharedForChunkId ([1f4a238](https://github.com/module-federation/nextjs-mf/commit/1f4a238dbf20589b61f01850a56dad9a44e245b4))
+
+
+
 ## [6.5.2-rc3.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.5.2-rc3.0...nextjs-mf-6.5.2-rc3.1) (2023-06-09)
 
 
