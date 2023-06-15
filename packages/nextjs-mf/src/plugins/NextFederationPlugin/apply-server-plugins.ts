@@ -144,6 +144,12 @@ export function handleServerExternals(
         return fromNext;
       }
 
+      if (fromNext.includes('uuid')) {
+        console.log(fromNext);
+        console.log(ctx.request);
+        return 'module uuid';
+      }
+
       // Otherwise, return (null) to treat the module as internalizable
       return;
     };
@@ -169,6 +175,12 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     ...compiler.options.node,
     global: false,
   };
+  compiler.options.resolve.conditionNames = [
+    'node',
+    'import',
+    'require',
+    'default',
+  ];
   // Build will hang without this. Likely something in my plugin
   compiler.options.optimization.chunkIds = 'named';
   // no custom chunk rules
