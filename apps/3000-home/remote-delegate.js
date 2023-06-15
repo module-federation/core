@@ -6,7 +6,7 @@ module.exports = new Promise(async (resolve, reject) => {
 
   const [global, url] = currentRequest.split('@');
   const { importDelegatedModule } = await import(
-    '@module-federation/utilities/src/utils/common'
+    '@module-federation/utilities/src/utils/importDelegatedModule'
   );
 
   importDelegatedModule({

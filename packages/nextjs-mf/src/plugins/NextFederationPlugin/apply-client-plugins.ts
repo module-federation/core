@@ -39,7 +39,6 @@ export function applyClientPlugins(
   //@ts-ignore
   compiler.options.output.publicPath = 'auto';
   // Build will hang without this. Likely something in my plugin
-  compiler.options.optimization.chunkIds = 'named';
   compiler.options.optimization.splitChunks = undefined;
 
   // Add a new plugin to hoist modules into remote runtime

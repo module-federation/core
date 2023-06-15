@@ -138,11 +138,15 @@ class InvertedContainerPlugin {
                 const asset = compilation.getAsset(file);
                 if (asset) {
                   let source = asset.source.source();
+                  const chunkID =
+                    typeof chunk.id === 'string'
+                      ? JSON.stringify(chunk.id)
+                      : chunk.id;
                   // Inject the chunk name at the beginning of the file
                   source = source
                     .toString()
                     //@ts-ignore
-                    .replace('__INSERT_CH_ID__MF__', chunk.id);
+                    .replace('__INSERT_CH_ID__MF__', chunkID);
                   const updatedSource = new RawSource(source);
 
                   //@ts-ignore
@@ -228,11 +232,11 @@ class InvertedContainerPlugin {
 
             return Template.asString([
               '',
-              'var currentChunkId = "__INSERT_CH_ID__MF__";',
+              'var currentChunkId = __INSERT_CH_ID__MF__;',
               `if(currentChunkId) {`,
               Template.indent([
-                `__webpack_require__.getEagerSharedForChunkId(currentChunkId,__webpack_require__.initRemotes);`,
-                `__webpack_require__.getEagerRemotesForChunkId(currentChunkId,__webpack_require__.initConsumes)`,
+                `if(__webpack_require__.getEagerSharedForChunkId) {__webpack_require__.getEagerSharedForChunkId(currentChunkId,__webpack_require__.initConsumes)}`,
+                `if(__webpack_require__.getEagerRemotesForChunkId) {__webpack_require__.getEagerRemotesForChunkId(currentChunkId,__webpack_require__.initRemotes)}`,
               ]),
               '}',
               originalRuntimeCode,
