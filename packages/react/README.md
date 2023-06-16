@@ -30,4 +30,5 @@ Next, Lets walk through using some of the features this library provides...
 
 - [Setup using Webpack](./docs/getting_started_webpack.md)
 - [Using the Hooks](./docs/using_hooks.md)
+- [Using the Hooks with Typescript](./docs/using_hooks_typescript.md)
 - [Logging and Debugging](./docs/logging_debugging.md)
