@@ -27,7 +27,7 @@ const RemoteErrorBoundary = ({ children, scope, module, fallback }: RemoteErrorB
 
     /** On mount, assign event types and subscribe. */
     useEffect(() => {
-        handleEventType(RemoteEventType.WebpackMissing);
+        handleEventType(RemoteEventType.BundlerMissing);
         handleEventType(RemoteEventType.FailedToImport);
     }, []);
 

@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
-import { RemoteEventType, RemoteEventDetails } from "../types/remote-events";
+import { RemoteEventType, RemoteEventDetails, RemoteLogLevel } from "../types/remote-events";
 import { UseRemoteProps } from "../types/remote-props";
-import { LogPrefix } from "../utilities/constants";
 import { getRemoteNamespace } from "../utilities/federation";
+import { emitEvent, logEvent } from "../utilities/logger";
 
 /**
  * Dynamically imports a remote
@@ -17,7 +18,7 @@ export default function useRemote<T>({
     verbose,
     useEvents,
 }: UseRemoteProps): Promise<T> {
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, _) => {
         // Define event details for reuse in the logger and error boundaries
         const remoteFullName = getRemoteNamespace(scope, module, '', '');
         const eventDetails = { scope, module, url: 'eager-loaded', detail: remoteFullName } as RemoteEventDetails;
@@ -27,21 +28,21 @@ export default function useRemote<T>({
             const remote = import(`${scope}/${module}`) as T;
 
             // Everything worked out fine, log and pass the remote back
-            useEvents && window.dispatchEvent(new CustomEvent(`${LogPrefix} Event: ${RemoteEventType.Imported}`, eventDetails));
-            verbose && console.info(`${LogPrefix} Imported dynamic remote: ${remoteFullName}`);
+            useEvents && emitEvent(RemoteEventType.Imported, eventDetails);
+            verbose && logEvent(RemoteLogLevel.Information, `Imported eager remote: ${remoteFullName}`);
             
             // Return the remote
             resolve(remote);
         } catch (error) {
             // Things did not work out fine, log and pass up the error.
-            useEvents && window.dispatchEvent(new CustomEvent(`${LogPrefix} Event: ${RemoteEventType.FailedToImport}`, eventDetails));
-            verbose && console.error(`${LogPrefix} Error importing dynamic remote: ${remoteFullName}`, error);
+            useEvents && emitEvent(RemoteEventType.FailedToImport, eventDetails);
+            verbose && logEvent(RemoteLogLevel.Error, `Error importing eager remote: ${remoteFullName}`, error as Error);
             
-            // Return a result
+            // Return an empty result if we use events, otherwise throw
             if (!useEvents) {
                 throw error;
             }
-            return (<></> as T);
+            resolve(<></> as T);
         }
     });
     

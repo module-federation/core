@@ -2,7 +2,7 @@ export enum RemoteEventType {
     Unassigned,
     Imported,
     FailedToImport,
-    WebpackMissing,
+    BundlerMissing,
     LazyLoaded,
 };
 

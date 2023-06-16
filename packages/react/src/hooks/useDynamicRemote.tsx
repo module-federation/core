@@ -1,10 +1,12 @@
 import React from "react";
 import { importRemote } from "@module-federation/utilities";
 import { checkUrlEnding } from "../utilities/url-check";
-import { RemoteEventType, RemoteEventDetails } from "../types/remote-events";
+import { RemoteEventType, RemoteEventDetails, RemoteLogLevel } from "../types/remote-events";
 import { UseDynamicRemoteProps } from "../types/remote-props";
 import { DefaultRemoteName, LogPrefix } from "../utilities/constants";
 import { getRemoteNamespace } from "../utilities/federation";
+import { emitEvent, logEvent } from "../utilities/logger";
+import { isBundlerAvailable } from "../utilities/bundlers";
 
 /**
  * Dynamically imports a remote
@@ -43,14 +45,6 @@ export default function useDynamicRemote<T>({
     };
 
     /**
-     * Checks to ensure Webpack is available before attempting import.
-    */
-    const checkIfWebpackIsAvailable = () => {
-        // @ts-ignore
-        return __webpack_require__ !== undefined;
-    }
-
-    /**
      * Check if the remote has already been loaded, saving us a script append.
     */
     const checkIfRemoteIsLoaded = () => {
@@ -67,18 +61,21 @@ export default function useDynamicRemote<T>({
         const remoteFullName = getRemoteNamespace(scope, module, url, remoteEntryFileName);
         const eventDetails = { scope, module, url, detail: remoteFullName } as RemoteEventDetails;
 
-        // Ensure webpack is available before we continue
-        if (!checkIfWebpackIsAvailable()) {
-            useEvents && window.dispatchEvent(new CustomEvent(`${LogPrefix} Event: ${RemoteEventType.WebpackMissing}`, eventDetails));
-            verbose && console.error(`${LogPrefix} Webpack not loaded when attempting to dynamically import remote: ${remoteFullName}`);
-            throw new Error(`${LogPrefix} Error: Webpack not found. Cannot import a dynamic remote.`);
+        // Ensure bundler is available before we continue
+        if (!isBundlerAvailable()) {
+            useEvents && emitEvent(RemoteEventType.BundlerMissing, eventDetails);
+            verbose && logEvent(RemoteLogLevel.Error, `Bundler not loaded when attempting to dynamically import remote: ${remoteFullName}`);
+            // Return an empty result if we use events, otherwise throw
+            if (!useEvents) {
+                throw new Error(`${LogPrefix} Error: Bundler not found. Cannot import a dynamic remote.`);
+            }
         }
         // Lets check to see if its already loaded, saving us a script append
         if (checkIfRemoteIsLoaded()) {
             // @ts-ignore
             const remote = window[scope].get(`./${module}`);
-            useEvents && window.dispatchEvent(new CustomEvent(`${LogPrefix} Event: ${RemoteEventType.LazyLoaded}`, eventDetails));
-            verbose && console.info(`${LogPrefix} Lazy Loaded dynamic remote: ${remoteFullName}`);
+            useEvents && emitEvent(RemoteEventType.LazyLoaded, eventDetails);
+            verbose && logEvent(RemoteLogLevel.Information, `Lazy Loaded dynamic remote: ${remoteFullName}`);
             return remote as unknown as Promise<T>;
         }
         // Return the module, but lets also log the events for capture.
@@ -91,14 +88,14 @@ export default function useDynamicRemote<T>({
         })
         .then((remote: T) => {
             // Everything worked out fine, log and pass the remote back
-            useEvents && window.dispatchEvent(new CustomEvent(`${LogPrefix} Event: ${RemoteEventType.Imported}`, eventDetails));
-            verbose && console.info(`${LogPrefix} Imported dynamic remote: ${remoteFullName}`);
+            useEvents && emitEvent(RemoteEventType.Imported, eventDetails);
+            verbose && logEvent(RemoteLogLevel.Information, `Imported dynamic remote: ${remoteFullName}`);
             return remote;
         })
         .catch((error: Error) => {
             // Things did not work out fine, log and pass up the error.
-            useEvents && window.dispatchEvent(new CustomEvent(`${LogPrefix} Event: ${RemoteEventType.FailedToImport}`, eventDetails));
-            verbose && console.error(`${LogPrefix} Error importing dynamic remote: ${remoteFullName}`, error);
+            useEvents && emitEvent(RemoteEventType.FailedToImport, eventDetails);
+            verbose && logEvent(RemoteLogLevel.Error, `Error importing dynamic remote: ${remoteFullName}`, error as Error);
             
             // Return the result
             if (!useEvents) {

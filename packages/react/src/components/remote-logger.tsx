@@ -26,7 +26,7 @@ const RemoteLogger = ({ loggerCallback, eventToInspect }: RemoteLoggerProps) => 
     useEffect(() => {
         handleEventType(RemoteEventType.Imported);
         handleEventType(RemoteEventType.LazyLoaded);
-        handleEventType(RemoteEventType.WebpackMissing);
+        handleEventType(RemoteEventType.BundlerMissing);
         handleEventType(RemoteEventType.FailedToImport);
     }, []);
 
