@@ -92,3 +92,8 @@ export type GetModuleOptions = {
   exportName?: string;
   remoteContainer: string | RemoteData;
 };
+
+export type GetModulesOptions = {
+  modulePaths: string[];
+  remoteContainer: string | RemoteData;
+};

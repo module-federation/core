@@ -8,6 +8,7 @@ import type {
   WebpackRemoteContainer,
   RemoteData,
   GetModuleOptions,
+  GetModulesOptions,
 } from '../types';
 
 type RemoteVars = Record<
@@ -374,6 +375,43 @@ export const getModule = async ({
     }
   } catch (error) {
     console.log(error);
+    return undefined;
+  }
+};
+
+export const getModules = async ({
+  remoteContainer,
+  modulePaths,
+}: GetModulesOptions) => {
+  if (!modulePaths || !modulePaths.length) {
+    throw new Error(`Module paths is empty`);
+  }
+
+  const container = await getContainer(remoteContainer);
+
+  if (!container) {
+    throw new Error(
+      `Unable to load container for remote: ${
+        typeof remoteContainer === 'string'
+          ? remoteContainer
+          : remoteContainer.global
+      }`
+    );
+  }
+
+  try {
+    const moduleFactories = await Promise.all([
+      ...modulePaths.map((modulePath) => container.get(modulePath)),
+    ]);
+
+    const modules = moduleFactories.map((modFactory) => {
+      if (!modFactory) return undefined;
+      return modFactory();
+    });
+
+    return modules;
+  } catch (error) {
+    console.error('[mf] - Unable to getModules', error);
     return undefined;
   }
 };

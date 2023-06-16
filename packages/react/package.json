@@ -10,7 +10,7 @@
   "author": "Chris Fryer <cfryerdev@gmail.com> (www.cfryerdev.com)",
   "license": "MIT",
   "dependencies": {
-    "@module-federation/utilities": "1.7.0",
+    "@module-federation/utilities": "*",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
