@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.15.2-rc3.2](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-rc3.1...node-0.15.2-rc3.2) (2023-06-15)
+
+
+### Bug Fixes
+
+* safety checks for getEagerSharedForChunkId ([1f4a238](https://github.com/module-federation/nextjs-mf/commit/1f4a238dbf20589b61f01850a56dad9a44e245b4))
+
+
+
 ## [0.15.2-rc3.1](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-rc3.0...node-0.15.2-rc3.1) (2023-06-09)
 
 

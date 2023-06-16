@@ -40,6 +40,7 @@ export const createDelegatedModule = (
     }
     queries.push(`${key}=${value}`);
   }
+  if (queries.length === 0) return `internal ${delegate}`;
   return `internal ${delegate}?${queries.join('&')}`;
 };
 
