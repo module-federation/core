@@ -19,9 +19,14 @@ const RemoteErrorBoundary = ({ children, scope, module, fallback }: RemoteErrorB
     /** Adds an event listener which determines if this event should be inspected */
     const handleEventType = (eventType: RemoteEventType) => {
         window.addEventListener(`${LogPrefix} Event: ${eventType}`, (event: Event) => {
-            // TODO: Type the event, so we can pull out remote details
-            // TODO: Determine if we care about this scope/module
-            setHasError(true);
+            // Determine if this is react to everything case, or only react to specific scopes or modules
+            const details = (event as CustomEvent).detail as RemoteEventDetails;
+            if (scope === undefined || details.scope == scope) {
+                setHasError(true);
+            }
+            if (module === undefined || details.module == module) {
+                setHasError(true);
+            }
         });
     };
 
@@ -39,7 +44,7 @@ const RemoteErrorBoundary = ({ children, scope, module, fallback }: RemoteErrorB
         return <></>;
     }
 
-    /** REnder the fallback, otherwise the passed through children, conditional above */
+    /** Render the fallback, otherwise the passed through children, conditional above */
     return (hasError ? renderFallabck() : children)
 }
 
