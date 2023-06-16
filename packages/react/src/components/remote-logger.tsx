@@ -1,14 +1,35 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import React, { useEffect } from "react";
+import { LogPrefix } from "../utilities/constants";
 import { RemoteEventType } from "../types/remote-events";
 
 interface RemoteLoggerProps {
-    loggerHook: (event: RemoteEventType, callback: Function) => {};
-}
+    loggerCallback: (event: Event) => void;
+    eventToInspect?: RemoteEventType;
+};
 
-const RemoteLogger = ({ loggerHook }: RemoteLoggerProps) => {
+/** Logging hook allowing you to snoop on all events (using null) or a specific event,
+ *  using eventToInspect, when triggered it will call loggerCallback
+ */
+const RemoteLogger = ({ loggerCallback, eventToInspect }: RemoteLoggerProps) => {
+    
+    /** Adds an event listener which determines if this event should be inspected */
+    const handleEventType = (eventType: RemoteEventType) => {
+        window.addEventListener(`${LogPrefix} Event: ${eventType}`, (event: Event) => {
+            if (eventToInspect === undefined || eventToInspect === eventType) {
+                loggerCallback(event);
+            }
+        });
+    };
+
+    /** On mount, assign event types and subscribe. */
     useEffect(() => {
-        // Implement logger here.
-    }, [])
+        handleEventType(RemoteEventType.Imported);
+        handleEventType(RemoteEventType.LazyLoaded);
+        handleEventType(RemoteEventType.WebpackMissing);
+        handleEventType(RemoteEventType.FailedToImport);
+    }, []);
+
     return <></>;
 }
 

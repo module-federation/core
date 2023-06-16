@@ -37,7 +37,7 @@ export default function useRemote<T>({
             useEvents && window.dispatchEvent(new CustomEvent(`${LogPrefix} Event: ${RemoteEventType.FailedToImport}`, eventDetails));
             verbose && console.error(`${LogPrefix} Error importing dynamic remote: ${remoteFullName}`, error);
             
-            // Return the result
+            // Return a result
             if (!useEvents) {
                 throw error;
             }

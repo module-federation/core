@@ -89,7 +89,7 @@ export default function useDynamicRemote<T>({
             remoteEntryFileName,
             bustRemoteEntryCache
         })
-        .then((remote: any) => {
+        .then((remote: T) => {
             // Everything worked out fine, log and pass the remote back
             useEvents && window.dispatchEvent(new CustomEvent(`${LogPrefix} Event: ${RemoteEventType.Imported}`, eventDetails));
             verbose && console.info(`${LogPrefix} Imported dynamic remote: ${remoteFullName}`);
