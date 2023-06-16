@@ -8,7 +8,9 @@ Using a dynamically loaded remote:
 import React, { Suspense } from "react";
 import { useDynamicRemote, RemotComponent, UseDynamicRemoteProps } from "@module-federation/react";
 
-
+type HomeRemoteProps = RemotComponent & {
+    id: number;
+};
 
 const remoteProps = {
     url: 'http://localhost:3001/',
