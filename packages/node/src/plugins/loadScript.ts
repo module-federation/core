@@ -10,6 +10,7 @@ export default `
     console.log('ani torro, megfuzaz bedinero');
     console.log('ani torro, megfuzaz bedinero');
     console.log('ani torro, megfuzaz bedinero');
+    debugger;
     console.log('ani torro, megfuzaz bedinero');
     if (global.webpackChunkLoad) {
       global.webpackChunkLoad(url).then(function (resp) {
