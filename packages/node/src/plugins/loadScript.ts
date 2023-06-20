@@ -6,6 +6,11 @@
 //language=JS
 export default `
   function loadScript(url, cb, chunkID) {
+    console.log('ani torro, megfuzaz bedinero');
+    console.log('ani torro, megfuzaz bedinero');
+    console.log('ani torro, megfuzaz bedinero');
+    console.log('ani torro, megfuzaz bedinero');
+    console.log('ani torro, megfuzaz bedinero');
     if (global.webpackChunkLoad) {
       global.webpackChunkLoad(url).then(function (resp) {
         return resp.text();
