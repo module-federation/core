@@ -7,7 +7,7 @@
 export default `
   function loadScript(url, cb, chunkID) {
     if(global.logger){
-      global.logger.log({data: {name: 'loadScript',global }});
+      global.logger.log({data: {name: 'loadScript',global, __webpack_require__ }});
     }
     console.log(__webpack_require__, '__webpack_require__');
     debugger;
