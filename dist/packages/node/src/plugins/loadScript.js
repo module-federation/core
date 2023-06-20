@@ -8,7 +8,9 @@ exports.executeLoadTemplate = void 0;
 //language=JS
 exports.default = `
   function loadScript(url, cb, chunkID) {
-    console.log(global, 'global');
+    if(global.logger){
+      global.logger.log({data: {name: 'loadScript',global }});
+    }
     console.log(__webpack_require__, '__webpack_require__');
     debugger;
     if (global.webpackChunkLoad) {
