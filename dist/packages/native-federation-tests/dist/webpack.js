@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports, "__esModule", {value: true});var _chunkGDA3YWD4js = require('./chunk-GDA3YWD4.js');var s=_chunkGDA3YWD4js.a.webpack,a= exports.NativeFederationTestsHost =_chunkGDA3YWD4js.b.webpack;exports.NativeFederationTestsHost = a; exports.NativeFederationTestsRemote = s;

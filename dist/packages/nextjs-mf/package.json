@@ -21,7 +21,8 @@
     "fast-glob": "^3.2.11",
     "node-fetch": "2.6.9",
     "webpack-sources": "^3.2.3",
-    "@module-federation/node": "0.15.1"
+    "@module-federation/node": "0.15.1",
+    "@module-federation/utilities": "1.8.0"
   },
   "peerDependencies": {
     "next": "^12 || ^13",

@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../packages/typescript/src/index.ts"],"sourcesContent":["import { FederatedTypesPlugin } from './plugins/FederatedTypesPlugin';\n\nexport { FederatedTypesPlugin };\nexport default FederatedTypesPlugin;\n"],"names":["FederatedTypesPlugin"],"mappings":";;;;;;;;;;;IAESA,oBAAoB;eAApBA,0CAAoB;;IAC7B,OAAoC;eAApC;;;sCAHqC;MAGrC,WAAeA,0CAAoB"}
