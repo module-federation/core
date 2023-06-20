@@ -7,6 +7,7 @@
 export default `
   function loadScript(url, cb, chunkID) {
     console.log(global, 'global');
+    console.log(__webpack_require__, '__webpack_require__');
     debugger;
     if (global.webpackChunkLoad) {
       global.webpackChunkLoad(url).then(function (resp) {
