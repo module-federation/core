@@ -34,7 +34,8 @@
   "license": "MIT",
   "dependencies": {
     "encoding": "^0.1.13",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.7",
+    "@module-federation/utilities": "1.8.0"
   },
   "peerDependencies": {
     "next": "^12||^13",

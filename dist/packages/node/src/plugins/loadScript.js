@@ -8,12 +8,8 @@ exports.executeLoadTemplate = void 0;
 //language=JS
 exports.default = `
   function loadScript(url, cb, chunkID) {
-    console.log('ani torro, megfuzaz bedinero');
-    console.log('ani torro, megfuzaz bedinero');
-    console.log('ani torro, megfuzaz bedinero');
-    console.log('ani torro, megfuzaz bedinero');
+    console.log(global, 'global');
     debugger;
-    console.log('ani torro, megfuzaz bedinero');
     if (global.webpackChunkLoad) {
       global.webpackChunkLoad(url).then(function (resp) {
         return resp.text();
