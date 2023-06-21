@@ -1,4 +1,4 @@
-import { getModule } from '@module-federation/utilities';
+import { getModule } from '@module-federation/core';
 
 type ModuleOptions = {
   name: string;

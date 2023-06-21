@@ -5,6 +5,7 @@
     "@module-federation/typescript": "2.3.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
     "@module-federation/utilities": "*",
+    "@module-federation/core": "*",
     "react-refresh": "0.14.0"
   }
 }
