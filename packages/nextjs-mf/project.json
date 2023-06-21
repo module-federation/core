@@ -18,7 +18,13 @@
         "assets": [
           "packages/nextjs-mf/*.md"
         ]
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "publish": {
       "executor": "nx:run-commands",

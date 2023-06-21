@@ -22,7 +22,7 @@ interface ReadFileChunkLoadingRuntimeModuleOptions {
   promiseBaseURI?: string;
   remotes: Record<string, string>;
   name?: string;
-  verbose?: boolean;
+  debug?: boolean;
 }
 
 interface ChunkLoadingContext {
@@ -70,7 +70,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
    * @param {unknown[]} items item to log
    */
   _getLogger(...items: unknown[]) {
-    if (!this.options.verbose) {
+    if (!this.options.debug) {
       return '';
     }
 
@@ -120,6 +120,12 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
         if (c.ids) {
           for (const id of c.ids) initialChunkIds.add(id);
         }
+        for (const c of chunk.getAllAsyncChunks()) {
+          if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
+          if (c.ids) {
+            for (const id of c.ids) initialChunkIds.add(id);
+          }
+        }
       }
       return initialChunkIds;
     };
@@ -131,6 +137,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     const withExternalInstallChunk = this.runtimeRequirements.has(
       RuntimeGlobals.externalInstallChunk
     );
+
     const withOnChunkLoad = this.runtimeRequirements.has(
       RuntimeGlobals.onChunksLoaded
     );
@@ -161,6 +168,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
         contentHashType: 'javascript',
       }
     );
+
     const rootOutputDir = getUndoPath(
       outputName,
       this.compilation.outputOptions.path,
@@ -170,7 +178,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     const stateExpression = withHmr
       ? `${RuntimeGlobals.hmrRuntimeStatePrefix}_readFileVm`
       : undefined;
-
     return Template.asString([
       withBaseURI
         ? this._generateBaseUri(chunk, rootOutputDir)
@@ -252,7 +259,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
             `${fn}.readFileVm = function(chunkId, promises) {`,
             hasJsMatcher !== false
               ? Template.indent([
-                  '',
                   'var installedChunkData = installedChunks[chunkId];',
                   'if(installedChunkData !== 0) { // 0 means "already installed".',
                   Template.indent([
@@ -276,6 +282,9 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           }(chunkId));`,
                           "var fs = require('fs');",
                           'if(fs.existsSync(filename)) {',
+                          this._getLogger(
+                            `'chunk filename local load', chunkId`
+                          ),
                           Template.indent([
                             "fs.readFile(filename, 'utf-8', function(err, content) {",
                             Template.indent([
@@ -288,6 +297,9 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             '});',
                           ]),
                           '} else {',
+                          this._getLogger(
+                            `'chunk filename remote load', chunkId`
+                          ),
                           Template.indent([
                             loadScriptTemplate,
 
@@ -376,6 +388,12 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             // `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
                             // since im looping over remote and creating global at build time, i dont need to split string at runtime
                             // there may still be a use case for that with promise new promise, depending on how we design it.
+                            this._getLogger(
+                              '"requestedRemote"',
+                              'requestedRemote',
+                              'current name',
+                              JSON.stringify(name)
+                            ),
                             `var scriptUrl = new URL(requestedRemote);`,
 
                             this._getLogger(
@@ -427,7 +445,11 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       withExternalInstallChunk
         ? Template.asString([
             'module.exports = __webpack_require__;',
-            `${RuntimeGlobals.externalInstallChunk} = installChunk;`,
+            `${RuntimeGlobals.externalInstallChunk} = function(){`,
+            this.options.debug
+              ? `console.debug('node: webpack installing to install chunk id:', arguments['0'].id);`
+              : '',
+            `return installChunk.apply(this, arguments)};`,
           ])
         : '// no external install chunk',
       '',

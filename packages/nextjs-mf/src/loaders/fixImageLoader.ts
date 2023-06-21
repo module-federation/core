@@ -42,7 +42,7 @@ export async function fixImageLoader(
         Template.asString([
           'try {',
           Template.indent([
-            'const remoteEntry = global.__remote_scope__ && global.remoteEntryName && global.__remote_scope__._config[global.remoteEntryName];',
+            'const remoteEntry = global.__remote_scope__ && global.__remote_scope__._config[__webpack_runtime_id__];',
             `if (remoteEntry) {`,
             Template.indent([
               `const splitted = remoteEntry.split('/_next')`,

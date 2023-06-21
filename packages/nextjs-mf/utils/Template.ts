@@ -5,7 +5,7 @@
 
 'use strict';
 
-import { ConcatSource, PrefixSource } from 'webpack-sources';
+import { ConcatSource, PrefixSource } from "webpack-sources";
 
 /** @typedef {import("../declarations/WebpackOptions").Output} OutputOptions */
 /** @typedef {import("webpack-sources").Source} Source */
@@ -297,7 +297,7 @@ class Template {
     prefix = ''
   ) {
     const { chunkGraph } = renderContext;
-    var source = new ConcatSource();
+    const source = new ConcatSource();
     if (modules.length === 0) {
       return null;
     }
