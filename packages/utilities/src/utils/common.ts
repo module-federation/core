@@ -8,6 +8,8 @@ import type {
   WebpackRemoteContainer,
   RemoteData,
   GetModuleOptions,
+  GetModulesOptions,
+  RemoteScope,
 } from '../types';
 
 type RemoteVars = Record<
@@ -54,7 +56,7 @@ const getRuntimeRemotes = () => {
         const [url, global] = extractUrlAndGlobal(value);
         acc[key] = { global, url };
       }
-      // we dont know or currently support this type
+      // we don't know or currently support this type
       else {
         //@ts-ignore
         console.log('remotes process', process.env.REMOTES);
@@ -89,16 +91,16 @@ export const importDelegatedModule = async (
         //TODO: need to solve chunk flushing with delegated modules
         return asyncContainer;
       } else {
-        const proxy = {
+        const proxy: WebpackRemoteContainer = {
           get: asyncContainer.get,
           //@ts-ignore
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           init: function (shareScope: any, initScope: any) {
             try {
               //@ts-ignore
               asyncContainer.init(shareScope, initScope);
               // for legacy reasons, we must mark container a initialized
               // here otherwise older promise based implementation will try to init again with diff object
-              //@ts-ignore
               proxy.__initialized = true;
             } catch (e) {
               return 1;
@@ -131,111 +133,157 @@ export const createDelegatedModule = (
   return `internal ${delegate}?${queries.join('&')}`;
 };
 
-const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
+const loadScript = (
+  keyOrRuntimeRemoteItem: string | RuntimeRemote
+): AsyncContainer | undefined => {
   const runtimeRemotes = getRuntimeRemotes();
 
-  // 1) Load remote container if needed
-  let asyncContainer: RuntimeRemote['asyncContainer'];
-  const reference =
+  let reference =
     typeof keyOrRuntimeRemoteItem === 'string'
       ? runtimeRemotes[keyOrRuntimeRemoteItem]
       : keyOrRuntimeRemoteItem;
 
+  // Support dynamic modules
+  if (
+    typeof keyOrRuntimeRemoteItem === 'string' &&
+    !runtimeRemotes[keyOrRuntimeRemoteItem]
+  ) {
+    const [remoteUrl, remoteGlobal] = extractUrlAndGlobal(
+      keyOrRuntimeRemoteItem
+    );
+
+    reference = {
+      global: remoteGlobal,
+      url: remoteUrl,
+    };
+  }
+
   if (reference.asyncContainer) {
-    asyncContainer =
-      typeof reference.asyncContainer.then === 'function'
-        ? reference.asyncContainer
-        : // @ts-ignore
-          reference.asyncContainer();
-  } else {
-    // This casting is just to satisfy typescript,
-    // In reality remoteGlobal will always be a string;
-    const remoteGlobal = reference.global as unknown as number;
+    if (typeof reference.asyncContainer === 'function') {
+      return reference.asyncContainer();
+    }
 
-    // Check if theres an override for container key if not use remote global
-    const containerKey = reference.uniqueKey
-      ? (reference.uniqueKey as unknown as number)
-      : remoteGlobal;
+    return reference.asyncContainer;
+  }
 
-    // @ts-ignore
+  const remoteGlobal = reference.global;
+
+  if (!remoteGlobal) {
+    throw new Error('Reference global is undefined');
+  }
+
+  // Check if theres an override for container key if not use remote global
+  const containerKey = reference.uniqueKey ? reference.uniqueKey : remoteGlobal;
+
+  if (typeof window === 'undefined') {
     if (!global.__remote_scope__) {
-      // create a global scope for container, similar to how remotes are set on window in the browser
-      // @ts-ignore
       global.__remote_scope__ = {
-        // @ts-ignore
         _config: {},
       };
     }
 
-    const globalScope =
-      // @ts-ignore
-      typeof window !== 'undefined' ? window : global.__remote_scope__;
+    const remoteScope = global.__remote_scope__ as RemoteScope;
 
-    if (typeof window === 'undefined') {
-      globalScope['_config'][containerKey] = reference.url;
-    } else {
-      // to match promise template system, can be removed once promise template is gone
-      if (!globalScope['remoteLoading']) {
-        globalScope['remoteLoading'] = {};
-      }
-      if (globalScope['remoteLoading'][containerKey]) {
-        return globalScope['remoteLoading'][containerKey];
-      }
+    const remoteScopeConfig = remoteScope['_config'] as Record<
+      string,
+      string | undefined
+    >;
+
+    remoteScopeConfig[containerKey] = reference.url;
+  } else {
+    const scope = window as Window;
+    // TODO: to match promise template system, can be removed once promise template is gone
+    if (!scope.remoteLoading) {
+      scope.remoteLoading = {};
     }
-
-    asyncContainer = new Promise(function (resolve, reject) {
-      function resolveRemoteGlobal() {
-        const asyncContainer = globalScope[
-          remoteGlobal
-        ] as unknown as AsyncContainer;
-        return resolve(asyncContainer);
-      }
-
-      if (typeof globalScope[remoteGlobal] !== 'undefined') {
-        return resolveRemoteGlobal();
-      }
-
-      (__webpack_require__ as any).l(
-        reference.url,
-        function (event: Event) {
-          if (typeof globalScope[remoteGlobal] !== 'undefined') {
-            return resolveRemoteGlobal();
-          }
-
-          const errorType =
-            event && (event.type === 'load' ? 'missing' : event.type);
-          const realSrc =
-            event && event.target && (event.target as HTMLScriptElement).src;
-
-          const __webpack_error__ = new Error() as Error & {
-            type: string;
-            request: string | null;
-          };
-
-          __webpack_error__.message =
-            'Loading script failed.\n(' +
-            errorType +
-            ': ' +
-            realSrc +
-            ' or global var ' +
-            remoteGlobal +
-            ')';
-
-          __webpack_error__.name = 'ScriptExternalLoadError';
-          __webpack_error__.type = errorType;
-          __webpack_error__.request = realSrc;
-
-          reject(__webpack_error__);
-        },
-        containerKey
-      );
-    });
-    if (typeof window !== 'undefined') {
-      globalScope['remoteLoading'][containerKey] = asyncContainer;
+    if (scope.remoteLoading[containerKey]) {
+      return scope.remoteLoading[containerKey];
     }
   }
 
+  if (!reference.url) {
+    throw new Error('Reference url is undefined');
+  }
+
+  const globalScope =
+    typeof window !== 'undefined' ? window : global.__remote_scope__;
+
+  // TODO: Consider passing this in, as a strategy of how to load the container
+  const asyncContainer = createWebpackRemoteContainer(
+    globalScope,
+    remoteGlobal,
+    reference.url,
+    containerKey
+  );
+
+  if (typeof window !== 'undefined') {
+    const scope = globalScope as Window;
+
+    // TODO: to match promise template system, can be removed once promise template is gone
+    if (!scope.remoteLoading) {
+      scope.remoteLoading = {};
+    }
+
+    scope.remoteLoading[containerKey] = asyncContainer;
+  }
+
   return asyncContainer;
+};
+
+const createWebpackRemoteContainer = async (
+  globalScope: RemoteScope | Window,
+  remoteName: string,
+  remoteUrl: string,
+  containerKey: string
+) => {
+  const __webpack_error__ = new Error() as Error & {
+    type: string;
+    request: string | null;
+  };
+
+  return new Promise<WebpackRemoteContainer>(function (resolve, reject) {
+    function resolveRemoteGlobal() {
+      const asyncContainer = globalScope[
+        remoteName
+      ] as unknown as AsyncContainer;
+      return resolve(asyncContainer);
+    }
+
+    if (typeof globalScope[remoteName] !== 'undefined') {
+      return resolveRemoteGlobal();
+    }
+
+    // TODO: Fix the type here.
+    (__webpack_require__ as any).l(
+      remoteUrl,
+      function (event: Event) {
+        if (typeof globalScope[containerKey] !== 'undefined') {
+          return resolveRemoteGlobal();
+        }
+
+        const errorType =
+          event && (event.type === 'load' ? 'missing' : event.type);
+        const realSrc =
+          event && event.target && (event.target as HTMLScriptElement).src;
+
+        __webpack_error__.message =
+          'Loading script failed.\n(' +
+          errorType +
+          ': ' +
+          realSrc +
+          ' or global var ' +
+          remoteName +
+          ')';
+
+        __webpack_error__.name = 'ScriptExternalLoadError';
+        __webpack_error__.type = errorType;
+        __webpack_error__.request = realSrc;
+
+        reject(__webpack_error__);
+      },
+      containerKey
+    );
+  });
 };
 
 const createContainerSharingScope = (
@@ -280,7 +328,7 @@ const createContainerSharingScope = (
  * or
  *    { asyncContainer } - async container is a promise that resolves to the remote container
  */
-export const injectScript = (
+export const loadAndInitializeRemote = (
   keyOrRuntimeRemoteItem: string | RuntimeRemote
 ) => {
   const asyncContainer = loadScript(keyOrRuntimeRemoteItem);
@@ -311,42 +359,31 @@ export const createRuntimeVariables = (remotes: Remotes) => {
 };
 
 /**
- * Returns initialized webpack RemoteContainer.
- * If its' script does not loaded - then load & init it firstly.
+ * Returns initialized webpack RemoteContainer if available.
  */
-export const getContainer = async (
+export const getContainer = (
   remoteContainer: string | RemoteData
-): Promise<WebpackRemoteContainer | undefined> => {
+): WebpackRemoteContainer | undefined => {
   if (!remoteContainer) {
     throw Error(`Remote container options is empty`);
   }
 
   const containerScope =
-    //@ts-ignore
     typeof window !== 'undefined' ? window : global.__remote_scope__;
 
   if (typeof remoteContainer === 'string') {
     if (containerScope[remoteContainer]) {
-      return containerScope[remoteContainer];
+      return containerScope[remoteContainer] as WebpackRemoteContainer;
     }
 
-    return;
+    return undefined;
   } else {
     const uniqueKey = remoteContainer.uniqueKey as string;
     if (containerScope[uniqueKey]) {
-      return containerScope[uniqueKey];
+      return containerScope[uniqueKey] as WebpackRemoteContainer;
     }
 
-    const container = await injectScript({
-      global: remoteContainer.global,
-      url: remoteContainer.url,
-    });
-
-    if (container) {
-      return container;
-    }
-
-    throw Error(`Remote container ${remoteContainer.url} is empty`);
+    return undefined;
   }
 };
 
@@ -355,14 +392,19 @@ export const getContainer = async (
  * If you provide `exportName` it automatically return exact property value from module.
  *
  * @example
- *   remote.getModule('./pages/index', 'default')
+ *   getModule('./pages/index', 'default')
  */
 export const getModule = async ({
   remoteContainer,
   modulePath,
   exportName,
 }: GetModuleOptions) => {
-  const container = await getContainer(remoteContainer);
+  let container = await getContainer(remoteContainer);
+
+  if (!container) {
+    container = await loadAndInitializeRemote(remoteContainer);
+  }
+
   try {
     const modFactory = await container?.get(modulePath);
     if (!modFactory) return undefined;
@@ -374,6 +416,35 @@ export const getModule = async ({
     }
   } catch (error) {
     console.log(error);
+    return undefined;
+  }
+};
+
+/**
+ * Return remote modules from container (assumes default exports).
+ *
+ * @example
+ *   getModules('remote', 'shop', 'checkout')
+ */
+export const getModules = async ({
+  remoteContainer,
+  modulePaths,
+}: GetModulesOptions) => {
+  if (!remoteContainer) return undefined;
+
+  try {
+    const moduleFactories = await Promise.all(
+      modulePaths.map((modulePath) => remoteContainer?.get(modulePath))
+    );
+
+    const modules = moduleFactories.map((modFactory) => {
+      if (!modFactory) return undefined;
+      return modFactory();
+    });
+
+    return modules;
+  } catch (error) {
+    console.error('[mf] - Unable to getModules', error);
     return undefined;
   }
 };

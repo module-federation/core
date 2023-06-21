@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { loadAndInitializeRemote, getModule } from '@module-federation/core';
+import { loadAndInitializeRemote } from '@module-federation/utilities';
 
 export default function ExposedPages() {
   const [pageMap, setPageMap] = useState('');
