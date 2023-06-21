@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { loadAndInitializeRemote } from '@module-federation/utilities';
+import { injectScript } from '@module-federation/utilities';
 
 export default function ExposedPages() {
   const [pageMap, setPageMap] = useState('');
   const [pageMapV2, setPageMapV2] = useState('');
 
   useEffect(() => {
-    loadAndInitializeRemote({
+    injectScript({
       global: 'home_app',
       url: 'http://localhost:3000/_next/static/chunks/remoteEntry.js',
     })
@@ -15,7 +15,7 @@ export default function ExposedPages() {
         setPageMap(data);
       });
 
-    loadAndInitializeRemote({
+    injectScript({
       global: 'home_app',
       url: 'http://localhost:3000/_next/static/chunks/remoteEntry.js',
     })

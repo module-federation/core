@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
 
-import { loadAndInitializeRemote } from '@module-federation/utilities';
+import { injectScript } from '@module-federation/utilities';
 
 export default function ExposedPages() {
   const [pageMap, setPageMap] = useState('');
   const [pageMapV2, setPageMapV2] = useState('');
 
   useEffect(() => {
-    loadAndInitializeRemote('checkout')
+    injectScript('checkout')
       .then((container) => container.get('./pages-map'))
       .then((data) => {
         setPageMap(data);
       });
 
-    loadAndInitializeRemote('checkout')
+    injectScript('checkout')
       .then((container) => container.get('./pages-map-v2'))
       .then((data) => {
         setPageMapV2(data);
