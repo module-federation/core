@@ -1,7 +1,7 @@
 import * as React from 'react';
 export {
   extractUrlAndGlobal,
-  injectScript,
+  loadAndInitializeRemote,
 } from '@module-federation/utilities';
 // @ts-ignore
 export { flushChunks } from '@module-federation/node/utils';

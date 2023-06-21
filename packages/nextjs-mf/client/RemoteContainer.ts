@@ -7,7 +7,7 @@ import type {
 
 import EventEmitter from 'eventemitter3';
 
-import { injectScript } from '../utils';
+import { loadAndInitializeRemote } from '../utils';
 
 /**
  * This is a Lazy loader of webpack remote container with some NextJS-specific helper methods.
@@ -86,7 +86,7 @@ export class RemoteContainer {
     this.events.emit('loadStart', this);
 
     try {
-      const container = await injectScript({
+      const container = await loadAndInitializeRemote({
         global: this.global,
         url: this.url,
       });

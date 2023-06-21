@@ -1,5 +1,5 @@
 {
-  "name": "react-ts-remote",
+  "name": "react_ts_remote",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/react-ts-remote/src",
   "projectType": "application",
@@ -7,7 +7,7 @@
     "build": {
       "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
-      "defaultConfiguration": "production",
+      "defaultConfiguration": "development",
       "options": {
         "compiler": "swc",
         "outputPath": "dist/apps/react-ts-remote",
@@ -53,19 +53,20 @@
       "executor": "@nrwl/react:module-federation-dev-server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "react-ts-remote:build",
+        "buildTarget": "react_ts_remote:build",
         "hmr": true,
         "port": 3004
       },
       "configurations": {
         "development": {
-          "buildTarget": "react-ts-remote:build:development"
+          "buildTarget": "react_ts_remote:build:development"
         },
         "production": {
-          "buildTarget": "react-ts-remote:build:production",
+          "buildTarget": "react_ts_remote:build:production",
           "hmr": false
         }
-      }
+      },
+      "dependsOn": ["build"]
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",

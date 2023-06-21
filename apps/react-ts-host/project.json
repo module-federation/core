@@ -1,5 +1,5 @@
 {
-  "name": "react-ts-host",
+  "name": "react_ts_host",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/react-ts-host/src",
   "projectType": "application",
@@ -7,7 +7,7 @@
     "build": {
       "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
-      "defaultConfiguration": "production",
+      "defaultConfiguration": "development",
       "options": {
         "compiler": "swc",
         "outputPath": "dist/apps/react-ts-host",
@@ -53,19 +53,21 @@
       "executor": "@nrwl/react:module-federation-dev-server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "react-ts-host:build",
+        "buildTarget": "react_ts_host:build",
         "hmr": true,
-        "port": 3003
+        "port": 3003,
+        "devRemotes": ["react_ts_remote"]
       },
       "configurations": {
         "development": {
-          "buildTarget": "react-ts-host:build:development"
+          "buildTarget": "react_ts_host:build:development"
         },
         "production": {
-          "buildTarget": "react-ts-host:build:production",
+          "buildTarget": "react_ts_host:build:production",
           "hmr": false
         }
-      }
+      },
+      "dependsOn": ["build"]
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
@@ -78,19 +80,19 @@
       "executor": "@nrwl/web:file-server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "react-ts-host:build",
+        "buildTarget": "react_ts_host:build",
         "port": 3003
       },
       "configurations": {
         "development": {
-          "buildTarget": "react-ts-host:build:development"
+          "buildTarget": "react_ts_host:build:development"
         },
         "production": {
-          "buildTarget": "react-ts-host:build:production"
+          "buildTarget": "react_ts_host:build:production"
         }
       }
     }
   },
   "tags": [],
-  "implicitDependencies": ["typescript"]
+  "implicitDependencies": ["typescript", "utils"]
 }

@@ -1,5 +1,6 @@
 const { withModuleFederation } = require('@nrwl/react/module-federation');
 const { FederatedTypesPlugin } = require('@module-federation/typescript');
+const path = require('path');
 
 const baseConfig = require('./module-federation.config');
 
@@ -16,26 +17,36 @@ module.exports = async (config, context) => {
   /** @type {import('webpack').Configuration} */
   const parsedConfig = mf(config, context);
 
-  let moduleFederationPlugin;
+  if (!parsedConfig.plugins) {
+    parsedConfig.plugins = [];
+  }
 
-  const plugins = parsedConfig.plugins?.filter((p) => {
-    if (p.constructor.name === 'ModuleFederationPlugin') {
-      moduleFederationPlugin = p;
-      return false;
-    }
-    return true;
-  });
-
-  parsedConfig.plugins = [
-    ...(plugins || []),
+  parsedConfig.plugins.push(
     new FederatedTypesPlugin({
-      federationConfig: moduleFederationPlugin._options,
-    }),
-  ];
+      federationConfig: {
+        ...baseConfig,
+        filename: 'remoteEntry.js',
+      },
+    })
+  );
 
   parsedConfig.infrastructureLogging = {
     level: 'verbose',
     colors: true,
+  };
+
+  parsedConfig.devServer = {
+    ...(parsedConfig.devServer || {}),
+    //Needs to resolve static files from the dist folder (@mf-types)
+    static: path.resolve(__dirname, '../../dist/apps/react-ts-remote'),
+  };
+
+  //Temporary workaround - https://github.com/nrwl/nx/issues/16983
+  parsedConfig.experiments = { outputModule: false };
+
+  parsedConfig.output = {
+    ...parsedConfig.output,
+    scriptType: 'text/javascript',
   };
 
   return parsedConfig;
