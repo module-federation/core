@@ -2,6 +2,17 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.8.2-rc4.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc3.1...utils-1.8.2-rc4.0) (2023-06-21)
+
+
+### Bug Fixes
+
+* Resolve condition names ([#974](https://github.com/module-federation/nextjs-mf/issues/974)) ([5e8b49c](https://github.com/module-federation/nextjs-mf/commit/5e8b49cf60f19dae6be4818a1c0ff783c7689393))
+* Runtime module checking ([#969](https://github.com/module-federation/nextjs-mf/issues/969)) ([b5c7af1](https://github.com/module-federation/nextjs-mf/commit/b5c7af1697a63d9e19f901238a4c0382ea0c3f50))
+* **Utils:** Unable to use importRemote util for root exported modules ([#970](https://github.com/module-federation/nextjs-mf/issues/970)) ([7bf6ecb](https://github.com/module-federation/nextjs-mf/commit/7bf6ecb602958ab5991d9c18f17e3d3755d84e91))
+
+
+
 ## [1.8.2-rc3.2](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc3.1...utils-1.8.2-rc3.2) (2023-06-15)
 
 
