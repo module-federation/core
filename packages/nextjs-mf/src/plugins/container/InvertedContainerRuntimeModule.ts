@@ -394,7 +394,10 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       initialConsumes.length > 0
         ? Template.asString([
             //@ts-ignore
-            `var initialConsumes = ${JSON.stringify(initialConsumes)};`,
+            `var initialConsumes = ${JSON.stringify(
+              //@ts-ignore
+              Array.from(new Set(initialConsumes))
+            )};`,
             // `initialConsumes.forEach(${runtimeTemplate.basicFunction('id', [
             //   `${
             //     RuntimeGlobals.moduleFactories
@@ -636,6 +639,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     const containerEntryModule = this.resolveContainerModule();
     //server runtime is always called webpack-runtime
     const isServer = chunk.name === 'webpack-runtime';
+    const isApi = chunk.name === 'webpack-api-runtime';
     const conditionMap = chunkGraph.getChunkConditionMap(chunk, chunkHasJs);
     // const hasJsMatcher = compileBooleanMatcher(conditionMap);
     // find the main webpack runtime, skip all other chunks
@@ -660,15 +664,18 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         ? RuntimeGlobals.global || 'global'
         : 'global';
 
-      const containerScope = isServer
-        ? [globalObject, "['__remote_scope__']"].join('')
-        : 'window';
-
+      const containerScope =
+        isServer || isApi
+          ? [globalObject, "['__remote_scope__']"].join('')
+          : 'window';
+      const runtimeId = isApi ? 'webpack-api-runtime' : 'webpack-runtime';
       const serverContainerKickstart = Template.asString([
         '__webpack_require__.own_remote = new Promise(function(resolve,reject){',
         Template.indent([
           // attachOnMount,
-          `__webpack_require__.O(0, ["webpack-runtime"], function() {`,
+          `__webpack_require__.O(0, [${JSON.stringify(
+            runtimeId
+          )}], function() {`,
           // attachOnMount,
           `if(!__webpack_require__.m[${JSON.stringify(containerModuleId)}]) {`,
           `console.error('container does not exist in host runtime graph', ${JSON.stringify(
