@@ -9,11 +9,11 @@ class UniversalFederationPlugin {
         this.context = context || {};
     }
     apply(compiler) {
-        const { isServer, verbose, ...options } = this._options;
+        const { isServer, debug, ...options } = this._options;
         const { webpack } = compiler;
         if (isServer || compiler.options.name === 'server') {
             new NodeFederationPlugin_1.default(options, this.context).apply(compiler);
-            new StreamingTargetPlugin_1.default({ ...options, verbose }).apply(compiler);
+            new StreamingTargetPlugin_1.default({ ...options, debug }).apply(compiler);
         }
         else {
             new (this.context.ModuleFederationPlugin ||

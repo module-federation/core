@@ -19,8 +19,12 @@ const performReload = (shouldReload) => {
     //@ts-ignore
     global.__remote_scope__ = {
         _config: {},
-        _medusa: {}
+        _medusa: {},
     };
+    //@ts-ignore
+    globalThis.backupScope = {};
+    //@ts-ignore
+    globalThis.factoryTracker = {};
     Object.keys(req.cache).forEach((key) => {
         if (requireCacheRegex.test(key)) {
             delete req.cache[key];
@@ -41,7 +45,7 @@ const revalidate = () => {
             const fetches = [];
             for (const property in remoteScope) {
                 if (remoteScope[property].fake) {
-                    console.log('unreachable remote found', property, 'hot reloading to refetch');
+                    console.error('unreachable remote found', property, 'hot reloading to refetch');
                     res(true);
                     break;
                 }
@@ -49,9 +53,13 @@ const revalidate = () => {
             const fetchModule = getFetchModule();
             if (remoteScope._medusa) {
                 for (const property in remoteScope._medusa) {
-                    fetchModule(property).then((res) => res.json()).then((medusaResponse) => {
+                    fetchModule(property)
+                        .then((res) => res.json())
+                        .then((medusaResponse) => {
                         //@ts-ignore
-                        if (medusaResponse.version !== remoteScope._medusa[property].version) {
+                        if (medusaResponse.version !==
+                            //@ts-ignore
+                            remoteScope?._medusa[property].version) {
                             console.log('medusa config changed', property, 'hot reloading to refetch');
                             performReload(true);
                             return res(true);

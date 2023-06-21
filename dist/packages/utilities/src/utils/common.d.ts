@@ -1,9 +1,11 @@
-import type { Remotes, RuntimeRemote, WebpackRemoteContainer, RemoteData, GetModuleOptions } from '../types';
+import type { GetModuleOptions, RemoteData, Remotes, RuntimeRemote, WebpackRemoteContainer } from '../types';
+import { RemoteVars } from '../types';
+export declare const remoteVars: RemoteVars;
 export declare const extractUrlAndGlobal: (urlAndGlobal: string) => [string, string];
-export declare const importDelegatedModule: (keyOrRuntimeRemoteItem: string | RuntimeRemote) => Promise<any>;
 export declare const createDelegatedModule: (delegate: string, params: {
     [key: string]: any;
 }) => string;
+export declare const loadScript: (keyOrRuntimeRemoteItem: string | RuntimeRemote) => any;
 /**
  * Return initialized remote container by remote's key or its runtime remote item data.
  *

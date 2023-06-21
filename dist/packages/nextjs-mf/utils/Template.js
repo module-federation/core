@@ -266,7 +266,7 @@ class Template {
      */
     static renderChunkModules(renderContext, modules, renderModule, prefix = '') {
         const { chunkGraph } = renderContext;
-        var source = new webpack_sources_1.ConcatSource();
+        const source = new webpack_sources_1.ConcatSource();
         if (modules.length === 0) {
             return null;
         }

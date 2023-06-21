@@ -45,7 +45,8 @@
     "lodash.get": "^4.4.2",
     "node-fetch": "2.6.9",
     "util": "0.11.1",
-    "@module-federation/utilities": "1.8.0"
+    "@module-federation/utilities": "1.8.2-rc3.2",
+    "webpack-sources": "3.2.3"
   },
   "main": "./src/index.js",
   "exports": {

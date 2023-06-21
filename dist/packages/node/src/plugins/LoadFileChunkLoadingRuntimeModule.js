@@ -36,7 +36,7 @@ class ReadFileChunkLoadingRuntimeModule extends webpack_1.RuntimeModule {
      * @param {unknown[]} items item to log
      */
     _getLogger(...items) {
-        if (!this.options.verbose) {
+        if (!this.options.debug) {
             return '';
         }
         return `console.log(${items.join(',')});`;
@@ -77,6 +77,14 @@ class ReadFileChunkLoadingRuntimeModule extends webpack_1.RuntimeModule {
                 if (c.ids) {
                     for (const id of c.ids)
                         initialChunkIds.add(id);
+                }
+                for (const c of chunk.getAllAsyncChunks()) {
+                    if (c === chunk || chunkHasJs(c, chunkGraph))
+                        continue;
+                    if (c.ids) {
+                        for (const id of c.ids)
+                            initialChunkIds.add(id);
+                    }
                 }
             }
             return initialChunkIds;
@@ -172,7 +180,6 @@ class ReadFileChunkLoadingRuntimeModule extends webpack_1.RuntimeModule {
                     `${fn}.readFileVm = function(chunkId, promises) {`,
                     hasJsMatcher !== false
                         ? webpack_1.Template.indent([
-                            '',
                             'var installedChunkData = installedChunks[chunkId];',
                             'if(installedChunkData !== 0) { // 0 means "already installed".',
                             webpack_1.Template.indent([
@@ -192,6 +199,7 @@ class ReadFileChunkLoadingRuntimeModule extends webpack_1.RuntimeModule {
                                             `var filename = require('path').join(__dirname, ${JSON.stringify(rootOutputDir)} + ${webpack_1.RuntimeGlobals.getChunkScriptFilename}(chunkId));`,
                                             "var fs = require('fs');",
                                             'if(fs.existsSync(filename)) {',
+                                            this._getLogger(`'chunk filename local load', chunkId`),
                                             webpack_1.Template.indent([
                                                 "fs.readFile(filename, 'utf-8', function(err, content) {",
                                                 webpack_1.Template.indent([
@@ -204,6 +212,7 @@ class ReadFileChunkLoadingRuntimeModule extends webpack_1.RuntimeModule {
                                                 '});',
                                             ]),
                                             '} else {',
+                                            this._getLogger(`'chunk filename remote load', chunkId`),
                                             webpack_1.Template.indent([
                                                 loadScript_1.default,
                                                 this._getLogger(`'needs to load remote module from ${JSON.stringify(name)}'`),
@@ -250,6 +259,7 @@ class ReadFileChunkLoadingRuntimeModule extends webpack_1.RuntimeModule {
                                                 // `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
                                                 // since im looping over remote and creating global at build time, i dont need to split string at runtime
                                                 // there may still be a use case for that with promise new promise, depending on how we design it.
+                                                this._getLogger('"requestedRemote"', 'requestedRemote', 'current name', JSON.stringify(name)),
                                                 `var scriptUrl = new URL(requestedRemote);`,
                                                 this._getLogger(`'global.__remote_scope__'`, `global.__remote_scope__`),
                                                 `var chunkName = ${webpack_1.RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
@@ -291,7 +301,11 @@ class ReadFileChunkLoadingRuntimeModule extends webpack_1.RuntimeModule {
             withExternalInstallChunk
                 ? webpack_1.Template.asString([
                     'module.exports = __webpack_require__;',
-                    `${webpack_1.RuntimeGlobals.externalInstallChunk} = installChunk;`,
+                    `${webpack_1.RuntimeGlobals.externalInstallChunk} = function(){`,
+                    this.options.debug
+                        ? `console.debug('node: webpack installing to install chunk id:', arguments['0'].id);`
+                        : '',
+                    `return installChunk.apply(this, arguments)};`,
                 ])
                 : '// no external install chunk',
             '',

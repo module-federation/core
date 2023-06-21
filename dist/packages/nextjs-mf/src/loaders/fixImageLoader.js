@@ -34,7 +34,7 @@ async function fixImageLoader(remaining) {
             webpack_1.Template.asString([
                 'try {',
                 webpack_1.Template.indent([
-                    'const remoteEntry = global.__remote_scope__ && global.remoteEntryName && global.__remote_scope__._config[global.remoteEntryName];',
+                    'const remoteEntry = global.__remote_scope__ && global.__remote_scope__._config[__webpack_runtime_id__];',
                     `if (remoteEntry) {`,
                     webpack_1.Template.indent([
                         `const splitted = remoteEntry.split('/_next')`,

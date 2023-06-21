@@ -3,7 +3,7 @@ import type { Compiler, container } from 'webpack';
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
     isServer: boolean;
     promiseBaseURI?: string;
-    verbose?: boolean;
+    debug?: boolean;
 }
 interface NodeFederationContext {
     ModuleFederationPlugin?: typeof container.ModuleFederationPlugin;

@@ -2,7 +2,7 @@ import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
     experiments?: Record<string, unknown>;
-    verbose?: boolean;
+    debug?: boolean;
 }
 interface Context {
     ModuleFederationPlugin?: typeof container.ModuleFederationPlugin;
@@ -14,7 +14,7 @@ declare class NodeFederationPlugin {
     private _options;
     private context;
     private experiments;
-    constructor({ experiments, verbose, ...options }: NodeFederationOptions, context: Context);
+    constructor({ experiments, debug, ...options }: NodeFederationOptions, context: Context);
     apply(compiler: Compiler): void;
 }
 export default NodeFederationPlugin;

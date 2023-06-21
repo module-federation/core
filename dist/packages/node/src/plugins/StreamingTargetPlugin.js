@@ -37,7 +37,7 @@ class StreamingTargetPlugin {
             remotes: this.options.remotes,
             baseURI: compiler.options.output.publicPath,
             promiseBaseURI: this.options.promiseBaseURI,
-            verbose: this.options.verbose,
+            debug: this.options.debug,
         }).apply(compiler);
     }
 }

@@ -1,4 +1,4 @@
-import { ConcatSource, PrefixSource } from 'webpack-sources';
+import { ConcatSource, PrefixSource } from "webpack-sources";
 export declare const NUMBER_OF_IDENTIFIER_START_CHARS: number;
 export declare const NUMBER_OF_IDENTIFIER_CONTINUATION_CHARS: number;
 /**

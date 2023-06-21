@@ -2,7 +2,7 @@ import type { Compiler } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 interface StreamingTargetOptions extends ModuleFederationPluginOptions {
     promiseBaseURI?: string;
-    verbose?: boolean;
+    debug?: boolean;
 }
 declare class StreamingTargetPlugin {
     private options;

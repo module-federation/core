@@ -47,7 +47,7 @@
     "extract-i18n:website": "nx run website:extract-i18n",
     "test:all": "nx run-many --target=test",
     "repair": "nx repair",
-    "dist": "nx build node && nx run-many --target=build --projects=typescript,utils,node,nextjs-mf,storybook-addon,native-federation-typescript,native-federation-tests"
+    "dist": "nx build nextjs-mf --cache=false"
   },
   "dependencies": {
     "adm-zip": "^0.5.10",

@@ -5,7 +5,7 @@ interface ReadFileChunkLoadingRuntimeModuleOptions {
     promiseBaseURI?: string;
     remotes: Record<string, string>;
     name?: string;
-    verbose?: boolean;
+    debug?: boolean;
 }
 interface ChunkLoadingContext {
     webpack: Compiler['webpack'];

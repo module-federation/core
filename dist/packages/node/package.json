@@ -1,8 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "0.15.1",
-  "type": "commonjs",
+  "version": "0.15.2-rc3.2",
   "main": "src/index.js",
   "exports": {
     ".": {
@@ -35,7 +34,7 @@
   "dependencies": {
     "encoding": "^0.1.13",
     "node-fetch": "^2.6.7",
-    "@module-federation/utilities": "1.8.0"
+    "@module-federation/utilities": "1.8.2-rc3.2"
   },
   "peerDependencies": {
     "next": "^12||^13",

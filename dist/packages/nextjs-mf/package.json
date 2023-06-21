@@ -1,11 +1,10 @@
 {
   "name": "@module-federation/nextjs-mf",
-  "version": "6.5.1",
+  "version": "6.5.2-rc3.2",
   "license": "MIT",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "public": true,
-  "type": "commonjs",
   "description": "Module Federation helper for NextJS",
   "repository": "https://github.com/module-federation/universe/tree/main/packages/nextjs-mf",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
@@ -16,13 +15,13 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "encoding": "0.1.13",
     "eventemitter3": "^5.0.0",
     "fast-glob": "^3.2.11",
-    "node-fetch": "2.6.9",
     "webpack-sources": "^3.2.3",
-    "@module-federation/node": "0.15.1",
-    "@module-federation/utilities": "1.8.0"
+    "@module-federation/node": "0.15.2-rc3.2",
+    "@module-federation/utilities": "1.8.2-rc3.2",
+    "encoding": "0.1.13",
+    "node-fetch": "2.6.9"
   },
   "peerDependencies": {
     "next": "^12 || ^13",

@@ -62,7 +62,7 @@ const generateRemoteTemplate = (url, global) => `new Promise(function (resolve, 
     return {
       fake: true,
       get: (arg) => {
-        console.log('faking', arg, 'module on', ${JSON.stringify(global)});
+        console.warn('faking', arg, 'module on', ${JSON.stringify(global)});
 
         return Promise.resolve(() => {
           return () => null
@@ -75,53 +75,7 @@ const generateRemoteTemplate = (url, global) => `new Promise(function (resolve, 
     if(remote.fake) {
       return remote;
     }
-    const proxy = {
-      get: (arg)=>{
-        return remote.get(arg).then((f)=>{
-          const m = f();
-          return ()=>new Proxy(m, {
-            get: (target, prop)=>{
-              if(global.usedChunks) global.usedChunks.add(${JSON.stringify(global)} + "->" + arg);
-              return target[prop];
-            }
-          })
-        })
-      },
-      init: function(shareScope) {
-        const handler = {
-          get(target, prop) {
-            if (target[prop]) {
-              Object.values(target[prop]).forEach(function(o) {
-                if(o.from === '_N_E') {
-                  o.loaded = 1
-                }
-              })
-            }
-            return target[prop]
-          },
-          set(target, property, value) {
-            if(global.usedChunks) global.usedChunks.add(${JSON.stringify(global)} + "->" + property);
-            if (target[property]) {
-              return target[property]
-            }
-            target[property] = value
-            return true
-          }
-        }
-        try {
-          global.__remote_scope__[${JSON.stringify(global)}].init(new Proxy(shareScope, handler))
-        } catch (e) {
-
-        }
-        global.__remote_scope__[${JSON.stringify(global)}].__initialized = true
-      }
-    }
-    try  {
-      proxy.init(__webpack_require__.S.default)
-    } catch(e) {
-      console.error('failed to init', ${JSON.stringify(global)}, e)
-    }
-    return proxy
+    return remote;
   })`;
 exports.generateRemoteTemplate = generateRemoteTemplate;
 /*
@@ -140,7 +94,7 @@ const parseRemoteSyntax = (remote) => {
 };
 exports.parseRemoteSyntax = parseRemoteSyntax;
 class NodeFederationPlugin {
-    constructor({ experiments, verbose, ...options }, context) {
+    constructor({ experiments, debug, ...options }, context) {
         this._options = options || {};
         this.context = context || {};
         this.experiments = experiments || {};
@@ -148,22 +102,29 @@ class NodeFederationPlugin {
     apply(compiler) {
         // When used with Next.js, context is needed to use Next.js webpack
         const { webpack } = compiler;
-        // const defs = {
-        //   'process.env.REMOTES': runtime,
-        //   'process.env.REMOTE_CONFIG': hot,
-        // };
-        // new ((webpack && webpack.DefinePlugin) || require("webpack").DefinePlugin)(
-        //     defs
-        // ).apply(compiler);
         const pluginOptions = {
             ...this._options,
             remotes: (0, exports.parseRemotes)(this._options.remotes || {}),
         };
         const chunkFileName = compiler.options?.output?.chunkFilename;
-        if (typeof chunkFileName === 'string' &&
-            !chunkFileName.includes('[hash]') &&
-            !chunkFileName.includes('[contenthash]')) {
-            compiler.options.output.chunkFilename = chunkFileName.replace('.js', '.[contenthash].js');
+        const uniqueName = compiler?.options?.output?.uniqueName || this._options.name;
+        if (typeof chunkFileName === 'string') {
+            const requiredSubstrings = [
+                '[chunkhash]',
+                '[contenthash]',
+                '[fullHash]',
+                uniqueName,
+            ];
+            if (
+            //@ts-ignore
+            !requiredSubstrings.some((substring) => 
+            //@ts-ignore
+            chunkFileName.includes(substring))) {
+                const suffix = compiler.options.mode === 'development'
+                    ? `.[chunkhash].js`
+                    : `.[chunkhash].js`;
+                compiler.options.output.chunkFilename = chunkFileName.replace('.js', suffix);
+            }
         }
         new (this.context.ModuleFederationPlugin ||
             (webpack && webpack.container.ModuleFederationPlugin) ||

@@ -6,7 +6,7 @@ interface CommonJsChunkLoadingOptions extends ModuleFederationPluginOptions {
     remotes: Record<string, string>;
     name?: string;
     asyncChunkLoading: boolean;
-    verbose?: boolean;
+    debug?: boolean;
 }
 declare class CommonJsChunkLoadingPlugin {
     private options;

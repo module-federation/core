@@ -146,6 +146,4 @@ function preparePageMapV2(pages) {
     });
     return result;
 }
-// module.exports = nextPageMapLoader;
-// module.exports.exposeNextjsPages = exposeNextjsPages;
 //# sourceMappingURL=nextPageMapLoader.js.map

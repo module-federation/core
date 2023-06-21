@@ -53,31 +53,19 @@ exports.executeLoadTemplate = `
     }
 
     if (typeof global.__remote_scope__[name] !== 'undefined') return callback(global.__remote_scope__[name]);
-
     const vm = require('vm');
     (global.webpackChunkLoad || global.fetch || require("node-fetch"))(url).then(function (res) {
       return res.text();
     }).then(function (scriptContent) {
       try {
         // TODO: remove conditional in v7, this is to prevent breaking change between v6.0.x and v6.1.x
-        const vmContext = typeof URLSearchParams === 'undefined' ?
-          {exports, require, module, global, __filename, __dirname, URL, console, process,Buffer, ...global, remoteEntryName: name} :
+        const vmContext = typeof URLSearchParams === 'undefined' ?{exports, require, module, global, __filename, __dirname, URL, URLSearchParams, console, process,Buffer, ...global, remoteEntryName: name}:
           {exports, require, module, global, __filename, __dirname, URL, URLSearchParams, console, process,Buffer, ...global, remoteEntryName: name};
-
         const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, {filename: 'node-federation-loader-' + name + '.vm'});
         const foundContainer = remote[name] || remote
 
         if(!global.__remote_scope__[name]) {
-          global.__remote_scope__[name] = {
-            get: foundContainer.get,
-            init: function(initScope, initToken) {
-              try {
-                foundContainer.init(initScope, initToken)
-              } catch (e) {
-                // already initialized
-              }
-            }
-          };
+          global.__remote_scope__[name] = foundContainer;
           global.__remote_scope__._config[name] = url;
         }
         callback(global.__remote_scope__[name]);
