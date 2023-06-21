@@ -138,25 +138,10 @@ const loadScript = (
 ): AsyncContainer | undefined => {
   const runtimeRemotes = getRuntimeRemotes();
 
-  let reference =
+  const reference =
     typeof keyOrRuntimeRemoteItem === 'string'
       ? runtimeRemotes[keyOrRuntimeRemoteItem]
       : keyOrRuntimeRemoteItem;
-
-  // Support dynamic modules
-  if (
-    typeof keyOrRuntimeRemoteItem === 'string' &&
-    !runtimeRemotes[keyOrRuntimeRemoteItem]
-  ) {
-    const [remoteUrl, remoteGlobal] = extractUrlAndGlobal(
-      keyOrRuntimeRemoteItem
-    );
-
-    reference = {
-      global: remoteGlobal,
-      url: remoteUrl,
-    };
-  }
 
   if (reference.asyncContainer) {
     if (typeof reference.asyncContainer === 'function') {
@@ -333,29 +318,6 @@ export const loadAndInitializeRemote = (
 ) => {
   const asyncContainer = loadScript(keyOrRuntimeRemoteItem);
   return createContainerSharingScope(asyncContainer);
-};
-
-export const createRuntimeVariables = (remotes: Remotes) => {
-  if (!remotes) {
-    return {};
-  }
-
-  return Object.entries(remotes).reduce((acc, remote) => {
-    // handle promise new promise and external new promise
-    if (remote[1].startsWith('promise ') || remote[1].startsWith('external ')) {
-      const promiseCall = remote[1]
-        .replace('promise ', '')
-        .replace('external ', '');
-      acc[remote[0]] = `function() {
-        return ${promiseCall}
-      }`;
-      return acc;
-    }
-    // if somehow its just the @ syntax or something else, pass it through
-    acc[remote[0]] = JSON.stringify(remote[1]);
-
-    return acc;
-  }, {} as Record<string, string>);
 };
 
 /**

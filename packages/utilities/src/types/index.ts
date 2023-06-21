@@ -3,25 +3,6 @@
 
 import type { container, WebpackOptionsNormalized } from 'webpack';
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __remote_scope__: RemoteScope;
-
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace NodeJS {
-    interface Global {
-      __remote_scope__: Record<string, WebpackRemoteContainer>;
-    }
-  }
-
-  interface Window {
-    [index: string | number]: unknown;
-    // TODO: to match promise template system, can be removed once promise template is gone
-    remoteLoading: Record<string, AsyncContainer | undefined>;
-    __remote_scope__: Record<string, WebpackRemoteContainer>;
-  }
-}
-
 export type ModuleFederationPluginOptions = ConstructorParameters<
   typeof container.ModuleFederationPlugin
 >['0'];
@@ -90,7 +71,7 @@ export type RemoteData = {
 };
 
 export type RuntimeRemote = Partial<RemoteData> & {
-  asyncContainer?: AsyncContainer | (() => AsyncContainer);
+  asyncContainer?: AsyncContainer;
 };
 
 export type RuntimeRemotesMap = Record<string, RuntimeRemote>;
@@ -110,13 +91,4 @@ export type GetModuleOptions = {
   modulePath: string;
   exportName?: string;
   remoteContainer: string | RemoteData;
-};
-
-export type GetModulesOptions = {
-  modulePaths: string[];
-  remoteContainer: WebpackRemoteContainer;
-};
-
-export type RemoteScope = {
-  [index: string]: AsyncContainer | string | undefined | Record<string, string>;
 };

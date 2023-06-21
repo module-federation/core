@@ -1,13 +1,11 @@
+/* eslint-disable no-var */
 /* eslint-disable @typescript-eslint/prefer-namespace-keyword */
-import type {
-  AsyncContainer,
-  WebpackRemoteContainer,
-  RemoteScope,
-} from '../types';
+import type { WebpackRemoteContainer } from '../types';
+
+export {};
 
 declare global {
-  // eslint-disable-next-line no-var
-  var __remote_scope__: RemoteScope;
+  var __remote_scope__: Record<string, WebpackRemoteContainer>;
 
   module NodeJS {
     interface Global {
@@ -16,9 +14,7 @@ declare global {
   }
 
   interface Window {
-    [index: string | number]: unknown;
-    // TODO: to match promise template system, can be removed once promise template is gone
-    remoteLoading: Record<string, AsyncContainer | undefined>;
+    [index: string | number]: any;
     __remote_scope__: Record<string, WebpackRemoteContainer>;
   }
 }
