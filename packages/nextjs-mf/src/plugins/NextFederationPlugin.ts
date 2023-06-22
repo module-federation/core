@@ -141,6 +141,7 @@ export class NextFederationPlugin {
     //patch next
     compiler.options.module.rules.push({
       test(req: string) {
+        if (isServer) return false;
         if (
           allowedPaths.some((p) => req.includes(path.join(compiler.context, p)))
         ) {
