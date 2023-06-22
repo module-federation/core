@@ -647,6 +647,8 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       return Template.asString('');
     }
 
+    console.log(chunk);
+
     const containerEntry = [containerEntryModule].map((module) => {
       //@ts-ignore
       const containerName = module?._name || name;
@@ -668,7 +670,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         isServer || isApi
           ? [globalObject, "['__remote_scope__']"].join('')
           : 'window';
-      const runtimeId = isApi ? 'webpack-api-runtime' : 'webpack-runtime';
+      const runtimeId = chunk.id;
       const serverContainerKickstart = Template.asString([
         '__webpack_require__.own_remote = new Promise(function(resolve,reject){',
         Template.indent([
@@ -712,7 +714,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         this.options.debug
           ? 'console.debug("O keys",Object.keys(__webpack_require__.O))'
           : '',
-        "__webpack_require__.O(0, ['webpack'], function() {",
+        `__webpack_require__.O(0, [${JSON.stringify(runtimeId)}], function() {`,
         this.options.debug
           ? "console.debug('runtime loaded, replaying all installed chunk requirements');"
           : '',
