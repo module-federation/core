@@ -45,3 +45,7 @@ Run `nx build my-app` to build the project. The build artifacts will be stored i
 Run `nx test my-app` to execute the unit tests via [Jest](https://jestjs.io).
 
 Run `nx affected:test` to execute the unit tests affected by a change.
+
+## Social links
+
+We are excited to announce the new [Discord community](https://discord.gg/T8c6yAxkbv) for Module Federation has been recently launched! This space will be used to discuss and share knowledge about the latest advancements in module federation and how to use it effectively. See you there!
