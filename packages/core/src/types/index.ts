@@ -8,14 +8,6 @@ export type ModuleFederationPluginOptions = ConstructorParameters<
   typeof container.ModuleFederationPlugin
 >['0'];
 
-export type WebpackRequire = {
-  l: (
-    url: string | undefined,
-    cb: (event: any) => void,
-    id: string | number
-  ) => Record<string, unknown>;
-};
-
 // TODO: Create generic interface.
 export type SharedScopes = WebpackSharedScope;
 
