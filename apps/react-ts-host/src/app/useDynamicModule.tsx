@@ -1,4 +1,4 @@
-import { getModule } from '@module-federation/core';
+import { loadAndInitializeRemote, getModule } from '@module-federation/core';
 
 type ModuleOptions = {
   name: string;
@@ -12,13 +12,17 @@ const useDynamicModule = <T,>({
   modulePath,
 }: ModuleOptions): Promise<T> => {
   return new Promise((resolve, reject) => {
-    getModule({
-      remoteContainer: {
-        global: name,
-        url,
-      },
-      modulePath,
-    }).then((module) => resolve(module as T));
+    loadAndInitializeRemote({
+      global: name,
+      url,
+    }).then((container) => {
+      getModule<T>({
+        remoteContainer: container,
+        modulePath,
+      }).then((module) => {
+        resolve(module as T);
+      });
+    });
   });
 };
 

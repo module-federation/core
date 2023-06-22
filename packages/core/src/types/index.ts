@@ -1,26 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="../../../../node_modules/webpack/module.d.ts" />
 
-import type { container, WebpackOptionsNormalized } from 'webpack';
-
-declare global {
-  // eslint-disable-next-line no-var
-  var __remote_scope__: RemoteScope;
-
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace NodeJS {
-    interface Global {
-      __remote_scope__: Record<string, WebpackRemoteContainer>;
-    }
-  }
-
-  interface Window {
-    [index: string | number]: unknown;
-    // TODO: to match promise template system, can be removed once promise template is gone
-    remoteLoading: Record<string, AsyncContainer | undefined>;
-    __remote_scope__: Record<string, WebpackRemoteContainer>;
-  }
-}
+import type { container } from 'webpack';
+import type { WebpackSharedScope } from '../integrations/webpack/types';
 
 export type ModuleFederationPluginOptions = ConstructorParameters<
   typeof container.ModuleFederationPlugin
@@ -34,33 +16,8 @@ export type WebpackRequire = {
   ) => Record<string, unknown>;
 };
 
-export type WebpackShareScopes = Record<
-  string,
-  Record<
-    string,
-    { loaded?: 1; get: () => Promise<unknown>; from: string; eager: boolean }
-  >
-> & {
-  default?: string;
-};
-
-export declare const __webpack_init_sharing__: (
-  parameter: string
-) => Promise<void>;
-
-export interface NextFederationPluginExtraOptions {
-  enableImageLoaderFix?: boolean;
-  enableUrlLoaderFix?: boolean;
-  exposePages?: boolean;
-  skipSharingNextInternals?: boolean;
-  automaticPageStitching?: boolean;
-  automaticAsyncBoundary?: boolean;
-}
-
-export interface NextFederationPluginOptions
-  extends ModuleFederationPluginOptions {
-  extraOptions: NextFederationPluginExtraOptions;
-}
+// TODO: Create generic interface.
+export type SharedScopes = WebpackSharedScope;
 
 export type Shared = ModuleFederationPluginOptions['shared'];
 export type Remotes = ModuleFederationPluginOptions['remotes'];
@@ -75,48 +32,48 @@ export type ExternalsType = Required<
 
 type ModulePath = string;
 
-export type WebpackRemoteContainer = {
+export type RemoteContainer = {
+  __initializing?: boolean;
   __initialized?: boolean;
-  get(modulePath: ModulePath): () => any;
-  init: (obj?: typeof __webpack_share_scopes__) => void;
+  get(modulePath: ModulePath): () => unknown;
+  init: (sharedScope?: SharedScopes) => void;
 };
 
-export type AsyncContainer = Promise<WebpackRemoteContainer>;
+export type AsyncContainer = Promise<RemoteContainer>;
 
-export type RemoteData = {
+export type RemoteOptions = {
   global: string;
   url: string;
   uniqueKey?: string;
 };
 
-export type RuntimeRemote = Partial<RemoteData> & {
+export type RuntimeRemote = Partial<RemoteOptions> & {
   asyncContainer?: AsyncContainer | (() => AsyncContainer);
 };
 
 export type RuntimeRemotesMap = Record<string, RuntimeRemote>;
 
-type Module = WebpackOptionsNormalized['module'];
-type Rules = Module['rules'];
-export type RuleSetRuleUnion = Rules[0];
-type RuleSetRule = Extract<RuleSetRuleUnion, { loader?: string }>;
-export type Loader = Extract<RuleSetRule['use'], { loader?: string }>;
-
 // Types for MFClient
 export type EventTypes = 'loadStart' | 'loadComplete' | 'loadError';
-type NextRoute = string;
-export type PageMap = Record<NextRoute, ModulePath>;
 
 export type GetModuleOptions = {
   modulePath: string;
   exportName?: string;
-  remoteContainer: string | RemoteData;
+  remoteContainer: RemoteContainer;
 };
 
 export type GetModulesOptions = {
   modulePaths: string[];
-  remoteContainer: WebpackRemoteContainer;
+  remoteContainer: RemoteContainer;
 };
 
 export type RemoteScope = {
-  [index: string]: AsyncContainer | string | undefined | Record<string, string>;
+  [index: string]:
+    | AsyncContainer
+    | string
+    | undefined
+    | Record<string, string>
+    | SharedScopes;
+  _config: Record<string, string>;
+  __sharing_scope__?: SharedScopes;
 };
