@@ -1,6 +1,6 @@
-import { getContainerKey, getScope } from '../../containers';
-import { WebpackScriptFactory } from '../webpack/factory';
-import { AsyncContainer, RemoteOptions } from '../../types';
+import { getContainerKey, getScope } from './containers';
+import { WebpackScriptFactory } from '../integrations/webpack/factory';
+import { AsyncContainer, RemoteOptions } from '../types';
 import { isWebpackAvailable } from './bundlers';
 
 export const ScriptFactory = {

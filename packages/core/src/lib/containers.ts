@@ -1,4 +1,4 @@
-import { SharingScopeFactory } from '../integrations/common/scopes';
+import { SharingScopeFactory } from './scopes';
 import {
   AsyncContainer,
   RemoteContainer,
@@ -32,7 +32,7 @@ export const createContainer = (remoteOptions: RemoteOptions) => {
 export const getContainerKey = (
   remoteOptions: string | RemoteOptions
 ): string => {
-  if (remoteOptions === 'string') {
+  if (typeof remoteOptions === 'string') {
     return remoteOptions as string;
   }
 
@@ -46,26 +46,26 @@ export const getContainerKey = (
  * @param remoteContainer
  * @returns
  */
-export const getContainer = (
-  remoteContainer: string | RemoteOptions
-): RemoteContainer | undefined => {
+export const getContainer = async (
+  remoteContainer: string | RemoteOptions // TODO: Should string be deprecated?
+): Promise<RemoteContainer | undefined> => {
   if (!remoteContainer) {
     throw Error(`Remote container options is empty`);
   }
-
-  const containerScope =
-    typeof window !== 'undefined' ? window : global.__remote_scope__;
+  const containerScope = getScope();
 
   if (typeof remoteContainer === 'string') {
     if (containerScope[remoteContainer]) {
-      return containerScope[remoteContainer] as RemoteContainer;
+      const container = containerScope[remoteContainer] as AsyncContainer;
+      return await container;
     }
 
     return undefined;
   } else {
-    const uniqueKey = remoteContainer.uniqueKey as string;
+    const uniqueKey = getContainerKey(remoteContainer);
     if (containerScope[uniqueKey]) {
-      return containerScope[uniqueKey] as RemoteContainer;
+      const container = containerScope[uniqueKey] as AsyncContainer;
+      return await container;
     }
 
     return undefined;
@@ -93,6 +93,11 @@ export const initContainer = async (
   return remoteContainer;
 };
 
+/**
+ * Create a shared scope ("shared space") if it doesn't exist, on the global common scope.
+ * @param scopeName
+ * @returns
+ */
 export const createSharingScope = async (scopeName = 'default') => {
   const scope = getScope();
 
@@ -109,6 +114,10 @@ export const createSharingScope = async (scopeName = 'default') => {
 
 export const getSharingScope = () => createSharingScope();
 
+/**
+ *
+ * @returns Generic globally available "scope" container
+ */
 export const getScope = (): RemoteScope => {
   if (typeof window === 'undefined') {
     if (!global.__remote_scope__) {

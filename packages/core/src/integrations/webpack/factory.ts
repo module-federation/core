@@ -4,9 +4,10 @@ import {
   RemoteScope,
   AsyncContainer,
 } from '../../types';
-import { IRemoteScriptFactory } from '../types';
-
-import { ISharingScopeFactory } from '../types';
+import {
+  IRemoteScriptFactory,
+  ISharingScopeFactory,
+} from '../../types/integrations';
 import { WebpackSharedScope } from './types';
 
 export class WebpackSharingScopeFactory implements ISharingScopeFactory {

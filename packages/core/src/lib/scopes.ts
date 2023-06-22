@@ -1,5 +1,5 @@
-import { SharedScopes } from '../../types';
-import { WebpackSharingScopeFactory } from '../webpack/factory';
+import { SharedScopes } from '../types';
+import { WebpackSharingScopeFactory } from '../integrations/webpack/factory';
 import { isWebpackAvailable } from './bundlers';
 
 // TODO: We need a centralized scope container

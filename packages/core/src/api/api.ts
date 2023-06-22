@@ -1,5 +1,5 @@
-import { getSharingScope, initContainer } from '../containers';
-import { ScriptFactory } from '../integrations/common';
+import { getSharingScope, initContainer } from '../lib';
+import { ScriptFactory } from '../lib';
 import {
   GetModuleOptions,
   GetModulesOptions,
