@@ -174,8 +174,6 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     'require',
     'default',
   ];
-  // Build will hang without this. Likely something in my plugin
-  compiler.options.optimization.chunkIds = 'named';
   // no custom chunk rules
   compiler.options.optimization.splitChunks = undefined;
 
