@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.5.2-rc5.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.5.2-rc4.0...nextjs-mf-6.5.2-rc5.0) (2023-06-23)
+
+
+### Bug Fixes
+
+* Non-Deterministic Chunk ID Handling ([#986](https://github.com/module-federation/nextjs-mf/issues/986)) ([b051c12](https://github.com/module-federation/nextjs-mf/commit/b051c12bbaf54f7327a4d25407326b6a7d1d9594))
+
+
+
 ## [6.5.2-rc4.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.5.2-rc3.1...nextjs-mf-6.5.2-rc4.0) (2023-06-21)
 
 
