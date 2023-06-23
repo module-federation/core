@@ -18,7 +18,13 @@
         "assets": [
           "packages/node/*.md"
         ]
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "publish": {
       "executor": "nx:run-commands",
