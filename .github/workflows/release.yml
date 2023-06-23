@@ -34,7 +34,7 @@ jobs:
           git config user.name "GitHub Bot"
           git config user.email "gituser@example.com"
       - name: Install packages
-        run: npm ci
+        run: npm i
       - name: Lint
         shell: bash
         run: |
