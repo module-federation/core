@@ -647,8 +647,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       return Template.asString('');
     }
 
-    console.log(chunk);
-
     const containerEntry = [containerEntryModule].map((module) => {
       //@ts-ignore
       const containerName = module?._name || name;
