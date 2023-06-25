@@ -66,6 +66,7 @@ jobs:
       - name: 'pnpm publish utilities'
         run: |
           cp ../../../.npmrc .
+          ls -a
           pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
