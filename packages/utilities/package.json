@@ -4,9 +4,6 @@
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "license": "MIT",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/ranshamay/"
-  },
   "repository": "https://github.com/ranshamay/nextjs-mf/tree/main/packages/utilities",
   "devDependencies": {
     "react": "18.2.0",
