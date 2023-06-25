@@ -21,15 +21,13 @@ jobs:
 #     - run: pnpm i
 #     - run: pnpm nx run-many -t build -p utils node  nextjs-mf
       - run: ls -a
-      - run: npm publish
+      - run: |
+          cd dist/packages/utils
+          npm run publish
+          cd ../node/
+          npm run publish
+          cd ../nextjs-mf
+          npm run publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        working-directory: dist/packages/utils
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        working-directory: dist/packages/node
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        working-directory: dist/packages/nextjs-mf
+
