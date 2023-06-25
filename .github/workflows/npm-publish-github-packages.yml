@@ -59,9 +59,14 @@ jobs:
       - name: Install next-mf dependencies
         run: cd packages/nextjs-mf && pnpm install --no-frozen-lockfile
 
+      - name: 'build utils'
+        run: pnpm nx run-many -t build -p utils
 
-      - name: 'build'
-        run: pnpm nx run-many -t build -p utils node nextjs-mf
+      - name: 'build node'
+        run: pnpm nx run-many -t build -p node
+
+      - name: 'build nextjs-mf'
+        run: pnpm nx run-many -t build -p nextjs-mf
 
       - uses: actions/setup-node@v3
         with:
