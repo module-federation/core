@@ -30,6 +30,8 @@ jobs:
           name: utilities
           path: dist/packages/utilities
 
+      - run: echo registry=https://npm.pkg.github.com/ranshamay >> .npmrc
+
       - run: npm publish utils
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
