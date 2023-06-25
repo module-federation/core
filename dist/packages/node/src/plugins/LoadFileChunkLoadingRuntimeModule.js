@@ -257,12 +257,12 @@ class ReadFileChunkLoadingRuntimeModule extends webpack_1.RuntimeModule {
                                                 `if(typeof requestedRemote === 'function'){
                     requestedRemote = await requestedRemote()
                   }`,
-                                                this._getLogger(`'var requestedRemote'`, `"requestedRemote"`),
+                                                this._getLogger(`'var requestedRemote'`, `requestedRemote`),
                                                 // example: uncomment this and server will never reply
                                                 // `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
                                                 // since im looping over remote and creating global at build time, i dont need to split string at runtime
                                                 // there may still be a use case for that with promise new promise, depending on how we design it.
-                                                this._getLogger('"requestedRemote"', '"requestedRemote"', '"current name"', JSON.stringify(name)),
+                                                this._getLogger('"requestedRemote"', 'requestedRemote', 'current name', JSON.stringify(name)),
                                                 `var scriptUrl = new URL(requestedRemote);`,
                                                 this._getLogger(`'global.__remote_scope__'`, `global.__remote_scope__`),
                                                 `var chunkName = ${webpack_1.RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
