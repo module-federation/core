@@ -121,7 +121,6 @@
     "@typescript-eslint/eslint-plugin": "5.59.7",
     "@typescript-eslint/parser": "5.59.7",
     "@vitest/coverage-c8": "^0.31.0",
-    "antora-navigator-extension": "git+https://gitlab.com/opendevise/oss/antora-navigator-extension",
     "asciidoctor-kroki": "^0.17.0",
     "autoprefixer": "^10.4.14",
     "babel-jest": "29.5.0",
