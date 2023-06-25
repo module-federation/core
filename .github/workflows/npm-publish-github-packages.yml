@@ -20,7 +20,7 @@ jobs:
           node-version: 18.11
           registry-url: https://npm.pkg.github.com/
       - name: Install packages
-        run: yarn install --frozen-lockfile 
+        run: yarn install --frozen-lockfile
       - name: 'build'
         run: yarn nx run-many -t build -p utils node  nextjs-mf
 
@@ -28,7 +28,7 @@ jobs:
         with:
           name: utilities
           path: dist/packages/utilities
-          
+
       - run: npm publish utils
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
