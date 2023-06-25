@@ -8,6 +8,16 @@
     "registry": "https://registry.npmjs.org/"
   },
   "repository": "https://github.com/module-federation/universe/tree/main/packages/utilities",
+  "devDependencies": {
+    "react": "18.2.0",
+    "next": "13.3.1"
+  },
+  "peerDependencies": {
+    "webpack": "^5.40.0",
+    "next": "^12 || ^13",
+    "react-dom": "^16 || ^17 || ^18",
+    "react": "^16 || ^17 || ^18"
+  },
   "peerDependenciesMeta": {
     "react": {
       "optional": true
