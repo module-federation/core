@@ -34,15 +34,15 @@ jobs:
 
       - run: npm publish utils
         env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
         working-directory: dist/packages/utilities
 
       - run: npm publish node
         env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
         working-directory: dist/packages/node
 
       - run: npm publish nextjs-mf
         env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
         working-directory: dist/packages/nextjs-mf
