@@ -23,6 +23,12 @@ jobs:
         run: yarn install --frozen-lockfile 
       - name: 'build'
         run: yarn nx run-many -t build -p utils node  nextjs-mf
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: utilities
+          path: dist/packages/utilities
+          
       - run: npm publish utils
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
