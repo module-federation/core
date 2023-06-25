@@ -394,7 +394,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             this._getLogger(
                               '"requestedRemote"',
                               'requestedRemote',
-                              'current name',
                               JSON.stringify(name)
                             ),
                             `var scriptUrl = new URL(requestedRemote);`,
