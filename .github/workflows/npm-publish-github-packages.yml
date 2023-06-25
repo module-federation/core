@@ -24,9 +24,9 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: 'build'
         run: yarn nx run-many -t build -p utils node  nextjs-mf
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
-          node-version: 12
+          node-version: 18.11
           registry-url: https://npm.pkg.github.com/
           scope: '@ranshamay'
       - run: npm ci
