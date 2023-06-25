@@ -4,7 +4,6 @@
   "engines": {
     "node": ">=18"
   },
-  "private": true,
   "description": "Module Federation helper for NextJS",
   "main": "src/index.js",
   "types": "src/index.d.ts",
