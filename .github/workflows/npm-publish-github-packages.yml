@@ -55,7 +55,7 @@ jobs:
       #   run: pnpm nx run-many -t build -p nextjs-mf
 
       - run: |
-          echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
+          echo registry=https://npm.pkg.github.com/ranshamay/ >> .npmrc
           echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
           echo always-auth=true >> .npmrc
           cat .npmrc
