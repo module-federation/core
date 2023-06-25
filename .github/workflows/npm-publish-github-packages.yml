@@ -65,15 +65,9 @@ jobs:
       - name: 'build node'
         run: pnpm nx run-many -t build -p node
 
-      - name: 'build nextjs-mf'
-        run: pnpm nx run-many -t build -p nextjs-mf
+      # - name: 'build nextjs-mf'
+      #   run: pnpm nx run-many -t build -p nextjs-mf
 
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18.11
-          registry-url: https://npm.pkg.github.com/
-          scope: '@ranshamay'
-      - run: pnpm ci
       - run: echo registry=https://npm.pkg.github.com/ranshamay >> .npmrc
       
       - run: pnpm publish
