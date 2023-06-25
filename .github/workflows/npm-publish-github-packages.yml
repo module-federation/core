@@ -63,11 +63,11 @@ jobs:
       #   env:
       #     NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
-      - name: 'pnpm publish utilities'
+      - name: 'npm publish utilities'
         run: |
           cp ../../../.npmrc .
           ls -a
-          pnpm publish --no-git-checks
+          npm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         working-directory: dist/packages/utilities
