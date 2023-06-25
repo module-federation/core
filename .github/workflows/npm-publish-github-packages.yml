@@ -13,12 +13,16 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js
+
+
+
+      - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18.11
           registry-url: https://npm.pkg.github.com/
           scope: '@ranshamay'
+
 
       - uses: pnpm/action-setup@v2
         name: Install pnpm
@@ -26,8 +30,6 @@ jobs:
         with:
           version: 7
           run_install: false
-      
-
 
 
       - name: Get pnpm store directory
@@ -35,7 +37,8 @@ jobs:
         shell: bash
         run: |
           echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-  
+
+
       - uses: actions/cache@v3
         name: Setup pnpm cache
         with:
@@ -43,9 +46,10 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-  
+
       - name: Install dependencies
         run: pnpm install
+
 
       - name: 'build'
         run: pnpm nx run-many -t build -p utils node nextjs-mf
