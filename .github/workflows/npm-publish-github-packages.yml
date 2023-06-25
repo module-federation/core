@@ -70,12 +70,12 @@ jobs:
 
       - run: |
           echo registry=https://npm.pkg.github.com/ranshamay >> .npmrc
-          echo //npm.pkg.github.com/:_authToken=${{secrets.PUBLISH_NPM_TOKEN}} >> .npmrc
+          echo //npm.pkg.github.com/:_authToken=${{secrets.GH_TOKEN}} >> .npmrc
           echo always-auth=true >> .npmrc
 
       - run: pnpm publish --no-git-checks
         env:
-          NODE_AUTH_TOKEN: ${{secrets.PUBLISH_NPM_TOKEN}}
+          NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
       - run: pnpm publish utils
         env:
           NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
