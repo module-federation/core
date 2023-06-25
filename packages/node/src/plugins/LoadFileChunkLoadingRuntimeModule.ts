@@ -384,7 +384,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                   }`,
                             this._getLogger(
                               `'var requestedRemote'`,
-                              `requestedRemote`
+                              `"requestedRemote"`
                             ),
 
                             // example: uncomment this and server will never reply
@@ -393,8 +393,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             // there may still be a use case for that with promise new promise, depending on how we design it.
                             this._getLogger(
                               '"requestedRemote"',
-                              'requestedRemote',
-                              'current name',
+                              '"requestedRemote"',
+                              '"current name"',
                               JSON.stringify(name)
                             ),
                             `var scriptUrl = new URL(requestedRemote);`,
