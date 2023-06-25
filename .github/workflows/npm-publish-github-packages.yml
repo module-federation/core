@@ -57,7 +57,6 @@ jobs:
       - run: |
           echo registry=https://npm.pkg.github.com/ranshamay >> .npmrc
           echo //npm.pkg.github.com/:_authToken=${GH_TOKEN} >> .npmrc
-          echo always-auth=true >> .npmrc
 
       # - run: pnpm publish --no-git-checks
       #   env:
