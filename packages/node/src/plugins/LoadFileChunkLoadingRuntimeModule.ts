@@ -9,6 +9,7 @@ import type { Chunk, ChunkGraph, Compiler } from 'webpack';
 import { RuntimeModule, RuntimeGlobals, Template } from 'webpack';
 import { getUndoPath } from 'webpack/lib/util/identifier';
 import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
+import { Logger } from '@module-federation/utilities';
 
 import loadScriptTemplate, { executeLoadTemplate } from './loadScript';
 
@@ -70,12 +71,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
    * @param {unknown[]} items item to log
    */
   _getLogger(...items: unknown[]) {
-    return `if (global.logger) {
-      global.logger.log({ data: { items:[${items.map(item => item,).join(',')}], global, __webpack_require__ } });
-    } else {
-      console.log(${items.join(',')});
-    }`;
-
+    return Logger.getInlineLogger()(items);
   }
 
   /**

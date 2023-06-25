@@ -8,6 +8,7 @@ const tslib_1 = require("tslib");
 const webpack_1 = require("webpack");
 const identifier_1 = require("webpack/lib/util/identifier");
 const compileBooleanMatcher_1 = tslib_1.__importDefault(require("webpack/lib/util/compileBooleanMatcher"));
+const utilities_1 = require("@module-federation/utilities");
 const loadScript_1 = tslib_1.__importStar(require("./loadScript"));
 class ReadFileChunkLoadingRuntimeModule extends webpack_1.RuntimeModule {
     constructor(runtimeRequirements, options, chunkLoadingContext) {
@@ -36,11 +37,7 @@ class ReadFileChunkLoadingRuntimeModule extends webpack_1.RuntimeModule {
      * @param {unknown[]} items item to log
      */
     _getLogger(...items) {
-        return `if (global.logger) {
-      global.logger.log({ data: { items:[${items.map(item => item).join(',')}], global, __webpack_require__ } });
-    } else {
-      console.log(${items.join(',')});
-    }`;
+        return utilities_1.Logger.getInlineLogger()(items);
     }
     /**
      * @returns {string} runtime code

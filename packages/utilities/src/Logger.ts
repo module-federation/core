@@ -13,4 +13,11 @@ export class Logger {
     this.loggerInstance = logger || console;
     return logger;
   }
-}
+
+  static getInlineLogger(): (items: unknown[]) =>string{
+      return (...items: unknown[]) =>  `if (global.logger) {
+        global.logger.log({ data: { items:[${items.map(item => item,).join(',')}], global, __webpack_require__ } });
+      } else {
+        console.log(${items.join(',')});
+      }`;
+}}

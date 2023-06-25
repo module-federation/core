@@ -1,17 +1,16 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.executeLoadTemplate = void 0;
+const utilities_1 = require("@module-federation/utilities");
 /**
  * loadScript(baseURI, fileName, cb)
  * loadScript(scriptUrl, cb)
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.executeLoadTemplate = void 0;
+const logger = utilities_1.Logger.getInlineLogger();
 //language=JS
 exports.default = `
   function loadScript(url, cb, chunkID) {
-    if(global.logger){
-      global.logger.log({data: {name: 'loadScript',global, __webpack_require__, url, chunkID }});
-    }
-    debugger;
+    ${logger(['loadScript'])}
     if (global.webpackChunkLoad) {
       global.webpackChunkLoad(url).then(function (resp) {
         return resp.text();
