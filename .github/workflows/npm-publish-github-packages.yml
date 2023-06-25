@@ -16,37 +16,37 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          cache: 'npm'
+          cache: 'pnpm'
           node-version: 18.11
           registry-url: https://npm.pkg.github.com/
           scope: '@ranshamay'
       - name: Install packages
-        run: npm install
+        run: pnpm install
       - name: 'build'
-        run: npm nx run-many -t build -p utils node nextjs-mf
+        run: pnpx nx run-many -t build -p utils node nextjs-mf
       - uses: actions/setup-node@v3
         with:
           node-version: 18.11
           registry-url: https://npm.pkg.github.com/
           scope: '@ranshamay'
-      - run: npm ci
+      - run: pnpm ci
       - run: echo registry=https://npm.pkg.github.com/ranshamay >> .npmrc
       
-      - run: npm publish
+      - run: pnpm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.PUBLISH_GITHUB_TOKEN}}
 
-      - run: npm publish utils
+      - run: pnpm publish utils
         env:
           NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
         working-directory: dist/packages/utilities
 
-      - run: npm publish node
+      - run: pnpm publish node
         env:
           NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
         working-directory: dist/packages/node
 
-      - run: npm publish nextjs-mf
+      - run: pnpm publish nextjs-mf
         env:
           NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
         working-directory: dist/packages/nextjs-mf
