@@ -12,7 +12,7 @@
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
   ],
   "publishConfig": {
-    "@ranshamay:registry": "https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com/@ranshamay"
   },
   "dependencies": {
     "fast-glob": "^3.2.11",
