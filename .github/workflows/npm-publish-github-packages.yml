@@ -70,7 +70,7 @@ jobs:
 
       - run: echo registry=https://npm.pkg.github.com/ranshamay >> .npmrc
       
-      - run: pnpm publish
+      - run: pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.PUBLISH_GITHUB_TOKEN}}
 
