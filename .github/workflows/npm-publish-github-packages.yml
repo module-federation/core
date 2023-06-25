@@ -1,7 +1,7 @@
 name: Publish Utils, Node, Nextjs-mf
 
 on:
-  
+
   push:
     branches:
       - main
@@ -55,8 +55,8 @@ jobs:
       #   run: pnpm nx run-many -t build -p nextjs-mf
 
       - run: |
-          echo registry=https://npm.pkg.github.com/ranshamay >> .npmrc
-          echo //npm.pkg.github.com/:_authToken=${{secrets.GH_TOKEN}} >> .npmrc
+          echo @${ranshamay}:registry=https://npm.pkg.github.com/ranshamay >> .npmrc
+          echo //npm.pkg.github.com/:_authToken=${GH_TOKEN} >> .npmrc
           echo always-auth=true >> .npmrc
 
       # - run: pnpm publish --no-git-checks
