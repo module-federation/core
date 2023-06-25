@@ -55,10 +55,10 @@ jobs:
       #   run: pnpm nx run-many -t build -p nextjs-mf
 
       - run: |
-          echo //npm.pkg.github.com/:_authToken=${{secrets.GH_TOKEN}} >> .npmrc
+          echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
           echo registry=https://npm.pkg.github.com/ranshamay/ >> .npmrc
           echo always-auth=true >> .npmrc
-          pnpm config set '//npm.pkg.github.com/:_authToken' "${{secrets.GH_TOKEN}}"
+          pnpm config set '//npm.pkg.github.com/:_authToken' "${{secrets.GITHUB_TOKEN}}"
 
       # - run: pnpm publish --no-git-checks
       #   env:
