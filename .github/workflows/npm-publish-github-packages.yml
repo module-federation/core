@@ -20,7 +20,7 @@ jobs:
           node-version: 16.14.2
           registry-url: https://npm.pkg.github.com/
       - name: Install packages
-        run: yarn install --frozen-lockfile 
+        run: yarn install
       - name: 'build'
         run: pnpm nx run-many -t build -p utils node  nextjs-mf
       - run: npm publish utils
