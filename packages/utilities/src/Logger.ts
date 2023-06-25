@@ -16,6 +16,7 @@ export class Logger {
 
   static getInlineLogger(): (items: unknown[]) =>string{
       return (...items: unknown[]) =>  `if (global.logger) {
+        debugger;
         global.logger.log({ data: { items:[${items.map(item => item,).join(',')}], global, __webpack_require__ } });
       } else {
         console.log(${items.join(',')});
