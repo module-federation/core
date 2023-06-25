@@ -16,20 +16,22 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          cache: 'yarn'
+          cache: 'npm'
           node-version: 18.11
           registry-url: https://npm.pkg.github.com/
           scope: '@ranshamay'
       - name: Install packages
-        run: yarn install --frozen-lockfile
+        run: npm install
       - name: 'build'
-        run: yarn nx run-many -t build -p utils node  nextjs-mf
+        run: npm nx run-many -t build -p utils node nextjs-mf
       - uses: actions/setup-node@v3
         with:
           node-version: 18.11
           registry-url: https://npm.pkg.github.com/
           scope: '@ranshamay'
+      - run: npm ci
       - run: echo registry=https://npm.pkg.github.com/ranshamay >> .npmrc
+      
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.PUBLISH_GITHUB_TOKEN}}
