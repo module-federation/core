@@ -64,7 +64,7 @@ jobs:
 
       - name: 'pnpm publish utilities'
         run: |
-          cd ../../../.npmrc .
+          cp ../../../.npmrc .
           pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
@@ -72,7 +72,7 @@ jobs:
 
       - name: 'pnpm publish node'
         run: |
-          cd ../../../.npmrc .
+          cp ../../../.npmrc .
           pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
@@ -80,7 +80,7 @@ jobs:
 
       - name: 'pnpm publish nextjs-mf'
         run: |
-          cd ../../../.npmrc .  
+          cp ../../../.npmrc .  
           pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
