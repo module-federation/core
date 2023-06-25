@@ -1,0 +1,34 @@
+name: Publish Utils, Node, Nextjs-mf
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.14.2
+          registry-url: https://npm.pkg.github.com/
+      - run: npm i -g pnpm
+      - run: pnpm i
+      - run: pnpm nx run-many -t build -p utils node  nextjs-mf
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        working-directory: ./dist/packages/utils
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        working-directory: ./dist/packages/node
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        working-directory: ./dist/packages/nextjs-mf
