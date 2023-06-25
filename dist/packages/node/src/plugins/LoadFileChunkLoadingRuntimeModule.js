@@ -39,6 +39,7 @@ class ReadFileChunkLoadingRuntimeModule extends webpack_1.RuntimeModule {
         return webpack_1.Template.asString([
             `if(global.logger){`,
             webpack_1.Template.asString([
+                'debugger;',
                 `global.logger.log(`,
                 webpack_1.Template.asString([
                     `{data: {items:${items.join(',')}, global, __webpack_require__ }}`,
