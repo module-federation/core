@@ -64,6 +64,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
         : '__filename'
     });`;
   }
+
   /**
    * @private
    * @param {unknown[]} items item to log
@@ -73,9 +74,11 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       `if(global.logger){`,
       Template.asString([
         'debugger;',
-        `global.logger.log({data: {items:${items.join(
-          ','
-        )}, global, __webpack_require__ }})`,
+        `global.logger.log(`,
+        Template.asString([
+          `{data: {items:${items.join(',')}, global, __webpack_require__ }}`,
+        ]),
+        `})`,
         Template.asString([
           `else {`,
           Template.asString([`console.log(${items.join(',')})`]),
