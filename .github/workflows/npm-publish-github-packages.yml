@@ -23,8 +23,6 @@ jobs:
         run: pnpm i
       - name: 'build'
         run: pnpm nx run-many -t build -p utils node  nextjs-mf
-      - run: ls -a
-
       - run: npm publish utils
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
