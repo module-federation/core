@@ -70,11 +70,21 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
    * @param {unknown[]} items item to log
    */
   _getLogger(...items: unknown[]) {
-    if (!this.options.debug) {
-      return '';
-    }
-
-    return `console.log(${items.join(',')});`;
+    return Template.asString([
+      `if(global.logger){`,
+      Template.asString([
+        `global.logger.log(`,
+        Template.asString([
+          `{data: {items:${items.join(',')}, global, __webpack_require__ }}`,
+        ]),
+        `)`,
+        Template.asString([
+          `else {`,
+          Template.asString([`console.log(${items.join(',')})`]),
+          `}`,
+        ]),
+      ]),
+    ]);
   }
 
   /**
