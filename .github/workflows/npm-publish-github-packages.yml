@@ -73,7 +73,6 @@ jobs:
       - run: pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.PUBLISH_GITHUB_TOKEN}}
-
       - run: pnpm publish utils
         env:
           NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
