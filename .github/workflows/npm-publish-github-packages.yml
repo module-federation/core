@@ -24,11 +24,6 @@ jobs:
       - run: |
           cd dist/packages/utils
           ls -a
-          npm run publish
-          cd ../node/
-          npm run publish
-          cd ../nextjs-mf
-          npm run publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
 

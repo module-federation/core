@@ -1,6 +1,0 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-gco nextmf npm run dist && git add . && git push
-gco node npm run dist && git add . && git push
-gco utils npm run dist && git add . && git push
-gco main
