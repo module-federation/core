@@ -23,6 +23,7 @@ jobs:
       - run: ls -a
       - run: |
           cd dist/packages/utils
+          ls -a
           npm run publish
           cd ../node/
           npm run publish
