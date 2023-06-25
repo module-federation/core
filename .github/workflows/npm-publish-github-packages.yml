@@ -50,7 +50,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-
       - name: 'build'
         run: pnpm nx run-many -t build -p utils node nextjs-mf
 
