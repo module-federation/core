@@ -63,7 +63,7 @@ jobs:
       #     NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
 
 
-      - run: pnpm publish utils --no-git-checks
+      - run: pnpm publish utilities --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
         working-directory: dist/packages/utilities
