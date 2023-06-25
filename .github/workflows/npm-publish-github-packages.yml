@@ -63,17 +63,17 @@ jobs:
       #     NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
 
 
-      - run: pnpm publish utils
+      - run: pnpm publish utils --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
         working-directory: dist/packages/utilities
 
-      - run: pnpm publish node
+      - run: pnpm publish node --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
         working-directory: dist/packages/node
 
-      - run: pnpm publish nextjs-mf
+      - run: pnpm publish nextjs-mf --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
         working-directory: dist/packages/nextjs-mf
