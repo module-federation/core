@@ -17,9 +17,9 @@ jobs:
         with:
           node-version: 16.14.2
           registry-url: https://npm.pkg.github.com/
-      - run: npm i -g pnpm
-      - run: pnpm i
-      - run: pnpm nx run-many -t build -p utils node  nextjs-mf
+#     - run: npm i -g pnpm
+#     - run: pnpm i
+#     - run: pnpm nx run-many -t build -p utils node  nextjs-mf
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
