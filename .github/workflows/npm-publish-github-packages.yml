@@ -68,11 +68,13 @@ jobs:
       # - name: 'build nextjs-mf'
       #   run: pnpm nx run-many -t build -p nextjs-mf
 
-      - run: echo registry=https://npm.pkg.github.com/ranshamay >> .npmrc
+      - run: | 
+          echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
+          echo //npm.pkg.github.com/:_authToken=${PUBLISH_NPM_TOKEN} >> .npmrc
       
       - run: pnpm publish --no-git-checks
         env:
-          NODE_AUTH_TOKEN: ${{secrets.PUBLISH_GITHUB_TOKEN}}
+          NODE_AUTH_TOKEN: ${{secrets.PUBLISH_NPM_TOKEN}}
       - run: pnpm publish utils
         env:
           NODE_AUTH_TOKEN: ${{secrets.GH_TOKEN}}
