@@ -5,11 +5,14 @@ import { Logger } from '@module-federation/utilities';
  * loadScript(baseURI, fileName, cb)
  * loadScript(scriptUrl, cb)
  */
-const logger = Logger.getInlineLogger();
+console.log(Logger);
+console.log(Logger.getInlineLogger);
+console.log(Logger.getInlineLogger());
+
 //language=JS
 export default `
   function loadScript(url, cb, chunkID) {
-    ${logger(['loadScript'])}
+    ${Logger.getInlineLogger()(['loadScript'])}
     if (global.webpackChunkLoad) {
       global.webpackChunkLoad(url).then(function (resp) {
         return resp.text();

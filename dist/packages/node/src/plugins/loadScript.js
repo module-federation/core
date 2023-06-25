@@ -6,11 +6,13 @@ const utilities_1 = require("@module-federation/utilities");
  * loadScript(baseURI, fileName, cb)
  * loadScript(scriptUrl, cb)
  */
-const logger = utilities_1.Logger.getInlineLogger();
+console.log(utilities_1.Logger);
+console.log(utilities_1.Logger.getInlineLogger);
+console.log(utilities_1.Logger.getInlineLogger());
 //language=JS
 exports.default = `
   function loadScript(url, cb, chunkID) {
-    ${logger(['loadScript'])}
+    ${utilities_1.Logger.getInlineLogger()(['loadScript'])}
     if (global.webpackChunkLoad) {
       global.webpackChunkLoad(url).then(function (resp) {
         return resp.text();
