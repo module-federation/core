@@ -56,7 +56,7 @@ jobs:
 
       - run: |
           echo //npm.pkg.github.com/:_authToken=${{secrets.GH_TOKEN}} >> .npmrc
-          echo registry=https://npm.pkg.github.com/@ranshamay/ >> .npmrc
+          echo registry=https://npm.pkg.github.com/ranshamay/ >> .npmrc
           echo always-auth=true >> .npmrc
           pnpm config set '//npm.pkg.github.com/:_authToken' "${{secrets.GH_TOKEN}}"
 
