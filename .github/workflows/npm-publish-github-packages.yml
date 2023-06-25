@@ -23,12 +23,12 @@ jobs:
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        working-directory: ./dist/packages/utils
+        working-directory: dist/packages/utils
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        working-directory: ./dist/packages/node
+        working-directory: dist/packages/node
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        working-directory: ./dist/packages/nextjs-mf
+        working-directory: dist/packages/nextjs-mf
