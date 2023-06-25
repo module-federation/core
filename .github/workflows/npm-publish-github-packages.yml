@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           cache: 'yarn'
-          node-version: 16.14.2
+          node-version: 18.11
           registry-url: https://npm.pkg.github.com/
       - name: Install packages
         run: yarn install --frozen-lockfile 
