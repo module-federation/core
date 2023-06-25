@@ -17,9 +17,12 @@ jobs:
         with:
           node-version: 16.14.2
           registry-url: https://npm.pkg.github.com/
-#     - run: npm i -g pnpm
-#     - run: pnpm i
-#     - run: pnpm nx run-many -t build -p utils node  nextjs-mf
+      - name: 'install PNPM'
+        run: npm i -g pnpm
+      - name: 'dependencies'
+        run: pnpm i
+      - name: 'build'
+        run: pnpm nx run-many -t build -p utils node  nextjs-mf
       - run: ls -a
       - run: |
           cd dist/packages/utilities
