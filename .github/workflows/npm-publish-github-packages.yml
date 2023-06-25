@@ -47,8 +47,18 @@ jobs:
       #     restore-keys: |
       #       ${{ runner.os }}-pnpm-store-
 
-      - name: Install dependencies
+      - name: Install global dependencies
         run: pnpm install --no-frozen-lockfile
+
+      - name: Install utilities dependencies
+        run: cd packages/utilities && pnpm install --no-frozen-lockfile
+
+      - name: Install node dependencies
+        run: cd packages/node && pnpm install --no-frozen-lockfile
+
+      - name: Install next-mf dependencies
+        run: cd packages/nextjs-mf && pnpm install --no-frozen-lockfile
+
 
       - name: 'build'
         run: pnpm nx run-many -t build -p utils node nextjs-mf
