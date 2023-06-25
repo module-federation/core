@@ -188,9 +188,5 @@
     "commitizen": {
       "path": "cz-conventional-changelog"
     }
-  },
-  "workspaces": [
-    "apps/**",
-    "dist/packages/**"
-  ]
+  }
 }
