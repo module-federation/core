@@ -67,7 +67,7 @@ jobs:
         run: |
           cp ../../../.npmrc .
           ls -a
-          npm config set '//npm.pkg.github.com/:_authToken' ${{secrets.GH_TOKEN}}"
+          npm config set '//npm.pkg.github.com/:_authToken' "${{secrets.GH_TOKEN}}"
           npm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
