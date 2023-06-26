@@ -4,7 +4,7 @@ import path from 'path';
 import type {
   ModuleFederationPluginOptions,
   SharedObject,
-} from '@module-federation/utilities';
+} from '@ranshamay/utilities';
 import {
   DEFAULT_SHARE_SCOPE,
   DEFAULT_SHARE_SCOPE_BROWSER,
@@ -27,7 +27,7 @@ export function getModuleFederationPluginConstructor(
   compiler: Compiler
 ): ConstructableModuleFederationPlugin {
   if (isServer) {
-    return require('@module-federation/node')
+    return require('@ranshamay/node')
       .NodeFederationPlugin as ConstructableModuleFederationPlugin;
   }
   return compiler.webpack.container

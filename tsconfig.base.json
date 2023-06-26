@@ -22,13 +22,13 @@
       "@module-federation/native-federation-typescript": [
         "packages/native-federation-typescript/src/index.ts"
       ],
-      "@module-federation/nextjs-mf": ["packages/nextjs-mf/src/index.ts"],
-      "@module-federation/node": ["packages/node/src/index.ts"],
+      "@ranshamay/nextjs-mf": ["packages/nextjs-mf/src/index.ts"],
+      "@ranshamay/node": ["packages/node/src/index.ts"],
       "@module-federation/storybook-addon": [
         "packages/storybook-addon/src/index.ts"
       ],
       "@module-federation/typescript": ["packages/typescript/src/index.ts"],
-      "@module-federation/utilities": ["packages/utilities/src/index.ts"]
+      "@ranshamay/utilities": ["packages/utilities/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

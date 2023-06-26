@@ -3,7 +3,7 @@ import type {
   EventTypes,
   RemoteData,
   PageMap,
-} from '@module-federation/utilities';
+} from '@ranshamay/utilities';
 
 import EventEmitter from 'eventemitter3';
 

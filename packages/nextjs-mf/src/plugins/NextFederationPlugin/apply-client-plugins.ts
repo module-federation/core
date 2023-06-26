@@ -2,10 +2,10 @@ import { Compiler } from 'webpack';
 import {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
-} from '@module-federation/utilities';
-import DelegateModulesPlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
+} from '@ranshamay/utilities';
+import DelegateModulesPlugin from '@ranshamay/utilities/src/plugins/DelegateModulesPlugin';
 import { DEFAULT_SHARE_SCOPE_BROWSER } from '../../internal';
-import { ChunkCorrelationPlugin } from '@module-federation/node';
+import { ChunkCorrelationPlugin } from '@ranshamay/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import JsonpChunkLoading from '../JsonpChunkLoading';
 /**

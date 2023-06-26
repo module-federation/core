@@ -6,7 +6,7 @@ function injectTopLoader(
   source: string
 ): string {
   const delegateModuleHoistImport =
-    "require('@module-federation/nextjs-mf/src/internal-delegate-hoist');\n";
+    "require('@ranshamay/nextjs-mf/src/internal-delegate-hoist');\n";
 
   return `${delegateModuleHoistImport}${source}`;
 }

@@ -3,9 +3,9 @@ import * as React from 'react';
 export {
   extractUrlAndGlobal,
   injectScript,
-} from '@module-federation/utilities/src/utils/common';
+} from '@ranshamay/utilities/src/utils/common';
 // @ts-ignore
-export { flushChunks } from '@module-federation/node/utils';
+export { flushChunks } from '@ranshamay/node/utils';
 export { FlushedChunks } from './flushedChunks';
 export type { FlushedChunksProps } from './flushedChunks';
 
@@ -15,7 +15,7 @@ export const revalidate = () => {
     return Promise.resolve(false);
   }
   // @ts-ignore
-  return import('@module-federation/node/utils').then((utils) => {
+  return import('@ranshamay/node/utils').then((utils) => {
     return utils.revalidate();
   });
 };

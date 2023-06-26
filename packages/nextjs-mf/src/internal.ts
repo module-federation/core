@@ -2,8 +2,8 @@ import type {
   ModuleFederationPluginOptions,
   SharedConfig,
   SharedObject,
-} from '@module-federation/utilities';
-import { createDelegatedModule } from '@module-federation/utilities';
+} from '@ranshamay/utilities';
+import { createDelegatedModule } from '@ranshamay/utilities';
 
 import { isRequiredVersion } from 'webpack/lib/sharing/utils';
 import { parseOptions } from 'webpack/lib/container/options';

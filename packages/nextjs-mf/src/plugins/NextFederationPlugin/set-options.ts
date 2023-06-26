@@ -2,7 +2,7 @@ import {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
-} from '@module-federation/utilities';
+} from '@ranshamay/utilities';
 
 /**
  * Utility function to set the main and extra options.

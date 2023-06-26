@@ -1,4 +1,4 @@
-import type { PageMap } from '@module-federation/utilities';
+import type { PageMap } from '@ranshamay/utilities';
 
 import * as React from 'react';
 

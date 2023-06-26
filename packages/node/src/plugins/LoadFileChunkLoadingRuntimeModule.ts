@@ -9,7 +9,7 @@ import type { Chunk, ChunkGraph, Compiler } from 'webpack';
 import { RuntimeModule, RuntimeGlobals, Template } from 'webpack';
 import { getUndoPath } from 'webpack/lib/util/identifier';
 import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
-import { Logger } from '@module-federation/utilities';
+import { Logger } from '@ranshamay/utilities';
 
 import loadScriptTemplate, { executeLoadTemplate } from './loadScript';
 

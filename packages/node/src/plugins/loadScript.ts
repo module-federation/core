@@ -1,4 +1,4 @@
-import { Logger } from '@module-federation/utilities';
+import { Logger } from '@ranshamay/utilities';
 
 
 /**

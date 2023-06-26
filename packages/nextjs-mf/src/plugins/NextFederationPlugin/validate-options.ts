@@ -1,5 +1,5 @@
 import { Compiler } from "webpack";
-import { ModuleFederationPluginOptions } from "@module-federation/utilities";
+import { ModuleFederationPluginOptions } from "@ranshamay/utilities";
 
 /**
  * Utility function to validate compiler options.

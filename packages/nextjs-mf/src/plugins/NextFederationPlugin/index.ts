@@ -9,8 +9,8 @@ import type {
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
   SharedObject,
-} from '@module-federation/utilities';
-import { createRuntimeVariables } from '@module-federation/utilities';
+} from '@ranshamay/utilities';
+import { createRuntimeVariables } from '@ranshamay/utilities';
 import type { Compiler, container } from 'webpack';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import {

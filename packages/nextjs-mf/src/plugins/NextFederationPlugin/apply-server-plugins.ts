@@ -1,6 +1,6 @@
 import { Compiler } from 'webpack';
-import { ModuleFederationPluginOptions } from '@module-federation/utilities';
-import DelegatesModulePlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
+import { ModuleFederationPluginOptions } from '@ranshamay/utilities';
+import DelegatesModulePlugin from '@ranshamay/utilities/src/plugins/DelegateModulesPlugin';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import JsonpChunkLoading from '../JsonpChunkLoading';
@@ -16,8 +16,8 @@ export function applyServerPlugins(
   compiler: Compiler,
   options: ModuleFederationPluginOptions
 ): void {
-  // Import the StreamingTargetPlugin from @module-federation/node
-  const { StreamingTargetPlugin } = require('@module-federation/node');
+  // Import the StreamingTargetPlugin from @ranshamay/node
+  const { StreamingTargetPlugin } = require('@ranshamay/node');
   new JsonpChunkLoading({ server: true }).apply(compiler);
 
   new DelegatesModulePlugin({
@@ -99,7 +99,7 @@ export function handleServerExternals(
       // Check if the module should not be treated as external
       if (
         ctx.request &&
-        (ctx.request.includes('@module-federation/utilities') ||
+        (ctx.request.includes('@ranshamay/utilities') ||
           ctx.request.includes('internal-delegate-hoist') ||
           Object.keys(options.shared || {}).some((key) => {
             return (
