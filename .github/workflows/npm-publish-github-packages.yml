@@ -70,11 +70,11 @@ jobs:
           echo always-auth=true >> .npmrc
         working-directory: dist/packages/nextjs-mf
 
-      - run: npm publish
+      - run: npm publish --access public
         working-directory: dist/packages/utilities
 
-      - run: npm publish
+      - run: npm publish --access public
         working-directory: dist/packages/node
 
-      - run: npm publish
+      - run: npm publish --access public
         working-directory: dist/packages/nextjs-mf
