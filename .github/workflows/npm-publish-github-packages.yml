@@ -25,11 +25,8 @@ jobs:
         name: Install pnpm
         id: pnpm-install
         with:
-          version: 7
-          run_install: false
-
-      - name: Install global dependencies
-        run: pnpm install
+          version: latest
+          run_install: true
 
       - name: build
         run: pnpm nx run-many -t build -p utils node nextjs-mf
