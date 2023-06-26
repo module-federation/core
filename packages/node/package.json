@@ -15,9 +15,6 @@
     },
     "./src/": "./src/"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/@ranshamay"
-  },
   "tags": [
     "module-federation",
     "node",

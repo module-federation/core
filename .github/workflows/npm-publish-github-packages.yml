@@ -15,15 +15,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-
-
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18.11
           registry-url: 'https://npm.pkg.github.com'
           scope: '@ranshamay'
-
+          token: ${{ secrets.GH_TOKEN }}
+          always-auth: true
 
       - uses: pnpm/action-setup@v2
         name: Install pnpm
@@ -31,7 +30,6 @@ jobs:
         with:
           version: 7
           run_install: false
-
 
       - name: Install global dependencies
         run: pnpm install --no-frozen-lockfile
@@ -51,40 +49,17 @@ jobs:
       - name: 'build node'
         run: pnpm nx run-many -t build -p node
 
-      # - name: 'build nextjs-mf'
-      #   run: pnpm nx run-many -t build -p nextjs-mf
-
-      - run: |
-          echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
-          echo registry=https://npm.pkg.github.com/ranshamay/ >> .npmrc
-          echo always-auth=true >> .npmrc
-          pnpm config set '//npm.pkg.github.com/:_authToken' "${{secrets.GITHUB_TOKEN}}"
-
-      # - run: pnpm publish --no-git-checks
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-      - name: 'npm publish utilities'
-        run: |
-          cp ../../../.npmrc .
-          ls -a
-          pnpm publish --no-git-checks
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         working-directory: dist/packages/utilities
 
-      - name: 'pnpm publish node'
-        run: |
-          cp ../../../.npmrc .
-          pnpm publish --no-git-checks
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         working-directory: dist/packages/node
 
-      - name: 'pnpm publish nextjs-mf'
-        run: |
-          cp ../../../.npmrc .  
-          pnpm publish --no-git-checks
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         working-directory: dist/packages/nextjs-mf
