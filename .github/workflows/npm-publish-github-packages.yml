@@ -46,6 +46,9 @@ jobs:
       - name: 'build node'
         run: pnpm nx run-many -t build -p node
 
+      - name: 'build nextjs-mf'
+        run: pnpm nx run-many -t build -p nextjs-mf
+
       - name: npmrc utils
         run: |
           echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
