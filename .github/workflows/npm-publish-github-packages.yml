@@ -19,10 +19,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18.11
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@ranshamay'
-          token: ${{ secrets.GH_TOKEN }}
-          always-auth: true
+      
+      - name: npmrc
+        run: |
+          echo //npm.pkg.github.com/:_authToken=${{secrets.GH_TOKEN}} >> .npmrc
+          echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
+          echo always-auth=true >> .npmrc
 
       - uses: pnpm/action-setup@v2
         name: Install pnpm
