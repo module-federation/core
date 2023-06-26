@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/utilities",
+  "name": "@ranshamay/utilities",
   "version": "1.8.2-rc3.2",
   "main": "src/index.js",
   "types": "src/index.d.ts",
