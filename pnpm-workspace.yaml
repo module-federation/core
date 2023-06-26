@@ -1,0 +1,4 @@
+packages:
+  - 'packages/node'
+  - 'packages/nextjs-mf'
+  - 'packages/utilities'

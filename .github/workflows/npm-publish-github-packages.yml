@@ -29,25 +29,10 @@ jobs:
           run_install: false
 
       - name: Install global dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
 
-      - name: Install utilities dependencies
-        run: cd packages/utilities && pnpm install --no-frozen-lockfile
-
-      - name: Install node dependencies
-        run: cd packages/node && pnpm install --no-frozen-lockfile
-
-      - name: Install next-mf dependencies
-        run: cd packages/nextjs-mf && pnpm install --no-frozen-lockfile
-
-      - name: 'build utils'
-        run: pnpm nx run-many -t build -p utils
-
-      - name: 'build node'
-        run: pnpm nx run-many -t build -p node
-
-      - name: 'build nextjs-mf'
-        run: pnpm nx run-many -t build -p nextjs-mf
+      - name: build
+        run: pnpm nx run-many -t build -p utils node nextjs-mf
 
       - name: npmrc utils
         run: |
