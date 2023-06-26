@@ -1,1 +1,0 @@
-{"version":3,"file":"inject-hoist.js","sourceRoot":"","sources":["../../../../../packages/nextjs-mf/src/loaders/inject-hoist.ts"],"names":[],"mappings":";;AAGA,SAAS,eAAe,CAEtB,MAAc;IAEd,MAAM,yBAAyB,GAC7B,wEAAwE,CAAC;IAE3E,OAAO,GAAG,yBAAyB,GAAG,MAAM,EAAE,CAAC;AACjD,CAAC;AAED,kBAAe,eAAe,CAAC"}

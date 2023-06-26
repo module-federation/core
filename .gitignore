@@ -44,3 +44,4 @@ Thumbs.db
 .netlify
 
 package-lock.json
+dist

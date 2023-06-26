@@ -48,21 +48,21 @@ jobs:
 
       - name: npmrc utils
         run: |
-          echo //npm.pkg.github.com/:_authToken=${{secrets.GH_TOKEN}} >> .npmrc
+          echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
           echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
           echo always-auth=true >> .npmrc
         working-directory: dist/packages/utilities
 
       - name: npmrc node
         run: |
-          echo //npm.pkg.github.com/:_authToken=${{secrets.GH_TOKEN}} >> .npmrc
+          echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
           echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
           echo always-auth=true >> .npmrc
         working-directory: dist/packages/node
 
       - name: npmrc nextjs-mf
         run: |
-          echo //npm.pkg.github.com/:_authToken=${{secrets.GH_TOKEN}} >> .npmrc
+          echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
           echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
           echo always-auth=true >> .npmrc
         working-directory: dist/packages/nextjs-mf

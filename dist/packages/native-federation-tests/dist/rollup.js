@@ -1,1 +1,0 @@
-"use strict";Object.defineProperty(exports, "__esModule", {value: true});var _chunkGDA3YWD4js = require('./chunk-GDA3YWD4.js');var s=_chunkGDA3YWD4js.a.rollup,a= exports.NativeFederationTestsHost =_chunkGDA3YWD4js.b.rollup;exports.NativeFederationTestsHost = a; exports.NativeFederationTestsRemote = s;

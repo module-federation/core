@@ -1,1 +1,0 @@
-{"version":3,"file":"build-utils.js","sourceRoot":"","sources":["../../../../packages/nextjs-mf/utils/build-utils.ts"],"names":[],"mappings":";;;;AAAA,wDAAwB;AAEjB,MAAM,qBAAqB,GAAG,CAAC,QAAiB,EAAE,QAAgB,EAAE,EAAE;IAC3E,IAAI,QAAQ,IAAI,QAAQ,EAAE;QACxB,OAAO,cAAI,CAAC,QAAQ,CAAC,QAAQ,CAAC,CAAC;KAChC;IACD,OAAO,QAAQ,CAAC;AAClB,CAAC,CAAC;AALW,QAAA,qBAAqB,yBAKhC"}

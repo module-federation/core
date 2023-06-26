@@ -1,1 +1,0 @@
-"use strict";Object.defineProperty(exports, "__esModule", {value: true});var _chunkYPO67MLAjs = require('./chunk-YPO67MLA.js');var i=_chunkYPO67MLAjs.a.vite,p= exports.NativeFederationTypeScriptHost =_chunkYPO67MLAjs.b.vite;exports.NativeFederationTypeScriptHost = p; exports.NativeFederationTypeScriptRemote = i;
