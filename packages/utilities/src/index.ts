@@ -6,3 +6,6 @@ export * from './utils/correctImportPath';
 export * from './Logger';
 export { getRuntimeRemotes } from './utils/getRuntimeRemotes';
 export { importDelegatedModule } from './utils/importDelegatedModule';
+import DelegateModulesPlugin from './plugins/DelegateModulesPlugin';
+
+export { DelegateModulesPlugin };

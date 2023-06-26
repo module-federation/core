@@ -2,9 +2,8 @@ import { Compiler } from 'webpack';
 import {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
+  DelegateModulesPlugin,
 } from '@ranshamay/utilities';
-import DelegateModulesPlugin from '@ranshamay/utilities/src/plugins/DelegateModulesPlugin';
-import { DEFAULT_SHARE_SCOPE_BROWSER } from '../../internal';
 import { ChunkCorrelationPlugin } from '@ranshamay/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import JsonpChunkLoading from '../JsonpChunkLoading';
@@ -34,7 +33,6 @@ export function applyClientPlugins(
   options: ModuleFederationPluginOptions,
   extraOptions: NextFederationPluginExtraOptions
 ): void {
-  const { webpack } = compiler;
   const { remotes, name } = options;
   //@ts-ignore
   compiler.options.output.publicPath = 'auto';
@@ -76,6 +74,7 @@ export function applyClientPlugins(
   // Add a new chunk correlation plugin to the compiler
   new ChunkCorrelationPlugin({
     filename: 'static/chunks/federated-stats.json',
+    // @ts-expect-error no idea what this does
   }).apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler

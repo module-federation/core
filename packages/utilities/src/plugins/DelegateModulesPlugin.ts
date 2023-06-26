@@ -1,10 +1,4 @@
-import type {
-  Compiler,
-  Compilation,
-  Chunk,
-  Module,
-  NormalModule,
-} from 'webpack';
+import type { Compiler, Compilation, Chunk, Module } from 'webpack';
 
 /**
  * A webpack plugin that moves specified modules from chunks to runtime chunk.
@@ -134,4 +128,5 @@ class DelegateModulesPlugin {
     );
   }
 }
+
 export default DelegateModulesPlugin;
