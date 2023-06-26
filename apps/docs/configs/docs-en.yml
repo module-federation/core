@@ -7,6 +7,8 @@ antora:
 site:
   title: Module Federation Documentation
   start_page: ROOT:getting-started.adoc
+  keys:
+    google_analytics: G-SDV5HRTM4G
 urls:
   html_extension_style: indexify
 content:
