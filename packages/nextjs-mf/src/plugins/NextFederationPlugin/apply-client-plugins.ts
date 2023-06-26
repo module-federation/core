@@ -74,7 +74,6 @@ export function applyClientPlugins(
   // Add a new chunk correlation plugin to the compiler
   new ChunkCorrelationPlugin({
     filename: 'static/chunks/federated-stats.json',
-    // @ts-expect-error no idea what this does
   }).apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler

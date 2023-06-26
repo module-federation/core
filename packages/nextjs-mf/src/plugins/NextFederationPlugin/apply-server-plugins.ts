@@ -1,6 +1,8 @@
 import { Compiler } from 'webpack';
-import { ModuleFederationPluginOptions } from '@ranshamay/utilities';
-import DelegatesModulePlugin from '@ranshamay/utilities/src/plugins/DelegateModulesPlugin';
+import {
+  ModuleFederationPluginOptions,
+  DelegateModulesPlugin,
+} from '@ranshamay/utilities';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import JsonpChunkLoading from '../JsonpChunkLoading';
@@ -20,7 +22,7 @@ export function applyServerPlugins(
   const { StreamingTargetPlugin } = require('@ranshamay/node');
   new JsonpChunkLoading({ server: true }).apply(compiler);
 
-  new DelegatesModulePlugin({
+  new DelegateModulesPlugin({
     runtime: 'webpack-runtime',
     remotes: options.remotes,
     container: options.name,
