@@ -5,24 +5,24 @@ import { Logger } from '@ranshamay/utilities';
  * loadScript(baseURI, fileName, cb)
  * loadScript(scriptUrl, cb)
  */
-console.log(Logger);
-console.log(Logger.getInlineLogger);
-console.log(Logger.getInlineLogger());
 
 //language=JS
 export default `
   function loadScript(url, cb, chunkID) {
-    ${Logger.getInlineLogger()(['loadScript'])}
+    ${Logger.getInlineLogger()(['"loadScript"'])}
     if (global.webpackChunkLoad) {
+      ${Logger.getInlineLogger()(['"using webpackChunkLoad"'])}
       global.webpackChunkLoad(url).then(function (resp) {
         return resp.text();
       }).then(function (rawData) {
         cb(null, rawData);
       }).catch(function (err) {
+        ${Logger.getInlineLogger()(['"Federated Chunk load failed"', 'error'])}
         console.error('Federated Chunk load failed', error);
         return cb(error)
       });
     } else {
+      ${Logger.getInlineLogger()(['"using fallback fetch remote"'])}
       //TODO https support
       let request = (url.startsWith('https') ? require('https') : require('http')).get(url, function (resp) {
         if (resp.statusCode === 200) {
@@ -39,6 +39,7 @@ export default `
         }
       });
       request.on('error', error => {
+        ${Logger.getInlineLogger()(['"Federated Chunk load failed"', 'error'])}
         console.error('Federated Chunk load failed', error);
         return cb(error)
       });
