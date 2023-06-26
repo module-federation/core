@@ -20,11 +20,6 @@ jobs:
         with:
           node-version: 18.11
       
-      - name: npmrc
-        run: |
-          echo //npm.pkg.github.com/:_authToken=${{secrets.GH_TOKEN}} >> .npmrc
-          echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
-          echo always-auth=true >> .npmrc
 
       - uses: pnpm/action-setup@v2
         name: Install pnpm
@@ -50,6 +45,27 @@ jobs:
 
       - name: 'build node'
         run: pnpm nx run-many -t build -p node
+
+      - name: npmrc utils
+        run: |
+          echo //npm.pkg.github.com/:_authToken=${{secrets.GH_TOKEN}} >> .npmrc
+          echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
+          echo always-auth=true >> .npmrc
+        working-directory: dist/packages/utilities
+
+      - name: npmrc node
+        run: |
+          echo //npm.pkg.github.com/:_authToken=${{secrets.GH_TOKEN}} >> .npmrc
+          echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
+          echo always-auth=true >> .npmrc
+        working-directory: dist/packages/node
+
+      - name: npmrc nextjs-mf
+        run: |
+          echo //npm.pkg.github.com/:_authToken=${{secrets.GH_TOKEN}} >> .npmrc
+          echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
+          echo always-auth=true >> .npmrc
+        working-directory: dist/packages/nextjs-mf
 
       - run: npm publish
         working-directory: dist/packages/utilities
