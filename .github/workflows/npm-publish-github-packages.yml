@@ -50,16 +50,10 @@ jobs:
         run: pnpm nx run-many -t build -p node
 
       - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         working-directory: dist/packages/utilities
 
       - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         working-directory: dist/packages/node
 
       - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         working-directory: dist/packages/nextjs-mf
