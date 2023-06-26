@@ -147,7 +147,7 @@
     "jest-environment-jsdom": "29.5.0",
     "js-yaml": "^4.1.0",
     "mammoth": "^1.5.1",
-    "marked": "^4.0.0",
+    "marked": "^5.1.0",
     "marked-terminal": "^5.2.0",
     "merge-stream": "~2.0",
     "mime-types": "2.1.35",
