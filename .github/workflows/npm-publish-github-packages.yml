@@ -46,6 +46,12 @@ jobs:
       - name: build
         run: pnpm nx run-many -t build -p utils node nextjs-mf
 
+      - name: npmrc global
+        run: |
+          echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
+          echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
+          echo always-auth=true >> .npmrc
+
       - name: npmrc utils
         run: |
           echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
@@ -67,11 +73,4 @@ jobs:
           echo always-auth=true >> .npmrc
         working-directory: dist/packages/nextjs-mf
 
-      - run: npm publish --access public
-        working-directory: dist/packages/utilities
-
-      - run: npm publish --access public
-        working-directory: dist/packages/node
-
-      - run: npm publish --access public
-        working-directory: dist/packages/nextjs-mf
+      - run: pnpm nx run-many -t version -p utils node nextjs-mf
