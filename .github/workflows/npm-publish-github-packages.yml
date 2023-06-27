@@ -14,8 +14,8 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v3
-        fetch-depth: 0
-
+        with:
+          fetch-depth: 0
       -  run: |
           git config user.name "GitHub Release Bot"
           git config user.email "gituser@example.com"
