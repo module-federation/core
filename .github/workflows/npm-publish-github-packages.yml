@@ -57,26 +57,26 @@ jobs:
           echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
           echo always-auth=true >> .npmrc
 
-      - name: npmrc utils
-        run: |
-          echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
-          echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
-          echo always-auth=true >> .npmrc
-        working-directory: packages/utilities
+      # - name: npmrc utils
+      #   run: |
+      #     echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
+      #     echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
+      #     echo always-auth=true >> .npmrc
+      #   working-directory: packages/utilities
 
-      - name: npmrc node
-        run: |
-          echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
-          echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
-          echo always-auth=true >> .npmrc
-        working-directory: packages/node
+      # - name: npmrc node
+      #   run: |
+      #     echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
+      #     echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
+      #     echo always-auth=true >> .npmrc
+      #   working-directory: packages/node
 
-      - name: npmrc nextjs-mf
-        run: |
-          echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
-          echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
-          echo always-auth=true >> .npmrc
-        working-directory: packages/nextjs-mf
+      # - name: npmrc nextjs-mf
+      #   run: |
+      #     echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
+      #     echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
+      #     echo always-auth=true >> .npmrc
+      #   working-directory: packages/nextjs-mf
 
       - run: pnpm nx run-many -t version -p util node nextjs-mf --allowEmptyRelease --parallel=1
         env:

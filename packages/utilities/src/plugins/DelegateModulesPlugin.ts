@@ -13,6 +13,7 @@ class DelegateModulesPlugin {
     this._delegateModules = new Set();
   }
 
+  
   getChunkByName(chunks: Iterable<Chunk>, name: string): Chunk | undefined {
     for (const chunk of chunks) {
       if (chunk.name == name) {
