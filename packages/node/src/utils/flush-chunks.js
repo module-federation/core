@@ -91,9 +91,10 @@ const processChunk = async (chunk, shareMap, hostStats) => {
     }
 
     // Add the main chunk to the chunks set
-    chunks.add(
-      global.__remote_scope__._config[remote].replace('ssr', 'chunks')
-    );
+    //TODO: ensure host doesnt embed its own remote in ssr, this causes crash
+    // chunks.add(
+    //   global.__remote_scope__._config[remote].replace('ssr', 'chunks')
+    // );
 
     // Extract the prefix from the remote config
     const [prefix] = global.__remote_scope__._config[remote].split('static/');
