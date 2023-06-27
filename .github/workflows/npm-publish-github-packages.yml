@@ -78,6 +78,6 @@ jobs:
           echo always-auth=true >> .npmrc
         working-directory: packages/nextjs-mf
 
-      - run: pnpm nx version nextjs-mf --allowEmptyRelease
+      - run: pnpm nx run-many -t version -p util nextjs-mf --allowEmptyRelease --parallel=1
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
