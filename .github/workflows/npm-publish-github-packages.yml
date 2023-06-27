@@ -78,4 +78,6 @@ jobs:
         working-directory: packages/nextjs-mf
         
 
-      - run: pnpm nx run-many -t version -p node nextjs-mf  --allowEmptyRelease
+      - run: pnpm nx run nextjs-mf:version --allowEmptyRelease
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
