@@ -73,4 +73,4 @@ jobs:
           echo always-auth=true >> .npmrc
         working-directory: dist/packages/nextjs-mf
 
-      - run: pnpm nx run-many -t version -p utils node nextjs-mf
+      - run: pnpm nx run-many -t version -p utils node nextjs-mf  --allowEmptyRelease
