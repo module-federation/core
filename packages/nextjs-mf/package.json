@@ -1,6 +1,6 @@
 {
   "name": "@ranshamay/nextjs-mf",
-  "version": "6.5.2",
+  "version": "6.5.3",
   "license": "MIT",
   "main": "src/index.js",
   "types": "src/index.d.ts",
