@@ -73,8 +73,7 @@
     "npm": {
       "executor": "ngx-deploy-npm:deploy",
       "options": {
-        "access": "public",
-        "tag": "next"
+        "access": "public"
       }
     }
   },
