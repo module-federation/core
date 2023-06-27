@@ -78,4 +78,4 @@ jobs:
         working-directory: packages/nextjs-mf
         
 
-      - run: pnpm nx run-many -t version -p utils node nextjs-mf  --allowEmptyRelease
+      - run: pnpm nx run-many -t version -p node nextjs-mf  --allowEmptyRelease
