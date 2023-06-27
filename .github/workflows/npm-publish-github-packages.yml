@@ -72,5 +72,9 @@ jobs:
           echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
           echo always-auth=true >> .npmrc
         working-directory: dist/packages/nextjs-mf
+        
+      -  run: |
+          git config user.name "GitHub Release Bot"
+          git config user.email "gituser@example.com"
 
       - run: pnpm nx run-many -t version -p utils node nextjs-mf  --allowEmptyRelease
