@@ -75,6 +75,6 @@ jobs:
         
       -  run: |
           git config user.name "GitHub Release Bot"
-          git config user.email "gituser@example.com"
+          git config user.email "ranshamay@gmail.com"
 
       - run: pnpm nx run-many -t version -p utils node nextjs-mf  --allowEmptyRelease
