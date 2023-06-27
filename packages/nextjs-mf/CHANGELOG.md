@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.5.2-rc7.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.5.2-rc6.0...nextjs-mf-6.5.2-rc7.0) (2023-06-27)
+
+
+### Bug Fixes
+
+* image path fallback ([fc176ff](https://github.com/module-federation/nextjs-mf/commit/fc176ffa74a082ab0d7a198315f3b0827eb13037))
+
+
+
 ## [6.5.2-rc6.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.5.2-rc5.0...nextjs-mf-6.5.2-rc6.0) (2023-06-23)
 
 
