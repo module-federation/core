@@ -15,6 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      -  run: |
+          git config user.name "GitHub Release Bot"
+          git config user.email "gituser@example.com"
+
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
@@ -57,27 +61,21 @@ jobs:
           echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
           echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
           echo always-auth=true >> .npmrc
-        working-directory: dist/packages/utilities
+        working-directory: packages/utilities
 
       - name: npmrc node
         run: |
           echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
           echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
           echo always-auth=true >> .npmrc
-        working-directory: dist/packages/node
+        working-directory: packages/node
 
       - name: npmrc nextjs-mf
         run: |
           echo //npm.pkg.github.com/:_authToken=${{secrets.GITHUB_TOKEN}} >> .npmrc
           echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
           echo always-auth=true >> .npmrc
-        working-directory: dist/packages/nextjs-mf
+        working-directory: packages/nextjs-mf
         
-      -  run: |
-          git config user.name "GitHub Release Bot"
-          git config user.email "ranshamay@gmail.com"
 
       - run: pnpm nx run-many -t version -p utils node nextjs-mf  --allowEmptyRelease
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
