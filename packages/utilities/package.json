@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/utilities",
-  "version": "1.8.2-rc7.0",
+  "version": "1.8.2-rc7.1",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "license": "MIT",
