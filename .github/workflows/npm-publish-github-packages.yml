@@ -76,8 +76,7 @@ jobs:
           echo @ranshamay:registry=https://npm.pkg.github.com >> .npmrc
           echo always-auth=true >> .npmrc
         working-directory: packages/nextjs-mf
-        
 
-      - run: pnpm nx run-many -t version -p util nextjs-mf --allowEmptyRelease --parallel=1
+      - run: pnpm nx version nextjs-mf --allowEmptyRelease
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
