@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.15.2-rc8.0](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-rc7.0...node-0.15.2-rc8.0) (2023-06-27)
+
+
+### Bug Fixes
+
+* disable flushing remotes to ssr for now ([2495582](https://github.com/module-federation/nextjs-mf/commit/249558248682896ccb05a9517d8540b97379b1bc))
+
+
+
 ## [0.15.2-rc7.0](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-rc6.0...node-0.15.2-rc7.0) (2023-06-27)
 
 
