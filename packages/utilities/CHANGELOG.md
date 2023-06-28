@@ -2,6 +2,16 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.8.1](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.0...utils-1.8.1) (2023-06-28)
+
+
+### Bug Fixes
+
+* use react.lazy instead of next/dynamic ([#951](https://github.com/module-federation/nextjs-mf/issues/951)) ([a27ff6e](https://github.com/module-federation/nextjs-mf/commit/a27ff6eb28acd93a7fcd8a011f76bd65e18d6b1f))
+* **Utils:** Unable to use importRemote util for root exported modules ([#970](https://github.com/module-federation/nextjs-mf/issues/970)) ([7bf6ecb](https://github.com/module-federation/nextjs-mf/commit/7bf6ecb602958ab5991d9c18f17e3d3755d84e91))
+
+
+
 # [1.8.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.7.0...utils-1.8.0) (2023-05-22)
 
 
