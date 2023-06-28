@@ -524,16 +524,12 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     }
 
     return Template.asString([
-      `var remoteMapping = Object.assign(__webpack_require__.rMap,${JSON.stringify(
-        chunkToRemotesMapping,
-        null,
-        ''
-      )});`,
-      `var idToExternalAndNameMapping =  Object.assign(__webpack_require__.reMap, ${JSON.stringify(
+      `var remoteMapping = ${JSON.stringify(chunkToRemotesMapping, null, '')};`,
+      `var idToExternalAndNameMapping = ${JSON.stringify(
         idToExternalAndNameMapping,
         null,
         ''
-      )});`,
+      )};`,
       'globalThis.factoryTracker = globalThis.factoryTracker  || {}',
       `__webpack_require__.getEagerRemotesForChunkId  = ${runtimeTemplate.basicFunction(
         'chunkId, promises',
@@ -729,8 +725,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         '__webpack_require__.S = globalThis.backupScope;',
         '__webpack_require__.initConsumes = __webpack_require__.initConsumes || [];',
         '__webpack_require__.initRemotes = __webpack_require__.initRemotes || [];',
-        '__webpack_require__.rMap = __webpack_require__.rMap || {};',
-        '__webpack_require__.reMap = __webpack_require__.reMap || {};',
         '__webpack_require__.installedModules = {};',
         this.options.debug
           ? "console.debug('share scope', __webpack_require__.S);"
