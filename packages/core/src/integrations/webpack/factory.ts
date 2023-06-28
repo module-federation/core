@@ -8,7 +8,7 @@ import {
   IRemoteScriptFactory,
   ISharingScopeFactory,
 } from '../../types/integrations';
-import { WebpackSharedScope } from './types';
+import { WebpackRequire, WebpackSharedScope } from './types';
 
 export class WebpackSharingScopeFactory implements ISharingScopeFactory {
   async initializeSharingScope(scopeName: string): Promise<WebpackSharedScope> {
@@ -19,7 +19,10 @@ export class WebpackSharingScopeFactory implements ISharingScopeFactory {
       await __webpack_init_sharing__(scopeName);
     }
 
-    return __webpack_share_scopes__ as unknown as WebpackSharedScope;
+    // TODO: Why would we reference __webpack_require and not __webpack_share_scopes__ ?
+    return (__webpack_require__ as unknown as WebpackRequire).S[
+      scopeName
+    ] as unknown as WebpackSharedScope;
   }
 }
 
@@ -45,11 +48,9 @@ export class WebpackScriptFactory implements IRemoteScriptFactory {
         return resolveRemoteGlobal();
       }
 
-      // TODO: Fix the type here.
-      (__webpack_require__ as any).l(
+      (__webpack_require__ as unknown as WebpackRequire).l(
         url,
         function (event: Event) {
-          console.log('Test: ', event, scope, containerKey);
           if (typeof scope[containerKey] !== 'undefined') {
             return resolveRemoteGlobal();
           }

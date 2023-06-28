@@ -11,6 +11,7 @@
     "js-cookie": "^3.0.1"
   },
   "devDependencies": {
-    "@module-federation/nextjs-mf": "*"
+    "@module-federation/nextjs-mf": "*",
+    "@module-federation/core": "*"
   }
 }

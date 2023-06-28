@@ -8,7 +8,7 @@ export type ModuleFederationPluginOptions = ConstructorParameters<
   typeof container.ModuleFederationPlugin
 >['0'];
 
-// TODO: Create generic interface.
+// TODO: Keep webpack as standard
 export type SharedScopes = WebpackSharedScope;
 
 export type Shared = ModuleFederationPluginOptions['shared'];

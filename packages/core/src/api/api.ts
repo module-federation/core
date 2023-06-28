@@ -24,6 +24,9 @@ export const loadAndInitializeRemote = async (
     throw new Error('Unable to load remote container');
   }
 
+  // TODO: look at init tokens, pass to getSharingScope
+  // init method on remote entry
+
   const sharedScope = await getSharingScope();
   return initContainer(asyncContainer, sharedScope);
 };

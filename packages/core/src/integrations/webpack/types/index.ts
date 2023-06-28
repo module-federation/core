@@ -12,6 +12,7 @@ export type WebpackRequire = {
     cb: (event: any) => void,
     id: string | number
   ) => Record<string, unknown>;
+  S: Record<string, unknown>;
 };
 
 type WebpackShareScopes = Record<

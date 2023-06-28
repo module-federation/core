@@ -12,7 +12,7 @@ import {
  * TODO: Can we standardize a container between node and browser?
  * @param remoteOptions
  */
-export const createContainer = (remoteOptions: RemoteOptions) => {
+export const registerContainer = (remoteOptions: RemoteOptions) => {
   const containerKey = getContainerKey(remoteOptions);
 
   const globalScope = getScope();
@@ -21,7 +21,7 @@ export const createContainer = (remoteOptions: RemoteOptions) => {
     globalScope._config[containerKey] = remoteOptions.url;
   }
 
-  // TODO: Window container created by Webpack?
+  // TODO: Remote container created by Webpack?
 };
 
 /**
@@ -85,6 +85,7 @@ export const initContainer = async (
 
   if (!remoteContainer.__initialized && !remoteContainer.__initializing) {
     remoteContainer.__initializing = true;
+    // TODO: check init tokens
     await remoteContainer.init(sharedScope);
     remoteContainer.__initialized = true;
     delete remoteContainer.__initializing;
@@ -129,8 +130,10 @@ export const getScope = (): RemoteScope => {
       };
     }
 
+    console.log('Scope: ', global.__remote_scope__);
+
     return global.__remote_scope__;
   }
 
-  return window as RemoteScope;
+  return window as unknown as RemoteScope;
 };
