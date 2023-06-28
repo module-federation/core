@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.2.1](https://github.com/module-federation/nextjs-mf/compare/native-federation-tests-0.2.0...native-federation-tests-0.2.1) (2023-06-28)
+
+
+### Bug Fixes
+
+* .at(-1) ([8dd0520](https://github.com/module-federation/nextjs-mf/commit/8dd0520b5464c49e89c63307c5388450e4bebbf8))
+
+
+
 # [0.2.0](https://github.com/module-federation/nextjs-mf/compare/native-federation-tests-0.1.2...native-federation-tests-0.2.0) (2023-04-29)
 
 
