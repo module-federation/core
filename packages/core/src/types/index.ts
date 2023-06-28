@@ -26,41 +26,8 @@ export type ModuleFederationPluginOptions = ConstructorParameters<
   typeof container.ModuleFederationPlugin
 >['0'];
 
-export type WebpackRequire = {
-  l: (
-    url: string | undefined,
-    cb: (event: any) => void,
-    id: string | number
-  ) => Record<string, unknown>;
-};
-
-export type WebpackShareScopes = Record<
-  string,
-  Record<
-    string,
-    { loaded?: 1; get: () => Promise<unknown>; from: string; eager: boolean }
-  >
-> & {
-  default?: string;
-};
-
-export declare const __webpack_init_sharing__: (
-  parameter: string
-) => Promise<void>;
-
-export interface NextFederationPluginExtraOptions {
-  enableImageLoaderFix?: boolean;
-  enableUrlLoaderFix?: boolean;
-  exposePages?: boolean;
-  skipSharingNextInternals?: boolean;
-  automaticPageStitching?: boolean;
-  automaticAsyncBoundary?: boolean;
-}
-
-export interface NextFederationPluginOptions
-  extends ModuleFederationPluginOptions {
-  extraOptions: NextFederationPluginExtraOptions;
-}
+// TODO: Keep webpack as standard
+export type SharedScopes = WebpackSharedScope;
 
 export type Shared = ModuleFederationPluginOptions['shared'];
 export type Remotes = ModuleFederationPluginOptions['remotes'];

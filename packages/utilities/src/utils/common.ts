@@ -141,12 +141,16 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       ? runtimeRemotes[keyOrRuntimeRemoteItem]
       : keyOrRuntimeRemoteItem;
 
+  console.log('REF: ', reference);
+
   if (reference.asyncContainer) {
     asyncContainer =
       typeof reference.asyncContainer.then === 'function'
         ? reference.asyncContainer
         : // @ts-ignore
           reference.asyncContainer();
+
+    console.log('ASYNC CONTAINER: ', asyncContainer);
   } else {
     // This casting is just to satisfy typescript,
     // In reality remoteGlobal will always be a string;
@@ -156,11 +160,6 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
     const containerKey = reference.uniqueKey
       ? (reference.uniqueKey as unknown as number)
       : remoteGlobal;
-
-    const __webpack_error__ = new Error() as Error & {
-      type: string;
-      request: string | null;
-    };
 
     // @ts-ignore
     if (!global.__remote_scope__) {
@@ -188,6 +187,8 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       }
     }
 
+    console.log('GLOBAL SCOPE: ', globalScope);
+
     asyncContainer = new Promise(function (resolve, reject) {
       function resolveRemoteGlobal() {
         const asyncContainer = globalScope[
@@ -211,6 +212,11 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
             event && (event.type === 'load' ? 'missing' : event.type);
           const realSrc =
             event && event.target && (event.target as HTMLScriptElement).src;
+
+          const __webpack_error__ = new Error() as Error & {
+            type: string;
+            request: string | null;
+          };
 
           __webpack_error__.message =
             'Loading script failed.\n(' +
