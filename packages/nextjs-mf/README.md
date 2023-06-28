@@ -81,9 +81,8 @@ const DEFAULT_SHARE_SCOPE = {
 ## Usage
 
 ```js
-const SampleComponent = dynamic(() => import('next2/sampleComponent'), {
-  ssr: false,
-});
+import React, {lazy} from 'react';
+const SampleComponent = lazy(() => import('next2/sampleComponent'));
 ```
 
 If you want support for sync imports. It is possible in next@12 as long as there is an async boundary.
@@ -93,14 +92,9 @@ If you want support for sync imports. It is possible in next@12 as long as there
 With async boundary installed at the page level. You can then do the following
 
 ```js
-if (process.browser) {
-  const SomeHook = require('next2/someHook');
-}
-// if client only file
+const SomeHook = require('next2/someHook');
 import SomeComponent from 'next2/someComponent';
 ```
-
-Make sure you are using `mini-css-extract-plugin@2` - version 2 supports resolving assets through `publicPath:'auto'`
 
 ## Demo
 
@@ -134,25 +128,6 @@ new NextFederationPlugin({
 - `enableImageLoaderFix` – adds public hostname to all assets bundled by `nextjs-image-loader`. So if you serve remoteEntry from `http://example.com` then all bundled assets will get this hostname in runtime. It's something like Base URL in HTML but for federated modules.
 - `enableUrlLoaderFix` – adds public hostname to all assets bundled by `url-loader`.
 - `skipSharingNextInternals` – disables sharing of next internals. You can use it if you want to share next internals yourself or want to use this plugin on non next applications
-
-### BREAKING CHANGE ABOUT SHARED MODULES:
-
-Previously, we used to "rekey" all shared packages used in a host in order to prevent eager consumption issues. However, this caused unforeseen issues when trying to share a singleton package, as the package would end up being bundled multiple times per page.
-
-As a result, we have had to stop rekeying shared modules in userland and only do so on internal Next packages themselves.
-
-If you need to dangerously share a package using the old method, you can do so by using the following code:
-
-```js
-const shared = {
-  fakeLodash: {
-    import: 'lodash',
-    shareKey: 'lodash',
-  },
-};
-```
-
-Please note that this method is now considered dangerous and should be used with caution.
 
 ## Demo
 
@@ -221,29 +196,23 @@ module.exports = {
   },
 };
 
-// _app.js or some other file in as high up in the app (like next's new layouts)
-// this ensures various parts of next.js are imported and "used" somewhere so that they wont be tree shaken out
-// note: this is optional in the latest release, as it is auto-injected by NextFederationPlugin now
-import '@module-federation/nextjs-mf/src/include-defaults';
 ```
 
-4. Use next/dynamic or low level api to import remotes.
+4. Use react.lazy or low level api to import remotes.
 
 ```js
-import dynamic from 'next/dynamic';
+import React, {lazy} from 'react';
 
-const SampleComponent = dynamic(() => window.next2.get('./sampleComponent').then((factory) => factory()), {
-  ssr: false,
-});
+const SampleComponent = lazy(() => window.next2.get('./sampleComponent').then((factory) => {
+  return {default: factory()}
+}));
 
 // or
 
-const SampleComponent = dynamic(() => import('next2/sampleComponent'), {
-  ssr: false,
-});
+const SampleComponent = lazy(() => import('next2/sampleComponent'));
 ```
 
-## Beta: Delegate modules
+## Delegate modules
 
 Delegate modules are a new feature in module federation that allow you to control the
 loading process of remote modules by delegating it to an internal file bundled by webpack.
@@ -280,9 +249,10 @@ const remotes = {
 };
 
 //remote-delegate.js
-import { importDelegatedModule } from '@module-federation/utilities';
 //Delegate MUST use module.exports, not export default - this is a webpack limitation
-module.exports = new Promise((resolve, reject) => {
+module.exports = new Promise(async(resolve, reject) => {
+  const { importDelegatedModule } = await import('@module-federation/utilities');
+
   console.log('Delegate being called for', __resourceQuery);
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
 
