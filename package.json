@@ -175,7 +175,7 @@
     "tsup": "^6.7.0",
     "typescript": "5.1.5",
     "url-loader": "^4.1.1",
-    "verdaccio": "5.24.1",
+    "verdaccio": "5.25.0",
     "vinyl-fs": "~3.0.3",
     "vite-tsconfig-paths": "4.2.0",
     "vitest": "0.31.1",
