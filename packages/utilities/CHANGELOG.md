@@ -2,6 +2,10 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.8.2-rc8.2](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc8.1...utils-1.8.2-rc8.2) (2023-06-28)
+
+
+
 ## [1.8.2-rc8.1](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc8.0...utils-1.8.2-rc8.1) (2023-06-28)
 
 
