@@ -127,8 +127,8 @@ export class UrlNode {
         if (previousSlug !== null) {
           // If the specific segment already has a slug but the slug is not `something`
           // This prevents collisions like:
-          // pages/[post]/index.js
-          // pages/[id]/index.js
+          // pages/[post]/index.ts
+          // pages/[id]/index.ts
           // Because currently multiple dynamic params on the same segment level are not supported
           if (previousSlug !== nextSlug) {
             // TODO: This error seems to be confusing for users, needs an error link, the description can be based on above comment.
