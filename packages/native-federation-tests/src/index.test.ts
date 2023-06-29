@@ -80,6 +80,7 @@ describe('index', () => {
       const unplugin = NativeFederationTestsRemote.rollup(
         options
       ) as UnpluginOptions
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       await unplugin.webpack?.(webpackCompiler)
 
