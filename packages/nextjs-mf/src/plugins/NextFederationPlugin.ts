@@ -156,7 +156,7 @@ export class NextFederationPlugin {
         /pages[\\/]middleware/,
         /pages[\\/]api/,
       ],
-      loader: path.resolve(__dirname, '../loaders/patchDefaultSharedLoader'),
+      loader: require.resolve('../loaders/patchDefaultSharedLoader'),
     });
 
     if (this._options.remotes) {
@@ -190,7 +190,7 @@ export class NextFederationPlugin {
             }
             return /node_modules/.test(request);
           },
-          loader: path.resolve(__dirname, '../loaders/delegateLoader'),
+          loader: require.resolve('../loaders/delegateLoader'),
           options: {
             delegates,
           },
@@ -243,10 +243,7 @@ export class NextFederationPlugin {
             use: [
               ...loaderChain,
               {
-                loader: path.resolve(
-                  __dirname,
-                  '../loaders/async-boundary-loader'
-                ),
+                loader: require.resolve('../loaders/async-boundary-loader'),
               },
             ],
           });
