@@ -60,7 +60,7 @@ jobs:
 
           echo "Projects to version: $PROJECTS"
 
-          yarn nx run-many --target=version --projects="$PROJECTS" --parallel=1 --allowEmptyRelease=true
+          yarn nx run-many --target=version --projects="$PROJECTS" --parallel=1 --allowEmptyRelease
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

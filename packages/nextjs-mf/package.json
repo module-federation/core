@@ -1,10 +1,11 @@
 {
   "name": "@module-federation/nextjs-mf",
-  "version": "6.5.2-rc8.1",
+  "version": "6.6.3",
   "license": "MIT",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "public": true,
+  "type": "commonjs",
   "description": "Module Federation helper for NextJS",
   "repository": "https://github.com/module-federation/universe/tree/main/packages/nextjs-mf",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
@@ -17,7 +18,8 @@
   "dependencies": {
     "fast-glob": "^3.2.11",
     "webpack-sources": "^3.2.3",
-    "eventemitter3": "^5.0.0"
+    "eventemitter3": "^5.0.0",
+    "@module-federation/node": "0.16.1"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",
