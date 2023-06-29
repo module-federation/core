@@ -80,6 +80,7 @@ describe('index', () => {
       const unplugin = NativeFederationTestsRemote.rollup(
         options
       ) as UnpluginOptions
+      // @ts-ignore
       await unplugin.webpack?.(webpackCompiler)
 
       expect(webpackCompiler).toStrictEqual({
