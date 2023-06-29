@@ -59,7 +59,7 @@
     "react-dom": "18.2.0",
     "react-router-dom": "6.11.2",
     "regenerator-runtime": "0.13.11",
-    "tsup": "^6.7.0",
+    "tsup": "^7.0.0",
     "undici": "5.22.1",
     "unplugin": "^1.3.1"
   },
