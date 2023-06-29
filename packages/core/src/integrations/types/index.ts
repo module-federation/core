@@ -2,7 +2,7 @@ import {
   AsyncContainer,
   RemoteOptions,
   RemoteScope,
-  SharedScopes,
+  SharedScope,
 } from '../../types';
 
 export interface IRemoteScriptFactory {
@@ -14,5 +14,5 @@ export interface IRemoteScriptFactory {
 }
 
 export interface ISharingScopeFactory {
-  initializeSharingScope: (scopeName: string) => Promise<SharedScopes>;
+  initializeSharingScope: (scopeName: string) => Promise<SharedScope>;
 }

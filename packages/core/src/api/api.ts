@@ -1,5 +1,10 @@
-import { getSharingScope, initContainer } from '../lib';
-import { ScriptFactory } from '../lib';
+import {
+  getContainerKey,
+  getScope,
+  getSharingScope,
+  initContainer,
+  ScriptFactory,
+} from '../lib';
 import {
   GetModuleOptions,
   GetModulesOptions,
@@ -18,7 +23,15 @@ import {
 export const loadAndInitializeRemote = async (
   remoteOptions: RemoteOptions
 ): Promise<RemoteContainer> => {
-  const asyncContainer = ScriptFactory.loadScript(remoteOptions);
+  const scope = getScope();
+
+  const containerKey = getContainerKey(remoteOptions);
+
+  const asyncContainer = new ScriptFactory().loadScript(
+    scope,
+    containerKey,
+    remoteOptions
+  );
 
   if (!asyncContainer) {
     throw new Error('Unable to load remote container');

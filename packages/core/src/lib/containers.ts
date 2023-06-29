@@ -1,15 +1,13 @@
-import { SharingScopeFactory } from './scopes';
+import { getScope } from './scopes';
 import {
   AsyncContainer,
   RemoteContainer,
   RemoteOptions,
-  RemoteScope,
-  SharedScopes,
+  SharedScope,
 } from '../types';
 
 /**
- * Creates a shell container
- * TODO: Can we standardize a container between node and browser?
+ * Creates a shell container on the common scope.
  * @param remoteOptions
  */
 export const registerContainer = (remoteOptions: RemoteOptions) => {
@@ -17,11 +15,9 @@ export const registerContainer = (remoteOptions: RemoteOptions) => {
 
   const globalScope = getScope();
 
-  if (typeof window === 'undefined') {
-    globalScope._config[containerKey] = remoteOptions.url;
-  }
+  if (globalScope[containerKey]) return;
 
-  // TODO: Remote container created by Webpack?
+  // TODO: Remote container currently created by Webpack, call this when outside of webpack.
 };
 
 /**
@@ -30,7 +26,7 @@ export const registerContainer = (remoteOptions: RemoteOptions) => {
  * @returns
  */
 export const getContainerKey = (
-  remoteOptions: string | RemoteOptions
+  remoteOptions: string | RemoteOptions // TODO: Should string be deprecated?
 ): string => {
   if (typeof remoteOptions === 'string') {
     return remoteOptions as string;
@@ -79,7 +75,7 @@ export const getContainer = async (
  */
 export const initContainer = async (
   asyncContainer: AsyncContainer,
-  sharedScope: SharedScopes
+  sharedScope: SharedScope
 ): Promise<RemoteContainer> => {
   const remoteContainer = await asyncContainer;
 
@@ -92,48 +88,4 @@ export const initContainer = async (
   }
 
   return remoteContainer;
-};
-
-/**
- * Create a shared scope ("shared space") if it doesn't exist, on the global common scope.
- * @param scopeName
- * @returns
- */
-export const createSharingScope = async (scopeName = 'default') => {
-  const scope = getScope();
-
-  if (typeof scope.__sharing_scope__ === 'undefined') {
-    const sharedScope = await SharingScopeFactory.initializeSharingScope(
-      scopeName
-    );
-
-    scope.__sharing_scope__ = sharedScope;
-  }
-
-  return scope.__sharing_scope__;
-};
-
-export const getSharingScope = () => createSharingScope();
-
-/**
- *
- * @returns Generic globally available "scope" container
- */
-export const getScope = (): RemoteScope => {
-  if (typeof window === 'undefined') {
-    if (!global.__remote_scope__) {
-      // create a global scope for container, similar to how remotes are set on window in the browser
-      // @ts-ignore
-      global.__remote_scope__ = {
-        // @ts-ignore
-        _config: {},
-      };
-    }
-
-    console.log('Scope: ', global.__remote_scope__);
-
-    return global.__remote_scope__;
-  }
-
-  return window as unknown as RemoteScope;
 };

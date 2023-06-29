@@ -141,16 +141,12 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       ? runtimeRemotes[keyOrRuntimeRemoteItem]
       : keyOrRuntimeRemoteItem;
 
-  console.log('REF: ', reference);
-
   if (reference.asyncContainer) {
     asyncContainer =
       typeof reference.asyncContainer.then === 'function'
         ? reference.asyncContainer
         : // @ts-ignore
           reference.asyncContainer();
-
-    console.log('ASYNC CONTAINER: ', asyncContainer);
   } else {
     // This casting is just to satisfy typescript,
     // In reality remoteGlobal will always be a string;
@@ -186,8 +182,6 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         return globalScope['remoteLoading'][containerKey];
       }
     }
-
-    console.log('GLOBAL SCOPE: ', globalScope);
 
     asyncContainer = new Promise(function (resolve, reject) {
       function resolveRemoteGlobal() {

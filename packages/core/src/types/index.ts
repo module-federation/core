@@ -2,14 +2,18 @@
 /// <reference path="../../../../node_modules/webpack/module.d.ts" />
 
 import type { container } from 'webpack';
-import type { WebpackSharedScope } from '../integrations/webpack/types';
 
 export type ModuleFederationPluginOptions = ConstructorParameters<
   typeof container.ModuleFederationPlugin
 >['0'];
 
-// TODO: Keep webpack as standard
-export type SharedScopes = WebpackSharedScope;
+export type SharedScope = Record<
+  string,
+  Record<
+    string,
+    { loaded?: 1; get: () => Promise<unknown>; from: string; eager: boolean }
+  >
+>;
 
 export type Shared = ModuleFederationPluginOptions['shared'];
 export type Remotes = ModuleFederationPluginOptions['remotes'];
@@ -28,7 +32,7 @@ export type RemoteContainer = {
   __initializing?: boolean;
   __initialized?: boolean;
   get(modulePath: ModulePath): () => unknown;
-  init: (sharedScope?: SharedScopes) => void;
+  init: (sharedScope?: SharedScope) => void;
 };
 
 export type AsyncContainer = Promise<RemoteContainer>;
@@ -65,7 +69,25 @@ export type RemoteScope = {
     | string
     | undefined
     | Record<string, string>
-    | SharedScopes;
+    | SharedScope;
   _config: Record<string, string>;
-  __sharing_scope__?: SharedScopes;
+  __sharing_scope__?: SharedScope;
 };
+
+export interface IRemoteScriptFactory {
+  /**
+   * Loads a remote URL and returns a promise that resolves to the remote container.
+   * Attaches the remote container to the scope object using the container key.
+   */
+  loadScript: RemoteScriptLoader;
+}
+
+export type RemoteScriptLoader = (
+  scope: RemoteScope,
+  containerKey: string,
+  remoteOptions: RemoteOptions
+) => AsyncContainer;
+
+export interface ISharingScopeFactory {
+  initializeSharingScope: (scopeName: string) => Promise<SharedScope>;
+}
