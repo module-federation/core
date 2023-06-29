@@ -58,7 +58,7 @@
     "rambda": "^7.5.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-router-dom": "6.11.2",
+    "react-router-dom": "6.14.0",
     "regenerator-runtime": "0.13.11",
     "tsup": "^7.0.0",
     "undici": "5.22.1",
