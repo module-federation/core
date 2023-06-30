@@ -240,7 +240,7 @@ const SampleComponent = lazy(() => import('next2/sampleComponent'));
 
 Delegated modules are now a standard feature in module federation, giving you the ability to manage the loading procedure of remote modules via an internally bundled file by webpack. This is facilitated by exporting a promise in the delegate file that resolves to a remote/container interface.
 
-A container interface represents the fundamental `{get, init}` API that remote entries present to a consuming app. Within the browser, a remote container could be `window.app1`, and in Node, it could be `global.__remote_scope__.app1`.
+A container interface represents the fundamental `{get, init}` API that remote entries present to a consuming app. Within the browser, a remote container could be `window.app1`, and in Node, it could be `globalThis.__remote_scope__.app1`.
 
 Implementing a method for script loading in the delegate file is necessary for the utilization of delegated modules. Although the built-in `__webpack_require__.l` method of webpack is a prevalent method, any method is suitable. This method is made available to the runtime and is identical to the method webpack employs internally to load remotes.
 
@@ -338,9 +338,9 @@ const remotes = {
 // remote-delegate.js
 module.exports = new Promise((resolve, reject) => {
   // some node specific for NodeFederation
-  if (!global.__remote_scope__) {
+  if (!globalThis.__remote_scope__) {
     // create a global scope for container, similar to how remotes are set on window in the browser
-    global.__remote_scope__ = {
+    globalThis.__remote_scope__ = {
       _config: {},
     };
   }
@@ -351,7 +351,7 @@ module.exports = new Promise((resolve, reject) => {
   const [containerGlobal, url] = currentRequest.split('@');
   // if node server, register the containers known origins
   if (typeof window === 'undefined') {
-    global.__remote_scope__._config[global] = url;
+    globalThis.__remote_scope__._config[global] = url;
   }
   const __webpack_error__ = new Error();
   // if you use NodeFederationPlugin, ive build a server-side version of __webpack_require__.l, with the same api.
@@ -360,7 +360,7 @@ module.exports = new Promise((resolve, reject) => {
     url,
     function (event) {
       // resolve promise with container, for browser env or node env.
-      const container = typeof window === 'undefined' ? global.__remote_scope__[containerGlobal] : window[containerGlobal];
+      const container = typeof window === 'undefined' ? globalThis.__remote_scope__[containerGlobal] : window[containerGlobal];
       console.log('delegate resolving', container);
       if (typeof container !== 'undefined') return resolve(container);
       var realSrc = event && event.target && event.target.src;

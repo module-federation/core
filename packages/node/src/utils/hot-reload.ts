@@ -15,7 +15,7 @@ const performReload = (shouldReload: any) => {
   }
 
   //@ts-ignore
-  global.__remote_scope__ = {
+  globalThis.__remote_scope__ = {
     _config: {},
     _medusa: {},
   };
@@ -39,7 +39,7 @@ const performReload = (shouldReload: any) => {
  webpack whether its hash has changed since last time or not
   */
 export const revalidate = () => {
-  if (global.__remote_scope__) {
+  if (globalThis.__remote_scope__) {
     const remoteScope = global.__remote_scope__;
 
     return new Promise((res) => {

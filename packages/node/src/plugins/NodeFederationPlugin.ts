@@ -47,19 +47,19 @@ export const generateRemoteTemplate = (
   url: string,
   global: any
 ) => `new Promise(function (resolve, reject) {
-    if(!global.__remote_scope__) {
+    if(!globalThis.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser
-      global.__remote_scope__ = {
+      globalThis.__remote_scope__ = {
         _config: {},
       }
     }
 
-    if (typeof global.__remote_scope__[${JSON.stringify(
+    if (typeof globalThis.__remote_scope__[${JSON.stringify(
       global
-    )}] !== 'undefined') return resolve(global.__remote_scope__[${JSON.stringify(
+    )}] !== 'undefined') return resolve(globalThis.__remote_scope__[${JSON.stringify(
   global
 )}]);
-    global.__remote_scope__._config[${JSON.stringify(
+    globalThis.__remote_scope__._config[${JSON.stringify(
       global
     )}] = ${JSON.stringify(url)};
     var __webpack_error__ = new Error();
@@ -67,9 +67,9 @@ export const generateRemoteTemplate = (
     __webpack_require__.l(
       ${JSON.stringify(url)},
       function (event) {
-        if (typeof global.__remote_scope__[${JSON.stringify(
+        if (typeof globalThis.__remote_scope__[${JSON.stringify(
           global
-        )}] !== 'undefined') return resolve(global.__remote_scope__[${JSON.stringify(
+        )}] !== 'undefined') return resolve(globalThis.__remote_scope__[${JSON.stringify(
   global
 )}]);
          var realSrc = event && event.target && event.target.src;

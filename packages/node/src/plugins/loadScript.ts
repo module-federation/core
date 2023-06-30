@@ -47,7 +47,7 @@ export const executeLoadTemplate = `
       throw new Error('__webpack_require__.l name is required for ' + url);
     }
 
-    if (typeof global.__remote_scope__[name] !== 'undefined') return callback(global.__remote_scope__[name]);
+    if (typeof globalThis.__remote_scope__[name] !== 'undefined') return callback(globalThis.__remote_scope__[name]);
     const vm = require('vm');
     (global.webpackChunkLoad || global.fetch || require("node-fetch"))(url).then(function (res) {
       return res.text();
@@ -59,11 +59,11 @@ export const executeLoadTemplate = `
         const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, {filename: 'node-federation-loader-' + name + '.vm'});
         const foundContainer = remote[name] || remote
 
-        if(!global.__remote_scope__[name]) {
-          global.__remote_scope__[name] = foundContainer;
-          global.__remote_scope__._config[name] = url;
+        if(!globalThis.__remote_scope__[name]) {
+          globalThis.__remote_scope__[name] = foundContainer;
+          globalThis.__remote_scope__._config[name] = url;
         }
-        callback(global.__remote_scope__[name]);
+        callback(globalThis.__remote_scope__[name]);
       } catch (e) {
         console.error('executeLoad hit catch block');
         e.target = {src: url};

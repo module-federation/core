@@ -236,10 +236,10 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
               'url,callback,chunkId',
               [
                 Template.indent([
-                  'if(!global.__remote_scope__) {',
+                  'if(!globalThis.__remote_scope__) {',
                   Template.indent([
                     '// create a global scope for container, similar to how remotes are set on window in the browser',
-                    'global.__remote_scope__ = {',
+                    'globalThis.__remote_scope__ = {',
                     '_config: {},',
                     '}',
                   ]),
@@ -326,8 +326,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                                 {} as Record<string, string>
                               )
                             )};`,
-                            'Object.assign(global.__remote_scope__._config, remotes)',
-                            'const remoteRegistry = global.__remote_scope__._config',
+                            'Object.assign(globalThis.__remote_scope__._config, remotes)',
+                            'const remoteRegistry = globalThis.__remote_scope__._config',
                             /*
                       TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise() global will/should still exist - but can only be known at runtime
                     */
@@ -337,19 +337,19 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             ),
                             this._getLogger(
                               `'remote scope configs'`,
-                              'global.__remote_scope__._config'
+                              'globalThis.__remote_scope__._config'
                             ),
 
                             this._getLogger(`'before remote scope'`),
                             this._getLogger(
-                              `'global.__remote_scope__'`,
-                              `global.__remote_scope__`
+                              `'globalThis.__remote_scope__'`,
+                              `globalThis.__remote_scope__`
                             ),
                             this._getLogger(
-                              `'global.__remote_scope__[${JSON.stringify(
+                              `'globalThis.__remote_scope__[${JSON.stringify(
                                 name
                               )}]'`,
-                              `global.__remote_scope__[${JSON.stringify(name)}]`
+                              `globalThis.__remote_scope__[${JSON.stringify(name)}]`
                             ),
 
                             /*   TODO: this global.REMOTE_CONFIG doesnt work in this v5 core, not sure if i need to keep it or not
@@ -397,8 +397,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             `var scriptUrl = new URL(requestedRemote);`,
 
                             this._getLogger(
-                              `'global.__remote_scope__'`,
-                              `global.__remote_scope__`
+                              `'globalThis.__remote_scope__'`,
+                              `globalThis.__remote_scope__`
                             ),
                             `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
                             this._getLogger(
