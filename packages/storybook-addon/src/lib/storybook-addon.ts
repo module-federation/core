@@ -65,6 +65,7 @@ export const webpack = async (
   );
 
   const index = plugins.findIndex(
+    //@ts-ignore
     (plugin) => plugin.constructor.name === 'VirtualModulesPlugin'
   );
 
