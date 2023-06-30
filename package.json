@@ -78,7 +78,7 @@
     "@commitlint/cli": "17.6.6",
     "@commitlint/config-conventional": "17.6.6",
     "@dqbd/tiktoken": "^1.0.7",
-    "@fontsource/roboto": "4.5.8",
+    "@fontsource/roboto": "5.0.3",
     "@fontsource/roboto-mono": "5.0.3",
     "@jscutlery/semver": "^3.0.0",
     "@node-rs/jieba": "^1.7.0",
