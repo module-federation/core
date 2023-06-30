@@ -2,6 +2,250 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.16.3-rc.0](https://github.com/module-federation/nextjs-mf/compare/node-0.16.2...node-0.16.3-rc.0) (2023-06-30)
+
+
+
+## [0.15.2-rc8.1](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-rc8.0...node-0.15.2-rc8.1) (2023-06-28)
+
+
+
+## [0.15.2-rc8.0](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-rc7.0...node-0.15.2-rc8.0) (2023-06-27)
+
+
+### Bug Fixes
+
+* disable flushing remotes to ssr for now ([2495582](https://github.com/module-federation/nextjs-mf/commit/249558248682896ccb05a9517d8540b97379b1bc))
+
+
+
+## [0.15.2-rc7.0](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-rc6.0...node-0.15.2-rc7.0) (2023-06-27)
+
+
+
+## [0.15.2-rc6.0](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-rc5.0...node-0.15.2-rc6.0) (2023-06-23)
+
+
+
+## [0.15.2-rc5.0](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-rc4.0...node-0.15.2-rc5.0) (2023-06-23)
+
+
+
+## [0.15.2-rc4.0](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-rc3.1...node-0.15.2-rc4.0) (2023-06-21)
+
+
+### Bug Fixes
+
+* Resolve condition names ([#974](https://github.com/module-federation/nextjs-mf/issues/974)) ([5e8b49c](https://github.com/module-federation/nextjs-mf/commit/5e8b49cf60f19dae6be4818a1c0ff783c7689393))
+* Runtime module checking ([#969](https://github.com/module-federation/nextjs-mf/issues/969)) ([b5c7af1](https://github.com/module-federation/nextjs-mf/commit/b5c7af1697a63d9e19f901238a4c0382ea0c3f50))
+
+
+
+## [0.15.2-rc3.1](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-rc3.0...node-0.15.2-rc3.1) (2023-06-09)
+
+
+### Bug Fixes
+
+* Path loader patches ([#960](https://github.com/module-federation/nextjs-mf/issues/960)) ([d362a77](https://github.com/module-federation/nextjs-mf/commit/d362a7752c4364cc499a27f2b6eeb5399543cb29))
+
+
+
+## [0.15.2-rc3.0](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-beta.0...node-0.15.2-rc3.0) (2023-06-09)
+
+
+
+## [0.15.2-beta.0](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-rc1.0...node-0.15.2-beta.0) (2023-05-26)
+
+
+### Bug Fixes
+
+* Improve chunk correlation ([#936](https://github.com/module-federation/nextjs-mf/issues/936)) ([4dad1eb](https://github.com/module-federation/nextjs-mf/commit/4dad1eb370feacd6ecb4c1726c435d5c579f424d))
+
+
+
+## [0.15.2-rc1.0](https://github.com/module-federation/nextjs-mf/compare/node-0.15.2-rc.0...node-0.15.2-rc1.0) (2023-05-25)
+
+
+
+## [0.15.2-rc.0](https://github.com/module-federation/nextjs-mf/compare/node-0.15.1...node-0.15.2-rc.0) (2023-05-23)
+
+
+### Bug Fixes
+
+* chunk and module duplications ([#885](https://github.com/module-federation/nextjs-mf/issues/885)) ([199e6b9](https://github.com/module-federation/nextjs-mf/commit/199e6b9937f4a2ca6caedb3ae4767342de463cb6))
+* client prod build issues ([#899](https://github.com/module-federation/nextjs-mf/issues/899)) ([470d7ad](https://github.com/module-federation/nextjs-mf/commit/470d7ad408ae8d64dbccc5a9528eaa2ed60fa2ca))
+* externalization and missing runtime chunks ([#887](https://github.com/module-federation/nextjs-mf/issues/887)) ([c79cd62](https://github.com/module-federation/nextjs-mf/commit/c79cd6226d3134f1d6294cd8eba40c8c33af5cb5))
+* missing chunk hashes on exposed modules ([#893](https://github.com/module-federation/nextjs-mf/issues/893)) ([cfa43f5](https://github.com/module-federation/nextjs-mf/commit/cfa43f506999d5ce3ab6afeea513d50d85f7886e))
+
+
+
+## [0.14.7-rc.2](https://github.com/module-federation/nextjs-mf/compare/node-0.14.7-rc.1...node-0.14.7-rc.2) (2023-05-17)
+
+
+
+## [0.14.7-rc.1](https://github.com/module-federation/nextjs-mf/compare/node-0.14.7-rc.0...node-0.14.7-rc.1) (2023-05-17)
+
+
+### Bug Fixes
+
+* **chunk-module-duplication:** prevent runtime reset and share scope loss ([14bfc38](https://github.com/module-federation/nextjs-mf/commit/14bfc38515a4da3be7321d4b6d876905d45ad20b))
+
+
+
+## [0.14.7-rc.0](https://github.com/module-federation/nextjs-mf/compare/node-0.14.7-beta.3...node-0.14.7-rc.0) (2023-05-16)
+
+
+
+## [0.14.7-beta.3](https://github.com/module-federation/nextjs-mf/compare/node-0.14.7-beta.2...node-0.14.7-beta.3) (2023-05-16)
+
+
+
+## [0.14.7-beta.2](https://github.com/module-federation/nextjs-mf/compare/node-0.14.7-beta.1...node-0.14.7-beta.2) (2023-05-16)
+
+
+
+## [0.14.7-beta.1](https://github.com/module-federation/nextjs-mf/compare/node-0.14.7-beta.0...node-0.14.7-beta.1) (2023-05-16)
+
+
+
+## [0.14.7-beta.0](https://github.com/module-federation/nextjs-mf/compare/node-0.14.6...node-0.14.7-beta.0) (2023-05-16)
+
+
+
+## [0.14.6](https://github.com/module-federation/nextjs-mf/compare/node-0.14.5...node-0.14.6) (2023-05-16)
+
+
+
+## [0.14.5](https://github.com/module-federation/nextjs-mf/compare/node-0.14.5-beta.0...node-0.14.5) (2023-05-15)
+
+
+
+## [0.14.5-beta.0](https://github.com/module-federation/nextjs-mf/compare/node-0.14.4...node-0.14.5-beta.0) (2023-05-15)
+
+
+### Features
+
+* Quantum Modules ([#872](https://github.com/module-federation/nextjs-mf/issues/872)) ([2991039](https://github.com/module-federation/nextjs-mf/commit/299103932b4e0aa6d8017be588ffa5272f519260))
+
+
+
+## [0.14.4](https://github.com/module-federation/nextjs-mf/compare/node-0.14.4-beta.0...node-0.14.4) (2023-05-13)
+
+
+
+## [0.14.4-beta.0](https://github.com/module-federation/nextjs-mf/compare/node-0.14.3...node-0.14.4-beta.0) (2023-05-13)
+
+
+### Bug Fixes
+
+* remove container proxy code ([6123d98](https://github.com/module-federation/nextjs-mf/commit/6123d9846606d76be949492ca04474f5c8164bc7))
+
+
+### Features
+
+* [7] Async boundary runtime server ([#851](https://github.com/module-federation/nextjs-mf/issues/851)) ([7fa792a](https://github.com/module-federation/nextjs-mf/commit/7fa792a4b518cd007b5ac41db225e20521063e73)), closes [#864](https://github.com/module-federation/nextjs-mf/issues/864)
+
+
+### BREAKING CHANGES
+
+* automaticAsyncBoundary option has been removed
+
+* fix: exclude specific pages from page map automatically
+
+* refactor: conslidate codebase
+
+* fix: improve hot reload share recovery
+
+* refactor: remove server jsonp template
+
+* chore: remove dead code from runtime modules
+
+* fix: clean up jsonp getCustomJsonpCode
+
+getting chunk loading global from compiler output options
+
+* feat: adding cleanInitArrays runtime helper
+
+* chore: remove share scope hoist and module hoisting system
+
+* chore: cleanup code
+
+
+
+## [0.14.3](https://github.com/module-federation/nextjs-mf/compare/node-0.14.3-beta.0...node-0.14.3) (2023-05-03)
+
+
+
+## [0.14.3-beta.0](https://github.com/module-federation/nextjs-mf/compare/node-0.14.2...node-0.14.3-beta.0) (2023-05-03)
+
+
+
+## [0.14.2](https://github.com/module-federation/nextjs-mf/compare/node-0.14.2-beta.1...node-0.14.2) (2023-04-28)
+
+
+
+## [0.14.2-beta.1](https://github.com/module-federation/nextjs-mf/compare/node-0.14.2-beta.0...node-0.14.2-beta.1) (2023-04-28)
+
+
+
+## [0.14.2-beta.0](https://github.com/module-federation/nextjs-mf/compare/node-0.14.1...node-0.14.2-beta.0) (2023-04-28)
+
+
+### Bug Fixes
+
+* use [fullhash] if no hash exists / in development mode. ([dfa7fb3](https://github.com/module-federation/nextjs-mf/commit/dfa7fb3a49b81b87dae43ec57ff2f86f5c2b7501))
+
+
+
+## [0.14.1](https://github.com/module-federation/nextjs-mf/compare/node-0.14.1-beta.0...node-0.14.1) (2023-04-28)
+
+
+
+## [0.14.1-beta.0](https://github.com/module-federation/nextjs-mf/compare/node-0.14.0...node-0.14.1-beta.0) (2023-04-28)
+
+
+### Features
+
+* Improve module chunk connections ([#802](https://github.com/module-federation/nextjs-mf/issues/802)) ([ce0bd7b](https://github.com/module-federation/nextjs-mf/commit/ce0bd7b16e080f712e6db0bdcd3955a8167c274f)), closes [#803](https://github.com/module-federation/nextjs-mf/issues/803) [#808](https://github.com/module-federation/nextjs-mf/issues/808) [#811](https://github.com/module-federation/nextjs-mf/issues/811)
+
+
+
+## [0.13.1](https://github.com/module-federation/nextjs-mf/compare/node-0.13.1-beta.0...node-0.13.1) (2023-04-19)
+
+
+
+## [0.13.1-beta.0](https://github.com/module-federation/nextjs-mf/compare/node-0.13.0...node-0.13.1-beta.0) (2023-04-19)
+
+
+### Bug Fixes
+
+*  use container proxy on script VM instead of host resolver point ([2929d0f](https://github.com/module-federation/nextjs-mf/commit/2929d0f64d4b8edf268af5ca83f807a02b121861))
+* get delegates working ([#527](https://github.com/module-federation/nextjs-mf/issues/527)) ([7655568](https://github.com/module-federation/nextjs-mf/commit/7655568fcef8dbfda40573deb5d3d029c101074c))
+* improved asset pipeline ([63928b2](https://github.com/module-federation/nextjs-mf/commit/63928b28150c2c4e3adb9e14fb7aa54f5cf1578d))
+* peer dependencies metadata ([d3a2ed0](https://github.com/module-federation/nextjs-mf/commit/d3a2ed0e378b59afdeb632d1e2e0290f05cbca19))
+* solve externalization ([49f52e5](https://github.com/module-federation/nextjs-mf/commit/49f52e53ddddc990d31e6aa510d67dc0552a9d9a))
+* use EntryPlugin for injection of remotes ([e522c5a](https://github.com/module-federation/nextjs-mf/commit/e522c5ad2b7adcbd6c39f9c5fdb7a3e418277b7a))
+
+
+### Features
+
+*  delegate module support ([5061d3d](https://github.com/module-federation/nextjs-mf/commit/5061d3d64d7d83dbb25b4ef2378d434545186cb1))
+* chunk flushing in delegates ([5e2375f](https://github.com/module-federation/nextjs-mf/commit/5e2375f598437803105ac4bc2237f6b652554d00))
+* delegate module support ([8dd154c](https://github.com/module-federation/nextjs-mf/commit/8dd154c261b34183b12250ce204904cd3e085658))
+* delegate module support ([d242163](https://github.com/module-federation/nextjs-mf/commit/d24216324183bfec5c7ba672ba6da05679f67809))
+* delegates part two ([1be2686](https://github.com/module-federation/nextjs-mf/commit/1be2686624798a7df9f447b48279294985b3f592))
+* improve chunk correlation ([22d8afc](https://github.com/module-federation/nextjs-mf/commit/22d8afccff101044fcdeba390656950dbc6eafed))
+* new chunk flushing system for exposed modules ([97a75d8](https://github.com/module-federation/nextjs-mf/commit/97a75d8702f2ddc5e12cff2ac4d24aca1df6f990))
+* prepare for v7 ([7bc4b3b](https://github.com/module-federation/nextjs-mf/commit/7bc4b3bd44e0926a52d6a9cbe56f0c4d7bb700ae))
+
+
+### BREAKING CHANGES
+
+* safety breaking change note
+BREAKING_CHANGE: safety breaking change note
+
+
+
 ## [0.16.2](https://github.com/module-federation/nextjs-mf/compare/node-0.16.1...node-0.16.2) (2023-06-30)
 
 ### Dependency Updates
