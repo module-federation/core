@@ -83,7 +83,7 @@
     "@node-rs/jieba": "^1.7.0",
     "@nrwl/eslint-plugin-nx": "16.2.2",
     "@nx/jest": "16.2.2",
-    "@nrwl/js": "16.2.2",
+    "@nx/js": "16.2.2",
     "@nrwl/linter": "16.2.2",
     "@nrwl/next": "16.2.2",
     "@nx/react": "16.2.2",
