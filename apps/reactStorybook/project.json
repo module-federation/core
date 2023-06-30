@@ -49,7 +49,7 @@
       }
     },
     "serve": {
-      "executor": "@nrwl/react:module-federation-dev-server",
+      "executor": "@nx/react:module-federation-dev-server",
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "reactStorybook:build",
