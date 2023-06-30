@@ -2,6 +2,22 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [6.7.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.6.3...nextjs-mf-6.7.0) (2023-06-30)
+
+### Dependency Updates
+
+* `utils` updated to version `1.9.1`
+* `node` updated to version `0.16.2`
+* `utils` updated to version `1.9.1`
+* `node` updated to version `0.16.2`
+* `node` updated to version `0.16.2`
+
+### Features
+
+* support use client directive ([#1069](https://github.com/module-federation/nextjs-mf/issues/1069)) ([e20ade1](https://github.com/module-federation/nextjs-mf/commit/e20ade134d96a339dc53fe886a41f2eb81d878d5))
+
+
+
 ## [6.6.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.6.2...nextjs-mf-6.6.3) (2023-06-29)
 
 
