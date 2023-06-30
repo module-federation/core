@@ -90,7 +90,7 @@
     "@nx/storybook": "16.2.2",
     "@nrwl/vite": "16.2.2",
     "@nrwl/web": "16.2.2",
-    "@nrwl/webpack": "16.2.2",
+    "@nx/webpack": "16.2.2",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10",
     "@storybook/addon-essentials": "7.0.24",
     "@storybook/builder-webpack5": "7.0.24",
