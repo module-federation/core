@@ -129,8 +129,7 @@ export function handleServerExternals(
       if (!fromNext) {
         return;
       }
-      return fromNext;
-console.log(fromNext);
+
       // If the module is from Next.js or React, return the original result
       const req = fromNext.split(' ')[1];
       if (
