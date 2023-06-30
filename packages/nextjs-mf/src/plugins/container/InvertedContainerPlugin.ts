@@ -13,7 +13,7 @@ interface InvertedContainerOptions extends ModuleFederationPluginOptions {
   container?: string;
   remotes: Record<string, string>; // A map of remote modules to their URLs.
   runtime: string; // The name of the current module.
-  debug?: boolean; // A flag to enable debug logging.
+  debug?: boolean | undefined; // A flag to enable debug logging.
 }
 
 /**
@@ -30,7 +30,7 @@ class InvertedContainerPlugin {
     container: string | undefined;
     runtime: string;
     remotes: Record<string, string>;
-    debug: boolean;
+    debug: boolean | undefined
   }) {
     this.options = options || ({} as InvertedContainerOptions);
   }
