@@ -1,12 +1,15 @@
 /* eslint-disable no-undef */
 
+// @ts-ignore
 if (!globalThis.usedChunks) {
+// @ts-ignore
   globalThis.usedChunks = new Set();
 }
 /**
  * Initialize usedChunks and share it globally.
  * @type {Set}
  */
+// @ts-ignore
 export const usedChunks = globalThis.usedChunks;
 /**
  * Load hostStats from the JSON file.
@@ -26,18 +29,24 @@ const loadHostStats = () => {
  */
 const createShareMap = () => {
   // Check if __webpack_share_scopes__ is defined and has a default property
+// @ts-ignore
   if (__webpack_share_scopes__?.default) {
     // Reduce the keys of the default property to create the share map
+// @ts-ignore
     return Object.keys(__webpack_share_scopes__.default).reduce((acc, key) => {
       // Get the loaded modules for the current key
+// @ts-ignore
       const loadedModules = Object.values(__webpack_share_scopes__.default[key])
         // Filter out the modules that are not loaded
+        // @ts-ignore
         .filter((sharedModule) => sharedModule.loaded)
         // Map the filtered modules to their 'from' properties
+        // @ts-ignore
         .map((sharedModule) => sharedModule.from);
 
       // If there are any loaded modules, add them to the accumulator object
       if (loadedModules.length > 0) {
+// @ts-ignore
         acc[key] = loadedModules;
       }
       // Return the accumulator object for the next iteration
@@ -55,6 +64,7 @@ const createShareMap = () => {
  * @param {object} hostStats - An object containing host stats data.
  * @returns {Promise<Array>} A promise that resolves to an array of updated chunks.
  */
+// @ts-ignore
 const processChunk = async (chunk, shareMap, hostStats) => {
   // Create a set to store the chunks
   const chunks = new Set();
@@ -100,23 +110,30 @@ const processChunk = async (chunk, shareMap, hostStats) => {
     const [prefix] = global.__remote_scope__._config[remote].split('static/');
 
     // Process federated modules from the stats object
+// @ts-ignore
     if (stats.federatedModules) {
+// @ts-ignore
       stats.federatedModules.forEach((modules) => {
         // Process exposed modules
         if (modules.exposes?.[request]) {
+// @ts-ignore
           modules.exposes[request].forEach((chunk) => {
             chunks.add([prefix, chunk].join(''));
 
             //TODO: reimplement this
             Object.values(chunk).forEach((chunk) => {
               // Add files to the chunks set
+// @ts-ignore
               if (chunk.files) {
+// @ts-ignore
                 chunk.files.forEach((file) => {
                   chunks.add(prefix + file);
                 });
               }
               // Process required modules
+// @ts-ignore
               if (chunk.requiredModules) {
+// @ts-ignore
                 chunk.requiredModules.forEach((module) => {
                   // Check if the module is in the shareMap
                   if (shareMap[module]) {
