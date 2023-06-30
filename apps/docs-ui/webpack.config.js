@@ -1,4 +1,4 @@
-const { composePlugins, withNx, withWeb } = require('@nrwl/webpack');
+const { composePlugins, withNx, withWeb } = require('@nx/webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 // Nx plugins for webpack.
