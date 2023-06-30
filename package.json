@@ -174,7 +174,7 @@
     "ts-jest": "29.1.0",
     "ts-node": "10.9.1",
     "tslib": "^2.5.0",
-    "tsup": "^6.7.0",
+    "tsup": "^7.0.0",
     "typescript": "5.1.5",
     "url-loader": "^4.1.1",
     "verdaccio": "5.25.0",
