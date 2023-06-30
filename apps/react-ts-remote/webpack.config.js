@@ -1,13 +1,13 @@
 const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 
 registerPluginTSTranspiler();
-const { withModuleFederation } = require('@nrwl/react/module-federation');
+const { withModuleFederation } = require('@nx/react/module-federation');
 const { FederatedTypesPlugin } = require('@module-federation/typescript');
 
 const baseConfig = require('./module-federation.config');
 
 /**
- * @type {import('@nrwl/react/module-federation').ModuleFederationConfig}
+ * @type {import('@nx/react/module-federation').ModuleFederationConfig}
  **/
 const defaultConfig = {
   ...baseConfig,

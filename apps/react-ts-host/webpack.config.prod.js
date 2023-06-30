@@ -1,6 +1,6 @@
 // @ts-check
 
-const { withModuleFederation } = require('@nrwl/react/module-federation');
+const { withModuleFederation } = require('@nx/react/module-federation');
 const baseConfig = require('./module-federation.config');
 
 /**
