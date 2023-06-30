@@ -86,7 +86,7 @@
     "@nrwl/js": "16.2.2",
     "@nrwl/linter": "16.2.2",
     "@nrwl/next": "16.2.2",
-    "@nrwl/react": "16.2.2",
+    "@nx/react": "16.2.2",
     "@nrwl/storybook": "16.2.2",
     "@nrwl/vite": "16.2.2",
     "@nrwl/web": "16.2.2",
