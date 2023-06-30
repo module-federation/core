@@ -152,6 +152,10 @@ revalidate().then((shouldReload) => {
 });
 ```
 
+## For Express.js
+
+Hot reloading Express.js required additional steps: https://github.com/module-federation/universe/blob/main/packages/node/README.md
+
 ## 🔑 License
 
 - MIT @[ScriptedAlchemy](https://github.com/ScriptedAlchemy)
