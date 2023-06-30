@@ -441,7 +441,6 @@ class MyDocument extends Document {
 
 Hot reloading Express.js required additional steps: https://github.com/module-federation/universe/blob/main/packages/node/README.md
 
-
 ## Contact
 
 If you have any questions or need to report a bug
