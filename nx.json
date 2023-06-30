@@ -56,7 +56,7 @@
     "libsDir": "packages"
   },
   "generators": {
-    "@nrwl/react": {
+    "@nx/react": {
       "application": {
         "linter": "eslint",
         "babel": true
@@ -65,19 +65,19 @@
         "linter": "eslint"
       }
     },
-    "@nrwl/next": {
+    "@nx/next": {
       "application": {
         "style": "css",
         "linter": "eslint"
       }
     },
-    "@nrwl/web:application": {
+    "@nx/web:application": {
       "style": "css",
       "linter": "eslint",
       "unitTestRunner": "none",
       "e2eTestRunner": "none"
     },
-    "@nrwl/web:library": {
+    "@nx/web:library": {
       "style": "css",
       "linter": "eslint",
       "unitTestRunner": "none"
