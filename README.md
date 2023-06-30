@@ -18,7 +18,7 @@
 
 ## Generate an application
 
-Run `nx g @nrwl/next:app my-app` to generate an application.
+Run `nx g @nx/next:app my-app` to generate an application.
 
 > You can use any of the plugins above to generate applications as well.
 
@@ -26,7 +26,7 @@ When using Nx, you can create multiple applications and libraries in the same wo
 
 ## Generate a library
 
-Run `nx g @nrwl/js:lib my-lib` to generate a library.
+Run `nx g @nx/js:lib my-lib` to generate a library.
 
 > You can also use any of the plugins above to generate libraries as well.
 
