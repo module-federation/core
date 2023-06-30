@@ -226,7 +226,7 @@ export class ChildFederationPlugin {
         ) {
           // childCompiler.options.module.parser.javascript?.url = 'relative';
           injectRuleLoader(rule, {
-            loader: path.resolve(__dirname, '../loaders/fixImageLoader'),
+            loader: require.resolve('../loaders/fixImageLoader'),
           });
         }
 
