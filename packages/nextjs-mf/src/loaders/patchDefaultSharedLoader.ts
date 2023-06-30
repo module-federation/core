@@ -20,7 +20,7 @@ export default function patchDefaultSharedLoader(
   // @see https://webpack.js.org/contribute/writing-a-loader/#absolute-paths
   const pathIncludeDefaults = path.relative(
     this.context,
-    path.resolve(__dirname, '../include-defaults.js')
+    path.resolve(__dirname, '../include-defaults')
   );
 
   return [
