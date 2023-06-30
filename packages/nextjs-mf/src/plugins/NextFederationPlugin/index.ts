@@ -107,7 +107,7 @@ export class NextFederationPlugin {
       runtime: false,
       exposes: {
         //something must be exposed in order to generate a remote entry, which is needed to kickstart runtime
-        './noop': require.resolve('../../federation-noop.js'),
+        './noop': require.resolve('../../federation-noop.ts'),
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)
           : {}),

@@ -150,7 +150,7 @@ export const parseRemotes = (
     if (isStandardRemoteSyntax(value)) {
       return {
         ...acc,
-        [key]: createDelegatedModule(require.resolve('./default-delegate.js'), {
+        [key]: createDelegatedModule(require.resolve('./default-delegate'), {
           remote: value,
         }),
       };
