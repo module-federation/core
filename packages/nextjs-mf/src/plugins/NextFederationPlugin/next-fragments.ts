@@ -73,7 +73,7 @@ export function applyRemoteDelegates(
     compiler.options.module.rules.push({
       enforce: 'pre',
       test: [/_app/],
-      loader: path.resolve(__dirname, '../../loaders/patchDefaultSharedLoader'),
+      loader: require.resolve('../../loaders/patchDefaultSharedLoader'),
     });
     // Add the delegate loader for hoist and container to the module rules
     compiler.options.module.rules.push({
@@ -86,7 +86,7 @@ export function applyRemoteDelegates(
         //eslint-disable-next-line
         /next[\/]dist/,
       ],
-      loader: path.resolve(__dirname, '../../loaders/delegateLoader'),
+      loader: require.resolve('../../loaders/delegateLoader'),
       options: {
         delegates,
       },
@@ -102,14 +102,14 @@ export const applyPathFixes = (compiler, options) => {
     if (options.enableImageLoaderFix && hasLoader(rule, 'next-image-loader')) {
       // childCompiler.options.module.parser.javascript?.url = 'relative';
       injectRuleLoader(rule, {
-        loader: path.resolve(__dirname, '../../loaders/fixImageLoader'),
+        loader: require.resolve('../../loaders/fixImageLoader'),
       });
     }
 
     // url-loader fix for which adds remote's hostname to the assets url
     if (options.enableUrlLoaderFix && hasLoader(rule, 'url-loader')) {
       injectRuleLoader({
-        loader: path.resolve(__dirname, '../../loaders/fixUrlLoader'),
+        loader: require.resolve('../../loaders/fixUrlLoader'),
       });
     }
   });
