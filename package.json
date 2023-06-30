@@ -82,7 +82,7 @@
     "@jscutlery/semver": "^3.0.0",
     "@node-rs/jieba": "^1.7.0",
     "@nrwl/eslint-plugin-nx": "16.2.2",
-    "@nrwl/jest": "16.2.2",
+    "@nx/jest": "16.2.2",
     "@nrwl/js": "16.2.2",
     "@nrwl/linter": "16.2.2",
     "@nrwl/next": "16.2.2",
