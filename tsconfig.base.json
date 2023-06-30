@@ -22,15 +22,16 @@
       "@module-federation/native-federation-typescript": [
         "packages/native-federation-typescript/src/index.ts"
       ],
-      "@module-federation/nextjs-mf": ["packages/nextjs-mf/src"],
-      "@module-federation/nextjs-mf/utils": ["packages/nextjs-mf/utils"],
+      "@module-federation/nextjs-mf": ["packages/nextjs-mf/src/index.ts"],
+      "@module-federation/nextjs-mf/*": ["packages/nextjs-mf/*"],
       "@module-federation/node": ["packages/node/src"],
       "@module-federation/node/utils": ["packages/node/src/utils"],
       "@module-federation/storybook-addon": [
         "packages/storybook-addon/src/index.ts"
       ],
       "@module-federation/typescript": ["packages/typescript/src/index.ts"],
-      "@module-federation/utilities": ["packages/utilities/src/index.ts"]
+      "@module-federation/utilities": ["packages/utilities/src/index.ts"],
+      "@module-federation/utilities/*": ["packages/utilities/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]
