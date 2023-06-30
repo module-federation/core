@@ -48,7 +48,7 @@ describe('index', () => {
 
       expect(dirTree(distFolder)).toMatchObject({
         name: '@mf-tests',
-        children: [{name: 'index.ts'}],
+        children: [{name: 'index.js'}],
       })
     })
 
@@ -137,7 +137,7 @@ describe('index', () => {
         children: [
           {
             name: 'remotes',
-            children: [{name: 'index.ts'}],
+            children: [{name: 'index.js'}],
           },
         ],
       })
