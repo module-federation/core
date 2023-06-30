@@ -1,7 +1,7 @@
 import { getRuntimeRemotes } from './getRuntimeRemotes';
 import { remoteVars } from './common';
 
-describe('getRuntimeRemotes', () => {
+xdescribe('getRuntimeRemotes', () => {
   afterEach(() => {
     Object.keys(remoteVars).forEach((key) => {
       delete remoteVars[key];

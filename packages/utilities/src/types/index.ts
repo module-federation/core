@@ -35,7 +35,7 @@ export interface NextFederationPluginExtraOptions {
   exposePages?: boolean;
   skipSharingNextInternals?: boolean;
   automaticPageStitching?: boolean;
-  debug: boolean;
+  debug?: boolean;
 }
 
 export interface NextFederationPluginOptions
