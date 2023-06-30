@@ -1,4 +1,4 @@
-export default `
+module.exports = `
 function promiseState(p) {
   var t = {};
   return Promise.race([p, t]).then(function (v) {

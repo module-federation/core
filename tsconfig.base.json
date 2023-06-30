@@ -30,7 +30,8 @@
         "packages/storybook-addon/src/index.ts"
       ],
       "@module-federation/typescript": ["packages/typescript/src/index.ts"],
-      "@module-federation/utilities": ["packages/utilities/src/index.ts"]
+      "@module-federation/utilities": ["packages/utilities/src/index.ts"],
+      "@module-federation/utilities/*": ["packages/utilities/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]
