@@ -1,9 +1,11 @@
 export const usedChunks = new Set();
+//@ts-ignore
 global.usedChunks = usedChunks;
 
 export const flushChunks = async () => {
   const allFlushed = await Promise.all(
-    Array.from(usedChunks).map(async (chunk) => {
+    //@ts-ignore
+    Array.from(usedChunks).map(async (chunk: any) => {
       const chunks = new Set();
       const [remote, request] = chunk.split('->');
       if (!global.__remote_scope__._config[remote]) {
@@ -24,11 +26,12 @@ export const flushChunks = async () => {
         const [prefix] =
           global.__remote_scope__._config[remote].split('static/');
         if (stats.federatedModules) {
-          stats.federatedModules.forEach((modules) => {
+          stats.federatedModules.forEach((modules: any) => {
             if (modules.exposes?.[request]) {
-              modules.exposes[request].forEach((chunk) => {
+              modules.exposes[request].forEach((chunk: any) => {
                 Object.values(chunk).forEach((chunk) => {
-                  chunk.forEach((chunk) => {
+                  //@ts-ignore
+                  chunk.forEach((chunk: any) => {
                     chunks.add(prefix + chunk);
                   });
                 });

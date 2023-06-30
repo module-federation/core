@@ -1,3 +1,6 @@
+const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+
+registerPluginTSTranspiler();
 const { withModuleFederation } = require('@nrwl/react/module-federation');
 const { FederatedTypesPlugin } = require('@module-federation/typescript');
 
