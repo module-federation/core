@@ -85,7 +85,7 @@
     "@nrwl/eslint-plugin-nx": "16.2.2",
     "@nx/jest": "16.2.2",
     "@nx/js": "16.2.2",
-    "@nrwl/linter": "16.2.2",
+    "@nx/linter": "16.2.2",
     "@nx/next": "16.2.2",
     "@nx/react": "16.2.2",
     "@nrwl/storybook": "16.2.2",
