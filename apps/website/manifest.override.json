@@ -1,0 +1,11 @@
+{
+  "functions": [
+    {
+      "path": "/*",
+      "excludedPath": "/docs/*",
+      "function": "entry.netlify-edge",
+      "cache": "manual"
+    }
+  ],
+  "version": 1
+}

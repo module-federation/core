@@ -1,10 +1,10 @@
 // @ts-check
 
-const { withModuleFederation } = require('@nrwl/react/module-federation');
+const { withModuleFederation } = require('@nx/react/module-federation');
 const baseConfig = require('./module-federation.config');
 
 /**
- * @type {import('@nrwl/react/module-federation').ModuleFederationConfig}
+ * @type {import('@nrwl/devkit').ModuleFederationConfig}
  **/
 const prodConfig = {
   ...baseConfig,
@@ -25,7 +25,7 @@ const prodConfig = {
    *   ['app2', '//example.com/path/to/app2/remoteEntry.js'],
    * ]
    */
-  remotes: [],
+  // remotes: [],
 };
 
 module.exports = withModuleFederation(prodConfig);

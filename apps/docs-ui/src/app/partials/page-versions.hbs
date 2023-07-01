@@ -1,0 +1,29 @@
+
+<div class="version-wrapper relative">
+  <button class="version-toggle flex gap-2 items-center text-sm border p-1 border-blue-gray-200 bg-deep-purple-100 hover:bg-[#DCE2F7]">
+    <div>
+      {{@root.page.componentVersion.displayVersion}}
+    </div>
+    <svg width="12"
+         height="8"
+         viewBox="0 0 12 8"
+         fill="none"
+         xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M0.410826 0.910826C0.736263 0.585389 1.2639 0.585389 1.58934 0.910826L6.00008 5.32157L10.4108 0.910826C10.7363 0.585389 11.2639 0.585389 11.5893 0.910826C11.9148 1.23626 11.9148 1.7639 11.5893 2.08934L6.58934 7.08934C6.2639 7.41477 5.73626 7.41477 5.41083 7.08934L0.410826 2.08934C0.0853888 1.7639 0.0853888 1.23626 0.410826 0.910826Z"
+            fill="#1C2135"></path>
+    </svg>
+  </button>
+
+
+  <div class="version-dropdown hidden absolute bottom-[-6px] left-[-1px] translate-y-full p-0 border z-[60] w-full border-blue-gray-200 bg-deep-purple-100">
+
+    {{#each @root.page.component.versions}}
+    <a class="flex w-full p-1 text-sm border-0 text-left {{#if (eq @root.page.componentVersion.displayVersion ./displayVersion)}} bg-blue-gray-200 {{else}} bg-deep-purple-100 {{/if}} hover:bg-[#DCE2F7]"
+       href="{{{relativize ./url}}}">{{./displayVersion}}</a>
+    {{/each}}
+
+  </div>
+
+</div>

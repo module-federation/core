@@ -42,7 +42,7 @@ export async function fixImageLoader(
         Template.asString([
           'try {',
           Template.indent([
-            'const remoteEntry = global.__remote_scope__ && global.remoteEntryName && global.__remote_scope__._config[global.remoteEntryName];',
+            'const remoteEntry = globalThis.__remote_scope__ && globalThis.__remote_scope__._config[__webpack_runtime_id__];',
             `if (remoteEntry) {`,
             Template.indent([
               `const splitted = remoteEntry.split('/_next')`,
@@ -69,13 +69,14 @@ export async function fixImageLoader(
             Template.indent(
               `return ${publicPath} && ${publicPath}.indexOf('://') > 0 ? new URL(${publicPath}).origin : ''`
             ),
-            `const path = document.currentScript && document.currentScript.src;`,
+            `const path = (document.currentScript && document.currentScript.src) || new URL(${publicPath}).origin;`,
             `const splitted = path.split('/_next')`,
             `return splitted.length === 2 ? splitted[0] : '';`,
           ]),
           '} catch (e) {',
           Template.indent([
-            `console.error('failed generating CSR image path', e);`,
+            `const path = document.currentScript && document.currentScript.src;`,
+            `console.error('failed generating CSR image path', e, path);`,
             'return "";',
           ]),
           '}',

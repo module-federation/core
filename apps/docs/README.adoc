@@ -1,0 +1,63 @@
+# Module Federation Documentation Contribution Guide
+
+Thank you for your interest in contributing to the Module Federation documentation! This guide will help you get started with setting up your environment, making changes, and submitting pull requests.
+
+## Prerequisites
+
+Before you begin, make sure you have the following installed on your machine:
+
+- Git
+- Node.js
+- nx
+- yarn
+
+You also need a GitHub account and a fork of the [module-federation/universe](https://github.com/module-federation/universe) repository.
+
+## Setting up your environment
+
+Documentation website consists of 2 applications:
+
+- `docs-ui` holds the visual part of the documentation website. When serving\building the docs app, docs-ui will be prebuilt as its dependency.
+- `docs` is the one that is meant to contain all the actual documentation. 
+
+To set up your environment, follow these steps:
+
+1. Clone your fork of the module-federation/universe repository to your local machine.
+2. Navigate to the `apps/docs` folder inside the cloned repository.
+3. Run `yarn install` to install the dependencies.
+4. By default, serving\building will pull the changes from the `main` branch. To use it, run `nx run docs:serve`. Along with it there's a `local` configuration, that provides an ability to rely on the files within the filesystem. Can be used by running `nx run docs:serve:local`
+
+You can now access the documentation site at http://127.0.0.1:8080/.
+
+## Making changes
+
+The documentation is written in AsciiDoc markup language, which is similar to Markdown but more powerful and expressive. You can learn more about AsciiDoc syntax from the [AsciiDoc Writer's Guide](https://asciidoctor.org/docs/asciidoc-writers-guide/).
+
+The source files for the documentation are located in the `apps/docs/src/modules/ROOT/pages` folder. Each file corresponds to a page on the documentation site, and has a `.adoc` extension.
+
+To make changes to the documentation, follow these steps:
+
+1. Find the file that corresponds to the page you want to edit or create a new file if you want to add a new page.
+2. Open the file in your preferred text editor and make your changes using AsciiDoc syntax.
+3. In case you created a new file, make sure to add it to sidebar navigation file `nav.adoc` located at `docs/src/modules/ROOT/nav.adoc`, so it appears in the website sidebar.
+4. Save the file and check the local development server for the updated page.
+
+## Submitting pull requests
+
+Once you are happy with your changes, you can submit a pull request to the module-federation/universe repository. A pull request is a way of proposing your changes to be merged into the main branch of the repository.
+
+To submit a pull request, follow these steps:
+
+1. Commit your changes to your local branch using `git commit -m "your message"`.
+2. Push your changes to your remote fork using `git push origin your-branch`.
+3. Go to https://github.com/module-federation/universe and click on "New pull request".
+4. Select your fork and branch as the source and the main branch as the destination.
+5. Fill in the title and description of your pull request and click on "Create pull request".
+
+Your pull request will be reviewed by the maintainers of the `module-federation/universe` repository as well as by a technical writer who will check your content for accuracy, clarity, and adherence to Google Developers Documentation Style Guide. The technical writer may suggest some changes or improvements to your content before merging it to the main branch. and they will provide feedback or approve it.
+
+## Conclusion
+
+That's it! You have successfully contributed to the Module Federation documentation! Thank you for your time and effort!
+
+If you have any questions or issues, feel free to reach out to us on [GitHub Discussions](https://github.com/module-federation/universe/discussions)

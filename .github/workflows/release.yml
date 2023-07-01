@@ -11,8 +11,11 @@ on:
           - all
           - nextjs-mf
           - node
+          - storybook-addon
           - typescript
           - utils
+          - native-federation-typescript
+          - native-federation-tests
 
 jobs:
   release:
@@ -24,14 +27,14 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
-          cache: 'yarn'
+          node-version: '18'
+          cache: 'npm'
       - name: Setup Git
         run: |
           git config user.name "GitHub Bot"
           git config user.email "gituser@example.com"
       - name: Install packages
-        run: yarn install --frozen-lockfile
+        run: npm i
       - name: Lint
         shell: bash
         run: |
@@ -44,21 +47,20 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          yarn nx run-many --target=build --projects=nextjs-mf,node,typescript,utils
+          yarn nx run-many --target=build --projects=typescript,utils,node,nextjs-mf,storybook-addon,native-federation-typescript,native-federation-tests
       - name: Version
         shell: bash
         run: |
           npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
-
-          PROJECTS=${{ inputs.projects }}
+          PROJECTS=${{ inputs.package }}
 
           if [[ $PROJECTS == "all" ]]; then
             PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=last-release)
           fi;
 
-          echo $PROJECTS
+          echo "Projects to version: $PROJECTS"
 
-          yarn nx run-many --target=version --projects="$PROJECTS" --parallel=1
+          yarn nx run-many --target=version --projects="$PROJECTS" --parallel=1 --allowEmptyRelease
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,10 +1,11 @@
 {
+  "name": "react-ts-remote",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/react-ts-remote/src",
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nrwl/web:webpack",
+      "executor": "@nx/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
@@ -19,9 +20,12 @@
           "apps/react-ts-remote/src/favicon.ico",
           "apps/react-ts-remote/src/assets"
         ],
-        "styles": ["apps/react-ts-remote/src/styles.css"],
+        "styles": [
+          "apps/react-ts-remote/src/styles.css"
+        ],
         "scripts": [],
-        "webpackConfig": "apps/react-ts-remote/webpack.config.js"
+        "webpackConfig": "apps/react-ts-remote/webpack.config.js",
+        "babelUpwardRootMode": true
       },
       "configurations": {
         "development": {
@@ -45,10 +49,16 @@
           "vendorChunk": false,
           "webpackConfig": "apps/react-ts-remote/webpack.config.prod.js"
         }
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "serve": {
-      "executor": "@nrwl/react:module-federation-dev-server",
+      "executor": "@nx/react:module-federation-dev-server",
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "react-ts-remote:build",
@@ -66,14 +76,16 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/react-ts-remote/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": [
+          "apps/react-ts-remote/**/*.{ts,tsx,js,jsx}"
+        ]
       }
     },
     "serve-static": {
-      "executor": "@nrwl/web:file-server",
+      "executor": "@nx/web:file-server",
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "react-ts-remote:build",

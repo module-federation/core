@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import type VueTs from 'vue-tsc';
+import type { _Program } from 'vue-tsc';
+
 import ts from 'typescript';
 import path from 'path';
 import fs from 'fs';
@@ -12,6 +15,13 @@ import {
 
 import { NormalizeOptions } from './normalizeOptions';
 import { TypesCache } from './Caching';
+
+let vueTs: typeof VueTs;
+try {
+  vueTs = require('vue-tsc');
+} catch {
+  // vue-tsc is an optional dependency.
+}
 
 export class TypescriptCompiler {
   private compilerOptions!: ts.CompilerOptions;
@@ -44,16 +54,21 @@ export class TypescriptCompiler {
 
     const normalizedAdditionalFiles = this.normalizeFiles(
       additionalFilesToCompile,
-      this.getNormalizedPathWithExt
+      this.getNormalizedPathWithExt.bind(this)
     );
 
     const host = this.createHost(exposeSrcToDestMap);
 
-    const program = ts.createProgram(
-      [...normalizedAdditionalFiles, ...normalizedExposedComponents],
-      this.compilerOptions,
-      host
-    );
+    const rootNames = [
+      ...normalizedAdditionalFiles,
+      ...normalizedExposedComponents,
+    ];
+
+    const program = this.getCompilerProgram({
+      rootNames,
+      options: this.compilerOptions,
+      host,
+    });
 
     const { diagnostics, emitSkipped } = program.emit();
 
@@ -61,9 +76,26 @@ export class TypescriptCompiler {
       return this.tsDefinitionFilesObj;
     }
 
-    diagnostics.forEach(this.reportCompileDiagnostic);
+    diagnostics.forEach(this.reportCompileDiagnostic.bind(this));
 
     throw new Error('something went wrong generating declaration files');
+  }
+
+  private getCompilerProgram(programOptions: ts.CreateProgramOptions) {
+    const { compiler } = this.options;
+
+    switch (compiler) {
+      case 'vue-tsc':
+        if (!vueTs) {
+          throw new Error(
+            'vue-tsc must be installed when using the vue-tsc compiler option'
+          );
+        }
+        return vueTs.createProgram(programOptions) as _Program;
+      case 'tsc':
+      default:
+        return ts.createProgram(programOptions);
+    }
   }
 
   private normalizeFiles<T, U extends string>(
@@ -85,24 +117,13 @@ export class TypescriptCompiler {
     );
 
     const pathWithExt = path.resolve(normalizedRootDir, filenameWithExt);
-    return pathWithExt;
+    return path.normalize(pathWithExt);
   }
 
   private createHost(exposeSrcToDestMap: Record<string, string>) {
     const host = ts.createCompilerHost(this.compilerOptions);
 
     const originalWriteFile = host.writeFile;
-
-    const rewritePathsWithExposedFederatedModules = (
-      sourceFilename: string
-    ) => {
-      const destFile = exposeSrcToDestMap[sourceFilename];
-
-      return (
-        destFile &&
-        path.join(this.compilerOptions.outDir as string, `${destFile}.d.ts`)
-      );
-    };
 
     host.writeFile = (
       filepath,
@@ -112,26 +133,52 @@ export class TypescriptCompiler {
       sourceFiles,
       data
     ) => {
-      // for exposes: { "./expose/path": "path/to/file" }
-      // force typescript to write compiled output to "@mf-typescript/expose/path"
-      const sourceFilename = sourceFiles?.[0].fileName || '';
-
-      // Try to rewrite the path with exposed federated modules,
-      // failing so, use the default filepath emitted by TS Compiler.
-      // This second case is valid for 'additionalFileToCompiler' added through Plugin Options.
-      const normalizedFilepath =
-        rewritePathsWithExposedFederatedModules(sourceFilename) ?? filepath;
-
-      this.tsDefinitionFilesObj[normalizedFilepath] = text;
-
+      this.tsDefinitionFilesObj[filepath] = text;
       originalWriteFile(
-        normalizedFilepath,
+        filepath,
         text,
         writeOrderByteMark,
         onError,
         sourceFiles,
         data
       );
+
+      // create exports matching the `exposes` config
+      const sourceFilename = path.normalize(sourceFiles?.[0].fileName || '');
+      const exposedDestFilePath = exposeSrcToDestMap[sourceFilename];
+
+      // create reexport file only if the file was marked for exposing
+      if (exposedDestFilePath) {
+        const normalizedExposedDestFilePath = path.resolve(
+          this.options.distDir,
+          `${exposedDestFilePath}.d.ts`
+        );
+
+        const relativePathToCompiledFile = path.relative(
+          path.dirname(normalizedExposedDestFilePath),
+          filepath
+        );
+        // add ./ so it's always relative, remove d.ts because it's not needed and can throw warnings
+        let importPath =
+          './' + relativePathToCompiledFile.replace(/\.d\.ts$/, '');
+
+        // If we're on Windows, need to convert "\" to "/" in the import path since it
+        // was derived from platform-specific file system path.
+        if (path.sep === '\\') {
+          importPath = importPath.replaceAll(path.sep, '/');
+        }
+
+        const reexport = `export * from '${importPath}';\nexport { default } from '${importPath}';`;
+
+        this.tsDefinitionFilesObj[normalizedExposedDestFilePath] = reexport;
+
+        // reuse originalWriteFile as it creates folders if they don't exist
+        originalWriteFile(
+          normalizedExposedDestFilePath,
+          reexport,
+          writeOrderByteMark
+        );
+      }
     };
 
     return host;
@@ -158,15 +205,25 @@ export class TypescriptCompiler {
   private getTSConfigCompilerOptions(): ts.CompilerOptions {
     const context = this.options.webpackCompilerOptions.context!;
 
-    const tsconfigPath = path.resolve(context, 'tsconfig.json');
+    const tsconfigPath = ts.findConfigFile(
+      context,
+      ts.sys.fileExists,
+      'tsconfig.json'
+    );
 
     if (!tsconfigPath) {
       this.logger.error('ERROR: Could not find a valid tsconfig.json');
       process.exit(1);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    return require(tsconfigPath).compilerOptions;
+    const readResult = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
+    const configContent = ts.parseJsonConfigFileContent(
+      readResult.config,
+      ts.sys,
+      context
+    );
+
+    return configContent.options;
   }
 
   private getFilenameWithExtension(rootDir: string, entry: string) {

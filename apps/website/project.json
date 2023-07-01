@@ -1,0 +1,106 @@
+{
+  "name": "website",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/website/src",
+  "implicitDependencies": ["docs"],
+  "targets": {
+    "build": {
+      "executor": "qwik-nx:build",
+      "options": {
+        "runSequence": ["website:build.client", "website:build.ssr"],
+        "outputPath": "dist/apps/website",
+        "skipTypeCheck": false
+      },
+      "configurations": {
+        "preview": {},
+        "netlify": {}
+      }
+    },
+    "build.client": {
+      "executor": "@nrwl/vite:build",
+      "options": {
+        "outputPath": "dist/apps/website",
+        "configFile": "apps/website/vite.config.ts"
+      }
+    },
+    "build.ssr": {
+      "executor": "@nrwl/vite:build",
+      "defaultConfiguration": "preview",
+      "options": {
+        "outputPath": "dist/apps/website"
+      },
+      "configurations": {
+        "preview": {
+          "ssr": "src/entry.preview.tsx",
+          "mode": "production"
+        },
+        "netlify": {
+          "configFile": "apps/website/adapters/netlify-edge/vite.config.ts"
+        }
+      }
+    },
+    "preview": {
+      "executor": "@nrwl/vite:preview-server",
+      "options": {
+        "buildTarget": "website:build",
+        "port": 4300
+      }
+    },
+    "test": {
+      "executor": "@nrwl/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/apps/website"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/apps/website"
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/vite:dev-server",
+      "options": {
+        "buildTarget": "website:build.client",
+        "mode": "ssr",
+        "port": 4200
+      }
+    },
+    "serve.debug": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --inspect-brk ../../node_modules/vite/bin/vite.js --mode ssr --force",
+        "cwd": "apps/website"
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/website/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "extract-i18n": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "qwik-speak-extract --sourceFilesPaths=./apps/website/src --assetsPath=./apps/website/src/i18n --supportedLangs=en-US,pt-BR"
+        ]
+      },
+      "configurations": {},
+      "dependsOn": []
+    },
+    "build.netlify": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          "nx run website:build:netlify",
+          "npx move-cli dist/apps/docs dist/apps/website/client/docs --mkdirp",
+          "npx move-cli dist/apps/website/.netlify/edge-functions .netlify/edge-functions --mkdirp",
+          "npx move-cli apps/website/manifest.override.json .netlify/edge-functions/manifest.json"
+        ]
+      },
+      "configurations": {},
+      "dependsOn": ["docs:build-docs"]
+    }
+  },
+  "tags": []
+}

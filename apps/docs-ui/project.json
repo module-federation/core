@@ -1,0 +1,51 @@
+{
+  "name": "docs-ui",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/docs-ui/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/docs-ui",
+        "compiler": "babel",
+        "main": "apps/docs-ui/src/main.ts",
+        "tsConfig": "apps/docs-ui/tsconfig.app.json",
+        "webpackConfig": "apps/docs-ui/webpack.config.js",
+        "assets": ["apps/docs-ui/src/favicon.ico", "apps/docs-ui/src/assets"],
+        "index": "apps/docs-ui/src/index.html",
+        "baseHref": "/",
+        "styles": ["apps/docs-ui/src/styles.scss"],
+        "scripts": [],
+        "postcssConfig": "apps/docs-ui/postcss.config.js",
+        "babelUpwardRootMode": true
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "outputHashing": "none",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": false,
+          "vendorChunk": false,
+          "fileReplacements": [
+            {
+              "replace": "apps/docs-ui/src/environments/environment.ts",
+              "with": "apps/docs-ui/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/docs-ui/**/*.ts"]
+      }
+    }
+  }
+}

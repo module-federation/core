@@ -5,6 +5,7 @@
 /tmp
 /out-tsc
 /build
+/@mf-types
 
 # dependencies
 node_modules
@@ -41,3 +42,4 @@ Thumbs.db
 
 # Next.js
 .next
+.netlify

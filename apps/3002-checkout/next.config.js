@@ -1,9 +1,13 @@
-const {withNx} = require('@nrwl/next/plugins/with-nx');
+const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+
+registerPluginTSTranspiler();
+const { withNx } = require('@nx/next/plugins/with-nx');
 
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
+const { createDelegatedModule } = require('@module-federation/utilities');
 
 /**
- * @type {import('@nrwl/next/plugins/with-nx').WithNxOptions}
+ * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
  **/
 const nextConfig = {
   nx: {
@@ -12,13 +16,22 @@ const nextConfig = {
     svgr: false,
   },
   webpack(config, options) {
-    const {webpack, isServer} = options;
+    const { webpack, isServer } = options;
 
     config.plugins.push(
       new NextFederationPlugin({
         name: 'checkout',
         filename: 'static/chunks/remoteEntry.js',
         remotes: {
+          // home: createDelegatedModule(require.resolve('./remote-delegate.js'), {
+          //   remote: `home_app@http://localhost:3000/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+          // }),
+          // shop: createDelegatedModule(require.resolve('./remote-delegate.js'), {
+          //   remote: `shop@http://localhost:3001/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+          // }),
+          // checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
+          //   remote: `checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+          // }),
           home: `home_app@http://localhost:3000/_next/static/${
             isServer ? 'ssr' : 'chunks'
           }/remoteEntry.js`,
@@ -30,18 +43,19 @@ const nextConfig = {
           }/remoteEntry.js`,
         },
         exposes: {
-          './CheckoutTitle': './src/components/CheckoutTitle',
-          './ButtonOldAnt': './src/components/ButtonOldAnt',
-          './menu': './src/components/menu',
+          './CheckoutTitle': './components/CheckoutTitle',
+          './ButtonOldAnt': './components/ButtonOldAnt',
+          './menu': './components/menu',
         },
         shared: {
           lodash: {},
+          antd: {},
         },
         extraOptions: {
           exposePages: true,
           enableImageLoaderFix: true,
           enableUrlLoaderFix: true,
-          automaticPageStitching: true,
+          automaticPageStitching: false,
         },
       })
     );

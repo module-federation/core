@@ -1,0 +1,24 @@
+{{#if navigation.length}}
+<ul class="nav flex flex-col text-blue-gray-700 font-normal text-base gap-4 {{#if (gt ./level 1)}} ml-6 pt-4 subnav {{/if}}">
+    {{#each navigation}}
+      <li class="{{#if (eq ./url @root.page.url)}} is-active {{/if}} {{#if ./content}}{{#if ./items.length}} subnav-item {{else}} nav-item {{/if}}{{/if}}">
+        {{#if ./content}}
+        {{#if ./items.length}}
+          <button class="subnav-toggle flex gap-2 items-center">
+            <div class="icon">{{>icon name="chevron-down" size="12px"}}</div>
+            <div>{{ ./content }}</div>
+          </button>
+        {{else}}
+         {{#if ./url}}
+            <a class="flex gap-2 items-center" href="{{~#if (eq ./urlType 'internal')}}{{{relativize ./url}}}{{~else}}{{{./url}}}{{~/if}}">
+              {{>icon name="bullet" size="4px"}}
+              <div>{{{./content}}}</div>
+            </a>
+         {{/if}}
+        {{/if}}
+         {{/if}}
+         {{> nav-tree navigation=./items level=(increment ../level)}}
+      </li>
+    {{/each}}
+</ul>
+{{/if}}

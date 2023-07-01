@@ -5,23 +5,24 @@
 
 'use strict';
 
-import type {Chunk, ChunkGraph, Compiler} from 'webpack';
-import {RuntimeModule, RuntimeGlobals, Template} from 'webpack';
-
-// import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-// import RuntimeModule from 'webpack/lib/RuntimeModule';
-// import Template from 'webpack/lib/Template';
-import {getUndoPath} from 'webpack/lib/util/identifier';
+import type { Chunk, ChunkGraph, Compiler } from 'webpack';
+import { RuntimeModule, RuntimeGlobals, Template } from 'webpack';
+import { getUndoPath } from 'webpack/lib/util/identifier';
 import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
 
-import loadScriptTemplate, {executeLoadTemplate} from './loadScript';
+import loadScriptTemplate, { executeLoadTemplate } from './loadScript';
+
+interface RemotesByType {
+  functional: string[];
+  normal: string[];
+}
 
 interface ReadFileChunkLoadingRuntimeModuleOptions {
   baseURI: Compiler['options']['output']['publicPath'];
   promiseBaseURI?: string;
   remotes: Record<string, string>;
   name?: string;
-  verbose?: boolean;
+  debug?: boolean;
 }
 
 interface ChunkLoadingContext {
@@ -69,11 +70,11 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
    * @param {unknown[]} items item to log
    */
   _getLogger(...items: unknown[]) {
-    if (!this.options.verbose) {
-      return "";
+    if (!this.options.debug) {
+      return '';
     }
 
-    return `console.log(${items.join(',')});`
+    return `console.log(${items.join(',')});`;
   }
 
   /**
@@ -87,8 +88,26 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     // remotes only use fs.readFile if we were to cache the chunks on disk after fetching - otherwise its always using http
     // so for example, if im in hostA and require(remoteb/module) --> console.log of name in runtime code will return remoteb
 
-    const {remotes, name} = this.options;
-    const {webpack} = this.chunkLoadingContext;
+    const { remotes = {}, name } = this.options;
+    // for delegate modules, we need to avoid serializing internal modules, only register primitive configs in the runtime
+    // delegates have their own registration code, so we dont need to handle them here.
+    const remotesByType: RemotesByType = Object.values(remotes).reduce(
+      (acc: RemotesByType, remote: string) => {
+        if (
+          remote.startsWith('promise ') ||
+          remote.startsWith('internal ') ||
+          remote.startsWith('external ')
+        ) {
+          acc.functional.push(remote);
+        } else {
+          acc.normal.push(remote);
+        }
+        return acc;
+      },
+      { functional: [], normal: [] }
+    );
+
+    const { webpack } = this.chunkLoadingContext;
     const chunkHasJs =
       (webpack && webpack.javascript.JavascriptModulesPlugin.chunkHasJs) ||
       require('webpack/lib/javascript/JavascriptModulesPlugin').chunkHasJs;
@@ -101,17 +120,24 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
         if (c.ids) {
           for (const id of c.ids) initialChunkIds.add(id);
         }
+        for (const c of chunk.getAllAsyncChunks()) {
+          if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
+          if (c.ids) {
+            for (const id of c.ids) initialChunkIds.add(id);
+          }
+        }
       }
       return initialChunkIds;
     };
 
-    const {chunkGraph, chunk} = this;
-    const {runtimeTemplate} = this.compilation;
+    const { chunkGraph, chunk } = this;
+    const { runtimeTemplate } = this.compilation;
     const fn = RuntimeGlobals.ensureChunkHandlers;
     const withBaseURI = this.runtimeRequirements.has(RuntimeGlobals.baseURI);
     const withExternalInstallChunk = this.runtimeRequirements.has(
       RuntimeGlobals.externalInstallChunk
     );
+
     const withOnChunkLoad = this.runtimeRequirements.has(
       RuntimeGlobals.onChunksLoaded
     );
@@ -142,6 +168,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
         contentHashType: 'javascript',
       }
     );
+
     const rootOutputDir = getUndoPath(
       outputName,
       this.compilation.outputOptions.path,
@@ -151,7 +178,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     const stateExpression = withHmr
       ? `${RuntimeGlobals.hmrRuntimeStatePrefix}_readFileVm`
       : undefined;
-
     return Template.asString([
       withBaseURI
         ? this._generateBaseUri(chunk, rootOutputDir)
@@ -171,36 +197,36 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       '',
       withOnChunkLoad
         ? `${
-          RuntimeGlobals.onChunksLoaded
-        }.readFileVm = ${runtimeTemplate.returningFunction(
-          'installedChunks[chunkId] === 0',
-          'chunkId'
-        )};`
+            RuntimeGlobals.onChunksLoaded
+          }.readFileVm = ${runtimeTemplate.returningFunction(
+            'installedChunks[chunkId] === 0',
+            'chunkId'
+          )};`
         : '// no on chunks loaded',
       '',
       withLoading || withExternalInstallChunk
         ? `var installChunk = ${runtimeTemplate.basicFunction('chunk', [
-          'var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;',
-          'for(var moduleId in moreModules) {',
-          Template.indent([
-            `if(${RuntimeGlobals.hasOwnProperty}(moreModules, moduleId)) {`,
+            'var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;',
+            'for(var moduleId in moreModules) {',
             Template.indent([
-              `${RuntimeGlobals.moduleFactories}[moduleId] = moreModules[moduleId];`,
+              `if(${RuntimeGlobals.hasOwnProperty}(moreModules, moduleId)) {`,
+              Template.indent([
+                `${RuntimeGlobals.moduleFactories}[moduleId] = moreModules[moduleId];`,
+              ]),
+              '}',
             ]),
             '}',
-          ]),
-          '}',
-          `if(runtime) runtime(__webpack_require__);`,
-          'for(var i = 0; i < chunkIds.length; i++) {',
-          Template.indent([
-            'if(installedChunks[chunkIds[i]]) {',
-            Template.indent(['installedChunks[chunkIds[i]][0]();']),
+            `if(runtime) runtime(__webpack_require__);`,
+            'for(var i = 0; i < chunkIds.length; i++) {',
+            Template.indent([
+              'if(installedChunks[chunkIds[i]]) {',
+              Template.indent(['installedChunks[chunkIds[i]][0]();']),
+              '}',
+              'installedChunks[chunkIds[i]] = 0;',
+            ]),
             '}',
-            'installedChunks[chunkIds[i]] = 0;',
-          ]),
-          '}',
-          withOnChunkLoad ? `${RuntimeGlobals.onChunksLoaded}();` : '',
-        ])};`
+            withOnChunkLoad ? `${RuntimeGlobals.onChunksLoaded}();` : '',
+          ])};`
         : '// no chunk install function needed',
       '',
       withLoading ?
@@ -252,6 +278,9 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                       }(chunkId)) : false;`,
                       "var fs = typeof process !== \"undefined\" ? require('fs') : false;",
                       'if(fs && fs.existsSync(filename)) {',
+                      this._getLogger(
+                        `'chunk filename local load', chunkId`
+                      ),
                       Template.indent([
                         "fs.readFile(filename, 'utf-8', function(err, content) {",
                         Template.indent([
@@ -307,7 +336,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           name
                         )}]`),
 
-                        /*   TODO: this global.REMOTE_CONFIG doesnt work in this v5 core, not sure if i need to keep it or not
+                            /*   TODO: this global.REMOTE_CONFIG doesnt work in this v5 core, not sure if i need to keep it or not
                          not deleting it yet since i might need this for tracking all the remote entries across systems
                          for now, im going to use locally known remote scope from remoteEntry config
                          update: We will most likely need this, since remote would not have its own config
@@ -317,32 +346,43 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           name
                         )}]`,
                      */
-                        `var requestedRemote = remoteRegistry[${JSON.stringify(
-                          name
-                        )}]`,
-                        this._getLogger(`'requested remote'`, `requestedRemote`),
-                        /*TODO: we need to support when user implements own promise new promise function
+                            `var requestedRemote = remoteRegistry[${JSON.stringify(
+                              name
+                            )}]`,
+                            this._getLogger(
+                              `'requested remote'`,
+                              `requestedRemote`
+                            ),
+                            /*TODO: we need to support when user implements own promise new promise function
                             for example i have my own promise remotes, not global@remotename
                             so there could be cases where remote may be function still - not sure */
 
-                        /*TODO: need to handle if chunk fetch fails/crashes - ensure server still can keep loading
+                            /*TODO: need to handle if chunk fetch fails/crashes - ensure server still can keep loading
                             right now if you throw an error in here, server will stall forever */
 
-                        `if(typeof requestedRemote === 'function'){
+                            `if(typeof requestedRemote === 'function'){
                     requestedRemote = await requestedRemote()
                   }`,
-                        this._getLogger(`'var requestedRemote'`,`requestedRemote`),
+                            this._getLogger(
+                              `'var requestedRemote'`,
+                              `requestedRemote`
+                            ),
 
-                        // example: uncomment this and server will never reply
-                        // `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
-                        // since im looping over remote and creating global at build time, i dont need to split string at runtime
-                        // there may still be a use case for that with promise new promise, depending on how we design it.
-                        `var scriptUrl = new URL(requestedRemote);`,
+                            // example: uncomment this and server will never reply
+                            // `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
+                            // since im looping over remote and creating global at build time, i dont need to split string at runtime
+                            // there may still be a use case for that with promise new promise, depending on how we design it.
+                            this._getLogger(
+                              '"requestedRemote"',
+                              'requestedRemote',
+                              'current name',
+                              JSON.stringify(name)
+                            ),
+                            `var scriptUrl = new URL(requestedRemote);`,
 
                         this._getLogger(`'globalThis.__remote_scope__'`,`globalThis.__remote_scope__`),
                         `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
                         this._getLogger(`'chunkname to request'`,`chunkName`),
-                        "console.log(scriptUrl)",
                         `
                         var getBasenameFromUrl = (url) => {
                           const urlParts = url.split('/');
@@ -388,98 +428,102 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       '',
       withExternalInstallChunk
         ? Template.asString([
-          'module.exports = __webpack_require__;',
-          `${RuntimeGlobals.externalInstallChunk} = installChunk;`,
-        ])
+            'module.exports = __webpack_require__;',
+            `${RuntimeGlobals.externalInstallChunk} = function(){`,
+            this.options.debug
+              ? `console.debug('node: webpack installing to install chunk id:', arguments['0'].id);`
+              : '',
+            `return installChunk.apply(this, arguments)};`,
+          ])
         : '// no external install chunk',
       '',
       withHmr
         ? Template.asString([
-          'function loadUpdateChunk(chunkId, updatedModulesList) {',
-          Template.indent([
-            'return new Promise(function(resolve, reject) {',
+            'function loadUpdateChunk(chunkId, updatedModulesList) {',
             Template.indent([
-              `var filename = require('path').join(__dirname, ${JSON.stringify(
-                rootOutputDir
-              )} + ${RuntimeGlobals.getChunkUpdateScriptFilename}(chunkId));`,
-              "require('fs').readFile(filename, 'utf-8', function(err, content) {",
+              'return new Promise(function(resolve, reject) {',
               Template.indent([
-                'if(err) return reject(err);',
-                'var update = {};',
-                "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
-                "(update, require, require('path').dirname(filename), filename);",
-                'var updatedModules = update.modules;',
-                'var runtime = update.runtime;',
-                'for(var moduleId in updatedModules) {',
+                `var filename = require('path').join(__dirname, ${JSON.stringify(
+                  rootOutputDir
+                )} + ${RuntimeGlobals.getChunkUpdateScriptFilename}(chunkId));`,
+                "require('fs').readFile(filename, 'utf-8', function(err, content) {",
                 Template.indent([
-                  `if(${RuntimeGlobals.hasOwnProperty}(updatedModules, moduleId)) {`,
+                  'if(err) return reject(err);',
+                  'var update = {};',
+                  "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
+                    "(update, require, require('path').dirname(filename), filename);",
+                  'var updatedModules = update.modules;',
+                  'var runtime = update.runtime;',
+                  'for(var moduleId in updatedModules) {',
                   Template.indent([
-                    `currentUpdate[moduleId] = updatedModules[moduleId];`,
-                    'if(updatedModulesList) updatedModulesList.push(moduleId);',
+                    `if(${RuntimeGlobals.hasOwnProperty}(updatedModules, moduleId)) {`,
+                    Template.indent([
+                      `currentUpdate[moduleId] = updatedModules[moduleId];`,
+                      'if(updatedModulesList) updatedModulesList.push(moduleId);',
+                    ]),
+                    '}',
                   ]),
                   '}',
+                  'if(runtime) currentUpdateRuntime.push(runtime);',
+                  'resolve();',
                 ]),
-                '}',
-                'if(runtime) currentUpdateRuntime.push(runtime);',
-                'resolve();',
+                '});',
               ]),
               '});',
             ]),
-            '});',
-          ]),
-          '}',
-          '',
-          Template.getFunctionContent(
-            require('webpack/lib/hmr/JavascriptHotModuleReplacement.runtime.js')
-          )
-            .replace(/\$key\$/g, 'readFileVm')
-            .replace(/\$installedChunks\$/g, 'installedChunks')
-            .replace(/\$loadUpdateChunk\$/g, 'loadUpdateChunk')
-            .replace(/\$moduleCache\$/g, RuntimeGlobals.moduleCache)
-            .replace(/\$moduleFactories\$/g, RuntimeGlobals.moduleFactories)
-            .replace(
-              /\$ensureChunkHandlers\$/g,
-              RuntimeGlobals.ensureChunkHandlers
+            '}',
+            '',
+            Template.getFunctionContent(
+              require('webpack/lib/hmr/JavascriptHotModuleReplacement.runtime.js')
             )
-            .replace(/\$hasOwnProperty\$/g, RuntimeGlobals.hasOwnProperty)
-            .replace(/\$hmrModuleData\$/g, RuntimeGlobals.hmrModuleData)
-            .replace(
-              /\$hmrDownloadUpdateHandlers\$/g,
-              RuntimeGlobals.hmrDownloadUpdateHandlers
-            )
-            .replace(
-              /\$hmrInvalidateModuleHandlers\$/g,
-              RuntimeGlobals.hmrInvalidateModuleHandlers
-            ),
-        ])
+              .replace(/\$key\$/g, 'readFileVm')
+              .replace(/\$installedChunks\$/g, 'installedChunks')
+              .replace(/\$loadUpdateChunk\$/g, 'loadUpdateChunk')
+              .replace(/\$moduleCache\$/g, RuntimeGlobals.moduleCache)
+              .replace(/\$moduleFactories\$/g, RuntimeGlobals.moduleFactories)
+              .replace(
+                /\$ensureChunkHandlers\$/g,
+                RuntimeGlobals.ensureChunkHandlers
+              )
+              .replace(/\$hasOwnProperty\$/g, RuntimeGlobals.hasOwnProperty)
+              .replace(/\$hmrModuleData\$/g, RuntimeGlobals.hmrModuleData)
+              .replace(
+                /\$hmrDownloadUpdateHandlers\$/g,
+                RuntimeGlobals.hmrDownloadUpdateHandlers
+              )
+              .replace(
+                /\$hmrInvalidateModuleHandlers\$/g,
+                RuntimeGlobals.hmrInvalidateModuleHandlers
+              ),
+          ])
         : '// no HMR',
       '',
       withHmrManifest
         ? Template.asString([
-          `${RuntimeGlobals.hmrDownloadManifest} = function() {`,
-          Template.indent([
-            'return new Promise(function(resolve, reject) {',
+            `${RuntimeGlobals.hmrDownloadManifest} = function() {`,
             Template.indent([
-              `var filename = require('path').join(__dirname, ${JSON.stringify(
-                rootOutputDir
-              )} + ${RuntimeGlobals.getUpdateManifestFilename}());`,
-              "require('fs').readFile(filename, 'utf-8', function(err, content) {",
+              'return new Promise(function(resolve, reject) {',
               Template.indent([
-                'if(err) {',
+                `var filename = require('path').join(__dirname, ${JSON.stringify(
+                  rootOutputDir
+                )} + ${RuntimeGlobals.getUpdateManifestFilename}());`,
+                "require('fs').readFile(filename, 'utf-8', function(err, content) {",
                 Template.indent([
-                  'if(err.code === "ENOENT") return resolve();',
-                  'return reject(err);',
+                  'if(err) {',
+                  Template.indent([
+                    'if(err.code === "ENOENT") return resolve();',
+                    'return reject(err);',
+                  ]),
+                  '}',
+                  'try { resolve(JSON.parse(content)); }',
+                  'catch(e) { reject(e); }',
                 ]),
-                '}',
-                'try { resolve(JSON.parse(content)); }',
-                'catch(e) { reject(e); }',
+                '});',
               ]),
               '});',
             ]),
-            '});',
-          ]),
-          '}',
-        ])
+            '}',
+          ])
         : '// no HMR manifest',
     ]);
   }

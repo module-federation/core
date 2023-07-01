@@ -1,0 +1,39 @@
+{
+  "extends": ["../../.eslintrc.json"],
+  "ignorePatterns": ["!**/*"],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "rules": {
+        "prefer-arrow-callback": "error",
+        "arrow-parens": ["error", "always"],
+        "comma-dangle": [
+          "error",
+          {
+            "arrays": "always-multiline",
+            "objects": "always-multiline",
+            "imports": "always-multiline",
+            "exports": "always-multiline"
+          }
+        ],
+        "max-len": [
+          "error",
+          {
+            "code": 520,
+            "ignoreUrls": true
+          }
+        ],
+        "prefer-regex-literals": "off",
+        "radix": ["error", "always"]
+      }
+    },
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {}
+    },
+    {
+      "files": ["*.js", "*.jsx"],
+      "rules": {}
+    }
+  ]
+}

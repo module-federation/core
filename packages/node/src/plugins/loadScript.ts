@@ -75,19 +75,9 @@ export const executeLoadTemplate = `
         return res.text();
       }).then(function (scriptContent) {
         try {
-          const vmContext = {
-            exports,
-            require,
-            module,
-            global,
-            __filename,
-            __dirname,
-            URL,
-            console,
-            process,
-            Buffer, ...global,
-            remoteEntryName: name
-          };
+     const vmContext = typeof URLSearchParams === 'undefined' ?{exports, require, module, global, __filename, __dirname, URL, URLSearchParams, console, process,Buffer, ...global, remoteEntryName: name}:
+          {exports, require, module, global, __filename, __dirname, URL, URLSearchParams, console, process,Buffer, ...global, remoteEntryName: name};
+
           const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, {filename: 'node-federation-loader-' + name + '.vm'});
           globalThis.__remote_scope__[name] = remote[name] || remote;
           globalThis.__remote_scope__._config[name] = url;

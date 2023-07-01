@@ -1,0 +1,10 @@
+{
+  "hero": {
+    "actions": {
+      "documentation": "Documentação",
+      "learn": "Aprender"
+    },
+    "subtitle": "Module Federation tem como objetivo resolver o compartilhamento de módulos em um sistema distribuído. Ele permite que você envie esses pedaços compartilhados críticos como macro ou micro quanto desejar. Ele faz isso retirando-os do pipeline de build e de seus aplicativos",
+    "title": "Module Federation: otimize seus microfrontends"
+  }
+}

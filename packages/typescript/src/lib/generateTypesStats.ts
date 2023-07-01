@@ -6,8 +6,10 @@ export const generateTypesStats = (
   normalizeOptions: NormalizeOptions
 ) => {
   return Object.entries(filesMap).reduce((acc, [path, contents]) => {
-    const filename = path.slice(`${normalizeOptions.distDir}/`.length);
-
+    const filename = path.slice(
+      path.indexOf(normalizeOptions.distDir) +
+        `${normalizeOptions.distDir}/`.length
+    );
     return {
       ...acc,
       [filename]: crypto.createHash('md5').update(contents).digest('hex'),

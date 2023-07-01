@@ -6,7 +6,7 @@ import type { Compiler, container } from 'webpack';
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
   isServer: boolean;
   promiseBaseURI?: string;
-  verbose?: boolean;
+  debug?: boolean;
 }
 
 interface NodeFederationContext {
@@ -18,17 +18,17 @@ class UniversalFederationPlugin {
   private context: NodeFederationContext;
 
   constructor(options: NodeFederationOptions, context: NodeFederationContext) {
-    this._options = Object.assign({remotes: {}, exposes: {}, shared: {}},options) as NodeFederationOptions;
-    this.context = context || {} as NodeFederationContext;
+    this._options = options || ({} as NodeFederationOptions);
+    this.context = context || ({} as NodeFederationContext);
   }
 
   apply(compiler: Compiler) {
-    const { isServer, verbose, ...options } = this._options;
+    const { isServer, debug, ...options } = this._options;
     const { webpack } = compiler;
 
     if (isServer || compiler.options.name === 'server') {
       new NodeFederationPlugin(options, this.context).apply(compiler);
-      new StreamingTargetPlugin({...options, verbose}).apply(compiler);
+      new StreamingTargetPlugin({ ...options, debug }).apply(compiler);
     } else {
       new (this.context.ModuleFederationPlugin ||
         (webpack && webpack.container.ModuleFederationPlugin) ||

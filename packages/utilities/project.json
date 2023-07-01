@@ -1,40 +1,52 @@
 {
+  "name": "utils",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/utilities/src",
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/packages/utilities",
         "main": "packages/utilities/src/index.ts",
         "tsConfig": "packages/utilities/tsconfig.lib.json",
-        "assets": ["packages/utilities/*.md"]
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true,
+        "assets": [
+          "packages/utilities/*.md"
+        ]
       }
     },
     "publish": {
-      "executor": "@nrwl/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "command": "node tools/scripts/publish.mjs utils {args.ver} {args.tag}"
       },
       "dependsOn": [
         {
-          "projects": "self",
           "target": "build"
         }
       ]
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "@nx/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["packages/utilities/**/*.ts"]
+        "lintFilePatterns": [
+          "packages/utilities/**/*.ts"
+        ]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/utilities"],
+      "executor": "@nx/jest:jest",
+      "outputs": [
+        "{workspaceRoot}/coverage/packages/utilities"
+      ],
       "options": {
         "jestConfig": "packages/utilities/jest.config.ts",
         "passWithNoTests": true
@@ -43,7 +55,10 @@
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": ["utils:npm", "utils:github"],
+        "postTargets": [
+          "utils:npm",
+          "utils:github"
+        ],
         "trackDeps": true,
         "push": true
       }
@@ -58,7 +73,8 @@
     "npm": {
       "executor": "ngx-deploy-npm:deploy",
       "options": {
-        "access": "public"
+        "access": "public",
+        "tag": "next"
       }
     }
   },

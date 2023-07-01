@@ -1,43 +1,60 @@
 {
+  "name": "typescript",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/typescript/src",
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:swc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/js:swc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/packages/typescript",
         "main": "packages/typescript/src/index.ts",
         "tsConfig": "packages/typescript/tsconfig.lib.json",
-        "assets": ["packages/typescript/*.md"],
+        "assets": [
+          "packages/typescript/*.md"
+        ],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "publish": {
-      "executor": "@nrwl/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "command": "node tools/scripts/publish.mjs typescript {args.ver} {args.tag}"
       },
       "dependsOn": [
         {
-          "projects": "self",
           "target": "build"
         }
       ]
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "@nx/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["packages/typescript/**/*.ts"]
+        "lintFilePatterns": [
+          "packages/typescript/**/*.ts"
+        ]
       }
     },
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": ["typescript:npm", "typescript:github"],
+        "postTargets": [
+          "typescript:npm",
+          "typescript:github"
+        ],
         "trackDeps": true,
         "push": true
       }
@@ -52,10 +69,13 @@
     "npm": {
       "executor": "ngx-deploy-npm:deploy",
       "options": {
-        "access": "public"
+        "access": "public",
+        "tag": "next"
       }
     }
   },
   "tags": [],
-  "implicitDependencies": ["utils"]
+  "implicitDependencies": [
+    "utils"
+  ]
 }

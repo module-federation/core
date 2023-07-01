@@ -1,0 +1,67 @@
+/*
+  HighlightJS styling
+*/
+.hljs {
+  @apply block overflow-x-auto bg-blue-gray-900 text-white font-light p-4;
+}
+
+.hljs-strong,
+.hljs-emphasis {
+  @apply text-blue-gray-300;
+}
+
+.hljs-bullet,
+.hljs-quote,
+.hljs-link,
+.hljs-number,
+.hljs-regexp,
+.hljs-literal {
+  @apply text-ui-green;
+}
+
+.hljs-code,
+.hljs-selector-class {
+  @apply text-ui-green;
+}
+
+.hljs-emphasis {
+  @apply italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-section,
+.hljs-attribute,
+.hljs-attr,
+.hljs-name,
+.hljs-variable {
+  @apply text-ui-blue;
+}
+
+.hljs-params {
+  color: #b9b9b9;
+}
+
+.hljs-string {
+  @apply text-ui-green;
+}
+
+.hljs-subst,
+.hljs-type,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-symbol,
+.hljs-selector-id,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-addition {
+  @apply text-cyan-500;
+}
+
+.hljs-comment,
+.hljs-deletion,
+.hljs-meta {
+  @apply text-blue-gray-300;
+}

@@ -1,0 +1,19 @@
+{
+  "evolving": {
+    "rfcs": {
+      "action": "Participe agora!",
+      "subtitle": "Participe das discussões comunitárias para decidir quais recursos virão a seguir",
+      "title": "RFCs"
+    },
+    "roadmap": {
+      "action": "Explore!",
+      "subtitle": "Descubra o futuro do Module Federation",
+      "title": "Roadmap do Module Federation"
+    },
+    "subtitle": "O mundo do Module Federation está em constante evolução e crescimento com base nos feedbacks da comunidade. Os RFCs estão abertos para que todos possam participar da discussão e o roadmap é publicado.",
+    "supported-bundlers": {
+      "title": "Empacotadores suportados"
+    },
+    "title": "Evolução do Module Federation"
+  }
+}

@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "0.9.6",
+  "version": "0.16.3-rc.0",
   "type": "commonjs",
   "main": "src/index.js",
   "exports": {
@@ -13,7 +13,8 @@
     "./utils": {
       "import": "./src/utils/index.js",
       "require": "./src/utils/index.js"
-    }
+    },
+    "./src/": "./src/"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
@@ -28,7 +29,7 @@
   ],
   "types": "src/index.d.ts",
   "description": "Module Federation helper for Node",
-  "repository": "https://github.com/module-federation/nextjs-mf/tree/main/packages/node",
+  "repository": "https://github.com/module-federation/universe/tree/main/packages/node",
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "license": "MIT",
   "dependencies": {
@@ -36,14 +37,20 @@
     "encoding": "^0.1.13"
   },
   "peerDependencies": {
-    "webpack": "^5.40.0"
+    "webpack": "^5.40.0",
+    "react": "^16||^17||^18",
+    "react-dom": "^16||^17||^18",
+    "next": "^12||^13"
   },
-  "devDependencies": {
-    "react": "^18",
-    "next": "^13"
-  },
-  "optionalDependencies": {
-    "react": "^17 || ^18",
-    "next": "^12 || ^13"
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    }
   }
 }

@@ -173,6 +173,3 @@ function preparePageMapV2(pages: string[]) {
 
   return result;
 }
-
-// module.exports = nextPageMapLoader;
-// module.exports.exposeNextjsPages = exposeNextjsPages;

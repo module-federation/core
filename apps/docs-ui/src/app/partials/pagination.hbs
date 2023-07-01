@@ -1,0 +1,34 @@
+{{#unless (eq page.attributes.pagination undefined)}}
+{{#if (or page.previous page.next)}}
+<nav class="flex flex-col xl:flex-row justify-between gap-8">
+  {{#with page.previous}}
+  <a href="{{{relativize ./url}}}"
+     class="flex items-center w-full xl:w-1/2 gap-6 border border-blue-gray-400 p-3 hover:bg-deep-purple-100 active:bg-blue-gray-200">
+    <div class="text-blue-gray-900">{{>icon name="left-arrow" size="16px"}}</div>
+    <div class="flex flex-col w-full h-full items-end text-right ">
+      <div class="text-blue-gray-500 text-xs font-normal">
+        Previous
+      </div>
+      <div class="text-base font-medium text-blue-gray-900">{{{./content}}}</div>
+    </div>
+  </a>
+  {{else}}
+  <div></div>
+  {{/with}}
+  {{#with page.next}}
+  <a href="{{{relativize ./url}}}"
+     class="flex items-center w-full xl:w-1/2 gap-6 border border-blue-gray-400 p-3 hover:bg-deep-purple-100 active:bg-blue-gray-200">
+    <div class="flex flex-col w-full h-full items-start text-left">
+      <div class="text-blue-gray-500 text-xs font-normal">
+        Next
+      </div>
+      <div class="text-base font-medium text-blue-gray-900">{{{./content}}}</div>
+    </div>
+    <div class="text-blue-gray-900">{{>icon name="right-arrow" size="16px"}}</div>
+  </a>
+  {{else}}
+  <div></div>
+  {{/with}}
+</nav>
+{{/if}}
+{{/unless}}

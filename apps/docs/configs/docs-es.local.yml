@@ -1,0 +1,37 @@
+antora:
+  extensions:
+    - require: antora-navigator-extension
+      config_file: ./mf-antora-navigator.yml
+    - require: '@antora/lunr-extension'
+      languages: [en, es, zh]
+site:
+  title: Documentación de federación de módulos
+  start_page: ipt::index.adoc
+  keys:
+    google_analytics: G-SDV5HRTM4G
+urls:
+  html_extension_style: indexify
+content:
+  sources:
+    - url: ./../../../
+      start_path: apps/docs/src
+    - url: https://github.com/omfgnuts/mf-translations.git
+      branches: [translated-main]
+      start_path: docs/es
+ui:
+  bundle:
+    url: ./../../../dist/apps/docs-ui
+    snapshot: false
+  # supplemental_files: ./../../../node_modules/antora-navigator-extension/data/
+output:
+  clean: true
+  dir: ./../../../dist/apps/docs/es
+runtime:
+  fetch: true
+  cache_dir: ./../../../tmp/docs-cache/es
+asciidoc:
+  extensions:
+    - '@asciidoctor/tabs'
+  attributes:
+    page-pagination: yes
+    language: es

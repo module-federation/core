@@ -1,46 +1,62 @@
 {
+  "name": "nextjs-mf",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/nextjs-mf/src",
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/packages/nextjs-mf",
         "main": "packages/nextjs-mf/src/index.js",
         "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true,
-        "assets": ["packages/nextjs-mf/*.md"]
-      }
+        "assets": [
+          "packages/nextjs-mf/*.md"
+        ]
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "publish": {
-      "executor": "@nrwl/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "command": "node tools/scripts/publish.mjs nextjs-mf {args.ver} {args.tag}"
       },
       "dependsOn": [
         {
-          "projects": "self",
           "target": "build"
         },
         {
-          "projects": "dependencies",
-          "target": "build"
+          "target": "build",
+          "dependencies": true
         }
       ]
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "@nx/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["packages/nextjs-mf/**/*.js"]
+        "lintFilePatterns": [
+          "packages/nextjs-mf/**/*.js"
+        ]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/nextjs-mf"],
+      "executor": "@nx/jest:jest",
+      "outputs": [
+        "{workspaceRoot}/coverage/packages/nextjs-mf"
+      ],
       "options": {
         "jestConfig": "packages/nextjs-mf/jest.config.js",
         "passWithNoTests": true
@@ -49,7 +65,10 @@
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": ["nextjs-mf:npm", "nextjs-mf:github"],
+        "postTargets": [
+          "nextjs-mf:npm",
+          "nextjs-mf:github"
+        ],
         "trackDeps": true,
         "push": true
       }
@@ -64,10 +83,14 @@
     "npm": {
       "executor": "ngx-deploy-npm:deploy",
       "options": {
-        "noBuild": true
+        "access": "public",
+        "tag": "next"
       }
     }
   },
   "tags": [],
-  "implicitDependencies": ["node", "utils"]
+  "implicitDependencies": [
+    "utils",
+    "node"
+  ]
 }

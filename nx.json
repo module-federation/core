@@ -9,39 +9,74 @@
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "lint", "test", "e2e"]
+        "cacheableOperations": [
+          "build",
+          "lint",
+          "test",
+          "e2e",
+          "build-storybook"
+        ]
       }
     }
   },
   "targetDefaults": {
+    "version": {
+      "dependsOn": [
+        "^version"
+      ]
+    },
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
+      "inputs": [
+        "production",
+        "^production"
+      ]
     },
     "lint": {
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"]
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.eslintrc.json"
+      ]
     },
     "test": {
-      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"]
+      "inputs": [
+        "default",
+        "^production",
+        "{workspaceRoot}/jest.preset.js"
+      ]
+    },
+    "build-storybook": {
+      "inputs": [
+        "default",
+        "^production",
+        "!{projectRoot}/.storybook/**/*"
+      ]
     }
   },
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
     "production": [
       "default",
       "!{projectRoot}/.eslintrc.json",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
       "!{projectRoot}/tsconfig.spec.json",
-      "!{projectRoot}/jest.config.[jt]s"
+      "!{projectRoot}/jest.config.[jt]s",
+      "!{projectRoot}/vitest.config.[jt]s",
+      "!{projectRoot}/.storybook/**/*",
+      "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)"
     ],
-    "sharedGlobals": ["{workspaceRoot}/babel.config.json"]
+    "sharedGlobals": [
+      "{workspaceRoot}/babel.config.json"
+    ]
   },
   "workspaceLayout": {
     "appsDir": "apps",
     "libsDir": "packages"
   },
   "generators": {
-    "@nrwl/react": {
+    "@nx/react": {
       "application": {
         "linter": "eslint",
         "babel": true
@@ -50,19 +85,22 @@
         "linter": "eslint"
       }
     },
-    "@nrwl/next": {
+    "@nx/next": {
       "application": {
         "style": "css",
         "linter": "eslint"
       }
+    },
+    "@nx/web:application": {
+      "style": "css",
+      "linter": "eslint",
+      "unitTestRunner": "none",
+      "e2eTestRunner": "none"
+    },
+    "@nx/web:library": {
+      "style": "css",
+      "linter": "eslint",
+      "unitTestRunner": "none"
     }
-  },
-  "targetDependencies": {
-    "version": [
-      {
-        "target": "version",
-        "projects": "dependencies"
-      }
-    ]
   }
 }

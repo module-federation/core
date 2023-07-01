@@ -17,6 +17,7 @@ declare module globalThis {
   var flushChunks: () => Promise<Array<string>>;
   var __remote_scope__: {
     _config: Record<string, any>;
+    _medusa?: Record<string, any>;
     [K: string]: {
       fake?: boolean;
     };

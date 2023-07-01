@@ -1,19 +1,18 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import Head from 'next/head';
-import dynamic from 'next/dynamic';
-
-const CheckoutTitle = dynamic(() => import('checkout/CheckoutTitle'), {
-  ssr: false,
-});
-const ButtonOldAnt = dynamic(() => import('checkout/ButtonOldAnt'), {
-  ssr: false,
-});
-const WebpackSvgRemote = dynamic(() => import('shop/WebpackSvg'), {
-  ssr: false,
-});
-const WebpackPngRemote = dynamic(() => import('shop/WebpackPng'), {
-  ssr: false,
-});
+import CheckoutTitle from 'checkout/CheckoutTitle';
+import ButtonOldAnt from 'checkout/ButtonOldAnt';
+console.log(ButtonOldAnt);
+// console.log('cc', cc);
+// const CheckoutTitle = lazy(() => import('checkout/CheckoutTitle'));
+// const ButtonOldAnt = lazy(() => import('checkout/ButtonOldAnt'));
+const WebpackSvgRemote = lazy(() =>
+  import('shop/WebpackSvg').then((m) => {
+    console.log(m);
+    return m;
+  })
+);
+const WebpackPngRemote = lazy(() => import('shop/WebpackPng'));
 
 const Home = () => {
   return (
@@ -63,7 +62,6 @@ const Home = () => {
           <b>checkout</b>
         </li>
       </ul>
-
       <h2 style={{ marginTop: '30px' }}>Federation test cases</h2>
       <table border={1} cellPadding={5}>
         <thead>
@@ -88,7 +86,9 @@ const Home = () => {
               <h3>This title came from checkout with hooks data!!!</h3>
             </td>
             <td>
-              <CheckoutTitle />
+              <Suspense fallback="loading CheckoutTitle">
+                <CheckoutTitle />
+              </Suspense>
             </td>
           </tr>
           <tr>
@@ -98,7 +98,9 @@ const Home = () => {
             </td>
             <td>[Button from antd@4.20.0]</td>
             <td>
-              <ButtonOldAnt />
+              <Suspense fallback="loading ButtonOldAnt">
+                <ButtonOldAnt />
+              </Suspense>
             </td>
           </tr>
           <tr>
@@ -112,7 +114,9 @@ const Home = () => {
               <img src="./webpack.png" />
             </td>
             <td>
-              <WebpackPngRemote />
+              <Suspense fallback="loading WebpackPngRemote">
+                <WebpackPngRemote />
+              </Suspense>
             </td>
           </tr>
           <tr>
@@ -126,7 +130,9 @@ const Home = () => {
               <img src="./webpack.svg" />
             </td>
             <td>
-              <WebpackSvgRemote />
+              <Suspense fallback="loading WebpackSvgRemote">
+                <WebpackSvgRemote />
+              </Suspense>
             </td>
           </tr>
         </tbody>

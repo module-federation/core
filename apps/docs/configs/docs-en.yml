@@ -1,0 +1,35 @@
+antora:
+  extensions:
+    - require: antora-navigator-extension
+      config_file: ./mf-antora-navigator.yml
+    - require: '@antora/lunr-extension'
+      languages: [en, es, zh]
+site:
+  title: Module Federation Documentation
+  start_page: ROOT:getting-started.adoc
+  keys:
+    google_analytics: G-SDV5HRTM4G
+urls:
+  html_extension_style: indexify
+content:
+  sources:
+    - url: https://github.com/module-federation/universe
+      branches: main
+      start_path: apps/docs/src
+ui:
+  bundle:
+    url: ./../../../dist/apps/docs-ui
+    snapshot: false
+  # supplemental_files: ./../../../node_modules/antora-navigator-extension/data/
+output:
+  clean: true
+  dir: ./../../../dist/apps/docs/en
+runtime:
+  fetch: true
+  cache_dir: ./../../../tmp/docs-cache/en
+asciidoc:
+  extensions:
+    - '@asciidoctor/tabs'
+  attributes:
+    page-pagination: yes
+    language: en
