@@ -320,7 +320,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           "}",
                         ]),
                         'Object.assign(globalThis.__remote_scope__._config, remotes)',
-                        'console.log("after reg");',
                         'const remoteRegistry = globalThis.__remote_scope__._config',
                         /*
                       TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise() global will/should still exist - but can only be known at runtime
