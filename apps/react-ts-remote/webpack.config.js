@@ -21,7 +21,6 @@ module.exports = async (config, context) => {
   const plugins = parsedConfig.plugins?.filter((p) => {
     if (p.constructor.name === 'ModuleFederationPlugin') {
       moduleFederationPlugin = p;
-      return false;
     }
     return true;
   });
