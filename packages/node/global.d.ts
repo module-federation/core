@@ -9,21 +9,16 @@ declare module 'webpack/lib/RuntimeModule';
 declare module 'webpack/lib/Template';
 declare module 'webpack/lib/util/compileBooleanMatcher';
 declare module 'webpack/lib/util/identifier';
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface global {}
-declare global {
-  //eslint-disable-next-line
-  var usedChunks: Set<string>;
-  //eslint-disable-next-line
-  var flushChunks: () => Promise<Array<string>>;
-  //eslint-disable-next-line
-  var __remote_scope__: {
+
+declare const globalThis: typeof globalThis & {
+  usedChunks: Set<string>;
+  flushChunks: () => Promise<Array<string>>;
+  __remote_scope__: {
     _config: Record<string, any>;
     _medusa?: Record<string, any>;
     [K: string]: {
       fake?: boolean;
     };
   };
-  //eslint-disable-next-line
-  var webpackChunkLoad;
-}
+  webpackChunkLoad;
+};
