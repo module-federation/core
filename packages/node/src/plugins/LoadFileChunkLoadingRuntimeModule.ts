@@ -413,6 +413,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             ),
                             `loadScript(scriptUrl.toString(), function(err, content) {`,
                             Template.indent([
+                              "console.log('fiding load script callback')",
                               this._getLogger(`'load script callback fired'`),
                               "if(err) {console.error('error loading remote chunk', scriptUrl.toString(),'got',content,'with error', err); return reject(err);}",
                               'var chunk = {};',
