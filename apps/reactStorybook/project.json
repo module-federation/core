@@ -19,7 +19,9 @@
           "apps/reactStorybook/src/favicon.ico",
           "apps/reactStorybook/src/assets"
         ],
-        "styles": ["apps/reactStorybook/src/styles.scss"],
+        "styles": [
+          "apps/reactStorybook/src/styles.scss"
+        ],
         "scripts": [],
         "isolatedConfig": true,
         "webpackConfig": "apps/reactStorybook/webpack.config.js"
@@ -46,7 +48,13 @@
           "vendorChunk": false,
           "webpackConfig": "apps/reactStorybook/webpack.config.prod.js"
         }
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "serve": {
       "executor": "@nx/react:module-federation-dev-server",
@@ -70,7 +78,9 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/reactStorybook/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": [
+          "apps/reactStorybook/**/*.{ts,tsx,js,jsx}"
+        ]
       }
     },
     "test": {

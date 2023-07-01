@@ -6,7 +6,7 @@ import { extractUrlAndGlobal } from '@module-federation/utilities';
 
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
   experiments?: Record<string, unknown>;
-  verbose?: boolean;
+  debug?: boolean;
 }
 
 interface Context {
@@ -47,31 +47,21 @@ export const generateRemoteTemplate = (
   url: string,
   global: any
 ) => `new Promise(function (resolve, reject) {
-    if(!global.__remote_scope__) {
+    if(!globalThis.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser
-      global.__remote_scope__ = {
+      globalThis.__remote_scope__ = {
         _config: {},
       }
     }
 
-    if (typeof global.__remote_scope__[${JSON.stringify(
-      global
-    )}] !== 'undefined') return resolve(global.__remote_scope__[${JSON.stringify(
-  global
-)}]);
-    global.__remote_scope__._config[${JSON.stringify(
-      global
-    )}] = ${JSON.stringify(url)};
+    if (typeof globalThis.__remote_scope__[${JSON.stringify(global)}] !== 'undefined') return resolve(globalThis.__remote_scope__[${JSON.stringify(global)}]);
+    globalThis.__remote_scope__._config[${JSON.stringify(global)}] = ${JSON.stringify(url)};
     var __webpack_error__ = new Error();
 
     __webpack_require__.l(
       ${JSON.stringify(url)},
       function (event) {
-        if (typeof global.__remote_scope__[${JSON.stringify(
-          global
-        )}] !== 'undefined') return resolve(global.__remote_scope__[${JSON.stringify(
-  global
-)}]);
+        if (typeof globalThis.__remote_scope__[${JSON.stringify(global)}] !== 'undefined') return resolve(globalThis.__remote_scope__[${JSON.stringify(global)}]);
          var realSrc = event && event.target && event.target.src;
         __webpack_error__.message = 'Loading script failed.\\n(' + event.message + ': ' + realSrc + ')';
         __webpack_error__.name = 'ScriptExternalLoadError';
@@ -89,7 +79,7 @@ export const generateRemoteTemplate = (
     return {
       fake: true,
       get: (arg) => {
-        console.log('faking', arg, 'module on', ${JSON.stringify(global)});
+        console.warn('faking', arg, 'module on', ${JSON.stringify(global)});
 
         return Promise.resolve(() => {
           return () => null
@@ -102,59 +92,7 @@ export const generateRemoteTemplate = (
     if(remote.fake) {
       return remote;
     }
-    const proxy = {
-      get: (arg)=>{
-        return remote.get(arg).then((f)=>{
-          const m = f();
-          return ()=>new Proxy(m, {
-            get: (target, prop)=>{
-              if(global.usedChunks) global.usedChunks.add(${JSON.stringify(
-                global
-              )} + "->" + arg);
-              return target[prop];
-            }
-          })
-        })
-      },
-      init: function(shareScope) {
-        const handler = {
-          get(target, prop) {
-            if (target[prop]) {
-              Object.values(target[prop]).forEach(function(o) {
-                if(o.from === '_N_E') {
-                  o.loaded = 1
-                }
-              })
-            }
-            return target[prop]
-          },
-          set(target, property, value) {
-            if(global.usedChunks) global.usedChunks.add(${JSON.stringify(
-              global
-            )} + "->" + property);
-            if (target[property]) {
-              return target[property]
-            }
-            target[property] = value
-            return true
-          }
-        }
-        try {
-          global.__remote_scope__[${JSON.stringify(
-            global
-          )}].init(new Proxy(shareScope, handler))
-        } catch (e) {
-
-        }
-        global.__remote_scope__[${JSON.stringify(global)}].__initialized = true
-      }
-    }
-    try  {
-      proxy.init(__webpack_require__.S.default)
-    } catch(e) {
-      console.error('failed to init', ${JSON.stringify(global)}, e)
-    }
-    return proxy
+    return remote;
   })`;
 
 /*
@@ -179,7 +117,7 @@ class NodeFederationPlugin {
   private experiments: NodeFederationOptions['experiments'];
 
   constructor(
-    { experiments, verbose, ...options }: NodeFederationOptions,
+    { experiments, debug, ...options }: NodeFederationOptions,
     context: Context
   ) {
     this._options = options || ({} as ModuleFederationPluginOptions);
@@ -191,14 +129,6 @@ class NodeFederationPlugin {
     // When used with Next.js, context is needed to use Next.js webpack
     const { webpack } = compiler;
 
-    // const defs = {
-    //   'process.env.REMOTES': runtime,
-    //   'process.env.REMOTE_CONFIG': hot,
-    // };
-
-    // new ((webpack && webpack.DefinePlugin) || require("webpack").DefinePlugin)(
-    //     defs
-    // ).apply(compiler);
     const pluginOptions = {
       ...this._options,
       remotes: parseRemotes(
@@ -207,15 +137,33 @@ class NodeFederationPlugin {
     };
 
     const chunkFileName = compiler.options?.output?.chunkFilename;
-    if (
-      typeof chunkFileName === 'string' &&
-      !chunkFileName.includes('[hash]') &&
-      !chunkFileName.includes('[contenthash]')
-    ) {
-      compiler.options.output.chunkFilename = chunkFileName.replace(
-        '.js',
-        '.[contenthash].js'
-      );
+    const uniqueName =
+      compiler?.options?.output?.uniqueName || this._options.name;
+
+    if (typeof chunkFileName === 'string') {
+      const requiredSubstrings = [
+        '[chunkhash]',
+        '[contenthash]',
+        '[fullHash]',
+        uniqueName,
+      ];
+
+      if (
+        //@ts-ignore
+        !requiredSubstrings.some((substring) =>
+          //@ts-ignore
+          chunkFileName.includes(substring)
+        )
+      ) {
+        const suffix =
+          compiler.options.mode === 'development'
+            ? `.[chunkhash].js`
+            : `.[chunkhash].js`;
+        compiler.options.output.chunkFilename = chunkFileName.replace(
+          '.js',
+          suffix
+        );
+      }
     }
 
     new (this.context.ModuleFederationPlugin ||

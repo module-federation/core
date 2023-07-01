@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import { injectScript } from '@module-federation/nextjs-mf/utils';
 
 export default function ExposedPages() {

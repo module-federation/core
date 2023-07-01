@@ -70,7 +70,6 @@ function parseGptResponse(incoming) {
     response = response.substring(
       response.indexOf('__BLOCK_START__') + '__BLOCK_START__'.length
     );
-    console.log('startswith', response);
     response = response.replace('__BLOCK_START__', '');
   }
 
@@ -91,9 +90,8 @@ function parseGptResponse(incoming) {
     return parsed;
   }
 
-  const cleanedCode = code.split('__BLOCK_END__')[0].trim(); // Ignore everything after the block end
+  const cleanedCode = body.split('__BLOCK_END__')[0].trim(); // Ignore everything after the block end
 
-  console.log('cleanedCode', cleanedCode);
   console.log(Object.keys(parsed).length, 'files parsed');
 
   return parsed;

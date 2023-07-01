@@ -2,22 +2,22 @@
 
 import type {
   AsyncContainer,
+  GetModuleOptions,
+  RemoteData,
   Remotes,
-  RuntimeRemotesMap,
   RuntimeRemote,
   WebpackRemoteContainer,
-  RemoteData,
-  GetModuleOptions,
 } from '../types';
-import { RemoteScope } from '../types/global';
-
-type RemoteVars = Record<
-  string,
-  | Promise<WebpackRemoteContainer>
-  | string
-  | (() => Promise<WebpackRemoteContainer>)
->;
-
+import { getRuntimeRemotes } from './getRuntimeRemotes';
+import { RemoteVars } from '../types';
+let remotesFromProcess = {} as RemoteVars;
+try {
+  // @ts-ignore
+  remotesFromProcess = process.env['REMOTES'] || {};
+} catch (e) {
+  // not in webpack bundle
+}
+export const remoteVars = remotesFromProcess as RemoteVars;
 // split the @ syntax into url and global
 export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
   const index = urlAndGlobal.indexOf('@');
@@ -25,95 +25,6 @@ export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
     throw new Error(`Invalid request "${urlAndGlobal}"`);
   }
   return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
-};
-
-const getRuntimeRemotes = () => {
-  try {
-    //@ts-ignore
-    const remoteVars = (process.env.REMOTES || {}) as RemoteVars;
-
-    const runtimeRemotes = Object.entries(remoteVars).reduce(function (
-      acc,
-      item
-    ) {
-      const [key, value] = item;
-      // if its an object with a thenable (eagerly executing function)
-      if (typeof value === 'object' && typeof value.then === 'function') {
-        acc[key] = { asyncContainer: value };
-      }
-      // if its a function that must be called (lazily executing function)
-      else if (typeof value === 'function') {
-        // @ts-ignore
-        acc[key] = { asyncContainer: value };
-      }
-      // if its a delegate module, skip it
-      else if (typeof value === 'string' && value.startsWith('internal ')) {
-        // do nothing to internal modules
-      }
-      // if its just a string (global@url)
-      else if (typeof value === 'string') {
-        const [url, global] = extractUrlAndGlobal(value);
-        acc[key] = { global, url };
-      }
-      // we dont know or currently support this type
-      else {
-        //@ts-ignore
-        console.log('remotes process', process.env.REMOTES);
-        throw new Error(
-          `[mf] Invalid value received for runtime_remote "${key}"`
-        );
-      }
-      return acc;
-    },
-    {} as RuntimeRemotesMap);
-
-    return runtimeRemotes;
-  } catch (err) {
-    console.warn('Unable to retrieve runtime remotes: ', err);
-  }
-
-  return {} as RuntimeRemotesMap;
-};
-
-export const importDelegatedModule = async (
-  keyOrRuntimeRemoteItem: string | RuntimeRemote
-) => {
-  // @ts-ignore
-  return loadScript(keyOrRuntimeRemoteItem)
-    .then((asyncContainer: WebpackRemoteContainer) => {
-      return asyncContainer;
-    })
-    .then((asyncContainer: WebpackRemoteContainer) => {
-      // most of this is only needed because of legacy promise based implementation
-      // can remove proxies once we remove promise based implementations
-      if (typeof window === 'undefined') {
-        //TODO: need to solve chunk flushing with delegated modules
-        return asyncContainer;
-      } else {
-        const proxy: WebpackRemoteContainer = {
-          get: asyncContainer.get,
-          //@ts-ignore
-          init: function (shareScope: any, initScope: any) {
-            try {
-              //@ts-ignore
-              asyncContainer.init(shareScope, initScope);
-              // for legacy reasons, we must mark container a initialized
-              // here otherwise older promise based implementation will try to init again with diff object
-
-              proxy.__initialized = true;
-            } catch (e) {
-              return 1;
-            }
-          },
-        };
-        // @ts-ignore
-        if (!proxy.__initialized) {
-          //@ts-ignore
-          proxy.init(__webpack_share_scopes__.default);
-        }
-        return proxy;
-      }
-    });
 };
 
 export const createDelegatedModule = (
@@ -129,12 +40,11 @@ export const createDelegatedModule = (
     }
     queries.push(`${key}=${value}`);
   }
+  if (queries.length === 0) return `internal ${delegate}`;
   return `internal ${delegate}?${queries.join('&')}`;
 };
 
-const loadScript = (
-  keyOrRuntimeRemoteItem: string | RuntimeRemote
-): AsyncContainer | undefined => {
+export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
 
   // 1) Load remote container if needed
@@ -144,12 +54,20 @@ const loadScript = (
       : keyOrRuntimeRemoteItem;
 
   if (reference.asyncContainer) {
-    if (typeof reference.asyncContainer === 'function') {
-      return reference.asyncContainer();
-    }
+    asyncContainer =
+      typeof reference.asyncContainer.then === 'function'
+        ? reference.asyncContainer
+        : // @ts-ignore
+          reference.asyncContainer();
+  } else {
+    // This casting is just to satisfy typescript,
+    // In reality remoteGlobal will always be a string;
+    const remoteGlobal = reference.global as unknown as string;
 
-    return reference.asyncContainer;
-  }
+    // Check if theres an override for container key if not use remote global
+    const containerKey = reference.uniqueKey
+      ? (reference.uniqueKey as unknown as string)
+      : remoteGlobal;
 
   const remoteGlobal = reference.global;
 
@@ -167,20 +85,19 @@ const loadScript = (
     };
   }
 
-  const globalScope =
-    typeof window !== 'undefined' ? window : global.__remote_scope__;
-
-  if (typeof window === 'undefined') {
-    const remoteScope = globalScope as RemoteScope;
-
-    if (!remoteScope['_config']) {
-      remoteScope['_config'] = {};
+    // @ts-ignore
+    if (!globalThis.__remote_scope__) {
+      // create a global scope for container, similar to how remotes are set on window in the browser
+      // @ts-ignore
+      globalThis.__remote_scope__ = {
+        // @ts-ignore
+        _config: {},
+      };
     }
-
-    const remoteScopeConfig = remoteScope['_config'] as Record<
-      string,
-      string | undefined
-    >;
+    // @ts-ignore
+    const globalScope =
+      // @ts-ignore
+      typeof window !== 'undefined' ? window : globalThis.__remote_scope__;
 
     remoteScopeConfig[containerKey] = reference.url;
   } else {
@@ -189,8 +106,73 @@ const loadScript = (
     if (!scope.remoteLoading) {
       scope.remoteLoading = {};
     }
-    if (scope.remoteLoading[containerKey]) {
-      return scope.remoteLoading[containerKey];
+    // @ts-ignore
+    asyncContainer = new Promise(function (resolve, reject) {
+      function resolveRemoteGlobal() {
+        const asyncContainer = globalScope[
+          remoteGlobal
+        ] as unknown as AsyncContainer;
+        return resolve(asyncContainer);
+      }
+
+      if (typeof globalScope[remoteGlobal] !== 'undefined') {
+        return resolveRemoteGlobal();
+      }
+
+      (__webpack_require__ as any).l(
+        reference.url,
+        function (event: Event) {
+          if (typeof globalScope[remoteGlobal] !== 'undefined') {
+            return resolveRemoteGlobal();
+          }
+
+          const errorType =
+            event && (event.type === 'load' ? 'missing' : event.type);
+          const realSrc =
+            event && event.target && (event.target as HTMLScriptElement).src;
+
+          __webpack_error__.message =
+            'Loading script failed.\n(' +
+            errorType +
+            ': ' +
+            realSrc +
+            ' or global var ' +
+            remoteGlobal +
+            ')';
+
+          __webpack_error__.name = 'ScriptExternalLoadError';
+          __webpack_error__.type = errorType;
+          __webpack_error__.request = realSrc;
+
+          reject(__webpack_error__);
+        },
+        containerKey
+      );
+    }).catch(function (err) {
+      console.error('container is offline, returning fake remote');
+      console.error(err);
+
+      return {
+        fake: true,
+        // @ts-ignore
+        get: (arg) => {
+          console.warn('faking', arg, 'module on, its offline');
+
+          return Promise.resolve(() => {
+            return {
+              __esModule: true,
+              default: () => {
+                return null;
+              },
+            };
+          });
+        },
+        //eslint-disable-next-line
+        init: () => {},
+      };
+    });
+    if (typeof window !== 'undefined') {
+      globalScope['remoteLoading'][containerKey] = asyncContainer;
     }
   }
 
@@ -356,9 +338,10 @@ export const getContainer = async (
   if (!remoteContainer) {
     throw Error(`Remote container options is empty`);
   }
-
+  // @ts-ignore
   const containerScope =
-    typeof window !== 'undefined' ? window : global.__remote_scope__;
+    // @ts-ignore
+    typeof window !== 'undefined' ? window : globalThis.__remote_scope__;
 
   if (typeof remoteContainer === 'string') {
     if (containerScope[remoteContainer]) {
@@ -408,7 +391,7 @@ export const getModule = async ({
       return mod;
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return undefined;
   }
 };
