@@ -1,6 +1,5 @@
 import { RemoteScope, SharedScope } from '../types';
 import { WebpackSharingScopeFactory } from '../integrations/webpack/factory';
-import { isWebpackAvailable } from './bundlers';
 
 // TODO: We need a centralized scope container
 export const SharingScopeFactory = {

@@ -2,7 +2,9 @@ import * as React from 'react';
 import NxWelcome from './nx-welcome';
 import { Link, Route, Routes } from 'react-router-dom';
 
-const ReactTsRemote = React.lazy(() => import('react-ts-remote/Module'));
+const ReactTsRemote = React.lazy(() => import('react_ts_remote/Module'));
+
+const DynamicReactTsRemote = React.lazy(() => { 
 
 export function App() {
   return (

@@ -2,6 +2,7 @@
 /// <reference path="../../../../node_modules/webpack/module.d.ts" />
 
 import type { container, WebpackOptionsNormalized } from 'webpack';
+import { WebpackSharedScope } from '../integrations/webpack/types';
 
 declare global {
   // eslint-disable-next-line no-var
@@ -27,7 +28,7 @@ export type ModuleFederationPluginOptions = ConstructorParameters<
 >['0'];
 
 // TODO: Keep webpack as standard
-export type SharedScopes = WebpackSharedScope;
+export type SharedScope = WebpackSharedScope;
 
 export type Shared = ModuleFederationPluginOptions['shared'];
 export type Remotes = ModuleFederationPluginOptions['remotes'];
@@ -106,3 +107,15 @@ export type RemoteScope = {
   __sharing_scope__?: SharedScope;
   _runtime?: ModuleFederationRuntime;
 };
+
+export interface IRemoteScriptFactory {
+  loadScript: (
+    scope: RemoteScope,
+    containerKey: string,
+    remoteOptions: RemoteOptions
+  ) => AsyncContainer;
+}
+
+export interface ISharingScopeFactory {
+  initializeSharingScope: (scopeName: string) => Promise<SharedScope>;
+}
