@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.9.2-rc.1](https://github.com/module-federation/nextjs-mf/compare/utils-1.9.2-rc.0...utils-1.9.2-rc.1) (2023-07-01)
+
+
+### Features
+
+* support edge workers ([#1084](https://github.com/module-federation/nextjs-mf/issues/1084)) ([3f5df94](https://github.com/module-federation/nextjs-mf/commit/3f5df944ea787cf958fd4cf7fabed84432a50a10))
+
+
+
 ## [1.9.2-rc.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.9.1...utils-1.9.2-rc.0) (2023-06-30)
 
 
