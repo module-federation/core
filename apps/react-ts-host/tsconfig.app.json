@@ -1,8 +1,12 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "baseUrl": ".",
     "outDir": "../../dist/out-tsc",
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "*": ["./@mf-types/*"]
+    }
   },
   "files": [
     "../../node_modules/@nrwl/react/typings/cssmodule.d.ts",

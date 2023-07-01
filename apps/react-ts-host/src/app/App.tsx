@@ -17,7 +17,14 @@ export function App() {
       </ul>
       <Routes>
         <Route path="/" element={<NxWelcome title="react-ts-host" />} />
-        <Route path="/react-ts-remote" element={<ReactTsRemote />} />
+        <Route
+          path="/react-ts-remote"
+          element={
+            <React.Suspense>
+              <ReactTsRemote />
+            </React.Suspense>
+          }
+        />
       </Routes>
     </React.Suspense>
   );
