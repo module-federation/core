@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.2.2](https://github.com/module-federation/nextjs-mf/compare/native-federation-tests-0.2.1...native-federation-tests-0.2.2) (2023-07-01)
+
+
+### Bug Fixes
+
+* **deps:** update dependency tsup to v7 ([#1042](https://github.com/module-federation/nextjs-mf/issues/1042)) ([f319c8a](https://github.com/module-federation/nextjs-mf/commit/f319c8a8d876e547eeadd59e5bde30dcc367edaf))
+
+
+
 ## [0.2.1](https://github.com/module-federation/nextjs-mf/compare/native-federation-tests-0.2.0...native-federation-tests-0.2.1) (2023-06-28)
 
 
