@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [6.7.2-rc.1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.7.2-rc.0...nextjs-mf-6.7.2-rc.1) (2023-07-01)
+
+
+### Features
+
+* support edge workers ([#1084](https://github.com/module-federation/nextjs-mf/issues/1084)) ([3f5df94](https://github.com/module-federation/nextjs-mf/commit/3f5df944ea787cf958fd4cf7fabed84432a50a10))
+
+
+
 ## [6.7.2-rc.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-6.7.1...nextjs-mf-6.7.2-rc.0) (2023-06-30)
 
 
