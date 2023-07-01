@@ -75,14 +75,18 @@ export const executeLoadTemplate = `
         return res.text();
       }).then(function (scriptContent) {
         try {
-          const vmContext = typeof URLSearchParams === 'undefined' ?{exports, require, module, global, __filename, __dirname, URL, URLSearchParams, console, process,Buffer, ...global, remoteEntryName: name}:
-          {exports, require, module, global, __filename, __dirname, URL, URLSearchParams, console, process,Buffer, ...global, remoteEntryName: name};
-          const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, {filename: 'node-federation-loader-' + name + '.vm'});
+         const m = require('module');
+
+         const remoteCapsule = vm.runInThisContext(m.wrap(scriptContent), 'node-federation-loader-' + name + '.vm')
+         const exp = {};
+         let remote = {exports:{}};
+         remoteCapsule(exp,require,remote,'node-federation-loader-' + name + '.vm',__dirname);
+         remote = remote.exports || remote;
           globalThis.__remote_scope__[name] = remote[name] || remote;
           globalThis.__remote_scope__._config[name] = url;
           callback(globalThis.__remote_scope__[name])
         } catch (e) {
-          console.error('executeLoad hit catch block');
+          console.error('executeLoad hit catch block', e);
           e.target = {src: url};
           callback(e);
         }
@@ -96,7 +100,6 @@ export const executeLoadTemplate = `
       }).then(function (scriptContent) {
         try {
           const remote = eval('let module = {};' + scriptContent + '\\nmodule.exports')
-          // const remote = vm.runInNewContext(scriptContent + '\\nmodule.exports', vmContext, {filename: 'node-federation-loader-' + name + '.vm'});
           globalThis.__remote_scope__[name] = remote[name] || remote;
           globalThis.__remote_scope__._config[name] = url;
           callback(globalThis.__remote_scope__[name])
