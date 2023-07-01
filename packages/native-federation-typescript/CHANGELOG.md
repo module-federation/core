@@ -2,6 +2,10 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.2.6](https://github.com/module-federation/nextjs-mf/compare/native-federation-typescript-0.2.5...native-federation-typescript-0.2.6) (2023-07-01)
+
+
+
 ## [0.2.5](https://github.com/module-federation/nextjs-mf/compare/native-federation-typescript-0.2.4...native-federation-typescript-0.2.5) (2023-07-01)
 
 
