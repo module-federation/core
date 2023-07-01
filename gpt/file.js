@@ -34,7 +34,8 @@ For each file, start with '__BLOCK_START__', followed by the filename, then '__C
 `;
 
 async function promptFile(filePaths, question) {
-  if (!filePaths || !Array.isArray(filePaths) || filePaths.length === 0) {
+  if (typeof filePaths === 'string') filePaths = [filePaths];
+  if (!filePaths || filePaths.length === 0) {
     throw new Error('Missing or invalid argument: filePaths');
   }
 

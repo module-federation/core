@@ -1,9 +1,7 @@
 import type { Chunk, Compiler } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
-
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
-
 import ChunkLoadingRuntimeModule from './LoadFileChunkLoadingRuntimeModule';
 
 interface CommonJsChunkLoadingOptions extends ModuleFederationPluginOptions {
@@ -12,7 +10,7 @@ interface CommonJsChunkLoadingOptions extends ModuleFederationPluginOptions {
   remotes: Record<string, string>;
   name?: string;
   asyncChunkLoading: boolean;
-  verbose?: boolean;
+  debug?: boolean;
 }
 
 class CommonJsChunkLoadingPlugin {

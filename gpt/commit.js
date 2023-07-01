@@ -17,7 +17,7 @@ const renderMarkdown = require('./markdown');
 const { commandJoin } = require('command-join');
 const schema = `
 {
-  "Title": "[title]",
+  "Title": "[fix|feat|chore|refactor]:[title]",
   "Description": "[description]",
   "Changes": [
     {{"filename": "[filename]", "description": ["[description]", "[description]"]}},
@@ -68,6 +68,33 @@ async function* getValidJsonResponse(prompt, userFeedback) {
   }
 }
 
+function getDiff(maxCharCount = MAX_CHAR_COUNT) {
+  let maxUFlag = 7;
+
+  let diff = [
+    execSync('git diff --staged --stat').toString(),
+    execSync(`git diff -U${maxUFlag} --staged`).toString(),
+  ].join('\n');
+
+  while (diff.length > maxCharCount && maxUFlag > 2) {
+    maxUFlag--;
+    diff = [
+      execSync('git diff --staged --stat').toString(),
+      execSync(`git diff -U${maxUFlag} --staged`).toString(),
+    ].join('\n');
+    console.warn(
+      'over max char count, reducing diff fidelity',
+      'from:',
+      diff.length,
+      'to:',
+      diff.length,
+      `(-U flag now ${maxUFlag})`
+    );
+  }
+
+  return diff;
+}
+
 /**
  * Generates a commit message using the GPT-3 model.
  *
@@ -94,21 +121,9 @@ async function generateCommitMsg() {
   }
 
   console.log('tokens', diff.length, MAX_CHAR_COUNT);
-  const oldDiff = diff.length;
 
   if (diff.length > MAX_CHAR_COUNT) {
-    diff = [
-      execSync('git diff --staged --stat').toString(),
-      execSync('git diff -U5 --staged').toString(),
-    ].join('\n');
-
-    console.warn(
-      'over max char count, reducing diff fidelity',
-      'from:',
-      oldDiff.length,
-      'to:',
-      diff.length
-    );
+    diff = getDiff(MAX_CHAR_COUNT);
   }
 
   let prompt = createPrompt(diff);
@@ -127,6 +142,16 @@ In the description, provide an overall summary of the changes, and detail the ch
 
 ${schema}
 
+Example:
+{
+  "Title": "fix: fix bug in commit message generation",
+  "Description": "This commit fixes a bug in the commit message generation process.",
+  "Changes": [
+    {{"filename": "example.js", "description": ["created new example"]}},
+    {{"filename": "src/example2.ts", "description": ["updated variable names", "added utility function to handle edge case"]}}
+  ]
+}
+\n\n
 Here's the git diff for your reference: ${input.slice(0, MAX_CHAR_COUNT)}`;
 }
 

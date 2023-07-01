@@ -17,7 +17,13 @@
           "outputPath": "dist/apps/3000-home"
         },
         "production": {}
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "serve": {
       "executor": "@nx/next:server",
@@ -50,10 +56,11 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/3000-home/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": [
+          "apps/3000-home/**/*.{ts,tsx,js,jsx}"
+        ]
       }
     }
   },
-  "tags": [],
-  "implicitDependencies": ["nextjs-mf"]
+  "tags": []
 }

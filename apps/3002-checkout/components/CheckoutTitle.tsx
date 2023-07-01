@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
 const CheckoutTitle = () => {
   const [hookData, setHookData] = useState('');
 
