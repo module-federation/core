@@ -1,9 +1,9 @@
 import {
+  createModuleFederationRuntime,
   getContainerKey,
   getScope,
   getSharingScope,
   initContainer,
-  ScriptFactory,
 } from '../lib';
 import {
   GetModuleOptions,
@@ -13,21 +13,23 @@ import {
 } from '../types';
 
 /**
- * Return initialized remote container by remote's key or its runtime remote item data.
+ * Return initialized remote container
  *
- * `runtimeRemoteItem` might be
- *    { global, url } - values obtained from webpack remotes option `global@url`
- * or
- *    { asyncContainer } - async container is a promise that resolves to the remote container
+ *  @returns remote container
  */
 export const loadAndInitializeRemote = async (
   remoteOptions: RemoteOptions
 ): Promise<RemoteContainer> => {
   const scope = getScope();
 
+  // TODO: Create this during build?
+  if (!scope._runtime) {
+    createModuleFederationRuntime();
+  }
+
   const containerKey = getContainerKey(remoteOptions);
 
-  const asyncContainer = new ScriptFactory().loadScript(
+  const asyncContainer = scope._runtime?.scriptFactory.loadScript(
     scope,
     containerKey,
     remoteOptions

@@ -84,6 +84,25 @@ export type GetModulesOptions = {
   remoteContainer: WebpackRemoteContainer;
 };
 
+export type ModuleFederationRuntimeOptions = {
+  scriptFactory: IRemoteScriptFactory;
+  sharingScopeFactory: ISharingScopeFactory;
+};
+
+export type ModuleFederationRuntime = {
+  scriptFactory: IRemoteScriptFactory;
+  sharingScopeFactory: ISharingScopeFactory;
+};
+
 export type RemoteScope = {
-  [index: string]: AsyncContainer | string | undefined | Record<string, string>;
+  [index: string]:
+    | AsyncContainer
+    | string
+    | undefined
+    | Record<string, string>
+    | SharedScope
+    | ModuleFederationRuntime;
+  _config: Record<string, string>;
+  __sharing_scope__?: SharedScope;
+  _runtime?: ModuleFederationRuntime;
 };

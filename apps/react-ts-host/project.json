@@ -94,5 +94,5 @@
     }
   },
   "tags": [],
-  "implicitDependencies": ["typescript", "utils"]
+  "implicitDependencies": ["typescript", "utils", "core"]
 }

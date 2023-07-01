@@ -1,12 +1,24 @@
-// TODO: Determine what the runtime should contain, what layers should it reference.
-// type ModuleFederationRuntimeOptions = {
+import {
+  WebpackRemoteScriptFactory,
+  WebpackSharingScopeFactory,
+} from '../integrations/webpack/factory';
+import type { ModuleFederationRuntimeOptions } from '../types';
+import { getScope } from './scopes';
 
-// }
+export const createModuleFederationRuntime = (
+  options?: ModuleFederationRuntimeOptions
+) => {
+  const scriptFactory =
+    options?.scriptFactory ?? new WebpackRemoteScriptFactory();
+  const sharingScopeFactory =
+    options?.sharingScopeFactory ?? new WebpackSharingScopeFactory();
 
-// type ModuleFederationRuntime = {
+  const scope = getScope();
 
-// }
+  scope._runtime = {
+    scriptFactory,
+    sharingScopeFactory,
+  };
 
-// export const createModuleFederationRuntime = () => {
-
-// };
+  return scope._runtime;
+};

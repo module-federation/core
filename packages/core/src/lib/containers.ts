@@ -10,14 +10,17 @@ import {
  * Creates a shell container on the common scope.
  * @param remoteOptions
  */
-export const registerContainer = (remoteOptions: RemoteOptions) => {
+export const registerContainer = (
+  asyncContainer: AsyncContainer,
+  remoteOptions: RemoteOptions
+) => {
   const containerKey = getContainerKey(remoteOptions);
 
   const globalScope = getScope();
 
   if (globalScope[containerKey]) return;
 
-  // TODO: Remote container created by Webpack?
+  globalScope[containerKey] = asyncContainer;
 };
 
 /**

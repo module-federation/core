@@ -1,6 +1,5 @@
 /* eslint-disable no-undef */
 const { loadAndInitializeRemote } = require('@module-federation/core');
-const { importDelegatedModule } = require('@module-federation/utilities');
 
 // Delegates are currently not used in this example, but are left here for testing.
 module.exports = new Promise((resolve, reject) => {
@@ -11,7 +10,7 @@ module.exports = new Promise((resolve, reject) => {
 
   const [global, url] = currentRequest.split('@');
 
-  importDelegatedModule({
+  loadAndInitializeRemote({
     global,
     url: url + '?' + Date.now(),
   })

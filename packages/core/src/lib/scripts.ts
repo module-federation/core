@@ -33,6 +33,58 @@ export const loadScript = async (url: string, callback: () => void) => {
   document.head.appendChild(element);
 };
 
+const webpackLoadScript = (
+  scope: RemoteScope,
+  containerKey: string,
+  url: string
+): Promise<AsyncContainer> => {
+  return new Promise(function (resolve, reject) {
+    function resolveRemoteGlobal() {
+      const asyncContainer = scope[containerKey] as unknown as AsyncContainer;
+      return resolve(asyncContainer);
+    }
+
+    if (typeof scope[containerKey] !== 'undefined') {
+      return resolveRemoteGlobal();
+    }
+
+    (__webpack_require__ as any).l(
+      url,
+      function (event: Event) {
+        if (typeof scope[containerKey] !== 'undefined') {
+          return resolveRemoteGlobal();
+        }
+
+        const errorType =
+          event && (event.type === 'load' ? 'missing' : event.type);
+        const realSrc =
+          event && event.target && (event.target as HTMLScriptElement).src;
+
+        const __webpack_error__ = new Error() as Error & {
+          type: string;
+          request: string | null;
+        };
+
+        __webpack_error__.message =
+          'Loading script failed.\n(' +
+          errorType +
+          ': ' +
+          realSrc +
+          ' or global var ' +
+          containerKey +
+          ')';
+
+        __webpack_error__.name = 'ScriptExternalLoadError';
+        __webpack_error__.type = errorType;
+        __webpack_error__.request = realSrc;
+
+        reject(__webpack_error__);
+      },
+      containerKey
+    );
+  });
+};
+
 /**
  * ScriptFactory is responsible for loading remote scripts and associating them with a scope.
  */
@@ -63,13 +115,17 @@ export class ScriptFactory implements IRemoteScriptFactory {
             containerKey,
             remoteOptions
           );
+
           resolve(asyncContainer);
           return;
         }
 
-        loadScript(remoteOptions.url, () => {
-          resolve(scope[containerKey] as AsyncContainer);
-        });
+        // Fallback to webpack for now.
+        webpackLoadScript(scope, containerKey, remoteOptions.url).then(
+          (asyncContainer) => {
+            resolve(asyncContainer);
+          }
+        );
       } catch (error) {
         reject(error);
       }

@@ -16,6 +16,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@module-federation/core": ["packages/core/src/index.ts"],
       "@module-federation/native-federation-tests": [
         "packages/native-federation-tests/src/index.ts"
       ],
@@ -30,7 +31,7 @@
         "packages/storybook-addon/src/index.ts"
       ],
       "@module-federation/typescript": ["packages/typescript/src/index.ts"],
-      "@module-federation/utilities": ["packages/utilities/src/index.ts"]
+      "@module-federation/utilities": ["packages/utilities/src/index.ts"],
     }
   },
   "exclude": ["node_modules", "tmp"]

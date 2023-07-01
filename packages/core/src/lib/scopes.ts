@@ -45,9 +45,7 @@ export const getScope = (): RemoteScope => {
   if (typeof window === 'undefined') {
     if (!global.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser
-      // @ts-ignore
       global.__remote_scope__ = {
-        // @ts-ignore
         _config: {},
       };
     }

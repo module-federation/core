@@ -9,26 +9,30 @@ export default function ExposedPages() {
     loadAndInitializeRemote({
       global: 'home_app',
       url: 'http://localhost:3000/_next/static/chunks/remoteEntry.js',
-    }).then((container) =>
-      getModule<any>({
-        remoteContainer: container,
-        modulePath: './pages-map',
-      }).then((data) => {
+    })
+      .then((container) =>
+        getModule<any>({
+          remoteContainer: container,
+          modulePath: './pages-map',
+        })
+      )
+      .then((data) => {
         setPageMap(data);
-      })
-    );
+      });
 
     loadAndInitializeRemote({
       global: 'home_app',
       url: 'http://localhost:3000/_next/static/chunks/remoteEntry.js',
-    }).then((container) =>
-      getModule<any>({
-        remoteContainer: container,
-        modulePath: './pages-map-v2',
-      }).then((data) => {
+    })
+      .then((container) =>
+        getModule<any>({
+          remoteContainer: container,
+          modulePath: './pages-map-v2',
+        })
+      )
+      .then((data) => {
         setPageMapV2(data);
-      })
-    );
+      });
   }, []);
 
   return (

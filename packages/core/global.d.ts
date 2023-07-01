@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/prefer-namespace-keyword */
-import type {
-  AsyncContainer,
-  WebpackRemoteContainer,
-  RemoteScope,
-} from '../types';
+import type { AsyncContainer, RemoteScope } from './src/types';
 
 declare global {
-  // eslint-disable-next-line no-var
-  var __remote_scope__: RemoteScope;
+  namespace globalThis {
+    // eslint-disable-next-line no-var
+    var __remote_scope__: RemoteScope;
+  }
 
-  module NodeJS {
+  namespace NodeJS {
     interface Global {
-      __remote_scope__: Record<string, WebpackRemoteContainer>;
+      [index: string | number]: unknown;
+      __remote_scope__: RemoteScope;
     }
   }
 

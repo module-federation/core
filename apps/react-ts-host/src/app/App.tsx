@@ -1,7 +1,6 @@
 import * as React from 'react';
 import NxWelcome from './nx-welcome';
 import { Link, Route, Routes } from 'react-router-dom';
-import { importRemote } from '@module-federation/utilities';
 import useDynamicModule from './useDynamicModule';
 import type RemoteModule from 'react_ts_remote/Module';
 
