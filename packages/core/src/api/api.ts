@@ -44,6 +44,8 @@ export const loadAndInitializeRemote = async (
 
   scope.__sharing_scope__ = getSharingScope();
 
+  console.log('scope.__sharing_scope__', scope.__sharing_scope__);
+
   if (!scope.__sharing_scope__) {
     scope.__sharing_scope__ =
       await scope._runtime.sharingScopeFactory.initializeSharingScope();

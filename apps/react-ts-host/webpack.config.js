@@ -4,7 +4,7 @@ const { FederatedTypesPlugin } = require('@module-federation/typescript');
 const baseConfig = require('./module-federation.config');
 
 /**
- * @type {import('@nrwl/react/module-federation').ModuleFederationConfig}
+ * @type {import('@nx/react/module-federation').ModuleFederationConfig}
  **/
 const defaultConfig = {
   ...baseConfig,
@@ -16,7 +16,15 @@ module.exports = async (config, context) => {
   /** @type {import('webpack').Configuration} */
   const parsedConfig = mf(config, context);
 
-  let moduleFederationPlugin;
+  if (!parsedConfig.plugins) {
+    parsedConfig.plugins = [];
+  }
+
+  const remotes = baseConfig.remotes.reduce((remotes, remote) => {
+    const [name, url] = remote;
+    remotes[name] = url;
+    return remotes;
+  }, {});
 
   parsedConfig.plugins.forEach((p) => {
     if (p.constructor.name === 'ModuleFederationPlugin') {
@@ -26,7 +34,11 @@ module.exports = async (config, context) => {
 
   parsedConfig.plugins.push(
     new FederatedTypesPlugin({
-      federationConfig: moduleFederationPlugin._options,
+      federationConfig: {
+        ...baseConfig,
+        filename: 'remoteEntry.js',
+        remotes,
+      },
     })
   );
 

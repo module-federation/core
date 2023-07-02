@@ -19,9 +19,8 @@ export class WebpackSharingScopeFactory implements ISharingScopeFactory {
     }
 
     // TODO: Why would we reference __webpack_require and not __webpack_share_scopes__ ?
-    return (__webpack_require__ as unknown as WebpackRequire).S[
-      scopeName
-    ] as unknown as SharedScope;
+    return (__webpack_require__ as unknown as WebpackRequire)
+      .S as unknown as SharedScope;
   }
 }
 
