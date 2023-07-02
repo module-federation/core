@@ -1,4 +1,3 @@
-const webpack = require('webpack');
 const { withModuleFederation } = require('@nrwl/react/module-federation');
 const { FederatedTypesPlugin } = require('@module-federation/typescript');
 
@@ -36,6 +35,14 @@ module.exports = async (config, context) => {
   parsedConfig.infrastructureLogging = {
     level: 'verbose',
     colors: true,
+  };
+
+  //Temporary workaround - https://github.com/nrwl/nx/issues/16983
+  parsedConfig.experiments = { outputModule: false };
+
+  parsedConfig.output = {
+    ...parsedConfig.output,
+    scriptType: 'text/javascript',
   };
 
   return parsedConfig;
