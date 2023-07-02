@@ -3,7 +3,6 @@ import {
   WebpackSharingScopeFactory,
 } from '../integrations/webpack/factory';
 import type { ModuleFederationRuntimeOptions } from '../types';
-import { getScope } from './scopes';
 
 export const createModuleFederationRuntime = (
   options?: ModuleFederationRuntimeOptions
@@ -13,12 +12,8 @@ export const createModuleFederationRuntime = (
   const sharingScopeFactory =
     options?.sharingScopeFactory ?? new WebpackSharingScopeFactory();
 
-  const scope = getScope();
-
-  scope._runtime = {
+  return {
     scriptFactory,
     sharingScopeFactory,
   };
-
-  return scope._runtime;
 };

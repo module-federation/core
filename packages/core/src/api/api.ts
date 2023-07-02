@@ -24,12 +24,12 @@ export const loadAndInitializeRemote = async (
 
   // TODO: Create this during build?
   if (!scope._runtime) {
-    createModuleFederationRuntime();
+    scope._runtime = createModuleFederationRuntime();
   }
 
   const containerKey = getContainerKey(remoteOptions);
 
-  const asyncContainer = scope._runtime?.scriptFactory.loadScript(
+  const asyncContainer = scope._runtime.scriptFactory.loadScript(
     scope,
     containerKey,
     remoteOptions
@@ -42,8 +42,14 @@ export const loadAndInitializeRemote = async (
   // TODO: look at init tokens, pass to getSharingScope
   // init method on remote entry
 
-  const sharedScope = await getSharingScope();
-  return initContainer(asyncContainer, sharedScope);
+  scope.__sharing_scope__ = getSharingScope();
+
+  if (!scope.__sharing_scope__) {
+    scope.__sharing_scope__ =
+      await scope._runtime.sharingScopeFactory.initializeSharingScope();
+  }
+
+  return initContainer(asyncContainer, scope.__sharing_scope__);
 };
 
 /**

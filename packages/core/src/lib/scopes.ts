@@ -1,40 +1,14 @@
-import { RemoteScope, SharedScope } from '../types';
-import { WebpackSharingScopeFactory } from '../integrations/webpack/factory';
-
-// TODO: We need a centralized scope container
-export const SharingScopeFactory = {
-  initializeSharingScope: (scopeName = 'default'): Promise<SharedScope> => {
-    if (isWebpackAvailable()) {
-      return new WebpackSharingScopeFactory().initializeSharingScope(scopeName);
-    }
-
-    // TODO: Create a default scope?
-    return Promise.resolve({
-      default: {},
-    });
-  },
-};
+import { RemoteScope } from '../types';
 
 /**
- * Create a shared scope ("shared space") if it doesn't exist, on the global common scope.
- * @param scopeName
- * @returns
+ *
+ * @returns Generic globally available "sharing scope" container
  */
-export const createSharingScope = async (scopeName = 'default') => {
+export const getSharingScope = () => {
   const scope = getScope();
-
-  if (typeof scope.__sharing_scope__ === 'undefined') {
-    const sharedScope = await SharingScopeFactory.initializeSharingScope(
-      scopeName
-    );
-
-    scope.__sharing_scope__ = sharedScope;
-  }
 
   return scope.__sharing_scope__;
 };
-
-export const getSharingScope = () => createSharingScope();
 
 /**
  *

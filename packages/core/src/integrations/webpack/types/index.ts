@@ -1,7 +1,3 @@
-export type WebpackSharedScope = {
-  default: WebpackShareScopes;
-};
-
 export declare const __webpack_init_sharing__: (
   parameter: string
 ) => Promise<void>;
@@ -14,11 +10,3 @@ export type WebpackRequire = {
   ) => Record<string, unknown>;
   S: Record<string, unknown>;
 };
-
-type WebpackShareScopes = Record<
-  string,
-  Record<
-    string,
-    { loaded?: 1; get: () => Promise<unknown>; from: string; eager: boolean }
-  >
->;

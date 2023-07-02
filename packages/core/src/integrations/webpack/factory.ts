@@ -2,16 +2,17 @@ import type {
   AsyncContainer,
   IRemoteScriptFactory,
   ISharingScopeFactory,
+  RemoteContainer,
   RemoteOptions,
   RemoteScope,
   SharedScope,
 } from '../../types';
-import type { WebpackRequire, WebpackSharedScope } from './types';
+import type { WebpackRequire } from './types';
 
 export class WebpackSharingScopeFactory implements ISharingScopeFactory {
-  async initializeSharingScope(scopeName: string): Promise<SharedScope> {
+  async initializeSharingScope(scopeName = 'default'): Promise<SharedScope> {
     const webpackShareScopes =
-      __webpack_share_scopes__ as unknown as WebpackSharedScope;
+      __webpack_share_scopes__ as unknown as SharedScope;
 
     if (!webpackShareScopes?.default) {
       await __webpack_init_sharing__(scopeName);
@@ -20,7 +21,7 @@ export class WebpackSharingScopeFactory implements ISharingScopeFactory {
     // TODO: Why would we reference __webpack_require and not __webpack_share_scopes__ ?
     return (__webpack_require__ as unknown as WebpackRequire).S[
       scopeName
-    ] as unknown as WebpackSharedScope;
+    ] as unknown as SharedScope;
   }
 }
 
@@ -31,10 +32,6 @@ export class WebpackScriptFactory implements IRemoteScriptFactory {
     remoteOptions: RemoteOptions
   ): AsyncContainer {
     const { url } = remoteOptions;
-    const __webpack_error__ = new Error() as Error & {
-      type: string;
-      request: string | null;
-    };
 
     return new Promise<RemoteContainer>(function (resolve, reject) {
       function resolveRemoteGlobal() {
@@ -57,6 +54,11 @@ export class WebpackScriptFactory implements IRemoteScriptFactory {
             event && (event.type === 'load' ? 'missing' : event.type);
           const realSrc =
             event && event.target && (event.target as HTMLScriptElement).src;
+
+          const __webpack_error__ = new Error() as Error & {
+            type: string;
+            request: string | null;
+          };
 
           __webpack_error__.message =
             'Loading script failed.\n(' +
