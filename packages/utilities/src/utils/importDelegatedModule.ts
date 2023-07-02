@@ -40,8 +40,8 @@ export const importDelegatedModule = async (
                             //@ts-ignore
                             `${keyOrRuntimeRemoteItem.global}->${arg}`
                           );
-                        // eslint-disable-next-line prefer-rest-params
-                        return m[prop](arguments);
+                        //eslint-disable-next-line prefer-rest-params
+                        return m[prop](...arguments);
                       };
                     },
                     enumerable: true,

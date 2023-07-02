@@ -31,7 +31,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     import: undefined,
   },
   'next/link': {
-    eager: false,
+    eager: true,
     requiredVersion: false,
     singleton: true,
     import: undefined,
@@ -101,7 +101,12 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
 
   acc[key] = { ...value, eager: undefined, import: undefined };
 
-  if (key === 'react' || key === 'react-dom' || key === 'next/router') {
+  if (
+    key === 'react' ||
+    key === 'react-dom' ||
+    key === 'next/router' ||
+    key === 'next/link'
+  ) {
     //@ts-ignore
     acc[key].eager = true;
   }
@@ -145,7 +150,7 @@ export const parseRemotes = (
     if (isStandardRemoteSyntax(value)) {
       return {
         ...acc,
-        [key]: createDelegatedModule(require.resolve('./default-delegate.js'), {
+        [key]: createDelegatedModule(require.resolve('./default-delegate'), {
           remote: value,
         }),
       };

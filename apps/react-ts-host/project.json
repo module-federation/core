@@ -5,7 +5,7 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nrwl/webpack:webpack",
+      "executor": "@nx/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
@@ -56,7 +56,7 @@
       ]
     },
     "serve": {
-      "executor": "@nrwl/react:module-federation-dev-server",
+      "executor": "@nx/react:module-federation-dev-server",
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "react_ts_host:build",
@@ -75,14 +75,16 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/react-ts-host/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": [
+          "apps/react-ts-host/**/*.{ts,tsx,js,jsx}"
+        ]
       }
     },
     "serve-static": {
-      "executor": "@nrwl/web:file-server",
+      "executor": "@nx/web:file-server",
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "react_ts_host:build",
@@ -99,5 +101,7 @@
     }
   },
   "tags": [],
-  "implicitDependencies": ["typescript"]
+  "implicitDependencies": [
+    "typescript"
+  ]
 }

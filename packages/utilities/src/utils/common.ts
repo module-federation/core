@@ -40,6 +40,7 @@ export const createDelegatedModule = (
     }
     queries.push(`${key}=${value}`);
   }
+  if (queries.length === 0) return `internal ${delegate}`;
   return `internal ${delegate}?${queries.join('&')}`;
 };
 
@@ -75,10 +76,10 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
     };
 
     // @ts-ignore
-    if (!global.__remote_scope__) {
+    if (!globalThis.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser
       // @ts-ignore
-      global.__remote_scope__ = {
+      globalThis.__remote_scope__ = {
         // @ts-ignore
         _config: {},
       };
@@ -86,7 +87,7 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
     // @ts-ignore
     const globalScope =
       // @ts-ignore
-      typeof window !== 'undefined' ? window : global.__remote_scope__;
+      typeof window !== 'undefined' ? window : globalThis.__remote_scope__;
 
     if (typeof window === 'undefined') {
       globalScope['_config'][containerKey] = reference.url;
@@ -257,7 +258,7 @@ export const getContainer = async (
   // @ts-ignore
   const containerScope =
     // @ts-ignore
-    typeof window !== 'undefined' ? window : global.__remote_scope__;
+    typeof window !== 'undefined' ? window : globalThis.__remote_scope__;
 
   if (typeof remoteContainer === 'string') {
     if (containerScope[remoteContainer]) {

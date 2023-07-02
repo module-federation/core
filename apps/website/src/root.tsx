@@ -10,7 +10,6 @@ import { RouterHead } from './components/router-head/router-head';
 
 import globalStyles from './global.css?inline';
 import { config, translationFn } from './speak-config';
-import { QwikPartytown } from './components/partytown/partytown';
 
 export default component$(() => {
   /**
@@ -26,12 +25,16 @@ export default component$(() => {
       <QwikCityProvider>
         <head>
           <meta charSet="utf-8" />
-          <QwikPartytown forward={['dataLayer.push']} />
-          <script
-            async
-            type="text/partytown"
-            src="https://www.googletagmanager.com/gtag/js?id=G-SDV5HRTM4G"
-          />
+          <script async src="https://www.googletagmanager.com/gtag/js?id=G-SDV5HRTM4G"></script>
+          <script dangerouslySetInnerHTML={`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-SDV5HRTM4G');
+          `}>
+
+          </script>
           <link rel="manifest" href="/manifest.json" />
           <RouterHead />
         </head>

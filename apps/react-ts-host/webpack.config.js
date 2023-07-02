@@ -1,4 +1,5 @@
-const { withModuleFederation } = require('@nrwl/react/module-federation');
+const webpack = require('webpack');
+const { withModuleFederation } = require('@nx/react/module-federation');
 const { FederatedTypesPlugin } = require('@module-federation/typescript');
 
 const baseConfig = require('./module-federation.config');

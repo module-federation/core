@@ -2,7 +2,28 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
-## [0.2.2-rc.0](https://github.com/module-federation/nextjs-mf/compare/native-federation-typescript-0.2.1...native-federation-typescript-0.2.2-rc.0) (2023-05-26)
+## [0.2.6](https://github.com/module-federation/nextjs-mf/compare/native-federation-typescript-0.2.5...native-federation-typescript-0.2.6) (2023-07-01)
+
+
+
+## [0.2.5](https://github.com/module-federation/nextjs-mf/compare/native-federation-typescript-0.2.4...native-federation-typescript-0.2.5) (2023-07-01)
+
+
+
+## [0.2.4](https://github.com/module-federation/nextjs-mf/compare/native-federation-typescript-0.2.3...native-federation-typescript-0.2.4) (2023-07-01)
+
+
+
+## [0.2.3](https://github.com/module-federation/nextjs-mf/compare/native-federation-typescript-0.2.2...native-federation-typescript-0.2.3) (2023-07-01)
+
+
+
+## [0.2.2](https://github.com/module-federation/nextjs-mf/compare/native-federation-typescript-0.2.1...native-federation-typescript-0.2.2) (2023-06-28)
+
+
+### Bug Fixes
+
+* .at(-1) ([8dd0520](https://github.com/module-federation/nextjs-mf/commit/8dd0520b5464c49e89c63307c5388450e4bebbf8))
 
 
 

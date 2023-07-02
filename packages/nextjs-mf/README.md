@@ -31,47 +31,73 @@ You do not need to share these packages, sharing next internals yourself will ca
 <details>
 <summary> See DEFAULT_SHARE_SCOPE:</summary>
 
-```js
-const DEFAULT_SHARE_SCOPE = {
-  react: {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'react/': {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'react-dom': {
-    singleton: true,
-    requiredVersion: false,
-  },
+```ts
+export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/dynamic': {
+    eager: false,
     requiredVersion: false,
     singleton: true,
+    import: undefined,
   },
-  'styled-jsx': {
+  'next/head': {
+    eager: false,
     requiredVersion: false,
     singleton: true,
-  },
-  'styled-jsx/style': {
-    requiredVersion: false,
-    singleton: true,
+    import: undefined,
   },
   'next/link': {
+    eager: true,
     requiredVersion: false,
     singleton: true,
+    import: undefined,
   },
   'next/router': {
     requiredVersion: false,
     singleton: true,
+    import: false,
+    eager: false,
   },
   'next/script': {
     requiredVersion: false,
     singleton: true,
+    import: undefined,
+    eager: false,
   },
-  'next/head': {
+  react: {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+    import: false,
+  },
+  'react-dom': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+    import: false,
+  },
+  'react/jsx-dev-runtime': {
+    singleton: true,
+    requiredVersion: false,
+    import: undefined,
+    eager: false,
+  },
+  'react/jsx-runtime': {
+    singleton: true,
+    requiredVersion: false,
+    eager: false,
+    import: false,
+  },
+  'styled-jsx': {
     requiredVersion: false,
     singleton: true,
+    import: undefined,
+    eager: false,
+  },
+  'styled-jsx/style': {
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+    eager: false,
   },
 };
 ```
@@ -81,30 +107,24 @@ const DEFAULT_SHARE_SCOPE = {
 ## Usage
 
 ```js
-const SampleComponent = dynamic(() => import('next2/sampleComponent'), {
-  ssr: false,
-});
+import React, {lazy} from 'react';
+const SampleComponent = lazy(() => import('next2/sampleComponent'));
 ```
 
-If you want support for sync imports. It is possible in next@12 as long as there is an async boundary.
+To avoid hydration errors, use `React.lazy` instead of `next/dynamic` for lazy loading federated components.
 
 #### See the implementation here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs/home/pages
 
 With async boundary installed at the page level. You can then do the following
 
 ```js
-if (process.browser) {
-  const SomeHook = require('next2/someHook');
-}
-// if client only file
+const SomeHook = require('next2/someHook');
 import SomeComponent from 'next2/someComponent';
 ```
 
-Make sure you are using `mini-css-extract-plugin@2` - version 2 supports resolving assets through `publicPath:'auto'`
-
 ## Demo
 
-You can see it in action here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs
+You can see it in action here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs-ssr
 
 ## Options
 
@@ -130,29 +150,11 @@ new NextFederationPlugin({
 });
 ```
 
+- `debug` – enables debug mode. It will print additional information about what is going on under the hood.
 - `exposePages` – exposes automatically all nextjs pages for you and theirs `./pages-map`.
 - `enableImageLoaderFix` – adds public hostname to all assets bundled by `nextjs-image-loader`. So if you serve remoteEntry from `http://example.com` then all bundled assets will get this hostname in runtime. It's something like Base URL in HTML but for federated modules.
 - `enableUrlLoaderFix` – adds public hostname to all assets bundled by `url-loader`.
 - `skipSharingNextInternals` – disables sharing of next internals. You can use it if you want to share next internals yourself or want to use this plugin on non next applications
-
-### BREAKING CHANGE ABOUT SHARED MODULES:
-
-Previously, we used to "rekey" all shared packages used in a host in order to prevent eager consumption issues. However, this caused unforeseen issues when trying to share a singleton package, as the package would end up being bundled multiple times per page.
-
-As a result, we have had to stop rekeying shared modules in userland and only do so on internal Next packages themselves.
-
-If you need to dangerously share a package using the old method, you can do so by using the following code:
-
-```js
-const shared = {
-  fakeLodash: {
-    import: 'lodash',
-    shareKey: 'lodash',
-  },
-};
-```
-
-Please note that this method is now considered dangerous and should be used with caution.
 
 ## Demo
 
@@ -191,14 +193,7 @@ module.exports = {
   },
 };
 
-// _app.js or some other file in as high up in the app (like next's new layouts)
-// this ensures various parts of next.js are imported and "used" somewhere so that they wont be tree shaken out
-// note: this is optional in the latest release, as it is auto-injected by NextFederationPlugin now
-import '@module-federation/nextjs-mf/src/include-defaults';
 ```
-
-2. For the consuming application, we'll call it "next1", add an instance of the ModuleFederationPlugin to your webpack config, and ensure you have a [custom Next.js App](https://nextjs.org/docs/advanced-features/custom-app) `pages/_app.js` (or `.tsx`):
-   Inside that \_app.js or layout.js file, ensure you import `include-defaults` file (this is now optional as include-defaults is auto injected into \_app)
 
 ```js
 // next.config.js
@@ -221,54 +216,43 @@ module.exports = {
   },
 };
 
-// _app.js or some other file in as high up in the app (like next's new layouts)
-// this ensures various parts of next.js are imported and "used" somewhere so that they wont be tree shaken out
-// note: this is optional in the latest release, as it is auto-injected by NextFederationPlugin now
-import '@module-federation/nextjs-mf/src/include-defaults';
 ```
 
-4. Use next/dynamic or low level api to import remotes.
+4. Use react.lazy, low level api, or require/import from to import remotes.
 
 ```js
-import dynamic from 'next/dynamic';
+import React, {lazy} from 'react';
 
-const SampleComponent = dynamic(() => window.next2.get('./sampleComponent').then((factory) => factory()), {
-  ssr: false,
-});
+const SampleComponent = lazy(() => window.next2.get('./sampleComponent').then((factory) => {
+  return {default: factory()}
+}));
 
 // or
 
-const SampleComponent = dynamic(() => import('next2/sampleComponent'), {
-  ssr: false,
-});
+const SampleComponent = lazy(() => import('next2/sampleComponent'));
+
+//or
+ 
+ import Sample from "next2/sampleComponent";
 ```
 
-## Beta: Delegate modules
+## Delegate modules
 
-Delegate modules are a new feature in module federation that allow you to control the
-loading process of remote modules by delegating it to an internal file bundled by webpack.
-This is done by exporting a promise in the delegate file that resolves to a remote/container interface.
+Delegated modules are now a standard feature in module federation, giving you the ability to manage the loading procedure of remote modules via an internally bundled file by webpack. This is facilitated by exporting a promise in the delegate file that resolves to a remote/container interface.
 
-A container interface is the low-level `{get, init}` API that remote entries expose to a consuming app.
-In the browser, a remote container would be window.app1, and in Node, it would be `global.__remote_scope__.app1`.
+A container interface represents the fundamental `{get, init}` API that remote entries present to a consuming app. Within the browser, a remote container could be `window.app1`, and in Node, it could be `globalThis.__remote_scope__.app1`.
 
-To use delegate modules, a method for script loading must be implemented in the delegate file.
-A common method is to use webpack's built-in `__webpack_require__.l` method, but any method can be used.
-This method is exposed to the runtime and is the same method that webpack uses internally to load remotes.
+Implementing a method for script loading in the delegate file is necessary for the utilization of delegated modules. Although the built-in `__webpack_require__.l` method of webpack is a prevalent method, any method is suitable. This method is made available to the runtime and is identical to the method webpack employs internally to load remotes.
 
-**Delegate modules will require a minimum version of 6.1.x across all apps,
-since consumers will need to be able to handle the new container interface.**
+Please note that using delegated modules demands a minimum version of `6.1.x` across all applications, given that consumers must be capable of handling the new container interface.
 
-The beta does not currently support chunk flushing, this will be added in a future release.
-
-Here's an example of using a delegate module with `__webpack_require__.l`:
+Here's a sample usage of a delegated module with `__webpack_require__.l`:
 
 <details>
   <summary>See Example: (click)  </summary>
-In this example, the delegate module exports a promise that
-loads the remote entry script located at "http://localhost:3000/_next/static/chunks/remoteEntry.js" 
-based on the `__resourceQuery` variable, which is set by webpack at runtime.
-If an error occurs while loading the script, a custom error object is created and the promise is rejected with this error.
+In this example, the delegated module exports a promise that loads the remote entry script located at "http://localhost:3000/_next/static/chunks/remoteEntry.js",
+based on the `__resourceQuery` variable set by webpack at runtime. 
+If an error surfaces while loading the script, a unique error object is generated, and the promise is rejected with this error.
 
 ```js
 //next.config.js
@@ -276,24 +260,26 @@ const { createDelegatedModule } = require('@module-federation/utilities');
 const remotes = {
   checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
     remote: `checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+    otherParam: 'testing',
   }),
 };
 
 //remote-delegate.js
-import { importDelegatedModule } from '@module-federation/utilities';
-//Delegate MUST use module.exports, not export default - this is a webpack limitation
-module.exports = new Promise((resolve, reject) => {
-  console.log('Delegate being called for', __resourceQuery);
+// Delegates must utilize module.exports, not export default - this is due to a webpack constraint
+// ALL imports MUST BE dynamic imports in here like import()
+module.exports = new Promise(async (resolve, reject) => {
+  const { importDelegatedModule } = await import(
+    '@module-federation/utilities/src/utils/importDelegatedModule'
+  );
+  // eslint-disable-next-line no-undef
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
-
   const [global, url] = currentRequest.split('@');
-
   importDelegatedModule({
     global,
-    url,
+    url: url + '?' + Date.now(),
   })
-    .then((container) => {
-      resolve(container);
+    .then((remote) => {
+      resolve(remote);
     })
     .catch((err) => reject(err));
 });
@@ -325,7 +311,7 @@ For more information on `__resourceQuery` visit: https://webpack.js.org/api/modu
 
 ```js
 // next.config.js
-
+// its advised you use createDelegatedModule from @module-federation/utilities instead of manually creating the delegate module
 const remotes = {
   // pass pointer to remote-delegate, pass delegate remote name as query param,
   // at runtime webpack will pass this as __resourceQuery
@@ -352,9 +338,9 @@ const remotes = {
 // remote-delegate.js
 module.exports = new Promise((resolve, reject) => {
   // some node specific for NodeFederation
-  if (!global.__remote_scope__) {
+  if (!globalThis.__remote_scope__) {
     // create a global scope for container, similar to how remotes are set on window in the browser
-    global.__remote_scope__ = {
+    globalThis.__remote_scope__ = {
       _config: {},
     };
   }
@@ -365,7 +351,7 @@ module.exports = new Promise((resolve, reject) => {
   const [containerGlobal, url] = currentRequest.split('@');
   // if node server, register the containers known origins
   if (typeof window === 'undefined') {
-    global.__remote_scope__._config[global] = url;
+    globalThis.__remote_scope__._config[global] = url;
   }
   const __webpack_error__ = new Error();
   // if you use NodeFederationPlugin, ive build a server-side version of __webpack_require__.l, with the same api.
@@ -374,7 +360,7 @@ module.exports = new Promise((resolve, reject) => {
     url,
     function (event) {
       // resolve promise with container, for browser env or node env.
-      const container = typeof window === 'undefined' ? global.__remote_scope__[containerGlobal] : window[containerGlobal];
+      const container = typeof window === 'undefined' ? globalThis.__remote_scope__[containerGlobal] : window[containerGlobal];
       console.log('delegate resolving', container);
       if (typeof container !== 'undefined') return resolve(container);
       var realSrc = event && event.target && event.target.src;
@@ -450,6 +436,10 @@ class MyDocument extends Document {
   }
 }
 ```
+
+## For Express.js
+
+Hot reloading Express.js required additional steps: https://github.com/module-federation/universe/blob/main/packages/node/README.md
 
 ## Contact
 

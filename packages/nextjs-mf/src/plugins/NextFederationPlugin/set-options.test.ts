@@ -27,6 +27,7 @@ describe('setOptions', () => {
       enableImageLoaderFix: false,
       enableUrlLoaderFix: false,
       skipSharingNextInternals: false,
+      debug: false
     };
 
     expect(mainOptions).toEqual(expectedMainOptions);
@@ -63,6 +64,7 @@ describe('setOptions', () => {
       enableImageLoaderFix: true,
       enableUrlLoaderFix: true,
       skipSharingNextInternals: true,
+      debug:false
     };
 
     expect(mainOptions).toEqual(expectedMainOptions);
