@@ -1,4 +1,3 @@
-const webpack = require('webpack');
 const { withModuleFederation } = require('@nx/react/module-federation');
 const { FederatedTypesPlugin } = require('@module-federation/typescript');
 
