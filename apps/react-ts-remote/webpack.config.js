@@ -19,19 +19,17 @@ module.exports = async (config, context) => {
 
   let moduleFederationPlugin;
 
-  const plugins = parsedConfig.plugins?.filter((p) => {
+  parsedConfig.plugins.forEach((p) => {
     if (p.constructor.name === 'ModuleFederationPlugin') {
-      moduleFederationPlugin = p;
+      p._options.library = undefined;
     }
-    return true;
   });
 
-  parsedConfig.plugins = [
-    ...(plugins || []),
+  parsedConfig.plugins.push(
     new FederatedTypesPlugin({
       federationConfig: moduleFederationPlugin._options,
-    }),
-  ];
+    })
+  );
 
   parsedConfig.infrastructureLogging = {
     level: 'verbose',
