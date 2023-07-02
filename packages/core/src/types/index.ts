@@ -3,6 +3,10 @@
 
 import type { container } from 'webpack';
 
+export interface CustomGlobal extends Global {
+  __remote_scope__: RemoteScope;
+}
+
 export type ModuleFederationPluginOptions = ConstructorParameters<
   typeof container.ModuleFederationPlugin
 >['0'];

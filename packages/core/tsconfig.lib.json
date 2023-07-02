@@ -6,7 +6,6 @@
     "declaration": true,
     "types": ["node"]
   },
-  "files": ["global.d.ts"],
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.d.ts"],
   "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts"]
 }

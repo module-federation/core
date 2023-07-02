@@ -1,4 +1,4 @@
-import { RemoteScope } from '../types';
+import { CustomGlobal, RemoteScope } from '../types';
 
 /**
  *
@@ -16,14 +16,15 @@ export const getSharingScope = () => {
  */
 export const getScope = (): RemoteScope => {
   if (typeof window === 'undefined') {
-    if (!global.__remote_scope__) {
+    const customGlobal = global as unknown as CustomGlobal;
+    if (!customGlobal.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser
-      global.__remote_scope__ = {
+      customGlobal.__remote_scope__ = {
         _config: {},
       };
     }
 
-    return global.__remote_scope__;
+    return customGlobal.__remote_scope__ as unknown as RemoteScope;
   }
 
   return window as unknown as RemoteScope;
