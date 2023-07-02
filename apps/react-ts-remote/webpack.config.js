@@ -37,5 +37,13 @@ module.exports = async (config, context) => {
     colors: true,
   };
 
+  //Temporary workaround - https://github.com/nrwl/nx/issues/16983
+  parsedConfig.experiments = { outputModule: false };
+
+  parsedConfig.output = {
+    ...parsedConfig.output,
+    scriptType: 'text/javascript',
+  };
+
   return parsedConfig;
 };
