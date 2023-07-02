@@ -1,3 +1,2 @@
-/// <reference types="react" />
-export declare function App(): JSX.Element;
+export declare function App(): import("react/jsx-runtime").JSX.Element;
 export default App;

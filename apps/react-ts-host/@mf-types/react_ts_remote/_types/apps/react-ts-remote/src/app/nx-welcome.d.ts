@@ -1,5 +1,4 @@
-/// <reference types="react" />
 export declare function NxWelcome({ title }: {
     title: string;
-}): JSX.Element;
+}): import("react/jsx-runtime").JSX.Element;
 export default NxWelcome;
