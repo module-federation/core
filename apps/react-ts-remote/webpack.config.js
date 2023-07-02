@@ -1,5 +1,6 @@
 const { withModuleFederation } = require('@nrwl/react/module-federation');
 const { FederatedTypesPlugin } = require('@module-federation/typescript');
+const path = require('path');
 
 const baseConfig = require('./module-federation.config');
 
@@ -35,6 +36,12 @@ module.exports = async (config, context) => {
   parsedConfig.infrastructureLogging = {
     level: 'verbose',
     colors: true,
+  };
+
+  parsedConfig.devServer = {
+    ...(parsedConfig.devServer || {}),
+    //Needs to resolve static files from the dist folder (@mf-types)
+    static: path.resolve(__dirname, '../../dist/apps/react-ts-remote'),
   };
 
   //Temporary workaround - https://github.com/nrwl/nx/issues/16983
