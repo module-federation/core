@@ -61,7 +61,8 @@
       "options": {
         "buildTarget": "react-ts-host:build",
         "hmr": true,
-        "port": 3003
+        "port": 3003,
+        "devRemotes": ["react_ts_remote"]
       },
       "configurations": {
         "development": {
