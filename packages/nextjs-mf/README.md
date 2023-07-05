@@ -28,9 +28,6 @@ You do not need to share these packages, sharing next internals yourself will ca
 <details>
 <summary> See DEFAULT_SHARE_SCOPE:</summary>
 
-<details>
-<summary> See DEFAULT_SHARE_SCOPE:</summary>
-
 ```ts
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/dynamic': {
@@ -113,7 +110,7 @@ const SampleComponent = lazy(() => import('next2/sampleComponent'));
 
 To avoid hydration errors, use `React.lazy` instead of `next/dynamic` for lazy loading federated components.
 
-#### See the implementation here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs/home/pages
+#### See the implementation here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs-v13/home/pages
 
 With async boundary installed at the page level. You can then do the following
 
