@@ -23,6 +23,8 @@ class StreamingTargetPlugin {
       console.warn(
         `target should be set to false while using NodeSoftwareStreamRuntime plugin, actual target: ${compiler.options.target}`
       );
+      console.info('Setting target to false');
+      compiler.options.target = false;
     }
 
     // When used with Next.js, context is needed to use Next.js webpack
