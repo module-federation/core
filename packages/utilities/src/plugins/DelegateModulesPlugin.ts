@@ -1,4 +1,14 @@
+<<<<<<< HEAD
 import type { Compiler, Compilation, Chunk, Module } from 'webpack';
+=======
+import type {
+  Compiler,
+  Compilation,
+  Chunk,
+  Module,
+  NormalModule,
+} from 'webpack';
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
 
 /**
  * A webpack plugin that moves specified modules from chunks to runtime chunk.
@@ -13,7 +23,6 @@ class DelegateModulesPlugin {
     this._delegateModules = new Set();
   }
 
-  
   getChunkByName(chunks: Iterable<Chunk>, name: string): Chunk | undefined {
     for (const chunk of chunks) {
       if (chunk.name == name) {
@@ -129,5 +138,8 @@ class DelegateModulesPlugin {
     );
   }
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
 export default DelegateModulesPlugin;

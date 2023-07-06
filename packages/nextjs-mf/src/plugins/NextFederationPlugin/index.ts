@@ -9,8 +9,13 @@ import type {
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
   SharedObject,
+<<<<<<< HEAD
 } from '@ranshamay/utilities';
 import { createRuntimeVariables } from '@ranshamay/utilities';
+=======
+} from '@module-federation/utilities';
+import { createRuntimeVariables } from '@module-federation/utilities';
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
 import type { Compiler, container } from 'webpack';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import {
@@ -107,7 +112,11 @@ export class NextFederationPlugin {
       runtime: false,
       exposes: {
         //something must be exposed in order to generate a remote entry, which is needed to kickstart runtime
+<<<<<<< HEAD
         './noop': require.resolve('../../federation-noop.js'),
+=======
+        './noop': require.resolve('../../federation-noop'),
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)
           : {}),

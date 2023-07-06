@@ -13,7 +13,11 @@ interface InvertedContainerOptions extends ModuleFederationPluginOptions {
   container?: string;
   remotes: Record<string, string>; // A map of remote modules to their URLs.
   runtime: string; // The name of the current module.
+<<<<<<< HEAD
   debug?: boolean; // A flag to enable debug logging.
+=======
+  debug?: boolean | undefined; // A flag to enable debug logging.
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
 }
 
 /**
@@ -30,7 +34,11 @@ class InvertedContainerPlugin {
     container: string | undefined;
     runtime: string;
     remotes: Record<string, string>;
+<<<<<<< HEAD
     debug: boolean;
+=======
+    debug: boolean | undefined
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
   }) {
     this.options = options || ({} as InvertedContainerOptions);
   }
@@ -166,7 +174,13 @@ class InvertedContainerPlugin {
               //@ts-ignore
               renderContext?._name ||
               !renderContext?.debugId ||
+<<<<<<< HEAD
               !compilation.chunkGraph.isEntryModule(renderContext)
+=======
+              !compilation.chunkGraph.isEntryModule(renderContext) ||
+              //@ts-ignore
+              renderContext?.rawRequest?.includes('pages/api')
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
             ) {
               // skip empty modules, container entry, and anything that doesnt have a moduleid or is not an entrypoint module.
               return source;

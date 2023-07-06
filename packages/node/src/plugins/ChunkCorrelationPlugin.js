@@ -445,11 +445,14 @@ class FederationStatsPlugin {
             compilation.chunkGraph.getChunkEntryModulesIterable(container)
           );
 
+<<<<<<< HEAD
           // Construct an object where the keys are the names of the exposed modules and the values are their options.
           const exposedObj = Object.fromEntries(containerEntryModule._exposes);
 
           const moduleMap = {};
 
+=======
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
           const blocks = containerEntryModule.blocks;
 
           const exposedResolved = {};

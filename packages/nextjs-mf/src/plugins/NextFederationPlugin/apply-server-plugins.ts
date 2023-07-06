@@ -1,8 +1,13 @@
 import { Compiler } from 'webpack';
+<<<<<<< HEAD
 import {
   ModuleFederationPluginOptions,
   DelegateModulesPlugin,
 } from '@ranshamay/utilities';
+=======
+import { ModuleFederationPluginOptions } from '@module-federation/utilities';
+import DelegatesModulePlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import JsonpChunkLoading from '../JsonpChunkLoading';
@@ -18,11 +23,19 @@ export function applyServerPlugins(
   compiler: Compiler,
   options: ModuleFederationPluginOptions
 ): void {
+<<<<<<< HEAD
   // Import the StreamingTargetPlugin from @ranshamay/node
   const { StreamingTargetPlugin } = require('@ranshamay/node');
   new JsonpChunkLoading({ server: true }).apply(compiler);
 
   new DelegateModulesPlugin({
+=======
+  // Import the StreamingTargetPlugin from @module-federation/node
+  const { StreamingTargetPlugin } = require('@module-federation/node');
+  new JsonpChunkLoading({ server: true }).apply(compiler);
+
+  new DelegatesModulePlugin({
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
     runtime: 'webpack-runtime',
     remotes: options.remotes,
     container: options.name,
@@ -101,7 +114,11 @@ export function handleServerExternals(
       // Check if the module should not be treated as external
       if (
         ctx.request &&
+<<<<<<< HEAD
         (ctx.request.includes('@ranshamay/utilities') ||
+=======
+        (ctx.request.includes('@module-federation/utilities') ||
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
           ctx.request.includes('internal-delegate-hoist') ||
           Object.keys(options.shared || {}).some((key) => {
             return (
@@ -176,8 +193,11 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     'require',
     'default',
   ];
+<<<<<<< HEAD
   // Build will hang without this. Likely something in my plugin
   compiler.options.optimization.chunkIds = 'named';
+=======
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
   // no custom chunk rules
   compiler.options.optimization.splitChunks = undefined;
 

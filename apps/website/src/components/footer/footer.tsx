@@ -54,7 +54,7 @@ export default component$((props: FooterProps) => {
   ];
 
   return (
-    <Container theme={props.theme || ContainerTheme.NONE}>
+    <Container theme={props.theme || ContainerTheme.PINK}>
       <footer class="flex flex-col items-center py-28 gap-10">
         <img
           src="/module-federation-logo.svg"

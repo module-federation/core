@@ -4,7 +4,11 @@ import path from 'path';
 import type {
   ModuleFederationPluginOptions,
   SharedObject,
+<<<<<<< HEAD
 } from '@ranshamay/utilities';
+=======
+} from '@module-federation/utilities';
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
 import {
   DEFAULT_SHARE_SCOPE,
   DEFAULT_SHARE_SCOPE_BROWSER,
@@ -27,7 +31,11 @@ export function getModuleFederationPluginConstructor(
   compiler: Compiler
 ): ConstructableModuleFederationPlugin {
   if (isServer) {
+<<<<<<< HEAD
     return require('@ranshamay/node')
+=======
+    return require('@module-federation/node')
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
       .NodeFederationPlugin as ConstructableModuleFederationPlugin;
   }
   return compiler.webpack.container
@@ -73,7 +81,11 @@ export function applyRemoteDelegates(
     compiler.options.module.rules.push({
       enforce: 'pre',
       test: [/_app/],
+<<<<<<< HEAD
       loader: path.resolve(__dirname, '../../loaders/patchDefaultSharedLoader'),
+=======
+      loader: require.resolve('../../loaders/patchDefaultSharedLoader'),
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
     });
     // Add the delegate loader for hoist and container to the module rules
     compiler.options.module.rules.push({
@@ -86,7 +98,11 @@ export function applyRemoteDelegates(
         //eslint-disable-next-line
         /next[\/]dist/,
       ],
+<<<<<<< HEAD
       loader: path.resolve(__dirname, '../../loaders/delegateLoader'),
+=======
+      loader: require.resolve('../../loaders/delegateLoader'),
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
       options: {
         delegates,
       },
@@ -102,14 +118,22 @@ export const applyPathFixes = (compiler, options) => {
     if (options.enableImageLoaderFix && hasLoader(rule, 'next-image-loader')) {
       // childCompiler.options.module.parser.javascript?.url = 'relative';
       injectRuleLoader(rule, {
+<<<<<<< HEAD
         loader: path.resolve(__dirname, '../../loaders/fixImageLoader'),
+=======
+        loader: require.resolve('../../loaders/fixImageLoader'),
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
       });
     }
 
     // url-loader fix for which adds remote's hostname to the assets url
     if (options.enableUrlLoaderFix && hasLoader(rule, 'url-loader')) {
       injectRuleLoader({
+<<<<<<< HEAD
         loader: path.resolve(__dirname, '../../loaders/fixUrlLoader'),
+=======
+        loader: require.resolve('../../loaders/fixUrlLoader'),
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
       });
     }
   });

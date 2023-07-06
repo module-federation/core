@@ -12,6 +12,10 @@ export default function patchDefaultSharedLoader(
   }
 
   const patch = `
+<<<<<<< HEAD
+=======
+  "use client";
+>>>>>>> ca73890b9cc05086bc0e31c9b2f4ff962695f7dd
 (globalThis || self).placeholderModuleEnsure = () => {
 throw new Error('should not exec');
   import('react');

@@ -2,8 +2,8 @@ import { Compiler } from 'webpack';
 import {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
-  DelegateModulesPlugin,
 } from '@ranshamay/utilities';
+import {DelegateModulesPlugin} from '@ranshamay/utilities';
 import { ChunkCorrelationPlugin } from '@ranshamay/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import JsonpChunkLoading from '../JsonpChunkLoading';

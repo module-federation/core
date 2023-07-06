@@ -28,7 +28,7 @@
       ]
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/native-federation-typescript/**/*.ts"]
@@ -62,7 +62,8 @@
       "executor": "ngx-deploy-npm:deploy",
       "options": {
         "access": "public",
-        "tag": "next"
+        "tag": "next",
+        "distFolderPath": "dist/packages/native-federation-typescript"
       }
     }
   },

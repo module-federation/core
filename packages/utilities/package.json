@@ -1,6 +1,7 @@
 {
   "name": "@ranshamay/utilities",
   "version": "1.8.9",
+  "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "license": "MIT",

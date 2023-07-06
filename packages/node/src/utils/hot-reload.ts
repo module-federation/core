@@ -15,7 +15,7 @@ const performReload = (shouldReload: any) => {
   }
 
   //@ts-ignore
-  global.__remote_scope__ = {
+  globalThis.__remote_scope__ = {
     _config: {},
     _medusa: {},
   };
@@ -39,8 +39,10 @@ const performReload = (shouldReload: any) => {
  webpack whether its hash has changed since last time or not
   */
 export const revalidate = () => {
-  if (global.__remote_scope__) {
-    const remoteScope = global.__remote_scope__;
+  //@ts-ignore
+  if (globalThis.__remote_scope__) {
+    //@ts-ignore
+    const remoteScope = globalThis.__remote_scope__;
 
     return new Promise((res) => {
       const fetches = [];
@@ -159,7 +161,8 @@ export const revalidate = () => {
  allows us to use fetch in our tests without having to mock out nodefetch
   */
 function getFetchModule() {
-  const loadedModule = global.webpackChunkLoad || global.fetch;
+  //@ts-ignore
+  const loadedModule = globalThis.webpackChunkLoad || global.webpackChunkLoad || global.fetch;
   if (loadedModule) {
     return loadedModule;
   }

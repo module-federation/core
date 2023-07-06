@@ -2,73 +2,259 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
-## [1.8.9](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.8...utils-1.8.9) (2023-06-27)
+# [2.0.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.9.1...utils-2.0.0) (2023-07-01)
+
+
+### Features
+
+* Next Federation 7 ([#726](https://github.com/module-federation/nextjs-mf/issues/726)) ([d50ca1e](https://github.com/module-federation/nextjs-mf/commit/d50ca1e4636c4e0a402190f6e9c3f69ed9ec8eac)), closes [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#835](https://github.com/module-federation/nextjs-mf/issues/835) [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#871](https://github.com/module-federation/nextjs-mf/issues/871) [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#872](https://github.com/module-federation/nextjs-mf/issues/872) [#875](https://github.com/module-federation/nextjs-mf/issues/875) [#884](https://github.com/module-federation/nextjs-mf/issues/884) [#887](https://github.com/module-federation/nextjs-mf/issues/887) [#893](https://github.com/module-federation/nextjs-mf/issues/893) [#885](https://github.com/module-federation/nextjs-mf/issues/885) [#899](https://github.com/module-federation/nextjs-mf/issues/899) [#904](https://github.com/module-federation/nextjs-mf/issues/904) [#932](https://github.com/module-federation/nextjs-mf/issues/932) [#936](https://github.com/module-federation/nextjs-mf/issues/936) [#959](https://github.com/module-federation/nextjs-mf/issues/959) [#960](https://github.com/module-federation/nextjs-mf/issues/960) [#969](https://github.com/module-federation/nextjs-mf/issues/969) [#971](https://github.com/module-federation/nextjs-mf/issues/971) [#974](https://github.com/module-federation/nextjs-mf/issues/974) [#984](https://github.com/module-federation/nextjs-mf/issues/984) [#986](https://github.com/module-federation/nextjs-mf/issues/986) [#1015](https://github.com/module-federation/nextjs-mf/issues/1015) [#1086](https://github.com/module-federation/nextjs-mf/issues/1086) [#1084](https://github.com/module-federation/nextjs-mf/issues/1084)
+
+
+### BREAKING CHANGES
+
+* automaticAsyncBoundary option has been removed
+
+* fix: exclude specific pages from page map automatically
+
+* refactor: conslidate codebase
+
+* fix: improve hot reload share recovery
+
+* refactor: remove server jsonp template
+
+* chore: remove dead code from runtime modules
+
+* fix: clean up jsonp getCustomJsonpCode
+
+getting chunk loading global from compiler output options
+
+* feat: adding cleanInitArrays runtime helper
+
+* chore: remove share scope hoist and module hoisting system
+
+* chore: cleanup code
+
+* chore: remove dead code from add module runtime plugin
+
+likely can remove whole plugin in future
+
+* chore: remove logs from delegate modules
+
+* chore: remove old utils
+
+* fix: add warning on auto page stitch
+
+* fix: remove commented out code from InvertedContainerPlugin.ts
+
+* chore: improve logging to see if its local load or remote load
+
+* chore: clean up old custom promises factories
+
+* fix: remove container proxy code
+
+* fix: remove container proxy code
+* automaticAsyncBoundary option has been removed
+
+* fix: exclude specific pages from page map automatically
+
+* refactor: conslidate codebase
+
+* fix: improve hot reload share recovery
+
+* refactor: remove server jsonp template
+
+* chore: remove dead code from runtime modules
+
+* fix: clean up jsonp getCustomJsonpCode
+
+getting chunk loading global from compiler output options
+
+* feat: adding cleanInitArrays runtime helper
+
+* chore: remove share scope hoist and module hoisting system
+
+* chore: cleanup code
+
+* chore: remove dead code from add module runtime plugin
+
+likely can remove whole plugin in future
+
+* chore: remove logs from delegate modules
+
+* chore: remove old utils
+
+* fix: add warning on auto page stitch
+
+* fix: remove commented out code from InvertedContainerPlugin.ts
+
+* chore: improve logging to see if its local load or remote load
+
+* chore: clean up old custom promises factories
+
+* fix: remove container proxy code
+
+* fix: remove container proxy code
+
+* chore: fix project.json
+
+* debugging
+
+* fix: resolve backmerge issues with build
+
+* Merge branch 'kill_child_compilers' into fix_backmerge_issues
+
+# Conflicts:
+#	package-lock.json
+#	package.json
+#	packages/nextjs-mf/src/plugins/NextFederationPlugin/index.ts
+#	packages/nextjs-mf/src/plugins/container/InvertedContainerPlugin.ts
+#	packages/nextjs-mf/src/plugins/container/InvertedContainerRuntimeModule.ts
+
+* feat: enable eager sharing
+
+* refactor: improve module hooks for eager loading and search
+
+* refactor: cleanup custom jsonp and make es5
+
+* refactor: cleanup inverted container code
+
+* refactor: cleanup inverted container code
+* automaticAsyncBoundary option has been removed
+
+* fix: exclude specific pages from page map automatically
+
+* refactor: conslidate codebase
+
+* fix: improve hot reload share recovery
+
+* refactor: remove server jsonp template
+
+* chore: remove dead code from runtime modules
+
+* fix: clean up jsonp getCustomJsonpCode
+
+getting chunk loading global from compiler output options
+
+* feat: adding cleanInitArrays runtime helper
+
+* chore: remove share scope hoist and module hoisting system
+
+* chore: cleanup code
+
+* chore: remove dead code from add module runtime plugin
+
+likely can remove whole plugin in future
+
+* chore: remove logs from delegate modules
+
+* chore: remove old utils
+
+* fix: add warning on auto page stitch
+
+* fix: remove commented out code from InvertedContainerPlugin.ts
+
+* chore: improve logging to see if its local load or remote load
+
+* chore: clean up old custom promises factories
+
+* fix: remove container proxy code
+
+* fix: remove container proxy code
+
+* fix: resolve backmerge issues with build
+
+* Merge branch 'kill_child_compilers' into fix_backmerge_issues
+
+# Conflicts:
+#	package-lock.json
+#	package.json
+#	packages/nextjs-mf/src/plugins/NextFederationPlugin/index.ts
+#	packages/nextjs-mf/src/plugins/container/InvertedContainerPlugin.ts
+#	packages/nextjs-mf/src/plugins/container/InvertedContainerRuntimeModule.ts
+
+* feat: enable eager sharing
+
+* refactor: improve module hooks for eager loading and search
+
+* refactor: cleanup custom jsonp and make es5
+
+* refactor: cleanup inverted container code
+
+* refactor: cleanup inverted container code
+
+* ci: fix install step with npm and NX
+
+* test: remove tests for now
+
+* chore(utils): release version 1.7.3-beta.0
+
+* chore(utils): release version 1.7.3
+
+* chore(node): release version 0.14.4-beta.0
+
+* chore(node): release version 0.14.4
+
+* chore(nextjs-mf): release version 6.4.1-beta.4
+
+* fix: remove debugging runtime variable
+
+* chore(nextjs-mf): release version 6.4.1-beta.5
 
 
 
-## [1.8.8](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.7...utils-1.8.8) (2023-06-27)
+## [1.9.2-rc.1](https://github.com/module-federation/nextjs-mf/compare/utils-1.9.2-rc.0...utils-1.9.2-rc.1) (2023-07-01)
+
+
+### Features
+
+* support edge workers ([#1084](https://github.com/module-federation/nextjs-mf/issues/1084)) ([3f5df94](https://github.com/module-federation/nextjs-mf/commit/3f5df944ea787cf958fd4cf7fabed84432a50a10))
 
 
 
-## [1.8.7](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.6...utils-1.8.7) (2023-06-27)
+## [1.9.2-rc.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.9.1...utils-1.9.2-rc.0) (2023-06-30)
 
 
 
-## [1.8.6](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.5...utils-1.8.6) (2023-06-27)
+## [1.8.2-rc8.2](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc8.1...utils-1.8.2-rc8.2) (2023-06-28)
 
 
 
-## 0.0.1 (2023-06-27)
-
-
-
-## [1.8.5](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.4...utils-1.8.5) (2023-06-27)
-
-
-
-## 0.0.1 (2023-06-27)
-
-
-
-## 0.0.1 (2023-06-27)
-
-
-
-## 0.0.1 (2023-06-27)
-
-
-
-## 0.0.1 (2023-06-27)
-
-
-
-## [1.8.2](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc3.2...utils-1.8.2) (2023-06-27)
+## [1.8.2-rc8.1](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc8.0...utils-1.8.2-rc8.1) (2023-06-28)
 
 
 ### Bug Fixes
 
-* publishConfig ([42dd37f](https://github.com/module-federation/nextjs-mf/commit/42dd37f4819a15937eef08a6333c2977445efe30))
-* **Utils:** Unable to use importRemote util for root exported modules ([#970](https://github.com/module-federation/nextjs-mf/issues/970)) ([7bf6ecb](https://github.com/module-federation/nextjs-mf/commit/7bf6ecb602958ab5991d9c18f17e3d3755d84e91))
+* disable flushing remotes to ssr for now ([6c5cfae](https://github.com/module-federation/nextjs-mf/commit/6c5cfaec3be94aeb3f1e12c24965b3904da23bae))
 
 
 
-## [1.8.2](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc3.2...utils-1.8.2) (2023-06-26)
+## [1.8.2-rc8.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc7.1...utils-1.8.2-rc8.0) (2023-06-27)
+
+
+
+## [1.8.2-rc7.1](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc7.0...utils-1.8.2-rc7.1) (2023-06-27)
+
+
+
+## [1.8.2-rc7.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc6.0...utils-1.8.2-rc7.0) (2023-06-27)
+
+
+
+## [1.8.2-rc6.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc5.0...utils-1.8.2-rc6.0) (2023-06-23)
+
+
+
+## [1.8.2-rc5.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc4.0...utils-1.8.2-rc5.0) (2023-06-23)
+
+
+
+## [1.8.2-rc4.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc3.1...utils-1.8.2-rc4.0) (2023-06-21)
 
 
 ### Bug Fixes
 
-* publishConfig ([42dd37f](https://github.com/module-federation/nextjs-mf/commit/42dd37f4819a15937eef08a6333c2977445efe30))
-* **Utils:** Unable to use importRemote util for root exported modules ([#970](https://github.com/module-federation/nextjs-mf/issues/970)) ([7bf6ecb](https://github.com/module-federation/nextjs-mf/commit/7bf6ecb602958ab5991d9c18f17e3d3755d84e91))
-
-
-
-## [1.8.2-rc3.2](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-rc3.1...utils-1.8.2-rc3.2) (2023-06-15)
-
-
-### Bug Fixes
-
-* eager share link to prevent stalled boots ([7cd7771](https://github.com/module-federation/nextjs-mf/commit/7cd7771b84f33ec91e44e60efc9ab7de6a847106))
-* safety checks for getEagerSharedForChunkId ([1f4a238](https://github.com/module-federation/nextjs-mf/commit/1f4a238dbf20589b61f01850a56dad9a44e245b4))
+* Resolve condition names ([#974](https://github.com/module-federation/nextjs-mf/issues/974)) ([5e8b49c](https://github.com/module-federation/nextjs-mf/commit/5e8b49cf60f19dae6be4818a1c0ff783c7689393))
+* Runtime module checking ([#969](https://github.com/module-federation/nextjs-mf/issues/969)) ([b5c7af1](https://github.com/module-federation/nextjs-mf/commit/b5c7af1697a63d9e19f901238a4c0382ea0c3f50))
 
 
 
@@ -84,11 +270,6 @@ This file was generated using [@jscutlery/semver](https://github.com/jscutlery/s
 ## [1.8.2-rc3.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.2-beta.0...utils-1.8.2-rc3.0) (2023-06-09)
 
 
-### Bug Fixes
-
-* use react.lazy instead of next/dynamic ([#951](https://github.com/module-federation/nextjs-mf/issues/951)) ([a27ff6e](https://github.com/module-federation/nextjs-mf/commit/a27ff6eb28acd93a7fcd8a011f76bd65e18d6b1f))
-
-
 
 ## [1.8.2-beta.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.1...utils-1.8.2-beta.0) (2023-05-26)
 
@@ -100,32 +281,6 @@ This file was generated using [@jscutlery/semver](https://github.com/jscutlery/s
 ### Bug Fixes
 
 * Improve chunk correlation ([#936](https://github.com/module-federation/nextjs-mf/issues/936)) ([4dad1eb](https://github.com/module-federation/nextjs-mf/commit/4dad1eb370feacd6ecb4c1726c435d5c579f424d))
-
-
-
-## [1.8.1-rc.2](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.1-rc1.0...utils-1.8.1-rc.2) (2023-05-26)
-
-
-### Bug Fixes
-
-* Improve chunk correlation ([#936](https://github.com/module-federation/nextjs-mf/issues/936)) ([4dad1eb](https://github.com/module-federation/nextjs-mf/commit/4dad1eb370feacd6ecb4c1726c435d5c579f424d))
-
-
-
-## [1.8.1-rc.2](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.1-rc1.0...utils-1.8.1-rc.2) (2023-05-26)
-
-
-### Bug Fixes
-
-* Improve chunk correlation ([#936](https://github.com/module-federation/nextjs-mf/issues/936)) ([4dad1eb](https://github.com/module-federation/nextjs-mf/commit/4dad1eb370feacd6ecb4c1726c435d5c579f424d))
-
-
-
-## [1.8.1-rc1.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.1-rc.1...utils-1.8.1-rc1.0) (2023-05-25)
-
-
-
-## [1.8.1-rc1.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.1-rc.1...utils-1.8.1-rc1.0) (2023-05-25)
 
 
 
@@ -304,6 +459,30 @@ likely can remove whole plugin in future
 
 * safety breaking change note
 BREAKING_CHANGE: safety breaking change note
+
+
+
+## [1.9.1](https://github.com/module-federation/nextjs-mf/compare/utils-1.9.0...utils-1.9.1) (2023-06-30)
+
+
+
+# [1.9.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.0...utils-1.9.0) (2023-06-29)
+
+
+### Bug Fixes
+
+* use react.lazy instead of next/dynamic ([#951](https://github.com/module-federation/nextjs-mf/issues/951)) ([a27ff6e](https://github.com/module-federation/nextjs-mf/commit/a27ff6eb28acd93a7fcd8a011f76bd65e18d6b1f))
+* **Utils:** Unable to use importRemote util for root exported modules ([#970](https://github.com/module-federation/nextjs-mf/issues/970)) ([7bf6ecb](https://github.com/module-federation/nextjs-mf/commit/7bf6ecb602958ab5991d9c18f17e3d3755d84e91))
+
+
+
+## [1.8.1](https://github.com/module-federation/nextjs-mf/compare/utils-1.8.0...utils-1.8.1) (2023-06-28)
+
+
+### Bug Fixes
+
+* use react.lazy instead of next/dynamic ([#951](https://github.com/module-federation/nextjs-mf/issues/951)) ([a27ff6e](https://github.com/module-federation/nextjs-mf/commit/a27ff6eb28acd93a7fcd8a011f76bd65e18d6b1f))
+* **Utils:** Unable to use importRemote util for root exported modules ([#970](https://github.com/module-federation/nextjs-mf/issues/970)) ([7bf6ecb](https://github.com/module-federation/nextjs-mf/commit/7bf6ecb602958ab5991d9c18f17e3d3755d84e91))
 
 
 
