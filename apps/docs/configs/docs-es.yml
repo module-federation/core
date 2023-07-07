@@ -5,20 +5,16 @@ antora:
     - require: '@antora/lunr-extension'
       languages: [en, es, zh]
 site:
-  title: Documentación de federación de módulos
-  start_page: ipt::index.adoc
+  title: Module Federation Documentation
+  start_page: ROOT:getting-started.adoc
   keys:
     google_analytics: G-SDV5HRTM4G
 urls:
   html_extension_style: indexify
 content:
   sources:
-    - url: https://github.com/module-federation/universe
-      branches: main
-      start_path: apps/docs/src
-    - url: https://github.com/omfgnuts/mf-translations.git
-      branches: [translated-main]
-      start_path: docs/es
+    - url: ./../../../
+      start_path: apps/docs/src/es
 ui:
   bundle:
     url: ./../../../dist/apps/docs-ui

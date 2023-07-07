@@ -1,0 +1,11 @@
+name: mf-docs
+title: Module Federation Documentation (Beta)
+version: 0.19
+display_version: '0.19'
+start_page: ROOT:getting-started.adoc
+nav:
+  - modules/ROOT/nav.adoc
+asciidoc:
+  attributes:
+    idprefix: '@'
+    idseparator: '-@'
