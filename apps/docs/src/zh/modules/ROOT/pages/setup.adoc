@@ -1,4 +1,4 @@
-= Setting up Module Federation
+= 设置模块联盟
 
 Module Federation is a feature of Webpack that allows you to share code between micro-frontends in a decentralized way. This documentation is intended for beginner users and will guide you through the process of setting up Module Federation.
 
