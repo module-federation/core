@@ -348,7 +348,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                      */
                             `var requestedRemote = remoteRegistry[${JSON.stringify(
                               name
-                            )}]`,
+                            )}];`,
                             this._getLogger(
                               `'requested remote'`,
                               `requestedRemote`
