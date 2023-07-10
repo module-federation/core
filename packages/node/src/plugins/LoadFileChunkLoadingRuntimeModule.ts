@@ -207,6 +207,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       withLoading || withExternalInstallChunk
         ? `var installChunk = ${runtimeTemplate.basicFunction('chunk', [
             'var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;',
+            this._getLogger(`"chunkIds"`, `chunkIds`),
             'for(var moduleId in moreModules) {',
             Template.indent([
               `if(${RuntimeGlobals.hasOwnProperty}(moreModules, moduleId)) {`,
@@ -234,11 +235,15 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
           "// load script equivalent for server side",
           `${RuntimeGlobals.loadScript} = ${runtimeTemplate.basicFunction('url,callback,chunkId', [
             Template.indent([
+              this._getLogger(`globalThis.__remote_scope__`, `'testing the condition'`,`!globalThis.__remote_scope__` ),
               "if(!globalThis.__remote_scope__) {",
+                Template.indent([
+                  this._getLogger(`'i need to be within cuz i am undefined'`),
+                ]),
               Template.indent(["// create a global scope for container, similar to how remotes are set on window in the browser",
                 "globalThis.__remote_scope__ = {",
                 "_config: {},",
-                "}",
+                "};",
               ]),
               "}",
             ]),
@@ -310,6 +315,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             return acc;
                           }, {} as Record<string, string>)
                         )};`,
+                        // how can we get the remote key?
+                        this._getLogger(`'var remotes after formatting'`,`remotes`),
                         Template.indent([
                           "if(!globalThis.__remote_scope__) {",
                           Template.indent(["// create a global scope for container, similar to how remotes are set on window in the browser",
@@ -321,10 +328,16 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         ]),
                         //TODO: double check this file and see if we can remove assigning to global scope (its a older hack)
                        // 'Object.assign(globalThis.__remote_scope__._config, remotes)',
-                        'const remoteRegistry = globalThis.__remote_scope__._config',
+                        // why exactly we need to do this? - we need to do this because we need to know which remote to load from
+                        // but the global name returns host instead of RemoteRoutes - why? - because the global name is the url
+                        // whats the value of the global name? - the value of the global name is the url
+
+                        `const remoteRegistry = globalThis.__remote_scope__._config;`,
+                        this._getLogger(`'var remoteRegistry'`, `remoteRegistry`),
                         /*
                       TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise() global will/should still exist - but can only be known at runtime
                     */
+                        this._getLogger(`'var chunkId'`,`chunkId`),
                         this._getLogger(`'remotes keyed by global name'`,JSON.stringify(remotes)),
                         this._getLogger(`'remote scope configs'`,'globalThis.__remote_scope__._config'),
 
@@ -346,6 +359,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           name
                         )}]`,
                      */
+                          // I believe that this should be remotes[name of the remote]
+                          // but the output of the variable name is the name you set when you instance the Plugin
                             `var requestedRemote = remoteRegistry[${JSON.stringify(
                               name
                             )}];`,
@@ -376,40 +391,46 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                               `'requestedRemote'`,
                               'requestedRemote',
                               `'current name'`,
+                              // this prints the name of the remote, not the key needed to access the remote
                               JSON.stringify(name)
                             ),
-                            `var scriptUrl = new URL(requestedRemote);`,
-                            this._getLogger( `'scriptUrl'`, 'scriptUrl'),
+                            `if (requestedRemote !== undefined) {`,
+                            Template.indent([
+                              // we will never be able to evaluate the requestedRemote because we dont know how to get the key
+                              `var scriptUrl = new URL(requestedRemote);`,
+                              this._getLogger( `'scriptUrl'`, 'scriptUrl'),
 
-                        this._getLogger(`'globalThis.__remote_scope__'`,`globalThis.__remote_scope__`),
-                        `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
-                        this._getLogger(`'chunkname to request'`,`chunkName`),
-                        `
-                        var getBasenameFromUrl = (url) => {
-                          const urlParts = url.split('/');
-                          return urlParts[urlParts.length - 1];
-                        };
-                        var fileToReplace = typeof process !== "undefined" ? require('path').basename(scriptUrl.pathname) : getBasenameFromUrl(scriptUrl.pathname);`,
-                        `scriptUrl.pathname = scriptUrl.pathname.replace(fileToReplace, chunkName);`,
-                        this._getLogger(`'will load remote chunk'`, `scriptUrl.toString()`),
-                        `loadScript(scriptUrl.toString(), function(err, content) {`,
-                        Template.indent([
-                          this._getLogger(`'load script callback fired'`),
-                          "if(err) {console.error('error loading remote chunk', scriptUrl.toString(),'got',content); return reject(err);}",
-                          'var chunk = {};',
-                          "if(typeof process !== 'undefined') {",
-                          'try {',
-                          "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
-                          "(chunk, require, require('path').dirname(filename), filename);",
-                          '} catch (e) {',
-                          "console.error('runInThisContext threw', e)",
-                          '}',
-                          '} else {',
-                          "eval('(function(exports, require, __dirname, __filename) {' + content + '\\n})')(chunk, __webpack_require__, '.', chunkName);",
-                          '}',
-                          'installChunk(chunk);',
-                        ]),
-                        '});',
+                              this._getLogger(`'globalThis.__remote_scope__'`,`globalThis.__remote_scope__`),
+                              `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
+                              this._getLogger(`'chunkname to request'`,`chunkName`),
+                              `
+                              var getBasenameFromUrl = (url) => {
+                                const urlParts = url.split('/');
+                                return urlParts[urlParts.length - 1];
+                              };`,
+                              `var fileToReplace = typeof process !== "undefined" ? require('path').basename(scriptUrl.pathname) : getBasenameFromUrl(scriptUrl.pathname);`,
+                              `scriptUrl.pathname = scriptUrl.pathname.replace(fileToReplace, chunkName);`,
+                              this._getLogger(`'will load remote chunk'`, `scriptUrl.toString()`),
+                              `loadScript(scriptUrl.toString(), function(err, content) {`,
+                                Template.indent([
+                                  this._getLogger(`'load script callback fired'`),
+                                  "if(err) {console.error('error loading remote chunk', scriptUrl.toString(),'got',content); return reject(err);}",
+                                  'var chunk = {};',
+                                  "if(typeof process !== 'undefined') {",
+                                  'try {',
+                                  "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
+                                  "(chunk, require, require('path').dirname(filename), filename);",
+                                  '} catch (e) {',
+                                  "console.error('runInThisContext threw', e)",
+                                  '}',
+                                  '} else {',
+                                  "eval('(function(exports, require, __dirname, __filename) {' + content + '\\n})')(chunk, __webpack_require__, '.', chunkName);",
+                                  '}',
+                                  'installChunk(chunk);',
+                                ]),
+                              '});',
+                            ]),
+                            '}',
                       ]),
                       '}',
                     ]),
