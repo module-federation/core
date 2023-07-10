@@ -375,10 +375,11 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             this._getLogger(
                               '"requestedRemote"',
                               'requestedRemote',
-                              'current name',
+                              '"current name"',
                               JSON.stringify(name)
                             ),
                             `var scriptUrl = new URL(requestedRemote);`,
+                            this._getLogger('"scriptUrl"', 'scriptUrl'),
 
                         this._getLogger(`'globalThis.__remote_scope__'`,`globalThis.__remote_scope__`),
                         `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
