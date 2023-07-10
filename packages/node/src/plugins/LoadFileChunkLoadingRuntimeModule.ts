@@ -373,13 +373,13 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             // since im looping over remote and creating global at build time, i dont need to split string at runtime
                             // there may still be a use case for that with promise new promise, depending on how we design it.
                             this._getLogger(
-                              '"requestedRemote"',
+                              `'requestedRemote'`,
                               'requestedRemote',
-                              '"current name"',
+                              `'current name'`,
                               JSON.stringify(name)
                             ),
                             `var scriptUrl = new URL(requestedRemote);`,
-                            this._getLogger('"scriptUrl"', 'scriptUrl'),
+                            this._getLogger( `'scriptUrl'`, 'scriptUrl'),
 
                         this._getLogger(`'globalThis.__remote_scope__'`,`globalThis.__remote_scope__`),
                         `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
