@@ -1,33 +1,34 @@
-= History of Module Federation
+= Historia de la Federación de Módulos
 
-Module Federation is a relatively new feature in the world of web development, first introduced in Webpack 5. In this guide, we'll explore the history of Module Federation, including its origins, evolution, and the major milestones that led to its development.
+Federación de Módulos es una característica relativamente nueva en el mundo del desarrollo web, introducida por primera vez en Webpack 5. En esta guía, exploraremos la historia de Federación de Módulos, incluyendo sus orígenes, evolución y los principales hitos que llevaron a su desarrollo.
 
-== Origins of Module Federation
+== Orígenes de la Federación de Módulos
 
-The idea of sharing code between multiple applications is not a new one. In fact, it has been a common practice in software development for many years. However, the rise of microservices and the need for highly modular and scalable architectures in web development created a new demand for code sharing across multiple applications.
+La idea de compartir código entre múltiples aplicaciones no es nueva. De hecho, ha sido una práctica común en el desarrollo de software durante muchos años. Sin embargo, el auge de los microservicios y la necesidad de arquitecturas altamente modulares y escalables en el desarrollo web crearon una nueva demanda para compartir código entre múltiples aplicaciones.
 
-The first attempts to solve this problem involved using iframes or server-side includes to embed code from one application into another. However, these approaches had significant limitations in terms of performance, flexibility, and security.
+Los primeros intentos de resolver este problema implicaban el uso de _iframes_ o inclusiones del lado del servidor para incrustar código de una aplicación en otra. Sin embargo, estos enfoques tenían limitaciones significativas en términos de rendimiento, flexibilidad y seguridad.
 
-== Webpack 5 and the Birth of Module Federation
+== Webpack 5 y el nacimiento de Federación de Módulos
 
-In 2020, Webpack 5 was released with a new feature called "Module Federation". This feature was a significant step forward in the evolution of code sharing in web development.
+En 2020, Webpack 5 fue lanzado con una nueva característica llamada "Federación de Módulos" (Module Federation). Esta característica supuso un importante paso adelante en la evolución de la compartición de código en el desarrollo web.
 
-Module Federation allowed developers to share entire modules between multiple applications, not just Redux-related code. This was accomplished by extending the Webpack module bundler to support remote loading of modules and using a runtime called the "Module Federation Runtime" to handle the loading and dependency resolution of remote modules.
+Federación de Módulos permite a los desarrolladores compartir módulos completos entre múltiples aplicaciones, no solo código relacionado con Redux. Esto se logra extendiendo el empaquetador de módulos Webpack para admitir la carga remota de módulos y utilizando un tiempo de ejecución llamado el “Module Federation Runtime” para manejar la carga y resolución de dependencias de los módulos remotos.
 
-== Evolution of Module Federation
+== Evolución de Federación de Módulos
 
-Since its introduction in Webpack 5, Module Federation has continued to evolve and improve. In Webpack 5, it was limited to sharing modules between applications built with Webpack. However, in Webpack 5.1, support was added for sharing modules between applications built with different module bundlers, such as Rollup or Parcel.
+Desde su introducción en Webpack 5, Federación de Módulos
+ha seguido evolucionando y mejorando. En Webpack 5, se limitaba a compartir módulos entre aplicaciones creadas con Webpack. Sin embargo, en Webpack 5.1, se añadió soporte para compartir módulos entre aplicaciones creadas con diferentes agrupadores de módulos, como Rollup o Parcel.
 
-In addition, the community has developed a number of tools and plugins to extend the capabilities of Module Federation, including the "Module Federation Plugin" for Next.js, and the "Federation Plugin" for Snowpack.
+Además, la comunidad ha desarrollado una serie de herramientas y complementos para ampliar las capacidades de Federación de Módulos, incluyendo el "Module Federation Plugin" para Next.js, y el "Federation Plugin" para Snowpack.
 
-== Future of Module Federation
+== Futuro de Federación de Módulos
 
-Module Federation has the potential to significantly change the way we approach code sharing in web development. As it continues to evolve and improve, it is likely that we will see more widespread adoption and integration with other tools and frameworks.
+Federación de Módulos tiene el potencial de cambiar significativamente la forma en que abordamos el intercambio de código en el desarrollo web. A medida que siga evolucionando y mejorando, es probable que veamos una mayor adopción e integración con otras herramientas y marcos de trabajo.
 
-Some potential future directions for Module Federation include:
+Algunas de las posibles direcciones futuras de Federación de Módulos son:
 
-- Improved support for sharing dynamic and asynchronous modules.
-- Integration with serverless functions and other backend services.
-- Support for sharing modules across multiple programming languages and environments.
+- Soporte mejorado para compartir módulos dinámicos y asíncronos.
+- Integración con funciones sin servidor y otros servicios backend.
+- Soporte para compartir módulos a través de múltiples lenguajes de programación y entornos.
 
-As Module Federation continues to evolve, we will continue updating documentation, to provide you with the best techniques on how to adopt and integrate with other tools and frameworks.
+A medida que Federación de Módulos siga evolucionando, seguiremos actualizando la documentación, para ofrecerle las mejores técnicas sobre cómo adoptar e integrarse con otras herramientas y _frameworks_.

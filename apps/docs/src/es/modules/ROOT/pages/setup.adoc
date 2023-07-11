@@ -1,28 +1,29 @@
-= Configuración de la federación de módulos
+= Configuración de Federación de Módulos
 
-Module Federation is a feature of Webpack that allows you to share code between micro-frontends in a decentralized way. This documentation is intended for beginner users and will guide you through the process of setting up Module Federation.
+Federación de Módulos es una característica de Webpack que permite compartir código entre micro-frontends de forma descentralizada. Esta documentación está dirigida a usuarios principiantes y le guiará a través del proceso de configuración de Federación de Módulos.
 
-== Prerequisites
+== Requisitos previos
 
-Before we begin, make sure you have a fresh version of Node.js installed. The current Long Term Support (LTS) release is an ideal starting point. You may run into a variety of issues with the older versions as they may be missing functionality webpack and/or its related packages require.
+Antes de empezar, asegúrese de tener instalada una versión reciente de Node.js. La versión actual Long Term Support (LTS) es un punto de partida ideal. Es posible que encontrarse con una variedad de problemas con las versiones anteriores, ya que pueden faltar funcionalidades que Webpack y/o sus paquetes relacionados requieren.
 
-- You need to have `Node.js` and `npm` installed on your machine.
-- You need to have a basic understanding of front-end development concepts.
-- You need to have multiple applications that can load JavaScript modules
+- Necesita tener `Node.js` y `npm` instalados en su ordenador.
+- Necesita tener una comprensión básica de los conceptos de desarrollo front-end.
+- Necesita tener múltiples aplicaciones que puedan cargar módulos JavaScript.
 
-For more detailed information on installation of Webpack 5, please, refer to the official https://webpack.js.org/guides/installation/[Installation Instructions]
+Para obtener información más detallada sobre la instalación de Webpack 5, por favor, consulte la página oficial
+https://webpack.js.org/guides/installation/[Installation Instructions]
 
-== Installation Instructions
+== Instrucciones de instalación
 
-To install Module Federation, follow these steps:
+Para instalar Federación de Módulos, siga estos pasos:
 
-- Open a terminal and navigate to your project directory.
-- Run the following command to install Webpack and its dependencies:
+- Abra un terminal y navegue hasta el directorio de su proyecto.
+- Ejecute el siguiente comando para instalar Webpack y sus dependencias:
 
 `npm install webpack webpack-cli webpack-dev-server --save-dev`
 
-- Create a Webpack configuration file in the root of each application that will be using Module Federation.
-- In each configuration file, add the following code to enable Module Federation:
+- Cree un archivo de configuración de Webpack en la raíz de cada aplicación que vaya a utilizar Federación de Módulos.
+- En cada archivo de configuración, añada el siguiente código para habilitar Federación de Módulos:
 
 const { ModuleFederationPlugin } = require("webpack").container;
 
@@ -38,24 +39,24 @@ module.exports = {
 };
 ----
 
-== Configuration Options
+== Opciones de configuración
 
-Once you have enabled Module Federation in your Webpack configuration files, you can start configuring it. The following options are available:
+Una vez que haya habilitado Federación de Módulos en sus archivos de configuración de Webpack, puede empezar a configurarlo. Dispone de las siguientes opciones:
 
-- name (required): The name of the application module.
-- filename (optional): The filename of the remote entry file.
-- exposes (optional): An object that maps local module names to the modules that should be exposed to other applications.
-- remotes (optional): An object that maps the names of remote applications to the URLs where they are hosted.
-- shared (optional): An object that lists the modules that should be shared between applications.
+- name (obligatorio): El nombre del módulo de la aplicación.
+- filename (opcional): El nombre de archivo del archivo de entrada remota.
+- exposes (opcional): Un objeto que asigna los nombres de los módulos locales a los módulos que deben exponerse a otras aplicaciones.
+- remotes (opcional): Un objeto que mapea los nombres de las aplicaciones remotas a las URLs donde están alojadas.
+- shared (opcional): Un objeto que lista los módulos que deben ser compartidos entre aplicaciones.
 
-== Using Module Federation
+== Utilización de Federación de Módulos
 
-To use Module Federation, you need to:
+Para utilizar Federación de Módulos, es necesario:
 
-. Identify the modules you want to share between applications.
-. Add those modules to a shared package or repository.
-. Make sure that each application has access to the shared package or repository.
-. Configure each application's Webpack configuration file to use Module Federation.
-. Use the shared modules in your applications as needed.
+. Identificar los módulos que desea compartir entre aplicaciones.
+. Añadir esos módulos a un paquete o repositorio compartido.
+. Asegúrese de que cada aplicación tiene acceso al paquete o repositorio compartido.
+. Configure el archivo de configuración Webpack de cada aplicación para utilizar Federación de Módulos.
+. Utilice los módulos compartidos en sus aplicaciones según sea necesario.
 
-For more information and advanced configuration options, please refer to the official Webpack documentation.
+Para obtener más información y opciones de configuración avanzadas, consulte la documentación oficial de Webpack.

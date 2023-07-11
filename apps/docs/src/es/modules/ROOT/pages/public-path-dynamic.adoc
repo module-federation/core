@@ -1,37 +1,37 @@
-= Setting the Dynamic Public Path 
+= Configuración de la ruta pública dinámica 
 
-In this guide, we'll cover how to set the public path dynamically for Module Federation. This is particularly useful when deploying federated modules to different environments with varying public paths. 
+En esta guía veremos cómo establecer la ruta pública de forma dinámica para la Federación de Módulos. Esto es particularmente útil cuando se despliegan módulos federados en diferentes entornos con diferentes rutas públicas. 
 
-One of the challenges of using Module Federation is to configure the public path of each Webpack build correctly, so that it can load remote modules from other builds at runtime. The public path is the base URL for all assets (including JavaScript files) in a Webpack build. By default, Webpack sets the public path to the current HTML document's base URL or location. However, this may not work well for Module Federation scenarios, where the public path needs to point to the location of the remote container that exposes the modules.
+Uno de los retos de usar Federación de Módulos es configurar la ruta pública de cada compilación de Webpack correctamente, para que pueda cargar módulos remotos de otras compilaciones en tiempo de ejecución. La ruta pública es la URL base para todos los activos (incluidos los archivos JavaScript) en una compilación de Webpack. Por defecto, Webpack establece la ruta pública en la URL base o ubicación del documento HTML actual. Sin embargo, esto puede no funcionar bien para escenarios de Federación de Módulos, donde la ruta pública necesita apuntar a la ubicación del contenedor remoto que expone los módulos.
 
-There are three ways to set the public path dynamically for Module Federation: using an inline script tag, using a custom entry point, or using startup code.
+Hay tres formas de establecer la ruta pública dinámicamente para la federación de módulos: utilizando una etiqueta de script en línea, utilizando un punto de entrada personalizado o utilizando código de inicio.
 
-== Using an inline script tag
+== Uso de una etiqueta de script en línea
 
-One way to set the public path dynamically is to use an inline script tag in the HTML document that hosts the Webpack build. The script tag should assign the `__webpack_public_path__` variable to the desired public path before loading the main JavaScript file. 
+Una forma de establecer la ruta pública dinámicamente es utilizar una etiqueta de script en línea en el documento HTML que aloja la compilación de Webpack. La etiqueta de script debe asignar la variable `__webpack_public_path__` a la ruta pública deseada antes de cargar el archivo JavaScript principal. 
 
-For example:
+Por ejemplo:
 
 [, html]
 ----
 <script>
-  // Set the public path to the location of the remote container
+  // Establece la ruta pública a la ubicación del contenedor remoto
   __webpack_public_path__ = "https://example.com/remote/";
 </script>
 <script src="main.js"></script>
 ----
 
-This approach has the advantage of being simple and straightforward, but it has some drawbacks:
+Este enfoque tiene la ventaja de ser simple y directo, pero tiene algunos inconvenientes:
 
-- It requires modifying the HTML document for each webpack build, which may not be feasible or desirable in some cases.
-- It may not work well with code splitting or lazy loading, as the public path needs to be set before any JavaScript file is loaded.
-- It may cause issues with caching or content delivery networks (CDNs), as the public path is hard-coded in the HTML document and cannot be changed dynamically.
+- Requiere modificar el documento HTML para cada compilación de webpack, lo que puede que no sea factible o deseable en algunos casos.
+- Puede que no funcione bien con la división de código o la carga diferida (lazy loading), ya que la ruta pública debe establecerse antes de cargar cualquier archivo JavaScript.
+- Puede causar problemas con el almacenamiento en caché o las redes de distribución de contenidos (CDN), ya que la ruta pública está codificada en el documento HTML y no se puede cambiar dinámicamente.
 
-== Using a custom entry point
+== Utilizar un punto de entrada personalizado
 
-Another way to set the public path dynamically is to use a custom entry point in the webpack configuration. The custom entry point should import a module that sets the `__webpack_public_path__` variable to the desired public path based on some logic or environment variables. 
+Otra forma de establecer la ruta pública dinámicamente es utilizar un punto de entrada personalizado en la configuración de webpack. El punto de entrada personalizado debería importar un módulo que establezca la variable `__webpack_public_path__` a la ruta pública deseada basándose en alguna lógica o variables de entorno. 
 
-For example:
+Por ejemplo:
 
 [tabs]
 ======
@@ -40,9 +40,9 @@ entry.js::
 [source, js]
 ----
 // entry.js
-// Import a module that sets the public path
+// Importa un módulo que establece la ruta pública
 import "./set-public-path.js";
-// Import other modules as usual
+// Importa los demás módulos de forma habitual
 import "./app.js";
 ----
 
@@ -51,7 +51,7 @@ set-public-path.js::
 [source, js]
 ----
 // set-public-path.js
-// Set the public path based on some logic or environment variables
+// Establece la ruta pública en función de algunas variables lógicas o de entorno
 __webpack_public_path__ = process.env.PUBLIC_PATH || "https://example.com/remote/";
 ----
 
@@ -61,29 +61,29 @@ webpack.config.js::
 ----
 // webpack.config.js
 module.exports = {
-  // Use the custom entry point
+  // Utiliza el punto de entrada personalizado
   entry: "./entry.js",
-  // Other configuration options...
+  // Otras opciones de configuración...
 };
 ----
 ======
 
-This approach has the advantage of being more flexible and robust, as it allows setting the public path based on any logic or environment variables. It also works well with code splitting or lazy loading, as the public path is set before any remote module is loaded. However, it has some drawbacks:
+Este enfoque tiene la ventaja de ser más flexible y robusto, ya que permite establecer la ruta pública basándose en cualquier lógica o variables de entorno. También funciona bien con la división de código o la carga diferida, ya que la ruta pública se establece antes de cargar cualquier módulo remoto. Sin embargo, tiene algunos inconvenientes:
 
-- It requires creating a custom entry point and a module that sets the public path, which may add some complexity and overhead to the webpack configuration.
-- It may not work well with hot module replacement (HMR), as changing the public path may require reloading the entire application.
+- Requiere crear un punto de entrada personalizado y un módulo que establezca la ruta pública, lo que puede añadir cierta complejidad y sobrecargar la configuración de Webpack.
+- Puede que no funcione bien con el reemplazo de módulos en caliente (HMR), ya que cambiar la ruta pública puede requerir recargar toda la aplicación.
 
-== Using startup code
+== Uso del código de inicio
 
-Startup code is an implementation tactic to attach additional runtime code to a remote container startup sequence. This is useful for scenarios where the public path needs to be set based on some logic or environment variables that are not available at build time.
+El código de inicio es una táctica de implementación para adjuntar código de ejecución adicional a la secuencia de inicio de un contenedor remoto. Esto es útil para escenarios donde la ruta pública necesita ser establecida basada en alguna lógica o variables de entorno que no están disponibles en tiempo de compilación.
 
-To use startup code, we need to do the following steps:
+Para utilizar el código de inicio, tenemos que seguir los siguientes pasos:
 
-. Create an entry point with the same name as the name we place in ModuleFederationPlugin. This merges the two "chunks" together. When a remoteEntry is placed on the page, the code in this entry point will execute as part of the `remoteEntry` startup.
-. In the entry point, import a module that sets the `__webpack_public_path__` variable to the desired public path based on some logic or environment variables.
-. Exclude the entry point chunk from the HTML document, as it will be loaded by the `remoteEntry`.
+. Crear un punto de entrada con el mismo nombre que el que colocamos en ModuleFederationPlugin. Esto fusiona los dos "fragmentos" juntos. Cuando se coloca un _remoteEntry_ en la página, el código en este punto de entrada se ejecutará como parte del arranque del _`remoteEntry`_.
+. En el punto de entrada, importe el módulo que establece la variable `__webpack_public_path__` a la ruta pública deseada basada en alguna lógica o variables de entorno.
+. Excluya el fragmento de punto de entrada del documento HTML, ya que será cargado por `remoteEntry`.
 
-For example, let's say we have a remote container named "app1" that exposes some modules. We want to set its public path based on an environment variable called `PUBLIC_PATH`. Here is how we can use startup code to achieve this:
+Por ejemplo, digamos que tenemos un contenedor remoto llamado "app1" que expone algunos módulos. Queremos establecer su ruta pública basándonos en una variable de entorno llamada `PUBLIC_PATH`. Así es como podemos utilizar el código de inicio para lograr esto:
 
 [tabs]
 ======
@@ -92,9 +92,9 @@ entry.js::
 [source, js]
 ----
 // entry.js
-// Import a module that sets the public path
+// Importar un módulo que establece la ruta pública
 import "./set-public-path.js";
-// Import other modules as usual import "./app.js";
+// Importa los demás módulos de forma habitual "./app.js";
 ----
 
 set-public-path.js::
@@ -102,7 +102,7 @@ set-public-path.js::
 [source, js]
 ----
 // set-public-path.js
-// Set the public path based on an environment variable
+// Establece la ruta pública en función de una variable de entorno
 __webpack_public_path__ = process.env.PUBLIC_PATH || "https://example.com/remote/";
 ----
 
@@ -112,17 +112,17 @@ webpack.config.js::
 ----
 // webpack.config.js
 module.exports = {
-  // Use the custom entry point
+  // Utiliza el punto de entrada personalizado
   entry: {
-    // we add an entrypoint with the same name as our name in ModuleFederationPlugin.
-    // This merges the two "chunks" together. When a remoteEntry is placed on the page,
-    // the code in this app1 entrypoint will execute as part of the remoteEntry startup.
+    // Añadimos un punto de entrada con el mismo nombre que el nombre en ModuleFederationPlugin.
+    // Esto fusiona los dos "fragmentos". Cuando un remoteEntry es colocado en la página,
+    // el código en este entrypoint app1 se ejecutará como parte del inicio del remoteEntry.
     app1: "./src/set-public-path.js",
     main: "./src/index.js",
   },
   mode: "development",
   output: {
-    // public path can be what it normally is, not a absolute, hardcoded url
+    // la ruta pública puede ser lo que normalmente es, no una URL absoluta y codificada de forma rígida
     publicPath: "/",
   },
   plugins: [
@@ -142,8 +142,8 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
-      // exclude app1 chunk, just incase HTML webpack plugin tries to do something silly.
-      // It doesn't have the best MF support right now when it comes to advanced implementations
+      // excluir el fragmento de la app1, por si acaso el plugin HTML webpack intenta hacer algo raro
+      // No tiene el mejor soporte de MF ahora mismo cuando se trata de implementaciones avanzadas
       excludeChunks: ["app1"],
     }),
   ],
@@ -151,18 +151,18 @@ module.exports = {
 ----
 ======
 
-This way, we can set the public path of app1 dynamically at runtime based on the PUBLIC_PATH environment variable. If it is not defined, we fall back to a default value of "https://example.com/remote/".
+De esta forma, podemos establecer la ruta pública de app1 dinámicamente en tiempo de ejecución basándonos en la variable de entorno PUBLIC_PATH. Si no está definida, volvemos al valor por defecto "https://example.com/remote/".
 
-== Additional Reading
+== Lectura adicional
 
 - https://github.com/module-federation/module-federation-examples/tree/master/startup-code[Basic host remote example, with startup code that sets the remotes public path dynamically.]
 - https://github.com/module-federation/module-federation-examples/issues/102[Dicscussion on GitHub related to Dynamic publicPath]
 - https://scriptedalchemy.medium.com/micro-fe-architecture-webpack-5-module-federation-and-custom-startup-code-9cb3fcd066c[Micro-FE Architecture: Webpack 5, Module Federation, and custom startup code by Zack Jackson]
 - https://dev.to/waldronmatt/tutorial-a-guide-to-module-federation-for-enterprise-n5[Tutorial - A Guide to Module Federation for Enterprise ]
 
-== Conclusion
 
-Setting the public path dynamically for Module Federation is an important step to ensure that remote modules can be loaded correctly at runtime. There are three ways to do this: using an inline script tag, using a custom entry point, or using startup code. Each approach has its own advantages and disadvantages, and developers should choose the one that suits their needs and preferences best.
+== Conclusión
 
-Using an inline script tag is simple and straightforward, but it may not work well with code splitting or lazy loading, and it may cause issues with caching or CDNs. Using a custom entry point is more flexible and robust, but it may add some complexity and overhead to the webpack configuration, and it may not work well with HMR. Using startup code is a powerful and advanced technique that allows injecting custom code into the webpack runtime, but it may require some familiarity with webpack internals and Module Federation.
+Establecer la ruta pública dinámicamente para Federación de Módulos es un paso importante para asegurar que los módulos remotos pueden ser cargados correctamente en tiempo de ejecución. Hay tres formas de hacerlo: utilizando una etiqueta de script en línea, utilizando un punto de entrada personalizado o utilizando código de inicio. Cada enfoque tiene sus propias ventajas y desventajas, y los desarrolladores deben elegir el que mejor se adapte a sus necesidades y preferencias.
 
+El uso de una etiqueta de secuencia de comandos en línea es simple y directo, pero puede no funcionar bien con la división de código o la carga diferida, y puede causar problemas con el almacenamiento en caché o CDN. Usar un punto de entrada personalizado es más flexible y robusto, pero puede añadir algo de complejidad y sobrecarga a la configuración de Webpack, y puede no funcionar bien con HMR. El uso de código de inicio es una técnica potente y avanzada que permite inyectar código personalizado en el tiempo de ejecución de Webpack, pero puede requerir cierta familiaridad con las funciones internas de Webpack y Federación de Módulos.
