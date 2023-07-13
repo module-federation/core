@@ -1,10 +1,10 @@
-import { getScope } from './scopes';
 import {
   AsyncContainer,
   RemoteContainer,
   RemoteOptions,
   SharedScope,
 } from '../types';
+import { getScope } from './scopes';
 
 /**
  * Creates a shell container on the common scope.
@@ -14,9 +14,8 @@ export const registerContainer = (
   asyncContainer: AsyncContainer,
   remoteOptions: RemoteOptions
 ) => {
-  const containerKey = getContainerKey(remoteOptions);
-
   const globalScope = getScope();
+  const containerKey = getContainerKey(remoteOptions);
 
   if (globalScope[containerKey]) return;
 
@@ -36,7 +35,6 @@ export const getContainerKey = (
   }
 
   const options = remoteOptions as RemoteOptions;
-
   return options.uniqueKey ? options.uniqueKey : options.global;
 };
 
@@ -48,22 +46,23 @@ export const getContainerKey = (
 export const getContainer = async (
   remoteContainer: string | RemoteOptions // TODO: Should string be deprecated?
 ): Promise<RemoteContainer | undefined> => {
+  const globalScope = getScope();
+
   if (!remoteContainer) {
     throw Error(`Remote container options is empty`);
   }
-  const containerScope = getScope();
 
   if (typeof remoteContainer === 'string') {
-    if (containerScope[remoteContainer]) {
-      const container = containerScope[remoteContainer] as AsyncContainer;
+    if (globalScope[remoteContainer]) {
+      const container = globalScope[remoteContainer] as AsyncContainer;
       return await container;
     }
 
     return undefined;
   } else {
     const uniqueKey = getContainerKey(remoteContainer);
-    if (containerScope[uniqueKey]) {
-      const container = containerScope[uniqueKey] as AsyncContainer;
+    if (globalScope[uniqueKey]) {
+      const container = globalScope[uniqueKey] as AsyncContainer;
       return await container;
     }
 

@@ -3,15 +3,14 @@
 
 import type { container } from 'webpack';
 
-export interface CustomGlobal extends Global {
-  __remote_scope__: RemoteScope;
-}
-
 export type ModuleFederationPluginOptions = ConstructorParameters<
   typeof container.ModuleFederationPlugin
 >['0'];
 
-// TODO: Keep webpack as standard
+export interface GlobalScope {
+  mfRuntime: ModuleFederationRuntime;
+}
+
 export type SharedScope = {
   default: Record<
     string,
@@ -42,6 +41,10 @@ export type RemoteContainer = {
   init: (obj?: typeof __webpack_share_scopes__) => void;
 };
 
+export type ModuleMap = {
+  [modulePath: string]: () => Promise<void>;
+};
+
 export type AsyncContainer = Promise<RemoteContainer>;
 
 export type RemoteOptions = {
@@ -56,11 +59,6 @@ export type RuntimeRemote = Partial<RemoteOptions> & {
 
 export type RuntimeRemotesMap = Record<string, RuntimeRemote>;
 
-// Types for MFClient
-export type EventTypes = 'loadStart' | 'loadComplete' | 'loadError';
-type NextRoute = string;
-export type PageMap = Record<NextRoute, ModulePath>;
-
 export type GetModuleOptions = {
   modulePath: string;
   exportName?: string;
@@ -73,13 +71,16 @@ export type GetModulesOptions = {
 };
 
 export type ModuleFederationRuntimeOptions = {
-  scriptFactory: IRemoteScriptFactory;
-  sharingScopeFactory: ISharingScopeFactory;
+  bundler: string;
+  scriptFactory?: IRemoteScriptFactory;
+  sharingScopeFactory?: ISharingScopeFactory;
 };
 
 export type ModuleFederationRuntime = {
   scriptFactory: IRemoteScriptFactory;
   sharingScopeFactory: ISharingScopeFactory;
+  remotes: Record<string, AsyncContainer | undefined>;
+  sharingScope: SharedScope;
 };
 
 export type RemoteScope = {
@@ -97,7 +98,6 @@ export type RemoteScope = {
 
 export interface IRemoteScriptFactory {
   loadScript: (
-    scope: RemoteScope,
     containerKey: string,
     remoteOptions: RemoteOptions
   ) => AsyncContainer;

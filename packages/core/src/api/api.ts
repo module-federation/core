@@ -1,10 +1,9 @@
 import {
-  createModuleFederationRuntime,
-  getContainerKey,
-  getScope,
-  getSharingScope,
-  initContainer,
-} from '../lib';
+  WebpackRemoteScriptFactory,
+  WebpackSharingScopeFactory,
+} from '../integrations/webpack';
+import { getContainerKey, initContainer } from '../lib';
+import { getScope } from '../lib/scopes';
 import {
   GetModuleOptions,
   GetModulesOptions,
@@ -15,22 +14,17 @@ import {
 /**
  * Return initialized remote container
  *
- *  @returns remote container
+ * @returns remote container
  */
 export const loadAndInitializeRemote = async (
   remoteOptions: RemoteOptions
 ): Promise<RemoteContainer> => {
-  const scope = getScope();
-
-  // TODO: Create this during build?
-  if (!scope._runtime) {
-    scope._runtime = createModuleFederationRuntime();
-  }
+  const globalScope = getScope();
 
   const containerKey = getContainerKey(remoteOptions);
 
-  const asyncContainer = scope._runtime.scriptFactory.loadScript(
-    scope,
+  // TODO: Make this generic, possibly the runtime?
+  const asyncContainer = new WebpackRemoteScriptFactory().loadScript(
     containerKey,
     remoteOptions
   );
@@ -40,18 +34,14 @@ export const loadAndInitializeRemote = async (
   }
 
   // TODO: look at init tokens, pass to getSharingScope
-  // init method on remote entry
 
-  scope.__sharing_scope__ = getSharingScope();
-
-  console.log('scope.__sharing_scope__', scope.__sharing_scope__);
-
-  if (!scope.__sharing_scope__) {
-    scope.__sharing_scope__ =
-      await scope._runtime.sharingScopeFactory.initializeSharingScope();
+  if (!globalScope.__sharing_scope__) {
+    // TODO: Make this generic, possibly the runtime?
+    globalScope.__sharing_scope__ =
+      await new WebpackSharingScopeFactory().initializeSharingScope();
   }
 
-  return initContainer(asyncContainer, scope.__sharing_scope__);
+  return initContainer(asyncContainer, globalScope.__sharing_scope__);
 };
 
 /**
