@@ -2,6 +2,24 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.0.2](https://github.com/module-federation/nextjs-mf/compare/node-1.0.1...node-1.0.2) (2023-07-05)
+
+
+### Bug Fixes
+
+* do not assign remotes to the registry from within chunk loading runtime modules ([#1111](https://github.com/module-federation/nextjs-mf/issues/1111)) ([e255c15](https://github.com/module-federation/nextjs-mf/commit/e255c15a05c8b691b6bed3a3653bc3fc92cd21d8))
+
+
+
+## [1.0.1](https://github.com/module-federation/nextjs-mf/compare/node-1.0.0...node-1.0.1) (2023-07-05)
+
+
+### Bug Fixes
+
+* better automatic server build detection ([#1106](https://github.com/module-federation/nextjs-mf/issues/1106)) ([6763cd6](https://github.com/module-federation/nextjs-mf/commit/6763cd60549d77add4745629bf6855e370d1375f))
+
+
+
 # [1.0.0](https://github.com/module-federation/nextjs-mf/compare/node-0.16.2...node-1.0.0) (2023-07-01)
 
 ### Dependency Updates

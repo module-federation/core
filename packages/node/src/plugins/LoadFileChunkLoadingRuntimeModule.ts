@@ -271,7 +271,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                     'var promise = new Promise(async function(resolve, reject) {',
                     Template.indent([
                       'installedChunkData = installedChunks[chunkId] = [resolve, reject];',
-                      `var filename = typeof process !== \"undefined\" ? require('path').join(__dirname, ${JSON.stringify(
+                      `var filename = typeof process !== "undefined" ? require('path').join(__dirname, ${JSON.stringify(
                         rootOutputDir
                       )} + ${
                         RuntimeGlobals.getChunkScriptFilename
@@ -319,7 +319,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           ]),
                           "}",
                         ]),
-                        'Object.assign(globalThis.__remote_scope__._config, remotes)',
+                        //TODO: double check this file and see if we can remove assigning to global scope (its a older hack)
+                       // 'Object.assign(globalThis.__remote_scope__._config, remotes)',
                         'const remoteRegistry = globalThis.__remote_scope__._config',
                         /*
                       TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise() global will/should still exist - but can only be known at runtime
