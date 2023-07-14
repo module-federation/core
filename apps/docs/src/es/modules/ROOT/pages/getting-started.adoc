@@ -1,18 +1,18 @@
-= ¿Qué es la Federación de Módulos?
+= ¿Qué es Federación de Módulos?
 
-Module Federation is a concept that allows developers to share code and resources across multiple JavaScript applications, or micro-frontends. In a traditional web application, all the code for a single page is usually contained within a single codebase. This can lead to monolithic applications that are difficult to maintain and scale.
+La Federación de Módulos es un concepto que permite a los desarrolladores compartir código y recursos a entre múltiples aplicaciones de JavaScript o micro-frontends. En una aplicación web tradicional, todo el código de una sola página suele estar contenido en una misma fuente de código. Esto puede conllevar a aplicaciones monolíticas difíciles de mantener y escalar.
 
-With Module Federation, code can be split into smaller, independently deployable modules that can be loaded on demand when they are needed. This allows micro-frontends to be developed and deployed independently, which reduces coordination between teams and allows for faster development cycles.
+Con Federación de Módulos, el código puede ser dividido en módulos pequeños e independientes para que así puedan ser cargados a demanda. Permitiendo que los micro-frontends puedan ser desarrollados y desplegados de manera independiente, lo cual reduce la coordinación entre equipos y agiliza los ciclos de desarrollo.
 
-At its core, Module Federation is based on the idea of remote loading of JavaScript modules. This means that instead of having all the code for a single application loaded at once, the code can be split into smaller, independently deployable modules that can be loaded on demand when they are needed.
+En esencia, Federación de Módulos se basa en la idea de cargar módulos de Javascript de manera remota. Esto significa que, en lugar de tener todo el código en una sola aplicación cargado al mismo tiempo, el código se puede dividir en módulos más pequeños e independientes para así ser cargados a demanda cuando sea necesario.
 
-Module Federation is implemented using the Webpack module bundler. Webpack is a tool that allows developers to bundle JavaScript modules into a single file that can be loaded by a web browser. With Module Federation, Webpack is extended to allow modules to be loaded from other applications, rather than just from within the same application.
+Federación de módulos es implementado usando el empaquetador de módulos Webpack. Webpack es una herramienta que permite a los desarrolladores empaquetar módulos de Javascript en un mismo archivo que puede ser ejecutado por el navegador web. Con Federación de Módulos, Webpack es extendido para permitir que los módulos puedan ser cargados desde otras aplicaciones, en vez de limitarse a la misma aplicación. 
 
-To use Module Federation, developers need to configure their Webpack builds to expose certain modules to other applications and to consume modules from other applications. This can be done using the `exposes` and `remotes` options in the Webpack configuration.
+Para usar Federación de Módulos, los desarrolladores necesitan configurar el compilador de Webpack para exponer ciertos módulos para ser consumidos por otras aplicaciones. Esto puede hacerse utilizando las opciones `exposes` y `remotes` en la configuración de Webpack
 
-- The `exposes` option is used to expose certain modules from an application to other applications. This tells Webpack which modules should be available to other applications when they are loaded remotely.
-- The `remotes` option is used to consume modules from other applications. This tells Webpack which modules should be loaded remotely from other applications when they are needed.
+- La opción `exposes` se utiliza para exponer ciertos módulos de una aplicación a otras aplicaciones. Esto le dice a Webpack qué módulos deben estar disponibles para otras aplicaciones cuando se cargan de forma remota.
+- La opción `remotes` se utiliza para consumir módulos de otras aplicaciones. Esto le dice a Webpack qué módulos deben ser cargados remotamente desde otras aplicaciones cuando son necesarios.
 
-Once the Webpack configurations for each application have been set up, the applications can be deployed independently. When a user visits a page that includes multiple micro-frontends, the micro-frontends will dynamically load the code they need from other micro-frontends using the `exposes` and `remotes` options.
+Una vez establecidas las configuraciones de Webpack para cada aplicación, las aplicaciones pueden desplegarse de forma independiente. Cuando un usuario visita una página que incluye varios micro-frontends, los micro-frontends cargarán dinámicamente el código que necesiten de otros micro-frontends utilizando las opciones `exposes` y `remotes`.
 
-In summary, Module Federation allows developers to share code and resources across micro-frontends, which reduces duplication and improves code maintainability. By allowing micro-frontends to be developed and deployed independently, Module Federation reduces the need for coordination between teams and allows for faster development cycles.
+En resumen, la Federación de Módulos permite a los desarrolladores compartir código y recursos entre micro-frontends, lo que reduce la duplicación y mejora el mantenimiento del código. Al permitir que los micro-frontends se desarrollen y desplieguen de forma independiente, Federación de Módulos reduce la necesidad de coordinación entre equipos y permite ciclos de desarrollo más rápidos.
