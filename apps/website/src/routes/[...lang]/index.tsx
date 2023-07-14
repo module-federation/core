@@ -12,6 +12,7 @@ import SubscribeSection from '../../components/sections/subscribe/subscribe';
 import ShowcaseSection from '../../components/sections/showcase/showcase';
 import MedusaSection from '../../components/sections/medusa/medusa';
 import ContactSection from '../../components/sections/contact/contact';
+import BannerSection from '../../components/sections/banner/banner';
 import BrandsSection from '../../components/sections/brands/brands';
 import SponsorSection from '../../components/sections/sponsor/sponsor';
 
@@ -28,6 +29,7 @@ export default component$(() => {
       <BrandsSection />
       <ShowcaseSection />
       <MedusaSection />
+      <BannerSection />
       <ContactSection />
       <SponsorSection />
       <Footer />

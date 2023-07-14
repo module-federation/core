@@ -18,6 +18,7 @@ export const config: SpeakConfig = {
   assets: [
     'app',
     'contact',
+    'banner',
     'discord',
     'doc-summary',
     'evolving',

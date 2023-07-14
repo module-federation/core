@@ -19,3 +19,17 @@
     }
   }
 }
+
+.contact {
+  border: 1px solid #949FC5;
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 40px;
+  width: 300px;
+  padding: 13px;
+  .text {
+    font-size: 17px;
+    line-height: 23px;
+    font-weight: normal;
+  }
+}
