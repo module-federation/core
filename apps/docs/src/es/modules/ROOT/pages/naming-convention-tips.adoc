@@ -1,14 +1,14 @@
-== Naming conventions for modules and their exports to avoid naming collisions
+== Convenciones de nomenclatura para módulos y sus exportaciones para evitar colisiones de nomenclatura
 
-When using Module Federation you may face some challenges when it comes to naming your modules and their exports. Since you are loading modules from different sources, you need to make sure that they don't conflict with each other or with the host application. Otherwise, you might end up with unexpected behavior, errors, or broken functionality.
+Al utilizar Federación de Módulos, puede que encuentre algunos problemas a la hora de nombrar los módulos y sus exportaciones. Dado que está cargando módulos de diferentes fuentes, es importante asegurarse de que no entran en conflicto entre ellos o con la aplicación huésped. De lo contrario, podría darse un comportamiento inesperado, errores o funcionalidades defectuosas.
 
-In this guide, we will show you some best practices for naming your modules and their exports when using Module Federation. We will also explain how Webpack handles naming collisions and how you can customize it to suit your needs.
+En esta guía, mostraremos algunas de las mejores prácticas para nombrar los módulos y sus exportaciones cuando use Federación de Módulos. También explicaremos cómo Webpack maneja las colisiones de nombres y cómo puede personalizarlo para adaptarlo según las necesidades.
 
-== Naming your modules
+== Cómo nombrar los módulos
 
-A module is a unit of code that can be loaded by Webpack. It can be a JavaScript file, a CSS file, an image, or any other type of asset. When using Module Federation, you can expose some of your modules to other bundles or applications by using the `exposes` option in your Webpack configuration.
+Un módulo es una unidad de código que puede ser cargada por Webpack. Puede ser un archivo JavaScript, un archivo CSS, una imagen, o cualquier otro tipo de activo. Cuando usa Federación de Módulos, puede exponer algunos de los módulos a otros paquetes o aplicaciones usando la opción `exposes` en la configuración de Webpack.
 
-For example, suppose you have a module called `utils.js` that contains some utility functions. You can expose it to other bundles by adding this to your Webpack configuration:
+Por ejemplo, supongamos que tiene un módulo llamado `utils.js` que contiene algunas funciones de utilidad. Puede exponerlo a otros paquetes añadiendo esto a la configuración de Webpack:
 
 [source, javascript]
 -----
@@ -25,11 +25,11 @@ module.exports = {
 };
 -----
 
-The key of the `exposes` object is the name of the module that you want to expose. The value is the path to the module file relative to your project root. In this case, we are exposing the module as `./utils` and pointing it to `./src/utils.js`.
+La llave del objeto `exposes` es el nombre del módulo que desea exponer. El valor es la ruta al archivo del módulo relativa a la raíz del proyecto. En este caso, estamos exponiendo el módulo como `./utils` y apuntando a `./src/utils.js`.
 
-When you expose a module, you need to follow some naming conventions to avoid collisions with other modules. Here are some tips:
+Cuando expone un módulo, necesita seguir algunas convenciones de nomenclatura para evitar colisiones con otros módulos. Estos son algunos consejos:
 
-- Use a unique prefix for your modules. This can be based on your project name, domain name, or any other identifier that distinguishes your modules from others. For example, if your project is called `my-app`, you can prefix your modules with `my-app/`, like this:
+- Utilice un prefijo único para los módulos. Este puede basarse en el nombre del proyecto, nombre de dominio, o cualquier otro identificador que distinga estos módulos de otros. Por ejemplo, si el proyecto se llama `my-app`, puede anteponer a los módulos el prefijo `my-app/`, de esta manera:
 
 [source, javascript]
 -----
@@ -46,7 +46,7 @@ module.exports = {
 };
 -----
 
-- Avoid using generic or common names for your modules. For example, don't expose a module as `./react` or `./lodash`, as these might conflict with other bundles that use the same libraries. Instead, use more specific names that reflect the purpose or content of your modules. For example, if you have a custom React component library, you can expose it as `my-app/components`, like this:
+- Evite utilizar nombres genéricos o comunes para los módulos. Por ejemplo, no exponga un módulo como `./react` o `./lodash`, ya que podrían entrar en conflicto con otros paquetes que utilicen las mismas bibliotecas. En su lugar, utilice nombres más específicos que reflejen la finalidad o el contenido de los módulos. Por ejemplo, si tiene una biblioteca de componentes de React personalizada, puede exponerla como `my-app/components`, de este modo:
 
 [source, javascript]
 -----
@@ -63,20 +63,20 @@ module.exports = {
 };
 -----
 
-- Use consistent naming conventions across your modules. For example, if you use camelCase for your module names, stick to it throughout your project. Don't mix it with snake_case or kebab-case. This will make your modules easier to find and import.
+- Utilice convenciones de nomenclatura coherentes en todos los módulos. Por ejemplo, si utiliza camelCase para los nombres de los módulos, es importante mantenerlo en todo el proyecto. No lo combine con snake_case o kebab-case. Esto hará que los módulos sean más fáciles de encontrar e importar.
 
-== Naming your exports
+== Cómo nombrar las exportaciones
 
-An export is a value or a function that a module provides to other modules. When using Module Federation, you can import exports from other bundles or applications by using the `import` statement or the `import()` function.
+Una exportación es un valor o una función que un módulo proporciona a otros módulos. Al utilizar Federación de Módulos, puede importar exportaciones de otros paquetes o aplicaciones utilizando la sentencia `import` o la función `import()`.
 
-For example, suppose you want to import the `utils` module that we exposed earlier from another bundle. You can do it like this:
+Por ejemplo, supongamos que quiere importar el módulo `utils` que expusimos anteriormente desde otro paquete. Puede hacerlo así:
 
 [source, javascript]
 -----
 import utils from "my-app/utils";
 -----
 
-Or like this:
+O así:
 
 [source, javascript]
 -----
@@ -85,11 +85,11 @@ import("my-app/utils").then((utils) => {
 });
 -----
 
-The name of the export that you import is the same as the name of the module that you expose. In this case, we are importing the default export of the `utils` module as `utils`.
+El nombre de la exportación que importa es el mismo que el nombre del módulo que expone. En este caso, estamos importando la exportación por defecto del módulo `utils` como `utils`.
 
-When you export values or functions from your modules, you need to follow some naming conventions to avoid collisions with other exports. Here are some tips:
+Cuando exporta valores o funciones de los módulos, necesita seguir algunas convenciones de nomenclatura para evitar colisiones con otras exportaciones. Estos son algunos consejos:
 
-- Use descriptive and meaningful names for your exports. For example, don't export a function as `foo` or `bar`, as these might conflict with other functions that have the same name. Instead, use more specific names that reflect what the function does or returns. For example, if you have a function that calculates the area of a circle, you can export it as `calculateCircleArea`, like this:
+- Utilice nombres descriptivos y significativos para sus exportaciones. Por ejemplo, no exporte una función como `foo` o `bar`, ya que podrían entrar en conflicto con otras funciones que tengan el mismo nombre. En su lugar, utilice nombres más específicos que reflejen lo que la función hace o devuelve. Por ejemplo, si tienes una función que calcula el área de un círculo, puede exportarla como `calculateCircleArea`, de esta forma:
 
 [source, javascript]
 -----
@@ -98,28 +98,27 @@ export function calculateCircleArea(radius) {
 }
 -----
 
-- Use consistent naming conventions across your exports. For example, if you use camelCase for your export names, stick to it throughout your project. Don't mix it with snake_case or kebab-case. This will make your exports easier to find and import.
+- Utilice convenciones de nomenclatura coherentes en todas tus exportaciones. Por ejemplo, si utiliza camelCase para los nombres de las exportaciones, es importante mantenerlo en todo el proyecto. No lo combine con snake_case o kebab-case. Esto hará que las exportaciones sean más fáciles de encontrar e importar.
 
-- Avoid using default exports for your modules. Default exports are anonymous and can be imported with any name. This can lead to confusion and inconsistency when importing modules from different sources. For example, if you have a module that exports a React component as the default export, you can import it like this:
-
+- Evite usar exportaciones por defecto para los módulos. Las exportaciones por defecto son anónimas y pueden ser importadas con cualquier nombre. Esto puede llevar a confusión e inconsistencia cuando se importan módulos de diferentes fuentes. Por ejemplo, si tiene un módulo que exporta un componente de React como exportación por defecto, puede importarlo así:
 
 [tabs]
 ======
-Approach 1::
+Opción 1::
 +
 [source, javascript]
 -----
 import MyComponent from "my-app/components";
 -----
 
-Approach 2::
+Opción 2::
 +
 [source, javascript]
 -----
 import Foo from "my-app/components";
 -----
 
-Approach 3::
+Opción 3::
 +
 [source, javascript]
 -----
@@ -127,7 +126,7 @@ import Bar from "my-app/components";
 -----
 ======
 
-As you can see, the name of the import does not match the name of the module or the component. This can make it hard to track where the component comes from and what it does. Instead, use named exports for your modules and import them with the same name. For example, if you have a module that exports a React component as a named export, you can export and import it like the following:
+Como puede ver, el nombre de la importación no coincide con el nombre del módulo o del componente. Esto puede dificultar el seguimiento de la procedencia del componente y de lo que hace. En su lugar, utilice exportaciones con nombre para sus módulos e impórtelos con el mismo nombre. Por ejemplo, si tiene un módulo que exporta un componente de React como una exportación con nombre, puede exportarlo e importarlo de la siguiente manera:
 
 [tabs]
 ======
@@ -146,15 +145,15 @@ import { MyComponent } from "my-app/components";
 -----
 ======
 
-This way, the name of the import matches the name of the module and the component. This will make your code more readable and maintainable.
+De esta forma, el nombre de la importación coincide con el nombre del módulo y del componente. Esto hará que el código sea más legible y fácil de mantener.
 
-== Handling naming collisions
+== Tratamiento de las colisiones de nombres
 
-Sometimes, despite following the naming conventions, you might encounter naming collisions with other modules or exports. This can happen when you import modules from different sources that use the same or similar names for their modules or exports.
+A veces, a pesar de seguir las convenciones de nomenclatura, es posible encontrarse con colisiones de nomenclatura con otros módulos o exportaciones. Esto puede ocurrir cuando importa módulos de diferentes fuentes que utilizan nombres iguales o similares para sus módulos o exportaciones.
 
-Webpack provides some options to handle naming collisions and resolve them in a way that suits your needs. Here are some of them:
+Webpack proporciona algunas opciones para manejar las colisiones de nombres y resolverlas de una manera que se adapte a sus necesidades. Estas son algunas de ellas:
 
-- Use aliases to rename modules or exports when importing them. Aliases are alternative names that you can assign to modules or exports when importing them. This can help you avoid conflicts and confusion when dealing with modules or exports that have the same or similar names. For example, suppose you want to import two modules that both expose a `utils` module. You can use aliases to rename one of them when importing it, like this:
+- Utilice alias para renombrar módulos o exportaciones al importarlos. Los alias son nombres alternativos que puede asignar a módulos o exportaciones al importarlos. Esto puede ayudarle a evitar conflictos y confusiones al tratar con módulos o exportaciones que tienen nombres iguales o similares. Por ejemplo, supongamos que se quiere importar dos módulos que exponen un módulo `utils`. Puede usar alias para renombrar uno de ellos cuando sea importado, de esta forma:
 
 [tabs]
 ======
@@ -162,22 +161,22 @@ Approach 1::
 +
 [source, javascript]
 -----
-import utils from "my-app/utils"; // Import utils from my-app
-import otherUtils as "other-app/utils"; // Import utils from other-app and rename it as otherUtils
+import utils from "my-app/utils"; // Importa utils desde my-app
+import otherUtils as "other-app/utils"; // Importa utils desde other-app y lo renombra como otherUtils
 -----
 
 Approach 2::
 +
 [source, javascript]
 -----
-import { utils as myUtils } from "my-app/utils"; // Import utils from my-app and rename it as myUtils
-import { utils as otherUtils } from "other-app/utils"; // Import utils from other-app and rename it as otherUtils
+import { utils as myUtils } from "my-app/utils"; // Importa utils de my-app y lo renombre como myUtils
+import { utils as otherUtils } from "other-app/utils"; // Importa utils desde other-app y lo renombra como otherUtils
 -----
 ======
 
-This way, you can avoid naming collisions and use both modules without confusion.
+De esta forma, puede evitar colisiones de nombres y utilizar ambos módulos sin confusión.
 
-- Use scopes to group modules or exports under a common namespace. Scopes are prefixes that you can add to your module or export names to create a hierarchy or a category for them. This can help you organize your modules or exports and avoid conflicts with other sources that use the same or similar names. For example, suppose you want to expose some modules under a scope called `my-app`. You can add the scope to your module names when exposing them, like this:
+- Utilice ámbitos (scopes) para agrupar módulos o exportaciones en un espacio de nombres común. Los ámbitos son prefijos que se pueden añadir a los nombres de los módulos o exportaciones para crear una jerarquía o una categoría para ellos. Esto puede ayudar a organizar los módulos o exportaciones y evitar conflictos con otras fuentes que utilicen nombres iguales o similares. Por ejemplo, supongamos que quiere exponer algunos módulos bajo un ámbito llamado `my-app`. Puede añadir el ámbito a los nombres de los módulos cuando los exponga, así:
 
 [source, javascript]
 -----
@@ -195,17 +194,17 @@ module.exports = {
 };
 -----
 
-Then, you can import them with the scope included, like this:
+Luego, puede importarlos con el ámbito incluido, así:
 
 [source, javascript]
 -----
-import utils from "my-app/utils"; // Import utils from my-app scope
-import components from "my-app/components"; // Import components from my-app scope
+import utils from "my-app/utils"; // Importa utils desde el ámbito my-app
+import components from "my-app/components"; // Importa components desde el ámbito my-app
 -----
 
-This way, you can avoid naming collisions and use your modules without confusion.
+De esta forma, puede evitar colisiones de nombres y utilizar sus módulos sin confusiones.
 
-- Use remotes to specify where to load modules from. Remotes are references to other bundles or applications that expose modules using Module Federation. You can use remotes to specify where to load modules from when importing them. This can help you avoid conflicts and confusion when dealing with modules that have the same or similar names but come from different sources. For example, suppose you want to import a module called `utils` from another bundle called `other-app`. You can use remotes to specify where to load the module from, like this:
+- Utilice _remotes_ para especificar desde dónde cargar los módulos. _Remotes_ son referencias a otros paquetes o aplicaciones que exponen módulos mediante Federación de Módulos. Puede utilizar _remotes_ para especificar desde dónde cargar los módulos al importarlos. Esto puede ayudar a evitar conflictos y confusiones cuando se trata de módulos que tienen el mismo nombre o nombres similares pero que provienen de diferentes fuentes. Por ejemplo, supongamos que quiere importar un módulo llamado `utils` de otro paquete llamado `other-app`. Puede usar _remotes_ para especificar desde dónde cargar el módulo, así:
 
 [source, javascript]
 -----
@@ -215,7 +214,7 @@ module.exports = {
     new ModuleFederationPlugin({
       // ...
       remotes: {
-        // Define a remote called other-app that points to the URL of the other bundle
+        // Define un remote llamado other-app que apunta a la URL de otro paquete
         other-app: "other-app@https://other-app.com/remoteEntry.js",
       },
     }),
@@ -223,15 +222,15 @@ module.exports = {
 };
 -----
 
-Then, you can import the module with the remote name included, like this:
+A continuación, puede importar el módulo con el nombre remoto incluido, así:
 
 [source, javascript]
 -----
-import utils from "other-app/utils"; // Import utils from other-app remote
+import utils from "other-app/utils"; // Importa utils desde el remote de other-app
 -----
 
-This way, you can avoid naming collisions and use the module without confusion.
+De esta forma, puede evitar colisiones de nombres y utilizar el módulo sin confusiones.
 
-== Conclusion
+== Conclusión
 
-Naming your modules and their exports when using Module Federation is an important aspect of creating micro-frontends, sharing code across applications, and optimizing performance and scalability. By following some best practices and conventions, you can avoid naming collisions and ensure that your modules and exports are clear, consistent, and easy to use. You can also leverage Webpack's options to handle naming collisions and resolve them in a way that suits your needs.
+Nombrar los módulos y sus exportaciones cuando utiliza Federación de Módulos es un aspecto importante para crear _micro-frontends_, compartir código entre aplicaciones y optimizar el rendimiento y la escalabilidad. Al seguir algunas buenas prácticas y convenciones, puede evitar colisiones de nombres y asegurarse de que los módulos y exportaciones son claros, consistentes y fáciles de usar. También puede aprovechar las opciones de Webpack para gestionar las colisiones de nombres y resolverlas de la forma que mejor se adapte a sus necesidades.
