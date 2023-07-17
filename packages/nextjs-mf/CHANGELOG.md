@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [7.0.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-7.0.2...nextjs-mf-7.0.3) (2023-07-17)
+
+
+### Bug Fixes
+
+* **invertedmoduleplugin:** added another check for nextjs api routes ([#1134](https://github.com/module-federation/nextjs-mf/issues/1134)) ([aba26be](https://github.com/module-federation/nextjs-mf/commit/aba26bed61bca4816238e7b7b93e88b108b65d9d))
+
+
+
 ## [7.0.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-7.0.1...nextjs-mf-7.0.2) (2023-07-05)
 
 ### Dependency Updates
