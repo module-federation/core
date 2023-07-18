@@ -22,7 +22,7 @@ class RemoveEagerModulesFromRuntimePlugin {
       );
       return;
     }
-    //return 
+    //return
     compiler.hooks.thisCompilation.tap(
       'RemoveEagerModulesFromRuntimePlugin',
       (compilation: Compilation) => {

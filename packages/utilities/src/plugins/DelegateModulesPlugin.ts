@@ -28,20 +28,28 @@ class DelegateModulesPlugin {
     return undefined;
   }
 
-  addDelegatesToChunks(compilation: Compilation, chunks: Chunk[]): void {
+  private addDelegatesToChunks(compilation: Compilation, chunks: Chunk[]): void {
     for (const chunk of chunks) {
-      this._delegateModules.forEach((module) => {
-        if (!compilation.chunkGraph.isModuleInChunk(module, chunk)) {
-          this.options.debug &&
-            console.log(
-              'adding ',
-              module.identifier(),
-              ' to chunk',
-              chunk.name
-            );
-          compilation.chunkGraph.connectChunkAndModule(chunk, module);
-        }
-      });
+      for (const module of Array.from(this._delegateModules)) {
+        this.addModuleAndDependenciesToChunk(module, chunk, compilation);
+      }
+    }
+  }
+
+
+  private addModuleAndDependenciesToChunk(module: Module, chunk: Chunk, compilation: Compilation): void {
+    if (!compilation.chunkGraph.isModuleInChunk(module, chunk)) {
+      if (this.options.debug) {
+        console.log('adding ', module.identifier(), ' to chunk', chunk.name);
+      }
+      compilation.chunkGraph.connectChunkAndModule(chunk, module);
+    }
+
+    for (const dependency of module.dependencies) {
+      const dependencyModule = compilation.moduleGraph.getModule(dependency);
+      if (dependencyModule && !compilation.chunkGraph.isModuleInChunk(dependencyModule, chunk)) {
+        this.addModuleAndDependenciesToChunk(dependencyModule, chunk, compilation);
+      }
     }
   }
 
@@ -59,7 +67,7 @@ class DelegateModulesPlugin {
             chunk.name
           );
         this._delegateModules.forEach((module) => {
-          compilation.chunkGraph.disconnectChunkAndModule(chunk, module);
+     //    compilation.chunkGraph.disconnectChunkAndModule(chunk, module);
         });
       }
     }

@@ -1,5 +1,6 @@
-import { RuntimeRemote, WebpackRemoteContainer } from '../types';
-import { loadScript } from './common';
+import { RuntimeRemote, WebpackRemoteContainer } from "../types";
+import { loadScript } from "./pure";
+
 
 export const importDelegatedModule = async (
   keyOrRuntimeRemoteItem: string | RuntimeRemote

@@ -53,6 +53,7 @@ const nextConfig = {
           antd: {},
         },
         extraOptions: {
+          debug:false,
           exposePages: true,
           enableImageLoaderFix: true,
           enableUrlLoaderFix: true,
