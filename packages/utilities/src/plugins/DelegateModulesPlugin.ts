@@ -67,7 +67,7 @@ class DelegateModulesPlugin {
             chunk.name
           );
         this._delegateModules.forEach((module) => {
-     //    compilation.chunkGraph.disconnectChunkAndModule(chunk, module);
+        compilation.chunkGraph.disconnectChunkAndModule(chunk, module);
         });
       }
     }
