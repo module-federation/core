@@ -1,10 +1,4 @@
-import type {
-  Compiler,
-  Compilation,
-  Chunk,
-  Module,
-  NormalModule,
-} from 'webpack';
+import type { Compiler, Compilation, Chunk, Module } from 'webpack';
 
 /**
  * A webpack plugin that moves specified modules from chunks to runtime chunk.
@@ -28,7 +22,10 @@ class DelegateModulesPlugin {
     return undefined;
   }
 
-  private addDelegatesToChunks(compilation: Compilation, chunks: Chunk[]): void {
+  private addDelegatesToChunks(
+    compilation: Compilation,
+    chunks: Chunk[]
+  ): void {
     for (const chunk of chunks) {
       for (const module of Array.from(this._delegateModules)) {
         this.addModuleAndDependenciesToChunk(module, chunk, compilation);
@@ -36,8 +33,11 @@ class DelegateModulesPlugin {
     }
   }
 
-
-  private addModuleAndDependenciesToChunk(module: Module, chunk: Chunk, compilation: Compilation): void {
+  private addModuleAndDependenciesToChunk(
+    module: Module,
+    chunk: Chunk,
+    compilation: Compilation
+  ): void {
     if (!compilation.chunkGraph.isModuleInChunk(module, chunk)) {
       if (this.options.debug) {
         console.log('adding ', module.identifier(), ' to chunk', chunk.name);
@@ -47,8 +47,15 @@ class DelegateModulesPlugin {
 
     for (const dependency of module.dependencies) {
       const dependencyModule = compilation.moduleGraph.getModule(dependency);
-      if (dependencyModule && !compilation.chunkGraph.isModuleInChunk(dependencyModule, chunk)) {
-        this.addModuleAndDependenciesToChunk(dependencyModule, chunk, compilation);
+      if (
+        dependencyModule &&
+        !compilation.chunkGraph.isModuleInChunk(dependencyModule, chunk)
+      ) {
+        this.addModuleAndDependenciesToChunk(
+          dependencyModule,
+          chunk,
+          compilation
+        );
       }
     }
   }
@@ -67,7 +74,7 @@ class DelegateModulesPlugin {
             chunk.name
           );
         this._delegateModules.forEach((module) => {
-        compilation.chunkGraph.disconnectChunkAndModule(chunk, module);
+          compilation.chunkGraph.disconnectChunkAndModule(chunk, module);
         });
       }
     }

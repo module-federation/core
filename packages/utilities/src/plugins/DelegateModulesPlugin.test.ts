@@ -2,13 +2,12 @@ import DelegateModulesPlugin from './DelegateModulesPlugin';
 import { Compilation } from 'webpack';
 import { RawSource } from 'webpack-sources';
 
-
 function createMockModuleDependency(resource: string): any {
   return {
     resource,
     identifier: () => resource,
     source: () => new RawSource(''),
-    dependencies: []
+    dependencies: [],
   };
 }
 const dependency = createMockModuleDependency('dependency');
@@ -36,9 +35,7 @@ function createMockCompiler(): any {
   };
 }
 
-const chunkMap = {
-
-}
+const chunkMap = {};
 
 // Mock a minimal Webpack Compilation
 function createMockCompilation(): Compilation {
@@ -53,22 +50,22 @@ function createMockCompilation(): Compilation {
     },
     chunkGraph: {
       //@ts-ignore
-      isModuleInChunk: jest.fn((module,chunk)=>{
+      isModuleInChunk: jest.fn((module, chunk) => {
         //@ts-ignore
-        return !!chunkMap?.[chunk.name]?.[module.identifier()]
+        return !!chunkMap?.[chunk.name]?.[module.identifier()];
       }),
       // @ts-ignore
-      connectChunkAndModule: jest.fn((chunk, module)=>{
+      connectChunkAndModule: jest.fn((chunk, module) => {
         //@ts-ignore
         chunkMap[chunk.name] = {};
         //@ts-ignore
-        chunkMap[chunk.name][module.identifier()] = module
+        chunkMap[chunk.name][module.identifier()] = module;
       }),
       disconnectChunkAndModule: jest.fn(),
     },
     moduleGraph: {
       getModule: jest.fn(() => dependency),
-    }
+    },
   } as unknown as Compilation;
 }
 

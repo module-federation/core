@@ -1,5 +1,4 @@
 export const correctImportPath = (context: string, entryFile: string) => {
-
   if (typeof process !== 'undefined') {
     if (process?.platform !== 'win32') {
       return entryFile;
