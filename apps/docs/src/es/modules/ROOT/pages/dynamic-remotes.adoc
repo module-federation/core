@@ -1,21 +1,21 @@
-= Using Dynamic Remotes in Module Federation
+= Uso de Remotos Dinámicos en Federación de Módulos
 
-This documentation page will discuss how to use dynamic remotes in Module Federation to deploy micro frontend applications across various environments. This guide is intended to provide elaborate and understandable instructions for implementing dynamic remotes in your projects.
+En esta página de documentación se explica cómo utilizar remotos dinámicos en Federación de Módulos para desplegar aplicaciones de micro-frontend en distintos entornos. Esta guía pretende proporcionar instrucciones elaboradas y comprensibles para implementar remotos dinámicos en sus proyectos.
 
-== Overview
+== Visión general
 
-Dynamic remotes enable you to deploy the same micro frontend application in testing, staging, and production environments. They also support on-premise, cloud, and hybrid deployments simultaneously, and allow you to scale multiple teams working on different parts of the architecture. In this guide, we will cover four ways to use dynamic remotes:
+Los remotos dinámicos permiten desplegar la misma aplicación de micro-frontend en entornos de prueba, ensayo y producción. También son compatibles con despliegues en las instalaciones (on-premise), en la nube e híbridos simultáneamente, lo que permite escalar múltiples equipos que trabajan en diferentes partes de la arquitectura. En esta guía, cubriremos cuatro formas de usar remotos dinámicos:
 
-1. Environment variables
-2. Webpack plugin external-remotes-plugin
-3. Promise-based dynamic remotes
-4. Dynamic remote containers
+1. Variables de entorno
+2. Complemento de Webpack external-remotes-plugin
+3. Remotos dinámicos basados en promesas
+4. Contenedores de remotos dinámicos
 
-== Environment Variables
+== Variables de entorno
 
-Environment variables provide a straightforward way to use dynamic remotes by replacing localhost in your Webpack config with environment variables.
+Las variables de entorno proporcionan una forma sencilla de utilizar remotos dinámicos sustituyendo localhost en la configuración de Webpack por variables de entorno.
 
-=== Implementation
+=== Implementación
 
 [,json]
 ----
@@ -33,16 +33,15 @@ module.exports = (env) => ({
 });
 ----
 
-=== Advantages and Limitations
+=== Ventajas y limitaciones
 
-This approach is simple but requires building a new version for each environment to update the URLs, which may not be ideal for enterprise use cases and multiple deployment models.
+Este enfoque es simple, pero requiere la construcción de una nueva versión para cada entorno para actualizar las direcciones URL, que puede no ser ideal para los casos de uso de la empresa y múltiples modelos de despliegue.
 
-== Webpack External Remotes Plugin
+== Plugin Webpack External Remotes
 
-The https://www.npmjs.com/package/external-remotes-plugin[external-remotes-plugin], developed by Zack Jackson, allows you to resolve URLs at runtime using templating. By defining window.appAUrl and window.appBUrl within your application before loading any code from remote applications, you gain the flexibility to define your URLs as needed.
+El plugin https://www.npmjs.com/package/external-remotes-plugin[external-remotes-plugin], desarrollado por Zack Jackson, permite resolver URLs en tiempo de ejecución utilizando plantillas. Definiendo window.appAUrl y window.appBUrl dentro de la aplicación antes de cargar cualquier código de aplicaciones remotas, obtiene la flexibilidad de definir las URLs como sea necesario.
 
-=== Implementation
-
+=== Implementación
 [,json]
 ----
 plugins: [
@@ -57,21 +56,21 @@ plugins: [
 ],
 ----
 
-=== Advantages and Limitations
+=== Ventajas y limitaciones
 
-All you need to do is define window.appAUrl and window.appBUrl within our application before you load any code from the remote applications.
+Todo lo que necesita hacer es definir window.appAUrl y window.appBUrl dentro la aplicación antes de cargar cualquier código de las aplicaciones remotas.
 
-Now you have the flexibility to define our URLs however you want. For example, you could maintain a map of the host URLs to remote URLs for each environment, use server-side rendering to allow the backend to define the URLs, create a custom configuration management service, and many other methods.
+Ahora tiene la flexibilidad de definir las URLs como prefiera. Por ejemplo, podría mantener un mapa de las URLs del huésped a las URLs remotas para cada entorno, utilizar renderizado del lado del servidor para permitir que el backend defina las URLs, crear un servicio de gestión de configuración personalizado, y muchos otros métodos.
 
-This approach is fully dynamic and would solve our use cases, but there is still a slight limitation with this approach. We do not have complete control over the loading lifecycle.
+Este enfoque es totalmente dinámico y resolvería los casos de uso, pero todavía hay una ligera limitación con este enfoque. No tenemos un control completo sobre el ciclo de vida de la carga.
 
-== Promise-Based Dynamic Remotes
+== Remotos dinámicos basados en promesas
 
-Module Federation allows you to define remote URLs as promises instead of URL strings. You can use any promise as long as it fits the get/init interface defined by Module Federation. This method offers more control over the loading process but may be difficult to debug or maintain due to the stringified code in the configuration file.
+Federación de Módulos permite definir las URL remotas como promesas en lugar de cadenas de URL. Puede utilizar cualquier promesa siempre que se ajuste a la interfaz get/init definida por Federación de Módulos. Este método ofrece más control sobre el proceso de carga pero puede ser difícil de depurar o mantener debido al código encadenado en el archivo de configuración.
 
-=== Implementation
+=== Implementación
 
-==== Webpack Configuration
+==== Configuración de Webpack
 
 [,json]
 ----
@@ -89,47 +88,47 @@ module.exports = {
 };
 ----
 
-==== Fetching Remote A Dynamically
+==== Obteniendo de forma dinámica un recurso remoto
 
 [,json]
 ----
-// Fetch Remote A dynamically:
+// Obtiene Remote A de forma dinámica:
 const fetchRemoteA = (resolve) => {
-  // We define a script tag to use the browser for fetching the remoteEntry.js file
+  // Definimos una etiqueta script para utilizar el navegador para obtener el archivo remoteEntry.js
   const script = document.createElement("script");
   script.src = window.appAUrl; // This could be defined anywhere
-  // When the script is loaded we need to resolve the promise back to Module Federation
+  // Cuando el script es cargado necesitamos resolver la promesa de vuelta a Federación de Módulos
   script.onload = () => {
-    // The script is now loaded on window using the name defined within the remote
+    // El script se carga ahora en la ventana usando el nombre definido en el remote
     const module = {
       get: (request) => window.RemoteA.get(request),
       init: (arg) => {
         try {
           return window.RemoteA.init(arg);
         } catch (e) {
-          console.log("Remote A has already been loaded");
+          console.log("Remote A ya ha sido cargado");
         }
       },
     };
     }
     resolve(module);
   }
-  // Lastly we inject the script tag into the document's head to trigger the script load
+  // Por último inyectamos la etiqueta script en la cabecera del documento para activar la carga del script
   document.head.appendChild(script);
 }
 ----
 
-=== Advantages and Limitations
+=== Ventajas y limitaciones
 
-In this approach, we create a new script tag and inject it into the DOM to fetch the remote JavaScript file. `window.appAUrl` contains the URL for the remote app. While this method provides control over the loading lifecycle, it is not the easiest to debug or maintain since it involves stringified code within the configuration file.
+En este enfoque, creamos una nueva etiqueta script y la inyectamos en el DOM para obtener el archivo JavaScript remoto. La etiqueta `window.appAUrl` contiene la URL de la aplicación remota. Aunque este método proporciona control sobre el ciclo de vida de la carga, no es el más fácil de depurar o mantener, ya que implica código encadenado dentro del archivo de configuración.
 
-== Dynamic Remote Containers
+== Contenedores de remotos dinámicos
 
-Dynamic remote containers allow you to load remote applications programmatically without defining any URLs in your Webpack configuration. This enables developers to work on new remote applications that may not yet be defined in the host application or allow partners and customers to inject their remote modules into their deployment of your app.
+Los contenedores de remotos dinámicos permiten cargar aplicaciones remotas mediante programación sin definir ninguna URL en la configuración de Webpack. Esto permite a los desarrolladores trabajar en nuevas aplicaciones remotas que pueden no estar aún definidas en la aplicación huésped o permitir a socios y clientes inyectar sus módulos remotos en su despliegue de su aplicación.
 
-=== Implementation 
+=== Implementación
 
-1. Remove the remotes field from the ModuleFederationPlugin configuration:
+1. Elimine el campo remotes de la configuración de ModuleFederationPlugin:
 
 [,json]
 ----
@@ -141,36 +140,36 @@ plugins: [
 ],
 ----
 
-2. Before loading any remote apps, fetch the remote module using a dynamic script tag and manually initialize the remote container:
+2. Antes de cargar cualquier aplicación remota, obtenga el módulo remoto utilizando una etiqueta de script dinámica e inicialice manualmente el contenedor remoto:
+
 
 [,js]
 ----
 (async () => {
-  // Initializes the shared scope. Fills it with known provided modules from this build and all remotes
+  // Inicializa el ámbito compartido. Lo rellena con los módulos proporcionados conocidos de esta compilación y todos los remotos
   await __webpack_init_sharing__("default");
-  const container = window.someContainer; // or get the container somewhere else
-  // Initialize the container, it may provide shared modules
+  const container = window.someContainer; // u obtiene el contenedor en otro lugar
+  // Inicializa el contenedor, puede proporcionar módulos compartidos
   await container.init(__webpack_share_scopes__.default);
   const module = await container.get("./module");
 })();
 ----
 
-Here, `container` refers to a remote app configured in the `remotes` field in the host app's Webpack configuration, and module refers to one of the items defined in the `exposes` field in the remote app's Webpack configuration.
+Aquí, `container` hace referencia a una aplicación remota configurada en el campo `remotes` de la configuración de Webpack de la aplicación huésped, y `module` hace referencia a uno de los elementos definidos en el campo `exposes` de la configuración de Webpack de la aplicación remota.
 
-By injecting a script tag to fetch the remote container and storing it in `window.someContainer`, you can ensure the code resolves to the same `get/init` pattern used in earlier examples.
+Al inyectar una etiqueta de script para obtener el contenedor remoto y almacenarlo en `window.someContainer`, puede asegurarte de que el código se resuelva con el mismo patrón `get/init` utilizado en ejemplos anteriores.
 
-To use one of the modules exposed by the remote app, call `container.get(moduleName)` as demonstrated in the example above.
+Para utilizar uno de los módulos expuestos por la aplicación remota, llame a `container.get(moduleName)` como se muestra en el ejemplo anterior.
 
-== Summary and Recommendations
+== Resumen y recomendaciones
 
-Using dynamic remotes, you can deploy your micro frontend to fetch remote applications from any URL, allowing for deployment to multiple test environments, on-premises, or in the cloud. Developers can choose whether to use production versions of other remote applications or introduce new ones dynamically.
+Usando remotos dinámicos, puede desplegar su _micro-frontend_ para obtener aplicaciones remotas desde cualquier URL, permitiendo el despliegue en múltiples entornos de prueba, _on-premises_, o en la nube. Los desarrolladores pueden elegir entre utilizar versiones de producción de otras aplicaciones remotas o introducir otras nuevas de forma dinámica.
 
-The four methods discussed in this guide are:
+Los cuatro métodos analizados en esta guía son:
 
-1. Environment Variables
-2. Webpack External Remotes Plugin
-3. Promise-Based Dynamic Remotes
-4. Dynamic Remote Containers
+1. Variables de entorno
+2. Complemento de Webpack external-remotes-plugin
+3. Remotos dinámicos basados en promesas
+4. Contenedores de remotos dinámicos
 
-Each method has its advantages and limitations. Choose the one that best suits your project's requirements and complexity.
-
+Cada método tiene sus ventajas y limitaciones. Elija el que mejor se adapte a los requisitos y la complejidad de su proyecto.

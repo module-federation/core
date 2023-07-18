@@ -168,7 +168,8 @@ class InvertedContainerPlugin {
               !renderContext?.debugId ||
               !compilation.chunkGraph.isEntryModule(renderContext) ||
               //@ts-ignore
-              renderContext?.rawRequest?.includes('pages/api')
+              renderContext?.rawRequest?.includes('pages/api') ||
+              renderContext?.layer === 'api'
             ) {
               // skip empty modules, container entry, and anything that doesnt have a moduleid or is not an entrypoint module.
               return source;

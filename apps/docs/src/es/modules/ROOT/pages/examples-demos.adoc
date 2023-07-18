@@ -1,117 +1,120 @@
-= Module Federation GitHub repository with examples and demos
+= Repositorio de GitHub Federación de Módulos con ejemplos y demos
 
-In this page, you will find a list of examples and demos that showcase how module federation works and how you can use it for various scenarios. These examples and demos are meant to help you understand the concepts and benefits of module federation, as well as provide you with some inspiration and guidance for your own projects.
+En esta página encontrará una lista de ejemplos y demos que muestran cómo funciona Federación de Módulos y cómo puedes utilizarla en distintos escenarios. Estos ejemplos y demos pretenden ayudarte a entender los conceptos y beneficios de la federación de módulos, así como proporcionarte algo de inspiración y orientación para tus propios proyectos.
 
-== How to use the repository
+== Cómo utilizar el repositorio
 
-The repository is organized into subfolders, each containing a specific example or demo of Module Federation. Each subfolder has its own README file that explains the purpose, setup, and configuration of the example or demo. You can browse the subfolders on GitHub or clone the repository to your local machine.
+El repositorio está organizado en subcarpetas, cada una de las cuales contiene un ejemplo o demo específico de Federación de Módulos. Cada subcarpeta tiene su propio archivo README que explica el propósito, instalación y configuración del ejemplo o demo. Puede navegar por las subcarpetas en GitHub o clonar el repositorio en su máquina local.
 
-To clone the repository, run the following command:
+Para clonar el repositorio, ejecute el siguiente comando:
 
 [source,bash]
 ----
 git clone https://github.com/module-federation/module-federation-examples.git
 ----
 
-Then, navigate to the subfolder of your choice and follow the instructions in the README file. Most of the examples and demos require you to install dependencies and run a development server using npm or yarn commands. For example:
+Luego, vaya a la subcarpeta de su elección y siga las instrucciones del archivo README. La mayoría de los ejemplos y demos requieren que instale dependencias y ejecute un servidor de desarrollo utilizando comandos npm o yarn. Por ejemplo:
 
 [source,bash]
 ----
-cd basic-host-remote # change directory to the example folder
-npm install # install dependencies
-npm start # start the development server
+cd basic-host-remote # cambia el directorio a la carpeta de ejemplo
+npm install # instala las dependencias
+npm start # inicia el servidor de desarrollo
 ----
 
-You can then open your browser and visit the URLs specified in the README file to see the example or demo in action.
+A continuación, puede abrir su navegador y visitar las URL especificadas en el archivo README para ver el ejemplo o la demostración en acción.
 
-== Examples and demos overview
+== Ejemplos y demos
 
-1. **Native Federation**: Demonstrates Module Federation using esBuild, ESM, and Import Maps, with the concept applicable to other bundlers as well. Learn how to implement Module Federation natively without Webpack.
+1. ** Native Federation**: Demuestra Federación de Módulos usando esBuild, ESM, y Mapas de Importación, con el concepto aplicable también a otros empaquetadores de módulos. Aprenda cómo implementar Federación de Módulos de forma nativa sin Webpack.
 
-2. **Native Federation React**: A React-specific example of Module Federation using esBuild, ESM, and Import Maps. Apply the native implementation of Module Federation in a React application.
+2. ** Native Federation React**: Un ejemplo específico de React de Federación de Módulos utilizando esBuild, ESM y Mapas de Importación. Aplique la implementación nativa de Federación de Módulos en una aplicación React.
 
-3. **Advanced API**: Showcases advanced API usage in Module Federation, highlighting techniques that can be found in other examples. Enhance your knowledge of Module Federation's advanced features.
+3. ** Advanced API**: Muestra el uso avanzado de la API en Federación de Módulos, destacando técnicas que se pueden encontrar en otros ejemplos. Mejore su conocimiento de las características avanzadas de Federación de Módulos.
 
-4. **Basic Host-Remote**: Illustrates how App 1 consumes remote components from App 2 in a simple host-remote configuration. Understand the fundamental concepts of Module Federation's host-remote architecture.
+4. ** Basic Host-Remote**: Ilustra cómo App 1 consume componentes remotos de la App 2 en una configuración huésped-remoto simple. Comprende los conceptos fundamentales de la arquitectura huésped-remoto de Federación de Módulos.
 
-5. **Create React App**: Learn how to implement Module Federation within a Create React App (CRA) project. Discover how to adapt CRA to support Module Federation.
+5. **Crear React App**: Aprenda a implementar Federación de Módulos dentro de un proyecto Create React App (CRA). Descubra cómo adaptar CRA para soportar Federación de Módulos.
 
-6. **Create React App with React App Rewired**: Implement Module Federation using CRA and React App Rewired, an alternative to ejecting from CRA. Explore a different way to configure CRA for Module Federation without ejecting.
+6. ** Create React App with React App Rewired**: Implemente Federación de Módulos usando CRA y React App Rewired, una alternativa a la eyección de CRA. Explore una forma diferente de configurar CRA para Federación de Módulos sin eyección.
 
-7. **HMR Remotes**: Demonstrates Hot Module Replacement (HMR) for remotes inside hosts, enabling seamless updates of remote components. Improve development experience with live updates.
+7. ** HMR Remotes**: Demuestra el Reemplazo de Módulos en Caliente (HMR) para remotos dentro de huésped, permitiendo actualizaciones sin interrupción de componentes remotos. Mejora la experiencia de desarrollo con actualizaciones en vivo.
 
-8. **Startup Code**: Features an advanced implementation that attaches initialization code to the remote container. This example is useful for dynamically setting publicPath in the remote, allowing more flexible deployment.
+8. ** Startup Code**: Presenta una implementación avanzada que adjunta código de inicialización al contenedor remoto. Este ejemplo es útil para establecer dinámicamente `publicPath` en el remoto, permitiendo un despliegue más flexible.
 
-9. **Dynamic Remotes in Node**: Learn how to load remotes dynamically in a Node.js environment, enabling runtime configuration of remote components.
+9. **Dynamic Remotes in Node**: Aprenda a cargar remotos dinámicamente en un entorno Node.js, permitiendo la configuración en tiempo de ejecución de los componentes remotos.
 
-10. **Bi-Directional Hosts**: Shows how App 1 and App 2 consume components from each other, creating a bi-directional relationship between host applications. Explore advanced host-remote scenarios.
+10. **Bi-Directional Hosts**: Muestra cómo App 1 y App 2 consumen componentes la una de la otra, creando una relación bidireccional entre aplicaciones host. Explore escenarios avanzados huésped-remoto.
 
-11. **Self-Healing**: Implements a fallback mechanism to remote app vendors when a dependency fails to load. Enhance application resilience with self-healing capabilities.
+11. **Self-Healing**: Implementa un mecanismo de contingencia a proveedores de aplicaciones remotas cuando una dependencia falla al cargarse. Mejora la resiliencia de las aplicaciones con capacidades de autocuración.
 
-12. **Server-Side Rendering**: Demonstrates how to implement Server-Side Rendering (SSR) with App 1 and App 2, enabling better SEO and faster initial page loads.
+12. **Server-Side Rendering**: Demuestra cómo implementar Server-Side Rendering (SSR) con App 1 y App 2, permitiendo un mejor SEO y cargas de página iniciales más rápidas.
 
-13. **Server-Side Rendering (Simplified)**: Provides a less complex boilerplate for SSR implementation in Module Federation, making it more accessible to developers.
 
-14. **Multi UI Framework Federation**: Shows how to federate multiple apps built with different technologies (React, Angular, Vue, etc.), enabling seamless integration across UI frameworks.
+13. **Server-Side Rendering (Simplified)**: Proporciona un código plantilla menos complejo para la implementación de SSR en Federación de Módulos, haciéndolo más accesible a los desarrolladores.
 
-15. **Dynamic System Host**: Teaches how to swap between remotes at runtime, allowing dynamic loading of remote components based on user interaction or other factors.
+14. 14. **Multi UI Framework Federation**: Muestra cómo federar múltiples apps construidas con diferentes tecnologías (React, Angular, Vue, etc.), permitiendo una integración fluida a través de frameworks UI.
 
-16. **Redux Reducer Injection**: Demonstrates injecting Redux reducers dynamically into the host store at runtime, enabling modular and scalable state management.
+15. 15. **Dynamic System Host**: Enseña cómo intercambiar entre remotos en tiempo de ejecución, permitiendo la carga dinámica de componentes remotos basados en la interacción del usuario u otros factores.
 
-17. **Shared Routes**: Illustrates composing federated routes for a seamless user experience, enabling navigation between federated applications.
+16. **Redux Reducer Injection**: Demuestra cómo inyectar reductores Redux dinámicamente en el almacén del huésped en tiempo de ejecución, lo que permite una gestión de estado modular y escalable.
 
-18. **Nested Components**: Learn how to use nested remote components in a Module Federation setup, showcasing the flexibility of component composition.
+17. **Shared Routes**: Ilustra la composición de rutas federadas para una experiencia de usuario fluida, permitiendo la navegación entre aplicaciones federadas.
 
-19. **Shared Context Provider**: Shows how App 1 and App 2 can share a Context Provider, enabling shared state management across federated applications.
+18. **Nested Components**: Aprenda a utilizar componentes remotos anidados en una configuración de Federación de Módulos, mostrando la flexibilidad de la composición de componentes.
 
-20. **Medusa Example**: Implements Module Federation Dashboard with a single example, demonstrating a practical application of Module Federation.
+19. **Shared Context Provider**: Muestra cómo App 1 y App 2 pueden compartir un Proveedor de Contexto, permitiendo la gestión de estados compartidos a través de aplicaciones federadas.
 
-21. **Non-UI Module**: Explores the use of Module Federation for non-UI components, such as utility functions or data processing modules.
+20. **Medusa Example**: Implementa un Panel de Control de Federación de Módulos con un único ejemplo, demostrando una aplicación práctica de Federación de Módulos.
 
-22. **Routing**: Teaches how to share router context between federated applications, enabling seamless navigation. An additional example, Routing 2, provides alternative techniques for sharing routing context.
+21. **Non-UI Module**: Explora el uso de Federación de Módulos para componentes no-UI, como funciones de utilidad o módulos de procesamiento de datos.
 
-23. **Version Discrepancy**: Handles different dependency versions in federated apps without side effects. Learn to manage dependencies in federated applications without conflicts or performance issues.
+22. **Routing**: Enseña cómo compartir el contexto de enrutamiento entre aplicaciones federadas, lo que permite una navegación fluida. Un ejemplo adicional, Routing 2, proporciona técnicas alternativas para compartir el contexto de enrutamiento.
 
-24. **TypeScript**: Demonstrates streaming TypeScript between module-federation apps, enabling better type safety and developer experience.
+23. **Version Discrepancy**: Maneja diferentes versiones de dependencias en apps federadas sin efectos secundarios. Aprenda a gestionar dependencias en aplicaciones federadas sin conflictos ni problemas de rendimiento.
 
-25. **Angular Universal**: Presents a Remote and Host app with Server-Side Rendering (SSR), lazy modules, and components, showcasing Module Federation in an Angular Universal application.
+24. **TypeScript**: Demuestra la transmisión de TypeScript entre aplicaciones con federación de módulos, lo que permite mejorar la seguridad de tipos y la experiencia del desarrollador.
 
-26. **NextJS Sidecar Build**: Describes a sidecar build enabling Module Federation alongside Next.js codebases, illustrating the integration of Module Federation with Next.js.
+25. **Angular Universal**: Presenta una aplicación remota y huésped con Server-Side Rendering (SSR), módulos y componentes con carga diferida, mostrando Federación de Módulos en una aplicación Angular Universal.
 
-27. **NextJS v12, v13**: Demonstrates the operation of Module Federation with Next.js versions 12 and 13 using the `nextjs-mf` package.
+26. 26. **NextJS Sidecar Build**: Describe una compilación sidecar que habilita Federación de Módulos junto con bases de código Next.js, ilustrando la integración de Federación Módulos con Next.js.
 
-28. **NextJS**: Showcases Module Federation operation with Next.js, using the `nextjs-mf` package to integrate the two technologies.
+27. **NextJS v12, v13**: Demuestra el funcionamiento de Federación de Módulos con las versiones 12 y 13 de Next.js utilizando el paquete `nextjs-mf`.
 
-29. **NextJS SSR**: Implements Server-Side Rendering with Next.js powered by software streams, using the `nextjs-ssr` package.
+28. **NextJS**: Muestra el funcionamiento de Federación de Módulos con Next.js, utilizando el paquete `nextjs-mf` para integrar las dos tecnologías.
 
-30. **NextJS SSR via Delegates**: Provides custom glue code for containers and hosts using `nextjs-ssr`, enabling a more tailored integration of Module Federation and Next.js with Server-Side Rendering.
+29. **NextJS SSR**: Implementa el renderizado del lado del servidor con Next.js impulsado por flujos de software, utilizando el paquete `nextjs-ssr`.
 
-31. **Building a Plugin-based Workflow Designer**: An external example demonstrating how to build a plugin-based workflow designer using Angular and Module Federation.
+30. **NextJS SSR via Delegates**: Proporciona código personalizado para contenedores y host utilizando `nextjs-ssr`, permitiendo una integración más personalizada de Federación de Módulos y Next.js con Server-Side Rendering.
 
-32. **Vue.js**: Offers a simple host/remote example with Vue 3.0, using render functions or Single File Components (SFC). Learn how to integrate Module Federation with Vue 3 applications.
+31. **Building a Plugin-based Workflow Designer**: Un ejemplo externo que demuestra cómo construir un diseñador de flujo de trabajo basado en plugins utilizando Angular y Federación de Módulos.
 
-33. **Vue 2 in Vue 3**: Demonstrates a Vue 3 application loading a remote Vue 2 component, enabling cross-version component sharing in a Vue.js ecosystem.
+32. **Vue.js**: Ofrece un ejemplo sencillo de huésped/remoto con Vue 3.0, utilizando funciones de renderizado o Single File Components (SFC). Aprenda a integrar Federación de Módulos con aplicaciones Vue 3.
 
-34. **Vue2 SSR**: Showcases the use of Module Federation as a service in a Server-Side Rendering scenario with Vue 2.
+33. **Vue 2 en Vue 3**: Demuestra una aplicación Vue 3 cargando un componente remoto de Vue 2, permitiendo compartir componentes entre versiones en un ecosistema Vue.js.
 
-35. **React & NextJS Host/Remote**: Presents examples of React and NextJS as host/remote, illustrating Module Federation capabilities in both React and NextJS applications.
+34. 34. **Vue2 SSR**: Muestra el uso de Federación de Módulos como servicio en un escenario de Server-Side Rendering con Vue 2.
 
-36. **Different React Versions in Isolation**: Offers a simple host/remote example where the apps have different React and ReactDOM versions and don't share any dependencies. Learn how to handle version discrepancies without conflicts.
+35. **React & NextJS Host/Remote**: Presenta ejemplos de React y NextJS como huésped/remoto, ilustrando las capacidades de Federación de Módulos tanto en aplicaciones React como NextJS.
 
-37. **CSS Isolated Host and Remote**: Demonstrates preventing CSS leakage between federated applications, ensuring styling remains isolated to the intended components.
+36. **Different React Versions in Isolation**: Ofrece un ejemplo simple de huésped/remoto donde las aplicaciones tienen diferentes versiones de React y ReactDOM y no comparten ninguna dependencia. Aprenda a manejar las discrepancias de versión sin conflictos.
 
-38. **vue3-demo-federation-with-vite**: Showcases integrated projects with Webpack and Vite Federation, where both Webpack and Vite play the roles of host and remote.
 
-39. **quasar-cli-vue3-webpack-javascript**: Teaches how to integrate Module Federation with Quasar apps running Vue 3 using Quasar CLI (JavaScript).
 
-40. **UMD Federation**: Demonstrates support for importing UMD remote modules, broadening the range of supported module formats.
+37. ** CSS Isolated Host and Remote**: Demuestra la prevención de fugas de CSS entre aplicaciones federadas, asegurando que el estilo permanece aislado de los componentes previstos.
 
-41. **Modernjs**: Provides an example of basic Module Federation usage in the Modern.js framework.
+38. **vue3-demo-federation-with-vite**: Muestra proyectos integrados con Webpack y Vite Federation, donde tanto Webpack como Vite desempeñan los roles de huésped y remoto.
 
-42. **Modernjs Medusa**: Illustrates the use of Medusa in the Modern.js framework, demonstrating integration with a popular Module Federation dashboard.
+39. **quasar-cli-vue3-webpack-javascript**: Enseña cómo integrar Federación de Módulos con aplicaciones Quasar que ejecutan Vue 3 usando Quasar CLI (JavaScript).
 
-== Summary and conclusion
+40. **UMD Federation**: Demuestra el soporte para importar módulos remotos UMD, ampliando el rango de formatos de módulos soportados.
 
-In this documentation page, you have learned how to use the Module Federation GitHub repository, which contains a collection of examples and demos for different use cases and scenarios of Module Federation. You have also learned about the various aspects and features of Module Federation, such as sharing modules, dynamic loading, communication, error handling, optimization, testing, debugging, and deployment. You have also found links to other resources and tutorials that will help you get started with Module Federation.
+41. **Modernjs**: Proporciona un ejemplo de uso básico de Federación de Módulos con el framework Modern.js.
 
-We hope you find this documentation page useful and informative. If you have any questions, feedback, or suggestions, please feel free to open an issue or a pull request on the [repository](https://github.com/module-federation/module-federation-examples). Happy coding! 😊
+42. **Modernjs Medusa**: Ilustra el uso de Medusa con el framework Modern.js, demostrando la integración con un popular panel de control de Federación de Módulos.
+
+== Resumen y conclusión
+
+En esta página de documentación, ha aprendido a utilizar el repositorio GitHub de Federación de Módulos, que contiene una colección de ejemplos y demos para diferentes casos de uso y escenarios de Federación de Módulos. También ha aprendido sobre los diversos aspectos y características de Federación de Módulos, tales como compartir módulos, carga dinámica, comunicación, gestión de errores, optimización, pruebas, depuración y despliegue. También ha encontrado enlaces a otros recursos y tutoriales que le ayudarán a iniciarse en Federación de Módulos.
+
+Esperamos que esta página de documentación le resulte útil e informativa. Si tiene alguna pregunta, comentario o sugerencia, no dude en abrir una incidencia o una solicitud de incorporación de cambios (pull request) en el [repositorio](https://github.com/module-federation/module-federation-examples). ¡Feliz programación! 😊
