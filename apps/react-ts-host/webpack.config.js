@@ -17,18 +17,12 @@ module.exports = async (config, context) => {
   /** @type {import('webpack').Configuration} */
   const parsedConfig = mf(config, context);
 
-  let moduleFederationPlugin;
-
-  const plugins = parsedConfig.plugins?.filter((p) => {
-    if (p.constructor.name === 'ModuleFederationPlugin') {
-      moduleFederationPlugin = p;
-      return false;
-    }
-    return true;
-  });
+  const moduleFederationPlugin = parsedConfig.plugins?.find(
+    (p) => p.constructor.name === 'ModuleFederationPlugin'
+  );
 
   parsedConfig.plugins = [
-    ...(plugins || []),
+    ...(parsedConfig.plugins || []),
     new FederatedTypesPlugin({
       federationConfig: moduleFederationPlugin._options,
     }),
