@@ -62,8 +62,11 @@ class RemoveEagerModulesFromRuntimePlugin {
     if (
       module.constructor.name === 'ExternalModule' ||
       module.type === 'provide-module' ||
-      module.type === 'consume-shared-module'
+      module.type === 'consume-shared-module' ||
+      //@ts-ignore
+      module.buildMeta?.eager // added flag from other plugin, non standard module api
     ) {
+      // could also use outgoing module connections to find modules that are not connected to the runtime
       return;
     }
 
