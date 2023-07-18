@@ -18,6 +18,7 @@ function createMockModule(resource: string): any {
     identifier: () => resource,
     source: () => new RawSource(''),
     dependencies: [dependency],
+    buildMeta: {},
   };
 }
 

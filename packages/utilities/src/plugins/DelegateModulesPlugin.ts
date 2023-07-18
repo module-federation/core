@@ -42,6 +42,11 @@ class DelegateModulesPlugin {
       if (this.options.debug) {
         console.log('adding ', module.identifier(), ' to chunk', chunk.name);
       }
+      if (module.buildMeta) {
+        //@ts-ignore
+        module.buildMeta.eager = true; // non-standard way to keep track of initial
+      }
+      // modules needed by delegate module, so during eager share removal they are perserved
       compilation.chunkGraph.connectChunkAndModule(chunk, module);
     }
 
