@@ -4,7 +4,7 @@
 // eslint-disable-next-line no-async-promise-executor
 module.exports = new Promise(async (resolve, reject) => {
   const { importDelegatedModule } = await import(
-    '@module-federation/utilities'
+    '@module-federation/utilities/src/utils/pure'
   );
 
   //eslint-disable-next-line
