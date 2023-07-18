@@ -1,5 +1,6 @@
 import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
+//eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import {
   revalidate,
   FlushedChunks,
