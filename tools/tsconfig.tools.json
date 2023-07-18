@@ -5,8 +5,7 @@
     "rootDir": ".",
     "module": "commonjs",
     "target": "es5",
-    "types": ["node"],
-    "importHelpers": false
+    "types": ["node"]
   },
   "include": ["**/*.ts"]
 }
