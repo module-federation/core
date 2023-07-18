@@ -1,35 +1,35 @@
-= Improving Resiliency and Failovers with Module Federation
+= Mejorando la Resistencia y la tolerancia a fallos con Federación de Módulos
 
-Module Federation is a feature of Webpack that allows you to dynamically load modules from different bundles at runtime. This can help you improve the resiliency and failover capabilities of your web applications by reducing the impact of network failures, server errors, or code bugs.
+Federación de Módulos es una característica de Webpack que le permite cargar dinámicamente módulos de diferentes paquetes en tiempo de ejecución. Esto puede ayudarle a mejorar la resistencia y las capacidades de tolerancia a fallos de sus aplicaciones web, reduciendo el impacto de los fallos de red, errores del servidor o errores de código.
 
-Resiliency is the ability of a system to recover from failures and continue to function. Failovers are the mechanisms that allow a system to switch to a backup or alternative mode of operation when a failure occurs.
+La resistencia es la capacidad de un sistema para recuperarse de fallos y seguir funcionando. Los failovers son los mecanismos que permiten a un sistema cambiar a una copia de seguridad o a un modo alternativo de funcionamiento cuando se produce un fallo.
 
-In this guide, you will learn how to use Module Federation to:
+En esta guía, aprenderá a utilizar la Federación de Módulos para:
 
-- Load modules from remote sources with fallbacks
-- Handle errors and retries when loading modules
-- Implement a circuit breaker pattern to avoid cascading failures
-- Use service workers to cache modules and serve them offline
+- Cargar módulos desde fuentes remotas con planes de contingencia (fallbacks)
+- Manejo errores y reintentos al cargar módulos
+- Implementación de un patrón de interruptor (circuit breaker pattern) para evitar fallos en cascada.
+- Utilizar _service workers_ para almacenar módulos en caché y servirlos offline.
 
-== Prerequisites
+== Requisitos previos
 
-To follow this guide, you need to have:
+Para seguir esta guía, necesita tener:
 
-- A basic understanding of Webpack and Module Federation
-- Node.js and npm installed on your machine
-- A code editor of your choice
+- Conocimiento básico de Webpack y Federación de Módulos
+- Node.js y npm instalados en el ordenador
+- Un editor de código de su elección
 
-== Setting up the project
+== Configuración del proyecto
 
-To demonstrate how Module Federation works, we will create a simple web application that consists of two parts: a host app and a remote app. The host app will load a module from the remote app and display its content on the page. The remote app will expose a module that returns a greeting message.
+Para demostrar cómo funciona Federación de Módulos, crearemos una aplicación web sencilla que consta de dos partes: una aplicación huésped y una aplicación remota. La aplicación huésped cargará un módulo de la aplicación remota y mostrará su contenido en la página. La aplicación remota expondrá un módulo que devuelve un mensaje de saludo.
 
-To set up the project, follow these steps:
+Para configurar el proyecto, siga estos pasos:
 
-1. Create a new folder called `module-federation-demo` and navigate to it in your terminal.
-2. Run `npm init -y` to create a `package.json` file with default values.
-3. Run `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin` to install the dependencies.
-4. Create two subfolders called `host` and `remote` inside the `module-federation-demo` folder. These will contain the source code for the host app and the remote app respectively.
-5. Create a `webpack.config.js` file in each subfolder with the following content:
+1. Cree una nueva carpeta llamada `module-federation-demo` y navege a ella desde el terminal.
+2. Ejecute `npm init -y` para crear un archivo `package.json` con valores por defecto.
+3. Ejecute `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin` para instalar las dependencias.
+4. Cree dos subcarpetas llamadas `host` y `remote` dentro de la carpeta `module-federation-demo`. Estas contendrán el código fuente para la aplicación huésped y la aplicación remota respectivamente.
+5. Cree un archivo `webpack.config.js` en cada subcarpeta con el siguiente contenido:
 
 [tabs]
 ======
@@ -37,7 +37,7 @@ host webpack.config::
 +
 [source, javascript]
 ----
-// webpack.config.js for host app
+// webpack.config.js de la aplicación huésped (host)
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { ModuleFederationPlugin } = require("webpack").container;
 
@@ -89,13 +89,14 @@ module.exports = {
 ----
 ======
 
-The `ModuleFederationPlugin` is the main plugin that enables Module Federation. It takes some options that define how the modules are exposed and consumed.
+`ModuleFederationPlugin` es el plugin principal que habilita Federación de Módulos. Este toma algunas opciones que definen cómo se exponen y consumen los módulos.
 
-In the host app, we specify a `remotes` option that tells Webpack where to find the remote app's entry point. The syntax is `<name>@<url>`, where `<name>` is an alias that we can use to import modules from the remote app, and `<url>` is the URL of the remote app's entry point.
+En la aplicación huésped, especificamos la opción `remotes` que le dice a Webpack dónde encontrar el punto de entrada de la aplicación remota. La sintaxis es `<nombre>@<url>`, donde `<nombre>` es un alias que podemos usar para importar módulos de la aplicación remota, y `<url>` es la URL del punto de entrada de la aplicación remota.
 
-In the remote app, we specify a `filename` option that tells Webpack what name to use for the entry point file. We also specify an `exposes` option that tells Webpack what modules we want to expose to other apps. The syntax is `<name>:<path>`, where `<name>` is an alias that other apps can use to import our module, and `<path>` is the relative path to our module file.
+En la aplicación remota, especificamos la opción `filename` que indica a Webpack el nombre que se debe utilizar en el archivo del punto de entrada. También especificamos la opción `exposes` que le dice a Webpack qué módulos queremos exponer a otras aplicaciones. La sintaxis es `<nombre>:<ruta>`, donde `<nombre>` es un alias que otras aplicaciones pueden utilizar para importar nuestro módulo, y `<ruta>` es la ruta relativa a nuestro archivo de módulo.
 
-6. Create an `index.html` file in each subfolder with the following content:
+6. Cree un archivo `index.html` en cada subcarpeta con el siguiente contenido:
+
 
 [tabs]
 ======
@@ -103,13 +104,13 @@ host index.html::
 +
 [source, html]
 ----
-<!-- index.html for host app -->
+<!-- index.html de la aplicación huésped (host) -->
 <html>
   <head>
-    <title>Host App</title>
+    <title>Aplicación Huésped</title>
   </head>
   <body>
-    <h1>Host App</h1>
+    <h1>Aplicación Huésped </h1>
     <div id="container"></div>
     <script src="main.js"></script>
   </body>
@@ -120,22 +121,22 @@ remote index.html::
 +
 [source, html]
 ----
-<!-- index.html for remote app -->
+<!-- index.html de la aplicación remota (remote) -->
 <html>
   <head>
-    <title>Remote App</title>
+    <title>Aplicación Remota</title>
   </head>
   <body>
-    <h1>Remote App</h1>
+    <h1>Aplicación Remota</h1>
     <script src="remoteEntry.js"></script>
   </body>
 </html>
 ----
 =====
 
-The `index.html` files are the entry points for the web applications. They load the respective JavaScript bundles generated by Webpack.
+Los archivos `index.html` son los puntos de entrada para las aplicaciones web. Cargan los respectivos paquetes JavaScript generados por Webpack.
 
-7. Create a `src` folder in each subfolder and add the following files:
+7. Cree una carpeta `src` en cada subcarpeta y añada los siguientes archivos:
 
 Host:
 
@@ -145,7 +146,7 @@ index.js::
 +
 [source, javascript]
 ----
-// src/index.js for host app
+// src/index.js de la aplicación huésped
 import("./bootstrap");
 ----
 
@@ -153,7 +154,7 @@ bootstrap.js::
 +
 [source, javascript]
 ----
-// src/bootstrap.js for host app
+// src/bootstrap.js de la aplicación huésped
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
@@ -165,29 +166,29 @@ App.js::
 +
 [source, javascript]
 ----
-// src/App.js for host app
+// src/App.js de la aplicación huésped
 import React, { useEffect, useState } from "react";
 
 const App = () => {
   const [greeting, setGreeting] = useState("");
 
   useEffect(() => {
-    // Load the greeting module from the remote app
+    // Carga el módulo de saludo desde la aplicación remota
     import("remote/greeting")
       .then((module) => {
-        // Call the module's default export function and set the greeting state
+        // Llama a la función de exportación por defecto del módulo y establece el estado de saludo
         setGreeting(module.default());
       })
       .catch((error) => {
-        // Handle any errors while loading the module
+        // Manejar cualquier error al cargar el módulo
         console.error(error);
-        setGreeting("Oops, something went wrong!");
+        setGreeting("Oops, algo salió mal!");
       });
   }, []);
 
   return (
     <div>
-      <p>The greeting from the remote app is:</p>
+      <p> El saludo de la aplicación remota es:</p>
       <p>{greeting}</p>
     </div>
   );
@@ -204,7 +205,7 @@ index.js::
 +
 [source, javascript]
 ----
-// src/index.js for remote app
+// src/index.js de la aplicación remota
 import("./bootstrap");
 ----
 
@@ -212,7 +213,7 @@ bootstrap.js::
 +
 [source, javascript]
 ----
-// src/bootstrap.js for remote app
+// src/bootstrap.js de la aplicación remota
 import React from "react";
 import ReactDOM from "react-dom";
 import Greeting from "./Greeting";
@@ -224,43 +225,42 @@ greeting.js::
 +
 [source, javascript]
 ----
-// src/Greeting.js for remote app
+// src/Greeting.js de la aplicación remota
 import React from "react";
 
 const Greeting = () => {
-  return <h2>Hello from the remote app!</h2>;
+  return <h2> ¡Hola desde la aplicación remota! </h2>;
 };
 
 export default Greeting;
 ----
 =====
 
+Los archivos `src/index.js` son los puntos de entrada para los paquetes JavaScript. Importan un archivo `bootstrap.js` que contiene la lógica real de las aplicaciones. Este es un patrón común para permitir la carga asíncrona de módulos con Federación de Módulos.
 
-The `src/index.js` files are the entry points for the JavaScript bundles. They import a `bootstrap.js` file that contains the actual logic of the apps. This is a common pattern to enable asynchronous loading of modules with Module Federation.
+Los archivos `src/bootstrap.js` de la aplicación host y de la aplicación remota utilizan React para renderizar algunos componentes de la página. La aplicación host importa un archivo `App.js` que contiene un componente que carga el módulo de saludo de la aplicación remota y lo muestra en la página. La aplicación remota importa un archivo `Greeting.js` que contiene un componente que muestra un mensaje de saludo en la página.
 
-The `src/bootstrap.js` files for the host app and the remote app use React to render some components on the page. The host app imports a `App.js` file that contains a component that loads the greeting module from the remote app and displays it on the page. The remote app imports a `Greeting.js` file that contains a component that renders a greeting message on the page.
+El archivo `src/greeting.js` de la aplicación remota es el módulo que exponemos a otras aplicaciones. Exporta una función que devuelve un mensaje de saludo.
 
-The `src/greeting.js` file for the remote app is the module that we expose to other apps. It exports a function that returns a greeting message.
-
-8. Run `npm run dev` in both subfolders to start the development servers. You should see something like this in your browser:
+8. Ejecuta `npm run dev` en ambas subcarpetas para iniciar los servidores de desarrollo. Deberia ver algo como esto en el navegador:
 
 // TODO: (screenshot)
 
-You have successfully set up a basic Module Federation project. Next, we will see how to improve its resiliency and failover capabilities.
+Ha configurado con éxito un proyecto básico de Federación de Módulos. A continuación, veremos cómo mejorar sus capacidades de resistencia y tolerancia a fallos.
 
-== Loading modules with fallbacks
+== Carga de módulos con plan de contingencia
 
-One of the benefits of Module Federation is that it allows you to load modules from remote sources without having to bundle them with your application. This can reduce your bundle size and improve your performance.
+Uno de los beneficios de Federación de Módulos es que permite cargar módulos desde fuentes remotas sin tener que empaquetarlos con la aplicación. Esto puede reducir el tamaño del paquete y mejorar el rendimiento.
 
-However, this also introduces some risks. What if the remote source is unavailable or slow? What if the module fails to load or execute? How can you ensure that your application still works in these scenarios?
+Sin embargo, esto también introduce algunos riesgos. ¿Qué pasa si la fuente remota no está disponible o es lenta? ¿Y si el módulo no se carga o ejecuta? ¿Cómo puede asegurarse de que su aplicación sigue funcionando en estas situaciones?
 
-One way to handle these situations is to provide fallbacks for your modules. A fallback is an alternative module that you can load in case the original module fails. For example, you can provide a local copy of the module, or a mock module that returns some dummy data.
+Una forma de manejar estas situaciones es proporcionar planes de contingencia para los módulos. Un "fallback" es un módulo alternativo que puede cargar en caso de que el módulo original falle. Por ejemplo, puede proporcionar una copia local del módulo, o un módulo falso que devuelva algunos datos ficticios.
 
-To use fallbacks with Module Federation, you can use the `fallback` option of the `ModuleFederationPlugin`. This option allows you to specify an object that maps remote names to fallback modules. For example, you can modify your host app's Webpack configuration like this:
+Para utilizar fallbacks con Federación de Módulos, puede utilizar la opción `fallback` del `ModuleFederationPlugin`. Esta opción le permite especificar un objeto que mapea nombres remotos a módulos fallback. Por ejemplo, puede modificar la configuración de Webpack de su aplicación host de la siguiente manera:
 
 [source, javascript]
 ----
-// webpack.config.js for host app
+// webpack.config.js de la aplicación huésped
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { ModuleFederationPlugin } = require("webpack").container;
 
@@ -278,7 +278,7 @@ module.exports = {
       remotes: {
         remote: "remote@http://localhost:3001/remoteEntry.js",
       },
-      // Specify the fallback modules for the remote app
+      // Especifica los módulos de contingencia de la aplicación remota
       fallback: {
         remote: "./src/fallback.js",
       },
@@ -287,34 +287,33 @@ module.exports = {
 };
 ----
 
-The `fallback` option tells Webpack to load the `src/fallback.js` file as a fallback for the remote app. This file should export the same modules as the remote app, but with different implementations. For example, you can create a `src/fallback.js` file like this:
+La opción `fallback` indica a Webpack que cargue el archivo `src/fallback.js` como fallback de la aplicación remota. Este archivo debe exportar los mismos módulos que la aplicación remota, pero con diferentes implementaciones. Por ejemplo, puede crear un archivo `src/fallback.js` como este:
 
 [source, javascript]
 ----
 // src/fallback.js for host app
-// Export a mock greeting module that returns a static message
+// Exporta un módulo de saludo simulado que devuelve un mensaje estático
 export const greeting = () => {
   return "Hello from the fallback module!";
 };
 ----
 
-Now, if the remote app fails to load or expose the greeting module, the host app will use the fallback module instead. You can test this by stopping the remote app's server and refreshing the host app's page. You should see something like this:
+Ahora, si la aplicación remota no puede cargar o exponer el módulo de saludo, la aplicación host utilizará el módulo alternativo en su lugar. Puede comprobarlo deteniendo el servidor de la aplicación remota y actualizando la página de la aplicación host. Debería ver algo como esto:
 
 // TODO: (screenshot)
 
-You have successfully implemented a fallback mechanism for your modules. Next, we will see how to handle errors and retries when loading modules.
+Ha implementado con éxito un mecanismo de contingencia para sus módulos. A continuación, veremos cómo manejar errores y reintentos al cargar módulos.
 
-## Handling errors and retries when loading modules
+## Manejo de errores y reintentos al cargar módulos
 
-Another way to improve the resiliency of your web application is to handle errors and retries when loading modules from remote sources. This can help you recover from temporary failures or network issues.
+Otra forma de mejorar la resistencia de su aplicación web es gestionar los errores y reintentos al cargar módulos desde fuentes remotas. Esto puede ayudarle a recuperarse de fallos temporales o problemas de red.
 
-To handle errors and retries with Module Federation, you can use the `import()` function that Webpack provides. This function returns a promise that resolves to the module object if the module is loaded successfully, or rejects with an error if the module fails to load. You can use the `catch()` method of the promise to handle any errors and retry loading the module if needed.
+Para manejar errores y reintentos con Federación de Módulos, puede utilizar la función `import()` que Webpack proporciona. Esta función devuelve una promesa que resuelve al objeto módulo si el módulo se carga correctamente, o rechaza con un error si el módulo no se carga. Puede usar el método `catch()` de la promesa para manejar cualquier error y reintentar cargar el módulo si es necesario.
 
-For example, you can modify your host app's `App.js` file like this:
-
+Por ejemplo, puede modificar el archivo `App.js` de su aplicación host de la siguiente manera:
 [source, javascript]
 ----
-// src/App.js for host app
+// src/App.js de la aplicación huésped
 import React, { useEffect, useState } from "react";
 
 const App = () => {
@@ -322,35 +321,34 @@ const App = () => {
   const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
-    // Load the greeting module from the remote app
+    // Carga el módulo de saludo desde la aplicación remota
     import("remote/greeting")
       .then((module) => {
-        // Call the module's default export function and set the greeting state
+        // Llama a la función de exportación por defecto del módulo y establece el estado de saludo
         setGreeting(module.default());
       })
       .catch((error) => {
-        // Handle any errors while loading the module
+        // Manejar cualquier error al cargar el módulo
         console.error(error);
-        // Check if we have reached the maximum number of retries
+        // Comprobar si hemos alcanzado el número máximo de reintentos
         if (retryCount < 3) {
-          // Increment the retry count
+          // Incrementa la cuenta de reintentos
           setRetryCount(retryCount + 1);
-          // Retry loading the module after 1 second
-          setTimeout(() => {
+          // Reintenta cargar el módulo después de 1 segundo          setTimeout(() => {
             import("remote/greeting").then((module) => {
               setGreeting(module.default());
             });
           }, 1000);
         } else {
-          // Give up and show an error message
-          setGreeting("Sorry, we could not load the greeting module.");
+          // Desistir y mostrar un mensaje de error
+          setGreeting("Lo sentimos, no hemos podido cargar el módulo de saludo.");
         }
       });
   }, [retryCount]);
 
   return (
     <div>
-      <p>The greeting from the remote app is:</p>
+      <p> El saludo de la aplicación remota es:</p>
       <p>{greeting}</p>
     </div>
   );
@@ -359,25 +357,26 @@ const App = () => {
 export default App;
 ----
 
-The `App.js` file now uses a `retryCount` state to keep track of how many times it has tried to load the greeting module. If the module fails to load, it checks if the retry count is less than 3. If so, it increments the retry count and tries to load the module again after 1 second. If not, it gives up and shows an error message.
+El archivo `App.js` utiliza ahora un estado `retryCount` para llevar la cuenta de cuántas veces ha intentado cargar el módulo de saludo. Si el módulo no se carga, comprueba si el recuento de reintentos es inferior a 3. Si es así, incrementa el recuento de reintentos e intenta cargar el módulo de nuevo después de 1 segundo. Si no, se desiste y muestra un mensaje de error.
 
-You can test this by simulating a network failure in your browser's developer tools. You should see something like this:
+Puede probar esto simulando un fallo de red en las herramientas de desarrollo de su navegador. Debería ver algo como esto
 
-// TODO: (screenshot)
+// TODO: (captura de pantalla)
 
-You have successfully implemented an error handling and retry mechanism for your modules. Next, we will see how to implement a circuit breaker pattern to avoid cascading failures.
+Ha implementado con éxito un mecanismo de manejo de errores y reintentos para sus módulos. A continuación, veremos cómo implementar un patrón de interruptor para evitar fallos en cascada.
 
-## Implementing a circuit breaker pattern to avoid cascading failures
 
-Another way to improve the resiliency of your web application is to implement a circuit breaker pattern to avoid cascading failures. A circuit breaker is a design pattern that monitors the health of a remote service and prevents excessive requests when the service is unhealthy. This can help you avoid overloading the service or wasting resources when the service is unlikely to respond.
+## Implementación de patrón de interruptor para evitar fallos en cascada
 
-To implement a circuit breaker pattern with Module Federation, you can use a third-party library called `opossum`. This library provides a `circuitBreaker` function that wraps a promise-based function and monitors its success and failure rates. It also provides some options to configure the circuit breaker's behavior, such as the failure threshold, the timeout duration, and the reset timeout.
+Otra forma de mejorar la resistencia de la aplicación web es implementar un patrón de interruptores para evitar fallos en cascada. Un patrón de interruptor es un diseño que monitoriza la salud de un servicio remoto y evita peticiones excesivas cuando el servicio no está funcionando correctamente. Esto puede ayudarle a evitar sobrecargar el servicio o malgastar recursos cuando es poco probable que el servicio responda.
 
-For example, you can modify your host app's `App.js` file like this:
+Para implementar un patrón de interruptor de circuito con Federación de Módulos, puede utilizar una biblioteca de terceros llamada `opossum`. Esta biblioteca proporciona una función `circuitBreaker` que envuelve una función basada en promesas y controla sus tasas de éxito y fracaso. También proporciona algunas opciones para configurar el comportamiento del interruptor, como el umbral de fallo, la duración del tiempo de espera y el tiempo de espera de reinicio.
+
+Por ejemplo, puede modificar el archivo `App.js` de su aplicación huésped de la siguiente manera:
 
 [source, javascript]
 ----
-// src/App.js for host app
+// src/App.js de la aplicación huésped
 import React, { useEffect, useState } from "react";
 import { circuitBreaker } from "opossum";
 
@@ -385,40 +384,40 @@ const App = () => {
   const [greeting, setGreeting] = useState("");
 
   useEffect(() => {
-    // Create a circuit breaker for loading the greeting module
+    // Crea un interruptor de circuito para cargar el módulo de saludo
     const breaker = circuitBreaker(() => import("remote/greeting"), {
-      // Set the failure threshold to 50%
+      // Fijar el umbral de fallo en el 50%.
       errorThresholdPercentage: 50,
-      // Set the timeout duration to 3 seconds
+      // Ajusta la duración del tiempo de espera a 3 segundos
       timeout: 3000,
-      // Set the reset timeout to 10 seconds
+      // Ajusta el tiempo de espera de reinicio a 10 segundos
       resetTimeout: 10000,
     });
 
-    // Load the greeting module using the circuit breaker
+    // Cargar el módulo de saludo mediante el interruptor de circuito
     breaker
       .fire()
       .then((module) => {
-        // Call the module's default export function and set the greeting state
+        // Llama a la función de exportación por defecto del módulo y establece el estado de saludo
         setGreeting(module.default());
       })
       .catch((error) => {
-        // Handle any errors while loading the module
+        // Maneja cualquier error al cargar el módulo
         console.error(error);
-        // Check if the circuit breaker is open
+        // Comprueba si el interruptor de circuito está encendido
         if (breaker.opened) {
-          // Show a message that the service is unavailable
-          setGreeting("The remote service is unavailable. Please try again later.");
+          // Muestra un mensaje indicando que el servicio no está disponible
+          setGreeting("El servicio remoto no está disponible. Por favor, inténtelo más tarde ");
         } else {
-          // Show a message that something went wrong
-          setGreeting("Oops, something went wrong!");
+          // Muestre un mensaje de que algo ha ido mal
+          setGreeting("Oops, algo salió mal!");
         }
       });
   }, []);
 
   return (
     <div>
-      <p>The greeting from the remote app is:</p>
+      <p> El saludo de la aplicación remota es:</p>
       <p>{greeting}</p>
     </div>
   );
@@ -427,25 +426,25 @@ const App = () => {
 export default App;
 ----
 
-The `App.js` file now uses a circuit breaker to load the greeting module. The circuit breaker will monitor the success and failure rates of loading the module and open or close accordingly. If the circuit breaker is open, it will reject any requests immediately and show a message that the service is unavailable. If the circuit breaker is closed, it will try to load the module normally and show a message that something went wrong if it fails.
+El archivo `App.js` utiliza ahora un interruptor automático para cargar el módulo de saludo. El interruptor controlará las tasas de éxito y fracaso de la carga del módulo y se abrirá o cerrará en consecuencia. Si el interruptor está abierto, rechazará cualquier petición inmediatamente y mostrará un mensaje indicando que el servicio no está disponible. Si el interruptor está cerrado, intentará cargar el módulo normalmente y mostrará un mensaje de que algo ha ido mal si falla.
 
-You can test this by simulating a network failure in your browser's developer tools. You should see something like this:
+Puede probar esto simulando un fallo de red en las herramientas de desarrollo del navegador. Debería ver algo como esto:
 
 // TODO: (screenshot)
 
-You have successfully implemented a circuit breaker pattern for your modules. Next, we will see how to use service workers to cache modules and serve them offline.
+Ha implementado con éxito un patrón de interruptor para sus módulos. A continuación, veremos cómo utilizar service workers para cachear módulos y servirlos offline.
 
-## Using service workers to cache modules and serve them offline
+## Uso de service workers para almacenar módulos en caché y servirlos _offline_
 
-Another way to improve the resiliency of your web application is to use service workers to cache modules and serve them offline. A service worker is a script that runs in the background and intercepts network requests. It can cache the responses and serve them from the cache when the network is unavailable or slow. This can help you improve the performance and reliability of your web application.
+Otra forma de mejorar la resistencia de la aplicación web es utilizar service workers para cachear módulos y servirlos _offline_. Un service worker es un script que se ejecuta en segundo plano e intercepta las peticiones de red. Puede almacenar en caché las respuestas y servirlas desde la caché cuando la red no está disponible o es lenta. Esto puede ayudarte a mejorar el rendimiento y la fiabilidad de la aplicación web.
 
-To use service workers with Module Federation, you can use a third-party library called `workbox`. This library provides some tools and modules to simplify the creation and management of service workers. It also provides some strategies to control how the service worker handles network requests and cache responses.
+Para utilizar los service workers con Federación de Módulos, puede utilizar una librería de terceros llamada `workbox`. Esta librería proporciona algunas herramientas y módulos para simplificar la creación y gestión de service workers. También proporciona algunas estrategias para controlar cómo el service worker gestiona las peticiones de red y las respuestas de caché.
 
-For example, you can modify your host app's Webpack configuration like this:
+Por ejemplo, puede modificar la configuración de Webpack de la aplicación huésped de la siguiente manera:
 
 [source, javascript]
 ----
-// webpack.config.js for host app
+// webpack.config.js de la aplicación huésped
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { ModuleFederationPlugin } = require("webpack").container;
 const { InjectManifest } = require("workbox-webpack-plugin");
@@ -468,7 +467,7 @@ module.exports = {
         remote: "./src/fallback.js",
       },
     }),
-    // Use the InjectManifest plugin to generate a service worker
+    // Utilice el plugin InjectManifest para generar un service worker
     new InjectManifest({
       swSrc: "./src/sw.js",
       swDest: "sw.js",
@@ -477,11 +476,11 @@ module.exports = {
 };
 ----
 
-The `InjectManifest` plugin is a plugin that generates a service worker based on a source file. It takes some options that define the source and destination of the service worker file.
+El plugin `InjectManifest` es un plugin que genera un service worker basado en un fichero fuente. Este toma algunas opciones que definen el origen y el destino del archivo del service worker.
 
-In this case, we specify a `swSrc` option that tells Webpack to use the `src/sw.js` file as the source of the service worker. We also specify a `swDest` option that tells Webpack what name to use for the generated service worker file.
+En este caso, especificamos una opción `swSrc` que le dice a Webpack que use el archivo `src/sw.js` como fuente del service worker. También especificamos una opción `swDest` que le dice a Webpack qué nombre usar para el archivo del service worker generado.
 
-Next, we need to create a `src/sw.js` file that contains the logic of the service worker. We can use the `workbox` modules to implement some caching strategies for our modules. For example, we can create a `src/sw.js` file like this:
+A continuación, tenemos que crear un archivo `src/sw.js` que contenga la lógica del service worker. Podemos utilizar los módulos `workbox` para implementar algunas estrategias de caché para nuestros módulos. Por ejemplo, podemos crear un archivo `src/sw.js` como este:
 
 [source, javascript]
 ----
@@ -500,20 +499,20 @@ registerRoute(
 );
 ----
 
-The `sw.js` file imports some modules from `workbox` and uses them to implement some caching strategies for our modules.
+El archivo `sw.js` importa algunos módulos del `workbox` y los utiliza para implementar algunas estrategias de caché para nuestros módulos.
 
-The `precacheAndRoute` function takes an array of files to precache and route. In this case, we pass it the `self.__WB_MANIFEST` variable, which is an array of files generated by Webpack. This will ensure that our host app's files are cached and served from the cache when offline.
+La función `precacheAndRoute` toma un array de ficheros para prealmacenar y enrutar. En este caso, le pasamos la variable `self.__WB_MANIFEST`, el cual es un array de ficheros generados por Webpack. Esto asegurará que los archivos de nuestra aplicación huésped se almacenen en caché y se sirvan desde la caché cuando no estemos conectados.
 
-The `registerRoute` function takes a matching function and a caching strategy. In this case, we pass it a function that matches any requests to the remote app's origin, and a `StaleWhileRevalidate` strategy. This will ensure that any remote modules are cached and served from the cache if available, while also updating the cache in the background if possible.
+La función `registerRoute` toma una función de coincidencia y una estrategia de caché. En este caso, le pasamos una función que coincide con cualquier petición al origen de la aplicación remota, y una estrategia `StaleWhileRevalidate`. Esto garantizará que cualquier módulo remoto se almacene en caché y se sirva desde la caché si está disponible, al tiempo que se actualiza la caché en segundo plano si es posible.
 
-Finally, we need to register the service worker in our host app's `index.html` file. We can add a script tag like this:
+Por último, tenemos que registrar el service worker en el archivo `index.html` de nuestra aplicación huésped. Podemos añadir una etiqueta script como la siguiente:
 
 [source, javascript]
 ----
 <!-- index.html for host app -->
 <html>
   <head>
-    <title>Host App</title>
+    <title>Aplicación Huésped</title>
   </head>
   <body>
     <h1>Host App</h1>
@@ -531,27 +530,27 @@ Finally, we need to register the service worker in our host app's `index.html` f
 </html>
 ----
 
-The script tag checks if the browser supports service workers and registers the `sw.js` file as a service worker.
+La etiqueta script comprueba si el navegador soporta service workers y registra el archivo `sw.js` como un service worker.
 
-Now, if you reload your host app's page, you should see something like this in your browser's developer tools:
-
-// TODO: (screenshot)
-
-You have successfully registered a service worker that caches your modules and serves them offline. You can test this by simulating an offline mode in your browser's developer tools. You should see something like this:
+Ahora, si se recarga la página de la aplicación huésped, debería ver algo como esto en las herramientas de desarrollo del navegador:
 
 // TODO: (screenshot)
 
-You have successfully implemented a service worker to cache modules and serve them offline.
+Ha registrado con éxito un service worker que almacena en caché los módulos y los sirve offline. Puede probarlo simulando un modo offline en las herramientas de desarrollo del navegador. Debería ver algo como esto
 
-## Conclusion
+// TODO: (screenshot)
 
-In this guide, you learned how to use Module Federation to improve the resiliency and failover capabilities of your web applications. You learned how to:
+Ha implementado con éxito un service worker para cachear módulos y servirlos offline.
 
-- Load modules from remote sources with fallbacks
-- Handle errors and retries when loading modules
-- Implement a circuit breaker pattern to avoid cascading failures
-- Use service workers to cache modules and serve them offline
+## Conclusión
 
-You can find the source code for this guide on GitHub.
+En esta guía ha aprendido a utilizar la Federación de Módulos para mejorar la resistencia y la capacidad de recuperación ante fallos de sus aplicaciones web. Ha aprendido como:
 
-We hope you enjoyed this guide and learned something new. If you have any feedback or questions, please let us know in the comments below. Thank you for reading! 😊
+- Cargar módulos desde fuentes remotas con fallbacks
+- Manejar errores y reintentos al cargar módulos
+- Implementar un patrón de interruptor para evitar fallos en cascada
+- Utilizar service workers para almacenar módulos en caché y servirlos offline
+
+Puede encontrar el código fuente de esta guía en GitHub.
+
+Esperamos que haya disfrutado de esta guía y haya aprendido algo nuevo. Si tiene algún comentario o pregunta, por favor háganoslo saber en los comentarios de abajo. ¡Gracias por leer! 😊
