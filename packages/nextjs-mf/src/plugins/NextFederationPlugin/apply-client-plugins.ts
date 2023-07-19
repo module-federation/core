@@ -4,7 +4,6 @@ import {
   NextFederationPluginExtraOptions,
 } from '@module-federation/utilities';
 import DelegateModulesPlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
-import { DEFAULT_SHARE_SCOPE_BROWSER } from '../../internal';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import JsonpChunkLoading from '../JsonpChunkLoading';

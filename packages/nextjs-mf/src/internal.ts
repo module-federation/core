@@ -42,6 +42,12 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     import: false,
     eager: false,
   },
+  'next/image': {
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+    eager: false,
+  },
   'next/script': {
     requiredVersion: false,
     singleton: true,

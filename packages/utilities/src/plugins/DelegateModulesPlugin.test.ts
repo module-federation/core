@@ -2,12 +2,23 @@ import DelegateModulesPlugin from './DelegateModulesPlugin';
 import { Compilation } from 'webpack';
 import { RawSource } from 'webpack-sources';
 
+function createMockModuleDependency(resource: string): any {
+  return {
+    resource,
+    identifier: () => resource,
+    source: () => new RawSource(''),
+    dependencies: [],
+  };
+}
+const dependency = createMockModuleDependency('dependency');
 // Mock a minimal Webpack Module
 function createMockModule(resource: string): any {
   return {
     resource,
     identifier: () => resource,
     source: () => new RawSource(''),
+    dependencies: [dependency],
+    buildMeta: {},
   };
 }
 
@@ -25,6 +36,8 @@ function createMockCompiler(): any {
   };
 }
 
+const chunkMap = {};
+
 // Mock a minimal Webpack Compilation
 function createMockCompilation(): Compilation {
   return {
@@ -37,9 +50,22 @@ function createMockCompilation(): Compilation {
       },
     },
     chunkGraph: {
-      isModuleInChunk: jest.fn(),
-      connectChunkAndModule: jest.fn(),
+      //@ts-ignore
+      isModuleInChunk: jest.fn((module, chunk) => {
+        //@ts-ignore
+        return !!chunkMap?.[chunk.name]?.[module.identifier()];
+      }),
+      // @ts-ignore
+      connectChunkAndModule: jest.fn((chunk, module) => {
+        //@ts-ignore
+        chunkMap[chunk.name] = {};
+        //@ts-ignore
+        chunkMap[chunk.name][module.identifier()] = module;
+      }),
       disconnectChunkAndModule: jest.fn(),
+    },
+    moduleGraph: {
+      getModule: jest.fn(() => dependency),
     },
   } as unknown as Compilation;
 }
@@ -102,7 +128,7 @@ describe('DelegateModulesPlugin', () => {
 
     // Check if connectChunkAndModule was called
     expect(compilation.chunkGraph.connectChunkAndModule).toHaveBeenCalledTimes(
-      4
+      8
     );
 
     // Check if disconnectChunkAndModule was called

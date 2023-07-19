@@ -2,8 +2,6 @@ import React, { Suspense, lazy } from 'react';
 import Head from 'next/head';
 import CheckoutTitle from 'checkout/CheckoutTitle';
 import ButtonOldAnt from 'checkout/ButtonOldAnt';
-console.log(ButtonOldAnt);
-// console.log('cc', cc);
 // const CheckoutTitle = lazy(() => import('checkout/CheckoutTitle'));
 // const ButtonOldAnt = lazy(() => import('checkout/ButtonOldAnt'));
 const WebpackSvgRemote = lazy(() =>
