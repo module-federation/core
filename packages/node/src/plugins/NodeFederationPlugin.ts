@@ -2,7 +2,7 @@
 
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
-import { extractUrlAndGlobal } from '@module-federation/utilities';
+import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
 
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
   experiments?: Record<string, unknown>;
