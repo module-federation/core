@@ -2,6 +2,24 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [2.4.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.2.3...typescript-2.4.0) (2023-07-19)
+
+### Dependency Updates
+
+* `utils` updated to version `2.0.3`
+* `utils` updated to version `2.0.3`
+
+### Bug Fixes
+
+* Add an error message when no MFP is present during build ([#1150](https://github.com/module-federation/nextjs-mf/issues/1150)) ([dff5153](https://github.com/module-federation/nextjs-mf/commit/dff5153f1fc0ad0499c360eeafd612dec564767b))
+
+
+### Features
+
+* Allow Container Utils to work Server Side ([#723](https://github.com/module-federation/nextjs-mf/issues/723)) ([232ba24](https://github.com/module-federation/nextjs-mf/commit/232ba24072f19bd32d1f745d4edf1518e548df50))
+* release to npm with next tag to not ruine latest one ([#763](https://github.com/module-federation/nextjs-mf/issues/763)) ([f2d199b](https://github.com/module-federation/nextjs-mf/commit/f2d199b3b3fbbd428514b1ce1f139efc82f7fff0))
+
+
 
 ## [2.3.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.2.1...typescript-2.2.2) (2023-04-05)
 
