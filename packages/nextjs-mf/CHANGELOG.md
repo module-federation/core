@@ -2,6 +2,22 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [7.0.6](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-7.0.5...nextjs-mf-7.0.6) (2023-07-19)
+
+### Dependency Updates
+
+* `utils` updated to version `2.0.4`
+* `node` updated to version `1.0.5`
+* `utils` updated to version `2.0.4`
+* `node` updated to version `1.0.5`
+* `node` updated to version `1.0.5`
+
+### Bug Fixes
+
+* Fix call undefined delegate ([#1149](https://github.com/module-federation/nextjs-mf/issues/1149)) ([87a5896](https://github.com/module-federation/nextjs-mf/commit/87a5896221a726578c3433071755fba3465824f4)), closes [#1151](https://github.com/module-federation/nextjs-mf/issues/1151)
+
+
+
 ## [7.0.5](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-7.0.4...nextjs-mf-7.0.5) (2023-07-18)
 
 ### Dependency Updates
