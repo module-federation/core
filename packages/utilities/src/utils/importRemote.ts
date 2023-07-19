@@ -104,14 +104,14 @@ export const importRemote = async <T>({
     const [, moduleFactory] = await Promise.all([
       initContainer(window[remoteScope]),
       (window[remoteScope] as unknown as WebpackRemoteContainer).get(
-        (module === '.' || module.startsWith('./')) ? module : `./${module}`
+        module === '.' || module.startsWith('./') ? module : `./${module}`
       ),
     ]);
     return moduleFactory();
   } else {
     const moduleFactory = await (
       window[remoteScope] as unknown as WebpackRemoteContainer
-    ).get((module === '.' || module.startsWith('./')) ? module : `./${module}`);
+    ).get(module === '.' || module.startsWith('./') ? module : `./${module}`);
     return moduleFactory();
   }
 };

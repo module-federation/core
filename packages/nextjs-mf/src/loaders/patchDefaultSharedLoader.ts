@@ -21,6 +21,7 @@ throw new Error('should not exec');
   import('next/router');
   import('next/head');
   import('next/script');
+  import('next/image');
   import('next/dynamic');
   import('styled-jsx');
   import('styled-jsx/style');
