@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/utilities",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
