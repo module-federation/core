@@ -1,0 +1,62 @@
+= Configuración de Federación de Módulos
+
+Federación de Módulos es una característica de Webpack que permite compartir código entre micro-frontends de forma descentralizada. Esta documentación está dirigida a usuarios principiantes y le guiará a través del proceso de configuración de Federación de Módulos.
+
+== Requisitos previos
+
+Antes de empezar, asegúrese de tener instalada una versión reciente de Node.js. La versión actual Long Term Support (LTS) es un punto de partida ideal. Es posible que encontrarse con una variedad de problemas con las versiones anteriores, ya que pueden faltar funcionalidades que Webpack y/o sus paquetes relacionados requieren.
+
+- Necesita tener `Node.js` y `npm` instalados en su ordenador.
+- Necesita tener una comprensión básica de los conceptos de desarrollo front-end.
+- Necesita tener múltiples aplicaciones que puedan cargar módulos JavaScript.
+
+Para obtener información más detallada sobre la instalación de Webpack 5, por favor, consulte la página oficial
+https://webpack.js.org/guides/installation/[Installation Instructions]
+
+== Instrucciones de instalación
+
+Para instalar Federación de Módulos, siga estos pasos:
+
+- Abra un terminal y navegue hasta el directorio de su proyecto.
+- Ejecute el siguiente comando para instalar Webpack y sus dependencias:
+
+`npm install webpack webpack-cli webpack-dev-server --save-dev`
+
+- Cree un archivo de configuración de Webpack en la raíz de cada aplicación que vaya a utilizar Federación de Módulos.
+- En cada archivo de configuración, añada el siguiente código para habilitar Federación de Módulos:
+
+const { ModuleFederationPlugin } = require("webpack").container;
+
+[,json]
+----
+module.exports = {
+  // ...
+  plugins: [
+	new ModuleFederationPlugin({
+  	// ...
+	}),
+  ],
+};
+----
+
+== Opciones de configuración
+
+Una vez que haya habilitado Federación de Módulos en sus archivos de configuración de Webpack, puede empezar a configurarlo. Dispone de las siguientes opciones:
+
+- name (obligatorio): El nombre del módulo de la aplicación.
+- filename (opcional): El nombre de archivo del archivo de entrada remota.
+- exposes (opcional): Un objeto que asigna los nombres de los módulos locales a los módulos que deben exponerse a otras aplicaciones.
+- remotes (opcional): Un objeto que mapea los nombres de las aplicaciones remotas a las URLs donde están alojadas.
+- shared (opcional): Un objeto que lista los módulos que deben ser compartidos entre aplicaciones.
+
+== Utilización de Federación de Módulos
+
+Para utilizar Federación de Módulos, es necesario:
+
+. Identificar los módulos que desea compartir entre aplicaciones.
+. Añadir esos módulos a un paquete o repositorio compartido.
+. Asegúrese de que cada aplicación tiene acceso al paquete o repositorio compartido.
+. Configure el archivo de configuración Webpack de cada aplicación para utilizar Federación de Módulos.
+. Utilice los módulos compartidos en sus aplicaciones según sea necesario.
+
+Para obtener más información y opciones de configuración avanzadas, consulte la documentación oficial de Webpack.

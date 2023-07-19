@@ -253,7 +253,7 @@ If an error surfaces while loading the script, a unique error object is generate
 
 ```js
 //next.config.js
-const { createDelegatedModule } = require('@module-federation/utilities');
+const { createDelegatedModule } = require('@module-federation/nextjs-mf/utilities');
 const remotes = {
   checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
     remote: `checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
@@ -266,7 +266,7 @@ const remotes = {
 // ALL imports MUST BE dynamic imports in here like import()
 module.exports = new Promise(async (resolve, reject) => {
   const { importDelegatedModule } = await import(
-    '@module-federation/utilities/src/utils/importDelegatedModule'
+    '@module-federation/nextjs-mf/importDelegatedModule'
   );
   // eslint-disable-next-line no-undef
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
@@ -308,7 +308,7 @@ For more information on `__resourceQuery` visit: https://webpack.js.org/api/modu
 
 ```js
 // next.config.js
-// its advised you use createDelegatedModule from @module-federation/utilities instead of manually creating the delegate module
+// its advised you use {createDelegatedModule} from @module-federation/utilities (re-exported as @module-federation/nextjs-mf/utilities) instead of manually creating the delegate module
 const remotes = {
   // pass pointer to remote-delegate, pass delegate remote name as query param,
   // at runtime webpack will pass this as __resourceQuery

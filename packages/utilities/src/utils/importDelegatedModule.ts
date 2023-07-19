@@ -1,5 +1,5 @@
 import { RuntimeRemote, WebpackRemoteContainer } from '../types';
-import { loadScript } from './common';
+import { loadScript } from './pure';
 
 export const importDelegatedModule = async (
   keyOrRuntimeRemoteItem: string | RuntimeRemote
@@ -13,7 +13,7 @@ export const importDelegatedModule = async (
       // most of this is only needed because of legacy promise based implementation
       // can remove proxies once we remove promise based implementations
       if (typeof window === 'undefined') {
-        if (!Object.hasOwnProperty.call(keyOrRuntimeRemoteItem, 'global')) {
+        if (!Object.hasOwnProperty.call(keyOrRuntimeRemoteItem, 'globalThis')) {
           return asyncContainer;
         }
 

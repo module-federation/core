@@ -1,0 +1,167 @@
+= Configuración de Federación de Módulos con renderización del lado del servidor
+
+En esta guía, le guiaremos a través de la configuración de Federación de Módulos con Server-Side Rendering (SSR) de una manera independiente del _framework_. Asumimos que usted ya tiene una comprensión básica de Federación de Módulos y la ha configurado en su proyecto. Si necesita un repaso, consulte la guía de configuración de Federación de Módulos. Esta guía se centra en los pasos necesarios para habilitar SSR con Federación de Módulos.
+
+Tabla de contenido
+
+- Entendiendo los Retos con SSR y Federación de Módulos
+- Configuración del Paquete del Lado del Servidor
+- Carga de Módulos Remotos en el Servidor
+- Renderización de Módulos Federados en el Servidor
+- Hidratación de la Aplicación del Lado del Cliente
+- Conclusión
+
+== Entendiendo los Retos con SSR y Federación de Módulos
+
+Server-Side Rendering (SSR) es una técnica utilizada para mejorar el tiempo de carga inicial y el SEO de las aplicaciones web renderizando el HTML en el servidor y enviándolo al cliente. Federación de Módulos, por su parte, es una función introducida en Webpack 5 que permite compartir código y dependencias entre varias aplicaciones en tiempo de ejecución.
+
+Aunque ambas técnicas ofrecen importantes ventajas, integrarlas puede resultar complicado. Federación de Módulos se basa en importaciones dinámicas, que no son compatibles de forma nativa durante la renderización del lado del servidor. Esta guía demostrará cómo superar estos retos y configurar Federación de Módulos con SSR.
+
+== Configuración del Paquete del Lado del Servidor
+
+Para habilitar SSR con Federación de Módulos, necesita crear una configuración Webpack separada para el paquete del lado del servidor. Este paquete debe incluir el ModuleFederationPlugin con la configuración adecuada para la renderización del lado del servidor.
+
+Cree un nuevo archivo webpack.server.config.js con la siguiente configuración:
+
+[, js]
+----
+const path = require('path');
+const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
+
+module.exports = {
+  target: 'node',
+  mode: 'production',
+  entry: './src/server.js',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'server.js',
+    libraryTarget: 'commonjs2',
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'serverApp',
+      library: { type: 'commonjs2' },
+      filename: 'remoteServerEntry.js',
+      exposes: {
+        './serverComponent': './src/serverComponent',
+      },
+      shared: ['react', 'react-dom'],
+    }),
+  ],
+};
+----
+
+Esta configuración especifica el `target` como `node` y establece el `libraryTarget` a `commonjs2` ya que estamos apuntando a un entorno Node.js. Asegúrese de exponer los componentes relevantes del servidor en el objeto `exposes`.
+
+== Carga de módulos remotos en el servidor
+
+Con la configuración del paquete en el servidor, el siguiente paso es cargar los módulos remotos en el servidor. Usaremos la función require para importar el archivo de entrada remoto generado por Webpack.
+
+En el archivo `src/server.js`, añada el siguiente código para cargar la entrada remota:
+
+[, js]
+----
+const path = require('path');
+const { ModuleFederationPlugin } = require('webpack/lib/container/ModuleFederationPlugin');
+
+const remoteEntryPath = path.resolve(__dirname, 'dist/remoteServerEntry.js');
+
+require(remoteEntryPath);
+
+// Su lógica de renderizado del lado del servidor va aquí
+----
+
+== Renderización de Módulos Federados en el Servidor
+
+Ahora que hemos cargado los módulos remotos, necesitamos renderizarlos en el servidor. Dado que esta guía es independiente del _framework_, le proporcionaremos un enfoque general que puede adaptarlo a su _framework_ en específico. 
+
+1. Importe el módulo federado en su código de renderizado del lado del servidor:
++
+[, js]
+----
+const serverComponent = require('serverApp/serverComponent');
+----
++
+2. Renderice el módulo federado importado a HTML:
++
+Este paso dependerá de su _framework_ en específico. La mayoría de las estructuras ofrecen un método para convertir los componentes en una cadena HTML en el servidor. Utilice ese método para renderizar el módulo federado importado.
++
+Este es un ejemplo de cómo podría renderizar el módulo federado utilizando una hipotética función renderToString:
+[, js]
+----
+const renderedHTML = renderToString(serverComponent);
+----
++
+3. Envíe el HTML renderizado al cliente:
++
+Una vez que tenga el HTML renderizado, envíelo como parte de la respuesta al cliente. Este paso también dependerá de su _framework_ en específico y de la configuración del servidor.
++
+Este es un ejemplo usando Express.js:
++
+[, js]
+----
+app.get('/', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>SSR con Federación de Módulos</title>
+      </head>
+      <body>
+        <div id="root">${renderedHTML}</div>
+        <script src="/remoteEntry.js"></script>
+        <script src="/client.js"></script>
+      </body>
+    </html>
+  `);
+});
+----
++
+En este ejemplo, hemos incluido los archivos `remoteEntry.js` y `client.js` para cargar los módulos federados desde el lado cliente.
+
+== Hidratación de la aplicación cliente
+
+Una vez completado el renderizado del lado del servidor, el paso final es hidratar la aplicación del lado del cliente. La hidratación es el proceso de adjuntar escuchadores de eventos e inicializar el estado de la aplicación cliente basándose en el HTML renderizado por el servidor.
+
+1. Cargue el archivo de entrada remota en su `index.html` del lado del cliente:
++
+[, html]
+----
+<script src="/remoteEntry.js"></script>
+----
++
+2. Importe el módulo federado en su aplicación cliente:
++
+[js]
+----
+import('./bootstrap.js');
+----
++
+3. Hidrate la aplicación del lado del cliente:
++
+Este paso dependerá de su _framework_ en específico. La mayoría de los _frameworks_ proporcionan un método para hidratar una aplicación cliente basada en el HTML renderizado por el servidor. Utilice ese método para hidratar su aplicación con el módulo federado importado.
++
+He aquí un ejemplo de cómo podría hidratar la aplicación del lado del cliente utilizando una hipotética función `hydrate`:
++
+[, js]
+----
+import { hydrate } from 'your-framework';
+import ClientComponent from './ClientComponent';
+
+hydrate(<ClientComponent />, document.getElementById('root'));
+----
+
+== Conclusión
+
+En esta guía, hemos mostrado cómo configurar Federación de Módulos con el Renderizado del Lado del Servidor de forma independiente del entorno de trabajo. Siguiendo estos pasos, podrá disfrutar de las ventajas tanto de Federación de Módulos como del SSR, lo que le permitirá mejorar la experiencia del usuario, los tiempos de carga iniciales y el SEO.
+
+Recuerde que la implementación exacta dependerá de su _framework_ en específico y de la configuración de su servidor. Consulte siempre la documentación de su _framework_ para obtener información detallada y las mejores prácticas.
+
+Para obtener guías que no sean independientes del marco de trabajo, consulte los siguientes recursos:
+
+- React: Module Federation with Server-Side Rendering
+- Vue.js: Module Federation with Server-Side Rendering
+- Angular: Module Federation with Server-Side Rendering
+- Svelte: Module Federation with Server-Side Rendering
+
+Estas guías le proporcionarán instrucciones específicas y ejemplos adaptados a cada _framework_ en específico.

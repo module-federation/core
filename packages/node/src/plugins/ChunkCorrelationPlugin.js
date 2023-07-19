@@ -457,7 +457,9 @@ class FederationStatsPlugin {
             // Iterate over each dependency within the block.
             for (const dep of blockmodule.dependencies) {
               // Get the module that corresponds to the dependency.
-              const { module } = compilation.moduleGraph.getConnection(dep);
+              const connection = compilation.moduleGraph.getConnection(dep);
+              if(!connection) continue;
+              const { module } = connection;
               const moduleChunks =
                 compilation.chunkGraph.getModuleChunksIterable(module);
               // Iterate over each chunk associated with the module.

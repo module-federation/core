@@ -1,0 +1,18 @@
+= ¿Qué es Federación de Módulos?
+
+La Federación de Módulos es un concepto que permite a los desarrolladores compartir código y recursos a entre múltiples aplicaciones de JavaScript o micro-frontends. En una aplicación web tradicional, todo el código de una sola página suele estar contenido en una misma fuente de código. Esto puede conllevar a aplicaciones monolíticas difíciles de mantener y escalar.
+
+Con Federación de Módulos, el código puede ser dividido en módulos pequeños e independientes para que así puedan ser cargados a demanda. Permitiendo que los micro-frontends puedan ser desarrollados y desplegados de manera independiente, lo cual reduce la coordinación entre equipos y agiliza los ciclos de desarrollo.
+
+En esencia, Federación de Módulos se basa en la idea de cargar módulos de Javascript de manera remota. Esto significa que, en lugar de tener todo el código en una sola aplicación cargado al mismo tiempo, el código se puede dividir en módulos más pequeños e independientes para así ser cargados a demanda cuando sea necesario.
+
+Federación de módulos es implementado usando el empaquetador de módulos Webpack. Webpack es una herramienta que permite a los desarrolladores empaquetar módulos de Javascript en un mismo archivo que puede ser ejecutado por el navegador web. Con Federación de Módulos, Webpack es extendido para permitir que los módulos puedan ser cargados desde otras aplicaciones, en vez de limitarse a la misma aplicación. 
+
+Para usar Federación de Módulos, los desarrolladores necesitan configurar el compilador de Webpack para exponer ciertos módulos para ser consumidos por otras aplicaciones. Esto puede hacerse utilizando las opciones `exposes` y `remotes` en la configuración de Webpack
+
+- La opción `exposes` se utiliza para exponer ciertos módulos de una aplicación a otras aplicaciones. Esto le dice a Webpack qué módulos deben estar disponibles para otras aplicaciones cuando se cargan de forma remota.
+- La opción `remotes` se utiliza para consumir módulos de otras aplicaciones. Esto le dice a Webpack qué módulos deben ser cargados remotamente desde otras aplicaciones cuando son necesarios.
+
+Una vez establecidas las configuraciones de Webpack para cada aplicación, las aplicaciones pueden desplegarse de forma independiente. Cuando un usuario visita una página que incluye varios micro-frontends, los micro-frontends cargarán dinámicamente el código que necesiten de otros micro-frontends utilizando las opciones `exposes` y `remotes`.
+
+En resumen, la Federación de Módulos permite a los desarrolladores compartir código y recursos entre micro-frontends, lo que reduce la duplicación y mejora el mantenimiento del código. Al permitir que los micro-frontends se desarrollen y desplieguen de forma independiente, Federación de Módulos reduce la necesidad de coordinación entre equipos y permite ciclos de desarrollo más rápidos.

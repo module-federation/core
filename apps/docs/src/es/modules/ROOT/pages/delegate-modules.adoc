@@ -1,0 +1,167 @@
+= Familiarizarse con los Módulos delegados: Guía detallada  
+
+En esta completa guía, se profundizará en la potente característica de los Módulos delegados de la versión 7 de Federación de Módulos explorando su propósito, casos de uso y técnicas de implementación. También se discutirá cómo pueden mejorar la flexibilidad y el control de la configuración de Webpack, permitiéndole crear aplicaciones más sofisticadas. 
+ 
+== Entendiendo los Módulos delegados 
+  
+Los Módulos delegados se han introducido para hacer frente a un antiguo reto en el espacio de Federación de módulos: las dinámicas remotas. Estos módulos ofrecen una forma más simplificada y escalable de controlar el código “adhesivo" que conecta las aplicaciones remotas, sin sacrificar las ventajas de Webpack. 
+ 
+Para familiarizarse con el concepto de dinámicas remotas, sugerimos leer la página de documentación dedicada: Dinámicas Remotas.
+
+//TODO: Add link
+
+Tradicionalmente, manejar dinámicas remotas implicaba inyectar un script utilizando la API de Federación de Módulos de bajo nivel, lo que provocaba la pérdida de muchas de las características de Webpack. Con los módulos delegados, ahora puedes indicar al Webpack que una entrada remota es un código dentro de la propia compilación de Webpack, lo que te permite agrupar varios puntos de entrada lógicos y exportar de vuelta una promesa que resuelve una federada en remoto. 
+ 
+En comparación con el uso de la promesa `new Promise syntax`, los módulos delegados se agrupan en Webpack y pueden utilizar declaraciones `require` e `import`. Esto los hace ideales para manejar requisitos complejos como cargar módulos remotos o personalizar la API de federación. Sin embargo, es importante tener en cuenta que los módulos delegados son una característica avanzada y pueden no ser necesarios para la mayoría de los usuarios.
+
+== Ventajas del uso de módulos delegados 
+
+Los módulos delegados proporcionan varias ventajas en comparación con la antigua implementación que implicaba la sintaxis "promesa nueva promesa". Adoptando módulos delegados, puede: 
+
+. Obtener un control preciso sobre la parte de código adhesivo cuando Webpack solicita uno remoto y cómo recupera el contenedor, sin la fragilidad y las restricciones de los métodos tradicionales. 
+. Agrupar una amplia gama de lógica de punto de entrada, creando eficazmente una estructura similar a un marco para federadas remotas. 
+. Acceder a diversos métodos para recuperar contenedores, incluidos HTTP, sistemas de archivos o incluso bases de datos, sin esperar a recibir asistencia del equipo de Federación de Módulos. 
+. Implementar un middleware robusto entre los puntos de conexión de los gráficos Webpack, obteniendo un control sin precedentes sobre los gráficos y su comportamiento. 
+. Integrarse a la perfección con diferentes entornos, como edge workers o aplicaciones del lado del servidor, sin necesidad de una compleja implementación de arriba hacia abajo.
+
+== Exploración de casos de uso 
+ 
+=== _Fallbacks_ 
+ 
+Uno de los principales casos de uso de los módulos delegados es la gestión de _fallbacks_. En situaciones en las que un remoto no está disponible cuando se espera, puede utilizar módulos delegados para recuperar el federado remoto sin problemas. Este enfoque de middleware le permite redirigir Webpack para recuperar código alternativo, manteniendo la misma interfaz de importación, lo que resulta en una aplicación más resistente.
+
+=== Integración del lado del servidor 
+ 
+Los módulos delegados también pueden emplearse para la integración del lado del servidor. Pueden utilizarse para obtener entradas remotas de diversas fuentes, como bases de datos o sistemas de archivos, sin depender únicamente de HTTP. Este enfoque ofrece una mayor seguridad y control sobre el acceso basado en el usuario y la recuperación de datos, lo que permite un control de acceso más granular y la protección de datos.
+
+=== Integración de _Edge_ _Side_ _Includes_ (ESI) y _Key_ _Value_ (KV) 
+ 
+Los módulos delegados pueden admitir la integración de ESI y KV en redes periféricas obteniendo HTML y devolviéndolo como componentes React. Este enfoque permite un método más agnóstico para los sistemas distribuidos sin requerir una implementación completa de arriba a abajo para el despliegue de borde. Al aprovechar los módulos delegados, puede simplificar el proceso de implementación de aplicaciones de borde y mejorar su rendimiento.
+
+== Cómo funcionan los módulos delegados 
+ 
+Un módulo delegado es un módulo federado que no contiene código propio, sino que delega la carga y ejecución de otro módulo en una compilación remota diferente. El módulo delegado actúa como marcador de posición del módulo real hasta que la aplicación lo solicita. 
+ 
+El módulo delegado tiene dos propiedades principales: `remote` y `remoteType`. La propiedad `remote` especifica el nombre de la compilación remota que contiene el módulo real. La propiedad `remoteType` especifica el tipo de la construcción remota, como `var`, `script`, `module`, etc. 
+ 
+El módulo delegado también tiene un método `get` que devuelve una promesa que resuelve el módulo actual. El método `get` se encarga de cargar la compilación remota y solicitarle el módulo real. 
+ 
+El módulo delegado puede ser expuesto por cualquier construcción remota utilizando la opción `exposes` en la configuración de Federación de Módulos plugin. Por ejemplo, si tienes una compilación remota llamada `app1` que expone un módulo delegado llamado `delegate`, puedes configurarlo así:
+
+[, javascript]
+----
+// webpack.config.js for app1
+module.exports = {
+  // ...
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "app1",
+      filename: "remoteEntry.js",
+      exposes: {
+        "./delegate": "./src/delegate.js",
+      },
+    }),
+  ],
+};
+----
+
+El archivo `src/delegate.js` contiene el código para el módulo delegado. Por ejemplo, si quiere delegar la carga de un módulo llamado `foo` desde otra compilación remota llamada `app2`, puede escribirlo así:
+
+[, javascript]
+----
+// src/delegate.js for app1
+import { get } from "webpack/container/entry/dynamic-remotes";
+
+export default {
+  // Specify the name and type of the remote build
+  remote: "app2",
+  remoteType: "var",
+
+  // Define a getter function that returns a promise for the actual module
+  get: () => get("app2/foo"),
+};
+----
+
+La función `get` utiliza la función `get` del módulo `webpack/container/entry/dynamic-remotes`, que es una función de ayuda proporcionada por webpack para cargar dinámicas remotas. Toma el nombre de la construcción remota y el nombre del módulo expuesto como argumentos, y devuelve una promesa que resuelve al módulo real. 
+ 
+El módulo delegado puede ser consumido por cualquier aplicación que tenga acceso a la construcción remota que lo expone. Por ejemplo, si tiene una aplicación llamada `host` que consume el módulo delegado de `app1`, puedes configurarlo así:
+
+[, javascript]
+----
+// webpack.config.js for host
+module.exports = {
+  // ...
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "host",
+      remotes: {
+        // Specify the URL of the remote build that exposes the delegate module
+        app1: "app1@http://localhost:3001/remoteEntry.js",
+      },
+    }),
+  ],
+};
+----
+
+La aplicación puede entonces importar y utilizar el módulo delegado como cualquier otro módulo federado. Por ejemplo:
+
+[, javascript]
+----
+// src/index.js for host
+import("./bootstrap");
+
+async function bootstrap() {
+  // Import the delegate module from app1
+  const delegate = await import("app1/delegate");
+
+  // Use the delegate module to get the actual module from app2
+  const foo = await delegate.get();
+
+  // Use the actual module as usual
+  foo.doSomething();
+}
+
+bootstrap();
+----
+
+Como puede ver, la aplicación no necesita saber nada sobre la compilación remota que contiene el módulo real. Sólo necesita saber el nombre de la compilación remota que expone el módulo delegado. El módulo delegado se encarga de cargar y resolver el módulo real de forma dinámica.
+
+== Cómo utilizar módulos delegados 
+ 
+Los módulos delegados son útiles cuando se desea compartir código entre varias compilaciones remotas sin tener que exponerlo directamente. Por ejemplo, puede tener una librería común que es usada por varias compilaciones remotas, pero no quiere exponerla como un módulo federado porque puede cambiar frecuentemente o tener diferentes versiones. En su lugar, puede exponer un módulo delegado que delegue la carga de la biblioteca común a otra compilación remota que se encargue de mantenerla y actualizarla. 
+
+Para utilizar módulos delegados, debe seguir estos pasos: 
+
+. Cree una compilación remota que contenga el módulo real que desea compartir. Por ejemplo, si tiene una biblioteca común llamada `foo`, puede crear una compilación remota llamada `app2` que la exponga como un módulo delegado.
+. Cree un módulo delegado que delegue la carga del módulo real a la compilación remota que lo contiene. Por ejemplo, si quiere delegar la carga de `foo` desde `app2`, puede crear un módulo `delegate` llamado delegate en otra compilación remota llamada `app1`. 
+. Exponga el módulo delegado como un módulo federado en la compilación remota que lo contiene. Por ejemplo, puede exponer `delegate` como un módulo federado en `app1`. 
+. Utilice el módulo delegado desde cualquier aplicación o compilación remota que tenga acceso a la compilación remota que lo expone. Por ejemplo, puedes consumir `delegate` desde una aplicación llamada `host` o desde otra compilación remota llamada `app3`.
+
+El uso de módulos delegados permite obtener varias ventajas: 
+ 
+- Puede evitar la duplicación y los conflictos de versión entre módulos federados. Por ejemplo, si tiene varias construcciones remotas que dependen de `foo`, no necesita exponer y cargar `foo` varias veces. Sólo tiene que cargarlo una vez a través del módulo delegado. 
+- Puede desacoplar tus construcciones remotas entre sí. Por ejemplo, si cambia o actualiza `foo`, no es necesario que reconstruya o vuelva a desplegar las demás construcciones remotas que dependen de él. Sólo tiene que reconstruir o redistribuir `app2`, y las otras compilaciones remotas obtendrán la última versión de `foo` a través del módulo delegado. 
+ - Puede abstraer los detalles de sus compilaciones remotas de sus consumidores. Por ejemplo, si quiere cambiar el nombre o el tipo de la compilación remota que contiene `foo`, no necesita actualizar los consumidores que la utilizan. Sólo tiene que actualizar el módulo delegado que apunta a él.
+
+== Qué hay que tener en cuenta al utilizar módulos delegados 
+
+Los módulos delegados son potentes y flexibles, pero también conllevan algunas advertencias y limitaciones que debe tener en cuenta cuando los utilices. 
+- Los módulos delegados introducen un nivel adicional de indirección y complejidad en la configuración de Federación de Módulos. Debe asegurarse de que sus consumidores saben cómo acceder a sus módulos delegados y utilizarlos correctamente, y de que sus módulos delegados apuntan a las construcciones y módulos remotos correctos.  - Los módulos delegados se basan en remotas dinámicas, lo que significa que cargan las compilaciones remotas en tiempo de ejecución en lugar de en tiempo de compilación. Esto puede tener algunas implicaciones para el rendimiento y la seguridad. Por ejemplo, puede que necesite añadir algunas estrategias de caché y precarga para mejorar la velocidad de carga, y algunos mecanismos de autenticación y autorización para evitar accesos no autorizados. 
+ - Los módulos delegados pueden no funcionar bien con algunos tipos de compilaciones o módulos remotos. Por ejemplo, si su compilación remota utiliza un bundler diferente a webpack, o si su módulo utiliza algunas características o sintaxis no estándar, puede encontrar algunos problemas de compatibilidad o errores al cargarlos a través de módulos delegados. 
+ 
+Por lo tanto, antes de utilizar módulos delegados, debe evaluar cuidadosamente su caso de uso y sus requisitos, y sopesar los pros y los contras de utilizarlos frente a otras alternativas.
+
+== Conclusión 
+
+Los módulos delegados son un tipo especial de módulos federados que te permiten cargar y resolver dinámicamente otros módulos de diferentes compilaciones remotas en tiempo de ejecución. Te permiten compartir código a través de múltiples aplicaciones sin tener que reconstruirlas o redistribuirlas cada vez que realices un cambio. 
+ 
+En esta guía ha aprendido todo lo que necesita saber sobre los módulos delegados, cómo funcionan, cómo utilizarlos y qué ventajas aportan a la configuración de la federación de módulos. También ha aprendido algunas de las advertencias y limitaciones del uso de los módulos de delegado y qué debe tener en cuenta al utilizarlos. 
+ 
+Los módulos delegados son una característica poderosa y flexible de webpack que puede ayudarle a mejorar su código compartido y desacoplado a través de múltiples aplicaciones. Sin embargo, no son una bala de plata, y puede que no se adapten a todos los casos de uso o escenarios. Por lo tanto, siempre debe probar y verificar su configuración de Federación de Módulos antes de desplegarla en producción. 
+Si desea obtener más información sobre la federación de módulos y los módulos delegados, puede consultar los siguientes recursos:
+
+- https://webpack.js.org/concepts/module-federation/[Module Federation documentation]
+- https://webpack.js.org/concepts/module-federation/#dynamic-remotes[Dynamic Remotes documentation]
+- https://github.com/module-federation/module-federation-examples[Module Federation examples]
+- https://medium.com/@ScriptedAlchemy[Module Federation blog posts]
+

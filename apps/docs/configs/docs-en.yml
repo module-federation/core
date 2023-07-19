@@ -13,9 +13,8 @@ urls:
   html_extension_style: indexify
 content:
   sources:
-    - url: https://github.com/module-federation/universe
-      branches: main
-      start_path: apps/docs/src
+    - url: ./../../../
+      start_path: apps/docs/src/en
 ui:
   bundle:
     url: ./../../../dist/apps/docs-ui

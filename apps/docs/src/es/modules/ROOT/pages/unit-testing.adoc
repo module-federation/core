@@ -1,0 +1,267 @@
+= Federación de Módulos: Cómo crear pruebas unitarias para código distribuido
+
+En esta guía, cubriremos las mejores prácticas para crear pruebas unitarias para código distribuido cuando se utiliza la Federación de Módulos. Discutiremos los retos y ventajas de probar los módulos federados, junto con técnicas para asegurar que sus pruebas son rigurosas y mantenibles.
+
+== Introducción a las pruebas unitarias en la federación de módulos
+
+Las pruebas unitarias son cruciales para asegurar la fiabilidad y el mantenimiento del código, especialmente cuando se trabaja con sistemas distribuidos como Federación de Módulos. Esto ayuda a detectar errores a tiempo, a verificar la veracidad del código y asegurarse que los cambios no introducen comportamientos inesperados.
+
+== Desafíos en las Pruebas de Módulos Federados
+
+Probar módulos federados puede ser más difícil que probar código tradicional debido a factores como:
+
+- Orquestación en tiempo de ejecución y código compartido 
+- Carga asíncrona de módulos
+- Dependencias y puntos de entrada remotos
+- Diversos entornos de aplicación
+
+A pesar de estos retos, es esencial crear pruebas unitarias sólidas para el código distribuido con el fin de garantizar su fiabilidad y mantenimiento.
+
+== Prácticas recomendadas para probar código distribuido
+
+Seguir estas prácticas recomendadas garantizará que las pruebas unitarias para sus módulos federados sean eficaces y mantenibles:
+
+=== Aislar los casos de prueba
+
+Escriba casos de prueba independientes para cada componente o módulo para garantizar que puedan probarse de forma aislada. Este enfoque le ayuda a identificar problemas más fácilmente y evita fallos en cascada.
+
+=== Pruebe varios escenarios
+
+Pruebe sus módulos federados en diferentes escenarios para asegurarse de que funcionan correctamente en varios entornos y configuraciones de aplicaciones.
+
+=== Garantizar la cobertura de las pruebas
+
+Asegúrese de que su paquete de pruebas proporciona una cobertura completa de su código distribuido, incluidos los casos extremos y las posibles condiciones de error.
+
+== Pruebas unitarias federadas
+
+El concepto de pruebas unitarias federadas se basa en la idea de federar funciones en Federación de Módulos. En este enfoque, se crea una compilación de prueba para cada repositorio involucrado en la federación, creando esencialmente una compilación de "servidor" de _commonjs_ que expone las características como módulos de _commonjs_. Esto le permite probar los componentes federados de forma aislada y realizar pruebas de responsabilidad.
+
+Echemos un vistazo a un ejemplo que demuestra las pruebas unitarias federadas con Jest:
+
+=== 1. Ejemplo de aplicación
+
+Consideremos una aplicación con un formulario que importa un botón federado.
+
+[, javascript]
+----
+import React, { Suspense } from "react";
+import lazy from "react-lazy-ssr";
+const Button = lazy(
+  () => import("federated/Button"), { chunkId: "federated/Button" }
+);
+
+const Form = () => (
+  <form>
+    <input type="text" />
+    <Suspense fallback={"failed"} loading={"loading"}>
+      <Button />
+    </Suspense>
+  </form>
+);
+
+export default Form;
+----
+
+En este escenario, hay dos aspectos a probar:
+
+- Botón: suministrado por su propia compilación de Webpack
+- Formulario: suministrado por su propia compilación de Webpack
+
+=== 2. Creación de compilaciones de prueba
+
+
+Para habilitar las pruebas unitarias federadas, es necesario crear compilaciones de prueba para cada repositorio involucrado en la federación. En este ejemplo, crearemos compilaciones de prueba para los repositorios `form_app` y `dsl`:
+
+[tabs]
+======
+form_app repository::
++
+[source, javascript]
+----
+new ModuleFederationPlugin({
+  name: "form_app",
+  filename: "remoteEntry.js",
+  library: { type: "commonjs-module", name: "form_app" },
+  remotes: {
+    "dsl": reunited(
+      path.resolve(__dirname, "../dsl/dist-test/remoteEntry.js"),
+      "dsl"
+    ),
+  },
+  exposes: {
+    "./Form": "./federated-cross-test/form.js",
+  },
+  shared: {
+    react: deps.devDependencies.react,
+    "react-dom": deps.devDependencies["react-dom"],
+  },
+});
+----
+
+dsl repository::
++
+[source, javascript]
+----
+new ModuleFederationPlugin({
+  name: "dsl",
+  filename: "remoteEntry.js",
+  library: { type: "commonjs-module", name: "dsl" },
+  exposes: {
+    "./Button": "./src/Button.js",
+  },
+  shared: {
+    react: deps.devDependencies.react,
+    "react-dom": deps.devDependencies["react-dom"],
+  },
+});
+----
+=====
+
+Tanto Button como Form están expuestos para pruebas de responsabilidad.
+
+=== 3. Pruebas unitarias federadas con Jest
+
+Con las compilaciones de prueba en su lugar, se puede utilizar Jest para ejecutar pruebas contra una prueba construida por Webpack de archivos de prueba. Esto le permite utilizar las capacidades asíncronas de Webpack para importar módulos federados y probarlos.
+
+[, javascript]
+----
+// federated.test.js
+import React from "react";
+import { shallow, mount, render } from "enzyme";
+// Form y Button son importaciones federadas
+const Form = import("form_app/Form");
+const Button = import("dsl/Button");
+import suspenseRender from "./suspenseRender";
+
+describe("Federación", function () {
+  it("está renderizándose en suspensión anidada", async () => {
+    const from = await Form;
+    console.log(await suspenseRender(from.default));
+  });
+
+  it("Probando Button desde Remote", async function () {
+    const Btn = (await Button).default;
+    const wrapper = render(<Btn />);
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it("Probando Button desde Form", async function () {
+    const Frm = (await Form).default;
+    const wrapper = mount(<Frm />);
+    expect(wrapper).toMatchSnapshot();
+  });
+});
+----
+En este ejemplo, Jest procesa un archivo de prueba ya construido, permitiéndole utilizar importaciones federadas en sus pruebas. Esto es posible gracias al uso de Webpack para compilar los archivos de prueba en lugar de Babel.
+
+=== 4. Construcción de prueba federada
+Para habilitar las pruebas federadas con Jest, se necesita una compilación especial de Webpack que sólo compile archivos `.test.js`.
+
+
+[, javascript]
+----
+// jest test/bundle.test.js
+
+// La compilación webpack que crea el paquete de prueba.
+const path = require("path");
+const glob = require("glob");
+const thisFile = path.basename(__filename);
+const nodeExternals = require("webpack-node-externals");
+const { ModuleFederationPlugin } = require("webpack").container;
+const ReactLazySsrPlugin = require("react-lazy-ssr/webpack");
+const reunited = require("../index");
+const testFiles = glob
+  .sync("!(node_modules)/**/*.test.js")
+  .filter(function (element) {
+    return (
+      element != "test/bundle.test.js" && !element.includes(thisFile)
+    );
+  })
+  .map(function (element) {
+    return "./" + element;
+  });
+
+module.exports = {
+  entry: { "bundle.test": testFiles },
+  output: {
+    path: path.resolve(__dirname, "."),
+    filename: "[name].js",
+  },
+  target: "node",
+  resolve: {
+    fallback: {
+      path: false,
+    },
+  },
+  externals: [
+    nodeExternals({
+      allowlist: [/^webpack\/container\/reference\//, /react/],
+    }),
+  ],
+  mode: "none",
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: "babel-loader",
+      },
+    ],
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "test_bundle",
+      library: { type: "commonjs-module", name: "test_bundle" },
+      filename: "remoteEntry.js",
+      exposes: {
+        "./render": "./test/suspenseRender.js",
+      },
+      remotes: {
+        form_app: reunited(
+          path.resolve(__dirname, "../form_app/dist/test/remoteEntry.js"),
+          "form_app"
+        ),
+        dsl: reunited(
+          path.resolve(__dirname, "../dsl/dist/remoteEntry.js"),
+          "dsl"
+        ),
+      },
+    }),
+    new ReactLazySsrPlugin(),
+  ],
+};
+----
+
+Esta configuración de compilación incluye el `ModuleFederationPlugin` e importa las compilaciones de prueba de los repositorios `form_app` y `dsl`.
+
+=== 5. Integración CI y Transmisión de código
+
+Integrar pruebas unitarias federadas en su _pipeline_ de CI se puede lograr de varias maneras:
+
+. Descargue otros repositorios o _storage buckets_ y ejecútelos localmente dentro del contenedor de pruebas. Este es un enfoque rudimentario pero efectivo.
+. Utilizar la transmisión de código (aún no está disponible públicamente y está previsto para ser comercial). Este enfoque hace que Node funcione como un navegador requiriendo módulos a través de _sockets_, HTTP o S3. Simplifica la integración CI y ofrece una arquitectura "simplemente funciona".
+
+El objetivo de la transmisión de código es ofrecer un mecanismo de despliegue más sencillo, teniendo en cuenta los vastos recursos que se invierten en CI.
+
+Para un ejemplo completo de pruebas unitarias federadas, consulte el siguiente repositorio:
+
+https://github.com/module-federation/reunited[reunited: An example of federated unit testing]
+
+Este ejemplo demuestra el concepto básico de hacer que Jest procese un archivo de prueba ya construido, permitiendo el uso de importaciones federadas en sus pruebas.
+
+== Conclusión
+
+Siguiendo los pasos y ejemplos descritos en esta guía, puede crear una estrategia de pruebas sólida y fácil de mantener para sus aplicaciones federadas. Estableciendo las configuraciones de compilación correctas y aprovechando la potencia de Federación de Módulos, puede asegurarse de que su código distribuido sigue siendo funcional y fiable.
+
+En resumen, los pasos esenciales para crear pruebas unitarias para código distribuido utilizando Federación de Módulos son:
+
+. Exponer los componentes de cada repositorio para pruebas.
+. Crear una compilación de prueba para cada repositorio que exponga componentes como módulos _commonJS_.
+. Escribir casos de prueba federados utilizando Jest y los componentes expuestos.
+. Establecer una configuración especial de Webpack para compilar archivos `.test.js`.
+. Integre las pruebas unitarias federadas en su canal CI mediante ejecución local o transmisión de código.
+
+Con este enfoque, puede lograr un alto grado de confianza en que sus módulos federados funcionarán correctamente en diferentes bases de código y repositorios. Además, al hacer que los equipos individuales participen en las pruebas de responsabilidad, puede asegurarse de que las actualizaciones y los cambios en los módulos federados no causen problemas inesperados en las aplicaciones que los consumen.
+
+El futuro de las pruebas unitarias federadas incluye más simplificaciones y optimizaciones, como la transmisión de código, que harán que el proceso sea aún más fluido y accesible. Si adopta estas prácticas recomendadas y se mantiene al día de los últimos avances en la federación de módulos, podrá seguir creando y manteniendo aplicaciones distribuidas de alta calidad con facilidad.
