@@ -3,14 +3,8 @@ import path from 'path';
 import axios from 'axios';
 import { Compiler } from 'webpack';
 
-import {
-  isObjectEmpty,
-  Logger,
-  LoggerInstance,
-} from '@module-federation/utilities';
-
 import { TypescriptCompiler } from '../lib/TypescriptCompiler';
-import { normalizeOptions } from '../lib/normalizeOptions';
+import { normalizeOptions, isObjectEmpty } from '../lib/normalizeOptions';
 import { TypesCache } from '../lib/Caching';
 import {
   CompilationParams,
@@ -20,6 +14,7 @@ import {
 
 import { FederatedTypesStatsPlugin } from './FederatedTypesStatsPlugin';
 import download from '../lib/download';
+import { Logger, LoggerInstance } from '../Logger';
 
 const PLUGIN_NAME = 'FederatedTypesPlugin';
 

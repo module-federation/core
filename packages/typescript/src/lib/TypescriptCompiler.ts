@@ -6,8 +6,6 @@ import ts from 'typescript';
 import path from 'path';
 import fs from 'fs';
 
-import { Logger } from '@module-federation/utilities';
-
 import {
   FederatedTypesPluginOptions,
   ModuleFederationPluginOptions,
@@ -15,6 +13,7 @@ import {
 
 import { NormalizeOptions } from './normalizeOptions';
 import { TypesCache } from './Caching';
+import { Logger } from '../Logger';
 
 let vueTs: typeof VueTs;
 try {
