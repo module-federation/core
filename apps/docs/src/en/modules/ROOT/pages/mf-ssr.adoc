@@ -15,7 +15,8 @@ Table of Contents
 Server-Side Rendering (SSR) is a technique used to improve the initial load time and SEO of web applications by rendering the HTML on the server and sending it to the client. Module Federation, on the other hand, is a feature introduced in Webpack 5 that allows sharing code and dependencies across multiple applications at runtime.
 
 While both techniques offer significant benefits, integrating them can be challenging. Module Federation relies on dynamic imports, which are not natively supported during server-side rendering. This guide will demonstrate how to overcome these challenges and set up Module Federation with SSR.
-Server-Side Bundle Configuration
+
+== Server-Side Bundle Configuration
 
 To enable SSR with Module Federation, you need to create a separate Webpack configuration for the server-side bundle. This bundle should include the ModuleFederationPlugin with the appropriate settings for server-side rendering.
 

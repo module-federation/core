@@ -39,5 +39,11 @@
     "next": {
       "optional": true
     }
+  },
+  "exports": {
+    ".": {
+      "require": "./src/index.js",
+      "types": "./src/index.d.ts"
+    }
   }
 }

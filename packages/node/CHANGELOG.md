@@ -2,6 +2,36 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.0.5](https://github.com/module-federation/nextjs-mf/compare/node-1.0.4...node-1.0.5) (2023-07-19)
+
+### Dependency Updates
+
+* `utils` updated to version `2.0.4`
+* `utils` updated to version `2.0.4`
+
+### Bug Fixes
+
+* Fix call undefined delegate ([#1149](https://github.com/module-federation/nextjs-mf/issues/1149)) ([87a5896](https://github.com/module-federation/nextjs-mf/commit/87a5896221a726578c3433071755fba3465824f4)), closes [#1151](https://github.com/module-federation/nextjs-mf/issues/1151)
+* thrown error during chunk correlation of empty graph connection ([#1146](https://github.com/module-federation/nextjs-mf/issues/1146)) ([508d754](https://github.com/module-federation/nextjs-mf/commit/508d754baa746b9d6575cd5d8b1faa22d24396c0))
+
+
+
+## [1.0.4](https://github.com/module-federation/nextjs-mf/compare/node-1.0.3...node-1.0.4) (2023-07-18)
+
+### Dependency Updates
+
+* `utils` updated to version `2.0.2`
+* `utils` updated to version `2.0.2`
+
+
+## [1.0.3](https://github.com/module-federation/nextjs-mf/compare/node-1.0.2...node-1.0.3) (2023-07-17)
+
+### Dependency Updates
+
+* `utils` updated to version `2.0.1`
+* `utils` updated to version `2.0.1`
+
+
 ## [1.0.2](https://github.com/module-federation/nextjs-mf/compare/node-1.0.1...node-1.0.2) (2023-07-05)
 
 

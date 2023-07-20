@@ -1,47 +1,47 @@
-= Module Federation: How to Create Unit Tests for Distributed Code
+= Federación de Módulos: Cómo crear pruebas unitarias para código distribuido
 
-In this guide, we'll cover the best practices for creating unit tests for distributed code when using Module Federation. We'll discuss the challenges and advantages of testing federated modules, along with techniques to ensure your tests are thorough and maintainable.
+En esta guía, cubriremos las mejores prácticas para crear pruebas unitarias para código distribuido cuando se utiliza la Federación de Módulos. Discutiremos los retos y ventajas de probar los módulos federados, junto con técnicas para asegurar que sus pruebas son rigurosas y mantenibles.
 
-== Introduction to Unit Testing in Module Federation
+== Introducción a las pruebas unitarias en la federación de módulos
 
-Unit testing is crucial for ensuring the reliability and maintainability of your code, especially when working with distributed systems like Module Federation. It helps you catch errors early, verify the correctness of your code, and ensure that changes don't introduce unexpected behavior.
+Las pruebas unitarias son cruciales para asegurar la fiabilidad y el mantenimiento del código, especialmente cuando se trabaja con sistemas distribuidos como Federación de Módulos. Esto ayuda a detectar errores a tiempo, a verificar la veracidad del código y asegurarse que los cambios no introducen comportamientos inesperados.
 
-== Challenges in Testing Federated Modules
+== Desafíos en las Pruebas de Módulos Federados
 
-Testing federated modules can be more challenging than testing traditional code due to factors such as:
+Probar módulos federados puede ser más difícil que probar código tradicional debido a factores como:
 
-- At-runtime orchestration and code sharing 
-- Asynchronous module loading
-- Remote dependencies and entry points
-- Diverse application environments
+- Orquestación en tiempo de ejecución y código compartido 
+- Carga asíncrona de módulos
+- Dependencias y puntos de entrada remotos
+- Diversos entornos de aplicación
 
-Despite these challenges, it's essential to create robust unit tests for your distributed code to ensure its reliability and maintainability.
+A pesar de estos retos, es esencial crear pruebas unitarias sólidas para el código distribuido con el fin de garantizar su fiabilidad y mantenimiento.
 
-==  Best Practices for Testing Distributed Code
+== Prácticas recomendadas para probar código distribuido
 
-Follow these best practices to ensure your unit tests for federated modules are effective and maintainable:
+Seguir estas prácticas recomendadas garantizará que las pruebas unitarias para sus módulos federados sean eficaces y mantenibles:
 
-=== Isolate Test Cases
+=== Aislar los casos de prueba
 
-Write independent test cases for each component or module to ensure that they can be tested in isolation. This approach helps you identify issues more easily and prevents cascading failures.
+Escriba casos de prueba independientes para cada componente o módulo para garantizar que puedan probarse de forma aislada. Este enfoque le ayuda a identificar problemas más fácilmente y evita fallos en cascada.
 
-=== Test Various Scenarios
+=== Pruebe varios escenarios
 
-Test your federated modules in different scenarios to ensure that they work correctly across various application environments and configurations.
+Pruebe sus módulos federados en diferentes escenarios para asegurarse de que funcionan correctamente en varios entornos y configuraciones de aplicaciones.
 
-=== Ensure Test Coverage
+=== Garantizar la cobertura de las pruebas
 
-Ensure that your test suite provides comprehensive coverage of your distributed code, including edge cases and potential error conditions.
+Asegúrese de que su paquete de pruebas proporciona una cobertura completa de su código distribuido, incluidos los casos extremos y las posibles condiciones de error.
 
-== Federated Unit Tests
+== Pruebas unitarias federadas
 
-The concept of federated unit testing builds upon the idea of federating features in Module Federation. In this approach, you create a test build for each repository involved in the federation, essentially creating a commonjs "server" build that exposes the features as commonjs modules. This allows you to test the federated components in isolation and perform liability testing.
+El concepto de pruebas unitarias federadas se basa en la idea de federar funciones en Federación de Módulos. En este enfoque, se crea una compilación de prueba para cada repositorio involucrado en la federación, creando esencialmente una compilación de "servidor" de _commonjs_ que expone las características como módulos de _commonjs_. Esto le permite probar los componentes federados de forma aislada y realizar pruebas de responsabilidad.
 
-Let's take a look at an example that demonstrates federated unit testing with Jest:
+Echemos un vistazo a un ejemplo que demuestra las pruebas unitarias federadas con Jest:
 
-=== 1. Example Application
+=== 1. Ejemplo de aplicación
 
-Consider an application with a form that imports a federated button.
+Consideremos una aplicación con un formulario que importa un botón federado.
 
 [, javascript]
 ----
@@ -63,14 +63,15 @@ const Form = () => (
 export default Form;
 ----
 
-In this scenario, there are two aspects to test:
+En este escenario, hay dos aspectos a probar:
 
-- Button: supplied by its own Webpack build
-- Form: supplied by its own Webpack build
+- Botón: suministrado por su propia compilación de Webpack
+- Formulario: suministrado por su propia compilación de Webpack
 
-=== 2. Creating Test Builds
+=== 2. Creación de compilaciones de prueba
 
-To enable federated unit testing, create test builds for each repository involved in the federation. In this example, we create test builds for both the `form_app` and the `dsl` repositories:
+
+Para habilitar las pruebas unitarias federadas, es necesario crear compilaciones de prueba para cada repositorio involucrado en la federación. En este ejemplo, crearemos compilaciones de prueba para los repositorios `form_app` y `dsl`:
 
 [tabs]
 ======
@@ -117,53 +118,52 @@ new ModuleFederationPlugin({
 ----
 =====
 
-Both Button and Form are exposed for liability testing.
+Tanto Button como Form están expuestos para pruebas de responsabilidad.
 
-=== 3. Federated Unit Testing with Jest
+=== 3. Pruebas unitarias federadas con Jest
 
-With the test builds in place, you can use Jest to run tests against a Webpack-built test of test files. This allows you to utilize Webpack's async capabilities to import federated modules and test them.
+Con las compilaciones de prueba en su lugar, se puede utilizar Jest para ejecutar pruebas contra una prueba construida por Webpack de archivos de prueba. Esto le permite utilizar las capacidades asíncronas de Webpack para importar módulos federados y probarlos.
 
 [, javascript]
 ----
 // federated.test.js
 import React from "react";
 import { shallow, mount, render } from "enzyme";
-// Form and Button are federated imports
+// Form y Button son importaciones federadas
 const Form = import("form_app/Form");
 const Button = import("dsl/Button");
 import suspenseRender from "./suspenseRender";
 
-describe("Federation", function () {
-  it("is rendering Nested Suspense", async () => {
+describe("Federación", function () {
+  it("está renderizándose en suspensión anidada", async () => {
     const from = await Form;
     console.log(await suspenseRender(from.default));
   });
 
-  it("Testing Button from Remote", async function () {
+  it("Probando Button desde Remote", async function () {
     const Btn = (await Button).default;
     const wrapper = render(<Btn />);
     expect(wrapper).toMatchSnapshot();
   });
 
-  it("Testing Button from Form", async function () {
+  it("Probando Button desde Form", async function () {
     const Frm = (await Form).default;
     const wrapper = mount(<Frm />);
     expect(wrapper).toMatchSnapshot();
   });
 });
 ----
+En este ejemplo, Jest procesa un archivo de prueba ya construido, permitiéndole utilizar importaciones federadas en sus pruebas. Esto es posible gracias al uso de Webpack para compilar los archivos de prueba en lugar de Babel.
 
-In this example, Jest processes an already-built test file, allowing you to use federated imports in your tests. This is made possible by using Webpack to compile the test files instead of Babel.
+=== 4. Construcción de prueba federada
+Para habilitar las pruebas federadas con Jest, se necesita una compilación especial de Webpack que sólo compile archivos `.test.js`.
 
-=== 4. Federated Test Build
-
-To enable federated testing with Jest, you need a special Webpack build that compiles `.test.js` files only.
 
 [, javascript]
 ----
 // jest test/bundle.test.js
 
-// The webpack build that creates the test bundle.
+// La compilación webpack que crea el paquete de prueba.
 const path = require("path");
 const glob = require("glob");
 const thisFile = path.basename(__filename);
@@ -233,35 +233,35 @@ module.exports = {
 };
 ----
 
-This build configuration includes the `ModuleFederationPlugin` and imports both the `form_app` and `dsl` repositories' test builds.
+Esta configuración de compilación incluye el `ModuleFederationPlugin` e importa las compilaciones de prueba de los repositorios `form_app` y `dsl`.
 
-=== 5. CI Integration and Code Streaming
+=== 5. Integración CI y Transmisión de código
 
-Integrating federated unit testing into your CI pipeline can be accomplished in a few ways:
+Integrar pruebas unitarias federadas en su _pipeline_ de CI se puede lograr de varias maneras:
 
-. Pull down other repositories or storage buckets and execute them locally within the test container. This is a rudimentary but effective approach.
-. Use code streaming (not publicly available yet and planned to be commercial). This approach makes Node work like a browser by requiring modules over sockets, HTTP, or S3. It simplifies CI integration and offers a "just works" architecture.
+. Descargue otros repositorios o _storage buckets_ y ejecútelos localmente dentro del contenedor de pruebas. Este es un enfoque rudimentario pero efectivo.
+. Utilizar la transmisión de código (aún no está disponible públicamente y está previsto para ser comercial). Este enfoque hace que Node funcione como un navegador requiriendo módulos a través de _sockets_, HTTP o S3. Simplifica la integración CI y ofrece una arquitectura "simplemente funciona".
 
-The goal of code streaming is to provide a more straightforward deployment mechanism, considering the vast resources spent on CI.
+El objetivo de la transmisión de código es ofrecer un mecanismo de despliegue más sencillo, teniendo en cuenta los vastos recursos que se invierten en CI.
 
-For a complete example of federated unit testing, refer to the following repository:
+Para un ejemplo completo de pruebas unitarias federadas, consulte el siguiente repositorio:
 
 https://github.com/module-federation/reunited[reunited: An example of federated unit testing]
 
-This example demonstrates the core concept of having Jest process an already-built test file, enabling the use of federated imports in your tests.
+Este ejemplo demuestra el concepto básico de hacer que Jest procese un archivo de prueba ya construido, permitiendo el uso de importaciones federadas en sus pruebas.
 
-== Conclusion
+== Conclusión
 
-By following the steps and examples outlined in this guide, you can create a robust and maintainable testing strategy for your federated applications. By setting up the correct build configurations and leveraging the power of Module Federation, you can ensure that your distributed code remains functional and reliable.
+Siguiendo los pasos y ejemplos descritos en esta guía, puede crear una estrategia de pruebas sólida y fácil de mantener para sus aplicaciones federadas. Estableciendo las configuraciones de compilación correctas y aprovechando la potencia de Federación de Módulos, puede asegurarse de que su código distribuido sigue siendo funcional y fiable.
 
-In summary, the essential steps to create unit tests for distributed code using Module Federation are:
+En resumen, los pasos esenciales para crear pruebas unitarias para código distribuido utilizando Federación de Módulos son:
 
-. Expose components from each repository for testing.
-. Create a test build for each repository that exposes components as CommonJS modules.
-. Write federated test cases using Jest and the exposed components.
-. Set up a special Webpack build configuration to compile `.test.js` files.
-. Integrate federated unit testing into your CI pipeline using local execution or code streaming.
+. Exponer los componentes de cada repositorio para pruebas.
+. Crear una compilación de prueba para cada repositorio que exponga componentes como módulos _commonJS_.
+. Escribir casos de prueba federados utilizando Jest y los componentes expuestos.
+. Establecer una configuración especial de Webpack para compilar archivos `.test.js`.
+. Integre las pruebas unitarias federadas en su canal CI mediante ejecución local o transmisión de código.
 
-With this approach, you can achieve a high degree of confidence that your federated modules will work correctly across different codebases and repositories. Moreover, by having individual teams take part in liability tests, you can ensure that updates and changes to federated modules do not cause unexpected issues in the consuming applications.
+Con este enfoque, puede lograr un alto grado de confianza en que sus módulos federados funcionarán correctamente en diferentes bases de código y repositorios. Además, al hacer que los equipos individuales participen en las pruebas de responsabilidad, puede asegurarse de que las actualizaciones y los cambios en los módulos federados no causen problemas inesperados en las aplicaciones que los consumen.
 
-The future of federated unit testing includes further simplifications and optimizations, such as code streaming, which will make the process even more seamless and accessible. By adopting these best practices and staying up-to-date with the latest advancements in Module Federation, you can continue to build and maintain high-quality distributed applications with ease.
+El futuro de las pruebas unitarias federadas incluye más simplificaciones y optimizaciones, como la transmisión de código, que harán que el proceso sea aún más fluido y accesible. Si adopta estas prácticas recomendadas y se mantiene al día de los últimos avances en la federación de módulos, podrá seguir creando y manteniendo aplicaciones distribuidas de alta calidad con facilidad.

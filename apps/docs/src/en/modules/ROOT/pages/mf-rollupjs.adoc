@@ -1,0 +1,89 @@
+= Implementing Module Federation in Rollup.JS
+
+== Introduction
+
+Rollup.JS, a popular JavaScript module bundler, is known for its efficiency and flexibility. With the advent of Module Federation in Webpack 5, it's time to bring this powerful feature into the Rollup.JS ecosystem. This guide will walk you through the process of implementing Module Federation in Rollup.JS, allowing you to share code between independently bundled applications seamlessly.
+
+== Enabling Hosts in Rollup.JS
+
+The first step in integrating Module Federation with Rollup.JS is to enable your Rollup.JS bundle to act as a Host. This capability allows your bundle to consume modules from Remotes built with Webpack. This feature is facilitated by the `@module-federation/rollup-federation` plugin, which is available directly from the Module Federation Organization.
+
+You can find the plugin on https://www.npmjs.com/package/@module-federation/rollup-federation[npm] and an example of its usage in https://github.com/module-federation/module-federation-examples/tree/master/rollup-federation-demo[module-federation-examples] repository.
+
+== Consuming a Remote
+
+Let's assume we have a Webpack Remote located at `http://localhost:8081/remote-entry.js` that was built to target SystemJS and exposes a `./hello` module that exports a default function. We can consume this remote in a Rollup.JS build with the following setup:
+
+=== rollup.config.js
+
+In this example, we configure the `@module-federation/rollup-federation` plugin and alias the remote as `webpack_remote`. The key is the name we will be importing from in our JavaScript modules, and the value is the name in our SystemJS import map.
+
+[source, javascript]
+----
+import federation from '@module-federation/rollup-federation';
+
+export default {
+  input: './src/index.js',
+  output: {
+    format: 'system',
+    dir: './dist'
+  },
+  plugins: [
+    federation({
+      remotes: {
+        'webpack_remote': 'webpack_remote'
+      },
+    })
+  ]
+};
+----
+
+=== src/index.js
+
+Next, we dynamically import the remote `hello` module from the Webpack Remote we have aliased as `webpack_remote` in the plugin.
+
+[source, javascript]
+----
+(async () => {
+  // Import the hello module from the remote
+  const hello = await import('webpack_remote/hello');
+
+  // Call the default export of the remote hello module
+  hello.default();
+})();
+----
+
+=== index.html
+
+Finally, we configure the SystemJS import map to recognize where `webpack_remote` is located and start our app by importing the main entry point.
+
+[source, html]
+----
+<!doctype html>
+<html>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/systemjs/dist/system.js"></script>
+  <script type="systemjs-importmap">
+    {
+      "webpack_remote": "http://localhost:8081/remote-entry.js",
+      "main": "./dist/main.js"
+    }
+  </script>
+  <script type="systemjs-module" src="import:main"></script>
+</body>
+</html>
+----
+
+Congratulations! You are now consuming Federated Modules in Rollup.JS.
+
+For more advanced use-cases, check out the Module Federation Examples repository located at https://github.com/module-federation//tree/master/rollup-federation-demo[module-federation-examples] repository.
+
+== Limitations and Future Work
+
+As of now, a Rollup.JS bundle can only act as a Host, meaning it can consume federated modules and share runtime vendor dependencies with the Remotes it consumes. The potential to act as a Remote, and thereby enable Bidirectional-Hosts, is being considered for future development based on community interest.
+
+For any questions or suggestions, feel free to reach out on Twitter @ebey_jacob. Contributions to the examples repo for AMD, fixes, or additions to the plugin are always welcome!
+
+## Conclusion
+
+Integrating Module Federation into Rollup.JS opens up new possibilities for code sharing between independently bundled applications. By following the steps outlined in this guide, you can leverage the power of Module Federation in your Rollup.JS projects, enhancing efficiency and collaboration.

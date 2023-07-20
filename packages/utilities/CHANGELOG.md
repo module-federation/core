@@ -2,6 +2,31 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.0.4](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.3...utils-2.0.4) (2023-07-19)
+
+
+
+## [2.0.3](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.2...utils-2.0.3) (2023-07-19)
+
+
+### Bug Fixes
+
+* Fix call undefined delegate ([#1149](https://github.com/module-federation/nextjs-mf/issues/1149)) ([87a5896](https://github.com/module-federation/nextjs-mf/commit/87a5896221a726578c3433071755fba3465824f4)), closes [#1151](https://github.com/module-federation/nextjs-mf/issues/1151)
+
+
+
+## [2.0.2](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.1...utils-2.0.2) (2023-07-18)
+
+
+
+## [2.0.1](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.0...utils-2.0.1) (2023-07-17)
+
+
+
+## [2.0.1](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.0...utils-2.0.1) (2023-07-17)
+
+
+
 # [2.0.0](https://github.com/module-federation/nextjs-mf/compare/utils-1.9.1...utils-2.0.0) (2023-07-01)
 
 
