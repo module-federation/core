@@ -2,6 +2,52 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [7.0.6](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-7.0.5...nextjs-mf-7.0.6) (2023-07-19)
+
+### Dependency Updates
+
+* `utils` updated to version `2.0.4`
+* `node` updated to version `1.0.5`
+* `utils` updated to version `2.0.4`
+* `node` updated to version `1.0.5`
+* `node` updated to version `1.0.5`
+
+### Bug Fixes
+
+* Fix call undefined delegate ([#1149](https://github.com/module-federation/nextjs-mf/issues/1149)) ([87a5896](https://github.com/module-federation/nextjs-mf/commit/87a5896221a726578c3433071755fba3465824f4)), closes [#1151](https://github.com/module-federation/nextjs-mf/issues/1151)
+
+
+
+## [7.0.5](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-7.0.4...nextjs-mf-7.0.5) (2023-07-18)
+
+### Dependency Updates
+
+* `utils` updated to version `2.0.2`
+* `node` updated to version `1.0.4`
+* `utils` updated to version `2.0.2`
+* `utils` updated to version `2.0.2`
+* `node` updated to version `1.0.4`
+
+
+## [7.0.4](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-7.0.3...nextjs-mf-7.0.4) (2023-07-17)
+
+### Dependency Updates
+
+* `utils` updated to version `2.0.1`
+* `node` updated to version `1.0.3`
+* `utils` updated to version `2.0.1`
+* `node` updated to version `1.0.3`
+
+
+## [7.0.3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-7.0.2...nextjs-mf-7.0.3) (2023-07-17)
+
+
+### Bug Fixes
+
+* **invertedmoduleplugin:** added another check for nextjs api routes ([#1134](https://github.com/module-federation/nextjs-mf/issues/1134)) ([aba26be](https://github.com/module-federation/nextjs-mf/commit/aba26bed61bca4816238e7b7b93e88b108b65d9d))
+
+
+
 ## [7.0.2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-7.0.1...nextjs-mf-7.0.2) (2023-07-05)
 
 ### Dependency Updates
