@@ -1,6 +1,6 @@
 {{#with page}}
 <nav class="flex flex-col gap-8">
-  
+
   <div id="search-field" class="flex items-center w-full px-3 py-2 bg-white border border-blue-gray-400 relative focus-within:border-ui-blue">
     <input id="search-input" class="w-full bg-transparent p-0 border-0 outline-none focus:border-0 focus:outline-none text-blue-gray-900 text-base" type="text" placeholder="Search"{{#if page.home}} autofocus{{/if}}>
         <div class="text-blue-gray-900">{{>"icon" name="search" size="20px"}}</div>
@@ -10,7 +10,22 @@
     <div class="font-medium text-blue-gray-900">{{this.component.title}}</div>
     {{>page-versions}}
   </div>
-  
+
   {{> nav-tree navigation=this.navigation}}
+  <a href="/#contact">
+    <div class="contact flex flex-col justify-between bg-white  gap-4">
+      <div class="flex justify-between">
+        <img alt="Contact experts"
+              src="{{{@root.uiRootPath}}}/img/text-bubble.svg"
+        />
+        <div class="text-blue-gray-900">
+          Talk to our experts
+        </div>
+      </div>
+      <div class="text text-deep-purple-700">
+        Our experts will gladly answer your questions.
+      </div>
+    </div>
+  </a>
 </nav>
 {{/with}}
