@@ -25,6 +25,13 @@ const defaultOptions: Required<
   downloadRemoteTypesTimeout: 2000,
 };
 
+export const isObjectEmpty = <T extends object>(obj: T) => {
+  for (const x in obj) {
+    return false;
+  }
+  return true;
+};
+
 export const normalizeOptions = (
   options: FederatedTypesPluginOptions,
   compiler: Compiler

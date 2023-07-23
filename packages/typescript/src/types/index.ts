@@ -1,7 +1,11 @@
-import type { ModuleFederationPluginOptions } from '@module-federation/utilities';
-import { Compilation } from 'webpack';
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="../../../../node_modules/webpack/module.d.ts" />
 
-export { ModuleFederationPluginOptions };
+import { Compilation, container } from 'webpack';
+
+export type ModuleFederationPluginOptions = ConstructorParameters<
+  typeof container.ModuleFederationPlugin
+>['0'];
 
 export interface FederatedTypesPluginOptions {
   disableTypeCompilation?: boolean;
