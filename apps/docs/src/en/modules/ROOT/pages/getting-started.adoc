@@ -15,4 +15,9 @@ To use Module Federation, developers need to configure their Webpack builds to e
 
 Once the Webpack configurations for each application have been set up, the applications can be deployed independently. When a user visits a page that includes multiple micro-frontends, the micro-frontends will dynamically load the code they need from other micro-frontends using the `exposes` and `remotes` options.
 
+== Conclusion
+
 In summary, Module Federation allows developers to share code and resources across micro-frontends, which reduces duplication and improves code maintainability. By allowing micro-frontends to be developed and deployed independently, Module Federation reduces the need for coordination between teams and allows for faster development cycles.
+
+Having built a necessary theoretical foundation of Module Federation, let us now pivot towards the practical aspect and embark on the journey of actual implementation, exploring the possibilities Module Federation has to offer: xref:getting-started-practical.adoc[Getting Started with Module Federation]
+
