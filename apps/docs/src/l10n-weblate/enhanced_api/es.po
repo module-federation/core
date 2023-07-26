@@ -8,20 +8,22 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2023-07-25 20:53+0300\n"
-"PO-Revision-Date: 2023-07-25 20:53+0300\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2023-07-26 16:26+0000\n"
+"Last-Translator: Nikita <omfgnuts@gmail.com>\n"
+"Language-Team: Spanish <https://hosted.weblate.org/projects/"
+"module-federation-documentation/module-federation-documentation/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.0-dev\n"
 
 #. type: Title =
 #: src/en/modules/enhanced_api/about.adoc:1
 #, no-wrap
 msgid "Enhanced Federation Plugin API: About"
-msgstr ""
+msgstr "API de complemento de federación mejorada: Acerca de"
 
 #. type: Plain text
 #: src/en/modules/enhanced_api/about.adoc:2
@@ -32,6 +34,12 @@ msgid ""
 "Plugin API, its features, and how it can be used to improve your development "
 "workflow."
 msgstr ""
+"La API del complemento de federación mejorada es una poderosa herramienta "
+"diseñada para aumentar las capacidades de la federación de módulos, una "
+"función proporcionada por Webpack. Este documento tiene como objetivo "
+"proporcionar una descripción general completa de la API del complemento de "
+"federación mejorada, sus características y cómo se puede usar para mejorar "
+"su flujo de trabajo de desarrollo."
 
 #. type: Title ==
 #: src/en/modules/enhanced_api/about.adoc:3
