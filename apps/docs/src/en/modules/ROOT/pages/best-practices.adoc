@@ -12,7 +12,9 @@ A modular architecture involves breaking down an application into smaller, more 
 
 When sharing modules between different applications, it is important to ensure that those modules are compatible with each other. This requires careful versioning and compatibility testing to ensure that changes to one module do not break other applications that rely on it.
 
-To ensure compatibility between shared modules, it is important to establish a clear versioning strategy. This strategy should define how versions are numbered, how backwards compatibility is maintained, and how changes to modules are communicated to other applications that rely on them.
+To ensure compatibility between shared modules, it is important to establish a clear xref:versioned-shared-modules.adoc[versioning strategy]. This strategy should define how versions are numbered, how backwards compatibility is maintained, and how changes to modules are communicated to other applications that rely on them.
+
+To learn more about versioning of modules, proceed to dedicated xref:versioned-shared-modules.adoc[Versioned Shared Modules] documentation page.
 
 == Code Organization and Structure
 
@@ -38,6 +40,8 @@ To more easily use Module Federation, it is important to design your application
 
 By designing modules and packages that are easily testable, developers can more easily ensure that changes to those modules do not break other applications that rely on them. This can help to reduce the risk of errors and improve the overall quality of the application.
 
+To learn more about testing of modules, proceed to dedicated xref:unit-testing.adoc[How to Create Unit Tests for Distributed Code] documentation page.
+
 == Security
 
 When sharing modules between different applications, it is important to consider security implications. This involves designing modules and packages that are secure by default, as well as implementing security measures to protect shared modules from unauthorized access or modification.
@@ -49,6 +53,8 @@ To ensure the security of shared modules, it is important to establish clear acc
 To more easily use Module Federation, it is important to design your application with monitoring and metrics in mind. This involves designing modules and packages that can be easily monitored, as well as designing monitoring tools that can be used to track the performance of shared modules.
 
 By designing modules and packages that are easily monitorable, developers can more easily identify performance issues and other problems that may affect the overall quality of the application. This can help to improve the overall reliability and performance of the application.
+
+To get more visibility of your federated modules, we suggest using https://www.medusa.codes/[Medusa]. Medusa provides visibility of tracking how every new feature update influences the performance, compare current, historical, and the upcoming version, discover insights, and take-data driven decisions.
 
 == Performance
 

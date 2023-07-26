@@ -312,7 +312,7 @@ If you take a peek at the browser's developer tools and navigate to the network 
 
 == Bundling Vendor Libraries
 
-Webpack's SplitChunksPlugin is traditionally employed to accomplish code splitting – the process of segmenting code into smaller, manageable bundles and regulating resource loading. However, in my scenario, I've deviated from the standard use and innovatively used this tool to aggregate all vendor code into a singular bundle.
+Webpack's `SplitChunksPlugin` is traditionally employed to accomplish code splitting - the process of segmenting code into smaller, manageable bundles and regulating resource loading. However, in my scenario, I've deviated from the standard use and innovatively used this tool to aggregate all vendor code into a singular bundle.
 
 In this demonstration, we're dealing with a limited number of vendor bundles, but this strategy can be immensely advantageous and performance-enhancing when operating at a larger scale with numerous smaller vendor modules. This holds particularly true if the requirement arises to load all vendor bundles simultaneously.
 
