@@ -1,3 +1,4 @@
+import { getScope } from '../../lib/scopes';
 import type {
   AsyncContainer,
   IRemoteScriptFactory,
@@ -32,11 +33,7 @@ const webpackLoadScript = (
   containerKey: string,
   url: string
 ): AsyncContainer => {
-  const scope =
-    typeof window !== 'undefined'
-      ? window
-      : //@ts-ignore
-        global.__remote_scope__;
+  const scope = getScope();
 
   return new Promise(function (resolve, reject) {
     function resolveRemoteGlobal() {
