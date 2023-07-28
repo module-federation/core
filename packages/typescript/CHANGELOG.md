@@ -2,6 +2,18 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.4.1](https://github.com/module-federation/nextjs-mf/compare/typescript-2.4.0...typescript-2.4.1) (2023-07-23)
+
+### Dependency Updates
+
+* `utils` updated to version `2.0.4`
+
+### Bug Fixes
+
+* **typescript:** add types field to package.json exports ([#1154](https://github.com/module-federation/nextjs-mf/issues/1154)) ([ec37484](https://github.com/module-federation/nextjs-mf/commit/ec374846567e4941ab42d18623642f90b3d70591))
+
+
+
 # [2.4.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.2.3...typescript-2.4.0) (2023-07-19)
 
 ### Dependency Updates

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/typescript",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "Webpack plugin to stream typescript for module federation apps/components",
   "license": "MIT",
   "type": "commonjs",
@@ -38,6 +38,12 @@
     },
     "next": {
       "optional": true
+    }
+  },
+  "exports": {
+    ".": {
+      "require": "./src/index.js",
+      "types": "./src/index.d.ts"
     }
   }
 }
