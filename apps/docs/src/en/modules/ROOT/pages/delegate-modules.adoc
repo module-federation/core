@@ -1,13 +1,12 @@
 = Getting Familiar with Delegate Modules: An In-Depth Guide 
 
 In this comprehensive guide, we will delve into the powerful feature of Delegate Modules in Module Federation version 7, exploring their purpose, use cases, and implementation techniques. We will also discuss how they can enhance the flexibility and control of your Webpack configuration, empowering you to create more sophisticated applications
+
 == Understanding Delegate Modules
 
 Delegate modules have been introduced to tackle a longstanding challenge in the module federation space - dynamic remotes. These modules offer a more streamlined and scalable way to control the "glue" code that connects remote applications, without sacrificing the advantages of Webpack.
 
-To get more familiar with the concept of Dynamic Remotes, we suggest reading a dedicated documentation page: Dynamic Remotes
-
-//TODO: Add link
+To get more familiar with the concept of Dynamic Remotes, we suggest reading a dedicated documentation page: xref:dynamic-remotes.adoc[Dynamic Remotes]
 
 Traditionally, managing dynamic remotes involved injecting a script using the low-level module federation API, which resulted in losing many of Webpack's features. With delegate modules, you can now instruct Webpack that a remote entry is a code within the Webpack build itself, enabling you to bundle various entry-point logic and export back a promise that resolves to a federated remote.
 
