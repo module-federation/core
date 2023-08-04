@@ -164,7 +164,7 @@ export class TypescriptCompiler {
         // If we're on Windows, need to convert "\" to "/" in the import path since it
         // was derived from platform-specific file system path.
         if (path.sep === '\\') {
-          importPath = importPath.replaceAll(path.sep, '/');
+          importPath = importPath.split(path.sep).join('/');
         }
 
         const reexport = `export * from '${importPath}';\nexport { default } from '${importPath}';`;
