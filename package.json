@@ -82,7 +82,7 @@
     "@fontsource/roboto": "5.0.3",
     "@fontsource/roboto-mono": "5.0.3",
     "@jscutlery/semver": "3.0.0",
-    "@node-rs/jieba": "1.7.0",
+    "@node-rs/jieba": "1.7.2",
     "@nrwl/eslint-plugin-nx": "16.2.2",
     "@nx/jest": "16.2.2",
     "@nx/js": "16.2.2",
