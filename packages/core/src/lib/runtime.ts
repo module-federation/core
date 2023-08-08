@@ -1,20 +1,16 @@
 import {
   WebpackRemoteScriptFactory,
   WebpackSharingScopeFactory,
-} from '../integrations/webpack/factory';
+} from '../integrations/webpack';
+
 import type {
   ModuleFederationRuntime,
   ModuleFederationRuntimeOptions,
 } from '../types';
 
-export const createModuleFederationRuntime = (
-  options?: ModuleFederationRuntimeOptions
-): ModuleFederationRuntime => {
-  const scriptFactory =
-    options?.scriptFactory ?? new WebpackRemoteScriptFactory();
-
-  const sharingScopeFactory =
-    options?.sharingScopeFactory ?? new WebpackSharingScopeFactory();
+export function createModuleFederationRuntime(options?: ModuleFederationRuntimeOptions): ModuleFederationRuntime {
+  const scriptFactory = options?.scriptFactory ?? new WebpackRemoteScriptFactory();
+  const sharingScopeFactory = options?.sharingScopeFactory ?? new WebpackSharingScopeFactory();
 
   return {
     scriptFactory,
@@ -24,4 +20,4 @@ export const createModuleFederationRuntime = (
       default: {},
     },
   };
-};
+}

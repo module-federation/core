@@ -16,7 +16,6 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "*": ["apps/react-ts-host/@mf-types/*"],
       "@module-federation/core": ["packages/core/src/index.ts"],
       "@module-federation/native-federation-tests": [
         "packages/native-federation-tests/src/index.ts"

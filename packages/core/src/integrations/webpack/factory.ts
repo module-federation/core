@@ -29,10 +29,7 @@ export class WebpackRemoteScriptFactory implements IRemoteScriptFactory {
   }
 }
 
-const webpackLoadScript = (
-  containerKey: string,
-  url: string
-): AsyncContainer => {
+async function webpackLoadScript(containerKey: string, url: string): AsyncContainer {
   const scope = getScope();
 
   return new Promise(function (resolve, reject) {
@@ -57,27 +54,16 @@ const webpackLoadScript = (
         const realSrc =
           event && event.target && (event.target as HTMLScriptElement).src;
 
-        const __webpack_error__ = new Error() as Error & {
-          type: string;
-          request: string | null;
-        };
-
-        __webpack_error__.message =
-          'Loading script failed.\n(' +
-          errorType +
-          ': ' +
-          realSrc +
-          ' or global var ' +
-          containerKey +
-          ')';
-
-        __webpack_error__.name = 'ScriptExternalLoadError';
-        __webpack_error__.type = errorType;
-        __webpack_error__.request = realSrc;
+        const __webpack_error__ = Object.assign(new Error(), {
+            message: `@mf-core: script failed to load. (${errorType}: ${realSrc} or global var ${containerKey} not exists)`,
+            name: 'ScriptExternalLoadError',
+            type: errorType,
+            request: realSrc,
+        });
 
         reject(__webpack_error__);
       },
       containerKey
     );
   });
-};
+}

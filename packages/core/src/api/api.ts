@@ -4,7 +4,7 @@ import {
 } from '../integrations/webpack';
 import { getContainerKey, initContainer } from '../lib';
 import { getScope } from '../lib/scopes';
-import {
+import type {
   GetModuleOptions,
   GetModulesOptions,
   RemoteContainer,
@@ -16,11 +16,8 @@ import {
  *
  * @returns remote container
  */
-export const loadAndInitializeRemote = async (
-  remoteOptions: RemoteOptions
-): Promise<RemoteContainer> => {
+export async function loadAndInitializeRemote(remoteOptions: RemoteOptions): Promise<RemoteContainer> {
   const globalScope = getScope();
-
   const containerKey = getContainerKey(remoteOptions);
 
   // TODO: Make this generic, possibly the runtime?

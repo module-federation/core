@@ -11,7 +11,7 @@ export interface GlobalScope {
   mfRuntime: ModuleFederationRuntime;
 }
 
-export type SharedScope = {
+export interface SharedScope {
   default: Record<
     string,
     Record<
@@ -19,7 +19,7 @@ export type SharedScope = {
       { loaded?: 1; get: () => Promise<unknown>; from: string; eager: boolean }
     >
   >;
-};
+}
 
 export type Shared = ModuleFederationPluginOptions['shared'];
 export type Remotes = ModuleFederationPluginOptions['remotes'];
@@ -28,30 +28,28 @@ export type SharedConfig = Extract<
   SharedObject[keyof SharedObject],
   { eager?: boolean }
 >;
-export type ExternalsType = Required<
-  ModuleFederationPluginOptions['remoteType']
->;
+export type ExternalsType = Required<ModuleFederationPluginOptions['remoteType']>;
 
 type ModulePath = string;
 
-export type RemoteContainer = {
+export interface RemoteContainer {
   __initializing?: boolean;
   __initialized?: boolean;
   get(modulePath: ModulePath): () => unknown;
   init: (obj?: typeof __webpack_share_scopes__) => void;
-};
+}
 
-export type ModuleMap = {
+export interface ModuleMap {
   [modulePath: string]: () => Promise<void>;
-};
+}
 
 export type AsyncContainer = Promise<RemoteContainer>;
 
-export type RemoteOptions = {
+export interface RemoteOptions {
   global: string;
   url: string;
   uniqueKey?: string;
-};
+}
 
 export type RuntimeRemote = Partial<RemoteOptions> & {
   asyncContainer?: AsyncContainer | (() => AsyncContainer);
@@ -59,31 +57,31 @@ export type RuntimeRemote = Partial<RemoteOptions> & {
 
 export type RuntimeRemotesMap = Record<string, RuntimeRemote>;
 
-export type GetModuleOptions = {
+export interface GetModuleOptions {
   modulePath: string;
   exportName?: string;
   remoteContainer: RemoteContainer;
-};
+}
 
-export type GetModulesOptions = {
+export interface GetModulesOptions {
   modulePaths: string[];
   remoteContainer: RemoteContainer;
-};
+}
 
-export type ModuleFederationRuntimeOptions = {
+export interface ModuleFederationRuntimeOptions {
   bundler: string;
   scriptFactory?: IRemoteScriptFactory;
   sharingScopeFactory?: ISharingScopeFactory;
-};
+}
 
-export type ModuleFederationRuntime = {
+export interface ModuleFederationRuntime {
   scriptFactory: IRemoteScriptFactory;
   sharingScopeFactory: ISharingScopeFactory;
   remotes: Record<string, AsyncContainer | undefined>;
   sharingScope: SharedScope;
-};
+}
 
-export type RemoteScope = {
+export interface RemoteScope {
   [index: string]:
     | AsyncContainer
     | string
@@ -94,7 +92,7 @@ export type RemoteScope = {
   _config: Record<string, string>;
   __sharing_scope__?: SharedScope;
   _runtime?: ModuleFederationRuntime;
-};
+}
 
 export interface IRemoteScriptFactory {
   loadScript: (

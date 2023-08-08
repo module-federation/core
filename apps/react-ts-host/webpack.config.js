@@ -31,6 +31,7 @@ module.exports = async (config, context) => {
 
   parsedConfig.plugins.forEach((p) => {
     if (p.constructor.name === 'ModuleFederationPlugin') {
+      // todo: what kinda of hack is this? :)
       p._options.library = undefined;
     }
   });

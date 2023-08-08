@@ -1,27 +1,18 @@
-import { loadAndInitializeRemote, getModule } from '@module-federation/core';
+import {getModule, loadAndInitializeRemote} from '@module-federation/core';
 
-type ModuleOptions = {
+export interface ModuleOptions {
   name: string;
   url: string;
   modulePath: string;
-};
+}
 
-const useDynamicModule = <T,>({
-  name,
-  url,
-  modulePath,
-}: ModuleOptions): Promise<T> => {
-  return new Promise((resolve, reject) => {
-    loadAndInitializeRemote({
-      global: name,
-      url,
-    }).then((remoteContainer) => {
-      getModule({
-        remoteContainer,
-        modulePath,
-      }).then((module) => resolve(module as T));
-    });
-  });
-};
-
-export default useDynamicModule;
+export default async function useDynamicModule({
+                                                      name,
+                                                      url,
+                                                      modulePath,
+                                                    }: ModuleOptions): Promise<{default: any}> {
+  const remoteContainer = await loadAndInitializeRemote({global: name, url});
+  return (await getModule({remoteContainer, modulePath}))
+      // todo: not sure this gonna work with React.lazy, but swallow the error here would be a mistake, imho
+    ?? {default: undefined};
+}

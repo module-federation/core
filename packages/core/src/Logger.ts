@@ -1,16 +1,16 @@
-import { Compilation } from 'webpack';
+import type { Compilation } from 'webpack';
 
 export type LoggerInstance = Compilation['logger'] | Console;
 
 export class Logger {
   private static loggerInstance: LoggerInstance = console;
 
-  static getLogger(): LoggerInstance {
+  static get logger(): LoggerInstance {
     return this.loggerInstance;
   }
 
-  static setLogger(logger: Compilation['logger']): LoggerInstance {
+  static set logger(logger: Compilation['logger']) {
+    // todo: consumer should be able to disable logging
     this.loggerInstance = logger || console;
-    return logger;
   }
 }
