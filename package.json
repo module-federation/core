@@ -183,7 +183,7 @@
     "vinyl-fs": "4.0.0",
     "vite-tsconfig-paths": "4.2.0",
     "vitest": "0.32.2",
-    "vue-tsc": "1.8.5",
+    "vue-tsc": "1.8.8",
     "webpack": "5.84.0",
     "webpack-virtual-modules": "0.5.0"
   },
