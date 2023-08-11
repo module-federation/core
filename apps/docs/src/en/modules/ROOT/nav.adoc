@@ -7,9 +7,6 @@
 ** xref:pros-cons.adoc[Pros and Cons of Module Federation]
 ** xref:best-practices.adoc[Best Practices and Tips]
 
-.List title
-* List item
-
 .Core Features
 * xref:dynamic-remotes.adoc[Dynamic Remotes in Module Federation]
 * xref:shared-api.adoc[]
