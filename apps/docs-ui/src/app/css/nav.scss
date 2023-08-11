@@ -8,9 +8,16 @@
   }
 
   .subnav-item {
+    ul {
+      padding-left: 10px;
+    }
     &.closed {
       .icon {
         @apply -rotate-90;
+      }
+
+      > ul {
+        display: none;
       }
 
       .subnav {
