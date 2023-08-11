@@ -1,3 +1,12 @@
+.Getting Started
+* xref:ROOT:history.adoc[History of Module Federation]
+* xref:getting-started.adoc[What is Module Federation?]
+** xref:setup.adoc[Setting up Environment]
+** xref:getting-started-practical.adoc[Getting Started]
+** xref:use-cases.adoc[Use Cases]
+** xref:pros-cons.adoc[Pros and Cons of Module Federation]
+** xref:best-practices.adoc[Best Practices and Tips]
+
 .List title
 * List item
 
