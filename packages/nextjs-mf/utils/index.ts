@@ -1,7 +1,8 @@
-import * as React from 'react';
 
 export {
   extractUrlAndGlobal,
+} from '@module-federation/utilities/src/utils/pure';
+export {
   injectScript,
 } from '@module-federation/utilities/src/utils/common';
 // @ts-ignore
