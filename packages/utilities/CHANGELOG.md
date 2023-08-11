@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.0.5](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.4...utils-2.0.5) (2023-08-11)
+
+
+### Bug Fixes
+
+* improve import ordering ([#1199](https://github.com/module-federation/nextjs-mf/issues/1199)) ([7354ed2](https://github.com/module-federation/nextjs-mf/commit/7354ed2b412bd9fd8745778e5212e10e8a3bf17f))
+
+
+
 ## [2.0.4](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.3...utils-2.0.4) (2023-07-19)
 
 
