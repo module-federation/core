@@ -1,5 +1,5 @@
 import { getRuntimeRemotes } from './getRuntimeRemotes';
-import { remoteVars } from './common';
+import { remoteVars } from './pure';
 
 xdescribe('getRuntimeRemotes', () => {
   afterEach(() => {
