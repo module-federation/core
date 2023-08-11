@@ -9,12 +9,7 @@ import type {
   WebpackRemoteContainer,
 } from '../types';
 
-import * as utils from './pure';
-
-export const remoteVars = utils.remoteVars;
-export const extractUrlAndGlobal = utils.extractUrlAndGlobal;
-export const loadScript = utils.loadScript;
-export const getRuntimeRemotes = utils.getRuntimeRemotes;
+import { loadScript } from './pure';
 
 export const createDelegatedModule = (
   delegate: string,

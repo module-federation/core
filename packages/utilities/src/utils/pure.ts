@@ -6,12 +6,12 @@ import {
 } from '../types/index';
 
 let pure = {} as RemoteVars;
-try {
-  // @ts-ignore
-  pure = process.env['REMOTES'] || {};
-} catch (e) {
-  // not in webpack bundle
-}
+// try {
+//   // @ts-ignore
+//   pure = process.env['REMOTES'] || {};
+// } catch (e) {
+//   // not in webpack bundle
+// }
 export const remoteVars = pure as RemoteVars;
 
 export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
