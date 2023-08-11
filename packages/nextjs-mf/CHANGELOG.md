@@ -2,6 +2,22 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [7.0.7](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-7.0.6...nextjs-mf-7.0.7) (2023-08-11)
+
+### Dependency Updates
+
+* `utils` updated to version `2.0.5`
+* `node` updated to version `1.0.6`
+* `utils` updated to version `2.0.5`
+* `node` updated to version `1.0.6`
+* `node` updated to version `1.0.6`
+
+### Bug Fixes
+
+* improve import ordering ([#1199](https://github.com/module-federation/nextjs-mf/issues/1199)) ([7354ed2](https://github.com/module-federation/nextjs-mf/commit/7354ed2b412bd9fd8745778e5212e10e8a3bf17f))
+
+
+
 ## [7.0.6](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-7.0.5...nextjs-mf-7.0.6) (2023-07-19)
 
 ### Dependency Updates
