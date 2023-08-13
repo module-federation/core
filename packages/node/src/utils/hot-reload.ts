@@ -1,6 +1,7 @@
 const hashmap = {} as Record<string, string>;
 import crypto from 'crypto';
-const requireCacheRegex = /(remote|runtime|server|hot-reload|react-loadable-manifest)/;
+const requireCacheRegex =
+  /(remote|runtime|server|hot-reload|react-loadable-manifest)/;
 
 const performReload = (shouldReload: any) => {
   if (!shouldReload) {
@@ -14,10 +15,14 @@ const performReload = (shouldReload: any) => {
   }
 
   //@ts-ignore
-  global.__remote_scope__ = {
+  globalThis.__remote_scope__ = {
     _config: {},
-    _medusa: {}
+    _medusa: {},
   };
+  //@ts-ignore
+  globalThis.backupScope = {};
+  //@ts-ignore
+  globalThis.factoryTracker = {};
 
   Object.keys(req.cache).forEach((key) => {
     if (requireCacheRegex.test(key)) {
@@ -26,7 +31,7 @@ const performReload = (shouldReload: any) => {
   });
 
   return true;
-}
+};
 /*
  This code is doing two things First it checks if there are any fake remotes in the
  global scope If so then we need to reload the server because a remote has changed
@@ -34,15 +39,16 @@ const performReload = (shouldReload: any) => {
  webpack whether its hash has changed since last time or not
   */
 export const revalidate = () => {
-  if (global.__remote_scope__) {
-    const remoteScope = global.__remote_scope__;
-
+  //@ts-ignore
+  if (globalThis.__remote_scope__) {
+    //@ts-ignore
+    const remoteScope = globalThis.__remote_scope__;
 
     return new Promise((res) => {
       const fetches = [];
       for (const property in remoteScope) {
         if (remoteScope[property].fake) {
-          console.log(
+          console.error(
             'unreachable remote found',
             property,
             'hot reloading to refetch'
@@ -54,20 +60,26 @@ export const revalidate = () => {
 
       const fetchModule = getFetchModule();
 
-      if(remoteScope._medusa) {
+      if (remoteScope._medusa) {
         for (const property in remoteScope._medusa) {
-          fetchModule(property).then((res:Response)=>res.json()).then((medusaResponse: any) => {
-            //@ts-ignore
-            if(medusaResponse.version !== remoteScope._medusa[property].version) {
-              console.log(
-                'medusa config changed',
-                property,
-                'hot reloading to refetch'
-              );
-              performReload(true);
-              return res(true);
-            }
-          });
+          fetchModule(property)
+            .then((res: Response) => res.json())
+            .then((medusaResponse: any) => {
+              //@ts-ignore
+              if (
+                medusaResponse.version !==
+                //@ts-ignore
+                remoteScope?._medusa[property].version
+              ) {
+                console.log(
+                  'medusa config changed',
+                  property,
+                  'hot reloading to refetch'
+                );
+                performReload(true);
+                return res(true);
+              }
+            });
         }
       }
 
@@ -149,7 +161,8 @@ export const revalidate = () => {
  allows us to use fetch in our tests without having to mock out nodefetch
   */
 function getFetchModule() {
-  const loadedModule = global.webpackChunkLoad || global.fetch;
+  //@ts-ignore
+  const loadedModule = globalThis.webpackChunkLoad || global.webpackChunkLoad || global.fetch;
   if (loadedModule) {
     return loadedModule;
   }

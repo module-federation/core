@@ -1,209 +1,51 @@
-# Module Federation For Next.js
+# ModuleFederation
 
-This plugin enables Module Federation on Next.js
+# Documentation
 
-This is a stable and viable solution to leverage Module Federation [until this issue is resolved](https://github.com/webpack/webpack/issues/11811).
+[module-federation/nextjs-mf](./packages/nextjs-mf)
 
-### Supports
+[module-federation/node](./packages/node)
 
-- next ^10.2.x || ^11.x.x || ^12.x.x
-- Client side only
+[module-federation/utilities](./packages/utilities)
 
-## Whats shared by default?
+[module-federation/typescript](./packages/typescript)
 
-Under the hood we share some next internals automatically
-You do not need to share these packages, sharing next internals yourself will cause errors.
+[module-federation/storybook-addon](./packages/storybook-addon)
 
-```js
-const sharedDefaults = {
-  "next/dynamic": {
-    requiredVersion: false,
-    singleton: true,
-  },
-  "styled-jsx": {
-    requiredVersion: false,
-    singleton: true,
-  },
-  "next/link": {
-    requiredVersion: false,
-    singleton: true,
-  },
-  "next/router": {
-    requiredVersion: false,
-    singleton: true,
-  },
-  "next/script": {
-    requiredVersion: false,
-    singleton: true,
-  },
-  "next/head": {
-    requiredVersion: false,
-    singleton: true,
-  },
-};
-```
+[module-federation/native-federation-typescript](./packages/native-federation-typescript)
 
-## Things to watch out for
+[module-federation/native-federation-tests](./packages/native-federation-tests)
 
-There's a bug in next.js which causes it to attempt and fail to resolve federated imports on files imported into the `pages/index.js`
+## Generate an application
 
-Its recommended using the low-level api to be safe.
+Run `nx g @nx/next:app my-app` to generate an application.
 
-```js
-const SampleComponent = dynamic(
-  () => window.next2.get("./sampleComponent").then((factory) => factory()),
-  {
-    ssr: false,
-  }
-);
-```
+> You can use any of the plugins above to generate applications as well.
 
-Make sure you are using `mini-css-extract-plugin@2` - version 2 supports resolving assets through `publicPath:'auto'`
+When using Nx, you can create multiple applications and libraries in the same workspace.
 
-## Options
+## Generate a library
 
-```js
-withFederatedSidecar(
-  {
-    name: "next2",
-    filename: "static/chunks/remoteEntry.js",
-    exposes: {
-      "./sampleComponent": "./components/sampleComponent.js",
-    },
-    shared: {
-      react: {
-        // Notice shared are NOT eager here.
-        requiredVersion: false,
-        singleton: true,
-      },
-    },
-  },
-  {
-    removePlugins: [
-      // optional
-      // these are the defaults
-      "BuildManifestPlugin",
-      "ReactLoadablePlugin",
-      "DropClientPage",
-      "WellKnownErrorsPlugin",
-      "ModuleFederationPlugin",
-    ],
-    publicPath: "auto", // defaults to 'auto', is optional
-  }
-);
-```
+Run `nx g @nx/js:lib my-lib` to generate a library.
 
-## Demo
+> You can also use any of the plugins above to generate libraries as well.
 
-You can see it in action here: https://github.com/module-federation/module-federation-examples/tree/master/nextjs
+Libraries are shareable across libraries and applications. They can be imported from `@module-federation/mylib`.
 
-## How to add a sidecar for exposes to your nextjs app
+## Development server
 
-1. Use `withFederatedSidecar` in your `next.config.js` of the app that you wish to expose modules from. We'll call this "next2".
+Run `nx serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
 
-```js
-// next.config.js
-const { withFederatedSidecar } = require("@module-federation/nextjs-mf");
+## Build
 
-module.exports = withFederatedSidecar({
-  name: "next2",
-  filename: "static/chunks/remoteEntry.js",
-  exposes: {
-    "./sampleComponent": "./components/sampleComponent.js",
-  },
-  shared: {
-    react: {
-      // Notice shared are NOT eager here.
-      requiredVersion: false,
-      singleton: true,
-    },
-  },
-})({
-  // your original next.config.js export
-});
-```
+Run `nx build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
-2. For the consuming application, we'll call it "next1", add an instance of the ModuleFederationPlugin to your webpack config, and ensure you have a [custom Next.js App](https://nextjs.org/docs/advanced-features/custom-app) `pages/_app.js` (or `.tsx`):
+## Running unit tests
 
-```js
-module.exports = {
-  webpack(config, options) {
-    config.plugins.push(
-      new options.webpack.container.ModuleFederationPlugin({
-        remoteType: "var",
-        remotes: {
-          next2: "next2",
-        },
-        shared: {
-          react: {
-            // Notice shared ARE eager here.
-            eager: true,
-            singleton: true,
-            requiredVersion: false,
-          },
-          // we have to share something to ensure share scope is initialized
-          "@module-federation/nextjs-mf/lib/noop": {
-            eager: false,
-          },
-        },
-      })
-    );
+Run `nx test my-app` to execute the unit tests via [Jest](https://jestjs.io).
 
-    // we attach next internals to share scope at runtime
-    config.module.rules.push({
-      test: /pages\/_app.[jt]sx?/,
-      loader: "@module-federation/nextjs-mf/lib/federation-loader.js",
-    });
+Run `nx affected:test` to execute the unit tests affected by a change.
 
-    return config;
-  },
-};
-```
+## Social links
 
-4. Add the remote entry for "next2" to the \_document for "next1"
-
-```js
-import Document, { Html, Head, Main, NextScript } from "next/document";
-
-class MyDocument extends Document {
-  static async getInitialProps(ctx) {
-    const initialProps = await Document.getInitialProps(ctx);
-    return { ...initialProps };
-  }
-
-  render() {
-    return (
-      <Html>
-        <Head />
-        <body>
-          <Main />
-          <script src="http://next2-domain-here.com/_next/static/chunks/remoteEntry.js" />
-          <NextScript />
-        </body>
-      </Html>
-    );
-  }
-}
-
-export default MyDocument;
-```
-
-5. Use next/dynamic to import from your remotes
-
-```js
-import dynamic from "next/dynamic";
-
-const SampleComponent = dynamic(
-  () => window.next2.get("./sampleComponent").then((factory) => factory()),
-  {
-    ssr: false,
-  }
-);
-```
-
-## Contact
-
-If you have any questions or need to report a bug
-<a href="https://twitter.com/ScriptedAlchemy"> Reach me on Twitter @ScriptedAlchemy</a>
-
-Or join this discussion thread: https://github.com/module-federation/module-federation-examples/discussions/978
+We are excited to announce the new [Discord community](https://discord.gg/T8c6yAxkbv) for Module Federation has been recently launched! This space will be used to discuss and share knowledge about the latest advancements in module federation and how to use it effectively. See you there!

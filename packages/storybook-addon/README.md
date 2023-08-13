@@ -48,8 +48,8 @@ module.exports = storybookConfig;
 Replace NX utils `withModuleFederation` in `webpack.config.js` with our utils `withModuleFederation`.
 Example:
 ```javascript
-const { composePlugins, withNx } = require('@nrwl/webpack');
-const { withReact } = require('@nrwl/react');
+const { composePlugins, withNx } = require('@nx/webpack');
+const { withReact } = require('@nx/react');
 const { withModuleFederation } = require('@module-federation/storybook-addon');
 
 const baseConfig = require('./module-federation.config');

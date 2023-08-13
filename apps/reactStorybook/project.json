@@ -5,7 +5,7 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nrwl/webpack:webpack",
+      "executor": "@nx/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
@@ -19,7 +19,9 @@
           "apps/reactStorybook/src/favicon.ico",
           "apps/reactStorybook/src/assets"
         ],
-        "styles": ["apps/reactStorybook/src/styles.scss"],
+        "styles": [
+          "apps/reactStorybook/src/styles.scss"
+        ],
         "scripts": [],
         "isolatedConfig": true,
         "webpackConfig": "apps/reactStorybook/webpack.config.js"
@@ -46,10 +48,16 @@
           "vendorChunk": false,
           "webpackConfig": "apps/reactStorybook/webpack.config.prod.js"
         }
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "serve": {
-      "executor": "@nrwl/react:module-federation-dev-server",
+      "executor": "@nx/react:module-federation-dev-server",
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "reactStorybook:build",
@@ -67,14 +75,16 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/reactStorybook/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": [
+          "apps/reactStorybook/**/*.{ts,tsx,js,jsx}"
+        ]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "jestConfig": "apps/reactStorybook/jest.config.ts",
@@ -88,7 +98,7 @@
       }
     },
     "serve-static": {
-      "executor": "@nrwl/web:file-server",
+      "executor": "@nx/web:file-server",
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "reactStorybook:build",
@@ -104,7 +114,7 @@
       }
     },
     "storybook": {
-      "executor": "@nrwl/storybook:storybook",
+      "executor": "@nx/storybook:storybook",
       "options": {
         "uiFramework": "@storybook/react",
         "port": 4400,
@@ -117,7 +127,7 @@
       }
     },
     "build-storybook": {
-      "executor": "@nrwl/storybook:build",
+      "executor": "@nx/storybook:build",
       "outputs": ["{options.outputDir}"],
       "options": {
         "uiFramework": "@storybook/react",

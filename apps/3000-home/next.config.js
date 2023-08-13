@@ -1,6 +1,9 @@
+const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+
+registerPluginTSTranspiler();
 const { withNx } = require('@nrwl/next/plugins/with-nx');
-const { createDelegatedModule } = require('@module-federation/utilities');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
+const { createDelegatedModule } = require('@module-federation/nextjs-mf/utilities');
 
 /**
  * @type {import('@nrwl/next/plugins/with-nx').WithNxOptions}
@@ -13,6 +16,7 @@ const nextConfig = {
   },
   webpack(config, options) {
     const { isServer } = options;
+    // used for testing build output snapshots
 
     const remotes = {
       shop: createDelegatedModule(require.resolve('./remote-delegate.js'), {
@@ -23,6 +27,7 @@ const nextConfig = {
       // checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
       //   remote: `checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
       // }),
+
       // shop: `shop@http://localhost:3001/_next/static/${
       //   isServer ? 'ssr' : 'chunks'
       // }/remoteEntry.js`,
@@ -48,7 +53,7 @@ const nextConfig = {
           antd: {},
         },
         extraOptions: {
-          automaticAsyncBoundary: true,
+          debug:false,
           exposePages: true,
           enableImageLoaderFix: true,
           enableUrlLoaderFix: true,

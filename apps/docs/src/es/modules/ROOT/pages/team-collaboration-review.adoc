@@ -1,0 +1,215 @@
+# Colaboración en equipo y revisión de código al trabajar con Módulos Federados
+
+Módulos Federados son una característica de Webpack 5 que permite crear y consumir módulos de JavaScript que son cargados dinámicamente en tiempo de ejecución. Permiten compartir código entre distintas aplicaciones sin necesidad de un paso de compilación o un registro de paquetes centralizado. Los módulos federados permiten crear una arquitectura más modular y desacoplada para las aplicaciones web.
+
+Sin embargo, trabajar con Módulos Federados también presentan algunos retos para la colaboración en equipo y la revisión del código. ¿Cómo asegurarse de que el código es consistente, legible y seguro en los distintos módulos y aplicaciones? ¿Cómo se gestionan las dependencias y se evitan cambios disruptivos? ¿Cómo probar y depurar el código en un entorno federado?
+
+En esta guía, exploraremos algunas de las mejores prácticas y herramientas para la colaboración en equipo y la revisión del código cuando se trabaja con Módulos Federados. Trataremos los siguientes temas:
+
+- Formateo de código y _linting_
+- Documentación del código y comentarios
+- Calidad de código y seguridad
+- Gestión de dependencias y versiones
+- Pruebas y depuración
+
+## Formateo del código y _linting_
+
+
+
+El formateo de código y el _linting_ son esenciales para mantener un estilo de código coherente y legible a través de todo el equipo. Ayudan a evitar errores comunes, a cumplir las buenas prácticas y a mejorar la legibilidad del código. También facilitan la revisión de los cambios en el código y la detección de posibles problemas.
+
+Hay muchas herramientas disponibles para el formateo y el _linting_ del código, como Prettier, ESLint, Stylelint, etc. Puede utilizarlas para formatear y corregir automáticamente el código de acuerdo con un conjunto de reglas definidas o adoptadas de una guía de estilo popular. También puede integrarlos con su editor, IDE o herramienta de compilación para formatear y corregir el código al guardarlo, al realizar _commit_, o al compilarlo.
+
+Al trabajar con Módulos Federados, se debe utilizar las mismas herramientas y reglas de formateo y _linting_ en todos los módulos y aplicaciones. Esto garantizará que su código sea coherente y compatible en los distintos entornos federados. También se debe configurar las herramientas para que sean compatibles con la sintaxis y las características de los Módulos Federados, como las importaciones dinámicas, los complementos de Federación de Módulos, etc.
+
+Por ejemplo, si se utiliza Prettier para formatear el código, puede añadir las siguientes opciones a su archivo `.prettierrc` para soportar importaciones dinámicas:
+
+[source, json]
+====
+{
+  "parser": "babel",
+  "plugins": ["@babel/plugin-syntax-dynamic-import"]
+}
+====
+
+Si está utilizando ESLint para el _linteo_ de código, puede añadir las siguientes opciones a su archivo `.eslintrc` para soportar plugins de Federación de Módulos:
+
+[source, json]
+====
+{
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 2020
+  },
+  "plugins": ["@module-federation/eslint-plugin"]
+}
+====
+
+## Documentación del código y comentarios
+
+La documentación del código y los comentarios son importantes para explicar el propósito, funcionalidad y uso del código. Ayudan a comunicar sus decisiones de diseño, suposiciones y limitaciones a otros desarrolladores que trabajan con su código o lo consumen. También facilitan el mantenimiento, la actualización y la reutilización del código en el futuro.
+
+Hay muchas herramientas disponibles para la documentación del código y los comentarios, como JSDoc, TypeScript Markdown, etc. Se pueden utilizar para escribir comentarios estructurados y descriptivos en el código para documentar los parámetros, valores de retorno, tipos, ejemplos, etc. de las funciones, clases, variables, etc. También se pueden utilizar para generar páginas HTML o archivos PDF que contengan la documentación del código.
+
+Cuando trabaje con Módulos Federados, debe utilizar las mismas herramientas y convenciones de documentación de código y comentarios en todos sus módulos y aplicaciones. Esto garantizará que su código esté bien documentado y sea comprensible en los distintos entornos federados. También debe documentar los aspectos específicos de los módulos federados en los comentarios del código, como los módulos expuestos, los módulos remotos, los módulos compartidos, etc.
+
+Por ejemplo, si utiliza JSDoc para la documentación del código, puede añadir las siguientes etiquetas a sus comentarios para documentar los módulos expuestos:
+
+[source, javascript]
+====
+/**
+ * A module that exposes a greeting function.
+ * @module greeting
+ * @expose greeting
+ */
+
+/**
+ * Una función que devuelve un mensaje de saludo.
+ * @param {string} name – El nombre de la persona a saludar.
+ * @returns {string} Un mensaje de saludo.
+ */
+export function greeting(name) {
+  return `Hello ${name}!`;
+}
+====
+
+Si está utilizando TypeScript para la documentación de código, puede añadir los siguientes tipos a sus comentarios para documentar los módulos remotos:
+
+[source, typescript]
+====
+/**
+ * Un tipo que representa un módulo remoto que proporciona una utilidad matemática.
+ * @remote math
+ */
+type MathModule = {
+  /**
+   * Una función que suma dos números
+   * @param {number} x – Primer número.
+   * @param {number} y – Segundo número.
+   * @returns {number} La suma entre x e y.
+   */
+  add: (x: number, y: number) => number;
+};
+
+/**
+ * Una función que importa y utiliza un módulo remoto.
+ * @async
+ * @returns {Promise<void>}
+ */
+async function useRemoteModule() {
+  // Importa el módulo remoto mediante importación dinámica
+  const math = await import("math@http://localhost:3001/remoteEntry.js");
+
+  // Utilizar el módulo remoto como un módulo normal
+  const result = math.add(1, 2);
+  console.log(result); // 3
+}
+====
+
+## Calidad de código y seguridad
+
+La calidad y la seguridad del código son esenciales para garantizar que el código es fiable, fácil de mantener y seguro. Ayudan a evitar fallos, errores, vulnerabilidades y problemas de rendimiento que pueden afectar a la funcionalidad y facilidad de uso del código. También facilitan la revisión de los cambios en el código y garantizan que cumplen las normas de calidad y seguridad del equipo.
+
+Hay muchas herramientas disponibles para la calidad y la seguridad del código, como Jest, Mocha, Chai, Sinon, Cypress, Codecov, SonarQube, Snyk, etc. Se pueden utilizar para escribir pruebas unitarias, pruebas de integración, pruebas de punta a punta, informes de cobertura de código, informes de análisis de código, análisis de vulnerabilidades, etc. para el código. También se pueden integrar con el editor, IDE o herramienta de compilación para ejecutar pruebas y generar informes al guardar, al realizar _commit_ o al compilar.
+
+Cuando trabaje con Módulos Federados, debe utilizar las mismas herramientas y técnicas de calidad y seguridad del código en todos sus módulos y aplicaciones. Esto garantizará que su código se pruebe y verifique en diferentes entornos federados. También debe probar y analizar los aspectos específicos de los Módulos Federados en su código, como la carga dinámica, los complementos de Federación de Módulos, el ámbito compartido, etc.
+
+Por ejemplo, si está utilizando Jest para pruebas unitarias, puede añadir las siguientes opciones a su archivo `jest.config.js` para soportar importaciones dinámicas:
+
+[source, javascript]
+====
+module.exports = {
+  // Use babel-jest para transformer las importaciones dinámicas
+  transform: {
+    "^.+\\.js$": "babel-jest",
+  },
+  // Use @module-federation/jest-federated-module-loader para simular módulos remotos.
+  moduleNameMapper: {
+    "@module-federation/jest-federated-module-loader": "@module-federation/jest-federated-module-loader",
+  },
+};
+```
+
+Si utiliza Codecov para los informes de cobertura de código, puede añadir las siguientes opciones a su archivo `.codecov.yml` para ignorar los complementos de federación de módulos:
+
+[source, yml]
+====
+ignore:
+  - "**/webpack.config.js" # Ignorar los archivos de configuración de webpack
+  - "**/remoteEntry.js" # Ignorar archivos de entrada remota generados por los complementos de federación de módulos
+====
+
+## Gestión de dependencias y versionado
+
+La gestión de dependencias y el control de versiones son importantes para gestionar los módulos externos de los que depende su código. Estos ayudan a especificar las versiones exactas de los módulos que requiere el código, evitar conflictos y problemas de compatibilidad con otros módulos o aplicaciones, y actualizar tus módulos cuando hay nuevas versiones disponibles. También facilitan la revisión de los cambios en el código y garantizan que no se introduzcan cambios de última hora o regresiones.
+
+Hay muchas herramientas disponibles para la gestión de dependencias y versionado, como npm, yarn, pnpm, lerna, semver, etc. Estas se pueden utilizar para instalar, actualizar y publicar los módulos en un registro de paquetes, como npm o GitHub Packages. También se pueden utilizar para definir los rangos de versiones de sus módulos utilizando el versionado semántico, que indica el nivel de cambios en cada versión utilizando números mayores, menores y de parche.
+
+Cuando trabaje con Módulos Federados, debe utilizar las mismas herramientas y prácticas de gestión de dependencias y versionado en todos sus módulos y aplicaciones. Esto garantizará que los módulos se instalen y actualicen de forma consistente y correcta en los distintos entornos federados. También debe utilizar el versionado semántico para sus módulos y seguir el principio de compatibilidad con versiones anteriores, lo que significa que no debe introducir cambios de disruptivos en versiones menores o de parche.
+
+Por ejemplo, si utiliza npm para la gestión de dependencias, puede añadir las siguientes opciones a su archivo `package.json` para especificar los rangos de versiones de sus dependencias utilizando el versionado semántico:
+
+[source, json]
+====
+{
+  "dependencies": {
+    "lodash": "^4.17.21", // Acepta cualquier versión de parche igual o superior a 4.17.21
+    "react": "~17.0.2", // Acepta cualquier versión de parche igual o superior a 17.0.2 pero inferior a 17.1.0
+    "webpack": "5.65.0" // Acepta sólo la versión exacta 5.65.0
+  }
+}
+====
+
+Si está utilizando lerna para el versionado, puede añadir las siguientes opciones a su fichero `lerna.json` para utilizar el versionado semántico de sus paquetes:
+
+[source, json]
+====
+{
+  "version": "independent", // Uso de versiones independientes para cada paquete
+  "command": {
+    "version": {
+      "conventionalCommits": true // Utilizar commits convencionales para determinar el salto de versión
+    }
+  }
+}
+====
+
+## Pruebas y depuración
+
+Las pruebas y la depuración son esenciales para verificar la funcionalidad y usabilidad del código. Ayudan a encontrar y corregir errores, fallos y problemas que pueden afectar al comportamiento y rendimiento del código. También facilitan la revisión de los cambios en el código y garantizan que no se introduzcan nuevos errores o regresiones.
+
+Hay muchas herramientas disponibles para probar y depurar, como Chrome DevTools, Firefox DevTools, Visual Studio Code, Webpack Dev Server, etc. Se pueden utilizar para ejecutar el código en diferentes navegadores y dispositivos, inspeccionar y modificar código y datos en tiempo de ejecución, establecer puntos de interrupción y ver expresiones, evaluar y ejecutar código en la consola, etc. También es posible integrarlos con un editor, IDE o herramienta de compilación para lanzar y depurar el código al guardar, al confirmar o al compilar.
+
+Cuando se trabaja con Módulos Federados, es necesario utilizar las mismas herramientas y técnicas de prueba y depuración en todos sus módulos y aplicaciones. Esto garantizará que el código se pruebe y depure en diferentes entornos federados. También se debe probar y depurar los aspectos específicos de los módulos federados en el código, como la carga dinámica, los complementos de Federación de Módulos, el ámbito compartido, etc.
+
+Por ejemplo, si utiliza Chrome DevTools para depurar, puede seguir los siguientes pasos para depurar sus módulos federados:
+
+- Abra el panel “Sources” y habilite “JavaScript source maps” en configuración.
+- Navegue a la carpeta de webpack:// y busque los módulos federados que desee depurar.
+- Establezca puntos de interrupción o puntos de registro en los módulos federados como lo haría normalmente.
+- Recargue la página o active la importación dinámica de los módulos federados.
+- Observe la ejecución de los módulos federados en el depurador.
+
+(screenshot)
+
+Si está utilizando Webpack Dev Server para realizar pruebas, puede utilizar las siguientes opciones para habilitar el reemplazo de módulos en caliente (HMR) para sus módulos federados:
+
+
+
+[source, javascript]
+module.exports = {
+  // Habilitar HMR para el modo de desarrollo
+  mode: "development",
+  devServer: {
+    hot: true,
+  },
+  plugins: [
+    // Utilice ModuleFederationPlugin para exponer o consumir módulos federados
+    new ModuleFederationPlugin({
+      // Habilitar HMR para módulos federados
+      hot: true,
+      // Other options...
+    }),
+  ],
+};
+====

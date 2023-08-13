@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/native-federation-tests",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Bundler agnostic unplugin to share federated tests",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
@@ -52,7 +52,7 @@
     "ansi-colors": "^4.1.3",
     "axios": "^1.3.4",
     "rambda": "^7.5.0",
-    "tsup": "^6.7.0",
+    "tsup": "^7.0.0",
     "unplugin": "^1.3.1"
   }
 }

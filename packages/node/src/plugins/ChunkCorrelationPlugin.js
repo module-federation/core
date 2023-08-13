@@ -65,7 +65,15 @@ function getRemoteModules(stats) {
  * @returns {WebpackStatsModule[]}
  */
 function getExposedModules(stats, exposedFile) {
-  return stats.modules.filter((mod) => mod.name.startsWith(exposedFile));
+  return stats.modules.filter((mod) => mod.name?.startsWith(exposedFile));
+}
+
+function getDependenciesOfChunk(stats, chunk) {
+  return stats.chunks
+    .filter((c) => c.children.includes(chunk.id))
+    .reduce((acc, c) => {
+      return acc.concat(c.modules);
+    }, []);
 }
 
 /**
@@ -75,14 +83,28 @@ function getExposedModules(stats, exposedFile) {
  * @returns {Exposed}
  */
 function getExposed(stats, mod) {
-  const chunks = stats.chunks.filter((chunk) =>
-    mod.chunks.some((id) => id === chunk.id)
-  );
+  const chunks = stats.chunks.filter((chunk) => {
+    return chunk.modules.find((modsInChunk) => {
+      return modsInChunk.id === mod.id && !modsInChunk.dependent;
+    });
+  });
+  const dependencies = stats.modules
+    .filter((sharedModule) => {
+      if (sharedModule.moduleType !== 'consume-shared-module') return false;
+      return sharedModule.issuerId === mod.id;
+    })
+    .map((sharedModule) => {
+      return sharedModule.identifier.split('|')[2];
+    });
 
   const flatChunks = flatMap(chunks, (chunk) => ({
-    [chunk.id]: chunk.files.map(
-      (f) => `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
-    ),
+    [chunk.id]: {
+      files: chunk.files.map(
+        (f) =>
+          `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
+      ),
+      requiredModules: dependencies,
+    },
   }));
 
   return flatChunks.reduce((acc, chunk) => {
@@ -105,6 +127,22 @@ function searchIssuer(mod, check) {
   return !!mod.modules && mod.modules.some((m) => searchIssuer(m, check));
 }
 
+function searchReason(mod, check) {
+  if (mod.reasons && check(mod.reasons)) {
+    return true;
+  }
+
+  return !!mod.reasons && mod.reasons.some((m) => searchReason(m, check));
+}
+
+function searchIssuerAndReason(mod, check) {
+  const foundIssuer = searchIssuer(mod, (issuer) => check(issuer));
+  if (foundIssuer) return foundIssuer;
+  return searchReason(mod, (reason) =>
+    reason.some((r) => check(r?.moduleIdentifier))
+  );
+}
+
 /**
  * @param {import("webpack").Module} mod
  * @param {(issuer: string) => boolean} check
@@ -118,6 +156,37 @@ function getIssuers(mod, check) {
   return (
     (mod.modules &&
       mod.modules.filter((m) => searchIssuer(m, check)).map((m) => m.issuer)) ||
+    []
+  );
+}
+
+function getIssuersAndReasons(mod, check) {
+  if (mod.issuer && check(mod.issuer)) {
+    return [mod.issuer];
+  }
+  if (
+    mod.reasons &&
+    searchReason(mod, (reason) =>
+      reason.some((r) => check(r?.moduleIdentifier))
+    )
+  ) {
+    return mod.reasons
+      .filter((r) => {
+        return r.moduleIdentifier && check(r.moduleIdentifier);
+      })
+      .map((r) => r.moduleIdentifier);
+  }
+
+  return (
+    (mod.modules &&
+      mod.modules
+        .filter((m) => searchIssuerAndReason(m, check))
+        .map((m) => {
+          return (
+            m.issuer ||
+            m.reasons.find((r) => check(r?.moduleIdentifier)).moduleIdentifier
+          );
+        })) ||
     []
   );
 }
@@ -161,10 +230,10 @@ function parseFederatedIssuer(issuer) {
 function getSharedModules(stats, federationPlugin) {
   return flatMap(
     stats.chunks.filter((chunk) => {
-      if (!stats.entrypoints[federationPlugin._options.name]) {
+      if (!stats.entrypoints[federationPlugin.name]) {
         return false;
       }
-      return stats.entrypoints[federationPlugin._options.name].chunks.some(
+      return stats.entrypoints[federationPlugin.name].chunks.some(
         (id) => chunk.id === id
       );
     }),
@@ -175,7 +244,7 @@ function getSharedModules(stats, federationPlugin) {
             c.id === id &&
             c.files.length > 0 &&
             c.parents.some((p) =>
-              stats.entrypoints[federationPlugin._options.name].chunks.some(
+              stats.entrypoints[federationPlugin.name].chunks.some(
                 (c) => c === p
               )
             ) &&
@@ -220,35 +289,40 @@ function getMainSharedModules(stats) {
 
   return flatMap(chunks, (chunk) =>
     flatMap(chunk.children, (id) =>
-      stats.chunks.filter(
-        (c) =>
+      stats.chunks.filter((c) => {
+        return (
           c.id === id &&
           c.files.length > 0 &&
-          c.modules.some((m) =>
-            searchIssuer(m, (issuer) =>
-              issuer?.startsWith('consume-shared-module')
-            )
-          )
-      )
+          c.modules.some((m) => {
+            return searchIssuerAndReason(m, (check) =>
+              check?.startsWith('consume-shared-module')
+            );
+          })
+        );
+      })
     )
   )
-    .map((chunk) => ({
-      chunks: chunk.files.map(
-        (f) =>
-          `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
-      ),
-      provides: flatMap(
-        chunk.modules.filter((m) =>
-          searchIssuer(m, (issuer) =>
-            issuer?.startsWith('consume-shared-module')
-          )
+    .map((chunk) => {
+      return {
+        chunks: chunk.files.map(
+          (f) =>
+            `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
         ),
-        (m) =>
-          getIssuers(m, (issuer) => issuer?.startsWith('consume-shared-module'))
-      )
-        .map(parseFederatedIssuer)
-        .filter((f) => !!f),
-    }))
+        provides: flatMap(
+          chunk.modules.filter((m) =>
+            searchIssuerAndReason(m, (check) =>
+              check?.startsWith('consume-shared-module')
+            )
+          ),
+          (m) =>
+            getIssuersAndReasons(m, (issuer) =>
+              issuer?.startsWith('consume-shared-module')
+            )
+        )
+          .map(parseFederatedIssuer)
+          .filter((f) => !!f),
+      };
+    })
     .filter((c) => c.provides.length > 0);
 }
 
@@ -258,10 +332,8 @@ function getMainSharedModules(stats) {
  * @param {import("webpack").container.ModuleFederationPlugin} federationPlugin
  * @returns {FederatedStats}
  */
-function getFederationStats(stats, federationPlugin) {
-  const exposedModules = Object.entries(
-    federationPlugin._options.exposes
-  ).reduce(
+function getFederationStats(stats, federationPluginOptions) {
+  const exposedModules = Object.entries(federationPluginOptions.exposes).reduce(
     (exposedModules, [exposedAs, exposedFile]) =>
       Object.assign(exposedModules, {
         [exposedAs]: getExposedModules(stats, exposedFile),
@@ -280,9 +352,9 @@ function getFederationStats(stats, federationPlugin) {
 
   /** @type {string} */
   const remote =
-    federationPlugin._options.library?.name || federationPlugin._options.name;
+    federationPluginOptions.library?.name || federationPluginOptions.name;
 
-  const sharedModules = getSharedModules(stats, federationPlugin);
+  const sharedModules = getSharedModules(stats, federationPluginOptions);
   const remoteModules = getRemoteModules(stats);
   return {
     remote,
@@ -290,7 +362,7 @@ function getFederationStats(stats, federationPlugin) {
       stats.assetsByChunkName[remote] &&
       stats.assetsByChunkName[remote].length === 1
         ? stats.assetsByChunkName[remote][0]
-        : federationPlugin._options.filename
+        : federationPluginOptions.filename
     }`,
     sharedModules,
     exposes,
@@ -338,51 +410,160 @@ class FederationStatsPlugin {
       console.error('No ModuleFederationPlugin(s) found.');
       return;
     }
-
+    // This is where the plugin is tapping into the Webpack compilation lifecycle.
+    // It's listening to the 'thisCompilation' event, which is triggered once for each new compilation.
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
-      compilation.hooks.processAssets.tapPromise(
+      // 'processAssets' is a hook that gets triggered when Webpack has finished the compilation
+      // and is about to generate the final assets. It allows plugins to do additional processing on the assets.
+      compilation.hooks.processAssets.tap(
         {
           name: PLUGIN_NAME,
-          stage: compilation.constructor.PROCESS_ASSETS_STAGE_ANALYSE,
+          stage: compilation.constructor.PROCESS_ASSETS_STAGE_REPORT,
         },
-        async () => {
-          const stats = compilation.getStats().toJson({
-            performance: false,
-            time: false,
-            logging: 'none',
-            loggingDebug: false,
-            loggingTrace: false,
-            source: false,
-            children: false,
-            errors: false,
-            warnings: false,
-            errorsCount: false,
-            warningsCount: false,
-            builtAt: false,
-            timings: false,
-          });
-
-          const federatedModules = federationPlugins.map((federationPlugin) =>
-            getFederationStats(stats, federationPlugin)
+        () => {
+          // Extract the options from the federation plugins.
+          const [federationOpts] = federationPlugins.map(
+            (federationPlugin) => federationPlugin?._options
           );
 
+          let container;
+          // Loop through all entry points and if one matches the name of a federation plugin,
+          // store the entry point in the 'container' variable.
+          for (const [name, entry] of compilation.entrypoints) {
+            if (container) break;
+            federationOpts.name.includes(name) && (container = entry);
+          }
+
+          // If no matching entry point was found, exit the function early.
+          if (!container) return;
+
+          // Get the chunk associated with the entry point.
+          container = container?.getEntrypointChunk();
+
+          // Get the module associated with the chunk.
+          const [containerEntryModule] = Array.from(
+            compilation.chunkGraph.getChunkEntryModulesIterable(container)
+          );
+
+          const blocks = containerEntryModule.blocks;
+
+          const exposedResolved = {};
+          const builtExposes = {};
+
+          // Iterate over each dependency block associated with the entry module.
+          for (let block of blocks) {
+            const blockmodule = block;
+
+            // Iterate over each dependency within the block.
+            for (const dep of blockmodule.dependencies) {
+              // Get the module that corresponds to the dependency.
+              const connection = compilation.moduleGraph.getConnection(dep);
+              if(!connection) continue;
+              const { module } = connection;
+              const moduleChunks =
+                compilation.chunkGraph.getModuleChunksIterable(module);
+              // Iterate over each chunk associated with the module.
+              for (let exposedChunk of moduleChunks) {
+                // Determine the runtime for the chunk.
+                const runtime =
+                  typeof exposedChunk.runtime === 'string'
+                    ? new Set([exposedChunk.runtime])
+                    : exposedChunk.runtime;
+
+                // Check if the chunk is meant for the same runtime as the entry module.
+                const isForThisRuntime = runtime.has(
+                  containerEntryModule._name
+                );
+
+                // Get the root modules for the chunk.
+                const rootModules =
+                  compilation.chunkGraph.getChunkRootModules(exposedChunk);
+
+                // Check if the module associated with the dependency is one of the root modules for the chunk.
+                const moduleActuallyNeedsChunk = rootModules.includes(module);
+
+                // If the chunk is not meant for this runtime or the module doesn't need the chunk, skip the rest of this iteration.
+                if (!isForThisRuntime || !moduleActuallyNeedsChunk) continue;
+
+                // Add the files associated with the chunk to the 'builtExposes' object under the name of the exposed module.
+                builtExposes[dep.exposedName] = [
+                  ...(builtExposes[dep.exposedName] || []),
+                  ...(exposedChunk.files || []),
+                ];
+              }
+
+              // Add the module to the 'exposedResolved' object under the name of the exposed module.
+              exposedResolved[dep.exposedName] = module;
+            }
+          }
+
+          // Generate a JSON object that contains detailed information about the compilation.
+          const stats = compilation.getStats().toJson({
+            all: false,
+            assets: true,
+            reasons: true,
+            modules: true,
+            children: true,
+            chunkGroups: true,
+            chunkModules: true,
+            chunkOrigins: false,
+            entrypoints: true,
+            namedChunkGroups: false,
+            chunkRelations: true,
+            chunks: true,
+            ids: true,
+            nestedModules: false,
+            outputPath: true,
+            publicPath: true,
+          });
+
+          // Apply a function 'getFederationStats' on the stats with the federation plugin options as the second argument.
+          const federatedModules = getFederationStats(stats, federationOpts);
+
+          // Assign the 'builtExposes' object to the 'exposes' property of the 'federatedModules' object.
+          federatedModules.exposes = builtExposes;
+
+          // Apply a function 'getMainSharedModules' on the stats.
           const sharedModules = getMainSharedModules(stats);
 
+          // Create a Set to hold the vendor chunks.
+          const vendorChunks = new Set();
+
+          // Iterate over the shared modules.
+          for (const share of sharedModules) {
+            if (share?.chunks) {
+              // If a shared module has chunks, add them to the 'vendorChunks' Set.
+              for (const file of share.chunks) {
+                vendorChunks.add(file);
+              }
+            }
+          }
+
+          // Construct an object that contains the shared and federated modules.
           const statsResult = {
             sharedModules,
-            federatedModules,
+            federatedModules: [federatedModules],
           };
 
+          // Convert the 'statsResult' object to a JSON string.
           const statsJson = JSON.stringify(statsResult);
+
+          // Convert the JSON string to a buffer.
           const statsBuffer = Buffer.from(statsJson, 'utf-8');
+
+          // Construct an object that represents the source of the final asset.
           const statsSource = {
             source: () => statsBuffer,
             size: () => statsBuffer.length,
           };
 
+          // Get the filename of the final asset from the plugin options.
           const { filename } = this._options;
 
+          // Check if an asset with the same filename already exists.
           const asset = compilation.getAsset(filename);
+
+          // If an asset with the same filename already exists, update it. Otherwise, create a new asset.
           if (asset) {
             compilation.updateAsset(filename, statsSource);
           } else {

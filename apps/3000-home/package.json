@@ -5,12 +5,13 @@
   "dependencies": {
     "antd": "^4.22.3",
     "lodash": "4.17.21",
-    "next": "13.3.1",
+    "next": "13.4.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "js-cookie": "^3.0.1"
   },
   "devDependencies": {
-    "@module-federation/nextjs-mf": "*"
+    "@module-federation/nextjs-mf": "6.7.1",
+    "@module-federation/utilities": "1.9.1"
   }
 }

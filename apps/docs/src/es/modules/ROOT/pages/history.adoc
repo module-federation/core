@@ -1,0 +1,34 @@
+= Historia de la Federación de Módulos
+
+Federación de Módulos es una característica relativamente nueva en el mundo del desarrollo web, introducida por primera vez en Webpack 5. En esta guía, exploraremos la historia de Federación de Módulos, incluyendo sus orígenes, evolución y los principales hitos que llevaron a su desarrollo.
+
+== Orígenes de la Federación de Módulos
+
+La idea de compartir código entre múltiples aplicaciones no es nueva. De hecho, ha sido una práctica común en el desarrollo de software durante muchos años. Sin embargo, el auge de los microservicios y la necesidad de arquitecturas altamente modulares y escalables en el desarrollo web crearon una nueva demanda para compartir código entre múltiples aplicaciones.
+
+Los primeros intentos de resolver este problema implicaban el uso de _iframes_ o inclusiones del lado del servidor para incrustar código de una aplicación en otra. Sin embargo, estos enfoques tenían limitaciones significativas en términos de rendimiento, flexibilidad y seguridad.
+
+== Webpack 5 y el nacimiento de Federación de Módulos
+
+En 2020, Webpack 5 fue lanzado con una nueva característica llamada "Federación de Módulos" (Module Federation). Esta característica supuso un importante paso adelante en la evolución de la compartición de código en el desarrollo web.
+
+Federación de Módulos permite a los desarrolladores compartir módulos completos entre múltiples aplicaciones, no solo código relacionado con Redux. Esto se logra extendiendo el empaquetador de módulos Webpack para admitir la carga remota de módulos y utilizando un tiempo de ejecución llamado el “Module Federation Runtime” para manejar la carga y resolución de dependencias de los módulos remotos.
+
+== Evolución de Federación de Módulos
+
+Desde su introducción en Webpack 5, Federación de Módulos
+ha seguido evolucionando y mejorando. En Webpack 5, se limitaba a compartir módulos entre aplicaciones creadas con Webpack. Sin embargo, en Webpack 5.1, se añadió soporte para compartir módulos entre aplicaciones creadas con diferentes agrupadores de módulos, como Rollup o Parcel.
+
+Además, la comunidad ha desarrollado una serie de herramientas y complementos para ampliar las capacidades de Federación de Módulos, incluyendo el "Module Federation Plugin" para Next.js, y el "Federation Plugin" para Snowpack.
+
+== Futuro de Federación de Módulos
+
+Federación de Módulos tiene el potencial de cambiar significativamente la forma en que abordamos el intercambio de código en el desarrollo web. A medida que siga evolucionando y mejorando, es probable que veamos una mayor adopción e integración con otras herramientas y marcos de trabajo.
+
+Algunas de las posibles direcciones futuras de Federación de Módulos son:
+
+- Soporte mejorado para compartir módulos dinámicos y asíncronos.
+- Integración con funciones sin servidor y otros servicios backend.
+- Soporte para compartir módulos a través de múltiples lenguajes de programación y entornos.
+
+A medida que Federación de Módulos siga evolucionando, seguiremos actualizando la documentación, para ofrecerle las mejores técnicas sobre cómo adoptar e integrarse con otras herramientas y _frameworks_.

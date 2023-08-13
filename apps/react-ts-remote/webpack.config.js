@@ -1,10 +1,13 @@
-const { withModuleFederation } = require('@nrwl/react/module-federation');
+const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+
+registerPluginTSTranspiler();
+const { withModuleFederation } = require('@nx/react/module-federation');
 const { FederatedTypesPlugin } = require('@module-federation/typescript');
 
 const baseConfig = require('./module-federation.config');
 
 /**
- * @type {import('@nrwl/react/module-federation').ModuleFederationConfig}
+ * @type {import('@nx/react/module-federation').ModuleFederationConfig}
  **/
 const defaultConfig = {
   ...baseConfig,
@@ -16,18 +19,12 @@ module.exports = async (config, context) => {
   /** @type {import('webpack').Configuration} */
   const parsedConfig = mf(config, context);
 
-  let moduleFederationPlugin;
-
-  const plugins = parsedConfig.plugins?.filter((p) => {
-    if (p.constructor.name === 'ModuleFederationPlugin') {
-      moduleFederationPlugin = p;
-      return false;
-    }
-    return true;
-  });
+  const moduleFederationPlugin = parsedConfig.plugins?.find(
+    (p) => p.constructor.name === 'ModuleFederationPlugin'
+  );
 
   parsedConfig.plugins = [
-    ...(plugins || []),
+    ...(parsedConfig.plugins || []),
     new FederatedTypesPlugin({
       federationConfig: moduleFederationPlugin._options,
     }),

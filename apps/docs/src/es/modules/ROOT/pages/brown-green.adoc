@@ -1,0 +1,74 @@
+= Desarrollo _Brownfield_ vs. _Greenfield_ con Federación de Módulos. 
+ 
+En esta página de documentación, exploraremos dos enfoques diferentes para implementar Federación de Módulos en sus proyectos: Desarrollo _Brownfield_ y _Greenfield_. Esta guía está dirigida a usuarios avanzados y proporcionará una comprensión completa de las diferencias, ventajas e inconvenientes de cada enfoque.
+
+== Visión general 
+
+Federación de Módulos es una potente herramienta de Webpack 5 que permite compartir dependencias y módulos entre aplicaciones, proporcionando importantes mejoras de rendimiento y permitiendo la creación de aplicaciones distribuidas.
+
+
+Al considerar la implementación de la Federación de Módulos en sus proyectos, a menudo se encontrará con dos enfoques de desarrollo principales en función del estado de su proyecto actual:
+
+- Desarrollo _Brownfield_: Integración de Federación de Módulos en una aplicación existente.
+- Desarrollo _Greenfield_: Creación de una nueva aplicación desde cero con Federación de Módulos en mente. 
+ 
+Esta guía tiene como objetivo proporcionar una comprensión en profundidad de ambas estrategias de desarrollo para ayudarle a tomar una decisión informada sobre si empezar desde cero, o inclinarse más hacia una refactorización.
+
+== Desarrollo _Brownfield_ con Federación de Módulos 
+
+El desarrollo _Brownfield _ se refiere a la integración de Federación de Módulos en una aplicación existente. Puede ser un proceso complejo, ya que implica refactorizar el código existente y adaptar la arquitectura de la aplicación para que funcione con Federación de Módulos.
+ 
+=== Ventajas 
+ 
+- Aprovechar el código y los recursos existentes: Puede seguir construyendo sobre su aplicación existente, sin necesidad de empezar desde cero. 
+- Mejoras incrementales: Puede introducir gradualmente Federación de Módulos en su aplicación, mejorando el rendimiento y el código compartido con el tiempo.
+
+=== Desafíos 
+
+- Refactorización del código existente: Es posible que tenga que refactorizar partes de su aplicación existente para acomodar Federación de Módulos. Esto puede llevar mucho tiempo e introducir inestabilidad temporal. 
+ - Posibles cambios en la arquitectura: Es posible que la arquitectura de su aplicación actual no esté optimizada para la Federación de Módulos, lo que puede requerir cambios significativos para aprovechar todo su potencial. 
+- Gestión de dependencias: Garantizar la coherencia y la compatibilidad de las dependencias compartidas puede ser un reto en los proyectos _Brownfield_, ya que diferentes partes de la aplicación pueden depender de varias versiones de dependencias.
+
+
+=== Mejores prácticas 
+
+- Analice su aplicación actual: Identifique las áreas que más se beneficiarían de Federación de Módulos y priorícelas. 
+- Planifique la refactorización: Desarrolle un plan detallado para refactorizar su aplicación e integrar Federación de Módulos. Considere la posibilidad de dividir el proceso en tareas más pequeñas y manejables. 
+- Realice pruebas exhaustivas: Asegúrese de contar con una estrategia de pruebas sólida para detectar posibles problemas durante el proceso de refactorización.
+
+=== Ejemplo de refactorización  
+
+//TODO:  
+
+
+== Desarrollo _Greenfield_ con Federación de Módulos 
+
+El desarrollo _Greenfield_ se refiere a la creación de una nueva aplicación desde cero, con Federación de Módulos en mente desde el principio. Este enfoque le permite diseñar y planear la arquitectura de su aplicación para aprovechar al máximo las capacidades de Federación de Módulos
+ 
+=== Ventajas 
+
+- Arquitectura optimizada: Diseñe la arquitectura de su aplicación para aprovechar al máximo la Federación de Módulos desde el principio, maximizando sus beneficios. 
+- Gestión de dependencias más sencilla: Planifique y gestione las dependencias teniendo en cuenta Federación de Módulos, garantizando la compatibilidad y coherencia en toda su aplicación. 
+- Implementación más rápida: Al empezar desde cero, no es necesario refactorizar el código existente, lo que reduce la complejidad potencial. 
+
+=== Desafíos 
+
+- Retorno de la inversión incierto: Al empezar con una aplicación nueva, puede resultar difícil calcular el retorno de la inversión (ROI) exacto de la implantación de Federación de Módulos. 
+- Posibilidad de sobre optimización: En un esfuerzo por aprovechar al máximo la Federación de Módulos, es posible que optimice en exceso la arquitectura, lo que podría generar una complejidad innecesaria. 
+ 
+=== Mejores prácticas 
+ 
+- Establezca objetivos claros: Defina claramente los objetivos de su proyecto _Greenfield_, incluidos los beneficios esperados de la implantación de la Federación de Módulos. 
+- Diseñe pensando en la escalabilidad: Asegúrese de que la arquitectura de su aplicación es flexible y escalable, lo que le permitirá sacar el máximo partido de la Federación de Módulos a medida que crezca su proyecto. 
+- Mantenga la simplicidad: Evite complicar en exceso el diseño de su aplicación para aprovechar al máximo las ventajas de la Federación de Módulos. Céntrese en la simplicidad y la facilidad de mantenimiento.
+
+
+== Conclusión 
+
+Ambos enfoques de desarrollo, _Brownfield_ y _Greenfield_, ofrecen ventajas y retos únicos a la hora de implantar la Federación de Módulos en sus proyectos. La elección correcta para su proyecto depende de sus necesidades, recursos y objetivos específicos. 
+ 
+Para aplicaciones existentes que podrían beneficiarse de la Federación de Módulos, el desarrollo _Brownfield_ puede ser el enfoque más adecuado. Sin embargo, prepárese para posibles cambios de refactorización y arquitectura. 
+ 
+Por otro lado, si está comenzando un nuevo proyecto y desea crear una aplicación optimizada para La Federación de Módulos desde el principio, el desarrollo _Greenfield_ podría ser la mejor opción. Este enfoque le permite crear una arquitectura que aprovecha al máximo las capacidades de la Federación de Módulos, al tiempo que garantiza una gestión de dependencias más sencilla. 
+ 
+En última instancia, la decisión entre el desarrollo _Brownfield_ y _Greenfield_ depende de los requisitos y limitaciones exclusivos de su proyecto. Considere cuidadosamente las ventajas y desafíos de cada enfoque y adopte las mejores prácticas para maximizar los beneficios de la implementación de la Federación de Módulos en sus aplicaciones. Con una estrategia bien pensada, puede aprovechar el poder de la Federación de Módulos para crear sistemas distribuidos eficientes y de alto rendimiento.

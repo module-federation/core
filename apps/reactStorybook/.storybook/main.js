@@ -8,7 +8,7 @@ module.exports = {
   ],
   addons: [
     '@storybook/addon-essentials',
-    '@nrwl/react/plugins/storybook',
+    '@nx/react/plugins/storybook',
     {
       name: '@module-federation/storybook-addon',
       options: {

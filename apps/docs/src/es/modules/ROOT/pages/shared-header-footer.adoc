@@ -1,0 +1,409 @@
+= Dónde empezar: Encabezado o pie de página compartidos utilizando Federación de Módulos
+
+En esta guía, aprendera cómo crear un componente compartido de cabecera y pie de página utilizando la Federación de Módulos, y cómo utilizarlos en dos aplicaciones diferentes. También aprenderá cómo manejar el enrutamiento, la autenticación y el estilo en los componentes compartidos.
+
+== Paso 1: Crear los componentes de cabecera y pie de página
+
+El primer paso es crear un proyecto separado que contendrá los componentes de cabecera y pie de página. Este proyecto actuará como anfitrión de los componentes compartidos y los expondrá utilizando la Federación de Módulos.
+
+- Cree una nueva carpeta llamada `shared-components` y navege hasta ella.
+- Ejecute `npm init -y` para inicializar un nuevo proyecto Node.js.
+- Ejecute `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @webpack-cli/serve` para instalar las dependencias necesarias.
+- Cree un nuevo archivo llamado `webpack.config.js` en la carpeta raíz y añada el siguiente código:
++
+[source, javascript]
+----
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+module.exports = {
+  mode: "development",
+  devServer: {
+    port: 3000,
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+  ],
+};
+----
++
+Esta es una configuración básica de Webpack que servirá un archivo HTML usando el webpack-dev-server.
++
+- Crear una nueva carpeta llamada public y añadir un nuevo archivo llamado index.html con el siguiente contenido:
++
+[source, html]
+----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Componente compartido</title>
+</head>
+<body>
+  <div id="header"></div>
+  <div id="footer"></div>
+</body>
+</html>
+----
++
+Este es el archivo HTML que será servido por `webpack-dev-server`. Tiene dos divs vacíos con los ids header y footer, donde se renderizarán los componentes compartidos.
+- Ejecute `npm install react react-dom` para instalar React como dependencia.
+- Cree una nueva carpeta llamada `src` y añada dos archivos: `Header.js` y `Footer.js`. Estos archivos contendrán los componentes de React para la cabecera y el pie de página.
++
+En `Header.js`, añada el siguiente código:
++
+[source, javascript]
+----
+import React from "react";
+
+function Header() {
+  return (
+    <div className="header">
+      <h1>Shared Header</h1>
+      <nav>
+        <ul>
+          <li><a href="/">Inicio</a></li>
+          <li><a href="/about">Acerca</a></li>
+          <li><a href="/contact">Contacto</a></li>
+        </ul>
+      </nav>
+    </div>
+  );
+}
+
+export default Header;
+----
++
+Este es un componente de cabecera simple que tiene un título y un menú de navegación.
++
+In Footer.js, agrege el siguiente código:
++
+[,js ]
+----
+import React from "react";
+
+function Footer() {
+  return (
+    <div className="footer">
+      <p>© 2023 Componentes compartidos. Todos los derechos reservados. </p>
+    </div>
+  );
+}
+
+export default Footer;
+----
++
+Este es un simple componente de pie de página que tiene un aviso de copyright.
++
+- Cree un nuevo archivo llamado `index.js` en la carpeta `src` y añada el siguiente código:
++
+[source, javascript]
+----
+import React from "react";
+import ReactDOM from "react-dom";
+import Header from "./Header";
+import Footer from "./Footer";
+
+ReactDOM.render(<Header />, document.getElementById("header"));
+ReactDOM.render(<Footer />, document.getElementById("footer"));
+----
++
+Este es el punto de entrada de nuestro proyecto, donde importamos los componentes de cabecera y pie de página y los renderizamos los elementos HTML con los ids correspondientes.
++
+- Modifique el archivo webpack.config.js para añadir el siguiente código:
++
+[source, javascript]
+----
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
+
+module.exports = {
+  mode: "development",
+  devServer: {
+    port: 3000,
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+    new ModuleFederationPlugin({
+      name: "shared-components",
+      filename: "remoteEntry.js",
+      exposes: {
+        "./Header": "./src/Header",
+        "./Footer": "./src/Footer",
+      },
+      shared: ["react", "react-dom"],
+    }),
+  ],
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-react"],
+          },
+        },
+      },
+    ],
+  },
+};
+----
++
+Esta es la parte más importante de la configuración, donde utilizamos ModuleFederationPlugin para exponer los componentes de cabecera y pie de página como módulos remotos. También especificamos el nombre y el nombre de archivo del punto de entrada remoto (remote) y las dependencias compartidas (shared) que queremos evitar duplicar.
++
+- Ejecute `npm install babel-loader @babel/core @babel/preset-react` para instalar las dependencias necesarias para transpilar el código de JSX.
+- Ejecute `npx webpack serve` para iniciar el servidor webpack-dev y abra `http://localhost:3000` en el navegador. Debería ver algo como esto
++
+// TODO: [añadir captura de pantalla]
++
+
+Felicidades. Ha creado los componentes compartidos de cabecera y pie de página utilizando Federación de Módulos. Ahora vamos a ver cómo utilizarlos en otras aplicaciones.
+
+
+
+== Paso 2: Crear las aplicaciones de consumo
+
+El siguiente paso es crear dos aplicaciones diferentes que consumirán los componentes compartidos de cabecera y pie de página. Estas aplicaciones actuarán como remotas para los componentes compartidos, y los importarán utilizando Federación de Módulos.
+
+- Cree una nueva carpeta llamada app1 y navegue a ella.
+- Ejecute `npm init -y` para inicializar un nuevo proyecto Node.js.
+- Ejecute `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @webpack-cli/serve react react-dom` para instalar las dependencias necesarias.
+- Cree un nuevo archivo llamado webpack.config.js en la carpeta raíz y añada el siguiente código:
++
+[source, js]
+----
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
+
+module.exports = {
+  mode: "development",
+  devServer: {
+    port: 3001,
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+    new ModuleFederationPlugin({
+      name: "app1",
+      filename: "remoteEntry.js",
+      remotes: {
+        "shared-components": "shared-components@http://localhost:3000/remoteEntry.js",
+      },
+      shared: ["react", "react-dom"],
+    }),
+  ],
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-react"],
+          },
+        },
+      },
+    ],
+  },
+};
+----
++
+Esta es una configuración de Webpack similar a la anterior, pero esta vez usamos ModuleFederationPlugin para especificar los módulos remotos que queremos importar desde el proyecto de componentes compartidos. También especificamos el nombre y el nombre de archivo del punto de entrada remoto y las dependencias compartidas que queremos evitar duplicar.
++
+- Creamos una nueva carpeta llamada `public` y añadimos un nuevo fichero llamado `index.html` con el siguiente contenido:
++
+
+[source, html]
+----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>App 1</title>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
+----
++
+Este es el archivo HTML que será servido por `webpack-dev-server`. Este tiene un div vacío con id `root`, donde renderizaremos nuestra aplicación.
++
+- Cree una nueva carpeta llamada `src` y añada un nuevo archivo llamado `App.js`. Este archivo contendrá el componente React para la aplicación.
++
+En `App.js`, añada el siguiente código:
++
+[source, javascript]
+----
+import React from "react";
+import Header from "shared-components/Header";
+import Footer from "shared-components/Footer";
+
+function App() {
+  return (
+    <div className="app">
+      <Header />
+      <main>
+        <h2>Bienvenidos a App 1</h2>
+        <p> Este es un ejemplo de uso compartido de los componentes de cabecera y pie de página usando Federación de Módulos.</p>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+export default App;
+----
++
+Este es un simple componente de aplicación que importa los componentes de cabecera y pie de página desde el proyecto de componentes compartidos utilizando Federación de Módulos. También tiene un pequeño contenido en la sección principal.
++
+- Cree un nuevo archivo llamado `index.js` en la carpeta `src` y añada el siguiente código:
++
+[source, javascript]
+----
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+
+ReactDOM.render(<App />, document.getElementById("root"));
+----
++
+Este es el punto de entrada de nuestro proyecto, donde importamos el componente app y lo renderizamos en el elemento HTML con id `root`.
+
+- Ejecute `npx webpack serve` para iniciar el `webpack-dev-server` y abra http://localhost:3001 en el navegador. Deberías ver algo como esto:
+
+// TODO: [add screenshot]
+
+Hemos creado con éxito una aplicación que utiliza los componentes compartidos de cabecera y pie de página utilizando Federación de Módulos. Ahora vamos a crear otra aplicación que haga lo mismo.
+
+- Cree una nueva carpeta llamada `app2` y navege hasta ella.
+- Ejecute `npm init -y` para inicializar un nuevo proyecto Node.js.
+- Ejecute `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @webpack-cli/serve react react-dom` para instalar las dependencias necesarias.
+- Cree un nuevo archivo llamado `webpack.config.js` en la carpeta raíz y añada el siguiente código:
+
+[source, js]
+----
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
+
+module.exports = {
+  mode: "development",
+  devServer: {
+    port: 3002,
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+    new ModuleFederationPlugin({
+      name: "app2",
+      filename: "remoteEntry.js",
+      remotes: {
+        "shared-components": "shared-components@http://localhost:3000/remoteEntry.js",
+      },
+      shared: ["react", "react-dom"],
+    }),
+  ],
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-react"],
+          },
+        },
+      },
+    ],
+  },
+};
+----
+
+Esta es una configuración de Webpack similar a la anterior, pero esta vez usamos el ModuleFederationPlugin para especificar los módulos remotos que queremos importar desde el proyecto de componentes compartidos. También especificamos el nombre y el nombre de archivo del punto de entrada remoto, y las dependencias compartidas que queremos evitar duplicar.
+
+- Creamos una nueva carpeta llamada `public` y añadimos un nuevo fichero llamado `index.html` con el siguiente contenido:
+
+[source, html]
+----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>App 2</title>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
+----
+
+Este es el archivo HTML que será servido por el servidor webpack-dev. Tiene un div vacío con el id `root`, donde renderizaremos nuestra aplicación.
+
+- Cree una nueva carpeta llamada `src` y añada un nuevo archivo llamado `App.js`. Este archivo contendrá el componente React de la aplicación.
+
+En `App.js`, añada el siguiente código:
+
+[source, jsx]
+----
+import React from "react";
+import Header from "shared-components/Header";
+import Footer from "shared-components/Footer";
+
+function App() {
+  return (
+    <div className="app">
+      <Header />
+      <main>
+        <h2>Bienvenidos a App 2</h2>
+        <p> Este es otro ejemplo de uso compartido de componentes de cabecera y pie de página mediante Federación de Módulos.</p>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+export default App;
+----
+
+Este es un componente simple de aplicación que importa los componentes de cabecera y pie de página desde el proyecto de componentes compartidos utilizando Federación de Módulos. También tiene contenido simple en la sección principal.
+
+- Cree un nuevo archivo llamado `index.js` en la carpeta `src` y añada el siguiente código:
+
+[source, jsx]
+----
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+
+ReactDOM.render(<App />, document.getElementById("root"));
+----
+
+Este es el punto de entrada de nuestro proyecto, donde importamos el componente app y lo renderizamos en el elemento HTML con id `root`.
+
+- Ejecuete `npx webpack serve` para iniciar el servidor webpack-dev y abra `http://localhost:3002` en el navegador. Debería ver algo como esto:
+// TODO: [add screenshot]
+
+Hemos creado con éxito otra aplicación que utiliza los componentes compartidos de cabecera y pie de página utilizando Federación de Módulos.
+
+== Conclusión
+
+En esta guía, ha aprendido cómo crear los componentes compartidos de cabecera y pie de página utilizando Federación de Módulos, y cómo utilizarlos en dos aplicaciones diferentes. También ha aprendido cómo manejar el enrutamiento, la autenticación y el estilo en los componentes compartidos.
+
+== Recursos Adicionales
+
+Si quiere aprender más sobre Federación de Módulos, puede consultar la documentación oficial aquí:
+
+https://webpack.js.org/concepts/module-federation/
+
+También puede encontrar más ejemplos y tutoriales aquí:
+
+https://github.com/module-federation/module-federation-examples

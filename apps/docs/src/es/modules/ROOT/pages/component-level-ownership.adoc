@@ -1,0 +1,96 @@
+= Federación de Módulos: Propiedad a Nivel de Componente 
+
+En esta guía, profundizaremos en el concepto de Propiedad a Nivel de Componente en el contexto de la Federación de Módulos, una característica introducida en Webpack 5. Aprenderás cómo funciona este modelo de propiedad, sus beneficios y cómo implementarlo en tus proyectos. 
+  
+== Introducción a la Propiedad a Nivel de Componente 
+  
+_Component_ _Level_ _Ownership_ (Propiedad a Nivel de Componentes) es un patrón de diseño que permite que los componentes individuales sean propiedad, gestionados y versionados independientemente dentro de una arquitectura federada. Este enfoque permite a los desarrolladores crear aplicaciones más mantenibles y escalables encapsulando la lógica y las dependencias de cada componente, reduciendo el riesgo de conflictos y promoviendo una mejor colaboración.
+
+Al aprovechar la propiedad a nivel de componentes, los equipos pueden trabajar en diferentes partes de la aplicación simultáneamente, lo que permite ciclos de desarrollo más rápidos y una mayor agilidad. 
+
+Un buen ejemplo de esto sería el equipo de _`checkout`_, que posee todo lo relacionado con el carrito, el pago y las cantidades. Otro equipo se encarga de la experiencia de "tienda", pero esa aplicación necesita una ventana emergente para "añadir al carrito". Antes de la federación, esto significaba paquetes de npm tradicionales para la parte compartida o literalmente tener que enviar una solicitud de extracción (PR) de algún componente que posea la aplicación de otra persona.
+
+Con Federación de Módulos, esto se puede conseguir en tiempo de ejecución de una forma muy cómoda:
+
+[source, javascript]
+----
+import CartModal from "checkoutTeam/components/cart-modal"
+----
+
+== Implementación de Propiedad a Nivel de Componente 
+ 
+Para conseguir la implementación de Propiedad a Nivel de Componente, cada aplicación necesita configurar su complemento de Federación de Módulos en Webpack con dos opciones: `name` y `exposes`. La opción `name` define el identificador único de la aplicación, que será utilizado por otras aplicaciones para referenciarla. La opción `exposes` define un mapeo de claves a ficheros locales que contienen los componentes a exponer. Por ejemplo:
+
+[source, javascript]
+----
+new ModuleFederationPlugin({
+  name: "app1",
+  exposes: {
+    "./Heroes": "./src/app/heroes/heroes.component.ts",
+    "./Villains": "./src/app/villains/villains.component.ts",
+  },
+});
+----
+
+Esta configuración le dice a Webpack que `app1` expone dos componentes: `Heroes` y `Villains`, que se encuentran en los archivos especificados. Estos componentes pueden ser importados por otras aplicaciones usando la sintaxis `app1/ComponentName`, donde `app1` es el nombre de la aplicación y `ComponentName` es la clave del componente en la opción `exposes`. 
+ 
+Por ejemplo, otra aplicación llamada `app2` puede importar y utilizar el componente `Heroes` de `app1` de esta forma:
+
+[source, javascript]
+----
+import { Heroes } from "app1/Heroes";
+
+// use Heroes component in app2
+----
+
+Para que esto funcione, `app2` también necesita configurar su complemento de Federación de Módulos Webpack con dos opciones: `remotes` y `shared`. La opción `remotes` define un mapeo de nombres a URLs que apuntan a los archivos de entrada remota de otras aplicaciones. El archivo de entrada remota es un archivo especial generado por Webpack que contiene información sobre los módulos expuestos y cómo cargarlos. La opción `shared` define qué módulos se comparten entre las aplicaciones, como bibliotecas de proveedores o dependencias comunes.
+
+Por ejemplo:
+
+[source, javascript]
+----
+new ModuleFederationPlugin({
+  remotes: {
+    app1: "app1@http://localhost:3000/remoteEntry.js",
+  },
+  shared: ["@angular/core", "@angular/common", "@angular/router"],
+});
+----
+
+== Ventajas de la Propiedad a Nivel de Componentes 
+
+1. **Escalabilidad mejorada**: A medida que su aplicación crece, La Propiedad a Nivel de Componentes le permite mantener una arquitectura modular, evitando dependencias estrechamente acopladas y reduciendo la complejidad al dividir una aplicación en componentes más pequeños, para que pueda asignar mejor los recursos y escalar su aplicación según sea necesario.
+
+2. **Mantenibilidad**: Al encapsular la lógica y las dependencias de cada componente, puede mejorar la legibilidad y la capacidad de mantenimiento del código, lo que facilita la actualización y la refactorización de los componentes según sea necesario. Además, la asignación de propiedad a los componentes individuales simplifica el proceso de mantenimiento y actualización de la base de código también, ya que está claro quién es responsable de cada componente. 
+ 
+3. **Colaboración en equipo**: La Propiedad a Nivel de Componentes permite una mejor colaboración entre equipos al permitirles trabajar de forma independiente en sus respectivos componentes, agilizando el proceso de desarrollo y reduciendo el riesgo de conflictos. 
+ 
+ 4. **Rendimiento**: Con las importaciones dinámicas y carga diferida, puede optimizar el rendimiento de su aplicación cargando únicamente los componentes necesarios y sus dependencias según sea necesario.
+
+== ¿Cuáles son los retos de la Propiedad a Nivel de Componentes? 
+La Propiedad a Nivel de Componentes también conlleva algunos retos que hay que abordar: 
+- Requiere un diseño y una documentación cuidadosos de los componentes expuestos, ya que deben tener una interfaz y un contrato claros con otras aplicaciones. 
+- Introduce cierta complejidad y sobrecarga en la configuración y orquestación de las aplicaciones, ya que necesitan saber dónde y cómo encontrar y cargar los componentes de los demás. 
+ - Puede causar problemas de compatibilidad o conflictos entre diferentes versiones o implementaciones del mismo componente, especialmente si no están correctamente aisladas o delimitadas.
+
+== ¿Cómo podemos superar estos retos? 
+ 
+Existen algunas buenas prácticas y herramientas que pueden ayudarnos a superar estos retos y aprovechar la Propiedad a Nivel de Componentes de forma eficaz: 
+ 
+- Utilizar componentes independientes que tengan un mínimo de dependencias y efectos secundarios, y que sigan el principio de responsabilidad única. Esto hará que sean más fáciles de exponer 
+- Utilizar el patrón SCAM (Single Component Angular Module) para componentes compartidos, lo que significa crear un NgModule dedicado para cada componente que lo declare y exporte. Esto hará que sean más fáciles de importar y reutilizar por otras aplicaciones. 
+- Utilice Federación de Módulos Dinámico para cargar componentes remotos a demanda, en lugar de importarlos estáticamente. Esto reducirá el tamaño inicial del paquete y mejorará el rendimiento. 
+- Utiliza los mecanismos integrados de Angular para aislar y delimitar los estilos de los componentes, como ViewEncapsulation y :host selector. Esto evitará conflictos de estilo y fugas entre componentes. 
+- Utiliza el sistema de inyección de dependencias de Angular para proporcionar servicios y configuración a los componentes, en lugar de depender de variables o constantes globales. Esto hará que sean más comprobables y adaptables a diferentes entornos³. 
+- Utilizar elementos personalizados o componentes web para envolver componentes independientes y exponerlos como elementos HTML estándar. Esto hará que sean interoperables con otros _frameworks_ o con JavaScript estándar.
+
+== Conclusión 
+
+La Propiedad a Nivel de Componentes es un poderoso concepto que permite una arquitectura federada para aplicaciones Angular. Permite a cada aplicación exponer y utilizar componentes individuales de otras aplicaciones, sin necesidad de coordinación o sincronización entre equipos o dominios. También reduce el acoplamiento y aumenta la cohesión entre aplicaciones, mejora la escalabilidad y el rendimiento, y mejora la experiencia del usuario. 
+ 
+Sin embargo, la propiedad a nivel de componente también conlleva algunos retos que hay que abordar, como el diseño y la documentación de los componentes expuestos, la configuración y orquestación de las aplicaciones, y la compatibilidad y resolución de conflictos entre distintas versiones o implementaciones del mismo componente. 
+
+Para superar estos retos, existen algunas prácticas recomendadas y herramientas que pueden ayudarnos a aprovechar la Propiedad a Nivel de Componente de forma eficaz, como el uso de componentes independientes que tengan dependencias y efectos secundarios mínimos, el uso del patrón SCAM para componentes compartidos, el uso de Federacion de Módulos Dinámico para cargar componentes remotos bajo demanda, el uso de los mecanismos integrados de Angular para aislar y delimitar estilos de componentes, el uso del sistema de inyección de dependencias de Angular para proporcionar servicios y configuración a los componentes, y el uso de elementos personalizados o componentes web para envolver componentes independientes y exponerlos como elementos HTML estándar. 
+  
+Siguiendo estas mejores prácticas y herramientas, podemos aprovechar al máximo la Federación de Módulos y la Propiedad a Nivel de Componentes en las aplicaciones Angular.
+

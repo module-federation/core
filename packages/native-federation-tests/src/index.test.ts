@@ -6,7 +6,10 @@ import {join, resolve} from 'path'
 import {UnpluginOptions} from 'unplugin'
 import {describe, expect, it, vi} from 'vitest'
 
-import {NativeFederationTestsHost, NativeFederationTestsRemote} from './index'
+import {
+  NativeFederationTestsHost,
+  NativeFederationTestsRemote,
+} from './index'
 
 describe('index', () => {
   const projectRoot = join(__dirname, '..', '..', '..')
@@ -29,21 +32,23 @@ describe('index', () => {
           },
           shared: {
             react: {singleton: true, eager: true},
-            'react-dom': {singleton: true, eager: true}
+            'react-dom': {singleton: true, eager: true},
           },
         },
         deleteTestsFolder: false,
-        testsFolder: '@mf-tests'
+        testsFolder: '@mf-tests',
       }
 
       const distFolder = join(projectRoot, 'dist', options.testsFolder)
 
-      const unplugin = NativeFederationTestsRemote.rollup(options) as UnpluginOptions
+      const unplugin = NativeFederationTestsRemote.rollup(
+        options
+      ) as UnpluginOptions
       await unplugin.writeBundle?.()
 
       expect(dirTree(distFolder)).toMatchObject({
         name: '@mf-tests',
-        children: [{name: 'index.js'}]
+        children: [{name: 'index.js'}],
       })
     })
 
@@ -57,22 +62,26 @@ describe('index', () => {
           },
           shared: {
             react: {singleton: true, eager: true},
-            'react-dom': {singleton: true, eager: true}
+            'react-dom': {singleton: true, eager: true},
           },
         },
         deleteTestsFolder: false,
-        testsFolder: '@mf-tests'
+        testsFolder: '@mf-tests',
       }
 
       const webpackCompiler = {
         options: {
           devServer: {
-            foo: {}
-          }
-        }
+            foo: {},
+          },
+        },
       }
 
-      const unplugin = NativeFederationTestsRemote.rollup(options) as UnpluginOptions
+      const unplugin = NativeFederationTestsRemote.rollup(
+        options
+      ) as UnpluginOptions
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       await unplugin.webpack?.(webpackCompiler)
 
       expect(webpackCompiler).toStrictEqual({
@@ -80,10 +89,10 @@ describe('index', () => {
           devServer: {
             foo: {},
             static: {
-              directory: resolve('./dist')
-            }
-          }
-        }
+              directory: resolve('./dist'),
+            },
+          },
+        },
       })
     })
   })
@@ -109,7 +118,7 @@ describe('index', () => {
           },
         },
         testsFolder: '@mf-tests',
-        mocksFolder: '__mocks__'
+        mocksFolder: '__mocks__',
       }
 
       const distFolder = join(projectRoot, 'dist', options.testsFolder)
@@ -118,17 +127,20 @@ describe('index', () => {
 
       axios.get = vi.fn().mockResolvedValueOnce({data: zip.toBuffer()})
 
-      const unplugin = NativeFederationTestsHost.rollup(options) as UnpluginOptions
+      const unplugin = NativeFederationTestsHost.rollup(
+        options
+      ) as UnpluginOptions
       await expect(unplugin.writeBundle?.()).resolves.not.toThrow()
 
       expect(dirTree(options.mocksFolder)).toMatchObject({
         name: '__mocks__',
-        children: [{
-          name: 'remotes',
-          children: [{name: 'index.js'}]
-        }]
-      }
-      )
+        children: [
+          {
+            name: 'remotes',
+            children: [{name: 'index.js'}],
+          },
+        ],
+      })
 
       await rm(options.mocksFolder, {recursive: true, force: true})
     })

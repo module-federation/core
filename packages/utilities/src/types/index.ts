@@ -35,7 +35,7 @@ export interface NextFederationPluginExtraOptions {
   exposePages?: boolean;
   skipSharingNextInternals?: boolean;
   automaticPageStitching?: boolean;
-  automaticAsyncBoundary?: boolean;
+  debug?: boolean;
 }
 
 export interface NextFederationPluginOptions
@@ -72,6 +72,8 @@ export type RemoteData = {
 
 export type RuntimeRemote = Partial<RemoteData> & {
   asyncContainer?: AsyncContainer;
+  global?: string;
+  url?: string;
 };
 
 export type RuntimeRemotesMap = Record<string, RuntimeRemote>;
@@ -92,3 +94,10 @@ export type GetModuleOptions = {
   exportName?: string;
   remoteContainer: string | RemoteData;
 };
+
+export type RemoteVars = Record<
+  string,
+  | Promise<WebpackRemoteContainer>
+  | string
+  | (() => Promise<WebpackRemoteContainer>)
+>;

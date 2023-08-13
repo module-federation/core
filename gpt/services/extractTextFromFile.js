@@ -39,6 +39,6 @@ module.exports = async function extractTextFromFile({ filepath, filetype }) {
     case 'application/javascript':
       return buffer.toString();
     default:
-      throw new Error('Unsupported file type');
+      return buffer.toString();
   }
 };

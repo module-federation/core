@@ -6,17 +6,15 @@ antora:
       languages: [en, es, zh]
 site:
   title: 模块联合文档
-  start_page: ipt::index.adoc
+  start_page: ROOT:getting-started.adoc
+  keys:
+    google_analytics: G-SDV5HRTM4G
 urls:
   html_extension_style: indexify
 content:
   sources:
-    - url: https://github.com/module-federation/universe
-      branches: main
-      start_path: apps/docs/src
-    - url: https://github.com/omfgnuts/mf-translations.git
-      branches: [translated-main]
-      start_path: docs/zh
+    - url: ./../../../
+      start_path: apps/docs/src/zh
 ui:
   bundle:
     url: ./../../../dist/apps/docs-ui

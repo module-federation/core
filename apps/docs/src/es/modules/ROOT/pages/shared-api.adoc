@@ -1,0 +1,161 @@
+= API compartida con Federación de Módulos
+
+Esta página de la documentación ofrece una explicación detallada de la API compartida de Federación de Módulos (Shared API), sus opciones de configuración, casos de uso y ventajas, así como posibles inconvenientes. Esta guía está dirigida a usuarios que deseen optimizar el rendimiento de sus aplicaciones distribuidas.
+
+== Descripción general de la API compartida
+
+La API compartida forma parte de las opciones de configuración del complemento de Federación de Módulos. Esta permite pasar un array u objeto llamado `shared` que contiene una lista de dependencias que pueden ser compartidas y utilizadas por otras aplicaciones federadas (también conocidas como "remotas").
+
+A continuación se muestra un ejemplo de cómo utilizar la API compartida en la federación de módulos:
+
+[source, json]
+----
+new ModuleFederationPlugin({
+  name: "host",
+  filename: "remoteEntry.js",
+  remotes: {},
+  exposes: {},
+  shared: [],
+});
+
+== Definición de la API
+
+
+-  `shared` (objeto | [cadena]): Un objeto o matriz de cadenas que contiene una lista de dependencias que pueden ser compartidas y consumidas por otras aplicaciones federadas.
+- eager (booleano)`: Si es `true`, la dependencia se cargará de manera temprana y se pondrá a disposición de otras aplicaciones federadas en cuanto se inicie la aplicación huésped. Si es `false`, la dependencia se cargará de manera diferida cuando una aplicación federada la solicite por primera vez.
+- `singleton` (booleano): Si es `true`, la dependencia se tratará como un singleton, y todas las aplicaciones federadas compartirán una única instancia de esta.
+- `requiredVersion` (cadena): Especifica la versión requerida de la dependencia. Si una aplicación federada intenta cargar una versión incompatible de la dependencia, se cargarán dos copias. Si la opción `singleton` es `true`, se imprimirá una advertencia en la consola.
+
+== Ventajas del uso de la API compartida
+
+Cuando se utilizan módulos federados, se empaquetan por separado e incluyen todas las dependencias que necesitan para funcionar. Sin embargo, cuando se utilizan en una aplicación huésped, es posible que se descarguen varias copias de la misma dependencia. Esto puede afectar el rendimiento y hacer que los usuarios descarguen más JavaScript del necesario.
+
+La API compartida ayuda a evitar este problema, ya que permite evitar la descarga de varias copias de la misma dependencia, lo que, en última instancia, mejora el rendimiento de la aplicación.
+
+== Evitar la duplicación
+Considere el siguiente ejemplo: usted tiene dos módulos, Módulo A y Módulo B, ambos de los cuales requieren Lodash para funcionar de forma independiente.
+
+Cuando estos módulos se utilizan en una aplicación huésped que reúne ambos módulos, entra en juego la API compartida. Si una copia precargada y compartida de Lodash está disponible, el Módulo A y el Módulo B utilizarán esa copia en lugar de cargar sus propias copias independientes. Esta copia puede ser cargada por el anfitrión o por otra aplicación remota dentro de él.
+
+NOTA: Tanto el remoto como el anfitrión tienen que añadir la misma dependencia en "shared" para que esté disponible para su consumo.
+
+[source, js]
+----
+new ModuleFederationPlugin({
+  ...
+  shared: ["lodash"],
+});
+----
+
+== Cómo funciona la API compartida
+
+Si está familiarizado con las importaciones dinámicas, Federación de Módulos funciona de forma similar; solicita un módulo y devuelve una promesa que se resuelve con un objeto que contiene todas las exportaciones del moduleName declarado en el objeto `exposes`.
+
+La naturaleza asíncrona de Federación de Módulos hace que la API Compartida sea altamente flexible.
+
+=== Carga asíncrona de dependencias
+
+Cuando un módulo es requerido, este cargará un archivo llamado `remoteEntry.js`, listando todas las dependencias que el módulo necesita. Como esta operación es asíncrona, el contenedor puede comprobar todos los archivos `remoteEntry` y listar todas las dependencias que cada módulo ha declarado en `shared`. Entonces, el host puede cargar una única copia y compartirla con todos los módulos que la necesiten.
+
+Dado que `shared` se basa en una operación asíncrona para inspeccionar y resolver las dependencias, si la aplicación o módulo se carga de forma síncrona y está declarada la dependencia en `shared`, podría presentarse siguiente error:
+
+[source, bash]
+----
+Uncaught Error: Shared module is not available for eager consumption
+----
+
+Para solucionar el error anterior, hay dos opciones:
+
+== Consumo Anticipado
+[source,  js]
+----
+new ModuleFederationPlugin({
+  ...
+  shared: { 
+      lodash: {
+          eager: true,
+        },
+  },
+});
+----
+
+Las dependencias individuales pueden marcarse como `eager: true`. Esta opción no incluye las dependencias en un segmento asíncrono (async chunk), por lo que se pueden proporcionar de forma síncrona. Sin embargo, esto significa que esas dependencias siempre se descargarán, lo que puede afectar al tamaño del paquete. La solución recomendada es cargar el módulo de forma asíncrona envolviéndolo en un límite asíncrono (Async Boundary):
+
+==== Usando Async Boundary
+
+NOTA: Esto sólo se aplica al punto de entrada de la aplicación; los módulos remotos consumidos a través de Federación de Módulos se envuelven automáticamente en un límite asíncrono.
+
+Para crear un límite asíncrono, utilice una importación dinámica para asegurarse de que su punto de entrada se ejecuta de forma asíncrona:
+
+[tabs]
+======
+index.js::
++
+[source, js]
+----
+import('./bootstrap.js');
+----
+
+bootstrap.js::
++
+[source, js]
+----
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+ReactDOM.render(<App />, document.getElementById('root'));
+----
+=====
+
+=== Versionado
+
+¿Qué ocurre si dos módulos remotos utilizan versiones diferentes de la misma dependencia?
+
+Federación de Módulos es capaz de manejar esta situación por defecto. Si los rangos semánticos de versiones para esas dependencias no coinciden, Federación de Módulos puede identificarlas y proporcionar copias separadas. Esto garantiza que no se cargue accidentalmente una versión incorrecta que contenga cambios de última hora. Si bien esto puede causar problemas de rendimiento debido a la descarga de diferentes versiones de una dependencia, evita que su aplicación se rompa.
+
+=== Carga de Instancia Única
+
+Para garantizar que sólo se carga una copia de una determinada dependencia en todo momento (por ejemplo, React), defina `singleton: true` en la dependencia del objeto:
+
+
+[source,  js]
+----
+shared: {
+  react: {
+    singleton: true,
+    requiredVersion: "^18.0.0",
+  },
+  "react-dom": {
+    singleton: true,
+    requiredVersion: "^18.0.0"
+  },
+},
+----
+Si uno de los módulos remotos intenta cargar una versión de dependencia incompatible que ha sido marcada como _singleton_, Webpack imprimirá una advertencia en la consola. La compilación no se romperá, y Webpack continuará empaquetando y cargando tus aplicaciones. Sin embargo, la advertencia sirve como un recordatorio para alinear sus dependencias para evitar posibles problemas.
+
+== Inconvenientes y compromisos
+
+Aunque la API Compartida es una herramienta poderosa, es importante ser consciente de algunos problemas potenciales y compromisos asociados con su uso.
+
+Estos son algunos de los problemas que puede encontrar al utilizar la API compartida:
+
+=== Inconsistencias en las dependencias en tiempo de ejecución
+
+Como las aplicaciones son compiladas en diferentes momentos por distintos procesos de Webpack, estos carecen de un gráfico de dependencias común. Como resultado, debe depender de los rangos de Versionado Semántico para la deduplicación y la provisión de versiones de dependencia idénticas.
+
+Puede darse la situación de que su aplicación remota haya sido construido y probado con la versión `1.0.0` de una librería. Sin embargo, cuando el anfitrión la carga, el Rango de Versionado Semántico (Semantic Versioning Range) `^1.0.0` satisface a `1.1.0`, haciendo que la versión `1.1.0` se cargue en tiempo de ejecución en producción. Esto podría provocar problemas de compatibilidad.
+
+Una forma de mitigar este riesgo es alinear las versiones en la mayor medida posible (utilizar un monorepo con un único paquete JSON podría ser beneficioso).
+
+Este obstáculo tiene que ver con nuestra dependencia de los rangos de Versionado Semántico, más que con la Federación de Módulos y la API Compartida en sí mismas. En los sistemas distribuidos (similares a los microservicios), es necesario un contrato para garantizar la estabilidad y fiabilidad del sistema. En el contexto de la API Compartida, el Rango de Versiones Semántico sirve como contrato (aunque puede no ser el más fiable).
+
+Desde nuestra experiencia, no existe una alternativa superior para las dependencias compartidas en una aplicación frontend distribuida. A pesar de las imperfecciones de la API compartida, sigue siendo la opción más eficaz actualmente disponible.
+
+== Conclusión
+
+En resumen, la API compartida de la federación de módulos es un potente instrumento para mejorar el rendimiento de las aplicaciones distribuidas. Permite compartir dependencias entre módulos, evitando la duplicación redundante y dando lugar a tiempos de carga más rápidos y un rendimiento general superior. No obstante, es fundamental ser consciente de los posibles problemas y compromisos, como las incoherencias en las dependencias en tiempo de ejecución. Si reconoce estos posibles problemas y trabaja activamente para solucionarlos, podrá emplear la API compartida de forma eficaz para optimizar sus aplicaciones distribuidas.
+
+Para sacar el máximo partido de la API compartida, asegúrese de que su equipo comprende sus características, limitaciones y prácticas recomendadas. Revise y actualice periódicamente las dependencias, alinee las versiones y controle los posibles problemas de compatibilidad. Si se mantiene proactivo en la gestión de estos aspectos, podrá seguir mejorando el rendimiento y la fiabilidad de sus aplicaciones distribuidas al tiempo que minimiza los riesgos asociados a la gestión de dependencias.
+
+
+En conclusión, aunque la API compartida de Federación de Módulos no está exenta de inconvenientes, sigue siendo una herramienta potente y valiosa para los desarrolladores que trabajan con aplicaciones distribuidas. Si se es consciente de sus limitaciones y trabaja con diligencia para mitigar los posibles problemas, podrá aprovechar todo el potencial de la API compartida para crear sistemas distribuidos eficientes y de alto rendimiento.

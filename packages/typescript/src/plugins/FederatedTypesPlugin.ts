@@ -3,14 +3,8 @@ import path from 'path';
 import axios from 'axios';
 import { Compiler } from 'webpack';
 
-import {
-  isObjectEmpty,
-  Logger,
-  LoggerInstance,
-} from '@module-federation/utilities';
-
 import { TypescriptCompiler } from '../lib/TypescriptCompiler';
-import { normalizeOptions } from '../lib/normalizeOptions';
+import { normalizeOptions, isObjectEmpty } from '../lib/normalizeOptions';
 import { TypesCache } from '../lib/Caching';
 import {
   CompilationParams,
@@ -20,6 +14,7 @@ import {
 
 import { FederatedTypesStatsPlugin } from './FederatedTypesStatsPlugin';
 import download from '../lib/download';
+import { Logger, LoggerInstance } from '../Logger';
 
 const PLUGIN_NAME = 'FederatedTypesPlugin';
 
@@ -30,6 +25,21 @@ export class FederatedTypesPlugin {
   constructor(private options: FederatedTypesPluginOptions) {}
 
   apply(compiler: Compiler) {
+    this.logger = Logger.setLogger(
+      compiler.getInfrastructureLogger(PLUGIN_NAME)
+    );
+
+    if (
+      !compiler.options.plugins.find(
+        (p) => p.constructor.name === 'ModuleFederationPlugin'
+      )
+    ) {
+      this.logger.error(
+        'Unable to find the Module Federation Plugin, this is plugin no longer provides it by default. Please add it to your webpack config.'
+      );
+      throw new Error('Unable to find the Module Federation Plugin');
+    }
+
     this.normalizeOptions = normalizeOptions(this.options, compiler);
 
     const { disableDownloadingRemoteTypes, disableTypeCompilation } =
@@ -39,10 +49,6 @@ export class FederatedTypesPlugin {
     if (disableDownloadingRemoteTypes && disableTypeCompilation) {
       return;
     }
-
-    this.logger = Logger.setLogger(
-      compiler.getInfrastructureLogger(PLUGIN_NAME)
-    );
 
     compiler.options.watchOptions.ignored =
       this.normalizeOptions.ignoredWatchOptions;

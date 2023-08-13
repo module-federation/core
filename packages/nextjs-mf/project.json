@@ -5,7 +5,7 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": [
         "{options.outputPath}"
       ],
@@ -18,7 +18,13 @@
         "assets": [
           "packages/nextjs-mf/*.md"
         ]
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "publish": {
       "executor": "nx:run-commands",
@@ -36,7 +42,7 @@
       ]
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": [
         "{options.outputFile}"
       ],
@@ -47,7 +53,7 @@
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": [
         "{workspaceRoot}/coverage/packages/nextjs-mf"
       ],

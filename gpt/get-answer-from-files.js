@@ -47,7 +47,7 @@ async function getAnswer(chunkMaps, question) {
     }
   }
 
-  if (currentChunk.length > 0) {
+  if (fileChunks.length > 0) {
     let prompt = basePrompt + currentChunk + responsePrompt;
     chatHistory.add({
       role: ChatCompletionRequestMessageRoleEnum.System,

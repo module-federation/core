@@ -1,0 +1,175 @@
+= Uso de Remotos Dinámicos en Federación de Módulos
+
+En esta página de documentación se explica cómo utilizar remotos dinámicos en Federación de Módulos para desplegar aplicaciones de micro-frontend en distintos entornos. Esta guía pretende proporcionar instrucciones elaboradas y comprensibles para implementar remotos dinámicos en sus proyectos.
+
+== Visión general
+
+Los remotos dinámicos permiten desplegar la misma aplicación de micro-frontend en entornos de prueba, ensayo y producción. También son compatibles con despliegues en las instalaciones (on-premise), en la nube e híbridos simultáneamente, lo que permite escalar múltiples equipos que trabajan en diferentes partes de la arquitectura. En esta guía, cubriremos cuatro formas de usar remotos dinámicos:
+
+1. Variables de entorno
+2. Complemento de Webpack external-remotes-plugin
+3. Remotos dinámicos basados en promesas
+4. Contenedores de remotos dinámicos
+
+== Variables de entorno
+
+Las variables de entorno proporcionan una forma sencilla de utilizar remotos dinámicos sustituyendo localhost en la configuración de Webpack por variables de entorno.
+
+=== Implementación
+
+[,json]
+----
+module.exports = (env) => ({
+  // ...
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "Host",
+      remotes: {
+        RemoteA: `RemoteA@${env.A_URL}/remoteEntry.js`,
+        RemoteB: `RemoteB@${env.B_URL}/remoteEntry.js`,
+      },
+    }),
+  ],
+});
+----
+
+=== Ventajas y limitaciones
+
+Este enfoque es simple, pero requiere la construcción de una nueva versión para cada entorno para actualizar las direcciones URL, que puede no ser ideal para los casos de uso de la empresa y múltiples modelos de despliegue.
+
+== Plugin Webpack External Remotes
+
+El plugin https://www.npmjs.com/package/external-remotes-plugin[external-remotes-plugin], desarrollado por Zack Jackson, permite resolver URLs en tiempo de ejecución utilizando plantillas. Definiendo window.appAUrl y window.appBUrl dentro de la aplicación antes de cargar cualquier código de aplicaciones remotas, obtiene la flexibilidad de definir las URLs como sea necesario.
+
+=== Implementación
+[,json]
+----
+plugins: [
+  new ModuleFederationPlugin({
+    name: "Host",
+    remotes: {
+      RemoteA: "RemoteA@[window.appAUrl]/remoteEntry.js",
+      RemoteB: "RemoteB@[window.appBUrl]/remoteEntry.js",
+    },
+  }),
+  new ExternalTemplateRemotesPlugin(),
+],
+----
+
+=== Ventajas y limitaciones
+
+Todo lo que necesita hacer es definir window.appAUrl y window.appBUrl dentro la aplicación antes de cargar cualquier código de las aplicaciones remotas.
+
+Ahora tiene la flexibilidad de definir las URLs como prefiera. Por ejemplo, podría mantener un mapa de las URLs del huésped a las URLs remotas para cada entorno, utilizar renderizado del lado del servidor para permitir que el backend defina las URLs, crear un servicio de gestión de configuración personalizado, y muchos otros métodos.
+
+Este enfoque es totalmente dinámico y resolvería los casos de uso, pero todavía hay una ligera limitación con este enfoque. No tenemos un control completo sobre el ciclo de vida de la carga.
+
+== Remotos dinámicos basados en promesas
+
+Federación de Módulos permite definir las URL remotas como promesas en lugar de cadenas de URL. Puede utilizar cualquier promesa siempre que se ajuste a la interfaz get/init definida por Federación de Módulos. Este método ofrece más control sobre el proceso de carga pero puede ser difícil de depurar o mantener debido al código encadenado en el archivo de configuración.
+
+=== Implementación
+
+==== Configuración de Webpack
+
+[,json]
+----
+// Webpack config:
+module.exports = {
+  // ...
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "Host",
+      remotes: {
+        RemoteA: `promise new Promise(${fetchRemoteA.toString()})`,
+      },
+    }),
+  ],
+};
+----
+
+==== Obteniendo de forma dinámica un recurso remoto
+
+[,json]
+----
+// Obtiene Remote A de forma dinámica:
+const fetchRemoteA = (resolve) => {
+  // Definimos una etiqueta script para utilizar el navegador para obtener el archivo remoteEntry.js
+  const script = document.createElement("script");
+  script.src = window.appAUrl; // This could be defined anywhere
+  // Cuando el script es cargado necesitamos resolver la promesa de vuelta a Federación de Módulos
+  script.onload = () => {
+    // El script se carga ahora en la ventana usando el nombre definido en el remote
+    const module = {
+      get: (request) => window.RemoteA.get(request),
+      init: (arg) => {
+        try {
+          return window.RemoteA.init(arg);
+        } catch (e) {
+          console.log("Remote A ya ha sido cargado");
+        }
+      },
+    };
+    }
+    resolve(module);
+  }
+  // Por último inyectamos la etiqueta script en la cabecera del documento para activar la carga del script
+  document.head.appendChild(script);
+}
+----
+
+=== Ventajas y limitaciones
+
+En este enfoque, creamos una nueva etiqueta script y la inyectamos en el DOM para obtener el archivo JavaScript remoto. La etiqueta `window.appAUrl` contiene la URL de la aplicación remota. Aunque este método proporciona control sobre el ciclo de vida de la carga, no es el más fácil de depurar o mantener, ya que implica código encadenado dentro del archivo de configuración.
+
+== Contenedores de remotos dinámicos
+
+Los contenedores de remotos dinámicos permiten cargar aplicaciones remotas mediante programación sin definir ninguna URL en la configuración de Webpack. Esto permite a los desarrolladores trabajar en nuevas aplicaciones remotas que pueden no estar aún definidas en la aplicación huésped o permitir a socios y clientes inyectar sus módulos remotos en su despliegue de su aplicación.
+
+=== Implementación
+
+1. Elimine el campo remotes de la configuración de ModuleFederationPlugin:
+
+[,json]
+----
+plugins: [
+  new ModuleFederationPlugin({
+    name: "Host",
+    remotes: {},
+  }),
+],
+----
+
+2. Antes de cargar cualquier aplicación remota, obtenga el módulo remoto utilizando una etiqueta de script dinámica e inicialice manualmente el contenedor remoto:
+
+
+[,js]
+----
+(async () => {
+  // Inicializa el ámbito compartido. Lo rellena con los módulos proporcionados conocidos de esta compilación y todos los remotos
+  await __webpack_init_sharing__("default");
+  const container = window.someContainer; // u obtiene el contenedor en otro lugar
+  // Inicializa el contenedor, puede proporcionar módulos compartidos
+  await container.init(__webpack_share_scopes__.default);
+  const module = await container.get("./module");
+})();
+----
+
+Aquí, `container` hace referencia a una aplicación remota configurada en el campo `remotes` de la configuración de Webpack de la aplicación huésped, y `module` hace referencia a uno de los elementos definidos en el campo `exposes` de la configuración de Webpack de la aplicación remota.
+
+Al inyectar una etiqueta de script para obtener el contenedor remoto y almacenarlo en `window.someContainer`, puede asegurarte de que el código se resuelva con el mismo patrón `get/init` utilizado en ejemplos anteriores.
+
+Para utilizar uno de los módulos expuestos por la aplicación remota, llame a `container.get(moduleName)` como se muestra en el ejemplo anterior.
+
+== Resumen y recomendaciones
+
+Usando remotos dinámicos, puede desplegar su _micro-frontend_ para obtener aplicaciones remotas desde cualquier URL, permitiendo el despliegue en múltiples entornos de prueba, _on-premises_, o en la nube. Los desarrolladores pueden elegir entre utilizar versiones de producción de otras aplicaciones remotas o introducir otras nuevas de forma dinámica.
+
+Los cuatro métodos analizados en esta guía son:
+
+1. Variables de entorno
+2. Complemento de Webpack external-remotes-plugin
+3. Remotos dinámicos basados en promesas
+4. Contenedores de remotos dinámicos
+
+Cada método tiene sus ventajas y limitaciones. Elija el que mejor se adapte a los requisitos y la complejidad de su proyecto.

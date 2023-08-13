@@ -1,10 +1,7 @@
+import importDelegatedModule from "@module-federation/nextjs-mf/importDelegatedModule";
 /* eslint-disable no-undef */
-const { importDelegatedModule } = require('@module-federation/utilities');
-
-// Delegates are currently not used in this example, but are left here for testing.
-module.exports = new Promise((resolve, reject) => {
-  //eslint-disable-next-line
-  console.log('Delegate being called for', __resourceQuery);
+// eslint-disable-next-line no-async-promise-executor
+module.exports = new Promise(async (resolve, reject) => {
   //eslint-disable-next-line
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
 
