@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.0.7](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.6...utils-2.0.7) (2023-08-14)
+
+
+### Bug Fixes
+
+* no barrel exports ([5bc775d](https://github.com/module-federation/nextjs-mf/commit/5bc775d9ce685161fc3ea2e1bd179d11526d365a))
+
+
+
 ## [2.0.6](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.5...utils-2.0.6) (2023-08-14)
 
 
