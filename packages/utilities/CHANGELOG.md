@@ -2,6 +2,69 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.0.7](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.6...utils-2.0.7) (2023-08-14)
+
+
+### Bug Fixes
+
+* no barrel exports ([5bc775d](https://github.com/module-federation/nextjs-mf/commit/5bc775d9ce685161fc3ea2e1bd179d11526d365a))
+
+
+
+## [2.0.6](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.5...utils-2.0.6) (2023-08-14)
+
+
+### Bug Fixes
+
+* workaround to self ref module error in prod ([#1205](https://github.com/module-federation/nextjs-mf/issues/1205)) ([1d88beb](https://github.com/module-federation/nextjs-mf/commit/1d88beb0da629f036e132573fee9f05494b1f540))
+
+
+
+## [2.0.6](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.5...utils-2.0.6) (2023-08-14)
+
+
+### Bug Fixes
+
+* workaround to self ref module error in prod ([#1205](https://github.com/module-federation/nextjs-mf/issues/1205)) ([1d88beb](https://github.com/module-federation/nextjs-mf/commit/1d88beb0da629f036e132573fee9f05494b1f540))
+
+
+
+## [2.0.6](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.5...utils-2.0.6) (2023-08-14)
+
+
+### Bug Fixes
+
+* workaround to self ref module error in prod ([#1205](https://github.com/module-federation/nextjs-mf/issues/1205)) ([1d88beb](https://github.com/module-federation/nextjs-mf/commit/1d88beb0da629f036e132573fee9f05494b1f540))
+
+
+
+## [2.0.6](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.5...utils-2.0.6) (2023-08-14)
+
+
+### Bug Fixes
+
+* workaround to self ref module error in prod ([#1205](https://github.com/module-federation/nextjs-mf/issues/1205)) ([1d88beb](https://github.com/module-federation/nextjs-mf/commit/1d88beb0da629f036e132573fee9f05494b1f540))
+
+
+
+## [2.0.6](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.5...utils-2.0.6) (2023-08-14)
+
+
+### Bug Fixes
+
+* workaround to self ref module error in prod ([#1205](https://github.com/module-federation/nextjs-mf/issues/1205)) ([1d88beb](https://github.com/module-federation/nextjs-mf/commit/1d88beb0da629f036e132573fee9f05494b1f540))
+
+
+
+## [2.0.6](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.5...utils-2.0.6) (2023-08-14)
+
+
+### Bug Fixes
+
+* workaround to self ref module error in prod ([e134caa](https://github.com/module-federation/nextjs-mf/commit/e134caa9a914da6a226e73dc877a108456b1053f))
+
+
+
 ## [2.0.5](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.4...utils-2.0.5) (2023-08-11)
 
 
