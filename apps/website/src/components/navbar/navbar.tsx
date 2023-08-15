@@ -108,7 +108,7 @@ export default component$((props: NavbarProps) => {
   const navLis = [
     {
       label: t('navbar.menu.documentation@@Documentation'),
-      href: '/docs/en/mf-docs/0.19/getting-started/',
+      href: '/docs/en/mf-docs/0.2/getting-started/',
     },
     {
       label: t('navbar.menu.discover@@Discover'),
