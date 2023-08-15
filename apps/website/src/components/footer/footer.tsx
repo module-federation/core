@@ -39,7 +39,7 @@ export default component$((props: FooterProps) => {
     },
     {
       label: t('footer.menu.documentation@@Documentation'),
-      href: '/docs/en/mf-docs/0.19/getting-started/',
+      href: '/docs/en/mf-docs/0.2/getting-started/',
     },
     {
       label: t('footer.menu.sponsor@@Become a sponsor'),

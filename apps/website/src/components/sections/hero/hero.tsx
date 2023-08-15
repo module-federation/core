@@ -33,7 +33,7 @@ export default component$(() => {
           <Button
             class="w-full md:w-[196px]"
             theme={ButtonTheme.SOLID}
-            href="/docs/en/mf-docs/0.19/setup"
+            href="/docs/en/mf-docs/0.2/setup"
             type="link"
           >
             {t('hero.actions.documentation@@Documentation')}
