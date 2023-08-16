@@ -15,10 +15,5 @@
   "files": [],
   "include": [
     "./remotes.d.ts"
-  ],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    }
   ]
 }

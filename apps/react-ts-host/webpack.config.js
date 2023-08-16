@@ -18,7 +18,6 @@ module.exports = async (config, context) => {
 
   /** @type {import('webpack').Configuration} */
   const parsedConfig = mf(config, context);
-  parsedConfig.plugins = parsedConfig.plugins || [];
 
   const remotes = baseConfig.remotes.reduce((remotes, remote) => {
     const [name, url] = remote;
@@ -28,7 +27,7 @@ module.exports = async (config, context) => {
 
   parsedConfig.plugins.forEach((plugin) => {
     if (plugin.constructor.name === 'ModuleFederationPlugin') {
-      // todo: what kinda of hack is this? :)
+      //Temporary workaround - https://github.com/nrwl/nx/issues/16983
       plugin._options.library = undefined;
     }
   });

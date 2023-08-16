@@ -20,18 +20,19 @@ module.exports = async (config, context) => {
   /** @type {import('webpack').Configuration} */
   const parsedConfig = mf(config, context);
 
-  let moduleFederationPlugin;
-
   parsedConfig.plugins.forEach((p) => {
     if (p.constructor.name === 'ModuleFederationPlugin') {
+      //Temporary workaround - https://github.com/nrwl/nx/issues/16983
       p._options.library = undefined;
-      moduleFederationPlugin = p;
     }
   });
 
   parsedConfig.plugins.push(
     new FederatedTypesPlugin({
-      federationConfig: moduleFederationPlugin._options,
+      federationConfig: {
+        ...baseConfig,
+        filename: 'remoteEntry.js',
+      },
     })
   );
 

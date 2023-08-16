@@ -6,7 +6,7 @@
 const moduleFederationConfig = {
   name: 'react_ts_remote',
   exposes: {
-    './Module': './src/remote-entry.ts',
+    './Module': './src/app/nx-welcome.tsx',
   },
 };
 

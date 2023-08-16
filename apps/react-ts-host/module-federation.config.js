@@ -8,10 +8,6 @@ const moduleFederationConfig = {
   remotes: [
     ['react_ts_remote', 'react_ts_remote@http://localhost:3004/remoteEntry.js'],
   ],
-  exposes: {
-    './Component': './src/app/nx-welcome.tsx',
-    './ab/c/Component': './src/app/App.tsx',
-  },
 };
 
 module.exports = moduleFederationConfig;

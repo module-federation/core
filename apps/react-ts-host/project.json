@@ -57,7 +57,7 @@
     },
     "serve": {
       "executor": "@nx/react:module-federation-dev-server",
-      "defaultConfiguration": "development",
+      "defaultConfiguration": "production",
       "options": {
         "buildTarget": "react_ts_host:build",
         "hmr": true,
