@@ -74,7 +74,7 @@
     "@asciidoctor/tabs": "1.0.0-beta.6",
     "@babel/plugin-transform-react-jsx": "7.22.5",
     "@builder.io/partytown": "0.8.0",
-    "@builder.io/qwik": "1.2.6",
+    "@builder.io/qwik": "1.2.7",
     "@builder.io/qwik-city": "1.2.2",
     "@commitlint/cli": "17.7.1",
     "@commitlint/config-conventional": "17.7.0",
