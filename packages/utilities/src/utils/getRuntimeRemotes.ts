@@ -1,5 +1,5 @@
 import { RuntimeRemotesMap } from '../types';
-import { extractUrlAndGlobal, remoteVars } from './common';
+import { extractUrlAndGlobal, remoteVars } from './pure';
 
 export const getRuntimeRemotes = () => {
   try {

@@ -14,7 +14,7 @@ urls:
 content:
   sources:
     - url: ./../../../
-      start_path: apps/docs/src/zh
+      start_path: apps/docs/src/zh_CN
 ui:
   bundle:
     url: ./../../../dist/apps/docs-ui

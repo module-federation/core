@@ -1,10 +1,10 @@
-= Module Federation GitHub repository with examples and demos
+= Examples and Demos
 
 In this page, you will find a list of examples and demos that showcase how module federation works and how you can use it for various scenarios. These examples and demos are meant to help you understand the concepts and benefits of module federation, as well as provide you with some inspiration and guidance for your own projects.
 
 == How to use the repository
 
-The repository is organized into subfolders, each containing a specific example or demo of Module Federation. Each subfolder has its own README file that explains the purpose, setup, and configuration of the example or demo. You can browse the subfolders on GitHub or clone the repository to your local machine.
+The repository is organized into subdirectories, each containing a specific example or demo of Module Federation. Each subdirectories has its own README file that explains the purpose, setup, and configuration of the example or demo. You can browse the subdirectories on GitHub or clone the repository to your local machine.
 
 To clone the repository, run the following command:
 

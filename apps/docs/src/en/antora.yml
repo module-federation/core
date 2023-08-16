@@ -1,7 +1,7 @@
 name: mf-docs
 title: Module Federation Documentation (Beta)
-version: 0.19
-display_version: '0.19'
+version: 0.20
+display_version: '0.20'
 start_page: ROOT:getting-started.adoc
 nav:
   - modules/ROOT/nav.adoc

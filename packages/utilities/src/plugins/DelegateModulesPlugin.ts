@@ -56,11 +56,11 @@ class DelegateModulesPlugin {
         dependencyModule &&
         !compilation.chunkGraph.isModuleInChunk(dependencyModule, chunk)
       ) {
-        this.addModuleAndDependenciesToChunk(
-          dependencyModule,
-          chunk,
-          compilation
-        );
+        // this.addModuleAndDependenciesToChunk(
+        //   dependencyModule,
+        //   chunk,
+        //   compilation
+        // );
       }
     }
   }

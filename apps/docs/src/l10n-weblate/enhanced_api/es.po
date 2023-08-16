@@ -1,0 +1,1449 @@
+# Spanish translations for PACKAGE package
+# Traducciones al español para el paquete PACKAGE
+# Copyright (C) 2023 Free Software Foundation, Inc.
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2023-07-25 20:53+0300\n"
+"PO-Revision-Date: 2023-07-26 16:26+0000\n"
+"Last-Translator: Nikita <omfgnuts@gmail.com>\n"
+"Language-Team: Spanish <https://hosted.weblate.org/projects/"
+"module-federation-documentation/module-federation-documentation/es/>\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.0-dev\n"
+
+#. type: Title =
+#: src/en/modules/enhanced_api/about.adoc:1
+#, no-wrap
+msgid "Enhanced Federation Plugin API: About"
+msgstr "API de complemento de federación mejorada: Acerca de"
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/about.adoc:2
+msgid ""
+"The Enhanced Federation Plugin API is a powerful tool designed to augment "
+"the capabilities of Module Federation, a feature provided by Webpack. This "
+"document aims to provide a comprehensive overview of the Enhanced Federation "
+"Plugin API, its features, and how it can be used to improve your development "
+"workflow."
+msgstr ""
+"La API del complemento de federación mejorada es una poderosa herramienta "
+"diseñada para aumentar las capacidades de la federación de módulos, una "
+"función proporcionada por Webpack. Este documento tiene como objetivo "
+"proporcionar una descripción general completa de la API del complemento de "
+"federación mejorada, sus características y cómo se puede usar para mejorar "
+"su flujo de trabajo de desarrollo."
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/about.adoc:3
+#, no-wrap
+msgid "Async by Default"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/about.adoc:4
+msgid ""
+"One of the key improvements offered by the Enhanced Federation Plugin API is "
+"the introduction of asynchronous loading by default. With the standard "
+"Module Federation Plugin, all applications are loaded at startup. While this "
+"is fine for dependencies, it can cause issues when integrating other "
+"applications. For instance, if one application is temporarily unavailable, "
+"the entire shell application fails to load."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/about.adoc:5
+msgid ""
+"To mitigate this issue, the Enhanced Federation Plugin API encapsulates the "
+"Promise Based Dynamic Remotes approach, making it a default behavior. This "
+"means that applications are loaded asynchronously, preventing a single "
+"application's failure from affecting the entire shell application. However, "
+"if you prefer, you can disable this feature for all remotes or selectively "
+"enable or disable it for individual ones."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/about.adoc:6
+#, no-wrap
+msgid "Object Remote"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/about.adoc:7
+msgid ""
+"The Enhanced Federation Plugin API introduces a more flexible way to define "
+"remotes, making it easier to manage and customize them. Instead of having to "
+"repeatedly add `remoteEntry.js` to all remotes and perform string "
+"concatenation for environment variables or validations, you can now split "
+"the definition of the name and URL."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/about.adoc:8
+msgid "For example, you can define a remote as follows:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/about.adoc:9
+#, no-wrap
+msgid ""
+"{\n"
+"  authRemote: {\n"
+"    name: \"auth\",\n"
+"    url: process.env.authUrl\n"
+"  },\n"
+"  dsRemote: {\n"
+"    name: \"ds\",\n"
+"    url: () => someValidation ? process.env.dsUrl : \"http://mydefaultds.com\",\n"
+"    remoteEntry: \"dsEntryVersion.js\" \n"
+"  },\n"
+"}\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/about.adoc:10
+msgid "This will generate:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/about.adoc:11
+#, no-wrap
+msgid ""
+"auth@authUrlFromEnv.com/remoteEntry.js\n"
+"ds@dsUrlAfteValidation/dsEntryVersion.js\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/about.adoc:12
+msgid ""
+"This approach simplifies the process of defining remotes and makes your code "
+"cleaner and more maintainable."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/about.adoc:13
+#, no-wrap
+msgid "Lists"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/about.adoc:14
+msgid ""
+"As the number of remotes and exposed modules increases, you may find it "
+"necessary to dynamically load or monitor each one. To facilitate this, the "
+"Enhanced Federation Plugin API provides several list methods. These include:"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/about.adoc:15
+msgid "Listing of remote names consumed in a remote"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/about.adoc:16
+msgid "List of modules exposed from a remote"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/about.adoc:17
+msgid "List of remote names and URLs (also available as an object Map)"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/about.adoc:18
+msgid ""
+"These list methods provide a convenient way to manage and monitor your "
+"remotes and modules, making it easier to maintain large and complex "
+"applications."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/about.adoc:19
+msgid ""
+"We hope this overview of the Enhanced Federation Plugin API has been "
+"helpful. This plugin is designed to enhance the capabilities of Module "
+"Federation, making it easier and more efficient to develop and manage your "
+"applications. We encourage you to explore its features and see how it can "
+"improve your development workflow."
+msgstr ""
+
+#. type: Title =
+#: src/en/modules/enhanced_api/features_default_async.adoc:1
+#, no-wrap
+msgid "Enhanced Federation Plugin API: Features: Default Async"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_default_async.adoc:2
+msgid ""
+"The Enhanced Federation Plugin API introduces a powerful feature: Default "
+"Async. This feature allows you to control the asynchronous loading of your "
+"remotes and modules, providing flexibility and robustness to your "
+"application. This guide will walk you through how to use this feature."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/features_default_async.adoc:3
+#, no-wrap
+msgid "Default Async Behavior"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_default_async.adoc:4
+msgid ""
+"By default, all remotes and modules are converted to asynchronous loading "
+"using the Promise-based approach as described in the Webpack documentation. "
+"This means that your remotes and modules will not block the loading of your "
+"application, improving its performance and user experience."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/features_default_async.adoc:5
+#, no-wrap
+msgid "Disabling Default Async"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_default_async.adoc:6
+msgid ""
+"If you prefer not to have all remotes load asynchronously by default, you "
+"can disable this feature by setting the `defaultAsync` property to `false` "
+"in your `ModuleFederationEnhancedPlugin` configuration. Here's an example:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/features_default_async.adoc:7
+#, no-wrap
+msgid ""
+"new ModuleFederationEnhancedPlugin({\n"
+"  defaultAsync: false\n"
+"})\n"
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/features_default_async.adoc:8
+#, no-wrap
+msgid "Enabling Async for Specific Remotes"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_default_async.adoc:9
+msgid ""
+"Even if you've disabled the default async behavior, you can still enable "
+"asynchronous loading for specific remotes. To do this, add the `async: true` "
+"property to your remote declaration. Here's an example:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/features_default_async.adoc:10
+#, no-wrap
+msgid ""
+"new ModuleFederationEnhancedPlugin({\n"
+"  defaultAsync: false,\n"
+"  remotes: {\n"
+"    app1: {\n"
+"      name: \"app1\",\n"
+"      url: 'myApp1.com/remoteEntry.js'\n"
+"    },\n"
+"    app2: {\n"
+"      async: true,\n"
+"      name: \"app2\",\n"
+"      url: 'myApp2.com/remoteEntry.js'\n"
+"    }\n"
+"  }\n"
+"})\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_default_async.adoc:11
+msgid ""
+"In this example, `app1` will load synchronously, while `app2` will load "
+"asynchronously."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_default_async.adoc:12
+msgid ""
+"The Default Async feature of the Enhanced Federation Plugin API provides you "
+"with the flexibility to control how your remotes and modules load, allowing "
+"you to optimize your application's performance based on your specific needs."
+msgstr ""
+
+#. type: Title =
+#: src/en/modules/enhanced_api/features_module_name_map.adoc:1
+#, no-wrap
+msgid "Enhanced Federation Plugin API: Features: Modules' Name Map"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_module_name_map.adoc:2
+msgid ""
+"The Enhanced Federation Plugin API introduces a feature called Modules' Name "
+"Map. This feature allows you to create a list of all available modules from "
+"a single remote. This guide will walk you through how to use this feature."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/features_module_name_map.adoc:3
+#, no-wrap
+msgid "Creating a Modules' Name Map"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_module_name_map.adoc:4
+msgid ""
+"To create a Modules' Name Map, you need to define the modules you want to "
+"expose in your `ModuleFederationEnhancedPlugin` configuration. Here's an "
+"example:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/features_module_name_map.adoc:5
+#: src/en/modules/enhanced_api/features_remote_object_definition.adoc:5
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:5
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:5
+#: src/en/modules/enhanced_api/getting_started.adoc:5
+#: src/en/modules/enhanced_api/getting_started.adoc:7
+#, no-wrap
+msgid "const ModuleFederationEnhancedPlugin = require(\"@schirrel/module-federation-enhanced-plugin\");\n"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/features_module_name_map.adoc:6
+#, no-wrap
+msgid ""
+"module.exports = {\n"
+"  //... rest of your config\n"
+"  plugins: [\n"
+"    new ModuleFederationEnhancedPlugin({\n"
+"      name: 'myRemoteModule',\n"
+"      // same as the ModuleFederationPlugin config\n"
+"      exposes: {\n"
+"        Button: \"./src/Button\",\n"
+"        Input: \"./src/Input\"\n"
+"      },\n"
+"    }),\n"
+"  ],\n"
+"};\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_module_name_map.adoc:7
+msgid ""
+"In this example, the `Button` and `Input` components from the `src` "
+"directory are exposed. You can replace these with the modules you want to "
+"expose in your application."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_module_name_map.adoc:8
+msgid ""
+"This configuration will export a list with `['Button', 'Input']` for "
+"`myRemoteModule`."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/features_module_name_map.adoc:9
+#, no-wrap
+msgid "Using the Modules' Name Map"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_module_name_map.adoc:10
+msgid ""
+"Once you've created a Modules' Name Map, you can use it in any other "
+"application. To do this, you can import `remoteNameList` from your remote "
+"module. Here's an example:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/features_module_name_map.adoc:11
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:17
+#, no-wrap
+msgid "import remoteNameList from \"myRemoteModule/remoteNameList\";\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_module_name_map.adoc:12
+msgid ""
+"In this example, `remoteNameList` will be an array containing the names of "
+"the modules exposed by `myRemoteModule`."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_module_name_map.adoc:13
+msgid ""
+"The Modules' Name Map feature of the Enhanced Federation Plugin API provides "
+"a convenient way to manage and access the modules exposed by your remotes."
+msgstr ""
+
+#. type: Title =
+#: src/en/modules/enhanced_api/features_remote_object_definition.adoc:1
+#, no-wrap
+msgid "Enhanced Federation Plugin API: Features: Remote Object Definition"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remote_object_definition.adoc:2
+msgid ""
+"The Enhanced Federation Plugin API introduces a feature called Remote Object "
+"Definition. This feature allows you to define your remotes as objects, which "
+"can be particularly useful when using remote names and URLs from environment "
+"variables or callback functions. This guide will walk you through how to use "
+"this feature."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/features_remote_object_definition.adoc:3
+#, no-wrap
+msgid "Creating a Remote Object Definition"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remote_object_definition.adoc:4
+msgid ""
+"To create a Remote Object Definition, you need to define the remotes in your "
+"`ModuleFederationEnhancedPlugin` configuration. Here's an example:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/features_remote_object_definition.adoc:6
+#, no-wrap
+msgid ""
+"module.exports = {\n"
+"  //... rest of your config\n"
+"  plugins: [\n"
+"    new ModuleFederationEnhancedPlugin({\n"
+"      remotes: {\n"
+"        app1: {\n"
+"          name: \"app1\",\n"
+"          url: \"myApp1.com\"\n"
+"        },\n"
+"        app2: {\n"
+"          name: process.env.app2NameByEnv,\n"
+"          url: process.env.app2UrlByEnv\n"
+"        },\n"
+"        app3: {\n"
+"          name: () => myVar.remoteName,\n"
+"          url: () => myVar.remoteUrl\n"
+"        },\n"
+"        otherApp: {\n"
+"          name: \"otherApp\",\n"
+"          url: \"coolSubdomain.myAwesomeRemotes.com/some-subdir\"\n"
+"        },\n"
+"      }\n"
+"    }),\n"
+"  ],\n"
+"};\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remote_object_definition.adoc:7
+msgid ""
+"In this example, `app1`, `app2`, `app3`, and `otherApp` are defined as "
+"remotes. You can replace these with the remotes you want to define in your "
+"application."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/features_remote_object_definition.adoc:8
+#, no-wrap
+msgid "Remote Object Definition Properties"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remote_object_definition.adoc:9
+msgid "The properties for the object definition are:"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remote_object_definition.adoc:10
+msgid ""
+"`name`: The name/scope of the remote, what comes before the `@` on the "
+"string-based remote configuration. This can be a string or a function."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remote_object_definition.adoc:11
+msgid ""
+"`url`: The URL of the JS file for the remote, what comes after the `@` on "
+"the string-based remote configuration. This can be a string or a function. "
+"It is extremely important not to use the last slash (`/`) on the URL."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remote_object_definition.adoc:12
+msgid ""
+"`remoteEntry`: The name of the remoteEntry file you are using. If you use "
+"the default and widely used `remoteEntry.js`, no need to fill this up. This "
+"can be a string or a function."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remote_object_definition.adoc:13
+msgid ""
+"`async`: The property you can use to disable the async behavior for a "
+"specific remote. This is a boolean."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remote_object_definition.adoc:14
+msgid ""
+"If you decide to disable the async behavior for any remote, the plugin will "
+"convert your object to string-based configuration."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remote_object_definition.adoc:15
+msgid ""
+"The Remote Object Definition feature of the Enhanced Federation Plugin API "
+"provides a flexible way to define and manage your remotes. We hope this "
+"guide has been helpful in understanding and using this feature. Happy coding!"
+msgstr ""
+
+#. type: Title =
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:1
+#, no-wrap
+msgid "Enhanced Federation Plugin API: Features: Remotes' Name Map"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:2
+msgid ""
+"The Enhanced Federation Plugin API introduces a feature called Remotes' Name "
+"Map. This feature allows you to create a list of all available remotes for "
+"consumption. This guide will walk you through how to use this feature."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:3
+#, no-wrap
+msgid "Creating a Remotes' Name Map"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:4
+msgid ""
+"To create a Remotes' Name Map, you need to define the remotes in your "
+"`ModuleFederationEnhancedPlugin` configuration. Here's an example:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:6
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:6
+#, no-wrap
+msgid ""
+"module.exports = {\n"
+"  //... rest of your config\n"
+"  plugins: [\n"
+"    new ModuleFederationEnhancedPlugin({\n"
+"      name: 'myMainModule',\n"
+"      // same as the ModuleFederationPlugin config\n"
+"      remotes: {\n"
+"        app1: \"app1@myApp1.com/remoteEntry.js\",\n"
+"        app2: \"app2@coolAppRunningOnCloud.com.br/remoteEntry.js\",\n"
+"      },\n"
+"    }),\n"
+"  ],\n"
+"};\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:7
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:7
+msgid ""
+"In this example, `app1` and `app2` are defined as remotes. You can replace "
+"these with the remotes you want to define in your application."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:8
+msgid ""
+"This configuration will export a list with `['app1', 'app2']`. It will "
+"expose this as a low-level API."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:9
+#, no-wrap
+msgid "Using the Remotes' Name Map"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:10
+msgid ""
+"Once you've created a Remotes' Name Map, you can use it in your application. "
+"Here's an example of how to do this:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:11
+#, no-wrap
+msgid ""
+"const remoteNameListFactory = await window.myMainModule.get('./remoteNameList')\n"
+"const remoteNameList = remoteNameListFactory()\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:12
+msgid ""
+"In this example, `remoteNameList` will be an array containing the names of "
+"the remotes defined by `myMainModule`."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:13
+#, no-wrap
+msgid "Using the Remotes' Name Map with Import"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:14
+msgid ""
+"To use the Remotes' Name Map with import, your main module must be in your "
+"remote entries. Here's an example of how to do this:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:15
+#, no-wrap
+msgid ""
+"remotes: {\n"
+"  myMainModule: \"myMainModule@myMainModule.com/remoteEntry.js\",\n"
+"  app1: \"app1@myApp1.com/remoteEntry.js\",\n"
+"  app2: \"app2@coolAppRunningOnCloud.com.br/remoteEntry.js\",\n"
+"},\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:16
+msgid "Then, you can import the Remotes' Name Map as follows:"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_name_map.adoc:18
+msgid ""
+"The Remotes' Name Map feature of the Enhanced Federation Plugin API provides "
+"a convenient way to manage and access your remotes."
+msgstr ""
+
+#. type: Title =
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:1
+#, no-wrap
+msgid "Enhanced Federation Plugin API: Features: Remotes' URL"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:2
+msgid ""
+"The Enhanced Federation Plugin API introduces a feature called Remotes' URL. "
+"This feature allows you to create a list or a map of all available remotes "
+"along with their URLs for consumption. This guide will walk you through how "
+"to use this feature."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:3
+#, no-wrap
+msgid "Creating a Remotes' URL List"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:4
+msgid ""
+"To create a Remotes' URL List, you need to define the remotes in your "
+"`ModuleFederationEnhancedPlugin` configuration. Here's an example:"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:8
+msgid "This configuration will export a list as:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:9
+#, no-wrap
+msgid ""
+"[\n"
+" { \"app1\": \"myApp1.com/remoteEntry.js\" },\n"
+" { \"app2\": \"coolAppRunningOnCloud.com.br/remoteEntry.js\" }\n"
+"]\n"
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:10
+#, no-wrap
+msgid "Using the Remotes' URL List"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:11
+msgid ""
+"Once you've created a Remotes' URL List, you can use it in your application. "
+"Here's an example of how to do this:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:12
+#, no-wrap
+msgid ""
+"const moduleUrlListFactory = await window.myMainModule.get(\"./remoteUrlList\");\n"
+"const moduleList = moduleUrlListFactory();\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:13
+msgid ""
+"In this example, `moduleList` will be an array containing the names and URLs "
+"of the remotes defined by `myMainModule`."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:14
+#, no-wrap
+msgid "Creating a Remotes' URL Map"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:15
+msgid ""
+"In addition to creating a list, you can also create a map of remotes and "
+"their URLs. The configuration is the same as for the list, but the output "
+"will be an object map:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:16
+#, no-wrap
+msgid ""
+"{\n"
+" \"app1\": \"myApp1.com/remoteEntry.js\",\n"
+" \"app2\": \"coolAppRunningOnCloud.com.br/remoteEntry.js\"\n"
+"}\n"
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:17
+#, no-wrap
+msgid "Using the Remotes' URL Map"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:18
+msgid ""
+"Once you've created a Remotes' URL Map, you can use it in your application. "
+"Here's an example of how to do this:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:19
+#, no-wrap
+msgid ""
+"const moduleUrlMapFactory = await window.myMainModule.get(\"./remoteUrlMap\");\n"
+"const remoteNameList = moduleUrlMapFactory();\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:20
+msgid ""
+"In this example, `remoteNameList` will be an object map containing the names "
+"and URLs of the remotes defined by `myMainModule`."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/features_remotes_url.adoc:21
+msgid ""
+"The Remotes' URL feature of the Enhanced Federation Plugin API provides a "
+"convenient way to manage and access your remotes."
+msgstr ""
+
+#. type: Title =
+#: src/en/modules/enhanced_api/getting_started.adoc:1
+#, no-wrap
+msgid "Enhanced Federation Plugin API: Getting Started"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/getting_started.adoc:2
+msgid ""
+"This guide provides a step-by-step walkthrough on how to get started with "
+"the Enhanced Federation Plugin API. The process is straightforward and "
+"builds on your existing knowledge of the Module Federation Plugin."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/getting_started.adoc:3
+#, no-wrap
+msgid "Configuration"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/getting_started.adoc:4
+msgid ""
+"To start using the Enhanced Federation Plugin API, you need to import it "
+"into your `webpack.config` file, or `vue.config` if you're using Vue.js. "
+"Here's how you can do it:"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/getting_started.adoc:6
+msgid ""
+"Next, replace the existing Module Federation Plugin usage with the Enhanced "
+"Federation Plugin API. Here's an example of how to do this:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/getting_started.adoc:8
+#, no-wrap
+msgid ""
+"module.exports = {\n"
+"  //... rest of your config\n"
+"  plugins: [\n"
+"    new ModuleFederationEnhancedPlugin({\n"
+"      // same as the ModuleFederationPlugin config\n"
+"      exposes: {\n"
+"        Button: \"./src/Button\",\n"
+"        Input: \"./src/Input\",\n"
+"      },\n"
+"    }),\n"
+"  ],\n"
+"};\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/getting_started.adoc:9
+msgid ""
+"In this example, the `Button` and `Input` components from the `src` "
+"directory are exposed. You can replace these with the components you want to "
+"expose in your application."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/getting_started.adoc:10
+msgid ""
+"The Enhanced Federation Plugin API extends all behaviors from the Module "
+"Federation Plugin and uses the same default configuration options. This "
+"means that your existing Module Federation Plugin configuration will work "
+"perfectly with the Enhanced Federation Plugin API."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/getting_started.adoc:11
+#: src/en/modules/enhanced_api/helper_installation.adoc:19
+#: src/en/modules/enhanced_api/installation.adoc:19
+#, no-wrap
+msgid "Next Steps"
+msgstr ""
+
+#. TODO: Add internal link
+#. type: Plain text
+#: src/en/modules/enhanced_api/getting_started.adoc:12
+msgid ""
+"After configuring the Enhanced Federation Plugin API, you're ready to start "
+"using its features in your project. Refer to the https://eatures."
+"html[Features] guide for more information on what you can do with the "
+"Enhanced Federation Plugin API."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/getting_started.adoc:13
+msgid ""
+"If you encounter any issues or have any questions, feel free to reach out "
+"for support."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_about.adoc:1
+msgid "# Enhanced Federation Plugin API: Helper: About"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_about.adoc:2
+msgid ""
+"The Enhanced Federation Plugin API provides a client-side/in-app helper to "
+"load remotes and their modules. This helper is particularly useful in "
+"scenarios where the app shell only has remotes that expose what is needed "
+"there."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_about.adoc:3
+msgid "## Scenario"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_about.adoc:4
+#: src/en/modules/enhanced_api/helper_dynamicLoad.adoc:4
+msgid ""
+"Consider a scenario where you need to install a Progressive Web App (PWA) "
+"offline and cache all features, including remotes. Many of these remotes "
+"might be used in some sort of \"lazy chunk load\" or require \"manual\" "
+"early registration, which can be a pain to manage."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_about.adoc:5
+msgid "## Solution: dynamicLoad"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_about.adoc:6
+#: src/en/modules/enhanced_api/helper_dynamicLoad.adoc:6
+msgid ""
+"To address this, the Enhanced Federation Plugin API provides a feature "
+"called `dynamicLoad`. This feature ensures that all files needed for remotes "
+"are loaded and cached. This means that even in offline scenarios, your PWA "
+"can still access and use the remotes it needs."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_about.adoc:7
+msgid "## Benefits"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_about.adoc:8
+msgid ""
+"By using the `dynamicLoad` feature, you can simplify the management of your "
+"remotes and improve the reliability of your application, especially in "
+"offline scenarios. This feature is part of the Enhanced Federation Plugin "
+"API's commitment to making Module Federation as easy and efficient as "
+"possible."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_about.adoc:9
+msgid ""
+"In the next sections, we will delve into how to install and use the helper, "
+"and how to use the http://www.test.test[`getModule`] and http://www.test."
+"test[`dynamicLoad`] features."
+msgstr ""
+
+#. TODO: Add internal links
+#. type: Title =
+#: src/en/modules/enhanced_api/helper_dynamicLoad.adoc:1
+#, no-wrap
+msgid "Enhanced Federation Plugin API: Helper: dynamicLoad"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_dynamicLoad.adoc:2
+msgid ""
+"The `dynamicLoad` function is a part of the Enhanced Federation Plugin API's "
+"Helper. It allows you to load all necessary and available modules for "
+"consumption. This function is particularly useful in scenarios where the app "
+"shell only has remotes that expose what is needed there. This guide will "
+"walk you through how to use the `dynamicLoad` function."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/helper_dynamicLoad.adoc:3
+#, no-wrap
+msgid "Scenario"
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/helper_dynamicLoad.adoc:5
+#, no-wrap
+msgid "Solution: dynamicLoad"
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/helper_dynamicLoad.adoc:7
+#, no-wrap
+msgid "Steps"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_dynamicLoad.adoc:8
+msgid "The `dynamicLoad` function follows these steps:"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_dynamicLoad.adoc:9
+msgid "Get `remoteUrlMap` to know remotes."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_dynamicLoad.adoc:10
+msgid "Dynamically register by calling `getModule`."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_dynamicLoad.adoc:11
+msgid ""
+"List all remotes available for consumption using `moduleNameList` for each "
+"remote."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_dynamicLoad.adoc:12
+msgid "Load all modules for each remote."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_dynamicLoad.adoc:13
+msgid "Return all modules to the app-shell, root-remote."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_dynamicLoad.adoc:14
+msgid ""
+"By using the `dynamicLoad` function, you can simplify the management of your "
+"remotes and improve the reliability of your application, especially in "
+"offline scenarios."
+msgstr ""
+
+#. type: Title =
+#: src/en/modules/enhanced_api/helper_getModule.adoc:1
+#, no-wrap
+msgid "Enhanced Federation Plugin API: Helper: getModule"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_getModule.adoc:2
+msgid ""
+"The `getModule` function is a part of the Enhanced Federation Plugin API's "
+"Helper. It allows you to load a module from a remote using a low-level API. "
+"This function is particularly useful when dynamic import `import()` doesn't "
+"work with dynamically passed names. This guide will walk you through how to "
+"use the `getModule` function."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/helper_getModule.adoc:3
+#, no-wrap
+msgid "Usage"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_getModule.adoc:4
+msgid ""
+"The `getModule` function can be used in both asynchronous and promise-based "
+"contexts."
+msgstr ""
+
+#. type: Title ===
+#: src/en/modules/enhanced_api/helper_getModule.adoc:5
+#, no-wrap
+msgid "Asynchronous Usage"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_getModule.adoc:6
+msgid "Here's an example of how to use `getModule` asynchronously:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/helper_getModule.adoc:7
+#, no-wrap
+msgid "const module = await getModule({ remote: \"myApp\", module: \"./Component\" });\n"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/helper_getModule.adoc:8
+#, no-wrap
+msgid ""
+"const module = await getModule({\n"
+"  remote: \"myApp\",\n"
+"  module: \"./ListOfSomethingNeeded\",\n"
+"});\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_getModule.adoc:9
+msgid ""
+"In this example, `getModule` is used to load the `Component` module from the "
+"`myApp` remote."
+msgstr ""
+
+#. type: Title ===
+#: src/en/modules/enhanced_api/helper_getModule.adoc:10
+#, no-wrap
+msgid "Promise-based Usage"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_getModule.adoc:11
+msgid "If you prefer to use promises, you can use `getModule` as follows:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/helper_getModule.adoc:12
+#, no-wrap
+msgid "getModule({ remote: \"myApp\", module: \"./Component\" }).then((module) => {});\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_getModule.adoc:13
+msgid ""
+"Again, `getModule` is used to load the `Component` module from the `myApp` "
+"remote."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/helper_getModule.adoc:14
+#, no-wrap
+msgid "Examples"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_getModule.adoc:15
+msgid ""
+"The `getModule` function can be used in various contexts, including vanilla "
+"JavaScript, Vue, and React."
+msgstr ""
+
+#. type: Title ===
+#: src/en/modules/enhanced_api/helper_getModule.adoc:16
+#, no-wrap
+msgid "Vanilla JavaScript"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_getModule.adoc:17
+msgid "Here's an example of how to use `getModule` in vanilla JavaScript:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/helper_getModule.adoc:18
+#, no-wrap
+msgid ""
+"const listOfSomethingNeeded = await getModule({\n"
+"  remote: \"myApp\",\n"
+"  module: \"./ListOfSomethingNeeded\",\n"
+"});\n"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/helper_getModule.adoc:19
+#, no-wrap
+msgid "listOfSomethingNeeded.forEach(callMethodToDealWithData);\n"
+msgstr ""
+
+#. type: Title ===
+#: src/en/modules/enhanced_api/helper_getModule.adoc:20
+#, no-wrap
+msgid "Vue"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_getModule.adoc:21
+msgid "In Vue, you can use `getModule` to load components dynamically:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/helper_getModule.adoc:22
+#, no-wrap
+msgid ""
+"<template>\n"
+"    <section>\n"
+"         <template v-for=\"product in products\" :key=\"product.id\">\n"
+"            <ProductCard :product=\"product\">\n"
+"         </template>\n"
+"         <NewMarketingInfo/>\n"
+"    </section>\n"
+"</template>\n"
+"<script>\n"
+"export default {\n"
+"    components: {\n"
+"    ProductCard: () =>  getModule(\n"
+"       remote: \"productRemote\", module: \"./ProductCard\"\n"
+"    ),\n"
+"    NewMarketingInfo: () => getModule(\n"
+"       remote: \"marketing\", module: \"./NewMarketingInfo\", url: \"http://marketing.info.com/remoteEntry.js\"\n"
+"    );\n"
+"  },\n"
+"    props: ['products'],\n"
+"}\n"
+"</script>\n"
+msgstr ""
+
+#. type: Title ===
+#: src/en/modules/enhanced_api/helper_getModule.adoc:23
+#, no-wrap
+msgid "React"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_getModule.adoc:24
+msgid ""
+"In React, you can use `getModule` with `React.lazy` to load components "
+"dynamically:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/helper_getModule.adoc:25
+#, no-wrap
+msgid "import React from \"react\";\n"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/helper_getModule.adoc:26
+#, no-wrap
+msgid ""
+"const ProductCard = React.lazy(\n"
+"  () => await getModule({ remote: \"productRemote\", module: \"./ProductCard\" })\n"
+");\n"
+"const NewMarketingInfo = React.lazy(\n"
+"  () =>\n"
+"    await getModule({\n"
+"      remote: \"marketing\",\n"
+"      module: \"./NewMarketingInfo\",\n"
+"      url: \"http://marketing.info.com/remoteEntry.js\",\n"
+"    })\n"
+");\n"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/helper_getModule.adoc:27
+#, no-wrap
+msgid ""
+"const Products = ({ products }) => (\n"
+"  <section>\n"
+"    {products.map((product) => (\n"
+"      <ProductCard product={product} />\n"
+"    ))}\n"
+"    <NewMarketingInfo />\n"
+"  </section>\n"
+");\n"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/helper_getModule.adoc:28
+#, no-wrap
+msgid "export default Products;\n"
+msgstr ""
+
+#. type: Title =
+#: src/en/modules/enhanced_api/helper_installation.adoc:1
+#, no-wrap
+msgid "Enhanced Federation Plugin API: Helper: Installation"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_installation.adoc:2
+msgid ""
+"This guide provides step-by-step instructions on how to install the Helper "
+"for the Enhanced Federation Plugin API. The installation process is "
+"straightforward and can be completed using your preferred terminal and "
+"package manager."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/helper_installation.adoc:3
+#: src/en/modules/enhanced_api/installation.adoc:3
+#, no-wrap
+msgid "Prerequisites"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_installation.adoc:4
+#: src/en/modules/enhanced_api/installation.adoc:4
+msgid ""
+"Before you begin, ensure that you have Node.js and npm installed on your "
+"machine. If you're using a different package manager, such as Yarn or pnpm, "
+"make sure they're installed as well."
+msgstr ""
+
+#. type: Title ==
+#: src/en/modules/enhanced_api/helper_installation.adoc:5
+#: src/en/modules/enhanced_api/installation.adoc:5
+#, no-wrap
+msgid "Installation"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_installation.adoc:6
+msgid ""
+"To install the Helper for the Enhanced Federation Plugin API, you can use "
+"npm, Yarn, or pnpm. Here are the commands for each package manager:"
+msgstr ""
+
+#. type: Title ===
+#: src/en/modules/enhanced_api/helper_installation.adoc:7
+#: src/en/modules/enhanced_api/installation.adoc:7
+#, no-wrap
+msgid "Using npm"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_installation.adoc:8
+msgid ""
+"To install the Helper using npm, open your terminal and run the following "
+"command:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/helper_installation.adoc:9
+#, no-wrap
+msgid "npm i @schirrel/module-federation-enhanced-plugin-helper\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_installation.adoc:10
+msgid "This command installs the Helper as a dependency in your project."
+msgstr ""
+
+#. type: Title ===
+#: src/en/modules/enhanced_api/helper_installation.adoc:11
+#: src/en/modules/enhanced_api/installation.adoc:11
+#, no-wrap
+msgid "Using Yarn"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_installation.adoc:12
+msgid ""
+"If you prefer to use Yarn, you can install the Helper with the following "
+"command:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/helper_installation.adoc:13
+#, no-wrap
+msgid "yarn add @schirrel/module-federation-enhanced-plugin-helper\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_installation.adoc:14
+msgid "Like the npm command, this installs the Helper as a dependency."
+msgstr ""
+
+#. type: Title ===
+#: src/en/modules/enhanced_api/helper_installation.adoc:15
+#: src/en/modules/enhanced_api/installation.adoc:15
+#, no-wrap
+msgid "Using pnpm"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_installation.adoc:16
+msgid ""
+"For those who prefer pnpm, use the following command to install the Helper:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/helper_installation.adoc:17
+#, no-wrap
+msgid "pnpm add @schirrel/module-federation-enhanced-plugin-helper\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_installation.adoc:18
+msgid "Again, this command installs the Helper as a dependency."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_installation.adoc:20
+msgid ""
+"After successfully installing the Helper for the Enhanced Federation Plugin "
+"API, you're ready to start using it in your project. Refer to the http://www."
+"test.test[`getModule`] and http://www.test.test[`dynamicLoad`] guide "
+"sections for instructions on how to use helper."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/helper_installation.adoc:21
+#: src/en/modules/enhanced_api/installation.adoc:21
+msgid ""
+"If you encounter any issues during the installation process, feel free to "
+"reach out for support."
+msgstr ""
+
+#. type: Title =
+#: src/en/modules/enhanced_api/installation.adoc:1
+#, no-wrap
+msgid "Enhanced Federation Plugin API: Installation Instructions"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/installation.adoc:2
+msgid ""
+"This guide provides step-by-step instructions on how to install the Enhanced "
+"Federation Plugin API. The installation process is straightforward and can "
+"be completed using your preferred terminal and package manager."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/installation.adoc:6
+msgid ""
+"To install the Enhanced Federation Plugin API, you can use npm, Yarn, or "
+"pnpm. Here are the commands for each package manager:"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/installation.adoc:8
+msgid ""
+"To install the Enhanced Federation Plugin API using npm, open your terminal "
+"and run the following command:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/installation.adoc:9
+#, no-wrap
+msgid "npm i @schirrel/module-federation-enhanced-plugin --save-dev\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/installation.adoc:10
+msgid ""
+"This command installs the Enhanced Federation Plugin API as a devDependency "
+"in your project."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/installation.adoc:12
+msgid ""
+"If you prefer to use Yarn, you can install the Enhanced Federation Plugin "
+"API with the following command:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/installation.adoc:13
+#, no-wrap
+msgid "yarn add @schirrel/module-federation-enhanced-plugin -D\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/installation.adoc:14
+msgid ""
+"Like the npm command, this installs the Enhanced Federation Plugin API as a "
+"devDependency."
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/installation.adoc:16
+msgid ""
+"For those who prefer pnpm, use the following command to install the Enhanced "
+"Federation Plugin API:"
+msgstr ""
+
+#. type: delimited block -
+#: src/en/modules/enhanced_api/installation.adoc:17
+#, no-wrap
+msgid "pnpm add -D @schirrel/module-federation-enhanced-plugin\n"
+msgstr ""
+
+#. type: Plain text
+#: src/en/modules/enhanced_api/installation.adoc:18
+msgid ""
+"Again, this command installs the Enhanced Federation Plugin API as a "
+"devDependency."
+msgstr ""
+
+#. TODO: add internal link
+#. type: Plain text
+#: src/en/modules/enhanced_api/installation.adoc:20
+msgid ""
+"After successfully installing the Enhanced Federation Plugin API, you're "
+"ready to start using it in your project. Refer to the http://test."
+"www[Getting Started] guide for instructions on how to begin."
+msgstr ""
