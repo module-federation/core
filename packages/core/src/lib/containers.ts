@@ -47,22 +47,18 @@ export async function getContainer(remoteContainer: string | RemoteOptions): Pro
     throw Error(`Remote container options is empty`);
   }
 
-  if (typeof remoteContainer === 'string') {
-    if (globalScope[remoteContainer]) {
-      const container = globalScope[remoteContainer] as AsyncContainer;
-      return await container;
-    }
-
-    return undefined;
-  } else {
-    const uniqueKey = getContainerKey(remoteContainer);
-    if (globalScope[uniqueKey]) {
-      const container = globalScope[uniqueKey] as AsyncContainer;
-      return await container;
-    }
-
-    return undefined;
+  if (typeof remoteContainer === 'string' && globalScope[remoteContainer]) {
+    const container = globalScope[remoteContainer] as AsyncContainer;
+    return await container;
   }
+
+  const uniqueKey = getContainerKey(remoteContainer);
+  if (globalScope[uniqueKey]) {
+    const container = globalScope[uniqueKey] as AsyncContainer;
+    return await container;
+  }
+
+  return undefined;
 }
 
 /**

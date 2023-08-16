@@ -1,16 +1,12 @@
-import {
-  WebpackRemoteScriptFactory,
-  WebpackSharingScopeFactory,
-} from '../integrations/webpack';
-
 import type {
   ModuleFederationRuntime,
   ModuleFederationRuntimeOptions,
 } from '../types';
+import { initializeSharingScope, loadScript } from '../integrations/webpack';
 
 export function createModuleFederationRuntime(options?: ModuleFederationRuntimeOptions): ModuleFederationRuntime {
-  const scriptFactory = options?.scriptFactory ?? new WebpackRemoteScriptFactory();
-  const sharingScopeFactory = options?.sharingScopeFactory ?? new WebpackSharingScopeFactory();
+  const scriptFactory = options?.scriptFactory ?? {loadScript};
+  const sharingScopeFactory = options?.sharingScopeFactory ?? {initializeSharingScope};
 
   return {
     scriptFactory,

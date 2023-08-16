@@ -13,7 +13,9 @@
     "noFallthroughCasesInSwitch": true
   },
   "files": [],
-  "include": [],
+  "include": [
+    "./remotes.d.ts"
+  ],
   "references": [
     {
       "path": "./tsconfig.app.json"

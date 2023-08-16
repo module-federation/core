@@ -18,10 +18,7 @@ module.exports = async (config, context) => {
 
   /** @type {import('webpack').Configuration} */
   const parsedConfig = mf(config, context);
-
-  if (!parsedConfig.plugins) {
-    parsedConfig.plugins = [];
-  }
+  parsedConfig.plugins = parsedConfig.plugins || [];
 
   const remotes = baseConfig.remotes.reduce((remotes, remote) => {
     const [name, url] = remote;
@@ -29,10 +26,10 @@ module.exports = async (config, context) => {
     return remotes;
   }, {});
 
-  parsedConfig.plugins.forEach((p) => {
-    if (p.constructor.name === 'ModuleFederationPlugin') {
+  parsedConfig.plugins.forEach((plugin) => {
+    if (plugin.constructor.name === 'ModuleFederationPlugin') {
       // todo: what kinda of hack is this? :)
-      p._options.library = undefined;
+      plugin._options.library = undefined;
     }
   });
 
