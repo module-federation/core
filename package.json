@@ -93,7 +93,7 @@
     "@nrwl/vite": "16.2.2",
     "@nx/web": "16.2.2",
     "@nx/webpack": "16.2.2",
-    "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "@storybook/addon-essentials": "7.0.24",
     "@storybook/builder-webpack5": "7.0.24",
     "@storybook/core-common": "7.0.24",
