@@ -99,8 +99,15 @@ export const webpack = async (
         );
         finalDir = dirname(finalPath);
 
-        // Fix storybook stories' path in virtual module `generated-stories-entry.cjs`
-        if (filePathFromProjectRootDir === '/generated-stories-entry.cjs') {
+        // Fix storybook stories' path in virtual module
+        if (
+          // For storybook version before 7
+          filePathFromProjectRootDir === '/generated-stories-entry.cjs' ||
+          // For storybook version 7
+          filePathFromProjectRootDir === '/storybook-stories.js'
+        ) {
+          const isStorybookVersion7 =
+            filePathFromProjectRootDir === '/storybook-stories.js';
           const nonNormalizedStories = await presets.apply<string[]>('stories');
           const stories = normalizeStories(nonNormalizedStories, {
             configDir: options.configDir,
@@ -111,10 +118,16 @@ export const webpack = async (
           stories.forEach((story) => {
             // Go up 3 times because the file was moved in /node_modules/.cache/storybook
             const newDirectory = join('..', '..', '..', story.directory);
-            sourceCode = sourceCode.replace(
-              `'${story.directory}'`,
-              `'${newDirectory}'`
-            );
+            // Adding trailing slash for story directory in storybook v7
+            const oldSrc = isStorybookVersion7
+              ? `'${story.directory}/'`
+              : `'${story.directory}'`;
+            const newSrc = isStorybookVersion7
+              ? `'${newDirectory}/'`
+              : `'${newDirectory}'`;
+
+            // Fix story directory
+            sourceCode = sourceCode.replace(oldSrc, newSrc);
           });
         }
       }
