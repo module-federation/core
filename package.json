@@ -70,7 +70,7 @@
     "@antora/cli": "3.1.4",
     "@antora/lunr-extension": "1.0.0-alpha.8",
     "@antora/site-generator": "3.1.4",
-    "@asciidoctor/core": "2.2.6",
+    "@asciidoctor/core": "3.0.2",
     "@asciidoctor/tabs": "1.0.0-beta.6",
     "@babel/plugin-transform-react-jsx": "7.22.5",
     "@builder.io/partytown": "0.8.0",
