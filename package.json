@@ -80,7 +80,7 @@
     "@dqbd/tiktoken": "1.0.7",
     "@fontsource/roboto": "5.0.8",
     "@fontsource/roboto-mono": "5.0.8",
-    "@jscutlery/semver": "3.0.0",
+    "@jscutlery/semver": "3.1.0",
     "@node-rs/jieba": "1.7.2",
     "@nrwl/eslint-plugin-nx": "16.2.2",
     "@nx/jest": "16.2.2",
