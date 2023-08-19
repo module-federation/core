@@ -1,6 +1,5 @@
-import webpack, {Compilation} from 'webpack';
+import webpack, {Compilation, RuntimeGlobals} from 'webpack';
 import ModuleInfoRuntimeModule from './ModuleInfoRuntimeModule';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 
 class ModuleInfoPlugin {
   apply(compiler: webpack.Compiler) {

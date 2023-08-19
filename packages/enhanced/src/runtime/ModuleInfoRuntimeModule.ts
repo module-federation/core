@@ -1,4 +1,5 @@
-import { Compilation, RuntimeGlobals, RuntimeModule } from "webpack";
+import  { Compilation, RuntimeGlobals, RuntimeModule } from "webpack";
+// @ts-ignore
 import { Template } from "webpack/lib/Template";
 
 class ModuleInfoRuntimeModule extends RuntimeModule {
@@ -9,7 +10,7 @@ class ModuleInfoRuntimeModule extends RuntimeModule {
   /**
    * @param {Compilation} compilation the compilation
    */
-  generate(): string {
+  override generate(): string {
     return Template.asString([
       `var globalScope = ${RuntimeGlobals.global};`,
       `Object.defineProperty(${RuntimeGlobals.require}, 'moduleInfo', {`,
