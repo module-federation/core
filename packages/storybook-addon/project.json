@@ -11,7 +11,8 @@
         "outputPath": "dist/packages/storybook-addon",
         "main": "packages/storybook-addon/src/index.ts",
         "tsConfig": "packages/storybook-addon/tsconfig.lib.json",
-        "assets": ["packages/storybook-addon/*.md"]
+        "assets": ["packages/storybook-addon/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       },
       "dependsOn": [
         {
@@ -24,9 +25,7 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/storybook-addon/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/storybook-addon/**/*.ts"]
       }
     },
     "test": {
@@ -46,10 +45,7 @@
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": [
-          "storybook-addon:npm",
-          "storybook-addon:github"
-        ],
+        "postTargets": ["storybook-addon:npm", "storybook-addon:github"],
         "trackDeps": true,
         "push": true
       }
@@ -70,7 +66,5 @@
     }
   },
   "tags": [],
-  "implicitDependencies": [
-    "utils"
-  ]
+  "implicitDependencies": ["utils"]
 }
