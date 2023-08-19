@@ -2,19 +2,91 @@
   "migrations": [
     {
       "cli": "nx",
-      "version": "16.2.0-beta.0",
-      "description": "Remove outputPath from run commands",
-      "implementation": "./src/migrations/update-16-2-0/remove-run-commands-output-path",
+      "version": "16.6.0-beta.6",
+      "description": "Prefix outputs with {workspaceRoot}/{projectRoot} if needed",
+      "implementation": "./src/migrations/update-15-0-0/prefix-outputs",
       "package": "nx",
-      "name": "16.2.0-remove-output-path-from-run-commands"
+      "name": "16.6.0-prefix-outputs"
     },
     {
       "cli": "nx",
-      "version": "16.2.0-beta.0",
-      "description": "Remove react-test-renderer from package.json",
-      "implementation": "./src/migrations/update-16-2-0-remove-package/update-16-2-0-remove-package",
-      "package": "@nrwl/react",
-      "name": "update-16-2-0-remove-package"
+      "version": "16.5.0-beta.2",
+      "description": "Add test-setup.ts to ignored files in production input",
+      "implementation": "./src/migrations/update-16-5-0/add-test-setup-to-inputs-ignore",
+      "package": "@nx/jest",
+      "name": "add-test-setup-to-inputs-ignore"
+    },
+    {
+      "cli": "nx",
+      "version": "16.5.0-beta.0",
+      "description": "Move .storybook/tsconfig.json to tsconfig.storybook.json for non-Angular projects.",
+      "factory": "./src/migrations/update-16-5-0/move-storybook-tsconfig",
+      "package": "@nx/storybook",
+      "name": "update-16-5-0"
+    },
+    {
+      "cli": "nx",
+      "version": "16.3.0-beta.2",
+      "description": "Remove @types/react-router-dom from package.json",
+      "implementation": "./src/migrations/update-16-3-0/remove-types-react-router-dom-package",
+      "package": "@nx/react",
+      "name": "remove-types-react-router-dom"
+    },
+    {
+      "cli": "nx",
+      "version": "16.7.0-beta.2",
+      "description": "Add @babel/core to package.json if @babel/preset-react is present",
+      "implementation": "./src/migrations/update-16-7-0/add-babel-core",
+      "package": "@nx/react",
+      "name": "add-babel-core"
+    },
+    {
+      "cli": "nx",
+      "version": "16.7.0-beta.2",
+      "description": "Add @nx/react types to tsconfig types array",
+      "implementation": "./src/migrations/update-16-7-0-add-typings/update-16-7-0-add-typings",
+      "package": "@nx/react",
+      "name": "update-16-7-0-add-typings"
+    },
+    {
+      "cli": "nx",
+      "version": "16.3.0-beta.9",
+      "description": "Remove root build option from project configurations since it is not needed.",
+      "implementation": "./src/migrations/update-16-3-0/remove-root-build-option",
+      "package": "@nx/next",
+      "name": "update-16-3-0-remove-root-build-option"
+    },
+    {
+      "cli": "nx",
+      "version": "16.4.0-beta.3",
+      "description": "Update package.json moving @nx/next from dependency to devDependency",
+      "implementation": "./src/migrations/update-16-4-0/update-nx-next-dependency",
+      "package": "@nx/next",
+      "name": "update-16-4-0-update-next-dependency"
+    },
+    {
+      "cli": "nx",
+      "version": "16.6.0-beta.0",
+      "description": "Explicitly set 'updateBuildableProjectDepsInPackageJson' to 'true' in targets that rely on that value as the default.",
+      "factory": "./src/migrations/update-16-6-0/explicitly-set-projects-to-update-buildable-deps",
+      "package": "@nx/js",
+      "name": "explicitly-set-projects-to-update-buildable-deps"
+    },
+    {
+      "version": "16.4.1-beta.0",
+      "description": "Changes the testFile config in the vite:test exectutor from a string to an array of strings",
+      "cli": "nx",
+      "implementation": "./src/migrations/update-16-4-1-update-test-file-config/update-16-4-1-test-file-config",
+      "package": "@nrwl/vite",
+      "name": "update-16-4-1-test-file-config"
+    },
+    {
+      "version": "16.6.0-beta.4",
+      "description": "Change vite-tsconfig-paths plugin for first party nx-vite-tsconfig-paths plugin",
+      "cli": "nx",
+      "implementation": "./src/migrations/update-16-6-0-change-ts-paths-plugin/change-ts-paths-plugin",
+      "package": "@nrwl/vite",
+      "name": "16-6-0-change-ts-paths-plugin"
     }
   ]
 }
