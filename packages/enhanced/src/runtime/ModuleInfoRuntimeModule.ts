@@ -4,7 +4,7 @@ import { Template } from "webpack/lib/Template";
 
 class ModuleInfoRuntimeModule extends RuntimeModule {
   constructor() {
-    super('moduleInfo');
+    super('moduleInfo',RuntimeModule.STAGE_ATTACH);
   }
 
   /**
