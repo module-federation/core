@@ -10,7 +10,7 @@ Module Federation is implemented using the Webpack module bundler. Webpack is a 
 
 To use Module Federation, developers need to configure their Webpack builds to expose certain modules to other applications and to consume modules from other applications. This can be done using the `exposes` and `remotes` options in the Webpack configuration.
 
-- The `exposes` option is used to expose certain modules from an application to other applications. This tells Webpack which modules should be available to other applications when they are loaded remotely. 
+- The `exposes` option is used to expose certain modules from an application to other applications. This tells Webpack which modules should be available to other applications when they are loaded remotely.
 - The `remotes` option is used to consume modules from other applications. This tells Webpack which modules should be loaded remotely from other applications when they are needed.
 
 Once the Webpack configurations for each application have been set up, the applications can be deployed independently. When a user visits a page that includes multiple micro-frontends, the micro-frontends will dynamically load the code they need from other micro-frontends using the `exposes` and `remotes` options.
