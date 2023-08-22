@@ -19,8 +19,8 @@ export const createTypesArchive = async (tsConfig: typescript.CompilerOptions, r
 }
 
 const downloadErrorLogger = (destinationFolder: string, fileToDownload: string) => (reason: Error) => {
-  console.error(ansiColors.red(`Unable to download federated types for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}', skipping...`))
-  throw reason
+  reason.message = ansiColors.red(`Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}', skipping...`);
+  throw reason;
 }
 
 export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => async ([destinationFolder, fileToDownload]: string[]) => {
