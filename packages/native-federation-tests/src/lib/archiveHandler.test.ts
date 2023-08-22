@@ -19,12 +19,12 @@ describe('archiveHandler', () => {
   })
 
   describe('createTypesArchive', () => {
-    const remoteOptions: Required<RemoteOptions> = {
+    const remoteOptions = {
       moduleFederationConfig: {},
       distFolder: tmpDir,
       testsFolder: '@mf-tests',
       deleteTestsFolder: false
-    }
+    } as unknown as Required<RemoteOptions>;
 
     it('correctly creates archive', async () => {
       const archivePath = join(tmpDir, `${remoteOptions.testsFolder}.zip`)
