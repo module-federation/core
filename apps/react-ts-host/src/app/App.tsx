@@ -3,7 +3,6 @@ import NxWelcome from './nx-welcome';
 import { Link, Route, Routes } from 'react-router-dom';
 import useDynamicModule from './useDynamicRemote';
 
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 const ReactTsRemote = React.lazy(() => import('react_ts_remote/Module'));
 
 const DynamicReactTsRemote = React.lazy(() =>

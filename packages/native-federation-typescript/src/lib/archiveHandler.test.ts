@@ -21,14 +21,14 @@ describe('archiveHandler', () => {
   })
 
   describe('createTypesArchive', () => {
-    const remoteOptions: Required<RemoteOptions> = {
+    const remoteOptions  = {
       additionalFilesToCompile: [],
       compiledTypesFolder: 'compiledTypesFolder',
       typesFolder: 'typesRemoteFolder',
       moduleFederationConfig: {},
       tsConfigPath: './tsconfig.json',
       deleteTypesFolder: false
-    }
+    } as unknown as Required<RemoteOptions>;
 
     it('correctly creates archive', async () => {
       const archivePath = join(tmpDir, `${remoteOptions.typesFolder}.zip`)
