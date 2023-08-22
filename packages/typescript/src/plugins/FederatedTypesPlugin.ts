@@ -30,8 +30,8 @@ export class FederatedTypesPlugin {
     );
 
     if (
-      !compiler.options.plugins.find(
-        (p) => p.constructor.name === 'ModuleFederationPlugin'
+      !compiler.options.plugins
+        .find((p) => p?.constructor.name === 'ModuleFederationPlugin'
       )
     ) {
       this.logger.error(
