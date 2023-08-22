@@ -11,7 +11,8 @@
         "outputPath": "dist/packages/storybook-addon",
         "main": "packages/storybook-addon/src/index.ts",
         "tsConfig": "packages/storybook-addon/tsconfig.lib.json",
-        "assets": ["packages/storybook-addon/*.md"]
+        "assets": ["packages/storybook-addon/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       },
       "dependsOn": [
         {

@@ -4,7 +4,7 @@ registerPluginTSTranspiler();
 const { withNx } = require('@nx/next/plugins/with-nx');
 
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
-const { createDelegatedModule } = require('@module-federation/nextjs-mf/utilities');
+// const { createDelegatedModule } = require('@module-federation/nextjs-mf/utilities');
 
 
 /**
@@ -17,7 +17,7 @@ const nextConfig = {
     svgr: false,
   },
   webpack(config, options) {
-    const { webpack, isServer } = options;
+    const { isServer } = options;
 
     config.plugins.push(
       new NextFederationPlugin({
