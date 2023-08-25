@@ -6,11 +6,21 @@ import type { RuleSetRuleUnion, Loader } from '@module-federation/utilities';
  */
 export function injectRuleLoader(rule: RuleSetRuleUnion, loader: Loader = {}) {
   if (rule !== '...') {
+    //@ts-ignore
     if (rule.loader) {
+      //@ts-ignore
       rule.use = [loader, { loader: rule.loader, options: rule.options }];
+      //@ts-ignore
+
       delete rule.loader;
+      //@ts-ignore
+
       delete rule.options;
+      //@ts-ignore
+
     } else if (rule.use) {
+      //@ts-ignore
+
       rule.use = [loader, ...(rule.use as any[])];
     }
   }
@@ -21,10 +31,14 @@ export function injectRuleLoader(rule: RuleSetRuleUnion, loader: Loader = {}) {
  */
 export function hasLoader(rule: RuleSetRuleUnion, loaderName: string) {
   if (rule !== '...') {
+    //@ts-ignore
     if (rule.loader === loaderName) {
       return true;
+      //@ts-ignore
     } else if (rule.use && Array.isArray(rule.use)) {
+      //@ts-ignore
       for (let i = 0; i < rule.use.length; i++) {
+        //@ts-ignore
         const loader = rule.use[i];
         // check exact name, eg "url-loader" or its path "node_modules/url-loader/dist/cjs.js"
         if (

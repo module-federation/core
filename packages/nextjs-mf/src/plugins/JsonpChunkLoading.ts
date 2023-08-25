@@ -53,6 +53,7 @@ class CustomWebpackPlugin {
             ) {
               const originalSource = runtimeModule.getGeneratedCode();
               const modifiedSource = new ConcatSource(
+                //@ts-ignore
                 originalSource,
                 '\n',
                 getCustomJsonpCode(
