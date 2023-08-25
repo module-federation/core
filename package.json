@@ -63,8 +63,7 @@
     "regenerator-runtime": "0.14.0",
     "tsup": "^7.0.0",
     "undici": "5.23.0",
-    "unplugin": "^1.3.1",
-    "antd": "4.24.12"
+    "unplugin": "^1.3.1"
   },
   "devDependencies": {
     "@antora/cli": "3.1.4",

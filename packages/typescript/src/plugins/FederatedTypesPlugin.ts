@@ -17,6 +17,7 @@ import download from '../lib/download';
 import { Logger, LoggerInstance } from '../Logger';
 
 const PLUGIN_NAME = 'FederatedTypesPlugin';
+const SUPPORTED_PLUGINS = ['ModuleFederationPlugin', 'NextFederationPlugin'];
 
 export class FederatedTypesPlugin {
   private normalizeOptions!: ReturnType<typeof normalizeOptions>;
@@ -30,11 +31,8 @@ export class FederatedTypesPlugin {
     );
 
     if (
-      !compiler.options.plugins.find((p) =>
-        ['ModuleFederationPlugin', 'NextFederationPlugin'].includes(
-          p?.constructor.name || ''
-        )
-      )
+      !compiler.options.plugins
+        .some((p) => SUPPORTED_PLUGINS.indexOf(p?.constructor.name ?? '') !== -1)
     ) {
       this.logger.error(
         'Unable to find the Module Federation Plugin, this is plugin no longer provides it by default. Please add it to your webpack config.'
