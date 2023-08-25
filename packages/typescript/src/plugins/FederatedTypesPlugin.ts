@@ -4,13 +4,9 @@ import axios from 'axios';
 import { Compiler } from 'webpack';
 
 import { TypescriptCompiler } from '../lib/TypescriptCompiler';
-import { normalizeOptions, isObjectEmpty } from '../lib/normalizeOptions';
+import { isObjectEmpty, normalizeOptions } from '../lib/normalizeOptions';
 import { TypesCache } from '../lib/Caching';
-import {
-  CompilationParams,
-  FederatedTypesPluginOptions,
-  TypesStatsJson,
-} from '../types';
+import { CompilationParams, FederatedTypesPluginOptions, TypesStatsJson } from '../types';
 
 import { FederatedTypesStatsPlugin } from './FederatedTypesStatsPlugin';
 import download from '../lib/download';
@@ -82,9 +78,7 @@ export class FederatedTypesPlugin {
       compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (_, params) => {
         this.logger.log('Preparing to Generate types');
 
-        const filesMap = this.compileTypes();
-
-        (params as CompilationParams).federated_types = filesMap;
+        (params as CompilationParams).federated_types = this.compileTypes();
       });
 
       new FederatedTypesStatsPlugin(this.normalizeOptions).apply(compiler);
