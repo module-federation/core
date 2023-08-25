@@ -32,7 +32,7 @@ export class FederatedTypesPlugin {
     if (
       !compiler.options.plugins.find((p) =>
         ['ModuleFederationPlugin', 'NextFederationPlugin'].includes(
-          p.constructor.name
+          p?.constructor.name || ''
         )
       )
     ) {
