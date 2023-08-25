@@ -131,6 +131,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     };
 
     const { chunkGraph, chunk } = this;
+    //@ts-ignore
     const { runtimeTemplate } = this.compilation;
     const fn = RuntimeGlobals.ensureChunkHandlers;
     const withBaseURI = this.runtimeRequirements.has(RuntimeGlobals.baseURI);
@@ -151,10 +152,12 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       RuntimeGlobals.hmrDownloadManifest
     );
 
+    // @ts-ignore
     const conditionMap = chunkGraph.getChunkConditionMap(chunk, chunkHasJs);
     const hasJsMatcher = compileBooleanMatcher(conditionMap);
+    // @ts-ignore
     const initialChunkIds = getInitialChunkIds(chunk, chunkGraph); // , chunkHasJs);
-
+//@ts-ignore
     const outputName = this.compilation.getPath(
       (
         (webpack &&
@@ -162,6 +165,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
             .getChunkFilenameTemplate) ||
         require('webpack/lib/javascript/JavascriptModulesPlugin')
           .getChunkFilenameTemplate
+        //@ts-ignore
       )(chunk, this.compilation.outputOptions),
       {
         chunk,
@@ -171,6 +175,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 
     const rootOutputDir = getUndoPath(
       outputName,
+      //@ts-ignore
       this.compilation.outputOptions.path,
       false
     );
@@ -180,6 +185,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       : undefined;
     return Template.asString([
       withBaseURI
+        //@ts-ignore
         ? this._generateBaseUri(chunk, rootOutputDir)
         : '// no baseURI',
       '',
