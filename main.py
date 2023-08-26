@@ -1,3 +1,6 @@
+# To run this script you need Python setup and installed chardet and beautifulsoup dependencies through pip install
+
+
 import os
 import chardet
 from bs4 import BeautifulSoup
