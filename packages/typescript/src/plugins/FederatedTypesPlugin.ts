@@ -4,19 +4,16 @@ import axios from 'axios';
 import { Compiler } from 'webpack';
 
 import { TypescriptCompiler } from '../lib/TypescriptCompiler';
-import { normalizeOptions, isObjectEmpty } from '../lib/normalizeOptions';
+import { isObjectEmpty, normalizeOptions } from '../lib/normalizeOptions';
 import { TypesCache } from '../lib/Caching';
-import {
-  CompilationParams,
-  FederatedTypesPluginOptions,
-  TypesStatsJson,
-} from '../types';
+import { CompilationParams, FederatedTypesPluginOptions, TypesStatsJson } from '../types';
 
 import { FederatedTypesStatsPlugin } from './FederatedTypesStatsPlugin';
 import download from '../lib/download';
 import { Logger, LoggerInstance } from '../Logger';
 
 const PLUGIN_NAME = 'FederatedTypesPlugin';
+const SUPPORTED_PLUGINS = ['ModuleFederationPlugin', 'NextFederationPlugin'];
 
 export class FederatedTypesPlugin {
   private normalizeOptions!: ReturnType<typeof normalizeOptions>;
@@ -30,9 +27,8 @@ export class FederatedTypesPlugin {
     );
 
     if (
-      !compiler.options.plugins.find(
-        (p) => p.constructor.name === 'ModuleFederationPlugin'
-      )
+      !compiler.options.plugins
+        .some((p) => SUPPORTED_PLUGINS.indexOf(p?.constructor.name ?? '') !== -1)
     ) {
       this.logger.error(
         'Unable to find the Module Federation Plugin, this is plugin no longer provides it by default. Please add it to your webpack config.'
@@ -82,9 +78,7 @@ export class FederatedTypesPlugin {
       compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (_, params) => {
         this.logger.log('Preparing to Generate types');
 
-        const filesMap = this.compileTypes();
-
-        (params as CompilationParams).federated_types = filesMap;
+        (params as CompilationParams).federated_types = this.compileTypes();
       });
 
       new FederatedTypesStatsPlugin(this.normalizeOptions).apply(compiler);
