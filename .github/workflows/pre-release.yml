@@ -2,6 +2,12 @@ name: PR-Workflow
 
 on: pull_request
 
+env:
+  CACHE_NODE_MODULES_PATH: |
+    ~/.npm
+    node_modules
+
+
 jobs:
   build_checks:
     name: Build Checks
@@ -22,6 +28,11 @@ jobs:
           git config user.email "gituser@example.com"
       - run: git fetch --no-tags --prune --depth=5 origin main
         name: Fetch Main branch
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: ${{ env.CACHE_NODE_MODULES_PATH }}
+          key: build-${{ hashFiles('**/package-lock.json') }}
       - name: Install packages
         run: npm i
       - name: Retrieve effected projects

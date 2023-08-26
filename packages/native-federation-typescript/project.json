@@ -35,7 +35,7 @@
       }
     },
     "test": {
-      "executor": "@nrwl/vite:test",
+      "executor": "@nx/vite:test",
       "outputs": [
         "{workspaceRoot}/coverage/packages/native-federation-typescript"
       ]

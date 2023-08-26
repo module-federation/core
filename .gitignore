@@ -45,3 +45,4 @@ Thumbs.db
 # Next.js
 .next
 .netlify
+migrations.json

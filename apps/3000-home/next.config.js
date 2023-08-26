@@ -1,9 +1,13 @@
-const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+const { withNx } = require('@nx/next/plugins/with-nx');
+const { workspaceRoot } = require('nx/src/utils/workspace-root');
 
-registerPluginTSTranspiler();
-const { withNx } = require('@nrwl/next/plugins/with-nx');
+const path = require('path');
+const { registerTsConfigPaths } = require('nx/src/plugins/js/utils/register');
+registerTsConfigPaths(path.join(workspaceRoot, 'tsconfig.tmp.json'));
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
-const { createDelegatedModule } = require('@module-federation/nextjs-mf/utilities');
+const {
+  createDelegatedModule,
+} = require('@module-federation/nextjs-mf/utilities');
 
 /**
  * @type {import('@nrwl/next/plugins/with-nx').WithNxOptions}
@@ -53,7 +57,7 @@ const nextConfig = {
           antd: {},
         },
         extraOptions: {
-          debug:false,
+          debug: false,
           exposePages: true,
           enableImageLoaderFix: true,
           enableUrlLoaderFix: true,
