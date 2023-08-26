@@ -41,12 +41,12 @@
     "release:utils:manual": "nx build && cd dist/packages/utilities && yarn publish --non-interactive --access public",
     "release:next:manual": "nx build && cd dist/packages/nextjs-mf && yarn publish --non-interactive --access public",
     "release:node:manual": "nx build && cd dist/packages/node && yarn publish --non-interactive --access public",
-    "docs": "typedoc",
     "serve:website": "nx run website:serve",
     "build:website": "nx run website:build.netlify",
     "extract-i18n:website": "nx run website:extract-i18n",
     "test:all": "nx run-many --target=test",
-    "repair": "nx repair"
+    "repair": "nx repair",
+    "docs": "typedoc"
   },
   "dependencies": {
     "adm-zip": "^0.5.10",
@@ -178,8 +178,8 @@
     "tailwindcss": "3.3.3",
     "ts-jest": "29.1.1",
     "ts-node": "10.9.1",
-    "typedoc": "^0.24.2",
     "tslib": "2.6.2",
+    "typedoc": "0.24.8",
     "tsup": "7.1.0",
     "typescript": "5.1.6",
     "url-loader": "4.1.1",
