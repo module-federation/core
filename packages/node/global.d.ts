@@ -10,11 +10,14 @@ declare module 'webpack/lib/Template';
 declare module 'webpack/lib/util/compileBooleanMatcher';
 declare module 'webpack/lib/util/identifier';
 
-
 // globals.d.ts
+// eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword
 declare module globalThis {
+  // eslint-disable-next-line no-var
   var usedChunks: Set<string>;
+  // eslint-disable-next-line no-var
   var flushChunks: () => Promise<Array<string>>;
+  // eslint-disable-next-line no-var
   var __remote_scope__: {
     _config: Record<string, any>;
     _medusa?: Record<string, any>;
@@ -22,5 +25,6 @@ declare module globalThis {
       fake?: boolean;
     };
   };
-  var webpackChunkLoad: ()=> any;
+  // eslint-disable-next-line no-var
+  var webpackChunkLoad: () => any;
 }

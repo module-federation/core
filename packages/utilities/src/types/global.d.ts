@@ -4,8 +4,19 @@ import type { AsyncContainer, WebpackRemoteContainer } from '../types';
 
 export {};
 
+export type FakeModule = {
+  fake?: boolean;
+};
+
 export type RemoteScope = {
-  [index: string]: AsyncContainer | string | undefined | Record<string, string>;
+  [index: string]:
+    | AsyncContainer
+    | string
+    | undefined
+    | Record<string, string>
+    | FakeModule;
+  _config: Record<string, any>;
+  _medusa?: Record<string, any>;
 };
 
 declare global {
@@ -13,7 +24,7 @@ declare global {
 
   module NodeJS {
     interface Global {
-      __remote_scope__: Record<string, WebpackRemoteContainer>;
+      __remote_scope__: RemoteScope;
     }
   }
 
@@ -23,6 +34,6 @@ declare global {
     remoteLoading?: {
       [index: string]: AsyncContainer | undefined;
     };
-    __remote_scope__: Record<string, WebpackRemoteContainer>;
+    __remote_scope__: RemoteScope;
   }
 }
