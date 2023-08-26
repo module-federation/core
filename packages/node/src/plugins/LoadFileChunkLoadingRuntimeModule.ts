@@ -1,10 +1,6 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 /*
   MIT License http://www.opensource.org/licenses/mit-license.php
 */
-
-'use strict';
-
 import type { Chunk, ChunkGraph, Compiler } from 'webpack';
 import { RuntimeModule, RuntimeGlobals, Template } from 'webpack';
 import { getUndoPath } from 'webpack/lib/util/identifier';
@@ -108,9 +104,16 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     );
 
     const { webpack } = this.chunkLoadingContext;
-    const chunkHasJs =
-      (webpack && webpack.javascript.JavascriptModulesPlugin.chunkHasJs) ||
-      require('webpack/lib/javascript/JavascriptModulesPlugin').chunkHasJs;
+    const { chunkGraph, chunk, compilation } = this;
+
+    if (!chunkGraph || !chunk || !compilation) return '';
+
+    const { runtimeTemplate } = compilation;
+
+    const jsModulePlugin = webpack?.javascript.JavascriptModulesPlugin
+      || require('webpack/lib/javascript/JavascriptModulesPlugin');
+
+    const chunkHasJs = jsModulePlugin.chunkHasJs;
 
     // workaround for next.js
     const getInitialChunkIds = (chunk: Chunk, chunkGraph: ChunkGraph) => {
@@ -130,8 +133,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       return initialChunkIds;
     };
 
-    const { chunkGraph, chunk } = this;
-    const { runtimeTemplate } = this.compilation;
+
     const fn = RuntimeGlobals.ensureChunkHandlers;
     const withBaseURI = this.runtimeRequirements.has(RuntimeGlobals.baseURI);
     const withExternalInstallChunk = this.runtimeRequirements.has(
@@ -155,14 +157,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     const hasJsMatcher = compileBooleanMatcher(conditionMap);
     const initialChunkIds = getInitialChunkIds(chunk, chunkGraph); // , chunkHasJs);
 
-    const outputName = this.compilation.getPath(
-      (
-        (webpack &&
-          webpack.javascript.JavascriptModulesPlugin
-            .getChunkFilenameTemplate) ||
-        require('webpack/lib/javascript/JavascriptModulesPlugin')
-          .getChunkFilenameTemplate
-      )(chunk, this.compilation.outputOptions),
+    const outputName = compilation
+      .getPath(jsModulePlugin.getChunkFilenameTemplate(chunk, compilation.outputOptions),
       {
         chunk,
         contentHashType: 'javascript',
@@ -171,7 +167,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 
     const rootOutputDir = getUndoPath(
       outputName,
-      this.compilation.outputOptions.path,
+      compilation.outputOptions.path,
       false
     );
 
@@ -474,6 +470,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
             '}',
             '',
             Template.getFunctionContent(
+              // eslint-disable-next-line @typescript-eslint/no-var-requires
               require('webpack/lib/hmr/JavascriptHotModuleReplacement.runtime.js')
             )
               .replace(/\$key\$/g, 'readFileVm')
