@@ -20,6 +20,21 @@ https://github.com/module-federation/module-federation-examples
 
 ## This project supports federated SSR
 
+# We are building a micro-frontend ecosystem!
+While NextFederationPlugin works, Next.js is staunchly opposed to the technology and Next is very difficult to support.
+
+This plugin attempts to make the experience as seamless as possible, but it is not perfect.
+
+We are building a micro-frontend ecosystem that is much more powerful than Next.js, built to support micro-frontends from the ground up.
+
+**If Federation is a big enabler for your teams and projects, please consider using our ecosystem thats designed for it**
+
+| [Rspack](https://github.com/web-infra-dev/rspack) | <a href="https://github.com/web-infra-dev/rspack" target="blank"><img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zq-uylkvT/ljhwZthlaukjlkulzlp/Rspack-1850.png" width="400" /></a> |
+| :-: | :-: |
+| [Modern.js](https://github.com/web-infra-dev/modern.js) | <a href="https://github.com/web-infra-dev/modern.js" target="blank"><img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zq-uylkvT/ljhwZthlaukjlkulzlp/Modern-0550.png" width="400" /></a> |
+| [Garfish](https://github.com/web-infra-dev/garfish) | <a href="https://github.com/web-infra-dev/garfish" target="blank"><img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zq-uylkvT/ljhwZthlaukjlkulzlp/Garfish-1630.png" width="400" /></a> |
+| [Oxc](https://github.com/web-infra-dev/oxc) | <a href="https://github.com/web-infra-dev/oxc" target="blank"><img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zq-uylkvT/ljhwZthlaukjlkulzlp/Oxc-0724.png" width="400" /></a> |
+
 ## Whats shared by default?
 
 Under the hood we share some next internals automatically
