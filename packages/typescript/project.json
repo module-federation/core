@@ -15,9 +15,7 @@
         "tsConfig": "packages/typescript/tsconfig.lib.json",
         "assets": [
           "packages/typescript/*.md"
-        ],
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true
+        ]
       },
       "dependsOn": [
         {

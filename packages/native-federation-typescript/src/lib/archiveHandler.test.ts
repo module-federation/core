@@ -21,14 +21,14 @@ describe('archiveHandler', () => {
   })
 
   describe('createTypesArchive', () => {
-    const remoteOptions: Required<RemoteOptions> = {
+    const remoteOptions  = {
       additionalFilesToCompile: [],
       compiledTypesFolder: 'compiledTypesFolder',
       typesFolder: 'typesRemoteFolder',
       moduleFederationConfig: {},
       tsConfigPath: './tsconfig.json',
       deleteTypesFolder: false
-    }
+    } as unknown as Required<RemoteOptions>;
 
     it('correctly creates archive', async () => {
       const archivePath = join(tmpDir, `${remoteOptions.typesFolder}.zip`)
@@ -52,7 +52,9 @@ describe('archiveHandler', () => {
     }
 
     it('throws for unexisting url', async () => {
-      expect(downloadTypesArchive(hostOptions)([tmpDir, 'https://foo.it'])).rejects.toThrowError('getaddrinfo ENOTFOUND foo.it')
+      expect(downloadTypesArchive(hostOptions)([tmpDir, 'https://foo.it']))
+        .rejects.toThrowError('Network error: Unable to download federated mocks');
+        // .rejects.toThrowError('getaddrinfo ENOTFOUND foo.it')
     })
 
     it('correctly extract downloaded archive', async () => {
