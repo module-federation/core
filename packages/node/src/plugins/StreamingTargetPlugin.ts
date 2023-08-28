@@ -24,16 +24,21 @@ class StreamingTargetPlugin {
         `target should be set to false while using NodeSoftwareStreamRuntime plugin, actual target: ${compiler.options.target}`
       );
       console.info('Setting target to false');
-      compiler.options.target = false;
+      // compiler.options.target = false;
     }
 
     // When used with Next.js, context is needed to use Next.js webpack
     const { webpack } = compiler;
 
-    // This will enable CommonJsChunkFormatPlugin
     compiler.options.output.chunkFormat = 'commonjs';
-    // This will force async chunk loading
+    if(compiler.options.output.enabledLibraryTypes === undefined) {
+      compiler.options.output.enabledLibraryTypes = ['commonjs-module']
+    } else {
+      compiler.options.output.enabledLibraryTypes.push('commonjs-module');
+    }
+
     compiler.options.output.chunkLoading = 'async-node';
+
 
     // Disable default config
     // FIXME: enabledChunkLoadingTypes is of type 'string[] | undefined'
