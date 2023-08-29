@@ -46,7 +46,11 @@ class CustomWebpackPlugin {
               // if server runtime module
             }
 
-            if (runtimeModule.constructor.name === 'JsonpChunkLoadingRuntimeModule' && chunk.name === 'webpack') {
+            if (
+              runtimeModule.constructor.name ===
+                'JsonpChunkLoadingRuntimeModule' &&
+              chunk.name === 'webpack'
+            ) {
               const originalSource = runtimeModule.getGeneratedCode();
               if (!originalSource) return;
 

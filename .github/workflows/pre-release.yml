@@ -7,7 +7,6 @@ env:
     ~/.npm
     node_modules
 
-
 jobs:
   build_checks:
     name: Build Checks
