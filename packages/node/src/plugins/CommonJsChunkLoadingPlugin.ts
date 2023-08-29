@@ -3,7 +3,6 @@ import type { ModuleFederationPluginOptions } from '../types';
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
 import ChunkLoadingRuntimeModule from './LoadFileChunkLoadingRuntimeModule';
-import EnsureRemoteRuntimeModule from './EnsureRemoteRuntimeModule';
 
 interface CommonJsChunkLoadingOptions extends ModuleFederationPluginOptions {
   baseURI: Compiler['options']['output']['publicPath'];
@@ -103,24 +102,6 @@ class CommonJsChunkLoadingPlugin {
             }
             set.add(RuntimeGlobals.getUpdateManifestFilename);
           });
-
-        compilation.hooks.additionalTreeRuntimeRequirements.tap(
-          'StartupChunkDependenciesPlugin',
-          (chunk:Chunk, set: Set<string>, { chunkGraph }:{chunkGraph:ChunkGraph}) => {
-            if (!isEnabledForChunk(chunk)) {
-              return;
-            }
-            if (chunkGraph.hasChunkEntryDependentChunks(chunk)) {
-              set.add(RuntimeGlobals.startup);
-              set.add(RuntimeGlobals.ensureChunk);
-              set.add(RuntimeGlobals.ensureChunkIncludeEntries);
-              compilation.addRuntimeModule(
-                chunk,
-                new EnsureRemoteRuntimeModule(),
-              );
-            }
-          },
-        );
       },
     );
   }
