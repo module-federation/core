@@ -5,6 +5,10 @@ import type { Chunk, ChunkGraph, Compiler } from 'webpack';
 import { RuntimeModule, RuntimeGlobals, Template } from 'webpack';
 import { getUndoPath } from 'webpack/lib/util/identifier';
 import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
+import DynamicFileSystem from '../filesystem/DynamicFilesystemRuntimeModule';
+import FileSystemStrategy from '../filesystem/FileSystemStrategyRuntimeModule';
+import HttpEvalStrategy from '../filesystem/HttpEvalStrategyRuntimeModule';
+import HttpStrategy from '../filesystem/HttpStrategyRuntimeModule';
 
 import loadScriptTemplate, { executeLoadTemplate } from './loadScript';
 
@@ -72,6 +76,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 
     return `console.log(${items.join(',')});`;
   }
+
 
   /**
    * @returns {string} runtime code
@@ -270,6 +275,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                       Template.indent([
                         '// load the chunk and return promise to it',
                         'var promise = new Promise(async function(resolve, reject) {',
+                        new DynamicFileSystem().generate(),
                         Template.indent([
                           'installedChunkData = installedChunks[chunkId] = [resolve, reject];',
                           `var filename = typeof process !== "undefined" ? require('path').join(__dirname, ${JSON.stringify(
