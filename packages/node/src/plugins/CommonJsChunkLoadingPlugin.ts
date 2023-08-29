@@ -1,4 +1,4 @@
-import type { Chunk, Compiler } from 'webpack';
+import type { Chunk, Compiler, Compilation, ChunkGraph } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
@@ -35,7 +35,7 @@ class CommonJsChunkLoadingPlugin {
 
     compiler.hooks.thisCompilation.tap(
       'CommonJsChunkLoadingPlugin',
-      (compilation) => {
+      (compilation: Compilation) => {
         // Always enabled
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const isEnabledForChunk = (_: Chunk) => true;
@@ -78,7 +78,7 @@ class CommonJsChunkLoadingPlugin {
           .tap('CommonJsChunkLoadingPlugin', handler);
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.ensureChunkHandlers)
-          .tap('CommonJsChunkLoadingPlugin', (chunk, set) => {
+          .tap('CommonJsChunkLoadingPlugin', (chunk:Chunk, set: Set<string>) => {
             if (!isEnabledForChunk(chunk)) {
               return;
             }
@@ -86,7 +86,7 @@ class CommonJsChunkLoadingPlugin {
           });
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadUpdateHandlers)
-          .tap('CommonJsChunkLoadingPlugin', (chunk, set) => {
+          .tap('CommonJsChunkLoadingPlugin', (chunk:Chunk, set: Set<string>) => {
             if (!isEnabledForChunk(chunk)) {
               return;
             }
@@ -97,7 +97,7 @@ class CommonJsChunkLoadingPlugin {
           });
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadManifest)
-          .tap('CommonJsChunkLoadingPlugin', (chunk, set) => {
+          .tap('CommonJsChunkLoadingPlugin', (chunk:Chunk, set: Set<string>) => {
             if (!isEnabledForChunk(chunk)) {
               return;
             }
@@ -106,7 +106,7 @@ class CommonJsChunkLoadingPlugin {
 
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'StartupChunkDependenciesPlugin',
-          (chunk, set, { chunkGraph }) => {
+          (chunk:Chunk, set: Set<string>, { chunkGraph }:{chunkGraph:ChunkGraph}) => {
             if (!isEnabledForChunk(chunk)) {
               return;
             }
