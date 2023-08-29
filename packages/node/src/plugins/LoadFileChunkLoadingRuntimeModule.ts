@@ -256,7 +256,11 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
         : '// no remote script loader needed',
       withLoading
         ? Template.asString([
-            '// ReadFile + VM.run chunk loading for javascript',
+          new DynamicFileSystem().generate(),
+          new HttpStrategy().generate(),
+          new HttpEvalStrategy().generate(),
+          new FileSystemStrategy().generate(),
+            '// Dynamic filesystem chunk loading for javascript',
             `${fn}.readFileVm = function(chunkId, promises) {`,
             hasJsMatcher !== false
               ? Template.indent([
@@ -275,7 +279,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                       Template.indent([
                         '// load the chunk and return promise to it',
                         'var promise = new Promise(async function(resolve, reject) {',
-                        new DynamicFileSystem().generate(),
                         Template.indent([
                           'installedChunkData = installedChunks[chunkId] = [resolve, reject];',
                           `var filename = typeof process !== "undefined" ? require('path').join(__dirname, ${JSON.stringify(
@@ -288,6 +291,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           this._getLogger(
                             `'chunk filename local load', chunkId`
                           ),
+                          `DynamicFileSystem(loadChunkFileSystemRunInContext).loadChunk(chunkId, chunkName, remotes, logger, callback)`,
+
                           Template.indent([
                             "fs.readFile(filename, 'utf-8', function(err, content) {",
                             Template.indent([

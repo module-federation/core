@@ -6,8 +6,6 @@ class HttpEvalStrategyRuntimeModule extends RuntimeModule {
   }
 
   generate() {
-    const { compilation } = this;
-    const { runtimeTemplate } = compilation;
 
     return Template.asString([
       '// HttpEvalStrategy',
