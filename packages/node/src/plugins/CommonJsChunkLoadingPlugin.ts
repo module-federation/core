@@ -3,7 +3,7 @@ import type { ModuleFederationPluginOptions } from '../types';
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
 import ChunkLoadingRuntimeModule from './LoadFileChunkLoadingRuntimeModule';
-
+import FederationModuleInfoRuntimeModule from "./FederationModuleInfoRuntimeModule";
 interface CommonJsChunkLoadingOptions extends ModuleFederationPluginOptions {
   baseURI: Compiler['options']['output']['publicPath'];
   promiseBaseURI?: string;
@@ -102,6 +102,16 @@ class CommonJsChunkLoadingPlugin {
             }
             set.add(RuntimeGlobals.getUpdateManifestFilename);
           });
+
+        compilation.hooks.additionalTreeRuntimeRequirements.tap(
+          'StartupChunkDependenciesPlugin',
+          (chunk:Chunk, set:Set<string>, { chunkGraph }:{chunkGraph:ChunkGraph}) => {
+            compilation.addRuntimeModule(
+              chunk,
+              new FederationModuleInfoRuntimeModule(),
+            );
+          },
+        );
       },
     );
   }
