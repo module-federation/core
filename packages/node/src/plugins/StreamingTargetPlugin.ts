@@ -23,14 +23,13 @@ class StreamingTargetPlugin {
     const { webpack } = compiler;
 
     compiler.options.output.chunkFormat = 'commonjs';
-    if(compiler.options.output.enabledLibraryTypes === undefined) {
-      compiler.options.output.enabledLibraryTypes = ['commonjs-module']
+    if (compiler.options.output.enabledLibraryTypes === undefined) {
+      compiler.options.output.enabledLibraryTypes = ['commonjs-module'];
     } else {
       compiler.options.output.enabledLibraryTypes.push('commonjs-module');
     }
 
     compiler.options.output.chunkLoading = 'async-node';
-
 
     // Disable default config
     // FIXME: enabledChunkLoadingTypes is of type 'string[] | undefined'
@@ -61,5 +60,3 @@ class StreamingTargetPlugin {
 }
 
 export default StreamingTargetPlugin;
-
-

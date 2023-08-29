@@ -30,7 +30,7 @@ class InvertedContainerPlugin {
     container: string | undefined;
     runtime: string;
     remotes: Record<string, string>;
-    debug: boolean | undefined
+    debug: boolean | undefined;
   }) {
     this.options = options || ({} as InvertedContainerOptions);
   }

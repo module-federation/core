@@ -3,7 +3,8 @@ import type { ModuleFederationPluginOptions } from '../types';
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
 import ChunkLoadingRuntimeModule from './LoadFileChunkLoadingRuntimeModule';
-import FederationModuleInfoRuntimeModule from "./FederationModuleInfoRuntimeModule";
+import FederationModuleInfoRuntimeModule from './FederationModuleInfoRuntimeModule';
+
 interface CommonJsChunkLoadingOptions extends ModuleFederationPluginOptions {
   baseURI: Compiler['options']['output']['publicPath'];
   promiseBaseURI?: string;
@@ -54,7 +55,7 @@ class CommonJsChunkLoadingPlugin {
             chunk,
             new ChunkLoadingRuntimeModule(set, this.options, {
               webpack: compiler.webpack,
-            }),
+            })
           );
         };
         compilation.hooks.runtimeRequirementInTree
@@ -77,42 +78,56 @@ class CommonJsChunkLoadingPlugin {
           .tap('CommonJsChunkLoadingPlugin', handler);
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.ensureChunkHandlers)
-          .tap('CommonJsChunkLoadingPlugin', (chunk:Chunk, set: Set<string>) => {
-            if (!isEnabledForChunk(chunk)) {
-              return;
+          .tap(
+            'CommonJsChunkLoadingPlugin',
+            (chunk: Chunk, set: Set<string>) => {
+              if (!isEnabledForChunk(chunk)) {
+                return;
+              }
+              set.add(RuntimeGlobals.getChunkScriptFilename);
             }
-            set.add(RuntimeGlobals.getChunkScriptFilename);
-          });
+          );
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadUpdateHandlers)
-          .tap('CommonJsChunkLoadingPlugin', (chunk:Chunk, set: Set<string>) => {
-            if (!isEnabledForChunk(chunk)) {
-              return;
+          .tap(
+            'CommonJsChunkLoadingPlugin',
+            (chunk: Chunk, set: Set<string>) => {
+              if (!isEnabledForChunk(chunk)) {
+                return;
+              }
+              set.add(RuntimeGlobals.getChunkUpdateScriptFilename);
+              set.add(RuntimeGlobals.moduleCache);
+              set.add(RuntimeGlobals.hmrModuleData);
+              set.add(RuntimeGlobals.moduleFactoriesAddOnly);
             }
-            set.add(RuntimeGlobals.getChunkUpdateScriptFilename);
-            set.add(RuntimeGlobals.moduleCache);
-            set.add(RuntimeGlobals.hmrModuleData);
-            set.add(RuntimeGlobals.moduleFactoriesAddOnly);
-          });
+          );
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadManifest)
-          .tap('CommonJsChunkLoadingPlugin', (chunk:Chunk, set: Set<string>) => {
-            if (!isEnabledForChunk(chunk)) {
-              return;
+          .tap(
+            'CommonJsChunkLoadingPlugin',
+            (chunk: Chunk, set: Set<string>) => {
+              if (!isEnabledForChunk(chunk)) {
+                return;
+              }
+              set.add(RuntimeGlobals.getUpdateManifestFilename);
             }
-            set.add(RuntimeGlobals.getUpdateManifestFilename);
-          });
+          );
 
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'StartupChunkDependenciesPlugin',
-          (chunk:Chunk, set:Set<string>, { chunkGraph }:{chunkGraph:ChunkGraph}) => {
+          (
+            chunk: Chunk,
+            set: Set<string>,
+            { chunkGraph }: { chunkGraph: ChunkGraph }
+          ) => {
             compilation.addRuntimeModule(
               chunk,
-              new FederationModuleInfoRuntimeModule(),
+              //@ts-ignore
+              new FederationModuleInfoRuntimeModule()
             );
-          },
+          }
         );
-      },
+      }
     );
   }
 }

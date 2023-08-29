@@ -9,6 +9,6 @@ export default component$(() => {
 
 export const onRequest: RequestHandler = ({ params, locale }) => {
   const lang = params.lang;
-  
+
   locale(lang || config.defaultLocale.lang);
 };

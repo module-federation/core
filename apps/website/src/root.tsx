@@ -25,16 +25,19 @@ export default component$(() => {
       <QwikCityProvider>
         <head>
           <meta charSet="utf-8" />
-          <script async src="https://www.googletagmanager.com/gtag/js?id=G-SDV5HRTM4G"></script>
-          <script dangerouslySetInnerHTML={`
+          <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-SDV5HRTM4G"
+          ></script>
+          <script
+            dangerouslySetInnerHTML={`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
 
             gtag('config', 'G-SDV5HRTM4G');
-          `}>
-
-          </script>
+          `}
+          ></script>
           <link rel="manifest" href="/manifest.json" />
           <RouterHead />
         </head>

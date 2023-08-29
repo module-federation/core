@@ -1,5 +1,5 @@
 // Utility function to remove unnecessary shared keys from the default share scope
-import { DEFAULT_SHARE_SCOPE } from "../../internal";
+import { DEFAULT_SHARE_SCOPE } from '../../internal';
 
 export function removeUnnecessarySharedKeys(
   shared: Record<string, unknown>

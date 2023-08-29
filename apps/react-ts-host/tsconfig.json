@@ -13,7 +13,5 @@
     "noFallthroughCasesInSwitch": true
   },
   "files": [],
-  "include": [
-    "./remotes.d.ts"
-  ]
+  "include": ["./remotes.d.ts"]
 }
