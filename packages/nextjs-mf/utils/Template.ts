@@ -5,7 +5,7 @@
 
 'use strict';
 
-import { ConcatSource, PrefixSource } from "webpack-sources";
+import { ConcatSource, PrefixSource } from 'webpack-sources';
 
 /** @typedef {import("../declarations/WebpackOptions").Output} OutputOptions */
 /** @typedef {import("webpack-sources").Source} Source */

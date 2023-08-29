@@ -63,8 +63,14 @@ export default component$(() => {
       </div>
 
       <div q:slot="background-no-overlay">
-        <Line showStart={false} class="absolute w-1/4 top-[55%] md:top-[60%] left-0" />
-        <Line showStart={false} class="absolute w-24 md:w-64 top-0 right-[26px] md:right-[14%] rotate-90 origin-left translate-x-full  md:translate-x-1/2 -translate-y-1/2" />
+        <Line
+          showStart={false}
+          class="absolute w-1/4 top-[55%] md:top-[60%] left-0"
+        />
+        <Line
+          showStart={false}
+          class="absolute w-24 md:w-64 top-0 right-[26px] md:right-[14%] rotate-90 origin-left translate-x-full  md:translate-x-1/2 -translate-y-1/2"
+        />
       </div>
     </Section>
   );

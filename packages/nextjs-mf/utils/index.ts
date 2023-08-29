@@ -1,10 +1,5 @@
-
-export {
-  extractUrlAndGlobal,
-} from '@module-federation/utilities/src/utils/pure';
-export {
-  injectScript,
-} from '@module-federation/utilities/src/utils/common';
+export { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
+export { injectScript } from '@module-federation/utilities/src/utils/common';
 // @ts-ignore
 export { flushChunks } from '@module-federation/node/utils';
 export { FlushedChunks } from './flushedChunks';

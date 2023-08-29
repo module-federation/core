@@ -28,7 +28,9 @@ export type SharedConfig = Extract<
   SharedObject[keyof SharedObject],
   { eager?: boolean }
 >;
-export type ExternalsType = Required<ModuleFederationPluginOptions['remoteType']>;
+export type ExternalsType = Required<
+  ModuleFederationPluginOptions['remoteType']
+>;
 
 type ModulePath = string;
 

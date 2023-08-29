@@ -1,5 +1,5 @@
-import { Compiler } from "webpack";
-import { ModuleFederationPluginOptions } from "@module-federation/utilities";
+import { Compiler } from 'webpack';
+import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 
 /**
  * Utility function to validate compiler options.
@@ -15,11 +15,11 @@ import { ModuleFederationPluginOptions } from "@module-federation/utilities";
 export function validateCompilerOptions(compiler: Compiler): boolean {
   // Throw an error if the name option is not defined in the options
   if (!compiler.options.name) {
-    throw new Error("name is not defined in Compiler options");
+    throw new Error('name is not defined in Compiler options');
   }
 
   // Only apply Module Federation to the main server and client builds in Next.js
-  return ["server", "client"].includes(compiler.options.name);
+  return ['server', 'client'].includes(compiler.options.name);
 }
 
 /**
@@ -38,11 +38,11 @@ export function validatePluginOptions(
 ): void {
   // Throw an error if the filename option is not defined in the options
   if (!options.filename) {
-    throw new Error("filename is not defined in NextFederation options");
+    throw new Error('filename is not defined in NextFederation options');
   }
 
   // A requirement for using Module Federation is that a name must be specified
   if (!options.name) {
-    throw new Error("Module federation \"name\" option must be specified");
+    throw new Error('Module federation "name" option must be specified');
   }
 }

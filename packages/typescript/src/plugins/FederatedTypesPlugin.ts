@@ -6,7 +6,11 @@ import { Compiler } from 'webpack';
 import { TypescriptCompiler } from '../lib/TypescriptCompiler';
 import { isObjectEmpty, normalizeOptions } from '../lib/normalizeOptions';
 import { TypesCache } from '../lib/Caching';
-import { CompilationParams, FederatedTypesPluginOptions, TypesStatsJson } from '../types';
+import {
+  CompilationParams,
+  FederatedTypesPluginOptions,
+  TypesStatsJson,
+} from '../types';
 
 import { FederatedTypesStatsPlugin } from './FederatedTypesStatsPlugin';
 import download from '../lib/download';
@@ -27,8 +31,9 @@ export class FederatedTypesPlugin {
     );
 
     if (
-      !compiler.options.plugins
-        .some((p) => SUPPORTED_PLUGINS.indexOf(p?.constructor.name ?? '') !== -1)
+      !compiler.options.plugins.some(
+        (p) => SUPPORTED_PLUGINS.indexOf(p?.constructor.name ?? '') !== -1
+      )
     ) {
       this.logger.error(
         'Unable to find the Module Federation Plugin, this is plugin no longer provides it by default. Please add it to your webpack config.'

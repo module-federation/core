@@ -54,14 +54,24 @@ export const generateRemoteTemplate = (
       }
     }
 
-    if (typeof globalThis.__remote_scope__[${JSON.stringify(global)}] !== 'undefined') return resolve(globalThis.__remote_scope__[${JSON.stringify(global)}]);
-    globalThis.__remote_scope__._config[${JSON.stringify(global)}] = ${JSON.stringify(url)};
+    if (typeof globalThis.__remote_scope__[${JSON.stringify(
+      global
+    )}] !== 'undefined') return resolve(globalThis.__remote_scope__[${JSON.stringify(
+  global
+)}]);
+    globalThis.__remote_scope__._config[${JSON.stringify(
+      global
+    )}] = ${JSON.stringify(url)};
     var __webpack_error__ = new Error();
 
     __webpack_require__.l(
       ${JSON.stringify(url)},
       function (event) {
-        if (typeof globalThis.__remote_scope__[${JSON.stringify(global)}] !== 'undefined') return resolve(globalThis.__remote_scope__[${JSON.stringify(global)}]);
+        if (typeof globalThis.__remote_scope__[${JSON.stringify(
+          global
+        )}] !== 'undefined') return resolve(globalThis.__remote_scope__[${JSON.stringify(
+  global
+)}]);
          var realSrc = event && event.target && event.target.src;
         __webpack_error__.message = 'Loading script failed.\\n(' + event.message + ': ' + realSrc + ')';
         __webpack_error__.name = 'ScriptExternalLoadError';

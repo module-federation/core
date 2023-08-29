@@ -40,7 +40,9 @@ export function getContainerKey(remoteOptions: string | RemoteOptions): string {
  * @returns
  */
 // @param remoteContainer -  Should string type be deprecated?
-export async function getContainer(remoteContainer: string | RemoteOptions): Promise<RemoteContainer | undefined> {
+export async function getContainer(
+  remoteContainer: string | RemoteOptions
+): Promise<RemoteContainer | undefined> {
   const globalScope = getScope();
 
   if (!remoteContainer) {

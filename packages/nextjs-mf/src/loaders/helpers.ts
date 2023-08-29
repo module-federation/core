@@ -6,7 +6,11 @@ import type { RuleSetRuleUnion, Loader } from '@module-federation/utilities';
  */
 export function injectRuleLoader(rule: RuleSetRuleUnion, loader: Loader = {}) {
   if (rule !== '...') {
-    const _rule = rule as {loader?: string; use?: (Loader|string)[], options?: any};
+    const _rule = rule as {
+      loader?: string;
+      use?: (Loader | string)[];
+      options?: any;
+    };
     if (_rule.loader) {
       _rule.use = [loader, { loader: _rule.loader, options: _rule.options }];
       delete _rule.loader;
@@ -22,7 +26,11 @@ export function injectRuleLoader(rule: RuleSetRuleUnion, loader: Loader = {}) {
  */
 export function hasLoader(rule: RuleSetRuleUnion, loaderName: string) {
   if (rule !== '...') {
-    const _rule = rule as {loader?: string; use?: (Loader|string)[], options?: any};
+    const _rule = rule as {
+      loader?: string;
+      use?: (Loader | string)[];
+      options?: any;
+    };
     if (_rule.loader === loaderName) {
       return true;
     } else if (_rule.use && Array.isArray(_rule.use)) {

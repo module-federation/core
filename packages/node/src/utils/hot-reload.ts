@@ -162,7 +162,8 @@ export const revalidate = () => {
   */
 function getFetchModule() {
   //@ts-ignore
-  const loadedModule = globalThis.webpackChunkLoad || global.webpackChunkLoad || global.fetch;
+  const loadedModule =
+    globalThis.webpackChunkLoad || global.webpackChunkLoad || global.fetch;
   if (loadedModule) {
     return loadedModule;
   }

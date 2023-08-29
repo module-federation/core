@@ -26,7 +26,11 @@ class UniversalFederationPlugin {
     const { isServer, debug, ...options } = this._options;
     const { webpack } = compiler;
 
-    if (isServer || compiler.options.name === 'server' || compiler.options.target === 'node') {
+    if (
+      isServer ||
+      compiler.options.name === 'server' ||
+      compiler.options.target === 'node'
+    ) {
       new NodeFederationPlugin(options, this.context).apply(compiler);
       new StreamingTargetPlugin({ ...options, debug }).apply(compiler);
     } else {
