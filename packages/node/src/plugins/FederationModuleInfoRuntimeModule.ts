@@ -16,9 +16,7 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
   generate() {
     return Template.asString([
       `${RuntimeGlobals.require}.federation = {`,
-      `cache: {},`,
-      `remotes: {},`,
-      `moduleInfo: {},`,
+      Template.indent([`cache: {},`, `remotes: {},`, `moduleInfo: {},`]),
       `}`,
     ]);
   }
