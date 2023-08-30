@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "devDependencies": {
     "@module-federation/utilities": "2.0.7",
-    "@module-federation/storybook-addon": "0.2.0"
+    "@module-federation/storybook-addon": "1.0.0"
   }
 }
