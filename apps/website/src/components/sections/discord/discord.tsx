@@ -28,7 +28,9 @@ export default component$(() => {
         q:slot="background"
         class="relative w-11/12 h-full max-w-1225 mx-auto block"
       >
-        <div class="absolute w-48 md:w-64 top-1/2 md:top-1/4 left-0 ">{leftShape}</div>
+        <div class="absolute w-48 md:w-64 top-1/2 md:top-1/4 left-0 ">
+          {leftShape}
+        </div>
         <div class="absolute w-36 md:w-52 bottom-0 right-[12%] md:right-1/4 translate-x-1/2 translate-y-1/2 ">
           {centerShape}
         </div>
@@ -38,9 +40,18 @@ export default component$(() => {
       </div>
 
       <div q:slot="background-no-overlay">
-        <Line showEnd={false} class="absolute w-12 md:w-20 bottom-0 left-1/2 rotate-90 -translate-x-full origin-right translate-y-1/2" />
-        <Line showEnd={false} class="absolute w-24 md:w-36 top-0 right-0 md:right-[5%] -rotate-[30deg]  origin-right" />
-        <Line showStart={false} class="absolute w-24 md:w-36 top-0 left-0 md:left-[5%] rotate-[30deg]  origin-left" />
+        <Line
+          showEnd={false}
+          class="absolute w-12 md:w-20 bottom-0 left-1/2 rotate-90 -translate-x-full origin-right translate-y-1/2"
+        />
+        <Line
+          showEnd={false}
+          class="absolute w-24 md:w-36 top-0 right-0 md:right-[5%] -rotate-[30deg]  origin-right"
+        />
+        <Line
+          showStart={false}
+          class="absolute w-24 md:w-36 top-0 left-0 md:left-[5%] rotate-[30deg]  origin-left"
+        />
       </div>
     </Section>
   );

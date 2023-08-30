@@ -10,7 +10,6 @@ declare module 'webpack/lib/Template';
 declare module 'webpack/lib/util/compileBooleanMatcher';
 declare module 'webpack/lib/util/identifier';
 
-
 // globals.d.ts
 declare module globalThis {
   var usedChunks: Set<string>;
@@ -22,5 +21,5 @@ declare module globalThis {
       fake?: boolean;
     };
   };
-  var webpackChunkLoad: ()=> any;
+  var webpackChunkLoad: () => any;
 }
