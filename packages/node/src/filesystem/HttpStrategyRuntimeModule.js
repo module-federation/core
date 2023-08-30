@@ -12,7 +12,7 @@ class HttpStrategyRuntimeModule extends RuntimeModule {
       'var https = require("https");',
       'var vm = require("vm");',
 
-      'async function loadChunkHttp(chunkId, chunkName, remotes, logger, callback) {',
+      'async function loadChunkHttp(chunkId,rootOutputDir, remotes, callback) {',
       Template.indent([
         'var url = new URL(remotes[chunkName]);',
         'var protocol = url.protocol === "https:" ? https : http;',

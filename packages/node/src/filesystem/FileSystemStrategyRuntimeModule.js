@@ -12,15 +12,12 @@ class FileSystemRunInContextStrategyRuntimeModule extends RuntimeModule {
 
     return Template.asString([
       '// FileSystemRunInContextStrategy',
-      'var fs = require("fs");',
-      'var path = require("path");',
-      'var vm = require("vm");',
-
-      'function loadChunkFileSystemRunInContext(chunkId, rootOutputDir, logger, callback) {',
+      'function loadChunkFileSystemRunInContext(chunkId,rootOutputDir, remotes, callback) {',
       Template.indent([
-        `var filename = path.join(__dirname, rootOutputDir, chunkId + '.js');`,
-        `logger("'chunk filename local load'", chunkId);`,
-
+        'var fs = require("fs");',
+        'var path = require("path");',
+        'var vm = require("vm");',
+        `var filename = require('path').join(__dirname, rootOutputDir + ${RuntimeGlobals.getChunkScriptFilename}(chunkId));`,
         'if (fs.existsSync(filename)) {',
         Template.indent([
           `fs.readFile(filename, 'utf-8', (err, content) => {`,
@@ -39,7 +36,7 @@ class FileSystemRunInContextStrategyRuntimeModule extends RuntimeModule {
             ]),
             '} catch (e) {',
             Template.indent([
-              `logger("'runInThisContext threw'", e);`,
+              `console.log("'runInThisContext threw'", e);`,
               'callback(e, null);'
             ]),
             '}',

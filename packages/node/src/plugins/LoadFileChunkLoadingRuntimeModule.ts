@@ -281,29 +281,32 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         'var promise = new Promise(async function(resolve, reject) {',
                         Template.indent([
                           'installedChunkData = installedChunks[chunkId] = [resolve, reject];',
-                          `var filename = typeof process !== "undefined" ? require('path').join(__dirname, ${JSON.stringify(
+                          `var filename = require('path').join(__dirname, ${JSON.stringify(
                             rootOutputDir
                           )} + ${
                             RuntimeGlobals.getChunkScriptFilename
-                          }(chunkId)) : false;`,
+                          }(chunkId));`,
                           'var fs = typeof process !== "undefined" ? require(\'fs\') : false;',
                           'if(fs && fs.existsSync(filename)) {',
                           this._getLogger(
                             `'chunk filename local load', chunkId`
                           ),
-                          `DynamicFileSystem(loadChunkFileSystemRunInContext).loadChunk(chunkId, chunkName, remotes, logger, callback)`,
+                          `DynamicFileSystem(loadChunkFileSystemRunInContext).loadChunk(chunkId,${JSON.stringify(rootOutputDir)}, remotes, function(error,chunk){
+                          if(error) return reject(error);
+                          installChunk(chunk);
+                          })`,
 
-                          Template.indent([
-                            "fs.readFile(filename, 'utf-8', function(err, content) {",
-                            Template.indent([
-                              'if(err) return reject(err);',
-                              'var chunk = {};',
-                              "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
-                                "(chunk, require, require('path').dirname(filename), filename);",
-                              'installChunk(chunk);',
-                            ]),
-                            '});',
-                          ]),
+                          // Template.indent([
+                          //   "fs.readFile(filename, 'utf-8', function(err, content) {",
+                          //   Template.indent([
+                          //     'if(err) return reject(err);',
+                          //     'var chunk = {};',
+                          //     "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
+                          //       "(chunk, require, require('path').dirname(filename), filename);",
+                          //     'installChunk(chunk);',
+                          //   ]),
+                          //   '});',
+                          // ]),
                           '} else {',
                           Template.indent([
                             loadScriptTemplate,

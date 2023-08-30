@@ -2,7 +2,7 @@ const https = require('https');
 const vm = require('vm');
 
 class HttpStrategy {
-  async loadChunk(chunkId, chunkName, remotes, logger, callback) {
+  async loadChunk(chunkId,rootOutputDir, remotes, callback) {
     const remoteRegistry = globalThis.__remote_scope__._config;
     const requestedRemote = remoteRegistry[chunkName];
     let scriptUrl = new URL(requestedRemote);

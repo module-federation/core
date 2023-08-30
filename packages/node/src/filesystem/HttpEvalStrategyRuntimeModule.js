@@ -12,7 +12,7 @@ class HttpEvalStrategyRuntimeModule extends RuntimeModule {
       'var http = require("http");',
       'var https = require("https");',
 
-      'async function loadChunkHttpEval(chunkId, chunkName, remotes, logger, callback) {',
+      'async function loadChunkHttpEval(chunkId,rootOutputDir, remotes, callback) {',
       Template.indent([
         'var url = new URL(remotes[chunkName]);',
         'var protocol = url.protocol === "https:" ? https : http;',

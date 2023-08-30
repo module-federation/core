@@ -13,12 +13,13 @@ class FileSystemRunInContextStrategyRuntimeModule extends RuntimeModule {
       '// DFS',
       'var DynamicFileSystem = function(strategy) {',
       Template.indent([
-        'this.strategy = strategy;',
-        'this.loadChunk = async function(chunkId, chunkName, remotes, logger, callback) {',
+        'console.log("DynamicFileSystem", {strategy});',
+        'var loadChunk = async function(chunkId,rootOutputDir, remotes, callback) {',
         Template.indent([
-          'return await this.strategy.loadChunk(chunkId, chunkName, remotes, logger, callback);'
+          'return await strategy(chunkId,rootOutputDir, remotes, callback);'
         ]),
-        '};'
+        '};',
+        "return {loadChunk:loadChunk};"
       ]),
       '};',
     ]);

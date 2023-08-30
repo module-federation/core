@@ -3,11 +3,11 @@ const path = require('path');
 const vm = require('vm');
 
 class FileSystemStrategy {
-  loadChunk(chunkId, rootOutputDir, logger, callback) {
+  loadChunk(chunkId,rootOutputDir, remotes, callback) {
     const filename = path.join(__dirname, rootOutputDir, `${chunkId}.js`);
 
     // Logging for debugging; you can remove or modify these as needed
-    logger(`'chunk filename local load'`, chunkId);
+    console.log(`'chunk filename local load'`, chunkId);
 
     if (fs.existsSync(filename)) {
       fs.readFile(filename, 'utf-8', (err, content) => {
@@ -23,7 +23,7 @@ class FileSystemStrategy {
           );
           callback(null, chunk);
         } catch (e) {
-          logger(`'runInThisContext threw'`, e);
+          console(`'runInThisContext threw'`, e);
           callback(e, null);
         }
       });

@@ -3,7 +3,7 @@ class HttpEvalStrategy {
     this.logger = logger;
   }
 
-  async loadChunk(chunkId, remoteUrl, callback) {
+  async loadChunk(chunkId,rootOutputDir, remotes, callback) {
     // Build the URL to fetch the chunk
     const chunkUrl = new URL(remoteUrl);
     chunkUrl.pathname += `/${chunkId}.js`;
