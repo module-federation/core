@@ -13,8 +13,10 @@ class HttpStrategyRuntimeModule extends RuntimeModule {
       'var vm = require("vm");',
 
       'async function loadChunkHttp(chunkId,rootOutputDir, remotes, callback) {',
+
       Template.indent([
-        'var url = new URL(remotes[chunkName]);',
+        'console.log("loadChunkHttp", {chunkId,rootOutputDir, remotes, callback});',
+        'var url = new URL(remotes[chunkId]);',
         'var protocol = url.protocol === "https:" ? https : http;',
 
         'protocol.get(url, (res) => {',
@@ -30,7 +32,7 @@ class HttpStrategyRuntimeModule extends RuntimeModule {
           'res.on("end", () => {',
           Template.indent([
             'var chunk = {};',
-            `vm.runInThisContext('(function(exports, require, __dirname, __filename) {' + data + '\\n})', chunkName)(chunk, require, '.', chunkName);`,
+            `vm.runInThisContext('(function(exports, require, __dirname, __filename) {' + data + '\\n})', chunkId)(chunk, require, '.', chunkId);`,
             'callback(null, chunk);'
           ]),
           '});',

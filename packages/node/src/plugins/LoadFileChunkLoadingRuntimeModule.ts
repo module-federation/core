@@ -295,19 +295,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           if(error) return reject(error);
                           installChunk(chunk);
                           })`,
-
-                          // Template.indent([
-                          //   "fs.readFile(filename, 'utf-8', function(err, content) {",
-                          //   Template.indent([
-                          //     'if(err) return reject(err);',
-                          //     'var chunk = {};',
-                          //     "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
-                          //       "(chunk, require, require('path').dirname(filename), filename);",
-                          //     'installChunk(chunk);',
-                          //   ]),
-                          //   '});',
-                          // ]),
-                          '} else {',
+                          '} else { ',
                           Template.indent([
                             loadScriptTemplate,
                             this._getLogger(
@@ -395,10 +383,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             `if(typeof requestedRemote === 'function'){
                     requestedRemote = await requestedRemote()
                   }`,
-                            this._getLogger(
-                              `'var requestedRemote'`,
-                              `requestedRemote`
-                            ),
+
+                            'console.log("requestedRemote", requestedRemote);',
 
                             // example: uncomment this and server will never reply
                             // `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
@@ -432,6 +418,12 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                               `'will load remote chunk'`,
                               `scriptUrl.toString()`
                             ),
+
+                            `DynamicFileSystem(loadChunkHttp).loadChunk(${JSON.stringify(name)},${JSON.stringify(rootOutputDir)}, globalThis.__remote_scope__._config, function(error,chunk){
+                              if(error) return reject(error);
+                              console.log('http dynamic system loaded', chunkId, chunk);
+                              installChunk(chunk);
+                            });`,
                             `loadScript(scriptUrl.toString(), function(err, content) {`,
                             Template.indent([
                               this._getLogger(`'load script callback fired'`),
