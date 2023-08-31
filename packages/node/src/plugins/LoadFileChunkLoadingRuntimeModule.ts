@@ -419,29 +419,28 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                               `scriptUrl.toString()`
                             ),
 
-                            `DynamicFileSystem(loadChunkHttp).loadChunk(${JSON.stringify(name)},${JSON.stringify(rootOutputDir)}, globalThis.__remote_scope__._config, function(error,chunk){
+                            `DynamicFileSystem(loadChunkHttp).loadChunk(chunkName,${JSON.stringify(name)}, globalThis.__remote_scope__._config, function(error,chunk){
                               if(error) return reject(error);
-                              console.log('http dynamic system loaded', chunkId, chunk);
                               installChunk(chunk);
                             });`,
-                            `loadScript(scriptUrl.toString(), function(err, content) {`,
-                            Template.indent([
-                              this._getLogger(`'load script callback fired'`),
-                              "if(err) {console.error('error loading remote chunk', scriptUrl.toString(),'got',content); return reject(err);}",
-                              'var chunk = {};',
-                              "if(typeof process !== 'undefined') {",
-                              'try {',
-                              "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
-                                "(chunk, require, require('path').dirname(filename), filename);",
-                              '} catch (e) {',
-                              "console.error('runInThisContext threw', e)",
-                              '}',
-                              '} else {',
-                              "eval('(function(exports, require, __dirname, __filename) {' + content + '\\n})')(chunk, __webpack_require__, '.', chunkName);",
-                              '}',
-                              'installChunk(chunk);',
-                            ]),
-                            '});',
+                            // `loadScript(scriptUrl.toString(), function(err, content) {`,
+                            // Template.indent([
+                            //   this._getLogger(`'load script callback fired'`),
+                            //   "if(err) {console.error('error loading remote chunk', scriptUrl.toString(),'got',content); return reject(err);}",
+                            //   'var chunk = {};',
+                            //   "if(typeof process !== 'undefined') {",
+                            //   'try {',
+                            //   "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
+                            //     "(chunk, require, require('path').dirname(filename), filename);",
+                            //   '} catch (e) {',
+                            //   "console.error('runInThisContext threw', e)",
+                            //   '}',
+                            //   '} else {',
+                            //   "eval('(function(exports, require, __dirname, __filename) {' + content + '\\n})')(chunk, __webpack_require__, '.', chunkName);",
+                            //   '}',
+                            //   'installChunk(chunk);',
+                            // ]),
+                            // '});',
                           ]),
                           '}',
                         ]),
