@@ -1,5 +1,9 @@
 const { RuntimeModule, RuntimeGlobals, Template } = require('webpack');
-import { fileSystemRunInContextStrategy,httpEvalStrategy,httpVmStrategy } from './stratagies';
+import {
+  fileSystemRunInContextStrategy,
+  httpEvalStrategy,
+  httpVmStrategy,
+} from './stratagies';
 
 class FileSystemRunInContextStrategyRuntimeModule extends RuntimeModule {
   constructor() {

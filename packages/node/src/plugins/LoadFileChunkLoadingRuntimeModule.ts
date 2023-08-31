@@ -6,9 +6,6 @@ import { RuntimeModule, RuntimeGlobals, Template } from 'webpack';
 import { getUndoPath } from 'webpack/lib/util/identifier';
 import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
 import DynamicFileSystem from '../filesystem/DynamicFilesystemRuntimeModule';
-import FileSystemStrategy from '../filesystem/FileSystemStrategyRuntimeModule';
-import HttpEvalStrategy from '../filesystem/HttpEvalStrategyRuntimeModule';
-import HttpStrategy from '../filesystem/HttpStrategyRuntimeModule';
 
 import loadScriptTemplate, { executeLoadTemplate } from './loadScript';
 
@@ -419,7 +416,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                               if(error) return reject(error);
                               installChunk(chunk);
                             });`,
-
                           ]),
                           '}',
                         ]),
