@@ -9,6 +9,7 @@ export async function fileSystemRunInContextStrategy(
   var vm = require('vm');
   var filename = require('path').join(
     __dirname,
+    //eslint-disable-next-line
     rootOutputDir + __webpack_require__.u(chunkId)
   );
   if (fs.existsSync(filename)) {
