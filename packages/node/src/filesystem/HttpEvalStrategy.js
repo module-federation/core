@@ -3,7 +3,7 @@ class HttpEvalStrategy {
     this.logger = logger;
   }
 
-  async loadChunk(chunkId,rootOutputDir, remotes, callback) {
+  async loadChunk(chunkId, rootOutputDir, remotes, callback) {
     // Build the URL to fetch the chunk
     const chunkUrl = new URL(remoteUrl);
     chunkUrl.pathname += `/${chunkId}.js`;
@@ -18,14 +18,20 @@ class HttpEvalStrategy {
         const chunk = {};
 
         try {
-          eval(`(function(exports, require, self) {${content}\n})`)(chunk, require, self);
+          eval(`(function(exports, require, self) {${content}\n})`)(
+            chunk,
+            require,
+            self
+          );
           callback(null, chunk);
         } catch (e) {
           this.logger(`'Eval threw'`, e);
           callback(e, null);
         }
       } else {
-        const err = new Error(`Failed to load chunk from ${chunkUrl}. Status: ${response.status}`);
+        const err = new Error(
+          `Failed to load chunk from ${chunkUrl}. Status: ${response.status}`
+        );
         callback(err, null);
       }
     } catch (e) {

@@ -16,10 +16,10 @@ class FileSystemRunInContextStrategyRuntimeModule extends RuntimeModule {
         'console.log("DynamicFileSystem", {strategy});',
         'var loadChunk = async function(chunkId,rootOutputDir, remotes, callback) {',
         Template.indent([
-          'return await strategy(chunkId,rootOutputDir, remotes, callback);'
+          'return await strategy(chunkId,rootOutputDir, remotes, callback);',
         ]),
         '};',
-        "return {loadChunk:loadChunk};"
+        'return {loadChunk:loadChunk};',
       ]),
       '};',
     ]);

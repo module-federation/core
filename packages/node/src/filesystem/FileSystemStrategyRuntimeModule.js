@@ -9,7 +9,6 @@ class FileSystemRunInContextStrategyRuntimeModule extends RuntimeModule {
   }
 
   generate() {
-
     return Template.asString([
       '// FileSystemRunInContextStrategy',
       'function loadChunkFileSystemRunInContext(chunkId,rootOutputDir, remotes, callback) {',
@@ -23,34 +22,31 @@ class FileSystemRunInContextStrategyRuntimeModule extends RuntimeModule {
           `fs.readFile(filename, 'utf-8', (err, content) => {`,
           Template.indent([
             'if (err) {',
-            Template.indent([
-              'callback(err, null);',
-              'return;'
-            ]),
+            Template.indent(['callback(err, null);', 'return;']),
             '}',
             'var chunk = {};',
             'try {',
             Template.indent([
               `vm.runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)(chunk, require, path.dirname(filename), filename);`,
-              'callback(null, chunk);'
+              'callback(null, chunk);',
             ]),
             '} catch (e) {',
             Template.indent([
               `console.log("'runInThisContext threw'", e);`,
-              'callback(e, null);'
+              'callback(e, null);',
             ]),
             '}',
           ]),
-          '});'
+          '});',
         ]),
         '} else {',
         Template.indent([
           'const err = new Error(`File ${filename} does not exist`);',
-          'callback(err, null);'
+          'callback(err, null);',
         ]),
-        '}'
+        '}',
       ]),
-      '}'
+      '}',
     ]);
   }
 }

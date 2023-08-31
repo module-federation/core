@@ -3,8 +3,13 @@ class DynamicFileSystem {
     this.strategy = strategy;
   }
 
-  async loadChunk(chunkId,rootOutputDir, remotes, callback) {
-    return await this.strategy.loadChunk(chunkId,rootOutputDir, remotes, callback);
+  async loadChunk(chunkId, rootOutputDir, remotes, callback) {
+    return await this.strategy.loadChunk(
+      chunkId,
+      rootOutputDir,
+      remotes,
+      callback
+    );
   }
 }
 

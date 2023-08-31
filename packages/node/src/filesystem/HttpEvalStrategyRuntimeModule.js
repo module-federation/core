@@ -6,52 +6,34 @@ class HttpEvalStrategyRuntimeModule extends RuntimeModule {
   }
 
   generate() {
-
     return Template.asString([
       '// HttpEvalStrategy',
-      'var http = require("http");',
-      'var https = require("https");',
-
-      'async function loadChunkHttpEval(chunkId,rootOutputDir, remotes, callback) {',
+      'async function loadChunkHttpEval(chunkName,remoteName, remotes, callback) {',
       Template.indent([
-        'var url = new URL(remotes[chunkName]);',
-        'var protocol = url.protocol === "https:" ? https : http;',
+        'var url = new URL(remotes[remoteName]);',
 
-        'protocol.get(url, (res) => {',
+        'var getBasenameFromUrl = (url) => {',
         Template.indent([
-          'let data = "";',
-
-          'res.on("data", (chunk) => {',
-          Template.indent([
-            'data += chunk;'
-          ]),
-          '});',
-
-          'res.on("end", () => {',
-          Template.indent([
-            'var chunk = {};',
-            'try {',
-            Template.indent([
-              'eval(`(function(exports, require, self) {${data}\\n})(chunk, require, self)`);',
-              'callback(null, chunk);'
-            ]),
-            '} catch(e) {',
-            Template.indent([
-              'callback(e, null);'
-            ]),
-            '}',
-          ]),
-          '});',
-
-          'res.on("error", (err) => {',
-          Template.indent([
-            'callback(err, null);'
-          ]),
-          '});'
+          "const urlParts = url.split('/');",
+          'return urlParts[urlParts.length - 1];',
         ]),
-        '});'
+        '};',
+        'var fileToReplace = getBasenameFromUrl(url.pathname)',
+        'url.pathname = url.pathname.replace(fileToReplace, chunkName);',
+        'const data = await fetch(url).then((res)=>res.text());',
+        Template.indent([
+          'var chunk = {};',
+          'try {',
+          Template.indent([
+            `eval('(function(exports, require, __dirname, __filename) {' + data + '\\n})', chunkName)(chunk, require, '.', chunkName);`,
+            'callback(null, chunk);',
+          ]),
+          '} catch(e) {',
+          Template.indent(['callback(e, null);']),
+          '}',
+        ]),
       ]),
-      '};'
+      '};',
     ]);
   }
 }
