@@ -7,6 +7,7 @@ import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
   experiments?: Record<string, unknown>;
   debug?: boolean;
+  useRemoteSideloader?: boolean;
 }
 
 interface Context {
@@ -127,7 +128,7 @@ class NodeFederationPlugin {
   private experiments: NodeFederationOptions['experiments'];
 
   constructor(
-    { experiments, debug, ...options }: NodeFederationOptions,
+    { experiments, debug,...options }: NodeFederationOptions,
     context: Context
   ) {
     this._options = options || ({} as ModuleFederationPluginOptions);
@@ -141,9 +142,10 @@ class NodeFederationPlugin {
 
     const pluginOptions = {
       ...this._options,
-      remotes: parseRemotes(
+      // @ts-ignore
+      remotes: !this.experiments.disableRemoteSideloader ? parseRemotes(
         this._options.remotes || {}
-      ) as ModuleFederationPluginOptions['remotes'],
+      ) as ModuleFederationPluginOptions['remotes'] : this._options.remotes,
     };
 
     const chunkFileName = compiler.options?.output?.chunkFilename;

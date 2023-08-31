@@ -6,7 +6,7 @@ import type { Compiler, container } from 'webpack';
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
   isServer: boolean;
   promiseBaseURI?: string;
-  debug?: boolean;
+  debug?: boolean
 }
 
 interface NodeFederationContext {

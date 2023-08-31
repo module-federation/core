@@ -8,12 +8,17 @@ const {UniversalFederationPlugin} = require('@module-federation/node');
 module.exports = composePlugins(withNx(), (config) => {
   // Update the webpack config as needed here.
   // e.g. `config.plugins.push(new MyPlugin())`
+  config.cache = false;
 delete config.module.rules[config.module.rules.length-1];
   config.plugins.push(new UniversalFederationPlugin({
     isServer: true,
     name: 'node_host',
     remotes: {
-      node_remote: 'node_remote@http://localhost:3002/remoteEntry.js',
+      node_remote: 'globalThis.__remote_scope__.cache.node_remote@http://localhost:3002/remoteEntry.js',
+    },
+    experiments: {
+      // disables / enables the remote sideloader promise template that evaluates the remote entry
+      disableRemoteSideloader: true, // set to false to disable the hack i use to load remote on node. Default is false.
     }
   }));
   return config;

@@ -253,6 +253,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       withLoading
         ? Template.asString([
             new DynamicFileSystem().generate(),
+            `if(!globalThis.__remote_scope__) globalThis.__remote_scope__ = ${RuntimeGlobals.require}.federation`,
+            'console.log(globalThis.__remote_scope__);',
             '// Dynamic filesystem chunk loading for javascript',
             `${fn}.readFileVm = function(chunkId, promises) {`,
             hasJsMatcher !== false
@@ -290,12 +292,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           if(error) return reject(error);
                           installChunk(chunk);
                           })`,
-                          // `DynamicFileSystem(loadChunkFileSystemRunInContext).loadChunk(chunkId,${JSON.stringify(
-                          //   rootOutputDir
-                          // )}, remotes, function(error,chunk){
-                          // if(error) return reject(error);
-                          // installChunk(chunk);
-                          // })`,
                           '} else { ',
                           Template.indent([
                             loadScriptTemplate,
@@ -318,19 +314,9 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                                 return acc;
                               }, {} as Record<string, string>)
                             )};`,
-                            Template.indent([
-                              'if(!globalThis.__remote_scope__) {',
-                              Template.indent([
-                                '// create a global scope for container, similar to how remotes are set on window in the browser',
-                                'globalThis.__remote_scope__ = {',
-                                '_config: {},',
-                                '}',
-                              ]),
-                              '}',
-                            ]),
                             //TODO: double check this file and see if we can remove assigning to global scope (its a older hack)
                             // 'Object.assign(globalThis.__remote_scope__._config, remotes)',
-                            'const remoteRegistry = globalThis.__remote_scope__._config',
+                            'const remoteRegistry = globalThis.__remote_scope__.remotes',
                             /*
                       TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise() global will/should still exist - but can only be known at runtime
                     */
@@ -367,6 +353,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           name
                         )}]`,
                      */
+
                             `var requestedRemote = remoteRegistry[${JSON.stringify(
                               name
                             )}]`,
@@ -412,7 +399,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 
                             `loadChunkStrategy(loadingStrategy, chunkName,${JSON.stringify(
                               name
-                            )}, globalThis.__remote_scope__._config, function(error,chunk){
+                            )}, globalThis.__remote_scope__.remotes, function(error,chunk){
                               if(error) return reject(error);
                               installChunk(chunk);
                             });`,
