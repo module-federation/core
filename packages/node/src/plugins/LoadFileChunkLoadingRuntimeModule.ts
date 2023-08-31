@@ -381,9 +381,11 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             /*TODO: need to handle if chunk fetch fails/crashes - ensure server still can keep loading
                             right now if you throw an error in here, server will stall forever */
 
-                            `if(typeof requestedRemote === 'function'){
-                    requestedRemote = await requestedRemote()
-                  }`,
+                            "if(typeof requestedRemote === 'function'){",
+                            Template.indent(
+                              'requestedRemote = await requestedRemote()'
+                            ),
+                            '}',
 
                             'console.log("requestedRemote", requestedRemote);',
 

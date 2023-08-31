@@ -5,7 +5,7 @@
 
 import express from 'express';
 import * as path from 'path';
-import('node_remote/test')
+import('node_remote/test');
 
 const app = express();
 
