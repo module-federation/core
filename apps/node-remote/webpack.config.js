@@ -9,7 +9,7 @@ module.exports = composePlugins(withNx(), (config) => {
 
   // config.output.publicPath = 'auto'; // this breaks because of import.meta
   config.output.publicPath = '/'; // this works buy not correct way to do things.
-
+  config.target = 'node';
   config.plugins.push(new UniversalFederationPlugin({
     isServer: true,
     name: 'node_remote',
