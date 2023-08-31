@@ -1,7 +1,5 @@
 const { RuntimeModule, RuntimeGlobals, Template } = require('webpack');
-const fs = require('fs');
-const path = require('path');
-const vm = require('vm');
+import { fileSystemRunInContextStrategy,httpEvalStrategy,httpVmStrategy } from './stratagies';
 
 class FileSystemRunInContextStrategyRuntimeModule extends RuntimeModule {
   constructor() {
@@ -10,16 +8,19 @@ class FileSystemRunInContextStrategyRuntimeModule extends RuntimeModule {
 
   generate() {
     return Template.asString([
-      '// DFS',
-      'var DynamicFileSystem = function(strategy) {',
+      fileSystemRunInContextStrategy.toString(),
+      httpEvalStrategy.toString(),
+      httpVmStrategy.toString(),
+      'const loadChunkStrategy = async (strategyType,chunkId,rootOutputDir, remotes, callback) => {',
       Template.indent([
-        'console.log("DynamicFileSystem", {strategy});',
-        'var loadChunk = async function(chunkId,rootOutputDir, remotes, callback) {',
+        'switch (strategyType) {',
         Template.indent([
-          'return await strategy(chunkId,rootOutputDir, remotes, callback);',
+          'case "filesystem": return await fileSystemRunInContextStrategy(chunkId,rootOutputDir, remotes, callback);',
+          'case "http-eval": return await httpEvalStrategy(chunkId,rootOutputDir, remotes, callback);',
+          'case "http-vm": return await httpVmStrategy(chunkId,rootOutputDir, remotes, callback);',
+          'default: throw new Error("Invalid strategy type");',
         ]),
-        '};',
-        'return {loadChunk:loadChunk};',
+        '}',
       ]),
       '};',
     ]);

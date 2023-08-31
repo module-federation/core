@@ -256,9 +256,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       withLoading
         ? Template.asString([
             new DynamicFileSystem().generate(),
-            new HttpStrategy().generate(),
-            new HttpEvalStrategy().generate(),
-            new FileSystemStrategy().generate(),
             '// Dynamic filesystem chunk loading for javascript',
             `${fn}.readFileVm = function(chunkId, promises) {`,
             hasJsMatcher !== false
@@ -290,12 +287,18 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           this._getLogger(
                             `'chunk filename local load', chunkId`
                           ),
-                          `DynamicFileSystem(loadChunkFileSystemRunInContext).loadChunk(chunkId,${JSON.stringify(
+                          `loadChunkStrategy('filesystem', chunkId, ${JSON.stringify(
                             rootOutputDir
                           )}, remotes, function(error,chunk){
                           if(error) return reject(error);
                           installChunk(chunk);
                           })`,
+                          // `DynamicFileSystem(loadChunkFileSystemRunInContext).loadChunk(chunkId,${JSON.stringify(
+                          //   rootOutputDir
+                          // )}, remotes, function(error,chunk){
+                          // if(error) return reject(error);
+                          // installChunk(chunk);
+                          // })`,
                           '} else { ',
                           Template.indent([
                             loadScriptTemplate,
@@ -408,9 +411,9 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                               `'chunkname to request'`,
                               `chunkName`
                             ),
-                            "const loadingStrategy = typeof process !== 'undefined' ?  loadChunkHttp : loadChunkHttpEval;",
+                            "const loadingStrategy = typeof process !== 'undefined' ?  'http-vm' : 'http-eval';",
 
-                            `DynamicFileSystem(loadingStrategy).loadChunk(chunkName,${JSON.stringify(
+                            `loadChunkStrategy(loadingStrategy, chunkName,${JSON.stringify(
                               name
                             )}, globalThis.__remote_scope__._config, function(error,chunk){
                               if(error) return reject(error);
