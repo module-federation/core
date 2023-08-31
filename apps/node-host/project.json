@@ -9,58 +9,44 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "babel",
+        "target": "node",
+        "compiler": "tsc",
         "outputPath": "dist/apps/node-host",
-        "index": "apps/node-host/src/index.html",
-        "baseHref": "/",
-        "main": "apps/node-host/src/main.tsx",
+        "main": "apps/node-host/src/main.js",
         "tsConfig": "apps/node-host/tsconfig.app.json",
-        "assets": [
-          "apps/node-host/src/favicon.ico",
-          "apps/node-host/src/assets"
-        ],
-        "styles": [],
-        "scripts": [],
+        "assets": ["apps/node-host/src/assets"],
         "isolatedConfig": true,
         "webpackConfig": "apps/node-host/webpack.config.js"
       },
       "configurations": {
-        "development": {
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
-        },
-        "production": {
-          "fileReplacements": [
-            {
-              "replace": "apps/node-host/src/environments/environment.ts",
-              "with": "apps/node-host/src/environments/environment.prod.ts"
-            }
-          ],
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": true,
-          "vendorChunk": false
+        "development": {},
+        "production": {}
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
         }
-      }
+      ]
     },
     "serve": {
-      "executor": "@nx/webpack:dev-server",
+      "executor": "@nx/js:node",
       "defaultConfiguration": "development",
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
       "options": {
-        "buildTarget": "node-host:build",
-        "hmr": true
+        "buildTarget": "node-host:build"
       },
       "configurations": {
         "development": {
           "buildTarget": "node-host:build:development"
         },
         "production": {
-          "buildTarget": "node-host:build:production",
-          "hmr": false
+          "buildTarget": "node-host:build:production"
         }
       }
     },
@@ -68,7 +54,7 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/node-host/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": ["apps/node-host/**/*.ts"]
       }
     },
     "test": {

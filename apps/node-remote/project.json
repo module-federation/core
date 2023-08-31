@@ -16,8 +16,6 @@
         "main": "apps/node-remote/src/main.tsx",
         "tsConfig": "apps/node-remote/tsconfig.app.json",
         "assets": [
-          "apps/node-remote/src/favicon.ico",
-          "apps/node-remote/src/assets"
         ],
         "styles": [],
         "scripts": [],
@@ -29,7 +27,7 @@
           "extractLicenses": false,
           "optimization": false,
           "sourceMap": true,
-          "vendorChunk": true
+          "vendorChunk": true,
         },
         "production": {
           "fileReplacements": [
@@ -45,14 +43,27 @@
           "extractLicenses": true,
           "vendorChunk": false
         }
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "serve": {
       "executor": "@nx/webpack:dev-server",
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ],
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "node-remote:build",
-        "hmr": true
+        "hmr": true,
+        "port": 3002
       },
       "configurations": {
         "development": {
