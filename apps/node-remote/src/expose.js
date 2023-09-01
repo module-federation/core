@@ -1,1 +1,1 @@
-console.log('expose module from node-remote')
+console.log('expose module from node-remote');

@@ -16,7 +16,8 @@ export default async function useDynamicModule({
     (await getModule({
       remoteContainer,
       modulePath,
-    })) ?? { // todo: not sure this gonna work with React.lazy, but swallow the error here would be a mistake, imho
+    })) ?? {
+      // todo: not sure this gonna work with React.lazy, but swallow the error here would be a mistake, imho
       default: undefined,
     }
   );

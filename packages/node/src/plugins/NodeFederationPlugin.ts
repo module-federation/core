@@ -128,7 +128,7 @@ class NodeFederationPlugin {
   private experiments: NodeFederationOptions['experiments'];
 
   constructor(
-    { experiments, debug,...options }: NodeFederationOptions,
+    { experiments, debug, ...options }: NodeFederationOptions,
     context: Context
   ) {
     this._options = options || ({} as ModuleFederationPluginOptions);
@@ -143,9 +143,11 @@ class NodeFederationPlugin {
     const pluginOptions = {
       ...this._options,
       // @ts-ignore
-      remotes: !this.experiments.disableRemoteSideloader ? parseRemotes(
-        this._options.remotes || {}
-      ) as ModuleFederationPluginOptions['remotes'] : this._options.remotes,
+      remotes: !this.experiments.disableRemoteSideloader
+        ? (parseRemotes(
+            this._options.remotes || {}
+          ) as ModuleFederationPluginOptions['remotes'])
+        : this._options.remotes,
     };
 
     const chunkFileName = compiler.options?.output?.chunkFilename;

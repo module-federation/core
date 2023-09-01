@@ -276,11 +276,18 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         'var promise = new Promise(async function(resolve, reject) {',
                         Template.indent([
                           'installedChunkData = installedChunks[chunkId] = [resolve, reject];',
+                          // filename is duplicated in here and in filesyste strategy below
                           `var filename = require('path').join(__dirname, ${JSON.stringify(
                             rootOutputDir
                           )} + ${
                             RuntimeGlobals.getChunkScriptFilename
                           }(chunkId));`,
+                          'function installChunkCallback(error,chunk){',
+                          Template.indent([
+                            'if(error) return reject(error);',
+                            'installChunk(chunk);',
+                          ]),
+                          '}',
                           'var fs = typeof process !== "undefined" ? require(\'fs\') : false;',
                           'if(fs && fs.existsSync(filename)) {',
                           this._getLogger(
@@ -288,13 +295,9 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           ),
                           `loadChunkStrategy('filesystem', chunkId, ${JSON.stringify(
                             rootOutputDir
-                          )}, remotes, function(error,chunk){
-                          if(error) return reject(error);
-                          installChunk(chunk);
-                          })`,
+                          )}, remotes, installChunkCallback);`,
                           '} else { ',
                           Template.indent([
-                            loadScriptTemplate,
                             this._getLogger(
                               `'needs to load remote module from ${JSON.stringify(
                                 name
@@ -314,95 +317,36 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                                 return acc;
                               }, {} as Record<string, string>)
                             )};`,
-                            //TODO: double check this file and see if we can remove assigning to global scope (its a older hack)
-                            // 'Object.assign(globalThis.__remote_scope__._config, remotes)',
-                            'const remoteRegistry = globalThis.__remote_scope__.remotes',
-                            /*
-                      TODO: keying by global should be ok, but need to verify - need to deal with when user passes promise new promise() global will/should still exist - but can only be known at runtime
-                    */
-                            this._getLogger(
-                              `'remotes keyed by global name'`,
-                              JSON.stringify(remotes)
-                            ),
-                            this._getLogger(
-                              `'remote scope configs'`,
-                              'globalThis.__remote_scope__._config'
-                            ),
 
-                            this._getLogger(`'before remote scope'`),
-                            this._getLogger(
-                              `'globalThis.__remote_scope__'`,
-                              `globalThis.__remote_scope__`
-                            ),
-                            this._getLogger(
-                              `'globalThis.__remote_scope__[${JSON.stringify(
-                                name
-                              )}]'`,
-                              `globalThis.__remote_scope__[${JSON.stringify(
-                                name
-                              )}]`
-                            ),
-
-                            /*   TODO: this global.REMOTE_CONFIG doesnt work in this v5 core, not sure if i need to keep it or not
-                         not deleting it yet since i might need this for tracking all the remote entries across systems
-                         for now, im going to use locally known remote scope from remoteEntry config
-                         update: We will most likely need this, since remote would not have its own config
-                         id need to access the host system and find the known url
-                          basically this is how i create publicPath: auto on servers.
-                         `var requestedRemote = global.REMOTE_CONFIG[${JSON.stringify(
-                          name
-                        )}]`,
-                     */
-
-                            `var requestedRemote = remoteRegistry[${JSON.stringify(
-                              name
-                            )}]`,
+                            `var requestedRemote = ${
+                              RuntimeGlobals.require
+                            }.federation.remotes[${JSON.stringify(name)}]`,
                             this._getLogger(
                               `'requested remote'`,
                               `requestedRemote`
                             ),
-                            /*TODO: we need to support when user implements own promise new promise function
-                            for example i have my own promise remotes, not global@remotename
-                            so there could be cases where remote may be function still - not sure */
 
-                            /*TODO: need to handle if chunk fetch fails/crashes - ensure server still can keep loading
-                            right now if you throw an error in here, server will stall forever */
+                            /*TODO:
+                            need to handle if chunk fetch fails/crashes - ensure server still can keep loading
+                            right now if you throw an error in here, server will stall forever
+                            */
 
                             `if(typeof requestedRemote === 'function'){
-                    requestedRemote = await requestedRemote()
-                  }`,
+                                requestedRemote = await requestedRemote()
+                              }`,
 
-                            'console.log("requestedRemote", requestedRemote);',
-
-                            // example: uncomment this and server will never reply
-                            // `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
-                            // since im looping over remote and creating global at build time, i dont need to split string at runtime
-                            // there may still be a use case for that with promise new promise, depending on how we design it.
                             this._getLogger(
                               '"requestedRemote"',
                               'requestedRemote',
                               'current name',
                               JSON.stringify(name)
                             ),
-                            `var scriptUrl = new URL(requestedRemote);`,
-
-                            this._getLogger(
-                              `'globalThis.__remote_scope__'`,
-                              `globalThis.__remote_scope__`
-                            ),
                             `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
-                            this._getLogger(
-                              `'chunkname to request'`,
-                              `chunkName`
-                            ),
                             "const loadingStrategy = typeof process !== 'undefined' ?  'http-vm' : 'http-eval';",
 
                             `loadChunkStrategy(loadingStrategy, chunkName,${JSON.stringify(
                               name
-                            )}, globalThis.__remote_scope__.remotes, function(error,chunk){
-                              if(error) return reject(error);
-                              installChunk(chunk);
-                            });`,
+                            )}, globalThis.__remote_scope__.remotes,installChunkCallback);`,
                           ]),
                           '}',
                         ]),
