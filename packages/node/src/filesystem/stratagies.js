@@ -70,7 +70,6 @@ export async function httpVmStrategy(chunkName, remoteName, remotes, callback) {
   var http = require('http');
   var https = require('https');
   var vm = require('vm');
-  console.log('loadChunkHttp', { chunkName, remoteName, remotes, callback });
   var url = new URL(remotes[remoteName]);
   var fileToReplace = require('path').basename(url.pathname);
   url.pathname = url.pathname.replace(fileToReplace, chunkName);

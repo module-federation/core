@@ -86,24 +86,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     // so for example, if im in hostA and require(remoteb/module) --> console.log of name in runtime code will return remoteb
 
     const { remotes = {}, name } = this.options;
-    // for delegate modules, we need to avoid serializing internal modules, only register primitive configs in the runtime
-    // delegates have their own registration code, so we dont need to handle them here.
-    const remotesByType: RemotesByType = Object.values(remotes).reduce(
-      (acc: RemotesByType, remote: string) => {
-        if (
-          remote.startsWith('promise ') ||
-          remote.startsWith('internal ') ||
-          remote.startsWith('external ')
-        ) {
-          acc.functional.push(remote);
-        } else {
-          acc.normal.push(remote);
-        }
-        return acc;
-      },
-      { functional: [], normal: [] }
-    );
-
     const { webpack } = this.chunkLoadingContext;
     const { chunkGraph, chunk, compilation } = this;
 
@@ -112,7 +94,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     const { runtimeTemplate } = compilation;
 
     const jsModulePlugin =
-      webpack?.javascript.JavascriptModulesPlugin ||
+      webpack?.javascript?.JavascriptModulesPlugin ||
       require('webpack/lib/javascript/JavascriptModulesPlugin');
 
     const chunkHasJs = jsModulePlugin.chunkHasJs;
@@ -156,7 +138,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 
     const conditionMap = chunkGraph.getChunkConditionMap(chunk, chunkHasJs);
     const hasJsMatcher = compileBooleanMatcher(conditionMap);
-    const initialChunkIds = getInitialChunkIds(chunk, chunkGraph); // , chunkHasJs);
+    const initialChunkIds = getInitialChunkIds(chunk, chunkGraph);
 
     const outputName = compilation.getPath(
       jsModulePlugin.getChunkFilenameTemplate(chunk, compilation.outputOptions),
@@ -254,7 +236,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
         ? Template.asString([
             new DynamicFileSystem().generate(),
             `if(!globalThis.__remote_scope__) globalThis.__remote_scope__ = ${RuntimeGlobals.require}.federation`,
-            'console.log(globalThis.__remote_scope__);',
             '// Dynamic filesystem chunk loading for javascript',
             `${fn}.readFileVm = function(chunkId, promises) {`,
             hasJsMatcher !== false
@@ -276,12 +257,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         'var promise = new Promise(async function(resolve, reject) {',
                         Template.indent([
                           'installedChunkData = installedChunks[chunkId] = [resolve, reject];',
-                          // filename is duplicated in here and in filesyste strategy below
-                          `var filename = require('path').join(__dirname, ${JSON.stringify(
-                            rootOutputDir
-                          )} + ${
-                            RuntimeGlobals.getChunkScriptFilename
-                          }(chunkId));`,
                           'function installChunkCallback(error,chunk){',
                           Template.indent([
                             'if(error) return reject(error);',
@@ -289,25 +264,20 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                           ]),
                           '}',
                           'var fs = typeof process !== "undefined" ? require(\'fs\') : false;',
-                          'if(fs && fs.existsSync(filename)) {',
-                          this._getLogger(
-                            `'chunk filename local load', chunkId`
-                          ),
-                          `loadChunkStrategy('filesystem', chunkId, ${JSON.stringify(
+                          // filename is duplicated in here and in filesystem strategy below
+                          `var filename = typeof process !== "undefined" ? require('path').join(__dirname, ${JSON.stringify(
                             rootOutputDir
-                          )}, remotes, installChunkCallback);`,
+                          )} + ${
+                            RuntimeGlobals.getChunkScriptFilename
+                          }(chunkId)) : false;`,
+                          'if(fs && fs.existsSync(filename)) {',
+                          Template.indent([
+                            `loadChunkStrategy('filesystem', chunkId, ${JSON.stringify(
+                              rootOutputDir
+                            )}, remotes, installChunkCallback);`,
+                          ]),
                           '} else { ',
                           Template.indent([
-                            this._getLogger(
-                              `'needs to load remote module from ${JSON.stringify(
-                                name
-                              )}'`
-                            ),
-                            this._getLogger(
-                              `'remotes known to'`,
-                              JSON.stringify(name),
-                              JSON.stringify(remotes)
-                            ),
                             // keys are mostly useless here, we want to find remote by its global (unique name)
                             `var remotes = ${JSON.stringify(
                               Object.values(remotes).reduce((acc, remote) => {
@@ -321,10 +291,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             `var requestedRemote = ${
                               RuntimeGlobals.require
                             }.federation.remotes[${JSON.stringify(name)}]`,
-                            this._getLogger(
-                              `'requested remote'`,
-                              `requestedRemote`
-                            ),
 
                             /*TODO:
                             need to handle if chunk fetch fails/crashes - ensure server still can keep loading
