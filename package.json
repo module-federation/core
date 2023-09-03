@@ -154,7 +154,7 @@
     "jest-environment-jsdom": "29.6.2",
     "js-yaml": "4.1.0",
     "mammoth": "1.6.0",
-    "marked": "4.3.0",
+    "marked": "8.0.0",
     "marked-terminal": "5.2.0",
     "merge-stream": "2.0.0",
     "mime-types": "2.1.35",
