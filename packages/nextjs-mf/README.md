@@ -22,7 +22,7 @@ https://github.com/module-federation/module-federation-examples
 
 # We are building a micro-frontend ecosystem!
 
-While NextFederationPlugin works, Next.js is staunchly opposed to the technology and Next is very difficult to support.
+While NextFederationPlugin "works", Next.js is staunchly opposed to the technology and Next is very difficult to support.
 
 This plugin attempts to make the experience as seamless as possible, but it is not perfect.
 

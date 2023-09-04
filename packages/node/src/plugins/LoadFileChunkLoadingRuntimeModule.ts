@@ -5,6 +5,7 @@ import type { Chunk, ChunkGraph, Compiler } from 'webpack';
 import { RuntimeModule, RuntimeGlobals, Template } from 'webpack';
 import { getUndoPath } from 'webpack/lib/util/identifier';
 import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
+import DynamicFileSystem from '../filesystem/DynamicFilesystemRuntimeModule';
 
 import loadScriptTemplate, { executeLoadTemplate } from './loadScript';
 
@@ -251,7 +252,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
         : '// no remote script loader needed',
       withLoading
         ? Template.asString([
-            '// ReadFile + VM.run chunk loading for javascript',
+            new DynamicFileSystem().generate(),
+            '// Dynamic filesystem chunk loading for javascript',
             `${fn}.readFileVm = function(chunkId, promises) {`,
             hasJsMatcher !== false
               ? Template.indent([
@@ -272,28 +274,29 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         'var promise = new Promise(async function(resolve, reject) {',
                         Template.indent([
                           'installedChunkData = installedChunks[chunkId] = [resolve, reject];',
-                          `var filename = typeof process !== "undefined" ? require('path').join(__dirname, ${JSON.stringify(
+                          `var filename = require('path').join(__dirname, ${JSON.stringify(
                             rootOutputDir
                           )} + ${
                             RuntimeGlobals.getChunkScriptFilename
-                          }(chunkId)) : false;`,
+                          }(chunkId));`,
                           'var fs = typeof process !== "undefined" ? require(\'fs\') : false;',
                           'if(fs && fs.existsSync(filename)) {',
                           this._getLogger(
                             `'chunk filename local load', chunkId`
                           ),
-                          Template.indent([
-                            "fs.readFile(filename, 'utf-8', function(err, content) {",
-                            Template.indent([
-                              'if(err) return reject(err);',
-                              'var chunk = {};',
-                              "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
-                                "(chunk, require, require('path').dirname(filename), filename);",
-                              'installChunk(chunk);',
-                            ]),
-                            '});',
-                          ]),
-                          '} else {',
+                          `loadChunkStrategy('filesystem', chunkId, ${JSON.stringify(
+                            rootOutputDir
+                          )}, remotes, function(error,chunk){
+                          if(error) return reject(error);
+                          installChunk(chunk);
+                          })`,
+                          // `DynamicFileSystem(loadChunkFileSystemRunInContext).loadChunk(chunkId,${JSON.stringify(
+                          //   rootOutputDir
+                          // )}, remotes, function(error,chunk){
+                          // if(error) return reject(error);
+                          // installChunk(chunk);
+                          // })`,
+                          '} else { ',
                           Template.indent([
                             loadScriptTemplate,
                             this._getLogger(
@@ -378,13 +381,13 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             /*TODO: need to handle if chunk fetch fails/crashes - ensure server still can keep loading
                             right now if you throw an error in here, server will stall forever */
 
-                            `if(typeof requestedRemote === 'function'){
-                    requestedRemote = await requestedRemote()
-                  }`,
-                            this._getLogger(
-                              `'var requestedRemote'`,
-                              `requestedRemote`
+                            "if(typeof requestedRemote === 'function'){",
+                            Template.indent(
+                              'requestedRemote = await requestedRemote()'
                             ),
+                            '}',
+
+                            'console.log("requestedRemote", requestedRemote);',
 
                             // example: uncomment this and server will never reply
                             // `var scriptUrl = new URL(requestedRemote.split("@")[1]);`,
@@ -407,35 +410,14 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                               `'chunkname to request'`,
                               `chunkName`
                             ),
-                            `
-                        var getBasenameFromUrl = (url) => {
-                          const urlParts = url.split('/');
-                          return urlParts[urlParts.length - 1];
-                        };
-                        var fileToReplace = typeof process !== "undefined" ? require('path').basename(scriptUrl.pathname) : getBasenameFromUrl(scriptUrl.pathname);`,
-                            `scriptUrl.pathname = scriptUrl.pathname.replace(fileToReplace, chunkName);`,
-                            this._getLogger(
-                              `'will load remote chunk'`,
-                              `scriptUrl.toString()`
-                            ),
-                            `loadScript(scriptUrl.toString(), function(err, content) {`,
-                            Template.indent([
-                              this._getLogger(`'load script callback fired'`),
-                              "if(err) {console.error('error loading remote chunk', scriptUrl.toString(),'got',content); return reject(err);}",
-                              'var chunk = {};',
-                              "if(typeof process !== 'undefined') {",
-                              'try {',
-                              "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
-                                "(chunk, require, require('path').dirname(filename), filename);",
-                              '} catch (e) {',
-                              "console.error('runInThisContext threw', e)",
-                              '}',
-                              '} else {',
-                              "eval('(function(exports, require, __dirname, __filename) {' + content + '\\n})')(chunk, __webpack_require__, '.', chunkName);",
-                              '}',
-                              'installChunk(chunk);',
-                            ]),
-                            '});',
+                            "const loadingStrategy = typeof process !== 'undefined' ?  'http-vm' : 'http-eval';",
+
+                            `loadChunkStrategy(loadingStrategy, chunkName,${JSON.stringify(
+                              name
+                            )}, globalThis.__remote_scope__._config, function(error,chunk){
+                              if(error) return reject(error);
+                              installChunk(chunk);
+                            });`,
                           ]),
                           '}',
                         ]),
