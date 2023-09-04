@@ -21,6 +21,12 @@ const PLUGIN_NAME = 'FederationStatsPlugin';
  */
 
 /**
+ * @typedef {object} VendorModule
+ * @property {string[]} chunks
+ * @property {string[]} provides
+ */
+
+/**
  * @typedef {object} Exposed
  * @property {string[]} chunks
  * @property {SharedModule[]} sharedModules
@@ -277,6 +283,46 @@ function getSharedModules(stats, federationPlugin) {
 }
 
 /**
+ *
+ * @param {WebpackStats} stats
+ * @param {import("webpack").container.ModuleFederationPlugin} federationPlugin
+ * @returns {VendorModule[]}
+ */
+function getVendorModules(stats, federationPlugin) {
+  return flatMap(
+    stats.chunks.filter(chunk => {
+      if (!stats.entrypoints[federationPlugin.name]) {
+        return false;
+      }
+      return stats.entrypoints[federationPlugin.name].chunks.some(id => chunk.id === id);
+    }),
+    chunk =>
+      flatMap(chunk.children, id =>
+        stats.chunks.filter(
+          c =>
+            c.id === id &&
+            c.files.length > 0 &&
+            c.parents.some(p =>
+              stats.entrypoints[federationPlugin.name].chunks.some(ec => ec === p)
+            ) &&
+            !c.sizes['consume-shared'] &&
+            c.reason?.startsWith('split chunk')
+        )
+      )
+  ).map(chunk => ({
+    chunks: chunk.files.map(
+      f => `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
+    ),
+    provides: flatMap(
+      chunk.modules.filter(m =>
+        searchIssuer(m, issuer => !issuer?.startsWith('consume-shared-module'))
+      ),
+      m => m.name
+    )
+  }));
+}
+
+/**
  * @param {WebpackStats} stats
  * @returns {SharedModule[]}
  */
@@ -355,6 +401,7 @@ function getFederationStats(stats, federationPluginOptions) {
     federationPluginOptions.library?.name || federationPluginOptions.name;
 
   const sharedModules = getSharedModules(stats, federationPluginOptions);
+  const vendorModules = getVendorModules(stats, federationPluginOptions);
   const remoteModules = getRemoteModules(stats);
   return {
     remote,
@@ -366,6 +413,7 @@ function getFederationStats(stats, federationPluginOptions) {
     }`,
     sharedModules,
     exposes,
+    vendorModules,
     remoteModules,
   };
 }
