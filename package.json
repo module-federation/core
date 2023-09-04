@@ -94,7 +94,7 @@
     "@nx/storybook": "16.7.2",
     "@nx/vite": "16.7.2",
     "@nx/web": "16.7.2",
-    "@nx/webpack": "16.7.2",
+    "@nx/webpack": "16.7.4",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "@storybook/addon-essentials": "7.4.0",
     "@storybook/builder-webpack5": "7.4.0",
