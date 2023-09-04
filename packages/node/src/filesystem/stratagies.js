@@ -17,7 +17,7 @@ export async function fileSystemRunInContextStrategy(
       if (err) {
         callback(err, null);
         return;
-      }
+      } 
       var chunk = {};
       try {
         vm.runInThisContext(

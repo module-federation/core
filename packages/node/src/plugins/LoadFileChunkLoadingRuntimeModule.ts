@@ -25,7 +25,6 @@ interface ReadFileChunkLoadingRuntimeModuleOptions {
 interface ChunkLoadingContext {
   webpack: Compiler['webpack'];
 }
-
 class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
   private runtimeRequirements: Set<string>;
   private options: ReadFileChunkLoadingRuntimeModuleOptions;
@@ -41,6 +40,23 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 
     this.options = options;
     this.chunkLoadingContext = chunkLoadingContext;
+  }
+
+  getInitialChunkIds(chunk: Chunk, chunkGraph: ChunkGraph, chunkHasJs: Function) {
+    const initialChunkIds = new Set(chunk.ids);
+    for (const c of chunk.getAllInitialChunks()) {
+      if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
+      if (c.ids) {
+        for (const id of c.ids) initialChunkIds.add(id);
+      }
+      for (const c of chunk.getAllAsyncChunks()) {
+        if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
+        if (c.ids) {
+          for (const id of c.ids) initialChunkIds.add(id);
+        }
+      }
+    }
+    return initialChunkIds;
   }
 
   /**
@@ -99,23 +115,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 
     const chunkHasJs = jsModulePlugin.chunkHasJs;
 
-    // workaround for next.js
-    const getInitialChunkIds = (chunk: Chunk, chunkGraph: ChunkGraph) => {
-      const initialChunkIds = new Set(chunk.ids);
-      for (const c of chunk.getAllInitialChunks()) {
-        if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
-        if (c.ids) {
-          for (const id of c.ids) initialChunkIds.add(id);
-        }
-        for (const c of chunk.getAllAsyncChunks()) {
-          if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
-          if (c.ids) {
-            for (const id of c.ids) initialChunkIds.add(id);
-          }
-        }
-      }
-      return initialChunkIds;
-    };
 
     const fn = RuntimeGlobals.ensureChunkHandlers;
     const withBaseURI = this.runtimeRequirements.has(RuntimeGlobals.baseURI);
@@ -138,7 +137,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 
     const conditionMap = chunkGraph.getChunkConditionMap(chunk, chunkHasJs);
     const hasJsMatcher = compileBooleanMatcher(conditionMap);
-    const initialChunkIds = getInitialChunkIds(chunk, chunkGraph);
+    const initialChunkIds = this.getInitialChunkIds(chunk, chunkGraph, chunkHasJs);
 
     const outputName = compilation.getPath(
       jsModulePlugin.getChunkFilenameTemplate(chunk, compilation.outputOptions),
