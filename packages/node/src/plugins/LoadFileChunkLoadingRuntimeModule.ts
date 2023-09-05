@@ -127,8 +127,142 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       '}',
       withOnChunkLoad ? `${RuntimeGlobals.onChunksLoaded}();` : '',
     ])};`;
+  
+}
+
+  /**
+   * Generates the load script equivalent for server side.
+   * @param {any} runtimeTemplate - The runtime template.
+   * @returns {string} - The generated script.
+   */
+  generateLoadScript(runtimeTemplate: any): string {
+    return Template.asString([
+      '// load script equivalent for server side',
+      `${RuntimeGlobals.loadScript} = ${runtimeTemplate.basicFunction(
+        'url,callback,chunkId',
+        [
+          Template.indent([
+            'if(!globalThis.__remote_scope__) {',
+            Template.indent([
+              '// create a global scope for container, similar to how remotes are set on window in the browser',
+              'globalThis.__remote_scope__ = {',
+              '_config: {},',
+              '}',
+            ]),
+            '}',
+          ]),
+          Template.indent([
+            executeLoadTemplate,
+            `executeLoad(url,callback,chunkId)`,
+          ]),
+        ]
+      )}`,
+    ]);
   }
 
+  generateLoadingCode(withLoading: boolean, fn: string, hasJsMatcher: any, rootOutputDir: string, remotes: Record<string, string>, name: string | undefined): string {
+    if (!withLoading) {
+      return '// no chunk loading';
+    }
+
+    return Template.asString([
+      new DynamicFileSystem().generate(),
+      `if(!globalThis.__remote_scope__) globalThis.__remote_scope__ = ${RuntimeGlobals.require}.federation`,
+      '// Dynamic filesystem chunk loading for javascript',
+      `${fn}.readFileVm = function(chunkId, promises) {`,
+      hasJsMatcher !== false
+        ? Template.indent([
+            '',
+            'var installedChunkData = installedChunks[chunkId];',
+            'if(installedChunkData !== 0) { // 0 means "already installed".',
+            Template.indent([
+              '// array of [resolve, reject, promise] means "currently loading"',
+              'if(installedChunkData) {',
+              Template.indent(['promises.push(installedChunkData[2]);']),
+              '} else {',
+              Template.indent([
+                hasJsMatcher === true
+                  ? 'if(true) { // all chunks have JS'
+                  : `if(${hasJsMatcher('chunkId')}) {`,
+                Template.indent([
+                  '// load the chunk and return promise to it',
+                  'var promise = new Promise(async function(resolve, reject) {',
+                  Template.indent([
+                    'installedChunkData = installedChunks[chunkId] = [resolve, reject];',
+                    'function installChunkCallback(error,chunk){',
+                    Template.indent([
+                      'if(error) return reject(error);',
+                      'installChunk(chunk);',
+                    ]),
+                    '}',
+                    'var fs = typeof process !== "undefined" ? require(\'fs\') : false;',
+                    // filename is duplicated in here and in filesystem strategy below
+                    `var filename = typeof process !== "undefined" ? require('path').join(__dirname, ${JSON.stringify(
+                      rootOutputDir
+                    )} + ${
+                      RuntimeGlobals.getChunkScriptFilename
+                    }(chunkId)) : false;`,
+                    'if(fs && fs.existsSync(filename)) {',
+                    Template.indent([
+                      `loadChunkStrategy('filesystem', chunkId, ${JSON.stringify(
+                        rootOutputDir
+                      )}, remotes, installChunkCallback);`,
+                    ]),
+                    '} else { ',
+                    Template.indent([
+                      // keys are mostly useless here, we want to find remote by its global (unique name)
+                      `var remotes = ${JSON.stringify(
+                        Object.values(remotes).reduce((acc, remote) => {
+                          //TODO: need to handle all other cases like when remote is not a @ syntax string
+                          const [global, url] = remote.split('@');
+                          acc[global] = url;
+                          return acc;
+                        }, {} as Record<string, string>)
+                      )};`,
+
+                      `var requestedRemote = ${
+                        RuntimeGlobals.require
+                      }.federation.remotes[${JSON.stringify(name)}]`,
+
+                      /*TODO:
+                      need to handle if chunk fetch fails/crashes - ensure server still can keep loading
+                      right now if you throw an error in here, server will stall forever
+                      */
+
+                      "if(typeof requestedRemote === 'function'){",
+                      Template.indent(
+                        'requestedRemote = await requestedRemote()'
+                      ),
+                      '}',
+
+                      this._getLogger(
+                        '"requestedRemote"',
+                        'requestedRemote',
+                        'current name',
+                        JSON.stringify(name)
+                      ),
+                      `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
+                      "const loadingStrategy = typeof process !== 'undefined' ?  'http-vm' : 'http-eval';",
+
+                      `loadChunkStrategy(loadingStrategy, chunkName,${JSON.stringify(
+                        name
+                      )}, globalThis.__remote_scope__.remotes,installChunkCallback);`,
+                    ]),
+                    '}',
+                  ]),
+                  '});',
+                  'promises.push(installedChunkData[2] = promise);',
+                ]),
+                '} else installedChunks[chunkId] = 0;',
+              ]),
+              '}',
+            ]),
+            '}',
+          ])
+        : Template.indent(['installedChunks[chunkId] = 0;']),
+      '};',
+    ]);
+  }
   /**
    * @returns {string} runtime code
    */
@@ -217,128 +351,12 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       this.generateInstallChunk(runtimeTemplate, withOnChunkLoad),
       '',
       withLoading
-        ? Template.asString([
-            '// load script equivalent for server side',
-            `${RuntimeGlobals.loadScript} = ${runtimeTemplate.basicFunction(
-              'url,callback,chunkId',
-              [
-                Template.indent([
-                  'if(!globalThis.__remote_scope__) {',
-                  Template.indent([
-                    '// create a global scope for container, similar to how remotes are set on window in the browser',
-                    'globalThis.__remote_scope__ = {',
-                    '_config: {},',
-                    '}',
-                  ]),
-                  '}',
-                ]),
-                Template.indent([
-                  executeLoadTemplate,
-                  `executeLoad(url,callback,chunkId)`,
-                ]),
-              ]
-            )}`,
-          ])
+        ? this.generateLoadScript(runtimeTemplate)
         : '// no remote script loader needed',
       withLoading
-        ? Template.asString([
-            new DynamicFileSystem().generate(),
-            `if(!globalThis.__remote_scope__) globalThis.__remote_scope__ = ${RuntimeGlobals.require}.federation`,
-            '// Dynamic filesystem chunk loading for javascript',
-            `${fn}.readFileVm = function(chunkId, promises) {`,
-            hasJsMatcher !== false
-              ? Template.indent([
-                  '',
-                  'var installedChunkData = installedChunks[chunkId];',
-                  'if(installedChunkData !== 0) { // 0 means "already installed".',
-                  Template.indent([
-                    '// array of [resolve, reject, promise] means "currently loading"',
-                    'if(installedChunkData) {',
-                    Template.indent(['promises.push(installedChunkData[2]);']),
-                    '} else {',
-                    Template.indent([
-                      hasJsMatcher === true
-                        ? 'if(true) { // all chunks have JS'
-                        : `if(${hasJsMatcher('chunkId')}) {`,
-                      Template.indent([
-                        '// load the chunk and return promise to it',
-                        'var promise = new Promise(async function(resolve, reject) {',
-                        Template.indent([
-                          'installedChunkData = installedChunks[chunkId] = [resolve, reject];',
-                          'function installChunkCallback(error,chunk){',
-                          Template.indent([
-                            'if(error) return reject(error);',
-                            'installChunk(chunk);',
-                          ]),
-                          '}',
-                          'var fs = typeof process !== "undefined" ? require(\'fs\') : false;',
-                          // filename is duplicated in here and in filesystem strategy below
-                          `var filename = typeof process !== "undefined" ? require('path').join(__dirname, ${JSON.stringify(
-                            rootOutputDir
-                          )} + ${
-                            RuntimeGlobals.getChunkScriptFilename
-                          }(chunkId)) : false;`,
-                          'if(fs && fs.existsSync(filename)) {',
-                          Template.indent([
-                            `loadChunkStrategy('filesystem', chunkId, ${JSON.stringify(
-                              rootOutputDir
-                            )}, remotes, installChunkCallback);`,
-                          ]),
-                          '} else { ',
-                          Template.indent([
-                            // keys are mostly useless here, we want to find remote by its global (unique name)
-                            `var remotes = ${JSON.stringify(
-                              Object.values(remotes).reduce((acc, remote) => {
-                                //TODO: need to handle all other cases like when remote is not a @ syntax string
-                                const [global, url] = remote.split('@');
-                                acc[global] = url;
-                                return acc;
-                              }, {} as Record<string, string>)
-                            )};`,
-
-                            `var requestedRemote = ${
-                              RuntimeGlobals.require
-                            }.federation.remotes[${JSON.stringify(name)}]`,
-
-                            /*TODO:
-                            need to handle if chunk fetch fails/crashes - ensure server still can keep loading
-                            right now if you throw an error in here, server will stall forever
-                            */
-
-                            "if(typeof requestedRemote === 'function'){",
-                            Template.indent(
-                              'requestedRemote = await requestedRemote()'
-                            ),
-                            '}',
-
-                            this._getLogger(
-                              '"requestedRemote"',
-                              'requestedRemote',
-                              'current name',
-                              JSON.stringify(name)
-                            ),
-                            `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
-                            "const loadingStrategy = typeof process !== 'undefined' ?  'http-vm' : 'http-eval';",
-
-                            `loadChunkStrategy(loadingStrategy, chunkName,${JSON.stringify(
-                              name
-                            )}, globalThis.__remote_scope__.remotes,installChunkCallback);`,
-                          ]),
-                          '}',
-                        ]),
-                        '});',
-                        'promises.push(installedChunkData[2] = promise);',
-                      ]),
-                      '} else installedChunks[chunkId] = 0;',
-                    ]),
-                    '}',
-                  ]),
-                  '}',
-                ])
-              : Template.indent(['installedChunks[chunkId] = 0;']),
-            '};',
-          ])
+        ? this.generateLoadingCode(withLoading, fn, hasJsMatcher, rootOutputDir, remotes, name)
         : '// no chunk loading',
+
       '',
       withExternalInstallChunk
         ? Template.asString([
