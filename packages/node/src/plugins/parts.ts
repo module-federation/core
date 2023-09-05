@@ -100,7 +100,6 @@ export function generateLoadingCode(
   }
 
   return Template.asString([
-    new DynamicFileSystem().generate(),
     `if(!globalThis.__remote_scope__) globalThis.__remote_scope__ = ${RuntimeGlobals.require}.federation`,
     '// Dynamic filesystem chunk loading for javascript',
     `${fn}.readFileVm = function(chunkId, promises) {`,
