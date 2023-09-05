@@ -2,8 +2,9 @@
   MIT License http://www.opensource.org/licenses/mit-license.php
 */
 import type { Chunk, ChunkGraph, Compiler } from 'webpack';
-import { RuntimeModule, RuntimeGlobals, Template } from 'webpack';
+import { RuntimeModule, RuntimeGlobals, Template  } from 'webpack';
 import { getUndoPath } from 'webpack/lib/util/identifier';
+import {SyncWaterfallHook} from 'tapable'
 import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
 import {
   generateHmrCode,
@@ -15,7 +16,7 @@ import {
   generateInstallChunk,
   generateExternalInstallChunkCode
 } from './parts';
-import { 
+import {
   fileSystemRunInContextStrategy,
   httpEvalStrategy,
   httpVmStrategy,
@@ -38,10 +39,28 @@ interface ChunkLoadingContext {
   webpack: Compiler['webpack'];
 }
 
+
+//hook can be tapped with
+// class MyPlugin {
+//   apply(compiler: Compiler) {
+//     compiler.hooks.thisCompilation.tap('MyPlugin', (compilation: Compilation) => {
+//       compilation.hooks.runtimeModule.tap('MyPlugin', (module: RuntimeModule) => {
+//         if (module instanceof ReadFileChunkLoadingRuntimeModule) {
+//           module.hooks.strategyCase.tap('MyPlugin', (source: string) => {
+//             return source + '\ncase "my-strategy": return myStrategy(chunkId,rootOutputDir, remotes, callback);';
+//           });
+//         }
+//       });
+//     });
+//   }
+// }
 class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
   private runtimeRequirements: Set<string>;
   private options: ReadFileChunkLoadingRuntimeModuleOptions;
   private chunkLoadingContext: ChunkLoadingContext;
+  hooks = {
+    strategyCase: new SyncWaterfallHook(['source']),
+  };
 
   constructor(
     runtimeRequirements: Set<string>,
@@ -136,7 +155,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
           'case "filesystem": return await fileSystemRunInContextStrategy(chunkId,rootOutputDir, remotes, callback);',
           'case "http-eval": return await httpEvalStrategy(chunkId,rootOutputDir, remotes, callback);',
           'case "http-vm": return await httpVmStrategy(chunkId,rootOutputDir, remotes, callback);',
-          'default: throw new Error("Invalid strategy type");',
+          this.hooks.strategyCase.call('default: throw new Error("Invalid strategy type");') as string,
         ]),
         '}',
       ]),
@@ -204,4 +223,5 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 }
 
 export default ReadFileChunkLoadingRuntimeModule;
+
 
