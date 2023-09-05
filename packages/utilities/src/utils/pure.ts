@@ -3,19 +3,16 @@ import {
   RemoteVars,
   RuntimeRemote,
   RuntimeRemotesMap,
-  GlobalScopeType
 } from '../types/index';
 
-
-
-let pure: RemoteVars = {};
+let pure = {} as RemoteVars;
 try {
   // @ts-ignore
   pure = process.env['REMOTES'] || {};
 } catch (e) {
   // not in webpack bundle
 }
-export const remoteVars: RemoteVars = pure;
+export const remoteVars = pure as RemoteVars;
 
 export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
   const index = urlAndGlobal.indexOf('@');
@@ -25,12 +22,12 @@ export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
   return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
 };
 
-export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote): Promise<AsyncContainer> => {
-  const runtimeRemotes: RuntimeRemotesMap = getRuntimeRemotes();
+export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
+  const runtimeRemotes = getRuntimeRemotes();
 
   // 1) Load remote container if needed
-  let asyncContainer: Promise<AsyncContainer>;
-  const reference: RuntimeRemote =
+  let asyncContainer: RuntimeRemote['asyncContainer'];
+  const reference =
     typeof keyOrRuntimeRemoteItem === 'string'
       ? runtimeRemotes[keyOrRuntimeRemoteItem]
       : keyOrRuntimeRemoteItem;
@@ -44,17 +41,14 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote): Prom
   } else {
     // This casting is just to satisfy typescript,
     // In reality remoteGlobal will always be a string;
-    const remoteGlobal: string = reference.global as unknown as string;
+    const remoteGlobal = reference.global as unknown as string;
 
     // Check if theres an override for container key if not use remote global
-    const containerKey: string = reference.uniqueKey
+    const containerKey = reference.uniqueKey
       ? (reference.uniqueKey as unknown as string)
       : remoteGlobal;
 
-    const __webpack_error__: Error & {
-      type: string;
-      request: string | null;
-    } = new Error() as Error & {
+    const __webpack_error__ = new Error() as Error & {
       type: string;
       request: string | null;
     };
@@ -68,38 +62,37 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote): Prom
         _config: {},
       };
     }
-
-    let globalScope: GlobalScopeType;
-
-    if (typeof window !== 'undefined') {
-      // If window doesn't have a _config property, add it
-      globalScope = window as unknown as GlobalScopeType;
-    } else {
-      globalScope = globalThis.__remote_scope__;
-    }
+    // @ts-ignore
+    const globalScope =
+      // @ts-ignore
+      typeof window !== 'undefined' ? window : globalThis.__remote_scope__;
 
     if (typeof window === 'undefined') {
       //@ts-ignore
       globalScope['_config'][containerKey] = reference.url;
     } else {
       // to match promise template system, can be removed once promise template is gone
+      //@ts-ignore
       if (!globalScope['remoteLoading']) {
+        //@ts-ignore
         globalScope['remoteLoading'] = {};
       }
-      // @ts-ignore
+      //@ts-ignore
       if (globalScope['remoteLoading'][containerKey]) {
+        //@ts-ignore
         return globalScope['remoteLoading'][containerKey];
       }
     }
     // @ts-ignore
-    asyncContainer = new Promise<AsyncContainer>(function (resolve, reject) {
-      function resolveRemoteGlobal(): void {
-        const asyncContainer: AsyncContainer = globalScope[
+    asyncContainer = new Promise(function (resolve, reject) {
+      function resolveRemoteGlobal() {
+        //@ts-ignore
+        const asyncContainer = globalScope[
           remoteGlobal
         ] as unknown as AsyncContainer;
         return resolve(asyncContainer);
       }
-
+      //@ts-ignore
       if (typeof globalScope[remoteGlobal] !== 'undefined') {
         return resolveRemoteGlobal();
       }
@@ -107,13 +100,14 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote): Prom
       (__webpack_require__ as any).l(
         reference.url,
         function (event: Event) {
+          //@ts-ignore
           if (typeof globalScope[remoteGlobal] !== 'undefined') {
             return resolveRemoteGlobal();
           }
 
-          const errorType: string | undefined =
+          const errorType =
             event && (event.type === 'load' ? 'missing' : event.type);
-            const realSrc: string | undefined | null =
+          const realSrc =
             event && event.target && (event.target as HTMLScriptElement).src;
 
           __webpack_error__.message =
@@ -157,7 +151,7 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote): Prom
       };
     });
     if (typeof window !== 'undefined') {
-      globalScope['remoteLoading'] = globalScope['remoteLoading'] || {};
+      //@ts-ignore
       globalScope['remoteLoading'][containerKey] = asyncContainer;
     }
   }
@@ -165,12 +159,12 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote): Prom
   return asyncContainer;
 };
 
-export const getRuntimeRemotes = (): RuntimeRemotesMap => {
+export const getRuntimeRemotes = () => {
   try {
-    const runtimeRemotes: RuntimeRemotesMap = Object.entries(remoteVars).reduce(function (
-      acc: RuntimeRemotesMap,
-      item: [string, any]
-    ): RuntimeRemotesMap {
+    const runtimeRemotes = Object.entries(remoteVars).reduce(function (
+      acc,
+      item
+    ) {
       const [key, value] = item;
       // if its an object with a thenable (eagerly executing function)
       if (typeof value === 'object' && typeof value.then === 'function') {
@@ -216,4 +210,3 @@ export const getRuntimeRemotes = (): RuntimeRemotesMap => {
 
   return {} as RuntimeRemotesMap;
 };
-
