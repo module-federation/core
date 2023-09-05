@@ -38,6 +38,14 @@
         "lintFilePatterns": ["packages/node/**/*.js"]
       }
     },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/node"],
+      "options": {
+        "jestConfig": "packages/node/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
