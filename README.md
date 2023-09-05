@@ -18,7 +18,7 @@
 
 ## Generate an application
 
-Run `nx g @nx/webpack:app my-app` to generate an application.
+Run `nx g @nx/next:app my-app` to generate an application.
 
 > You can use any of the plugins above to generate applications as well.
 
