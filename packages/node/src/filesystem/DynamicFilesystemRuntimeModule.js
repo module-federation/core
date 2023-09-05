@@ -9,7 +9,7 @@ class FileSystemRunInContextStrategyRuntimeModule extends RuntimeModule {
   constructor() {
     super('dynamic-file-system', RuntimeModule.STAGE_BASIC);
   }
- 
+
   generate() {
     return Template.asString([
       fileSystemRunInContextStrategy.toString(),
