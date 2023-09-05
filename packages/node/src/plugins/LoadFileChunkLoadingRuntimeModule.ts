@@ -15,7 +15,11 @@ import {
   generateInstallChunk,
   generateExternalInstallChunkCode
 } from './parts';
-
+import { 
+  fileSystemRunInContextStrategy,
+  httpEvalStrategy,
+  httpVmStrategy,
+} from '../filesystem/stratagies';
 
 interface RemotesByType {
   functional: string[];
@@ -86,12 +90,14 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
   /**
    * @returns {string} runtime code
    */
-  override generate() {
-    const { remotes = {}, name } = this.options;
-    const { webpack } = this.chunkLoadingContext;
-    const { chunkGraph, chunk, compilation } = this;
+  override generate() { const { remotes = {}, name } = this.options;
+  const { webpack } = this.chunkLoadingContext;
+  const { chunkGraph, chunk, compilation } = this;
 
-    if (!chunkGraph || !chunk || !compilation) return '';
+  if (!chunkGraph || !chunk || !compilation) {
+    console.warn('Missing required properties. Returning empty string.');
+    return '';
+  }
 
     const { runtimeTemplate } = compilation;
     const jsModulePlugin =
@@ -119,7 +125,26 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       ? `${RuntimeGlobals.hmrRuntimeStatePrefix}_readFileVm`
       : undefined;
 
+    const dynamicFilesystemChunkLoadingPluginCode = Template.asString([
+      fileSystemRunInContextStrategy.toString(),
+      httpEvalStrategy.toString(),
+      httpVmStrategy.toString(),
+      'const loadChunkStrategy = async (strategyType,chunkId,rootOutputDir, remotes, callback) => {',
+      Template.indent([
+        'switch (strategyType) {',
+        Template.indent([
+          'case "filesystem": return await fileSystemRunInContextStrategy(chunkId,rootOutputDir, remotes, callback);',
+          'case "http-eval": return await httpEvalStrategy(chunkId,rootOutputDir, remotes, callback);',
+          'case "http-vm": return await httpVmStrategy(chunkId,rootOutputDir, remotes, callback);',
+          'default: throw new Error("Invalid strategy type");',
+        ]),
+        '}',
+      ]),
+      '};',
+    ]);
+
     return Template.asString([
+      dynamicFilesystemChunkLoadingPluginCode,
       this.runtimeRequirements.has(RuntimeGlobals.baseURI)
         ? this._generateBaseUri(chunk, rootOutputDir)
         : '// no baseURI',
@@ -179,3 +204,4 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 }
 
 export default ReadFileChunkLoadingRuntimeModule;
+
