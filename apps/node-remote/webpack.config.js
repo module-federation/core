@@ -22,8 +22,6 @@ module.exports = composePlugins(withNx(), (config) => {
         './test': './src/expose.js',
       },
       experiments: {
-        // disables / enables the remote sideloader promise template that evaluates the remote entry
-        disableRemoteSideloader: true, // set to false to disable the hack i use to load remote on node. Default is false.
       },
     })
   );

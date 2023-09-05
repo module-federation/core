@@ -142,12 +142,7 @@ class NodeFederationPlugin {
 
     const pluginOptions = {
       ...this._options,
-      // @ts-ignore
-      remotes: !this.experiments.disableRemoteSideloader
-        ? (parseRemotes(
-            this._options.remotes || {}
-          ) as ModuleFederationPluginOptions['remotes'])
-        : this._options.remotes,
+      remotes: this._options.remotes,
     };
 
     const chunkFileName = compiler.options?.output?.chunkFilename;

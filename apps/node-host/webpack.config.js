@@ -19,8 +19,6 @@ module.exports = composePlugins(withNx(), (config) => {
           'globalThis.__remote_scope__.cache.node_remote@http://localhost:3002/remoteEntry.js',
       },
       experiments: {
-        // disables / enables the remote sideloader promise template that evaluates the remote entry
-        disableRemoteSideloader: true, // set to false to disable the hack i use to load remote on node. Default is false.
       },
     })
   );
