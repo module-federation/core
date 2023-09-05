@@ -1,17 +1,10 @@
 const { RuntimeModule, RuntimeGlobals, Template } = require('webpack');
-import {
+const {
   fileSystemRunInContextStrategy,
   httpEvalStrategy,
   httpVmStrategy,
-} from './stratagies';
+} = require('./stratagies');
 
-
-const { RuntimeModule, RuntimeGlobals, Template } = require('webpack');
-import {
-  fileSystemRunInContextStrategy,
-  httpEvalStrategy,
-  httpVmStrategy,
-} from './strategies';
 
 class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
   constructor() {
@@ -35,20 +28,17 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
    * @private
    * @param {unknown[]} items item to log
    */
-    _getLogger(...items]) {
+    _getLogger(...items) {
         if (!this.options.debug) {
           return '';
         }
-    
+
         return `console.log(${items.join(',')});`;
       }
   /**
    * @returns {string} runtime code
    */
- /**
- * @returns {string} runtime code
- */
-override generate() {
+ generate() {
     // Code from DynamicFilesystemChunkLoadingPlugin.js
     const dynamicFilesystemChunkLoadingPluginCode = Template.asString([
       fileSystemRunInContextStrategy.toString(),
@@ -65,37 +55,8 @@ override generate() {
         ]),
         '}',
       ]),
-      '};',
-      // Add the contents of CommonJsChunkLoadingPlugin.ts here
-      Template.asString([
-        'const installedChunks = {};',
-        '',
-        'const promise = new Promise((resolve, reject) => {',
-        Template.indent([
-          'installedChunks[chunkId] = [resolve, reject];',
-        ]),
-        '});',
-        '',
-        'const onScriptComplete = (event) => {',
-        Template.indent([
-          '// ...',
-        ]),
-        '};',
-        '',
-        'const script = document.createElement("script");',
-        'script.src = url;',
-        'script.onerror = script.onload = onScriptComplete;',
-        'document.head.appendChild(script);',
-        '',
-        'return promise;',
-      ]),
-      // ...
+      '};'
     ]);
-  
-    // Existing code from ReadFileChunkLoadingRuntimeModule's generate method
-    // ...
-  
-    // Combine the code from both snippets
     return Template.asString([
       dynamicFilesystemChunkLoadingPluginCode,
       // ...
@@ -103,9 +64,10 @@ override generate() {
   }
 }
 
-export default DynamicFilesystemChunkLoadingRuntimeModule;
-  
+module.exports = DynamicFilesystemChunkLoadingRuntimeModule;
 
 
-  
+
+
+
 

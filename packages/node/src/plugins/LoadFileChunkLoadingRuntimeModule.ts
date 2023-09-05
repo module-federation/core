@@ -42,7 +42,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     this.chunkLoadingContext = chunkLoadingContext;
   }
 
-  getInitialChunkIds(chunk: Chunk, chunkGraph: ChunkGraph, chunkHasJs: Function) {
+  getInitialChunkIds(chunk: Chunk, chunkGraph: ChunkGraph, chunkHasJs: any) {
     const initialChunkIds = new Set(chunk.ids);
     for (const c of chunk.getAllInitialChunks()) {
       if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
@@ -88,6 +88,39 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     }
 
     return `console.log(${items.join(',')});`;
+  }
+
+  withLoading(withOnChunkLoad: boolean, runtimeTemplate: any, RuntimeGlobals: any) {
+    return `var installChunk = ${runtimeTemplate.basicFunction('chunk', [
+      'var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;',
+      'for(var moduleId in moreModules) {',
+      Template.indent([
+        `if(${RuntimeGlobals.hasOwnProperty}(moreModules, moduleId)) {`,
+        Template.indent([
+          `${RuntimeGlobals.moduleFactories}[moduleId] = moreModules[moduleId];`,
+        ]),
+        '}',
+      ]),
+      '}',
+      `if(runtime) runtime(__webpack_require__);`,
+      'for(var i = 0; i < chunkIds.length; i++) {',
+      Template.indent([
+        'if(installedChunks[chunkIds[i]]) {',
+        Template.indent(['installedChunks[chunkIds[i]][0]();']),
+        '}',
+        'installedChunks[chunkIds[i]] = 0;',
+      ]),
+      '}',
+      withOnChunkLoad ? `${RuntimeGlobals.onChunksLoaded}();` : '',
+    ])};`;
+  }
+  withOnChunkLoad(runtimeTemplate: any, RuntimeGlobals: any) {
+    return RuntimeGlobals.onChunksLoaded
+      ? `${RuntimeGlobals.onChunksLoaded}.readFileVm = ${runtimeTemplate.returningFunction(
+          'installedChunks[chunkId] === 0',
+          'chunkId'
+        )};`
+      : '// no on chunks loaded';
   }
 
   /**
@@ -173,38 +206,10 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       ),
       '};',
       '',
-      withOnChunkLoad
-        ? `${
-            RuntimeGlobals.onChunksLoaded
-          }.readFileVm = ${runtimeTemplate.returningFunction(
-            'installedChunks[chunkId] === 0',
-            'chunkId'
-          )};`
-        : '// no on chunks loaded',
+      this.withOnChunkLoad(runtimeTemplate, RuntimeGlobals),
       '',
       withLoading || withExternalInstallChunk
-        ? `var installChunk = ${runtimeTemplate.basicFunction('chunk', [
-            'var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;',
-            'for(var moduleId in moreModules) {',
-            Template.indent([
-              `if(${RuntimeGlobals.hasOwnProperty}(moreModules, moduleId)) {`,
-              Template.indent([
-                `${RuntimeGlobals.moduleFactories}[moduleId] = moreModules[moduleId];`,
-              ]),
-              '}',
-            ]),
-            '}',
-            `if(runtime) runtime(__webpack_require__);`,
-            'for(var i = 0; i < chunkIds.length; i++) {',
-            Template.indent([
-              'if(installedChunks[chunkIds[i]]) {',
-              Template.indent(['installedChunks[chunkIds[i]][0]();']),
-              '}',
-              'installedChunks[chunkIds[i]] = 0;',
-            ]),
-            '}',
-            withOnChunkLoad ? `${RuntimeGlobals.onChunksLoaded}();` : '',
-          ])};`
+        ? this.withLoading(withOnChunkLoad, runtimeTemplate, RuntimeGlobals)
         : '// no chunk install function needed',
       '',
       withLoading
@@ -436,3 +441,5 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 }
 
 export default ReadFileChunkLoadingRuntimeModule;
+
+
