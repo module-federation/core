@@ -6,6 +6,7 @@ import { RuntimeModule, RuntimeGlobals, Template } from 'webpack';
 import { getUndoPath } from 'webpack/lib/util/identifier';
 import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
 import DynamicFileSystem from '../filesystem/DynamicFilesystemRuntimeModule';
+import {generateHmrCode} from  './parts'
 
 import loadScriptTemplate, { executeLoadTemplate } from './loadScript';
 
@@ -278,71 +279,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     ]);
   }
 
-  generateHmrCode(withHmr: boolean, rootOutputDir: string): string {
-    if (!withHmr) {
-      return '// no HMR';
-    }
-
-    return Template.asString([
-      'function loadUpdateChunk(chunkId, updatedModulesList) {',
-      Template.indent([
-        'return new Promise(function(resolve, reject) {',
-        Template.indent([
-          `var filename = require('path').join(__dirname, ${JSON.stringify(
-            rootOutputDir
-          )} + ${RuntimeGlobals.getChunkUpdateScriptFilename}(chunkId));`,
-          "require('fs').readFile(filename, 'utf-8', function(err, content) {",
-          Template.indent([
-            'if(err) return reject(err);',
-            'var update = {};',
-            "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
-              "(update, require, require('path').dirname(filename), filename);",
-            'var updatedModules = update.modules;',
-            'var runtime = update.runtime;',
-            'for(var moduleId in updatedModules) {',
-            Template.indent([
-              `if(${RuntimeGlobals.hasOwnProperty}(updatedModules, moduleId)) {`,
-              Template.indent([
-                `currentUpdate[moduleId] = updatedModules[moduleId];`,
-                'if(updatedModulesList) updatedModulesList.push(moduleId);',
-              ]),
-              '}',
-            ]),
-            '}',
-            'if(runtime) currentUpdateRuntime.push(runtime);',
-            'resolve();',
-          ]),
-          '});',
-        ]),
-        '});',
-      ]),
-      '}',
-      '',
-      Template.getFunctionContent(
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        require('webpack/lib/hmr/JavascriptHotModuleReplacement.runtime.js')
-      )
-        .replace(/\$key\$/g, 'readFileVm')
-        .replace(/\$installedChunks\$/g, 'installedChunks')
-        .replace(/\$loadUpdateChunk\$/g, 'loadUpdateChunk')
-        .replace(/\$moduleCache\$/g, RuntimeGlobals.moduleCache)
-        .replace(/\$moduleFactories\$/g, RuntimeGlobals.moduleFactories)
-        .replace(
-          /\$ensureChunkHandlers\$/g,
-          RuntimeGlobals.ensureChunkHandlers
-        )
-        .replace(/\$hasOwnProperty\$/g, RuntimeGlobals.hasOwnProperty)
-        .replace(/\$hmrModuleData\$/g, RuntimeGlobals.hmrModuleData)
-        .replace(
-          /\$hmrDownloadUpdateHandlers\$/g,
-          RuntimeGlobals.hmrDownloadUpdateHandlers
-        )
-        .replace(
-          /\$hmrInvalidateModuleHandlers\$/g,
-          RuntimeGlobals.hmrInvalidateModuleHandlers
-        ),
-    ]);
-  }
   generateHmrManifestCode(withHmrManifest: boolean, rootOutputDir: string): string {
     if (!withHmrManifest) {
       return '// no HMR manifest';
@@ -379,13 +315,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
    * @returns {string} runtime code
    */
   override generate() {
-    // name in this context is always the current remote itself.
-    // this code below is in each webpack runtime, host and remotes
-    // remote entries handle their own loading of chunks, so i have fractal self awareness
-    // hosts will likely never run the http chunk loading runtime, they use fs.readFile
-    // remotes only use fs.readFile if we were to cache the chunks on disk after fetching - otherwise its always using http
-    // so for example, if im in hostA and require(remoteb/module) --> console.log of name in runtime code will return remoteb
-
     const { remotes = {}, name } = this.options;
     const { webpack } = this.chunkLoadingContext;
     const { chunkGraph, chunk, compilation } = this;
@@ -393,88 +322,39 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     if (!chunkGraph || !chunk || !compilation) return '';
 
     const { runtimeTemplate } = compilation;
-
-    const jsModulePlugin =
-      webpack?.javascript?.JavascriptModulesPlugin ||
-      require('webpack/lib/javascript/JavascriptModulesPlugin');
-
+    const jsModulePlugin = webpack?.javascript?.JavascriptModulesPlugin || require('webpack/lib/javascript/JavascriptModulesPlugin');
     const chunkHasJs = jsModulePlugin.chunkHasJs;
-
-
     const fn = RuntimeGlobals.ensureChunkHandlers;
-    const withBaseURI = this.runtimeRequirements.has(RuntimeGlobals.baseURI);
-    const withExternalInstallChunk = this.runtimeRequirements.has(
-      RuntimeGlobals.externalInstallChunk
-    );
-
-    const withOnChunkLoad = this.runtimeRequirements.has(
-      RuntimeGlobals.onChunksLoaded
-    );
-    const withLoading = this.runtimeRequirements.has(
-      RuntimeGlobals.ensureChunkHandlers
-    );
-    const withHmr = this.runtimeRequirements.has(
-      RuntimeGlobals.hmrDownloadUpdateHandlers
-    );
-    const withHmrManifest = this.runtimeRequirements.has(
-      RuntimeGlobals.hmrDownloadManifest
-    );
 
     const conditionMap = chunkGraph.getChunkConditionMap(chunk, chunkHasJs);
     const hasJsMatcher = compileBooleanMatcher(conditionMap);
     const initialChunkIds = this.getInitialChunkIds(chunk, chunkGraph, chunkHasJs);
 
-    const outputName = compilation.getPath(
-      jsModulePlugin.getChunkFilenameTemplate(chunk, compilation.outputOptions),
-      {
-        chunk,
-        contentHashType: 'javascript',
-      }
-    );
+    const outputName = compilation.getPath(jsModulePlugin.getChunkFilenameTemplate(chunk, compilation.outputOptions), { chunk, contentHashType: 'javascript' });
+    const rootOutputDir = getUndoPath(outputName, compilation.outputOptions.path, false);
+    const stateExpression = this.runtimeRequirements.has(RuntimeGlobals.hmrDownloadUpdateHandlers) ? `${RuntimeGlobals.hmrRuntimeStatePrefix}_readFileVm` : undefined;
 
-    const rootOutputDir = getUndoPath(
-      outputName,
-      compilation.outputOptions.path,
-      false
-    );
-
-    const stateExpression = withHmr
-      ? `${RuntimeGlobals.hmrRuntimeStatePrefix}_readFileVm`
-      : undefined;
     return Template.asString([
-      withBaseURI
-        ? this._generateBaseUri(chunk, rootOutputDir)
-        : '// no baseURI',
+      this.runtimeRequirements.has(RuntimeGlobals.baseURI) ? this._generateBaseUri(chunk, rootOutputDir) : '// no baseURI',
       '',
       '// object to store loaded chunks',
       '// "0" means "already loaded", Promise means loading',
-      `var installedChunks = ${
-        stateExpression ? `${stateExpression} = ${stateExpression} || ` : ''
-      }{`,
-      Template.indent(
-        Array.from(initialChunkIds, (id) => `${JSON.stringify(id)}: 0`).join(
-          ',\n'
-        )
-      ),
+      `var installedChunks = ${stateExpression ? `${stateExpression} = ${stateExpression} || ` : ''}{`,
+      Template.indent(Array.from(initialChunkIds, (id) => `${JSON.stringify(id)}: 0`).join(',\n')),
       '};',
       '',
-      this.handleOnChunkLoad(withOnChunkLoad, runtimeTemplate),
+      this.handleOnChunkLoad(this.runtimeRequirements.has(RuntimeGlobals.onChunksLoaded), runtimeTemplate),
       '',
-      this.generateInstallChunk(runtimeTemplate, withOnChunkLoad),
+      this.generateInstallChunk(runtimeTemplate, this.runtimeRequirements.has(RuntimeGlobals.onChunksLoaded)),
       '',
-      withLoading
-        ? this.generateLoadScript(runtimeTemplate)
-        : '// no remote script loader needed',
-      withLoading
-        ? this.generateLoadingCode(withLoading, fn, hasJsMatcher, rootOutputDir, remotes, name)
-        : '// no chunk loading',
-
+      this.runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers) ? this.generateLoadScript(runtimeTemplate) : '// no remote script loader needed',
+      this.runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers) ? this.generateLoadingCode(this.runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers), fn, hasJsMatcher, rootOutputDir, remotes, name) : '// no chunk loading',
       '',
-      this.generateExternalInstallChunkCode(withExternalInstallChunk),
+      this.generateExternalInstallChunkCode(this.runtimeRequirements.has(RuntimeGlobals.externalInstallChunk)),
       '',
-      this.generateHmrCode(withHmr, rootOutputDir),
+      generateHmrCode(this.runtimeRequirements.has(RuntimeGlobals.hmrDownloadUpdateHandlers), rootOutputDir),
       '',
-      this.generateHmrManifestCode(withHmrManifest, rootOutputDir),
+      this.generateHmrManifestCode(this.runtimeRequirements.has(RuntimeGlobals.hmrDownloadManifest), rootOutputDir),
     ]);
   }
 }
