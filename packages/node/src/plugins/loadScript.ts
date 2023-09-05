@@ -67,7 +67,11 @@ export const executeLoadTemplate = `
     if (!name) {
       throw new Error('__webpack_require__.l name is required for ' + url);
     }
-    if (typeof globalThis.__remote_scope__[name] !== 'undefined') return callback(globalThis.__remote_scope__[name]);
+    var remoteName = name;
+    if(name.includes('__remote_scope__')) {
+      remoteName = name.split('__remote_scope__.cache.')[1]
+    }
+    if (typeof globalThis.__remote_scope__[remoteName] !== 'undefined') return callback(globalThis.__remote_scope__[remoteName]);
     // if its a worker or node
     if (typeof process !== 'undefined') {
       const vm = require('vm');
@@ -82,9 +86,10 @@ export const executeLoadTemplate = `
          let remote = {exports:{}};
          remoteCapsule(exp,require,remote,'node-federation-loader-' + name + '.vm',__dirname);
          remote = remote.exports || remote;
-          globalThis.__remote_scope__[name] = remote[name] || remote;
-          globalThis.__remote_scope__._config[name] = url;
-          callback(globalThis.__remote_scope__[name])
+          globalThis.__remote_scope__.cache[remoteName] = remote[name] || remote;
+          globalThis.__remote_scope__.remotes[remoteName] = url;
+          console.log(globalThis.__remote_scope__);
+          callback(globalThis.__remote_scope__.cache[name])
         } catch (e) {
           console.error('executeLoad hit catch block', e);
           e.target = {src: url};

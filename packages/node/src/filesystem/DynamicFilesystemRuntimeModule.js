@@ -7,7 +7,7 @@ import {
 
 class FileSystemRunInContextStrategyRuntimeModule extends RuntimeModule {
   constructor() {
-    super('dynamic-file-system', 10);
+    super('dynamic-file-system', RuntimeModule.STAGE_BASIC);
   }
 
   generate() {

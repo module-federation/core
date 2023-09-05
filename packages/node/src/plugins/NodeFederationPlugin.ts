@@ -7,6 +7,7 @@ import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
   experiments?: Record<string, unknown>;
   debug?: boolean;
+  useRemoteSideloader?: boolean;
 }
 
 interface Context {
@@ -141,9 +142,7 @@ class NodeFederationPlugin {
 
     const pluginOptions = {
       ...this._options,
-      remotes: parseRemotes(
-        this._options.remotes || {}
-      ) as ModuleFederationPluginOptions['remotes'],
+      remotes: this._options.remotes,
     };
 
     const chunkFileName = compiler.options?.output?.chunkFilename;

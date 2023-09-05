@@ -63,6 +63,7 @@
     "react-dom": "18.2.0",
     "react-router-dom": "6.14.1",
     "regenerator-runtime": "0.14.0",
+    "tapable": "^2.2.1",
     "tsup": "^7.0.0",
     "typedoc": "^0.24.2",
     "undici": "5.23.0",
