@@ -1,4 +1,4 @@
-import { Template, RuntimeGlobals } from 'webpack';
+import { Template, RuntimeGlobals, Chunk, ChunkGraph } from 'webpack';
 
 export function generateHmrCode(withHmr: boolean, rootOutputDir: string): string {
   if (!withHmr) {
@@ -65,3 +65,21 @@ export function generateHmrCode(withHmr: boolean, rootOutputDir: string): string
       ),
   ]);
 }
+export function getInitialChunkIds(chunk: Chunk, chunkGraph: ChunkGraph, chunkHasJs: any) {
+  const initialChunkIds = new Set(chunk.ids);
+  for (const c of chunk.getAllInitialChunks()) {
+    if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
+    if (c.ids) {
+      for (const id of c.ids) initialChunkIds.add(id);
+    }
+    for (const c of chunk.getAllAsyncChunks()) {
+      if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
+      if (c.ids) {
+        for (const id of c.ids) initialChunkIds.add(id);
+      }
+    }
+  }
+  return initialChunkIds;
+}
+
+

@@ -6,7 +6,7 @@ import { RuntimeModule, RuntimeGlobals, Template } from 'webpack';
 import { getUndoPath } from 'webpack/lib/util/identifier';
 import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
 import DynamicFileSystem from '../filesystem/DynamicFilesystemRuntimeModule';
-import {generateHmrCode} from  './parts'
+import {generateHmrCode,getInitialChunkIds} from  './parts'
 
 import loadScriptTemplate, { executeLoadTemplate } from './loadScript';
 
@@ -42,23 +42,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 
     this.options = options;
     this.chunkLoadingContext = chunkLoadingContext;
-  }
-
-  getInitialChunkIds(chunk: Chunk, chunkGraph: ChunkGraph, chunkHasJs: any) {
-    const initialChunkIds = new Set(chunk.ids);
-    for (const c of chunk.getAllInitialChunks()) {
-      if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
-      if (c.ids) {
-        for (const id of c.ids) initialChunkIds.add(id);
-      }
-      for (const c of chunk.getAllAsyncChunks()) {
-        if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
-        if (c.ids) {
-          for (const id of c.ids) initialChunkIds.add(id);
-        }
-      }
-    }
-    return initialChunkIds;
   }
 
   /**
@@ -328,7 +311,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 
     const conditionMap = chunkGraph.getChunkConditionMap(chunk, chunkHasJs);
     const hasJsMatcher = compileBooleanMatcher(conditionMap);
-    const initialChunkIds = this.getInitialChunkIds(chunk, chunkGraph, chunkHasJs);
+    const initialChunkIds = getInitialChunkIds(chunk, chunkGraph, chunkHasJs);
 
     const outputName = compilation.getPath(jsModulePlugin.getChunkFilenameTemplate(chunk, compilation.outputOptions), { chunk, contentHashType: 'javascript' });
     const rootOutputDir = getUndoPath(outputName, compilation.outputOptions.path, false);
@@ -360,4 +343,5 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 }
 
 export default ReadFileChunkLoadingRuntimeModule;
+
 
