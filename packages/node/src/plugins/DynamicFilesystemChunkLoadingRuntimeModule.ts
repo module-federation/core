@@ -27,7 +27,7 @@ interface RemotesByType {
   normal: string[];
 }
 
-interface ReadFileChunkLoadingRuntimeModuleOptions {
+interface DynamicFilesystemChunkLoadingRuntimeModuleOptions {
   baseURI: Compiler['options']['output']['publicPath'];
   promiseBaseURI?: string;
   remotes: Record<string, string>;
@@ -45,7 +45,7 @@ interface ChunkLoadingContext {
 //   apply(compiler: Compiler) {
 //     compiler.hooks.thisCompilation.tap('MyPlugin', (compilation: Compilation) => {
 //       compilation.hooks.runtimeModule.tap('MyPlugin', (module: RuntimeModule) => {
-//         if (module instanceof ReadFileChunkLoadingRuntimeModule) {
+//         if (module instanceof DynamicFilesystemChunkLoadingRuntimeModule) {
 //           module.hooks.strategyCase.tap('MyPlugin', (source: string) => {
 //             return source + '\ncase "my-strategy": return myStrategy(chunkId,rootOutputDir, remotes, callback);';
 //           });
@@ -54,9 +54,9 @@ interface ChunkLoadingContext {
 //     });
 //   }
 // }
-class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
+class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
   private runtimeRequirements: Set<string>;
-  private options: ReadFileChunkLoadingRuntimeModuleOptions;
+  private options: DynamicFilesystemChunkLoadingRuntimeModuleOptions;
   private chunkLoadingContext: ChunkLoadingContext;
   hooks = {
     strategyCase: new SyncWaterfallHook(['source']),
@@ -64,7 +64,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 
   constructor(
     runtimeRequirements: Set<string>,
-    options: ReadFileChunkLoadingRuntimeModuleOptions,
+    options: DynamicFilesystemChunkLoadingRuntimeModuleOptions,
     chunkLoadingContext: ChunkLoadingContext
   ) {
     super('readFile chunk loading', RuntimeModule.STAGE_ATTACH);
@@ -222,6 +222,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
   }
 }
 
-export default ReadFileChunkLoadingRuntimeModule;
+export default DynamicFilesystemChunkLoadingRuntimeModule;
 
 
