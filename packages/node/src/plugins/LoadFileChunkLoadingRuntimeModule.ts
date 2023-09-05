@@ -25,6 +25,7 @@ interface ReadFileChunkLoadingRuntimeModuleOptions {
 interface ChunkLoadingContext {
   webpack: Compiler['webpack'];
 }
+
 class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
   private runtimeRequirements: Set<string>;
   private options: ReadFileChunkLoadingRuntimeModuleOptions;
@@ -89,8 +90,21 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 
     return `console.log(${items.join(',')});`;
   }
+   handleOnChunkLoad(withOnChunkLoad: boolean, runtimeTemplate: any): string {
+    if (withOnChunkLoad) {
+      return `${
+        RuntimeGlobals.onChunksLoaded
+      }.readFileVm = ${runtimeTemplate.returningFunction(
+        'installedChunks[chunkId] === 0',
+        'chunkId'
+      )};`
+    } else {
+      return '// no on chunks loaded';
+    }
+  }
 
-  withLoading(withOnChunkLoad: boolean, runtimeTemplate: any, RuntimeGlobals: any) {
+
+  generateInstallChunk(runtimeTemplate: any, withOnChunkLoad: boolean): string {
     return `var installChunk = ${runtimeTemplate.basicFunction('chunk', [
       'var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;',
       'for(var moduleId in moreModules) {',
@@ -113,14 +127,6 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       '}',
       withOnChunkLoad ? `${RuntimeGlobals.onChunksLoaded}();` : '',
     ])};`;
-  }
-  withOnChunkLoad(runtimeTemplate: any, RuntimeGlobals: any) {
-    return RuntimeGlobals.onChunksLoaded
-      ? `${RuntimeGlobals.onChunksLoaded}.readFileVm = ${runtimeTemplate.returningFunction(
-          'installedChunks[chunkId] === 0',
-          'chunkId'
-        )};`
-      : '// no on chunks loaded';
   }
 
   /**
@@ -206,11 +212,9 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       ),
       '};',
       '',
-      this.withOnChunkLoad(runtimeTemplate, RuntimeGlobals),
+      this.handleOnChunkLoad(withOnChunkLoad, runtimeTemplate),
       '',
-      withLoading || withExternalInstallChunk
-        ? this.withLoading(withOnChunkLoad, runtimeTemplate, RuntimeGlobals)
-        : '// no chunk install function needed',
+      this.generateInstallChunk(runtimeTemplate, withOnChunkLoad),
       '',
       withLoading
         ? Template.asString([
@@ -441,5 +445,4 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
 }
 
 export default ReadFileChunkLoadingRuntimeModule;
-
 
