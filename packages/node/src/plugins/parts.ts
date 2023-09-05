@@ -253,6 +253,7 @@ export function generateLoadScript(runtimeTemplate: any): string {
           '}',
         ]),
         Template.indent([
+"          console.log('executeLoadTemplate',url,chunkId)",
           executeLoadTemplate,
           `executeLoad(url,callback,chunkId)`,
         ]),

@@ -1,0 +1,70 @@
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+*/
+
+"use strict";
+
+import { RuntimeGlobals, RuntimeModule, Template, javascript } from "webpack";
+import { getUndoPath } from 'webpack/lib/util/identifier';
+
+class AutoPublicPathRuntimeModule extends RuntimeModule {
+  constructor(options) {
+    super("publicPath", RuntimeModule.STAGE_BASIC + 1);
+    this.options = options
+  }
+
+  /**
+   * @returns {string} runtime code
+   */
+  generate() {
+    const { compilation } = this;
+    const { scriptType, importMetaName, path } = compilation.outputOptions;
+    const chunkName = compilation.getPath(
+      javascript.JavascriptModulesPlugin.getChunkFilenameTemplate(
+        this.chunk,
+        compilation.outputOptions
+      ),
+      {
+        chunk: this.chunk,
+        contentHashType: "javascript"
+      }
+    );
+    const undoPath = getUndoPath(chunkName, path, false);
+
+    return Template.asString([
+      "var scriptUrl;",
+      "console.log('runtimemoduletesting',globalThis.__remote_scope__);",
+      scriptType === "module"
+        ? `if (typeof ${RuntimeGlobals.require}.federation.remotes[${JSON.stringify(this.options.name)}] === "string") scriptUrl = ${RuntimeGlobals.require}.federation.remotes[${JSON.stringify(this.options.name)}]`
+        : Template.asString([
+          `if (${RuntimeGlobals.global}.importScripts) scriptUrl = ${RuntimeGlobals.global}.location + "";`,
+          `var document = ${RuntimeGlobals.global}.document;`,
+          "if (!scriptUrl && document) {",
+          Template.indent([
+            `if (document.currentScript)`,
+            Template.indent(`scriptUrl = document.currentScript.src`),
+            "if (!scriptUrl) {",
+            Template.indent([
+              'var scripts = document.getElementsByTagName("script");',
+              "if(scripts.length) scriptUrl = scripts[scripts.length - 1].src"
+            ]),
+            "}"
+          ]),
+          "}"
+        ]),
+      "// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration",
+      '// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.',
+      'if (!scriptUrl) throw new Error("Automatic publicPath is not supported in this browser");',
+      'scriptUrl = scriptUrl.replace(/#.*$/, "").replace(/\\?.*$/, "").replace(/\\/[^\\/]+$/, "/");',
+      !undoPath
+        ? `${RuntimeGlobals.publicPath} = scriptUrl;`
+        : `${RuntimeGlobals.publicPath} = scriptUrl + ${JSON.stringify(
+          undoPath
+        )};`
+    ]);
+  }
+}
+
+export default AutoPublicPathRuntimeModule;
+
+

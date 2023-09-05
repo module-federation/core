@@ -4,6 +4,10 @@ import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
 import ChunkLoadingRuntimeModule from './DynamicFilesystemChunkLoadingRuntimeModule';
 import FederationModuleInfoRuntimeModule from './FederationModuleInfoRuntimeModule';
+import AutoPublicPathRuntimeModule from './RemotePublicPathRuntimeModule';
+//@ts-ignore
+import PublicPathRuntimeModule from "webpack/lib/runtime/PublicPathRuntimeModule";
+
 
 interface CommonJsChunkLoadingOptions extends ModuleFederationPluginOptions {
   baseURI: Compiler['options']['output']['publicPath'];
@@ -50,7 +54,8 @@ class CommonJsChunkLoadingPlugin {
           }
           set.add(RuntimeGlobals.moduleFactoriesAddOnly);
           set.add(RuntimeGlobals.hasOwnProperty);
-          set.add(RuntimeGlobals.publicPath);
+
+          set.add(RuntimeGlobals.publicPath); // this breaks things
           compilation.addRuntimeModule(
             chunk,
             new ChunkLoadingRuntimeModule(set, this.options, {
@@ -113,6 +118,38 @@ class CommonJsChunkLoadingPlugin {
             }
           );
 
+        compilation.hooks.runtimeRequirementInTree
+          .for(RuntimeGlobals.publicPath)
+          .tap("RuntimePlugin", (chunk, set) => {
+            const { outputOptions } = compilation;
+            const { publicPath: globalPublicPath, scriptType } = outputOptions;
+            const entryOptions = chunk.getEntryOptions();
+            const publicPath =
+              entryOptions && entryOptions.publicPath !== undefined
+                ? entryOptions.publicPath
+                : globalPublicPath;
+
+            if (publicPath === "auto") {
+              const module = new AutoPublicPathRuntimeModule(this.options);
+              if (scriptType !== "module") set.add(RuntimeGlobals.global);
+              compilation.addRuntimeModule(chunk, module);
+            } else {
+              const module = new PublicPathRuntimeModule(publicPath);
+
+              if (
+                typeof publicPath !== "string" ||
+                /\[(full)?hash\]/.test(publicPath)
+              ) {
+                module.fullHash = true;
+              }
+
+              compilation.addRuntimeModule(chunk, module);
+            }
+            return true;
+          });
+
+
+
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'StartupChunkDependenciesPlugin',
           (
@@ -133,3 +170,5 @@ class CommonJsChunkLoadingPlugin {
 }
 
 export default CommonJsChunkLoadingPlugin;
+
+

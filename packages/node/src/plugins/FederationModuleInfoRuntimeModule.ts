@@ -6,7 +6,7 @@ const { Template } = require('webpack');
 
 class FederationModuleInfoRuntimeModule extends RuntimeModule {
   constructor() {
-    super('federation module info runtime', RuntimeModule.STAGE_BASIC + 1);
+    super('federation module info runtime', RuntimeModule.STAGE_BASIC );
   }
 
   /**
