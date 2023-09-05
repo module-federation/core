@@ -343,6 +343,37 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
         ),
     ]);
   }
+  generateHmrManifestCode(withHmrManifest: boolean, rootOutputDir: string): string {
+    if (!withHmrManifest) {
+      return '// no HMR manifest';
+    }
+
+    return Template.asString([
+      `${RuntimeGlobals.hmrDownloadManifest} = function() {`,
+      Template.indent([
+        'return new Promise(function(resolve, reject) {',
+        Template.indent([
+          `var filename = require('path').join(__dirname, ${JSON.stringify(
+            rootOutputDir
+          )} + ${RuntimeGlobals.getUpdateManifestFilename}());`,
+          "require('fs').readFile(filename, 'utf-8', function(err, content) {",
+          Template.indent([
+            'if(err) {',
+            Template.indent([
+              'if(err.code === "ENOENT") return resolve();',
+              'return reject(err);',
+            ]),
+            '}',
+            'try { resolve(JSON.parse(content)); }',
+            'catch(e) { reject(e); }',
+          ]),
+          '});',
+        ]),
+        '});',
+      ]),
+      '}',
+    ]);
+  }
 
   /**
    * @returns {string} runtime code
@@ -443,33 +474,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       '',
       this.generateHmrCode(withHmr, rootOutputDir),
       '',
-      withHmrManifest
-        ? Template.asString([
-            `${RuntimeGlobals.hmrDownloadManifest} = function() {`,
-            Template.indent([
-              'return new Promise(function(resolve, reject) {',
-              Template.indent([
-                `var filename = require('path').join(__dirname, ${JSON.stringify(
-                  rootOutputDir
-                )} + ${RuntimeGlobals.getUpdateManifestFilename}());`,
-                "require('fs').readFile(filename, 'utf-8', function(err, content) {",
-                Template.indent([
-                  'if(err) {',
-                  Template.indent([
-                    'if(err.code === "ENOENT") return resolve();',
-                    'return reject(err);',
-                  ]),
-                  '}',
-                  'try { resolve(JSON.parse(content)); }',
-                  'catch(e) { reject(e); }',
-                ]),
-                '});',
-              ]),
-              '});',
-            ]),
-            '}',
-          ])
-        : '// no HMR manifest',
+      this.generateHmrManifestCode(withHmrManifest, rootOutputDir),
     ]);
   }
 }
