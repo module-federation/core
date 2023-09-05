@@ -51,12 +51,12 @@ describe('parseRemotes', () => {
   it('should return the parsed remotes when remotes contains relative file path', () => {
     const remotes = {
       remote1: './relative/path/to/remote1',
-      remote2: './relative/path/to/remote2',
+      remote2: 'someglobal@./relative/path/to/remote2',
     };
     const result = parseRemotes(remotes);
     expect(result).toEqual({
-      remote1: 'globalThis.__remote_scope__.cache.global@./relative/path/to/remote1',
-      remote2: 'globalThis.__remote_scope__.cache.global@./relative/path/to/remote2',
+      remote1: './relative/path/to/remote1',
+      remote2: 'globalThis.__remote_scope__.cache.someglobal@./relative/path/to/remote2',
     });
   });
 
@@ -85,21 +85,21 @@ describe('parseRemoteSyntax', () => {
 
   // Positive test case: remote starts with 'window'
   it('should return the original remote string when remote starts with "window"', () => {
-    const remote = 'window@https://example.com/remote';
+    const remote = 'window.testing@https://example.com/remote';
     const result = parseRemoteSyntax(remote);
     expect(result).toBe(remote);
   });
 
   // Positive test case: remote starts with 'global'
   it('should return the original remote string when remote starts with "global"', () => {
-    const remote = 'global@https://example.com/remote';
+    const remote = 'global.testing@https://example.com/remote';
     const result = parseRemoteSyntax(remote);
     expect(result).toBe(remote);
   });
 
   // Positive test case: remote starts with 'globalThis'
   it('should return the original remote string when remote starts with "globalThis"', () => {
-    const remote = 'globalThis@https://example.com/remote';
+    const remote = 'globalThis.testing@https://example.com/remote';
     const result = parseRemoteSyntax(remote);
     expect(result).toBe(remote);
   });

@@ -40,7 +40,7 @@ export const parseRemotes = (remotes: Record<string, any>): Record<string, strin
   
   return Object.entries(remotes).reduce((acc: Record<string, string>, [key, value]) => {
     const isInternal = value.startsWith('internal ');
-    const isGlobal = value.includes('@') && !['window', 'global', 'globalThis','self'].some(prefix => value.startsWith(prefix));
+    const isGlobal = value.includes('@') && !['window.', 'global.', 'globalThis.','self.'].some(prefix => value.startsWith(prefix));
     
     acc[key] = isInternal || !isGlobal ? value : parseRemoteSyntax(value);
     
@@ -53,11 +53,16 @@ export const parseRemotes = (remotes: Record<string, any>): Record<string, strin
  *
  * @param {string} remote - The remote string to parse.
  * @returns {string} - The parsed remote string or the original remote string.
+ * @throws {Error} - Throws an error if the remote is not a string.
  */
-export const parseRemoteSyntax = (remote: string): string => {
-  if (typeof remote === 'string' && remote.includes('@')) {
+export const parseRemoteSyntax = (remote: any): string => {
+  if (typeof remote !== 'string') {
+    throw new Error('remote must be a string');
+  }
+  
+  if (remote.includes('@')) {
     const [url, global] = extractUrlAndGlobal(remote);
-    if (!['window', 'global', 'globalThis'].some(prefix => global.startsWith(prefix))) {
+    if (!['window.', 'global.', 'globalThis.'].some(prefix => global.startsWith(prefix))) {
       return `globalThis.__remote_scope__.cache.${global}@${url}`;
     }
   }
