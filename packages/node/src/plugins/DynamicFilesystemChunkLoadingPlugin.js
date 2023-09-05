@@ -5,7 +5,6 @@ const {
   httpVmStrategy,
 } = require('./stratagies');
 
-
 class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
   constructor() {
     super('dynamic-filesystem-chunk-loading', RuntimeModule.STAGE_BASIC);
@@ -24,21 +23,21 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
     });`;
   }
 
-    /**
+  /**
    * @private
    * @param {unknown[]} items item to log
    */
-    _getLogger(...items) {
-        if (!this.options.debug) {
-          return '';
-        }
+  _getLogger(...items) {
+    if (!this.options.debug) {
+      return '';
+    }
 
-        return `console.log(${items.join(',')});`;
-      }
+    return `console.log(${items.join(',')});`;
+  }
   /**
    * @returns {string} runtime code
    */
- generate() {
+  generate() {
     // Code from DynamicFilesystemChunkLoadingPlugin.js
     const dynamicFilesystemChunkLoadingPluginCode = Template.asString([
       fileSystemRunInContextStrategy.toString(),
@@ -55,7 +54,7 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
         ]),
         '}',
       ]),
-      '};'
+      '};',
     ]);
     return Template.asString([
       dynamicFilesystemChunkLoadingPluginCode,
@@ -65,9 +64,3 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
 }
 
 module.exports = DynamicFilesystemChunkLoadingRuntimeModule;
-
-
-
-
-
-
