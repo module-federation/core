@@ -16,9 +16,7 @@ export function registerContainer(
   const globalScope = getScope();
   const containerKey = getContainerKey(remoteOptions);
 
-  if (globalScope[containerKey]) return;
-
-  globalScope[containerKey] = asyncContainer;
+  globalScope[containerKey] ??= asyncContainer;
 }
 
 /**
@@ -27,11 +25,10 @@ export function registerContainer(
 // TODO: @param remoteOptions -  Should string type be deprecated?
 export function getContainerKey(remoteOptions: string | RemoteOptions): string {
   if (typeof remoteOptions === 'string') {
-    return remoteOptions as string;
+    return remoteOptions;
   }
 
-  const options = remoteOptions as RemoteOptions;
-  return options.uniqueKey ? options.uniqueKey : options.global;
+  return remoteOptions.uniqueKey || remoteOptions.global;
 }
 
 /**
@@ -47,11 +44,6 @@ export async function getContainer(
 
   if (!remoteContainer) {
     throw Error(`Remote container options is empty`);
-  }
-
-  if (typeof remoteContainer === 'string' && globalScope[remoteContainer]) {
-    const container = globalScope[remoteContainer] as AsyncContainer;
-    return await container;
   }
 
   const uniqueKey = getContainerKey(remoteContainer);
