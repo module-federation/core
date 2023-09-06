@@ -33,9 +33,10 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
 
     return Template.asString([
       "var scriptUrl;",
-      "console.log('runtimemoduletesting',globalThis.__remote_scope__);",
+      'var remoteContainerRegistry = globalThis.__remote_scope__.remotes;',
+      `console.log('remoteContainerRegistry',remoteContainerRegistry);`,
       scriptType === "module"
-        ? `if (typeof ${RuntimeGlobals.require}.federation.remotes[${JSON.stringify(this.options.name)}] === "string") scriptUrl = ${RuntimeGlobals.require}.federation.remotes[${JSON.stringify(this.options.name)}]`
+        ? `if (typeof remoteContainerRegistry[${JSON.stringify(this.options.name)}] === "string") scriptUrl = remoteContainerRegistry[${JSON.stringify(this.options.name)}]`
         : Template.asString([
           `if (${RuntimeGlobals.global}.importScripts) scriptUrl = ${RuntimeGlobals.global}.location + "";`,
           `var document = ${RuntimeGlobals.global}.document;`,

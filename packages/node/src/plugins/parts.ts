@@ -1,5 +1,4 @@
 import { Template, RuntimeGlobals, Chunk, ChunkGraph } from 'webpack';
-import DynamicFileSystem from '../filesystem/DynamicFilesystemRuntimeModule';
 import { executeLoadTemplate } from './loadScript';
 
 export function generateHmrCode(
