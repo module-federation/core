@@ -64,6 +64,8 @@ export default `
 //language=JS
 export const executeLoadTemplate = `
   function executeLoad(url, callback, name) {
+
+    console.log('running execute load template')
     if (!name) {
       throw new Error('__webpack_require__.l name is required for ' + url);
     }
@@ -85,9 +87,13 @@ export const executeLoadTemplate = `
          const exp = {};
          let remote = {exports:{}};
          remoteCapsule(exp,require,remote,'node-federation-loader-' + name + '.vm',__dirname);
+
+         console.log('after capsule');
          remote = remote.exports || remote;
-          globalThis.__remote_scope__.cache[remoteName] = remote[name] || remote;
-          globalThis.__remote_scope__.remotes[remoteName] = url;
+         console.log('got exports',remote)
+         console.log('globalThis.__remote_scope__[remoteName]',globalThis.__remote_scope__[remoteName]);
+          globalThis.__remote_scope__[remoteName] = remote[name] || remote;
+          globalThis.__remote_scope__._config[remoteName] = url;
           console.log(globalThis.__remote_scope__);
           callback(globalThis.__remote_scope__.cache[name])
         } catch (e) {

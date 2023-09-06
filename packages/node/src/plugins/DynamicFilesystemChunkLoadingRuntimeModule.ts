@@ -171,8 +171,9 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
         }, {} as Record<string, string>)
       )};`,
       `Object.keys(remotes).forEach(function(remote) {
-        ${RuntimeGlobals.require}.federation.remotes[remote] = remotes[remote];
+       globalThis.__remote_scope__[remote] = remotes[remote];
       });`,
+      "console.log('remotes writter', globalThis.__remote_scope__);",
     ]);
 
     return Template.asString([
