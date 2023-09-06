@@ -20,17 +20,15 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
       // `if (!globalThis.__remote_scopes__) {`,
       Template.indent([
         '// backward compatible global proxy',
-        'console.log("Creating global proxy",globalThis.__remote_scope__,__webpack_require__.federation);',
         `globalThis.__remote_scope__ = new Proxy(globalThis.__remote_scope__ || __webpack_require__.federation, {`,
         Template.indent([
           `get: function(target, prop, receiver) {`,
           Template.indent([
-            `console.log('Reading property:', prop);`,
-            'console.log("__webpack_require__.federation",__webpack_require__.federation);',
+            // `console.log('Reading property:', prop);`,
             `if (prop === '_config') {`,
-            Template.indent([`console.log('Reading from remotes'); return ${RuntimeGlobals.require}.federation.remotes;`]),
+            Template.indent([` return ${RuntimeGlobals.require}.federation.remotes;`]),
             `} else {`,
-            Template.indent([`console.log('Reading from cache'); return ${RuntimeGlobals.require}.federation.cache[prop];`]),
+            Template.indent([` return ${RuntimeGlobals.require}.federation.cache[prop];`]),
             `}`,
           ]),
           `},`,
@@ -38,9 +36,9 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
           Template.indent([
             `console.log('Writing to property:', prop);`,
             `if (prop === '_config') {`,
-            Template.indent([`console.log('Writing to remotes'); ${RuntimeGlobals.require}.federation.remotes = value;`]),
+            Template.indent([`console.log('Writing to remotes', {prop,target,value}); ${RuntimeGlobals.require}.federation.remotes = value;`]),
             `} else {`,
-            Template.indent([`console.log('Writing to cache'); ${RuntimeGlobals.require}.federation.cache[prop] = value;`]),
+            Template.indent([` ${RuntimeGlobals.require}.federation.cache[prop] = value;`]),
             `}`,
             `return true;`,
           ]),

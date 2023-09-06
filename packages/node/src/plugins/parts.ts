@@ -149,9 +149,7 @@ export function generateLoadingCode(
                       }, {} as Record<string, string>)
                     )};`,
 
-                    `var requestedRemote = ${
-                      RuntimeGlobals.require
-                    }.federation.remotes[${JSON.stringify(name)}]`,
+                    `var requestedRemote = globalThis.__remote_scope__[${JSON.stringify(name)}]`,
 
                     "if(typeof requestedRemote === 'function'){",
                     Template.indent(

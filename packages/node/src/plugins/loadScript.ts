@@ -91,11 +91,12 @@ export const executeLoadTemplate = `
          console.log('after capsule');
          remote = remote.exports || remote;
          console.log('got exports',remote)
-         console.log('globalThis.__remote_scope__[remoteName]',globalThis.__remote_scope__[remoteName]);
           globalThis.__remote_scope__[remoteName] = remote[name] || remote;
+         console.log('globalThis.__remote_scope__[remoteName]',globalThis.__remote_scope__[remoteName]);
+
           globalThis.__remote_scope__._config[remoteName] = url;
           console.log(globalThis.__remote_scope__);
-          callback(globalThis.__remote_scope__.cache[name])
+          callback(globalThis.__remote_scope__[name])
         } catch (e) {
           console.error('executeLoad hit catch block', e);
           e.target = {src: url};
