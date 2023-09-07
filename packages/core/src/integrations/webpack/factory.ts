@@ -16,7 +16,7 @@ export async function initializeSharingScope(
     .S as unknown as SharedScope;
 }
 
-export async function loadScript(
+export function loadScript(
   containerKey: string,
   remoteOptions: RemoteOptions
 ) {
@@ -48,8 +48,7 @@ export async function webpackLoadScript(
 
         const errorType =
           event && (event.type === 'load' ? 'missing' : event.type);
-        const realSrc =
-          event && event.target && (event.target as HTMLScriptElement).src;
+        const realSrc = (event?.target as HTMLScriptElement)?.src;
 
         const __webpack_error__ = Object.assign(new Error(), {
           message: `@mf-core: script failed to load. (${errorType}: ${realSrc} or global var ${containerKey} not exists)`,
