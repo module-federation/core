@@ -72,8 +72,14 @@ export async function httpEvalStrategy(
     callback(e, null);
   }
 }
-
-// HttpVmStrategy
+/**
+ * HttpVmStrategy
+ * This function is used to execute a chunk of code in a VM using HTTP or HTTPS based on the protocol.
+ * @param {string} chunkName - The name of the chunk to be executed.
+ * @param {string} remoteName - The name of the remote server.
+ * @param {object} remotes - An object containing the remote servers.
+ * @param {function} callback - A callback function to be executed after the chunk is executed.
+ */
 export async function httpVmStrategy(chunkName, remoteName, remotes, callback) {
   var http = require('http');
   var https = require('https');
