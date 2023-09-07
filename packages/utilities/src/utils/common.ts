@@ -14,6 +14,10 @@ import type {
   WebpackShareScopes
 } from '../types';
 
+declare global {
+  var __remote_scope__: any;
+}
+
 /**
  * Importing loadScript function from './pure'.
  * This function is used to load scripts dynamically.
@@ -106,7 +110,6 @@ export const getContainer = async (
   if (!remoteContainer) {
     throw Error(`Remote container options is empty`);
   }
-
   const containerScope = typeof window !== 'undefined' ? window : globalThis.__remote_scope__;
   let containerKey: string;
 

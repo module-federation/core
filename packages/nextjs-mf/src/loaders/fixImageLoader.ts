@@ -29,6 +29,7 @@ export async function fixImageLoader(
 
   const isServer = this._compiler?.options.name !== 'client';
   //@ts-ignore
+// sourcery skip: use-object-destructuring
   const publicPath = this._compiler?.webpack.RuntimeGlobals.publicPath;
 
   const result = await this.importModule(
