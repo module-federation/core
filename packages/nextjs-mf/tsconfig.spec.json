@@ -5,5 +5,5 @@
     "module": "commonjs",
     "types": ["jest", "node"]
   },
-  "include": ["jest.config.js", "**/*.test.ts", "**/*.spec.ts", "**/*.d.ts", "src/loaders/delegateLoader.test.js"]
+  "include": ["jest.config.js", "**/*.test.ts", "**/*.spec.ts", "**/*.d.ts", "**/*.test.js"]
 }
