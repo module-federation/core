@@ -96,7 +96,7 @@ export const getContainer = async (
   if (!remoteContainer) {
     throw Error(`Remote container options is empty`);
   }
-  const containerScope = typeof window !== 'undefined' ? window : globalThis.__remote_scope__;
+  const containerScope = typeof window !== 'undefined' ? window : (globalThis as any).__remote_scope__;
   let containerKey: string;
 
   if (typeof remoteContainer === 'string') {
