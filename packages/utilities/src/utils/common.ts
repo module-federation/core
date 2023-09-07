@@ -76,25 +76,20 @@ export const injectScript = (
   const asyncContainer = loadScript(keyOrRuntimeRemoteItem);
   return createContainerSharingScope(asyncContainer);
 };
-
-export const createRuntimeVariables = (remotes: Remotes) => {
+export const createRuntimeVariables = (remotes: Remotes): Record<string, string> => {
   if (!remotes) {
     return {};
   }
 
-  return Object.entries(remotes).reduce((acc, remote) => {
-    // handle promise new promise and external new promise
-    if (remote[1].startsWith('promise ') || remote[1].startsWith('external ')) {
-      const promiseCall = remote[1]
-        .replace('promise ', '')
-        .replace('external ', '');
-      acc[remote[0]] = `function() {
+  return Object.entries(remotes).reduce((acc, [key, value]) => {
+    if (value.startsWith('promise ') || value.startsWith('external ')) {
+      const promiseCall = value.split(' ')[1];
+      acc[key] = `function() {
         return ${promiseCall}
       }`;
-      return acc;
+    } else {
+      acc[key] = JSON.stringify(value);
     }
-    // if somehow its just the @ syntax or something else, pass it through
-    acc[remote[0]] = JSON.stringify(remote[1]);
 
     return acc;
   }, {} as Record<string, string>);
