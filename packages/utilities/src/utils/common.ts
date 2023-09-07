@@ -7,26 +7,35 @@ import type {
   Remotes,
   RuntimeRemote,
   WebpackRemoteContainer,
+  WebpackShareScopes
 } from '../types';
-
 import { loadScript } from './pure';
 
+/**
+ * Creates a module that can be shared across different builds.
+ * @param {string} delegate - The delegate string.
+ * @param {Object} params - The parameters for the module.
+ * @returns {string} - The created module.
+ * @throws Will throw an error if the params are an array or object.
+ */
 export const createDelegatedModule = (
   delegate: string,
   params: { [key: string]: any }
 ) => {
   const queries: string[] = [];
-  for (const [key, value] of Object.entries(params)) {
-    if (Array.isArray(value) || typeof value === 'object') {
-      throw new Error(
-        `[Module Federation] Delegated module params cannot be an array or object. Key "${key}" should be a string or number`
-      );
+  const processParam = (key: string, value: any) => {
+    if (Array.isArray(value)) {
+      value.forEach((v, i) => processParam(`${key}[${i}]`, v));
+    } else if (typeof value === 'object' && value !== null) {
+      Object.entries(value).forEach(([k, v]) => processParam(`${key}.${k}`, v));
+    } else {
+      queries.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
     }
-    queries.push(`${key}=${value}`);
-  }
-  if (queries.length === 0) return `internal ${delegate}`;
-  return `internal ${delegate}?${queries.join('&')}`;
+  };
+  Object.entries(params).forEach(([key, value]) => processParam(key, value));
+  return queries.length === 0 ? `internal ${delegate}` : `internal ${delegate}?${queries.join('&')}`;
 };
+
 
 const createContainerSharingScope = (
   asyncContainer: AsyncContainer | undefined
@@ -70,13 +79,20 @@ const createContainerSharingScope = (
  * or
  *    { asyncContainer } - async container is a promise that resolves to the remote container
  */
-export const injectScript = (
+export const injectScript = async (
   keyOrRuntimeRemoteItem: string | RuntimeRemote
 ) => {
   const asyncContainer = loadScript(keyOrRuntimeRemoteItem);
   return createContainerSharingScope(asyncContainer);
 };
 
+/**
+ * Creates runtime variables from the provided remotes.
+ * If the value of a remote starts with 'promise ' or 'external ', it is transformed into a function that returns the promise call.
+ * Otherwise, the value is stringified.
+ * @param {Remotes} remotes - The remotes to create runtime variables from.
+ * @returns {Record<string, string>} - The created runtime variables.
+ */
 export const createRuntimeVariables = (remotes: Remotes) => {
   if (!remotes) {
     return {};
