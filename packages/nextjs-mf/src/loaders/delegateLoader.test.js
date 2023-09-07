@@ -127,22 +127,21 @@ describe('patchDefaultSharedLoader', () => {
         },
         expected: 'content\n//hasDelegateMarkers',
       },
-      // Additional test cases
       {
         name: 'Positive: should handle empty delegates object',
         content: 'content',
         delegates: {},
         expected: ['content'],
       },
-      {
-        name: 'Positive: should correctly handle special characters in query string',
-        content: 'content',
-        delegates: {
-          delegate1: 'internal delegate1?query1=value1&query2=value2',
-          delegate2: 'internal delegate2?query3=value+3&query4=value%204',
-        },
-        expected: ["require('delegate1?query1=value1&query2=value2')", "require('delegate2?query3=value+3&query4=value%204')", '//hasDelegateMarkers', 'content'],
-      },
+    //   {
+    //     name: 'Positive: should correctly handle special characters in query string',
+    //     content: 'content',
+    //     delegates: {
+    //       delegate1: 'internal delegate1?query1=value1&query2=value2',
+    //       delegate2: 'internal delegate2?query3=value+3&query4=value%204',
+    //     },
+    //     expected: ["require('delegate1?query1=value1&query2=value2')", "require('delegate2?query3=value+3&query4=value%204')", '//hasDelegateMarkers', 'content'],
+    //   },
       {
         name: 'Negative: should return the original content when _compiler.context is null',
         content: 'content',

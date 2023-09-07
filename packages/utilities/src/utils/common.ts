@@ -142,7 +142,9 @@ export const getModule = async ({
   const container = await getContainer(remoteContainer);
   try {
     const modFactory = await container?.get(modulePath);
-    if (!modFactory) return undefined;
+    if (!modFactory) {
+      return undefined;
+    }
     const mod = modFactory();
     if (exportName) {
       return mod && typeof mod === 'object' ? mod[exportName] : undefined;

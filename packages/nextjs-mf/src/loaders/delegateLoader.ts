@@ -17,15 +17,14 @@ export default function patchDefaultSharedLoader(
       for (const [key, value] of new URLSearchParams(query).entries()) {
         queries.push(`${key}=${encodeURIComponent(value)}`);
       }
-      const delegatePath = this.utils.contextify(
+      return this.utils.contextify(
         this.context,
         this.utils.absolutify(this._compiler?.context || '', request) +
           '?' +
           queries.join('&')
       );
-      return delegatePath;
     }
-    return delegate;
+    return request;
   });
   if (content.includes('hasDelegateMarkers')) {
     return content;
