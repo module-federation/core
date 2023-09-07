@@ -36,22 +36,25 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
       'var remoteContainerRegistry = globalThis.__remote_scope__._config;',
       scriptType === "module"
         ? `if (typeof remoteContainerRegistry[${JSON.stringify(this.options.name)}] === "string") scriptUrl = remoteContainerRegistry[${JSON.stringify(this.options.name)}]`
-        : Template.asString([
-          `if (${RuntimeGlobals.global}.importScripts) scriptUrl = ${RuntimeGlobals.global}.location + "";`,
-          `var document = ${RuntimeGlobals.global}.document;`,
-          "if (!scriptUrl && document) {",
-          Template.indent([
-            `if (document.currentScript)`,
-            Template.indent(`scriptUrl = document.currentScript.src`),
-            "if (!scriptUrl) {",
-            Template.indent([
-              'var scripts = document.getElementsByTagName("script");',
-              "if(scripts.length) scriptUrl = scripts[scripts.length - 1].src"
-            ]),
-            "}"
-          ]),
-          "}"
+        :  Template.asString([
+          'scriptUrl = __dirname',
         ]),
+        // Template.asString([
+        //   `if (${RuntimeGlobals.global}.importScripts) scriptUrl = ${RuntimeGlobals.global}.location + "";`,
+        //   `var document = ${RuntimeGlobals.global}.document;`,
+        //   "if (!scriptUrl && document) {",
+        //   Template.indent([
+        //     `if (document.currentScript)`,
+        //     Template.indent(`scriptUrl = document.currentScript.src`),
+        //     "if (!scriptUrl) {",
+        //     Template.indent([
+        //       'var scripts = document.getElementsByTagName("script");',
+        //       "if(scripts.length) scriptUrl = scripts[scripts.length - 1].src"
+        //     ]),
+        //     "}"
+        //   ]),
+        //   "}"
+        // ]),
       "// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration",
       '// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.',
       'if (!scriptUrl) throw new Error("Automatic publicPath is not supported in this browser");',

@@ -108,7 +108,6 @@ export const executeLoadTemplate = `
          console.log('after capsule');
          remote = remote.exports || remote;
          console.log('got exports',remote)
-         console.log('globalThis.__remote_scope__[remoteName]',globalThis.__remote_scope__[remoteName]);
           globalThis.__remote_scope__[remoteName] = remote[name] || remote;
           // globalThis.__remote_scope__._config[remoteName] = url;
           console.log(globalThis.__remote_scope__);
