@@ -25,6 +25,7 @@ const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
 
 const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
+
   // 1) Load remote container if needed
   let asyncContainer: RuntimeRemote['asyncContainer'];
   const reference =
@@ -78,7 +79,6 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         return globalScope['remoteLoading'][containerKey];
       }
     }
-
     // @ts-ignore
     asyncContainer = new Promise(function (resolve, reject) {
       function resolveRemoteGlobal() {
@@ -95,7 +95,6 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       (__webpack_require__ as any).l(
         reference.url,
         function (event: Event) {
-
           if (typeof globalScope[remoteGlobal] !== 'undefined') {
             return resolveRemoteGlobal();
           }
@@ -159,7 +158,6 @@ const getRuntimeRemotes = () => {
       acc,
       item
     ) {
-
       const [key, value] = item;
       // if its an object with a thenable (eagerly executing function)
       if (typeof value === 'object' && typeof value.then === 'function') {
@@ -182,6 +180,7 @@ const getRuntimeRemotes = () => {
         }
       } else if (typeof value === 'string' && !value.includes('@')) {
         acc[key] = { global: key, url: value };
+        console.log('delegates may need work')
       }
       // if its just a string (global@url)
       else if (typeof value === 'string') {

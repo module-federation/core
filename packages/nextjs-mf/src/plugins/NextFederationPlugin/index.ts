@@ -123,9 +123,9 @@ export class NextFederationPlugin {
       },
     };
 
-    // if (this._extraOptions.debug) {
+    if (this._extraOptions.debug) {
       compiler.options.devtool = false;
-    // }
+    }
     compiler.options.output.uniqueName = this._options.name;
 
     // inject module hoisting system

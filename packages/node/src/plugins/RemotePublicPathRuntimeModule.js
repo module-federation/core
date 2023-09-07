@@ -1,3 +1,9 @@
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+*/
+
+"use strict";
+
 import { RuntimeGlobals, RuntimeModule, Template, javascript } from "webpack";
 import { getUndoPath } from 'webpack/lib/util/identifier';
 
