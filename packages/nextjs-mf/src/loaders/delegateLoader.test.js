@@ -1,100 +1,13 @@
 import patchDefaultSharedLoader from './delegateLoader';
 
-// describe('patchDefaultSharedLoader', () => {
-
-//   let mockContext;
-
-//   beforeEach(() => {
-//     mockContext = {
-//       getOptions: jest.fn(),
-//       utils: {
-//         contextify: jest.fn((context, absolutePath) => absolutePath),
-//         absolutify: jest.fn((context, request) => request),
-//       },
-//     };
-//   });
-
-//   it('Positive: should return the content with required delegates', () => {
-//     const content = 'content';
-//     const delegates = {
-//       delegate1: 'internal delegate1?query1=value1&query2=value2',
-//       delegate2: 'internal delegate2',
-//     };
-
-//     mockContext.getOptions.mockReturnValue({ delegates });
-
-//     const result = patchDefaultSharedLoader.call(mockContext, content);
-
-//     expect(result).toContain("require('delegate1?query1=value1&query2=value2')");
-//     expect(result).toContain("require('delegate2')");
-//     expect(result).toContain('//hasDelegateMarkers');
-//     expect(result).toContain(content);
-//   });
-
-
-
-//   test('Negative: should return the original content when it includes hasDelegateMarkers', () => {
-//     const content = 'content\n//hasDelegateMarkers';
-//     const delegates = {
-//       delegate1: 'internal delegate1?query1=value1&query2=value2',
-//       delegate2: 'internal delegate2',
-//     };
-
-//     mockContext.getOptions.mockReturnValue({ delegates });
-
-//     const result = patchDefaultSharedLoader.call(mockContext, content);
-
-//     expect(result).toBe(content);
-//   });
-
- 
-// describe('patchDefaultSharedLoader', () => {
-//   beforeEach(() => {
-//     jest.clearAllMocks();
-//   });
-
-//   test('Positive: should return the content with required delegates', () => {
-//     const content = 'content';
-//     const delegates = {
-//       delegate1: 'internal delegate1?query1=value1&query2=value2',
-//       delegate2: 'internal delegate2',
-//     };
-
-//     mockContext.getOptions.mockReturnValue({ delegates });
-
-//     const result = patchDefaultSharedLoader.call(mockContext, content);
-
-//     expect(result).toContain("require('delegate1?query1=value1&query2=value2')");
-//     expect(result).toContain("require('delegate2')");
-//     expect(result).toContain('//hasDelegateMarkers');
-//     expect(result).toContain(content);
-//   });
-
-//   test('Negative: should return the original content when it includes hasDelegateMarkers', () => {
-//     const content = 'content\n//hasDelegateMarkers';
-//     const delegates = {
-//       delegate1: 'internal delegate1?query1=value1&query2=value2',
-//       delegate2: 'internal delegate2',
-//     };
-    
-
-//     mockContext.getOptions.mockReturnValue({ delegates });
-
-//     const result = patchDefaultSharedLoader.call(mockContext, content);
-
-//     expect(result).toBe(content);
-//   });
-// });
-// });
-
 describe('patchDefaultSharedLoader', () => {
     let mockContext;
-  
+
     const setupMocks = (delegates, _compilerContext = '') => {
       mockContext._compiler = { context: _compilerContext };
       mockContext.getOptions.mockReturnValue({ delegates });
     };
-  
+
     beforeEach(() => {
       jest.clearAllMocks();
       mockContext = {
@@ -106,7 +19,7 @@ describe('patchDefaultSharedLoader', () => {
         },
       };
     });
-  
+
     const testCases = [
       // Existing test cases
       {
@@ -152,12 +65,12 @@ describe('patchDefaultSharedLoader', () => {
         expected: ['content'],
       }
     ];
-  
+
     testCases.forEach(({ name, content, delegates, _compilerContext, expected }) => {
       test(name, () => {
         setupMocks(delegates, _compilerContext);
         const result = patchDefaultSharedLoader.call(mockContext, content);
-        
+
         if (Array.isArray(expected)) {
           expected.forEach(e => {
             expect(result).toContain(e);
@@ -168,4 +81,3 @@ describe('patchDefaultSharedLoader', () => {
       });
     });
   });
-  
