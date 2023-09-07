@@ -58,6 +58,7 @@ type ModulePath = string;
 
 export type WebpackRemoteContainer = {
   __initialized?: boolean;
+  __initializing?: boolean;
   get(modulePath: ModulePath): () => any;
   init: (obj?: typeof __webpack_share_scopes__) => void;
 };
