@@ -1,9 +1,3 @@
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-*/
-
-"use strict";
-
 import { RuntimeGlobals, RuntimeModule, Template, javascript } from "webpack";
 import { getUndoPath } from 'webpack/lib/util/identifier';
 
@@ -33,8 +27,7 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
 
     return Template.asString([
       "var scriptUrl;",
-      'var remoteContainerRegistry = globalThis.__remote_scope__.remotes;',
-      `console.log('remoteContainerRegistry',remoteContainerRegistry);`,
+      'var remoteContainerRegistry = globalThis.__remote_scope__._config;',
       scriptType === "module"
         ? `if (typeof remoteContainerRegistry[${JSON.stringify(this.options.name)}] === "string") scriptUrl = remoteContainerRegistry[${JSON.stringify(this.options.name)}]`
         : Template.asString([
@@ -67,5 +60,3 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
 }
 
 export default AutoPublicPathRuntimeModule;
-
-

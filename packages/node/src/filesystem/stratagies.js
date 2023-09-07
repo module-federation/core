@@ -50,7 +50,7 @@ export async function httpEvalStrategy(
     // eslint-disable-next-line no-undef
      url = new URL(chunkName,__webpack_require__.p);
   } catch(e) {
-    console.error('module-federation: failed to construct absolute chunk path of',remoteName,'for',chunkName);
+    console.error('module-federation: failed to construct absolute chunk path of',remoteName,'for',chunkName, e);
     url = new URL(remotes[remoteName]);
     var getBasenameFromUrl = (url) => {
       const urlParts = url.split('/');
@@ -78,8 +78,18 @@ export async function httpVmStrategy(chunkName, remoteName, remotes, callback) {
   var http = require('http');
   var https = require('https');
   var vm = require('vm');
+  var url;
   // eslint-disable-next-line no-undef
-  var url = new URL(chunkName,__webpack_require__.p);
+
+  console.log('httpvmstrategy',__webpack_require__.p, chunkName,remotes[remoteName])
+  try {
+    url = new URL(chunkName, __webpack_require__.p);
+  } catch(e) {
+    console.error('module-federation: failed to construct absolute chunk path of',remoteName,'for',chunkName, e);
+ url = new URL(remotes[remoteName]);
+    var fileToReplace = require('path').basename(url.pathname);
+    url.pathname = url.pathname.replace(fileToReplace, chunkName);
+  }
   var protocol = url.protocol === 'https:' ? https : http;
   protocol.get(url, (res) => {
     let data = '';

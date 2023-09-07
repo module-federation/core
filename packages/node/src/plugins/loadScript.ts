@@ -1,6 +1,11 @@
 /**
  * loadScript(baseURI, fileName, cb)
  * loadScript(scriptUrl, cb)
+ * This function is used to load a script from a given URL. It supports three different environments:
+ * 1. When globalThis.webpackChunkLoad is available, it uses it to load the script.
+ * 2. When running in a Node.js environment, it uses http or https to load the script.
+ * 3. Otherwise, it uses fetch to load the script.
+ * The loaded script is then passed to the callback function.
  */
 
 //language=JS
@@ -60,20 +65,32 @@ export default `
   }
 `;
 
+/**
+ * executeLoad(url, callback, name)
+ * This function is used to execute a script from a given URL. It supports two different environments:
+ * 1. When running in a Node.js environment, it uses vm to execute the script.
+ * 2. Otherwise, it uses eval to execute the script.
+ * The executed script is then passed to the callback function.
+ */
+
 // Shim to recreate browser version of webpack_require.loadChunk, same api
 //language=JS
 export const executeLoadTemplate = `
   function executeLoad(url, callback, name) {
 
-    console.log('running execute load template')
+    console.log('running execute load template', url, name)
     if (!name) {
       throw new Error('__webpack_require__.l name is required for ' + url);
     }
     var remoteName = name;
     if(name.includes('__remote_scope__')) {
-      remoteName = name.split('__remote_scope__.cache.')[1]
+      remoteName = name.split('__remote_scope__.')[1]
     }
+    console.log('remoteName',remoteName)
+    console.log('globalThis.__remote_scope__[remoteName]',globalThis.__remote_scope__[remoteName]);
     if (typeof globalThis.__remote_scope__[remoteName] !== 'undefined') return callback(globalThis.__remote_scope__[remoteName]);
+    console.log('going to load remote', url);
+    globalThis.__remote_scope__._config[remoteName] = url;
     // if its a worker or node
     if (typeof process !== 'undefined') {
       const vm = require('vm');
@@ -93,9 +110,11 @@ export const executeLoadTemplate = `
          console.log('got exports',remote)
          console.log('globalThis.__remote_scope__[remoteName]',globalThis.__remote_scope__[remoteName]);
           globalThis.__remote_scope__[remoteName] = remote[name] || remote;
-          globalThis.__remote_scope__._config[remoteName] = url;
+          // globalThis.__remote_scope__._config[remoteName] = url;
           console.log(globalThis.__remote_scope__);
-          callback(globalThis.__remote_scope__.cache[name])
+
+          globalThis.__remote_scope__._config[remoteName] = url;
+          callback(globalThis.__remote_scope__[name])
         } catch (e) {
           console.error('executeLoad hit catch block', e);
           e.target = {src: url};
