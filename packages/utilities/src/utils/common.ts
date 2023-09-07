@@ -69,10 +69,10 @@ export async function createContainerSharingScope(
  * @param {string | RuntimeRemote} keyOrRuntimeRemoteItem - The key or runtime remote item.
  * @returns {Promise} - The initialized remote container.
  */
-export const injectScript = (
+export const injectScript = async (
   keyOrRuntimeRemoteItem: string | RuntimeRemote
 ) => {
-  const asyncContainer = loadScript(keyOrRuntimeRemoteItem);
+  const asyncContainer = await loadScript(keyOrRuntimeRemoteItem);
   return createContainerSharingScope(asyncContainer);
 }
 /**
