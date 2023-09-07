@@ -14,9 +14,7 @@ import type {
   WebpackShareScopes
 } from '../types';
 
-declare global {
-  var __remote_scope__: any;
-}
+
 
 /**
  * Importing loadScript function from './pure'.
