@@ -34,12 +34,13 @@ export const importDelegatedModule = async (
                     get: function () {
                       return function () {
                         //@ts-ignore
-                        if (globalThis.usedChunks)
+                        if (globalThis.usedChunks) {
                           //@ts-ignore
                           globalThis.usedChunks.add(
                             //@ts-ignore
                             `${keyOrRuntimeRemoteItem.global}->${arg}`
                           );
+                        }
                         //eslint-disable-next-line prefer-rest-params
                         return m[prop](...arguments);
                       };
@@ -50,12 +51,13 @@ export const importDelegatedModule = async (
                   Object.defineProperty(result, prop, {
                     get: () => {
                       //@ts-ignore
-                      if (globalThis.usedChunks)
+                      if (globalThis.usedChunks) {
                         //@ts-ignore
                         globalThis.usedChunks.add(
                           //@ts-ignore
                           `${keyOrRuntimeRemoteItem.global}->${arg}`
                         );
+                      }
 
                       return m[prop];
                     },

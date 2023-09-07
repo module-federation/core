@@ -92,8 +92,10 @@ export class RemoteContainer {
       });
 
       if (container) {
+        //@ts-ignore
         this.container = container;
         this.events.emit('loadComplete', this);
+        //@ts-ignore
         return container;
       }
 
