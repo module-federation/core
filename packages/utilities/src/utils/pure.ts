@@ -39,19 +39,19 @@ export const loadScript = async (keyOrRuntimeRemoteItem: string | RuntimeRemote)
 
     asyncContainer = new Promise<WebpackRemoteContainer>((resolve, reject) => {
       const resolveRemoteGlobal = () => resolve(globalScope[remoteGlobal] as unknown as WebpackRemoteContainer);
-    
+
       if (globalScope[remoteGlobal]) {
         return resolveRemoteGlobal();
       }
-    
+
       (__webpack_require__ as any).l(reference.url, (event: Event) => {
         if (globalScope[remoteGlobal]) {
           return resolveRemoteGlobal();
         }
-    
+
         const errorType = event && (event.type === 'load' ? 'missing' : event.type);
         const realSrc = event && event.target && (event.target as HTMLScriptElement).src;
-    
+
         const __webpack_error__ = new Error(`Loading script failed.\n(${errorType}: ${realSrc} or global var ${remoteGlobal})`) as Error & {
           type: string;
           request: string | null;
@@ -59,7 +59,7 @@ export const loadScript = async (keyOrRuntimeRemoteItem: string | RuntimeRemote)
         __webpack_error__.name = 'ScriptExternalLoadError';
         __webpack_error__.type = errorType;
         __webpack_error__.request = realSrc;
-    
+
         reject(__webpack_error__);
       }, containerKey);
     }).catch((err) => {
@@ -70,7 +70,7 @@ export const loadScript = async (keyOrRuntimeRemoteItem: string | RuntimeRemote)
           console.warn('faking', arg, 'module on, its offline');
           return () => Promise.resolve({ __esModule: true, default: () => null });
         },
-        init: () => {},
+        init: () => Promise.resolve(),
       } as unknown as WebpackRemoteContainer; // Ensure the returned object is of type WebpackRemoteContainer
     });
     globalScope['remoteLoading'][containerKey] = asyncContainer;
