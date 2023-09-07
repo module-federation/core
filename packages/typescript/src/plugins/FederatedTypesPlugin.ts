@@ -210,7 +210,9 @@ export class FederatedTypesPlugin {
   }
 
   private getError(error: unknown): Error {
-    if (error instanceof Error) return error;
+    if (error instanceof Error) {
+      return error;
+    }
     return new Error(error as string);
   }
 }
