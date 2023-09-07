@@ -63,7 +63,8 @@ export const injectScript = async (
   keyOrRuntimeRemoteItem: string | RuntimeRemote
 ) => {
   const asyncContainer = await loadScript(keyOrRuntimeRemoteItem);
-  return createContainerSharingScope(asyncContainer);
+  await createContainerSharingScope();
+return asyncContainer
 }
 /**
  * Creates runtime variables from the provided remotes.
