@@ -1,9 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-
-/**
- * Importing types from '../types'.
- * These types are related to Module Federation in Webpack 5.
- */
 import type {
   AsyncContainer,
   GetModuleOptions,
@@ -13,13 +8,6 @@ import type {
   WebpackRemoteContainer,
   WebpackShareScopes
 } from '../types';
-
-
-
-/**
- * Importing loadScript function from './pure'.
- * This function is used to load scripts dynamically.
- */
 import { loadScript } from './pure';
 
 /**
