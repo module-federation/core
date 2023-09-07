@@ -1,4 +1,4 @@
-import type { LoaderContext } from 'webpack';
+import { LoaderContext } from 'webpack';
 /**
  *
  * Requires either the default delegate module or a custom one
@@ -15,7 +15,7 @@ export default function patchDefaultSharedLoader(
     if (query) {
       const queries = [];
       for (const [key, value] of new URLSearchParams(query).entries()) {
-        queries.push(`${key}=${value}`);
+        queries.push(`${key}=${encodeURIComponent(value)}`);
       }
       const delegatePath = this.utils.contextify(
         this.context,
@@ -24,15 +24,9 @@ export default function patchDefaultSharedLoader(
           queries.join('&')
       );
       return delegatePath;
-    } else {
-      const delegatePath = this.utils.contextify(
-        this.context,
-        this.utils.absolutify(this._compiler?.context || '', request)
-      );
-      return delegatePath;
     }
+    return delegate;
   });
-
   if (content.includes('hasDelegateMarkers')) {
     return content;
   }
