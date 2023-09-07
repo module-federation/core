@@ -1,3 +1,4 @@
+import { IgnorePlugin } from 'webpack';
 import {
   AsyncContainer,
   RemoteVars,
@@ -28,6 +29,7 @@ export const loadScript = async (keyOrRuntimeRemoteItem: string | RuntimeRemote)
     const remoteGlobal = reference.global as unknown as string;
     const containerKey = reference.uniqueKey ? (reference.uniqueKey as unknown as string) : remoteGlobal;
 
+    //@ts-ignore
     const globalScope = typeof window !== 'undefined' ? window : globalThis.__remote_scope__ || {};
     globalScope['_config'] = globalScope['_config'] || {};
     globalScope['_config'][containerKey] = reference.url;
