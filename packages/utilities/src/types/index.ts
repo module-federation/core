@@ -71,7 +71,7 @@ export type RemoteData = {
 };
 
 export type RuntimeRemote = Partial<RemoteData> & {
-  asyncContainer?: AsyncContainer;
+  asyncContainer?: Promise<WebpackRemoteContainer>;
   global?: string;
   url?: string;
 };
