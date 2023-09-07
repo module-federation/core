@@ -52,7 +52,9 @@ class CustomWebpackPlugin {
               chunk.name === 'webpack'
             ) {
               const originalSource = runtimeModule.getGeneratedCode();
-              if (!originalSource) return;
+              if (!originalSource) {
+                return;
+              }
 
               const modifiedSource = new ConcatSource(
                 originalSource,
