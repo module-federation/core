@@ -16,7 +16,9 @@ const resolveWithExtension = (exposedPath: string) => {
   const cwd = process.cwd();
   for (const extension of EXTENSIONS) {
     const exposedPathWithExtension = join(cwd, `${exposedPath}.${extension}`);
-    if (existsSync(exposedPathWithExtension)) return exposedPathWithExtension;
+    if (existsSync(exposedPathWithExtension)) {
+      return exposedPathWithExtension;
+    }
   }
   return undefined;
 };

@@ -51,7 +51,9 @@ export class RemotePages {
     remote: RemoteContainer
   ): Promise<PageMap | undefined> {
     const pageMap = await remote.getPageMap();
-    if (!pageMap) return undefined;
+    if (!pageMap) {
+      return undefined;
+    }
 
     // init once page map from remote if it wasn't done before
     // here we updating real routes received from remote app in runtime

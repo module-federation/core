@@ -124,18 +124,10 @@ export class UrlNode {
         previousSlug: string | null,
         nextSlug: string
       ) {
-        if (previousSlug !== null) {
-          // If the specific segment already has a slug but the slug is not `something`
-          // This prevents collisions like:
-          // pages/[post]/index.ts
-          // pages/[id]/index.ts
-          // Because currently multiple dynamic params on the same segment level are not supported
-          if (previousSlug !== nextSlug) {
-            // TODO: This error seems to be confusing for users, needs an error link, the description can be based on above comment.
-            throw new Error(
-              `You cannot use different slug names for the same dynamic path ('${previousSlug}' !== '${nextSlug}').`
-            );
-          }
+        if (previousSlug !== null && previousSlug !== nextSlug) {
+              throw new Error(
+                `You cannot use different slug names for the same dynamic path ('${previousSlug}' !== '${nextSlug}').`
+              );
         }
 
         slugNames.forEach((slug) => {

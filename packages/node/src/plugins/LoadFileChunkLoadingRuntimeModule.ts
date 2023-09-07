@@ -106,7 +106,9 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     const { webpack } = this.chunkLoadingContext;
     const { chunkGraph, chunk, compilation } = this;
 
-    if (!chunkGraph || !chunk || !compilation) return '';
+    if (!chunkGraph || !chunk || !compilation) {
+      return '';
+    }
 
     const { runtimeTemplate } = compilation;
 
@@ -114,18 +116,22 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       webpack?.javascript.JavascriptModulesPlugin ||
       require('webpack/lib/javascript/JavascriptModulesPlugin');
 
-    const chunkHasJs = jsModulePlugin.chunkHasJs;
+    const {chunkHasJs} = jsModulePlugin;
 
     // workaround for next.js
     const getInitialChunkIds = (chunk: Chunk, chunkGraph: ChunkGraph) => {
       const initialChunkIds = new Set(chunk.ids);
       for (const c of chunk.getAllInitialChunks()) {
-        if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
+        if (c === chunk || chunkHasJs(c, chunkGraph)) {
+          continue;
+        }
         if (c.ids) {
           for (const id of c.ids) initialChunkIds.add(id);
         }
         for (const c of chunk.getAllAsyncChunks()) {
-          if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
+          if (c === chunk || chunkHasJs(c, chunkGraph)) {
+            continue;
+          }
           if (c.ids) {
             for (const id of c.ids) initialChunkIds.add(id);
           }
