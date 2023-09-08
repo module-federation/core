@@ -1,9 +1,3 @@
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-*/
-
-"use strict";
-
 import { RuntimeGlobals, RuntimeModule, Template, javascript } from "webpack";
 import { getUndoPath } from 'webpack/lib/util/identifier';
 
@@ -18,7 +12,17 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
    */
   generate() {
     const { compilation } = this;
-    const { scriptType, path } = compilation.outputOptions;
+    const { scriptType, path, publicPath } = compilation.outputOptions;
+
+    // If publicPath is not "auto", return the static value
+    if (publicPath !== "auto") {
+      return `${RuntimeGlobals.publicPath} = ${JSON.stringify(
+        compilation.getPath(publicPath || "", {
+          hash: compilation.hash || "XXXX"
+        })
+      )};`;
+    }
+
     const chunkName = compilation.getPath(
       javascript.JavascriptModulesPlugin.getChunkFilenameTemplate(
         this.chunk,

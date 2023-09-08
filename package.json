@@ -17,8 +17,8 @@
   "license": "MIT",
   "scripts": {
     "nx": "nx",
-    "debug:node:remote": "nx run-many --target=serve --projects=node-remote",
-    "debug:node:host": "nx run-many --target=serve --projects=node-host",
+    "debug:node:remote": "nx run node-remote:serve:development",
+    "debug:node:host": "nx run node-host:serve:development",
     "gpt:file:example": "npm run gpt:file --file ./gpt/services/openai.js --file ./gpt/commit.js --file ./gpt/file.js --question \"Fix all JSDoc issues, dont modify any other aspectf of these files besides JSDOC\"",
     "gpt:commit": "node ./gpt --commit",
     "sync": "rsync -av --delete /Users/bytedance/dev/universe/dist/packages/ /Users/bytedance/dev/module-federation-examples/nextjs-ssr/node_modules/@module-federation/",
