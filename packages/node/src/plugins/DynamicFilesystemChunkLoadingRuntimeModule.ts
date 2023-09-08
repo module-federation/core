@@ -122,7 +122,7 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
     const jsModulePlugin =
       webpack?.javascript?.JavascriptModulesPlugin ||
       require('webpack/lib/javascript/JavascriptModulesPlugin');
-    const chunkHasJs = jsModulePlugin.chunkHasJs;
+    const {chunkHasJs} = jsModulePlugin;
     const fn = RuntimeGlobals.ensureChunkHandlers;
 
     const conditionMap = chunkGraph.getChunkConditionMap(chunk, chunkHasJs);

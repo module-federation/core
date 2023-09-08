@@ -48,10 +48,9 @@ const Shop = (props) => {
 
 Shop.getInitialProps = async () => {
   try {
-    const swapi = await fetch('https://swapi.dev/api/people/1').then((res) =>
-      res.json()
-    );
-    return swapi;
+    return await fetch('https://swapi.dev/api/people/1').then((res) =>
+          res.json()
+        );
   } catch (e) {
     return {
       apiFail: true,
