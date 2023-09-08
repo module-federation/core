@@ -3,6 +3,7 @@ import {
   RemoteVars,
   RuntimeRemote,
   RuntimeRemotesMap,
+  WebpackRemoteContainer,
 } from '../types/index';
 
 let pure = {} as RemoteVars;
