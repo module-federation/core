@@ -148,7 +148,7 @@
     "concurrently": "8.2.1",
     "cz-conventional-changelog": "3.3.0",
     "directory-tree": "3.5.1",
-    "esbuild": "^0.17.17",
+    "esbuild": "0.19.2",
     "eslint": "8.48.0",
     "eslint-config-next": "13.4.19",
     "eslint-config-prettier": "9.0.0",
