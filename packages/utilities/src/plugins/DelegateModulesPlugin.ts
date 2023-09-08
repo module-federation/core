@@ -10,7 +10,7 @@ class DelegateModulesPlugin {
   }
 
   getChunkByName(chunks: Iterable<Chunk>, name: string): Chunk | undefined {
-    for (let chunk of chunks) {
+    for (const chunk of chunks) {
       if (chunk.name === name) {
         return chunk;
       }
@@ -22,7 +22,7 @@ class DelegateModulesPlugin {
     compilation: Compilation,
     chunks: Iterable<Chunk>
   ): void {
-    for (let chunk of chunks) {
+    for (const chunk of chunks) {
       this._delegateModules.forEach(module => {
         this.addModuleAndDependenciesToChunk(module, chunk, compilation);
       });
@@ -63,7 +63,7 @@ class DelegateModulesPlugin {
     compilation: Compilation,
     chunks: Iterable<Chunk>
   ): void {
-    for (let chunk of chunks) {
+    for (const chunk of chunks) {
       if (!chunk.hasRuntime()) {
         this.options.debug &&
           console.log(

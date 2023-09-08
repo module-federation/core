@@ -29,6 +29,9 @@ function createMockCompiler(): any {
       name: 'test-compiler',
     },
     hooks: {
+        thisCompilation: {
+          tap: jest.fn(),
+        },
       compilation: {
         tap: jest.fn(),
       },
@@ -82,7 +85,7 @@ describe('DelegateModulesPlugin', () => {
 
     plugin.apply(compiler);
 
-    expect(compiler.hooks.compilation.tap).toHaveBeenCalledWith(
+    expect(compiler.hooks.thisCompilation.tap).toHaveBeenCalledWith(
       'DelegateModulesPlugin',
       expect.any(Function)
     );
@@ -104,7 +107,7 @@ describe('DelegateModulesPlugin', () => {
     plugin.apply(compiler);
 
     // Call the compilation tap function
-    (compiler.hooks.compilation.tap as jest.Mock).mock.calls[0][1](compilation);
+    (compiler.hooks.thisCompilation.tap as jest.Mock).mock.calls[0][1](compilation);
 
     // Call the finishModules tap function
     (compilation.hooks.finishModules.tapAsync as jest.Mock).mock.calls[0][1](
@@ -128,7 +131,7 @@ describe('DelegateModulesPlugin', () => {
 
     // Check if connectChunkAndModule was called
     expect(compilation.chunkGraph.connectChunkAndModule).toHaveBeenCalledTimes(
-      4
+      8
     );
 
     // Check if disconnectChunkAndModule was called
