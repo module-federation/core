@@ -47,7 +47,9 @@ class InvertedContainerPlugin {
     const container = compilation.entrypoints
       .get(this.options.container as string)
       ?.getRuntimeChunk?.();
-    if (!container) return undefined;
+    if (!container) {
+      return undefined;
+    }
     const entrymodule =
       compilation.chunkGraph.getChunkEntryModulesIterable(container);
     for (const module of entrymodule) {
@@ -76,7 +78,9 @@ class InvertedContainerPlugin {
         // Define a handler function to be called for each chunk in the compilation.
         const handler = (chunk: Chunk, set: Set<string>) => {
           // If the chunk has already been processed, skip it.
-          if (onceForChunkSet.has(chunk)) return;
+          if (onceForChunkSet.has(chunk)) {
+            return;
+          }
           set.add(RuntimeGlobals.onChunksLoaded);
 
           // Mark the chunk as processed by adding it to the WeakSet.
@@ -106,7 +110,9 @@ class InvertedContainerPlugin {
             const containerEntryModule =
               this.resolveContainerModule(compilation);
 
-            if (!containerEntryModule) return;
+            if (!containerEntryModule) {
+              return;
+            }
             for (const chunk of chunks) {
               if (
                 !compilation.chunkGraph.isModuleInChunk(
@@ -191,10 +197,7 @@ class InvertedContainerPlugin {
             }
 
             const firstHalf = replaceSource.slice(0, originalExec + 1);
-            const secondHalf = replaceSource.slice(
-              originalExec + 1,
-              replaceSource.length
-            );
+            const secondHalf = replaceSource.slice(originalExec + 1);
 
             const originalRuntimeCode = firstHalf
               .join('\n')

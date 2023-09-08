@@ -209,8 +209,7 @@ export class MFClient {
           // do nothing, load original entrypoint
         }
       }
-      const routeInfo = await routeLoader._whenEntrypointOriginal(route);
-      return routeInfo;
+      return await routeLoader._whenEntrypointOriginal(route);
     };
   }
 }

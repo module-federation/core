@@ -41,11 +41,15 @@ class CommonJsChunkLoadingPlugin {
         const onceForChunkSet = new WeakSet();
 
         const handler = (chunk: Chunk, set: Set<string>) => {
-          if (onceForChunkSet.has(chunk)) return;
+          if (onceForChunkSet.has(chunk)) {
+            return;
+          }
 
           onceForChunkSet.add(chunk);
 
-          if (!isEnabledForChunk(chunk)) return;
+          if (!isEnabledForChunk(chunk)) {
+            return;
+          }
 
           set.add(RuntimeGlobals.moduleFactoriesAddOnly);
           set.add(RuntimeGlobals.hasOwnProperty);
@@ -85,14 +89,18 @@ class CommonJsChunkLoadingPlugin {
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.ensureChunkHandlers)
           .tap('CommonJsChunkLoadingPlugin', (chunk, set) => {
-            if (!isEnabledForChunk(chunk)) return;
+            if (!isEnabledForChunk(chunk)) {
+              return;
+            }
             set.add(RuntimeGlobals.getChunkScriptFilename);
           });
 
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadUpdateHandlers)
           .tap('CommonJsChunkLoadingPlugin', (chunk, set) => {
-            if (!isEnabledForChunk(chunk)) return;
+            if (!isEnabledForChunk(chunk)) {
+              return;
+            }
             set.add(RuntimeGlobals.getChunkUpdateScriptFilename);
             set.add(RuntimeGlobals.moduleCache);
             set.add(RuntimeGlobals.hmrModuleData);
@@ -102,7 +110,9 @@ class CommonJsChunkLoadingPlugin {
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadManifest)
           .tap('CommonJsChunkLoadingPlugin', (chunk, set) => {
-            if (!isEnabledForChunk(chunk)) return;
+            if (!isEnabledForChunk(chunk)) {
+              return;
+            }
             set.add(RuntimeGlobals.getUpdateManifestFilename);
           });
       }
