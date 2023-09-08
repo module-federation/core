@@ -1,4 +1,4 @@
-const { RuntimeModule, RuntimeGlobals, Template } = require('webpack');
+const { RuntimeModule, Template } = require('webpack');
 import {
   fileSystemRunInContextStrategy,
   httpEvalStrategy,
