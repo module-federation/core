@@ -1,8 +1,7 @@
 'use strict';
 
-const { RuntimeGlobals } = require('webpack');
-const { RuntimeModule } = require('webpack');
-const { Template } = require('webpack');
+import { RuntimeGlobals, RuntimeModule } from 'webpack';
+import { Template } from 'webpack';
 
 class FederationModuleInfoRuntimeModule extends RuntimeModule {
   constructor() {
@@ -13,7 +12,7 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
    * @returns {string} runtime code
    */
   // eslint-disable-next-line max-lines-per-function
-  generate() {
+  override generate() {
     return Template.asString([
       `${RuntimeGlobals.require}.federation = {`,
       Template.indent([`cache: {},`, `remotes: {},`, `moduleInfo: {},`]),
