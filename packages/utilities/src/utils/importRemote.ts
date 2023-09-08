@@ -2,10 +2,24 @@ import type {
   WebpackRemoteContainer,
   WebpackRequire,
   WebpackShareScopes,
-} from '../types';
+  RemoteData,
+} from '../types/index';
 
+/**
+ * Type definition for RemoteUrl
+ * @typedef {string | function} RemoteUrl
+ */
 type RemoteUrl = string | (() => Promise<string>);
 
+/**
+ * Interface for ImportRemoteOptions
+ * @interface
+ * @property {RemoteUrl} url - The url of the remote module
+ * @property {string} scope - The scope of the remote module
+ * @property {string} module - The module to import
+ * @property {string} [remoteEntryFileName] - The filename of the remote entry
+ * @property {boolean} [bustRemoteEntryCache] - Flag to bust the remote entry cache
+ */
 export interface ImportRemoteOptions {
   url: RemoteUrl;
   scope: string;
@@ -14,8 +28,20 @@ export interface ImportRemoteOptions {
   bustRemoteEntryCache?: boolean;
 }
 
+/**
+ * Constant for remote entry file
+ * @constant {string}
+ */
 const REMOTE_ENTRY_FILE = 'remoteEntry.js';
 
+/**
+ * Function to load remote
+ * @function
+ * @param {ImportRemoteOptions['url']} url - The url of the remote module
+ * @param {ImportRemoteOptions['scope']} scope - The scope of the remote module
+ * @param {ImportRemoteOptions['bustRemoteEntryCache']} bustRemoteEntryCache - Flag to bust the remote entry cache
+ * @returns {Promise<void>} A promise that resolves when the remote is loaded
+ */
 const loadRemote = (
   url: ImportRemoteOptions['url'],
   scope: ImportRemoteOptions['scope'],
@@ -41,6 +67,11 @@ const loadRemote = (
     );
   });
 
+/**
+ * Function to initialize sharing
+ * @async
+ * @function
+ */
 const initSharing = async () => {
   const webpackShareScopes =
     __webpack_share_scopes__ as unknown as WebpackShareScopes;
@@ -49,14 +80,19 @@ const initSharing = async () => {
   }
 };
 
-// __initialized and __initializing flags prevent some concurrent re-initialization corner cases
+/**
+ * Function to initialize container
+ * @async
+ * @function
+ * @param {WebpackRemoteContainer} containerScope - The container scope
+ */
 const initContainer = async (containerScope: any) => {
   try {
     const webpackShareScopes =
       __webpack_share_scopes__ as unknown as WebpackShareScopes;
     if (!containerScope.__initialized && !containerScope.__initializing) {
       containerScope.__initializing = true;
-      await containerScope.init(webpackShareScopes.default);
+      await containerScope.init(webpackShareScopes.default as any);
       containerScope.__initialized = true;
       delete containerScope.__initializing;
     }
@@ -65,10 +101,13 @@ const initContainer = async (containerScope: any) => {
   }
 };
 
-/*
-    Dynamically import a remote module using Webpack's loading mechanism:
-    https://webpack.js.org/concepts/module-federation/
-  */
+/**
+ * Function to import remote
+ * @async
+ * @function
+ * @param {ImportRemoteOptions} options - The options for importing the remote
+ * @returns {Promise<T>} A promise that resolves with the imported module
+ */
 export const importRemote = async <T>({
   url,
   scope,
@@ -78,7 +117,7 @@ export const importRemote = async <T>({
 }: ImportRemoteOptions): Promise<T> => {
   const remoteScope = scope as unknown as number;
   if (!window[remoteScope]) {
-    let remoteUrl = '';
+    let remoteUrl: RemoteData['url'] = '';
 
     if (typeof url === 'string') {
       remoteUrl = url;
@@ -102,7 +141,7 @@ export const importRemote = async <T>({
     }
     // Initialize the container to get shared modules and get the module factory:
     const [, moduleFactory] = await Promise.all([
-      initContainer(window[remoteScope]),
+      initContainer(window[remoteScope] as any),
       (window[remoteScope] as unknown as WebpackRemoteContainer).get(
         module === '.' || module.startsWith('./') ? module : `./${module}`
       ),
@@ -115,3 +154,4 @@ export const importRemote = async <T>({
     return moduleFactory();
   }
 };
+
