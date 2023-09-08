@@ -6,13 +6,7 @@ import {
   WebpackRemoteContainer,
 } from '../types/index';
 
-let pure = {} as RemoteVars;
-try {
-  // @ts-ignore
-  pure = process.env['REMOTES'] || {};
-} catch (e) {
-  // not in webpack bundle
-}
+const pure = typeof process !== 'undefined' ? process.env['REMOTES'] || {} : {};
 export const remoteVars = pure as RemoteVars;
 
 export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
@@ -23,15 +17,12 @@ export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
   return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
 };
 
-export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
+export const loadScript = async (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
 
   // 1) Load remote container if needed
   let asyncContainer: RuntimeRemote['asyncContainer'];
-  const reference =
-    typeof keyOrRuntimeRemoteItem === 'string'
-      ? runtimeRemotes[keyOrRuntimeRemoteItem]
-      : keyOrRuntimeRemoteItem;
+  const reference = typeof keyOrRuntimeRemoteItem === 'string' ? runtimeRemotes[keyOrRuntimeRemoteItem] : keyOrRuntimeRemoteItem;
 
   if (reference.asyncContainer) {
     asyncContainer =
