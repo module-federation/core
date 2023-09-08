@@ -47,13 +47,11 @@ export function exposeNextjsPages(cwd: string) {
     pageModulesMap['./' + sanitizePagePath(page)] = `./${page}`;
   });
 
-  const exposesWithPageMap = {
-    './pages-map': `${__filename}!${__filename}`,
-    './pages-map-v2': `${__filename}?v2!${__filename}`,
-    ...pageModulesMap,
-  };
-
-  return exposesWithPageMap;
+  return {
+      './pages-map': `${__filename}!${__filename}`,
+      './pages-map-v2': `${__filename}?v2!${__filename}`,
+      ...pageModulesMap,
+    };
 }
 
 function getNextPagesRoot(appRoot: string) {

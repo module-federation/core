@@ -109,7 +109,10 @@ class DelegateModulesPlugin {
           (chunks) => {
             const { runtime, container } = this.options;
             const runtimeChunk = this.getChunkByName(chunks, runtime);
-            if (!runtimeChunk || !runtimeChunk.hasRuntime()) return;
+            if (!runtimeChunk || !runtimeChunk.hasRuntime()) {
+              return;
+            }
+            // Get the container chunk if specified
             const remoteContainer = container
               ? this.getChunkByName(chunks, container)
               : null;

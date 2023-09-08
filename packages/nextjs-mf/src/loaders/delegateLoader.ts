@@ -15,24 +15,17 @@ export default function patchDefaultSharedLoader(
     if (query) {
       const queries = [];
       for (const [key, value] of new URLSearchParams(query).entries()) {
-        queries.push(`${key}=${value}`);
+        queries.push(`${key}=${encodeURIComponent(value)}`);
       }
-      const delegatePath = this.utils.contextify(
+      return this.utils.contextify(
         this.context,
         this.utils.absolutify(this._compiler?.context || '', request) +
           '?' +
           queries.join('&')
       );
-      return delegatePath;
-    } else {
-      const delegatePath = this.utils.contextify(
-        this.context,
-        this.utils.absolutify(this._compiler?.context || '', request)
-      );
-      return delegatePath;
     }
+    return request;
   });
-
   if (content.includes('hasDelegateMarkers')) {
     return content;
   }
