@@ -18,7 +18,7 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
    */
   generate() {
     const { compilation } = this;
-    const { scriptType, importMetaName, path } = compilation.outputOptions;
+    const { scriptType, path } = compilation.outputOptions;
     const chunkName = compilation.getPath(
       javascript.JavascriptModulesPlugin.getChunkFilenameTemplate(
         this.chunk,
