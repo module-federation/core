@@ -17,7 +17,7 @@ export const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
   return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
 };
 
-export const loadScript = async (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
+export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
 
   // 1) Load remote container if needed
