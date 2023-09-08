@@ -10,7 +10,7 @@ if (!globalThis.usedChunks) {
  * @type {Set}
  */
 // @ts-ignore
-export const usedChunks = globalThis.usedChunks;
+export const {usedChunks} = globalThis;
 /**
  * Load hostStats from the JSON file.
  * @returns {object} hostStats - An object containing host stats data.

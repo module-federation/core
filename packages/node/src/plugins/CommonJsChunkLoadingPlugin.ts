@@ -42,7 +42,9 @@ class CommonJsChunkLoadingPlugin {
         const onceForChunkSet = new WeakSet();
 
         const handler = (chunk: Chunk, set: Set<string>) => {
-          if (onceForChunkSet.has(chunk)) return;
+          if (onceForChunkSet.has(chunk)) {
+            return;
+          }
 
           onceForChunkSet.add(chunk);
           if (!isEnabledForChunk(chunk)) {

@@ -59,7 +59,9 @@ export class NextFederationPlugin {
   apply(compiler: Compiler) {
     // Validate the compiler options
     const validCompile = validateCompilerOptions(compiler);
-    if (!validCompile) return;
+    if (!validCompile) {
+      return;
+    }
     // Validate the NextFederationPlugin options
     validatePluginOptions(this._options);
 

@@ -60,13 +60,17 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
   private resolveContainerModule() {
     const { compilation } = this;
-    if (!compilation) return;
+    if (!compilation) {
+      return;
+    }
     const { chunkGraph, entrypoints } = compilation;
 
     const container = entrypoints
       .get(this.options.container as string)
       ?.getRuntimeChunk?.();
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     const entryModules = chunkGraph.getChunkEntryModulesIterable(container);
 
@@ -80,7 +84,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
   }
 
   private mapShared(): string {
-    if (!this.compilation) return '';
+    if (!this.compilation) {
+      return '';
+    }
 
     const {
       runtimeTemplate,
@@ -141,7 +147,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
     for (const entrypointModule of entrypoints.values()) {
       const entrypoint = entrypointModule.getEntrypointChunk();
-      if (entrypoint.hasRuntime()) continue;
+      if (entrypoint.hasRuntime()) {
+        continue;
+      }
 
       // for (const entryChunks of entrypoint.getAllInitialChunks()) {}
       // @ts-ignore
@@ -151,7 +159,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           chunk,
           'consume-shared'
         );
-        if (!modules) continue;
+        if (!modules) {
+          continue;
+        }
 
         //@ts-ignore
         //  addModules(modules, chunk, (chunkToModuleMapping[chunk.id] = []));
@@ -163,7 +173,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           chunk,
           'consume-shared'
         );
-        if (!modules) continue;
+        if (!modules) {
+          continue;
+        }
         // @ts-ignore
         addModules(modules, chunk, (chunkToModuleMapping[chunk.id] = []));
         //@ts-ignore
@@ -482,7 +494,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
   }
 
   private mapChunks(): string {
-    if (!this.compilation || !this.chunkGraph) return '';
+    if (!this.compilation || !this.chunkGraph) {
+      return '';
+    }
     const { chunkGraph, compilation } = this;
     const { runtimeTemplate, moduleGraph, entrypoints, compiler } = compilation;
     const { RuntimeGlobals, Template } = compiler.webpack;
@@ -493,7 +507,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
     for (const entrypointModule of entrypoints.values()) {
       const entrypoint = entrypointModule.getEntrypointChunk();
-      if (entrypoint.hasRuntime()) continue;
+      if (entrypoint.hasRuntime()) {
+        continue;
+      }
 
       for (const chunk of entrypoint.getAllInitialChunks()) {
         const modules = chunkGraph.getChunkModulesIterableBySourceType(
@@ -501,9 +517,13 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           'remote'
         ) as Module[];
 
-        if (!modules) continue;
+        if (!modules) {
+          continue;
+        }
         const _id = chunk.id ?? chunk.name;
-        if (!_id) continue;
+        if (!_id) {
+          continue;
+        }
 
         const remotes: (string | number)[] = (chunkToRemotesMapping[_id] = []);
 
@@ -516,14 +536,18 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           const name = module.internalRequest;
 
           const id = chunkGraph.getModuleId(module);
-          const shareScope = module.shareScope;
+          const {shareScope} = module;
           const dep = module.dependencies[0];
           const externalModule = moduleGraph.getModule(dep);
 
-          if (!externalModule) continue;
+          if (!externalModule) {
+            continue;
+          }
           const externalModuleId =
             externalModule && chunkGraph.getModuleId(externalModule);
-          if (!externalModuleId) continue;
+          if (!externalModuleId) {
+            continue;
+          }
 
           remotes.push(id);
           idToExternalAndNameMapping[id] = [shareScope, name, externalModuleId];
@@ -633,9 +657,11 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
    * @returns {string} runtime code
    */
   override generate() {
-    if (!this.compilation || !this.chunk || !this.chunkGraph) return '';
+    if (!this.compilation || !this.chunk || !this.chunkGraph) {
+      return '';
+    }
 
-    const compilation = this.compilation;
+    const {compilation} = this;
 
     const { name } = this.options;
     const { chunkGraph, chunk } = this;

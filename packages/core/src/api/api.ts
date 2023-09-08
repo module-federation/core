@@ -45,16 +45,22 @@ export async function getModule<T>({
   modulePath,
   exportName,
 }: GetModuleOptions): Promise<T | void> {
-  if (!remoteContainer) return;
+  if (!remoteContainer) {
+    return;
+  }
 
   try {
     const modFactory = await remoteContainer?.get(modulePath);
 
-    if (!modFactory) return undefined;
+    if (!modFactory) {
+      return undefined;
+    }
 
     const mod = modFactory() as Record<string, T>;
 
-    if (!exportName) return mod as T;
+    if (!exportName) {
+      return mod as T;
+    }
 
     if (mod && typeof mod === 'object') {
       return mod[exportName] as T;
@@ -71,7 +77,9 @@ export async function getModules({
   remoteContainer,
   modulePaths,
 }: GetModulesOptions): Promise<unknown[] | void> {
-  if (!remoteContainer) return;
+  if (!remoteContainer) {
+    return;
+  }
 
   try {
     const moduleFactories = await Promise.all(

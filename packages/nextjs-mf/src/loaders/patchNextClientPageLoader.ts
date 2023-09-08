@@ -21,30 +21,28 @@ export default function patchNextClientPageLoader(
     path.resolve(__dirname, '../../client/MFClient.js')
   );
 
-  const patchedContent = content.replace(
-    'exports.default = PageLoader;',
-    `
-      const MFClient = require(${JSON.stringify(pathMFClient)}).MFClient;
+  return content.replace(
+      'exports.default = PageLoader;',
+      `
+        const MFClient = require(${JSON.stringify(pathMFClient)}).MFClient;
 
-      class PageLoaderExtended extends PageLoader {
-        constructor(buildId, assetPrefix) {
-          super(buildId, assetPrefix);
-          global.mf_client = new MFClient(this, { mode: process.env.NODE_ENV });
+        class PageLoaderExtended extends PageLoader {
+          constructor(buildId, assetPrefix) {
+            super(buildId, assetPrefix);
+            global.mf_client = new MFClient(this, { mode: process.env.NODE_ENV });
+          }
+
+          _getPageListOriginal() {
+            return super.getPageList();
+          }
+
+          getPageList() {
+            return global.mf_client.getPageList();
+          }
         }
-
-        _getPageListOriginal() {
-          return super.getPageList();
-        }
-
-        getPageList() {
-          return global.mf_client.getPageList();
-        }
-      }
-      exports.default = PageLoaderExtended;
-    `
-  );
-
-  return patchedContent;
+        exports.default = PageLoaderExtended;
+      `
+    );
 }
 
 // module.exports = patchNextClientPageLoader;

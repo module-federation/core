@@ -28,7 +28,8 @@ export async function fixImageLoader(
   this.cacheable(true);
 
   const isServer = this._compiler?.options.name !== 'client';
-  const publicPath = this._compiler?.webpack.RuntimeGlobals.publicPath;
+  //@ts-ignore
+  const {publicPath} = this._compiler?.webpack.RuntimeGlobals;
 
   const result = await this.importModule(
     `${this.resourcePath}.webpack[javascript/auto]!=!${remaining}`
