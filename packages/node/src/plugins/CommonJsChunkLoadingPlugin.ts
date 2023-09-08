@@ -131,22 +131,14 @@ class CommonJsChunkLoadingPlugin {
                 ? entryOptions.publicPath
                 : globalPublicPath;
 
-            if (publicPath === "auto") {
-              const module = new AutoPublicPathRuntimeModule(this.options);
-              if (scriptType !== "module") set.add(RuntimeGlobals.global);
-              compilation.addRuntimeModule(chunk, module);
-            } else {
-              const module = new AutoPublicPathRuntimeModule(this.options);
-
-              if (
-                typeof publicPath !== "string" ||
-                /\[(full)?hash\]/.test(publicPath)
-              ) {
-                module.fullHash = true;
-              }
-
-              compilation.addRuntimeModule(chunk, module);
+            const module = new AutoPublicPathRuntimeModule(this.options);
+            if (publicPath === "auto" && scriptType !== "module") {
+              set.add(RuntimeGlobals.global);
+            } else if (typeof publicPath !== "string" || /\[(full)?hash\]/.test(publicPath)) {
+              module.fullHash = true;
             }
+
+            compilation.addRuntimeModule(chunk, module);
             return true;
           });
 
