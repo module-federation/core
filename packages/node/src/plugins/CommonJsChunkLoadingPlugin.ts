@@ -136,7 +136,7 @@ class CommonJsChunkLoadingPlugin {
               if (scriptType !== "module") set.add(RuntimeGlobals.global);
               compilation.addRuntimeModule(chunk, module);
             } else {
-              const module = new PublicPathRuntimeModule(publicPath);
+              const module = new AutoPublicPathRuntimeModule(this.options);
 
               if (
                 typeof publicPath !== "string" ||

@@ -89,10 +89,13 @@ export async function httpVmStrategy(chunkName, remoteName, remotes, callback) {
 
   console.log('httpvmstrategy',__webpack_require__.p, chunkName,remotes[remoteName])
   try {
+    console.log('trying chunk load', chunkName, __webpack_require__.p);
     url = new URL(chunkName, __webpack_require__.p);
   } catch(e) {
     console.error('module-federation: failed to construct absolute chunk path of',remoteName,'for',chunkName, e);
- url = new URL(remotes[remoteName]);
+ console.log('fallbak url constructed', remotes._config[remoteName])
+
+ url = new URL(remotes._config[remoteName]);
     var fileToReplace = require('path').basename(url.pathname);
     url.pathname = url.pathname.replace(fileToReplace, chunkName);
   }
