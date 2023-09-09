@@ -195,14 +195,14 @@ class GitDiffStagedTool extends GitTool {
     const message = this.runGitCommand(`diff ${path.resolve(args.input)}`);
     console.log(message)
     const diff = getDiff();
-    if (diff === undefined) {
-      console.log('No meaningful changes in git diff. Aborting agent.');
-      const abortController = new AbortController();
-      abortController.abort(); // trigger the abort signal
-      return 'Final Answer: No meaningful changes in git diff. Aborting agent.'
-    }
+    // if (diff === undefined) {
+    //   console.log('No meaningful changes in git diff. Aborting agent.');
+    //   const abortController = new AbortController();
+    //   abortController.abort(); // trigger the abort signal
+    //   return 'Final Answer: No meaningful changes in git diff. Aborting agent.'
+    // }
     console.log('running diff')
-    return diff
+    return message
   }
 
   description = `Get the diff of staged changes.`;
@@ -495,7 +495,7 @@ async function recursiveAgent(input) {
       new GitStagedFilesTool({repoPath: process.cwd()}),
       // new GitTools.GitDiffTool({repoPath: process.cwd()}),
     //   new GitTools.GitNewBranchTool({repoPath: process.cwd()}),
-      new GitTools.GitPullTool({repoPath: process.cwd()}),
+      new GitPullTool({repoPath: process.cwd()}),
     //   new GitTools.GitPushTool({repoPath: process.cwd()}),
     //   new GitTools.GitStatusTool({repoPath: process.cwd()}),
     ];
