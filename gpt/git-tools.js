@@ -14,7 +14,7 @@ const path = require('path')
 const formatInstructions = (
   toolNames
 ) => `
-  Use the following format in your response, you must respond with a commit title, body, and footer. Include detailed changed in each file:
+  Use the following format in your response, you must respond with a commit title, body. If there is no meaningful change, then you should not commit anything.
 
   Question: the input question you must answer
   Thought: you should always think about what to do
@@ -45,11 +45,19 @@ class GitCommitPromptTemplate extends BaseStringPromptTemplate {
     const fileName = file.match(/(?<=diff --git a\/).*?(?= b\/)/)
     console.log('fileName', fileName?.[0] || file);
     console.log(file.length)
+
+    console.log(file)
   
+    if(!fileName?.[0]) {
+      console.log('no filename', fileName)
+      return ''
+    }
     // recursiveAgent("write commit message for this code change:", file)
     // Use the AI agent to generate a commit message for this file
     // This is a placeholder implementation, replace it with your actual implementation
     const commitMessage = await recursiveAgent("Write commit message for this codechange \n\n" + file);
+
+    console.log({commitMessage})
     return commitMessage;
   }
   async format(input) {
@@ -70,10 +78,10 @@ class GitCommitPromptTemplate extends BaseStringPromptTemplate {
     // console.log(input)
     let files
     if(lastStep) {
-      files = lastStep.observation.split(/(?=diff --git)/);
-      console.log('files',files)
+      files = lastStep.observation.split(/(?<=\n)diff --git a\//);
       files = await Promise.all(files.map(file => this.processFile(file)));
     }
+    
     const agentScratchpad = intermediateSteps.reduce(
       (thoughts, { action, observation }) => {
         const newThought = [action.log, `\nObservation: ${observation}`, "Thought:"].join("\n");
@@ -127,10 +135,9 @@ class GitTool extends Tool {
 function getDiff(maxCharCount = 12000) {
     let maxUFlag = 7;
     let diff = [
-      execSync('git diff --staged --stat').toString(),
+      // execSync('git diff --staged --stat').toString(),
       execSync(`git diff -U${maxUFlag} --staged`).toString(),
     ].join('\n');
-console.log("DIFFFFF", diff)
     while (diff.length > maxCharCount && maxUFlag > 2) {
       maxUFlag--;
       diff = [
@@ -147,6 +154,9 @@ console.log("DIFFFFF", diff)
       );
     }
 
+    if (diff.length < 5) {
+        return undefined;
+    }
     return diff;
   }
 
@@ -180,11 +190,14 @@ class GitDiffStagedTool extends GitTool {
   async _call() {
     console.log('staged diff')
     // const message = this.runGitCommand('diff --cached');
-    const diff = getDiff()
+    const diff = getDiff();
+    if (diff === undefined) {
+      console.log('No meaningful changes in git diff. Aborting agent.');
+      const abortController = new AbortController();
+      abortController.abort(); // trigger the abort signal
+      return;
+    }
     console.log('running diff')
-    console.log("diff",diff)
-     const files = diff.split(/(?=diff --git)/);
-    //  console.log(files[1])
     return diff
   }
 
@@ -466,13 +479,13 @@ class GitDeleteBranchTool extends GitTool {
 }
 
 async function recursiveAgent(input) {
-    const model = new OpenAIChat({ temperature: 0.5, modelName: 'gpt-4', maxTokens: 7000, maxConcurrency: 40 });
+    const model = new OpenAIChat({ temperature: 0.5, modelName: 'gpt-4', maxConcurrency: 40 });
     const tools = [
       new Calculator(),
       new GitAddTool({repoPath: process.cwd()}),
       new GitBranchListTool({repoPath: process.cwd()}),
       new GitCheckoutBranchTool({repoPath: process.cwd()}),
-      new GitCommitTool({repoPath: process.cwd()}),
+      // new GitCommitTool({repoPath: process.cwd()}),
       new GitDeleteBranchTool({repoPath: process.cwd()}),
       new GitDiffStagedTool({repoPath: process.cwd()}),
     //   new GitTools.GitDiffTool({repoPath: process.cwd()}),
@@ -481,6 +494,7 @@ async function recursiveAgent(input) {
     //   new GitTools.GitPushTool({repoPath: process.cwd()}),
     //   new GitTools.GitStatusTool({repoPath: process.cwd()}),
     ];
+    
 
 
 
@@ -510,7 +524,7 @@ async function recursiveAgent(input) {
 
     const inputText = input
 
-    console.log(`Executing with input "${inputText}"...`);
+    console.log(`Executing with input`);
 
     const result = await executor.call({ input: inputText });
 

@@ -12,7 +12,7 @@ class GitCommitOutputParser extends AgentActionOutputParser {
           resolve({ log: text, returnValues: { commitMsg } });
         }
   
-        const match = /Action: (.*)\nAction Input: (.*)/s.exec(text);
+        const match = /Action: (.*)\nAction Input:z (.*)/s.exec(text);
         
         if (!match) reject(new Error(`Could not parse LLM output: ${text}`));
   console.log(text, 'text response')
