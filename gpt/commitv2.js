@@ -13,4 +13,5 @@ const GitTools = require("./git-tools");
 
 
 
-  recursiveAgent("write commit message with a title and body based on staged files git diff, do not commit anything, format the commit message");
+//   recursiveAgent("Summarize each staged file, do this one at a time. After reviewing all the files, write a conventional commit message");
+  recursiveAgent("List the files that have been staged for commit, then pass the files one by one as an input to git_diff_staged");

@@ -11,11 +11,12 @@ class GitCommitOutputParser extends AgentActionOutputParser {
           const commitMsg = parts[parts.length - 1].trim();
           resolve({ log: text, returnValues: { commitMsg } });
         }
-  
-        const match = /Action: (.*)\nAction Input:z (.*)/s.exec(text);
+
         
+  
+        const match = /Action: (.*)\nAction Input: (.*)/s.exec(text);
+
         if (!match) reject(new Error(`Could not parse LLM output: ${text}`));
-  console.log(text, 'text response')
         resolve({
           tool: match[1].trim(),
           toolInput: match[2].trim().replace(/^"+|"+$/g, ""),

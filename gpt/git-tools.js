@@ -19,13 +19,13 @@ const formatInstructions = (
   Question: the input question you must answer
   Thought: you should always think about what to do
   Action: the action to take, should be one of [${toolNames}]
-  Action Input: the input to the action
+  Action Input: the input to the action \n
   Observation: the result of the action
   ... (this Thought/Action/Action Input/Observation can repeat N times)
   Thought: is this relavent to the code being commited?
   Final Answer:
-  Title: [commit title] \n
-  Body: [commit body]
+  [commit title] \n
+  [commit body]
   `;
 const SUFFIX = `Begin!\n\nQuestion: {input}\nThought:{agent_scratchpad}`;
 const PREFIX = `Rules for conventional commit: ${require('fs').readFileSync(path.resolve(__dirname,'./conventional_commit.md'), 'utf8')}`;
@@ -77,10 +77,11 @@ class GitCommitPromptTemplate extends BaseStringPromptTemplate {
 
     // console.log(input)
     let files
-    if(lastStep) {
-      files = lastStep.observation.split(/(?<=\n)diff --git a\//);
-      files = await Promise.all(files.map(file => this.processFile(file)));
-    }
+    // if(lastStep) {
+    //   files = lastStep.observation.split(/(?<=\n)diff --git a\//);
+    //   files = await Promise.all(files.map(file => this.processFile(file)));
+    // }
+
     
     const agentScratchpad = intermediateSteps.reduce(
       (thoughts, { action, observation }) => {
@@ -179,7 +180,9 @@ class GitDiffStagedTool extends GitTool {
   constructor(args) {
     super(args);
     this.name = "git_diff_staged";
-    this.schema = z.object({});
+    this.schema = z.object({
+      input: z.string(),
+    });
   }
 
   /**
@@ -187,15 +190,16 @@ class GitDiffStagedTool extends GitTool {
    * @description Returns the diff of staged changes
    * @returns {string} The diff of staged changes
    */
-  async _call() {
-    console.log('staged diff')
-    // const message = this.runGitCommand('diff --cached');
+  async _call(args) {
+    console.log('staged diff', args)
+    const message = this.runGitCommand(`diff ${path.resolve(args.input)}`);
+    console.log(message)
     const diff = getDiff();
     if (diff === undefined) {
       console.log('No meaningful changes in git diff. Aborting agent.');
       const abortController = new AbortController();
       abortController.abort(); // trigger the abort signal
-      return;
+      return 'Final Answer: No meaningful changes in git diff. Aborting agent.'
     }
     console.log('running diff')
     return diff
@@ -485,12 +489,13 @@ async function recursiveAgent(input) {
       new GitAddTool({repoPath: process.cwd()}),
       new GitBranchListTool({repoPath: process.cwd()}),
       new GitCheckoutBranchTool({repoPath: process.cwd()}),
-      // new GitCommitTool({repoPath: process.cwd()}),
+      new GitCommitTool({repoPath: process.cwd()}),
       new GitDeleteBranchTool({repoPath: process.cwd()}),
       new GitDiffStagedTool({repoPath: process.cwd()}),
-    //   new GitTools.GitDiffTool({repoPath: process.cwd()}),
+      new GitStagedFilesTool({repoPath: process.cwd()}),
+      // new GitTools.GitDiffTool({repoPath: process.cwd()}),
     //   new GitTools.GitNewBranchTool({repoPath: process.cwd()}),
-    //   new GitTools.GitPullTool({repoPath: process.cwd()}),
+      new GitTools.GitPullTool({repoPath: process.cwd()}),
     //   new GitTools.GitPushTool({repoPath: process.cwd()}),
     //   new GitTools.GitStatusTool({repoPath: process.cwd()}),
     ];
