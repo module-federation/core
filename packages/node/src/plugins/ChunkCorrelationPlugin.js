@@ -67,7 +67,7 @@ function getRemoteModules(stats) {
 function getExposedModules(stats, exposedFile) {
   return stats.modules.filter((mod) => mod.name?.startsWith(exposedFile));
 }
-
+//eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getDependenciesOfChunk(stats, chunk) {
   return stats.chunks
     .filter((c) => c.children.includes(chunk.id))

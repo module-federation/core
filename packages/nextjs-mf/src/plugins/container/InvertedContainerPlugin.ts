@@ -6,8 +6,14 @@ import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
 import { RuntimeGlobals, Compilation } from 'webpack';
 import Template from '../../../utils/Template';
 import RemoveEagerModulesFromRuntimePlugin from './RemoveEagerModulesFromRuntimePlugin';
+
 /**
  * This interface includes additional fields specific to the plugin's behavior.
+ * @typedef {Object} InvertedContainerOptions
+ * @property {string} [container] - The container name.
+ * @property {Record<string, string>} remotes - A map of remote modules to their URLs.
+ * @property {string} runtime - The name of the current module.
+ * @property {boolean} [debug] - A flag to enable debug logging.
  */
 interface InvertedContainerOptions extends ModuleFederationPluginOptions {
   container?: string;
@@ -18,6 +24,7 @@ interface InvertedContainerOptions extends ModuleFederationPluginOptions {
 
 /**
  * InvertedContainerPlugin is a Webpack plugin that handles loading of chunks in a federated module.
+ * @class
  */
 class InvertedContainerPlugin {
   private options: InvertedContainerOptions;
@@ -258,3 +265,4 @@ class InvertedContainerPlugin {
 }
 
 export default InvertedContainerPlugin;
+
