@@ -4,7 +4,7 @@ const z = require('zod');
 const {GitCommitOutputParser} = require('./outputs/GitCommitOutputParser')
 const { LLMSingleActionAgent, AgentActionOutputParser, AgentExecutor } = require("langchain/agents");
 const { LLMChain } = require("langchain/chains");
-const { OpenAI } = require("langchain/llms/openai");
+const { OpenAI, OpenAIChat } = require("langchain/llms/openai");
 const { BasePromptTemplate, BaseStringPromptTemplate, SerializedBasePromptTemplate,renderTemplate } = require("langchain/prompts");
 const {  InputValues, PartialValues, AgentStep, AgentAction, AgentFinish } = require("langchain/schema");
 const { Calculator } = require("langchain/tools/calculator");
@@ -41,12 +41,16 @@ class GitCommitPromptTemplate extends BaseStringPromptTemplate {
     return 'prompt'
   }
   async processFile(file) {
-    console.log('process file',file)
+    console.log('process file');
+    const fileName = file.match(/(?<=diff --git a\/).*?(?= b\/)/)
+    console.log('fileName', fileName?.[0] || file);
+    console.log(file.length)
+  
     // recursiveAgent("write commit message for this code change:", file)
     // Use the AI agent to generate a commit message for this file
     // This is a placeholder implementation, replace it with your actual implementation
-    // const commitMessage = await run(file);
-    // return commitMessage;
+    const commitMessage = await recursiveAgent("Write commit message for this codechange \n\n" + file);
+    return commitMessage;
   }
   async format(input) {
     // console.log('DRIVED',input)
@@ -63,15 +67,12 @@ class GitCommitPromptTemplate extends BaseStringPromptTemplate {
     // const files = lastStep.observation.split(/(?=diff --git)/);
     const lastStep = intermediateSteps[intermediateSteps.length - 1];
 
-    console.log(input)
+    // console.log(input)
     let files
     if(lastStep) {
       files = lastStep.observation.split(/(?=diff --git)/);
       console.log('files',files)
-      const commitMessages = await Promise.all(files.map(file => this.processFile(file)));
-
-      const combinedCommitMessage = commitMessages.join("\n\n");
-      // console.log(combinedCommitMessage)
+      files = await Promise.all(files.map(file => this.processFile(file)));
     }
     const agentScratchpad = intermediateSteps.reduce(
       (thoughts, { action, observation }) => {
@@ -81,8 +82,8 @@ class GitCommitPromptTemplate extends BaseStringPromptTemplate {
       ""
     );
 
+
     const newInput = { agent_scratchpad: agentScratchpad, ...input };
-    // console.log({newInput})
 
 
     /** Format the template. */
@@ -465,7 +466,7 @@ class GitDeleteBranchTool extends GitTool {
 }
 
 async function recursiveAgent(input) {
-    const model = new OpenAI({ temperature: 0.5, modelName: 'gpt-4', maxTokens: 7000, maxConcurrency: 3 });
+    const model = new OpenAIChat({ temperature: 0.5, modelName: 'gpt-4', maxTokens: 7000, maxConcurrency: 40 });
     const tools = [
       new Calculator(),
       new GitAddTool({repoPath: process.cwd()}),
