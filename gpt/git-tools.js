@@ -1,4 +1,4 @@
-econst { Tool } = require("langchain/tools");
+const { Tool } = require("langchain/tools");
 const execSync = require("child_process").execSync;
 const z = require('zod');
 const {GitCommitOutputParser} = require('./outputs/GitCommitOutputParser')
@@ -9,7 +9,93 @@ const { BasePromptTemplate, BaseStringPromptTemplate, SerializedBasePromptTempla
 const {  InputValues, PartialValues, AgentStep, AgentAction, AgentFinish } = require("langchain/schema");
 const { Calculator } = require("langchain/tools/calculator");
 const { BufferWindowMemory } = require("langchain/memory");
-const GitCommitPromptTemplate = require("./fir-remplates");
+const path = require('path')
+
+const formatInstructions = (
+  toolNames
+) => `
+  Use the following format in your response, you must respond with a commit title, body, and footer. Include detailed changed in each file:
+
+  Question: the input question you must answer
+  Thought: you should always think about what to do
+  Action: the action to take, should be one of [${toolNames}]
+  Action Input: the input to the action
+  Observation: the result of the action
+  ... (this Thought/Action/Action Input/Observation can repeat N times)
+  Thought: is this relavent to the code being commited?
+  Final Answer:
+  Title: [commit title] \n
+  Body: [commit body]
+  `;
+const SUFFIX = `Begin!\n\nQuestion: {input}\nThought:{agent_scratchpad}`;
+const PREFIX = `Rules for conventional commit: ${require('fs').readFileSync(path.resolve(__dirname,'./conventional_commit.md'), 'utf8')}`;
+
+
+
+class GitCommitPromptTemplate extends BaseStringPromptTemplate {
+  constructor(args) {
+    super({ inputVariables: args.inputVariables });
+    this.tools = args.tools;
+  }
+  _getPromptType() {
+    return 'prompt'
+  }
+  async processFile(file) {
+    console.log('process file',file)
+    // recursiveAgent("write commit message for this code change:", file)
+    // Use the AI agent to generate a commit message for this file
+    // This is a placeholder implementation, replace it with your actual implementation
+    // const commitMessage = await run(file);
+    // return commitMessage;
+  }
+  async format(input) {
+    // console.log('DRIVED',input)
+    /** Construct the final template */
+    const toolStrings = this.tools
+      .map((tool) => `${tool.name}: ${tool.description}`)
+      .join("\n");
+    const toolNames = this.tools.map((tool) => tool.name).join("\n");
+    const instructions = formatInstructions(toolNames);
+    const template = [PREFIX, toolStrings, instructions, SUFFIX].join("\n\n");
+    /** Construct the agent_scratchpad */
+    const intermediateSteps = input.intermediate_steps;
+    // console.log('intermediateSteps',intermediateSteps[0])
+    // const files = lastStep.observation.split(/(?=diff --git)/);
+    const lastStep = intermediateSteps[intermediateSteps.length - 1];
+
+    console.log(input)
+    let files
+    if(lastStep) {
+      files = lastStep.observation.split(/(?=diff --git)/);
+      console.log('files',files)
+      const commitMessages = await Promise.all(files.map(file => this.processFile(file)));
+
+      const combinedCommitMessage = commitMessages.join("\n\n");
+      // console.log(combinedCommitMessage)
+    }
+    const agentScratchpad = intermediateSteps.reduce(
+      (thoughts, { action, observation }) => {
+        const newThought = [action.log, `\nObservation: ${observation}`, "Thought:"].join("\n");
+        return thoughts.includes(newThought) ? thoughts : thoughts + newThought;
+      },
+      ""
+    );
+
+    const newInput = { agent_scratchpad: agentScratchpad, ...input };
+    // console.log({newInput})
+
+
+    /** Format the template. */
+    return Promise.resolve(renderTemplate(template, "f-string", newInput));
+  }
+  partial(_values) {
+    throw new Error("Not implemented");
+  }
+
+  serialize() {
+    throw new Error("Not implemented");
+  }
+}
 
 /**
  * @class
@@ -37,14 +123,13 @@ class GitTool extends Tool {
   }
 }
 
-function getDiff(maxCharCount = 10000) {
+function getDiff(maxCharCount = 12000) {
     let maxUFlag = 7;
-  
     let diff = [
       execSync('git diff --staged --stat').toString(),
       execSync(`git diff -U${maxUFlag} --staged`).toString(),
     ].join('\n');
-  
+console.log("DIFFFFF", diff)
     while (diff.length > maxCharCount && maxUFlag > 2) {
       maxUFlag--;
       diff = [
@@ -60,7 +145,7 @@ function getDiff(maxCharCount = 10000) {
         `(-U flag now ${maxUFlag})`
       );
     }
-  
+
     return diff;
   }
 
@@ -96,6 +181,7 @@ class GitDiffStagedTool extends GitTool {
     // const message = this.runGitCommand('diff --cached');
     const diff = getDiff()
     console.log('running diff')
+    console.log("diff",diff)
      const files = diff.split(/(?=diff --git)/);
     //  console.log(files[1])
     return diff
@@ -396,8 +482,7 @@ async function recursiveAgent(input) {
     ];
 
 
-    console.log(GitCommitPromptTemplate)
-    
+
 
     const llmChain = new LLMChain({
       prompt: new GitCommitPromptTemplate({
@@ -406,29 +491,29 @@ async function recursiveAgent(input) {
       }),
       llm: model,
     });
-  
+
     const agent = new LLMSingleActionAgent({
       llmChain,
       outputParser: new GitCommitOutputParser(),
       stop: ["\nObservation"],
     });
-    
+
     const executor = new AgentExecutor({
       agent,
       tools,
       agentType: "openai-functions",
     });
 
-    
+
     console.log("Loaded agent.");
-    
+
     const inputText = input
-    
+
     console.log(`Executing with input "${inputText}"...`);
-    
+
     const result = await executor.call({ input: inputText });
 
-    
+
     console.log(`Commit message generated: ${result.commitMsg}`);
     return result.commitMsg
   };

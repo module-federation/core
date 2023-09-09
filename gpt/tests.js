@@ -91,7 +91,7 @@ const { commandJoin } = require('command-join');
 const { Calculator } = require("langchain/tools/calculator");
 const {PlanAndExecuteAgentExecutor} = require("langchain/experimental/plan_and_execute");
 
-const GitTools = require("./git")
+const GitTools = require("./git-tools")
 const model = new ChatOpenAI({ modelName:"gpt-4",temperature: 0, verbose: true });
 const tools = [
     new Calculator(),
