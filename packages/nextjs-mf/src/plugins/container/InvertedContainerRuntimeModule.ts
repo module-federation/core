@@ -16,7 +16,7 @@ import {
  * options for the InvertedContainerRuntimeModule class.
  */
 interface InvertedContainerRuntimeModuleOptions {
-  runtime: string;
+  runtime: string; // The runtime environment.
   remotes: Record<string, string>; // A map of remote modules to their URLs.
   name?: string; // The name of the current module.
   debug?: boolean; // A flag to enable verbose logging.
@@ -27,8 +27,8 @@ interface InvertedContainerRuntimeModuleOptions {
  * Interface for ChunkLoadingContext, containing Webpack-related properties.
  */
 interface ChunkLoadingContext {
-  webpack: Compiler['webpack'];
-  debug?: boolean;
+  webpack: Compiler['webpack']; // The Webpack compiler instance.
+  debug?: boolean; // A flag to enable verbose logging.
 }
 
 /**
@@ -36,9 +36,9 @@ interface ChunkLoadingContext {
  * the runtime code needed for loading federated modules in an inverted container.
  */
 class InvertedContainerRuntimeModule extends RuntimeModule {
-  private runtimeRequirements: Set<string>;
-  private options: InvertedContainerRuntimeModuleOptions;
-  private chunkLoadingContext: ChunkLoadingContext;
+  private runtimeRequirements: Set<string>; // A set of runtime requirement strings.
+  private options: InvertedContainerRuntimeModuleOptions; // Runtime module options.
+  private chunkLoadingContext: ChunkLoadingContext; // Chunk loading context.
 
   /**
    * Constructor for the InvertedContainerRuntimeModule.
@@ -58,6 +58,10 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     this.chunkLoadingContext = chunkLoadingContext;
   }
 
+  /**
+   * Resolves the container module.
+   * @returns {Module | undefined} The entry module of the container.
+   */
   private resolveContainerModule() {
     const { compilation } = this;
     if (!compilation) {
@@ -82,7 +86,10 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
     return entryModule;
   }
-
+  /**
+   * This method maps shared modules and generates code for loading them.
+   * @returns {string} The generated code for loading shared modules.
+   */
   private mapShared(): string {
     if (!this.compilation) {
       return '';
@@ -104,10 +111,10 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     const initialConsumes = [];
 
     /**
-     *
-     * @param {Iterable<Module>} modules modules
-     * @param {Chunk} chunk the chunk
-     * @param {(string | number)[]} list list of ids
+     * This function adds shared modules to the list of modules.
+     * @param {Iterable<Module>} modules - The modules to be added.
+     * @param {Chunk} chunk - The chunk containing the modules.
+     * @param {(string | number)[]} list - The list to which the modules are added.
      */
     //@ts-ignore
     const addShared = (modules, chunk, list) => {
@@ -493,6 +500,11 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     ]);
   }
 
+
+  /**
+   * This method maps chunks and generates code for loading them.
+   * @returns {string} The generated code for loading chunks.
+   */
   private mapChunks(): string {
     if (!this.compilation || !this.chunkGraph) {
       return '';
@@ -505,12 +517,14 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       [key: string]: [string, string, number | string];
     } = {};
 
+    // Iterate over all entrypoint modules
     for (const entrypointModule of entrypoints.values()) {
       const entrypoint = entrypointModule.getEntrypointChunk();
       if (entrypoint.hasRuntime()) {
         continue;
       }
 
+      // Iterate over all initial chunks of the entrypoint
       for (const chunk of entrypoint.getAllInitialChunks()) {
         const modules = chunkGraph.getChunkModulesIterableBySourceType(
           chunk,
@@ -527,6 +541,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
         const remotes: (string | number)[] = (chunkToRemotesMapping[_id] = []);
 
+        // Iterate over all modules
         for (const m of modules) {
           const module = m as Module & {
             internalRequest: string;
@@ -555,6 +570,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       }
     }
 
+    // Generate the final code string
     return Template.asString([
       `var remoteMapping = ${JSON.stringify(chunkToRemotesMapping, null, '')};`,
       `var idToExternalAndNameMapping = ${JSON.stringify(
@@ -652,6 +668,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     ]);
   }
 
+  
   /**
    * Generate method for the runtime module, producing the runtime code.
    * @returns {string} runtime code
@@ -808,3 +825,4 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 }
 
 export default InvertedContainerRuntimeModule;
+
