@@ -9,9 +9,9 @@ const { BasePromptTemplate, BaseStringPromptTemplate, SerializedBasePromptTempla
 const {  InputValues, PartialValues, AgentStep, AgentAction, AgentFinish } = require("langchain/schema");
 const { Calculator } = require("langchain/tools/calculator");
 const { BufferWindowMemory } = require("langchain/memory");
-const path = require('path')
-const {GitCommitOutputParser} = require('./outputs/GitCommitOutputParser')
-const { formatInstructions, SUFFIX, PREFIX } = require('./git/instructions')
+const path = require('path');
+const {GitCommitOutputParser} = require('./outputs/GitCommitOutputParser');
+const { formatInstructions, SUFFIX, PREFIX } = require('./git/instructions');
 const { GitTool, GitDiffStagedTool, GitStagedFilesTool, GitDiffTool, GitStatusTool, GitCommitTool, GitAddTool, GitNewBranchTool, GitCheckoutBranchTool, GitPullTool, GitPushTool, GitBranchListTool, GitDeleteBranchTool } = require('./git/tools');
 
 // File: GitCommitPromptTemplate.js
@@ -21,51 +21,25 @@ class GitCommitPromptTemplate extends BaseStringPromptTemplate {
     this.tools = args.tools;
   }
   _getPromptType() {
-    return 'prompt'
+    return 'prompt';
   }
   async processFile(file) {
-    console.log('process file');
-    const fileName = file.match(/(?<=diff --git a\/).*?(?= b\/)/)
-    console.log('fileName', fileName?.[0] || file);
-    console.log(file.length)
-
-    console.log(file)
-  
+    const fileName = file.match(/(?<=diff --git a\/).*?(?= b\/)/);
     if(!fileName?.[0]) {
-      console.log('no filename', fileName)
-      return ''
+      return '';
     }
-    // recursiveAgent("write commit message for this code change:", file)
-    // Use the AI agent to generate a commit message for this file
-    // This is a placeholder implementation, replace it with your actual implementation
     const commitMessage = await recursiveAgent("Write commit message for this codechange \n\n" + file);
-
-    console.log({commitMessage})
     return commitMessage;
   }
   async format(input) {
-    // console.log('DRIVED',input)
-    /** Construct the final template */
     const toolStrings = this.tools
       .map((tool) => `${tool.name}: ${tool.description}`)
       .join("\n");
     const toolNames = this.tools.map((tool) => tool.name).join("\n");
     const instructions = formatInstructions(toolNames);
     const template = [PREFIX, toolStrings, instructions, SUFFIX].join("\n\n");
-    /** Construct the agent_scratchpad */
     const intermediateSteps = input.intermediate_steps;
-    // console.log('intermediateSteps',intermediateSteps[0])
-    // const files = lastStep.observation.split(/(?=diff --git)/);
     const lastStep = intermediateSteps[intermediateSteps.length - 1];
-
-    // console.log(input)
-    let files
-    // if(lastStep) {
-    //   files = lastStep.observation.split(/(?<=\n)diff --git a\//);
-    //   files = await Promise.all(files.map(file => this.processFile(file)));
-    // }
-
-    
     const agentScratchpad = intermediateSteps.reduce(
       (thoughts, { action, observation }) => {
         const newThought = [action.log, `\nObservation: ${observation}`, "Thought:"].join("\n");
@@ -73,18 +47,12 @@ class GitCommitPromptTemplate extends BaseStringPromptTemplate {
       },
       ""
     );
-
-
     const newInput = { agent_scratchpad: agentScratchpad, ...input };
-
-
-    /** Format the template. */
     return Promise.resolve(renderTemplate(template, "f-string", newInput));
   }
   partial(_values) {
     throw new Error("Not implemented");
   }
-
   serialize() {
     throw new Error("Not implemented");
   }
@@ -100,17 +68,8 @@ async function recursiveAgent(input) {
     new GitDeleteBranchTool({repoPath: process.cwd()}),
     new GitDiffStagedTool({repoPath: process.cwd()}),
     new GitStagedFilesTool({repoPath: process.cwd()}),
-    // new GitTools.GitDiffTool({repoPath: process.cwd()}),
-  //   new GitTools.GitNewBranchTool({repoPath: process.cwd()}),
     new GitPullTool({repoPath: process.cwd()}),
-  //   new GitTools.GitPushTool({repoPath: process.cwd()}),
-  //   new GitTools.GitStatusTool({repoPath: process.cwd()}),
   ];
-  
-
-
-
-
   const llmChain = new LLMChain({
     prompt: new GitCommitPromptTemplate({
       tools,
@@ -118,32 +77,19 @@ async function recursiveAgent(input) {
     }),
     llm: model,
   });
-
   const agent = new LLMSingleActionAgent({
     llmChain,
     outputParser: new GitCommitOutputParser(),
     stop: ["\nObservation"],
   });
-
   const executor = new AgentExecutor({
     agent,
     tools,
     agentType: "openai-functions",
   });
-
-
-  console.log("Loaded agent.");
-
-  const inputText = input
-
-  console.log(`Executing with input`);
-
+  const inputText = input;
   const result = await executor.call({ input: inputText });
-
-
-  console.log(`Commit message generated: ${result.commitMsg}`);
-  return result.commitMsg
-};
-
-
+  console.log(result)
+  return result.commitMsg;
+}
 module.exports = { GitCommitPromptTemplate, recursiveAgent };
