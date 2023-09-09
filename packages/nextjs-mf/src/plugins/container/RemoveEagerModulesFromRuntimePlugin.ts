@@ -2,6 +2,7 @@ import { Compiler, Compilation, Chunk, Module } from 'webpack';
 
 /**
  * This plugin removes eager modules from the runtime.
+ * @class RemoveEagerModulesFromRuntimePlugin
  */
 class RemoveEagerModulesFromRuntimePlugin {
   private container: string | undefined;
@@ -9,6 +10,7 @@ class RemoveEagerModulesFromRuntimePlugin {
   private modulesToProcess: Set<Module>;
 
   /**
+   * Creates an instance of RemoveEagerModulesFromRuntimePlugin.
    * @param {Object} options - The options for the plugin.
    * @param {string} options.container - The container to remove modules from.
    * @param {boolean} options.debug - Whether to log debug information.
