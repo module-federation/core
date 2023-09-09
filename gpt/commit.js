@@ -252,6 +252,61 @@ const runGenerativeCommit = async () => {
     }
   );
 };
+async function recursiveAgent(input) {
+  const model = new OpenAIChat({ temperature: 0.5, modelName: 'gpt-4', maxConcurrency: 40 });
+  const tools = [
+    new Calculator(),
+    new GitAddTool({repoPath: process.cwd()}),
+    new GitBranchListTool({repoPath: process.cwd()}),
+    new GitCheckoutBranchTool({repoPath: process.cwd()}),
+    new GitCommitTool({repoPath: process.cwd()}),
+    new GitDeleteBranchTool({repoPath: process.cwd()}),
+    new GitDiffStagedTool({repoPath: process.cwd()}),
+    new GitStagedFilesTool({repoPath: process.cwd()}),
+    // new GitTools.GitDiffTool({repoPath: process.cwd()}),
+    //   new GitTools.GitNewBranchTool({repoPath: process.cwd()}),
+    new GitPullTool({repoPath: process.cwd()}),
+    //   new GitTools.GitPushTool({repoPath: process.cwd()}),
+    //   new GitTools.GitStatusTool({repoPath: process.cwd()}),
+  ];
+
+
+
+
+
+  const llmChain = new LLMChain({
+    prompt: new GitCommitPromptTemplate({
+      tools,
+      inputVariables: ["input", "agent_scratchpad"],
+    }),
+    llm: model,
+  });
+
+  const agent = new LLMSingleActionAgent({
+    llmChain,
+    outputParser: new GitCommitOutputParser(),
+    stop: ["\nObservation"],
+  });
+
+  const executor = new AgentExecutor({
+    agent,
+    tools,
+    agentType: "openai-functions",
+  });
+
+
+  console.log("Loaded agent.");
+
+  const inputText = input
+
+  console.log(`Executing with input`);
+
+  const result = await executor.call({ input: inputText });
+
+
+  console.log(`Commit message generated: ${result.commitMsg}`);
+  return result.commitMsg
+};
 
 module.exports = {
   gitCommit,

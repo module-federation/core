@@ -5,7 +5,6 @@ const { BasePromptTemplate, BaseStringPromptTemplate, SerializedBasePromptTempla
 const {  InputValues, PartialValues, AgentStep, AgentAction, AgentFinish } = require("langchain/schema");
 const { Calculator } = require("langchain/tools/calculator");
 const { BufferWindowMemory } = require("langchain/memory");
-const GitTools = require("./git-tools");
   const {recursiveAgent} = require('./git-tools')
 
 
