@@ -1,78 +1,152 @@
-const fs = require('fs');
-const path = require('path');
-const processFile = require('./process-file');
-const { getAnswer } = require('./get-answer-from-files');
-const { parseGptResponse } = require('./services/utils');
-const { chatHistory, response } = require('./constants');
+import jsonpointer from "jsonpointer";
+import { Tool, ToolParams } from "./base.js";
+import { Serializable } from "../load/serializable.js";
 
-let prompt = `
-Given the files provided, please perform the following tasks as needed:
-1. Improve the runtime complexity of the code. Analyze the current time complexity and identify any bottlenecks or inefficient operations. Implement optimizations to improve the efficiency of the code.
-2. Add thorough JSDoc comments to all functions, variables, and classes in the code. The comments should provide detailed descriptions of the purpose and functionality of each element, the types and descriptions of all parameters and return values, and any side effects or exceptions. The comments should be formatted correctly for use with autocomplete features in code editors.
-3. Refactor the code as needed for easier maintainability. This may include simplifying complex code, breaking down large functions into smaller ones, removing redundant or unnecessary code, improving the organization and structure of the code, and renaming variables and functions for clarity.
-4. Ensure that the user feedback is taken into consideration, if it exists.
-5. Ensure that the updated code is returned in the response, with no additional text or formatting. The code should be ready to use as-is.
-6. Do not include any presentational text in responses. No markdown, code blocks, or other formatting should be included in the response.
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json }
+  | Json[];
 
-Please provide the updated code as the answer to this objective.
+export type JsonObject = { [key: string]: Json };
 
-The response should follow this template:
+/**
+ * Represents a JSON object in the LangChain framework. Provides methods
+ * to get keys and values from the JSON object.
+ */
+export class JsonSpec extends Serializable {
+  lc_namespace = ["langchain", "tools", "json"];
 
-__BLOCK_START__
-[filename 1]
-__CODE_START__
-[code changes for file 1]
-__BLOCK_END__
-__BLOCK_START__
-[filename 2]
-__CODE_START__
-[code changes for file 2]
-__BLOCK_END__
-${response.end}
+  obj: JsonObject;
 
-For each file, start with '__BLOCK_START__', followed by the filename, then '__CODE_START__', then the updated content of the file, and end with '__BLOCK_END__'. Separate the sections for different files with a newline. The very last line should be ${response.end} mark
-`;
+  maxValueLength = 4000;
 
-async function promptFile(filePaths, question) {
-  if (typeof filePaths === 'string') filePaths = [filePaths];
-  if (!filePaths || filePaths.length === 0) {
-    throw new Error('Missing or invalid argument: filePaths');
+  constructor(obj: JsonObject, max_value_length = 4000) {
+    super(...arguments);
+    this.obj = obj;
+    this.maxValueLength = max_value_length;
   }
 
-  if (!question) {
-    throw new Error('Missing argument: question');
+  /**
+   * Retrieves all keys at a given path in the JSON object.
+   * @param input The path to the keys in the JSON object, provided as a string in JSON pointer syntax.
+   * @returns A string containing all keys at the given path, separated by commas.
+   */
+  public getKeys(input: string): string {
+    const pointer = jsonpointer.compile(input);
+    const res = pointer.get(this.obj) as Json;
+    if (typeof res === "object" && !Array.isArray(res) && res !== null) {
+      return Object.keys(res)
+        .map((i) => i.replaceAll("~", "~0").replaceAll("/", "~1"))
+        .join(", ");
+    }
+
+    throw new Error(
+      `Value at ${input} is not a dictionary, get the value directly instead.`
+    );
   }
 
-  chatHistory.add({
-    role: 'user',
-    content: `Primary Objective/User Feedback: ${question}`,
-  });
+  /**
+   * Retrieves the value at a given path in the JSON object.
+   * @param input The path to the value in the JSON object, provided as a string in JSON pointer syntax.
+   * @returns The value at the given path in the JSON object, as a string. If the value is a large dictionary or exceeds the maximum length, a message is returned instead.
+   */
+  public getValue(input: string): string {
+    const pointer = jsonpointer.compile(input);
+    const res = pointer.get(this.obj) as Json;
 
-  let chunkMaps = {};
-  for (let filePath of filePaths) {
-    console.log('Processing file:', filePath);
-    filePath = path.resolve(process.cwd(), filePath);
+    if (res === null || res === undefined) {
+      throw new Error(`Value at ${input} is null or undefined.`);
+    }
+
+    const str = typeof res === "object" ? JSON.stringify(res) : res.toString();
+    if (
+      typeof res === "object" &&
+      !Array.isArray(res) &&
+      str.length > this.maxValueLength
+    ) {
+      return `Value is a large dictionary, should explore its keys directly.`;
+    }
+
+    if (str.length > this.maxValueLength) {
+      return `${str.slice(0, this.maxValueLength)}...`;
+    }
+    return str;
+  }
+}
+
+export interface JsonToolFields extends ToolParams {
+  jsonSpec: JsonSpec;
+}
+
+/**
+ * A tool in the LangChain framework that lists all keys at a given path
+ * in a JSON object.
+ */
+export class JsonListKeysTool extends Tool {
+  static lc_name() {
+    return "JsonListKeysTool";
+  }
+
+  name = "json_list_keys";
+
+  jsonSpec: JsonSpec;
+
+  constructor(jsonSpec: JsonSpec);
+
+  constructor(fields: JsonToolFields);
+
+  constructor(fields: JsonSpec | JsonToolFields) {
+    if (!("jsonSpec" in fields)) {
+      // eslint-disable-next-line no-param-reassign
+      fields = { jsonSpec: fields };
+    }
+    super(fields);
+
+    this.jsonSpec = fields.jsonSpec;
+  }
+
+  /** @ignore */
+  async _call(input: string) {
     try {
-      const result = await processFile(filePath);
-      if (!chunkMaps[filePath]) chunkMaps[filePath] = [];
-      chunkMaps[filePath] = chunkMaps[filePath].concat(result.chunks);
-      //getLastItemInArray
-      // const lastItem = result.chunks[result.chunks.length - 1];
-      // console.log(lastItem.text);
-    } catch (err) {
-      console.error('Error processing file:', filePath);
-      throw err;
+      return this.jsonSpec.getKeys(input);
+    } catch (error) {
+      return `${error}`;
     }
   }
 
-  console.log('Asking questions...');
-
-  const answer = await getAnswer(chunkMaps, prompt);
-  console.log('Parsing response...');
-  const parsedResposne = parseGptResponse(answer);
-  console.log('Response parsed successfully.');
-
-  return parsedResposne;
+  description = `Can be used to list all keys at a given path.
+    Before calling this you should be SURE that the path to this exists.
+    The input is a text representation of the path to the json as json pointer syntax (e.g. /key1/0/key2).`;
 }
 
-module.exports = promptFile;
+/**
+ * A tool in the LangChain framework that retrieves the value at a given
+ * path in a JSON object.
+ */
+export class JsonGetValueTool extends Tool {
+  static lc_name() {
+    return "JsonGetValueTool";
+  }
+
+  name = "json_get_value";
+
+  constructor(public jsonSpec: JsonSpec) {
+    super();
+  }
+
+  /** @ignore */
+  async _call(input: string) {
+    try {
+      return this.jsonSpec.getValue(input);
+    } catch (error) {
+      return `${error}`;
+    }
+  }
+
+  description = `Can be used to see value in string format at a given path.
+    Before calling this you should be SURE that the path to this exists.
+    The input is a text representation of the path to the json as json pointer syntax (e.g. /key1/0/key2).`;
+}ote 

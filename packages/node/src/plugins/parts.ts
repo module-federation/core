@@ -91,20 +91,19 @@ export function getInitialChunkIds(
   chunkHasJs: any
 ) {
   const initialChunkIds = new Set(chunk.ids);
-  for (const c of chunk.getAllInitialChunks()) {
-    if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
-    if (c.ids) {
-      for (const id of c.ids) initialChunkIds.add(id);
-    }
-    for (const c of chunk.getAllAsyncChunks()) {
-      if (c === chunk || chunkHasJs(c, chunkGraph)) continue;
-      if (c.ids) {
-        for (const id of c.ids) initialChunkIds.add(id);
+  const initialChunks = [...chunk.getAllInitialChunks(), ...chunk.getAllAsyncChunks()];
+  
+  for (const c of initialChunks) {
+    if (c !== chunk && !chunkHasJs(c, chunkGraph) && c.ids) {
+      for (const id of c.ids) {
+        initialChunkIds.add(id);
       }
     }
   }
+  
   return initialChunkIds;
 }
+
 /**
  * Generates the loading code for chunks.
  * @param {boolean} withLoading - Flag indicating whether chunk loading is enabled.

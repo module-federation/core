@@ -1,23 +1,26 @@
 /* eslint-disable no-undef */
 
 // @ts-ignore
+let usedChunks;
 if (!globalThis.usedChunks) {
   // @ts-ignore
-  globalThis.usedChunks = new Set();
+  usedChunks = new Set();
+  //@ts-ignore
+  globalThis.usedChunks = usedChunks;
 }
 /**
  * Initialize usedChunks and share it globally.
  * @type {Set}
  */
 // @ts-ignore
-export const {usedChunks} = globalThis;
+export const getUsedChunks = () => usedChunks;
 /**
  * Load hostStats from the JSON file.
  * @returns {object} hostStats - An object containing host stats data.
  */
-const loadHostStats = () => {
+export const loadHostStats = (requireFunc = __non_webpack_require__) => {
   try {
-    return __non_webpack_require__('../federated-stats.json');
+    return requireFunc('../federated-stats.json');
   } catch (e) {
     return {};
   }
@@ -27,16 +30,16 @@ const loadHostStats = () => {
  * Create a shareMap based on the loaded modules.
  * @returns {object} shareMap - An object containing the shareMap data.
  */
-const createShareMap = () => {
-  // Check if __webpack_share_scopes__ is defined and has a default property
+export const createShareMap = (webpackShareScopes = __webpack_share_scopes__) => {
+  // Check if webpackShareScopes is defined and has a default property
   // @ts-ignore
-  if (__webpack_share_scopes__?.default) {
+  if (webpackShareScopes?.default) {
     // Reduce the keys of the default property to create the share map
     // @ts-ignore
-    return Object.keys(__webpack_share_scopes__.default).reduce((acc, key) => {
+    return Object.keys(webpackShareScopes.default).reduce((acc, key) => {
       // Get the loaded modules for the current key
       // @ts-ignore
-      const loadedModules = Object.values(__webpack_share_scopes__.default[key])
+      const loadedModules = Object.values(webpackShareScopes.default[key])
         // Filter out the modules that are not loaded
         // @ts-ignore
         .filter((sharedModule) => sharedModule.loaded)
@@ -53,7 +56,7 @@ const createShareMap = () => {
       return acc;
     }, {});
   }
-  // If __webpack_share_scopes__ is not defined or doesn't have a default property, return an empty object
+  // If webpackShareScopes is not defined or doesn't have a default property, return an empty object
   return {};
 };
 
@@ -64,8 +67,8 @@ const createShareMap = () => {
  * @param {object} hostStats - An object containing host stats data.
  * @returns {Promise<Array>} A promise that resolves to an array of updated chunks.
  */
-// @ts-ignore
-const processChunk = async (chunk, shareMap, hostStats) => {
+//@ts-ignore
+export const processChunk = async (chunk, shareMap, hostStats, fetchFunc = fetch, remoteScopeConfig = globalThis.__remote_scope__._config) => {
   // Create a set to store the chunks
   const chunks = new Set();
 
@@ -73,7 +76,7 @@ const processChunk = async (chunk, shareMap, hostStats) => {
   const [remote, request] = chunk.split('->');
 
   // If the remote is not defined in the global config, return
-  if (!globalThis.__remote_scope__._config[remote]) {
+  if (!remoteScopeConfig[remote]) {
     console.error(
       `flush chunks:`,
       `Remote ${remote} is not defined in the global config`
@@ -85,20 +88,20 @@ const processChunk = async (chunk, shareMap, hostStats) => {
     // Extract the remote name from the URL
     //@ts-ignore
     const remoteName = new URL(
-      globalThis.__remote_scope__._config[remote]
+      remoteScopeConfig[remote]
     ).pathname
       .split('/')
       .pop();
 
     // Construct the stats file URL from the remote config
-    const statsFile = globalThis.__remote_scope__._config[remote]
+    const statsFile = remoteScopeConfig[remote]
       .replace(remoteName, 'federated-stats.json')
       .replace('ssr', 'chunks');
 
     let stats = {};
     try {
       // Fetch the remote config and stats file
-      stats = await fetch(statsFile).then((res) => res.json());
+      stats = await fetchFunc(statsFile).then((res) => res.json());
     } catch (e) {
       console.error('flush error', e);
     }
@@ -111,7 +114,7 @@ const processChunk = async (chunk, shareMap, hostStats) => {
 
     // Extract the prefix from the remote config
     const [prefix] =
-      globalThis.__remote_scope__._config[remote].split('static/');
+      remoteScopeConfig[remote].split('static/');
 
     // Process federated modules from the stats object
     // @ts-ignore
@@ -162,13 +165,13 @@ const processChunk = async (chunk, shareMap, hostStats) => {
  * Flush the chunks and return a deduplicated array of chunks.
  * @returns {Promise<Array>} A promise that resolves to an array of deduplicated chunks.
  */
-export const flushChunks = async () => {
-  const hostStats = loadHostStats();
-  const shareMap = createShareMap();
+export const flushChunks = async (loadHostStatsFunc = loadHostStats, createShareMapFunc = createShareMap, processChunkFunc = processChunk) => {
+  const hostStats = loadHostStatsFunc();
+  const shareMap = createShareMapFunc();
 
   const allFlushed = await Promise.all(
-    Array.from(usedChunks).map(async (chunk) =>
-      processChunk(chunk, shareMap, hostStats)
+    Array.from(getUsedChunks()).map(async (chunk) =>
+      processChunkFunc(chunk, shareMap, hostStats)
     )
   );
 
@@ -176,7 +179,8 @@ export const flushChunks = async () => {
   const dedupe = Array.from(new Set([...allFlushed.flat()]));
 
   // Clear usedChunks
-  usedChunks.clear();
+  getUsedChunks().clear();
   // Filter out any undefined or null values
   return dedupe.filter(Boolean);
 };
+
