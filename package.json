@@ -87,7 +87,7 @@
     "@node-rs/jieba": "1.7.2",
     "@nx/devkit": "16.8.0",
     "@nx/eslint-plugin": "16.8.0",
-    "@nx/jest": "16.8.0",
+    "@nx/jest": "16.8.1",
     "@nx/js": "16.8.0",
     "@nx/linter": "16.8.0",
     "@nx/next": "16.8.0",
