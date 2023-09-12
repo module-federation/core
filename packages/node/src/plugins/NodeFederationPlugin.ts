@@ -104,6 +104,10 @@ class NodeFederationPlugin {
       ...this._options,
       remotes: this._options.remotes ? parseRemotes(this._options.remotes as Record<string, any>) : {},
     };
+   //TODO can use import meta mock object but need to update data structure of remote_scope
+    if (compiler.options && compiler.options.output) {
+      compiler.options.output.importMetaName = 'remoteContainerRegistry';
+    }
 
     const chunkFileName = compiler.options?.output?.chunkFilename;
     const uniqueName =
