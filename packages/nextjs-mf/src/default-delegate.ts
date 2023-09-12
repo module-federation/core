@@ -95,6 +95,8 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       (__webpack_require__ as any).l(
         reference.url,
         function (event: Event) {
+
+      
           if (typeof globalScope[remoteGlobal] !== 'undefined') {
             return resolveRemoteGlobal();
           }
@@ -178,7 +180,10 @@ const getRuntimeRemotes = () => {
                 acc[key] = { global, url };
               }
             }
-          }
+          } else if (typeof value === 'string' && !value.includes('@')) {
+        acc[key] = { global: key, url: value };
+        console.log('delegates may need work')
+      }
           // if its just a string (global@url)
           else if (typeof value === 'string') {
             const [url, global] = extractUrlAndGlobal(value);

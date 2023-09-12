@@ -45,13 +45,21 @@ export async function httpEvalStrategy(
   remotes,
   callback
 ) {
-  var url = new URL(remotes[remoteName]);
-  var getBasenameFromUrl = (url) => {
-    const urlParts = url.split('/');
-    return urlParts[urlParts.length - 1];
-  };
-  var fileToReplace = getBasenameFromUrl(url.pathname);
-  url.pathname = url.pathname.replace(fileToReplace, chunkName);
+  var url;
+  try {
+    // eslint-disable-next-line no-undef
+     url = new URL(chunkName,__webpack_require__.p);
+  } catch(e) {
+    console.error('module-federation: failed to construct absolute chunk path of',remoteName,'for',chunkName, e);
+    url = new URL(remotes[remoteName]);
+    var getBasenameFromUrl = (url) => {
+      const urlParts = url.split('/');
+      return urlParts[urlParts.length - 1];
+    };
+    var fileToReplace = getBasenameFromUrl(url.pathname);
+    url.pathname = url.pathname.replace(fileToReplace, chunkName);
+  }
+
   const data = await fetch(url).then((res) => res.text());
   var chunk = {};
   try {
@@ -64,15 +72,33 @@ export async function httpEvalStrategy(
     callback(e, null);
   }
 }
-
-// HttpVmStrategy
+/**
+ * HttpVmStrategy
+ * This function is used to execute a chunk of code in a VM using HTTP or HTTPS based on the protocol.
+ * @param {string} chunkName - The name of the chunk to be executed.
+ * @param {string} remoteName - The name of the remote server.
+ * @param {object} remotes - An object containing the remote servers.
+ * @param {function} callback - A callback function to be executed after the chunk is executed.
+ */
 export async function httpVmStrategy(chunkName, remoteName, remotes, callback) {
   var http = require('http');
   var https = require('https');
   var vm = require('vm');
-  var url = new URL(remotes[remoteName]);
-  var fileToReplace = require('path').basename(url.pathname);
-  url.pathname = url.pathname.replace(fileToReplace, chunkName);
+  var url;
+  // eslint-disable-next-line no-undef
+
+  console.log('httpvmstrategy',__webpack_require__.p, chunkName,remotes[remoteName])
+  try {
+    console.log('trying chunk load', chunkName, __webpack_require__.p);
+    url = new URL(chunkName, __webpack_require__.p);
+  } catch(e) {
+    console.error('module-federation: failed to construct absolute chunk path of',remoteName,'for',chunkName, e);
+ console.log('fallbak url constructed', remotes._config[remoteName])
+
+ url = new URL(remotes._config[remoteName]);
+    var fileToReplace = require('path').basename(url.pathname);
+    url.pathname = url.pathname.replace(fileToReplace, chunkName);
+  }
   var protocol = url.protocol === 'https:' ? https : http;
   protocol.get(url, (res) => {
     let data = '';

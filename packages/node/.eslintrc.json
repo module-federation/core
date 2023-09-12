@@ -4,6 +4,9 @@
   "env": {
     "jest": true
   },
+  "globals": {
+    "__webpack_require__":"writable"
+  },
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],

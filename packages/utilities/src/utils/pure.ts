@@ -46,15 +46,6 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
     };
 
     // @ts-ignore
-    if (!globalThis.__remote_scope__) {
-      // create a global scope for container, similar to how remotes are set on window in the browser
-      // @ts-ignore
-      globalThis.__remote_scope__ = {
-        // @ts-ignore
-        _config: {},
-      };
-    }
-    // @ts-ignore
     const globalScope =
       // @ts-ignore
       typeof window !== 'undefined' ? window : globalThis.__remote_scope__;

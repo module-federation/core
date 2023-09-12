@@ -9,6 +9,10 @@ module.exports = composePlugins(withNx(), (config) => {
   // Update the webpack config as needed here.
   // e.g. `config.plugins.push(new MyPlugin())`
   config.cache = false;
+  config.devtool = false
+  config.output.publicPath = '/testing'
+  // config.output.publicPath = 'auto'
+
   delete config.module.rules[config.module.rules.length - 1];
   config.plugins.push(
     new UniversalFederationPlugin({
