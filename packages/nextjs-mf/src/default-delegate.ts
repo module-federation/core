@@ -96,7 +96,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         reference.url,
         function (event: Event) {
 
-          console.log('to resolve',globalScope)
+      
           if (typeof globalScope[remoteGlobal] !== 'undefined') {
             return resolveRemoteGlobal();
           }
