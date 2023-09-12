@@ -77,7 +77,7 @@
     "@babel/plugin-transform-react-jsx": "7.22.15",
     "@builder.io/partytown": "0.8.1",
     "@builder.io/qwik": "1.2.10",
-    "@builder.io/qwik-city": "1.2.10",
+    "@builder.io/qwik-city": "1.2.11",
     "@commitlint/cli": "17.7.1",
     "@commitlint/config-conventional": "17.7.0",
     "@dqbd/tiktoken": "1.0.7",
