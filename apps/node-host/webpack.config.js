@@ -1,29 +1,27 @@
-const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+const nxPlugin = require('nx/src/utils/nx-plugin.js');
+const nxWebpack = require('@nx/webpack');
+const moduleFederationNode = require('@module-federation/node');
 
-registerPluginTSTranspiler();
-const { composePlugins, withNx } = require('@nx/webpack');
-const { UniversalFederationPlugin } = require('@module-federation/node');
+nxPlugin.registerPluginTSTranspiler();
 
 // Nx plugins for webpack.
-module.exports = composePlugins(withNx(), (config) => {
+module.exports = nxWebpack.composePlugins(nxWebpack.withNx(), (config) => {
   // Update the webpack config as needed here.
   // e.g. `config.plugins.push(new MyPlugin())`
   config.cache = false;
-  config.devtool = false
-  config.output.publicPath = '/testing'
-  // config.output.publicPath = 'auto'
+  config.devtool = false;
+  config.output.publicPath = '/testing';
 
-  delete config.module.rules[config.module.rules.length - 1];
+  config.module.rules.pop();
   config.plugins.push(
-    new UniversalFederationPlugin({
+    new moduleFederationNode.UniversalFederationPlugin({
       isServer: true,
       name: 'node_host',
       remotes: {
-        node_remote:
-          'commonjs ../node-remote/remoteEntry.js',
+        "node_local_remote": 'node_remote@http://localhost:3002/remoteEntry.js',
+        node_remote: 'commonjs ../node-remote/remoteEntry.js',
       },
-      experiments: {
-      },
+      experiments: {},
     })
   );
   return config;
