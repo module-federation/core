@@ -20,7 +20,7 @@ module.exports = composePlugins(withNx(), (config) => {
       name: 'node_host',
       remotes: {
         node_remote:
-          'node_remote@http://localhost:3002/remoteEntry.js',
+          'commonjs ../node-remote/remoteEntry.js',
       },
       experiments: {
       },
