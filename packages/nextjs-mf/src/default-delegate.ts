@@ -1,3 +1,6 @@
+/**
+ * Importing types from '@module-federation/utilities/src/types/index'
+ */
 import {
   AsyncContainer,
   RemoteVars,
@@ -6,15 +9,29 @@ import {
   WebpackRemoteContainer,
 } from '@module-federation/utilities/src/types/index';
 
+/**
+ * Initializing pure as RemoteVars
+ */
 let pure = {} as RemoteVars;
 try {
-  // @ts-ignore
+  /**
+   * Assigning process.env['REMOTES'] to pure if it exists
+   */
+   // @ts-ignore
   pure = process.env['REMOTES'] || {};
 } catch (e) {
   // not in webpack bundle
 }
+/**
+ * Casting pure as RemoteVars
+ */
 const remoteVars = pure as RemoteVars;
 
+/**
+ * Function to extract URL and Global from a string
+ * @param {string} urlAndGlobal - The string to extract from
+ * @returns {Array} - An array containing the URL and Global
+ */
 const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
   const index = urlAndGlobal.indexOf('@');
   if (index <= 0 || index === urlAndGlobal.length - 1) {
@@ -23,6 +40,11 @@ const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
   return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
 };
 
+/**
+ * Function to load script
+ * @param {string | RuntimeRemote} keyOrRuntimeRemoteItem - The key or RuntimeRemote item to load
+ * @returns {Promise} - A promise that resolves with the loaded script
+ */
 const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
 
@@ -153,7 +175,10 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
 
   return asyncContainer;
 };
-
+/**
+ * Function to get runtime remotes
+ * @returns {RuntimeRemotesMap} - An object containing runtime remotes
+ */
 const getRuntimeRemotes = () => {
   try {
     return Object.entries(remoteVars).reduce(function (
@@ -207,6 +232,11 @@ const getRuntimeRemotes = () => {
   return {} as RuntimeRemotesMap;
 };
 
+/**
+ * Function to import a delegated module
+ * @param {string | RuntimeRemote} keyOrRuntimeRemoteItem - The key or RuntimeRemote item to import
+ * @returns {Promise} - A promise that resolves with the imported module
+ */
 const importDelegatedModule = async (
   keyOrRuntimeRemoteItem: string | RuntimeRemote
 ) => {
@@ -227,6 +257,11 @@ const importDelegatedModule = async (
 
         //TODO: need to solve chunk flushing with delegated modules
         return {
+          /**
+           * Function to get a module from the asyncContainer
+           * @param {string} arg - The module to get
+           * @returns {Promise} - A promise that resolves with the module
+           */
           get: function (arg: string) {
             //@ts-ignore
             return asyncContainer.get(arg).then((f) => {
@@ -283,20 +318,41 @@ const importDelegatedModule = async (
     });
 };
 
+/**
+ * Module exports a Promise that resolves with a remote module
+ * @returns {Promise} - A promise that resolves with the remote module
+ */
 // eslint-disable-next-line no-async-promise-executor
 module.exports = new Promise(async (resolve, reject) => {
+  /**
+   * Extracting the current request from the resource query
+   */
   // eslint-disable-next-line no-undef
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
+  /**
+   * Splitting the current request into global and url
+   */
   // @ts-ignore
   const [global, url] = currentRequest.split('@');
+  /**
+   * Importing the delegated module
+   */
   importDelegatedModule({
     global,
     url: url + '?' + Date.now(),
   })
     // @ts-ignore
     .then((remote) => {
+      /**
+       * Resolving the promise with the remote module
+       */
       resolve(remote);
     })
     // @ts-ignore
-    .catch((err) => reject(err));
+    .catch((err) => {
+      /**
+       * Rejecting the promise if an error occurs
+       */
+      reject(err);
+    });
 });
