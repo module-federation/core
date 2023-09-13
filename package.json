@@ -29,7 +29,7 @@
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
     "full:test": "nx run-many --target=test,lint,build --all",
-    "start:node": "nx run-many --projects=node-remote,node-local-remote,node-host --target=serve --verbose --output-style=stream --maxParallel=3",
+    "start:node": "nx run-many --projects=node-remote,node-local-remote,node-host --target=serve --verbose --output-style=stream",
     "start:next": "npm run build:libs && concurrently 'nx run 3000-home:serve:development --output-style=stream' 'nx run 3001-shop:serve:development --output-style=stream' 'nx run 3002-checkout:serve:development --output-style=stream'",
     "start:nextho": "npm run build:libs && nx run-many --target=serve --projects=3000-home --output-style=stream --verbose",
     "serve:next": "npm run build:libs && concurrently 'nx run 3000-home:serve:production --output-style=stream' 'nx run 3001-shop:serve:production --output-style=stream' 'nx run 3002-checkout:serve:production --output-style=stream'",
@@ -211,4 +211,3 @@
     }
   }
 }
-
