@@ -4,12 +4,23 @@ import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
 
+/**
+ * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
+ * @interface
+ * @property {Record<string, unknown>} experiments - Optional experiments configuration
+ * @property {boolean} debug - Optional debug flag
+ */
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
   experiments?: Record<string, unknown>;
   debug?: boolean;
   useRemoteSideloader?: boolean;
 }
 
+/**
+ * Interface for Context
+ * @interface
+ * @property {typeof container.ModuleFederationPlugin} ModuleFederationPlugin - Optional ModuleFederationPlugin
+ */
 interface Context {
   ModuleFederationPlugin?: typeof container.ModuleFederationPlugin;
 }
@@ -71,7 +82,8 @@ export const parseRemoteSyntax = (remote: any): string => {
 
 
 /**
- * NodeFederationPlugin class for handling webpack configurations.
+ * Class representing a NodeFederationPlugin.
+ * @class
  */
 class NodeFederationPlugin {
   private _options: ModuleFederationPluginOptions;
@@ -79,9 +91,10 @@ class NodeFederationPlugin {
   private experiments: NodeFederationOptions['experiments'];
 
   /**
-   * Constructor for the NodeFederationPlugin class.
-   * @param {NodeFederationOptions} options - The options for the plugin.
-   * @param {Context} context - The context for the plugin.
+   * Create a NodeFederationPlugin.
+   * @constructor
+   * @param {NodeFederationOptions} options - The options for the NodeFederationPlugin
+   * @param {Context} context - The context for the NodeFederationPlugin
    */
   constructor(
     { experiments, debug, ...options }: NodeFederationOptions,
@@ -94,6 +107,7 @@ class NodeFederationPlugin {
 
   /**
    * Apply method for the NodeFederationPlugin class.
+   * @method
    * @param {Compiler} compiler - The webpack compiler.
    */
   apply(compiler: Compiler) {
