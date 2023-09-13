@@ -1,11 +1,12 @@
-const nxPlugin = require('nx/src/utils/nx-plugin.js');
-const nxWebpack = require('@nx/webpack');
-const moduleFederationNode = require('@module-federation/node');
+const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 
-nxPlugin.registerPluginTSTranspiler();
+registerPluginTSTranspiler();
+const { composePlugins, withNx } = require('@nx/webpack');
+const { UniversalFederationPlugin } = require('@module-federation/node');
+
 
 // Nx plugins for webpack.
-module.exports = nxWebpack.composePlugins(nxWebpack.withNx(), (config) => {
+module.exports = composePlugins(withNx(), (config) => {
   // Update the webpack config as needed here.
   // e.g. `config.plugins.push(new MyPlugin())`
   config.cache = false;
@@ -14,7 +15,7 @@ module.exports = nxWebpack.composePlugins(nxWebpack.withNx(), (config) => {
 
   config.module.rules.pop();
   config.plugins.push(
-    new moduleFederationNode.UniversalFederationPlugin({
+    new UniversalFederationPlugin({
       isServer: true,
       name: 'node_host',
       remotes: {

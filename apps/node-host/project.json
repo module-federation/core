@@ -39,7 +39,7 @@
         }
       ],
       "options": {
-        "buildTarget": "node-host:build"
+        "buildTarget": ["node-host:build","node-remote:build"]
       },
       "configurations": {
         "development": {
