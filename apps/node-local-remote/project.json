@@ -1,7 +1,7 @@
 {
-  "name": "node-remote",
+  "name": "node-local-remote",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/node-remote/src",
+  "sourceRoot": "apps/node-local-remote/src",
   "projectType": "application",
   "targets": {
     "build": {
@@ -12,16 +12,16 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "babel",
-        "outputPath": "dist/apps/node-remote",
-        "index": "apps/node-remote/src/index.html",
+        "outputPath": "dist/apps/node-local-remote",
+        "index": "apps/node-local-remote/src/index.html",
         "baseHref": "/",
-        "main": "apps/node-remote/src/main.tsx",
-        "tsConfig": "apps/node-remote/tsconfig.app.json",
+        "main": "apps/node-local-remote/src/main.tsx",
+        "tsConfig": "apps/node-local-remote/tsconfig.app.json",
         "assets": [],
         "styles": [],
         "scripts": [],
         "isolatedConfig": true,
-        "webpackConfig": "apps/node-remote/webpack.config.js"
+        "webpackConfig": "apps/node-local-remote/webpack.config.js"
       },
       "configurations": {
         "development": {
@@ -33,8 +33,8 @@
         "production": {
           "fileReplacements": [
             {
-              "replace": "apps/node-remote/src/environments/environment.ts",
-              "with": "apps/node-remote/src/environments/environment.prod.ts"
+              "replace": "apps/node-local-remote/src/environments/environment.ts",
+              "with": "apps/node-local-remote/src/environments/environment.prod.ts"
             }
           ],
           "optimization": true,
@@ -62,16 +62,16 @@
       ],
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "node-remote:build",
+        "buildTarget": "node-local-remote:build",
         "hmr": true,
-        "port": 3002
+        "port": 3003
       },
       "configurations": {
         "development": {
-          "buildTarget": "node-remote:build:development"
+          "buildTarget": "node-local-remote:build:development"
         },
         "production": {
-          "buildTarget": "node-remote:build:production",
+          "buildTarget": "node-local-remote:build:production",
           "hmr": false
         }
       }
@@ -83,7 +83,7 @@
       ],
       "options": {
         "lintFilePatterns": [
-          "apps/node-remote/**/*.{ts,tsx,js,jsx}"
+          "apps/node-local-remote/**/*.{ts,tsx,js,jsx}"
         ]
       }
     },
@@ -93,7 +93,7 @@
         "{workspaceRoot}/coverage/{projectRoot}"
       ],
       "options": {
-        "jestConfig": "apps/node-remote/jest.config.ts",
+        "jestConfig": "apps/node-local-remote/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {
