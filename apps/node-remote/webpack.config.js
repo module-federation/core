@@ -6,7 +6,7 @@ const { UniversalFederationPlugin } = require('@module-federation/node');
 
 // Nx plugins for webpack.
 module.exports = composePlugins(withNx(), (config) => {
-  config.output.publicPath = '/remotetest'; // this breaks because of import.meta
+  // config.output.publicPath = '/remotetest'; // this breaks because of import.meta
   // config.output.publicPath = 'auto';
   config.target = 'node';
   config.devtool = false;

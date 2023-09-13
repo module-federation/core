@@ -17,7 +17,7 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
       Template.indent([
         `cache: {},`, 
         `remotes: {},`, 
-        `moduleInfo: {},`,
+        `moduleInfo: { },`,
       ]),
       `};`,
       // `if (!globalThis.__remote_scopes__) {`,
