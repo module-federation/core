@@ -13,14 +13,14 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
   generate() {
     const { compilation } = this;
     const { scriptType, path, publicPath, importMetaName, uniqueName } = compilation.outputOptions;
-
+    const getPath = () => {
+      return compilation.getPath(publicPath || "", {
+        hash: compilation.hash || "XXXX"
+      });
+    };
     // If publicPath is not "auto", return the static value
     if (publicPath !== "auto") {
-      return `${RuntimeGlobals.publicPath} = ${JSON.stringify(
-        compilation.getPath(publicPath || "", {
-          hash: compilation.hash || "XXXX"
-        })
-      )};`;
+      return `${RuntimeGlobals.publicPath} = ${JSON.stringify(getPath())};`;
     }
 
     const chunkName = compilation.getPath(
