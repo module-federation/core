@@ -1,4 +1,4 @@
-import type { Chunk, Compiler } from 'webpack';
+import type { Chunk, Compiler, Compilation, ChunkGraph } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
@@ -34,7 +34,7 @@ class CommonJsChunkLoadingPlugin {
 
     compiler.hooks.thisCompilation.tap(
       'CommonJsChunkLoadingPlugin',
-      (compilation) => {
+      (compilation: Compilation) => {
         // Always enabled
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const isEnabledForChunk = (_: Chunk) => true;
@@ -46,11 +46,9 @@ class CommonJsChunkLoadingPlugin {
           }
 
           onceForChunkSet.add(chunk);
-
           if (!isEnabledForChunk(chunk)) {
             return;
           }
-
           set.add(RuntimeGlobals.moduleFactoriesAddOnly);
           set.add(RuntimeGlobals.hasOwnProperty);
 
@@ -61,31 +59,24 @@ class CommonJsChunkLoadingPlugin {
             })
           );
         };
-
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.ensureChunkHandlers)
           .tap('CommonJsChunkLoadingPlugin', handler);
-
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadUpdateHandlers)
           .tap('CommonJsChunkLoadingPlugin', handler);
-
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadManifest)
           .tap('CommonJsChunkLoadingPlugin', handler);
-
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.baseURI)
           .tap('CommonJsChunkLoadingPlugin', handler);
-
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.externalInstallChunk)
           .tap('CommonJsChunkLoadingPlugin', handler);
-
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.onChunksLoaded)
           .tap('CommonJsChunkLoadingPlugin', handler);
-
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.ensureChunkHandlers)
           .tap('CommonJsChunkLoadingPlugin', (chunk, set) => {
