@@ -5,7 +5,7 @@
     "declaration": true,
     "types": ["node"]
   },
-  "include": ["**/*.ts", "**/*.js"],
+  "include": ["**/*.ts", "**/*.js","**/*.cjs"],
   "exclude": [
     "jest.config.js",
     "**/*.spec.ts",

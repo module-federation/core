@@ -41,6 +41,9 @@
         {
           "target": "build",
           "dependencies": true
+        },
+        {
+          "target": "compile"
         }
       ]
     },
