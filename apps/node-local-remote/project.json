@@ -1,7 +1,7 @@
 {
   "name": "node-load-remote",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/node-load-remote/src",
+  "sourceRoot": "/src",
   "projectType": "application",
   "targets": {
     "build": {
