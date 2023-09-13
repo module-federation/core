@@ -155,7 +155,7 @@ export const parseRemotes = (
       // If the value is using the standard remote syntax, create a delegated module
       return {
         ...acc,
-        [key]: createDelegatedModule(require.resolve('./default-delegate'), {
+        [key]: createDelegatedModule(require.resolve('./default-delegate.cjs'), {
           remote: value,
         }),
       };

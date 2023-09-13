@@ -169,9 +169,6 @@ export function handleServerExternals(
  *
  */
 export function configureServerCompilerOptions(compiler: Compiler): void {
-  // Turn off the compiler target on node builds because we add our own chunk loading runtime module
-  // with NodeFederationPlugin and StreamingTargetPlugin
-  compiler.options.target = false;
   compiler.options.node = {
     ...compiler.options.node,
     global: false,

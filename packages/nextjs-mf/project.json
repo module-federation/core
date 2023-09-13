@@ -20,6 +20,15 @@
         }
       ]
     },
+    "compile": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "find ./dist/packages/nextjs-mf -name 'default-delegate.js' -exec bash -c 'mv $0 ${0/.js/.cjs}' {} \\;",
+          "find ./dist/packages/nextjs-mf -name 'federation-noop.js' -exec bash -c 'mv $0 ${0/.js/.cjs}' {} \\;"
+        ]
+      }
+    },
     "publish": {
       "executor": "nx:run-commands",
       "options": {
