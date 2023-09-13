@@ -5,9 +5,13 @@
 
 import express from 'express';
 import * as path from 'path';
+
+import node_local_remote from 'node_local_remote/test';
+console.log(__webpack_require__.federation);
 import('node_remote/test').then((m) => {
-  console.log(__webpack_require__.federation)
+  console.log('from node-remote',m)
 });
+console.log(node_local_remote)
 
 const app = express();
 
