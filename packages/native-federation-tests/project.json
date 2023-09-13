@@ -6,7 +6,9 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/dist/packages/native-federation-tests"],
+      "outputs": [
+        "{workspaceRoot}/dist/packages/native-federation-tests"
+      ],
       "options": {
         "parallel": false,
         "commands": [
@@ -29,14 +31,20 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["packages/native-federation-tests/**/*.ts"]
+        "lintFilePatterns": [
+          "packages/native-federation-tests/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/packages/native-federation-tests"]
+      "outputs": [
+        "{workspaceRoot}/coverage/packages/native-federation-tests"
+      ]
     },
     "version": {
       "executor": "@jscutlery/semver:version",
