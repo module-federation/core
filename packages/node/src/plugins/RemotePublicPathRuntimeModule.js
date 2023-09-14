@@ -21,8 +21,9 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
     };
     // If publicPath is not "auto", return the static value
     if (publicPath !== "auto") {
+      const path = getPath();
       return Template.asString([
-        `${RuntimeGlobals.publicPath} = ${JSON.stringify(getPath())};`,
+        `${RuntimeGlobals.publicPath} = ${JSON.stringify(path)};`,
         'var addProtocol = (url)=> url.startsWith(\'//\') ? \'https:\' + url : url;',
         `globalThis.currentVmokPublicPath = addProtocol(${RuntimeGlobals.publicPath}) || '/';`,
       ])
