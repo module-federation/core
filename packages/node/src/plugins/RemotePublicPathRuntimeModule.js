@@ -12,7 +12,8 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
    */
   generate() {
     const { compilation } = this;
-    const { scriptType, path, publicPath, importMetaName, uniqueName } = compilation.outputOptions;
+    const { scriptType, path, publicPath, importMetaName, uniqueName, chunkLoading } = compilation.outputOptions;
+
     const getPath = () => {
       return compilation.getPath(publicPath || "", {
         hash: compilation.hash || "XXXX"
@@ -53,7 +54,7 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
       };
       `,
 
-      scriptType === "module"
+      (['module', 'node', 'async-node', 'require'].includes(scriptType) || chunkLoading)
         ? Template.asString([
           'try {',
             Template.indent([
