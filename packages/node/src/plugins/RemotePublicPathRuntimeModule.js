@@ -20,7 +20,12 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
     };
     // If publicPath is not "auto", return the static value
     if (publicPath !== "auto") {
-      return `${RuntimeGlobals.publicPath} = ${JSON.stringify(getPath())};`;
+      return Template.asString([
+        `${RuntimeGlobals.publicPath} = ${JSON.stringify(getPath())};`,
+        'var addProtocol = (url)=> url.startsWith(\'//\') ? \'https:\' + url : url;',
+        `globalThis.currentVmokPublicPath = addProtocol(${RuntimeGlobals.publicPath}) || '/';`,
+      ])
+
     }
 
     const chunkName = compilation.getPath(
@@ -39,7 +44,7 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
     return Template.asString([
       "var scriptUrl;",
       // its an esproxy so nesting into _config directly is not possible
-      "var remoteReg = globalThis.__remote_scope__._config;",
+      "var remoteReg = globalThis.__remote_scope__ ? globalThis.__remote_scope__._config : {};",
       `
       let remoteContainerRegistry = {
         get url() {
@@ -47,10 +52,10 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
         }
       };
       `,
-      
+
       scriptType === "module"
         ? Template.asString([
-          'try {',           
+          'try {',
             Template.indent([
               `scriptUrl = new Function('return typeof ${importMetaName}.url === "string" ? ${importMetaName}.url : undefined;')();`,
             ]),
@@ -89,7 +94,9 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
         ? `${RuntimeGlobals.publicPath} = scriptUrl;`
         : `${RuntimeGlobals.publicPath} = scriptUrl + ${JSON.stringify(
           undoPath
-        )};`
+        )};`,
+        'var addProtocol = (url)=> url.startsWith(\'//\') ? \'https:\' + url : url;',
+        `globalThis.currentVmokPublicPath = addProtocol(${RuntimeGlobals.publicPath}) || '/';`,
     ]);
   }
 }
