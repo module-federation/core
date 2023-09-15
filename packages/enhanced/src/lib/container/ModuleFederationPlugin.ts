@@ -1,34 +1,35 @@
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
-*/
+/**
+ * MIT License http://www.opensource.org/licenses/mit-license.php
+ * Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
+ */
 
-"use strict";
+import isValidExternalsType from "webpack/schemas/plugins/container/ExternalsType.check.js";
+import SharePlugin from "../sharing/SharePlugin";
+import createSchemaValidation from "webpack/lib/util/create-schema-validation";
+import ContainerPlugin from "./ContainerPlugin";
+import ContainerReferencePlugin from "./ContainerReferencePlugin";
 
-const isValidExternalsType = require("../../schemas/plugins/container/ExternalsType.check.js");
-const SharePlugin = require("../sharing/SharePlugin");
-const createSchemaValidation = require("../util/create-schema-validation");
-const ContainerPlugin = require("./ContainerPlugin");
-const ContainerReferencePlugin = require("./ContainerReferencePlugin");
-
-/** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ExternalsType} ExternalsType */
-/** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").ModuleFederationPluginOptions} ModuleFederationPluginOptions */
-/** @typedef {import("../../declarations/plugins/container/ModuleFederationPlugin").Shared} Shared */
-/** @typedef {import("../Compiler")} Compiler */
+/** @typedef {import("webpack/declarations/plugins/container/ModuleFederationPlugin").ExternalsType} ExternalsType */
+/** @typedef {import("webpack/declarations/plugins/container/ModuleFederationPlugin").ModuleFederationPluginOptions} ModuleFederationPluginOptions */
+/** @typedef {import("webpack/declarations/plugins/container/ModuleFederationPlugin").Shared} Shared */
+/** @typedef {import("webpack/Compiler")} Compiler */
 
 const validate = createSchemaValidation(
-	require("../../schemas/plugins/container/ModuleFederationPlugin.check.js"),
-	() => require("../../schemas/plugins/container/ModuleFederationPlugin.json"),
+	require("webpack/schemas/plugins/container/ModuleFederationPlugin.check.js"),
+	() => require("webpack/schemas/plugins/container/ModuleFederationPlugin.json"),
 	{
 		name: "Module Federation Plugin",
 		baseDataPath: "options"
 	}
 );
+
 class ModuleFederationPlugin {
+	_options: ModuleFederationPluginOptions;
+
 	/**
 	 * @param {ModuleFederationPluginOptions} options options
 	 */
-	constructor(options) {
+	constructor(options: ModuleFederationPluginOptions) {
 		validate(options);
 
 		this._options = options;
@@ -39,10 +40,10 @@ class ModuleFederationPlugin {
 	 * @param {Compiler} compiler the compiler instance
 	 * @returns {void}
 	 */
-	apply(compiler) {
+	apply(compiler: Compiler): void {
 		const { _options: options } = this;
 		const library = options.library || { type: "var", name: options.name };
-		const remoteType =
+		const remoteType: ExternalsType =
 			options.remoteType ||
 			(options.library && isValidExternalsType(options.library.type)
 				? /** @type {ExternalsType} */ (options.library.type)
@@ -91,4 +92,5 @@ class ModuleFederationPlugin {
 	}
 }
 
-module.exports = ModuleFederationPlugin;
+export default ModuleFederationPlugin;
+

@@ -3,20 +3,20 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
 
-"use strict";
+import createSchemaValidation from "webpack/lib/util/create-schema-validation";
+import ContainerEntryDependency from "./ContainerEntryDependency";
+import ContainerEntryModuleFactory from "./ContainerEntryModuleFactory";
+import ContainerExposedDependency from "./ContainerExposedDependency";
+import { parseOptions } from "./options";
+import ContainerPluginCheck from "webpack/schemas/plugins/container/ContainerPlugin.check.js";
+import ContainerPluginJson from "webpack/schemas/plugins/container/ContainerPlugin.json";
 
-const createSchemaValidation = require("../util/create-schema-validation");
-const ContainerEntryDependency = require("./ContainerEntryDependency");
-const ContainerEntryModuleFactory = require("./ContainerEntryModuleFactory");
-const ContainerExposedDependency = require("./ContainerExposedDependency");
-const { parseOptions } = require("./options");
-
-/** @typedef {import("../../declarations/plugins/container/ContainerPlugin").ContainerPluginOptions} ContainerPluginOptions */
-/** @typedef {import("../Compiler")} Compiler */
+/** @typedef {import("webpack/declarations/plugins/container/ContainerPlugin").ContainerPluginOptions} ContainerPluginOptions */
+/** @typedef {import("webpack/lib/Compiler")} Compiler */
 
 const validate = createSchemaValidation(
-	require("../../schemas/plugins/container/ContainerPlugin.check.js"),
-	() => require("../../schemas/plugins/container/ContainerPlugin.json"),
+	ContainerPluginCheck,
+	() => ContainerPluginJson,
 	{
 		name: "Container Plugin",
 		baseDataPath: "options"
@@ -29,7 +29,7 @@ class ContainerPlugin {
 	/**
 	 * @param {ContainerPluginOptions} options options
 	 */
-	constructor(options) {
+	constructor(options: ContainerPluginOptions) {
 		validate(options);
 
 		this._options = {
@@ -60,7 +60,7 @@ class ContainerPlugin {
 	 * @param {Compiler} compiler the compiler instance
 	 * @returns {void}
 	 */
-	apply(compiler) {
+	apply(compiler: Compiler): void {
 		const { name, exposes, shareScope, filename, library, runtime } =
 			this._options;
 
@@ -104,4 +104,5 @@ class ContainerPlugin {
 	}
 }
 
-module.exports = ContainerPlugin;
+export default ContainerPlugin;
+

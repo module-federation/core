@@ -1,29 +1,26 @@
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
-*/
+/**
+ * MIT License http://www.opensource.org/licenses/mit-license.php
+ * Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
+ */
 
-"use strict";
+import ExternalsPlugin from "webpack/lib/ExternalsPlugin";
+import RuntimeGlobals from "webpack/lib/RuntimeGlobals";
+import createSchemaValidation from "webpack/lib/util/create-schema-validation";
+import FallbackDependency from "./FallbackDependency";
+import FallbackItemDependency from "./FallbackItemDependency";
+import FallbackModuleFactory from "./FallbackModuleFactory";
+import RemoteModule from "./RemoteModule";
+import RemoteRuntimeModule from "./RemoteRuntimeModule";
+import RemoteToExternalDependency from "./RemoteToExternalDependency";
+import { parseOptions } from "./options";
 
-const ExternalsPlugin = require("../ExternalsPlugin");
-const RuntimeGlobals = require("../RuntimeGlobals");
-const createSchemaValidation = require("../util/create-schema-validation");
-const FallbackDependency = require("./FallbackDependency");
-const FallbackItemDependency = require("./FallbackItemDependency");
-const FallbackModuleFactory = require("./FallbackModuleFactory");
-const RemoteModule = require("./RemoteModule");
-const RemoteRuntimeModule = require("./RemoteRuntimeModule");
-const RemoteToExternalDependency = require("./RemoteToExternalDependency");
-const { parseOptions } = require("./options");
-
-/** @typedef {import("../../declarations/plugins/container/ContainerReferencePlugin").ContainerReferencePluginOptions} ContainerReferencePluginOptions */
-/** @typedef {import("../../declarations/plugins/container/ContainerReferencePlugin").RemotesConfig} RemotesConfig */
-/** @typedef {import("../Compiler")} Compiler */
+import { ContainerReferencePluginOptions, RemotesConfig } from "webpack/declarations/plugins/container/ContainerReferencePlugin";
+import { Compiler } from "webpack";
 
 const validate = createSchemaValidation(
-	require("../../schemas/plugins/container/ContainerReferencePlugin.check.js"),
+	require("webpack/schemas/plugins/container/ContainerReferencePlugin.check.js"),
 	() =>
-		require("../../schemas/plugins/container/ContainerReferencePlugin.json"),
+		require("webpack/schemas/plugins/container/ContainerReferencePlugin.json"),
 	{
 		name: "Container Reference Plugin",
 		baseDataPath: "options"
@@ -36,17 +33,20 @@ class ContainerReferencePlugin {
 	/**
 	 * @param {ContainerReferencePluginOptions} options options
 	 */
-	constructor(options) {
+	private _remoteType: any;
+	private _remotes: any;
+
+	constructor(options: ContainerReferencePluginOptions) {
 		validate(options);
 
 		this._remoteType = options.remoteType;
 		this._remotes = parseOptions(
 			options.remotes,
-			item => ({
+			(item: any) => ({
 				external: Array.isArray(item) ? item : [item],
 				shareScope: options.shareScope || "default"
 			}),
-			item => ({
+			(item: any) => ({
 				external: Array.isArray(item.external)
 					? item.external
 					: [item.external],
@@ -60,11 +60,11 @@ class ContainerReferencePlugin {
 	 * @param {Compiler} compiler the compiler instance
 	 * @returns {void}
 	 */
-	apply(compiler) {
+	apply(compiler: Compiler) {
 		const { _remotes: remotes, _remoteType: remoteType } = this;
 
 		/** @type {Record<string, string>} */
-		const remoteExternals = {};
+		const remoteExternals: Record<string, string> = {};
 		for (const [key, config] of remotes) {
 			let i = 0;
 			for (const external of config.external) {
@@ -80,7 +80,7 @@ class ContainerReferencePlugin {
 
 		compiler.hooks.compilation.tap(
 			"ContainerReferencePlugin",
-			(compilation, { normalModuleFactory }) => {
+			(compilation: any, { normalModuleFactory }: any) => {
 				compilation.dependencyFactories.set(
 					RemoteToExternalDependency,
 					normalModuleFactory
@@ -98,7 +98,7 @@ class ContainerReferencePlugin {
 
 				normalModuleFactory.hooks.factorize.tap(
 					"ContainerReferencePlugin",
-					data => {
+					(data: any) => {
 						if (!data.request.includes("!")) {
 							for (const [key, config] of remotes) {
 								if (
@@ -108,7 +108,7 @@ class ContainerReferencePlugin {
 								) {
 									return new RemoteModule(
 										data.request,
-										config.external.map((external, i) =>
+										config.external.map((external: any, i: number) =>
 											external.startsWith("internal ")
 												? external.slice(9)
 												: `webpack/container/reference/${key}${
@@ -126,7 +126,7 @@ class ContainerReferencePlugin {
 
 				compilation.hooks.runtimeRequirementInTree
 					.for(RuntimeGlobals.ensureChunkHandlers)
-					.tap("ContainerReferencePlugin", (chunk, set) => {
+					.tap("ContainerReferencePlugin", (chunk: any, set: any) => {
 						set.add(RuntimeGlobals.module);
 						set.add(RuntimeGlobals.moduleFactoriesAddOnly);
 						set.add(RuntimeGlobals.hasOwnProperty);
@@ -139,4 +139,4 @@ class ContainerReferencePlugin {
 	}
 }
 
-module.exports = ContainerReferencePlugin;
+export default ContainerReferencePlugin;

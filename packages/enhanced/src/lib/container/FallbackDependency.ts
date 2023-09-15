@@ -3,42 +3,37 @@
 	Author Tobias Koppers @sokra
 */
 
-"use strict";
-
-const Dependency = require("../Dependency");
-const makeSerializable = require("../util/makeSerializable");
-
-/** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
+import Dependency from "webpack/lib/Dependency";
+import makeSerializable from "webpack/lib/util/makeSerializable";
+import { ObjectDeserializerContext, ObjectSerializerContext } from "./types";
 
 class FallbackDependency extends Dependency {
 	/**
 	 * @param {string[]} requests requests
 	 */
-	constructor(requests) {
+	constructor(public requests: string[]) {
 		super();
-		this.requests = requests;
 	}
 
 	/**
 	 * @returns {string | null} an identifier to merge equal requests
 	 */
-	getResourceIdentifier() {
+	getResourceIdentifier(): string | null {
 		return `fallback ${this.requests.join(" ")}`;
 	}
 
-	get type() {
+	get type(): string {
 		return "fallback";
 	}
 
-	get category() {
+	get category(): string {
 		return "esm";
 	}
 
 	/**
 	 * @param {ObjectSerializerContext} context context
 	 */
-	serialize(context) {
+	serialize(context: ObjectSerializerContext): void {
 		const { write } = context;
 		write(this.requests);
 		super.serialize(context);
@@ -48,10 +43,10 @@ class FallbackDependency extends Dependency {
 	 * @param {ObjectDeserializerContext} context context
 	 * @returns {FallbackDependency} deserialize fallback dependency
 	 */
-	static deserialize(context) {
+	static deserialize(context: ObjectDeserializerContext): FallbackDependency {
 		const { read } = context;
 		const obj = new FallbackDependency(read());
-		obj.deserialize(context);
+		obj['deserialize'](context);
 		return obj;
 	}
 }
@@ -61,4 +56,5 @@ makeSerializable(
 	"webpack/lib/container/FallbackDependency"
 );
 
-module.exports = FallbackDependency;
+export default FallbackDependency;
+

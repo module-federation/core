@@ -5,15 +5,16 @@
 
 "use strict";
 
-const { OriginalSource, RawSource } = require("webpack-sources");
-const AsyncDependenciesBlock = require("webpack/lib/AsyncDependenciesBlock");
-const Module = require("webpack/lib/Module");
-const { JAVASCRIPT_MODULE_TYPE_DYNAMIC } = require("webpack/lib/ModuleTypeConstants");
-const RuntimeGlobals = require("webpack/lib/RuntimeGlobals");
-const Template = require("webpack/lib/Template");
-const StaticExportsDependency = require("webpack/lib/dependencies/StaticExportsDependency");
-const makeSerializable = require("webpack/lib/util/makeSerializable");
-const ContainerExposedDependency = require("./ContainerExposedDependency");
+import { OriginalSource, RawSource } from "webpack-sources";
+import AsyncDependenciesBlock from "webpack/lib/AsyncDependenciesBlock";
+import Module from "webpack/lib/Module";
+import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from "webpack/lib/ModuleTypeConstants";
+import RuntimeGlobals from "webpack/lib/RuntimeGlobals";
+import Template from "webpack/lib/Template";
+import StaticExportsDependency from "webpack/lib/dependencies/StaticExportsDependency";
+import makeSerializable from "webpack/lib/util/makeSerializable";
+import ContainerExposedDependency from "./ContainerExposedDependency";
+import exp from "constants";
 
 /** @typedef {import("webpack/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
 /** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
@@ -290,4 +291,4 @@ makeSerializable(
 	"webpack/lib/container/ContainerEntryModule"
 );
 
-module.exports = ContainerEntryModule;
+export default ContainerEntryModule;

@@ -8,16 +8,17 @@
 const ModuleDependency = require("../dependencies/ModuleDependency");
 const makeSerializable = require("../util/makeSerializable");
 
-class FallbackItemDependency extends ModuleDependency {
+class ProvideForSharedDependency extends ModuleDependency {
 	/**
-	 * @param {string} request request
+	 *
+	 * @param {string} request request string
 	 */
 	constructor(request) {
 		super(request);
 	}
 
 	get type() {
-		return "fallback item";
+		return "provide module for shared";
 	}
 
 	get category() {
@@ -26,8 +27,8 @@ class FallbackItemDependency extends ModuleDependency {
 }
 
 makeSerializable(
-	FallbackItemDependency,
-	"webpack/lib/container/FallbackItemDependency"
+	ProvideForSharedDependency,
+	"webpack/lib/sharing/ProvideForSharedDependency"
 );
 
-module.exports = FallbackItemDependency;
+module.exports = ProvideForSharedDependency;
