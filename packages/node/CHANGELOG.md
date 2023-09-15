@@ -2,6 +2,16 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.0.2-beta.2](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.1...node-2.0.2-beta.2) (2023-09-15)
+
+
+### Bug Fixes
+
+* Auto Public Path, detect multiple output targets ([65f17b1](https://github.com/module-federation/nextjs-mf/commit/65f17b189f37e0ad9e72bb0bf04463e9c5455929))
+* ensure custom FS works with target: node or async node preset ([a08fcab](https://github.com/module-federation/nextjs-mf/commit/a08fcab7dde903966d34be9dab0b34c8896948ca))
+
+
+
 ## [2.0.2-beta.1](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.0...node-2.0.2-beta.1) (2023-09-14)
 
 
