@@ -50,7 +50,7 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
       `
       let remoteContainerRegistry = {
         get url() {
-          return remoteReg[${JSON.stringify(ident)}];
+          return remoteReg[${JSON.stringify(ident)}] || remoteReg[${JSON.stringify(uniqueName)}];
         }
       };
       `,
