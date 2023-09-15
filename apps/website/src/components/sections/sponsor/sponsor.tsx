@@ -49,10 +49,12 @@ export default component$(() => {
         </div>
       </div>
 
-
       <div q:slot="background-no-overlay">
         <Line showEnd={false} class="absolute w-1/4 top-[25%] right-0" />
-        <Line showEnd={false} class="absolute w-52 bottom-0 left-[14%] rotate-90 origin-right -translate-x-full translate-y-1/2" />
+        <Line
+          showEnd={false}
+          class="absolute w-52 bottom-0 left-[14%] rotate-90 origin-right -translate-x-full translate-y-1/2"
+        />
       </div>
     </Section>
   );

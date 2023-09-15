@@ -23,33 +23,33 @@ export default component$((props: FooterProps) => {
       label: t('footer.menu.examples@@Examples'),
       href: 'https://github.com/module-federation/module-federation-examples',
       target: '_blank' as ButtonPropsTarget,
-      rel: 'noopener noreferrer'
+      rel: 'noopener noreferrer',
     },
     {
       label: t('footer.menu.practical-guide@@Practical guide'),
       href: 'https://module-federation.myshopify.com/products/practical-module-federation',
       target: '_blank' as ButtonPropsTarget,
-      rel: 'noopener noreferrer'
+      rel: 'noopener noreferrer',
     },
     {
       label: t('footer.menu.medusa@@Try Medusa'),
       href: 'https://app.medusa.codes/',
       target: '_blank' as ButtonPropsTarget,
-      rel: 'noopener noreferrer'
+      rel: 'noopener noreferrer',
     },
     {
       label: t('footer.menu.documentation@@Documentation'),
-      href: '/docs/en/mf-docs/0.19/getting-started/',
+      href: '/docs/en/mf-docs/0.2/getting-started/',
     },
     {
       label: t('footer.menu.sponsor@@Become a sponsor'),
       href: 'https://opencollective.com/module-federation-universe',
       target: '_blank' as ButtonPropsTarget,
-      rel: 'noopener noreferrer'
+      rel: 'noopener noreferrer',
     },
     {
       label: t('footer.menu.privacy-policy@@Privacy Policy'),
-      href: localizedUrl('/privacy-policy')
+      href: localizedUrl('/privacy-policy'),
     },
   ];
 

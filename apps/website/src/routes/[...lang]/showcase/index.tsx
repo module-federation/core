@@ -83,11 +83,7 @@ export default component$(() => {
       <Navbar theme={theme} activeHref={localizedUrl('showcase')} />
       <div class="block  h-[80px] md:h-[20px] z-[999]"></div>
       <Section padding={SectionPadding.TOP} theme={theme}>
-        <SectionHeader
-          q:slot="header"
-          title={title}
-          subtitle={subtitle}
-        />
+        <SectionHeader q:slot="header" title={title} subtitle={subtitle} />
 
         <div class="flex flex-col items-center gap-y-10">
           <div class="flex flex-col items-center gap-y-8">

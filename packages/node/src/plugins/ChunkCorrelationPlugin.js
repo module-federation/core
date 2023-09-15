@@ -67,7 +67,7 @@ function getRemoteModules(stats) {
 function getExposedModules(stats, exposedFile) {
   return stats.modules.filter((mod) => mod.name?.startsWith(exposedFile));
 }
-
+//eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getDependenciesOfChunk(stats, chunk) {
   return stats.chunks
     .filter((c) => c.children.includes(chunk.id))
@@ -90,7 +90,9 @@ function getExposed(stats, mod) {
   });
   const dependencies = stats.modules
     .filter((sharedModule) => {
-      if (sharedModule.moduleType !== 'consume-shared-module') return false;
+      if (sharedModule.moduleType !== 'consume-shared-module') {
+        return false;
+      }
       return sharedModule.issuerId === mod.id;
     })
     .map((sharedModule) => {
@@ -137,7 +139,9 @@ function searchReason(mod, check) {
 
 function searchIssuerAndReason(mod, check) {
   const foundIssuer = searchIssuer(mod, (issuer) => check(issuer));
-  if (foundIssuer) return foundIssuer;
+  if (foundIssuer) {
+    return foundIssuer;
+  }
   return searchReason(mod, (reason) =>
     reason.some((r) => check(r?.moduleIdentifier))
   );
@@ -430,12 +434,16 @@ class FederationStatsPlugin {
           // Loop through all entry points and if one matches the name of a federation plugin,
           // store the entry point in the 'container' variable.
           for (const [name, entry] of compilation.entrypoints) {
-            if (container) break;
+            if (container) {
+              break;
+            }
             federationOpts.name.includes(name) && (container = entry);
           }
 
           // If no matching entry point was found, exit the function early.
-          if (!container) return;
+          if (!container) {
+            return;
+          }
 
           // Get the chunk associated with the entry point.
           container = container?.getEntrypointChunk();
@@ -445,7 +453,7 @@ class FederationStatsPlugin {
             compilation.chunkGraph.getChunkEntryModulesIterable(container)
           );
 
-          const blocks = containerEntryModule.blocks;
+          const {blocks} = containerEntryModule;
 
           const exposedResolved = {};
           const builtExposes = {};
@@ -458,7 +466,9 @@ class FederationStatsPlugin {
             for (const dep of blockmodule.dependencies) {
               // Get the module that corresponds to the dependency.
               const connection = compilation.moduleGraph.getConnection(dep);
-              if(!connection) continue;
+              if (!connection) {
+                continue;
+              }
               const { module } = connection;
 
               const moduleChunks =
@@ -484,7 +494,9 @@ class FederationStatsPlugin {
                 const moduleActuallyNeedsChunk = rootModules.includes(module);
 
                 // If the chunk is not meant for this runtime or the module doesn't need the chunk, skip the rest of this iteration.
-                if (!isForThisRuntime || !moduleActuallyNeedsChunk) continue;
+                if (!isForThisRuntime || !moduleActuallyNeedsChunk) {
+                  continue;
+                }
 
                 // Add the files associated with the chunk to the 'builtExposes' object under the name of the exposed module.
                 builtExposes[dep.exposedName] = [

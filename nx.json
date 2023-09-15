@@ -7,7 +7,7 @@
   },
   "tasksRunnerOptions": {
     "default": {
-      "runner": "nx/tasks-runners/default",
+      "runner": "nx-cloud",
       "options": {
         "cacheableOperations": [
           "build",
@@ -15,7 +15,8 @@
           "test",
           "e2e",
           "build-storybook"
-        ]
+        ],
+        "accessToken": "NTVlZTRhOWItMGRjYy00YmJjLTllNzAtNDFkNzRhNzdjZDkwfHJlYWQtd3JpdGU="
       }
     }
   },
@@ -48,7 +49,8 @@
       "inputs": [
         "default",
         "^production",
-        "!{projectRoot}/.storybook/**/*"
+        "{projectRoot}/.storybook/**/*",
+        "{projectRoot}/tsconfig.storybook.json"
       ]
     }
   },
@@ -65,7 +67,9 @@
       "!{projectRoot}/jest.config.[jt]s",
       "!{projectRoot}/vitest.config.[jt]s",
       "!{projectRoot}/.storybook/**/*",
-      "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)"
+      "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)",
+      "!{projectRoot}/src/test-setup.[jt]s",
+      "!{projectRoot}/tsconfig.storybook.json"
     ],
     "sharedGlobals": [
       "{workspaceRoot}/babel.config.json"
@@ -78,11 +82,17 @@
   "generators": {
     "@nx/react": {
       "application": {
+        "style": "none",
         "linter": "eslint",
+        "bundler": "webpack",
         "babel": true
       },
       "library": {
+        "style": "none",
         "linter": "eslint"
+      },
+      "component": {
+        "style": "none"
       }
     },
     "@nx/next": {

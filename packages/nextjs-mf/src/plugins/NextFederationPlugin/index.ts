@@ -1,8 +1,10 @@
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Zackary Jackson @ScriptedAlchemy
-*/
+/**
+ * MIT License http://www.opensource.org/licenses/mit-license.php
+ * Author Zackary Jackson @ScriptedAlchemy
+ * This module contains the NextFederationPlugin class which is a webpack plugin that handles Next.js application federation using Module Federation.
+ */
 'use strict';
+
 
 import type {
   ModuleFederationPluginOptions,
@@ -19,7 +21,6 @@ import {
   retrieveDefaultShared,
   applyPathFixes,
 } from './next-fragments';
-
 import { parseRemotes } from '../../internal';
 import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
@@ -35,11 +36,11 @@ import {
   configureServerLibraryAndFilename,
   handleServerExternals,
 } from './apply-server-plugins';
+
 import { applyClientPlugins } from './apply-client-plugins';
 
 /**
- * NextFederationPlugin is a webpack plugin that handles Next.js application
- * federation using Module Federation.
+ * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
 export class NextFederationPlugin {
   _options: ModuleFederationPluginOptions;
@@ -56,10 +57,16 @@ export class NextFederationPlugin {
     this._extraOptions = extraOptions;
   }
 
+  /**
+   * The apply method is called by the webpack compiler and allows the plugin to hook into the webpack process.
+   * @param compiler The webpack compiler object.
+   */
   apply(compiler: Compiler) {
     // Validate the compiler options
     const validCompile = validateCompilerOptions(compiler);
-    if (!validCompile) return;
+    if (!validCompile) {
+      return;
+    }
     // Validate the NextFederationPlugin options
     validatePluginOptions(this._options);
 
@@ -99,6 +106,7 @@ export class NextFederationPlugin {
       applyClientPlugins(compiler, this._options, this._extraOptions);
     }
 
+    //@ts-ignore
     applyPathFixes(compiler, this._extraOptions);
 
     // @ts-ignore
@@ -144,23 +152,15 @@ export class NextFederationPlugin {
 
     // @ts-ignore
     new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
-    if (
-      Object.keys(this._options?.remotes || {}).length > 0 ||
-      Object.keys(this._options?.exposes || {}).length > 0
-    ) {
+    const hasRemotesOrExposes = Object.keys(this._options?.remotes || {}).length > 0 || Object.keys(this._options?.exposes || {}).length > 0;
+    if (hasRemotesOrExposes) {
       const commonOptions = {
         ...hostFederationPluginOptions,
         name: 'host_inner_ctn',
         runtime: isServer ? 'webpack-runtime' : 'webpack',
         filename: `host_inner_ctn.js`,
-        library: {
-          ...hostFederationPluginOptions.library,
-          name: this._options.name,
-        },
-        shared: {
-          ...hostFederationPluginOptions.shared,
-          ...defaultShared,
-        },
+        library: { ...hostFederationPluginOptions.library, name: this._options.name },
+        shared: { ...hostFederationPluginOptions.shared, ...defaultShared },
       };
 
       // @ts-ignore
@@ -173,4 +173,7 @@ export class NextFederationPlugin {
   }
 }
 
+/**
+ * Exporting NextFederationPlugin as default
+ */
 export default NextFederationPlugin;

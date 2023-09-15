@@ -7,9 +7,9 @@
  * You might need to authenticate with NPM before running this script.
  */
 
-import { readCachedProjectGraph } from '@nrwl/devkit';
-import { execSync } from 'child_process';
-import { readFileSync, writeFileSync } from 'fs';
+import { readCachedProjectGraph } from '@nx/devkit';
+import { execSync } from 'node:child_process';
+import { readFileSync, writeFileSync } from 'node:fs';
 import chalk from 'chalk';
 
 function invariant(condition, message) {

@@ -6,18 +6,12 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/node",
         "main": "packages/node/src/index.js",
         "tsConfig": "packages/node/tsconfig.lib.json",
-        "updateBuildableProjectDepsInPackageJson": true,
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "assets": [
-          "packages/node/*.md"
-        ]
+        "assets": ["packages/node/*.md"]
       },
       "dependsOn": [
         {
@@ -39,22 +33,15 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/node/**/*.js"
-        ]
+        "lintFilePatterns": ["packages/node/**/*.js"]
       }
     },
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": [
-          "node:npm",
-          "node:github"
-        ],
+        "postTargets": ["node:npm", "node:github"],
         "trackDeps": true,
         "push": true
       }
@@ -75,7 +62,5 @@
     }
   },
   "tags": [],
-  "implicitDependencies": [
-    "utils"
-  ]
+  "implicitDependencies": ["utils"]
 }

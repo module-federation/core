@@ -11,9 +11,11 @@ npm i -D @module-federation/native-federation-typescript
 This module provides two plugins:
 
 ### NativeFederationTypeScriptRemote
+
 This plugin is used to build the federated types.
 
 #### Configuration
+
 ```typescript
 {
     moduleFederationConfig: any; // the configuration same configuration provided to the module federation plugin, it is MANDATORY
@@ -27,10 +29,12 @@ This plugin is used to build the federated types.
 ```
 
 #### Additional configuration
+
 Note that, for Webpack, the plugin automatically inject the `devServer.static.directory` configuration.  
 For the other bundlers, you should configure it by yourself.
 
 ### NativeFederationTypeScriptHost
+
 This plugin is used to download the federated types.
 
 ### Configuration
@@ -50,30 +54,35 @@ This plugin is used to download the federated types.
 
 ```ts
 // vite.config.ts
-import {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} from '@module-federation/native-federation-typescript/vite'
+import { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } from '@module-federation/native-federation-typescript/vite';
 
 export default defineConfig({
   plugins: [
-    NativeFederationTypeScriptRemote({ /* options */ }),
-    NativeFederationTypeScriptHost({ /* options */ }),
+    NativeFederationTypeScriptRemote({
+      /* options */
+    }),
+    NativeFederationTypeScriptHost({
+      /* options */
+    }),
   ],
   /* ... */
-  server: { // This is needed to emulate the devServer.static.directory of WebPack and correctly serve the zip file
+  server: {
+    // This is needed to emulate the devServer.static.directory of WebPack and correctly serve the zip file
     /* ... */
     proxy: {
       '/@mf-types.zip': {
-          target: 'http://localhost:3000',
-          changeOrigin: true,
-          rewrite: () => `/@fs/${process.cwd()}/dist/@mf-types.zip`
-      }
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        rewrite: () => `/@fs/${process.cwd()}/dist/@mf-types.zip`,
+      },
     },
     fs: {
       /* ... */
-      allow: ['./dist']
+      allow: ['./dist'],
       /* ... */
-    }
-  }
-})
+    },
+  },
+});
 ```
 
 <br>
@@ -83,14 +92,18 @@ export default defineConfig({
 
 ```ts
 // rollup.config.js
-import {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} from '@module-federation/native-federation-typescript/rollup'
+import { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } from '@module-federation/native-federation-typescript/rollup';
 
 export default {
   plugins: [
-    NativeFederationTypeScriptRemote({ /* options */ }),
-    NativeFederationTypeScriptHost({ /* options */ }),
+    NativeFederationTypeScriptRemote({
+      /* options */
+    }),
+    NativeFederationTypeScriptHost({
+      /* options */
+    }),
   ],
-}
+};
 ```
 
 <br>
@@ -100,14 +113,18 @@ export default {
 
 ```ts
 // webpack.config.js
-const {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} = require('@module-federation/native-federation-typescript/webpack')
+const { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } = require('@module-federation/native-federation-typescript/webpack');
 module.exports = {
   /* ... */
   plugins: [
-    NativeFederationTypeScriptRemote({ /* options */ }),
-    NativeFederationTypeScriptHost({ /* options */ })
-  ]
-}
+    NativeFederationTypeScriptRemote({
+      /* options */
+    }),
+    NativeFederationTypeScriptHost({
+      /* options */
+    }),
+  ],
+};
 ```
 
 <br>
@@ -117,15 +134,19 @@ module.exports = {
 
 ```ts
 // esbuild.config.js
-import { build } from 'esbuild'
-import {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} from '@module-federation/native-federation-typescript/esbuild'
+import { build } from 'esbuild';
+import { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } from '@module-federation/native-federation-typescript/esbuild';
 
 build({
   plugins: [
-    NativeFederationTypeScriptRemote({ /* options */ }),
-    NativeFederationTypeScriptHost({ /* options */ })
+    NativeFederationTypeScriptRemote({
+      /* options */
+    }),
+    NativeFederationTypeScriptHost({
+      /* options */
+    }),
   ],
-})
+});
 ```
 
 <br>
@@ -135,14 +156,18 @@ build({
 
 ```ts
 // rspack.config.js
-const {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} = require('@module-federation/native-federation-typescript/rspack')
+const { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } = require('@module-federation/native-federation-typescript/rspack');
 module.exports = {
   /* ... */
   plugins: [
-    NativeFederationTypeScriptRemote({ /* options */ }),
-    NativeFederationTypeScriptHost({ /* options */ })
-  ]
-}
+    NativeFederationTypeScriptRemote({
+      /* options */
+    }),
+    NativeFederationTypeScriptHost({
+      /* options */
+    }),
+  ],
+};
 ```
 
 <br>
@@ -153,7 +178,7 @@ module.exports = {
 To have the type definitions automatically found for imports, add paths to the `compilerOptions` in the `tsconfig.json`:
 
 ```json
-{  
+{
   "paths": {
     "*": ["./@mf-types/*"]
   }

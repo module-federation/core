@@ -13,9 +13,11 @@ npm i -D @module-federation/native-federation-tests
 This module provides two plugins:
 
 ### NativeFederationTestsRemote
+
 This plugin is used to concat the components that will be used in tests.
 
 #### Configuration
+
 ```typescript
 {
     moduleFederationConfig: any; // the same configuration provided to the module federation plugin, it is MANDATORY
@@ -27,10 +29,12 @@ This plugin is used to concat the components that will be used in tests.
 ```
 
 #### Additional configuration
+
 Note that, for Webpack, the plugin automatically inject the `devServer.static.directory` configuration.  
 For the other bundlers, you should configure it by yourself.
 
 ### NativeFederationTestsHost
+
 This plugin is used to download the concatenated components mock that will be used for tests.
 
 ### Configuration
@@ -51,30 +55,35 @@ This plugin is used to download the concatenated components mock that will be us
 
 ```ts
 // vite.config.ts
-import {NativeFederationTestsHost, NativeFederationTestsRemote} from '@module-federation/native-federation-tests/vite'
+import { NativeFederationTestsHost, NativeFederationTestsRemote } from '@module-federation/native-federation-tests/vite';
 
 export default defineConfig({
   plugins: [
-    NativeFederationTestsRemote({ /* options */ }),
-    NativeFederationTestsHost({ /* options */ }),
+    NativeFederationTestsRemote({
+      /* options */
+    }),
+    NativeFederationTestsHost({
+      /* options */
+    }),
   ],
   /* ... */
-  server: { // This is needed to emulate the devServer.static.directory of WebPack and correctly serve the zip file
+  server: {
+    // This is needed to emulate the devServer.static.directory of WebPack and correctly serve the zip file
     /* ... */
     proxy: {
       '/@mf-types.zip': {
-          target: 'http://localhost:3000',
-          changeOrigin: true,
-          rewrite: () => `/@fs/${process.cwd()}/dist/@mf-types.zip`
-      }
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        rewrite: () => `/@fs/${process.cwd()}/dist/@mf-types.zip`,
+      },
     },
     fs: {
       /* ... */
-      allow: ['./dist']
+      allow: ['./dist'],
       /* ... */
-    }
-  }
-})
+    },
+  },
+});
 ```
 
 <br>
@@ -84,14 +93,18 @@ export default defineConfig({
 
 ```ts
 // rollup.config.js
-import {NativeFederationTestsHost, NativeFederationTestsRemote} from '@module-federation/native-federation-tests/rollup'
+import { NativeFederationTestsHost, NativeFederationTestsRemote } from '@module-federation/native-federation-tests/rollup';
 
 export default {
   plugins: [
-    NativeFederationTestsRemote({ /* options */ }),
-    NativeFederationTestsHost({ /* options */ }),
+    NativeFederationTestsRemote({
+      /* options */
+    }),
+    NativeFederationTestsHost({
+      /* options */
+    }),
   ],
-}
+};
 ```
 
 <br>
@@ -101,14 +114,18 @@ export default {
 
 ```ts
 // webpack.config.js
-const {NativeFederationTestsHost, NativeFederationTestsRemote} = require('@module-federation/native-federation-tests/webpack')
+const { NativeFederationTestsHost, NativeFederationTestsRemote } = require('@module-federation/native-federation-tests/webpack');
 module.exports = {
   /* ... */
   plugins: [
-    NativeFederationTestsRemote({ /* options */ }),
-    NativeFederationTestsHost({ /* options */ })
-  ]
-}
+    NativeFederationTestsRemote({
+      /* options */
+    }),
+    NativeFederationTestsHost({
+      /* options */
+    }),
+  ],
+};
 ```
 
 <br>
@@ -118,15 +135,19 @@ module.exports = {
 
 ```ts
 // esbuild.config.js
-import { build } from 'esbuild'
-import {NativeFederationTestsHost, NativeFederationTestsRemote} from '@module-federation/native-federation-tests/esbuild'
+import { build } from 'esbuild';
+import { NativeFederationTestsHost, NativeFederationTestsRemote } from '@module-federation/native-federation-tests/esbuild';
 
 build({
   plugins: [
-    NativeFederationTestsRemote({ /* options */ }),
-    NativeFederationTestsHost({ /* options */ })
+    NativeFederationTestsRemote({
+      /* options */
+    }),
+    NativeFederationTestsHost({
+      /* options */
+    }),
   ],
-})
+});
 ```
 
 <br>
@@ -137,15 +158,19 @@ build({
 
 ```ts
 // rspack.config.js
-const {NativeFederationTestsHost, NativeFederationTestsRemote} = require('@module-federation/native-federation-tests/rspack')
+const { NativeFederationTestsHost, NativeFederationTestsRemote } = require('@module-federation/native-federation-tests/rspack');
 
 module.exports = {
   /* ... */
   plugins: [
-    NativeFederationTestsRemote({ /* options */ }),
-    NativeFederationTestsHost({ /* options */ })
-  ]
-}
+    NativeFederationTestsRemote({
+      /* options */
+    }),
+    NativeFederationTestsHost({
+      /* options */
+    }),
+  ],
+};
 ```
 
 <br>
