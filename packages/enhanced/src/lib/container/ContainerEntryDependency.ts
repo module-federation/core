@@ -3,25 +3,22 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
 
-import { Dependency } from "webpack";
-import { makeSerializable } from "webpack/util";
-import { ExposeOptions } from "./ContainerEntryModule";
+import { Dependency, ExposeOptions } from "webpack";
+import { makeSerializable } from "webpack/lib/util";
 
-/**
- * @class ContainerEntryDependency
- * @extends {Dependency}
- */
-export default class ContainerEntryDependency extends Dependency {
-	name: string;
-	exposes: [string, ExposeOptions][];
-	shareScope: string;
+/** @typedef {import("webpack/lib/container/ContainerEntryModule").ExposeOptions} ExposeOptions */
+
+class ContainerEntryDependency extends Dependency {
+	private name: string;
+	private exposes: Array<[string, ExposeOptions]>;
+	private shareScope: string;
 
 	/**
-	 * @param name entry name
-	 * @param exposes list of exposed modules
-	 * @param shareScope name of the share scope
+	 * @param {string} name entry name
+	 * @param {[string, ExposeOptions][]} exposes list of exposed modules
+	 * @param {string} shareScope name of the share scope
 	 */
-	constructor(name: string, exposes: [string, ExposeOptions][], shareScope: string) {
+	constructor(name: string, exposes: Array<[string, ExposeOptions]>, shareScope: string) {
 		super();
 		this.name = name;
 		this.exposes = exposes;
@@ -29,17 +26,17 @@ export default class ContainerEntryDependency extends Dependency {
 	}
 
 	/**
-	 * @returns an identifier to merge equal requests
+	 * @returns {string | null} an identifier to merge equal requests
 	 */
-	getResourceIdentifier(): string | null {
+	override getResourceIdentifier(): string | null {
 		return `container-entry-${this.name}`;
 	}
 
-	get type(): string {
+	override get type(): string {
 		return "container entry";
 	}
 
-	get category(): string {
+	override get category(): string {
 		return "esm";
 	}
 }
@@ -48,5 +45,7 @@ makeSerializable(
 	ContainerEntryDependency,
 	"webpack/lib/container/ContainerEntryDependency"
 );
+
+export = ContainerEntryDependency;
 
 
