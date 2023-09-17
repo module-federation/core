@@ -3,8 +3,9 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
 
-import { Dependency, ExposeOptions } from "webpack";
-import { makeSerializable } from "webpack/lib/util";
+import { Dependency } from "webpack";
+import {ExposeOptions} from "./ContainerEntryModule";
+import makeSerializable from "webpack/lib/util/makeSerializable";
 
 /** @typedef {import("webpack/lib/container/ContainerEntryModule").ExposeOptions} ExposeOptions */
 
