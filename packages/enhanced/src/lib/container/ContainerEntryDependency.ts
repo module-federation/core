@@ -7,7 +7,7 @@ import { Dependency } from "webpack";
 import {ExposeOptions} from "./ContainerEntryModule";
 import makeSerializable from "webpack/lib/util/makeSerializable";
 
-/** @typedef {import("webpack/lib/container/ContainerEntryModule").ExposeOptions} ExposeOptions */
+/** @typedef {import("./ContainerEntryModule").ExposeOptions} ExposeOptions */
 
 class ContainerEntryDependency extends Dependency {
 	private name: string;
@@ -47,6 +47,6 @@ makeSerializable(
 	"webpack/lib/container/ContainerEntryDependency"
 );
 
-export = ContainerEntryDependency;
+export default ContainerEntryDependency;
 
 

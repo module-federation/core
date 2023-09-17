@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "declaration": true,
-    "types": ["node"],
+    "types": ["node","webpack","../../node_modules"],
     "resolveJsonModule": true
   },
   "include": ["src/**/*.ts","./global.d.ts"],

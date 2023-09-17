@@ -7,13 +7,22 @@
 
 import { OriginalSource, RawSource } from "webpack-sources";
 import AsyncDependenciesBlock from "webpack/lib/AsyncDependenciesBlock";
-import { Module, Dependency, WebpackError, WebpackOptionsNormalized, Compilation,Resolver,ModuleGraph, ChunkGraph} from "webpack";
+import { Dependency, Resolver, WebpackError, WebpackOptionsNormalized, Compilation, Compiler, Chunk,ChunkGraph} from "webpack";
+import Module from 'webpack/lib/Module'
 import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from "webpack/lib/ModuleTypeConstants";
 import RuntimeGlobals from "webpack/lib/RuntimeGlobals";
 import Template from "webpack/lib/Template";
 import StaticExportsDependency from "webpack/lib/dependencies/StaticExportsDependency";
 import makeSerializable from "webpack/lib/util/makeSerializable";
 import ContainerExposedDependency from "./ContainerExposedDependency";
+import type { ObjectSerializerContext , ObjectDeserializerContext} from "webpack/lib/serialization/ObjectMiddleware";
+import type RequestShortener from 'webpack/lib/RequestShortener'
+import type { LibIdentOptions, CodeGenerationContext, CodeGenerationResult, NeedBuildContext } from "webpack/lib/Module";
+import type { ResolverWithOptions } from "webpack/lib/ResolverFactory";
+import type  Hash  from "webpack/lib/util/Hash";
+import type { InputFileSystem } from "webpack/lib/util/fs";
+
+
 
 /** @typedef {import("webpack/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
 /** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
@@ -46,7 +55,7 @@ const SOURCE_TYPES = new Set(["javascript"]);
 
 class ContainerEntryModule extends Module {
 	private _name: string;
-	private _exposes: Array<[string, ExposeOptions]>;
+	private _exposes: [string, ExposeOptions][];
 	private _shareScope: string;
 
 	/**
@@ -54,7 +63,7 @@ class ContainerEntryModule extends Module {
 	 * @param {[string, ExposeOptions][]} exposes list of exposed modules
 	 * @param {string} shareScope name of the share scope
 	 */
-	constructor(name: string, exposes: Array<[string, ExposeOptions]>, shareScope: string) {
+	constructor(name: string, exposes: [string, ExposeOptions][], shareScope: string) {
 		super(JAVASCRIPT_MODULE_TYPE_DYNAMIC, null);
 		this._name = name;
 		this._exposes = exposes;
@@ -112,8 +121,7 @@ class ContainerEntryModule extends Module {
 	 * @param {function(WebpackError=): void} callback callback function
 	 * @returns {void}
 	 */
-	// override build(options: WebpackOptionsNormalized, compilation: Compilation, resolver: ResolverWithOptions, fs: InputFileSystem, callback: (error?: WebpackError) => void): void {
-	override build(options: WebpackOptionsNormalized, compilation: Compilation, resolver: Resolver, fs: object, callback: (error?: WebpackError) => void): void {
+	override build(options: WebpackOptionsNormalized, compilation: Compilation, resolver: Resolver, fs: InputFileSystem, callback: (error?: WebpackError) => void): void {
 		this.buildMeta = {};
 		this.buildInfo = {
 			strict: true,
@@ -267,14 +275,14 @@ class ContainerEntryModule extends Module {
 	 * @param {string=} type the source type for which the size should be estimated
 	 * @returns {number} the estimated size of the module (must be non-zero)
 	 */
-	size(type?: string): number {
+	override size(type?: string): number {
 		return 42;
 	}
 
 	/**
 	 * @param {ObjectSerializerContext} context context
 	 */
-	serialize(context: ObjectSerializerContext): void {
+	override serialize(context: ObjectSerializerContext): void {
 		const { write } = context;
 		write(this._name);
 		write(this._exposes);
@@ -299,5 +307,7 @@ makeSerializable(
 	"webpack/lib/container/ContainerEntryModule"
 );
 
-module.exports = ContainerEntryModule;
+export default  ContainerEntryModule;
+
+
 
