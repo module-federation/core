@@ -5,8 +5,8 @@
 
 'use strict';
 
-import { Compiler } from "webpack/lib/container/ModuleFederationPlugin";
-import { ModuleFederationPluginOptions } from "./ModuleFederationPluginTypes";
+import { Compiler } from 'webpack/lib/container/ModuleFederationPlugin';
+import { ModuleFederationPluginOptions } from './ModuleFederationPluginTypes';
 
 import isValidExternalsType from 'webpack/schemas/plugins/container/ExternalsType.check.js';
 import SharePlugin from '../sharing/SharePlugin';
@@ -32,9 +32,9 @@ const validate = createSchemaValidation(
 
 class ModuleFederationPlugin {
   private _options: ModuleFederationPluginOptions;
-/**
-	 * @param {ModuleFederationPluginOptions} options options
-	 */
+  /**
+   * @param {ModuleFederationPluginOptions} options options
+   */
   constructor(options: ModuleFederationPluginOptions) {
     validate(options);
 
@@ -46,7 +46,7 @@ class ModuleFederationPlugin {
    * @param {Compiler} compiler the compiler instance
    * @returns {void}
    */
-  apply(compiler:Compiler):void {
+  apply(compiler: Compiler): void {
     const { _options: options } = this;
     const library = options.library || { type: 'var', name: options.name };
     const remoteType =
@@ -68,6 +68,7 @@ class ModuleFederationPlugin {
           : Object.keys(options.exposes).length > 0)
       ) {
         new ContainerPlugin({
+          //@ts-ignore
           name: options.name,
           library,
           filename: options.filename,
@@ -83,6 +84,7 @@ class ModuleFederationPlugin {
           : Object.keys(options.remotes).length > 0)
       ) {
         new ContainerReferencePlugin({
+          //@ts-ignore
           remoteType,
           shareScope: options.shareScope,
           remotes: options.remotes,

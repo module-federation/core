@@ -4,24 +4,31 @@
 */
 
 'use strict';
-
-const ModuleFactory = require('webpack/lib/ModuleFactory');
-const FallbackModule = require('./FallbackModule');
+import ModuleFactory, {
+  Dependency,
+  ModuleFactoryCreateData,
+  ModuleFactoryResult,
+} from 'webpack/lib/ModuleFactory';
+import FallbackModule from './FallbackModule';
+import FallbackDependency from './FallbackDependency';
 
 /** @typedef {import("webpack/lib/ModuleFactory").ModuleFactoryCreateData} ModuleFactoryCreateData */
 /** @typedef {import("webpack/lib/ModuleFactory").ModuleFactoryResult} ModuleFactoryResult */
 /** @typedef {import("./FallbackDependency")} FallbackDependency */
 
-module.exports = class FallbackModuleFactory extends ModuleFactory {
+export default class FallbackModuleFactory extends ModuleFactory {
   /**
    * @param {ModuleFactoryCreateData} data data object
    * @param {function((Error | null)=, ModuleFactoryResult=): void} callback callback
    * @returns {void}
    */
-  create({ dependencies: [dependency] }, callback) {
-    const dep = /** @type {FallbackDependency} */ (dependency);
+  override create(
+    data: ModuleFactoryCreateData,
+    callback: (error: Error | null, result?: ModuleFactoryResult) => void,
+  ): void {
+    const dependency = data.dependencies[0] as FallbackDependency;
     callback(null, {
-      module: new FallbackModule(dep.requests),
+      module: new FallbackModule(dependency.requests),
     });
   }
-};
+}

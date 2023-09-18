@@ -5,15 +5,28 @@
 
 'use strict';
 
-const { RawSource } = require('webpack-sources');
-const Module = require('webpack/lib/Module');
-const {
-  WEBPACK_MODULE_TYPE_FALLBACK,
-} = require('webpack/lib/ModuleTypeConstants');
-const RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
-const Template = require('webpack/lib/Template');
-const makeSerializable = require('webpack/lib/util/makeSerializable');
-const FallbackItemDependency = require('./FallbackItemDependency');
+import { RawSource } from 'webpack-sources';
+import Module, {
+  RequestShortener,
+  LibIdentOptions,
+  CodeGenerationContext,
+  CodeGenerationResult,
+  NeedBuildContext,
+  WebpackError,
+  ResolverWithOptions,
+  InputFileSystem,
+  Compilation,
+  WebpackOptions,
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+} from 'webpack/lib/Module';
+import ChunkGraph from 'webpack/lib/ChunkGraph';
+import Chunk from 'webpack/lib/Chunk';
+import { WEBPACK_MODULE_TYPE_FALLBACK } from 'webpack/lib/ModuleTypeConstants';
+import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import Template from 'webpack/lib/Template';
+import makeSerializable from 'webpack/lib/util/makeSerializable';
+import FallbackItemDependency from './FallbackItemDependency';
 
 /** @typedef {import("webpack/lib/webpack/lib/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
 /** @typedef {import("webpack/lib/Chunk")} Chunk */
@@ -36,10 +49,13 @@ const TYPES = new Set(['javascript']);
 const RUNTIME_REQUIREMENTS = new Set([RuntimeGlobals.module]);
 
 class FallbackModule extends Module {
+  private requests: string[];
+  private _identifier: string;
+
   /**
    * @param {string[]} requests list of requests to choose one
    */
-  constructor(requests) {
+  constructor(requests: string[]) {
     super(WEBPACK_MODULE_TYPE_FALLBACK);
     this.requests = requests;
     this._identifier = `fallback ${this.requests.join(' ')}`;
@@ -48,7 +64,7 @@ class FallbackModule extends Module {
   /**
    * @returns {string} a unique identifier of the module
    */
-  identifier() {
+  override identifier(): string {
     return this._identifier;
   }
 
@@ -56,7 +72,7 @@ class FallbackModule extends Module {
    * @param {RequestShortener} requestShortener the request shortener
    * @returns {string} a user readable identifier of the module
    */
-  readableIdentifier(requestShortener) {
+  override readableIdentifier(requestShortener: RequestShortener): string {
     return this._identifier;
   }
 
@@ -64,7 +80,7 @@ class FallbackModule extends Module {
    * @param {LibIdentOptions} options options
    * @returns {string | null} an identifier for library inclusion
    */
-  libIdent(options) {
+  override libIdent(options: LibIdentOptions): string | null {
     return `${this.layer ? `(${this.layer})/` : ''}webpack/container/fallback/${
       this.requests[0]
     }/and ${this.requests.length - 1} more`;
@@ -75,7 +91,10 @@ class FallbackModule extends Module {
    * @param {Compilation} compilation the compilation
    * @returns {boolean} true, if the chunk is ok for the module
    */
-  chunkCondition(chunk, { chunkGraph }) {
+  override chunkCondition(
+    chunk: Chunk,
+    { chunkGraph }: { chunkGraph: ChunkGraph },
+  ): boolean {
     return chunkGraph.getNumberOfEntryModules(chunk) > 0;
   }
 
@@ -84,7 +103,10 @@ class FallbackModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
-  needBuild(context, callback) {
+  override needBuild(
+    context: NeedBuildContext,
+    callback: (error: WebpackError | null, result?: boolean) => void,
+  ): void {
     callback(null, !this.buildInfo);
   }
 
@@ -96,7 +118,13 @@ class FallbackModule extends Module {
    * @param {function(WebpackError=): void} callback callback function
    * @returns {void}
    */
-  build(options, compilation, resolver, fs, callback) {
+  override build(
+    options: WebpackOptions,
+    compilation: Compilation,
+    resolver: ResolverWithOptions,
+    fs: InputFileSystem,
+    callback: (error?: WebpackError) => void,
+  ): void {
     this.buildMeta = {};
     this.buildInfo = {
       strict: true,
@@ -113,14 +141,14 @@ class FallbackModule extends Module {
    * @param {string=} type the source type for which the size should be estimated
    * @returns {number} the estimated size of the module (must be non-zero)
    */
-  size(type) {
+  override size(type?: string): number {
     return this.requests.length * 5 + 42;
   }
 
   /**
    * @returns {Set<string>} types available (do not mutate)
    */
-  getSourceTypes() {
+  override getSourceTypes(): Set<string> {
     return TYPES;
   }
 
@@ -128,8 +156,13 @@ class FallbackModule extends Module {
    * @param {CodeGenerationContext} context context for code generation
    * @returns {CodeGenerationResult} result
    */
-  codeGeneration({ runtimeTemplate, moduleGraph, chunkGraph }) {
+  override codeGeneration({
+    runtimeTemplate,
+    moduleGraph,
+    chunkGraph,
+  }: CodeGenerationContext): CodeGenerationResult {
     const ids = this.dependencies.map((dep) =>
+      //@ts-ignore
       chunkGraph.getModuleId(moduleGraph.getModule(dep)),
     );
     const code = Template.asString([
@@ -162,7 +195,7 @@ class FallbackModule extends Module {
   /**
    * @param {ObjectSerializerContext} context context
    */
-  serialize(context) {
+  override serialize(context: ObjectSerializerContext): void {
     const { write } = context;
     write(this.requests);
     super.serialize(context);
@@ -172,7 +205,7 @@ class FallbackModule extends Module {
    * @param {ObjectDeserializerContext} context context
    * @returns {FallbackModule} deserialized fallback module
    */
-  static deserialize(context) {
+  static deserialize(context: ObjectDeserializerContext): FallbackModule {
     const { read } = context;
     const obj = new FallbackModule(read());
     obj.deserialize(context);
@@ -182,4 +215,4 @@ class FallbackModule extends Module {
 
 makeSerializable(FallbackModule, 'webpack/lib/container/FallbackModule');
 
-module.exports = FallbackModule;
+export default FallbackModule;

@@ -12,7 +12,18 @@ import Template from 'webpack/lib/Template';
 import StaticExportsDependency from 'webpack/lib/dependencies/StaticExportsDependency';
 import makeSerializable from 'webpack/lib/util/makeSerializable';
 import ContainerExposedDependency from './ContainerExposedDependency';
-import Module, {InputFileSystem, Compilation, LibIdentOptions, NeedBuildContext, ObjectDeserializerContext, ObjectSerializerContext, WebpackError, RequestShortener, WebpackOptions, ResolverWithOptions } from 'webpack/lib/Module';
+import Module, {
+  InputFileSystem,
+  Compilation,
+  LibIdentOptions,
+  NeedBuildContext,
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+  WebpackError,
+  RequestShortener,
+  WebpackOptions,
+  ResolverWithOptions,
+} from 'webpack/lib/Module';
 import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
 import Dependency from 'webpack/lib/Dependency';
 
@@ -112,7 +123,10 @@ class ContainerEntryModule extends Module {
    */
   override needBuild(
     context: any | NeedBuildContext,
-    callback:  (arg0: (WebpackError | null) | undefined, arg1: boolean | undefined) => void,
+    callback: (
+      arg0: (WebpackError | null) | undefined,
+      arg1: boolean | undefined,
+    ) => void,
   ): void {
     const baseContext = context as NeedBuildContext;
     callback(null, !this.buildMeta);

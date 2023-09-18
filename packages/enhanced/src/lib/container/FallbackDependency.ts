@@ -5,7 +5,10 @@
 
 'use strict';
 
-import Dependency, { ObjectDeserializerContext, ObjectSerializerContext } from 'webpack/lib/Dependency';
+import Dependency, {
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+} from 'webpack/lib/Dependency';
 import makeSerializable from 'webpack/lib/util/makeSerializable';
 
 /** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
@@ -64,5 +67,3 @@ makeSerializable(
 );
 
 export default FallbackDependency;
-
-
