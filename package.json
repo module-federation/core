@@ -183,7 +183,7 @@
     "postcss-url": "10.1.3",
     "prettier": "3.0.3",
     "prettier-eslint": "15.0.1",
-    "qwik-nx": "1.0.8",
+    "qwik-nx": "1.0.9",
     "qwik-speak": "0.12.2",
     "react-refresh": "0.14.0",
     "stopword": "2.0.8",
