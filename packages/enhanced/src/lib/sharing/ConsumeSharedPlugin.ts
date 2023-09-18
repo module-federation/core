@@ -23,20 +23,20 @@ import {
   getRequiredVersionFromDescriptionFile,
 } from './utils';
 import { ConsumeOptions } from './ConsumeSharedModule';
-import { ConsumeSharedPluginOptions } from './ConsumeSharedPluginTypes';
+import { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
 import Compiler from 'webpack/lib/Compiler';
 import { SemVerRange } from 'webpack/lib/util/semver';
 
-/** @typedef {import("webpack/declarations/plugins/sharing/ConsumeSharedPlugin").ConsumeSharedPluginOptions} ConsumeSharedPluginOptions */
-/** @typedef {import("webpack/declarations/plugins/sharing/ConsumeSharedPlugin").ConsumesConfig} ConsumesConfig */
+/** @typedef {import("../../declarations/plugins/sharing/ConsumeSharedPlugin").ConsumeSharedPluginOptions} ConsumeSharedPluginOptions */
+/** @typedef {import("../../declarations/plugins/sharing/ConsumeSharedPlugin").ConsumesConfig} ConsumesConfig */
 /** @typedef {import("webpack/lib/Compiler")} Compiler */
 /** @typedef {import("webpack/lib/ResolverFactory").ResolveOptionsWithDependencyType} ResolveOptionsWithDependencyType */
 /** @typedef {import("./ConsumeSharedModule").ConsumeOptions} ConsumeOptions */
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
-  require('../../schemas/plugins/sharing/ConsumeSharedPlugin.check.js'),
-  () => require('../../schemas/plugins/sharing/ConsumeSharedPlugin.json'),
+  require('webpack/schemas/plugins/sharing/ConsumeSharedPlugin.check.js'),
+  () => require('webpack/schemas/plugins/sharing/ConsumeSharedPlugin.json'),
   {
     name: 'Consume Shared Plugin',
     baseDataPath: 'options',
@@ -202,7 +202,7 @@ class ConsumeSharedPlugin {
               if (config.requiredVersion !== undefined) {
                 return resolve(`${config.requiredVersion}`);
               }
-          
+
               let packageName = config.packageName;
               if (packageName === undefined) {
                 if (/^(\/|[A-Za-z]:|\\\\)/.test(request)) {

@@ -30,4 +30,3 @@ makeSerializable(
 );
 
 export default ProvideForSharedDependency;
-

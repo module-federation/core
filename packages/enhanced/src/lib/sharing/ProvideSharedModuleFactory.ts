@@ -3,14 +3,13 @@
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 
-'use strict';
-
-const ModuleFactory = require('../ModuleFactory');
-const ProvideSharedModule = require('./ProvideSharedModule');
-
-/** @typedef {import("../ModuleFactory").ModuleFactoryCreateData} ModuleFactoryCreateData */
-/** @typedef {import("../ModuleFactory").ModuleFactoryResult} ModuleFactoryResult */
-/** @typedef {import("./ProvideSharedDependency")} ProvideSharedDependency */
+import ModuleFactory from 'webpack/lib/ModuleFactory';
+import ProvideSharedModule from './ProvideSharedModule';
+import {
+  ModuleFactoryCreateData,
+  ModuleFactoryResult,
+} from 'webpack/lib/ModuleFactory';
+import ProvideSharedDependency from './ProvideSharedDependency';
 
 class ProvideSharedModuleFactory extends ModuleFactory {
   /**
@@ -18,8 +17,12 @@ class ProvideSharedModuleFactory extends ModuleFactory {
    * @param {function((Error | null)=, ModuleFactoryResult=): void} callback callback
    * @returns {void}
    */
-  create(data, callback) {
-    const dep = /** @type {ProvideSharedDependency} */ (data.dependencies[0]);
+  override create(
+    data: ModuleFactoryCreateData,
+    callback: (error: Error | null, result?: ModuleFactoryResult) => void,
+  ): void {
+    const dep: ProvideSharedDependency = data
+      .dependencies[0] as ProvideSharedDependency;
     callback(null, {
       module: new ProvideSharedModule(
         dep.shareScope,
@@ -32,4 +35,4 @@ class ProvideSharedModuleFactory extends ModuleFactory {
   }
 }
 
-module.exports = ProvideSharedModuleFactory;
+export default ProvideSharedModuleFactory;

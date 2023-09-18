@@ -5,7 +5,10 @@
 
 import Dependency from 'webpack/lib/Dependency';
 import makeSerializable from 'webpack/lib/util/makeSerializable';
-import { ObjectDeserializerContext, ObjectSerializerContext } from "webpack/lib/serialization/ObjectMiddleware";
+import {
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+} from 'webpack/lib/serialization/ObjectMiddleware';
 
 class ProvideSharedDependency extends Dependency {
   shareScope: string;
@@ -21,7 +24,13 @@ class ProvideSharedDependency extends Dependency {
    * @param {string} request request
    * @param {boolean} eager true, if this is an eager dependency
    */
-  constructor(shareScope: string, name: string, version: string | false, request: string, eager: boolean) {
+  constructor(
+    shareScope: string,
+    name: string,
+    version: string | false,
+    request: string,
+    eager: boolean,
+  ) {
     super();
     this.shareScope = shareScope;
     this.name = name;
@@ -59,7 +68,9 @@ class ProvideSharedDependency extends Dependency {
    * @param {ObjectDeserializerContext} context context
    * @returns {ProvideSharedDependency} deserialize fallback dependency
    */
-  static deserialize(context: ObjectDeserializerContext): ProvideSharedDependency {
+  static deserialize(
+    context: ObjectDeserializerContext,
+  ): ProvideSharedDependency {
     const { read } = context;
     const obj = new ProvideSharedDependency(
       read(),

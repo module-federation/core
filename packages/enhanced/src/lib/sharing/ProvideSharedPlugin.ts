@@ -5,20 +5,37 @@
 
 'use strict';
 
-const WebpackError = require('../WebpackError');
-const { parseOptions } = require('../container/options');
-const createSchemaValidation = require('../util/create-schema-validation');
-const ProvideForSharedDependency = require('./ProvideForSharedDependency');
-const ProvideSharedDependency = require('./ProvideSharedDependency');
-const ProvideSharedModuleFactory = require('./ProvideSharedModuleFactory');
+import WebpackError from 'webpack/lib/WebpackError';
+import { parseOptions } from '../container/options';
+import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
+import ProvideForSharedDependency from './ProvideForSharedDependency';
+import ProvideSharedDependency from './ProvideSharedDependency';
+import ProvideSharedModuleFactory from './ProvideSharedModuleFactory';
+import Compiler from 'webpack/lib/Compiler';
+import Compilation from 'webpack/lib/Compilation';
+import {
+  ProvideSharedPluginOptions,
+} from '../../declarations/plugins/sharing/ProvideSharedPlugin';
 
-/** @typedef {import("../../declarations/plugins/sharing/ProvideSharedPlugin").ProvideSharedPluginOptions} ProvideSharedPluginOptions */
-/** @typedef {import("../Compilation")} Compilation */
-/** @typedef {import("../Compiler")} Compiler */
+export type ProvideOptions = {
+  shareKey: string;
+  shareScope: string;
+  version: string | undefined | false;
+  eager: boolean;
+};
+export type ResolvedProvideMap = Map<string, {
+  config: ProvideOptions;
+  version: string | undefined | false;
+}>;
+
+/** @typedef {import("./ProvideSharedPlugin").ProvideSharedPluginOptions} ProvideSharedPluginOptions */
+/** @typedef {import("webpack/lib/Compilation")} Compilation */
+/** @typedef {import("webpack/lib/Compiler")} Compiler */
 
 const validate = createSchemaValidation(
-  require('../../schemas/plugins/sharing/ProvideSharedPlugin.check.js'),
-  () => require('../../schemas/plugins/sharing/ProvideSharedPlugin.json'),
+  //eslint-disable-next-line
+  require('webpack/schemas/plugins/sharing/ProvideSharedPlugin.check.js'),
+  () => require('webpack/schemas/plugins/sharing/ProvideSharedPlugin.json'),
   {
     name: 'Provide Shared Plugin',
     baseDataPath: 'options',
@@ -36,34 +53,34 @@ const validate = createSchemaValidation(
 /** @typedef {Map<string, { config: ProvideOptions, version: string | undefined | false }>} ResolvedProvideMap */
 
 class ProvideSharedPlugin {
+  private _provides: [string, ProvideOptions][];
+
   /**
    * @param {ProvideSharedPluginOptions} options options
    */
-  constructor(options) {
+  constructor(options: ProvideSharedPluginOptions) {
     validate(options);
-
-    this._provides = /** @type {[string, ProvideOptions][]} */ (
-      parseOptions(
-        options.provides,
-        (item) => {
-          if (Array.isArray(item))
-            throw new Error('Unexpected array of provides');
-          /** @type {ProvideOptions} */
-          const result = {
-            shareKey: item,
-            version: undefined,
-            shareScope: options.shareScope || 'default',
-            eager: false,
-          };
-          return result;
-        },
-        (item) => ({
-          shareKey: item.shareKey,
-          version: item.version,
-          shareScope: item.shareScope || options.shareScope || 'default',
-          eager: !!item.eager,
-        }),
-      )
+    //@ts-ignore
+    this._provides = parseOptions(
+      options.provides,
+      (item) => {
+        if (Array.isArray(item))
+          throw new Error('Unexpected array of provides');
+        /** @type {ProvideOptions} */
+        const result = {
+          shareKey: item,
+          version: undefined,
+          shareScope: options.shareScope || 'default',
+          eager: false,
+        };
+        return result;
+      },
+      (item) => ({
+        shareKey: item.shareKey,
+        version: item.version,
+        shareScope: item.shareScope || options.shareScope || 'default',
+        eager: !!item.eager,
+      }),
     );
     this._provides.sort(([a], [b]) => {
       if (a < b) return -1;
@@ -77,19 +94,16 @@ class ProvideSharedPlugin {
    * @param {Compiler} compiler the compiler instance
    * @returns {void}
    */
-  apply(compiler) {
-    /** @type {WeakMap<Compilation, ResolvedProvideMap>} */
-    const compilationData = new WeakMap();
+  apply(compiler: Compiler): void {
+    const compilationData: WeakMap<Compilation, ResolvedProvideMap> =
+      new WeakMap();
 
     compiler.hooks.compilation.tap(
       'ProvideSharedPlugin',
-      (compilation, { normalModuleFactory }) => {
-        /** @type {ResolvedProvideMap} */
-        const resolvedProvideMap = new Map();
-        /** @type {Map<string, ProvideOptions>} */
-        const matchProvides = new Map();
-        /** @type {Map<string, ProvideOptions>} */
-        const prefixMatchProvides = new Map();
+      (compilation: Compilation, { normalModuleFactory }) => {
+        const resolvedProvideMap: ResolvedProvideMap = new Map();
+        const matchProvides: Map<string, ProvideOptions> = new Map();
+        const prefixMatchProvides: Map<string, ProvideOptions> = new Map();
         for (const [request, config] of this._provides) {
           if (/^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(request)) {
             // relative request
@@ -113,10 +127,10 @@ class ProvideSharedPlugin {
         }
         compilationData.set(compilation, resolvedProvideMap);
         const provideSharedModule = (
-          key,
-          config,
-          resource,
-          resourceResolveData,
+          key: string,
+          config: ProvideOptions,
+          resource: string,
+          resourceResolveData: any,
         ) => {
           let version = config.version;
           if (version === undefined) {
@@ -151,13 +165,13 @@ class ProvideSharedPlugin {
         normalModuleFactory.hooks.module.tap(
           'ProvideSharedPlugin',
           (module, { resource, resourceResolveData }, resolveData) => {
-            if (resolvedProvideMap.has(resource)) {
+            if (resource && resolvedProvideMap.has(resource)) {
               return module;
             }
             const { request } = resolveData;
             {
               const config = matchProvides.get(request);
-              if (config !== undefined) {
+              if (config !== undefined && resource) {
                 provideSharedModule(
                   request,
                   config,
@@ -168,7 +182,7 @@ class ProvideSharedPlugin {
               }
             }
             for (const [prefix, config] of prefixMatchProvides) {
-              if (request.startsWith(prefix)) {
+              if (request.startsWith(prefix) && resource) {
                 const remainder = request.slice(prefix.length);
                 provideSharedModule(
                   resource,
@@ -189,14 +203,14 @@ class ProvideSharedPlugin {
     );
     compiler.hooks.finishMake.tapPromise(
       'ProvideSharedPlugin',
-      (compilation) => {
+      async (compilation: Compilation) => {
         const resolvedProvideMap = compilationData.get(compilation);
-        if (!resolvedProvideMap) return Promise.resolve();
-        return Promise.all(
+        if (!resolvedProvideMap) return;
+        await Promise.all(
           Array.from(
             resolvedProvideMap,
             ([resource, { config, version }]) =>
-              new Promise((resolve, reject) => {
+              new Promise<void>((resolve, reject) => {
                 compilation.addInclude(
                   compiler.context,
                   new ProvideSharedDependency(
@@ -209,20 +223,20 @@ class ProvideSharedPlugin {
                   {
                     name: undefined,
                   },
-                  (err) => {
+                  (err: WebpackError | null | undefined) => {
                     if (err) return reject(err);
                     resolve();
                   },
                 );
               }),
           ),
-        ).then(() => {});
+        );
       },
     );
 
     compiler.hooks.compilation.tap(
       'ProvideSharedPlugin',
-      (compilation, { normalModuleFactory }) => {
+      (compilation: Compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
           ProvideForSharedDependency,
           normalModuleFactory,
@@ -236,5 +250,4 @@ class ProvideSharedPlugin {
     );
   }
 }
-
-module.exports = ProvideSharedPlugin;
+export default ProvideSharedPlugin;

@@ -10,18 +10,26 @@ import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import makeSerializable from 'webpack/lib/util/makeSerializable';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 
-import { WebpackOptionsNormalized as WebpackOptions } from "webpack/declarations/WebpackOptions";
-import Chunk from "webpack/lib/Chunk";
-import ChunkGraph from "webpack/lib/ChunkGraph";
-import ChunkGroup from "webpack/lib/ChunkGroup";
-import Compilation from "webpack/lib/Compilation";
-import { CodeGenerationContext, CodeGenerationResult, LibIdentOptions, NeedBuildContext } from "webpack/lib/Module";
-import RequestShortener from "webpack/lib/RequestShortener";
-import { ResolverWithOptions } from "webpack/lib/ResolverFactory";
-import WebpackError from "webpack/lib/WebpackError";
-import { ObjectDeserializerContext, ObjectSerializerContext } from "webpack/lib/serialization/ObjectMiddleware";
-import Hash from "webpack/lib/util/Hash";
-import { InputFileSystem } from "webpack/lib/util/fs";
+import { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';
+import Chunk from 'webpack/lib/Chunk';
+import ChunkGraph from 'webpack/lib/ChunkGraph';
+import ChunkGroup from 'webpack/lib/ChunkGroup';
+import Compilation from 'webpack/lib/Compilation';
+import {
+  CodeGenerationContext,
+  CodeGenerationResult,
+  LibIdentOptions,
+  NeedBuildContext,
+} from 'webpack/lib/Module';
+import RequestShortener from 'webpack/lib/RequestShortener';
+import { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
+import WebpackError from 'webpack/lib/WebpackError';
+import {
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+} from 'webpack/lib/serialization/ObjectMiddleware';
+import Hash from 'webpack/lib/util/Hash';
+import { InputFileSystem } from 'webpack/lib/util/fs';
 
 /** @typedef {import("../../declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
 /** @typedef {import("../Chunk")} Chunk */
@@ -61,7 +69,13 @@ class ProvideSharedModule extends Module {
    * @param {string} request request to the provided module
    * @param {boolean} eager include the module in sync way
    */
-  constructor(shareScope: string, name: string, version: string | false, request: string, eager: boolean) {
+  constructor(
+    shareScope: string,
+    name: string,
+    version: string | false,
+    request: string,
+    eager: boolean,
+  ) {
     super(WEBPACK_MODULE_TYPE_PROVIDE);
     this._shareScope = shareScope;
     this._name = name;
@@ -102,7 +116,10 @@ class ProvideSharedModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
-  override needBuild(context: NeedBuildContext, callback: (error?: WebpackError | null, needsRebuild?: boolean) => void): void {
+  override needBuild(
+    context: NeedBuildContext,
+    callback: (error?: WebpackError | null, needsRebuild?: boolean) => void,
+  ): void {
     callback(null, !this.buildInfo);
   }
 
@@ -114,7 +131,13 @@ class ProvideSharedModule extends Module {
    * @param {function(WebpackError=): void} callback callback function
    * @returns {void}
    */
-  override build(options: WebpackOptions, compilation: Compilation, resolver: ResolverWithOptions, fs: InputFileSystem, callback: (error?: WebpackError) => void): void {
+  override build(
+    options: WebpackOptions,
+    compilation: Compilation,
+    resolver: ResolverWithOptions,
+    fs: InputFileSystem,
+    callback: (error?: WebpackError) => void,
+  ): void {
     this.buildMeta = {};
     this.buildInfo = {
       strict: true,
@@ -152,7 +175,11 @@ class ProvideSharedModule extends Module {
    * @param {CodeGenerationContext} context context for code generation
    * @returns {CodeGenerationResult} result
    */
-  override codeGeneration({ runtimeTemplate, moduleGraph, chunkGraph }: CodeGenerationContext): CodeGenerationResult {
+  override codeGeneration({
+    runtimeTemplate,
+    moduleGraph,
+    chunkGraph,
+  }: CodeGenerationContext): CodeGenerationResult {
     const runtimeRequirements = new Set([RuntimeGlobals.initializeSharing]);
     const code = `register(${JSON.stringify(this._name)}, ${JSON.stringify(
       this._version || '0',
