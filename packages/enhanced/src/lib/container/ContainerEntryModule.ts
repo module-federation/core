@@ -118,36 +118,37 @@ class ContainerEntryModule extends Module {
    */
   override build(options: WebpackOptionsNormalized, compilation: Compilation, resolver: Resolver, fs: InputFileSystem, callback: (err?: WebpackError) => void): void {
     this.buildMeta = {};
-    this.buildInfo = {
-      strict: true,
-      topLevelDeclarations: new Set(["moduleMap", "get", "init"])
-    };
-    this.buildMeta.exportsType = "namespace";
+		this.buildInfo = {
+			strict: true,
+			topLevelDeclarations: new Set(["moduleMap", "get", "init"])
+		};
+		this.buildMeta.exportsType = "namespace";
 
-    this.clearDependenciesAndBlocks();
+		this.clearDependenciesAndBlocks();
 
-    for (const [name, options] of this._exposes) {
-      const block = new AsyncDependenciesBlock(
-        {
-          name: options.name
-        },
-        { name },
-        options.import[options.import.length - 1]
-      );
-      let idx = 0;
-      for (const request of options.import) {
-        const dep = new ContainerExposedDependency(name, request);
-        dep.loc = {
-          name,
-          index: idx++
-        };
+		for (const [name, options] of this._exposes) {
+			const block = new AsyncDependenciesBlock(
+				{
+					name: options.name
+				},
+				{ name },
+				options.import[options.import.length - 1]
+			);
+			let idx = 0;
+			for (const request of options.import) {
+				const dep = new ContainerExposedDependency(name, request);
+				dep.loc = {
+					name,
+					index: idx++
+				};
 
-		block.addDependency(dep as unknown as Dependency);
-	}
-      this.addBlock(block as unknown as AsyncDependenciesBlock);
-    }
-	this.addDependency(new StaticExportsDependency(["get", "init"], false) as unknown as Dependency);
-    callback();
+				block.addDependency(dep as unknown as Dependency);
+			}
+			this.addBlock(block as unknown as AsyncDependenciesBlock);
+		}
+		this.addDependency(new StaticExportsDependency(["get", "init"], false) as unknown as Dependency);
+
+		callback();
   }
 
 	/**
