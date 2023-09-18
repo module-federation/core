@@ -3,20 +3,20 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
 
-import createSchemaValidation from "webpack/lib/util/create-schema-validation";
-import ContainerEntryDependency from "./ContainerEntryDependency";
-import ContainerEntryModuleFactory from "./ContainerEntryModuleFactory";
-import ContainerExposedDependency from "./ContainerExposedDependency";
-import { parseOptions } from "./options";
-import ContainerPluginCheck from "webpack/schemas/plugins/container/ContainerPlugin.check.js";
-import ContainerPluginJson from "webpack/schemas/plugins/container/ContainerPlugin.json";
+"use strict";
+
+const createSchemaValidation = require("webpack/lib/util/create-schema-validation");
+const ContainerEntryDependency = require("./ContainerEntryDependency");
+const ContainerEntryModuleFactory = require("./ContainerEntryModuleFactory");
+const ContainerExposedDependency = require("./ContainerExposedDependency");
+const { parseOptions } = require("./options");
 
 /** @typedef {import("webpack/declarations/plugins/container/ContainerPlugin").ContainerPluginOptions} ContainerPluginOptions */
 /** @typedef {import("webpack/lib/Compiler")} Compiler */
 
 const validate = createSchemaValidation(
-	ContainerPluginCheck,
-	() => ContainerPluginJson,
+	require("webpack/schemas/plugins/container/ContainerPlugin.check.js"),
+	() => require("webpack/schemas/plugins/container/ContainerPlugin.json"),
 	{
 		name: "Container Plugin",
 		baseDataPath: "options"
@@ -29,7 +29,7 @@ class ContainerPlugin {
 	/**
 	 * @param {ContainerPluginOptions} options options
 	 */
-	constructor(options: ContainerPluginOptions) {
+	constructor(options) {
 		validate(options);
 
 		this._options = {
@@ -60,7 +60,7 @@ class ContainerPlugin {
 	 * @param {Compiler} compiler the compiler instance
 	 * @returns {void}
 	 */
-	apply(compiler: Compiler): void {
+	apply(compiler) {
 		const { name, exposes, shareScope, filename, library, runtime } =
 			this._options;
 
@@ -104,5 +104,4 @@ class ContainerPlugin {
 	}
 }
 
-export default ContainerPlugin;
-
+module.exports = ContainerPlugin;
