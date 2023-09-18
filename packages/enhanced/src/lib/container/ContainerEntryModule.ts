@@ -7,7 +7,7 @@
 
 import { OriginalSource, RawSource } from "webpack-sources";
 import AsyncDependenciesBlock from "webpack/lib/AsyncDependenciesBlock";
-import { Dependency, Resolver, WebpackError, WebpackOptionsNormalized, Compilation, Compiler, Chunk,ChunkGraph} from "webpack";
+import { Dependency, Resolver, WebpackError, WebpackOptionsNormalized, Compilation, Compiler, Chunk,ChunkGraph, } from "webpack";
 import Module from 'webpack/lib/Module'
 import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from "webpack/lib/ModuleTypeConstants";
 import RuntimeGlobals from "webpack/lib/RuntimeGlobals";
@@ -110,6 +110,10 @@ class ContainerEntryModule extends Module {
 	 * @returns {void}
 	 */
 	override needBuild(context: NeedBuildContext, callback: (error?: WebpackError | null, needsRebuild?: boolean) => void): void {
+		// Fix TS iwssue: Property 'needBuild' in type 'ContainerEntryModule' is not assignable to the same property in base type 'Module'.
+		// The issue is caused by incompatible types of parameters 'callback' and 'callback'.
+		// To fix this, we need to change the type of 'error' parameter in the callback from 'import("/Users/zackjackson/lulu_dev/universe/node_modules/webpack/types").WebpackError | null | undefined' to 'import("/Users/zackjackson/lulu_dev/universe/node_modules/webpack/lib/WebpackError") | null | undefined'.
+		// We also need to make the 'details' property in 'WebpackError' required.
 		return callback(null, !this.buildMeta);
 	}
 
