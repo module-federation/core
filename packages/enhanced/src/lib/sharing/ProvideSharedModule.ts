@@ -3,14 +3,25 @@
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 
-'use strict';
+import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
+import Module from 'webpack/lib/Module';
+import { WEBPACK_MODULE_TYPE_PROVIDE } from 'webpack/lib/ModuleTypeConstants';
+import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import makeSerializable from 'webpack/lib/util/makeSerializable';
+import ProvideForSharedDependency from './ProvideForSharedDependency';
 
-const AsyncDependenciesBlock = require('../AsyncDependenciesBlock');
-const Module = require('../Module');
-const { WEBPACK_MODULE_TYPE_PROVIDE } = require('../ModuleTypeConstants');
-const RuntimeGlobals = require('../RuntimeGlobals');
-const makeSerializable = require('../util/makeSerializable');
-const ProvideForSharedDependency = require('./ProvideForSharedDependency');
+import { WebpackOptionsNormalized as WebpackOptions } from "webpack/declarations/WebpackOptions";
+import Chunk from "webpack/lib/Chunk";
+import ChunkGraph from "webpack/lib/ChunkGraph";
+import ChunkGroup from "webpack/lib/ChunkGroup";
+import Compilation from "webpack/lib/Compilation";
+import { CodeGenerationContext, CodeGenerationResult, LibIdentOptions, NeedBuildContext } from "webpack/lib/Module";
+import RequestShortener from "webpack/lib/RequestShortener";
+import { ResolverWithOptions } from "webpack/lib/ResolverFactory";
+import WebpackError from "webpack/lib/WebpackError";
+import { ObjectDeserializerContext, ObjectSerializerContext } from "webpack/lib/serialization/ObjectMiddleware";
+import Hash from "webpack/lib/util/Hash";
+import { InputFileSystem } from "webpack/lib/util/fs";
 
 /** @typedef {import("../../declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
 /** @typedef {import("../Chunk")} Chunk */
@@ -31,15 +42,26 @@ const ProvideForSharedDependency = require('./ProvideForSharedDependency');
 
 const TYPES = new Set(['share-init']);
 
+/**
+ * @class
+ * @extends {Module}
+ */
 class ProvideSharedModule extends Module {
+  private _shareScope: string;
+  private _name: string;
+  private _version: string | false;
+  private _request: string;
+  private _eager: boolean;
+
   /**
+   * @constructor
    * @param {string} shareScope shared scope name
    * @param {string} name shared key
    * @param {string | false} version version
    * @param {string} request request to the provided module
    * @param {boolean} eager include the module in sync way
    */
-  constructor(shareScope, name, version, request, eager) {
+  constructor(shareScope: string, name: string, version: string | false, request: string, eager: boolean) {
     super(WEBPACK_MODULE_TYPE_PROVIDE);
     this._shareScope = shareScope;
     this._name = name;
@@ -51,7 +73,7 @@ class ProvideSharedModule extends Module {
   /**
    * @returns {string} a unique identifier of the module
    */
-  identifier() {
+  override identifier(): string {
     return `provide module (${this._shareScope}) ${this._name}@${this._version} = ${this._request}`;
   }
 
@@ -59,7 +81,7 @@ class ProvideSharedModule extends Module {
    * @param {RequestShortener} requestShortener the request shortener
    * @returns {string} a user readable identifier of the module
    */
-  readableIdentifier(requestShortener) {
+  override readableIdentifier(requestShortener: RequestShortener): string {
     return `provide shared module (${this._shareScope}) ${this._name}@${
       this._version
     } = ${requestShortener.shorten(this._request)}`;
@@ -69,7 +91,7 @@ class ProvideSharedModule extends Module {
    * @param {LibIdentOptions} options options
    * @returns {string | null} an identifier for library inclusion
    */
-  libIdent(options) {
+  override libIdent(options: LibIdentOptions): string | null {
     return `${this.layer ? `(${this.layer})/` : ''}webpack/sharing/provide/${
       this._shareScope
     }/${this._name}`;
@@ -80,7 +102,7 @@ class ProvideSharedModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
-  needBuild(context, callback) {
+  override needBuild(context: NeedBuildContext, callback: (error?: WebpackError | null, needsRebuild?: boolean) => void): void {
     callback(null, !this.buildInfo);
   }
 
@@ -92,7 +114,7 @@ class ProvideSharedModule extends Module {
    * @param {function(WebpackError=): void} callback callback function
    * @returns {void}
    */
-  build(options, compilation, resolver, fs, callback) {
+  override build(options: WebpackOptions, compilation: Compilation, resolver: ResolverWithOptions, fs: InputFileSystem, callback: (error?: WebpackError) => void): void {
     this.buildMeta = {};
     this.buildInfo = {
       strict: true,
@@ -115,14 +137,14 @@ class ProvideSharedModule extends Module {
    * @param {string=} type the source type for which the size should be estimated
    * @returns {number} the estimated size of the module (must be non-zero)
    */
-  size(type) {
+  override size(type?: string): number {
     return 42;
   }
 
   /**
    * @returns {Set<string>} types available (do not mutate)
    */
-  getSourceTypes() {
+  override getSourceTypes(): Set<string> {
     return TYPES;
   }
 
@@ -130,7 +152,7 @@ class ProvideSharedModule extends Module {
    * @param {CodeGenerationContext} context context for code generation
    * @returns {CodeGenerationResult} result
    */
-  codeGeneration({ runtimeTemplate, moduleGraph, chunkGraph }) {
+  override codeGeneration({ runtimeTemplate, moduleGraph, chunkGraph }: CodeGenerationContext): CodeGenerationResult {
     const runtimeRequirements = new Set([RuntimeGlobals.initializeSharing]);
     const code = `register(${JSON.stringify(this._name)}, ${JSON.stringify(
       this._version || '0',
@@ -164,7 +186,7 @@ class ProvideSharedModule extends Module {
   /**
    * @param {ObjectSerializerContext} context context
    */
-  serialize(context) {
+  override serialize(context: ObjectSerializerContext): void {
     const { write } = context;
     write(this._shareScope);
     write(this._name);
@@ -178,7 +200,7 @@ class ProvideSharedModule extends Module {
    * @param {ObjectDeserializerContext} context context
    * @returns {ProvideSharedModule} deserialize fallback dependency
    */
-  static deserialize(context) {
+  static deserialize(context: ObjectDeserializerContext): ProvideSharedModule {
     const { read } = context;
     const obj = new ProvideSharedModule(read(), read(), read(), read(), read());
     obj.deserialize(context);
@@ -191,4 +213,4 @@ makeSerializable(
   'webpack/lib/sharing/ProvideSharedModule',
 );
 
-module.exports = ProvideSharedModule;
+export default ProvideSharedModule;

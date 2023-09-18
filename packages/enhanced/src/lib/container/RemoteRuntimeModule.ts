@@ -40,7 +40,9 @@ class RemoteRuntimeModule extends RuntimeModule {
         const dep = module.dependencies[0];
         const externalModule = moduleGraph.getModule(dep);
         const externalModuleId =
-        chunkGraph && externalModule ? chunkGraph.getModuleId(externalModule) : undefined;
+          chunkGraph && externalModule
+            ? chunkGraph.getModuleId(externalModule)
+            : undefined;
         if (id !== undefined) {
           //@ts-ignore
           remotes.push(id);

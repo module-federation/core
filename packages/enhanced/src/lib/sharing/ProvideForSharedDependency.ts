@@ -3,25 +3,23 @@
 	Author Tobias Koppers @sokra
 */
 
-'use strict';
-
-const ModuleDependency = require('../dependencies/ModuleDependency');
-const makeSerializable = require('../util/makeSerializable');
+import ModuleDependency from 'webpack/lib/dependencies/ModuleDependency';
+import makeSerializable from 'webpack/lib/util/makeSerializable';
 
 class ProvideForSharedDependency extends ModuleDependency {
   /**
    *
-   * @param {string} request request string
+   * @param request request string
    */
-  constructor(request) {
+  constructor(request: string) {
     super(request);
   }
 
-  get type() {
+  override get type(): string {
     return 'provide module for shared';
   }
 
-  get category() {
+  override get category(): string {
     return 'esm';
   }
 }
@@ -31,4 +29,5 @@ makeSerializable(
   'webpack/lib/sharing/ProvideForSharedDependency',
 );
 
-module.exports = ProvideForSharedDependency;
+export default ProvideForSharedDependency;
+

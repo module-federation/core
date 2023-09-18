@@ -3,30 +3,36 @@
 	Author Tobias Koppers @sokra
 */
 
-'use strict';
-
-const RuntimeGlobals = require('../RuntimeGlobals');
-const RuntimeModule = require('../RuntimeModule');
-const Template = require('../Template');
-const {
+import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import Template from 'webpack/lib/Template';
+import {
   parseVersionRuntimeCode,
   versionLtRuntimeCode,
   rangeToStringRuntimeCode,
   satisfyRuntimeCode,
-} = require('../util/semver');
+} from 'webpack/lib/util/semver';
+import RuntimeModule from 'webpack/lib/RuntimeModule';
+import Module from 'webpack/lib/Module';
+import ConsumeSharedModule from './ConsumeSharedModule';
+import ChunkGraph from 'webpack/lib/ChunkGraph';
+import Compilation from 'webpack/lib/Compilation';
+import Chunk from 'webpack/lib/Chunk';
+import { Source } from 'webpack-sources';
 
 /** @typedef {import("webpack-sources").Source} Source */
-/** @typedef {import("../Chunk")} Chunk */
-/** @typedef {import("../ChunkGraph")} ChunkGraph */
-/** @typedef {import("../Compilation")} Compilation */
-/** @typedef {import("../Module")} Module */
+/** @typedef {import("webpack/lib/Chunk")} Chunk */
+/** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
+/** @typedef {import("webpack/lib/Compilation")} Compilation */
+/** @typedef {import("webpack/lib/Module")} Module */
 /** @typedef {import("./ConsumeSharedModule")} ConsumeSharedModule */
 
 class ConsumeSharedRuntimeModule extends RuntimeModule {
+  private _runtimeRequirements: ReadonlySet<string>;
+
   /**
    * @param {ReadonlySet<string>} runtimeRequirements runtime requirements
    */
-  constructor(runtimeRequirements) {
+  constructor(runtimeRequirements: ReadonlySet<string>) {
     super('consumes', RuntimeModule.STAGE_ATTACH);
     this._runtimeRequirements = runtimeRequirements;
   }
@@ -34,24 +40,28 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
   /**
    * @returns {string | null} runtime code
    */
-  generate() {
-    const compilation = /** @type {Compilation} */ (this.compilation);
-    const chunkGraph = /** @type {ChunkGraph} */ (this.chunkGraph);
+  override generate(): string | null {
+    //@ts-ignore
+    const compilation: Compilation = this.compilation;
+    //@ts-ignore
+    const chunkGraph: ChunkGraph = this.chunkGraph;
     const { runtimeTemplate, codeGenerationResults } = compilation;
-    const chunkToModuleMapping = {};
-    /** @type {Map<string | number, Source>} */
-    const moduleIdToSourceMapping = new Map();
-    /** @type {(string | number)[]} */
-    const initialConsumes = [];
+    const chunkToModuleMapping: Record<string, any> = {};
+    const moduleIdToSourceMapping: Map<string | number, Source> = new Map();
+    const initialConsumes: (string | number)[] = [];
     /**
      *
      * @param {Iterable<Module>} modules modules
      * @param {Chunk} chunk the chunk
      * @param {(string | number)[]} list list of ids
      */
-    const addModules = (modules, chunk, list) => {
+    const addModules = (
+      modules: Iterable<Module>,
+      chunk: Chunk,
+      list: (string | number)[],
+    ) => {
       for (const m of modules) {
-        const module = /** @type {ConsumeSharedModule} */ (m);
+        const module: ConsumeSharedModule = m as ConsumeSharedModule;
         const id = chunkGraph.getModuleId(module);
         list.push(id);
         moduleIdToSourceMapping.set(
@@ -64,17 +74,21 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
         );
       }
     };
-    for (const chunk of /** @type {Chunk} */ (this.chunk).getAllAsyncChunks()) {
+    for (const chunk of this.chunk?.getAllAsyncChunks() || []) {
       const modules = chunkGraph.getChunkModulesIterableBySourceType(
         chunk,
         'consume-shared',
       );
       if (!modules) continue;
-      addModules(modules, chunk, (chunkToModuleMapping[chunk.id] = []));
+      if (!chunk.id) continue;
+
+      addModules(
+        modules,
+        chunk,
+        (chunkToModuleMapping[chunk.id.toString()] = []),
+      );
     }
-    for (const chunk of /** @type {Chunk} */ (
-      this.chunk
-    ).getAllInitialChunks()) {
+    for (const chunk of this.chunk?.getAllInitialChunks() || []) {
       const modules = chunkGraph.getChunkModulesIterableBySourceType(
         chunk,
         'consume-shared',
@@ -82,7 +96,9 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
       if (!modules) continue;
       addModules(modules, chunk, initialConsumes);
     }
+
     if (moduleIdToSourceMapping.size === 0) return null;
+
     return Template.asString([
       parseVersionRuntimeCode(runtimeTemplate),
       versionLtRuntimeCode(runtimeTemplate),
@@ -372,4 +388,4 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
   }
 }
 
-module.exports = ConsumeSharedRuntimeModule;
+export default ConsumeSharedRuntimeModule;

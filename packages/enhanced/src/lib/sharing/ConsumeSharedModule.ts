@@ -5,34 +5,88 @@
 
 'use strict';
 
-const { RawSource } = require('webpack-sources');
-const AsyncDependenciesBlock = require('../AsyncDependenciesBlock');
-const Module = require('../Module');
-const {
-  WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE,
-} = require('../ModuleTypeConstants');
-const RuntimeGlobals = require('../RuntimeGlobals');
-const makeSerializable = require('../util/makeSerializable');
-const { rangeToString, stringifyHoley } = require('../util/semver');
-const ConsumeSharedFallbackDependency = require('./ConsumeSharedFallbackDependency');
+import { RawSource } from 'webpack-sources';
+import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
+import Module, {
+  WebpackOptions,
+  Compilation,
+  UpdateHashContext,
+  CodeGenerationContext,
+  CodeGenerationResult,
+  LibIdentOptions,
+  NeedBuildContext,
+  RequestShortener,
+  ResolverWithOptions,
+  WebpackError,
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+  Hash,
+  InputFileSystem,
+} from 'webpack/lib/Module';
+import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from 'webpack/lib/ModuleTypeConstants';
+import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import makeSerializable from 'webpack/lib/util/makeSerializable';
+import { rangeToString, stringifyHoley } from 'webpack/lib/util/semver';
+import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
+export type ConsumeOptions = {
+  /**
+   * fallback request
+   */
+  import?: string | undefined;
+  /**
+   * resolved fallback request
+   */
+  importResolved?: string | undefined;
+  /**
+   * global share key
+   */
+  shareKey: string;
+  /**
+   * share scope
+   */
+  shareScope: string;
+  /**
+   * version requirement
+   */
+  requiredVersion:
+    | import('webpack/lib/util/semver').SemVerRange
+    | false
+    | undefined;
+  /**
+   * package name to determine required version automatically
+   */
+  packageName: string;
+  /**
+   * don't use shared version even if version isn't valid
+   */
+  strictVersion: boolean;
+  /**
+   * use single global version
+   */
+  singleton: boolean;
+  /**
+   * include the fallback module in a sync way
+   */
+  eager: boolean;
+};
 
-/** @typedef {import("../../declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
-/** @typedef {import("../ChunkGraph")} ChunkGraph */
-/** @typedef {import("../ChunkGroup")} ChunkGroup */
-/** @typedef {import("../Compilation")} Compilation */
-/** @typedef {import("../Dependency").UpdateHashContext} UpdateHashContext */
-/** @typedef {import("../Module").CodeGenerationContext} CodeGenerationContext */
-/** @typedef {import("../Module").CodeGenerationResult} CodeGenerationResult */
-/** @typedef {import("../Module").LibIdentOptions} LibIdentOptions */
-/** @typedef {import("../Module").NeedBuildContext} NeedBuildContext */
-/** @typedef {import("../RequestShortener")} RequestShortener */
-/** @typedef {import("../ResolverFactory").ResolverWithOptions} ResolverWithOptions */
-/** @typedef {import("../WebpackError")} WebpackError */
-/** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
-/** @typedef {import("../util/Hash")} Hash */
-/** @typedef {import("../util/fs").InputFileSystem} InputFileSystem */
-/** @typedef {import("../util/semver").SemVerRange} SemVerRange */
+/** @typedef {import("webpack/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
+/** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
+/** @typedef {import("webpack/lib/ChunkGroup")} ChunkGroup */
+/** @typedef {import("webpack/lib/Compilation")} Compilation */
+/** @typedef {import("webpack/lib/Dependency").UpdateHashContext} UpdateHashContext */
+/** @typedef {import("webpack/lib/Module").CodeGenerationContext} CodeGenerationContext */
+/** @typedef {import("webpack/lib/Module").CodeGenerationResult} CodeGenerationResult */
+/** @typedef {import("webpack/lib/Module").LibIdentOptions} LibIdentOptions */
+/** @typedef {import("webpack/lib/Module").NeedBuildContext} NeedBuildContext */
+/** @typedef {import("webpack/lib/RequestShortener")} RequestShortener */
+/** @typedef {import("webpack/lib/ResolverFactory").ResolverWithOptions} ResolverWithOptions */
+/** @typedef {import("webpack/lib/WebpackError")} WebpackError */
+/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
+/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
+/** @typedef {import("webpack/lib/util/Hash")} Hash */
+/** @typedef {import("webpack/lib/util/fs").InputFileSystem} InputFileSystem */
+/** @typedef {import("webpack/lib/util/semver").SemVerRange} SemVerRange */
 
 /**
  * @typedef {Object} ConsumeOptions
@@ -50,11 +104,13 @@ const ConsumeSharedFallbackDependency = require('./ConsumeSharedFallbackDependen
 const TYPES = new Set(['consume-shared']);
 
 class ConsumeSharedModule extends Module {
+  options: ConsumeOptions;
+
   /**
    * @param {string} context context
    * @param {ConsumeOptions} options consume options
    */
-  constructor(context, options) {
+  constructor(context: string, options: ConsumeOptions) {
     super(WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE, context);
     this.options = options;
   }
@@ -62,7 +118,7 @@ class ConsumeSharedModule extends Module {
   /**
    * @returns {string} a unique identifier of the module
    */
-  identifier() {
+  override identifier(): string {
     const {
       shareKey,
       shareScope,
@@ -81,7 +137,7 @@ class ConsumeSharedModule extends Module {
    * @param {RequestShortener} requestShortener the request shortener
    * @returns {string} a user readable identifier of the module
    */
-  readableIdentifier(requestShortener) {
+  override readableIdentifier(requestShortener: RequestShortener): string {
     const {
       shareKey,
       shareScope,
@@ -104,7 +160,7 @@ class ConsumeSharedModule extends Module {
    * @param {LibIdentOptions} options options
    * @returns {string | null} an identifier for library inclusion
    */
-  libIdent(options) {
+  override libIdent(options: LibIdentOptions): string | null {
     const { shareKey, shareScope, import: request } = this.options;
     return `${
       this.layer ? `(${this.layer})/` : ''
@@ -118,7 +174,10 @@ class ConsumeSharedModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
-  needBuild(context, callback) {
+  override needBuild(
+    context: NeedBuildContext,
+    callback: (error?: WebpackError | null, needsRebuild?: boolean) => void,
+  ): void {
     callback(null, !this.buildInfo);
   }
 
@@ -130,7 +189,13 @@ class ConsumeSharedModule extends Module {
    * @param {function(WebpackError=): void} callback callback function
    * @returns {void}
    */
-  build(options, compilation, resolver, fs, callback) {
+  override build(
+    options: WebpackOptions,
+    compilation: Compilation,
+    resolver: ResolverWithOptions,
+    fs: InputFileSystem,
+    callback: (error?: WebpackError) => void,
+  ): void {
     this.buildMeta = {};
     this.buildInfo = {};
     if (this.options.import) {
@@ -149,7 +214,7 @@ class ConsumeSharedModule extends Module {
   /**
    * @returns {Set<string>} types available (do not mutate)
    */
-  getSourceTypes() {
+  override getSourceTypes(): Set<string> {
     return TYPES;
   }
 
@@ -157,7 +222,7 @@ class ConsumeSharedModule extends Module {
    * @param {string=} type the source type for which the size should be estimated
    * @returns {number} the estimated size of the module (must be non-zero)
    */
-  size(type) {
+  override size(type?: string): number {
     return 42;
   }
 
@@ -166,7 +231,7 @@ class ConsumeSharedModule extends Module {
    * @param {UpdateHashContext} context context
    * @returns {void}
    */
-  updateHash(hash, context) {
+  override updateHash(hash: Hash, context: UpdateHashContext): void {
     hash.update(JSON.stringify(this.options));
     super.updateHash(hash, context);
   }
@@ -175,7 +240,11 @@ class ConsumeSharedModule extends Module {
    * @param {CodeGenerationContext} context context for code generation
    * @returns {CodeGenerationResult} result
    */
-  codeGeneration({ chunkGraph, moduleGraph, runtimeTemplate }) {
+  override codeGeneration({
+    chunkGraph,
+    moduleGraph,
+    runtimeTemplate,
+  }: CodeGenerationContext): CodeGenerationResult {
     const runtimeRequirements = new Set([RuntimeGlobals.shareScopeMap]);
     const {
       shareScope,
@@ -238,7 +307,7 @@ class ConsumeSharedModule extends Module {
   /**
    * @param {ObjectSerializerContext} context context
    */
-  serialize(context) {
+  override serialize(context: ObjectSerializerContext): void {
     const { write } = context;
     write(this.options);
     super.serialize(context);
@@ -247,7 +316,7 @@ class ConsumeSharedModule extends Module {
   /**
    * @param {ObjectDeserializerContext} context context
    */
-  deserialize(context) {
+  override deserialize(context: ObjectDeserializerContext): void {
     const { read } = context;
     this.options = read();
     super.deserialize(context);
@@ -259,4 +328,4 @@ makeSerializable(
   'webpack/lib/sharing/ConsumeSharedModule',
 );
 
-module.exports = ConsumeSharedModule;
+export default ConsumeSharedModule;

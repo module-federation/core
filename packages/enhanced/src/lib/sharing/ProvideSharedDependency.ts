@@ -3,15 +3,17 @@
 	Author Tobias Koppers @sokra
 */
 
-'use strict';
-
-const Dependency = require('../Dependency');
-const makeSerializable = require('../util/makeSerializable');
-
-/** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
+import Dependency from 'webpack/lib/Dependency';
+import makeSerializable from 'webpack/lib/util/makeSerializable';
+import { ObjectDeserializerContext, ObjectSerializerContext } from "webpack/lib/serialization/ObjectMiddleware";
 
 class ProvideSharedDependency extends Dependency {
+  shareScope: string;
+  name: string;
+  version: string | false;
+  request: string;
+  eager: boolean;
+
   /**
    * @param {string} shareScope share scope
    * @param {string} name module name
@@ -19,7 +21,7 @@ class ProvideSharedDependency extends Dependency {
    * @param {string} request request
    * @param {boolean} eager true, if this is an eager dependency
    */
-  constructor(shareScope, name, version, request, eager) {
+  constructor(shareScope: string, name: string, version: string | false, request: string, eager: boolean) {
     super();
     this.shareScope = shareScope;
     this.name = name;
@@ -28,14 +30,14 @@ class ProvideSharedDependency extends Dependency {
     this.eager = eager;
   }
 
-  get type() {
+  override get type(): string {
     return 'provide shared module';
   }
 
   /**
    * @returns {string | null} an identifier to merge equal requests
    */
-  getResourceIdentifier() {
+  override getResourceIdentifier(): string | null {
     return `provide module (${this.shareScope}) ${this.request} as ${
       this.name
     } @ ${this.version}${this.eager ? ' (eager)' : ''}`;
@@ -44,7 +46,7 @@ class ProvideSharedDependency extends Dependency {
   /**
    * @param {ObjectSerializerContext} context context
    */
-  serialize(context) {
+  override serialize(context: ObjectSerializerContext): void {
     context.write(this.shareScope);
     context.write(this.name);
     context.write(this.request);
@@ -57,7 +59,7 @@ class ProvideSharedDependency extends Dependency {
    * @param {ObjectDeserializerContext} context context
    * @returns {ProvideSharedDependency} deserialize fallback dependency
    */
-  static deserialize(context) {
+  static deserialize(context: ObjectDeserializerContext): ProvideSharedDependency {
     const { read } = context;
     const obj = new ProvideSharedDependency(
       read(),
@@ -66,6 +68,7 @@ class ProvideSharedDependency extends Dependency {
       read(),
       read(),
     );
+    //@ts-ignore
     this.shareScope = context.read();
     obj.deserialize(context);
     return obj;
@@ -77,4 +80,4 @@ makeSerializable(
   'webpack/lib/sharing/ProvideSharedDependency',
 );
 
-module.exports = ProvideSharedDependency;
+export default ProvideSharedDependency;

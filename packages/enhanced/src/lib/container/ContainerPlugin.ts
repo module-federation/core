@@ -75,6 +75,7 @@ class ContainerPlugin {
     }
 
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
+      //@ts-ignore
       const dep = new ContainerEntryDependency(name, exposes, shareScope);
       dep.loc = { name };
       compilation.addEntry(
@@ -86,7 +87,7 @@ class ContainerPlugin {
           runtime,
           library,
         },
-        (error:WebpackError | null | undefined) => {
+        (error: WebpackError | null | undefined) => {
           if (error) return callback(error);
           callback();
         },
