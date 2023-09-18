@@ -4,7 +4,7 @@
 */
 
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import type RemoteModule from './RemoteModule';
+import RemoteModule from './RemoteModule';
 import RuntimeModule, { Compilation } from 'webpack/lib/RuntimeModule';
 import Template from 'webpack/lib/Template';
 

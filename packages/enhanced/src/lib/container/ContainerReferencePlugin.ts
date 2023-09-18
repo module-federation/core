@@ -5,7 +5,7 @@
 
 import  Compiler from 'webpack/lib/Compiler';
 import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
-import { ContainerReferencePluginOptions, ExternalsType, RemotesConfig } from './ContainerReferencePluginTypes';
+import { ContainerReferencePluginOptions, RemotesConfig } from './ContainerReferencePluginTypes';
 import FallbackDependency from './FallbackDependency';
 import FallbackItemDependency from './FallbackItemDependency';
 import FallbackModuleFactory from './FallbackModuleFactory';
@@ -16,8 +16,8 @@ import { parseOptions } from './options';
 import ExternalsPlugin from 'webpack/lib/ExternalsPlugin';
 import Compilation from 'webpack/lib/Compilation';
 import NormalModuleFactory, { ResolveData } from 'webpack/lib/NormalModuleFactory';
-
-
+import { ExternalsType } from 'webpack/declarations/plugins/container/ContainerReferencePlugin';
+import {Module} from "webpack/lib/Module";
 /** @typedef {import("webpack/declarations/plugins/container/ContainerReferencePlugin").ContainerReferencePluginOptions} ContainerReferencePluginOptions */
 /** @typedef {import("webpack/declarations/plugins/container/ContainerReferencePlugin").RemotesConfig} RemotesConfig */
 /** @typedef {import("webpack/lib/Compiler")} Compiler */
@@ -103,7 +103,7 @@ class ContainerReferencePlugin {
 
         normalModuleFactory.hooks.factorize.tap(
           'ContainerReferencePlugin',
-          (data : ResolveData) => {
+          (data : ResolveData): Module => {
             if (!data.request.includes('!')) {
               for (const [key, config] of remotes) {
                 if (
@@ -126,6 +126,7 @@ class ContainerReferencePlugin {
                 }
               }
             }
+		
           },
         );
 
