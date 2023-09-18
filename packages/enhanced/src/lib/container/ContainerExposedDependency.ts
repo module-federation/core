@@ -7,9 +7,6 @@ import makeSerializable from 'webpack/lib/util/hash;
 import { ModuleDependency } from '../../types';
 import { ObjectDeserializerContext, ObjectSerializerContext } from './types';
 
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
-
 class ContainerExposedDependency extends ModuleDependency {
   /**
    * @param {string} exposedName public name

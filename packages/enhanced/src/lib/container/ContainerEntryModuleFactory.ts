@@ -5,7 +5,11 @@
 
 import ContainerEntryModule from './ContainerEntryModule';
 import type ContainerEntryDependency from './ContainerEntryDependency';
-import { ModuleFactory, ModuleFactoryResult, WebpackError } from '../../types';
+import {
+  ModuleFactory,
+  ModuleFactoryResult,
+  ModuleFactoryCreateData,
+} from '../../types';
 
 export default class ContainerEntryModuleFactory extends ModuleFactory {
   /**
@@ -13,12 +17,10 @@ export default class ContainerEntryModuleFactory extends ModuleFactory {
    * @param {function((Error | null)=, ModuleFactoryResult=): void} callback callback
    * @returns {void}
    */
-  create(
-    {
-      dependencies: [dependency],
-    }: { dependencies: ContainerEntryDependency[] },
+  override create(
+    data: ModuleFactoryCreateData,
     callback: (
-      error: WebpackError | null | undefined,
+      error: Error | null | undefined,
       result?: ModuleFactoryResult,
     ) => void,
   ): void {

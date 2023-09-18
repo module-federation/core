@@ -13230,7 +13230,7 @@ declare class WebpackError extends Error {
    * Creates an instance of WebpackError.
    */
   constructor(message?: string);
-  details?: string;
+  details: string;
   module?: null | Module;
   loc?: SyntheticDependencyLocation | RealDependencyLocation;
   hideStack?: boolean;
@@ -14181,6 +14181,7 @@ declare namespace exports {
     Dependency,
     ModuleFactory,
     ModuleFactoryResult,
+    ModuleFactoryCreateData,
   };
 }
 declare const topLevelSymbolTag: unique symbol;

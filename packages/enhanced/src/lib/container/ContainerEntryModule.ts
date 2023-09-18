@@ -8,14 +8,7 @@
 import { OriginalSource, RawSource } from 'webpack-sources';
 import {
   Resolver,
-  WebpackError,
-  WebpackOptionsNormalized,
   Compilation,
-  Compiler,
-  Chunk,
-  ChunkGraph,
-} from 'webpack';
-import {
   AsyncDependenciesBlock,
   Module,
   InputFileSystem,
@@ -26,28 +19,15 @@ import {
   RuntimeGlobals,
   Dependency,
   Template,
+  WebpackError,
+  WebpackOptionsNormalized,
 } from '../../types';
 import {
   LibIdentOptions,
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from './types';
-
-/** @typedef {import("webpack/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
-/** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
-/** @typedef {import("webpack/lib/ChunkGroup")} ChunkGroup */
-/** @typedef {import("webpack/lib/Compilation")} Compilation */
-/** @typedef {import("webpack/lib/Module").CodeGenerationContext} CodeGenerationContext */
-/** @typedef {import("webpack/lib/Module").CodeGenerationResult} CodeGenerationResult */
-/** @typedef {import("webpack/lib/Module").LibIdentOptions} LibIdentOptions */
-/** @typedef {import("webpack/lib/Module").NeedBuildContext} NeedBuildContext */
-/** @typedef {import("webpack/lib/RequestShortener")} RequestShortener */
-/** @typedef {import("webpack/lib/ResolverFactory").ResolverWithOptions} ResolverWithOptions */
-/** @typedef {import("webpack/lib/WebpackError")} WebpackError */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
-/** @typedef {import("webpack/lib/util/Hash")} Hash */
-/** @typedef {import("./ContainerEntryDependency")} ContainerEntryDependency */
+import ContainerExposedDependency from './ContainerExposedDependency';
 
 /**
  * @typedef {Object} ExposeOptions
@@ -125,10 +105,6 @@ class ContainerEntryModule extends Module {
     context: NeedBuildContext,
     callback: (error?: WebpackError | null, needsRebuild?: boolean) => void,
   ): void {
-    // Fix TS iwssue: Property 'needBuild' in type 'ContainerEntryModule' is not assignable to the same property in base type 'Module'.
-    // The issue is caused by incompatible types of parameters 'callback' and 'callback'.
-    // To fix this, we need to change the type of 'error' parameter in the callback from 'import("/Users/zackjackson/lulu_dev/universe/node_modules/webpack/types").WebpackError | null | undefined' to 'import("/Users/zackjackson/lulu_dev/universe/node_modules/webpack/lib/WebpackError") | null | undefined'.
-    // We also need to make the 'details' property in 'WebpackError' required.
     return callback(null, !this.buildMeta);
   }
 
@@ -176,6 +152,7 @@ class ContainerEntryModule extends Module {
       }
       this.addBlock(block);
     }
+    //TODO: Need to port utils code?
     this.addDependency(new StaticExportsDependency(['get', 'init'], false));
 
     callback();
