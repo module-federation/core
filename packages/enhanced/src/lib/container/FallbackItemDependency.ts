@@ -3,24 +3,22 @@
 	Author Tobias Koppers @sokra
 */
 
-'use strict';
-
-const ModuleDependency = require('webpack/lib/dependencies/ModuleDependency');
-const makeSerializable = require('webpack/lib/util/makeSerializable');
+import ModuleDependency from 'webpack/lib/dependencies/ModuleDependency';
+import makeSerializable from 'webpack/lib/util/makeSerializable';
 
 class FallbackItemDependency extends ModuleDependency {
   /**
    * @param {string} request request
    */
-  constructor(request) {
+  constructor(request: string) {
     super(request);
   }
 
-  get type() {
+  override get type(): string {
     return 'fallback item';
   }
 
-  get category() {
+  override get category(): string {
     return 'esm';
   }
 }
@@ -30,4 +28,4 @@ makeSerializable(
   'webpack/lib/container/FallbackItemDependency',
 );
 
-module.exports = FallbackItemDependency;
+export default FallbackItemDependency;

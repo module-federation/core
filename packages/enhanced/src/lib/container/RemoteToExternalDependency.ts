@@ -4,23 +4,21 @@
 */
 
 'use strict';
-
-const ModuleDependency = require('webpack/lib/dependencies/ModuleDependency');
-const makeSerializable = require('webpack/lib/util/makeSerializable');
+import ModuleDependency from 'webpack/lib/dependencies/ModuleDependency';
+import makeSerializable from 'webpack/lib/util/makeSerializable';
 
 class RemoteToExternalDependency extends ModuleDependency {
   /**
    * @param {string} request request
    */
-  constructor(request) {
+  constructor(request: string) {
     super(request);
   }
-
-  get type() {
+  override get type() {
     return 'remote to external';
   }
 
-  get category() {
+  override get category() {
     return 'esm';
   }
 }
@@ -30,4 +28,4 @@ makeSerializable(
   'webpack/lib/container/RemoteToExternalDependency',
 );
 
-module.exports = RemoteToExternalDependency;
+export default RemoteToExternalDependency;

@@ -4,7 +4,8 @@
 */
 
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import RuntimeModule from 'webpack/lib/RuntimeModule';
+import type RemoteModule from './RemoteModule';
+import RuntimeModule, { Compilation } from 'webpack/lib/RuntimeModule';
 import Template from 'webpack/lib/Template';
 
 /** @typedef {import("webpack/lib/Chunk")} Chunk */
@@ -20,27 +21,31 @@ class RemoteRuntimeModule extends RuntimeModule {
    */
   override generate(): string | null {
     const { compilation, chunkGraph } = this;
-    const { runtimeTemplate, moduleGraph } = compilation;
+    const { runtimeTemplate, moduleGraph } = compilation as Compilation;
     const chunkToRemotesMapping: Record<string, any> = {};
-    const idToExternalAndNameMapping: Record<string, any> = {};
-    for (const chunk of this.chunk.getAllAsyncChunks()) {
-      const modules = chunkGraph.getChunkModulesIterableBySourceType(
+    const idToExternalAndNameMapping: Record<string | number, any> = {};
+    for (const chunk of this?.chunk?.getAllAsyncChunks() || []) {
+      const modules = chunkGraph?.getChunkModulesIterableBySourceType(
         chunk,
         'remote',
       );
       if (!modules) continue;
+      // @ts-ignore
       const remotes = (chunkToRemotesMapping[chunk.id] = []);
       for (const m of modules) {
         const module: RemoteModule = m as RemoteModule;
         const name = module.internalRequest;
-        const id = chunkGraph.getModuleId(module);
+        const id = chunkGraph ? chunkGraph.getModuleId(module) : undefined;
         const shareScope = module.shareScope;
         const dep = module.dependencies[0];
         const externalModule = moduleGraph.getModule(dep);
         const externalModuleId =
-          externalModule && chunkGraph.getModuleId(externalModule);
-        remotes.push(id);
-        idToExternalAndNameMapping[id] = [shareScope, name, externalModuleId];
+        chunkGraph && externalModule ? chunkGraph.getModuleId(externalModule) : undefined;
+        if (id !== undefined) {
+          //@ts-ignore
+          remotes.push(id);
+          idToExternalAndNameMapping[id] = [shareScope, name, externalModuleId];
+        }
       }
     }
     return Template.asString([

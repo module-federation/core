@@ -2,61 +2,59 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
-import { RuntimeGlobals, Compiler, Externals, ExternalsPlugin } from 'webpack';
-import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
+
+import  Compiler from 'webpack/lib/Compiler';
+import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
+import { ContainerReferencePluginOptions, ExternalsType, RemotesConfig } from './ContainerReferencePluginTypes';
 import FallbackDependency from './FallbackDependency';
 import FallbackItemDependency from './FallbackItemDependency';
 import FallbackModuleFactory from './FallbackModuleFactory';
-import RemoteModule = require('./RemoteModule');
+import RemoteModule from './RemoteModule';
 import RemoteRuntimeModule from './RemoteRuntimeModule';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
 import { parseOptions } from './options';
-import {
-  ContainerReferencePluginOptions,
-  ExternalsType,
-  Remotes,
-  RemotesConfig,
-  RemotesItem,
-  RemotesItems,
-  RemotesObject,
-} from './ContainerReferencePluginTypes';
+import ExternalsPlugin from 'webpack/lib/ExternalsPlugin';
+import Compilation from 'webpack/lib/Compilation';
+import NormalModuleFactory, { ResolveData } from 'webpack/lib/NormalModuleFactory';
+
+
 /** @typedef {import("webpack/declarations/plugins/container/ContainerReferencePlugin").ContainerReferencePluginOptions} ContainerReferencePluginOptions */
 /** @typedef {import("webpack/declarations/plugins/container/ContainerReferencePlugin").RemotesConfig} RemotesConfig */
 /** @typedef {import("webpack/lib/Compiler")} Compiler */
 
 const validate = createSchemaValidation(
-  require('webpack/schemas/plugins/container/ContainerReferencePlugin.check.js'),
-  () =>
-    require('webpack/schemas/plugins/container/ContainerReferencePlugin.json'),
-  {
-    name: 'Container Reference Plugin',
-    baseDataPath: 'options',
-  },
-);
+	//eslint-disable-next-line
+	require('../../schemas/plugins/container/ContainerReferencePlugin.check.js'),
+	() => require('../../schemas/plugins/container/ContainerReferencePlugin.json'),
+	{
+	  name: 'Container Reference Plugin',
+	  baseDataPath: 'options',
+	}
+  );
+  
 
-const slashCode = '/'.charCodeAt(0);
+  const slashCode = '/'.charCodeAt(0);
 
 class ContainerReferencePlugin {
-  private _remoteType: ExternalsType;
-  private _remotes: Remotes;
+	private _remoteType: ExternalsType;
+	private _remotes: [string, RemotesConfig][];
+  
 
-  constructor(options: ContainerReferencePluginOptions) {
-    validate(options);
+	constructor(options: ContainerReferencePluginOptions) {
+		validate(options);
 
     this._remoteType = options.remoteType;
-    this._remotes = parseOptions<RemotesObject, RemotesObject>(
-      options.remotes,
-      (item) => ({
-        external: Array.isArray(item) ? item : [item],
-        shareScope: options.shareScope || 'default',
-      }),
-      (item) => ({
-        external: Array.isArray(item.external)
-          ? item.external
-          : [item.external],
-        shareScope: item.shareScope || options.shareScope || 'default',
-      }),
-    ) as unknown as Remotes;
+	this._remotes = parseOptions(
+		options.remotes,
+		(item) => ({
+		  external: Array.isArray(item) ? item : [item],
+		  shareScope: options.shareScope || 'default',
+		}),
+		(item) => ({
+		  external: Array.isArray(item.external) ? item.external : [item.external],
+		  shareScope: item.shareScope || options.shareScope || 'default',
+		})
+	  );
   }
 
   /**
@@ -64,15 +62,18 @@ class ContainerReferencePlugin {
    * @param {Compiler} compiler the compiler instance
    * @returns {void}
    */
-  apply(compiler: Compiler) {
+  apply(compiler: Compiler): void {
     const { _remotes: remotes, _remoteType: remoteType } = this;
 
+
     /** @type {Record<string, string>} */
-    const remoteExternals = {};
+	const remoteExternals: Record<string, string> = {};
+
     for (const [key, config] of remotes) {
       let i = 0;
       for (const external of config.external) {
-        if (external.startsWith('internal ')) continue;
+		if (typeof external === 'string' && external.startsWith('internal ')) continue;
+
         remoteExternals[
           `webpack/container/reference/${key}${i ? `/fallback-${i}` : ''}`
         ] = external;
@@ -84,7 +85,7 @@ class ContainerReferencePlugin {
 
     compiler.hooks.compilation.tap(
       'ContainerReferencePlugin',
-      (compilation, { normalModuleFactory }) => {
+      (compilation : Compilation, { normalModuleFactory } : {normalModuleFactory: NormalModuleFactory}) => {
         compilation.dependencyFactories.set(
           RemoteToExternalDependency,
           normalModuleFactory,
@@ -102,7 +103,7 @@ class ContainerReferencePlugin {
 
         normalModuleFactory.hooks.factorize.tap(
           'ContainerReferencePlugin',
-          (data) => {
+          (data : ResolveData) => {
             if (!data.request.includes('!')) {
               for (const [key, config] of remotes) {
                 if (
@@ -112,7 +113,7 @@ class ContainerReferencePlugin {
                 ) {
                   return new RemoteModule(
                     data.request,
-                    config.external.map((external, i) =>
+                    config.external.map((external : any, i : any) =>
                       external.startsWith('internal ')
                         ? external.slice(9)
                         : `webpack/container/reference/${key}${

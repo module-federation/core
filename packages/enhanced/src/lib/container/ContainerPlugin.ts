@@ -8,7 +8,7 @@ import ContainerEntryDependency from './ContainerEntryDependency';
 import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { parseOptions } from './options';
-import { Compiler } from 'webpack';
+import Compiler from 'webpack/lib/Compiler';
 import type {
   ContainerPluginOptions,
   Exposes,

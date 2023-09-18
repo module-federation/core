@@ -5,17 +5,19 @@
 
 'use strict';
 
-const Dependency = require('webpack/lib/Dependency');
-const makeSerializable = require('webpack/lib/util/makeSerializable');
+import Dependency, { ObjectDeserializerContext, ObjectSerializerContext } from 'webpack/lib/Dependency';
+import makeSerializable from 'webpack/lib/util/makeSerializable';
 
 /** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
 /** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 
 class FallbackDependency extends Dependency {
+  requests: string[];
+
   /**
    * @param {string[]} requests requests
    */
-  constructor(requests) {
+  constructor(requests: string[]) {
     super();
     this.requests = requests;
   }
@@ -23,22 +25,22 @@ class FallbackDependency extends Dependency {
   /**
    * @returns {string | null} an identifier to merge equal requests
    */
-  getResourceIdentifier() {
+  override getResourceIdentifier(): string | null {
     return `fallback ${this.requests.join(' ')}`;
   }
 
-  get type() {
+  override get type(): string {
     return 'fallback';
   }
 
-  get category() {
+  override get category(): string {
     return 'esm';
   }
 
   /**
    * @param {ObjectSerializerContext} context context
    */
-  serialize(context) {
+  override serialize(context: ObjectSerializerContext): void {
     const { write } = context;
     write(this.requests);
     super.serialize(context);
@@ -48,7 +50,7 @@ class FallbackDependency extends Dependency {
    * @param {ObjectDeserializerContext} context context
    * @returns {FallbackDependency} deserialize fallback dependency
    */
-  static deserialize(context) {
+  static deserialize(context: ObjectDeserializerContext): FallbackDependency {
     const { read } = context;
     const obj = new FallbackDependency(read());
     obj.deserialize(context);
@@ -61,4 +63,6 @@ makeSerializable(
   'webpack/lib/container/FallbackDependency',
 );
 
-module.exports = FallbackDependency;
+export default FallbackDependency;
+
+

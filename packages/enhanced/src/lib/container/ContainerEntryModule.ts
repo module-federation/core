@@ -5,35 +5,16 @@
 
 'use strict';
 
-import {
-  Module,
-  AsyncDependenciesBlock,
-  Compilation,
-  Resolver,
-  WebpackError,
-  WebpackOptionsNormalized,
-  Dependency,
-} from 'webpack';
 import { OriginalSource, RawSource } from 'webpack-sources';
-import {
-  CodeGenerationContext,
-  CodeGenerationResult,
-  Source,
-  LibIdentOptions,
-  NeedBuildContext,
-} from 'webpack/lib/Module';
 import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from 'webpack/lib/ModuleTypeConstants';
-import type RequestShortener from 'webpack/lib/RequestShortener';
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import Template from 'webpack/lib/Template';
 import StaticExportsDependency from 'webpack/lib/dependencies/StaticExportsDependency';
-import type {
-  ObjectDeserializerContext,
-  ObjectSerializerContext,
-} from 'webpack/lib/serialization/ObjectMiddleware';
-import type { InputFileSystem } from 'webpack/lib/util/fs';
 import makeSerializable from 'webpack/lib/util/makeSerializable';
 import ContainerExposedDependency from './ContainerExposedDependency';
+import Module, {InputFileSystem, Compilation, LibIdentOptions, NeedBuildContext, ObjectDeserializerContext, ObjectSerializerContext, WebpackError, RequestShortener, WebpackOptions, ResolverWithOptions } from 'webpack/lib/Module';
+import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
+import Dependency from 'webpack/lib/Dependency';
 
 /** @typedef {import("webpack/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
 /** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
@@ -131,7 +112,7 @@ class ContainerEntryModule extends Module {
    */
   override needBuild(
     context: any | NeedBuildContext,
-    callback: (err: WebpackError | null, needsRebuild?: boolean) => void,
+    callback:  (arg0: (WebpackError | null) | undefined, arg1: boolean | undefined) => void,
   ): void {
     const baseContext = context as NeedBuildContext;
     callback(null, !this.buildMeta);
@@ -145,9 +126,9 @@ class ContainerEntryModule extends Module {
    * @returns {void}
    */
   override build(
-    options: WebpackOptionsNormalized,
+    options: WebpackOptions,
     compilation: Compilation,
-    resolver: Resolver,
+    resolver: ResolverWithOptions,
     fs: InputFileSystem,
     callback: (err?: WebpackError) => void,
   ): void {
@@ -176,7 +157,7 @@ class ContainerEntryModule extends Module {
           index: idx++,
         };
 
-        block.addDependency(dep as unknown as Dependency);
+        block.addDependency(dep as unknown as ContainerExposedDependency);
       }
       this.addBlock(block as unknown as AsyncDependenciesBlock);
     }

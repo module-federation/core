@@ -5,18 +5,22 @@
 
 'use strict';
 
-const isValidExternalsType = require('webpack/schemas/plugins/container/ExternalsType.check.js');
-const SharePlugin = require('webpack/lib/sharing/SharePlugin');
-const createSchemaValidation = require('webpack/lib/util/create-schema-validation');
-const ContainerPlugin = require('./ContainerPlugin');
-const ContainerReferencePlugin = require('./ContainerReferencePlugin');
+import { Compiler } from "webpack/lib/container/ModuleFederationPlugin";
+import { ModuleFederationPluginOptions } from "./ModuleFederationPluginTypes";
 
-/** @typedef {import("webpack/declarations/plugins/container/ModuleFederationPlugin").ExternalsType} ExternalsType */
-/** @typedef {import("webpack/declarations/plugins/container/ModuleFederationPlugin").ModuleFederationPluginOptions} ModuleFederationPluginOptions */
-/** @typedef {import("webpack/declarations/plugins/container/ModuleFederationPlugin").Shared} Shared */
+import isValidExternalsType from 'webpack/schemas/plugins/container/ExternalsType.check.js';
+import SharePlugin from '../sharing/SharePlugin';
+import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
+import ContainerPlugin from './ContainerPlugin';
+import ContainerReferencePlugin from './ContainerReferencePlugin';
+
+/** @typedef {import("./ModuleFederationPluginTypes").ExternalsType} ExternalsType */
+/** @typedef {import("./ModuleFederationPluginTypes").ModuleFederationPluginOptions} ModuleFederationPluginOptions */
+/** @typedef {import("./ModuleFederationPluginTypes").Shared} Shared */
 /** @typedef {import("webpack/lib/Compiler")} Compiler */
 
 const validate = createSchemaValidation(
+  //eslint-disable-next-line
   require('webpack/schemas/plugins/container/ModuleFederationPlugin.check.js'),
   () =>
     require('webpack/schemas/plugins/container/ModuleFederationPlugin.json'),
@@ -25,11 +29,13 @@ const validate = createSchemaValidation(
     baseDataPath: 'options',
   },
 );
+
 class ModuleFederationPlugin {
-  /**
-   * @param {ModuleFederationPluginOptions} options options
-   */
-  constructor(options) {
+  private _options: ModuleFederationPluginOptions;
+/**
+	 * @param {ModuleFederationPluginOptions} options options
+	 */
+  constructor(options: ModuleFederationPluginOptions) {
     validate(options);
 
     this._options = options;
@@ -40,13 +46,13 @@ class ModuleFederationPlugin {
    * @param {Compiler} compiler the compiler instance
    * @returns {void}
    */
-  apply(compiler) {
+  apply(compiler:Compiler):void {
     const { _options: options } = this;
     const library = options.library || { type: 'var', name: options.name };
     const remoteType =
       options.remoteType ||
       (options.library && isValidExternalsType(options.library.type)
-        ? /** @type {ExternalsType} */ (options.library.type)
+        ? options.library.type
         : 'script');
     if (
       library &&
@@ -92,4 +98,4 @@ class ModuleFederationPlugin {
   }
 }
 
-module.exports = ModuleFederationPlugin;
+export default ModuleFederationPlugin;
