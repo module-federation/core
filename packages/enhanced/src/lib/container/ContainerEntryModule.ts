@@ -49,12 +49,19 @@ import Dependency from 'webpack/lib/Dependency';
  * @property {string[]} import requests to exposed modules (last one is exported)
  * @property {string} name custom chunk name for the exposed module
  */
-export type ExposeOptions = {
-  import: string[];
-  name: string;
-};
 
 const SOURCE_TYPES = new Set(['javascript']);
+
+export type ExposeOptions = {
+  /**
+   * requests to exposed modules (last one is exported)
+   */
+  import: string[];
+  /**
+   * custom chunk name for the exposed module
+   */
+  name: string;
+};
 
 class ContainerEntryModule extends Module {
   private _name: string;

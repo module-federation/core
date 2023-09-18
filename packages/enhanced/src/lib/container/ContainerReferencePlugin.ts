@@ -6,10 +6,6 @@
 import Compiler from 'webpack/lib/Compiler';
 import { RuntimeGlobals } from 'webpack';
 import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
-import {
-  ContainerReferencePluginOptions,
-  RemotesConfig,
-} from './ContainerReferencePluginTypes';
 import FallbackDependency from './FallbackDependency';
 import FallbackItemDependency from './FallbackItemDependency';
 import FallbackModuleFactory from './FallbackModuleFactory';
@@ -22,18 +18,18 @@ import Compilation from 'webpack/lib/Compilation';
 import NormalModuleFactory, {
   ResolveData,
 } from 'webpack/lib/NormalModuleFactory';
-import { ExternalsType } from 'webpack/declarations/plugins/container/ContainerReferencePlugin';
+import { ExternalsType, ContainerReferencePluginOptions,RemotesConfig} from '../../declarations/plugins/container/ContainerReferencePlugin';
 import Module from 'webpack/lib/Module';
 
-/** @typedef {import("webpack/declarations/plugins/container/ContainerReferencePlugin").ContainerReferencePluginOptions} ContainerReferencePluginOptions */
-/** @typedef {import("webpack/declarations/plugins/container/ContainerReferencePlugin").RemotesConfig} RemotesConfig */
+/** @typedef {import("../../declarations/plugins/container/ContainerReferencePlugin").ContainerReferencePluginOptions} ContainerReferencePluginOptions */
+/** @typedef {import("../../declarations/plugins/container/ContainerReferencePlugin").RemotesConfig} RemotesConfig */
 /** @typedef {import("webpack/lib/Compiler")} Compiler */
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
-  require('../../schemas/plugins/container/ContainerReferencePlugin.check.js'),
+  require('webpack/schemas/plugins/container/ContainerReferencePlugin.check.js'),
   () =>
-    require('../../schemas/plugins/container/ContainerReferencePlugin.json'),
+    require('webpack/schemas/plugins/container/ContainerReferencePlugin.json'),
   {
     name: 'Container Reference Plugin',
     baseDataPath: 'options',

@@ -51,4 +51,4 @@ makeSerializable(
   'webpack/lib/container/ContainerEntryDependency',
 );
 
-export = ContainerEntryDependency;
+export default ContainerEntryDependency;

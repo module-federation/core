@@ -1,14 +1,14 @@
 export = ShareRuntimeModule;
-/** @typedef {import("../Chunk")} Chunk */
-/** @typedef {import("../ChunkGraph")} ChunkGraph */
-/** @typedef {import("../Compilation")} Compilation */
+/** @typedef {import("webpack/lib/Chunk")} Chunk */
+/** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
+/** @typedef {import("webpack/lib/Compilation")} Compilation */
 declare class ShareRuntimeModule extends RuntimeModule {
-  constructor();
+    constructor();
 }
 declare namespace ShareRuntimeModule {
-  export { Chunk, ChunkGraph, Compilation };
+    export { Chunk, ChunkGraph, Compilation };
 }
-import RuntimeModule = require('../RuntimeModule');
-type Chunk = import('../Chunk');
-type ChunkGraph = import('../ChunkGraph');
-type Compilation = import('../Compilation');
+import RuntimeModule = require("webpack/lib/RuntimeModule");
+type Chunk = import("webpack/lib/Chunk");
+type ChunkGraph = import("webpack/lib/ChunkGraph");
+type Compilation = import("webpack/lib/Compilation");

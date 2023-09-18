@@ -9,11 +9,7 @@ import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { parseOptions } from './options';
 import Compiler from 'webpack/lib/Compiler';
-import type {
-  ContainerPluginOptions,
-  Exposes,
-  ExposesItem,
-} from './ContainerPluginTypes';
+import type {ContainerPluginOptions} from '../../declarations/plugins/container/ContainerPlugin'
 import { WebpackError } from 'webpack/lib/Module';
 
 /** @typedef {import("./ContainerPluginTypes").ContainerPluginOptions} ContainerPluginOptions */
@@ -47,6 +43,7 @@ class ContainerPlugin {
       },
       runtime: options.runtime,
       filename: options.filename || undefined,
+	
       exposes: parseOptions(
         options.exposes,
         (item) => ({
@@ -88,7 +85,9 @@ class ContainerPlugin {
           library,
         },
         (error: WebpackError | null | undefined) => {
-          if (error) return callback(error);
+          if (error) {
+            return callback(error);
+          }
           callback();
         },
       );
