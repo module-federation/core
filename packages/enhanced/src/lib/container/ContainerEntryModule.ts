@@ -5,23 +5,18 @@
 
 "use strict";
 
+import { Module, AsyncDependenciesBlock, Compilation, Dependency, Resolver, WebpackError, WebpackOptionsNormalized, Asy Dependency } from 'webpack';
 import { OriginalSource, RawSource } from "webpack-sources";
-import AsyncDependenciesBlock from "webpack/lib/AsyncDependenciesBlock";
-import { Dependency, Resolver, WebpackError, WebpackOptionsNormalized, Compilation, Compiler, Chunk,ChunkGraph, } from "webpack";
-import Module from 'webpack/lib/Module'
+import { CodeGenerationContext, CodeGenerationResult, Source, LibIdentOptions,NeedBuildContext } from "webpack/lib/Module";
 import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from "webpack/lib/ModuleTypeConstants";
+import type RequestShortener from "webpack/lib/RequestShortener";
 import RuntimeGlobals from "webpack/lib/RuntimeGlobals";
 import Template from "webpack/lib/Template";
 import StaticExportsDependency from "webpack/lib/dependencies/StaticExportsDependency";
+import type { ObjectDeserializerContext, ObjectSerializerContext } from "webpack/lib/serialization/ObjectMiddleware";
+import type { InputFileSystem } from "webpack/lib/util/fs";
 import makeSerializable from "webpack/lib/util/makeSerializable";
 import ContainerExposedDependency from "./ContainerExposedDependency";
-import type { ObjectSerializerContext , ObjectDeserializerContext} from "webpack/lib/serialization/ObjectMiddleware";
-import type RequestShortener from 'webpack/lib/RequestShortener'
-import type { LibIdentOptions, CodeGenerationContext, CodeGenerationResult, NeedBuildContext } from "webpack/lib/Module";
-import type { ResolverWithOptions } from "webpack/lib/ResolverFactory";
-import type  Hash  from "webpack/lib/util/Hash";
-import type { InputFileSystem } from "webpack/lib/util/fs";
-
 
 
 /** @typedef {import("webpack/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
@@ -54,117 +49,113 @@ export type ExposeOptions = {
 const SOURCE_TYPES = new Set(["javascript"]);
 
 class ContainerEntryModule extends Module {
-	private _name: string;
-	private _exposes: [string, ExposeOptions][];
-	private _shareScope: string;
+  private _name: string;
+  private _exposes: [string, ExposeOptions][];
+  private _shareScope: string;
+  /**
+   * @param {string} name container entry name
+   * @param {[string, ExposeOptions][]} exposes list of exposed modules
+   * @param {string} shareScope name of the share scope
+   */
+  constructor(name: string, exposes: [string, ExposeOptions][], shareScope: string) {
+    super(JAVASCRIPT_MODULE_TYPE_DYNAMIC, null);
+    this._name = name;
+    this._exposes = exposes;
+    this._shareScope = shareScope;
+  }
+  /**
+   * @param {ObjectDeserializerContext} context context
+   * @returns {ContainerEntryModule} deserialized container entry module
+   */
+  static deserialize(context: ObjectDeserializerContext): ContainerEntryModule {
+    const { read } = context;
+    const obj = new ContainerEntryModule(read(), read(), read());
+    obj.deserialize(context);
+    return obj;
+  }
+  /**
+   * @returns {Set<string>} types available (do not mutate)
+   */
+  override getSourceTypes(): Set<string> {
+    return SOURCE_TYPES;
+  }
+  /**
+   * @returns {string} a unique identifier of the module
+   */
+  override identifier(): string {
+    return `container entry (${this._shareScope}) ${JSON.stringify(this._exposes)}`;
+  }
+  /**
+   * @param {RequestShortener} requestShortener the request shortener
+   * @returns {string} a user readable identifier of the module
+   */
+  override readableIdentifier(requestShortener: RequestShortener): string {
+    return "container entry";
+  }
+  /**
+   * @param {LibIdentOptions} options options
+   * @returns {string | null} an identifier for library inclusion
+   */
+  override libIdent(options: LibIdentOptions): string | null {
+    return `${this.layer ? `(${this.layer})/` : ""}webpack/container/entry/${this._name}`;
+  }
+  /**
+   * @param {NeedBuildContext} context context info
+   * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
+   * @returns {void}
+   */
+  override needBuild(context: any | NeedBuildContext, callback: (err: WebpackError | null, needsRebuild?: boolean) => void): void {
+    const baseContext = context as NeedBuildContext;
+	  callback(null, !this.buildMeta);
+  }
+  /**
+   * @param {WebpackOptions} options webpack options
+   * @param {Compilation} compilation the compilation
+   * @param {ResolverWithOptions} resolver the resolver
+   * @param {InputFileSystem} fs the file system
+   * @param {function(WebpackError=): void} callback callback function
+   * @returns {void}
+   */
+  override build(options: WebpackOptionsNormalized, compilation: Compilation, resolver: Resolver, fs: InputFileSystem, callback: (err?: WebpackError) => void): void {
+    this.buildMeta = {};
+    this.buildInfo = {
+      strict: true,
+      topLevelDeclarations: new Set(["moduleMap", "get", "init"])
+    };
+    this.buildMeta.exportsType = "namespace";
 
-	/**
-	 * @param {string} name container entry name
-	 * @param {[string, ExposeOptions][]} exposes list of exposed modules
-	 * @param {string} shareScope name of the share scope
-	 */
-	constructor(name: string, exposes: [string, ExposeOptions][], shareScope: string) {
-		super(JAVASCRIPT_MODULE_TYPE_DYNAMIC, null);
-		this._name = name;
-		this._exposes = exposes;
-		this._shareScope = shareScope;
+    this.clearDependenciesAndBlocks();
+
+    for (const [name, options] of this._exposes) {
+      const block = new AsyncDependenciesBlock(
+        {
+          name: options.name
+        },
+        { name },
+        options.import[options.import.length - 1]
+      );
+      let idx = 0;
+      for (const request of options.import) {
+        const dep = new ContainerExposedDependency(name, request);
+        dep.loc = {
+          name,
+          index: idx++
+        };
+
+		block.addDependency(dep as unknown as Dependency);
 	}
-
-	/**
-	 * @returns {Set<string>} types available (do not mutate)
-	 */
-	override getSourceTypes(): Set<string> {
-		return SOURCE_TYPES;
-	}
-
-	/**
-	 * @returns {string} a unique identifier of the module
-	 */
-	override identifier(): string {
-		return `container entry (${this._shareScope}) ${JSON.stringify(
-			this._exposes
-		)}`;
-	}
-
-	/**
-	 * @param {RequestShortener} requestShortener the request shortener
-	 * @returns {string} a user readable identifier of the module
-	 */
-	override readableIdentifier(requestShortener: RequestShortener): string {
-		return `container entry`;
-	}
-
-	/**
-	 * @param {LibIdentOptions} options options
-	 * @returns {string | null} an identifier for library inclusion
-	 */
-	override libIdent(options: LibIdentOptions): string | null {
-		return `${this.layer ? `(${this.layer})/` : ""}webpack/container/entry/${
-			this._name
-		}`;
-	}
-
-	/**
-	 * @param {NeedBuildContext} context context info
-	 * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
-	 * @returns {void}
-	 */
-	override needBuild(context: NeedBuildContext, callback: (error?: WebpackError | null, needsRebuild?: boolean) => void): void {
-		// Fix TS iwssue: Property 'needBuild' in type 'ContainerEntryModule' is not assignable to the same property in base type 'Module'.
-		// The issue is caused by incompatible types of parameters 'callback' and 'callback'.
-		// To fix this, we need to change the type of 'error' parameter in the callback from 'import("/Users/zackjackson/lulu_dev/universe/node_modules/webpack/types").WebpackError | null | undefined' to 'import("/Users/zackjackson/lulu_dev/universe/node_modules/webpack/lib/WebpackError") | null | undefined'.
-		// We also need to make the 'details' property in 'WebpackError' required.
-		return callback(null, !this.buildMeta);
-	}
-
-	/**
-	 * @param {WebpackOptions} options webpack options
-	 * @param {Compilation} compilation the compilation
-	 * @param {ResolverWithOptions} resolver the resolver
-	 * @param {InputFileSystem} fs the file system
-	 * @param {function(WebpackError=): void} callback callback function
-	 * @returns {void}
-	 */
-	override build(options: WebpackOptionsNormalized, compilation: Compilation, resolver: Resolver, fs: InputFileSystem, callback: (error?: WebpackError) => void): void {
-		this.buildMeta = {};
-		this.buildInfo = {
-			strict: true,
-			topLevelDeclarations: new Set(["moduleMap", "get", "init"])
-		};
-		this.buildMeta.exportsType = "namespace";
-
-		this.clearDependenciesAndBlocks();
-
-		for (const [name, options] of this._exposes) {
-			const block = new AsyncDependenciesBlock(
-				{
-					name: options.name
-				},
-				{ name },
-				options.import[options.import.length - 1]
-			);
-			let idx = 0;
-			for (const request of options.import) {
-				const dep = new ContainerExposedDependency(name, request);
-				dep.loc = {
-					name,
-					index: idx++
-				};
-
-				block.addDependency(dep);
-			}
-			this.addBlock(block);
-		}
-		this.addDependency(new StaticExportsDependency(["get", "init"], false));
-
-		callback();
-	}
+      this.addBlock(block as unknown as AsyncDependenciesBlock);
+    }
+	this.addDependency(new StaticExportsDependency(["get", "init"], false) as unknown as Dependency);
+    callback();
+  }
 
 	/**
 	 * @param {CodeGenerationContext} context context for code generation
 	 * @returns {CodeGenerationResult} result
 	 */
-	override codeGeneration({ moduleGraph, chunkGraph, runtimeTemplate }: CodeGenerationContext): CodeGenerationResult {
+  //@ts-ignore
+	override codeGeneration({ moduleGraph, chunkGraph, runtimeTemplate }) {
 		const sources = new Map();
 		const runtimeRequirements = new Set([
 			RuntimeGlobals.definePropertyGetters,
@@ -176,8 +167,8 @@ class ContainerEntryModule extends Module {
 		for (const block of this.blocks) {
 			const { dependencies } = block;
 
-			const modules = dependencies.map((dependency: Dependency) => {
-				const dep = dependency as ContainerExposedDependency;
+			const modules = dependencies.map(dependency => {
+				const dep = /** @type {ContainerExposedDependency} */ (dependency as unknown as ContainerExposedDependency);
 				return {
 					name: dep.exposedName,
 					module: moduleGraph.getModule(dep),
@@ -275,43 +266,26 @@ class ContainerEntryModule extends Module {
 		};
 	}
 
-	/**
-	 * @param {string=} type the source type for which the size should be estimated
-	 * @returns {number} the estimated size of the module (must be non-zero)
-	 */
-	override size(type?: string): number {
-		return 42;
-	}
-
-	/**
-	 * @param {ObjectSerializerContext} context context
-	 */
-	override serialize(context: ObjectSerializerContext): void {
-		const { write } = context;
-		write(this._name);
-		write(this._exposes);
-		write(this._shareScope);
-		super.serialize(context);
-	}
-
-	/**
-	 * @param {ObjectDeserializerContext} context context
-	 * @returns {ContainerEntryModule} deserialized container entry module
-	 */
-	static deserialize(context: ObjectDeserializerContext): ContainerEntryModule {
-		const { read } = context;
-		const obj = new ContainerEntryModule(read(), read(), read());
-		obj.deserialize(context);
-		return obj;
-	}
+  /**
+   * @param {string=} type the source type for which the size should be estimated
+   * @returns {number} the estimated size of the module (must be non-zero)
+   */
+  override size(type?: string): number {
+    return 42;
+  }
+  /**
+   * @param {ObjectSerializerContext} context context
+   */
+  override serialize(context: ObjectSerializerContext): void {
+    const { write } = context;
+    write(this._name);
+    write(this._exposes);
+    write(this._shareScope);
+    super.serialize(context);
+  }
 }
 
-makeSerializable(
-	ContainerEntryModule,
-	"webpack/lib/container/ContainerEntryModule"
-);
+makeSerializable(ContainerEntryModule, "webpack/lib/container/ContainerEntryModule");
 
-export default  ContainerEntryModule;
-
-
+export default ContainerEntryModule;
 
