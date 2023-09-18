@@ -4,13 +4,14 @@
 */
 
 import ModuleFactory from "webpack/lib/ModuleFactory";
+import type { ModuleFactoryCreateData, ModuleFactoryResult } from "webpack/lib/ModuleFactory";
 import ContainerEntryModule from "./ContainerEntryModule";
-import type {ContainerEntryDependency} from './types'
+import type  ContainerEntryDependency from "./ContainerEntryDependency";
 
 
 /** @typedef {import("webpack/lib/ModuleFactory").ModuleFactoryCreateData} ModuleFactoryCreateData */
 /** @typedef {import("webpack/lib/ModuleFactory").ModuleFactoryResult} ModuleFactoryResult */
-/** @typedef {import("webpack/lib/container/ContainerEntryDependency")} ContainerEntryDependency */
+/** @typedef {import("./ContainerEntryDependency").ContainerEntryDependency} ContainerEntryDependency */
 
 export default class ContainerEntryModuleFactory extends ModuleFactory {
 	/**
@@ -19,10 +20,9 @@ export default class ContainerEntryModuleFactory extends ModuleFactory {
 	 * @returns {void}
 	 */
 	create({ dependencies: [dependency] }: { dependencies: ContainerEntryDependency[] }, callback: (error: Error | null, result?: ModuleFactoryResult) => void): void {
-		const dep = /** @type {ContainerEntryDependency} */ (dependency);
+		const dep = dependency as ContainerEntryDependency;
 		callback(null, {
 			module: new ContainerEntryModule(dep.name, dep.exposes, dep.shareScope)
 		});
 	}
 };
-
