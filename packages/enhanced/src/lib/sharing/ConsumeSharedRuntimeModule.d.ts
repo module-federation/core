@@ -1,9 +1,9 @@
 export = ConsumeSharedRuntimeModule;
 /** @typedef {import("webpack-sources").Source} Source */
-/** @typedef {import("../Chunk")} Chunk */
-/** @typedef {import("../ChunkGraph")} ChunkGraph */
-/** @typedef {import("../Compilation")} Compilation */
-/** @typedef {import("../Module")} Module */
+/** @typedef {import("webpacklib/Chunk")} Chunk */
+/** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
+/** @typedef {import("webpack/lib/Compilation")} Compilation */
+/** @typedef {import("webpack/lib/Module")} Module */
 /** @typedef {import("./ConsumeSharedModule")} ConsumeSharedModule */
 declare class ConsumeSharedRuntimeModule extends RuntimeModule {
   /**
@@ -22,10 +22,10 @@ declare namespace ConsumeSharedRuntimeModule {
     ConsumeSharedModule,
   };
 }
-import RuntimeModule = require('../RuntimeModule');
+import RuntimeModule = require('webpack/lib/RuntimeModule');
 type Source = any;
-type Chunk = import('../Chunk');
-type ChunkGraph = import('../ChunkGraph');
-type Compilation = import('../Compilation');
-type Module = import('../Module');
+type Chunk = import('webpack/lib/Chunk');
+type ChunkGraph = import('webpack/lib/ChunkGraph');
+export type Compilation = import('webpack/lib/Compilation');
+type Module = import('webpack/lib/Module');
 type ConsumeSharedModule = import('./ConsumeSharedModule');
