@@ -11,9 +11,6 @@ import makeSerializable from 'webpack/lib/util/makeSerializable';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 
 import { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';
-import Chunk from 'webpack/lib/Chunk';
-import ChunkGraph from 'webpack/lib/ChunkGraph';
-import ChunkGroup from 'webpack/lib/ChunkGroup';
 import Compilation from 'webpack/lib/Compilation';
 import {
   CodeGenerationContext,

@@ -1,6 +1,6 @@
 /*
 	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
+	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
@@ -29,14 +29,16 @@ class RemoteRuntimeModule extends RuntimeModule {
         chunk,
         'remote',
       );
-      if (!modules) continue;
+      if (!modules) {
+        continue;
+      }
       // @ts-ignore
       const remotes = (chunkToRemotesMapping[chunk.id] = []);
       for (const m of modules) {
         const module: RemoteModule = m as RemoteModule;
         const name = module.internalRequest;
         const id = chunkGraph ? chunkGraph.getModuleId(module) : undefined;
-        const shareScope = module.shareScope;
+        const {shareScope} = module;
         const dep = module.dependencies[0];
         const externalModule = moduleGraph.getModule(dep);
         const externalModuleId =

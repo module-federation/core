@@ -43,7 +43,7 @@ class ContainerPlugin {
       },
       runtime: options.runtime,
       filename: options.filename || undefined,
-	
+	//@ts-ignore
       exposes: parseOptions(
         options.exposes,
         (item) => ({

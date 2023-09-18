@@ -1,3 +1,8 @@
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
+*/
+
 import { RawSource } from 'webpack-sources';
 import Module, {
   CodeGenerationContext,
@@ -10,7 +15,6 @@ import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import makeSerializable from 'webpack/lib/util/makeSerializable';
 import FallbackDependency from './FallbackDependency';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
-import { ChunkGraph, ChunkGroup } from 'webpack';
 import Compilation from 'webpack/lib/Compilation';
 import { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
 import { InputFileSystem } from 'webpack/lib/FileSystemInfo';

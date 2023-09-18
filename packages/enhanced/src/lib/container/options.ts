@@ -1,6 +1,6 @@
 /*
 	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
+	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 export type ContainerOptionsFormat<T> =
   | (string | Record<string, string | string[] | T>)[]

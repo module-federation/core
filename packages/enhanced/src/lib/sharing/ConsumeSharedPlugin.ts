@@ -1,6 +1,6 @@
 /*
 	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
+	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 
 'use strict';
@@ -25,7 +25,6 @@ import {
 import { ConsumeOptions } from './ConsumeSharedModule';
 import { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
 import Compiler from 'webpack/lib/Compiler';
-import { SemVerRange } from 'webpack/lib/util/semver';
 
 /** @typedef {import("../../declarations/plugins/sharing/ConsumeSharedPlugin").ConsumeSharedPluginOptions} ConsumeSharedPluginOptions */
 /** @typedef {import("../../declarations/plugins/sharing/ConsumeSharedPlugin").ConsumesConfig} ConsumesConfig */

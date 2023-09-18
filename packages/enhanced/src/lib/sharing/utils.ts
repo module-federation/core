@@ -3,43 +3,39 @@
 	Author Tobias Koppers @sokra
 */
 
-'use strict';
-
-const { join, dirname, readJson } = require('../util/fs');
-
-/** @typedef {import("../util/fs").InputFileSystem} InputFileSystem */
+import { join, dirname, readJson, InputFileSystem } from 'webpack/lib/util/fs';
 
 // Extreme shorthand only for github. eg: foo/bar
-const RE_URL_GITHUB_EXTREME_SHORT = /^[^/@:.\s][^/@:\s]*\/[^@:\s]*[^/@:\s]#\S+/;
+const RE_URL_GITHUB_EXTREME_SHORT: RegExp = /^[^/@:.\s][^/@:\s]*\/[^@:\s]*[^/@:\s]#\S+/;
 
 // Short url with specific protocol. eg: github:foo/bar
-const RE_GIT_URL_SHORT = /^(github|gitlab|bitbucket|gist):\/?[^/.]+\/?/i;
+const RE_GIT_URL_SHORT: RegExp = /^(github|gitlab|bitbucket|gist):\/?[^/.]+\/?/i;
 
 // Currently supported protocols
-const RE_PROTOCOL =
+const RE_PROTOCOL: RegExp =
   /^((git\+)?(ssh|https?|file)|git|github|gitlab|bitbucket|gist):$/i;
 
 // Has custom protocol
-const RE_CUSTOM_PROTOCOL = /^((git\+)?(ssh|https?|file)|git):\/\//i;
+const RE_CUSTOM_PROTOCOL: RegExp = /^((git\+)?(ssh|https?|file)|git):\/\//i;
 
 // Valid hash format for npm / yarn ...
-const RE_URL_HASH_VERSION = /#(?:semver:)?(.+)/;
+const RE_URL_HASH_VERSION: RegExp = /#(?:semver:)?(.+)/;
 
 // Simple hostname validate
-const RE_HOSTNAME = /^(?:[^/.]+(\.[^/]+)+|localhost)$/;
+const RE_HOSTNAME: RegExp = /^(?:[^/.]+(\.[^/]+)+|localhost)$/;
 
 // For hostname with colon. eg: ssh://user@github.com:foo/bar
-const RE_HOSTNAME_WITH_COLON =
+const RE_HOSTNAME_WITH_COLON: RegExp =
   /([^/@#:.]+(?:\.[^/@#:.]+)+|localhost):([^#/0-9]+)/;
 
 // Reg for url without protocol
-const RE_NO_PROTOCOL = /^([^/@#:.]+(?:\.[^/@#:.]+)+)/;
+const RE_NO_PROTOCOL: RegExp = /^([^/@#:.]+(?:\.[^/@#:.]+)+)/;
 
 // RegExp for version string
-const VERSION_PATTERN_REGEXP = /^([\d^=v<>~]|[*xX]$)/;
+const VERSION_PATTERN_REGEXP: RegExp = /^([\d^=v<>~]|[*xX]$)/;
 
 // Specific protocol for short url without normal hostname
-const PROTOCOLS_FOR_SHORT = [
+const PROTOCOLS_FOR_SHORT: string[] = [
   'github:',
   'gitlab:',
   'bitbucket:',
@@ -48,51 +44,53 @@ const PROTOCOLS_FOR_SHORT = [
 ];
 
 // Default protocol for git url
-const DEF_GIT_PROTOCOL = 'git+ssh://';
+const DEF_GIT_PROTOCOL: string = 'git+ssh://';
 
 // thanks to https://github.com/npm/hosted-git-info/blob/latest/git-host-info.js
-const extractCommithashByDomain = {
+const extractCommithashByDomain: { [key: string]: (pathname: string, hash: string) => string | undefined } = {
   /**
    * @param {string} pathname pathname
    * @param {string} hash hash
    * @returns {string | undefined} hash
    */
-  'github.com': (pathname, hash) => {
-    let [, user, project, type, commithash] = pathname.split('/', 5);
+  'github.com': (pathname: string, hash: string) => {
+    const [, user, project, type, commithash] = pathname.split('/', 5);
     if (type && type !== 'tree') {
       return;
     }
 
+    let commithashResult = commithash;
     if (!type) {
-      commithash = hash;
+      commithashResult = hash;
     } else {
-      commithash = '#' + commithash;
+      commithashResult = '#' + commithash;
     }
 
+    let projectResult = project;
     if (project && project.endsWith('.git')) {
-      project = project.slice(0, -4);
+      projectResult = project.slice(0, -4);
     }
 
-    if (!user || !project) {
+    if (!user || !projectResult) {
       return;
     }
 
-    return commithash;
+    return commithashResult;
   },
   /**
    * @param {string} pathname pathname
    * @param {string} hash hash
    * @returns {string | undefined} hash
    */
-  'gitlab.com': (pathname, hash) => {
+  'gitlab.com': (pathname: string, hash: string) => {
     const path = pathname.slice(1);
     if (path.includes('/-/') || path.includes('/archive.tar.gz')) {
       return;
     }
 
     const segments = path.split('/');
-    let project = /** @type {string} */ (segments.pop());
-    if (project.endsWith('.git')) {
+    let project = segments.pop();
+    if (project && project.endsWith('.git')) {
       project = project.slice(0, -4);
     }
 
@@ -108,17 +106,18 @@ const extractCommithashByDomain = {
    * @param {string} hash hash
    * @returns {string | undefined} hash
    */
-  'bitbucket.org': (pathname, hash) => {
-    let [, user, project, aux] = pathname.split('/', 4);
+  'bitbucket.org': (pathname: string, hash: string) => {
+    const [, user, project, aux] = pathname.split('/', 4);
     if (['get'].includes(aux)) {
       return;
     }
 
+    let projectResult = project;
     if (project && project.endsWith('.git')) {
-      project = project.slice(0, -4);
+      projectResult = project.slice(0, -4);
     }
 
-    if (!user || !project) {
+    if (!user || !projectResult) {
       return;
     }
 
@@ -129,22 +128,23 @@ const extractCommithashByDomain = {
    * @param {string} hash hash
    * @returns {string | undefined} hash
    */
-  'gist.github.com': (pathname, hash) => {
-    let [, user, project, aux] = pathname.split('/', 4);
+  'gist.github.com': (pathname: string, hash: string) => {
+    const [, user, project, aux] = pathname.split('/', 4);
     if (aux === 'raw') {
       return;
     }
 
-    if (!project) {
+    let projectResult = project;
+    if (!projectResult) {
       if (!user) {
         return;
       }
 
-      project = user;
+      projectResult = user;
     }
 
-    if (project.endsWith('.git')) {
-      project = project.slice(0, -4);
+    if (projectResult.endsWith('.git')) {
+      projectResult = projectResult.slice(0, -4);
     }
 
     return hash;
@@ -158,28 +158,29 @@ const extractCommithashByDomain = {
  * @param {URL} urlParsed parsed url
  * @returns {string} commithash
  */
-function getCommithash(urlParsed) {
-  let { hostname, pathname, hash } = urlParsed;
-  hostname = hostname.replace(/^www\./, '');
+function getCommithash(urlParsed: URL): string {
+  const { hostname, pathname, hash } = urlParsed;
+  const hostnameResult = hostname.replace(/^www\./, '');
 
+  let hashResult = hash;
   try {
-    hash = decodeURIComponent(hash);
+    hashResult = decodeURIComponent(hash);
     // eslint-disable-next-line no-empty
   } catch (e) {}
 
   if (
     extractCommithashByDomain[
-      /** @type {keyof extractCommithashByDomain} */ (hostname)
+      /** @type {keyof extractCommithashByDomain} */ (hostnameResult)
     ]
   ) {
     return (
       extractCommithashByDomain[
-        /** @type {keyof extractCommithashByDomain} */ (hostname)
-      ](pathname, hash) || ''
+        /** @type {keyof extractCommithashByDomain} */ (hostnameResult)
+      ](pathname, hashResult) || ''
     );
   }
 
-  return hash;
+  return hashResult;
 }
 
 /**
@@ -189,7 +190,7 @@ function getCommithash(urlParsed) {
  * @param {string} gitUrl git url
  * @returns {string} fixed url
  */
-function correctUrl(gitUrl) {
+function correctUrl(gitUrl: string): string {
   // like:
   // proto://hostname.com:user/repo -> proto://hostname.com/user/repo
   return gitUrl.replace(RE_HOSTNAME_WITH_COLON, '$1/$2');
@@ -202,7 +203,7 @@ function correctUrl(gitUrl) {
  * @param {string} gitUrl git url
  * @returns {string} fixed url
  */
-function correctProtocol(gitUrl) {
+function correctProtocol(gitUrl: string): string {
   // eg: github:foo/bar#v1.0. Should not add double slash, in case of error parsed `pathname`
   if (RE_GIT_URL_SHORT.test(gitUrl)) {
     return gitUrl;
@@ -223,7 +224,7 @@ function correctProtocol(gitUrl) {
  * @param {string} hash hash
  * @returns {string} git dep version
  */
-function getVersionFromHash(hash) {
+function getVersionFromHash(hash: string): string {
   const matched = hash.match(RE_URL_HASH_VERSION);
 
   return (matched && matched[1]) || '';
@@ -236,7 +237,7 @@ function getVersionFromHash(hash) {
  * @param {string} str str to be checked
  * @returns {boolean} if can be decoded
  */
-function canBeDecoded(str) {
+function canBeDecoded(str: string): boolean {
   try {
     decodeURIComponent(str);
   } catch (e) {
@@ -253,8 +254,8 @@ function canBeDecoded(str) {
  * @param {string} gitUrl git url
  * @returns {string} dep version
  */
-function getGitUrlVersion(gitUrl) {
-  let oriGitUrl = gitUrl;
+function getGitUrlVersion(gitUrl: string): string {
+  const oriGitUrl = gitUrl;
   // github extreme shorthand
   if (RE_URL_GITHUB_EXTREME_SHORT.test(gitUrl)) {
     gitUrl = 'github:' + gitUrl;
@@ -306,18 +307,18 @@ function getGitUrlVersion(gitUrl) {
  * @param {string} str maybe required version
  * @returns {boolean} true, if it looks like a version
  */
-function isRequiredVersion(str) {
+function isRequiredVersion(str: string): boolean {
   return VERSION_PATTERN_REGEXP.test(str);
 }
 
-exports.isRequiredVersion = isRequiredVersion;
+export { isRequiredVersion };
 
 /**
  * @see https://docs.npmjs.com/cli/v7/configuring-npm/package-json#urls-as-dependencies
  * @param {string} versionDesc version to be normalized
  * @returns {string} normalized version
  */
-function normalizeVersion(versionDesc) {
+function normalizeVersion(versionDesc: string): string {
   versionDesc = (versionDesc && versionDesc.trim()) || '';
 
   if (isRequiredVersion(versionDesc)) {
@@ -328,7 +329,7 @@ function normalizeVersion(versionDesc) {
   return getGitUrlVersion(versionDesc.toLowerCase());
 }
 
-exports.normalizeVersion = normalizeVersion;
+export { normalizeVersion };
 
 /**
  *
@@ -337,12 +338,15 @@ exports.normalizeVersion = normalizeVersion;
  * @param {string[]} descriptionFiles possible description filenames
  * @param {function((Error | null)=, {data: object, path: string}=): void} callback callback
  */
-const getDescriptionFile = (fs, directory, descriptionFiles, callback) => {
+const getDescriptionFile = (fs: InputFileSystem, directory: string, descriptionFiles: string[], callback: (err: Error | null, data?: { data: object, path: string }) => void) => {
   let i = 0;
   const tryLoadCurrent = () => {
     if (i >= descriptionFiles.length) {
       const parentDirectory = dirname(fs, directory);
-      if (!parentDirectory || parentDirectory === directory) return callback();
+      if (!parentDirectory || parentDirectory === directory) {
+        //@ts-ignore
+        return callback();
+      }
       return getDescriptionFile(
         fs,
         parentDirectory,
@@ -351,7 +355,7 @@ const getDescriptionFile = (fs, directory, descriptionFiles, callback) => {
       );
     }
     const filePath = join(fs, directory, descriptionFiles[i]);
-    readJson(fs, filePath, (err, data) => {
+    readJson(fs, filePath, (err, data: object) => {
       if (err) {
         if ('code' in err && err.code === 'ENOENT') {
           i++;
@@ -369,35 +373,41 @@ const getDescriptionFile = (fs, directory, descriptionFiles, callback) => {
   };
   tryLoadCurrent();
 };
-exports.getDescriptionFile = getDescriptionFile;
+export { getDescriptionFile };
+/**
+ * Get required version from description file
+ * @param {Record<string, any>} data - The data object
+ * @param {string} packageName - The package name
+ * @returns {string | undefined} The normalized version
+ */
+export function getRequiredVersionFromDescriptionFile(data: Record<string, any>, packageName: string): string | undefined {
+  if (
+    data['optionalDependencies'] &&
+    typeof data['optionalDependencies'] === 'object' &&
+    packageName in data['optionalDependencies']
+  ) {
+    return normalizeVersion(data['optionalDependencies'][packageName]);
+  }
+  if (
+    data['dependencies'] &&
+    typeof data['dependencies'] === 'object' &&
+    packageName in data['dependencies']
+  ) {
+    return normalizeVersion(data['dependencies'][packageName]);
+  }
+  if (
+    data['peerDependencies'] &&
+    typeof data['peerDependencies'] === 'object' &&
+    packageName in data['peerDependencies']
+  ) {
+    return normalizeVersion(data['peerDependencies'][packageName]);
+  }
+  if (
+    data['devDependencies'] &&
+    typeof data['devDependencies'] === 'object' &&
+    packageName in data['devDependencies']
+  ) {
+    return normalizeVersion(data['devDependencies'][packageName]);
+  }
+}
 
-exports.getRequiredVersionFromDescriptionFile = (data, packageName) => {
-  if (
-    data.optionalDependencies &&
-    typeof data.optionalDependencies === 'object' &&
-    packageName in data.optionalDependencies
-  ) {
-    return normalizeVersion(data.optionalDependencies[packageName]);
-  }
-  if (
-    data.dependencies &&
-    typeof data.dependencies === 'object' &&
-    packageName in data.dependencies
-  ) {
-    return normalizeVersion(data.dependencies[packageName]);
-  }
-  if (
-    data.peerDependencies &&
-    typeof data.peerDependencies === 'object' &&
-    packageName in data.peerDependencies
-  ) {
-    return normalizeVersion(data.peerDependencies[packageName]);
-  }
-  if (
-    data.devDependencies &&
-    typeof data.devDependencies === 'object' &&
-    packageName in data.devDependencies
-  ) {
-    return normalizeVersion(data.devDependencies[packageName]);
-  }
-};
