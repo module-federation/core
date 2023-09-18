@@ -166,7 +166,7 @@
     "jest-environment-node": "29.7.0",
     "js-yaml": "4.1.0",
     "mammoth": "1.6.0",
-    "marked": "9.0.1",
+    "marked": "9.0.2",
     "marked-terminal": "5.2.0",
     "merge-stream": "2.0.0",
     "mime-types": "2.1.35",
