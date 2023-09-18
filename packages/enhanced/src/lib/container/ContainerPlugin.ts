@@ -14,6 +14,7 @@ import type {
   Exposes,
   ExposesItem,
 } from './ContainerPluginTypes';
+import { WebpackError } from 'webpack/lib/Module';
 
 /** @typedef {import("./ContainerPluginTypes").ContainerPluginOptions} ContainerPluginOptions */
 /** @typedef {import("webpack/lib/Compiler")} Compiler */
@@ -85,7 +86,7 @@ class ContainerPlugin {
           runtime,
           library,
         },
-        (error) => {
+        (error:WebpackError | null | undefined) => {
           if (error) return callback(error);
           callback();
         },
