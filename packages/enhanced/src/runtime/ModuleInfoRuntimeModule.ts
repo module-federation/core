@@ -13,7 +13,7 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
    * Initializes the module with the name and stage.
    */
   constructor() {
-    super('federation module info runtime', RuntimeModule.STAGE_BASIC );
+    super('federation module info runtime', RuntimeModule.STAGE_BASIC);
   }
 
   /**
@@ -23,11 +23,7 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
   override generate(): string {
     return Template.asString([
       `${RuntimeGlobals.require}.federation = {`,
-      Template.indent([
-        `cache: {},`, 
-        `remotes: {},`, 
-        `moduleInfo: { },`,
-      ]),
+      Template.indent([`cache: {},`, `remotes: {},`, `moduleInfo: { },`]),
       `};`,
       // `if (!globalThis.__remote_scopes__) {`,
       Template.indent([
@@ -45,11 +41,15 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
           'var result;',
           Template.indent([
             `if (prop === '_config') {`,
-            Template.indent([`result = ${RuntimeGlobals.require}.federation.remotes;`]),
+            Template.indent([
+              `result = ${RuntimeGlobals.require}.federation.remotes;`,
+            ]),
             `} else {`,
-            Template.indent([`result = ${RuntimeGlobals.require}.federation.cache[prop];`]),
+            Template.indent([
+              `result = ${RuntimeGlobals.require}.federation.cache[prop];`,
+            ]),
             `}`,
-            'return result;'
+            'return result;',
           ]),
           `},`,
           /**
@@ -62,9 +62,13 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
           `set: function(target: any, prop: string, value: any): boolean {`,
           Template.indent([
             `if (prop === '_config') {`,
-            Template.indent([`${RuntimeGlobals.require}.federation.remotes = value;`]),
+            Template.indent([
+              `${RuntimeGlobals.require}.federation.remotes = value;`,
+            ]),
             `} else {`,
-            Template.indent([`${RuntimeGlobals.require}.federation.cache[prop] = value;`]),
+            Template.indent([
+              `${RuntimeGlobals.require}.federation.cache[prop] = value;`,
+            ]),
             `}`,
             `return true;`,
           ]),
@@ -78,4 +82,3 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
 }
 
 export default FederationModuleInfoRuntimeModule;
-

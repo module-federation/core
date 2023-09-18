@@ -3,13 +3,17 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
 
+'use strict';
+
 import ContainerEntryModule from './ContainerEntryModule';
-import type ContainerEntryDependency from './ContainerEntryDependency';
+import ContainerEntryDependency from './ContainerEntryDependency';
 import {
-  ModuleFactory,
-  ModuleFactoryResult,
   ModuleFactoryCreateData,
+  ModuleFactoryResult,
+  ModuleFactory,
 } from '../../types';
+
+/** @typedef {import("./ContainerEntryDependency")} ContainerEntryDependency */
 
 export default class ContainerEntryModuleFactory extends ModuleFactory {
   /**
@@ -19,12 +23,13 @@ export default class ContainerEntryModuleFactory extends ModuleFactory {
    */
   override create(
     data: ModuleFactoryCreateData,
-    callback: (
-      error: Error | null | undefined,
-      result?: ModuleFactoryResult,
-    ) => void,
+    callback: (error: Error | null, result: ModuleFactoryResult) => void,
   ): void {
-    const dep = dependency as ContainerEntryDependency;
+    const { dependencies } = data;
+    const containerDependencies =
+      dependencies as unknown as ContainerEntryDependency[];
+    const dep = containerDependencies[0];
+
     callback(null, {
       module: new ContainerEntryModule(dep.name, dep.exposes, dep.shareScope),
     });

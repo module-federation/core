@@ -3,20 +3,25 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
 
-import makeSerializable from 'webpack/lib/util/hash;
+import makeSerializable from 'webpack/lib/util/makeSerializable';
 import { ModuleDependency } from '../../types';
-import { ObjectDeserializerContext, ObjectSerializerContext } from './types';
+import {
+  ObjectSerializerContext,
+  ObjectDeserializerContext,
+} from '../sharing/ConsumeSharedModule';
 
 class ContainerExposedDependency extends ModuleDependency {
+  exposedName: string;
+  override request: string;
+
   /**
    * @param {string} exposedName public name
    * @param {string} request request to module
    */
-  constructor(
-    public exposedName: string,
-    override request: string,
-  ) {
+  constructor(exposedName: string, request: string) {
     super(request);
+    this.exposedName = exposedName;
+    this.request = request;
   }
 
   override get type(): string {

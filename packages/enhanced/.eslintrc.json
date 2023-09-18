@@ -9,12 +9,6 @@
       }
     },
     {
-      "files": ["*.ts", "*.tsx"],
-      "rules": {
-        "@typescript-eslint/no-explicit-any": "off"
-      }
-    },
-    {
       "files": ["*.js", "*.jsx"],
       "rules": {}
     }

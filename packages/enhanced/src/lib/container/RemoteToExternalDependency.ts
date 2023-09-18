@@ -3,29 +3,29 @@
 	Author Tobias Koppers @sokra
 */
 
+'use strict';
 import ModuleDependency from 'webpack/lib/dependencies/ModuleDependency';
 import makeSerializable from 'webpack/lib/util/makeSerializable';
 
-class FallbackItemDependency extends ModuleDependency {
+class RemoteToExternalDependency extends ModuleDependency {
   /**
    * @param {string} request request
    */
   constructor(request: string) {
     super(request);
   }
-
-  override get type(): string {
-    return 'fallback item';
+  override get type() {
+    return 'remote to external';
   }
 
-  override get category(): string {
+  override get category() {
     return 'esm';
   }
 }
 
 makeSerializable(
-  FallbackItemDependency,
-  'webpack/lib/container/FallbackItemDependency',
+  RemoteToExternalDependency,
+  'webpack/lib/container/RemoteToExternalDependency',
 );
 
-export default FallbackItemDependency;
+export default RemoteToExternalDependency;

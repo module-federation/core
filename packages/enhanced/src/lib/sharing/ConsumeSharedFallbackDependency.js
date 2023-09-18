@@ -3,31 +3,31 @@
 	Author Tobias Koppers @sokra
 */
 
-"use strict";
+'use strict';
 
-const ModuleDependency = require("../dependencies/ModuleDependency");
-const makeSerializable = require("../util/makeSerializable");
+const ModuleDependency = require('../dependencies/ModuleDependency');
+const makeSerializable = require('../util/makeSerializable');
 
 class ConsumeSharedFallbackDependency extends ModuleDependency {
-	/**
-	 * @param {string} request the request
-	 */
-	constructor(request) {
-		super(request);
-	}
+  /**
+   * @param {string} request the request
+   */
+  constructor(request) {
+    super(request);
+  }
 
-	get type() {
-		return "consume shared fallback";
-	}
+  get type() {
+    return 'consume shared fallback';
+  }
 
-	get category() {
-		return "esm";
-	}
+  get category() {
+    return 'esm';
+  }
 }
 
 makeSerializable(
-	ConsumeSharedFallbackDependency,
-	"webpack/lib/sharing/ConsumeSharedFallbackDependency"
+  ConsumeSharedFallbackDependency,
+  'webpack/lib/sharing/ConsumeSharedFallbackDependency',
 );
 
 module.exports = ConsumeSharedFallbackDependency;
