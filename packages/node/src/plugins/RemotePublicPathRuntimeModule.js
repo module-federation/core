@@ -12,15 +12,22 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
    */
   generate() {
     const { compilation } = this;
-    const { scriptType, path, publicPath, importMetaName, uniqueName } = compilation.outputOptions;
+    const { scriptType, path, publicPath, importMetaName, uniqueName, chunkLoading } = compilation.outputOptions;
 
+    const getPath = () => {
+      return compilation.getPath(publicPath || "", {
+        hash: compilation.hash || "XXXX"
+      });
+    };
     // If publicPath is not "auto", return the static value
     if (publicPath !== "auto") {
-      return `${RuntimeGlobals.publicPath} = ${JSON.stringify(
-        compilation.getPath(publicPath || "", {
-          hash: compilation.hash || "XXXX"
-        })
-      )};`;
+      const path = getPath();
+      return Template.asString([
+        `${RuntimeGlobals.publicPath} = ${JSON.stringify(path)};`,
+        'var addProtocol = (url)=> url.startsWith(\'//\') ? \'https:\' + url : url;',
+        `globalThis.currentVmokPublicPath = addProtocol(${RuntimeGlobals.publicPath}) || '/';`,
+      ])
+
     }
 
     const chunkName = compilation.getPath(
@@ -39,18 +46,18 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
     return Template.asString([
       "var scriptUrl;",
       // its an esproxy so nesting into _config directly is not possible
-      "var remoteReg = globalThis.__remote_scope__._config;",
+      "var remoteReg = globalThis.__remote_scope__ ? globalThis.__remote_scope__._config : {};",
       `
       let remoteContainerRegistry = {
         get url() {
-          return remoteReg[${JSON.stringify(ident)}];
+          return remoteReg[${JSON.stringify(ident)}] || remoteReg[${JSON.stringify(uniqueName)}];
         }
       };
       `,
-      
-      scriptType === "module"
+
+      (['module', 'node', 'async-node', 'require'].includes(scriptType) || chunkLoading)
         ? Template.asString([
-          'try {',           
+          'try {',
             Template.indent([
               `scriptUrl = new Function('return typeof ${importMetaName}.url === "string" ? ${importMetaName}.url : undefined;')();`,
             ]),
@@ -89,7 +96,9 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
         ? `${RuntimeGlobals.publicPath} = scriptUrl;`
         : `${RuntimeGlobals.publicPath} = scriptUrl + ${JSON.stringify(
           undoPath
-        )};`
+        )};`,
+        'var addProtocol = (url)=> url.startsWith(\'//\') ? \'https:\' + url : url;',
+        `globalThis.currentVmokPublicPath = addProtocol(${RuntimeGlobals.publicPath}) || '/';`,
     ]);
   }
 }

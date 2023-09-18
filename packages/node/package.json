@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "2.0.0",
+  "version": "2.0.2-beta.2",
   "type": "commonjs",
   "main": "src/index.js",
   "exports": {
@@ -14,6 +14,7 @@
       "import": "./src/utils/index.js",
       "require": "./src/utils/index.js"
     },
+    "./src/plugins/RemotePublicPathPlugin.js": "./src/plugins/RemotePublicPathPlugin.js",
     "./src/": "./src/"
   },
   "publishConfig": {
@@ -34,7 +35,8 @@
   "license": "MIT",
   "dependencies": {
     "node-fetch": "^2.6.7",
-    "encoding": "^0.1.13"
+    "encoding": "^0.1.13",
+    "@module-federation/utilities": "3.0.2-beta.0"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",

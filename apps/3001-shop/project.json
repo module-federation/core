@@ -6,7 +6,9 @@
   "targets": {
     "build": {
       "executor": "@nx/next:build",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/3001-shop"
@@ -53,9 +55,13 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["apps/3001-shop/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": [
+          "apps/3001-shop/**/*.{ts,tsx,js,jsx}"
+        ]
       }
     }
   },

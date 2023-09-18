@@ -2,6 +2,23 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [3.0.2](https://github.com/module-federation/nextjs-mf/compare/utils-3.0.2-beta.0...utils-3.0.2) (2023-09-14)
+
+
+
+## [3.0.2-beta.0](https://github.com/module-federation/nextjs-mf/compare/utils-3.0.1...utils-3.0.2-beta.0) (2023-09-14)
+
+
+### Features
+
+* **utilities:** update DelegateModulesPlugin and tests (#node_auto_public_path) ([df8bb79](https://github.com/module-federation/nextjs-mf/commit/df8bb791c3fedef299cb15960546ff5ad9c665ef))
+
+
+
+## [3.0.1](https://github.com/module-federation/nextjs-mf/compare/utils-3.0.0...utils-3.0.1) (2023-09-13)
+
+
+
 # [3.0.0](https://github.com/module-federation/nextjs-mf/compare/utils-2.0.7...utils-3.0.0) (2023-09-09)
 
 

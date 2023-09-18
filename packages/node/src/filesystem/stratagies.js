@@ -85,9 +85,6 @@ export async function httpVmStrategy(chunkName, remoteName, remotes, callback) {
   var https = require('https');
   var vm = require('vm');
   var url;
-  // eslint-disable-next-line no-undef
-
-  console.log('httpvmstrategy',__webpack_require__.p, chunkName,remotes[remoteName])
   try {
     console.log('trying chunk load', chunkName, __webpack_require__.p);
     url = new URL(chunkName, __webpack_require__.p);

@@ -67,7 +67,7 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
     options: DynamicFilesystemChunkLoadingRuntimeModuleOptions,
     chunkLoadingContext: ChunkLoadingContext
   ) {
-    super('readFile chunk loading', RuntimeModule.STAGE_ATTACH);
+    super('readFile chunk loading', RuntimeModule.STAGE_ATTACH + 1);
     this.runtimeRequirements = runtimeRequirements;
 
     this.options = options;

@@ -1,5 +1,4 @@
 import { Template, RuntimeGlobals, Chunk, ChunkGraph } from 'webpack';
-import { executeLoadTemplate } from './loadScript';
 
 /**
  * Generates the hot module replacement (HMR) code.

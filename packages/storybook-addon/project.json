@@ -6,12 +6,16 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/packages/storybook-addon",
         "main": "packages/storybook-addon/src/index.ts",
         "tsConfig": "packages/storybook-addon/tsconfig.lib.json",
-        "assets": ["packages/storybook-addon/*.md"]
+        "assets": [
+          "packages/storybook-addon/*.md"
+        ]
       },
       "dependsOn": [
         {
@@ -22,14 +26,20 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["packages/storybook-addon/**/*.ts"]
+        "lintFilePatterns": [
+          "packages/storybook-addon/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "packages/storybook-addon/jest.config.ts",
         "passWithNoTests": true
@@ -44,7 +54,10 @@
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": ["storybook-addon:npm", "storybook-addon:github"],
+        "postTargets": [
+          "storybook-addon:npm",
+          "storybook-addon:github"
+        ],
         "trackDeps": true,
         "push": true
       }
@@ -65,5 +78,7 @@
     }
   },
   "tags": [],
-  "implicitDependencies": ["utils"]
+  "implicitDependencies": [
+    "utils"
+  ]
 }
