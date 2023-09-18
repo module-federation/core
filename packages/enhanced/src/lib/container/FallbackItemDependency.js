@@ -8,7 +8,7 @@
 const ModuleDependency = require('webpack/lib/dependencies/ModuleDependency');
 const makeSerializable = require('webpack/lib/util/makeSerializable');
 
-class RemoteToExternalDependency extends ModuleDependency {
+class FallbackItemDependency extends ModuleDependency {
   /**
    * @param {string} request request
    */
@@ -17,7 +17,7 @@ class RemoteToExternalDependency extends ModuleDependency {
   }
 
   get type() {
-    return 'remote to external';
+    return 'fallback item';
   }
 
   get category() {
@@ -26,8 +26,8 @@ class RemoteToExternalDependency extends ModuleDependency {
 }
 
 makeSerializable(
-  RemoteToExternalDependency,
-  'webpack/lib/container/RemoteToExternalDependency',
+  FallbackItemDependency,
+  'webpack/lib/container/FallbackItemDependency',
 );
 
-module.exports = RemoteToExternalDependency;
+module.exports = FallbackItemDependency;

@@ -10,9 +10,9 @@ import makeSerializable from 'webpack/lib/util/makeSerializable';
 /** @typedef {import("./ContainerEntryModule").ExposeOptions} ExposeOptions */
 
 class ContainerEntryDependency extends Dependency {
-  private name: string;
-  private exposes: Array<[string, ExposeOptions]>;
-  private shareScope: string;
+  public name: string;
+  public exposes: [string, ExposeOptions][];
+  public shareScope: string;
 
   /**
    * @param {string} name entry name
@@ -21,7 +21,7 @@ class ContainerEntryDependency extends Dependency {
    */
   constructor(
     name: string,
-    exposes: Array<[string, ExposeOptions]>,
+    exposes: [string, ExposeOptions][],
     shareScope: string,
   ) {
     super();
@@ -51,4 +51,4 @@ makeSerializable(
   'webpack/lib/container/ContainerEntryDependency',
 );
 
-export default ContainerEntryDependency;
+export = ContainerEntryDependency;

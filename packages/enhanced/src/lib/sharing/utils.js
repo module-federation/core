@@ -3,9 +3,9 @@
 	Author Tobias Koppers @sokra
 */
 
-"use strict";
+'use strict';
 
-const { join, dirname, readJson } = require("../util/fs");
+const { join, dirname, readJson } = require('../util/fs');
 
 /** @typedef {import("../util/fs").InputFileSystem} InputFileSystem */
 
@@ -17,7 +17,7 @@ const RE_GIT_URL_SHORT = /^(github|gitlab|bitbucket|gist):\/?[^/.]+\/?/i;
 
 // Currently supported protocols
 const RE_PROTOCOL =
-	/^((git\+)?(ssh|https?|file)|git|github|gitlab|bitbucket|gist):$/i;
+  /^((git\+)?(ssh|https?|file)|git|github|gitlab|bitbucket|gist):$/i;
 
 // Has custom protocol
 const RE_CUSTOM_PROTOCOL = /^((git\+)?(ssh|https?|file)|git):\/\//i;
@@ -30,7 +30,7 @@ const RE_HOSTNAME = /^(?:[^/.]+(\.[^/]+)+|localhost)$/;
 
 // For hostname with colon. eg: ssh://user@github.com:foo/bar
 const RE_HOSTNAME_WITH_COLON =
-	/([^/@#:.]+(?:\.[^/@#:.]+)+|localhost):([^#/0-9]+)/;
+  /([^/@#:.]+(?:\.[^/@#:.]+)+|localhost):([^#/0-9]+)/;
 
 // Reg for url without protocol
 const RE_NO_PROTOCOL = /^([^/@#:.]+(?:\.[^/@#:.]+)+)/;
@@ -40,115 +40,115 @@ const VERSION_PATTERN_REGEXP = /^([\d^=v<>~]|[*xX]$)/;
 
 // Specific protocol for short url without normal hostname
 const PROTOCOLS_FOR_SHORT = [
-	"github:",
-	"gitlab:",
-	"bitbucket:",
-	"gist:",
-	"file:"
+  'github:',
+  'gitlab:',
+  'bitbucket:',
+  'gist:',
+  'file:',
 ];
 
 // Default protocol for git url
-const DEF_GIT_PROTOCOL = "git+ssh://";
+const DEF_GIT_PROTOCOL = 'git+ssh://';
 
 // thanks to https://github.com/npm/hosted-git-info/blob/latest/git-host-info.js
 const extractCommithashByDomain = {
-	/**
-	 * @param {string} pathname pathname
-	 * @param {string} hash hash
-	 * @returns {string | undefined} hash
-	 */
-	"github.com": (pathname, hash) => {
-		let [, user, project, type, commithash] = pathname.split("/", 5);
-		if (type && type !== "tree") {
-			return;
-		}
+  /**
+   * @param {string} pathname pathname
+   * @param {string} hash hash
+   * @returns {string | undefined} hash
+   */
+  'github.com': (pathname, hash) => {
+    let [, user, project, type, commithash] = pathname.split('/', 5);
+    if (type && type !== 'tree') {
+      return;
+    }
 
-		if (!type) {
-			commithash = hash;
-		} else {
-			commithash = "#" + commithash;
-		}
+    if (!type) {
+      commithash = hash;
+    } else {
+      commithash = '#' + commithash;
+    }
 
-		if (project && project.endsWith(".git")) {
-			project = project.slice(0, -4);
-		}
+    if (project && project.endsWith('.git')) {
+      project = project.slice(0, -4);
+    }
 
-		if (!user || !project) {
-			return;
-		}
+    if (!user || !project) {
+      return;
+    }
 
-		return commithash;
-	},
-	/**
-	 * @param {string} pathname pathname
-	 * @param {string} hash hash
-	 * @returns {string | undefined} hash
-	 */
-	"gitlab.com": (pathname, hash) => {
-		const path = pathname.slice(1);
-		if (path.includes("/-/") || path.includes("/archive.tar.gz")) {
-			return;
-		}
+    return commithash;
+  },
+  /**
+   * @param {string} pathname pathname
+   * @param {string} hash hash
+   * @returns {string | undefined} hash
+   */
+  'gitlab.com': (pathname, hash) => {
+    const path = pathname.slice(1);
+    if (path.includes('/-/') || path.includes('/archive.tar.gz')) {
+      return;
+    }
 
-		const segments = path.split("/");
-		let project = /** @type {string} */ (segments.pop());
-		if (project.endsWith(".git")) {
-			project = project.slice(0, -4);
-		}
+    const segments = path.split('/');
+    let project = /** @type {string} */ (segments.pop());
+    if (project.endsWith('.git')) {
+      project = project.slice(0, -4);
+    }
 
-		const user = segments.join("/");
-		if (!user || !project) {
-			return;
-		}
+    const user = segments.join('/');
+    if (!user || !project) {
+      return;
+    }
 
-		return hash;
-	},
-	/**
-	 * @param {string} pathname pathname
-	 * @param {string} hash hash
-	 * @returns {string | undefined} hash
-	 */
-	"bitbucket.org": (pathname, hash) => {
-		let [, user, project, aux] = pathname.split("/", 4);
-		if (["get"].includes(aux)) {
-			return;
-		}
+    return hash;
+  },
+  /**
+   * @param {string} pathname pathname
+   * @param {string} hash hash
+   * @returns {string | undefined} hash
+   */
+  'bitbucket.org': (pathname, hash) => {
+    let [, user, project, aux] = pathname.split('/', 4);
+    if (['get'].includes(aux)) {
+      return;
+    }
 
-		if (project && project.endsWith(".git")) {
-			project = project.slice(0, -4);
-		}
+    if (project && project.endsWith('.git')) {
+      project = project.slice(0, -4);
+    }
 
-		if (!user || !project) {
-			return;
-		}
+    if (!user || !project) {
+      return;
+    }
 
-		return hash;
-	},
-	/**
-	 * @param {string} pathname pathname
-	 * @param {string} hash hash
-	 * @returns {string | undefined} hash
-	 */
-	"gist.github.com": (pathname, hash) => {
-		let [, user, project, aux] = pathname.split("/", 4);
-		if (aux === "raw") {
-			return;
-		}
+    return hash;
+  },
+  /**
+   * @param {string} pathname pathname
+   * @param {string} hash hash
+   * @returns {string | undefined} hash
+   */
+  'gist.github.com': (pathname, hash) => {
+    let [, user, project, aux] = pathname.split('/', 4);
+    if (aux === 'raw') {
+      return;
+    }
 
-		if (!project) {
-			if (!user) {
-				return;
-			}
+    if (!project) {
+      if (!user) {
+        return;
+      }
 
-			project = user;
-		}
+      project = user;
+    }
 
-		if (project.endsWith(".git")) {
-			project = project.slice(0, -4);
-		}
+    if (project.endsWith('.git')) {
+      project = project.slice(0, -4);
+    }
 
-		return hash;
-	}
+    return hash;
+  },
 };
 
 /**
@@ -159,27 +159,27 @@ const extractCommithashByDomain = {
  * @returns {string} commithash
  */
 function getCommithash(urlParsed) {
-	let { hostname, pathname, hash } = urlParsed;
-	hostname = hostname.replace(/^www\./, "");
+  let { hostname, pathname, hash } = urlParsed;
+  hostname = hostname.replace(/^www\./, '');
 
-	try {
-		hash = decodeURIComponent(hash);
-		// eslint-disable-next-line no-empty
-	} catch (e) {}
+  try {
+    hash = decodeURIComponent(hash);
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
 
-	if (
-		extractCommithashByDomain[
-			/** @type {keyof extractCommithashByDomain} */ (hostname)
-		]
-	) {
-		return (
-			extractCommithashByDomain[
-				/** @type {keyof extractCommithashByDomain} */ (hostname)
-			](pathname, hash) || ""
-		);
-	}
+  if (
+    extractCommithashByDomain[
+      /** @type {keyof extractCommithashByDomain} */ (hostname)
+    ]
+  ) {
+    return (
+      extractCommithashByDomain[
+        /** @type {keyof extractCommithashByDomain} */ (hostname)
+      ](pathname, hash) || ''
+    );
+  }
 
-	return hash;
+  return hash;
 }
 
 /**
@@ -190,9 +190,9 @@ function getCommithash(urlParsed) {
  * @returns {string} fixed url
  */
 function correctUrl(gitUrl) {
-	// like:
-	// proto://hostname.com:user/repo -> proto://hostname.com/user/repo
-	return gitUrl.replace(RE_HOSTNAME_WITH_COLON, "$1/$2");
+  // like:
+  // proto://hostname.com:user/repo -> proto://hostname.com/user/repo
+  return gitUrl.replace(RE_HOSTNAME_WITH_COLON, '$1/$2');
 }
 
 /**
@@ -203,17 +203,17 @@ function correctUrl(gitUrl) {
  * @returns {string} fixed url
  */
 function correctProtocol(gitUrl) {
-	// eg: github:foo/bar#v1.0. Should not add double slash, in case of error parsed `pathname`
-	if (RE_GIT_URL_SHORT.test(gitUrl)) {
-		return gitUrl;
-	}
+  // eg: github:foo/bar#v1.0. Should not add double slash, in case of error parsed `pathname`
+  if (RE_GIT_URL_SHORT.test(gitUrl)) {
+    return gitUrl;
+  }
 
-	// eg: user@github.com:foo/bar
-	if (!RE_CUSTOM_PROTOCOL.test(gitUrl)) {
-		return `${DEF_GIT_PROTOCOL}${gitUrl}`;
-	}
+  // eg: user@github.com:foo/bar
+  if (!RE_CUSTOM_PROTOCOL.test(gitUrl)) {
+    return `${DEF_GIT_PROTOCOL}${gitUrl}`;
+  }
 
-	return gitUrl;
+  return gitUrl;
 }
 
 /**
@@ -224,9 +224,9 @@ function correctProtocol(gitUrl) {
  * @returns {string} git dep version
  */
 function getVersionFromHash(hash) {
-	const matched = hash.match(RE_URL_HASH_VERSION);
+  const matched = hash.match(RE_URL_HASH_VERSION);
 
-	return (matched && matched[1]) || "";
+  return (matched && matched[1]) || '';
 }
 
 /**
@@ -237,13 +237,13 @@ function getVersionFromHash(hash) {
  * @returns {boolean} if can be decoded
  */
 function canBeDecoded(str) {
-	try {
-		decodeURIComponent(str);
-	} catch (e) {
-		return false;
-	}
+  try {
+    decodeURIComponent(str);
+  } catch (e) {
+    return false;
+  }
 
-	return true;
+  return true;
 }
 
 /**
@@ -254,52 +254,52 @@ function canBeDecoded(str) {
  * @returns {string} dep version
  */
 function getGitUrlVersion(gitUrl) {
-	let oriGitUrl = gitUrl;
-	// github extreme shorthand
-	if (RE_URL_GITHUB_EXTREME_SHORT.test(gitUrl)) {
-		gitUrl = "github:" + gitUrl;
-	} else {
-		gitUrl = correctProtocol(gitUrl);
-	}
+  let oriGitUrl = gitUrl;
+  // github extreme shorthand
+  if (RE_URL_GITHUB_EXTREME_SHORT.test(gitUrl)) {
+    gitUrl = 'github:' + gitUrl;
+  } else {
+    gitUrl = correctProtocol(gitUrl);
+  }
 
-	gitUrl = correctUrl(gitUrl);
+  gitUrl = correctUrl(gitUrl);
 
-	let parsed;
-	try {
-		parsed = new URL(gitUrl);
-		// eslint-disable-next-line no-empty
-	} catch (e) {}
+  let parsed;
+  try {
+    parsed = new URL(gitUrl);
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
 
-	if (!parsed) {
-		return "";
-	}
+  if (!parsed) {
+    return '';
+  }
 
-	const { protocol, hostname, pathname, username, password } = parsed;
-	if (!RE_PROTOCOL.test(protocol)) {
-		return "";
-	}
+  const { protocol, hostname, pathname, username, password } = parsed;
+  if (!RE_PROTOCOL.test(protocol)) {
+    return '';
+  }
 
-	// pathname shouldn't be empty or URL malformed
-	if (!pathname || !canBeDecoded(pathname)) {
-		return "";
-	}
+  // pathname shouldn't be empty or URL malformed
+  if (!pathname || !canBeDecoded(pathname)) {
+    return '';
+  }
 
-	// without protocol, there should have auth info
-	if (RE_NO_PROTOCOL.test(oriGitUrl) && !username && !password) {
-		return "";
-	}
+  // without protocol, there should have auth info
+  if (RE_NO_PROTOCOL.test(oriGitUrl) && !username && !password) {
+    return '';
+  }
 
-	if (!PROTOCOLS_FOR_SHORT.includes(protocol.toLowerCase())) {
-		if (!RE_HOSTNAME.test(hostname)) {
-			return "";
-		}
+  if (!PROTOCOLS_FOR_SHORT.includes(protocol.toLowerCase())) {
+    if (!RE_HOSTNAME.test(hostname)) {
+      return '';
+    }
 
-		const commithash = getCommithash(parsed);
-		return getVersionFromHash(commithash) || commithash;
-	}
+    const commithash = getCommithash(parsed);
+    return getVersionFromHash(commithash) || commithash;
+  }
 
-	// for protocol short
-	return getVersionFromHash(gitUrl);
+  // for protocol short
+  return getVersionFromHash(gitUrl);
 }
 
 /**
@@ -307,7 +307,7 @@ function getGitUrlVersion(gitUrl) {
  * @returns {boolean} true, if it looks like a version
  */
 function isRequiredVersion(str) {
-	return VERSION_PATTERN_REGEXP.test(str);
+  return VERSION_PATTERN_REGEXP.test(str);
 }
 
 exports.isRequiredVersion = isRequiredVersion;
@@ -318,14 +318,14 @@ exports.isRequiredVersion = isRequiredVersion;
  * @returns {string} normalized version
  */
 function normalizeVersion(versionDesc) {
-	versionDesc = (versionDesc && versionDesc.trim()) || "";
+  versionDesc = (versionDesc && versionDesc.trim()) || '';
 
-	if (isRequiredVersion(versionDesc)) {
-		return versionDesc;
-	}
+  if (isRequiredVersion(versionDesc)) {
+    return versionDesc;
+  }
 
-	// add handle for URL Dependencies
-	return getGitUrlVersion(versionDesc.toLowerCase());
+  // add handle for URL Dependencies
+  return getGitUrlVersion(versionDesc.toLowerCase());
 }
 
 exports.normalizeVersion = normalizeVersion;
@@ -338,66 +338,66 @@ exports.normalizeVersion = normalizeVersion;
  * @param {function((Error | null)=, {data: object, path: string}=): void} callback callback
  */
 const getDescriptionFile = (fs, directory, descriptionFiles, callback) => {
-	let i = 0;
-	const tryLoadCurrent = () => {
-		if (i >= descriptionFiles.length) {
-			const parentDirectory = dirname(fs, directory);
-			if (!parentDirectory || parentDirectory === directory) return callback();
-			return getDescriptionFile(
-				fs,
-				parentDirectory,
-				descriptionFiles,
-				callback
-			);
-		}
-		const filePath = join(fs, directory, descriptionFiles[i]);
-		readJson(fs, filePath, (err, data) => {
-			if (err) {
-				if ("code" in err && err.code === "ENOENT") {
-					i++;
-					return tryLoadCurrent();
-				}
-				return callback(err);
-			}
-			if (!data || typeof data !== "object" || Array.isArray(data)) {
-				return callback(
-					new Error(`Description file ${filePath} is not an object`)
-				);
-			}
-			callback(null, { data, path: filePath });
-		});
-	};
-	tryLoadCurrent();
+  let i = 0;
+  const tryLoadCurrent = () => {
+    if (i >= descriptionFiles.length) {
+      const parentDirectory = dirname(fs, directory);
+      if (!parentDirectory || parentDirectory === directory) return callback();
+      return getDescriptionFile(
+        fs,
+        parentDirectory,
+        descriptionFiles,
+        callback,
+      );
+    }
+    const filePath = join(fs, directory, descriptionFiles[i]);
+    readJson(fs, filePath, (err, data) => {
+      if (err) {
+        if ('code' in err && err.code === 'ENOENT') {
+          i++;
+          return tryLoadCurrent();
+        }
+        return callback(err);
+      }
+      if (!data || typeof data !== 'object' || Array.isArray(data)) {
+        return callback(
+          new Error(`Description file ${filePath} is not an object`),
+        );
+      }
+      callback(null, { data, path: filePath });
+    });
+  };
+  tryLoadCurrent();
 };
 exports.getDescriptionFile = getDescriptionFile;
 
 exports.getRequiredVersionFromDescriptionFile = (data, packageName) => {
-	if (
-		data.optionalDependencies &&
-		typeof data.optionalDependencies === "object" &&
-		packageName in data.optionalDependencies
-	) {
-		return normalizeVersion(data.optionalDependencies[packageName]);
-	}
-	if (
-		data.dependencies &&
-		typeof data.dependencies === "object" &&
-		packageName in data.dependencies
-	) {
-		return normalizeVersion(data.dependencies[packageName]);
-	}
-	if (
-		data.peerDependencies &&
-		typeof data.peerDependencies === "object" &&
-		packageName in data.peerDependencies
-	) {
-		return normalizeVersion(data.peerDependencies[packageName]);
-	}
-	if (
-		data.devDependencies &&
-		typeof data.devDependencies === "object" &&
-		packageName in data.devDependencies
-	) {
-		return normalizeVersion(data.devDependencies[packageName]);
-	}
+  if (
+    data.optionalDependencies &&
+    typeof data.optionalDependencies === 'object' &&
+    packageName in data.optionalDependencies
+  ) {
+    return normalizeVersion(data.optionalDependencies[packageName]);
+  }
+  if (
+    data.dependencies &&
+    typeof data.dependencies === 'object' &&
+    packageName in data.dependencies
+  ) {
+    return normalizeVersion(data.dependencies[packageName]);
+  }
+  if (
+    data.peerDependencies &&
+    typeof data.peerDependencies === 'object' &&
+    packageName in data.peerDependencies
+  ) {
+    return normalizeVersion(data.peerDependencies[packageName]);
+  }
+  if (
+    data.devDependencies &&
+    typeof data.devDependencies === 'object' &&
+    packageName in data.devDependencies
+  ) {
+    return normalizeVersion(data.devDependencies[packageName]);
+  }
 };

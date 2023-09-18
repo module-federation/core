@@ -93,6 +93,7 @@ class ContainerEntryModule extends Module {
     obj.deserialize(context);
     return obj;
   }
+
   /**
    * @returns {Set<string>} types available (do not mutate)
    */
