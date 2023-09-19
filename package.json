@@ -18,7 +18,7 @@
   "scripts": {
     "nx": "nx",
     "gpt:file:example": "npm run gpt:file --file ./gpt/services/openai.js --file ./gpt/commit.js --file ./gpt/file.js --question \"Fix all JSDoc issues, dont modify any other aspectf of these files besides JSDOC\"",
-    "sync:types:webpack": "npx -p typescript tsc ./node_modules/webpack/**/*.js --declaration --allowJs --emitDeclarationOnly --outDir ./node_modules/webpack && node ./packages/enhanced/pullts.js",
+    "sync:types:webpack": "npx -p typescript tsc ./node_modules/webpack/lib/**/*.js --declaration --allowJs --emitDeclarationOnly --outDir ./node_modules/webpack/lib && node ./packages/enhanced/pullts.js",
     "gpt:commit": "node ./gpt --commit",
     "gpt:file": "node ./gpt",
     "gpt:pr": "node ./gpt --pr",
