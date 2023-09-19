@@ -15,7 +15,7 @@ import {
   generateLoadScript,
   generateInstallChunk,
   generateExternalInstallChunkCode
-} from './parts';
+} from './webpackChunkUtilities';
 import {
   fileSystemRunInContextStrategy,
   httpEvalStrategy,
@@ -38,7 +38,6 @@ interface DynamicFilesystemChunkLoadingRuntimeModuleOptions {
 interface ChunkLoadingContext {
   webpack: Compiler['webpack'];
 }
-
 
 //hook can be tapped with
 // class MyPlugin {
@@ -163,16 +162,20 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
     ]);
 
     const remoteRegistry = Template.asString([
-      `var remotes = ${JSON.stringify(
-        Object.values(remotes).reduce((acc, remote) => {
-          const [global, url] = remote.split('@');
-          acc[global] = url;
-          return acc;
+      `const remotesRegistry = ${JSON.stringify(
+        Object.entries(remotes).reduce((registry, [global, url]) => {
+          registry[global] = url.split('@')[1];
+          return registry;
         }, {} as Record<string, string>)
       )};`,
-      `Object.keys(remotes).forEach(function(remote) {
-       globalThis.__remote_scope__._config[remote] = remotes[remote];
-      });`,
+      'var remotesRegistryKeys = Object.keys(remotesRegistry);',
+      'for (var i = 0; i < remotesRegistryKeys.length; i++) {',
+      Template.indent([
+        'var remote = remotesRegistryKeys[i];',
+        'var url = remotesRegistry[remote];',
+        'globalThis.__remote_scope__._config[remote] = url;',
+      ]),
+      '}',
     ]);
 
     return Template.asString([
@@ -237,5 +240,3 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
 }
 
 export default DynamicFilesystemChunkLoadingRuntimeModule;
-
-

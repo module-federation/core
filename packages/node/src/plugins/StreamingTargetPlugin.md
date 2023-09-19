@@ -1,14 +1,14 @@
 # StreamingTargetPlugin
 
-## Introduction
-The `StreamingTargetPlugin` is designed to provide a new transport layer for Webpack, allowing for the streaming of chunks in Node.js environments where the chunks may not be available on disk. It serves as an alternative to Webpack's `CommonJsChunkLoadingPlugin` but without a coupled filesystem.
+## Overview
+The `StreamingTargetPlugin` is designed to introduce a new transport layer for Webpack. It enables the streaming of chunks in Node.js environments, even when the chunks are not readily available on disk. This plugin is an excellent alternative to Webpack's `CommonJsChunkLoadingPlugin`, offering similar functionality without the need for a coupled filesystem.
 
 ## Installation
-To be installed via npm or yarn. (Installation command to be provided by package maintainer.)
+You can install the `StreamingTargetPlugin` via npm or yarn using the following command:
 `npm install @module-federation/node`
 
 ## Prerequisites
-- The plugin is generally used in conjunction with `NodeFederationPlugin` or `UniversalFederationPlugin`.
+The `StreamingTargetPlugin` is typically used in combination with either the `NodeFederationPlugin` or the `UniversalFederationPlugin`.
   
 ## Usage
 
@@ -76,3 +76,5 @@ License information to be provided by package maintainer.
 
 URLs:
 - Roadmap/RFC: https://github.com/module-federation/universe/discussions/1170
+
+

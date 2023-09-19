@@ -4,12 +4,11 @@ export async function fileSystemRunInContextStrategy(
   remotes,
   callback
 ) {
-  var fs = require('fs');
-  var path = require('path');
-  var vm = require('vm');
-  var filename = require('path').join(
+  const fs = require('fs');
+  const path = require('path');
+  const vm = require('vm');
+  const filename = path.join(
     __dirname,
-    //eslint-disable-next-line
     rootOutputDir + __webpack_require__.u(chunkId)
   );
   if (fs.existsSync(filename)) {
@@ -18,7 +17,7 @@ export async function fileSystemRunInContextStrategy(
         callback(err, null);
         return;
       }
-      var chunk = {};
+      const chunk = {};
       try {
         vm.runInThisContext(
           '(function(exports, require, __dirname, __filename) {' +
@@ -45,33 +44,35 @@ export async function httpEvalStrategy(
   remotes,
   callback
 ) {
-  var url;
+  let url;
   try {
-    // eslint-disable-next-line no-undef
-     url = new URL(chunkName,__webpack_require__.p);
+    url = new URL(chunkName,__webpack_require__.p);
   } catch(e) {
     console.error('module-federation: failed to construct absolute chunk path of',remoteName,'for',chunkName, e);
     url = new URL(remotes[remoteName]);
-    var getBasenameFromUrl = (url) => {
+    const getBasenameFromUrl = (url) => {
       const urlParts = url.split('/');
       return urlParts[urlParts.length - 1];
     };
-    var fileToReplace = getBasenameFromUrl(url.pathname);
+    const fileToReplace = getBasenameFromUrl(url.pathname);
     url.pathname = url.pathname.replace(fileToReplace, chunkName);
   }
 
   const data = await fetch(url).then((res) => res.text());
-  var chunk = {};
+  const chunk = {};
   try {
+    const urlDirname = url.pathname.split('/').slice(0, -1).join('/');
+
     eval(
       '(function(exports, require, __dirname, __filename) {' + data + '\n})',
       chunkName
-    )(chunk, require, '.', chunkName);
+    )(chunk, require, urlDirname, chunkName);
     callback(null, chunk);
   } catch (e) {
     callback(e, null);
   }
 }
+
 /**
  * HttpVmStrategy
  * This function is used to execute a chunk of code in a VM using HTTP or HTTPS based on the protocol.
@@ -81,33 +82,33 @@ export async function httpEvalStrategy(
  * @param {function} callback - A callback function to be executed after the chunk is executed.
  */
 export async function httpVmStrategy(chunkName, remoteName, remotes, callback) {
-  var http = require('http');
-  var https = require('https');
-  var vm = require('vm');
-  var url;
+  const http = require('http');
+  const https = require('https');
+  const vm = require('vm');
+  const path = require('path');
+  let url;
   try {
-    console.log('trying chunk load', chunkName, __webpack_require__.p);
     url = new URL(chunkName, __webpack_require__.p);
   } catch(e) {
     console.error('module-federation: failed to construct absolute chunk path of',remoteName,'for',chunkName, e);
- console.log('fallbak url constructed', remotes._config[remoteName])
-
- url = new URL(remotes._config[remoteName]);
-    var fileToReplace = require('path').basename(url.pathname);
+    url = new URL(remotes._config[remoteName]);
+    const fileToReplace = path.basename(url.pathname);
     url.pathname = url.pathname.replace(fileToReplace, chunkName);
   }
-  var protocol = url.protocol === 'https:' ? https : http;
+  const protocol = url.protocol === 'https:' ? https : http;
   protocol.get(url, (res) => {
     let data = '';
     res.on('data', (chunk) => {
       data += chunk;
     });
     res.on('end', () => {
-      var chunk = {};
+      const chunk = {};
+      const urlDirname = url.pathname.split('/').slice(0, -1).join('/');
+
       vm.runInThisContext(
         '(function(exports, require, __dirname, __filename) {' + data + '\n})',
         chunkName
-      )(chunk, require, '.', chunkName);
+      )(chunk, require, urlDirname, chunkName);
       callback(null, chunk);
     });
     res.on('error', (err) => {
