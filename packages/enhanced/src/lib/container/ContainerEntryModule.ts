@@ -4,28 +4,27 @@
 */
 
 'use strict';
-
-import { OriginalSource, RawSource } from 'webpack-sources';
 import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from 'webpack/lib/ModuleTypeConstants';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import Template from 'webpack/lib/Template';
-import StaticExportsDependency from 'webpack/lib/dependencies/StaticExportsDependency';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+import { OriginalSource, RawSource } from 'webpack-sources';
+import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
 import ContainerExposedDependency from './ContainerExposedDependency';
+import Dependency from 'webpack/lib/Dependency';
 import Module, {
-  InputFileSystem,
   Compilation,
+  InputFileSystem,
   LibIdentOptions,
   NeedBuildContext,
   ObjectDeserializerContext,
   ObjectSerializerContext,
-  WebpackError,
   RequestShortener,
-  WebpackOptions,
   ResolverWithOptions,
+  WebpackError,
+  WebpackOptions,
 } from 'webpack/lib/Module';
-import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
-import Dependency from 'webpack/lib/Dependency';
+import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import StaticExportsDependency from 'webpack/lib/dependencies/StaticExportsDependency';
+import Template from 'webpack/lib/Template';
+import makeSerializable from 'webpack/lib/util/makeSerializable';
 
 /** @typedef {import("webpack/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
 /** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */

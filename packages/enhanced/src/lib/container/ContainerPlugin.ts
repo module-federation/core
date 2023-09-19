@@ -9,6 +9,7 @@ import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { parseOptions } from './options';
 import Compiler from 'webpack/lib/Compiler';
+import Compilation from 'webpack/lib/Compilation';
 import type { ContainerPluginOptions } from '../../declarations/plugins/container/ContainerPlugin';
 import { WebpackError } from 'webpack/lib/Module';
 
@@ -95,7 +96,7 @@ class ContainerPlugin {
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
-      (compilation, { normalModuleFactory }) => {
+      (compilation : Compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
           ContainerEntryDependency,
           new ContainerEntryModuleFactory(),

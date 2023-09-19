@@ -5,10 +5,9 @@
 
 'use strict';
 
-import { Compiler } from 'webpack/lib/container/ModuleFederationPlugin';
-import { ModuleFederationPluginOptions } from './ModuleFederationPluginTypes';
-
+import Compiler from 'webpack/lib/Compiler';
 import isValidExternalsType from 'webpack/schemas/plugins/container/ExternalsType.check.js';
+import { ModuleFederationPluginOptions } from './ModuleFederationPluginTypes';
 import SharePlugin from '../sharing/SharePlugin';
 import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
 import ContainerPlugin from './ContainerPlugin';
@@ -56,9 +55,9 @@ class ModuleFederationPlugin {
         : 'script');
     if (
       library &&
-      !compiler.options.output.enabledLibraryTypes.includes(library.type)
+      !compiler.options.output.enabledLibraryTypes?.includes(library.type)
     ) {
-      compiler.options.output.enabledLibraryTypes.push(library.type);
+      compiler.options.output.enabledLibraryTypes?.push(library.type);
     }
     compiler.hooks.afterPlugins.tap('ModuleFederationPlugin', () => {
       if (
