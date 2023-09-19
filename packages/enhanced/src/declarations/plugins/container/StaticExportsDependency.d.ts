@@ -1,5 +1,4 @@
-export = StaticExportsDependency;
-declare class StaticExportsDependency extends NullDependency {
+export class StaticExportsDependency extends NullDependency {
   /**
    * @param {string[] | true} exports export names
    * @param {boolean} canMangle true, if mangling exports names is allowed
@@ -26,8 +25,4 @@ type ExportSpec = import('./Dependency').ExportSpec;
 type ExportsSpec = import('./Dependency').ExportsSpec;
 type UpdateHashContext = import('./Dependency').UpdateHashContext;
 type ModuleGraph = import('../ModuleGraph');
-type ObjectDeserializerContext =
-  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
-type ObjectSerializerContext =
-  import('../serialization/ObjectMiddleware').ObjectSerializerContext;
 type Hash = import('../util/Hash');

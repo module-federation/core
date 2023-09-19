@@ -11,10 +11,6 @@ import { parseOptions } from './options';
 import Compiler from 'webpack/lib/Compiler';
 import Compilation from 'webpack/lib/Compilation';
 import type { ContainerPluginOptions } from '../../declarations/plugins/container/ContainerPlugin';
-import { WebpackError } from 'webpack/lib/Module';
-
-/** @typedef {import("./ContainerPluginTypes").ContainerPluginOptions} ContainerPluginOptions */
-/** @typedef {import("webpack/lib/Compiler")} Compiler */
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line

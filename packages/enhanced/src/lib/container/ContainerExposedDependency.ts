@@ -9,9 +9,6 @@ import ModuleDependency, {
 } from 'webpack/lib/dependencies/ModuleDependency';
 import makeSerializable from 'webpack/lib/util/makeSerializable';
 
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
-
 class ContainerExposedDependency extends ModuleDependency {
   exposedName: string;
   override request: string;

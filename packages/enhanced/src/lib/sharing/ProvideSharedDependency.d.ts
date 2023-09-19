@@ -1,7 +1,4 @@
-export = ProvideSharedDependency;
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
-declare class ProvideSharedDependency extends Dependency {
+export class ProvideSharedDependency extends Dependency {
   /**
    * @param {ObjectDeserializerContext} context context
    * @returns {ProvideSharedDependency} deserialize fallback dependency
@@ -32,9 +29,8 @@ declare class ProvideSharedDependency extends Dependency {
 declare namespace ProvideSharedDependency {
   export { shareScope, ObjectDeserializerContext, ObjectSerializerContext };
 }
-import Dependency = require('webpack/lib/Dependency');
-type ObjectDeserializerContext =
+export type ObjectDeserializerContext =
   import('webpack/lib/serialization/ObjectMiddleware').ObjectDeserializerContext;
-declare var shareScope: any;
-type ObjectSerializerContext =
+declare let shareScope: any;
+export type ObjectSerializerContext =
   import('webpack/lib/serialization/ObjectMiddleware').ObjectSerializerContext;

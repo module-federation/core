@@ -18,5 +18,4 @@ declare class ContainerEntryDependency extends Dependency {
 declare namespace ContainerEntryDependency {
   export { ExposeOptions };
 }
-import Dependency = require('webpack/lib/Dependency');
 type ExposeOptions = import('./ContainerEntryModule').ExposeOptions;

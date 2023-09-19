@@ -8,8 +8,6 @@
 import ContainerEntryModule from './ContainerEntryModule';
 import ContainerEntryDependency from './ContainerEntryDependency';
 
-/** @typedef {import("./ContainerEntryDependency")} ContainerEntryDependency */
-
 export default class ContainerEntryModuleFactory extends ModuleFactory {
   /**
    * @param {ModuleFactoryCreateData} data data object

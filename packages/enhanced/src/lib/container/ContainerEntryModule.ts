@@ -4,38 +4,18 @@
 */
 
 'use strict';
+import { AsyncDependenciesBlock } from '../../declarations/plugins/container/AsyncDependenciesBlock';
 import { OriginalSource, RawSource } from 'webpack-sources';
 import ContainerExposedDependency from './ContainerExposedDependency';
-import AsyncDependenciesBlock from '../../declarations/plugins/container/AsyncDependenciesBlock';
 import { RuntimeGlobals } from 'webpack';
 import StaticExportsDependency from '../../declarations/plugins/container/StaticExportsDependency';
-import Dependency from '../../declarations/plugins/container/Dependency';
 import { ObjectDeserializerContext } from '../../declarations/plugins/container/ObjectDeserializerContext';
 import { WebpackOptions } from '../../declarations/plugins/container/WebpackOptions';
 import Template from '../../declarations/plugins/container/Template';
-
-/** @typedef {import("webpack/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
-/** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
-/** @typedef {import("webpack/lib/ChunkGroup")} ChunkGroup */
-/** @typedef {import("webpack/lib/Compilation")} Compilation */
-/** @typedef {import("webpack/lib/Module").CodeGenerationContext} CodeGenerationContext */
-/** @typedef {import("webpack/lib/Module").CodeGenerationResult} CodeGenerationResult */
-/** @typedef {import("webpack/lib/Module").LibIdentOptions} LibIdentOptions */
-/** @typedef {import("webpack/lib/Module").NeedBuildContext} NeedBuildContext */
-/** @typedef {import("webpack/lib/RequestShortener")} RequestShortener */
-/** @typedef {import("webpack/lib/ResolverFactory").ResolverWithOptions} ResolverWithOptions */
-/** @typedef {import("webpack/lib/WebpackError")} WebpackError */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
-/** @typedef {import("webpack/lib/util/Hash")} Hash */
-/** @typedef {import("webpack/lib/util/fs").InputFileSystem} InputFileSystem */
-/** @typedef {import("./ContainerEntryDependency")} ContainerEntryDependency */
-
-/**
- * @typedef {Object} ExposeOptions
- * @property {string[]} import requests to exposed modules (last one is exported)
- * @property {string} name custom chunk name for the exposed module
- */
+import {
+  Dependency,
+  ObjectSerializerContext,
+} from '../../declarations/plugins/container/Dependency';
 
 const SOURCE_TYPES = new Set(['javascript']);
 
@@ -165,9 +145,9 @@ class ContainerEntryModule extends Module {
           index: idx++,
         };
 
-        block.addDependency(dep as unknown as ContainerExposedDependency);
+        block.addDependency(dep);
       }
-      this.addBlock(block as unknown as AsyncDependenciesBlock);
+      this.addBlock(block);
     }
     this.addDependency(
       new StaticExportsDependency(

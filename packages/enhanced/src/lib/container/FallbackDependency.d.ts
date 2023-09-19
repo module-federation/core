@@ -1,7 +1,4 @@
-export = FallbackDependency;
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
-declare class FallbackDependency extends Dependency {
+export class FallbackDependency extends Dependency {
   /**
    * @param {ObjectDeserializerContext} context context
    * @returns {FallbackDependency} deserialize fallback dependency
@@ -16,8 +13,3 @@ declare class FallbackDependency extends Dependency {
 declare namespace FallbackDependency {
   export { ObjectDeserializerContext, ObjectSerializerContext };
 }
-import Dependency = require('webpack/lib/Dependency');
-type ObjectDeserializerContext =
-  import('webpack/lib/serialization/ObjectMiddleware').ObjectDeserializerContext;
-type ObjectSerializerContext =
-  import('webpack/lib/serialization/ObjectMiddleware').ObjectSerializerContext;

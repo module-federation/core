@@ -3,12 +3,12 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 
-import Dependency from 'webpack/lib/Dependency';
 import makeSerializable from 'webpack/lib/util/makeSerializable';
 import {
+  Dependency,
   ObjectDeserializerContext,
   ObjectSerializerContext,
-} from 'webpack/lib/serialization/ObjectMiddleware';
+} from '../../declarations/plugins/container/Dependency';
 /** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
 /** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 class ProvideSharedDependency extends Dependency {

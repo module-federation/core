@@ -23,11 +23,6 @@ import {
   ContainerReferencePluginOptions,
   RemotesConfig,
 } from '../../declarations/plugins/container/ContainerReferencePlugin';
-import Module from 'webpack/lib/Module';
-
-/** @typedef {import("../../declarations/plugins/container/ContainerReferencePlugin").ContainerReferencePluginOptions} ContainerReferencePluginOptions */
-/** @typedef {import("../../declarations/plugins/container/ContainerReferencePlugin").RemotesConfig} RemotesConfig */
-/** @typedef {import("webpack/lib/Compiler")} Compiler */
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line

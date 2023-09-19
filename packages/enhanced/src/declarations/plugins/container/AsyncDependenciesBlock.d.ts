@@ -1,6 +1,4 @@
-export = AsyncDependenciesBlock;
-
-declare class AsyncDependenciesBlock extends DependenciesBlock {
+export class AsyncDependenciesBlock extends DependenciesBlock {
   /**
    * @param {(ChunkGroupOptions & { entryOptions?: EntryOptions }) | null} groupOptions options for the group
    * @param {(DependencyLocation | null)=} loc the line of code
@@ -56,9 +54,4 @@ type DependencyLocation = import('./Dependency').DependencyLocation;
 type ChunkGraph = import('./ChunkGraph');
 type ChunkGroup = import('./ChunkGroup');
 type UpdateHashContext = import('./Dependency').UpdateHashContext;
-type Module = import('./Module');
-type ObjectDeserializerContext =
-  import('./serialization/ObjectMiddleware').ObjectDeserializerContext;
-type ObjectSerializerContext =
-  import('./serialization/ObjectMiddleware').ObjectSerializerContext;
 type Hash = import('./util/Hash');

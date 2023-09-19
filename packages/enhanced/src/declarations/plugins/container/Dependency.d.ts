@@ -1,5 +1,4 @@
-export = Dependency;
-declare class Dependency {
+export class Dependency {
   /** @type {Module | undefined} */
   _parentModule: Module | undefined;
   /** @type {DependenciesBlock | undefined} */
