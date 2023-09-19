@@ -5,10 +5,6 @@
 
 'use strict';
 
-import ModuleFactory, {
-  ModuleFactoryCreateData,
-  ModuleFactoryResult,
-} from 'webpack/lib/ModuleFactory';
 import ContainerEntryModule from './ContainerEntryModule';
 import ContainerEntryDependency from './ContainerEntryDependency';
 

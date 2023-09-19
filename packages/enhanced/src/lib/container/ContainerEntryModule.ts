@@ -4,27 +4,15 @@
 */
 
 'use strict';
-import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from 'webpack/lib/ModuleTypeConstants';
 import { OriginalSource, RawSource } from 'webpack-sources';
-import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
 import ContainerExposedDependency from './ContainerExposedDependency';
-import Dependency from 'webpack/lib/Dependency';
-import Module, {
-  Compilation,
-  InputFileSystem,
-  LibIdentOptions,
-  NeedBuildContext,
-  ObjectDeserializerContext,
-  ObjectSerializerContext,
-  RequestShortener,
-  ResolverWithOptions,
-  WebpackError,
-  WebpackOptions,
-} from 'webpack/lib/Module';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import StaticExportsDependency from 'webpack/lib/dependencies/StaticExportsDependency';
-import Template from 'webpack/lib/Template';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+import AsyncDependenciesBlock from '../../declarations/plugins/container/AsyncDependenciesBlock';
+import { RuntimeGlobals } from 'webpack';
+import StaticExportsDependency from '../../declarations/plugins/container/StaticExportsDependency';
+import Dependency from '../../declarations/plugins/container/Dependency';
+import { ObjectDeserializerContext } from '../../declarations/plugins/container/ObjectDeserializerContext';
+import { WebpackOptions } from '../../declarations/plugins/container/WebpackOptions';
+import Template from '../../declarations/plugins/container/Template';
 
 /** @typedef {import("webpack/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
 /** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
@@ -142,7 +130,7 @@ class ContainerEntryModule extends Module {
    * @param {Compilation} compilation the compilation
    * @param {ResolverWithOptions} resolver the resolver
    * @param {InputFileSystem} fs the file system
-   * @param {function(WebpackError=): void} callback callback function
+   * @param {function(WebpackError): void} callback callback function
    * @returns {void}
    */
   override build(
@@ -209,8 +197,7 @@ class ContainerEntryModule extends Module {
       const { dependencies } = block;
 
       const modules = dependencies.map((dependency) => {
-        const dep =
-          /** @type {ContainerExposedDependency} */ dependency as unknown as ContainerExposedDependency;
+        const dep = dependency as unknown as ContainerExposedDependency;
         return {
           name: dep.exposedName,
           module: moduleGraph.getModule(dep),
