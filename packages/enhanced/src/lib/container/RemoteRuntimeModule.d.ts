@@ -2,11 +2,11 @@ export = RemoteRuntimeModule;
 /** @typedef {import("webpack/lib/Chunk")} Chunk */
 /** @typedef {import("./RemoteModule")} RemoteModule */
 declare class RemoteRuntimeModule extends RuntimeModule {
-    constructor();
+  constructor();
 }
 declare namespace RemoteRuntimeModule {
-    export { Chunk, RemoteModule };
+  export { Chunk, RemoteModule };
 }
-import RuntimeModule = require("webpack/lib/RuntimeModule");
-type Chunk = import("webpack/lib/Chunk");
-type RemoteModule = import("./RemoteModule");
+import RuntimeModule = require('webpack/lib/RuntimeModule');
+type Chunk = import('webpack/lib/Chunk');
+type RemoteModule = import('./RemoteModule');

@@ -13,9 +13,7 @@ import ProvideSharedDependency from './ProvideSharedDependency';
 import ProvideSharedModuleFactory from './ProvideSharedModuleFactory';
 import Compiler from 'webpack/lib/Compiler';
 import Compilation from 'webpack/lib/Compilation';
-import {
-  ProvideSharedPluginOptions,
-} from '../../declarations/plugins/sharing/ProvideSharedPlugin';
+import { ProvideSharedPluginOptions } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
 
 export type ProvideOptions = {
   shareKey: string;
@@ -23,10 +21,13 @@ export type ProvideOptions = {
   version: string | undefined | false;
   eager: boolean;
 };
-export type ResolvedProvideMap = Map<string, {
-  config: ProvideOptions;
-  version: string | undefined | false;
-}>;
+export type ResolvedProvideMap = Map<
+  string,
+  {
+    config: ProvideOptions;
+    version: string | undefined | false;
+  }
+>;
 
 /** @typedef {import("./ProvideSharedPlugin").ProvideSharedPluginOptions} ProvideSharedPluginOptions */
 /** @typedef {import("webpack/lib/Compilation")} Compilation */

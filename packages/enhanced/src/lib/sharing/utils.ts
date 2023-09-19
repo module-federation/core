@@ -6,10 +6,12 @@
 import { join, dirname, readJson, InputFileSystem } from 'webpack/lib/util/fs';
 
 // Extreme shorthand only for github. eg: foo/bar
-const RE_URL_GITHUB_EXTREME_SHORT: RegExp = /^[^/@:.\s][^/@:\s]*\/[^@:\s]*[^/@:\s]#\S+/;
+const RE_URL_GITHUB_EXTREME_SHORT: RegExp =
+  /^[^/@:.\s][^/@:\s]*\/[^@:\s]*[^/@:\s]#\S+/;
 
 // Short url with specific protocol. eg: github:foo/bar
-const RE_GIT_URL_SHORT: RegExp = /^(github|gitlab|bitbucket|gist):\/?[^/.]+\/?/i;
+const RE_GIT_URL_SHORT: RegExp =
+  /^(github|gitlab|bitbucket|gist):\/?[^/.]+\/?/i;
 
 // Currently supported protocols
 const RE_PROTOCOL: RegExp =
@@ -47,7 +49,9 @@ const PROTOCOLS_FOR_SHORT: string[] = [
 const DEF_GIT_PROTOCOL: string = 'git+ssh://';
 
 // thanks to https://github.com/npm/hosted-git-info/blob/latest/git-host-info.js
-const extractCommithashByDomain: { [key: string]: (pathname: string, hash: string) => string | undefined } = {
+const extractCommithashByDomain: {
+  [key: string]: (pathname: string, hash: string) => string | undefined;
+} = {
   /**
    * @param {string} pathname pathname
    * @param {string} hash hash
@@ -169,14 +173,16 @@ function getCommithash(urlParsed: URL): string {
   } catch (e) {}
 
   if (
-    extractCommithashByDomain[
-      /** @type {keyof extractCommithashByDomain} */ (hostnameResult)
+    /** @type {keyof extractCommithashByDomain} */ extractCommithashByDomain[
+      hostnameResult
     ]
   ) {
     return (
-      extractCommithashByDomain[
-        /** @type {keyof extractCommithashByDomain} */ (hostnameResult)
-      ](pathname, hashResult) || ''
+      extractCommithashByDomain
+        /** @type {keyof extractCommithashByDomain} */ [hostnameResult](
+          pathname,
+          hashResult,
+        ) || ''
     );
   }
 
@@ -338,7 +344,12 @@ export { normalizeVersion };
  * @param {string[]} descriptionFiles possible description filenames
  * @param {function((Error | null)=, {data: object, path: string}=): void} callback callback
  */
-const getDescriptionFile = (fs: InputFileSystem, directory: string, descriptionFiles: string[], callback: (err: Error | null, data?: { data: object, path: string }) => void) => {
+const getDescriptionFile = (
+  fs: InputFileSystem,
+  directory: string,
+  descriptionFiles: string[],
+  callback: (err: Error | null, data?: { data: object; path: string }) => void,
+) => {
   let i = 0;
   const tryLoadCurrent = () => {
     if (i >= descriptionFiles.length) {
@@ -380,7 +391,10 @@ export { getDescriptionFile };
  * @param {string} packageName - The package name
  * @returns {string | undefined} The normalized version
  */
-export function getRequiredVersionFromDescriptionFile(data: Record<string, any>, packageName: string): string | undefined {
+export function getRequiredVersionFromDescriptionFile(
+  data: Record<string, any>,
+  packageName: string,
+): string | undefined {
   if (
     data['optionalDependencies'] &&
     typeof data['optionalDependencies'] === 'object' &&
@@ -410,4 +424,3 @@ export function getRequiredVersionFromDescriptionFile(data: Record<string, any>,
     return normalizeVersion(data['devDependencies'][packageName]);
   }
 }
-

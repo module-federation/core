@@ -38,7 +38,7 @@ class RemoteRuntimeModule extends RuntimeModule {
         const module: RemoteModule = m as RemoteModule;
         const name = module.internalRequest;
         const id = chunkGraph ? chunkGraph.getModuleId(module) : undefined;
-        const {shareScope} = module;
+        const { shareScope } = module;
         const dep = module.dependencies[0];
         const externalModule = moduleGraph.getModule(dep);
         const externalModuleId =

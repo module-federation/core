@@ -18,7 +18,11 @@ import Compilation from 'webpack/lib/Compilation';
 import NormalModuleFactory, {
   ResolveData,
 } from 'webpack/lib/NormalModuleFactory';
-import { ExternalsType, ContainerReferencePluginOptions,RemotesConfig} from '../../declarations/plugins/container/ContainerReferencePlugin';
+import {
+  ExternalsType,
+  ContainerReferencePluginOptions,
+  RemotesConfig,
+} from '../../declarations/plugins/container/ContainerReferencePlugin';
 import Module from 'webpack/lib/Module';
 
 /** @typedef {import("../../declarations/plugins/container/ContainerReferencePlugin").ContainerReferencePluginOptions} ContainerReferencePluginOptions */

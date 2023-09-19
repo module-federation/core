@@ -9,7 +9,10 @@ import { parseOptions } from '../container/options';
 import ConsumeSharedPlugin from './ConsumeSharedPlugin';
 import ProvideSharedPlugin from './ProvideSharedPlugin';
 import { isRequiredVersion } from './utils';
-import type  { SharePluginOptions, SharedConfig } from '../../declarations/plugins/sharing/SharePlugin';
+import type {
+  SharePluginOptions,
+  SharedConfig,
+} from '../../declarations/plugins/sharing/SharePlugin';
 import type { ConsumesConfig } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
 import type Compiler from 'webpack/lib/Compiler';
 import type { ProvidesConfig } from '../../declarations/plugins/sharing/ProvideSharedPlugin';

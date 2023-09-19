@@ -10,7 +10,10 @@ import RuntimeModule from 'webpack/lib/RuntimeModule';
 import Template from 'webpack/lib/Template';
 import Compilation from 'webpack/lib/Compilation';
 import ChunkGraph from 'webpack/lib/ChunkGraph';
-import { compareModulesByIdentifier, compareStrings } from 'webpack/lib/util/comparators';
+import {
+  compareModulesByIdentifier,
+  compareStrings,
+} from 'webpack/lib/util/comparators';
 
 /** @typedef {import("webpack/lib/Chunk")} Chunk */
 /** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
