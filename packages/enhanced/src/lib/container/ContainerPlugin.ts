@@ -96,7 +96,7 @@ class ContainerPlugin {
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
-      (compilation : Compilation, { normalModuleFactory }) => {
+      (compilation: Compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
           ContainerEntryDependency,
           new ContainerEntryModuleFactory(),

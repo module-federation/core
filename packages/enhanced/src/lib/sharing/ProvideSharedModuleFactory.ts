@@ -38,4 +38,3 @@ class ProvideSharedModuleFactory extends ModuleFactory {
 }
 
 export default ProvideSharedModuleFactory;
-
