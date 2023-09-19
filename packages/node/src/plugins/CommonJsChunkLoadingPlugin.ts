@@ -9,7 +9,7 @@ import AutoPublicPathRuntimeModule from './RemotePublicPathRuntimeModule';
 import PublicPathRuntimeModule from "webpack/lib/runtime/PublicPathRuntimeModule";
 
 
-interface CommonJsChunkLoadingOptions extends ModuleFederationPluginOptions {
+interface DynamicFilesystemChunkLoadingOptions extends ModuleFederationPluginOptions {
   baseURI: Compiler['options']['output']['publicPath'];
   promiseBaseURI?: string;
   remotes: Record<string, string>;
@@ -18,12 +18,12 @@ interface CommonJsChunkLoadingOptions extends ModuleFederationPluginOptions {
   debug?: boolean;
 }
 
-class CommonJsChunkLoadingPlugin {
-  private options: CommonJsChunkLoadingOptions;
+class DynamicFilesystemChunkLoadingPlugin {
+  private options: DynamicFilesystemChunkLoadingOptions;
   private _asyncChunkLoading: boolean;
 
-  constructor(options: CommonJsChunkLoadingOptions) {
-    this.options = options || ({} as CommonJsChunkLoadingOptions);
+  constructor(options: DynamicFilesystemChunkLoadingOptions) {
+    this.options = options || ({} as DynamicFilesystemChunkLoadingOptions);
     this._asyncChunkLoading = this.options.asyncChunkLoading;
   }
 
@@ -38,7 +38,7 @@ class CommonJsChunkLoadingPlugin {
     }).apply(compiler);
 
     compiler.hooks.thisCompilation.tap(
-      'CommonJsChunkLoadingPlugin',
+      'DynamicFilesystemChunkLoadingPlugin',
       (compilation: Compilation) => {
         // Always enabled
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -67,26 +67,26 @@ class CommonJsChunkLoadingPlugin {
         };
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.ensureChunkHandlers)
-          .tap('CommonJsChunkLoadingPlugin', handler);
+          .tap('DynamicFilesystemChunkLoadingPlugin', handler);
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadUpdateHandlers)
-          .tap('CommonJsChunkLoadingPlugin', handler);
+          .tap('DynamicFilesystemChunkLoadingPlugin', handler);
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadManifest)
-          .tap('CommonJsChunkLoadingPlugin', handler);
+          .tap('DynamicFilesystemChunkLoadingPlugin', handler);
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.baseURI)
-          .tap('CommonJsChunkLoadingPlugin', handler);
+          .tap('DynamicFilesystemChunkLoadingPlugin', handler);
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.externalInstallChunk)
-          .tap('CommonJsChunkLoadingPlugin', handler);
+          .tap('DynamicFilesystemChunkLoadingPlugin', handler);
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.onChunksLoaded)
-          .tap('CommonJsChunkLoadingPlugin', handler);
+          .tap('DynamicFilesystemChunkLoadingPlugin', handler);
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.ensureChunkHandlers)
           .tap(
-            'CommonJsChunkLoadingPlugin',
+            'DynamicFilesystemChunkLoadingPlugin',
             (chunk: Chunk, set: Set<string>) => {
               if (!isEnabledForChunk(chunk)) {
                 return;
@@ -97,7 +97,7 @@ class CommonJsChunkLoadingPlugin {
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadUpdateHandlers)
           .tap(
-            'CommonJsChunkLoadingPlugin',
+            'DynamicFilesystemChunkLoadingPlugin',
             (chunk: Chunk, set: Set<string>) => {
               if (!isEnabledForChunk(chunk)) {
                 return;
@@ -111,7 +111,7 @@ class CommonJsChunkLoadingPlugin {
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadManifest)
           .tap(
-            'CommonJsChunkLoadingPlugin',
+            'DynamicFilesystemChunkLoadingPlugin',
             (chunk: Chunk, set: Set<string>) => {
               if (!isEnabledForChunk(chunk)) {
                 return;
@@ -163,6 +163,6 @@ class CommonJsChunkLoadingPlugin {
   }
 }
 
-export default CommonJsChunkLoadingPlugin;
+export default DynamicFilesystemChunkLoadingPlugin;
 
 
