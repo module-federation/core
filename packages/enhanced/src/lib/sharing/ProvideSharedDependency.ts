@@ -9,7 +9,8 @@ import {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/serialization/ObjectMiddleware';
-
+/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
+/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 class ProvideSharedDependency extends Dependency {
   shareScope: string;
   name: string;

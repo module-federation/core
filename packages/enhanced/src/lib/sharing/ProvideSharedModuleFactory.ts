@@ -10,7 +10,9 @@ import {
   ModuleFactoryResult,
 } from 'webpack/lib/ModuleFactory';
 import ProvideSharedDependency from './ProvideSharedDependency';
-
+/** @typedef {import("webpack/lib/ModuleFactory").ModuleFactoryCreateData} ModuleFactoryCreateData */
+/** @typedef {import("webpack/lib/ModuleFactory").ModuleFactoryResult} ModuleFactoryResult */
+/** @typedef {import("./ProvideSharedDependency")} ProvideSharedDependency */
 class ProvideSharedModuleFactory extends ModuleFactory {
   /**
    * @param {ModuleFactoryCreateData} data data object
@@ -36,3 +38,4 @@ class ProvideSharedModuleFactory extends ModuleFactory {
 }
 
 export default ProvideSharedModuleFactory;
+

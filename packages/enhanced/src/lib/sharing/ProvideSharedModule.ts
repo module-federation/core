@@ -28,22 +28,22 @@ import {
 import Hash from 'webpack/lib/util/Hash';
 import { InputFileSystem } from 'webpack/lib/util/fs';
 
-/** @typedef {import("../../declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
-/** @typedef {import("../Chunk")} Chunk */
-/** @typedef {import("../ChunkGraph")} ChunkGraph */
-/** @typedef {import("../ChunkGroup")} ChunkGroup */
-/** @typedef {import("../Compilation")} Compilation */
-/** @typedef {import("../Module").CodeGenerationContext} CodeGenerationContext */
-/** @typedef {import("../Module").CodeGenerationResult} CodeGenerationResult */
-/** @typedef {import("../Module").LibIdentOptions} LibIdentOptions */
-/** @typedef {import("../Module").NeedBuildContext} NeedBuildContext */
-/** @typedef {import("../RequestShortener")} RequestShortener */
-/** @typedef {import("../ResolverFactory").ResolverWithOptions} ResolverWithOptions */
-/** @typedef {import("../WebpackError")} WebpackError */
-/** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
-/** @typedef {import("../util/Hash")} Hash */
-/** @typedef {import("../util/fs").InputFileSystem} InputFileSystem */
+/** @typedef {import("webpack/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
+/** @typedef {import("webpack/lib/Chunk")} Chunk */
+/** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
+/** @typedef {import("webpack/lib/ChunkGroup")} ChunkGroup */
+/** @typedef {import("webpack/lib/Compilation")} Compilation */
+/** @typedef {import("webpack/lib/Module").CodeGenerationContext} CodeGenerationContext */
+/** @typedef {import("webpack/lib/Module").CodeGenerationResult} CodeGenerationResult */
+/** @typedef {import("webpack/lib/Module").LibIdentOptions} LibIdentOptions */
+/** @typedef {import("webpack/lib/Module").NeedBuildContext} NeedBuildContext */
+/** @typedef {import("webpack/lib/RequestShortener")} RequestShortener */
+/** @typedef {import("webpack/lib/ResolverFactory").ResolverWithOptions} ResolverWithOptions */
+/** @typedef {import("webpack/lib/WebpackError")} WebpackError */
+/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
+/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
+/** @typedef {import("webpack/lib/util/Hash")} Hash */
+/** @typedef {import("webpack/lib/util/fs").InputFileSystem} InputFileSystem */
 
 const TYPES = new Set(['share-init']);
 
