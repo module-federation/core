@@ -45,7 +45,13 @@ function traverseAndWrite(dir, outputDir) {
     }
   }
 }
-
+const checkAndTraverse = (dirPath, outputDir) => {
+  if (fs.existsSync(dirPath)) {
+    traverseAndWrite(dirPath, outputDir);
+  } else {
+    console.warn(`Directory ${dirPath} does not exist.`);
+  }
+};
 // Find the path to the webpack package in node_modules
 const webpackPath = path.dirname(require.resolve('webpack/package.json'));
 
@@ -53,13 +59,13 @@ const webpackPath = path.dirname(require.resolve('webpack/package.json'));
 const outputDir = './src';
 
 // Start the traversal and modification
-traverseAndWrite(path.join(webpackPath, 'lib/container'), outputDir);
-traverseAndWrite(path.join(webpackPath, 'lib/sharing'), outputDir);
-traverseAndWrite(
+checkAndTraverse(path.join(webpackPath, 'lib/container'), outputDir);
+checkAndTraverse(path.join(webpackPath, 'lib/sharing'), outputDir);
+checkAndTraverse(
   path.join(webpackPath, 'declarations/plugins/container'),
   outputDir,
 );
-traverseAndWrite(
+checkAndTraverse(
   path.join(webpackPath, 'declarations/plugins/sharing'),
   outputDir,
 );

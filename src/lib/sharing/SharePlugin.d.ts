@@ -1,0 +1,33 @@
+export = SharePlugin;
+/** @typedef {import("webpack/declarations/plugins/sharing/ConsumeSharedPlugin").ConsumeSharedPluginOptions} ConsumeSharedPluginOptions */
+/** @typedef {import("webpack/declarations/plugins/sharing/ConsumeSharedPlugin").ConsumesConfig} ConsumesConfig */
+/** @typedef {import("webpack/declarations/plugins/sharing/ProvideSharedPlugin").ProvideSharedPluginOptions} ProvideSharedPluginOptions */
+/** @typedef {import("webpack/declarations/plugins/sharing/ProvideSharedPlugin").ProvidesConfig} ProvidesConfig */
+/** @typedef {import("webpack/declarations/plugins/sharing/SharePlugin").SharePluginOptions} SharePluginOptions */
+/** @typedef {import("webpack/declarations/plugins/sharing/SharePlugin").SharedConfig} SharedConfig */
+/** @typedef {import("webpack/lib/Compiler")} Compiler */
+declare class SharePlugin {
+    /**
+     * @param {SharePluginOptions} options options
+     */
+    constructor(options: any);
+    _shareScope: any;
+    _consumes: Record<string, any>[];
+    _provides: Record<string, any>[];
+    /**
+     * Apply the plugin
+     * @param {Compiler} compiler the compiler instance
+     * @returns {void}
+     */
+    apply(compiler: any): void;
+}
+declare namespace SharePlugin {
+    export { ConsumeSharedPluginOptions, ConsumesConfig, ProvideSharedPluginOptions, ProvidesConfig, SharePluginOptions, SharedConfig, Compiler };
+}
+type ConsumeSharedPluginOptions = any;
+type ConsumesConfig = any;
+type ProvideSharedPluginOptions = any;
+type ProvidesConfig = any;
+type SharePluginOptions = any;
+type SharedConfig = any;
+type Compiler = any;
