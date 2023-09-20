@@ -4,7 +4,6 @@ import DelegatesModulePlugin from '@module-federation/utilities/src/plugins/Dele
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import JsonpChunkLoading from '../JsonpChunkLoading';
-
 /**
  * This function applies server-specific plugins to the webpack compiler.
  *
@@ -101,7 +100,7 @@ export function handleServerExternals(
     const originalExternals = compiler.options.externals[0];
 
     // Replace the original externals function with a new asynchronous function
-    compiler.options.externals[0] = async function (ctx, callback) {
+    compiler.options.externals[0] = async function (ctx: any, callback: any) {
       // Check if the module should not be treated as external
       if (
         ctx.request &&
@@ -191,3 +190,6 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     name: 'webpack-runtime',
   };
 }
+
+
+
