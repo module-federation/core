@@ -30,14 +30,14 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
         hash: compilation?.hash || 'XXXX',
       });
     // If publicPath is not "auto", return the static value
-    if (publicPath !== 'auto') {
-      const path = getPath();
-      return Template.asString([
-        `${RuntimeGlobals.publicPath} = ${JSON.stringify(path)};`,
-        'var addProtocol = (url)=> url.startsWith(\'//\') ? \'https:\' + url : url;',
-        `globalThis.currentVmokPublicPath = addProtocol(${RuntimeGlobals.publicPath}) || '/';`,
-      ]);
-    }
+    // if (publicPath !== 'auto') {
+    //   const path = getPath();
+    //   return Template.asString([
+    //     `${RuntimeGlobals.publicPath} = ${JSON.stringify(path)};`,
+    //     'var addProtocol = (url)=> url.startsWith(\'//\') ? \'https:\' + url : url;',
+    //     `globalThis.currentVmokPublicPath = addProtocol(${RuntimeGlobals.publicPath}) || '/';`,
+    //   ]);
+    // }
     const chunkName = compilation?.getPath(
       javascript.JavascriptModulesPlugin.getChunkFilenameTemplate(
         this.chunk,
@@ -54,14 +54,19 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
     return Template.asString([
       'var scriptUrl;',
       // its an esproxy so nesting into _config directly is not possible
-      'var remoteReg = globalThis.__remote_scope__ ? globalThis.__remote_scope__._config : {};',
-      "console.log('remoteReg', globalThis.__remote_scope__);",
       `
       let remoteContainerRegistry = {
         get url() {
+          var remoteReg = globalThis.__remote_scope__ ? globalThis.__remote_scope__._config : {};
+          console.log('remoteReg', globalThis.__remote_scope__);
           return remoteReg[${JSON.stringify(ident)}] || remoteReg[${JSON.stringify(uniqueName)}];
         }
       };
+
+      console.log('runtime', ${RuntimeGlobals.runtimeId})
+
+
+      
       `,
 
       ['module', 'node', 'async-node', 'require'].includes(scriptType || '') ||
@@ -79,7 +84,7 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
             Template.indent('scriptUrl = __filename;'),
             '} else {',
             Template.indent([
-              `scriptUrl = ${publicPath ! == 'auto' ? JSON.stringify(publicPath) : 'undefined'}`
+              `scriptUrl = ${publicPath !== 'auto' ? JSON.stringify(getPath()) : 'undefined'}`
             ]),
            '}'
           ]),

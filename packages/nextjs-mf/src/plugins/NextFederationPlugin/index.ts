@@ -77,19 +77,24 @@ export class NextFederationPlugin {
     // Apply the CopyFederationPlugin
     new CopyFederationPlugin(isServer).apply(compiler);
 
-    // If remotes are provided, parse them
-    if (this._options.remotes) {
-      // @ts-ignore
-      this._options.remotes = parseRemotes(this._options.remotes);
-    }
-
     // If shared modules are provided, remove unnecessary shared keys from the default share scope
+    // @ts-ignore
     if (this._options.shared) {
-      removeUnnecessarySharedKeys(this._options.shared as SharedObject);
+     // removeUnnecessarySharedKeys(this._options.shared as SharedObject);
     }
 
     const ModuleFederationPlugin: container.ModuleFederationPlugin =
       getModuleFederationPluginConstructor(isServer, compiler);
+    // const { SharePlugin } = webpack.sharing;
+    //
+    // new SharePlugin({
+    //   shareScope: 'default',
+    //   shared: {
+    //     react: {
+    //       eager: true
+    //     }
+    //   }
+    // }).apply(compiler);
 
     const defaultShared = retrieveDefaultShared(isServer);
     if (isServer) {
@@ -98,42 +103,55 @@ export class NextFederationPlugin {
       configureServerLibraryAndFilename(this._options);
 
       applyServerPlugins(compiler, this._options);
-      handleServerExternals(compiler, {
-        ...this._options,
-        shared: { ...defaultShared, ...this._options.shared },
-      });
+      // handleServerExternals(compiler, {
+      //   // @ts-ignore
+      //   ...this._options,
+      //   // @ts-ignore
+      //   shared: { ...defaultShared, ...this._options.shared },
+      // });
     } else {
       applyClientPlugins(compiler, this._options, this._extraOptions);
     }
+    // compiler.options.output.publicPath = 'auto';
 
     //@ts-ignore
     applyPathFixes(compiler, this._extraOptions);
-
+let noop;
+try {
+  noop = require.resolve('../../federation-noop');
+} catch (e) {
+  noop = require.resolve('../../federation-noop.cjs');
+}
     // @ts-ignore
     const hostFederationPluginOptions: ModuleFederationPluginOptions = {
+      // @ts-ignore
       ...this._options,
       runtime: false,
+      //@ts-ignore
+      remoteType: 'script',
       exposes: {
         //something must be exposed in order to generate a remote entry, which is needed to kickstart runtime
-        './noop': require.resolve('../../federation-noop'),
+        './noop': noop,
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)
           : {}),
+        // @ts-ignore
         ...this._options.exposes,
       },
       remotes: {
         //@ts-ignore
         ...this._options.remotes,
       },
-      shared: {
-        ...defaultShared,
-        ...this._options.shared,
-      },
+      // shared: {
+      //   ...defaultShared,
+      //   ...this._options.shared,
+      // },
     };
 
-    if (this._extraOptions.debug) {
+    // if (this._extraOptions.debug) {
       compiler.options.devtool = false;
-    }
+    // }
+    // @ts-ignore
     compiler.options.output.uniqueName = this._options.name;
 
     // inject module hoisting system
@@ -146,21 +164,30 @@ export class NextFederationPlugin {
     //todo runtime variable creation needs to be applied for server as well. this is just for client
     // TODO: this needs to be refactored into something more comprehensive. this is just a quick fix
     new webpack.DefinePlugin({
+      // @ts-ignore
+
       'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
+      // @ts-ignore
+
       'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
     }).apply(compiler);
 
     // @ts-ignore
     new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
+    // @ts-ignore
+
     const hasRemotesOrExposes = Object.keys(this._options?.remotes || {}).length > 0 || Object.keys(this._options?.exposes || {}).length > 0;
     if (hasRemotesOrExposes) {
       const commonOptions = {
+        // @ts-ignore
         ...hostFederationPluginOptions,
         name: 'host_inner_ctn',
         runtime: isServer ? 'webpack-runtime' : 'webpack',
         filename: `host_inner_ctn.js`,
+        remoteType: 'script',
+        // @ts-ignore
         library: { ...hostFederationPluginOptions.library, name: this._options.name },
-        shared: { ...hostFederationPluginOptions.shared, ...defaultShared },
+        // shared: { ...hostFederationPluginOptions.shared, ...defaultShared },
       };
 
       // @ts-ignore

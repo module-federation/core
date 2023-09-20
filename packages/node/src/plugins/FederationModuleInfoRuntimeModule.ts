@@ -15,22 +15,27 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
     return Template.asString([
       `${RuntimeGlobals.require}.federation = {`,
       Template.indent([
-        `cache: {},`, 
-        `remotes: {},`, 
-        `moduleInfo: { },`,
+        `cache: {},`,
+        `remotes: {},`,
+        `moduleInfo: {},`,
       ]),
       `};`,
       // `if (!globalThis.__remote_scopes__) {`,
       Template.indent([
         '// backward compatible global proxy',
-        `globalThis.__remote_scope__ = globalThis.__remote_scope__ || new Proxy(${RuntimeGlobals.require}.federation, {`,
+        `let oldScope = ()=> globalThis.__remote_scope__ || {};`,
+        'console.log("old scope",oldScope());',
+        `if (!globalThis.__remote_scope__ || !oldScope().moduleInfo) {   console.log("create proxy",!globalThis.__remote_scope__, !oldScope().moduleInfo);`,
+        `globalThis.__remote_scope__ = new Proxy(${RuntimeGlobals.require}.federation, {`,
         Template.indent([
           `get: function(target, prop, receiver) {`,
           'var result;',
           Template.indent([
             `if (prop === '_config') {`,
             Template.indent([`result = ${RuntimeGlobals.require}.federation.remotes;`]),
-            `} else {`,
+            `} else if(prop === 'moduleInfo') {`,
+            Template.indent([`result = ${RuntimeGlobals.require}.federation[prop];`]),    
+             `} else {`,
             Template.indent([`result = ${RuntimeGlobals.require}.federation.cache[prop];`]),
             `}`,
             'return result;'
@@ -48,6 +53,19 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
           `}`,
         ]),
         `});`,
+
+        Template.indent([
+          `for (let key in oldScope()._config) {`,
+          Template.indent([`globalThis.__remote_scope__._config[key] = oldScope[key];`]),
+          `}`,
+          `for (let key in oldScope) {`,
+          Template.indent([
+            'if(key === "_config") continue;',
+            // `globalThis.__remote_scope__[key] = oldScope()[key];`
+          ]),
+          `}`,
+        ]),
+        `}`,
       ]),
       // `}`,
     ]);

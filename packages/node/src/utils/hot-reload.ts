@@ -47,7 +47,7 @@ export const revalidate = () => {
     return new Promise((res) => {
       const fetches = [];
       for (const property in remoteScope) {
-        if (remoteScope[property].fake) {
+        if (!remoteScope[property]) {
           console.error(
             'unreachable remote found',
             property,
