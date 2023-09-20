@@ -1,16 +1,19 @@
 import { RuntimeGlobals, RuntimeModule, Template, javascript } from "webpack";
+//@ts-ignore
 import { getUndoPath } from 'webpack/lib/util/identifier';
 
 class AutoPublicPathRuntimeModule extends RuntimeModule {
-  constructor(options) {
+  private options: any;
+
+  constructor(options: any) {
     super("publicPath", RuntimeModule.STAGE_BASIC + 1);
-    this.options = options
+    this.options = options;
   }
 
   /**
    * @returns {string} runtime code
    */
-  generate() {
+  override generate() {
     const { compilation } = this;
     const {
       scriptType,
@@ -19,11 +22,12 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
       importMetaName,
       uniqueName,
       chunkLoading,
+      //@ts-ignore
     } = compilation.outputOptions;
 
     const getPath = () =>
-      compilation.getPath(publicPath || '', {
-        hash: compilation.hash || 'XXXX',
+      compilation?.getPath(publicPath || '', {
+        hash: compilation?.hash || 'XXXX',
       });
     // If publicPath is not "auto", return the static value
     if (publicPath !== 'auto') {
@@ -34,11 +38,10 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
         `globalThis.currentVmokPublicPath = addProtocol(${RuntimeGlobals.publicPath}) || '/';`,
       ]);
     }
-
-    const chunkName = compilation.getPath(
+    const chunkName = compilation?.getPath(
       javascript.JavascriptModulesPlugin.getChunkFilenameTemplate(
         this.chunk,
-        compilation.outputOptions,
+        compilation?.outputOptions,
       ),
       {
         chunk: this.chunk,
@@ -46,12 +49,13 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
       },
     );
     const undoPath = getUndoPath(chunkName, path, false);
-    const ident = Template.toIdentifier(uniqueName);
+    const ident = Template.toIdentifier(uniqueName || '');
 
     return Template.asString([
       'var scriptUrl;',
       // its an esproxy so nesting into _config directly is not possible
       'var remoteReg = globalThis.__remote_scope__ ? globalThis.__remote_scope__._config : {};',
+      "console.log('remoteReg', globalThis.__remote_scope__);",
       `
       let remoteContainerRegistry = {
         get url() {
@@ -60,7 +64,7 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
       };
       `,
 
-      ['module', 'node', 'async-node', 'require'].includes(scriptType) ||
+      ['module', 'node', 'async-node', 'require'].includes(scriptType || '') ||
       chunkLoading ?
         Template.asString([
           'try {',
@@ -71,9 +75,13 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
           Template.indent([
             'if (typeof remoteContainerRegistry.url === "string") {',
             Template.indent('scriptUrl = remoteContainerRegistry.url;'),
-            '} else {',
+            '} else if(typeof __filename !== "undefined") {',
             Template.indent('scriptUrl = __filename;'),
-            '}',
+            '} else {',
+            Template.indent([
+              `scriptUrl = ${publicPath ! == 'auto' ? JSON.stringify(publicPath) : 'undefined'}`
+            ]),
+           '}'
           ]),
           '}',
         ]) :
@@ -110,4 +118,7 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
 }
 
 export default AutoPublicPathRuntimeModule;
+
+
+
 
