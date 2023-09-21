@@ -1,8 +1,9 @@
 import React, { Suspense, lazy } from 'react';
 import Head from 'next/head';
-import CheckoutTitle from 'checkout/CheckoutTitle';
+// import CheckoutTitle from 'checkout/CheckoutTitle';
 import ButtonOldAnt from 'checkout/ButtonOldAnt';
-// const CheckoutTitle = lazy(() => import('checkout/CheckoutTitle'));
+
+const CheckoutTitle = lazy(() => import('checkout/CheckoutTitle'));
 // const ButtonOldAnt = lazy(() => import('checkout/ButtonOldAnt'));
 const WebpackSvgRemote = lazy(() =>
   import('shop/WebpackSvg').then((m) => {
@@ -96,9 +97,9 @@ const Home = () => {
             </td>
             <td>[Button from antd@4.20.0]</td>
             <td>
-              <Suspense fallback="loading ButtonOldAnt">
+              {/* <Suspense fallback="loading ButtonOldAnt">
                 <ButtonOldAnt />
-              </Suspense>
+              </Suspense> */}
             </td>
           </tr>
           <tr>
@@ -112,9 +113,9 @@ const Home = () => {
               <img src="./webpack.png" />
             </td>
             <td>
-              <Suspense fallback="loading WebpackPngRemote">
+              {/* <Suspense fallback="loading WebpackPngRemote">
                 <WebpackPngRemote />
-              </Suspense>
+              </Suspense> */}
             </td>
           </tr>
           <tr>
@@ -128,9 +129,9 @@ const Home = () => {
               <img src="./webpack.svg" />
             </td>
             <td>
-              <Suspense fallback="loading WebpackSvgRemote">
+              {/* <Suspense fallback="loading WebpackSvgRemote">
                 <WebpackSvgRemote />
-              </Suspense>
+              </Suspense> */}
             </td>
           </tr>
         </tbody>

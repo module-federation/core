@@ -170,95 +170,95 @@ class InvertedContainerPlugin {
           }
         );
 
-        hooks.renderStartup.tap(
-          'InvertedContainerPlugin',
-          //@ts-ignore
-          (source, renderContext) => {
-            if (
-              !renderContext ||
-              //@ts-ignore
-              renderContext?._name ||
-              !renderContext?.debugId ||
-              !compilation.chunkGraph.isEntryModule(renderContext) ||
-              //@ts-ignore
-              renderContext?.rawRequest?.includes('pages/api') ||
-              renderContext?.layer === 'api'
-            ) {
-              // skip empty modules, container entry, and anything that doesnt have a moduleid or is not an entrypoint module.
-              return source;
-            }
-
-            const { runtimeTemplate } = compilation;
-
-            const replaceSource = source.source().toString().split('\n');
-
-            const searchString = '__webpack_exec__';
-            const replaceString = '__webpack_exec_proxy__';
-
-            const originalExec = replaceSource.findIndex((s: string) =>
-              s.includes(searchString)
-            );
-
-            if (originalExec === -1) {
-              return source;
-            }
-
-            const firstHalf = replaceSource.slice(0, originalExec + 1);
-            const secondHalf = replaceSource.slice(originalExec + 1);
-
-            const originalRuntimeCode = firstHalf
-              .join('\n')
-              .replace(searchString, replaceString);
-
-            const fancyTemplate = Template.asString([
-              runtimeTemplate.returningFunction(
-                Template.asString(
-                  [
-                    '__webpack_require__.own_remote.then(',
-                    runtimeTemplate.returningFunction(
-                      Template.asString([
-                        'Promise.all([',
-                        Template.indent(
-                          [
-                            'Promise.all(__webpack_require__.initRemotes)',
-                            'Promise.all(__webpack_require__.initConsumes)',
-                          ].join(',\n')
-                        ),
-                        '])',
-                      ])
-                    ),
-                    ').then(',
-                    runtimeTemplate.returningFunction(
-                      Template.asString([`${replaceString}(moduleId)`])
-                    ),
-                    ')',
-                  ].join('')
-                ),
-                'moduleId'
-              ),
-            ]);
-
-            const wholeTem = Template.asString([
-              `var ${searchString} =`,
-              fancyTemplate,
-            ]);
-
-            return Template.asString([
-              '',
-              'var currentChunkId = __INSERT_CH_ID__MF__;',
-              `if(currentChunkId) {`,
-              Template.indent([
-                `if(__webpack_require__.getEagerSharedForChunkId) {__webpack_require__.getEagerSharedForChunkId(currentChunkId,__webpack_require__.initConsumes)}`,
-                `if(__webpack_require__.getEagerRemotesForChunkId) {__webpack_require__.getEagerRemotesForChunkId(currentChunkId,__webpack_require__.initRemotes)}`,
-              ]),
-              '}',
-              originalRuntimeCode,
-              wholeTem,
-              ...secondHalf,
-              '',
-            ]);
-          }
-        );
+        // hooks.renderStartup.tap(
+        //   'InvertedContainerPlugin',
+        //   //@ts-ignore
+        //   (source, renderContext) => {
+        //     if (
+        //       !renderContext ||
+        //       //@ts-ignore
+        //       renderContext?._name ||
+        //       !renderContext?.debugId ||
+        //       !compilation.chunkGraph.isEntryModule(renderContext) ||
+        //       //@ts-ignore
+        //       renderContext?.rawRequest?.includes('pages/api') ||
+        //       renderContext?.layer === 'api'
+        //     ) {
+        //       // skip empty modules, container entry, and anything that doesnt have a moduleid or is not an entrypoint module.
+        //       return source;
+        //     }
+        //
+        //     const { runtimeTemplate } = compilation;
+        //
+        //     const replaceSource = source.source().toString().split('\n');
+        //
+        //     const searchString = '__webpack_exec__';
+        //     const replaceString = '__webpack_exec_proxy__';
+        //
+        //     const originalExec = replaceSource.findIndex((s: string) =>
+        //       s.includes(searchString)
+        //     );
+        //
+        //     if (originalExec === -1) {
+        //       return source;
+        //     }
+        //
+        //     const firstHalf = replaceSource.slice(0, originalExec + 1);
+        //     const secondHalf = replaceSource.slice(originalExec + 1);
+        //
+        //     const originalRuntimeCode = firstHalf
+        //       .join('\n')
+        //       .replace(searchString, replaceString);
+        //
+        //     const fancyTemplate = Template.asString([
+        //       runtimeTemplate.returningFunction(
+        //         Template.asString(
+        //           [
+        //             '__webpack_require__.own_remote.then(',
+        //             runtimeTemplate.returningFunction(
+        //               Template.asString([
+        //                 'Promise.all([',
+        //                 Template.indent(
+        //                   [
+        //                     'Promise.all(__webpack_require__.initRemotes)',
+        //                     'Promise.all(__webpack_require__.initConsumes)',
+        //                   ].join(',\n')
+        //                 ),
+        //                 '])',
+        //               ])
+        //             ),
+        //             ').then(',
+        //             runtimeTemplate.returningFunction(
+        //               Template.asString([`${replaceString}(moduleId)`])
+        //             ),
+        //             ')',
+        //           ].join('')
+        //         ),
+        //         'moduleId'
+        //       ),
+        //     ]);
+        //
+        //     const wholeTem = Template.asString([
+        //       `var ${searchString} =`,
+        //       fancyTemplate,
+        //     ]);
+        //
+        //     return Template.asString([
+        //       '',
+        //       'var currentChunkId = __INSERT_CH_ID__MF__;',
+        //       `if(currentChunkId) {`,
+        //       Template.indent([
+        //         `if(__webpack_require__.getEagerSharedForChunkId) {__webpack_require__.getEagerSharedForChunkId(currentChunkId,__webpack_require__.initConsumes)}`,
+        //         `if(__webpack_require__.getEagerRemotesForChunkId) {__webpack_require__.getEagerRemotesForChunkId(currentChunkId,__webpack_require__.initRemotes)}`,
+        //       ]),
+        //       '}',
+        //       originalRuntimeCode,
+        //       wholeTem,
+        //       ...secondHalf,
+        //       '',
+        //     ]);
+        //   }
+        // );
       }
     );
   }

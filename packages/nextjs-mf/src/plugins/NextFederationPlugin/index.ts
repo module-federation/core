@@ -176,25 +176,25 @@ try {
     new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
     // @ts-ignore
 
-    const hasRemotesOrExposes = Object.keys(this._options?.remotes || {}).length > 0 || Object.keys(this._options?.exposes || {}).length > 0;
-    if (hasRemotesOrExposes) {
-      const commonOptions = {
-        // @ts-ignore
-        ...hostFederationPluginOptions,
-        name: 'host_inner_ctn',
-        runtime: isServer ? 'webpack-runtime' : 'webpack',
-        filename: `host_inner_ctn.js`,
-        remoteType: 'script',
-        // @ts-ignore
-        library: { ...hostFederationPluginOptions.library, name: this._options.name },
-        // shared: { ...hostFederationPluginOptions.shared, ...defaultShared },
-      };
+    // const hasRemotesOrExposes = Object.keys(this._options?.remotes || {}).length > 0 || Object.keys(this._options?.exposes || {}).length > 0;
+    // if (hasRemotesOrExposes) {
+    //   const commonOptions = {
+    //     // @ts-ignore
+    //     ...hostFederationPluginOptions,
+    //     name: 'host_inner_ctn',
+    //     runtime: isServer ? 'webpack-runtime' : 'webpack',
+    //     filename: `host_inner_ctn.js`,
+    //     remoteType: 'script',
+    //     // @ts-ignore
+    //     library: { ...hostFederationPluginOptions.library, name: this._options.name },
+    //     // shared: { ...hostFederationPluginOptions.shared, ...defaultShared },
+    //   };
 
-      // @ts-ignore
-      new ModuleFederationPlugin({
-        ...commonOptions,
-      }).apply(compiler);
-    }
+    //   // @ts-ignore
+    //   new ModuleFederationPlugin({
+    //     ...commonOptions,
+    //   }).apply(compiler);
+    // }
 
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
   }

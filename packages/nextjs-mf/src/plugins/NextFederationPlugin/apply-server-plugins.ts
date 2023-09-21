@@ -18,7 +18,7 @@ export function applyServerPlugins(
 ): void {
   // Import the StreamingTargetPlugin from @module-federation/node
   const { StreamingTargetPlugin } = require('@module-federation/node');
-  new JsonpChunkLoading({ server: true }).apply(compiler);
+  // new JsonpChunkLoading({ server: true }).apply(compiler);
 
   // Apply the DelegatesModulePlugin to the compiler
   new DelegatesModulePlugin({

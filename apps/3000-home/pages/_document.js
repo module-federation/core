@@ -11,9 +11,7 @@ class MyDocument extends Document {
     const initialProps = await Document.getInitialProps(ctx);
     const chunks = await flushChunks();
     ctx?.res?.on('finish', () => {
-      revalidate().then((shouldUpdate) => {
-        console.log('finished sending response', shouldUpdate);
-      });
+    
     });
 
     return {

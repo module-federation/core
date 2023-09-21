@@ -7,17 +7,17 @@ export default function ExposedPages() {
   const [pageMapV2, setPageMapV2] = useState('');
 
   useEffect(() => {
-    injectScript('checkout')
-      .then((container) => container.get('./pages-map'))
-      .then((data) => {
-        setPageMap(data);
-      });
+    // injectScript('checkout')
+    //   .then((container) => container.get('./pages-map'))
+    //   .then((data) => {
+    //     setPageMap(data);
+    //   });
 
-    injectScript('checkout')
-      .then((container) => container.get('./pages-map-v2'))
-      .then((data) => {
-        setPageMapV2(data);
-      });
+    // injectScript('checkout')
+    //   .then((container) => container.get('./pages-map-v2'))
+    //   .then((data) => {
+    //     setPageMapV2(data);
+    //   });
   }, []);
 
   return (

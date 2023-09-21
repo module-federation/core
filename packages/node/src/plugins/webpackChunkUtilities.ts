@@ -306,9 +306,10 @@ export function generateLoadScript(runtimeTemplate: any): string {
               } else {
                 remote = eval('let module = {};' + scriptContent + '\\nmodule.exports')
               }
-              globalThis.__remote_scope__[remoteName] = remote[name] || remote;
+              console.log({name,remoteName,'remote[name]':remote[name], remote})
+              globalThis.__remote_scope__[remoteName] = remote[remoteName] || remote;
               globalThis.__remote_scope__._config[remoteName] = url;
-              callback(globalThis.__remote_scope__[name])
+              callback(globalThis.__remote_scope__[remoteName])
             } catch (e) {
               e.target = {src: url};
               callback(e);

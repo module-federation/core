@@ -15,12 +15,12 @@ function MyApp(props) {
   const handleRouteChange = async (url) => {
     if (url.startsWith('/shop')) {
       // @ts-ignore
-      const RemoteAppMenu = (await import('shop/menu')).default;
-      setMenuComponent(() => RemoteAppMenu);
+      // const RemoteAppMenu = (await import('shop/menu')).default;
+      // setMenuComponent(() => RemoteAppMenu);
     } else if (url.startsWith('/checkout')) {
       // @ts-ignore
-      const RemoteAppMenu = (await import('checkout/menu')).default;
-      setMenuComponent(() => RemoteAppMenu);
+      // const RemoteAppMenu = (await import('checkout/menu')).default;
+      // setMenuComponent(() => RemoteAppMenu);
     } else {
       setMenuComponent(() => HostAppMenu);
     }

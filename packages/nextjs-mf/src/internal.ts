@@ -18,78 +18,78 @@ import { parseOptions } from 'webpack/lib/container/options';
  * @property {boolean} key.import - Whether the shared object should be imported or not.
  */
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
-  'next/dynamic': {
-    eager: false,
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-  },
-  'next/head': {
-    eager: false,
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-  },
-  'next/link': {
-    eager: true,
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-  },
-  'next/router': {
-    requiredVersion: false,
-    singleton: true,
-    import: false,
-    eager: false,
-  },
-  'next/image': {
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-    eager: false,
-  },
-  'next/script': {
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-    eager: false,
-  },
-  react: {
-    singleton: true,
-    requiredVersion: false,
-    eager: false,
-    import: false,
-  },
-  'react-dom': {
-    singleton: true,
-    requiredVersion: false,
-    eager: false,
-    import: false,
-  },
-  'react/jsx-dev-runtime': {
-    singleton: true,
-    requiredVersion: false,
-    import: undefined,
-    eager: false,
-  },
-  'react/jsx-runtime': {
-    singleton: true,
-    requiredVersion: false,
-    eager: false,
-    import: false,
-  },
-  'styled-jsx': {
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-    eager: false,
-  },
-  'styled-jsx/style': {
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-    eager: false,
-  },
+  // 'next/dynamic': {
+  //   eager: false,
+  //   requiredVersion: false,
+  //   singleton: true,
+  //   import: undefined,
+  // },
+  // 'next/head': {
+  //   eager: false,
+  //   requiredVersion: false,
+  //   singleton: true,
+  //   import: undefined,
+  // },
+  // 'next/link': {
+  //   eager: true,
+  //   requiredVersion: false,
+  //   singleton: true,
+  //   import: undefined,
+  // },
+  // 'next/router': {
+  //   requiredVersion: false,
+  //   singleton: true,
+  //   import: false,
+  //   eager: false,
+  // },
+  // 'next/image': {
+  //   requiredVersion: false,
+  //   singleton: true,
+  //   import: undefined,
+  //   eager: false,
+  // },
+  // 'next/script': {
+  //   requiredVersion: false,
+  //   singleton: true,
+  //   import: undefined,
+  //   eager: false,
+  // },
+  // react: {
+  //   singleton: true,
+  //   requiredVersion: false,
+  //   eager: false,
+  //   import: false,
+  // },
+  // 'react-dom': {
+  //   singleton: true,
+  //   requiredVersion: false,
+  //   eager: false,
+  //   import: false,
+  // },
+  // 'react/jsx-dev-runtime': {
+  //   singleton: true,
+  //   requiredVersion: false,
+  //   import: undefined,
+  //   eager: false,
+  // },
+  // 'react/jsx-runtime': {
+  //   singleton: true,
+  //   requiredVersion: false,
+  //   eager: false,
+  //   import: false,
+  // },
+  // 'styled-jsx': {
+  //   requiredVersion: false,
+  //   singleton: true,
+  //   import: undefined,
+  //   eager: false,
+  // },
+  // 'styled-jsx/style': {
+  //   requiredVersion: false,
+  //   singleton: true,
+  //   import: undefined,
+  //   eager: false,
+  // },
 };
 
 /**
@@ -106,10 +106,10 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
   DEFAULT_SHARE_SCOPE
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
-  
+
   // Initialize eager as true for 'react', 'react-dom', 'next/router', and 'next/link', otherwise undefined
   const eager = ['react', 'react-dom', 'next/router', 'next/link'].some(k => k === key) ? true : undefined;
-  
+
   // Set eager and import to undefined for all entries, except for the ones specified above
   acc[key] = { ...value, eager, import: undefined };
 
@@ -139,7 +139,7 @@ const isStandardRemoteSyntax = (value: string): boolean => {
  * If the remote value is using the standard remote syntax, a delegated module is created.
  *
  * @param {Record<string, any>} remotes - The remotes object to be parsed.
- * @returns {Record<string, string>} - The parsed remotes object with either the original value, 
+ * @returns {Record<string, string>} - The parsed remotes object with either the original value,
  * the value for internal or promise delegate module reference, or the created delegated module.
  */
 export const parseRemotes = (
@@ -151,11 +151,21 @@ export const parseRemotes = (
       return { ...acc, [key]: value };
     }
 
+    return { ...acc, [key]: value };
+
+
     if (isStandardRemoteSyntax(value)) {
+      let resolvePath
+      try {
+        resolvePath = require.resolve('./default-delegate.cjs')
+      } catch(e) {
+        resolvePath = require.resolve('./default-delegate')
+      }
+
       // If the value is using the standard remote syntax, create a delegated module
       return {
         ...acc,
-        [key]: createDelegatedModule(require.resolve('./default-delegate'), {
+        [key]: createDelegatedModule(resolvePath, {
           remote: value,
         }),
       };
@@ -183,12 +193,12 @@ const isInternalDelegate = (value: string): boolean => {
  * @param {Record<string, any>} remotes - The remotes object containing delegate module references.
  * @returns {Record<string, string>} - An object containing only the delegate modules from the remotes object.
  */
-export const getDelegates = (remotes: Record<string, any>): Record<string, string> => 
+export const getDelegates = (remotes: Record<string, any>): Record<string, string> =>
   Object.entries(remotes).reduce((acc, [key, value]) => isInternalDelegate(value) ? {...acc, [key]: value} : acc, {});
 
 /**
  * Validates the shared item type and constructs a shared configuration object based on the item and key.
- * If the item is the same as the key or if the item does not require a specific version, 
+ * If the item is the same as the key or if the item does not require a specific version,
  * the function returns an object with the import property set to the item.
  * Otherwise, it returns an object with the import property set to the key and the requiredVersion property set to the item.
  *

@@ -1,4 +1,4 @@
-import  type { Compiler, Compilation, Chunk, NormalModule } from 'webpack';
+import { Compiler, Compilation, Chunk, NormalModule } from 'webpack';
 
 class DelegateModulesPlugin {
   options: { debug: boolean; [key: string]: any };
@@ -20,10 +20,10 @@ class DelegateModulesPlugin {
 
   private addDelegatesToChunks(
     compilation: Compilation,
-    chunks: Iterable<Chunk>
+    chunks: Iterable<Chunk>,
   ): void {
     for (const chunk of chunks) {
-      this._delegateModules.forEach(module => {
+      this._delegateModules.forEach((module) => {
         this.addModuleAndDependenciesToChunk(module, chunk, compilation);
       });
     }
@@ -32,7 +32,7 @@ class DelegateModulesPlugin {
   private addModuleAndDependenciesToChunk(
     module: NormalModule,
     chunk: Chunk,
-    compilation: Compilation
+    compilation: Compilation,
   ): void {
     if (!compilation.chunkGraph.isModuleInChunk(module, chunk)) {
       if (this.options.debug) {
@@ -44,7 +44,7 @@ class DelegateModulesPlugin {
       compilation.chunkGraph.connectChunkAndModule(chunk, module);
     }
 
-    module.dependencies.forEach(dependency => {
+    module.dependencies.forEach((dependency) => {
       const dependencyModule = compilation.moduleGraph.getModule(dependency);
       if (
         dependencyModule &&
@@ -53,7 +53,7 @@ class DelegateModulesPlugin {
         this.addModuleAndDependenciesToChunk(
           dependencyModule as NormalModule,
           chunk,
-          compilation
+          compilation,
         );
       }
     });
@@ -61,7 +61,7 @@ class DelegateModulesPlugin {
 
   removeDelegatesNonRuntimeChunks(
     compilation: Compilation,
-    chunks: Iterable<Chunk>
+    chunks: Iterable<Chunk>,
   ): void {
     for (const chunk of chunks) {
       if (!chunk.hasRuntime()) {
@@ -70,11 +70,12 @@ class DelegateModulesPlugin {
             'non-runtime chunk:',
             chunk.debugId,
             chunk.id,
-            chunk.name
+            chunk.name,
           );
-        this._delegateModules.forEach((module) => {
+
+        for (const [id, module] of this._delegateModules) {
           compilation.chunkGraph.disconnectChunkAndModule(chunk, module);
-        });
+        }
       }
     }
   }
@@ -90,18 +91,31 @@ class DelegateModulesPlugin {
             const knownDelegates = new Set(
               remotes
                 ? (Object.values(remotes) as string[]).map((remote: string) =>
-                    remote.replace('internal ', '')
+                    remote.replace('internal ', ''),
                   )
-                : []
+                : [],
             );
             for (const module of modules) {
               const normalModule = module as NormalModule;
-              if (normalModule.resource && knownDelegates.has(normalModule.resource)) {
+              if (normalModule) {
+                const mid = normalModule.identifier();
+                if (
+                  normalModule?.userRequest?.startsWith(
+                    'webpack/container/reference',
+                  )
+                ) {
+                  this._delegateModules.set(mid, normalModule);
+                }
+              }
+              if (
+                normalModule.resource &&
+                knownDelegates.has(normalModule.resource)
+              ) {
                 this._delegateModules.set(normalModule.resource, normalModule);
               }
             }
             callback();
-          }
+          },
         );
 
         compilation.hooks.optimizeChunks.tap(
@@ -121,19 +135,20 @@ class DelegateModulesPlugin {
               console.log(
                 remoteContainer?.name,
                 runtimeChunk.name,
-                this._delegateModules.size
+                this._delegateModules.size,
               );
             this.addDelegatesToChunks(
               compilation,
-              [remoteContainer, runtimeChunk].filter(Boolean) as Chunk[]
+              [remoteContainer, runtimeChunk].filter(Boolean) as Chunk[],
             );
 
             this.removeDelegatesNonRuntimeChunks(compilation, chunks);
-          }
+          },
         );
-      }
+      },
     );
   }
 }
 
 export default DelegateModulesPlugin;
+

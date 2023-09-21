@@ -58,15 +58,9 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
       let remoteContainerRegistry = {
         get url() {
           var remoteReg = globalThis.__remote_scope__ ? globalThis.__remote_scope__._config : {};
-          console.log('remoteReg', globalThis.__remote_scope__);
           return remoteReg[${JSON.stringify(ident)}] || remoteReg[${JSON.stringify(uniqueName)}];
         }
       };
-
-      console.log('runtime', ${RuntimeGlobals.runtimeId})
-
-
-      
       `,
 
       ['module', 'node', 'async-node', 'require'].includes(scriptType || '') ||
