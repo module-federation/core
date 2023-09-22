@@ -214,6 +214,7 @@ class ProvideSharedPlugin {
               new Promise<void>((resolve, reject) => {
                 compilation.addInclude(
                   compiler.context,
+                  //@ts-ignore
                   new ProvideSharedDependency(
                     config.shareScope,
                     config.shareKey,
@@ -244,6 +245,7 @@ class ProvideSharedPlugin {
         );
 
         compilation.dependencyFactories.set(
+          //@ts-ignore
           ProvideSharedDependency,
           new ProvideSharedModuleFactory(),
         );

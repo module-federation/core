@@ -4,6 +4,7 @@
 */
 
 'use strict';
+import {Compilation} from 'webpack'
 import { AsyncDependenciesBlock } from '../../declarations/plugins/container/AsyncDependenciesBlock';
 import { OriginalSource, RawSource } from 'webpack-sources';
 import ContainerExposedDependency from './ContainerExposedDependency';
@@ -12,6 +13,10 @@ import StaticExportsDependency from '../../declarations/plugins/container/Static
 import { ObjectDeserializerContext } from '../../declarations/plugins/container/ObjectDeserializerContext';
 import { WebpackOptions } from '../../declarations/plugins/container/WebpackOptions';
 import Template from '../../declarations/plugins/container/Template';
+import {LibIdentOptions, NeedBuildContext} from 'webpack/lib/Module';
+import type RequestShortener from 'webpack/lib/RequestShortener'
+import type {InputFileSystem} from 'webpack/lib/util/fs';
+import type {ResolverWithOptions} from 'webpack/lib/ResolverFactory';
 import {
   Dependency,
   ObjectSerializerContext,
@@ -56,6 +61,7 @@ class ContainerEntryModule extends Module {
   static deserialize(context: ObjectDeserializerContext): ContainerEntryModule {
     const { read } = context;
     const obj = new ContainerEntryModule(read(), read(), read());
+    //@ts-ignore
     obj.deserialize(context);
     return obj;
   }
@@ -96,7 +102,7 @@ class ContainerEntryModule extends Module {
    * @returns {void}
    */
   override needBuild(
-    context: any | NeedBuildContext,
+    context: NeedBuildContext,
     callback: (
       arg0: (WebpackError | null) | undefined,
       arg1: boolean | undefined,
@@ -126,7 +132,7 @@ class ContainerEntryModule extends Module {
       topLevelDeclarations: new Set(['moduleMap', 'get', 'init']),
     };
     this.buildMeta.exportsType = 'namespace';
-
+//@ts-ignore
     this.clearDependenciesAndBlocks();
 
     for (const [name, options] of this._exposes) {
@@ -144,12 +150,15 @@ class ContainerEntryModule extends Module {
           name,
           index: idx++,
         };
-
+//@ts-ignore
         block.addDependency(dep);
       }
+      //@ts-ignore
       this.addBlock(block);
     }
+    //@ts-ignore
     this.addDependency(
+      //@ts-ignore
       new StaticExportsDependency(
         ['get', 'init'],
         false,
@@ -172,11 +181,11 @@ class ContainerEntryModule extends Module {
       RuntimeGlobals.exports,
     ]);
     const getters = [];
-
+//@ts-ignore
     for (const block of this.blocks) {
       const { dependencies } = block;
 
-      const modules = dependencies.map((dependency) => {
+      const modules = dependencies.map((dependency:Dependency) => {
         const dep = dependency as unknown as ContainerExposedDependency;
         return {
           name: dep.exposedName,
@@ -186,9 +195,10 @@ class ContainerEntryModule extends Module {
       });
 
       let str;
-
+//@ts-ignore
       if (modules.some((m) => !m.module)) {
         str = runtimeTemplate.throwMissingModuleErrorBlock({
+          //@ts-ignore
           request: modules.map((m) => m.request).join(', '),
         });
       } else {
@@ -200,6 +210,7 @@ class ContainerEntryModule extends Module {
         })}.then(${runtimeTemplate.returningFunction(
           runtimeTemplate.returningFunction(
             `(${modules
+              //@ts-ignore
               .map(({ module, request }) =>
                 runtimeTemplate.moduleRaw({
                   module,
@@ -285,18 +296,21 @@ class ContainerEntryModule extends Module {
   /**
    * @param {ObjectSerializerContext} context context
    */
+  //@ts-ignore
   override serialize(context: ObjectSerializerContext): void {
     const { write } = context;
     write(this._name);
     write(this._exposes);
     write(this._shareScope);
+    //@ts-ignore
     super.serialize(context);
   }
 }
-
+//@ts-ignore
 makeSerializable(
   ContainerEntryModule,
   'webpack/lib/container/ContainerEntryModule',
 );
 
 export default ContainerEntryModule;
+

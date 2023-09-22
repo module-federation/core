@@ -74,6 +74,7 @@ class ContainerPlugin {
       dep.loc = { name };
       compilation.addEntry(
         compilation.options.context || '',
+        //@ts-ignore
         dep,
         {
           name,
@@ -94,6 +95,7 @@ class ContainerPlugin {
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
+          //@ts-ignore
           ContainerEntryDependency,
           new ContainerEntryModuleFactory(),
         );
