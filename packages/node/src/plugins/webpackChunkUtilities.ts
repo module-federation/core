@@ -269,7 +269,7 @@ export function handleOnChunkLoad(
   }
 }
 /**
- * Generates the load script for server-side execution. This function creates a script that loads a remote module 
+ * Generates the load script for server-side execution. This function creates a script that loads a remote module
  * and executes it in the current context. It supports both browser and Node.js environments.
  * @param {any} runtimeTemplate - The runtime template used to generate the load script.
  * @returns {string} - The generated load script.
@@ -306,7 +306,6 @@ export function generateLoadScript(runtimeTemplate: any): string {
               } else {
                 remote = eval('let module = {};' + scriptContent + '\\nmodule.exports')
               }
-              console.log({name,remoteName,'remote[name]':remote[name], remote})
               globalThis.__remote_scope__[remoteName] = remote[remoteName] || remote;
               globalThis.__remote_scope__._config[remoteName] = url;
               callback(globalThis.__remote_scope__[remoteName])
@@ -333,7 +332,8 @@ export function generateInstallChunk(runtimeTemplate: any, withOnChunkLoad: bool
       '}',
     ]),
     '}',
-    `if(runtime) runtime(__webpack_require__);`,
+    // 'console.log("install chunk", chunkIds, installedChunks);',
+    'if(runtime) runtime(__webpack_require__);',
     'for(var i = 0; i < chunkIds.length; i++) {',
     Template.indent([
       'if(installedChunks[chunkIds[i]]) {',
@@ -353,7 +353,7 @@ export  function generateExternalInstallChunkCode(withExternalInstallChunk: bool
   return Template.asString([
     'module.exports = __webpack_require__;',
     `${RuntimeGlobals.externalInstallChunk} = function(){`,
-   debug
+   true
       ? `console.debug('node: webpack installing to install chunk id:', arguments['0'].id);`
       : '',
     `return installChunk.apply(this, arguments)};`,

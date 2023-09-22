@@ -103,12 +103,12 @@ export class NextFederationPlugin {
       configureServerLibraryAndFilename(this._options);
 
       applyServerPlugins(compiler, this._options);
-      // handleServerExternals(compiler, {
-      //   // @ts-ignore
-      //   ...this._options,
-      //   // @ts-ignore
-      //   shared: { ...defaultShared, ...this._options.shared },
-      // });
+      handleServerExternals(compiler, {
+        // @ts-ignore
+        ...this._options,
+        // @ts-ignore
+        shared: { ...defaultShared, ...this._options.shared },
+      });
     } else {
       applyClientPlugins(compiler, this._options, this._extraOptions);
     }
@@ -173,28 +173,32 @@ try {
     }).apply(compiler);
 
     // @ts-ignore
-    new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
+    new ModuleFederationPlugin({
+      ...hostFederationPluginOptions,
+      // @ts-ignore
+      shared: Object.keys(hostFederationPluginOptions.shared).reduce((acc, key) => ({ ...acc, [key]: { ...hostFederationPluginOptions.shared[key], version: "0" } }), {}),
+    }).apply(compiler);
     // @ts-ignore
 
-    // const hasRemotesOrExposes = Object.keys(this._options?.remotes || {}).length > 0 || Object.keys(this._options?.exposes || {}).length > 0;
-    // if (hasRemotesOrExposes) {
-    //   const commonOptions = {
-    //     // @ts-ignore
-    //     ...hostFederationPluginOptions,
-    //     name: 'host_inner_ctn',
-    //     runtime: isServer ? 'webpack-runtime' : 'webpack',
-    //     filename: `host_inner_ctn.js`,
-    //     remoteType: 'script',
-    //     // @ts-ignore
-    //     library: { ...hostFederationPluginOptions.library, name: this._options.name },
-    //     // shared: { ...hostFederationPluginOptions.shared, ...defaultShared },
-    //   };
+    const hasRemotesOrExposes = Object.keys(this._options?.remotes || {}).length > 0 || Object.keys(this._options?.exposes || {}).length > 0;
+    if (hasRemotesOrExposes) {
+      const commonOptions = {
+        // @ts-ignore
+        ...hostFederationPluginOptions,
+        name: 'host_inner_ctn',
+        runtime: isServer ? 'webpack-runtime' : 'webpack',
+        filename: `host_inner_ctn.js`,
+        remoteType: 'script',
+        // @ts-ignore
+        library: { ...hostFederationPluginOptions.library, name: this._options.name },
+        shared: { ...hostFederationPluginOptions.shared, ...defaultShared },
+      };
 
-    //   // @ts-ignore
-    //   new ModuleFederationPlugin({
-    //     ...commonOptions,
-    //   }).apply(compiler);
-    // }
+     // @ts-ignore
+      new ModuleFederationPlugin({
+        ...commonOptions,
+      }).apply(compiler);
+    }
 
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
   }
@@ -204,3 +208,4 @@ try {
  * Exporting NextFederationPlugin as default
  */
 export default NextFederationPlugin;
+

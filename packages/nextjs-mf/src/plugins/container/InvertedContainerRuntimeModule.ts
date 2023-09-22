@@ -723,28 +723,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           ? [globalObject, "['__remote_scope__']"].join('')
           : 'window';
       const runtimeId = chunk.id;
-      const serverContainerKickstart = Template.asString([
-        '__webpack_require__.own_remote = new Promise(function(resolve,reject){',
-        Template.indent([
-          // attachOnMount,
-          `__webpack_require__.O(0, [${JSON.stringify(
-            runtimeId
-          )}], function() {`,
-          // attachOnMount,
-          `if(!__webpack_require__.m[${JSON.stringify(containerModuleId)}]) {`,
-          `console.error('container does not exist in host runtime graph', ${JSON.stringify(
-            containerModuleId
-          )});`,
-          `} else { `,
-          this.options.debug
-            ? `console.debug('SHOULD ATTACH CONTAINER'); `
-            : '',
-          'attachRemote(resolve)',
-          `} `,
-          '},0)',
-        ]),
-        '})',
-      ]);
+      const serverContainerKickstart = ''
 
       const checkForAsyncChunkRequirements = Template.asString([
         `__webpack_require__.checkAsyncReqs = function() {`,

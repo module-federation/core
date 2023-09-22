@@ -1,10 +1,9 @@
-import type { Chunk, Compiler, Module } from 'webpack';
+import type { Chunk, Compiler } from 'webpack';
 import { RawSource } from 'webpack-sources';
 //@ts-ignore
 import type { ModuleFederationPluginOptions } from '../types';
 import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
 import { RuntimeGlobals, Compilation } from 'webpack';
-import Template from '../../../utils/Template';
 import RemoveEagerModulesFromRuntimePlugin from './RemoveEagerModulesFromRuntimePlugin';
 
 /**
@@ -170,99 +169,51 @@ class InvertedContainerPlugin {
           }
         );
 
-        // hooks.renderStartup.tap(
-        //   'InvertedContainerPlugin',
-        //   //@ts-ignore
-        //   (source, renderContext) => {
-        //     if (
-        //       !renderContext ||
-        //       //@ts-ignore
-        //       renderContext?._name ||
-        //       !renderContext?.debugId ||
-        //       !compilation.chunkGraph.isEntryModule(renderContext) ||
-        //       //@ts-ignore
-        //       renderContext?.rawRequest?.includes('pages/api') ||
-        //       renderContext?.layer === 'api'
-        //     ) {
-        //       // skip empty modules, container entry, and anything that doesnt have a moduleid or is not an entrypoint module.
-        //       return source;
-        //     }
-        //
-        //     const { runtimeTemplate } = compilation;
-        //
-        //     const replaceSource = source.source().toString().split('\n');
-        //
-        //     const searchString = '__webpack_exec__';
-        //     const replaceString = '__webpack_exec_proxy__';
-        //
-        //     const originalExec = replaceSource.findIndex((s: string) =>
-        //       s.includes(searchString)
-        //     );
-        //
-        //     if (originalExec === -1) {
-        //       return source;
-        //     }
-        //
-        //     const firstHalf = replaceSource.slice(0, originalExec + 1);
-        //     const secondHalf = replaceSource.slice(originalExec + 1);
-        //
-        //     const originalRuntimeCode = firstHalf
-        //       .join('\n')
-        //       .replace(searchString, replaceString);
-        //
-        //     const fancyTemplate = Template.asString([
-        //       runtimeTemplate.returningFunction(
-        //         Template.asString(
-        //           [
-        //             '__webpack_require__.own_remote.then(',
-        //             runtimeTemplate.returningFunction(
-        //               Template.asString([
-        //                 'Promise.all([',
-        //                 Template.indent(
-        //                   [
-        //                     'Promise.all(__webpack_require__.initRemotes)',
-        //                     'Promise.all(__webpack_require__.initConsumes)',
-        //                   ].join(',\n')
-        //                 ),
-        //                 '])',
-        //               ])
-        //             ),
-        //             ').then(',
-        //             runtimeTemplate.returningFunction(
-        //               Template.asString([`${replaceString}(moduleId)`])
-        //             ),
-        //             ')',
-        //           ].join('')
-        //         ),
-        //         'moduleId'
-        //       ),
-        //     ]);
-        //
-        //     const wholeTem = Template.asString([
-        //       `var ${searchString} =`,
-        //       fancyTemplate,
-        //     ]);
-        //
-        //     return Template.asString([
-        //       '',
-        //       'var currentChunkId = __INSERT_CH_ID__MF__;',
-        //       `if(currentChunkId) {`,
-        //       Template.indent([
-        //         `if(__webpack_require__.getEagerSharedForChunkId) {__webpack_require__.getEagerSharedForChunkId(currentChunkId,__webpack_require__.initConsumes)}`,
-        //         `if(__webpack_require__.getEagerRemotesForChunkId) {__webpack_require__.getEagerRemotesForChunkId(currentChunkId,__webpack_require__.initRemotes)}`,
-        //       ]),
-        //       '}',
-        //       originalRuntimeCode,
-        //       wholeTem,
-        //       ...secondHalf,
-        //       '',
-        //     ]);
-        //   }
-        // );
+        hooks.renderStartup.tap(
+          'InvertedContainerPlugin',
+          (source : any, renderContext:any, startupRendercontext: any) => {
+            const isInvalidContext = 
+              !renderContext ||
+              //@ts-ignore
+              renderContext?._name ||
+              !renderContext?.debugId ||
+              !compilation.chunkGraph.isEntryModule(renderContext) ||
+              //@ts-ignore
+              renderContext?.rawRequest?.includes('pages/api') ||
+              renderContext?.layer === 'api';
+
+            if (isInvalidContext) {
+              // skip empty modules, container entry, and anything that doesn't have a moduleid or is not an entrypoint module.
+              return source;
+            }
+     
+            const { runtimeTemplate } = compilation;
+            const replaceSource = source.source().toString();
+            const [webpack_exec, webpack_exports] = replaceSource.split('\n');
+
+        const chunkID = typeof startupRendercontext.chunk.id === 'string' ? JSON.stringify(startupRendercontext.chunk.id) : startupRendercontext.chunk.id
+
+            return Template.asString([
+              webpack_exec.replace('__webpack_exec__', '__original_webpack_exec__'),
+              'globalThis.ongoingRemotes = globalThis.ongoingRemotes || [];',
+              `var __webpack_exec__ = async function() {`,
+              Template.indent([
+                `${RuntimeGlobals.ensureChunkHandlers}.consumes(${chunkID},globalThis.ongoingRemotes)`,
+                `await Promise.all((()=>globalThis.ongoingRemotes)())`,
+                `${RuntimeGlobals.ensureChunkHandlers}.remotes(${chunkID},globalThis.ongoingRemotes)`,
+                `await Promise.all((()=>globalThis.ongoingRemotes)())`,
+                `return  __original_webpack_exec__.apply(this, arguments);`,
+              ]),
+              `};`,
+              webpack_exports,
+            ]);
+          }
+        );
       }
     );
   }
 }
 
 export default InvertedContainerPlugin;
+
 

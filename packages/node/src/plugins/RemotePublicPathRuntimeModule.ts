@@ -100,7 +100,7 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
           ]),
           '}',
         ]),
-      'console.log(\'scriptUrl\', scriptUrl);',
+      // 'console.log(\'scriptUrl\', scriptUrl);',
       '// When supporting server environments where an automatic publicPath is not supported, you must specify an output.publicPath manually via configuration',
       '// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.',
       'if (!scriptUrl) throw new Error("Unable to calculate automatic public path");',
