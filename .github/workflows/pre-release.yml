@@ -33,7 +33,7 @@ jobs:
           path: ${{ env.CACHE_NODE_MODULES_PATH }}
           key: build-${{ hashFiles('**/package-lock.json') }}
       - name: Install packages
-        run: npm i
+        run: npm i && npm run sync:types:webpack
       - name: Retrieve effected projects
         id: effected-projects
         run: echo "projects=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)" >> $GITHUB_OUTPUT

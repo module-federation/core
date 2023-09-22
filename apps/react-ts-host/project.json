@@ -84,9 +84,7 @@
         "{options.outputFile}"
       ],
       "options": {
-        "lintFilePatterns": [
-          "apps/react-ts-host/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/react-ts-host/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "serve-static": {
@@ -107,7 +105,5 @@
     }
   },
   "tags": [],
-  "implicitDependencies": [
-    "typescript"
-  ]
+  "implicitDependencies": ["typescript"]
 }

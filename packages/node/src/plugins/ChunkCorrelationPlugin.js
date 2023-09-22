@@ -470,6 +470,7 @@ class FederationStatsPlugin {
                 continue;
               }
               const { module } = connection;
+
               const moduleChunks =
                 compilation.chunkGraph.getModuleChunksIterable(module);
               // Iterate over each chunk associated with the module.

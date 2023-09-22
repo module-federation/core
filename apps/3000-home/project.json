@@ -59,9 +59,7 @@
         "{options.outputFile}"
       ],
       "options": {
-        "lintFilePatterns": [
-          "apps/3000-home/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/3000-home/**/*.{ts,tsx,js,jsx}"]
       }
     }
   },

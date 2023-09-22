@@ -3,6 +3,7 @@
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
+import {ModuleInfoRuntimePlugin} from '@module-federation/enhanced'
 
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
@@ -175,6 +176,7 @@ class NodeFederationPlugin {
     // When used with Next.js, context is needed to use Next.js webpack
     const { webpack } = compiler;
 
+    new ModuleInfoRuntimePlugin().apply(compiler);
     const pluginOptions = {
       ...this._options,
       remotes: parseRemotes(
