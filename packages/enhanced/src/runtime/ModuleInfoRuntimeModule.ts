@@ -37,7 +37,7 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
            * @param {any} receiver - The Proxy or an object that inherits from the Proxy.
            * @returns {any} The value to return.
            */
-          `get: function(target: any, prop: string, receiver: any): any {`,
+          `get: function(target, prop, receiver) {`,
           'var result;',
           Template.indent([
             `if (prop === '_config') {`,
