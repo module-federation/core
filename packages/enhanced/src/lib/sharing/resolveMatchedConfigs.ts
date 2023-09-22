@@ -33,6 +33,7 @@ export async function resolveMatchedConfigs<T>(
   const context = compilation.compiler.context;
 
   await Promise.all(
+    //@ts-ignore
     configs.map(([request, config]) => {
       if (/^\.\.?(\/|$)/.test(request)) {
         // relative request
