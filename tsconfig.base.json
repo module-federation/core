@@ -19,7 +19,6 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@module-federation/enhanced": ["packages/enhanced/src/index.ts"],
       "@module-federation/core": [
         "packages/core/src/index.ts"
       ],
@@ -52,6 +51,12 @@
       ],
       "@module-federation/utilities/*": [
         "packages/utilities/*"
+      ],
+      "@module-federation/enhanced": [
+        "packages/enhanced/src/index.ts"
+      ],
+      "@module-federation/enhanced/*": [
+        "packages/enhanced/*"
       ]
     }
   },

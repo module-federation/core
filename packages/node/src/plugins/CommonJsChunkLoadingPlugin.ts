@@ -30,6 +30,7 @@ class CommonJsChunkLoadingPlugin {
     new StartupChunkDependenciesPlugin({
       chunkLoading: chunkLoadingValue,
       asyncChunkLoading: this._asyncChunkLoading,
+      //@ts-ignore
     }).apply(compiler);
 
     compiler.hooks.thisCompilation.tap(

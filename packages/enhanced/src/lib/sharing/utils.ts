@@ -394,7 +394,7 @@ export { getDescriptionFile };
 export function getRequiredVersionFromDescriptionFile(
   data: Record<string, any>,
   packageName: string,
-): string | undefined {
+): string | undefined | void {
   if (
     data['optionalDependencies'] &&
     typeof data['optionalDependencies'] === 'object' &&
