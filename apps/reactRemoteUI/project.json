@@ -17,12 +17,8 @@
         "baseHref": "/",
         "main": "apps/reactRemoteUI/src/main.ts",
         "tsConfig": "apps/reactRemoteUI/tsconfig.app.json",
-        "assets": [
-          "apps/reactRemoteUI/src/favicon.ico"
-        ],
-        "styles": [
-          "apps/reactRemoteUI/src/styles.scss"
-        ],
+        "assets": ["apps/reactRemoteUI/src/favicon.ico"],
+        "styles": ["apps/reactRemoteUI/src/styles.scss"],
         "scripts": [],
         "isolatedConfig": true,
         "webpackConfig": "apps/reactRemoteUI/webpack.config.js"
@@ -81,9 +77,7 @@
         "{options.outputFile}"
       ],
       "options": {
-        "lintFilePatterns": [
-          "apps/reactRemoteUI/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/reactRemoteUI/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "test": {

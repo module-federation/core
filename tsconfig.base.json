@@ -51,6 +51,12 @@
       ],
       "@module-federation/utilities/*": [
         "packages/utilities/*"
+      ],
+      "@module-federation/enhanced": [
+        "packages/enhanced/src/index.ts"
+      ],
+      "@module-federation/enhanced/*": [
+        "packages/enhanced/*"
       ]
     }
   },
