@@ -142,10 +142,10 @@ try {
         //@ts-ignore
         ...this._options.remotes,
       },
-      // shared: {
-      //   ...defaultShared,
-      //   ...this._options.shared,
-      // },
+      shared: {
+        ...defaultShared,
+        ...this._options.shared,
+      },
     };
 
     // if (this._extraOptions.debug) {
@@ -173,12 +173,6 @@ try {
     }).apply(compiler);
 
     // @ts-ignore
-    new ModuleFederationPlugin({
-      ...hostFederationPluginOptions,
-      // @ts-ignore
-      shared: Object.keys(hostFederationPluginOptions.shared).reduce((acc, key) => ({ ...acc, [key]: { ...hostFederationPluginOptions.shared[key], version: "0" } }), {}),
-    }).apply(compiler);
-    // @ts-ignore
 
     const hasRemotesOrExposes = Object.keys(this._options?.remotes || {}).length > 0 || Object.keys(this._options?.exposes || {}).length > 0;
     if (hasRemotesOrExposes) {
@@ -191,13 +185,24 @@ try {
         remoteType: 'script',
         // @ts-ignore
         library: { ...hostFederationPluginOptions.library, name: this._options.name },
-        shared: { ...hostFederationPluginOptions.shared, ...defaultShared },
+        //@ts-ignore
+        shared: Object.keys(hostFederationPluginOptions.shared || {}).reduce((acc, key) => ({ ...acc, [key]: { ...hostFederationPluginOptions.shared[key], eager: true, import: undefined } }), {}),
       };
+
+      console.log(hostFederationPluginOptions);
 
      // @ts-ignore
       new ModuleFederationPlugin({
         ...commonOptions,
       }).apply(compiler);
+
+
+    // @ts-ignore
+    new ModuleFederationPlugin({
+      ...hostFederationPluginOptions,
+      // @ts-ignore
+      shared: Object.keys(hostFederationPluginOptions.shared).reduce((acc, key) => ({ ...acc, [key]: { ...hostFederationPluginOptions.shared[key], version: "0", eager: false, shareScope: 'host' } }), {}),
+    }).apply(compiler);
     }
 
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);

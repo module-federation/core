@@ -20,7 +20,6 @@ import { parseOptions } from 'webpack/lib/container/options';
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/dynamic': {
     eager: false,
-    requiredVersion: false,
     singleton: true,
     import: undefined,
   },
@@ -38,8 +37,8 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/router': {
     requiredVersion: false,
     singleton: true,
-    import: false,
-    eager: false,
+    import: undefined,
+    eager: true,
   },
   'next/image': {
     requiredVersion: false,
@@ -56,13 +55,13 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   react: {
     singleton: true,
     requiredVersion: false,
-    eager: false,
+    eager: true,
     import: false,
   },
   'react-dom': {
     singleton: true,
     requiredVersion: false,
-    eager: false,
+    eager: true,
     import: false,
   },
   'react/jsx-dev-runtime': {

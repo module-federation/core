@@ -8,6 +8,8 @@ import SharedNav from '../components/SharedNav';
 import HostAppMenu from '../components/menu';
 import 'antd/dist/antd.css';
 console.log(__webpack_share_scopes__);
+
+
 function MyApp(props) {
   const { Component, pageProps } = props;
   const { asPath } = useRouter();
