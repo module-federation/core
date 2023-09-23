@@ -26,14 +26,11 @@ class RemoteRuntimeModule extends RuntimeModule {
     const chunkToRemotesMapping: Record<string, any> = {};
     const idToExternalAndNameMapping: Record<string | number, any> = {};
     const allChunks = [
-      ...(this.chunk?.getAllAsyncChunks() || []),
-      ...(this.chunk?.getAllInitialChunks() || []),
+      ...(Array.from(this.chunk?.getAllAsyncChunks() || [])),
+      ...(Array.from(this.chunk?.getAllInitialChunks() || [])),
     ];
 
-    for (const chunk of [
-      ...(this.chunk?.getAllAsyncChunks() || []),
-      ...(this.chunk?.getAllInitialChunks() || []),
-    ]) {
+    for (const chunk of allChunks) {
       const modules = chunkGraph?.getChunkModulesIterableBySourceType(
         chunk,
         'remote',

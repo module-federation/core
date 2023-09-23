@@ -223,11 +223,7 @@ export class NextFederationPlugin {
       commonOptions,
       //@ts-ignore
       isServer
-        ? {
-            context:
-              require('@module-federation/enhanced/src/lib/container/ModuleFederationPlugin')
-                .default,
-          }
+        ? {ModuleFederationPlugin: require('@module-federation/enhanced/src/lib/container/ModuleFederationPlugin').default}
         : undefined,
     ).apply(compiler);
 
@@ -250,12 +246,8 @@ export class NextFederationPlugin {
       },
       //@ts-ignore
       isServer
-        ? {
-            context:
-              require('@module-federation/enhanced/src/lib/container/ModuleFederationPlugin')
-                .default,
-          }
-        : undefined,
+      ? {ModuleFederationPlugin: require('@module-federation/enhanced/src/lib/container/ModuleFederationPlugin').default}
+      : undefined,
     ).apply(compiler);
   }
 }

@@ -115,7 +115,6 @@ class NodeFederationPlugin {
     { experiments, debug, ...options }: NodeFederationOptions,
     context: Context,
   ) {
-    console.log('NODE FEDERATION PLUGIN', context);
     this._options = options || ({} as ModuleFederationPluginOptions);
     this.context = context || ({} as Context);
     this.experiments = experiments || {};
@@ -162,7 +161,7 @@ class NodeFederationPlugin {
     console.log('CONTXT', this.context.ModuleFederationPlugin);
 
     new (this.context.ModuleFederationPlugin ||
-      // (webpack && webpack.container.ModuleFederationPlugin) ||
+      (webpack && webpack.container.ModuleFederationPlugin) ||
       require('webpack/lib/container/ModuleFederationPlugin'))(
       pluginOptions,
     ).apply(compiler);

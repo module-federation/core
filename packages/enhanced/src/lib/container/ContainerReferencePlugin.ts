@@ -130,7 +130,7 @@ class ContainerReferencePlugin {
                             i ? `/fallback-${i}` : ''
                           }`,
                     ),
-                    `${data.request.slice(key.length)}`,
+                    `.${data.request.slice(key.length)}`,
                     //@ts-ignore
                     config.shareScope,
                   );
