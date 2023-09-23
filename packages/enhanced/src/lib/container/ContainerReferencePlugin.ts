@@ -5,7 +5,7 @@
 
 import Compiler from 'webpack/lib/Compiler';
 import { RuntimeGlobals } from 'webpack';
-import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
+import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
 import FallbackDependency from './FallbackDependency';
 import FallbackItemDependency from './FallbackItemDependency';
 import FallbackModuleFactory from './FallbackModuleFactory';
@@ -13,11 +13,12 @@ import RemoteModule from './RemoteModule';
 import RemoteRuntimeModule from './RemoteRuntimeModule';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
 import { parseOptions } from './options';
-import ExternalsPlugin from 'webpack/lib/ExternalsPlugin';
-import Compilation from 'webpack/lib/Compilation';
-import NormalModuleFactory, {
+import ExternalsPlugin = require('webpack/lib/ExternalsPlugin');
+import type Compilation from 'webpack/lib/Compilation';
+import type {
   ResolveData,
 } from 'webpack/lib/NormalModuleFactory';
+import NormalModuleFactory = require('webpack/lib/NormalModuleFactory');
 import {
   ExternalsType,
   ContainerReferencePluginOptions,

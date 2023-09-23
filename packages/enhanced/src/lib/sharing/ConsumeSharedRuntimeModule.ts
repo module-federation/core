@@ -11,8 +11,8 @@ import {
   rangeToStringRuntimeCode,
   satisfyRuntimeCode,
 } from 'webpack/lib/util/semver';
-import RuntimeModule from 'webpack/lib/RuntimeModule';
-import Module from 'webpack/lib/Module';
+import RuntimeModule = require('webpack/lib/RuntimeModule');
+import Module = require('webpack/lib/Module');
 import ConsumeSharedModule from './ConsumeSharedModule';
 import ChunkGraph from 'webpack/lib/ChunkGraph';
 import Compilation from 'webpack/lib/Compilation';

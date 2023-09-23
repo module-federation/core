@@ -4,18 +4,19 @@
 */
 
 import { RawSource } from 'webpack-sources';
-import Module, {
+import type {
   CodeGenerationContext,
   CodeGenerationResult,
   LibIdentOptions,
   NeedBuildContext,
   WebpackError,
 } from 'webpack/lib/Module';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+import Module = require('webpack/lib/Module');
+import RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
+import makeSerializable = require('webpack/lib/util/makeSerializable');
 import FallbackDependency from './FallbackDependency';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
-import Compilation from 'webpack/lib/Compilation';
+import type Compilation from 'webpack/lib/Compilation';
 import { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
 import { InputFileSystem } from 'webpack/lib/FileSystemInfo';
 import { RequestShortener } from 'webpack/lib/RuntimeModule';
@@ -183,6 +184,6 @@ class RemoteModule extends Module {
   }
 }
 
-makeSerializable(RemoteModule, 'webpack/lib/container/RemoteModule');
+makeSerializable(RemoteModule, 'enhanced/lib/container/RemoteModule');
 
 export = RemoteModule;

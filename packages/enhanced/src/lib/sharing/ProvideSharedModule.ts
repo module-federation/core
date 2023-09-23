@@ -3,30 +3,29 @@
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 
-import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
-import Module from 'webpack/lib/Module';
-import { WEBPACK_MODULE_TYPE_PROVIDE } from 'webpack/lib/ModuleTypeConstants';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
-import ProvideForSharedDependency from './ProvideForSharedDependency';
-
-import { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';
+import  AsyncDependenciesBlock = require('webpack/lib/AsyncDependenciesBlock');
+import Module = require('webpack/lib/Module');
+import RuntimeGlobals from 'webpack/lib/RuntimeGlobals'
+import makeSerializable = require('webpack/lib/util/makeSerializable');
 import Compilation from 'webpack/lib/Compilation';
+import RequestShortener from 'webpack/lib/RequestShortener'
+import WebpackError from 'webpack/lib/WebpackError';
+import Hash from'webpack/lib/util/Hash'
+import { WEBPACK_MODULE_TYPE_PROVIDE } from 'webpack/lib/ModuleTypeConstants';
 import {
   CodeGenerationContext,
   CodeGenerationResult,
   LibIdentOptions,
   NeedBuildContext,
 } from 'webpack/lib/Module';
-import RequestShortener from 'webpack/lib/RequestShortener';
 import { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
-import WebpackError from 'webpack/lib/WebpackError';
 import {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/serialization/ObjectMiddleware';
-import Hash from 'webpack/lib/util/Hash';
 import { InputFileSystem } from 'webpack/lib/util/fs';
+import ProvideForSharedDependency from './ProvideForSharedDependency';
+import { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';
 
 /** @typedef {import("webpack/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
 /** @typedef {import("webpack/lib/Chunk")} Chunk */
@@ -234,7 +233,7 @@ class ProvideSharedModule extends Module {
 
 makeSerializable(
   ProvideSharedModule,
-  'webpack/lib/sharing/ProvideSharedModule',
+  'enhanced/lib/sharing/ProvideSharedModule',
 );
 
 export default ProvideSharedModule;

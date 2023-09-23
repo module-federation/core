@@ -4,23 +4,20 @@
 */
 
 'use strict';
-import {Compilation} from 'webpack'
-import { AsyncDependenciesBlock } from '../../declarations/plugins/container/AsyncDependenciesBlock';
+import AsyncDependenciesBlock = require('webpack/lib/AsyncDependenciesBlock');
+import Dependency = require('webpack/lib/Dependency');
+import Template = require('webpack/lib/Template');
+import Module = require('webpack/lib/Module');
+import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import { OriginalSource, RawSource } from 'webpack-sources';
+import {JAVASCRIPT_MODULE_TYPE_DYNAMIC} from '../Constants';
 import ContainerExposedDependency from './ContainerExposedDependency';
-import { RuntimeGlobals } from 'webpack';
-import StaticExportsDependency from '../../declarations/plugins/container/StaticExportsDependency';
-import { ObjectDeserializerContext } from '../../declarations/plugins/container/ObjectDeserializerContext';
-import { WebpackOptions } from '../../declarations/plugins/container/WebpackOptions';
-import Template from '../../declarations/plugins/container/Template';
-import {LibIdentOptions, NeedBuildContext} from 'webpack/lib/Module';
-import type RequestShortener from 'webpack/lib/RequestShortener'
-import type {InputFileSystem} from 'webpack/lib/util/fs';
-import type {ResolverWithOptions} from 'webpack/lib/ResolverFactory';
-import {
-  Dependency,
-  ObjectSerializerContext,
-} from '../../declarations/plugins/container/Dependency';
+import StaticExportsDependency from 'webpack/lib/dependencies/StaticExportsDependency';
+import type Compilation from 'webpack/lib/Compilation';
+import type {LibIdentOptions, NeedBuildContext, RequestShortener, ObjectDeserializerContext,ObjectSerializerContext, WebpackOptions, InputFileSystem, ResolverWithOptions} from 'webpack/lib/Module';
+import type WebpackError  from 'webpack/lib/WebpackError';
+
+import makeSerializable = require('webpack/lib/util/makeSerializable');
 
 const SOURCE_TYPES = new Set(['javascript']);
 
@@ -309,8 +306,9 @@ class ContainerEntryModule extends Module {
 //@ts-ignore
 makeSerializable(
   ContainerEntryModule,
-  'webpack/lib/container/ContainerEntryModule',
+  'enhanced/lib/container/ContainerEntryModule',
 );
 
 export default ContainerEntryModule;
+
 

@@ -3,10 +3,11 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
+import type Compilation from 'webpack/lib/Compilation'; 
 import RemoteModule from './RemoteModule';
-import RuntimeModule, { Compilation } from 'webpack/lib/RuntimeModule';
-import Template from 'webpack/lib/Template';
+import RuntimeModule = require('webpack/lib/RuntimeModule');
+import Template = require('webpack/lib/Template');
 
 /** @typedef {import("webpack/lib/Chunk")} Chunk */
 /** @typedef {import("./RemoteModule")} RemoteModule */

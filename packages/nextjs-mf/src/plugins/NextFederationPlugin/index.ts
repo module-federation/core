@@ -5,31 +5,45 @@
  */
 'use strict';
 
-
+// Importing types
 import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
   SharedObject,
 } from '@module-federation/utilities';
-import { createRuntimeVariables } from '@module-federation/utilities';
 import type { Compiler, container } from 'webpack';
+
+// Importing utilities
+import { createRuntimeVariables } from '@module-federation/utilities';
+import { parseRemotes } from '../../internal';
+
+// Importing plugins
 import CopyFederationPlugin from '../CopyFederationPlugin';
+import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
+
+// Importing loaders
+import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
+
+// Importing fragments
 import {
   applyRemoteDelegates,
   getModuleFederationPluginConstructor,
   retrieveDefaultShared,
   applyPathFixes,
 } from './next-fragments';
-import { parseRemotes } from '../../internal';
-import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
-import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
+
+// Importing helpers
 import { removeUnnecessarySharedKeys } from './remove-unnecessary-shared-keys';
 import { setOptions } from './set-options';
+
+// Importing validators
 import {
   validateCompilerOptions,
   validatePluginOptions,
 } from './validate-options';
+
+// Importing server plugins
 import {
   applyServerPlugins,
   configureServerCompilerOptions,
@@ -37,6 +51,7 @@ import {
   handleServerExternals,
 } from './apply-server-plugins';
 
+// Importing client plugins
 import { applyClientPlugins } from './apply-client-plugins';
 
 /**
@@ -85,6 +100,7 @@ export class NextFederationPlugin {
 
     const ModuleFederationPlugin: container.ModuleFederationPlugin =
       getModuleFederationPluginConstructor(isServer, compiler);
+
     // const { SharePlugin } = webpack.sharing;
     //
     // new SharePlugin({
@@ -194,15 +210,19 @@ try {
      // @ts-ignore
       new ModuleFederationPlugin({
         ...commonOptions,
-      }).apply(compiler);
+      },isServer ? {
+        context: require('@module-federation/enhanced/src/lib/container/ModuleFederationPlugin').default
+      } : undefined).apply(compiler);
 
 
     // @ts-ignore
     new ModuleFederationPlugin({
       ...hostFederationPluginOptions,
       // @ts-ignore
-      shared: Object.keys(hostFederationPluginOptions.shared).reduce((acc, key) => ({ ...acc, [key]: { ...hostFederationPluginOptions.shared[key], version: "0", eager: false, shareScope: 'host' } }), {}),
-    }).apply(compiler);
+      shared: Object.keys(hostFederationPluginOptions.shared).reduce((acc, key) => ({ ...acc, [key]: { ...hostFederationPluginOptions.shared[key], eager: false, requiredVersion: false} }), {}),
+    }, isServer ? {
+      context: require('@module-federation/enhanced/src/lib/container/ModuleFederationPlugin').default
+    }:undefined).apply(compiler);
     }
 
     new AddRuntimeRequirementToPromiseExternal().apply(compiler);
@@ -213,4 +233,5 @@ try {
  * Exporting NextFederationPlugin as default
  */
 export default NextFederationPlugin;
+
 

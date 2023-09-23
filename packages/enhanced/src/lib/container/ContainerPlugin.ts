@@ -3,13 +3,13 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
 
-import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
+import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
 import ContainerEntryDependency from './ContainerEntryDependency';
 import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { parseOptions } from './options';
-import Compiler from 'webpack/lib/Compiler';
-import Compilation from 'webpack/lib/Compilation';
+import type Compiler from 'webpack/lib/Compiler';
+import type Compilation from 'webpack/lib/Compilation';
 import type { ContainerPluginOptions } from '../../declarations/plugins/container/ContainerPlugin';
 
 const validate = createSchemaValidation(

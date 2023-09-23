@@ -3,7 +3,8 @@
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
-import {ModuleInfoRuntimePlugin} from '@module-federation/enhanced'
+//@ts-ignore
+const ModuleInfoPlugin = require('@module-federation/enhanced/src/runtime/ModuleInfoRuntimePlugin').default
 
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
@@ -117,7 +118,7 @@ class NodeFederationPlugin {
 
 
     //TODO: module info runtime should be somewhere universal
-    new ModuleInfoRuntimePlugin().apply(compiler);
+    new ModuleInfoPlugin().apply(compiler);
     const pluginOptions = {
       ...this._options,
       remotes: this._options.remotes ? parseRemotes(this._options.remotes as Record<string, any>) : {},
@@ -136,8 +137,10 @@ class NodeFederationPlugin {
       compiler.options.output.chunkFilename = chunkFileName.replace('.js', suffix);
     }
 
+    console.log('CONTXT', this.context.ModuleFederationPlugin)
+
     new (this.context.ModuleFederationPlugin ||
-      (webpack && webpack.container.ModuleFederationPlugin) ||
+      // (webpack && webpack.container.ModuleFederationPlugin) ||
       require('webpack/lib/container/ModuleFederationPlugin'))(
       pluginOptions
     ).apply(compiler);

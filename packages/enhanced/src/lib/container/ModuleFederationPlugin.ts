@@ -5,11 +5,11 @@
 
 'use strict';
 
-import Compiler from 'webpack/lib/Compiler';
-import isValidExternalsType from 'webpack/schemas/plugins/container/ExternalsType.check.js';
-import { ModuleFederationPluginOptions } from './ModuleFederationPluginTypes';
+import type Compiler from 'webpack/lib/Compiler';
+import isValidExternalsType = require('webpack/schemas/plugins/container/ExternalsType.check.js');
+import type { ModuleFederationPluginOptions } from './ModuleFederationPluginTypes';
 import SharePlugin from '../sharing/SharePlugin';
-import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
+import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 
