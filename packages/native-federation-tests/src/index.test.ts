@@ -42,7 +42,7 @@ describe('index', () => {
       const distFolder = join(projectRoot, 'dist', options.testsFolder);
 
       const unplugin = NativeFederationTestsRemote.rollup(
-        options
+        options,
       ) as UnpluginOptions;
       await unplugin.writeBundle?.();
 
@@ -78,7 +78,7 @@ describe('index', () => {
       };
 
       const unplugin = NativeFederationTestsRemote.rollup(
-        options
+        options,
       ) as UnpluginOptions;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -128,7 +128,7 @@ describe('index', () => {
       axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
       const unplugin = NativeFederationTestsHost.rollup(
-        options
+        options,
       ) as UnpluginOptions;
       await expect(unplugin.writeBundle?.()).resolves.not.toThrow();
 

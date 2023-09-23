@@ -3,7 +3,7 @@
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
-import {ModuleInfoRuntimePlugin} from '@module-federation/enhanced'
+import { ModuleInfoRuntimePlugin } from '@module-federation/enhanced';
 
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
@@ -43,18 +43,21 @@ interface Context {
  * @returns {Record<string, string>} The parsed remotes
  */
 export const parseRemotes = (remotes: Record<string, any>) =>
-  Object.entries(remotes).reduce((acc, remote) => {
-    if (remote[1].startsWith('internal ')) {
+  Object.entries(remotes).reduce(
+    (acc, remote) => {
+      if (remote[1].startsWith('internal ')) {
+        acc[remote[0]] = remote[1];
+        return acc;
+      }
+      if (!remote[1].startsWith('promise ') && remote[1].includes('@')) {
+        acc[remote[0]] = `promise ${parseRemoteSyntax(remote[1])}`;
+        return acc;
+      }
       acc[remote[0]] = remote[1];
       return acc;
-    }
-    if (!remote[1].startsWith('promise ') && remote[1].includes('@')) {
-      acc[remote[0]] = `promise ${parseRemoteSyntax(remote[1])}`;
-      return acc;
-    }
-    acc[remote[0]] = remote[1];
-    return acc;
-  }, {} as Record<string, string>);
+    },
+    {} as Record<string, string>,
+  );
 // server template to convert remote into promise new promise and use require.loadChunk to load the chunk
 /**
  * This function generates a remote template.
@@ -65,7 +68,7 @@ export const parseRemotes = (remotes: Record<string, any>) =>
  */
 export const generateRemoteTemplate = (
   url: string,
-  global: any
+  global: any,
 ) => `new Promise(function (resolve, reject) {
     if(!globalThis.__remote_scope__) {
       // create a global scope for container, similar to how remotes are set on window in the browser
@@ -75,12 +78,12 @@ export const generateRemoteTemplate = (
     }
 
     if (typeof globalThis.__remote_scope__[${JSON.stringify(
-      global
+      global,
     )}] !== 'undefined') return resolve(globalThis.__remote_scope__[${JSON.stringify(
-  global
-)}]);
+      global,
+    )}]);
     globalThis.__remote_scope__._config[${JSON.stringify(
-      global
+      global,
     )}] = ${JSON.stringify(url)};
     var __webpack_error__ = new Error();
 
@@ -88,10 +91,10 @@ export const generateRemoteTemplate = (
       ${JSON.stringify(url)},
       function (event) {
         if (typeof globalThis.__remote_scope__[${JSON.stringify(
-          global
+          global,
         )}] !== 'undefined') return resolve(globalThis.__remote_scope__[${JSON.stringify(
-  global
-)}]);
+          global,
+        )}]);
          var realSrc = event && event.target && event.target.src;
         __webpack_error__.message = 'Loading script failed.\\n(' + event.message + ': ' + realSrc + ')';
         __webpack_error__.name = 'ScriptExternalLoadError';
@@ -102,7 +105,7 @@ export const generateRemoteTemplate = (
     );
   }).catch((e)=> {
     console.error(${JSON.stringify(
-      global
+      global,
     )}, 'is offline, returning fake remote');
     console.error(e);
 
@@ -160,7 +163,7 @@ class NodeFederationPlugin {
    */
   constructor(
     { experiments, debug, ...options }: NodeFederationOptions,
-    context: Context
+    context: Context,
   ) {
     this._options = options || ({} as ModuleFederationPluginOptions);
     this.context = context || ({} as Context);
@@ -180,7 +183,7 @@ class NodeFederationPlugin {
     const pluginOptions = {
       ...this._options,
       remotes: parseRemotes(
-        this._options.remotes || {}
+        this._options.remotes || {},
       ) as ModuleFederationPluginOptions['remotes'],
     };
 
@@ -200,7 +203,7 @@ class NodeFederationPlugin {
         //@ts-ignore
         !requiredSubstrings.some((substring) =>
           //@ts-ignore
-          chunkFileName.includes(substring)
+          chunkFileName.includes(substring),
         )
       ) {
         const suffix =
@@ -209,7 +212,7 @@ class NodeFederationPlugin {
             : `.[chunkhash].js`;
         compiler.options.output.chunkFilename = chunkFileName.replace(
           '.js',
-          suffix
+          suffix,
         );
       }
     }
@@ -217,7 +220,7 @@ class NodeFederationPlugin {
     new (this.context.ModuleFederationPlugin ||
       (webpack && webpack.container.ModuleFederationPlugin) ||
       require('webpack/lib/container/ModuleFederationPlugin'))(
-      pluginOptions
+      pluginOptions,
     ).apply(compiler);
   }
 }

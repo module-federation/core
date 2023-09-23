@@ -29,7 +29,7 @@ export { withModuleFederation };
 
 export const webpack = async (
   webpackConfig: Configuration,
-  options: Options
+  options: Options,
 ): Promise<Configuration> => {
   const { plugins = [], context: webpackContext } = webpackConfig;
   const { moduleFederationConfig, presets, nxModuleFederationConfig } = options;
@@ -41,7 +41,7 @@ export const webpack = async (
 
   if (webpackVersion !== '5') {
     throw new Error(
-      'Webpack 5 required: Configure Storybook to use the webpack5 builder'
+      'Webpack 5 required: Configure Storybook to use the webpack5 builder',
     );
   }
 
@@ -63,12 +63,12 @@ export const webpack = async (
 
   const entries = await presets.apply<string[]>('entries');
   const bootstrap: string[] = entries.map(
-    (entryFile: string) => `import '${correctImportPath(context, entryFile)}';`
+    (entryFile: string) => `import '${correctImportPath(context, entryFile)}';`,
   );
 
   const index = plugins.findIndex(
     //@ts-ignore
-    (plugin) => plugin.constructor.name === 'VirtualModulesPlugin'
+    (plugin) => plugin.constructor.name === 'VirtualModulesPlugin',
   );
 
   if (index !== -1) {
@@ -95,7 +95,7 @@ export const webpack = async (
           nodeModulesPath,
           '.cache',
           'storybook',
-          filePathFromProjectRootDir
+          filePathFromProjectRootDir,
         );
         finalDir = dirname(finalPath);
 
@@ -159,7 +159,7 @@ export const webpack = async (
     action = 'Replace';
   }
   logger.info(
-    `=> [MF] ${action} plugin VirtualModulesPlugin to bootstrap entry point`
+    `=> [MF] ${action} plugin VirtualModulesPlugin to bootstrap entry point`,
   );
 
   return {

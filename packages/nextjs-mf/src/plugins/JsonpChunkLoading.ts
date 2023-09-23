@@ -1,10 +1,5 @@
 // CustomWebpackPlugin.ts
-import type {
-  Chunk,
-  Compilation,
-  Compiler,
-  RuntimeModule,
-} from 'webpack';
+import type { Chunk, Compilation, Compiler, RuntimeModule } from 'webpack';
 import { ConcatSource } from 'webpack-sources';
 //@ts-ignore
 import JsonpChunkLoadingRuntimeModule from 'webpack/lib/web/JsonpChunkLoadingRuntimeModule';
@@ -19,13 +14,13 @@ import template from './container/custom-jsonp';
  */
 function getCustomJsonpCode(
   chunkLoadingGlobal: string,
-  RuntimeGlobals: any
+  RuntimeGlobals: any,
 ): string {
   const code = [
     'var chunkQueue = [];',
     'var chunkTracker = [];',
     `var chunkLoadingGlobal = self[${JSON.stringify(
-      chunkLoadingGlobal
+      chunkLoadingGlobal,
     )}] || [];`,
     'var asyncQueue = [];',
     template,
@@ -77,14 +72,14 @@ class CustomWebpackPlugin {
                 getCustomJsonpCode(
                   //@ts-ignore
                   compilation.outputOptions.chunkLoadingGlobal,
-                  compiler.webpack.RuntimeGlobals
-                )
+                  compiler.webpack.RuntimeGlobals,
+                ),
               );
               runtimeModule.getGeneratedCode = () => modifiedSource.source();
             }
-          }
+          },
         );
-      }
+      },
     );
   }
 }

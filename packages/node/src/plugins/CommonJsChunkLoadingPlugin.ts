@@ -57,7 +57,7 @@ class CommonJsChunkLoadingPlugin {
             chunk,
             new ChunkLoadingRuntimeModule(set, this.options, {
               webpack: compiler.webpack,
-            })
+            }),
           );
         };
         compilation.hooks.runtimeRequirementInTree
@@ -107,7 +107,7 @@ class CommonJsChunkLoadingPlugin {
             }
             set.add(RuntimeGlobals.getUpdateManifestFilename);
           });
-      }
+      },
     );
   }
 }

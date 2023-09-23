@@ -15,7 +15,7 @@ import JsonpChunkLoading from '../JsonpChunkLoading';
  */
 export function applyServerPlugins(
   compiler: Compiler,
-  options: ModuleFederationPluginOptions
+  options: ModuleFederationPluginOptions,
 ): void {
   // Import the StreamingTargetPlugin from @module-federation/node
   const { StreamingTargetPlugin } = require('@module-federation/node');
@@ -56,7 +56,7 @@ export function applyServerPlugins(
  * filename.
  */
 export function configureServerLibraryAndFilename(
-  options: ModuleFederationPluginOptions
+  options: ModuleFederationPluginOptions,
 ): void {
   // Configure the library option with type "commonjs-module" and the name from the options
   options.library = {
@@ -90,7 +90,7 @@ export function configureServerLibraryAndFilename(
  */
 export function handleServerExternals(
   compiler: Compiler,
-  options: ModuleFederationPluginOptions
+  options: ModuleFederationPluginOptions,
 ): void {
   // Check if the compiler has an `externals` array
   if (

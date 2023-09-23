@@ -16,7 +16,7 @@ import { UrlNode } from '../../client/UrlNode';
  * @param {LoaderContext<Record<string, unknown>>} this - The loader context.
  */
 export default function nextPageMapLoader(
-  this: LoaderContext<Record<string, unknown>>
+  this: LoaderContext<Record<string, unknown>>,
 ) {
   // const [pagesRoot] = getNextPagesRoot(this.rootContext);
   // this.addContextDependency(pagesRoot);
@@ -33,7 +33,7 @@ export default function nextPageMapLoader(
 
   this.callback(
     null,
-    `module.exports = { default: ${JSON.stringify(result)} };`
+    `module.exports = { default: ${JSON.stringify(result)} };`,
   );
 }
 
@@ -57,10 +57,10 @@ export function exposeNextjsPages(cwd: string) {
   });
 
   return {
-      './pages-map': `${__filename}!${__filename}`,
-      './pages-map-v2': `${__filename}?v2!${__filename}`,
-      ...pageModulesMap,
-    };
+    './pages-map': `${__filename}!${__filename}`,
+    './pages-map-v2': `${__filename}?v2!${__filename}`,
+    ...pageModulesMap,
+  };
 }
 
 /**

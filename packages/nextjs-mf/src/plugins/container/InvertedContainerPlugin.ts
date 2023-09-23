@@ -101,14 +101,14 @@ class InvertedContainerPlugin {
               new InvertedContainerRuntimeModule(set, this.options, {
                 webpack: compiler.webpack,
                 debug: this.options.debug,
-              })
+              }),
             );
           }
         };
 
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           'InvertedContainerPlugin',
-          handler
+          handler,
         );
 
         compilation.hooks.optimizeChunks.tap(
@@ -124,17 +124,17 @@ class InvertedContainerPlugin {
               if (
                 !compilation.chunkGraph.isModuleInChunk(
                   containerEntryModule,
-                  chunk
+                  chunk,
                 ) &&
                 chunk.hasRuntime()
               ) {
                 compilation.chunkGraph.connectChunkAndModule(
                   chunk,
-                  containerEntryModule
+                  containerEntryModule,
                 );
               }
             }
-          }
+          },
         );
 
         const hooks =
@@ -167,7 +167,7 @@ class InvertedContainerPlugin {
                 }
               }
             }
-          }
+          },
         );
 
         hooks.renderStartup.tap(
@@ -196,7 +196,7 @@ class InvertedContainerPlugin {
             const replaceString = '__webpack_exec_proxy__';
 
             const originalExec = replaceSource.findIndex((s: string) =>
-              s.includes(searchString)
+              s.includes(searchString),
             );
 
             if (originalExec === -1) {
@@ -222,19 +222,19 @@ class InvertedContainerPlugin {
                           [
                             'Promise.all(__webpack_require__.initRemotes)',
                             'Promise.all(__webpack_require__.initConsumes)',
-                          ].join(',\n')
+                          ].join(',\n'),
                         ),
                         '])',
-                      ])
+                      ]),
                     ),
                     ').then(',
                     runtimeTemplate.returningFunction(
-                      Template.asString([`${replaceString}(moduleId)`])
+                      Template.asString([`${replaceString}(moduleId)`]),
                     ),
                     ')',
-                  ].join('')
+                  ].join(''),
                 ),
-                'moduleId'
+                'moduleId',
               ),
             ]);
 
@@ -257,12 +257,11 @@ class InvertedContainerPlugin {
               ...secondHalf,
               '',
             ]);
-          }
+          },
         );
-      }
+      },
     );
   }
 }
 
 export default InvertedContainerPlugin;
-

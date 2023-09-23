@@ -33,7 +33,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
   constructor(
     runtimeRequirements: Set<string>,
     options: ReadFileChunkLoadingRuntimeModuleOptions,
-    chunkLoadingContext: ChunkLoadingContext
+    chunkLoadingContext: ChunkLoadingContext,
   ) {
     super('readFile chunk loading', RuntimeModule.STAGE_ATTACH);
     this.runtimeRequirements = runtimeRequirements;
@@ -100,7 +100,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
         }
         return acc;
       },
-      { functional: [], normal: [] }
+      { functional: [], normal: [] },
     );
 
     const { webpack } = this.chunkLoadingContext;
@@ -116,7 +116,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       webpack?.javascript.JavascriptModulesPlugin ||
       require('webpack/lib/javascript/JavascriptModulesPlugin');
 
-    const {chunkHasJs} = jsModulePlugin;
+    const { chunkHasJs } = jsModulePlugin;
 
     // workaround for next.js
     const getInitialChunkIds = (chunk: Chunk, chunkGraph: ChunkGraph) => {
@@ -143,20 +143,20 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
     const fn = RuntimeGlobals.ensureChunkHandlers;
     const withBaseURI = this.runtimeRequirements.has(RuntimeGlobals.baseURI);
     const withExternalInstallChunk = this.runtimeRequirements.has(
-      RuntimeGlobals.externalInstallChunk
+      RuntimeGlobals.externalInstallChunk,
     );
 
     const withOnChunkLoad = this.runtimeRequirements.has(
-      RuntimeGlobals.onChunksLoaded
+      RuntimeGlobals.onChunksLoaded,
     );
     const withLoading = this.runtimeRequirements.has(
-      RuntimeGlobals.ensureChunkHandlers
+      RuntimeGlobals.ensureChunkHandlers,
     );
     const withHmr = this.runtimeRequirements.has(
-      RuntimeGlobals.hmrDownloadUpdateHandlers
+      RuntimeGlobals.hmrDownloadUpdateHandlers,
     );
     const withHmrManifest = this.runtimeRequirements.has(
-      RuntimeGlobals.hmrDownloadManifest
+      RuntimeGlobals.hmrDownloadManifest,
     );
 
     const conditionMap = chunkGraph.getChunkConditionMap(chunk, chunkHasJs);
@@ -168,13 +168,13 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       {
         chunk,
         contentHashType: 'javascript',
-      }
+      },
     );
 
     const rootOutputDir = getUndoPath(
       outputName,
       compilation.outputOptions.path,
-      false
+      false,
     );
 
     const stateExpression = withHmr
@@ -192,8 +192,8 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
       }{`,
       Template.indent(
         Array.from(initialChunkIds, (id) => `${JSON.stringify(id)}: 0`).join(
-          ',\n'
-        )
+          ',\n',
+        ),
       ),
       '};',
       '',
@@ -202,7 +202,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
             RuntimeGlobals.onChunksLoaded
           }.readFileVm = ${runtimeTemplate.returningFunction(
             'installedChunks[chunkId] === 0',
-            'chunkId'
+            'chunkId',
           )};`
         : '// no on chunks loaded',
       '',
@@ -251,7 +251,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                   executeLoadTemplate,
                   `executeLoad(url,callback,chunkId)`,
                 ]),
-              ]
+              ],
             )}`,
           ])
         : '// no remote script loader needed',
@@ -279,14 +279,14 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         Template.indent([
                           'installedChunkData = installedChunks[chunkId] = [resolve, reject];',
                           `var filename = typeof process !== "undefined" ? require('path').join(__dirname, ${JSON.stringify(
-                            rootOutputDir
+                            rootOutputDir,
                           )} + ${
                             RuntimeGlobals.getChunkScriptFilename
                           }(chunkId)) : false;`,
                           'var fs = typeof process !== "undefined" ? require(\'fs\') : false;',
                           'if(fs && fs.existsSync(filename)) {',
                           this._getLogger(
-                            `'chunk filename local load', chunkId`
+                            `'chunk filename local load', chunkId`,
                           ),
                           Template.indent([
                             "fs.readFile(filename, 'utf-8', function(err, content) {",
@@ -304,22 +304,25 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             loadScriptTemplate,
                             this._getLogger(
                               `'needs to load remote module from ${JSON.stringify(
-                                name
-                              )}'`
+                                name,
+                              )}'`,
                             ),
                             this._getLogger(
                               `'remotes known to'`,
                               JSON.stringify(name),
-                              JSON.stringify(remotes)
+                              JSON.stringify(remotes),
                             ),
                             // keys are mostly useless here, we want to find remote by its global (unique name)
                             `var remotes = ${JSON.stringify(
-                              Object.values(remotes).reduce((acc, remote) => {
-                                //TODO: need to handle all other cases like when remote is not a @ syntax string
-                                const [global, url] = remote.split('@');
-                                acc[global] = url;
-                                return acc;
-                              }, {} as Record<string, string>)
+                              Object.values(remotes).reduce(
+                                (acc, remote) => {
+                                  //TODO: need to handle all other cases like when remote is not a @ syntax string
+                                  const [global, url] = remote.split('@');
+                                  acc[global] = url;
+                                  return acc;
+                                },
+                                {} as Record<string, string>,
+                              ),
                             )};`,
                             Template.indent([
                               'if(!globalThis.__remote_scope__) {',
@@ -339,25 +342,25 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                     */
                             this._getLogger(
                               `'remotes keyed by global name'`,
-                              JSON.stringify(remotes)
+                              JSON.stringify(remotes),
                             ),
                             this._getLogger(
                               `'remote scope configs'`,
-                              'globalThis.__remote_scope__._config'
+                              'globalThis.__remote_scope__._config',
                             ),
 
                             this._getLogger(`'before remote scope'`),
                             this._getLogger(
                               `'globalThis.__remote_scope__'`,
-                              `globalThis.__remote_scope__`
+                              `globalThis.__remote_scope__`,
                             ),
                             this._getLogger(
                               `'globalThis.__remote_scope__[${JSON.stringify(
-                                name
+                                name,
                               )}]'`,
                               `globalThis.__remote_scope__[${JSON.stringify(
-                                name
-                              )}]`
+                                name,
+                              )}]`,
                             ),
 
                             /*   TODO: this global.REMOTE_CONFIG doesnt work in this v5 core, not sure if i need to keep it or not
@@ -371,11 +374,11 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                         )}]`,
                      */
                             `var requestedRemote = remoteRegistry[${JSON.stringify(
-                              name
+                              name,
                             )}]`,
                             this._getLogger(
                               `'requested remote'`,
-                              `requestedRemote`
+                              `requestedRemote`,
                             ),
                             /*TODO: we need to support when user implements own promise new promise function
                             for example i have my own promise remotes, not global@remotename
@@ -389,7 +392,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                   }`,
                             this._getLogger(
                               `'var requestedRemote'`,
-                              `requestedRemote`
+                              `requestedRemote`,
                             ),
 
                             // example: uncomment this and server will never reply
@@ -400,18 +403,18 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                               '"requestedRemote"',
                               'requestedRemote',
                               'current name',
-                              JSON.stringify(name)
+                              JSON.stringify(name),
                             ),
                             `var scriptUrl = new URL(requestedRemote);`,
 
                             this._getLogger(
                               `'globalThis.__remote_scope__'`,
-                              `globalThis.__remote_scope__`
+                              `globalThis.__remote_scope__`,
                             ),
                             `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
                             this._getLogger(
                               `'chunkname to request'`,
-                              `chunkName`
+                              `chunkName`,
                             ),
                             `
                         var getBasenameFromUrl = (url) => {
@@ -422,7 +425,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
                             `scriptUrl.pathname = scriptUrl.pathname.replace(fileToReplace, chunkName);`,
                             this._getLogger(
                               `'will load remote chunk'`,
-                              `scriptUrl.toString()`
+                              `scriptUrl.toString()`,
                             ),
                             `loadScript(scriptUrl.toString(), function(err, content) {`,
                             Template.indent([
@@ -477,7 +480,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
               'return new Promise(function(resolve, reject) {',
               Template.indent([
                 `var filename = require('path').join(__dirname, ${JSON.stringify(
-                  rootOutputDir
+                  rootOutputDir,
                 )} + ${RuntimeGlobals.getChunkUpdateScriptFilename}(chunkId));`,
                 "require('fs').readFile(filename, 'utf-8', function(err, content) {",
                 Template.indent([
@@ -508,7 +511,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
             '',
             Template.getFunctionContent(
               // eslint-disable-next-line @typescript-eslint/no-var-requires
-              require('webpack/lib/hmr/JavascriptHotModuleReplacement.runtime.js')
+              require('webpack/lib/hmr/JavascriptHotModuleReplacement.runtime.js'),
             )
               .replace(/\$key\$/g, 'readFileVm')
               .replace(/\$installedChunks\$/g, 'installedChunks')
@@ -517,17 +520,17 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
               .replace(/\$moduleFactories\$/g, RuntimeGlobals.moduleFactories)
               .replace(
                 /\$ensureChunkHandlers\$/g,
-                RuntimeGlobals.ensureChunkHandlers
+                RuntimeGlobals.ensureChunkHandlers,
               )
               .replace(/\$hasOwnProperty\$/g, RuntimeGlobals.hasOwnProperty)
               .replace(/\$hmrModuleData\$/g, RuntimeGlobals.hmrModuleData)
               .replace(
                 /\$hmrDownloadUpdateHandlers\$/g,
-                RuntimeGlobals.hmrDownloadUpdateHandlers
+                RuntimeGlobals.hmrDownloadUpdateHandlers,
               )
               .replace(
                 /\$hmrInvalidateModuleHandlers\$/g,
-                RuntimeGlobals.hmrInvalidateModuleHandlers
+                RuntimeGlobals.hmrInvalidateModuleHandlers,
               ),
           ])
         : '// no HMR',
@@ -539,7 +542,7 @@ class ReadFileChunkLoadingRuntimeModule extends RuntimeModule {
               'return new Promise(function(resolve, reject) {',
               Template.indent([
                 `var filename = require('path').join(__dirname, ${JSON.stringify(
-                  rootOutputDir
+                  rootOutputDir,
                 )} + ${RuntimeGlobals.getUpdateManifestFilename}());`,
                 "require('fs').readFile(filename, 'utf-8', function(err, content) {",
                 Template.indent([

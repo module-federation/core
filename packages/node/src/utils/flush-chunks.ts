@@ -10,7 +10,7 @@ if (!globalThis.usedChunks) {
  * @type {Set}
  */
 // @ts-ignore
-export const {usedChunks} = globalThis;
+export const { usedChunks } = globalThis;
 /**
  * Load hostStats from the JSON file.
  * @returns {object} hostStats - An object containing host stats data.
@@ -76,7 +76,7 @@ const processChunk = async (chunk, shareMap, hostStats) => {
   if (!globalThis.__remote_scope__._config[remote]) {
     console.error(
       `flush chunks:`,
-      `Remote ${remote} is not defined in the global config`
+      `Remote ${remote} is not defined in the global config`,
     );
     return;
   }
@@ -85,7 +85,7 @@ const processChunk = async (chunk, shareMap, hostStats) => {
     // Extract the remote name from the URL
     //@ts-ignore
     const remoteName = new URL(
-      globalThis.__remote_scope__._config[remote]
+      globalThis.__remote_scope__._config[remote],
     ).pathname
       .split('/')
       .pop();
@@ -168,8 +168,8 @@ export const flushChunks = async () => {
 
   const allFlushed = await Promise.all(
     Array.from(usedChunks).map(async (chunk) =>
-      processChunk(chunk, shareMap, hostStats)
-    )
+      processChunk(chunk, shareMap, hostStats),
+    ),
   );
 
   // Deduplicate the chunks array

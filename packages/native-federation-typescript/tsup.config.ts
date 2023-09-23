@@ -7,7 +7,7 @@ export default defineConfig({
   entry: [
     join(__dirname, 'src', 'index.ts'),
     ...SUPPORTED_BUNDLERS.map((bundler) =>
-      join(__dirname, 'src', `${bundler}.ts`)
+      join(__dirname, 'src', `${bundler}.ts`),
     ),
   ],
   dts: true,

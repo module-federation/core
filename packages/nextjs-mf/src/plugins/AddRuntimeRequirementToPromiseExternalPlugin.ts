@@ -13,9 +13,9 @@ export class AddRuntimeRequirementToPromiseExternal {
               set.add(RuntimeGlobals.loadScript);
               set.add(RuntimeGlobals.require);
             }
-          }
+          },
         );
-      }
+      },
     );
   }
 }

@@ -4,7 +4,7 @@
 */
 
 'use strict';
-import {Compilation} from 'webpack'
+import { Compilation } from 'webpack';
 import { AsyncDependenciesBlock } from '../../declarations/plugins/container/AsyncDependenciesBlock';
 import { OriginalSource, RawSource } from 'webpack-sources';
 import ContainerExposedDependency from './ContainerExposedDependency';
@@ -13,10 +13,10 @@ import StaticExportsDependency from '../../declarations/plugins/container/Static
 import { ObjectDeserializerContext } from '../../declarations/plugins/container/ObjectDeserializerContext';
 import { WebpackOptions } from '../../declarations/plugins/container/WebpackOptions';
 import Template from '../../declarations/plugins/container/Template';
-import {LibIdentOptions, NeedBuildContext} from 'webpack/lib/Module';
-import type RequestShortener from 'webpack/lib/RequestShortener'
-import type {InputFileSystem} from 'webpack/lib/util/fs';
-import type {ResolverWithOptions} from 'webpack/lib/ResolverFactory';
+import { LibIdentOptions, NeedBuildContext } from 'webpack/lib/Module';
+import type RequestShortener from 'webpack/lib/RequestShortener';
+import type { InputFileSystem } from 'webpack/lib/util/fs';
+import type { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
 import {
   Dependency,
   ObjectSerializerContext,
@@ -132,7 +132,7 @@ class ContainerEntryModule extends Module {
       topLevelDeclarations: new Set(['moduleMap', 'get', 'init']),
     };
     this.buildMeta.exportsType = 'namespace';
-//@ts-ignore
+    //@ts-ignore
     this.clearDependenciesAndBlocks();
 
     for (const [name, options] of this._exposes) {
@@ -150,7 +150,7 @@ class ContainerEntryModule extends Module {
           name,
           index: idx++,
         };
-//@ts-ignore
+        //@ts-ignore
         block.addDependency(dep);
       }
       //@ts-ignore
@@ -181,11 +181,11 @@ class ContainerEntryModule extends Module {
       RuntimeGlobals.exports,
     ]);
     const getters = [];
-//@ts-ignore
+    //@ts-ignore
     for (const block of this.blocks) {
       const { dependencies } = block;
 
-      const modules = dependencies.map((dependency:Dependency) => {
+      const modules = dependencies.map((dependency: Dependency) => {
         const dep = dependency as unknown as ContainerExposedDependency;
         return {
           name: dep.exposedName,
@@ -195,7 +195,7 @@ class ContainerEntryModule extends Module {
       });
 
       let str;
-//@ts-ignore
+      //@ts-ignore
       if (modules.some((m) => !m.module)) {
         str = runtimeTemplate.throwMissingModuleErrorBlock({
           //@ts-ignore
@@ -313,4 +313,3 @@ makeSerializable(
 );
 
 export default ContainerEntryModule;
-

@@ -40,7 +40,7 @@ class StreamingTargetPlugin {
   apply(compiler: Compiler) {
     if (compiler.options.target) {
       console.warn(
-        `target should be set to false while using NodeSoftwareStreamRuntime plugin, actual target: ${compiler.options.target}`
+        `target should be set to false while using NodeSoftwareStreamRuntime plugin, actual target: ${compiler.options.target}`,
       );
       console.info('Setting target to false');
       compiler.options.target = false;
