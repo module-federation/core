@@ -151,4 +151,3 @@ class DelegateModulesPlugin {
 }
 
 export default DelegateModulesPlugin;
-

@@ -23,7 +23,7 @@ import type {
   Hash,
   InputFileSystem,
 } from 'webpack/lib/Module';
-import Module = require('webpack/lib/Module')
+import Module = require('webpack/lib/Module');
 import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from 'webpack/lib/ModuleTypeConstants';
 import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import makeSerializable = require('webpack/lib/util/makeSerializable');

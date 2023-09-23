@@ -4,7 +4,7 @@
 */
 
 import RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
-import type Compilation from 'webpack/lib/Compilation'; 
+import type Compilation from 'webpack/lib/Compilation';
 import RemoteModule from './RemoteModule';
 import RuntimeModule = require('webpack/lib/RuntimeModule');
 import Template = require('webpack/lib/Template');
@@ -25,9 +25,15 @@ class RemoteRuntimeModule extends RuntimeModule {
     const { runtimeTemplate, moduleGraph } = compilation as Compilation;
     const chunkToRemotesMapping: Record<string, any> = {};
     const idToExternalAndNameMapping: Record<string | number, any> = {};
-        const allChunks = [...(this.chunk?.getAllAsyncChunks() || []), ...(this.chunk?.getAllInitialChunks() || [])];
+    const allChunks = [
+      ...(this.chunk?.getAllAsyncChunks() || []),
+      ...(this.chunk?.getAllInitialChunks() || []),
+    ];
 
-    for (const chunk of [...(this.chunk?.getAllAsyncChunks() || []), ...(this.chunk?.getAllInitialChunks() || [])]) {
+    for (const chunk of [
+      ...(this.chunk?.getAllAsyncChunks() || []),
+      ...(this.chunk?.getAllInitialChunks() || []),
+    ]) {
       const modules = chunkGraph?.getChunkModulesIterableBySourceType(
         chunk,
         'remote',

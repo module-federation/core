@@ -43,20 +43,29 @@ interface Context {
  * @returns {Record<string, string>} - The parsed remotes.
  * */
 
-export const parseRemotes = (remotes: Record<string, any>): Record<string, string> => {
+export const parseRemotes = (
+  remotes: Record<string, any>,
+): Record<string, string> => {
   if (!remotes || typeof remotes !== 'object') {
     throw new Error('remotes must be an object');
   }
 
-  return Object.entries(remotes).reduce((acc: Record<string, string>, [key, value]) => {
-    const isInternal = value.startsWith('internal ');
-    const isGlobal = value.includes('@') && !['window.', 'global.', 'globalThis.','self.'].some(prefix => value.startsWith(prefix));
+  return Object.entries(remotes).reduce(
+    (acc: Record<string, string>, [key, value]) => {
+      const isInternal = value.startsWith('internal ');
+      const isGlobal =
+        value.includes('@') &&
+        !['window.', 'global.', 'globalThis.', 'self.'].some((prefix) =>
+          value.startsWith(prefix),
+        );
 
-    acc[key] = isInternal || !isGlobal ? value : parseRemoteSyntax(value);
+      acc[key] = isInternal || !isGlobal ? value : parseRemoteSyntax(value);
 
-    return acc;
-  }, {});
-}
+      return acc;
+    },
+    {},
+  );
+};
 /**
  * Parses the remote syntax and returns a formatted string if the remote includes '@' and does not start with 'window', 'global', or 'globalThis'.
  * Otherwise, it returns the original remote string.
@@ -72,13 +81,16 @@ export const parseRemoteSyntax = (remote: any): string => {
 
   if (remote.includes('@')) {
     const [url, global] = extractUrlAndGlobal(remote);
-    if (!['window.', 'global.', 'globalThis.'].some(prefix => global.startsWith(prefix))) {
+    if (
+      !['window.', 'global.', 'globalThis.'].some((prefix) =>
+        global.startsWith(prefix),
+      )
+    ) {
       return `globalThis.__remote_scope__.${global}@${url}`;
     }
   }
   return remote;
 };
-
 
 /**
  * Class representing a NodeContainerPlugin.
@@ -95,10 +107,7 @@ class NodeContainerPlugin {
    * @param {NodeContainerOptions} options - The options for the NodeContainerPlugin
    * @param {Context} context - The context for the NodeContainerPlugin
    */
-  constructor(
-    { experiments, debug, ...options }: any,
-    context: Context
-  ) {
+  constructor({ experiments, debug, ...options }: any, context: Context) {
     this._options = options || ({} as any);
     this.context = context || ({} as Context);
     this.experiments = experiments || {};
@@ -121,10 +130,10 @@ class NodeContainerPlugin {
       runtime: this._options.runtime,
       shareScope: this._options.shareScope,
     };
-//    //TODO can use import meta mock object but need to update data structure of remote_scope
-//     if (compiler.options && compiler.options.output) {
-//       compiler.options.output.importMetaName = 'remoteContainerRegistry';
-//     }
+    //    //TODO can use import meta mock object but need to update data structure of remote_scope
+    //     if (compiler.options && compiler.options.output) {
+    //       compiler.options.output.importMetaName = 'remoteContainerRegistry';
+    //     }
 
     // const chunkFileName = compiler.options?.output?.chunkFilename;
     // const uniqueName =
@@ -137,11 +146,10 @@ class NodeContainerPlugin {
 
     new (this.context.ContainerPlugin ||
       (webpack && webpack.container.ContainerPlugin) ||
-      require('webpack/lib/container/ContainerPlugin'))(
-      pluginOptions
-    ).apply(compiler);
+      require('webpack/lib/container/ContainerPlugin'))(pluginOptions).apply(
+      compiler,
+    );
   }
 }
 
 export default NodeContainerPlugin;
-

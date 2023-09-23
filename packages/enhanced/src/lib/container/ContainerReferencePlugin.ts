@@ -14,12 +14,10 @@ import RemoteRuntimeModule from './RemoteRuntimeModule';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
 import { parseOptions } from './options';
 //@ts-ignore
-import ExternalsPlugin = require('webpack/lib/ExternalsPlugin')
+import ExternalsPlugin = require('webpack/lib/ExternalsPlugin');
 
 import type Compilation from 'webpack/lib/Compilation';
-import type {
-  ResolveData,
-} from 'webpack/lib/NormalModuleFactory';
+import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
 import NormalModuleFactory = require('webpack/lib/NormalModuleFactory');
 import {
   ExternalsType,
@@ -86,7 +84,7 @@ class ContainerReferencePlugin {
         i++;
       }
     }
-const Externals = compiler.webpack.ExternalsPlugin || ExternalsPlugin
+    const Externals = compiler.webpack.ExternalsPlugin || ExternalsPlugin;
     //@ts-ignore
     new Externals(remoteType, remoteExternals).apply(compiler);
 

@@ -5,7 +5,6 @@
  */
 'use strict';
 
-
 import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
@@ -173,23 +172,23 @@ export class NextFederationPlugin {
           // "next/":{
           //   singleton: true,
           // },
-          "react/": {
+          'react/': {
             singleton: true,
             requiredVersion: false,
           },
-          "react":{
+          react: {
             singleton: true,
             requiredVersion: false,
           },
-          "react-dom": {
+          'react-dom': {
             singleton: true,
             requiredVersion: false,
           },
-          "react-dom/": {
+          'react-dom/': {
             eager: false,
             singleton: true,
             requiredVersion: false,
-          }
+          },
         },
       }).apply(compiler);
       //@ts-ignore
@@ -199,23 +198,23 @@ export class NextFederationPlugin {
           // "next/":{
           //   singleton: true,
           // },
-          "react/": {
+          'react/': {
             singleton: true,
             requiredVersion: false,
           },
-          "react":{
+          react: {
             singleton: true,
             requiredVersion: false,
           },
-          "react-dom": {
+          'react-dom': {
             singleton: true,
             requiredVersion: false,
           },
-          "react-dom/": {
+          'react-dom/': {
             eager: false,
             singleton: true,
             requiredVersion: false,
-          }
+          },
         },
       }).apply(compiler);
       return;

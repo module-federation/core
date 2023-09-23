@@ -159,20 +159,24 @@ class InvertedContainerPlugin {
               typeof startupRendercontext.chunk.id === 'string'
                 ? JSON.stringify(startupRendercontext.chunk.id)
                 : startupRendercontext.chunk.id;
-                const entries = Array.from(
-                  chunkGraph.getChunkEntryModulesWithChunkGroupIterable(startupRendercontext.chunk)
-                );
-                const dependentChunkIds = new Set(entries
-                  .filter(([module, entrypoint]) => entrypoint !== undefined)
-                  .flatMap(([module, entrypoint]) => {
-                    if (entrypoint) {
-                      const runtimeChunk = entrypoint.getRuntimeChunk();
-                      //@ts-ignore
-                      const chunks = getAllChunks(entrypoint,runtimeChunk);
-                      return Array.from(chunks, c => c.id);
-                    }
-                    return [];
-                  }));
+            const entries = Array.from(
+              chunkGraph.getChunkEntryModulesWithChunkGroupIterable(
+                startupRendercontext.chunk,
+              ),
+            );
+            const dependentChunkIds = new Set(
+              entries
+                .filter(([module, entrypoint]) => entrypoint !== undefined)
+                .flatMap(([module, entrypoint]) => {
+                  if (entrypoint) {
+                    const runtimeChunk = entrypoint.getRuntimeChunk();
+                    //@ts-ignore
+                    const chunks = getAllChunks(entrypoint, runtimeChunk);
+                    return Array.from(chunks, (c) => c.id);
+                  }
+                  return [];
+                }),
+            );
             return Template.asString([
               webpack_exec.replace(
                 '__webpack_exec__',
@@ -181,7 +185,9 @@ class InvertedContainerPlugin {
               'globalThis.ongoingRemotes = globalThis.ongoingRemotes || [];',
               `var __webpack_exec__ = async function() {`,
               Template.indent([
-                `var chunkids = ${JSON.stringify(Array.from(dependentChunkIds))};`,
+                `var chunkids = ${JSON.stringify(
+                  Array.from(dependentChunkIds),
+                )};`,
                 `chunkids.forEach((id) => ${RuntimeGlobals.ensureChunkHandlers}.consumes(id, globalThis.ongoingRemotes));`,
                 `await Promise.all(globalThis.ongoingRemotes);`,
                 'console.log("waiting for consume", globalThis.ongoingRemotes);',
@@ -191,7 +197,7 @@ class InvertedContainerPlugin {
                 `return  __original_webpack_exec__.apply(this, arguments);`,
               ]),
               `};`,
-             // 'debugger',
+              // 'debugger',
               ...webpack_exports,
             ]);
           },

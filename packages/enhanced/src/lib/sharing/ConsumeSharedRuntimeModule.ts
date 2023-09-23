@@ -74,7 +74,10 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
         );
       }
     };
-    const allChunks = [...(this.chunk?.getAllAsyncChunks() || []), ...(this.chunk?.getAllInitialChunks() || [])];
+    const allChunks = [
+      ...(this.chunk?.getAllAsyncChunks() || []),
+      ...(this.chunk?.getAllInitialChunks() || []),
+    ];
     for (const chunk of allChunks) {
       const modules = chunkGraph.getChunkModulesIterableBySourceType(
         chunk,
@@ -89,7 +92,7 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
         (chunkToModuleMapping[chunk.id.toString()] = []),
       );
     }
-    for (const chunk of [...this.chunk?.getAllInitialChunks()||[]]) {
+    for (const chunk of [...(this.chunk?.getAllInitialChunks() || [])]) {
       const modules = chunkGraph.getChunkModulesIterableBySourceType(
         chunk,
         'consume-shared',

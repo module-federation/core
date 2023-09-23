@@ -112,9 +112,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         '__webpack_require__.initConsumes = __webpack_require__.initConsumes || [];',
         '__webpack_require__.initRemotes = __webpack_require__.initRemotes || [];',
         '__webpack_require__.installedModules = {};',
-        true
-          ? "console.debug('share scope', __webpack_require__.S);"
-          : '',
+        true ? "console.debug('share scope', __webpack_require__.S);" : '',
         `if(${containerScope} === undefined) {`,
         this.options.debug
           ? `console.debug('container scope is empty, initializing');`

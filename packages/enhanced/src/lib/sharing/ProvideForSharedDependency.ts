@@ -4,7 +4,7 @@
 */
 
 import ModuleDependency = require('webpack/lib/dependencies/ModuleDependency');
-import makeSerializable =  require('webpack/lib/util/makeSerializable');
+import makeSerializable = require('webpack/lib/util/makeSerializable');
 
 class ProvideForSharedDependency extends ModuleDependency {
   /**

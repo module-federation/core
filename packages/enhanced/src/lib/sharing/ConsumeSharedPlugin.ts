@@ -10,7 +10,11 @@ import { ConsumeOptions } from './ConsumeSharedModule';
 import { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
 import { parseRange } from 'webpack/lib/util/semver';
 import { resolveMatchedConfigs } from './resolveMatchedConfigs';
-import { isRequiredVersion, getDescriptionFile, getRequiredVersionFromDescriptionFile } from './utils';
+import {
+  isRequiredVersion,
+  getDescriptionFile,
+  getRequiredVersionFromDescriptionFile,
+} from './utils';
 
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import ConsumeSharedModule from './ConsumeSharedModule';

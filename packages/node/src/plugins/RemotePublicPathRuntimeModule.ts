@@ -52,16 +52,15 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
     const ident = Template.toIdentifier(uniqueName || '');
 
     // Define potential lookup keys
-    const potentialLookups = [
-      this.chunk?.name,
-      ident,
-      uniqueName
-    ];
+    const potentialLookups = [this.chunk?.name, ident, uniqueName];
 
     // Generate lookup string using potential keys
-    const lookupString = potentialLookups.filter(Boolean).map((lookup) => {
-      return `remoteReg[${JSON.stringify(lookup)}]`;
-    }).join(' || ');
+    const lookupString = potentialLookups
+      .filter(Boolean)
+      .map((lookup) => {
+        return `remoteReg[${JSON.stringify(lookup)}]`;
+      })
+      .join(' || ');
 
     return Template.asString([
       'var scriptUrl;',
@@ -76,42 +75,46 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
       `,
 
       ['module', 'node', 'async-node', 'require'].includes(scriptType || '') ||
-      chunkLoading ?
-        Template.asString([
-          'try {',
-          Template.indent([
-            `scriptUrl = new Function('return typeof ${importMetaName}.url === "string" ? ${importMetaName}.url : undefined;')();`,
-          ]),
-          '} catch (e) {',
-          Template.indent([
-            'if (typeof remoteContainerRegistry.url === "string") {',
-            Template.indent('scriptUrl = remoteContainerRegistry.url;'),
-            '} else if(typeof __filename !== "undefined") {',
-            Template.indent('scriptUrl = __filename;'),
-            '} else {',
+      chunkLoading
+        ? Template.asString([
+            'try {',
             Template.indent([
-              `scriptUrl = ${publicPath !== 'auto' ? JSON.stringify(getPath()) : 'undefined'}`
+              `scriptUrl = new Function('return typeof ${importMetaName}.url === "string" ? ${importMetaName}.url : undefined;')();`,
             ]),
-           '}'
-          ]),
-          '}',
-        ]) :
-        Template.asString([
-          `if (${RuntimeGlobals.global}.importScripts) scriptUrl = ${RuntimeGlobals.global}.location + "";`,
-          `var document = ${RuntimeGlobals.global}.document;`,
-          'if (!scriptUrl && document) {',
-          Template.indent([
-            'if (document.currentScript)',
-            Template.indent('scriptUrl = document.currentScript.src'),
-            'if (!scriptUrl) {',
+            '} catch (e) {',
             Template.indent([
-              'var scripts = document.getElementsByTagName("script");',
-              'if(scripts.length) scriptUrl = scripts[scripts.length - 1].src',
+              'if (typeof remoteContainerRegistry.url === "string") {',
+              Template.indent('scriptUrl = remoteContainerRegistry.url;'),
+              '} else if(typeof __filename !== "undefined") {',
+              Template.indent('scriptUrl = __filename;'),
+              '} else {',
+              Template.indent([
+                `scriptUrl = ${
+                  publicPath !== 'auto'
+                    ? JSON.stringify(getPath())
+                    : 'undefined'
+                }`,
+              ]),
+              '}',
+            ]),
+            '}',
+          ])
+        : Template.asString([
+            `if (${RuntimeGlobals.global}.importScripts) scriptUrl = ${RuntimeGlobals.global}.location + "";`,
+            `var document = ${RuntimeGlobals.global}.document;`,
+            'if (!scriptUrl && document) {',
+            Template.indent([
+              'if (document.currentScript)',
+              Template.indent('scriptUrl = document.currentScript.src'),
+              'if (!scriptUrl) {',
+              Template.indent([
+                'var scripts = document.getElementsByTagName("script");',
+                'if(scripts.length) scriptUrl = scripts[scripts.length - 1].src',
+              ]),
+              '}',
             ]),
             '}',
           ]),
-          '}',
-        ]),
       // 'console.log(\'scriptUrl\', scriptUrl);',
       '// When supporting server environments where an automatic publicPath is not supported, you must specify an output.publicPath manually via configuration',
       '// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.',
@@ -129,4 +132,3 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
 }
 
 export default AutoPublicPathRuntimeModule;
-

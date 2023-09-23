@@ -3,9 +3,9 @@
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 
-import  AsyncDependenciesBlock = require('webpack/lib/AsyncDependenciesBlock');
+import AsyncDependenciesBlock = require('webpack/lib/AsyncDependenciesBlock');
 import Module = require('webpack/lib/Module');
-import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals'
+import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import makeSerializable = require('webpack/lib/util/makeSerializable');
 import type Compilation from 'webpack/lib/Compilation';
 import WebpackError from 'webpack/lib/WebpackError';
@@ -18,7 +18,7 @@ import type {
   RequestShortener,
   ResolverWithOptions,
   ObjectDeserializerContext,
-  ObjectSerializerContext
+  ObjectSerializerContext,
 } from 'webpack/lib/Module';
 import { InputFileSystem } from 'webpack/lib/util/fs';
 import ProvideForSharedDependency from './ProvideForSharedDependency';

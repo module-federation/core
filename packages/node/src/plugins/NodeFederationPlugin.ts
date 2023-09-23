@@ -4,7 +4,8 @@ import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
 //@ts-ignore
-const ModuleInfoPlugin = require('@module-federation/enhanced/src/runtime/ModuleInfoRuntimePlugin').default
+const ModuleInfoPlugin =
+  require('@module-federation/enhanced/src/runtime/ModuleInfoRuntimePlugin').default;
 
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
@@ -114,7 +115,7 @@ class NodeFederationPlugin {
     { experiments, debug, ...options }: NodeFederationOptions,
     context: Context,
   ) {
-    console.log('NODE FEDERATION PLUGIN', context)
+    console.log('NODE FEDERATION PLUGIN', context);
     this._options = options || ({} as ModuleFederationPluginOptions);
     this.context = context || ({} as Context);
     this.experiments = experiments || {};
@@ -128,7 +129,6 @@ class NodeFederationPlugin {
   apply(compiler: Compiler) {
     // When used with Next.js, context is needed to use Next.js webpack
     const { webpack } = compiler;
-
 
     //TODO: module info runtime should be somewhere universal
     new ModuleInfoPlugin().apply(compiler);
@@ -159,7 +159,7 @@ class NodeFederationPlugin {
       );
     }
 
-    console.log('CONTXT', this.context.ModuleFederationPlugin)
+    console.log('CONTXT', this.context.ModuleFederationPlugin);
 
     new (this.context.ModuleFederationPlugin ||
       // (webpack && webpack.container.ModuleFederationPlugin) ||

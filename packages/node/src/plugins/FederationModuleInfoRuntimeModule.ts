@@ -14,11 +14,7 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
   override generate() {
     return Template.asString([
       `${RuntimeGlobals.require}.federation = {`,
-      Template.indent([
-        `cache: {},`,
-        `remotes: {},`,
-        `moduleInfo: {},`,
-      ]),
+      Template.indent([`cache: {},`, `remotes: {},`, `moduleInfo: {},`]),
       `};`,
       // `if (!globalThis.__remote_scopes__) {`,
       Template.indent([
@@ -33,11 +29,17 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
           'var result;',
           Template.indent([
             `if (prop === '_config') {`,
-            Template.indent([`result = ${RuntimeGlobals.require}.federation.remotes;`]),
+            Template.indent([
+              `result = ${RuntimeGlobals.require}.federation.remotes;`,
+            ]),
             `} else if(prop === 'moduleInfo') {`,
-            Template.indent([`result = ${RuntimeGlobals.require}.federation[prop];`]),
-             `} else {`,
-            Template.indent([`result = ${RuntimeGlobals.require}.federation.cache[prop];`]),
+            Template.indent([
+              `result = ${RuntimeGlobals.require}.federation[prop];`,
+            ]),
+            `} else {`,
+            Template.indent([
+              `result = ${RuntimeGlobals.require}.federation.cache[prop];`,
+            ]),
             `}`,
             'return result;',
           ]),
@@ -61,12 +63,14 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
 
         Template.indent([
           `for (let key in oldScope._config) {`,
-          Template.indent([`globalThis.__remote_scope__._config[key] = oldScope[key];`]),
+          Template.indent([
+            `globalThis.__remote_scope__._config[key] = oldScope[key];`,
+          ]),
           `}`,
           `for (let key in oldScope) {`,
           Template.indent([
             'if(key === "_config") continue;',
-            `globalThis.__remote_scope__[key] = oldScope[key];`
+            `globalThis.__remote_scope__[key] = oldScope[key];`,
           ]),
           `}`,
         ]),

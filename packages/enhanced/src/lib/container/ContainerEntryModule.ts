@@ -10,12 +10,21 @@ import Template = require('webpack/lib/Template');
 import Module = require('webpack/lib/Module');
 import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import { OriginalSource, RawSource } from 'webpack-sources';
-import {JAVASCRIPT_MODULE_TYPE_DYNAMIC} from 'webpack/lib/ModuleTypeConstants';
+import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from 'webpack/lib/ModuleTypeConstants';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import StaticExportsDependency = require('webpack/lib/dependencies/StaticExportsDependency');
 import type Compilation from 'webpack/lib/Compilation';
-import type {LibIdentOptions, NeedBuildContext, RequestShortener, ObjectDeserializerContext,ObjectSerializerContext, WebpackOptions, InputFileSystem, ResolverWithOptions} from 'webpack/lib/Module';
-import type WebpackError  from 'webpack/lib/WebpackError';
+import type {
+  LibIdentOptions,
+  NeedBuildContext,
+  RequestShortener,
+  ObjectDeserializerContext,
+  ObjectSerializerContext,
+  WebpackOptions,
+  InputFileSystem,
+  ResolverWithOptions,
+} from 'webpack/lib/Module';
+import type WebpackError from 'webpack/lib/WebpackError';
 
 import makeSerializable = require('webpack/lib/util/makeSerializable');
 
