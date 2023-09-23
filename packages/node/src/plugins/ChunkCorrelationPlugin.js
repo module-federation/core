@@ -103,7 +103,7 @@ function getExposed(stats, mod) {
     [chunk.id]: {
       files: chunk.files.map(
         (f) =>
-          `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
+          `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`,
       ),
       requiredModules: dependencies,
     },
@@ -143,7 +143,7 @@ function searchIssuerAndReason(mod, check) {
     return foundIssuer;
   }
   return searchReason(mod, (reason) =>
-    reason.some((r) => check(r?.moduleIdentifier))
+    reason.some((r) => check(r?.moduleIdentifier)),
   );
 }
 
@@ -171,7 +171,7 @@ function getIssuersAndReasons(mod, check) {
   if (
     mod.reasons &&
     searchReason(mod, (reason) =>
-      reason.some((r) => check(r?.moduleIdentifier))
+      reason.some((r) => check(r?.moduleIdentifier)),
     )
   ) {
     return mod.reasons
@@ -238,7 +238,7 @@ function getSharedModules(stats, federationPlugin) {
         return false;
       }
       return stats.entrypoints[federationPlugin.name].chunks.some(
-        (id) => chunk.id === id
+        (id) => chunk.id === id,
       );
     }),
     (chunk) =>
@@ -249,30 +249,32 @@ function getSharedModules(stats, federationPlugin) {
             c.files.length > 0 &&
             c.parents.some((p) =>
               stats.entrypoints[federationPlugin.name].chunks.some(
-                (c) => c === p
-              )
+                (c) => c === p,
+              ),
             ) &&
             c.modules.some((m) =>
               searchIssuer(m, (issuer) =>
-                issuer?.startsWith('consume-shared-module')
-              )
-            )
-        )
-      )
+                issuer?.startsWith('consume-shared-module'),
+              ),
+            ),
+        ),
+      ),
   )
     .map((chunk) => ({
       chunks: chunk.files.map(
         (f) =>
-          `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
+          `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`,
       ),
       provides: flatMap(
         chunk.modules.filter((m) =>
           searchIssuer(m, (issuer) =>
-            issuer?.startsWith('consume-shared-module')
-          )
+            issuer?.startsWith('consume-shared-module'),
+          ),
         ),
         (m) =>
-          getIssuers(m, (issuer) => issuer?.startsWith('consume-shared-module'))
+          getIssuers(m, (issuer) =>
+            issuer?.startsWith('consume-shared-module'),
+          ),
       )
         .map(parseFederatedIssuer)
         .filter((f) => !!f),
@@ -287,7 +289,7 @@ function getSharedModules(stats, federationPlugin) {
 function getMainSharedModules(stats) {
   const chunks = stats.namedChunkGroups['main']
     ? flatMap(stats.namedChunkGroups['main'].chunks, (c) =>
-        stats.chunks.filter((chunk) => chunk.id === c)
+        stats.chunks.filter((chunk) => chunk.id === c),
       )
     : [];
 
@@ -299,29 +301,29 @@ function getMainSharedModules(stats) {
           c.files.length > 0 &&
           c.modules.some((m) => {
             return searchIssuerAndReason(m, (check) =>
-              check?.startsWith('consume-shared-module')
+              check?.startsWith('consume-shared-module'),
             );
           })
         );
-      })
-    )
+      }),
+    ),
   )
     .map((chunk) => {
       return {
         chunks: chunk.files.map(
           (f) =>
-            `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`
+            `${stats.publicPath === 'auto' ? '' : stats.publicPath || ''}${f}`,
         ),
         provides: flatMap(
           chunk.modules.filter((m) =>
             searchIssuerAndReason(m, (check) =>
-              check?.startsWith('consume-shared-module')
-            )
+              check?.startsWith('consume-shared-module'),
+            ),
           ),
           (m) =>
             getIssuersAndReasons(m, (issuer) =>
-              issuer?.startsWith('consume-shared-module')
-            )
+              issuer?.startsWith('consume-shared-module'),
+            ),
         )
           .map(parseFederatedIssuer)
           .filter((f) => !!f),
@@ -342,7 +344,7 @@ function getFederationStats(stats, federationPluginOptions) {
       Object.assign(exposedModules, {
         [exposedAs]: getExposedModules(stats, exposedFile),
       }),
-    {}
+    {},
   );
 
   /** @type {{ [key: string]: Exposed }} */
@@ -351,7 +353,7 @@ function getFederationStats(stats, federationPluginOptions) {
       Object.assign(exposedChunks, {
         [exposedAs]: flatMap(exposedModules, (mod) => getExposed(stats, mod)),
       }),
-    {}
+    {},
   );
 
   /** @type {string} */
@@ -407,7 +409,7 @@ class FederationStatsPlugin {
           'UniversalFederationPlugin',
           'NodeFederationPlugin',
           'ModuleFederationPlugin',
-        ].includes(plugin.constructor.name) && plugin?._options?.exposes
+        ].includes(plugin.constructor.name) && plugin?._options?.exposes,
     );
 
     if (!federationPlugins || federationPlugins.length === 0) {
@@ -427,7 +429,7 @@ class FederationStatsPlugin {
         () => {
           // Extract the options from the federation plugins.
           const [federationOpts] = federationPlugins.map(
-            (federationPlugin) => federationPlugin?._options
+            (federationPlugin) => federationPlugin?._options,
           );
 
           let container;
@@ -450,10 +452,10 @@ class FederationStatsPlugin {
 
           // Get the module associated with the chunk.
           const [containerEntryModule] = Array.from(
-            compilation.chunkGraph.getChunkEntryModulesIterable(container)
+            compilation.chunkGraph.getChunkEntryModulesIterable(container),
           );
 
-          const {blocks} = containerEntryModule;
+          const { blocks } = containerEntryModule;
 
           const exposedResolved = {};
           const builtExposes = {};
@@ -470,6 +472,7 @@ class FederationStatsPlugin {
                 continue;
               }
               const { module } = connection;
+
               const moduleChunks =
                 compilation.chunkGraph.getModuleChunksIterable(module);
               // Iterate over each chunk associated with the module.
@@ -482,7 +485,7 @@ class FederationStatsPlugin {
 
                 // Check if the chunk is meant for the same runtime as the entry module.
                 const isForThisRuntime = runtime.has(
-                  containerEntryModule._name
+                  containerEntryModule._name,
                 );
 
                 // Get the root modules for the chunk.
@@ -581,7 +584,7 @@ class FederationStatsPlugin {
           } else {
             compilation.emitAsset(filename, statsSource);
           }
-        }
+        },
       );
     });
   }

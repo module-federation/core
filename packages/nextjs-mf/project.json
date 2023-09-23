@@ -6,16 +6,12 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/nextjs-mf",
         "main": "packages/nextjs-mf/src/index.js",
         "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
-        "assets": [
-          "packages/nextjs-mf/*.md"
-        ]
+        "assets": ["packages/nextjs-mf/*.md"]
       },
       "dependsOn": [
         {
@@ -41,20 +37,14 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/nextjs-mf/**/*.js"
-        ]
+        "lintFilePatterns": ["packages/nextjs-mf/**/*.js"]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/packages/nextjs-mf"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/nextjs-mf"],
       "options": {
         "jestConfig": "packages/nextjs-mf/jest.config.js",
         "passWithNoTests": true
@@ -63,10 +53,7 @@
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": [
-          "nextjs-mf:npm",
-          "nextjs-mf:github"
-        ],
+        "postTargets": ["nextjs-mf:npm", "nextjs-mf:github"],
         "trackDeps": true,
         "push": true
       }
@@ -87,8 +74,5 @@
     }
   },
   "tags": [],
-  "implicitDependencies": [
-    "utils",
-    "node"
-  ]
+  "implicitDependencies": ["utils", "node"]
 }

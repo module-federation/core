@@ -11,7 +11,7 @@ export type WebpackRequire = {
   l: (
     url: string | undefined,
     cb: (event: any) => void,
-    id: string | number
+    id: string | number,
   ) => Record<string, unknown>;
 };
 
@@ -33,7 +33,7 @@ export type GlobalScopeType = {
 
 
 export declare const __webpack_init_sharing__: (
-  parameter: string
+  parameter: string,
 ) => Promise<void>;
 
 export interface NextFederationPluginExtraOptions {

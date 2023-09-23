@@ -33,7 +33,7 @@ export function validateCompilerOptions(compiler: Compiler): boolean {
  * as they are required for using Module Federation.
  */
 export function validatePluginOptions(
-  options: ModuleFederationPluginOptions
+  options: ModuleFederationPluginOptions,
 ): void {
   // Throw an error if the filename option is not defined in the options
   if (!options.filename) {

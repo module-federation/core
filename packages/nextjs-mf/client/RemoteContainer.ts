@@ -43,10 +43,10 @@ export class RemoteContainer {
     if (!data) {
       console.error(
         `Cannot init RemoteContainer with following data`,
-        RemoteContainer
+        RemoteContainer,
       );
       throw Error(
-        '[nextjs-mf] RemoteContainer.createSingleton(remote) accepts string "shop@http://example.com/_next/static/chunks/remoteEntry.js" OR object { global: "shop", url: "http://example.com/_next/static/chunks/remoteEntry.js"}'
+        '[nextjs-mf] RemoteContainer.createSingleton(remote) accepts string "shop@http://example.com/_next/static/chunks/remoteEntry.js" OR object { global: "shop", url: "http://example.com/_next/static/chunks/remoteEntry.js"}',
       );
     }
 
@@ -140,7 +140,7 @@ export class RemoteContainer {
     } else {
       this.pageMap = {};
       console.warn(
-        `[nextjs-mf] Container ${this.global} does not expose "./pages-map-v2" module.`
+        `[nextjs-mf] Container ${this.global} does not expose "./pages-map-v2" module.`,
       );
     }
 

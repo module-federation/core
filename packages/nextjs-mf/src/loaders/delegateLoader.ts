@@ -10,7 +10,7 @@ import type { LoaderContext } from 'webpack';
  */
 export default function patchDefaultSharedLoader(
   this: LoaderContext<Record<string, unknown>>,
-  content: string
+  content: string,
 ) {
   const { delegates } = this.getOptions() as Record<string, string>;
 
@@ -30,7 +30,7 @@ export default function patchDefaultSharedLoader(
         this.context,
         this.utils.absolutify(this._compiler?.context || '', request) +
           '?' +
-          queries.join('&')
+          queries.join('&'),
       );
     }
     return request;

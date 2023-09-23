@@ -11,7 +11,7 @@ import { getScope } from './scopes';
  */
 export function registerContainer(
   asyncContainer: AsyncContainer,
-  remoteOptions: RemoteOptions
+  remoteOptions: RemoteOptions,
 ) {
   const globalScope = getScope();
   const containerKey = getContainerKey(remoteOptions);
@@ -38,7 +38,7 @@ export function getContainerKey(remoteOptions: string | RemoteOptions): string {
  */
 // @param remoteContainer -  Should string type be deprecated?
 export async function getContainer(
-  remoteContainer: string | RemoteOptions
+  remoteContainer: string | RemoteOptions,
 ): Promise<RemoteContainer | undefined> {
   const globalScope = getScope();
 
@@ -60,7 +60,7 @@ export async function getContainer(
  */
 export async function initContainer(
   asyncContainer: AsyncContainer,
-  sharedScope: SharedScope
+  sharedScope: SharedScope,
 ): Promise<RemoteContainer> {
   const remoteContainer = await asyncContainer;
 

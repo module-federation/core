@@ -35,7 +35,7 @@ export class FederatedTypesStatsPlugin {
           } else {
             compilation.emitAsset(typesIndexJsonFilePath, source);
           }
-        }
+        },
       );
     });
   }

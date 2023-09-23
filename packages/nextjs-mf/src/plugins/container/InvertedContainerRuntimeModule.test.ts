@@ -42,7 +42,7 @@ describe('InvertedContainerRuntimeModule', () => {
       },
       {
         webpack: compiler.webpack,
-      }
+      },
     );
 
     // Assign compilation and chunkGraph to runtimeModule for testing purposes

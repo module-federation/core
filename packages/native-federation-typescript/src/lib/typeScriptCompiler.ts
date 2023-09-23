@@ -10,49 +10,49 @@ const DEFINITION_FILE_EXTENSION = '.d.ts';
 
 const reportCompileDiagnostic = (diagnostic: typescript.Diagnostic): void => {
   const { line } = diagnostic.file!.getLineAndCharacterOfPosition(
-    diagnostic.start!
+    diagnostic.start!,
   );
 
   console.error(
     ansiColors.red(
       `TS Error ${diagnostic.code}':' ${typescript.flattenDiagnosticMessageText(
         diagnostic.messageText,
-        typescript.sys.newLine
-      )}`
-    )
+        typescript.sys.newLine,
+      )}`,
+    ),
   );
   console.error(
     ansiColors.red(
       `         at ${diagnostic.file!.fileName}:${
         line + 1
-      } typescript.sys.newLine`
-    )
+      } typescript.sys.newLine`,
+    ),
   );
 };
 
 export const retrieveMfTypesPath = (
   tsConfig: typescript.CompilerOptions,
-  remoteOptions: Required<RemoteOptions>
+  remoteOptions: Required<RemoteOptions>,
 ) => normalize(tsConfig.outDir!.replace(remoteOptions.compiledTypesFolder, ''));
 export const retrieveOriginalOutDir = (
   tsConfig: typescript.CompilerOptions,
-  remoteOptions: Required<RemoteOptions>
+  remoteOptions: Required<RemoteOptions>,
 ) =>
   normalize(
     tsConfig
       .outDir!.replace(remoteOptions.compiledTypesFolder, '')
-      .replace(remoteOptions.typesFolder, '')
+      .replace(remoteOptions.typesFolder, ''),
   );
 
 const createHost = (
   mapComponentsToExpose: Record<string, string>,
   tsConfig: typescript.CompilerOptions,
-  remoteOptions: Required<RemoteOptions>
+  remoteOptions: Required<RemoteOptions>,
 ) => {
   const host = typescript.createCompilerHost(tsConfig);
   const originalWriteFile = host.writeFile;
   const mapExposeToEntry = Object.fromEntries(
-    Object.entries(mapComponentsToExpose).map((entry) => entry.reverse())
+    Object.entries(mapComponentsToExpose).map((entry) => entry.reverse()),
   );
   const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);
 
@@ -62,7 +62,7 @@ const createHost = (
     writeOrderByteMark,
     onError,
     sourceFiles,
-    data
+    data,
   ) => {
     originalWriteFile(
       filepath,
@@ -70,7 +70,7 @@ const createHost = (
       writeOrderByteMark,
       onError,
       sourceFiles,
-      data
+      data,
     );
 
     for (const sourceFile of sourceFiles || []) {
@@ -78,7 +78,7 @@ const createHost = (
       if (sourceEntry) {
         const mfeTypeEntry = join(
           mfTypePath,
-          `${sourceEntry}${DEFINITION_FILE_EXTENSION}`
+          `${sourceEntry}${DEFINITION_FILE_EXTENSION}`,
         );
         const mfeTypeEntryDirectory = dirname(mfeTypeEntry);
         const relativePathToOutput = relative(mfeTypeEntryDirectory, filepath)
@@ -87,7 +87,7 @@ const createHost = (
         originalWriteFile(
           mfeTypeEntry,
           `export * from './${relativePathToOutput}';\nexport { default } from './${relativePathToOutput}';`,
-          writeOrderByteMark
+          writeOrderByteMark,
         );
       }
     }
@@ -97,7 +97,7 @@ const createHost = (
 };
 
 const createVueTscProgram = (
-  programOptions: typescript.CreateProgramOptions
+  programOptions: typescript.CreateProgramOptions,
 ) => {
   const vueTypescript = require('vue-tsc');
   return vueTypescript.createProgram(programOptions);
@@ -105,7 +105,7 @@ const createVueTscProgram = (
 
 const createProgram = (
   remoteOptions: Required<RemoteOptions>,
-  programOptions: typescript.CreateProgramOptions
+  programOptions: typescript.CreateProgramOptions,
 ) => {
   switch (remoteOptions.compilerInstance) {
     case 'vue-tsc':
@@ -119,7 +119,7 @@ const createProgram = (
 export const compileTs = (
   mapComponentsToExpose: Record<string, string>,
   tsConfig: typescript.CompilerOptions,
-  remoteOptions: Required<RemoteOptions>
+  remoteOptions: Required<RemoteOptions>,
 ) => {
   const tsHost = createHost(mapComponentsToExpose, tsConfig, remoteOptions);
   const filesToCompile = [

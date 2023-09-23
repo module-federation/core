@@ -15,8 +15,8 @@
   ],
   "author": "Fiodorov Andrei <hello@fyodorovandrei.com> (https://github.com/fyodorovandrei)",
   "devDependencies": {
-    "@storybook/core-common": "7.4.1",
-    "@storybook/node-logger": "7.4.1",
+    "@storybook/core-common": "7.4.2",
+    "@storybook/node-logger": "7.4.2",
     "webpack": "5.88.2",
     "webpack-virtual-modules": "0.5.0",
     "@module-federation/utilities": "3.0.0"

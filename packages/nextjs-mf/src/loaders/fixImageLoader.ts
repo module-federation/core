@@ -8,7 +8,7 @@ import path from 'path';
  * For server-side rendering (SSR), it injects the remote scope of a specific remote URL.
  * For client-side rendering (CSR), it injects the document.currentScript.src.
  * After these injections, it selects the full URI before _next.
- * 
+ *
  * @example
  * http://localhost:1234/test/test2/_next/static/media/ssl.e3019f0e.svg
  * will become
@@ -20,16 +20,16 @@ import path from 'path';
  */
 export async function fixImageLoader(
   this: LoaderContext<Record<string, unknown>>,
-  remaining: string
+  remaining: string,
 ) {
   this.cacheable(true);
 
   const isServer = this._compiler?.options.name !== 'client';
   //@ts-ignore
-  const {publicPath} = this._compiler?.webpack.RuntimeGlobals;
+  const { publicPath } = this._compiler?.webpack.RuntimeGlobals;
 
   const result = await this.importModule(
-    `${this.resourcePath}.webpack[javascript/auto]!=!${remaining}`
+    `${this.resourcePath}.webpack[javascript/auto]!=!${remaining}`,
   );
 
   const content = (result.default || result) as Record<string, string>;
@@ -65,7 +65,7 @@ export async function fixImageLoader(
           Template.indent([
             `if(typeof document === 'undefined')`,
             Template.indent(
-              `return ${publicPath} && ${publicPath}.indexOf('://') > 0 ? new URL(${publicPath}).origin : ''`
+              `return ${publicPath} && ${publicPath}.indexOf('://') > 0 ? new URL(${publicPath}).origin : ''`,
             ),
             `const path = (document.currentScript && document.currentScript.src) || new URL(${publicPath}).origin;`,
             `const splitted = path.split('/_next')`,
@@ -89,14 +89,14 @@ export async function fixImageLoader(
           value = path.join(value);
         }
         acc.push(
-          `${key}: computedAssetsPrefixReference + ${JSON.stringify(value)}`
+          `${key}: computedAssetsPrefixReference + ${JSON.stringify(value)}`,
         );
         return acc;
       }
       acc.push(`${key}: ${JSON.stringify(value)}`);
       return acc;
     },
-    [] as string[]
+    [] as string[],
   );
 
   return Template.asString([

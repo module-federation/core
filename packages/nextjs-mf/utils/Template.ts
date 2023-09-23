@@ -158,7 +158,7 @@ class Template {
       return (
         Template.numberToIdentifier(n % NUMBER_OF_IDENTIFIER_START_CHARS) +
         Template.numberToIdentifierContinuation(
-          Math.floor(n / NUMBER_OF_IDENTIFIER_START_CHARS)
+          Math.floor(n / NUMBER_OF_IDENTIFIER_START_CHARS),
         )
       );
     }
@@ -189,10 +189,10 @@ class Template {
       // use multiple letters
       return (
         Template.numberToIdentifierContinuation(
-          n % NUMBER_OF_IDENTIFIER_CONTINUATION_CHARS
+          n % NUMBER_OF_IDENTIFIER_CONTINUATION_CHARS,
         ) +
         Template.numberToIdentifierContinuation(
-          Math.floor(n / NUMBER_OF_IDENTIFIER_CONTINUATION_CHARS)
+          Math.floor(n / NUMBER_OF_IDENTIFIER_CONTINUATION_CHARS),
         )
       );
     }
@@ -283,7 +283,7 @@ class Template {
       if (typeof moduleId !== 'number') {
         return false;
       }
-      maxId = Math.max(maxId, moduleId)
+      maxId = Math.max(maxId, moduleId);
       minId = Math.min(minId, moduleId);
     }
     if (minId < 16 + ('' + minId).length) {
@@ -312,7 +312,7 @@ class Template {
     renderContext: { chunkGraph: any },
     modules: any[],
     renderModule: (arg0: any) => any,
-    prefix = ''
+    prefix = '',
   ) {
     const { chunkGraph } = renderContext;
     const source = new ConcatSource();
@@ -385,17 +385,17 @@ class Template {
       dependencyTemplates: any;
       moduleGraph: any;
       runtimeTemplate: { supportsArrowFunction: () => any };
-    }
+    },
   ) {
     const source = new ConcatSource();
     for (const module of runtimeModules) {
-      const {codeGenerationResults} = renderContext;
+      const { codeGenerationResults } = renderContext;
       let runtimeSource;
       if (codeGenerationResults) {
         runtimeSource = codeGenerationResults.getSource(
           module,
           renderContext.chunk.runtime,
-          'runtime'
+          'runtime',
         );
       } else {
         const codeGenResult = module.codeGeneration({
@@ -441,8 +441,8 @@ class Template {
       new ConcatSource(
         'function(__webpack_require__) { // webpackRuntimeModules\n',
         this.renderRuntimeModules(runtimeModules, renderContext),
-        '}\n'
-      )
+        '}\n',
+      ),
     );
   }
 }

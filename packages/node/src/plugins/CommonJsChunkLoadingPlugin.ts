@@ -62,7 +62,7 @@ class DynamicFilesystemChunkLoadingPlugin {
             chunk,
             new ChunkLoadingRuntimeModule(set, this.options, {
               webpack: compiler.webpack,
-            })
+            }),
           );
         };
         compilation.hooks.runtimeRequirementInTree

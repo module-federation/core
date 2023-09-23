@@ -25,7 +25,7 @@ export const NativeFederationTestsRemote = createUnplugin(
       async writeBundle() {
         const buildConfig = mergeRight(remoteOptions.additionalBundlerConfig, {
           external: externalDeps.map(
-            (externalDep) => new RegExp(`^${externalDep}`)
+            (externalDep) => new RegExp(`^${externalDep}`),
           ),
           entry: mapComponentsToExpose,
           outDir: compiledFilesFolder,
@@ -43,7 +43,7 @@ export const NativeFederationTestsRemote = createUnplugin(
           console.log(ansiColors.green('Federated mocks created correctly'));
         } catch (error) {
           console.error(
-            ansiColors.red(`Unable to build federated mocks: ${error}`)
+            ansiColors.red(`Unable to build federated mocks: ${error}`),
           );
         }
       },
@@ -54,11 +54,11 @@ export const NativeFederationTestsRemote = createUnplugin(
             static: {
               directory: resolve(remoteOptions.distFolder),
             },
-          }
+          },
         );
       },
     };
-  }
+  },
 );
 
 export const NativeFederationTestsHost = createUnplugin(
@@ -70,7 +70,7 @@ export const NativeFederationTestsHost = createUnplugin(
         if (hostOptions.deleteTestsFolder) {
           await cleanMocksFolder(
             hostOptions,
-            Object.keys(mapRemotesToDownload)
+            Object.keys(mapRemotesToDownload),
           );
         }
 
@@ -82,5 +82,5 @@ export const NativeFederationTestsHost = createUnplugin(
         console.log(ansiColors.green('Federated mocks extraction completed'));
       },
     };
-  }
+  },
 );

@@ -41,7 +41,7 @@ describe('archiveHandler', () => {
 
     it('throws for unexisting outDir', async () => {
       expect(
-        createTypesArchive({ ...tsConfig, outDir: '/foo' }, remoteOptions)
+        createTypesArchive({ ...tsConfig, outDir: '/foo' }, remoteOptions),
       ).rejects.toThrowError();
     });
   });
@@ -55,9 +55,9 @@ describe('archiveHandler', () => {
 
     it('throws for unexisting url', async () => {
       expect(
-        downloadTypesArchive(hostOptions)([tmpDir, 'https://foo.it'])
+        downloadTypesArchive(hostOptions)([tmpDir, 'https://foo.it']),
       ).rejects.toThrowError(
-        'Network error: Unable to download federated mocks'
+        'Network error: Unable to download federated mocks',
       );
       // .rejects.toThrowError('getaddrinfo ENOTFOUND foo.it')
     });
@@ -85,7 +85,10 @@ describe('archiveHandler', () => {
       axios.get = vi.fn().mockRejectedValueOnce({ message });
 
       expect(() =>
-        downloadTypesArchive(hostOptions)(['typesHostFolder', 'https://foo.it'])
+        downloadTypesArchive(hostOptions)([
+          'typesHostFolder',
+          'https://foo.it',
+        ]),
       ).rejects.toThrowError(message);
     });
   });

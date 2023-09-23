@@ -21,9 +21,7 @@
           "apps/reactStorybook/src/favicon.ico",
           "apps/reactStorybook/src/assets"
         ],
-        "styles": [
-          "apps/reactStorybook/src/styles.scss"
-        ],
+        "styles": ["apps/reactStorybook/src/styles.scss"],
         "scripts": [],
         "isolatedConfig": true,
         "webpackConfig": "apps/reactStorybook/webpack.config.js"
@@ -82,9 +80,7 @@
         "{options.outputFile}"
       ],
       "options": {
-        "lintFilePatterns": [
-          "apps/reactStorybook/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/reactStorybook/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "test": {

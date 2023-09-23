@@ -63,7 +63,7 @@ class UniversalFederationPlugin {
       new (this.context.ModuleFederationPlugin ||
         (webpack && webpack.container.ModuleFederationPlugin) ||
         require('webpack/lib/container/ModuleFederationPlugin'))(options).apply(
-        compiler
+        compiler,
       );
     }
   }
