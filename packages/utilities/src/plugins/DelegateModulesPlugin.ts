@@ -1,4 +1,4 @@
-import { Compiler, Compilation, Chunk, NormalModule } from 'webpack';
+import type { Compiler, Compilation, Chunk, NormalModule } from 'webpack';
 
 class DelegateModulesPlugin {
   options: { debug: boolean; [key: string]: any };

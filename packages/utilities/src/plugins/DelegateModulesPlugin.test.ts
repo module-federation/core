@@ -29,9 +29,9 @@ function createMockCompiler(): any {
       name: 'test-compiler',
     },
     hooks: {
-        thisCompilation: {
-          tap: jest.fn(),
-        },
+      thisCompilation: {
+        tap: jest.fn(),
+      },
       compilation: {
         tap: jest.fn(),
       },
@@ -87,7 +87,7 @@ describe('DelegateModulesPlugin', () => {
 
     expect(compiler.hooks.thisCompilation.tap).toHaveBeenCalledWith(
       'DelegateModulesPlugin',
-      expect.any(Function)
+      expect.any(Function),
     );
   });
 
@@ -107,7 +107,9 @@ describe('DelegateModulesPlugin', () => {
     plugin.apply(compiler);
 
     // Call the compilation tap function
-    (compiler.hooks.thisCompilation.tap as jest.Mock).mock.calls[0][1](compilation);
+    (compiler.hooks.thisCompilation.tap as jest.Mock).mock.calls[0][1](
+      compilation,
+    );
 
     // Call the finishModules tap function
     (compilation.hooks.finishModules.tapAsync as jest.Mock).mock.calls[0][1](
@@ -117,7 +119,7 @@ describe('DelegateModulesPlugin', () => {
         createMockModule('/path/to/non-delegate-module'),
       ],
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      () => {}
+      () => {},
     );
 
     // Check if delegate modules are added
@@ -131,12 +133,12 @@ describe('DelegateModulesPlugin', () => {
 
     // Check if connectChunkAndModule was called
     expect(compilation.chunkGraph.connectChunkAndModule).toHaveBeenCalledTimes(
-      8
+      8,
     );
 
     // Check if disconnectChunkAndModule was called
     expect(
-      compilation.chunkGraph.disconnectChunkAndModule
+      compilation.chunkGraph.disconnectChunkAndModule,
     ).toHaveBeenCalledTimes(2);
   });
 });

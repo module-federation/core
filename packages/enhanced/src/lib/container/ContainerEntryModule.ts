@@ -129,7 +129,7 @@ class ContainerEntryModule extends Module {
       topLevelDeclarations: new Set(['moduleMap', 'get', 'init']),
     };
     this.buildMeta.exportsType = 'namespace';
-//@ts-ignore
+    //@ts-ignore
     this.clearDependenciesAndBlocks();
 
     for (const [name, options] of this._exposes) {
@@ -147,7 +147,7 @@ class ContainerEntryModule extends Module {
           name,
           index: idx++,
         };
-//@ts-ignore
+        //@ts-ignore
         block.addDependency(dep);
       }
       //@ts-ignore
@@ -178,11 +178,11 @@ class ContainerEntryModule extends Module {
       RuntimeGlobals.exports,
     ]);
     const getters = [];
-//@ts-ignore
+    //@ts-ignore
     for (const block of this.blocks) {
       const { dependencies } = block;
 
-      const modules = dependencies.map((dependency:Dependency) => {
+      const modules = dependencies.map((dependency: Dependency) => {
         const dep = dependency as unknown as ContainerExposedDependency;
         return {
           name: dep.exposedName,
@@ -192,7 +192,7 @@ class ContainerEntryModule extends Module {
       });
 
       let str;
-//@ts-ignore
+      //@ts-ignore
       if (modules.some((m) => !m.module)) {
         str = runtimeTemplate.throwMissingModuleErrorBlock({
           //@ts-ignore
@@ -310,5 +310,3 @@ makeSerializable(
 );
 
 export default ContainerEntryModule;
-
-

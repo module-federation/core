@@ -1,4 +1,4 @@
-import { RuntimeGlobals, RuntimeModule, Template, javascript } from "webpack";
+import { RuntimeGlobals, RuntimeModule, Template, javascript } from 'webpack';
 //@ts-ignore
 import { getUndoPath } from 'webpack/lib/util/identifier';
 
@@ -6,7 +6,7 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
   private options: any;
 
   constructor(options: any) {
-    super("publicPath", RuntimeModule.STAGE_BASIC + 1);
+    super('publicPath', RuntimeModule.STAGE_BASIC + 1);
     this.options = options;
   }
 
@@ -117,19 +117,16 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
       '// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.',
       'if (!scriptUrl) throw new Error("Unable to calculate automatic public path");',
       'scriptUrl = scriptUrl.replace(/#.*$/, "").replace(/\\?.*$/, "").replace(/\\/[^\\/]+$/, "/");',
-      !undoPath ?
-        `${RuntimeGlobals.publicPath} = scriptUrl;` :
-        `${RuntimeGlobals.publicPath} = scriptUrl + ${JSON.stringify(
-          undoPath,
-        )};`,
-      'var addProtocol = (url)=> url.startsWith(\'//\') ? \'https:\' + url : url;',
+      !undoPath
+        ? `${RuntimeGlobals.publicPath} = scriptUrl;`
+        : `${RuntimeGlobals.publicPath} = scriptUrl + ${JSON.stringify(
+            undoPath,
+          )};`,
+      "var addProtocol = (url)=> url.startsWith('//') ? 'https:' + url : url;",
       `globalThis.currentVmokPublicPath = addProtocol(${RuntimeGlobals.publicPath}) || '/';`,
     ]);
   }
 }
 
 export default AutoPublicPathRuntimeModule;
-
-
-
 

@@ -6,10 +6,10 @@ import ChunkLoadingRuntimeModule from './DynamicFilesystemChunkLoadingRuntimeMod
 import FederationModuleInfoRuntimeModule from './FederationModuleInfoRuntimeModule';
 import AutoPublicPathRuntimeModule from './RemotePublicPathRuntimeModule';
 //@ts-ignore
-import PublicPathRuntimeModule from "webpack/lib/runtime/PublicPathRuntimeModule";
+import PublicPathRuntimeModule from 'webpack/lib/runtime/PublicPathRuntimeModule';
 
-
-interface DynamicFilesystemChunkLoadingOptions extends ModuleFederationPluginOptions {
+interface DynamicFilesystemChunkLoadingOptions
+  extends ModuleFederationPluginOptions {
   baseURI: Compiler['options']['output']['publicPath'];
   promiseBaseURI?: string;
   remotes: Record<string, string>;
@@ -35,7 +35,6 @@ class DynamicFilesystemChunkLoadingPlugin {
     new StartupChunkDependenciesPlugin({
       chunkLoading: chunkLoadingValue,
       asyncChunkLoading: this._asyncChunkLoading,
-      //@ts-ignore
     }).apply(compiler);
 
     compiler.hooks.thisCompilation.tap(
@@ -63,7 +62,7 @@ class DynamicFilesystemChunkLoadingPlugin {
             chunk,
             new ChunkLoadingRuntimeModule(set, this.options, {
               webpack: compiler.webpack,
-            })
+            }),
           );
         };
         compilation.hooks.runtimeRequirementInTree
@@ -93,7 +92,7 @@ class DynamicFilesystemChunkLoadingPlugin {
                 return;
               }
               set.add(RuntimeGlobals.getChunkScriptFilename);
-            }
+            },
           );
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadUpdateHandlers)
@@ -107,7 +106,7 @@ class DynamicFilesystemChunkLoadingPlugin {
               set.add(RuntimeGlobals.moduleCache);
               set.add(RuntimeGlobals.hmrModuleData);
               set.add(RuntimeGlobals.moduleFactoriesAddOnly);
-            }
+            },
           );
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadManifest)
@@ -118,12 +117,12 @@ class DynamicFilesystemChunkLoadingPlugin {
                 return;
               }
               set.add(RuntimeGlobals.getUpdateManifestFilename);
-            }
+            },
           );
 
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.publicPath)
-          .tap("RuntimePlugin", (chunk, set) => {
+          .tap('RuntimePlugin', (chunk, set) => {
             const { outputOptions } = compilation;
             const { publicPath: globalPublicPath, scriptType } = outputOptions;
             const entryOptions = chunk.getEntryOptions();
@@ -133,9 +132,12 @@ class DynamicFilesystemChunkLoadingPlugin {
                 : globalPublicPath;
 
             const module = new AutoPublicPathRuntimeModule(this.options);
-            if (publicPath === "auto" && scriptType !== "module") {
+            if (publicPath === 'auto' && scriptType !== 'module') {
               set.add(RuntimeGlobals.global);
-            } else if (typeof publicPath !== "string" || /\[(full)?hash\]/.test(publicPath)) {
+            } else if (
+              typeof publicPath !== 'string' ||
+              /\[(full)?hash\]/.test(publicPath)
+            ) {
               module.fullHash = true;
             }
 
@@ -143,27 +145,23 @@ class DynamicFilesystemChunkLoadingPlugin {
             return true;
           });
 
-
-
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'StartupChunkDependenciesPlugin',
           (
             chunk: Chunk,
             set: Set<string>,
-            { chunkGraph }: { chunkGraph: ChunkGraph }
+            { chunkGraph }: { chunkGraph: ChunkGraph },
           ) => {
             compilation.addRuntimeModule(
               chunk,
               //@ts-ignore
-              new FederationModuleInfoRuntimeModule()
+              new FederationModuleInfoRuntimeModule(),
             );
-          }
+          },
         );
-      }
+      },
     );
   }
 }
 
 export default DynamicFilesystemChunkLoadingPlugin;
-
-

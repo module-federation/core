@@ -46,20 +46,29 @@ interface Context {
  * @returns {Record<string, string>} - The parsed remotes.
  * */
 
-export const parseRemotes = (remotes: Record<string, any>): Record<string, string> => {
+export const parseRemotes = (
+  remotes: Record<string, any>,
+): Record<string, string> => {
   if (!remotes || typeof remotes !== 'object') {
     throw new Error('remotes must be an object');
   }
 
-  return Object.entries(remotes).reduce((acc: Record<string, string>, [key, value]) => {
-    const isInternal = value.startsWith('internal ');
-    const isGlobal = value.includes('@') && !['window.', 'global.', 'globalThis.','self.'].some(prefix => value.startsWith(prefix));
+  return Object.entries(remotes).reduce(
+    (acc: Record<string, string>, [key, value]) => {
+      const isInternal = value.startsWith('internal ');
+      const isGlobal =
+        value.includes('@') &&
+        !['window.', 'global.', 'globalThis.', 'self.'].some((prefix) =>
+          value.startsWith(prefix),
+        );
 
-    acc[key] = isInternal || !isGlobal ? value : parseRemoteSyntax(value);
+      acc[key] = isInternal || !isGlobal ? value : parseRemoteSyntax(value);
 
-    return acc;
-  }, {});
-}
+      return acc;
+    },
+    {},
+  );
+};
 /**
  * Parses the remote syntax and returns a formatted string if the remote includes '@' and does not start with 'window', 'global', or 'globalThis'.
  * Otherwise, it returns the original remote string.
@@ -75,13 +84,16 @@ export const parseRemoteSyntax = (remote: any): string => {
 
   if (remote.includes('@')) {
     const [url, global] = extractUrlAndGlobal(remote);
-    if (!['window.', 'global.', 'globalThis.'].some(prefix => global.startsWith(prefix))) {
+    if (
+      !['window.', 'global.', 'globalThis.'].some((prefix) =>
+        global.startsWith(prefix),
+      )
+    ) {
       return `globalThis.__remote_scope__.${global}@${url}`;
     }
   }
   return remote;
 };
-
 
 /**
  * Class representing a NodeFederationPlugin.
@@ -100,7 +112,7 @@ class NodeFederationPlugin {
    */
   constructor(
     { experiments, debug, ...options }: NodeFederationOptions,
-    context: Context
+    context: Context,
   ) {
     console.log('NODE FEDERATION PLUGIN', context)
     this._options = options || ({} as ModuleFederationPluginOptions);
@@ -122,9 +134,11 @@ class NodeFederationPlugin {
     new ModuleInfoPlugin().apply(compiler);
     const pluginOptions = {
       ...this._options,
-      remotes: this._options.remotes ? parseRemotes(this._options.remotes as Record<string, any>) : {},
+      remotes: this._options.remotes
+        ? parseRemotes(this._options.remotes as Record<string, any>)
+        : {},
     };
-   //TODO can use import meta mock object but need to update data structure of remote_scope
+    //TODO can use import meta mock object but need to update data structure of remote_scope
     if (compiler.options && compiler.options.output) {
       compiler.options.output.importMetaName = 'remoteContainerRegistry';
     }
@@ -133,9 +147,16 @@ class NodeFederationPlugin {
     const uniqueName =
       compiler?.options?.output?.uniqueName || this._options.name;
 
-    if (typeof chunkFileName === 'string' && uniqueName && !chunkFileName.includes(uniqueName)) {
+    if (
+      typeof chunkFileName === 'string' &&
+      uniqueName &&
+      !chunkFileName.includes(uniqueName)
+    ) {
       const suffix = `-[chunkhash].js`;
-      compiler.options.output.chunkFilename = chunkFileName.replace('.js', suffix);
+      compiler.options.output.chunkFilename = chunkFileName.replace(
+        '.js',
+        suffix,
+      );
     }
 
     console.log('CONTXT', this.context.ModuleFederationPlugin)
@@ -143,7 +164,7 @@ class NodeFederationPlugin {
     new (this.context.ModuleFederationPlugin ||
       // (webpack && webpack.container.ModuleFederationPlugin) ||
       require('webpack/lib/container/ModuleFederationPlugin'))(
-      pluginOptions
+      pluginOptions,
     ).apply(compiler);
   }
 }

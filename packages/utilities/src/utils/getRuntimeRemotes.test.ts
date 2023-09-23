@@ -68,7 +68,7 @@ xdescribe('getRuntimeRemotes', () => {
     // Check that console.warn was called with the correct message
     //@ts-ignore
     expect(console.warn.mock.calls[0][0]).toMatch(
-      /Unable to retrieve runtime remotes/
+      /Unable to retrieve runtime remotes/,
     );
     //@ts-ignore
     console.log(console.warn.mock.calls[0][1].message);

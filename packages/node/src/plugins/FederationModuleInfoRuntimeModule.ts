@@ -5,7 +5,7 @@ import { Template } from 'webpack';
 
 class FederationModuleInfoRuntimeModule extends RuntimeModule {
   constructor() {
-    super('federation module info runtime', RuntimeModule.STAGE_BASIC );
+    super('federation module info runtime', RuntimeModule.STAGE_BASIC);
   }
 
   /**
@@ -39,15 +39,19 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
              `} else {`,
             Template.indent([`result = ${RuntimeGlobals.require}.federation.cache[prop];`]),
             `}`,
-            'return result;'
+            'return result;',
           ]),
           `},`,
           `set: function(target, prop, value) {`,
           Template.indent([
             `if (prop === '_config') {`,
-            Template.indent([`${RuntimeGlobals.require}.federation.remotes = value;`]),
+            Template.indent([
+              `${RuntimeGlobals.require}.federation.remotes = value;`,
+            ]),
             `} else {`,
-            Template.indent([`${RuntimeGlobals.require}.federation.cache[prop] = value;`]),
+            Template.indent([
+              `${RuntimeGlobals.require}.federation.cache[prop] = value;`,
+            ]),
             `}`,
             `return true;`,
           ]),
@@ -74,4 +78,3 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
 }
 
 export default FederationModuleInfoRuntimeModule;
-

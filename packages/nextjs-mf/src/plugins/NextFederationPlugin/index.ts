@@ -1,4 +1,10 @@
+/**
+ * MIT License http://www.opensource.org/licenses/mit-license.php
+ * Author Zackary Jackson @ScriptedAlchemy
+ * This module contains the NextFederationPlugin class which is a webpack plugin that handles Next.js application federation using Module Federation.
+ */
 'use strict';
+
 
 import type {
   ModuleFederationPluginOptions,
@@ -31,16 +37,28 @@ import {
 } from './apply-server-plugins';
 import { applyClientPlugins } from './apply-client-plugins';
 
+/**
+ * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
+ */
 export class NextFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
 
+  /**
+   * Constructs the NextFederationPlugin with the provided options.
+   *
+   * @param options The options to configure the plugin.
+   */
   constructor(options: NextFederationPluginOptions) {
     const { mainOptions, extraOptions } = setOptions(options);
     this._options = mainOptions;
     this._extraOptions = extraOptions;
   }
 
+  /**
+   * The apply method is called by the webpack compiler and allows the plugin to hook into the webpack process.
+   * @param compiler The webpack compiler object.
+   */
   apply(compiler: Compiler) {
     if (!this.validateOptions(compiler)) return;
     console.log('applying');
@@ -79,7 +97,7 @@ export class NextFederationPlugin {
   }
 
   private applyConditionalPlugins(compiler: Compiler, isServer: boolean) {
-    compiler.options.output.uniqueName = this._options.name; 
+    compiler.options.output.uniqueName = this._options.name;
     if (isServer) {
       configureServerCompilerOptions(compiler);
       configureServerLibraryAndFilename(this._options);
@@ -243,4 +261,7 @@ export class NextFederationPlugin {
   }
 }
 
+/**
+ * Exporting NextFederationPlugin as default
+ */
 export default NextFederationPlugin;

@@ -20,6 +20,7 @@ import { parseOptions } from 'webpack/lib/container/options';
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/dynamic': {
     eager: false,
+    requiredVersion: false,
     singleton: true,
     import: undefined,
   },
@@ -30,6 +31,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     import: undefined,
   },
   'next/link': {
+    eager: true,
     requiredVersion: false,
     singleton: true,
     import: undefined,
@@ -37,8 +39,8 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/router': {
     requiredVersion: false,
     singleton: true,
-    import: undefined,
-    eager: true,
+    import: false,
+    eager: false,
   },
   'next/image': {
     requiredVersion: false,
@@ -55,13 +57,13 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   react: {
     singleton: true,
     requiredVersion: false,
-    eager: true,
+    eager: false,
     import: false,
   },
   'react-dom': {
     singleton: true,
     requiredVersion: false,
-    eager: true,
+    eager: false,
     import: false,
   },
   'react/jsx-dev-runtime': {
@@ -109,7 +111,7 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
   const eager = ['react', 'react-dom', 'next/router', 'next/link'].some(
     (k) => k === key,
   )
-    ? false
+    ? true
     : undefined;
 
   // Set eager and import to undefined for all entries, except for the ones specified above

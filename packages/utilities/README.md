@@ -59,10 +59,10 @@ importRemote({
   (
     {
       /* list of Bar exports */
-    }
+    },
   ) => {
     // Use Bar exports
-  }
+  },
 );
 
 // If Bar is a React component you can use it with lazy and Suspense just like a dynamic import:
@@ -87,10 +87,10 @@ importRemote({
   (
     {
       /* list of Bar exports */
-    }
+    },
   ) => {
     // Use Bar exports
-  }
+  },
 );
 
 // If Bar is a React component you can use it with lazy and Suspense just like a dynamic import:
@@ -99,7 +99,7 @@ const Bar = lazy(() =>
     url: () => MyAsyncMethod('remote_name'),
     scope: 'Foo',
     module: 'Bar',
-  })
+  }),
 );
 
 return (

@@ -2,14 +2,14 @@ export async function fileSystemRunInContextStrategy(
   chunkId,
   rootOutputDir,
   remotes,
-  callback
+  callback,
 ) {
   const fs = require('fs');
   const path = require('path');
   const vm = require('vm');
   const filename = path.join(
     __dirname,
-    rootOutputDir + __webpack_require__.u(chunkId)
+    rootOutputDir + __webpack_require__.u(chunkId),
   );
   if (fs.existsSync(filename)) {
     fs.readFile(filename, 'utf-8', (err, content) => {
@@ -23,7 +23,7 @@ export async function fileSystemRunInContextStrategy(
           '(function(exports, require, __dirname, __filename) {' +
             content +
             '\n})',
-          filename
+          filename,
         )(chunk, require, path.dirname(filename), filename);
         callback(null, chunk);
       } catch (e) {
@@ -42,13 +42,19 @@ export async function httpEvalStrategy(
   chunkName,
   remoteName,
   remotes,
-  callback
+  callback,
 ) {
   let url;
   try {
-    url = new URL(chunkName,__webpack_require__.p);
-  } catch(e) {
-    console.error('module-federation: failed to construct absolute chunk path of',remoteName,'for',chunkName, e);
+    url = new URL(chunkName, __webpack_require__.p);
+  } catch (e) {
+    console.error(
+      'module-federation: failed to construct absolute chunk path of',
+      remoteName,
+      'for',
+      chunkName,
+      e,
+    );
     url = new URL(remotes[remoteName]);
     const getBasenameFromUrl = (url) => {
       const urlParts = url.split('/');
@@ -65,7 +71,7 @@ export async function httpEvalStrategy(
 
     eval(
       '(function(exports, require, __dirname, __filename) {' + data + '\n})',
-      chunkName
+      chunkName,
     )(chunk, require, urlDirname, chunkName);
     callback(null, chunk);
   } catch (e) {
@@ -89,8 +95,14 @@ export async function httpVmStrategy(chunkName, remoteName, remotes, callback) {
   let url;
   try {
     url = new URL(chunkName, __webpack_require__.p);
-  } catch(e) {
-    console.error('module-federation: failed to construct absolute chunk path of',remoteName,'for',chunkName, e);
+  } catch (e) {
+    console.error(
+      'module-federation: failed to construct absolute chunk path of',
+      remoteName,
+      'for',
+      chunkName,
+      e,
+    );
     url = new URL(remotes._config[remoteName]);
     const fileToReplace = path.basename(url.pathname);
     url.pathname = url.pathname.replace(fileToReplace, chunkName);
@@ -108,7 +120,7 @@ export async function httpVmStrategy(chunkName, remoteName, remotes, callback) {
 
       vm.runInThisContext(
         '(function(exports, require, __dirname, __filename) {' + data + '\n})',
-        chunkName
+        chunkName,
       )(chunk, require, urlDirname, chunkName);
       callback(null, chunk);
     });
