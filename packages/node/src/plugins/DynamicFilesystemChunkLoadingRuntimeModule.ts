@@ -2,9 +2,9 @@
   MIT License http://www.opensource.org/licenses/mit-license.php
 */
 import type { Chunk, ChunkGraph, Compiler } from 'webpack';
-import { RuntimeModule, RuntimeGlobals, Template  } from 'webpack';
+import { RuntimeModule, RuntimeGlobals, Template } from 'webpack';
 import { getUndoPath } from 'webpack/lib/util/identifier';
-import {SyncWaterfallHook} from 'tapable'
+import { SyncWaterfallHook } from 'tapable';
 import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
 import {
   generateHmrCode,
@@ -14,7 +14,7 @@ import {
   handleOnChunkLoad,
   generateLoadScript,
   generateInstallChunk,
-  generateExternalInstallChunkCode
+  generateExternalInstallChunkCode,
 } from './webpackChunkUtilities';
 import {
   fileSystemRunInContextStrategy,
@@ -64,7 +64,7 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
   constructor(
     runtimeRequirements: Set<string>,
     options: DynamicFilesystemChunkLoadingRuntimeModuleOptions,
-    chunkLoadingContext: ChunkLoadingContext
+    chunkLoadingContext: ChunkLoadingContext,
   ) {
     super('readFile chunk loading', RuntimeModule.STAGE_ATTACH + 1);
     this.runtimeRequirements = runtimeRequirements;
@@ -104,24 +104,24 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
     return `console.log(${items.join(',')});`;
   }
 
-
   /**
    * @returns {string} runtime code
    */
-  override generate() { const { remotes = {}, name } = this.options;
-  const { webpack } = this.chunkLoadingContext;
-  const { chunkGraph, chunk, compilation } = this;
+  override generate() {
+    const { remotes = {}, name } = this.options;
+    const { webpack } = this.chunkLoadingContext;
+    const { chunkGraph, chunk, compilation } = this;
 
-  if (!chunkGraph || !chunk || !compilation) {
-    console.warn('Missing required properties. Returning empty string.');
-    return '';
-  }
+    if (!chunkGraph || !chunk || !compilation) {
+      console.warn('Missing required properties. Returning empty string.');
+      return '';
+    }
 
     const { runtimeTemplate } = compilation;
     const jsModulePlugin =
       webpack?.javascript?.JavascriptModulesPlugin ||
       require('webpack/lib/javascript/JavascriptModulesPlugin');
-    const {chunkHasJs} = jsModulePlugin;
+    const { chunkHasJs } = jsModulePlugin;
     const fn = RuntimeGlobals.ensureChunkHandlers;
 
     const conditionMap = chunkGraph.getChunkConditionMap(chunk, chunkHasJs);
@@ -130,15 +130,15 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
 
     const outputName = compilation.getPath(
       jsModulePlugin.getChunkFilenameTemplate(chunk, compilation.outputOptions),
-      { chunk, contentHashType: 'javascript' }
+      { chunk, contentHashType: 'javascript' },
     );
     const rootOutputDir = getUndoPath(
       outputName,
       compilation.outputOptions.path,
-      false
+      false,
     );
     const stateExpression = this.runtimeRequirements.has(
-      RuntimeGlobals.hmrDownloadUpdateHandlers
+      RuntimeGlobals.hmrDownloadUpdateHandlers,
     )
       ? `${RuntimeGlobals.hmrRuntimeStatePrefix}_readFileVm`
       : undefined;
@@ -154,19 +154,24 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
           'case "filesystem": return await fileSystemRunInContextStrategy(chunkId,rootOutputDir, remotes, callback);',
           'case "http-eval": return await httpEvalStrategy(chunkId,rootOutputDir, remotes, callback);',
           'case "http-vm": return await httpVmStrategy(chunkId,rootOutputDir, remotes, callback);',
-          this.hooks.strategyCase.call('default: throw new Error("Invalid strategy type");') as string,
+          this.hooks.strategyCase.call(
+            'default: throw new Error("Invalid strategy type");',
+          ) as string,
         ]),
         '}',
       ]),
-      '};'
+      '};',
     ]);
 
     const remoteRegistry = Template.asString([
       `const remotesRegistry = ${JSON.stringify(
-        Object.entries(remotes).reduce((registry, [global, url]) => {
-          registry[global] = url.split('@')[1];
-          return registry;
-        }, {} as Record<string, string>)
+        Object.entries(remotes).reduce(
+          (registry, [global, url]) => {
+            registry[global] = url.split('@')[1];
+            return registry;
+          },
+          {} as Record<string, string>,
+        ),
       )};`,
       'var remotesRegistryKeys = Object.keys(remotesRegistry);',
       'for (var i = 0; i < remotesRegistryKeys.length; i++) {',
@@ -192,19 +197,19 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
       }{`,
       Template.indent(
         Array.from(initialChunkIds, (id) => `${JSON.stringify(id)}: 0`).join(
-          ',\n'
-        )
+          ',\n',
+        ),
       ),
       '};',
       '',
       handleOnChunkLoad(
         this.runtimeRequirements.has(RuntimeGlobals.onChunksLoaded),
-        runtimeTemplate
+        runtimeTemplate,
       ),
       '',
       generateInstallChunk(
         runtimeTemplate,
-        this.runtimeRequirements.has(RuntimeGlobals.onChunksLoaded)
+        this.runtimeRequirements.has(RuntimeGlobals.onChunksLoaded),
       ),
       '',
       this.runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers)
@@ -217,23 +222,23 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
             hasJsMatcher,
             rootOutputDir,
             remotes,
-            name
+            name,
           )
         : '// no chunk loading',
       '',
       generateExternalInstallChunkCode(
         this.runtimeRequirements.has(RuntimeGlobals.externalInstallChunk),
-        this.options.debug
+        this.options.debug,
       ),
       '',
       generateHmrCode(
         this.runtimeRequirements.has(RuntimeGlobals.hmrDownloadUpdateHandlers),
-        rootOutputDir
+        rootOutputDir,
       ),
       '',
       generateHmrManifestCode(
         this.runtimeRequirements.has(RuntimeGlobals.hmrDownloadManifest),
-        rootOutputDir
+        rootOutputDir,
       ),
     ]);
   }

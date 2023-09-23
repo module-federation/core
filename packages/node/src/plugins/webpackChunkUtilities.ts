@@ -8,7 +8,7 @@ import { Template, RuntimeGlobals, Chunk, ChunkGraph } from 'webpack';
  */
 export function generateHmrCode(
   withHmr: boolean,
-  rootOutputDir: string
+  rootOutputDir: string,
 ): string {
   if (!withHmr) {
     return '// no HMR';
@@ -22,7 +22,7 @@ export function generateHmrCode(
       Template.indent([
         // Construct filename for the updated chunk
         `var filename = require('path').join(__dirname, ${JSON.stringify(
-          rootOutputDir
+          rootOutputDir,
         )} + ${RuntimeGlobals.getChunkUpdateScriptFilename}(chunkId));`,
         // Read the updated chunk file
         "require('fs').readFile(filename, 'utf-8', function(err, content) {",
@@ -57,7 +57,7 @@ export function generateHmrCode(
     // Replace placeholders in the HMR runtime code
     Template.getFunctionContent(
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('webpack/lib/hmr/JavascriptHotModuleReplacement.runtime.js')
+      require('webpack/lib/hmr/JavascriptHotModuleReplacement.runtime.js'),
     )
       .replace(/\$key\$/g, 'readFileVm')
       .replace(/\$installedChunks\$/g, 'installedChunks')
@@ -69,11 +69,11 @@ export function generateHmrCode(
       .replace(/\$hmrModuleData\$/g, RuntimeGlobals.hmrModuleData)
       .replace(
         /\$hmrDownloadUpdateHandlers\$/g,
-        RuntimeGlobals.hmrDownloadUpdateHandlers
+        RuntimeGlobals.hmrDownloadUpdateHandlers,
       )
       .replace(
         /\$hmrInvalidateModuleHandlers\$/g,
-        RuntimeGlobals.hmrInvalidateModuleHandlers
+        RuntimeGlobals.hmrInvalidateModuleHandlers,
       ),
   ]);
 }
@@ -87,7 +87,7 @@ export function generateHmrCode(
 export function getInitialChunkIds(
   chunk: Chunk,
   chunkGraph: ChunkGraph,
-  chunkHasJs: any
+  chunkHasJs: any,
 ) {
   const initialChunkIds = new Set(chunk.ids);
   for (const c of chunk.getAllInitialChunks()) {
@@ -120,7 +120,7 @@ export function generateLoadingCode(
   hasJsMatcher: any,
   rootOutputDir: string,
   remotes: Record<string, string>,
-  name: string | undefined
+  name: string | undefined,
 ): string {
   if (!withLoading) {
     return '// no chunk loading';
@@ -156,7 +156,7 @@ export function generateLoadingCode(
                   '}',
                   'var fs = typeof process !== "undefined" ? require(\'fs\') : false;',
                   `var filename = typeof process !== "undefined" ? require('path').join(__dirname, ${JSON.stringify(
-                    rootOutputDir
+                    rootOutputDir,
                   )} + ${
                     RuntimeGlobals.getChunkScriptFilename
                   }(chunkId)) : false;`,
@@ -164,24 +164,29 @@ export function generateLoadingCode(
                   'if(fs && fs.existsSync(filename)) {',
                   Template.indent([
                     `loadChunkStrategy('filesystem', chunkId, ${JSON.stringify(
-                      rootOutputDir
+                      rootOutputDir,
                     )}, remotes, installChunkCallback);`,
                   ]),
                   '} else { ',
                   Template.indent([
                     `var remotes = ${JSON.stringify(
-                      Object.values(remotes).reduce((acc, remote) => {
-                        const [global, url] = remote.split('@');
-                        acc[global] = url;
-                        return acc;
-                      }, {} as Record<string, string>)
+                      Object.values(remotes).reduce(
+                        (acc, remote) => {
+                          const [global, url] = remote.split('@');
+                          acc[global] = url;
+                          return acc;
+                        },
+                        {} as Record<string, string>,
+                      ),
                     )};`,
 
-                    `var requestedRemote = globalThis.__remote_scope__[${JSON.stringify(name)}]`,
+                    `var requestedRemote = globalThis.__remote_scope__[${JSON.stringify(
+                      name,
+                    )}]`,
 
                     "if(typeof requestedRemote === 'function'){",
                     Template.indent(
-                      'requestedRemote = await requestedRemote()'
+                      'requestedRemote = await requestedRemote()',
                     ),
                     '}',
 
@@ -189,7 +194,7 @@ export function generateLoadingCode(
                     "const loadingStrategy = typeof process !== 'undefined' ?  'http-vm' : 'http-eval';",
 
                     `loadChunkStrategy(loadingStrategy, chunkName,${JSON.stringify(
-                      name
+                      name,
                     )}, globalThis.__remote_scope__,installChunkCallback);`,
                   ]),
                   '}',
@@ -215,7 +220,7 @@ export function generateLoadingCode(
  */
 export function generateHmrManifestCode(
   withHmrManifest: boolean,
-  rootOutputDir: string
+  rootOutputDir: string,
 ): string {
   if (!withHmrManifest) {
     return '// no HMR manifest';
@@ -227,7 +232,7 @@ export function generateHmrManifestCode(
       'return new Promise(function(resolve, reject) {',
       Template.indent([
         `var filename = require('path').join(__dirname, ${JSON.stringify(
-          rootOutputDir
+          rootOutputDir,
         )} + ${RuntimeGlobals.getUpdateManifestFilename}());`,
         "require('fs').readFile(filename, 'utf-8', function(err, content) {",
         Template.indent([
@@ -255,21 +260,21 @@ export function generateHmrManifestCode(
  */
 export function handleOnChunkLoad(
   withOnChunkLoad: boolean,
-  runtimeTemplate: any
+  runtimeTemplate: any,
 ): string {
   if (withOnChunkLoad) {
     return `${
       RuntimeGlobals.onChunksLoaded
     }.readFileVm = ${runtimeTemplate.returningFunction(
       'installedChunks[chunkId] === 0',
-      'chunkId'
+      'chunkId',
     )};`;
   } else {
     return '// no on chunks loaded';
   }
 }
 /**
- * Generates the load script for server-side execution. This function creates a script that loads a remote module 
+ * Generates the load script for server-side execution. This function creates a script that loads a remote module
  * and executes it in the current context. It supports both browser and Node.js environments.
  * @param {any} runtimeTemplate - The runtime template used to generate the load script.
  * @returns {string} - The generated load script.
@@ -316,11 +321,14 @@ export function generateLoadScript(runtimeTemplate: any): string {
           }`,
           `executeLoad(url,callback,chunkId)`,
         ]),
-      ]
+      ],
     )}`,
   ]);
 }
-export function generateInstallChunk(runtimeTemplate: any, withOnChunkLoad: boolean): string {
+export function generateInstallChunk(
+  runtimeTemplate: any,
+  withOnChunkLoad: boolean,
+): string {
   return `var installChunk = ${runtimeTemplate.basicFunction('chunk', [
     'var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;',
     'for(var moduleId in moreModules) {',
@@ -344,7 +352,10 @@ export function generateInstallChunk(runtimeTemplate: any, withOnChunkLoad: bool
     withOnChunkLoad ? `${RuntimeGlobals.onChunksLoaded}();` : '',
   ])};`;
 }
-export  function generateExternalInstallChunkCode(withExternalInstallChunk: boolean, debug: boolean | undefined): string {
+export function generateExternalInstallChunkCode(
+  withExternalInstallChunk: boolean,
+  debug: boolean | undefined,
+): string {
   if (!withExternalInstallChunk) {
     return '// no external install chunk';
   }
@@ -352,11 +363,9 @@ export  function generateExternalInstallChunkCode(withExternalInstallChunk: bool
   return Template.asString([
     'module.exports = __webpack_require__;',
     `${RuntimeGlobals.externalInstallChunk} = function(){`,
-   debug
+    debug
       ? `console.debug('node: webpack installing to install chunk id:', arguments['0'].id);`
       : '',
     `return installChunk.apply(this, arguments)};`,
   ]);
 }
-
-

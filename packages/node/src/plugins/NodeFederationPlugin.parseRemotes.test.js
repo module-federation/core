@@ -27,7 +27,8 @@ describe('parseRemotes', () => {
     const result = parseRemotes(remotes);
     expect(result).toEqual({
       remote1: 'globalThis.__remote_scope__.global@https://example.com/remote1',
-      remote2: 'globalThis.__remote_scope__.remote2@https://example.com/remote2',
+      remote2:
+        'globalThis.__remote_scope__.remote2@https://example.com/remote2',
     });
   });
 
@@ -53,7 +54,8 @@ describe('parseRemotes', () => {
     const result = parseRemotes(remotes);
     expect(result).toEqual({
       remote1: './relative/path/to/remote1',
-      remote2: 'globalThis.__remote_scope__.someglobal@./relative/path/to/remote2',
+      remote2:
+        'globalThis.__remote_scope__.someglobal@./relative/path/to/remote2',
     });
   });
 
@@ -69,7 +71,9 @@ describe('parseRemoteSyntax', () => {
   it('should return the parsed remote string when remote includes "@" and does not start with "window", "global", or "globalThis"', () => {
     const remote = 'global@https://example.com/remote';
     const result = parseRemoteSyntax(remote);
-    expect(result).toBe('globalThis.__remote_scope__.global@https://example.com/remote');
+    expect(result).toBe(
+      'globalThis.__remote_scope__.global@https://example.com/remote',
+    );
   });
 
   // Positive test case: remote does not include '@'

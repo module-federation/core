@@ -54,7 +54,7 @@ class UniversalFederationPlugin {
     if (
       isServer ||
       compiler.options.name === 'server' ||
-      compiler.options.target === 'node'||
+      compiler.options.target === 'node' ||
       compiler.options.target === 'async-node'
     ) {
       new NodeFederationPlugin(options, this.context).apply(compiler);

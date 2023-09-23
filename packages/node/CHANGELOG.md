@@ -4,46 +4,37 @@ This file was generated using [@jscutlery/semver](https://github.com/jscutlery/s
 
 ## [2.0.2-beta.2](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.1...node-2.0.2-beta.2) (2023-09-15)
 
-
 ### Bug Fixes
 
-* Auto Public Path, detect multiple output targets ([65f17b1](https://github.com/module-federation/nextjs-mf/commit/65f17b189f37e0ad9e72bb0bf04463e9c5455929))
-* ensure custom FS works with target: node or async node preset ([a08fcab](https://github.com/module-federation/nextjs-mf/commit/a08fcab7dde903966d34be9dab0b34c8896948ca))
-
-
+- Auto Public Path, detect multiple output targets ([65f17b1](https://github.com/module-federation/nextjs-mf/commit/65f17b189f37e0ad9e72bb0bf04463e9c5455929))
+- ensure custom FS works with target: node or async node preset ([a08fcab](https://github.com/module-federation/nextjs-mf/commit/a08fcab7dde903966d34be9dab0b34c8896948ca))
 
 ## [2.0.2-beta.1](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.0...node-2.0.2-beta.1) (2023-09-14)
 
-
-
 ## [2.0.2-beta.0](https://github.com/module-federation/nextjs-mf/compare/node-2.0.1...node-2.0.2-beta.0) (2023-09-14)
-
 
 ### Bug Fixes
 
-* import utils manually ([2767191](https://github.com/module-federation/nextjs-mf/commit/2767191467d9d685704b747d42b5f170da233847))
-* **node:** use ES6 imports and override method in FederationModuleInfoRuntimeModule (#bytedance) ([d420ad9](https://github.com/module-federation/nextjs-mf/commit/d420ad94b7515123254af45c61704abcc0971511))
-* remove ensure remote runtime module ([d06c082](https://github.com/module-federation/nextjs-mf/commit/d06c0823435063dcd277897ab551cd3a9c996d3d))
-
+- import utils manually ([2767191](https://github.com/module-federation/nextjs-mf/commit/2767191467d9d685704b747d42b5f170da233847))
+- **node:** use ES6 imports and override method in FederationModuleInfoRuntimeModule (#bytedance) ([d420ad9](https://github.com/module-federation/nextjs-mf/commit/d420ad94b7515123254af45c61704abcc0971511))
+- remove ensure remote runtime module ([d06c082](https://github.com/module-federation/nextjs-mf/commit/d06c0823435063dcd277897ab551cd3a9c996d3d))
 
 ### Features
 
-* add auto public path support for remote modules (node_auto_public_path) ([b12c984](https://github.com/module-federation/nextjs-mf/commit/b12c9841aa55027cb7b77e768ff9c0b456120d51))
-* Dynamic Filesystem ([#1274](https://github.com/module-federation/nextjs-mf/issues/1274)) ([2bec98a](https://github.com/module-federation/nextjs-mf/commit/2bec98a2472b44898a7f14ec6868a2368cfb6d82))
-* FederationModuleInfo Runtime Module ([50a1a0c](https://github.com/module-federation/nextjs-mf/commit/50a1a0c7a37bbe42ab6f2f5559b411567fee0fe9))
-* FederationModuleInfo Runtime Module ([7b09ef6](https://github.com/module-federation/nextjs-mf/commit/7b09ef6c0f4ee68a1b5caa5f021632059c522b8f))
-* implement Bytedance Infra Node Plugin ([82e6801](https://github.com/module-federation/nextjs-mf/commit/82e680157bbad68fa93800a69149c4c28652cfed))
-* implement Bytedance Infra Node Plugin ([97f283e](https://github.com/module-federation/nextjs-mf/commit/97f283e4746bf6f048ee27584adde5249c8e577c))
-* native self forming node federation  ([#1291](https://github.com/module-federation/nextjs-mf/issues/1291)) ([1dd5ed1](https://github.com/module-federation/nextjs-mf/commit/1dd5ed17c981e036336925e807203e94b58c36d6))
-* **node-remote:** Improve module federation runtime compatibility ([5eb2092](https://github.com/module-federation/nextjs-mf/commit/5eb209249c44d525c12eff5739bf23a93db08e4f))
-* **node:** auto set public path and improve chunk loading strategy #node_auto_public_path ([65989da](https://github.com/module-federation/nextjs-mf/commit/65989dab95ee2acee7ec9a5ab321921a278cd078))
-* **node:** enhance error handling and remote container registry in RemotePublicPathRuntimeModule (#bytedance) ([061285e](https://github.com/module-federation/nextjs-mf/commit/061285e0b6210baa1dd502dc94fd57fd9a8af822))
-* **NodeFederationPlugin:** assign remoteContainerRegistry to importMetaName ([ca33d98](https://github.com/module-federation/nextjs-mf/commit/ca33d98df63fdb8dac402b1cc0ec8bf95f9f1971))
-* **node:** remove unused import from DynamicFilesystemRuntimeModule ([f9787a9](https://github.com/module-federation/nextjs-mf/commit/f9787a9a67da936679db388e5c66e012e7452d8a))
-* remove old loadScript hack ([fbe19bc](https://github.com/module-federation/nextjs-mf/commit/fbe19bc76694c14b6a95c577669c2e8656ede1ba))
-* **utilities:** update DelegateModulesPlugin and tests (#node_auto_public_path) ([df8bb79](https://github.com/module-federation/nextjs-mf/commit/df8bb791c3fedef299cb15960546ff5ad9c665ef))
-
-
+- add auto public path support for remote modules (node_auto_public_path) ([b12c984](https://github.com/module-federation/nextjs-mf/commit/b12c9841aa55027cb7b77e768ff9c0b456120d51))
+- Dynamic Filesystem ([#1274](https://github.com/module-federation/nextjs-mf/issues/1274)) ([2bec98a](https://github.com/module-federation/nextjs-mf/commit/2bec98a2472b44898a7f14ec6868a2368cfb6d82))
+- FederationModuleInfo Runtime Module ([50a1a0c](https://github.com/module-federation/nextjs-mf/commit/50a1a0c7a37bbe42ab6f2f5559b411567fee0fe9))
+- FederationModuleInfo Runtime Module ([7b09ef6](https://github.com/module-federation/nextjs-mf/commit/7b09ef6c0f4ee68a1b5caa5f021632059c522b8f))
+- implement Bytedance Infra Node Plugin ([82e6801](https://github.com/module-federation/nextjs-mf/commit/82e680157bbad68fa93800a69149c4c28652cfed))
+- implement Bytedance Infra Node Plugin ([97f283e](https://github.com/module-federation/nextjs-mf/commit/97f283e4746bf6f048ee27584adde5249c8e577c))
+- native self forming node federation ([#1291](https://github.com/module-federation/nextjs-mf/issues/1291)) ([1dd5ed1](https://github.com/module-federation/nextjs-mf/commit/1dd5ed17c981e036336925e807203e94b58c36d6))
+- **node-remote:** Improve module federation runtime compatibility ([5eb2092](https://github.com/module-federation/nextjs-mf/commit/5eb209249c44d525c12eff5739bf23a93db08e4f))
+- **node:** auto set public path and improve chunk loading strategy #node_auto_public_path ([65989da](https://github.com/module-federation/nextjs-mf/commit/65989dab95ee2acee7ec9a5ab321921a278cd078))
+- **node:** enhance error handling and remote container registry in RemotePublicPathRuntimeModule (#bytedance) ([061285e](https://github.com/module-federation/nextjs-mf/commit/061285e0b6210baa1dd502dc94fd57fd9a8af822))
+- **NodeFederationPlugin:** assign remoteContainerRegistry to importMetaName ([ca33d98](https://github.com/module-federation/nextjs-mf/commit/ca33d98df63fdb8dac402b1cc0ec8bf95f9f1971))
+- **node:** remove unused import from DynamicFilesystemRuntimeModule ([f9787a9](https://github.com/module-federation/nextjs-mf/commit/f9787a9a67da936679db388e5c66e012e7452d8a))
+- remove old loadScript hack ([fbe19bc](https://github.com/module-federation/nextjs-mf/commit/fbe19bc76694c14b6a95c577669c2e8656ede1ba))
+- **utilities:** update DelegateModulesPlugin and tests (#node_auto_public_path) ([df8bb79](https://github.com/module-federation/nextjs-mf/commit/df8bb791c3fedef299cb15960546ff5ad9c665ef))
 
 ## [2.0.1](https://github.com/module-federation/nextjs-mf/compare/node-2.0.0...node-2.0.1) (2023-09-13)
 
