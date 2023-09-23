@@ -59,7 +59,7 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
            * @param {any} value - The value to set.
            * @returns {boolean} Returns true.
            */
-          `set: function(target, prop, value): boolean {`,
+          `set: function(target, prop, value) {`,
           Template.indent([
             `if (prop === '_config') {`,
             Template.indent([
