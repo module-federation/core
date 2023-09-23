@@ -22,9 +22,7 @@ import type { InputFileSystem } from 'webpack/lib/FileSystemInfo';
 import type { RequestShortener } from 'webpack/lib/RuntimeModule';
 import { WEBPACK_MODULE_TYPE_REMOTE } from 'webpack/lib/ModuleTypeConstants';
 import type { WebpackOptionsNormalized } from 'webpack/lib/WebpackOptionsDefaulter';
-
-type ObjectDeserializerContext =
-  import('webpack/lib/serialization/ObjectMiddleware').ObjectDeserializerContext;
+import type { ObjectDeserializerContext } from 'webpack/lib/serialization/ObjectMiddleware';
 
 const TYPES: Set<string> = new Set(['remote', 'share-init']);
 const RUNTIME_REQUIREMENTS: Set<string> = new Set([RuntimeGlobals.module]);
@@ -187,3 +185,5 @@ class RemoteModule extends Module {
 makeSerializable(RemoteModule, 'enhanced/lib/container/RemoteModule');
 
 export default RemoteModule;
+
+
