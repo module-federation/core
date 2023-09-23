@@ -26,7 +26,7 @@ export class TypesCache {
     }
 
     const cachedFiles = stats?.files;
-    const {files} = statsJson;
+    const { files } = statsJson;
 
     const filesToCacheBust: string[] = [];
     const filesToDelete: string[] = [];

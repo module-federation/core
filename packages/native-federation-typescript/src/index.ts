@@ -36,7 +36,7 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
           console.log(ansiColors.green('Federated types created correctly'));
         } catch (error) {
           console.error(
-            ansiColors.red(`Unable to compile federated types, ${error}`)
+            ansiColors.red(`Unable to compile federated types, ${error}`),
           );
         }
       },
@@ -46,14 +46,14 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
           {
             static: {
               directory: resolve(
-                retrieveOriginalOutDir(tsConfig, remoteOptions)
+                retrieveOriginalOutDir(tsConfig, remoteOptions),
               ),
             },
-          }
+          },
         );
       },
     };
-  }
+  },
 );
 
 export const NativeFederationTypeScriptHost = createUnplugin(
@@ -68,8 +68,8 @@ export const NativeFederationTypeScriptHost = createUnplugin(
             force: true,
           }).catch((error) =>
             console.error(
-              ansiColors.red(`Unable to remove types folder, ${error}`)
-            )
+              ansiColors.red(`Unable to remove types folder, ${error}`),
+            ),
           );
         }
 
@@ -81,5 +81,5 @@ export const NativeFederationTypeScriptHost = createUnplugin(
         console.log(ansiColors.green('Federated types extraction completed'));
       },
     };
-  }
+  },
 );

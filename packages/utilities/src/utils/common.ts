@@ -7,7 +7,7 @@ import type {
   Remotes,
   RuntimeRemote,
   WebpackRemoteContainer,
-  WebpackShareScopes
+  WebpackShareScopes,
 } from '../types';
 import { loadScript } from './pure';
 
@@ -20,7 +20,7 @@ import { loadScript } from './pure';
  */
 export const createDelegatedModule = (
   delegate: string,
-  params: { [key: string]: any }
+  params: { [key: string]: any },
 ) => {
   const queries: string[] = [];
   const processParam = (key: string, value: any) => {
@@ -33,12 +33,13 @@ export const createDelegatedModule = (
     }
   };
   Object.entries(params).forEach(([key, value]) => processParam(key, value));
-  return queries.length === 0 ? `internal ${delegate}` : `internal ${delegate}?${queries.join('&')}`;
+  return queries.length === 0
+    ? `internal ${delegate}`
+    : `internal ${delegate}?${queries.join('&')}`;
 };
 
-
 const createContainerSharingScope = (
-  asyncContainer: AsyncContainer | undefined
+  asyncContainer: AsyncContainer | undefined,
 ) => {
   // @ts-ignore
   return asyncContainer
@@ -48,7 +49,7 @@ const createContainerSharingScope = (
         return Promise.resolve(__webpack_init_sharing__('default')).then(
           function () {
             return container;
-          }
+          },
         );
       } else {
         return container;
@@ -80,7 +81,7 @@ const createContainerSharingScope = (
  *    { asyncContainer } - async container is a promise that resolves to the remote container
  */
 export const injectScript = async (
-  keyOrRuntimeRemoteItem: string | RuntimeRemote
+  keyOrRuntimeRemoteItem: string | RuntimeRemote,
 ) => {
   const asyncContainer = loadScript(keyOrRuntimeRemoteItem);
   return createContainerSharingScope(asyncContainer);
@@ -93,23 +94,28 @@ export const injectScript = async (
  * @param {Remotes} remotes - The remotes to create runtime variables from.
  * @returns {Record<string, string>} - The created runtime variables.
  */
-export const createRuntimeVariables = (remotes: Remotes): Record<string, string> => {
+export const createRuntimeVariables = (
+  remotes: Remotes,
+): Record<string, string> => {
   if (!remotes) {
     return {};
   }
 
-  return Object.entries(remotes).reduce((acc, [key, value]) => {
-    if (value.startsWith('promise ') || value.startsWith('external ')) {
-      const promiseCall = value.split(' ')[1];
-      acc[key] = `function() {
+  return Object.entries(remotes).reduce(
+    (acc, [key, value]) => {
+      if (value.startsWith('promise ') || value.startsWith('external ')) {
+        const promiseCall = value.split(' ')[1];
+        acc[key] = `function() {
         return ${promiseCall}
       }`;
-    } else {
-      acc[key] = JSON.stringify(value);
-    }
+      } else {
+        acc[key] = JSON.stringify(value);
+      }
 
-    return acc;
-  }, {} as Record<string, string>);
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
 };
 
 /**
@@ -117,12 +123,15 @@ export const createRuntimeVariables = (remotes: Remotes): Record<string, string>
  * If its' script does not loaded - then load & init it firstly.
  */
 export const getContainer = async (
-  remoteContainer: string | RemoteData
+  remoteContainer: string | RemoteData,
 ): Promise<WebpackRemoteContainer | undefined> => {
   if (!remoteContainer) {
     throw Error(`Remote container options is empty`);
   }
-  const containerScope = typeof window !== 'undefined' ? window : (globalThis as any).__remote_scope__;
+  const containerScope =
+    typeof window !== 'undefined'
+      ? window
+      : (globalThis as any).__remote_scope__;
   let containerKey: string;
 
   if (typeof remoteContainer === 'string') {
@@ -171,4 +180,3 @@ export const getModule = async ({
     return undefined;
   }
 };
-

@@ -5,7 +5,6 @@
  */
 'use strict';
 
-
 import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
@@ -152,14 +151,19 @@ export class NextFederationPlugin {
 
     // @ts-ignore
     new ModuleFederationPlugin(hostFederationPluginOptions).apply(compiler);
-    const hasRemotesOrExposes = Object.keys(this._options?.remotes || {}).length > 0 || Object.keys(this._options?.exposes || {}).length > 0;
+    const hasRemotesOrExposes =
+      Object.keys(this._options?.remotes || {}).length > 0 ||
+      Object.keys(this._options?.exposes || {}).length > 0;
     if (hasRemotesOrExposes) {
       const commonOptions = {
         ...hostFederationPluginOptions,
         name: 'host_inner_ctn',
         runtime: isServer ? 'webpack-runtime' : 'webpack',
         filename: `host_inner_ctn.js`,
-        library: { ...hostFederationPluginOptions.library, name: this._options.name },
+        library: {
+          ...hostFederationPluginOptions.library,
+          name: this._options.name,
+        },
         shared: { ...hostFederationPluginOptions.shared, ...defaultShared },
       };
 

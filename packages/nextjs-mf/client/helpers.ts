@@ -37,7 +37,7 @@ function getParametrizedRoute(route: string) {
       .map((segment) => {
         if (segment.startsWith('[') && segment.endsWith(']')) {
           const { key, optional, repeat } = parseParameter(
-            segment.slice(1, -1)
+            segment.slice(1, -1),
           );
           groups[key] = { pos: groupIndex++, repeat, optional };
           return repeat ? (optional ? '(?:/(.+?))?' : '/(.+?)') : '/([^/]+?)';
@@ -72,7 +72,7 @@ function escapeStringRegexp(str: string) {
  */
 export function pathnameToRoute(
   cleanPathname: string,
-  routes: string[]
+  routes: string[],
 ): string | undefined {
   if (routes.includes(cleanPathname)) {
     return cleanPathname;

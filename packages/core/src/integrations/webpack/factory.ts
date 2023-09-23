@@ -3,7 +3,7 @@ import type { AsyncContainer, RemoteOptions, SharedScope } from '../../types';
 import type { WebpackRequire } from './types';
 
 export async function initializeSharingScope(
-  scopeName = 'default'
+  scopeName = 'default',
 ): Promise<SharedScope> {
   const webpackShareScopes = __webpack_share_scopes__ as unknown as SharedScope;
 
@@ -16,16 +16,13 @@ export async function initializeSharingScope(
     .S as unknown as SharedScope;
 }
 
-export function loadScript(
-  containerKey: string,
-  remoteOptions: RemoteOptions
-) {
+export function loadScript(containerKey: string, remoteOptions: RemoteOptions) {
   return webpackLoadScript(containerKey, remoteOptions.url);
 }
 
 export async function webpackLoadScript(
   containerKey: string,
-  url: string
+  url: string,
 ): AsyncContainer {
   const scope = getScope();
 
@@ -59,7 +56,7 @@ export async function webpackLoadScript(
 
         reject(__webpack_error__);
       },
-      containerKey
+      containerKey,
     );
   });
 }

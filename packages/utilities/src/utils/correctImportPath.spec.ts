@@ -15,7 +15,7 @@ describe(`${correctImportPath.name}()`, () => {
       const actual = correctImportPath('/context/path', '/path/to/file.js');
 
       expect(actual).toEqual('/path/to/file.js');
-    }
+    },
   );
 
   it.each([
@@ -39,6 +39,6 @@ describe(`${correctImportPath.name}()`, () => {
       const actual = correctImportPath('C:\\path\\to\\dir', entryFile);
 
       expect(actual).toEqual(output);
-    }
+    },
   );
 });

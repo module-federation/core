@@ -42,7 +42,7 @@ const FederationBoundary: React.FC<FederationBoundaryProps> = ({
             //@ts-ignore
             default: m.default || m,
           };
-        })
+        }),
     );
   }, [dynamicImporter, fallback]);
 

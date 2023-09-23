@@ -43,13 +43,13 @@ export class DevHmrFixInvalidPongPlugin {
               const newSource = (asset?.source.source() as string).replace(
                 new RegExp(
                   escapeRegExp(
-                    'if (payload.event === \\"pong\\" && payload.invalid && !self.__NEXT_DATA__.err) {'
+                    'if (payload.event === \\"pong\\" && payload.invalid && !self.__NEXT_DATA__.err) {',
                   ),
-                  'g'
+                  'g',
                 ),
                 `if (payload.event === \\"pong\\" && payload.invalid && !self.__NEXT_DATA__.err) {
                     if (window.mf_client &&  window.mf_client.isFederatedPathname(window.location.pathname)) return;
-                  `.replaceAll('\n', '\\n')
+                  `.replaceAll('\n', '\\n'),
               );
 
               const updatedAsset = new webpack.sources.RawSource(newSource);
@@ -60,9 +60,9 @@ export class DevHmrFixInvalidPongPlugin {
                 compilation.emitAsset(filename, updatedAsset);
               }
             });
-          }
+          },
         );
-      }
+      },
     );
   }
 }

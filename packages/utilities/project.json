@@ -6,16 +6,12 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/utilities",
         "main": "packages/utilities/src/index.ts",
         "tsConfig": "packages/utilities/tsconfig.lib.json",
-        "assets": [
-          "packages/utilities/*.md"
-        ]
+        "assets": ["packages/utilities/*.md"]
       }
     },
     "publish": {
@@ -31,20 +27,14 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/utilities/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/utilities/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/packages/utilities"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/utilities"],
       "options": {
         "jestConfig": "packages/utilities/jest.config.ts",
         "passWithNoTests": true
@@ -53,10 +43,7 @@
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": [
-          "utils:npm",
-          "utils:github"
-        ],
+        "postTargets": ["utils:npm", "utils:github"],
         "trackDeps": true,
         "push": true
       }

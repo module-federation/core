@@ -30,20 +30,25 @@ class CopyBuildOutputPlugin {
      * @async
      * @function
      */
-    const copyFiles = async (source: string, destination: string): Promise<void> => {
+    const copyFiles = async (
+      source: string,
+      destination: string,
+    ): Promise<void> => {
       const files = await fs.readdir(source);
 
-      await Promise.all(files.map(async (file) => {
-        const sourcePath = path.join(source, file);
-        const destinationPath = path.join(destination, file);
+      await Promise.all(
+        files.map(async (file) => {
+          const sourcePath = path.join(source, file);
+          const destinationPath = path.join(destination, file);
 
-        if ((await fs.lstat(sourcePath)).isDirectory()) {
-          await fs.mkdir(destinationPath, { recursive: true });
-          await copyFiles(sourcePath, destinationPath);
-        } else {
-          await fs.copyFile(sourcePath, destinationPath);
-        }
-      }));
+          if ((await fs.lstat(sourcePath)).isDirectory()) {
+            await fs.mkdir(destinationPath, { recursive: true });
+            await copyFiles(sourcePath, destinationPath);
+          } else {
+            await fs.copyFile(sourcePath, destinationPath);
+          }
+        }),
+      );
     };
 
     compiler.hooks.afterEmit.tapPromise(
@@ -59,14 +64,14 @@ class CopyBuildOutputPlugin {
 
         const serverLoc = path.join(
           outputString,
-          this.isServer && isProd ? '/ssr' : '/static/ssr'
+          this.isServer && isProd ? '/ssr' : '/static/ssr',
         );
         const servingLoc = path.join(outputPath, 'ssr');
 
         await fs.mkdir(serverLoc, { recursive: true });
 
         const sourcePath = this.isServer ? outputPath : servingLoc;
-     
+
         try {
           await fs.access(sourcePath);
           // If the promise resolves, the file exists and you can proceed with copying.
@@ -75,10 +80,9 @@ class CopyBuildOutputPlugin {
           // If the promise rejects, the file does not exist.
           console.error(`File at ${sourcePath} does not exist.`);
         }
-      }
+      },
     );
   }
 }
 
 export default CopyBuildOutputPlugin;
-

@@ -22,17 +22,17 @@ const readTsConfig = ({
 
   const readResult = typescript.readConfigFile(
     resolvedTsConfigPath,
-    typescript.sys.readFile
+    typescript.sys.readFile,
   );
   const configContent = typescript.parseJsonConfigFileContent(
     readResult.config,
     typescript.sys,
-    dirname(resolvedTsConfigPath)
+    dirname(resolvedTsConfigPath),
   );
   const outDir = join(
     configContent.options.outDir || 'dist',
     typesFolder,
-    compiledTypesFolder
+    compiledTypesFolder,
   );
 
   return {
@@ -59,14 +59,17 @@ const resolveWithExtension = (exposedPath: string) => {
 
 const resolveExposes = (remoteOptions: RemoteOptions) => {
   return Object.entries(
-    remoteOptions.moduleFederationConfig.exposes as Record<string, string>
-  ).reduce((accumulator, [exposedEntry, exposedPath]) => {
-    accumulator[exposedEntry] =
-      resolveWithExtension(exposedPath) ||
-      resolveWithExtension(join(exposedPath, 'index')) ||
-      exposedPath;
-    return accumulator;
-  }, {} as Record<string, string>);
+    remoteOptions.moduleFederationConfig.exposes as Record<string, string>,
+  ).reduce(
+    (accumulator, [exposedEntry, exposedPath]) => {
+      accumulator[exposedEntry] =
+        resolveWithExtension(exposedPath) ||
+        resolveWithExtension(join(exposedPath, 'index')) ||
+        exposedPath;
+      return accumulator;
+    },
+    {} as Record<string, string>,
+  );
 };
 
 export const retrieveRemoteConfig = (options: RemoteOptions) => {

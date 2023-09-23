@@ -22,7 +22,10 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
 
   // 1) Load remote container if needed
   let asyncContainer: RuntimeRemote['asyncContainer'];
-  const reference = typeof keyOrRuntimeRemoteItem === 'string' ? runtimeRemotes[keyOrRuntimeRemoteItem] : keyOrRuntimeRemoteItem;
+  const reference =
+    typeof keyOrRuntimeRemoteItem === 'string'
+      ? runtimeRemotes[keyOrRuntimeRemoteItem]
+      : keyOrRuntimeRemoteItem;
 
   if (reference.asyncContainer) {
     asyncContainer =
@@ -110,7 +113,7 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
 
           reject(__webpack_error__);
         },
-        containerKey
+        containerKey,
       );
     }).catch(function (err) {
       console.error('container is offline, returning fake remote');
@@ -145,30 +148,30 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
 
 export const getRuntimeRemotes = () => {
   return Object.entries(remoteVars).reduce((acc, [key, value]) => {
-      if (typeof value === 'object' && typeof value.then === 'function') {
-        acc[key] = { asyncContainer: value };
-      } else if (typeof value === 'function') {
-        acc[key] = { asyncContainer: Promise.resolve(value()) };
-      } else if (typeof value === 'string') {
-        if (value.startsWith('internal ')) {
-          const [request, query] = value.replace('internal ', '').split('?');
-          if (query) {
-            const remoteSyntax = new URLSearchParams(query).get('remote');
-            if (remoteSyntax) {
-              const [url, global] = extractUrlAndGlobal(remoteSyntax);
-              acc[key] = { global, url };
-            }
+    if (typeof value === 'object' && typeof value.then === 'function') {
+      acc[key] = { asyncContainer: value };
+    } else if (typeof value === 'function') {
+      acc[key] = { asyncContainer: Promise.resolve(value()) };
+    } else if (typeof value === 'string') {
+      if (value.startsWith('internal ')) {
+        const [request, query] = value.replace('internal ', '').split('?');
+        if (query) {
+          const remoteSyntax = new URLSearchParams(query).get('remote');
+          if (remoteSyntax) {
+            const [url, global] = extractUrlAndGlobal(remoteSyntax);
+            acc[key] = { global, url };
           }
-        } else {
-          const [url, global] = extractUrlAndGlobal(value);
-          acc[key] = { global, url };
         }
       } else {
-        console.warn('remotes process', process.env['REMOTES']);
-        throw new Error(`[mf] Invalid value received for runtime_remote "${key}"`);
+        const [url, global] = extractUrlAndGlobal(value);
+        acc[key] = { global, url };
       }
-      return acc;
-    }, {} as RuntimeRemotesMap);
+    } else {
+      console.warn('remotes process', process.env['REMOTES']);
+      throw new Error(
+        `[mf] Invalid value received for runtime_remote "${key}"`,
+      );
+    }
+    return acc;
+  }, {} as RuntimeRemotesMap);
 };
-
-

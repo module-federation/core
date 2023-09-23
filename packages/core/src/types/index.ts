@@ -99,7 +99,7 @@ export interface RemoteScope {
 export interface IRemoteScriptFactory {
   loadScript: (
     containerKey: string,
-    remoteOptions: RemoteOptions
+    remoteOptions: RemoteOptions,
   ) => AsyncContainer;
 }
 

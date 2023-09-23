@@ -31,7 +31,7 @@ import JsonpChunkLoading from '../JsonpChunkLoading';
 export function applyClientPlugins(
   compiler: Compiler,
   options: ModuleFederationPluginOptions,
-  extraOptions: NextFederationPluginExtraOptions
+  extraOptions: NextFederationPluginExtraOptions,
 ): void {
   const { webpack } = compiler;
   const { remotes, name } = options;

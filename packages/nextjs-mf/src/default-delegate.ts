@@ -17,7 +17,7 @@ try {
   /**
    * Assigning process.env['REMOTES'] to pure if it exists
    */
-   // @ts-ignore
+  // @ts-ignore
   pure = process.env['REMOTES'] || {};
 } catch (e) {
   // not in webpack bundle
@@ -117,8 +117,6 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       (__webpack_require__ as any).l(
         reference.url,
         function (event: Event) {
-
-      
           if (typeof globalScope[remoteGlobal] !== 'undefined') {
             return resolveRemoteGlobal();
           }
@@ -143,7 +141,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
 
           reject(__webpack_error__);
         },
-        containerKey
+        containerKey,
       );
     }).catch(function (err) {
       console.error('container is offline, returning fake remote');
@@ -181,50 +179,46 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
  */
 const getRuntimeRemotes = () => {
   try {
-    return Object.entries(remoteVars).reduce(function (
-          acc,
-          item
-        ) {
-          const [key, value] = item;
-          // if its an object with a thenable (eagerly executing function)
-          if (typeof value === 'object' && typeof value.then === 'function') {
-            acc[key] = { asyncContainer: value };
-          }
-          // if its a function that must be called (lazily executing function)
-          else if (typeof value === 'function') {
-            // @ts-ignore
-            acc[key] = { asyncContainer: value };
-          }
-          // if its a delegate module, skip it
-          else if (typeof value === 'string' && value.startsWith('internal ')) {
-            const [request, query] = value.replace('internal ', '').split('?');
-            if (query) {
-              const remoteSyntax = new URLSearchParams(query).get('remote');
-              if (remoteSyntax) {
-                const [url, global] = extractUrlAndGlobal(remoteSyntax);
-                acc[key] = { global, url };
-              }
-            }
-          } else if (typeof value === 'string' && !value.includes('@')) {
-        acc[key] = { global: key, url: value };
-        console.log('delegates may need work')
+    return Object.entries(remoteVars).reduce(function (acc, item) {
+      const [key, value] = item;
+      // if its an object with a thenable (eagerly executing function)
+      if (typeof value === 'object' && typeof value.then === 'function') {
+        acc[key] = { asyncContainer: value };
       }
-          // if its just a string (global@url)
-          else if (typeof value === 'string') {
-            const [url, global] = extractUrlAndGlobal(value);
+      // if its a function that must be called (lazily executing function)
+      else if (typeof value === 'function') {
+        // @ts-ignore
+        acc[key] = { asyncContainer: value };
+      }
+      // if its a delegate module, skip it
+      else if (typeof value === 'string' && value.startsWith('internal ')) {
+        const [request, query] = value.replace('internal ', '').split('?');
+        if (query) {
+          const remoteSyntax = new URLSearchParams(query).get('remote');
+          if (remoteSyntax) {
+            const [url, global] = extractUrlAndGlobal(remoteSyntax);
             acc[key] = { global, url };
           }
-          // we dont know or currently support this type
-          else {
-            //@ts-ignore
-            console.warn('remotes process', process.env.REMOTES);
-            throw new Error(
-              `[mf] Invalid value received for runtime_remote "${key}"`
-            );
-          }
-          return acc;
-        },
-        {} as RuntimeRemotesMap);
+        }
+      } else if (typeof value === 'string' && !value.includes('@')) {
+        acc[key] = { global: key, url: value };
+        console.log('delegates may need work');
+      }
+      // if its just a string (global@url)
+      else if (typeof value === 'string') {
+        const [url, global] = extractUrlAndGlobal(value);
+        acc[key] = { global, url };
+      }
+      // we dont know or currently support this type
+      else {
+        //@ts-ignore
+        console.warn('remotes process', process.env.REMOTES);
+        throw new Error(
+          `[mf] Invalid value received for runtime_remote "${key}"`,
+        );
+      }
+      return acc;
+    }, {} as RuntimeRemotesMap);
   } catch (err) {
     console.warn('Unable to retrieve runtime remotes: ', err);
   }
@@ -238,7 +232,7 @@ const getRuntimeRemotes = () => {
  * @returns {Promise} - A promise that resolves with the imported module
  */
 const importDelegatedModule = async (
-  keyOrRuntimeRemoteItem: string | RuntimeRemote
+  keyOrRuntimeRemoteItem: string | RuntimeRemote,
 ) => {
   // @ts-ignore
   return loadScript(keyOrRuntimeRemoteItem)
@@ -277,7 +271,7 @@ const importDelegatedModule = async (
                         if (globalThis.usedChunks) {
                           globalThis.usedChunks.add(
                             //@ts-ignore
-                            `${keyOrRuntimeRemoteItem.global}->${arg}`
+                            `${keyOrRuntimeRemoteItem.global}->${arg}`,
                           );
                         }
                         //eslint-disable-next-line prefer-rest-params
@@ -292,7 +286,7 @@ const importDelegatedModule = async (
                       if (globalThis.usedChunks) {
                         globalThis.usedChunks.add(
                           //@ts-ignore
-                          `${keyOrRuntimeRemoteItem.global}->${arg}`
+                          `${keyOrRuntimeRemoteItem.global}->${arg}`,
                         );
                       }
 

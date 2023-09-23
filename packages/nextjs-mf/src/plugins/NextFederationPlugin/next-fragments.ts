@@ -13,7 +13,7 @@ import {
 import { hasLoader, injectRuleLoader } from '../../loaders/helpers';
 
 type ConstructableModuleFederationPlugin = new (
-  options: ModuleFederationPluginOptions
+  options: ModuleFederationPluginOptions,
 ) => container.ModuleFederationPlugin;
 
 /**
@@ -24,7 +24,7 @@ type ConstructableModuleFederationPlugin = new (
  */
 export function getModuleFederationPluginConstructor(
   isServer: boolean,
-  compiler: Compiler
+  compiler: Compiler,
 ): ConstructableModuleFederationPlugin {
   if (isServer) {
     return require('@module-federation/node')
@@ -62,7 +62,7 @@ export const retrieveDefaultShared = (isServer: boolean): SharedObject => {
  */
 export function applyRemoteDelegates(
   options: ModuleFederationPluginOptions,
-  compiler: Compiler
+  compiler: Compiler,
 ) {
   if (options.remotes) {
     // Get the available delegates
@@ -100,7 +100,10 @@ export function applyRemoteDelegates(
  * @param {Compiler} compiler - The Webpack compiler instance.
  * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
  */
-export const applyPathFixes = (compiler: Compiler, options: ModuleFederationPluginOptions) => {
+export const applyPathFixes = (
+  compiler: Compiler,
+  options: ModuleFederationPluginOptions,
+) => {
   //@ts-ignore
   compiler.options.module.rules.forEach((rule) => {
     // next-image-loader fix which adds remote's hostname to the assets url

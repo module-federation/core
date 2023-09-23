@@ -5,7 +5,7 @@ import type {
 import { initializeSharingScope, loadScript } from '../integrations/webpack';
 
 export function createModuleFederationRuntime(
-  options?: ModuleFederationRuntimeOptions
+  options?: ModuleFederationRuntimeOptions,
 ): ModuleFederationRuntime {
   const scriptFactory = options?.scriptFactory ?? { loadScript };
   const sharingScopeFactory = options?.sharingScopeFactory ?? {

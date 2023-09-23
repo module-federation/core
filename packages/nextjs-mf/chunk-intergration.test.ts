@@ -20,7 +20,7 @@ xdescribe('Next.js build output', () => {
     const buildOutputDir = path.join(
       __dirname,
       '../../',
-      'dist/apps/3000-home/.next/static/chunks'
+      'dist/apps/3000-home/.next/static/chunks',
     );
     it('remoteEntry.js', () => {
       const buildOutput = findFileInDirectory('remoteEntry', buildOutputDir);
@@ -38,14 +38,14 @@ xdescribe('Next.js build output', () => {
       it('main chunk should have react', () => {
         const buildOutput = findModulesInChunk('main', buildOutputDir);
         const hasReact = buildOutput?.some((module) =>
-          module.includes('node_modules/react/')
+          module.includes('node_modules/react/'),
         );
         expect(hasReact).toBe(true);
       });
       it('main chunk should have delegate hoist', () => {
         const buildOutput = findModulesInChunk('main', buildOutputDir);
         const hasReact = buildOutput?.some((module) =>
-          module.includes('internal-delegate-hoist')
+          module.includes('internal-delegate-hoist'),
         );
         expect(hasReact).toBe(true);
       });
@@ -53,14 +53,14 @@ xdescribe('Next.js build output', () => {
       it('main chunk should have styled-jsx', () => {
         const buildOutput = findModulesInChunk('main', buildOutputDir);
         const hasReact = buildOutput?.some((module) =>
-          module.includes('node_modules/styled-jsx/')
+          module.includes('node_modules/styled-jsx/'),
         );
         expect(hasReact).toBe(true);
       });
       it('main chunk should NOT have delegate modules', () => {
         const buildOutput = findModulesInChunk('main', buildOutputDir);
         const hasReact = buildOutput?.some((module) =>
-          module.includes('remote=')
+          module.includes('remote='),
         );
         expect(hasReact).toBe(false);
       });
@@ -75,7 +75,7 @@ xdescribe('Next.js build output', () => {
     const buildOutputDir = path.join(
       __dirname,
       '../../',
-      'dist/apps/3000-home/.next/server'
+      'dist/apps/3000-home/.next/server',
     );
     it('remoteEntry.js', () => {
       const buildOutput = findFileInDirectory('remoteEntry', buildOutputDir);
@@ -94,7 +94,7 @@ xdescribe('Next.js build output', () => {
         const buildOutput = findModulesInChunk('pages_', buildOutputDir);
         const hasReact = buildOutput?.some(
           (module) =>
-            module.includes('node_modules/react/') || module === 'react'
+            module.includes('node_modules/react/') || module === 'react',
         );
         expect(hasReact).toBe(false);
       });
@@ -108,7 +108,7 @@ xdescribe('Next.js build output', () => {
         // @ant-design
         const buildOutput = findModulesInChunk('pages__app', buildOutputDir);
         const hasReact = buildOutput?.some(
-          (module) => module.includes('/@ant-design/') || module === 'react'
+          (module) => module.includes('/@ant-design/') || module === 'react',
         );
         expect(hasReact).toBe(false);
       });
@@ -118,7 +118,7 @@ xdescribe('Next.js build output', () => {
 
 function findFileInDirectory(
   filename: string,
-  directory: string
+  directory: string,
 ): string | null {
   const files = fs.readdirSync(directory);
   for (const file of files) {

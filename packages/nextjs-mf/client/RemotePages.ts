@@ -48,7 +48,7 @@ export class RemotePages {
    * Load a remote page map and add its routes to registry.
    */
   async loadRemotePageMap(
-    remote: RemoteContainer
+    remote: RemoteContainer,
   ): Promise<PageMap | undefined> {
     const pageMap = await remote.getPageMap();
     if (!pageMap) {
@@ -161,20 +161,20 @@ export class RemotePages {
               React.createElement(
                 'div',
                 null,
-                'This page is shown only in DEVELOPMENT mode. In PRODUCTION NextJS will reload this page trying to obtain it again from the server.'
+                'This page is shown only in DEVELOPMENT mode. In PRODUCTION NextJS will reload this page trying to obtain it again from the server.',
               ),
               React.createElement(
                 'div',
                 null,
                 'Federated page ',
                 route,
-                ' load error:'
+                ' load error:',
               ),
               React.createElement(
                 'div',
                 null,
-                React.createElement('b', null, (e as Error).message)
-              )
+                React.createElement('b', null, (e as Error).message),
+              ),
             ),
           exports: {},
           styles: [],

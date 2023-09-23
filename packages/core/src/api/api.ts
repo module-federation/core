@@ -14,7 +14,7 @@ import type {
  * @returns remote container
  */
 export async function loadAndInitializeRemote(
-  remoteOptions: RemoteOptions
+  remoteOptions: RemoteOptions,
 ): Promise<RemoteContainer> {
   const globalScope = getScope();
   const containerKey = getContainerKey(remoteOptions);
@@ -83,10 +83,10 @@ export async function getModules({
 
   try {
     const moduleFactories = await Promise.all(
-      modulePaths.map(remoteContainer.get, remoteContainer)
+      modulePaths.map(remoteContainer.get, remoteContainer),
     );
 
-    return moduleFactories.filter(Boolean).map(modFactory => modFactory());
+    return moduleFactories.filter(Boolean).map((modFactory) => modFactory());
   } catch (error) {
     console.error('[mf] - Unable to getModules', error);
   }

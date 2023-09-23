@@ -24,7 +24,7 @@ class DelegateModulesPlugin {
 
   private addDelegatesToChunks(
     compilation: Compilation,
-    chunks: Chunk[]
+    chunks: Chunk[],
   ): void {
     for (const chunk of chunks) {
       for (const module of Array.from(this._delegateModules)) {
@@ -36,7 +36,7 @@ class DelegateModulesPlugin {
   private addModuleAndDependenciesToChunk(
     module: Module,
     chunk: Chunk,
-    compilation: Compilation
+    compilation: Compilation,
   ): void {
     if (!compilation.chunkGraph.isModuleInChunk(module, chunk)) {
       if (this.options.debug) {
@@ -67,7 +67,7 @@ class DelegateModulesPlugin {
 
   removeDelegatesNonRuntimeChunks(
     compilation: Compilation,
-    chunks: Iterable<Chunk>
+    chunks: Iterable<Chunk>,
   ): void {
     for (const chunk of chunks) {
       if (!chunk.hasRuntime()) {
@@ -76,7 +76,7 @@ class DelegateModulesPlugin {
             'non-runtime chunk:',
             chunk.debugId,
             chunk.id,
-            chunk.name
+            chunk.name,
           );
         this._delegateModules.forEach((module) => {
           compilation.chunkGraph.disconnectChunkAndModule(chunk, module);
@@ -114,17 +114,17 @@ class DelegateModulesPlugin {
               console.log(
                 remoteContainer?.name,
                 runtimeChunk.name,
-                this._delegateModules.size
+                this._delegateModules.size,
               );
             this.addDelegatesToChunks(
               compilation,
-              [remoteContainer, runtimeChunk].filter(Boolean) as Chunk[]
+              [remoteContainer, runtimeChunk].filter(Boolean) as Chunk[],
             );
 
             this.removeDelegatesNonRuntimeChunks(compilation, chunks);
-          }
+          },
         );
-      }
+      },
     );
   }
 
@@ -139,9 +139,9 @@ class DelegateModulesPlugin {
         const knownDelegates = new Set(
           remotes
             ? (Object.values(remotes) as string[]).map((remote: string) =>
-                remote.replace('internal ', '')
+                remote.replace('internal ', ''),
               )
-            : []
+            : [],
         );
 
         for (const module of modules) {
@@ -152,7 +152,7 @@ class DelegateModulesPlugin {
         }
         // Continue the process
         callback();
-      }
+      },
     );
   }
 }

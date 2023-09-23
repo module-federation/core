@@ -5,7 +5,7 @@
     "jest": true
   },
   "globals": {
-    "__webpack_require__":"writable"
+    "__webpack_require__": "writable"
   },
   "overrides": [
     {
