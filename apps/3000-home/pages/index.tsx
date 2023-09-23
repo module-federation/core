@@ -97,9 +97,9 @@ const Home = () => {
             </td>
             <td>[Button from antd@4.20.0]</td>
             <td>
-              {/* <Suspense fallback="loading ButtonOldAnt">
+              <Suspense fallback="loading ButtonOldAnt">
                 <ButtonOldAnt />
-              </Suspense> */}
+              </Suspense>
             </td>
           </tr>
           <tr>
@@ -113,9 +113,9 @@ const Home = () => {
               <img src="./webpack.png" />
             </td>
             <td>
-              {/* <Suspense fallback="loading WebpackPngRemote">
+              <Suspense fallback="loading WebpackPngRemote">
                 <WebpackPngRemote />
-              </Suspense> */}
+              </Suspense>
             </td>
           </tr>
           <tr>
@@ -129,9 +129,9 @@ const Home = () => {
               <img src="./webpack.svg" />
             </td>
             <td>
-              {/* <Suspense fallback="loading WebpackSvgRemote">
+              <Suspense fallback="loading WebpackSvgRemote">
                 <WebpackSvgRemote />
-              </Suspense> */}
+              </Suspense>
             </td>
           </tr>
         </tbody>

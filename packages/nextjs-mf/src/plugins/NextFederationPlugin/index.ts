@@ -95,7 +95,7 @@ export class NextFederationPlugin {
     // If shared modules are provided, remove unnecessary shared keys from the default share scope
     // @ts-ignore
     if (this._options.shared) {
-     // removeUnnecessarySharedKeys(this._options.shared as SharedObject);
+      // removeUnnecessarySharedKeys(this._options.shared as SharedObject);
     }
 
     const ModuleFederationPlugin: container.ModuleFederationPlugin =
