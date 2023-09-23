@@ -1,19 +1,20 @@
-import type { Compiler } from "webpack";
-import { container } from "webpack";
-import path from "path";
+import type { Compiler } from 'webpack';
+import { container } from 'webpack';
+import path from 'path';
 import type {
   ModuleFederationPluginOptions,
-  SharedObject
-} from "@module-federation/utilities";
+  SharedObject,
+} from '@module-federation/utilities';
 import {
   DEFAULT_SHARE_SCOPE,
   DEFAULT_SHARE_SCOPE_BROWSER,
-  getDelegates
-} from "../../internal";
-import { hasLoader, injectRuleLoader } from "../../loaders/helpers";
+  getDelegates,
+} from '../../internal';
+import { hasLoader, injectRuleLoader } from '../../loaders/helpers';
+const { ModuleFederationPlugin } = require('@module-federation/enhanced');
 
 type ConstructableModuleFederationPlugin = new (
-  options: ModuleFederationPluginOptions
+  options: ModuleFederationPluginOptions,
 ) => container.ModuleFederationPlugin;
 
 /**
@@ -24,14 +25,13 @@ type ConstructableModuleFederationPlugin = new (
  */
 export function getModuleFederationPluginConstructor(
   isServer: boolean,
-  compiler: Compiler
+  compiler: Compiler,
 ): ConstructableModuleFederationPlugin {
   if (isServer) {
     return require('@module-federation/node')
       .NodeFederationPlugin as ConstructableModuleFederationPlugin;
   }
-  return compiler.webpack.container
-    .ModuleFederationPlugin as unknown as ConstructableModuleFederationPlugin;
+  return ModuleFederationPlugin as unknown as ConstructableModuleFederationPlugin;
 }
 
 /**
@@ -62,31 +62,31 @@ export const retrieveDefaultShared = (isServer: boolean): SharedObject => {
  */
 export function applyRemoteDelegates(
   options: ModuleFederationPluginOptions,
-  compiler: Compiler
+  compiler: Compiler,
 ) {
   if (options.remotes) {
     // Get the available delegates
     const delegates = getDelegates(options.remotes);
     compiler.options.module.rules.push({
-      enforce: "pre",
+      enforce: 'pre',
       test: [/_app/],
-      loader: require.resolve("../../loaders/patchDefaultSharedLoader")
+      loader: require.resolve('../../loaders/patchDefaultSharedLoader'),
     });
     // Add the delegate loader for hoist and container to the module rules
     compiler.options.module.rules.push({
-      enforce: "pre",
+      enforce: 'pre',
       test: [/internal-delegate-hoist/, /delegate-hoist-container/],
       include: [
         compiler.context,
         /internal-delegate-hoist/,
         /delegate-hoist-container/,
         //eslint-disable-next-line
-        /next[\/]dist/
+        /next[\/]dist/,
       ],
-      loader: require.resolve("../../loaders/delegateLoader"),
+      loader: require.resolve('../../loaders/delegateLoader'),
       options: {
-        delegates
-      }
+        delegates,
+      },
     });
   }
 }
@@ -100,23 +100,26 @@ export function applyRemoteDelegates(
  * @param {Compiler} compiler - The Webpack compiler instance.
  * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
  */
-export const applyPathFixes = (compiler: Compiler, options: ModuleFederationPluginOptions) => {
+export const applyPathFixes = (
+  compiler: Compiler,
+  options: ModuleFederationPluginOptions,
+) => {
   //@ts-ignore
   compiler.options.module.rules.forEach((rule) => {
     // next-image-loader fix which adds remote's hostname to the assets url
     //@ts-ignore
-    if (options.enableImageLoaderFix && hasLoader(rule, "next-image-loader")) {
+    if (options.enableImageLoaderFix && hasLoader(rule, 'next-image-loader')) {
       // childCompiler.options.module.parser.javascript?.url = 'relative';
       injectRuleLoader(rule, {
-        loader: require.resolve("../../loaders/fixImageLoader")
+        loader: require.resolve('../../loaders/fixImageLoader'),
       });
     }
 
     // url-loader fix for which adds remote's hostname to the assets url
     //@ts-ignore
-    if (options.enableUrlLoaderFix && hasLoader(rule, "url-loader")) {
+    if (options.enableUrlLoaderFix && hasLoader(rule, 'url-loader')) {
       injectRuleLoader({
-        loader: require.resolve("../../loaders/fixUrlLoader")
+        loader: require.resolve('../../loaders/fixUrlLoader'),
       });
     }
   });

@@ -51,6 +51,18 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
     const undoPath = getUndoPath(chunkName, path, false);
     const ident = Template.toIdentifier(uniqueName || '');
 
+    // Define potential lookup keys
+    const potentialLookups = [
+      this.chunk?.name,
+      ident,
+      uniqueName
+    ];
+
+    // Generate lookup string using potential keys
+    const lookupString = potentialLookups.filter(Boolean).map((lookup) => {
+      return `remoteReg[${JSON.stringify(lookup)}]`;
+    }).join(' || ');
+
     return Template.asString([
       'var scriptUrl;',
       // its an esproxy so nesting into _config directly is not possible
@@ -58,7 +70,7 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
       let remoteContainerRegistry = {
         get url() {
           var remoteReg = globalThis.__remote_scope__ ? globalThis.__remote_scope__._config : {};
-          return remoteReg[${JSON.stringify(ident)}] || remoteReg[${JSON.stringify(uniqueName)}];
+          return ${lookupString}
         }
       };
       `,

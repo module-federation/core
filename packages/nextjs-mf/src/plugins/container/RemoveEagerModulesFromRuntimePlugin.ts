@@ -30,12 +30,12 @@ class RemoveEagerModulesFromRuntimePlugin {
       console.warn(
         '[nextjs-mf]:',
         'RemoveEagerModulesFromRuntimePlugin container is not defined:',
-        this.container
+        this.container,
       );
       return;
     }
 
-    return
+    return;
 
     compiler.hooks.thisCompilation.tap(
       'RemoveEagerModulesFromRuntimePlugin',
@@ -48,9 +48,9 @@ class RemoveEagerModulesFromRuntimePlugin {
                 this.processModules(compilation, chunk, modules);
               }
             }
-          }
+          },
         );
-      }
+      },
     );
   }
 
@@ -63,7 +63,7 @@ class RemoveEagerModulesFromRuntimePlugin {
   private processModules(
     compilation: Compilation,
     chunk: Chunk,
-    modules: Iterable<Module>
+    modules: Iterable<Module>,
   ) {
     for (const module of modules) {
       if (!compilation.chunkGraph.isModuleInChunk(module, chunk)) {
@@ -86,10 +86,7 @@ class RemoveEagerModulesFromRuntimePlugin {
   private removeModules(compilation: Compilation, chunk: Chunk) {
     for (const moduleToRemove of this.modulesToProcess) {
       if (this.debug) {
-        console.log(
-          'removing',
-          moduleToRemove.constructor.name
-        );
+        console.log('removing', moduleToRemove.constructor.name);
       }
 
       if (compilation.chunkGraph.isModuleInChunk(moduleToRemove, chunk)) {
@@ -100,5 +97,3 @@ class RemoveEagerModulesFromRuntimePlugin {
 }
 
 export default RemoveEagerModulesFromRuntimePlugin;
-
-

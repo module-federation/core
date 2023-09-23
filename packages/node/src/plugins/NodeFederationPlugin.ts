@@ -102,6 +102,7 @@ class NodeFederationPlugin {
     { experiments, debug, ...options }: NodeFederationOptions,
     context: Context
   ) {
+    console.log('NODE FEDERATION PLUGIN', context)
     this._options = options || ({} as ModuleFederationPluginOptions);
     this.context = context || ({} as Context);
     this.experiments = experiments || {};

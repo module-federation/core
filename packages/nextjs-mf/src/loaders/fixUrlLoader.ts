@@ -18,7 +18,7 @@ export function fixUrlLoader(content: string) {
   // Replace the default export path in the content with the modified path that includes the hostname.
   return content.replace(
     'export default "/',
-    `export default ${currentHostnameCode}+"/`
+    `export default ${currentHostnameCode}+"/`,
   );
 }
 

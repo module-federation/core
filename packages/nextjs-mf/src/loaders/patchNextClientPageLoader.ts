@@ -11,7 +11,7 @@ import path from 'path';
  */
 export default function patchNextClientPageLoader(
   this: LoaderContext<Record<string, unknown>>,
-  content: string
+  content: string,
 ) {
   if (content.includes('MFClient')) {
     // If MFClient already applied then skip patch
@@ -24,7 +24,7 @@ export default function patchNextClientPageLoader(
    */
   const pathMFClient = path.relative(
     this.context,
-    path.resolve(__dirname, '../../client/MFClient.js')
+    path.resolve(__dirname, '../../client/MFClient.js'),
   );
 
   /**
@@ -33,8 +33,8 @@ export default function patchNextClientPageLoader(
    * @returns {string} The patched content.
    */
   return content.replace(
-      'exports.default = PageLoader;',
-      `
+    'exports.default = PageLoader;',
+    `
         const MFClient = require(${JSON.stringify(pathMFClient)}).MFClient;
 
         class PageLoaderExtended extends PageLoader {
@@ -60,8 +60,8 @@ export default function patchNextClientPageLoader(
           }
         }
         exports.default = PageLoaderExtended;
-      `
-    );
+      `,
+  );
 }
 
 // module.exports = patchNextClientPageLoader;

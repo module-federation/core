@@ -18,7 +18,6 @@ function cleanInitArrays(array) {
 }
 
 function asyncOperation(originalPush) {
-  __webpack_require__.checkAsyncReqs();
   return Promise.all(__webpack_require__.initConsumes).then(function(){
     return Promise.all(__webpack_require__.initRemotes)
   }).then(function () {

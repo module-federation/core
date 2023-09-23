@@ -45,9 +45,9 @@ export class MFClient {
 
     this.combinedPages = new CombinedPages(
       (this._nextPageLoader as any)._getPageListOriginal.bind(
-        this._nextPageLoader
+        this._nextPageLoader,
       ),
-      this.remotePages
+      this.remotePages,
     );
 
     this._wrapLoadRoute(nextPageLoader);
@@ -109,7 +109,7 @@ export class MFClient {
   private _wrapLoadRoute(nextPageLoader: PageLoader) {
     if (!nextPageLoader?.routeLoader?.loadRoute) {
       throw new Error(
-        '[nextjs-mf] Cannot wrap `pageLoader.routeLoader.loadRoute()` with custom logic.'
+        '[nextjs-mf] Cannot wrap `pageLoader.routeLoader.loadRoute()` with custom logic.',
       );
     }
 
@@ -137,7 +137,7 @@ export class MFClient {
             'loadedRemoteRoute',
             routeInfo,
             prefetch,
-            this.remotePages.routeToRemote(route)
+            this.remotePages.routeToRemote(route),
           );
         } catch (e) {
           // as fallback try to use original loadRoute for keeping nextjs logic for routes load errors
@@ -155,7 +155,7 @@ export class MFClient {
   private _wrapWhenEntrypoint(nextPageLoader: PageLoader) {
     if (!nextPageLoader.routeLoader?.whenEntrypoint) {
       throw new Error(
-        '[nextjs-mf] Cannot wrap `pageLoader.routeLoader.whenEntrypoint()` with custom logic.'
+        '[nextjs-mf] Cannot wrap `pageLoader.routeLoader.whenEntrypoint()` with custom logic.',
       );
     }
 
@@ -186,7 +186,7 @@ export class MFClient {
                   remote
                     .getContainer()
                     .then(() => this.remotePages.loadRemotePageMap(remote))
-                    .catch(() => null)
+                    .catch(() => null),
                 );
               }
             });
@@ -201,7 +201,7 @@ export class MFClient {
               'loadedRemoteRoute',
               routeInfo,
               false,
-              this.remotePages.routeToRemote(route)
+              this.remotePages.routeToRemote(route),
             );
             return routeInfo;
           }

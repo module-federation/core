@@ -13,7 +13,7 @@ import path from 'path';
  */
 export default function patchDefaultSharedLoader(
   this: LoaderContext<Record<string, unknown>>,
-  content: string
+  content: string,
 ) {
   if (content.includes('placeholderModuleEnsure')) {
     // If already patched, return

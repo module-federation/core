@@ -14,7 +14,9 @@ import { DEFAULT_SHARE_SCOPE } from '../../internal';
  *
  * @param {Record<string, unknown>} shared - The shared object to be checked.
  */
-export function removeUnnecessarySharedKeys(shared: Record<string, unknown>): void {
+export function removeUnnecessarySharedKeys(
+  shared: Record<string, unknown>,
+): void {
   Object.keys(shared).forEach((key: string) => {
     /**
      * If the key is found in the default share scope, log a warning and remove the key from the shared object.
@@ -22,11 +24,9 @@ export function removeUnnecessarySharedKeys(shared: Record<string, unknown>): vo
     if (DEFAULT_SHARE_SCOPE[key]) {
       console.warn(
         `%c[nextjs-mf] You are sharing ${key} from the default share scope. This is not necessary and can be removed.`,
-        'color: red'
+        'color: red',
       );
       delete (shared as { [key: string]: unknown })[key];
     }
   });
 }
-
-

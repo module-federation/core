@@ -19,7 +19,7 @@ export const regexEqual = (
     | ((value: string) => boolean)
     | RuleSetConditionAbsolute[]
     | undefined,
-  y: RegExp
+  y: RegExp,
 ): boolean => {
   return (
     x instanceof RegExp &&

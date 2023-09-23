@@ -1,10 +1,10 @@
 import type { Chunk, Compiler } from 'webpack';
 import { RawSource } from 'webpack-sources';
-//@ts-ignore
-import type { ModuleFederationPluginOptions } from '../types';
+import { ModuleFederationPluginOptions } from './types';
 import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
 import { RuntimeGlobals, Compilation } from 'webpack';
 import RemoveEagerModulesFromRuntimePlugin from './RemoveEagerModulesFromRuntimePlugin';
+import { getAllChunks } from 'webpack/lib/javascript/ChunkHelpers';
 
 /**
  * This interface includes additional fields specific to the plugin's behavior.
@@ -18,7 +18,7 @@ interface InvertedContainerOptions extends ModuleFederationPluginOptions {
   container?: string;
   remotes: Record<string, string>; // A map of remote modules to their URLs.
   runtime: string; // The name of the current module.
-  debug?: boolean | undefined; // A flag to enable debug logging.
+  debug?: boolean; // A flag to enable debug logging.
 }
 
 /**
@@ -32,13 +32,8 @@ class InvertedContainerPlugin {
    * Constructor for the InvertedContainerPlugin.
    * @param {InvertedContainerOptions} options - Plugin configuration options.
    */
-  constructor(options: {
-    container: string | undefined;
-    runtime: string;
-    remotes: Record<string, string>;
-    debug: boolean | undefined;
-  }) {
-    this.options = options || ({} as InvertedContainerOptions);
+  constructor(options: InvertedContainerOptions) {
+    this.options = options;
   }
 
   /**
@@ -46,12 +41,12 @@ class InvertedContainerPlugin {
    * @param {Compilation} compilation - Webpack compilation instance.
    * @returns {Module | undefined} - The container module or undefined if not found.
    */
-  resolveContainerModule(compilation: Compilation) {
+  private resolveContainerModule(compilation: Compilation) {
     if (!this.options.container) {
       return undefined;
     }
     const container = compilation.entrypoints
-      .get(this.options.container as string)
+      .get(this.options.container)
       ?.getRuntimeChunk?.();
     if (!container) {
       return undefined;
@@ -68,7 +63,7 @@ class InvertedContainerPlugin {
    * Apply method for the Webpack plugin, handling the plugin logic and hooks.
    * @param {Compiler} compiler - Webpack compiler instance.
    */
-  apply(compiler: Compiler) {
+  public apply(compiler: Compiler) {
     new RemoveEagerModulesFromRuntimePlugin({
       container: this.options.container,
       debug: this.options.debug,
@@ -100,14 +95,14 @@ class InvertedContainerPlugin {
               new InvertedContainerRuntimeModule(set, this.options, {
                 webpack: compiler.webpack,
                 debug: this.options.debug,
-              })
+              }),
             );
           }
         };
 
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           'InvertedContainerPlugin',
-          handler
+          handler,
         );
 
         compilation.hooks.optimizeChunks.tap(
@@ -123,62 +118,30 @@ class InvertedContainerPlugin {
               if (
                 !compilation.chunkGraph.isModuleInChunk(
                   containerEntryModule,
-                  chunk
+                  chunk,
                 ) &&
                 chunk.hasRuntime()
               ) {
                 compilation.chunkGraph.connectChunkAndModule(
                   chunk,
-                  containerEntryModule
+                  containerEntryModule,
                 );
               }
             }
-          }
+          },
         );
 
         const hooks =
           javascript.JavascriptModulesPlugin.getCompilationHooks(compilation);
 
-        compilation.hooks.processAssets.tap(
-          {
-            name: 'InvertedContainerPlugin',
-            stage: Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
-          },
-          (assets) => {
-            for (const chunk of compilation.chunks) {
-              for (const file of chunk.files) {
-                const asset = compilation.getAsset(file);
-                if (asset) {
-                  let source = asset.source.source();
-                  const chunkID =
-                    typeof chunk.id === 'string'
-                      ? JSON.stringify(chunk.id)
-                      : chunk.id;
-                  // Inject the chunk name at the beginning of the file
-                  source = source
-                    .toString()
-                    //@ts-ignore
-                    .replace('__INSERT_CH_ID__MF__', chunkID);
-                  const updatedSource = new RawSource(source);
-
-                  //@ts-ignore
-                  compilation.updateAsset(file, updatedSource);
-                }
-              }
-            }
-          }
-        );
-
         hooks.renderStartup.tap(
           'InvertedContainerPlugin',
-          (source : any, renderContext:any, startupRendercontext: any) => {
-            const isInvalidContext = 
+          (source: any, renderContext: any, startupRendercontext: any) => {
+            const isInvalidContext =
               !renderContext ||
-              //@ts-ignore
               renderContext?._name ||
               !renderContext?.debugId ||
               !compilation.chunkGraph.isEntryModule(renderContext) ||
-              //@ts-ignore
               renderContext?.rawRequest?.includes('pages/api') ||
               renderContext?.layer === 'api';
 
@@ -186,34 +149,56 @@ class InvertedContainerPlugin {
               // skip empty modules, container entry, and anything that doesn't have a moduleid or is not an entrypoint module.
               return source;
             }
-     
-            const { runtimeTemplate } = compilation;
+
+            const { runtimeTemplate, chunkGraph } = compilation;
             const replaceSource = source.source().toString();
-            const [webpack_exec, webpack_exports] = replaceSource.split('\n');
+            const [webpack_exec, ...webpack_exports] =
+              replaceSource.split('\n');
 
-        const chunkID = typeof startupRendercontext.chunk.id === 'string' ? JSON.stringify(startupRendercontext.chunk.id) : startupRendercontext.chunk.id
-
+            const chunkID =
+              typeof startupRendercontext.chunk.id === 'string'
+                ? JSON.stringify(startupRendercontext.chunk.id)
+                : startupRendercontext.chunk.id;
+                const entries = Array.from(
+                  chunkGraph.getChunkEntryModulesWithChunkGroupIterable(startupRendercontext.chunk)
+                );
+                const dependentChunkIds = new Set(entries
+                  .filter(([module, entrypoint]) => entrypoint !== undefined)
+                  .flatMap(([module, entrypoint]) => {
+                    if (entrypoint) {
+                      const runtimeChunk = entrypoint.getRuntimeChunk();
+                      //@ts-ignore
+                      const chunks = getAllChunks(entrypoint,runtimeChunk);
+                      return Array.from(chunks, c => c.id);
+                    }
+                    return [];
+                  }));
             return Template.asString([
-              webpack_exec.replace('__webpack_exec__', '__original_webpack_exec__'),
+              webpack_exec.replace(
+                '__webpack_exec__',
+                '__original_webpack_exec__',
+              ),
               'globalThis.ongoingRemotes = globalThis.ongoingRemotes || [];',
               `var __webpack_exec__ = async function() {`,
               Template.indent([
-                `${RuntimeGlobals.ensureChunkHandlers}.consumes(${chunkID},globalThis.ongoingRemotes)`,
-                `await Promise.all((()=>globalThis.ongoingRemotes)())`,
-                `${RuntimeGlobals.ensureChunkHandlers}.remotes(${chunkID},globalThis.ongoingRemotes)`,
-                `await Promise.all((()=>globalThis.ongoingRemotes)())`,
+                `var chunkids = ${JSON.stringify(Array.from(dependentChunkIds))};`,
+                `chunkids.forEach((id) => ${RuntimeGlobals.ensureChunkHandlers}.consumes(id, globalThis.ongoingRemotes));`,
+                `await Promise.all(globalThis.ongoingRemotes);`,
+                'console.log("waiting for consume", globalThis.ongoingRemotes);',
+                `chunkids.forEach((id) => ${RuntimeGlobals.ensureChunkHandlers}.remotes(id, globalThis.ongoingRemotes));`,
+                `await Promise.all(globalThis.ongoingRemotes);`,
+                'console.log("waiting for remote", globalThis.ongoingRemotes);',
                 `return  __original_webpack_exec__.apply(this, arguments);`,
               ]),
               `};`,
-              webpack_exports,
+             // 'debugger',
+              ...webpack_exports,
             ]);
-          }
+          },
         );
-      }
+      },
     );
   }
 }
 
 export default InvertedContainerPlugin;
-
-

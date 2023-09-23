@@ -101,12 +101,16 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
  */
 
 export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
-  DEFAULT_SHARE_SCOPE
+  DEFAULT_SHARE_SCOPE,
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
 
   // Initialize eager as true for 'react', 'react-dom', 'next/router', and 'next/link', otherwise undefined
-  const eager = ['react', 'react-dom', 'next/router', 'next/link'].some(k => k === key) ? true : undefined;
+  const eager = ['react', 'react-dom', 'next/router', 'next/link'].some(
+    (k) => k === key,
+  )
+    ? false
+    : undefined;
 
   // Set eager and import to undefined for all entries, except for the ones specified above
   acc[key] = { ...value, eager, import: undefined };
@@ -120,7 +124,8 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
  * @param {string} value - The remote value to check.
  * @returns {boolean} - True if the value is an internal or promise delegate module reference, false otherwise.
  */
-const isInternalOrPromise = (value: string): boolean => ['internal ', 'promise '].some(prefix => value.startsWith(prefix));
+const isInternalOrPromise = (value: string): boolean =>
+  ['internal ', 'promise '].some((prefix) => value.startsWith(prefix));
 
 /**
  * Checks if the remote value is using the standard remote syntax.
@@ -141,37 +146,39 @@ const isStandardRemoteSyntax = (value: string): boolean => {
  * the value for internal or promise delegate module reference, or the created delegated module.
  */
 export const parseRemotes = (
-  remotes: Record<string, any>
+  remotes: Record<string, any>,
 ): Record<string, string> => {
-  return Object.entries(remotes).reduce((acc, [key, value]) => {
-    if (isInternalOrPromise(value)) {
-      // If the value is an internal or promise delegate module reference, keep the original value
-      return { ...acc, [key]: value };
-    }
-
-    return { ...acc, [key]: value };
-
-
-    if (isStandardRemoteSyntax(value)) {
-      let resolvePath
-      try {
-        resolvePath = require.resolve('./default-delegate.cjs')
-      } catch(e) {
-        resolvePath = require.resolve('./default-delegate')
+  return Object.entries(remotes).reduce(
+    (acc, [key, value]) => {
+      if (isInternalOrPromise(value)) {
+        // If the value is an internal or promise delegate module reference, keep the original value
+        return { ...acc, [key]: value };
       }
 
-      // If the value is using the standard remote syntax, create a delegated module
-      return {
-        ...acc,
-        [key]: createDelegatedModule(resolvePath, {
-          remote: value,
-        }),
-      };
-    }
+      return { ...acc, [key]: value };
 
-    // If none of the above conditions are met, keep the original value
-    return { ...acc, [key]: value };
-  }, {} as Record<string, string>);
+      if (isStandardRemoteSyntax(value)) {
+        let resolvePath;
+        try {
+          resolvePath = require.resolve('./default-delegate.cjs');
+        } catch (e) {
+          resolvePath = require.resolve('./default-delegate');
+        }
+
+        // If the value is using the standard remote syntax, create a delegated module
+        return {
+          ...acc,
+          [key]: createDelegatedModule(resolvePath, {
+            remote: value,
+          }),
+        };
+      }
+
+      // If none of the above conditions are met, keep the original value
+      return { ...acc, [key]: value };
+    },
+    {} as Record<string, string>,
+  );
 };
 /**
  * Checks if the remote value is an internal delegate module reference.
@@ -191,8 +198,14 @@ const isInternalDelegate = (value: string): boolean => {
  * @param {Record<string, any>} remotes - The remotes object containing delegate module references.
  * @returns {Record<string, string>} - An object containing only the delegate modules from the remotes object.
  */
-export const getDelegates = (remotes: Record<string, any>): Record<string, string> =>
-  Object.entries(remotes).reduce((acc, [key, value]) => isInternalDelegate(value) ? {...acc, [key]: value} : acc, {});
+export const getDelegates = (
+  remotes: Record<string, any>,
+): Record<string, string> =>
+  Object.entries(remotes).reduce(
+    (acc, [key, value]) =>
+      isInternalDelegate(value) ? { ...acc, [key]: value } : acc,
+    {},
+  );
 
 /**
  * Validates the shared item type and constructs a shared configuration object based on the item and key.
@@ -235,22 +248,25 @@ const parseShareOptions = (options: ModuleFederationPluginOptions) => {
   const sharedOptions: [string, SharedConfig][] = parseOptions(
     options.shared,
     getSharedConfig,
-    (item: any) => item
+    (item: any) => item,
   );
 
-  return sharedOptions.reduce((acc, [key, options]) => {
-    acc[key] = {
-      import: options.import,
-      shareKey: options.shareKey || key,
-      shareScope: options.shareScope,
-      requiredVersion: options.requiredVersion,
-      strictVersion: options.strictVersion,
-      singleton: options.singleton,
-      packageName: options.packageName,
-      eager: options.eager,
-    };
-    return acc;
-  }, {} as Record<string, SharedConfig>);
+  return sharedOptions.reduce(
+    (acc, [key, options]) => {
+      acc[key] = {
+        import: options.import,
+        shareKey: options.shareKey || key,
+        shareScope: options.shareScope,
+        requiredVersion: options.requiredVersion,
+        strictVersion: options.strictVersion,
+        singleton: options.singleton,
+        packageName: options.packageName,
+        eager: options.eager,
+      };
+      return acc;
+    },
+    {} as Record<string, SharedConfig>,
+  );
 };
 
 /**

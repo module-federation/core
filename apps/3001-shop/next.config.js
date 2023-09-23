@@ -43,9 +43,9 @@ const nextConfig = {
           //     }/remoteEntry.js`,
           //   }
           // ),
-          home: `home_app@http://localhost:3000/_next/static/${
-            isServer ? 'ssr' : 'chunks'
-          }/remoteEntry.js`,
+          // home: `home_app@http://localhost:3000/_next/static/${
+          //   isServer ? 'ssr' : 'chunks'
+          // }/remoteEntry.js`,
           shop: `shop@http://localhost:3001/_next/static/${
             isServer ? 'ssr' : 'chunks'
           }/remoteEntry.js`,
