@@ -18,7 +18,7 @@ import ConsumeSharedRuntimeModule from './ConsumeSharedRuntimeModule';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 
 import ModuleNotFoundError = require('webpack/lib/ModuleNotFoundError');
-import RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
+import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import WebpackError = require('webpack/lib/WebpackError');
 import Compiler = require('webpack/lib/Compiler');
 import LazySet = require('webpack/lib/util/LazySet');

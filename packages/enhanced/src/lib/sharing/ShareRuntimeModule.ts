@@ -5,9 +5,9 @@
 
 'use strict';
 
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import RuntimeModule from 'webpack/lib/RuntimeModule';
-import Template from 'webpack/lib/Template';
+import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import RuntimeModule = require('webpack/lib/RuntimeModule');
+import Template = require('webpack/lib/Template');
 import Compilation from 'webpack/lib/Compilation';
 import ChunkGraph from 'webpack/lib/ChunkGraph';
 import {

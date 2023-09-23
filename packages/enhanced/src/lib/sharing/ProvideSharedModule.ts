@@ -5,24 +5,21 @@
 
 import  AsyncDependenciesBlock = require('webpack/lib/AsyncDependenciesBlock');
 import Module = require('webpack/lib/Module');
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals'
+import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals'
 import makeSerializable = require('webpack/lib/util/makeSerializable');
-import Compilation from 'webpack/lib/Compilation';
-import RequestShortener from 'webpack/lib/RequestShortener'
+import type Compilation from 'webpack/lib/Compilation';
 import WebpackError from 'webpack/lib/WebpackError';
-import Hash from'webpack/lib/util/Hash'
 import { WEBPACK_MODULE_TYPE_PROVIDE } from 'webpack/lib/ModuleTypeConstants';
-import {
+import type {
   CodeGenerationContext,
   CodeGenerationResult,
   LibIdentOptions,
   NeedBuildContext,
-} from 'webpack/lib/Module';
-import { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
-import {
+  RequestShortener,
+  ResolverWithOptions,
   ObjectDeserializerContext,
-  ObjectSerializerContext,
-} from 'webpack/lib/serialization/ObjectMiddleware';
+  ObjectSerializerContext
+} from 'webpack/lib/Module';
 import { InputFileSystem } from 'webpack/lib/util/fs';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';

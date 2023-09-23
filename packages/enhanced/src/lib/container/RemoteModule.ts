@@ -17,11 +17,11 @@ import makeSerializable = require('webpack/lib/util/makeSerializable');
 import FallbackDependency from './FallbackDependency';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
 import type Compilation from 'webpack/lib/Compilation';
-import { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
-import { InputFileSystem } from 'webpack/lib/FileSystemInfo';
-import { RequestShortener } from 'webpack/lib/RuntimeModule';
+import type { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
+import type { InputFileSystem } from 'webpack/lib/FileSystemInfo';
+import type { RequestShortener } from 'webpack/lib/RuntimeModule';
 import { WEBPACK_MODULE_TYPE_REMOTE } from 'webpack/lib/ModuleTypeConstants';
-import { WebpackOptionsNormalized } from 'webpack/lib/WebpackOptionsDefaulter';
+import type { WebpackOptionsNormalized } from 'webpack/lib/WebpackOptionsDefaulter';
 
 type ObjectDeserializerContext =
   import('webpack/lib/serialization/ObjectMiddleware').ObjectDeserializerContext;
@@ -186,4 +186,4 @@ class RemoteModule extends Module {
 
 makeSerializable(RemoteModule, 'enhanced/lib/container/RemoteModule');
 
-export = RemoteModule;
+export default RemoteModule;

@@ -25,7 +25,7 @@ import type ChunkGraph from 'webpack/lib/ChunkGraph';
 import Chunk from 'webpack/lib/Chunk';
 import { WEBPACK_MODULE_TYPE_FALLBACK } from 'webpack/lib/ModuleTypeConstants';
 import RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
-import Template from 'webpack/lib/Template';
+import Template = require('webpack/lib/Template');
 import makeSerializable = require('webpack/lib/util/makeSerializable');
 import FallbackItemDependency from './FallbackItemDependency';
 

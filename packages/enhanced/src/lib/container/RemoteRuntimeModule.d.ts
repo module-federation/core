@@ -1,4 +1,4 @@
-export = RemoteRuntimeModule;
+export default RemoteRuntimeModule;
 /** @typedef {import("webpack/lib/Chunk")} Chunk */
 /** @typedef {import("./RemoteModule")} RemoteModule */
 declare class RemoteRuntimeModule extends RuntimeModule {

@@ -25,7 +25,7 @@ import type {
 } from 'webpack/lib/Module';
 import Module = require('webpack/lib/Module')
 import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from 'webpack/lib/ModuleTypeConstants';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import makeSerializable = require('webpack/lib/util/makeSerializable');
 import { rangeToString, stringifyHoley } from 'webpack/lib/util/semver';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';

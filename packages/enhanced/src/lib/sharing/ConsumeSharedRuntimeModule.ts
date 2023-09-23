@@ -3,8 +3,8 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import Template from 'webpack/lib/Template';
+import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import Template = require('webpack/lib/Template');
 import {
   parseVersionRuntimeCode,
   versionLtRuntimeCode,
@@ -14,9 +14,9 @@ import {
 import RuntimeModule = require('webpack/lib/RuntimeModule');
 import Module = require('webpack/lib/Module');
 import ConsumeSharedModule from './ConsumeSharedModule';
-import ChunkGraph from 'webpack/lib/ChunkGraph';
-import Compilation from 'webpack/lib/Compilation';
-import Chunk from 'webpack/lib/Chunk';
+import type ChunkGraph from 'webpack/lib/ChunkGraph';
+import type Compilation from 'webpack/lib/Compilation';
+import type Chunk from 'webpack/lib/Chunk';
 import { Source } from 'webpack-sources';
 
 /** @typedef {import("webpack-sources").Source} Source */
