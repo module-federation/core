@@ -6,7 +6,6 @@ import {
 import DelegateModulesPlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import JsonpChunkLoading from '../JsonpChunkLoading';
 /**
  * Applies client-specific plugins.
  *
@@ -22,7 +21,6 @@ import JsonpChunkLoading from '../JsonpChunkLoading';
  * - ChunkCorrelationPlugin: Collects metadata on chunks to enable proper module loading across different runtimes.
  * - InvertedContainerPlugin: Adds custom runtime modules to the container runtime to allow a host to expose its
  *   own remote interface at startup.
- * - JsonpChunkLoading: Adds a new plugin to hoist modules into remote runtime.
  *
  * If automatic page stitching is enabled, a loader is added to process the `next/dist/client/page-loader.js`
  * file. If a custom library is specified in the options, an error is thrown. The options.library property is
@@ -40,8 +38,6 @@ export function applyClientPlugins(
   // Build will hang without this. Likely something in my plugin
   compiler.options.optimization.splitChunks = undefined;
 
-  // Add a new plugin to hoist modules into remote runtime
-  new JsonpChunkLoading({ debug: extraOptions.debug }).apply(compiler);
   new DelegateModulesPlugin({
     container: name,
     runtime: 'webpack',
@@ -82,6 +78,9 @@ export function applyClientPlugins(
     runtime: 'webpack',
     container: options.name,
     remotes: options.remotes as Record<string, string>,
+    shared: options.shared as any,
+    shareScope: 'default',
+    exposes: options.exposes as any,
     debug: extraOptions.debug,
   }).apply(compiler);
 }

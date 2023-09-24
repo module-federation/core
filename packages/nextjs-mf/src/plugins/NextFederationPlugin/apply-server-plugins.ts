@@ -3,7 +3,7 @@ import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import DelegatesModulePlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import JsonpChunkLoading from '../JsonpChunkLoading';
+import {ModuleFederationPlugin} from '@module-federation/enhanced';
 /**
  * This function applies server-specific plugins to the webpack compiler.
  *
@@ -18,7 +18,6 @@ export function applyServerPlugins(
 ): void {
   // Import the StreamingTargetPlugin from @module-federation/node
   const { StreamingTargetPlugin } = require('@module-federation/node');
-  // new JsonpChunkLoading({ server: true }).apply(compiler);
 
   // Apply the DelegatesModulePlugin to the compiler
   new DelegatesModulePlugin({
@@ -29,7 +28,7 @@ export function applyServerPlugins(
 
   // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
   new StreamingTargetPlugin(options, {
-    ModuleFederationPlugin: compiler.webpack.container.ModuleFederationPlugin,
+    ModuleFederationPlugin: ModuleFederationPlugin,
   }).apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler
@@ -37,6 +36,9 @@ export function applyServerPlugins(
     runtime: 'webpack-runtime',
     container: options.name,
     remotes: options.remotes as Record<string, string>,
+    shared: options.shared as any,
+    shareScope: 'default',
+    exposes: options.exposes as any,
     debug: false,
   }).apply(compiler);
 }
@@ -190,3 +192,4 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     name: 'webpack-runtime',
   };
 }
+

@@ -1,10 +1,11 @@
 import type { Chunk, Compiler } from 'webpack';
 import { RawSource } from 'webpack-sources';
 import { ModuleFederationPluginOptions } from './types';
-import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
 import { RuntimeGlobals, Compilation } from 'webpack';
 import RemoveEagerModulesFromRuntimePlugin from './RemoveEagerModulesFromRuntimePlugin';
 import { getAllChunks } from 'webpack/lib/javascript/ChunkHelpers';
+import {ContainerEntryModule} from '@module-federation/enhanced';
+import { parseOptions } from '@module-federation/enhanced/src/lib/container/options';
 
 /**
  * This interface includes additional fields specific to the plugin's behavior.
@@ -76,60 +77,60 @@ class InvertedContainerPlugin {
         // Create a WeakSet to store chunks that have already been processed.
         const onceForChunkSet = new WeakSet();
 
-        // Define a handler function to be called for each chunk in the compilation.
-        const handler = (chunk: Chunk, set: Set<string>) => {
-          // If the chunk has already been processed, skip it.
-          if (onceForChunkSet.has(chunk)) {
-            return;
-          }
-          set.add(RuntimeGlobals.onChunksLoaded);
+        // Hook into the 'afterChunks' event to create a new container entry module and add it to the runtime chunk.
+        compilation.hooks.afterChunks.tap('InvertedContainerPlugin', (chunk) => {
+          if(this.options.container) {
 
-          // Mark the chunk as processed by adding it to the WeakSet.
-          onceForChunkSet.add(chunk);
-
-          if (chunk.hasRuntime()) {
-            // Add an InvertedContainerRuntimeModule to the chunk, which handles
-            // the runtime logic for loading remote modules.
-            compilation.addRuntimeModule(
-              chunk,
-              new InvertedContainerRuntimeModule(set, this.options, {
-                webpack: compiler.webpack,
-                debug: this.options.debug,
-              }),
-            );
-          }
-        };
-
-        compilation.hooks.additionalChunkRuntimeRequirements.tap(
-          'InvertedContainerPlugin',
-          handler,
-        );
-
-        compilation.hooks.optimizeChunks.tap(
-          'InvertedContainerPlugin',
-          (chunks) => {
-            const containerEntryModule =
-              this.resolveContainerModule(compilation);
-
-            if (!containerEntryModule) {
-              return;
-            }
-            for (const chunk of chunks) {
-              if (
-                !compilation.chunkGraph.isModuleInChunk(
-                  containerEntryModule,
-                  chunk,
-                ) &&
-                chunk.hasRuntime()
-              ) {
-                compilation.chunkGraph.connectChunkAndModule(
-                  chunk,
-                  containerEntryModule,
-                );
+            const runtimeChunks = new Map();
+            for (const entrypoint of compilation.entrypoints.values()) {
+              const runtimeChunk = entrypoint.getRuntimeChunk();
+              if (runtimeChunk) {
+                runtimeChunks.set(runtimeChunk.name, runtimeChunk);
               }
             }
-          },
-        );
+
+            const runtimeChunk = runtimeChunks.get(this.options.runtime);
+            const parsedoptions = parseOptions(
+              //@ts-ignore
+              this.options.exposes,
+              (item: any) => ({
+                import: Array.isArray(item) ? item : [item],
+                name: undefined,
+              }),
+              (item: any) => ({
+                import: Array.isArray(item.import) ? item.import : [item.import],
+                name: item.name || undefined,
+              }),
+            )
+            const containerEntryModule = new ContainerEntryModule(
+              this.options.container + 'new',
+              parseOptions(
+                //@ts-ignore
+                this.options.exposes,
+                (item: any) => ({
+                  import: Array.isArray(item) ? item : [item],
+                  name: undefined,
+                }),
+                (item: any) => ({
+                  import: Array.isArray(item.import) ? item.import : [item.import],
+                  name: item.name || undefined,
+                }),
+              ),
+              this.options.shareScope || 'default',
+            );
+//@ts-ignore
+            //compilation.chunkGraph.connectChunkAndModule(runtimeChunk, containerEntryModule)
+            // name: string,
+            // exposes: [string, ExposeOptions][],
+            // shareScope: string,
+            // const runtimeChunk = compilation.addChunk('webpack');
+            // compilation.chunkGraph.connectChunkAndModule(
+            //   runtimeChunk,
+            //   //@ts-ignore
+            //   containerEntryModule ,
+            // );
+          }
+        });
 
         const hooks =
           javascript.JavascriptModulesPlugin.getCompilationHooks(compilation);
@@ -208,3 +209,4 @@ class InvertedContainerPlugin {
 }
 
 export default InvertedContainerPlugin;
+
