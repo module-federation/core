@@ -12,7 +12,16 @@
         "main": "packages/enhanced/src/index.ts",
         "tsConfig": "packages/enhanced/tsconfig.lib.json",
         "assets": ["packages/enhanced/*.md"]
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build"
+        },
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "lint": {
       "executor": "@nx/linter:eslint",
