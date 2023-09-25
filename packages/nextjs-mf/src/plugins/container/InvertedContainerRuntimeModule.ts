@@ -17,7 +17,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
   constructor(
     options: InvertedContainerRuntimeModuleOptions,
   ) {
-    super('inverted container startup', RuntimeModule.STAGE_ATTACH);
+    super('inverted container startup', RuntimeModule.STAGE_BASIC);
     this.options = options;
   }
 
@@ -45,33 +45,36 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     const { name, debug } = this.options;
     const containerEntryModule = this.resolveContainerModule() as (Module & { _name: string }) | undefined;
     const containerName = containerEntryModule?._name || name;
+const chunk = this.chunk;
+
     const containerModuleId = containerEntryModule?.id || containerEntryModule?.debugId;
     // const hasEnsurechunkHandlers = !this.compilation.runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers)) {
-
-    if (!(containerName && containerModuleId)) {
+      const isPartialContainer = chunk.runtime === this.options.runtime 
+    if (!(containerName && containerModuleId) || !isPartialContainer) {
       return '';
     }
-
-    const globalObject = 'global';
-    const containerScope = 'window';
+    const globalObject = `globalThis.__remote_scope__`;
+    const containerScope = `${RuntimeGlobals.global}`;
 
     return `
       function attachRemote (resolve) {
         const innerRemote = __webpack_require__(${JSON.stringify(containerModuleId)});
-        ${containerScope}[${JSON.stringify(containerName)}] = innerRemote;
-        __webpack_require__.I('default',[globalThis.backupScope]);
+        console.log({innerRemote})
+        if(${globalObject}) {
+          ${globalObject}[${JSON.stringify(name)}] = innerRemote;
+        } else {
+          ${containerScope}[${JSON.stringify(name)}] = innerRemote;
+        }
+        //__webpack_require__.I('default',[globalThis.backupScope]);
         if(resolve) resolve(innerRemote);
       }
-
-      try {
-        __webpack_require__.own_remote = new Promise(function(resolve, reject){
-          __webpack_require__.O(0, ["${this.chunk.id}"], function() {
-            attachRemote(resolve);
-          }, 0);
-        });
-      } catch (e) {
-        attachRemote(resolve);
-        console.error('host runtime was unable to initialize its own remote', e);
+      if (__webpack_require__.O) {
+        console.log('has on chunk load handler');
+        __webpack_require__.O(0, ["${this.chunk.id}"], function() {
+          attachRemote();
+        }, 0);
+      } else {
+        attachRemote();
       }
     `;
   }
