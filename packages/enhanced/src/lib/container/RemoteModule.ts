@@ -185,5 +185,3 @@ class RemoteModule extends Module {
 makeSerializable(RemoteModule, 'enhanced/lib/container/RemoteModule');
 
 export default RemoteModule;
-
-
