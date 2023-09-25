@@ -27,7 +27,7 @@
     "build:prod": "nx run-many --target=build --projects=3000-home --verbose --output-style=stream",
     "build": "nx run-many --target=build --projects=3000-home --verbose --output-style=stream",
     "oldbuuild": "nx build",
-    "build:libs": "nx run-many --target=build --projects=utils,node,nextjs-mf --verbose --output-style=stream --maxParallel=1",
+    "build:libs": "nx run-many --target=build --projects=utils,node,nextjs-mf,enhanced --verbose --output-style=stream --maxParallel=1 --no-cache",
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
     "full:test": "nx run-many --target=test,lint,build --all",
