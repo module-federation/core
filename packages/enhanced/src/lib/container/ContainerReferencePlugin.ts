@@ -3,9 +3,9 @@
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 
-import Compiler from 'webpack/lib/Compiler';
-import { RuntimeGlobals } from 'webpack';
-import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
+import type Compiler from 'webpack/lib/Compiler';
+import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
 import FallbackDependency from './FallbackDependency';
 import FallbackItemDependency from './FallbackItemDependency';
 import FallbackModuleFactory from './FallbackModuleFactory';
@@ -13,11 +13,12 @@ import RemoteModule from './RemoteModule';
 import RemoteRuntimeModule from './RemoteRuntimeModule';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
 import { parseOptions } from './options';
-import ExternalsPlugin from 'webpack/lib/ExternalsPlugin';
-import Compilation from 'webpack/lib/Compilation';
-import NormalModuleFactory, {
-  ResolveData,
-} from 'webpack/lib/NormalModuleFactory';
+//@ts-ignore
+import ExternalsPlugin = require('webpack/lib/ExternalsPlugin');
+
+import type Compilation from 'webpack/lib/Compilation';
+import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
+import NormalModuleFactory = require('webpack/lib/NormalModuleFactory');
 import {
   ExternalsType,
   ContainerReferencePluginOptions,
@@ -83,8 +84,9 @@ class ContainerReferencePlugin {
         i++;
       }
     }
-
-    new ExternalsPlugin(remoteType, remoteExternals).apply(compiler);
+    const Externals = compiler.webpack.ExternalsPlugin || ExternalsPlugin;
+    //@ts-ignore
+    new Externals(remoteType, remoteExternals).apply(compiler);
 
     compiler.hooks.compilation.tap(
       'ContainerReferencePlugin',
@@ -128,7 +130,7 @@ class ContainerReferencePlugin {
                             i ? `/fallback-${i}` : ''
                           }`,
                     ),
-                    `${data.request.slice(key.length)}`,
+                    `.${data.request.slice(key.length)}`,
                     //@ts-ignore
                     config.shareScope,
                   );

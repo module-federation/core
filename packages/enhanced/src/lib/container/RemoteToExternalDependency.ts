@@ -4,8 +4,8 @@
 */
 
 'use strict';
-import ModuleDependency from 'webpack/lib/dependencies/ModuleDependency';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+import ModuleDependency = require('webpack/lib/dependencies/ModuleDependency');
+import makeSerializable = require('webpack/lib/util/makeSerializable');
 
 class RemoteToExternalDependency extends ModuleDependency {
   /**
@@ -25,7 +25,7 @@ class RemoteToExternalDependency extends ModuleDependency {
 
 makeSerializable(
   RemoteToExternalDependency,
-  'webpack/lib/container/RemoteToExternalDependency',
+  'enhanced/lib/container/RemoteToExternalDependency',
 );
 
 export default RemoteToExternalDependency;

@@ -3,30 +3,26 @@
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 
-import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
-import Module from 'webpack/lib/Module';
+import AsyncDependenciesBlock = require('webpack/lib/AsyncDependenciesBlock');
+import Module = require('webpack/lib/Module');
+import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import makeSerializable = require('webpack/lib/util/makeSerializable');
+import type Compilation from 'webpack/lib/Compilation';
+import WebpackError from 'webpack/lib/WebpackError';
 import { WEBPACK_MODULE_TYPE_PROVIDE } from 'webpack/lib/ModuleTypeConstants';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
-import ProvideForSharedDependency from './ProvideForSharedDependency';
-
-import { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';
-import Compilation from 'webpack/lib/Compilation';
-import {
+import type {
   CodeGenerationContext,
   CodeGenerationResult,
   LibIdentOptions,
   NeedBuildContext,
-} from 'webpack/lib/Module';
-import RequestShortener from 'webpack/lib/RequestShortener';
-import { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
-import WebpackError from 'webpack/lib/WebpackError';
-import {
+  RequestShortener,
+  ResolverWithOptions,
   ObjectDeserializerContext,
   ObjectSerializerContext,
-} from 'webpack/lib/serialization/ObjectMiddleware';
-import Hash from 'webpack/lib/util/Hash';
+} from 'webpack/lib/Module';
 import { InputFileSystem } from 'webpack/lib/util/fs';
+import ProvideForSharedDependency from './ProvideForSharedDependency';
+import { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';
 
 /** @typedef {import("webpack/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
 /** @typedef {import("webpack/lib/Chunk")} Chunk */
@@ -234,7 +230,7 @@ class ProvideSharedModule extends Module {
 
 makeSerializable(
   ProvideSharedModule,
-  'webpack/lib/sharing/ProvideSharedModule',
+  'enhanced/lib/sharing/ProvideSharedModule',
 );
 
 export default ProvideSharedModule;

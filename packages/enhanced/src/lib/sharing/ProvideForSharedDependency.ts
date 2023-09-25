@@ -3,8 +3,8 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 
-import ModuleDependency from 'webpack/lib/dependencies/ModuleDependency';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+import ModuleDependency = require('webpack/lib/dependencies/ModuleDependency');
+import makeSerializable = require('webpack/lib/util/makeSerializable');
 
 class ProvideForSharedDependency extends ModuleDependency {
   /**
@@ -26,7 +26,7 @@ class ProvideForSharedDependency extends ModuleDependency {
 
 makeSerializable(
   ProvideForSharedDependency,
-  'webpack/lib/sharing/ProvideForSharedDependency',
+  'enhanced/lib/sharing/ProvideForSharedDependency',
 );
 
 export default ProvideForSharedDependency;

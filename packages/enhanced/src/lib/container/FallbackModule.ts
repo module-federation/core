@@ -6,7 +6,7 @@
 'use strict';
 
 import { RawSource } from 'webpack-sources';
-import Module, {
+import type {
   RequestShortener,
   LibIdentOptions,
   CodeGenerationContext,
@@ -20,12 +20,13 @@ import Module, {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/Module';
-import ChunkGraph from 'webpack/lib/ChunkGraph';
+import Module = require('webpack/lib/Module');
+import type ChunkGraph from 'webpack/lib/ChunkGraph';
 import Chunk from 'webpack/lib/Chunk';
 import { WEBPACK_MODULE_TYPE_FALLBACK } from 'webpack/lib/ModuleTypeConstants';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import Template from 'webpack/lib/Template';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+import RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
+import Template = require('webpack/lib/Template');
+import makeSerializable = require('webpack/lib/util/makeSerializable');
 import FallbackItemDependency from './FallbackItemDependency';
 
 /** @typedef {import("webpack/lib/webpack/lib/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
@@ -213,6 +214,6 @@ class FallbackModule extends Module {
   }
 }
 
-makeSerializable(FallbackModule, 'webpack/lib/container/FallbackModule');
+makeSerializable(FallbackModule, 'enhanced/lib/container/FallbackModule');
 
 export default FallbackModule;

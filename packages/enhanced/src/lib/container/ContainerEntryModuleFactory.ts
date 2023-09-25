@@ -7,6 +7,11 @@
 
 import ContainerEntryModule from './ContainerEntryModule';
 import ContainerEntryDependency from './ContainerEntryDependency';
+import ModuleFactory = require('webpack/lib/ModuleFactory');
+import type {
+  ModuleFactoryCreateData,
+  ModuleFactoryResult,
+} from 'webpack/lib/ModuleFactory';
 
 export default class ContainerEntryModuleFactory extends ModuleFactory {
   /**

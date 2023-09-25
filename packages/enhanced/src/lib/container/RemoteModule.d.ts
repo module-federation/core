@@ -1,4 +1,4 @@
-export = RemoteModule;
+export default RemoteModule;
 declare class RemoteModule extends Module {
   /**
    * @param {ObjectDeserializerContext} context context

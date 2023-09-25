@@ -2,10 +2,10 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-import Compilation from 'webpack/lib/Compilation';
-import { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
-import ModuleNotFoundError from 'webpack/lib/ModuleNotFoundError';
-import LazySet from 'webpack/lib/util/LazySet';
+import type Compilation from 'webpack/lib/Compilation';
+import type { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
+import ModuleNotFoundError = require('webpack/lib/ModuleNotFoundError');
+import LazySet = require('webpack/lib/util/LazySet');
 
 interface MatchedConfigs<T> {
   resolved: Map<string, T>;

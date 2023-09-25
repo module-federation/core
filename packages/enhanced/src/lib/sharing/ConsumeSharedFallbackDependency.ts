@@ -3,8 +3,10 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 
-import ModuleDependency from 'webpack/lib/dependencies/ModuleDependency';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+'use strict';
+
+import ModuleDependency = require('webpack/lib/dependencies/ModuleDependency');
+import makeSerializable = require('webpack/lib/util/makeSerializable');
 
 class ConsumeSharedFallbackDependency extends ModuleDependency {
   /**
@@ -12,7 +14,6 @@ class ConsumeSharedFallbackDependency extends ModuleDependency {
    */
   constructor(request: string) {
     super(request);
-    this.request = request;
   }
 
   override get type(): string {
@@ -26,7 +27,7 @@ class ConsumeSharedFallbackDependency extends ModuleDependency {
 
 makeSerializable(
   ConsumeSharedFallbackDependency,
-  'webpack/lib/sharing/ConsumeSharedFallbackDependency',
+  'enhanced/lib/sharing/ConsumeSharedFallbackDependency',
 );
 
 export default ConsumeSharedFallbackDependency;

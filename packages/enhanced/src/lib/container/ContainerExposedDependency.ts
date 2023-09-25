@@ -3,11 +3,12 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
 
-import ModuleDependency, {
+import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/dependencies/ModuleDependency';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+import ModuleDependency = require('webpack/lib/dependencies/ModuleDependency');
+import makeSerializable = require('webpack/lib/util/makeSerializable');
 
 class ContainerExposedDependency extends ModuleDependency {
   exposedName: string;
@@ -57,7 +58,7 @@ class ContainerExposedDependency extends ModuleDependency {
 
 makeSerializable(
   ContainerExposedDependency,
-  'webpack/lib/container/ContainerExposedDependency',
+  'enhanced/lib/container/ContainerExposedDependency',
 );
 
 export default ContainerExposedDependency;
