@@ -107,7 +107,7 @@
     "@nx/web": "16.8.1",
     "@nx/webpack": "16.8.1",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
-    "@storybook/addon-essentials": "7.4.2",
+    "@storybook/addon-essentials": "7.4.5",
     "@storybook/builder-webpack5": "7.4.2",
     "@storybook/core-common": "7.4.2",
     "@storybook/core-server": "7.4.2",
