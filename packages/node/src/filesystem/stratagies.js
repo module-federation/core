@@ -107,7 +107,6 @@ export async function httpVmStrategy(chunkName, remoteName, remotes, callback) {
     const fileToReplace = path.basename(url.pathname);
     url.pathname = url.pathname.replace(fileToReplace, chunkName);
   }
-  console.log('httpVM', url);
   const protocol = url.protocol === 'https:' ? https : http;
   protocol.get(url, (res) => {
     let data = '';
