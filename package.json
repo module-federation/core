@@ -93,7 +93,7 @@
     "@jscutlery/semver": "3.1.0",
     "@node-rs/jieba": "1.7.2",
     "@nx/devkit": "16.8.1",
-    "@nx/esbuild": "16.8.1",
+    "@nx/esbuild": "16.9.0",
     "@nx/eslint-plugin": "16.8.1",
     "@nx/express": "16.8.1",
     "@nx/jest": "16.8.1",
