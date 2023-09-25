@@ -60,35 +60,33 @@ export class NextFederationPlugin {
    */
   apply(compiler: Compiler) {
     if (!this.validateOptions(compiler)) return;
-    console.log('applying');
     const isServer = this.isServerCompiler(compiler);
     new CopyFederationPlugin(isServer).apply(compiler);
-
     this.applyConditionalPlugins(compiler, isServer);
-
-    const hostFederationPluginOptions = this.getHostFederationPluginOptions(
+    const normalFederationPluginOptions = this.getNormalFederationPluginOptions(
       compiler,
       isServer,
     );
     this.applyModuleFederationPlugins(
       compiler,
-      hostFederationPluginOptions,
+      normalFederationPluginOptions,
       isServer,
     );
   }
+
   private validateOptions(compiler: Compiler): boolean {
     const compilerValid = validateCompilerOptions(compiler);
     const pluginValid = validatePluginOptions(this._options);
-
-    if (compilerValid === undefined) {
+    if (compilerValid === undefined)
       console.error('Compiler validation failed');
-    }
-
-    if (pluginValid === undefined) {
-      console.error('Plugin validation failed');
-    }
-
-    return compilerValid !== undefined && pluginValid !== undefined;
+    if (pluginValid === undefined) console.error('Plugin validation failed');
+    const validCompilerTarget =
+      compiler.options.name === 'server' || compiler.options.name === 'client';
+    return (
+      compilerValid !== undefined &&
+      pluginValid !== undefined &&
+      validCompilerTarget
+    );
   }
 
   private isServerCompiler(compiler: Compiler): boolean {
@@ -106,11 +104,12 @@ export class NextFederationPlugin {
         shared: { ...retrieveDefaultShared(isServer), ...this._options.shared },
       });
     } else {
+      //@ts-ignore
       applyClientPlugins(compiler, this._options, this._extraOptions);
     }
   }
 
-  private getHostFederationPluginOptions(
+  private getNormalFederationPluginOptions(
     compiler: Compiler,
     isServer: boolean,
   ): ModuleFederationPluginOptions {
@@ -144,115 +143,124 @@ export class NextFederationPlugin {
     return noop;
   }
 
+  private createEmbeddedOptions(
+    normalFederationPluginOptions: ModuleFederationPluginOptions,
+    isServer?: boolean,
+  ) {
+    return {
+      ...normalFederationPluginOptions,
+      name: 'host_inner_ctn',
+      runtime: isServer ? 'webpack-runtime' : 'webpack',
+      filename: `host_inner_ctn.js`,
+      remoteType: 'script',
+      library: {
+        ...normalFederationPluginOptions.library,
+        name: this._options.name,
+      },
+    };
+  }
+
+  private createSharedOptions() {
+    return {
+      'react/': {
+        singleton: true,
+        requiredVersion: false,
+      },
+      react: {
+        singleton: true,
+        requiredVersion: false,
+      },
+      'react-dom': {
+        singleton: true,
+        requiredVersion: false,
+      },
+      'react-dom/': {
+        eager: false,
+        singleton: true,
+        requiredVersion: false,
+      },
+    };
+  }
+
+  private applyClientFederationPlugins(
+    compiler: Compiler,
+    normalFederationPluginOptions: ModuleFederationPluginOptions,
+    sharedOptions: any,
+    ModuleFederationPlugin: any,
+  ) {
+    const embeddedOptions = this.createEmbeddedOptions(
+      normalFederationPluginOptions,
+    );
+    new ModuleFederationPlugin({
+      ...normalFederationPluginOptions,
+      shared: sharedOptions,
+    }).apply(compiler);
+    new ModuleFederationPlugin({
+      ...embeddedOptions,
+      shared: sharedOptions,
+    }).apply(compiler);
+  }
+
+  private applyServerFederationPlugins(
+    compiler: Compiler,
+    normalFederationPluginOptions: ModuleFederationPluginOptions,
+    ModuleFederationPluginConstructor: any,
+    ModuleFederationPlugin: any,
+  ) {
+    console.log('apply server federation');
+    const embeddedOptions = this.createEmbeddedOptions(
+      normalFederationPluginOptions,
+      true,
+    );
+    new ModuleFederationPlugin(
+      embeddedOptions,
+      ModuleFederationPluginConstructor,
+    ).apply(compiler);
+    //@ts-ignore
+    const serverSharedOptions = Object.keys(
+      //@ts-ignore
+      normalFederationPluginOptions.shared,
+    ).reduce(
+      (acc, key) => ({
+        ...acc,
+        //@ts-ignore
+        [key]: { ...normalFederationPluginOptions.shared[key], eager: false },
+      }),
+      {},
+    );
+
+    new ModuleFederationPlugin(
+      { ...normalFederationPluginOptions, shared: serverSharedOptions },
+      ModuleFederationPluginConstructor,
+    ).apply(compiler);
+  }
+
   private applyModuleFederationPlugins(
     compiler: Compiler,
-    hostFederationPluginOptions: ModuleFederationPluginOptions,
+    normalFederationPluginOptions: ModuleFederationPluginOptions,
     isServer: boolean,
   ) {
     const ModuleFederationPlugin = getModuleFederationPluginConstructor(
       isServer,
       compiler,
     );
-    const commonOptions = {
-      ...hostFederationPluginOptions,
-      name: 'host_inner_ctn',
-      runtime: isServer ? 'webpack-runtime' : 'webpack',
-      filename: `host_inner_ctn.js`,
-      remoteType: 'script',
-      library: {
-        ...hostFederationPluginOptions.library,
-        name: this._options.name,
-      },
-    };
-
+    const sharedOptions = this.createSharedOptions();
     if (!isServer) {
-      new ModuleFederationPlugin({
-        ...hostFederationPluginOptions,
-        shared: {
-          // "next/":{
-          //   singleton: true,
-          // },
-          'react/': {
-            singleton: true,
-            requiredVersion: false,
-          },
-          react: {
-            singleton: true,
-            requiredVersion: false,
-          },
-          'react-dom': {
-            singleton: true,
-            requiredVersion: false,
-          },
-          'react-dom/': {
-            eager: false,
-            singleton: true,
-            requiredVersion: false,
-          },
-        },
-      }).apply(compiler);
-      //@ts-ignore
-      new ModuleFederationPlugin({
-        ...commonOptions,
-        shared: {
-          // "next/":{
-          //   singleton: true,
-          // },
-          'react/': {
-            singleton: true,
-            requiredVersion: false,
-          },
-          react: {
-            singleton: true,
-            requiredVersion: false,
-          },
-          'react-dom': {
-            singleton: true,
-            requiredVersion: false,
-          },
-          'react-dom/': {
-            eager: false,
-            singleton: true,
-            requiredVersion: false,
-          },
-        },
-      }).apply(compiler);
-      return;
+      this.applyClientFederationPlugins(
+        compiler,
+        normalFederationPluginOptions,
+        sharedOptions,
+        ModuleFederationPlugin,
+      );
+    } else {
+      this.applyServerFederationPlugins(
+        compiler,
+        normalFederationPluginOptions,
+        ModuleFederationPlugin,
+        ModuleFederationPlugin,
+      );
     }
-    new ModuleFederationPlugin(
-      commonOptions,
-      //@ts-ignore
-      isServer
-        ? {ModuleFederationPlugin: require('@module-federation/enhanced/src/lib/container/ModuleFederationPlugin').default}
-        : undefined,
-    ).apply(compiler);
-
-    if (!isServer) {
-      // console.log(hostFederationPluginOptions.shared);
-    }
-
-    new ModuleFederationPlugin(
-      {
-        ...hostFederationPluginOptions,
-        //@ts-ignore
-        shared: Object.keys(hostFederationPluginOptions.shared).reduce(
-          (acc, key) => ({
-            ...acc,
-            //@ts-ignore
-            [key]: { ...hostFederationPluginOptions.shared[key], eager: false },
-          }),
-          {},
-        ),
-      },
-      //@ts-ignore
-      isServer
-      ? {ModuleFederationPlugin: require('@module-federation/enhanced/src/lib/container/ModuleFederationPlugin').default}
-      : undefined,
-    ).apply(compiler);
   }
 }
 
-/**
- * Exporting NextFederationPlugin as default
- */
 export default NextFederationPlugin;
