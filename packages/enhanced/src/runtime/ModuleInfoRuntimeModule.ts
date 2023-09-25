@@ -1,15 +1,14 @@
 'use strict';
 
-import { RuntimeGlobals, RuntimeModule } from 'webpack';
-import { Template } from 'webpack';
+import { RuntimeGlobals, RuntimeModule, Template } from 'webpack';
 
 /**
  * This class extends the RuntimeModule to provide functionality
  * for the federation module in the runtime.
  */
-class FederationModuleInfoRuntimeModule extends RuntimeModule {
+export class ModuleInfoRuntimeModule extends RuntimeModule {
   /**
-   * Constructor for the FederationModuleInfoRuntimeModule class.
+   * Constructor for the ModuleInfoRuntimeModule class.
    * Initializes the module with the name and stage.
    */
   constructor() {
@@ -80,5 +79,3 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
     ]);
   }
 }
-
-export default FederationModuleInfoRuntimeModule;

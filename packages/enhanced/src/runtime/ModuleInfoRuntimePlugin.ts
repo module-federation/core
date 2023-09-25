@@ -1,8 +1,8 @@
-import webpack, { Compilation, RuntimeGlobals } from 'webpack';
-import ModuleInfoRuntimeModule from './ModuleInfoRuntimeModule';
+import { Compilation, RuntimeGlobals, Compiler } from 'webpack';
+import {ModuleInfoRuntimeModule} from './ModuleInfoRuntimeModule';
 
-class ModuleInfoPlugin {
-  apply(compiler: webpack.Compiler) {
+class ModuleInfoRuntimePlugin {
+  apply(compiler: Compiler) {
     compiler.hooks.thisCompilation.tap(
       'ModuleInfoPlugin',
       (compilation: Compilation) => {
@@ -18,4 +18,4 @@ class ModuleInfoPlugin {
   }
 }
 
-export default ModuleInfoPlugin;
+export { ModuleInfoRuntimePlugin };
