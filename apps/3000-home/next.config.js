@@ -22,14 +22,14 @@ function renameDefaultDelegate() {
   filesToRename.forEach(({ oldPath, newPath }) => {
     fs.rename(oldPath, newPath, function(err) {
       if (err) {
-        console.error(`ERROR while renaming file from ${oldPath} to ${newPath}: `, err);
+        // Do not log error
       }
     });
   });
 }
 try {
 renameDefaultDelegate();
-} catch(e) {}
+} catch(e) { /* empty */ }
 const {
   createDelegatedModule,
 } = require('@module-federation/nextjs-mf/utilities');
