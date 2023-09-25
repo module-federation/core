@@ -1,7 +1,6 @@
 'use strict';
 
-import { RuntimeGlobals, RuntimeModule } from 'webpack';
-import { Template } from 'webpack';
+import { RuntimeGlobals, RuntimeModule, Template } from 'webpack';
 
 /**
  * Class representing a runtime module for federation module info.
@@ -28,7 +27,7 @@ export class ModuleInfoRuntimeModule extends RuntimeModule {
         '// backward compatible global proxy',
         `let oldScope = globalThis.__remote_scope__ || {};`,
         `if (!globalThis.__remote_scope__ || !globalThis.__remote_scope__.moduleInfo) {
-         console.log("create proxy",!globalThis.__remote_scope__, globalThis.__remote_scope__ && !globalThis.__remote_scope__.moduleInfo);
+         console.log("create proxy",${RuntimeGlobals.runtimeId},!globalThis.__remote_scope__, globalThis.__remote_scope__ && !globalThis.__remote_scope__.moduleInfo);
          `,
         `globalThis.__remote_scope__ = new Proxy(${RuntimeGlobals.require}.federation, {`,
         Template.indent([
