@@ -9,11 +9,6 @@ import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure
  * @property {Record<string, unknown>} experiments - Optional experiments configuration
  * @property {boolean} debug - Optional debug flag
  */
-// interface NodeContainerOptions extends ContainerPluginOptions {
-//   experiments?: Record<string, unknown>;
-//   debug?: boolean;
-//   useRemoteSideloader?: boolean;
-// }
 
 /**
  * Interface for Context

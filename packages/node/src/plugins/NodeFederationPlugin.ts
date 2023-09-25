@@ -3,9 +3,7 @@
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
-//@ts-ignore
-const ModuleInfoPlugin =
-  require('@module-federation/enhanced/src/runtime/ModuleInfoRuntimePlugin').default;
+import {ModuleInfoRuntimePlugin} from '@module-federation/enhanced';
 
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
@@ -16,7 +14,6 @@ const ModuleInfoPlugin =
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
   experiments?: Record<string, unknown>;
   debug?: boolean;
-  useRemoteSideloader?: boolean;
 }
 
 /**
@@ -130,7 +127,7 @@ class NodeFederationPlugin {
     const { webpack } = compiler;
 
     //TODO: module info runtime should be somewhere universal
-    new ModuleInfoPlugin().apply(compiler);
+    new ModuleInfoRuntimePlugin().apply(compiler);
     const pluginOptions = {
       ...this._options,
       remotes: this._options.remotes
@@ -158,7 +155,7 @@ class NodeFederationPlugin {
       );
     }
 
-    console.log('CONTXT', this.context.ModuleFederationPlugin);
+    console.log('Context for node', this.context);
 
     new (this.context.ModuleFederationPlugin ||
       (webpack && webpack.container.ModuleFederationPlugin) ||
