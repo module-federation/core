@@ -1,4 +1,4 @@
-import { Compiler } from 'webpack';
+import type Compiler from 'webpack/lib/Compiler';
 import {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
@@ -43,6 +43,7 @@ export function applyClientPlugins(
     runtime: 'webpack',
     remotes,
     debug: extraOptions.debug,
+    //@ts-ignore
   }).apply(compiler);
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
@@ -71,16 +72,19 @@ export function applyClientPlugins(
   // Add a new chunk correlation plugin to the compiler
   new ChunkCorrelationPlugin({
     filename: 'static/chunks/federated-stats.json',
+    //@ts-ignore
   }).apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler
   new InvertedContainerPlugin({
     runtime: 'webpack',
+    chunkToEmbed: 'host_inner_ctn',
     container: options.name,
     remotes: options.remotes as Record<string, string>,
     shared: options.shared as any,
     shareScope: 'default',
     exposes: options.exposes as any,
     debug: extraOptions.debug,
+    //@ts-ignore
   }).apply(compiler);
 }

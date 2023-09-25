@@ -3,7 +3,7 @@ import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import DelegatesModulePlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import {ModuleFederationPlugin} from '@module-federation/enhanced';
+import { ModuleFederationPlugin } from '@module-federation/enhanced';
 /**
  * This function applies server-specific plugins to the webpack compiler.
  *
@@ -35,11 +35,13 @@ export function applyServerPlugins(
   new InvertedContainerPlugin({
     runtime: 'webpack-runtime',
     container: options.name,
+    chunkToEmbed: 'host_inner_ctn',
     remotes: options.remotes as Record<string, string>,
     shared: options.shared as any,
     shareScope: 'default',
     exposes: options.exposes as any,
     debug: false,
+    //@ts-ignore
   }).apply(compiler);
 }
 
@@ -192,4 +194,3 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     name: 'webpack-runtime',
   };
 }
-
