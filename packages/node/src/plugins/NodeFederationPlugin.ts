@@ -127,7 +127,7 @@ class NodeFederationPlugin {
     const { webpack } = compiler;
 
     //TODO: module info runtime should be somewhere universal
-    new ModuleInfoRuntimePlugin().apply(compiler);
+   new ModuleInfoRuntimePlugin().apply(compiler);
     const pluginOptions = {
       ...this._options,
       remotes: this._options.remotes
