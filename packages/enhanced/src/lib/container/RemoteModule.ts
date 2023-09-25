@@ -169,6 +169,14 @@ class RemoteModule extends Module {
     ]);
     return { sources, data, runtimeRequirements: RUNTIME_REQUIREMENTS };
   }
+  serialize(context: any) {
+		const { write } = context;
+		write(this.request);
+		write(this.externalRequests);
+		write(this.internalRequest);
+		write(this.shareScope);
+		super.serialize(context);
+	}
 
   /**
    * @param {ObjectDeserializerContext} context context
