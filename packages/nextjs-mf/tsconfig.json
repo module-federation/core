@@ -1,9 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES6",
+    // "target": "ES6",
     "module": "commonjs",
-    "lib": ["ES2021"],
+    // "lib": ["ES2021"],
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "esModuleInterop": true,

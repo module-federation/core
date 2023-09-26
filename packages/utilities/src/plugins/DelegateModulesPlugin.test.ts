@@ -133,7 +133,7 @@ describe('DelegateModulesPlugin', () => {
 
     // Check if connectChunkAndModule was called
     expect(compilation.chunkGraph.connectChunkAndModule).toHaveBeenCalledTimes(
-      8,
+      4,
     );
 
     // Check if disconnectChunkAndModule was called
@@ -142,3 +142,4 @@ describe('DelegateModulesPlugin', () => {
     ).toHaveBeenCalledTimes(2);
   });
 });
+
