@@ -18,7 +18,8 @@
   "scripts": {
     "nx": "nx",
     "gpt:file:example": "npm run gpt:file --file ./gpt/services/openai.js --file ./gpt/commit.js --file ./gpt/file.js --question \"Fix all JSDoc issues, dont modify any other aspectf of these files besides JSDOC\"",
-    "sync:types:webpack": "cp -r ./declarations ./node_modules/webpack && npx -p typescript tsc ./node_modules/webpack/**/*.js --declaration --allowJs --emitDeclarationOnly --noEmitOnError false --outDir ./node_modules/webpack; npx -p typescript tsc ./node_modules/webpack/lib/**/*.js --declaration --allowJs --emitDeclarationOnly --noEmitOnError false --outDir ./node_modules/webpack/lib; node ./packages/enhanced/pullts.js",
+    "sync:types:webpack": "cp -rf ./webpack/* ./node_modules/webpack",
+    "sync:pullMFTypes":"concurrently \"node ./packages/enhanced/pullts.js\"",
     "gpt:commit": "node ./gpt --commit",
     "sync": "rsync -av --delete /Users/bytedance/dev/universe/dist/packages/ /Users/bytedance/dev/module-federation-examples/nextjs-ssr/node_modules/@module-federation/",
     "gpt:file": "node ./gpt",
@@ -26,7 +27,7 @@
     "build:prod": "nx run-many --target=build --projects=3000-home --verbose --output-style=stream",
     "build": "nx run-many --target=build --projects=3000-home --verbose --output-style=stream",
     "oldbuuild": "nx build",
-    "build:libs": "nx run-many --target=build --projects=utils,node,nextjs-mf --verbose --output-style=stream --maxParallel=1",
+    "build:libs": "nx run-many --target=build --projects=utils,node,nextjs-mf,enhanced --verbose --output-style=stream --maxParallel=1 --no-cache",
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
     "full:test": "nx run-many --target=test,lint,build --all",
@@ -50,7 +51,8 @@
     "extract-i18n:website": "nx run website:extract-i18n",
     "test:all": "nx run-many --target=test",
     "repair": "nx repair",
-    "docs": "typedoc"
+    "docs": "typedoc",
+    "postinstall": "npm run sync:types:webpackv2"
   },
   "dependencies": {
     "adm-zip": "0.5.10",
