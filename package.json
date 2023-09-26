@@ -52,7 +52,7 @@
     "test:all": "nx run-many --target=test",
     "repair": "nx repair",
     "docs": "typedoc",
-    "postinstall": "npm run sync:types:webpackv2"
+    "postinstall": "npm run sync:types:webpack"
   },
   "dependencies": {
     "adm-zip": "0.5.10",
