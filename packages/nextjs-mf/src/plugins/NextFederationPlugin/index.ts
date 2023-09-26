@@ -63,6 +63,7 @@ export class NextFederationPlugin {
   apply(compiler: Compiler) {
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
+      //@ts-ignore
     new CopyFederationPlugin(isServer).apply(compiler);
     this.applyConditionalPlugins(compiler, isServer);
     const normalFederationPluginOptions = this.getNormalFederationPluginOptions(
@@ -98,9 +99,12 @@ export class NextFederationPlugin {
   private applyConditionalPlugins(compiler: Compiler, isServer: boolean) {
     compiler.options.output.uniqueName = this._options.name;
     if (isServer) {
+      //@ts-ignore
       configureServerCompilerOptions(compiler);
       configureServerLibraryAndFilename(this._options);
+      //@ts-ignore
       applyServerPlugins(compiler, this._options);
+      //@ts-ignore
       handleServerExternals(compiler, {
         ...this._options,
         shared: { ...retrieveDefaultShared(isServer), ...this._options.shared },
