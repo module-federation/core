@@ -38,25 +38,8 @@ class DelegateModulesPlugin {
       if (this.options.debug) {
         console.log('adding ', module.identifier(), ' to chunk', chunk.name);
       }
-      if (module.buildMeta) {
-        module.buildMeta['eager'] = true;
-      }
       compilation.chunkGraph.connectChunkAndModule(chunk, module);
     }
-
-    module.dependencies.forEach((dependency) => {
-      const dependencyModule = compilation.moduleGraph.getModule(dependency);
-      if (
-        dependencyModule &&
-        !compilation.chunkGraph.isModuleInChunk(dependencyModule, chunk)
-      ) {
-        this.addModuleAndDependenciesToChunk(
-          dependencyModule as NormalModule,
-          chunk,
-          compilation,
-        );
-      }
-    });
   }
 
   removeDelegatesNonRuntimeChunks(
