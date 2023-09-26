@@ -25,14 +25,14 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     import: undefined,
   },
   'next/head': {
-    eager: false,
-    requiredVersion: false,
+    eager: true,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/link': {
     eager: true,
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
