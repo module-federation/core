@@ -2,10 +2,12 @@ import { Template, RuntimeGlobals } from 'webpack';
 import { Source } from 'webpack-sources';
 import type Compilation from 'webpack/lib/Compilation';
 import type Compiler from 'webpack/lib/Compiler';
+import type Module from 'webpack/lib/Module';
 import type Chunk from 'webpack/lib/Chunk';
-import { RenderContext } from 'webpack/lib/MainTemplate';
 import { getAllChunks } from 'webpack/lib/javascript/ChunkHelpers';
 import { ChunkGraph } from 'webpack/lib/ChunkGroup';
+import { StartupRenderContext } from 'webpack/lib/javascript/JavascriptModulesPlugin';
+import { RenderContext } from 'webpack/lib/javascript/JavascriptModulesPlugin';
 
 /**
  * AsyncBoundaryPlugin is a Webpack plugin that handles asynchronous boundaries in a federated module.
@@ -20,7 +22,8 @@ class AsyncBoundaryPlugin {
     const { javascript } = compiler.webpack;
     compiler.hooks.thisCompilation.tap('AsyncBoundaryPlugin', (compilation: Compilation) => {
       const hooks = javascript.JavascriptModulesPlugin.getCompilationHooks(compilation);
-      hooks.renderStartup.tap('AsyncBoundaryPlugin', (source: Source, renderContext: RenderContext, startupRenderContext: Chunk) => {
+      //@ts-ignore
+      hooks.renderStartup.tap('AsyncBoundaryPlugin', (source, renderContext: RenderContext, startupRenderContext:StartupRenderContext) => {
         return this.renderStartupLogic(source, renderContext, startupRenderContext, compilation);
       });
     });
@@ -34,7 +37,7 @@ class AsyncBoundaryPlugin {
    * @param {Compilation} compilation - The Webpack compilation instance.
    * @returns {string} - The modified source code.
    */
-  private renderStartupLogic(source: Source, renderContext: RenderContext, startupRenderContext: Chunk, compilation: Compilation): string {
+  private renderStartupLogic(source: Source, renderContext: RenderContext, startupRenderContext: StartupRenderContext, compilation: Compilation): string {
     const isInvalidContext = this.checkInvalidContext(renderContext, compilation);
     if (isInvalidContext) return source.source().toString();
 
@@ -70,10 +73,15 @@ class AsyncBoundaryPlugin {
    */
   private checkInvalidContext(renderContext: RenderContext, compilation: Compilation): boolean {
     return !renderContext ||
+    //@ts-ignore
       renderContext?._name ||
+       //@ts-ignore
       !renderContext?.debugId ||
+       //@ts-ignore
       !compilation.chunkGraph.isEntryModule(renderContext) ||
+       //@ts-ignore
       renderContext?.rawRequest?.includes('pages/api') ||
+       //@ts-ignore
       renderContext?.layer === 'api';
   }
 
