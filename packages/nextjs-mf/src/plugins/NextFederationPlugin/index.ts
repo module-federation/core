@@ -35,7 +35,9 @@ import {
   handleServerExternals,
 } from './apply-server-plugins';
 import { applyClientPlugins } from './apply-client-plugins';
-
+import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
+import ModuleFederationNextFork from '../container/ModuleFederationPlugin';
+import { parseRemotes } from '@module-federation/node';
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
@@ -155,7 +157,7 @@ export class NextFederationPlugin {
       remoteType: 'script',
       library: {
         ...normalFederationPluginOptions.library,
-        name: this._options.name,
+        name: 'host_inner_ctn',
       },
     };
   }
@@ -212,10 +214,7 @@ export class NextFederationPlugin {
       normalFederationPluginOptions,
       true,
     );
-    new ModuleFederationPlugin(
-      embeddedOptions,
-      ModuleFederationPluginConstructor,
-    ).apply(compiler);
+
     //@ts-ignore
     const serverSharedOptions = Object.keys(
       //@ts-ignore
@@ -228,11 +227,33 @@ export class NextFederationPlugin {
       }),
       {},
     );
+    const mainOptions = {
+      ...normalFederationPluginOptions,
+      shared: serverSharedOptions,
+    };
+    //@ts-ignore
 
-    new ModuleFederationPlugin(
-      { ...normalFederationPluginOptions, shared: serverSharedOptions },
-      ModuleFederationPluginConstructor,
+    const prepareRemote = (options) => {
+      return {
+        ...options,
+        remotes: options.remotes
+          ? parseRemotes(options.remotes as Record<string, any>)
+          : {},
+      };
+    };
+    //@ts-ignore
+    new ModuleFederationNextFork(
+      prepareRemote(mainOptions),
+      prepareRemote(embeddedOptions),
     ).apply(compiler);
+    // new ModuleFederationPlugin(
+    //   embeddedOptions,
+    //   ModuleFederationPluginConstructor,
+    // ).apply(compiler);
+    // new ModuleFederationPlugin(
+    //   { ...normalFederationPluginOptions, shared: serverSharedOptions },
+    //   ModuleFederationPluginConstructor,
+    // ).apply(compiler);
   }
 
   private applyModuleFederationPlugins(
