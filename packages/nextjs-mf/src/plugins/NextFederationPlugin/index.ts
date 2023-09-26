@@ -128,6 +128,9 @@ export class NextFederationPlugin {
       exposes: {
         './noop': noop,
         ...this._options.exposes,
+        ...(this._extraOptions.exposePages
+          ? exposeNextjsPages(compiler.options.context as string)
+          : {}),
       },
       remotes: {
         ...this._options.remotes,
@@ -166,54 +169,23 @@ export class NextFederationPlugin {
     };
   }
 
-  private createSharedOptions() {
-    return {
-      'react/': {
-        singleton: true,
-        requiredVersion: false,
-      },
-      react: {
-        singleton: true,
-        requiredVersion: false,
-      },
-      'react-dom': {
-        singleton: true,
-        requiredVersion: false,
-      },
-      'react-dom/': {
-        eager: false,
-        singleton: true,
-        requiredVersion: false,
-      },
-    };
-  }
-
   private applyClientFederationPlugins(
     compiler: Compiler,
     normalFederationPluginOptions: ModuleFederationPluginOptions,
-    sharedOptions: any,
-    ModuleFederationPlugin: any,
   ) {
     const embeddedOptions = this.createEmbeddedOptions(
       normalFederationPluginOptions,
     );
-    new ModuleFederationPlugin({
-      ...normalFederationPluginOptions,
-      shared: sharedOptions,
-    }).apply(compiler);
-    new ModuleFederationPlugin({
-      ...embeddedOptions,
-      shared: sharedOptions,
-    }).apply(compiler);
+    new ModuleFederationNextFork(
+      normalFederationPluginOptions,
+      embeddedOptions,
+    ).apply(compiler);
   }
 
   private applyServerFederationPlugins(
     compiler: Compiler,
     normalFederationPluginOptions: ModuleFederationPluginOptions,
-    ModuleFederationPluginConstructor: any,
-    ModuleFederationPlugin: any,
   ) {
-    console.log('apply server federation');
     const embeddedOptions = this.createEmbeddedOptions(
       normalFederationPluginOptions,
       true,
@@ -250,14 +222,6 @@ export class NextFederationPlugin {
       prepareRemote(mainOptions),
       prepareRemote(embeddedOptions),
     ).apply(compiler);
-    // new ModuleFederationPlugin(
-    //   embeddedOptions,
-    //   ModuleFederationPluginConstructor,
-    // ).apply(compiler);
-    // new ModuleFederationPlugin(
-    //   { ...normalFederationPluginOptions, shared: serverSharedOptions },
-    //   ModuleFederationPluginConstructor,
-    // ).apply(compiler);
   }
 
   private applyModuleFederationPlugins(
@@ -269,20 +233,15 @@ export class NextFederationPlugin {
       isServer,
       compiler,
     );
-    const sharedOptions = this.createSharedOptions();
     if (!isServer) {
       this.applyClientFederationPlugins(
         compiler,
         normalFederationPluginOptions,
-        sharedOptions,
-        ModuleFederationPlugin,
       );
     } else {
       this.applyServerFederationPlugins(
         compiler,
         normalFederationPluginOptions,
-        ModuleFederationPlugin,
-        ModuleFederationPlugin,
       );
     }
   }
