@@ -169,7 +169,7 @@ class RemoteModule extends Module {
     ]);
     return { sources, data, runtimeRequirements: RUNTIME_REQUIREMENTS };
   }
-  serialize(context: any) {
+  override serialize(context: any) {
     const { write } = context;
     write(this.request);
     write(this.externalRequests);
