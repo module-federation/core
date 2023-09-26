@@ -3,7 +3,10 @@ import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import DelegatesModulePlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import { ModuleFederationPlugin, ModuleInfoRuntimePlugin } from '@module-federation/enhanced';
+import {
+  ModuleFederationPlugin,
+  ModuleInfoRuntimePlugin,
+} from '@module-federation/enhanced';
 /**
  * This function applies server-specific plugins to the webpack compiler.
  *

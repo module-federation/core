@@ -37,7 +37,10 @@ class EmbeddedContainerPlugin {
    * @returns {void}
    * @private
    */
-  private processChunks(chunks: Iterable<Chunk>, compilation: Compilation): void {
+  private processChunks(
+    chunks: Iterable<Chunk>,
+    compilation: Compilation,
+  ): void {
     const relevantChunks = new Map();
     for (const chunk of chunks) {
       if (
@@ -57,7 +60,9 @@ class EmbeddedContainerPlugin {
 
     if (partialContainerChunk && runtimeChunk) {
       const chunkGraph = compilation.chunkGraph;
-      for (const module of chunkGraph.getChunkModulesIterable(partialContainerChunk)) {
+      for (const module of chunkGraph.getChunkModulesIterable(
+        partialContainerChunk,
+      )) {
         chunkGraph.connectChunkAndModule(runtimeChunk, module);
         chunkGraph.disconnectChunkAndModule(partialContainerChunk, module);
       }
@@ -92,14 +97,13 @@ class EmbeddedContainerPlugin {
               container: this.options.container,
             };
 
-
             compilation.addRuntimeModule(
               chunk,
-              new InvertedContainerRuntimeModule(runtimeModuleOptions)
+              new InvertedContainerRuntimeModule(runtimeModuleOptions),
             );
-          }
+          },
         );
-      }
+      },
     );
   }
 }
