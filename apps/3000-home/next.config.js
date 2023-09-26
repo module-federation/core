@@ -30,9 +30,9 @@ function renameDefaultDelegate() {
 try {
 renameDefaultDelegate();
 } catch(e) { /* empty */ }
-const {
-  createDelegatedModule,
-} = require('@module-federation/nextjs-mf/utilities');
+// const {
+//   createDelegatedModule,
+// } = require('@module-federation/nextjs-mf/utilities');
 
 /**
  * @type {import('@nrwl/next/plugins/with-nx').WithNxOptions}
@@ -96,3 +96,4 @@ const nextConfig = {
 };
 
 module.exports = withNx(nextConfig);
+
