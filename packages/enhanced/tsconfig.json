@@ -1,8 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-      "target": "ES6",
-      "lib": ["ES2021"],
       "moduleResolution": "node",
       "resolveJsonModule": true,
       "skipLibCheck": true,

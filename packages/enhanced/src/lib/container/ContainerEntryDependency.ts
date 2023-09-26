@@ -4,7 +4,9 @@
 */
 
 import { ExposeOptions } from './ContainerEntryModule';
+//@ts-ignore
 import makeSerializable = require('webpack/lib/util/makeSerializable');
+//@ts-ignore
 import Dependency = require('webpack/lib/Dependency');
 
 class ContainerEntryDependency extends Dependency {

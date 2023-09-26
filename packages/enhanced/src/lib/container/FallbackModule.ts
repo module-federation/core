@@ -20,12 +20,16 @@ import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/Module';
+//@ts-ignore
 import Module = require('webpack/lib/Module');
 import type ChunkGraph from 'webpack/lib/ChunkGraph';
 import Chunk from 'webpack/lib/Chunk';
 import { WEBPACK_MODULE_TYPE_FALLBACK } from 'webpack/lib/ModuleTypeConstants';
+//@ts-ignore
 import RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
+//@ts-ignore
 import Template = require('webpack/lib/Template');
+//@ts-ignore
 import makeSerializable = require('webpack/lib/util/makeSerializable');
 import FallbackItemDependency from './FallbackItemDependency';
 

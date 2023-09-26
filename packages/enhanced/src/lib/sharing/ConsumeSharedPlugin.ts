@@ -20,12 +20,16 @@ import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import ConsumeSharedModule from './ConsumeSharedModule';
 import ConsumeSharedRuntimeModule from './ConsumeSharedRuntimeModule';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
-
+//@ts-ignore
 import ModuleNotFoundError = require('webpack/lib/ModuleNotFoundError');
 import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+//@ts-ignore
 import WebpackError = require('webpack/lib/WebpackError');
+//@ts-ignore
 import Compiler = require('webpack/lib/Compiler');
+//@ts-ignore
 import LazySet = require('webpack/lib/util/LazySet');
+//@ts-ignore
 import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
 
 /** @typedef {import("../../declarations/plugins/sharing/ConsumeSharedPlugin").ConsumeSharedPluginOptions} ConsumeSharedPluginOptions */

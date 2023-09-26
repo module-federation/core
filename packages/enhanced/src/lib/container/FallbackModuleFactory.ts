@@ -8,6 +8,7 @@ import {
   ModuleFactoryCreateData,
   ModuleFactoryResult,
 } from 'webpack/lib/ModuleFactory';
+//@ts-ignore
 import ModuleFactory = require('webpack/lib/ModuleFactory');
 import FallbackModule from './FallbackModule';
 import FallbackDependency from './FallbackDependency';

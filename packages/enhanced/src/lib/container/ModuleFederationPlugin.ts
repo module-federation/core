@@ -6,9 +6,11 @@
 'use strict';
 
 import type Compiler from 'webpack/lib/Compiler';
+//@ts-ignore
 import isValidExternalsType = require('webpack/schemas/plugins/container/ExternalsType.check.js');
 import type { ModuleFederationPluginOptions } from './ModuleFederationPluginTypes';
 import SharePlugin from '../sharing/SharePlugin';
+//@ts-ignore
 import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';

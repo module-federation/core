@@ -4,6 +4,7 @@
 */
 
 import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+//@ts-ignore
 import Template = require('webpack/lib/Template');
 import {
   parseVersionRuntimeCode,
@@ -11,7 +12,9 @@ import {
   rangeToStringRuntimeCode,
   satisfyRuntimeCode,
 } from 'webpack/lib/util/semver';
+//@ts-ignore
 import RuntimeModule = require('webpack/lib/RuntimeModule');
+//@ts-ignore
 import Module = require('webpack/lib/Module');
 import ConsumeSharedModule from './ConsumeSharedModule';
 import type ChunkGraph from 'webpack/lib/ChunkGraph';

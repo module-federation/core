@@ -6,6 +6,7 @@
 'use strict';
 
 import { RawSource } from 'webpack-sources';
+//@ts-ignore
 import AsyncDependenciesBlock = require('webpack/lib/AsyncDependenciesBlock');
 import type {
   WebpackOptions,
@@ -23,9 +24,11 @@ import type {
   Hash,
   InputFileSystem,
 } from 'webpack/lib/Module';
+//@ts-ignore
 import Module = require('webpack/lib/Module');
 import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from 'webpack/lib/ModuleTypeConstants';
 import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+//@ts-ignore
 import makeSerializable = require('webpack/lib/util/makeSerializable');
 import { rangeToString, stringifyHoley } from 'webpack/lib/util/semver';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';

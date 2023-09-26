@@ -6,7 +6,7 @@
 'use strict';
 
 import type Compiler from 'webpack/lib/Compiler';
-import isValidExternalsType = require('webpack/schemas/plugins/container/ExternalsType.check.js');
+const isValidExternalsType = require('webpack/schemas/plugins/container/ExternalsType.check.js');
 const SharePlugin =
   require('@module-federation/enhanced/src/lib/sharing/SharePlugin').default;
 const createSchemaValidation = require('webpack/lib/util/create-schema-validation');

@@ -2,10 +2,12 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
-
+//@ts-ignore
 import AsyncDependenciesBlock = require('webpack/lib/AsyncDependenciesBlock');
+//@ts-ignore
 import Module = require('webpack/lib/Module');
 import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+//@ts-ignore
 import makeSerializable = require('webpack/lib/util/makeSerializable');
 import type Compilation from 'webpack/lib/Compilation';
 import WebpackError from 'webpack/lib/WebpackError';

@@ -7,7 +7,9 @@ import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/dependencies/ModuleDependency';
+//@ts-ignore
 import ModuleDependency = require('webpack/lib/dependencies/ModuleDependency');
+//@ts-ignore
 import makeSerializable = require('webpack/lib/util/makeSerializable');
 
 class ContainerExposedDependency extends ModuleDependency {
