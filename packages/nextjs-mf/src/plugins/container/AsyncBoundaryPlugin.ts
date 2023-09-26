@@ -20,13 +20,29 @@ class AsyncBoundaryPlugin {
    */
   public apply(compiler: Compiler): void {
     const { javascript } = compiler.webpack;
-    compiler.hooks.thisCompilation.tap('AsyncBoundaryPlugin', (compilation: Compilation) => {
-      const hooks = javascript.JavascriptModulesPlugin.getCompilationHooks(compilation);
-      //@ts-ignore
-      hooks.renderStartup.tap('AsyncBoundaryPlugin', (source, renderContext: RenderContext, startupRenderContext:StartupRenderContext) => {
-        return this.renderStartupLogic(source, renderContext, startupRenderContext, compilation);
-      });
-    });
+    compiler.hooks.thisCompilation.tap(
+      'AsyncBoundaryPlugin',
+      (compilation: Compilation) => {
+        const hooks =
+          javascript.JavascriptModulesPlugin.getCompilationHooks(compilation);
+        //@ts-ignore
+        hooks.renderStartup.tap(
+          'AsyncBoundaryPlugin',
+          (
+            source,
+            renderContext: RenderContext,
+            startupRenderContext: StartupRenderContext,
+          ) => {
+            return this.renderStartupLogic(
+              source,
+              renderContext,
+              startupRenderContext,
+              compilation,
+            );
+          },
+        );
+      },
+    );
   }
 
   /**
@@ -37,14 +53,25 @@ class AsyncBoundaryPlugin {
    * @param {Compilation} compilation - The Webpack compilation instance.
    * @returns {string} - The modified source code.
    */
-  private renderStartupLogic(source: Source, renderContext: RenderContext, startupRenderContext: StartupRenderContext, compilation: Compilation): string {
-    const isInvalidContext = this.checkInvalidContext(renderContext, compilation);
+  private renderStartupLogic(
+    source: Source,
+    renderContext: RenderContext,
+    startupRenderContext: StartupRenderContext,
+    compilation: Compilation,
+  ): string {
+    const isInvalidContext = this.checkInvalidContext(
+      renderContext,
+      compilation,
+    );
     if (isInvalidContext) return source.source().toString();
 
     const { chunkGraph } = compilation;
     const replaceSource = source.source().toString();
     const [webpack_exec, ...webpack_exports] = replaceSource.split('\n');
-    const dependentChunkIds = this.getDependentChunkIds(startupRenderContext, chunkGraph);
+    const dependentChunkIds = this.getDependentChunkIds(
+      startupRenderContext,
+      chunkGraph,
+    );
 
     return Template.asString([
       this.replaceWebpackExec(webpack_exec),
@@ -71,18 +98,23 @@ class AsyncBoundaryPlugin {
    * @param {Compilation} compilation - The Webpack compilation instance.
    * @returns {boolean} - True if the context is invalid, false otherwise.
    */
-  private checkInvalidContext(renderContext: RenderContext, compilation: Compilation): boolean {
-    return !renderContext ||
-    //@ts-ignore
+  private checkInvalidContext(
+    renderContext: RenderContext,
+    compilation: Compilation,
+  ): boolean {
+    return (
+      !renderContext ||
+      //@ts-ignore
       renderContext?._name ||
-       //@ts-ignore
+      //@ts-ignore
       !renderContext?.debugId ||
-       //@ts-ignore
+      //@ts-ignore
       !compilation.chunkGraph.isEntryModule(renderContext) ||
-       //@ts-ignore
+      //@ts-ignore
       renderContext?.rawRequest?.includes('pages/api') ||
-       //@ts-ignore
-      renderContext?.layer === 'api';
+      //@ts-ignore
+      renderContext?.layer === 'api'
+    );
   }
 
   /**
@@ -91,7 +123,10 @@ class AsyncBoundaryPlugin {
    * @returns {string} - The replaced webpack exec string.
    */
   private replaceWebpackExec(webpack_exec: string): string {
-    return webpack_exec.replace('__webpack_exec__', '__original_webpack_exec__');
+    return webpack_exec.replace(
+      '__webpack_exec__',
+      '__original_webpack_exec__',
+    );
   }
 
   /**
@@ -100,13 +135,20 @@ class AsyncBoundaryPlugin {
    * @param {any} chunkGraph - The chunk graph.
    * @returns {Set} - The set of dependent chunk IDs.
    */
-  private getDependentChunkIds(startupRenderContext: RenderContext, chunkGraph: ChunkGraph): Set<string | number | null> {
-    const entries = Array.from(chunkGraph.getChunkEntryModulesWithChunkGroupIterable(startupRenderContext.chunk));
+  private getDependentChunkIds(
+    startupRenderContext: RenderContext,
+    chunkGraph: ChunkGraph,
+  ): Set<string | number | null> {
+    const entries = Array.from(
+      chunkGraph.getChunkEntryModulesWithChunkGroupIterable(
+        startupRenderContext.chunk,
+      ),
+    );
     const chunkIds = new Set<string | number | null>();
     for (const [module, entrypoint] of entries) {
       if (entrypoint) {
         const runtimeChunk = entrypoint.getRuntimeChunk();
-        if(runtimeChunk) {
+        if (runtimeChunk) {
           const chunks = getAllChunks(entrypoint, runtimeChunk);
           for (const c of chunks) {
             chunkIds.add(c.id);
