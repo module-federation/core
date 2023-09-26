@@ -7,10 +7,13 @@
 
 import type Compiler from 'webpack/lib/Compiler';
 import isValidExternalsType = require('webpack/schemas/plugins/container/ExternalsType.check.js');
-import SharePlugin = require('@module-federation/enhanced/src/lib/sharing/SharePlugin');
-import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
-import ContainerPlugin = require('@module-federation/enhanced/src/lib/container/ContainerPlugin');
-import ContainerReferencePlugin = require('@module-federation/enhanced/src/lib/container/ContainerReferencePlugin');
+const SharePlugin =
+  require('@module-federation/enhanced/src/lib/sharing/SharePlugin').default;
+const createSchemaValidation = require('webpack/lib/util/create-schema-validation');
+const ContainerPlugin =
+  require('@module-federation/enhanced/src/lib/container/ContainerPlugin').default;
+const ContainerReferencePlugin =
+  require('@module-federation/enhanced/src/lib/container/ContainerReferencePlugin').default;
 
 /** @typedef {import("./ModuleFederationPluginTypes").ExternalsType} ExternalsType */
 /** @typedef {import("./ModuleFederationPluginTypes").any} any */
@@ -49,8 +52,12 @@ class ModuleFederationPlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
-    const { _mainOptions: mainOptions, _embeddedOptions: embeddedOptions } = this;
-    const library = mainOptions.library || { type: 'var', name: mainOptions.name };
+    const { _mainOptions: mainOptions, _embeddedOptions: embeddedOptions } =
+      this;
+    const library = mainOptions.library || {
+      type: 'var',
+      name: mainOptions.name,
+    };
     const remoteType =
       mainOptions.remoteType ||
       (mainOptions.library && isValidExternalsType(mainOptions.library.type)
@@ -89,17 +96,24 @@ class ModuleFederationPlugin {
         }).apply(compiler);
       }
       if (
-        embeddedOptions.remotes &&
-        (Array.isArray(embeddedOptions.remotes)
-          ? embeddedOptions.remotes.length > 0
-          : Object.keys(embeddedOptions.remotes).length > 0)
+        mainOptions.remotes &&
+        (Array.isArray(mainOptions.remotes)
+          ? mainOptions.remotes.length > 0
+          : Object.keys(mainOptions.remotes).length > 0)
       ) {
         new ContainerReferencePlugin({
           //@ts-ignore
           remoteType,
-          shareScope: embeddedOptions.shareScope,
-          remotes: embeddedOptions.remotes,
+          shareScope: mainOptions.shareScope,
+          remotes: mainOptions.remotes,
         }).apply(compiler);
+        console.log({
+          remoteType,
+          shareScope: mainOptions.shareScope,
+          remotes: mainOptions.remotes,
+        });
+
+        console.log('applying reference plugin');
       }
       if (embeddedOptions.shared) {
         new SharePlugin({
@@ -112,5 +126,3 @@ class ModuleFederationPlugin {
 }
 
 export default ModuleFederationPlugin;
-
-
