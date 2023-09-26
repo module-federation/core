@@ -29,8 +29,8 @@ class AsyncBoundaryPlugin {
         hooks.renderStartup.tap(
           'AsyncBoundaryPlugin',
           (
-            source,
-            renderContext: RenderContext,
+            source: Source,
+            renderContext: Module,
             startupRenderContext: StartupRenderContext,
           ) => {
             return this.renderStartupLogic(
@@ -55,7 +55,7 @@ class AsyncBoundaryPlugin {
    */
   private renderStartupLogic(
     source: Source,
-    renderContext: RenderContext,
+    renderContext: Module,
     startupRenderContext: StartupRenderContext,
     compilation: Compilation,
   ): string {
@@ -99,7 +99,7 @@ class AsyncBoundaryPlugin {
    * @returns {boolean} - True if the context is invalid, false otherwise.
    */
   private checkInvalidContext(
-    renderContext: RenderContext,
+    renderContext: Module,
     compilation: Compilation,
   ): boolean {
     return (
