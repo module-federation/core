@@ -1,4 +1,4 @@
 export = OptionsApply;
 declare class OptionsApply {
-    process(options: any, compiler: any): void;
+  process(options: any, compiler: any): void;
 }

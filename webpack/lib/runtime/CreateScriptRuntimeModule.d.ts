@@ -1,10 +1,10 @@
 export = CreateScriptRuntimeModule;
 /** @typedef {import("../Compilation")} Compilation */
 declare class CreateScriptRuntimeModule extends HelperRuntimeModule {
-    constructor();
+  constructor();
 }
 declare namespace CreateScriptRuntimeModule {
-    export { Compilation };
+  export { Compilation };
 }
-import HelperRuntimeModule = require("./HelperRuntimeModule");
-type Compilation = import("../Compilation");
+import HelperRuntimeModule = require('./HelperRuntimeModule');
+type Compilation = import('../Compilation');

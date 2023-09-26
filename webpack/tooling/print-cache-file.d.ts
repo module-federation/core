@@ -1,4 +1,4 @@
 export type SizeInfo = {
-    size: number;
-    lazySize: number;
+  size: number;
+  lazySize: number;
 };

@@ -1,6 +1,6 @@
 export = CurrentScript;
 declare class CurrentScript {
-    constructor(path?: string, type?: string);
-    src: string;
-    type: string;
+  constructor(path?: string, type?: string);
+  src: string;
+  type: string;
 }

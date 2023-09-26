@@ -1,10 +1,10 @@
 export = AsyncModuleRuntimeModule;
 /** @typedef {import("../Compilation")} Compilation */
 declare class AsyncModuleRuntimeModule extends HelperRuntimeModule {
-    constructor();
+  constructor();
 }
 declare namespace AsyncModuleRuntimeModule {
-    export { Compilation };
+  export { Compilation };
 }
-import HelperRuntimeModule = require("./HelperRuntimeModule");
-type Compilation = import("../Compilation");
+import HelperRuntimeModule = require('./HelperRuntimeModule');
+type Compilation = import('../Compilation');

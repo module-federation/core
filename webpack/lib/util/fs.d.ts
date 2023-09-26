@@ -1,138 +1,189 @@
-export type WatchOptions = import("../../declarations/WebpackOptions").WatchOptions;
-export type FileSystemInfoEntry = import("../FileSystemInfo").FileSystemInfoEntry;
+export type WatchOptions =
+  import('../../declarations/WebpackOptions').WatchOptions;
+export type FileSystemInfoEntry =
+  import('../FileSystemInfo').FileSystemInfoEntry;
 export type IStats = {
-    isFile: () => boolean;
-    isDirectory: () => boolean;
-    isBlockDevice: () => boolean;
-    isCharacterDevice: () => boolean;
-    isSymbolicLink: () => boolean;
-    isFIFO: () => boolean;
-    isSocket: () => boolean;
-    dev: number | bigint;
-    ino: number | bigint;
-    mode: number | bigint;
-    nlink: number | bigint;
-    uid: number | bigint;
-    gid: number | bigint;
-    rdev: number | bigint;
-    size: number | bigint;
-    blksize: number | bigint;
-    blocks: number | bigint;
-    atimeMs: number | bigint;
-    mtimeMs: number | bigint;
-    ctimeMs: number | bigint;
-    birthtimeMs: number | bigint;
-    atime: Date;
-    mtime: Date;
-    ctime: Date;
-    birthtime: Date;
+  isFile: () => boolean;
+  isDirectory: () => boolean;
+  isBlockDevice: () => boolean;
+  isCharacterDevice: () => boolean;
+  isSymbolicLink: () => boolean;
+  isFIFO: () => boolean;
+  isSocket: () => boolean;
+  dev: number | bigint;
+  ino: number | bigint;
+  mode: number | bigint;
+  nlink: number | bigint;
+  uid: number | bigint;
+  gid: number | bigint;
+  rdev: number | bigint;
+  size: number | bigint;
+  blksize: number | bigint;
+  blocks: number | bigint;
+  atimeMs: number | bigint;
+  mtimeMs: number | bigint;
+  ctimeMs: number | bigint;
+  birthtimeMs: number | bigint;
+  atime: Date;
+  mtime: Date;
+  ctime: Date;
+  birthtime: Date;
 };
 export type IDirent = {
-    isFile: () => boolean;
-    isDirectory: () => boolean;
-    isBlockDevice: () => boolean;
-    isCharacterDevice: () => boolean;
-    isSymbolicLink: () => boolean;
-    isFIFO: () => boolean;
-    isSocket: () => boolean;
-    name: string | Buffer;
+  isFile: () => boolean;
+  isDirectory: () => boolean;
+  isBlockDevice: () => boolean;
+  isCharacterDevice: () => boolean;
+  isSymbolicLink: () => boolean;
+  isFIFO: () => boolean;
+  isSocket: () => boolean;
+  name: string | Buffer;
 };
-export type Callback = (arg0: (NodeJS.ErrnoException | null) | undefined) => void;
-export type BufferCallback = (arg0: (NodeJS.ErrnoException | null) | undefined, arg1: Buffer | undefined) => void;
-export type BufferOrStringCallback = (arg0: (NodeJS.ErrnoException | null) | undefined, arg1: (Buffer | string) | undefined) => void;
-export type DirentArrayCallback = (arg0: (NodeJS.ErrnoException | null) | undefined, arg1: ((string | Buffer)[] | IDirent[]) | undefined) => void;
-export type StringCallback = (arg0: (NodeJS.ErrnoException | null) | undefined, arg1: string | undefined) => void;
-export type NumberCallback = (arg0: (NodeJS.ErrnoException | null) | undefined, arg1: number | undefined) => void;
-export type StatsCallback = (arg0: (NodeJS.ErrnoException | null) | undefined, arg1: IStats | undefined) => void;
-export type ReadJsonCallback = (arg0: (NodeJS.ErrnoException | Error | null) | undefined, arg1: any | undefined) => void;
-export type LstatReadlinkAbsoluteCallback = (arg0: (NodeJS.ErrnoException | Error | null) | undefined, arg1: (IStats | string) | undefined) => void;
+export type Callback = (
+  arg0: (NodeJS.ErrnoException | null) | undefined,
+) => void;
+export type BufferCallback = (
+  arg0: (NodeJS.ErrnoException | null) | undefined,
+  arg1: Buffer | undefined,
+) => void;
+export type BufferOrStringCallback = (
+  arg0: (NodeJS.ErrnoException | null) | undefined,
+  arg1: (Buffer | string) | undefined,
+) => void;
+export type DirentArrayCallback = (
+  arg0: (NodeJS.ErrnoException | null) | undefined,
+  arg1: ((string | Buffer)[] | IDirent[]) | undefined,
+) => void;
+export type StringCallback = (
+  arg0: (NodeJS.ErrnoException | null) | undefined,
+  arg1: string | undefined,
+) => void;
+export type NumberCallback = (
+  arg0: (NodeJS.ErrnoException | null) | undefined,
+  arg1: number | undefined,
+) => void;
+export type StatsCallback = (
+  arg0: (NodeJS.ErrnoException | null) | undefined,
+  arg1: IStats | undefined,
+) => void;
+export type ReadJsonCallback = (
+  arg0: (NodeJS.ErrnoException | Error | null) | undefined,
+  arg1: any | undefined,
+) => void;
+export type LstatReadlinkAbsoluteCallback = (
+  arg0: (NodeJS.ErrnoException | Error | null) | undefined,
+  arg1: (IStats | string) | undefined,
+) => void;
 export type WatcherInfo = {
-    /**
-     * get current aggregated changes that have not yet send to callback
-     */
-    changes: Set<string>;
-    /**
-     * get current aggregated removals that have not yet send to callback
-     */
-    removals: Set<string>;
-    /**
-     * get info about files
-     */
-    fileTimeInfoEntries: Map<string, FileSystemInfoEntry | "ignore">;
-    /**
-     * get info about directories
-     */
-    contextTimeInfoEntries: Map<string, FileSystemInfoEntry | "ignore">;
+  /**
+   * get current aggregated changes that have not yet send to callback
+   */
+  changes: Set<string>;
+  /**
+   * get current aggregated removals that have not yet send to callback
+   */
+  removals: Set<string>;
+  /**
+   * get info about files
+   */
+  fileTimeInfoEntries: Map<string, FileSystemInfoEntry | 'ignore'>;
+  /**
+   * get info about directories
+   */
+  contextTimeInfoEntries: Map<string, FileSystemInfoEntry | 'ignore'>;
 };
 export type Watcher = {
-    /**
-     * closes the watcher and all underlying file watchers
-     */
-    close: () => void;
-    /**
-     * closes the watcher, but keeps underlying file watchers alive until the next watch call
-     */
-    pause: () => void;
-    /**
-     * get current aggregated changes that have not yet send to callback
-     */
-    getAggregatedChanges?: (() => Set<string>) | undefined;
-    /**
-     * get current aggregated removals that have not yet send to callback
-     */
-    getAggregatedRemovals?: (() => Set<string>) | undefined;
-    /**
-     * get info about files
-     */
-    getFileTimeInfoEntries: () => Map<string, FileSystemInfoEntry | "ignore">;
-    /**
-     * get info about directories
-     */
-    getContextTimeInfoEntries: () => Map<string, FileSystemInfoEntry | "ignore">;
-    /**
-     * get info about timestamps and changes
-     */
-    getInfo?: (() => WatcherInfo) | undefined;
+  /**
+   * closes the watcher and all underlying file watchers
+   */
+  close: () => void;
+  /**
+   * closes the watcher, but keeps underlying file watchers alive until the next watch call
+   */
+  pause: () => void;
+  /**
+   * get current aggregated changes that have not yet send to callback
+   */
+  getAggregatedChanges?: (() => Set<string>) | undefined;
+  /**
+   * get current aggregated removals that have not yet send to callback
+   */
+  getAggregatedRemovals?: (() => Set<string>) | undefined;
+  /**
+   * get info about files
+   */
+  getFileTimeInfoEntries: () => Map<string, FileSystemInfoEntry | 'ignore'>;
+  /**
+   * get info about directories
+   */
+  getContextTimeInfoEntries: () => Map<string, FileSystemInfoEntry | 'ignore'>;
+  /**
+   * get info about timestamps and changes
+   */
+  getInfo?: (() => WatcherInfo) | undefined;
 };
-export type WatchMethod = (files: Iterable<string>, directories: Iterable<string>, missing: Iterable<string>, startTime: number, options: WatchOptions, callback: (arg0: Error | undefined, arg1: Map<string, FileSystemInfoEntry | "ignore">, arg2: Map<string, FileSystemInfoEntry | "ignore">, arg3: Set<string>, arg4: Set<string>) => void, callbackUndelayed: (arg0: string, arg1: number) => void) => Watcher;
+export type WatchMethod = (
+  files: Iterable<string>,
+  directories: Iterable<string>,
+  missing: Iterable<string>,
+  startTime: number,
+  options: WatchOptions,
+  callback: (
+    arg0: Error | undefined,
+    arg1: Map<string, FileSystemInfoEntry | 'ignore'>,
+    arg2: Map<string, FileSystemInfoEntry | 'ignore'>,
+    arg3: Set<string>,
+    arg4: Set<string>,
+  ) => void,
+  callbackUndelayed: (arg0: string, arg1: number) => void,
+) => Watcher;
 export type OutputFileSystem = {
-    writeFile: (arg0: string, arg1: Buffer | string, arg2: Callback) => void;
-    mkdir: (arg0: string, arg1: Callback) => void;
-    readdir?: ((arg0: string, arg1: DirentArrayCallback) => void) | undefined;
-    rmdir?: ((arg0: string, arg1: Callback) => void) | undefined;
-    unlink?: ((arg0: string, arg1: Callback) => void) | undefined;
-    stat: (arg0: string, arg1: StatsCallback) => void;
-    lstat?: ((arg0: string, arg1: StatsCallback) => void) | undefined;
-    readFile: (arg0: string, arg1: BufferOrStringCallback) => void;
-    join?: ((arg0: string, arg1: string) => string) | undefined;
-    relative?: ((arg0: string, arg1: string) => string) | undefined;
-    dirname?: ((arg0: string) => string) | undefined;
+  writeFile: (arg0: string, arg1: Buffer | string, arg2: Callback) => void;
+  mkdir: (arg0: string, arg1: Callback) => void;
+  readdir?: ((arg0: string, arg1: DirentArrayCallback) => void) | undefined;
+  rmdir?: ((arg0: string, arg1: Callback) => void) | undefined;
+  unlink?: ((arg0: string, arg1: Callback) => void) | undefined;
+  stat: (arg0: string, arg1: StatsCallback) => void;
+  lstat?: ((arg0: string, arg1: StatsCallback) => void) | undefined;
+  readFile: (arg0: string, arg1: BufferOrStringCallback) => void;
+  join?: ((arg0: string, arg1: string) => string) | undefined;
+  relative?: ((arg0: string, arg1: string) => string) | undefined;
+  dirname?: ((arg0: string) => string) | undefined;
 };
 export type InputFileSystem = {
-    readFile: (arg0: string, arg1: BufferOrStringCallback) => void;
-    readJson?: ((arg0: string, arg1: ReadJsonCallback) => void) | undefined;
-    readlink: (arg0: string, arg1: BufferOrStringCallback) => void;
-    readdir: (arg0: string, arg1: DirentArrayCallback) => void;
-    stat: (arg0: string, arg1: StatsCallback) => void;
-    lstat?: ((arg0: string, arg1: StatsCallback) => void) | undefined;
-    realpath?: ((arg0: string, arg1: BufferOrStringCallback) => void) | undefined;
-    purge?: ((arg0: string | undefined) => void) | undefined;
-    join?: ((arg0: string, arg1: string) => string) | undefined;
-    relative?: ((arg0: string, arg1: string) => string) | undefined;
-    dirname?: ((arg0: string) => string) | undefined;
+  readFile: (arg0: string, arg1: BufferOrStringCallback) => void;
+  readJson?: ((arg0: string, arg1: ReadJsonCallback) => void) | undefined;
+  readlink: (arg0: string, arg1: BufferOrStringCallback) => void;
+  readdir: (arg0: string, arg1: DirentArrayCallback) => void;
+  stat: (arg0: string, arg1: StatsCallback) => void;
+  lstat?: ((arg0: string, arg1: StatsCallback) => void) | undefined;
+  realpath?: ((arg0: string, arg1: BufferOrStringCallback) => void) | undefined;
+  purge?: ((arg0: string | undefined) => void) | undefined;
+  join?: ((arg0: string, arg1: string) => string) | undefined;
+  relative?: ((arg0: string, arg1: string) => string) | undefined;
+  dirname?: ((arg0: string) => string) | undefined;
 };
 export type WatchFileSystem = {
-    watch: WatchMethod;
+  watch: WatchMethod;
 };
 export type IntermediateFileSystemExtras = {
-    mkdirSync: (arg0: string) => void;
-    createWriteStream: (arg0: string) => NodeJS.WritableStream;
-    open: (arg0: string, arg1: string, arg2: NumberCallback) => void;
-    read: (arg0: number, arg1: Buffer, arg2: number, arg3: number, arg4: number, arg5: NumberCallback) => void;
-    close: (arg0: number, arg1: Callback) => void;
-    rename: (arg0: string, arg1: string, arg2: Callback) => void;
+  mkdirSync: (arg0: string) => void;
+  createWriteStream: (arg0: string) => NodeJS.WritableStream;
+  open: (arg0: string, arg1: string, arg2: NumberCallback) => void;
+  read: (
+    arg0: number,
+    arg1: Buffer,
+    arg2: number,
+    arg3: number,
+    arg4: number,
+    arg5: NumberCallback,
+  ) => void;
+  close: (arg0: number, arg1: Callback) => void;
+  rename: (arg0: string, arg1: string, arg2: Callback) => void;
 };
-export type IntermediateFileSystem = InputFileSystem & OutputFileSystem & IntermediateFileSystemExtras;
+export type IntermediateFileSystem = InputFileSystem &
+  OutputFileSystem &
+  IntermediateFileSystemExtras;
 /** @typedef {import("../../declarations/WebpackOptions").WatchOptions} WatchOptions */
 /** @typedef {import("../FileSystemInfo").FileSystemInfoEntry} FileSystemInfoEntry */
 /**
@@ -260,27 +311,42 @@ export type IntermediateFileSystem = InputFileSystem & OutputFileSystem & Interm
  * @param {string} targetPath the target path
  * @returns {string} location of targetPath relative to rootPath
  */
-export function relative(fs: InputFileSystem | OutputFileSystem | undefined, rootPath: string, targetPath: string): string;
+export function relative(
+  fs: InputFileSystem | OutputFileSystem | undefined,
+  rootPath: string,
+  targetPath: string,
+): string;
 /**
  * @param {InputFileSystem|OutputFileSystem|undefined} fs a file system
  * @param {string} rootPath a path
  * @param {string} filename a filename
  * @returns {string} the joined path
  */
-export function join(fs: InputFileSystem | OutputFileSystem | undefined, rootPath: string, filename: string): string;
+export function join(
+  fs: InputFileSystem | OutputFileSystem | undefined,
+  rootPath: string,
+  filename: string,
+): string;
 /**
  * @param {InputFileSystem|OutputFileSystem|undefined} fs a file system
  * @param {string} absPath an absolute path
  * @returns {string} the parent directory of the absolute path
  */
-export function dirname(fs: InputFileSystem | OutputFileSystem | undefined, absPath: string): string;
+export function dirname(
+  fs: InputFileSystem | OutputFileSystem | undefined,
+  absPath: string,
+): string;
 /**
  * @param {OutputFileSystem} fs a file system
  * @param {string} p an absolute path
  * @param {function(Error=): void} callback callback function for the error
  * @returns {void}
  */
-export function mkdirp(fs: OutputFileSystem, p: string, callback: (arg0: Error | undefined) => void): void;
+export function mkdirp(
+  fs: OutputFileSystem,
+  p: string,
+  callback: (arg0: Error | undefined) => void,
+): void;
 /**
  * @param {IntermediateFileSystem} fs a file system
  * @param {string} p an absolute path
@@ -293,11 +359,19 @@ export function mkdirpSync(fs: IntermediateFileSystem, p: string): void;
  * @param {ReadJsonCallback} callback callback
  * @returns {void}
  */
-export function readJson(fs: InputFileSystem, p: string, callback: ReadJsonCallback): void;
+export function readJson(
+  fs: InputFileSystem,
+  p: string,
+  callback: ReadJsonCallback,
+): void;
 /**
  * @param {InputFileSystem} fs a file system
  * @param {string} p an absolute path
  * @param {ReadJsonCallback} callback callback
  * @returns {void}
  */
-export function lstatReadlinkAbsolute(fs: InputFileSystem, p: string, callback: ReadJsonCallback): void;
+export function lstatReadlinkAbsolute(
+  fs: InputFileSystem,
+  p: string,
+  callback: ReadJsonCallback,
+): void;

@@ -30,32 +30,32 @@ export = StringXor;
  * ```
  */
 declare class StringXor {
-    /** @type {Buffer|undefined} */
-    _value: Buffer | undefined;
-    /**
-     * Adds a string to the current StringXor object.
-     *
-     * @param {string} str string
-     * @returns {void}
-     */
-    add(str: string): void;
-    /**
-     * Returns a string that represents the current state of the StringXor object. We chose to use "latin1" encoding
-     * here because "latin1" encoding is a single-byte encoding that can represent all characters in the
-     * [ISO-8859-1 character set](https://en.wikipedia.org/wiki/ISO/IEC_8859-1). This is useful when working
-     * with binary data that needs to be represented as a string.
-     *
-     * @returns {string} Returns a string that represents the current state of the StringXor object.
-     */
-    toString(): string;
-    /**
-     * Updates the hash with the current state of the StringXor object.
-     *
-     * @param {Hash} hash Hash instance
-     */
-    updateHash(hash: Hash): void;
+  /** @type {Buffer|undefined} */
+  _value: Buffer | undefined;
+  /**
+   * Adds a string to the current StringXor object.
+   *
+   * @param {string} str string
+   * @returns {void}
+   */
+  add(str: string): void;
+  /**
+   * Returns a string that represents the current state of the StringXor object. We chose to use "latin1" encoding
+   * here because "latin1" encoding is a single-byte encoding that can represent all characters in the
+   * [ISO-8859-1 character set](https://en.wikipedia.org/wiki/ISO/IEC_8859-1). This is useful when working
+   * with binary data that needs to be represented as a string.
+   *
+   * @returns {string} Returns a string that represents the current state of the StringXor object.
+   */
+  toString(): string;
+  /**
+   * Updates the hash with the current state of the StringXor object.
+   *
+   * @param {Hash} hash Hash instance
+   */
+  updateHash(hash: Hash): void;
 }
 declare namespace StringXor {
-    export { Hash };
+  export { Hash };
 }
-type Hash = import("../util/Hash");
+type Hash = import('../util/Hash');

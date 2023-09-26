@@ -10,7 +10,10 @@ export function last<T>(set: Iterable<T>): T;
  * @param {function(T): boolean} filter predicate
  * @returns {boolean} true, if some items match the filter predicate
  */
-export function someInIterable<T>(iterable: Iterable<T>, filter: (arg0: T) => boolean): boolean;
+export function someInIterable<T>(
+  iterable: Iterable<T>,
+  filter: (arg0: T) => boolean,
+): boolean;
 /**
  * @template T
  * @param {Iterable<T>} iterable an iterable

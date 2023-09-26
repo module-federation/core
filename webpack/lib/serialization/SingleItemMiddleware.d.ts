@@ -5,11 +5,11 @@ export = SingleItemMiddleware;
  * @extends {SerializerMiddleware<any, any[]>}
  */
 declare class SingleItemMiddleware extends SerializerMiddleware<any, any[]> {
-    constructor();
+  constructor();
 }
 declare namespace SingleItemMiddleware {
-    export { DeserializedType, SerializedType };
+  export { DeserializedType, SerializedType };
 }
-import SerializerMiddleware = require("./SerializerMiddleware");
+import SerializerMiddleware = require('./SerializerMiddleware');
 type DeserializedType = any;
 type SerializedType = any[];

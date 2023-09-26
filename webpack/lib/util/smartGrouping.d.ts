@@ -32,27 +32,30 @@ export = smartGrouping;
  * @param {GroupConfig<T, R>[]} groupConfigs configuration
  * @returns {(R | T)[]} grouped items
  */
-declare function smartGrouping<T, R>(items: T[], groupConfigs: GroupConfig<T, R>[]): (T | R)[];
+declare function smartGrouping<T, R>(
+  items: T[],
+  groupConfigs: GroupConfig<T, R>[],
+): (T | R)[];
 declare namespace smartGrouping {
-    export { GroupOptions, GroupConfig, ItemWithGroups, Group };
+  export { GroupOptions, GroupConfig, ItemWithGroups, Group };
 }
 type GroupConfig<T, R> = {
-    getKeys: (arg0: T) => string[];
-    createGroup: (arg0: string, arg1: (R | T)[], arg2: T[]) => R;
-    getOptions?: ((arg0: string, arg1: T[]) => GroupOptions) | undefined;
+  getKeys: (arg0: T) => string[];
+  createGroup: (arg0: string, arg1: (R | T)[], arg2: T[]) => R;
+  getOptions?: ((arg0: string, arg1: T[]) => GroupOptions) | undefined;
 };
 type GroupOptions = {
-    groupChildren?: boolean | undefined;
-    force?: boolean | undefined;
-    targetGroupCount?: number | undefined;
+  groupChildren?: boolean | undefined;
+  force?: boolean | undefined;
+  targetGroupCount?: number | undefined;
 };
 type ItemWithGroups<T, R> = {
-    item: T;
-    groups: Set<Group<T, R>>;
+  item: T;
+  groups: Set<Group<T, R>>;
 };
 type Group<T, R> = {
-    config: GroupConfig<T, R>;
-    name: string;
-    alreadyGrouped: boolean;
-    items: Set<ItemWithGroups<T, R>> | undefined;
+  config: GroupConfig<T, R>;
+  name: string;
+  alreadyGrouped: boolean;
+  items: Set<ItemWithGroups<T, R>> | undefined;
 };

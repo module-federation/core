@@ -23,34 +23,49 @@ export = AmdLibraryPlugin;
  * @extends {AbstractLibraryPlugin<AmdLibraryPluginParsed>}
  */
 declare class AmdLibraryPlugin extends AbstractLibraryPlugin<AmdLibraryPluginParsed> {
-    /**
-     * @param {AmdLibraryPluginOptions} options the plugin options
-     */
-    constructor(options: AmdLibraryPluginOptions);
-    requireAsWrapper: boolean;
+  /**
+   * @param {AmdLibraryPluginOptions} options the plugin options
+   */
+  constructor(options: AmdLibraryPluginOptions);
+  requireAsWrapper: boolean;
 }
 declare namespace AmdLibraryPlugin {
-    export { Source, LibraryOptions, LibraryType, Chunk, ChunkHashContext, Compiler, RenderContext, Hash, LibraryContext, AmdLibraryPluginOptions, AmdLibraryPluginParsed, T };
+  export {
+    Source,
+    LibraryOptions,
+    LibraryType,
+    Chunk,
+    ChunkHashContext,
+    Compiler,
+    RenderContext,
+    Hash,
+    LibraryContext,
+    AmdLibraryPluginOptions,
+    AmdLibraryPluginParsed,
+    T,
+  };
 }
 type AmdLibraryPluginParsed = {
-    name: string;
-    amdContainer: string;
+  name: string;
+  amdContainer: string;
 };
-import AbstractLibraryPlugin = require("./AbstractLibraryPlugin");
+import AbstractLibraryPlugin = require('./AbstractLibraryPlugin');
 type AmdLibraryPluginOptions = {
-    type: LibraryType;
-    requireAsWrapper?: boolean | undefined;
+  type: LibraryType;
+  requireAsWrapper?: boolean | undefined;
 };
 type Source = any;
-type LibraryOptions = import("../../declarations/WebpackOptions").LibraryOptions;
-type LibraryType = import("../../declarations/WebpackOptions").LibraryType;
-type Chunk = import("../Chunk");
-type ChunkHashContext = import("../Compilation").ChunkHashContext;
-type Compiler = import("../Compiler");
-type RenderContext = import("../javascript/JavascriptModulesPlugin").RenderContext;
-type Hash = import("../util/Hash");
+type LibraryOptions =
+  import('../../declarations/WebpackOptions').LibraryOptions;
+type LibraryType = import('../../declarations/WebpackOptions').LibraryType;
+type Chunk = import('../Chunk');
+type ChunkHashContext = import('../Compilation').ChunkHashContext;
+type Compiler = import('../Compiler');
+type RenderContext =
+  import('../javascript/JavascriptModulesPlugin').RenderContext;
+type Hash = import('../util/Hash');
 /**
  * <T>
  */
-type LibraryContext<T_1> = import("./AbstractLibraryPlugin").LibraryContext<T>;
+type LibraryContext<T_1> = import('./AbstractLibraryPlugin').LibraryContext<T>;
 type T = AmdLibraryPluginParsed;

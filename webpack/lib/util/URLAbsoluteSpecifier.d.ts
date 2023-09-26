@@ -1,4 +1,4 @@
-export type InputFileSystem = import("./fs").InputFileSystem;
+export type InputFileSystem = import('./fs').InputFileSystem;
 export type ErrorFirstCallback = (error: Error | null, result?: Buffer) => void;
 /**
  * Get scheme if specifier is an absolute URL specifier

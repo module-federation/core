@@ -3,5 +3,7 @@
  * DO NOT MODIFY BY HAND.
  * Run `yarn special-lint-fix` to update
  */
-declare const check: (options: import("../../declarations/plugins/HashedModuleIdsPlugin").HashedModuleIdsPluginOptions) => boolean;
+declare const check: (
+  options: import('../../declarations/plugins/HashedModuleIdsPlugin').HashedModuleIdsPluginOptions,
+) => boolean;
 export = check;

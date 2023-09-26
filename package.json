@@ -18,8 +18,7 @@
   "scripts": {
     "nx": "nx",
     "gpt:file:example": "npm run gpt:file --file ./gpt/services/openai.js --file ./gpt/commit.js --file ./gpt/file.js --question \"Fix all JSDoc issues, dont modify any other aspectf of these files besides JSDOC\"",
-    "sync:types:webpack": "cp -r ./declarations ./node_modules/webpack && concurrently \"npx -p typescript tsc ./node_modules/webpack/**/*.js --declaration --allowJs --emitDeclarationOnly --noEmitOnError false --outDir ./node_modules/webpack\" \"npx -p typescript tsc ./node_modules/webpack/**/*.js --declaration --allowJs --emitDeclarationOnly --noEmitOnError false --outDir ./node_modules/webpack\"",
-    "sync:types:webpackv2": "cp -rf ./webpack/* ./node_modules/webpack",
+    "sync:types:webpack": "cp -rf ./webpack/* ./node_modules/webpack",
     "sync:pullMFTypes":"concurrently \"node ./packages/enhanced/pullts.js\"",
     "gpt:commit": "node ./gpt --commit",
     "sync": "rsync -av --delete /Users/bytedance/dev/universe/dist/packages/ /Users/bytedance/dev/module-federation-examples/nextjs-ssr/node_modules/@module-federation/",
@@ -53,7 +52,7 @@
     "test:all": "nx run-many --target=test",
     "repair": "nx repair",
     "docs": "typedoc",
-    "postinstall": "npm run sync:types:webpackv2"
+    "postinstall": "npm run sync:types:webpack"
   },
   "dependencies": {
     "adm-zip": "0.5.10",

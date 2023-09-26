@@ -1,9 +1,9 @@
 export = ImportMetaContextDependency;
 declare class ImportMetaContextDependency extends ContextDependency {
-    constructor(options: any, range: any);
+  constructor(options: any, range: any);
 }
 declare namespace ImportMetaContextDependency {
-    export { ModuleDependencyTemplateAsRequireId as Template };
+  export { ModuleDependencyTemplateAsRequireId as Template };
 }
-import ContextDependency = require("./ContextDependency");
-import ModuleDependencyTemplateAsRequireId = require("./ModuleDependencyTemplateAsRequireId");
+import ContextDependency = require('./ContextDependency');
+import ModuleDependencyTemplateAsRequireId = require('./ModuleDependencyTemplateAsRequireId');

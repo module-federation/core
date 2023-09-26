@@ -21,31 +21,46 @@ export = JsonpLibraryPlugin;
  * @extends {AbstractLibraryPlugin<JsonpLibraryPluginParsed>}
  */
 declare class JsonpLibraryPlugin extends AbstractLibraryPlugin<JsonpLibraryPluginParsed> {
-    /**
-     * @param {JsonpLibraryPluginOptions} options the plugin options
-     */
-    constructor(options: JsonpLibraryPluginOptions);
+  /**
+   * @param {JsonpLibraryPluginOptions} options the plugin options
+   */
+  constructor(options: JsonpLibraryPluginOptions);
 }
 declare namespace JsonpLibraryPlugin {
-    export { Source, LibraryOptions, LibraryType, Chunk, ChunkHashContext, Compiler, RenderContext, Hash, LibraryContext, JsonpLibraryPluginOptions, JsonpLibraryPluginParsed, T };
+  export {
+    Source,
+    LibraryOptions,
+    LibraryType,
+    Chunk,
+    ChunkHashContext,
+    Compiler,
+    RenderContext,
+    Hash,
+    LibraryContext,
+    JsonpLibraryPluginOptions,
+    JsonpLibraryPluginParsed,
+    T,
+  };
 }
 type JsonpLibraryPluginParsed = {
-    name: string;
+  name: string;
 };
-import AbstractLibraryPlugin = require("./AbstractLibraryPlugin");
+import AbstractLibraryPlugin = require('./AbstractLibraryPlugin');
 type JsonpLibraryPluginOptions = {
-    type: LibraryType;
+  type: LibraryType;
 };
 type Source = any;
-type LibraryOptions = import("../../declarations/WebpackOptions").LibraryOptions;
-type LibraryType = import("../../declarations/WebpackOptions").LibraryType;
-type Chunk = import("../Chunk");
-type ChunkHashContext = import("../Compilation").ChunkHashContext;
-type Compiler = import("../Compiler");
-type RenderContext = import("../javascript/JavascriptModulesPlugin").RenderContext;
-type Hash = import("../util/Hash");
+type LibraryOptions =
+  import('../../declarations/WebpackOptions').LibraryOptions;
+type LibraryType = import('../../declarations/WebpackOptions').LibraryType;
+type Chunk = import('../Chunk');
+type ChunkHashContext = import('../Compilation').ChunkHashContext;
+type Compiler = import('../Compiler');
+type RenderContext =
+  import('../javascript/JavascriptModulesPlugin').RenderContext;
+type Hash = import('../util/Hash');
 /**
  * <T>
  */
-type LibraryContext<T_1> = import("./AbstractLibraryPlugin").LibraryContext<T>;
+type LibraryContext<T_1> = import('./AbstractLibraryPlugin').LibraryContext<T>;
 type T = JsonpLibraryPluginParsed;
