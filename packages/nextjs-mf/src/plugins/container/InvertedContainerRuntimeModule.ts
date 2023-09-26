@@ -14,9 +14,7 @@ interface InvertedContainerRuntimeModuleOptions {
 class InvertedContainerRuntimeModule extends RuntimeModule {
   private options: InvertedContainerRuntimeModuleOptions;
 
-  constructor(
-    options: InvertedContainerRuntimeModuleOptions,
-  ) {
+  constructor(options: InvertedContainerRuntimeModuleOptions) {
     super('inverted container startup', RuntimeModule.STAGE_BASIC);
     this.options = options;
   }
@@ -31,7 +29,8 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     if (!container) {
       return;
     }
-    const entryModules = this.compilation.chunkGraph.getChunkEntryModulesIterable(container);
+    const entryModules =
+      this.compilation.chunkGraph.getChunkEntryModulesIterable(container);
     return Array.from(entryModules)[0];
   }
 
@@ -41,12 +40,16 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     }
 
     const { name, debug } = this.options;
-    const containerEntryModule = this.resolveContainerModule() as (Module & { _name: string }) | undefined;
+    const containerEntryModule = this.resolveContainerModule() as
+      | (Module & { _name: string })
+      | undefined;
     const containerName = containerEntryModule?._name || name;
     const chunk = this.chunk;
 
-    const containerModuleId = containerEntryModule?.id || containerEntryModule?.debugId;
-    const isPartialContainer = chunk.runtime === this.options.runtime 
+    const containerModuleId =
+      containerEntryModule?.id || containerEntryModule?.debugId;
+    // const hasEnsurechunkHandlers = !this.compilation.runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers)) {
+    const isPartialContainer = chunk.runtime === this.options.runtime;
     if (!(containerName && containerModuleId) || !isPartialContainer) {
       return '';
     }
@@ -55,16 +58,25 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
     return `
       function attachRemote (resolve) {
-        const innerRemote = __webpack_require__(${JSON.stringify(containerModuleId)});
+        const innerRemote = __webpack_require__(${JSON.stringify(
+          containerModuleId,
+        )});
         console.log({innerRemote, name: ${RuntimeGlobals.runtimeId}})
         if(${globalObject} && !${globalObject}[${JSON.stringify(name)}]) {
           ${globalObject}[${JSON.stringify(name)}] = innerRemote;
-        } else if(!${containerScope}[${JSON.stringify(name)}]) {
+        } else if(${containerScope} && !${containerScope}[${JSON.stringify(
+          name,
+        )}]) {
           ${containerScope}[${JSON.stringify(name)}] = innerRemote;
         }
+        //__webpack_require__.I('default',[globalThis.backupScope]);
         if(resolve) resolve(innerRemote);
       }
-      if(!(${globalObject} && ${globalObject}[${JSON.stringify(name)}]) && !${containerScope}[${JSON.stringify(name)}]) {
+      if(!(${globalObject} && ${globalObject}[${JSON.stringify(
+        name,
+      )}]) && !(${containerScope} && ${containerScope}[${JSON.stringify(
+        name,
+      )}])) {
         if (__webpack_require__.O) {
         __webpack_require__.O(0, ["${this.chunk.id}"], function() {
           attachRemote();
