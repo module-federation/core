@@ -69,7 +69,26 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         )}]) {
           ${containerScope}[${JSON.stringify(name)}] = innerRemote;
         }
-        //__webpack_require__.I('default',[globalThis.backupScope]);
+        __webpack_require__.S.default = new Proxy({}, {
+          get: function(target, property) {
+            if(typeof target[property] === 'object' && target[property] !== null) {
+              for(const key in target[property]) {
+                if(property.startsWith('next/') || property.startsWith('react') || property.startsWith('next-dom')) {
+                  target[property][key].loaded = true
+                }
+              }
+            }
+            
+            return target[property];
+          },
+          set: function(target, property, value) {
+            if(!target[property]) {
+            target[property] = value;
+            }
+            return true;
+          }
+        });
+        
         if(resolve) resolve(innerRemote);
       }
       if(!(${globalObject} && ${globalObject}[${JSON.stringify(
