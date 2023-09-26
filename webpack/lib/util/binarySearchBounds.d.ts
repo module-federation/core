@@ -1,5 +1,5 @@
-export type BinarySearchPredicate = ">=" | "<=" | "<" | ">" | "-";
-export type SearchPredicateSuffix = "GE" | "GT" | "LT" | "LE" | "EQ";
+export type BinarySearchPredicate = '>=' | '<=' | '<' | '>' | '-';
+export type SearchPredicateSuffix = 'GE' | 'GT' | 'LT' | 'LE' | 'EQ';
 declare const ge: Function;
 declare const gt: Function;
 declare const lt: Function;

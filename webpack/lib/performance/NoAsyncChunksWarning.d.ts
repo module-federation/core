@@ -1,5 +1,5 @@
 export = NoAsyncChunksWarning;
 declare class NoAsyncChunksWarning extends WebpackError {
-    constructor();
+  constructor();
 }
-import WebpackError = require("../WebpackError");
+import WebpackError = require('../WebpackError');

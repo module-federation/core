@@ -24,41 +24,54 @@ export = ModuleFactory;
  * @property {Dependency[]} dependencies
  */
 declare class ModuleFactory {
-    /**
-     * @abstract
-     * @param {ModuleFactoryCreateData} data data object
-     * @param {function((Error | null)=, ModuleFactoryResult=): void} callback callback
-     * @returns {void}
-     */
-    create(data: ModuleFactoryCreateData, callback: (arg0: (Error | null) | undefined, arg1: ModuleFactoryResult | undefined) => void): void;
+  /**
+   * @abstract
+   * @param {ModuleFactoryCreateData} data data object
+   * @param {function((Error | null)=, ModuleFactoryResult=): void} callback callback
+   * @returns {void}
+   */
+  create(
+    data: ModuleFactoryCreateData,
+    callback: (
+      arg0: (Error | null) | undefined,
+      arg1: ModuleFactoryResult | undefined,
+    ) => void,
+  ): void;
 }
 declare namespace ModuleFactory {
-    export { ResolveOptions, Dependency, Module, ModuleFactoryResult, ModuleFactoryCreateDataContextInfo, ModuleFactoryCreateData };
+  export {
+    ResolveOptions,
+    Dependency,
+    Module,
+    ModuleFactoryResult,
+    ModuleFactoryCreateDataContextInfo,
+    ModuleFactoryCreateData,
+  };
 }
 type ModuleFactoryCreateData = {
-    contextInfo: ModuleFactoryCreateDataContextInfo;
-    resolveOptions?: ResolveOptions | undefined;
-    context: string;
-    dependencies: Dependency[];
+  contextInfo: ModuleFactoryCreateDataContextInfo;
+  resolveOptions?: ResolveOptions | undefined;
+  context: string;
+  dependencies: Dependency[];
 };
 type ModuleFactoryResult = {
-    /**
-     * the created module or unset if no module was created
-     */
-    module?: Module | undefined;
-    fileDependencies?: Set<string> | undefined;
-    contextDependencies?: Set<string> | undefined;
-    missingDependencies?: Set<string> | undefined;
-    /**
-     * allow to use the unsafe cache
-     */
-    cacheable?: boolean | undefined;
+  /**
+   * the created module or unset if no module was created
+   */
+  module?: Module | undefined;
+  fileDependencies?: Set<string> | undefined;
+  contextDependencies?: Set<string> | undefined;
+  missingDependencies?: Set<string> | undefined;
+  /**
+   * allow to use the unsafe cache
+   */
+  cacheable?: boolean | undefined;
 };
-type ResolveOptions = import("../declarations/WebpackOptions").ResolveOptions;
-type Dependency = import("./Dependency");
-type Module = import("./Module");
+type ResolveOptions = import('../declarations/WebpackOptions').ResolveOptions;
+type Dependency = import('./Dependency');
+type Module = import('./Module');
 type ModuleFactoryCreateDataContextInfo = {
-    issuer: string;
-    issuerLayer?: (string | null) | undefined;
-    compiler: string;
+  issuer: string;
+  issuerLayer?: (string | null) | undefined;
+  compiler: string;
 };

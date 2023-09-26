@@ -20,39 +20,37 @@ export = RecordIdsPlugin;
  * @property {RecordsModules=} modules
  */
 declare class RecordIdsPlugin {
-    /**
-     * @param {Object} options Options object
-     * @param {boolean=} options.portableIds true, when ids need to be portable
-     */
-    constructor(options: {
-        portableIds?: boolean | undefined;
-    });
-    options: {
-        portableIds?: boolean | undefined;
-    };
-    /**
-     * @param {Compiler} compiler the Compiler
-     * @returns {void}
-     */
-    apply(compiler: Compiler): void;
+  /**
+   * @param {Object} options Options object
+   * @param {boolean=} options.portableIds true, when ids need to be portable
+   */
+  constructor(options: { portableIds?: boolean | undefined });
+  options: {
+    portableIds?: boolean | undefined;
+  };
+  /**
+   * @param {Compiler} compiler the Compiler
+   * @returns {void}
+   */
+  apply(compiler: Compiler): void;
 }
 declare namespace RecordIdsPlugin {
-    export { Chunk, Compiler, Module, RecordsChunks, RecordsModules, Records };
+  export { Chunk, Compiler, Module, RecordsChunks, RecordsModules, Records };
 }
-type Compiler = import("./Compiler");
-type Chunk = import("./Chunk");
-type Module = import("./Module");
+type Compiler = import('./Compiler');
+type Chunk = import('./Chunk');
+type Module = import('./Module');
 type RecordsChunks = {
-    byName?: Record<string, number> | undefined;
-    bySource?: Record<string, number> | undefined;
-    usedIds?: number[] | undefined;
+  byName?: Record<string, number> | undefined;
+  bySource?: Record<string, number> | undefined;
+  usedIds?: number[] | undefined;
 };
 type RecordsModules = {
-    byIdentifier?: Record<string, number> | undefined;
-    bySource?: Record<string, number> | undefined;
-    usedIds?: number[] | undefined;
+  byIdentifier?: Record<string, number> | undefined;
+  bySource?: Record<string, number> | undefined;
+  usedIds?: number[] | undefined;
 };
 type Records = {
-    chunks?: RecordsChunks | undefined;
-    modules?: RecordsModules | undefined;
+  chunks?: RecordsChunks | undefined;
+  modules?: RecordsModules | undefined;
 };

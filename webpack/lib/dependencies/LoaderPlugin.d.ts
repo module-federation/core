@@ -21,36 +21,51 @@ export = LoaderPlugin;
  * @property {string=} baseUri target base uri
  */
 declare class LoaderPlugin {
-    /**
-     * @param {Object} options options
-     */
-    constructor(options?: any);
-    /**
-     * Apply the plugin
-     * @param {Compiler} compiler the compiler instance
-     * @returns {void}
-     */
-    apply(compiler: Compiler): void;
+  /**
+   * @param {Object} options options
+   */
+  constructor(options?: any);
+  /**
+   * Apply the plugin
+   * @param {Compiler} compiler the compiler instance
+   * @returns {void}
+   */
+  apply(compiler: Compiler): void;
 }
 declare namespace LoaderPlugin {
-    export { DepConstructor, Compiler, Module, LoadModuleCallback, ImportModuleCallback, ImportModuleOptions };
+  export {
+    DepConstructor,
+    Compiler,
+    Module,
+    LoadModuleCallback,
+    ImportModuleCallback,
+    ImportModuleOptions,
+  };
 }
-type Compiler = import("../Compiler");
-type DepConstructor = import("../Compilation").DepConstructor;
-type Module = import("../Module");
-type LoadModuleCallback = (err?: (Error | null) | undefined, source?: (string | Buffer) | undefined, map?: object | undefined, module?: Module | undefined) => any;
-type ImportModuleCallback = (err?: (Error | null) | undefined, exports?: any | undefined) => any;
+type Compiler = import('../Compiler');
+type DepConstructor = import('../Compilation').DepConstructor;
+type Module = import('../Module');
+type LoadModuleCallback = (
+  err?: (Error | null) | undefined,
+  source?: (string | Buffer) | undefined,
+  map?: object | undefined,
+  module?: Module | undefined,
+) => any;
+type ImportModuleCallback = (
+  err?: (Error | null) | undefined,
+  exports?: any | undefined,
+) => any;
 type ImportModuleOptions = {
-    /**
-     * the target layer
-     */
-    layer?: string | undefined;
-    /**
-     * the target public path
-     */
-    publicPath?: string | undefined;
-    /**
-     * target base uri
-     */
-    baseUri?: string | undefined;
+  /**
+   * the target layer
+   */
+  layer?: string | undefined;
+  /**
+   * the target public path
+   */
+  publicPath?: string | undefined;
+  /**
+   * target base uri
+   */
+  baseUri?: string | undefined;
 };

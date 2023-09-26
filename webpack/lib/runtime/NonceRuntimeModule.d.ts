@@ -1,5 +1,5 @@
 export = NonceRuntimeModule;
 declare class NonceRuntimeModule extends RuntimeModule {
-    constructor();
+  constructor();
 }
-import RuntimeModule = require("../RuntimeModule");
+import RuntimeModule = require('../RuntimeModule');

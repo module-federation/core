@@ -11,46 +11,46 @@ export = DeterministicModuleIdsPlugin;
  * @property {boolean=} failOnConflict throw an error when id conflicts occur (instead of rehashing)
  */
 declare class DeterministicModuleIdsPlugin {
-    /**
-     * @param {DeterministicModuleIdsPluginOptions} [options] options
-     */
-    constructor(options?: DeterministicModuleIdsPluginOptions);
-    options: DeterministicModuleIdsPluginOptions;
-    /**
-     * Apply the plugin
-     * @param {Compiler} compiler the compiler instance
-     * @returns {void}
-     */
-    apply(compiler: Compiler): void;
+  /**
+   * @param {DeterministicModuleIdsPluginOptions} [options] options
+   */
+  constructor(options?: DeterministicModuleIdsPluginOptions);
+  options: DeterministicModuleIdsPluginOptions;
+  /**
+   * Apply the plugin
+   * @param {Compiler} compiler the compiler instance
+   * @returns {void}
+   */
+  apply(compiler: Compiler): void;
 }
 declare namespace DeterministicModuleIdsPlugin {
-    export { Compiler, Module, DeterministicModuleIdsPluginOptions };
+  export { Compiler, Module, DeterministicModuleIdsPluginOptions };
 }
 type DeterministicModuleIdsPluginOptions = {
-    /**
-     * context relative to which module identifiers are computed
-     */
-    context?: string | undefined;
-    /**
-     * selector function for modules
-     */
-    test?: ((arg0: Module) => boolean) | undefined;
-    /**
-     * maximum id length in digits (used as starting point)
-     */
-    maxLength?: number | undefined;
-    /**
-     * hash salt for ids
-     */
-    salt?: number | undefined;
-    /**
-     * do not increase the maxLength to find an optimal id space size
-     */
-    fixedLength?: boolean | undefined;
-    /**
-     * throw an error when id conflicts occur (instead of rehashing)
-     */
-    failOnConflict?: boolean | undefined;
+  /**
+   * context relative to which module identifiers are computed
+   */
+  context?: string | undefined;
+  /**
+   * selector function for modules
+   */
+  test?: ((arg0: Module) => boolean) | undefined;
+  /**
+   * maximum id length in digits (used as starting point)
+   */
+  maxLength?: number | undefined;
+  /**
+   * hash salt for ids
+   */
+  salt?: number | undefined;
+  /**
+   * do not increase the maxLength to find an optimal id space size
+   */
+  fixedLength?: boolean | undefined;
+  /**
+   * throw an error when id conflicts occur (instead of rehashing)
+   */
+  failOnConflict?: boolean | undefined;
 };
-type Compiler = import("../Compiler");
-type Module = import("../Module");
+type Compiler = import('../Compiler');
+type Module = import('../Module');

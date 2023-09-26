@@ -2,11 +2,11 @@ export = RuntimeIdRuntimeModule;
 /** @typedef {import("../Chunk")} Chunk */
 /** @typedef {import("../ChunkGraph")} ChunkGraph */
 declare class RuntimeIdRuntimeModule extends RuntimeModule {
-    constructor();
+  constructor();
 }
 declare namespace RuntimeIdRuntimeModule {
-    export { Chunk, ChunkGraph };
+  export { Chunk, ChunkGraph };
 }
-import RuntimeModule = require("../RuntimeModule");
-type Chunk = import("../Chunk");
-type ChunkGraph = import("../ChunkGraph");
+import RuntimeModule = require('../RuntimeModule');
+type Chunk = import('../Chunk');
+type ChunkGraph = import('../ChunkGraph');

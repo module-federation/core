@@ -1,10 +1,10 @@
 export = CreateFakeNamespaceObjectRuntimeModule;
 /** @typedef {import("../Compilation")} Compilation */
 declare class CreateFakeNamespaceObjectRuntimeModule extends HelperRuntimeModule {
-    constructor();
+  constructor();
 }
 declare namespace CreateFakeNamespaceObjectRuntimeModule {
-    export { Compilation };
+  export { Compilation };
 }
-import HelperRuntimeModule = require("./HelperRuntimeModule");
-type Compilation = import("../Compilation");
+import HelperRuntimeModule = require('./HelperRuntimeModule');
+type Compilation = import('../Compilation');

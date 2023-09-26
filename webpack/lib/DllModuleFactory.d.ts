@@ -3,12 +3,13 @@ export = DllModuleFactory;
 /** @typedef {import("./ModuleFactory").ModuleFactoryResult} ModuleFactoryResult */
 /** @typedef {import("./dependencies/DllEntryDependency")} DllEntryDependency */
 declare class DllModuleFactory extends ModuleFactory {
-    hooks: Readonly<{}>;
+  hooks: Readonly<{}>;
 }
 declare namespace DllModuleFactory {
-    export { ModuleFactoryCreateData, ModuleFactoryResult, DllEntryDependency };
+  export { ModuleFactoryCreateData, ModuleFactoryResult, DllEntryDependency };
 }
-import ModuleFactory = require("./ModuleFactory");
-type ModuleFactoryCreateData = import("./ModuleFactory").ModuleFactoryCreateData;
-type ModuleFactoryResult = import("./ModuleFactory").ModuleFactoryResult;
-type DllEntryDependency = import("./dependencies/DllEntryDependency");
+import ModuleFactory = require('./ModuleFactory');
+type ModuleFactoryCreateData =
+  import('./ModuleFactory').ModuleFactoryCreateData;
+type ModuleFactoryResult = import('./ModuleFactory').ModuleFactoryResult;
+type DllEntryDependency = import('./dependencies/DllEntryDependency');

@@ -1,15 +1,15 @@
 export = DelegatedModuleFactoryPlugin;
 /** @typedef {import("./NormalModuleFactory")} NormalModuleFactory */
 declare class DelegatedModuleFactoryPlugin {
-    constructor(options: any);
-    options: any;
-    /**
-     * @param {NormalModuleFactory} normalModuleFactory the normal module factory
-     * @returns {void}
-     */
-    apply(normalModuleFactory: NormalModuleFactory): void;
+  constructor(options: any);
+  options: any;
+  /**
+   * @param {NormalModuleFactory} normalModuleFactory the normal module factory
+   * @returns {void}
+   */
+  apply(normalModuleFactory: NormalModuleFactory): void;
 }
 declare namespace DelegatedModuleFactoryPlugin {
-    export { NormalModuleFactory };
+  export { NormalModuleFactory };
 }
-type NormalModuleFactory = import("./NormalModuleFactory");
+type NormalModuleFactory = import('./NormalModuleFactory');

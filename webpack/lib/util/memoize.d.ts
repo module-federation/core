@@ -7,6 +7,6 @@ export = memoize;
  */
 declare function memoize<T>(fn: FunctionReturning<T>): FunctionReturning<T>;
 declare namespace memoize {
-    export { FunctionReturning };
+  export { FunctionReturning };
 }
 type FunctionReturning<T> = () => T;

@@ -8,4 +8,13 @@ export = processAsyncTree;
  * @param {function(E=): void} callback all items processed
  * @returns {void}
  */
-declare function processAsyncTree<T, E extends Error>(items: Iterable<T>, concurrency: number, processor: (arg0: T, arg1: (arg0: T) => void, arg2: (arg0?: E) => void) => void, callback: (arg0?: E) => void): void;
+declare function processAsyncTree<T, E extends Error>(
+  items: Iterable<T>,
+  concurrency: number,
+  processor: (
+    arg0: T,
+    arg1: (arg0: T) => void,
+    arg2: (arg0?: E) => void,
+  ) => void,
+  callback: (arg0?: E) => void,
+): void;

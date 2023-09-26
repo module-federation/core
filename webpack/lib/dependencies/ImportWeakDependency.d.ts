@@ -7,24 +7,43 @@ export = ImportWeakDependency;
 /** @typedef {import("../Module").BuildMeta} BuildMeta */
 /** @typedef {import("../ModuleGraph")} ModuleGraph */
 /** @typedef {import("../javascript/JavascriptParser").Range} Range */
-declare class ImportWeakDependency extends ImportDependency {
-}
+declare class ImportWeakDependency extends ImportDependency {}
 declare namespace ImportWeakDependency {
-    export { ImportDependencyTemplate as Template, ReplaceSource, Dependency, ReferencedExport, DependencyTemplateContext, Module, BuildMeta, ModuleGraph, Range };
+  export {
+    ImportDependencyTemplate as Template,
+    ReplaceSource,
+    Dependency,
+    ReferencedExport,
+    DependencyTemplateContext,
+    Module,
+    BuildMeta,
+    ModuleGraph,
+    Range,
+  };
 }
-import ImportDependency = require("./ImportDependency");
+import ImportDependency = require('./ImportDependency');
 declare const ImportDependencyTemplate_base: {
-    new (): {
-        apply(dependency: import("../Dependency"), source: any, { runtimeTemplate, module, moduleGraph, chunkGraph, runtimeRequirements }: import("../DependencyTemplate").DependencyTemplateContext): void;
-    };
+  new (): {
+    apply(
+      dependency: import('../Dependency'),
+      source: any,
+      {
+        runtimeTemplate,
+        module,
+        moduleGraph,
+        chunkGraph,
+        runtimeRequirements,
+      }: import('../DependencyTemplate').DependencyTemplateContext,
+    ): void;
+  };
 };
-declare class ImportDependencyTemplate extends ImportDependencyTemplate_base {
-}
+declare class ImportDependencyTemplate extends ImportDependencyTemplate_base {}
 type ReplaceSource = any;
-type Dependency = import("../Dependency");
-type ReferencedExport = import("../Dependency").ReferencedExport;
-type DependencyTemplateContext = import("../DependencyTemplate").DependencyTemplateContext;
-type Module = import("../Module");
-type BuildMeta = import("../Module").BuildMeta;
-type ModuleGraph = import("../ModuleGraph");
-type Range = import("../javascript/JavascriptParser").Range;
+type Dependency = import('../Dependency');
+type ReferencedExport = import('../Dependency').ReferencedExport;
+type DependencyTemplateContext =
+  import('../DependencyTemplate').DependencyTemplateContext;
+type Module = import('../Module');
+type BuildMeta = import('../Module').BuildMeta;
+type ModuleGraph = import('../ModuleGraph');
+type Range = import('../javascript/JavascriptParser').Range;

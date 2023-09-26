@@ -1,29 +1,31 @@
 export type ObjectParsedPropertyEntry = {
-    /**
-     * base value
-     */
-    base: any | undefined;
-    /**
-     * the name of the selector property
-     */
-    byProperty: string | undefined;
-    /**
-     * value depending on selector property, merged with base
-     */
-    byValues: Map<string, any>;
+  /**
+   * base value
+   */
+  base: any | undefined;
+  /**
+   * the name of the selector property
+   */
+  byProperty: string | undefined;
+  /**
+   * value depending on selector property, merged with base
+   */
+  byValues: Map<string, any>;
 };
 export type ParsedObject = {
-    /**
-     * static properties (key is property name)
-     */
-    static: Map<string, ObjectParsedPropertyEntry>;
-    /**
-     * dynamic part
-     */
-    dynamic: {
+  /**
+   * static properties (key is property name)
+   */
+  static: Map<string, ObjectParsedPropertyEntry>;
+  /**
+   * dynamic part
+   */
+  dynamic:
+    | {
         byProperty: string;
         fn: Function;
-    } | undefined;
+      }
+    | undefined;
 };
 /**
  * @template T
@@ -32,7 +34,11 @@ export type ParsedObject = {
  * @param {string|number|boolean} value assignment value
  * @returns {T} new object
  */
-export function cachedSetProperty<T>(obj: Partial<T>, property: string, value: string | number | boolean): T;
+export function cachedSetProperty<T>(
+  obj: Partial<T>,
+  property: string,
+  value: string | number | boolean,
+): T;
 /**
  * Merges two given objects and caches the result to avoid computation if same objects passed as arguments again.
  * @template T
@@ -68,7 +74,11 @@ export function cleverMerge<T, O>(first: T, second: O): T | O | (T & O);
  * @param  {...any} values values
  * @returns {Omit<T, P>} object with merged byProperty
  */
-export function resolveByProperty<T, P extends string>(obj: T, byProperty: P, ...values: any[]): Omit<T, P>;
+export function resolveByProperty<T, P extends string>(
+  obj: T,
+  byProperty: P,
+  ...values: any[]
+): Omit<T, P>;
 /**
  * @template T
  * @param {T} obj the object

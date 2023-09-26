@@ -1,5 +1,5 @@
 export = ConcurrentCompilationError;
 declare class ConcurrentCompilationError extends WebpackError {
-    constructor();
+  constructor();
 }
-import WebpackError = require("./WebpackError");
+import WebpackError = require('./WebpackError');

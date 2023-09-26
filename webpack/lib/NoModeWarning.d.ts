@@ -1,5 +1,5 @@
 export = NoModeWarning;
 declare class NoModeWarning extends WebpackError {
-    constructor();
+  constructor();
 }
-import WebpackError = require("./WebpackError");
+import WebpackError = require('./WebpackError');

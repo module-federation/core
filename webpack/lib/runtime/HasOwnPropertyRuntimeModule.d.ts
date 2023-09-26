@@ -1,10 +1,10 @@
 export = HasOwnPropertyRuntimeModule;
 /** @typedef {import("../Compilation")} Compilation */
 declare class HasOwnPropertyRuntimeModule extends RuntimeModule {
-    constructor();
+  constructor();
 }
 declare namespace HasOwnPropertyRuntimeModule {
-    export { Compilation };
+  export { Compilation };
 }
-import RuntimeModule = require("../RuntimeModule");
-type Compilation = import("../Compilation");
+import RuntimeModule = require('../RuntimeModule');
+type Compilation = import('../Compilation');
