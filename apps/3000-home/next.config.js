@@ -96,4 +96,3 @@ const nextConfig = {
 };
 
 module.exports = withNx(nextConfig);
-
