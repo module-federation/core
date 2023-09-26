@@ -315,6 +315,16 @@ export function generateLoadScript(runtimeTemplate: any): string {
               callback(globalThis.__remote_scope__[remoteName])
             } catch (e) {
               e.target = {src: url};
+              globalThis.__remote_scope__[remoteName] = {
+                get: function() {
+                  return function() {
+                    return ()=>null
+                  }
+                },
+                init: function() {},
+                fake: true
+              }
+              console.log(e);
               callback(e);
             }
           }`,
