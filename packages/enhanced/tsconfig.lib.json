@@ -2,7 +2,6 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "declaration": true,
     "types": ["node", "webpack", "../../node_modules/webpack"],
     "resolveJsonModule": true,
     "esModuleInterop": true

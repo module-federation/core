@@ -4,7 +4,8 @@
     "outDir": "../../dist/out-tsc",
     "declaration": true,
     "types": ["node"],
-    "module": "Node16"
+    "module": "Node16",
+    "esModuleInterop": true
   },
   "include": ["**/*.ts", "**/*.js"],
   "exclude": [
