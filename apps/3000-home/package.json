@@ -5,7 +5,7 @@
   "dependencies": {
     "antd": "4.24.14",
     "lodash": "4.17.21",
-    "next": "13.4.19",
+    "next": "13.5.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "js-cookie": "3.0.5"
