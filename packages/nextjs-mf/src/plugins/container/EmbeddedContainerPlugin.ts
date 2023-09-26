@@ -51,10 +51,10 @@ class EmbeddedContainerPlugin {
         relevantChunks.set(chunk.name, chunk);
       }
     }
-  
+
     const runtimeChunk = relevantChunks.get(this.options.runtime);
     const partialContainerChunk = relevantChunks.get(this.options.chunkToEmbed);
-  
+
     if (partialContainerChunk && runtimeChunk) {
       const chunkGraph = compilation.chunkGraph;
       for (const module of chunkGraph.getChunkModulesIterable(partialContainerChunk)) {
