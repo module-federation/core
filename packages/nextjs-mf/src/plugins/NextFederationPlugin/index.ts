@@ -11,7 +11,7 @@ import type {
   NextFederationPluginOptions,
   SharedObject,
 } from '@module-federation/utilities';
-import type { Compiler, container } from 'webpack';
+import type Compiler from 'webpack/lib/Compiler';
 import { createRuntimeVariables } from '@module-federation/utilities';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
