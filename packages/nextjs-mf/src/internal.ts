@@ -19,19 +19,16 @@ import { parseOptions } from 'webpack/lib/container/options';
  */
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/dynamic': {
-    eager: false,
     requiredVersion: false,
     singleton: true,
     import: undefined,
   },
   'next/head': {
-    eager: true,
     requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/link': {
-    eager: true,
     requiredVersion: undefined,
     singleton: true,
     import: undefined,
@@ -40,55 +37,56 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     requiredVersion: false,
     singleton: true,
     import: false,
-    eager: false,
   },
   'next/image': {
     requiredVersion: false,
     singleton: true,
     import: undefined,
-    eager: false,
   },
   'next/script': {
     requiredVersion: false,
     singleton: true,
     import: undefined,
-    eager: false,
   },
   react: {
     singleton: true,
     requiredVersion: false,
-    eager: false,
+    import: false,
+  },
+  "react/": {
+    singleton: true,
+    requiredVersion: false,
+    import: false,
+  },
+  'react-dom/': {
+    singleton: true,
+    requiredVersion: false,
     import: false,
   },
   'react-dom': {
     singleton: true,
     requiredVersion: false,
-    eager: false,
     import: false,
   },
   'react/jsx-dev-runtime': {
     singleton: true,
     requiredVersion: false,
     import: undefined,
-    eager: false,
   },
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: false,
-    eager: false,
     import: false,
   },
   'styled-jsx': {
     requiredVersion: false,
     singleton: true,
     import: undefined,
-    eager: false,
   },
   'styled-jsx/style': {
     requiredVersion: false,
     singleton: true,
     import: undefined,
-    eager: false,
   },
 };
 
@@ -107,15 +105,9 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
 
-  // Initialize eager as true for 'react', 'react-dom', 'next/router', and 'next/link', otherwise undefined
-  const eager = ['react', 'react-dom', 'next/router', 'next/link'].some(
-    (k) => k === key,
-  )
-    ? true
-    : undefined;
 
   // Set eager and import to undefined for all entries, except for the ones specified above
-  acc[key] = { ...value, eager, import: undefined };
+  acc[key] = { ...value, import: undefined };
 
   return acc;
 }, {} as SharedObject);
