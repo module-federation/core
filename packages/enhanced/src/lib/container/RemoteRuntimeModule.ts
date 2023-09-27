@@ -2,11 +2,14 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+//@ts-ignore
+import RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
+import type Compilation from 'webpack/lib/Compilation';
 import RemoteModule from './RemoteModule';
-import RuntimeModule, { Compilation } from 'webpack/lib/RuntimeModule';
-import Template from 'webpack/lib/Template';
+//@ts-ignore
+import RuntimeModule = require('webpack/lib/RuntimeModule');
+//@ts-ignore
+import Template = require('webpack/lib/Template');
 
 /** @typedef {import("webpack/lib/Chunk")} Chunk */
 /** @typedef {import("./RemoteModule")} RemoteModule */
@@ -24,7 +27,12 @@ class RemoteRuntimeModule extends RuntimeModule {
     const { runtimeTemplate, moduleGraph } = compilation as Compilation;
     const chunkToRemotesMapping: Record<string, any> = {};
     const idToExternalAndNameMapping: Record<string | number, any> = {};
-    for (const chunk of this?.chunk?.getAllAsyncChunks() || []) {
+    const allChunks = [
+      ...Array.from(this.chunk?.getAllAsyncChunks() || []),
+      ...Array.from(this.chunk?.getAllInitialChunks() || []),
+    ];
+
+    for (const chunk of allChunks) {
       const modules = chunkGraph?.getChunkModulesIterableBySourceType(
         chunk,
         'remote',

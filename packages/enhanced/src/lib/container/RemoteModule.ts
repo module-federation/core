@@ -4,26 +4,28 @@
 */
 
 import { RawSource } from 'webpack-sources';
-import Module, {
+import type {
   CodeGenerationContext,
   CodeGenerationResult,
   LibIdentOptions,
   NeedBuildContext,
   WebpackError,
 } from 'webpack/lib/Module';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+//@ts-ignore
+import Module = require('webpack/lib/Module');
+//@ts-ignore
+import RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
+//@ts-ignore
+import makeSerializable = require('webpack/lib/util/makeSerializable');
 import FallbackDependency from './FallbackDependency';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
-import Compilation from 'webpack/lib/Compilation';
-import { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
-import { InputFileSystem } from 'webpack/lib/FileSystemInfo';
-import { RequestShortener } from 'webpack/lib/RuntimeModule';
+import type Compilation from 'webpack/lib/Compilation';
+import type { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
+import type { InputFileSystem } from 'webpack/lib/FileSystemInfo';
+import type { RequestShortener } from 'webpack/lib/RuntimeModule';
 import { WEBPACK_MODULE_TYPE_REMOTE } from 'webpack/lib/ModuleTypeConstants';
-import { WebpackOptionsNormalized } from 'webpack/lib/WebpackOptionsDefaulter';
-
-type ObjectDeserializerContext =
-  import('webpack/lib/serialization/ObjectMiddleware').ObjectDeserializerContext;
+import type { WebpackOptionsNormalized } from 'webpack/lib/WebpackOptionsDefaulter';
+import type { ObjectDeserializerContext } from 'webpack/lib/serialization/ObjectMiddleware';
 
 const TYPES: Set<string> = new Set(['remote', 'share-init']);
 const RUNTIME_REQUIREMENTS: Set<string> = new Set([RuntimeGlobals.module]);
@@ -170,6 +172,14 @@ class RemoteModule extends Module {
     ]);
     return { sources, data, runtimeRequirements: RUNTIME_REQUIREMENTS };
   }
+  override serialize(context: any) {
+    const { write } = context;
+    write(this.request);
+    write(this.externalRequests);
+    write(this.internalRequest);
+    write(this.shareScope);
+    super.serialize(context);
+  }
 
   /**
    * @param {ObjectDeserializerContext} context context
@@ -183,6 +193,6 @@ class RemoteModule extends Module {
   }
 }
 
-makeSerializable(RemoteModule, 'webpack/lib/container/RemoteModule');
+makeSerializable(RemoteModule, 'enhanced/lib/container/RemoteModule');
 
-export = RemoteModule;
+export default RemoteModule;

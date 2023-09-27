@@ -2,10 +2,11 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+//@ts-ignore
+import makeSerializable = require('webpack/lib/util/makeSerializable');
+//@ts-ignore
+import Dependency = require('webpack/lib/Dependency');
 import {
-  Dependency,
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from '../../declarations/plugins/container/Dependency';
@@ -89,7 +90,7 @@ class ProvideSharedDependency extends Dependency {
 
 makeSerializable(
   ProvideSharedDependency,
-  'webpack/lib/sharing/ProvideSharedDependency',
+  'enhanced/lib/sharing/ProvideSharedDependency',
 );
 
 export default ProvideSharedDependency;

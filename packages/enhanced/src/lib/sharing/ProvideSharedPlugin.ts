@@ -5,15 +5,16 @@
 
 'use strict';
 
-import WebpackError from 'webpack/lib/WebpackError';
 import { parseOptions } from '../container/options';
-import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
+//@ts-ignore
+import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
+import WebpackError from 'webpack/lib/WebpackError';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import ProvideSharedDependency from './ProvideSharedDependency';
 import ProvideSharedModuleFactory from './ProvideSharedModuleFactory';
-import Compiler from 'webpack/lib/Compiler';
-import Compilation from 'webpack/lib/Compilation';
-import { ProvideSharedPluginOptions } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
+import type Compiler from 'webpack/lib/Compiler';
+import type Compilation from 'webpack/lib/Compilation';
+import type { ProvideSharedPluginOptions } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
 
 export type ProvideOptions = {
   shareKey: string;

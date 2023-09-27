@@ -3,9 +3,11 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
 
-import { Dependency } from '../../declarations/plugins/container/Dependency';
 import { ExposeOptions } from './ContainerEntryModule';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+//@ts-ignore
+import makeSerializable = require('webpack/lib/util/makeSerializable');
+//@ts-ignore
+import Dependency = require('webpack/lib/Dependency');
 
 class ContainerEntryDependency extends Dependency {
   public name: string;
@@ -46,7 +48,7 @@ class ContainerEntryDependency extends Dependency {
 
 makeSerializable(
   ContainerEntryDependency,
-  'webpack/lib/container/ContainerEntryDependency',
+  'enhanced/lib/container/ContainerEntryDependency',
 );
 
 export default ContainerEntryDependency;
