@@ -19,7 +19,7 @@
     "nx": "nx",
     "gpt:file:example": "npm run gpt:file --file ./gpt/services/openai.js --file ./gpt/commit.js --file ./gpt/file.js --question \"Fix all JSDoc issues, dont modify any other aspectf of these files besides JSDOC\"",
     "sync:types:webpack": "cp -rf ./webpack/* ./node_modules/webpack",
-    "sync:pullMFTypes":"concurrently \"node ./packages/enhanced/pullts.js\"",
+    "sync:pullMFTypes": "concurrently \"node ./packages/enhanced/pullts.js\"",
     "gpt:commit": "node ./gpt --commit",
     "sync": "rsync -av --delete /Users/bytedance/dev/universe/dist/packages/ /Users/bytedance/dev/module-federation-examples/nextjs-ssr/node_modules/@module-federation/",
     "gpt:file": "node ./gpt",
@@ -213,5 +213,9 @@
     "commitizen": {
       "path": "cz-conventional-changelog"
     }
-  }
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
 }

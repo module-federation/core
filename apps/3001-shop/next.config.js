@@ -3,7 +3,7 @@ const { workspaceRoot } = require('nx/src/utils/workspace-root');
 
 const path = require('path');
 const { registerTsConfigPaths } = require('nx/src/plugins/js/utils/register');
-registerTsConfigPaths(path.join(workspaceRoot, 'tsconfig.tmp.json'));
+registerTsConfigPaths(path.join(workspaceRoot, 'tsconfig.base.json'));
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 
 // const { createDelegatedModule } = require('@module-federation/nextjs-mf/utilities');
@@ -69,7 +69,7 @@ const nextConfig = {
           enableUrlLoaderFix: true,
           automaticPageStitching: false,
         },
-      })
+      }),
     );
     return config;
   },
