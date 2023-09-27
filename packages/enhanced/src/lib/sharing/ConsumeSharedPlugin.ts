@@ -5,26 +5,32 @@
 
 'use strict';
 
-import ModuleNotFoundError from 'webpack/lib/ModuleNotFoundError';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import WebpackError from 'webpack/lib/WebpackError';
 import { parseOptions } from '../container/options';
-import LazySet from 'webpack/lib/util/LazySet';
-import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
+import { ConsumeOptions } from './ConsumeSharedModule';
+import { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
 import { parseRange } from 'webpack/lib/util/semver';
-import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
-import ConsumeSharedModule from './ConsumeSharedModule';
-import ConsumeSharedRuntimeModule from './ConsumeSharedRuntimeModule';
-import ProvideForSharedDependency from './ProvideForSharedDependency';
 import { resolveMatchedConfigs } from './resolveMatchedConfigs';
 import {
   isRequiredVersion,
   getDescriptionFile,
   getRequiredVersionFromDescriptionFile,
 } from './utils';
-import { ConsumeOptions } from './ConsumeSharedModule';
-import { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
-import Compiler from 'webpack/lib/Compiler';
+
+import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
+import ConsumeSharedModule from './ConsumeSharedModule';
+import ConsumeSharedRuntimeModule from './ConsumeSharedRuntimeModule';
+import ProvideForSharedDependency from './ProvideForSharedDependency';
+//@ts-ignore
+import ModuleNotFoundError = require('webpack/lib/ModuleNotFoundError');
+import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+//@ts-ignore
+import WebpackError = require('webpack/lib/WebpackError');
+//@ts-ignore
+import Compiler = require('webpack/lib/Compiler');
+//@ts-ignore
+import LazySet = require('webpack/lib/util/LazySet');
+//@ts-ignore
+import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
 
 /** @typedef {import("../../declarations/plugins/sharing/ConsumeSharedPlugin").ConsumeSharedPluginOptions} ConsumeSharedPluginOptions */
 /** @typedef {import("../../declarations/plugins/sharing/ConsumeSharedPlugin").ConsumesConfig} ConsumesConfig */

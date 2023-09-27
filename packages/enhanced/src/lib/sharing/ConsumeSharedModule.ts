@@ -6,8 +6,9 @@
 'use strict';
 
 import { RawSource } from 'webpack-sources';
-import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
-import Module, {
+//@ts-ignore
+import AsyncDependenciesBlock = require('webpack/lib/AsyncDependenciesBlock');
+import type {
   WebpackOptions,
   Compilation,
   UpdateHashContext,
@@ -23,9 +24,12 @@ import Module, {
   Hash,
   InputFileSystem,
 } from 'webpack/lib/Module';
+//@ts-ignore
+import Module = require('webpack/lib/Module');
 import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from 'webpack/lib/ModuleTypeConstants';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+//@ts-ignore
+import makeSerializable = require('webpack/lib/util/makeSerializable');
 import { rangeToString, stringifyHoley } from 'webpack/lib/util/semver';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 export type ConsumeOptions = {
@@ -325,7 +329,7 @@ class ConsumeSharedModule extends Module {
 
 makeSerializable(
   ConsumeSharedModule,
-  'webpack/lib/sharing/ConsumeSharedModule',
+  'enhanced/lib/sharing/ConsumeSharedModule',
 );
 
 export default ConsumeSharedModule;

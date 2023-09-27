@@ -1,48 +1,55 @@
 'use strict';
 
-import { RuntimeGlobals, RuntimeModule } from 'webpack';
-import { Template } from 'webpack';
+import { RuntimeGlobals, RuntimeModule, Template } from 'webpack';
 
 /**
- * This class extends the RuntimeModule to provide functionality
- * for the federation module in the runtime.
+ * Class representing a runtime module for federation module info.
+ * @extends RuntimeModule
  */
-class FederationModuleInfoRuntimeModule extends RuntimeModule {
+export class ModuleInfoRuntimeModule extends RuntimeModule {
   /**
-   * Constructor for the FederationModuleInfoRuntimeModule class.
-   * Initializes the module with the name and stage.
+   * Create a ModuleInfoRuntimeModule.
    */
   constructor() {
     super('federation module info runtime', RuntimeModule.STAGE_BASIC);
   }
 
   /**
-   * Generates runtime code
-   * @returns {string} runtime code
+   * Generate runtime code.
+   * @returns {string} The generated runtime code.
    */
   override generate(): string {
     return Template.asString([
       `${RuntimeGlobals.require}.federation = {`,
-      Template.indent([`cache: {},`, `remotes: {},`, `moduleInfo: { },`]),
+      Template.indent([`cache: {},`, `remotes: {},`, `moduleInfo: {}, `]),
       `};`,
-      // `if (!globalThis.__remote_scopes__) {`,
       Template.indent([
         '// backward compatible global proxy',
-        `globalThis.__remote_scope__ = globalThis.__remote_scope__ || new Proxy(${RuntimeGlobals.require}.federation, {`,
+        `let oldScope = globalThis.__remote_scope__ || {};`,
+             //TODO: move this elsewhere
+        `if(${RuntimeGlobals.runtimeId} === 'webpack-runtime' && globalThis.__remote_scope__) {`,
+          // during lazy compilations, webpack will push updated runtime modules ito webpack runtime
+          // this causes sharing to reinitialize, but remotes in the cache are already initialized
+          // when this happens, we will clear the cache so that the runtime re-initilizes remotes as well
+          Template.indent([
+            'globalThis.__remote_scope__ = {}',
+          ]),
+          `}`,
+        `if (!globalThis.__remote_scope__ || !globalThis.__remote_scope__.moduleInfo) {
+         console.log("create proxy",${RuntimeGlobals.runtimeId},!globalThis.__remote_scope__, globalThis.__remote_scope__ && !globalThis.__remote_scope__.moduleInfo);
+         `,
+        `globalThis.__remote_scope__ = new Proxy(${RuntimeGlobals.require}.federation, {`,
         Template.indent([
-          /**
-           * Getter function for the Proxy.
-           * @param {any} target - The target object.
-           * @param {string} prop - The property to get.
-           * @param {any} receiver - The Proxy or an object that inherits from the Proxy.
-           * @returns {any} The value to return.
-           */
           `get: function(target, prop, receiver) {`,
           'var result;',
           Template.indent([
             `if (prop === '_config') {`,
             Template.indent([
               `result = ${RuntimeGlobals.require}.federation.remotes;`,
+            ]),
+            `} else if(prop === 'moduleInfo') {`,
+            Template.indent([
+              `result = ${RuntimeGlobals.require}.federation[prop];`,
             ]),
             `} else {`,
             Template.indent([
@@ -52,13 +59,8 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
             'return result;',
           ]),
           `},`,
-          /**
-           * Setter function for the Proxy.
-           * @param {any} target - The target object.
-           * @param {string} prop - The property to set.
-           * @param {any} value - The value to set.
-           * @returns {boolean} Returns true.
-           */
+
+
           `set: function(target, prop, value) {`,
           Template.indent([
             `if (prop === '_config') {`,
@@ -75,10 +77,23 @@ class FederationModuleInfoRuntimeModule extends RuntimeModule {
           `}`,
         ]),
         `});`,
+
+
+        Template.indent([
+          `for (let key in oldScope._config) {`,
+          Template.indent([
+            `globalThis.__remote_scope__._config[key] = oldScope[key];`,
+          ]),
+          `}`,
+          `for (let key in oldScope) {`,
+          Template.indent([
+            'if(key === "_config") continue;',
+            `globalThis.__remote_scope__[key] = oldScope[key];`,
+          ]),
+          `}`,
+        ]),
+        `}`,
       ]),
-      // `}`,
     ]);
   }
 }
-
-export default FederationModuleInfoRuntimeModule;

@@ -5,11 +5,14 @@
 
 'use strict';
 
-import Dependency, {
+import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/Dependency';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+//@ts-ignore
+import Dependency = require('webpack/lib/Dependency');
+//@ts-ignore
+import makeSerializable = require('webpack/lib/util/makeSerializable');
 
 /** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
 /** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
@@ -63,7 +66,7 @@ class FallbackDependency extends Dependency {
 
 makeSerializable(
   FallbackDependency,
-  'webpack/lib/container/FallbackDependency',
+  'enhanced/lib/container/FallbackDependency',
 );
 
 export default FallbackDependency;

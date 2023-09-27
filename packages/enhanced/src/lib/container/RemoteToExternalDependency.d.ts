@@ -1,3 +1,3 @@
-export = RemoteToExternalDependency;
+export default RemoteToExternalDependency;
 declare class RemoteToExternalDependency extends ModuleDependency {}
-import ModuleDependency = require('webpack/lib/dependencies/ModuleDependency');
+import ModuleDependency from 'webpack/lib/dependencies/ModuleDependency';
