@@ -5,6 +5,7 @@
 
 import type Compiler from 'webpack/lib/Compiler';
 import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+//@ts-ignore
 import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
 import FallbackDependency from './FallbackDependency';
 import FallbackItemDependency from './FallbackItemDependency';
@@ -18,6 +19,7 @@ import ExternalsPlugin = require('webpack/lib/ExternalsPlugin');
 
 import type Compilation from 'webpack/lib/Compilation';
 import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
+//@ts-ignore
 import NormalModuleFactory = require('webpack/lib/NormalModuleFactory');
 import {
   ExternalsType,

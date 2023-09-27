@@ -1,4 +1,4 @@
-import type { Compiler } from 'webpack';
+import Compiler from 'webpack/lib/Compiler';
 import { container } from 'webpack';
 import path from 'path';
 import type {
@@ -11,6 +11,7 @@ import {
   getDelegates,
 } from '../../internal';
 import { hasLoader, injectRuleLoader } from '../../loaders/helpers';
+const { ModuleFederationPlugin } = require('@module-federation/enhanced');
 
 type ConstructableModuleFederationPlugin = new (
   options: ModuleFederationPluginOptions,
@@ -30,8 +31,7 @@ export function getModuleFederationPluginConstructor(
     return require('@module-federation/node')
       .NodeFederationPlugin as ConstructableModuleFederationPlugin;
   }
-  return compiler.webpack.container
-    .ModuleFederationPlugin as unknown as ConstructableModuleFederationPlugin;
+  return ModuleFederationPlugin as unknown as ConstructableModuleFederationPlugin;
 }
 
 /**
@@ -110,6 +110,7 @@ export const applyPathFixes = (
     //@ts-ignore
     if (options.enableImageLoaderFix && hasLoader(rule, 'next-image-loader')) {
       // childCompiler.options.module.parser.javascript?.url = 'relative';
+      //@ts-ignore
       injectRuleLoader(rule, {
         loader: require.resolve('../../loaders/fixImageLoader'),
       });

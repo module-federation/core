@@ -3,8 +3,10 @@ import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import DelegatesModulePlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import JsonpChunkLoading from '../JsonpChunkLoading';
-
+import {
+  ModuleFederationPlugin,
+  ModuleInfoRuntimePlugin,
+} from '@module-federation/enhanced';
 /**
  * This function applies server-specific plugins to the webpack compiler.
  *
@@ -19,8 +21,7 @@ export function applyServerPlugins(
 ): void {
   // Import the StreamingTargetPlugin from @module-federation/node
   const { StreamingTargetPlugin } = require('@module-federation/node');
-  new JsonpChunkLoading({ server: true }).apply(compiler);
-
+  new ModuleInfoRuntimePlugin().apply(compiler);
   // Apply the DelegatesModulePlugin to the compiler
   new DelegatesModulePlugin({
     runtime: 'webpack-runtime',
@@ -30,15 +31,20 @@ export function applyServerPlugins(
 
   // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
   new StreamingTargetPlugin(options, {
-    ModuleFederationPlugin: compiler.webpack.container.ModuleFederationPlugin,
+    ModuleFederationPlugin: ModuleFederationPlugin,
   }).apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler
   new InvertedContainerPlugin({
     runtime: 'webpack-runtime',
     container: options.name,
+    chunkToEmbed: 'host_inner_ctn',
     remotes: options.remotes as Record<string, string>,
+    shared: options.shared as any,
+    shareScope: 'default',
+    exposes: options.exposes as any,
     debug: false,
+    //@ts-ignore
   }).apply(compiler);
 }
 
@@ -101,7 +107,7 @@ export function handleServerExternals(
     const originalExternals = compiler.options.externals[0];
 
     // Replace the original externals function with a new asynchronous function
-    compiler.options.externals[0] = async function (ctx, callback) {
+    compiler.options.externals[0] = async function (ctx: any, callback: any) {
       // Check if the module should not be treated as external
       if (
         ctx.request &&

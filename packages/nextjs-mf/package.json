@@ -18,7 +18,8 @@
   "dependencies": {
     "fast-glob": "^3.2.11",
     "webpack-sources": "^3.2.3",
-    "eventemitter3": "^5.0.0"
+    "eventemitter3": "^5.0.0",
+    "@module-federation/enhanced": "0.1.1"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",

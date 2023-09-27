@@ -9,7 +9,9 @@ import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/Dependency';
+//@ts-ignore
 import Dependency = require('webpack/lib/Dependency');
+//@ts-ignore
 import makeSerializable = require('webpack/lib/util/makeSerializable');
 
 /** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */

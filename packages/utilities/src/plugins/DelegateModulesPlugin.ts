@@ -38,25 +38,8 @@ class DelegateModulesPlugin {
       if (this.options.debug) {
         console.log('adding ', module.identifier(), ' to chunk', chunk.name);
       }
-      if (module.buildMeta) {
-        module.buildMeta['eager'] = true;
-      }
       compilation.chunkGraph.connectChunkAndModule(chunk, module);
     }
-
-    module.dependencies.forEach((dependency) => {
-      const dependencyModule = compilation.moduleGraph.getModule(dependency);
-      if (
-        dependencyModule &&
-        !compilation.chunkGraph.isModuleInChunk(dependencyModule, chunk)
-      ) {
-        this.addModuleAndDependenciesToChunk(
-          dependencyModule as NormalModule,
-          chunk,
-          compilation,
-        );
-      }
-    });
   }
 
   removeDelegatesNonRuntimeChunks(
@@ -72,9 +55,10 @@ class DelegateModulesPlugin {
             chunk.id,
             chunk.name,
           );
-        this._delegateModules.forEach((module) => {
+
+        for (const [id, module] of this._delegateModules) {
           compilation.chunkGraph.disconnectChunkAndModule(chunk, module);
-        });
+        }
       }
     }
   }
@@ -96,6 +80,16 @@ class DelegateModulesPlugin {
             );
             for (const module of modules) {
               const normalModule = module as NormalModule;
+              if (normalModule) {
+                const mid = normalModule.identifier();
+                if (
+                  normalModule?.userRequest?.startsWith(
+                    'webpack/container/reference',
+                  )
+                ) {
+                  this._delegateModules.set(mid, normalModule);
+                }
+              }
               if (
                 normalModule.resource &&
                 knownDelegates.has(normalModule.resource)

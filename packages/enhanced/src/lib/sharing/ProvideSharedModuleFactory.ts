@@ -2,7 +2,7 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
-
+//@ts-ignore
 import ModuleFactory = require('webpack/lib/ModuleFactory');
 import ProvideSharedModule from './ProvideSharedModule';
 import type {

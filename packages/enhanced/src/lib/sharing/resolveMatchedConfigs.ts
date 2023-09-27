@@ -4,7 +4,9 @@
 */
 import type Compilation from 'webpack/lib/Compilation';
 import type { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
+//@ts-ignore
 import ModuleNotFoundError = require('webpack/lib/ModuleNotFoundError');
+//@ts-ignore
 import LazySet = require('webpack/lib/util/LazySet');
 
 interface MatchedConfigs<T> {

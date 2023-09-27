@@ -2,8 +2,9 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-
+//@ts-ignore
 import ModuleDependency = require('webpack/lib/dependencies/ModuleDependency');
+//@ts-ignore
 import makeSerializable = require('webpack/lib/util/makeSerializable');
 
 class ProvideForSharedDependency extends ModuleDependency {

@@ -2,10 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "declaration": true,
     "types": ["node", "webpack", "../../node_modules/webpack"],
-    "resolveJsonModule": true,
-    "esModuleInterop": true
   },
   "include": ["**/*.ts", "**/*.js"],
   "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]

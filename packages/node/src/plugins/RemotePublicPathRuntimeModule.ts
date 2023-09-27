@@ -1,8 +1,11 @@
 import { RuntimeGlobals, RuntimeModule, Template, javascript } from 'webpack';
+//@ts-ignore
 import { getUndoPath } from 'webpack/lib/util/identifier';
 
 class AutoPublicPathRuntimeModule extends RuntimeModule {
-  constructor(options) {
+  private options: any;
+
+  constructor(options: any) {
     super('publicPath', RuntimeModule.STAGE_BASIC + 1);
     this.options = options;
   }
@@ -10,7 +13,7 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
   /**
    * @returns {string} runtime code
    */
-  generate() {
+  override generate() {
     const { compilation } = this;
     const {
       scriptType,
@@ -19,26 +22,26 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
       importMetaName,
       uniqueName,
       chunkLoading,
+      //@ts-ignore
     } = compilation.outputOptions;
 
     const getPath = () =>
-      compilation.getPath(publicPath || '', {
-        hash: compilation.hash || 'XXXX',
+      compilation?.getPath(publicPath || '', {
+        hash: compilation?.hash || 'XXXX',
       });
     // If publicPath is not "auto", return the static value
-    if (publicPath !== 'auto') {
-      const path = getPath();
-      return Template.asString([
-        `${RuntimeGlobals.publicPath} = ${JSON.stringify(path)};`,
-        "var addProtocol = (url)=> url.startsWith('//') ? 'https:' + url : url;",
-        `globalThis.currentVmokPublicPath = addProtocol(${RuntimeGlobals.publicPath}) || '/';`,
-      ]);
-    }
-
-    const chunkName = compilation.getPath(
+    // if (publicPath !== 'auto') {
+    //   const path = getPath();
+    //   return Template.asString([
+    //     `${RuntimeGlobals.publicPath} = ${JSON.stringify(path)};`,
+    //     'var addProtocol = (url)=> url.startsWith(\'//\') ? \'https:\' + url : url;',
+    //     `globalThis.currentVmokPublicPath = addProtocol(${RuntimeGlobals.publicPath}) || '/';`,
+    //   ]);
+    // }
+    const chunkName = compilation?.getPath(
       javascript.JavascriptModulesPlugin.getChunkFilenameTemplate(
         this.chunk,
-        compilation.outputOptions,
+        compilation?.outputOptions,
       ),
       {
         chunk: this.chunk,
@@ -46,23 +49,32 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
       },
     );
     const undoPath = getUndoPath(chunkName, path, false);
-    const ident = Template.toIdentifier(uniqueName);
+    const ident = Template.toIdentifier(uniqueName || '');
+
+    // Define potential lookup keys
+    const potentialLookups = [this.chunk?.name, ident, uniqueName];
+
+    // Generate lookup string using potential keys
+    const lookupString = potentialLookups
+      .filter(Boolean)
+      .map((lookup) => {
+        return `remoteReg[${JSON.stringify(lookup)}]`;
+      })
+      .join(' || ');
 
     return Template.asString([
       'var scriptUrl;',
       // its an esproxy so nesting into _config directly is not possible
-      'var remoteReg = globalThis.__remote_scope__ ? globalThis.__remote_scope__._config : {};',
       `
       let remoteContainerRegistry = {
         get url() {
-          return remoteReg[${JSON.stringify(
-            ident,
-          )}] || remoteReg[${JSON.stringify(uniqueName)}];
+          var remoteReg = globalThis.__remote_scope__ ? globalThis.__remote_scope__._config : {};
+          return ${lookupString}
         }
       };
       `,
 
-      ['module', 'node', 'async-node', 'require'].includes(scriptType) ||
+      ['module', 'node', 'async-node', 'require'].includes(scriptType || '') ||
       chunkLoading
         ? Template.asString([
             'try {',
@@ -73,8 +85,16 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
             Template.indent([
               'if (typeof remoteContainerRegistry.url === "string") {',
               Template.indent('scriptUrl = remoteContainerRegistry.url;'),
-              '} else {',
+              '} else if(typeof __filename !== "undefined") {',
               Template.indent('scriptUrl = __filename;'),
+              '} else {',
+              Template.indent([
+                `scriptUrl = ${
+                  publicPath !== 'auto'
+                    ? JSON.stringify(getPath())
+                    : 'undefined'
+                }`,
+              ]),
               '}',
             ]),
             '}',
@@ -95,7 +115,7 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
             ]),
             '}',
           ]),
-      "console.log('scriptUrl', scriptUrl);",
+      // 'console.log(\'scriptUrl\', scriptUrl);',
       '// When supporting server environments where an automatic publicPath is not supported, you must specify an output.publicPath manually via configuration',
       '// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.',
       'if (!scriptUrl) throw new Error("Unable to calculate automatic public path");',

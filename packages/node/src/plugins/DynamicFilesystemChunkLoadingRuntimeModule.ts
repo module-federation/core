@@ -162,25 +162,24 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
       ]),
       '};',
     ]);
-
     const remoteRegistry = Template.asString([
-      `const remotesRegistry = ${JSON.stringify(
-        Object.entries(remotes).reduce(
-          (registry, [global, url]) => {
-            registry[global] = url.split('@')[1];
-            return registry;
+      `var remotes = ${JSON.stringify(
+        Object.values(remotes).reduce(
+          (acc, remote) => {
+            const [global, url] = remote.split('@');
+            acc[global] = url;
+            return acc;
           },
           {} as Record<string, string>,
         ),
       )};`,
-      'var remotesRegistryKeys = Object.keys(remotesRegistry);',
-      'for (var i = 0; i < remotesRegistryKeys.length; i++) {',
-      Template.indent([
-        'var remote = remotesRegistryKeys[i];',
-        'var url = remotesRegistry[remote];',
-        'globalThis.__remote_scope__._config[remote] = url;',
+      Template.asString([
+        'Object.keys(remotes).forEach(function(remote) {',
+        Template.indent(
+          'globalThis.__remote_scope__._config[remote] = remotes[remote];',
+        ),
+        '});',
       ]),
-      '}',
     ]);
 
     return Template.asString([

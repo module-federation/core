@@ -15,20 +15,20 @@ const performReload = (shouldReload: any) => {
   }
 
   //@ts-ignore
-  globalThis.__remote_scope__ = {
-    _config: {},
-    _medusa: {},
-  };
+  // globalThis.__remote_scope__ = {
+  //   _config: {},
+  //   _medusa: {},
+  // };
   //@ts-ignore
   globalThis.backupScope = {};
   //@ts-ignore
   globalThis.factoryTracker = {};
 
-  Object.keys(req.cache).forEach((key) => {
-    if (requireCacheRegex.test(key)) {
-      delete req.cache[key];
-    }
-  });
+  // Object.keys(req.cache).forEach((key) => {
+  //   if (requireCacheRegex.test(key)) {
+  //     delete req.cache[key];
+  //   }
+  // });
 
   return true;
 };
@@ -47,7 +47,7 @@ export const revalidate = () => {
     return new Promise((res) => {
       const fetches = [];
       for (const property in remoteScope) {
-        if (remoteScope[property].fake) {
+        if (!remoteScope[property]) {
           console.error(
             'unreachable remote found',
             property,

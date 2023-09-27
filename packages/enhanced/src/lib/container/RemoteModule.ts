@@ -11,8 +11,11 @@ import type {
   NeedBuildContext,
   WebpackError,
 } from 'webpack/lib/Module';
+//@ts-ignore
 import Module = require('webpack/lib/Module');
+//@ts-ignore
 import RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
+//@ts-ignore
 import makeSerializable = require('webpack/lib/util/makeSerializable');
 import FallbackDependency from './FallbackDependency';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
@@ -169,7 +172,7 @@ class RemoteModule extends Module {
     ]);
     return { sources, data, runtimeRequirements: RUNTIME_REQUIREMENTS };
   }
-  serialize(context: any) {
+  override serialize(context: any) {
     const { write } = context;
     write(this.request);
     write(this.externalRequests);

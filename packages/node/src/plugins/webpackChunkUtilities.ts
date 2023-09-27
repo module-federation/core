@@ -127,7 +127,6 @@ export function generateLoadingCode(
   }
 
   return Template.asString([
-    // `if(!globalThis.__remote_scope__) globalThis.__remote_scope__ = ${RuntimeGlobals.require}.federation`,
     '// Dynamic filesystem chunk loading for javascript',
     `${fn}.readFileVm = function(chunkId, promises) {`,
     hasJsMatcher !== false
@@ -311,11 +310,21 @@ export function generateLoadScript(runtimeTemplate: any): string {
               } else {
                 remote = eval('let module = {};' + scriptContent + '\\nmodule.exports')
               }
-              globalThis.__remote_scope__[remoteName] = remote[name] || remote;
+              globalThis.__remote_scope__[remoteName] = remote[remoteName] || remote;
               globalThis.__remote_scope__._config[remoteName] = url;
-              callback(globalThis.__remote_scope__[name])
+              callback(globalThis.__remote_scope__[remoteName])
             } catch (e) {
               e.target = {src: url};
+              globalThis.__remote_scope__[remoteName] = {
+                get: function() {
+                  return function() {
+                    return ()=>null
+                  }
+                },
+                init: function() {},
+                fake: true
+              }
+              console.log(e);
               callback(e);
             }
           }`,
@@ -340,7 +349,8 @@ export function generateInstallChunk(
       '}',
     ]),
     '}',
-    `if(runtime) runtime(__webpack_require__);`,
+    // 'console.log("install chunk", chunkIds, installedChunks);',
+    'if(runtime) runtime(__webpack_require__);',
     'for(var i = 0; i < chunkIds.length; i++) {',
     Template.indent([
       'if(installedChunks[chunkIds[i]]) {',

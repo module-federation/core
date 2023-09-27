@@ -3,7 +3,6 @@ import type { ModuleFederationPluginOptions } from '../types';
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
 import ChunkLoadingRuntimeModule from './DynamicFilesystemChunkLoadingRuntimeModule';
-import FederationModuleInfoRuntimeModule from './FederationModuleInfoRuntimeModule';
 import AutoPublicPathRuntimeModule from './RemotePublicPathRuntimeModule';
 //@ts-ignore
 import PublicPathRuntimeModule from 'webpack/lib/runtime/PublicPathRuntimeModule';
@@ -35,6 +34,7 @@ class DynamicFilesystemChunkLoadingPlugin {
     new StartupChunkDependenciesPlugin({
       chunkLoading: chunkLoadingValue,
       asyncChunkLoading: this._asyncChunkLoading,
+      //@ts-ignore
     }).apply(compiler);
 
     compiler.hooks.thisCompilation.tap(
@@ -152,11 +152,11 @@ class DynamicFilesystemChunkLoadingPlugin {
             set: Set<string>,
             { chunkGraph }: { chunkGraph: ChunkGraph },
           ) => {
-            compilation.addRuntimeModule(
-              chunk,
-              //@ts-ignore
-              new FederationModuleInfoRuntimeModule(),
-            );
+            // compilation.addRuntimeModule(
+            //   chunk,
+            //   //@ts-ignore
+            //   new FederationModuleInfoRuntimeModule(),
+            // );
           },
         );
       },

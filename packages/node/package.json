@@ -15,6 +15,7 @@
       "require": "./src/utils/index.js"
     },
     "./src/plugins/RemotePublicPathPlugin.js": "./src/plugins/RemotePublicPathPlugin.js",
+    "./src/plugins/NodeFederationPlugin.js": "./src/plugins/NodeFederationPlugin.js",
     "./src/": "./src/"
   },
   "publishConfig": {

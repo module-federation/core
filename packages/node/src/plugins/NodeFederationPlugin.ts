@@ -3,6 +3,7 @@
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
+import {ModuleInfoRuntimePlugin} from '@module-federation/enhanced';
 
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
@@ -13,7 +14,6 @@ import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure
 interface NodeFederationOptions extends ModuleFederationPluginOptions {
   experiments?: Record<string, unknown>;
   debug?: boolean;
-  useRemoteSideloader?: boolean;
 }
 
 /**
@@ -24,15 +24,6 @@ interface NodeFederationOptions extends ModuleFederationPluginOptions {
 interface Context {
   ModuleFederationPlugin?: typeof container.ModuleFederationPlugin;
 }
-
-// possible remote evaluators
-// this depends on the chunk format selected.
-// commonjs2 - it think, is lazily evaluated - beware
-// const remote = eval(scriptContent + '\n  try{' + moduleName + '}catch(e) { null; };');
-// commonjs - fine to use but exports marker doesnt exist
-// const remote = eval('let exports = {};' + scriptContent + 'exports');
-// commonjs-module, ideal since it returns a commonjs module format
-// const remote = eval(scriptContent + 'module.exports')
 
 /**
  * This function iterates over all remotes and checks if they
@@ -123,24 +114,30 @@ class NodeFederationPlugin {
    * @param {Compiler} compiler - The webpack compiler.
    */
   apply(compiler: Compiler) {
-    // When used with Next.js, context is needed to use Next.js webpack
     const { webpack } = compiler;
+    new ModuleInfoRuntimePlugin().apply(compiler);
+    const pluginOptions = this.preparePluginOptions();
+    this.updateCompilerOptions(compiler);
+    const ModuleFederationPlugin = this.getModuleFederationPlugin(compiler, webpack);
+    new ModuleFederationPlugin(pluginOptions).apply(compiler);
+  }
 
-    const pluginOptions = {
+  private preparePluginOptions(): ModuleFederationPluginOptions {
+    return {
       ...this._options,
       remotes: this._options.remotes
         ? parseRemotes(this._options.remotes as Record<string, any>)
         : {},
     };
-    //TODO can use import meta mock object but need to update data structure of remote_scope
+  }
+
+  private updateCompilerOptions(compiler: Compiler): void {
     if (compiler.options && compiler.options.output) {
       compiler.options.output.importMetaName = 'remoteContainerRegistry';
     }
-
     const chunkFileName = compiler.options?.output?.chunkFilename;
     const uniqueName =
       compiler?.options?.output?.uniqueName || this._options.name;
-
     if (
       typeof chunkFileName === 'string' &&
       uniqueName &&
@@ -152,13 +149,30 @@ class NodeFederationPlugin {
         suffix,
       );
     }
+  }
 
-    new (this.context.ModuleFederationPlugin ||
-      (webpack && webpack.container.ModuleFederationPlugin) ||
-      require('webpack/lib/container/ModuleFederationPlugin'))(
-      pluginOptions,
-    ).apply(compiler);
+  private getModuleFederationPlugin(compiler: Compiler, webpack: any): any {
+    let ModuleFederationPlugin;
+    if(this.context.ModuleFederationPlugin) {
+      ModuleFederationPlugin = this.context.ModuleFederationPlugin;
+    } else if(webpack && webpack.container && webpack.container.ModuleFederationPlugin) {
+      ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
+    } else {
+      ModuleFederationPlugin = this.loadModuleFederationPlugin();
+    }
+    return ModuleFederationPlugin;
+  }
+
+  private loadModuleFederationPlugin(): any {
+    let ModuleFederationPlugin;
+    try {
+      ModuleFederationPlugin = require('@module-federation/enhanced').ModuleFederationPlugin;
+    } catch (e) {
+      ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin')
+    }
+    return ModuleFederationPlugin;
   }
 }
 
 export default NodeFederationPlugin;
+
