@@ -74,7 +74,9 @@ const loadEsmRemote = async (
   bustRemoteEntryCache: ImportRemoteOptions['bustRemoteEntryCache'],
 ) => {
   const timestamp = bustRemoteEntryCache ? `?t=${new Date().getTime()}` : '';
-  const module = await import(/* webpackIgnore: true */ `${url}${timestamp}`);
+  const module = await eval(
+    'import(/* webpackIgnore: true */ `${url}${timestamp}`)',
+  );
 
   if (!module) {
     throw new Error(
