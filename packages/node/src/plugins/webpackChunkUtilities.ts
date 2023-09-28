@@ -286,7 +286,6 @@ export function generateLoadScript(runtimeTemplate: any): string {
       [
         Template.indent([
           `async function executeLoad(url, callback, name) {
-            console.log('in execute load', name, url)
             if (!name) {
               throw new Error('__webpack_require__.l name is required for ' + url);
             }
