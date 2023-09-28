@@ -98,12 +98,14 @@ export function applyRemoteDelegates(
  * and if the loader is present in the rule. If both conditions are met, it injects the fix loader.
  *
  * @param {Compiler} compiler - The Webpack compiler instance.
- * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
+ * @param {any} options - The ModuleFederationPluginOptions instance.
  */
 export const applyPathFixes = (
   compiler: Compiler,
-  options: ModuleFederationPluginOptions,
+  options: any,
 ) => {
+
+
   //@ts-ignore
   compiler.options.module.rules.forEach((rule) => {
     // next-image-loader fix which adds remote's hostname to the assets url
