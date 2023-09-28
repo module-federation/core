@@ -98,6 +98,7 @@ export class NextFederationPlugin {
 
   private applyConditionalPlugins(compiler: Compiler, isServer: boolean) {
     compiler.options.output.uniqueName = this._options.name;
+    applyPathFixes(compiler, this._extraOptions);
     if (isServer) {
       //@ts-ignore
       configureServerCompilerOptions(compiler);
