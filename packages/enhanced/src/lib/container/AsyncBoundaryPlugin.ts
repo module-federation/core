@@ -75,13 +75,13 @@ class AsyncBoundaryPlugin {
 
     return Template.asString([
       this.replaceWebpackExec(webpack_exec),
-      'globalThis.ongoingRemotes = globalThis.ongoingRemotes || [];',
-      'var __webpack_exec__ = async function() {',
+      `globalThis.ongoingRemotes = globalThis.ongoingRemotes || [];`,
+      `var __webpack_exec__ = async function() {`,
       Template.indent([
         `var chunkIds = ${JSON.stringify(Array.from(dependentChunkIds))};`,
-        `chunkIds.forEach((id) => ${RuntimeGlobals.ensureChunkHandlers}.consumes(id, globalThis.ongoingRemotes));`,
+        `chunkIds.forEach(function(id) { ${RuntimeGlobals.ensureChunkHandlers}.consumes(id, globalThis.ongoingRemotes); });`,
         `await Promise.all(globalThis.ongoingRemotes);`,
-        `chunkIds.forEach((id) => ${RuntimeGlobals.ensureChunkHandlers}.remotes(id, globalThis.ongoingRemotes));`,
+        `chunkIds.forEach(function(id) { ${RuntimeGlobals.ensureChunkHandlers}.remotes(id, globalThis.ongoingRemotes); });`,
         `await Promise.all(globalThis.ongoingRemotes);`,
         `return  __original_webpack_exec__.apply(this, arguments);`,
       ]),
