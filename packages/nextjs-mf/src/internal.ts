@@ -19,7 +19,7 @@ import { parseOptions } from 'webpack/lib/container/options';
  */
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/dynamic': {
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
@@ -34,7 +34,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     import: undefined,
   },
   'next/router': {
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined
   },
@@ -42,47 +42,47 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     eager:true,
   },
   'next/image': {
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/script': {
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   react: {
     singleton: true,
-    requiredVersion: false,
+    requiredVersion: undefined,
     import: false,
   },
   "react/": {
     singleton: true,
-    requiredVersion: false,
+    requiredVersion: undefined,
     import: false,
   },
   'react-dom/': {
     singleton: true,
-    requiredVersion: false,
-    import: false,
+    requiredVersion: undefined,
+     import: false,
   },
   'react-dom': {
     singleton: true,
-    requiredVersion: false,
+    requiredVersion: undefined,
     import: false,
   },
   'react/jsx-dev-runtime': {
     singleton: true,
-    requiredVersion: false,
+    requiredVersion: undefined,
     import: undefined,
   },
   'react/jsx-runtime': {
     singleton: true,
-    requiredVersion: false,
-    import: false,
+    requiredVersion: undefined,
+    // import: false,
   },
   'styled-jsx': {
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
