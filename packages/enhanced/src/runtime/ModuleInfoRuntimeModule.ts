@@ -23,78 +23,56 @@ export class ModuleInfoRuntimeModule extends RuntimeModule {
       `${RuntimeGlobals.require}.federation = {`,
       Template.indent([`cache: {},`, `remotes: {},`, `moduleInfo: {}, `]),
       `};`,
+      "var createProxyGetter = function() {",
       Template.indent([
-        "// backward compatible global proxy",
-        `let oldScope = globalThis.__remote_scope__ || {};`,
-        //TODO: move this elsewhere
-        `if(${RuntimeGlobals.runtimeId} === 'webpack-runtime' && globalThis.__remote_scope__) {`,
-        // during lazy compilations, webpack will push updated runtime modules ito webpack runtime
-        // this causes sharing to reinitialize, but remotes in the cache are already initialized
-        // when this happens, we will clear the cache so that the runtime re-initilizes remotes as well
+        "return function(target, prop, receiver) {",
         Template.indent([
-          "globalThis.__remote_scope__ = {}"
-        ]),
-        `}`,
-        `if (!globalThis.__remote_scope__ || !globalThis.__remote_scope__.moduleInfo) {
-         console.log("create proxy",${RuntimeGlobals.runtimeId},!globalThis.__remote_scope__, globalThis.__remote_scope__ && !globalThis.__remote_scope__.moduleInfo);
-         `,
-        `globalThis.__remote_scope__ = new Proxy(${RuntimeGlobals.require}.federation, {`,
-        Template.indent([
-          `get: function(target, prop, receiver) {`,
           "var result;",
-          Template.indent([
-            `if (prop === '_config') {`,
-            Template.indent([
-              `result = ${RuntimeGlobals.require}.federation.remotes;`
-            ]),
-            `} else if(prop === 'moduleInfo') {`,
-            Template.indent([
-              `result = ${RuntimeGlobals.require}.federation[prop];`
-            ]),
-            `} else {`,
-            Template.indent([
-              `result = ${RuntimeGlobals.require}.federation.cache[prop];`
-            ]),
-            `}`,
-            "return result;"
-          ]),
-          `},`,
-
-
-          `set: function(target, prop, value) {`,
-          Template.indent([
-            `if (prop === '_config') {`,
-            Template.indent([
-              `${RuntimeGlobals.require}.federation.remotes = value;`
-            ]),
-            `} else {`,
-            Template.indent([
-              `${RuntimeGlobals.require}.federation.cache[prop] = value;`
-            ]),
-            `}`,
-            `return true;`
-          ]),
-          `}`
-        ]),
-        `});`,
-
-        "if(!oldScope.moduleInfo) {",
-        Template.indent([
-          `for (let key in oldScope._config) {`,
-          Template.indent([
-            `globalThis.__remote_scope__._config[key] = oldScope[key];`
-          ]),
-          `}`,
-          `for (let key in oldScope) {`,
-          Template.indent([
-            "if(key === \"_config\" || !oldScope[key]) continue;",
-            `globalThis.__remote_scope__[key] = oldScope[key];`,
-          ]),
+          "if (prop === '_config') {",
+          Template.indent("result = target.remotes;"),
+          "} else if (prop === 'moduleInfo') {",
+          Template.indent("result = target[prop];"),
+          "} else {",
+          Template.indent("result = target.cache[prop];"),
           "}",
-          `}`
+          "return result;",
         ]),
-        `}`
-      ])
+        "};"
+      ]),
+      "};",
+      "var createProxySetter = function() {",
+      Template.indent([
+        "return function(target, prop, value) {",
+        Template.indent([
+          "if (prop === '_config') {",
+          Template.indent(["target.remotes = value;"]),
+          "} else {",
+          Template.indent(["target.cache[prop] = value;"]),
+          "}",
+          "return true;",
+        ]),
+        "};"
+      ]),
+      "};",
+      "let oldScope = globalThis.__remote_scope__ || {};",
+      `if(${RuntimeGlobals.runtimeId} === 'webpack-runtime' && globalThis.__remote_scope__) {`,
+        "globalThis.__remote_scope__ = {}",
+      `}`,
+      "if (!globalThis.__remote_scope__ || !globalThis.__remote_scope__.moduleInfo) {",
+        `globalThis.__remote_scope__ = new Proxy(${RuntimeGlobals.require}.federation, {`,
+          "get: createProxyGetter(),",
+          "set: createProxySetter()",
+        `});`,
+        "if(!oldScope.moduleInfo) {",
+          "for (let key in oldScope._config) {",
+            "globalThis.__remote_scope__._config[key] = oldScope[key];",
+          "}",
+          "for (let key in oldScope) {",
+            "if(key === '_config' || !oldScope[key]) continue;",
+            "globalThis.__remote_scope__[key] = oldScope[key];",
+          "}",
+        "}",
+      "}",
     ]);
   }
 }
