@@ -1,6 +1,7 @@
 import { getModuleFederationConfig } from '@nx/react/src/module-federation/utils';
 import { container, Configuration } from 'webpack';
-import type { ModuleFederationConfig } from '@nx/devkit';
+
+import { ModuleFederationConfig } from '@nx/webpack';
 
 const { ModuleFederationPlugin } = container;
 
