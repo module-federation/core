@@ -8,7 +8,7 @@
 import { parseOptions } from '../container/options';
 //@ts-ignore
 import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
-import WebpackError from 'webpack/lib/WebpackError';
+import WebpackError = require('webpack/lib/WebpackError');
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import ProvideSharedDependency from './ProvideSharedDependency';
 import ProvideSharedModuleFactory from './ProvideSharedModuleFactory';

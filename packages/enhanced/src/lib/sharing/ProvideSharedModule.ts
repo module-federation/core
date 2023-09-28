@@ -10,7 +10,7 @@ import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 //@ts-ignore
 import makeSerializable = require('webpack/lib/util/makeSerializable');
 import type Compilation from 'webpack/lib/Compilation';
-import WebpackError from 'webpack/lib/WebpackError';
+import WebpackError = require('webpack/lib/WebpackError');
 import { WEBPACK_MODULE_TYPE_PROVIDE } from 'webpack/lib/ModuleTypeConstants';
 import type {
   CodeGenerationContext,
