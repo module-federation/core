@@ -107,13 +107,6 @@ class ModuleFederationPlugin {
           shareScope: mainOptions.shareScope,
           remotes: mainOptions.remotes,
         }).apply(compiler);
-        console.log({
-          remoteType,
-          shareScope: mainOptions.shareScope,
-          remotes: mainOptions.remotes,
-        });
-
-        console.log('applying reference plugin');
       }
       if (embeddedOptions.shared) {
         new SharePlugin({

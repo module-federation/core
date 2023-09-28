@@ -36,7 +36,10 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/router': {
     requiredVersion: false,
     singleton: true,
-    import: false,
+    import: undefined
+  },
+  "@module-federation/utilities":{
+    eager:true,
   },
   'next/image': {
     requiredVersion: false,
