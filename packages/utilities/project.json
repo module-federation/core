@@ -13,7 +13,7 @@
         "tsConfig": "packages/utilities/tsconfig.lib.json",
         "assets": ["packages/utilities/*.md"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true,
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "publish": {
