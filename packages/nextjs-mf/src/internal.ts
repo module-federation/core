@@ -33,6 +33,11 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     import: undefined,
   },
+  'next/image': {
+    requiredVersion: undefined,
+    singleton: true,
+    import: undefined,
+  },
   'next/router': {
     requiredVersion: undefined,
     singleton: true,
