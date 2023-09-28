@@ -203,7 +203,7 @@
     "vite": "4.4.9",
     "vite-tsconfig-paths": "4.2.1",
     "vitest": "0.32.4",
-    "vue-tsc": "1.8.14",
+    "vue-tsc": "1.8.15",
     "webpack": "^5.88.2",
     "webpack-virtual-modules": "0.5.0"
   },
