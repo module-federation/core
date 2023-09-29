@@ -110,7 +110,7 @@ export function handleServerExternals(
   ) {
     // Retrieve the original externals function
     const originalExternals = compiler.options.externals[0];
-  
+
     // Replace the original externals function with a new asynchronous function
     compiler.options.externals[0] = async function (ctx: any, callback: any) {
       // Check if the module should not be treated as external
@@ -125,28 +125,22 @@ export function handleServerExternals(
               ctx?.request?.includes(key)
             );
           }) ||
-          ctx.request.includes('@module-federation/dashboard-plugin'))
+          ctx.request.includes('@module-federation/dashboard-plugin')
+        )
       ) {
         // If the module should not be treated as external, return without calling the original externals function
         return;
       }
-  
-      // seems to cause build issues at lululemon
-      // nobody else seems to run into this issue
-      // #JobSecurity
-      if (ctx.request && ctx.request.includes('react/jsx-runtime')) {
-        return 'commonjs ' + ctx.request;
-      }
-  
+
       // Call the original externals function and retrieve the result
       // @ts-ignore
       const fromNext = await originalExternals(ctx, callback);
-  
+
       // If the result is null, return without further processing
       if (!fromNext) {
         return;
       }
-  
+
       // If the module is from Next.js or React, return the original result
       const req = fromNext.split(' ')[1];
       if (
@@ -186,17 +180,10 @@ export function handleServerExternals(
 export function configureServerCompilerOptions(compiler: Compiler): void {
   // Turn off the compiler target on node builds because we add our own chunk loading runtime module
   // with NodeFederationPlugin and StreamingTargetPlugin
-  compiler.options.target = false;
   compiler.options.node = {
     ...compiler.options.node,
     global: false,
   };
-  compiler.options.resolve.conditionNames = [
-    'node',
-    'import',
-    'require',
-    'default',
-  ];
   // no custom chunk rules
   compiler.options.optimization.splitChunks = undefined;
 

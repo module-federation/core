@@ -378,7 +378,7 @@ function getFederationStats(stats, federationPluginOptions) {
 
 /**
  * @typedef {object} FederationStatsPluginOptions
- * @property {string} filename The filename in the `output.path` directory to write stats to.
+ * @property {string | string[]} filename The filename or an array of filenames in the `output.path` directory to write stats to.
  */
 
 /**
@@ -416,6 +416,7 @@ class FederationStatsPlugin {
       console.error('No ModuleFederationPlugin(s) found.');
       return;
     }
+
     // This is where the plugin is tapping into the Webpack compilation lifecycle.
     // It's listening to the 'thisCompilation' event, which is triggered once for each new compilation.
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
@@ -454,6 +455,7 @@ class FederationStatsPlugin {
           const [containerEntryModule] = Array.from(
             compilation.chunkGraph.getChunkEntryModulesIterable(container),
           );
+
 
           const { blocks } = containerEntryModule;
 
@@ -575,14 +577,29 @@ class FederationStatsPlugin {
           // Get the filename of the final asset from the plugin options.
           const { filename } = this._options;
 
-          // Check if an asset with the same filename already exists.
-          const asset = compilation.getAsset(filename);
+          // If filename is an array, loop over it to emit or update assets.
+          if (Array.isArray(filename)) {
+            for (const file of filename) {
+              // Check if an asset with the same filename already exists.
+              const asset = compilation.getAsset(file);
 
-          // If an asset with the same filename already exists, update it. Otherwise, create a new asset.
-          if (asset) {
-            compilation.updateAsset(filename, statsSource);
+              // If an asset with the same filename already exists, update it. Otherwise, create a new asset.
+              if (asset) {
+                compilation.updateAsset(file, statsSource);
+              } else {
+                compilation.emitAsset(file, statsSource);
+              }
+            }
           } else {
-            compilation.emitAsset(filename, statsSource);
+            // Check if an asset with the same filename already exists.
+            const asset = compilation.getAsset(filename);
+
+            // If an asset with the same filename already exists, update it. Otherwise, create a new asset.
+            if (asset) {
+              compilation.updateAsset(filename, statsSource);
+            } else {
+              compilation.emitAsset(filename, statsSource);
+            }
           }
         },
       );
