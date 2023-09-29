@@ -2,7 +2,7 @@
 
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
-import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
+import { parseRemotes } from "./commonUtilities";
 import {ModuleInfoRuntimePlugin} from '@module-federation/enhanced';
 
 /**
@@ -26,65 +26,6 @@ interface Context {
 }
 
 /**
- * This function iterates over all remotes and checks if they
- * are internal or not. If it's an internal remote then we add it to our new object
- * with a key of the name of the remote and value as internal. If it's not an internal
- * remote then we check if there is a '@' in that string which likely means it is a global @ url
- *
- * @param {Record<string, any>} remotes - The remotes to parse.
- * @returns {Record<string, string>} - The parsed remotes.
- * */
-
-export const parseRemotes = (
-  remotes: Record<string, any>,
-): Record<string, string> => {
-  if (!remotes || typeof remotes !== 'object') {
-    throw new Error('remotes must be an object');
-  }
-
-  return Object.entries(remotes).reduce(
-    (acc: Record<string, string>, [key, value]) => {
-      const isInternal = value.startsWith('internal ');
-      const isGlobal =
-        value.includes('@') &&
-        !['window.', 'global.', 'globalThis.', 'self.'].some((prefix) =>
-          value.startsWith(prefix),
-        );
-
-      acc[key] = isInternal || !isGlobal ? value : parseRemoteSyntax(value);
-
-      return acc;
-    },
-    {},
-  );
-};
-/**
- * Parses the remote syntax and returns a formatted string if the remote includes '@' and does not start with 'window', 'global', or 'globalThis'.
- * Otherwise, it returns the original remote string.
- *
- * @param {string} remote - The remote string to parse.
- * @returns {string} - The parsed remote string or the original remote string.
- * @throws {Error} - Throws an error if the remote is not a string.
- */
-export const parseRemoteSyntax = (remote: any): string => {
-  if (typeof remote !== 'string') {
-    throw new Error('remote must be a string');
-  }
-
-  if (remote.includes('@')) {
-    const [url, global] = extractUrlAndGlobal(remote);
-    if (
-      !['window.', 'global.', 'globalThis.'].some((prefix) =>
-        global.startsWith(prefix),
-      )
-    ) {
-      return `globalThis.__remote_scope__.${global}@${url}`;
-    }
-  }
-  return remote;
-};
-
-/**
  * Class representing a NodeFederationPlugin.
  * @class
  */
@@ -96,13 +37,15 @@ class NodeFederationPlugin {
   /**
    * Create a NodeFederationPlugin.
    * @constructor
-   * @param {NodeFederationOptions} options - The options for the NodeFederationPlugin
+   * @param {NodeFederationOptions} opts - The options for the NodeFederationPlugin
    * @param {Context} context - The context for the NodeFederationPlugin
    */
   constructor(
-    { experiments, debug, ...options }: NodeFederationOptions,
+    opts: NodeFederationOptions,
     context: Context,
   ) {
+    // @todo debug flag is not used
+    const { experiments, debug, ...options } = opts;
     this._options = options || ({} as ModuleFederationPluginOptions);
     this.context = context || ({} as Context);
     this.experiments = experiments || {};
@@ -114,11 +57,10 @@ class NodeFederationPlugin {
    * @param {Compiler} compiler - The webpack compiler.
    */
   apply(compiler: Compiler) {
-    const { webpack } = compiler;
     new ModuleInfoRuntimePlugin().apply(compiler);
     const pluginOptions = this.preparePluginOptions();
     this.updateCompilerOptions(compiler);
-    const ModuleFederationPlugin = this.getModuleFederationPlugin(compiler, webpack);
+    const ModuleFederationPlugin = this.getModuleFederationPlugin(compiler);
     new ModuleFederationPlugin(pluginOptions).apply(compiler);
   }
 
@@ -151,26 +93,22 @@ class NodeFederationPlugin {
     }
   }
 
-  private getModuleFederationPlugin(compiler: Compiler, webpack: any): any {
-    let ModuleFederationPlugin;
+  private getModuleFederationPlugin(compiler: Compiler): typeof container.ModuleFederationPlugin {
     if(this.context.ModuleFederationPlugin) {
-      ModuleFederationPlugin = this.context.ModuleFederationPlugin;
-    } else if(webpack && webpack.container && webpack.container.ModuleFederationPlugin) {
-      ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
-    } else {
-      ModuleFederationPlugin = this.loadModuleFederationPlugin();
+      return this.context.ModuleFederationPlugin;
     }
-    return ModuleFederationPlugin;
+    if(compiler.webpack.container?.ModuleFederationPlugin) {
+      return compiler.webpack.container.ModuleFederationPlugin;
+    }
+    return this.loadModuleFederationPlugin();
   }
 
-  private loadModuleFederationPlugin(): any {
-    let ModuleFederationPlugin;
+  private loadModuleFederationPlugin(): typeof container.ModuleFederationPlugin {
     try {
-      ModuleFederationPlugin = require('@module-federation/enhanced').ModuleFederationPlugin;
+      return require('@module-federation/enhanced').ModuleFederationPlugin;
     } catch (e) {
-      ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin')
+      return require('webpack/lib/container/ModuleFederationPlugin')
     }
-    return ModuleFederationPlugin;
   }
 }
 

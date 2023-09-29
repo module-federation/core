@@ -1,4 +1,4 @@
-import { Template, RuntimeGlobals, Chunk, ChunkGraph } from 'webpack';
+import { Template, RuntimeGlobals, Chunk, ChunkGraph, Compilation } from 'webpack';
 
 /**
  * Generates the hot module replacement (HMR) code.
@@ -87,7 +87,7 @@ export function generateHmrCode(
 export function getInitialChunkIds(
   chunk: Chunk,
   chunkGraph: ChunkGraph,
-  chunkHasJs: any,
+  chunkHasJs: (chunk: Chunk, chunkGraph: ChunkGraph) => boolean,
 ) {
   const initialChunkIds = new Set(chunk.ids);
   for (const c of chunk.getAllInitialChunks()) {
@@ -259,7 +259,7 @@ export function generateHmrManifestCode(
  */
 export function handleOnChunkLoad(
   withOnChunkLoad: boolean,
-  runtimeTemplate: any,
+  runtimeTemplate: Compilation['runtimeTemplate'],
 ): string {
   if (withOnChunkLoad) {
     return `${
@@ -334,7 +334,7 @@ export function generateLoadScript(runtimeTemplate: any): string {
   ]);
 }
 export function generateInstallChunk(
-  runtimeTemplate: any,
+  runtimeTemplate: Compilation['runtimeTemplate'],
   withOnChunkLoad: boolean,
 ): string {
   return `var installChunk = ${runtimeTemplate.basicFunction('chunk', [
@@ -363,7 +363,7 @@ export function generateInstallChunk(
 }
 export function generateExternalInstallChunkCode(
   withExternalInstallChunk: boolean,
-  debug: boolean | undefined,
+  debug?: boolean,
 ): string {
   if (!withExternalInstallChunk) {
     return '// no external install chunk';

@@ -39,8 +39,6 @@ class StreamingTargetPlugin {
    */
   apply(compiler: Compiler) {
     // When used with Next.js, context is needed to use Next.js webpack
-    const { webpack } = compiler;
-
     compiler.options.output.chunkFormat = 'commonjs';
     if (compiler.options.output.enabledLibraryTypes === undefined) {
       compiler.options.output.enabledLibraryTypes = ['commonjs-module'];
@@ -60,13 +58,10 @@ class StreamingTargetPlugin {
       dynamicImport: true,
     };
 
-    new (webpack?.node?.NodeEnvironmentPlugin ||
-      require('webpack/lib/node/NodeEnvironmentPlugin'))({
-      infrastructureLogging: compiler.options.infrastructureLogging,
-    }).apply(compiler);
+    this.getNodeEnvironmentPlugin(compiler).apply(compiler);
 
-    new (webpack?.node?.NodeTargetPlugin ||
-      require('webpack/lib/node/NodeTargetPlugin'))().apply(compiler);
+    this.getNodeTargetPlugin(compiler).apply(compiler);
+
     new CommonJsChunkLoadingPlugin({
       asyncChunkLoading: true,
       name: this.options.name,
@@ -75,6 +70,16 @@ class StreamingTargetPlugin {
       promiseBaseURI: this.options.promiseBaseURI,
       debug: this.options.debug,
     }).apply(compiler);
+  }
+
+  private getNodeEnvironmentPlugin(compiler: Compiler) {
+    return new (
+        compiler.webpack?.node?.NodeEnvironmentPlugin || require('webpack/lib/node/NodeEnvironmentPlugin')
+    )({ infrastructureLogging: compiler.options.infrastructureLogging });
+  }
+
+  private getNodeTargetPlugin(compiler: Compiler) {
+    return new (compiler.webpack?.node?.NodeTargetPlugin || require('webpack/lib/node/NodeTargetPlugin'));
   }
 }
 

@@ -18,6 +18,8 @@ interface NodeFederationOptions extends ModuleFederationPluginOptions {
   debug?: boolean;
 }
 
+const defaultNodeFederationOptions = {} as NodeFederationOptions;
+
 /**
  * Interface for NodeFederationContext
  * @property {typeof container.ModuleFederationPlugin} [ModuleFederationPlugin] - The ModuleFederationPlugin from webpack container
@@ -30,17 +32,15 @@ interface NodeFederationContext {
  * Class representing a UniversalFederationPlugin
  */
 class UniversalFederationPlugin {
-  private _options: NodeFederationOptions;
-  private context: NodeFederationContext;
-
   /**
    * Create a UniversalFederationPlugin
-   * @param {NodeFederationOptions} options - The options for the plugin
+   * @param {NodeFederationOptions} _options - The options for the plugin
    * @param {NodeFederationContext} context - The context for the plugin
    */
-  constructor(options: NodeFederationOptions, context: NodeFederationContext) {
-    this._options = options || ({} as NodeFederationOptions);
-    this.context = context || ({} as NodeFederationContext);
+  constructor(
+      private readonly _options: NodeFederationOptions = defaultNodeFederationOptions,
+      private context: NodeFederationContext = {}
+  ) {
   }
 
   /**
@@ -49,23 +49,57 @@ class UniversalFederationPlugin {
    */
   apply(compiler: Compiler) {
     const { isServer, debug, ...options } = this._options;
-    const { webpack } = compiler;
-
-    if (
-      isServer ||
-      compiler.options.name === 'server' ||
-      compiler.options.target === 'node' ||
-      compiler.options.target === 'async-node'
-    ) {
-      new NodeFederationPlugin(options, this.context).apply(compiler);
-      new StreamingTargetPlugin({ ...options, debug }).apply(compiler);
-    } else {
-      new (this.context.ModuleFederationPlugin ||
-        (webpack && webpack.container.ModuleFederationPlugin) ||
-        require('webpack/lib/container/ModuleFederationPlugin'))(options).apply(
-        compiler,
-      );
+    if (this.isServer(compiler)) {
+      return this.applyServerPlugins(compiler, { ...options, debug });
     }
+    return this.applyModuleFederationPlugin(compiler, options);
+  }
+
+  /**
+   * Apply the NodeFederationPlugin and StreamingTargetPlugin to the compiler
+   * @param compiler
+   * @param options
+   * @private
+   */
+  private applyServerPlugins(
+      compiler: Compiler,
+      options: Omit<NodeFederationOptions, 'isServer'>
+  ): void {
+    new NodeFederationPlugin(options, this.context).apply(compiler);
+    new StreamingTargetPlugin(options).apply(compiler);
+  }
+
+  /**
+   * Apply the ModuleFederationPlugin to the compiler
+   * @param compiler
+   * @param options
+   * @private
+   */
+  private applyModuleFederationPlugin(
+      compiler: Compiler,
+      options: Omit<NodeFederationOptions, 'isServer' | 'debug'>
+  ): void {
+    const ModuleFederationPlugin = (
+        this.context.ModuleFederationPlugin ||
+        (compiler.webpack.container?.ModuleFederationPlugin) ||
+        require('webpack/lib/container/ModuleFederationPlugin')
+    );
+    new ModuleFederationPlugin(options).apply(compiler);
+  }
+
+  /**
+   * Whether the compiler is running on the server or
+   * is configured to run on the server
+   * @param compiler
+   * @private
+   */
+  private isServer(compiler: Compiler): boolean {
+    return (
+        this._options.isServer ||
+        compiler.options.name === 'server' ||
+        compiler.options.target === 'node' ||
+        compiler.options.target === 'async-node'
+    );
   }
 }
 

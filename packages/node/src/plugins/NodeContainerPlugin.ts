@@ -1,7 +1,8 @@
 'use strict';
 
 import type { Compiler, container } from 'webpack';
-import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
+
+type ContainerPluginOptions = ConstructorParameters<typeof container.ContainerPlugin>[0];
 
 /**
  * Interface for NodeContainerOptions which extends ContainerPluginOptions
@@ -9,6 +10,10 @@ import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure
  * @property {Record<string, unknown>} experiments - Optional experiments configuration
  * @property {boolean} debug - Optional debug flag
  */
+export interface NodeContainerOptions extends ContainerPluginOptions {
+    experiments?: Record<string, unknown>;
+    debug?: boolean;
+}
 
 /**
  * Interface for Context
@@ -29,81 +34,24 @@ interface Context {
 // const remote = eval(scriptContent + 'module.exports')
 
 /**
- * This function iterates over all remotes and checks if they
- * are internal or not. If it's an internal remote then we add it to our new object
- * with a key of the name of the remote and value as internal. If it's not an internal
- * remote then we check if there is a '@' in that string which likely means it is a global @ url
- *
- * @param {Record<string, any>} remotes - The remotes to parse.
- * @returns {Record<string, string>} - The parsed remotes.
- * */
-
-export const parseRemotes = (
-  remotes: Record<string, any>,
-): Record<string, string> => {
-  if (!remotes || typeof remotes !== 'object') {
-    throw new Error('remotes must be an object');
-  }
-
-  return Object.entries(remotes).reduce(
-    (acc: Record<string, string>, [key, value]) => {
-      const isInternal = value.startsWith('internal ');
-      const isGlobal =
-        value.includes('@') &&
-        !['window.', 'global.', 'globalThis.', 'self.'].some((prefix) =>
-          value.startsWith(prefix),
-        );
-
-      acc[key] = isInternal || !isGlobal ? value : parseRemoteSyntax(value);
-
-      return acc;
-    },
-    {},
-  );
-};
-/**
- * Parses the remote syntax and returns a formatted string if the remote includes '@' and does not start with 'window', 'global', or 'globalThis'.
- * Otherwise, it returns the original remote string.
- *
- * @param {string} remote - The remote string to parse.
- * @returns {string} - The parsed remote string or the original remote string.
- * @throws {Error} - Throws an error if the remote is not a string.
- */
-export const parseRemoteSyntax = (remote: any): string => {
-  if (typeof remote !== 'string') {
-    throw new Error('remote must be a string');
-  }
-
-  if (remote.includes('@')) {
-    const [url, global] = extractUrlAndGlobal(remote);
-    if (
-      !['window.', 'global.', 'globalThis.'].some((prefix) =>
-        global.startsWith(prefix),
-      )
-    ) {
-      return `globalThis.__remote_scope__.${global}@${url}`;
-    }
-  }
-  return remote;
-};
-
-/**
  * Class representing a NodeContainerPlugin.
  * @class
  */
 class NodeContainerPlugin {
-  private _options: any;
+  private _options: NodeContainerOptions;
   private context: Context;
-  private experiments: any['experiments'];
+  private experiments: NodeContainerOptions['experiments'];
 
   /**
    * Create a NodeContainerPlugin.
    * @constructor
-   * @param {NodeContainerOptions} options - The options for the NodeContainerPlugin
+   * @param {NodeContainerOptions} opts - The options for the NodeContainerPlugin
    * @param {Context} context - The context for the NodeContainerPlugin
    */
-  constructor({ experiments, debug, ...options }: any, context: Context) {
-    this._options = options || ({} as any);
+  constructor(opts: NodeContainerOptions, context: Context) {
+    // @todo debug flag is not used
+    const { experiments = {}, debug, ...options } = opts;
+    this._options = options || ({} as NodeContainerOptions);
     this.context = context || ({} as Context);
     this.experiments = experiments || {};
   }
@@ -138,12 +86,20 @@ class NodeContainerPlugin {
     //   const suffix = `-[chunkhash].js`;
     //   compiler.options.output.chunkFilename = chunkFileName.replace('.js', suffix);
     // }
-
-    new (this.context.ContainerPlugin ||
-      (webpack && webpack.container.ContainerPlugin) ||
-      require('webpack/lib/container/ContainerPlugin'))(pluginOptions).apply(
+    const ContainerPlugin = this.getContainerPlugin(compiler);
+    new ContainerPlugin(pluginOptions).apply(
       compiler,
     );
+  }
+
+  private getContainerPlugin(compiler: Compiler): typeof container.ContainerPlugin {
+    if (this.context.ContainerPlugin) {
+      return this.context.ContainerPlugin;
+    }
+    if (compiler.webpack && compiler.webpack.container && compiler.webpack.container.ContainerPlugin) {
+      return compiler.webpack.container.ContainerPlugin;
+    }
+    return require('webpack/lib/container/ContainerPlugin');
   }
 }
 
