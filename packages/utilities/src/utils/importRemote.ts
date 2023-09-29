@@ -71,12 +71,8 @@ const loadRemote = (
 const loadEsmRemote = async (
   url: RemoteData['url'],
   scope: ImportRemoteOptions['scope'],
-  bustRemoteEntryCache: ImportRemoteOptions['bustRemoteEntryCache'],
 ) => {
-  const timestamp = bustRemoteEntryCache ? `?t=${new Date().getTime()}` : '';
-  const module = await eval(
-    'import(/* webpackIgnore: true */ `${url}${timestamp}`)',
-  );
+  const module = await import(/* webpackIgnore: true */ url);
 
   if (!module) {
     throw new Error(
@@ -154,7 +150,7 @@ export const importRemote = async <T>({
 
     const asyncContainer = !esm
       ? loadRemote(remoteUrlWithEntryFile, scope, bustRemoteEntryCache)
-      : loadEsmRemote(remoteUrlWithEntryFile, scope, bustRemoteEntryCache);
+      : loadEsmRemote(remoteUrlWithEntryFile, scope);
 
     // Load the remote and initialize the share scope if it's empty
     await Promise.all([asyncContainer, initSharing()]);

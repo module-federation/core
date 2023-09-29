@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2015",
-    "module": "commonjs",
+    "module": "Node16",
+    "moduleResolution": "Node16",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitOverride": true,
