@@ -7,7 +7,7 @@ import {ModuleInfoRuntimePlugin} from '@module-federation/enhanced';
 
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
- * @interface
+ * @interface NodeFederationOptions
  * @property {Record<string, unknown>} experiments - Optional experiments configuration
  * @property {boolean} debug - Optional debug flag
  */
