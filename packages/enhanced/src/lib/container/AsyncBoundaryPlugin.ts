@@ -3,12 +3,16 @@ import { Source } from 'webpack-sources';
 import type Compilation from 'webpack/lib/Compilation';
 import type Compiler from 'webpack/lib/Compiler';
 import type Module from 'webpack/lib/Module';
-import type Chunk from 'webpack/lib/Chunk';
 import { getAllChunks } from 'webpack/lib/javascript/ChunkHelpers';
 import { ChunkGraph } from 'webpack/lib/ChunkGroup';
 import { StartupRenderContext } from 'webpack/lib/javascript/JavascriptModulesPlugin';
 import { RenderContext } from 'webpack/lib/javascript/JavascriptModulesPlugin';
 import { SyncBailHook } from 'tapable';
+
+interface RenderStartupLogicHook {
+  (source: Source, renderContext: Module, startupRenderContext: StartupRenderContext): string;
+}
+
 /**
  * AsyncBoundaryPlugin is a Webpack plugin that handles asynchronous boundaries in a federated module.
  * @class
@@ -30,72 +34,65 @@ class AsyncBoundaryPlugin {
    * @param {Compiler} compiler - Webpack compiler instance.
    */
   public apply(compiler: Compiler): void {
-    const { javascript } = compiler.webpack;
+    const getCompilationHooks =
+        compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks;
     compiler.hooks.thisCompilation.tap(
       'AsyncBoundaryPlugin',
       (compilation: Compilation) => {
-        const hooks =
-          javascript.JavascriptModulesPlugin.getCompilationHooks(compilation);
-        hooks.renderStartup.tap(
+        getCompilationHooks(compilation).renderStartup.tap(
           'AsyncBoundaryPlugin',
-          (
-            source: Source,
-            renderContext: Module,
-            startupRenderContext: StartupRenderContext,
-          ) => {
-            return this.renderStartupLogic(
-              source,
-              renderContext,
-              startupRenderContext,
-              compilation,
-            );
-          },
+          this.renderStartupLogic(compilation),
         );
       },
     );
   }
 
   /**
-   * Render the startup logic for the plugin.
-   * @param {Source} source - The source code.
-   * @param {RenderContext} renderContext - The render context.
-   * @param {any} startupRenderContext - The startup render context.
+   * Render the startup logic function creator for the plugin.
    * @param {Compilation} compilation - The Webpack compilation instance.
-   * @returns {string} - The modified source code.
+   * @returns {RenderStartupLogicHook} - The modified source code.
    */
-  private renderStartupLogic(
-    source: Source,
-    renderContext: Module,
-    startupRenderContext: StartupRenderContext,
-    compilation: Compilation,
-  ): string {
-    const isInvalidContext =
-      this.hooks.checkInvalidContext.call(renderContext, compilation) ?? false;
-    if (isInvalidContext) return source.source().toString();
+  private renderStartupLogic(compilation: Compilation): RenderStartupLogicHook {
+    /**
+     * Render the startup logic for the plugin.
+     * @param {Source} source - The source code.
+     * @param {RenderContext} renderContext - The render context.
+     * @param {StartupRenderContext} startupRenderContext - The startup render context.
+     * @returns {string} - The modified source code.
+     */
+    return (
+        source: Source,
+        renderContext: Module,
+        startupRenderContext: StartupRenderContext,
+    ): string => {
+      const isInvalidContext =
+          this.hooks.checkInvalidContext.call(renderContext, compilation) ?? false;
+      if (isInvalidContext) return source.source().toString();
 
-    const { chunkGraph } = compilation;
-    const replaceSource = source.source().toString();
-    const [webpack_exec, ...webpack_exports] = replaceSource.split('\n');
-    const dependentChunkIds = this.getDependentChunkIds(
-      startupRenderContext,
-      chunkGraph,
-    );
+      const { chunkGraph } = compilation;
+      const replaceSource = source.source().toString();
+      const [webpack_exec, ...webpack_exports] = replaceSource.split('\n');
+      const dependentChunkIds = this.getDependentChunkIds(
+          startupRenderContext,
+          chunkGraph,
+      );
 
-    return Template.asString([
-      this.replaceWebpackExec(webpack_exec),
-      `globalThis.ongoingRemotes = globalThis.ongoingRemotes || [];`,
-      `var __webpack_exec__ = async function() {`,
-      Template.indent([
-        `var chunkIds = ${JSON.stringify(Array.from(dependentChunkIds))};`,
-        `chunkIds.forEach(function(id) { ${RuntimeGlobals.ensureChunkHandlers}.consumes(id, globalThis.ongoingRemotes); });`,
-        `await Promise.all(globalThis.ongoingRemotes);`,
-        `chunkIds.forEach(function(id) { ${RuntimeGlobals.ensureChunkHandlers}.remotes(id, globalThis.ongoingRemotes); });`,
-        `await Promise.all(globalThis.ongoingRemotes);`,
-        `return  __original_webpack_exec__.apply(this, arguments);`,
-      ]),
-      `};`,
-      ...webpack_exports,
-    ]);
+      return Template.asString([
+        this.replaceWebpackExec(webpack_exec),
+        `globalThis.ongoingRemotes = globalThis.ongoingRemotes || [];`,
+        `var __webpack_exec__ = async function() {`,
+        Template.indent([
+          `var chunkIds = ${JSON.stringify(Array.from(dependentChunkIds))};`,
+          `chunkIds.forEach(function(id) { ${RuntimeGlobals.ensureChunkHandlers}.consumes(id, globalThis.ongoingRemotes); });`,
+          `await Promise.all(globalThis.ongoingRemotes);`,
+          `chunkIds.forEach(function(id) { ${RuntimeGlobals.ensureChunkHandlers}.remotes(id, globalThis.ongoingRemotes); });`,
+          `await Promise.all(globalThis.ongoingRemotes);`,
+          `return  __original_webpack_exec__.apply(this, arguments);`,
+        ]),
+        `};`,
+        ...webpack_exports,
+      ]);
+    }
   }
 
   /**
