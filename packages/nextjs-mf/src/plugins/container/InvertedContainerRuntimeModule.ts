@@ -58,10 +58,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
     return `
       function attachRemote (resolve) {
-        const innerRemote = __webpack_require__(${JSON.stringify(
+        var innerRemote = __webpack_require__(${JSON.stringify(
           containerModuleId,
         )});
-        console.log({innerRemote, name: ${RuntimeGlobals.runtimeId}})
         if(${globalObject} && !${globalObject}[${JSON.stringify(name)}]) {
           ${globalObject}[${JSON.stringify(name)}] = innerRemote;
         } else if(${containerScope} && !${containerScope}[${JSON.stringify(

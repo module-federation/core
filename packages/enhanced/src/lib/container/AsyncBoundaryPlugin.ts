@@ -19,7 +19,10 @@ class AsyncBoundaryPlugin {
    * @property {SyncBailHook} checkInvalidContext - A hook that checks if the render context is invalid.
    */
   public hooks = {
-    checkInvalidContext: new SyncBailHook<[Module, Compilation], boolean>(['renderContext', 'compilation']),
+    checkInvalidContext: new SyncBailHook<[Module, Compilation], boolean>([
+      'renderContext',
+      'compilation',
+    ]),
   };
 
   /**
@@ -31,10 +34,15 @@ class AsyncBoundaryPlugin {
     compiler.hooks.thisCompilation.tap(
       'AsyncBoundaryPlugin',
       (compilation: Compilation) => {
-        const hooks = javascript.JavascriptModulesPlugin.getCompilationHooks(compilation);
+        const hooks =
+          javascript.JavascriptModulesPlugin.getCompilationHooks(compilation);
         hooks.renderStartup.tap(
           'AsyncBoundaryPlugin',
-          (source: Source, renderContext: Module, startupRenderContext: StartupRenderContext) => {
+          (
+            source: Source,
+            renderContext: Module,
+            startupRenderContext: StartupRenderContext,
+          ) => {
             return this.renderStartupLogic(
               source,
               renderContext,
@@ -61,7 +69,8 @@ class AsyncBoundaryPlugin {
     startupRenderContext: StartupRenderContext,
     compilation: Compilation,
   ): string {
-    const isInvalidContext = this.hooks.checkInvalidContext.call(renderContext, compilation) ?? false;
+    const isInvalidContext =
+      this.hooks.checkInvalidContext.call(renderContext, compilation) ?? false;
     if (isInvalidContext) return source.source().toString();
 
     const { chunkGraph } = compilation;
