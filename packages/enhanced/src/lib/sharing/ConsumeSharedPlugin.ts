@@ -229,6 +229,7 @@ class ConsumeSharedPlugin {
                     );
                     return resolve(undefined);
                   }
+                  //@ts-ignore
                   if (data.name === packageName) {
                     // Package self-referencing
                     return resolve(undefined);
