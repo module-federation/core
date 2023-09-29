@@ -40,6 +40,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   },
   "@module-federation/utilities":{
     eager:true,
+    requiredVersion: false
   },
   'next/image': {
     requiredVersion: undefined,

@@ -8,12 +8,23 @@ import { getAllChunks } from 'webpack/lib/javascript/ChunkHelpers';
 import { ChunkGraph } from 'webpack/lib/ChunkGroup';
 import { StartupRenderContext } from 'webpack/lib/javascript/JavascriptModulesPlugin';
 import { RenderContext } from 'webpack/lib/javascript/JavascriptModulesPlugin';
-
+import { SyncBailHook } from 'tapable';
 /**
  * AsyncBoundaryPlugin is a Webpack plugin that handles asynchronous boundaries in a federated module.
  * @class
  */
 class AsyncBoundaryPlugin {
+  /**
+   * Define hooks
+   * @property {SyncBailHook} checkInvalidContext - A hook that checks if the render context is invalid.
+   */
+  public hooks = {
+    checkInvalidContext: new SyncBailHook<[Module, Compilation], boolean>([
+      'renderContext',
+      'compilation',
+    ]),
+  };
+
   /**
    * Apply the plugin to the Webpack compiler instance.
    * @param {Compiler} compiler - Webpack compiler instance.
@@ -25,7 +36,6 @@ class AsyncBoundaryPlugin {
       (compilation: Compilation) => {
         const hooks =
           javascript.JavascriptModulesPlugin.getCompilationHooks(compilation);
-        //@ts-ignore
         hooks.renderStartup.tap(
           'AsyncBoundaryPlugin',
           (
@@ -59,10 +69,8 @@ class AsyncBoundaryPlugin {
     startupRenderContext: StartupRenderContext,
     compilation: Compilation,
   ): string {
-    const isInvalidContext = this.checkInvalidContext(
-      renderContext,
-      compilation,
-    );
+    const isInvalidContext =
+      this.hooks.checkInvalidContext.call(renderContext, compilation) ?? false;
     if (isInvalidContext) return source.source().toString();
 
     const { chunkGraph } = compilation;
@@ -88,31 +96,6 @@ class AsyncBoundaryPlugin {
       `};`,
       ...webpack_exports,
     ]);
-  }
-
-  /**
-   * Check if the render context is invalid.
-   * @param {RenderContext} renderContext - The render context.
-   * @param {Compilation} compilation - The Webpack compilation instance.
-   * @returns {boolean} - True if the context is invalid, false otherwise.
-   */
-  private checkInvalidContext(
-    renderContext: Module,
-    compilation: Compilation,
-  ): boolean {
-    return (
-      !renderContext ||
-      //@ts-ignore
-      renderContext?._name ||
-      //@ts-ignore
-      !renderContext?.debugId ||
-      //@ts-ignore
-      !compilation.chunkGraph.isEntryModule(renderContext) ||
-      //@ts-ignore
-      renderContext?.rawRequest?.includes('pages/api') ||
-      //@ts-ignore
-      renderContext?.layer === 'api'
-    );
   }
 
   /**
