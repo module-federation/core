@@ -1,3 +1,6 @@
+/**
+ * Importing types from '@module-federation/utilities/src/types/index'
+ */
 import {
   AsyncContainer,
   RemoteVars,
@@ -6,15 +9,29 @@ import {
   WebpackRemoteContainer,
 } from '@module-federation/utilities/src/types/index';
 
+/**
+ * Initializing pure as RemoteVars
+ */
 let pure = {} as RemoteVars;
 try {
+  /**
+   * Assigning process.env['REMOTES'] to pure if it exists
+   */
   // @ts-ignore
   pure = process.env['REMOTES'] || {};
 } catch (e) {
   // not in webpack bundle
 }
+/**
+ * Casting pure as RemoteVars
+ */
 const remoteVars = pure as RemoteVars;
 
+/**
+ * Function to extract URL and Global from a string
+ * @param {string} urlAndGlobal - The string to extract from
+ * @returns {Array} - An array containing the URL and Global
+ */
 const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
   const index = urlAndGlobal.indexOf('@');
   if (index <= 0 || index === urlAndGlobal.length - 1) {
@@ -23,6 +40,11 @@ const extractUrlAndGlobal = (urlAndGlobal: string): [string, string] => {
   return [urlAndGlobal.substring(index + 1), urlAndGlobal.substring(0, index)];
 };
 
+/**
+ * Function to load script
+ * @param {string | RuntimeRemote} keyOrRuntimeRemoteItem - The key or RuntimeRemote item to load
+ * @returns {Promise} - A promise that resolves with the loaded script
+ */
 const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
   const runtimeRemotes = getRuntimeRemotes();
 
@@ -119,7 +141,7 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
 
           reject(__webpack_error__);
         },
-        containerKey
+        containerKey,
       );
     }).catch(function (err) {
       console.error('container is offline, returning fake remote');
@@ -151,13 +173,13 @@ const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
 
   return asyncContainer;
 };
-
+/**
+ * Function to get runtime remotes
+ * @returns {RuntimeRemotesMap} - An object containing runtime remotes
+ */
 const getRuntimeRemotes = () => {
   try {
-    const runtimeRemotes = Object.entries(remoteVars).reduce(function (
-      acc,
-      item
-    ) {
+    return Object.entries(remoteVars).reduce(function (acc, item) {
       const [key, value] = item;
       // if its an object with a thenable (eagerly executing function)
       if (typeof value === 'object' && typeof value.then === 'function') {
@@ -178,6 +200,9 @@ const getRuntimeRemotes = () => {
             acc[key] = { global, url };
           }
         }
+      } else if (typeof value === 'string' && !value.includes('@')) {
+        acc[key] = { global: key, url: value };
+        console.log('delegates may need work');
       }
       // if its just a string (global@url)
       else if (typeof value === 'string') {
@@ -189,14 +214,11 @@ const getRuntimeRemotes = () => {
         //@ts-ignore
         console.warn('remotes process', process.env.REMOTES);
         throw new Error(
-          `[mf] Invalid value received for runtime_remote "${key}"`
+          `[mf] Invalid value received for runtime_remote "${key}"`,
         );
       }
       return acc;
-    },
-    {} as RuntimeRemotesMap);
-
-    return runtimeRemotes;
+    }, {} as RuntimeRemotesMap);
   } catch (err) {
     console.warn('Unable to retrieve runtime remotes: ', err);
   }
@@ -204,8 +226,13 @@ const getRuntimeRemotes = () => {
   return {} as RuntimeRemotesMap;
 };
 
+/**
+ * Function to import a delegated module
+ * @param {string | RuntimeRemote} keyOrRuntimeRemoteItem - The key or RuntimeRemote item to import
+ * @returns {Promise} - A promise that resolves with the imported module
+ */
 const importDelegatedModule = async (
-  keyOrRuntimeRemoteItem: string | RuntimeRemote
+  keyOrRuntimeRemoteItem: string | RuntimeRemote,
 ) => {
   // @ts-ignore
   return loadScript(keyOrRuntimeRemoteItem)
@@ -224,6 +251,11 @@ const importDelegatedModule = async (
 
         //TODO: need to solve chunk flushing with delegated modules
         return {
+          /**
+           * Function to get a module from the asyncContainer
+           * @param {string} arg - The module to get
+           * @returns {Promise} - A promise that resolves with the module
+           */
           get: function (arg: string) {
             //@ts-ignore
             return asyncContainer.get(arg).then((f) => {
@@ -236,13 +268,12 @@ const importDelegatedModule = async (
                   Object.defineProperty(result, prop, {
                     get: function () {
                       return function () {
-                        //@ts-ignore
-                        if (globalThis.usedChunks)
-                          //@ts-ignore
+                        if (globalThis.usedChunks) {
                           globalThis.usedChunks.add(
                             //@ts-ignore
-                            `${keyOrRuntimeRemoteItem.global}->${arg}`
+                            `${keyOrRuntimeRemoteItem.global}->${arg}`,
                           );
+                        }
                         //eslint-disable-next-line prefer-rest-params
                         return m[prop](...arguments);
                       };
@@ -252,13 +283,12 @@ const importDelegatedModule = async (
                 } else {
                   Object.defineProperty(result, prop, {
                     get: () => {
-                      //@ts-ignore
-                      if (globalThis.usedChunks)
-                        //@ts-ignore
+                      if (globalThis.usedChunks) {
                         globalThis.usedChunks.add(
                           //@ts-ignore
-                          `${keyOrRuntimeRemoteItem.global}->${arg}`
+                          `${keyOrRuntimeRemoteItem.global}->${arg}`,
                         );
+                      }
 
                       return m[prop];
                     },
@@ -282,20 +312,41 @@ const importDelegatedModule = async (
     });
 };
 
+/**
+ * Module exports a Promise that resolves with a remote module
+ * @returns {Promise} - A promise that resolves with the remote module
+ */
 // eslint-disable-next-line no-async-promise-executor
 module.exports = new Promise(async (resolve, reject) => {
+  /**
+   * Extracting the current request from the resource query
+   */
   // eslint-disable-next-line no-undef
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
+  /**
+   * Splitting the current request into global and url
+   */
   // @ts-ignore
   const [global, url] = currentRequest.split('@');
+  /**
+   * Importing the delegated module
+   */
   importDelegatedModule({
     global,
     url: url + '?' + Date.now(),
   })
     // @ts-ignore
     .then((remote) => {
+      /**
+       * Resolving the promise with the remote module
+       */
       resolve(remote);
     })
     // @ts-ignore
-    .catch((err) => reject(err));
+    .catch((err) => {
+      /**
+       * Rejecting the promise if an error occurs
+       */
+      reject(err);
+    });
 });

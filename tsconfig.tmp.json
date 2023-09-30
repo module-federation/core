@@ -20,7 +20,9 @@
         "dist/packages/typescript/src/index.js"
       ],
       "@module-federation/utilities": ["dist/packages/utilities/src/index.js"],
-      "@module-federation/utilities/*": ["dist/packages/utilities/*"]
+      "@module-federation/utilities/*": ["dist/packages/utilities/*"],
+      "@module-federation/enhanced": ["dist/packages/enhanced/src/index.js"],
+      "@module-federation/enhanced/*": ["dist/packages/enhanced/*"]
     }
   }
 }

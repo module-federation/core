@@ -6,20 +6,22 @@ import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import JsonpChunkLoading from '../JsonpChunkLoading';
 
 /**
- * Applies server-specific plugins.
+ * This function applies server-specific plugins to the webpack compiler.
  *
- * @param compiler - The Webpack compiler instance.
- * @param options - The ModuleFederationPluginOptions instance.
+ * @param {Compiler} compiler - The Webpack compiler instance.
+ * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
  *
+ * @returns {void}
  */
 export function applyServerPlugins(
   compiler: Compiler,
-  options: ModuleFederationPluginOptions
+  options: ModuleFederationPluginOptions,
 ): void {
   // Import the StreamingTargetPlugin from @module-federation/node
   const { StreamingTargetPlugin } = require('@module-federation/node');
   new JsonpChunkLoading({ server: true }).apply(compiler);
 
+  // Apply the DelegatesModulePlugin to the compiler
   new DelegatesModulePlugin({
     runtime: 'webpack-runtime',
     remotes: options.remotes,
@@ -41,9 +43,11 @@ export function applyServerPlugins(
 }
 
 /**
- * Configures server-specific library and filename options.
+ * This function configures server-specific library and filename options.
  *
- * @param options - The ModuleFederationPluginOptions instance.
+ * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
+ *
+ * @returns {void}
  *
  * @remarks
  * This function configures the library and filename options for server builds. The library option is
@@ -52,7 +56,7 @@ export function applyServerPlugins(
  * filename.
  */
 export function configureServerLibraryAndFilename(
-  options: ModuleFederationPluginOptions
+  options: ModuleFederationPluginOptions,
 ): void {
   // Configure the library option with type "commonjs-module" and the name from the options
   options.library = {
@@ -65,10 +69,12 @@ export function configureServerLibraryAndFilename(
 }
 
 /**
- * Patches Next.js' default externals function to make sure shared modules are bundled and not treated as external.
+ * This function patches Next.js' default externals function to make sure shared modules are bundled and not treated as external.
  *
- * @param compiler - The Webpack compiler instance.
- * @param options - The ModuleFederationPluginOptions instance.
+ * @param {Compiler} compiler - The Webpack compiler instance.
+ * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
+ *
+ * @returns {void}
  *
  * @remarks
  * In server builds, all node modules are treated as external, which prevents them from being shared
@@ -84,7 +90,7 @@ export function configureServerLibraryAndFilename(
  */
 export function handleServerExternals(
   compiler: Compiler,
-  options: ModuleFederationPluginOptions
+  options: ModuleFederationPluginOptions,
 ): void {
   // Check if the compiler has an `externals` array
   if (
@@ -150,9 +156,11 @@ export function handleServerExternals(
 }
 
 /**
- * Configures server-specific compiler options.
+ * This function configures server-specific compiler options.
  *
- * @param compiler - The Webpack compiler instance.
+ * @param {Compiler} compiler - The Webpack compiler instance.
+ *
+ * @returns {void}
  *
  * @remarks
  * This function configures the compiler options for server builds. It turns off the compiler target on node

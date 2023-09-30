@@ -6,12 +6,18 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/packages/nextjs-mf",
         "main": "packages/nextjs-mf/src/index.js",
         "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
-        "assets": ["packages/nextjs-mf/*.md"]
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true,
+        "assets": [
+          "packages/nextjs-mf/*.md"
+        ]
       },
       "dependsOn": [
         {

@@ -1,8 +1,11 @@
 import type { RuleSetRuleUnion, Loader } from '@module-federation/utilities';
 
 /**
- * Inject a loader into the current module rule.
- * This function mutates `rule` argument!
+ * This function injects a loader into the current module rule.
+ * Note: This function mutates the `rule` argument.
+ *
+ * @param {RuleSetRuleUnion} rule - The current module rule.
+ * @param {Loader} [loader={}] - The loader to be injected.
  */
 export function injectRuleLoader(rule: RuleSetRuleUnion, loader: Loader = {}) {
   if (rule !== '...') {
@@ -22,7 +25,11 @@ export function injectRuleLoader(rule: RuleSetRuleUnion, loader: Loader = {}) {
 }
 
 /**
- * Check that current module rule has a loader with the provided name.
+ * This function checks if the current module rule has a loader with the provided name.
+ *
+ * @param {RuleSetRuleUnion} rule - The current module rule.
+ * @param {string} loaderName - The name of the loader to check.
+ * @returns {boolean} Returns true if the current module rule has a loader with the provided name, otherwise false.
  */
 export function hasLoader(rule: RuleSetRuleUnion, loaderName: string) {
   if (rule !== '...') {

@@ -34,7 +34,7 @@ export const isObjectEmpty = <T extends object>(obj: T) => {
 
 export const normalizeOptions = (
   options: FederatedTypesPluginOptions,
-  compiler: Compiler
+  compiler: Compiler,
 ) => {
   const webpackCompilerOptions = compiler.options;
 
@@ -57,12 +57,12 @@ export const normalizeOptions = (
 
   const typesPath = federationFileName.substring(
     0,
-    federationFileName.lastIndexOf('/')
+    federationFileName.lastIndexOf('/'),
   );
 
   const typesIndexJsonFilePath = path.join(
     typesPath,
-    TYPES_INDEX_JSON_FILE_NAME
+    TYPES_INDEX_JSON_FILE_NAME,
   );
 
   const distDir = path.join(distPath, typesPath, typescriptFolderName);

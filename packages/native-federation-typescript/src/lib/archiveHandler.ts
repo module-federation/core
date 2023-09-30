@@ -10,16 +10,16 @@ import { retrieveMfTypesPath } from './typeScriptCompiler';
 
 const retrieveTypesZipPath = (
   mfTypesPath: string,
-  remoteOptions: Required<RemoteOptions>
+  remoteOptions: Required<RemoteOptions>,
 ) =>
   join(
     mfTypesPath.replace(remoteOptions.typesFolder, ''),
-    `${remoteOptions.typesFolder}.zip`
+    `${remoteOptions.typesFolder}.zip`,
   );
 
 export const createTypesArchive = async (
   tsConfig: typescript.CompilerOptions,
-  remoteOptions: Required<RemoteOptions>
+  remoteOptions: Required<RemoteOptions>,
 ) => {
   const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
 
@@ -31,7 +31,7 @@ export const createTypesArchive = async (
 const downloadErrorLogger =
   (destinationFolder: string, fileToDownload: string) => (reason: Error) => {
     reason.message = ansiColors.red(
-      `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}', skipping...`
+      `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}', skipping...`,
     );
     throw reason;
   };

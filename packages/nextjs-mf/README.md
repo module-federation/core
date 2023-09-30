@@ -22,7 +22,7 @@ https://github.com/module-federation/module-federation-examples
 
 # We are building a micro-frontend ecosystem!
 
-While NextFederationPlugin works, Next.js is staunchly opposed to the technology and Next is very difficult to support.
+While NextFederationPlugin "works", Next.js is staunchly opposed to the technology and Next is very difficult to support.
 
 This plugin attempts to make the experience as seamless as possible, but it is not perfect.
 
@@ -199,7 +199,7 @@ module.exports = {
         shared: {
           // whatever else
         },
-      })
+      }),
     );
 
     return config;
@@ -221,7 +221,7 @@ module.exports = {
         remotes: {
           next2: `next2@http://localhost:3000/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
         },
-      })
+      }),
     );
 
     return config;
@@ -237,7 +237,7 @@ import React, { lazy } from 'react';
 const SampleComponent = lazy(() =>
   window.next2.get('./sampleComponent').then((factory) => {
     return { default: factory() };
-  })
+  }),
 );
 
 // or
@@ -380,7 +380,7 @@ module.exports = new Promise((resolve, reject) => {
       __webpack_error__.stack = event.stack;
       reject(__webpack_error__);
     },
-    containerGlobal
+    containerGlobal,
   );
 });
 ```

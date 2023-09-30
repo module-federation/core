@@ -14,7 +14,7 @@ import type {
  * @returns remote container
  */
 export async function loadAndInitializeRemote(
-  remoteOptions: RemoteOptions
+  remoteOptions: RemoteOptions,
 ): Promise<RemoteContainer> {
   const globalScope = getScope();
   const containerKey = getContainerKey(remoteOptions);
@@ -45,16 +45,22 @@ export async function getModule<T>({
   modulePath,
   exportName,
 }: GetModuleOptions): Promise<T | void> {
-  if (!remoteContainer) return;
+  if (!remoteContainer) {
+    return;
+  }
 
   try {
     const modFactory = await remoteContainer?.get(modulePath);
 
-    if (!modFactory) return undefined;
+    if (!modFactory) {
+      return undefined;
+    }
 
     const mod = modFactory() as Record<string, T>;
 
-    if (!exportName) return mod as T;
+    if (!exportName) {
+      return mod as T;
+    }
 
     if (mod && typeof mod === 'object') {
       return mod[exportName] as T;
@@ -71,11 +77,13 @@ export async function getModules({
   remoteContainer,
   modulePaths,
 }: GetModulesOptions): Promise<unknown[] | void> {
-  if (!remoteContainer) return;
+  if (!remoteContainer) {
+    return;
+  }
 
   try {
     const moduleFactories = await Promise.all(
-      modulePaths.map((modulePath) => remoteContainer?.get(modulePath))
+      modulePaths.map(remoteContainer.get, remoteContainer),
     );
 
     return moduleFactories.filter(Boolean).map((modFactory) => modFactory());

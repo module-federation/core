@@ -2,14 +2,14 @@ import { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 
 /**
- * Utility function to validate compiler options.
+ * Validates the compiler options.
  *
- * @param compiler - The Webpack compiler instance.
- * @returns True if the compiler options are valid, false otherwise.
+ * @param {Compiler} compiler - The Webpack compiler instance.
+ * @returns {boolean} - Returns true if the compiler options are valid, false otherwise.
  *
+ * @throws Will throw an error if the name option is not defined in the options.
  * @remarks
- * This function validates the options passed to the Webpack compiler. It throws an error if the name
- * option is not defined in the options. It also checks if the name option is set to either "server" or
+ * This function validates the options passed to the Webpack compiler. It checks if the name option is set to either "server" or
  * "client", as Module Federation is only applied to the main server and client builds in Next.js.
  */
 export function validateCompilerOptions(compiler: Compiler): boolean {
@@ -23,18 +23,17 @@ export function validateCompilerOptions(compiler: Compiler): boolean {
 }
 
 /**
- * Utility function to validate NextFederationPlugin options.
+ * Validates the NextFederationPlugin options.
  *
- * @param options - The ModuleFederationPluginOptions instance.
+ * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
  *
+ * @throws Will throw an error if the filename option is not defined in the options or if the name option is not specified.
  * @remarks
- * This function validates the options passed to NextFederationPlugin. It throws an error if the filename
- * option is not defined in the options.
- *
- * A requirement for using Module Federation is that a name must be specified.
+ * This function validates the options passed to NextFederationPlugin. It ensures that the filename and name options are defined,
+ * as they are required for using Module Federation.
  */
 export function validatePluginOptions(
-  options: ModuleFederationPluginOptions
+  options: ModuleFederationPluginOptions,
 ): void {
   // Throw an error if the filename option is not defined in the options
   if (!options.filename) {

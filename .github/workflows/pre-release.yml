@@ -12,7 +12,7 @@ jobs:
     name: Build Checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
@@ -33,7 +33,7 @@ jobs:
           path: ${{ env.CACHE_NODE_MODULES_PATH }}
           key: build-${{ hashFiles('**/package-lock.json') }}
       - name: Install packages
-        run: npm i
+        run: npm i && npm run sync:types:webpack
       - name: Retrieve effected projects
         id: effected-projects
         run: echo "projects=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)" >> $GITHUB_OUTPUT
@@ -41,7 +41,7 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ steps.effected-projects.outputs.projects }}" ]]; then
-            yarn nx run-many --target=lint --projects="$PROJECTS"
+            yarn nx run-many --target=lint --projects="$PROJECTS" --maxParallel=10
           else
             echo "No changes, Skipping lint check."
           fi
@@ -49,7 +49,7 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ steps.effected-projects.outputs.projects }}" ]]; then
-            yarn nx run-many --target=test --projects="$PROJECTS"
+            yarn nx run-many --target=test --projects="$PROJECTS" --maxParallel=10
           else
             echo "No changes, Skipping tests."
           fi
@@ -57,7 +57,7 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ steps.effected-projects.outputs.projects }}" ]]; then
-            yarn nx run-many --target=build --projects="$PROJECTS"
+            yarn nx run-many --target=build --projects="$PROJECTS" --maxParallel=10
           else
             echo "No changes, Skipping build."
           fi

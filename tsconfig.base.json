@@ -17,6 +17,8 @@
     "baseUrl": ".",
     "paths": {
       "@module-federation/core": ["packages/core/src/index.ts"],
+      "@module-federation/enhanced": ["packages/enhanced/src/index.ts"],
+      "@module-federation/enhanced/*": ["packages/enhanced/*"],
       "@module-federation/native-federation-tests": [
         "packages/native-federation-tests/src/index.ts"
       ],

@@ -36,9 +36,9 @@ describe('webpack()', () => {
         moduleFederationConfig,
         presets,
         configDir,
-      })
+      }),
     ).rejects.toThrow(
-      'Webpack 5 required: Configure Storybook to use the webpack5 builder'
+      'Webpack 5 required: Configure Storybook to use the webpack5 builder',
     );
   });
 
@@ -76,7 +76,7 @@ describe('webpack()', () => {
         moduleFederationConfig,
         presets,
         configDir,
-      })
+      }),
     ).resolves.toMatchObject(matchObject);
   });
 });

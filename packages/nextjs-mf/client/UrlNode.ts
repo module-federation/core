@@ -39,7 +39,7 @@ export class UrlNode {
 
     if (this.slugName !== null) {
       routes.push(
-        ...this.children.get('[]')!._smoosh(`${prefix}[${this.slugName}]/`)
+        ...this.children.get('[]')!._smoosh(`${prefix}[${this.slugName}]/`),
       );
     }
 
@@ -47,7 +47,7 @@ export class UrlNode {
       const r = prefix === '/' ? '/' : prefix.slice(0, -1);
       if (this.optionalRestSlugName != null) {
         throw new Error(
-          `You cannot define a route with the same specificity as a optional catch-all route ("${r}" and "${r}[[...${this.optionalRestSlugName}]]").`
+          `You cannot define a route with the same specificity as a optional catch-all route ("${r}" and "${r}[[...${this.optionalRestSlugName}]]").`,
         );
       }
 
@@ -58,7 +58,7 @@ export class UrlNode {
       routes.push(
         ...this.children
           .get('[...]')!
-          ._smoosh(`${prefix}[...${this.restSlugName}]/`)
+          ._smoosh(`${prefix}[...${this.restSlugName}]/`),
       );
     }
 
@@ -66,7 +66,7 @@ export class UrlNode {
       routes.push(
         ...this.children
           .get('[[...]]')!
-          ._smoosh(`${prefix}[[...${this.optionalRestSlugName}]]/`)
+          ._smoosh(`${prefix}[[...${this.optionalRestSlugName}]]/`),
       );
     }
 
@@ -76,7 +76,7 @@ export class UrlNode {
   private _insert(
     urlPaths: string[],
     slugNames: string[],
-    isCatchAll: boolean
+    isCatchAll: boolean,
   ): void {
     if (urlPaths.length === 0) {
       this.placeholder = false;
@@ -110,44 +110,36 @@ export class UrlNode {
 
       if (segmentName.startsWith('[') || segmentName.endsWith(']')) {
         throw new Error(
-          `Segment names may not start or end with extra brackets ('${segmentName}').`
+          `Segment names may not start or end with extra brackets ('${segmentName}').`,
         );
       }
 
       if (segmentName.startsWith('.')) {
         throw new Error(
-          `Segment names may not start with erroneous periods ('${segmentName}').`
+          `Segment names may not start with erroneous periods ('${segmentName}').`,
         );
       }
 
       const handleSlug = function handleSlug(
         previousSlug: string | null,
-        nextSlug: string
+        nextSlug: string,
       ) {
-        if (previousSlug !== null) {
-          // If the specific segment already has a slug but the slug is not `something`
-          // This prevents collisions like:
-          // pages/[post]/index.ts
-          // pages/[id]/index.ts
-          // Because currently multiple dynamic params on the same segment level are not supported
-          if (previousSlug !== nextSlug) {
-            // TODO: This error seems to be confusing for users, needs an error link, the description can be based on above comment.
-            throw new Error(
-              `You cannot use different slug names for the same dynamic path ('${previousSlug}' !== '${nextSlug}').`
-            );
-          }
+        if (previousSlug !== null && previousSlug !== nextSlug) {
+          throw new Error(
+            `You cannot use different slug names for the same dynamic path ('${previousSlug}' !== '${nextSlug}').`,
+          );
         }
 
         slugNames.forEach((slug) => {
           if (slug === nextSlug) {
             throw new Error(
-              `You cannot have the same slug name "${nextSlug}" repeat within a single dynamic path`
+              `You cannot have the same slug name "${nextSlug}" repeat within a single dynamic path`,
             );
           }
 
           if (slug.replace(/\W/g, '') === nextSegment.replace(/\W/g, '')) {
             throw new Error(
-              `You cannot have the slug names "${slug}" and "${nextSlug}" differ only by non-word symbols within a single dynamic path`
+              `You cannot have the slug names "${slug}" and "${nextSlug}" differ only by non-word symbols within a single dynamic path`,
             );
           }
         });
@@ -159,7 +151,7 @@ export class UrlNode {
         if (isOptional) {
           if (this.restSlugName != null) {
             throw new Error(
-              `You cannot use both an required and optional catch-all route at the same level ("[...${this.restSlugName}]" and "${urlPaths[0]}" ).`
+              `You cannot use both an required and optional catch-all route at the same level ("[...${this.restSlugName}]" and "${urlPaths[0]}" ).`,
             );
           }
 
@@ -171,7 +163,7 @@ export class UrlNode {
         } else {
           if (this.optionalRestSlugName != null) {
             throw new Error(
-              `You cannot use both an optional and required catch-all route at the same level ("[[...${this.optionalRestSlugName}]]" and "${urlPaths[0]}").`
+              `You cannot use both an optional and required catch-all route at the same level ("[[...${this.optionalRestSlugName}]]" and "${urlPaths[0]}").`,
             );
           }
 
@@ -184,7 +176,7 @@ export class UrlNode {
       } else {
         if (isOptional) {
           throw new Error(
-            `Optional route parameters are not yet supported ("${urlPaths[0]}").`
+            `Optional route parameters are not yet supported ("${urlPaths[0]}").`,
           );
         }
         handleSlug(this.slugName, segmentName);

@@ -45,7 +45,7 @@ describe('index', () => {
       const distFolder = join(projectRoot, 'dist', options.typesFolder);
 
       const unplugin = NativeFederationTypeScriptRemote.rollup(
-        options
+        options,
       ) as UnpluginOptions;
       await unplugin.writeBundle?.();
 
@@ -110,7 +110,7 @@ describe('index', () => {
       } as unknown as Compiler;
 
       const unplugin = NativeFederationTypeScriptRemote.rollup(
-        options
+        options,
       ) as UnpluginOptions;
       await unplugin.webpack?.(webpackCompiler);
 
@@ -157,7 +157,7 @@ describe('index', () => {
       axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
       const unplugin = NativeFederationTypeScriptHost.rollup(
-        options
+        options,
       ) as UnpluginOptions;
       await expect(unplugin.writeBundle?.()).resolves.not.toThrow();
 

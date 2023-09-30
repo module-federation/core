@@ -16,7 +16,7 @@ import {
  * options for the InvertedContainerRuntimeModule class.
  */
 interface InvertedContainerRuntimeModuleOptions {
-  runtime: string;
+  runtime: string; // The runtime environment.
   remotes: Record<string, string>; // A map of remote modules to their URLs.
   name?: string; // The name of the current module.
   debug?: boolean; // A flag to enable verbose logging.
@@ -27,8 +27,8 @@ interface InvertedContainerRuntimeModuleOptions {
  * Interface for ChunkLoadingContext, containing Webpack-related properties.
  */
 interface ChunkLoadingContext {
-  webpack: Compiler['webpack'];
-  debug?: boolean;
+  webpack: Compiler['webpack']; // The Webpack compiler instance.
+  debug?: boolean; // A flag to enable verbose logging.
 }
 
 /**
@@ -36,9 +36,9 @@ interface ChunkLoadingContext {
  * the runtime code needed for loading federated modules in an inverted container.
  */
 class InvertedContainerRuntimeModule extends RuntimeModule {
-  private runtimeRequirements: Set<string>;
-  private options: InvertedContainerRuntimeModuleOptions;
-  private chunkLoadingContext: ChunkLoadingContext;
+  private runtimeRequirements: Set<string>; // A set of runtime requirement strings.
+  private options: InvertedContainerRuntimeModuleOptions; // Runtime module options.
+  private chunkLoadingContext: ChunkLoadingContext; // Chunk loading context.
 
   /**
    * Constructor for the InvertedContainerRuntimeModule.
@@ -49,7 +49,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
   constructor(
     runtimeRequirements: Set<string>,
     options: InvertedContainerRuntimeModuleOptions,
-    chunkLoadingContext: ChunkLoadingContext
+    chunkLoadingContext: ChunkLoadingContext,
   ) {
     super('inverted container startup', RuntimeModule.STAGE_ATTACH);
     this.runtimeRequirements = runtimeRequirements;
@@ -58,15 +58,23 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     this.chunkLoadingContext = chunkLoadingContext;
   }
 
+  /**
+   * Resolves the container module.
+   * @returns {Module | undefined} The entry module of the container.
+   */
   private resolveContainerModule() {
     const { compilation } = this;
-    if (!compilation) return;
+    if (!compilation) {
+      return;
+    }
     const { chunkGraph, entrypoints } = compilation;
 
     const container = entrypoints
       .get(this.options.container as string)
       ?.getRuntimeChunk?.();
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     const entryModules = chunkGraph.getChunkEntryModulesIterable(container);
 
@@ -78,9 +86,14 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
     return entryModule;
   }
-
+  /**
+   * This method maps shared modules and generates code for loading them.
+   * @returns {string} The generated code for loading shared modules.
+   */
   private mapShared(): string {
-    if (!this.compilation) return '';
+    if (!this.compilation) {
+      return '';
+    }
 
     const {
       runtimeTemplate,
@@ -98,10 +111,10 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     const initialConsumes = [];
 
     /**
-     *
-     * @param {Iterable<Module>} modules modules
-     * @param {Chunk} chunk the chunk
-     * @param {(string | number)[]} list list of ids
+     * This function adds shared modules to the list of modules.
+     * @param {Iterable<Module>} modules - The modules to be added.
+     * @param {Chunk} chunk - The chunk containing the modules.
+     * @param {(string | number)[]} list - The list to which the modules are added.
      */
     //@ts-ignore
     const addShared = (modules, chunk, list) => {
@@ -114,8 +127,8 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           codeGenerationResults.getSource(
             module,
             chunk.runtime,
-            'consume-shared'
-          )
+            'consume-shared',
+          ),
         );
       }
     };
@@ -132,7 +145,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
             // @ts-ignore
             return module?.resource === moduleOrigin;
           },
-          true
+          true,
         );
 
         moduleIdToSourceChunkID.set(id, filter);
@@ -141,7 +154,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
     for (const entrypointModule of entrypoints.values()) {
       const entrypoint = entrypointModule.getEntrypointChunk();
-      if (entrypoint.hasRuntime()) continue;
+      if (entrypoint.hasRuntime()) {
+        continue;
+      }
 
       // for (const entryChunks of entrypoint.getAllInitialChunks()) {}
       // @ts-ignore
@@ -149,9 +164,11 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         //if(chunk.hasEntryModule()) continue
         const modules = chunkGraph.getChunkModulesIterableBySourceType(
           chunk,
-          'consume-shared'
+          'consume-shared',
         );
-        if (!modules) continue;
+        if (!modules) {
+          continue;
+        }
 
         //@ts-ignore
         //  addModules(modules, chunk, (chunkToModuleMapping[chunk.id] = []));
@@ -161,9 +178,11 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         // if(chunk.hasEntryModule()) continue
         const modules = chunkGraph.getChunkModulesIterableBySourceType(
           chunk,
-          'consume-shared'
+          'consume-shared',
         );
-        if (!modules) continue;
+        if (!modules) {
+          continue;
+        }
         // @ts-ignore
         addModules(modules, chunk, (chunkToModuleMapping[chunk.id] = []));
         //@ts-ignore
@@ -191,7 +210,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         'var versions = scope[key];',
         `var key = Object.keys(versions).reduce(${runtimeTemplate.basicFunction(
           'a, b',
-          ['return !a || versionLt(a, b) ? b : a;']
+          ['return !a || versionLt(a, b) ? b : a;'],
         )}, 0);`,
         'return key && versions[key]',
       ])};`,
@@ -201,22 +220,22 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           'var versions = scope[key];',
           `return Object.keys(versions).reduce(${runtimeTemplate.basicFunction(
             'a, b',
-            ['return !a || (!versions[a].loaded && versionLt(a, b)) ? b : a;']
+            ['return !a || (!versions[a].loaded && versionLt(a, b)) ? b : a;'],
           )}, 0);`,
-        ]
+        ],
       )};`,
       `var getInvalidSingletonVersionMessage = ${runtimeTemplate.basicFunction(
         'scope, key, version, requiredVersion',
         [
           `return "Unsatisfied version " + version + " from " + (version && scope[key][version].from) + " of shared singleton module " + key + " (required " + rangeToString(requiredVersion) + ")"`,
-        ]
+        ],
       )};`,
       `var getSingleton = ${runtimeTemplate.basicFunction(
         'scope, scopeName, key, requiredVersion',
         [
           'var version = findSingletonVersionKey(scope, key);',
           'return get(scope[key][version]);',
-        ]
+        ],
       )};`,
       `var getSingletonVersion = ${runtimeTemplate.basicFunction(
         'scope, scopeName, key, requiredVersion',
@@ -225,7 +244,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           'if (!satisfy(requiredVersion, version)) ' +
             'typeof console !== "undefined" && console.warn && console.warn(getInvalidSingletonVersionMessage(scope, key, version, requiredVersion));',
           'return get(scope[key][version]);',
-        ]
+        ],
       )};`,
       `var getStrictSingletonVersion = ${runtimeTemplate.basicFunction(
         'scope, scopeName, key, requiredVersion',
@@ -234,7 +253,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           'if (!satisfy(requiredVersion, version)) ' +
             'throw new Error(getInvalidSingletonVersionMessage(scope, key, version, requiredVersion));',
           'return get(scope[key][version]);',
-        ]
+        ],
       )};`,
       `var findValidVersion = ${runtimeTemplate.basicFunction(
         'scope, key, requiredVersion',
@@ -245,10 +264,10 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
             [
               'if (!satisfy(requiredVersion, b)) return a;',
               'return !a || versionLt(a, b) ? b : a;',
-            ]
+            ],
           )}, 0);`,
           'return key && versions[key]',
-        ]
+        ],
       )};`,
       `var getInvalidVersionMessage = ${runtimeTemplate.basicFunction(
         'scope, scopeName, key, requiredVersion',
@@ -257,9 +276,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           'return "No satisfying version (" + rangeToString(requiredVersion) + ") of shared module " + key + " found in shared scope " + scopeName + ".\\n" +',
           `"Available versions: " + Object.keys(versions).map(${runtimeTemplate.basicFunction(
             'key',
-            ['return key + " from " + versions[key].from;']
+            ['return key + " from " + versions[key].from;'],
           )}).join(", ");`,
-        ]
+        ],
       )};`,
       `var getValidVersion = ${runtimeTemplate.basicFunction(
         'scope, scopeName, key, requiredVersion',
@@ -267,13 +286,13 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           'var entry = findValidVersion(scope, key, requiredVersion);',
           'if(entry) return get(entry);',
           'throw new Error(getInvalidVersionMessage(scope, scopeName, key, requiredVersion));',
-        ]
+        ],
       )};`,
       `var warnInvalidVersion = ${runtimeTemplate.basicFunction(
         'scope, scopeName, key, requiredVersion',
         [
           'typeof console !== "undefined" && console.warn && console.warn(getInvalidVersionMessage(scope, scopeName, key, requiredVersion));',
-        ]
+        ],
       )};`,
       `var get = ${runtimeTemplate.basicFunction('entry', [
         'entry.loaded = 1;',
@@ -289,7 +308,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           ]),
           '}',
         ]),
-        'fn'
+        'fn',
       )};`,
       '',
       `var load = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
@@ -297,100 +316,100 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         [
           'ensureExistence(scopeName, key);',
           'return get(findVersion(scope, key));',
-        ]
+        ],
       )});`,
       `var loadFallback = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
         'scopeName, scope, key, fallback',
         [
           `return scope && ${RuntimeGlobals.hasOwnProperty}(scope, key) ? get(findVersion(scope, key)) : fallback();`,
-        ]
+        ],
       )});`,
       `var loadVersionCheck = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
         'scopeName, scope, key, version',
         [
           'ensureExistence(scopeName, key);',
           'return get(findValidVersion(scope, key, version) || warnInvalidVersion(scope, scopeName, key, version) || findVersion(scope, key));',
-        ]
+        ],
       )});`,
       `var loadSingleton = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
         'scopeName, scope, key',
         [
           'ensureExistence(scopeName, key);',
           'return getSingleton(scope, scopeName, key);',
-        ]
+        ],
       )});`,
       `var loadSingletonVersionCheck = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
         'scopeName, scope, key, version',
         [
           'ensureExistence(scopeName, key);',
           'return getSingletonVersion(scope, scopeName, key, version);',
-        ]
+        ],
       )});`,
       `var loadStrictVersionCheck = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
         'scopeName, scope, key, version',
         [
           'ensureExistence(scopeName, key);',
           'return getValidVersion(scope, scopeName, key, version);',
-        ]
+        ],
       )});`,
       `var loadStrictSingletonVersionCheck = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
         'scopeName, scope, key, version',
         [
           'ensureExistence(scopeName, key);',
           'return getStrictSingletonVersion(scope, scopeName, key, version);',
-        ]
+        ],
       )});`,
       `var loadVersionCheckFallback = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
         'scopeName, scope, key, version, fallback',
         [
           `if(!scope || !${RuntimeGlobals.hasOwnProperty}(scope, key)) return fallback();`,
           'return get(findValidVersion(scope, key, version) || warnInvalidVersion(scope, scopeName, key, version) || findVersion(scope, key));',
-        ]
+        ],
       )});`,
       `var loadSingletonFallback = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
         'scopeName, scope, key, fallback',
         [
           `if(!scope || !${RuntimeGlobals.hasOwnProperty}(scope, key)) return fallback();`,
           'return getSingleton(scope, scopeName, key);',
-        ]
+        ],
       )});`,
       `var loadSingletonVersionCheckFallback = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
         'scopeName, scope, key, version, fallback',
         [
           `if(!scope || !${RuntimeGlobals.hasOwnProperty}(scope, key)) return fallback();`,
           'return getSingletonVersion(scope, scopeName, key, version);',
-        ]
+        ],
       )});`,
       `var loadStrictVersionCheckFallback = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
         'scopeName, scope, key, version, fallback',
         [
           `var entry = scope && ${RuntimeGlobals.hasOwnProperty}(scope, key) && findValidVersion(scope, key, version);`,
           `return entry ? get(entry) : fallback();`,
-        ]
+        ],
       )});`,
       `var loadStrictSingletonVersionCheckFallback = /*#__PURE__*/ init(${runtimeTemplate.basicFunction(
         'scopeName, scope, key, version, fallback',
         [
           `if(!scope || !${RuntimeGlobals.hasOwnProperty}(scope, key)) return fallback();`,
           'return getStrictSingletonVersion(scope, scopeName, key, version);',
-        ]
+        ],
       )});`,
       'var installedModules = __webpack_require__.installedModules',
       'var moduleToHandlerMapping = {',
       Template.indent(
         Array.from(
           moduleIdToSourceMapping,
-          ([key, source]) => `${JSON.stringify(key)}: ${source.source()}`
-        ).join(',\n')
+          ([key, source]) => `${JSON.stringify(key)}: ${source.source()}`,
+        ).join(',\n'),
       ),
       '};',
       'var listOfInitialIds = {',
       Template.indent(
         Array.from(moduleIdToSourceChunkID, ([key, chunkIds]) => {
           return `${JSON.stringify(key)}: ${JSON.stringify(
-            Object.keys(chunkIds)
+            Object.keys(chunkIds),
           )}`;
-        }).join(',\n')
+        }).join(',\n'),
       ),
       '};',
 
@@ -399,7 +418,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
             //@ts-ignore
             `var initialConsumes = ${JSON.stringify(
               //@ts-ignore
-              Array.from(new Set(initialConsumes))
+              Array.from(new Set(initialConsumes)),
             )};`,
             // `initialConsumes.forEach(${runtimeTemplate.basicFunction('id', [
             //   `${
@@ -466,23 +485,29 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                     'var promise = moduleToHandlerMapping[id]();',
                     'if(promise.then) {',
                     Template.indent(
-                      "promises.push(installedModules[id] = promise.then(onFactory)['catch'](onError));"
+                      "promises.push(installedModules[id] = promise.then(onFactory)['catch'](onError));",
                     ),
                     '} else onFactory(promise);',
                   ]),
                   '} catch(e) { onError(e); }',
-                ]
+                ],
               )});`,
             ]),
             '}',
-          ]
+          ],
         )}`,
       ]),
     ]);
   }
 
+  /**
+   * This method maps chunks and generates code for loading them.
+   * @returns {string} The generated code for loading chunks.
+   */
   private mapChunks(): string {
-    if (!this.compilation || !this.chunkGraph) return '';
+    if (!this.compilation || !this.chunkGraph) {
+      return '';
+    }
     const { chunkGraph, compilation } = this;
     const { runtimeTemplate, moduleGraph, entrypoints, compiler } = compilation;
     const { RuntimeGlobals, Template } = compiler.webpack;
@@ -491,22 +516,31 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       [key: string]: [string, string, number | string];
     } = {};
 
+    // Iterate over all entrypoint modules
     for (const entrypointModule of entrypoints.values()) {
       const entrypoint = entrypointModule.getEntrypointChunk();
-      if (entrypoint.hasRuntime()) continue;
+      if (entrypoint.hasRuntime()) {
+        continue;
+      }
 
+      // Iterate over all initial chunks of the entrypoint
       for (const chunk of entrypoint.getAllInitialChunks()) {
         const modules = chunkGraph.getChunkModulesIterableBySourceType(
           chunk,
-          'remote'
+          'remote',
         ) as Module[];
 
-        if (!modules) continue;
+        if (!modules) {
+          continue;
+        }
         const _id = chunk.id ?? chunk.name;
-        if (!_id) continue;
+        if (!_id) {
+          continue;
+        }
 
         const remotes: (string | number)[] = (chunkToRemotesMapping[_id] = []);
 
+        // Iterate over all modules
         for (const m of modules) {
           const module = m as Module & {
             internalRequest: string;
@@ -516,14 +550,18 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           const name = module.internalRequest;
 
           const id = chunkGraph.getModuleId(module);
-          const shareScope = module.shareScope;
+          const { shareScope } = module;
           const dep = module.dependencies[0];
           const externalModule = moduleGraph.getModule(dep);
 
-          if (!externalModule) continue;
+          if (!externalModule) {
+            continue;
+          }
           const externalModuleId =
             externalModule && chunkGraph.getModuleId(externalModule);
-          if (!externalModuleId) continue;
+          if (!externalModuleId) {
+            continue;
+          }
 
           remotes.push(id);
           idToExternalAndNameMapping[id] = [shareScope, name, externalModuleId];
@@ -531,12 +569,13 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       }
     }
 
+    // Generate the final code string
     return Template.asString([
       `var remoteMapping = ${JSON.stringify(chunkToRemotesMapping, null, '')};`,
       `var idToExternalAndNameMapping = ${JSON.stringify(
         idToExternalAndNameMapping,
         null,
-        ''
+        '',
       )};`,
       'globalThis.factoryTracker = globalThis.factoryTracker  || {}',
       `__webpack_require__.getEagerRemotesForChunkId  = ${runtimeTemplate.basicFunction(
@@ -569,7 +608,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                   'if(!error) error = new Error("Container missing");',
                   'if(typeof error.message === "string")',
                   Template.indent(
-                    `error.message += '\\nwhile loading "' + data[1] + '" from ' + data[2];`
+                    `error.message += '\\nwhile loading "' + data[1] + '" from ' + data[2];`,
                   ),
                   `${
                     RuntimeGlobals.moduleFactories
@@ -588,7 +627,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                       Template.indent([
                         `var p = promise.then(${runtimeTemplate.returningFunction(
                           'next(result, d)',
-                          'result'
+                          'result',
                         )}, onError);`,
                         `if(first) promises.push(data.p = p); else return p;`,
                       ]),
@@ -599,16 +638,16 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                     '} catch(error) {',
                     Template.indent(['onError(error);']),
                     '}',
-                  ]
+                  ],
                 )}`,
                 `var onExternal = ${runtimeTemplate.basicFunction(
                   ['external', '_', 'first'],
                   `
-                  return external ? handleFunction(${RuntimeGlobals.initializeSharing}, data[0], 0, external, onInitialized, first) : onError()`
+                  return external ? handleFunction(${RuntimeGlobals.initializeSharing}, data[0], 0, external, onInitialized, first) : onError()`,
                 )};`,
                 `var onInitialized = ${runtimeTemplate.returningFunction(
                   `handleFunction(external.get, data[1], getScope, 0, onFactory, first)`,
-                  '_, external, first'
+                  '_, external, first',
                 )};`,
                 `var onFactory = ${runtimeTemplate.basicFunction('factory', [
                   'data.p = 1;',
@@ -619,11 +658,11 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
                   ])}`,
                 ])};`,
                 'handleFunction(__webpack_require__, data[2], 0, 0, onExternal, 1);',
-              ]
+              ],
             )});`,
           ]),
           '}',
-        ]
+        ],
       )}`,
     ]);
   }
@@ -633,9 +672,11 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
    * @returns {string} runtime code
    */
   override generate() {
-    if (!this.compilation || !this.chunk || !this.chunkGraph) return '';
+    if (!this.compilation || !this.chunk || !this.chunkGraph) {
+      return '';
+    }
 
-    const compilation = this.compilation;
+    const { compilation } = this;
 
     const { name } = this.options;
     const { chunkGraph, chunk } = this;
@@ -685,12 +726,12 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         Template.indent([
           // attachOnMount,
           `__webpack_require__.O(0, [${JSON.stringify(
-            runtimeId
+            runtimeId,
           )}], function() {`,
           // attachOnMount,
           `if(!__webpack_require__.m[${JSON.stringify(containerModuleId)}]) {`,
           `console.error('container does not exist in host runtime graph', ${JSON.stringify(
-            containerModuleId
+            containerModuleId,
           )});`,
           `} else { `,
           this.options.debug
@@ -707,7 +748,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         `__webpack_require__.checkAsyncReqs = function() {`,
         Template.indent([
           `self[${JSON.stringify(
-            compilation.outputOptions.chunkLoadingGlobal
+            compilation.outputOptions.chunkLoadingGlobal,
           )}].forEach(function(chunkId) {`,
           Template.indent([
             `if(__webpack_require__.getEagerSharedForChunkId) {__webpack_require__.getEagerSharedForChunkId(chunkId[0],__webpack_require__.initConsumes)}`,
@@ -755,10 +796,10 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           'function attachRemote (resolve) {',
           Template.indent([
             `const innerRemote = __webpack_require__(${JSON.stringify(
-              containerModuleId
+              containerModuleId,
             )});`,
             `${containerScope}[${JSON.stringify(
-              containerName
+              containerName,
             )}] = innerRemote;`,
             "__webpack_require__.I('default',[globalThis.backupScope]);",
             this.options.debug

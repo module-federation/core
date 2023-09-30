@@ -11,7 +11,7 @@ const retrieveTestsZipPath = (remoteOptions: Required<RemoteOptions>) =>
 
 export const createTypesArchive = async (
   remoteOptions: Required<RemoteOptions>,
-  compiledFilesFolder: string
+  compiledFilesFolder: string,
 ) => {
   const zip = new AdmZip();
   zip.addLocalFolder(compiledFilesFolder);
@@ -21,7 +21,7 @@ export const createTypesArchive = async (
 const downloadErrorLogger =
   (destinationFolder: string, fileToDownload: string) => (reason: Error) => {
     reason.message = ansiColors.red(
-      `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}', skipping...`
+      `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}', skipping...`,
     );
     throw reason;
   };

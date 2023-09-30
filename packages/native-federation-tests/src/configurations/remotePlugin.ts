@@ -16,21 +16,26 @@ const resolveWithExtension = (exposedPath: string) => {
   const cwd = process.cwd();
   for (const extension of EXTENSIONS) {
     const exposedPathWithExtension = join(cwd, `${exposedPath}.${extension}`);
-    if (existsSync(exposedPathWithExtension)) return exposedPathWithExtension;
+    if (existsSync(exposedPathWithExtension)) {
+      return exposedPathWithExtension;
+    }
   }
   return undefined;
 };
 
 const resolveExposes = (remoteOptions: RemoteOptions) => {
   return Object.entries(
-    remoteOptions.moduleFederationConfig.exposes as Record<string, string>
-  ).reduce((accumulator, [exposedEntry, exposedPath]) => {
-    accumulator[exposedEntry] =
-      resolveWithExtension(exposedPath) ||
-      resolveWithExtension(join(exposedPath, 'index')) ||
-      exposedPath;
-    return accumulator;
-  }, {} as Record<string, string>);
+    remoteOptions.moduleFederationConfig.exposes as Record<string, string>,
+  ).reduce(
+    (accumulator, [exposedEntry, exposedPath]) => {
+      accumulator[exposedEntry] =
+        resolveWithExtension(exposedPath) ||
+        resolveWithExtension(join(exposedPath, 'index')) ||
+        exposedPath;
+      return accumulator;
+    },
+    {} as Record<string, string>,
+  );
 };
 
 export const retrieveRemoteConfig = (options: RemoteOptions) => {
@@ -44,11 +49,11 @@ export const retrieveRemoteConfig = (options: RemoteOptions) => {
   };
   const mapComponentsToExpose = resolveExposes(remoteOptions);
   const externalDeps = Object.keys(
-    options.moduleFederationConfig.shared || {}
+    options.moduleFederationConfig.shared || {},
   ).concat(Object.keys(options.moduleFederationConfig.remotes || {}));
   const compiledFilesFolder = join(
     remoteOptions.distFolder,
-    remoteOptions.testsFolder
+    remoteOptions.testsFolder,
   );
 
   return {
