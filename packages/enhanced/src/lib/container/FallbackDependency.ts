@@ -9,13 +9,8 @@ import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/Dependency';
-//@ts-ignore
-import Dependency = require('webpack/lib/Dependency');
-//@ts-ignore
-import makeSerializable = require('webpack/lib/util/makeSerializable');
-
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
+import Dependency from 'webpack/lib/Dependency';
+import makeSerializable from 'webpack/lib/util/makeSerializable';
 
 class FallbackDependency extends Dependency {
   requests: string[];

@@ -6,10 +6,8 @@
 'use strict';
 
 import { parseOptions } from '../container/options';
-//@ts-ignore
-import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
-//@ts-ignore
-import WebpackError = require('webpack/lib/WebpackError');
+import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
+import WebpackError from 'webpack/lib/WebpackError';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import ProvideSharedDependency from './ProvideSharedDependency';
 import ProvideSharedModuleFactory from './ProvideSharedModuleFactory';
@@ -30,10 +28,6 @@ export type ResolvedProvideMap = Map<
     version: string | undefined | false;
   }
 >;
-
-/** @typedef {import("./ProvideSharedPlugin").ProvideSharedPluginOptions} ProvideSharedPluginOptions */
-/** @typedef {import("webpack/lib/Compilation")} Compilation */
-/** @typedef {import("webpack/lib/Compiler")} Compiler */
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
