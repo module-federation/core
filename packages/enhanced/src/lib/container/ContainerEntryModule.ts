@@ -12,7 +12,7 @@ import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import { OriginalSource, RawSource } from 'webpack-sources';
 import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from 'webpack/lib/ModuleTypeConstants';
 import ContainerExposedDependency from './ContainerExposedDependency';
-import StaticExportsDependency = require('webpack/lib/dependencies/StaticExportsDependency');
+import StaticExportsDependency from 'webpack/lib/dependencies/StaticExportsDependency';
 import type Compilation from 'webpack/lib/Compilation';
 import type {
   LibIdentOptions,

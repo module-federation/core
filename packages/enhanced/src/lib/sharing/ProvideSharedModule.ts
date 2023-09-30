@@ -6,7 +6,7 @@
 import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
 import Module from 'webpack/lib/Module';
 import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import makeSerializable = require('webpack/lib/util/makeSerializable');
+import makeSerializable from 'webpack/lib/util/makeSerializable';
 import type Compilation from 'webpack/lib/Compilation';
 import WebpackError from 'webpack/lib/WebpackError';
 import { WEBPACK_MODULE_TYPE_PROVIDE } from 'webpack/lib/ModuleTypeConstants';
