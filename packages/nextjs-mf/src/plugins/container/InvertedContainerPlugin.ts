@@ -56,7 +56,6 @@ class InvertedContainerPlugin {
         renderContext?._name ||
         //@ts-ignore
         !renderContext?.debugId ||
-        //@ts-ignore
         !compilation.chunkGraph.isEntryModule(renderContext) ||
         //@ts-ignore
         renderContext?.rawRequest?.includes('pages/api') ||
@@ -64,7 +63,7 @@ class InvertedContainerPlugin {
         renderContext?.layer === 'api'
       );
     });
-    
+
     asyncBoundaryPlugin.apply(compiler);
   }
 }
