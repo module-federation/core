@@ -26,6 +26,7 @@ export interface ImportRemoteOptions {
   module: string;
   remoteEntryFileName?: string;
   bustRemoteEntryCache?: boolean;
+  esm?: boolean;
 }
 
 /**
@@ -43,7 +44,7 @@ const REMOTE_ENTRY_FILE = 'remoteEntry.js';
  * @returns {Promise<void>} A promise that resolves when the remote is loaded
  */
 const loadRemote = (
-  url: ImportRemoteOptions['url'],
+  url: RemoteData['url'],
   scope: ImportRemoteOptions['scope'],
   bustRemoteEntryCache: ImportRemoteOptions['bustRemoteEntryCache'],
 ) =>
@@ -66,6 +67,25 @@ const loadRemote = (
       scope,
     );
   });
+
+const loadEsmRemote = async (
+  url: RemoteData['url'],
+  scope: ImportRemoteOptions['scope'],
+) => {
+  const module = await import(/* webpackIgnore: true */ url);
+
+  if (!module) {
+    throw new Error(
+      `Unable to load requested remote from ${url} with scope ${scope}`,
+    );
+  }
+
+  window[scope] = {
+    ...module,
+    __initializing: false,
+    __initialized: false,
+  } satisfies WebpackRemoteContainer;
+};
 
 /**
  * Function to initialize sharing
@@ -114,6 +134,7 @@ export const importRemote = async <T>({
   module,
   remoteEntryFileName = REMOTE_ENTRY_FILE,
   bustRemoteEntryCache = true,
+  esm = false,
 }: ImportRemoteOptions): Promise<T> => {
   const remoteScope = scope as unknown as number;
   if (!window[remoteScope]) {
@@ -125,15 +146,14 @@ export const importRemote = async <T>({
       remoteUrl = await url();
     }
 
+    const remoteUrlWithEntryFile = `${remoteUrl}/${remoteEntryFileName}`;
+
+    const asyncContainer = !esm
+      ? loadRemote(remoteUrlWithEntryFile, scope, bustRemoteEntryCache)
+      : loadEsmRemote(remoteUrlWithEntryFile, scope);
+
     // Load the remote and initialize the share scope if it's empty
-    await Promise.all([
-      loadRemote(
-        `${remoteUrl}/${remoteEntryFileName}`,
-        scope,
-        bustRemoteEntryCache,
-      ),
-      initSharing(),
-    ]);
+    await Promise.all([asyncContainer, initSharing()]);
     if (!window[remoteScope]) {
       throw new Error(
         `Remote loaded successfully but ${scope} could not be found! Verify that the name is correct in the Webpack configuration!`,
