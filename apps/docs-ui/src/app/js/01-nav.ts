@@ -19,9 +19,15 @@ export default function () {
       const closed = el.classList.contains('closed');
 
       // Note: Close all items
-      liEls.forEach((liEl) => {
-        closeSubnavItem(liEl);
-      });
+      if (el.parentElement.parentElement.tagName === 'NAV') {
+        liEls.forEach((liEl) => {
+          closeSubnavItem(liEl);
+        });
+      } else {
+        for (let i = 0; i < el.parentElement.children.length; i++) {
+          closeSubnavItem(el.parentElement.children[i]);
+        }
+      }
 
       if (closed) {
         openSubnavItem(el);

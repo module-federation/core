@@ -1,1 +1,1 @@
-export * from '@module-federation/utilities'
+export * from '@module-federation/utilities';

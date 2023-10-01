@@ -7,29 +7,39 @@ import type {
   Remotes,
   RuntimeRemote,
   WebpackRemoteContainer,
+  WebpackShareScopes,
 } from '../types';
-
 import { loadScript } from './pure';
 
+/**
+ * Creates a module that can be shared across different builds.
+ * @param {string} delegate - The delegate string.
+ * @param {Object} params - The parameters for the module.
+ * @returns {string} - The created module.
+ * @throws Will throw an error if the params are an array or object.
+ */
 export const createDelegatedModule = (
   delegate: string,
-  params: { [key: string]: any }
+  params: { [key: string]: any },
 ) => {
   const queries: string[] = [];
-  for (const [key, value] of Object.entries(params)) {
-    if (Array.isArray(value) || typeof value === 'object') {
-      throw new Error(
-        `[Module Federation] Delegated module params cannot be an array or object. Key "${key}" should be a string or number`
-      );
+  const processParam = (key: string, value: any) => {
+    if (Array.isArray(value)) {
+      value.forEach((v, i) => processParam(`${key}[${i}]`, v));
+    } else if (typeof value === 'object' && value !== null) {
+      Object.entries(value).forEach(([k, v]) => processParam(`${key}.${k}`, v));
+    } else {
+      queries.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
     }
-    queries.push(`${key}=${value}`);
-  }
-  if (queries.length === 0) return `internal ${delegate}`;
-  return `internal ${delegate}?${queries.join('&')}`;
+  };
+  Object.entries(params).forEach(([key, value]) => processParam(key, value));
+  return queries.length === 0
+    ? `internal ${delegate}`
+    : `internal ${delegate}?${queries.join('&')}`;
 };
 
 const createContainerSharingScope = (
-  asyncContainer: AsyncContainer | undefined
+  asyncContainer: AsyncContainer | undefined,
 ) => {
   // @ts-ignore
   return asyncContainer
@@ -39,7 +49,7 @@ const createContainerSharingScope = (
         return Promise.resolve(__webpack_init_sharing__('default')).then(
           function () {
             return container;
-          }
+          },
         );
       } else {
         return container;
@@ -70,34 +80,42 @@ const createContainerSharingScope = (
  * or
  *    { asyncContainer } - async container is a promise that resolves to the remote container
  */
-export const injectScript = (
-  keyOrRuntimeRemoteItem: string | RuntimeRemote
+export const injectScript = async (
+  keyOrRuntimeRemoteItem: string | RuntimeRemote,
 ) => {
   const asyncContainer = loadScript(keyOrRuntimeRemoteItem);
   return createContainerSharingScope(asyncContainer);
 };
 
-export const createRuntimeVariables = (remotes: Remotes) => {
+/**
+ * Creates runtime variables from the provided remotes.
+ * If the value of a remote starts with 'promise ' or 'external ', it is transformed into a function that returns the promise call.
+ * Otherwise, the value is stringified.
+ * @param {Remotes} remotes - The remotes to create runtime variables from.
+ * @returns {Record<string, string>} - The created runtime variables.
+ */
+export const createRuntimeVariables = (
+  remotes: Remotes,
+): Record<string, string> => {
   if (!remotes) {
     return {};
   }
 
-  return Object.entries(remotes).reduce((acc, remote) => {
-    // handle promise new promise and external new promise
-    if (remote[1].startsWith('promise ') || remote[1].startsWith('external ')) {
-      const promiseCall = remote[1]
-        .replace('promise ', '')
-        .replace('external ', '');
-      acc[remote[0]] = `function() {
+  return Object.entries(remotes).reduce(
+    (acc, [key, value]) => {
+      if (value.startsWith('promise ') || value.startsWith('external ')) {
+        const promiseCall = value.split(' ')[1];
+        acc[key] = `function() {
         return ${promiseCall}
       }`;
-      return acc;
-    }
-    // if somehow its just the @ syntax or something else, pass it through
-    acc[remote[0]] = JSON.stringify(remote[1]);
+      } else {
+        acc[key] = JSON.stringify(value);
+      }
 
-    return acc;
-  }, {} as Record<string, string>);
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
 };
 
 /**
@@ -105,41 +123,34 @@ export const createRuntimeVariables = (remotes: Remotes) => {
  * If its' script does not loaded - then load & init it firstly.
  */
 export const getContainer = async (
-  remoteContainer: string | RemoteData
+  remoteContainer: string | RemoteData,
 ): Promise<WebpackRemoteContainer | undefined> => {
   if (!remoteContainer) {
     throw Error(`Remote container options is empty`);
   }
-  // @ts-ignore
   const containerScope =
-    // @ts-ignore
-    typeof window !== 'undefined' ? window : globalThis.__remote_scope__;
+    typeof window !== 'undefined'
+      ? window
+      : (globalThis as any).__remote_scope__;
+  let containerKey: string;
 
   if (typeof remoteContainer === 'string') {
-    if (containerScope[remoteContainer]) {
-      return containerScope[remoteContainer];
-    }
-
-    return;
+    containerKey = remoteContainer;
   } else {
-    const uniqueKey = remoteContainer.uniqueKey as string;
-    if (containerScope[uniqueKey]) {
-      return containerScope[uniqueKey];
+    containerKey = remoteContainer.uniqueKey as string;
+    if (!containerScope[containerKey]) {
+      const container = await injectScript({
+        global: remoteContainer.global,
+        url: remoteContainer.url,
+      });
+      if (!container) {
+        throw Error(`Remote container ${remoteContainer.url} is empty`);
+      }
     }
-
-    const container = await injectScript({
-      global: remoteContainer.global,
-      url: remoteContainer.url,
-    });
-
-    if (container) {
-      return container;
-    }
-
-    throw Error(`Remote container ${remoteContainer.url} is empty`);
   }
-};
 
+  return containerScope[containerKey];
+};
 /**
  * Return remote module from container.
  * If you provide `exportName` it automatically return exact property value from module.
@@ -155,7 +166,9 @@ export const getModule = async ({
   const container = await getContainer(remoteContainer);
   try {
     const modFactory = await container?.get(modulePath);
-    if (!modFactory) return undefined;
+    if (!modFactory) {
+      return undefined;
+    }
     const mod = modFactory();
     if (exportName) {
       return mod && typeof mod === 'object' ? mod[exportName] : undefined;

@@ -1,12 +1,14 @@
 {
-  "name": "react-ts-remote",
+  "name": "react_ts_remote",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/react-ts-remote/src",
   "projectType": "application",
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "defaultConfiguration": "production",
       "options": {
         "compiler": "swc",
@@ -20,9 +22,7 @@
           "apps/react-ts-remote/src/favicon.ico",
           "apps/react-ts-remote/src/assets"
         ],
-        "styles": [
-          "apps/react-ts-remote/src/styles.css"
-        ],
+        "styles": ["apps/react-ts-remote/src/styles.css"],
         "scripts": [],
         "webpackConfig": "apps/react-ts-remote/webpack.config.js",
         "babelUpwardRootMode": true
@@ -59,44 +59,44 @@
     },
     "serve": {
       "executor": "@nx/react:module-federation-dev-server",
-      "defaultConfiguration": "development",
+      "defaultConfiguration": "production",
       "options": {
-        "buildTarget": "react-ts-remote:build",
+        "buildTarget": "react_ts_remote:build",
         "hmr": true,
         "port": 3004
       },
       "configurations": {
         "development": {
-          "buildTarget": "react-ts-remote:build:development"
+          "buildTarget": "react_ts_remote:build:development"
         },
         "production": {
-          "buildTarget": "react-ts-remote:build:production",
+          "buildTarget": "react_ts_remote:build:production",
           "hmr": false
         }
       }
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": [
-          "apps/react-ts-remote/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/react-ts-remote/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "serve-static": {
       "executor": "@nx/web:file-server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "react-ts-remote:build",
+        "buildTarget": "react_ts_remote:build",
         "port": 3004
       },
       "configurations": {
         "development": {
-          "buildTarget": "react-ts-remote:build:development"
+          "buildTarget": "react_ts_remote:build:development"
         },
         "production": {
-          "buildTarget": "react-ts-remote:build:production"
+          "buildTarget": "react_ts_remote:build:production"
         }
       }
     }

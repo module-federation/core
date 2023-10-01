@@ -15,38 +15,39 @@ yarn add @module-federation/storybook-addon
 ## Configuration
 
 In file `./storybook/main.js`:
+
 ```js
 const moduleFederationConfig = {
-    // Module Federation config
+  // Module Federation config
 };
 
 const storybookConfig = {
-  "stories": [
-    "../src/**/*.stories.mdx",
-    "../src/**/*.stories.@(js|jsx|ts|tsx)"
-  ],
-  "addons": [
+  stories: ['../src/**/*.stories.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],
+  addons: [
     // other addons,
     {
-      name: "@module-federation/storybook-addon",
+      name: '@module-federation/storybook-addon',
       options: {
-        moduleFederationConfig
-      }
-    }
+        moduleFederationConfig,
+      },
+    },
   ],
-  "framework": "@storybook/react",
-  "core": {
-    "builder": "@storybook/builder-webpack5" // is required webpack 5 builder
-  }
+  framework: '@storybook/react',
+  core: {
+    builder: '@storybook/builder-webpack5', // is required webpack 5 builder
+  },
 };
 
 module.exports = storybookConfig;
 ```
+
 ---
+
 ### For the [NX](https://nx.dev/getting-started/intro) projects:
 
 Replace NX utils `withModuleFederation` in `webpack.config.js` with our utils `withModuleFederation`.
 Example:
+
 ```javascript
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
@@ -58,37 +59,31 @@ const config = {
   ...baseConfig,
 };
 
-module.exports = composePlugins(
-  withNx(),
-  withReact(),
-  withModuleFederation(config)
-);
+module.exports = composePlugins(withNx(), withReact(), withModuleFederation(config));
 ```
 
 In file `./storybook/main.js`:
+
 ```js
 const nxModuleFederationConfig = {
-    // Module Federation config
+  // Module Federation config
 };
 
 const storybookConfig = {
-  "stories": [
-    "../src/**/*.stories.mdx",
-    "../src/**/*.stories.@(js|jsx|ts|tsx)"
-  ],
-  "addons": [
+  stories: ['../src/**/*.stories.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],
+  addons: [
     // other addons,
     {
-      name: "@module-federation/storybook-addon",
+      name: '@module-federation/storybook-addon',
       options: {
-        nxModuleFederationConfig
-      }
-    }
+        nxModuleFederationConfig,
+      },
+    },
   ],
-  "framework": "@storybook/react",
-  "core": {
-    "builder": "@storybook/builder-webpack5" // is required webpack 5 builder
-  }
+  framework: '@storybook/react',
+  core: {
+    builder: '@storybook/builder-webpack5', // is required webpack 5 builder
+  },
 };
 
 module.exports = storybookConfig;
@@ -102,7 +97,9 @@ import React, { Suspense } from 'react';
 const LazyButton = React.lazy(() => import('remote/Button'));
 
 const Button = (props) => (
-  <Suspense fallback={<p>Please wait...</p>}><LazyButton {...props} /></Suspense>
+  <Suspense fallback={<p>Please wait...</p>}>
+    <LazyButton {...props} />
+  </Suspense>
 );
 
 export default {
@@ -111,14 +108,14 @@ export default {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['primary', 'secondary']
+      options: ['primary', 'secondary'],
     },
   },
 };
 
 const Template = (args) => <Button {...args} />;
 
-export const Primary = Template.bind({variant: 'primary'});
+export const Primary = Template.bind({ variant: 'primary' });
 Primary.args = {
   variant: 'primary',
   children: 'Button',
@@ -129,5 +126,4 @@ Secondary.args = {
   variant: 'secondary',
   children: 'Button',
 };
-
 ```

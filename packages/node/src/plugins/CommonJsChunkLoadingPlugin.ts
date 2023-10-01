@@ -1,4 +1,4 @@
-import type { Chunk, Compiler } from 'webpack';
+import type { Chunk, Compiler, Compilation } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
@@ -30,23 +30,26 @@ class CommonJsChunkLoadingPlugin {
     new StartupChunkDependenciesPlugin({
       chunkLoading: chunkLoadingValue,
       asyncChunkLoading: this._asyncChunkLoading,
+      //@ts-ignore
     }).apply(compiler);
 
     compiler.hooks.thisCompilation.tap(
       'CommonJsChunkLoadingPlugin',
-      (compilation) => {
+      (compilation: Compilation) => {
         // Always enabled
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const isEnabledForChunk = (_: Chunk) => true;
         const onceForChunkSet = new WeakSet();
 
         const handler = (chunk: Chunk, set: Set<string>) => {
-          if (onceForChunkSet.has(chunk)) return;
+          if (onceForChunkSet.has(chunk)) {
+            return;
+          }
 
           onceForChunkSet.add(chunk);
-
-          if (!isEnabledForChunk(chunk)) return;
-
+          if (!isEnabledForChunk(chunk)) {
+            return;
+          }
           set.add(RuntimeGlobals.moduleFactoriesAddOnly);
           set.add(RuntimeGlobals.hasOwnProperty);
 
@@ -54,45 +57,42 @@ class CommonJsChunkLoadingPlugin {
             chunk,
             new ChunkLoadingRuntimeModule(set, this.options, {
               webpack: compiler.webpack,
-            })
+            }),
           );
         };
-
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.ensureChunkHandlers)
           .tap('CommonJsChunkLoadingPlugin', handler);
-
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadUpdateHandlers)
           .tap('CommonJsChunkLoadingPlugin', handler);
-
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadManifest)
           .tap('CommonJsChunkLoadingPlugin', handler);
-
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.baseURI)
           .tap('CommonJsChunkLoadingPlugin', handler);
-
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.externalInstallChunk)
           .tap('CommonJsChunkLoadingPlugin', handler);
-
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.onChunksLoaded)
           .tap('CommonJsChunkLoadingPlugin', handler);
-
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.ensureChunkHandlers)
           .tap('CommonJsChunkLoadingPlugin', (chunk, set) => {
-            if (!isEnabledForChunk(chunk)) return;
+            if (!isEnabledForChunk(chunk)) {
+              return;
+            }
             set.add(RuntimeGlobals.getChunkScriptFilename);
           });
 
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadUpdateHandlers)
           .tap('CommonJsChunkLoadingPlugin', (chunk, set) => {
-            if (!isEnabledForChunk(chunk)) return;
+            if (!isEnabledForChunk(chunk)) {
+              return;
+            }
             set.add(RuntimeGlobals.getChunkUpdateScriptFilename);
             set.add(RuntimeGlobals.moduleCache);
             set.add(RuntimeGlobals.hmrModuleData);
@@ -102,10 +102,12 @@ class CommonJsChunkLoadingPlugin {
         compilation.hooks.runtimeRequirementInTree
           .for(RuntimeGlobals.hmrDownloadManifest)
           .tap('CommonJsChunkLoadingPlugin', (chunk, set) => {
-            if (!isEnabledForChunk(chunk)) return;
+            if (!isEnabledForChunk(chunk)) {
+              return;
+            }
             set.add(RuntimeGlobals.getUpdateManifestFilename);
           });
-      }
+      },
     );
   }
 }

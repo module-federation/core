@@ -5,7 +5,7 @@
 
 'use strict';
 
-import { ConcatSource, PrefixSource } from "webpack-sources";
+import { ConcatSource, PrefixSource } from 'webpack-sources';
 
 /** @typedef {import("../declarations/WebpackOptions").Output} OutputOptions */
 /** @typedef {import("webpack-sources").Source} Source */
@@ -103,7 +103,9 @@ class Template {
    * @returns {string} created identifier
    */
   static toIdentifier(str: string) {
-    if (typeof str !== 'string') return '';
+    if (typeof str !== 'string') {
+      return '';
+    }
     return str
       .replace(IDENTIFIER_NAME_REPLACE_REGEX, '_$1')
       .replace(IDENTIFIER_ALPHA_NUMERIC_NAME_REPLACE_REGEX, '_');
@@ -114,7 +116,9 @@ class Template {
    * @returns {string} returns a commented version of string
    */
   static toComment(str: string) {
-    if (!str) return '';
+    if (!str) {
+      return '';
+    }
     return `/*! ${str.replace(COMMENT_END_REGEX, '* /')} */`;
   }
 
@@ -124,7 +128,9 @@ class Template {
    * @returns {string} returns a commented version of string
    */
   static toNormalComment(str: string) {
-    if (!str) return '';
+    if (!str) {
+      return '';
+    }
     return `/* ${str.replace(COMMENT_END_REGEX, '* /')} */`;
   }
 
@@ -133,7 +139,9 @@ class Template {
    * @returns {string} normalized bundle-safe path
    */
   static toPath(str: string) {
-    if (typeof str !== 'string') return '';
+    if (typeof str !== 'string') {
+      return '';
+    }
     return str
       .replace(PATH_NAME_NORMALIZE_REPLACE_REGEX, '-')
       .replace(MATCH_PADDED_HYPHENS_REPLACE_REGEX, '');
@@ -150,7 +158,7 @@ class Template {
       return (
         Template.numberToIdentifier(n % NUMBER_OF_IDENTIFIER_START_CHARS) +
         Template.numberToIdentifierContinuation(
-          Math.floor(n / NUMBER_OF_IDENTIFIER_START_CHARS)
+          Math.floor(n / NUMBER_OF_IDENTIFIER_START_CHARS),
         )
       );
     }
@@ -166,7 +174,9 @@ class Template {
       return String.fromCharCode(START_UPPERCASE_ALPHABET_CODE + n);
     }
 
-    if (n === DELTA_A_TO_Z) return '_';
+    if (n === DELTA_A_TO_Z) {
+      return '_';
+    }
     return '$';
   }
 
@@ -179,10 +189,10 @@ class Template {
       // use multiple letters
       return (
         Template.numberToIdentifierContinuation(
-          n % NUMBER_OF_IDENTIFIER_CONTINUATION_CHARS
+          n % NUMBER_OF_IDENTIFIER_CONTINUATION_CHARS,
         ) +
         Template.numberToIdentifierContinuation(
-          Math.floor(n / NUMBER_OF_IDENTIFIER_CONTINUATION_CHARS)
+          Math.floor(n / NUMBER_OF_IDENTIFIER_CONTINUATION_CHARS),
         )
       );
     }
@@ -204,7 +214,9 @@ class Template {
       return `${n}`;
     }
 
-    if (n === 10) return '_';
+    if (n === 10) {
+      return '_';
+    }
     return '$';
   }
 
@@ -218,7 +230,9 @@ class Template {
       return s.map(Template.indent).join('\n');
     } else {
       const str = s.trimRight();
-      if (!str) return '';
+      if (!str) {
+        return '';
+      }
       const ind = str[0] === '\n' ? '' : '\t';
       return ind + str.replace(/\n([^\n])/g, '\n\t$1');
     }
@@ -232,7 +246,9 @@ class Template {
    */
   static prefix(s: any, prefix: string) {
     const str = Template.asString(s).trim();
-    if (!str) return '';
+    if (!str) {
+      return '';
+    }
     const ind = str[0] === '\n' ? '' : prefix;
     return ind + str.replace(/\n([^\n])/g, '\n' + prefix + '$1');
   }
@@ -264,9 +280,11 @@ class Template {
     let minId = Infinity;
     for (const module of modules) {
       const moduleId = module.id;
-      if (typeof moduleId !== 'number') return false;
-      if (maxId < moduleId) maxId = moduleId;
-      if (minId > moduleId) minId = moduleId;
+      if (typeof moduleId !== 'number') {
+        return false;
+      }
+      maxId = Math.max(maxId, moduleId);
+      minId = Math.min(minId, moduleId);
     }
     if (minId < 16 + ('' + minId).length) {
       // add minId x ',' instead of 'Array(minId).concat(…)'
@@ -294,7 +312,7 @@ class Template {
     renderContext: { chunkGraph: any },
     modules: any[],
     renderModule: (arg0: any) => any,
-    prefix = ''
+    prefix = '',
   ) {
     const { chunkGraph } = renderContext;
     const source = new ConcatSource();
@@ -367,17 +385,17 @@ class Template {
       dependencyTemplates: any;
       moduleGraph: any;
       runtimeTemplate: { supportsArrowFunction: () => any };
-    }
+    },
   ) {
     const source = new ConcatSource();
     for (const module of runtimeModules) {
-      const codeGenerationResults = renderContext.codeGenerationResults;
+      const { codeGenerationResults } = renderContext;
       let runtimeSource;
       if (codeGenerationResults) {
         runtimeSource = codeGenerationResults.getSource(
           module,
           renderContext.chunk.runtime,
-          'runtime'
+          'runtime',
         );
       } else {
         const codeGenResult = module.codeGeneration({
@@ -388,7 +406,9 @@ class Template {
           runtime: renderContext.chunk.runtime,
           codeGenerationResults,
         });
-        if (!codeGenResult) continue;
+        if (!codeGenResult) {
+          continue;
+        }
         runtimeSource = codeGenResult.sources.get('runtime');
       }
       if (runtimeSource) {
@@ -421,8 +441,8 @@ class Template {
       new ConcatSource(
         'function(__webpack_require__) { // webpackRuntimeModules\n',
         this.renderRuntimeModules(runtimeModules, renderContext),
-        '}\n'
-      )
+        '}\n',
+      ),
     );
   }
 }

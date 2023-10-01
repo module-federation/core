@@ -5,8 +5,18 @@
         {{/with}}
         {{{page.contents}}}
     </article>
-
-    <div class="mt-10">
-        {{> pagination}}
+  {{#if page.editUrl}}
+    <div class="edit-this-page">
+      <a href="{{page.editUrl}}">
+        <img alt="edit page"
+           src="{{{@root.uiRootPath}}}/img/icons-edit.svg"
+        />
+        Edit this page on GitHub
+      </a>
     </div>
+  {{/if}}
+
+  <div class="mt-10">
+    {{> pagination}}
+  </div>
 </div>

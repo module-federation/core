@@ -1,4 +1,3 @@
-//eslint-disable @nrwl/nx/enforce-module-boundaries
 import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import {

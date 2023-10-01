@@ -20,6 +20,22 @@ https://github.com/module-federation/module-federation-examples
 
 ## This project supports federated SSR
 
+# We are building a micro-frontend ecosystem!
+
+While NextFederationPlugin "works", Next.js is staunchly opposed to the technology and Next is very difficult to support.
+
+This plugin attempts to make the experience as seamless as possible, but it is not perfect.
+
+We are building a micro-frontend ecosystem that is much more powerful than Next.js, built to support micro-frontends from the ground up.
+
+**If Federation is a big enabler for your teams and projects, please consider using our ecosystem thats designed for it**
+
+|    [Rspack](https://github.com/web-infra-dev/rspack)    |  <a href="https://github.com/web-infra-dev/rspack" target="blank"><img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zq-uylkvT/ljhwZthlaukjlkulzlp/Rspack-1850.png" width="400" /></a>   |
+| :-----------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| [Modern.js](https://github.com/web-infra-dev/modern.js) | <a href="https://github.com/web-infra-dev/modern.js" target="blank"><img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zq-uylkvT/ljhwZthlaukjlkulzlp/Modern-0550.png" width="400" /></a> |
+|   [Garfish](https://github.com/web-infra-dev/garfish)   | <a href="https://github.com/web-infra-dev/garfish" target="blank"><img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zq-uylkvT/ljhwZthlaukjlkulzlp/Garfish-1630.png" width="400" /></a>  |
+|       [Oxc](https://github.com/web-infra-dev/oxc)       |     <a href="https://github.com/web-infra-dev/oxc" target="blank"><img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zq-uylkvT/ljhwZthlaukjlkulzlp/Oxc-0724.png" width="400" /></a>      |
+
 ## Whats shared by default?
 
 Under the hood we share some next internals automatically
@@ -104,7 +120,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
 ## Usage
 
 ```js
-import React, {lazy} from 'react';
+import React, { lazy } from 'react';
 const SampleComponent = lazy(() => import('next2/sampleComponent'));
 ```
 
@@ -183,13 +199,12 @@ module.exports = {
         shared: {
           // whatever else
         },
-      })
+      }),
     );
 
     return config;
   },
 };
-
 ```
 
 ```js
@@ -206,31 +221,32 @@ module.exports = {
         remotes: {
           next2: `next2@http://localhost:3000/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
         },
-      })
+      }),
     );
 
     return config;
   },
 };
-
 ```
 
 4. Use react.lazy, low level api, or require/import from to import remotes.
 
 ```js
-import React, {lazy} from 'react';
+import React, { lazy } from 'react';
 
-const SampleComponent = lazy(() => window.next2.get('./sampleComponent').then((factory) => {
-  return {default: factory()}
-}));
+const SampleComponent = lazy(() =>
+  window.next2.get('./sampleComponent').then((factory) => {
+    return { default: factory() };
+  }),
+);
 
 // or
 
 const SampleComponent = lazy(() => import('next2/sampleComponent'));
 
 //or
- 
- import Sample from "next2/sampleComponent";
+
+import Sample from 'next2/sampleComponent';
 ```
 
 ## Delegate modules
@@ -265,9 +281,7 @@ const remotes = {
 // Delegates must utilize module.exports, not export default - this is due to a webpack constraint
 // ALL imports MUST BE dynamic imports in here like import()
 module.exports = new Promise(async (resolve, reject) => {
-  const { importDelegatedModule } = await import(
-    '@module-federation/nextjs-mf/importDelegatedModule'
-  );
+  const { importDelegatedModule } = await import('@module-federation/nextjs-mf/importDelegatedModule');
   // eslint-disable-next-line no-undef
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
   const [global, url] = currentRequest.split('@');
@@ -366,7 +380,7 @@ module.exports = new Promise((resolve, reject) => {
       __webpack_error__.stack = event.stack;
       reject(__webpack_error__);
     },
-    containerGlobal
+    containerGlobal,
   );
 });
 ```

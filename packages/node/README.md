@@ -129,7 +129,7 @@ revalidate().then((shouldReload) => {
 });
 ```
 
-*Note*: To ensure that changes made to files in remotes are picked up `revalidate`, you can set the remotes webpack [output.filename](https://webpack.js.org/configuration/output/#outputfilename) to `[name]-[contenthash].js` (or similar). This will cause the remoteEntry.js file to be regenerated with a unique hash every time a new build occurs. The revalidate method intelligently detects changes by comparing the hashes of the remoteEntry.js files. By incorporating [contenthash] into the remote's webpack configuration, you enable the shell to seamlessly incorporate the updated files from the remotes.
+_Note_: To ensure that changes made to files in remotes are picked up `revalidate`, you can set the remotes webpack [output.filename](https://webpack.js.org/configuration/output/#outputfilename) to `[name]-[contenthash].js` (or similar). This will cause the remoteEntry.js file to be regenerated with a unique hash every time a new build occurs. The revalidate method intelligently detects changes by comparing the hashes of the remoteEntry.js files. By incorporating [contenthash] into the remote's webpack configuration, you enable the shell to seamlessly incorporate the updated files from the remotes.
 
 **Hot reloading Express.js**
 

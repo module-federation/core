@@ -12,7 +12,10 @@ export default component$((props: IconProps) => {
   useStylesScoped$(styles);
 
   return (
-    <div class={`inline-block ${props.class || ''}`} style={{width: props.size, height: props.size}} >
+    <div
+      class={`inline-block ${props.class || ''}`}
+      style={{ width: props.size, height: props.size }}
+    >
       {iconsMap[props.name]}
     </div>
   );

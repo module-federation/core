@@ -22,7 +22,7 @@ export type MFClientHookOptions = {
    */
   onChangeRemote?: (
     remote: RemoteContainer | undefined,
-    MFClient: MFClient
+    MFClient: MFClient,
   ) => void;
 };
 

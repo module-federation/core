@@ -6,8 +6,14 @@ import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
 import { RuntimeGlobals, Compilation } from 'webpack';
 import Template from '../../../utils/Template';
 import RemoveEagerModulesFromRuntimePlugin from './RemoveEagerModulesFromRuntimePlugin';
+
 /**
  * This interface includes additional fields specific to the plugin's behavior.
+ * @typedef {Object} InvertedContainerOptions
+ * @property {string} [container] - The container name.
+ * @property {Record<string, string>} remotes - A map of remote modules to their URLs.
+ * @property {string} runtime - The name of the current module.
+ * @property {boolean} [debug] - A flag to enable debug logging.
  */
 interface InvertedContainerOptions extends ModuleFederationPluginOptions {
   container?: string;
@@ -18,6 +24,7 @@ interface InvertedContainerOptions extends ModuleFederationPluginOptions {
 
 /**
  * InvertedContainerPlugin is a Webpack plugin that handles loading of chunks in a federated module.
+ * @class
  */
 class InvertedContainerPlugin {
   private options: InvertedContainerOptions;
@@ -30,7 +37,7 @@ class InvertedContainerPlugin {
     container: string | undefined;
     runtime: string;
     remotes: Record<string, string>;
-    debug: boolean | undefined
+    debug: boolean | undefined;
   }) {
     this.options = options || ({} as InvertedContainerOptions);
   }
@@ -47,7 +54,9 @@ class InvertedContainerPlugin {
     const container = compilation.entrypoints
       .get(this.options.container as string)
       ?.getRuntimeChunk?.();
-    if (!container) return undefined;
+    if (!container) {
+      return undefined;
+    }
     const entrymodule =
       compilation.chunkGraph.getChunkEntryModulesIterable(container);
     for (const module of entrymodule) {
@@ -76,7 +85,9 @@ class InvertedContainerPlugin {
         // Define a handler function to be called for each chunk in the compilation.
         const handler = (chunk: Chunk, set: Set<string>) => {
           // If the chunk has already been processed, skip it.
-          if (onceForChunkSet.has(chunk)) return;
+          if (onceForChunkSet.has(chunk)) {
+            return;
+          }
           set.add(RuntimeGlobals.onChunksLoaded);
 
           // Mark the chunk as processed by adding it to the WeakSet.
@@ -90,14 +101,14 @@ class InvertedContainerPlugin {
               new InvertedContainerRuntimeModule(set, this.options, {
                 webpack: compiler.webpack,
                 debug: this.options.debug,
-              })
+              }),
             );
           }
         };
 
         compilation.hooks.additionalChunkRuntimeRequirements.tap(
           'InvertedContainerPlugin',
-          handler
+          handler,
         );
 
         compilation.hooks.optimizeChunks.tap(
@@ -106,22 +117,24 @@ class InvertedContainerPlugin {
             const containerEntryModule =
               this.resolveContainerModule(compilation);
 
-            if (!containerEntryModule) return;
+            if (!containerEntryModule) {
+              return;
+            }
             for (const chunk of chunks) {
               if (
                 !compilation.chunkGraph.isModuleInChunk(
                   containerEntryModule,
-                  chunk
+                  chunk,
                 ) &&
                 chunk.hasRuntime()
               ) {
                 compilation.chunkGraph.connectChunkAndModule(
                   chunk,
-                  containerEntryModule
+                  containerEntryModule,
                 );
               }
             }
-          }
+          },
         );
 
         const hooks =
@@ -154,7 +167,7 @@ class InvertedContainerPlugin {
                 }
               }
             }
-          }
+          },
         );
 
         hooks.renderStartup.tap(
@@ -183,7 +196,7 @@ class InvertedContainerPlugin {
             const replaceString = '__webpack_exec_proxy__';
 
             const originalExec = replaceSource.findIndex((s: string) =>
-              s.includes(searchString)
+              s.includes(searchString),
             );
 
             if (originalExec === -1) {
@@ -191,10 +204,7 @@ class InvertedContainerPlugin {
             }
 
             const firstHalf = replaceSource.slice(0, originalExec + 1);
-            const secondHalf = replaceSource.slice(
-              originalExec + 1,
-              replaceSource.length
-            );
+            const secondHalf = replaceSource.slice(originalExec + 1);
 
             const originalRuntimeCode = firstHalf
               .join('\n')
@@ -212,19 +222,19 @@ class InvertedContainerPlugin {
                           [
                             'Promise.all(__webpack_require__.initRemotes)',
                             'Promise.all(__webpack_require__.initConsumes)',
-                          ].join(',\n')
+                          ].join(',\n'),
                         ),
                         '])',
-                      ])
+                      ]),
                     ),
                     ').then(',
                     runtimeTemplate.returningFunction(
-                      Template.asString([`${replaceString}(moduleId)`])
+                      Template.asString([`${replaceString}(moduleId)`]),
                     ),
                     ')',
-                  ].join('')
+                  ].join(''),
                 ),
-                'moduleId'
+                'moduleId',
               ),
             ]);
 
@@ -247,9 +257,9 @@ class InvertedContainerPlugin {
               ...secondHalf,
               '',
             ]);
-          }
+          },
         );
-      }
+      },
     );
   }
 }

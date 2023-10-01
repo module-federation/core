@@ -6,7 +6,9 @@
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "defaultConfiguration": "production",
       "options": {
         "compiler": "babel",
@@ -19,9 +21,7 @@
           "apps/reactStorybook/src/favicon.ico",
           "apps/reactStorybook/src/assets"
         ],
-        "styles": [
-          "apps/reactStorybook/src/styles.scss"
-        ],
+        "styles": ["apps/reactStorybook/src/styles.scss"],
         "scripts": [],
         "isolatedConfig": true,
         "webpackConfig": "apps/reactStorybook/webpack.config.js"
@@ -76,16 +76,18 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": [
-          "apps/reactStorybook/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/reactStorybook/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "apps/reactStorybook/jest.config.ts",
         "passWithNoTests": true
@@ -128,7 +130,9 @@
     },
     "build-storybook": {
       "executor": "@nx/storybook:build",
-      "outputs": ["{options.outputDir}"],
+      "outputs": [
+        "{options.outputDir}"
+      ],
       "options": {
         "uiFramework": "@storybook/react",
         "outputDir": "dist/storybook/reactStorybook",

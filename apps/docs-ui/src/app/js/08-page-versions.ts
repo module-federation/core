@@ -1,6 +1,5 @@
 export default function () {
   const wrappers = document.querySelectorAll('.version-wrapper');
-  
 
   if (!wrappers) return;
 

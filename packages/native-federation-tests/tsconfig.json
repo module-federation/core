@@ -2,13 +2,12 @@
   "compilerOptions": {
     "target": "es2017",
     "module": "esnext",
-    "lib": [
-      "esnext"
-    ],
+    "lib": ["esnext"],
     "moduleResolution": "node",
     "esModuleInterop": true,
     "strict": true,
     "strictNullChecks": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["vitest"]
   }
 }

@@ -51,7 +51,7 @@ export const revalidate = () => {
           console.error(
             'unreachable remote found',
             property,
-            'hot reloading to refetch'
+            'hot reloading to refetch',
           );
           res(true);
           break;
@@ -74,7 +74,7 @@ export const revalidate = () => {
                 console.log(
                   'medusa config changed',
                   property,
-                  'hot reloading to refetch'
+                  'hot reloading to refetch',
                 );
                 performReload(true);
                 return res(true);
@@ -98,7 +98,7 @@ export const revalidate = () => {
           console.log(
             'fake remote found',
             property,
-            'hot reloading to refetch'
+            'hot reloading to refetch',
           );
           res(true);
         }
@@ -112,7 +112,7 @@ export const revalidate = () => {
               throw new Error(
                 `Error loading remote: status: ${
                   re.status
-                }, content-type: ${re.headers.get('content-type')}`
+                }, content-type: ${re.headers.get('content-type')}`,
               );
             }
             return re.text();
@@ -139,7 +139,7 @@ export const revalidate = () => {
               name,
               url,
               'Failed to load or is not online',
-              e
+              e,
             );
           });
 
@@ -162,7 +162,8 @@ export const revalidate = () => {
   */
 function getFetchModule() {
   //@ts-ignore
-  const loadedModule = globalThis.webpackChunkLoad || global.webpackChunkLoad || global.fetch;
+  const loadedModule =
+    globalThis.webpackChunkLoad || global.webpackChunkLoad || global.fetch;
   if (loadedModule) {
     return loadedModule;
   }

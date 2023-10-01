@@ -31,7 +31,9 @@ export default component$((props: SectionProps) => {
     <Container fullWidth={props.fullWidth} theme={props.theme}>
       <section
         id={props.id}
-        class={`flex flex-col items-center gap-10 ${paddingClasses} ${props.class || ''}`}
+        class={`flex flex-col items-center gap-10 ${paddingClasses} ${
+          props.class || ''
+        }`}
       >
         <div class="empty:hidden">
           <Slot name="header" />

@@ -58,7 +58,7 @@ export default component$(() => {
   useStylesScoped$(styles);
 
   const speakState = useSpeakContext();
-  
+
   const localizedUrl = (url: string) => {
     return locUrl(url, speakState);
   };

@@ -6,11 +6,17 @@ import fs from 'fs';
 import { UrlNode } from '../../client/UrlNode';
 
 /**
- * Webpack loader which prepares MF map for NextJS pages
+ * Webpack loader which prepares MF map for NextJS pages.
+ * This function is the main entry point for the loader.
+ * It gets the options passed to the loader and prepares the pages map.
+ * If the 'v2' option is passed, it prepares the pages map using the 'preparePageMapV2' function.
+ * Otherwise, it uses the 'preparePageMap' function.
+ * Finally, it calls the loader's callback function with the prepared pages map.
  *
+ * @param {LoaderContext<Record<string, unknown>>} this - The loader context.
  */
 export default function nextPageMapLoader(
-  this: LoaderContext<Record<string, unknown>>
+  this: LoaderContext<Record<string, unknown>>,
 ) {
   // const [pagesRoot] = getNextPagesRoot(this.rootContext);
   // this.addContextDependency(pagesRoot);
@@ -27,14 +33,17 @@ export default function nextPageMapLoader(
 
   this.callback(
     null,
-    `module.exports = { default: ${JSON.stringify(result)} };`
+    `module.exports = { default: ${JSON.stringify(result)} };`,
   );
 }
 
 /**
  * Webpack config generator for `exposes` option.
- *   - automatically create `./pages-map` module
- *   - automatically add all page modules
+ * This function generates the webpack config for the 'exposes' option.
+ * It creates a map of pages to modules and returns an object with the pages map and the pages map v2.
+ *
+ * @param {string} cwd - The current working directory.
+ * @returns {Record<string, string>} The webpack config for the 'exposes' option.
  */
 export function exposeNextjsPages(cwd: string) {
   const pages = getNextPages(cwd);
@@ -47,15 +56,22 @@ export function exposeNextjsPages(cwd: string) {
     pageModulesMap['./' + sanitizePagePath(page)] = `./${page}`;
   });
 
-  const exposesWithPageMap = {
+  return {
     './pages-map': `${__filename}!${__filename}`,
     './pages-map-v2': `${__filename}?v2!${__filename}`,
     ...pageModulesMap,
   };
-
-  return exposesWithPageMap;
 }
 
+/**
+ * This function gets the root directory of the NextJS pages.
+ * It checks if the 'src/pages/' directory exists.
+ * If it does, it returns the absolute path and the relative path to this directory.
+ * If it doesn't, it returns the absolute path and the relative path to the 'pages/' directory.
+ *
+ * @param {string} appRoot - The root directory of the application.
+ * @returns {[string, string]} The absolute path and the relative path to the pages directory.
+ */
 function getNextPagesRoot(appRoot: string) {
   let pagesDir = 'src/pages/';
   let absPageDir = `${appRoot}/${pagesDir}`;
@@ -68,9 +84,11 @@ function getNextPagesRoot(appRoot: string) {
 }
 
 /**
- * From provided ROOT_DIR `scan` pages directory
- * and return list of user defined pages
- * (except special ones, like _app, _document, _error)
+ * This function scans the pages directory and returns a list of user defined pages.
+ * It excludes special pages like '_app', '_document', '_error', '404', '500', and federation pages.
+ *
+ * @param {string} rootDir - The root directory of the application.
+ * @returns {string[]} The list of user defined pages.
  */
 function getNextPages(rootDir: string) {
   const [cwd, pagesDir] = getNextPagesRoot(rootDir);
@@ -100,6 +118,13 @@ function getNextPages(rootDir: string) {
   return pageList;
 }
 
+/**
+ * This function sanitizes a page path.
+ * It removes the 'src/pages/' prefix and the file extension.
+ *
+ * @param {string} item - The page path to sanitize.
+ * @returns {string} The sanitized page path.
+ */
 function sanitizePagePath(item: string) {
   return item
     .replace(/^src\/pages\//i, 'pages/')
@@ -107,18 +132,12 @@ function sanitizePagePath(item: string) {
 }
 
 /**
- * Create MF map from list of NextJS pages
+ * This function creates a MF map from a list of NextJS pages.
+ * It sanitizes the page paths and sorts them using the 'UrlNode' class.
+ * Then, it creates a map with the sorted page paths as keys and the original page paths as values.
  *
- * From
- *   ['pages/index.tsx', 'pages/storage/[...slug].tsx', 'pages/storage/index.tsx']
- *
- * Getting the following map
- *   {
- *     '/': './pages/index',
- *     '/storage/*': './pages/storage/[...slug]',
- *     '/storage': './pages/storage/index'
- *   }
- *
+ * @param {string[]} pages - The list of NextJS pages.
+ * @returns {Record<string, string>} The MF map.
  */
 function preparePageMap(pages: string[]) {
   const result = {} as Record<string, string>;
@@ -143,17 +162,13 @@ function preparePageMap(pages: string[]) {
 }
 
 /**
- * Create MF list of NextJS pages
+ * This function creates a MF list from a list of NextJS pages.
+ * It sanitizes the page paths and sorts them using the 'UrlNode' class.
+ * Then, it creates a map with the sorted page paths as keys and the original page paths as values.
+ * Unlike the 'preparePageMap' function, this function does not replace the '[...]' and '[]' parts in the page paths.
  *
- * From
- *   ['pages/index.tsx', 'pages/storage/[...slug].tsx', 'pages/storage/index.tsx']
- * Getting the following map
- *   {
- *     '/': './pages/index',
- *     '/storage': './pages/storage/index'
- *     '/storage/[...slug]': './pages/storage/[...slug]',
- *   }
- *
+ * @param {string[]} pages - The list of NextJS pages.
+ * @returns {Record<string, string>} The MF list.
  */
 function preparePageMapV2(pages: string[]) {
   const result = {} as Record<string, string>;

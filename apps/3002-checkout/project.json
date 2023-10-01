@@ -6,10 +6,11 @@
   "targets": {
     "build": {
       "executor": "@nx/next:build",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "defaultConfiguration": "production",
       "options": {
-        "root": "apps/3002-checkout",
         "outputPath": "dist/apps/3002-checkout"
       },
       "configurations": {
@@ -54,11 +55,11 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": [
-          "apps/3002-checkout/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/3002-checkout/**/*.{ts,tsx,js,jsx}"]
       }
     }
   },

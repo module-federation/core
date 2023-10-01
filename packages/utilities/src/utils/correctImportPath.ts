@@ -3,7 +3,6 @@ export const correctImportPath = (context: string, entryFile: string) => {
     if (process?.platform !== 'win32') {
       return entryFile;
     }
-    console.log('entryFile', entryFile);
 
     if (entryFile.match(/^\.?\.\\/) || !entryFile.match(/^[A-Z]:\\\\/i)) {
       return entryFile.replace(/\\/g, '/');

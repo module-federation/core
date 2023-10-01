@@ -1,0 +1,10 @@
+{
+  "presets": [
+    [
+      "@nx/web/babel",
+      {
+        "useBuiltIns": "usage"
+      }
+    ]
+  ]
+}

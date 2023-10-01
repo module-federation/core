@@ -6,9 +6,7 @@
   "targets": {
     "build": {
       "executor": "@nx/js:swc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/typescript",
         "main": "packages/typescript/src/index.ts",
@@ -39,22 +37,15 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/typescript/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/typescript/**/*.ts"]
       }
     },
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
-        "postTargets": [
-          "typescript:npm",
-          "typescript:github"
-        ],
+        "postTargets": ["typescript:npm", "typescript:github"],
         "trackDeps": true,
         "push": true
       }
@@ -75,7 +66,5 @@
     }
   },
   "tags": [],
-  "implicitDependencies": [
-    "utils"
-  ]
+  "implicitDependencies": ["utils"]
 }

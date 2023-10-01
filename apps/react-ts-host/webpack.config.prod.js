@@ -1,31 +1,59 @@
-// @ts-check
+const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 
+registerPluginTSTranspiler();
 const { withModuleFederation } = require('@nx/react/module-federation');
+const { FederatedTypesPlugin } = require('@module-federation/typescript');
+
 const baseConfig = require('./module-federation.config');
 
 /**
- * @type {import('@nrwl/devkit').ModuleFederationConfig}
+ * @type {import('@nx/react/module-federation').ModuleFederationConfig}
  **/
-const prodConfig = {
+const defaultConfig = {
   ...baseConfig,
-  /*
-   * Remote overrides for production.
-   * Each entry is a pair of an unique name and the URL where it is deployed.
-   *
-   * e.g.
-   * remotes: [
-   *   ['app1', '//app1.example.com'],
-   *   ['app2', '//app2.example.com'],
-   * ]
-   *
-   * You can also use a full path to the remoteEntry.js file if desired.
-   *
-   * remotes: [
-   *   ['app1', '//example.com/path/to/app1/remoteEntry.js'],
-   *   ['app2', '//example.com/path/to/app2/remoteEntry.js'],
-   * ]
-   */
-  // remotes: [],
 };
 
-module.exports = withModuleFederation(prodConfig);
+module.exports = async (config, context) => {
+  const mf = await withModuleFederation(defaultConfig);
+
+  /** @type {import('webpack').Configuration} */
+  const parsedConfig = mf(config, context);
+
+  const remotes = baseConfig.remotes.reduce((remotes, remote) => {
+    const [name, url] = remote;
+    remotes[name] = url;
+    return remotes;
+  }, {});
+
+  parsedConfig.plugins.forEach((plugin) => {
+    if (plugin.constructor.name === 'ModuleFederationPlugin') {
+      // todo: what kinda of hack is this? :)
+      plugin._options.library = undefined;
+    }
+  });
+
+  parsedConfig.plugins.push(
+    new FederatedTypesPlugin({
+      federationConfig: {
+        ...baseConfig,
+        filename: 'remoteEntry.js',
+        remotes,
+      },
+    })
+  );
+
+  parsedConfig.infrastructureLogging = {
+    level: 'verbose',
+    colors: true,
+  };
+
+  //Temporary workaround - https://github.com/nrwl/nx/issues/16983
+  parsedConfig.experiments = { outputModule: false };
+
+  parsedConfig.output = {
+    ...parsedConfig.output,
+    scriptType: 'text/javascript',
+  };
+
+  return parsedConfig;
+};

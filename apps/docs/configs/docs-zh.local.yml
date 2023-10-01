@@ -13,6 +13,7 @@ content:
   sources:
     - url: ./../../../
       start_path: apps/docs/src/zh
+      edit_url: '{web_url}/blob/{refname}/{path}'
 ui:
   bundle:
     url: ./../../../dist/apps/docs-ui

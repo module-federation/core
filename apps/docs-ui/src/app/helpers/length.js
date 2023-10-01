@@ -1,3 +1,3 @@
 'use strict';
 
-module.exports = (val) => val ? val.length : 0;
+module.exports = (val) => (val ? val.length : 0);

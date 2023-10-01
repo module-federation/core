@@ -164,4 +164,21 @@
       }
     }
   }
+  + .edit-this-page {
+    width: 242px;
+    box-sizing: border-box;
+    @apply bg-blue-gray-800;
+    line-height: 36px;
+    padding: 0 16px;
+    a {
+      font-size: 16px;
+      @apply text-white;
+      font-weight: 500;
+    }
+    img {
+      display: inline;
+      margin-right: 4px;
+      vertical-align: text-bottom;
+    }
+  }
 }

@@ -50,7 +50,9 @@ Usage looks something like this:
 ```js
 import { importRemote } from '@module-federation/utilities';
 
+// --
 // If it's a regular js module:
+// --
 importRemote({
   url: 'http://localhost:3001',
   scope: 'Foo',
@@ -59,13 +61,26 @@ importRemote({
   (
     {
       /* list of Bar exports */
-    }
+    },
   ) => {
     // Use Bar exports
-  }
+  },
 );
 
+// --
+// If it's a ESM module (this is currently the default for NX):
+// --
+const Bar = lazy(() => importRemote({ url: 'http://localhost:3001', scope: 'Foo', module: 'Bar', esm: true }));
+
+return (
+  <Suspense fallback={<div>Loading Bar...</div>}>
+    <Bar />
+  </Suspense>
+);
+
+// --
 // If Bar is a React component you can use it with lazy and Suspense just like a dynamic import:
+// --
 const Bar = lazy(() => importRemote({ url: 'http://localhost:3001', scope: 'Foo', module: 'Bar' }));
 
 return (
@@ -87,10 +102,10 @@ importRemote({
   (
     {
       /* list of Bar exports */
-    }
+    },
   ) => {
     // Use Bar exports
-  }
+  },
 );
 
 // If Bar is a React component you can use it with lazy and Suspense just like a dynamic import:
@@ -99,7 +114,7 @@ const Bar = lazy(() =>
     url: () => MyAsyncMethod('remote_name'),
     scope: 'Foo',
     module: 'Bar',
-  })
+  }),
 );
 
 return (

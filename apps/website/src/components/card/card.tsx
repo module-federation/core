@@ -8,7 +8,11 @@ export default component$((props: CardProps) => {
   useStylesScoped$(styles);
 
   return (
-    <div class={`relative border border-blue-gray-400 bg-white h-full w-full ${props.hover && 'transition-shadow hover:shadow-card'}`}>
+    <div
+      class={`relative border border-blue-gray-400 bg-white h-full w-full ${
+        props.hover && 'transition-shadow hover:shadow-card'
+      }`}
+    >
       <Slot />
     </div>
   );

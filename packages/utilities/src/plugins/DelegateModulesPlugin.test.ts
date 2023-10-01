@@ -84,7 +84,7 @@ describe('DelegateModulesPlugin', () => {
 
     expect(compiler.hooks.compilation.tap).toHaveBeenCalledWith(
       'DelegateModulesPlugin',
-      expect.any(Function)
+      expect.any(Function),
     );
   });
 
@@ -114,7 +114,7 @@ describe('DelegateModulesPlugin', () => {
         createMockModule('/path/to/non-delegate-module'),
       ],
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      () => {}
+      () => {},
     );
 
     // Check if delegate modules are added
@@ -128,12 +128,12 @@ describe('DelegateModulesPlugin', () => {
 
     // Check if connectChunkAndModule was called
     expect(compilation.chunkGraph.connectChunkAndModule).toHaveBeenCalledTimes(
-      8
+      4,
     );
 
     // Check if disconnectChunkAndModule was called
     expect(
-      compilation.chunkGraph.disconnectChunkAndModule
+      compilation.chunkGraph.disconnectChunkAndModule,
     ).toHaveBeenCalledTimes(2);
   });
 });

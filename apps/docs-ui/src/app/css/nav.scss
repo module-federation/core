@@ -8,9 +8,16 @@
   }
 
   .subnav-item {
+    ul {
+      padding-left: 10px;
+    }
     &.closed {
       .icon {
         @apply -rotate-90;
+      }
+
+      > ul {
+        display: none;
       }
 
       .subnav {
@@ -21,7 +28,7 @@
 }
 
 .contact {
-  border: 1px solid #949FC5;
+  border: 1px solid #949fc5;
   font-size: 23px;
   font-weight: 600;
   line-height: 40px;

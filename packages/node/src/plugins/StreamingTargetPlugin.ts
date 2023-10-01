@@ -3,25 +3,44 @@ import type { ModuleFederationPluginOptions } from '../types';
 
 import CommonJsChunkLoadingPlugin from './CommonJsChunkLoadingPlugin';
 
+/**
+ * Interface for StreamingTargetOptions which extends ModuleFederationPluginOptions
+ * @property {string} promiseBaseURI - The base URI for the promise
+ * @property {boolean} debug - Flag to enable/disable debug mode
+ */
 interface StreamingTargetOptions extends ModuleFederationPluginOptions {
   promiseBaseURI?: string;
   debug?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
+/**
+ * Interface for StreamingTargetContext
+ */
 interface StreamingTargetContext {}
 
+/**
+ * Class representing a StreamingTargetPlugin
+ */
 class StreamingTargetPlugin {
   private options: StreamingTargetOptions;
 
+  /**
+   * Create a StreamingTargetPlugin
+   * @param {StreamingTargetOptions} options - The options for the plugin
+   */
   constructor(options: StreamingTargetOptions) {
     this.options = options || {};
   }
 
+  /**
+   * Apply the plugin to the compiler
+   * @param {Compiler} compiler - The webpack compiler
+   */
   apply(compiler: Compiler) {
     if (compiler.options.target) {
       console.warn(
-        `target should be set to false while using NodeSoftwareStreamRuntime plugin, actual target: ${compiler.options.target}`
+        `target should be set to false while using NodeSoftwareStreamRuntime plugin, actual target: ${compiler.options.target}`,
       );
       console.info('Setting target to false');
       compiler.options.target = false;
@@ -64,5 +83,3 @@ class StreamingTargetPlugin {
 }
 
 export default StreamingTargetPlugin;
-
-

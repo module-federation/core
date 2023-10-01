@@ -1,34 +1,18 @@
 .Getting Started
-* xref:ROOT:history.adoc[History of Module Federation]
+* xref:history.adoc[History of Module Federation]
 * xref:getting-started.adoc[What is Module Federation?]
-** xref:setup.adoc[Setting up Environment]
-** xref:getting-started-practical.adoc[Getting Started]
-** xref:use-cases.adoc[Use Cases]
-** xref:pros-cons.adoc[Pros and Cons of Module Federation]
-** xref:best-practices.adoc[Best Practices and Tips]
+* xref:setup.adoc[Setting up Environment]
+* xref:getting-started-practical.adoc[Getting Started]
+* xref:use-cases.adoc[Use Cases]
+* xref:pros-cons.adoc[Pros and Cons of Module Federation]
+* xref:best-practices.adoc[Best Practices and Tips]
 
 .Core Features
 * xref:dynamic-remotes.adoc[Dynamic Remotes in Module Federation]
 * xref:shared-api.adoc[]
 * xref:delegate-modules.adoc[]
 * xref:versioned-shared-modules.adoc[]
-
-.Plugins/Packages
-* Enhanced API Plugin
-** xref:enhanced_api/about.adoc[About]
-** xref:enhanced_api/installation.adoc[Installation]
-** xref:enhanced_api/getting_started.adoc[Getting Started]
-* Features
-** xref:enhanced_api/features_default_async.adoc[Default Async]
-* xref:enhanced_api/features_module_name_map.adoc[Modules' Name Map]
-** xref:enhanced_api/features_remotes_name_map.adoc[Remotes' Name Map]
-** xref:enhanced_api/features_remotes_url.adoc[Remotes' URL]
-** xref:enhanced_api/features_remote_object_definition.adoc[Object Definition]
-* Helper
-** xref:enhanced_api/helper_about.adoc[About]
-** xref:enhanced_api/helper_installation.adoc[Install]
-** xref:enhanced_api/helper_getModule.adoc[getModule]
-** xref:enhanced_api/helper_dynamicLoad.adoc[dynamicLoad]
+* xref:cache_busting.adoc[]
 
 .Recipes
 * xref:examples-demos.adoc[]
@@ -37,22 +21,18 @@
 * xref:unit-testing.adoc[]
 * xref:public-path-dynamic.adoc[]
 * xref:resiliency-failovers.adoc[]
-* xref:naming-convention-tips.adoc[]
+* xref:naming-convention-tips.adoc[Naming Conventions for Modules and Exports ]
 * xref:shared-header-footer.adoc[]
 * xref:composable-commerce-PBC-edition.adoc[]
 
-.Concepts 
+.Concepts
 * xref:component-level-ownership.adoc[Component Level Ownership]
 * xref:brown-green.adoc[]
 
-
-
-
-
-
-
-
-
-
-
+.Packages
+* xref:module-federation-node.adoc[@module-federation/node]
+* xref:module-federation-typescript.adoc[@module-federation/typescript - v2.4.2]
+* xref:module-federation-utilities.adoc[@module-federation/utilities]
+* xref:module-federation-native-federation-typescript.adoc[@module-federation/native-federation-typescript - v0.2.6]
+* xref:module-federation-native-federation-tests.adoc[@module-federation/native-federation-tests - v0.2.1]
 

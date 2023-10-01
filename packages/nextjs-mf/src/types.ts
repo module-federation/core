@@ -28,3 +28,8 @@ export declare interface WatchOptions {
 export declare interface CallbackFunction<T> {
   (err?: null | Error, result?: T): any;
 }
+
+declare global {
+  //eslint-disable-next-line
+  var usedChunks: Set<string>;
+}

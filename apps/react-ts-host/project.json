@@ -1,12 +1,14 @@
 {
-  "name": "react-ts-host",
+  "name": "react_ts_host",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/react-ts-host/src",
   "projectType": "application",
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "defaultConfiguration": "production",
       "options": {
         "compiler": "swc",
@@ -57,50 +59,51 @@
     },
     "serve": {
       "executor": "@nx/react:module-federation-dev-server",
-      "defaultConfiguration": "development",
+      "defaultConfiguration": "production",
       "options": {
-        "buildTarget": "react-ts-host:build",
+        "buildTarget": "react_ts_host:build",
         "hmr": true,
-        "port": 3003
+        "port": 3003,
+        "devRemotes": [
+          "react_ts_remote"
+        ]
       },
       "configurations": {
         "development": {
-          "buildTarget": "react-ts-host:build:development"
+          "buildTarget": "react_ts_host:build:development"
         },
         "production": {
-          "buildTarget": "react-ts-host:build:production",
+          "buildTarget": "react_ts_host:build:production",
           "hmr": false
         }
       }
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": [
-          "apps/react-ts-host/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/react-ts-host/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "serve-static": {
       "executor": "@nx/web:file-server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "react-ts-host:build",
+        "buildTarget": "react_ts_host:build",
         "port": 3003
       },
       "configurations": {
         "development": {
-          "buildTarget": "react-ts-host:build:development"
+          "buildTarget": "react_ts_host:build:development"
         },
         "production": {
-          "buildTarget": "react-ts-host:build:production"
+          "buildTarget": "react_ts_host:build:production"
         }
       }
     }
   },
   "tags": [],
-  "implicitDependencies": [
-    "typescript"
-  ]
+  "implicitDependencies": ["typescript"]
 }

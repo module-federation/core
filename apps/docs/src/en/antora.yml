@@ -5,6 +5,7 @@ display_version: '0.20'
 start_page: ROOT:getting-started.adoc
 nav:
   - modules/ROOT/nav.adoc
+  - modules/enhanced_api/nav.adoc
 asciidoc:
   attributes:
     idprefix: '@'

@@ -2,7 +2,14 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "types": ["node"]
+    "types": [
+      "node",
+      "@nx/react/typings/cssmodule.d.ts",
+      "@nx/react/typings/image.d.ts"
+    ],
+    "paths": {
+      "*": ["./@mf-types/*"]
+    }
   },
   "files": [
     "../../node_modules/@nx/react/typings/cssmodule.d.ts",

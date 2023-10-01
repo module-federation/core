@@ -4,9 +4,9 @@
  * @type {import('@nrwl/devkit').ModuleFederationConfig}
  **/
 const moduleFederationConfig = {
-  name: 'react-ts-remote',
+  name: 'react_ts_remote',
   exposes: {
-    './Module': './src/remote-entry.ts',
+    './Module': './src/app/nx-welcome.tsx',
   },
 };
 

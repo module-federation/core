@@ -33,7 +33,7 @@ export default component$(() => {
       actionText: t(
         'explore.cards.implementing-module-federation.action@@Learn more'
       ),
-      actionHref: 'https://module-federation.io/en/mf-docs/0.19/setup',
+      actionHref: 'https://module-federation.io/en/mf-docs/0.2/setup',
       target: '_blank' as ButtonPropsTarget,
     },
     {

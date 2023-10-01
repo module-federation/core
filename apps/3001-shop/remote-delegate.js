@@ -1,3 +1,4 @@
+import { importDelegatedModule } from '@module-federation/utilities/src/utils/importDelegatedModule';
 /* eslint-disable no-undef */
 // eslint-disable-next-line no-async-promise-executor
 module.exports = new Promise(async (resolve, reject) => {
@@ -5,7 +6,6 @@ module.exports = new Promise(async (resolve, reject) => {
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
 
   const [global, url] = currentRequest.split('@');
-  const {importDelegatedModule} = await import("@module-federation/nextjs-mf/importDelegatedModule")
 
   importDelegatedModule({
     global,

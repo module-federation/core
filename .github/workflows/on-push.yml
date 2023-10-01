@@ -24,7 +24,7 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           access_token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
         with:
           fetch-depth: 0
       - uses: actions/cache@v3
@@ -49,13 +49,13 @@ jobs:
     needs: setup
     if: ${{ needs.setup.outputs.website-changed == 'true' && github.event_name == 'push' }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
       - uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_NODE_MODULES_PATH }}
           key: build-${{ hashFiles('**/package-lock.json') }}
       - run: npm run build:website
-      - run: "npx netlify deploy --build --prod --message \"Deploy from GitHub Actions\""
+      - run: 'npx netlify deploy --build --prod --message "Deploy from GitHub Actions"'
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
@@ -67,14 +67,14 @@ jobs:
     needs: setup
     if: ${{ needs.setup.outputs.website-changed == 'true' && github.event_name == 'pull_request' }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
       - uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_NODE_MODULES_PATH }}
           key: build-${{ hashFiles('**/package-lock.json') }}
       - uses: nelonoel/branch-name@v1.0.1
       - run: npm run build:website
-      - run: "npx netlify deploy --build --message \"Deploy Preview from GitHub Actions\" --alias \"${{ env.BRANCH_NAME }}\""
+      - run: 'npx netlify deploy --build --message "Deploy Preview from GitHub Actions" --alias "${{ env.BRANCH_NAME }}" --filter docs-ui'
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
