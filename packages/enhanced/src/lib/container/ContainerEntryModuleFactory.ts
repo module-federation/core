@@ -7,8 +7,7 @@
 
 import ContainerEntryModule from './ContainerEntryModule';
 import ContainerEntryDependency from './ContainerEntryDependency';
-//@ts-ignore
-import ModuleFactory = require('webpack/lib/ModuleFactory');
+import ModuleFactory from 'webpack/lib/ModuleFactory';
 import type {
   ModuleFactoryCreateData,
   ModuleFactoryResult,

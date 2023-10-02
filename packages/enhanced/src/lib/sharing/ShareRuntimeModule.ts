@@ -6,18 +6,14 @@
 'use strict';
 
 import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import RuntimeModule = require('webpack/lib/RuntimeModule');
-import Template = require('webpack/lib/Template');
+import RuntimeModule from 'webpack/lib/RuntimeModule';
+import Template from 'webpack/lib/Template';
 import Compilation from 'webpack/lib/Compilation';
 import ChunkGraph from 'webpack/lib/ChunkGraph';
 import {
   compareModulesByIdentifier,
   compareStrings,
 } from 'webpack/lib/util/comparators';
-
-/** @typedef {import("webpack/lib/Chunk")} Chunk */
-/** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
-/** @typedef {import("webpack/lib/Compilation")} Compilation */
 
 class ShareRuntimeModule extends RuntimeModule {
   constructor() {

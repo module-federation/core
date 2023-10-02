@@ -20,35 +20,14 @@ import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/Module';
-//@ts-ignore
-import Module = require('webpack/lib/Module');
+import Module from 'webpack/lib/Module';
 import type ChunkGraph from 'webpack/lib/ChunkGraph';
 import Chunk from 'webpack/lib/Chunk';
 import { WEBPACK_MODULE_TYPE_FALLBACK } from 'webpack/lib/ModuleTypeConstants';
-//@ts-ignore
-import RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
-//@ts-ignore
-import Template = require('webpack/lib/Template');
-//@ts-ignore
-import makeSerializable = require('webpack/lib/util/makeSerializable');
+import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import Template from 'webpack/lib/Template';
+import makeSerializable from 'webpack/lib/util/makeSerializable';
 import FallbackItemDependency from './FallbackItemDependency';
-
-/** @typedef {import("webpack/lib/webpack/lib/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
-/** @typedef {import("webpack/lib/Chunk")} Chunk */
-/** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
-/** @typedef {import("webpack/lib/ChunkGroup")} ChunkGroup */
-/** @typedef {import("webpack/lib/Compilation")} Compilation */
-/** @typedef {import("webpack/lib/Module").CodeGenerationContext} CodeGenerationContext */
-/** @typedef {import("webpack/lib/Module").CodeGenerationResult} CodeGenerationResult */
-/** @typedef {import("webpack/lib/Module").LibIdentOptions} LibIdentOptions */
-/** @typedef {import("webpack/lib/Module").NeedBuildContext} NeedBuildContext */
-/** @typedef {import("webpack/lib/RequestShortener")} RequestShortener */
-/** @typedef {import("webpack/lib/ResolverFactory").ResolverWithOptions} ResolverWithOptions */
-/** @typedef {import("webpack/lib/WebpackError")} WebpackError */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
-/** @typedef {import("webpack/lib/util/Hash")} Hash */
-/** @typedef {import("webpack/lib/util/fs").InputFileSystem} InputFileSystem */
 
 const TYPES = new Set(['javascript']);
 const RUNTIME_REQUIREMENTS = new Set([RuntimeGlobals.module]);

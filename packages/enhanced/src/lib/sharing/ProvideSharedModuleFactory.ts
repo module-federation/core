@@ -3,7 +3,7 @@
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 //@ts-ignore
-import ModuleFactory = require('webpack/lib/ModuleFactory');
+import ModuleFactory from 'webpack/lib/ModuleFactory';
 import ProvideSharedModule from './ProvideSharedModule';
 import type {
   ModuleFactoryCreateData,
@@ -11,9 +11,6 @@ import type {
 } from 'webpack/lib/ModuleFactory';
 import ProvideSharedDependency from './ProvideSharedDependency';
 
-/** @typedef {import("webpack/lib/ModuleFactory").ModuleFactoryCreateData} ModuleFactoryCreateData */
-/** @typedef {import("webpack/lib/ModuleFactory").ModuleFactoryResult} ModuleFactoryResult */
-/** @typedef {import("./ProvideSharedDependency")} ProvideSharedDependency */
 class ProvideSharedModuleFactory extends ModuleFactory {
   /**
    * @param {ModuleFactoryCreateData} data data object

@@ -21,23 +21,17 @@ import ConsumeSharedModule from './ConsumeSharedModule';
 import ConsumeSharedRuntimeModule from './ConsumeSharedRuntimeModule';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 //@ts-ignore
-import ModuleNotFoundError = require('webpack/lib/ModuleNotFoundError');
+import ModuleNotFoundError from 'webpack/lib/ModuleNotFoundError';
 import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 //@ts-ignore
-import WebpackError = require('webpack/lib/WebpackError');
+import WebpackError from 'webpack/lib/WebpackError';
 //@ts-ignore
-import Compiler = require('webpack/lib/Compiler');
+import Compiler from 'webpack/lib/Compiler';
 //@ts-ignore
-import LazySet = require('webpack/lib/util/LazySet');
+import LazySet from 'webpack/lib/util/LazySet';
 //@ts-ignore
-import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
+import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
 import { SemVerRange } from 'webpack/lib/util/semver';
-
-/** @typedef {import("../../declarations/plugins/sharing/ConsumeSharedPlugin").ConsumeSharedPluginOptions} ConsumeSharedPluginOptions */
-/** @typedef {import("../../declarations/plugins/sharing/ConsumeSharedPlugin").ConsumesConfig} ConsumesConfig */
-/** @typedef {import("webpack/lib/Compiler")} Compiler */
-/** @typedef {import("webpack/lib/ResolverFactory").ResolveOptionsWithDependencyType} ResolveOptionsWithDependencyType */
-/** @typedef {import("./ConsumeSharedModule").ConsumeOptions} ConsumeOptions */
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line

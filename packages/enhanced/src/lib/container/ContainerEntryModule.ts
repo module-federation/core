@@ -4,20 +4,15 @@
 */
 
 'use strict';
-//@ts-ignore
-import AsyncDependenciesBlock = require('webpack/lib/AsyncDependenciesBlock');
-//@ts-ignore
-import Dependency = require('webpack/lib/Dependency');
-//@ts-ignore
-import Template = require('webpack/lib/Template');
-//@ts-ignore
-import Module = require('webpack/lib/Module');
+import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
+import Dependency from 'webpack/lib/Dependency';
+import Template from 'webpack/lib/Template';
+import Module from 'webpack/lib/Module';
 import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import { OriginalSource, RawSource } from 'webpack-sources';
 import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from 'webpack/lib/ModuleTypeConstants';
 import ContainerExposedDependency from './ContainerExposedDependency';
-//@ts-ignore
-import StaticExportsDependency = require('webpack/lib/dependencies/StaticExportsDependency');
+import StaticExportsDependency from 'webpack/lib/dependencies/StaticExportsDependency';
 import type Compilation from 'webpack/lib/Compilation';
 import type {
   LibIdentOptions,
@@ -30,8 +25,7 @@ import type {
   ResolverWithOptions,
 } from 'webpack/lib/Module';
 import type WebpackError from 'webpack/lib/WebpackError';
-//@ts-ignore
-import makeSerializable = require('webpack/lib/util/makeSerializable');
+import makeSerializable from 'webpack/lib/util/makeSerializable';
 
 const SOURCE_TYPES = new Set(['javascript']);
 
