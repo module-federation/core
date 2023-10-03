@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [0.0.4-0](https://github.com/module-federation/nextjs-mf/compare/enhanced-0.0.3...enhanced-0.0.4-0) (2023-10-03)
+
+
+### Bug Fixes
+
+* no external helpers ([6c47fd4](https://github.com/module-federation/nextjs-mf/commit/6c47fd4ce19f2292f6718d201005fba4a8552252))
+
+
+
 ## [0.0.3](https://github.com/module-federation/nextjs-mf/compare/enhanced-0.0.2...enhanced-0.0.3) (2023-10-03)
 
 
