@@ -21,11 +21,6 @@
     }
   },
   "targetDefaults": {
-    "version": {
-      "dependsOn": [
-        "^version"
-      ]
-    },
     "build": {
       "inputs": [
         "production",
