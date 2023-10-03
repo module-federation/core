@@ -5,7 +5,10 @@
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
-  "devDependencies": {
-    "webpack": "5.88.2"
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "peerDependencies": {
+    "webpack": "^5.0.0"
   }
 }
