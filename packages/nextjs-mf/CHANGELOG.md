@@ -2,6 +2,51 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [8.0.1-0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-8.0.0...nextjs-mf-8.0.1-0) (2023-10-03)
+
+
+### Bug Fixes
+
+* add styled-jsx to internal share ([a50dae8](https://github.com/module-federation/nextjs-mf/commit/a50dae8ead5ed46491bf3cfa8452a536ba0de622))
+* bad impleentation during federation port ([cc2e53f](https://github.com/module-federation/nextjs-mf/commit/cc2e53f0351fb94c9068223ad6b8d990a913ab53))
+* enable path fixes ([2f9e14b](https://github.com/module-federation/nextjs-mf/commit/2f9e14b602c71d357063a8168d8ea8c554bcb2ca))
+* enable path fixes again ([6098fee](https://github.com/module-federation/nextjs-mf/commit/6098fee3b3734018ec0f4866656709f3b5d20173))
+* ensure sharing of react/jsx runtime and dev runtime ([ae890d5](https://github.com/module-federation/nextjs-mf/commit/ae890d5e5698c729618d602053b4336b067dd34a))
+* ignore TS issues in async plugin ([f6e3e7f](https://github.com/module-federation/nextjs-mf/commit/f6e3e7f9ca6aabdf26752f8f794e1176fc73af1c))
+* improve image loader public path calc ([d86dcde](https://github.com/module-federation/nextjs-mf/commit/d86dcde344d5d9b7430512672ec26c53ac0f100e))
+* lint container module ([ea4f105](https://github.com/module-federation/nextjs-mf/commit/ea4f105e4949f041a8747a0e3ce50e7020598f88))
+* module order of inverted container runtime ([90caa8d](https://github.com/module-federation/nextjs-mf/commit/90caa8dc80f9af7c6c6f8d7a4a437e337540ddc3))
+* reduce noise on async boundary plugin ([9bab3de](https://github.com/module-federation/nextjs-mf/commit/9bab3de0b556120e60303921881fa4d857fe71d4))
+* remote global share scope ([e05d32f](https://github.com/module-federation/nextjs-mf/commit/e05d32f489880d6b4e0fc21a3807e619a40bc5b3))
+* remove hard coded share scope ([105c124](https://github.com/module-federation/nextjs-mf/commit/105c12441199621b11a85eb5368315175f127523))
+* resupport delegate modules ([f4843ec](https://github.com/module-federation/nextjs-mf/commit/f4843ecd28b4361064be4342565e6d32eafacb2d))
+* server sharing ([1c5c6a8](https://github.com/module-federation/nextjs-mf/commit/1c5c6a8cc8519c157842ae5bf79655710f7acaaf))
+* set requiredVersion to false on utils ([1e325a6](https://github.com/module-federation/nextjs-mf/commit/1e325a6dedb4249c18dde8ce3ae7e57ece26a3ae))
+* stats plugin updates ([c1db325](https://github.com/module-federation/nextjs-mf/commit/c1db325d3311b2126964f4ad2ddbfa9d82a50674))
+* TS imports to webpack ([d506b49](https://github.com/module-federation/nextjs-mf/commit/d506b492b724ccfb7fdcf6234196ac421564c153))
+* ts in template string ([0a0d03d](https://github.com/module-federation/nextjs-mf/commit/0a0d03dd9acb465f0b80bdd9787150e586e6bfcf))
+* ts in template string ([0edbbea](https://github.com/module-federation/nextjs-mf/commit/0edbbeaa42503237b88132252e29a34a79bade51))
+* use ES5 for renderStartup of entrypoint ([d14324a](https://github.com/module-federation/nextjs-mf/commit/d14324a9af856fca974a8f9945ba7d0d2a96be48))
+
+
+### Features
+
+*  container inversion module injection ([52ad258](https://github.com/module-federation/nextjs-mf/commit/52ad258a8eea90fcf40100e3b2378cd219bc4422))
+* checkInvalidContext as tapable hook ([a3eb553](https://github.com/module-federation/nextjs-mf/commit/a3eb5537ff462ead2230615f578569ec46199f50))
+* **enhanced:** async boundary plugin ([17640dc](https://github.com/module-federation/nextjs-mf/commit/17640dcf3286ccd8c5e66378c0d6bdbc640ba3ce))
+* **enhanced:** Embedded Container Plugin ([66ac81d](https://github.com/module-federation/nextjs-mf/commit/66ac81db05491eb7bbb618eb267c5331760badd1))
+* implement custom next vanity federation plugin ([5e584e6](https://github.com/module-federation/nextjs-mf/commit/5e584e6415820f15c32ef683796f02aac72e207d))
+* improved async init ([08aa0fa](https://github.com/module-federation/nextjs-mf/commit/08aa0faf00781b19a3360af15492142e6f7e0999))
+* improved async init ([019694e](https://github.com/module-federation/nextjs-mf/commit/019694e55fe1f6bebfdab0701bf9087bf0034b8f))
+* prefer host modules for next and react ([7f253f1](https://github.com/module-federation/nextjs-mf/commit/7f253f123b21504148221ef4727c41b3d43a19f0))
+* remove custom jsonp runtime patching ([718c3fc](https://github.com/module-federation/nextjs-mf/commit/718c3fc497d89d5228680d0949e4192070f59cf9))
+* rewrite next federation vanity plugin ([b8c9859](https://github.com/module-federation/nextjs-mf/commit/b8c98599ba78102183f59964ccee3d29bbe2bedf))
+* share next/image ([f4b0386](https://github.com/module-federation/nextjs-mf/commit/f4b03869743cf9188c2227c1e28321367a199955))
+* use enhanced federation plugin ([1ec5f0f](https://github.com/module-federation/nextjs-mf/commit/1ec5f0f98986b21605714565d3543f92b8b9aeaf))
+* Use enhanced Federation Plugin ([e021d66](https://github.com/module-federation/nextjs-mf/commit/e021d6667996962f154137d164bed13f53a6a135))
+
+
+
 # [8.0.0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-7.0.7...nextjs-mf-8.0.0) (2023-09-14)
 
 ### Dependency Updates
