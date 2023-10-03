@@ -73,6 +73,5 @@
       }
     }
   },
-  "tags": [],
-  "implicitDependencies": ["utils", "enhanced"]
+  "tags": []
 }
