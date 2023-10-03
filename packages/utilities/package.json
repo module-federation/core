@@ -1,13 +1,10 @@
 {
   "name": "@module-federation/utilities",
-  "version": "3.0.2",
+  "version": "3.0.3-rc.0",
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "license": "MIT",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  },
   "repository": "https://github.com/module-federation/universe/tree/main/packages/utilities",
   "devDependencies": {
     "react": "18.2.0",
