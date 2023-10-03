@@ -80,11 +80,13 @@ export class NextFederationPlugin {
   private validateOptions(compiler: Compiler): boolean {
     const compilerValid = validateCompilerOptions(compiler);
     const pluginValid = validatePluginOptions(this._options);
+    const envValid = process.env.NEXT_PRIVATE_LOCAL_WEBPACK
     if (compilerValid === undefined)
       console.error('Compiler validation failed');
     if (pluginValid === undefined) console.error('Plugin validation failed');
     const validCompilerTarget =
       compiler.options.name === 'server' || compiler.options.name === 'client';
+    if(!envValid) throw new Error('process.env.NEXT_PRIVATE_LOCAL_WEBPACK is not set to true, please set it to true, and "npm install webpack"')
     return (
       compilerValid !== undefined &&
       pluginValid !== undefined &&
