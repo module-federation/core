@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/enhanced",
-  "version": "0.0.1-0",
+  "version": "0.0.1-rc.0",
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
