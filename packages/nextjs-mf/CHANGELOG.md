@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [8.0.1-1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-8.0.1-0...nextjs-mf-8.0.1-1) (2023-10-03)
+
+
+### Bug Fixes
+
+* throw errors if NEXT_PRIVATE_LOCAL_WEBPACK is false ([1256488](https://github.com/module-federation/nextjs-mf/commit/1256488870ee8d23b0daafe6b6041228652ab883))
+
+
+
 ## [8.0.1-0](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-8.0.0...nextjs-mf-8.0.1-0) (2023-10-03)
 
 
