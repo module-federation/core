@@ -49,6 +49,7 @@
     "version": {
       "executor": "@jscutlery/semver:version",
       "options": {
+        "baseBranch": "HEAD:main",
         "postTargets": ["enhanced:npm", "enhanced:github"],
         "trackDeps": true,
         "push": true
