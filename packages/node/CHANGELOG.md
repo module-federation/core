@@ -2,6 +2,39 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.0.2-beta.3](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.2...node-2.0.2-beta.3) (2023-10-03)
+
+
+### Bug Fixes
+
+* add exported file ([19b1afb](https://github.com/module-federation/nextjs-mf/commit/19b1afbd58572897f36b16926f841e35d154c712))
+* bad impleentation during federation port ([cc2e53f](https://github.com/module-federation/nextjs-mf/commit/cc2e53f0351fb94c9068223ad6b8d990a913ab53))
+* chunk flushing ([c9df545](https://github.com/module-federation/nextjs-mf/commit/c9df5451c84e6458b392884492bf669bf7383d5c))
+* dont crash offline remotes ([f0d7671](https://github.com/module-federation/nextjs-mf/commit/f0d7671569ac34f64017a303739b54880f5220e6))
+* export parseRemotes ([12ed54c](https://github.com/module-federation/nextjs-mf/commit/12ed54c87ba539bc2a79cdee86058f0a2776653e))
+* hot reloading system ([99f733b](https://github.com/module-federation/nextjs-mf/commit/99f733bbdbd727a99fbaaeab3f92f4b65fa568dd))
+* remove logger in filesystem ([c370ed5](https://github.com/module-federation/nextjs-mf/commit/c370ed5fdc5fe3423703f29daa40a4227ac51cf2))
+* remove logging on DFS ([40b8c28](https://github.com/module-federation/nextjs-mf/commit/40b8c28fac9c39fec8623415a36e487152c2ef34))
+* search registry for both ident and unique name ([f22dc25](https://github.com/module-federation/nextjs-mf/commit/f22dc25e5a6374273b1bc51b0e101b57226c5906))
+* simplify template ([b4e633b](https://github.com/module-federation/nextjs-mf/commit/b4e633b6624264456800bc7351c6d815430d42b5))
+* stats plugin updates ([c1db325](https://github.com/module-federation/nextjs-mf/commit/c1db325d3311b2126964f4ad2ddbfa9d82a50674))
+* ts in template string ([0edbbea](https://github.com/module-federation/nextjs-mf/commit/0edbbeaa42503237b88132252e29a34a79bade51))
+* ts in template string ([9b8f652](https://github.com/module-federation/nextjs-mf/commit/9b8f652f96bf6f29d5fc238bb616e19187158a57))
+
+
+### Features
+
+* create and expose AutomaticPublicPathPlugin.ts ([9d0fcdd](https://github.com/module-federation/nextjs-mf/commit/9d0fcdd2e36fae971f2eec3269980baedf276b35))
+* improve options logic in node federation plugin ([b69b70d](https://github.com/module-federation/nextjs-mf/commit/b69b70d200c63e3557089e8a0669fc43330c988c))
+* improved async init ([bb19b07](https://github.com/module-federation/nextjs-mf/commit/bb19b07b5be1bbc28bd6b049ea7aea6510ad17a2))
+* improved async init ([019694e](https://github.com/module-federation/nextjs-mf/commit/019694e55fe1f6bebfdab0701bf9087bf0034b8f))
+* Static fallback to non auto public path ([3c58780](https://github.com/module-federation/nextjs-mf/commit/3c587809f1e936fba291eab3d7c790115be5102c))
+* support vmok conventions ([0501da8](https://github.com/module-federation/nextjs-mf/commit/0501da86eaaab6ea79a3397c2c683086cc591309))
+* support vmok conventions ([d53b586](https://github.com/module-federation/nextjs-mf/commit/d53b5867719eb7fff32bee2edd3255023d598f44))
+* Use enhanced Federation Plugin ([e021d66](https://github.com/module-federation/nextjs-mf/commit/e021d6667996962f154137d164bed13f53a6a135))
+
+
+
 ## [2.0.2-beta.2](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.1...node-2.0.2-beta.2) (2023-09-15)
 
 ### Bug Fixes
