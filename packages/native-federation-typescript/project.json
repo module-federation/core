@@ -47,7 +47,7 @@
           "native-federation-typescript:npm",
           "native-federation-typescript:github"
         ],
-        "trackDeps": true,
+        "trackDeps": false,
         "push": true
       }
     },

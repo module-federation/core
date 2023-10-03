@@ -45,7 +45,7 @@
       "executor": "@jscutlery/semver:version",
       "options": {
         "postTargets": ["storybook-addon:npm", "storybook-addon:github"],
-        "trackDeps": true,
+        "trackDeps": false,
         "push": true
       }
     },
