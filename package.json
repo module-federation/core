@@ -150,7 +150,7 @@
     "concurrently": "8.2.1",
     "cz-conventional-changelog": "3.3.0",
     "directory-tree": "3.5.1",
-    "esbuild": "0.19.3",
+    "esbuild": "0.19.4",
     "eslint": "8.50.0",
     "eslint-config-next": "13.5.3",
     "eslint-config-prettier": "9.0.0",
