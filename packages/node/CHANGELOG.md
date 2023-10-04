@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [2.0.2-beta.5](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.4...node-2.0.2-beta.5) (2023-10-04)
+
+
+### Bug Fixes
+
+* remove logs from flush chunks ([b7d317c](https://github.com/module-federation/nextjs-mf/commit/b7d317c4b2b0eda2f3530315dbf471289fa6918b))
+
+
+
 ## [2.0.2-beta.4](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.3...node-2.0.2-beta.4) (2023-10-03)
 
 
