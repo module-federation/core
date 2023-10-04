@@ -21,6 +21,14 @@ export function applyServerPlugins(
 ): void {
   // Import the StreamingTargetPlugin from @module-federation/node
   const { StreamingTargetPlugin } = require('@module-federation/node');
+  const chunkFileName = compiler.options?.output?.chunkFilename;
+  const uniqueName = compiler?.options?.output?.uniqueName || options.name;
+  if (typeof chunkFileName === 'string' &&
+    uniqueName &&
+    !chunkFileName.includes(uniqueName)) {
+    const suffix = `-[chunkhash].js`;
+    compiler.options.output.chunkFilename = chunkFileName.replace('.js', suffix);
+  }
   new ModuleInfoRuntimePlugin().apply(compiler);
   // Apply the DelegatesModulePlugin to the compiler
   new DelegatesModulePlugin({
