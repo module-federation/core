@@ -12,7 +12,7 @@ This plugin enables Module Federation on Next.js
 
 ## Supports
 
-- next ^12 || ^13
+- next ^13 || ^12(?)
 - SSR included!
 
 I highly recommend referencing this application which takes advantage of the best capabilities:
@@ -116,6 +116,17 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
 ```
 
 </details>
+
+
+## Requirement
+
+I set `process.env.NEXT_PRIVATE_LOCAL_WEBPACK = 'true'` inside this plugin, but its best if its set in env or command line export. 
+
+"Local Webpack" means you must have webpack installed as a dependency, and next will not use its bundled copy of webpack which cannot be used as i need access to all of webpack internals
+
+- `NEXT_PRIVATE_LOCAL_WEBPACK=true next dev` or `next build`
+- `npm install webpack`
+
 
 ## Usage
 
