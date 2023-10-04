@@ -24,7 +24,7 @@ export default function () {
           closeSubnavItem(liEl);
         });
       } else {
-        for(let i= 0; i < el.parentElement.children.length; i++) {
+        for (let i = 0; i < el.parentElement.children.length; i++) {
           closeSubnavItem(el.parentElement.children[i]);
         }
       }

@@ -59,10 +59,7 @@ export default component$(() => {
 
   return (
     <Section id="contact" class="scroll-mt-32" theme={ContainerTheme.OPAQUE}>
-      <SectionHeader
-        q:slot="header"
-        title={title}
-      />
+      <SectionHeader q:slot="header" title={title} />
       <div class="flex flex-col lg:flex-row gap-10 ">
         <div class="flex flex-col items-center gap-4 flex-1 w-50">
           <form

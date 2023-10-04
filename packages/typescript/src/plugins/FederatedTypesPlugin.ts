@@ -6,7 +6,11 @@ import { Compiler } from 'webpack';
 import { TypescriptCompiler } from '../lib/TypescriptCompiler';
 import { isObjectEmpty, normalizeOptions } from '../lib/normalizeOptions';
 import { TypesCache } from '../lib/Caching';
-import { CompilationParams, FederatedTypesPluginOptions, TypesStatsJson } from '../types';
+import {
+  CompilationParams,
+  FederatedTypesPluginOptions,
+  TypesStatsJson,
+} from '../types';
 
 import { FederatedTypesStatsPlugin } from './FederatedTypesStatsPlugin';
 import download from '../lib/download';
@@ -23,15 +27,16 @@ export class FederatedTypesPlugin {
 
   apply(compiler: Compiler) {
     this.logger = Logger.setLogger(
-      compiler.getInfrastructureLogger(PLUGIN_NAME)
+      compiler.getInfrastructureLogger(PLUGIN_NAME),
     );
 
     if (
-      !compiler.options.plugins
-        .some((p) => SUPPORTED_PLUGINS.indexOf(p?.constructor.name ?? '') !== -1)
+      !compiler.options.plugins.some(
+        (p) => SUPPORTED_PLUGINS.indexOf(p?.constructor.name ?? '') !== -1,
+      )
     ) {
       this.logger.error(
-        'Unable to find the Module Federation Plugin, this is plugin no longer provides it by default. Please add it to your webpack config.'
+        'Unable to find the Module Federation Plugin, this is plugin no longer provides it by default. Please add it to your webpack config.',
       );
       throw new Error('Unable to find the Module Federation Plugin');
     }
@@ -53,7 +58,7 @@ export class FederatedTypesPlugin {
       const importRemotes = async (
         callback: Parameters<
           Parameters<typeof compiler.hooks.beforeRun.tapAsync>['1']
-        >['1']
+        >['1'],
       ) => {
         try {
           await this.importRemoteTypes();
@@ -98,7 +103,7 @@ export class FederatedTypesPlugin {
     try {
       return compiler.generateDeclarationFiles(
         exposedComponents,
-        this.options.additionalFilesToCompile
+        this.options.additionalFilesToCompile,
       );
     } catch (error) {
       this.logger.error(error);
@@ -128,7 +133,7 @@ export class FederatedTypesPlugin {
           origin: url ?? remoteUrl,
           remote,
         };
-      }
+      },
     );
 
     for await (const { origin, remote } of remoteUrls) {
@@ -139,7 +144,7 @@ export class FederatedTypesPlugin {
         this.logger.log(`Getting types index for remote '${remote}'`);
         const resp = await axios.get<TypesStatsJson>(
           `${origin}/${this.normalizeOptions.typesIndexJsonFileName}`,
-          { timeout: downloadRemoteTypesTimeout }
+          { timeout: downloadRemoteTypesTimeout },
         );
 
         const statsJson = resp.data;
@@ -161,8 +166,8 @@ export class FederatedTypesPlugin {
                     .context as string,
                   typescriptFolderName,
                   remote,
-                  file
-                )
+                  file,
+                ),
               );
             });
           }
@@ -171,13 +176,13 @@ export class FederatedTypesPlugin {
             await Promise.all(
               filesToCacheBust.map((file) => {
                 const url = new URL(
-                  path.join(origin, typescriptFolderName, file)
+                  path.join(origin, typescriptFolderName, file),
                 ).toString();
                 const destination = path.join(
                   this.normalizeOptions.webpackCompilerOptions
                     .context as string,
                   typescriptFolderName,
-                  remote
+                  remote,
                 );
 
                 this.logger.log('Downloading types...');
@@ -186,7 +191,7 @@ export class FederatedTypesPlugin {
                   destination,
                   filename: file,
                 });
-              })
+              }),
             );
 
             this.logger.log('downloading complete');
@@ -197,7 +202,7 @@ export class FederatedTypesPlugin {
       } catch (error) {
         this.logger.error(
           `Unable to download '${remote}' remote types index file: `,
-          (error as Error).message
+          (error as Error).message,
         );
         this.logger.log(error);
       }
@@ -205,7 +210,9 @@ export class FederatedTypesPlugin {
   }
 
   private getError(error: unknown): Error {
-    if (error instanceof Error) return error;
+    if (error instanceof Error) {
+      return error;
+    }
     return new Error(error as string);
   }
 }

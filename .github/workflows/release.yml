@@ -16,12 +16,13 @@ on:
           - utils
           - native-federation-typescript
           - native-federation-tests
+          - enhanced
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
         with:
           fetch-depth: 0
       - name: Use Node.js
@@ -34,7 +35,7 @@ jobs:
           git config user.name "GitHub Bot"
           git config user.email "gituser@example.com"
       - name: Install packages
-        run: npm i
+        run: npm i && npm run sync:types:webpack
       - name: Lint
         shell: bash
         run: |

@@ -11,7 +11,9 @@
         "outputPath": "dist/packages/utilities",
         "main": "packages/utilities/src/index.ts",
         "tsConfig": "packages/utilities/tsconfig.lib.json",
-        "assets": ["packages/utilities/*.md"]
+        "assets": ["packages/utilities/*.md"],
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "publish": {
@@ -44,7 +46,7 @@
       "executor": "@jscutlery/semver:version",
       "options": {
         "postTargets": ["utils:npm", "utils:github"],
-        "trackDeps": true,
+        "trackDeps": false,
         "push": true
       }
     },

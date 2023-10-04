@@ -1,4 +1,4 @@
-import type { Compiler } from 'webpack';
+import Compiler from 'webpack/lib/Compiler';
 import { container } from 'webpack';
 import path from 'path';
 import type {
@@ -11,9 +11,10 @@ import {
   getDelegates,
 } from '../../internal';
 import { hasLoader, injectRuleLoader } from '../../loaders/helpers';
+const { ModuleFederationPlugin } = require('@module-federation/enhanced');
 
 type ConstructableModuleFederationPlugin = new (
-  options: ModuleFederationPluginOptions
+  options: ModuleFederationPluginOptions,
 ) => container.ModuleFederationPlugin;
 
 /**
@@ -24,21 +25,19 @@ type ConstructableModuleFederationPlugin = new (
  */
 export function getModuleFederationPluginConstructor(
   isServer: boolean,
-  compiler: Compiler
+  compiler: Compiler,
 ): ConstructableModuleFederationPlugin {
   if (isServer) {
     return require('@module-federation/node')
       .NodeFederationPlugin as ConstructableModuleFederationPlugin;
   }
-  return compiler.webpack.container
-    .ModuleFederationPlugin as unknown as ConstructableModuleFederationPlugin;
+  return ModuleFederationPlugin as unknown as ConstructableModuleFederationPlugin;
 }
 
 /**
-
- Set up default shared values based on the environment.
- @param isServer - Boolean indicating if the code is running on the server.
- @returns The default share scope based on the environment.
+ * Set up default shared values based on the environment.
+ * @param {boolean} isServer - Boolean indicating if the code is running on the server.
+ * @returns {SharedObject} The default share scope based on the environment.
  */
 export const retrieveDefaultShared = (isServer: boolean): SharedObject => {
   // If the code is running on the server, treat some Next.js internals as import false to make them external
@@ -51,21 +50,19 @@ export const retrieveDefaultShared = (isServer: boolean): SharedObject => {
 };
 
 /**
-
- Apply remote delegates.
-
- This function adds the remote delegates feature by configuring and injecting the appropriate loader that will look
- for internal delegate hoist or delegate hoist container and load it using a custom delegateLoader.
- Once loaded, it will then look for the available delegates that will be used to configure the remote
- that the hoisted module will be dependent upon.
-
- @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
-
- @param {Compiler} compiler - The Webpack compiler instance.
+ * Apply remote delegates.
+ *
+ * This function adds the remote delegates feature by configuring and injecting the appropriate loader that will look
+ * for internal delegate hoist or delegate hoist container and load it using a custom delegateLoader.
+ * Once loaded, it will then look for the available delegates that will be used to configure the remote
+ * that the hoisted module will be dependent upon.
+ *
+ * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
+ * @param {Compiler} compiler - The Webpack compiler instance.
  */
 export function applyRemoteDelegates(
   options: ModuleFederationPluginOptions,
-  compiler: Compiler
+  compiler: Compiler,
 ) {
   if (options.remotes) {
     // Get the available delegates
@@ -94,19 +91,35 @@ export function applyRemoteDelegates(
   }
 }
 
-// @ts-ignore
-export const applyPathFixes = (compiler, options) => {
+/**
+ * Apply path fixes.
+ *
+ * This function applies fixes to the path for certain loaders. It checks if the fix is enabled in the options
+ * and if the loader is present in the rule. If both conditions are met, it injects the fix loader.
+ *
+ * @param {Compiler} compiler - The Webpack compiler instance.
+ * @param {any} options - The ModuleFederationPluginOptions instance.
+ */
+export const applyPathFixes = (
+  compiler: Compiler,
+  options: any,
+) => {
+
+
   //@ts-ignore
   compiler.options.module.rules.forEach((rule) => {
     // next-image-loader fix which adds remote's hostname to the assets url
+    //@ts-ignore
     if (options.enableImageLoaderFix && hasLoader(rule, 'next-image-loader')) {
       // childCompiler.options.module.parser.javascript?.url = 'relative';
+      //@ts-ignore
       injectRuleLoader(rule, {
         loader: require.resolve('../../loaders/fixImageLoader'),
       });
     }
 
     // url-loader fix for which adds remote's hostname to the assets url
+    //@ts-ignore
     if (options.enableUrlLoaderFix && hasLoader(rule, 'url-loader')) {
       injectRuleLoader({
         loader: require.resolve('../../loaders/fixUrlLoader'),

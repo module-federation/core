@@ -77,7 +77,7 @@ To have the type definitions automatically found for imports, add `paths` in `ts
 | compiler                      | `tsc or vue-tsc` | No       | tsc         | The compiler to use to emit declaration files. Use `vue-tsc` to emit declarations from your Vue Templates                                                                                  |
 | disableTypeCompilation        | boolean          | No       | false       | Disable compiling types for exposed components                                                                                                                                             |
 | disableDownloadingRemoteTypes | boolean          | No       | false       | Disable downloading types from remote apps                                                                                                                                                 |
-| downloadRemoteTypesTimeout  | number           | No       | `2000`    | The maximum time to wait for downloading remote types. This is to prevent blocking compilation or hanging the plugin.                                                                                                                              |
+| downloadRemoteTypesTimeout    | number           | No       | `2000`      | The maximum time to wait for downloading remote types. This is to prevent blocking compilation or hanging the plugin.                                                                      |
 | federationConfig              |                  | Yes      | -           | Configuration for `ModuleFederationPlugin`                                                                                                                                                 |
 | typescriptFolderName          | string           | No       | `@mf-types` | The folder name to download remote types and output compiled types                                                                                                                         |
 | typescriptCompiledFolderName  | string           | No       | `_types`    | The folder name to output the raw output from the ts compiler                                                                                                                              |
@@ -101,7 +101,7 @@ module.exports = {
           remotes: { app2: 'app2@http://localhost:3000/remoteEntry.js' },
         },
         // ...
-      })
+      }),
     );
     return config;
   },

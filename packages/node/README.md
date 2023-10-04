@@ -129,7 +129,7 @@ revalidate().then((shouldReload) => {
 });
 ```
 
-*Note*: To ensure that changes made to files in remotes are picked up `revalidate`, you can set the remotes webpack [output.filename](https://webpack.js.org/configuration/output/#outputfilename) to `[name]-[contenthash].js` (or similar). This will cause the remoteEntry.js file to be regenerated with a unique hash every time a new build occurs. The revalidate method intelligently detects changes by comparing the hashes of the remoteEntry.js files. By incorporating [contenthash] into the remote's webpack configuration, you enable the shell to seamlessly incorporate the updated files from the remotes.
+_Note_: To ensure that changes made to files in remotes are picked up `revalidate`, you can set the remotes webpack [output.filename](https://webpack.js.org/configuration/output/#outputfilename) to `[name]-[contenthash].js` (or similar). This will cause the remoteEntry.js file to be regenerated with a unique hash every time a new build occurs. The revalidate method intelligently detects changes by comparing the hashes of the remoteEntry.js files. By incorporating [contenthash] into the remote's webpack configuration, you enable the shell to seamlessly incorporate the updated files from the remotes.
 
 **Hot reloading Express.js**
 
@@ -150,6 +150,33 @@ revalidate().then((shouldReload) => {
     global.clearRoutes();
   }
 });
+```
+
+### Overrideing default http chunk fetch
+
+```js
+const chunkFetcher = globalThis.webpackChunkLoad || globalThis.fetch || fetchPolyfill;
+// then it will pass one argument to the function, the url to fetch
+
+chunkFetcher(url)
+  .then((res) => res.text())
+  .then((text) => {
+    // do something with the text
+  });
+```
+
+if you want to use your own custom fetch, or add fetch headers, either in the entrypoint of webpack or outside
+of webpack scope, like in express server- you can override the default chunk fetcher by setting the globalThis.webpackChunkLoad variable.
+
+```js
+globalThis.webpackChunkLoad = async (url) => {
+  const res = await fetch(url, {
+    headers: {
+      'x-custom-header': 'custom-header-value',
+    },
+  });
+  return res.text();
+};
 ```
 
 ## 🔑 License

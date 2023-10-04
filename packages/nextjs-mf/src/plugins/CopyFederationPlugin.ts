@@ -1,60 +1,86 @@
-import fs from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 import { Compilation, Compiler } from 'webpack';
 
+/**
+ * Plugin to copy build output files.
+ * @class
+ */
 class CopyBuildOutputPlugin {
   private isServer: boolean;
 
+  /**
+   * @param {boolean} isServer - Indicates if the current environment is server.
+   * @constructor
+   */
   constructor(isServer: boolean) {
     this.isServer = isServer;
   }
 
+  /**
+   * Applies the plugin to the compiler.
+   * @param {Compiler} compiler - The webpack compiler object.
+   * @method
+   */
   apply(compiler: Compiler): void {
-    const copyFiles = (source: string, destination: string): void => {
-      const files = fs.readdirSync(source);
+    /**
+     * Copies files from source to destination.
+     * @param {string} source - The source directory.
+     * @param {string} destination - The destination directory.
+     * @async
+     * @function
+     */
+    const copyFiles = async (
+      source: string,
+      destination: string,
+    ): Promise<void> => {
+      const files = await fs.readdir(source);
 
-      files.forEach((file) => {
-        const sourcePath = path.join(source, file);
-        const destinationPath = path.join(destination, file);
+      await Promise.all(
+        files.map(async (file) => {
+          const sourcePath = path.join(source, file);
+          const destinationPath = path.join(destination, file);
 
-        if (fs.lstatSync(sourcePath).isDirectory()) {
-          if (!fs.existsSync(destinationPath)) {
-            fs.mkdirSync(destinationPath);
+          if ((await fs.lstat(sourcePath)).isDirectory()) {
+            await fs.mkdir(destinationPath, { recursive: true });
+            await copyFiles(sourcePath, destinationPath);
+          } else {
+            await fs.copyFile(sourcePath, destinationPath);
           }
-          copyFiles(sourcePath, destinationPath);
-        } else {
-          fs.copyFileSync(sourcePath, destinationPath);
-        }
-      });
+        }),
+      );
     };
 
-    compiler.hooks.afterEmit.tapAsync(
+    compiler.hooks.afterEmit.tapPromise(
       'CopyBuildOutputPlugin',
-      (compilation: Compilation, callback: () => void) => {
+      async (compilation: Compilation) => {
         const { outputPath } = compiler;
         const outputString = outputPath.split('server')[0];
         const isProd = compiler.options.mode === 'production';
 
         if (!isProd && !this.isServer) {
-          return callback();
+          return;
         }
 
         const serverLoc = path.join(
           outputString,
-          this.isServer && isProd ? '/ssr' : '/static/ssr'
+          this.isServer && isProd ? '/ssr' : '/static/ssr',
         );
         const servingLoc = path.join(outputPath, 'ssr');
 
-        if (!fs.existsSync(serverLoc)) {
-          fs.mkdirSync(serverLoc, { recursive: true });
-        }
+        await fs.mkdir(serverLoc, { recursive: true });
 
         const sourcePath = this.isServer ? outputPath : servingLoc;
-        if (fs.existsSync(sourcePath)) {
-          copyFiles(sourcePath, serverLoc);
+
+        try {
+          await fs.access(sourcePath);
+          // If the promise resolves, the file exists and you can proceed with copying.
+          await copyFiles(sourcePath, serverLoc);
+        } catch (error) {
+          // If the promise rejects, the file does not exist.
+          console.error(`File at ${sourcePath} does not exist.`);
         }
-        callback();
-      }
+      },
     );
   }
 }

@@ -129,7 +129,10 @@ export default component$(() => {
               policy. Unless otherwise defined in this Privacy policy, the terms
               used in this Privacy policy have the same meanings as in our Terms
               and Conditions, accessible from{' '}
-              <a href="https://modulefederation.com">www.modulefederation.com</a>.
+              <a href="https://modulefederation.com">
+                www.modulefederation.com
+              </a>
+              .
             </p>
             <h2 id="definitions">Definitions</h2>
             <ul>
@@ -546,7 +549,9 @@ export default component$(() => {
               parental consent, we take steps to remove that information from
               our servers.
             </p>
-            <h2 id="changes-to-privacy-policy">Changes to this privacy policy</h2>
+            <h2 id="changes-to-privacy-policy">
+              Changes to this privacy policy
+            </h2>
             <p>
               We may update our Privacy policy from time to time. You are
               advised to review this Privacy policy periodically for any
@@ -559,7 +564,12 @@ export default component$(() => {
               contact us:
             </p>
             <ul>
-              <li>By email: <a href="mailto:module-federation@valor-software.com">module-federation@valor-software.com</a></li>
+              <li>
+                By email:{' '}
+                <a href="mailto:module-federation@valor-software.com">
+                  module-federation@valor-software.com
+                </a>
+              </li>
             </ul>
           </div>
         </div>

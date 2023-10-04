@@ -13,7 +13,7 @@ export const RouterHead = component$(() => {
     <>
       <title>{t(head.title)}</title>
 
-      <link rel="canonical" href={loc.url.hash}  />
+      <link rel="canonical" href={loc.url.hash} />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 

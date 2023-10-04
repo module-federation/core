@@ -23,7 +23,7 @@ describe('archiveHandler', () => {
       moduleFederationConfig: {},
       distFolder: tmpDir,
       testsFolder: '@mf-tests',
-      deleteTestsFolder: false
+      deleteTestsFolder: false,
     } as unknown as Required<RemoteOptions>;
 
     it('correctly creates archive', async () => {
@@ -46,12 +46,15 @@ describe('archiveHandler', () => {
       moduleFederationConfig: {},
       mocksFolder: archivePath,
       testsFolder: tmpDir,
-      deleteTestsFolder: true
+      deleteTestsFolder: true,
     };
 
     it('throws for unexisting url', async () => {
-      expect(downloadTypesArchive(hostOptions)([tmpDir, 'https://foo.it']))
-        .rejects.toThrowError('Network error: Unable to download federated mocks');
+      expect(
+        downloadTypesArchive(hostOptions)([tmpDir, 'https://foo.it']),
+      ).rejects.toThrowError(
+        'Network error: Unable to download federated mocks',
+      );
       // .rejects.toThrowError('getaddrinfo ENOTFOUND foo.it')
     });
 
@@ -61,7 +64,10 @@ describe('archiveHandler', () => {
 
       axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
-      await downloadTypesArchive(hostOptions)(['testsHostFolder', 'https://foo.it']);
+      await downloadTypesArchive(hostOptions)([
+        'testsHostFolder',
+        'https://foo.it',
+      ]);
       expect(existsSync(archivePath)).toBeTruthy();
     });
   });

@@ -1,4 +1,4 @@
-import { Compiler } from 'webpack';
+import type Compiler from 'webpack/lib/Compiler';
 import {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
@@ -6,7 +6,6 @@ import {
 import DelegateModulesPlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import JsonpChunkLoading from '../JsonpChunkLoading';
 /**
  * Applies client-specific plugins.
  *
@@ -18,8 +17,7 @@ import JsonpChunkLoading from '../JsonpChunkLoading';
  * This function applies plugins to the Webpack compiler instance that are specific to the client build of
  * a Next.js application with Module Federation enabled. These plugins include the following:
  *
- * - AddModulesPlugin: Adds modules to the webpack container runtime that can be streamed to other runtimes.
- * - EntryPlugin: Creates an entry point for the application that delegates module loading to the container runtime.
+ * - DelegateModulesPlugin: Delegates modules to the webpack container runtime that can be streamed to other runtimes.
  * - ChunkCorrelationPlugin: Collects metadata on chunks to enable proper module loading across different runtimes.
  * - InvertedContainerPlugin: Adds custom runtime modules to the container runtime to allow a host to expose its
  *   own remote interface at startup.
@@ -31,7 +29,7 @@ import JsonpChunkLoading from '../JsonpChunkLoading';
 export function applyClientPlugins(
   compiler: Compiler,
   options: ModuleFederationPluginOptions,
-  extraOptions: NextFederationPluginExtraOptions
+  extraOptions: NextFederationPluginExtraOptions,
 ): void {
   const { webpack } = compiler;
   const { remotes, name } = options;
@@ -40,13 +38,12 @@ export function applyClientPlugins(
   // Build will hang without this. Likely something in my plugin
   compiler.options.optimization.splitChunks = undefined;
 
-  // Add a new plugin to hoist modules into remote runtime
-  new JsonpChunkLoading({ debug: extraOptions.debug }).apply(compiler);
   new DelegateModulesPlugin({
     container: name,
     runtime: 'webpack',
     remotes,
     debug: extraOptions.debug,
+    //@ts-ignore
   }).apply(compiler);
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
@@ -74,14 +71,20 @@ export function applyClientPlugins(
 
   // Add a new chunk correlation plugin to the compiler
   new ChunkCorrelationPlugin({
-    filename: 'static/chunks/federated-stats.json',
+    filename: ['static/chunks/federated-stats.json','server/federated-stats.json'],
+    //@ts-ignore
   }).apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler
   new InvertedContainerPlugin({
     runtime: 'webpack',
+    chunkToEmbed: 'host_inner_ctn',
     container: options.name,
     remotes: options.remotes as Record<string, string>,
+    shared: options.shared as any,
+    shareScope: 'default',
+    exposes: options.exposes as any,
     debug: extraOptions.debug,
+    //@ts-ignore
   }).apply(compiler);
 }

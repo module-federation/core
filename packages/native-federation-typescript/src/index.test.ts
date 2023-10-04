@@ -6,7 +6,10 @@ import { join, resolve } from 'path';
 import { UnpluginOptions } from 'unplugin';
 import { describe, expect, it, vi } from 'vitest';
 
-import { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } from './index';
+import {
+  NativeFederationTypeScriptHost,
+  NativeFederationTypeScriptRemote,
+} from './index';
 import type { Compiler } from 'webpack';
 
 describe('index', () => {
@@ -25,23 +28,25 @@ describe('index', () => {
           name: 'moduleFederationTypescript',
           filename: 'remoteEntry.js',
           exposes: {
-            './index': join(__dirname, './index.ts')
+            './index': join(__dirname, './index.ts'),
           },
           shared: {
             react: { singleton: true, eager: true },
-            'react-dom': { singleton: true, eager: true }
-          }
+            'react-dom': { singleton: true, eager: true },
+          },
         },
         tsConfigPath: join(__dirname, '..', './tsconfig.json'),
         typesFolder: '@mf-types',
         compiledTypesFolder: 'compiled-types',
         deleteTypesFolder: false,
-        additionalFilesToCompile: []
+        additionalFilesToCompile: [],
       };
 
       const distFolder = join(projectRoot, 'dist', options.typesFolder);
 
-      const unplugin = NativeFederationTypeScriptRemote.rollup(options) as UnpluginOptions;
+      const unplugin = NativeFederationTypeScriptRemote.rollup(
+        options,
+      ) as UnpluginOptions;
       await unplugin.writeBundle?.();
 
       expect(dirTree(distFolder)).toMatchObject({
@@ -54,28 +59,28 @@ describe('index', () => {
                 name: 'configurations',
                 children: [
                   { name: 'hostPlugin.d.ts' },
-                  { name: 'remotePlugin.d.ts' }
-                ]
+                  { name: 'remotePlugin.d.ts' },
+                ],
               },
               { name: 'index.d.ts' },
               {
                 name: 'interfaces',
                 children: [
                   { name: 'HostOptions.d.ts' },
-                  { name: 'RemoteOptions.d.ts' }
-                ]
+                  { name: 'RemoteOptions.d.ts' },
+                ],
               },
               {
                 name: 'lib',
                 children: [
                   { name: 'archiveHandler.d.ts' },
-                  { name: 'typeScriptCompiler.d.ts' }
-                ]
-              }
-            ]
+                  { name: 'typeScriptCompiler.d.ts' },
+                ],
+              },
+            ],
           },
-          { name: 'index.d.ts' }
-        ]
+          { name: 'index.d.ts' },
+        ],
       });
     });
 
@@ -85,26 +90,28 @@ describe('index', () => {
           name: 'moduleFederationTypescript',
           filename: 'remoteEntry.js',
           exposes: {
-            './index': join(__dirname, './index.ts')
+            './index': join(__dirname, './index.ts'),
           },
           shared: {
             react: { singleton: true, eager: true },
-            'react-dom': { singleton: true, eager: true }
-          }
+            'react-dom': { singleton: true, eager: true },
+          },
         },
         deleteTestsFolder: false,
-        testsFolder: '@mf-tests'
+        testsFolder: '@mf-tests',
       };
 
       const webpackCompiler = {
         options: {
           devServer: {
-            foo: {}
-          }
-        }
+            foo: {},
+          },
+        },
       } as unknown as Compiler;
 
-      const unplugin = NativeFederationTypeScriptRemote.rollup(options) as UnpluginOptions;
+      const unplugin = NativeFederationTypeScriptRemote.rollup(
+        options,
+      ) as UnpluginOptions;
       await unplugin.webpack?.(webpackCompiler);
 
       expect(webpackCompiler).toStrictEqual({
@@ -112,10 +119,10 @@ describe('index', () => {
           devServer: {
             foo: {},
             static: {
-              directory: resolve('./dist')
-            }
-          }
-        }
+              directory: resolve('./dist'),
+            },
+          },
+        },
       });
     });
   });
@@ -133,14 +140,14 @@ describe('index', () => {
           name: 'moduleFederationTypescript',
           filename: 'remoteEntry.js',
           remotes: {
-            remotes: 'https://foo.it'
+            remotes: 'https://foo.it',
           },
           shared: {
             react: { singleton: true, eager: true },
-            'react-dom': { singleton: true, eager: true }
-          }
+            'react-dom': { singleton: true, eager: true },
+          },
         },
-        typesFolder: '@mf-types'
+        typesFolder: '@mf-types',
       };
 
       const distFolder = join(projectRoot, 'dist', options.typesFolder);
@@ -149,7 +156,9 @@ describe('index', () => {
 
       axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
-      const unplugin = NativeFederationTypeScriptHost.rollup(options) as UnpluginOptions;
+      const unplugin = NativeFederationTypeScriptHost.rollup(
+        options,
+      ) as UnpluginOptions;
       await expect(unplugin.writeBundle?.()).resolves.not.toThrow();
 
       const typesFolder = join(projectRoot, options.typesFolder);
@@ -167,32 +176,32 @@ describe('index', () => {
                     name: 'configurations',
                     children: [
                       { name: 'hostPlugin.d.ts' },
-                      { name: 'remotePlugin.d.ts' }
-                    ]
+                      { name: 'remotePlugin.d.ts' },
+                    ],
                   },
                   {
-                    name: 'index.d.ts'
+                    name: 'index.d.ts',
                   },
                   {
                     name: 'interfaces',
                     children: [
                       { name: 'HostOptions.d.ts' },
-                      { name: 'RemoteOptions.d.ts' }
-                    ]
+                      { name: 'RemoteOptions.d.ts' },
+                    ],
                   },
                   {
                     name: 'lib',
                     children: [
                       { name: 'archiveHandler.d.ts' },
-                      { name: 'typeScriptCompiler.d.ts' }
-                    ]
-                  }
-                ]
+                      { name: 'typeScriptCompiler.d.ts' },
+                    ],
+                  },
+                ],
               },
-              { name: 'index.d.ts' }
-            ]
-          }
-        ]
+              { name: 'index.d.ts' },
+            ],
+          },
+        ],
       });
 
       await rm(options.typesFolder, { recursive: true, force: true });

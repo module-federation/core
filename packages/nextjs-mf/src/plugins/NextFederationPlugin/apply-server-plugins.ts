@@ -3,23 +3,26 @@ import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import DelegatesModulePlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import JsonpChunkLoading from '../JsonpChunkLoading';
-
+import {
+  ModuleFederationPlugin,
+  ModuleInfoRuntimePlugin,
+} from '@module-federation/enhanced';
 /**
- * Applies server-specific plugins.
+ * This function applies server-specific plugins to the webpack compiler.
  *
- * @param compiler - The Webpack compiler instance.
- * @param options - The ModuleFederationPluginOptions instance.
+ * @param {Compiler} compiler - The Webpack compiler instance.
+ * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
  *
+ * @returns {void}
  */
 export function applyServerPlugins(
   compiler: Compiler,
-  options: ModuleFederationPluginOptions
+  options: ModuleFederationPluginOptions,
 ): void {
   // Import the StreamingTargetPlugin from @module-federation/node
   const { StreamingTargetPlugin } = require('@module-federation/node');
-  new JsonpChunkLoading({ server: true }).apply(compiler);
-
+  new ModuleInfoRuntimePlugin().apply(compiler);
+  // Apply the DelegatesModulePlugin to the compiler
   new DelegatesModulePlugin({
     runtime: 'webpack-runtime',
     remotes: options.remotes,
@@ -28,22 +31,29 @@ export function applyServerPlugins(
 
   // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
   new StreamingTargetPlugin(options, {
-    ModuleFederationPlugin: compiler.webpack.container.ModuleFederationPlugin,
+    ModuleFederationPlugin: ModuleFederationPlugin,
   }).apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler
   new InvertedContainerPlugin({
     runtime: 'webpack-runtime',
     container: options.name,
+    chunkToEmbed: 'host_inner_ctn',
     remotes: options.remotes as Record<string, string>,
+    shared: options.shared as any,
+    shareScope: 'default',
+    exposes: options.exposes as any,
     debug: false,
+    //@ts-ignore
   }).apply(compiler);
 }
 
 /**
- * Configures server-specific library and filename options.
+ * This function configures server-specific library and filename options.
  *
- * @param options - The ModuleFederationPluginOptions instance.
+ * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
+ *
+ * @returns {void}
  *
  * @remarks
  * This function configures the library and filename options for server builds. The library option is
@@ -52,7 +62,7 @@ export function applyServerPlugins(
  * filename.
  */
 export function configureServerLibraryAndFilename(
-  options: ModuleFederationPluginOptions
+  options: ModuleFederationPluginOptions,
 ): void {
   // Configure the library option with type "commonjs-module" and the name from the options
   options.library = {
@@ -65,10 +75,12 @@ export function configureServerLibraryAndFilename(
 }
 
 /**
- * Patches Next.js' default externals function to make sure shared modules are bundled and not treated as external.
+ * This function patches Next.js' default externals function to make sure shared modules are bundled and not treated as external.
  *
- * @param compiler - The Webpack compiler instance.
- * @param options - The ModuleFederationPluginOptions instance.
+ * @param {Compiler} compiler - The Webpack compiler instance.
+ * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
+ *
+ * @returns {void}
  *
  * @remarks
  * In server builds, all node modules are treated as external, which prevents them from being shared
@@ -84,9 +96,14 @@ export function configureServerLibraryAndFilename(
  */
 export function handleServerExternals(
   compiler: Compiler,
-  options: ModuleFederationPluginOptions
+  options: ModuleFederationPluginOptions,
 ): void {
-  // Check if the compiler has an `externals` array
+
+  // Use a regex to match the required external modules
+  // const crittersRegex = 'critters';
+  // const reactRegex = /^react$/;
+  // const reactDomRegex = /^react-dom$/;
+  // const nextCompiledRegex = /next\/dist\/compiled\/(?!server|client|shared).*/;
   if (
     Array.isArray(compiler.options.externals) &&
     compiler.options.externals[0]
@@ -95,7 +112,7 @@ export function handleServerExternals(
     const originalExternals = compiler.options.externals[0];
 
     // Replace the original externals function with a new asynchronous function
-    compiler.options.externals[0] = async function (ctx, callback) {
+    compiler.options.externals[0] = async function (ctx: any, callback: any) {
       // Check if the module should not be treated as external
       if (
         ctx.request &&
@@ -108,17 +125,11 @@ export function handleServerExternals(
               ctx?.request?.includes(key)
             );
           }) ||
-          ctx.request.includes('@module-federation/dashboard-plugin'))
+          ctx.request.includes('@module-federation/dashboard-plugin')
+        )
       ) {
         // If the module should not be treated as external, return without calling the original externals function
         return;
-      }
-
-      // seems to cause build issues at lululemon
-      // nobody else seems to run into this issue
-      // #JobSecurity
-      if (ctx.request && ctx.request.includes('react/jsx-runtime')) {
-        return 'commonjs ' + ctx.request;
       }
 
       // Call the original externals function and retrieve the result
@@ -146,13 +157,19 @@ export function handleServerExternals(
       // Otherwise, return (null) to treat the module as internalizable
       return;
     };
+    // compiler.options.externals.push(crittersRegex)
+    // compiler.options.externals.push(reactRegex)
+    // compiler.options.externals.push(reactDomRegex)
+    // compiler.options.externals.push(nextCompiledRegex)
   }
 }
 
 /**
- * Configures server-specific compiler options.
+ * This function configures server-specific compiler options.
  *
- * @param compiler - The Webpack compiler instance.
+ * @param {Compiler} compiler - The Webpack compiler instance.
+ *
+ * @returns {void}
  *
  * @remarks
  * This function configures the compiler options for server builds. It turns off the compiler target on node
@@ -163,17 +180,10 @@ export function handleServerExternals(
 export function configureServerCompilerOptions(compiler: Compiler): void {
   // Turn off the compiler target on node builds because we add our own chunk loading runtime module
   // with NodeFederationPlugin and StreamingTargetPlugin
-  compiler.options.target = false;
   compiler.options.node = {
     ...compiler.options.node,
     global: false,
   };
-  compiler.options.resolve.conditionNames = [
-    'node',
-    'import',
-    'require',
-    'default',
-  ];
   // no custom chunk rules
   compiler.options.optimization.splitChunks = undefined;
 

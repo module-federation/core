@@ -1,6 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "target": "ES2021",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "declaration": true,
     "module": "commonjs",
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
@@ -19,3 +25,4 @@
     }
   ]
 }
+

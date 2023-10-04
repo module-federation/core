@@ -162,7 +162,9 @@ export default component$((props: NavbarProps) => {
                       target={link.target}
                       type="link"
                       theme={ButtonTheme.NAV}
-                      active={link.active || props.activeHref === link.href || false}
+                      active={
+                        link.active || props.activeHref === link.href || false
+                      }
                     >
                       {link.label}
                     </Button>
@@ -208,7 +210,6 @@ export default component$((props: NavbarProps) => {
                   })}
                 </Select>
               </li>
-
             </ul>
 
             <div class="flex xl:hidden relative">

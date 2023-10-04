@@ -2,141 +2,328 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [3.0.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.4.2...typescript-3.0.0) (2023-09-13)
+
+### Dependency Updates
+
+- `utils` updated to version `3.0.0`
+
+### Features
+
+- core package for module federation ([#1093](https://github.com/module-federation/nextjs-mf/issues/1093)) ([d460400](https://github.com/module-federation/nextjs-mf/commit/d46040053e9b627321b5fe8e05556c5bb727c238)), closes [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#835](https://github.com/module-federation/nextjs-mf/issues/835) [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#871](https://github.com/module-federation/nextjs-mf/issues/871) [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#872](https://github.com/module-federation/nextjs-mf/issues/872) [#875](https://github.com/module-federation/nextjs-mf/issues/875) [#884](https://github.com/module-federation/nextjs-mf/issues/884) [#887](https://github.com/module-federation/nextjs-mf/issues/887) [#893](https://github.com/module-federation/nextjs-mf/issues/893) [#885](https://github.com/module-federation/nextjs-mf/issues/885) [#899](https://github.com/module-federation/nextjs-mf/issues/899) [#904](https://github.com/module-federation/nextjs-mf/issues/904) [#932](https://github.com/module-federation/nextjs-mf/issues/932) [#936](https://github.com/module-federation/nextjs-mf/issues/936) [#959](https://github.com/module-federation/nextjs-mf/issues/959) [#960](https://github.com/module-federation/nextjs-mf/issues/960) [#969](https://github.com/module-federation/nextjs-mf/issues/969) [#971](https://github.com/module-federation/nextjs-mf/issues/971) [#1234](https://github.com/module-federation/nextjs-mf/issues/1234) [#1235](https://github.com/module-federation/nextjs-mf/issues/1235)
+- **typedoc-parsetr:** merged main ([2ff0d5a](https://github.com/module-federation/nextjs-mf/commit/2ff0d5a075df3f241742cc7e516cd0378e8e1b3e))
+- **typedoc-parsetr:** python script implementation ([0a533cb](https://github.com/module-federation/nextjs-mf/commit/0a533cb60e0c3ca269ab45df740c1367be175e80))
+
+### BREAKING CHANGES
+
+- automaticAsyncBoundary option has been removed
+
+- fix: exclude specific pages from page map automatically
+
+- refactor: conslidate codebase
+
+- fix: improve hot reload share recovery
+
+- refactor: remove server jsonp template
+
+- chore: remove dead code from runtime modules
+
+- fix: clean up jsonp getCustomJsonpCode
+
+getting chunk loading global from compiler output options
+
+- feat: adding cleanInitArrays runtime helper
+
+- chore: remove share scope hoist and module hoisting system
+
+- chore: cleanup code
+
+- chore: remove dead code from add module runtime plugin
+
+likely can remove whole plugin in future
+
+- chore: remove logs from delegate modules
+
+- chore: remove old utils
+
+- fix: add warning on auto page stitch
+
+- fix: remove commented out code from InvertedContainerPlugin.ts
+
+- chore: improve logging to see if its local load or remote load
+
+- chore: clean up old custom promises factories
+
+- fix: remove container proxy code
+
+- fix: remove container proxy code
+- automaticAsyncBoundary option has been removed
+
+- fix: exclude specific pages from page map automatically
+
+- refactor: conslidate codebase
+
+- fix: improve hot reload share recovery
+
+- refactor: remove server jsonp template
+
+- chore: remove dead code from runtime modules
+
+- fix: clean up jsonp getCustomJsonpCode
+
+getting chunk loading global from compiler output options
+
+- feat: adding cleanInitArrays runtime helper
+
+- chore: remove share scope hoist and module hoisting system
+
+- chore: cleanup code
+
+- chore: remove dead code from add module runtime plugin
+
+likely can remove whole plugin in future
+
+- chore: remove logs from delegate modules
+
+- chore: remove old utils
+
+- fix: add warning on auto page stitch
+
+- fix: remove commented out code from InvertedContainerPlugin.ts
+
+- chore: improve logging to see if its local load or remote load
+
+- chore: clean up old custom promises factories
+
+- fix: remove container proxy code
+
+- fix: remove container proxy code
+
+- chore: fix project.json
+
+- debugging
+
+- fix: resolve backmerge issues with build
+
+- Merge branch 'kill_child_compilers' into fix_backmerge_issues
+
+# Conflicts:
+
+# package-lock.json
+
+# package.json
+
+# packages/nextjs-mf/src/plugins/NextFederationPlugin/index.ts
+
+# packages/nextjs-mf/src/plugins/container/InvertedContainerPlugin.ts
+
+# packages/nextjs-mf/src/plugins/container/InvertedContainerRuntimeModule.ts
+
+- feat: enable eager sharing
+
+- refactor: improve module hooks for eager loading and search
+
+- refactor: cleanup custom jsonp and make es5
+
+- refactor: cleanup inverted container code
+
+- refactor: cleanup inverted container code
+- automaticAsyncBoundary option has been removed
+
+- fix: exclude specific pages from page map automatically
+
+- refactor: conslidate codebase
+
+- fix: improve hot reload share recovery
+
+- refactor: remove server jsonp template
+
+- chore: remove dead code from runtime modules
+
+- fix: clean up jsonp getCustomJsonpCode
+
+getting chunk loading global from compiler output options
+
+- feat: adding cleanInitArrays runtime helper
+
+- chore: remove share scope hoist and module hoisting system
+
+- chore: cleanup code
+
+- chore: remove dead code from add module runtime plugin
+
+likely can remove whole plugin in future
+
+- chore: remove logs from delegate modules
+
+- chore: remove old utils
+
+- fix: add warning on auto page stitch
+
+- fix: remove commented out code from InvertedContainerPlugin.ts
+
+- chore: improve logging to see if its local load or remote load
+
+- chore: clean up old custom promises factories
+
+- fix: remove container proxy code
+
+- fix: remove container proxy code
+
+- fix: resolve backmerge issues with build
+
+- Merge branch 'kill_child_compilers' into fix_backmerge_issues
+
+# Conflicts:
+
+# package-lock.json
+
+# package.json
+
+# packages/nextjs-mf/src/plugins/NextFederationPlugin/index.ts
+
+# packages/nextjs-mf/src/plugins/container/InvertedContainerPlugin.ts
+
+# packages/nextjs-mf/src/plugins/container/InvertedContainerRuntimeModule.ts
+
+- feat: enable eager sharing
+
+- refactor: improve module hooks for eager loading and search
+
+- refactor: cleanup custom jsonp and make es5
+
+- refactor: cleanup inverted container code
+
+- refactor: cleanup inverted container code
+
+- ci: fix install step with npm and NX
+
+- test: remove tests for now
+
+- chore(utils): release version 1.7.3-beta.0
+
+- chore(utils): release version 1.7.3
+
+- chore(node): release version 0.14.4-beta.0
+
+- chore(node): release version 0.14.4
+
+- chore(nextjs-mf): release version 6.4.1-beta.4
+
+- fix: remove debugging runtime variable
+
+- chore(nextjs-mf): release version 6.4.1-beta.5
+
 ## [2.4.2](https://github.com/module-federation/nextjs-mf/compare/typescript-2.4.1...typescript-2.4.2) (2023-08-09)
-
-
 
 ## [2.4.1](https://github.com/module-federation/nextjs-mf/compare/typescript-2.4.0...typescript-2.4.1) (2023-07-23)
 
 ### Dependency Updates
 
-* `utils` updated to version `2.0.4`
+- `utils` updated to version `2.0.4`
 
 ### Bug Fixes
 
-* **typescript:** add types field to package.json exports ([#1154](https://github.com/module-federation/nextjs-mf/issues/1154)) ([ec37484](https://github.com/module-federation/nextjs-mf/commit/ec374846567e4941ab42d18623642f90b3d70591))
-
-
+- **typescript:** add types field to package.json exports ([#1154](https://github.com/module-federation/nextjs-mf/issues/1154)) ([ec37484](https://github.com/module-federation/nextjs-mf/commit/ec374846567e4941ab42d18623642f90b3d70591))
 
 # [2.4.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.2.3...typescript-2.4.0) (2023-07-19)
 
 ### Dependency Updates
 
-* `utils` updated to version `2.0.3`
-* `utils` updated to version `2.0.3`
+- `utils` updated to version `2.0.3`
+- `utils` updated to version `2.0.3`
 
 ### Bug Fixes
 
-* Add an error message when no MFP is present during build ([#1150](https://github.com/module-federation/nextjs-mf/issues/1150)) ([dff5153](https://github.com/module-federation/nextjs-mf/commit/dff5153f1fc0ad0499c360eeafd612dec564767b))
-
+- Add an error message when no MFP is present during build ([#1150](https://github.com/module-federation/nextjs-mf/issues/1150)) ([dff5153](https://github.com/module-federation/nextjs-mf/commit/dff5153f1fc0ad0499c360eeafd612dec564767b))
 
 ### Features
 
-* Allow Container Utils to work Server Side ([#723](https://github.com/module-federation/nextjs-mf/issues/723)) ([232ba24](https://github.com/module-federation/nextjs-mf/commit/232ba24072f19bd32d1f745d4edf1518e548df50))
-* release to npm with next tag to not ruine latest one ([#763](https://github.com/module-federation/nextjs-mf/issues/763)) ([f2d199b](https://github.com/module-federation/nextjs-mf/commit/f2d199b3b3fbbd428514b1ce1f139efc82f7fff0))
-
-
+- Allow Container Utils to work Server Side ([#723](https://github.com/module-federation/nextjs-mf/issues/723)) ([232ba24](https://github.com/module-federation/nextjs-mf/commit/232ba24072f19bd32d1f745d4edf1518e548df50))
+- release to npm with next tag to not ruine latest one ([#763](https://github.com/module-federation/nextjs-mf/issues/763)) ([f2d199b](https://github.com/module-federation/nextjs-mf/commit/f2d199b3b3fbbd428514b1ce1f139efc82f7fff0))
 
 ## [2.3.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.2.1...typescript-2.2.2) (2023-04-05)
 
-
 ### Bug Fixes
 
-* Add timeout to `importRemoteTypes`, reduce error log ([#695](https://github.com/module-federation/nextjs-mf/issues/695)) ([85563ef](https://github.com/module-federation/nextjs-mf/commit/85563efaffb041abe02bf6704ec7ac254634f9d0))
-* release typescript ([946c052](https://github.com/module-federation/nextjs-mf/commit/946c052d1b3268e27a221ce49453e94aa0e98fbd))
-* remove unused dependencies nx added to typescript package ([#690](https://github.com/module-federation/nextjs-mf/issues/690)) ([c87e7d7](https://github.com/module-federation/nextjs-mf/commit/c87e7d74226f060bbd2aff7e65df691e69f6f82a))
-* safely build url to download type files ([#694](https://github.com/module-federation/nextjs-mf/issues/694)) ([ee5429d](https://github.com/module-federation/nextjs-mf/commit/ee5429dea3469ff1bf020f84d88e96caf1075d07))
-
+- Add timeout to `importRemoteTypes`, reduce error log ([#695](https://github.com/module-federation/nextjs-mf/issues/695)) ([85563ef](https://github.com/module-federation/nextjs-mf/commit/85563efaffb041abe02bf6704ec7ac254634f9d0))
+- release typescript ([946c052](https://github.com/module-federation/nextjs-mf/commit/946c052d1b3268e27a221ce49453e94aa0e98fbd))
+- remove unused dependencies nx added to typescript package ([#690](https://github.com/module-federation/nextjs-mf/issues/690)) ([c87e7d7](https://github.com/module-federation/nextjs-mf/commit/c87e7d74226f060bbd2aff7e65df691e69f6f82a))
+- safely build url to download type files ([#694](https://github.com/module-federation/nextjs-mf/issues/694)) ([ee5429d](https://github.com/module-federation/nextjs-mf/commit/ee5429dea3469ff1bf020f84d88e96caf1075d07))
 
 ### Features
 
-* Remove MF plugin from Typescript plugin ([#607](https://github.com/module-federation/nextjs-mf/issues/607)) ([94e9149](https://github.com/module-federation/nextjs-mf/commit/94e9149c4be12cc3e2627da7d7a9e11289cab894)), closes [#608](https://github.com/module-federation/nextjs-mf/issues/608) [#608](https://github.com/module-federation/nextjs-mf/issues/608)
-
-
+- Remove MF plugin from Typescript plugin ([#607](https://github.com/module-federation/nextjs-mf/issues/607)) ([94e9149](https://github.com/module-federation/nextjs-mf/commit/94e9149c4be12cc3e2627da7d7a9e11289cab894)), closes [#608](https://github.com/module-federation/nextjs-mf/issues/608) [#608](https://github.com/module-federation/nextjs-mf/issues/608)
 
 # [2.3.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.2.1...typescript-2.3.0) (2023-04-05)
 
-
 ### Bug Fixes
 
-* Add timeout to `importRemoteTypes`, reduce error log ([#695](https://github.com/module-federation/nextjs-mf/issues/695)) ([85563ef](https://github.com/module-federation/nextjs-mf/commit/85563efaffb041abe02bf6704ec7ac254634f9d0))
-* release typescript ([946c052](https://github.com/module-federation/nextjs-mf/commit/946c052d1b3268e27a221ce49453e94aa0e98fbd))
-* remove unused dependencies nx added to typescript package ([#690](https://github.com/module-federation/nextjs-mf/issues/690)) ([c87e7d7](https://github.com/module-federation/nextjs-mf/commit/c87e7d74226f060bbd2aff7e65df691e69f6f82a))
-* safely build url to download type files ([#694](https://github.com/module-federation/nextjs-mf/issues/694)) ([ee5429d](https://github.com/module-federation/nextjs-mf/commit/ee5429dea3469ff1bf020f84d88e96caf1075d07))
-
+- Add timeout to `importRemoteTypes`, reduce error log ([#695](https://github.com/module-federation/nextjs-mf/issues/695)) ([85563ef](https://github.com/module-federation/nextjs-mf/commit/85563efaffb041abe02bf6704ec7ac254634f9d0))
+- release typescript ([946c052](https://github.com/module-federation/nextjs-mf/commit/946c052d1b3268e27a221ce49453e94aa0e98fbd))
+- remove unused dependencies nx added to typescript package ([#690](https://github.com/module-federation/nextjs-mf/issues/690)) ([c87e7d7](https://github.com/module-federation/nextjs-mf/commit/c87e7d74226f060bbd2aff7e65df691e69f6f82a))
+- safely build url to download type files ([#694](https://github.com/module-federation/nextjs-mf/issues/694)) ([ee5429d](https://github.com/module-federation/nextjs-mf/commit/ee5429dea3469ff1bf020f84d88e96caf1075d07))
 
 ### Features
 
-* Remove MF plugin from Typescript plugin ([#607](https://github.com/module-federation/nextjs-mf/issues/607)) ([94e9149](https://github.com/module-federation/nextjs-mf/commit/94e9149c4be12cc3e2627da7d7a9e11289cab894)), closes [#608](https://github.com/module-federation/nextjs-mf/issues/608) [#608](https://github.com/module-federation/nextjs-mf/issues/608)
-
-
+- Remove MF plugin from Typescript plugin ([#607](https://github.com/module-federation/nextjs-mf/issues/607)) ([94e9149](https://github.com/module-federation/nextjs-mf/commit/94e9149c4be12cc3e2627da7d7a9e11289cab894)), closes [#608](https://github.com/module-federation/nextjs-mf/issues/608) [#608](https://github.com/module-federation/nextjs-mf/issues/608)
 
 # [2.3.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.2.1...typescript-2.3.0) (2023-04-05)
 
 ### Dependency Updates
 
-* `utils` updated to version `1.4.1`
-* `utils` updated to version `1.4.1`
+- `utils` updated to version `1.4.1`
+- `utils` updated to version `1.4.1`
 
 ### Bug Fixes
 
-* Add timeout to `importRemoteTypes`, reduce error log ([#695](https://github.com/module-federation/nextjs-mf/issues/695)) ([85563ef](https://github.com/module-federation/nextjs-mf/commit/85563efaffb041abe02bf6704ec7ac254634f9d0))
-* release typescript ([946c052](https://github.com/module-federation/nextjs-mf/commit/946c052d1b3268e27a221ce49453e94aa0e98fbd))
-* remove unused dependencies nx added to typescript package ([#690](https://github.com/module-federation/nextjs-mf/issues/690)) ([c87e7d7](https://github.com/module-federation/nextjs-mf/commit/c87e7d74226f060bbd2aff7e65df691e69f6f82a))
-* safely build url to download type files ([#694](https://github.com/module-federation/nextjs-mf/issues/694)) ([ee5429d](https://github.com/module-federation/nextjs-mf/commit/ee5429dea3469ff1bf020f84d88e96caf1075d07))
-
+- Add timeout to `importRemoteTypes`, reduce error log ([#695](https://github.com/module-federation/nextjs-mf/issues/695)) ([85563ef](https://github.com/module-federation/nextjs-mf/commit/85563efaffb041abe02bf6704ec7ac254634f9d0))
+- release typescript ([946c052](https://github.com/module-federation/nextjs-mf/commit/946c052d1b3268e27a221ce49453e94aa0e98fbd))
+- remove unused dependencies nx added to typescript package ([#690](https://github.com/module-federation/nextjs-mf/issues/690)) ([c87e7d7](https://github.com/module-federation/nextjs-mf/commit/c87e7d74226f060bbd2aff7e65df691e69f6f82a))
+- safely build url to download type files ([#694](https://github.com/module-federation/nextjs-mf/issues/694)) ([ee5429d](https://github.com/module-federation/nextjs-mf/commit/ee5429dea3469ff1bf020f84d88e96caf1075d07))
 
 ### Features
 
-* Remove MF plugin from Typescript plugin ([#607](https://github.com/module-federation/nextjs-mf/issues/607)) ([94e9149](https://github.com/module-federation/nextjs-mf/commit/94e9149c4be12cc3e2627da7d7a9e11289cab894)), closes [#608](https://github.com/module-federation/nextjs-mf/issues/608) [#608](https://github.com/module-federation/nextjs-mf/issues/608)
-
-
+- Remove MF plugin from Typescript plugin ([#607](https://github.com/module-federation/nextjs-mf/issues/607)) ([94e9149](https://github.com/module-federation/nextjs-mf/commit/94e9149c4be12cc3e2627da7d7a9e11289cab894)), closes [#608](https://github.com/module-federation/nextjs-mf/issues/608) [#608](https://github.com/module-federation/nextjs-mf/issues/608)
 
 # [2.3.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.2.1...typescript-2.3.0) (2023-04-05)
 
 ### Dependency Updates
 
-* `utils` updated to version `1.4.1`
-* `utils` updated to version `1.4.1`
+- `utils` updated to version `1.4.1`
+- `utils` updated to version `1.4.1`
 
 ### Bug Fixes
 
-* Add timeout to `importRemoteTypes`, reduce error log ([#695](https://github.com/module-federation/nextjs-mf/issues/695)) ([85563ef](https://github.com/module-federation/nextjs-mf/commit/85563efaffb041abe02bf6704ec7ac254634f9d0))
-* release typescript ([946c052](https://github.com/module-federation/nextjs-mf/commit/946c052d1b3268e27a221ce49453e94aa0e98fbd))
-* remove unused dependencies nx added to typescript package ([#690](https://github.com/module-federation/nextjs-mf/issues/690)) ([c87e7d7](https://github.com/module-federation/nextjs-mf/commit/c87e7d74226f060bbd2aff7e65df691e69f6f82a))
-* safely build url to download type files ([#694](https://github.com/module-federation/nextjs-mf/issues/694)) ([ee5429d](https://github.com/module-federation/nextjs-mf/commit/ee5429dea3469ff1bf020f84d88e96caf1075d07))
-
+- Add timeout to `importRemoteTypes`, reduce error log ([#695](https://github.com/module-federation/nextjs-mf/issues/695)) ([85563ef](https://github.com/module-federation/nextjs-mf/commit/85563efaffb041abe02bf6704ec7ac254634f9d0))
+- release typescript ([946c052](https://github.com/module-federation/nextjs-mf/commit/946c052d1b3268e27a221ce49453e94aa0e98fbd))
+- remove unused dependencies nx added to typescript package ([#690](https://github.com/module-federation/nextjs-mf/issues/690)) ([c87e7d7](https://github.com/module-federation/nextjs-mf/commit/c87e7d74226f060bbd2aff7e65df691e69f6f82a))
+- safely build url to download type files ([#694](https://github.com/module-federation/nextjs-mf/issues/694)) ([ee5429d](https://github.com/module-federation/nextjs-mf/commit/ee5429dea3469ff1bf020f84d88e96caf1075d07))
 
 ### Features
 
-* Remove MF plugin from Typescript plugin ([#607](https://github.com/module-federation/nextjs-mf/issues/607)) ([94e9149](https://github.com/module-federation/nextjs-mf/commit/94e9149c4be12cc3e2627da7d7a9e11289cab894)), closes [#608](https://github.com/module-federation/nextjs-mf/issues/608) [#608](https://github.com/module-federation/nextjs-mf/issues/608)
-
-
+- Remove MF plugin from Typescript plugin ([#607](https://github.com/module-federation/nextjs-mf/issues/607)) ([94e9149](https://github.com/module-federation/nextjs-mf/commit/94e9149c4be12cc3e2627da7d7a9e11289cab894)), closes [#608](https://github.com/module-federation/nextjs-mf/issues/608) [#608](https://github.com/module-federation/nextjs-mf/issues/608)
 
 # [2.3.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.2.1...typescript-2.3.0) (2023-03-07)
 
 ### Dependency Updates
 
-* `utils` updated to version `1.3.0`
+- `utils` updated to version `1.3.0`
 
 ### Features
 
-* Remove MF plugin from Typescript plugin ([#607](https://github.com/module-federation/nextjs-mf/issues/607)) ([94e9149](https://github.com/module-federation/nextjs-mf/commit/94e9149c4be12cc3e2627da7d7a9e11289cab894)), closes [#608](https://github.com/module-federation/nextjs-mf/issues/608) [#608](https://github.com/module-federation/nextjs-mf/issues/608)
-
-
+- Remove MF plugin from Typescript plugin ([#607](https://github.com/module-federation/nextjs-mf/issues/607)) ([94e9149](https://github.com/module-federation/nextjs-mf/commit/94e9149c4be12cc3e2627da7d7a9e11289cab894)), closes [#608](https://github.com/module-federation/nextjs-mf/issues/608) [#608](https://github.com/module-federation/nextjs-mf/issues/608)
 
 ## [2.2.1](https://github.com/module-federation/nextjs-mf/compare/typescript-2.2.0...typescript-2.2.1) (2023-02-09)
 
 ### Dependency Updates
 
-* `utils` updated to version `1.2.1`
+- `utils` updated to version `1.2.1`
 
 ### Bug Fixes
 
-* **typescript:** fix import path for generated dts in Windows ([#566](https://github.com/module-federation/nextjs-mf/issues/566)) ([80d09c4](https://github.com/module-federation/nextjs-mf/commit/80d09c40a4ca8f72a4dd0077936959c9f9bdddd2))
-* **typescript:** use node-fetch to download TS types ([#565](https://github.com/module-federation/nextjs-mf/issues/565)) ([f668b1f](https://github.com/module-federation/nextjs-mf/commit/f668b1fa11f05ff5d15e6581c27b5da9ad454ed2))
-
-
+- **typescript:** fix import path for generated dts in Windows ([#566](https://github.com/module-federation/nextjs-mf/issues/566)) ([80d09c4](https://github.com/module-federation/nextjs-mf/commit/80d09c40a4ca8f72a4dd0077936959c9f9bdddd2))
+- **typescript:** use node-fetch to download TS types ([#565](https://github.com/module-federation/nextjs-mf/issues/565)) ([f668b1f](https://github.com/module-federation/nextjs-mf/commit/f668b1fa11f05ff5d15e6581c27b5da9ad454ed2))
 
 # [2.2.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.1.6...typescript-2.2.0) (2023-01-31)
 

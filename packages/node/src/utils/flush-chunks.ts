@@ -2,7 +2,7 @@
 
 // @ts-ignore
 if (!globalThis.usedChunks) {
-// @ts-ignore
+  // @ts-ignore
   globalThis.usedChunks = new Set();
 }
 /**
@@ -10,7 +10,7 @@ if (!globalThis.usedChunks) {
  * @type {Set}
  */
 // @ts-ignore
-export const usedChunks = globalThis.usedChunks;
+export const { usedChunks } = globalThis;
 /**
  * Load hostStats from the JSON file.
  * @returns {object} hostStats - An object containing host stats data.
@@ -29,13 +29,13 @@ const loadHostStats = () => {
  */
 const createShareMap = () => {
   // Check if __webpack_share_scopes__ is defined and has a default property
-// @ts-ignore
+  // @ts-ignore
   if (__webpack_share_scopes__?.default) {
     // Reduce the keys of the default property to create the share map
-// @ts-ignore
+    // @ts-ignore
     return Object.keys(__webpack_share_scopes__.default).reduce((acc, key) => {
       // Get the loaded modules for the current key
-// @ts-ignore
+      // @ts-ignore
       const loadedModules = Object.values(__webpack_share_scopes__.default[key])
         // Filter out the modules that are not loaded
         // @ts-ignore
@@ -46,7 +46,7 @@ const createShareMap = () => {
 
       // If there are any loaded modules, add them to the accumulator object
       if (loadedModules.length > 0) {
-// @ts-ignore
+        // @ts-ignore
         acc[key] = loadedModules;
       }
       // Return the accumulator object for the next iteration
@@ -76,7 +76,7 @@ const processChunk = async (chunk, shareMap, hostStats) => {
   if (!globalThis.__remote_scope__._config[remote]) {
     console.error(
       `flush chunks:`,
-      `Remote ${remote} is not defined in the global config`
+      `Remote ${remote} is not defined in the global config`,
     );
     return;
   }
@@ -84,7 +84,9 @@ const processChunk = async (chunk, shareMap, hostStats) => {
   try {
     // Extract the remote name from the URL
     //@ts-ignore
-    const remoteName = new URL(globalThis.__remote_scope__._config[remote]).pathname
+    const remoteName = new URL(
+      globalThis.__remote_scope__._config[remote],
+    ).pathname
       .split('/')
       .pop();
 
@@ -108,38 +110,38 @@ const processChunk = async (chunk, shareMap, hostStats) => {
     // );
 
     // Extract the prefix from the remote config
-    const [prefix] = globalThis.__remote_scope__._config[remote].split('static/');
+    const [prefix] =
+      globalThis.__remote_scope__._config[remote].split('static/');
 
     // Process federated modules from the stats object
-// @ts-ignore
+    // @ts-ignore
     if (stats.federatedModules) {
-// @ts-ignore
+      // @ts-ignore
       stats.federatedModules.forEach((modules) => {
         // Process exposed modules
         if (modules.exposes?.[request]) {
-// @ts-ignore
+          // @ts-ignore
           modules.exposes[request].forEach((chunk) => {
             chunks.add([prefix, chunk].join(''));
 
             //TODO: reimplement this
             Object.values(chunk).forEach((chunk) => {
               // Add files to the chunks set
-// @ts-ignore
+              // @ts-ignore
               if (chunk.files) {
-// @ts-ignore
+                // @ts-ignore
                 chunk.files.forEach((file) => {
                   chunks.add(prefix + file);
                 });
               }
               // Process required modules
-// @ts-ignore
+              // @ts-ignore
               if (chunk.requiredModules) {
-// @ts-ignore
+                // @ts-ignore
                 chunk.requiredModules.forEach((module) => {
                   // Check if the module is in the shareMap
                   if (shareMap[module]) {
                     // If the module is from the host, log the host stats
-
                   }
                 });
               }
@@ -162,12 +164,13 @@ const processChunk = async (chunk, shareMap, hostStats) => {
  */
 export const flushChunks = async () => {
   const hostStats = loadHostStats();
+  console.log('hostStats', hostStats)
   const shareMap = createShareMap();
 
   const allFlushed = await Promise.all(
     Array.from(usedChunks).map(async (chunk) =>
-      processChunk(chunk, shareMap, hostStats)
-    )
+      processChunk(chunk, shareMap, hostStats),
+    ),
   );
 
   // Deduplicate the chunks array

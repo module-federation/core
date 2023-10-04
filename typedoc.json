@@ -1,0 +1,13 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "packages/node",
+    "packages/typescript",
+    "packages/utilities",
+    "packages/native-federation-typescript",
+    "packages/native-federation-tests"
+  ],
+  "exclude": ["apps/**"],
+  "entryPointStrategy": "packages",
+  "out": "docs"
+}

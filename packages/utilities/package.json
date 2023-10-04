@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/utilities",
-  "version": "2.0.7",
+  "version": "3.0.3-0",
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -11,7 +11,7 @@
   "repository": "https://github.com/module-federation/universe/tree/main/packages/utilities",
   "devDependencies": {
     "react": "18.2.0",
-    "next": "13.4.19"
+    "next": "13.5.3"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",

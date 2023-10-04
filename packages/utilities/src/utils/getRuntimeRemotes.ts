@@ -3,10 +3,7 @@ import { extractUrlAndGlobal, remoteVars } from './pure';
 
 export const getRuntimeRemotes = () => {
   try {
-    const runtimeRemotes = Object.entries(remoteVars).reduce(function (
-      acc,
-      item
-    ) {
+    return Object.entries(remoteVars).reduce(function (acc, item) {
       const [key, value] = item;
       // if its an object with a thenable (eagerly executing function)
       if (typeof value === 'object' && typeof value.then === 'function') {
@@ -38,14 +35,11 @@ export const getRuntimeRemotes = () => {
         //@ts-ignore
         console.warn('remotes process', process.env.REMOTES);
         throw new Error(
-          `[mf] Invalid value received for runtime_remote "${key}"`
+          `[mf] Invalid value received for runtime_remote "${key}"`,
         );
       }
       return acc;
-    },
-    {} as RuntimeRemotesMap);
-
-    return runtimeRemotes;
+    }, {} as RuntimeRemotesMap);
   } catch (err) {
     console.warn('Unable to retrieve runtime remotes: ', err);
   }

@@ -44,7 +44,7 @@
       "executor": "@jscutlery/semver:version",
       "options": {
         "postTargets": ["utils:npm", "utils:github"],
-        "trackDeps": true,
+        "trackDeps": false,
         "push": true
       }
     },

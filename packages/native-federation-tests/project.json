@@ -45,7 +45,7 @@
           "native-federation-tests:npm",
           "native-federation-tests:github"
         ],
-        "trackDeps": true,
+        "trackDeps": false,
         "push": true
       }
     },

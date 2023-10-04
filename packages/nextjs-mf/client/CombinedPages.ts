@@ -22,7 +22,7 @@ export class CombinedPages {
 
   constructor(
     localPagesGetter: () => Promise<string[]>,
-    remotePages: RemotePages
+    remotePages: RemotePages,
   ) {
     this.localPagesGetter = localPagesGetter;
     this.remotePages = remotePages;

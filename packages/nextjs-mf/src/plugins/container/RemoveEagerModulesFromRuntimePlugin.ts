@@ -1,28 +1,43 @@
-import { Compiler, Compilation, Chunk, Module } from 'webpack';
+import type Compiler from 'webpack/lib/Compiler';
+import type Compilation from 'webpack/lib/Compilation';
+import type Chunk from 'webpack/lib/Chunk';
+import type Module from 'webpack/lib/Module';
 
+/**
+ * This plugin removes eager modules from the runtime.
+ * @class RemoveEagerModulesFromRuntimePlugin
+ */
 class RemoveEagerModulesFromRuntimePlugin {
   private container: string | undefined;
   private debug: boolean;
-  private dependentModules: Set<Module>;
-  private visitedModules: Set<Module>;
+  private modulesToProcess: Set<Module>;
 
+  /**
+   * Creates an instance of RemoveEagerModulesFromRuntimePlugin.
+   * @param {Object} options - The options for the plugin.
+   * @param {string} options.container - The container to remove modules from.
+   * @param {boolean} options.debug - Whether to log debug information.
+   */
   constructor(options: { container?: string; debug?: boolean }) {
     this.container = options.container;
     this.debug = options.debug || false;
-    this.dependentModules = new Set<Module>();
-    this.visitedModules = new Set<Module>();
+    this.modulesToProcess = new Set<Module>();
   }
 
+  /**
+   * Applies the plugin to the compiler.
+   * @param {Compiler} compiler - The webpack compiler.
+   */
   apply(compiler: Compiler) {
     if (!this.container) {
       console.warn(
         '[nextjs-mf]:',
         'RemoveEagerModulesFromRuntimePlugin container is not defined:',
-        this.container
+        this.container,
       );
       return;
     }
-    //return
+
     compiler.hooks.thisCompilation.tap(
       'RemoveEagerModulesFromRuntimePlugin',
       (compilation: Compilation) => {
@@ -31,114 +46,48 @@ class RemoveEagerModulesFromRuntimePlugin {
           (chunks: Iterable<Chunk>, modules: Iterable<Module>) => {
             for (const chunk of chunks) {
               if (chunk.hasRuntime() && chunk.name === this.container) {
-                const eagerModulesInRemote = this.getEagerModulesInRemote(
-                  compilation,
-                  chunk
-                );
-                this.processModules(
-                  compilation,
-                  chunk,
-                  modules,
-                  eagerModulesInRemote
-                );
-                this.removeDependentModules(compilation, chunk);
+                this.processModules(compilation, chunk, modules);
               }
             }
-          }
+          },
         );
-      }
+      },
     );
   }
 
-  private traverseModuleGraph(module: Module, compilation: Compilation) {
-    // Check if module has been visited before
-    if (this.visitedModules.has(module)) {
-      return; // Skip traversal if module has been visited
-    }
-
-    this.visitedModules.add(module); // Mark module as visited
-
-    // Skip traversal for certain module types
-    if (
-      module.constructor.name === 'ExternalModule' ||
-      module.type === 'provide-module' ||
-      module.type === 'consume-shared-module' ||
-      //@ts-ignore
-      module.buildMeta?.eager // added flag from other plugin, non standard module api
-    ) {
-      // could also use outgoing module connections to find modules that are not connected to the runtime
-      return;
-    }
-
-    this.dependentModules.add(module); // Add module to dependent modules set
-
-    module.dependencies.forEach((dependency) => {
-      // Get the dependent module using moduleGraph
-      const dependentModule = compilation.moduleGraph.getModule(dependency);
-
-      // If dependent module exists and is not already in dependentModules set, traverse it
-      if (dependentModule && !this.dependentModules.has(dependentModule)) {
-        this.traverseModuleGraph(dependentModule, compilation);
-      }
-    });
-  }
-
-  private getEagerModulesInRemote(compilation: Compilation, chunk: Chunk) {
-    const eagerModulesInRemote: Set<string> = new Set();
-    const iterableModules =
-      compilation.chunkGraph.getChunkModulesIterableBySourceType(
-        chunk,
-        'share-init'
-      ) || [];
-
-    for (const module of iterableModules) {
-      if ((module as any)._eager) {
-        //@ts-ignore
-        eagerModulesInRemote.add((module as any)._request);
-      }
-
-      if (
-        (module as any)?._eager ||
-        (module as any)?._name?.startsWith('next')
-      ) {
-        compilation.chunkGraph.disconnectChunkAndModule(chunk, module);
-      }
-    }
-    return eagerModulesInRemote;
-  }
-
+  /**
+   * Processes the modules in the chunk.
+   * @param {Compilation} compilation - The webpack compilation.
+   * @param {Chunk} chunk - The chunk to process.
+   * @param {Iterable<Module>} modules - The modules in the chunk.
+   */
   private processModules(
     compilation: Compilation,
     chunk: Chunk,
     modules: Iterable<Module>,
-    eagerModulesInRemote: Set<string>
   ) {
     for (const module of modules) {
       if (!compilation.chunkGraph.isModuleInChunk(module, chunk)) {
         continue;
       }
 
-      if (
-        module.constructor.name === 'NormalModule' &&
-        eagerModulesInRemote.has((module as any).resource)
-      ) {
-        this.traverseModuleGraph(module, compilation);
+      if (module.constructor.name === 'NormalModule') {
+        this.modulesToProcess.add(module);
       }
     }
+
+    this.removeModules(compilation, chunk);
   }
 
-  private removeDependentModules(compilation: Compilation, chunk: Chunk) {
-    for (const moduleToRemove of this.dependentModules) {
+  /**
+   * Removes the modules from the chunk.
+   * @param {Compilation} compilation - The webpack compilation.
+   * @param {Chunk} chunk - The chunk to remove modules from.
+   */
+  private removeModules(compilation: Compilation, chunk: Chunk) {
+    for (const moduleToRemove of this.modulesToProcess) {
       if (this.debug) {
-        //@ts-ignore
-        console.log(
-          'removing',
-          (moduleToRemove as any)?.resource,
-          //@ts-ignore
-          moduleToRemove?.request,
-          chunk.name,
-          moduleToRemove.constructor.name
-        );
+        console.log('removing', moduleToRemove.constructor.name);
       }
 
       if (compilation.chunkGraph.isModuleInChunk(moduleToRemove, chunk)) {

@@ -1,82 +1,95 @@
-import AdmZip from 'adm-zip'
-import axios from 'axios'
-import {existsSync, mkdirSync, mkdtempSync, rmSync} from 'fs'
-import os from 'os'
-import {join} from 'path'
-import {afterAll, describe, expect, it, vi} from 'vitest'
+import AdmZip from 'adm-zip';
+import axios from 'axios';
+import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'fs';
+import os from 'os';
+import { join } from 'path';
+import { afterAll, describe, expect, it, vi } from 'vitest';
 
-import {RemoteOptions} from '../interfaces/RemoteOptions'
-import {createTypesArchive, downloadTypesArchive} from './archiveHandler'
+import { RemoteOptions } from '../interfaces/RemoteOptions';
+import { createTypesArchive, downloadTypesArchive } from './archiveHandler';
 
 describe('archiveHandler', () => {
-  const tmpDir = mkdtempSync(join(os.tmpdir(), 'archive-handler'))
+  const tmpDir = mkdtempSync(join(os.tmpdir(), 'archive-handler'));
   const tsConfig = {
-    outDir: join(tmpDir, 'typesRemoteFolder', 'compiledTypesFolder')
-  }
+    outDir: join(tmpDir, 'typesRemoteFolder', 'compiledTypesFolder'),
+  };
 
-  mkdirSync(tsConfig.outDir, {recursive: true})
+  mkdirSync(tsConfig.outDir, { recursive: true });
 
   afterAll(() => {
-    rmSync(tmpDir, {recursive: true})
-  })
+    rmSync(tmpDir, { recursive: true });
+  });
 
   describe('createTypesArchive', () => {
-    const remoteOptions  = {
+    const remoteOptions = {
       additionalFilesToCompile: [],
       compiledTypesFolder: 'compiledTypesFolder',
       typesFolder: 'typesRemoteFolder',
       moduleFederationConfig: {},
       tsConfigPath: './tsconfig.json',
-      deleteTypesFolder: false
+      deleteTypesFolder: false,
     } as unknown as Required<RemoteOptions>;
 
     it('correctly creates archive', async () => {
-      const archivePath = join(tmpDir, `${remoteOptions.typesFolder}.zip`)
+      const archivePath = join(tmpDir, `${remoteOptions.typesFolder}.zip`);
 
-      const archiveCreated = await createTypesArchive(tsConfig, remoteOptions)
+      const archiveCreated = await createTypesArchive(tsConfig, remoteOptions);
 
-      expect(archiveCreated).toBeTruthy()
-      expect(existsSync(archivePath)).toBeTruthy()
-    })
+      expect(archiveCreated).toBeTruthy();
+      expect(existsSync(archivePath)).toBeTruthy();
+    });
 
     it('throws for unexisting outDir', async () => {
-      expect(createTypesArchive({...tsConfig, outDir: '/foo'}, remoteOptions)).rejects.toThrowError()
-    })
-  })
+      expect(
+        createTypesArchive({ ...tsConfig, outDir: '/foo' }, remoteOptions),
+      ).rejects.toThrowError();
+    });
+  });
 
   describe('downloadTypesArchive', () => {
     const hostOptions = {
       moduleFederationConfig: {},
       typesFolder: tmpDir,
-      deleteTypesFolder: true
-    }
+      deleteTypesFolder: true,
+    };
 
     it('throws for unexisting url', async () => {
-      expect(downloadTypesArchive(hostOptions)([tmpDir, 'https://foo.it']))
-        .rejects.toThrowError('Network error: Unable to download federated mocks');
-        // .rejects.toThrowError('getaddrinfo ENOTFOUND foo.it')
-    })
+      expect(
+        downloadTypesArchive(hostOptions)([tmpDir, 'https://foo.it']),
+      ).rejects.toThrowError(
+        'Network error: Unable to download federated mocks',
+      );
+      // .rejects.toThrowError('getaddrinfo ENOTFOUND foo.it')
+    });
 
     it('correctly extract downloaded archive', async () => {
-      const archivePath = join(tmpDir, 'typesHostFolder')
-      const zip = new AdmZip()
-      await zip.addLocalFolderPromise(tmpDir, {})
+      const archivePath = join(tmpDir, 'typesHostFolder');
+      const zip = new AdmZip();
+      await zip.addLocalFolderPromise(tmpDir, {});
 
-      axios.get = vi.fn().mockResolvedValueOnce({data: zip.toBuffer()})
+      axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
-      await downloadTypesArchive(hostOptions)(['typesHostFolder', 'https://foo.it'])
-      expect(existsSync(archivePath)).toBeTruthy()
-    })
+      await downloadTypesArchive(hostOptions)([
+        'typesHostFolder',
+        'https://foo.it',
+      ]);
+      expect(existsSync(archivePath)).toBeTruthy();
+    });
 
     it('correctly handle exception', async () => {
-      const message = 'Rejected value'
+      const message = 'Rejected value';
 
-      const zip = new AdmZip()
-      await zip.addLocalFolderPromise(tmpDir, {})
+      const zip = new AdmZip();
+      await zip.addLocalFolderPromise(tmpDir, {});
 
-      axios.get = vi.fn().mockRejectedValueOnce({message})
+      axios.get = vi.fn().mockRejectedValueOnce({ message });
 
-      expect(() => downloadTypesArchive(hostOptions)(['typesHostFolder', 'https://foo.it'])).rejects.toThrowError(message)
-    })
-  })
-})
+      expect(() =>
+        downloadTypesArchive(hostOptions)([
+          'typesHostFolder',
+          'https://foo.it',
+        ]),
+      ).rejects.toThrowError(message);
+    });
+  });
+});

@@ -11,14 +11,12 @@ import { getScope } from './scopes';
  */
 export function registerContainer(
   asyncContainer: AsyncContainer,
-  remoteOptions: RemoteOptions
+  remoteOptions: RemoteOptions,
 ) {
   const globalScope = getScope();
   const containerKey = getContainerKey(remoteOptions);
 
-  if (globalScope[containerKey]) return;
-
-  globalScope[containerKey] = asyncContainer;
+  globalScope[containerKey] ??= asyncContainer;
 }
 
 /**
@@ -27,11 +25,10 @@ export function registerContainer(
 // TODO: @param remoteOptions -  Should string type be deprecated?
 export function getContainerKey(remoteOptions: string | RemoteOptions): string {
   if (typeof remoteOptions === 'string') {
-    return remoteOptions as string;
+    return remoteOptions;
   }
 
-  const options = remoteOptions as RemoteOptions;
-  return options.uniqueKey ? options.uniqueKey : options.global;
+  return remoteOptions.uniqueKey || remoteOptions.global;
 }
 
 /**
@@ -40,16 +37,13 @@ export function getContainerKey(remoteOptions: string | RemoteOptions): string {
  * @returns
  */
 // @param remoteContainer -  Should string type be deprecated?
-export async function getContainer(remoteContainer: string | RemoteOptions): Promise<RemoteContainer | undefined> {
+export async function getContainer(
+  remoteContainer: string | RemoteOptions,
+): Promise<RemoteContainer | undefined> {
   const globalScope = getScope();
 
   if (!remoteContainer) {
     throw Error(`Remote container options is empty`);
-  }
-
-  if (typeof remoteContainer === 'string' && globalScope[remoteContainer]) {
-    const container = globalScope[remoteContainer] as AsyncContainer;
-    return await container;
   }
 
   const uniqueKey = getContainerKey(remoteContainer);
@@ -66,7 +60,7 @@ export async function getContainer(remoteContainer: string | RemoteOptions): Pro
  */
 export async function initContainer(
   asyncContainer: AsyncContainer,
-  sharedScope: SharedScope
+  sharedScope: SharedScope,
 ): Promise<RemoteContainer> {
   const remoteContainer = await asyncContainer;
 

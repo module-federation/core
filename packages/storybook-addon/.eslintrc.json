@@ -8,7 +8,13 @@
         "@nx/enforce-module-boundaries": [
           "error",
           {
-            "allow": ["@storybook/**", "fs", "os", "path", "webpack-virtual-modules"]
+            "allow": [
+              "@storybook/**",
+              "fs",
+              "os",
+              "path",
+              "webpack-virtual-modules"
+            ]
           }
         ]
       }

@@ -1,6 +1,6 @@
-import {describe, expect, it} from 'vitest'
+import { describe, expect, it } from 'vitest';
 
-import {retrieveHostConfig} from './hostPlugin'
+import { retrieveHostConfig } from './hostPlugin';
 
 describe('hostPlugin', () => {
   const moduleFederationConfig = {
@@ -10,67 +10,72 @@ describe('hostPlugin', () => {
       moduleFederationTypescript: 'http://localhost:3000/remoteEntry.js',
     },
     shared: {
-      react: {singleton: true, eager: true},
-      'react-dom': {singleton: true, eager: true}
+      react: { singleton: true, eager: true },
+      'react-dom': { singleton: true, eager: true },
     },
-  }
+  };
 
   describe('retrieveHostConfig', () => {
     it('throws for missing module federation configuration', () => {
       // @ts-expect-error Missing module federation configuration
-      const invokeRetrieve = () => retrieveHostConfig({})
-      expect(invokeRetrieve).toThrowError('moduleFederationConfig is required')
-    })
+      const invokeRetrieve = () => retrieveHostConfig({});
+      expect(invokeRetrieve).toThrowError('moduleFederationConfig is required');
+    });
 
     describe('correctly intersect with default options', () => {
       it('only moduleFederationConfig provided', () => {
-        const {hostOptions, mapRemotesToDownload} = retrieveHostConfig({
-          moduleFederationConfig
-        })
+        const { hostOptions, mapRemotesToDownload } = retrieveHostConfig({
+          moduleFederationConfig,
+        });
 
         expect(hostOptions).toStrictEqual({
           moduleFederationConfig,
           testsFolder: '@mf-tests',
           deleteTestsFolder: true,
           mocksFolder: './__mocks__',
-        })
+        });
 
         expect(mapRemotesToDownload).toStrictEqual({
-          moduleFederationTypescript: 'http://localhost:3000/@mf-tests.zip'
-        })
-      })
+          moduleFederationTypescript: 'http://localhost:3000/@mf-tests.zip',
+        });
+      });
 
       it('all options provided', () => {
         const options = {
           moduleFederationConfig,
           mocksFolder: './__mocks__',
           testsFolder: 'custom-tests',
-          deleteTestsFolder: false
-        }
+          deleteTestsFolder: false,
+        };
 
-        const {hostOptions, mapRemotesToDownload} = retrieveHostConfig(options)
+        const { hostOptions, mapRemotesToDownload } =
+          retrieveHostConfig(options);
 
-        expect(hostOptions).toStrictEqual(options)
+        expect(hostOptions).toStrictEqual(options);
 
         expect(mapRemotesToDownload).toStrictEqual({
-          moduleFederationTypescript: 'http://localhost:3000/custom-tests.zip'
-        })
-      })
-    })
+          moduleFederationTypescript: 'http://localhost:3000/custom-tests.zip',
+        });
+      });
+    });
 
     it('correctly resolve subpath remotes', () => {
       const subpathModuleFederationConfig = {
         ...moduleFederationConfig,
         remotes: {
-          moduleFederationTypescript: 'http://localhost:3000/subpatha/subpathb/remoteEntry.js',
-        }
-      }
+          moduleFederationTypescript:
+            'http://localhost:3000/subpatha/subpathb/remoteEntry.js',
+        },
+      };
 
-      const {mapRemotesToDownload} = retrieveHostConfig({moduleFederationConfig: subpathModuleFederationConfig})
+      const { mapRemotesToDownload } = retrieveHostConfig({
+        moduleFederationConfig: subpathModuleFederationConfig,
+      });
 
       expect(mapRemotesToDownload).toStrictEqual({
-        moduleFederationTypescript: 'http://localhost:3000/subpatha/subpathb/@mf-tests.zip'
-      })
-    })
-  })
-})
+        moduleFederationTypescript:
+          'http://localhost:3000/subpatha/subpathb/@mf-tests.zip',
+      });
+    });
+  });
+});

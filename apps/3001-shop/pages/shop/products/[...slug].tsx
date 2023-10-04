@@ -13,7 +13,9 @@ export default function ProductPage() {
 
   const { query } = useRouter();
 
-  if (cnt === 0) return null;
+  if (cnt === 0) {
+    return null;
+  }
 
   return (
     <div>

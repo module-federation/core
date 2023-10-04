@@ -1,6 +1,12 @@
 {
   "extends": ["../../.eslintrc.json"],
   "ignorePatterns": ["!**/*"],
+  "env": {
+    "jest": true
+  },
+  "globals": {
+    "__webpack_require__": "writable"
+  },
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
@@ -8,7 +14,9 @@
     },
     {
       "files": ["*.ts", "*.tsx"],
-      "rules": {}
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off"
+      }
     },
     {
       "files": ["*.js", "*.jsx"],
