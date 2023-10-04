@@ -2,6 +2,16 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [8.0.1-2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-8.0.1-1...nextjs-mf-8.0.1-2) (2023-10-04)
+
+
+### Bug Fixes
+
+* move cache file hashing to next-mf ([11917bf](https://github.com/module-federation/nextjs-mf/commit/11917bf4500b9ebdb14b46631d89350a98511461))
+* preset process.env.NEXT_PRIVATE_LOCAL_WEBPACK ([dc236a1](https://github.com/module-federation/nextjs-mf/commit/dc236a15a4a8ffee42f8e50a78adc80ad4976fbc))
+
+
+
 ## [8.0.1-1](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-8.0.1-0...nextjs-mf-8.0.1-1) (2023-10-03)
 
 
