@@ -120,7 +120,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
 
 ## Requirement
 
-I set process.env.NEXT_PRIVATE_LOCAL_WEBPACK = 'true' inside this plugin, but its best if its set in env or command line export. 
+I set `process.env.NEXT_PRIVATE_LOCAL_WEBPACK = 'true'` inside this plugin, but its best if its set in env or command line export. 
 
 "Local Webpack" means you must have webpack installed as a dependency, and next will not use its bundled copy of webpack which cannot be used as i need access to all of webpack internals
 
