@@ -80,10 +80,11 @@ export class FederatedTypesPlugin {
     }
 
     if (!disableTypeCompilation) {
-      compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (_, params) => {
+      compiler.hooks.afterEmit.tap(PLUGIN_NAME, (compilation) => {
         this.logger.log('Preparing to Generate types');
 
-        (params as CompilationParams).federated_types = this.compileTypes();
+        (compilation.params as CompilationParams).federated_types =
+          this.compileTypes();
       });
 
       new FederatedTypesStatsPlugin(this.normalizeOptions).apply(compiler);
