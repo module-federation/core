@@ -7,21 +7,27 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: nikita.demchenko@valor-software.com\n"
 "POT-Creation-Date: 2023-07-25 20:53+0300\n"
-"PO-Revision-Date: 2023-07-25 20:53+0300\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2023-10-06 14:12+0000\n"
+"Last-Translator: Nikita <omfgnuts@gmail.com>\n"
+"Language-Team: Spanish <https://hosted.weblate.org/projects/"
+"module-federation-documentation-oss/"
+"module-federation-documentation-main-docs/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.1-dev\n"
 
 #. type: Title =
 #: src/en/modules/ROOT/pages/best-practices.adoc:1
 #, no-wrap
 msgid "Designing Your Application for Module Federation: Best Practices and Tips"
 msgstr ""
+"Diseño de su aplicación para la federación de módulos: mejores prácticas y "
+"consejos"
 
 #. type: Plain text
 #: src/en/modules/ROOT/pages/best-practices.adoc:2
