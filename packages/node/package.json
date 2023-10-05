@@ -37,7 +37,7 @@
   "dependencies": {
     "node-fetch": "^2.6.7",
     "encoding": "^0.1.13",
-    "@module-federation/utilities": "3.0.2-beta.0"
+    "@module-federation/utilities": "3.0.2"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",
