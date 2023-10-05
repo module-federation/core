@@ -36,8 +36,7 @@
   "license": "MIT",
   "dependencies": {
     "node-fetch": "^2.6.7",
-    "encoding": "^0.1.13",
-    "@module-federation/utilities": "3.0.2-beta.0"
+    "encoding": "^0.1.13"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",
