@@ -36,6 +36,7 @@ class AsyncBoundaryPlugin {
       (compilation: Compilation) => {
         const hooks =
           javascript.JavascriptModulesPlugin.getCompilationHooks(compilation);
+       
         hooks.renderStartup.tap(
           'AsyncBoundaryPlugin',
           (
@@ -75,7 +76,10 @@ class AsyncBoundaryPlugin {
 
     const { chunkGraph } = compilation;
     const replaceSource = source.source().toString();
-    const [webpack_exec, ...webpack_exports] = replaceSource.split('\n');
+    const replaceSourceLines = replaceSource.split('\n');
+    const webpack_exec_index = replaceSourceLines.findIndex(line => line.includes('webpack_exec'));
+    const webpack_exec = replaceSourceLines[webpack_exec_index];
+    const webpack_exports = replaceSourceLines.slice(webpack_exec_index + 1);
     const dependentChunkIds = this.getDependentChunkIds(
       startupRenderContext,
       chunkGraph,
@@ -87,10 +91,14 @@ class AsyncBoundaryPlugin {
       `var __webpack_exec__ = async function() {`,
       Template.indent([
         `var chunkIds = ${JSON.stringify(Array.from(dependentChunkIds))};`,
-        `chunkIds.forEach(function(id) { ${RuntimeGlobals.ensureChunkHandlers}.consumes(id, globalThis.ongoingRemotes); });`,
-        `await Promise.all(globalThis.ongoingRemotes);`,
-        `chunkIds.forEach(function(id) { ${RuntimeGlobals.ensureChunkHandlers}.remotes(id, globalThis.ongoingRemotes); });`,
-        `await Promise.all(globalThis.ongoingRemotes);`,
+        `if (${RuntimeGlobals.ensureChunkHandlers}.consumes) {`,
+        `  chunkIds.forEach(function(id) { ${RuntimeGlobals.ensureChunkHandlers}.consumes(id, globalThis.ongoingRemotes); });`,
+        `  await Promise.all(globalThis.ongoingRemotes);`,
+        `}`,
+        `if (${RuntimeGlobals.ensureChunkHandlers}.remotes) {`,
+        `  chunkIds.forEach(function(id) { ${RuntimeGlobals.ensureChunkHandlers}.remotes(id, globalThis.ongoingRemotes); });`,
+        `  await Promise.all(globalThis.ongoingRemotes);`,
+        `}`,
         `return  __original_webpack_exec__.apply(this, arguments);`,
       ]),
       `};`,
