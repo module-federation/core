@@ -92,6 +92,11 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     import: undefined,
   },
+  'styled-jsx/css': {
+    requiredVersion: false,
+    singleton: true,
+    import: undefined,
+  },
 };
 
 /**
