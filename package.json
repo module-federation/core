@@ -86,7 +86,7 @@
     "@babel/preset-react": "^7.14.5",
     "@builder.io/partytown": "0.8.1",
     "@builder.io/qwik": "1.2.12",
-    "@builder.io/qwik-city": "1.2.12",
+    "@builder.io/qwik-city": "1.2.13",
     "@commitlint/cli": "17.7.2",
     "@commitlint/config-conventional": "17.7.0",
     "@dqbd/tiktoken": "1.0.7",
