@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [8.0.1-3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-8.0.1-2...nextjs-mf-8.0.1-3) (2023-10-07)
+
+
+### Bug Fixes
+
+* share styled-jsx/css ([0a44bbd](https://github.com/module-federation/nextjs-mf/commit/0a44bbdbac5f9b1debb8680894265e3670f0ac51))
+
+
+
 ## [8.0.1-2](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-8.0.1-1...nextjs-mf-8.0.1-2) (2023-10-04)
 
 
