@@ -2,6 +2,20 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [0.1.0](https://github.com/module-federation/nextjs-mf/compare/enhanced-0.0.4-0...enhanced-0.1.0) (2023-10-07)
+
+
+### Bug Fixes
+
+* ensure chunk handler exists before calling it ([98ba838](https://github.com/module-federation/nextjs-mf/commit/98ba838f979bbef11f5d678c3bf27a4de534cf9d))
+
+
+### Features
+
+* AddRuntimeRequirementToPromiseExternal ([9bc5a20](https://github.com/module-federation/nextjs-mf/commit/9bc5a20b54228de7d1f2554eee10360a34e8d8a1))
+
+
+
 ## [0.0.4-0](https://github.com/module-federation/nextjs-mf/compare/enhanced-0.0.3...enhanced-0.0.4-0) (2023-10-03)
 
 
