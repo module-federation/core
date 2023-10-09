@@ -4,17 +4,19 @@ import axios from 'axios';
 import { Compiler } from 'webpack';
 
 import { TypescriptCompiler } from '../lib/TypescriptCompiler';
-import { isObjectEmpty, normalizeOptions } from '../lib/normalizeOptions';
-import { TypesCache } from '../lib/Caching';
 import {
-  CompilationParams,
-  FederatedTypesPluginOptions,
-  TypesStatsJson,
-} from '../types';
+  DEFAULT_FETCH_MAX_RETRY_ATTEMPTS,
+  DEFAULT_FETCH_RETRY_DELAY,
+  DEFAULT_FETCH_TIMEOUT,
+  isObjectEmpty,
+  normalizeOptions,
+} from '../lib/normalizeOptions';
+import { TypesCache } from '../lib/Caching';
+import { FederatedTypesPluginOptions, TypesStatsJson } from '../types';
 
-import { FederatedTypesStatsPlugin } from './FederatedTypesStatsPlugin';
 import download from '../lib/download';
 import { Logger, LoggerInstance } from '../Logger';
+import { generateTypesStats } from '../lib/generateTypesStats';
 
 const PLUGIN_NAME = 'FederatedTypesPlugin';
 const SUPPORTED_PLUGINS = ['ModuleFederationPlugin', 'NextFederationPlugin'];
@@ -54,40 +56,57 @@ export class FederatedTypesPlugin {
     compiler.options.watchOptions.ignored =
       this.normalizeOptions.ignoredWatchOptions;
 
-    if (!disableDownloadingRemoteTypes) {
-      const importRemotes = async (
-        callback: Parameters<
-          Parameters<typeof compiler.hooks.beforeRun.tapAsync>['1']
-        >['1'],
-      ) => {
-        try {
-          await this.importRemoteTypes();
+    const importRemotes = async (
+      callback: Parameters<
+        Parameters<typeof compiler.hooks.beforeRun.tapAsync>['1']
+      >['1'],
+    ) => {
+      try {
+        await this.importRemoteTypes();
+        callback();
+      } catch (error) {
+        callback(this.getError(error));
+      }
+    };
+
+    if (!disableTypeCompilation) {
+      compiler.hooks.afterEmit.tapAsync(PLUGIN_NAME, async (_, callback) => {
+        this.logger.log('Preparing to Generate types');
+        const federatedTypesMap = this.compileTypes();
+
+        const { typesIndexJsonFilePath, publicPath } = this.normalizeOptions;
+
+        const statsJson: TypesStatsJson = {
+          publicPath,
+          files: generateTypesStats(federatedTypesMap, this.normalizeOptions),
+        };
+
+        if (Object.entries(statsJson.files).length === 0) {
           callback();
-        } catch (error) {
-          callback(this.getError(error));
+          return;
         }
-      };
 
-      compiler.hooks.beforeRun.tapAsync(PLUGIN_NAME, async (_, callback) => {
-        this.logger.log('Preparing to download types from remotes on startup');
-        await importRemotes(callback);
-      });
+        const dest = path.join(compiler.outputPath, typesIndexJsonFilePath);
 
-      compiler.hooks.watchRun.tapAsync(PLUGIN_NAME, async (_, callback) => {
-        this.logger.log('Preparing to download types from remotes');
-        await importRemotes(callback);
+        await fs.writeFile(dest, JSON.stringify(statsJson), (error) => {
+          callback(error);
+          if (error) {
+            throw error;
+          }
+        });
       });
     }
 
-    if (!disableTypeCompilation) {
-      compiler.hooks.afterEmit.tap(PLUGIN_NAME, (compilation) => {
-        this.logger.log('Preparing to Generate types');
-
-        (compilation.params as CompilationParams).federated_types =
-          this.compileTypes();
-      });
-
-      new FederatedTypesStatsPlugin(this.normalizeOptions).apply(compiler);
+    if (!disableDownloadingRemoteTypes) {
+      compiler.hooks.beforeCompile.tapAsync(
+        PLUGIN_NAME,
+        async (_, callback) => {
+          this.logger.log(
+            'Preparing to download types from remotes on startup',
+          );
+          await importRemotes(callback);
+        },
+      );
     }
   }
 
@@ -110,6 +129,10 @@ export class FederatedTypesPlugin {
       this.logger.error(error);
       throw error;
     }
+  }
+
+  private async delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private async importRemoteTypes() {
@@ -138,75 +161,126 @@ export class FederatedTypesPlugin {
     );
 
     for await (const { origin, remote } of remoteUrls) {
-      const { typescriptFolderName, downloadRemoteTypesTimeout } =
-        this.normalizeOptions;
+      const { typescriptFolderName, typeFetchOptions } = this.normalizeOptions;
 
-      try {
-        this.logger.log(`Getting types index for remote '${remote}'`);
-        const resp = await axios.get<TypesStatsJson>(
-          `${origin}/${this.normalizeOptions.typesIndexJsonFileName}`,
-          { timeout: downloadRemoteTypesTimeout },
-        );
+      const {
+        shouldRetryOnTypesNotFound,
+        downloadRemoteTypesTimeout,
+        retryDelay,
+        maxRetryAttempts,
+        shouldRetry,
+      } = typeFetchOptions;
 
-        const statsJson = resp.data;
+      const isRetrying = shouldRetry || shouldRetryOnTypesNotFound;
 
-        if (statsJson?.files) {
-          this.logger.log(`Checking with Cache entries`);
+      const maxRetryCount = !isRetrying
+        ? 0
+        : maxRetryAttempts ?? DEFAULT_FETCH_MAX_RETRY_ATTEMPTS;
 
-          const { filesToCacheBust, filesToDelete } =
-            TypesCache.getCacheBustedFiles(remote, statsJson);
+      let retryCount = 0;
+      let delay = retryDelay ?? DEFAULT_FETCH_RETRY_DELAY;
 
-          this.logger.log('filesToCacheBust', filesToCacheBust);
-          this.logger.log('filesToDelete', filesToDelete);
+      while (retryCount < maxRetryCount) {
+        try {
+          await this.downloadTypesFromRemote(
+            remote,
+            origin,
+            downloadRemoteTypesTimeout ?? DEFAULT_FETCH_TIMEOUT,
+            shouldRetryOnTypesNotFound ?? false,
+            typescriptFolderName,
+          );
+          break;
+        } catch (error) {
+          this.logger.error(`Unable to download types from remote '${remote}'`);
+          this.logger.log(error);
 
-          if (filesToDelete.length > 0) {
-            filesToDelete.forEach((file) => {
-              fs.unlinkSync(
-                path.resolve(
-                  this.normalizeOptions.webpackCompilerOptions
-                    .context as string,
-                  typescriptFolderName,
-                  remote,
-                  file,
-                ),
-              );
-            });
-          }
-
-          if (filesToCacheBust.length > 0) {
-            await Promise.all(
-              filesToCacheBust.map((file) => {
-                const url = new URL(
-                  path.join(origin, typescriptFolderName, file),
-                ).toString();
-                const destination = path.join(
-                  this.normalizeOptions.webpackCompilerOptions
-                    .context as string,
-                  typescriptFolderName,
-                  remote,
-                );
-
-                this.logger.log('Downloading types...');
-                return download({
-                  url,
-                  destination,
-                  filename: file,
-                });
-              }),
+          if (isRetrying) {
+            retryCount++;
+            delay = 1000 * retryCount;
+            this.logger.log(
+              `Retrying download of types from remote '${remote}' in ${delay}ms`,
             );
-
-            this.logger.log('downloading complete');
+            await this.delay(delay);
           }
-        } else {
-          this.logger.log(`No types index found for remote '${remote}'`);
         }
-      } catch (error) {
-        this.logger.error(
-          `Unable to download '${remote}' remote types index file: `,
-          (error as Error).message,
-        );
-        this.logger.log(error);
       }
+    }
+  }
+
+  private async downloadTypesFromRemote(
+    remote: string,
+    origin: string,
+    downloadRemoteTypesTimeout: number,
+    shouldRetryOnTypesNotFound: boolean,
+    typescriptFolderName: string,
+  ) {
+    try {
+      this.logger.log(`Getting types index for remote '${remote}'`);
+      const resp = await axios.get<TypesStatsJson>(
+        `${origin}/${this.normalizeOptions.typesIndexJsonFileName}`,
+        { timeout: downloadRemoteTypesTimeout },
+      );
+
+      const statsJson = resp.data;
+
+      if (statsJson?.files) {
+        this.logger.log(`Checking with Cache entries`);
+
+        const { filesToCacheBust, filesToDelete } =
+          TypesCache.getCacheBustedFiles(remote, statsJson);
+
+        this.logger.log('filesToCacheBust', filesToCacheBust);
+        this.logger.log('filesToDelete', filesToDelete);
+
+        if (filesToDelete.length > 0) {
+          filesToDelete.forEach((file) => {
+            fs.unlinkSync(
+              path.resolve(
+                this.normalizeOptions.webpackCompilerOptions.context as string,
+                typescriptFolderName,
+                remote,
+                file,
+              ),
+            );
+          });
+        }
+
+        if (filesToCacheBust.length > 0) {
+          await Promise.all(
+            filesToCacheBust.map((file) => {
+              const url = new URL(
+                path.join(origin, typescriptFolderName, file),
+              ).toString();
+              const destination = path.join(
+                this.normalizeOptions.webpackCompilerOptions.context as string,
+                typescriptFolderName,
+                remote,
+              );
+
+              this.logger.log('Downloading types...');
+              return download({
+                url,
+                destination,
+                filename: file,
+              });
+            }),
+          );
+
+          this.logger.log('downloading complete');
+        }
+      } else {
+        this.logger.log(`No types index found for remote '${remote}'`);
+
+        if (shouldRetryOnTypesNotFound) {
+          throw new Error(`shouldRetryOnTypesNotFound is enabled, retrying...`);
+        }
+      }
+    } catch (error) {
+      this.logger.error(
+        `Unable to download '${remote}' remote types index file: `,
+        (error as Error).message,
+      );
+      throw error;
     }
   }
 

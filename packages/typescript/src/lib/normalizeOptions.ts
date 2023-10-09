@@ -13,6 +13,10 @@ import {
 
 export type NormalizeOptions = ReturnType<typeof normalizeOptions>;
 
+export const DEFAULT_FETCH_TIMEOUT = 3000;
+export const DEFAULT_FETCH_MAX_RETRY_ATTEMPTS = 3;
+export const DEFAULT_FETCH_RETRY_DELAY = 1000;
+
 const defaultOptions: Required<
   Omit<FederatedTypesPluginOptions, 'federationConfig'>
 > = {
@@ -22,7 +26,12 @@ const defaultOptions: Required<
   typescriptFolderName: TYPESCRIPT_FOLDER_NAME,
   typescriptCompiledFolderName: TYPESCRIPT_COMPILED_FOLDER_NAME,
   additionalFilesToCompile: [],
-  downloadRemoteTypesTimeout: 2000,
+  typeFetchOptions: {
+    downloadRemoteTypesTimeout: DEFAULT_FETCH_TIMEOUT,
+    maxRetryAttempts: DEFAULT_FETCH_MAX_RETRY_ATTEMPTS,
+    retryDelay: DEFAULT_FETCH_RETRY_DELAY,
+    shouldRetry: true,
+  },
 };
 
 export const isObjectEmpty = <T extends object>(obj: T) => {
