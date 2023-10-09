@@ -196,11 +196,14 @@ export class FederatedTypesPlugin {
 
           if (isRetrying) {
             retryCount++;
-            delay = 1000 * retryCount;
-            this.logger.log(
-              `Retrying download of types from remote '${remote}' in ${delay}ms`,
-            );
-            await this.delay(delay);
+
+            if (retryCount < maxRetryCount) {
+              delay = 1000 * retryCount;
+              this.logger.log(
+                `Retrying download of types from remote '${remote}' in ${delay}ms`,
+              );
+              await this.delay(delay);
+            }
           }
         }
       }
