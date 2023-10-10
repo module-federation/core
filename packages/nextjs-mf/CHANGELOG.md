@@ -2,6 +2,16 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [8.0.1-4](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-8.0.1-3...nextjs-mf-8.0.1-4) (2023-10-10)
+
+
+### Bug Fixes
+
+* fix styled-jsx flushing ([207db51](https://github.com/module-federation/nextjs-mf/commit/207db51c16f9b92c8e0c25f0b2157359488e552d))
+* improve externals lookup ([5630eb9](https://github.com/module-federation/nextjs-mf/commit/5630eb9e891e5a819938f3eb9742a882dac1ef16))
+
+
+
 ## [8.0.1-3](https://github.com/module-federation/nextjs-mf/compare/nextjs-mf-8.0.1-2...nextjs-mf-8.0.1-3) (2023-10-07)
 
 
