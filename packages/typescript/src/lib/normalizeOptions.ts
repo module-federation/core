@@ -58,6 +58,11 @@ export const normalizeOptions = (
     ...options,
   };
 
+  const typeFetchOptions = {
+    ...defaultOptions.typeFetchOptions,
+    ...(options.typeFetchOptions ?? {}),
+  };
+
   const federationFileName = federationConfig.filename as string;
   const distPath =
     get(webpackCompilerOptions, 'devServer.static.directory') ||
@@ -102,6 +107,7 @@ export const normalizeOptions = (
 
   return {
     ...restOptions,
+    typeFetchOptions,
     distDir,
     publicPath,
     tsCompilerOptions,
