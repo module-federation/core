@@ -90,7 +90,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'styled-jsx/style': {
     requiredVersion: false,
     singleton: true,
-    import: undefined,
+    import: false,
   },
   'styled-jsx/css': {
     requiredVersion: false,

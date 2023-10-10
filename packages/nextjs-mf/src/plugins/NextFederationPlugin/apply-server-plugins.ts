@@ -130,7 +130,7 @@ export function handleServerExternals(
             return (
               //@ts-ignore
               options.shared?.[key]?.import !== false &&
-              ctx?.request?.includes(key)
+              (key.endsWith('/') ? ctx?.request?.startsWith(key) : ctx?.request === key)
             );
           }) ||
           ctx.request.includes('@module-federation/dashboard-plugin')
@@ -158,6 +158,7 @@ export function handleServerExternals(
         req.startsWith('react/') ||
         req.startsWith('react-dom/') ||
         req === 'react' ||
+        req === 'styled-jsx/style' ||
         req === 'react-dom'
       ) {
         return fromNext;
