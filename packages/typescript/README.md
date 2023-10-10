@@ -25,7 +25,7 @@ const federationConfig = {
     './Input': './src/Input',
   },
   remotes: {
-    app2: 'app2@http://localhost:3002/remoteEntry.js', // or Just the URL 'http://localhost:3002/remoteEntry.js'
+    app2: 'app2@http://localhost:3002/remoteEntry.js', // or Just the URL 'http://localhost:3002'
   },
   shared: ['react', 'react-dom'],
 };
@@ -43,6 +43,8 @@ module.exports = {
 ```
 
 If you are running multiple remotes that use bi-directional module sharing, you may run into race conditions while starting up the webpack-dev-servers. The library now supports configuring retry options, along with serving the types out of the webpack compiler in a separate HTTP host.
+
+Remember to only use <b>typeServeOptions</b> if you need to host them outside of webpack-dev-server locally, you'll also need to set the federationConfig for this plugin to reflect that new http server.
 
 ```typescript
 module.exports = {
