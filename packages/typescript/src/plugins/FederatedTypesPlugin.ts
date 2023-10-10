@@ -2,17 +2,20 @@ import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
 import { Compiler } from 'webpack';
-
+import { startServer, stopServer } from '../lib/server';
 import { TypescriptCompiler } from '../lib/TypescriptCompiler';
 import {
-  DEFAULT_FETCH_MAX_RETRY_ATTEMPTS,
-  DEFAULT_FETCH_RETRY_DELAY,
   DEFAULT_FETCH_TIMEOUT,
   isObjectEmpty,
   normalizeOptions,
+  validateTypeServeOptions,
 } from '../lib/normalizeOptions';
 import { TypesCache } from '../lib/Caching';
-import { FederatedTypesPluginOptions, TypesStatsJson } from '../types';
+import {
+  FederatedTypesPluginOptions,
+  TypeServeOptions,
+  TypesStatsJson,
+} from '../types';
 
 import download from '../lib/download';
 import { Logger, LoggerInstance } from '../Logger';
@@ -70,31 +73,7 @@ export class FederatedTypesPlugin {
     };
 
     if (!disableTypeCompilation) {
-      compiler.hooks.afterEmit.tapAsync(PLUGIN_NAME, async (_, callback) => {
-        this.logger.log('Preparing to Generate types');
-        const federatedTypesMap = this.compileTypes();
-
-        const { typesIndexJsonFilePath, publicPath } = this.normalizeOptions;
-
-        const statsJson: TypesStatsJson = {
-          publicPath,
-          files: generateTypesStats(federatedTypesMap, this.normalizeOptions),
-        };
-
-        if (Object.entries(statsJson.files).length === 0) {
-          callback();
-          return;
-        }
-
-        const dest = path.join(compiler.outputPath, typesIndexJsonFilePath);
-
-        await fs.writeFile(dest, JSON.stringify(statsJson), (error) => {
-          callback(error);
-          if (error) {
-            throw error;
-          }
-        });
-      });
+      this.handleTypeGenerate(compiler, this.normalizeOptions.typeServeOptions);
     }
 
     if (!disableDownloadingRemoteTypes) {
@@ -104,10 +83,71 @@ export class FederatedTypesPlugin {
           this.logger.log(
             'Preparing to download types from remotes on startup',
           );
+
           await importRemotes(callback);
         },
       );
     }
+  }
+
+  private handleTypeGenerate(
+    compiler: Compiler,
+    typeServeOptions: TypeServeOptions | undefined,
+  ) {
+    if (typeServeOptions) {
+      compiler.hooks.beforeCompile.tapAsync(
+        PLUGIN_NAME,
+        async (_, callback) => {
+          this.logger.log('Preparing to serve types');
+
+          validateTypeServeOptions(typeServeOptions);
+
+          await startServer({
+            outputPath: compiler.outputPath,
+            host: typeServeOptions.host,
+            port: typeServeOptions.port,
+            logger: this.logger,
+          });
+
+          callback();
+        },
+      );
+
+      compiler.hooks.failed.tap(PLUGIN_NAME, () => {
+        stopServer({ logger: this.logger });
+      });
+
+      compiler.hooks.done.tap(PLUGIN_NAME, () => {
+        stopServer({ logger: this.logger });
+      });
+    }
+
+    compiler.hooks.afterEmit.tapAsync(PLUGIN_NAME, async (_, callback) => {
+      this.logger.log('Preparing to Generate types');
+
+      const federatedTypesMap = this.compileTypes();
+
+      const { typesIndexJsonFilePath, publicPath } = this.normalizeOptions;
+
+      const statsJson: TypesStatsJson = {
+        publicPath,
+        files: generateTypesStats(federatedTypesMap, this.normalizeOptions),
+      };
+
+      if (Object.entries(statsJson.files).length === 0) {
+        callback();
+        return;
+      }
+
+      const dest = path.join(compiler.outputPath, typesIndexJsonFilePath);
+
+      await fs.writeFile(dest, JSON.stringify(statsJson), (error) => {
+        callback(error);
+        if (error) {
+          throw error;
+        }
+      });
+    });
   }
 
   private compileTypes() {
@@ -148,8 +188,12 @@ export class FederatedTypesPlugin {
 
     this.logger.log('Normalizing remote URLs');
     const remoteUrls = Object.entries(remoteComponents).map(
-      ([remote, entry]) => {
-        const remoteUrl = entry.substring(0, entry.lastIndexOf('/'));
+      ([remote, entry]: [string, string]) => {
+        let urlEndIndex = entry.length;
+        if (entry.endsWith('.js')) {
+          urlEndIndex = entry.lastIndexOf('/');
+        }
+        const remoteUrl = entry.substring(0, urlEndIndex);
         const splitIndex = remoteUrl.indexOf('@');
         const url = remoteUrl.substring(splitIndex + 1);
 
@@ -173,20 +217,18 @@ export class FederatedTypesPlugin {
 
       const isRetrying = shouldRetry || shouldRetryOnTypesNotFound;
 
-      const maxRetryCount = !isRetrying
-        ? 0
-        : maxRetryAttempts ?? DEFAULT_FETCH_MAX_RETRY_ATTEMPTS;
+      const maxRetryCount = !isRetrying ? 0 : maxRetryAttempts!;
 
       let retryCount = 0;
-      let delay = retryDelay ?? DEFAULT_FETCH_RETRY_DELAY;
+      let delay = retryDelay!;
 
       while (retryCount < maxRetryCount) {
         try {
           await this.downloadTypesFromRemote(
             remote,
             origin,
-            downloadRemoteTypesTimeout ?? DEFAULT_FETCH_TIMEOUT,
-            shouldRetryOnTypesNotFound ?? false,
+            downloadRemoteTypesTimeout!,
+            shouldRetryOnTypesNotFound!,
             typescriptFolderName,
           );
           break;
@@ -198,7 +240,7 @@ export class FederatedTypesPlugin {
             retryCount++;
 
             if (retryCount < maxRetryCount) {
-              delay = 1000 * retryCount;
+              delay = retryDelay! * retryCount;
               this.logger.log(
                 `Retrying download of types from remote '${remote}' in ${delay}ms`,
               );

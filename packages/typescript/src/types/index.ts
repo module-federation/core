@@ -18,11 +18,18 @@ export interface TypeFetchOptions {
    * @default 1000  */
   retryDelay?: number;
   /** Should retry if no types are found in destination.
-   * @default false  */
+   * @default true  */
   shouldRetryOnTypesNotFound?: boolean;
   /** Should retry type fetching operations.
    * @default true  */
   shouldRetry?: boolean;
+}
+
+export interface TypeServeOptions {
+  /** The port to serve type files on, this is separate from the webpack dev server port. */
+  port?: number;
+  /** The host to serve type files on. */
+  host?: string;
 }
 
 export interface FederatedTypesPluginOptions {
@@ -37,6 +44,7 @@ export interface FederatedTypesPluginOptions {
   /** @default 'tsc' */
   compiler?: 'tsc' | 'vue-tsc';
   typeFetchOptions?: TypeFetchOptions;
+  typeServeOptions?: TypeServeOptions;
 }
 
 export interface TypesStatsJson {

@@ -42,6 +42,44 @@ module.exports = {
 };
 ```
 
+If you are running multiple remotes that use bi-directional module sharing, you may run into race conditions while starting up the webpack-dev-servers. The library now supports configuring retry options, along with serving the types out of the webpack compiler in a separate HTTP host.
+
+```typescript
+module.exports = {
+  /* ... */
+  plugins: [
+    // ...
+    new FederatedTypesPlugin({
+      federationConfig,
+      typeFetchOptions: {
+        /** The maximum time to wait for downloading remote types in milliseconds.
+         * @default 2000  */
+        downloadRemoteTypesTimeout?: number;
+        /** The maximum number of retry attempts.
+         * @default 3  */
+        maxRetryAttempts?: number;
+        /** The default number of milliseconds between retries.
+         * @default 1000  */
+        retryDelay?: number;
+        /** Should retry if no types are found in destination. This could be due to another instance still compiling.
+         * @default true  */
+        shouldRetryOnTypesNotFound?: boolean;
+        /** Should retry type fetching operations.
+         * @default true  */
+        shouldRetry?: boolean;
+      },
+      typeServeOptions: {
+        /** The port to serve type files on, this is separate from the webpack dev server port. */
+        port?: number;
+        /** The host to serve type files on. */
+        host?: string;
+      }
+      // ...
+    }),
+  ],
+};
+```
+
 To enable verbose logging add folowing in webpack config:
 
 ```javascript

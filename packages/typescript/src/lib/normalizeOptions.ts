@@ -3,7 +3,7 @@ import { Compiler } from 'webpack';
 import get from 'lodash.get';
 import path from 'path';
 
-import type { FederatedTypesPluginOptions } from '../types';
+import type { FederatedTypesPluginOptions, TypeServeOptions } from '../types';
 
 import {
   TYPESCRIPT_COMPILED_FOLDER_NAME,
@@ -18,7 +18,7 @@ export const DEFAULT_FETCH_MAX_RETRY_ATTEMPTS = 3;
 export const DEFAULT_FETCH_RETRY_DELAY = 1000;
 
 const defaultOptions: Required<
-  Omit<FederatedTypesPluginOptions, 'federationConfig'>
+  Omit<FederatedTypesPluginOptions, 'federationConfig' | 'typeServeOptions'>
 > = {
   compiler: 'tsc',
   disableDownloadingRemoteTypes: false,
@@ -30,8 +30,23 @@ const defaultOptions: Required<
     downloadRemoteTypesTimeout: DEFAULT_FETCH_TIMEOUT,
     maxRetryAttempts: DEFAULT_FETCH_MAX_RETRY_ATTEMPTS,
     retryDelay: DEFAULT_FETCH_RETRY_DELAY,
+    shouldRetryOnTypesNotFound: true,
     shouldRetry: true,
   },
+};
+
+export const validateTypeServeOptions = (options: TypeServeOptions) => {
+  if (!options) {
+    throw new Error('TypeServeOptions is required');
+  }
+
+  if (!options.host) {
+    throw new Error('TypeServeOptions.host is required');
+  }
+
+  if (!options.port || !Number.isInteger(options.port)) {
+    throw new Error('TypeServeOptions.port is required');
+  }
 };
 
 export const isObjectEmpty = <T extends object>(obj: T) => {
@@ -56,6 +71,11 @@ export const normalizeOptions = (
   } = {
     ...defaultOptions,
     ...options,
+  };
+
+  const typeFetchOptions = {
+    ...defaultOptions.typeFetchOptions,
+    ...(options.typeFetchOptions ?? {}),
   };
 
   const federationFileName = federationConfig.filename as string;
@@ -102,6 +122,7 @@ export const normalizeOptions = (
 
   return {
     ...restOptions,
+    typeFetchOptions,
     distDir,
     publicPath,
     tsCompilerOptions,
