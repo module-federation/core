@@ -18,7 +18,7 @@ export interface TypeFetchOptions {
    * @default 1000  */
   retryDelay?: number;
   /** Should retry if no types are found in destination.
-   * @default false  */
+   * @default true  */
   shouldRetryOnTypesNotFound?: boolean;
   /** Should retry type fetching operations.
    * @default true  */

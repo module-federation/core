@@ -30,6 +30,7 @@ const defaultOptions: Required<
     downloadRemoteTypesTimeout: DEFAULT_FETCH_TIMEOUT,
     maxRetryAttempts: DEFAULT_FETCH_MAX_RETRY_ATTEMPTS,
     retryDelay: DEFAULT_FETCH_RETRY_DELAY,
+    shouldRetryOnTypesNotFound: true,
     shouldRetry: true,
   },
 };
