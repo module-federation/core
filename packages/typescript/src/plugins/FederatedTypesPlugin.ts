@@ -73,7 +73,10 @@ export class FederatedTypesPlugin {
     };
 
     if (!disableTypeCompilation) {
-      this.handleTypeGenerate(compiler, this.normalizeOptions.typeServeOptions);
+      this.handleTypeGeneration(
+        compiler,
+        this.normalizeOptions.typeServeOptions,
+      );
     }
 
     if (!disableDownloadingRemoteTypes) {
@@ -90,7 +93,7 @@ export class FederatedTypesPlugin {
     }
   }
 
-  private handleTypeGenerate(
+  private handleTypeGeneration(
     compiler: Compiler,
     typeServeOptions: TypeServeOptions | undefined,
   ) {
