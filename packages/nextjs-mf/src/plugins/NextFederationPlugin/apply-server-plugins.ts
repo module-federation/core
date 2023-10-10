@@ -121,6 +121,14 @@ export function handleServerExternals(
 
     // Replace the original externals function with a new asynchronous function
     compiler.options.externals[0] = async function (ctx: any, callback: any) {
+      //@ts-ignore
+      const fromNext = await originalExternals(ctx, callback);
+      // If the result is null, return without further processing
+      if (!fromNext) {
+        return;
+    }
+    // If the module is from Next.js or React, return the original result
+    const req = fromNext.split(' ')[1];
       // Check if the module should not be treated as external
       if (
         ctx.request &&
@@ -130,7 +138,7 @@ export function handleServerExternals(
             return (
               //@ts-ignore
               options.shared?.[key]?.import !== false &&
-              (key.endsWith('/') ? ctx?.request?.startsWith(key) : ctx?.request === key)
+              (key.endsWith('/') ? req.includes(key) : req === key)
             );
           }) ||
           ctx.request.includes('@module-federation/dashboard-plugin')
@@ -140,17 +148,7 @@ export function handleServerExternals(
         return;
       }
 
-      // Call the original externals function and retrieve the result
-      // @ts-ignore
-      const fromNext = await originalExternals(ctx, callback);
 
-      // If the result is null, return without further processing
-      if (!fromNext) {
-        return;
-      }
-
-      // If the module is from Next.js or React, return the original result
-      const req = fromNext.split(' ')[1];
       if (
         req.startsWith('next') ||
         // make sure we dont screw up package names that start with react
