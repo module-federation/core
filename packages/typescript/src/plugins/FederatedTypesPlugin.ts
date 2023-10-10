@@ -173,12 +173,10 @@ export class FederatedTypesPlugin {
 
       const isRetrying = shouldRetry || shouldRetryOnTypesNotFound;
 
-      const maxRetryCount = !isRetrying
-        ? 0
-        : maxRetryAttempts ?? DEFAULT_FETCH_MAX_RETRY_ATTEMPTS;
+      const maxRetryCount = !isRetrying ? 0 : maxRetryAttempts!;
 
       let retryCount = 0;
-      let delay = retryDelay ?? DEFAULT_FETCH_RETRY_DELAY;
+      let delay = retryDelay!;
 
       while (retryCount < maxRetryCount) {
         try {
@@ -198,7 +196,7 @@ export class FederatedTypesPlugin {
             retryCount++;
 
             if (retryCount < maxRetryCount) {
-              delay = 1000 * retryCount;
+              delay = retryDelay! * retryCount;
               this.logger.log(
                 `Retrying download of types from remote '${remote}' in ${delay}ms`,
               );
