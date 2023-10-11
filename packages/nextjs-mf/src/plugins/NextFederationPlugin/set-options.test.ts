@@ -3,7 +3,7 @@ import {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
-} from '@module-federation/utilities';
+} from '@bruno-module-federation/utilities';
 
 describe('setOptions', () => {
   it('should set main and extra options with default values', () => {

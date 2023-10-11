@@ -1,4 +1,4 @@
-= @module-federation/utilities
+= @bruno-module-federation/utilities
 
 = utils
 
@@ -26,7 +26,7 @@ Usage looks something like this:
 
 [source, javascript]
 ----
-import { FederationBoundary } from '@module-federation/utilities/src/utils/react';
+import { FederationBoundary } from '@bruno-module-federation/utilities/src/utils/react';
 // defining dynamicImport and fallback outside the Component to keep the component identity
 // another alternative would be to use useMemo
 const dynamicImport = () => import('some_remote_host_name').then((m) => m.Component);
@@ -47,7 +47,7 @@ Usage looks something like this:
 
 [source, javascript]
 ----
-import { importRemote } from '@module-federation/utilities';
+import { importRemote } from '@bruno-module-federation/utilities';
 // If it's a regular js module:
 importRemote({
   url: 'http://localhost:3001',
@@ -74,7 +74,7 @@ return (
 
 [source, javascript]
 ----
-import { importRemote } from '@module-federation/utilities';
+import { importRemote } from '@bruno-module-federation/utilities';
 // If it's a regular js module:
 importRemote({
   url: () => MyAsyncMethod('remote_name'),

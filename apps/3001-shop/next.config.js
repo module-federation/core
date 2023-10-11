@@ -4,9 +4,9 @@ const { workspaceRoot } = require('nx/src/utils/workspace-root');
 const path = require('path');
 const { registerTsConfigPaths } = require('nx/src/plugins/js/utils/register');
 registerTsConfigPaths(path.join(workspaceRoot, 'tsconfig.tmp.json'));
-const NextFederationPlugin = require('@module-federation/nextjs-mf');
+const NextFederationPlugin = require('@bruno-module-federation/nextjs-mf');
 
-// const { createDelegatedModule } = require('@module-federation/nextjs-mf/utilities');
+// const { createDelegatedModule } = require('@bruno-module-federation/nextjs-mf/utilities');
 
 /**
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}

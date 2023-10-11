@@ -1,7 +1,7 @@
 'use strict';
 
 import type { Compiler, container } from 'webpack';
-import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
+import { extractUrlAndGlobal } from '@bruno-module-federation/utilities/src/utils/pure';
 
 /**
  * Interface for NodeContainerOptions which extends ContainerPluginOptions

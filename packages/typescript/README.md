@@ -5,7 +5,7 @@ This plugin enables **Typescript Types** support for Module Federated Components
 ## Installation
 
 ```
-$ npm i @module-federation/typescript
+$ npm i @bruno-module-federation/typescript
 ```
 
 ## Usage
@@ -14,7 +14,7 @@ Register the plugin in `webpack configuration (webpack.config.js)` file
 
 ```typescript
 import webpack from 'webpack';
-const { FederatedTypesPlugin } = require('@module-federation/typescript');
+const { FederatedTypesPlugin } = require('@bruno-module-federation/typescript');
 
 const federationConfig = {
   name: 'my-app',
@@ -90,7 +90,7 @@ Sample code:
 
 ```typescript
 // next.config.js
-const FederatedTypesPlugin = require('@module-federation/typescript');
+const FederatedTypesPlugin = require('@bruno-module-federation/typescript');
 
 module.exports = {
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {

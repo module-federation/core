@@ -7,7 +7,7 @@ The `StreamingTargetPlugin` is designed to introduce a new transport layer for W
 ## Installation
 
 You can install the `StreamingTargetPlugin` via npm or yarn using the following command:
-`npm install @module-federation/node`
+`npm install @bruno-module-federation/node`
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ The `StreamingTargetPlugin` is typically used in combination with either the `No
 ### With NodeFederationPlugin
 
 ```javascript
-const { NodeFederationPlugin, StreamingTargetPlugin } = require('@module-federation/node');
+const { NodeFederationPlugin, StreamingTargetPlugin } = require('@bruno-module-federation/node');
 const config = {
   target: isServer ? false : 'web',
   plugins: [
@@ -43,7 +43,7 @@ const config = {
 ### With UniversalFederationPlugin
 
 ```javascript
-const { UniversalFederationPlugin } = require('@module-federation/node');
+const { UniversalFederationPlugin } = require('@bruno-module-federation/node');
 const config = {
   target: isServer ? false : 'web',
   plugins: [

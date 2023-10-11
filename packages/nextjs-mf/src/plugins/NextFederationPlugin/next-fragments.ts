@@ -4,14 +4,14 @@ import path from 'path';
 import type {
   ModuleFederationPluginOptions,
   SharedObject,
-} from '@module-federation/utilities';
+} from '@bruno-module-federation/utilities';
 import {
   DEFAULT_SHARE_SCOPE,
   DEFAULT_SHARE_SCOPE_BROWSER,
   getDelegates,
 } from '../../internal';
 import { hasLoader, injectRuleLoader } from '../../loaders/helpers';
-const { ModuleFederationPlugin } = require('@module-federation/enhanced');
+const { ModuleFederationPlugin } = require('@bruno-module-federation/enhanced');
 
 type ConstructableModuleFederationPlugin = new (
   options: ModuleFederationPluginOptions,
@@ -28,7 +28,7 @@ export function getModuleFederationPluginConstructor(
   compiler: Compiler,
 ): ConstructableModuleFederationPlugin {
   if (isServer) {
-    return require('@module-federation/node')
+    return require('@bruno-module-federation/node')
       .NodeFederationPlugin as ConstructableModuleFederationPlugin;
   }
   return ModuleFederationPlugin as unknown as ConstructableModuleFederationPlugin;

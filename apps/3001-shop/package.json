@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/3001-shop",
+  "name": "@bruno-module-federation/3001-shop",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
@@ -10,6 +10,6 @@
     "react-dom": "18.2.0"
   },
   "devDependencies": {
-    "@module-federation/nextjs-mf": "7.0.8"
+    "@bruno-module-federation/nextjs-mf": "7.0.8"
   }
 }

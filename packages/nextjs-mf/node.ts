@@ -1,1 +1,1 @@
-export * from '@module-federation/node';
+export * from '@bruno-module-federation/node';

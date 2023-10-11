@@ -1,5 +1,5 @@
 import Compiler from 'webpack/lib/Compiler';
-import { ModuleFederationPluginOptions } from '@module-federation/utilities';
+import { ModuleFederationPluginOptions } from '@bruno-module-federation/utilities';
 
 /**
  * Validates the compiler options.

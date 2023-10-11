@@ -2,27 +2,33 @@
   "extends": "tsconfig.base.json",
   "compilerOptions": {
     "paths": {
-      "@module-federation/core": ["dist/packages/core/src/index.js"],
-      "@module-federation/native-federation-tests": [
+      "@bruno-module-federation/core": ["dist/packages/core/src/index.js"],
+      "@bruno-module-federation/native-federation-tests": [
         "dist/packages/native-federation-tests/src/index.js"
       ],
-      "@module-federation/native-federation-typescript": [
+      "@bruno-module-federation/native-federation-typescript": [
         "dist/packages/native-federation-typescript/src/index.js"
       ],
-      "@module-federation/nextjs-mf": ["dist/packages/nextjs-mf/src/index.js"],
-      "@module-federation/nextjs-mf/*": ["dist/packages/nextjs-mf/*"],
-      "@module-federation/node": ["dist/packages/node/src"],
-      "@module-federation/node/utils": ["dist/packages/node/src/utils"],
-      "@module-federation/storybook-addon": [
+      "@bruno-module-federation/nextjs-mf": [
+        "dist/packages/nextjs-mf/src/index.js"
+      ],
+      "@bruno-module-federation/nextjs-mf/*": ["dist/packages/nextjs-mf/*"],
+      "@bruno-module-federation/node": ["dist/packages/node/src"],
+      "@bruno-module-federation/node/utils": ["dist/packages/node/src/utils"],
+      "@bruno-module-federation/storybook-addon": [
         "dist/packages/storybook-addon/src/index.js"
       ],
-      "@module-federation/typescript": [
+      "@bruno-module-federation/typescript": [
         "dist/packages/typescript/src/index.js"
       ],
-      "@module-federation/utilities": ["dist/packages/utilities/src/index.js"],
-      "@module-federation/utilities/*": ["dist/packages/utilities/*"],
-      "@module-federation/enhanced": ["dist/packages/enhanced/src/index.js"],
-      "@module-federation/enhanced/*": ["dist/packages/enhanced/*"]
+      "@bruno-module-federation/utilities": [
+        "dist/packages/utilities/src/index.js"
+      ],
+      "@bruno-module-federation/utilities/*": ["dist/packages/utilities/*"],
+      "@bruno-module-federation/enhanced": [
+        "dist/packages/enhanced/src/index.js"
+      ],
+      "@bruno-module-federation/enhanced/*": ["dist/packages/enhanced/*"]
     }
   }
 }

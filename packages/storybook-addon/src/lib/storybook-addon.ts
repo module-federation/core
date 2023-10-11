@@ -8,7 +8,7 @@ import { normalizeStories } from '@storybook/core-common';
 import {
   correctImportPath,
   ModuleFederationPluginOptions,
-} from '@module-federation/utilities';
+} from '@bruno-module-federation/utilities';
 
 import { ModuleFederationConfig } from '@nx/webpack';
 import withModuleFederation from '../utils/with-module-federation';

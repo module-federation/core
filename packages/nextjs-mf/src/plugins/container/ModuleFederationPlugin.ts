@@ -8,12 +8,12 @@
 import type Compiler from 'webpack/lib/Compiler';
 const isValidExternalsType = require('webpack/schemas/plugins/container/ExternalsType.check.js');
 const SharePlugin =
-  require('@module-federation/enhanced/src/lib/sharing/SharePlugin').default;
+  require('@bruno-module-federation/enhanced/src/lib/sharing/SharePlugin').default;
 const createSchemaValidation = require('webpack/lib/util/create-schema-validation');
 const ContainerPlugin =
-  require('@module-federation/enhanced/src/lib/container/ContainerPlugin').default;
+  require('@bruno-module-federation/enhanced/src/lib/container/ContainerPlugin').default;
 const ContainerReferencePlugin =
-  require('@module-federation/enhanced/src/lib/container/ContainerReferencePlugin').default;
+  require('@bruno-module-federation/enhanced/src/lib/container/ContainerReferencePlugin').default;
 
 /** @typedef {import("./ModuleFederationPluginTypes").ExternalsType} ExternalsType */
 /** @typedef {import("./ModuleFederationPluginTypes").any} any */

@@ -2,9 +2,9 @@ import type Compiler from 'webpack/lib/Compiler';
 import {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
-} from '@module-federation/utilities';
-import DelegateModulesPlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
-import { ChunkCorrelationPlugin } from '@module-federation/node';
+} from '@bruno-module-federation/utilities';
+import DelegateModulesPlugin from '@bruno-module-federation/utilities/src/plugins/DelegateModulesPlugin';
+import { ChunkCorrelationPlugin } from '@bruno-module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 /**
  * Applies client-specific plugins.

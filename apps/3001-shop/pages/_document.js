@@ -4,7 +4,7 @@ import {
   revalidate,
   FlushedChunks,
   flushChunks,
-} from '@module-federation/nextjs-mf/utils';
+} from '@bruno-module-federation/nextjs-mf/utils';
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {

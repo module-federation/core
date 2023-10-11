@@ -1,4 +1,7 @@
-import { getModule, loadAndInitializeRemote } from '@module-federation/core';
+import {
+  getModule,
+  loadAndInitializeRemote,
+} from '@bruno-module-federation/core';
 
 export interface ModuleOptions {
   name: string;

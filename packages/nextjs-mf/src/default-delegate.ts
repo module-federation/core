@@ -1,5 +1,5 @@
 /**
- * Importing types from '@module-federation/utilities/src/types/index'
+ * Importing types from '@bruno-module-federation/utilities/src/types/index'
  */
 import {
   AsyncContainer,
@@ -7,7 +7,7 @@ import {
   RuntimeRemote,
   RuntimeRemotesMap,
   WebpackRemoteContainer,
-} from '@module-federation/utilities/src/types/index';
+} from '@bruno-module-federation/utilities/src/types/index';
 
 /**
  * Initializing pure as RemoteVars

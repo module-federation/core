@@ -27,7 +27,7 @@ describe(`${correctImportPath.name}()`, () => {
     ['@scope\\module', '@scope/module'],
     [
       '@module-federation\\storybook-addon',
-      '@module-federation/storybook-addon',
+      '@bruno-module-federation/storybook-addon',
     ],
   ])(
     'should return correct path on windows systems - %s',

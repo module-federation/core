@@ -30,7 +30,7 @@ Run `nx g @nx/js:lib my-lib` to generate a library.
 
 > You can also use any of the plugins above to generate libraries as well.
 
-Libraries are shareable across libraries and applications. They can be imported from `@module-federation/mylib`.
+Libraries are shareable across libraries and applications. They can be imported from `@bruno-module-federation/mylib`.
 
 ## Development server
 
