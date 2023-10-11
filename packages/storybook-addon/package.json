@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/storybook-addon",
+  "name": "@bruno-module-federation/storybook-addon",
   "version": "1.0.0",
   "description": "Storybook addon to consume remote module federated apps/components",
   "license": "MIT",

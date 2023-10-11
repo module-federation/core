@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/3002-checkout",
+  "name": "@bruno-module-federation/3002-checkout",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
