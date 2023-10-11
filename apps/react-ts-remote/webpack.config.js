@@ -33,7 +33,7 @@ module.exports = async (config, context) => {
         ...baseConfig,
         filename: 'remoteEntry.js',
       },
-    })
+    }),
   );
 
   parsedConfig.infrastructureLogging = {

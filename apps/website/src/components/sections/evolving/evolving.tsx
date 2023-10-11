@@ -50,7 +50,7 @@ export default component$(() => {
     {
       title: t('evolving.rfcs.title@@RFCs'),
       subtitle: t(
-        'evolving.rfcs.subtitle@@Participate in the community discussions to decide on what features are coming next'
+        'evolving.rfcs.subtitle@@Participate in the community discussions to decide on what features are coming next',
       ),
       actionText: t('evolving.rfcs.action@@Take part now!'),
       actionHref:
@@ -64,7 +64,7 @@ export default component$(() => {
     {
       title: t('evolving.roadmap.title@@Module Federation Roadmap'),
       subtitle: t(
-        'evolving.roadmap.subtitle@@Discover the future of Module Federation'
+        'evolving.roadmap.subtitle@@Discover the future of Module Federation',
       ),
       actionText: t('evolving.roadmap.action@@Explore it!'),
       actionHref:
@@ -79,7 +79,7 @@ export default component$(() => {
 
   const title = t('evolving.title@@Evolving Module Federation');
   const subtitle = t(
-    'evolving.subtitle@@The world of Module Federation is constantly evolving and growing based on the feedback from the community. The RFCs are open for all to participate in the discussion and the roadmap is published.'
+    'evolving.subtitle@@The world of Module Federation is constantly evolving and growing based on the feedback from the community. The RFCs are open for all to participate in the discussion and the roadmap is published.',
   );
 
   return (

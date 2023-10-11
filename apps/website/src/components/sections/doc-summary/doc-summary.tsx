@@ -17,10 +17,10 @@ export default component$(() => {
   const cards = [
     {
       title: t(
-        'doc-summary.cards.decentralized.title@@Decentralized code sharing'
+        'doc-summary.cards.decentralized.title@@Decentralized code sharing',
       ),
       desc: t(
-        'doc-summary.cards.decentralized.desc@@Module Federation allows developers to share code between multiple projects in a decentralized manner, making it easier to manage complex applications.'
+        'doc-summary.cards.decentralized.desc@@Module Federation allows developers to share code between multiple projects in a decentralized manner, making it easier to manage complex applications.',
       ),
       actionHref: '/docs/en/mf-docs/0.2/getting-started/',
       actionTitle: t('doc-summary.cards.decentralized.action@@Documentation'),
@@ -28,32 +28,32 @@ export default component$(() => {
     },
     {
       title: t(
-        'doc-summary.cards.modular-architecture.title@@Modular architecture'
+        'doc-summary.cards.modular-architecture.title@@Modular architecture',
       ),
       desc: t(
-        'doc-summary.cards.modular-architecture.desc@@Applications can be split into smaller, self-contained modules that can be developed, tested, and deployed independently.'
+        'doc-summary.cards.modular-architecture.desc@@Applications can be split into smaller, self-contained modules that can be developed, tested, and deployed independently.',
       ),
       actionHref: '/docs/en/mf-docs/0.2/getting-started/',
       actionTitle: t(
-        'doc-summary.cards.modular-architecture.action@@Documentation'
+        'doc-summary.cards.modular-architecture.action@@Documentation',
       ),
       target: '_blank' as ButtonPropsTarget,
     },
     {
       title: t('doc-summary.cards.federated-runtime.title@@Federated runtime'),
       desc: t(
-        'doc-summary.cards.federated-runtime.desc@@The modules can be combined and federated at runtime, allowing for greater collaboration and faster development times.'
+        'doc-summary.cards.federated-runtime.desc@@The modules can be combined and federated at runtime, allowing for greater collaboration and faster development times.',
       ),
       actionHref: '/docs/en/mf-docs/0.2/getting-started/',
       actionTitle: t(
-        'doc-summary.cards.federated-runtime.action@@Documentation'
+        'doc-summary.cards.federated-runtime.action@@Documentation',
       ),
       target: '_blank' as ButtonPropsTarget,
     },
     {
       title: t('doc-summary.cards.flexibility.title@@Flexibility'),
       desc: t(
-        'doc-summary.cards.flexibility.desc@@Module Federation gives developers the freedom to choose and implement the architecture that best suits their needs, promoting a modular and scalable approach to application development.'
+        'doc-summary.cards.flexibility.desc@@Module Federation gives developers the freedom to choose and implement the architecture that best suits their needs, promoting a modular and scalable approach to application development.',
       ),
       actionHref: '/docs/en/mf-docs/0.2/getting-started/',
       actionTitle: t('doc-summary.cards.flexibility.action@@Documentation'),
@@ -62,11 +62,11 @@ export default component$(() => {
     {
       title: t('doc-summary.cards.team-colaboration.title@@Team collaboration'),
       desc: t(
-        'doc-summary.cards.team-colaboration.desc@@Independent teams can be assigned responsibility for specific microfrontends, making it easier to manage the development process and promote collaboration between team members.'
+        'doc-summary.cards.team-colaboration.desc@@Independent teams can be assigned responsibility for specific microfrontends, making it easier to manage the development process and promote collaboration between team members.',
       ),
       actionHref: '/docs/en/mf-docs/0.2/getting-started/',
       actionTitle: t(
-        'doc-summary.cards.team-colaboration.action@@Documentation'
+        'doc-summary.cards.team-colaboration.action@@Documentation',
       ),
       target: '_blank' as ButtonPropsTarget,
     },
@@ -74,7 +74,7 @@ export default component$(() => {
 
   const title = t('doc-summary.title@@Scalability with Module Federation');
   const subtitle = t(
-    'doc-summary.subtitle@@Module Federation brings scalability to not only code but also individual and organizational productivity'
+    'doc-summary.subtitle@@Module Federation brings scalability to not only code but also individual and organizational productivity',
   );
 
   return (

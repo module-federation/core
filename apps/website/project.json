@@ -3,17 +3,12 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/website/src",
-  "implicitDependencies": [
-    "docs"
-  ],
+  "implicitDependencies": ["docs"],
   "targets": {
     "build": {
       "executor": "qwik-nx:build",
       "options": {
-        "runSequence": [
-          "website:build.client",
-          "website:build.ssr"
-        ],
+        "runSequence": ["website:build.client", "website:build.ssr"],
         "outputPath": "dist/apps/website",
         "skipTypeCheck": false
       },
@@ -54,9 +49,7 @@
     },
     "test": {
       "executor": "@nrwl/vite:test",
-      "outputs": [
-        "{workspaceRoot}/coverage/apps/website"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/apps/website"],
       "options": {
         "passWithNoTests": true,
         "reportsDirectory": "../../coverage/apps/website"
@@ -79,13 +72,9 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "apps/website/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/website/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "extract-i18n": {
@@ -110,9 +99,7 @@
         ]
       },
       "configurations": {},
-      "dependsOn": [
-        "docs:build-docs"
-      ]
+      "dependsOn": ["docs:build-docs"]
     }
   },
   "tags": []

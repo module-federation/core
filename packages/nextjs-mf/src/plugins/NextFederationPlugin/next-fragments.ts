@@ -100,12 +100,7 @@ export function applyRemoteDelegates(
  * @param {Compiler} compiler - The Webpack compiler instance.
  * @param {any} options - The ModuleFederationPluginOptions instance.
  */
-export const applyPathFixes = (
-  compiler: Compiler,
-  options: any,
-) => {
-
-
+export const applyPathFixes = (compiler: Compiler, options: any) => {
   //@ts-ignore
   compiler.options.module.rules.forEach((rule) => {
     // next-image-loader fix which adds remote's hostname to the assets url

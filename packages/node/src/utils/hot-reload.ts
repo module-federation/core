@@ -49,7 +49,7 @@ export const checkMedusaConfigChange = (remoteScope: any, fetchModule: any) => {
     for (const property in remoteScope._medusa) {
       fetchModule(property)
         .then((res: Response) => res.json())
-        .then((medusaResponse: any) : void | boolean => {
+        .then((medusaResponse: any): void | boolean => {
           if (
             medusaResponse.version !==
             //@ts-ignore
@@ -82,11 +82,7 @@ export const checkFakeRemote = (remoteScope: any) => {
     }
 
     if (remote.fake) {
-      console.log(
-        'fake remote found',
-        property,
-        'hot reloading to refetch',
-      );
+      console.log('fake remote found', property, 'hot reloading to refetch');
       return true;
     }
   }
@@ -110,11 +106,8 @@ export const fetchRemote = (remoteScope: any, fetchModule: any) => {
         }
         return re.text();
       })
-      .then((contents: string) : void | boolean=> {
-        const hash = crypto
-          .createHash('md5')
-          .update(contents)
-          .digest('hex');
+      .then((contents: string): void | boolean => {
+        const hash = crypto.createHash('md5').update(contents).digest('hex');
 
         if (hashmap[name]) {
           if (hashmap[name] !== hash) {
@@ -141,12 +134,15 @@ export const fetchRemote = (remoteScope: any, fetchModule: any) => {
   return Promise.all(fetches);
 };
 //@ts-ignore
-export const revalidate = (remoteScope: any = globalThis.__remote_scope__ || {}, fetchModule: any = getFetchModule() || (() => {})) => {
+export const revalidate = (
+  remoteScope: any = globalThis.__remote_scope__ || {},
+  fetchModule: any = getFetchModule() || (() => {}),
+) => {
   return new Promise((res) => {
     if (checkUnreachableRemote(remoteScope)) {
       res(true);
     }
-// @ts-ignore
+    // @ts-ignore
     if (checkMedusaConfigChange(remoteScope, fetchModule)) {
       res(true);
     }

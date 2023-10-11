@@ -22,6 +22,7 @@
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
     "build": "nx run-many --target=test --parallel=3 --exclude='*,!tag:package'",
+    "lint-fix": "nx format:write",
     "postinstall": "npm run sync:types:webpack",
     "publish-canary": "node -e 'import(\"open\").then(open => open.default(\"https://github.com/module-federation/universe/actions/workflows/trigger-release.yml\"))'",
     "publish-stable": "npm run publish-canary",

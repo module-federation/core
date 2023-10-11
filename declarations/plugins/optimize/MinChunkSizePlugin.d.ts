@@ -5,16 +5,16 @@
  */
 
 export interface MinChunkSizePluginOptions {
-	/**
-	 * Constant overhead for a chunk.
-	 */
-	chunkOverhead?: number;
-	/**
-	 * Multiplicator for initial chunks.
-	 */
-	entryChunkMultiplicator?: number;
-	/**
-	 * Minimum number of characters.
-	 */
-	minChunkSize: number;
+  /**
+   * Constant overhead for a chunk.
+   */
+  chunkOverhead?: number;
+  /**
+   * Multiplicator for initial chunks.
+   */
+  entryChunkMultiplicator?: number;
+  /**
+   * Minimum number of characters.
+   */
+  minChunkSize: number;
 }
