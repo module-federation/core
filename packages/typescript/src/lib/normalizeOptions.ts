@@ -78,7 +78,8 @@ export const normalizeOptions = (
     ...(options.typeFetchOptions ?? {}),
   };
 
-  const federationFileName = federationConfig.filename as string;
+  const federationFileName = (federationConfig.filename ??
+    'remoteEntry.js') as string;
   const distPath =
     get(webpackCompilerOptions, 'devServer.static.directory') ||
     get(webpackCompilerOptions, 'output.path') ||

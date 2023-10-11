@@ -81,6 +81,14 @@ export class FederatedTypesPlugin {
       });
 
       this.handleTypeServing(compiler, this.normalizeOptions.typeServeOptions);
+
+      // TODO - this is not ideal, but it will repopulate types if clean is enabled
+      if (compiler.options.output.clean) {
+        compiler.hooks.afterEmit.tapAsync(PLUGIN_NAME, (_, callback) => {
+          this.generateTypes({ outputPath: compiler.outputPath });
+          callback();
+        });
+      }
     }
 
     if (!disableDownloadingRemoteTypes) {
@@ -136,12 +144,6 @@ export class FederatedTypesPlugin {
           callback();
         },
       );
-    }
-
-    if (compiler.options.output.clean) {
-      compiler.hooks.afterEmit.tap(PLUGIN_NAME, (_) => {
-        this.generateTypes({ outputPath: compiler.outputPath });
-      });
     }
   }
 
