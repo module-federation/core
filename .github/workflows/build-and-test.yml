@@ -9,6 +9,7 @@ on:
 jobs:
   main:
     runs-on: ubuntu-latest
+    # Cancel any previous runs in progress
     concurrency:
       group: ${{ github.head_ref || github.run_id }}
       cancel-in-progress: true
