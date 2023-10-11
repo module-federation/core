@@ -31,6 +31,9 @@
     "sync:types:webpack": "cp -rf ./webpack/* ./node_modules/webpack",
     "sync:pullMFTypes": "concurrently \"node ./packages/enhanced/pullts.js\""
   },
+  "overrides": {
+    "semantic-release-plugin-decorators": "npm:@w4rlock/semantic-release-plugin-decorators@^1.0.3"
+  },
   "dependencies": {
     "adm-zip": "0.5.10",
     "ansi-colors": "4.1.3",
