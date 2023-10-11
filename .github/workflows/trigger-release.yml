@@ -20,7 +20,7 @@ on:
           - enhanced
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.packages }}
 
