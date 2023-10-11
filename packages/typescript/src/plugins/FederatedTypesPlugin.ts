@@ -67,6 +67,7 @@ export class FederatedTypesPlugin {
       >['1'],
     ) => {
       try {
+        this.logger.log('Preparing to download types from remotes on startup');
         await this.importRemoteTypes();
         callback();
       } catch (error) {
@@ -75,27 +76,24 @@ export class FederatedTypesPlugin {
     };
 
     if (!disableTypeCompilation) {
-      this.handleTypeGeneration(
-        compiler,
-        this.normalizeOptions.typeServeOptions,
-      );
+      compiler.hooks.beforeCompile.tap(PLUGIN_NAME, async (_) => {
+        this.generateTypes({ outputPath: compiler.outputPath });
+      });
+
+      this.handleTypeServing(compiler, this.normalizeOptions.typeServeOptions);
     }
 
     if (!disableDownloadingRemoteTypes) {
       compiler.hooks.beforeCompile.tapAsync(
         PLUGIN_NAME,
         async (_, callback) => {
-          this.logger.log(
-            'Preparing to download types from remotes on startup',
-          );
-
           await importRemotes(callback);
         },
       );
     }
   }
 
-  private handleTypeGeneration(
+  private handleTypeServing(
     compiler: Compiler,
     typeServeOptions: TypeServeOptions | undefined,
   ) {
@@ -109,7 +107,14 @@ export class FederatedTypesPlugin {
         async (_, callback) => {
           this.logger.log('Preparing to serve types');
 
-          validateTypeServeOptions(typeServeOptions);
+          try {
+            validateTypeServeOptions(typeServeOptions);
+          } catch (error) {
+            callback(error as Error);
+            return;
+          }
+
+          this.logger.log('Starting Federated Types server');
 
           await startServer({
             outputPath: compiler.outputPath,
@@ -120,11 +125,11 @@ export class FederatedTypesPlugin {
 
           if (!isServe) {
             compiler.hooks.failed.tap(PLUGIN_NAME, () => {
-              stopServer({ logger: this.logger });
+              stopServer({ port: typeServeOptions.port, logger: this.logger });
             });
 
             compiler.hooks.done.tap(PLUGIN_NAME, () => {
-              stopServer({ logger: this.logger });
+              stopServer({ port: typeServeOptions.port, logger: this.logger });
             });
           }
 
@@ -133,19 +138,15 @@ export class FederatedTypesPlugin {
       );
     }
 
-    compiler.hooks.afterEmit.tapAsync(PLUGIN_NAME, async (_, callback) => {
-      this.logger.log('Preparing to Generate types');
-      this.generateTypes({ outputPath: compiler.outputPath, callback });
-    });
+    if (compiler.options.output.clean) {
+      compiler.hooks.afterEmit.tap(PLUGIN_NAME, (_) => {
+        this.generateTypes({ outputPath: compiler.outputPath });
+      });
+    }
   }
 
-  private async generateTypes({
-    outputPath,
-    callback,
-  }: {
-    outputPath: string;
-    callback: InnerCallback<Error, void>;
-  }) {
+  private async generateTypes({ outputPath }: { outputPath: string }) {
+    this.logger.log('Generating types');
     const federatedTypesMap = this.compileTypes();
 
     const { typesIndexJsonFilePath, publicPath } = this.normalizeOptions;
@@ -156,15 +157,12 @@ export class FederatedTypesPlugin {
     };
 
     if (Object.entries(statsJson.files).length === 0) {
-      callback();
       return;
     }
 
     const dest = path.join(outputPath, typesIndexJsonFilePath);
 
-    await fs.writeFile(dest, JSON.stringify(statsJson), (error) => {
-      callback(error);
-    });
+    fs.writeFileSync(dest, JSON.stringify(statsJson));
   }
 
   private compileTypes() {

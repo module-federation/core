@@ -11,7 +11,7 @@ export type TypeServerOptions = {
   logger: LoggerInstance;
 };
 
-let server: http.Server | null = null;
+const activeServers: Map<number, http.Server | null> = new Map();
 
 export const startServer = async ({
   outputPath,
@@ -20,12 +20,12 @@ export const startServer = async ({
   logger,
 }: TypeServerOptions) => {
   return new Promise((resolve) => {
-    if (server) {
+    if (activeServers.get(port!)) {
       resolve(1);
       return;
     }
 
-    server = http.createServer((req, res) => {
+    const server = http.createServer((req, res) => {
       const { url: fileName } = req;
 
       if (!fileName) {
@@ -34,9 +34,14 @@ export const startServer = async ({
         return;
       }
 
-      const filePath = path.join(outputPath, fileName);
+      const safeSuffix = path
+        .normalize(fileName)
+        .replace(/^(\.\.(\/|\\|$))+/, '');
+      const safeJoin = path.join(outputPath, safeSuffix);
 
-      const fileStream = fs.createReadStream(filePath);
+      logger.log(`Retrieving file: ${safeJoin}`);
+
+      const fileStream = fs.createReadStream(safeJoin);
 
       fileStream.on('error', (err) => {
         logger.log(`Error reading file: ${err}`);
@@ -48,17 +53,28 @@ export const startServer = async ({
       fileStream.pipe(res);
     });
 
-    server.listen(port, 'localhost', () => {
-      resolve(1);
+    server.listen(port, host, () => {
       logger.log(`Federated Type Server listening on http://${host}:${port}`);
+      resolve(1);
     });
+
+    activeServers.set(port!, server);
   });
 };
 
-export const stopServer = ({ logger }: { logger: LoggerInstance }) => {
-  if (!server) return;
+export const stopServer = ({
+  port,
+  logger,
+}: {
+  port: number | undefined;
+  logger: LoggerInstance;
+}) => {
+  if (!activeServers.get(port!)) return;
 
   logger.log('Stopping Federated Type Server');
 
-  server.close();
+  const server = activeServers.get(port!);
+  if (server) {
+    server.close();
+  }
 };
