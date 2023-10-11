@@ -26,7 +26,7 @@ export const startServer = async ({
     }
 
     server = http.createServer((req, res) => {
-      const fileName = req.url!;
+      const { url: fileName } = req;
 
       if (!fileName) {
         logger.log(`Unable to find file: ${fileName} in request url`);
@@ -35,6 +35,7 @@ export const startServer = async ({
       }
 
       const filePath = path.join(outputPath, fileName);
+
       const fileStream = fs.createReadStream(filePath);
 
       fileStream.on('error', (err) => {

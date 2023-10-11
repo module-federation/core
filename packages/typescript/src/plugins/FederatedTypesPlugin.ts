@@ -5,7 +5,6 @@ import { Compiler } from 'webpack';
 import { startServer, stopServer } from '../lib/server';
 import { TypescriptCompiler } from '../lib/TypescriptCompiler';
 import {
-  DEFAULT_FETCH_TIMEOUT,
   isObjectEmpty,
   normalizeOptions,
   validateTypeServeOptions,
@@ -20,9 +19,12 @@ import {
 import download from '../lib/download';
 import { Logger, LoggerInstance } from '../Logger';
 import { generateTypesStats } from '../lib/generateTypesStats';
+import { InnerCallback } from 'tapable';
 
 const PLUGIN_NAME = 'FederatedTypesPlugin';
 const SUPPORTED_PLUGINS = ['ModuleFederationPlugin', 'NextFederationPlugin'];
+
+let isServe = false;
 
 export class FederatedTypesPlugin {
   private normalizeOptions!: ReturnType<typeof normalizeOptions>;
@@ -98,6 +100,10 @@ export class FederatedTypesPlugin {
     typeServeOptions: TypeServeOptions | undefined,
   ) {
     if (typeServeOptions) {
+      compiler.hooks.watchRun.tap(PLUGIN_NAME, () => {
+        isServe = true;
+      });
+
       compiler.hooks.beforeCompile.tapAsync(
         PLUGIN_NAME,
         async (_, callback) => {
@@ -112,44 +118,52 @@ export class FederatedTypesPlugin {
             logger: this.logger,
           });
 
+          if (!isServe) {
+            compiler.hooks.failed.tap(PLUGIN_NAME, () => {
+              stopServer({ logger: this.logger });
+            });
+
+            compiler.hooks.done.tap(PLUGIN_NAME, () => {
+              stopServer({ logger: this.logger });
+            });
+          }
+
           callback();
         },
       );
-
-      compiler.hooks.failed.tap(PLUGIN_NAME, () => {
-        stopServer({ logger: this.logger });
-      });
-
-      compiler.hooks.done.tap(PLUGIN_NAME, () => {
-        stopServer({ logger: this.logger });
-      });
     }
 
     compiler.hooks.afterEmit.tapAsync(PLUGIN_NAME, async (_, callback) => {
       this.logger.log('Preparing to Generate types');
+      this.generateTypes({ outputPath: compiler.outputPath, callback });
+    });
+  }
 
-      const federatedTypesMap = this.compileTypes();
+  private async generateTypes({
+    outputPath,
+    callback,
+  }: {
+    outputPath: string;
+    callback: InnerCallback<Error, void>;
+  }) {
+    const federatedTypesMap = this.compileTypes();
 
-      const { typesIndexJsonFilePath, publicPath } = this.normalizeOptions;
+    const { typesIndexJsonFilePath, publicPath } = this.normalizeOptions;
 
-      const statsJson: TypesStatsJson = {
-        publicPath,
-        files: generateTypesStats(federatedTypesMap, this.normalizeOptions),
-      };
+    const statsJson: TypesStatsJson = {
+      publicPath,
+      files: generateTypesStats(federatedTypesMap, this.normalizeOptions),
+    };
 
-      if (Object.entries(statsJson.files).length === 0) {
-        callback();
-        return;
-      }
+    if (Object.entries(statsJson.files).length === 0) {
+      callback();
+      return;
+    }
 
-      const dest = path.join(compiler.outputPath, typesIndexJsonFilePath);
+    const dest = path.join(outputPath, typesIndexJsonFilePath);
 
-      await fs.writeFile(dest, JSON.stringify(statsJson), (error) => {
-        callback(error);
-        if (error) {
-          throw error;
-        }
-      });
+    await fs.writeFile(dest, JSON.stringify(statsJson), (error) => {
+      callback(error);
     });
   }
 
@@ -178,19 +192,18 @@ export class FederatedTypesPlugin {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  private async importRemoteTypes() {
-    const remoteComponents = this.options.federationConfig.remotes;
-
+  private parseRemoteUrls(
+    remoteComponents: Record<string, string>,
+  ): { origin: string; remote: string }[] {
     if (
       !remoteComponents ||
       (remoteComponents && isObjectEmpty(remoteComponents))
     ) {
       this.logger.log('No Remote components configured');
-      return;
+      return [];
     }
 
-    this.logger.log('Normalizing remote URLs');
-    const remoteUrls = Object.entries(remoteComponents).map(
+    return Object.entries(remoteComponents).map(
       ([remote, entry]: [string, string]) => {
         let urlEndIndex = entry.length;
         if (entry.endsWith('.js')) {
@@ -206,6 +219,16 @@ export class FederatedTypesPlugin {
         };
       },
     );
+  }
+
+  private async importRemoteTypes() {
+    const remoteUrls = this.parseRemoteUrls(
+      this.options.federationConfig.remotes as Record<string, string>,
+    );
+
+    if (remoteUrls.length === 0) {
+      return;
+    }
 
     for await (const { origin, remote } of remoteUrls) {
       const { typescriptFolderName, typeFetchOptions } = this.normalizeOptions;
@@ -265,7 +288,7 @@ export class FederatedTypesPlugin {
     try {
       this.logger.log(`Getting types index for remote '${remote}'`);
       const resp = await axios.get<TypesStatsJson>(
-        `${origin}/${this.normalizeOptions.typesIndexJsonFileName}`,
+        `${new URL(origin)}${this.normalizeOptions.typesIndexJsonFileName}`,
         { timeout: downloadRemoteTypesTimeout },
       );
 
