@@ -26,7 +26,7 @@ describe(`${correctImportPath.name}()`, () => {
     ['C:\\\\path\\to\\dir\\node_modules\\@scope\\module', '@scope/module'],
     ['@scope\\module', '@scope/module'],
     [
-      '@module-federation\\storybook-addon',
+      '@bruno-module-federation\\storybook-addon',
       '@bruno-module-federation/storybook-addon',
     ],
   ])(
