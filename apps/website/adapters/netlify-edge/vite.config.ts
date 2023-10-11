@@ -9,7 +9,7 @@ const modified: UserConfig = {
   ...baseConfig,
   // vite does not override plugins in it's "mergeConfig" util
   plugins: (baseConfig as UserConfig).plugins?.filter(
-    (p) => (p as Plugin)?.name !== 'vite-plugin-qwik'
+    (p) => (p as Plugin)?.name !== 'vite-plugin-qwik',
   ),
 };
 export default extendConfig(modified, () => {

@@ -36,11 +36,11 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/router': {
     requiredVersion: undefined,
     singleton: true,
-    import: undefined
+    import: undefined,
   },
-  "@module-federation/utilities":{
-    eager:true,
-    requiredVersion: false
+  '@module-federation/utilities': {
+    eager: true,
+    requiredVersion: false,
   },
   'next/image': {
     requiredVersion: undefined,
@@ -57,7 +57,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     requiredVersion: undefined,
     import: false,
   },
-  "react/": {
+  'react/': {
     singleton: true,
     requiredVersion: undefined,
     import: false,
@@ -65,7 +65,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'react-dom/': {
     singleton: true,
     requiredVersion: undefined,
-     import: false,
+    import: false,
   },
   'react-dom': {
     singleton: true,
@@ -113,7 +113,6 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
   DEFAULT_SHARE_SCOPE,
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
-
 
   // Set eager and import to undefined for all entries, except for the ones specified above
   acc[key] = { ...value, import: undefined };

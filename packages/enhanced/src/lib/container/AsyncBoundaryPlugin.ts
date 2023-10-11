@@ -36,7 +36,7 @@ class AsyncBoundaryPlugin {
       (compilation: Compilation) => {
         const hooks =
           javascript.JavascriptModulesPlugin.getCompilationHooks(compilation);
-       
+
         hooks.renderStartup.tap(
           'AsyncBoundaryPlugin',
           (
@@ -77,7 +77,9 @@ class AsyncBoundaryPlugin {
     const { chunkGraph } = compilation;
     const replaceSource = source.source().toString();
     const replaceSourceLines = replaceSource.split('\n');
-    const webpack_exec_index = replaceSourceLines.findIndex(line => line.includes('webpack_exec'));
+    const webpack_exec_index = replaceSourceLines.findIndex((line) =>
+      line.includes('webpack_exec'),
+    );
     const webpack_exec = replaceSourceLines[webpack_exec_index];
     const webpack_exports = replaceSourceLines.slice(webpack_exec_index + 1);
     const dependentChunkIds = this.getDependentChunkIds(

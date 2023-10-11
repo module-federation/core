@@ -6,9 +6,7 @@
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "compiler": "swc",
@@ -64,9 +62,7 @@
         "buildTarget": "react_ts_host:build",
         "hmr": true,
         "port": 3003,
-        "devRemotes": [
-          "react_ts_remote"
-        ]
+        "devRemotes": ["react_ts_remote"]
       },
       "configurations": {
         "development": {
@@ -80,9 +76,7 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["apps/react-ts-host/**/*.{ts,tsx,js,jsx}"]
       }

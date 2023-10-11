@@ -13,7 +13,7 @@ if (!appName) {
 const appNames = appName.split(',');
 
 const isAffected = execSync(
-  `npx nx print-affected --type=app --select=projects --base=${base} --head=${head}`
+  `npx nx print-affected --type=app --select=projects --base=${base} --head=${head}`,
 )
   .toString()
   .split(',')

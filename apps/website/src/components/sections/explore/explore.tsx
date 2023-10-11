@@ -16,10 +16,10 @@ export default component$(() => {
     {
       iconSrc: '/illustrations/pratical-module-federation.svg',
       title: t(
-        'explore.cards.practical-module-federation.title@@Practical Module Federation'
+        'explore.cards.practical-module-federation.title@@Practical Module Federation',
       ),
       actionText: t(
-        'explore.cards.practical-module-federation.action@@Get the book'
+        'explore.cards.practical-module-federation.action@@Get the book',
       ),
       actionHref:
         'https://module-federation.myshopify.com/products/practical-module-federation',
@@ -28,10 +28,10 @@ export default component$(() => {
     {
       iconSrc: '/illustrations/implementing-module-federation.svg',
       title: t(
-        'explore.cards.implementing-module-federation.title@@Implementing Module Federation'
+        'explore.cards.implementing-module-federation.title@@Implementing Module Federation',
       ),
       actionText: t(
-        'explore.cards.implementing-module-federation.action@@Learn more'
+        'explore.cards.implementing-module-federation.action@@Learn more',
       ),
       actionHref: 'https://module-federation.io/en/mf-docs/0.2/setup',
       target: '_blank' as ButtonPropsTarget,
@@ -112,12 +112,12 @@ export default component$(() => {
                 <div class="flex flex-col items-start gap-1">
                   <h3 class="text-blue-gray-900 font-semibold text-xl">
                     {t(
-                      'explore.cards.module-federation-courses.title@@Module Federation courses'
+                      'explore.cards.module-federation-courses.title@@Module Federation courses',
                     )}
                   </h3>
                   <p class="font-medium text-blue-gray-900 text-lg">
                     {t(
-                      'explore.cards.module-federation-courses.subtitle@@Gain expertise in Module Federation and enhance your skills now'
+                      'explore.cards.module-federation-courses.subtitle@@Gain expertise in Module Federation and enhance your skills now',
                     )}
                   </p>
                 </div>
@@ -154,12 +154,12 @@ export default component$(() => {
                 <div class="flex flex-col items-start gap-2 md:gap-1">
                   <h3 class="text-blue-gray-900 font-semibold text-xl">
                     {t(
-                      'explore.cards.module-federation-courses.title@@Module Federation courses'
+                      'explore.cards.module-federation-courses.title@@Module Federation courses',
                     )}
                   </h3>
                   <p class="font-medium text-blue-gray-900 text-lg">
                     {t(
-                      'explore.cards.module-federation-courses.subtitle@@Gain expertise in Module Federation and enhance your skills now'
+                      'explore.cards.module-federation-courses.subtitle@@Gain expertise in Module Federation and enhance your skills now',
                     )}
                   </p>
                 </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 const CheckoutTitle = () => {
-console.log('from checkout title', globalThis.__remote_scope__);
+  console.log('from checkout title', globalThis.__remote_scope__);
 
   const [hookData, setHookData] = useState('');
 

@@ -7,9 +7,7 @@
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/docs-ui",
@@ -17,15 +15,10 @@
         "main": "apps/docs-ui/src/main.ts",
         "tsConfig": "apps/docs-ui/tsconfig.app.json",
         "webpackConfig": "apps/docs-ui/webpack.config.js",
-        "assets": [
-          "apps/docs-ui/src/favicon.ico",
-          "apps/docs-ui/src/assets"
-        ],
+        "assets": ["apps/docs-ui/src/favicon.ico", "apps/docs-ui/src/assets"],
         "index": "apps/docs-ui/src/index.html",
         "baseHref": "/",
-        "styles": [
-          "apps/docs-ui/src/styles.scss"
-        ],
+        "styles": ["apps/docs-ui/src/styles.scss"],
         "scripts": [],
         "postcssConfig": "apps/docs-ui/postcss.config.js",
         "babelUpwardRootMode": true
@@ -49,13 +42,9 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "apps/docs-ui/**/*.ts"
-        ]
+        "lintFilePatterns": ["apps/docs-ui/**/*.ts"]
       }
     }
   }
