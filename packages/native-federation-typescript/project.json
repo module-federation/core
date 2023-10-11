@@ -16,17 +16,6 @@
         ]
       }
     },
-    "publish": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "node tools/scripts/publish.mjs native-federation-typescript {args.ver} {args.tag}"
-      },
-      "dependsOn": [
-        {
-          "target": "build"
-        }
-      ]
-    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
@@ -40,30 +29,75 @@
         "{workspaceRoot}/coverage/packages/native-federation-typescript"
       ]
     },
-    "version": {
-      "executor": "@jscutlery/semver:version",
+    "release": {
+      "executor": "nx:run-commands",
       "options": {
-        "postTargets": [
-          "native-federation-typescript:npm",
-          "native-federation-typescript:github"
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run native-federation-typescript:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run native-federation-typescript:build",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run native-federation-typescript:semantic-release",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "semantic-release": {
+      "executor": "@theunderscorer/nx-semantic-release:semantic-release",
+      "options": {
+        "changelog": true,
+        "git": true,
+        "npm": true,
+        "github": true,
+        "repositoryUrl": "https://github.com/brunos3d/universe",
+        "outputPath": "dist/packages/${PROJECT_NAME}",
+        "tagFormat": "${PROJECT_NAME}-v${VERSION}",
+        "commitMessage": "chore(release): Release ${PROJECT_NAME} v${nextRelease.version} [skip ci]",
+        "branches": [
+          {
+            "name": "main",
+            "channel": "latest"
+          },
+          {
+            "name": "next",
+            "channel": "next",
+            "prerelease": "rc"
+          },
+          {
+            "name": "develop",
+            "channel": "alpha",
+            "prerelease": "alpha"
+          }
         ],
-        "trackDeps": false,
-        "push": true
-      }
-    },
-    "github": {
-      "executor": "@jscutlery/semver:github",
-      "options": {
-        "tag": "${tag}",
-        "notes": "${notes}"
-      }
-    },
-    "npm": {
-      "executor": "ngx-deploy-npm:deploy",
-      "options": {
-        "access": "public",
-        "tag": "next",
-        "distFolderPath": "dist/packages/native-federation-typescript"
+        "releaseRules": [
+          { "breaking": true, "release": "major" },
+          { "type": "docs", "release": "patch" },
+          { "type": "refactor", "release": "patch" },
+          { "type": "style", "release": "patch" },
+          { "type": "perf", "release": "patch" },
+          { "type": "build", "release": "patch" }
+        ],
+        "preset": "conventionalcommits",
+        "presetConfig": {
+          "types": [
+            { "type": "feat", "section": "Features" },
+            { "type": "fix", "section": "Bug Fixes" },
+            { "type": "chore", "hidden": true },
+            { "type": "docs", "section": "Documentation" },
+            { "type": "style", "hidden": true },
+            { "type": "refactor", "section": "Refactors" },
+            { "type": "build", "section": "Build config" },
+            { "type": "perf", "hidden": true },
+            { "type": "test", "hidden": true }
+          ]
+        }
       }
     }
   },
