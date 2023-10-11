@@ -5,7 +5,7 @@ module.exports = {
   github: true,
   repositoryUrl: 'https://github.com/brunos3d/universe',
   outputPath: 'dist/packages/${PROJECT_NAME}',
-  tagFormat: '${PROJECT_NAME}-v${VERSION}',
+  tagFormat: '${PROJECT_NAME}-${VERSION}',
   commitMessage:
     'chore(release): Release ${PROJECT_NAME} v${nextRelease.version} [skip ci]',
   branches: [
