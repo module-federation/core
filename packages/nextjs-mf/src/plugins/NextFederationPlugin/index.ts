@@ -39,7 +39,6 @@ import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import ModuleFederationNextFork from '../container/ModuleFederationPlugin';
 import { parseRemotes } from '@module-federation/node';
 
-process.env.NEXT_PRIVATE_LOCAL_WEBPACK = 'true'
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
