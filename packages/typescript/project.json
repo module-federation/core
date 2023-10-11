@@ -11,9 +11,7 @@
         "outputPath": "dist/packages/typescript",
         "main": "packages/typescript/src/index.ts",
         "tsConfig": "packages/typescript/tsconfig.lib.json",
-        "assets": [
-          "packages/typescript/*.md"
-        ],
+        "assets": ["packages/typescript/*.md"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true
       },
@@ -65,6 +63,6 @@
       }
     }
   },
-  "tags": [],
+  "tags": ["package"],
   "implicitDependencies": ["utils"]
 }

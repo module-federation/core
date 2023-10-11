@@ -13,9 +13,7 @@
         "tsConfig": "packages/node/tsconfig.lib.json",
         "updateBuildableProjectDepsInPackageJson": true,
         "buildableProjectDepsInPackageJsonType": "dependencies",
-        "assets": [
-          "packages/node/*.md"
-        ]
+        "assets": ["packages/node/*.md"]
       },
       "dependsOn": [
         {
@@ -74,5 +72,5 @@
       }
     }
   },
-  "tags": []
+  "tags": ["package"]
 }

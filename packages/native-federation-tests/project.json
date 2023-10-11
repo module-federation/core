@@ -64,6 +64,6 @@
       }
     }
   },
-  "tags": [],
+  "tags": ["package"],
   "implicitDependencies": []
 }
