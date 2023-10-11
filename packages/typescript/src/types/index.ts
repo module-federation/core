@@ -28,7 +28,7 @@ export interface TypeFetchOptions {
 export interface TypeServeOptions {
   /** The port to serve type files on, this is separate from the webpack dev server port. */
   port?: number;
-  /** The host to serve type files on. */
+  /** The host to serve type files on. Example: 'localhost' */
   host?: string;
 }
 
