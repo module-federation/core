@@ -3,7 +3,7 @@ module.exports = {
   git: true,
   npm: true,
   github: true,
-  repositoryUrl: 'https://github.com/brunos3d/universe',
+  repositoryUrl: 'https://github.com/module-federation/universe',
   outputPath: 'dist/packages/${PROJECT_NAME}',
   tagFormat: '${PROJECT_NAME}-${VERSION}',
   commitMessage:
