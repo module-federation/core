@@ -1,5 +1,4 @@
 export * from './types';
-export type { ImportRemoteOptions } from './utils/importRemote';
 export type { LoggerInstance } from './Logger';
 
 export {
