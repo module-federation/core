@@ -1,12 +1,12 @@
 import { Compiler } from 'webpack';
-import { ModuleFederationPluginOptions } from '@bruno-module-federation/utilities';
-import DelegatesModulePlugin from '@bruno-module-federation/utilities/src/plugins/DelegateModulesPlugin';
+import { ModuleFederationPluginOptions } from '@module-federation/utilities';
+import DelegatesModulePlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import {
   ModuleFederationPlugin,
   ModuleInfoRuntimePlugin,
-} from '@bruno-module-federation/enhanced';
+} from '@module-federation/enhanced';
 /**
  * This function applies server-specific plugins to the webpack compiler.
  *
@@ -19,8 +19,8 @@ export function applyServerPlugins(
   compiler: Compiler,
   options: ModuleFederationPluginOptions,
 ): void {
-  // Import the StreamingTargetPlugin from @bruno-module-federation/node
-  const { StreamingTargetPlugin } = require('@bruno-module-federation/node');
+  // Import the StreamingTargetPlugin from @module-federation/node
+  const { StreamingTargetPlugin } = require('@module-federation/node');
   const chunkFileName = compiler.options?.output?.chunkFilename;
   const uniqueName = compiler?.options?.output?.uniqueName || options.name;
   if (
@@ -136,7 +136,7 @@ export function handleServerExternals(
       // Check if the module should not be treated as external
       if (
         ctx.request &&
-        (ctx.request.includes('@bruno-module-federation/utilities') ||
+        (ctx.request.includes('@module-federation/utilities') ||
           ctx.request.includes('internal-delegate-hoist') ||
           Object.keys(options.shared || {}).some((key) => {
             return (
@@ -145,7 +145,7 @@ export function handleServerExternals(
               (key.endsWith('/') ? req.includes(key) : req === key)
             );
           }) ||
-          ctx.request.includes('@bruno-module-federation/dashboard-plugin'))
+          ctx.request.includes('@module-federation/dashboard-plugin'))
       ) {
         // If the module should not be treated as external, return without calling the original externals function
         return;

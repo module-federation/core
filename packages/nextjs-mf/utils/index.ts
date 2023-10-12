@@ -1,21 +1,21 @@
 /**
  * Extracts the URL and global from the module federation utilities.
- * @module @bruno-module-federation/utilities/src/utils/pure
+ * @module @module-federation/utilities/src/utils/pure
  */
-export { extractUrlAndGlobal } from '@bruno-module-federation/utilities/src/utils/pure';
+export { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
 
 /**
  * Injects a script from the module federation utilities.
- * @module @bruno-module-federation/utilities/src/utils/common
+ * @module @module-federation/utilities/src/utils/common
  */
-export { injectScript } from '@bruno-module-federation/utilities/src/utils/common';
+export { injectScript } from '@module-federation/utilities/src/utils/common';
 
 /**
  * Flushes chunks from the module federation node utilities.
- * @module @bruno-module-federation/node/utils
+ * @module @module-federation/node/utils
  */
 // @ts-ignore
-export { flushChunks } from '@bruno-module-federation/node/utils';
+export { flushChunks } from '@module-federation/node/utils';
 
 /**
  * Exports the FlushedChunks component from the current directory.
@@ -39,7 +39,7 @@ export const revalidate = () => {
     return Promise.resolve(false);
   }
   // @ts-ignore
-  return import('@bruno-module-federation/node/utils').then((utils) => {
+  return import('@module-federation/node/utils').then((utils) => {
     return utils.revalidate();
   });
 };

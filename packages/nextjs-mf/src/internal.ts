@@ -2,8 +2,8 @@ import type {
   ModuleFederationPluginOptions,
   SharedConfig,
   SharedObject,
-} from '@bruno-module-federation/utilities';
-import { createDelegatedModule } from '@bruno-module-federation/utilities';
+} from '@module-federation/utilities';
+import { createDelegatedModule } from '@module-federation/utilities';
 
 import { isRequiredVersion } from 'webpack/lib/sharing/utils';
 import { parseOptions } from 'webpack/lib/container/options';
@@ -38,7 +38,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     import: undefined,
   },
-  '@bruno-module-federation/utilities': {
+  '@module-federation/utilities': {
     eager: true,
     requiredVersion: false,
   },

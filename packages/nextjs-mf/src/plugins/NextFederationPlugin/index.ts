@@ -10,9 +10,9 @@ import type {
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
   SharedObject,
-} from '@bruno-module-federation/utilities';
+} from '@module-federation/utilities';
 import type Compiler from 'webpack/lib/Compiler';
-import { createRuntimeVariables } from '@bruno-module-federation/utilities';
+import { createRuntimeVariables } from '@module-federation/utilities';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
@@ -37,7 +37,7 @@ import {
 import { applyClientPlugins } from './apply-client-plugins';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import ModuleFederationNextFork from '../container/ModuleFederationPlugin';
-import { parseRemotes } from '@bruno-module-federation/node';
+import { parseRemotes } from '@module-federation/node';
 
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.

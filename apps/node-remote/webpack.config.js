@@ -2,7 +2,7 @@ const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 
 registerPluginTSTranspiler();
 const { composePlugins, withNx } = require('@nx/webpack');
-const { UniversalFederationPlugin } = require('@bruno-module-federation/node');
+const { UniversalFederationPlugin } = require('@module-federation/node');
 
 // Nx plugins for webpack.
 module.exports = composePlugins(withNx(), (config) => {
