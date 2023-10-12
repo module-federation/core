@@ -1,3 +1,10 @@
+## [8.1.1](https://github.com/brunos3d/universe/compare/nextjs-mf-8.1.0...nextjs-mf-8.1.1) (2023-10-12)
+
+
+### Bug Fixes
+
+* use access public ([6ab884e](https://github.com/brunos3d/universe/commit/6ab884e824063db16a38c55df943a23d94338d4c))
+
 ## [8.1.0](https://github.com/brunos3d/universe/compare/nextjs-mf-8.0.0...nextjs-mf-8.1.0) (2023-10-12)
 
 
