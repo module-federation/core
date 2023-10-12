@@ -1,6 +1,6 @@
 {
   "name": "@bruno-module-federation/nextjs-mf",
-  "version": "8.0.1-4",
+  "version": "8.1.0",
   "license": "MIT",
   "main": "src/index.js",
   "types": "src/index.d.ts",
