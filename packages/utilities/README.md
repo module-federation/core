@@ -140,7 +140,41 @@ const Bar = () => {
 };
 ```
 
+```js
+// If Bar is a React component you can use it with lazy
+const Bar = lazy(() =>
+  importRemote({
+    url: () => MyAsyncMethod('remote_name'),
+    scope: 'Foo',
+    module: 'Bar',
+    remoteEvents: {
+      beforePreloadRemote: () => Promise.resolve()
+      beforeLoadRemote: () => Promise.resolve()
+      remoteLoaded: () => Promise.resolve()
+    }
+  }),
+);
+
+return (
+  <Suspense fallback={<div>Loading Bar...</div>}>
+    <Bar />
+  </Suspense>
+);
+```
+
+## Additional Configuration
+
 Apart from **url**, **scope** and **module** you can also pass additional options to the **importRemote()** function:
 
 - **remoteEntryFileName**: The name of the remote entry file. Defaults to "remoteEntry.js".
 - **bustRemoteEntryCache**: Whether to add a cache busting query parameter to the remote entry file URL. Defaults to **true**. You can disable it if cachebusting is handled by the server.
+- **esm**: If this module is built as an ESM module in webpack (default NX module type)
+- **remoteEvents**: An object allowing you to add handlers for different remote lifecycles.
+
+## Remote Event Lifecycles
+
+These events can be useful for logging or collection metrics around performance of remote loading in the browser.
+
+- **beforePreloadRemote**: Runs before a remoteEntry file is fetched for a particular module scope.
+- **beforeLoadRemote**: Runs after a remoteEntry file is fetched, but before modules bundles are fetched.
+- **remoteLoaded**: Runs after remote modules are fetched but before the modules are returned.
