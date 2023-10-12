@@ -31,9 +31,9 @@ module.exports = {
       prerelease: 'rc',
     },
     {
-      name: 'develop',
-      channel: 'alpha',
-      prerelease: 'alpha',
+      name: 'canary',
+      channel: 'canary',
+      prerelease: 'canary',
     },
   ],
   parserOpts: {
