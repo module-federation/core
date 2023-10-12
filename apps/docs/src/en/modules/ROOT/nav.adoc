@@ -30,9 +30,9 @@
 * xref:brown-green.adoc[]
 
 .Packages
-* xref:module-federation-node.adoc[@bruno-module-federation/node]
-* xref:module-federation-typescript.adoc[@bruno-module-federation/typescript - v2.4.2]
-* xref:module-federation-utilities.adoc[@bruno-module-federation/utilities]
-* xref:module-federation-native-federation-typescript.adoc[@bruno-module-federation/native-federation-typescript - v0.2.6]
-* xref:module-federation-native-federation-tests.adoc[@bruno-module-federation/native-federation-tests - v0.2.1]
+* xref:module-federation-node.adoc[@module-federation/node]
+* xref:module-federation-typescript.adoc[@module-federation/typescript - v2.4.2]
+* xref:module-federation-utilities.adoc[@module-federation/utilities]
+* xref:module-federation-native-federation-typescript.adoc[@module-federation/native-federation-typescript - v0.2.6]
+* xref:module-federation-native-federation-tests.adoc[@module-federation/native-federation-tests - v0.2.1]
 

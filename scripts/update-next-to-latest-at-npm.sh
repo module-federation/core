@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-PACKAGES=(@bruno-module-federation/storybook-addon @bruno-module-federation/native-federation-tests @bruno-module-federation/native-federation-typescript @bruno-module-federation/nextjs-mf @bruno-module-federation/node @bruno-module-federation/utilities @bruno-module-federation/typescript)
+PACKAGES=(@module-federation/storybook-addon @module-federation/native-federation-tests @module-federation/native-federation-typescript @module-federation/nextjs-mf @module-federation/node @module-federation/utilities @module-federation/typescript)
 
 for package in "${PACKAGES[@]}"; do
   # Check if the package is published with "next" tag

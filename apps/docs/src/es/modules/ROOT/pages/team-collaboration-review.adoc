@@ -41,7 +41,7 @@ Si está utilizando ESLint para el _linteo_ de código, puede añadir las siguie
     "sourceType": "module",
     "ecmaVersion": 2020
   },
-  "plugins": ["@bruno-module-federation/eslint-plugin"]
+  "plugins": ["@module-federation/eslint-plugin"]
 }
 ====
 
@@ -123,9 +123,9 @@ module.exports = {
   transform: {
     "^.+\\.js$": "babel-jest",
   },
-  // Use @bruno-module-federation/jest-federated-module-loader para simular módulos remotos.
+  // Use @module-federation/jest-federated-module-loader para simular módulos remotos.
   moduleNameMapper: {
-    "@bruno-module-federation/jest-federated-module-loader": "@bruno-module-federation/jest-federated-module-loader",
+    "@module-federation/jest-federated-module-loader": "@module-federation/jest-federated-module-loader",
   },
 };
 ```

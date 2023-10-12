@@ -1,5 +1,5 @@
 {
-  "name": "@bruno-module-federation/native-federation-tests",
+  "name": "@module-federation/native-federation-tests",
   "version": "0.2.1",
   "description": "Bundler agnostic unplugin to share federated tests",
   "publishConfig": {

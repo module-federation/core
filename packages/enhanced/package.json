@@ -1,6 +1,6 @@
 {
   "public": true,
-  "name": "@bruno-module-federation/enhanced",
+  "name": "@module-federation/enhanced",
   "version": "0.1.0",
   "type": "commonjs",
   "main": "src/index.js",

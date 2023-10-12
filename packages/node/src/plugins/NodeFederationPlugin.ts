@@ -2,8 +2,8 @@
 
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
-import { extractUrlAndGlobal } from '@bruno-module-federation/utilities/src/utils/pure';
-import { ModuleInfoRuntimePlugin } from '@bruno-module-federation/enhanced';
+import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
+import { ModuleInfoRuntimePlugin } from '@module-federation/enhanced';
 
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
@@ -174,7 +174,7 @@ class NodeFederationPlugin {
     let ModuleFederationPlugin;
     try {
       ModuleFederationPlugin =
-        require('@bruno-module-federation/enhanced').ModuleFederationPlugin;
+        require('@module-federation/enhanced').ModuleFederationPlugin;
     } catch (e) {
       ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
     }

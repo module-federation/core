@@ -98,14 +98,14 @@ The following steps will guide you through creating a simple e-commerce applicat
 
 1. Create a new folder for your project and navigate to it in your terminal or command-line interface.
 2. Initialize a new npm project by running `npm init -y`.
-3. Install webpack and its dependencies by running `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @bruno-module-federation/module-federation-plugin --save-dev`.
+3. Install webpack and its dependencies by running `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @module-federation/module-federation-plugin --save-dev`.
 4. Create a `webpack.config.js` file in the root folder of your project and add the following code:
 
 [source, javascript]
 ----
 // webpack.config.js
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const ModuleFederationPlugin = require("@bruno-module-federation/module-federation-plugin");
+const ModuleFederationPlugin = require("@module-federation/module-federation-plugin");
 
 module.exports = {
   mode: "development",
@@ -202,14 +202,14 @@ This code imports React and its lazy and Suspense features, which allow loading 
 
 - Create a new folder for your project and navigate to it in your terminal or command-line interface.
 - Initialize a new npm project by running `npm init -y`.
-- Install webpack and its dependencies by running `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @bruno-module-federation/module-federation-plugin --save-dev`.
+- Install webpack and its dependencies by running `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @module-federation/module-federation-plugin --save-dev`.
 - Create a `webpack.config.js` file in the root folder of your project and add the following code:
 
 [source, javascript]
 ----
 // webpack.config.js
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const ModuleFederationPlugin = require("@bruno-module-federation/module-federation-plugin");
+const ModuleFederationPlugin = require("@module-federation/module-federation-plugin");
 
 module.exports = {
   mode: "development",
@@ -332,14 +332,14 @@ This code imports React and its useState and useEffect hooks, as well as axios l
 
 - Create a new folder for your project and navigate to it in your terminal or command-line interface.
 - Initialize a new npm project by running `npm init -y`.
-- Install webpack and its dependencies by running `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @bruno-module-federation/module-federation-plugin --save-dev`.
+- Install webpack and its dependencies by running `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @module-federation/module-federation-plugin --save-dev`.
 - Create a `webpack.config.js` file in the root folder of your project and add the following code:
 
 [source, javascript]
 ----
 // webpack.config.js
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const ModuleFederationPlugin = require("@bruno-module-federation/module-federation-plugin");
+const ModuleFederationPlugin = require("@module-federation/module-federation-plugin");
 
 module.exports = {
   mode: "development",
@@ -435,14 +435,14 @@ This code imports React and its useState hook. It defines a Cart component that 
 
 - Create a new folder for your project and navigate to it in your terminal or command-line interface.
 - Initialize a new npm project by running `npm init -y`.
-- Install webpack and its dependencies by running `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @bruno-module-federation/module-federation-plugin --save-dev`.
+- Install webpack and its dependencies by running `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @module-federation/module-federation-plugin --save-dev`.
 - Create a `webpack.config.js` file in the root folder of your project and add the following code:
 
 [source, javascript]
 ----
 // webpack.config.js
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const ModuleFederationPlugin = require("@bruno-module-federation/module-federation-plugin");
+const ModuleFederationPlugin = require("@module-federation/module-federation-plugin");
 
 module.exports = {
   mode: "development",
@@ -640,14 +640,14 @@ This code imports React and its useState hook. It defines a Checkout component t
 
 - Create a new folder for your project and navigate to it in your terminal or command-line interface.
 - Initialize a new npm project by running `npm init -y`.
-- Install webpack and its dependencies by running `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @bruno-module-federation/module-federation-plugin --save-dev`.
+- Install webpack and its dependencies by running `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @module-federation/module-federation-plugin --save-dev`.
 - Create a `webpack.config.js` file in the root folder of your project and add the following code:
 
 [source, javascript]
 ----
 // webpack.config.js
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const ModuleFederationPlugin = require("@bruno-module-federation/module-federation-plugin");
+const ModuleFederationPlugin = require("@module-federation/module-federation-plugin");
 
 module.exports = {
   mode: "development",

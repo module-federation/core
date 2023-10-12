@@ -1,4 +1,4 @@
-= @bruno-module-federation/native-federation-tests - v0.2.1
+= @module-federation/native-federation-tests - v0.2.1
 
 = native-federation-tests
 
@@ -10,7 +10,7 @@ It aims to work for both https://vitest.dev/[vitest]  and https://vitest.dev/[vi
 
 [source, javascript]
 ----
-npm i -D @bruno-module-federation/native-federation-tests
+npm i -D @module-federation/native-federation-tests
 
 ----
 
@@ -60,7 +60,7 @@ This plugin is used to download the concatenated components mock that will be us
 [source, javascript]
 ----
 // vite.config.ts
-import {NativeFederationTestsHost, NativeFederationTestsRemote} from '@bruno-module-federation/native-federation-tests/vite'
+import {NativeFederationTestsHost, NativeFederationTestsRemote} from '@module-federation/native-federation-tests/vite'
 export default defineConfig({
   plugins: [
     NativeFederationTestsRemote({ /* options */ }),
@@ -89,7 +89,7 @@ export default defineConfig({
 [source, javascript]
 ----
 // rollup.config.js
-import {NativeFederationTestsHost, NativeFederationTestsRemote} from '@bruno-module-federation/native-federation-tests/rollup'
+import {NativeFederationTestsHost, NativeFederationTestsRemote} from '@module-federation/native-federation-tests/rollup'
 export default {
   plugins: [
     NativeFederationTestsRemote({ /* options */ }),
@@ -102,7 +102,7 @@ export default {
 [source, javascript]
 ----
 // webpack.config.js
-const {NativeFederationTestsHost, NativeFederationTestsRemote} = require('@bruno-module-federation/native-federation-tests/webpack')
+const {NativeFederationTestsHost, NativeFederationTestsRemote} = require('@module-federation/native-federation-tests/webpack')
 module.exports = {
   /* ... */
   plugins: [
@@ -117,7 +117,7 @@ module.exports = {
 ----
 // esbuild.config.js
 import { build } from 'esbuild'
-import {NativeFederationTestsHost, NativeFederationTestsRemote} from '@bruno-module-federation/native-federation-tests/esbuild'
+import {NativeFederationTestsHost, NativeFederationTestsRemote} from '@module-federation/native-federation-tests/esbuild'
 build({
   plugins: [
     NativeFederationTestsRemote({ /* options */ }),
@@ -130,7 +130,7 @@ build({
 [source, javascript]
 ----
 // rspack.config.js
-const {NativeFederationTestsHost, NativeFederationTestsRemote} = require('@bruno-module-federation/native-federation-tests/rspack')
+const {NativeFederationTestsHost, NativeFederationTestsRemote} = require('@module-federation/native-federation-tests/rspack')
 module.exports = {
   /* ... */
   plugins: [

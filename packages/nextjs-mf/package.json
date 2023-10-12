@@ -1,5 +1,5 @@
 {
-  "name": "@bruno-module-federation/nextjs-mf",
+  "name": "@module-federation/nextjs-mf",
   "version": "8.1.1",
   "license": "MIT",
   "main": "src/index.js",

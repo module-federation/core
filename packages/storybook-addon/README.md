@@ -6,10 +6,10 @@ This addon enables to consume remote Module Federated apps/components
 
 ```shell
 # with NPM
-npm install @bruno-module-federation/storybook-addon
+npm install @module-federation/storybook-addon
 
 # with Yarn
-yarn add @bruno-module-federation/storybook-addon
+yarn add @module-federation/storybook-addon
 ```
 
 ## Configuration
@@ -26,7 +26,7 @@ const storybookConfig = {
   addons: [
     // other addons,
     {
-      name: '@bruno-module-federation/storybook-addon',
+      name: '@module-federation/storybook-addon',
       options: {
         moduleFederationConfig,
       },
@@ -51,7 +51,7 @@ Example:
 ```javascript
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
-const { withModuleFederation } = require('@bruno-module-federation/storybook-addon');
+const { withModuleFederation } = require('@module-federation/storybook-addon');
 
 const baseConfig = require('./module-federation.config');
 
@@ -74,7 +74,7 @@ const storybookConfig = {
   addons: [
     // other addons,
     {
-      name: '@bruno-module-federation/storybook-addon',
+      name: '@module-federation/storybook-addon',
       options: {
         nxModuleFederationConfig,
       },

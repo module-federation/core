@@ -1,4 +1,4 @@
-= @bruno-module-federation/native-federation-typescript - v0.2.6
+= @module-federation/native-federation-typescript - v0.2.6
 
 = native-federation-typescript
 
@@ -8,7 +8,7 @@ Bundler agnostic plugins to share federated types.
 
 [source, javascript]
 ----
-npm i -D @bruno-module-federation/native-federation-typescript
+npm i -D @module-federation/native-federation-typescript
 
 ----
 
@@ -59,7 +59,7 @@ This plugin is used to download the federated types.
 [source, javascript]
 ----
 // vite.config.ts
-import {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} from '@bruno-module-federation/native-federation-typescript/vite'
+import {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} from '@module-federation/native-federation-typescript/vite'
 export default defineConfig({
   plugins: [
     NativeFederationTypeScriptRemote({ /* options */ }),
@@ -88,7 +88,7 @@ export default defineConfig({
 [source, javascript]
 ----
 // rollup.config.js
-import {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} from '@bruno-module-federation/native-federation-typescript/rollup'
+import {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} from '@module-federation/native-federation-typescript/rollup'
 export default {
   plugins: [
     NativeFederationTypeScriptRemote({ /* options */ }),
@@ -101,7 +101,7 @@ export default {
 [source, javascript]
 ----
 // webpack.config.js
-const {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} = require('@bruno-module-federation/native-federation-typescript/webpack')
+const {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} = require('@module-federation/native-federation-typescript/webpack')
 module.exports = {
   /* ... */
   plugins: [
@@ -116,7 +116,7 @@ module.exports = {
 ----
 // esbuild.config.js
 import { build } from 'esbuild'
-import {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} from '@bruno-module-federation/native-federation-typescript/esbuild'
+import {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} from '@module-federation/native-federation-typescript/esbuild'
 build({
   plugins: [
     NativeFederationTypeScriptRemote({ /* options */ }),
@@ -129,7 +129,7 @@ build({
 [source, javascript]
 ----
 // rspack.config.js
-const {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} = require('@bruno-module-federation/native-federation-typescript/rspack')
+const {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} = require('@module-federation/native-federation-typescript/rspack')
 module.exports = {
   /* ... */
   plugins: [

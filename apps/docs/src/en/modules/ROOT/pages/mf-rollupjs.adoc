@@ -6,9 +6,9 @@ Rollup.JS, a popular JavaScript module bundler, is known for its efficiency and 
 
 == Enabling Hosts in Rollup.JS
 
-The first step in integrating Module Federation with Rollup.JS is to enable your Rollup.JS bundle to act as a Host. This capability allows your bundle to consume modules from Remotes built with Webpack. This feature is facilitated by the `@bruno-module-federation/rollup-federation` plugin, which is available directly from the Module Federation Organization.
+The first step in integrating Module Federation with Rollup.JS is to enable your Rollup.JS bundle to act as a Host. This capability allows your bundle to consume modules from Remotes built with Webpack. This feature is facilitated by the `@module-federation/rollup-federation` plugin, which is available directly from the Module Federation Organization.
 
-You can find the plugin on https://www.npmjs.com/package/@bruno-module-federation/rollup-federation[npm] and an example of its usage in https://github.com/module-federation/module-federation-examples/tree/master/rollup-federation-demo[module-federation-examples] repository.
+You can find the plugin on https://www.npmjs.com/package/@module-federation/rollup-federation[npm] and an example of its usage in https://github.com/module-federation/module-federation-examples/tree/master/rollup-federation-demo[module-federation-examples] repository.
 
 == Consuming a Remote
 
@@ -16,11 +16,11 @@ Let's assume we have a Webpack Remote located at `http://localhost:8081/remote-e
 
 === rollup.config.js
 
-In this example, we configure the `@bruno-module-federation/rollup-federation` plugin and alias the remote as `webpack_remote`. The key is the name we will be importing from in our JavaScript modules, and the value is the name in our SystemJS import map.
+In this example, we configure the `@module-federation/rollup-federation` plugin and alias the remote as `webpack_remote`. The key is the name we will be importing from in our JavaScript modules, and the value is the name in our SystemJS import map.
 
 [source, javascript]
 ----
-import federation from '@bruno-module-federation/rollup-federation';
+import federation from '@module-federation/rollup-federation';
 
 export default {
   input: './src/index.js',

@@ -1,5 +1,5 @@
 {
-  "name": "@bruno-module-federation/utilities",
+  "name": "@module-federation/utilities",
   "version": "3.0.3-0",
   "type": "commonjs",
   "main": "src/index.js",

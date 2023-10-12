@@ -39,7 +39,7 @@ If you are using ESLint for code linting, you can add the following options to y
     "sourceType": "module",
     "ecmaVersion": 2020
   },
-  "plugins": ["@bruno-module-federation/eslint-plugin"]
+  "plugins": ["@module-federation/eslint-plugin"]
 }
 ----
 
@@ -121,9 +121,9 @@ module.exports = {
   transform: {
     "^.+\\.js$": "babel-jest",
   },
-  // Use @bruno-module-federation/jest-federated-module-loader to mock remote modules
+  // Use @module-federation/jest-federated-module-loader to mock remote modules
   moduleNameMapper: {
-    "@bruno-module-federation/jest-federated-module-loader": "@bruno-module-federation/jest-federated-module-loader",
+    "@module-federation/jest-federated-module-loader": "@module-federation/jest-federated-module-loader",
   },
 };
 ----

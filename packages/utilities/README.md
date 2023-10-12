@@ -25,7 +25,7 @@ Any extra props will be passed directly to the imported module.
 Usage looks something like this:
 
 ```js
-import { FederationBoundary } from '@bruno-module-federation/utilities/src/utils/react';
+import { FederationBoundary } from '@module-federation/utilities/src/utils/react';
 
 // defining dynamicImport and fallback outside the Component to keep the component identity
 // another alternative would be to use useMemo
@@ -48,7 +48,7 @@ This function will allow you to provide a static url or an async method to retri
 Usage looks something like this:
 
 ```js
-import { importRemote } from '@bruno-module-federation/utilities';
+import { importRemote } from '@module-federation/utilities';
 
 // --
 // If it's a regular js module:
@@ -91,7 +91,7 @@ return (
 ```
 
 ```js
-import { importRemote } from '@bruno-module-federation/utilities';
+import { importRemote } from '@module-federation/utilities';
 
 // If it's a regular js module:
 importRemote({

@@ -16,27 +16,25 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@bruno-module-federation/core": ["packages/core/src/index.ts"],
-      "@bruno-module-federation/enhanced": ["packages/enhanced/src/index.ts"],
-      "@bruno-module-federation/enhanced/*": ["packages/enhanced/*"],
-      "@bruno-module-federation/native-federation-tests": [
+      "@module-federation/core": ["packages/core/src/index.ts"],
+      "@module-federation/enhanced": ["packages/enhanced/src/index.ts"],
+      "@module-federation/enhanced/*": ["packages/enhanced/*"],
+      "@module-federation/native-federation-tests": [
         "packages/native-federation-tests/src/index.ts"
       ],
-      "@bruno-module-federation/native-federation-typescript": [
+      "@module-federation/native-federation-typescript": [
         "packages/native-federation-typescript/src/index.ts"
       ],
-      "@bruno-module-federation/nextjs-mf": ["packages/nextjs-mf/src/index.ts"],
-      "@bruno-module-federation/nextjs-mf/*": ["packages/nextjs-mf/*"],
-      "@bruno-module-federation/node": ["packages/node/src"],
-      "@bruno-module-federation/node/utils": ["packages/node/src/utils"],
-      "@bruno-module-federation/storybook-addon": [
+      "@module-federation/nextjs-mf": ["packages/nextjs-mf/src/index.ts"],
+      "@module-federation/nextjs-mf/*": ["packages/nextjs-mf/*"],
+      "@module-federation/node": ["packages/node/src"],
+      "@module-federation/node/utils": ["packages/node/src/utils"],
+      "@module-federation/storybook-addon": [
         "packages/storybook-addon/src/index.ts"
       ],
-      "@bruno-module-federation/typescript": [
-        "packages/typescript/src/index.ts"
-      ],
-      "@bruno-module-federation/utilities": ["packages/utilities/src/index.ts"],
-      "@bruno-module-federation/utilities/*": ["packages/utilities/*"]
+      "@module-federation/typescript": ["packages/typescript/src/index.ts"],
+      "@module-federation/utilities": ["packages/utilities/src/index.ts"],
+      "@module-federation/utilities/*": ["packages/utilities/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]

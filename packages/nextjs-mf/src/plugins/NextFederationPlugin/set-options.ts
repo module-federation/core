@@ -2,7 +2,7 @@ import {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
-} from '@bruno-module-federation/utilities';
+} from '@module-federation/utilities';
 
 /**
  * This function sets the main and extra options for NextFederationPlugin. It splits the options object into

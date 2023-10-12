@@ -1,4 +1,4 @@
-= @bruno-module-federation/typescript - v2.4.2
+= @module-federation/typescript - v2.4.2
 
 = Federated Types
 
@@ -8,7 +8,7 @@ This plugin enables *Typescript Types* support for Module Federated Components.
 
 [source, javascript]
 ----
-$ npm i @bruno-module-federation/typescript
+$ npm i @module-federation/typescript
 
 ----
 
@@ -19,7 +19,7 @@ Register the plugin in `webpack configuration (webpack.config.js)` file
 [source, javascript]
 ----
 import webpack from 'webpack';
-const { FederatedTypesPlugin } = require('@bruno-module-federation/typescript');
+const { FederatedTypesPlugin } = require('@module-federation/typescript');
 const federationConfig = {
   name: 'my-app',
   filename: 'remoteEntry.js',
@@ -88,7 +88,7 @@ Sample code:
 [source, javascript]
 ----
 // next.config.js
-const FederatedTypesPlugin = require('@bruno-module-federation/typescript');
+const FederatedTypesPlugin = require('@module-federation/typescript');
 module.exports = {
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     config.plugins.push(

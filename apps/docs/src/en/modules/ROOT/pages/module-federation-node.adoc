@@ -1,4 +1,4 @@
-= @bruno-module-federation/node
+= @module-federation/node
 
 
 
@@ -20,9 +20,9 @@ To install the plugin run one of the following commands in your terminal for you
 [source, javascript]
 ----
 # npm
-npm install @bruno-module-federation/node
+npm install @module-federation/node
 # yarn
-yarn add @bruno-module-federation/node
+yarn add @module-federation/node
 
 ----
 
@@ -42,7 +42,7 @@ It accepts the other standard options from `ModuleFederationPlugin` as well. You
 
 [source, javascript]
 ----
-const { UniversalFederationPlugin } = require('@bruno-module-federation/node');
+const { UniversalFederationPlugin } = require('@module-federation/node');
 const config = {
   target: isServer ? false : 'web',
   plugins: [
@@ -76,7 +76,7 @@ An example configuration is presented below:
 
 [source, javascript]
 ----
-const { NodeFederationPlugin, StreamingTargetPlugin } = require('@bruno-module-federation/node');
+const { NodeFederationPlugin, StreamingTargetPlugin } = require('@module-federation/node');
 const config = {
   target: isServer ? false : 'web',
   plugins: [
@@ -112,7 +112,7 @@ Used to "hot reload" the federated application.
 
 [source, javascript]
 ----
-import { revalidate } from '@bruno-module-federation/node/utils';
+import { revalidate } from '@module-federation/node/utils';
 // we automatically reset require cache, so the reload callback is only if you need to do something else
 revalidate().then((shouldReload) => {
   // do something extra after revalidation

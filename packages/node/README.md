@@ -3,10 +3,10 @@
 </p>
 <div align="center">
 	<!--  for version -->
-  <img src="https://img.shields.io/npm/v/@bruno-module-federation/node" alt="version" >
-	<img src="https://img.shields.io/npm/l/@bruno-module-federation/node.svg?" alt="license" >
+  <img src="https://img.shields.io/npm/v/@module-federation/node" alt="version" >
+	<img src="https://img.shields.io/npm/l/@module-federation/node.svg?" alt="license" >
   <!-- for downloads -->
-  <img src="https://img.shields.io/npm/dt/@bruno-module-federation/node" alt="downloads">
+  <img src="https://img.shields.io/npm/dt/@module-federation/node" alt="downloads">
  </div>
 
 <p align="center">
@@ -26,10 +26,10 @@ To install the plugin run one of the following commands in your terminal for you
 
 ```bash
 # npm
-npm install @bruno-module-federation/node
+npm install @module-federation/node
 
 # yarn
-yarn add @bruno-module-federation/node
+yarn add @module-federation/node
 ```
 
 ## 🚀 Usage
@@ -50,7 +50,7 @@ This simplifies the code required in your `webpack.config.js` to enable SSR Modu
 It accepts the other standard options from `ModuleFederationPlugin` as well. You can see an example usage below:
 
 ```js
-const { UniversalFederationPlugin } = require('@bruno-module-federation/node');
+const { UniversalFederationPlugin } = require('@module-federation/node');
 
 const config = {
   target: isServer ? false : 'web',
@@ -83,7 +83,7 @@ The `NodeFederationPlugin` follows the same API as the [Module Federation Plugin
 An example configuration is presented below:
 
 ```js
-const { NodeFederationPlugin, StreamingTargetPlugin } = require('@bruno-module-federation/node');
+const { NodeFederationPlugin, StreamingTargetPlugin } = require('@module-federation/node');
 
 const config = {
   target: isServer ? false : 'web',
@@ -118,7 +118,7 @@ Used to "hot reload" the federated application.
 - Also useful for production environments where you want to be able to update the federated application without having to restart the server.
 
 ```js
-import { revalidate } from '@bruno-module-federation/node/utils';
+import { revalidate } from '@module-federation/node/utils';
 
 // we automatically reset require cache, so the reload callback is only if you need to do something else
 revalidate().then((shouldReload) => {

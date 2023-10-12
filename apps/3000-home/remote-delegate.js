@@ -1,4 +1,4 @@
-import { importDelegatedModule } from '@bruno-module-federation/utilities/src/utils/importDelegatedModule';
+import { importDelegatedModule } from '@module-federation/utilities/src/utils/importDelegatedModule';
 /* eslint-disable no-undef */
 // eslint-disable-next-line no-async-promise-executor
 module.exports = new Promise((resolve, reject) => {
