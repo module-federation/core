@@ -3,31 +3,8 @@ import type {
   WebpackRequire,
   WebpackShareScopes,
   RemoteData,
+  ImportRemoteOptions,
 } from '../types/index';
-
-/**
- * Type definition for RemoteUrl
- * @typedef {string | function} RemoteUrl
- */
-type RemoteUrl = string | (() => Promise<string>);
-
-/**
- * Interface for ImportRemoteOptions
- * @interface
- * @property {RemoteUrl} url - The url of the remote module
- * @property {string} scope - The scope of the remote module
- * @property {string} module - The module to import
- * @property {string} [remoteEntryFileName] - The filename of the remote entry
- * @property {boolean} [bustRemoteEntryCache] - Flag to bust the remote entry cache
- */
-export interface ImportRemoteOptions {
-  url: RemoteUrl;
-  scope: string;
-  module: string;
-  remoteEntryFileName?: string;
-  bustRemoteEntryCache?: boolean;
-  esm?: boolean;
-}
 
 /**
  * Constant for remote entry file
@@ -135,6 +112,7 @@ export const importRemote = async <T>({
   remoteEntryFileName = REMOTE_ENTRY_FILE,
   bustRemoteEntryCache = true,
   esm = false,
+  remoteEvents,
 }: ImportRemoteOptions): Promise<T> => {
   const remoteScope = scope as unknown as number;
   if (!window[remoteScope]) {
@@ -148,9 +126,17 @@ export const importRemote = async <T>({
 
     const remoteUrlWithEntryFile = `${remoteUrl}/${remoteEntryFileName}`;
 
+    if (remoteEvents?.beforePreloadRemote) {
+      await remoteEvents.beforePreloadRemote({ scope });
+    }
+
     const asyncContainer = !esm
       ? loadRemote(remoteUrlWithEntryFile, scope, bustRemoteEntryCache)
       : loadEsmRemote(remoteUrlWithEntryFile, scope);
+
+    if (remoteEvents?.beforeLoadRemote) {
+      await remoteEvents.beforeLoadRemote({ scope, module });
+    }
 
     // Load the remote and initialize the share scope if it's empty
     await Promise.all([asyncContainer, initSharing()]);
@@ -159,13 +145,23 @@ export const importRemote = async <T>({
         `Remote loaded successfully but ${scope} could not be found! Verify that the name is correct in the Webpack configuration!`,
       );
     }
+
+    const remoteContainer = window[
+      remoteScope
+    ] as unknown as WebpackRemoteContainer;
+
     // Initialize the container to get shared modules and get the module factory:
     const [, moduleFactory] = await Promise.all([
-      initContainer(window[remoteScope] as any),
-      (window[remoteScope] as unknown as WebpackRemoteContainer).get(
+      initContainer(remoteContainer),
+      remoteContainer.get(
         module === '.' || module.startsWith('./') ? module : `./${module}`,
       ),
     ]);
+
+    if (remoteEvents?.remoteLoaded) {
+      await remoteEvents.remoteLoaded({ scope, module, remoteContainer });
+    }
+
     return moduleFactory();
   } else {
     const moduleFactory = await (

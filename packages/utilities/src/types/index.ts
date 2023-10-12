@@ -107,3 +107,65 @@ export type RemoteVars = Record<
   | string
   | (() => Promise<WebpackRemoteContainer>)
 >;
+
+/**
+ * The method of providing a remote base url, either as a string or a function that returns a promise.
+ * @typedef {string | function} RemoteUrl
+ */
+export type RemoteUrl = string | (() => Promise<string>);
+
+/**
+ * The set of events available for a remote.
+ */
+export interface RemoteEvents {
+  beforePreloadRemote: RemoteEventCallback;
+  beforeLoadRemote: RemoteModuleEventCallback;
+  remoteLoaded: RemoteModuleEventCallback;
+}
+
+/**
+ * Interface for ImportRemoteOptions
+ * @interface
+ * @property {RemoteUrl} url - The url of the remote module
+ * @property {string} scope - The scope of the remote module
+ * @property {string} module - The module to import
+ * @property {string} [remoteEntryFileName] - The filename of the remote entry
+ * @property {boolean} [bustRemoteEntryCache] - Flag to bust the remote entry cache
+ */
+export interface ImportRemoteOptions {
+  url: RemoteUrl;
+  scope: string;
+  module: string;
+  remoteEntryFileName?: string;
+  bustRemoteEntryCache?: boolean;
+  esm?: boolean;
+  remoteEvents?: RemoteEvents;
+}
+
+/**
+ * RemoteEvent is an event containing the container scope in context.
+ */
+export type RemoteEvent = {
+  scope: ImportRemoteOptions['scope'];
+};
+
+/**
+ * RemoteModuleEvent is an event containing the container scope and module in context.
+ */
+export type RemoteModuleEvent = {
+  scope: ImportRemoteOptions['scope'];
+  module: ImportRemoteOptions['module'];
+  remoteContainer?: WebpackRemoteContainer;
+};
+
+/**
+ * RemoteEventCallback is a callback function for a RemoteEvent.
+ */
+export type RemoteEventCallback = (event: RemoteEvent) => Promise<void>;
+
+/**
+ * RemoteModuleEventCallback is a callback function for a RemoteModuleEvent.
+ */
+export type RemoteModuleEventCallback = (
+  event: RemoteModuleEvent,
+) => Promise<void>;
