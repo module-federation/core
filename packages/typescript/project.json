@@ -42,7 +42,7 @@
           "codeCoverage": true
         }
       }
-    }
+    },
     "release": {
       "executor": "nx:run-commands",
       "options": {
@@ -65,8 +65,7 @@
     },
     "semantic-release": {
       "executor": "@goestav/nx-semantic-release:semantic-release"
-    },
-
+    }
   },
   "tags": ["package"],
   "implicitDependencies": ["utils"]
