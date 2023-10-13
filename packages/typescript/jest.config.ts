@@ -2,5 +2,5 @@
 export default {
   displayName: 'typescript',
   preset: '../../jest.preset.js',
-  coverageDirectory: '../../coverage/packages/typescript'
+  coverageDirectory: '../../coverage/packages/typescript',
 };
