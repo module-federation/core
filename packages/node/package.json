@@ -1,6 +1,6 @@
 {
   "public": true,
-  "name": "@bruno-module-federation/node",
+  "name": "@module-federation/node",
   "version": "2.0.2-beta.6",
   "type": "commonjs",
   "main": "src/index.js",
@@ -19,7 +19,7 @@
     "./src/": "./src/"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "access": "public"
   },
   "tags": [
     "module-federation",

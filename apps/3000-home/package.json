@@ -1,5 +1,5 @@
 {
-  "name": "@bruno-module-federation/3000-home",
+  "name": "@module-federation/3000-home",
   "version": "1.0.0",
   "private": true,
   "dependencies": {

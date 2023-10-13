@@ -1,12 +1,12 @@
 {
-  "name": "@bruno-module-federation/core",
+  "name": "@module-federation/core",
   "version": "0.0.1",
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "license": "MIT",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "access": "public"
   },
   "repository": "https://github.com/module-federation/universe/tree/main/packages/core",
   "peerDependencies": {
