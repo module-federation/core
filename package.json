@@ -166,7 +166,7 @@
     "nx": "16.10.0",
     "nx-cloud": "16.4.0",
     "open": "^9.1.0",
-    "openai": "3.3.0",
+    "openai": "4.12.1",
     "pdf-parse": "1.1.1",
     "postcss-calc": "9.0.1",
     "postcss-custom-properties": "13.3.2",
