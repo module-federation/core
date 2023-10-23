@@ -24,12 +24,15 @@
     "build": "nx run-many --target=build --parallel=3 --exclude='*,!tag:package'",
     "lint-fix": "nx format:write",
     "trigger-release": "node -e 'import(\"open\").then(open => open.default(\"https://github.com/module-federation/universe/actions/workflows/trigger-release.yml\"))'",
+    "serve:next": "nx run-many --target=serve --all --parallel=3 -exclude='*,!tag:nextjs'",
     "serve:website": "nx run website:serve",
     "build:website": "nx run website:build.netlify",
     "extract-i18n:website": "nx run website:extract-i18n",
     "postinstall": "npm run sync:types:webpack",
     "sync:types:webpack": "cp -rf ./webpack/* ./node_modules/webpack",
-    "sync:pullMFTypes": "concurrently \"node ./packages/enhanced/pullts.js\""
+    "sync:pullMFTypes": "concurrently \"node ./packages/enhanced/pullts.js\"",
+    "app:next:dev": "nx run-many --target=build --configuration=development -p enhanced utils nextjs-mf  && nx run-many --target=serve --configuration=development -p 3000-home 3001-shop 3002-checkout",
+    "app:next:prod": "nx run-many --target=build --configuration=production -p 3000-home 3001-shop 3002-checkout && nx run-many --target=serve --configuration=production -p 3000-home 3001-shop 3002-checkout"
   },
   "dependencies": {
     "adm-zip": "0.5.10",

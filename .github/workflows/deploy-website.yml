@@ -55,7 +55,7 @@ jobs:
           path: ${{ env.CACHE_NODE_MODULES_PATH }}
           key: build-${{ hashFiles('**/package-lock.json') }}
       - run: npm run build:website
-      - run: 'npx netlify deploy --build --prod --message "Deploy from GitHub Actions"'
+      - run: 'npx netlify deploy --build --prod --message "Deploy from GitHub Actions" --filter docs-ui'
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
