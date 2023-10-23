@@ -139,6 +139,9 @@ export class NextFederationPlugin {
         './noop': noop,
         './react': require.resolve('react'),
         './react-dom': require.resolve('react-dom'),
+        './next/router': require.resolve('next/router'),
+        './next/link': require.resolve('next/link'),
+        './next/head': require.resolve('next/head'),
         ...this._options.exposes,
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)
