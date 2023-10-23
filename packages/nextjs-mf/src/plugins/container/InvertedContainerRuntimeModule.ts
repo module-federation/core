@@ -73,6 +73,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
           react: {
             "18.0.0": {
               loaded: true,
+              loaded: 1,
               from: 'roothost',
               get() {return innerRemote.get('./react')}
             }
@@ -80,6 +81,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
            "react-dom": {
             "18.0.0": {
               from: 'roothost',
+              loaded: 1,
               loaded: true,
               get() {return innerRemote.get('./react-dom')}
             },
