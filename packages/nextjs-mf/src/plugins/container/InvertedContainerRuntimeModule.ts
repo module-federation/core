@@ -1,7 +1,7 @@
 import type Compiler from 'webpack/lib/Compiler';
 import type Module from 'webpack/lib/Module';
 import RuntimeModule from 'webpack/lib/RuntimeModule';
-import { RuntimeGlobals } from 'webpack';
+import { RuntimeGlobals, Template } from 'webpack';
 
 interface InvertedContainerRuntimeModuleOptions {
   runtime: string;
@@ -33,6 +33,26 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       this.compilation.chunkGraph.getChunkEntryModulesIterable(container);
     return Array.from(entryModules)[0];
   }
+  private generateSharedObjectString(): string {
+    const sharedObjects = [
+      { key: 'react', version: '18.100.0', path: './react' },
+      { key: 'next/router', version: '13.100.0', path: './next/router' },
+      { key: 'next/head', version: '13.100.0', path: './next/head' },
+      { key: 'react-dom', version: '18.100.0', path: './react-dom' },
+    ];
+
+    return sharedObjects.reduce((acc, obj) => {
+      return acc + `
+        "${obj.key}": {
+          "${obj.version}": {
+            loaded: true,
+            loaded: 1,
+            from: "roothost",
+            get() { return innerRemote.get("${obj.path}") }
+          }
+        },`;
+    }, '');
+  }
 
   override generate(): string {
     if (!this.compilation || !this.chunk || !this.chunkGraph) {
@@ -55,78 +75,45 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     }
     const globalObject = `globalThis.__remote_scope__`;
     const containerScope = `${RuntimeGlobals.global}`;
+    const sharedObjectString = this.generateSharedObjectString();
 
-    return `
-      var innerRemote;
-      function attachRemote (resolve) {
-        innerRemote = __webpack_require__(${JSON.stringify(
-          containerModuleId,
-        )});
-        if(${globalObject} && !${globalObject}[${JSON.stringify(name)}]) {
-          ${globalObject}[${JSON.stringify(name)}] = innerRemote;
-        } else if(${containerScope} && !${containerScope}[${JSON.stringify(
-          name,
-        )}]) {
-          ${containerScope}[${JSON.stringify(name)}] = innerRemote;
-        }
-        __webpack_require__.S.default = new Proxy({
-          react: {
-            "18.0.0": {
-              loaded: true,
-              loaded: 1,
-              from: 'roothost',
-              get() {return innerRemote.get('./react')}
-            }
-          },
-           "react-dom": {
-            "18.0.0": {
-              from: 'roothost',
-              loaded: 1,
-              loaded: true,
-              get() {return innerRemote.get('./react-dom')}
-            },
-          },
-        }, {
-          get: function(target, property) {
-            // if(typeof target[property] === 'object' && target[property] !== null) {
-            //   for(const key in target[property]) {
-            //     if(property.startsWith('next/') || property.startsWith('react') || property.startsWith('react-dom')) {
-            //       //target[property][key].loaded = target[property][key].from === ${JSON.stringify(name)};
-            //     }
-            //   }
-            // }
 
-            return target[property];
-          },
-          set: function(target, property, value) {
-            if(property.startsWith('next/') || property.startsWith('react') || property.startsWith('react-dom')) {
-return true;
-}
-            // console.log(reacts);
-            // if(!target[property]) {
-              target[property] = value;
+    return Template.asString([
+      'var innerRemote;',
+      Template.indent([
+      'function attachRemote (resolve) {',
+      `  innerRemote = __webpack_require__(${JSON.stringify(containerModuleId)});`,
+      `  if(${globalObject} && !${globalObject}[${JSON.stringify(name)}]) {`,
+      `    ${globalObject}[${JSON.stringify(name)}] = innerRemote;`,
+      `  } else if(${containerScope} && !${containerScope}[${JSON.stringify(name)}]) {`,
+      `    ${containerScope}[${JSON.stringify(name)}] = innerRemote;`,
+      '  }',
+      `  __webpack_require__.S.default = new Proxy({${sharedObjectString}}`,
+      ' , {',
+      '    get: function(target, property) {',
+      '      return target[property];',
+      '    },',
+      '    set: function(target, property, value) {',
+      '      target[property] = value;',
+      '      return true;',
+      '    }',
+      '  });',
+      '  if(resolve) resolve(innerRemote);',
+      '}',
+      ]),
+      `if(!(${globalObject} && ${globalObject}[${JSON.stringify(name)}]) && !(${containerScope} && ${containerScope}[${JSON.stringify(name)}])) {`,
+      Template.indent([
+      '  if (__webpack_require__.O) {',
+      `  __webpack_require__.O(0, ["${this.chunk.id}"], function() {`,
+      '    attachRemote();',
+      '  }, 0);',
+      '} else {',
+      'attachRemote();',
+      '}',
+      ]),
+      '}'
+    ])
 
-            // }
-            return true;
-          }
-        });
-
-        if(resolve) resolve(innerRemote);
-      }
-      if(!(${globalObject} && ${globalObject}[${JSON.stringify(
-        name,
-      )}]) && !(${containerScope} && ${containerScope}[${JSON.stringify(
-        name,
-      )}])) {
-        if (__webpack_require__.O) {
-        __webpack_require__.O(0, ["${this.chunk.id}"], function() {
-          attachRemote();
-        }, 0);
-      } else {
-        attachRemote();
-      }
-    }
-    `;
   }
 }
 
