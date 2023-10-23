@@ -12,7 +12,7 @@ export default function () {
 
   [].slice
     .call(
-      document.querySelectorAll('.doc pre.highlight, .doc .literalblock pre'),
+      document.querySelectorAll('.doc pre.highlight, .doc .literalblock pre')
     )
     .forEach((pre) => {
       let code, language, lang, copy, toast, toolbox;
@@ -43,16 +43,16 @@ export default function () {
         if (svgAs === 'svg') {
           const svg = document.createElementNS(
             'http://www.w3.org/2000/svg',
-            'svg',
+            'svg'
           );
           svg.setAttribute('class', 'copy-icon');
           const use = document.createElementNS(
             'http://www.w3.org/2000/svg',
-            'use',
+            'use'
           );
           use.setAttribute(
             'href',
-            uiRootPath + '/img/octicons-16.svg#icon-clippy',
+            uiRootPath + '/img/octicons-16.svg#icon-clippy'
           );
           svg.appendChild(use);
           copy.appendChild(svg);
@@ -92,7 +92,7 @@ export default function () {
         this.classList.remove('clicked');
       },
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      () => {},
+      () => {}
     );
   }
 }
