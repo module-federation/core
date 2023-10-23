@@ -22,7 +22,7 @@ export default function () {
     }
     window.scrollTo(
       0,
-      computePosition(this, 0) - toolbar.getBoundingClientRect().bottom,
+      computePosition(this, 0) - toolbar.getBoundingClientRect().bottom
     );
   }
 
