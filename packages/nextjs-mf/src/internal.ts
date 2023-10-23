@@ -19,77 +19,76 @@ import { parseOptions } from 'webpack/lib/container/options';
  */
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/dynamic': {
-    version: '0',
+    version: '^0',
     requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/head': {
-    version: '0',
+    version: '^0',
     requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/link': {
-    version: '0',
+    version: '^0',
     requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/router': {
-    version: '0',
+    version: '^0',
     requiredVersion: undefined,
     singleton: true,
-    import: undefined
+    import: undefined,
   },
-  "@module-federation/utilities":{
-    eager:true,
-    requiredVersion: false
+  '@module-federation/utilities': {
+    eager: true,
+    requiredVersion: false,
   },
   'next/image': {
     requiredVersion: undefined,
     singleton: true,
-    version: '0',
+    version: '^0',
     import: undefined,
   },
   'next/script': {
-    version: '0',
+    version: '^0',
     requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   react: {
-    version: '0',
+    version: '^0',
     singleton: true,
     requiredVersion: undefined,
     import: false,
   },
-  "react/": {
-    version: '0',
+  'react/': {
     singleton: true,
     requiredVersion: undefined,
     import: false,
   },
   'react-dom/': {
-    version: '0',
+    version: '^0',
     singleton: true,
     requiredVersion: undefined,
-     import: false,
+    import: false,
   },
   'react-dom': {
-    version: '0',
+    version: '^0',
     singleton: true,
     requiredVersion: undefined,
     import: false,
   },
   'react/jsx-dev-runtime': {
-    version: '0',
+    version: '^0',
     singleton: true,
     requiredVersion: undefined,
     import: undefined,
   },
   'react/jsx-runtime': {
-    version: '0',
+    version: '^0',
     singleton: true,
     requiredVersion: undefined,
     // import: false,
@@ -125,7 +124,6 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
   DEFAULT_SHARE_SCOPE,
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
-
 
   // Set eager and import to undefined for all entries, except for the ones specified above
   acc[key] = { ...value, import: undefined };

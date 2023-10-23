@@ -5,7 +5,7 @@
   "license": "MIT",
   "repository": "https://github.com/module-federation/universe/tree/main/packages/storybook-addon",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "access": "public"
   },
   "keywords": [
     "module-federation",

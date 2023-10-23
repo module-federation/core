@@ -1,0 +1,54 @@
+name: Trigger Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: 'Package name (as in Nx)'
+        required: true
+        type: choice
+        options:
+          - affected
+          - all
+          - nextjs-mf
+          - node
+          - storybook-addon
+          - typescript
+          - utils
+          - native-federation-typescript
+          - native-federation-tests
+          - enhanced
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to be able to publish a GitHub release
+      issues: write # to be able to comment on released issues
+      pull-requests: write # to be able to comment on released pull requests
+      id-token: write # to enable use of OIDC for npm provenance
+    if: ${{ github.event.inputs.packages }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: nrwl/nx-set-shas@v3
+      - run: npm ci
+
+      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+        run: npm audit signatures
+
+      - name: Release ${{ github.event.inputs.packages }} package(s)
+        run: |
+          if [[ ${{ github.event.inputs.packages }} == 'affected' ]]; then
+            npx nx affected -t release --parallel=3 --exclude='*,!tag:package'
+          elif [[ ${{ github.event.inputs.packages }} == 'all' ]]; then
+            npx nx run-many --target=release --all --parallel=3 -exclude='*,!tag:package'
+          else
+            npx nx run ${{ github.event.inputs.packages }}:release
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # NPM_CONFIG_PROVENANCE: true

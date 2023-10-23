@@ -142,4 +142,3 @@ describe('DelegateModulesPlugin', () => {
     ).toHaveBeenCalledTimes(2);
   });
 });
-

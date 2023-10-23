@@ -3,7 +3,6 @@ import { ModuleFederationPluginOptions } from './types';
 import EmbeddedContainerPlugin from './EmbeddedContainerPlugin';
 import { AsyncBoundaryPlugin } from '@module-federation/enhanced';
 
-
 /**
  * This interface includes additional fields specific to the plugin's behavior.
  * @interface InvertedContainerOptions
@@ -49,22 +48,25 @@ class InvertedContainerPlugin {
     }).apply(compiler);
 
     const asyncBoundaryPlugin = new AsyncBoundaryPlugin();
-    asyncBoundaryPlugin.hooks.checkInvalidContext.tap('InvertedContainerPlugin', (renderContext, compilation) => {
-      return (
-        !renderContext ||
-        //@ts-ignore
-        renderContext?._name ||
-        //@ts-ignore
-        !renderContext?.debugId ||
-        //@ts-ignore
-        !compilation.chunkGraph.isEntryModule(renderContext) ||
-        //@ts-ignore
-        renderContext?.rawRequest?.includes('pages/api') ||
-        //@ts-ignore
-        renderContext?.layer === 'api'
-      );
-    });
-    
+    asyncBoundaryPlugin.hooks.checkInvalidContext.tap(
+      'InvertedContainerPlugin',
+      (renderContext, compilation) => {
+        return (
+          !renderContext ||
+          //@ts-ignore
+          renderContext?._name ||
+          //@ts-ignore
+          !renderContext?.debugId ||
+          //@ts-ignore
+          !compilation.chunkGraph.isEntryModule(renderContext) ||
+          //@ts-ignore
+          renderContext?.rawRequest?.includes('pages/api') ||
+          //@ts-ignore
+          renderContext?.layer === 'api'
+        );
+      },
+    );
+
     asyncBoundaryPlugin.apply(compiler);
   }
 }

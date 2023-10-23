@@ -4,7 +4,7 @@ import * as ReactDOM from 'react-dom/client';
 import Button from './Button';
 
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
+  document.getElementById('root') as HTMLElement,
 );
 root.render(
   <StrictMode>
@@ -12,5 +12,5 @@ root.render(
       UI Library Button:
       <Button>Test Button</Button>
     </div>
-  </StrictMode>
+  </StrictMode>,
 );

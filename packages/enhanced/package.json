@@ -1,12 +1,11 @@
 {
-  "public": true,
   "name": "@module-federation/enhanced",
   "version": "0.1.0",
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "access": "public"
   },
   "peerDependencies": {
     "webpack": "^5.0.0"

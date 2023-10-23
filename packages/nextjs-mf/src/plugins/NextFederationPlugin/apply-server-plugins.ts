@@ -23,11 +23,16 @@ export function applyServerPlugins(
   const { StreamingTargetPlugin } = require('@module-federation/node');
   const chunkFileName = compiler.options?.output?.chunkFilename;
   const uniqueName = compiler?.options?.output?.uniqueName || options.name;
-  if (typeof chunkFileName === 'string' &&
+  if (
+    typeof chunkFileName === 'string' &&
     uniqueName &&
-    !chunkFileName.includes(uniqueName)) {
+    !chunkFileName.includes(uniqueName)
+  ) {
     const suffix = `-[chunkhash].js`;
-    compiler.options.output.chunkFilename = chunkFileName.replace('.js', suffix);
+    compiler.options.output.chunkFilename = chunkFileName.replace(
+      '.js',
+      suffix,
+    );
   }
   new ModuleInfoRuntimePlugin().apply(compiler);
   // Apply the DelegatesModulePlugin to the compiler
@@ -106,7 +111,6 @@ export function handleServerExternals(
   compiler: Compiler,
   options: ModuleFederationPluginOptions,
 ): void {
-
   // Use a regex to match the required external modules
   // const crittersRegex = 'critters';
   // const reactRegex = /^react$/;
@@ -126,9 +130,9 @@ export function handleServerExternals(
       // If the result is null, return without further processing
       if (!fromNext) {
         return;
-    }
-    // If the module is from Next.js or React, return the original result
-    const req = fromNext.split(' ')[1];
+      }
+      // If the module is from Next.js or React, return the original result
+      const req = fromNext.split(' ')[1];
       // Check if the module should not be treated as external
       if (
         ctx.request &&
@@ -141,13 +145,11 @@ export function handleServerExternals(
               (key.endsWith('/') ? req.includes(key) : req === key)
             );
           }) ||
-          ctx.request.includes('@module-federation/dashboard-plugin')
-        )
+          ctx.request.includes('@module-federation/dashboard-plugin'))
       ) {
         // If the module should not be treated as external, return without calling the original externals function
         return;
       }
-
 
       if (
         req.startsWith('next') ||

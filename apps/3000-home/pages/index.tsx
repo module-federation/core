@@ -8,7 +8,7 @@ const WebpackSvgRemote = lazy(() =>
   import('shop/WebpackSvg').then((m) => {
     console.log(m);
     return m;
-  })
+  }),
 );
 const WebpackPngRemote = lazy(() => import('shop/WebpackPng'));
 

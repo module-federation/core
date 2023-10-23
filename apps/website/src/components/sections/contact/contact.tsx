@@ -116,7 +116,7 @@ export default component$(() => {
             <div class="flex flex-col gap-1 col-span-2">
               <label class="text-blue-gray-500" for="howCanWeHelp">
                 {t(
-                  'contact.form.how-can-we-help-you.label@@How can we help you?'
+                  'contact.form.how-can-we-help-you.label@@How can we help you?',
                 )}
               </label>
               <textarea
@@ -148,7 +148,7 @@ export default component$(() => {
 
           <div class="text-blue-gray-900 font-normal max-w-sm text-center text-lg leading-tight">
             {t(
-              'contact.disclaimer.text@@By submitting this form, I confirm that I have read and understood the'
+              'contact.disclaimer.text@@By submitting this form, I confirm that I have read and understood the',
             )}{' '}
             <a class="text-ui-blue" href={localizedUrl('/privacy-policy')}>
               {t('contact.disclaimer.action@@Privacy & Policy')}
@@ -159,7 +159,7 @@ export default component$(() => {
         <div class="flex flex-col gap-10 flex-1 w-50">
           <div class="text-blue-gray-900 text-3xl font-medium text-center md:text-left leading-normal">
             {t(
-              'contact.quote.text@@There are now 4000 companies using Module Federation in a detectable way. Likely many more who we cannot trace, but 4000 is still an impressive number of known entities.'
+              'contact.quote.text@@There are now 4000 companies using Module Federation in a detectable way. Likely many more who we cannot trace, but 4000 is still an impressive number of known entities.',
             )}
           </div>
 
@@ -175,7 +175,7 @@ export default component$(() => {
               </div>
               <div class="text-blue-gray-900 font-normal text-lg">
                 {t(
-                  'contact.quote.author.title@@the сreator of Module Federation'
+                  'contact.quote.author.title@@the сreator of Module Federation',
                 )}
               </div>
             </div>

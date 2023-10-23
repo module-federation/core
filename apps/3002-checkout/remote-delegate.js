@@ -15,7 +15,7 @@ module.exports = new Promise(async (resolve, reject) => {
       console.log(
         __resourceQuery,
         'resolved remote from',
-        __webpack_runtime_id__
+        __webpack_runtime_id__,
       );
 
       resolve(remote);
