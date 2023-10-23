@@ -38,6 +38,8 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       { key: 'react', version: '18.100.0', path: './react' },
       { key: 'next/router', version: '13.100.0', path: './next/router' },
       { key: 'next/head', version: '13.100.0', path: './next/head' },
+      { key: 'next/link', version: '13.100.0', path: './next/link' },
+      { key: 'next/image', version: '13.100.0', path: './next/image' },
       { key: 'react-dom', version: '18.100.0', path: './react-dom' },
     ];
 
