@@ -57,8 +57,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     const containerScope = `${RuntimeGlobals.global}`;
 
     return `
+      var innerRemote;
       function attachRemote (resolve) {
-        var innerRemote = __webpack_require__(${JSON.stringify(
+        innerRemote = __webpack_require__(${JSON.stringify(
           containerModuleId,
         )});
         if(${globalObject} && !${globalObject}[${JSON.stringify(name)}]) {
@@ -68,26 +69,46 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         )}]) {
           ${containerScope}[${JSON.stringify(name)}] = innerRemote;
         }
-        __webpack_require__.S.default = new Proxy({}, {
-          get: function(target, property) {
-            if(typeof target[property] === 'object' && target[property] !== null) {
-              for(const key in target[property]) {
-                if(property.startsWith('next/') || property.startsWith('react') || property.startsWith('next-dom')) {
-                  target[property][key].loaded = true
-                }
-              }
+        __webpack_require__.S.default = new Proxy({
+          react: {
+            "18.0.0": {
+              loaded: true,
+              from: 'roothost',
+              get() {return innerRemote.get('./react')}
             }
-            
+          },
+           "react-dom": {
+            "18.0.0": {
+              from: 'roothost',
+              loaded: true,
+              get() {return innerRemote.get('./react-dom')}
+            },
+          },
+        }, {
+          get: function(target, property) {
+            // if(typeof target[property] === 'object' && target[property] !== null) {
+            //   for(const key in target[property]) {
+            //     if(property.startsWith('next/') || property.startsWith('react') || property.startsWith('react-dom')) {
+            //       //target[property][key].loaded = target[property][key].from === ${JSON.stringify(name)};
+            //     }
+            //   }
+            // }
+
             return target[property];
           },
           set: function(target, property, value) {
-            if(!target[property]) {
-            target[property] = value;
-            }
+            if(property.startsWith('next/') || property.startsWith('react') || property.startsWith('react-dom')) {
+return true;
+}
+            // console.log(reacts);
+            // if(!target[property]) {
+              target[property] = value;
+
+            // }
             return true;
           }
         });
-        
+
         if(resolve) resolve(innerRemote);
       }
       if(!(${globalObject} && ${globalObject}[${JSON.stringify(

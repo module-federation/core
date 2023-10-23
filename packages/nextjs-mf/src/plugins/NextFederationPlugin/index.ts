@@ -134,6 +134,8 @@ export class NextFederationPlugin {
       remoteType: 'script',
       exposes: {
         './noop': noop,
+        './react': require.resolve('react'),
+        './react-dom': require.resolve('react-dom'),
         ...this._options.exposes,
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)
