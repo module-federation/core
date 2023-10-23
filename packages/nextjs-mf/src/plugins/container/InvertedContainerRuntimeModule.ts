@@ -44,7 +44,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     ];
 
     return sharedObjects.reduce((acc, obj) => {
-      return acc + `
+      return (
+        acc +
+        `
         "${obj.key}": {
           "${obj.version}": {
             loaded: true,
@@ -52,7 +54,8 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
             from: "roothost",
             get() { return innerRemote.get("${obj.path}") }
           }
-        },`;
+        },`
+      );
     }, '');
   }
 
@@ -79,43 +82,49 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     const containerScope = `${RuntimeGlobals.global}`;
     const sharedObjectString = this.generateSharedObjectString();
 
-
     return Template.asString([
       'var innerRemote;',
       Template.indent([
-      'function attachRemote (resolve) {',
-      `  innerRemote = __webpack_require__(${JSON.stringify(containerModuleId)});`,
-      `  if(${globalObject} && !${globalObject}[${JSON.stringify(name)}]) {`,
-      `    ${globalObject}[${JSON.stringify(name)}] = innerRemote;`,
-      `  } else if(${containerScope} && !${containerScope}[${JSON.stringify(name)}]) {`,
-      `    ${containerScope}[${JSON.stringify(name)}] = innerRemote;`,
-      '  }',
-      `  __webpack_require__.S.default = new Proxy({${sharedObjectString}}`,
-      ' , {',
-      '    get: function(target, property) {',
-      '      return target[property];',
-      '    },',
-      '    set: function(target, property, value) {',
-      '      target[property] = value;',
-      '      return true;',
-      '    }',
-      '  });',
-      '  if(resolve) resolve(innerRemote);',
-      '}',
+        'function attachRemote (resolve) {',
+        `  innerRemote = __webpack_require__(${JSON.stringify(
+          containerModuleId,
+        )});`,
+        `  if(${globalObject} && !${globalObject}[${JSON.stringify(name)}]) {`,
+        `    ${globalObject}[${JSON.stringify(name)}] = innerRemote;`,
+        `  } else if(${containerScope} && !${containerScope}[${JSON.stringify(
+          name,
+        )}]) {`,
+        `    ${containerScope}[${JSON.stringify(name)}] = innerRemote;`,
+        '  }',
+        `  __webpack_require__.S.default = new Proxy({${sharedObjectString}}`,
+        ' , {',
+        '    get: function(target, property) {',
+        '      return target[property];',
+        '    },',
+        '    set: function(target, property, value) {',
+        '      target[property] = value;',
+        '      return true;',
+        '    }',
+        '  });',
+        '  if(resolve) resolve(innerRemote);',
+        '}',
       ]),
-      `if(!(${globalObject} && ${globalObject}[${JSON.stringify(name)}]) && !(${containerScope} && ${containerScope}[${JSON.stringify(name)}])) {`,
+      `if(!(${globalObject} && ${globalObject}[${JSON.stringify(
+        name,
+      )}]) && !(${containerScope} && ${containerScope}[${JSON.stringify(
+        name,
+      )}])) {`,
       Template.indent([
-      '  if (__webpack_require__.O) {',
-      `  __webpack_require__.O(0, ["${this.chunk.id}"], function() {`,
-      '    attachRemote();',
-      '  }, 0);',
-      '} else {',
-      'attachRemote();',
-      '}',
+        '  if (__webpack_require__.O) {',
+        `  __webpack_require__.O(0, ["${this.chunk.id}"], function() {`,
+        '    attachRemote();',
+        '  }, 0);',
+        '} else {',
+        'attachRemote();',
+        '}',
       ]),
-      '}'
-    ])
-
+      '}',
+    ]);
   }
 }
 
