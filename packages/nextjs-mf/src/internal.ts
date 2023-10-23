@@ -59,7 +59,7 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     import: undefined,
   },
   react: {
-    version: ^0',
+    version: '0',
     singleton: true,
     requiredVersion: undefined,
     import: false,
