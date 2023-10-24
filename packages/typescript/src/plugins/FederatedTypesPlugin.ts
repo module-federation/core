@@ -25,6 +25,7 @@ const PLUGIN_NAME = 'FederatedTypesPlugin';
 const SUPPORTED_PLUGINS = ['ModuleFederationPlugin', 'NextFederationPlugin'];
 
 let isServe = false;
+let typeDownloadCompleted = false;
 
 export class FederatedTypesPlugin {
   private normalizeOptions!: ReturnType<typeof normalizeOptions>;
@@ -61,20 +62,6 @@ export class FederatedTypesPlugin {
     compiler.options.watchOptions.ignored =
       this.normalizeOptions.ignoredWatchOptions;
 
-    const importRemotes = async (
-      callback: Parameters<
-        Parameters<typeof compiler.hooks.beforeRun.tapAsync>['1']
-      >['1'],
-    ) => {
-      try {
-        this.logger.log('Preparing to download types from remotes on startup');
-        await this.importRemoteTypes();
-        callback();
-      } catch (error) {
-        callback(this.getError(error));
-      }
-    };
-
     if (!disableTypeCompilation) {
       compiler.hooks.beforeCompile.tap(PLUGIN_NAME, async (_) => {
         this.generateTypes({ outputPath: compiler.outputPath });
@@ -84,9 +71,8 @@ export class FederatedTypesPlugin {
 
       // TODO - this is not ideal, but it will repopulate types if clean is enabled
       if (compiler.options.output.clean) {
-        compiler.hooks.afterEmit.tapAsync(PLUGIN_NAME, (_, callback) => {
+        compiler.hooks.afterEmit.tap(PLUGIN_NAME, (_) => {
           this.generateTypes({ outputPath: compiler.outputPath });
-          callback();
         });
       }
     }
@@ -95,7 +81,20 @@ export class FederatedTypesPlugin {
       compiler.hooks.beforeCompile.tapAsync(
         PLUGIN_NAME,
         async (_, callback) => {
-          await importRemotes(callback);
+          if (typeDownloadCompleted) {
+            callback();
+            return;
+          }
+
+          try {
+            this.logger.log(
+              'Preparing to download types from remotes on startup',
+            );
+            await this.importRemoteTypes();
+            callback();
+          } catch (error) {
+            callback(this.getError(error));
+          }
         },
       );
     }
@@ -147,7 +146,7 @@ export class FederatedTypesPlugin {
     }
   }
 
-  private async generateTypes({ outputPath }: { outputPath: string }) {
+  private generateTypes({ outputPath }: { outputPath: string }) {
     this.logger.log('Generating types');
     const federatedTypesMap = this.compileTypes();
 
@@ -230,7 +229,7 @@ export class FederatedTypesPlugin {
       return;
     }
 
-    for await (const { origin, remote } of remoteUrls) {
+    for (const { origin, remote } of remoteUrls) {
       const { typescriptFolderName, typeFetchOptions } = this.normalizeOptions;
 
       const {
@@ -275,6 +274,8 @@ export class FederatedTypesPlugin {
           }
         }
       }
+
+      typeDownloadCompleted = true;
     }
   }
 

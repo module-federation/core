@@ -26,7 +26,11 @@ export const startServer = async ({
     }
 
     const server = http.createServer((req, res) => {
-      const fileName = path.join(outputPath, req.url!);
+      const safeSuffix = path
+        .normalize(req.url!)
+        .replace(/^(\.\.(\/|\\|$))+/, '');
+
+      const fileName = path.join(outputPath, safeSuffix);
 
       try {
         // Ensure the requested file is within the specified directory
