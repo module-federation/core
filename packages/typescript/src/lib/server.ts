@@ -26,31 +26,38 @@ export const startServer = async ({
     }
 
     const server = http.createServer((req, res) => {
-      const { url: fileName } = req;
+      const fileName = path.join(outputPath, req.url);
 
-      if (!fileName) {
-        logger.log(`Unable to find file: ${fileName} in request url`);
-        res.end();
-        return;
-      }
+      try {
+        // Ensure the requested file is within the specified directory
+        if (!fileName.startsWith(outputPath)) {
+          res.writeHead(403, { 'Content-Type': 'text/plain' });
+          res.end('Forbidden');
+          return;
+        }
 
-      const safeSuffix = path
-        .normalize(fileName)
-        .replace(/^(\.\.(\/|\\|$))+/, '');
-      const safeJoin = path.join(outputPath, safeSuffix);
-
-      logger.log(`Retrieving file: ${safeJoin}`);
-
-      const fileStream = fs.createReadStream(safeJoin);
-
-      fileStream.on('error', (err) => {
+        // Check if the file exists
+        fs.stat(fileName, (err, stat) => {
+          if (err) {
+            logger.log(`Error reading file: ${err}`);
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end('Internal Server Error');
+          } else {
+            if (stat.isFile()) {
+              res.writeHead(200, { 'Content-Type': 'text/plain' });
+              fs.createReadStream(fileName).pipe(res);
+            } else {
+              // Handle non-file requests (e.g., directories)
+              res.writeHead(404, { 'Content-Type': 'text/plain' });
+              res.end('Not Found');
+            }
+          }
+        });
+      } catch (err) {
         logger.log(`Error reading file: ${err}`);
-        res.statusCode = 500;
-        res.end();
-      });
-
-      res.writeHead(200, { 'Content-Type': 'text/plain' });
-      fileStream.pipe(res);
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Internal Server Error');
+      }
     });
 
     server.listen(port, host, () => {
