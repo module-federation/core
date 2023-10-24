@@ -63,7 +63,7 @@ export class FederatedTypesPlugin {
       this.normalizeOptions.ignoredWatchOptions;
 
     if (!disableTypeCompilation) {
-      compiler.hooks.beforeCompile.tap(PLUGIN_NAME, async (_) => {
+      compiler.hooks.beforeCompile.tap(PLUGIN_NAME, (_) => {
         this.generateTypes({ outputPath: compiler.outputPath });
       });
 
