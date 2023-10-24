@@ -50,7 +50,7 @@
     "tapable": "2.2.1",
     "tsup": "7.2.0",
     "typedoc": "0.25.2",
-    "undici": "5.25.4",
+    "undici": "5.26.2",
     "unplugin": "1.5.0"
   },
   "devDependencies": {
@@ -141,7 +141,7 @@
     "eslint-config-prettier": "9.0.0",
     "eslint-plugin-import": "2.28.1",
     "eslint-plugin-jsx-a11y": "6.7.1",
-    "eslint-plugin-prettier": "5.0.0",
+    "eslint-plugin-prettier": "5.0.1",
     "eslint-plugin-qwik": "1.2.13",
     "eslint-plugin-react": "7.33.2",
     "eslint-plugin-react-hooks": "4.6.0",
@@ -191,7 +191,7 @@
     "vite": "4.4.11",
     "vite-tsconfig-paths": "4.2.1",
     "vitest": "0.32.4",
-    "vue-tsc": "1.8.18",
+    "vue-tsc": "1.8.20",
     "webpack": "^5.88.2",
     "webpack-virtual-modules": "0.6.0"
   },
