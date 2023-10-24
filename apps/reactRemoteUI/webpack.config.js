@@ -14,5 +14,5 @@ const config = {
 module.exports = composePlugins(
   withNx(),
   withReact(),
-  withModuleFederation(config)
+  withModuleFederation(config),
 );

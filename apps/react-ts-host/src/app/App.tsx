@@ -10,7 +10,7 @@ const DynamicReactTsRemote = React.lazy(() =>
     name: 'react_ts_remote',
     url: 'http://localhost:3004/remoteEntry.js',
     modulePath: './Module',
-  })
+  }),
 );
 
 export function App() {

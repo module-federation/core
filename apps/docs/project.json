@@ -3,9 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/docs/src",
-  "implicitDependencies": [
-    "docs-ui"
-  ],
+  "implicitDependencies": ["docs-ui"],
   "tags": [],
   "targets": {
     "serve": {
@@ -18,9 +16,7 @@
           "buildTarget": "docs:build-docs:local"
         }
       },
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "build-docs": {
       "executor": "nx:run-commands",
@@ -40,13 +36,8 @@
           ]
         }
       },
-      "dependsOn": [
-        "^build",
-        "prepare-antora-configs"
-      ],
-      "outputs": [
-        "{workspaceRoot}/dist/apps/docs"
-      ]
+      "dependsOn": ["^build", "prepare-antora-configs"],
+      "outputs": ["{workspaceRoot}/dist/apps/docs"]
     }
   }
 }

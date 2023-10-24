@@ -122,7 +122,7 @@ export default function () {
       if (list.scrollHeight > list.offsetHeight) {
         list.scrollTop = Math.max(
           0,
-          activeLink.offsetTop + activeLink.offsetHeight - list.offsetHeight
+          activeLink.offsetTop + activeLink.offsetHeight - list.offsetHeight,
         );
       }
       lastActiveFragment = activeFragment;

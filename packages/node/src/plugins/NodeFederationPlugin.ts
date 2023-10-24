@@ -3,7 +3,7 @@
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
-import {ModuleInfoRuntimePlugin} from '@module-federation/enhanced';
+import { ModuleInfoRuntimePlugin } from '@module-federation/enhanced';
 
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
@@ -118,7 +118,10 @@ class NodeFederationPlugin {
     new ModuleInfoRuntimePlugin().apply(compiler);
     const pluginOptions = this.preparePluginOptions();
     this.updateCompilerOptions(compiler);
-    const ModuleFederationPlugin = this.getModuleFederationPlugin(compiler, webpack);
+    const ModuleFederationPlugin = this.getModuleFederationPlugin(
+      compiler,
+      webpack,
+    );
     new ModuleFederationPlugin(pluginOptions).apply(compiler);
   }
 
@@ -153,9 +156,13 @@ class NodeFederationPlugin {
 
   private getModuleFederationPlugin(compiler: Compiler, webpack: any): any {
     let ModuleFederationPlugin;
-    if(this.context.ModuleFederationPlugin) {
+    if (this.context.ModuleFederationPlugin) {
       ModuleFederationPlugin = this.context.ModuleFederationPlugin;
-    } else if(webpack && webpack.container && webpack.container.ModuleFederationPlugin) {
+    } else if (
+      webpack &&
+      webpack.container &&
+      webpack.container.ModuleFederationPlugin
+    ) {
       ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
     } else {
       ModuleFederationPlugin = this.loadModuleFederationPlugin();
@@ -166,13 +173,13 @@ class NodeFederationPlugin {
   private loadModuleFederationPlugin(): any {
     let ModuleFederationPlugin;
     try {
-      ModuleFederationPlugin = require('@module-federation/enhanced').ModuleFederationPlugin;
+      ModuleFederationPlugin =
+        require('@module-federation/enhanced').ModuleFederationPlugin;
     } catch (e) {
-      ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin')
+      ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
     }
     return ModuleFederationPlugin;
   }
 }
 
 export default NodeFederationPlugin;
-
