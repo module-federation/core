@@ -1,10 +1,9 @@
 {
-  "name": "@bruno-module-federation/nextjs-mf",
-  "version": "8.0.1-4",
+  "name": "@module-federation/nextjs-mf",
+  "version": "8.1.1",
   "license": "MIT",
   "main": "src/index.js",
   "types": "src/index.d.ts",
-  "public": true,
   "type": "commonjs",
   "description": "Module Federation helper for NextJS",
   "repository": "https://github.com/module-federation/universe/tree/main/packages/nextjs-mf",
@@ -13,7 +12,7 @@
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
   ],
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "access": "public"
   },
   "dependencies": {
     "fast-glob": "^3.2.11",

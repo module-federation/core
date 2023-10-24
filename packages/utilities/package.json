@@ -1,12 +1,12 @@
 {
-  "name": "@bruno-module-federation/utilities",
+  "name": "@module-federation/utilities",
   "version": "3.0.3-0",
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "license": "MIT",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "access": "public"
   },
   "repository": "https://github.com/module-federation/universe/tree/main/packages/utilities",
   "devDependencies": {

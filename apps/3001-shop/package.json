@@ -1,5 +1,5 @@
 {
-  "name": "@bruno-module-federation/3001-shop",
+  "name": "@module-federation/3001-shop",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
