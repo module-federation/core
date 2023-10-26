@@ -39,6 +39,9 @@ jobs:
       - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
         run: npm audit signatures
 
+      - name: Check for un-formatted files
+        run: npx nx format:check
+
       - name: Release ${{ github.event.inputs.packages }} package(s)
         run: |
           if [[ ${{ github.event.inputs.packages }} == 'affected' ]]; then
