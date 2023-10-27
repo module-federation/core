@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Module Federation: How to Create Unit Tests for Distributed Code :: Module Federation Documentation</title>
+    <link rel="prev" href="../team-collaboration-review/">
+    <link rel="next" href="../public-path-dynamic/">
+    <meta name="generator" content="Antora 3.1.4">
+<link rel="stylesheet" href="../../../_/styles.css"><link rel="stylesheet" href="../../../_/css/nav.css">
+    <meta name="page-component" content="mf-docs">
+    <meta name="page-version" content="0.2">
+    <meta name="page-url" content="/mf-docs/0.2/unit-testing/">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SDV5HRTM4G"></script>
+    <script>function gtag(){dataLayer.push(arguments)};window.dataLayer=window.dataLayer||[];gtag('js',new Date());gtag('config','G-SDV5HRTM4G')</script>
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="flex items-center w-full bg-mf-gray sticky top-0 z-50">
+
+  <nav class="max-w-7xl w-full mx-auto flex flex-row-reverse xl:flex-row items-center justify-between px-4 py-6">
+    <a href="/"
+       class="flex w-full items-center justify-end xl:justify-start">
+      <img class="h-10"
+           src="../../../_/img/module-federation-logo.svg"
+           alt="Module Federation Logo">
+    </a>
+
+
+    <ul class="hidden xl:flex xl:flex w-full justify-center gap-8">
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700 !text-deep-purple-300"
+           href="/docs/en/mf-docs/0.2/">Documentation</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+           href="/#discover">Discover</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+           href="/showcase/">Showcase</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+           href="/#contact">Enterprise</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+          target="_blank" href="https://app.medusa.codes/">Medusa</a>
+      </li>
+    </ul>
+
+
+    <ul class="hidden xl:flex w-full justify-end items-center gap-5">
+      <li class="flex">
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue hover:text-blue-gray-600 active:text-blue-gray-700"
+           href="https://github.com/module-federation"
+           target="_blank">
+          <div style="height: 36px; width: 36px">
+    <svg width="100%"
+         height="100%"
+         viewBox="0 0 37 36"
+         fill="none"
+         xmlns="http://www.w3.org/2000/svg">
+        <path d="M18.4893 3C10.2061 3 3.48926 9.54134 3.48926 17.6107C3.48926 24.0662 7.78722 29.5429 13.7472 31.4749C14.4969 31.6101 14.7722 31.1579 14.7722 30.772C14.7722 30.4237 14.7582 29.2726 14.7518 28.0518C10.5787 28.9356 9.6981 26.3279 9.6981 26.3279C9.01577 24.6391 8.03263 24.1901 8.03263 24.1901C6.67173 23.2832 8.13521 23.3018 8.13521 23.3018C9.64151 23.4049 10.4347 24.8075 10.4347 24.8075C11.7725 27.0412 13.9437 26.3954 14.7997 26.0222C14.9343 25.0777 15.3231 24.4333 15.752 24.0684C12.4204 23.6989 8.91789 22.4461 8.91789 16.8477C8.91789 15.2526 9.50387 13.9491 10.4635 12.926C10.3077 12.5579 9.79433 11.0719 10.6088 9.05938C10.6088 9.05938 11.8684 8.66668 14.7349 10.5571C15.9313 10.2332 17.2145 10.071 18.4893 10.0655C19.7641 10.071 21.0483 10.2332 22.2471 10.5571C25.1101 8.66668 26.368 9.05938 26.368 9.05938C27.1844 11.0719 26.6708 12.5579 26.515 12.926C27.4768 13.9491 28.0587 15.2525 28.0587 16.8477C28.0587 22.4594 24.5497 23.6951 21.2096 24.0567C21.7476 24.5102 22.2269 25.3994 22.2269 26.7624C22.2269 28.7173 22.2095 30.2907 22.2095 30.772C22.2095 31.1608 22.4795 31.6164 23.24 31.473C29.1967 29.5388 33.4893 24.0641 33.4893 17.6107C33.4893 9.54134 26.7734 3 18.4893 3Z"
+              fill="currentColor"></path>
+        <path d="M9.10719 23.8134C9.07425 23.8859 8.95684 23.9077 8.85014 23.8579C8.74132 23.8103 8.68014 23.7113 8.71544 23.6384C8.74779 23.5637 8.8652 23.5428 8.97378 23.593C9.08284 23.6406 9.14495 23.7405 9.10719 23.8134ZM9.84504 24.4546C9.77352 24.5192 9.63364 24.4892 9.5387 24.3871C9.44059 24.2852 9.42224 24.1491 9.49482 24.0835C9.56858 24.0189 9.70423 24.0491 9.80258 24.1511C9.90069 24.2541 9.91987 24.3893 9.84504 24.4546ZM10.3513 25.2751C10.2593 25.3373 10.1089 25.279 10.0161 25.149C9.92422 25.0192 9.92422 24.8633 10.0181 24.8009C10.1113 24.7384 10.2593 24.7946 10.3534 24.9235C10.4451 25.0556 10.4453 25.2114 10.3513 25.2751ZM11.2072 26.2254C11.125 26.3136 10.9499 26.29 10.8217 26.1694C10.6907 26.0516 10.6541 25.8845 10.7365 25.7961C10.8197 25.7076 10.9958 25.7325 11.125 25.852C11.2552 25.9696 11.2949 26.138 11.2072 26.2254ZM12.3135 26.5462C12.2774 26.6606 12.1087 26.7126 11.9389 26.664C11.7692 26.6139 11.6582 26.4799 11.6924 26.3642C11.7277 26.2491 11.8971 26.1949 12.0683 26.2469C12.2377 26.2967 12.3488 26.4298 12.3135 26.5462ZM13.5728 26.6822C13.577 26.8028 13.4329 26.9027 13.2546 26.9049C13.0752 26.9087 12.9301 26.8111 12.9282 26.6927C12.9282 26.571 13.069 26.472 13.2483 26.4691C13.4267 26.4657 13.5728 26.5625 13.5728 26.6822ZM14.8097 26.636C14.8311 26.7536 14.7071 26.8744 14.5301 26.9065C14.3559 26.9374 14.1948 26.8649 14.1725 26.7483C14.1509 26.6278 14.2772 26.5071 14.451 26.4758C14.6284 26.4458 14.7871 26.5165 14.8097 26.636Z"
+              fill="currentColor"></path>
+    </svg>
+</div>        </a>
+      </li>
+
+      <li class="flex">
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue hover:text-blue-gray-600 active:text-blue-gray-700"
+           href="https://discord.gg/T8c6yAxkbv"
+           target="_blank">
+          <div style="height: 36px; width: 36px">
+    <svg width="100%" height="100%" viewBox="0 0 37 36" fill="none" xmlns="http://www.w3.org/2000/svg"
+>
+    <path
+        d="M28.9242 8.02698C32.3123 13.2572 33.9856 19.1568 33.3601 25.9485C33.3575 25.9773 33.3432 26.0036 33.3207 26.021C30.755 27.999 28.2691 29.1995 25.8181 29.9956C25.799 30.0017 25.7786 30.0014 25.7597 29.9947C25.7408 29.988 25.7244 29.9752 25.7127 29.9582C25.1465 29.131 24.632 28.2589 24.1812 27.3431C24.1554 27.2892 24.179 27.2242 24.2322 27.2029C25.0494 26.8797 25.8264 26.4923 26.5737 26.0336C26.6326 25.9973 26.6364 25.9088 26.582 25.8662C26.4234 25.7426 26.2662 25.6127 26.1159 25.4827C26.0877 25.4587 26.0499 25.454 26.018 25.4701C21.1659 27.8227 15.8506 27.8227 10.9411 25.4701C10.9093 25.4552 10.8714 25.4603 10.844 25.4839C10.694 25.6139 10.5365 25.7426 10.3794 25.8662C10.325 25.9088 10.3295 25.9973 10.3888 26.0336C11.1361 26.4836 11.9131 26.8797 12.7291 27.2045C12.782 27.2258 12.8071 27.2892 12.7809 27.3431C12.3399 28.2601 11.8254 29.1322 11.2486 29.9594C11.2235 29.9929 11.1823 30.0082 11.1433 29.9956C8.70389 29.1995 6.21802 27.999 3.65227 26.021C3.6309 26.0036 3.61552 25.9761 3.61327 25.9473C3.09052 20.0726 4.1559 14.1242 8.04501 8.0258C8.05439 8.00965 8.06864 7.99705 8.08514 7.98957C9.99876 7.06747 12.0489 6.38908 14.1916 6.00166C14.2306 5.99536 14.2696 6.01426 14.2899 6.05048C14.5546 6.54264 14.8573 7.17378 15.062 7.68956C17.3206 7.32733 19.6145 7.32733 21.9204 7.68956C22.1251 7.1848 22.4172 6.54264 22.6809 6.05048C22.6903 6.03251 22.7048 6.01812 22.7225 6.00935C22.7401 6.00058 22.7599 5.99789 22.7791 6.00166C24.923 6.39027 26.9731 7.06865 28.8852 7.98957C28.9021 7.99705 28.916 8.00965 28.9242 8.02698ZM16.2103 19.1969C16.2339 17.4602 15.0279 16.0231 13.514 16.0231C12.0125 16.0231 10.8181 17.4476 10.8181 19.1969C10.8181 20.9459 12.0361 22.3704 13.514 22.3704C15.0159 22.3704 16.2103 20.9459 16.2103 19.1969ZM26.1785 19.1969C26.2021 17.4602 24.9961 16.0231 23.4826 16.0231C21.9807 16.0231 20.7864 17.4476 20.7864 19.1969C20.7864 20.9459 22.0044 22.3704 23.4826 22.3704C24.9961 22.3704 26.1785 20.9459 26.1785 19.1969Z"
+        fill="currentColor"></path>
+</svg>
+</div>        </a>
+      </li>
+
+      <li class="flex">
+        <button class="language-toggle relative border-blue-gray-900 border px-4 py-1.5 bg-mf-gray hover:bg-white focus:bg-mf-gray text-lg">
+
+    <div class="flex gap-2 items-center">
+        <div>
+            English
+
+        </div>
+        <svg width="12"
+             height="8"
+             viewBox="0 0 12 8"
+             fill="none"
+             xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.410826 0.910826C0.736263 0.585389 1.2639 0.585389 1.58934 0.910826L6.00008 5.32157L10.4108 0.910826C10.7363 0.585389 11.2639 0.585389 11.5893 0.910826C11.9148 1.23626 11.9148 1.7639 11.5893 2.08934L6.58934 7.08934C6.2639 7.41477 5.73626 7.41477 5.41083 7.08934L0.410826 2.08934C0.0853888 1.7639 0.0853888 1.23626 0.410826 0.910826Z"
+                  fill="#1C2135"></path>
+        </svg>
+    </div>
+
+
+    <div class="language-dropdown hidden absolute bottom-[-6px] left-[-1px] translate-y-full p-0 border-blue-gray-900 border z-[60]">
+        <a href="../../../../en/mf-docs/0.2/unit-testing/"
+           class="flex w-full px-4 py-1.5 bg-mf-gray hover:bg-white focus:bg-mf-gray text-lg border-0 text-left hover:bg-blue-gray-300 bg-blue-gray-300">
+            English
+        </a>
+
+        <a href="../../../../es/mf-docs/0.2/unit-testing/"
+           class="flex w-full px-4 py-1.5 bg-mf-gray hover:bg-white focus:bg-mf-gray text-lg  border-0 text-left hover:bg-blue-gray-300 bg-blue-gray-300">
+            Español
+        </a>
+
+        <a href="../../../../zh/mf-docs/0.2/unit-testing/"
+           class="flex w-full px-4 py-1.5 bg-mf-gray hover:bg-white focus:bg-mf-gray text-lg  border-0 text-left hover:bg-blue-gray-300 bg-blue-gray-300">
+            繁體中文
+        </a>
+    </div>
+
+</button>      </li>
+    </ul>
+
+
+    <div class="flex xl:hidden relative">
+      <button id="mobile-nav-toggle">
+        <span class="relative my-1.5 block h-0.5 w-[30px] bg-blue-gray-900 transition-all duration-300"></span>
+        <span class="relative my-1.5 block h-0.5 w-[30px] bg-blue-gray-900 transition-all duration-300"></span>
+        <span class="relative my-1.5 block h-0.5 w-[30px] bg-blue-gray-900 transition-all duration-300"></span>
+      </button>
+    </div>
+
+
+    <div id="mobile-nav"
+         class="hidden bg-mf-gray inline-block xl:hidden absolute left-0 px-4 top-[88px] w-full h-screen z-[60] transition-opacity duration-300 visible opacity-100">
+
+      <ul class="flex flex-col w-full gap-8">
+        <li>
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="/docs/en/mf-docs/0.2/">Documentation</a>
+        </li>
+
+        <li>
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="/#discover">Discover</a>
+        </li>
+
+        <li>
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="/showcase/">Showcase</a>
+        </li>
+
+        <li>
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="/#contact">Enterprise</a>
+        </li>
+
+        <li>
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent active:font-semibold text-lg outline-ui-blue font-medium leading-snug hover:text-blue-gray-600 active:text-blue-gray-700"
+             target="_blank" href="https://app.medusa.codes/">Medusa</a>
+        </li>
+
+
+
+        <li class="flex gap-8">
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="https://github.com/module-federation"
+             target="_blank">
+            <div style="height: 36px; width: 36px">
+    <svg width="100%"
+         height="100%"
+         viewBox="0 0 37 36"
+         fill="none"
+         xmlns="http://www.w3.org/2000/svg">
+        <path d="M18.4893 3C10.2061 3 3.48926 9.54134 3.48926 17.6107C3.48926 24.0662 7.78722 29.5429 13.7472 31.4749C14.4969 31.6101 14.7722 31.1579 14.7722 30.772C14.7722 30.4237 14.7582 29.2726 14.7518 28.0518C10.5787 28.9356 9.6981 26.3279 9.6981 26.3279C9.01577 24.6391 8.03263 24.1901 8.03263 24.1901C6.67173 23.2832 8.13521 23.3018 8.13521 23.3018C9.64151 23.4049 10.4347 24.8075 10.4347 24.8075C11.7725 27.0412 13.9437 26.3954 14.7997 26.0222C14.9343 25.0777 15.3231 24.4333 15.752 24.0684C12.4204 23.6989 8.91789 22.4461 8.91789 16.8477C8.91789 15.2526 9.50387 13.9491 10.4635 12.926C10.3077 12.5579 9.79433 11.0719 10.6088 9.05938C10.6088 9.05938 11.8684 8.66668 14.7349 10.5571C15.9313 10.2332 17.2145 10.071 18.4893 10.0655C19.7641 10.071 21.0483 10.2332 22.2471 10.5571C25.1101 8.66668 26.368 9.05938 26.368 9.05938C27.1844 11.0719 26.6708 12.5579 26.515 12.926C27.4768 13.9491 28.0587 15.2525 28.0587 16.8477C28.0587 22.4594 24.5497 23.6951 21.2096 24.0567C21.7476 24.5102 22.2269 25.3994 22.2269 26.7624C22.2269 28.7173 22.2095 30.2907 22.2095 30.772C22.2095 31.1608 22.4795 31.6164 23.24 31.473C29.1967 29.5388 33.4893 24.0641 33.4893 17.6107C33.4893 9.54134 26.7734 3 18.4893 3Z"
+              fill="currentColor"></path>
+        <path d="M9.10719 23.8134C9.07425 23.8859 8.95684 23.9077 8.85014 23.8579C8.74132 23.8103 8.68014 23.7113 8.71544 23.6384C8.74779 23.5637 8.8652 23.5428 8.97378 23.593C9.08284 23.6406 9.14495 23.7405 9.10719 23.8134ZM9.84504 24.4546C9.77352 24.5192 9.63364 24.4892 9.5387 24.3871C9.44059 24.2852 9.42224 24.1491 9.49482 24.0835C9.56858 24.0189 9.70423 24.0491 9.80258 24.1511C9.90069 24.2541 9.91987 24.3893 9.84504 24.4546ZM10.3513 25.2751C10.2593 25.3373 10.1089 25.279 10.0161 25.149C9.92422 25.0192 9.92422 24.8633 10.0181 24.8009C10.1113 24.7384 10.2593 24.7946 10.3534 24.9235C10.4451 25.0556 10.4453 25.2114 10.3513 25.2751ZM11.2072 26.2254C11.125 26.3136 10.9499 26.29 10.8217 26.1694C10.6907 26.0516 10.6541 25.8845 10.7365 25.7961C10.8197 25.7076 10.9958 25.7325 11.125 25.852C11.2552 25.9696 11.2949 26.138 11.2072 26.2254ZM12.3135 26.5462C12.2774 26.6606 12.1087 26.7126 11.9389 26.664C11.7692 26.6139 11.6582 26.4799 11.6924 26.3642C11.7277 26.2491 11.8971 26.1949 12.0683 26.2469C12.2377 26.2967 12.3488 26.4298 12.3135 26.5462ZM13.5728 26.6822C13.577 26.8028 13.4329 26.9027 13.2546 26.9049C13.0752 26.9087 12.9301 26.8111 12.9282 26.6927C12.9282 26.571 13.069 26.472 13.2483 26.4691C13.4267 26.4657 13.5728 26.5625 13.5728 26.6822ZM14.8097 26.636C14.8311 26.7536 14.7071 26.8744 14.5301 26.9065C14.3559 26.9374 14.1948 26.8649 14.1725 26.7483C14.1509 26.6278 14.2772 26.5071 14.451 26.4758C14.6284 26.4458 14.7871 26.5165 14.8097 26.636Z"
+              fill="currentColor"></path>
+    </svg>
+</div>          </a>
+
+          <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium active:font-semibold text-lg outline-ui-blue hover:text-blue-gray-600 active:text-blue-gray-700"
+             href="https://discord.gg/T8c6yAxkbv"
+             target="_blank">
+            <div style="height: 36px; width: 36px">
+    <svg width="100%" height="100%" viewBox="0 0 37 36" fill="none" xmlns="http://www.w3.org/2000/svg"
+>
+    <path
+        d="M28.9242 8.02698C32.3123 13.2572 33.9856 19.1568 33.3601 25.9485C33.3575 25.9773 33.3432 26.0036 33.3207 26.021C30.755 27.999 28.2691 29.1995 25.8181 29.9956C25.799 30.0017 25.7786 30.0014 25.7597 29.9947C25.7408 29.988 25.7244 29.9752 25.7127 29.9582C25.1465 29.131 24.632 28.2589 24.1812 27.3431C24.1554 27.2892 24.179 27.2242 24.2322 27.2029C25.0494 26.8797 25.8264 26.4923 26.5737 26.0336C26.6326 25.9973 26.6364 25.9088 26.582 25.8662C26.4234 25.7426 26.2662 25.6127 26.1159 25.4827C26.0877 25.4587 26.0499 25.454 26.018 25.4701C21.1659 27.8227 15.8506 27.8227 10.9411 25.4701C10.9093 25.4552 10.8714 25.4603 10.844 25.4839C10.694 25.6139 10.5365 25.7426 10.3794 25.8662C10.325 25.9088 10.3295 25.9973 10.3888 26.0336C11.1361 26.4836 11.9131 26.8797 12.7291 27.2045C12.782 27.2258 12.8071 27.2892 12.7809 27.3431C12.3399 28.2601 11.8254 29.1322 11.2486 29.9594C11.2235 29.9929 11.1823 30.0082 11.1433 29.9956C8.70389 29.1995 6.21802 27.999 3.65227 26.021C3.6309 26.0036 3.61552 25.9761 3.61327 25.9473C3.09052 20.0726 4.1559 14.1242 8.04501 8.0258C8.05439 8.00965 8.06864 7.99705 8.08514 7.98957C9.99876 7.06747 12.0489 6.38908 14.1916 6.00166C14.2306 5.99536 14.2696 6.01426 14.2899 6.05048C14.5546 6.54264 14.8573 7.17378 15.062 7.68956C17.3206 7.32733 19.6145 7.32733 21.9204 7.68956C22.1251 7.1848 22.4172 6.54264 22.6809 6.05048C22.6903 6.03251 22.7048 6.01812 22.7225 6.00935C22.7401 6.00058 22.7599 5.99789 22.7791 6.00166C24.923 6.39027 26.9731 7.06865 28.8852 7.98957C28.9021 7.99705 28.916 8.00965 28.9242 8.02698ZM16.2103 19.1969C16.2339 17.4602 15.0279 16.0231 13.514 16.0231C12.0125 16.0231 10.8181 17.4476 10.8181 19.1969C10.8181 20.9459 12.0361 22.3704 13.514 22.3704C15.0159 22.3704 16.2103 20.9459 16.2103 19.1969ZM26.1785 19.1969C26.2021 17.4602 24.9961 16.0231 23.4826 16.0231C21.9807 16.0231 20.7864 17.4476 20.7864 19.1969C20.7864 20.9459 22.0044 22.3704 23.4826 22.3704C24.9961 22.3704 26.1785 20.9459 26.1785 19.1969Z"
+        fill="currentColor"></path>
+</svg>
+</div>          </a>
+        </li>
+
+      </ul>
+
+
+    </div>
+
+
+  </nav>
+
+</header>
+
+<div class="hidden top-[7px] rotate-45 opacity-0 top-[-8px] -rotate-45"></div>
+<div class="flex items-center w-full bg-mf-gray">
+    <div class="max-w-7xl w-full mx-auto flex flex-col-reverse xl:flex-row px-4 py-12 gap-8">
+        <div class="min-w-[300px] sticky top-[136px] h-fit">
+            <nav class="flex flex-col gap-8 main-nav">
+
+  <div id="search-field" class="flex items-center w-full px-3 py-2 bg-white border border-blue-gray-400 relative focus-within:border-ui-blue">
+    <input id="search-input" class="w-full bg-transparent p-0 border-0 outline-none focus:border-0 focus:outline-none text-blue-gray-900 text-base" type="text" placeholder="Search">
+        <div class="text-blue-gray-900"><div style="height: 20px; width: 20px">
+
+
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 21 21"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2ZM0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8C16 9.84869 15.3729 11.5509 14.3199 12.9056L20.4142 19L19 20.4142L12.9057 14.3198C11.551 15.3729 9.84873 16 8 16C3.58172 16 0 12.4183 0 8Z"
+                  fill="currentColor" />
+      </svg>
+
+
+</div></div>
+  </div>
+
+  <div class="flex items-center justify-between w-full">
+    <div class="font-medium text-blue-gray-900">Module Federation Documentation (Beta)</div>
+    
+<div class="version-wrapper relative">
+  <button class="version-toggle flex gap-2 items-center text-sm border p-1 border-blue-gray-200 bg-deep-purple-100 hover:bg-[#DCE2F7]">
+    <div>
+      0.20
+    </div>
+    <svg width="12"
+         height="8"
+         viewBox="0 0 12 8"
+         fill="none"
+         xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M0.410826 0.910826C0.736263 0.585389 1.2639 0.585389 1.58934 0.910826L6.00008 5.32157L10.4108 0.910826C10.7363 0.585389 11.2639 0.585389 11.5893 0.910826C11.9148 1.23626 11.9148 1.7639 11.5893 2.08934L6.58934 7.08934C6.2639 7.41477 5.73626 7.41477 5.41083 7.08934L0.410826 2.08934C0.0853888 1.7639 0.0853888 1.23626 0.410826 0.910826Z"
+            fill="#1C2135"></path>
+    </svg>
+  </button>
+
+
+  <div class="version-dropdown hidden absolute bottom-[-6px] left-[-1px] translate-y-full p-0 border z-[60] w-full border-blue-gray-200 bg-deep-purple-100">
+
+    <a class="flex w-full p-1 text-sm border-0 text-left  bg-blue-gray-200  hover:bg-[#DCE2F7]"
+       href="../getting-started/">0.20</a>
+
+  </div>
+
+</div>
+  </div>
+
+  <ul class="nav flex flex-col text-blue-gray-700 font-normal text-base gap-4 ">
+      <li class="  subnav-item ">
+          <button class="subnav-toggle flex gap-2 items-center">
+            <div class="icon"><div style="height: 12px; width: 12px">
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 14 8"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.292893 0.292893C0.683417 -0.0976311 1.31658 -0.0976311 1.70711 0.292893L7 5.58579L12.2929 0.292893C12.6834 -0.0976311 13.3166 -0.0976311 13.7071 0.292893C14.0976 0.683417 14.0976 1.31658 13.7071 1.70711L7.70711 7.70711C7.31658 8.09763 6.68342 8.09763 6.29289 7.70711L0.292893 1.70711C-0.0976311 1.31658 -0.0976311 0.683417 0.292893 0.292893Z"
+                  fill="currentColor" />
+      </svg>
+
+
+
+
+
+</div></div>
+            <div>Getting Started</div>
+          </button>
+         <ul class="nav flex flex-col text-blue-gray-700 font-normal text-base gap-4 ">
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../history/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>History of Module Federation</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../getting-started/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>What is Module Federation?</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../setup/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Setting up Environment</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../getting-started-practical/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Getting Started</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../use-cases/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Use Cases</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../pros-cons/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Pros and Cons of Module Federation</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../best-practices/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Best Practices and Tips</div>
+            </a>
+               </li>
+</ul>
+      </li>
+      <li class="  subnav-item ">
+          <button class="subnav-toggle flex gap-2 items-center">
+            <div class="icon"><div style="height: 12px; width: 12px">
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 14 8"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.292893 0.292893C0.683417 -0.0976311 1.31658 -0.0976311 1.70711 0.292893L7 5.58579L12.2929 0.292893C12.6834 -0.0976311 13.3166 -0.0976311 13.7071 0.292893C14.0976 0.683417 14.0976 1.31658 13.7071 1.70711L7.70711 7.70711C7.31658 8.09763 6.68342 8.09763 6.29289 7.70711L0.292893 1.70711C-0.0976311 1.31658 -0.0976311 0.683417 0.292893 0.292893Z"
+                  fill="currentColor" />
+      </svg>
+
+
+
+
+
+</div></div>
+            <div>Core Features</div>
+          </button>
+         <ul class="nav flex flex-col text-blue-gray-700 font-normal text-base gap-4 ">
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../dynamic-remotes/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Dynamic Remotes in Module Federation</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../shared-api/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Module Federation Shared API</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../delegate-modules/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Getting Familiar with Delegate Modules: An In-Depth Guide</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../versioned-shared-modules/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Module Federation: Versioned Shared Modules</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../cache_busting/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Cache Busting</div>
+            </a>
+               </li>
+</ul>
+      </li>
+      <li class="  subnav-item ">
+          <button class="subnav-toggle flex gap-2 items-center">
+            <div class="icon"><div style="height: 12px; width: 12px">
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 14 8"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.292893 0.292893C0.683417 -0.0976311 1.31658 -0.0976311 1.70711 0.292893L7 5.58579L12.2929 0.292893C12.6834 -0.0976311 13.3166 -0.0976311 13.7071 0.292893C14.0976 0.683417 14.0976 1.31658 13.7071 1.70711L7.70711 7.70711C7.31658 8.09763 6.68342 8.09763 6.29289 7.70711L0.292893 1.70711C-0.0976311 1.31658 -0.0976311 0.683417 0.292893 0.292893Z"
+                  fill="currentColor" />
+      </svg>
+
+
+
+
+
+</div></div>
+            <div>Recipes</div>
+          </button>
+         <ul class="nav flex flex-col text-blue-gray-700 font-normal text-base gap-4 ">
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../examples-demos/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Examples and Demos</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../mf-ssr/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Setting up Module Federation with Server-Side Rendering</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../team-collaboration-review/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Team collaboration and code review when working with Federated Modules</div>
+            </a>
+               </li>
+      <li class=" is-active   nav-item ">
+            <a class="flex gap-2 items-center" href="./">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Module Federation: How to Create Unit Tests for Distributed Code</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../public-path-dynamic/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Setting the Dynamic Public Path</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../resiliency-failovers/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Improving Resiliency and Failovers with Module Federation</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../naming-convention-tips/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Naming Conventions for Modules and Exports </div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../shared-header-footer/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Where to start: Shared Header or Footer using Module Federation</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../composable-commerce-PBC-edition/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Composable Commerce with Module Federation</div>
+            </a>
+               </li>
+</ul>
+      </li>
+      <li class="  subnav-item ">
+          <button class="subnav-toggle flex gap-2 items-center">
+            <div class="icon"><div style="height: 12px; width: 12px">
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 14 8"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.292893 0.292893C0.683417 -0.0976311 1.31658 -0.0976311 1.70711 0.292893L7 5.58579L12.2929 0.292893C12.6834 -0.0976311 13.3166 -0.0976311 13.7071 0.292893C14.0976 0.683417 14.0976 1.31658 13.7071 1.70711L7.70711 7.70711C7.31658 8.09763 6.68342 8.09763 6.29289 7.70711L0.292893 1.70711C-0.0976311 1.31658 -0.0976311 0.683417 0.292893 0.292893Z"
+                  fill="currentColor" />
+      </svg>
+
+
+
+
+
+</div></div>
+            <div>Concepts</div>
+          </button>
+         <ul class="nav flex flex-col text-blue-gray-700 font-normal text-base gap-4 ">
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../component-level-ownership/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Component Level Ownership</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../brown-green/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Brownfield vs. Greenfield Development with Module Federation</div>
+            </a>
+               </li>
+</ul>
+      </li>
+      <li class="  subnav-item ">
+          <button class="subnav-toggle flex gap-2 items-center">
+            <div class="icon"><div style="height: 12px; width: 12px">
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 14 8"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.292893 0.292893C0.683417 -0.0976311 1.31658 -0.0976311 1.70711 0.292893L7 5.58579L12.2929 0.292893C12.6834 -0.0976311 13.3166 -0.0976311 13.7071 0.292893C14.0976 0.683417 14.0976 1.31658 13.7071 1.70711L7.70711 7.70711C7.31658 8.09763 6.68342 8.09763 6.29289 7.70711L0.292893 1.70711C-0.0976311 1.31658 -0.0976311 0.683417 0.292893 0.292893Z"
+                  fill="currentColor" />
+      </svg>
+
+
+
+
+
+</div></div>
+            <div>Packages</div>
+          </button>
+         <ul class="nav flex flex-col text-blue-gray-700 font-normal text-base gap-4 ">
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../module-federation-node/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>@module-federation/node</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../module-federation-typescript/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>@module-federation/typescript - v2.4.2</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../module-federation-utilities/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>@module-federation/utilities</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../module-federation-native-federation-typescript/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>@module-federation/native-federation-typescript - v0.2.6</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="../module-federation-native-federation-tests/">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>@module-federation/native-federation-tests - v0.2.1</div>
+            </a>
+               </li>
+</ul>
+      </li>
+      <li class="  subnav-item ">
+          <button class="subnav-toggle flex gap-2 items-center">
+            <div class="icon"><div style="height: 12px; width: 12px">
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 14 8"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.292893 0.292893C0.683417 -0.0976311 1.31658 -0.0976311 1.70711 0.292893L7 5.58579L12.2929 0.292893C12.6834 -0.0976311 13.3166 -0.0976311 13.7071 0.292893C14.0976 0.683417 14.0976 1.31658 13.7071 1.70711L7.70711 7.70711C7.31658 8.09763 6.68342 8.09763 6.29289 7.70711L0.292893 1.70711C-0.0976311 1.31658 -0.0976311 0.683417 0.292893 0.292893Z"
+                  fill="currentColor" />
+      </svg>
+
+
+
+
+
+</div></div>
+            <div>Plugins/Packages</div>
+          </button>
+         <ul class="nav flex flex-col text-blue-gray-700 font-normal text-base gap-4 ">
+      <li class="  subnav-item ">
+          <button class="subnav-toggle flex gap-2 items-center">
+            <div class="icon"><div style="height: 12px; width: 12px">
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 14 8"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.292893 0.292893C0.683417 -0.0976311 1.31658 -0.0976311 1.70711 0.292893L7 5.58579L12.2929 0.292893C12.6834 -0.0976311 13.3166 -0.0976311 13.7071 0.292893C14.0976 0.683417 14.0976 1.31658 13.7071 1.70711L7.70711 7.70711C7.31658 8.09763 6.68342 8.09763 6.29289 7.70711L0.292893 1.70711C-0.0976311 1.31658 -0.0976311 0.683417 0.292893 0.292893Z"
+                  fill="currentColor" />
+      </svg>
+
+
+
+
+
+</div></div>
+            <div>Enhanced API Plugin</div>
+          </button>
+         <ul class="nav flex flex-col text-blue-gray-700 font-normal text-base gap-4  ml-6 pt-4 subnav ">
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="#about.adoc">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>About</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="#installation.adoc">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Installation</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="#getting_started.adoc">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Getting Started</div>
+            </a>
+               </li>
+</ul>
+      </li>
+      <li class="  subnav-item ">
+          <button class="subnav-toggle flex gap-2 items-center">
+            <div class="icon"><div style="height: 12px; width: 12px">
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 14 8"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.292893 0.292893C0.683417 -0.0976311 1.31658 -0.0976311 1.70711 0.292893L7 5.58579L12.2929 0.292893C12.6834 -0.0976311 13.3166 -0.0976311 13.7071 0.292893C14.0976 0.683417 14.0976 1.31658 13.7071 1.70711L7.70711 7.70711C7.31658 8.09763 6.68342 8.09763 6.29289 7.70711L0.292893 1.70711C-0.0976311 1.31658 -0.0976311 0.683417 0.292893 0.292893Z"
+                  fill="currentColor" />
+      </svg>
+
+
+
+
+
+</div></div>
+            <div>Features</div>
+          </button>
+         <ul class="nav flex flex-col text-blue-gray-700 font-normal text-base gap-4  ml-6 pt-4 subnav ">
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="#features_default_async.adoc">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Default Async</div>
+            </a>
+               </li>
+</ul>
+      </li>
+      <li class="  subnav-item ">
+          <button class="subnav-toggle flex gap-2 items-center">
+            <div class="icon"><div style="height: 12px; width: 12px">
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 14 8"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.292893 0.292893C0.683417 -0.0976311 1.31658 -0.0976311 1.70711 0.292893L7 5.58579L12.2929 0.292893C12.6834 -0.0976311 13.3166 -0.0976311 13.7071 0.292893C14.0976 0.683417 14.0976 1.31658 13.7071 1.70711L7.70711 7.70711C7.31658 8.09763 6.68342 8.09763 6.29289 7.70711L0.292893 1.70711C-0.0976311 1.31658 -0.0976311 0.683417 0.292893 0.292893Z"
+                  fill="currentColor" />
+      </svg>
+
+
+
+
+
+</div></div>
+            <div>Modules&#x27; Name Map</div>
+          </button>
+         <ul class="nav flex flex-col text-blue-gray-700 font-normal text-base gap-4  ml-6 pt-4 subnav ">
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="#features_remotes_name_map.adoc">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Remotes' Name Map</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="#features_remotes_url.adoc">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Remotes' URL</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="#features_remote_object_definition.adoc">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Object Definition</div>
+            </a>
+               </li>
+</ul>
+      </li>
+      <li class="  subnav-item ">
+          <button class="subnav-toggle flex gap-2 items-center">
+            <div class="icon"><div style="height: 12px; width: 12px">
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 14 8"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.292893 0.292893C0.683417 -0.0976311 1.31658 -0.0976311 1.70711 0.292893L7 5.58579L12.2929 0.292893C12.6834 -0.0976311 13.3166 -0.0976311 13.7071 0.292893C14.0976 0.683417 14.0976 1.31658 13.7071 1.70711L7.70711 7.70711C7.31658 8.09763 6.68342 8.09763 6.29289 7.70711L0.292893 1.70711C-0.0976311 1.31658 -0.0976311 0.683417 0.292893 0.292893Z"
+                  fill="currentColor" />
+      </svg>
+
+
+
+
+
+</div></div>
+            <div>Helper</div>
+          </button>
+         <ul class="nav flex flex-col text-blue-gray-700 font-normal text-base gap-4  ml-6 pt-4 subnav ">
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="#helper_about.adoc">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>About</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="#helper_installation.adoc">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>Install</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="#helper_getModule.adoc">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>getModule</div>
+            </a>
+               </li>
+      <li class="  nav-item ">
+            <a class="flex gap-2 items-center" href="#helper_dynamicLoad.adoc">
+              <div style="height: 4px; width: 4px">
+
+
+
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 4 4"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <circle cx="2"
+                    cy="2"
+                    r="2"
+                    fill="currentColor" />
+      </svg>
+
+
+
+
+</div>              <div>dynamicLoad</div>
+            </a>
+               </li>
+</ul>
+      </li>
+</ul>
+      </li>
+</ul>
+  <a href="/#contact">
+    <div class="contact flex flex-col justify-between bg-white  gap-4">
+      <div class="flex justify-between">
+        <img alt="Contact experts"
+              src="../../../_/img/text-bubble.svg"
+        />
+        <div class="text-blue-gray-900">
+          Talk to our experts
+        </div>
+      </div>
+      <div class="text text-deep-purple-700">
+        Our experts will gladly answer your questions.
+      </div>
+    </div>
+  </a>
+</nav>
+        </div>
+
+        <div class="w-full overflow-x-hidden">
+            <main class="z-40">
+  <div class="flex flex-col">
+    <article class="doc">
+        <h1>Module Federation: How to Create Unit Tests for Distributed Code</h1>
+        <div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this guide, we&#8217;ll cover the best practices for creating unit tests for distributed code when using Module Federation. We&#8217;ll discuss the challenges and advantages of testing federated modules, along with techniques to ensure your tests are thorough and maintainable.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="introduction-to-unit-testing-in-module-federation"><a class="anchor" href="#introduction-to-unit-testing-in-module-federation"></a>Introduction to Unit Testing in Module Federation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Unit testing is crucial for ensuring the reliability and maintainability of your code, especially when working with distributed systems like Module Federation. It helps you catch errors early, verify the correctness of your code, and ensure that changes don&#8217;t introduce unexpected behavior.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="challenges-in-testing-federated-modules"><a class="anchor" href="#challenges-in-testing-federated-modules"></a>Challenges in Testing Federated Modules</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Testing federated modules can be more challenging than testing traditional code due to factors such as:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>At-runtime orchestration and code sharing</p>
+</li>
+<li>
+<p>Asynchronous module loading</p>
+</li>
+<li>
+<p>Remote dependencies and entry points</p>
+</li>
+<li>
+<p>Diverse application environments</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Despite these challenges, it&#8217;s essential to create robust unit tests for your distributed code to ensure its reliability and maintainability.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="best-practices-for-testing-distributed-code"><a class="anchor" href="#best-practices-for-testing-distributed-code"></a>Best Practices for Testing Distributed Code</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Follow these best practices to ensure your unit tests for federated modules are effective and maintainable:</p>
+</div>
+<div class="sect2">
+<h3 id="isolate-test-cases"><a class="anchor" href="#isolate-test-cases"></a>Isolate Test Cases</h3>
+<div class="paragraph">
+<p>Write independent test cases for each component or module to ensure that they can be tested in isolation. This approach helps you identify issues more easily and prevents cascading failures.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="test-various-scenarios"><a class="anchor" href="#test-various-scenarios"></a>Test Various Scenarios</h3>
+<div class="paragraph">
+<p>Test your federated modules in different scenarios to ensure that they work correctly across various application environments and configurations.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="ensure-test-coverage"><a class="anchor" href="#ensure-test-coverage"></a>Ensure Test Coverage</h3>
+<div class="paragraph">
+<p>Ensure that your test suite provides comprehensive coverage of your distributed code, including edge cases and potential error conditions.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="federated-unit-tests"><a class="anchor" href="#federated-unit-tests"></a>Federated Unit Tests</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The concept of federated unit testing builds upon the idea of federating features in Module Federation. In this approach, you create a test build for each repository involved in the federation, essentially creating a commonjs "server" build that exposes the features as commonjs modules. This allows you to test the federated components in isolation and perform liability testing.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s take a look at an example that demonstrates federated unit testing with Jest:</p>
+</div>
+<div class="sect2">
+<h3 id="1-example-application"><a class="anchor" href="#1-example-application"></a>1. Example Application</h3>
+<div class="paragraph">
+<p>Consider an application with a form that imports a federated button.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">import React, { Suspense } from "react";
+import lazy from "react-lazy-ssr";
+const Button = lazy(
+  () =&gt; import("federated/Button"), { chunkId: "federated/Button" }
+);
+
+const Form = () =&gt; (
+  &lt;form&gt;
+    &lt;input type="text" /&gt;
+    &lt;Suspense fallback={"failed"} loading={"loading"}&gt;
+      &lt;Button /&gt;
+    &lt;/Suspense&gt;
+  &lt;/form&gt;
+);
+
+export default Form;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this scenario, there are two aspects to test:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Button: supplied by its own Webpack build</p>
+</li>
+<li>
+<p>Form: supplied by its own Webpack build</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="2-creating-test-builds"><a class="anchor" href="#2-creating-test-builds"></a>2. Creating Test Builds</h3>
+<div class="paragraph">
+<p>To enable federated unit testing, create test builds for each repository involved in the federation. In this example, we create test builds for both the <code>form_app</code> and the <code>dsl</code> repositories:</p>
+</div>
+<div id="tabs-1" class="openblock tabs is-loading">
+<div class="content">
+<div class="ulist tablist">
+<ul>
+<li id="tabs-1-form_app-repository" class="tab">
+<p>form_app repository</p>
+</li>
+<li id="tabs-1-dsl-repository" class="tab">
+<p>dsl repository</p>
+</li>
+</ul>
+</div>
+<div id="tabs-1-form_app-repository--panel" class="tabpanel" aria-labelledby="tabs-1-form_app-repository">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">new ModuleFederationPlugin({
+  name: "form_app",
+  filename: "remoteEntry.js",
+  library: { type: "commonjs-module", name: "form_app" },
+  remotes: {
+    "dsl": reunited(
+      path.resolve(__dirname, "../dsl/dist-test/remoteEntry.js"),
+      "dsl"
+    ),
+  },
+  exposes: {
+    "./Form": "./federated-cross-test/form.js",
+  },
+  shared: {
+    react: deps.devDependencies.react,
+    "react-dom": deps.devDependencies["react-dom"],
+  },
+});</code></pre>
+</div>
+</div>
+</div>
+<div id="tabs-1-dsl-repository--panel" class="tabpanel" aria-labelledby="tabs-1-dsl-repository">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">new ModuleFederationPlugin({
+  name: "dsl",
+  filename: "remoteEntry.js",
+  library: { type: "commonjs-module", name: "dsl" },
+  exposes: {
+    "./Button": "./src/Button.js",
+  },
+  shared: {
+    react: deps.devDependencies.react,
+    "react-dom": deps.devDependencies["react-dom"],
+  },
+});</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Both Button and Form are exposed for liability testing.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="3-federated-unit-testing-with-jest"><a class="anchor" href="#3-federated-unit-testing-with-jest"></a>3. Federated Unit Testing with Jest</h3>
+<div class="paragraph">
+<p>With the test builds in place, you can use Jest to run tests against a Webpack-built test of test files. This allows you to utilize Webpack&#8217;s async capabilities to import federated modules and test them.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">// federated.test.js
+import React from "react";
+import { shallow, mount, render } from "enzyme";
+// Form and Button are federated imports
+const Form = import("form_app/Form");
+const Button = import("dsl/Button");
+import suspenseRender from "./suspenseRender";
+
+describe("Federation", function () {
+  it("is rendering Nested Suspense", async () =&gt; {
+    const from = await Form;
+    console.log(await suspenseRender(from.default));
+  });
+
+  it("Testing Button from Remote", async function () {
+    const Btn = (await Button).default;
+    const wrapper = render(&lt;Btn /&gt;);
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it("Testing Button from Form", async function () {
+    const Frm = (await Form).default;
+    const wrapper = mount(&lt;Frm /&gt;);
+    expect(wrapper).toMatchSnapshot();
+  });
+});</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this example, Jest processes an already-built test file, allowing you to use federated imports in your tests. This is made possible by using Webpack to compile the test files instead of Babel.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="4-federated-test-build"><a class="anchor" href="#4-federated-test-build"></a>4. Federated Test Build</h3>
+<div class="paragraph">
+<p>To enable federated testing with Jest, you need a special Webpack build that compiles <code>.test.js</code> files only.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">// jest test/bundle.test.js
+
+// The webpack build that creates the test bundle.
+const path = require("path");
+const glob = require("glob");
+const thisFile = path.basename(__filename);
+const nodeExternals = require("webpack-node-externals");
+const { ModuleFederationPlugin } = require("webpack").container;
+const ReactLazySsrPlugin = require("react-lazy-ssr/webpack");
+const reunited = require("../index");
+const testFiles = glob
+  .sync("!(node_modules)/**/*.test.js")
+  .filter(function (element) {
+    return (
+      element != "test/bundle.test.js" &amp;&amp; !element.includes(thisFile)
+    );
+  })
+  .map(function (element) {
+    return "./" + element;
+  });
+
+module.exports = {
+  entry: { "bundle.test": testFiles },
+  output: {
+    path: path.resolve(__dirname, "."),
+    filename: "[name].js",
+  },
+  target: "node",
+  resolve: {
+    fallback: {
+      path: false,
+    },
+  },
+  externals: [
+    nodeExternals({
+      allowlist: [/^webpack\/container\/reference\//, /react/],
+    }),
+  ],
+  mode: "none",
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: "babel-loader",
+      },
+    ],
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "test_bundle",
+      library: { type: "commonjs-module", name: "test_bundle" },
+      filename: "remoteEntry.js",
+      exposes: {
+        "./render": "./test/suspenseRender.js",
+      },
+      remotes: {
+        form_app: reunited(
+          path.resolve(__dirname, "../form_app/dist/test/remoteEntry.js"),
+          "form_app"
+        ),
+        dsl: reunited(
+          path.resolve(__dirname, "../dsl/dist/remoteEntry.js"),
+          "dsl"
+        ),
+      },
+    }),
+    new ReactLazySsrPlugin(),
+  ],
+};</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This build configuration includes the <code>ModuleFederationPlugin</code> and imports both the <code>form_app</code> and <code>dsl</code> repositories' test builds.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="5-ci-integration-and-code-streaming"><a class="anchor" href="#5-ci-integration-and-code-streaming"></a>5. CI Integration and Code Streaming</h3>
+<div class="paragraph">
+<p>Integrating federated unit testing into your CI pipeline can be accomplished in a few ways:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Pull down other repositories or storage buckets and execute them locally within the test container. This is a rudimentary but effective approach.</p>
+</li>
+<li>
+<p>Use code streaming (not publicly available yet and planned to be commercial). This approach makes Node work like a browser by requiring modules over sockets, HTTP, or S3. It simplifies CI integration and offers a "just works" architecture.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The goal of code streaming is to provide a more straightforward deployment mechanism, considering the vast resources spent on CI.</p>
+</div>
+<div class="paragraph">
+<p>For a complete example of federated unit testing, refer to the following repository:</p>
+</div>
+<div class="paragraph">
+<p><a href="https://github.com/module-federation/reunited">reunited: An example of federated unit testing</a></p>
+</div>
+<div class="paragraph">
+<p>This example demonstrates the core concept of having Jest process an already-built test file, enabling the use of federated imports in your tests.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="conclusion"><a class="anchor" href="#conclusion"></a>Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>By following the steps and examples outlined in this guide, you can create a robust and maintainable testing strategy for your federated applications. By setting up the correct build configurations and leveraging the power of Module Federation, you can ensure that your distributed code remains functional and reliable.</p>
+</div>
+<div class="paragraph">
+<p>In summary, the essential steps to create unit tests for distributed code using Module Federation are:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Expose components from each repository for testing.</p>
+</li>
+<li>
+<p>Create a test build for each repository that exposes components as CommonJS modules.</p>
+</li>
+<li>
+<p>Write federated test cases using Jest and the exposed components.</p>
+</li>
+<li>
+<p>Set up a special Webpack build configuration to compile <code>.test.js</code> files.</p>
+</li>
+<li>
+<p>Integrate federated unit testing into your CI pipeline using local execution or code streaming.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>With this approach, you can achieve a high degree of confidence that your federated modules will work correctly across different codebases and repositories. Moreover, by having individual teams take part in liability tests, you can ensure that updates and changes to federated modules do not cause unexpected issues in the consuming applications.</p>
+</div>
+<div class="paragraph">
+<p>The future of federated unit testing includes further simplifications and optimizations, such as code streaming, which will make the process even more seamless and accessible. By adopting these best practices and staying up-to-date with the latest advancements in Module Federation, you can continue to build and maintain high-quality distributed applications with ease.</p>
+</div>
+</div>
+</div>
+    </article>
+    <div class="edit-this-page">
+      <a href="https://github.com/lexasq/universe/blob/alex-fix-prod/apps/docs/src/en/modules/ROOT/pages/unit-testing.adoc">
+        <img alt="edit page"
+           src="../../../_/img/icons-edit.svg"
+        />
+        Edit this page on GitHub
+      </a>
+    </div>
+
+  <div class="mt-10">
+    <nav class="flex flex-col xl:flex-row justify-between gap-8">
+  <a href="../team-collaboration-review/"
+     class="flex items-center w-full xl:w-1/2 gap-6 border border-blue-gray-400 p-3 hover:bg-deep-purple-100 active:bg-blue-gray-200">
+    <div class="text-blue-gray-900"><div style="height: 16px; width: 16px">
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 16 14"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M7.51181 1.9998L3.34514 6.16647H15.5V7.83313H3.34514L7.51181 11.9998L6.3333 13.1783L0.154785 6.9998L6.3333 0.821289L7.51181 1.9998Z"
+                  fill="currentColor" />
+      </svg>
+
+
+
+
+
+
+
+
+</div></div>
+    <div class="flex flex-col w-full h-full items-end text-right ">
+      <div class="text-blue-gray-500 text-xs font-normal">
+        Previous
+      </div>
+      <div class="text-base font-medium text-blue-gray-900">Team collaboration and code review when working with Federated Modules</div>
+    </div>
+  </a>
+  <a href="../public-path-dynamic/"
+     class="flex items-center w-full xl:w-1/2 gap-6 border border-blue-gray-400 p-3 hover:bg-deep-purple-100 active:bg-blue-gray-200">
+    <div class="flex flex-col w-full h-full items-start text-left">
+      <div class="text-blue-gray-500 text-xs font-normal">
+        Next
+      </div>
+      <div class="text-base font-medium text-blue-gray-900">Setting the Dynamic Public Path</div>
+    </div>
+    <div class="text-blue-gray-900"><div style="height: 16px; width: 16px">
+
+
+
+      <svg width="100%"
+           height="100%"
+           viewBox="0 0 16 14"
+           fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M9.66667 0.821289L15.8452 6.9998L9.66667 13.1783L8.48815 11.9998L12.6548 7.83313H0.5V6.16647H12.6548L8.48815 1.9998L9.66667 0.821289Z"
+                  fill="currentColor" />
+      </svg>
+
+
+
+
+
+
+</div></div>
+  </a>
+</nav>
+  </div>
+</div>
+</main>        </div>
+
+        <div class="w-fit min-w-[140px] xl:sticky top-[136px] h-fit hidden xl:flex">
+            <aside class="toc sidebar" data-title="On this page" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+        </div>
+    </div>
+</div><footer class="flex flex-col justify-center items-center w-full bg-mf-gray gap-10 py-28">
+
+  <a href="/">
+    <img class="h-10"
+         src="../../../_/img/module-federation-logo.svg"
+         alt="Module Federation Logo">
+  </a>
+
+  <nav class="flex">
+    <ul class="flex items-center justify-center flex-wrap gap-y-4 gap-x-10">
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+          target="_blank" href="https://github.com/module-federation/module-federation-examples">Examples</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+          target="_blank" href="https://module-federation.myshopify.com/products/practical-module-federation">Practical guide</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+           target="_blank" href="https://app.medusa.codes/">Try Medusa</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+           href="/docs/en/mf-docs/0.2/">Documentation</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+           target="_blank" href="https://opencollective.com/module-federation-universe">Become a sponsor</a>
+      </li>
+
+      <li>
+        <a class="inline-block border-solid relative text-blue-gray-900 border-transparent font-medium text-lg outline-ui-blue hover:text-deep-purple-700 active:text-deep-purple-300"
+           href="/privacy-policy">Privacy Policy</a>
+      </li>
+
+    </ul>
+
+  </nav>
+
+
+</footer>
+<div id="icondefs" hidden>
+    <svg xmlns="http://www.w3.org/2000/svg">
+        <desc>Octicons v17.0.0 by GitHub - https://primer.style/octicons/ - License: MIT</desc>
+        <symbol id="icon-nav-group" viewBox="0 0 16 16">
+            <path d="m12.78 5.345a0.75 0.75 0 0 1 0 1.06l-4.25 4.25a0.75 0.75 0 0 1-1.06 0l-4.25-4.25a0.75 0.75 0 0 1 1.06-1.06l3.72 3.72 3.72-3.72a0.75 0.75 0 0 1 1.06 0z"/>
+        </symbol>
+        <symbol id="icon-nav-component" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M1.543 7.25h2.733c.144-2.074.866-3.756 1.58-4.948.12-.197.237-.381.353-.552a6.506 6.506 0 00-4.666 5.5zm2.733 1.5H1.543a6.506 6.506 0 004.666 5.5 11.13 11.13 0 01-.352-.552c-.715-1.192-1.437-2.874-1.581-4.948zm1.504 0h4.44a9.637 9.637 0 01-1.363 4.177c-.306.51-.612.919-.857 1.215a9.978 9.978 0 01-.857-1.215A9.637 9.637 0 015.78 8.75zm4.44-1.5H5.78a9.637 9.637 0 011.363-4.177c.306-.51.612-.919.857-1.215.245.296.55.705.857 1.215A9.638 9.638 0 0110.22 7.25zm1.504 1.5c-.144 2.074-.866 3.756-1.58 4.948-.12.197-.237.381-.353.552a6.506 6.506 0 004.666-5.5h-2.733zm2.733-1.5h-2.733c-.144-2.074-.866-3.756-1.58-4.948a11.738 11.738 0 00-.353-.552 6.506 6.506 0 014.666 5.5zM8 0a8 8 0 100 16A8 8 0 008 0z"/>
+        </symbol>
+        <symbol id="icon-nav-item-toggle" viewBox="0 0 16 16">
+            <path d="m5.345 3.22a0.75 0.75 0 0 1 1.06 0l4.25 4.25a0.75 0.75 0 0 1 0 1.06l-4.25 4.25a0.75 0.75 0 0 1-1.06-1.06l3.72-3.72-3.72-3.72a0.75 0.75 0 0 1 0-1.06z" fill-rule="evenodd"/>
+        </symbol>
+        <symbol id="icon-nav-version" viewBox="0 0 16 16">
+            <path d="m12.78 5.345a0.75 0.75 0 0 1 0 1.06l-4.25 4.25a0.75 0.75 0 0 1-1.06 0l-4.25-4.25a0.75 0.75 0 0 1 1.06-1.06l3.72 3.72 3.72-3.72a0.75 0.75 0 0 1 1.06 0z"/>
+        </symbol>
+    </svg>
+</div>
+<script src="../../../site-navigation-data.js"></script>
+<script src="../../../_/js/nav.js"></script> 
+<script src="../../../_/runtime.js" type="module"></script>
+<script src="../../../_/styles.js" type="module"></script>
+<script src="../../../_/main.js" type="module"></script>
+
+    <script src="../../../_/js/vendor/lunr.js"></script>
+<script src="../../../_/js/vendor/lunr-languages.js"></script>
+<script src="../../../_/js/search-ui.js" id="search-ui-script" data-site-root-path="../../.." data-snippet-length="100" data-stylesheet="../../../_/css/search.css"></script>
+<script async src="../../../search-index.js"></script>
+  </body>
+</html>
