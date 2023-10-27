@@ -98,7 +98,7 @@
         ]
       },
       "configurations": {},
-      "dependsOn": []
+      "dependsOn": ["docs:build-docs"]
     }
   },
   "tags": []
