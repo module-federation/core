@@ -1,8 +1,5 @@
-import { server$ } from '@builder.io/qwik-city';
 import {
-  LoadTranslationFn,
   SpeakConfig,
-  TranslationFn,
   SpeakLocale,
   SpeakState,
 } from 'qwik-speak';
@@ -34,28 +31,15 @@ export const config: SpeakConfig = {
   ],
 };
 
-const translationData = import.meta.glob('/src/i18n/**/*.json', {
-  as: 'raw',
-  eager: true,
-});
-
-const loadTranslation$: LoadTranslationFn = server$(
-  (lang: string, asset: string) =>
-    JSON.parse(translationData[`/src/i18n/${lang}/${asset}.json`]),
-);
-
-export const translationFn: TranslationFn = {
-  loadTranslation$: loadTranslation$,
-};
 
 export const localizedUrl = (url: string, speakState: SpeakState) => {
   const starturl = url.startsWith('/') ? url : `/${url}`;
   const endurl = starturl.endsWith('/') ? starturl : `${starturl}/`;
 
   const handledLang =
-    config.defaultLocale.lang === speakState.locale.lang
-      ? ''
-      : `/${speakState.locale.lang}`;
+      config.defaultLocale.lang === speakState.locale.lang
+          ? ''
+          : `/${speakState.locale.lang}`;
   const finalUrl = `${handledLang}${endurl}`;
 
   const isAnchor = finalUrl.includes('/#');
