@@ -12,7 +12,7 @@ urls:
 content:
   sources:
     - url: ./../../../
-      start_path: ../
+      start_path: apps/docs/src/en
       edit_url: '{web_url}/blob/{refname}/{path}'
 ui:
   bundle:

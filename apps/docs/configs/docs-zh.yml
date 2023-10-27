@@ -14,7 +14,7 @@ urls:
 content:
   sources:
     - url: ./../../../
-      start_path: ../
+      start_path: apps/docs/src/zh_CN
       edit_url: '{web_url}/blob/{refname}/{path}'
 ui:
   bundle:
