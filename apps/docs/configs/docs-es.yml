@@ -13,7 +13,7 @@ urls:
   html_extension_style: indexify
 content:
   sources:
-    - url: ./../../../
+    - url: ./
       start_path: apps/docs/src/es
       edit_url: '{web_url}/blob/{refname}/{path}'
 ui:
