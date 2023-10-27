@@ -11,7 +11,7 @@
     "federated types"
   ],
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "access": "public"
   },
   "author": "Prasanna Mestha <prasanna@privjs.com> (https://github.com/prasannamestha)",
   "contributors": [

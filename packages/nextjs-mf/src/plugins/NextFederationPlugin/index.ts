@@ -39,7 +39,6 @@ import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import ModuleFederationNextFork from '../container/ModuleFederationPlugin';
 import { parseRemotes } from '@module-federation/node';
 
-process.env.NEXT_PRIVATE_LOCAL_WEBPACK = 'true'
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
@@ -65,7 +64,7 @@ export class NextFederationPlugin {
   apply(compiler: Compiler) {
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
-      //@ts-ignore
+    //@ts-ignore
     new CopyFederationPlugin(isServer).apply(compiler);
     this.applyConditionalPlugins(compiler, isServer);
     const normalFederationPluginOptions = this.getNormalFederationPluginOptions(
@@ -82,13 +81,16 @@ export class NextFederationPlugin {
   private validateOptions(compiler: Compiler): boolean {
     const compilerValid = validateCompilerOptions(compiler);
     const pluginValid = validatePluginOptions(this._options);
-    const envValid = process.env.NEXT_PRIVATE_LOCAL_WEBPACK
+    const envValid = process.env.NEXT_PRIVATE_LOCAL_WEBPACK;
     if (compilerValid === undefined)
       console.error('Compiler validation failed');
     if (pluginValid === undefined) console.error('Plugin validation failed');
     const validCompilerTarget =
       compiler.options.name === 'server' || compiler.options.name === 'client';
-    if(!envValid) throw new Error('process.env.NEXT_PRIVATE_LOCAL_WEBPACK is not set to true, please set it to true, and "npm install webpack"')
+    if (!envValid)
+      throw new Error(
+        'process.env.NEXT_PRIVATE_LOCAL_WEBPACK is not set to true, please set it to true, and "npm install webpack"',
+      );
     return (
       compilerValid !== undefined &&
       pluginValid !== undefined &&
@@ -103,8 +105,8 @@ export class NextFederationPlugin {
   private applyConditionalPlugins(compiler: Compiler, isServer: boolean) {
     compiler.options.output.uniqueName = this._options.name;
     applyPathFixes(compiler, this._extraOptions);
-    if(this._extraOptions.debug) {
-      compiler.options.devtool = false
+    if (this._extraOptions.debug) {
+      compiler.options.devtool = false;
     }
     if (isServer) {
       //@ts-ignore

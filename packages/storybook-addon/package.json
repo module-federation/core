@@ -1,11 +1,11 @@
 {
   "name": "@module-federation/storybook-addon",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Storybook addon to consume remote module federated apps/components",
   "license": "MIT",
   "repository": "https://github.com/module-federation/universe/tree/main/packages/storybook-addon",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "access": "public"
   },
   "keywords": [
     "module-federation",

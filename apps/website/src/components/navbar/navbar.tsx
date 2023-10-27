@@ -83,7 +83,7 @@ export default component$((props: NavbarProps) => {
         document.removeEventListener('scroll', listener);
       };
     },
-    { strategy: 'document-ready' }
+    { strategy: 'document-ready' },
   );
 
   const changeLocale$ = $((locale: string) => {
@@ -95,7 +95,7 @@ export default component$((props: NavbarProps) => {
       } else {
         url.pathname = url.pathname.replace(
           new RegExp(`(/${loc.params.lang}/)|(/${loc.params.lang}$)`),
-          '/'
+          '/',
         );
       }
     } else if (newLocale.lang !== config.defaultLocale.lang) {

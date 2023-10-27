@@ -456,7 +456,6 @@ class FederationStatsPlugin {
             compilation.chunkGraph.getChunkEntryModulesIterable(container),
           );
 
-
           const { blocks } = containerEntryModule;
 
           const exposedResolved = {};

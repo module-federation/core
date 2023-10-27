@@ -75,7 +75,7 @@ export default component$(() => {
 
   const title = t('showcase-page.title@@Showcase');
   const subtitle = t(
-    'showcase-page.subtitle@@Meet leading companies embracing Module Federation for their web development needs.'
+    'showcase-page.subtitle@@Meet leading companies embracing Module Federation for their web development needs.',
   );
 
   return (

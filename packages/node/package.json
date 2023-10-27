@@ -19,7 +19,7 @@
     "./src/": "./src/"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "access": "public"
   },
   "tags": [
     "module-federation",
