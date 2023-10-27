@@ -43,7 +43,8 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - run: npm ci
       - run: npx nx affected -t build.netlify
-      - run: npx netlify deploy --build --prod --message "Deploy from GitHub Actions" --filter website
+      - uses: nelonoel/branch-name@v1.0.1
+      - run: 'npx netlify deploy --build --message "Deploy Preview from GitHub Actions" --alias "${{ env.BRANCH_NAME }}" --filter website'
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
