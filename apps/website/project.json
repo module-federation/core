@@ -92,6 +92,7 @@
       "options": {
         "parallel": false,
         "commands": [
+          "npx nx run website:build.netlify",
           "nx run website:build:netlify",
           "npx move-cli apps/website/manifest.override.json dist/apps/website/.netlify/edge-functions/manifest.json",
           "npx move-cli dist/apps/website/.netlify/edge-functions .netlify/edge-functions"
