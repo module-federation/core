@@ -1,0 +1,11 @@
+{
+  "functions": [
+    {
+      "path": "/*",
+      "function": "entry.netlify-edge",
+      "cache": "manual",
+      "excludedPath": ""
+    }
+  ],
+  "version": 1
+}
