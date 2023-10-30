@@ -4,6 +4,7 @@
       "path": "/*",
       "excludedPath": "/docs/*",
       "function": "entry.netlify-edge",
+
       "cache": "manual"
     }
   ],
