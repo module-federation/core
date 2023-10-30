@@ -27,186 +27,186 @@ Please check out https://qwik.builder.io/docs/advanced/qrl/ for more information
     "title": "Enterprise Support & Training"
   }
 }
-`,Ui=`{\r
-  "contact": {\r
-    "disclaimer": {\r
-      "action": "Privacy & Policy",\r
-      "text": "By submitting this form, I confirm that I have read and understood the"\r
-    },\r
-    "form": {\r
-      "action": "Submit",\r
-      "company-email": {\r
-        "label": "Company email"\r
-      },\r
-      "company-website": {\r
-        "label": "Company website"\r
-      },\r
-      "how-can-we-help-you": {\r
-        "label": "How can we help you?"\r
-      },\r
-      "name": {\r
-        "label": "Your name"\r
-      },\r
-      "company-size": {\r
-        "label": "Company size"\r
-      }\r
-    },\r
-    "quote": {\r
-      "author": {\r
-        "name": "Zack Jackson",\r
-        "title": "the сreator of Module Federation"\r
-      },\r
-      "text": "There are now 4000 companies using Module Federation in a detectable way. Likely many more who we cannot trace, but 4000 is still an impressive number of known entities."\r
-    },\r
-    "title": "Talk to our experts"\r
-  }\r
-}`,Bi=`{\r
-  "discord": {\r
-    "action": "Discord",\r
-    "title": "Join to Module Federation community in"\r
-  }\r
-}`,Hi=`{\r
-  "doc-summary": {\r
-    "action": "Start using module federation",\r
-    "cards": {\r
-      "decentralized": {\r
-        "action": "Documentation",\r
-        "desc": "Module Federation allows developers to share code between multiple projects in a decentralized manner, making it easier to manage complex applications.",\r
-        "title": "Decentralized code sharing"\r
-      },\r
-      "federated-runtime": {\r
-        "action": "Documentation",\r
-        "desc": "The modules can be combined and federated at runtime, allowing for greater collaboration and faster development times.",\r
-        "title": "Federated runtime"\r
-      },\r
-      "flexibility": {\r
-        "action": "Documentation",\r
-        "desc": "Module Federation gives developers the freedom to choose and implement the architecture that best suits their needs, promoting a modular and scalable approach to application development.",\r
-        "title": "Flexibility"\r
-      },\r
-      "modular-architecture": {\r
-        "action": "Documentation",\r
-        "desc": "Applications can be split into smaller, self-contained modules that can be developed, tested, and deployed independently.",\r
-        "title": "Modular architecture"\r
-      },\r
-      "scalability": {\r
-        "action": "Documentation",\r
-        "desc": "Module Federation brings scalability to not only code but also individual and organizational productivity",\r
-        "title": "Scalability with Module Federation"\r
-      },\r
-      "team-colaboration": {\r
-        "action": "Documentation",\r
-        "desc": "Independent teams can be assigned responsibility for specific microfrontends, making it easier to manage the development process and promote collaboration between team members.",\r
-        "title": "Team collaboration"\r
-      }\r
-    },\r
-    "subtitle": "Module Federation brings scalability to not only code but also individual and organizational productivity",\r
-    "title": "Scalability with Module Federation"\r
-  }\r
-}`,Vi=`{\r
-  "evolving": {\r
-    "rfcs": {\r
-      "action": "Take part now!",\r
-      "subtitle": "Participate in the community discussions to decide on what features are coming next",\r
-      "title": "RFCs"\r
-    },\r
-    "roadmap": {\r
-      "action": "Explore it!",\r
-      "subtitle": "Discover the future of Module Federation",\r
-      "title": "Module Federation Roadmap"\r
-    },\r
-    "subtitle": "The world of Module Federation is constantly evolving and growing based on the feedback from the community. The RFCs are open for all to participate in the discussion and the roadmap is published.",\r
-    "supported-bundlers": {\r
-      "title": "Supported bundlers"\r
-    },\r
-    "title": "Evolving Module Federation"\r
-  }\r
-}`,Wi=`{\r
-  "explore": {\r
-    "cards": {\r
-      "community-content": {\r
-        "action": "Find out more",\r
-        "title": "Community content"\r
-      },\r
-      "conference-talks": {\r
-        "action": "Watch now",\r
-        "title": "Conference talks"\r
-      },\r
-      "implementing-module-federation": {\r
-        "action": "Learn more",\r
-        "title": "Implementing Module Federation"\r
-      },\r
-      "module-federation-courses": {\r
-        "action": "Start exploring",\r
-        "subtitle": "Gain expertise in Module Federation and enhance your skills now",\r
-        "title": "Module Federation courses"\r
-      },\r
-      "practical-module-federation": {\r
-        "action": "Get the book",\r
-        "title": "Practical Module Federation"\r
-      }\r
-    },\r
-    "disabled": "Coming soon"\r
-  }\r
-}`,Qi=`{\r
-  "footer": {\r
-    "menu": {\r
-      "documentation": "Documentation",\r
-      "examples": "Examples",\r
-      "medusa": "Try Medusa",\r
-      "practical-guide": "Practical guide",\r
-      "sponsor": "Become a sponsor",\r
-      "privacy-policy": "Privacy Policy"\r
-    }\r
-  }\r
-}`,Gi=`{\r
-  "hero": {\r
-    "actions": {\r
-      "documentation": "Documentation",\r
-      "learn": "Learn"\r
-    },\r
-    "subtitle": "Module Federation aims to solve the sharing of modules in a distributed system. It allows you to ship those critical shared pieces as macro or as micro as you would like. It does this by pulling them out of the build pipeline and out of your apps",\r
-    "title": "Module Federation: streamline your microfrontends"\r
-  }\r
-}`,ji=`{\r
-  "medusa": {\r
-    "title": "Start using Module Federation with"\r
-  }\r
-}`,Zi=`{\r
-  "navbar": {\r
-    "menu": {\r
-      "discover": "Discover",\r
-      "documentation": "Documentation",\r
-      "enterprise": "Enterprise",\r
-      "medusa": "Medusa",\r
-      "showcase": "Showcase"\r
-    }\r
-  }\r
-}`,Ji=`{\r
-  "showcase-page": {\r
-    "action": "Become a showcase",\r
-    "subtitle": "Meet leading companies embracing Module Federation for their web development needs.",\r
-    "title": "Showcase"\r
-  }\r
-}`,Yi=`{\r
-  "showcase": {\r
-    "action": "See more showcases",\r
-    "title": "Showcase"\r
-  }\r
-}`,Ki=`{\r
-  "sponsor": {\r
-    "action": "Become a sponsor",\r
-    "subtitle": "Sponsoring Module Federation offers the chance to be part of a technology community making a positive impact<br> and receive benefits and recognition opportunities in return.",\r
-    "title": "Sponsor Module Federation!"\r
-  }\r
-}`,Xi=`{\r
-  "subscribe": {\r
-    "action": "Subscribe",\r
-    "input": {\r
-      "placeholder": "Enter your email"\r
-    },\r
-    "title": "Subscribe to our email newsletter!"\r
-  }\r
+`,Ui=`{
+  "contact": {
+    "disclaimer": {
+      "action": "Privacy & Policy",
+      "text": "By submitting this form, I confirm that I have read and understood the"
+    },
+    "form": {
+      "action": "Submit",
+      "company-email": {
+        "label": "Company email"
+      },
+      "company-website": {
+        "label": "Company website"
+      },
+      "how-can-we-help-you": {
+        "label": "How can we help you?"
+      },
+      "name": {
+        "label": "Your name"
+      },
+      "company-size": {
+        "label": "Company size"
+      }
+    },
+    "quote": {
+      "author": {
+        "name": "Zack Jackson",
+        "title": "the сreator of Module Federation"
+      },
+      "text": "There are now 4000 companies using Module Federation in a detectable way. Likely many more who we cannot trace, but 4000 is still an impressive number of known entities."
+    },
+    "title": "Talk to our experts"
+  }
+}`,Bi=`{
+  "discord": {
+    "action": "Discord",
+    "title": "Join to Module Federation community in"
+  }
+}`,Hi=`{
+  "doc-summary": {
+    "action": "Start using module federation",
+    "cards": {
+      "decentralized": {
+        "action": "Documentation",
+        "desc": "Module Federation allows developers to share code between multiple projects in a decentralized manner, making it easier to manage complex applications.",
+        "title": "Decentralized code sharing"
+      },
+      "federated-runtime": {
+        "action": "Documentation",
+        "desc": "The modules can be combined and federated at runtime, allowing for greater collaboration and faster development times.",
+        "title": "Federated runtime"
+      },
+      "flexibility": {
+        "action": "Documentation",
+        "desc": "Module Federation gives developers the freedom to choose and implement the architecture that best suits their needs, promoting a modular and scalable approach to application development.",
+        "title": "Flexibility"
+      },
+      "modular-architecture": {
+        "action": "Documentation",
+        "desc": "Applications can be split into smaller, self-contained modules that can be developed, tested, and deployed independently.",
+        "title": "Modular architecture"
+      },
+      "scalability": {
+        "action": "Documentation",
+        "desc": "Module Federation brings scalability to not only code but also individual and organizational productivity",
+        "title": "Scalability with Module Federation"
+      },
+      "team-colaboration": {
+        "action": "Documentation",
+        "desc": "Independent teams can be assigned responsibility for specific microfrontends, making it easier to manage the development process and promote collaboration between team members.",
+        "title": "Team collaboration"
+      }
+    },
+    "subtitle": "Module Federation brings scalability to not only code but also individual and organizational productivity",
+    "title": "Scalability with Module Federation"
+  }
+}`,Vi=`{
+  "evolving": {
+    "rfcs": {
+      "action": "Take part now!",
+      "subtitle": "Participate in the community discussions to decide on what features are coming next",
+      "title": "RFCs"
+    },
+    "roadmap": {
+      "action": "Explore it!",
+      "subtitle": "Discover the future of Module Federation",
+      "title": "Module Federation Roadmap"
+    },
+    "subtitle": "The world of Module Federation is constantly evolving and growing based on the feedback from the community. The RFCs are open for all to participate in the discussion and the roadmap is published.",
+    "supported-bundlers": {
+      "title": "Supported bundlers"
+    },
+    "title": "Evolving Module Federation"
+  }
+}`,Wi=`{
+  "explore": {
+    "cards": {
+      "community-content": {
+        "action": "Find out more",
+        "title": "Community content"
+      },
+      "conference-talks": {
+        "action": "Watch now",
+        "title": "Conference talks"
+      },
+      "implementing-module-federation": {
+        "action": "Learn more",
+        "title": "Implementing Module Federation"
+      },
+      "module-federation-courses": {
+        "action": "Start exploring",
+        "subtitle": "Gain expertise in Module Federation and enhance your skills now",
+        "title": "Module Federation courses"
+      },
+      "practical-module-federation": {
+        "action": "Get the book",
+        "title": "Practical Module Federation"
+      }
+    },
+    "disabled": "Coming soon"
+  }
+}`,Qi=`{
+  "footer": {
+    "menu": {
+      "documentation": "Documentation",
+      "examples": "Examples",
+      "medusa": "Try Medusa",
+      "practical-guide": "Practical guide",
+      "sponsor": "Become a sponsor",
+      "privacy-policy": "Privacy Policy"
+    }
+  }
+}`,Gi=`{
+  "hero": {
+    "actions": {
+      "documentation": "Documentation",
+      "learn": "Learn"
+    },
+    "subtitle": "Module Federation aims to solve the sharing of modules in a distributed system. It allows you to ship those critical shared pieces as macro or as micro as you would like. It does this by pulling them out of the build pipeline and out of your apps",
+    "title": "Module Federation: streamline your microfrontends"
+  }
+}`,ji=`{
+  "medusa": {
+    "title": "Start using Module Federation with"
+  }
+}`,Zi=`{
+  "navbar": {
+    "menu": {
+      "discover": "Discover",
+      "documentation": "Documentation",
+      "enterprise": "Enterprise",
+      "medusa": "Medusa",
+      "showcase": "Showcase"
+    }
+  }
+}`,Ji=`{
+  "showcase-page": {
+    "action": "Become a showcase",
+    "subtitle": "Meet leading companies embracing Module Federation for their web development needs.",
+    "title": "Showcase"
+  }
+}`,Yi=`{
+  "showcase": {
+    "action": "See more showcases",
+    "title": "Showcase"
+  }
+}`,Ki=`{
+  "sponsor": {
+    "action": "Become a sponsor",
+    "subtitle": "Sponsoring Module Federation offers the chance to be part of a technology community making a positive impact<br> and receive benefits and recognition opportunities in return.",
+    "title": "Sponsor Module Federation!"
+  }
+}`,Xi=`{
+  "subscribe": {
+    "action": "Subscribe",
+    "input": {
+      "placeholder": "Enter your email"
+    },
+    "title": "Subscribe to our email newsletter!"
+  }
 }`,ec=`{
   "app": {
     "meta": {
@@ -224,77 +224,77 @@ Please check out https://qwik.builder.io/docs/advanced/qrl/ for more information
     "title": "Enterprise Support & Training"
   }
 }
-`,nc=`{\r
-  "contact": {\r
-    "disclaimer": {\r
-      "action": "Política de privacidade",\r
-      "text": "Ao enviar este formulário, confirmo que li e compreendi a nossa "\r
-    },\r
-    "form": {\r
-      "action": "Enviar",\r
-      "company-email": {\r
-        "label": "Email corporativo"\r
-      },\r
-      "company-website": {\r
-        "label": "Website da empresa"\r
-      },\r
-      "how-can-we-help-you": {\r
-        "label": "Como podemos te ajudar?"\r
-      },\r
-      "name": {\r
-        "label": "Seu nome"\r
-      },\r
-      "company-size": {\r
-        "label": "Tamanho da empresa"\r
-      }\r
-    },\r
-    "quote": {\r
-      "author": {\r
-        "name": "Zack Jackson",\r
-        "title": "o criador de Module Federation"\r
-      },\r
-      "text": "Existem agora 4.000 empresas usando o Module Federation de forma detectável. Provavelmente muitos mais que não podemos rastrear, mas 4000 ainda é um número impressionante de entidades conhecidas."\r
-    },\r
-    "title": "Fale com nossos especialistas"\r
-  }\r
-}`,lc=`{\r
-  "discord": {\r
-    "action": "Discord",\r
-    "title": "Junte-se à comunidade Module Federation no"\r
-  }\r
-}`,oc=`{\r
-  "doc-summary": {\r
-    "action": "Comece a usar Module Federation",\r
-    "cards": {\r
-      "decentralized": {\r
-        "action": "Documentação",\r
-        "desc": "Module Federation permite que os desenvolvedores compartilhem código entre vários projetos de maneira descentralizada, facilitando o gerenciamento de aplicativos complexos.",\r
-        "title": "Compartilhamento de código descentralizado"\r
-      },\r
-      "federated-runtime": {\r
-        "action": "Documentação",\r
-        "desc": "Os módulos podem ser combinados e federados em tempo de execução, permitindo maior colaboração e tempos de desenvolvimento mais rápidos.",\r
-        "title": "Tempo de execução federado"\r
-      },\r
-      "flexibility": {\r
-        "action": "Documentação",\r
-        "desc": "Module Federation dá aos desenvolvedores a liberdade de escolher e implementar a arquitetura que melhor se adapta às suas necessidades, promovendo uma abordagem modular e escalável para o desenvolvimento de aplicativos.",\r
-        "title": "Flexibilidade"\r
-      },\r
-      "modular-architecture": {\r
-        "action": "Documentação",\r
-        "desc": "Os aplicativos podem ser divididos em módulos menores e independentes que podem ser desenvolvidos, testados e implantados de forma independente.",\r
-        "title": "Modular architecture"\r
-      },\r
-      "team-colaboration": {\r
-        "action": "Documentação",\r
-        "desc": "Equipes independentes podem ser responsáveis por microfrontends específicos, facilitando o gerenciamento do processo de desenvolvimento e promovendo a colaboração entre os membros da equipe.",\r
-        "title": "Colaboração em equipe"\r
-      }\r
-    },\r
-    "subtitle": "Module Federation traz escalabilidade não apenas para o código, mas também para a produtividade individual e organizacional",\r
-    "title": "Escalabilidade com Module Federation"\r
-  }\r
+`,nc=`{
+  "contact": {
+    "disclaimer": {
+      "action": "Política de privacidade",
+      "text": "Ao enviar este formulário, confirmo que li e compreendi a nossa "
+    },
+    "form": {
+      "action": "Enviar",
+      "company-email": {
+        "label": "Email corporativo"
+      },
+      "company-website": {
+        "label": "Website da empresa"
+      },
+      "how-can-we-help-you": {
+        "label": "Como podemos te ajudar?"
+      },
+      "name": {
+        "label": "Seu nome"
+      },
+      "company-size": {
+        "label": "Tamanho da empresa"
+      }
+    },
+    "quote": {
+      "author": {
+        "name": "Zack Jackson",
+        "title": "o criador de Module Federation"
+      },
+      "text": "Existem agora 4.000 empresas usando o Module Federation de forma detectável. Provavelmente muitos mais que não podemos rastrear, mas 4000 ainda é um número impressionante de entidades conhecidas."
+    },
+    "title": "Fale com nossos especialistas"
+  }
+}`,lc=`{
+  "discord": {
+    "action": "Discord",
+    "title": "Junte-se à comunidade Module Federation no"
+  }
+}`,oc=`{
+  "doc-summary": {
+    "action": "Comece a usar Module Federation",
+    "cards": {
+      "decentralized": {
+        "action": "Documentação",
+        "desc": "Module Federation permite que os desenvolvedores compartilhem código entre vários projetos de maneira descentralizada, facilitando o gerenciamento de aplicativos complexos.",
+        "title": "Compartilhamento de código descentralizado"
+      },
+      "federated-runtime": {
+        "action": "Documentação",
+        "desc": "Os módulos podem ser combinados e federados em tempo de execução, permitindo maior colaboração e tempos de desenvolvimento mais rápidos.",
+        "title": "Tempo de execução federado"
+      },
+      "flexibility": {
+        "action": "Documentação",
+        "desc": "Module Federation dá aos desenvolvedores a liberdade de escolher e implementar a arquitetura que melhor se adapta às suas necessidades, promovendo uma abordagem modular e escalável para o desenvolvimento de aplicativos.",
+        "title": "Flexibilidade"
+      },
+      "modular-architecture": {
+        "action": "Documentação",
+        "desc": "Os aplicativos podem ser divididos em módulos menores e independentes que podem ser desenvolvidos, testados e implantados de forma independente.",
+        "title": "Modular architecture"
+      },
+      "team-colaboration": {
+        "action": "Documentação",
+        "desc": "Equipes independentes podem ser responsáveis por microfrontends específicos, facilitando o gerenciamento do processo de desenvolvimento e promovendo a colaboração entre os membros da equipe.",
+        "title": "Colaboração em equipe"
+      }
+    },
+    "subtitle": "Module Federation traz escalabilidade não apenas para o código, mas também para a produtividade individual e organizacional",
+    "title": "Escalabilidade com Module Federation"
+  }
 }`,sc=`{
   "evolving": {
     "rfcs": {
@@ -364,10 +364,10 @@ Please check out https://qwik.builder.io/docs/advanced/qrl/ for more information
     "title": "Module Federation: otimize seus microfrontends"
   }
 }
-`,cc=`{\r
-  "medusa": {\r
-    "title": "Comece a usar Module Federation com"\r
-  }\r
+`,cc=`{
+  "medusa": {
+    "title": "Comece a usar Module Federation com"
+  }
 }`,uc=`{
   "navbar": {
     "menu": {
