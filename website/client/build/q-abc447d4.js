@@ -1,0 +1,1 @@
+import{$ as e,h as r,j as s}from"./q-02d1ab66.js";import{s as t}from"./q-5dfe0b81.js";const n=l=>e("button",{class:`flex w-full ${t} border-0 text-left hover:bg-blue-gray-300 ${l.selected&&"bg-blue-gray-300"}`,onClick$:l.onClick$},null,r(s,null,3,"Vv_3"),0,"Vv_4");export{n as s_lHJ6l0hcvRg};

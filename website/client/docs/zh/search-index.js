@@ -1,0 +1,1 @@
+antoraSearch.initSearch(lunr, {})
