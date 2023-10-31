@@ -47,6 +47,10 @@ class AsyncBoundaryPlugin {
               if (startupRenderContext.chunk.hasRuntime()) {
                 return source;
               }
+            const isInvalidContext =
+              this.hooks.checkInvalidContext.call(renderContext, compilation) ?? false;
+              if (isInvalidContext) return source
+
               const startup = [
                 'var promiseTrack = [];',
                 `if(__webpack_require__.f && __webpack_require__.f.remotes) __webpack_require__.f.remotes(${JSON.stringify(
@@ -62,110 +66,10 @@ class AsyncBoundaryPlugin {
               ].join('\n');
 
               return startup;
-            // return this.renderStartupLogic(
-            //   source,
-            //   renderContext,
-            //   startupRenderContext,
-            //   compilation,
-            // );
           },
         );
       },
     );
-  }
-
-  /**
-   * Render the startup logic for the plugin.
-   * @param {Source} source - The source code.
-   * @param {RenderContext} renderContext - The render context.
-   * @param {any} startupRenderContext - The startup render context.
-   * @param {Compilation} compilation - The Webpack compilation instance.
-   * @returns {string} - The modified source code.
-   */
-  private renderStartupLogic(
-    source: Source,
-    renderContext: Module,
-    startupRenderContext: StartupRenderContext,
-    compilation: Compilation,
-  ): string {
-    const isInvalidContext =
-      this.hooks.checkInvalidContext.call(renderContext, compilation) ?? false;
-    if (isInvalidContext) return source.source().toString();
-
-    const { chunkGraph } = compilation;
-    const replaceSource = source.source().toString();
-    const replaceSourceLines = replaceSource.split('\n');
-    const webpack_exec_index = replaceSourceLines.findIndex((line) =>
-      line.includes('webpack_exec'),
-    );
-    const webpack_exec = replaceSourceLines[webpack_exec_index];
-    const webpack_exports = replaceSourceLines.slice(webpack_exec_index + 1);
-    const dependentChunkIds = this.getDependentChunkIds(
-      startupRenderContext,
-      chunkGraph,
-    );
-
-    return Template.asString([
-      this.replaceWebpackExec(webpack_exec),
-      `globalThis.ongoingRemotes = globalThis.ongoingRemotes || [];`,
-      `var __webpack_exec__ = async function() {`,
-      Template.indent([
-        `var chunkIds = ${JSON.stringify(Array.from(dependentChunkIds))};`,
-        `if (${RuntimeGlobals.ensureChunkHandlers}.consumes) {`,
-        `  chunkIds.forEach(function(id) { ${RuntimeGlobals.ensureChunkHandlers}.consumes(id, globalThis.ongoingRemotes); });`,
-        `  await Promise.all(globalThis.ongoingRemotes);`,
-        `}`,
-        `if (${RuntimeGlobals.ensureChunkHandlers}.remotes) {`,
-        `  chunkIds.forEach(function(id) { ${RuntimeGlobals.ensureChunkHandlers}.remotes(id, globalThis.ongoingRemotes); });`,
-        `  await Promise.all(globalThis.ongoingRemotes);`,
-        `}`,
-        `return  __original_webpack_exec__.apply(this, arguments);`,
-      ]),
-      `};`,
-      ...webpack_exports,
-    ]);
-  }
-
-  /**
-   * Replace the webpack exec string.
-   * @param {string} webpack_exec - The webpack exec string.
-   * @returns {string} - The replaced webpack exec string.
-   */
-  private replaceWebpackExec(webpack_exec: string): string {
-    return webpack_exec.replace(
-      '__webpack_exec__',
-      '__original_webpack_exec__',
-    );
-  }
-
-  /**
-   * Get the IDs of the dependent chunks.
-   * @param {any} startupRenderContext - The startup render context.
-   * @param {any} chunkGraph - The chunk graph.
-   * @returns {Set} - The set of dependent chunk IDs.
-   */
-  private getDependentChunkIds(
-    startupRenderContext: RenderContext,
-    chunkGraph: ChunkGraph,
-  ): Set<string | number | null> {
-    const entries = Array.from(
-      chunkGraph.getChunkEntryModulesWithChunkGroupIterable(
-        startupRenderContext.chunk,
-      ),
-    );
-    const chunkIds = new Set<string | number | null>();
-    for (const [module, entrypoint] of entries) {
-      if (entrypoint) {
-        const runtimeChunk = entrypoint.getRuntimeChunk();
-        if (runtimeChunk) {
-          const chunks = getAllChunks(entrypoint, runtimeChunk);
-          for (const c of chunks) {
-            chunkIds.add(c.id);
-          }
-        }
-      }
-    }
-    return chunkIds;
   }
 }
 
