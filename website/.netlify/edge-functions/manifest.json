@@ -1,0 +1,19 @@
+{
+  "functions": [
+    {
+      "path": "/*",
+      "function": "entry.netlify-edge",
+      "cache": "manual",
+      "excludedPath": [
+        "/build/*",
+        "/favicon.ico",
+        "/robots.txt",
+        "/mainifest.json",
+        "/~partytown/*",
+        "/service-worker.js",
+        "/sitemap.xml"
+      ]
+    }
+  ],
+  "version": 1
+}
