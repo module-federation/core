@@ -1,8 +1,5 @@
-import { server$ } from '@builder.io/qwik-city';
 import {
-  LoadTranslationFn,
   SpeakConfig,
-  TranslationFn,
   SpeakLocale,
   SpeakState,
 } from 'qwik-speak';
@@ -32,20 +29,6 @@ export const config: SpeakConfig = {
     'subscribe',
     'showcase-page',
   ],
-};
-
-const translationData = import.meta.glob('/src/i18n/**/*.json', {
-  as: 'raw',
-  eager: true,
-});
-
-const loadTranslation$: LoadTranslationFn = server$(
-  (lang: string, asset: string) =>
-    JSON.parse(translationData[`/src/i18n/${lang}/${asset}.json`]),
-);
-
-export const translationFn: TranslationFn = {
-  loadTranslation$: loadTranslation$,
 };
 
 export const localizedUrl = (url: string, speakState: SpeakState) => {
