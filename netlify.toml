@@ -1,2 +1,2 @@
 [build]
-publish = "dist/apps/website/client"
+publish = "website/client"
