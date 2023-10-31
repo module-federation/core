@@ -1,1 +1,0 @@
-import{t as s}from"./q-0ec4f38b.js";import{_ as p}from"./q-1b3bace9.js";const i=(o,a,t)=>{const[r,e,n]=p();return t??(t=e.lang),s(o,n[t],a,r.keySeparator,r.keyValueSeparator)};export{i as s_t8pAmchwKZE};

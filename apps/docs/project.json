@@ -25,6 +25,7 @@
     "build-docs": {
       "executor": "nx:run-commands",
       "options": {
+        "outputPath": "dist/apps/docs",
         "commands": [
           "npx antora --fetch apps/docs/configs/docs-en.yml",
           "npx antora --fetch apps/docs/configs/docs-es.yml",

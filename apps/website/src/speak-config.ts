@@ -34,20 +34,6 @@ export const config: SpeakConfig = {
   ],
 };
 
-const translationData = import.meta.glob('/src/i18n/**/*.json', {
-  as: 'raw',
-  eager: true,
-});
-
-const loadTranslation$: LoadTranslationFn = server$(
-  (lang: string, asset: string) =>
-    JSON.parse(translationData[`/src/i18n/${lang}/${asset}.json`])
-);
-
-export const translationFn: TranslationFn = {
-  loadTranslation$: loadTranslation$,
-};
-
 export const localizedUrl = (url: string, speakState: SpeakState) => {
   const starturl = url.startsWith('/') ? url : `/${url}`;
   const endurl = starturl.endsWith('/') ? starturl : `${starturl}/`;

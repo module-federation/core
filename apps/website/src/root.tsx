@@ -9,7 +9,8 @@ import { QwikSpeakProvider } from 'qwik-speak';
 import { RouterHead } from './components/router-head/router-head';
 
 import globalStyles from './global.css?inline';
-import { config, translationFn } from './speak-config';
+import { config } from './speak-config';
+import { translationFn } from './speak-config-functions';
 
 export default component$(() => {
   /**
