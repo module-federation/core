@@ -44,12 +44,30 @@ class AsyncBoundaryPlugin {
             renderContext: Module,
             startupRenderContext: StartupRenderContext,
           ) => {
-            return this.renderStartupLogic(
-              source,
-              renderContext,
-              startupRenderContext,
-              compilation,
-            );
+              if (startupRenderContext.chunk.hasRuntime()) {
+                return source;
+              }
+              const startup = [
+                'var promiseTrack = [];',
+                `if(__webpack_require__.f && __webpack_require__.f.remotes) __webpack_require__.f.remotes(${JSON.stringify(
+                  startupRenderContext.chunk.id,
+                )}, promiseTrack);`,
+                `if(__webpack_require__.f && __webpack_require__.f.consumes) __webpack_require__.f.consumes(${JSON.stringify(
+                  startupRenderContext.chunk.id,
+                )}, promiseTrack);`,
+                `var __webpack_exports__ = Promise.all(promiseTrack).then(function() {`,
+                source.source(),
+                'return __webpack_exports__;',
+                `});`,
+              ].join('\n');
+
+              return startup;
+            // return this.renderStartupLogic(
+            //   source,
+            //   renderContext,
+            //   startupRenderContext,
+            //   compilation,
+            // );
           },
         );
       },
