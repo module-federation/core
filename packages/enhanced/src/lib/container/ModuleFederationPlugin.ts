@@ -17,7 +17,7 @@ const validate = createSchemaValidation(
   //eslint-disable-next-line
   require('webpack/schemas/plugins/container/ModuleFederationPlugin.check.js'),
   () =>
-    require('webpack/schemas/plugins/container/ModuleFederationPlugin.json'),
+    require('../../schemas/container/ModuleFederationPlugin.json'),
   {
     name: 'Module Federation Plugin',
     baseDataPath: 'options',
