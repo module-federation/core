@@ -26,7 +26,7 @@ export default component$(() => {
         </h1>
         <p class="font-medium text-lg  text-blue-gray-900 break-words max-w-4xl">
           {t(
-            'hero.subtitle@@Module Federation aims to solve the sharing of modules in a distributed system. It allows you to ship those critical shared pieces as macro or as micro as you would like. It does this by pulling them out of the build pipeline and out of your apps'
+            'hero.subtitle@@Module Federation aims to solve the sharing of modules in a distributed system. It allows you to ship those critical shared pieces as macro or as micro as you would like. It does this by pulling them out of the build pipeline and out of your apps',
           )}
         </p>
         <div class="flex flex-col md:flex-row gap-4 w-full md:justify-center">

@@ -11,12 +11,9 @@ import type {
   NeedBuildContext,
   WebpackError,
 } from 'webpack/lib/Module';
-//@ts-ignore
-import Module = require('webpack/lib/Module');
-//@ts-ignore
-import RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
-//@ts-ignore
-import makeSerializable = require('webpack/lib/util/makeSerializable');
+import Module from 'webpack/lib/Module';
+import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import makeSerializable from 'webpack/lib/util/makeSerializable';
 import FallbackDependency from './FallbackDependency';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
 import type Compilation from 'webpack/lib/Compilation';

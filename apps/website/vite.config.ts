@@ -29,7 +29,7 @@ export default defineConfig({
         'apps',
         'website',
         'client',
-        '~partytown'
+        '~partytown',
       ),
     }),
   ],

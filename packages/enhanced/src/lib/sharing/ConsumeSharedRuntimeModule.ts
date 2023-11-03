@@ -4,30 +4,20 @@
 */
 
 import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-//@ts-ignore
-import Template = require('webpack/lib/Template');
+import Template from 'webpack/lib/Template';
 import {
   parseVersionRuntimeCode,
   versionLtRuntimeCode,
   rangeToStringRuntimeCode,
   satisfyRuntimeCode,
 } from 'webpack/lib/util/semver';
-//@ts-ignore
-import RuntimeModule = require('webpack/lib/RuntimeModule');
-//@ts-ignore
-import Module = require('webpack/lib/Module');
+import RuntimeModule from 'webpack/lib/RuntimeModule';
+import Module from 'webpack/lib/Module';
 import ConsumeSharedModule from './ConsumeSharedModule';
 import type ChunkGraph from 'webpack/lib/ChunkGraph';
 import type Compilation from 'webpack/lib/Compilation';
 import type Chunk from 'webpack/lib/Chunk';
 import { Source } from 'webpack-sources';
-
-/** @typedef {import("webpack-sources").Source} Source */
-/** @typedef {import("webpack/lib/Chunk")} Chunk */
-/** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
-/** @typedef {import("webpack/lib/Compilation")} Compilation */
-/** @typedef {import("webpack/lib/Module")} Module */
-/** @typedef {import("./ConsumeSharedModule")} ConsumeSharedModule */
 
 class ConsumeSharedRuntimeModule extends RuntimeModule {
   private _runtimeRequirements: ReadonlySet<string>;
@@ -44,10 +34,8 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
    * @returns {string | null} runtime code
    */
   override generate(): string | null {
-    //@ts-ignore
-    const compilation: Compilation = this.compilation;
-    //@ts-ignore
-    const chunkGraph: ChunkGraph = this.chunkGraph;
+    const compilation: Compilation = this.compilation!;
+    const chunkGraph: ChunkGraph = this.chunkGraph!;
     const { runtimeTemplate, codeGenerationResults } = compilation;
     const chunkToModuleMapping: Record<string, any> = {};
     const moduleIdToSourceMapping: Map<string | number, Source> = new Map();

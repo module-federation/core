@@ -27,12 +27,12 @@ export default component$(() => {
         <div class="flex flex-col gap-4 flex-1 w-50">
           <div class="text-blue-gray-900 text-2xl font-medium text-center md:text-left leading-normal">
             {t(
-              'banner.text.firstLine@@At Valor, we are delighted to be the exclusive support partners for Module Federation - a technology created by Zack Jackson that has revolutionized modern development.'
+              'banner.text.firstLine@@At Valor, we are delighted to be the exclusive support partners for Module Federation - a technology created by Zack Jackson that has revolutionized modern development.',
             )}
           </div>
           <div class="text-blue-gray-900 text-2xl font-medium text-center md:text-left leading-normal">
             {t(
-              "banner.text.secondLine@@Our collaboration and status as core team members has enabled us to reduce the community's reliance on a single individual, as well as bring greater value to OSS."
+              "banner.text.secondLine@@Our collaboration and status as core team members has enabled us to reduce the community's reliance on a single individual, as well as bring greater value to OSS.",
             )}
           </div>
         </div>

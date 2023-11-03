@@ -41,7 +41,7 @@ const translationData = import.meta.glob('/src/i18n/**/*.json', {
 
 const loadTranslation$: LoadTranslationFn = server$(
   (lang: string, asset: string) =>
-    JSON.parse(translationData[`/src/i18n/${lang}/${asset}.json`])
+    JSON.parse(translationData[`/src/i18n/${lang}/${asset}.json`]),
 );
 
 export const translationFn: TranslationFn = {

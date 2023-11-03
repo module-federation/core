@@ -2,16 +2,14 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-//@ts-ignore
-import makeSerializable = require('webpack/lib/util/makeSerializable');
-//@ts-ignore
-import Dependency = require('webpack/lib/Dependency');
+
+import makeSerializable from 'webpack/lib/util/makeSerializable';
+import Dependency from 'webpack/lib/Dependency';
 import {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from '../../declarations/plugins/container/Dependency';
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
+
 class ProvideSharedDependency extends Dependency {
   shareScope: string;
   name: string;

@@ -2,17 +2,11 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-//@ts-ignore
-import RuntimeGlobals = require('webpack/lib/RuntimeGlobals');
+import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import type Compilation from 'webpack/lib/Compilation';
 import RemoteModule from './RemoteModule';
-//@ts-ignore
-import RuntimeModule = require('webpack/lib/RuntimeModule');
-//@ts-ignore
-import Template = require('webpack/lib/Template');
-
-/** @typedef {import("webpack/lib/Chunk")} Chunk */
-/** @typedef {import("./RemoteModule")} RemoteModule */
+import RuntimeModule from 'webpack/lib/RuntimeModule';
+import Template from 'webpack/lib/Template';
 
 class RemoteRuntimeModule extends RuntimeModule {
   constructor() {

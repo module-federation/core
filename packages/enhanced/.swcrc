@@ -11,13 +11,14 @@
       "legacyDecorator": true
     },
     "keepClassNames": true,
-    "externalHelpers": true,
+    "externalHelpers": false,
     "loose": true
   },
   "module": {
     "type": "commonjs",
     "strict": true,
-    "noInterop": true
+    "noInterop": false,
+    "importInterop": "swc"
   },
   "sourceMaps": true,
   "exclude": [

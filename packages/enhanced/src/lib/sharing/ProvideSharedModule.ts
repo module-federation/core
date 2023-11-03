@@ -2,13 +2,11 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
-//@ts-ignore
-import AsyncDependenciesBlock = require('webpack/lib/AsyncDependenciesBlock');
-//@ts-ignore
-import Module = require('webpack/lib/Module');
+
+import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
+import Module from 'webpack/lib/Module';
 import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-//@ts-ignore
-import makeSerializable = require('webpack/lib/util/makeSerializable');
+import makeSerializable from 'webpack/lib/util/makeSerializable';
 import type Compilation from 'webpack/lib/Compilation';
 import WebpackError from 'webpack/lib/WebpackError';
 import { WEBPACK_MODULE_TYPE_PROVIDE } from 'webpack/lib/ModuleTypeConstants';
@@ -25,23 +23,6 @@ import type {
 import { InputFileSystem } from 'webpack/lib/util/fs';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';
-
-/** @typedef {import("webpack/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
-/** @typedef {import("webpack/lib/Chunk")} Chunk */
-/** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
-/** @typedef {import("webpack/lib/ChunkGroup")} ChunkGroup */
-/** @typedef {import("webpack/lib/Compilation")} Compilation */
-/** @typedef {import("webpack/lib/Module").CodeGenerationContext} CodeGenerationContext */
-/** @typedef {import("webpack/lib/Module").CodeGenerationResult} CodeGenerationResult */
-/** @typedef {import("webpack/lib/Module").LibIdentOptions} LibIdentOptions */
-/** @typedef {import("webpack/lib/Module").NeedBuildContext} NeedBuildContext */
-/** @typedef {import("webpack/lib/RequestShortener")} RequestShortener */
-/** @typedef {import("webpack/lib/ResolverFactory").ResolverWithOptions} ResolverWithOptions */
-/** @typedef {import("webpack/lib/WebpackError")} WebpackError */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
-/** @typedef {import("webpack/lib/util/Hash")} Hash */
-/** @typedef {import("webpack/lib/util/fs").InputFileSystem} InputFileSystem */
 
 const TYPES = new Set(['share-init']);
 

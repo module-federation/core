@@ -8,14 +8,9 @@ import {
   ModuleFactoryCreateData,
   ModuleFactoryResult,
 } from 'webpack/lib/ModuleFactory';
-//@ts-ignore
-import ModuleFactory = require('webpack/lib/ModuleFactory');
+import ModuleFactory from 'webpack/lib/ModuleFactory';
 import FallbackModule from './FallbackModule';
 import FallbackDependency from './FallbackDependency';
-
-/** @typedef {import("webpack/lib/ModuleFactory").ModuleFactoryCreateData} ModuleFactoryCreateData */
-/** @typedef {import("webpack/lib/ModuleFactory").ModuleFactoryResult} ModuleFactoryResult */
-/** @typedef {import("./FallbackDependency")} FallbackDependency */
 
 export default class FallbackModuleFactory extends ModuleFactory {
   /**

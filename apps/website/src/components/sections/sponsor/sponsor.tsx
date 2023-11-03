@@ -20,7 +20,7 @@ export default component$(() => {
         <p
           class="text-blue-gray-900 font-medium text-lg text-center"
           dangerouslySetInnerHTML={t(
-            'sponsor.subtitle@@Module Federation offers the chance to be part of a technology community making a positive impact<br> and receive benefits and recognition opportunities in return.'
+            'sponsor.subtitle@@Module Federation offers the chance to be part of a technology community making a positive impact<br> and receive benefits and recognition opportunities in return.',
           )}
         ></p>
 

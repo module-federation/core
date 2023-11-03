@@ -14,7 +14,9 @@
     },
     {
       "files": ["*.ts", "*.tsx"],
-      "rules": {}
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off"
+      }
     },
     {
       "files": ["*.js", "*.jsx"],

@@ -24,6 +24,12 @@ export type WebpackShareScopes = Record<
 > & {
   default?: string;
 };
+export type GlobalScopeType = {
+  [K: string]: any;
+  _config?: Record<string | number, any>;
+  _medusa?: Record<string, any> | undefined;
+  remoteLoading?: Record<string, Promise<AsyncContainer>>;
+};
 
 export declare const __webpack_init_sharing__: (
   parameter: string,

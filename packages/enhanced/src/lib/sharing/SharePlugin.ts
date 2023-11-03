@@ -17,14 +17,6 @@ import type { ConsumesConfig } from '../../declarations/plugins/sharing/ConsumeS
 import type Compiler from 'webpack/lib/Compiler';
 import type { ProvidesConfig } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
 
-/** @typedef {import("../sharing/ConsumeSharedPlugin").ConsumeSharedPluginOptions} ConsumeSharedPluginOptions */
-/** @typedef {import("../sharing/ConsumeSharedPlugin").ConsumesConfig} ConsumesConfig */
-/** @typedef {import("../sharing/ProvideSharedPlugin").ProvideSharedPluginOptions} ProvideSharedPluginOptions */
-/** @typedef {import("../sharing/ProvideSharedPlugin").ProvidesConfig} ProvidesConfig */
-/** @typedef {import("../sharing/SharePlugin").SharePluginOptions} SharePluginOptions */
-/** @typedef {import("../sharing/SharePlugin").SharedConfig} SharedConfig */
-/** @typedef {import("webpack/lib/Compiler")} Compiler */
-
 class SharePlugin {
   private _shareScope: string;
   private _consumes: Record<string, ConsumesConfig>[];

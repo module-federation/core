@@ -11,7 +11,9 @@
         "outputPath": "dist/packages/enhanced",
         "main": "packages/enhanced/src/index.ts",
         "tsConfig": "packages/enhanced/tsconfig.lib.json",
-        "assets": ["packages/enhanced/*.md"]
+        "assets": ["packages/enhanced/*.md"],
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true
       },
       "dependsOn": [
         {
@@ -43,7 +45,30 @@
           "codeCoverage": true
         }
       }
+    },
+    "release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run enhanced:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run enhanced:build",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run enhanced:semantic-release",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "semantic-release": {
+      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
-  "tags": []
+  "tags": ["package"]
 }

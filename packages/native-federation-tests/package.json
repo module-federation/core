@@ -3,7 +3,7 @@
   "version": "0.2.1",
   "description": "Bundler agnostic unplugin to share federated tests",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "access": "public"
   },
   "exports": {
     ".": {

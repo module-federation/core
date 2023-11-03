@@ -7,7 +7,7 @@
 
 import { RawSource } from 'webpack-sources';
 //@ts-ignore
-import AsyncDependenciesBlock = require('webpack/lib/AsyncDependenciesBlock');
+import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
 import type {
   WebpackOptions,
   Compilation,
@@ -25,11 +25,11 @@ import type {
   InputFileSystem,
 } from 'webpack/lib/Module';
 //@ts-ignore
-import Module = require('webpack/lib/Module');
+import Module from 'webpack/lib/Module';
 import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from 'webpack/lib/ModuleTypeConstants';
 import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 //@ts-ignore
-import makeSerializable = require('webpack/lib/util/makeSerializable');
+import makeSerializable from 'webpack/lib/util/makeSerializable';
 import { rangeToString, stringifyHoley } from 'webpack/lib/util/semver';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 export type ConsumeOptions = {
@@ -73,24 +73,6 @@ export type ConsumeOptions = {
    */
   eager: boolean;
 };
-
-/** @typedef {import("webpack/declarations/WebpackOptions").WebpackOptionsNormalized} WebpackOptions */
-/** @typedef {import("webpack/lib/ChunkGraph")} ChunkGraph */
-/** @typedef {import("webpack/lib/ChunkGroup")} ChunkGroup */
-/** @typedef {import("webpack/lib/Compilation")} Compilation */
-/** @typedef {import("webpack/lib/Dependency").UpdateHashContext} UpdateHashContext */
-/** @typedef {import("webpack/lib/Module").CodeGenerationContext} CodeGenerationContext */
-/** @typedef {import("webpack/lib/Module").CodeGenerationResult} CodeGenerationResult */
-/** @typedef {import("webpack/lib/Module").LibIdentOptions} LibIdentOptions */
-/** @typedef {import("webpack/lib/Module").NeedBuildContext} NeedBuildContext */
-/** @typedef {import("webpack/lib/RequestShortener")} RequestShortener */
-/** @typedef {import("webpack/lib/ResolverFactory").ResolverWithOptions} ResolverWithOptions */
-/** @typedef {import("webpack/lib/WebpackError")} WebpackError */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
-/** @typedef {import("webpack/lib/serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
-/** @typedef {import("webpack/lib/util/Hash")} Hash */
-/** @typedef {import("webpack/lib/util/fs").InputFileSystem} InputFileSystem */
-/** @typedef {import("webpack/lib/util/semver").SemVerRange} SemVerRange */
 
 /**
  * @typedef {Object} ConsumeOptions

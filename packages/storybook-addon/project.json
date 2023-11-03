@@ -41,29 +41,30 @@
         }
       }
     },
-    "version": {
-      "executor": "@jscutlery/semver:version",
+    "release": {
+      "executor": "nx:run-commands",
       "options": {
-        "postTargets": ["storybook-addon:npm", "storybook-addon:github"],
-        "trackDeps": true,
-        "push": true
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run storybook-addon:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run storybook-addon:build",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run storybook-addon:semantic-release",
+            "forwardAllArgs": true
+          }
+        ]
       }
     },
-    "github": {
-      "executor": "@jscutlery/semver:github",
-      "options": {
-        "tag": "${tag}",
-        "notes": "${notes}"
-      }
-    },
-    "npm": {
-      "executor": "ngx-deploy-npm:deploy",
-      "options": {
-        "access": "public",
-        "tag": "next"
-      }
+    "semantic-release": {
+      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
-  "tags": [],
+  "tags": ["package"],
   "implicitDependencies": ["utils"]
 }

@@ -11,9 +11,7 @@
         "outputPath": "dist/packages/typescript",
         "main": "packages/typescript/src/index.ts",
         "tsConfig": "packages/typescript/tsconfig.lib.json",
-        "assets": [
-          "packages/typescript/*.md"
-        ],
+        "assets": ["packages/typescript/*.md"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true
       },
@@ -24,17 +22,6 @@
         }
       ]
     },
-    "publish": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "node tools/scripts/publish.mjs typescript {args.ver} {args.tag}"
-      },
-      "dependsOn": [
-        {
-          "target": "build"
-        }
-      ]
-    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
@@ -42,29 +29,44 @@
         "lintFilePatterns": ["packages/typescript/**/*.ts"]
       }
     },
-    "version": {
-      "executor": "@jscutlery/semver:version",
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "postTargets": ["typescript:npm", "typescript:github"],
-        "trackDeps": true,
-        "push": true
+        "jestConfig": "packages/typescript/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
       }
     },
-    "github": {
-      "executor": "@jscutlery/semver:github",
+    "release": {
+      "executor": "nx:run-commands",
       "options": {
-        "tag": "${tag}",
-        "notes": "${notes}"
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run typescript:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run typescript:build",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run typescript:semantic-release",
+            "forwardAllArgs": true
+          }
+        ]
       }
     },
-    "npm": {
-      "executor": "ngx-deploy-npm:deploy",
-      "options": {
-        "access": "public",
-        "tag": "next"
-      }
+    "semantic-release": {
+      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
-  "tags": [],
+  "tags": ["package"],
   "implicitDependencies": ["utils"]
 }
