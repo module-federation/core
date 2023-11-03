@@ -123,7 +123,7 @@ class AsyncEntryStartupPlugin {
               remotes,
               'var __webpack_exports__ = Promise.all(promiseTrack).then(function() {',
               Template.indent(source.source()),
-              'return __webpack_exports__',
+              Template.indent('return __webpack_exports__'),
               '});',
             ]);
           }
