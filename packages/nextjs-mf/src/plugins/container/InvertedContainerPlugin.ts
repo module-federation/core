@@ -47,27 +47,27 @@ class InvertedContainerPlugin {
       chunkToEmbed: this.options.chunkToEmbed,
     }).apply(compiler);
 
-    const asyncBoundaryPlugin = new AsyncBoundaryPlugin();
-    asyncBoundaryPlugin.hooks.checkInvalidContext.tap(
-      'InvertedContainerPlugin',
-      (renderContext, compilation) => {
-        return (
-          !renderContext ||
-          //@ts-ignore
-          renderContext?._name ||
-          //@ts-ignore
-          !renderContext?.debugId ||
-          //@ts-ignore
-          !compilation.chunkGraph.isEntryModule(renderContext) ||
-          //@ts-ignore
-          renderContext?.rawRequest?.includes('pages/api') ||
-          //@ts-ignore
-          renderContext?.layer === 'api'
-        );
-      },
-    );
-
-    asyncBoundaryPlugin.apply(compiler);
+    const asyncBoundaryPlugin = new AsyncBoundaryPlugin().apply(compiler);
+    // asyncBoundaryPlugin.hooks.checkInvalidContext.tap(
+    //   'InvertedContainerPlugin',
+    //   (renderContext, compilation) => {
+    //     return (
+    //       !renderContext ||
+    //       //@ts-ignore
+    //       renderContext?._name ||
+    //       //@ts-ignore
+    //       !renderContext?.debugId ||
+    //       //@ts-ignore
+    //       !compilation.chunkGraph.isEntryModule(renderContext) ||
+    //       //@ts-ignore
+    //       renderContext?.rawRequest?.includes('pages/api') ||
+    //       //@ts-ignore
+    //       renderContext?.layer === 'api'
+    //     );
+    //   },
+    // );
+    //
+    // asyncBoundaryPlugin.apply(compiler);
   }
 }
 
