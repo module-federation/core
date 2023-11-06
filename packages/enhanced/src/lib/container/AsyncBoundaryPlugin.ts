@@ -24,13 +24,13 @@ class AsyncEntryStartupPlugin {
       'AsyncEntryStartupPlugin',
       (compilation: Compilation) => {
         compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
-          compilation
+          compilation,
         ).renderStartup.tap(
           'AsyncEntryStartupPlugin',
           (
             source: any,
             renderContext: Module,
-            upperContext: { chunk: Chunk }
+            upperContext: { chunk: Chunk },
           ) => {
             // Check if single runtime chunk is enabled
             if (compiler?.options?.optimization?.runtimeChunk) {
@@ -53,7 +53,7 @@ class AsyncEntryStartupPlugin {
             // Get the runtime requirements of the chunk
             const requirements =
               compilation.chunkGraph.getTreeRuntimeRequirements(
-                runtime || upperContext.chunk
+                runtime || upperContext.chunk,
               );
 
             let remotes = '';
@@ -61,7 +61,7 @@ class AsyncEntryStartupPlugin {
             const hasRemoteModules =
               compilation.chunkGraph.getChunkModulesIterableBySourceType(
                 upperContext.chunk,
-                'remote'
+                'remote',
               );
 
             // Check if the chunk has remote get scope
@@ -71,7 +71,7 @@ class AsyncEntryStartupPlugin {
               requirements.has('__webpack_require__.vmok')
             ) {
               remotes = `if(__webpack_require__.f && __webpack_require__.f.remotes) __webpack_require__.f.remotes(${JSON.stringify(
-                upperContext.chunk.id
+                upperContext.chunk.id,
               )}, promiseTrack);`;
             }
 
@@ -81,7 +81,7 @@ class AsyncEntryStartupPlugin {
               requirements.has(RuntimeGlobals.initializeSharing)
             ) {
               shared = `if(__webpack_require__.f && __webpack_require__.f.consumes) __webpack_require__.f.consumes(${JSON.stringify(
-                upperContext.chunk.id
+                upperContext.chunk.id,
               )}, promiseTrack);`;
             }
 
@@ -93,7 +93,7 @@ class AsyncEntryStartupPlugin {
             // Get the entry modules of the chunk
             const entryModules =
               compilation.chunkGraph.getChunkEntryModulesIterable(
-                upperContext.chunk
+                upperContext.chunk,
               );
 
             const initialEntryModules = [];
@@ -117,7 +117,7 @@ class AsyncEntryStartupPlugin {
                 // If shouldInclude is true, push the module to initialEntryModules
                 if (shouldInclude) {
                   initialEntryModules.push(
-                    `__webpack_require__(${JSON.stringify(entryModule.id)});`
+                    `__webpack_require__(${JSON.stringify(entryModule.id)});`,
                   );
                 }
               }
@@ -133,9 +133,9 @@ class AsyncEntryStartupPlugin {
               Template.indent('return __webpack_exports__'),
               '});',
             ]);
-          }
+          },
         );
-      }
+      },
     );
   }
 }
