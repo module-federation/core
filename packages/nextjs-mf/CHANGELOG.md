@@ -1,3 +1,17 @@
+# [8.1.0-canary.2](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.1...nextjs-mf-8.1.0-canary.2) (2023-11-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency undici to v5.26.2 [security] ([410a8b8](https://github.com/module-federation/universe/commit/410a8b8bd1558dfb5119ae10941d2b3816a0d0e0))
+
+
+### Features
+
+* **enhanced:** new async boundary plugin design ([a4ac1ac](https://github.com/module-federation/universe/commit/a4ac1acff974f74db6395c31134de14d9c344b6f))
+* **enhanced:** Rewrite Async Boundary based on bytedance version ([fa05dd6](https://github.com/module-federation/universe/commit/fa05dd6bce2dd577b1e3fd84533459a04dbe195a))
+* **enhanced:** Support Async Mode and option ([3c33b8e](https://github.com/module-federation/universe/commit/3c33b8ea3b483de5dcc3e5da9fb40c9826fdb7f7))
+
 # [8.1.0-canary.1](https://github.com/module-federation/universe/compare/nextjs-mf-8.0.0...nextjs-mf-8.1.0-canary.1) (2023-10-23)
 
 ### Bug Fixes
