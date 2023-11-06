@@ -1,154 +1,143 @@
-import { Template, RuntimeGlobals } from 'webpack';
-import { Source } from 'webpack-sources';
-import type Compilation from 'webpack/lib/Compilation';
-import type Compiler from 'webpack/lib/Compiler';
-import type Module from 'webpack/lib/Module';
-import type Chunk from 'webpack/lib/Chunk';
-import { getAllChunks } from 'webpack/lib/javascript/ChunkHelpers';
-import { ChunkGraph } from 'webpack/lib/ChunkGroup';
-import { StartupRenderContext } from 'webpack/lib/javascript/JavascriptModulesPlugin';
-import { RenderContext } from 'webpack/lib/javascript/JavascriptModulesPlugin';
-import { SyncBailHook } from 'tapable';
-/**
- * AsyncBoundaryPlugin is a Webpack plugin that handles asynchronous boundaries in a federated module.
- * @class
- */
-class AsyncBoundaryPlugin {
-  /**
-   * Define hooks
-   * @property {SyncBailHook} checkInvalidContext - A hook that checks if the render context is invalid.
-   */
-  public hooks = {
-    checkInvalidContext: new SyncBailHook<[Module, Compilation], boolean>([
-      'renderContext',
-      'compilation',
-    ]),
-  };
+import Compiler from 'webpack/lib/Compiler';
+import Compilation from 'webpack/lib/Compilation';
+import Chunk from 'webpack/lib/Chunk';
+import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import Template from 'webpack/lib/Template';
+import Module from 'webpack/lib/Module';
 
-  /**
-   * Apply the plugin to the Webpack compiler instance.
-   * @param {Compiler} compiler - Webpack compiler instance.
-   */
-  public apply(compiler: Compiler): void {
-    const { javascript } = compiler.webpack;
+interface Options {
+  eager?: RegExp | ((module: Module) => boolean);
+  excludeChunk?: (chunk: Chunk) => boolean;
+}
+
+// Class to handle asynchronous entry startup
+class AsyncEntryStartupPlugin {
+  private _options: Options;
+
+  constructor(options?: Options) {
+    this._options = options || {};
+  }
+
+  apply(compiler: Compiler): void {
+    const chunkRuntimes = new Map();
     compiler.hooks.thisCompilation.tap(
-      'AsyncBoundaryPlugin',
+      'AsyncEntryStartupPlugin',
       (compilation: Compilation) => {
-        const hooks =
-          javascript.JavascriptModulesPlugin.getCompilationHooks(compilation);
-
-        hooks.renderStartup.tap(
-          'AsyncBoundaryPlugin',
+        compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
+          compilation,
+        ).renderStartup.tap(
+          'AsyncEntryStartupPlugin',
           (
-            source: Source,
+            source: any,
             renderContext: Module,
-            startupRenderContext: StartupRenderContext,
+            upperContext: { chunk: Chunk },
           ) => {
-            return this.renderStartupLogic(
-              source,
-              renderContext,
-              startupRenderContext,
-              compilation,
-            );
+            // Check if single runtime chunk is enabled
+            if (compiler?.options?.optimization?.runtimeChunk) {
+              if (upperContext?.chunk.hasRuntime()) {
+                chunkRuntimes.set(upperContext.chunk.id, upperContext.chunk);
+                return source;
+              }
+            }
+
+            // Check if excludeChunk is provided, use it to decide further processing
+            if (
+              this._options.excludeChunk &&
+              this._options.excludeChunk(upperContext.chunk)
+            ) {
+              return source;
+            }
+
+            const runtime = chunkRuntimes.get(upperContext.chunk.runtime);
+
+            // Get the runtime requirements of the chunk
+            const requirements =
+              compilation.chunkGraph.getTreeRuntimeRequirements(
+                runtime || upperContext.chunk,
+              );
+
+            let remotes = '';
+            let shared = '';
+            const hasRemoteModules =
+              compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                upperContext.chunk,
+                'remote',
+              );
+
+            // Check if the chunk has remote get scope
+            if (
+              requirements.has(RuntimeGlobals.currentRemoteGetScope) ||
+              hasRemoteModules ||
+              requirements.has('__webpack_require__.vmok')
+            ) {
+              remotes = `if(__webpack_require__.f && __webpack_require__.f.remotes) __webpack_require__.f.remotes(${JSON.stringify(
+                upperContext.chunk.id,
+              )}, promiseTrack);`;
+            }
+
+            // Check if the chunk has share scope map or initialize sharing
+            if (
+              requirements.has(RuntimeGlobals.shareScopeMap) ||
+              requirements.has(RuntimeGlobals.initializeSharing)
+            ) {
+              shared = `if(__webpack_require__.f && __webpack_require__.f.consumes) __webpack_require__.f.consumes(${JSON.stringify(
+                upperContext.chunk.id,
+              )}, promiseTrack);`;
+            }
+
+            // If no remotes or shared, return the source
+            if (!remotes && !shared) {
+              return source;
+            }
+
+            // Get the entry modules of the chunk
+            const entryModules =
+              compilation.chunkGraph.getChunkEntryModulesIterable(
+                upperContext.chunk,
+              );
+
+            const initialEntryModules = [];
+
+            // Iterate over the entry modules
+            for (const entryModule of entryModules) {
+              if (entryModule.id) {
+                let shouldInclude = false;
+
+                // Check if eager is a function and call it
+                if (typeof this._options.eager === 'function') {
+                  shouldInclude = this._options.eager(entryModule);
+                } else if (
+                  this._options.eager &&
+                  this._options.eager.test(entryModule.identifier())
+                ) {
+                  // Check if eager is a RegExp and test it
+                  shouldInclude = true;
+                }
+
+                // If shouldInclude is true, push the module to initialEntryModules
+                if (shouldInclude) {
+                  initialEntryModules.push(
+                    `__webpack_require__(${JSON.stringify(entryModule.id)});`,
+                  );
+                }
+              }
+            }
+
+            return Template.asString([
+              'var promiseTrack = [];',
+              Template.asString(initialEntryModules),
+              shared,
+              remotes,
+              'var __webpack_exports__ = Promise.all(promiseTrack).then(function() {',
+              Template.indent(source.source()),
+              Template.indent('return __webpack_exports__'),
+              '});',
+            ]);
           },
         );
       },
     );
   }
-
-  /**
-   * Render the startup logic for the plugin.
-   * @param {Source} source - The source code.
-   * @param {RenderContext} renderContext - The render context.
-   * @param {any} startupRenderContext - The startup render context.
-   * @param {Compilation} compilation - The Webpack compilation instance.
-   * @returns {string} - The modified source code.
-   */
-  private renderStartupLogic(
-    source: Source,
-    renderContext: Module,
-    startupRenderContext: StartupRenderContext,
-    compilation: Compilation,
-  ): string {
-    const isInvalidContext =
-      this.hooks.checkInvalidContext.call(renderContext, compilation) ?? false;
-    if (isInvalidContext) return source.source().toString();
-
-    const { chunkGraph } = compilation;
-    const replaceSource = source.source().toString();
-    const replaceSourceLines = replaceSource.split('\n');
-    const webpack_exec_index = replaceSourceLines.findIndex((line) =>
-      line.includes('webpack_exec'),
-    );
-    const webpack_exec = replaceSourceLines[webpack_exec_index];
-    const webpack_exports = replaceSourceLines.slice(webpack_exec_index + 1);
-    const dependentChunkIds = this.getDependentChunkIds(
-      startupRenderContext,
-      chunkGraph,
-    );
-
-    return Template.asString([
-      this.replaceWebpackExec(webpack_exec),
-      `globalThis.ongoingRemotes = globalThis.ongoingRemotes || [];`,
-      `var __webpack_exec__ = async function() {`,
-      Template.indent([
-        `var chunkIds = ${JSON.stringify(Array.from(dependentChunkIds))};`,
-        `if (${RuntimeGlobals.ensureChunkHandlers}.consumes) {`,
-        `  chunkIds.forEach(function(id) { ${RuntimeGlobals.ensureChunkHandlers}.consumes(id, globalThis.ongoingRemotes); });`,
-        `  await Promise.all(globalThis.ongoingRemotes);`,
-        `}`,
-        `if (${RuntimeGlobals.ensureChunkHandlers}.remotes) {`,
-        `  chunkIds.forEach(function(id) { ${RuntimeGlobals.ensureChunkHandlers}.remotes(id, globalThis.ongoingRemotes); });`,
-        `  await Promise.all(globalThis.ongoingRemotes);`,
-        `}`,
-        `return  __original_webpack_exec__.apply(this, arguments);`,
-      ]),
-      `};`,
-      ...webpack_exports,
-    ]);
-  }
-
-  /**
-   * Replace the webpack exec string.
-   * @param {string} webpack_exec - The webpack exec string.
-   * @returns {string} - The replaced webpack exec string.
-   */
-  private replaceWebpackExec(webpack_exec: string): string {
-    return webpack_exec.replace(
-      '__webpack_exec__',
-      '__original_webpack_exec__',
-    );
-  }
-
-  /**
-   * Get the IDs of the dependent chunks.
-   * @param {any} startupRenderContext - The startup render context.
-   * @param {any} chunkGraph - The chunk graph.
-   * @returns {Set} - The set of dependent chunk IDs.
-   */
-  private getDependentChunkIds(
-    startupRenderContext: RenderContext,
-    chunkGraph: ChunkGraph,
-  ): Set<string | number | null> {
-    const entries = Array.from(
-      chunkGraph.getChunkEntryModulesWithChunkGroupIterable(
-        startupRenderContext.chunk,
-      ),
-    );
-    const chunkIds = new Set<string | number | null>();
-    for (const [module, entrypoint] of entries) {
-      if (entrypoint) {
-        const runtimeChunk = entrypoint.getRuntimeChunk();
-        if (runtimeChunk) {
-          const chunks = getAllChunks(entrypoint, runtimeChunk);
-          for (const c of chunks) {
-            chunkIds.add(c.id);
-          }
-        }
-      }
-    }
-    return chunkIds;
-  }
 }
 
-export default AsyncBoundaryPlugin;
+export default AsyncEntryStartupPlugin;
