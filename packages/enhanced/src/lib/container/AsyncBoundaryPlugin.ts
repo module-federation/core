@@ -33,8 +33,8 @@ class AsyncEntryStartupPlugin {
             upperContext: { chunk: Chunk }
           ) => {
             // Check if single runtime chunk is enabled
-            if(compiler?.options?.optimization?.runtimeChunk) {
-              if (upperContext.chunk.hasRuntime()) {
+            if (compiler?.options?.optimization?.runtimeChunk) {
+              if (upperContext?.chunk.hasRuntime()) {
                 chunkRuntimes.set(upperContext.chunk.id, upperContext.chunk);
                 return source;
               }
@@ -48,7 +48,7 @@ class AsyncEntryStartupPlugin {
               return source;
             }
 
-            const runtime = chunkRuntimes.get(upperContext.chunk.runtime)
+            const runtime = chunkRuntimes.get(upperContext.chunk.runtime);
 
             // Get the runtime requirements of the chunk
             const requirements =
@@ -58,11 +58,18 @@ class AsyncEntryStartupPlugin {
 
             let remotes = '';
             let shared = '';
-            const hasRemoteModules = compilation.chunkGraph.getChunkModulesIterableBySourceType(upperContext.chunk,'remote')
-
+            const hasRemoteModules =
+              compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                upperContext.chunk,
+                'remote'
+              );
 
             // Check if the chunk has remote get scope
-            if (requirements.has(RuntimeGlobals.currentRemoteGetScope) || hasRemoteModules || requirements.has('__webpack_require__.vmok')) {
+            if (
+              requirements.has(RuntimeGlobals.currentRemoteGetScope) ||
+              hasRemoteModules ||
+              requirements.has('__webpack_require__.vmok')
+            ) {
               remotes = `if(__webpack_require__.f && __webpack_require__.f.remotes) __webpack_require__.f.remotes(${JSON.stringify(
                 upperContext.chunk.id
               )}, promiseTrack);`;
