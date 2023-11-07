@@ -1,3 +1,17 @@
+# [8.1.0-canary.3](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.2...nextjs-mf-8.1.0-canary.3) (2023-11-07)
+
+
+### Bug Fixes
+
+* issues with integrated runtime chunk ([edc4d97](https://github.com/module-federation/universe/commit/edc4d97393c8ad04adecc53062f40a80735defb7))
+* issues with integrated runtime chunk ([d4fa90d](https://github.com/module-federation/universe/commit/d4fa90de214e5b15957c208436878d82ce223a22))
+* issues with integrated runtime chunk ([aa1b137](https://github.com/module-federation/universe/commit/aa1b13791e353433d2a219addbef1443b853c2f0))
+
+
+### Features
+
+* **enhanced:** AsyncBoundary support ESM targets and remix_run framework outputs ([0100694](https://github.com/module-federation/universe/commit/0100694a07044460dc44a73cfb4ecff619177457))
+
 # [8.1.0-canary.2](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.1...nextjs-mf-8.1.0-canary.2) (2023-11-06)
 
 ### Bug Fixes
