@@ -64,6 +64,7 @@ class AsyncEntryStartupPlugin {
           }
         }
 
+        // Check if excludeChunk is provided, use it to decide further processing
         if (
           this._options.excludeChunk &&
           this._options.excludeChunk(upperContext.chunk)
