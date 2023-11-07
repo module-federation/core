@@ -61,8 +61,7 @@ class AsyncEntryStartupPlugin {
         // Check if this._runtimeChunks contains any runtime chunks
         const isSingleRuntime = compiler.options?.optimization?.runtimeChunk;
         if (
-          this._runtimeChunks.size > 0 &&
-          upperContext.chunk.id &&
+          upperContext?.chunk.id &&
           isSingleRuntime
         ) {
           if (upperContext?.chunk.hasRuntime()) {
