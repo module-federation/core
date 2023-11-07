@@ -20,29 +20,42 @@ class AsyncEntryStartupPlugin {
   }
 
   apply(compiler: Compiler): void {
-    compiler.hooks.thisCompilation.tap('AsyncEntryStartupPlugin', (compilation: Compilation) => {
-      this.collectRuntimeChunks(compilation);
-      this.handleRenderStartup(compiler, compilation);
-    });
+    compiler.hooks.thisCompilation.tap(
+      'AsyncEntryStartupPlugin',
+      (compilation: Compilation) => {
+        this.collectRuntimeChunks(compilation);
+        this.handleRenderStartup(compiler, compilation);
+      },
+    );
   }
 
   private collectRuntimeChunks(compilation: Compilation): void {
-    compilation.hooks.beforeChunkAssets.tap('CollectRuntimeChunksPlugin', () => {
-      for (const chunk of compilation.chunks) {
-        if (chunk.hasRuntime() && chunk.id !== null) {
-          this._runtimeChunks.set(chunk.id, chunk);
-          for (const dependentChunk of compilation.chunkGraph.getChunkEntryDependentChunksIterable(chunk)) {
-            if (dependentChunk.id !== null) {
-              this._runtimeChunks.set(dependentChunk.id, dependentChunk);
+    compilation.hooks.beforeChunkAssets.tap(
+      'CollectRuntimeChunksPlugin',
+      () => {
+        for (const chunk of compilation.chunks) {
+          if (chunk.hasRuntime() && chunk.id !== null) {
+            this._runtimeChunks.set(chunk.id, chunk);
+            for (const dependentChunk of compilation.chunkGraph.getChunkEntryDependentChunksIterable(
+              chunk,
+            )) {
+              if (dependentChunk.id !== null) {
+                this._runtimeChunks.set(dependentChunk.id, dependentChunk);
+              }
             }
           }
         }
-      }
-    });
+      },
+    );
   }
 
-  private handleRenderStartup(compiler: Compiler, compilation: Compilation): void {
-    compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(compilation).renderStartup.tap(
+  private handleRenderStartup(
+    compiler: Compiler,
+    compilation: Compilation,
+  ): void {
+    compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
+      compilation,
+    ).renderStartup.tap(
       'AsyncEntryStartupPlugin',
       (source: any, renderContext: Module, upperContext: { chunk: Chunk }) => {
         // Check if this._runtimeChunks contains any runtime chunks
@@ -62,13 +75,19 @@ class AsyncEntryStartupPlugin {
         }
 
         const runtime = new Set();
-        if (typeof upperContext.chunk.runtime === 'string' || typeof upperContext.chunk.runtime === 'number') {
+        if (
+          typeof upperContext.chunk.runtime === 'string' ||
+          typeof upperContext.chunk.runtime === 'number'
+        ) {
           if (this._runtimeChunks.has(upperContext.chunk.runtime)) {
             runtime.add(this._runtimeChunks.get(upperContext.chunk.runtime));
           } else {
             runtime.add(upperContext.chunk);
           }
-        } else if (upperContext.chunk.runtime && typeof upperContext.chunk.runtime[Symbol.iterator] === 'function') {
+        } else if (
+          upperContext.chunk.runtime &&
+          typeof upperContext.chunk.runtime[Symbol.iterator] === 'function'
+        ) {
           for (const runtimeItem of upperContext.chunk.runtime) {
             if (this._runtimeChunks.has(runtimeItem)) {
               runtime.add(this._runtimeChunks.get(runtimeItem));
@@ -138,7 +157,7 @@ class AsyncEntryStartupPlugin {
 
         // Iterate over the entry modules
         for (const entryModule of entryModules) {
-          const entryModuleID = compilation.chunkGraph.getModuleId(entryModule)
+          const entryModuleID = compilation.chunkGraph.getModuleId(entryModule);
           if (entryModuleID) {
             let shouldInclude = false;
 
@@ -161,7 +180,10 @@ class AsyncEntryStartupPlugin {
             }
           }
         }
-        if(compiler.options?.experiments?.topLevelAwait && compiler.options?.experiments?.outputModule) {
+        if (
+          compiler.options?.experiments?.topLevelAwait &&
+          compiler.options?.experiments?.outputModule
+        ) {
           return Template.asString([
             'var promiseTrack = [];',
             Template.asString(initialEntryModules),
