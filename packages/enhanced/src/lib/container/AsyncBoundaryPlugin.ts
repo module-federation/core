@@ -84,7 +84,6 @@ class AsyncEntryStartupPlugin {
                 upperContext.chunk.id,
               )}, promiseTrack);`;
             }
-
             // If no remotes or shared, return the source
             if (!remotes && !shared) {
               return source;
