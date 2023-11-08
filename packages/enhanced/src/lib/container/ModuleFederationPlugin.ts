@@ -12,8 +12,8 @@ import SharePlugin from '../sharing/SharePlugin';
 import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
-import checkOptions from 'webpack/schemas/plugins/container/ModuleFederationPlugin.check.js'
-import schema from '../../schemas/container/ModuleFederationPlugin'
+import checkOptions from 'webpack/schemas/plugins/container/ModuleFederationPlugin.check.js';
+import schema from '../../schemas/container/ModuleFederationPlugin';
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
