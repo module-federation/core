@@ -1,10 +1,13 @@
+/* eslint-disable */
+//@ts-nocheck
+
 /*
  * This file was automatically generated.
  * DO NOT MODIFY BY HAND.
  * Run `yarn special-lint-fix` to update
  */
 const t = /^(?:[A-Za-z]:[\\/]|\\\\|\/)/;
-(module.exports = D), (module.exports.default = D);
+
 const e = {
     definitions: {
       AmdContainer: { type: 'string', minLength: 1 },
@@ -1745,3 +1748,5 @@ function D(
   }
   return (D.errors = f), 0 === c;
 }
+
+export default D;
