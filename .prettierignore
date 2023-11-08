@@ -3,3 +3,5 @@
 /dist
 /coverage
 **/*.hbs
+*.md
+!README.md

@@ -47,7 +47,7 @@ jobs:
           if [[ ${{ github.event.inputs.packages }} == 'affected' ]]; then
             npx nx affected -t release --parallel=3 --exclude='*,!tag:package'
           elif [[ ${{ github.event.inputs.packages }} == 'all' ]]; then
-            npx nx run-many --target=release --all --parallel=3 -exclude='*,!tag:package'
+            npx nx run-many --target=release --all --parallel=3 --exclude='*,!tag:package'
           else
             npx nx run ${{ github.event.inputs.packages }}:release
           fi
