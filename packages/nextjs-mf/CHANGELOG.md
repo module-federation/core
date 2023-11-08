@@ -1,3 +1,10 @@
+# [8.1.0-canary.4](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.3...nextjs-mf-8.1.0-canary.4) (2023-11-08)
+
+
+### Bug Fixes
+
+* fix version missmatch ([2d45df4](https://github.com/module-federation/universe/commit/2d45df485e72471bd2d5b116a050a0ae2416acc1))
+
 # [8.1.0-canary.3](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.2...nextjs-mf-8.1.0-canary.3) (2023-11-07)
 
 ### Bug Fixes
