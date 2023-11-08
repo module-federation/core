@@ -12,11 +12,13 @@ import SharePlugin from '../sharing/SharePlugin';
 import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
+import checkOptions from 'webpack/schemas/plugins/container/ModuleFederationPlugin.check.js'
+import schema from '../../schemas/container/ModuleFederationPlugin'
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
-  require('webpack/schemas/plugins/container/ModuleFederationPlugin.check.js'),
-  () => require('../../schemas/container/ModuleFederationPlugin.json'),
+  checkOptions,
+  () => schema,
   {
     name: 'Module Federation Plugin',
     baseDataPath: 'options',
