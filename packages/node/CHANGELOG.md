@@ -1,3 +1,10 @@
+# [2.1.0-canary.4](https://github.com/module-federation/universe/compare/node-2.1.0-canary.3...node-2.1.0-canary.4) (2023-11-08)
+
+
+### Bug Fixes
+
+* **enhanced:** correct schema validation issues ([5a04a81](https://github.com/module-federation/universe/commit/5a04a812f505ab8287d206abd0a6996057a994fc))
+
 # [2.1.0-canary.3](https://github.com/module-federation/universe/compare/node-2.1.0-canary.2...node-2.1.0-canary.3) (2023-11-08)
 
 ### Bug Fixes

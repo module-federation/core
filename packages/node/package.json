@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "2.1.0-canary.3",
+  "version": "2.1.0-canary.4",
   "type": "commonjs",
   "main": "src/index.js",
   "exports": {
