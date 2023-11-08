@@ -1,4 +1,5 @@
-{
+//@ts-nocheck
+export default {
   "definitions": {
     "AmdContainer": {
       "description": "Add a container for define/require functions in the AMD module.",
