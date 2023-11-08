@@ -1,3 +1,10 @@
+# [8.1.0-canary.5](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.4...nextjs-mf-8.1.0-canary.5) (2023-11-08)
+
+
+### Bug Fixes
+
+* **enhanced:** correct schema validation issues ([5a04a81](https://github.com/module-federation/universe/commit/5a04a812f505ab8287d206abd0a6996057a994fc))
+
 # [8.1.0-canary.4](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.3...nextjs-mf-8.1.0-canary.4) (2023-11-08)
 
 
