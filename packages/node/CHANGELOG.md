@@ -1,3 +1,10 @@
+# [2.1.0-canary.3](https://github.com/module-federation/universe/compare/node-2.1.0-canary.2...node-2.1.0-canary.3) (2023-11-08)
+
+
+### Bug Fixes
+
+* fix version missmatch ([2d45df4](https://github.com/module-federation/universe/commit/2d45df485e72471bd2d5b116a050a0ae2416acc1))
+
 # [2.1.0-canary.2](https://github.com/module-federation/universe/compare/node-2.1.0-canary.1...node-2.1.0-canary.2) (2023-11-07)
 
 ### Bug Fixes
