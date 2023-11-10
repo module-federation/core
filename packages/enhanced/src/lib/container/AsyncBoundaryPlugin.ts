@@ -31,7 +31,7 @@ class AsyncEntryStartupPlugin {
 
   private collectRuntimeChunks(compilation: Compilation): void {
     compilation.hooks.beforeChunkAssets.tap(
-      'CollectRuntimeChunksPlugin',
+      'AsyncEntryStartupPlugin',
       () => {
         for (const chunk of compilation.chunks) {
           if (chunk.hasRuntime() && chunk.id !== null) {
