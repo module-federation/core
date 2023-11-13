@@ -1,3 +1,20 @@
+# [3.1.0](https://github.com/module-federation/universe/compare/typescript-3.0.1...typescript-3.1.0) (2023-11-13)
+
+
+### Bug Fixes
+
+* add missing comma ([541dd28](https://github.com/module-federation/universe/commit/541dd28959dae614e8dc2717eafe2c567cdda1f6))
+* **deps:** update dependency typedoc to v0.25.2 ([46c6524](https://github.com/module-federation/universe/commit/46c65247e187cee9e15625402c1570ac351bb1fe))
+* **deps:** update dependency undici to v5.26.2 [security] ([410a8b8](https://github.com/module-federation/universe/commit/410a8b8bd1558dfb5119ae10941d2b3816a0d0e0))
+* override semantic-release-plugin-decorators ([18675de](https://github.com/module-federation/universe/commit/18675defef65570d2b3bb6a9caa3fd039badee29))
+* switch to @goestav/nx-semantic-release ([63a3350](https://github.com/module-federation/universe/commit/63a3350a6a1a12235e3c9f1e7c724d54f0476356))
+
+
+### Features
+
+* add test setup to typescript package ([bccb789](https://github.com/module-federation/universe/commit/bccb7893d321357e5de54752d30e9b18ba6e5f0d))
+* new actions, remove gpt integration ([370229e](https://github.com/module-federation/universe/commit/370229e02cc352fcfaeaa0f3cf1f9f2d4966d1bb))
+
 # Changelog
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
