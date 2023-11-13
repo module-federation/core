@@ -101,6 +101,7 @@ class AsyncEntryStartupPlugin {
         // Get the runtime requirements of the chunk
         let remotes = '';
         let shared = '';
+        let topLevelExports = false;
 
         for (const runtimeItem of runtime) {
           const requirements =
@@ -108,6 +109,7 @@ class AsyncEntryStartupPlugin {
               runtimeItem as Chunk,
             );
 
+          topLevelExports = requirements.has(RuntimeGlobals.thisAsExports);
           const hasRemoteModules =
             compilation.chunkGraph.getChunkModulesIterableBySourceType(
               upperContext.chunk,
@@ -148,6 +150,70 @@ class AsyncEntryStartupPlugin {
           return source;
         }
 
+        let libraryType;
+
+        const chunkRequirements = compilation.chunkGraph.getChunkRuntimeRequirements(upperContext.chunk)
+        if(chunkRequirements.has(RuntimeGlobals.thisAsExports) && compilation.outputOptions.library) {
+          console.log(source.source());
+          const exportsInfo = compilation.moduleGraph.getExportsInfo(renderContext);
+          console.log(exportsInfo.orderedExports);
+          const {type,name} = compilation.outputOptions.library
+          switch (type) {
+            case 'var':
+              libraryType = '';
+              break;
+            case 'assign':
+              libraryType = '';
+              break;
+            case 'assign-properties':
+              libraryType = '';
+              break;
+            case 'this':
+              // libraryType = 'this = __webpack_exports__';
+              break;
+            case 'window':
+              // libraryType = 'window = __webpack_exports__';
+              break;
+            case 'self':
+              // libraryType = 'self = __webpack_exports__';
+              break;
+            case 'global':
+              // libraryType = 'global = __webpack_exports__';
+              break;
+            case 'commonjs':
+              libraryType = 'exports = __webpack_exports__;';
+              break;
+            case 'commonjs2':
+              libraryType = 'exports = __webpack_exports__;';
+              break;
+            case 'commonjs-module':
+              libraryType = 'module.exports = __webpack_exports__;';
+              break;
+            case 'amd':
+              // libraryType = 'amd = __webpack_exports__';
+              break;
+            case 'amd-require':
+              // libraryType = 'amd-require = __webpack_exports__';
+              break;
+            case 'umd':
+              // libraryType = 'umd = __webpack_exports__';
+              break;
+            case 'umd2':
+              // libraryType = 'umd2 = __webpack_exports__';
+              break;
+            case 'jsonp':
+              // libraryType = 'jsonp = __webpack_exports__';
+              break;
+            case 'system':
+              // libraryType = 'system = __webpack_exports__';
+              break;
+            default:
+              // libraryType = 'var = __webpack_exports__';
+              break;
+          }
+
+
+        }
         // Get the entry modules of the chunk
         const entryModules =
           compilation.chunkGraph.getChunkEntryModulesIterable(
@@ -203,6 +269,7 @@ class AsyncEntryStartupPlugin {
           Template.indent(source.source()),
           Template.indent('return __webpack_exports__'),
           '});',
+          libraryType ? libraryType : ''
         ]);
       },
     );
