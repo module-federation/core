@@ -1,3 +1,41 @@
+# [8.1.0-canary.5](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.4...nextjs-mf-8.1.0-canary.5) (2023-11-08)
+
+
+### Bug Fixes
+
+* **enhanced:** correct schema validation issues ([5a04a81](https://github.com/module-federation/universe/commit/5a04a812f505ab8287d206abd0a6996057a994fc))
+
+# [8.1.0-canary.4](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.3...nextjs-mf-8.1.0-canary.4) (2023-11-08)
+
+
+### Bug Fixes
+
+* fix version missmatch ([2d45df4](https://github.com/module-federation/universe/commit/2d45df485e72471bd2d5b116a050a0ae2416acc1))
+
+# [8.1.0-canary.3](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.2...nextjs-mf-8.1.0-canary.3) (2023-11-07)
+
+### Bug Fixes
+
+- issues with integrated runtime chunk ([edc4d97](https://github.com/module-federation/universe/commit/edc4d97393c8ad04adecc53062f40a80735defb7))
+- issues with integrated runtime chunk ([d4fa90d](https://github.com/module-federation/universe/commit/d4fa90de214e5b15957c208436878d82ce223a22))
+- issues with integrated runtime chunk ([aa1b137](https://github.com/module-federation/universe/commit/aa1b13791e353433d2a219addbef1443b853c2f0))
+
+### Features
+
+- **enhanced:** AsyncBoundary support ESM targets and remix_run framework outputs ([0100694](https://github.com/module-federation/universe/commit/0100694a07044460dc44a73cfb4ecff619177457))
+
+# [8.1.0-canary.2](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.1...nextjs-mf-8.1.0-canary.2) (2023-11-06)
+
+### Bug Fixes
+
+- **deps:** update dependency undici to v5.26.2 [security] ([410a8b8](https://github.com/module-federation/universe/commit/410a8b8bd1558dfb5119ae10941d2b3816a0d0e0))
+
+### Features
+
+- **enhanced:** new async boundary plugin design ([a4ac1ac](https://github.com/module-federation/universe/commit/a4ac1acff974f74db6395c31134de14d9c344b6f))
+- **enhanced:** Rewrite Async Boundary based on bytedance version ([fa05dd6](https://github.com/module-federation/universe/commit/fa05dd6bce2dd577b1e3fd84533459a04dbe195a))
+- **enhanced:** Support Async Mode and option ([3c33b8e](https://github.com/module-federation/universe/commit/3c33b8ea3b483de5dcc3e5da9fb40c9826fdb7f7))
+
 # [8.1.0-canary.1](https://github.com/module-federation/universe/compare/nextjs-mf-8.0.0...nextjs-mf-8.1.0-canary.1) (2023-10-23)
 
 ### Bug Fixes

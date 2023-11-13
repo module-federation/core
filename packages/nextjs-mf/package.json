@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/nextjs-mf",
-  "version": "8.1.0-canary.1",
+  "version": "8.1.0-canary.5",
   "license": "MIT",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -21,7 +21,7 @@
   },
   "peerDependencies": {
     "webpack": "^5.40.0",
-    "next": "^12 || ^13",
+    "next": "^12 || ^13 || ^14",
     "react": "^17 || ^18",
     "react-dom": "^17 || ^18",
     "styled-jsx": "*"
