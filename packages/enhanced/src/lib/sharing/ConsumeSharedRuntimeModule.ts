@@ -65,10 +65,7 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
         );
       }
     };
-    const allChunks = [
-      ...(this.chunk?.getAllAsyncChunks() || []),
-      ...(this.chunk?.getAllInitialChunks() || []),
-    ];
+    const allChunks = [...(this.chunk?.getAllReferencedChunks() || [])];
     for (const chunk of allChunks) {
       const modules = chunkGraph.getChunkModulesIterableBySourceType(
         chunk,
