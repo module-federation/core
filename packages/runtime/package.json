@@ -1,0 +1,8 @@
+{
+  "name": "@module-federation/runtime",
+  "version": "0.0.1",
+  "dependencies": {},
+  "type": "commonjs",
+  "main": "./index.cjs",
+  "module": "./index.js"
+}
