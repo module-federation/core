@@ -30,23 +30,20 @@ class AsyncEntryStartupPlugin {
   }
 
   private collectRuntimeChunks(compilation: Compilation): void {
-    compilation.hooks.beforeChunkAssets.tap(
-      'AsyncEntryStartupPlugin',
-      () => {
-        for (const chunk of compilation.chunks) {
-          if (chunk.hasRuntime() && chunk.id !== null) {
-            this._runtimeChunks.set(chunk.id, chunk);
-            for (const dependentChunk of compilation.chunkGraph.getChunkEntryDependentChunksIterable(
-              chunk,
-            )) {
-              if (dependentChunk.id !== null) {
-                this._runtimeChunks.set(dependentChunk.id, dependentChunk);
-              }
+    compilation.hooks.beforeChunkAssets.tap('AsyncEntryStartupPlugin', () => {
+      for (const chunk of compilation.chunks) {
+        if (chunk.hasRuntime() && chunk.id !== null) {
+          this._runtimeChunks.set(chunk.id, chunk);
+          for (const dependentChunk of compilation.chunkGraph.getChunkEntryDependentChunksIterable(
+            chunk,
+          )) {
+            if (dependentChunk.id !== null) {
+              this._runtimeChunks.set(dependentChunk.id, dependentChunk);
             }
           }
         }
-      },
-    );
+      }
+    });
   }
 
   private handleRenderStartup(
@@ -152,12 +149,19 @@ class AsyncEntryStartupPlugin {
 
         let libraryType;
 
-        const chunkRequirements = compilation.chunkGraph.getChunkRuntimeRequirements(upperContext.chunk)
-        if(chunkRequirements.has(RuntimeGlobals.thisAsExports) && compilation.outputOptions.library) {
+        const chunkRequirements =
+          compilation.chunkGraph.getChunkRuntimeRequirements(
+            upperContext.chunk,
+          );
+        if (
+          chunkRequirements.has(RuntimeGlobals.thisAsExports) &&
+          compilation.outputOptions.library
+        ) {
           console.log(source.source());
-          const exportsInfo = compilation.moduleGraph.getExportsInfo(renderContext);
+          const exportsInfo =
+            compilation.moduleGraph.getExportsInfo(renderContext);
           console.log(exportsInfo.orderedExports);
-          const {type,name} = compilation.outputOptions.library
+          const { type, name } = compilation.outputOptions.library;
           switch (type) {
             case 'var':
               libraryType = '';
@@ -184,7 +188,7 @@ class AsyncEntryStartupPlugin {
               libraryType = 'exports = __webpack_exports__;';
               break;
             case 'commonjs2':
-              libraryType = 'exports = __webpack_exports__;';
+              libraryType = '';
               break;
             case 'commonjs-module':
               libraryType = 'module.exports = __webpack_exports__;';
@@ -211,8 +215,6 @@ class AsyncEntryStartupPlugin {
               // libraryType = 'var = __webpack_exports__';
               break;
           }
-
-
         }
         // Get the entry modules of the chunk
         const entryModules =
@@ -269,7 +271,7 @@ class AsyncEntryStartupPlugin {
           Template.indent(source.source()),
           Template.indent('return __webpack_exports__'),
           '});',
-          libraryType ? libraryType : ''
+          libraryType ? libraryType : '',
         ]);
       },
     );
