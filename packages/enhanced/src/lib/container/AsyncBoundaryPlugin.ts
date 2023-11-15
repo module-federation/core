@@ -155,7 +155,6 @@ class AsyncEntryStartupPlugin {
           );
 
         const initialEntryModules = [];
-
         // Iterate over the entry modules
         for (const entryModule of entryModules) {
           const entryModuleID = compilation.chunkGraph.getModuleId(entryModule);
