@@ -6,16 +6,26 @@
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "outputs": ["{workspaceRoot}/dist/packages/runtime"],
       "options": {
+        "parallel": false,
         "outputPath": "dist/packages/runtime",
-        "main": "packages/runtime/src/index.ts",
+        "main": "packages/sdk/src/index.ts",
+        "additionalEntryPoints":["packages/runtime/src/type/index.ts","packages/runtime/src/helpers.ts"],
         "tsConfig": "packages/runtime/tsconfig.lib.json",
         "assets": [],
         "project": "packages/runtime/package.json",
         "compiler": "swc",
-        "format": ["cjs", "esm"]
-      }
+        "format": ["cjs", "esm"],
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "lint": {
       "executor": "@nx/linter:eslint",
