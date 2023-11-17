@@ -62,13 +62,13 @@ export class FederationHost {
       shareInfo: ShareInfos;
     }>('beforeInit'),
     init: new SyncHook<
-    [
-      {
-        options: Options;
-        origin: FederationHost;
-      },
-    ],
-    void
+      [
+        {
+          options: Options;
+          origin: FederationHost;
+        },
+      ],
+      void
     >(),
     beforeLoadRemote: new AsyncWaterfallHook<{
       id: string;
@@ -77,29 +77,29 @@ export class FederationHost {
     }>('beforeLoadRemote'),
     loadRemoteMatch: new AsyncWaterfallHook<LoadRemoteMatch>('loadRemoteMatch'),
     loadRemote: new AsyncHook<
-    [
-      {
-        id: string;
-        expose: string;
-        pkgNameOrAlias: string;
-        remote: Remote;
-        options: ModuleOptions;
-        origin: FederationHost;
-        exposeModule: any;
-        exposeModuleFactory: any;
-        moduleInstance: Module;
-      },
-    ],
-    void
+      [
+        {
+          id: string;
+          expose: string;
+          pkgNameOrAlias: string;
+          remote: Remote;
+          options: ModuleOptions;
+          origin: FederationHost;
+          exposeModule: any;
+          exposeModuleFactory: any;
+          moduleInstance: Module;
+        },
+      ],
+      void
     >('loadRemote'),
     errorLoadRemote: new AsyncHook<
-    [
-      {
-        id: string;
-        error: unknown;
-      },
-    ],
-    void
+      [
+        {
+          id: string;
+          error: unknown;
+        },
+      ],
+      void
     >('errorLoadRemote'),
     beforeLoadShare: new AsyncWaterfallHook<{
       pkgName: string;
@@ -114,17 +114,17 @@ export class FederationHost {
       origin: FederationHost;
     }>(),
     generatePreloadAssets: new AsyncHook<
-    [
-      {
-        origin: FederationHost;
-        preloadOptions: PreloadOptions[number];
-        remote: Remote;
-        remoteInfo: RemoteInfo;
-        remoteSnapshot: ModuleInfo;
-        globalSnapshot: GlobalModuleInfo;
-      },
-    ],
-    Promise<PreloadAssets>
+      [
+        {
+          origin: FederationHost;
+          preloadOptions: PreloadOptions[number];
+          remote: Remote;
+          remoteInfo: RemoteInfo;
+          remoteSnapshot: ModuleInfo;
+          globalSnapshot: GlobalModuleInfo;
+        },
+      ],
+      Promise<PreloadAssets>
     >('generatePreloadAssets'),
     afterPreloadRemote: new AsyncHook<{
       preloadOps: Array<PreloadRemoteArgs>;
@@ -139,21 +139,21 @@ export class FederationHost {
   loaderHook = new PluginSystem({
     // FIXME: may not suitable
     getModuleInfo: new SyncHook<
-    [
-      {
-        target: Record<string, any>;
-        key: any;
-      },
-    ],
-    { value: any | undefined; key: string } | void
+      [
+        {
+          target: Record<string, any>;
+          key: any;
+        },
+      ],
+      { value: any | undefined; key: string } | void
     >(),
     createScript: new SyncHook<
-    [
-      {
-        url: string;
-      },
-    ],
-    HTMLScriptElement | void
+      [
+        {
+          url: string;
+        },
+      ],
+      HTMLScriptElement | void
     >(),
   });
   loadingShare: {
@@ -462,7 +462,7 @@ export class FederationHost {
     );
 
     await Promise.all(
-      preloadOps.map(async ops => {
+      preloadOps.map(async (ops) => {
         const { remote } = ops;
         const remoteInfo = getRemoteInfo(remote);
         const { globalSnapshot, remoteSnapshot } =
@@ -518,9 +518,9 @@ export class FederationHost {
       if (
         !activeVersion ||
         (!activeVersion.loaded &&
-          (Boolean(!eager) !== !activeVersionEager ?
-            eager :
-            hostName > activeVersion.from))
+          (Boolean(!eager) !== !activeVersionEager
+            ? eager
+            : hostName > activeVersion.from))
       ) {
         versions[version] = shared;
       }
@@ -535,13 +535,13 @@ export class FederationHost {
       const entry = await module.getEntry();
       initFn(entry);
     };
-    Object.keys(this.options.shared).forEach(shareName => {
+    Object.keys(this.options.shared).forEach((shareName) => {
       const shared = this.options.shared[shareName];
       if (shared.scope.includes(shareScopeName)) {
         register(shareName, shared);
       }
     });
-    this.options.remotes.forEach(remote => {
+    this.options.remotes.forEach((remote) => {
       if (remote.shareScope === shareScopeName) {
         promises.push(initRemoteModule(remote.name));
       }
@@ -579,12 +579,12 @@ export class FederationHost {
     const userRemotes = userOptionsRes.remotes || [];
 
     const remotes = userRemotes.reduce((res, remote) => {
-      if (!res.find(item => item.name === remote.name)) {
+      if (!res.find((item) => item.name === remote.name)) {
         if (remote.alias) {
           // 校验 alias 是否等于 remote.name 和 remote.alias 的前缀，如果是则报错
           // 因为引用支持多级路径的引用时无法保证名称是否唯一，所以不支持 alias 为 remote.name 的前缀
           const findEqual = res.find(
-            item =>
+            (item) =>
               remote.alias &&
               (item.name.startsWith(remote.alias) ||
                 item.alias?.startsWith(remote.alias)),
@@ -618,7 +618,7 @@ export class FederationHost {
 
     // register shared include lib
     const sharedKeys = Object.keys(formatShareOptions);
-    sharedKeys.forEach(sharedKey => {
+    sharedKeys.forEach((sharedKey) => {
       const sharedVal = formatShareOptions[sharedKey];
       const globalShare = getGlobalShare(sharedKey, sharedVal);
       if (!globalShare && sharedVal && sharedVal.lib) {
@@ -635,7 +635,7 @@ export class FederationHost {
     const plugins = [...globalOptionsRes.plugins];
 
     if (userOptionsRes.plugins) {
-      userOptionsRes.plugins.forEach(plugin => {
+      userOptionsRes.plugins.forEach((plugin) => {
         if (!plugins.includes(plugin)) {
           plugins.push(plugin);
         }
@@ -685,7 +685,7 @@ export class FederationHost {
     const target = getGlobalShareScope();
     const { version, scope = 'default', ...shareInfo } = shared;
     const scopes: string[] = Array.isArray(scope) ? scope : [scope];
-    scopes.forEach(sc => {
+    scopes.forEach((sc) => {
       if (!target[sc]) {
         target[sc] = {};
       }
