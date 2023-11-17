@@ -186,9 +186,9 @@ export const getTargetSnapshotInfoByModuleInfo = (
     getModuleInfo &&
     !getModuleInfo.version &&
     'version' in moduleInfo &&
-    moduleInfo.version
+    moduleInfo["version"]
   ) {
-    getModuleInfo.version = moduleInfo.version;
+    getModuleInfo.version = moduleInfo["version"];
   }
 
   if (getModuleInfo) {
@@ -197,7 +197,7 @@ export const getTargetSnapshotInfoByModuleInfo = (
 
   // remote don't include in hostSnapshot
   // deploy micro app snapshot
-  if ('version' in moduleInfo && moduleInfo.version) {
+  if ('version' in moduleInfo && moduleInfo["version"]) {
     const { version, ...resModuleInfo } = moduleInfo;
     const moduleKeyWithoutVersion = getFMId(resModuleInfo);
     const getModuleInfoWithoutVersion = getInfoWithoutType(
