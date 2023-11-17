@@ -13,7 +13,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "declaration": true,
+    "declaration": true
   },
   "files": [],
   "include": [],

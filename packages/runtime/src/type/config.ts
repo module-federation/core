@@ -36,8 +36,8 @@ export interface RemoteInfo {
 }
 
 export type HostInfo = Pick<
-Options,
-'name' | 'version' | 'remotes' | 'version'
+  Options,
+  'name' | 'version' | 'remotes' | 'version'
 >;
 
 export interface SharedConfig {
@@ -100,8 +100,8 @@ export interface Options {
 }
 
 export type UserOptions = Omit<
-Optional<Options, 'plugins'>,
-'shared' | 'inBrowser'
+  Optional<Options, 'plugins'>,
+  'shared' | 'inBrowser'
 > & {
   shared?: {
     [pkgName: string]: ShareArgs;

@@ -64,11 +64,11 @@ export function satisfy(version: string, range: string): boolean {
   const parsedRange = parseRange(range);
   const parsedComparator = parsedRange
     .split(' ')
-    .map(rangeVersion => parseComparatorString(rangeVersion))
+    .map((rangeVersion) => parseComparatorString(rangeVersion))
     .join(' ');
   const comparators = parsedComparator
     .split(/\s+/)
-    .map(comparator => parseGTE0(comparator));
+    .map((comparator) => parseGTE0(comparator));
   const extractedVersion = extractComparator(version);
 
   if (!extractedVersion) {

@@ -19,8 +19,8 @@ export function checkReturnData(originData: any, returnData: any): boolean {
 }
 
 export class SyncWaterfallHook<T extends Record<string, any>> extends SyncHook<
-[T],
-T
+  [T],
+  T
 > {
   onerror: (errMsg: string | Error | unknown) => void = error;
 

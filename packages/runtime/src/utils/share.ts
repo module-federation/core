@@ -143,9 +143,9 @@ export function getGlobalShare(
       // eslint-disable-next-line max-depth
       if (shareConfig.singleton) {
         const singletonVersion =
-          strategy === 'loaded-first' ?
-            findSingletonVersionOrderByLoaded(sc, pkgName) :
-            findSingletonVersionOrderByVersion(sc, pkgName);
+          strategy === 'loaded-first'
+            ? findSingletonVersionOrderByLoaded(sc, pkgName)
+            : findSingletonVersionOrderByVersion(sc, pkgName);
         // eslint-disable-next-line max-depth
         if (
           requiredVersion !== false &&

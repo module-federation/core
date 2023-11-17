@@ -18,8 +18,8 @@ type ModuleLifeCycleCyclePartial = Partial<{
 }>;
 
 export type FederationRuntimePlugin = CoreLifeCyclePartial &
-SnapshotLifeCycleCyclePartial &
-ModuleLifeCycleCyclePartial & {
-  name: string;
-  version?: string;
-};
+  SnapshotLifeCycleCyclePartial &
+  ModuleLifeCycleCyclePartial & {
+    name: string;
+    version?: string;
+  };

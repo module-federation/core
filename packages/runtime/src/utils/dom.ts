@@ -33,7 +33,7 @@ export function createScript(
   }
 
   if (attrs) {
-    Object.keys(attrs).forEach(name => {
+    Object.keys(attrs).forEach((name) => {
       if (script) {
         if (name === 'async' || name === 'defer') {
           script[name] = attrs[name];
@@ -72,10 +72,21 @@ export function createScript(
   return { script, needAttach };
 }
 
-export function loadScript(url: string, info: { attrs?: Record<string, any>; createScriptHook?: (url: string) => HTMLScriptElement | void }) {
+export function loadScript(
+  url: string,
+  info: {
+    attrs?: Record<string, any>;
+    createScriptHook?: (url: string) => HTMLScriptElement | void;
+  },
+) {
   const { attrs, createScriptHook } = info;
   return new Promise<void>((resolve, _reject) => {
-    const { script, needAttach } = createScript(url, resolve, attrs, createScriptHook);
+    const { script, needAttach } = createScript(
+      url,
+      resolve,
+      attrs,
+      createScriptHook,
+    );
     needAttach && document.getElementsByTagName('head')[0].appendChild(script);
   });
 }

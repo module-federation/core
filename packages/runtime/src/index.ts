@@ -19,7 +19,8 @@ export function init(options: UserOptions): FederationHost {
   const instance = getGlobalFederationInstance(options.name, options.version);
   if (!instance) {
     // get debug constructor
-    const FederationConstructor = getGlobalFederationConstructor() || FederationHost;
+    const FederationConstructor =
+      getGlobalFederationConstructor() || FederationHost;
     FederationInstance = new FederationConstructor(options);
     setGlobalFederationInstance(FederationInstance);
     return FederationInstance;

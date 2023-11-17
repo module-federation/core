@@ -71,7 +71,7 @@ export function parseCarets(range: string): string {
   return range
     .trim()
     .split(/\s+/)
-    .map(rangeVersion =>
+    .map((rangeVersion) =>
       rangeVersion.replace(
         parseRegex(caret),
         (_, major, minor, patch, preRelease) => {
@@ -126,7 +126,7 @@ export function parseTildes(range: string): string {
   return range
     .trim()
     .split(/\s+/)
-    .map(rangeVersion =>
+    .map((rangeVersion) =>
       rangeVersion.replace(
         parseRegex(tilde),
         (_, major, minor, patch, preRelease) => {
@@ -154,7 +154,7 @@ export function parseTildes(range: string): string {
 export function parseXRanges(range: string): string {
   return range
     .split(/\s+/)
-    .map(rangeVersion =>
+    .map((rangeVersion) =>
       rangeVersion
         .trim()
         .replace(
