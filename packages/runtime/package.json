@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/runtime",
   "version": "0.0.1",
-  "dependencies": {},
+  "author": "zhouxiao <codingzx@gmail.com>",
   "type": "commonjs",
   "main": "./index.cjs",
   "module": "./index.js"
