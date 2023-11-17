@@ -24,8 +24,7 @@ describe('parseEntry', () => {
   });
 
   it('get correct entryInfo by parsing local version entry', () => {
-    const entry =
-      '@byted/app1:http://localhost:8080/vmok-manifest.json';
+    const entry = '@byted/app1:http://localhost:8080/vmok-manifest.json';
 
     const entryInfo = parseEntry(entry);
 

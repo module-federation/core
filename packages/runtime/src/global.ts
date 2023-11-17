@@ -27,8 +27,8 @@ declare global {
     __VMOK__: Federation,
     // eslint-disable-next-line no-var
     __GLOBAL_LOADING_REMOTE_ENTRY__: Record<
-    string,
-    undefined | Promise<RemoteEntryExports | void>
+      string,
+      undefined | Promise<RemoteEntryExports | void>
     >;
 }
 
@@ -72,7 +72,7 @@ nativeGlobal.__FEDERATION__.__SHARE_SCOPE_LOADING__ ??= {};
 nativeGlobal.__FEDERATION__.__PRELOADED_MAP__ ??= new Map();
 
 export const Global = {
-  get __FEDERATION__(): typeof nativeGlobal['__FEDERATION__'] {
+  get __FEDERATION__(): (typeof nativeGlobal)['__FEDERATION__'] {
     const globalThisVal = new Function('return globalThis')();
     return globalThisVal.__FEDERATION__;
   },
@@ -92,7 +92,7 @@ export function getGlobalFederationInstance(
   version: string | undefined,
 ): FederationHost | undefined {
   const buildId = getBuilderId();
-  return Global.__FEDERATION__.__INSTANCES__.find(GMInstance => {
+  return Global.__FEDERATION__.__INSTANCES__.find((GMInstance) => {
     if (buildId && GMInstance.options.id === getBuilderId()) {
       return true;
     }
@@ -119,8 +119,8 @@ export function setGlobalFederationInstance(
 }
 
 export function getGlobalFederationConstructor():
-| typeof FederationHost
-| undefined {
+  | typeof FederationHost
+  | undefined {
   return Global.__FEDERATION__.__DEBUG_CONSTRUCTOR__;
 }
 
@@ -186,9 +186,9 @@ export const getTargetSnapshotInfoByModuleInfo = (
     getModuleInfo &&
     !getModuleInfo.version &&
     'version' in moduleInfo &&
-    moduleInfo["version"]
+    moduleInfo['version']
   ) {
-    getModuleInfo.version = moduleInfo["version"];
+    getModuleInfo.version = moduleInfo['version'];
   }
 
   if (getModuleInfo) {
@@ -197,7 +197,7 @@ export const getTargetSnapshotInfoByModuleInfo = (
 
   // remote don't include in hostSnapshot
   // deploy micro app snapshot
-  if ('version' in moduleInfo && moduleInfo["version"]) {
+  if ('version' in moduleInfo && moduleInfo['version']) {
     const { version, ...resModuleInfo } = moduleInfo;
     const moduleKeyWithoutVersion = getFMId(resModuleInfo);
     const getModuleInfoWithoutVersion = getInfoWithoutType(
@@ -244,7 +244,7 @@ export const addGlobalSnapshot = (
     ...moduleInfos,
   };
   return () => {
-    Object.keys(moduleInfos).forEach(key => {
+    Object.keys(moduleInfos).forEach((key) => {
       delete Global.__FEDERATION__.moduleInfo[key];
     });
   };
@@ -271,8 +271,8 @@ export const registerGlobalPlugins = (
 ): void => {
   const { __GLOBAL_PLUGIN__ } = Global.__FEDERATION__;
 
-  plugins.forEach(plugin => {
-    if (__GLOBAL_PLUGIN__.findIndex(p => p.name === plugin.name) === -1) {
+  plugins.forEach((plugin) => {
+    if (__GLOBAL_PLUGIN__.findIndex((p) => p.name === plugin.name) === -1) {
       __GLOBAL_PLUGIN__.push(plugin);
     } else {
       warn(`The plugin ${plugin.name} has been registered.`);

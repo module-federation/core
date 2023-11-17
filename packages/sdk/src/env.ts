@@ -8,8 +8,12 @@ function isBrowserEnv(): boolean {
 }
 
 function isDebugMode(): boolean {
-  if (typeof process !== 'undefined' && process.env && process.env["FEDERATION_DEBUG"]) {
-    return Boolean(process.env["FEDERATION_DEBUG"]);
+  if (
+    typeof process !== 'undefined' &&
+    process.env &&
+    process.env['FEDERATION_DEBUG']
+  ) {
+    return Boolean(process.env['FEDERATION_DEBUG']);
   }
   return typeof FEDERATION_DEBUG !== 'undefined' && Boolean(FEDERATION_DEBUG);
 }

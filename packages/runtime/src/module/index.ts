@@ -93,7 +93,7 @@ class Module {
       };
       remoteEntryExports.init(shareScope, [], remoteEntryInitOptions);
       const federationInstance = Global.__FEDERATION__.__INSTANCES__.find(
-        i =>
+        (i) =>
           i.options.id ===
           composeKeyWithSeparator(
             this.remoteInfo.name,

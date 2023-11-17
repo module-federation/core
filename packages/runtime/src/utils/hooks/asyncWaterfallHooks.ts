@@ -6,8 +6,8 @@ import { checkReturnData } from './syncWaterfallHook';
 type CallbackReturnType<T> = T | Promise<T>;
 
 export class AsyncWaterfallHook<T extends Record<string, any>> extends SyncHook<
-[T],
-CallbackReturnType<T>
+  [T],
+  CallbackReturnType<T>
 > {
   onerror: (errMsg: string | Error | unknown) => void = error;
   constructor(type: string) {
