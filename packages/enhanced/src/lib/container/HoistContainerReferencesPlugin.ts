@@ -3,7 +3,6 @@ import Module from 'webpack/lib/Module';
 import Chunk from 'webpack/lib/Chunk';
 import Compilation from 'webpack/lib/Compilation';
 import ChunkGroup from 'webpack/lib/ChunkGroup';
-import Dependency from 'webpack/lib/Dependency';
 
 /**
  * @typedef {import("webpack").Compiler} Compiler
