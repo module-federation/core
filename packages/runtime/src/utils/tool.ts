@@ -3,7 +3,7 @@ import { Remote, RemoteInfoOptionalVersion, UserOptions } from '../type';
 import { warn } from './logger';
 
 export function addUniqueItem(arr: Array<string>, item: string): Array<string> {
-  if (arr.findIndex(name => name === item) === -1) {
+  if (arr.findIndex((name) => name === item) === -1) {
     arr.push(item);
   }
   return arr;
@@ -72,5 +72,3 @@ export function isStaticResourcesEqual(url1: string, url2: string): boolean {
   // Determines whether relative paths are equal
   return relativeUrl1 === relativeUrl2;
 }
-
-

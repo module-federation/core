@@ -9,9 +9,9 @@ export function isDevelopmentMode(): boolean {
 }
 
 export function getBuilderId(): string {
-  return typeof FEDERATION_BUILD_IDENTIFIER !== 'undefined' ?
-    FEDERATION_BUILD_IDENTIFIER :
-    '';
+  return typeof FEDERATION_BUILD_IDENTIFIER !== 'undefined'
+    ? FEDERATION_BUILD_IDENTIFIER
+    : '';
 }
 
 export function isDebugMode(): boolean {

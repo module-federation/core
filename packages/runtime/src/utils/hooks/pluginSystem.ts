@@ -26,7 +26,7 @@ export class PluginSystem<T extends Record<string, any>> {
     if (!this.registerPlugins[pluginName]) {
       this.registerPlugins[pluginName] = plugin;
 
-      Object.keys(this.lifecycle).forEach(key => {
+      Object.keys(this.lifecycle).forEach((key) => {
         const pluginLife = plugin[key as string];
         if (pluginLife) {
           this.lifecycle[key].on(pluginLife);
@@ -40,7 +40,7 @@ export class PluginSystem<T extends Record<string, any>> {
     const plugin = this.registerPlugins[pluginName];
     assert(plugin, `plugin "${pluginName}" is not registered.`);
 
-    Object.keys(plugin).forEach(key => {
+    Object.keys(plugin).forEach((key) => {
       if (key !== 'name') {
         this.lifecycle[key].remove(plugin[key as string]);
       }
@@ -52,7 +52,7 @@ export class PluginSystem<T extends Record<string, any>> {
     lifecycle,
     registerPlugins,
   }: T): void {
-    Object.keys(lifecycle).forEach(hookName => {
+    Object.keys(lifecycle).forEach((hookName) => {
       assert(
         !this.lifecycle[hookName],
         `"${hookName as string}" hook has conflict and cannot be inherited.`,
@@ -60,7 +60,7 @@ export class PluginSystem<T extends Record<string, any>> {
       (this.lifecycle as any)[hookName] = lifecycle[hookName];
     });
 
-    Object.keys(registerPlugins).forEach(pluginName => {
+    Object.keys(registerPlugins).forEach((pluginName) => {
       assert(
         !this.registerPlugins[pluginName],
         `"${pluginName}" plugin has conflict and cannot be inherited.`,

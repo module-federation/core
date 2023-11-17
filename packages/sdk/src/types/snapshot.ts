@@ -52,19 +52,19 @@ interface BasicConsumerModuleInfo extends BasicModuleInfo {
 
 export interface ConsumerModuleInfoWithPublicPath
   extends BasicConsumerModuleInfo,
-  BasicProviderModuleInfo {
+    BasicProviderModuleInfo {
   publicPath: string;
 }
 
 interface ConsumerModuleInfoWithGetPublicPath
   extends BasicConsumerModuleInfo,
-  BasicProviderModuleInfo {
+    BasicProviderModuleInfo {
   getPublicPath: string;
 }
 
 export type PureConsumerModuleInfo = Omit<
-BasicConsumerModuleInfo,
-'remoteTypes'
+  BasicConsumerModuleInfo,
+  'remoteTypes'
 >;
 
 export type ConsumerModuleInfo =
