@@ -30,7 +30,6 @@ export const performReload = (shouldReload: any) => {
 export const checkUnreachableRemote = (remoteScope: any) => {
   for (const property in remoteScope.remotes) {
     if (!remoteScope[property]) {
-      console.log(remoteScope, property);
       console.error(
         'unreachable remote found',
         property,
