@@ -28,8 +28,8 @@ export type ManifestRemote<T = ManifestRemoteCommonInfo> =
   | (Omit<RemoteWithVersion, 'name'> & T);
 
 export type ManifestExpose = Pick<
-StatsExpose,
-'assets' | 'id' | 'name' | 'path'
+  StatsExpose,
+  'assets' | 'id' | 'name' | 'path'
 >;
 
 export interface Manifest<

@@ -24,13 +24,13 @@ export class SnapshotHandler {
   manifestCache: Map<string, Manifest> = new Map();
   hooks = new PluginSystem({
     beforeLoadRemoteSnapshot: new AsyncHook<
-    [
-      {
-        options: Options;
-        moduleInfo: Remote;
-      },
-    ],
-    void
+      [
+        {
+          options: Options;
+          moduleInfo: Remote;
+        },
+      ],
+      void
     >('beforeLoadRemoteSnapshot'),
     loadSnapshot: new AsyncWaterfallHook<{
       options: Options;
@@ -49,7 +49,7 @@ export class SnapshotHandler {
     }>('loadRemoteSnapshot'),
   });
   manifestLoading: Record<string, Promise<ModuleInfo>> =
-  Global.__FEDERATION__.__MANIFEST_LOADING__;
+    Global.__FEDERATION__.__MANIFEST_LOADING__;
 
   constructor(HostInstance: FederationHost) {
     this.HostInstance = HostInstance;
@@ -81,11 +81,11 @@ export class SnapshotHandler {
 
   // eslint-disable-next-line max-lines-per-function
   async loadRemoteSnapshotInfo(moduleInfo: Remote):
-  | Promise<{
-    remoteSnapshot: ModuleInfo;
-    globalSnapshot: GlobalModuleInfo;
-  }>
-  | never {
+    | Promise<{
+        remoteSnapshot: ModuleInfo;
+        globalSnapshot: GlobalModuleInfo;
+      }>
+    | never {
     const { options } = this.HostInstance;
     const hostSnapshot = getGlobalSnapshotInfoByModuleInfo(
       {
@@ -210,14 +210,14 @@ export class SnapshotHandler {
       } else {
         error(`
           Cannot get remoteSnapshot with the name: '${
-  moduleInfo.name
-}', version: '${
-  moduleInfo.version
-}' from __FEDERATION__.moduleInfo. The following reasons may be causing the problem:\n
+            moduleInfo.name
+          }', version: '${
+            moduleInfo.version
+          }' from __FEDERATION__.moduleInfo. The following reasons may be causing the problem:\n
           1. The Deploy platform did not deliver the correct data. You can use __FEDERATION__.moduleInfo to check the remoteInfo.\n
           2. The remote '${moduleInfo.name}' version '${
-  moduleInfo.version
-}' is not released.\n
+            moduleInfo.version
+          }' is not released.\n
           The transformed module info: ${JSON.stringify(globalSnapshotRes)}
         `);
       }
@@ -360,7 +360,7 @@ export class SnapshotHandler {
     };
 
     if (!this.manifestLoading[manifestUrl]) {
-      this.manifestLoading[manifestUrl] = asyncLoadProcess().then(res => res);
+      this.manifestLoading[manifestUrl] = asyncLoadProcess().then((res) => res);
     }
     return this.manifestLoading[manifestUrl];
   }

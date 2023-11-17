@@ -16,10 +16,7 @@ import { assignRemoteInfo } from './snapshot';
 import { getInfoWithoutType, getPreloaded, setPreloaded } from '../global';
 import { getResourceUrl } from '../utils/manifest';
 import { FederationHost } from '../core';
-import {
-  defaultPreloadArgs,
-  normalizePreloadExposes,
-} from '../utils/preload';
+import { defaultPreloadArgs, normalizePreloadExposes } from '../utils/preload';
 import { getGlobalShare } from '../utils/share';
 import { getFMId, isPureRemoteEntry, isRemoteInfoWithEntry } from '../utils';
 
@@ -133,7 +130,7 @@ export function generatePreloadAssets(
       } else {
         if (Array.isArray(depsRemote)) {
           // eslint-disable-next-line array-callback-return
-          const findPreloadConfig = depsRemote.find(remoteConfig => {
+          const findPreloadConfig = depsRemote.find((remoteConfig) => {
             if (
               remoteConfig.nameOrAlias === remoteInfo.name ||
               remoteConfig.nameOrAlias === remoteInfo.alias
@@ -154,9 +151,9 @@ export function generatePreloadAssets(
 
       const remoteEntryUrl = getResourceUrl(
         moduleInfoSnapshot,
-        'remoteEntry' in moduleInfoSnapshot ?
-          moduleInfoSnapshot.remoteEntry :
-          '',
+        'remoteEntry' in moduleInfoSnapshot
+          ? moduleInfoSnapshot.remoteEntry
+          : '',
       );
 
       if (remoteEntryUrl) {
@@ -166,18 +163,18 @@ export function generatePreloadAssets(
             name: remoteInfo.name,
             entry: remoteEntryUrl,
             type:
-              'remoteEntryType' in moduleInfoSnapshot ?
-                moduleInfoSnapshot.remoteEntryType :
-                'global',
+              'remoteEntryType' in moduleInfoSnapshot
+                ? moduleInfoSnapshot.remoteEntryType
+                : 'global',
             entryGlobalName:
-              'globalName' in moduleInfoSnapshot ?
-                moduleInfoSnapshot.globalName :
-                remoteInfo.name,
+              'globalName' in moduleInfoSnapshot
+                ? moduleInfoSnapshot.globalName
+                : remoteInfo.name,
             shareScope: '',
             version:
-              'version' in moduleInfoSnapshot ?
-                moduleInfoSnapshot.version :
-                undefined,
+              'version' in moduleInfoSnapshot
+                ? moduleInfoSnapshot.version
+                : undefined,
           },
           url: remoteEntryUrl,
         });
@@ -199,12 +196,12 @@ export function generatePreloadAssets(
             }
             return assets;
           },
-          [] as NonNullable<typeof moduleInfoSnapshot['modules']>,
+          [] as NonNullable<(typeof moduleInfoSnapshot)['modules']>,
         );
       }
 
       function handlerAssets(assets: string[]): string[] {
-        const assetsRes = assets.map(asset =>
+        const assetsRes = assets.map((asset) =>
           getResourceUrl(moduleInfoSnapshot, asset),
         );
         if (preloadConfig.filter) {
@@ -254,7 +251,7 @@ export function generatePreloadAssets(
   );
 
   if (remoteSnapshot.shared) {
-    remoteSnapshot.shared.forEach(shared => {
+    remoteSnapshot.shared.forEach((shared) => {
       const shareInfo = options.shared?.[shared.sharedName];
       // When data is downgraded, the shared configuration may be different.
       if (!shareInfo) {
@@ -264,10 +261,10 @@ export function generatePreloadAssets(
       // If the global share does not exist, or the lib function does not exist, it means that the shared has not been loaded yet and can be preloaded.
 
       if (globalShare && typeof globalShare.lib === 'function') {
-        shared.assets.js.sync.forEach(asset => {
+        shared.assets.js.sync.forEach((asset) => {
           loadedSharedJsAssets.add(asset);
         });
-        shared.assets.css.sync.forEach(asset => {
+        shared.assets.css.sync.forEach((asset) => {
           loadedSharedCssAssets.add(asset);
         });
       }
@@ -275,10 +272,10 @@ export function generatePreloadAssets(
   }
 
   const needPreloadJsAssets = jsAssets.filter(
-    asset => !loadedSharedJsAssets.has(asset),
+    (asset) => !loadedSharedJsAssets.has(asset),
   );
   const needPreloadCssAssets = cssAssets.filter(
-    asset => !loadedSharedCssAssets.has(asset),
+    (asset) => !loadedSharedCssAssets.has(asset),
   );
 
   return {

@@ -30,7 +30,7 @@ export function formatPreloadArgs(
   preloadArgs: Array<PreloadRemoteArgs>,
 ): PreloadOptions {
   // let preloadOps: PreloadOptions;
-  return preloadArgs.map(args => {
+  return preloadArgs.map((args) => {
     const remoteInfo = matchRemote(remotes, args.nameOrAlias);
     assert(
       remoteInfo,
@@ -54,7 +54,7 @@ export function normalizePreloadExposes(exposes?: string[]): string[] {
     return [];
   }
 
-  return exposes.map(expose => {
+  return exposes.map((expose) => {
     if (expose === '.') {
       return expose;
     }
@@ -73,7 +73,7 @@ export function preloadAssets(
   const { cssAssets, jsAssetsWithoutEntry, entryAssets } = assets;
 
   if (host.options.inBrowser) {
-    entryAssets.forEach(asset => {
+    entryAssets.forEach((asset) => {
       const { moduleInfo } = asset;
       const module = host.moduleCache.get(remoteInfo.name);
       if (module) {
@@ -106,7 +106,7 @@ export function preloadAssets(
     });
 
     const fragment = document.createDocumentFragment();
-    cssAssets.forEach(cssUrl => {
+    cssAssets.forEach((cssUrl) => {
       const cssEl = document.createElement('link');
       cssEl.setAttribute('rel', 'preload');
       cssEl.setAttribute('href', cssUrl);
@@ -116,7 +116,7 @@ export function preloadAssets(
     });
     document.head.appendChild(fragment);
 
-    jsAssetsWithoutEntry.forEach(jsUrl => {
+    jsAssetsWithoutEntry.forEach((jsUrl) => {
       const { script: scriptEl } = createScript(
         jsUrl,
         () => {

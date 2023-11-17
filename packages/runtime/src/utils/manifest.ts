@@ -25,10 +25,10 @@ export function matchRemoteWithNameAndExpose(
   id: string,
 ):
   | {
-    pkgNameOrAlias: string;
-    expose: string;
-    remote: Remote;
-  }
+      pkgNameOrAlias: string;
+      expose: string;
+      remote: Remote;
+    }
   | undefined {
   for (const remote of remotes) {
     // match pkgName

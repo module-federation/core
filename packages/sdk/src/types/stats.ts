@@ -65,9 +65,9 @@ export interface StatsRemoteVal {
 }
 
 export type StatsRemoteWithEntry<T = StatsRemoteVal> = T &
-Omit<RemoteWithEntry, 'name'>;
+  Omit<RemoteWithEntry, 'name'>;
 export type StatsRemoteWithVersion<T = StatsRemoteVal> = T &
-Omit<RemoteWithVersion, 'name'>;
+  Omit<RemoteWithVersion, 'name'>;
 
 export type StatsRemote<T = StatsRemoteVal> =
   | StatsRemoteWithEntry<T>

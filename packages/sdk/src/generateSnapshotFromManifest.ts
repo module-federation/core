@@ -72,35 +72,38 @@ export function generateSnapshotFromManifest(
   // 如果没传 remotes ，仅读取 manifest 里的 remotes
   if (!Object.keys(remotes).length) {
     remotesInfo =
-      manifest.remotes?.reduce((res, next) => {
-        let matchedVersion: string;
-        const name = next.federationContainerName;
-        // garfishModuleName
-        // overrides 优先级最高
-        if (overridesKeys.includes(name)) {
-          matchedVersion = overrides[name];
-        } else {
-          if ('version' in next) {
-            matchedVersion = next.version;
+      manifest.remotes?.reduce(
+        (res, next) => {
+          let matchedVersion: string;
+          const name = next.federationContainerName;
+          // garfishModuleName
+          // overrides 优先级最高
+          if (overridesKeys.includes(name)) {
+            matchedVersion = overrides[name];
           } else {
-            matchedVersion = next.entry;
+            if ('version' in next) {
+              matchedVersion = next.version;
+            } else {
+              matchedVersion = next.entry;
+            }
           }
-        }
-        res[name] = {
-          matchedVersion,
-        };
-        return res;
-      }, {} as ConsumerModuleInfo['remotesInfo']) || {};
+          res[name] = {
+            matchedVersion,
+          };
+          return res;
+        },
+        {} as ConsumerModuleInfo['remotesInfo'],
+      ) || {};
   }
 
   // 若指定了 remotes（deploy 场景），需要再遍历一遍
   Object.keys(remotes).forEach(
-    key =>
+    (key) =>
       (remotesInfo[key] = {
         // overrides 会改写依赖关系
-        matchedVersion: overridesKeys.includes(key) ?
-          overrides[key] :
-          remotes[key],
+        matchedVersion: overridesKeys.includes(key)
+          ? overrides[key]
+          : remotes[key],
       }),
   );
 
@@ -124,11 +127,11 @@ export function generateSnapshotFromManifest(
     remoteEntryType,
     remoteTypes: simpleJoinRemoteEntry(remoteTypes.path, remoteTypes.name),
     remotesInfo,
-    shared: manifest?.shared.map(item => ({
+    shared: manifest?.shared.map((item) => ({
       assets: item.assets,
       sharedName: item.name,
     })),
-    modules: exposes?.map(expose => ({
+    modules: exposes?.map((expose) => ({
       moduleName: expose.name,
       modulePath: expose.path,
       assets: expose.assets,
