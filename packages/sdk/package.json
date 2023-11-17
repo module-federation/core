@@ -2,11 +2,16 @@
   "name": "@module-federation/sdk",
   "version": "0.0.1",
   "description": "A sdk for support module federation",
-  "keywords": ["Module Federation", "sdk"],
+  "keywords": [
+    "Module Federation",
+    "sdk"
+  ],
   "author": "zhanghang <hanric.zhang@gmail.com>",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
   "main": "./index.cjs.js",
   "module": "./index.esm.js",
-  "types": "./src/index.d.ts"
+  "types": "./index.cjs.d.ts"
 }
