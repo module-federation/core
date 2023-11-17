@@ -61,14 +61,21 @@ export class HoistContainerReferences {
                   if (mod !== null && chunk.runtime) {
                     externalRequests.add(mod);
                     // Get the runtime chunk(s) associated with the chunk
-                    const runtimeChunk = typeof chunk.runtime === 'string' || typeof chunk.runtime === 'number' ? [chunk.runtime] : [...chunk.runtime];
+                    const runtimeChunk =
+                      typeof chunk.runtime === 'string' ||
+                      typeof chunk.runtime === 'number'
+                        ? [chunk.runtime]
+                        : [...chunk.runtime];
                     // Iterate over runtime chunks
                     for (const runtimeChunkId of runtimeChunk) {
                       // Get the runtime chunk from the chunkSet
                       const runtimeChunk = chunkSet.get(runtimeChunkId);
                       // If the runtime chunk exists, connect it with the module in the chunk graph
                       if (runtimeChunk) {
-                        compilation.chunkGraph.connectChunkAndModule(runtimeChunk, mod);
+                        compilation.chunkGraph.connectChunkAndModule(
+                          runtimeChunk,
+                          mod,
+                        );
                       }
                     }
                   }
