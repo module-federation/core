@@ -6,6 +6,8 @@ import {
 import DelegateModulesPlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
+import { HoistContainerReferences } from '@module-federation/enhanced/src/lib/container/HoistContainerReferencesPlugin';
+
 /**
  * Applies client-specific plugins.
  *
@@ -37,14 +39,14 @@ export function applyClientPlugins(
   compiler.options.output.publicPath = 'auto';
   // Build will hang without this. Likely something in my plugin
   compiler.options.optimization.splitChunks = undefined;
-
-  new DelegateModulesPlugin({
-    container: name,
-    runtime: 'webpack',
-    remotes,
-    debug: extraOptions.debug,
-    //@ts-ignore
-  }).apply(compiler);
+  new HoistContainerReferences().apply(compiler);
+  // new DelegateModulesPlugin({
+  //   container: name,
+  //   runtime: 'webpack',
+  //   remotes,
+  //   debug: extraOptions.debug,
+  //   //@ts-ignore
+  // }).apply(compiler);
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
   if (extraOptions.automaticPageStitching) {
