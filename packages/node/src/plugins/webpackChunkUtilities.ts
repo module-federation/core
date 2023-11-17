@@ -348,7 +348,6 @@ export function generateInstallChunk(
       '}',
     ]),
     '}',
-    // 'console.log("install chunk", chunkIds, installedChunks);',
     'if(runtime) runtime(__webpack_require__);',
     'for(var i = 0; i < chunkIds.length; i++) {',
     Template.indent([
