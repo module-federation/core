@@ -205,7 +205,6 @@
     "msw": "^1.2.1",
     "vitest-fetch-mock": "^0.2.2",
     "whatwg-fetch": "^3.6.2"
-
   },
   "config": {
     "commitizen": {
