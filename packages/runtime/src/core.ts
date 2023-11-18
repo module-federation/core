@@ -137,7 +137,7 @@ export class FederationHost {
   moduleCache: Map<string, Module> = new Map();
   snapshotHandler: SnapshotHandler;
   loaderHook = new PluginSystem({
-    // FIXME: may not suitable
+    // FIXME: may not be suitable
     getModuleInfo: new SyncHook<
       [
         {

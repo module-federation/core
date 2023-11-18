@@ -14,7 +14,7 @@ import {
 } from '../type';
 import { assignRemoteInfo } from './snapshot';
 import { getInfoWithoutType, getPreloaded, setPreloaded } from '../global';
-import { getResourceUrl } from '../utils/manifest';
+import { getResourc eUrl } from '../utils/manifest';
 import { FederationHost } from '../core';
 import { defaultPreloadArgs, normalizePreloadExposes } from '../utils/preload';
 import { getGlobalShare } from '../utils/share';

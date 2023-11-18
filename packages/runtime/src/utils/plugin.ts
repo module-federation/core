@@ -12,7 +12,7 @@ export function registerPlugins(
   >,
 ) {
   const globalPlugins = getGlobalHostPlugins();
-  // register global plugins
+  // Register global plugins
   if (globalPlugins.length > 0) {
     globalPlugins.forEach((plugin) => {
       if (plugins?.find((item) => item.name !== plugin.name)) {
