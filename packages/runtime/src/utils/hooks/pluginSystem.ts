@@ -19,7 +19,7 @@ export class PluginSystem<T extends Record<string, any>> {
 
   usePlugin(plugin: Plugin<T>): void {
     assert(isPlainObject(plugin), 'Invalid plugin configuration.');
-    // Plugin name is required and unique
+    // The plugin name is required and must be unique
     const pluginName = plugin.name;
     assert(pluginName, 'Plugin must provide a name.');
 

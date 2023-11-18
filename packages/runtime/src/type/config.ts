@@ -112,7 +112,7 @@ export type LoadModuleOptions = {
   version?: string;
 };
 
-// 仅对旧的 federation provider 使用
+// Only for old federation provider
 export type RemoteEntryInitOptions = {
   version: string;
 };

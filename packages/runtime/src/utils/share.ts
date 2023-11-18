@@ -128,8 +128,8 @@ function findSingletonVersionOrderByLoaded(
   return findVersion(scope, pkgName, callback);
 }
 
-// share info
-// TODO: strictVersion needs to be added to be consistent with mf.
+// Information about sharing
+// TODO: Add strictVersion for consistency with mf.
 export function getGlobalShare(
   pkgName: string,
   shareInfo: ShareInfos[keyof ShareInfos],
