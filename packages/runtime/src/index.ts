@@ -15,17 +15,17 @@ export { loadScript } from './utils';
 let FederationInstance: FederationHost | null = null;
 
 export function init(options: UserOptions): FederationHost {
-  // get the same instance with the same name
+  // Retrieve the same instance with the same name
   const instance = getGlobalFederationInstance(options.name, options.version);
   if (!instance) {
-    // get debug constructor
+    // Retrieve debug constructor
     const FederationConstructor =
       getGlobalFederationConstructor() || FederationHost;
     FederationInstance = new FederationConstructor(options);
     setGlobalFederationInstance(FederationInstance);
     return FederationInstance;
   } else {
-    // merge options
+    // Merge options
     instance.initOptions(options);
     return instance;
   }
@@ -63,5 +63,5 @@ export function preloadRemote(
   return FederationInstance.preloadRemote.apply(FederationInstance, args);
 }
 
-// inject for debug
+// Inject for debug
 setGlobalFederationConstructor(FederationHost);

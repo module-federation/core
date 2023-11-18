@@ -6,7 +6,7 @@ export class AsyncHook<
   T,
   ExternalEmitReturnType = CallbackReturnType,
 > extends SyncHook<T, ExternalEmitReturnType> {
-  emit(...data: ArgsType<T>): Promise<void | false | ExternalEmitReturnType> {
+  override emit(...data: ArgsType<T>): Promise<void | false | ExternalEmitReturnType> {
     let result;
     const ls = Array.from(this.listeners);
     if (ls.length > 0) {
