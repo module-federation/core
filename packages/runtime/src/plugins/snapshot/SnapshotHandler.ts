@@ -111,6 +111,8 @@ export class SnapshotHandler {
 
     // In the dynamic loadRemote scenario, incomplete remotesInfo delivery may occur. In this case, the remotesInfo in the host needs to be completed in the snapshot at runtime.
     // Ensure the integrity of the snapshot, and at the same time help the chrome plug-in correctly identify all producer modules, ensuring that proxyable producer modules will not be missing
+    // In the dynamic loadRemote scenario, incomplete remotesInfo delivery may occur. In this case, the remotesInfo in the host needs to be completed in the snapshot at runtime.
+    // Ensure the integrity of the snapshot, and at the same time help the chrome plug-in correctly identify all producer modules, ensuring that proxyable producer modules will not be missing
     if (
       hostSnapshot &&
       'remotesInfo' in hostSnapshot &&

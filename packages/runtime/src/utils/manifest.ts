@@ -9,7 +9,7 @@ export function getResourceUrl(module: ModuleInfo, sourceUrl: string): string {
     return `${module.publicPath}${sourceUrl}`;
   } else {
     console.warn(
-      'Can not get resource url, if in debug mode, please ignore',
+      'Cannot get resource URL. If in debug mode, please ignore.',
       module,
       sourceUrl,
     );

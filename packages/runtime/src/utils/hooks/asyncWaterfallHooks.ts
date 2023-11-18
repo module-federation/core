@@ -15,7 +15,7 @@ export class AsyncWaterfallHook<T extends Record<string, any>> extends SyncHook<
     this.type = type;
   }
 
-  emit(data: T): Promise<T> {
+  override emit(data: T): Promise<T> {
     if (!isObject(data)) {
       error(`"${this.type}" hook response data must be an object.`);
     }

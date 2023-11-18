@@ -29,7 +29,7 @@ export class SyncWaterfallHook<T extends Record<string, any>> extends SyncHook<
     this.type = type;
   }
 
-  emit(data: T): T {
+  override emit(data: T): T {
     if (!isObject(data)) {
       error(`"${this.type}" hook response data must be an object.`);
     }

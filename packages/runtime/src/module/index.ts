@@ -49,7 +49,7 @@ class Module {
       return this.remoteEntryExports;
     }
 
-    // 获取 remoteEntry.js
+    // Get remoteEntry.js
     const remoteEntryExports = await getRemoteEntry({
       remoteInfo: this.remoteInfo,
       remoteEntryExports: this.remoteEntryExports,
@@ -73,7 +73,7 @@ class Module {
   async get(expose: string, options?: { loadFactory?: boolean }) {
     const { loadFactory = true } = options || { loadFactory: true };
 
-    // 获取 remoteEntry.js
+    // Get remoteEntry.js
     const remoteEntryExports = await this.getEntry();
 
     if (!this.inited) {
