@@ -12,9 +12,10 @@ class MyDocument extends Document {
     const chunks = await flushChunks();
     ctx?.res?.on('finish', () => {
       revalidate().then((shouldUpdate) => {
-        if(shouldUpdate) {
+        if (shouldUpdate) {
           console.log('should HMR', shouldUpdate);
-        }      });
+        }
+      });
     });
 
     return {
