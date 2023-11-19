@@ -15,7 +15,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
   private options: InvertedContainerRuntimeModuleOptions;
 
   constructor(options: InvertedContainerRuntimeModuleOptions) {
-    super('inverted container startup', RuntimeModule.STAGE_BASIC);
+    super('inverted container startup', RuntimeModule.STAGE_ATTACH + 3);
     this.options = options;
   }
 
@@ -96,16 +96,16 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         )}]) {`,
         `    ${containerScope}[${JSON.stringify(name)}] = innerRemote;`,
         '  }',
-        `  __webpack_require__.S.default = new Proxy({${sharedObjectString}}`,
-        ' , {',
-        '    get: function(target, property) {',
-        '      return target[property];',
-        '    },',
-        '    set: function(target, property, value) {',
-        '      target[property] = value;',
-        '      return true;',
-        '    }',
-        '  });',
+        // `  __webpack_require__.S.default = new Proxy({${sharedObjectString}}`,
+        // ' , {',
+        // '    get: function(target, property) {',
+        // '      return target[property];',
+        // '    },',
+        // '    set: function(target, property, value) {',
+        // '      target[property] = value;',
+        // '      return true;',
+        // '    }',
+        // '  });',
         '  if(resolve) resolve(innerRemote);',
         '}',
       ]),
