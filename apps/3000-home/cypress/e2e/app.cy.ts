@@ -36,7 +36,7 @@ describe('3000-home/', () => {
       cy.url().should('include', '/shop');
       getH1().contains('Shop Page');
       cy.get('.home-menu-link').click();
-      cy.wait(2999)
+      cy.wait(2999);
       cy.url().should('include', '/');
       getH1().contains('This is SPA combined');
     });
@@ -99,7 +99,7 @@ describe('3000-home/', () => {
         cy.url().should('include', '/shop');
         getH1().contains('Shop Page');
         cy.get('.home-menu-link').click();
-        cy.wait(2999)
+        cy.wait(2999);
         cy.get('img.shop-webpack-png')
           .invoke('attr', 'src')
           .then((src) => {
@@ -116,4 +116,3 @@ describe('3000-home/', () => {
     });
   });
 });
-
