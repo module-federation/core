@@ -58,7 +58,7 @@
         "lintFilePatterns": ["apps/3000-home/**/*.{ts,tsx,js,jsx}"]
       }
     },
-    "e2eReal": {
+    "e2e": {
       "executor": "@nx/cypress:cypress",
       "options": {
         "cypressConfig": "apps/3000-home/cypress.config.ts",
@@ -71,7 +71,7 @@
         }
       }
     },
-    "e2e": {
+    "test": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": true,
@@ -85,7 +85,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 5 && nx run 3000-home:e2eReal",
+            "command": "sleep 10 && nx run 3000-home:e2e && echo 'killing' && lsof -ti tcp:3000,3001,3002 | xargs kill",
             "forwardAllArgs": true
           }
         ]
