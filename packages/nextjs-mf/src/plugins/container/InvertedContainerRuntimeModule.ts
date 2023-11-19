@@ -35,9 +35,21 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
   }
   private generateSharedObjectString(): string {
     const sharedObjects = [
-      { key: 'react', version: '18.100.0', path: './react' },
-      { key: 'next/router', version: '13.100.0', path: './next/router' },
-      { key: 'react-dom', version: '18.100.0', path: './react-dom' },
+      {
+        key: 'react',
+        version: require('react/package.json').version,
+        path: './react',
+      },
+      {
+        key: 'next/router',
+        version: require('next/package.json').version,
+        path: './next/router',
+      },
+      {
+        key: 'react-dom',
+        version: require('react-dom/package.json').version,
+        path: './react-dom',
+      },
     ];
 
     return sharedObjects.reduce((acc, obj) => {
