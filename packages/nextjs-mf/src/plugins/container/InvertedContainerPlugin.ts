@@ -5,7 +5,7 @@ import { AsyncBoundaryPlugin } from '@module-federation/enhanced';
 import HoistPseudoEager from './HoistPseudoEagerModules';
 
 /**
- * This interface extends the ModuleFederationPluginOptions interface and includes additional fields 
+ * This interface extends the ModuleFederationPluginOptions interface and includes additional fields
  * specific to the InvertedContainerPlugin's behavior.
  * @interface InvertedContainerOptions
  * @property {string} [container] - The name of the container.

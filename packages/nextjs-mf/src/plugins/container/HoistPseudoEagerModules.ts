@@ -43,7 +43,6 @@ export class HoistPseudoEager {
               }
             }
 
-
             // Iterate over chunks again to handle remote modules
             for (const chunk of chunks) {
               // Get iterable of remote modules for the chunk
@@ -53,15 +52,21 @@ export class HoistPseudoEager {
                   'remote',
                 );
               if (!remoteModules) continue;
-              const runtime = chunkSet.get('webpack-runtime') || chunkSet.get('webpack');
-              const runtimeRoots = runtime ? compilation.chunkGraph.getChunkRootModules(runtime) : null;
-              const refChunks = runtime ? Array.from(runtime.getAllReferencedChunks()) : null;
+              const runtime =
+                chunkSet.get('webpack-runtime') || chunkSet.get('webpack');
+              const runtimeRoots = runtime
+                ? compilation.chunkGraph.getChunkRootModules(runtime)
+                : null;
+              const refChunks = runtime
+                ? Array.from(runtime.getAllReferencedChunks())
+                : null;
               if (refChunks) {
                 for (const refChunk of refChunks) {
-                  const consumeSharedModules = compilation.chunkGraph.getChunkModulesIterableBySourceType(
-                    refChunk,
-                    'consume-shared',
-                  );
+                  const consumeSharedModules =
+                    compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                      refChunk,
+                      'consume-shared',
+                    );
                   if (!consumeSharedModules) continue;
                   //loop through consume-shared modules
                   for (const module of consumeSharedModules) {
@@ -83,7 +88,6 @@ export class HoistPseudoEager {
                   }
                 }
               }
-
             }
           },
         );
@@ -92,4 +96,3 @@ export class HoistPseudoEager {
   }
 }
 export default HoistPseudoEager;
-
