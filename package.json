@@ -19,7 +19,7 @@
     "nx": "nx",
     "commit": "cz",
     "docs": "typedoc",
-    "e2e:test": "nx run 3000-home:e2e",
+    "e2e:test": "nx run 3000-home:test",
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
     "build": "nx run-many --target=build --parallel=3 --exclude='*,!tag:package'",
