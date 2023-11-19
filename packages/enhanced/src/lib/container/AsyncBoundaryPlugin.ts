@@ -116,7 +116,9 @@ class AsyncEntryStartupPlugin {
             );
 
           const entryOptions = upperContext.chunk.getEntryOptions();
-          const chunksToRef = entryOptions?.dependOn ? [...entryOptions.dependOn, upperContext.chunk.id] : [upperContext.chunk.id];
+          const chunksToRef = entryOptions?.dependOn
+            ? [...entryOptions.dependOn, upperContext.chunk.id]
+            : [upperContext.chunk.id];
 
           if (
             requirements.has(RuntimeGlobals.currentRemoteGetScope) ||
