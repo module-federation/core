@@ -55,7 +55,6 @@ class AsyncEntryStartupPlugin {
     ).renderStartup.tap(
       'AsyncEntryStartupPlugin',
       (source: any, renderContext: Module, upperContext: { chunk: Chunk }) => {
-        // Check if this._runtimeChunks contains any runtime chunks
         const isSingleRuntime = compiler.options?.optimization?.runtimeChunk;
         if (upperContext?.chunk.id && isSingleRuntime) {
           if (upperContext?.chunk.hasRuntime()) {
@@ -64,7 +63,6 @@ class AsyncEntryStartupPlugin {
           }
         }
 
-        // Check if excludeChunk is provided, use it to decide further processing
         if (
           this._options.excludeChunk &&
           this._options.excludeChunk(upperContext.chunk)
@@ -95,7 +93,7 @@ class AsyncEntryStartupPlugin {
         if (runtime.size === 0) {
           runtime.add(upperContext.chunk);
         }
-        // Get the runtime requirements of the chunk
+
         let remotes = '';
         let shared = '';
 
@@ -117,59 +115,59 @@ class AsyncEntryStartupPlugin {
               'consume-shared',
             );
 
-          // Check if the chunk has remote get scope
+          const entryOptions = upperContext.chunk.getEntryOptions();
+          const chunksToRef = entryOptions?.dependOn ? [...entryOptions.dependOn, upperContext.chunk.id] : [upperContext.chunk.id];
+
           if (
             requirements.has(RuntimeGlobals.currentRemoteGetScope) ||
             hasRemoteModules ||
             requirements.has('__webpack_require__.vmok')
           ) {
-            remotes = `if(__webpack_require__.f && __webpack_require__.f.remotes) __webpack_require__.f.remotes(${JSON.stringify(
-              upperContext.chunk.id,
-            )}, promiseTrack);`;
+            for (const chunkId of chunksToRef) {
+              remotes += `if(__webpack_require__.f && __webpack_require__.f.remotes) __webpack_require__.f.remotes(${JSON.stringify(
+                chunkId,
+              )}, promiseTrack);`;
+            }
           }
 
-          // Check if the chunk has share scope map or initialize sharing
           if (
             requirements.has(RuntimeGlobals.shareScopeMap) ||
             requirements.has(RuntimeGlobals.initializeSharing) ||
             consumeShares
           ) {
-            shared = `if(__webpack_require__.f && __webpack_require__.f.consumes) __webpack_require__.f.consumes(${JSON.stringify(
-              upperContext.chunk.id,
-            )}, promiseTrack);`;
+            for (const chunkId of chunksToRef) {
+              shared += `if(__webpack_require__.f && __webpack_require__.f.consumes) __webpack_require__.f.consumes(${JSON.stringify(
+                chunkId,
+              )}, promiseTrack);`;
+            }
           }
         }
 
-        // If no remotes or shared, return the source
         if (!remotes && !shared) {
           return source;
         }
 
-        // Get the entry modules of the chunk
         const entryModules =
           compilation.chunkGraph.getChunkEntryModulesIterable(
             upperContext.chunk,
           );
 
         const initialEntryModules = [];
-        // Iterate over the entry modules
+
         for (const entryModule of entryModules) {
           const entryModuleID = compilation.chunkGraph.getModuleId(entryModule);
           if (entryModuleID) {
             let shouldInclude = false;
 
-            // Check if eager is a function and call it
             if (typeof this._options.eager === 'function') {
               shouldInclude = this._options.eager(entryModule);
             } else if (
               this._options.eager &&
               this._options.eager.test(entryModule.identifier())
             ) {
-              // Check if eager is a RegExp and test it
               shouldInclude = true;
             }
 
-            // If shouldInclude is true, push the module to initialEntryModules
             if (shouldInclude) {
               initialEntryModules.push(
                 `__webpack_require__(${JSON.stringify(entryModuleID)});`,
