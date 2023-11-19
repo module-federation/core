@@ -34,13 +34,15 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     import: undefined,
   },
   'next/router': {
-    requiredVersion: undefined,
+    requiredVersion: false,
     singleton: true,
     import: undefined,
   },
   '@module-federation/utilities': {
     eager: true,
-    requiredVersion: false,
+    version: require('@module-federation/utilities/package.json').version,
+    requiredVersion: require('@module-federation/utilities/package.json')
+      .version,
   },
   'next/image': {
     requiredVersion: undefined,
@@ -54,22 +56,22 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   },
   react: {
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react/': {
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react-dom/': {
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react-dom': {
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react/jsx-dev-runtime': {
@@ -83,19 +85,22 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     // import: false,
   },
   'styled-jsx': {
-    requiredVersion: undefined,
     singleton: true,
     import: undefined,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
   },
   'styled-jsx/style': {
-    requiredVersion: false,
     singleton: true,
     import: false,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
   },
   'styled-jsx/css': {
-    requiredVersion: false,
     singleton: true,
     import: undefined,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
   },
 };
 
