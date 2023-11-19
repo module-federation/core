@@ -3,7 +3,6 @@ import {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
 } from '@module-federation/utilities';
-import DelegateModulesPlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import { HoistContainerReferences } from '@module-federation/enhanced/src/lib/container/HoistContainerReferencesPlugin';

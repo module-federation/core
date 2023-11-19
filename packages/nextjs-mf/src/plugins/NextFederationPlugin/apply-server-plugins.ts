@@ -1,6 +1,6 @@
 import { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
-import DelegatesModulePlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
+import { HoistContainerReferences } from '@module-federation/enhanced/src/lib/container/HoistContainerReferencesPlugin';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import {
@@ -35,12 +35,9 @@ export function applyServerPlugins(
     );
   }
   new ModuleInfoRuntimePlugin().apply(compiler);
-  // Apply the DelegatesModulePlugin to the compiler
-  new DelegatesModulePlugin({
-    runtime: 'webpack-runtime',
-    remotes: options.remotes,
-    container: options.name,
-  }).apply(compiler);
+  // Hoist container references into runtime chunks
+  //@ts-ignore
+  new HoistContainerReferences().apply(compiler);
 
   // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
   new StreamingTargetPlugin(options, {
