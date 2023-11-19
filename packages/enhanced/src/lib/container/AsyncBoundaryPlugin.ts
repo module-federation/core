@@ -30,23 +30,20 @@ class AsyncEntryStartupPlugin {
   }
 
   private collectRuntimeChunks(compilation: Compilation): void {
-    compilation.hooks.beforeChunkAssets.tap(
-      'AsyncEntryStartupPlugin',
-      () => {
-        for (const chunk of compilation.chunks) {
-          if (chunk.hasRuntime() && chunk.id !== null) {
-            this._runtimeChunks.set(chunk.id, chunk);
-            for (const dependentChunk of compilation.chunkGraph.getChunkEntryDependentChunksIterable(
-              chunk,
-            )) {
-              if (dependentChunk.id !== null) {
-                this._runtimeChunks.set(dependentChunk.id, dependentChunk);
-              }
+    compilation.hooks.beforeChunkAssets.tap('AsyncEntryStartupPlugin', () => {
+      for (const chunk of compilation.chunks) {
+        if (chunk.hasRuntime() && chunk.id !== null) {
+          this._runtimeChunks.set(chunk.id, chunk);
+          for (const dependentChunk of compilation.chunkGraph.getChunkEntryDependentChunksIterable(
+            chunk,
+          )) {
+            if (dependentChunk.id !== null) {
+              this._runtimeChunks.set(dependentChunk.id, dependentChunk);
             }
           }
         }
-      },
-    );
+      }
+    });
   }
 
   private handleRenderStartup(
