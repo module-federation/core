@@ -1,5 +1,6 @@
 {
   "extends": [
+    "plugin:cypress/recommended",
     "plugin:@nx/react-typescript",
     "next",
     "next/core-web-vitals",
@@ -19,6 +20,10 @@
     },
     {
       "files": ["*.js", "*.jsx"],
+      "rules": {}
+    },
+    {
+      "files": ["*.cy.{ts,js,tsx,jsx}", "cypress/**/*.{ts,js,tsx,jsx}"],
       "rules": {}
     }
   ],
