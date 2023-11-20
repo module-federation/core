@@ -57,6 +57,19 @@
       "options": {
         "lintFilePatterns": ["apps/3002-checkout/**/*.{ts,tsx,js,jsx}"]
       }
+    },
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/3002-checkout/cypress.config.ts",
+        "testingType": "e2e",
+        "devServerTarget": "3002-checkout:serve"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "3002-checkout:serve:production"
+        }
+      }
     }
   },
   "tags": []
