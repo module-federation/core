@@ -19,6 +19,7 @@
         "assets": [],
         "project": "packages/runtime/package.json",
         "compiler": "swc",
+        "rollupConfig": "packages/runtime/rollup.config.js",
         "format": ["cjs", "esm"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true
