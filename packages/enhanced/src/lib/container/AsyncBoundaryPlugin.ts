@@ -12,11 +12,10 @@ interface Options {
 
 class AsyncEntryStartupPlugin {
   private _options: Options;
-  private _runtimeChunks: Map<string | number, Chunk>;
+  private _runtimeChunks = new Map<string | number, Chunk | undefined>();
 
   constructor(options?: Options) {
     this._options = options || {};
-    this._runtimeChunks = new Map<string | number, Chunk>();
   }
 
   apply(compiler: Compiler): void {
@@ -55,23 +54,7 @@ class AsyncEntryStartupPlugin {
         return source;
       }
 
-      const runtime = new Set();
-      if (typeof upperContext.chunk.runtime === 'string' || typeof upperContext.chunk.runtime === 'number') {
-        if (this._runtimeChunks.has(upperContext.chunk.runtime)) {
-          runtime.add(this._runtimeChunks.get(upperContext.chunk.runtime));
-        } else {
-          runtime.add(upperContext.chunk);
-        }
-      } else if (upperContext.chunk.runtime && typeof upperContext.chunk.runtime[Symbol.iterator] === 'function') {
-        for (const runtimeItem of upperContext.chunk.runtime) {
-          if (this._runtimeChunks.has(runtimeItem)) {
-            runtime.add(this._runtimeChunks.get(runtimeItem));
-          }
-        }
-      }
-      if (runtime.size === 0) {
-        runtime.add(upperContext.chunk);
-      }
+      const runtime = this.getChunkRuntime(upperContext);
 
       let remotes = '';
       let shared = '';
@@ -83,47 +66,86 @@ class AsyncEntryStartupPlugin {
         const entryOptions = upperContext.chunk.getEntryOptions();
         const chunksToRef = entryOptions?.dependOn ? [...entryOptions.dependOn, upperContext.chunk.id] : [upperContext.chunk.id];
 
-        if (requirements.has(RuntimeGlobals.currentRemoteGetScope) || hasRemoteModules || requirements.has('__webpack_require__.vmok')) {
-          for (const chunkId of chunksToRef) {
-            remotes += `if(__webpack_require__.f && __webpack_require__.f.remotes) __webpack_require__.f.remotes(${JSON.stringify(chunkId)}, promiseTrack);`;
-          }
-        }
-
-        if (requirements.has(RuntimeGlobals.shareScopeMap) || requirements.has(RuntimeGlobals.initializeSharing) || consumeShares) {
-          for (const chunkId of chunksToRef) {
-            shared += `if(__webpack_require__.f && __webpack_require__.f.consumes) __webpack_require__.f.consumes(${JSON.stringify(chunkId)}, promiseTrack);`;
-          }
-        }
+        remotes = this.getRemotes(requirements, hasRemoteModules, chunksToRef, remotes);
+        shared = this.getShared(requirements, consumeShares, chunksToRef, shared);
       }
 
       if (!remotes && !shared) {
         return source;
       }
 
-      const entryModules = compilation.chunkGraph.getChunkEntryModulesIterable(upperContext.chunk);
-      const initialEntryModules = [];
+      const initialEntryModules = this.getInitialEntryModules(compilation, upperContext);
+      return this.getTemplateString(compiler, initialEntryModules, shared, remotes, source);
+    });
+  }
 
-      for (const entryModule of entryModules) {
-        const entryModuleID = compilation.chunkGraph.getModuleId(entryModule);
-        if (entryModuleID) {
-          let shouldInclude = false;
-
-          if (typeof this._options.eager === 'function') {
-            shouldInclude = this._options.eager(entryModule);
-          } else if (this._options.eager && this._options.eager.test(entryModule.identifier())) {
-            shouldInclude = true;
-          }
-
-          if (shouldInclude) {
-            initialEntryModules.push(`__webpack_require__(${JSON.stringify(entryModuleID)});`);
-          }
+  private getChunkRuntime(upperContext: { chunk: Chunk }): Set<Chunk | undefined> {
+    const runtime = new Set<Chunk | undefined>();
+    if (typeof upperContext.chunk.runtime === 'string' || typeof upperContext.chunk.runtime === 'number') {
+      if (this._runtimeChunks.has(upperContext.chunk.runtime)) {
+        runtime.add(this._runtimeChunks.get(upperContext.chunk.runtime));
+      } else {
+        runtime.add(upperContext.chunk);
+      }
+    } else if (upperContext.chunk.runtime && typeof upperContext.chunk.runtime[Symbol.iterator] === 'function') {
+      for (const runtimeItem of upperContext.chunk.runtime) {
+        if (this._runtimeChunks.has(runtimeItem)) {
+          runtime.add(this._runtimeChunks.get(runtimeItem));
         }
       }
-      if (compiler.options?.experiments?.topLevelAwait && compiler.options?.experiments?.outputModule) {
-        return Template.asString(['var promiseTrack = [];', Template.asString(initialEntryModules), shared, remotes, 'await Promise.all(promiseTrack)', Template.indent(source.source())]);
+    }
+    if (runtime.size === 0) {
+      runtime.add(upperContext.chunk);
+    }
+    return runtime;
+  }
+
+  private getRemotes(requirements: ReadonlySet<string>, hasRemoteModules: Iterable<Module> | undefined, chunksToRef: (string | number)[], remotes: string): string {
+    if (requirements.has(RuntimeGlobals.currentRemoteGetScope) || hasRemoteModules || requirements.has('__webpack_require__.vmok')) {
+      for (const chunkId of chunksToRef) {
+        remotes += `if(__webpack_require__.f && __webpack_require__.f.remotes) __webpack_require__.f.remotes(${JSON.stringify(chunkId)}, promiseTrack);`;
       }
-      return Template.asString(['var promiseTrack = [];', Template.asString(initialEntryModules), shared, remotes, 'var __webpack_exports__ = Promise.all(promiseTrack).then(function() {', Template.indent(source.source()), Template.indent('return __webpack_exports__'), '});']);
-    });
+    }
+    return remotes;
+  }
+
+  private getShared(requirements: ReadonlySet<string>, consumeShares: Iterable<Module> | undefined, chunksToRef: (string | number)[], shared: string): string {
+    if (requirements.has(RuntimeGlobals.shareScopeMap) || requirements.has(RuntimeGlobals.initializeSharing) || consumeShares) {
+      for (const chunkId of chunksToRef) {
+        shared += `if(__webpack_require__.f && __webpack_require__.f.consumes) __webpack_require__.f.consumes(${JSON.stringify(chunkId)}, promiseTrack);`;
+      }
+    }
+    return shared;
+  }
+
+  private getInitialEntryModules(compilation: Compilation, upperContext: { chunk: Chunk }): string[] {
+    const entryModules = compilation.chunkGraph.getChunkEntryModulesIterable(upperContext.chunk);
+    const initialEntryModules = [];
+
+    for (const entryModule of entryModules) {
+      const entryModuleID = compilation.chunkGraph.getModuleId(entryModule);
+      if (entryModuleID) {
+        let shouldInclude = false;
+
+        if (typeof this._options.eager === 'function') {
+          shouldInclude = this._options.eager(entryModule);
+        } else if (this._options.eager && this._options.eager.test(entryModule.identifier())) {
+          shouldInclude = true;
+        }
+
+        if (shouldInclude) {
+          initialEntryModules.push(`__webpack_require__(${JSON.stringify(entryModuleID)});`);
+        }
+      }
+    }
+    return initialEntryModules;
+  }
+
+  private getTemplateString(compiler: Compiler, initialEntryModules: string[], shared: string, remotes: string, source: any): string {
+    if (compiler.options?.experiments?.topLevelAwait && compiler.options?.experiments?.outputModule) {
+      return Template.asString(['var promiseTrack = [];', Template.asString(initialEntryModules), shared, remotes, 'await Promise.all(promiseTrack)', Template.indent(source.source())]);
+    }
+    return Template.asString(['var promiseTrack = [];', Template.asString(initialEntryModules), shared, remotes, 'var __webpack_exports__ = Promise.all(promiseTrack).then(function() {', Template.indent(source.source()), Template.indent('return __webpack_exports__'), '});']);
   }
 }
 
