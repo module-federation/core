@@ -14,7 +14,7 @@ import {
 } from '../type';
 import { assignRemoteInfo } from './snapshot';
 import { getInfoWithoutType, getPreloaded, setPreloaded } from '../global';
-import { getResourc eUrl } from '../utils/manifest';
+import { getResourceUrl } from '../utils/manifest';
 import { FederationHost } from '../core';
 import { defaultPreloadArgs, normalizePreloadExposes } from '../utils/preload';
 import { getGlobalShare } from '../utils/share';
@@ -137,6 +137,7 @@ export function generatePreloadAssets(
             ) {
               return true;
             }
+            return false;
           });
           if (!findPreloadConfig) {
             return;
@@ -247,6 +248,7 @@ export function generatePreloadAssets(
       if (res && !(res instanceof Promise)) {
         return res;
       }
+      return;
     },
   );
 
