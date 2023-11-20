@@ -9,7 +9,6 @@ export const mergeShareInfo1 = {
       shareConfig: {
         singleton: true,
         requiredVersion: '^16.0.0',
-        fixedDependencies: false,
         eager: false
       },
       get: () => Promise.resolve(() => ({
@@ -61,7 +60,6 @@ export const localMergeShareInfos: Options['shared'] = {
     shareConfig: {
       singleton: true,
       requiredVersion: '^16.0.0',
-      fixedDependencies: false,
       eager: false
     },
     scope: ['default'],
@@ -75,7 +73,6 @@ export const localMergeShareInfos: Options['shared'] = {
     shareConfig: {
       singleton: false,
       requiredVersion: '^17.0.0',
-      fixedDependencies: false,
       eager: false
     },
     scope: ['default', 'sub2'],
@@ -94,7 +91,6 @@ export const globalMergeShareInfos: GlobalShareScope = {
         shareConfig: {
           singleton: false,
           requiredVersion: '^16.0.0',
-          fixedDependencies: false,
           eager: false
         },
         scope: ['default'],
@@ -110,7 +106,6 @@ export const globalMergeShareInfos: GlobalShareScope = {
         shareConfig: {
           singleton: false,
           requiredVersion: '^16.0.0',
-          fixedDependencies: false,
           eager: false
         },
         scope: ['default', 'sub2'],
@@ -124,7 +119,6 @@ export const globalMergeShareInfos: GlobalShareScope = {
         shareConfig: {
           singleton: false,
           requiredVersion: '^16.0.0',
-          fixedDependencies: false,
           eager: false
         },
         scope: ['default', 'sub2'],
@@ -142,7 +136,6 @@ export const globalMergeShareInfos: GlobalShareScope = {
         shareConfig: {
           singleton: false,
           requiredVersion: '^16.0.0',
-          fixedDependencies: false,
           eager: false
         },
         scope: ['default', 'sub2'],
@@ -156,7 +149,6 @@ export const globalMergeShareInfos: GlobalShareScope = {
         shareConfig: {
           singleton: false,
           requiredVersion: '^16.0.0',
-          fixedDependencies: false,
           eager: false
         },
         scope: ['default', 'sub2'],
