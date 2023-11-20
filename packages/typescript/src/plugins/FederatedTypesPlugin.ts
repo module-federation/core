@@ -288,10 +288,9 @@ export class FederatedTypesPlugin {
   ) {
     try {
       this.logger.log(`Getting types index for remote '${remote}'`);
-      const resp = await axios.get<TypesStatsJson>(
-        `${new URL(origin)}${this.normalizeOptions.typesIndexJsonFileName}`,
-        { timeout: downloadRemoteTypesTimeout },
-      );
+      const indexTypesUrl = new URL(origin);
+      indexTypesUrl.pathname = _path.default.join(indexTypesUrl.pathname, this.normalizeOptions.typesIndexJsonFileName);
+      const resp = await axios.get<TypesStatsJson>(indexTypesUrl, { timeout: downloadRemoteTypesTimeout });
 
       const statsJson = resp.data;
 
