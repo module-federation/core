@@ -64,11 +64,11 @@
         "parallel": true,
         "commands": [
           {
-            "command": "nx run 3002-checkout:serve",
+            "command": "lsof -i :3002 || nx run 3002-checkout:serve",
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 20 && nx run 3002-checkout:e2e && sleep 120 && lsof -ti tcp:3000,3001,3002 | xargs kill",
+            "command": "sleep 5 && nx run 3002-checkout:e2e",
             "forwardAllArgs": true
           }
         ]
