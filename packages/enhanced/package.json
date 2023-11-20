@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.2.0-canary.4",
+  "version": "0.2.0-canary.5",
   "type": "commonjs",
   "main": "src/index.js",
   "types": "src/index.d.ts",
