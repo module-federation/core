@@ -1,4 +1,4 @@
-# `@vmok/runtime-open-source`
+# `@module-federation/runtime`
 
 * Can be combined with the build plug-in to share basic dependencies according to policies to reduce the number of module downloads and improve the loading speed of modules.
 * Only consume part of the export of the remote module and will not fully download the remote module
@@ -9,33 +9,22 @@
 ```javascript
 // Can load modules using only the runtime SDK without relying on build plugins
 // When not using build plugins, shared dependencies cannot be automatically reused
-import { init, loadRemote } from '@vmok/kit/runtime';
+import { init, loadRemote } from '@module-federation/runtime';
 
 init({
     name: '@demo/app-main',
     remotes: [
         {
+            name: "@demo/app2",
+            entry: "http://localhost:3006/remoteEntry.js"
+        },
+        {
             name: "@demo/app3",
             alias: "app3",
-            entry: "http://localhost:2001/vmok-manifest.json"
-        },
-        // Runtime consumption version support requires @vmok/kit 1.6.0 and above
-        {
-            name: "@demo/app2",
-            // If the version number is specified, the specific version number data will be obtained
-            // If the version interval or * is set, then the latest released producer data will be obtained
-            version: "1.0.0"
+            entry: "http://localhost:2001/module-federation-manifest.json"
         },
     ],
-    // If you want to fill in version at runtime, you must fill in this field
-    // This field means: @demo/app2 version 1.0.0 released under Extranet-CN will be obtained automatically
-    region: NetTypeRegionMap.EXTRANET_CN,
 });
-
-// Load the util exposed by app2
-// loadRemote<{add: (...args: Array<number>)=> number }>("@demo/app2/util").then((md)=>{
-//     md.add(1,2);
-// });
 
 // Load by alias
 loadRemote<{add: (...args: Array<number>)=> number }>("app3/util").then((md)=>{
@@ -46,25 +35,13 @@ loadRemote<{add: (...args: Array<number>)=> number }>("app3/util").then((md)=>{
 ### init
 
 - Type: `init(options: InitOptions): void`
-- It is used to dynamically register the `Vmok` module at runtime, you can also use `Vmok` to build a plugin registration module, and use the build plugin registration module first
+- It is used to dynamically register the module at runtime
 - InitOptions:
 
 ```ts
 type InitOptions {
-    // Current host name
     name: string;
-    // Current host version. The host version corresponding to the online version will be used.
-    // The remoteInfo in remotes will use the online version.
-    version: string;
-    // The area where the module is deployed, the consumer will transparently transmit this data to the producer
-    // After setting, when the producer data fails to be obtained normally, the backup data will be obtained automatically according to this configuration
-    region?: `EnhancedRegion`;
-    // tip: The remotes configured at runtime are not exactly the same as the type and data passed in by the build plugin, and the runtime does not support passing in * ^ ~ version rules
-    remotes: Array<RemoteInfo>;
-    // List of dependencies that need to be shared by the current host
-    // When using build plugins, users can configure the dependencies that need to be shared in the build plugin,
-    // and the build plugin will inject the dependencies that need to be shared into the runtime shared configuration
-    // When shared is passed in at runtime, the version instance reference must be manually passed in, because it cannot be directly passed in at runtime
+    version?: string;
     shared?: ShareInfos;
 };
 
@@ -108,35 +85,23 @@ type Share = {
 - Example
 
 ```js
-import { init, loadRemote } from '@vmok/kit/runtime';
+import { init, loadRemote } from '@module-federation/runtime';
 
 init({
     name: "@demo/main-app",
-    region: "cn",
     remotes: [
         {
-            name: "@demo/app3",
-            // After configuring the alias, it can be loaded directly through the alias
-            alias: "app3",
-            // Determine the loaded module by specifying the manifest.json file address of the module
-            entry: "http://localhost:2001/vmok-manifest.json"
+            name: "@demo/app2",
+            entry: "http://localhost:3006/remoteEntry.js"
         },
         {
-             // Runtime consumption version support requires @vmok/kit 1.6.0 and above
-            name: "@demo/app2",
-            // If the version number is specified, the specific version number data will be obtained
-            // If the version interval or * is set, then the latest released producer data will be obtained
-            version: "1.0.0"
+            name: "@demo/app3",
+            alias: "app3",
+            entry: "http://localhost:2001/module-federation-manifest.json"
         },
     ],
-    // If you want to fill in version at runtime, you must fill in this field
-    // This field means: @demo/app2 version 1.0.0 released under Extranet-CN will be obtained automatically
-    region: NetTypeRegionMap.EXTRANET_CN,
 });
 ```
-import CustomAddress from '@components/en/CustomAddress'
-
-<CustomAddress />
 
 ### loadRemote
 
@@ -146,56 +111,25 @@ import CustomAddress from '@components/en/CustomAddress'
 - Example
 
 ```javascript
-import { init, loadRemote } from '@vmok/kit/runtime';
+import { init, loadRemote } from '@module-federation/runtime';
 
 init({
     name: "@demo/main-app",
-    region: "cn",
     remotes: [
-        // Not yet supported to consume version at runtime directly
-        // {
-        //     // Remote module name
-        //     name: "@demo/app2",
-        //     // Remote module version, can directly specify version or semver rule
-        //     // https://semver.org/lang/zh-CN/
-        //     version: "^1.0.0"
-        // },
         {
             name: "@demo/app3",
-            // After configuring the alias, it can be loaded directly through the alias
             alias: "app3",
-            // Determine the loaded module by specifying the manifest.json file address of the module
-            entry: "http://localhost:2001/vmok-manifest.json"
+            entry: "http://localhost:2001/module-federation-manifest.json"
         }
     ],
 });
 
 // remoteName + expose
-loadRemote("@demo/app2/util").then((m)=> m.add(1,2,3));
+loadRemote("@demo/app3/util").then((m)=> m.add(1,2,3));
 
 // alias + expose
 loadRemote("app3/util").then((m)=> m.add(1,2,3));
 ```
-
-::: tip
-The prefix of the alias and name cannot be the same, for example:
-
-```js
-remotes: [
-    {
-        name: "@tiktok/button",
-        version: "1.0.2"
-    },
-    {
-        name: "@tiktok/component",
-        alias: "@tiktok",
-        version: "1.0.1"
-    }
-]
-```
-
-Because the reference supports multi-level path reference, it cannot be determined internally whether it is obtained from `"@tiktok/button"` or `"@tiktok/component"` when using `"@tiktok/button"`
-:::
 
 ### loadShare
 
@@ -206,7 +140,10 @@ Because the reference supports multi-level path reference, it cannot be determin
 - Example
 
 ```js
-import { init, loadRemote, loadShare } from '@vmok/kit/runtime';
+import { init, loadRemote, loadShare } from '@module-federation/runtime';
+import React from 'react';
+import ReactDOM from 'react-dom';
+
 init({
     name: "@demo/main-app",
     remotes: [],
@@ -214,7 +151,7 @@ init({
         react: {
             version: "17.0.0",
             scope: "default",
-            lib: ()=> import("react"),
+            lib: ()=> React,
             shareConfig: {
                 singleton: true,
                 requiredVersion: "^17.0.0"
@@ -223,7 +160,7 @@ init({
         "react-dom": {
             version: "17.0.0",
             scope: "default",
-            lib: ()=> import("react-dom"),
+            lib: ()=> ReactDOM,
             shareConfig: {
                 singleton: true,
                 requiredVersion: "^17.0.0"
@@ -239,15 +176,15 @@ loadShare("react").then((reactFactory)=>{
 ```
 ### usePlugin
 
-Used to extend the internal loading process of `Vmok`, affecting the entire loading process through hook triggers and return values.
+Used to extend the internal loading process of `ModuleFederation`, affecting the entire loading process through hook triggers and return values.
 
 - Example
 
 ```ts
-import { init } from '@vmok/kit/runtime';
+import { init } from '@module-federation/runtime';
 
-// mock get remote tcc remotes config
-function getTccConfig (){
+// mock get remote data remotes config
+function getDataConfig (){
     return new Promise((resolve)=>{
         setTimeout(()=>{
             resolve({
@@ -255,7 +192,7 @@ function getTccConfig (){
                     {
                         name: "@demo/sub",
                         alias: "sub",
-                        version: "1.0.2"
+                        entry: "http://localhost:2001/module-federation-manifest.json"
                     }
                 ]
             })
@@ -263,11 +200,11 @@ function getTccConfig (){
     })
 }
 
-function TccRemotesPlugin () {
+function RemotesDataPlugin () {
     return {
-        name: "tcc-config",
+        name: "data-config",
         async beforeLoadRemote(args){
-            const remotes = await getTccConfig();
+            const remotes = await getDataConfig();
             origin.initOptions({
                 remotes
             });
@@ -280,7 +217,7 @@ function TccRemotesPlugin () {
 init({
     name: "@demo/micro-app",
     remotes: [],
-    pluigns: [TccRemotesPlugin()]
+    pluigns: [RemotesDataPlugin()]
 });
 
 loadRemote("sub/utils").then((m)=>{
@@ -347,7 +284,7 @@ Through `preloadRemote`, module resources can be preloaded at an earlier stage t
 - Example
 
 ```ts
-import { init, preloadRemote } from '@vmok/kit/runtime';
+import { init, preloadRemote } from '@module-federation/runtime';
 init({
     name: '@demo/preload-remote',
     remotes: [
@@ -366,7 +303,5 @@ init({
     ],
 });
 
-// Preload @demo/sub1 module
-// Filter out resources with the word 'ignore' in their
 ```
 
