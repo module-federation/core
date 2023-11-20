@@ -45,6 +45,7 @@ class AsyncEntryStartupPlugin {
       }
     });
   }
+
   private handleRenderStartup(
     compiler: Compiler,
     compilation: Compilation,
@@ -54,184 +55,153 @@ class AsyncEntryStartupPlugin {
     ).renderStartup.tap(
       'AsyncEntryStartupPlugin',
       (source: any, renderContext: Module, upperContext: { chunk: Chunk }) => {
-        this.handleRuntimeChunk(compiler, upperContext, source);
-        this.handleExcludedChunk(upperContext, source);
-        this.handleRuntimeSet(upperContext);
-        this.handleRemotesAndShared(compilation, upperContext);
-        this.handleEntryModules(compilation, upperContext, compiler, source);
+        const isSingleRuntime = compiler.options?.optimization?.runtimeChunk;
+        if (upperContext?.chunk.id && isSingleRuntime) {
+          if (upperContext?.chunk.hasRuntime()) {
+            this._runtimeChunks.set(upperContext.chunk.id, upperContext.chunk);
+            return source;
+          }
+        }
+
+        if (
+          this._options.excludeChunk &&
+          this._options.excludeChunk(upperContext.chunk)
+        ) {
+          return source;
+        }
+
+        const runtime = new Set();
+        if (
+          typeof upperContext.chunk.runtime === 'string' ||
+          typeof upperContext.chunk.runtime === 'number'
+        ) {
+          if (this._runtimeChunks.has(upperContext.chunk.runtime)) {
+            runtime.add(this._runtimeChunks.get(upperContext.chunk.runtime));
+          } else {
+            runtime.add(upperContext.chunk);
+          }
+        } else if (
+          upperContext.chunk.runtime &&
+          typeof upperContext.chunk.runtime[Symbol.iterator] === 'function'
+        ) {
+          for (const runtimeItem of upperContext.chunk.runtime) {
+            if (this._runtimeChunks.has(runtimeItem)) {
+              runtime.add(this._runtimeChunks.get(runtimeItem));
+            }
+          }
+        }
+        if (runtime.size === 0) {
+          runtime.add(upperContext.chunk);
+        }
+
+        let remotes = '';
+        let shared = '';
+
+        for (const runtimeItem of runtime) {
+          const requirements =
+            compilation.chunkGraph.getTreeRuntimeRequirements(
+              runtimeItem as Chunk,
+            );
+
+          const hasRemoteModules =
+            compilation.chunkGraph.getChunkModulesIterableBySourceType(
+              upperContext.chunk,
+              'remote',
+            );
+
+          const consumeShares =
+            compilation.chunkGraph.getChunkModulesIterableBySourceType(
+              upperContext.chunk,
+              'consume-shared',
+            );
+
+          const entryOptions = upperContext.chunk.getEntryOptions();
+          const chunksToRef = entryOptions?.dependOn
+            ? [...entryOptions.dependOn, upperContext.chunk.id]
+            : [upperContext.chunk.id];
+
+          if (
+            requirements.has(RuntimeGlobals.currentRemoteGetScope) ||
+            hasRemoteModules ||
+            requirements.has('__webpack_require__.vmok')
+          ) {
+            for (const chunkId of chunksToRef) {
+              remotes += `if(__webpack_require__.f && __webpack_require__.f.remotes) __webpack_require__.f.remotes(${JSON.stringify(
+                chunkId,
+              )}, promiseTrack);`;
+            }
+          }
+
+          if (
+            requirements.has(RuntimeGlobals.shareScopeMap) ||
+            requirements.has(RuntimeGlobals.initializeSharing) ||
+            consumeShares
+          ) {
+            for (const chunkId of chunksToRef) {
+              shared += `if(__webpack_require__.f && __webpack_require__.f.consumes) __webpack_require__.f.consumes(${JSON.stringify(
+                chunkId,
+              )}, promiseTrack);`;
+            }
+          }
+        }
+
+        if (!remotes && !shared) {
+          return source;
+        }
+
+        const entryModules =
+          compilation.chunkGraph.getChunkEntryModulesIterable(
+            upperContext.chunk,
+          );
+
+        const initialEntryModules = [];
+
+        for (const entryModule of entryModules) {
+          const entryModuleID = compilation.chunkGraph.getModuleId(entryModule);
+          if (entryModuleID) {
+            let shouldInclude = false;
+
+            if (typeof this._options.eager === 'function') {
+              shouldInclude = this._options.eager(entryModule);
+            } else if (
+              this._options.eager &&
+              this._options.eager.test(entryModule.identifier())
+            ) {
+              shouldInclude = true;
+            }
+
+            if (shouldInclude) {
+              initialEntryModules.push(
+                `__webpack_require__(${JSON.stringify(entryModuleID)});`,
+              );
+            }
+          }
+        }
+        if (
+          compiler.options?.experiments?.topLevelAwait &&
+          compiler.options?.experiments?.outputModule
+        ) {
+          return Template.asString([
+            'var promiseTrack = [];',
+            Template.asString(initialEntryModules),
+            shared,
+            remotes,
+            'await Promise.all(promiseTrack)',
+            Template.indent(source.source()),
+          ]);
+        }
+        return Template.asString([
+          'var promiseTrack = [];',
+          Template.asString(initialEntryModules),
+          shared,
+          remotes,
+          'var __webpack_exports__ = Promise.all(promiseTrack).then(function() {',
+          Template.indent(source.source()),
+          Template.indent('return __webpack_exports__'),
+          '});',
+        ]);
       },
     );
-  }
-
-  private handleRuntimeChunk(
-    compiler: Compiler,
-    upperContext: { chunk: Chunk },
-    source: any,
-  ): void {
-    const isSingleRuntime = compiler.options?.optimization?.runtimeChunk;
-    if (upperContext?.chunk.id && isSingleRuntime) {
-      if (upperContext?.chunk.hasRuntime()) {
-        this._runtimeChunks.set(upperContext.chunk.id, upperContext.chunk);
-        return source;
-      }
-    }
-  }
-
-  private handleExcludedChunk(
-    upperContext: { chunk: Chunk },
-    source: any,
-  ): void {
-    if (
-      this._options.excludeChunk &&
-      this._options.excludeChunk(upperContext.chunk)
-    ) {
-      return source;
-    }
-  }
-
-  private handleRuntimeSet(upperContext: { chunk: Chunk }): void {
-    const runtime = new Set();
-    if (
-      typeof upperContext.chunk.runtime === 'string' ||
-      typeof upperContext.chunk.runtime === 'number'
-    ) {
-      if (this._runtimeChunks.has(upperContext.chunk.runtime)) {
-        runtime.add(this._runtimeChunks.get(upperContext.chunk.runtime));
-      } else {
-        runtime.add(upperContext.chunk);
-      }
-    } else if (
-      upperContext.chunk.runtime &&
-      typeof upperContext.chunk.runtime[Symbol.iterator] === 'function'
-    ) {
-      for (const runtimeItem of upperContext.chunk.runtime) {
-        if (this._runtimeChunks.has(runtimeItem)) {
-          runtime.add(this._runtimeChunks.get(runtimeItem));
-        }
-      }
-    }
-    if (runtime.size === 0) {
-      runtime.add(upperContext.chunk);
-    }
-  }
-
-  private handleRemotesAndShared(
-    compilation: Compilation,
-    upperContext: { chunk: Chunk },
-  ): void {
-    let remotes = '';
-    let shared = '';
-
-    for (const runtimeItem of runtime) {
-      const requirements =
-        compilation.chunkGraph.getTreeRuntimeRequirements(
-          runtimeItem as Chunk,
-        );
-
-      const hasRemoteModules =
-        compilation.chunkGraph.getChunkModulesIterableBySourceType(
-          upperContext.chunk,
-          'remote',
-        );
-
-      const consumeShares =
-        compilation.chunkGraph.getChunkModulesIterableBySourceType(
-          upperContext.chunk,
-          'consume-shared',
-        );
-
-      const entryOptions = upperContext.chunk.getEntryOptions();
-      const chunksToRef = entryOptions?.dependOn
-        ? [...entryOptions.dependOn, upperContext.chunk.id]
-        : [upperContext.chunk.id];
-
-      if (
-        requirements.has(RuntimeGlobals.currentRemoteGetScope) ||
-        hasRemoteModules ||
-        requirements.has('__webpack_require__.vmok')
-      ) {
-        for (const chunkId of chunksToRef) {
-          remotes += `if(__webpack_require__.f && __webpack_require__.f.remotes) __webpack_require__.f.remotes(${JSON.stringify(
-            chunkId,
-          )}, promiseTrack);`;
-        }
-      }
-
-      if (
-        requirements.has(RuntimeGlobals.shareScopeMap) ||
-        requirements.has(RuntimeGlobals.initializeSharing) ||
-        consumeShares
-      ) {
-        for (const chunkId of chunksToRef) {
-          shared += `if(__webpack_require__.f && __webpack_require__.f.consumes) __webpack_require__.f.consumes(${JSON.stringify(
-            chunkId,
-          )}, promiseTrack);`;
-        }
-      }
-    }
-
-    if (!remotes && !shared) {
-      return source;
-    }
-  }
-
-  private handleEntryModules(
-    compilation: Compilation,
-    upperContext: { chunk: Chunk },
-    compiler: Compiler,
-    source: any,
-  ): void {
-    const entryModules =
-      compilation.chunkGraph.getChunkEntryModulesIterable(
-        upperContext.chunk,
-      );
-
-    const initialEntryModules = [];
-
-    for (const entryModule of entryModules) {
-      const entryModuleID = compilation.chunkGraph.getModuleId(entryModule);
-      if (entryModuleID) {
-        let shouldInclude = false;
-
-        if (typeof this._options.eager === 'function') {
-          shouldInclude = this._options.eager(entryModule);
-        } else if (
-          this._options.eager &&
-          this._options.eager.test(entryModule.identifier())
-        ) {
-          shouldInclude = true;
-        }
-
-        if (shouldInclude) {
-          initialEntryModules.push(
-            `__webpack_require__(${JSON.stringify(entryModuleID)});`,
-          );
-        }
-      }
-    }
-    if (
-      compiler.options?.experiments?.topLevelAwait &&
-      compiler.options?.experiments?.outputModule
-    ) {
-      return Template.asString([
-        'var promiseTrack = [];',
-        Template.asString(initialEntryModules),
-        shared,
-        remotes,
-        'await Promise.all(promiseTrack)',
-        Template.indent(source.source()),
-      ]);
-    }
-    return Template.asString([
-      'var promiseTrack = [];',
-      Template.asString(initialEntryModules),
-      shared,
-      remotes,
-      'var __webpack_exports__ = Promise.all(promiseTrack).then(function() {',
-      Template.indent(source.source()),
-      Template.indent('return __webpack_exports__'),
-      '});',
-    ]);
   }
 }
 
