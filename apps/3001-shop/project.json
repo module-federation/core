@@ -72,7 +72,7 @@
             "forwardAllArgs": true
           },
           {
-            "command": "sleep 40 && lsof -ti tcp:3000,3001,3002 | xargs kill",
+            "command": "sleep 60 && lsof -ti tcp:3000,3001,3002 | xargs kill",
             "forwardAllArgs": true
           }
         ]
