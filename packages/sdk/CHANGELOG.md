@@ -1,1 +1,1 @@
-# @vmok/sdk-open-source
+# @module-federation/sdk
