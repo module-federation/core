@@ -77,11 +77,11 @@
         "parallel": true,
         "commands": [
           {
-            "command": "nx run 3000-home:serve",
+            "command": "lsof -i :3000 || nx run 3000-home:serve",
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 2 && nx run 3000-home:e2e && sleep 40 && lsof -ti tcp:3000,3001,3002 | xargs kill",
+            "command": "sleep 4 && nx run 3000-home:e2e",
             "forwardAllArgs": true
           }
         ]
