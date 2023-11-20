@@ -210,6 +210,8 @@ export const getTargetSnapshotInfoByModuleInfo = (
       return getModuleInfoWithoutVersion;
     }
   }
+
+  return;
 };
 
 export const getGlobalSnapshotInfoByModuleInfo = (

@@ -100,6 +100,7 @@ export class SnapshotHandler {
           if (res && !(res instanceof Promise)) {
             return res;
           }
+          return;
         },
       },
     );
@@ -126,6 +127,7 @@ export class SnapshotHandler {
           if (res && !(res instanceof Promise)) {
             return res;
           }
+          return;
         },
       ).value
     ) {
@@ -244,6 +246,7 @@ export class SnapshotHandler {
           if (res && !(res instanceof Promise)) {
             return res;
           }
+          return;
         },
       },
     );
@@ -263,6 +266,7 @@ export class SnapshotHandler {
           if (res && !(res instanceof Promise)) {
             return res;
           }
+          return;
         },
       ).value;
 
@@ -285,6 +289,7 @@ export class SnapshotHandler {
               if (res && !(res instanceof Promise)) {
                 return res;
               }
+              return;
             },
           },
         ),
@@ -308,6 +313,7 @@ export class SnapshotHandler {
             if (res && !(res instanceof Promise)) {
               return res;
             }
+            return;
           },
         },
       ),

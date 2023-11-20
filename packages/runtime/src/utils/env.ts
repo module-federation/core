@@ -1,9 +1,3 @@
-declare global {
-  // eslint-disable-next-line no-var
-  var FEDERATION_DEBUG: string | undefined,
-    FEDERATION_BUILD_IDENTIFIER: string | undefined;
-}
-
 export function isDevelopmentMode(): boolean {
   return true;
 }

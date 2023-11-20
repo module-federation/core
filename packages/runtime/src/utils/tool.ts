@@ -41,6 +41,7 @@ export async function safeWrapper<T extends (...args: Array<any>) => any>(
     return res;
   } catch (e) {
     !disableWarn && warn(e);
+    return;
   }
 }
 
