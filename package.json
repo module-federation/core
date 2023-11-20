@@ -79,13 +79,13 @@
     "@goestav/nx-semantic-release": "1.0.0",
     "@jscutlery/semver": "3.1.0",
     "@node-rs/jieba": "1.7.2",
-    "@nx/cypress": "^17.1.2",
+    "@nx/cypress": "16.10.0",
     "@nx/devkit": "16.10.0",
     "@nx/esbuild": "16.10.0",
     "@nx/eslint-plugin": "16.10.0",
     "@nx/express": "16.10.0",
     "@nx/jest": "16.10.0",
-    "@nx/js": "17.1.2",
+    "@nx/js": "16.10.0",
     "@nx/linter": "16.10.0",
     "@nx/next": "16.10.0",
     "@nx/node": "16.10.0",
@@ -171,7 +171,7 @@
     "node-html-markdown": "1.3.0",
     "nodejieba": "2.6.0",
     "nx": "16.10.0",
-    "nx-cloud": "16.4.0",
+    "nx-cloud": "16.5.2",
     "open": "^9.1.0",
     "openai": "3.3.0",
     "pdf-parse": "1.1.1",
@@ -208,3 +208,4 @@
     }
   }
 }
+
