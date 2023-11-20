@@ -103,7 +103,7 @@ declare namespace JavascriptModulesPlugin {
     CompilationHooks,
   };
 }
-type Source = any;
+type Source = import('../Source').Source;
 type Compiler = import('../Compiler');
 type Module = import('../Module');
 type ChunkRenderContext = {
