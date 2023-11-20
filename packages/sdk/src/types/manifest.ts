@@ -12,7 +12,6 @@ export interface ManifestShared {
   version: string;
   singleton: boolean;
   requiredVersion: string;
-  fixedDependencies: boolean;
   hash: string;
   assets: StatsAssets;
 }

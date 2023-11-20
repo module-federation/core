@@ -204,7 +204,9 @@
     "webpack-virtual-modules": "0.6.0",
     "msw": "^1.2.1",
     "vitest-fetch-mock": "^0.2.2",
-    "whatwg-fetch": "^3.6.2"
+    "whatwg-fetch": "^3.6.2",
+    "@rollup/plugin-replace": "3.0.0",
+    "@rollup/plugin-alias": "3.1.9"
   },
   "config": {
     "commitizen": {

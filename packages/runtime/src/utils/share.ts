@@ -20,7 +20,6 @@ export function formatShare(shareArgs: ShareArgs, from: string): Shared {
     shareConfig: {
       requiredVersion: `^${shareArgs.version}`,
       singleton: false,
-      fixedDependencies: false,
       eager: false,
     },
     loading: null,
@@ -148,7 +147,7 @@ export function getGlobalShare(
             : findSingletonVersionOrderByVersion(sc, pkgName);
         // eslint-disable-next-line max-depth
         if (
-          requiredVersion !== false &&
+          typeof requiredVersion ==='string' &&
           !satisfy(singletonVersion, requiredVersion)
         ) {
           warn(
