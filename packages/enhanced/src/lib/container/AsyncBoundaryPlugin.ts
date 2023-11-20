@@ -24,13 +24,13 @@ class AsyncEntryStartupPlugin {
     compiler.hooks.thisCompilation.tap(
       'AsyncEntryStartupPlugin',
       (compilation: Compilation) => {
-        this.collectRuntimeChunks(compilation);
-        this.handleRenderStartup(compiler, compilation);
+        this._collectRuntimeChunks(compilation);
+        this._handleRenderStartup(compiler, compilation);
       },
     );
   }
 
-  private collectRuntimeChunks(compilation: Compilation) {
+  private _collectRuntimeChunks(compilation: Compilation) {
     compilation.hooks.beforeChunkAssets.tap('AsyncEntryStartupPlugin', () => {
       for (const chunk of compilation.chunks) {
         if (chunk.hasRuntime() && chunk.id !== null) {
@@ -47,7 +47,7 @@ class AsyncEntryStartupPlugin {
     });
   }
 
-  private handleRenderStartup(compiler: Compiler, compilation: Compilation) {
+  private _handleRenderStartup(compiler: Compiler, compilation: Compilation) {
     compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
       compilation,
     ).renderStartup.tap(
@@ -72,13 +72,15 @@ class AsyncEntryStartupPlugin {
           return source;
         }
 
-        const runtime = this.getChunkRuntime(upperContext);
+        const runtime = this._getChunkRuntime(upperContext);
 
         let remotes = '';
         let shared = '';
 
         for (const runtimeItem of runtime) {
-          if (!runtimeItem) continue;
+          if (!runtimeItem) {
+            continue;
+          }
           const requirements =
             compilation.chunkGraph.getTreeRuntimeRequirements(runtimeItem);
           const hasRemoteModules =
@@ -96,15 +98,15 @@ class AsyncEntryStartupPlugin {
             ? [...entryOptions.dependOn, upperContext.chunk.id]
             : [upperContext.chunk.id];
 
-          remotes = this.getRemotes(
+          remotes = this._getRemotes(
             requirements,
-            !!hasRemoteModules,
+            Boolean(hasRemoteModules),
             chunksToRef,
             remotes,
           );
-          shared = this.getShared(
+          shared = this._getShared(
             requirements,
-            !!consumeShares,
+            Boolean(consumeShares),
             chunksToRef,
             shared,
           );
@@ -114,11 +116,11 @@ class AsyncEntryStartupPlugin {
           return source;
         }
 
-        const initialEntryModules = this.getInitialEntryModules(
+        const initialEntryModules = this._getInitialEntryModules(
           compilation,
           upperContext,
         );
-        return this.getTemplateString(
+        return this._getTemplateString(
           compiler,
           initialEntryModules,
           shared,
@@ -129,7 +131,7 @@ class AsyncEntryStartupPlugin {
     );
   }
 
-  private getChunkRuntime(upperContext: StartupRenderContext) {
+  private _getChunkRuntime(upperContext: StartupRenderContext) {
     const runtime = new Set<Chunk>();
     const chunkRuntime = upperContext.chunk.runtime;
     if (chunkRuntime) {
@@ -147,7 +149,7 @@ class AsyncEntryStartupPlugin {
     }
     return runtime;
   }
-  private getRemotes(
+  private _getRemotes(
     requirements: ReadonlySet<string>,
     hasRemoteModules: boolean,
     chunksToRef: (Chunk.ChunkId | null)[],
@@ -184,7 +186,7 @@ class AsyncEntryStartupPlugin {
     return remotesParts.join('');
   }
 
-  private getShared(
+  private _getShared(
     requirements: ReadonlySet<string>,
     consumeShares: boolean,
     chunksToRef: (Chunk.ChunkId | null)[],
@@ -221,7 +223,7 @@ class AsyncEntryStartupPlugin {
     return sharedParts.join('');
   }
 
-  private getInitialEntryModules(
+  private _getInitialEntryModules(
     compilation: Compilation,
     upperContext: { chunk: Chunk },
   ): string[] {
@@ -254,7 +256,7 @@ class AsyncEntryStartupPlugin {
     return initialEntryModules;
   }
 
-  private getTemplateString(
+  private _getTemplateString(
     compiler: Compiler,
     initialEntryModules: string[],
     shared: string,
