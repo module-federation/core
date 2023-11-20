@@ -1,3 +1,12 @@
+# [0.2.0-canary.5](https://github.com/module-federation/universe/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
+
+
+### Bug Fixes
+
+* align with bytedance linting ([8000055](https://github.com/module-federation/universe/commit/800005571f37e0d1b31590834ddcd4d98bbd3086))
+* **enhanced:** refactory async boundary plugin ([230a105](https://github.com/module-federation/universe/commit/230a105b230ba108318d3e0aab6bea8e94fb3699))
+* nx build dep sync ([38c0902](https://github.com/module-federation/universe/commit/38c09025aeee8b3bb91f45721678d59ff814b8ba))
+
 # [0.2.0-canary.4](https://github.com/module-federation/universe/compare/enhanced-0.2.0-canary.3...enhanced-0.2.0-canary.4) (2023-11-20)
 
 
