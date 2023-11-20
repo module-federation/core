@@ -1,6 +1,6 @@
 import { getH1, getH3 } from '../support/app.po';
 
-describe('3000-home/', () => {
+describe('3002-checkout/', () => {
   beforeEach(() => cy.visit('/'));
 
   describe('Welcome message', () => {
@@ -42,7 +42,7 @@ describe('3000-home/', () => {
     });
   });
 
-  describe('3000-home/checkout', () => {
+  describe('3002-checkout/checkout', () => {
     beforeEach(() => cy.visit('/checkout'));
 
     describe('Welcome message', () => {
@@ -58,7 +58,7 @@ describe('3000-home/', () => {
       });
     });
 
-    describe('3000-home/checkout/test-title', () => {
+    describe('3002-checkout/checkout/test-title', () => {
       beforeEach(() => cy.visit('/checkout/test-title'));
 
       it('should display welcome message', () => {
@@ -66,7 +66,7 @@ describe('3000-home/', () => {
       });
     });
 
-    describe('3000-home/checkout/test-check-button', () => {
+    describe('3002-checkout/checkout/test-check-button', () => {
       beforeEach(() => cy.visit('/checkout/test-check-button'));
 
       it('should display welcome message', () => {
@@ -75,7 +75,7 @@ describe('3000-home/', () => {
     });
   });
 
-  describe('3000-home/shop', () => {
+  describe('3002-checkout/shop', () => {
     beforeEach(() => cy.visit('/shop'));
 
     describe('Welcome message', () => {
