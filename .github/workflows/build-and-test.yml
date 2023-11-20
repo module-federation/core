@@ -23,5 +23,5 @@ jobs:
       - run: npx nx format:check
       - run: npx nx affected -t lint --parallel=3 --exclude='*,!tag:package'
       - run: npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
-      - run: npx nx affected -t test --parallel=3 --exclude='tag:package'
+      - run: npx nx affected -t test:e2e --parallel=3 --exclude='tag:package'
       - run: npx nx affected -t build --parallel=3 --exclude='*,!tag:package'

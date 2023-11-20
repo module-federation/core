@@ -58,12 +58,32 @@
         "lintFilePatterns": ["apps/3001-shop/**/*.{ts,tsx,js,jsx}"]
       }
     },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": true,
+        "commands": [
+          {
+            "command": "nx run 3001-shop:serve",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "sleep 5 && nx run 3001-shop:e2e",
+            "forwardAllArgs": true
+          },
+          {
+            "command": "sleep 40 && lsof -ti tcp:3000,3001,3002 | xargs kill",
+            "forwardAllArgs": true
+          },
+        ]
+      }
+    },
     "e2e": {
       "executor": "@nx/cypress:cypress",
       "options": {
         "cypressConfig": "apps/3001-shop/cypress.config.ts",
         "testingType": "e2e",
-        "devServerTarget": "3001-shop:serve"
+        "baseUrl": "http://localhost:3001"
       },
       "configurations": {
         "production": {
