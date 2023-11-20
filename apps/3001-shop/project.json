@@ -57,6 +57,19 @@
       "options": {
         "lintFilePatterns": ["apps/3001-shop/**/*.{ts,tsx,js,jsx}"]
       }
+    },
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/3001-shop/cypress.config.ts",
+        "testingType": "e2e",
+        "devServerTarget": "3001-shop:serve"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "3001-shop:serve:production"
+        }
+      }
     }
   },
   "tags": []
