@@ -19,94 +19,88 @@ import { parseOptions } from 'webpack/lib/container/options';
  */
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/dynamic': {
-    version: '1',
     requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/head': {
-    version: '1',
     requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/link': {
-    version: '1',
     requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/router': {
-    version: '1',
-    requiredVersion: undefined,
+    requiredVersion: false,
     singleton: true,
     import: undefined,
   },
   '@module-federation/utilities': {
     eager: true,
-    requiredVersion: false,
+    version: require('@module-federation/utilities/package.json').version,
+    requiredVersion: require('@module-federation/utilities/package.json')
+      .version,
   },
   'next/image': {
     requiredVersion: undefined,
     singleton: true,
-    version: '1',
     import: undefined,
   },
   'next/script': {
-    version: '1',
     requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   react: {
-    version: '0',
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react/': {
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react-dom/': {
-    version: '1',
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react-dom': {
-    version: '1',
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react/jsx-dev-runtime': {
-    version: '1',
     singleton: true,
     requiredVersion: undefined,
     import: undefined,
   },
   'react/jsx-runtime': {
-    version: '1',
     singleton: true,
     requiredVersion: undefined,
     // import: false,
   },
   'styled-jsx': {
-    requiredVersion: undefined,
     singleton: true,
     import: undefined,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
   },
   'styled-jsx/style': {
-    requiredVersion: false,
     singleton: true,
     import: false,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
   },
   'styled-jsx/css': {
-    requiredVersion: false,
     singleton: true,
     import: undefined,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
   },
 };
 

@@ -11,6 +11,7 @@ on:
           - affected
           - all
           - nextjs-mf
+          - runtime
           - node
           - storybook-addon
           - typescript

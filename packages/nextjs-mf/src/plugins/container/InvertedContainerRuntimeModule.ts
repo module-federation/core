@@ -15,7 +15,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
   private options: InvertedContainerRuntimeModuleOptions;
 
   constructor(options: InvertedContainerRuntimeModuleOptions) {
-    super('inverted container startup', RuntimeModule.STAGE_BASIC);
+    super('inverted container startup', RuntimeModule.STAGE_ATTACH + 3);
     this.options = options;
   }
 
@@ -35,12 +35,21 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
   }
   private generateSharedObjectString(): string {
     const sharedObjects = [
-      { key: 'react', version: '18.100.0', path: './react' },
-      { key: 'next/router', version: '13.100.0', path: './next/router' },
-      { key: 'next/head', version: '13.100.0', path: './next/head' },
-      { key: 'next/link', version: '13.100.0', path: './next/link' },
-      { key: 'next/image', version: '13.100.0', path: './next/image' },
-      { key: 'react-dom', version: '18.100.0', path: './react-dom' },
+      {
+        key: 'react',
+        version: require('react/package.json').version,
+        path: './react',
+      },
+      {
+        key: 'next/router',
+        version: require('next/package.json').version,
+        path: './next/router',
+      },
+      {
+        key: 'react-dom',
+        version: require('react-dom/package.json').version,
+        path: './react-dom',
+      },
     ];
 
     return sharedObjects.reduce((acc, obj) => {
