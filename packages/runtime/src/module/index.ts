@@ -58,6 +58,7 @@ class Module {
         if (res instanceof HTMLScriptElement) {
           return res;
         }
+        return;
       },
     });
     assert(

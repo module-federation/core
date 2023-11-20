@@ -4,5 +4,24 @@
   "author": "zhouxiao <codingzx@gmail.com>",
   "type": "commonjs",
   "main": "./index.cjs",
-  "module": "./index.js"
+  "module": "./index.esm.js",
+  "types": "./index.cjs.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index.cjs.js",
+      "require": "./index.esm.js"
+    },
+    "./helpers": {
+      "import": "./helpers.esm.js",
+      "require": "./helpers.cjs.js"
+    },
+    "./*": "./*"
+  },
+  "typesVersions": {
+    "*": {
+      ".": ["./index.cjs.d.ts"],
+      "helpers": ["./helpers.cjs.d.ts"],
+      "type": ["./types.cjs.d.ts"]
+    }
+  }
 }

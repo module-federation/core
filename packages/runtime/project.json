@@ -12,7 +12,7 @@
         "outputPath": "dist/packages/runtime",
         "main": "packages/runtime/src/index.ts",
         "additionalEntryPoints": [
-          "packages/runtime/src/type/index.ts",
+          "packages/runtime/src/types.ts",
           "packages/runtime/src/helpers.ts"
         ],
         "tsConfig": "packages/runtime/tsconfig.lib.json",
