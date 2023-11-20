@@ -1,3 +1,20 @@
+# [2.1.0-canary.5](https://github.com/module-federation/universe/compare/node-2.1.0-canary.4...node-2.1.0-canary.5) (2023-11-20)
+
+
+### Bug Fixes
+
+* **enhanced:** use getAllReferencedChunks api for federation indexing ([b8846be](https://github.com/module-federation/universe/commit/b8846be5135c58841c3c22453e45751bebbecdeb))
+* **nextjs-mf:** Improved async startup dep track ([839e47b](https://github.com/module-federation/universe/commit/839e47bc7e1b887f0729c17257e6dd17cc3e3a5d))
+* nx build dep sync ([38c0902](https://github.com/module-federation/universe/commit/38c09025aeee8b3bb91f45721678d59ff814b8ba))
+* rename plugin took tap ([b1e0f58](https://github.com/module-federation/universe/commit/b1e0f58d689a60223b03277fbffe3c5bd18dd481))
+
+
+### Features
+
+* **enhanced:** ✨ Reference Hoisting ([6ab3e72](https://github.com/module-federation/universe/commit/6ab3e72b147bf8338a4e50fee2ff49cc79c53195))
+* **enhanced:** HoistContainerReferencesPlugin ([adc00e7](https://github.com/module-federation/universe/commit/adc00e744522d3a96cbac7ff4f6fdfa435f77896))
+* **nextjs-mf:** Use HoistReferencePlugin over DelegatePlugin ([e8f1e43](https://github.com/module-federation/universe/commit/e8f1e437f13ad0b922c7e147c4911d83ebf1b226))
+
 # [2.1.0-canary.4](https://github.com/module-federation/universe/compare/node-2.1.0-canary.3...node-2.1.0-canary.4) (2023-11-08)
 
 
