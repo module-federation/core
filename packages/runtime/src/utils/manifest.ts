@@ -73,6 +73,8 @@ export function matchRemoteWithNameAndExpose(
       }
     }
   }
+
+  return;
 }
 
 export function matchRemote(
@@ -90,4 +92,5 @@ export function matchRemote(
       return remote;
     }
   }
+  return
 }

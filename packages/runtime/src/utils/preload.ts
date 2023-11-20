@@ -87,6 +87,7 @@ export function preloadAssets(
             if (res instanceof HTMLScriptElement) {
               return res;
             }
+            return;
           },
         });
       } else {
@@ -100,6 +101,7 @@ export function preloadAssets(
             if (res instanceof HTMLScriptElement) {
               return res;
             }
+            return;
           },
         });
       }
@@ -130,6 +132,7 @@ export function preloadAssets(
           if (res instanceof HTMLScriptElement) {
             return res;
           }
+          return;
         },
       );
       document.head.appendChild(scriptEl);

@@ -73,4 +73,4 @@ export default {
   share: ShareUtils,
 };
 
-export { IGlobalUtils, IShareUtils };
+export type { IGlobalUtils, IShareUtils };
