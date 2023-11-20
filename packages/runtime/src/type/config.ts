@@ -41,10 +41,9 @@ export type HostInfo = Pick<
 >;
 
 export interface SharedConfig {
-  singleton: boolean;
+  singleton?: boolean;
   requiredVersion: false | string;
-  fixedDependencies: boolean | string[] | Array<string[]>;
-  eager: boolean;
+  eager?: boolean;
 }
 
 type SharedBaseArgs = {
@@ -52,7 +51,7 @@ type SharedBaseArgs = {
   shareConfig?: SharedConfig;
   scope?: string | Array<string>;
   deps?: Array<string>;
-  strategy: 'version-first' | 'loaded-first';
+  strategy?: 'version-first' | 'loaded-first';
 };
 
 export type ShareArgs =

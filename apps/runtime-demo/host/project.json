@@ -1,0 +1,91 @@
+{
+  "name": "runtime_demo_host",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/runtime-demo/host/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "swc",
+        "outputPath": "dist/apps/runtime-demo/host",
+        "index": "apps/runtime-demo/host/src/index.html",
+        "baseHref": "/",
+        "main": "apps/runtime-demo/host/src/index.ts",
+        "tsConfig": "apps/runtime-demo/host/tsconfig.app.json",
+        "styles": [],
+        "scripts": [],
+        "webpackConfig": "apps/runtime-demo/host/webpack.config.js",
+        "babelUpwardRootMode": true
+      },
+      "configurations": {
+        "development": {
+          "extractLicenses": false,
+          "optimization": false,
+          "sourceMap": true,
+          "vendorChunk": true
+        },
+        "production": {
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "serve": {
+      "executor": "@nx/webpack:dev-server",
+      "defaultConfiguration": "production",
+      "options": {
+        "buildTarget": "runtime_demo_host:build",
+        "hmr": true,
+        "port": 3005,
+        "devRemotes": ["runtime_demo_remote"]
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "runtime_demo_host:build:development"
+        },
+        "production": {
+          "buildTarget": "runtime_demo_host:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/runtime-demo/host/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "runtime_demo_host:build",
+        "port": 3005
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "runtime_demo_host:build:development"
+        },
+        "production": {
+          "buildTarget": "runtime_demo_host:build:production"
+        }
+      }
+    }
+  },
+  "tags": [],
+  "implicitDependencies": ["typescript"]
+}

@@ -50,7 +50,6 @@ describe('shared', () => {
           shareConfig: {
             singleton: true,
             requiredVersion:'^16.0.0',
-            fixedDependencies: false,
           },
           get: () =>
             new Promise<()=> {version: string, from: string}>(resolve => {
@@ -162,7 +161,6 @@ describe('shared', () => {
           shareConfig: {
             requiredVersion: '^16.0.0',
             singleton: false,
-            fixedDependencies: false,
           },
           get: async () => () => {
             return { from: '@federation/runtime-deps2' }
@@ -264,7 +262,6 @@ describe('single shared', ()=> {
           shareConfig: {
             requiredVersion: '^17.0.0',
             singleton: true,
-            fixedDependencies: false,
           },
           get: async () => () => {
             return { from: '@shared-single/runtime-deps2' }
@@ -282,7 +279,6 @@ describe('single shared', ()=> {
           shareConfig: {
             requiredVersion: '^18.0.0',
             singleton: false,
-            fixedDependencies: false,
           },
           lib: () => {
             return { from: '@shared-single/runtime-deps3' }
@@ -319,7 +315,6 @@ describe('eager shared', () => {
           shareConfig: {
             singleton: true,
             requiredVersion:'^16.0.0',
-            fixedDependencies: false,
             eager:true
           },
           lib:()=> ({
@@ -339,7 +334,6 @@ describe('eager shared', () => {
           shareConfig: {
             singleton: true,
             requiredVersion:'^16.0.0',
-            fixedDependencies: false,
             eager:true
           },
           lib:()=> ({
@@ -379,7 +373,6 @@ describe('eager shared', () => {
           shareConfig: {
             singleton: true,
             requiredVersion:'^16.0.0',
-            fixedDependencies: false,
             eager:true
           },
           get:async ()=> ()=> ({
@@ -398,7 +391,6 @@ describe('eager shared', () => {
           shareConfig: {
             singleton: true,
             requiredVersion:'^16.0.0',
-            fixedDependencies: false,
             eager:true
           },
           version: '16.0.1',
@@ -431,7 +423,6 @@ describe('eager shared', () => {
           shareConfig: {
             singleton: true,
             requiredVersion:'^16.0.0',
-            fixedDependencies: false,
             eager:true
           },
           get:async ()=> ()=> ({
