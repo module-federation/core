@@ -63,7 +63,7 @@
       "options": {
         "cypressConfig": "apps/3000-home/cypress.config.ts",
         "testingType": "e2e",
-        "devServerTarget": "3000-home:serve:development"
+        "baseUrl": "http://localhost:3000"
       },
       "configurations": {
         "production": {
@@ -71,21 +71,21 @@
         }
       }
     },
-    "test": {
+    "test:e2e": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": true,
         "commands": [
           {
-            "command": "nx run 3002-checkout:serve",
+            "command": "nx run 3000-home:serve",
             "forwardAllArgs": false
           },
           {
-            "command": "nx run 3001-shop:serve",
-            "forwardAllArgs": false
+            "command": "sleep 5 && nx run 3000-home:e2e",
+            "forwardAllArgs": true
           },
           {
-            "command": "sleep 10 && nx run 3000-home:e2e && echo 'killing' && lsof -ti tcp:3000,3001,3002 | xargs kill",
+            "command": "sleep 40 && lsof -ti tcp:3000,3001,3002 | xargs kill",
             "forwardAllArgs": true
           }
         ]
