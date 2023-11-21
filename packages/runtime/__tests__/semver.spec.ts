@@ -161,8 +161,8 @@ describe('simple ranges', () => {
     expect(satisfy('1.2.4', '<=1.2.3')).toBe(false);
   });
   test('>= Array', () => {
-    let array = ['1.2.3', '1.2.4', '1.2.0', '1.2.9'];
-    let map = array.sort((a, b) => {
+    const array = ['1.2.3', '1.2.4', '1.2.0', '1.2.9'];
+    const map = array.sort((a, b) => {
       if (satisfy(a, '<=' + b)) {
         return 1;
       } else {

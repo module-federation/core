@@ -120,8 +120,8 @@ export const mockRemoteSnapshot: (
 };
 
 export function removeScriptTags() {
-  var scriptTags = document.querySelectorAll('script'); // 获取页面中所有的 script 标签
-  for (var i = 0; i < scriptTags.length; i++) {
+  const scriptTags = document.querySelectorAll('script'); // 获取页面中所有的 script 标签
+  for (let i = 0; i < scriptTags.length; i++) {
     // 循环所有 script 标签
     scriptTags[i].remove(); // 移除当前 script 标签
   }
