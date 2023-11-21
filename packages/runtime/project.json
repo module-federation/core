@@ -41,6 +41,29 @@
         ]
       }
     },
+    "release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run runtime:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run runtime:build",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run runtime:semantic-release",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "semantic-release": {
+      "executor": "@goestav/nx-semantic-release:semantic-release"
+    },
     "test": {
       "executor": "@nx/vite:test",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
