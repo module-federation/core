@@ -1,0 +1,13 @@
+{
+  "name": "@module-federation/webpack-bundler-runtime",
+  "version": "0.0.1",
+  "description": "Module Federation Runtime for webpack",
+  "keywords": [
+    "Module Federation",
+    "bundler runtime"
+  ],
+  "author": "zhanghang <hanric.zhang@gmail.com>",
+  "main": "./index.cjs.js",
+  "module": "./index.esm.js",
+  "types": "./index.cjs.d.ts"
+}

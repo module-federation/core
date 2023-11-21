@@ -1,0 +1,59 @@
+{
+  "name": "runtime",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/runtime/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{workspaceRoot}/dist/packages/runtime"],
+      "options": {
+        "parallel": false,
+        "outputPath": "dist/packages/runtime",
+        "main": "packages/runtime/src/index.ts",
+        "additionalEntryPoints": [
+          "packages/runtime/src/types.ts",
+          "packages/runtime/src/helpers.ts"
+        ],
+        "tsConfig": "packages/runtime/tsconfig.lib.json",
+        "assets": [],
+        "project": "packages/runtime/package.json",
+        "compiler": "swc",
+        "rollupConfig": "packages/runtime/rollup.config.js",
+        "format": ["cjs", "esm"],
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/runtime/**/*.ts",
+          "packages/runtime/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "packages/runtime/vitest.config.ts"
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    }
+  },
+  "tags": ["package"]
+}

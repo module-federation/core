@@ -12,10 +12,12 @@ on:
           - all
           - nextjs-mf
           - runtime
+          - sdk
           - node
           - storybook-addon
           - typescript
           - utils
+          - webpack-bundler-runtime
           - native-federation-typescript
           - native-federation-tests
           - enhanced
