@@ -25,7 +25,7 @@ export const handlers = [
       const category = req.params.category;
       const app = req.params.app;
       const file = req.params.file;
-      let filepath = path.resolve(
+      const filepath = path.resolve(
         __dirname,
         `../resources/${category}/${app}/${file}`,
       );
