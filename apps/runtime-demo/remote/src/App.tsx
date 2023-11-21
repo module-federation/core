@@ -1,7 +1,6 @@
 import LocalButton from './Button';
 import React from 'react';
 
-
 const App = () => (
   <div>
     <h1>Bi-Directional</h1>

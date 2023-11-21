@@ -3,12 +3,11 @@ if (!globalThis.execTime) {
 }
 globalThis.execTime++;
 
-
 globalThis[`__FEDERATION_${'@module-federation/sub1:1.0.2'}__`] = {
   get(scope) {
     const moduleMap = {
       '.'() {
-        return ()=> 'hello world';
+        return () => 'hello world';
       },
     };
     return moduleMap[scope];

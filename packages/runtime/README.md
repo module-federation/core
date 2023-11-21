@@ -1,8 +1,8 @@
 # `@module-federation/runtime`
 
-* Can be combined with the build plug-in to share basic dependencies according to policies to reduce the number of module downloads and improve the loading speed of modules.
-* Only consume part of the export of the remote module and will not fully download the remote module
-* The runtime calling process can be extended through the module-runtime plug-in mechanism
+- Can be combined with the build plug-in to share basic dependencies according to policies to reduce the number of module downloads and improve the loading speed of modules.
+- Only consume part of the export of the remote module and will not fully download the remote module
+- The runtime calling process can be extended through the module-runtime plug-in mechanism
 
 ## Usage
 
@@ -88,18 +88,18 @@ type Share = {
 import { init, loadRemote } from '@module-federation/runtime';
 
 init({
-    name: "@demo/main-app",
-    remotes: [
-        {
-            name: "@demo/app2",
-            entry: "http://localhost:3006/remoteEntry.js"
-        },
-        {
-            name: "@demo/app3",
-            alias: "app3",
-            entry: "http://localhost:2001/module-federation-manifest.json"
-        },
-    ],
+  name: '@demo/main-app',
+  remotes: [
+    {
+      name: '@demo/app2',
+      entry: 'http://localhost:3006/remoteEntry.js',
+    },
+    {
+      name: '@demo/app3',
+      alias: 'app3',
+      entry: 'http://localhost:2001/module-federation-manifest.json',
+    },
+  ],
 });
 ```
 
@@ -114,21 +114,21 @@ init({
 import { init, loadRemote } from '@module-federation/runtime';
 
 init({
-    name: "@demo/main-app",
-    remotes: [
-        {
-            name: "@demo/app3",
-            alias: "app3",
-            entry: "http://localhost:2001/module-federation-manifest.json"
-        }
-    ],
+  name: '@demo/main-app',
+  remotes: [
+    {
+      name: '@demo/app3',
+      alias: 'app3',
+      entry: 'http://localhost:2001/module-federation-manifest.json',
+    },
+  ],
 });
 
 // remoteName + expose
-loadRemote("@demo/app3/util").then((m)=> m.add(1,2,3));
+loadRemote('@demo/app3/util').then((m) => m.add(1, 2, 3));
 
 // alias + expose
-loadRemote("app3/util").then((m)=> m.add(1,2,3));
+loadRemote('app3/util').then((m) => m.add(1, 2, 3));
 ```
 
 ### loadShare
@@ -145,35 +145,35 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 init({
-    name: "@demo/main-app",
-    remotes: [],
-    shared: {
-        react: {
-            version: "17.0.0",
-            scope: "default",
-            lib: ()=> React,
-            shareConfig: {
-                singleton: true,
-                requiredVersion: "^17.0.0"
-            }
-        },
-        "react-dom": {
-            version: "17.0.0",
-            scope: "default",
-            lib: ()=> ReactDOM,
-            shareConfig: {
-                singleton: true,
-                requiredVersion: "^17.0.0"
-            }
-        }
-    }
+  name: '@demo/main-app',
+  remotes: [],
+  shared: {
+    react: {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => React,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+    'react-dom': {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => ReactDOM,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+  },
 });
 
-
-loadShare("react").then((reactFactory)=>{
-    console.log(reactFactory())
+loadShare('react').then((reactFactory) => {
+  console.log(reactFactory());
 });
 ```
+
 ### usePlugin
 
 Used to extend the internal loading process of `ModuleFederation`, affecting the entire loading process through hook triggers and return values.
@@ -184,44 +184,43 @@ Used to extend the internal loading process of `ModuleFederation`, affecting the
 import { init } from '@module-federation/runtime';
 
 // mock get remote data remotes config
-function getDataConfig (){
-    return new Promise((resolve)=>{
-        setTimeout(()=>{
-            resolve({
-                remotes: [
-                    {
-                        name: "@demo/sub",
-                        alias: "sub",
-                        entry: "http://localhost:2001/module-federation-manifest.json"
-                    }
-                ]
-            })
-        }, 2000);
-    })
+function getDataConfig() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        remotes: [
+          {
+            name: '@demo/sub',
+            alias: 'sub',
+            entry: 'http://localhost:2001/module-federation-manifest.json',
+          },
+        ],
+      });
+    }, 2000);
+  });
 }
 
-function RemotesDataPlugin () {
-    return {
-        name: "data-config",
-        async beforeLoadRemote(args){
-            const remotes = await getDataConfig();
-            origin.initOptions({
-                remotes
-            });
-            return args;
-        }
-    }
+function RemotesDataPlugin() {
+  return {
+    name: 'data-config',
+    async beforeLoadRemote(args) {
+      const remotes = await getDataConfig();
+      origin.initOptions({
+        remotes,
+      });
+      return args;
+    },
+  };
 }
-
 
 init({
-    name: "@demo/micro-app",
-    remotes: [],
-    pluigns: [RemotesDataPlugin()]
+  name: '@demo/micro-app',
+  remotes: [],
+  pluigns: [RemotesDataPlugin()],
 });
 
-loadRemote("sub/utils").then((m)=>{
-    m.add(1,2,3,4);
+loadRemote('sub/utils').then((m) => {
+  m.add(1, 2, 3, 4);
 });
 ```
 
@@ -229,28 +228,25 @@ loadRemote("sub/utils").then((m)=>{
 
 ```typescript
 type Plugin = {
-    name: string;
-    core: {
-        beforeLoadRemote: AsyncWaterfallHook<{
-            id: string;
-            options: Options;
-            origin: VmokHost;
-        }>
-    },
-    snapshot: {
-
-    }
-}
-type usePlugin = (plugin: Plugin)=> void;
+  name: string;
+  core: {
+    beforeLoadRemote: AsyncWaterfallHook<{
+      id: string;
+      options: Options;
+      origin: VmokHost;
+    }>;
+  };
+  snapshot: {};
+};
+type usePlugin = (plugin: Plugin) => void;
 ```
-
 
 ### preloadRemote
 
 - Type
 
 ```typescript
-async function preloadRemote(preloadOptions: Array<PreloadRemoteArgs>){}
+async function preloadRemote(preloadOptions: Array<PreloadRemoteArgs>) {}
 
 type depsPreloadArg = Omit<PreloadRemoteArgs, 'depsRemote'>;
 type PreloadRemoteArgs = {
@@ -276,32 +272,30 @@ type PreloadRemoteArgs = {
 
 Through `preloadRemote`, module resources can be preloaded at an earlier stage to avoid waterfall requests. `preloadRemote` can preload the following content:
 
-* The `remoteEntry` of `remote`
-* `expose` of `remote`
-* Synchronous resources or asynchronous resources of `remote`
-* `remote` resources that `remote` depends on
+- The `remoteEntry` of `remote`
+- `expose` of `remote`
+- Synchronous resources or asynchronous resources of `remote`
+- `remote` resources that `remote` depends on
 
-- Example
+* Example
 
 ```ts
 import { init, preloadRemote } from '@module-federation/runtime';
 init({
-    name: '@demo/preload-remote',
-    remotes: [
-        {
-            name: '@demo/sub1',
-            entry: "http://localhost:2001/vmok-manifest.json"
-        },
-        {
-            name: '@demo/sub2',
-            entry: "http://localhost:2001/vmok-manifest.json"
-        },
-        {
-            name: '@demo/sub3',
-            entry: "http://localhost:2001/vmok-manifest.json"
-        },
-    ],
+  name: '@demo/preload-remote',
+  remotes: [
+    {
+      name: '@demo/sub1',
+      entry: 'http://localhost:2001/vmok-manifest.json',
+    },
+    {
+      name: '@demo/sub2',
+      entry: 'http://localhost:2001/vmok-manifest.json',
+    },
+    {
+      name: '@demo/sub3',
+      entry: 'http://localhost:2001/vmok-manifest.json',
+    },
+  ],
 });
-
 ```
-

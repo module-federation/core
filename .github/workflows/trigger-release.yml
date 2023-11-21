@@ -17,6 +17,7 @@ on:
           - storybook-addon
           - typescript
           - utils
+          - webpack-bundler-runtime
           - native-federation-typescript
           - native-federation-tests
           - enhanced

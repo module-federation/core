@@ -61,20 +61,22 @@ describe('api', () => {
       ],
     });
     // merge remotes
-    expect(FM1.options.remotes).toEqual(expect.arrayContaining([
-      {
-        name: '@federation/sub2',
-        entry: new URL('xxx', location.origin).href,
-        shareScope: 'default',
-        type: "global",
-      },
-      {
-        name: '@federation/sub3',
-        entry: new URL('xxx', location.origin).href,
-        shareScope: 'default',
-        type: "global",
-      }
-    ]));
+    expect(FM1.options.remotes).toEqual(
+      expect.arrayContaining([
+        {
+          name: '@federation/sub2',
+          entry: new URL('xxx', location.origin).href,
+          shareScope: 'default',
+          type: 'global',
+        },
+        {
+          name: '@federation/sub3',
+          entry: new URL('xxx', location.origin).href,
+          shareScope: 'default',
+          type: 'global',
+        },
+      ]),
+    );
   });
 
   it('init with diffrent same name', () => {

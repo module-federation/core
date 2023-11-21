@@ -19,9 +19,15 @@
   },
   "typesVersions": {
     "*": {
-      ".": ["./index.cjs.d.ts"],
-      "helpers": ["./helpers.cjs.d.ts"],
-      "type": ["./types.cjs.d.ts"]
+      ".": [
+        "./index.cjs.d.ts"
+      ],
+      "helpers": [
+        "./helpers.cjs.d.ts"
+      ],
+      "type": [
+        "./types.cjs.d.ts"
+      ]
     }
   }
 }

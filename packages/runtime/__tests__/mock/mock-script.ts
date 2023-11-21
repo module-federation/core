@@ -25,21 +25,24 @@ function injector(current: Function, methodName: string) {
     const index = methodName === 'insertAdjacentElement' ? 1 : 0;
     // eslint-disable-next-line prefer-rest-params
     const el = arguments[index];
-    let oriArguments = arguments
-
+    let oriArguments = arguments;
 
     // eslint-disable-next-line prefer-rest-params
     const originProcess = () => current.apply(this, oriArguments);
-    function evalScript(element: HTMLScriptElement,preload?:boolean){
+    function evalScript(element: HTMLScriptElement, preload?: boolean) {
       const matchInfoKey = Object.keys(responseMatchInfo).find(
-        matchKey => element?.src?.indexOf(matchKey) > -1,
+        (matchKey) => element?.src?.indexOf(matchKey) > -1,
       );
       const matchInfo = matchInfoKey && responseMatchInfo[matchInfoKey];
-      if (matchInfo && element.tagName === 'SCRIPT' && !element.src.includes('preload-resource')) {
+      if (
+        matchInfo &&
+        element.tagName === 'SCRIPT' &&
+        !element.src.includes('preload-resource')
+      ) {
         element.setAttribute('innerHTML', matchInfoKey);
         const nEl = document.createElement('script');
         const attrs = element.attributes;
-        for(var j = 0; j < attrs.length; j++) {
+        for (var j = 0; j < attrs.length; j++) {
           // Setting src causes a timeout
           if (attrs[j].name !== 'src') {
             nEl.setAttribute(attrs[j].name, attrs[j].value);
@@ -51,9 +54,9 @@ function injector(current: Function, methodName: string) {
             safeWrapper(() => {
               (nEl as any)[key] = (element as any)[key];
             }, true);
-          }else{
+          } else {
             // Setting src causes a timeout
-            (nEl as any)['fakeSrc'] = (element as any)[key]
+            (nEl as any)['fakeSrc'] = (element as any)[key];
           }
         }
         const filePath = element.src.replace(matchInfo.baseUrl, '');
@@ -68,8 +71,8 @@ function injector(current: Function, methodName: string) {
         // );
         nEl.innerHTML = execScriptContent;
         // vitest 无法让 jsdom 和当前环境处于同一个执行环境
-        if(!preload){
-          (new Function(execScriptContent))();
+        if (!preload) {
+          new Function(execScriptContent)();
         }
         // eslint-disable-next-line prefer-rest-params
         oriArguments[index] = nEl;
@@ -77,9 +80,9 @@ function injector(current: Function, methodName: string) {
     }
     if (el instanceof DocumentFragment) {
       let listEl = el.querySelectorAll('script');
-      listEl.forEach((element)=> {
-        evalScript(element,true)
-      })
+      listEl.forEach((element) => {
+        evalScript(element, true);
+      });
     } else if (el instanceof HTMLScriptElement) {
       evalScript(el);
     }
@@ -97,7 +100,6 @@ const rewrite = (methods: Array<string>, builder: typeof injector) => {
 };
 
 rewrite(mountElementMethods, injector);
-
 
 /**
  * vite 无法让 jsdom 和当前环境处于同一个执行环境

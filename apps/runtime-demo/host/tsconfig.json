@@ -13,10 +13,12 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@module-federation/runtime": ["dist/packages/runtime"],
-      "@module-federation/runtime/type": ["dist/packages/runtime/type.cjs.d.ts"],
-      "@module-federation/sdk": ["dist/packages/sdk"],
+      "@module-federation/runtime/type": [
+        "dist/packages/runtime/type.cjs.d.ts"
+      ],
+      "@module-federation/sdk": ["dist/packages/sdk"]
     }
   },
   "files": [],
-  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"]
 }

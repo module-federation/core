@@ -9,13 +9,14 @@ export const mergeShareInfo1 = {
       shareConfig: {
         singleton: true,
         requiredVersion: '^16.0.0',
-        eager: false
+        eager: false,
       },
-      get: () => Promise.resolve(() => ({
-        default: 'react',
-        version: '16.0.0',
-        from: '@federation/merge-shared',
-      })),
+      get: () =>
+        Promise.resolve(() => ({
+          default: 'react',
+          version: '16.0.0',
+          from: '@federation/merge-shared',
+        })),
     },
   },
 };
@@ -27,11 +28,12 @@ export const mergeShareInfo2 = {
     'react-dom': {
       version: '17.0.0',
       scope: ['default', 'sub2'],
-      get: () => Promise.resolve(() => ({
-        default: 'react-dom',
-        version: '17.0.0',
-        from: '@federation/merge-shared',
-      })),
+      get: () =>
+        Promise.resolve(() => ({
+          default: 'react-dom',
+          version: '17.0.0',
+          from: '@federation/merge-shared',
+        })),
     },
   },
 };
@@ -43,11 +45,12 @@ export const mergeShareInfo3 = {
     'react-dom': {
       version: '16.0.0',
       scope: ['default', 'sub2'],
-      get: () => Promise.resolve(() => ({
-        default: 'react-dom',
-        version: '16.0.0',
-        from: '@federation/merge-shared3',
-      })),
+      get: () =>
+        Promise.resolve(() => ({
+          default: 'react-dom',
+          version: '16.0.0',
+          from: '@federation/merge-shared3',
+        })),
     },
   },
 };
@@ -60,7 +63,7 @@ export const localMergeShareInfos: Options['shared'] = {
     shareConfig: {
       singleton: true,
       requiredVersion: '^16.0.0',
-      eager: false
+      eager: false,
     },
     scope: ['default'],
     useIn: [],
@@ -73,7 +76,7 @@ export const localMergeShareInfos: Options['shared'] = {
     shareConfig: {
       singleton: false,
       requiredVersion: '^17.0.0',
-      eager: false
+      eager: false,
     },
     scope: ['default', 'sub2'],
     useIn: [],
@@ -91,7 +94,7 @@ export const globalMergeShareInfos: GlobalShareScope = {
         shareConfig: {
           singleton: false,
           requiredVersion: '^16.0.0',
-          eager: false
+          eager: false,
         },
         scope: ['default'],
         useIn: [],
@@ -106,7 +109,7 @@ export const globalMergeShareInfos: GlobalShareScope = {
         shareConfig: {
           singleton: false,
           requiredVersion: '^16.0.0',
-          eager: false
+          eager: false,
         },
         scope: ['default', 'sub2'],
         useIn: [],
@@ -119,7 +122,7 @@ export const globalMergeShareInfos: GlobalShareScope = {
         shareConfig: {
           singleton: false,
           requiredVersion: '^16.0.0',
-          eager: false
+          eager: false,
         },
         scope: ['default', 'sub2'],
         useIn: [],
@@ -136,7 +139,7 @@ export const globalMergeShareInfos: GlobalShareScope = {
         shareConfig: {
           singleton: false,
           requiredVersion: '^16.0.0',
-          eager: false
+          eager: false,
         },
         scope: ['default', 'sub2'],
         useIn: [],
@@ -149,7 +152,7 @@ export const globalMergeShareInfos: GlobalShareScope = {
         shareConfig: {
           singleton: false,
           requiredVersion: '^16.0.0',
-          eager: false
+          eager: false,
         },
         scope: ['default', 'sub2'],
         useIn: [],
