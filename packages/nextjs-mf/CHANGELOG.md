@@ -1,3 +1,11 @@
+# [8.1.0-canary.7](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
+
+
+### Bug Fixes
+
+* align with bytedance linting ([8000055](https://github.com/module-federation/universe/commit/800005571f37e0d1b31590834ddcd4d98bbd3086))
+* **enhanced:** refactory async boundary plugin ([230a105](https://github.com/module-federation/universe/commit/230a105b230ba108318d3e0aab6bea8e94fb3699))
+
 # [8.1.0-canary.6](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.5...nextjs-mf-8.1.0-canary.6) (2023-11-20)
 
 
