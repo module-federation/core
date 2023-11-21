@@ -18,12 +18,6 @@
       "files": ["*.json"],
       "parser": "jsonc-eslint-parser",
       "rules": {
-        "@nx/dependency-checks": [
-          "error",
-          {
-            "ignoredFiles": ["{projectRoot}/rollup.config.{js,ts,mjs,mts}"]
-          }
-        ]
       }
     }
   ]
