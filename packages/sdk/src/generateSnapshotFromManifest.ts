@@ -69,15 +69,14 @@ export function generateSnapshotFromManifest(
 
   let remotesInfo: ConsumerModuleInfo['remotesInfo'] = {};
 
-  // 如果没传 remotes ，仅读取 manifest 里的 remotes
+  // If remotes are not passed, only the remotes in the manifest will be read
   if (!Object.keys(remotes).length) {
     remotesInfo =
       manifest.remotes?.reduce(
         (res, next) => {
           let matchedVersion: string;
           const name = next.federationContainerName;
-          // garfishModuleName
-          // overrides 优先级最高
+          // overrides has hight priority
           if (overridesKeys.includes(name)) {
             matchedVersion = overrides[name];
           } else {
@@ -96,11 +95,11 @@ export function generateSnapshotFromManifest(
       ) || {};
   }
 
-  // 若指定了 remotes（deploy 场景），需要再遍历一遍
+  // If remotes (deploy scenario) are specified, you need to traverse it again
   Object.keys(remotes).forEach(
     (key) =>
       (remotesInfo[key] = {
-        // overrides 会改写依赖关系
+        // overrides will override dependencies
         matchedVersion: overridesKeys.includes(key)
           ? overrides[key]
           : remotes[key],
