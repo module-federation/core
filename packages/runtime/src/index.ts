@@ -13,7 +13,6 @@ export { registerGlobalPlugins } from './global';
 export { loadScript } from './utils';
 
 let FederationInstance: FederationHost | null = null;
-
 export function init(options: UserOptions): FederationHost {
   // Retrieve the same instance with the same name
   const instance = getGlobalFederationInstance(options.name, options.version);
