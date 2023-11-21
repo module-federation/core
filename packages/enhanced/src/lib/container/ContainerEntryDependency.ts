@@ -11,21 +11,25 @@ class ContainerEntryDependency extends Dependency {
   public name: string;
   public exposes: [string, ExposeOptions][];
   public shareScope: string;
+  public runtimePlugins: string[];
 
   /**
    * @param {string} name entry name
    * @param {[string, ExposeOptions][]} exposes list of exposed modules
    * @param {string} shareScope name of the share scope
+   * @param {string[]} runtimePlugins Runtime plugin file paths or package name.
    */
   constructor(
     name: string,
     exposes: [string, ExposeOptions][],
     shareScope: string,
+    runtimePlugins: string[]
   ) {
     super();
     this.name = name;
     this.exposes = exposes;
     this.shareScope = shareScope;
+    this.runtimePlugins = runtimePlugins
   }
 
   /**
