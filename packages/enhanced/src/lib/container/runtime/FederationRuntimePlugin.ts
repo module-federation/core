@@ -1,0 +1,276 @@
+import type { Compiler, sources } from 'webpack';
+import {Template} from 'webpack'
+import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import FederationRuntimeModule from './FederationRuntimeModule';
+import {
+  getFederationGlobalScope,
+  normalizeRuntimeInitOptionsWithOutShared,
+  modifyEntry,
+  getRequestType,
+  createHash,
+} from './utils';
+import { mkdirpSync } from 'webpack/lib/util/fs';
+import fs from 'fs';
+import path from 'path';
+import { TEMP_DIR } from '../constant';
+import type { ModuleFederationPluginOptions } from '../../../declarations/plugins/container/ModuleFederationPlugin';
+
+const BundlerRuntimePath = require.resolve('@module-federation/runtime');
+const RuntimePath = require.resolve(
+  '@module-federation/webpack-bundler-runtime',
+  {
+    paths: [BundlerRuntimePath],
+  },
+);
+const InitializeRemoteEntryRuntimePluginPath = require.resolve(
+  './InitializeRemoteEntryRuntimePlugin',
+);
+
+const DEFAULT_REMOTE_ENTRY = 'remoteEntry.js';
+
+const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
+
+class FederationRuntimePlugin {
+  options: ModuleFederationPluginOptions;
+  entryFilePath: string;
+
+  constructor(options: ModuleFederationPluginOptions) {
+    this.options = options;
+    this.entryFilePath = '';
+  }
+
+  static getTemplate(runtimePlugins: string[]) {
+    // internal runtime plugin
+    let runtimePluginTemplates = `import initializeRemoteEntryRuntimePlugin from '${InitializeRemoteEntryRuntimePluginPath}';\n`;
+    const runtimePLuginNames = ['initializeRemoteEntryRuntimePlugin'];
+
+    if (Array.isArray(runtimePlugins)) {
+      runtimePlugins.forEach((runtimePlugin, index) => {
+        const runtimePluginName = `plugin_${index}`;
+        const runtimePluginPath =
+          getRequestType(runtimePlugin) === 'relative'
+            ? path.join(process.cwd(), runtimePlugin)
+            : runtimePlugin;
+
+        runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
+        runtimePLuginNames.push(runtimePluginName);
+      });
+    }
+    return Template.asString([
+      `import federation from '${BundlerRuntimePath}';`,
+      runtimePluginTemplates,
+      `${federationGlobal} = {...federation,...${federationGlobal}};`,
+      runtimePLuginNames.length
+        ? Template.asString([
+            `${federationGlobal}.initOptions.plugins = ([`,
+            Template.indent(runtimePLuginNames.map((item) => `${item}(),`)),
+            '])',
+          ])
+        : '',
+      `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
+      `if(${federationGlobal}.installInitialConsumes){`,
+      Template.indent([`${federationGlobal}.installInitialConsumes()`]),
+      '}',
+    ]);
+  }
+
+  static getFilePath(runtimePlugins: string[]) {
+    const hash = createHash(
+      FederationRuntimePlugin.getTemplate(runtimePlugins),
+    );
+    return path.join(TEMP_DIR, `entry.${hash}.js`);
+  }
+
+  getFilePath() {
+    if (this.entryFilePath) {
+      return this.entryFilePath;
+    }
+
+    this.entryFilePath = FederationRuntimePlugin.getFilePath(
+      this.options.runtimePlugins!,
+    );
+    return this.entryFilePath;
+  }
+
+  ensureFile() {
+    const filePath = this.getFilePath();
+    try {
+      fs.readFileSync(filePath);
+    } catch (err) {
+      mkdirpSync(fs, TEMP_DIR);
+      fs.writeFileSync(
+        filePath,
+        FederationRuntimePlugin.getTemplate(this.options.runtimePlugins!),
+      );
+    }
+  }
+
+  prependEntry(compiler: Compiler) {
+    this.ensureFile();
+    const entryFilePath = this.getFilePath();
+
+    modifyEntry({
+      compiler,
+      prependEntry: (entry) => {
+        Object.keys(entry).forEach((entryName) => {
+          const entryItem = entry[entryName];
+          if (!entryItem.import) {
+            // TODO: maybe set this variable as constant is better https://github.com/webpack/webpack/blob/main/lib/config/defaults.js#L176
+            entryItem.import = ['./src'];
+          }
+          if (!entryItem.import.includes(entryFilePath)) {
+            entryItem.import.unshift(entryFilePath);
+          }
+        });
+      },
+    });
+  }
+
+  injectRuntime(compiler: Compiler) {
+    const initOptionsWithoutShared = normalizeRuntimeInitOptionsWithOutShared(
+      this.options,
+    );
+    const federationGlobal = getFederationGlobalScope(RuntimeGlobals || {});
+
+    compiler.hooks.thisCompilation.tap(
+      this.constructor.name,
+      (compilation, { normalModuleFactory }) => {
+        compilation.hooks.additionalTreeRuntimeRequirements.tap(
+          this.constructor.name,
+          // Setup react-refresh globals with a Webpack runtime module
+          (chunk, runtimeRequirements) => {
+            if (runtimeRequirements.has(federationGlobal)) {
+              return;
+            }
+            runtimeRequirements.add(RuntimeGlobals.interceptModuleExecution);
+            runtimeRequirements.add(RuntimeGlobals.moduleCache);
+            runtimeRequirements.add(RuntimeGlobals.compatGetDefaultExport);
+            runtimeRequirements.add(federationGlobal);
+            compilation.addRuntimeModule(
+              chunk,
+              new FederationRuntimeModule(
+                runtimeRequirements,
+                this.options.name!,
+                initOptionsWithoutShared,
+              ),
+            );
+
+            // compilation.addRuntimeModule(
+            // 	chunk,
+            // 	new FederationRuntimeInitModule()
+            // );
+
+            // compilation.addRuntimeModule(
+            // 	chunk,
+            // 	new FederationRuntimeConcatModule()
+            // );
+          },
+        );
+      },
+    );
+  }
+
+  // merge runtime chunk into container
+  mergeContainerRuntime(compiler: Compiler) {
+    let enableRuntimeChunk = false;
+
+    if (compiler.options.optimization) {
+      switch (typeof compiler.options.optimization.runtimeChunk) {
+        case 'boolean':
+          enableRuntimeChunk = compiler.options.optimization.runtimeChunk;
+          break;
+        case 'object':
+          enableRuntimeChunk = true;
+          break;
+        default:
+          enableRuntimeChunk = false;
+          break;
+      }
+    }
+
+    // merge runtime into container
+    if (enableRuntimeChunk) {
+      compiler.hooks.emit.tap(
+        'EnableSingleRunTimeForFederationPlugin',
+        (compilation) => {
+          const { assets } = compilation;
+          const entryPoint = compilation.entrypoints.get(this.options.name!);
+          if (!entryPoint) {
+            return;
+          }
+
+          const runtimeChunk = entryPoint.getRuntimeChunk();
+          if (!runtimeChunk) {
+            return;
+          }
+          const runtimeAssets: sources.Source[] = [];
+          runtimeChunk.files.forEach((fileName) => {
+            runtimeAssets.push(assets[fileName]);
+          });
+          const remoteEntry =
+            assets[this.options.filename || DEFAULT_REMOTE_ENTRY];
+          const mergedSource = new compiler.webpack.sources.ConcatSource(
+            ...runtimeAssets,
+            remoteEntry,
+          );
+          assets[this.options.filename || DEFAULT_REMOTE_ENTRY] = mergedSource;
+        },
+      );
+    }
+  }
+
+  setRuntimeAlias(compiler: Compiler) {
+    compiler.options.resolve.alias = {
+      ...compiler.options.resolve.alias,
+      '@vmok/kit/runtime$': RuntimePath,
+      '@vmok/kit$': RuntimePath,
+      '@vmok/runtime$': RuntimePath,
+    };
+  }
+
+  apply(compiler: Compiler) {
+    const useModuleFederationPlugin = compiler.options.plugins.find(
+      (p) =>{
+        if(typeof p !=='object' || !p){
+          return false
+        }
+
+        return p['name'] === 'ModuleFederationPlugin'
+      },
+    );
+
+    if (useModuleFederationPlugin && !this.options) {
+      // @ts-ignore
+      this.options = useModuleFederationPlugin._options;
+    }
+
+    const useContainerPlugin = compiler.options.plugins.find(
+      (p) => {
+        if(typeof p !=='object' || !p){
+          return false
+        }
+
+        return p['name'] === 'ContainerPlugin'
+      },
+    );
+
+    if (useContainerPlugin && !this.options) {
+      // @ts-ignore
+      this.options = useContainerPlugin._options;
+    }
+
+    if (!useContainerPlugin && !useModuleFederationPlugin) {
+      this.options = {
+        ...this.options,
+        name: compiler.options.output.uniqueName || 'container',
+        remotes: {},
+      };
+    }
+
+    this.prependEntry(compiler);
+    this.injectRuntime(compiler);
+    this.setRuntimeAlias(compiler);
+  }
+}
+
+module.exports = FederationRuntimePlugin;

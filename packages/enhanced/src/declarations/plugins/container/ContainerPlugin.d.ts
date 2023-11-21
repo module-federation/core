@@ -91,6 +91,10 @@ export interface ContainerPluginOptions {
    * The name of the share scope which is shared with the host (defaults to 'default').
    */
   shareScope?: string;
+  /**
+   * Runtime plugin file paths or package name.
+   */
+  runtimePlugins?: string[];
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.
