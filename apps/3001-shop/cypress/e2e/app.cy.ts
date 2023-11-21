@@ -36,6 +36,7 @@ describe('3001-shop/', () => {
       cy.url().should('include', '/shop');
       getH1().contains('Shop Page');
       cy.get('.home-menu-link').click();
+      //eslint-disable-next-line
       cy.wait(2999);
       cy.url().should('include', '/');
       getH1().contains('This is SPA combined');
@@ -99,6 +100,7 @@ describe('3001-shop/', () => {
         cy.url().should('include', '/shop');
         getH1().contains('Shop Page');
         cy.get('.home-menu-link').click();
+        //eslint-disable-next-line
         cy.wait(2999);
         cy.get('img.shop-webpack-png')
           .invoke('attr', 'src')

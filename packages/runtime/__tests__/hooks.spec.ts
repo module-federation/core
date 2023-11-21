@@ -181,7 +181,9 @@ describe('hooks', () => {
       ],
     });
 
-    const res = await INSTANCE.loadRemote<() => string>('@loader-hooks/app2/say');
+    const res = await INSTANCE.loadRemote<() => string>(
+      '@loader-hooks/app2/say',
+    );
     assert(res);
     expect(res()).toBe('hello app2');
     // @ts-ignore fakeSrc is local mock attr, which value is the same as src

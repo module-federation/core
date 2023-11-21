@@ -31,7 +31,6 @@
     }
   },
   "dependencies": {
-  
     "@module-federation/sdk": "*",
     "msw": "^1.2.1",
     "vitest-fetch-mock": "^0.2.2",
