@@ -20,16 +20,14 @@
   },
   "remotes": [
     {
-    "alias": "@circulate-deps/app2",
-    "consumingFederationContainerName": "@circulate-deps/app1",
-    "federationContainerName": "@circulate-deps/app2",
-    "moduleName": "Say",
-    "usedIn": [
-      "src/routes/user/page.tsx"
-    ],
-    "entry": "http://localhost:1111/resources/load-remote/circulate-dep-app2/federation-manifest.json"
-  }
-],
+      "alias": "@circulate-deps/app2",
+      "consumingFederationContainerName": "@circulate-deps/app1",
+      "federationContainerName": "@circulate-deps/app2",
+      "moduleName": "Say",
+      "usedIn": ["src/routes/user/page.tsx"],
+      "entry": "http://localhost:1111/resources/load-remote/circulate-dep-app2/federation-manifest.json"
+    }
+  ],
   "shared": [],
   "exposes": [
     {
@@ -40,13 +38,11 @@
       "federationContainerName": "@circulate-deps/app1",
       "assets": {
         "js": {
-          "sync": [
-          ],
+          "sync": [],
           "async": []
         },
         "css": {
-          "sync": [
-          ],
+          "sync": [],
           "async": []
         }
       }

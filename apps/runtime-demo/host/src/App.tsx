@@ -1,15 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { init ,loadRemote} from '@module-federation/runtime';
+import { init, loadRemote } from '@module-federation/runtime';
 import LocalButton from './Button';
-import customPlugin from './runtimePlugin'
+import customPlugin from './runtimePlugin';
 
 init({
   name: 'app1',
   remotes: [
     {
       name: 'runtime_demo_remote',
-      alias:'app2',
+      alias: 'app2',
       entry: 'http://localhost:3006/remoteEntry.js',
     },
   ],
@@ -33,15 +33,15 @@ init({
       },
     },
   },
-  plugins:[customPlugin()]
+  plugins: [customPlugin()],
 });
 
-function RemoteButton () {
+function RemoteButton() {
   // @ts-ignore ignore
   const Comp = React.lazy(async () => {
-    const Button = await loadRemote('app2/Button') ;
-    return Button
-  })
+    const Button = await loadRemote('app2/Button');
+    return Button;
+  });
   return (
     <React.Suspense fallback="Loading Button">
       <Comp />

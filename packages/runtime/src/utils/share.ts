@@ -147,7 +147,7 @@ export function getGlobalShare(
             : findSingletonVersionOrderByVersion(sc, pkgName);
         // eslint-disable-next-line max-depth
         if (
-          typeof requiredVersion ==='string' &&
+          typeof requiredVersion === 'string' &&
           !satisfy(singletonVersion, requiredVersion)
         ) {
           warn(

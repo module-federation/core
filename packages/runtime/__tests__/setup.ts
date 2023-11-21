@@ -5,14 +5,14 @@ import { requestList } from './mock/env';
 import { resetFederationGlobalInfo } from '../src/global';
 
 mockScriptDomResponse({
-    baseDir: __dirname,
-    baseUrl: 'http://localhost:1111/',
+  baseDir: __dirname,
+  baseUrl: 'http://localhost:1111/',
 });
 
-beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }))
-afterAll(() => server.close())
+beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
+afterAll(() => server.close());
 afterEach(() => {
-    resetFederationGlobalInfo();
-    requestList.clear();
-    server.resetHandlers()
+  resetFederationGlobalInfo();
+  requestList.clear();
+  server.resetHandlers();
 });

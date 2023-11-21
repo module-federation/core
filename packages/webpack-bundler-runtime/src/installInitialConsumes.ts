@@ -28,8 +28,8 @@ export function installInitialConsumes(options: InstallInitialConsumesOptions) {
     initialConsumes,
   } = options;
 
-  initialConsumes.forEach(id => {
-    webpackRequire.m[id] = module => {
+  initialConsumes.forEach((id) => {
+    webpackRequire.m[id] = (module) => {
       // Handle case when module is used sync
       installedModules[id] = 0;
       delete webpackRequire.c[id];

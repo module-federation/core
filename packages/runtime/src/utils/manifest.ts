@@ -92,5 +92,5 @@ export function matchRemote(
       return remote;
     }
   }
-  return
+  return;
 }
