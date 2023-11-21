@@ -11,7 +11,7 @@ export function remotes(options: RemotesOptions) {
   } = options;
 
   if (webpackRequire.o(chunkMapping, chunkId)) {
-    chunkMapping[chunkId].forEach(id => {
+    chunkMapping[chunkId].forEach((id) => {
       let getScope = webpackRequire.R;
       if (!getScope) {
         getScope = [];
@@ -67,16 +67,16 @@ export function remotes(options: RemotesOptions) {
         _: any,
         first: 1 | 0,
       ) =>
-        (external ?
-          handleFunction(
-            webpackRequire.I,
-            data[0],
-            0,
-            external,
-            onInitialized,
-            first,
-          ) :
-          onError());
+        external
+          ? handleFunction(
+              webpackRequire.I,
+              data[0],
+              0,
+              external,
+              onInitialized,
+              first,
+            )
+          : onError();
 
       // eslint-disable-next-line no-var
       var onInitialized = (
@@ -88,7 +88,7 @@ export function remotes(options: RemotesOptions) {
       // eslint-disable-next-line no-var
       var onFactory = (factory: () => any) => {
         data.p = 1;
-        webpackRequire.m[id] = module => {
+        webpackRequire.m[id] = (module) => {
           module.exports = factory();
         };
       };

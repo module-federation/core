@@ -6,7 +6,7 @@ export function setMockModuleInfos(modules: GlobalModuleInfo): () => void {
     ...modules,
   };
   return () => {
-    Object.keys(modules).forEach(key => {
+    Object.keys(modules).forEach((key) => {
       delete globalThis.__FEDERATION__.moduleInfo[key];
     });
   };

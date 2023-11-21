@@ -11,7 +11,7 @@ describe('hooks', () => {
     filterKeywords: [],
     basename: 'http://localhost:1111/',
   });
-  beforeEach(()=>{
+  beforeEach(() => {
     removeScriptTags();
   });
 
@@ -30,7 +30,7 @@ describe('hooks', () => {
         initArgs = args;
       },
       beforeLoadRemote(args) {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           beforeLoadRemoteArgs = args;
           setTimeout(
             () =>
@@ -53,7 +53,8 @@ describe('hooks', () => {
         {
           name: '@demo/main',
           alias: 'main',
-          entry: 'http://localhost:1111/resources/main/federation-manifest.json',
+          entry:
+            'http://localhost:1111/resources/main/federation-manifest.json',
         },
       ],
       plugins: [testPlugin()],
@@ -80,9 +81,8 @@ describe('hooks', () => {
     );
 
     // modify ./sub expose to ./add
-    const module = await GM.loadRemote<(...args: Array<number>) => number>(
-      '@demo/main/sub',
-    );
+    const module =
+      await GM.loadRemote<(...args: Array<number>) => number>('@demo/main/sub');
     assert(module, 'loadRemote should return a module');
     expect(beforeLoadRemoteArgs).toMatchObject({
       id: '@demo/main/sub',
@@ -99,9 +99,11 @@ describe('hooks', () => {
   });
 
   it('loader hooks', async () => {
-    let testRemoteEntry = 'http://localhost:1111/resources/hooks/app2/federation-remote-entry.js';
-    let preloadRemoteEntry = 'http://localhost:1111/resources/hooks/app3/federation-remote-entry.js';
-    const remotePublicPath = 'http://localhost:1111/'
+    let testRemoteEntry =
+      'http://localhost:1111/resources/hooks/app2/federation-remote-entry.js';
+    let preloadRemoteEntry =
+      'http://localhost:1111/resources/hooks/app3/federation-remote-entry.js';
+    const remotePublicPath = 'http://localhost:1111/';
     const reset = addGlobalSnapshot({
       '@loader-hooks/globalinfo': {
         globalName: '',
@@ -132,8 +134,7 @@ describe('hooks', () => {
         remoteEntryType: 'global',
         modules: [],
         version: '0.0.1',
-        remoteEntry:
-          'resources/hooks/app2/federation-remote-entry.js',
+        remoteEntry: 'resources/hooks/app2/federation-remote-entry.js',
       },
       '@loader-hooks/app3:0.0.1': {
         globalName: '@loader-hooks/app3',
@@ -145,8 +146,7 @@ describe('hooks', () => {
         remoteEntryType: 'global',
         modules: [],
         version: '0.0.1',
-        remoteEntry:
-          'resources/hooks/app3/federation-remote-entry.js',
+        remoteEntry: 'resources/hooks/app3/federation-remote-entry.js',
       },
     });
 
@@ -172,31 +172,33 @@ describe('hooks', () => {
               script.setAttribute('loader-hooks', 'isTrue');
               script.setAttribute('crossorigin', 'anonymous');
               return script;
-            } else if( url === preloadRemoteEntry) {
+            } else if (url === preloadRemoteEntry) {
               script.setAttribute('loader-hooks', 'isFalse');
               return script;
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
 
     let res = await INSTANCE.loadRemote<() => string>('@loader-hooks/app2/say');
     assert(res);
-    expect(res()).toBe('hello app2')
+    expect(res()).toBe('hello app2');
     // @ts-ignore fakeSrc is local mock attr, which value is the same as src
-    const testLoadedScript =   [...document.querySelectorAll('script')].find((script)=> script.fakeSrc === testRemoteEntry);
+    const testLoadedScript = [...document.querySelectorAll('script')].find(
+      (script) => script.fakeSrc === testRemoteEntry,
+    );
     assert(testLoadedScript);
     expect(testLoadedScript.getAttribute('loader-hooks')).toBe('isTrue');
     expect(testLoadedScript.getAttribute('crossorigin')).toBe('anonymous');
 
-
-    await INSTANCE.preloadRemote([{nameOrAlias: '@loader-hooks/app3'}]);
-    const testLoadedScript1 =   [...document.querySelectorAll('script')].find((script)=> (script as any).fakeSrc === preloadRemoteEntry);
+    await INSTANCE.preloadRemote([{ nameOrAlias: '@loader-hooks/app3' }]);
+    const testLoadedScript1 = [...document.querySelectorAll('script')].find(
+      (script) => (script as any).fakeSrc === preloadRemoteEntry,
+    );
     assert(testLoadedScript1);
     expect(testLoadedScript1.getAttribute('loader-hooks')).toBe('isFalse');
 
     reset();
   });
-
 });

@@ -12,20 +12,20 @@ export function consumes(options: ConsumesOptions) {
   } = options;
   proxyShareScopeMap(webpackRequire);
   if (webpackRequire.o(chunkMapping, chunkId)) {
-    chunkMapping[chunkId].forEach(id => {
+    chunkMapping[chunkId].forEach((id) => {
       if (webpackRequire.o(installedModules, id)) {
         return promises.push(installedModules[id] as Promise<any>);
       }
       const onFactory = (factory: () => any) => {
         installedModules[id] = 0;
-        webpackRequire.m[id] = module => {
+        webpackRequire.m[id] = (module) => {
           delete webpackRequire.c[id];
           module.exports = factory();
         };
       };
       const onError = (error: unknown) => {
         delete installedModules[id];
-        webpackRequire.m[id] = module => {
+        webpackRequire.m[id] = (module) => {
           delete webpackRequire.c[id];
           throw error;
         };
