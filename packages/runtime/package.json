@@ -1,4 +1,5 @@
 {
+  "public": true,
   "name": "@module-federation/runtime",
   "version": "0.0.1",
   "author": "zhouxiao <codingzx@gmail.com>",
