@@ -71,7 +71,7 @@
     "@commitlint/cz-commitlint": "^17.7.2",
     "@dqbd/tiktoken": "1.0.7",
     "@fontsource/roboto": "5.0.8",
-    "@fontsource/roboto-mono": "5.0.12",
+    "@fontsource/roboto-mono": "5.0.15",
     "@goestav/nx-semantic-release": "1.0.0",
     "@jscutlery/semver": "3.1.0",
     "@node-rs/jieba": "1.7.2",
