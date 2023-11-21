@@ -8,6 +8,7 @@ const mountElementMethods = [
   'insertBefore',
   'insertAdjacentElement',
 ];
+
 const rawElementMethods = Object.create(null);
 
 type MatchInfo = {
