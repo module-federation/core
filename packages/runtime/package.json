@@ -1,5 +1,4 @@
 {
-  "public": true,
   "name": "@module-federation/runtime",
   "version": "0.0.1",
   "author": "zhouxiao <codingzx@gmail.com>",
@@ -7,6 +6,9 @@
   "main": "./index.cjs",
   "module": "./index.esm.js",
   "types": "./index.cjs.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "import": "./index.cjs.js",
