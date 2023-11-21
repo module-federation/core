@@ -99,9 +99,9 @@ describe('hooks', () => {
   });
 
   it('loader hooks', async () => {
-    let testRemoteEntry =
+    const testRemoteEntry =
       'http://localhost:1111/resources/hooks/app2/federation-remote-entry.js';
-    let preloadRemoteEntry =
+    const preloadRemoteEntry =
       'http://localhost:1111/resources/hooks/app3/federation-remote-entry.js';
     const remotePublicPath = 'http://localhost:1111/';
     const reset = addGlobalSnapshot({
@@ -166,7 +166,7 @@ describe('hooks', () => {
         {
           name: 'change-script-attribute',
           createScript({ url }) {
-            let script = document.createElement('script');
+            const script = document.createElement('script');
             script.src = url;
             if (url === testRemoteEntry) {
               script.setAttribute('loader-hooks', 'isTrue');
@@ -181,7 +181,7 @@ describe('hooks', () => {
       ],
     });
 
-    let res = await INSTANCE.loadRemote<() => string>('@loader-hooks/app2/say');
+    const res = await INSTANCE.loadRemote<() => string>('@loader-hooks/app2/say');
     assert(res);
     expect(res()).toBe('hello app2');
     // @ts-ignore fakeSrc is local mock attr, which value is the same as src

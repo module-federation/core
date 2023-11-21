@@ -15,7 +15,7 @@ type MatchInfo = {
   baseDir: string;
 };
 
-let responseMatchInfo: {
+const responseMatchInfo: {
   [key: string]: MatchInfo;
 } = {};
 
@@ -25,7 +25,8 @@ function injector(current: Function, methodName: string) {
     const index = methodName === 'insertAdjacentElement' ? 1 : 0;
     // eslint-disable-next-line prefer-rest-params
     const el = arguments[index];
-    let oriArguments = arguments;
+    // eslint-disable-next-line prefer-rest-params
+    const oriArguments = arguments;
 
     // eslint-disable-next-line prefer-rest-params
     const originProcess = () => current.apply(this, oriArguments);
@@ -42,7 +43,7 @@ function injector(current: Function, methodName: string) {
         element.setAttribute('innerHTML', matchInfoKey);
         const nEl = document.createElement('script');
         const attrs = element.attributes;
-        for (var j = 0; j < attrs.length; j++) {
+        for (let j = 0; j < attrs.length; j++) {
           // Setting src causes a timeout
           if (attrs[j].name !== 'src') {
             nEl.setAttribute(attrs[j].name, attrs[j].value);
@@ -79,7 +80,7 @@ function injector(current: Function, methodName: string) {
       }
     }
     if (el instanceof DocumentFragment) {
-      let listEl = el.querySelectorAll('script');
+      const listEl = el.querySelectorAll('script');
       listEl.forEach((element) => {
         evalScript(element, true);
       });

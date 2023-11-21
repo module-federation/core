@@ -12,7 +12,7 @@ export async function loadEsmEntry({
   entry: string;
   remoteEntryExports: RemoteEntryExports | undefined;
 }): Promise<RemoteEntryExports> {
-  return new Promise<RemoteEntryExports>(async (resolve, reject) => {
+  return new Promise<RemoteEntryExports>((resolve, reject) => {
     try {
       if (!remoteEntryExports) {
         // eslint-disable-next-line no-eval
