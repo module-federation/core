@@ -4,7 +4,7 @@ import { isStaticResourcesEqual } from '../src/utils/tool';
 describe('isStaticResourcesEqual', () => {
   it('check resources while url not specify protocol', () => {
     const url = '//a.b.c';
-    var sc = document.createElement('script');
+    const sc = document.createElement('script');
     sc.src = url;
     expect(sc.src).toBe('http://a.b.c/');
 
@@ -15,7 +15,7 @@ describe('isStaticResourcesEqual', () => {
 
   it('check resources while url specify protocol(https)', () => {
     const url = 'https://a.b.c';
-    var sc = document.createElement('script');
+    const sc = document.createElement('script');
     sc.src = url;
     expect(sc.src).toBe('https://a.b.c/');
 
@@ -29,7 +29,7 @@ describe('isStaticResourcesEqual', () => {
 
   it('check resources while url specify protocol(http)', () => {
     const url = 'http://a.b.c';
-    var sc = document.createElement('script');
+    const sc = document.createElement('script');
     sc.src = url;
     expect(sc.src).toBe('http://a.b.c/');
 

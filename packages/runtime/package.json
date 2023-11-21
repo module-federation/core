@@ -29,5 +29,13 @@
         "./types.cjs.d.ts"
       ]
     }
+  },
+  "dependencies": {
+  
+    "@module-federation/sdk": "*",
+    "msw": "^1.2.1",
+    "vitest-fetch-mock": "^0.2.2",
+    "vitest": "0.32.4",
+    "whatwg-fetch": "^3.6.2"
   }
 }
