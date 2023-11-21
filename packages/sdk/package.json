@@ -8,9 +8,6 @@
     "sdk"
   ],
   "author": "zhanghang <hanric.zhang@gmail.com>",
-  "files": [
-    "dist"
-  ],
   "sideEffects": false,
   "main": "./index.cjs.js",
   "module": "./index.esm.js",
