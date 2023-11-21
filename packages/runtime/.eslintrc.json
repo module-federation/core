@@ -17,8 +17,7 @@
     {
       "files": ["*.json"],
       "parser": "jsonc-eslint-parser",
-      "rules": {
-      }
+      "rules": {}
     }
   ]
 }
