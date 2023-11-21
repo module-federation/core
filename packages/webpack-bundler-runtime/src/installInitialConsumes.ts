@@ -2,7 +2,6 @@ import {
   HandleInitialConsumesOptions,
   InstallInitialConsumesOptions,
 } from './types';
-
 function handleInitialConsumes(options: HandleInitialConsumesOptions) {
   const { moduleId, moduleToHandlerMapping, webpackRequire } = options;
 
