@@ -1,3 +1,10 @@
+# [1.0.0-canary.3](https://github.com/module-federation/universe/compare/sdk-1.0.0-canary.2...sdk-1.0.0-canary.3) (2023-11-21)
+
+
+### Bug Fixes
+
+* update publish config ([b5e04ff](https://github.com/module-federation/universe/commit/b5e04ffff7003b73f3a65a28a792ef389035214d))
+
 # [1.0.0-canary.2](https://github.com/module-federation/universe/compare/sdk-1.0.0-canary.1...sdk-1.0.0-canary.2) (2023-11-21)
 
 
