@@ -3,17 +3,19 @@ import { initializeSharing } from './initializeSharing';
 
 // FIXME: ideal situation => import { GlobalShareScope,UserOptions } from '@module-federation/runtime/type'
 type ExcludeUndefined<T> = T extends undefined ? never : T;
-type NonUndefined<T=Shared> = ExcludeUndefined<T>;
+type NonUndefined<T = Shared> = ExcludeUndefined<T>;
 
-type InitOptions = Parameters<typeof runtime.init>[0]
-type Shared = InitOptions['shared']
+type InitOptions = Parameters<typeof runtime.init>[0];
+type Shared = InitOptions['shared'];
 
-type SharedConfig = NonUndefined<NonUndefined[string]['shareConfig']>
+type SharedConfig = NonUndefined<NonUndefined[string]['shareConfig']>;
 
-type ModuleCache = runtime.FederationHost['moduleCache']
+type ModuleCache = runtime.FederationHost['moduleCache'];
 type InferModule<T> = T extends Map<string, infer U> ? U : never;
 type InferredModule = InferModule<ModuleCache>;
-export type RemoteEntryExports = NonUndefined<InferredModule['remoteEntryExports']>
+export type RemoteEntryExports = NonUndefined<
+  InferredModule['remoteEntryExports']
+>;
 
 type ExtractInitParameters<T> = T extends {
   init: (shareScope: infer U, ...args: any[]) => void;
@@ -23,7 +25,7 @@ type ExtractInitParameters<T> = T extends {
 
 type InferredShareScope = ExtractInitParameters<RemoteEntryExports>;
 type InferredGlobalShareScope = {
-  [scope: string]: InferredShareScope
+  [scope: string]: InferredShareScope;
 };
 
 // shareScope, name, externalModuleId, externalType, remoteName
@@ -68,8 +70,8 @@ export interface RemotesOptions {
   promises: Promise<any>[];
   chunkMapping: Record<string, Array<string | number>>;
   idToExternalAndNameMapping: Record<
-  string,
-  IdToExternalAndNameMappingItemWithPromise
+    string,
+    IdToExternalAndNameMappingItemWithPromise
   >;
   webpackRequire: WebpackRequire;
 }

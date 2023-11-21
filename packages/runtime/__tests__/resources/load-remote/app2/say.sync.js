@@ -1,1 +1,1 @@
-console.log('load-remote say.sync.js loaded')
+console.log('load-remote say.sync.js loaded');

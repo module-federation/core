@@ -1,4 +1,4 @@
-import { assert, describe, it } from 'vitest'
+import { assert, describe, it } from 'vitest';
 import { init } from '../src/index';
 import { getGlobalShareScope } from '../src/utils/share';
 import {
@@ -13,7 +13,7 @@ import { FederationHost } from '../src/core';
 
 // eslint-disable-next-line max-lines-per-function
 describe('shared', () => {
-  beforeEach(()=>{
+  beforeEach(() => {
     __FEDERATION__.__SHARE__ = {};
   });
 
@@ -22,7 +22,9 @@ describe('shared', () => {
     const FederationInstance2 = init(mergeShareInfo2);
     init(mergeShareInfo3);
     expect(FederationInstance).toBe(FederationInstance2);
-    expect(FederationInstance.options.shared).toMatchObject(localMergeShareInfos);
+    expect(FederationInstance.options.shared).toMatchObject(
+      localMergeShareInfos,
+    );
   });
 
   it('loadShare singleton', async () => {
@@ -33,9 +35,12 @@ describe('shared', () => {
         'singleton-react': {
           version: '16.0.0',
           get: () =>
-            new Promise<()=> {version: string, from: string}>(resolve => {
+            new Promise<() => { version: string; from: string }>((resolve) => {
               setTimeout(() => {
-                resolve(()=> ({ version: '16.0.0', from: '@federation/loadShare' }));
+                resolve(() => ({
+                  version: '16.0.0',
+                  from: '@federation/loadShare',
+                }));
               }, 500);
             }),
         },
@@ -49,12 +54,15 @@ describe('shared', () => {
           version: '16.0.1',
           shareConfig: {
             singleton: true,
-            requiredVersion:'^16.0.0',
+            requiredVersion: '^16.0.0',
           },
           get: () =>
-            new Promise<()=> {version: string, from: string}>(resolve => {
+            new Promise<() => { version: string; from: string }>((resolve) => {
               setTimeout(() => {
-                resolve(()=> ({ version: '16.0.0', from: '@federation/loadShare2' }));
+                resolve(() => ({
+                  version: '16.0.0',
+                  from: '@federation/loadShare2',
+                }));
               }, 600);
             }),
         },
@@ -64,9 +72,10 @@ describe('shared', () => {
     const FederationInstance = new FederationHost(gmConfig1);
     const FederationInstance2 = new FederationHost(gmConfig2);
 
-    const reactInstance = await FederationInstance.loadShare<{ version: string; from: string }>(
-      'singleton-react',
-    );
+    const reactInstance = await FederationInstance.loadShare<{
+      version: string;
+      from: string;
+    }>('singleton-react');
     const reactInstanceRes = reactInstance();
     assert(reactInstanceRes, "reactInstance can't be undefined");
     expect(reactInstanceRes.from).toBe('@federation/loadShare');
@@ -103,10 +112,10 @@ describe('shared', () => {
         react: {
           version: '16.0.0',
           get: () =>
-            new Promise<()=> {version: string, from: string}>(resolve => {
+            new Promise<() => { version: string; from: string }>((resolve) => {
               setTimeout(() => {
                 uniqueId++;
-                resolve(()=> ({
+                resolve(() => ({
                   version: '16.0.0',
                   from: '@federation/loadshare-cache',
                   uniqueId,
@@ -120,12 +129,16 @@ describe('shared', () => {
     const FederationInstance = new FederationHost(gmConfig1);
 
     const [reactInstance1, reactInstance2] = await Promise.all([
-      FederationInstance.loadShare<{ version: string; from: string; uniqueId: number }>(
-        'react',
-      ),
-      FederationInstance.loadShare<{ version: string; from: string; uniqueId: number }>(
-        'react',
-      ),
+      FederationInstance.loadShare<{
+        version: string;
+        from: string;
+        uniqueId: number;
+      }>('react'),
+      FederationInstance.loadShare<{
+        version: string;
+        from: string;
+        uniqueId: number;
+      }>('react'),
     ]);
     const reactInstance1Res = reactInstance1();
     const reactInstance2Res = reactInstance2();
@@ -138,7 +151,7 @@ describe('shared', () => {
 
   it('runtime inject deps', async () => {
     const runtimeReact = () => {
-      return { from: '@federation/runtime-deps' }
+      return { from: '@federation/runtime-deps' };
     };
 
     const gmConfig1 = {
@@ -163,7 +176,7 @@ describe('shared', () => {
             singleton: false,
           },
           get: async () => () => {
-            return { from: '@federation/runtime-deps2' }
+            return { from: '@federation/runtime-deps2' };
           },
         },
       },
@@ -171,23 +184,25 @@ describe('shared', () => {
 
     const GM1 = new FederationHost(gmConfig1);
     GM1.initOptions({
-      name:'@federation/runtime-deps',
-      remotes:[],
-      shared:{
+      name: '@federation/runtime-deps',
+      remotes: [],
+      shared: {
         'runtime-react': {
           version: '16.0.0',
           lib: runtimeReact,
         },
-      }
-    })
-    await GM1.loadShare<{ from: string, version: string }>("runtime-react");
+      },
+    });
+    await GM1.loadShare<{ from: string; version: string }>('runtime-react');
     const FederationInstance2 = new FederationHost(gmConfig2);
-    const shared = await FederationInstance2.loadShare<{ from: string, version: string }>("runtime-react");
+    const shared = await FederationInstance2.loadShare<{
+      from: string;
+      version: string;
+    }>('runtime-react');
     const sharedRes = shared();
-    assert(sharedRes, 'shared can\'t be null')
+    assert(sharedRes, "shared can't be null");
     expect(sharedRes.from).toEqual('@federation/runtime-deps');
   });
-
 
   // it('share deps', async () => {
   //   const GM1 = new FederationHost({
@@ -234,23 +249,22 @@ describe('shared', () => {
   // });
 });
 
-
-describe('single shared', ()=> {
-  beforeEach(()=>{
+describe('single shared', () => {
+  beforeEach(() => {
     __FEDERATION__.__SHARE__ = {};
   });
-  it('major version', async ()=>{
+  it('major version', async () => {
     const vmConfig1 = {
       name: '@shared-single/runtime-deps',
       remotes: [],
-      shared:{
+      shared: {
         'runtime-react': {
           version: '16.0.0',
           lib: () => {
-            return { from: '@shared-single/runtime-deps' }
+            return { from: '@shared-single/runtime-deps' };
           },
         },
-      }
+      },
     };
 
     const vmConfig2 = {
@@ -264,7 +278,7 @@ describe('single shared', ()=> {
             singleton: true,
           },
           get: async () => () => {
-            return { from: '@shared-single/runtime-deps2' }
+            return { from: '@shared-single/runtime-deps2' };
           },
         },
       },
@@ -273,7 +287,7 @@ describe('single shared', ()=> {
     const vmConfig3 = {
       name: '@shared-single/runtime-deps3',
       remotes: [],
-      shared:{
+      shared: {
         'runtime-react': {
           version: '18.0.0',
           shareConfig: {
@@ -281,27 +295,29 @@ describe('single shared', ()=> {
             singleton: false,
           },
           lib: () => {
-            return { from: '@shared-single/runtime-deps3' }
+            return { from: '@shared-single/runtime-deps3' };
           },
         },
-      }
+      },
     };
 
     const FM1 = new FederationHost(vmConfig1);
-    await FM1.loadShare<{ from: string, version: string }>("runtime-react");
+    await FM1.loadShare<{ from: string; version: string }>('runtime-react');
     const FM3 = new FederationHost(vmConfig3);
-    await FM3.loadShare<{ from: string, version: string }>("runtime-react");
+    await FM3.loadShare<{ from: string; version: string }>('runtime-react');
 
     const FM2 = new FederationHost(vmConfig2);
-    const shared = await FM2.loadShare<{ from: string, version: string }>("runtime-react");
+    const shared = await FM2.loadShare<{ from: string; version: string }>(
+      'runtime-react',
+    );
     const sharedRes = shared();
-    assert(sharedRes, 'shared can\'t be null')
+    assert(sharedRes, "shared can't be null");
     expect(sharedRes.from).toEqual('@shared-single/runtime-deps3');
-  })
+  });
 });
 
 describe('eager shared', () => {
-  beforeEach(()=>{
+  beforeEach(() => {
     __FEDERATION__.__SHARE__ = {};
   });
 
@@ -314,13 +330,13 @@ describe('eager shared', () => {
           version: '16.0.0',
           shareConfig: {
             singleton: true,
-            requiredVersion:'^16.0.0',
-            eager:true
+            requiredVersion: '^16.0.0',
+            eager: true,
           },
-          lib:()=> ({
-            name:'eager-react-ins1',
-            version:'16.0.0',
-          })
+          lib: () => ({
+            name: 'eager-react-ins1',
+            version: '16.0.0',
+          }),
         },
       },
     };
@@ -333,29 +349,31 @@ describe('eager shared', () => {
           version: '16.0.1',
           shareConfig: {
             singleton: true,
-            requiredVersion:'^16.0.0',
-            eager:true
+            requiredVersion: '^16.0.0',
+            eager: true,
           },
-          lib:()=> ({
-            name:'eager-react-ins2',
-            version:'16.0.1'
-          })
+          lib: () => ({
+            name: 'eager-react-ins2',
+            version: '16.0.1',
+          }),
         },
-        },
-      };
+      },
+    };
 
     const FM = new FederationHost(federationConfig1);
     const FM2 = new FederationHost(federationConfig2);
 
-    const reactInstanceFactory =  FM.loadShareSync<{ version: string; name: string }>(
-      'eager-react',
-    );
+    const reactInstanceFactory = FM.loadShareSync<{
+      version: string;
+      name: string;
+    }>('eager-react');
     const reactInstanceRes = reactInstanceFactory();
     assert(reactInstanceRes, "reactInstance can't be undefined");
     expect(reactInstanceRes.version).toBe('16.0.0');
 
-    const reactInstance2 =  FM2.loadShareSync<{
-      version: string; name: string
+    const reactInstance2 = FM2.loadShareSync<{
+      version: string;
+      name: string;
     }>('eager-react');
     const reactInstance2Res = reactInstance2();
 
@@ -372,13 +390,13 @@ describe('eager shared', () => {
           version: '16.0.0',
           shareConfig: {
             singleton: true,
-            requiredVersion:'^16.0.0',
-            eager:true
+            requiredVersion: '^16.0.0',
+            eager: true,
           },
-          get:async ()=> ()=> ({
-            name:'eager-react-ins1',
-            version:'16.0.0',
-          })
+          get: async () => () => ({
+            name: 'eager-react-ins1',
+            version: '16.0.0',
+          }),
         },
       },
     };
@@ -390,23 +408,24 @@ describe('eager shared', () => {
         'eager-react': {
           shareConfig: {
             singleton: true,
-            requiredVersion:'^16.0.0',
-            eager:true
+            requiredVersion: '^16.0.0',
+            eager: true,
           },
           version: '16.0.1',
-          lib:()=> ({
-            name:'eager-react-ins2',
-            version:'16.0.1'
-          })
+          lib: () => ({
+            name: 'eager-react-ins2',
+            version: '16.0.1',
+          }),
         },
-        },
-      };
+      },
+    };
 
     const FM = new FederationHost(federationConfig1);
     const FM2 = new FederationHost(federationConfig2);
 
-    const reactInstance2 =  FM2.loadShareSync<{
-      version: string; name: string
+    const reactInstance2 = FM2.loadShareSync<{
+      version: string;
+      name: string;
     }>('eager-react');
     const reactInstance2Res = reactInstance2();
     assert(reactInstance2Res, "reactInstance can't be undefined");
@@ -422,24 +441,23 @@ describe('eager shared', () => {
           version: '16.0.0',
           shareConfig: {
             singleton: true,
-            requiredVersion:'^16.0.0',
-            eager:true
+            requiredVersion: '^16.0.0',
+            eager: true,
           },
-          get:async ()=> ()=> ({
-            name:'none-eager-react',
-            version:'16.0.0',
-          })
+          get: async () => () => ({
+            name: 'none-eager-react',
+            version: '16.0.0',
+          }),
         },
       },
     };
     const FM = new FederationHost(federationConfig1);
 
-
-    expect(function(){
+    expect(function () {
       FM.loadShareSync<{
-        version: string; name: string
-      }>('none-eager-react')
-    }).toThrowError('The loadShareSync')
+        version: string;
+        name: string;
+      }>('none-eager-react');
+    }).toThrowError('The loadShareSync');
   });
-
 });

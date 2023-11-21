@@ -30,26 +30,26 @@ export function mockStaticServer({
   responseMatchs?: Record<string, string>;
 }) {
   const match = (input: Request) =>
-    (Array.isArray(filterKeywords) ?
-      !filterKeywords.some(words => input.url.includes(words)) :
-      true);
+    Array.isArray(filterKeywords)
+      ? !filterKeywords.some((words) => input.url.includes(words))
+      : true;
 
-    fetchMocker.enableMocks();
-    fetchMocker.doMock();
+  fetchMocker.enableMocks();
+  fetchMocker.doMock();
 
-    fetchMocker.mockIf(match, req => {
-      let pathname = req.url;
-      if (isAbsolute(req.url)) {
-        // eslint-disable-next-line prefer-destructuring
-        pathname = new URL(req.url).pathname;
-        if (basename) {
-          pathname = pathname.replace(basename, './');
-        }
+  fetchMocker.mockIf(match, (req) => {
+    let pathname = req.url;
+    if (isAbsolute(req.url)) {
+      // eslint-disable-next-line prefer-destructuring
+      pathname = new URL(req.url).pathname;
+      if (basename) {
+        pathname = pathname.replace(basename, './');
       }
-      const fullDir = path.resolve(baseDir, `./${pathname}`);
-      const { ext } = path.parse(fullDir);
-      // prettier-ignore
-      const mimeType =
+    }
+    const fullDir = path.resolve(baseDir, `./${pathname}`);
+    const { ext } = path.parse(fullDir);
+    // prettier-ignore
+    const mimeType =
         // eslint-disable-next-line no-nested-ternary
         ext === '.html' ?
           'text/html' :
@@ -59,33 +59,33 @@ export function mockStaticServer({
             ext === '.css' ?
               'text/css' :
               'text/plain';
-      const { timeConsuming = 0, ...headers } = customerHeaders[pathname] || {
-        timeConsuming: 0,
-      };
+    const { timeConsuming = 0, ...headers } = customerHeaders[pathname] || {
+      timeConsuming: 0,
+    };
 
-      return new Promise((resolve, reject) => {
-        try {
-          const body =
-            responseMatchs[pathname] || fs.readFileSync(fullDir, 'utf-8');
-          const res = {
-            url: req.url,
-            body,
-            headers: {
-              'Content-Type': mimeType,
-              ...(headers || {}),
-            },
-          };
-          if (timeConsuming) {
-            setTimeout(() => resolve(res), timeConsuming);
-          } else {
-            resolve(res);
-          }
-        } catch (err) {
-          console.error(
-            `mockStaticServer: request ${pathname}, fullDir: ${fullDir}`,
-          );
-          return reject(err);
+    return new Promise((resolve, reject) => {
+      try {
+        const body =
+          responseMatchs[pathname] || fs.readFileSync(fullDir, 'utf-8');
+        const res = {
+          url: req.url,
+          body,
+          headers: {
+            'Content-Type': mimeType,
+            ...(headers || {}),
+          },
+        };
+        if (timeConsuming) {
+          setTimeout(() => resolve(res), timeConsuming);
+        } else {
+          resolve(res);
         }
+      } catch (err) {
+        console.error(
+          `mockStaticServer: request ${pathname}, fullDir: ${fullDir}`,
+        );
+        return reject(err);
+      }
     });
   });
 }
@@ -103,7 +103,7 @@ export const mockRemoteSnapshot: (
     name: `mock-snapshot-${uniqueId}`,
     loadSnapshot({ moduleInfo, ...info }) {
       const key = `${moduleInfo.name}:${(moduleInfo as any).version}`;
-      const remoteSnapshot = remoteSnapshots[key] ;
+      const remoteSnapshot = remoteSnapshots[key];
 
       if (remoteSnapshot) {
         return {
@@ -121,7 +121,8 @@ export const mockRemoteSnapshot: (
 
 export function removeScriptTags() {
   var scriptTags = document.querySelectorAll('script'); // 获取页面中所有的 script 标签
-  for (var i = 0; i < scriptTags.length; i++) { // 循环所有 script 标签
+  for (var i = 0; i < scriptTags.length; i++) {
+    // 循环所有 script 标签
     scriptTags[i].remove(); // 移除当前 script 标签
   }
 }
