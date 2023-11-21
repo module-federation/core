@@ -1,3 +1,10 @@
+# [1.0.0-canary.2](https://github.com/module-federation/universe/compare/sdk-1.0.0-canary.1...sdk-1.0.0-canary.2) (2023-11-21)
+
+
+### Features
+
+* **sdk:** Federation SDK Package ([7b09ec1](https://github.com/module-federation/universe/commit/7b09ec1e16e7d6e3746c4ef3f0257812b4704015))
+
 # 1.0.0-canary.1 (2023-11-21)
 
 
