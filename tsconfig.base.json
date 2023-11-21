@@ -30,7 +30,7 @@
       "@module-federation/node": ["packages/node/src"],
       "@module-federation/node/utils": ["packages/node/src/utils"],
       "@module-federation/runtime": ["packages/runtime/src/index.ts"],
-      "@module-federation/runtime/type": ["packages/runtime/src/type/index.ts"],
+      "@module-federation/runtime/type": ["packages/runtime/src/type/*"],
       "@module-federation/sdk": ["packages/sdk/src/index.ts"],
       "@module-federation/storybook-addon": [
         "packages/storybook-addon/src/index.ts"
@@ -40,6 +40,9 @@
       "@module-federation/utilities/*": ["packages/utilities/*"],
       "@module-federation/webpack-bundler-runtime": [
         "packages/webpack-bundler-runtime/src/index.ts"
+      ],
+      "@module-federation/webpack-bundler-runtime/*": [
+        "packages/webpack-bundler-runtime/*"
       ]
     }
   },
