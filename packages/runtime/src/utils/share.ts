@@ -127,8 +127,8 @@ function findSingletonVersionOrderByLoaded(
   return findVersion(scope, pkgName, callback);
 }
 
-// Information about sharing
-// TODO: Add strictVersion for consistency with mf.
+// Details about shared resources
+// TODO: Implement strictVersion for alignment with module federation.
 export function getGlobalShare(
   pkgName: string,
   shareInfo: ShareInfos[keyof ShareInfos],
@@ -151,12 +151,12 @@ export function getGlobalShare(
           !satisfy(singletonVersion, requiredVersion)
         ) {
           warn(
-            `Unsatisfied version ${singletonVersion} from ${
+            `Version ${singletonVersion} from ${
               singletonVersion &&
               globalShares[sc][pkgName][singletonVersion].from
-            } of shared singleton module ${pkgName} (${
+            } of shared singleton module ${pkgName} does not satisfy the requirement of ${
               shareInfo.from
-            } required ${requiredVersion})`,
+            } which needs ${requiredVersion})`,
           );
         }
         return globalShares[sc][pkgName][singletonVersion];

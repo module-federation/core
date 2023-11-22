@@ -14,7 +14,7 @@ export function assignRemoteInfo(
   remoteSnapshot: ModuleInfo,
 ): void {
   if (!('remoteEntry' in remoteSnapshot) || !remoteSnapshot.remoteEntry) {
-    error(`The remoteEntry attribute of ${name} cannot be undefined.`);
+    error(`The attribute remoteEntry of ${name} must not be undefined.`);
   }
   const { remoteEntry } = remoteSnapshot;
 
@@ -38,7 +38,7 @@ export function snapshotPlugin(): FederationRuntimePlugin {
           await origin.snapshotHandler.loadRemoteSnapshotInfo(remote);
 
         assignRemoteInfo(remoteInfo, remoteSnapshot);
-        // preload assets
+        // preloading assets
         const preloadOptions: PreloadOptions[0] = {
           remote,
           preloadConfig: {

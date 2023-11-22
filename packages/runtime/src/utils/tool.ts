@@ -67,9 +67,9 @@ export function isPlainObject(val: any): val is object {
 
 export function isStaticResourcesEqual(url1: string, url2: string): boolean {
   const REG_EXP = /^(https?:)?\/\//i;
-  // Convert both url1 and url2 to relative paths
+  // Transform url1 and url2 into relative paths
   const relativeUrl1 = url1.replace(REG_EXP, '').replace(/\/$/, '');
   const relativeUrl2 = url2.replace(REG_EXP, '').replace(/\/$/, '');
-  // Determines whether relative paths are equal
+  // Check if the relative paths are identical
   return relativeUrl1 === relativeUrl2;
 }

@@ -17,7 +17,7 @@ export class AsyncWaterfallHook<T extends Record<string, any>> extends SyncHook<
 
   override emit(data: T): Promise<T> {
     if (!isObject(data)) {
-      error(`"${this.type}" hook response data must be an object.`);
+      error(`The response data for the "${this.type}" hook must be an object.`);
     }
     const ls = Array.from(this.listeners);
 
@@ -41,7 +41,7 @@ export class AsyncWaterfallHook<T extends Record<string, any>> extends SyncHook<
           }
         } else {
           this.onerror(
-            `The "${this.type}" type has a plugin return value error.`,
+            `A plugin returned an incorrect value for the "${this.type}" type.`,
           );
         }
         return data;
