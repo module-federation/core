@@ -73,7 +73,7 @@
     "@fontsource/roboto": "5.0.8",
     "@fontsource/roboto-mono": "5.0.15",
     "@goestav/nx-semantic-release": "1.0.0",
-    "@jscutlery/semver": "3.1.0",
+    "@jscutlery/semver": "3.4.1",
     "@node-rs/jieba": "1.7.2",
     "@nx/devkit": "16.10.0",
     "@nx/esbuild": "16.10.0",
