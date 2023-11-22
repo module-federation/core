@@ -22,6 +22,7 @@ import {
   ContainerReferencePluginOptions,
   RemotesConfig,
 } from '../../declarations/plugins/container/ContainerReferencePlugin';
+import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
@@ -66,6 +67,8 @@ class ContainerReferencePlugin {
    */
   apply(compiler: Compiler): void {
     const { _remotes: remotes, _remoteType: remoteType } = this;
+    // @ts-ignore
+		new FederationRuntimePlugin().apply(compiler);
 
     /** @type {Record<string, string>} */
     const remoteExternals: Record<string, string> = {};

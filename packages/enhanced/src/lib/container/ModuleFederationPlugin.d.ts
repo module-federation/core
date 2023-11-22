@@ -4,6 +4,7 @@ declare class ModuleFederationPlugin {
    * @param {ModuleFederationPluginOptions} options options
    */
   constructor(options: any);
+  name: string;
   _options: any;
   /**
    * Apply the plugin
@@ -17,5 +18,6 @@ declare namespace ModuleFederationPlugin {
 }
 type Compiler = import('webpack/lib/Compiler');
 type ExternalsType = any;
-type ModuleFederationPluginOptions = any;
+type ModuleFederationPluginOptions =
+import('../../declarations/plugins/container/ModuleFederationPlugin').ModuleFederationPluginOptions;;
 type Shared = any;
