@@ -2,7 +2,6 @@
   "name": "@module-federation/runtime",
   "version": "1.0.0-canary.2",
   "author": "zhouxiao <codingzx@gmail.com>",
-  "type": "commonjs",
   "main": "./index.cjs",
   "module": "./index.esm.js",
   "types": "./index.cjs.d.ts",
