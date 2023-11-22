@@ -6,7 +6,7 @@ export function createScript(
   attrs?: Record<string, any>,
   createScriptHook?: (url: string) => HTMLScriptElement | void,
 ): { script: HTMLScriptElement; needAttach: boolean } {
-  // get the existing script element by src
+  // Retrieve the existing script element by its src attribute
   let script: HTMLScriptElement | null = null;
   let needAttach = true;
   const scripts = document.getElementsByTagName('script');
@@ -49,7 +49,7 @@ export function createScript(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event: any,
   ): void => {
-    // avoid memory leaks in IE.
+    // Prevent memory leaks in IE.
     if (script) {
       script.onerror = null;
       script.onload = null;

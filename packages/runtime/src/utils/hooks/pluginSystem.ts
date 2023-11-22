@@ -18,10 +18,10 @@ export class PluginSystem<T extends Record<string, any>> {
   }
 
   usePlugin(plugin: Plugin<T>): void {
-    assert(isPlainObject(plugin), 'Invalid plugin configuration.');
-    // The plugin name is required and must be unique
+    assert(isPlainObject(plugin), 'Plugin configuration is invalid.');
+    // The plugin's name is mandatory and must be unique
     const pluginName = plugin.name;
-    assert(pluginName, 'Plugin must provide a name.');
+    assert(pluginName, 'A name must be provided by the plugin.');
 
     if (!this.registerPlugins[pluginName]) {
       this.registerPlugins[pluginName] = plugin;
@@ -36,9 +36,9 @@ export class PluginSystem<T extends Record<string, any>> {
   }
 
   removePlugin(pluginName: string): void {
-    assert(pluginName, 'Must provide a name.');
+    assert(pluginName, 'A name is required.');
     const plugin = this.registerPlugins[pluginName];
-    assert(plugin, `plugin "${pluginName}" is not registered.`);
+    assert(plugin, `The plugin "${pluginName}" is not registered.`);
 
     Object.keys(plugin).forEach((key) => {
       if (key !== 'name') {
@@ -55,7 +55,9 @@ export class PluginSystem<T extends Record<string, any>> {
     Object.keys(lifecycle).forEach((hookName) => {
       assert(
         !this.lifecycle[hookName],
-        `"${hookName as string}" hook has conflict and cannot be inherited.`,
+        `The hook "${
+          hookName as string
+        }" has a conflict and cannot be inherited.`,
       );
       (this.lifecycle as any)[hookName] = lifecycle[hookName];
     });
@@ -63,7 +65,7 @@ export class PluginSystem<T extends Record<string, any>> {
     Object.keys(registerPlugins).forEach((pluginName) => {
       assert(
         !this.registerPlugins[pluginName],
-        `"${pluginName}" plugin has conflict and cannot be inherited.`,
+        `The plugin "${pluginName}" has a conflict and cannot be inherited.`,
       );
       this.usePlugin(registerPlugins[pluginName]);
     });

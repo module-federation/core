@@ -19,7 +19,7 @@ const parseEntry = (str: string, devVerOrUrl?: string): RemoteEntryInfo => {
   const isEntry = (s: string) =>
     s.startsWith('http') || s.endsWith(MANIFEST_EXT);
 
-  // startWith type
+  // Check if the string starts with a type
   if (strSplit.length >= 2) {
     const [name, ...versionOrEntryArr] = strSplit;
     const versionOrEntry = devVersionOrUrl || versionOrEntryArr.join(SEPARATOR);
@@ -29,7 +29,7 @@ const parseEntry = (str: string, devVerOrUrl?: string): RemoteEntryInfo => {
         entry: versionOrEntry,
       };
     } else {
-      // version rule
+      // Apply version rule
       // devVersionOrUrl => inputVersion => defaultVersion
       return {
         name,
@@ -146,7 +146,7 @@ const generateExposeFilename = /* @__PURE__ */ (
 
   let expose = exposeName;
   if (expose === '.') {
-    expose = 'defautl_export';
+    expose = 'default_export';
   }
   if (expose.startsWith('./')) {
     expose = expose.replace('./', '');

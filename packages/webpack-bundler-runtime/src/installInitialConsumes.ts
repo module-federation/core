@@ -7,13 +7,13 @@ function handleInitialConsumes(options: HandleInitialConsumesOptions) {
 
   const federationInstance = webpackRequire.federation.instance;
   if (!federationInstance) {
-    throw new Error('Can not find federation Instance!');
+    throw new Error('Federation instance not found!');
   }
   const { shareKey, shareInfo } = moduleToHandlerMapping[moduleId];
 
   if (!shareInfo.shareConfig.eager) {
     throw new Error(
-      `shared: "${shareKey}" can not be loaded synchronous while not set "eager:true" or enable async entry. `,
+      `Shared: "${shareKey}" cannot be loaded synchronously unless "eager:true" is set or async entry is enabled.`,
     );
   }
   return federationInstance.loadShareSync(shareKey);
@@ -29,7 +29,7 @@ export function installInitialConsumes(options: InstallInitialConsumesOptions) {
 
   initialConsumes.forEach((id) => {
     webpackRequire.m[id] = (module) => {
-      // Handle case when module is used sync
+      // Handle scenario when module is used synchronously
       installedModules[id] = 0;
       delete webpackRequire.c[id];
       const factory = handleInitialConsumes({

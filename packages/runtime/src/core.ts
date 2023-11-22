@@ -161,8 +161,8 @@ export class FederationHost {
   } = {};
 
   constructor(userOptions: UserOptions) {
-    // TODO: check options detail type
-    // set options default value
+    // TODO: Validate the details of the options
+    // Initialize options with default values
     const defaultOptions: Options = {
       id: getBuilderId(),
       name: userOptions.name,
@@ -197,9 +197,10 @@ export class FederationHost {
     pkgName: string,
     customShareInfo?: Partial<Shared>,
   ): Promise<false | (() => T | undefined)> {
-    // 1. Verify whether the currently loaded share already exists, and report an error if it does not exist
-    // 2. Search globally to see if there is a matching share, and if so, use it directly
-    // 3. If not, get it from the current share and store the obtained share globally.
+    // This function performs the following steps:
+    // 1. Checks if the currently loaded share already exists, if not, it throws an error
+    // 2. Searches globally for a matching share, if found, it uses it directly
+    // 3. If not found, it retrieves it from the current share and stores the obtained share globally.
     const shareInfo = Object.assign(
       {},
       this.options.shared?.[pkgName],
@@ -215,12 +216,13 @@ export class FederationHost {
 
     const { shareInfo: shareInfoRes } = loadShareRes;
 
+    // Assert that shareInfoRes exists, if not, throw an error
     assert(
       shareInfoRes,
-      `cannot find ${pkgName} Share in the ${this.options.name}. Perhaps you have not injected the ${pkgName} Share parameters`,
+      `Cannot find ${pkgName} Share in the ${this.options.name}. Please ensure that the ${pkgName} Share parameters have been injected`,
     );
 
-    // get from cache
+    // Retrieve from cache
     const globalShare = getGlobalShare(pkgName, shareInfoRes);
 
     if (globalShare && globalShare.lib) {
@@ -278,10 +280,10 @@ export class FederationHost {
     }
   }
 
-  // There will be a lib function only if the shared set by eager or runtime init is set or the shared is successfully loaded.
-  // 1. If the loaded shared already exists globally, then reuse
-  // 2. If lib exists in local shared, use it directly
-  // 3. If the local get returns something other than Promise, then use it directly
+  // The lib function will only be available if the shared set by eager or runtime init is set or the shared is successfully loaded.
+  // 1. If the loaded shared already exists globally, then it will be reused
+  // 2. If lib exists in local shared, it will be used directly
+  // 3. If the local get returns something other than Promise, then it will be used directly
   loadShareSync<T>(pkgName: string): () => T | never {
     const shareInfo = this.options.shared?.[pkgName];
     const globalShare = getGlobalShare(pkgName, shareInfo);
@@ -309,10 +311,10 @@ export class FederationHost {
 
       if (module instanceof Promise) {
         throw new Error(`
-        The loadShareSync function failed to load ${pkgName}. Cannot find ${pkgName} in ${this.options.name}.
-        Failure reason: \n
-        1. Registered ${pkgName} share with the 'get' attribute, but did not use loadShare before.\n
-        2. Did not register ${pkgName} share with the 'lib' attribute.\n
+        The loadShareSync function was unable to load ${pkgName}. The ${pkgName} could not be found in ${this.options.name}.
+        Possible reasons for failure: \n
+        1. The ${pkgName} share was registered with the 'get' attribute, but loadShare was not used beforehand.\n
+        2. The ${pkgName} share was not registered with the 'lib' attribute.\n
       `);
       }
 
@@ -330,10 +332,10 @@ export class FederationHost {
 
     throw new Error(
       `
-        The loadShareSync function failed to load ${pkgName}. Cannot find ${pkgName} in ${this.options.name}.
-        Failure reason: \n
-        1. Registered ${pkgName} share with the 'get' attribute, but did not use loadShare before.\n
-        2. Did not register ${pkgName} share with the 'lib' attribute.\n
+        The loadShareSync function was unable to load ${pkgName}. The ${pkgName} could not be found in ${this.options.name}.
+        Possible reasons for failure: \n
+        1. The ${pkgName} share was registered with the 'get' attribute, but loadShare was not used beforehand.\n
+        2. The ${pkgName} share was not registered with the 'lib' attribute.\n
       `,
     );
   }
@@ -359,10 +361,10 @@ export class FederationHost {
     assert(
       remoteSplitInfo,
       `
-        Cannot find ${idRes} in ${this.options.name}. Possible cause of failure:\n
-        1. ${idRes} was not injected into ${this.options.name}'s 'remotes' parameter.\n
-        2. Cannot find ${idRes} in ${this.options.name}'s 'remotes' with attribute 'name' or 'alias'.
-        3. The 'beforeLoadRemote' hook was provided but did not return the correct 'remoteInfo' when loading ${idRes}.
+        Unable to locate ${idRes} in ${this.options.name}. Potential reasons for failure include:\n
+        1. ${idRes} was not included in the 'remotes' parameter of ${this.options.name}.\n
+        2. ${idRes} could not be found in the 'remotes' of ${this.options.name} with either 'name' or 'alias' attributes.
+        3. The 'beforeLoadRemote' hook was provided but did not return the correct 'remoteInfo' when attempting to load ${idRes}.
       `,
     );
 
@@ -380,7 +382,7 @@ export class FederationHost {
 
     assert(
       remote && expose,
-      `The 'beforeLoadRemote' hook was provided but did not return the correct 'remote' and 'expose' when loading ${idRes}.`,
+      `The 'beforeLoadRemote' hook was executed, but it failed to return the correct 'remote' and 'expose' values while loading ${idRes}.`,
     );
     let module: Module | undefined = this.moduleCache.get(remote.name);
 
@@ -414,10 +416,10 @@ export class FederationHost {
   ): Promise<T | null> {
     try {
       const { loadFactory = true } = options || { loadFactory: true };
-      // 1. Verify whether the parameters of the obtained module are legal. There are two module request methods: pkgName + expose and alias + expose.
-      // 2. Request the snapshot information of the current host and store the obtained snapshot information globally. The obtained module information is partly offline and partly online. The online module information will obtain the modules used online.
-      // 3. Get the detailed information of the current module from global (remoteEntry address, expose resource address)
-      // 4. After obtaining remoteEntry, call the init of the module, and then obtain the exported content of the module through get
+      // 1. Validate the parameters of the retrieved module. There are two module request methods: pkgName + expose and alias + expose.
+      // 2. Request the snapshot information of the current host and globally store the obtained snapshot information. The retrieved module information is partially offline and partially online. The online module information will retrieve the modules used online.
+      // 3. Retrieve the detailed information of the current module from global (remoteEntry address, expose resource address)
+      // 4. After retrieving remoteEntry, call the init of the module, and then retrieve the exported content of the module through get
       // id: pkgName(@federation/app1) + expose(button) = @federation/app1/button
       // id: alias(app1) + expose(button) = app1/button
       // id: alias(app1/utils) + expose(loadash/sort) = app1/utils/loadash/sort
@@ -485,9 +487,9 @@ export class FederationHost {
   }
 
   /**
-   * The sharing init sequence function (only runs once per share scope).
-   * Has one argument, the name of the share scope.
-   * Creates a share scope if not existing
+   * This function initializes the sharing sequence (executed only once per share scope).
+   * It accepts one argument, the name of the share scope.
+   * If the share scope does not exist, it creates one.
    */
   // eslint-disable-next-line @typescript-eslint/member-ordering
   initializeSharing(
@@ -496,15 +498,15 @@ export class FederationHost {
     const shareScopeLoading = Global.__FEDERATION__.__SHARE_SCOPE_LOADING__;
     const shareScope = Global.__FEDERATION__.__SHARE__;
     const hostName = this.options.name;
-    // only runs once
+    // Executes only once
     if (shareScopeLoading[shareScopeName]) {
       return shareScopeLoading[shareScopeName];
     }
-    // creates a new share scope if needed
+    // Creates a new share scope if necessary
     if (!shareScope[shareScopeName]) {
       shareScope[shareScopeName] = {};
     }
-    // runs all init snippets from all modules reachable
+    // Executes all initialization snippets from all accessible modules
     const scope = shareScope[shareScopeName];
     const register = (name: string, shared: Shared) => {
       const { version, eager } = shared;
@@ -581,8 +583,8 @@ export class FederationHost {
     const remotes = userRemotes.reduce((res, remote) => {
       if (!res.find((item) => item.name === remote.name)) {
         if (remote.alias) {
-          // 校验 alias 是否等于 remote.name 和 remote.alias 的前缀，如果是则报错
-          // 因为引用支持多级路径的引用时无法保证名称是否唯一，所以不支持 alias 为 remote.name 的前缀
+          // Validate if alias equals the prefix of remote.name and remote.alias, if so, throw an error
+          // As multi-level path references cannot guarantee unique names, alias being a prefix of remote.name is not supported
           const findEqual = res.find(
             (item) =>
               remote.alias &&
@@ -608,7 +610,7 @@ export class FederationHost {
           remote.shareScope = DEFAULT_SCOPE;
         }
         if (!remote.type) {
-          // FIXME: The build plugin need to support this field
+          // FIXME: The build plugin needs to support this field
           remote.type = DEFAULT_REMOTE_TYPE;
         }
         res.push(remote);
