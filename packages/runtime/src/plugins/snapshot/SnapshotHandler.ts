@@ -110,10 +110,8 @@ export class SnapshotHandler {
       moduleInfo,
     });
 
-    // In the dynamic loadRemote scenario, incomplete remotesInfo delivery may occur. In this case, the remotesInfo in the host needs to be completed in the snapshot at runtime.
-    // Ensure the integrity of the snapshot, and at the same time help the chrome plug-in correctly identify all producer modules, ensuring that proxyable producer modules will not be missing
-    // In the dynamic loadRemote scenario, incomplete remotesInfo delivery may occur. In this case, the remotesInfo in the host needs to be completed in the snapshot at runtime.
-    // Ensure the integrity of the snapshot, and at the same time help the chrome plug-in correctly identify all producer modules, ensuring that proxyable producer modules will not be missing
+    // In dynamic loadRemote scenarios, incomplete remotesInfo delivery may occur. In such cases, the remotesInfo in the host needs to be completed in the snapshot at runtime.
+    // This ensures the snapshot's integrity and helps the chrome plugin correctly identify all producer modules, ensuring that proxyable producer modules will not be missing.
     if (
       hostSnapshot &&
       'remotesInfo' in hostSnapshot &&
@@ -155,7 +153,7 @@ export class SnapshotHandler {
       globalSnapshot,
     });
 
-    // global snapshot include manifest or module info include manifest
+    // global snapshot includes manifest or module info includes manifest
     if (globalRemoteSnapshot) {
       if (isManifestProvider(globalRemoteSnapshot)) {
         const moduleSnapshot = await this.getManifestJson(
@@ -336,7 +334,7 @@ export class SnapshotHandler {
         manifestJson = (await res.json()) as Manifest;
         assert(
           manifestJson.metaData && manifestJson.exposes && manifestJson.shared,
-          `${manifestUrl} is not federation manifest`,
+          `${manifestUrl} is not a federation manifest`,
         );
         this.manifestCache.set(manifestUrl, manifestJson);
         return manifestJson;

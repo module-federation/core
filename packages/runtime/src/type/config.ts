@@ -71,7 +71,7 @@ export type Shared = {
   lib?: () => Module;
   loaded?: boolean;
   loading?: null | Promise<any>;
-  // compat prev shared
+  // compatibility with previous shared
   eager?: boolean;
   strategy: 'version-first' | 'loaded-first';
 };
@@ -111,7 +111,7 @@ export type LoadModuleOptions = {
   version?: string;
 };
 
-// Only for old federation provider
+// Only for legacy federation provider
 export type RemoteEntryInitOptions = {
   version: string;
 };

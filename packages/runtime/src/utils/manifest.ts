@@ -1,6 +1,7 @@
 import { ModuleInfo } from '@module-federation/sdk';
 import { Remote } from '../type';
 
+// Function to get the URL of a resource
 export function getResourceUrl(module: ModuleInfo, sourceUrl: string): string {
   if ('getPublicPath' in module) {
     const publicPath = new Function(module.getPublicPath)();
@@ -9,7 +10,7 @@ export function getResourceUrl(module: ModuleInfo, sourceUrl: string): string {
     return `${module.publicPath}${sourceUrl}`;
   } else {
     console.warn(
-      'Cannot get resource URL. If in debug mode, please ignore.',
+      'Unable to retrieve resource URL. If in debug mode, this warning can be disregarded.',
       module,
       sourceUrl,
     );
@@ -17,6 +18,7 @@ export function getResourceUrl(module: ModuleInfo, sourceUrl: string): string {
   }
 }
 
+// Function to match a remote with its name and expose
 // id: pkgName(@federation/app1) + expose(button) = @federation/app1/button
 // id: alias(app1) + expose(button) = app1/button
 // id: alias(app1/utils) + expose(loadash/sort) = app1/utils/loadash/sort
@@ -32,9 +34,9 @@ export function matchRemoteWithNameAndExpose(
   | undefined {
   for (const remote of remotes) {
     // match pkgName
-    const matchNameSuccess = id.startsWith(remote.name);
+    const isNameMatched = id.startsWith(remote.name);
     let expose = id.replace(remote.name, '');
-    if (matchNameSuccess) {
+    if (isNameMatched) {
       if (expose.startsWith('/')) {
         const pkgNameOrAlias = remote.name;
         expose = `.${expose}`;
@@ -53,9 +55,9 @@ export function matchRemoteWithNameAndExpose(
     }
 
     // match alias
-    const matchAliasSuccess = remote.alias && id.startsWith(remote.alias);
+    const isAliasMatched = remote.alias && id.startsWith(remote.alias);
     let exposeWithAlias = remote.alias && id.replace(remote.alias, '');
-    if (remote.alias && matchAliasSuccess) {
+    if (remote.alias && isAliasMatched) {
       if (exposeWithAlias && exposeWithAlias.startsWith('/')) {
         const pkgNameOrAlias = remote.alias;
         exposeWithAlias = `.${exposeWithAlias}`;
@@ -77,18 +79,19 @@ export function matchRemoteWithNameAndExpose(
   return;
 }
 
+// Function to match a remote with its name or alias
 export function matchRemote(
   remotes: Array<Remote>,
   nameOrAlias: string,
 ): Remote | undefined {
   for (const remote of remotes) {
-    const matchNameSuccess = nameOrAlias === remote.name;
-    if (matchNameSuccess) {
+    const isNameMatched = nameOrAlias === remote.name;
+    if (isNameMatched) {
       return remote;
     }
 
-    const matchAliasSuccess = remote.alias && nameOrAlias === remote.alias;
-    if (matchAliasSuccess) {
+    const isAliasMatched = remote.alias && nameOrAlias === remote.alias;
+    if (isAliasMatched) {
       return remote;
     }
   }
