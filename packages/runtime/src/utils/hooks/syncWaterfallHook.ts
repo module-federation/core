@@ -3,14 +3,14 @@ import { isObject } from '../tool';
 import { SyncHook } from './syncHook';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function checkReturnData(originData: any, returnData: any): boolean {
-  if (!isObject(returnData)) {
+export function checkReturnData(originalData: any, returnedData: any): boolean {
+  if (!isObject(returnedData)) {
     return false;
   }
-  if (originData !== returnData) {
+  if (originalData !== returnedData) {
     // eslint-disable-next-line no-restricted-syntax
-    for (const key in originData) {
-      if (!(key in returnData)) {
+    for (const key in originalData) {
+      if (!(key in returnedData)) {
         return false;
       }
     }
@@ -31,7 +31,7 @@ export class SyncWaterfallHook<T extends Record<string, any>> extends SyncHook<
 
   override emit(data: T): T {
     if (!isObject(data)) {
-      error(`"${this.type}" hook response data must be an object.`);
+      error(`The data for the "${this.type}" hook should be an object.`);
     }
     for (const fn of this.listeners) {
       try {
@@ -40,7 +40,7 @@ export class SyncWaterfallHook<T extends Record<string, any>> extends SyncHook<
           data = tempData;
         } else {
           this.onerror(
-            `The "${this.type}" type has a plugin return value error.`,
+            `A plugin returned an unacceptable value for the "${this.type}" type.`,
           );
           break;
         }

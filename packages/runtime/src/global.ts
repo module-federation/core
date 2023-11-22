@@ -32,9 +32,9 @@ declare global {
     >;
 }
 
-// Avoid being windowed by some microfront end frameworks, but sandbox escapes due to reuse policies
-// The sandbox in the microfront does not copy the value of configurable
-// If no loading content exists on the global object, the loading object is defined
+// This section is to prevent encapsulation by certain microfrontend frameworks. Due to reuse policies, sandbox escapes.
+// The sandbox in the microfrontend does not replicate the value of 'configurable'.
+// If there is no loading content on the global object, this section defines the loading object.
 if (
   !Object.hasOwnProperty.call(globalThis, '__GLOBAL_LOADING_REMOTE_ENTRY__')
 ) {
@@ -142,18 +142,10 @@ export function getInfoWithoutType<T extends object>(
     key: string | number | symbol,
   ) => { value: any | undefined; key: string } | void,
 ): { value: T[keyof T] | undefined; key: string } {
-  let res: { value: T[keyof T] | undefined; key: string };
-  if (target[key]) {
-    res = {
-      value: target[key],
-      key: key as string,
-    };
-  } else {
-    res = {
-      value: undefined,
-      key: key as string,
-    };
-  }
+  let res: { value: T[keyof T] | undefined; key: string } = {
+    value: target[key],
+    key: key as string,
+  };
 
   if (getModuleInfoHook) {
     const hookRes = getModuleInfoHook(target, key);
@@ -173,7 +165,7 @@ export const getTargetSnapshotInfoByModuleInfo = (
     key: string | number | symbol,
   ) => { value: any | undefined; key: string } | void,
 ): GlobalModuleInfo[string] | undefined => {
-  // remote include in hostSnapshot
+  // Check if the remote is included in the hostSnapshot
   const moduleKey = getFMId(moduleInfo);
   const getModuleInfo = getInfoWithoutType(
     snapshot,
@@ -181,7 +173,7 @@ export const getTargetSnapshotInfoByModuleInfo = (
     getModuleInfoHook,
   ).value;
 
-  // remoteSnapshot may don't include version
+  // The remoteSnapshot might not include a version
   if (
     getModuleInfo &&
     !getModuleInfo.version &&
@@ -195,8 +187,7 @@ export const getTargetSnapshotInfoByModuleInfo = (
     return getModuleInfo;
   }
 
-  // remote don't include in hostSnapshot
-  // deploy micro app snapshot
+  // If the remote is not included in the hostSnapshot, deploy a micro app snapshot
   if ('version' in moduleInfo && moduleInfo['version']) {
     const { version, ...resModuleInfo } = moduleInfo;
     const moduleKeyWithoutVersion = getFMId(resModuleInfo);
@@ -246,9 +237,10 @@ export const addGlobalSnapshot = (
     ...moduleInfos,
   };
   return () => {
-    Object.keys(moduleInfos).forEach((key) => {
+    const keys = Object.keys(moduleInfos);
+    for (const key of keys) {
       delete Global.__FEDERATION__.moduleInfo[key];
-    });
+    }
   };
 };
 
@@ -267,7 +259,10 @@ export const getRemoteEntryExports = (
   };
 };
 
-// global hooks
+// This function is used to register global plugins.
+// It iterates over the provided plugins and checks if they are already registered.
+// If a plugin is not registered, it is added to the global plugins.
+// If a plugin is already registered, a warning message is logged.
 export const registerGlobalPlugins = (
   plugins: Array<FederationRuntimePlugin>,
 ): void => {

@@ -58,10 +58,10 @@ export async function loadEntryScript({
     assert(
       entryExports,
       `
-      Cannot use the ${name}'s '${entry}' URL with ${remoteEntryKey}'s globalName to get remoteEntry exports.
-      The following reasons may be causing the problem:\n
+      Unable to use the ${name}'s '${entry}' URL with ${remoteEntryKey}'s globalName to get remoteEntry exports.
+      Possible reasons could be:\n
       1. '${entry}' is not the correct URL, or the remoteEntry resource or name is incorrect.\n
-      2. Unable to use ${remoteEntryKey} to get remoteEntry exports in the window object.
+      2. ${remoteEntryKey} cannot be used to get remoteEntry exports in the window object.
     `,
     );
 

@@ -50,7 +50,7 @@ function splitId(id: string): {
   }
 }
 
-// Traverse all nodes through moduleInfo and traverse the entire snapshot
+// Traverse all nodes in moduleInfo and traverse the entire snapshot
 function traverseModuleInfo(
   globalSnapshot: GlobalModuleInfo,
   remoteInfo: RemoteInfoOptionalVersion,
@@ -73,18 +73,18 @@ function traverseModuleInfo(
     id,
     getModuleInfoHook,
   );
-  const effectRemoteSnapshot = remoteSnapshot || snapshotValue;
-  if (effectRemoteSnapshot && !isManifestProvider(effectRemoteSnapshot)) {
-    traverse(effectRemoteSnapshot, remoteInfo, isRoot);
-    if (effectRemoteSnapshot.remotesInfo) {
-      const remoteKeys = Object.keys(effectRemoteSnapshot.remotesInfo);
+  const effectiveRemoteSnapshot = remoteSnapshot || snapshotValue;
+  if (effectiveRemoteSnapshot && !isManifestProvider(effectiveRemoteSnapshot)) {
+    traverse(effectiveRemoteSnapshot, remoteInfo, isRoot);
+    if (effectiveRemoteSnapshot.remotesInfo) {
+      const remoteKeys = Object.keys(effectiveRemoteSnapshot.remotesInfo);
       for (const key of remoteKeys) {
         if (memo[key]) {
           continue;
         }
         memo[key] = true;
         const subRemoteInfo = splitId(key);
-        const remoteValue = effectRemoteSnapshot.remotesInfo[key];
+        const remoteValue = effectiveRemoteSnapshot.remotesInfo[key];
         traverseModuleInfo(
           globalSnapshot,
           {
@@ -201,7 +201,7 @@ export function generatePreloadAssets(
         );
       }
 
-      function handlerAssets(assets: string[]): string[] {
+      function handleAssets(assets: string[]): string[] {
         const assetsRes = assets.map((asset) =>
           getResourceUrl(moduleInfoSnapshot, asset),
         );
@@ -215,7 +215,6 @@ export function generatePreloadAssets(
         const assetsLength = moduleAssetsInfo.length;
         for (let index = 0; index < assetsLength; index++) {
           const assetsInfo = moduleAssetsInfo[index];
-          // for (const assetsInfo of moduleAssetsInfo) {
           const exposeFullPath = `${remoteInfo.name}/${assetsInfo.moduleName}`;
           const preloaded = getPreloaded(exposeFullPath);
           if (preloaded) {
@@ -223,14 +222,14 @@ export function generatePreloadAssets(
           }
 
           if (preloadConfig.resourceCategory === 'all') {
-            cssAssets.push(...handlerAssets(assetsInfo.assets.css.async));
-            cssAssets.push(...handlerAssets(assetsInfo.assets.css.sync));
-            jsAssets.push(...handlerAssets(assetsInfo.assets.js.async));
-            jsAssets.push(...handlerAssets(assetsInfo.assets.js.sync));
+            cssAssets.push(...handleAssets(assetsInfo.assets.css.async));
+            cssAssets.push(...handleAssets(assetsInfo.assets.css.sync));
+            jsAssets.push(...handleAssets(assetsInfo.assets.js.async));
+            jsAssets.push(...handleAssets(assetsInfo.assets.js.sync));
             // eslint-disable-next-line no-constant-condition
           } else if ((preloadConfig.resourceCategory = 'sync')) {
-            cssAssets.push(...handlerAssets(assetsInfo.assets.css.sync));
-            jsAssets.push(...handlerAssets(assetsInfo.assets.js.sync));
+            cssAssets.push(...handleAssets(assetsInfo.assets.css.sync));
+            jsAssets.push(...handleAssets(assetsInfo.assets.js.sync));
           }
 
           setPreloaded(exposeFullPath);
