@@ -48,7 +48,7 @@ export const simpleJoinRemoteEntry = (rPath: string, rName: string): string => {
   return `${transformedPath}/${rName}`;
 };
 
-// 优先级：overrides > remotes
+// Priority: overrides > remotes
 // eslint-disable-next-line max-lines-per-function
 export function generateSnapshotFromManifest(
   manifest: Manifest,
@@ -69,14 +69,14 @@ export function generateSnapshotFromManifest(
 
   let remotesInfo: ConsumerModuleInfo['remotesInfo'] = {};
 
-  // If remotes are not passed, only the remotes in the manifest will be read
+  // If remotes are not provided, only the remotes in the manifest will be read
   if (!Object.keys(remotes).length) {
     remotesInfo =
       manifest.remotes?.reduce(
         (res, next) => {
           let matchedVersion: string;
           const name = next.federationContainerName;
-          // overrides has hight priority
+          // overrides have higher priority
           if (overridesKeys.includes(name)) {
             matchedVersion = overrides[name];
           } else {
@@ -95,7 +95,7 @@ export function generateSnapshotFromManifest(
       ) || {};
   }
 
-  // If remotes (deploy scenario) are specified, you need to traverse it again
+  // If remotes (deploy scenario) are specified, they need to be traversed again
   Object.keys(remotes).forEach(
     (key) =>
       (remotesInfo[key] = {
