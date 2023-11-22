@@ -33,7 +33,7 @@ export function consumes(options: ConsumesOptions) {
       try {
         const federationInstance = webpackRequire.federation.instance;
         if (!federationInstance) {
-          throw new Error('Can not find federation Instance!');
+          throw new Error('Federation instance not found!');
         }
         const { shareKey, getter, shareInfo } = moduleToHandlerMapping[id];
 
@@ -51,7 +51,7 @@ export function consumes(options: ConsumesOptions) {
             (installedModules[id] = promise.then(onFactory).catch(onError)),
           );
         } else {
-          // @ts-ignore keep prev logic
+          // @ts-ignore maintain previous logic
           onFactory(promise);
         }
       } catch (e) {

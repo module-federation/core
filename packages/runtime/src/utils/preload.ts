@@ -29,18 +29,17 @@ export function formatPreloadArgs(
   remotes: Array<Remote>,
   preloadArgs: Array<PreloadRemoteArgs>,
 ): PreloadOptions {
-  // let preloadOps: PreloadOptions;
   return preloadArgs.map((args) => {
     const remoteInfo = matchRemote(remotes, args.nameOrAlias);
     assert(
       remoteInfo,
-      `can't preload ${args.nameOrAlias}，it is no't include in ${
+      `Unable to preload ${args.nameOrAlias} as it is not included in ${
         !remoteInfo &&
         safeToString({
           remoteInfo,
           remotes,
         })
-      } `,
+      }`,
     );
     return {
       remote: remoteInfo,
