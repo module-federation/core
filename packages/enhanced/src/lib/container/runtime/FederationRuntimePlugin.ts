@@ -31,10 +31,10 @@ const DEFAULT_REMOTE_ENTRY = 'remoteEntry.js';
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class FederationRuntimePlugin {
-  options: ModuleFederationPluginOptions;
+  options?: ModuleFederationPluginOptions;
   entryFilePath: string;
 
-  constructor(options: ModuleFederationPluginOptions) {
+  constructor(options?: ModuleFederationPluginOptions) {
     this.options = options;
     this.entryFilePath = '';
   }
@@ -86,6 +86,10 @@ class FederationRuntimePlugin {
       return this.entryFilePath;
     }
 
+    if(!this.options){
+      return ''
+    }
+
     this.entryFilePath = FederationRuntimePlugin.getFilePath(
       this.options.runtimePlugins!,
     );
@@ -93,6 +97,9 @@ class FederationRuntimePlugin {
   }
 
   ensureFile() {
+    if(!this.options){
+      return
+    }
     const filePath = this.getFilePath();
     try {
       fs.readFileSync(filePath);
@@ -127,6 +134,10 @@ class FederationRuntimePlugin {
   }
 
   injectRuntime(compiler: Compiler) {
+    if(!this.options || !this.options.name){
+      return
+    }
+    const name = this.options.name
     const initOptionsWithoutShared = normalizeRuntimeInitOptionsWithOutShared(
       this.options,
     );
@@ -150,20 +161,10 @@ class FederationRuntimePlugin {
               chunk,
               new FederationRuntimeModule(
                 runtimeRequirements,
-                this.options.name!,
+                name,
                 initOptionsWithoutShared,
               ),
             );
-
-            // compilation.addRuntimeModule(
-            // 	chunk,
-            // 	new FederationRuntimeInitModule()
-            // );
-
-            // compilation.addRuntimeModule(
-            // 	chunk,
-            // 	new FederationRuntimeConcatModule()
-            // );
           },
         );
       },
@@ -172,6 +173,15 @@ class FederationRuntimePlugin {
 
   // merge runtime chunk into container
   mergeContainerRuntime(compiler: Compiler) {
+    if(!this.options){
+      return
+    }
+
+    const {name,filename} = this.options
+    if(!name || !filename){
+      return
+    }
+
     let enableRuntimeChunk = false;
 
     if (compiler.options.optimization) {
@@ -194,7 +204,7 @@ class FederationRuntimePlugin {
         'EnableSingleRunTimeForFederationPlugin',
         (compilation) => {
           const { assets } = compilation;
-          const entryPoint = compilation.entrypoints.get(this.options.name!);
+          const entryPoint = compilation.entrypoints.get(name);
           if (!entryPoint) {
             return;
           }
@@ -208,12 +218,12 @@ class FederationRuntimePlugin {
             runtimeAssets.push(assets[fileName]);
           });
           const remoteEntry =
-            assets[this.options.filename || DEFAULT_REMOTE_ENTRY];
+            assets[filename || DEFAULT_REMOTE_ENTRY];
           const mergedSource = new compiler.webpack.sources.ConcatSource(
             ...runtimeAssets,
             remoteEntry,
           );
-          assets[this.options.filename || DEFAULT_REMOTE_ENTRY] = mergedSource;
+          assets[filename || DEFAULT_REMOTE_ENTRY] = mergedSource;
         },
       );
     }
@@ -273,4 +283,4 @@ class FederationRuntimePlugin {
   }
 }
 
-module.exports = FederationRuntimePlugin;
+export default FederationRuntimePlugin;

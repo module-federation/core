@@ -14,6 +14,7 @@ import ProvideSharedModuleFactory from './ProvideSharedModuleFactory';
 import type Compiler from 'webpack/lib/Compiler';
 import type Compilation from 'webpack/lib/Compilation';
 import type { ProvideSharedPluginOptions } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
+import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 
 export type ProvideOptions = {
   shareKey: string;
@@ -92,6 +93,9 @@ class ProvideSharedPlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
+    // @ts-ignore
+    new FederationRuntimePlugin().apply(compiler);
+
     const compilationData: WeakMap<Compilation, ResolvedProvideMap> =
       new WeakMap();
 

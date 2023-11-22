@@ -14,6 +14,7 @@ import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import checkOptions from 'webpack/schemas/plugins/container/ModuleFederationPlugin.check.js';
 import schema from '../../schemas/container/ModuleFederationPlugin';
+import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
@@ -25,14 +26,17 @@ const validate = createSchemaValidation(
   },
 );
 
+const PLUGIN_NAME = 'ModuleFederationPlugin';
+
 class ModuleFederationPlugin {
   private _options: ModuleFederationPluginOptions;
+  name: string;
   /**
    * @param {ModuleFederationPluginOptions} options options
    */
   constructor(options: ModuleFederationPluginOptions) {
     validate(options);
-
+    this.name = PLUGIN_NAME;
     this._options = options;
   }
 
@@ -43,12 +47,25 @@ class ModuleFederationPlugin {
    */
   apply(compiler: Compiler): void {
     const { _options: options } = this;
+    // @ts-ignore
+    new FederationRuntimePlugin(options).apply(compiler);
     const library = options.library || { type: 'var', name: options.name };
     const remoteType =
       options.remoteType ||
       (options.library && isValidExternalsType(options.library.type)
         ? options.library.type
         : 'script');
+
+    const useContainerPlugin =
+      options.exposes &&
+      (Array.isArray(options.exposes)
+        ? options.exposes.length > 0
+        : Object.keys(options.exposes).length > 0);
+    if (useContainerPlugin) {
+      // @ts-ignore
+      ContainerPlugin.patchChunkSplit(compiler, this._options.name);
+    }
+
     if (
       library &&
       !compiler.options.output.enabledLibraryTypes?.includes(library.type)
@@ -57,10 +74,7 @@ class ModuleFederationPlugin {
     }
     compiler.hooks.afterPlugins.tap('ModuleFederationPlugin', () => {
       if (
-        options.exposes &&
-        (Array.isArray(options.exposes)
-          ? options.exposes.length > 0
-          : Object.keys(options.exposes).length > 0)
+        useContainerPlugin
       ) {
         new ContainerPlugin({
           //@ts-ignore
@@ -69,7 +83,10 @@ class ModuleFederationPlugin {
           filename: options.filename,
           runtime: options.runtime,
           shareScope: options.shareScope,
+          //@ts-ignore
           exposes: options.exposes,
+          runtimePlugins:options.runtimePlugins
+          //@ts-ignore
         }).apply(compiler);
       }
       if (
