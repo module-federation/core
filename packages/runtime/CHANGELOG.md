@@ -1,3 +1,10 @@
+# [1.0.0-canary.3](https://github.com/module-federation/universe/compare/runtime-1.0.0-canary.2...runtime-1.0.0-canary.3) (2023-11-22)
+
+
+### Bug Fixes
+
+* **runtime:** runtime type should not be commonjs ([b20c195](https://github.com/module-federation/universe/commit/b20c195ab5232874ee3c7df7620c8c490f1605a2))
+
 # [1.0.0-canary.2](https://github.com/module-federation/universe/compare/runtime-1.0.0-canary.1...runtime-1.0.0-canary.2) (2023-11-22)
 
 
