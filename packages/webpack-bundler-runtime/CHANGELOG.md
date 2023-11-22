@@ -1,3 +1,12 @@
+# [1.0.0-canary.2](https://github.com/module-federation/universe/compare/webpack-bundler-runtime-1.0.0-canary.1...webpack-bundler-runtime-1.0.0-canary.2) (2023-11-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency axios to v1.6.0 [security] ([71bd7be](https://github.com/module-federation/universe/commit/71bd7becbc201d69b11f0975d5a56548facb3242))
+* **runtime:** fix type definition ([ec932b9](https://github.com/module-federation/universe/commit/ec932b933dcf8a3f67e53d067738b2b5210d8ff8))
+* **runtime:** runtime type should not be commonjs ([b20c195](https://github.com/module-federation/universe/commit/b20c195ab5232874ee3c7df7620c8c490f1605a2))
+
 # 1.0.0-canary.1 (2023-11-21)
 
 
