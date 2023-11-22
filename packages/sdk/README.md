@@ -6,6 +6,7 @@
 - Additionally, it provides a function to generate a snapshot from a manifest and environment detection utilities.
 
 ## Usage
+
 ```javascript
 // The SDK can be used to parse entry strings, encode and decode module names, and generate filenames for exposed modules and shared packages.
 // It also includes a logger for debugging and environment detection utilities.
@@ -95,5 +96,4 @@ generateSnapshotFromManifest(manifest, options);
 
 ## Testing
 
-The SDK uses Jest for testing. The configuration can be found in `jest.config.js`. The tests are located in the __tests__ directory.
-
+The SDK uses Jest for testing. The configuration can be found in `jest.config.js`. The tests are located in the **tests** directory.

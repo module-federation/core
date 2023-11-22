@@ -55,7 +55,9 @@ export class PluginSystem<T extends Record<string, any>> {
     Object.keys(lifecycle).forEach((hookName) => {
       assert(
         !this.lifecycle[hookName],
-        `The hook "${hookName as string}" has a conflict and cannot be inherited.`,
+        `The hook "${
+          hookName as string
+        }" has a conflict and cannot be inherited.`,
       );
       (this.lifecycle as any)[hookName] = lifecycle[hookName];
     });
