@@ -29,7 +29,7 @@
         "./helpers.cjs.d.ts"
       ],
       "type": [
-        "./types.cjs.d.ts"
+        "./type.cjs.d.ts"
       ]
     }
   }
