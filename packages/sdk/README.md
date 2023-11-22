@@ -2,11 +2,15 @@
 
 - This SDK provides utilities and tools to support the implementation of Module Federation in your projects.
 - It contains utility functions for parsing, encoding, and decoding module names, as well as generating filenames for exposed modules and shared packages.
+- It also includes a logger for debugging and environment detection utilities.
+- Additionally, it provides a function to generate a snapshot from a manifest and environment detection utilities.
 
 ## Usage
 ```javascript
 // The SDK can be used to parse entry strings, encode and decode module names, and generate filenames for exposed modules and shared packages.
-import { parseEntry, encodeName, decodeName, generateExposeFilename, generateShareFilename } from '@module-federation/sdk';
+// It also includes a logger for debugging and environment detection utilities.
+// Additionally, it provides a function to generate a snapshot from a manifest and environment detection utilities.
+import { parseEntry, encodeName, decodeName, generateExposeFilename, generateShareFilename, Logger, isBrowserEnv, isDebugMode, getProcessEnv, generateSnapshotFromManifest } from '@module-federation/sdk';
 
 // Parse an entry string into a RemoteEntryInfo object
 parseEntry('entryString');
@@ -22,6 +26,21 @@ generateExposeFilename('exposeName', true);
 
 // Generate a filename for a shared package
 generateShareFilename('packageName', true);
+
+// Create a new logger
+const logger = new Logger('identifier');
+
+// Check if the current environment is a browser
+isBrowserEnv();
+
+// Check if the current environment is in debug mode
+isDebugMode();
+
+// Get the process environment
+getProcessEnv();
+
+// Generate a snapshot from a manifest
+generateSnapshotFromManifest(manifest, options);
 ```
 
 ### parseEntry
@@ -49,6 +68,32 @@ generateShareFilename('packageName', true);
 - Type: `generateShareFilename(pkgName: string, withExt: boolean)`
 - Generates a filename for a shared package.
 
+### Logger
+
+- Type: `new Logger(identifier?: string)`
+- Creates a new logger for debugging.
+
+### isBrowserEnv
+
+- Type: `isBrowserEnv()`
+- Checks if the current environment is a browser.
+
+### isDebugMode
+
+- Type: `isDebugMode()`
+- Checks if the current environment is in debug mode.
+
+### getProcessEnv
+
+- Type: `getProcessEnv()`
+- Gets the process environment.
+
+### generateSnapshotFromManifest
+
+- Type: `generateSnapshotFromManifest(manifest: Manifest, options: IOptions = {})`
+- Generates a snapshot from a manifest.
+
 ## Testing
 
 The SDK uses Jest for testing. The configuration can be found in `jest.config.js`. The tests are located in the __tests__ directory.
+
