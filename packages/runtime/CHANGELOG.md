@@ -1,3 +1,11 @@
+# [1.0.0-canary.2](https://github.com/module-federation/universe/compare/runtime-1.0.0-canary.1...runtime-1.0.0-canary.2) (2023-11-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency axios to v1.6.0 [security] ([71bd7be](https://github.com/module-federation/universe/commit/71bd7becbc201d69b11f0975d5a56548facb3242))
+* **runtime:** fix type definition ([ec932b9](https://github.com/module-federation/universe/commit/ec932b933dcf8a3f67e53d067738b2b5210d8ff8))
+
 # 1.0.0-canary.1 (2023-11-21)
 
 
