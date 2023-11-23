@@ -1,3 +1,10 @@
+# [1.0.0-canary.5](https://github.com/module-federation/universe/compare/runtime-1.0.0-canary.4...runtime-1.0.0-canary.5) (2023-11-23)
+
+
+### Bug Fixes
+
+* **runtime:** correct runtime package.json exports ([849e1e2](https://github.com/module-federation/universe/commit/849e1e2cce4eeb9c64ada3504eaf3c0d68aaf64a))
+
 # [1.0.0-canary.4](https://github.com/module-federation/universe/compare/runtime-1.0.0-canary.3...runtime-1.0.0-canary.4) (2023-11-23)
 
 
