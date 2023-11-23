@@ -1,3 +1,10 @@
+# [1.0.0-canary.3](https://github.com/module-federation/universe/compare/webpack-bundler-runtime-1.0.0-canary.2...webpack-bundler-runtime-1.0.0-canary.3) (2023-11-23)
+
+
+### Bug Fixes
+
+* **runtime:** Repeated requests to repair css preload failure ([062b4f5](https://github.com/module-federation/universe/commit/062b4f5bef6051342b3f33ad753c780635f82933))
+
 # [1.0.0-canary.2](https://github.com/module-federation/universe/compare/webpack-bundler-runtime-1.0.0-canary.1...webpack-bundler-runtime-1.0.0-canary.2) (2023-11-22)
 
 
