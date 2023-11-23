@@ -12,7 +12,7 @@ import SharePlugin from '../sharing/SharePlugin';
 import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
-import checkOptions from 'webpack/schemas/plugins/container/ModuleFederationPlugin.check.js';
+import checkOptions from '../../schemas/container/ModuleFederationPlugin.check';
 import schema from '../../schemas/container/ModuleFederationPlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 

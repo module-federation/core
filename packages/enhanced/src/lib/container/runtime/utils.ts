@@ -94,20 +94,6 @@ export function modifyEntry(options: ModifyEntryOptions): void {
   }
 }
 
-export function getRequestType(request:string) {
-  if (/^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(request)) {
-    // relative request
-    return 'relative';
-  } else if (/^(\/|[A-Za-z]:\\|\\\\)/.test(request)) {
-    // absolute path
-    return 'absolute';
-  } else if (request.endsWith('/')) {
-    throw new Error('Not support module request prefix !');
-  } else {
-    // module request
-    return 'module';
-  }
-}
 
 export function createHash(contents: string): string {
   return crypto.createHash('md5').update(contents).digest('hex');

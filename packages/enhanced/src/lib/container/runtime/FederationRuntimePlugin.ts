@@ -1,12 +1,11 @@
 import type { Compiler, sources } from 'webpack';
-import {Template} from 'webpack'
+import { Template } from 'webpack';
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import FederationRuntimeModule from './FederationRuntimeModule';
 import {
   getFederationGlobalScope,
   normalizeRuntimeInitOptionsWithOutShared,
   modifyEntry,
-  getRequestType,
   createHash,
 } from './utils';
 import { mkdirpSync } from 'webpack/lib/util/fs';
@@ -15,13 +14,12 @@ import path from 'path';
 import { TEMP_DIR } from '../constant';
 import type { ModuleFederationPluginOptions } from '../../../declarations/plugins/container/ModuleFederationPlugin';
 
-const BundlerRuntimePath = require.resolve('@module-federation/runtime');
-const RuntimePath = require.resolve(
+const BundlerRuntimePath = require.resolve(
   '@module-federation/webpack-bundler-runtime',
-  {
-    paths: [BundlerRuntimePath],
-  },
 );
+const RuntimePath = require.resolve('@module-federation/runtime', {
+  paths: [BundlerRuntimePath],
+});
 const InitializeRemoteEntryRuntimePluginPath = require.resolve(
   './InitializeRemoteEntryRuntimePlugin',
 );
@@ -47,10 +45,9 @@ class FederationRuntimePlugin {
     if (Array.isArray(runtimePlugins)) {
       runtimePlugins.forEach((runtimePlugin, index) => {
         const runtimePluginName = `plugin_${index}`;
-        const runtimePluginPath =
-          getRequestType(runtimePlugin) === 'relative'
-            ? path.join(process.cwd(), runtimePlugin)
-            : runtimePlugin;
+        const runtimePluginPath = path.isAbsolute(runtimePlugin)
+          ? runtimePlugin
+          : path.join(process.cwd(), runtimePlugin);
 
         runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
         runtimePLuginNames.push(runtimePluginName);
@@ -74,9 +71,9 @@ class FederationRuntimePlugin {
     ]);
   }
 
-  static getFilePath(runtimePlugins: string[]) {
+  static getFilePath(containerName: string, runtimePlugins: string[]) {
     const hash = createHash(
-      FederationRuntimePlugin.getTemplate(runtimePlugins),
+      `${containerName} ${FederationRuntimePlugin.getTemplate(runtimePlugins)}`,
     );
     return path.join(TEMP_DIR, `entry.${hash}.js`);
   }
@@ -86,19 +83,20 @@ class FederationRuntimePlugin {
       return this.entryFilePath;
     }
 
-    if(!this.options){
-      return ''
+    if (!this.options) {
+      return '';
     }
 
     this.entryFilePath = FederationRuntimePlugin.getFilePath(
+      this.options.name!,
       this.options.runtimePlugins!,
     );
     return this.entryFilePath;
   }
 
   ensureFile() {
-    if(!this.options){
-      return
+    if (!this.options) {
+      return;
     }
     const filePath = this.getFilePath();
     try {
@@ -134,10 +132,10 @@ class FederationRuntimePlugin {
   }
 
   injectRuntime(compiler: Compiler) {
-    if(!this.options || !this.options.name){
-      return
+    if (!this.options || !this.options.name) {
+      return;
     }
-    const name = this.options.name
+    const name = this.options.name;
     const initOptionsWithoutShared = normalizeRuntimeInitOptionsWithOutShared(
       this.options,
     );
@@ -173,13 +171,13 @@ class FederationRuntimePlugin {
 
   // merge runtime chunk into container
   mergeContainerRuntime(compiler: Compiler) {
-    if(!this.options){
-      return
+    if (!this.options) {
+      return;
     }
 
-    const {name,filename} = this.options
-    if(!name || !filename){
-      return
+    const { name, filename } = this.options;
+    if (!name || !filename) {
+      return;
     }
 
     let enableRuntimeChunk = false;
@@ -217,8 +215,7 @@ class FederationRuntimePlugin {
           runtimeChunk.files.forEach((fileName) => {
             runtimeAssets.push(assets[fileName]);
           });
-          const remoteEntry =
-            assets[filename || DEFAULT_REMOTE_ENTRY];
+          const remoteEntry = assets[filename || DEFAULT_REMOTE_ENTRY];
           const mergedSource = new compiler.webpack.sources.ConcatSource(
             ...runtimeAssets,
             remoteEntry,
@@ -239,30 +236,26 @@ class FederationRuntimePlugin {
   }
 
   apply(compiler: Compiler) {
-    const useModuleFederationPlugin = compiler.options.plugins.find(
-      (p) =>{
-        if(typeof p !=='object' || !p){
-          return false
-        }
+    const useModuleFederationPlugin = compiler.options.plugins.find((p) => {
+      if (typeof p !== 'object' || !p) {
+        return false;
+      }
 
-        return p['name'] === 'ModuleFederationPlugin'
-      },
-    );
+      return p['name'] === 'ModuleFederationPlugin';
+    });
 
     if (useModuleFederationPlugin && !this.options) {
       // @ts-ignore
       this.options = useModuleFederationPlugin._options;
     }
 
-    const useContainerPlugin = compiler.options.plugins.find(
-      (p) => {
-        if(typeof p !=='object' || !p){
-          return false
-        }
+    const useContainerPlugin = compiler.options.plugins.find((p) => {
+      if (typeof p !== 'object' || !p) {
+        return false;
+      }
 
-        return p['name'] === 'ContainerPlugin'
-      },
-    );
+      return p['name'] === 'ContainerPlugin';
+    });
 
     if (useContainerPlugin && !this.options) {
       // @ts-ignore

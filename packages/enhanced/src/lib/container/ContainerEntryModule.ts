@@ -178,7 +178,7 @@ class ContainerEntryModule extends Module {
 
     this.addDependency(
 			new EntryDependency(
-				FederationRuntimePlugin.getFilePath(this._runtimePlugins)
+				FederationRuntimePlugin.getFilePath(this._name,this._runtimePlugins)
 			)
 		);
 
@@ -291,7 +291,7 @@ class ContainerEntryModule extends Module {
 				// no need to verify shareScope, because shareScope will be proxied by global shareScope
 				//`if(oldScope && oldScope !== shareScope) throw new Error("Container initialization failed as it has already been initialized with a different share scope");`,
 				`${RuntimeGlobals.shareScopeMap}[name] = shareScope;`,
-				`${federationGlobal}.instance.initOptions({name:${federationGlobal}.initOptions.name,shared: shareScope})`,
+				`${federationGlobal}.instance.initOptions({name:${federationGlobal}.initOptions.name, })`,
 				`return ${RuntimeGlobals.initializeSharing}(name, initScope);`
 			])};`,
 			`${initRuntimeModuleGetter}`,

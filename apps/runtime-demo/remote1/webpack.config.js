@@ -7,6 +7,7 @@ const { withReact } = require('@nx/react');
 const path = require('path');
 const baseConfig = require('./module-federation.config');
 const { ModuleFederationPlugin } = require('@module-federation/enhanced');
+
 /**
  * @type {import('@nx/react/module-federation').ModuleFederationConfig}
  **/
@@ -44,8 +45,6 @@ module.exports = composePlugins(
     config.optimization = {
       runtimeChunk: false,
     };
-
-
     return config;
   },
 );

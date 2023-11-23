@@ -32,6 +32,7 @@ import LazySet from 'webpack/lib/util/LazySet';
 import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
 import { SemVerRange } from 'webpack/lib/util/semver';
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
+import ShareRuntimeModule from './ShareRuntimeModule';
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
@@ -319,6 +320,8 @@ class ConsumeSharedPlugin {
               chunk,
               new ConsumeSharedRuntimeModule(set),
             );
+            // FIXME: need to remove webpack internal inject ShareRuntimeModule, otherwise there will be two ShareRuntimeModule
+						compilation.addRuntimeModule(chunk, new ShareRuntimeModule());
           },
         );
       },

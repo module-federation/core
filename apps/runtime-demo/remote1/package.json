@@ -1,5 +1,5 @@
 {
-  "name": "runtime-demo-remote",
+  "name": "runtime-demo-remote1",
   "version": "0.0.0",
   "devDependencies": {
     "@module-federation/core": "*",
