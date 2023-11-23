@@ -14,7 +14,9 @@
         "assets": [],
         "project": "packages/sdk/package.json",
         "compiler": "swc",
-        "format": ["cjs", "esm"]
+        "format": ["cjs", "esm"],
+        "generateExportsField": true,
+        "additionalEntryPoints": ["packages/sdk/src/normalize-webpack-path.ts"]
       }
     },
     "lint": {
