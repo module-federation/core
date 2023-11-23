@@ -133,7 +133,7 @@
     "command-join": "3.0.0",
     "comment-parser": "1.4.1",
     "commitizen": "^4.3.0",
-    "concurrently": "8.2.1",
+    "concurrently": "8.2.2",
     "directory-tree": "3.5.1",
     "esbuild": "0.19.7",
     "eslint": "8.51.0",
