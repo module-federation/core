@@ -10,8 +10,8 @@
   },
   "exports": {
     ".": {
-      "import": "./index.cjs.js",
-      "require": "./index.esm.js"
+      "import": "./index.esm.js",
+      "require": "./index.cjs.js"
     },
     "./helpers": {
       "import": "./helpers.esm.js",
