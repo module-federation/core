@@ -1,5 +1,4 @@
 import { Module, RuntimeModule, Template, RuntimeGlobals } from 'webpack';
-
 interface InvertedContainerRuntimeModuleOptions {
   runtime: string;
   remotes: Record<string, string>;

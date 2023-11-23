@@ -1,0 +1,4 @@
+.*rc
+./webpack
+./tools
+*.snap

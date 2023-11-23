@@ -10,3 +10,9 @@ export interface RemoteWithVersion {
 
 export type RemoteEntryInfo = RemoteWithEntry | RemoteWithVersion;
 export type Module = any;
+
+declare namespace NodeJS {
+  interface ProcessEnv {
+    FEDERATION_WEBPACK_PATH?: string;
+  }
+}

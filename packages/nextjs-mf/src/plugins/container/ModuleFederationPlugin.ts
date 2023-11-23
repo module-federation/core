@@ -4,16 +4,13 @@
 */
 
 'use strict';
-
-import { Compiler } from 'webpack';
-const isValidExternalsType = require('webpack/schemas/plugins/container/ExternalsType.check.js');
-const SharePlugin =
-  require('@module-federation/enhanced/src/lib/sharing/SharePlugin').default;
+import { Compiler, WebpackPluginInstance } from 'webpack';
+import { ModuleFederationPluginOptions } from './types';
+import SharePlugin from '@module-federation/enhanced/lib/sharing/SharePlugin';
+import ContainerPlugin from '@module-federation/enhanced/lib/container/ContainerPlugin';
+import ContainerReferencePlugin from '@module-federation/enhanced/lib/container/ContainerReferencePlugin';
 const createSchemaValidation = require('webpack/lib/util/create-schema-validation');
-const ContainerPlugin =
-  require('@module-federation/enhanced/src/lib/container/ContainerPlugin').default;
-const ContainerReferencePlugin =
-  require('@module-federation/enhanced/src/lib/container/ContainerReferencePlugin').default;
+const isValidExternalsType = require('webpack/schemas/plugins/container/ExternalsType.check.js');
 
 /** @typedef {import("./ModuleFederationPluginTypes").ExternalsType} ExternalsType */
 /** @typedef {import("./ModuleFederationPluginTypes").any} any */
@@ -31,14 +28,14 @@ const validate = createSchemaValidation(
   },
 );
 
-class ModuleFederationPlugin {
-  private _mainOptions: any;
-  private _embeddedOptions: any;
-  /**
-   * @param {any} mainOptions main options
-   * @param {any} embeddedOptions embedded options
-   */
-  constructor(mainOptions: any, embeddedOptions: any) {
+class ModuleFederationPlugin implements WebpackPluginInstance {
+  private _mainOptions: ModuleFederationPluginOptions;
+  private _embeddedOptions: ModuleFederationPluginOptions;
+
+  constructor(
+    mainOptions: ModuleFederationPluginOptions,
+    embeddedOptions: ModuleFederationPluginOptions,
+  ) {
     validate(mainOptions);
     validate(embeddedOptions);
 
@@ -76,24 +73,28 @@ class ModuleFederationPlugin {
           ? mainOptions.exposes.length > 0
           : Object.keys(mainOptions.exposes).length > 0)
       ) {
-        new ContainerPlugin({
-          //@ts-ignore
-          name: mainOptions.name,
-          library,
-          filename: mainOptions.filename,
-          runtime: mainOptions.runtime,
-          shareScope: mainOptions.shareScope,
-          exposes: mainOptions.exposes,
-        }).apply(compiler);
-        new ContainerPlugin({
-          //@ts-ignore
-          name: embeddedOptions.name,
-          library,
-          filename: embeddedOptions.filename,
-          runtime: embeddedOptions.runtime,
-          shareScope: embeddedOptions.shareScope,
-          exposes: mainOptions.exposes,
-        }).apply(compiler);
+        if (!mainOptions.name) {
+          new ContainerPlugin({
+            //@ts-ignore
+            name: mainOptions.name,
+            library,
+            filename: mainOptions.filename,
+            runtime: mainOptions.runtime,
+            shareScope: mainOptions.shareScope,
+            exposes: mainOptions.exposes,
+            //@ts-ignore
+          }).apply(compiler);
+          new ContainerPlugin({
+            //@ts-ignore
+            name: embeddedOptions.name,
+            library,
+            filename: embeddedOptions.filename,
+            runtime: embeddedOptions.runtime,
+            shareScope: embeddedOptions.shareScope,
+            exposes: mainOptions.exposes,
+            //@ts-ignore
+          }).apply(compiler);
+        }
       }
       if (
         mainOptions.remotes &&
@@ -106,12 +107,14 @@ class ModuleFederationPlugin {
           remoteType,
           shareScope: mainOptions.shareScope,
           remotes: mainOptions.remotes,
+          //@ts-ignore
         }).apply(compiler);
       }
       if (embeddedOptions.shared) {
         new SharePlugin({
           shared: embeddedOptions.shared,
           shareScope: embeddedOptions.shareScope,
+          //@ts-ignore
         }).apply(compiler);
       }
     });

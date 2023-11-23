@@ -1,4 +1,5 @@
 import type webpack from 'webpack';
+import path from 'path';
 export function getWebpackPath(compiler: webpack.Compiler): string {
   try {
     // @ts-ignore just throw err
@@ -15,3 +16,18 @@ export function getWebpackPath(compiler: webpack.Compiler): string {
     return require.resolve('webpack', { paths: [webpackPath] });
   }
 }
+
+export const normalizeWebpackPath = (fullPath: string): string => {
+  if (fullPath === 'webpack') {
+    return process.env.FEDERATION_WEBPACK_PATH || fullPath;
+  }
+
+  if (process.env.FEDERATION_WEBPACK_PATH) {
+    return path.resolve(
+      process.env.FEDERATION_WEBPACK_PATH,
+      fullPath.replace('webpack', '../../'),
+    );
+  }
+
+  return fullPath;
+};

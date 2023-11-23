@@ -1,4 +1,10 @@
-import  { Chunk, Compiler, Compilation, ChunkGraph,RuntimeGlobals } from 'webpack';
+import {
+  Chunk,
+  Compiler,
+  Compilation,
+  ChunkGraph,
+  RuntimeGlobals,
+} from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
 import ChunkLoadingRuntimeModule from './DynamicFilesystemChunkLoadingRuntimeModule';
