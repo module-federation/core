@@ -135,7 +135,7 @@
     "commitizen": "^4.3.0",
     "concurrently": "8.2.1",
     "directory-tree": "3.5.1",
-    "esbuild": "0.19.4",
+    "esbuild": "0.19.7",
     "eslint": "8.51.0",
     "eslint-config-next": "13.5.4",
     "eslint-config-prettier": "9.0.0",
