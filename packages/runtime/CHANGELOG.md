@@ -1,3 +1,10 @@
+# [1.0.0-canary.4](https://github.com/module-federation/universe/compare/runtime-1.0.0-canary.3...runtime-1.0.0-canary.4) (2023-11-23)
+
+
+### Bug Fixes
+
+* **runtime:** Repeated requests to repair css preload failure ([062b4f5](https://github.com/module-federation/universe/commit/062b4f5bef6051342b3f33ad753c780635f82933))
+
 # [1.0.0-canary.3](https://github.com/module-federation/universe/compare/runtime-1.0.0-canary.2...runtime-1.0.0-canary.3) (2023-11-22)
 
 

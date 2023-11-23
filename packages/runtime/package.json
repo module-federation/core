@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime",
-  "version": "1.0.0-canary.3",
+  "version": "1.0.0-canary.4",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./index.cjs",
   "module": "./index.esm.js",
