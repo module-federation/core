@@ -1,1752 +1,3469 @@
 /* eslint-disable */
 //@ts-nocheck
-
 /*
  * This file was automatically generated.
  * DO NOT MODIFY BY HAND.
  * Run `yarn special-lint-fix` to update
  */
-const t = /^(?:[A-Za-z]:[\\/]|\\\\|\/)/;
+const absolutePathRegExp = /^(?:[A-Za-z]:[\\/]|\\\\|\/)/;
 
-const e = {
-    definitions: {
-      AmdContainer: { type: 'string', minLength: 1 },
-      AuxiliaryComment: {
-        anyOf: [
-          { type: 'string' },
-          { $ref: '#/definitions/LibraryCustomUmdCommentObject' },
-        ],
-      },
-      EntryRuntime: {
-        anyOf: [{ enum: [!1] }, { type: 'string', minLength: 1 }],
-      },
-      Exposes: {
-        anyOf: [
-          {
-            type: 'array',
-            items: {
-              anyOf: [
-                { $ref: '#/definitions/ExposesItem' },
-                { $ref: '#/definitions/ExposesObject' },
-              ],
-            },
-          },
-          { $ref: '#/definitions/ExposesObject' },
-        ],
-      },
-      ExposesConfig: {
-        type: 'object',
-        additionalProperties: !1,
-        properties: {
-          import: {
-            anyOf: [
-              { $ref: '#/definitions/ExposesItem' },
-              { $ref: '#/definitions/ExposesItems' },
-            ],
-          },
-          name: { type: 'string' },
-        },
-        required: ['import'],
-      },
-      ExposesItem: { type: 'string', minLength: 1 },
-      ExposesItems: {
-        type: 'array',
-        items: { $ref: '#/definitions/ExposesItem' },
-      },
-      ExposesObject: {
-        type: 'object',
-        additionalProperties: {
-          anyOf: [
-            { $ref: '#/definitions/ExposesConfig' },
-            { $ref: '#/definitions/ExposesItem' },
-            { $ref: '#/definitions/ExposesItems' },
-          ],
-        },
-      },
-      ExternalsType: {
-        enum: [
-          'var',
-          'module',
-          'assign',
-          'this',
-          'window',
-          'self',
-          'global',
-          'commonjs',
-          'commonjs2',
-          'commonjs-module',
-          'commonjs-static',
-          'amd',
-          'amd-require',
-          'umd',
-          'umd2',
-          'jsonp',
-          'system',
-          'promise',
-          'import',
-          'script',
-          'node-commonjs',
-        ],
-      },
-      LibraryCustomUmdCommentObject: {
-        type: 'object',
-        additionalProperties: !1,
-        properties: {
-          amd: { type: 'string' },
-          commonjs: { type: 'string' },
-          commonjs2: { type: 'string' },
-          root: { type: 'string' },
-        },
-      },
-      LibraryCustomUmdObject: {
-        type: 'object',
-        additionalProperties: !1,
-        properties: {
-          amd: { type: 'string', minLength: 1 },
-          commonjs: { type: 'string', minLength: 1 },
-          root: {
-            anyOf: [
-              { type: 'array', items: { type: 'string', minLength: 1 } },
-              { type: 'string', minLength: 1 },
-            ],
-          },
-        },
-      },
-      LibraryExport: {
-        anyOf: [
-          { type: 'array', items: { type: 'string', minLength: 1 } },
-          { type: 'string', minLength: 1 },
-        ],
-      },
-      LibraryName: {
-        anyOf: [
-          {
-            type: 'array',
-            items: { type: 'string', minLength: 1 },
-            minItems: 1,
-          },
-          { type: 'string', minLength: 1 },
-          { $ref: '#/definitions/LibraryCustomUmdObject' },
-        ],
-      },
-      LibraryOptions: {
-        type: 'object',
-        additionalProperties: !1,
-        properties: {
-          amdContainer: { $ref: '#/definitions/AmdContainer' },
-          auxiliaryComment: { $ref: '#/definitions/AuxiliaryComment' },
-          export: { $ref: '#/definitions/LibraryExport' },
-          name: { $ref: '#/definitions/LibraryName' },
-          type: { $ref: '#/definitions/LibraryType' },
-          umdNamedDefine: { $ref: '#/definitions/UmdNamedDefine' },
-        },
-        required: ['type'],
-      },
-      LibraryType: {
-        anyOf: [
-          {
-            enum: [
-              'var',
-              'module',
-              'assign',
-              'assign-properties',
-              'this',
-              'window',
-              'self',
-              'global',
-              'commonjs',
-              'commonjs2',
-              'commonjs-module',
-              'commonjs-static',
-              'amd',
-              'amd-require',
-              'umd',
-              'umd2',
-              'jsonp',
-              'system',
-            ],
-          },
-          { type: 'string' },
-        ],
-      },
-      Remotes: {
-        anyOf: [
-          {
-            type: 'array',
-            items: {
-              anyOf: [
-                { $ref: '#/definitions/RemotesItem' },
-                { $ref: '#/definitions/RemotesObject' },
-              ],
-            },
-          },
-          { $ref: '#/definitions/RemotesObject' },
-        ],
-      },
-      RemotesConfig: {
-        type: 'object',
-        additionalProperties: !1,
-        properties: {
-          external: {
-            anyOf: [
-              { $ref: '#/definitions/RemotesItem' },
-              { $ref: '#/definitions/RemotesItems' },
-            ],
-          },
-          shareScope: { type: 'string', minLength: 1 },
-        },
-        required: ['external'],
-      },
-      RemotesItem: { type: 'string', minLength: 1 },
-      RemotesItems: {
-        type: 'array',
-        items: { $ref: '#/definitions/RemotesItem' },
-      },
-      RemotesObject: {
-        type: 'object',
-        additionalProperties: {
-          anyOf: [
-            { $ref: '#/definitions/RemotesConfig' },
-            { $ref: '#/definitions/RemotesItem' },
-            { $ref: '#/definitions/RemotesItems' },
-          ],
-        },
-      },
-      Shared: {
-        anyOf: [
-          {
-            type: 'array',
-            items: {
-              anyOf: [
-                { $ref: '#/definitions/SharedItem' },
-                { $ref: '#/definitions/SharedObject' },
-              ],
-            },
-          },
-          { $ref: '#/definitions/SharedObject' },
-        ],
-      },
-      SharedConfig: {
-        type: 'object',
-        additionalProperties: !1,
-        properties: {
-          eager: { type: 'boolean' },
-          import: {
-            anyOf: [{ enum: [!1] }, { $ref: '#/definitions/SharedItem' }],
-          },
-          packageName: { type: 'string', minLength: 1 },
-          requiredVersion: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
-          shareKey: { type: 'string', minLength: 1 },
-          shareScope: { type: 'string', minLength: 1 },
-          singleton: { type: 'boolean' },
-          strictVersion: { type: 'boolean' },
-          version: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
-        },
-      },
-      SharedItem: { type: 'string', minLength: 1 },
-      SharedObject: {
-        type: 'object',
-        additionalProperties: {
-          anyOf: [
-            { $ref: '#/definitions/SharedConfig' },
-            { $ref: '#/definitions/SharedItem' },
-          ],
-        },
-      },
-      UmdNamedDefine: { type: 'boolean' },
-    },
-    type: 'object',
-    additionalProperties: !1,
-    properties: {
-      exposes: { $ref: '#/definitions/Exposes' },
-      filename: { type: 'string', absolutePath: !1 },
-      library: { $ref: '#/definitions/LibraryOptions' },
-      name: { type: 'string' },
-      remoteType: { oneOf: [{ $ref: '#/definitions/ExternalsType' }] },
-      remotes: { $ref: '#/definitions/Remotes' },
-      runtime: { $ref: '#/definitions/EntryRuntime' },
-      shareScope: { type: 'string', minLength: 1 },
-      shared: { $ref: '#/definitions/Shared' },
-    },
-  },
-  r = Object.prototype.hasOwnProperty;
-function n(
-  t,
-  {
-    instancePath: e = '',
-    parentData: r,
-    parentDataProperty: s,
-    rootData: a = t,
-  } = {},
-) {
-  if (!Array.isArray(t))
-    return (n.errors = [{ params: { type: 'array' } }]), !1;
-  {
-    const e = t.length;
-    for (let r = 0; r < e; r++) {
-      let e = t[r];
-      const s = 0;
-      if ('string' != typeof e)
-        return (n.errors = [{ params: { type: 'string' } }]), !1;
-      if (e.length < 1) return (n.errors = [{ params: {} }]), !1;
-      if (0 !== s) break;
-    }
-  }
-  return (n.errors = null), !0;
-}
-function s(
-  t,
-  {
-    instancePath: e = '',
-    parentData: r,
-    parentDataProperty: a,
-    rootData: o = t,
-  } = {},
-) {
-  let i = null,
-    l = 0;
-  if (0 === l) {
-    if (!t || 'object' != typeof t || Array.isArray(t))
-      return (s.errors = [{ params: { type: 'object' } }]), !1;
-    {
-      let r;
-      if (void 0 === t.import && (r = 'import'))
-        return (s.errors = [{ params: { missingProperty: r } }]), !1;
-      {
-        const r = l;
-        for (const e in t)
-          if ('import' !== e && 'name' !== e)
-            return (s.errors = [{ params: { additionalProperty: e } }]), !1;
-        if (r === l) {
-          if (void 0 !== t.import) {
-            let r = t.import;
-            const a = l,
-              c = l;
-            let m = !1;
-            const u = l;
-            if (l == l)
-              if ('string' == typeof r) {
-                if (r.length < 1) {
-                  const t = { params: {} };
-                  null === i ? (i = [t]) : i.push(t), l++;
-                }
-              } else {
-                const t = { params: { type: 'string' } };
-                null === i ? (i = [t]) : i.push(t), l++;
-              }
-            var p = u === l;
-            if (((m = m || p), !m)) {
-              const s = l;
-              n(r, {
-                instancePath: e + '/import',
-                parentData: t,
-                parentDataProperty: 'import',
-                rootData: o,
-              }) ||
-                ((i = null === i ? n.errors : i.concat(n.errors)),
-                (l = i.length)),
-                (p = s === l),
-                (m = m || p);
-            }
-            if (!m) {
-              const t = { params: {} };
-              return (
-                null === i ? (i = [t]) : i.push(t), l++, (s.errors = i), !1
-              );
-            }
-            (l = c), null !== i && (c ? (i.length = c) : (i = null));
-            var f = a === l;
-          } else f = !0;
-          if (f)
-            if (void 0 !== t.name) {
-              const e = l;
-              if ('string' != typeof t.name)
-                return (s.errors = [{ params: { type: 'string' } }]), !1;
-              f = e === l;
-            } else f = !0;
-        }
-      }
-    }
-  }
-  return (s.errors = i), 0 === l;
-}
-function a(
-  t,
-  {
-    instancePath: e = '',
-    parentData: r,
-    parentDataProperty: o,
-    rootData: i = t,
-  } = {},
-) {
-  let l = null,
-    p = 0;
-  if (0 === p) {
-    if (!t || 'object' != typeof t || Array.isArray(t))
-      return (a.errors = [{ params: { type: 'object' } }]), !1;
-    for (const r in t) {
-      let o = t[r];
-      const c = p,
-        m = p;
-      let u = !1;
-      const y = p;
-      s(o, {
-        instancePath: e + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
-        parentData: t,
-        parentDataProperty: r,
-        rootData: i,
-      }) || ((l = null === l ? s.errors : l.concat(s.errors)), (p = l.length));
-      var f = y === p;
-      if (((u = u || f), !u)) {
-        const s = p;
-        if (p == p)
-          if ('string' == typeof o) {
-            if (o.length < 1) {
-              const t = { params: {} };
-              null === l ? (l = [t]) : l.push(t), p++;
-            }
-          } else {
-            const t = { params: { type: 'string' } };
-            null === l ? (l = [t]) : l.push(t), p++;
-          }
-        if (((f = s === p), (u = u || f), !u)) {
-          const s = p;
-          n(o, {
-            instancePath: e + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
-            parentData: t,
-            parentDataProperty: r,
-            rootData: i,
-          }) ||
-            ((l = null === l ? n.errors : l.concat(n.errors)), (p = l.length)),
-            (f = s === p),
-            (u = u || f);
-        }
-      }
-      if (!u) {
-        const t = { params: {} };
-        return null === l ? (l = [t]) : l.push(t), p++, (a.errors = l), !1;
-      }
-      if (((p = m), null !== l && (m ? (l.length = m) : (l = null)), c !== p))
-        break;
-    }
-  }
-  return (a.errors = l), 0 === p;
-}
-function o(
-  t,
-  {
-    instancePath: e = '',
-    parentData: r,
-    parentDataProperty: n,
-    rootData: s = t,
-  } = {},
-) {
-  let i = null,
-    l = 0;
-  const p = l;
-  let f = !1;
-  const c = l;
-  if (l === c)
-    if (Array.isArray(t)) {
-      const r = t.length;
-      for (let n = 0; n < r; n++) {
-        let r = t[n];
-        const o = l,
-          p = l;
-        let f = !1;
-        const c = l;
-        if (l == l)
-          if ('string' == typeof r) {
-            if (r.length < 1) {
-              const t = { params: {} };
-              null === i ? (i = [t]) : i.push(t), l++;
-            }
-          } else {
-            const t = { params: { type: 'string' } };
-            null === i ? (i = [t]) : i.push(t), l++;
-          }
-        var m = c === l;
-        if (((f = f || m), !f)) {
-          const o = l;
-          a(r, {
-            instancePath: e + '/' + n,
-            parentData: t,
-            parentDataProperty: n,
-            rootData: s,
-          }) ||
-            ((i = null === i ? a.errors : i.concat(a.errors)), (l = i.length)),
-            (m = o === l),
-            (f = f || m);
-        }
-        if (f) (l = p), null !== i && (p ? (i.length = p) : (i = null));
-        else {
-          const t = { params: {} };
-          null === i ? (i = [t]) : i.push(t), l++;
-        }
-        if (o !== l) break;
-      }
-    } else {
-      const t = { params: { type: 'array' } };
-      null === i ? (i = [t]) : i.push(t), l++;
-    }
-  var u = c === l;
-  if (((f = f || u), !f)) {
-    const o = l;
-    a(t, {
-      instancePath: e,
-      parentData: r,
-      parentDataProperty: n,
-      rootData: s,
-    }) || ((i = null === i ? a.errors : i.concat(a.errors)), (l = i.length)),
-      (u = o === l),
-      (f = f || u);
-  }
-  if (!f) {
-    const t = { params: {} };
-    return null === i ? (i = [t]) : i.push(t), l++, (o.errors = i), !1;
-  }
-  return (
-    (l = p),
-    null !== i && (p ? (i.length = p) : (i = null)),
-    (o.errors = i),
-    0 === l
-  );
-}
-function i(
-  t,
-  {
-    instancePath: e = '',
-    parentData: r,
-    parentDataProperty: n,
-    rootData: s = t,
-  } = {},
-) {
-  let a = null,
-    o = 0;
-  const l = o;
-  let p = !1;
-  const f = o;
-  if ('string' != typeof t) {
-    const t = { params: { type: 'string' } };
-    null === a ? (a = [t]) : a.push(t), o++;
-  }
-  var c = f === o;
-  if (((p = p || c), !p)) {
-    const e = o;
-    if (o == o)
-      if (t && 'object' == typeof t && !Array.isArray(t)) {
-        const e = o;
-        for (const e in t)
-          if (
-            'amd' !== e &&
-            'commonjs' !== e &&
-            'commonjs2' !== e &&
-            'root' !== e
-          ) {
-            const t = { params: { additionalProperty: e } };
-            null === a ? (a = [t]) : a.push(t), o++;
-            break;
-          }
-        if (e === o) {
-          if (void 0 !== t.amd) {
-            const e = o;
-            if ('string' != typeof t.amd) {
-              const t = { params: { type: 'string' } };
-              null === a ? (a = [t]) : a.push(t), o++;
-            }
-            var m = e === o;
-          } else m = !0;
-          if (m) {
-            if (void 0 !== t.commonjs) {
-              const e = o;
-              if ('string' != typeof t.commonjs) {
-                const t = { params: { type: 'string' } };
-                null === a ? (a = [t]) : a.push(t), o++;
-              }
-              m = e === o;
-            } else m = !0;
-            if (m) {
-              if (void 0 !== t.commonjs2) {
-                const e = o;
-                if ('string' != typeof t.commonjs2) {
-                  const t = { params: { type: 'string' } };
-                  null === a ? (a = [t]) : a.push(t), o++;
-                }
-                m = e === o;
-              } else m = !0;
-              if (m)
-                if (void 0 !== t.root) {
-                  const e = o;
-                  if ('string' != typeof t.root) {
-                    const t = { params: { type: 'string' } };
-                    null === a ? (a = [t]) : a.push(t), o++;
-                  }
-                  m = e === o;
-                } else m = !0;
-            }
-          }
-        }
-      } else {
-        const t = { params: { type: 'object' } };
-        null === a ? (a = [t]) : a.push(t), o++;
-      }
-    (c = e === o), (p = p || c);
-  }
-  if (!p) {
-    const t = { params: {} };
-    return null === a ? (a = [t]) : a.push(t), o++, (i.errors = a), !1;
-  }
-  return (
-    (o = l),
-    null !== a && (l ? (a.length = l) : (a = null)),
-    (i.errors = a),
-    0 === o
-  );
-}
-function l(
-  t,
-  {
-    instancePath: e = '',
-    parentData: r,
-    parentDataProperty: n,
-    rootData: s = t,
-  } = {},
-) {
-  let a = null,
-    o = 0;
-  const i = o;
-  let p = !1;
-  const f = o;
-  if (o === f)
-    if (Array.isArray(t))
-      if (t.length < 1) {
-        const t = { params: { limit: 1 } };
-        null === a ? (a = [t]) : a.push(t), o++;
-      } else {
-        const e = t.length;
-        for (let r = 0; r < e; r++) {
-          let e = t[r];
-          const n = o;
-          if (o === n)
-            if ('string' == typeof e) {
-              if (e.length < 1) {
-                const t = { params: {} };
-                null === a ? (a = [t]) : a.push(t), o++;
-              }
-            } else {
-              const t = { params: { type: 'string' } };
-              null === a ? (a = [t]) : a.push(t), o++;
-            }
-          if (n !== o) break;
-        }
-      }
-    else {
-      const t = { params: { type: 'array' } };
-      null === a ? (a = [t]) : a.push(t), o++;
-    }
-  var c = f === o;
-  if (((p = p || c), !p)) {
-    const e = o;
-    if (o === e)
-      if ('string' == typeof t) {
-        if (t.length < 1) {
-          const t = { params: {} };
-          null === a ? (a = [t]) : a.push(t), o++;
-        }
-      } else {
-        const t = { params: { type: 'string' } };
-        null === a ? (a = [t]) : a.push(t), o++;
-      }
-    if (((c = e === o), (p = p || c), !p)) {
-      const e = o;
-      if (o == o)
-        if (t && 'object' == typeof t && !Array.isArray(t)) {
-          const e = o;
-          for (const e in t)
-            if ('amd' !== e && 'commonjs' !== e && 'root' !== e) {
-              const t = { params: { additionalProperty: e } };
-              null === a ? (a = [t]) : a.push(t), o++;
-              break;
-            }
-          if (e === o) {
-            if (void 0 !== t.amd) {
-              let e = t.amd;
-              const r = o;
-              if (o === r)
-                if ('string' == typeof e) {
-                  if (e.length < 1) {
-                    const t = { params: {} };
-                    null === a ? (a = [t]) : a.push(t), o++;
-                  }
-                } else {
-                  const t = { params: { type: 'string' } };
-                  null === a ? (a = [t]) : a.push(t), o++;
-                }
-              var m = r === o;
-            } else m = !0;
-            if (m) {
-              if (void 0 !== t.commonjs) {
-                let e = t.commonjs;
-                const r = o;
-                if (o === r)
-                  if ('string' == typeof e) {
-                    if (e.length < 1) {
-                      const t = { params: {} };
-                      null === a ? (a = [t]) : a.push(t), o++;
-                    }
-                  } else {
-                    const t = { params: { type: 'string' } };
-                    null === a ? (a = [t]) : a.push(t), o++;
-                  }
-                m = r === o;
-              } else m = !0;
-              if (m)
-                if (void 0 !== t.root) {
-                  let e = t.root;
-                  const r = o,
-                    n = o;
-                  let s = !1;
-                  const i = o;
-                  if (o === i)
-                    if (Array.isArray(e)) {
-                      const t = e.length;
-                      for (let r = 0; r < t; r++) {
-                        let t = e[r];
-                        const n = o;
-                        if (o === n)
-                          if ('string' == typeof t) {
-                            if (t.length < 1) {
-                              const t = { params: {} };
-                              null === a ? (a = [t]) : a.push(t), o++;
-                            }
-                          } else {
-                            const t = { params: { type: 'string' } };
-                            null === a ? (a = [t]) : a.push(t), o++;
-                          }
-                        if (n !== o) break;
-                      }
-                    } else {
-                      const t = { params: { type: 'array' } };
-                      null === a ? (a = [t]) : a.push(t), o++;
-                    }
-                  var u = i === o;
-                  if (((s = s || u), !s)) {
-                    const t = o;
-                    if (o === t)
-                      if ('string' == typeof e) {
-                        if (e.length < 1) {
-                          const t = { params: {} };
-                          null === a ? (a = [t]) : a.push(t), o++;
-                        }
-                      } else {
-                        const t = { params: { type: 'string' } };
-                        null === a ? (a = [t]) : a.push(t), o++;
-                      }
-                    (u = t === o), (s = s || u);
-                  }
-                  if (s)
-                    (o = n), null !== a && (n ? (a.length = n) : (a = null));
-                  else {
-                    const t = { params: {} };
-                    null === a ? (a = [t]) : a.push(t), o++;
-                  }
-                  m = r === o;
-                } else m = !0;
-            }
-          }
-        } else {
-          const t = { params: { type: 'object' } };
-          null === a ? (a = [t]) : a.push(t), o++;
-        }
-      (c = e === o), (p = p || c);
-    }
-  }
-  if (!p) {
-    const t = { params: {} };
-    return null === a ? (a = [t]) : a.push(t), o++, (l.errors = a), !1;
-  }
-  return (
-    (o = i),
-    null !== a && (i ? (a.length = i) : (a = null)),
-    (l.errors = a),
-    0 === o
-  );
-}
-function p(
-  t,
-  {
-    instancePath: e = '',
-    parentData: r,
-    parentDataProperty: n,
-    rootData: s = t,
-  } = {},
-) {
-  let a = null,
-    o = 0;
-  if (0 === o) {
-    if (!t || 'object' != typeof t || Array.isArray(t))
-      return (p.errors = [{ params: { type: 'object' } }]), !1;
-    {
-      let r;
-      if (void 0 === t.type && (r = 'type'))
-        return (p.errors = [{ params: { missingProperty: r } }]), !1;
-      {
-        const r = o;
-        for (const e in t)
-          if (
-            'amdContainer' !== e &&
-            'auxiliaryComment' !== e &&
-            'export' !== e &&
-            'name' !== e &&
-            'type' !== e &&
-            'umdNamedDefine' !== e
-          )
-            return (p.errors = [{ params: { additionalProperty: e } }]), !1;
-        if (r === o) {
-          if (void 0 !== t.amdContainer) {
-            let e = t.amdContainer;
-            const r = o;
-            if (o == o) {
-              if ('string' != typeof e)
-                return (p.errors = [{ params: { type: 'string' } }]), !1;
-              if (e.length < 1) return (p.errors = [{ params: {} }]), !1;
-            }
-            var f = r === o;
-          } else f = !0;
-          if (f) {
-            if (void 0 !== t.auxiliaryComment) {
-              const r = o;
-              i(t.auxiliaryComment, {
-                instancePath: e + '/auxiliaryComment',
-                parentData: t,
-                parentDataProperty: 'auxiliaryComment',
-                rootData: s,
-              }) ||
-                ((a = null === a ? i.errors : a.concat(i.errors)),
-                (o = a.length)),
-                (f = r === o);
-            } else f = !0;
-            if (f) {
-              if (void 0 !== t.export) {
-                let e = t.export;
-                const r = o,
-                  n = o;
-                let s = !1;
-                const i = o;
-                if (o === i)
-                  if (Array.isArray(e)) {
-                    const t = e.length;
-                    for (let r = 0; r < t; r++) {
-                      let t = e[r];
-                      const n = o;
-                      if (o === n)
-                        if ('string' == typeof t) {
-                          if (t.length < 1) {
-                            const t = { params: {} };
-                            null === a ? (a = [t]) : a.push(t), o++;
-                          }
-                        } else {
-                          const t = { params: { type: 'string' } };
-                          null === a ? (a = [t]) : a.push(t), o++;
-                        }
-                      if (n !== o) break;
-                    }
-                  } else {
-                    const t = { params: { type: 'array' } };
-                    null === a ? (a = [t]) : a.push(t), o++;
-                  }
-                var c = i === o;
-                if (((s = s || c), !s)) {
-                  const t = o;
-                  if (o === t)
-                    if ('string' == typeof e) {
-                      if (e.length < 1) {
-                        const t = { params: {} };
-                        null === a ? (a = [t]) : a.push(t), o++;
-                      }
-                    } else {
-                      const t = { params: { type: 'string' } };
-                      null === a ? (a = [t]) : a.push(t), o++;
-                    }
-                  (c = t === o), (s = s || c);
-                }
-                if (!s) {
-                  const t = { params: {} };
-                  return (
-                    null === a ? (a = [t]) : a.push(t), o++, (p.errors = a), !1
-                  );
-                }
-                (o = n),
-                  null !== a && (n ? (a.length = n) : (a = null)),
-                  (f = r === o);
-              } else f = !0;
-              if (f) {
-                if (void 0 !== t.name) {
-                  const r = o;
-                  l(t.name, {
-                    instancePath: e + '/name',
-                    parentData: t,
-                    parentDataProperty: 'name',
-                    rootData: s,
-                  }) ||
-                    ((a = null === a ? l.errors : a.concat(l.errors)),
-                    (o = a.length)),
-                    (f = r === o);
-                } else f = !0;
-                if (f) {
-                  if (void 0 !== t.type) {
-                    let e = t.type;
-                    const r = o,
-                      n = o;
-                    let s = !1;
-                    const i = o;
-                    if (
-                      'var' !== e &&
-                      'module' !== e &&
-                      'assign' !== e &&
-                      'assign-properties' !== e &&
-                      'this' !== e &&
-                      'window' !== e &&
-                      'self' !== e &&
-                      'global' !== e &&
-                      'commonjs' !== e &&
-                      'commonjs2' !== e &&
-                      'commonjs-module' !== e &&
-                      'commonjs-static' !== e &&
-                      'amd' !== e &&
-                      'amd-require' !== e &&
-                      'umd' !== e &&
-                      'umd2' !== e &&
-                      'jsonp' !== e &&
-                      'system' !== e
-                    ) {
-                      const t = { params: {} };
-                      null === a ? (a = [t]) : a.push(t), o++;
-                    }
-                    var m = i === o;
-                    if (((s = s || m), !s)) {
-                      const t = o;
-                      if ('string' != typeof e) {
-                        const t = { params: { type: 'string' } };
-                        null === a ? (a = [t]) : a.push(t), o++;
-                      }
-                      (m = t === o), (s = s || m);
-                    }
-                    if (!s) {
-                      const t = { params: {} };
-                      return (
-                        null === a ? (a = [t]) : a.push(t),
-                        o++,
-                        (p.errors = a),
-                        !1
-                      );
-                    }
-                    (o = n),
-                      null !== a && (n ? (a.length = n) : (a = null)),
-                      (f = r === o);
-                  } else f = !0;
-                  if (f)
-                    if (void 0 !== t.umdNamedDefine) {
-                      const e = o;
-                      if ('boolean' != typeof t.umdNamedDefine)
-                        return (
-                          (p.errors = [{ params: { type: 'boolean' } }]), !1
-                        );
-                      f = e === o;
-                    } else f = !0;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  return (p.errors = a), 0 === o;
-}
-function f(
-  t,
-  {
-    instancePath: e = '',
-    parentData: r,
-    parentDataProperty: n,
-    rootData: s = t,
-  } = {},
-) {
-  if (!Array.isArray(t))
-    return (f.errors = [{ params: { type: 'array' } }]), !1;
-  {
-    const e = t.length;
-    for (let r = 0; r < e; r++) {
-      let e = t[r];
-      const n = 0;
-      if ('string' != typeof e)
-        return (f.errors = [{ params: { type: 'string' } }]), !1;
-      if (e.length < 1) return (f.errors = [{ params: {} }]), !1;
-      if (0 !== n) break;
-    }
-  }
-  return (f.errors = null), !0;
-}
-function c(
-  t,
-  {
-    instancePath: e = '',
-    parentData: r,
-    parentDataProperty: n,
-    rootData: s = t,
-  } = {},
-) {
-  let a = null,
-    o = 0;
-  if (0 === o) {
-    if (!t || 'object' != typeof t || Array.isArray(t))
-      return (c.errors = [{ params: { type: 'object' } }]), !1;
-    {
-      let r;
-      if (void 0 === t.external && (r = 'external'))
-        return (c.errors = [{ params: { missingProperty: r } }]), !1;
-      {
-        const r = o;
-        for (const e in t)
-          if ('external' !== e && 'shareScope' !== e)
-            return (c.errors = [{ params: { additionalProperty: e } }]), !1;
-        if (r === o) {
-          if (void 0 !== t.external) {
-            let r = t.external;
-            const n = o,
-              p = o;
-            let m = !1;
-            const u = o;
-            if (o == o)
-              if ('string' == typeof r) {
-                if (r.length < 1) {
-                  const t = { params: {} };
-                  null === a ? (a = [t]) : a.push(t), o++;
-                }
-              } else {
-                const t = { params: { type: 'string' } };
-                null === a ? (a = [t]) : a.push(t), o++;
-              }
-            var i = u === o;
-            if (((m = m || i), !m)) {
-              const n = o;
-              f(r, {
-                instancePath: e + '/external',
-                parentData: t,
-                parentDataProperty: 'external',
-                rootData: s,
-              }) ||
-                ((a = null === a ? f.errors : a.concat(f.errors)),
-                (o = a.length)),
-                (i = n === o),
-                (m = m || i);
-            }
-            if (!m) {
-              const t = { params: {} };
-              return (
-                null === a ? (a = [t]) : a.push(t), o++, (c.errors = a), !1
-              );
-            }
-            (o = p), null !== a && (p ? (a.length = p) : (a = null));
-            var l = n === o;
-          } else l = !0;
-          if (l)
-            if (void 0 !== t.shareScope) {
-              let e = t.shareScope;
-              const r = o;
-              if (o === r) {
-                if ('string' != typeof e)
-                  return (c.errors = [{ params: { type: 'string' } }]), !1;
-                if (e.length < 1) return (c.errors = [{ params: {} }]), !1;
-              }
-              l = r === o;
-            } else l = !0;
-        }
-      }
-    }
-  }
-  return (c.errors = a), 0 === o;
-}
-function m(
-  t,
-  {
-    instancePath: e = '',
-    parentData: r,
-    parentDataProperty: n,
-    rootData: s = t,
-  } = {},
-) {
-  let a = null,
-    o = 0;
-  if (0 === o) {
-    if (!t || 'object' != typeof t || Array.isArray(t))
-      return (m.errors = [{ params: { type: 'object' } }]), !1;
-    for (const r in t) {
-      let n = t[r];
-      const l = o,
-        p = o;
-      let u = !1;
-      const y = o;
-      c(n, {
-        instancePath: e + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
-        parentData: t,
-        parentDataProperty: r,
-        rootData: s,
-      }) || ((a = null === a ? c.errors : a.concat(c.errors)), (o = a.length));
-      var i = y === o;
-      if (((u = u || i), !u)) {
-        const l = o;
-        if (o == o)
-          if ('string' == typeof n) {
-            if (n.length < 1) {
-              const t = { params: {} };
-              null === a ? (a = [t]) : a.push(t), o++;
-            }
-          } else {
-            const t = { params: { type: 'string' } };
-            null === a ? (a = [t]) : a.push(t), o++;
-          }
-        if (((i = l === o), (u = u || i), !u)) {
-          const l = o;
-          f(n, {
-            instancePath: e + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
-            parentData: t,
-            parentDataProperty: r,
-            rootData: s,
-          }) ||
-            ((a = null === a ? f.errors : a.concat(f.errors)), (o = a.length)),
-            (i = l === o),
-            (u = u || i);
-        }
-      }
-      if (!u) {
-        const t = { params: {} };
-        return null === a ? (a = [t]) : a.push(t), o++, (m.errors = a), !1;
-      }
-      if (((o = p), null !== a && (p ? (a.length = p) : (a = null)), l !== o))
-        break;
-    }
-  }
-  return (m.errors = a), 0 === o;
-}
-function u(
-  t,
-  {
-    instancePath: e = '',
-    parentData: r,
-    parentDataProperty: n,
-    rootData: s = t,
-  } = {},
-) {
-  let a = null,
-    o = 0;
-  const i = o;
-  let l = !1;
-  const p = o;
-  if (o === p)
-    if (Array.isArray(t)) {
-      const r = t.length;
-      for (let n = 0; n < r; n++) {
-        let r = t[n];
-        const i = o,
-          l = o;
-        let p = !1;
-        const c = o;
-        if (o == o)
-          if ('string' == typeof r) {
-            if (r.length < 1) {
-              const t = { params: {} };
-              null === a ? (a = [t]) : a.push(t), o++;
-            }
-          } else {
-            const t = { params: { type: 'string' } };
-            null === a ? (a = [t]) : a.push(t), o++;
-          }
-        var f = c === o;
-        if (((p = p || f), !p)) {
-          const i = o;
-          m(r, {
-            instancePath: e + '/' + n,
-            parentData: t,
-            parentDataProperty: n,
-            rootData: s,
-          }) ||
-            ((a = null === a ? m.errors : a.concat(m.errors)), (o = a.length)),
-            (f = i === o),
-            (p = p || f);
-        }
-        if (p) (o = l), null !== a && (l ? (a.length = l) : (a = null));
-        else {
-          const t = { params: {} };
-          null === a ? (a = [t]) : a.push(t), o++;
-        }
-        if (i !== o) break;
-      }
-    } else {
-      const t = { params: { type: 'array' } };
-      null === a ? (a = [t]) : a.push(t), o++;
-    }
-  var c = p === o;
-  if (((l = l || c), !l)) {
-    const i = o;
-    m(t, {
-      instancePath: e,
-      parentData: r,
-      parentDataProperty: n,
-      rootData: s,
-    }) || ((a = null === a ? m.errors : a.concat(m.errors)), (o = a.length)),
-      (c = i === o),
-      (l = l || c);
-  }
-  if (!l) {
-    const t = { params: {} };
-    return null === a ? (a = [t]) : a.push(t), o++, (u.errors = a), !1;
-  }
-  return (
-    (o = i),
-    null !== a && (i ? (a.length = i) : (a = null)),
-    (u.errors = a),
-    0 === o
-  );
-}
-const y = {
-  type: 'object',
-  additionalProperties: !1,
-  properties: {
-    eager: { type: 'boolean' },
-    import: { anyOf: [{ enum: [!1] }, { $ref: '#/definitions/SharedItem' }] },
-    packageName: { type: 'string', minLength: 1 },
-    requiredVersion: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
-    shareKey: { type: 'string', minLength: 1 },
-    shareScope: { type: 'string', minLength: 1 },
-    singleton: { type: 'boolean' },
-    strictVersion: { type: 'boolean' },
-    version: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
-  },
+const schema51 = {
+	"definitions": {
+		"AmdContainer": {
+			"type": "string",
+			"minLength": 1
+		},
+		"AuxiliaryComment": {
+			"anyOf": [{
+				"type": "string"
+			}, {
+				"$ref": "#/definitions/LibraryCustomUmdCommentObject"
+			}]
+		},
+		"EntryRuntime": {
+			"anyOf": [{
+				"enum": [false]
+			}, {
+				"type": "string",
+				"minLength": 1
+			}]
+		},
+		"Exposes": {
+			"anyOf": [{
+				"type": "array",
+				"items": {
+					"anyOf": [{
+						"$ref": "#/definitions/ExposesItem"
+					}, {
+						"$ref": "#/definitions/ExposesObject"
+					}]
+				}
+			}, {
+				"$ref": "#/definitions/ExposesObject"
+			}]
+		},
+		"ExposesConfig": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"import": {
+					"anyOf": [{
+						"$ref": "#/definitions/ExposesItem"
+					}, {
+						"$ref": "#/definitions/ExposesItems"
+					}]
+				},
+				"name": {
+					"type": "string"
+				}
+			},
+			"required": ["import"]
+		},
+		"ExposesItem": {
+			"type": "string",
+			"minLength": 1
+		},
+		"ExposesItems": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/ExposesItem"
+			}
+		},
+		"ExposesObject": {
+			"type": "object",
+			"additionalProperties": {
+				"anyOf": [{
+					"$ref": "#/definitions/ExposesConfig"
+				}, {
+					"$ref": "#/definitions/ExposesItem"
+				}, {
+					"$ref": "#/definitions/ExposesItems"
+				}]
+			}
+		},
+		"ExternalsType": {
+			"enum": ["var", "module", "assign", "this", "window", "self", "global",
+				"commonjs", "commonjs2", "commonjs-module", "commonjs-static",
+				"amd", "amd-require", "umd", "umd2", "jsonp", "system", "promise",
+				"import", "script", "node-commonjs"
+			]
+		},
+		"LibraryCustomUmdCommentObject": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"amd": {
+					"type": "string"
+				},
+				"commonjs": {
+					"type": "string"
+				},
+				"commonjs2": {
+					"type": "string"
+				},
+				"root": {
+					"type": "string"
+				}
+			}
+		},
+		"LibraryCustomUmdObject": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"amd": {
+					"type": "string",
+					"minLength": 1
+				},
+				"commonjs": {
+					"type": "string",
+					"minLength": 1
+				},
+				"root": {
+					"anyOf": [{
+						"type": "array",
+						"items": {
+							"type": "string",
+							"minLength": 1
+						}
+					}, {
+						"type": "string",
+						"minLength": 1
+					}]
+				}
+			}
+		},
+		"LibraryExport": {
+			"anyOf": [{
+				"type": "array",
+				"items": {
+					"type": "string",
+					"minLength": 1
+				}
+			}, {
+				"type": "string",
+				"minLength": 1
+			}]
+		},
+		"LibraryName": {
+			"anyOf": [{
+				"type": "array",
+				"items": {
+					"type": "string",
+					"minLength": 1
+				},
+				"minItems": 1
+			}, {
+				"type": "string",
+				"minLength": 1
+			}, {
+				"$ref": "#/definitions/LibraryCustomUmdObject"
+			}]
+		},
+		"LibraryOptions": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"amdContainer": {
+					"$ref": "#/definitions/AmdContainer"
+				},
+				"auxiliaryComment": {
+					"$ref": "#/definitions/AuxiliaryComment"
+				},
+				"export": {
+					"$ref": "#/definitions/LibraryExport"
+				},
+				"name": {
+					"$ref": "#/definitions/LibraryName"
+				},
+				"type": {
+					"$ref": "#/definitions/LibraryType"
+				},
+				"umdNamedDefine": {
+					"$ref": "#/definitions/UmdNamedDefine"
+				}
+			},
+			"required": ["type"]
+		},
+		"LibraryType": {
+			"anyOf": [{
+				"enum": ["var", "module", "assign", "assign-properties", "this",
+					"window", "self", "global", "commonjs", "commonjs2",
+					"commonjs-module", "commonjs-static", "amd", "amd-require",
+					"umd", "umd2", "jsonp", "system"
+				]
+			}, {
+				"type": "string"
+			}]
+		},
+		"Remotes": {
+			"anyOf": [{
+				"type": "array",
+				"items": {
+					"anyOf": [{
+						"$ref": "#/definitions/RemotesItem"
+					}, {
+						"$ref": "#/definitions/RemotesObject"
+					}]
+				}
+			}, {
+				"$ref": "#/definitions/RemotesObject"
+			}]
+		},
+		"RemotesConfig": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"external": {
+					"anyOf": [{
+						"$ref": "#/definitions/RemotesItem"
+					}, {
+						"$ref": "#/definitions/RemotesItems"
+					}]
+				},
+				"shareScope": {
+					"type": "string",
+					"minLength": 1
+				}
+			},
+			"required": ["external"]
+		},
+		"RemotesItem": {
+			"type": "string",
+			"minLength": 1
+		},
+		"RemotesItems": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/RemotesItem"
+			}
+		},
+		"RemotesObject": {
+			"type": "object",
+			"additionalProperties": {
+				"anyOf": [{
+					"$ref": "#/definitions/RemotesConfig"
+				}, {
+					"$ref": "#/definitions/RemotesItem"
+				}, {
+					"$ref": "#/definitions/RemotesItems"
+				}]
+			}
+		},
+		"Shared": {
+			"anyOf": [{
+				"type": "array",
+				"items": {
+					"anyOf": [{
+						"$ref": "#/definitions/SharedItem"
+					}, {
+						"$ref": "#/definitions/SharedObject"
+					}]
+				}
+			}, {
+				"$ref": "#/definitions/SharedObject"
+			}]
+		},
+		"SharedConfig": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"eager": {
+					"type": "boolean"
+				},
+				"import": {
+					"anyOf": [{
+						"enum": [false]
+					}, {
+						"$ref": "#/definitions/SharedItem"
+					}]
+				},
+				"packageName": {
+					"type": "string",
+					"minLength": 1
+				},
+				"requiredVersion": {
+					"anyOf": [{
+						"enum": [false]
+					}, {
+						"type": "string"
+					}]
+				},
+				"shareKey": {
+					"type": "string",
+					"minLength": 1
+				},
+				"shareScope": {
+					"type": "string",
+					"minLength": 1
+				},
+				"singleton": {
+					"type": "boolean"
+				},
+				"strictVersion": {
+					"type": "boolean"
+				},
+				"version": {
+					"anyOf": [{
+						"enum": [false]
+					}, {
+						"type": "string"
+					}]
+				}
+			}
+		},
+		"SharedItem": {
+			"type": "string",
+			"minLength": 1
+		},
+		"SharedObject": {
+			"type": "object",
+			"additionalProperties": {
+				"anyOf": [{
+					"$ref": "#/definitions/SharedConfig"
+				}, {
+					"$ref": "#/definitions/SharedItem"
+				}]
+			}
+		},
+		"UmdNamedDefine": {
+			"type": "boolean"
+		}
+	},
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"exposes": {
+			"$ref": "#/definitions/Exposes"
+		},
+		"filename": {
+			"type": "string",
+			"absolutePath": false
+		},
+		"library": {
+			"$ref": "#/definitions/LibraryOptions"
+		},
+		"name": {
+			"type": "string"
+		},
+		"remoteType": {
+			"oneOf": [{
+				"$ref": "#/definitions/ExternalsType"
+			}]
+		},
+		"remotes": {
+			"$ref": "#/definitions/Remotes"
+		},
+		"runtime": {
+			"$ref": "#/definitions/EntryRuntime"
+		},
+		"runtimePlugins": {
+			"type": "array",
+			"items": {
+				"type": "string",
+				"minLength": 1
+			}
+		},
+		"shareScope": {
+			"type": "string",
+			"minLength": 1
+		},
+		"shared": {
+			"$ref": "#/definitions/Shared"
+		}
+	},
 };
-function h(
-  t,
-  {
-    instancePath: e = '',
-    parentData: n,
-    parentDataProperty: s,
-    rootData: a = t,
-  } = {},
-) {
-  let o = null,
-    i = 0;
-  if (0 === i) {
-    if (!t || 'object' != typeof t || Array.isArray(t))
-      return (h.errors = [{ params: { type: 'object' } }]), !1;
-    {
-      const e = i;
-      for (const e in t)
-        if (!r.call(y.properties, e))
-          return (h.errors = [{ params: { additionalProperty: e } }]), !1;
-      if (e === i) {
-        if (void 0 !== t.eager) {
-          const e = i;
-          if ('boolean' != typeof t.eager)
-            return (h.errors = [{ params: { type: 'boolean' } }]), !1;
-          var l = e === i;
-        } else l = !0;
-        if (l) {
-          if (void 0 !== t.import) {
-            let e = t.import;
-            const r = i,
-              n = i;
-            let s = !1;
-            const a = i;
-            if (!1 !== e) {
-              const t = { params: {} };
-              null === o ? (o = [t]) : o.push(t), i++;
-            }
-            var p = a === i;
-            if (((s = s || p), !s)) {
-              const t = i;
-              if (i == i)
-                if ('string' == typeof e) {
-                  if (e.length < 1) {
-                    const t = { params: {} };
-                    null === o ? (o = [t]) : o.push(t), i++;
-                  }
-                } else {
-                  const t = { params: { type: 'string' } };
-                  null === o ? (o = [t]) : o.push(t), i++;
-                }
-              (p = t === i), (s = s || p);
-            }
-            if (!s) {
-              const t = { params: {} };
-              return (
-                null === o ? (o = [t]) : o.push(t), i++, (h.errors = o), !1
-              );
-            }
-            (i = n),
-              null !== o && (n ? (o.length = n) : (o = null)),
-              (l = r === i);
-          } else l = !0;
-          if (l) {
-            if (void 0 !== t.packageName) {
-              let e = t.packageName;
-              const r = i;
-              if (i === r) {
-                if ('string' != typeof e)
-                  return (h.errors = [{ params: { type: 'string' } }]), !1;
-                if (e.length < 1) return (h.errors = [{ params: {} }]), !1;
-              }
-              l = r === i;
-            } else l = !0;
-            if (l) {
-              if (void 0 !== t.requiredVersion) {
-                let e = t.requiredVersion;
-                const r = i,
-                  n = i;
-                let s = !1;
-                const a = i;
-                if (!1 !== e) {
-                  const t = { params: {} };
-                  null === o ? (o = [t]) : o.push(t), i++;
-                }
-                var f = a === i;
-                if (((s = s || f), !s)) {
-                  const t = i;
-                  if ('string' != typeof e) {
-                    const t = { params: { type: 'string' } };
-                    null === o ? (o = [t]) : o.push(t), i++;
-                  }
-                  (f = t === i), (s = s || f);
-                }
-                if (!s) {
-                  const t = { params: {} };
-                  return (
-                    null === o ? (o = [t]) : o.push(t), i++, (h.errors = o), !1
-                  );
-                }
-                (i = n),
-                  null !== o && (n ? (o.length = n) : (o = null)),
-                  (l = r === i);
-              } else l = !0;
-              if (l) {
-                if (void 0 !== t.shareKey) {
-                  let e = t.shareKey;
-                  const r = i;
-                  if (i === r) {
-                    if ('string' != typeof e)
-                      return (h.errors = [{ params: { type: 'string' } }]), !1;
-                    if (e.length < 1) return (h.errors = [{ params: {} }]), !1;
-                  }
-                  l = r === i;
-                } else l = !0;
-                if (l) {
-                  if (void 0 !== t.shareScope) {
-                    let e = t.shareScope;
-                    const r = i;
-                    if (i === r) {
-                      if ('string' != typeof e)
-                        return (
-                          (h.errors = [{ params: { type: 'string' } }]), !1
-                        );
-                      if (e.length < 1)
-                        return (h.errors = [{ params: {} }]), !1;
-                    }
-                    l = r === i;
-                  } else l = !0;
-                  if (l) {
-                    if (void 0 !== t.singleton) {
-                      const e = i;
-                      if ('boolean' != typeof t.singleton)
-                        return (
-                          (h.errors = [{ params: { type: 'boolean' } }]), !1
-                        );
-                      l = e === i;
-                    } else l = !0;
-                    if (l) {
-                      if (void 0 !== t.strictVersion) {
-                        const e = i;
-                        if ('boolean' != typeof t.strictVersion)
-                          return (
-                            (h.errors = [{ params: { type: 'boolean' } }]), !1
-                          );
-                        l = e === i;
-                      } else l = !0;
-                      if (l)
-                        if (void 0 !== t.version) {
-                          let e = t.version;
-                          const r = i,
-                            n = i;
-                          let s = !1;
-                          const a = i;
-                          if (!1 !== e) {
-                            const t = { params: {} };
-                            null === o ? (o = [t]) : o.push(t), i++;
-                          }
-                          var c = a === i;
-                          if (((s = s || c), !s)) {
-                            const t = i;
-                            if ('string' != typeof e) {
-                              const t = { params: { type: 'string' } };
-                              null === o ? (o = [t]) : o.push(t), i++;
-                            }
-                            (c = t === i), (s = s || c);
-                          }
-                          if (!s) {
-                            const t = { params: {} };
-                            return (
-                              null === o ? (o = [t]) : o.push(t),
-                              i++,
-                              (h.errors = o),
-                              !1
-                            );
-                          }
-                          (i = n),
-                            null !== o && (n ? (o.length = n) : (o = null)),
-                            (l = r === i);
-                        } else l = !0;
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  return (h.errors = o), 0 === i;
-}
-function g(
-  t,
-  {
-    instancePath: e = '',
-    parentData: r,
-    parentDataProperty: n,
-    rootData: s = t,
-  } = {},
-) {
-  let a = null,
-    o = 0;
-  if (0 === o) {
-    if (!t || 'object' != typeof t || Array.isArray(t))
-      return (g.errors = [{ params: { type: 'object' } }]), !1;
-    for (const r in t) {
-      let n = t[r];
-      const l = o,
-        p = o;
-      let f = !1;
-      const c = o;
-      h(n, {
-        instancePath: e + '/' + r.replace(/~/g, '~0').replace(/\//g, '~1'),
-        parentData: t,
-        parentDataProperty: r,
-        rootData: s,
-      }) || ((a = null === a ? h.errors : a.concat(h.errors)), (o = a.length));
-      var i = c === o;
-      if (((f = f || i), !f)) {
-        const t = o;
-        if (o == o)
-          if ('string' == typeof n) {
-            if (n.length < 1) {
-              const t = { params: {} };
-              null === a ? (a = [t]) : a.push(t), o++;
-            }
-          } else {
-            const t = { params: { type: 'string' } };
-            null === a ? (a = [t]) : a.push(t), o++;
-          }
-        (i = t === o), (f = f || i);
-      }
-      if (!f) {
-        const t = { params: {} };
-        return null === a ? (a = [t]) : a.push(t), o++, (g.errors = a), !1;
-      }
-      if (((o = p), null !== a && (p ? (a.length = p) : (a = null)), l !== o))
-        break;
-    }
-  }
-  return (g.errors = a), 0 === o;
-}
-function d(
-  t,
-  {
-    instancePath: e = '',
-    parentData: r,
-    parentDataProperty: n,
-    rootData: s = t,
-  } = {},
-) {
-  let a = null,
-    o = 0;
-  const i = o;
-  let l = !1;
-  const p = o;
-  if (o === p)
-    if (Array.isArray(t)) {
-      const r = t.length;
-      for (let n = 0; n < r; n++) {
-        let r = t[n];
-        const i = o,
-          l = o;
-        let p = !1;
-        const c = o;
-        if (o == o)
-          if ('string' == typeof r) {
-            if (r.length < 1) {
-              const t = { params: {} };
-              null === a ? (a = [t]) : a.push(t), o++;
-            }
-          } else {
-            const t = { params: { type: 'string' } };
-            null === a ? (a = [t]) : a.push(t), o++;
-          }
-        var f = c === o;
-        if (((p = p || f), !p)) {
-          const i = o;
-          g(r, {
-            instancePath: e + '/' + n,
-            parentData: t,
-            parentDataProperty: n,
-            rootData: s,
-          }) ||
-            ((a = null === a ? g.errors : a.concat(g.errors)), (o = a.length)),
-            (f = i === o),
-            (p = p || f);
-        }
-        if (p) (o = l), null !== a && (l ? (a.length = l) : (a = null));
-        else {
-          const t = { params: {} };
-          null === a ? (a = [t]) : a.push(t), o++;
-        }
-        if (i !== o) break;
-      }
-    } else {
-      const t = { params: { type: 'array' } };
-      null === a ? (a = [t]) : a.push(t), o++;
-    }
-  var c = p === o;
-  if (((l = l || c), !l)) {
-    const i = o;
-    g(t, {
-      instancePath: e,
-      parentData: r,
-      parentDataProperty: n,
-      rootData: s,
-    }) || ((a = null === a ? g.errors : a.concat(g.errors)), (o = a.length)),
-      (c = i === o),
-      (l = l || c);
-  }
-  if (!l) {
-    const t = { params: {} };
-    return null === a ? (a = [t]) : a.push(t), o++, (d.errors = a), !1;
-  }
-  return (
-    (o = i),
-    null !== a && (i ? (a.length = i) : (a = null)),
-    (d.errors = a),
-    0 === o
-  );
-}
-function D(
-  n,
-  {
-    instancePath: s = '',
-    parentData: a,
-    parentDataProperty: i,
-    rootData: l = n,
-  } = {},
-) {
-  let f = null,
-    c = 0;
-  if (0 === c) {
-    if (!n || 'object' != typeof n || Array.isArray(n))
-      return (D.errors = [{ params: { type: 'object' } }]), !1;
-    {
-      const a = c;
-      for (const t in n)
-        if (!r.call(e.properties, t))
-          return (D.errors = [{ params: { additionalProperty: t } }]), !1;
-      if (a === c) {
-        if (void 0 !== n.exposes) {
-          const t = c;
-          o(n.exposes, {
-            instancePath: s + '/exposes',
-            parentData: n,
-            parentDataProperty: 'exposes',
-            rootData: l,
-          }) ||
-            ((f = null === f ? o.errors : f.concat(o.errors)), (c = f.length));
-          var m = t === c;
-        } else m = !0;
-        if (m) {
-          if (void 0 !== n.filename) {
-            let e = n.filename;
-            const r = c;
-            if (c === r) {
-              if ('string' != typeof e)
-                return (D.errors = [{ params: { type: 'string' } }]), !1;
-              if (e.includes('!') || !1 !== t.test(e))
-                return (D.errors = [{ params: {} }]), !1;
-            }
-            m = r === c;
-          } else m = !0;
-          if (m) {
-            if (void 0 !== n.library) {
-              const t = c;
-              p(n.library, {
-                instancePath: s + '/library',
-                parentData: n,
-                parentDataProperty: 'library',
-                rootData: l,
-              }) ||
-                ((f = null === f ? p.errors : f.concat(p.errors)),
-                (c = f.length)),
-                (m = t === c);
-            } else m = !0;
-            if (m) {
-              if (void 0 !== n.name) {
-                const t = c;
-                if ('string' != typeof n.name)
-                  return (D.errors = [{ params: { type: 'string' } }]), !1;
-                m = t === c;
-              } else m = !0;
-              if (m) {
-                if (void 0 !== n.remoteType) {
-                  let t = n.remoteType;
-                  const e = c,
-                    r = c;
-                  let s = !1,
-                    a = null;
-                  const o = c;
-                  if (
-                    'var' !== t &&
-                    'module' !== t &&
-                    'assign' !== t &&
-                    'this' !== t &&
-                    'window' !== t &&
-                    'self' !== t &&
-                    'global' !== t &&
-                    'commonjs' !== t &&
-                    'commonjs2' !== t &&
-                    'commonjs-module' !== t &&
-                    'commonjs-static' !== t &&
-                    'amd' !== t &&
-                    'amd-require' !== t &&
-                    'umd' !== t &&
-                    'umd2' !== t &&
-                    'jsonp' !== t &&
-                    'system' !== t &&
-                    'promise' !== t &&
-                    'import' !== t &&
-                    'script' !== t &&
-                    'node-commonjs' !== t
-                  ) {
-                    const t = { params: {} };
-                    null === f ? (f = [t]) : f.push(t), c++;
-                  }
-                  if ((o === c && ((s = !0), (a = 0)), !s)) {
-                    const t = { params: { passingSchemas: a } };
-                    return (
-                      null === f ? (f = [t]) : f.push(t),
-                      c++,
-                      (D.errors = f),
-                      !1
-                    );
-                  }
-                  (c = r),
-                    null !== f && (r ? (f.length = r) : (f = null)),
-                    (m = e === c);
-                } else m = !0;
-                if (m) {
-                  if (void 0 !== n.remotes) {
-                    const t = c;
-                    u(n.remotes, {
-                      instancePath: s + '/remotes',
-                      parentData: n,
-                      parentDataProperty: 'remotes',
-                      rootData: l,
-                    }) ||
-                      ((f = null === f ? u.errors : f.concat(u.errors)),
-                      (c = f.length)),
-                      (m = t === c);
-                  } else m = !0;
-                  if (m) {
-                    if (void 0 !== n.runtime) {
-                      let t = n.runtime;
-                      const e = c,
-                        r = c;
-                      let s = !1;
-                      const a = c;
-                      if (!1 !== t) {
-                        const t = { params: {} };
-                        null === f ? (f = [t]) : f.push(t), c++;
-                      }
-                      var y = a === c;
-                      if (((s = s || y), !s)) {
-                        const e = c;
-                        if (c === e)
-                          if ('string' == typeof t) {
-                            if (t.length < 1) {
-                              const t = { params: {} };
-                              null === f ? (f = [t]) : f.push(t), c++;
-                            }
-                          } else {
-                            const t = { params: { type: 'string' } };
-                            null === f ? (f = [t]) : f.push(t), c++;
-                          }
-                        (y = e === c), (s = s || y);
-                      }
-                      if (!s) {
-                        const t = { params: {} };
-                        return (
-                          null === f ? (f = [t]) : f.push(t),
-                          c++,
-                          (D.errors = f),
-                          !1
-                        );
-                      }
-                      (c = r),
-                        null !== f && (r ? (f.length = r) : (f = null)),
-                        (m = e === c);
-                    } else m = !0;
-                    if (m) {
-                      if (void 0 !== n.shareScope) {
-                        let t = n.shareScope;
-                        const e = c;
-                        if (c === e) {
-                          if ('string' != typeof t)
-                            return (
-                              (D.errors = [{ params: { type: 'string' } }]), !1
-                            );
-                          if (t.length < 1)
-                            return (D.errors = [{ params: {} }]), !1;
-                        }
-                        m = e === c;
-                      } else m = !0;
-                      if (m)
-                        if (void 0 !== n.shared) {
-                          const t = c;
-                          d(n.shared, {
-                            instancePath: s + '/shared',
-                            parentData: n,
-                            parentDataProperty: 'shared',
-                            rootData: l,
-                          }) ||
-                            ((f = null === f ? d.errors : f.concat(d.errors)),
-                            (c = f.length)),
-                            (m = t === c);
-                        } else m = !0;
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  return (D.errors = f), 0 === c;
+const schema69 = {
+	"enum": ["var", "module", "assign", "this", "window", "self", "global",
+		"commonjs", "commonjs2", "commonjs-module", "commonjs-static", "amd",
+		"amd-require", "umd", "umd2", "jsonp", "system", "promise", "import",
+		"script", "node-commonjs"
+	]
+};
+const schema78 = {
+	"anyOf": [{
+		"enum": [false]
+	}, {
+		"type": "string",
+		"minLength": 1
+	}]
+};
+const func2 = Object.prototype.hasOwnProperty;
+const schema52 = {
+	"anyOf": [{
+		"type": "array",
+		"items": {
+			"anyOf": [{
+				"$ref": "#/definitions/ExposesItem"
+			}, {
+				"$ref": "#/definitions/ExposesObject"
+			}]
+		}
+	}, {
+		"$ref": "#/definitions/ExposesObject"
+	}]
+};
+const schema53 = {
+	"type": "string",
+	"minLength": 1
+};
+const schema54 = {
+	"type": "object",
+	"additionalProperties": {
+		"anyOf": [{
+			"$ref": "#/definitions/ExposesConfig"
+		}, {
+			"$ref": "#/definitions/ExposesItem"
+		}, {
+			"$ref": "#/definitions/ExposesItems"
+		}]
+	}
+};
+const schema55 = {
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"import": {
+			"anyOf": [{
+				"$ref": "#/definitions/ExposesItem"
+			}, {
+				"$ref": "#/definitions/ExposesItems"
+			}]
+		},
+		"name": {
+			"type": "string"
+		}
+	},
+	"required": ["import"]
+};
+const schema57 = {
+	"type": "array",
+	"items": {
+		"$ref": "#/definitions/ExposesItem"
+	}
+};
+
+function validate52(data, {
+	instancePath = "",
+	parentData,
+	parentDataProperty,
+	rootData = data
+} = {}) {
+	let vErrors = null;
+	let errors = 0;
+	if (errors === 0) {
+		if (Array.isArray(data)) {
+			var valid0 = true;
+			const len0 = data.length;
+			for (let i0 = 0; i0 < len0; i0++) {
+				let data0 = data[i0];
+				const _errs1 = errors;
+				const _errs2 = errors;
+				if (errors === _errs2) {
+					if (typeof data0 === "string") {
+						if (data0.length < 1) {
+							validate52.errors = [{
+								params: {}
+							}];
+							return false;
+						}
+					} else {
+						validate52.errors = [{
+							params: {
+								type: "string"
+							}
+						}];
+						return false;
+					}
+				}
+				var valid0 = _errs1 === errors;
+				if (!valid0) {
+					break;
+				}
+			}
+		} else {
+			validate52.errors = [{
+				params: {
+					type: "array"
+				}
+			}];
+			return false;
+		}
+	}
+	validate52.errors = vErrors;
+	return errors === 0;
 }
 
-export default D;
+function validate51(data, {
+	instancePath = "",
+	parentData,
+	parentDataProperty,
+	rootData = data
+} = {}) {
+	let vErrors = null;
+	let errors = 0;
+	if (errors === 0) {
+		if (data && typeof data == "object" && !Array.isArray(data)) {
+			let missing0;
+			if ((data.import === undefined) && (missing0 = "import")) {
+				validate51.errors = [{
+					params: {
+						missingProperty: missing0
+					}
+				}];
+				return false;
+			} else {
+				const _errs1 = errors;
+				for (const key0 in data) {
+					if (!((key0 === "import") || (key0 === "name"))) {
+						validate51.errors = [{
+							params: {
+								additionalProperty: key0
+							}
+						}];
+						return false;
+						break;
+					}
+				}
+				if (_errs1 === errors) {
+					if (data.import !== undefined) {
+						let data0 = data.import;
+						const _errs2 = errors;
+						const _errs3 = errors;
+						let valid1 = false;
+						const _errs4 = errors;
+						const _errs5 = errors;
+						if (errors === _errs5) {
+							if (typeof data0 === "string") {
+								if (data0.length < 1) {
+									const err0 = {
+										params: {}
+									};
+									if (vErrors === null) {
+										vErrors = [err0];
+									} else {
+										vErrors.push(err0);
+									}
+									errors++;
+								}
+							} else {
+								const err1 = {
+									params: {
+										type: "string"
+									}
+								};
+								if (vErrors === null) {
+									vErrors = [err1];
+								} else {
+									vErrors.push(err1);
+								}
+								errors++;
+							}
+						}
+						var _valid0 = _errs4 === errors;
+						valid1 = valid1 || _valid0;
+						if (!valid1) {
+							const _errs7 = errors;
+							if (!(validate52(data0, {
+									instancePath: instancePath + "/import",
+									parentData: data,
+									parentDataProperty: "import",
+									rootData
+								}))) {
+								vErrors = vErrors === null ? validate52.errors : vErrors.concat(
+									validate52.errors);
+								errors = vErrors.length;
+							}
+							var _valid0 = _errs7 === errors;
+							valid1 = valid1 || _valid0;
+						}
+						if (!valid1) {
+							const err2 = {
+								params: {}
+							};
+							if (vErrors === null) {
+								vErrors = [err2];
+							} else {
+								vErrors.push(err2);
+							}
+							errors++;
+							validate51.errors = vErrors;
+							return false;
+						} else {
+							errors = _errs3;
+							if (vErrors !== null) {
+								if (_errs3) {
+									vErrors.length = _errs3;
+								} else {
+									vErrors = null;
+								}
+							}
+						}
+						var valid0 = _errs2 === errors;
+					} else {
+						var valid0 = true;
+					}
+					if (valid0) {
+						if (data.name !== undefined) {
+							const _errs8 = errors;
+							if (typeof data.name !== "string") {
+								validate51.errors = [{
+									params: {
+										type: "string"
+									}
+								}];
+								return false;
+							}
+							var valid0 = _errs8 === errors;
+						} else {
+							var valid0 = true;
+						}
+					}
+				}
+			}
+		} else {
+			validate51.errors = [{
+				params: {
+					type: "object"
+				}
+			}];
+			return false;
+		}
+	}
+	validate51.errors = vErrors;
+	return errors === 0;
+}
+
+function validate50(data, {
+	instancePath = "",
+	parentData,
+	parentDataProperty,
+	rootData = data
+} = {}) {
+	let vErrors = null;
+	let errors = 0;
+	if (errors === 0) {
+		if (data && typeof data == "object" && !Array.isArray(data)) {
+			for (const key0 in data) {
+				let data0 = data[key0];
+				const _errs2 = errors;
+				const _errs3 = errors;
+				let valid1 = false;
+				const _errs4 = errors;
+				if (!(validate51(data0, {
+						instancePath: instancePath + "/" + key0.replace(/~/g, "~0")
+							.replace(/\//g, "~1"),
+						parentData: data,
+						parentDataProperty: key0,
+						rootData
+					}))) {
+					vErrors = vErrors === null ? validate51.errors : vErrors.concat(
+						validate51.errors);
+					errors = vErrors.length;
+				}
+				var _valid0 = _errs4 === errors;
+				valid1 = valid1 || _valid0;
+				if (!valid1) {
+					const _errs5 = errors;
+					const _errs6 = errors;
+					if (errors === _errs6) {
+						if (typeof data0 === "string") {
+							if (data0.length < 1) {
+								const err0 = {
+									params: {}
+								};
+								if (vErrors === null) {
+									vErrors = [err0];
+								} else {
+									vErrors.push(err0);
+								}
+								errors++;
+							}
+						} else {
+							const err1 = {
+								params: {
+									type: "string"
+								}
+							};
+							if (vErrors === null) {
+								vErrors = [err1];
+							} else {
+								vErrors.push(err1);
+							}
+							errors++;
+						}
+					}
+					var _valid0 = _errs5 === errors;
+					valid1 = valid1 || _valid0;
+					if (!valid1) {
+						const _errs8 = errors;
+						if (!(validate52(data0, {
+								instancePath: instancePath + "/" + key0.replace(/~/g, "~0")
+									.replace(/\//g, "~1"),
+								parentData: data,
+								parentDataProperty: key0,
+								rootData
+							}))) {
+							vErrors = vErrors === null ? validate52.errors : vErrors.concat(
+								validate52.errors);
+							errors = vErrors.length;
+						}
+						var _valid0 = _errs8 === errors;
+						valid1 = valid1 || _valid0;
+					}
+				}
+				if (!valid1) {
+					const err2 = {
+						params: {}
+					};
+					if (vErrors === null) {
+						vErrors = [err2];
+					} else {
+						vErrors.push(err2);
+					}
+					errors++;
+					validate50.errors = vErrors;
+					return false;
+				} else {
+					errors = _errs3;
+					if (vErrors !== null) {
+						if (_errs3) {
+							vErrors.length = _errs3;
+						} else {
+							vErrors = null;
+						}
+					}
+				}
+				var valid0 = _errs2 === errors;
+				if (!valid0) {
+					break;
+				}
+			}
+		} else {
+			validate50.errors = [{
+				params: {
+					type: "object"
+				}
+			}];
+			return false;
+		}
+	}
+	validate50.errors = vErrors;
+	return errors === 0;
+}
+
+function validate49(data, {
+	instancePath = "",
+	parentData,
+	parentDataProperty,
+	rootData = data
+} = {}) {
+	let vErrors = null;
+	let errors = 0;
+	const _errs0 = errors;
+	let valid0 = false;
+	const _errs1 = errors;
+	if (errors === _errs1) {
+		if (Array.isArray(data)) {
+			var valid1 = true;
+			const len0 = data.length;
+			for (let i0 = 0; i0 < len0; i0++) {
+				let data0 = data[i0];
+				const _errs3 = errors;
+				const _errs4 = errors;
+				let valid2 = false;
+				const _errs5 = errors;
+				const _errs6 = errors;
+				if (errors === _errs6) {
+					if (typeof data0 === "string") {
+						if (data0.length < 1) {
+							const err0 = {
+								params: {}
+							};
+							if (vErrors === null) {
+								vErrors = [err0];
+							} else {
+								vErrors.push(err0);
+							}
+							errors++;
+						}
+					} else {
+						const err1 = {
+							params: {
+								type: "string"
+							}
+						};
+						if (vErrors === null) {
+							vErrors = [err1];
+						} else {
+							vErrors.push(err1);
+						}
+						errors++;
+					}
+				}
+				var _valid1 = _errs5 === errors;
+				valid2 = valid2 || _valid1;
+				if (!valid2) {
+					const _errs8 = errors;
+					if (!(validate50(data0, {
+							instancePath: instancePath + "/" + i0,
+							parentData: data,
+							parentDataProperty: i0,
+							rootData
+						}))) {
+						vErrors = vErrors === null ? validate50.errors : vErrors.concat(
+							validate50.errors);
+						errors = vErrors.length;
+					}
+					var _valid1 = _errs8 === errors;
+					valid2 = valid2 || _valid1;
+				}
+				if (!valid2) {
+					const err2 = {
+						params: {}
+					};
+					if (vErrors === null) {
+						vErrors = [err2];
+					} else {
+						vErrors.push(err2);
+					}
+					errors++;
+				} else {
+					errors = _errs4;
+					if (vErrors !== null) {
+						if (_errs4) {
+							vErrors.length = _errs4;
+						} else {
+							vErrors = null;
+						}
+					}
+				}
+				var valid1 = _errs3 === errors;
+				if (!valid1) {
+					break;
+				}
+			}
+		} else {
+			const err3 = {
+				params: {
+					type: "array"
+				}
+			};
+			if (vErrors === null) {
+				vErrors = [err3];
+			} else {
+				vErrors.push(err3);
+			}
+			errors++;
+		}
+	}
+	var _valid0 = _errs1 === errors;
+	valid0 = valid0 || _valid0;
+	if (!valid0) {
+		const _errs9 = errors;
+		if (!(validate50(data, {
+				instancePath,
+				parentData,
+				parentDataProperty,
+				rootData
+			}))) {
+			vErrors = vErrors === null ? validate50.errors : vErrors.concat(validate50
+				.errors);
+			errors = vErrors.length;
+		}
+		var _valid0 = _errs9 === errors;
+		valid0 = valid0 || _valid0;
+	}
+	if (!valid0) {
+		const err4 = {
+			params: {}
+		};
+		if (vErrors === null) {
+			vErrors = [err4];
+		} else {
+			vErrors.push(err4);
+		}
+		errors++;
+		validate49.errors = vErrors;
+		return false;
+	} else {
+		errors = _errs0;
+		if (vErrors !== null) {
+			if (_errs0) {
+				vErrors.length = _errs0;
+			} else {
+				vErrors = null;
+			}
+		}
+	}
+	validate49.errors = vErrors;
+	return errors === 0;
+}
+const schema60 = {
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"amdContainer": {
+			"$ref": "#/definitions/AmdContainer"
+		},
+		"auxiliaryComment": {
+			"$ref": "#/definitions/AuxiliaryComment"
+		},
+		"export": {
+			"$ref": "#/definitions/LibraryExport"
+		},
+		"name": {
+			"$ref": "#/definitions/LibraryName"
+		},
+		"type": {
+			"$ref": "#/definitions/LibraryType"
+		},
+		"umdNamedDefine": {
+			"$ref": "#/definitions/UmdNamedDefine"
+		}
+	},
+	"required": ["type"]
+};
+const schema61 = {
+	"type": "string",
+	"minLength": 1
+};
+const schema64 = {
+	"anyOf": [{
+		"type": "array",
+		"items": {
+			"type": "string",
+			"minLength": 1
+		}
+	}, {
+		"type": "string",
+		"minLength": 1
+	}]
+};
+const schema67 = {
+	"anyOf": [{
+		"enum": ["var", "module", "assign", "assign-properties", "this",
+			"window", "self", "global", "commonjs", "commonjs2",
+			"commonjs-module", "commonjs-static", "amd", "amd-require", "umd",
+			"umd2", "jsonp", "system"
+		]
+	}, {
+		"type": "string"
+	}]
+};
+const schema68 = {
+	"type": "boolean"
+};
+const schema62 = {
+	"anyOf": [{
+		"type": "string"
+	}, {
+		"$ref": "#/definitions/LibraryCustomUmdCommentObject"
+	}]
+};
+const schema63 = {
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"amd": {
+			"type": "string"
+		},
+		"commonjs": {
+			"type": "string"
+		},
+		"commonjs2": {
+			"type": "string"
+		},
+		"root": {
+			"type": "string"
+		}
+	}
+};
+
+function validate60(data, {
+	instancePath = "",
+	parentData,
+	parentDataProperty,
+	rootData = data
+} = {}) {
+	let vErrors = null;
+	let errors = 0;
+	const _errs0 = errors;
+	let valid0 = false;
+	const _errs1 = errors;
+	if (typeof data !== "string") {
+		const err0 = {
+			params: {
+				type: "string"
+			}
+		};
+		if (vErrors === null) {
+			vErrors = [err0];
+		} else {
+			vErrors.push(err0);
+		}
+		errors++;
+	}
+	var _valid0 = _errs1 === errors;
+	valid0 = valid0 || _valid0;
+	if (!valid0) {
+		const _errs3 = errors;
+		const _errs4 = errors;
+		if (errors === _errs4) {
+			if (data && typeof data == "object" && !Array.isArray(data)) {
+				const _errs6 = errors;
+				for (const key0 in data) {
+					if (!((((key0 === "amd") || (key0 === "commonjs")) || (key0 ===
+							"commonjs2")) || (key0 === "root"))) {
+						const err1 = {
+							params: {
+								additionalProperty: key0
+							}
+						};
+						if (vErrors === null) {
+							vErrors = [err1];
+						} else {
+							vErrors.push(err1);
+						}
+						errors++;
+						break;
+					}
+				}
+				if (_errs6 === errors) {
+					if (data.amd !== undefined) {
+						const _errs7 = errors;
+						if (typeof data.amd !== "string") {
+							const err2 = {
+								params: {
+									type: "string"
+								}
+							};
+							if (vErrors === null) {
+								vErrors = [err2];
+							} else {
+								vErrors.push(err2);
+							}
+							errors++;
+						}
+						var valid2 = _errs7 === errors;
+					} else {
+						var valid2 = true;
+					}
+					if (valid2) {
+						if (data.commonjs !== undefined) {
+							const _errs9 = errors;
+							if (typeof data.commonjs !== "string") {
+								const err3 = {
+									params: {
+										type: "string"
+									}
+								};
+								if (vErrors === null) {
+									vErrors = [err3];
+								} else {
+									vErrors.push(err3);
+								}
+								errors++;
+							}
+							var valid2 = _errs9 === errors;
+						} else {
+							var valid2 = true;
+						}
+						if (valid2) {
+							if (data.commonjs2 !== undefined) {
+								const _errs11 = errors;
+								if (typeof data.commonjs2 !== "string") {
+									const err4 = {
+										params: {
+											type: "string"
+										}
+									};
+									if (vErrors === null) {
+										vErrors = [err4];
+									} else {
+										vErrors.push(err4);
+									}
+									errors++;
+								}
+								var valid2 = _errs11 === errors;
+							} else {
+								var valid2 = true;
+							}
+							if (valid2) {
+								if (data.root !== undefined) {
+									const _errs13 = errors;
+									if (typeof data.root !== "string") {
+										const err5 = {
+											params: {
+												type: "string"
+											}
+										};
+										if (vErrors === null) {
+											vErrors = [err5];
+										} else {
+											vErrors.push(err5);
+										}
+										errors++;
+									}
+									var valid2 = _errs13 === errors;
+								} else {
+									var valid2 = true;
+								}
+							}
+						}
+					}
+				}
+			} else {
+				const err6 = {
+					params: {
+						type: "object"
+					}
+				};
+				if (vErrors === null) {
+					vErrors = [err6];
+				} else {
+					vErrors.push(err6);
+				}
+				errors++;
+			}
+		}
+		var _valid0 = _errs3 === errors;
+		valid0 = valid0 || _valid0;
+	}
+	if (!valid0) {
+		const err7 = {
+			params: {}
+		};
+		if (vErrors === null) {
+			vErrors = [err7];
+		} else {
+			vErrors.push(err7);
+		}
+		errors++;
+		validate60.errors = vErrors;
+		return false;
+	} else {
+		errors = _errs0;
+		if (vErrors !== null) {
+			if (_errs0) {
+				vErrors.length = _errs0;
+			} else {
+				vErrors = null;
+			}
+		}
+	}
+	validate60.errors = vErrors;
+	return errors === 0;
+}
+const schema65 = {
+	"anyOf": [{
+		"type": "array",
+		"items": {
+			"type": "string",
+			"minLength": 1
+		},
+		"minItems": 1
+	}, {
+		"type": "string",
+		"minLength": 1
+	}, {
+		"$ref": "#/definitions/LibraryCustomUmdObject"
+	}]
+};
+const schema66 = {
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"amd": {
+			"type": "string",
+			"minLength": 1
+		},
+		"commonjs": {
+			"type": "string",
+			"minLength": 1
+		},
+		"root": {
+			"anyOf": [{
+				"type": "array",
+				"items": {
+					"type": "string",
+					"minLength": 1
+				}
+			}, {
+				"type": "string",
+				"minLength": 1
+			}]
+		}
+	}
+};
+
+function validate62(data, {
+	instancePath = "",
+	parentData,
+	parentDataProperty,
+	rootData = data
+} = {}) {
+	let vErrors = null;
+	let errors = 0;
+	const _errs0 = errors;
+	let valid0 = false;
+	const _errs1 = errors;
+	if (errors === _errs1) {
+		if (Array.isArray(data)) {
+			if (data.length < 1) {
+				const err0 = {
+					params: {
+						limit: 1
+					}
+				};
+				if (vErrors === null) {
+					vErrors = [err0];
+				} else {
+					vErrors.push(err0);
+				}
+				errors++;
+			} else {
+				var valid1 = true;
+				const len0 = data.length;
+				for (let i0 = 0; i0 < len0; i0++) {
+					let data0 = data[i0];
+					const _errs3 = errors;
+					if (errors === _errs3) {
+						if (typeof data0 === "string") {
+							if (data0.length < 1) {
+								const err1 = {
+									params: {}
+								};
+								if (vErrors === null) {
+									vErrors = [err1];
+								} else {
+									vErrors.push(err1);
+								}
+								errors++;
+							}
+						} else {
+							const err2 = {
+								params: {
+									type: "string"
+								}
+							};
+							if (vErrors === null) {
+								vErrors = [err2];
+							} else {
+								vErrors.push(err2);
+							}
+							errors++;
+						}
+					}
+					var valid1 = _errs3 === errors;
+					if (!valid1) {
+						break;
+					}
+				}
+			}
+		} else {
+			const err3 = {
+				params: {
+					type: "array"
+				}
+			};
+			if (vErrors === null) {
+				vErrors = [err3];
+			} else {
+				vErrors.push(err3);
+			}
+			errors++;
+		}
+	}
+	var _valid0 = _errs1 === errors;
+	valid0 = valid0 || _valid0;
+	if (!valid0) {
+		const _errs5 = errors;
+		if (errors === _errs5) {
+			if (typeof data === "string") {
+				if (data.length < 1) {
+					const err4 = {
+						params: {}
+					};
+					if (vErrors === null) {
+						vErrors = [err4];
+					} else {
+						vErrors.push(err4);
+					}
+					errors++;
+				}
+			} else {
+				const err5 = {
+					params: {
+						type: "string"
+					}
+				};
+				if (vErrors === null) {
+					vErrors = [err5];
+				} else {
+					vErrors.push(err5);
+				}
+				errors++;
+			}
+		}
+		var _valid0 = _errs5 === errors;
+		valid0 = valid0 || _valid0;
+		if (!valid0) {
+			const _errs7 = errors;
+			const _errs8 = errors;
+			if (errors === _errs8) {
+				if (data && typeof data == "object" && !Array.isArray(data)) {
+					const _errs10 = errors;
+					for (const key0 in data) {
+						if (!(((key0 === "amd") || (key0 === "commonjs")) || (key0 ===
+								"root"))) {
+							const err6 = {
+								params: {
+									additionalProperty: key0
+								}
+							};
+							if (vErrors === null) {
+								vErrors = [err6];
+							} else {
+								vErrors.push(err6);
+							}
+							errors++;
+							break;
+						}
+					}
+					if (_errs10 === errors) {
+						if (data.amd !== undefined) {
+							let data1 = data.amd;
+							const _errs11 = errors;
+							if (errors === _errs11) {
+								if (typeof data1 === "string") {
+									if (data1.length < 1) {
+										const err7 = {
+											params: {}
+										};
+										if (vErrors === null) {
+											vErrors = [err7];
+										} else {
+											vErrors.push(err7);
+										}
+										errors++;
+									}
+								} else {
+									const err8 = {
+										params: {
+											type: "string"
+										}
+									};
+									if (vErrors === null) {
+										vErrors = [err8];
+									} else {
+										vErrors.push(err8);
+									}
+									errors++;
+								}
+							}
+							var valid3 = _errs11 === errors;
+						} else {
+							var valid3 = true;
+						}
+						if (valid3) {
+							if (data.commonjs !== undefined) {
+								let data2 = data.commonjs;
+								const _errs13 = errors;
+								if (errors === _errs13) {
+									if (typeof data2 === "string") {
+										if (data2.length < 1) {
+											const err9 = {
+												params: {}
+											};
+											if (vErrors === null) {
+												vErrors = [err9];
+											} else {
+												vErrors.push(err9);
+											}
+											errors++;
+										}
+									} else {
+										const err10 = {
+											params: {
+												type: "string"
+											}
+										};
+										if (vErrors === null) {
+											vErrors = [err10];
+										} else {
+											vErrors.push(err10);
+										}
+										errors++;
+									}
+								}
+								var valid3 = _errs13 === errors;
+							} else {
+								var valid3 = true;
+							}
+							if (valid3) {
+								if (data.root !== undefined) {
+									let data3 = data.root;
+									const _errs15 = errors;
+									const _errs16 = errors;
+									let valid4 = false;
+									const _errs17 = errors;
+									if (errors === _errs17) {
+										if (Array.isArray(data3)) {
+											var valid5 = true;
+											const len1 = data3.length;
+											for (let i1 = 0; i1 < len1; i1++) {
+												let data4 = data3[i1];
+												const _errs19 = errors;
+												if (errors === _errs19) {
+													if (typeof data4 === "string") {
+														if (data4.length < 1) {
+															const err11 = {
+																params: {}
+															};
+															if (vErrors === null) {
+																vErrors = [err11];
+															} else {
+																vErrors.push(err11);
+															}
+															errors++;
+														}
+													} else {
+														const err12 = {
+															params: {
+																type: "string"
+															}
+														};
+														if (vErrors === null) {
+															vErrors = [err12];
+														} else {
+															vErrors.push(err12);
+														}
+														errors++;
+													}
+												}
+												var valid5 = _errs19 === errors;
+												if (!valid5) {
+													break;
+												}
+											}
+										} else {
+											const err13 = {
+												params: {
+													type: "array"
+												}
+											};
+											if (vErrors === null) {
+												vErrors = [err13];
+											} else {
+												vErrors.push(err13);
+											}
+											errors++;
+										}
+									}
+									var _valid1 = _errs17 === errors;
+									valid4 = valid4 || _valid1;
+									if (!valid4) {
+										const _errs21 = errors;
+										if (errors === _errs21) {
+											if (typeof data3 === "string") {
+												if (data3.length < 1) {
+													const err14 = {
+														params: {}
+													};
+													if (vErrors === null) {
+														vErrors = [err14];
+													} else {
+														vErrors.push(err14);
+													}
+													errors++;
+												}
+											} else {
+												const err15 = {
+													params: {
+														type: "string"
+													}
+												};
+												if (vErrors === null) {
+													vErrors = [err15];
+												} else {
+													vErrors.push(err15);
+												}
+												errors++;
+											}
+										}
+										var _valid1 = _errs21 === errors;
+										valid4 = valid4 || _valid1;
+									}
+									if (!valid4) {
+										const err16 = {
+											params: {}
+										};
+										if (vErrors === null) {
+											vErrors = [err16];
+										} else {
+											vErrors.push(err16);
+										}
+										errors++;
+									} else {
+										errors = _errs16;
+										if (vErrors !== null) {
+											if (_errs16) {
+												vErrors.length = _errs16;
+											} else {
+												vErrors = null;
+											}
+										}
+									}
+									var valid3 = _errs15 === errors;
+								} else {
+									var valid3 = true;
+								}
+							}
+						}
+					}
+				} else {
+					const err17 = {
+						params: {
+							type: "object"
+						}
+					};
+					if (vErrors === null) {
+						vErrors = [err17];
+					} else {
+						vErrors.push(err17);
+					}
+					errors++;
+				}
+			}
+			var _valid0 = _errs7 === errors;
+			valid0 = valid0 || _valid0;
+		}
+	}
+	if (!valid0) {
+		const err18 = {
+			params: {}
+		};
+		if (vErrors === null) {
+			vErrors = [err18];
+		} else {
+			vErrors.push(err18);
+		}
+		errors++;
+		validate62.errors = vErrors;
+		return false;
+	} else {
+		errors = _errs0;
+		if (vErrors !== null) {
+			if (_errs0) {
+				vErrors.length = _errs0;
+			} else {
+				vErrors = null;
+			}
+		}
+	}
+	validate62.errors = vErrors;
+	return errors === 0;
+}
+
+function validate59(data, {
+	instancePath = "",
+	parentData,
+	parentDataProperty,
+	rootData = data
+} = {}) {
+	let vErrors = null;
+	let errors = 0;
+	if (errors === 0) {
+		if (data && typeof data == "object" && !Array.isArray(data)) {
+			let missing0;
+			if ((data.type === undefined) && (missing0 = "type")) {
+				validate59.errors = [{
+					params: {
+						missingProperty: missing0
+					}
+				}];
+				return false;
+			} else {
+				const _errs1 = errors;
+				for (const key0 in data) {
+					if (!((((((key0 === "amdContainer") || (key0 ===
+							"auxiliaryComment")) || (key0 === "export")) || (key0 ===
+							"name")) || (key0 === "type")) || (key0 === "umdNamedDefine"))) {
+						validate59.errors = [{
+							params: {
+								additionalProperty: key0
+							}
+						}];
+						return false;
+						break;
+					}
+				}
+				if (_errs1 === errors) {
+					if (data.amdContainer !== undefined) {
+						let data0 = data.amdContainer;
+						const _errs2 = errors;
+						const _errs3 = errors;
+						if (errors === _errs3) {
+							if (typeof data0 === "string") {
+								if (data0.length < 1) {
+									validate59.errors = [{
+										params: {}
+									}];
+									return false;
+								}
+							} else {
+								validate59.errors = [{
+									params: {
+										type: "string"
+									}
+								}];
+								return false;
+							}
+						}
+						var valid0 = _errs2 === errors;
+					} else {
+						var valid0 = true;
+					}
+					if (valid0) {
+						if (data.auxiliaryComment !== undefined) {
+							const _errs5 = errors;
+							if (!(validate60(data.auxiliaryComment, {
+									instancePath: instancePath + "/auxiliaryComment",
+									parentData: data,
+									parentDataProperty: "auxiliaryComment",
+									rootData
+								}))) {
+								vErrors = vErrors === null ? validate60.errors : vErrors.concat(
+									validate60.errors);
+								errors = vErrors.length;
+							}
+							var valid0 = _errs5 === errors;
+						} else {
+							var valid0 = true;
+						}
+						if (valid0) {
+							if (data.export !== undefined) {
+								let data2 = data.export;
+								const _errs6 = errors;
+								const _errs8 = errors;
+								let valid3 = false;
+								const _errs9 = errors;
+								if (errors === _errs9) {
+									if (Array.isArray(data2)) {
+										var valid4 = true;
+										const len0 = data2.length;
+										for (let i0 = 0; i0 < len0; i0++) {
+											let data3 = data2[i0];
+											const _errs11 = errors;
+											if (errors === _errs11) {
+												if (typeof data3 === "string") {
+													if (data3.length < 1) {
+														const err0 = {
+															params: {}
+														};
+														if (vErrors === null) {
+															vErrors = [err0];
+														} else {
+															vErrors.push(err0);
+														}
+														errors++;
+													}
+												} else {
+													const err1 = {
+														params: {
+															type: "string"
+														}
+													};
+													if (vErrors === null) {
+														vErrors = [err1];
+													} else {
+														vErrors.push(err1);
+													}
+													errors++;
+												}
+											}
+											var valid4 = _errs11 === errors;
+											if (!valid4) {
+												break;
+											}
+										}
+									} else {
+										const err2 = {
+											params: {
+												type: "array"
+											}
+										};
+										if (vErrors === null) {
+											vErrors = [err2];
+										} else {
+											vErrors.push(err2);
+										}
+										errors++;
+									}
+								}
+								var _valid0 = _errs9 === errors;
+								valid3 = valid3 || _valid0;
+								if (!valid3) {
+									const _errs13 = errors;
+									if (errors === _errs13) {
+										if (typeof data2 === "string") {
+											if (data2.length < 1) {
+												const err3 = {
+													params: {}
+												};
+												if (vErrors === null) {
+													vErrors = [err3];
+												} else {
+													vErrors.push(err3);
+												}
+												errors++;
+											}
+										} else {
+											const err4 = {
+												params: {
+													type: "string"
+												}
+											};
+											if (vErrors === null) {
+												vErrors = [err4];
+											} else {
+												vErrors.push(err4);
+											}
+											errors++;
+										}
+									}
+									var _valid0 = _errs13 === errors;
+									valid3 = valid3 || _valid0;
+								}
+								if (!valid3) {
+									const err5 = {
+										params: {}
+									};
+									if (vErrors === null) {
+										vErrors = [err5];
+									} else {
+										vErrors.push(err5);
+									}
+									errors++;
+									validate59.errors = vErrors;
+									return false;
+								} else {
+									errors = _errs8;
+									if (vErrors !== null) {
+										if (_errs8) {
+											vErrors.length = _errs8;
+										} else {
+											vErrors = null;
+										}
+									}
+								}
+								var valid0 = _errs6 === errors;
+							} else {
+								var valid0 = true;
+							}
+							if (valid0) {
+								if (data.name !== undefined) {
+									const _errs15 = errors;
+									if (!(validate62(data.name, {
+											instancePath: instancePath + "/name",
+											parentData: data,
+											parentDataProperty: "name",
+											rootData
+										}))) {
+										vErrors = vErrors === null ? validate62.errors : vErrors
+											.concat(validate62.errors);
+										errors = vErrors.length;
+									}
+									var valid0 = _errs15 === errors;
+								} else {
+									var valid0 = true;
+								}
+								if (valid0) {
+									if (data.type !== undefined) {
+										let data5 = data.type;
+										const _errs16 = errors;
+										const _errs18 = errors;
+										let valid6 = false;
+										const _errs19 = errors;
+										if (data5 !== "var" && data5 !== "module" && data5 !==
+											"assign" && data5 !== "assign-properties" && data5 !==
+											"this" && data5 !== "window" && data5 !== "self" &&
+											data5 !== "global" && data5 !== "commonjs" && data5 !==
+											"commonjs2" && data5 !== "commonjs-module" && data5 !==
+											"commonjs-static" && data5 !== "amd" && data5 !==
+											"amd-require" && data5 !== "umd" && data5 !== "umd2" &&
+											data5 !== "jsonp" && data5 !== "system") {
+											const err6 = {
+												params: {}
+											};
+											if (vErrors === null) {
+												vErrors = [err6];
+											} else {
+												vErrors.push(err6);
+											}
+											errors++;
+										}
+										var _valid1 = _errs19 === errors;
+										valid6 = valid6 || _valid1;
+										if (!valid6) {
+											const _errs20 = errors;
+											if (typeof data5 !== "string") {
+												const err7 = {
+													params: {
+														type: "string"
+													}
+												};
+												if (vErrors === null) {
+													vErrors = [err7];
+												} else {
+													vErrors.push(err7);
+												}
+												errors++;
+											}
+											var _valid1 = _errs20 === errors;
+											valid6 = valid6 || _valid1;
+										}
+										if (!valid6) {
+											const err8 = {
+												params: {}
+											};
+											if (vErrors === null) {
+												vErrors = [err8];
+											} else {
+												vErrors.push(err8);
+											}
+											errors++;
+											validate59.errors = vErrors;
+											return false;
+										} else {
+											errors = _errs18;
+											if (vErrors !== null) {
+												if (_errs18) {
+													vErrors.length = _errs18;
+												} else {
+													vErrors = null;
+												}
+											}
+										}
+										var valid0 = _errs16 === errors;
+									} else {
+										var valid0 = true;
+									}
+									if (valid0) {
+										if (data.umdNamedDefine !== undefined) {
+											const _errs22 = errors;
+											if (typeof data.umdNamedDefine !== "boolean") {
+												validate59.errors = [{
+													params: {
+														type: "boolean"
+													}
+												}];
+												return false;
+											}
+											var valid0 = _errs22 === errors;
+										} else {
+											var valid0 = true;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} else {
+			validate59.errors = [{
+				params: {
+					type: "object"
+				}
+			}];
+			return false;
+		}
+	}
+	validate59.errors = vErrors;
+	return errors === 0;
+}
+const schema70 = {
+	"anyOf": [{
+		"type": "array",
+		"items": {
+			"anyOf": [{
+				"$ref": "#/definitions/RemotesItem"
+			}, {
+				"$ref": "#/definitions/RemotesObject"
+			}]
+		}
+	}, {
+		"$ref": "#/definitions/RemotesObject"
+	}]
+};
+const schema71 = {
+	"type": "string",
+	"minLength": 1
+};
+const schema72 = {
+	"type": "object",
+	"additionalProperties": {
+		"anyOf": [{
+			"$ref": "#/definitions/RemotesConfig"
+		}, {
+			"$ref": "#/definitions/RemotesItem"
+		}, {
+			"$ref": "#/definitions/RemotesItems"
+		}]
+	}
+};
+const schema73 = {
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"external": {
+			"anyOf": [{
+				"$ref": "#/definitions/RemotesItem"
+			}, {
+				"$ref": "#/definitions/RemotesItems"
+			}]
+		},
+		"shareScope": {
+			"type": "string",
+			"minLength": 1
+		}
+	},
+	"required": ["external"]
+};
+const schema75 = {
+	"type": "array",
+	"items": {
+		"$ref": "#/definitions/RemotesItem"
+	}
+};
+
+function validate68(data, {
+	instancePath = "",
+	parentData,
+	parentDataProperty,
+	rootData = data
+} = {}) {
+	let vErrors = null;
+	let errors = 0;
+	if (errors === 0) {
+		if (Array.isArray(data)) {
+			var valid0 = true;
+			const len0 = data.length;
+			for (let i0 = 0; i0 < len0; i0++) {
+				let data0 = data[i0];
+				const _errs1 = errors;
+				const _errs2 = errors;
+				if (errors === _errs2) {
+					if (typeof data0 === "string") {
+						if (data0.length < 1) {
+							validate68.errors = [{
+								params: {}
+							}];
+							return false;
+						}
+					} else {
+						validate68.errors = [{
+							params: {
+								type: "string"
+							}
+						}];
+						return false;
+					}
+				}
+				var valid0 = _errs1 === errors;
+				if (!valid0) {
+					break;
+				}
+			}
+		} else {
+			validate68.errors = [{
+				params: {
+					type: "array"
+				}
+			}];
+			return false;
+		}
+	}
+	validate68.errors = vErrors;
+	return errors === 0;
+}
+
+function validate67(data, {
+	instancePath = "",
+	parentData,
+	parentDataProperty,
+	rootData = data
+} = {}) {
+	let vErrors = null;
+	let errors = 0;
+	if (errors === 0) {
+		if (data && typeof data == "object" && !Array.isArray(data)) {
+			let missing0;
+			if ((data.external === undefined) && (missing0 = "external")) {
+				validate67.errors = [{
+					params: {
+						missingProperty: missing0
+					}
+				}];
+				return false;
+			} else {
+				const _errs1 = errors;
+				for (const key0 in data) {
+					if (!((key0 === "external") || (key0 === "shareScope"))) {
+						validate67.errors = [{
+							params: {
+								additionalProperty: key0
+							}
+						}];
+						return false;
+						break;
+					}
+				}
+				if (_errs1 === errors) {
+					if (data.external !== undefined) {
+						let data0 = data.external;
+						const _errs2 = errors;
+						const _errs3 = errors;
+						let valid1 = false;
+						const _errs4 = errors;
+						const _errs5 = errors;
+						if (errors === _errs5) {
+							if (typeof data0 === "string") {
+								if (data0.length < 1) {
+									const err0 = {
+										params: {}
+									};
+									if (vErrors === null) {
+										vErrors = [err0];
+									} else {
+										vErrors.push(err0);
+									}
+									errors++;
+								}
+							} else {
+								const err1 = {
+									params: {
+										type: "string"
+									}
+								};
+								if (vErrors === null) {
+									vErrors = [err1];
+								} else {
+									vErrors.push(err1);
+								}
+								errors++;
+							}
+						}
+						var _valid0 = _errs4 === errors;
+						valid1 = valid1 || _valid0;
+						if (!valid1) {
+							const _errs7 = errors;
+							if (!(validate68(data0, {
+									instancePath: instancePath + "/external",
+									parentData: data,
+									parentDataProperty: "external",
+									rootData
+								}))) {
+								vErrors = vErrors === null ? validate68.errors : vErrors.concat(
+									validate68.errors);
+								errors = vErrors.length;
+							}
+							var _valid0 = _errs7 === errors;
+							valid1 = valid1 || _valid0;
+						}
+						if (!valid1) {
+							const err2 = {
+								params: {}
+							};
+							if (vErrors === null) {
+								vErrors = [err2];
+							} else {
+								vErrors.push(err2);
+							}
+							errors++;
+							validate67.errors = vErrors;
+							return false;
+						} else {
+							errors = _errs3;
+							if (vErrors !== null) {
+								if (_errs3) {
+									vErrors.length = _errs3;
+								} else {
+									vErrors = null;
+								}
+							}
+						}
+						var valid0 = _errs2 === errors;
+					} else {
+						var valid0 = true;
+					}
+					if (valid0) {
+						if (data.shareScope !== undefined) {
+							let data1 = data.shareScope;
+							const _errs8 = errors;
+							if (errors === _errs8) {
+								if (typeof data1 === "string") {
+									if (data1.length < 1) {
+										validate67.errors = [{
+											params: {}
+										}];
+										return false;
+									}
+								} else {
+									validate67.errors = [{
+										params: {
+											type: "string"
+										}
+									}];
+									return false;
+								}
+							}
+							var valid0 = _errs8 === errors;
+						} else {
+							var valid0 = true;
+						}
+					}
+				}
+			}
+		} else {
+			validate67.errors = [{
+				params: {
+					type: "object"
+				}
+			}];
+			return false;
+		}
+	}
+	validate67.errors = vErrors;
+	return errors === 0;
+}
+
+function validate66(data, {
+	instancePath = "",
+	parentData,
+	parentDataProperty,
+	rootData = data
+} = {}) {
+	let vErrors = null;
+	let errors = 0;
+	if (errors === 0) {
+		if (data && typeof data == "object" && !Array.isArray(data)) {
+			for (const key0 in data) {
+				let data0 = data[key0];
+				const _errs2 = errors;
+				const _errs3 = errors;
+				let valid1 = false;
+				const _errs4 = errors;
+				if (!(validate67(data0, {
+						instancePath: instancePath + "/" + key0.replace(/~/g, "~0")
+							.replace(/\//g, "~1"),
+						parentData: data,
+						parentDataProperty: key0,
+						rootData
+					}))) {
+					vErrors = vErrors === null ? validate67.errors : vErrors.concat(
+						validate67.errors);
+					errors = vErrors.length;
+				}
+				var _valid0 = _errs4 === errors;
+				valid1 = valid1 || _valid0;
+				if (!valid1) {
+					const _errs5 = errors;
+					const _errs6 = errors;
+					if (errors === _errs6) {
+						if (typeof data0 === "string") {
+							if (data0.length < 1) {
+								const err0 = {
+									params: {}
+								};
+								if (vErrors === null) {
+									vErrors = [err0];
+								} else {
+									vErrors.push(err0);
+								}
+								errors++;
+							}
+						} else {
+							const err1 = {
+								params: {
+									type: "string"
+								}
+							};
+							if (vErrors === null) {
+								vErrors = [err1];
+							} else {
+								vErrors.push(err1);
+							}
+							errors++;
+						}
+					}
+					var _valid0 = _errs5 === errors;
+					valid1 = valid1 || _valid0;
+					if (!valid1) {
+						const _errs8 = errors;
+						if (!(validate68(data0, {
+								instancePath: instancePath + "/" + key0.replace(/~/g, "~0")
+									.replace(/\//g, "~1"),
+								parentData: data,
+								parentDataProperty: key0,
+								rootData
+							}))) {
+							vErrors = vErrors === null ? validate68.errors : vErrors.concat(
+								validate68.errors);
+							errors = vErrors.length;
+						}
+						var _valid0 = _errs8 === errors;
+						valid1 = valid1 || _valid0;
+					}
+				}
+				if (!valid1) {
+					const err2 = {
+						params: {}
+					};
+					if (vErrors === null) {
+						vErrors = [err2];
+					} else {
+						vErrors.push(err2);
+					}
+					errors++;
+					validate66.errors = vErrors;
+					return false;
+				} else {
+					errors = _errs3;
+					if (vErrors !== null) {
+						if (_errs3) {
+							vErrors.length = _errs3;
+						} else {
+							vErrors = null;
+						}
+					}
+				}
+				var valid0 = _errs2 === errors;
+				if (!valid0) {
+					break;
+				}
+			}
+		} else {
+			validate66.errors = [{
+				params: {
+					type: "object"
+				}
+			}];
+			return false;
+		}
+	}
+	validate66.errors = vErrors;
+	return errors === 0;
+}
+
+function validate65(data, {
+	instancePath = "",
+	parentData,
+	parentDataProperty,
+	rootData = data
+} = {}) {
+	let vErrors = null;
+	let errors = 0;
+	const _errs0 = errors;
+	let valid0 = false;
+	const _errs1 = errors;
+	if (errors === _errs1) {
+		if (Array.isArray(data)) {
+			var valid1 = true;
+			const len0 = data.length;
+			for (let i0 = 0; i0 < len0; i0++) {
+				let data0 = data[i0];
+				const _errs3 = errors;
+				const _errs4 = errors;
+				let valid2 = false;
+				const _errs5 = errors;
+				const _errs6 = errors;
+				if (errors === _errs6) {
+					if (typeof data0 === "string") {
+						if (data0.length < 1) {
+							const err0 = {
+								params: {}
+							};
+							if (vErrors === null) {
+								vErrors = [err0];
+							} else {
+								vErrors.push(err0);
+							}
+							errors++;
+						}
+					} else {
+						const err1 = {
+							params: {
+								type: "string"
+							}
+						};
+						if (vErrors === null) {
+							vErrors = [err1];
+						} else {
+							vErrors.push(err1);
+						}
+						errors++;
+					}
+				}
+				var _valid1 = _errs5 === errors;
+				valid2 = valid2 || _valid1;
+				if (!valid2) {
+					const _errs8 = errors;
+					if (!(validate66(data0, {
+							instancePath: instancePath + "/" + i0,
+							parentData: data,
+							parentDataProperty: i0,
+							rootData
+						}))) {
+						vErrors = vErrors === null ? validate66.errors : vErrors.concat(
+							validate66.errors);
+						errors = vErrors.length;
+					}
+					var _valid1 = _errs8 === errors;
+					valid2 = valid2 || _valid1;
+				}
+				if (!valid2) {
+					const err2 = {
+						params: {}
+					};
+					if (vErrors === null) {
+						vErrors = [err2];
+					} else {
+						vErrors.push(err2);
+					}
+					errors++;
+				} else {
+					errors = _errs4;
+					if (vErrors !== null) {
+						if (_errs4) {
+							vErrors.length = _errs4;
+						} else {
+							vErrors = null;
+						}
+					}
+				}
+				var valid1 = _errs3 === errors;
+				if (!valid1) {
+					break;
+				}
+			}
+		} else {
+			const err3 = {
+				params: {
+					type: "array"
+				}
+			};
+			if (vErrors === null) {
+				vErrors = [err3];
+			} else {
+				vErrors.push(err3);
+			}
+			errors++;
+		}
+	}
+	var _valid0 = _errs1 === errors;
+	valid0 = valid0 || _valid0;
+	if (!valid0) {
+		const _errs9 = errors;
+		if (!(validate66(data, {
+				instancePath,
+				parentData,
+				parentDataProperty,
+				rootData
+			}))) {
+			vErrors = vErrors === null ? validate66.errors : vErrors.concat(validate66
+				.errors);
+			errors = vErrors.length;
+		}
+		var _valid0 = _errs9 === errors;
+		valid0 = valid0 || _valid0;
+	}
+	if (!valid0) {
+		const err4 = {
+			params: {}
+		};
+		if (vErrors === null) {
+			vErrors = [err4];
+		} else {
+			vErrors.push(err4);
+		}
+		errors++;
+		validate65.errors = vErrors;
+		return false;
+	} else {
+		errors = _errs0;
+		if (vErrors !== null) {
+			if (_errs0) {
+				vErrors.length = _errs0;
+			} else {
+				vErrors = null;
+			}
+		}
+	}
+	validate65.errors = vErrors;
+	return errors === 0;
+}
+const schema79 = {
+	"anyOf": [{
+		"type": "array",
+		"items": {
+			"anyOf": [{
+				"$ref": "#/definitions/SharedItem"
+			}, {
+				"$ref": "#/definitions/SharedObject"
+			}]
+		}
+	}, {
+		"$ref": "#/definitions/SharedObject"
+	}]
+};
+const schema80 = {
+	"type": "string",
+	"minLength": 1
+};
+const schema81 = {
+	"type": "object",
+	"additionalProperties": {
+		"anyOf": [{
+			"$ref": "#/definitions/SharedConfig"
+		}, {
+			"$ref": "#/definitions/SharedItem"
+		}]
+	}
+};
+const schema82 = {
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"eager": {
+			"type": "boolean"
+		},
+		"import": {
+			"anyOf": [{
+				"enum": [false]
+			}, {
+				"$ref": "#/definitions/SharedItem"
+			}]
+		},
+		"packageName": {
+			"type": "string",
+			"minLength": 1
+		},
+		"requiredVersion": {
+			"anyOf": [{
+				"enum": [false]
+			}, {
+				"type": "string"
+			}]
+		},
+		"shareKey": {
+			"type": "string",
+			"minLength": 1
+		},
+		"shareScope": {
+			"type": "string",
+			"minLength": 1
+		},
+		"singleton": {
+			"type": "boolean"
+		},
+		"strictVersion": {
+			"type": "boolean"
+		},
+		"version": {
+			"anyOf": [{
+				"enum": [false]
+			}, {
+				"type": "string"
+			}]
+		}
+	}
+};
+
+function validate77(data, {
+	instancePath = "",
+	parentData,
+	parentDataProperty,
+	rootData = data
+} = {}) {
+	let vErrors = null;
+	let errors = 0;
+	if (errors === 0) {
+		if (data && typeof data == "object" && !Array.isArray(data)) {
+			const _errs1 = errors;
+			for (const key0 in data) {
+				if (!(func2.call(schema82.properties, key0))) {
+					validate77.errors = [{
+						params: {
+							additionalProperty: key0
+						}
+					}];
+					return false;
+					break;
+				}
+			}
+			if (_errs1 === errors) {
+				if (data.eager !== undefined) {
+					const _errs2 = errors;
+					if (typeof data.eager !== "boolean") {
+						validate77.errors = [{
+							params: {
+								type: "boolean"
+							}
+						}];
+						return false;
+					}
+					var valid0 = _errs2 === errors;
+				} else {
+					var valid0 = true;
+				}
+				if (valid0) {
+					if (data.import !== undefined) {
+						let data1 = data.import;
+						const _errs4 = errors;
+						const _errs5 = errors;
+						let valid1 = false;
+						const _errs6 = errors;
+						if (data1 !== false) {
+							const err0 = {
+								params: {}
+							};
+							if (vErrors === null) {
+								vErrors = [err0];
+							} else {
+								vErrors.push(err0);
+							}
+							errors++;
+						}
+						var _valid0 = _errs6 === errors;
+						valid1 = valid1 || _valid0;
+						if (!valid1) {
+							const _errs7 = errors;
+							const _errs8 = errors;
+							if (errors === _errs8) {
+								if (typeof data1 === "string") {
+									if (data1.length < 1) {
+										const err1 = {
+											params: {}
+										};
+										if (vErrors === null) {
+											vErrors = [err1];
+										} else {
+											vErrors.push(err1);
+										}
+										errors++;
+									}
+								} else {
+									const err2 = {
+										params: {
+											type: "string"
+										}
+									};
+									if (vErrors === null) {
+										vErrors = [err2];
+									} else {
+										vErrors.push(err2);
+									}
+									errors++;
+								}
+							}
+							var _valid0 = _errs7 === errors;
+							valid1 = valid1 || _valid0;
+						}
+						if (!valid1) {
+							const err3 = {
+								params: {}
+							};
+							if (vErrors === null) {
+								vErrors = [err3];
+							} else {
+								vErrors.push(err3);
+							}
+							errors++;
+							validate77.errors = vErrors;
+							return false;
+						} else {
+							errors = _errs5;
+							if (vErrors !== null) {
+								if (_errs5) {
+									vErrors.length = _errs5;
+								} else {
+									vErrors = null;
+								}
+							}
+						}
+						var valid0 = _errs4 === errors;
+					} else {
+						var valid0 = true;
+					}
+					if (valid0) {
+						if (data.packageName !== undefined) {
+							let data2 = data.packageName;
+							const _errs10 = errors;
+							if (errors === _errs10) {
+								if (typeof data2 === "string") {
+									if (data2.length < 1) {
+										validate77.errors = [{
+											params: {}
+										}];
+										return false;
+									}
+								} else {
+									validate77.errors = [{
+										params: {
+											type: "string"
+										}
+									}];
+									return false;
+								}
+							}
+							var valid0 = _errs10 === errors;
+						} else {
+							var valid0 = true;
+						}
+						if (valid0) {
+							if (data.requiredVersion !== undefined) {
+								let data3 = data.requiredVersion;
+								const _errs12 = errors;
+								const _errs13 = errors;
+								let valid3 = false;
+								const _errs14 = errors;
+								if (data3 !== false) {
+									const err4 = {
+										params: {}
+									};
+									if (vErrors === null) {
+										vErrors = [err4];
+									} else {
+										vErrors.push(err4);
+									}
+									errors++;
+								}
+								var _valid1 = _errs14 === errors;
+								valid3 = valid3 || _valid1;
+								if (!valid3) {
+									const _errs15 = errors;
+									if (typeof data3 !== "string") {
+										const err5 = {
+											params: {
+												type: "string"
+											}
+										};
+										if (vErrors === null) {
+											vErrors = [err5];
+										} else {
+											vErrors.push(err5);
+										}
+										errors++;
+									}
+									var _valid1 = _errs15 === errors;
+									valid3 = valid3 || _valid1;
+								}
+								if (!valid3) {
+									const err6 = {
+										params: {}
+									};
+									if (vErrors === null) {
+										vErrors = [err6];
+									} else {
+										vErrors.push(err6);
+									}
+									errors++;
+									validate77.errors = vErrors;
+									return false;
+								} else {
+									errors = _errs13;
+									if (vErrors !== null) {
+										if (_errs13) {
+											vErrors.length = _errs13;
+										} else {
+											vErrors = null;
+										}
+									}
+								}
+								var valid0 = _errs12 === errors;
+							} else {
+								var valid0 = true;
+							}
+							if (valid0) {
+								if (data.shareKey !== undefined) {
+									let data4 = data.shareKey;
+									const _errs17 = errors;
+									if (errors === _errs17) {
+										if (typeof data4 === "string") {
+											if (data4.length < 1) {
+												validate77.errors = [{
+													params: {}
+												}];
+												return false;
+											}
+										} else {
+											validate77.errors = [{
+												params: {
+													type: "string"
+												}
+											}];
+											return false;
+										}
+									}
+									var valid0 = _errs17 === errors;
+								} else {
+									var valid0 = true;
+								}
+								if (valid0) {
+									if (data.shareScope !== undefined) {
+										let data5 = data.shareScope;
+										const _errs19 = errors;
+										if (errors === _errs19) {
+											if (typeof data5 === "string") {
+												if (data5.length < 1) {
+													validate77.errors = [{
+														params: {}
+													}];
+													return false;
+												}
+											} else {
+												validate77.errors = [{
+													params: {
+														type: "string"
+													}
+												}];
+												return false;
+											}
+										}
+										var valid0 = _errs19 === errors;
+									} else {
+										var valid0 = true;
+									}
+									if (valid0) {
+										if (data.singleton !== undefined) {
+											const _errs21 = errors;
+											if (typeof data.singleton !== "boolean") {
+												validate77.errors = [{
+													params: {
+														type: "boolean"
+													}
+												}];
+												return false;
+											}
+											var valid0 = _errs21 === errors;
+										} else {
+											var valid0 = true;
+										}
+										if (valid0) {
+											if (data.strictVersion !== undefined) {
+												const _errs23 = errors;
+												if (typeof data.strictVersion !== "boolean") {
+													validate77.errors = [{
+														params: {
+															type: "boolean"
+														}
+													}];
+													return false;
+												}
+												var valid0 = _errs23 === errors;
+											} else {
+												var valid0 = true;
+											}
+											if (valid0) {
+												if (data.version !== undefined) {
+													let data8 = data.version;
+													const _errs25 = errors;
+													const _errs26 = errors;
+													let valid4 = false;
+													const _errs27 = errors;
+													if (data8 !== false) {
+														const err7 = {
+															params: {}
+														};
+														if (vErrors === null) {
+															vErrors = [err7];
+														} else {
+															vErrors.push(err7);
+														}
+														errors++;
+													}
+													var _valid2 = _errs27 === errors;
+													valid4 = valid4 || _valid2;
+													if (!valid4) {
+														const _errs28 = errors;
+														if (typeof data8 !== "string") {
+															const err8 = {
+																params: {
+																	type: "string"
+																}
+															};
+															if (vErrors === null) {
+																vErrors = [err8];
+															} else {
+																vErrors.push(err8);
+															}
+															errors++;
+														}
+														var _valid2 = _errs28 === errors;
+														valid4 = valid4 || _valid2;
+													}
+													if (!valid4) {
+														const err9 = {
+															params: {}
+														};
+														if (vErrors === null) {
+															vErrors = [err9];
+														} else {
+															vErrors.push(err9);
+														}
+														errors++;
+														validate77.errors = vErrors;
+														return false;
+													} else {
+														errors = _errs26;
+														if (vErrors !== null) {
+															if (_errs26) {
+																vErrors.length = _errs26;
+															} else {
+																vErrors = null;
+															}
+														}
+													}
+													var valid0 = _errs25 === errors;
+												} else {
+													var valid0 = true;
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} else {
+			validate77.errors = [{
+				params: {
+					type: "object"
+				}
+			}];
+			return false;
+		}
+	}
+	validate77.errors = vErrors;
+	return errors === 0;
+}
+
+function validate76(data, {
+	instancePath = "",
+	parentData,
+	parentDataProperty,
+	rootData = data
+} = {}) {
+	let vErrors = null;
+	let errors = 0;
+	if (errors === 0) {
+		if (data && typeof data == "object" && !Array.isArray(data)) {
+			for (const key0 in data) {
+				let data0 = data[key0];
+				const _errs2 = errors;
+				const _errs3 = errors;
+				let valid1 = false;
+				const _errs4 = errors;
+				if (!(validate77(data0, {
+						instancePath: instancePath + "/" + key0.replace(/~/g, "~0")
+							.replace(/\//g, "~1"),
+						parentData: data,
+						parentDataProperty: key0,
+						rootData
+					}))) {
+					vErrors = vErrors === null ? validate77.errors : vErrors.concat(
+						validate77.errors);
+					errors = vErrors.length;
+				}
+				var _valid0 = _errs4 === errors;
+				valid1 = valid1 || _valid0;
+				if (!valid1) {
+					const _errs5 = errors;
+					const _errs6 = errors;
+					if (errors === _errs6) {
+						if (typeof data0 === "string") {
+							if (data0.length < 1) {
+								const err0 = {
+									params: {}
+								};
+								if (vErrors === null) {
+									vErrors = [err0];
+								} else {
+									vErrors.push(err0);
+								}
+								errors++;
+							}
+						} else {
+							const err1 = {
+								params: {
+									type: "string"
+								}
+							};
+							if (vErrors === null) {
+								vErrors = [err1];
+							} else {
+								vErrors.push(err1);
+							}
+							errors++;
+						}
+					}
+					var _valid0 = _errs5 === errors;
+					valid1 = valid1 || _valid0;
+				}
+				if (!valid1) {
+					const err2 = {
+						params: {}
+					};
+					if (vErrors === null) {
+						vErrors = [err2];
+					} else {
+						vErrors.push(err2);
+					}
+					errors++;
+					validate76.errors = vErrors;
+					return false;
+				} else {
+					errors = _errs3;
+					if (vErrors !== null) {
+						if (_errs3) {
+							vErrors.length = _errs3;
+						} else {
+							vErrors = null;
+						}
+					}
+				}
+				var valid0 = _errs2 === errors;
+				if (!valid0) {
+					break;
+				}
+			}
+		} else {
+			validate76.errors = [{
+				params: {
+					type: "object"
+				}
+			}];
+			return false;
+		}
+	}
+	validate76.errors = vErrors;
+	return errors === 0;
+}
+
+function validate75(data, {
+	instancePath = "",
+	parentData,
+	parentDataProperty,
+	rootData = data
+} = {}) {
+	let vErrors = null;
+	let errors = 0;
+	const _errs0 = errors;
+	let valid0 = false;
+	const _errs1 = errors;
+	if (errors === _errs1) {
+		if (Array.isArray(data)) {
+			var valid1 = true;
+			const len0 = data.length;
+			for (let i0 = 0; i0 < len0; i0++) {
+				let data0 = data[i0];
+				const _errs3 = errors;
+				const _errs4 = errors;
+				let valid2 = false;
+				const _errs5 = errors;
+				const _errs6 = errors;
+				if (errors === _errs6) {
+					if (typeof data0 === "string") {
+						if (data0.length < 1) {
+							const err0 = {
+								params: {}
+							};
+							if (vErrors === null) {
+								vErrors = [err0];
+							} else {
+								vErrors.push(err0);
+							}
+							errors++;
+						}
+					} else {
+						const err1 = {
+							params: {
+								type: "string"
+							}
+						};
+						if (vErrors === null) {
+							vErrors = [err1];
+						} else {
+							vErrors.push(err1);
+						}
+						errors++;
+					}
+				}
+				var _valid1 = _errs5 === errors;
+				valid2 = valid2 || _valid1;
+				if (!valid2) {
+					const _errs8 = errors;
+					if (!(validate76(data0, {
+							instancePath: instancePath + "/" + i0,
+							parentData: data,
+							parentDataProperty: i0,
+							rootData
+						}))) {
+						vErrors = vErrors === null ? validate76.errors : vErrors.concat(
+							validate76.errors);
+						errors = vErrors.length;
+					}
+					var _valid1 = _errs8 === errors;
+					valid2 = valid2 || _valid1;
+				}
+				if (!valid2) {
+					const err2 = {
+						params: {}
+					};
+					if (vErrors === null) {
+						vErrors = [err2];
+					} else {
+						vErrors.push(err2);
+					}
+					errors++;
+				} else {
+					errors = _errs4;
+					if (vErrors !== null) {
+						if (_errs4) {
+							vErrors.length = _errs4;
+						} else {
+							vErrors = null;
+						}
+					}
+				}
+				var valid1 = _errs3 === errors;
+				if (!valid1) {
+					break;
+				}
+			}
+		} else {
+			const err3 = {
+				params: {
+					type: "array"
+				}
+			};
+			if (vErrors === null) {
+				vErrors = [err3];
+			} else {
+				vErrors.push(err3);
+			}
+			errors++;
+		}
+	}
+	var _valid0 = _errs1 === errors;
+	valid0 = valid0 || _valid0;
+	if (!valid0) {
+		const _errs9 = errors;
+		if (!(validate76(data, {
+				instancePath,
+				parentData,
+				parentDataProperty,
+				rootData
+			}))) {
+			vErrors = vErrors === null ? validate76.errors : vErrors.concat(validate76
+				.errors);
+			errors = vErrors.length;
+		}
+		var _valid0 = _errs9 === errors;
+		valid0 = valid0 || _valid0;
+	}
+	if (!valid0) {
+		const err4 = {
+			params: {}
+		};
+		if (vErrors === null) {
+			vErrors = [err4];
+		} else {
+			vErrors.push(err4);
+		}
+		errors++;
+		validate75.errors = vErrors;
+		return false;
+	} else {
+		errors = _errs0;
+		if (vErrors !== null) {
+			if (_errs0) {
+				vErrors.length = _errs0;
+			} else {
+				vErrors = null;
+			}
+		}
+	}
+	validate75.errors = vErrors;
+	return errors === 0;
+}
+
+function validate48(data, {
+	instancePath = "",
+	parentData,
+	parentDataProperty,
+	rootData = data
+} = {}) {
+	/*# sourceURL="file:///Users/bytedance/work/webpack/schemas/plugins/container/ModuleFederationPlugin.json" */ ;
+	let vErrors = null;
+	let errors = 0;
+	if (errors === 0) {
+		if (data && typeof data == "object" && !Array.isArray(data)) {
+			const _errs1 = errors;
+			for (const key0 in data) {
+				if (!(func2.call(schema51.properties, key0))) {
+					validate48.errors = [{
+						params: {
+							additionalProperty: key0
+						}
+					}];
+					return false;
+					break;
+				}
+			}
+			if (_errs1 === errors) {
+				if (data.exposes !== undefined) {
+					const _errs2 = errors;
+					if (!(validate49(data.exposes, {
+							instancePath: instancePath + "/exposes",
+							parentData: data,
+							parentDataProperty: "exposes",
+							rootData
+						}))) {
+						vErrors = vErrors === null ? validate49.errors : vErrors.concat(
+							validate49.errors);
+						errors = vErrors.length;
+					}
+					var valid0 = _errs2 === errors;
+				} else {
+					var valid0 = true;
+				}
+				if (valid0) {
+					if (data.filename !== undefined) {
+						let data1 = data.filename;
+						const _errs3 = errors;
+						if (errors === _errs3) {
+							if (typeof data1 === "string") {
+								if (data1.includes("!") || (absolutePathRegExp.test(data1) !==
+										false)) {
+									validate48.errors = [{
+										params: {}
+									}];
+									return false;
+								}
+							} else {
+								validate48.errors = [{
+									params: {
+										type: "string"
+									}
+								}];
+								return false;
+							}
+						}
+						var valid0 = _errs3 === errors;
+					} else {
+						var valid0 = true;
+					}
+					if (valid0) {
+						if (data.library !== undefined) {
+							const _errs5 = errors;
+							if (!(validate59(data.library, {
+									instancePath: instancePath + "/library",
+									parentData: data,
+									parentDataProperty: "library",
+									rootData
+								}))) {
+								vErrors = vErrors === null ? validate59.errors : vErrors.concat(
+									validate59.errors);
+								errors = vErrors.length;
+							}
+							var valid0 = _errs5 === errors;
+						} else {
+							var valid0 = true;
+						}
+						if (valid0) {
+							if (data.name !== undefined) {
+								const _errs6 = errors;
+								if (typeof data.name !== "string") {
+									validate48.errors = [{
+										params: {
+											type: "string"
+										}
+									}];
+									return false;
+								}
+								var valid0 = _errs6 === errors;
+							} else {
+								var valid0 = true;
+							}
+							if (valid0) {
+								if (data.remoteType !== undefined) {
+									let data4 = data.remoteType;
+									const _errs8 = errors;
+									const _errs9 = errors;
+									let valid1 = false;
+									let passing0 = null;
+									const _errs10 = errors;
+									if (data4 !== "var" && data4 !== "module" && data4 !==
+										"assign" && data4 !== "this" && data4 !== "window" &&
+										data4 !== "self" && data4 !== "global" && data4 !==
+										"commonjs" && data4 !== "commonjs2" && data4 !==
+										"commonjs-module" && data4 !== "commonjs-static" &&
+										data4 !== "amd" && data4 !== "amd-require" && data4 !==
+										"umd" && data4 !== "umd2" && data4 !== "jsonp" && data4 !==
+										"system" && data4 !== "promise" && data4 !== "import" &&
+										data4 !== "script" && data4 !== "node-commonjs") {
+										const err0 = {
+											params: {}
+										};
+										if (vErrors === null) {
+											vErrors = [err0];
+										} else {
+											vErrors.push(err0);
+										}
+										errors++;
+									}
+									var _valid0 = _errs10 === errors;
+									if (_valid0) {
+										valid1 = true;
+										passing0 = 0;
+									}
+									if (!valid1) {
+										const err1 = {
+											params: {
+												passingSchemas: passing0
+											}
+										};
+										if (vErrors === null) {
+											vErrors = [err1];
+										} else {
+											vErrors.push(err1);
+										}
+										errors++;
+										validate48.errors = vErrors;
+										return false;
+									} else {
+										errors = _errs9;
+										if (vErrors !== null) {
+											if (_errs9) {
+												vErrors.length = _errs9;
+											} else {
+												vErrors = null;
+											}
+										}
+									}
+									var valid0 = _errs8 === errors;
+								} else {
+									var valid0 = true;
+								}
+								if (valid0) {
+									if (data.remotes !== undefined) {
+										const _errs12 = errors;
+										if (!(validate65(data.remotes, {
+												instancePath: instancePath + "/remotes",
+												parentData: data,
+												parentDataProperty: "remotes",
+												rootData
+											}))) {
+											vErrors = vErrors === null ? validate65.errors : vErrors
+												.concat(validate65.errors);
+											errors = vErrors.length;
+										}
+										var valid0 = _errs12 === errors;
+									} else {
+										var valid0 = true;
+									}
+									if (valid0) {
+										if (data.runtime !== undefined) {
+											let data6 = data.runtime;
+											const _errs13 = errors;
+											const _errs15 = errors;
+											let valid4 = false;
+											const _errs16 = errors;
+											if (data6 !== false) {
+												const err2 = {
+													params: {}
+												};
+												if (vErrors === null) {
+													vErrors = [err2];
+												} else {
+													vErrors.push(err2);
+												}
+												errors++;
+											}
+											var _valid1 = _errs16 === errors;
+											valid4 = valid4 || _valid1;
+											if (!valid4) {
+												const _errs17 = errors;
+												if (errors === _errs17) {
+													if (typeof data6 === "string") {
+														if (data6.length < 1) {
+															const err3 = {
+																params: {}
+															};
+															if (vErrors === null) {
+																vErrors = [err3];
+															} else {
+																vErrors.push(err3);
+															}
+															errors++;
+														}
+													} else {
+														const err4 = {
+															params: {
+																type: "string"
+															}
+														};
+														if (vErrors === null) {
+															vErrors = [err4];
+														} else {
+															vErrors.push(err4);
+														}
+														errors++;
+													}
+												}
+												var _valid1 = _errs17 === errors;
+												valid4 = valid4 || _valid1;
+											}
+											if (!valid4) {
+												const err5 = {
+													params: {}
+												};
+												if (vErrors === null) {
+													vErrors = [err5];
+												} else {
+													vErrors.push(err5);
+												}
+												errors++;
+												validate48.errors = vErrors;
+												return false;
+											} else {
+												errors = _errs15;
+												if (vErrors !== null) {
+													if (_errs15) {
+														vErrors.length = _errs15;
+													} else {
+														vErrors = null;
+													}
+												}
+											}
+											var valid0 = _errs13 === errors;
+										} else {
+											var valid0 = true;
+										}
+										if (valid0) {
+											if (data.runtimePlugins !== undefined) {
+												let data7 = data.runtimePlugins;
+												const _errs19 = errors;
+												if (errors === _errs19) {
+													if (Array.isArray(data7)) {
+														var valid5 = true;
+														const len0 = data7.length;
+														for (let i0 = 0; i0 < len0; i0++) {
+															let data8 = data7[i0];
+															const _errs21 = errors;
+															if (errors === _errs21) {
+																if (typeof data8 === "string") {
+																	if (data8.length < 1) {
+																		validate48.errors = [{
+																			params: {}
+																		}];
+																		return false;
+																	}
+																} else {
+																	validate48.errors = [{
+																		params: {
+																			type: "string"
+																		}
+																	}];
+																	return false;
+																}
+															}
+															var valid5 = _errs21 === errors;
+															if (!valid5) {
+																break;
+															}
+														}
+													} else {
+														validate48.errors = [{
+															params: {
+																type: "array"
+															}
+														}];
+														return false;
+													}
+												}
+												var valid0 = _errs19 === errors;
+											} else {
+												var valid0 = true;
+											}
+											if (valid0) {
+												if (data.shareScope !== undefined) {
+													let data9 = data.shareScope;
+													const _errs23 = errors;
+													if (errors === _errs23) {
+														if (typeof data9 === "string") {
+															if (data9.length < 1) {
+																validate48.errors = [{
+																	params: {}
+																}];
+																return false;
+															}
+														} else {
+															validate48.errors = [{
+																params: {
+																	type: "string"
+																}
+															}];
+															return false;
+														}
+													}
+													var valid0 = _errs23 === errors;
+												} else {
+													var valid0 = true;
+												}
+												if (valid0) {
+													if (data.shared !== undefined) {
+														const _errs25 = errors;
+														if (!(validate75(data.shared, {
+																instancePath: instancePath + "/shared",
+																parentData: data,
+																parentDataProperty: "shared",
+																rootData
+															}))) {
+															vErrors = vErrors === null ? validate75.errors :
+																vErrors.concat(validate75.errors);
+															errors = vErrors.length;
+														}
+														var valid0 = _errs25 === errors;
+													} else {
+														var valid0 = true;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} else {
+			validate48.errors = [{
+				params: {
+					type: "object"
+				}
+			}];
+			return false;
+		}
+	}
+	validate48.errors = vErrors;
+	return errors === 0;
+}
+
+export default validate48;

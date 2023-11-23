@@ -11,6 +11,8 @@ import { parseOptions } from './options';
 import type { optimize,Compiler,Compilation } from 'webpack';
 import type { ContainerPluginOptions } from '../../declarations/plugins/container/ContainerPlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import checkOptions from '../../schemas/container/ContainerPlugin.check';
+import schema from '../../schemas/container/ContainerPlugin';
 
 type ExcludeUndefined<T> = T extends undefined ? never : T;
 type NonUndefined<T> = ExcludeUndefined<T>;
@@ -23,9 +25,8 @@ type CacheGroups = OptimizationSplitChunksOptions['cacheGroups'];
 type CacheGroup = NonUndefined<CacheGroups>[string];
 
 const validate = createSchemaValidation(
-  //eslint-disable-next-line
-  require('webpack/schemas/plugins/container/ContainerPlugin.check.js'),
-  () => require('webpack/schemas/plugins/container/ContainerPlugin.json'),
+  checkOptions,
+  () => schema,
   {
     name: 'Container Plugin',
     baseDataPath: 'options',

@@ -283,12 +283,12 @@ class ConsumeSharedModule extends Module {
       fn += 'Fallback';
       args.push(fallbackCode);
     }
-    const code = runtimeTemplate.returningFunction(`${fn}(${args.join(', ')})`);
+    // const code = runtimeTemplate.returningFunction(`${fn}(${args.join(', ')})`);
     const sources = new Map();
     sources.set("consume-shared", new RawSource(fallbackCode || "()=>()=>{}"));
+
 		const data = new Map();
 		data.set("consume-shared", normalizeConsumeShareOptions(this.options));
-    sources.set('consume-shared', new RawSource(code));
 
     return {
       runtimeRequirements,
