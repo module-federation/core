@@ -193,7 +193,7 @@
     "vitest": "0.32.4",
     "vue-tsc": "1.8.20",
     "webpack": "^5.88.2",
-    "webpack-virtual-modules": "0.6.0"
+    "webpack-virtual-modules": "0.6.1"
   },
   "config": {
     "commitizen": {
