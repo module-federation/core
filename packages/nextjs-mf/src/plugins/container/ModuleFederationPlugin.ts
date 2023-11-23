@@ -4,7 +4,7 @@
 */
 
 'use strict';
-import { Compiler, WebpackPluginInstance } from 'webpack';
+import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { ModuleFederationPluginOptions } from './types';
 import SharePlugin from '@module-federation/enhanced/lib/sharing/SharePlugin';
 import ContainerPlugin from '@module-federation/enhanced/lib/container/ContainerPlugin';

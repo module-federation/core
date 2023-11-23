@@ -19,12 +19,12 @@ export function getWebpackPath(compiler: webpack.Compiler): string {
 
 export const normalizeWebpackPath = (fullPath: string): string => {
   if (fullPath === 'webpack') {
-    return process.env.FEDERATION_WEBPACK_PATH || fullPath;
+    return process.env['FEDERATION_WEBPACK_PATH'] || fullPath;
   }
 
-  if (process.env.FEDERATION_WEBPACK_PATH) {
+  if (process.env['FEDERATION_WEBPACK_PATH']) {
     return path.resolve(
-      process.env.FEDERATION_WEBPACK_PATH,
+      process.env['FEDERATION_WEBPACK_PATH'],
       fullPath.replace('webpack', '../../'),
     );
   }

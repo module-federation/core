@@ -1,4 +1,4 @@
-import { Compiler, Compilation, Chunk, Module } from 'webpack';
+import type { Compiler, Compilation, Chunk, Module } from 'webpack';
 
 /**
  * This plugin removes eager modules from the runtime.

@@ -1,4 +1,4 @@
-import { container, Compiler } from 'webpack';
+import type { container, Compiler } from 'webpack';
 import type {
   ModuleFederationPluginOptions,
   SharedObject,

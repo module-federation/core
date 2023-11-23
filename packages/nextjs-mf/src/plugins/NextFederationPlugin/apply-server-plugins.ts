@@ -1,4 +1,4 @@
-import { Compiler } from 'webpack';
+import type { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import { HoistContainerReferences } from '@module-federation/enhanced/lib/container/HoistContainerReferencesPlugin';
 import path from 'path';

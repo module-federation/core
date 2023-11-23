@@ -1,4 +1,4 @@
-import { Compiler, Chunk, Module, Compilation, ChunkGroup } from 'webpack';
+import type { Compiler, Chunk, Module, Compilation, ChunkGroup } from 'webpack';
 
 /**
  * @typedef {import("webpack").Compiler} Compiler

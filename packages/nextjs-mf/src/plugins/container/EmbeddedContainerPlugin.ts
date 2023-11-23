@@ -1,4 +1,4 @@
-import { Compilation, Compiler, Chunk } from 'webpack';
+import type { Compilation, Compiler, Chunk } from 'webpack';
 import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
 
 /**

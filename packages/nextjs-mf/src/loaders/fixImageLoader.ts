@@ -1,4 +1,8 @@
-import { LoaderContext, Template } from 'webpack';
+import type { LoaderContext } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+const { Template } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 import path from 'path';
 
 /**
@@ -25,7 +29,7 @@ export async function fixImageLoader(
 
   const isServer = this._compiler?.options.name !== 'client';
   //@ts-ignore
-  const { publicPath } = this._compiler?.webpack.RuntimeGlobals;
+  const { publicPath } = this._compiler.webpack.RuntimeGlobals;
 
   const result = await this.importModule(
     `${this.resourcePath}.webpack[javascript/auto]!=!${remaining}`,
