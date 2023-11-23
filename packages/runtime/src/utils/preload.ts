@@ -112,7 +112,6 @@ export function preloadAssets(
       cssEl.setAttribute('rel', 'preload');
       cssEl.setAttribute('href', cssUrl);
       cssEl.setAttribute('as', 'style');
-      cssEl.setAttribute('crossorigin', 'anonymous');
       fragment.appendChild(cssEl);
     });
     document.head.appendChild(fragment);
