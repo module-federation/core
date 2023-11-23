@@ -1,6 +1,4 @@
-import type Compilation from 'webpack/lib/Compilation';
-import type Compiler from 'webpack/lib/Compiler';
-import type Chunk from 'webpack/lib/Chunk';
+import { Compilation, Compiler, Chunk } from 'webpack';
 import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
 
 /**

@@ -1,4 +1,4 @@
-import Compiler from 'webpack/lib/Compiler';
+import { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 
 /**

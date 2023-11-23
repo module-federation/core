@@ -1,8 +1,4 @@
-import Compiler from 'webpack/lib/Compiler';
-import Module from 'webpack/lib/Module';
-import Chunk from 'webpack/lib/Chunk';
-import Compilation from 'webpack/lib/Compilation';
-import ChunkGroup from 'webpack/lib/ChunkGroup';
+import { Compiler, Chunk, Module, Compilation, ChunkGroup } from 'webpack';
 
 /**
  * @typedef {import("webpack").Compiler} Compiler

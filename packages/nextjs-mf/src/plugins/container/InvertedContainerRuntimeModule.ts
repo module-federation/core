@@ -1,7 +1,4 @@
-import type Compiler from 'webpack/lib/Compiler';
-import type Module from 'webpack/lib/Module';
-import RuntimeModule from 'webpack/lib/RuntimeModule';
-import { RuntimeGlobals, Template } from 'webpack';
+import { Module, RuntimeModule, Template, RuntimeGlobals } from 'webpack';
 
 interface InvertedContainerRuntimeModuleOptions {
   runtime: string;

@@ -5,7 +5,7 @@
 
 'use strict';
 
-import type Compiler from 'webpack/lib/Compiler';
+import { Compiler } from 'webpack';
 const isValidExternalsType = require('webpack/schemas/plugins/container/ExternalsType.check.js');
 const SharePlugin =
   require('@module-federation/enhanced/src/lib/sharing/SharePlugin').default;

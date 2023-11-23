@@ -1,5 +1,4 @@
-import type { LoaderContext } from 'webpack';
-import { Template } from 'webpack';
+import { LoaderContext, Template } from 'webpack';
 import path from 'path';
 
 /**
