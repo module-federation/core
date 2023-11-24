@@ -12,6 +12,5 @@
   "devDependencies": {
     "@module-federation/nextjs-mf": "7.0.8",
     "@module-federation/sdk": "3.0.0"
-
   }
 }
