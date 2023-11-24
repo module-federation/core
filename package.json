@@ -109,7 +109,7 @@
     "@swc/helpers": "0.5.3",
     "@swc/jest": "0.2.29",
     "@tailwindcss/forms": "0.5.7",
-    "@testing-library/react": "14.0.0",
+    "@testing-library/react": "14.1.2",
     "@types/adm-zip": "0.5.5",
     "@types/download": "8.0.5",
     "@types/express": "4.17.21",
