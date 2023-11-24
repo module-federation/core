@@ -45,7 +45,6 @@ module.exports = composePlugins(
       runtimeChunk: false,
     };
 
-
     return config;
   },
 );

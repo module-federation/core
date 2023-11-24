@@ -285,15 +285,15 @@ class ConsumeSharedModule extends Module {
     }
     // const code = runtimeTemplate.returningFunction(`${fn}(${args.join(', ')})`);
     const sources = new Map();
-    sources.set("consume-shared", new RawSource(fallbackCode || "()=>()=>{}"));
+    sources.set('consume-shared', new RawSource(fallbackCode || '()=>()=>{}'));
 
-		const data = new Map();
-		data.set("consume-shared", normalizeConsumeShareOptions(this.options));
+    const data = new Map();
+    data.set('consume-shared', normalizeConsumeShareOptions(this.options));
 
     return {
       runtimeRequirements,
       sources,
-      data
+      data,
     };
   }
 

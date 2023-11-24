@@ -1,15 +1,15 @@
 import { getFederationGlobalScope } from './utils';
-import  {Template} from 'webpack';
+import { Template } from 'webpack';
 import type RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import { NormalizedRuntimeInitOptionsWithOutShared } from '../../../types/runtime';
 
 function getFederationGlobal(
   template: typeof Template,
   runtimeGlobals: typeof RuntimeGlobals,
-  initOptionsWithoutShared:NormalizedRuntimeInitOptionsWithOutShared,
-) :string{
+  initOptionsWithoutShared: NormalizedRuntimeInitOptionsWithOutShared,
+): string {
   const federationGlobal = getFederationGlobalScope(runtimeGlobals);
-  // TODO: 获取 shared getter
+  // TODO: get shared getter
   const initOptionsStrWithoutShared = JSON.stringify(initOptionsWithoutShared);
   // return Template.asString([
   // 	`if(!${federationGlobal}){`,

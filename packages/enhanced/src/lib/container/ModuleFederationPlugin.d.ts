@@ -19,5 +19,5 @@ declare namespace ModuleFederationPlugin {
 type Compiler = import('webpack/lib/Compiler');
 type ExternalsType = any;
 type ModuleFederationPluginOptions =
-import('../../declarations/plugins/container/ModuleFederationPlugin').ModuleFederationPluginOptions;;
+  import('../../declarations/plugins/container/ModuleFederationPlugin').ModuleFederationPluginOptions;
 type Shared = any;

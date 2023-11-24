@@ -14,13 +14,12 @@ import {
   compareModulesByIdentifier,
   compareStrings,
 } from 'webpack/lib/util/comparators';
-import { getFederationGlobalScope } from "../container/runtime/utils";
+import { getFederationGlobalScope } from '../container/runtime/utils';
 
 class ShareRuntimeModule extends RuntimeModule {
   constructor() {
-		// must after FederationRuntimeModule
-		super("sharing", RuntimeModule.STAGE_NORMAL + 2);
-
+    // must after FederationRuntimeModule
+    super('sharing', RuntimeModule.STAGE_NORMAL + 2);
   }
 
   /**
@@ -41,7 +40,7 @@ class ShareRuntimeModule extends RuntimeModule {
       throw new Error('ChunkGraph is undefined');
     }
     const initCodePerScope: Map<string, Map<number, Set<string>>> = new Map();
-    let sharedInitOptionsStr = "";
+    let sharedInitOptionsStr = '';
 
     for (const chunk of this.chunk?.getAllReferencedChunks() || []) {
       if (!chunk) {
@@ -73,26 +72,26 @@ class ShareRuntimeModule extends RuntimeModule {
           list.add(init);
         }
         const sharedOption = codeGenerationResults.getData(
-					m,
-					chunk.runtime,
-					"share-init-option"
-				);
-				if (sharedOption) {
-					sharedInitOptionsStr += `
+          m,
+          chunk.runtime,
+          'share-init-option',
+        );
+        if (sharedOption) {
+          sharedInitOptionsStr += `
 					"${sharedOption.name}" : {
 						version: ${sharedOption.version},
 						get: ${sharedOption.getter},
 						scope: ${JSON.stringify(sharedOption.shareScope)}
 					},
 					`;
-				}
+        }
       }
     }
     const federationGlobal = getFederationGlobalScope(RuntimeGlobals || {});
     return Template.asString([
       `${getFederationGlobalScope(
-				RuntimeGlobals
-			)}.initOptions.shared = {${sharedInitOptionsStr}}`,
+        RuntimeGlobals,
+      )}.initOptions.shared = {${sharedInitOptionsStr}}`,
       `${RuntimeGlobals.shareScopeMap} = {};`,
       'var initPromises = {};',
       'var initTokens = {};',

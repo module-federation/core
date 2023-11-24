@@ -73,9 +73,7 @@ class ModuleFederationPlugin {
       compiler.options.output.enabledLibraryTypes?.push(library.type);
     }
     compiler.hooks.afterPlugins.tap('ModuleFederationPlugin', () => {
-      if (
-        useContainerPlugin
-      ) {
+      if (useContainerPlugin) {
         new ContainerPlugin({
           //@ts-ignore
           name: options.name,
@@ -85,7 +83,7 @@ class ModuleFederationPlugin {
           shareScope: options.shareScope,
           //@ts-ignore
           exposes: options.exposes,
-          runtimePlugins:options.runtimePlugins
+          runtimePlugins: options.runtimePlugins,
           //@ts-ignore
         }).apply(compiler);
       }

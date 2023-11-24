@@ -12,7 +12,7 @@ import { FEDERATION_SUPPORTED_TYPES } from './constant';
 import { getFederationGlobalScope } from './runtime/utils';
 import type ExternalModule from 'webpack/lib/ExternalModule';
 import type FallbackModule from './FallbackModule';
-import type {RemotesOptions} from '@module-federation/webpack-bundler-runtime'
+import type { RemotesOptions } from '@module-federation/webpack-bundler-runtime';
 
 class RemoteRuntimeModule extends RuntimeModule {
   constructor() {

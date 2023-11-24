@@ -321,7 +321,7 @@ class ConsumeSharedPlugin {
               new ConsumeSharedRuntimeModule(set),
             );
             // FIXME: need to remove webpack internal inject ShareRuntimeModule, otherwise there will be two ShareRuntimeModule
-						compilation.addRuntimeModule(chunk, new ShareRuntimeModule());
+            compilation.addRuntimeModule(chunk, new ShareRuntimeModule());
           },
         );
       },

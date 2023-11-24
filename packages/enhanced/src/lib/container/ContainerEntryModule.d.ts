@@ -49,7 +49,7 @@ declare class ContainerEntryModule extends Module {
   _name: string;
   _exposes: [string, ExposeOptions][];
   _shareScope: string;
-  runtimePlugins: string[]
+  runtimePlugins: string[];
 }
 declare namespace ContainerEntryModule {
   export {

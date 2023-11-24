@@ -11,12 +11,12 @@ declare class ContainerEntryDependency extends Dependency {
     name: string,
     exposes: [string, ExposeOptions][],
     shareScope: string,
-    runtimePlugins: string[]
+    runtimePlugins: string[],
   );
   name: string;
   exposes: [string, import('./ContainerEntryModule').ExposeOptions][];
   shareScope: string;
-  runtimePlugins: string[]
+  runtimePlugins: string[];
 }
 declare namespace ContainerEntryDependency {
   export { ExposeOptions };
