@@ -426,25 +426,24 @@ export function getRequiredVersionFromDescriptionFile(
   }
 }
 
-
-export function normalizeConsumeShareOptions (consumeOptions:ConsumeOptions) {
-	const {
-		requiredVersion = false,
-		strictVersion,
-		singleton = false,
-		eager,
-		shareKey,
-		shareScope
-	} = consumeOptions;
-	return {
-		shareConfig: {
-			fixedDependencies: false,
-			requiredVersion,
-			strictVersion,
-			singleton,
-			eager
-		},
-		shareScope,
-		shareKey
-	};
-};
+export function normalizeConsumeShareOptions(consumeOptions: ConsumeOptions) {
+  const {
+    requiredVersion = false,
+    strictVersion,
+    singleton = false,
+    eager,
+    shareKey,
+    shareScope,
+  } = consumeOptions;
+  return {
+    shareConfig: {
+      fixedDependencies: false,
+      requiredVersion,
+      strictVersion,
+      singleton,
+      eager,
+    },
+    shareScope,
+    shareKey,
+  };
+}

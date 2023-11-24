@@ -8,7 +8,7 @@ import ContainerEntryDependency from './ContainerEntryDependency';
 import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { parseOptions } from './options';
-import type { optimize,Compiler,Compilation } from 'webpack';
+import type { optimize, Compiler, Compilation } from 'webpack';
 import type { ContainerPluginOptions } from '../../declarations/plugins/container/ContainerPlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import checkOptions from '../../schemas/container/ContainerPlugin.check';
@@ -24,14 +24,10 @@ type OptimizationSplitChunksOptions = NonUndefined<
 type CacheGroups = OptimizationSplitChunksOptions['cacheGroups'];
 type CacheGroup = NonUndefined<CacheGroups>[string];
 
-const validate = createSchemaValidation(
-  checkOptions,
-  () => schema,
-  {
-    name: 'Container Plugin',
-    baseDataPath: 'options',
-  },
-);
+const validate = createSchemaValidation(checkOptions, () => schema, {
+  name: 'Container Plugin',
+  baseDataPath: 'options',
+});
 
 const PLUGIN_NAME = 'ContainerPlugin';
 
@@ -127,7 +123,7 @@ class ContainerPlugin {
     // 修改 splitChunk.chunks
     patchChunkSplit(splitChunks);
 
-    const cacheGroups  = splitChunks.cacheGroups
+    const cacheGroups = splitChunks.cacheGroups;
     if (!cacheGroups) {
       return;
     }
@@ -139,31 +135,28 @@ class ContainerPlugin {
   }
 
   apply(compiler: Compiler): void {
-    const useModuleFederationPlugin = compiler.options.plugins.find(
-      (p) =>{
-        if(typeof p !=='object' || !p){
-          return false
-        }
+    const useModuleFederationPlugin = compiler.options.plugins.find((p) => {
+      if (typeof p !== 'object' || !p) {
+        return false;
+      }
 
-        return p['name'] === 'ModuleFederationPlugin'
-      },
-    );
+      return p['name'] === 'ModuleFederationPlugin';
+    });
 
-		if (!useModuleFederationPlugin) {
-			ContainerPlugin.patchChunkSplit(compiler, this._options.name);
-		}
+    if (!useModuleFederationPlugin) {
+      ContainerPlugin.patchChunkSplit(compiler, this._options.name);
+    }
 
-		new FederationRuntimePlugin().apply(compiler);
-		const {
-			name,
-			exposes,
-			shareScope,
-			filename,
-			library,
-			runtime,
-			runtimePlugins
-		} = this._options;
-
+    new FederationRuntimePlugin().apply(compiler);
+    const {
+      name,
+      exposes,
+      shareScope,
+      filename,
+      library,
+      runtime,
+      runtimePlugins,
+    } = this._options;
 
     if (
       library &&
@@ -175,14 +168,13 @@ class ContainerPlugin {
     }
 
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
-
       const dep = new ContainerEntryDependency(
-				name,
+        name,
         //@ts-ignore
-				exposes,
-				shareScope,
-				runtimePlugins
-			);
+        exposes,
+        shareScope,
+        runtimePlugins,
+      );
 
       dep.loc = { name };
       compilation.addEntry(

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { init, loadRemote } from '@module-federation/runtime';
-import Remote2Button from 'remote2/Button'
+import Remote2Button from 'remote2/Button';
 import LocalButton from './Button';
 import customPlugin from './runtimePlugin';
 

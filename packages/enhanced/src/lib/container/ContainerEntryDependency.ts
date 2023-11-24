@@ -23,13 +23,13 @@ class ContainerEntryDependency extends Dependency {
     name: string,
     exposes: [string, ExposeOptions][],
     shareScope: string,
-    runtimePlugins: string[]
+    runtimePlugins: string[],
   ) {
     super();
     this.name = name;
     this.exposes = exposes;
     this.shareScope = shareScope;
-    this.runtimePlugins = runtimePlugins
+    this.runtimePlugins = runtimePlugins;
   }
 
   /**

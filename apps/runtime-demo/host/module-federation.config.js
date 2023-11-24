@@ -1,4 +1,4 @@
-const path = require('path')
+const path = require('path');
 const moduleFederationConfig = {
   name: 'runtime_demo_host',
   remotes: {
@@ -14,7 +14,7 @@ const moduleFederationConfig = {
       requiredVersion: '>17',
     },
   },
-  runtimePlugins: [path.join(__dirname,'./runtimePlugin.ts')]
+  runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
 };
 
 module.exports = moduleFederationConfig;

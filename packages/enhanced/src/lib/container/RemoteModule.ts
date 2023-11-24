@@ -189,7 +189,7 @@ class RemoteModule extends Module {
    */
   static deserialize(context: ObjectDeserializerContext): RemoteModule {
     const { read } = context;
-    const obj = new RemoteModule(read(), read(), read(), read(),read());
+    const obj = new RemoteModule(read(), read(), read(), read(), read());
     obj.deserialize(context);
     return obj;
   }

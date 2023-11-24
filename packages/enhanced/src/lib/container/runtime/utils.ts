@@ -5,10 +5,10 @@ import type webpack from 'webpack';
 import type RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import extractUrlAndGlobal from 'webpack/lib/util/extractUrlAndGlobal';
 import type { ModuleFederationPluginOptions } from '../../../declarations/plugins/container/ModuleFederationPlugin';
-import {NormalizedRuntimeInitOptionsWithOutShared} from '../../../types/runtime'
+import { NormalizedRuntimeInitOptionsWithOutShared } from '../../../types/runtime';
 
 type EntryStaticNormalized = Awaited<
-ReturnType<Extract<webpack.WebpackOptionsNormalized['entry'], () => any>>
+  ReturnType<Extract<webpack.WebpackOptionsNormalized['entry'], () => any>>
 >;
 
 type Remotes = Parameters<typeof init>[0]['remotes'];
@@ -27,7 +27,7 @@ export function getFederationGlobalScope(
 
 export function normalizeRuntimeInitOptionsWithOutShared(
   options: ModuleFederationPluginOptions,
-) :NormalizedRuntimeInitOptionsWithOutShared{
+): NormalizedRuntimeInitOptionsWithOutShared {
   const parsedOptions = parseOptions(
     options.remotes || [],
     (item) => ({
@@ -69,7 +69,7 @@ export function modifyEntry(options: ModifyEntryOptions): void {
   const { compiler, staticEntry, prependEntry } = options;
   const operator = (
     oriEntry: EntryStaticNormalized,
-    newEntry: EntryStaticNormalized
+    newEntry: EntryStaticNormalized,
   ): EntryStaticNormalized => Object.assign(oriEntry, newEntry);
 
   if (typeof compiler.options.entry === 'function') {
@@ -93,7 +93,6 @@ export function modifyEntry(options: ModifyEntryOptions): void {
     }
   }
 }
-
 
 export function createHash(contents: string): string {
   return crypto.createHash('md5').update(contents).digest('hex');

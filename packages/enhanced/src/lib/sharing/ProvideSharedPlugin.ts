@@ -200,7 +200,6 @@ class ProvideSharedPlugin {
             return module;
           },
         );
-
       },
     );
     compiler.hooks.finishMake.tapPromise(

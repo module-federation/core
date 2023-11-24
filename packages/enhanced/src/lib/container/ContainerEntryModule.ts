@@ -26,9 +26,9 @@ import type {
 } from 'webpack/lib/Module';
 import type WebpackError from 'webpack/lib/WebpackError';
 import makeSerializable from 'webpack/lib/util/makeSerializable';
-import FederationRuntimePlugin from "./runtime/FederationRuntimePlugin";
-import { getFederationGlobalScope } from "./runtime/utils";
-import EntryDependency from "webpack/lib/dependencies/EntryDependency";
+import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import { getFederationGlobalScope } from './runtime/utils';
+import EntryDependency from 'webpack/lib/dependencies/EntryDependency';
 
 const SOURCE_TYPES = new Set(['javascript']);
 
@@ -57,7 +57,7 @@ class ContainerEntryModule extends Module {
     name: string,
     exposes: [string, ExposeOptions][],
     shareScope: string,
-    runtimePlugins: string[]
+    runtimePlugins: string[],
   ) {
     super(JAVASCRIPT_MODULE_TYPE_DYNAMIC, null);
     this._name = name;
@@ -177,10 +177,10 @@ class ContainerEntryModule extends Module {
     );
 
     this.addDependency(
-			new EntryDependency(
-				FederationRuntimePlugin.getFilePath(this._name,this._runtimePlugins)
-			)
-		);
+      new EntryDependency(
+        FederationRuntimePlugin.getFilePath(this._name, this._runtimePlugins),
+      ),
+    );
 
     callback();
   }
@@ -250,15 +250,15 @@ class ContainerEntryModule extends Module {
       );
     }
 
-		const initRuntimeDep = this.dependencies[1];
-		const initRuntimeModuleGetter = runtimeTemplate.moduleRaw({
-			module: moduleGraph.getModule(initRuntimeDep),
-			chunkGraph,
-			// @ts-expect-error
-			request: initRuntimeDep.userRequest,
-			weak: false,
-			runtimeRequirements
-		});
+    const initRuntimeDep = this.dependencies[1];
+    const initRuntimeModuleGetter = runtimeTemplate.moduleRaw({
+      module: moduleGraph.getModule(initRuntimeDep),
+      chunkGraph,
+      // @ts-expect-error
+      request: initRuntimeDep.userRequest,
+      weak: false,
+      runtimeRequirements,
+    });
     const federationGlobal = getFederationGlobalScope(RuntimeGlobals || {});
 
     const source = Template.asString([
@@ -285,16 +285,16 @@ class ContainerEntryModule extends Module {
       ])};`,
       `var init = ${runtimeTemplate.basicFunction('shareScope, initScope', [
         `if (!${RuntimeGlobals.shareScopeMap}) return;`,
-				`if (!${federationGlobal}) return;`,
-				`var name = ${JSON.stringify(this._shareScope)}`,
-				//`var oldScope = ${RuntimeGlobals.shareScopeMap}[name];`,
-				// no need to verify shareScope, because shareScope will be proxied by global shareScope
-				//`if(oldScope && oldScope !== shareScope) throw new Error("Container initialization failed as it has already been initialized with a different share scope");`,
-				`${RuntimeGlobals.shareScopeMap}[name] = shareScope;`,
-				`${federationGlobal}.instance.initOptions({name:${federationGlobal}.initOptions.name, })`,
-				`return ${RuntimeGlobals.initializeSharing}(name, initScope);`
-			])};`,
-			`${initRuntimeModuleGetter}`,
+        `if (!${federationGlobal}) return;`,
+        `var name = ${JSON.stringify(this._shareScope)}`,
+        //`var oldScope = ${RuntimeGlobals.shareScopeMap}[name];`,
+        // no need to verify shareScope, because shareScope will be proxied by global shareScope
+        //`if(oldScope && oldScope !== shareScope) throw new Error("Container initialization failed as it has already been initialized with a different share scope");`,
+        `${RuntimeGlobals.shareScopeMap}[name] = shareScope;`,
+        `${federationGlobal}.instance.initOptions({name:${federationGlobal}.initOptions.name, })`,
+        `return ${RuntimeGlobals.initializeSharing}(name, initScope);`,
+      ])};`,
+      `${initRuntimeModuleGetter}`,
       '',
       '// This exports getters to disallow modifications',
       `${RuntimeGlobals.definePropertyGetters}(exports, {`,

@@ -29,11 +29,7 @@ type InferredGlobalShareScope = {
 };
 
 // shareScope, name, externalModuleId
-type IdToExternalAndNameMappingItem = [
-  string,
-  string,
-  string | number,
-];
+type IdToExternalAndNameMappingItem = [string, string, string | number];
 
 interface IdToExternalAndNameMappingItemWithPromise
   extends IdToExternalAndNameMappingItem {
