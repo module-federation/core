@@ -49,7 +49,7 @@
     "regenerator-runtime": "0.14.0",
     "tapable": "2.2.1",
     "tsup": "7.2.0",
-    "typedoc": "0.25.2",
+    "typedoc": "0.25.3",
     "undici": "5.26.2",
     "unplugin": "1.5.1"
   },
