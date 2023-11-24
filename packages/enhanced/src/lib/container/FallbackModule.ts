@@ -33,7 +33,7 @@ const TYPES = new Set(['javascript']);
 const RUNTIME_REQUIREMENTS = new Set([RuntimeGlobals.module]);
 
 class FallbackModule extends Module {
-  private requests: string[];
+  public requests: string[];
   private _identifier: string;
 
   /**

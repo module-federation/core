@@ -5,6 +5,8 @@ import { consumes } from './consumes';
 import { initializeSharing } from './initializeSharing';
 import { installInitialConsumes } from './installInitialConsumes';
 
+export * from './types'
+
 const federation: Federation = {
   runtime,
   instance: undefined,

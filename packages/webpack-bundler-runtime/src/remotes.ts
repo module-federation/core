@@ -8,6 +8,7 @@ export function remotes(options: RemotesOptions) {
     chunkMapping,
     idToExternalAndNameMapping,
     webpackRequire,
+    idToRemoteMap,
   } = options;
 
   if (webpackRequire.o(chunkMapping, chunkId)) {
@@ -17,6 +18,7 @@ export function remotes(options: RemotesOptions) {
         getScope = [];
       }
       const data = idToExternalAndNameMapping[id];
+      const remoteInfos = idToRemoteMap[id];
       // @ts-ignore seems not work
       if (getScope.indexOf(data) >= 0) {
         return;
@@ -84,7 +86,6 @@ export function remotes(options: RemotesOptions) {
         external: RemoteEntryExports,
         first: 1 | 0,
       ) => handleFunction(external.get, data[1], getScope, 0, onFactory, first);
-      const useRuntimeLoad = ['script'].includes(data[3]) && data[4];
       // eslint-disable-next-line no-var
       var onFactory = (factory: () => any) => {
         data.p = 1;
@@ -94,7 +95,8 @@ export function remotes(options: RemotesOptions) {
       };
       const onRemoteLoaded = () => {
         try {
-          const remoteModuleName = data[4] + data[1].slice(1);
+          const remoteName = remoteInfos[0].remoteName;
+          const remoteModuleName = remoteName + data[1].slice(1);
           return webpackRequire.federation.instance!.loadRemote(
             remoteModuleName,
             { loadFactory: false },
@@ -103,6 +105,12 @@ export function remotes(options: RemotesOptions) {
           onError(error as Error);
         }
       };
+
+      const useRuntimeLoad =
+        remoteInfos.length === 1 &&
+        ['script'].includes(remoteInfos[0].externalType) &&
+        remoteInfos[0].request;
+
       if (useRuntimeLoad) {
         handleFunction(onRemoteLoaded, data[2], 0, 0, onFactory, 1);
       } else {

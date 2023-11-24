@@ -47,15 +47,17 @@ class ContainerReferencePlugin {
     this._remoteType = options.remoteType;
     this._remotes = parseOptions(
       options.remotes,
-      (item) => ({
+      (item,key) => ({
         external: Array.isArray(item) ? item : [item],
         shareScope: options.shareScope || 'default',
+        name: key
       }),
-      (item) => ({
+      (item,key) => ({
         external: Array.isArray(item.external)
           ? item.external
           : [item.external],
         shareScope: item.shareScope || options.shareScope || 'default',
+        name: item.name || key
       }),
     );
   }
@@ -134,6 +136,7 @@ class ContainerReferencePlugin {
                     `.${data.request.slice(key.length)}`,
                     //@ts-ignore
                     config.shareScope,
+                    config.name
                   );
                 }
               }
