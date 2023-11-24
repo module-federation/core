@@ -28,13 +28,11 @@ type InferredGlobalShareScope = {
   [scope: string]: InferredShareScope;
 };
 
-// shareScope, name, externalModuleId, externalType, remoteName
+// shareScope, name, externalModuleId
 type IdToExternalAndNameMappingItem = [
   string,
   string,
   string | number,
-  string,
-  string,
 ];
 
 interface IdToExternalAndNameMappingItemWithPromise
@@ -65,6 +63,12 @@ interface ModuleToHandlerMappingItem {
   shareKey: string;
 }
 
+interface IdToRemoteMapItem {
+  externalType: string;
+  request: string;
+  remoteName: string;
+}
+
 export interface RemotesOptions {
   chunkId: string | number;
   promises: Promise<any>[];
@@ -73,6 +77,7 @@ export interface RemotesOptions {
     string,
     IdToExternalAndNameMappingItemWithPromise
   >;
+  idToRemoteMap: Record<string, IdToRemoteMapItem[]>;
   webpackRequire: WebpackRequire;
 }
 
