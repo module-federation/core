@@ -47,17 +47,17 @@ class ContainerReferencePlugin {
     this._remoteType = options.remoteType;
     this._remotes = parseOptions(
       options.remotes,
-      (item,key) => ({
+      (item) => ({
         external: Array.isArray(item) ? item : [item],
         shareScope: options.shareScope || 'default',
-        name: key
+        name: undefined,
       }),
-      (item,key) => ({
+      (item) => ({
         external: Array.isArray(item.external)
           ? item.external
           : [item.external],
         shareScope: item.shareScope || options.shareScope || 'default',
-        name: item.name || key
+        name: item.name,
       }),
     );
   }
@@ -70,7 +70,7 @@ class ContainerReferencePlugin {
   apply(compiler: Compiler): void {
     const { _remotes: remotes, _remoteType: remoteType } = this;
     // @ts-ignore
-		new FederationRuntimePlugin().apply(compiler);
+    new FederationRuntimePlugin().apply(compiler);
 
     /** @type {Record<string, string>} */
     const remoteExternals: Record<string, string> = {};
@@ -136,7 +136,7 @@ class ContainerReferencePlugin {
                     `.${data.request.slice(key.length)}`,
                     //@ts-ignore
                     config.shareScope,
-                    config.name
+                    config.name,
                   );
                 }
               }

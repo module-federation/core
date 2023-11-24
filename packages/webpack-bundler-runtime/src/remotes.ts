@@ -93,9 +93,27 @@ export function remotes(options: RemotesOptions) {
           module.exports = factory();
         };
       };
+      const extractUrlAndGlobal = (urlAndGlobal: string) => {
+        const index = urlAndGlobal.indexOf('@');
+        if (index <= 0 || index === urlAndGlobal.length - 1) {
+          throw new Error(`Invalid request "${urlAndGlobal}"`);
+        }
+        return [
+          urlAndGlobal.substring(index + 1),
+          urlAndGlobal.substring(0, index),
+        ];
+      };
+
       const onRemoteLoaded = () => {
         try {
-          const remoteName = remoteInfos[0].remoteName;
+          let remoteName = remoteInfos[0].remoteName;
+          if (!remoteName) {
+            const [globalName, _entryUrl] = extractUrlAndGlobal(
+              remoteInfos[0].request,
+            );
+            remoteName = globalName;
+          }
+
           const remoteModuleName = remoteName + data[1].slice(1);
           return webpackRequire.federation.instance!.loadRemote(
             remoteModuleName,
