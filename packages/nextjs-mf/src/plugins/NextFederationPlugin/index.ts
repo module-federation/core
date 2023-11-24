@@ -63,7 +63,7 @@ export class NextFederationPlugin {
    * @param compiler The webpack compiler object.
    */
   apply(compiler: Compiler) {
-    process.env.FEDERATION_WEBPACK_PATH = getWebpackPath(compiler);
+    process.env['FEDERATION_WEBPACK_PATH'] = getWebpackPath(compiler);
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
     //@ts-ignore
@@ -83,7 +83,7 @@ export class NextFederationPlugin {
   private validateOptions(compiler: Compiler): boolean {
     const compilerValid = validateCompilerOptions(compiler);
     const pluginValid = validatePluginOptions(this._options);
-    const envValid = process.env.NEXT_PRIVATE_LOCAL_WEBPACK;
+    const envValid = process.env['NEXT_PRIVATE_LOCAL_WEBPACK'];
     if (compilerValid === undefined)
       console.error('Compiler validation failed');
     if (pluginValid === undefined) console.error('Plugin validation failed');
