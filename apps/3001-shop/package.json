@@ -10,6 +10,8 @@
     "react-dom": "18.2.0"
   },
   "devDependencies": {
-    "@module-federation/nextjs-mf": "7.0.8"
+    "@module-federation/nextjs-mf": "7.0.8",
+    "@module-federation/sdk": "3.0.0",
+    "@module-federation/utilities": "3.0.0"
   }
 }

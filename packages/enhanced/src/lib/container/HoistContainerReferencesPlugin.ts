@@ -1,8 +1,11 @@
-import Compiler from 'webpack/lib/Compiler';
-import Module from 'webpack/lib/Module';
-import Chunk from 'webpack/lib/Chunk';
-import Compilation from 'webpack/lib/Compilation';
-import ChunkGroup from 'webpack/lib/ChunkGroup';
+import {
+  Compiler,
+  Module,
+  Chunk,
+  Compilation,
+  ChunkGroup,
+  WebpackPluginInstance,
+} from 'webpack';
 
 /**
  * @typedef {import("webpack").Compiler} Compiler
@@ -15,7 +18,7 @@ import ChunkGroup from 'webpack/lib/ChunkGroup';
  * This class is used to hoist container references in the code.
  * @constructor
  */
-export class HoistContainerReferences {
+export class HoistContainerReferences implements WebpackPluginInstance {
   /**
    * @function apply
    * @param {Compiler} compiler The webpack compiler object

@@ -1,6 +1,8 @@
-import { Compiler } from 'webpack';
+import type { Compiler, WebpackPluginInstance } from 'webpack';
 
-export class AddRuntimeRequirementToPromiseExternal {
+export class AddRuntimeRequirementToPromiseExternal
+  implements WebpackPluginInstance
+{
   apply(compiler: Compiler) {
     compiler.hooks.compilation.tap(
       'AddRuntimeRequirementToPromiseExternal',
