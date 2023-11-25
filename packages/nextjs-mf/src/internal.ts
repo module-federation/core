@@ -4,8 +4,8 @@ import type {
   SharedObject,
 } from '@module-federation/utilities';
 import { createDelegatedModule } from '@module-federation/utilities';
-import { isRequiredVersion } from '@module-federation/enhanced/lib/sharing/utils';
-import { parseOptions } from '@module-federation/enhanced/lib/container/options';
+import { isRequiredVersion } from '@module-federation/enhanced/src/lib/sharing/utils';
+import { parseOptions } from '@module-federation/enhanced/src/lib/container/options';
 
 /**
  * @typedef SharedObject

@@ -6,9 +6,9 @@
 'use strict';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { ModuleFederationPluginOptions } from './types';
-import SharePlugin from '@module-federation/enhanced/lib/sharing/SharePlugin';
-import ContainerPlugin from '@module-federation/enhanced/lib/container/ContainerPlugin';
-import ContainerReferencePlugin from '@module-federation/enhanced/lib/container/ContainerReferencePlugin';
+import SharePlugin from '@module-federation/enhanced/src/lib/sharing/SharePlugin';
+import ContainerPlugin from '@module-federation/enhanced/src/lib/container/ContainerPlugin';
+import ContainerReferencePlugin from '@module-federation/enhanced/src/lib/container/ContainerReferencePlugin';
 const createSchemaValidation = require('webpack/lib/util/create-schema-validation');
 const isValidExternalsType = require('webpack/schemas/plugins/container/ExternalsType.check.js');
 

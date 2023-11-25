@@ -3,7 +3,9 @@
   "compilerOptions": {
     "paths": {
       "@module-federation/sdk": ["dist/packages/sdk"],
-      "@module-federation/sdk/*": ["dist/packages/sdk/*"],
+      "@module-federation/sdk/normalize-webpack-path": [
+        "dist/packages/sdk/normalize-webpack-path.cjs.js"
+      ],
       "@module-federation/core": ["dist/packages/core/src/index.js"],
       "@module-federation/native-federation-tests": [
         "dist/packages/native-federation-tests/src/index.js"
@@ -23,8 +25,17 @@
       ],
       "@module-federation/utilities": ["dist/packages/utilities/src/index.js"],
       "@module-federation/utilities/*": ["dist/packages/utilities/*"],
-      "@module-federation/enhanced": ["dist/packages/enhanced/src/index.js"],
-      "@module-federation/enhanced/*": ["dist/packages/enhanced/*"]
+      "@module-federation/enhanced": ["dist/packages/enhanced"],
+      "@module-federation/enhanced/*": ["dist/packages/enhanced/*"],
+      "@module-federation/enhanced/lib/sharing/utils": [
+        "dist/packages/enhanced/lib/sharing/utils.cjs"
+      ],
+      "@module-federation/enhanced/lib/container/*": [
+        "dist/packages/enhanced/lib/container/*.cjs"
+      ],
+        "@module-federation/enhanced/runtime/ModuleInfoRuntime": [
+        "dist/packages/enhanced/runtime/ModuleInfoRuntime.cjs"
+      ]
     }
   }
 }

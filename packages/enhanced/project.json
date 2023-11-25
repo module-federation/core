@@ -5,21 +5,13 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/rollup:rollup",
+      "executor": "@nx/js:swc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/enhanced",
         "main": "packages/enhanced/src/index.ts",
         "tsConfig": "packages/enhanced/tsconfig.lib.json",
-        "project": "packages/enhanced/package.json",
-        "compiler": "swc",
-        "format": ["cjs", "esm"],
-        "generateExportsField": true,
-        "additionalEntryPoints": [
-          "packages/enhanced/src/lib/*/*.ts",
-          "packages/enhanced/src/lib/*/*.js"
-        ],
-        "assets": [],
+        "assets": ["packages/enhanced/*.md"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true
       },

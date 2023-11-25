@@ -5,7 +5,7 @@ import {
 } from '@module-federation/utilities';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import { HoistContainerReferences } from '@module-federation/enhanced/lib/container/HoistContainerReferencesPlugin';
+import { HoistContainerReferences } from '@module-federation/enhanced/src/lib/container/HoistContainerReferencesPlugin';
 
 /**
  * Applies client-specific plugins.
