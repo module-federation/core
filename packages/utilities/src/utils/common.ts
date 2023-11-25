@@ -7,7 +7,6 @@ import type {
   Remotes,
   RuntimeRemote,
   WebpackRemoteContainer,
-  WebpackShareScopes,
 } from '../types';
 import { loadScript } from './pure';
 

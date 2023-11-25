@@ -1,12 +1,12 @@
-import {
-  Chunk,
-  Compiler,
-  Compilation,
-  ChunkGraph,
-  RuntimeGlobals,
-} from 'webpack';
+import type { Chunk, Compiler, Compilation, ChunkGraph } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+const { RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 import type { ModuleFederationPluginOptions } from '../types';
-import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
+const StartupChunkDependenciesPlugin = require(
+  normalizeWebpackPath('webpack/lib/runtime/StartupChunkDependenciesPlugin'),
+) as typeof import('webpack/lib/runtime/StartupChunkDependenciesPlugin');
 import ChunkLoadingRuntimeModule from './DynamicFilesystemChunkLoadingRuntimeModule';
 import AutoPublicPathRuntimeModule from './RemotePublicPathRuntimeModule';
 
