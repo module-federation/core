@@ -1,4 +1,4 @@
-import type { container, Compiler } from 'webpack';
+import { container, Compiler } from 'webpack';
 import type {
   ModuleFederationPluginOptions,
   SharedObject,
@@ -9,7 +9,7 @@ import {
   getDelegates,
 } from '../../internal';
 import { hasLoader, injectRuleLoader } from '../../loaders/helpers';
-const { ModuleFederationPlugin } = require('@module-federation/enhanced');
+import { ModuleFederationPlugin } from '@module-federation/enhanced';
 
 type ConstructableModuleFederationPlugin = new (
   options: ModuleFederationPluginOptions,

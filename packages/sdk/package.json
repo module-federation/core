@@ -13,6 +13,5 @@
   "sideEffects": false,
   "main": "./index.cjs.js",
   "module": "./index.esm.js",
-  "types": "./index.cjs.d.ts",
-  "exports": {}
+  "types": "./index.cjs.d.ts"
 }

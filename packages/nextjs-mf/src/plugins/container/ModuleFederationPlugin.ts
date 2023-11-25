@@ -9,8 +9,15 @@ import { ModuleFederationPluginOptions } from './types';
 import SharePlugin from '@module-federation/enhanced/src/lib/sharing/SharePlugin';
 import ContainerPlugin from '@module-federation/enhanced/src/lib/container/ContainerPlugin';
 import ContainerReferencePlugin from '@module-federation/enhanced/src/lib/container/ContainerReferencePlugin';
-const createSchemaValidation = require('webpack/lib/util/create-schema-validation');
-const isValidExternalsType = require('webpack/schemas/plugins/container/ExternalsType.check.js');
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+const createSchemaValidation = require(
+  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
+) as typeof import('webpack/lib/util/create-schema-validation');
+const isValidExternalsType = require(
+  normalizeWebpackPath(
+    'webpack/schemas/plugins/container/ExternalsType.check.js',
+  ),
+) as typeof import('webpack/schemas/plugins/container/ExternalsType.check');
 
 /** @typedef {import("./ModuleFederationPluginTypes").ExternalsType} ExternalsType */
 /** @typedef {import("./ModuleFederationPluginTypes").any} any */
@@ -19,9 +26,17 @@ const isValidExternalsType = require('webpack/schemas/plugins/container/External
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
-  require('webpack/schemas/plugins/container/ModuleFederationPlugin.check.js'),
+  require(
+    normalizeWebpackPath(
+      'webpack/schemas/plugins/container/ModuleFederationPlugin.check.js',
+    ),
+  ),
   () =>
-    require('webpack/schemas/plugins/container/ModuleFederationPlugin.json'),
+    require(
+      normalizeWebpackPath(
+        'webpack/schemas/plugins/container/ModuleFederationPlugin.json',
+      ),
+    ),
   {
     name: 'Module Federation Plugin',
     baseDataPath: 'options',

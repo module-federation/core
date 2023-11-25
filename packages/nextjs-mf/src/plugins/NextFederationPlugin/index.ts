@@ -9,21 +9,16 @@ import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
-  SharedObject,
 } from '@module-federation/utilities';
 import { Compiler } from 'webpack';
-import { createRuntimeVariables } from '@module-federation/utilities';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
-import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
 import {
-  applyRemoteDelegates,
   getModuleFederationPluginConstructor,
   retrieveDefaultShared,
   applyPathFixes,
 } from './next-fragments';
-import { removeUnnecessarySharedKeys } from './remove-unnecessary-shared-keys';
 import { setOptions } from './set-options';
 import {
   validateCompilerOptions,
@@ -36,7 +31,6 @@ import {
   handleServerExternals,
 } from './apply-server-plugins';
 import { applyClientPlugins } from './apply-client-plugins';
-import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import ModuleFederationNextFork from '../container/ModuleFederationPlugin';
 import { parseRemotes } from '@module-federation/node';
 
