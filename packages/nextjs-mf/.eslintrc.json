@@ -10,7 +10,11 @@
       "rules": {
         "@typescript-eslint/no-unused-vars": "warn",
         "@typescript-eslint/ban-ts-comment": "warn",
-        "@typescript-eslint/no-var-requires": 0
+        "@typescript-eslint/no-var-requires": 0,
+        "@typescript-eslint/no-restricted-imports": [
+          "error",
+          { "paths": ["webpack"] }
+        ]
       }
     },
     {
@@ -19,7 +23,9 @@
     },
     {
       "files": ["*.js", "*.jsx"],
-      "rules": {}
+      "rules": {
+        "no-restricted-imports": ["error", { "paths": ["webpack"] }]
+      }
     }
   ]
 }
