@@ -1,6 +1,6 @@
 'use strict';
 
-import type { Compiler, container } from 'webpack';
+import { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
 import { ModuleInfoRuntimePlugin } from '@module-federation/enhanced';
