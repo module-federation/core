@@ -42,6 +42,10 @@ module.exports = (rollupConfig, projectOptions) => {
   //   rollupConfig.output.chunkFileNames = rollupConfig.output.chunkFileNames.replace('.esm.js', '.mjs')
   // }
 
+  rollupConfig.input['lib/container/ContainerPlugin'] = require.resolve(
+    './src/lib/container/ContainerPlugin.ts',
+  );
+
   console.log(rollupConfig.plugins);
   const project = projectOptions.project;
   const pkg = require(project);

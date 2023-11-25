@@ -2,6 +2,8 @@
   "extends": "tsconfig.base.json",
   "compilerOptions": {
     "paths": {
+      "@module-federation/enhanced": ["dist/packages/enhanced"],
+      "@module-federation/enhanced/*": ["dist/packages/enhanced/*"],
       "@module-federation/sdk": ["dist/packages/sdk"],
       "@module-federation/sdk/normalize-webpack-path": [
         "dist/packages/sdk/normalize-webpack-path.cjs.js"
@@ -24,18 +26,7 @@
         "dist/packages/typescript/src/index.js"
       ],
       "@module-federation/utilities": ["dist/packages/utilities/src/index.js"],
-      "@module-federation/utilities/*": ["dist/packages/utilities/*"],
-      "@module-federation/enhanced": ["dist/packages/enhanced"],
-      "@module-federation/enhanced/*": ["dist/packages/enhanced/*"],
-      "@module-federation/enhanced/lib/sharing/utils": [
-        "dist/packages/enhanced/lib/sharing/utils.cjs"
-      ],
-      "@module-federation/enhanced/lib/container/*": [
-        "dist/packages/enhanced/lib/container/*.cjs"
-      ],
-      "@module-federation/enhanced/runtime/ModuleInfoRuntime": [
-        "dist/packages/enhanced/runtime/ModuleInfoRuntime.cjs"
-      ]
+      "@module-federation/utilities/*": ["dist/packages/utilities/*"]
     }
   }
 }
