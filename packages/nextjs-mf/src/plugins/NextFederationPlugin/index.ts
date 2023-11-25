@@ -10,7 +10,7 @@ import type {
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
 } from '@module-federation/utilities';
-import { Compiler } from 'webpack';
+import type { Compiler } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';

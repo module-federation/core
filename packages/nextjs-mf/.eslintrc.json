@@ -13,7 +13,16 @@
         "@typescript-eslint/no-var-requires": 0,
         "@typescript-eslint/no-restricted-imports": [
           "error",
-          { "paths": ["webpack"] }
+          {
+            "patterns": ["webpack/lib/*"],
+            "paths": [
+              {
+                "name": "webpack",
+                "message": "Please use require(normalizeWebpackPath('webpack')) instead.",
+                "allowTypeImports": true
+              }
+            ]
+          }
         ]
       }
     },
@@ -22,10 +31,7 @@
       "rules": {}
     },
     {
-      "files": ["*.js", "*.jsx"],
-      "rules": {
-        "no-restricted-imports": ["error", { "paths": ["webpack"] }]
-      }
+      "files": ["*.js", "*.jsx"]
     }
   ]
 }
