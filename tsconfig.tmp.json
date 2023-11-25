@@ -33,7 +33,7 @@
       "@module-federation/enhanced/lib/container/*": [
         "dist/packages/enhanced/lib/container/*.cjs"
       ],
-        "@module-federation/enhanced/runtime/ModuleInfoRuntime": [
+      "@module-federation/enhanced/runtime/ModuleInfoRuntime": [
         "dist/packages/enhanced/runtime/ModuleInfoRuntime.cjs"
       ]
     }
