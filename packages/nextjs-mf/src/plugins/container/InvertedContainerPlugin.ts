@@ -1,4 +1,4 @@
-import type Compiler from 'webpack/lib/Compiler';
+import { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from './types';
 import EmbeddedContainerPlugin from './EmbeddedContainerPlugin';
 import { AsyncBoundaryPlugin } from '@module-federation/enhanced';
@@ -48,6 +48,7 @@ class InvertedContainerPlugin {
       chunkToEmbed: this.options.chunkToEmbed,
     }).apply(compiler);
 
+    //@ts-ignore
     const asyncBoundaryPlugin = new AsyncBoundaryPlugin().apply(compiler);
     new HoistPseudoEager().apply(compiler);
     // The following code is commented out for future reference.

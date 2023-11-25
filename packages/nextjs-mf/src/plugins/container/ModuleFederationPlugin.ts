@@ -4,16 +4,13 @@
 */
 
 'use strict';
-
-import type Compiler from 'webpack/lib/Compiler';
-const isValidExternalsType = require('webpack/schemas/plugins/container/ExternalsType.check.js');
-const SharePlugin =
-  require('@module-federation/enhanced/src/lib/sharing/SharePlugin').default;
+import type { Compiler, WebpackPluginInstance } from 'webpack';
+import { ModuleFederationPluginOptions } from './types';
+import SharePlugin from '@module-federation/enhanced/src/lib/sharing/SharePlugin';
+import ContainerPlugin from '@module-federation/enhanced/src/lib/container/ContainerPlugin';
+import ContainerReferencePlugin from '@module-federation/enhanced/src/lib/container/ContainerReferencePlugin';
 const createSchemaValidation = require('webpack/lib/util/create-schema-validation');
-const ContainerPlugin =
-  require('@module-federation/enhanced/src/lib/container/ContainerPlugin').default;
-const ContainerReferencePlugin =
-  require('@module-federation/enhanced/src/lib/container/ContainerReferencePlugin').default;
+const isValidExternalsType = require('webpack/schemas/plugins/container/ExternalsType.check.js');
 
 /** @typedef {import("./ModuleFederationPluginTypes").ExternalsType} ExternalsType */
 /** @typedef {import("./ModuleFederationPluginTypes").any} any */
@@ -31,14 +28,14 @@ const validate = createSchemaValidation(
   },
 );
 
-class ModuleFederationPlugin {
-  private _mainOptions: any;
-  private _embeddedOptions: any;
-  /**
-   * @param {any} mainOptions main options
-   * @param {any} embeddedOptions embedded options
-   */
-  constructor(mainOptions: any, embeddedOptions: any) {
+class ModuleFederationPlugin implements WebpackPluginInstance {
+  private _mainOptions: ModuleFederationPluginOptions;
+  private _embeddedOptions: ModuleFederationPluginOptions;
+
+  constructor(
+    mainOptions: ModuleFederationPluginOptions,
+    embeddedOptions: ModuleFederationPluginOptions,
+  ) {
     validate(mainOptions);
     validate(embeddedOptions);
 
@@ -84,6 +81,7 @@ class ModuleFederationPlugin {
           runtime: mainOptions.runtime,
           shareScope: mainOptions.shareScope,
           exposes: mainOptions.exposes,
+          //@ts-ignore
         }).apply(compiler);
         new ContainerPlugin({
           //@ts-ignore
@@ -93,6 +91,7 @@ class ModuleFederationPlugin {
           runtime: embeddedOptions.runtime,
           shareScope: embeddedOptions.shareScope,
           exposes: mainOptions.exposes,
+          //@ts-ignore
         }).apply(compiler);
       }
       if (
@@ -106,12 +105,14 @@ class ModuleFederationPlugin {
           remoteType,
           shareScope: mainOptions.shareScope,
           remotes: mainOptions.remotes,
+          //@ts-ignore
         }).apply(compiler);
       }
       if (embeddedOptions.shared) {
         new SharePlugin({
           shared: embeddedOptions.shared,
           shareScope: embeddedOptions.shareScope,
+          //@ts-ignore
         }).apply(compiler);
       }
     });
