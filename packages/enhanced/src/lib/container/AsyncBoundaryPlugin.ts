@@ -2,7 +2,6 @@ import Compiler from 'webpack/lib/Compiler';
 import Compilation from 'webpack/lib/Compilation';
 import Chunk, { Source } from 'webpack/lib/Chunk';
 import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import Template from 'webpack/lib/Template';
 import SortableSet from 'webpack/lib/util/SortableSet';
 import Module from 'webpack/lib/Module';
 import { StartupRenderContext } from 'webpack/lib/javascript/JavascriptModulesPlugin';
@@ -54,7 +53,7 @@ class AsyncEntryStartupPlugin {
       'AsyncEntryStartupPlugin',
       (
         source: Source,
-        renderContext: Module,
+        _renderContext: Module,
         upperContext: StartupRenderContext,
       ) => {
         const isSingleRuntime = compiler.options?.optimization?.runtimeChunk;
@@ -81,6 +80,7 @@ class AsyncEntryStartupPlugin {
           if (!runtimeItem) {
             continue;
           }
+
           const requirements =
             compilation.chunkGraph.getTreeRuntimeRequirements(runtimeItem);
           const hasRemoteModules =
@@ -99,12 +99,14 @@ class AsyncEntryStartupPlugin {
             : [upperContext.chunk.id];
 
           remotes = this._getRemotes(
+            compiler.webpack.RuntimeGlobals,
             requirements,
             Boolean(hasRemoteModules),
             chunksToRef,
             remotes,
           );
           shared = this._getShared(
+            compiler.webpack.RuntimeGlobals,
             requirements,
             Boolean(consumeShares),
             chunksToRef,
@@ -120,13 +122,15 @@ class AsyncEntryStartupPlugin {
           compilation,
           upperContext,
         );
-        return this._getTemplateString(
+        const templateString = this._getTemplateString(
           compiler,
           initialEntryModules,
           shared,
           remotes,
           source,
         );
+
+        return new compiler.webpack.sources.ConcatSource(templateString);
       },
     );
   }
@@ -150,13 +154,14 @@ class AsyncEntryStartupPlugin {
     return runtime;
   }
   private _getRemotes(
+    runtimeGlobals: typeof RuntimeGlobals,
     requirements: ReadonlySet<string>,
     hasRemoteModules: boolean,
-    chunksToRef: (Chunk.ChunkId | null)[],
+    chunksToRef: (Chunk['id'] | null)[],
     remotes: string,
   ): string {
     if (
-      !requirements.has(RuntimeGlobals.currentRemoteGetScope) &&
+      !requirements.has(runtimeGlobals.currentRemoteGetScope) &&
       !hasRemoteModules &&
       !requirements.has('__webpack_require__.vmok')
     ) {
@@ -187,15 +192,16 @@ class AsyncEntryStartupPlugin {
   }
 
   private _getShared(
+    runtimeGlobals: typeof RuntimeGlobals,
     requirements: ReadonlySet<string>,
     consumeShares: boolean,
-    chunksToRef: (Chunk.ChunkId | null)[],
+    chunksToRef: (Chunk['id'] | null)[],
     shared: string,
   ): string {
     if (
-      !requirements.has(RuntimeGlobals.shareScopeMap) &&
+      !requirements.has(runtimeGlobals.shareScopeMap) &&
       !consumeShares &&
-      !requirements.has(RuntimeGlobals.initializeSharing)
+      !requirements.has(runtimeGlobals.initializeSharing)
     ) {
       return shared;
     }
@@ -263,6 +269,7 @@ class AsyncEntryStartupPlugin {
     remotes: string,
     source: Source,
   ) {
+    const { Template } = compiler.webpack;
     if (
       compiler.options?.experiments?.topLevelAwait &&
       compiler.options?.experiments?.outputModule
@@ -273,7 +280,7 @@ class AsyncEntryStartupPlugin {
         shared,
         remotes,
         'await Promise.all(promiseTrack)',
-        Template.indent(source.source()),
+        Template.indent(source.source().toString()),
       ]);
     }
     return Template.asString([
@@ -282,7 +289,7 @@ class AsyncEntryStartupPlugin {
       shared,
       remotes,
       'var __webpack_exports__ = Promise.all(promiseTrack).then(function() {',
-      Template.indent(source.source()),
+      Template.indent(source.source().toString()),
       Template.indent('return __webpack_exports__'),
       '});',
     ]);

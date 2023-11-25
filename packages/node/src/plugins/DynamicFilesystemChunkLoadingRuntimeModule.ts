@@ -1,8 +1,13 @@
 /*
   MIT License http://www.opensource.org/licenses/mit-license.php
 */
-import type { Chunk, ChunkGraph, Compiler } from 'webpack';
-import { RuntimeModule, RuntimeGlobals, Template } from 'webpack';
+import {
+  Chunk,
+  RuntimeModule,
+  RuntimeGlobals,
+  Template,
+  Compiler,
+} from 'webpack';
 import { getUndoPath } from 'webpack/lib/util/identifier';
 import { SyncWaterfallHook } from 'tapable';
 import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';

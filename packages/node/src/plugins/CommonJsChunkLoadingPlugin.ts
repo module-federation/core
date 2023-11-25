@@ -1,11 +1,14 @@
-import type { Chunk, Compiler, Compilation, ChunkGraph } from 'webpack';
+import {
+  Chunk,
+  Compiler,
+  Compilation,
+  ChunkGraph,
+  RuntimeGlobals,
+} from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import StartupChunkDependenciesPlugin from 'webpack/lib/runtime/StartupChunkDependenciesPlugin';
 import ChunkLoadingRuntimeModule from './DynamicFilesystemChunkLoadingRuntimeModule';
 import AutoPublicPathRuntimeModule from './RemotePublicPathRuntimeModule';
-//@ts-ignore
-import PublicPathRuntimeModule from 'webpack/lib/runtime/PublicPathRuntimeModule';
 
 interface DynamicFilesystemChunkLoadingOptions
   extends ModuleFederationPluginOptions {
