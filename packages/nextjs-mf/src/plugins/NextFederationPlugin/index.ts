@@ -13,6 +13,7 @@ import type {
 } from '@module-federation/utilities';
 import { Compiler } from 'webpack';
 import { createRuntimeVariables } from '@module-federation/utilities';
+import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
@@ -62,6 +63,7 @@ export class NextFederationPlugin {
    * @param compiler The webpack compiler object.
    */
   apply(compiler: Compiler) {
+    process.env['FEDERATION_WEBPACK_PATH'] = getWebpackPath(compiler);
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
     //@ts-ignore
