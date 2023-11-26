@@ -1,4 +1,4 @@
-import type Compiler from 'webpack/lib/Compiler';
+import type { Compiler } from 'webpack';
 import {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
@@ -39,24 +39,10 @@ export function applyClientPlugins(
   // Build will hang without this. Likely something in my plugin
   compiler.options.optimization.splitChunks = undefined;
   new HoistContainerReferences().apply(compiler);
-  // new DelegateModulesPlugin({
-  //   container: name,
-  //   runtime: 'webpack',
-  //   remotes,
-  //   debug: extraOptions.debug,
-  //   //@ts-ignore
-  // }).apply(compiler);
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
   if (extraOptions.automaticPageStitching) {
     console.warn('[nextjs-mf]', 'automatic page stitching is disabled in v7');
-    // compiler.options.module.rules.push({
-    //   test: /next[\\/]dist[\\/]client[\\/]page-loader\.js$/,
-    //   loader: path.resolve(
-    //     __dirname,
-    //     '../../loaders/patchNextClientPageLoader'
-    //   ),
-    // });
   }
 
   // If a custom library is set, log an error message
