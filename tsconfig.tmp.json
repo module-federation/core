@@ -21,8 +21,15 @@
       ],
       "@module-federation/utilities": ["dist/packages/utilities/src/index.js"],
       "@module-federation/utilities/*": ["dist/packages/utilities/*"],
-      "@module-federation/enhanced": ["dist/packages/enhanced/src/index.js"],
-      "@module-federation/enhanced/*": ["dist/packages/enhanced/*"]
+      "@module-federation/enhanced": ["dist/packages/enhanced"],
+      "@module-federation/enhanced/*": ["dist/packages/enhanced/*"],
+      "@module-federation/sdk": ["dist/packages/sdk"],
+      "@module-federation/sdk/normalize-webpack-path": [
+        "dist/packages/sdk/normalize-webpack-path.cjs.js"
+      ],
+      "@module-federation/runtime": ["dist/packages/runtime"],
+      "@module-federation/runtime/*": ["dist/packages/runtime/*"],
+      "@module-federation/webpack-bundler-runtime": ["dist/packages/webpack-bundler-runtime/index.cjs"],
     }
   }
 }

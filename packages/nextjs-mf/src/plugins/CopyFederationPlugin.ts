@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import { Compilation, Compiler } from 'webpack';
+import type { Compilation, Compiler } from 'webpack';
 
 /**
  * Plugin to copy build output files.
