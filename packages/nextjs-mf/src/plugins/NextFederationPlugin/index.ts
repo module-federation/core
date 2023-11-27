@@ -11,7 +11,7 @@ import type {
   NextFederationPluginOptions,
   SharedObject,
 } from '@module-federation/utilities';
-import type Compiler from 'webpack/lib/Compiler';
+import { Compiler } from 'webpack';
 import { createRuntimeVariables } from '@module-federation/utilities';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
@@ -81,7 +81,7 @@ export class NextFederationPlugin {
   private validateOptions(compiler: Compiler): boolean {
     const compilerValid = validateCompilerOptions(compiler);
     const pluginValid = validatePluginOptions(this._options);
-    const envValid = process.env.NEXT_PRIVATE_LOCAL_WEBPACK;
+    const envValid = process.env['NEXT_PRIVATE_LOCAL_WEBPACK'];
     if (compilerValid === undefined)
       console.error('Compiler validation failed');
     if (pluginValid === undefined) console.error('Plugin validation failed');
@@ -191,6 +191,7 @@ export class NextFederationPlugin {
     );
     new ModuleFederationNextFork(
       normalFederationPluginOptions,
+      //@ts-ignore
       embeddedOptions,
     ).apply(compiler);
   }

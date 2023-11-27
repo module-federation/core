@@ -1,4 +1,4 @@
-import { RuleSetConditionAbsolute } from 'webpack';
+import type { RuleSetConditionAbsolute } from 'webpack';
 
 /**
  * Compares two regular expressions or other types of conditions to see if they are equal.
