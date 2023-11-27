@@ -63,6 +63,7 @@ interface IdToRemoteMapItem {
   externalType: string;
   request: string;
   remoteName?: string;
+  externalModuleId?: string | number;
 }
 
 export interface RemotesOptions {
@@ -106,11 +107,11 @@ export interface Federation {
   bundlerRuntime?: {
     remotes: (options: RemotesOptions) => void;
     consumes: (options: ConsumesOptions) => void;
-    I: (
-      name: string,
-      webpackRequire: WebpackRequire,
-    ) => Promise<boolean> | boolean;
+    I: typeof initializeSharing;
     S: InferredGlobalShareScope;
     installInitialConsumes: (options: InstallInitialConsumesOptions) => any;
+  };
+  bundlerRuntimeOptions?: {
+    remotes: RemotesOptions;
   };
 }

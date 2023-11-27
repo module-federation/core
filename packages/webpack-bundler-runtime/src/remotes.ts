@@ -11,6 +11,14 @@ export function remotes(options: RemotesOptions) {
     idToRemoteMap,
   } = options;
 
+  if (!webpackRequire.federation.bundlerRuntimeOptions) {
+    webpackRequire.federation.bundlerRuntimeOptions = {
+      remotes: options,
+    };
+  } else if (!webpackRequire.federation.bundlerRuntimeOptions.remotes) {
+    webpackRequire.federation.bundlerRuntimeOptions.remotes = options;
+  }
+
   if (webpackRequire.o(chunkMapping, chunkId)) {
     chunkMapping[chunkId].forEach((id) => {
       let getScope = webpackRequire.R;

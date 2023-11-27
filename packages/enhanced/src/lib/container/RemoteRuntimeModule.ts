@@ -77,10 +77,15 @@ class RemoteRuntimeModule extends RuntimeModule {
 
           idToRemoteMap[id] = [];
           remoteModules.forEach((remoteModule) => {
+            const externalModuleId =
+              chunkGraph &&
+              remoteModule &&
+              chunkGraph.getModuleId(remoteModule);
             idToRemoteMap[id].push({
               externalType: remoteModule.externalType,
               request: remoteModule.request as string,
               remoteName,
+              externalModuleId,
             });
           });
         }

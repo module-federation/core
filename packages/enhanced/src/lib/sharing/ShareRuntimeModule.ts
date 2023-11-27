@@ -98,13 +98,14 @@ class ShareRuntimeModule extends RuntimeModule {
       `${RuntimeGlobals.initializeSharing} = ${runtimeTemplate.basicFunction(
         'name, initScope',
         [
-          'if(!initScope) initScope = [];',
-          '// handling circular init calls',
-          'var initToken = initTokens[name];',
-          'if(!initToken) initToken = initTokens[name] = {};',
-          'if(initScope.indexOf(initToken) >= 0) return;',
-          'initScope.push(initToken);',
-          `return ${federationGlobal}.bundlerRuntime.I(name,${RuntimeGlobals.require})`,
+          `return ${federationGlobal}.bundlerRuntime.I({${Template.indent([
+            `shareScopeName: name,`,
+            `webpackRequire: ${RuntimeGlobals.require},`,
+            `initPromises: initPromises,`,
+            `initTokens: initTokens,`,
+            `initScope: initScope,`,
+          ])}`,
+          '})',
           // '// only runs once',
           // 'if(initPromises[name]) return initPromises[name];',
           // '// creates a new share scope if needed',

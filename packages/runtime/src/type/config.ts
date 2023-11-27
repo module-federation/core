@@ -120,7 +120,7 @@ export type RemoteEntryExports = {
   get: (id: string) => () => Promise<Module>;
   init: (
     shareScope: GlobalShareScope[string],
-    initScope?: Array<Record<string, never>>,
+    initScope?: Array<Record<string, any>>,
     remoteEntryInitOPtions?: RemoteEntryInitOptions,
-  ) => void;
+  ) => Promise<boolean> | boolean | void;
 };

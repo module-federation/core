@@ -73,23 +73,15 @@ const findVersion = (
     if (callback(prev as string, cur)) {
       return cur;
     }
+
+    // default version is '0' https://github.com/webpack/webpack/blob/main/lib/sharing/ProvideSharedModule.js#L136
+    if (prev === '0') {
+      return cur;
+    }
+
     return prev;
   }, 0) as string;
 };
-
-function getHighestVersion(scope: string, pkgName: string): string {
-  const globalShares = Global.__FEDERATION__.__SHARE__;
-
-  const versions = Object.keys(globalShares[scope][pkgName]);
-  const sortVersions = versions.sort((a, b) => {
-    if (versionLt(a, b)) {
-      return 1;
-    } else {
-      return -1;
-    }
-  });
-  return sortVersions[0];
-}
 
 function findSingletonVersionOrderByVersion(
   scope: string,

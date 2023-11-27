@@ -29,7 +29,9 @@
       ],
       "@module-federation/runtime": ["dist/packages/runtime"],
       "@module-federation/runtime/*": ["dist/packages/runtime/*"],
-      "@module-federation/webpack-bundler-runtime": ["dist/packages/webpack-bundler-runtime/index.cjs"],
+      "@module-federation/webpack-bundler-runtime": [
+        "dist/packages/webpack-bundler-runtime/index.cjs"
+      ]
     }
   }
 }

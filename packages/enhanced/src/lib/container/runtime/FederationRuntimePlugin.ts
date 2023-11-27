@@ -39,8 +39,10 @@ class FederationRuntimePlugin {
 
   static getTemplate(runtimePlugins: string[]) {
     // internal runtime plugin
-    let runtimePluginTemplates = `import initializeRemoteEntryRuntimePlugin from '${InitializeRemoteEntryRuntimePluginPath}';\n`;
-    const runtimePLuginNames = ['initializeRemoteEntryRuntimePlugin'];
+    const internalRuntimePlugin = `import initializeRemoteEntryRuntimePlugin from '${InitializeRemoteEntryRuntimePluginPath}';\n`;
+    const internalRuntimePluginName = 'initializeRemoteEntryRuntimePlugin';
+    let runtimePluginTemplates = '';
+    const runtimePLuginNames: string[] = [];
 
     if (Array.isArray(runtimePlugins)) {
       runtimePlugins.forEach((runtimePlugin, index) => {
@@ -53,6 +55,9 @@ class FederationRuntimePlugin {
         runtimePLuginNames.push(runtimePluginName);
       });
     }
+    runtimePluginTemplates += internalRuntimePlugin;
+    runtimePLuginNames.push(internalRuntimePluginName);
+
     return Template.asString([
       `import federation from '${BundlerRuntimePath}';`,
       runtimePluginTemplates,

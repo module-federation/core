@@ -228,26 +228,32 @@ export class FederationHost {
     if (globalShare && globalShare.lib) {
       addUniqueItem(globalShare.useIn, this.options.name);
       return globalShare.lib as () => T;
-    } else if (globalShare && globalShare.loading) {
+    } else if (globalShare && globalShare.loading && !globalShare.loaded) {
       const factory = await globalShare.loading;
+      globalShare.loaded = true;
+      if (!globalShare.lib) {
+        globalShare.lib = factory;
+      }
       addUniqueItem(globalShare.useIn, this.options.name);
       return factory;
     } else if (globalShare) {
       const asyncLoadProcess = async () => {
         const factory = await globalShare.get();
         shareInfoRes.lib = factory;
+        shareInfoRes.loaded = true;
         addUniqueItem(shareInfoRes.useIn, this.options.name);
         const gShared = getGlobalShare(pkgName, shareInfoRes);
         if (gShared) {
           gShared.lib = factory;
+          gShared.loaded = true;
         }
         return factory as () => T;
       };
       const loading = asyncLoadProcess();
       this.setShared({
         pkgName,
-        loaded: true,
-        shared: shareInfoRes,
+        loaded: false,
+        shared: globalShare,
         from: this.options.name,
         lib: null,
         loading,
@@ -260,6 +266,7 @@ export class FederationHost {
       const asyncLoadProcess = async () => {
         const factory = await shareInfoRes.get();
         shareInfoRes.lib = factory;
+        shareInfoRes.loaded = true;
         addUniqueItem(shareInfoRes.useIn, this.options.name);
         const gShared = getGlobalShare(pkgName, shareInfoRes);
         if (gShared) {
@@ -270,7 +277,7 @@ export class FederationHost {
       const loading = asyncLoadProcess();
       this.setShared({
         pkgName,
-        loaded: true,
+        loaded: false,
         shared: shareInfoRes,
         from: this.options.name,
         lib: null,
@@ -492,16 +499,10 @@ export class FederationHost {
    * If the share scope does not exist, it creates one.
    */
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  initializeSharing(
-    shareScopeName = DEFAULT_SCOPE,
-  ): boolean | Promise<boolean> {
-    const shareScopeLoading = Global.__FEDERATION__.__SHARE_SCOPE_LOADING__;
+  initializeSharing(shareScopeName = DEFAULT_SCOPE): Array<Promise<void>> {
     const shareScope = Global.__FEDERATION__.__SHARE__;
     const hostName = this.options.name;
-    // Executes only once
-    if (shareScopeLoading[shareScopeName]) {
-      return shareScopeLoading[shareScopeName];
-    }
+
     // Creates a new share scope if necessary
     if (!shareScope[shareScopeName]) {
       shareScope[shareScopeName] = {};
@@ -528,12 +529,11 @@ export class FederationHost {
       }
     };
     const promises: Promise<any>[] = [];
+    const initFn = (mod: RemoteEntryExports) =>
+      mod && mod.init && mod.init(shareScope[shareScopeName]);
 
     const initRemoteModule = async (key: string): Promise<void> => {
       const { module } = await this._getRemoteModuleAndOptions(key);
-
-      const initFn = (mod: RemoteEntryExports) =>
-        mod && mod.init && mod.init(shareScope[shareScopeName]);
       const entry = await module.getEntry();
       initFn(entry);
     };
@@ -548,13 +548,7 @@ export class FederationHost {
         promises.push(initRemoteModule(remote.name));
       }
     });
-
-    if (!promises.length) {
-      return (shareScopeLoading[shareScopeName] = true);
-    }
-    return (shareScopeLoading[shareScopeName] = Promise.all(promises).then(
-      () => (shareScopeLoading[shareScopeName] = true),
-    ));
+    return promises;
   }
 
   private formatOptions(
