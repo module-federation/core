@@ -48,11 +48,18 @@ nvm use 18
 
 #### Install Dependencies
 
+Install NX
+
+```bash
+npm install --global nx@latest
+```
+
 Install Node.js dependencies via npm.
 
 ```bash
 npm install
 ```
+
 ## Testing
 
 You can run all test cases by the follow command: 
