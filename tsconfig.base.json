@@ -43,7 +43,9 @@
       ],
       "@module-federation/webpack-bundler-runtime/*": [
         "packages/webpack-bundler-runtime/*"
-      ]
+      ],
+      "@module-federation/prefetch": ["packages/plugins/prefetch/src/index.ts"],
+      "@module-federation/prefetch/webpack": ["packages/plugins/prefetch/src/webpack/index.ts"],
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -1,10 +1,11 @@
-import { RemoteEntryInfo } from './types';
+import { RemoteEntryInfo, ModuleInfo } from './types';
 import {
   NameTransformMap,
   NameTransformSymbol,
   EncodedNameTransformMap,
   SEPARATOR,
   MANIFEST_EXT,
+  FederationPrefetchCommon,
 } from './constant';
 import { Logger } from './logger';
 import { getProcessEnv } from './env';
@@ -165,6 +166,31 @@ const generateShareFilename = /* @__PURE__ */ (
   return encodeName(pkgName, '__federation_shared_', withExt);
 };
 
+const fixPrefetchPath = (exposePath: string): Array<string> => {
+  const pathExt = ['.js', '.ts'];
+  const extReg = /\.(ts|js|tsx|jsx)$/;
+  return pathExt.map(ext => exposePath.replace(extReg, `.prefetch${ext}`));
+};
+
+const getPrefetchId = (id: string): string =>
+  encodeName(`${id}/${FederationPrefetchCommon['identifier']}`);
+
+const getResourceUrl = (module: ModuleInfo, sourceUrl: string): string => {
+  if ('getPublicPath' in module) {
+    const publicPath = new Function(module.getPublicPath)();
+    return `${publicPath}${sourceUrl}`;
+  } else if ('publicPath' in module) {
+    return `${module.publicPath}${sourceUrl}`;
+  } else {
+    console.warn(
+      'Can not get resource url, if in debug mode, please ignore',
+      module,
+      sourceUrl,
+    );
+    return '';
+  }
+};
+
 export {
   parseEntry,
   logger,
@@ -173,4 +199,7 @@ export {
   composeKeyWithSeparator,
   generateExposeFilename,
   generateShareFilename,
+  fixPrefetchPath,
+  getPrefetchId,
+  getResourceUrl
 };

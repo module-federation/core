@@ -3,6 +3,7 @@ import {
   ModuleInfo,
   ProviderModuleInfo,
   isManifestProvider,
+  getResourceUrl,
 } from '@module-federation/sdk';
 import {
   EntryAssets,
@@ -14,7 +15,6 @@ import {
 } from '../type';
 import { assignRemoteInfo } from './snapshot';
 import { getInfoWithoutType, getPreloaded, setPreloaded } from '../global';
-import { getResourceUrl } from '../utils/manifest';
 import { FederationHost } from '../core';
 import { defaultPreloadArgs, normalizePreloadExposes } from '../utils/preload';
 import { getGlobalShare } from '../utils/share';

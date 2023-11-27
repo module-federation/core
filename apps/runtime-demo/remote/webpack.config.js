@@ -7,6 +7,7 @@ const { withReact } = require('@nx/react');
 const path = require('path');
 const baseConfig = require('./module-federation.config');
 const { withModuleFederation } = require('@nx/react/module-federation');
+const { PrefetchPlugin } = require('@module-federation/prefetch/webpack')
 
 /**
  * @type {import('@nx/react/module-federation').ModuleFederationConfig}
@@ -19,6 +20,7 @@ module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
+    config.plugins.push(new PrefetchPlugin(baseConfig));
     const mf = await withModuleFederation(defaultConfig);
 
     /** @type {import('webpack').Configuration} */

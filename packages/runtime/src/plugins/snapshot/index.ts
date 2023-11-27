@@ -1,11 +1,11 @@
+import { ModuleInfo, getResourceUrl } from '@module-federation/sdk';
+
 import { FederationRuntimePlugin } from '../../type/plugin';
 import {
   error,
-  getResourceUrl,
   isPureRemoteEntry,
   isRemoteInfoWithEntry,
 } from '../../utils';
-import { ModuleInfo } from '@module-federation/sdk';
 import { PreloadOptions, RemoteInfo } from '../../type';
 import { preloadAssets } from '../../utils/preload';
 
@@ -49,7 +49,7 @@ export function snapshotPlugin(): FederationRuntimePlugin {
             depsRemote: false,
           },
         };
-
+        
         const assets = await origin.hooks.lifecycle.generatePreloadAssets.emit({
           origin,
           preloadOptions,
@@ -61,6 +61,11 @@ export function snapshotPlugin(): FederationRuntimePlugin {
 
         if (assets) {
           preloadAssets(remoteInfo, origin, assets);
+        }
+
+        return {
+          ...args,
+          remoteSnapshot,
         }
       }
 

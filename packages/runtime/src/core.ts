@@ -50,6 +50,7 @@ interface LoadRemoteMatch {
   options: Options;
   origin: FederationHost;
   remoteInfo: RemoteInfo;
+  remoteSnapshot?: ModuleInfo;
 }
 
 export class FederationHost {
@@ -92,6 +93,21 @@ export class FederationHost {
       ],
       void
     >('loadRemote'),
+    prefetch: new AsyncHook<
+    {
+      id: string;
+      name: string;
+      remoteSnapshot?: ModuleInfo;
+    },
+    Promise<any> | null
+    >('prefetch'),
+    afterPrefetch: new AsyncHook<
+    {
+      name: string;
+      remoteSnapshot?: ModuleInfo;
+    },
+    (() => any) | undefined
+    >('afterPrefetch'),
     errorLoadRemote: new AsyncHook<
       [
         {
@@ -379,11 +395,11 @@ export class FederationHost {
     });
 
     const { remote, expose } = matchInfo;
-
     assert(
       remote && expose,
       `The 'beforeLoadRemote' hook was executed, but it failed to return the correct 'remote' and 'expose' values while loading ${idRes}.`,
     );
+
     let module: Module | undefined = this.moduleCache.get(remote.name);
 
     const moduleOptions: ModuleOptions = {
@@ -426,8 +442,22 @@ export class FederationHost {
       const { module, moduleOptions, remoteMatchInfo } =
         await this._getRemoteModuleAndOptions(id);
 
+      const prefetch = await this.hooks.lifecycle.prefetch.emit({
+        id,
+        name: remoteMatchInfo.remote.name,
+        remoteSnapshot: remoteMatchInfo.remoteSnapshot,
+      });
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
-      const moduleOrFactory = (await module.get(expose, options)) as T;
+      const factoryP = module.get(expose, options);
+      const handler = await this.hooks.lifecycle.afterPrefetch.emit({
+        id,
+        prefetch,
+        name: remote.name,
+        module: factoryP,
+      });
+      const moduleOrFactory = typeof handler === 'function' ?
+        await handler() :
+        await factoryP;
 
       await this.hooks.lifecycle.loadRemote.emit({
         id: idRes,

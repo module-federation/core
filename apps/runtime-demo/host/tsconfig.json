@@ -16,7 +16,9 @@
       "@module-federation/runtime/type": [
         "dist/packages/runtime/type.cjs.d.ts"
       ],
-      "@module-federation/sdk": ["dist/packages/sdk"]
+      "@module-federation/sdk": ["dist/packages/sdk"],
+      "@module-federation/prefetch": ["dist/packages/plugins/prefetch"],
+      "@module-federation/prefetch/webpack": ["dist/packages/plugins/prefetch/webpack"]
     }
   },
   "files": [],

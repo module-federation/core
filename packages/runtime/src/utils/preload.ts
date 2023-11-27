@@ -1,3 +1,5 @@
+import { createScript } from '@module-federation/sdk';
+
 import {
   PreloadAssets,
   PreloadConfig,
@@ -12,7 +14,6 @@ import { assert } from './logger';
 import { safeToString } from './tool';
 import { FederationHost } from '../core';
 import { getRemoteEntry } from './load';
-import { createScript } from './dom';
 
 export function defaultPreloadArgs(
   preloadConfig: PreloadRemoteArgs | depsPreloadArg,

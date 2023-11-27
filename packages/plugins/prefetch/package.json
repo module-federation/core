@@ -1,0 +1,45 @@
+{
+  "name": "@module-federation/prefetch",
+  "description": "Module Federation Prefetch",
+  "version": "0.0.1",
+  "author": "nieyan <nyqykk@foxmail.com>",
+  "homepage": "https://github.com/bytedance/garfish",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bytedance/garfish.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bytedance/garfish/issues"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./react": {
+      "import": "./dist/esm/react/index.js",
+      "require": "./dist/react/index.js",
+      "types": "./dist/react/index.d.ts"
+    },
+    "./webpack": {
+      "import": "./dist/esm/webpack/index.js",
+      "require": "./dist/webpack/index.js",
+      "types": "./dist/webpack/index.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": ["./dist/index.d.ts"],
+      "react": ["./dist/react/index.d.ts"],
+      "webpack": ["./dist/webpack/index.d.ts"]
+    }
+  },
+  "main": "dist/index.js",
+  "module": "dist/esm/index.js",
+  "peerDependencies": {
+    "react": ">=16.9.0",
+    "react-dom": ">=16.9.0"
+  }
+}
