@@ -13,9 +13,7 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@module-federation/runtime": ["dist/packages/runtime"],
-      "@module-federation/sdk": ["dist/packages/sdk"],
-      "@module-federation/prefetch": ["dist/packages/prefetch"],
-      "@module-federation/prefetch/webpack": ["dist/packages/plugins/prefetch/webpack"]
+      "@module-federation/sdk": ["dist/packages/sdk"]
     }
   },
   "files": [],
