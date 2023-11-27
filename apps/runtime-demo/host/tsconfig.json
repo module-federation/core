@@ -16,7 +16,7 @@
       "@module-federation/runtime/type": [
         "dist/packages/runtime/type.cjs.d.ts"
       ],
-      "@module-federation/sdk": ["dist/packages/sdk"],
+      "@module-federation/sdk": ["dist/packages/sdk"]
     }
   },
   "files": [],

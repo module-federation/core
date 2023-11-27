@@ -19,7 +19,8 @@ const defaultConfig = {
 module.exports = composePlugins(
   withNx(),
   withReact(),
-  async (config, context) => {    const mf = await withModuleFederation(defaultConfig);
+  async (config, context) => {   
+     const mf = await withModuleFederation(defaultConfig);
 
     /** @type {import('webpack').Configuration} */
     const parsedConfig = mf(config, context);
