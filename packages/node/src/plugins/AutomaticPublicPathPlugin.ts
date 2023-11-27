@@ -1,4 +1,10 @@
-import { Compiler, RuntimeGlobals } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { Compiler } from 'webpack';
+
+const { RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+
 import RemotePublicPathRuntimeModule from './RemotePublicPathRuntimeModule';
 
 interface PluginOptions {}

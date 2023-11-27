@@ -1,17 +1,19 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    // "target": "ES6",
     "module": "commonjs",
-    // "lib": ["ES2021"],
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "strict": true,
-    "declaration": true,
-    "forceConsistentCasingInFileNames": true
+    "declaration": true
   },
   "files": [],
   "include": [],

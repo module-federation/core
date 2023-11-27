@@ -9,7 +9,21 @@
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
         "@typescript-eslint/no-unused-vars": "warn",
-        "@typescript-eslint/ban-ts-comment": "warn"
+        "@typescript-eslint/ban-ts-comment": "warn",
+        "@typescript-eslint/no-var-requires": 0,
+        "@typescript-eslint/no-restricted-imports": [
+          "error",
+          {
+            "patterns": ["webpack/lib/*"],
+            "paths": [
+              {
+                "name": "webpack",
+                "message": "Please use require(normalizeWebpackPath('webpack')) instead.",
+                "allowTypeImports": true
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -17,8 +31,7 @@
       "rules": {}
     },
     {
-      "files": ["*.js", "*.jsx"],
-      "rules": {}
+      "files": ["*.js", "*.jsx"]
     }
   ]
 }

@@ -1,4 +1,4 @@
-import { Compiler } from 'webpack';
+import type { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from './types';
 import EmbeddedContainerPlugin from './EmbeddedContainerPlugin';
 import { AsyncBoundaryPlugin } from '@module-federation/enhanced';

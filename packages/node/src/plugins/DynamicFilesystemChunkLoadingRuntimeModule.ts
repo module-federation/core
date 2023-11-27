@@ -1,16 +1,18 @@
 /*
   MIT License http://www.opensource.org/licenses/mit-license.php
 */
-import {
-  Chunk,
-  RuntimeModule,
-  RuntimeGlobals,
-  Template,
-  Compiler,
-} from 'webpack';
-import { getUndoPath } from 'webpack/lib/util/identifier';
+import type { Chunk, Compiler } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+const { RuntimeGlobals, RuntimeModule, Template } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const { getUndoPath } = require(
+  normalizeWebpackPath('webpack/lib/util/identifier'),
+) as typeof import('webpack/lib/util/identifier');
 import { SyncWaterfallHook } from 'tapable';
-import compileBooleanMatcher from 'webpack/lib/util/compileBooleanMatcher';
+const compileBooleanMatcher = require(
+  normalizeWebpackPath('webpack/lib/util/compileBooleanMatcher'),
+) as typeof import('webpack/lib/util/compileBooleanMatcher');
 import {
   generateHmrCode,
   getInitialChunkIds,

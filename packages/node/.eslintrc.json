@@ -15,7 +15,21 @@
     {
       "files": ["*.ts", "*.tsx"],
       "rules": {
-        "@typescript-eslint/no-var-requires": "off"
+        "no-var": "off",
+        "@typescript-eslint/no-var-requires": "off",
+        "@typescript-eslint/no-restricted-imports": [
+          "error",
+          {
+            "patterns": ["webpack/lib/*"],
+            "paths": [
+              {
+                "name": "webpack",
+                "message": "Please use require(normalizeWebpackPath('webpack')) instead.",
+                "allowTypeImports": true
+              }
+            ]
+          }
+        ]
       }
     },
     {
