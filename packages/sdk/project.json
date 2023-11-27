@@ -12,7 +12,9 @@
         "main": "packages/sdk/src/index.ts",
         "tsConfig": "packages/sdk/tsconfig.lib.json",
         "assets": [],
+        "generateExportsField": true,
         "project": "packages/sdk/package.json",
+        "additionalEntryPoints": ["packages/sdk/src/normalize-webpack-path.ts"],
         "compiler": "swc",
         "format": ["cjs", "esm"]
       }

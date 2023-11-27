@@ -1,11 +1,9 @@
-import {
-  Compiler,
-  RuntimeGlobals,
-  Template,
-  RuntimeModule,
-  Module,
-} from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { Module } from 'webpack';
 
+const { RuntimeModule, Template, RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 interface InvertedContainerRuntimeModuleOptions {
   runtime: string;
   remotes: Record<string, string>;

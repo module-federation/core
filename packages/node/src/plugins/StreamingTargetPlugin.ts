@@ -1,4 +1,4 @@
-import type { Compiler } from 'webpack';
+import type { Compiler, WebpackPluginInstance } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 
 import CommonJsChunkLoadingPlugin from './CommonJsChunkLoadingPlugin';
@@ -22,7 +22,7 @@ interface StreamingTargetContext {}
 /**
  * Class representing a StreamingTargetPlugin
  */
-class StreamingTargetPlugin {
+class StreamingTargetPlugin implements WebpackPluginInstance {
   private options: StreamingTargetOptions;
 
   /**

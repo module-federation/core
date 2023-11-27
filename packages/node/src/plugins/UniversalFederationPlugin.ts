@@ -5,6 +5,10 @@ import StreamingTargetPlugin from './StreamingTargetPlugin';
 import NodeFederationPlugin from './NodeFederationPlugin';
 import { ModuleFederationPluginOptions } from '../types';
 import type { Compiler, container } from 'webpack';
+import {
+  getWebpackPath,
+  normalizeWebpackPath,
+} from '@module-federation/sdk/normalize-webpack-path';
 
 /**
  * Interface for NodeFederationOptions
@@ -50,7 +54,9 @@ class UniversalFederationPlugin {
   apply(compiler: Compiler) {
     const { isServer, debug, ...options } = this._options;
     const { webpack } = compiler;
-
+    if (!process.env['FEDERATION_WEBPACK_PATH']) {
+      process.env['FEDERATION_WEBPACK_PATH'] = getWebpackPath(compiler);
+    }
     if (
       isServer ||
       compiler.options.name === 'server' ||
@@ -62,9 +68,9 @@ class UniversalFederationPlugin {
     } else {
       new (this.context.ModuleFederationPlugin ||
         (webpack && webpack.container.ModuleFederationPlugin) ||
-        require('webpack/lib/container/ModuleFederationPlugin'))(options).apply(
-        compiler,
-      );
+        require(
+          normalizeWebpackPath('webpack/lib/container/ModuleFederationPlugin'),
+        ))(options).apply(compiler);
     }
   }
 }
