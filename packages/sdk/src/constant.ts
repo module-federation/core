@@ -22,10 +22,3 @@ export const EncodedNameTransformMap = {
 };
 
 export const SEPARATOR = ':';
-
-export const FederationPrefetchCommon: Record<string, string> = {
-  identifier: 'FederationPrefetch',
-  globalKey: '__PREFETCH__',
-  library: 'federation-prefetch',
-  exportsKey: '__PREFETCH_EXPORTS__',
-};
