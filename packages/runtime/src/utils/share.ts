@@ -46,7 +46,19 @@ export function formatShareConfigs(
 }
 
 function versionLt(a: string, b: string): boolean {
-  if (satisfy(a, `<=${b}`)) {
+  const transformInvalidVersion = (version: string) => {
+    const isNumberVersion = !Number.isNaN(Number(version));
+    if (isNumberVersion) {
+      const splitArr = version.split('.');
+      let validVersion = version;
+      for (let i = 0; i < 3 - splitArr.length; i++) {
+        validVersion += '.0';
+      }
+      return validVersion;
+    }
+    return version;
+  };
+  if (satisfy(transformInvalidVersion(a), `<=${transformInvalidVersion(b)}`)) {
     return true;
   } else {
     return false;
@@ -119,6 +131,13 @@ function findSingletonVersionOrderByLoaded(
   return findVersion(scope, pkgName, callback);
 }
 
+function getFindShareFunction(strategy: Shared['strategy']) {
+  if (strategy === 'loaded-first') {
+    return findSingletonVersionOrderByLoaded;
+  }
+  return findSingletonVersionOrderByVersion;
+}
+
 // Details about shared resources
 // TODO: Implement strictVersion for alignment with module federation.
 export function getGlobalShare(
@@ -133,10 +152,7 @@ export function getGlobalShare(
       const { requiredVersion } = shareConfig;
       // eslint-disable-next-line max-depth
       if (shareConfig.singleton) {
-        const singletonVersion =
-          strategy === 'loaded-first'
-            ? findSingletonVersionOrderByLoaded(sc, pkgName)
-            : findSingletonVersionOrderByVersion(sc, pkgName);
+        const singletonVersion = getFindShareFunction(strategy)(sc, pkgName);
         // eslint-disable-next-line max-depth
         if (
           typeof requiredVersion === 'string' &&
@@ -153,7 +169,7 @@ export function getGlobalShare(
         }
         return globalShares[sc][pkgName][singletonVersion];
       } else {
-        const maxVersion = findSingletonVersionOrderByLoaded(sc, pkgName);
+        const maxVersion = getFindShareFunction(strategy)(sc, pkgName);
 
         // eslint-disable-next-line max-depth
         if (requiredVersion === false || requiredVersion === '*') {
