@@ -18,7 +18,8 @@
         "format": ["cjs", "esm"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true,
-        "rollupConfig": "packages/webpack-bundler-runtime/rollup.config.js"
+        "rollupConfig": "packages/webpack-bundler-runtime/rollup.config.js",
+        "external": ["@module-federation/runtime", "@module-federation/sdk"]
       },
       "dependsOn": [
         {
