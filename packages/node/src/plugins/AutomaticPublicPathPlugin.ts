@@ -1,9 +1,4 @@
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler } from 'webpack';
-
-const { RuntimeGlobals } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
 
 import RemotePublicPathRuntimeModule from './RemotePublicPathRuntimeModule';
 
@@ -17,6 +12,7 @@ class RemotePublicPathPlugin {
   }
 
   apply(compiler: Compiler) {
+    const { RuntimeGlobals } = compiler.webpack;
     compiler.hooks.thisCompilation.tap(
       'RemotePublicPathPlugin',
       (compilation) => {
