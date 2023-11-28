@@ -81,30 +81,126 @@ initializeSharing(shareScopeName?: string): boolean | Promise<boolean>
 ```
 Initializes sharing sequences for shared scopes.
 
-## Hooks
-`FederationHost` offers various lifecycle hooks for interacting at different stages of the module federation process.
+Based on your reference, here's how the hooks section can be enhanced with detailed information about the options, nested types, and examples for each hook:
 
-## Plugin System Integration
-`FederationHost` utilizes `PluginSystem` for extended capabilities and custom behavior integration, using `FederationRuntimePlugin`.
+## Hooks in FederationHost
 
-## Types and Options
+### beforeInit
+- **Type**: `beforeInit(args: BeforeInitArgs): void`
+- **Description**: Executed before the initialization of FederationHost.
+- **BeforeInitArgs**:
+  ```typescript
+  type BeforeInitArgs = {
+    userOptions: UserOptions;
+    options: Options;
+    origin: FederationHost;
+    shareInfo: ShareInfos;
+  };
 
-### `FederationRuntimePlugin`
-- **Properties**:
-  - `name`: `string` - Name of the plugin.
-  - `version?`: `string` - Optional version of the plugin.
-  - `CoreLifeCyclePartial`, `SnapshotLifeCycleCyclePartial`, `ModuleLifeCycleCyclePartial`: Partial lifecycle hooks for `FederationHost`, `SnapshotHandler`, and `Module`.
+  type UserOptions = {
+    // User-specified settings for FederationHost
+  };
 
-### `RemoteInfoOptionalVersion`
-- **Properties**:
-  - `name`: `string` - Name of the remote.
-  - `version?`: `string` - Optional version of the remote.
+  type Options = {
+    // Resolved options for FederationHost
+  };
 
-### `PreloadRemoteArgs`
-- **Properties**:
-  - `nameOrAlias`: `string` - Name or alias of the remote.
-  - `exposes?`: `Array<string>` - List of exposed modules.
-  - `resourceCategory?`: `'all' | 'sync'` - Category of resources.
-  - `share?`: `boolean` - Flag to share the module.
-  - `depsRemote?`: `boolean | Array<depsPreloadArg>` - Dependencies of the remote.
-  - `filter?`: `(assetUrl: string) => boolean` - Filter function for assets.
+  type ShareInfos = {
+    // Information about shared modules
+  };
+  ```
+- **Example**:
+  ```typescript
+  federationHost.hooks.beforeInit.tap('MyPlugin', (args) => {
+    // Plugin logic here
+  });
+  ```
+
+### init
+- **Type**: `init(args: InitArgs): void`
+- **Description**: Triggered during the initialization of FederationHost.
+- **InitArgs**:
+  ```typescript
+  type InitArgs = {
+    options: Options;
+    origin: FederationHost;
+  };
+
+  type Options = {
+    // Finalized options for FederationHost
+  };
+  ```
+- **Example**:
+  ```typescript
+  federationHost.hooks.init.tap('MyPlugin', (args) => {
+    // Initialization logic
+  });
+  ```
+
+### beforeLoadRemote
+- **Type**: `beforeLoadRemote(args: BeforeLoadRemoteArgs): Promise<void>`
+- **Description**: Invoked before a remote module is loaded.
+- **BeforeLoadRemoteArgs**:
+  ```typescript
+  type BeforeLoadRemoteArgs = {
+    id: string;
+    options: Options;
+    origin: FederationHost;
+  };
+  ```
+- **Example**:
+  ```typescript
+  federationHost.hooks.beforeLoadRemote.tapPromise('MyPlugin', async (args) => {
+    // Logic before loading a remote module
+  });
+  ```
+
+### loadRemote
+- **Type**: `loadRemote(args: LoadRemoteArgs): void`
+- **Description**: Triggered when a remote module is loaded.
+- **LoadRemoteArgs**:
+  ```typescript
+  type LoadRemoteArgs = {
+    id: string;
+    expose: string;
+    pkgNameOrAlias: string;
+    remote: Remote;
+    options: ModuleOptions;
+    origin: FederationHost;
+    exposeModule: any;
+    exposeModuleFactory: any;
+    moduleInstance: Module;
+  };
+
+  type ModuleOptions = {
+    // Options for the loaded module
+  };
+  ```
+- **Example**:
+  ```typescript
+  federationHost.hooks.loadRemote.tap('MyPlugin', (args) => {
+    // Logic when a remote module is loaded
+  });
+  ```
+
+### afterPreloadRemote
+- **Type**: `afterPreloadRemote(args: AfterPreloadRemoteArgs): void`
+- **Description**: Called after remote modules have been preloaded.
+- **AfterPreloadRemoteArgs**:
+  ```typescript
+  type AfterPreloadRemoteArgs = {
+    preloadOps: Array<PreloadRemoteArgs>;
+    options: Options;
+    origin: FederationHost;
+  };
+
+  type PreloadRemoteArgs = {
+    // Arguments for preloading remote modules
+  };
+  ```
+- **Example**:
+  ```typescript
+  federationHost.hooks.afterPreloadRemote.tap('MyPlugin', (args) => {
+    // Post-preloading logic
+  });
+  ```
