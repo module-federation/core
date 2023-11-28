@@ -3,7 +3,7 @@
 */
 import type { Chunk, Compiler } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-const { RuntimeGlobals, RuntimeModule, Template } = require(
+const { RuntimeGlobals, RuntimeModule } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 const { getUndoPath } = require(
@@ -46,20 +46,6 @@ interface ChunkLoadingContext {
   webpack: Compiler['webpack'];
 }
 
-//hook can be tapped with
-// class MyPlugin {
-//   apply(compiler: Compiler) {
-//     compiler.hooks.thisCompilation.tap('MyPlugin', (compilation: Compilation) => {
-//       compilation.hooks.runtimeModule.tap('MyPlugin', (module: RuntimeModule) => {
-//         if (module instanceof DynamicFilesystemChunkLoadingRuntimeModule) {
-//           module.hooks.strategyCase.tap('MyPlugin', (source: string) => {
-//             return source + '\ncase "my-strategy": return myStrategy(chunkId,rootOutputDir, remotes, callback);';
-//           });
-//         }
-//       });
-//     });
-//   }
-// }
 class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
   private runtimeRequirements: Set<string>;
   private options: DynamicFilesystemChunkLoadingRuntimeModuleOptions;
@@ -118,7 +104,7 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
     const { remotes = {}, name } = this.options;
     const { webpack } = this.chunkLoadingContext;
     const { chunkGraph, chunk, compilation } = this;
-
+    const { Template } = webpack;
     if (!chunkGraph || !chunk || !compilation) {
       console.warn('Missing required properties. Returning empty string.');
       return '';
