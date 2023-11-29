@@ -7,7 +7,6 @@ const { withReact } = require('@nx/react');
 const path = require('path');
 const baseConfig = require('./module-federation.config');
 const { withModuleFederation } = require('@nx/react/module-federation');
-const { PrefetchPlugin } = require('@module-federation/prefetch/webpack')
 
 /**
  * @type {import('@nx/react/module-federation').ModuleFederationConfig}
