@@ -93,21 +93,21 @@ export class FederationHost {
       ],
       void
     >('loadRemote'),
-    prefetch: new AsyncHook<
+    interfacePrefetch: new AsyncHook<
     {
       id: string;
       name: string;
       remoteSnapshot?: ModuleInfo;
     },
     Promise<any> | null
-    >('prefetch'),
-    afterPrefetch: new AsyncHook<
+    >('interfacePrefetch'),
+    afterInterfacePrefetch: new AsyncHook<
     {
       name: string;
       remoteSnapshot?: ModuleInfo;
     },
     (() => any) | undefined
-    >('afterPrefetch'),
+    >('afterInterfacePrefetch'),
     errorLoadRemote: new AsyncHook<
       [
         {
@@ -442,16 +442,16 @@ export class FederationHost {
       const { module, moduleOptions, remoteMatchInfo } =
         await this._getRemoteModuleAndOptions(id);
 
-      const prefetch = await this.hooks.lifecycle.prefetch.emit({
+      const interfacePrefetch = await this.hooks.lifecycle.interfacePrefetch.emit({
         id,
         name: remoteMatchInfo.remote.name,
         remoteSnapshot: remoteMatchInfo.remoteSnapshot,
       });
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
       const factoryP = module.get(expose, options);
-      const handler = await this.hooks.lifecycle.afterPrefetch.emit({
+      const handler = await this.hooks.lifecycle.afterInterfacePrefetch.emit({
         id,
-        prefetch,
+        interfacePrefetch,
         name: remote.name,
         module: factoryP,
       });
