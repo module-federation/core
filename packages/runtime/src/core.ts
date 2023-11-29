@@ -108,6 +108,15 @@ export class FederationHost {
     },
     (() => any) | undefined
     >('afterInterfacePrefetch'),
+    preloadRemoteWithInterface: new SyncHook<
+    {
+      id: string;
+      name: string;
+      remoteSnapshot: ModuleInfo;
+      preloadConfig: PreloadRemoteArgs;
+    },
+    void
+    >('preloadRemoteWithInterface'),
     errorLoadRemote: new AsyncHook<
       [
         {

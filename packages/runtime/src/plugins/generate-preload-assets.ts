@@ -216,6 +216,12 @@ export function generatePreloadAssets(
         for (let index = 0; index < assetsLength; index++) {
           const assetsInfo = moduleAssetsInfo[index];
           const exposeFullPath = `${remoteInfo.name}/${assetsInfo.moduleName}`;
+          origin.hooks.lifecycle.preloadRemoteWithInterface.emit({
+            id: assetsInfo.moduleName === '.' ? remoteInfo.name : exposeFullPath,
+            name: remoteInfo.name,
+            remoteSnapshot: moduleInfoSnapshot,
+            preloadConfig,
+          });
           const preloaded = getPreloaded(exposeFullPath);
           if (preloaded) {
             continue;
