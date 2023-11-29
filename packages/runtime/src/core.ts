@@ -435,20 +435,8 @@ export class FederationHost {
       // id: alias(app1/utils) + expose(loadash/sort) = app1/utils/loadash/sort
       const { module, moduleOptions, remoteMatchInfo } =
         await this._getRemoteModuleAndOptions(id);
-
-      // const interfacePrefetch = await this.hooks.lifecycle.interfacePrefetch.emit({
-      //   id,
-      //   name: remoteMatchInfo.remote.name,
-      //   remoteSnapshot: remoteMatchInfo.remoteSnapshot,
-      // });
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
       const factory = await module.get(expose, options);
-      // const handler = await this.hooks.lifecycle.afterInterfacePrefetch.emit({
-      //   id,
-      //   interfacePrefetch,
-      //   name: remote.name,
-      //   module: factoryP,
-      // });
 
       await this.hooks.lifecycle.loadRemote.emit({
         id: idRes,
