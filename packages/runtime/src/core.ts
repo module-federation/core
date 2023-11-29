@@ -436,20 +436,20 @@ export class FederationHost {
       const { module, moduleOptions, remoteMatchInfo } =
         await this._getRemoteModuleAndOptions(id);
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
-      const factory = await module.get(expose, options);
+      const moduleOrFactory = await module.get(expose, options) as T;
 
       await this.hooks.lifecycle.loadRemote.emit({
         id: idRes,
         pkgNameOrAlias,
         expose,
-        exposeModule: loadFactory ? factory : undefined,
-        exposeModuleFactory: loadFactory ? undefined : factory,
+        exposeModule: loadFactory ? moduleOrFactory : undefined,
+        exposeModuleFactory: loadFactory ? undefined : moduleOrFactory,
         remote,
         options: moduleOptions,
         moduleInstance: module,
         origin: this,
       });
-      return factory;
+      return moduleOrFactory;
     } catch (error) {
       this.hooks.lifecycle.errorLoadRemote.emit({
         id,
