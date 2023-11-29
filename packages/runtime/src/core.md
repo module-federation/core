@@ -86,35 +86,46 @@ Based on your reference, here's how the hooks section can be enhanced with detai
 ## Hooks in FederationHost
 
 ### beforeInit
-- **Type**: `beforeInit(args: BeforeInitArgs): void`
-- **Description**: Executed before the initialization of FederationHost.
-- **BeforeInitArgs**:
-  ```typescript
-  type BeforeInitArgs = {
-    userOptions: UserOptions;
-    options: Options;
-    origin: FederationHost;
-    shareInfo: ShareInfos;
-  };
+  - **Type**: `beforeInit(args: BeforeInitArgs): void`
+  - **Description**: Executed before the initialization of FederationHost.
+  - **BeforeInitArgs**:
+    ```typescript
+    type BeforeInitArgs = {
+      userOptions: UserOptions;
+      options: Options;
+      origin: FederationHost;
+      shareInfo: ShareInfos;
+    };
 
-  type UserOptions = {
-    // User-specified settings for FederationHost
-  };
+    interface Options {
+      id?: string;
+      name: string;
+      version?: string;
+      remotes: Array<Remote>;
+      shared: ShareInfos;
+      plugins: Array<FederationRuntimePlugin>;
+      inBrowser: boolean;
+    }
 
-  type Options = {
-    // Resolved options for FederationHost
-  };
+    export type UserOptions = Omit<
+      Optional<Options, 'plugins'>,
+      'shared' | 'inBrowser'
+    > & {
+      shared?: {
+        [pkgName: string]: ShareArgs;
+      };
+    };
 
-  type ShareInfos = {
-    // Information about shared modules
-  };
-  ```
-- **Example**:
-  ```typescript
-  federationHost.hooks.beforeInit.tap('MyPlugin', (args) => {
-    // Plugin logic here
-  });
-  ```
+    type ShareInfos = {
+      // Information about shared modules
+    };
+    ```
+  - **Example**:
+    ```typescript
+    federationHost.hooks.beforeInit.tap('MyPlugin', (args) => {
+      // Plugin logic here
+    });
+    ```
 
 ### init
 - **Type**: `init(args: InitArgs): void`
