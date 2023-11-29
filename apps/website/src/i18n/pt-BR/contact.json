@@ -9,6 +9,9 @@
       "company-email": {
         "label": "Email corporativo"
       },
+      "company-size": {
+        "label": "Tamanho da empresa"
+      },
       "company-website": {
         "label": "Website da empresa"
       },
@@ -17,9 +20,6 @@
       },
       "name": {
         "label": "Seu nome"
-      },
-      "company-size": {
-        "label": "Tamanho da empresa"
       }
     },
     "quote": {

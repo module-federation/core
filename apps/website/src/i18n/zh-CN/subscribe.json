@@ -1,0 +1,9 @@
+{
+  "subscribe": {
+    "action": "订阅",
+    "input": {
+      "placeholder": "输入您的邮箱地址"
+    },
+    "title": "订阅我们的电子邮件新闻通讯！"
+  }
+}
