@@ -5,7 +5,6 @@ import {
   EncodedNameTransformMap,
   SEPARATOR,
   MANIFEST_EXT,
-  FederationPrefetchCommon,
 } from './constant';
 import { Logger } from './logger';
 import { getProcessEnv } from './env';
@@ -166,15 +165,6 @@ const generateShareFilename = /* @__PURE__ */ (
   return encodeName(pkgName, '__federation_shared_', withExt);
 };
 
-const fixPrefetchPath = (exposePath: string): Array<string> => {
-  const pathExt = ['.js', '.ts'];
-  const extReg = /\.(ts|js|tsx|jsx)$/;
-  return pathExt.map(ext => exposePath.replace(extReg, `.prefetch${ext}`));
-};
-
-const getPrefetchId = (id: string): string =>
-  encodeName(`${id}/${FederationPrefetchCommon['identifier']}`);
-
 const getResourceUrl = (module: ModuleInfo, sourceUrl: string): string => {
   if ('getPublicPath' in module) {
     const publicPath = new Function(module.getPublicPath)();
@@ -199,7 +189,5 @@ export {
   composeKeyWithSeparator,
   generateExposeFilename,
   generateShareFilename,
-  fixPrefetchPath,
-  getPrefetchId,
   getResourceUrl
 };
