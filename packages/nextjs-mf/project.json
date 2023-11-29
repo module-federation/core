@@ -26,7 +26,10 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/nextjs-mf/**/*.js"]
+        "lintFilePatterns": [
+          "packages/nextjs-mf/**/*.js",
+          "packages/nextjs-mf/**/*.ts"
+        ]
       }
     },
     "test": {

@@ -1,6 +1,10 @@
-import { RuntimeGlobals, RuntimeModule, Template, javascript } from 'webpack';
-//@ts-ignore
-import { getUndoPath } from 'webpack/lib/util/identifier';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+const { RuntimeGlobals, RuntimeModule, Template, javascript } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const { getUndoPath } = require(
+  normalizeWebpackPath('webpack/lib/util/identifier'),
+) as typeof import('webpack/lib/util/identifier');
 
 class AutoPublicPathRuntimeModule extends RuntimeModule {
   private options: any;
