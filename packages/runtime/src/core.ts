@@ -436,7 +436,7 @@ export class FederationHost {
       const { module, moduleOptions, remoteMatchInfo } =
         await this._getRemoteModuleAndOptions(id);
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
-      const moduleOrFactory = await module.get(expose, options) as T;
+      const moduleOrFactory = (await module.get(expose, options)) as T;
 
       await this.hooks.lifecycle.loadRemote.emit({
         id: idRes,
