@@ -93,22 +93,7 @@ export class FederationHost {
       ],
       void
     >('loadRemote'),
-    interfacePrefetch: new AsyncHook<
-    {
-      id: string;
-      name: string;
-      remoteSnapshot?: ModuleInfo;
-    },
-    Promise<any> | null
-    >('interfacePrefetch'),
-    afterInterfacePrefetch: new AsyncHook<
-    {
-      name: string;
-      remoteSnapshot?: ModuleInfo;
-    },
-    (() => any) | undefined
-    >('afterInterfacePrefetch'),
-    preloadRemoteWithInterface: new SyncHook<
+    handlePreloadModule: new SyncHook<
     {
       id: string;
       name: string;
@@ -116,7 +101,7 @@ export class FederationHost {
       preloadConfig: PreloadRemoteArgs;
     },
     void
-    >('preloadRemoteWithInterface'),
+    >('handlePreloadModule'),
     errorLoadRemote: new AsyncHook<
       [
         {
@@ -451,35 +436,32 @@ export class FederationHost {
       const { module, moduleOptions, remoteMatchInfo } =
         await this._getRemoteModuleAndOptions(id);
 
-      const interfacePrefetch = await this.hooks.lifecycle.interfacePrefetch.emit({
-        id,
-        name: remoteMatchInfo.remote.name,
-        remoteSnapshot: remoteMatchInfo.remoteSnapshot,
-      });
+      // const interfacePrefetch = await this.hooks.lifecycle.interfacePrefetch.emit({
+      //   id,
+      //   name: remoteMatchInfo.remote.name,
+      //   remoteSnapshot: remoteMatchInfo.remoteSnapshot,
+      // });
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
-      const factoryP = module.get(expose, options);
-      const handler = await this.hooks.lifecycle.afterInterfacePrefetch.emit({
-        id,
-        interfacePrefetch,
-        name: remote.name,
-        module: factoryP,
-      });
-      const moduleOrFactory = typeof handler === 'function' ?
-        await handler() :
-        await factoryP;
+      const factory = await module.get(expose, options);
+      // const handler = await this.hooks.lifecycle.afterInterfacePrefetch.emit({
+      //   id,
+      //   interfacePrefetch,
+      //   name: remote.name,
+      //   module: factoryP,
+      // });
 
       await this.hooks.lifecycle.loadRemote.emit({
         id: idRes,
         pkgNameOrAlias,
         expose,
-        exposeModule: loadFactory ? moduleOrFactory : undefined,
-        exposeModuleFactory: loadFactory ? undefined : moduleOrFactory,
+        exposeModule: loadFactory ? factory : undefined,
+        exposeModuleFactory: loadFactory ? undefined : factory,
         remote,
         options: moduleOptions,
         moduleInstance: module,
         origin: this,
       });
-      return moduleOrFactory;
+      return factory;
     } catch (error) {
       this.hooks.lifecycle.errorLoadRemote.emit({
         id,
