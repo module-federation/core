@@ -39,6 +39,7 @@ init({
 function RemoteButton() {
   // @ts-ignore ignore
   const Comp = React.lazy(async () => {
+    //@ts-ignore
     const Button = await loadRemote('app2/Button');
     return Button;
   });
