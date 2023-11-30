@@ -16,7 +16,7 @@ export interface Federation {
   __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
   __SHARE_SCOPE_LOADING__: Record<string, boolean | Promise<boolean>>;
   __PRELOADED_MAP__: Map<string, boolean>;
-};
+}
 
 // export const nativeGlobal: typeof global = new Function('return this')();
 export const nativeGlobal: typeof global = new Function('return this')();

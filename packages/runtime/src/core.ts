@@ -94,13 +94,13 @@ export class FederationHost {
       void
     >('loadRemote'),
     handlePreloadModule: new SyncHook<
-    {
-      id: string;
-      name: string;
-      remoteSnapshot: ModuleInfo;
-      preloadConfig: PreloadRemoteArgs;
-    },
-    void
+      {
+        id: string;
+        name: string;
+        remoteSnapshot: ModuleInfo;
+        preloadConfig: PreloadRemoteArgs;
+      },
+      void
     >('handlePreloadModule'),
     errorLoadRemote: new AsyncHook<
       [

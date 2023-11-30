@@ -189,5 +189,5 @@ export {
   composeKeyWithSeparator,
   generateExposeFilename,
   generateShareFilename,
-  getResourceUrl
+  getResourceUrl,
 };

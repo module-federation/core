@@ -105,7 +105,7 @@ export function createScript(
   };
 
   script.onerror = onScriptComplete.bind(null, script.onerror);
-  script.onload = onScriptComplete.bind(null, script.onload); 
+  script.onload = onScriptComplete.bind(null, script.onload);
 
   return { script, needAttach };
 }
