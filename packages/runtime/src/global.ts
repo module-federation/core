@@ -6,7 +6,7 @@ import { getBuilderId, isDebugMode } from './utils/env';
 import { warn } from './utils/logger';
 import { FederationRuntimePlugin } from './type/plugin';
 
-export type Federation = {
+export interface Federation {
   __GLOBAL_PLUGIN__: Array<FederationRuntimePlugin>;
   __DEBUG_CONSTRUCTOR_VERSION__?: string;
   moduleInfo: GlobalModuleInfo;
@@ -16,7 +16,7 @@ export type Federation = {
   __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
   __SHARE_SCOPE_LOADING__: Record<string, boolean | Promise<boolean>>;
   __PRELOADED_MAP__: Map<string, boolean>;
-};
+}
 
 // export const nativeGlobal: typeof global = new Function('return this')();
 export const nativeGlobal: typeof global = new Function('return this')();

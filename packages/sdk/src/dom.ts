@@ -1,4 +1,27 @@
-import { isStaticResourcesEqual, safeWrapper } from './tool';
+import { warn } from './utils';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function safeWrapper<T extends (...args: Array<any>) => any>(
+  callback: T,
+  disableWarn?: boolean,
+): Promise<ReturnType<T> | undefined> {
+  try {
+    const res = await callback();
+    return res;
+  } catch (e) {
+    !disableWarn && warn(e);
+    return;
+  }
+}
+
+export function isStaticResourcesEqual(url1: string, url2: string): boolean {
+  const REG_EXP = /^(https?:)?\/\//i;
+  // Transform url1 and url2 into relative paths
+  const relativeUrl1 = url1.replace(REG_EXP, '').replace(/\/$/, '');
+  const relativeUrl2 = url2.replace(REG_EXP, '').replace(/\/$/, '');
+  // Check if the relative paths are identical
+  return relativeUrl1 === relativeUrl2;
+}
 
 export function createScript(
   url: string,

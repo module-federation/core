@@ -1,11 +1,7 @@
+import { ModuleInfo, getResourceUrl } from '@module-federation/sdk';
+
 import { FederationRuntimePlugin } from '../../type/plugin';
-import {
-  error,
-  getResourceUrl,
-  isPureRemoteEntry,
-  isRemoteInfoWithEntry,
-} from '../../utils';
-import { ModuleInfo } from '@module-federation/sdk';
+import { error, isPureRemoteEntry, isRemoteInfoWithEntry } from '../../utils';
 import { PreloadOptions, RemoteInfo } from '../../type';
 import { preloadAssets } from '../../utils/preload';
 
@@ -62,6 +58,11 @@ export function snapshotPlugin(): FederationRuntimePlugin {
         if (assets) {
           preloadAssets(remoteInfo, origin, assets);
         }
+
+        return {
+          ...args,
+          remoteSnapshot,
+        };
       }
 
       return args;
