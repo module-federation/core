@@ -118,7 +118,7 @@ export function generateSnapshotFromManifest(
   } = manifest.metaData;
   const { exposes } = manifest;
 
-  const basicRemoteSnapshot: BasicProviderModuleInfo = {
+  let basicRemoteSnapshot: BasicProviderModuleInfo = {
     version: version ? version : '',
     buildVersion,
     globalName,
@@ -136,6 +136,16 @@ export function generateSnapshotFromManifest(
       assets: expose.assets,
     })),
   };
+
+  if (manifest.metaData?.prefetchEntry) {
+    const { path, name, type } = manifest.metaData.prefetchEntry;
+
+    basicRemoteSnapshot = {
+      ...basicRemoteSnapshot,
+      prefetchEntry: simpleJoinRemoteEntry(path, name),
+      prefetchEntryType: type,
+    };
+  }
 
   if ('publicPath' in manifest.metaData) {
     remoteSnapshot = {

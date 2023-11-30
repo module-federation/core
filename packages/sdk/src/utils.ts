@@ -1,4 +1,4 @@
-import { RemoteEntryInfo } from './types';
+import { RemoteEntryInfo, ModuleInfo } from './types';
 import {
   NameTransformMap,
   NameTransformSymbol,
@@ -8,6 +8,8 @@ import {
 } from './constant';
 import { Logger } from './logger';
 import { getProcessEnv } from './env';
+
+const LOG_CATEGORY = '[ Federation Runtime ]';
 
 // entry: name:version   version : 1.0.0 | ^1.2.3
 // entry: name:entry  entry:  https://localhost:9000/federation-manifest.json
@@ -165,6 +167,37 @@ const generateShareFilename = /* @__PURE__ */ (
   return encodeName(pkgName, '__federation_shared_', withExt);
 };
 
+const getResourceUrl = (module: ModuleInfo, sourceUrl: string): string => {
+  if ('getPublicPath' in module) {
+    const publicPath = new Function(module.getPublicPath)();
+    return `${publicPath}${sourceUrl}`;
+  } else if ('publicPath' in module) {
+    return `${module.publicPath}${sourceUrl}`;
+  } else {
+    console.warn(
+      'Can not get resource url, if in debug mode, please ignore',
+      module,
+      sourceUrl,
+    );
+    return '';
+  }
+};
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+const assert = (condition: any, msg: string): asserts condition => {
+  if (!condition) {
+    error(msg);
+  }
+};
+
+const error = (msg: string | Error | unknown): never => {
+  throw new Error(`${LOG_CATEGORY}: ${msg}`);
+};
+
+const warn = (msg: Parameters<typeof console.warn>[0]): void => {
+  console.warn(`${LOG_CATEGORY}: ${msg}`);
+};
+
 export {
   parseEntry,
   logger,
@@ -173,4 +206,8 @@ export {
   composeKeyWithSeparator,
   generateExposeFilename,
   generateShareFilename,
+  getResourceUrl,
+  assert,
+  error,
+  warn,
 };
