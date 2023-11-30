@@ -9,6 +9,8 @@ import {
 import { Logger } from './logger';
 import { getProcessEnv } from './env';
 
+const LOG_CATEGORY = '[ Federation Runtime ]';
+
 // entry: name:version   version : 1.0.0 | ^1.2.3
 // entry: name:entry  entry:  https://localhost:9000/federation-manifest.json
 const parseEntry = (str: string, devVerOrUrl?: string): RemoteEntryInfo => {
@@ -181,6 +183,21 @@ const getResourceUrl = (module: ModuleInfo, sourceUrl: string): string => {
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+const assert = (condition: any, msg: string): asserts condition => {
+  if (!condition) {
+    error(msg);
+  }
+}
+
+const error = (msg: string | Error | unknown): never => {
+  throw new Error(`${LOG_CATEGORY}: ${msg}`);
+}
+
+const warn = (msg: Parameters<typeof console.warn>[0]): void => {
+  console.warn(`${LOG_CATEGORY}: ${msg}`);
+}
+
 export {
   parseEntry,
   logger,
@@ -190,4 +207,7 @@ export {
   generateExposeFilename,
   generateShareFilename,
   getResourceUrl,
+  assert,
+  error,
+  warn
 };
