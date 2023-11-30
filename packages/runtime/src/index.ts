@@ -11,7 +11,6 @@ import { assert } from './utils/logger';
 export { FederationHost } from './core';
 export { registerGlobalPlugins } from './global';
 export type { Federation } from './global';
-export type { FederationRuntimePlugin } from './types';
 
 let FederationInstance: FederationHost | null = null;
 export function init(options: UserOptions): FederationHost {
