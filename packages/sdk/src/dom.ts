@@ -1,4 +1,42 @@
-import { isStaticResourcesEqual, safeWrapper } from './tool';
+const LOG_CATEGORY = '[ Federation Runtime ]';
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function assert(condition: any, msg: string): asserts condition {
+  if (!condition) {
+    error(msg);
+  }
+}
+
+export function error(msg: string | Error | unknown): never {
+  throw new Error(`${LOG_CATEGORY}: ${msg}`);
+}
+
+export function warn(msg: Parameters<typeof console.warn>[0]): void {
+  console.warn(`${LOG_CATEGORY}: ${msg}`);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function safeWrapper<T extends (...args: Array<any>) => any>(
+  callback: T,
+  disableWarn?: boolean,
+): Promise<ReturnType<T> | undefined> {
+  try {
+    const res = await callback();
+    return res;
+  } catch (e) {
+    !disableWarn && warn(e);
+    return;
+  }
+}
+
+export function isStaticResourcesEqual(url1: string, url2: string): boolean {
+  const REG_EXP = /^(https?:)?\/\//i;
+  // Transform url1 and url2 into relative paths
+  const relativeUrl1 = url1.replace(REG_EXP, '').replace(/\/$/, '');
+  const relativeUrl2 = url2.replace(REG_EXP, '').replace(/\/$/, '');
+  // Check if the relative paths are identical
+  return relativeUrl1 === relativeUrl2;
+}
 
 export function createScript(
   url: string,

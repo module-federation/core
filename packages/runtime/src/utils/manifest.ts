@@ -1,22 +1,4 @@
-import { ModuleInfo } from '@module-federation/sdk';
 import { Remote } from '../type';
-
-// Function to get the URL of a resource
-export function getResourceUrl(module: ModuleInfo, sourceUrl: string): string {
-  if ('getPublicPath' in module) {
-    const publicPath = new Function(module.getPublicPath)();
-    return `${publicPath}${sourceUrl}`;
-  } else if ('publicPath' in module) {
-    return `${module.publicPath}${sourceUrl}`;
-  } else {
-    console.warn(
-      'Unable to retrieve resource URL. If in debug mode, this warning can be disregarded.',
-      module,
-      sourceUrl,
-    );
-    return '';
-  }
-}
 
 // Function to match a remote with its name and expose
 // id: pkgName(@federation/app1) + expose(button) = @federation/app1/button

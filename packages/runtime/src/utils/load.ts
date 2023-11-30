@@ -1,7 +1,6 @@
-import { composeKeyWithSeparator } from '@module-federation/sdk';
+import { composeKeyWithSeparator, loadScript } from '@module-federation/sdk';
 import { assert } from '../utils/logger';
 import { getRemoteEntryExports, globalLoading } from '../global';
-import { loadScript } from '../utils/dom';
 import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 

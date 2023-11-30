@@ -1,4 +1,4 @@
-import { RemoteEntryInfo } from './types';
+import { RemoteEntryInfo, ModuleInfo } from './types';
 import {
   NameTransformMap,
   NameTransformSymbol,
@@ -165,6 +165,22 @@ const generateShareFilename = /* @__PURE__ */ (
   return encodeName(pkgName, '__federation_shared_', withExt);
 };
 
+const getResourceUrl = (module: ModuleInfo, sourceUrl: string): string => {
+  if ('getPublicPath' in module) {
+    const publicPath = new Function(module.getPublicPath)();
+    return `${publicPath}${sourceUrl}`;
+  } else if ('publicPath' in module) {
+    return `${module.publicPath}${sourceUrl}`;
+  } else {
+    console.warn(
+      'Can not get resource url, if in debug mode, please ignore',
+      module,
+      sourceUrl,
+    );
+    return '';
+  }
+};
+
 export {
   parseEntry,
   logger,
@@ -173,4 +189,5 @@ export {
   composeKeyWithSeparator,
   generateExposeFilename,
   generateShareFilename,
+  getResourceUrl
 };

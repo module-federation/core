@@ -50,6 +50,7 @@ interface LoadRemoteMatch {
   options: Options;
   origin: FederationHost;
   remoteInfo: RemoteInfo;
+  remoteSnapshot?: ModuleInfo;
 }
 
 export class FederationHost {
@@ -92,6 +93,15 @@ export class FederationHost {
       ],
       void
     >('loadRemote'),
+    handlePreloadModule: new SyncHook<
+    {
+      id: string;
+      name: string;
+      remoteSnapshot: ModuleInfo;
+      preloadConfig: PreloadRemoteArgs;
+    },
+    void
+    >('handlePreloadModule'),
     errorLoadRemote: new AsyncHook<
       [
         {
@@ -379,11 +389,11 @@ export class FederationHost {
     });
 
     const { remote, expose } = matchInfo;
-
     assert(
       remote && expose,
       `The 'beforeLoadRemote' hook was executed, but it failed to return the correct 'remote' and 'expose' values while loading ${idRes}.`,
     );
+
     let module: Module | undefined = this.moduleCache.get(remote.name);
 
     const moduleOptions: ModuleOptions = {
@@ -425,7 +435,6 @@ export class FederationHost {
       // id: alias(app1/utils) + expose(loadash/sort) = app1/utils/loadash/sort
       const { module, moduleOptions, remoteMatchInfo } =
         await this._getRemoteModuleAndOptions(id);
-
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
       const moduleOrFactory = (await module.get(expose, options)) as T;
 

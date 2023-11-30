@@ -6,7 +6,7 @@ import { getBuilderId, isDebugMode } from './utils/env';
 import { warn } from './utils/logger';
 import { FederationRuntimePlugin } from './type/plugin';
 
-export type Federation = {
+export interface Federation {
   __GLOBAL_PLUGIN__: Array<FederationRuntimePlugin>;
   __DEBUG_CONSTRUCTOR_VERSION__?: string;
   moduleInfo: GlobalModuleInfo;
