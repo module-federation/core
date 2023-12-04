@@ -19,7 +19,6 @@ export function initializeSharing({
   initTokens,
   initScope,
 }: Options): Promise<boolean> | boolean | void {
-  proxyShareScopeMap(webpackRequire);
 
   if (!initScope) initScope = [];
   // handling circular init calls
@@ -55,6 +54,8 @@ export function initializeSharing({
   };
   const promises =
     webpackRequire.federation.instance!.initializeSharing(shareScopeName);
+  proxyShareScopeMap(webpackRequire);
+
   const bundlerRuntimeRemotesOptions = webpackRequire.federation.bundlerRuntimeOptions.remotes;
   if (bundlerRuntimeRemotesOptions) {
     Object.keys(bundlerRuntimeRemotesOptions.idToRemoteMap).forEach(

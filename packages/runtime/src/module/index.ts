@@ -111,7 +111,7 @@ class Module {
 
       if (federationInstance) {
         // means the instance is prev vmok instance
-      if (federationInstance.constructorName!=='FederationHost') {
+      if (federationInstance.releaseNumber) {
         // 兼容旧的生产者传参
           federationInstance.initOptions({
             ...remoteEntryInitOptions,

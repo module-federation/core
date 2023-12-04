@@ -160,6 +160,7 @@ class FederationRuntimePlugin {
             runtimeRequirements.add(RuntimeGlobals.moduleCache);
             runtimeRequirements.add(RuntimeGlobals.compatGetDefaultExport);
             runtimeRequirements.add(federationGlobal);
+            runtimeRequirements.add(RuntimeGlobals.global);
             compilation.addRuntimeModule(
               chunk,
               new FederationRuntimeModule(

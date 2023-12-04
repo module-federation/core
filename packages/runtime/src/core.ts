@@ -144,7 +144,7 @@ export class FederationHost {
       origin: FederationHost;
     }>(),
   });
-  constructorName = 'FederationHost';
+  releaseNumber = __RELEASE_NUMBER__;
   version: string = __VERSION__;
   name: string;
   moduleCache: Map<string, Module> = new Map();
@@ -520,6 +520,9 @@ export class FederationHost {
   initializeSharing(shareScopeName = DEFAULT_SCOPE): Array<Promise<void>> {
     const globalShareScope = Global.__FEDERATION__.__SHARE__;
     const hostName = this.options.name;
+    if(!globalShareScope[hostName]){
+      globalShareScope[hostName] = {}
+    }
     const shareScope = globalShareScope[hostName]
 
     // Creates a new share scope if necessary
@@ -570,10 +573,20 @@ export class FederationHost {
     return promises;
   }
 
-  addShareScope(scopeName: string, shareScope: ShareScopeMap[string]): void {
+  // maybe move to bundler runtime is better
+  initShareScopeMap(scopeName: string, shareScope: ShareScopeMap[string]): void {
+    // compat prev consumers
+    if('version' in shareScope && typeof shareScope['version']!=='object'){
+      return;
+    }
+    if('region' in shareScope && typeof shareScope['region']!=='object'){
+      return;
+    }
     const globalShareScope = getGlobalShareScope();
-    const localShareScopeMap = globalShareScope[this.options.name]
-    // override
+    if(!globalShareScope[this.options.name]){
+      globalShareScope[this.options.name] = {}
+    }
+    const localShareScopeMap = globalShareScope[this.options.name];
     localShareScopeMap[scopeName] = shareScope
   }
 
