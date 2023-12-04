@@ -1,17 +1,12 @@
-const path = require('path');
-const alias = require('@rollup/plugin-alias');
+const copy = require('rollup-plugin-copy');
 
 module.exports = (rollupConfig, projectOptions) => {
   rollupConfig.plugins.push(
-    alias({
-      entries: [
+    copy({
+      targets: [
         {
-          find: '@module-federation/sdk',
-          replacement: path.resolve(__dirname, '../../dist/packages/sdk'),
-        },
-        {
-          find: '@module-federation/runtime',
-          replacement: path.resolve(__dirname, '../../dist/packages/runtime'),
+          src: 'packages/webpack-bundler-runtime/LICENSE',
+          dest: 'dist/packages/webpack-bundler-runtime',
         },
       ],
     }),

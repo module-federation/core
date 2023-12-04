@@ -39,6 +39,7 @@ export function initializeSharing({
       var initFn = (module: RemoteEntryExports) =>
         module &&
         module.init &&
+        // @ts-ignore
         module.init(webpackRequire.S![shareScopeName], initScope);
       if (module.then) return promises.push(module.then(initFn, handleError));
       var initResult = initFn(module);

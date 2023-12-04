@@ -16,10 +16,10 @@
         "project": "packages/webpack-bundler-runtime/package.json",
         "compiler": "swc",
         "format": ["cjs", "esm"],
+        "external": ["@module-federation/sdk", "@module-federation/runtime"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true,
-        "rollupConfig": "packages/webpack-bundler-runtime/rollup.config.js",
-        "external": ["@module-federation/runtime", "@module-federation/sdk"]
+        "rollupConfig": "packages/webpack-bundler-runtime/rollup.config.js"
       },
       "dependsOn": [
         {

@@ -1,6 +1,8 @@
 const path = require('path');
 const alias = require('@rollup/plugin-alias');
 const replace = require('@rollup/plugin-replace');
+const copy = require('rollup-plugin-copy');
+
 const FEDERATION_DEBUG = process.env.FEDERATION_DEBUG || '';
 
 module.exports = (rollupConfig, projectOptions) => {
@@ -25,6 +27,11 @@ module.exports = (rollupConfig, projectOptions) => {
     replace({
       __VERSION__: `'${pkg.version}'`,
       FEDERATION_DEBUG: `'${FEDERATION_DEBUG}'`,
+    }),
+    copy({
+      targets: [
+        { src: 'packages/runtime/LICENSE', dest: 'dist/packages/runtime' },
+      ],
     }),
   );
 

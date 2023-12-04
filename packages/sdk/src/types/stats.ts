@@ -18,6 +18,7 @@ export interface BasicStatsMetaData {
   globalName: string;
   buildInfo: StatsBuildInfo;
   remoteEntry: ResourceInfo;
+  prefetchEntry: ResourceInfo;
   types: Omit<ResourceInfo, 'type'>;
 }
 
