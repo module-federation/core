@@ -5,6 +5,7 @@
   "main": "./index.cjs",
   "module": "./index.esm.js",
   "types": "./index.cjs.d.ts",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
