@@ -20,6 +20,6 @@ const federation: Federation = {
     installInitialConsumes,
   },
   proxyShareScopeMap,
-  bundlerRuntimeOptions:{}
+  bundlerRuntimeOptions: {},
 };
 export default federation;

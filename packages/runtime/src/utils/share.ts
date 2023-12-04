@@ -1,6 +1,12 @@
 import { DEFAULT_SCOPE } from '../constant';
 import { Global } from '../global';
-import { GlobalShareScopeMap, Shared, ShareArgs, ShareInfos, ShareScopeMap } from '../type';
+import {
+  GlobalShareScopeMap,
+  Shared,
+  ShareArgs,
+  ShareInfos,
+  ShareScopeMap,
+} from '../type';
 import { warn } from './logger';
 import { satisfy } from './semver';
 
@@ -25,7 +31,7 @@ export function formatShare(shareArgs: ShareArgs, from: string): Shared {
     loading: null,
     ...shareArgs,
     get,
-    loaded:'lib' in shareArgs ? true : undefined ,
+    loaded: 'lib' in shareArgs ? true : undefined,
     scope: Array.isArray(shareArgs.scope) ? shareArgs.scope : ['default'],
     strategy: shareArgs.strategy || 'version-first',
   };
@@ -67,7 +73,7 @@ function versionLt(a: string, b: string): boolean {
 }
 
 const findVersion = (
-  shareScopeMap:ShareScopeMap,
+  shareScopeMap: ShareScopeMap,
   scope: string,
   pkgName: string,
   cb?: (prev: string, cur: string) => boolean,
@@ -97,7 +103,7 @@ const findVersion = (
 };
 
 function findSingletonVersionOrderByVersion(
-  shareScopeMap:ShareScopeMap,
+  shareScopeMap: ShareScopeMap,
   scope: string,
   pkgName: string,
 ): string {
@@ -106,11 +112,11 @@ function findSingletonVersionOrderByVersion(
     return !versions[prev].loaded && versionLt(prev, cur);
   };
 
-  return findVersion(shareScopeMap,scope, pkgName, callback);
+  return findVersion(shareScopeMap, scope, pkgName, callback);
 }
 
 function findSingletonVersionOrderByLoaded(
-  shareScopeMap:ShareScopeMap,
+  shareScopeMap: ShareScopeMap,
   scope: string,
   pkgName: string,
 ): string {
@@ -129,7 +135,7 @@ function findSingletonVersionOrderByLoaded(
     return versionLt(prev, cur);
   };
 
-  return findVersion(shareScopeMap,scope, pkgName, callback);
+  return findVersion(shareScopeMap, scope, pkgName, callback);
 }
 
 function getFindShareFunction(strategy: Shared['strategy']) {
@@ -142,23 +148,31 @@ function getFindShareFunction(strategy: Shared['strategy']) {
 // Details about shared resources
 // TODO: Implement strictVersion for alignment with module federation.
 export function getRegisteredShare(
-  instanceName:string,
+  instanceName: string,
   pkgName: string,
   shareInfo: ShareInfos[keyof ShareInfos],
 ): Shared | void {
   const globalShares = Global.__FEDERATION__.__SHARE__;
-  const localShareScopeMap= globalShares[instanceName]
-  if(!localShareScopeMap){
+  const localShareScopeMap = globalShares[instanceName];
+  if (!localShareScopeMap) {
     return;
   }
   const { shareConfig, scope = DEFAULT_SCOPE, strategy } = shareInfo;
   const scopes = Array.isArray(scope) ? scope : [scope];
   for (const sc of scopes) {
-    if (shareConfig && localShareScopeMap[sc] && localShareScopeMap[sc][pkgName]) {
+    if (
+      shareConfig &&
+      localShareScopeMap[sc] &&
+      localShareScopeMap[sc][pkgName]
+    ) {
       const { requiredVersion } = shareConfig;
       // eslint-disable-next-line max-depth
       if (shareConfig.singleton) {
-        const singletonVersion = getFindShareFunction(strategy)(localShareScopeMap,sc, pkgName);
+        const singletonVersion = getFindShareFunction(strategy)(
+          localShareScopeMap,
+          sc,
+          pkgName,
+        );
         // eslint-disable-next-line max-depth
         if (
           typeof requiredVersion === 'string' &&
@@ -175,7 +189,11 @@ export function getRegisteredShare(
         }
         return localShareScopeMap[sc][pkgName][singletonVersion];
       } else {
-        const maxVersion = getFindShareFunction(strategy)(localShareScopeMap,sc, pkgName);
+        const maxVersion = getFindShareFunction(strategy)(
+          localShareScopeMap,
+          sc,
+          pkgName,
+        );
 
         // eslint-disable-next-line max-depth
         if (requiredVersion === false || requiredVersion === '*') {

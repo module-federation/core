@@ -11,7 +11,7 @@ import {
   UserOptions,
   RemoteInfo,
   GlobalShareScopeMap,
-  ShareScopeMap
+  ShareScopeMap,
 } from './type';
 import {
   assert,
@@ -169,7 +169,7 @@ export class FederationHost {
       HTMLScriptElement | void
     >(),
   });
-  shareScopeMap:ShareScopeMap;
+  shareScopeMap: ShareScopeMap;
 
   constructor(userOptions: UserOptions) {
     // TODO: Validate the details of the options
@@ -235,7 +235,11 @@ export class FederationHost {
     );
 
     // Retrieve from cache
-    const registeredShared = getRegisteredShare(this.options.name,pkgName, shareInfoRes);
+    const registeredShared = getRegisteredShare(
+      this.options.name,
+      pkgName,
+      shareInfoRes,
+    );
 
     const addUseIn = (shared: Shared): void => {
       if (!shared.useIn) {
@@ -247,7 +251,11 @@ export class FederationHost {
     if (registeredShared && registeredShared.lib) {
       addUseIn(registeredShared);
       return registeredShared.lib as () => T;
-    } else if (registeredShared && registeredShared.loading && !registeredShared.loaded) {
+    } else if (
+      registeredShared &&
+      registeredShared.loading &&
+      !registeredShared.loaded
+    ) {
       const factory = await registeredShared.loading;
       registeredShared.loaded = true;
       if (!registeredShared.lib) {
@@ -261,7 +269,11 @@ export class FederationHost {
         shareInfoRes.lib = factory;
         shareInfoRes.loaded = true;
         addUseIn(shareInfoRes);
-        const gShared = getRegisteredShare(this.options.name,pkgName, shareInfoRes);
+        const gShared = getRegisteredShare(
+          this.options.name,
+          pkgName,
+          shareInfoRes,
+        );
         if (gShared) {
           gShared.lib = factory;
           gShared.loaded = true;
@@ -287,7 +299,11 @@ export class FederationHost {
         shareInfoRes.lib = factory;
         shareInfoRes.loaded = true;
         addUseIn(shareInfoRes);
-        const gShared = getRegisteredShare(this.options.name,pkgName, shareInfoRes);
+        const gShared = getRegisteredShare(
+          this.options.name,
+          pkgName,
+          shareInfoRes,
+        );
         if (gShared) {
           gShared.lib = factory;
           gShared.loaded = true;
@@ -313,7 +329,11 @@ export class FederationHost {
   // 3. If the local get returns something other than Promise, then it will be used directly
   loadShareSync<T>(pkgName: string): () => T | never {
     const shareInfo = this.options.shared?.[pkgName];
-    const registeredShared = getRegisteredShare(this.options.name,pkgName, shareInfo);
+    const registeredShared = getRegisteredShare(
+      this.options.name,
+      pkgName,
+      shareInfo,
+    );
 
     if (registeredShared && typeof registeredShared.lib === 'function') {
       addUniqueItem(registeredShared.useIn, this.options.name);
@@ -520,10 +540,10 @@ export class FederationHost {
   initializeSharing(shareScopeName = DEFAULT_SCOPE): Array<Promise<void>> {
     const globalShareScope = Global.__FEDERATION__.__SHARE__;
     const hostName = this.options.name;
-    if(!globalShareScope[hostName]){
-      globalShareScope[hostName] = {}
+    if (!globalShareScope[hostName]) {
+      globalShareScope[hostName] = {};
     }
-    const shareScope = globalShareScope[hostName]
+    const shareScope = globalShareScope[hostName];
 
     // Creates a new share scope if necessary
     if (!shareScope[shareScopeName]) {
@@ -574,20 +594,23 @@ export class FederationHost {
   }
 
   // maybe move to bundler runtime is better
-  initShareScopeMap(scopeName: string, shareScope: ShareScopeMap[string]): void {
+  initShareScopeMap(
+    scopeName: string,
+    shareScope: ShareScopeMap[string],
+  ): void {
     // compat prev consumers
-    if('version' in shareScope && typeof shareScope['version']!=='object'){
+    if ('version' in shareScope && typeof shareScope['version'] !== 'object') {
       return;
     }
-    if('region' in shareScope && typeof shareScope['region']!=='object'){
+    if ('region' in shareScope && typeof shareScope['region'] !== 'object') {
       return;
     }
     const globalShareScope = getGlobalShareScope();
-    if(!globalShareScope[this.options.name]){
-      globalShareScope[this.options.name] = {}
+    if (!globalShareScope[this.options.name]) {
+      globalShareScope[this.options.name] = {};
     }
     const localShareScopeMap = globalShareScope[this.options.name];
-    localShareScopeMap[scopeName] = shareScope
+    localShareScopeMap[scopeName] = shareScope;
   }
 
   private formatOptions(
@@ -655,7 +678,11 @@ export class FederationHost {
     const sharedKeys = Object.keys(formatShareOptions);
     sharedKeys.forEach((sharedKey) => {
       const sharedVal = formatShareOptions[sharedKey];
-      const registeredShared = getRegisteredShare(userOptions.name,sharedKey, sharedVal);
+      const registeredShared = getRegisteredShare(
+        userOptions.name,
+        sharedKey,
+        sharedVal,
+      );
       if (!registeredShared && sharedVal && sharedVal.lib) {
         this.setShared({
           pkgName: sharedKey,
@@ -719,10 +746,10 @@ export class FederationHost {
     get?: Shared['get'];
   }): void {
     const globalShareScopeMap = getGlobalShareScope();
-    if(!globalShareScopeMap[this.options.name]){
-      globalShareScopeMap[this.options.name] = {}
+    if (!globalShareScopeMap[this.options.name]) {
+      globalShareScopeMap[this.options.name] = {};
     }
-    const target = globalShareScopeMap[this.options.name] ;
+    const target = globalShareScopeMap[this.options.name];
     const { version, scope = 'default', ...shareInfo } = shared;
     const scopes: string[] = Array.isArray(scope) ? scope : [scope];
     scopes.forEach((sc) => {

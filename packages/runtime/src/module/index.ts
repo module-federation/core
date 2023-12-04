@@ -73,7 +73,7 @@ class Module {
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   async get(expose: string, options?: { loadFactory?: boolean }) {
     const { loadFactory = true } = options || { loadFactory: true };
-    const hostName = this.hostInfo.name
+    const hostName = this.hostInfo.name;
 
     // Get remoteEntry.js
     const remoteEntryExports = await this.getEntry();
@@ -81,11 +81,11 @@ class Module {
     if (!this.inited) {
       const globalShareScopeMap = Global.__FEDERATION__.__SHARE__;
 
-      if(!globalShareScopeMap[hostName]){
-        globalShareScopeMap[hostName] = {}
+      if (!globalShareScopeMap[hostName]) {
+        globalShareScopeMap[hostName] = {};
       }
 
-      const localShareScopeMap = globalShareScopeMap[hostName]
+      const localShareScopeMap = globalShareScopeMap[hostName];
       const remoteShareScope = this.remoteInfo.shareScope || 'default';
 
       if (!localShareScopeMap[remoteShareScope]) {
@@ -111,16 +111,21 @@ class Module {
 
       if (federationInstance) {
         // means the instance is prev vmok instance
-      if (federationInstance.releaseNumber) {
-        // 兼容旧的生产者传参
+        if (federationInstance.releaseNumber) {
+          // 兼容旧的生产者传参
           federationInstance.initOptions({
             ...remoteEntryInitOptions,
             remotes: [],
             name: this.remoteInfo.name,
           });
-          if(!__FEDERATION__.__SHARE__['default'] && __FEDERATION__.__SHARE__[hostName] && __FEDERATION__.__SHARE__[hostName]['default']){
+          if (
+            !__FEDERATION__.__SHARE__['default'] &&
+            __FEDERATION__.__SHARE__[hostName] &&
+            __FEDERATION__.__SHARE__[hostName]['default']
+          ) {
             // @ts-ignore compat prev logic , and it will be optimized by supporting startup hook
-            __FEDERATION__.__SHARE__['default'] = __FEDERATION__.__SHARE__[hostName]['default'];
+            __FEDERATION__.__SHARE__['default'] =
+              __FEDERATION__.__SHARE__[hostName]['default'];
           }
         }
       }

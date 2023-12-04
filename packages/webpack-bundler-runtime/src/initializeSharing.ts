@@ -19,7 +19,6 @@ export function initializeSharing({
   initTokens,
   initScope,
 }: Options): Promise<boolean> | boolean | void {
-
   if (!initScope) initScope = [];
   // handling circular init calls
   var initToken = initTokens[shareScopeName];
@@ -56,13 +55,14 @@ export function initializeSharing({
     webpackRequire.federation.instance!.initializeSharing(shareScopeName);
   proxyShareScopeMap(webpackRequire);
 
-  const bundlerRuntimeRemotesOptions = webpackRequire.federation.bundlerRuntimeOptions.remotes;
+  const bundlerRuntimeRemotesOptions =
+    webpackRequire.federation.bundlerRuntimeOptions.remotes;
   if (bundlerRuntimeRemotesOptions) {
     Object.keys(bundlerRuntimeRemotesOptions.idToRemoteMap).forEach(
       (moduleId) => {
         const info = bundlerRuntimeRemotesOptions.idToRemoteMap[moduleId];
         const externalModuleId =
-        bundlerRuntimeRemotesOptions.idToExternalAndNameMapping[moduleId][2];
+          bundlerRuntimeRemotesOptions.idToExternalAndNameMapping[moduleId][2];
         if (info.length > 1) {
           initExternal(externalModuleId);
         } else if (info.length === 1) {

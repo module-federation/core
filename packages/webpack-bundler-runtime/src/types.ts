@@ -46,7 +46,7 @@ export interface WebpackRequire {
   I: typeof initializeSharing;
   S?: InferredGlobalShareScope;
   federation: Federation;
-  g: typeof globalThis
+  g: typeof globalThis;
 }
 
 interface ShareInfo {
@@ -114,8 +114,8 @@ export interface Federation {
     installInitialConsumes: (options: InstallInitialConsumesOptions) => any;
   };
   bundlerRuntimeOptions: {
-    remotes?: Exclude<RemotesOptions,'chunkId' | 'promises'>;
+    remotes?: Exclude<RemotesOptions, 'chunkId' | 'promises'>;
   };
-  proxyShareScopeMap?:typeof proxyShareScopeMap;
-  hasProxyShareScopeMap?:boolean
+  proxyShareScopeMap?: typeof proxyShareScopeMap;
+  hasProxyShareScopeMap?: boolean;
 }

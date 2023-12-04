@@ -85,7 +85,7 @@ export type ShareScopeMap = {
 };
 
 export type GlobalShareScopeMap = {
-  [instanceName: string]: ShareScopeMap
+  [instanceName: string]: ShareScopeMap;
 };
 
 export type ShareInfos = {

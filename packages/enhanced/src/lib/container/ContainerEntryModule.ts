@@ -289,12 +289,12 @@ class ContainerEntryModule extends Module {
         `var name = ${JSON.stringify(this._shareScope)}`,
         `${federationGlobal}.instance.initOptions({name:${federationGlobal}.initOptions.name, })`,
         `${federationGlobal}.instance.initShareScopeMap(name,shareScope)`,
-      `if (${RuntimeGlobals.global}.__FEDERATION__.__SHARE__.default){`,
-      Template.indent([
-        `${federationGlobal}.instance.initShareScopeMap(name,${RuntimeGlobals.global}.__FEDERATION__.__SHARE__.default)`,
-      ]),
-      '}',
-      `${federationGlobal}.proxyShareScopeMap(${RuntimeGlobals.require});`,
+        `if (${RuntimeGlobals.global}.__FEDERATION__.__SHARE__.default){`,
+        Template.indent([
+          `${federationGlobal}.instance.initShareScopeMap(name,${RuntimeGlobals.global}.__FEDERATION__.__SHARE__.default)`,
+        ]),
+        '}',
+        `${federationGlobal}.proxyShareScopeMap(${RuntimeGlobals.require});`,
         `return ${RuntimeGlobals.initializeSharing}(name, initScope);`,
       ])};`,
       `${initRuntimeModuleGetter}`,

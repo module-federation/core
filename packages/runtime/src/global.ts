@@ -1,5 +1,10 @@
 import { FederationHost } from './core';
-import { RemoteEntryExports, GlobalShareScopeMap, Remote, Optional } from './type';
+import {
+  RemoteEntryExports,
+  GlobalShareScopeMap,
+  Remote,
+  Optional,
+} from './type';
 import { getFMId } from './utils/tool';
 import { GlobalModuleInfo, ModuleInfo } from '@module-federation/sdk';
 import { getBuilderId, isDebugMode } from './utils/env';
@@ -15,7 +20,7 @@ export interface Federation {
   __SHARE__: GlobalShareScopeMap;
   __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
   __PRELOADED_MAP__: Map<string, boolean>;
-};
+}
 
 // export const nativeGlobal: typeof global = new Function('return this')();
 export const nativeGlobal: typeof global = new Function('return this')();

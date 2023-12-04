@@ -265,7 +265,11 @@ export function generatePreloadAssets(
       if (!shareInfo) {
         return;
       }
-      const registeredShared = getRegisteredShare(origin.name,shared.sharedName, shareInfo);
+      const registeredShared = getRegisteredShare(
+        origin.name,
+        shared.sharedName,
+        shareInfo,
+      );
       // If the global share does not exist, or the lib function does not exist, it means that the shared has not been loaded yet and can be preloaded.
 
       if (registeredShared && typeof registeredShared.lib === 'function') {
