@@ -1,5 +1,8 @@
 import { BROWSER_LOG_KEY, BROWSER_LOG_VALUE } from './constant';
 import { isBrowserEnv, isDebugMode } from './env';
+
+const DEBUG_LOG = '[ FEDERATION DEBUG ]';
+
 function safeToString(info: any): string {
   try {
     return JSON.stringify(info, null, 2);
@@ -8,7 +11,6 @@ function safeToString(info: any): string {
   }
 }
 
-const DEBUG_LOG = '[ FEDERATION DEBUG ]';
 class Logger {
   enable = false;
   identifier: string;
