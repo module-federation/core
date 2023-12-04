@@ -30,9 +30,9 @@ module.exports = (rollupConfig, projectOptions) => {
     }),
     copy({
       targets: [
-        { src: 'packages/runtime/LICENSE', dest: 'dist/packages/runtime' }
-      ]
-    })
+        { src: 'packages/runtime/LICENSE', dest: 'dist/packages/runtime' },
+      ],
+    }),
   );
 
   return rollupConfig;
