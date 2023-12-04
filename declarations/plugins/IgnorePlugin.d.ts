@@ -5,19 +5,19 @@
  */
 
 export type IgnorePluginOptions =
-	| {
-			/**
-			 * A RegExp to test the context (directory) against.
-			 */
-			contextRegExp?: RegExp;
-			/**
-			 * A RegExp to test the request against.
-			 */
-			resourceRegExp: RegExp;
-	  }
-	| {
-			/**
-			 * A filter function for resource and context.
-			 */
-			checkResource: (resource: string, context: string) => boolean;
-	  };
+  | {
+      /**
+       * A RegExp to test the context (directory) against.
+       */
+      contextRegExp?: RegExp;
+      /**
+       * A RegExp to test the request against.
+       */
+      resourceRegExp: RegExp;
+    }
+  | {
+      /**
+       * A filter function for resource and context.
+       */
+      checkResource: (resource: string, context: string) => boolean;
+    };

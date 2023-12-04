@@ -5,6 +5,45 @@ const path = require('path');
 const { registerTsConfigPaths } = require('nx/src/plugins/js/utils/register');
 registerTsConfigPaths(path.join(workspaceRoot, 'tsconfig.tmp.json'));
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
+const fs = require('fs');
+
+function renameDefaultDelegate() {
+  const filesToRename = [
+    {
+      oldPath: path.resolve(
+        __dirname,
+        '../../dist/packages/nextjs-mf/src/default-delegate.js',
+      ),
+      newPath: path.resolve(
+        __dirname,
+        '../../dist/packages/nextjs-mf/src/default-delegate.cjs',
+      ),
+    },
+    {
+      oldPath: path.resolve(
+        __dirname,
+        '../../dist/packages/nextjs-mf/src/federation-noop.js',
+      ),
+      newPath: path.resolve(
+        __dirname,
+        '../../dist/packages/nextjs-mf/src/federation-noop.cjs',
+      ),
+    },
+  ];
+
+  filesToRename.forEach(({ oldPath, newPath }) => {
+    fs.rename(oldPath, newPath, function (err) {
+      if (err) {
+        // Do not log error
+      }
+    });
+  });
+}
+try {
+  renameDefaultDelegate();
+} catch (e) {
+  /* empty */
+}
 const {
   createDelegatedModule,
 } = require('@module-federation/nextjs-mf/utilities');
@@ -64,7 +103,7 @@ const nextConfig = {
           skipSharingNextInternals: false,
           automaticPageStitching: false,
         },
-      })
+      }),
     );
     return config;
   },

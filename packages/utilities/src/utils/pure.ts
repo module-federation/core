@@ -49,39 +49,36 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
     };
 
     // @ts-ignore
-    if (!globalThis.__remote_scope__) {
-      // create a global scope for container, similar to how remotes are set on window in the browser
-      // @ts-ignore
-      globalThis.__remote_scope__ = {
-        // @ts-ignore
-        _config: {},
-      };
-    }
-    // @ts-ignore
     const globalScope =
       // @ts-ignore
       typeof window !== 'undefined' ? window : globalThis.__remote_scope__;
 
     if (typeof window === 'undefined') {
+      //@ts-ignore
       globalScope['_config'][containerKey] = reference.url;
     } else {
       // to match promise template system, can be removed once promise template is gone
+      //@ts-ignore
       if (!globalScope['remoteLoading']) {
+        //@ts-ignore
         globalScope['remoteLoading'] = {};
       }
+      //@ts-ignore
       if (globalScope['remoteLoading'][containerKey]) {
+        //@ts-ignore
         return globalScope['remoteLoading'][containerKey];
       }
     }
     // @ts-ignore
     asyncContainer = new Promise(function (resolve, reject) {
       function resolveRemoteGlobal() {
+        //@ts-ignore
         const asyncContainer = globalScope[
           remoteGlobal
         ] as unknown as AsyncContainer;
         return resolve(asyncContainer);
       }
-
+      //@ts-ignore
       if (typeof globalScope[remoteGlobal] !== 'undefined') {
         return resolveRemoteGlobal();
       }
@@ -89,6 +86,7 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       (__webpack_require__ as any).l(
         reference.url,
         function (event: Event) {
+          //@ts-ignore
           if (typeof globalScope[remoteGlobal] !== 'undefined') {
             return resolveRemoteGlobal();
           }
@@ -139,6 +137,7 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
       };
     });
     if (typeof window !== 'undefined') {
+      //@ts-ignore
       globalScope['remoteLoading'][containerKey] = asyncContainer;
     }
   }

@@ -1,8 +1,5 @@
 // @ts-check
 
-/**
- * @type {import('@nrwl/devkit').ModuleFederationConfig}
- **/
 const moduleFederationConfig = {
   name: 'react_ts_remote',
   exposes: {

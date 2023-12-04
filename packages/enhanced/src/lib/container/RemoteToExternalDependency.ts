@@ -4,10 +4,9 @@
 */
 
 'use strict';
-//@ts-ignore
-import ModuleDependency = require('webpack/lib/dependencies/ModuleDependency');
-//@ts-ignore
-import makeSerializable = require('webpack/lib/util/makeSerializable');
+
+import ModuleDependency from 'webpack/lib/dependencies/ModuleDependency';
+import makeSerializable from 'webpack/lib/util/makeSerializable';
 
 class RemoteToExternalDependency extends ModuleDependency {
   /**

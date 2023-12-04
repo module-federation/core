@@ -1,21 +1,17 @@
-import type { Compiler, Compilation, Chunk, Module } from 'webpack';
+import type { Compiler, Compilation, Chunk, NormalModule } from 'webpack';
 
-/**
- * A webpack plugin that moves specified modules from chunks to runtime chunk.
- * @class DelegateModulesPlugin
- */
 class DelegateModulesPlugin {
   options: { debug: boolean; [key: string]: any };
-  _delegateModules: Set<Module>;
+  _delegateModules: Map<string, NormalModule>;
 
   constructor(options: { debug?: boolean; [key: string]: any }) {
     this.options = { debug: false, ...options };
-    this._delegateModules = new Set();
+    this._delegateModules = new Map();
   }
 
   getChunkByName(chunks: Iterable<Chunk>, name: string): Chunk | undefined {
     for (const chunk of chunks) {
-      if (chunk.name == name) {
+      if (chunk.name === name) {
         return chunk;
       }
     }
@@ -24,17 +20,17 @@ class DelegateModulesPlugin {
 
   private addDelegatesToChunks(
     compilation: Compilation,
-    chunks: Chunk[],
+    chunks: Iterable<Chunk>,
   ): void {
     for (const chunk of chunks) {
-      for (const module of Array.from(this._delegateModules)) {
+      this._delegateModules.forEach((module) => {
         this.addModuleAndDependenciesToChunk(module, chunk, compilation);
-      }
+      });
     }
   }
 
   private addModuleAndDependenciesToChunk(
-    module: Module,
+    module: NormalModule,
     chunk: Chunk,
     compilation: Compilation,
   ): void {
@@ -42,26 +38,7 @@ class DelegateModulesPlugin {
       if (this.options.debug) {
         console.log('adding ', module.identifier(), ' to chunk', chunk.name);
       }
-      if (module.buildMeta) {
-        //@ts-ignore
-        module.buildMeta.eager = true; // non-standard way to keep track of initial
-      }
-      // modules needed by delegate module, so during eager share removal they are perserved
       compilation.chunkGraph.connectChunkAndModule(chunk, module);
-    }
-
-    for (const dependency of module.dependencies) {
-      const dependencyModule = compilation.moduleGraph.getModule(dependency);
-      if (
-        dependencyModule &&
-        !compilation.chunkGraph.isModuleInChunk(dependencyModule, chunk)
-      ) {
-        // this.addModuleAndDependenciesToChunk(
-        //   dependencyModule,
-        //   chunk,
-        //   compilation
-        // );
-      }
     }
   }
 
@@ -78,28 +55,55 @@ class DelegateModulesPlugin {
             chunk.id,
             chunk.name,
           );
-        this._delegateModules.forEach((module) => {
+
+        for (const [id, module] of this._delegateModules) {
           compilation.chunkGraph.disconnectChunkAndModule(chunk, module);
-        });
+        }
       }
     }
   }
 
-  /**
-   * Applies the plugin to the webpack compiler.
-   * @param {Compiler} compiler - The webpack compiler instance.
-   */
   apply(compiler: Compiler): void {
-    // Tap into compilation hooks
-    compiler.hooks.compilation.tap(
+    compiler.hooks.thisCompilation.tap(
       'DelegateModulesPlugin',
       (compilation: Compilation) => {
-        // fills this._delegateModules set
-        this.resolveDelegateModules(compilation);
+        compilation.hooks.finishModules.tapAsync(
+          'DelegateModulesPlugin',
+          (modules, callback) => {
+            const { remotes } = this.options;
+            const knownDelegates = new Set(
+              remotes
+                ? (Object.values(remotes) as string[]).map((remote: string) =>
+                    remote.replace('internal ', ''),
+                  )
+                : [],
+            );
+            for (const module of modules) {
+              const normalModule = module as NormalModule;
+              if (normalModule) {
+                const mid = normalModule.identifier();
+                if (
+                  normalModule?.userRequest?.startsWith(
+                    'webpack/container/reference',
+                  )
+                ) {
+                  this._delegateModules.set(mid, normalModule);
+                }
+              }
+              if (
+                normalModule.resource &&
+                knownDelegates.has(normalModule.resource)
+              ) {
+                this._delegateModules.set(normalModule.resource, normalModule);
+              }
+            }
+            callback();
+          },
+        );
+
         compilation.hooks.optimizeChunks.tap(
           'DelegateModulesPlugin',
           (chunks) => {
-            // Change this line
             const { runtime, container } = this.options;
             const runtimeChunk = this.getChunkByName(chunks, runtime);
             if (!runtimeChunk || !runtimeChunk.hasRuntime()) {
@@ -127,33 +131,6 @@ class DelegateModulesPlugin {
       },
     );
   }
-
-  resolveDelegateModules(compilation: Compilation): void {
-    // Tap into the 'finish-modules' hook to access the module list after they are all processed
-    compilation.hooks.finishModules.tapAsync(
-      'ModuleIDFinderPlugin',
-      (modules, callback) => {
-        const { remotes } = this.options;
-
-        // Get the delegate module names for remote chunks if specified
-        const knownDelegates = new Set(
-          remotes
-            ? (Object.values(remotes) as string[]).map((remote: string) =>
-                remote.replace('internal ', ''),
-              )
-            : [],
-        );
-
-        for (const module of modules) {
-          // @ts-ignore
-          if (module.resource && knownDelegates.has(module.resource)) {
-            this._delegateModules.add(module);
-          }
-        }
-        // Continue the process
-        callback();
-      },
-    );
-  }
 }
+
 export default DelegateModulesPlugin;

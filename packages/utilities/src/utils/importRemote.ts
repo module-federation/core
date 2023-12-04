@@ -80,7 +80,7 @@ const loadEsmRemote = async (
     );
   }
 
-  window[scope] = {
+  (window as any)[scope] = {
     ...module,
     __initializing: false,
     __initialized: false,

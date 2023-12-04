@@ -15,28 +15,23 @@ import {
   getDescriptionFile,
   getRequiredVersionFromDescriptionFile,
 } from './utils';
-
+import type { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import ConsumeSharedModule from './ConsumeSharedModule';
 import ConsumeSharedRuntimeModule from './ConsumeSharedRuntimeModule';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 //@ts-ignore
-import ModuleNotFoundError = require('webpack/lib/ModuleNotFoundError');
+import ModuleNotFoundError from 'webpack/lib/ModuleNotFoundError';
 import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 //@ts-ignore
-import WebpackError = require('webpack/lib/WebpackError');
+import WebpackError from 'webpack/lib/WebpackError';
 //@ts-ignore
-import Compiler = require('webpack/lib/Compiler');
+import Compiler from 'webpack/lib/Compiler';
 //@ts-ignore
-import LazySet = require('webpack/lib/util/LazySet');
+import LazySet from 'webpack/lib/util/LazySet';
 //@ts-ignore
-import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
-
-/** @typedef {import("../../declarations/plugins/sharing/ConsumeSharedPlugin").ConsumeSharedPluginOptions} ConsumeSharedPluginOptions */
-/** @typedef {import("../../declarations/plugins/sharing/ConsumeSharedPlugin").ConsumesConfig} ConsumesConfig */
-/** @typedef {import("webpack/lib/Compiler")} Compiler */
-/** @typedef {import("webpack/lib/ResolverFactory").ResolveOptionsWithDependencyType} ResolveOptionsWithDependencyType */
-/** @typedef {import("./ConsumeSharedModule").ConsumeOptions} ConsumeOptions */
+import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
+import { SemVerRange } from 'webpack/lib/util/semver';
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
@@ -48,15 +43,13 @@ const validate = createSchemaValidation(
   },
 );
 
-/** @type {ResolveOptionsWithDependencyType} */
-const RESOLVE_OPTIONS = { dependencyType: 'esm' };
+const RESOLVE_OPTIONS: ResolveOptionsWithDependencyType = {
+  dependencyType: 'esm',
+};
 const PLUGIN_NAME = 'ConsumeSharedPlugin';
 class ConsumeSharedPlugin {
   private _consumes: [string, ConsumeOptions][];
 
-  /**
-   * @param {ConsumeSharedPluginOptions} options options
-   */
   constructor(options: ConsumeSharedPluginOptions) {
     if (typeof options !== 'string') {
       validate(options);
@@ -114,11 +107,6 @@ class ConsumeSharedPlugin {
     );
   }
 
-  /**
-   * Apply the plugin
-   * @param {Compiler} compiler the compiler instance
-   * @returns {void}
-   */
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
@@ -144,12 +132,6 @@ class ConsumeSharedPlugin {
           RESOLVE_OPTIONS,
         );
 
-        /**
-         * @param {string} context issuer directory
-         * @param {string} request request
-         * @param {ConsumeOptions} config options
-         * @returns {Promise<ConsumeSharedModule>} create module
-         */
         const createConsumeSharedModule = (
           context: string,
           request: string,
@@ -167,9 +149,7 @@ class ConsumeSharedPlugin {
             /^(\.\.?(\/|$)|\/|[A-Za-z]:|\\\\)/.test(config.import);
           return Promise.all([
             new Promise<string | undefined>((resolve) => {
-              if (!config.import) {
-                return resolve(undefined);
-              }
+              if (!config.import) return resolve(undefined);
               const resolveContext = {
                 fileDependencies: new LazySet<string>(),
                 contextDependencies: new LazySet<string>(),
@@ -203,11 +183,10 @@ class ConsumeSharedPlugin {
                 },
               );
             }),
-            new Promise<string | undefined>((resolve) => {
+            new Promise<false | undefined | SemVerRange>((resolve) => {
               if (config.requiredVersion !== undefined) {
-                return resolve(`${config.requiredVersion}`);
+                return resolve(config.requiredVersion);
               }
-
               let packageName = config.packageName;
               if (packageName === undefined) {
                 if (/^(\/|[A-Za-z]:|\\\\)/.test(request)) {
@@ -236,10 +215,8 @@ class ConsumeSharedPlugin {
                     );
                     return resolve(undefined);
                   }
-                  const { data, path: descriptionPath } = result || {
-                    data: undefined,
-                    path: undefined,
-                  };
+                  //@ts-ignore
+                  const { data, path: descriptionPath } = result;
                   if (!data) {
                     requiredVersionWarning(
                       `Unable to find description file in ${context}.`,
@@ -261,10 +238,7 @@ class ConsumeSharedPlugin {
                     );
                     return resolve(undefined);
                   }
-                  resolve(
-                    parseRange(requiredVersion)?.toString() ||
-                      JSON.stringify(parseRange(requiredVersion)),
-                  );
+                  resolve(parseRange(requiredVersion));
                 },
               );
             }),
@@ -275,9 +249,7 @@ class ConsumeSharedPlugin {
                 ...config,
                 importResolved,
                 import: importResolved ? config.import : undefined,
-                requiredVersion: requiredVersion
-                  ? parseRange(requiredVersion)
-                  : undefined,
+                requiredVersion,
               },
             );
           });
@@ -287,13 +259,12 @@ class ConsumeSharedPlugin {
           PLUGIN_NAME,
           ({ context, request, dependencies }) =>
             // wait for resolving to be complete
-            // @ts-ignore
-            promise.then((): Promise<Module | undefined> => {
+            //@ts-ignore
+            promise.then(() => {
               if (
                 dependencies[0] instanceof ConsumeSharedFallbackDependency ||
                 dependencies[0] instanceof ProvideForSharedDependency
               ) {
-                //@ts-ignore
                 return;
               }
               const match = unresolvedConsumes.get(request);
@@ -326,11 +297,7 @@ class ConsumeSharedPlugin {
             if (resource) {
               const options = resolvedConsumes.get(resource);
               if (options !== undefined) {
-                return createConsumeSharedModule(
-                  context,
-                  resource || '',
-                  options,
-                );
+                return createConsumeSharedModule(context, resource, options);
               }
             }
             return Promise.resolve();

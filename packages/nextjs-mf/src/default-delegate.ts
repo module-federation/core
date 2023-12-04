@@ -202,7 +202,7 @@ const getRuntimeRemotes = () => {
         }
       } else if (typeof value === 'string' && !value.includes('@')) {
         acc[key] = { global: key, url: value };
-        console.log('delegates may need work');
+        console.warn('delegates may need work');
       }
       // if its just a string (global@url)
       else if (typeof value === 'string') {

@@ -16,17 +16,6 @@
         ]
       }
     },
-    "publish": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "node tools/scripts/publish.mjs native-federation-tests {args.ver} {args.tag}"
-      },
-      "dependsOn": [
-        {
-          "target": "build"
-        }
-      ]
-    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
@@ -38,32 +27,30 @@
       "executor": "@nx/vite:test",
       "outputs": ["{workspaceRoot}/coverage/packages/native-federation-tests"]
     },
-    "version": {
-      "executor": "@jscutlery/semver:version",
+    "release": {
+      "executor": "nx:run-commands",
       "options": {
-        "postTargets": [
-          "native-federation-tests:npm",
-          "native-federation-tests:github"
-        ],
-        "trackDeps": true,
-        "push": true
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run native-federation-tests:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run native-federation-tests:build",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run native-federation-tests:semantic-release",
+            "forwardAllArgs": true
+          }
+        ]
       }
     },
-    "github": {
-      "executor": "@jscutlery/semver:github",
-      "options": {
-        "tag": "${tag}",
-        "notes": "${notes}"
-      }
-    },
-    "npm": {
-      "executor": "ngx-deploy-npm:deploy",
-      "options": {
-        "access": "public",
-        "tag": "next"
-      }
+    "semantic-release": {
+      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
-  "tags": [],
+  "tags": ["package"],
   "implicitDependencies": []
 }

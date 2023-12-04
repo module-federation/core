@@ -526,7 +526,7 @@ msgstr ""
 msgid "Refactoring Example "
 msgstr ""
 
-#. TODO: 
+#. TODO:
 #. type: Title ==
 #: src/en/modules/ROOT/pages/brown-green.adoc:23
 #, no-wrap

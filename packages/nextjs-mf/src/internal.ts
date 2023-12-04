@@ -19,76 +19,83 @@ import { parseOptions } from 'webpack/lib/container/options';
  */
 export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'next/dynamic': {
-    eager: false,
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/head': {
-    eager: false,
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/link': {
-    eager: true,
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
   },
   'next/router': {
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
-    import: false,
-    eager: false,
+    import: undefined,
+  },
+  '@module-federation/utilities': {
+    eager: true,
+    requiredVersion: false,
   },
   'next/image': {
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
-    eager: false,
   },
   'next/script': {
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
-    eager: false,
   },
   react: {
     singleton: true,
-    requiredVersion: false,
-    eager: false,
+    requiredVersion: undefined,
+    import: false,
+  },
+  'react/': {
+    singleton: true,
+    requiredVersion: undefined,
+    import: false,
+  },
+  'react-dom/': {
+    singleton: true,
+    requiredVersion: undefined,
     import: false,
   },
   'react-dom': {
     singleton: true,
-    requiredVersion: false,
-    eager: false,
+    requiredVersion: undefined,
     import: false,
   },
   'react/jsx-dev-runtime': {
     singleton: true,
-    requiredVersion: false,
+    requiredVersion: undefined,
     import: undefined,
-    eager: false,
   },
   'react/jsx-runtime': {
     singleton: true,
-    requiredVersion: false,
-    eager: false,
-    import: false,
+    requiredVersion: undefined,
+    // import: false,
   },
   'styled-jsx': {
-    requiredVersion: false,
+    requiredVersion: undefined,
     singleton: true,
     import: undefined,
-    eager: false,
   },
   'styled-jsx/style': {
     requiredVersion: false,
     singleton: true,
+    import: false,
+  },
+  'styled-jsx/css': {
+    requiredVersion: false,
+    singleton: true,
     import: undefined,
-    eager: false,
   },
 };
 
@@ -107,15 +114,8 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
 ).reduce((acc, item) => {
   const [key, value] = item as [string, SharedConfig];
 
-  // Initialize eager as true for 'react', 'react-dom', 'next/router', and 'next/link', otherwise undefined
-  const eager = ['react', 'react-dom', 'next/router', 'next/link'].some(
-    (k) => k === key,
-  )
-    ? true
-    : undefined;
-
   // Set eager and import to undefined for all entries, except for the ones specified above
-  acc[key] = { ...value, eager, import: undefined };
+  acc[key] = { ...value, import: undefined };
 
   return acc;
 }, {} as SharedObject);
@@ -157,11 +157,20 @@ export const parseRemotes = (
         return { ...acc, [key]: value };
       }
 
+      return { ...acc, [key]: value };
+
       if (isStandardRemoteSyntax(value)) {
+        let resolvePath;
+        try {
+          resolvePath = require.resolve('./default-delegate.cjs');
+        } catch (e) {
+          resolvePath = require.resolve('./default-delegate');
+        }
+
         // If the value is using the standard remote syntax, create a delegated module
         return {
           ...acc,
-          [key]: createDelegatedModule(require.resolve('./default-delegate'), {
+          [key]: createDelegatedModule(resolvePath, {
             remote: value,
           }),
         };

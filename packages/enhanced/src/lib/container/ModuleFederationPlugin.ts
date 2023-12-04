@@ -6,19 +6,12 @@
 'use strict';
 
 import type Compiler from 'webpack/lib/Compiler';
-//@ts-ignore
-import isValidExternalsType = require('webpack/schemas/plugins/container/ExternalsType.check.js');
+import isValidExternalsType from 'webpack/schemas/plugins/container/ExternalsType.check.js';
 import type { ModuleFederationPluginOptions } from './ModuleFederationPluginTypes';
 import SharePlugin from '../sharing/SharePlugin';
-//@ts-ignore
-import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
+import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
-
-/** @typedef {import("./ModuleFederationPluginTypes").ExternalsType} ExternalsType */
-/** @typedef {import("./ModuleFederationPluginTypes").ModuleFederationPluginOptions} ModuleFederationPluginOptions */
-/** @typedef {import("./ModuleFederationPluginTypes").Shared} Shared */
-/** @typedef {import("webpack/lib/Compiler")} Compiler */
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line

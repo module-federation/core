@@ -3,8 +3,10 @@ import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import DelegatesModulePlugin from '@module-federation/utilities/src/plugins/DelegateModulesPlugin';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import JsonpChunkLoading from '../JsonpChunkLoading';
-
+import {
+  ModuleFederationPlugin,
+  ModuleInfoRuntimePlugin,
+} from '@module-federation/enhanced';
 /**
  * This function applies server-specific plugins to the webpack compiler.
  *
@@ -19,8 +21,20 @@ export function applyServerPlugins(
 ): void {
   // Import the StreamingTargetPlugin from @module-federation/node
   const { StreamingTargetPlugin } = require('@module-federation/node');
-  new JsonpChunkLoading({ server: true }).apply(compiler);
-
+  const chunkFileName = compiler.options?.output?.chunkFilename;
+  const uniqueName = compiler?.options?.output?.uniqueName || options.name;
+  if (
+    typeof chunkFileName === 'string' &&
+    uniqueName &&
+    !chunkFileName.includes(uniqueName)
+  ) {
+    const suffix = `-[chunkhash].js`;
+    compiler.options.output.chunkFilename = chunkFileName.replace(
+      '.js',
+      suffix,
+    );
+  }
+  new ModuleInfoRuntimePlugin().apply(compiler);
   // Apply the DelegatesModulePlugin to the compiler
   new DelegatesModulePlugin({
     runtime: 'webpack-runtime',
@@ -30,15 +44,20 @@ export function applyServerPlugins(
 
   // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
   new StreamingTargetPlugin(options, {
-    ModuleFederationPlugin: compiler.webpack.container.ModuleFederationPlugin,
+    ModuleFederationPlugin: ModuleFederationPlugin,
   }).apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler
   new InvertedContainerPlugin({
     runtime: 'webpack-runtime',
     container: options.name,
+    chunkToEmbed: 'host_inner_ctn',
     remotes: options.remotes as Record<string, string>,
+    shared: options.shared as any,
+    shareScope: 'default',
+    exposes: options.exposes as any,
     debug: false,
+    //@ts-ignore
   }).apply(compiler);
 }
 
@@ -92,7 +111,11 @@ export function handleServerExternals(
   compiler: Compiler,
   options: ModuleFederationPluginOptions,
 ): void {
-  // Check if the compiler has an `externals` array
+  // Use a regex to match the required external modules
+  // const crittersRegex = 'critters';
+  // const reactRegex = /^react$/;
+  // const reactDomRegex = /^react-dom$/;
+  // const nextCompiledRegex = /next\/dist\/compiled\/(?!server|client|shared).*/;
   if (
     Array.isArray(compiler.options.externals) &&
     compiler.options.externals[0]
@@ -101,7 +124,15 @@ export function handleServerExternals(
     const originalExternals = compiler.options.externals[0];
 
     // Replace the original externals function with a new asynchronous function
-    compiler.options.externals[0] = async function (ctx, callback) {
+    compiler.options.externals[0] = async function (ctx: any, callback: any) {
+      //@ts-ignore
+      const fromNext = await originalExternals(ctx, callback);
+      // If the result is null, return without further processing
+      if (!fromNext) {
+        return;
+      }
+      // If the module is from Next.js or React, return the original result
+      const req = fromNext.split(' ')[1];
       // Check if the module should not be treated as external
       if (
         ctx.request &&
@@ -111,7 +142,7 @@ export function handleServerExternals(
             return (
               //@ts-ignore
               options.shared?.[key]?.import !== false &&
-              ctx?.request?.includes(key)
+              (key.endsWith('/') ? req.includes(key) : req === key)
             );
           }) ||
           ctx.request.includes('@module-federation/dashboard-plugin'))
@@ -120,24 +151,6 @@ export function handleServerExternals(
         return;
       }
 
-      // seems to cause build issues at lululemon
-      // nobody else seems to run into this issue
-      // #JobSecurity
-      if (ctx.request && ctx.request.includes('react/jsx-runtime')) {
-        return 'commonjs ' + ctx.request;
-      }
-
-      // Call the original externals function and retrieve the result
-      // @ts-ignore
-      const fromNext = await originalExternals(ctx, callback);
-
-      // If the result is null, return without further processing
-      if (!fromNext) {
-        return;
-      }
-
-      // If the module is from Next.js or React, return the original result
-      const req = fromNext.split(' ')[1];
       if (
         req.startsWith('next') ||
         // make sure we dont screw up package names that start with react
@@ -145,6 +158,7 @@ export function handleServerExternals(
         req.startsWith('react/') ||
         req.startsWith('react-dom/') ||
         req === 'react' ||
+        req === 'styled-jsx/style' ||
         req === 'react-dom'
       ) {
         return fromNext;
@@ -152,6 +166,10 @@ export function handleServerExternals(
       // Otherwise, return (null) to treat the module as internalizable
       return;
     };
+    // compiler.options.externals.push(crittersRegex)
+    // compiler.options.externals.push(reactRegex)
+    // compiler.options.externals.push(reactDomRegex)
+    // compiler.options.externals.push(nextCompiledRegex)
   }
 }
 
@@ -171,17 +189,10 @@ export function handleServerExternals(
 export function configureServerCompilerOptions(compiler: Compiler): void {
   // Turn off the compiler target on node builds because we add our own chunk loading runtime module
   // with NodeFederationPlugin and StreamingTargetPlugin
-  compiler.options.target = false;
   compiler.options.node = {
     ...compiler.options.node,
     global: false,
   };
-  compiler.options.resolve.conditionNames = [
-    'node',
-    'import',
-    'require',
-    'default',
-  ];
   // no custom chunk rules
   compiler.options.optimization.splitChunks = undefined;
 

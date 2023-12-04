@@ -13,25 +13,12 @@
         "tsConfig": "packages/node/tsconfig.lib.json",
         "updateBuildableProjectDepsInPackageJson": true,
         "buildableProjectDepsInPackageJsonType": "dependencies",
-        "assets": [
-          "packages/node/*.md"
-        ]
+        "assets": ["packages/node/*.md"]
       },
       "dependsOn": [
         {
           "target": "build",
           "dependencies": true
-        }
-      ]
-    },
-    "publish": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "node tools/scripts/publish.mjs node {args.ver} {args.tag}"
-      },
-      "dependsOn": [
-        {
-          "target": "build"
         }
       ]
     },
@@ -42,29 +29,37 @@
         "lintFilePatterns": ["packages/node/**/*.js"]
       }
     },
-    "version": {
-      "executor": "@jscutlery/semver:version",
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/node"],
       "options": {
-        "postTargets": ["node:npm", "node:github"],
-        "trackDeps": true,
-        "push": true
+        "jestConfig": "packages/node/jest.config.js",
+        "passWithNoTests": true
       }
     },
-    "github": {
-      "executor": "@jscutlery/semver:github",
+    "release": {
+      "executor": "nx:run-commands",
       "options": {
-        "tag": "${tag}",
-        "notes": "${notes}"
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run node:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run node:build",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run node:semantic-release",
+            "forwardAllArgs": true
+          }
+        ]
       }
     },
-    "npm": {
-      "executor": "ngx-deploy-npm:deploy",
-      "options": {
-        "access": "public",
-        "tag": "next"
-      }
+    "semantic-release": {
+      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
-  "tags": [],
-  "implicitDependencies": ["utils"]
+  "tags": ["package"]
 }

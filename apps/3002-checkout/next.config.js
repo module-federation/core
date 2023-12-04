@@ -59,7 +59,7 @@ const nextConfig = {
           enableUrlLoaderFix: true,
           automaticPageStitching: false,
         },
-      })
+      }),
     );
     return config;
   },

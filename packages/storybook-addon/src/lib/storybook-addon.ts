@@ -5,13 +5,11 @@ import VirtualModulesPlugin from 'webpack-virtual-modules';
 import { container, Configuration } from 'webpack';
 import { logger } from '@storybook/node-logger';
 import { normalizeStories } from '@storybook/core-common';
-import {
-  correctImportPath,
-  ModuleFederationPluginOptions,
-} from '@module-federation/utilities';
+import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 
 import { ModuleFederationConfig } from '@nx/webpack';
 import withModuleFederation from '../utils/with-module-federation';
+import { correctImportPath } from '../utils/correctImportPath';
 
 const { ModuleFederationPlugin } = container;
 

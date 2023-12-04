@@ -3,7 +3,7 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
 //@ts-ignore
-import createSchemaValidation = require('webpack/lib/util/create-schema-validation');
+import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';

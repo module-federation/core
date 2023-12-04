@@ -1,4 +1,3 @@
-// @ts-ignore
 import Page from 'checkout/pages/checkout/index';
 
 const Checkout = Page;
