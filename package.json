@@ -205,7 +205,8 @@
     "vitest-fetch-mock": "^0.2.2",
     "whatwg-fetch": "^3.6.2",
     "@rollup/plugin-replace": "3.0.0",
-    "@rollup/plugin-alias": "3.1.9"
+    "@rollup/plugin-alias": "3.1.9",
+    "rollup-plugin-copy": "3.5.0"
   },
   "config": {
     "commitizen": {
