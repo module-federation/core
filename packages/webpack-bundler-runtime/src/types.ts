@@ -1,5 +1,6 @@
 import * as runtime from '@module-federation/runtime';
 import { initializeSharing } from './initializeSharing';
+import { proxyShareScopeMap } from './proxyShareScopeMap';
 
 // FIXME: ideal situation => import { GlobalShareScope,UserOptions } from '@module-federation/runtime/type'
 type ExcludeUndefined<T> = T extends undefined ? never : T;
@@ -45,6 +46,7 @@ export interface WebpackRequire {
   I: typeof initializeSharing;
   S?: InferredGlobalShareScope;
   federation: Federation;
+  g: typeof globalThis
 }
 
 interface ShareInfo {
@@ -111,7 +113,9 @@ export interface Federation {
     S: InferredGlobalShareScope;
     installInitialConsumes: (options: InstallInitialConsumesOptions) => any;
   };
-  bundlerRuntimeOptions?: {
-    remotes: RemotesOptions;
+  bundlerRuntimeOptions: {
+    remotes?: Exclude<RemotesOptions,'chunkId' | 'promises'>;
   };
+  proxyShareScopeMap?:typeof proxyShareScopeMap;
+  hasProxyShareScopeMap?:boolean
 }

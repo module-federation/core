@@ -105,6 +105,7 @@ class RemoteRuntimeModule extends RuntimeModule {
         '\t',
       )};`,
       `var idToRemoteMap = ${JSON.stringify(idToRemoteMap, null, '\t')};`,
+      `${federationGlobal}.bundlerRuntimeOptions.remotes = {idToRemoteMap,chunkMapping, idToExternalAndNameMapping, webpackRequire:${RuntimeGlobals.require}};`,
       `${
         RuntimeGlobals.ensureChunkHandlers
       }.remotes = ${runtimeTemplate.basicFunction('chunkId, promises', [

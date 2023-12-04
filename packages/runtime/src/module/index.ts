@@ -73,18 +73,25 @@ class Module {
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   async get(expose: string, options?: { loadFactory?: boolean }) {
     const { loadFactory = true } = options || { loadFactory: true };
+    const hostName = this.hostInfo.name
 
     // Get remoteEntry.js
     const remoteEntryExports = await this.getEntry();
 
     if (!this.inited) {
-      const globalShareScope = Global.__FEDERATION__.__SHARE__;
+      const globalShareScopeMap = Global.__FEDERATION__.__SHARE__;
+
+      if(!globalShareScopeMap[hostName]){
+        globalShareScopeMap[hostName] = {}
+      }
+
+      const localShareScopeMap = globalShareScopeMap[hostName]
       const remoteShareScope = this.remoteInfo.shareScope || 'default';
 
-      if (!globalShareScope[remoteShareScope]) {
-        globalShareScope[remoteShareScope] = {};
+      if (!localShareScopeMap[remoteShareScope]) {
+        localShareScopeMap[remoteShareScope] = {};
       }
-      const shareScope = globalShareScope[remoteShareScope];
+      const shareScope = localShareScopeMap[remoteShareScope];
 
       // TODO: compat logic , it could be moved after providing startup hooks
       const remoteEntryInitOptions = {
@@ -101,12 +108,21 @@ class Module {
             this.remoteInfo.buildVersion,
           ),
       );
+
       if (federationInstance) {
-        federationInstance.initOptions({
-          ...remoteEntryInitOptions,
-          remotes: [],
-          name: this.remoteInfo.name,
-        });
+        // means the instance is prev vmok instance
+      if (federationInstance.constructorName!=='FederationHost') {
+        // 兼容旧的生产者传参
+          federationInstance.initOptions({
+            ...remoteEntryInitOptions,
+            remotes: [],
+            name: this.remoteInfo.name,
+          });
+          if(!__FEDERATION__.__SHARE__['default'] && __FEDERATION__.__SHARE__[hostName] && __FEDERATION__.__SHARE__[hostName]['default']){
+            // @ts-ignore compat prev logic , and it will be optimized by supporting startup hook
+            __FEDERATION__.__SHARE__['default'] = __FEDERATION__.__SHARE__[hostName]['default'];
+          }
+        }
       }
     }
 

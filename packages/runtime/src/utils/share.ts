@@ -1,6 +1,6 @@
 import { DEFAULT_SCOPE } from '../constant';
 import { Global } from '../global';
-import { GlobalShareScope, Shared, ShareArgs, ShareInfos } from '../type';
+import { GlobalShareScopeMap, Shared, ShareArgs, ShareInfos, ShareScopeMap } from '../type';
 import { warn } from './logger';
 import { satisfy } from './semver';
 
@@ -25,6 +25,7 @@ export function formatShare(shareArgs: ShareArgs, from: string): Shared {
     loading: null,
     ...shareArgs,
     get,
+    loaded:'lib' in shareArgs ? true : undefined ,
     scope: Array.isArray(shareArgs.scope) ? shareArgs.scope : ['default'],
     strategy: shareArgs.strategy || 'version-first',
   };
@@ -66,12 +67,12 @@ function versionLt(a: string, b: string): boolean {
 }
 
 const findVersion = (
+  shareScopeMap:ShareScopeMap,
   scope: string,
   pkgName: string,
   cb?: (prev: string, cur: string) => boolean,
 ): string => {
-  const globalShares = Global.__FEDERATION__.__SHARE__;
-  const versions = globalShares[scope][pkgName];
+  const versions = shareScopeMap[scope][pkgName];
   const callback =
     cb ||
     function (prev: string, cur: string): boolean {
@@ -96,24 +97,24 @@ const findVersion = (
 };
 
 function findSingletonVersionOrderByVersion(
+  shareScopeMap:ShareScopeMap,
   scope: string,
   pkgName: string,
 ): string {
-  const globalShares = Global.__FEDERATION__.__SHARE__;
-  const versions = globalShares[scope][pkgName];
+  const versions = shareScopeMap[scope][pkgName];
   const callback = function (prev: string, cur: string): boolean {
     return !versions[prev].loaded && versionLt(prev, cur);
   };
 
-  return findVersion(scope, pkgName, callback);
+  return findVersion(shareScopeMap,scope, pkgName, callback);
 }
 
 function findSingletonVersionOrderByLoaded(
+  shareScopeMap:ShareScopeMap,
   scope: string,
   pkgName: string,
 ): string {
-  const globalShares = Global.__FEDERATION__.__SHARE__;
-  const versions = globalShares[scope][pkgName];
+  const versions = shareScopeMap[scope][pkgName];
   const callback = function (prev: string, cur: string): boolean {
     if (versions[cur].loaded) {
       if (versions[prev].loaded) {
@@ -128,7 +129,7 @@ function findSingletonVersionOrderByLoaded(
     return versionLt(prev, cur);
   };
 
-  return findVersion(scope, pkgName, callback);
+  return findVersion(shareScopeMap,scope, pkgName, callback);
 }
 
 function getFindShareFunction(strategy: Shared['strategy']) {
@@ -140,19 +141,24 @@ function getFindShareFunction(strategy: Shared['strategy']) {
 
 // Details about shared resources
 // TODO: Implement strictVersion for alignment with module federation.
-export function getGlobalShare(
+export function getRegisteredShare(
+  instanceName:string,
   pkgName: string,
   shareInfo: ShareInfos[keyof ShareInfos],
 ): Shared | void {
   const globalShares = Global.__FEDERATION__.__SHARE__;
+  const localShareScopeMap= globalShares[instanceName]
+  if(!localShareScopeMap){
+    return;
+  }
   const { shareConfig, scope = DEFAULT_SCOPE, strategy } = shareInfo;
   const scopes = Array.isArray(scope) ? scope : [scope];
   for (const sc of scopes) {
-    if (shareConfig && globalShares[sc] && globalShares[sc][pkgName]) {
+    if (shareConfig && localShareScopeMap[sc] && localShareScopeMap[sc][pkgName]) {
       const { requiredVersion } = shareConfig;
       // eslint-disable-next-line max-depth
       if (shareConfig.singleton) {
-        const singletonVersion = getFindShareFunction(strategy)(sc, pkgName);
+        const singletonVersion = getFindShareFunction(strategy)(localShareScopeMap,sc, pkgName);
         // eslint-disable-next-line max-depth
         if (
           typeof requiredVersion === 'string' &&
@@ -161,29 +167,29 @@ export function getGlobalShare(
           warn(
             `Version ${singletonVersion} from ${
               singletonVersion &&
-              globalShares[sc][pkgName][singletonVersion].from
+              localShareScopeMap[sc][pkgName][singletonVersion].from
             } of shared singleton module ${pkgName} does not satisfy the requirement of ${
               shareInfo.from
             } which needs ${requiredVersion})`,
           );
         }
-        return globalShares[sc][pkgName][singletonVersion];
+        return localShareScopeMap[sc][pkgName][singletonVersion];
       } else {
-        const maxVersion = getFindShareFunction(strategy)(sc, pkgName);
+        const maxVersion = getFindShareFunction(strategy)(localShareScopeMap,sc, pkgName);
 
         // eslint-disable-next-line max-depth
         if (requiredVersion === false || requiredVersion === '*') {
-          return globalShares[sc][pkgName][maxVersion];
+          return localShareScopeMap[sc][pkgName][maxVersion];
         }
 
         // eslint-disable-next-line max-depth
         if (satisfy(maxVersion, requiredVersion)) {
-          return globalShares[sc][pkgName][maxVersion];
+          return localShareScopeMap[sc][pkgName][maxVersion];
         }
 
         // eslint-disable-next-line max-depth
         for (const [versionKey, versionValue] of Object.entries(
-          globalShares[sc][pkgName],
+          localShareScopeMap[sc][pkgName],
         )) {
           // eslint-disable-next-line max-depth
           if (satisfy(versionKey, requiredVersion)) {
@@ -195,6 +201,6 @@ export function getGlobalShare(
   }
 }
 
-export function getGlobalShareScope(): GlobalShareScope {
+export function getGlobalShareScope(): GlobalShareScopeMap {
   return Global.__FEDERATION__.__SHARE__;
 }

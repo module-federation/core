@@ -1,4 +1,5 @@
 import { FEDERATION_SUPPORTED_TYPES } from './constant';
+import { proxyShareScopeMap } from './proxyShareScopeMap';
 import { RemoteEntryExports, WebpackRequire } from './types';
 
 type InitToken = Record<string, Record<string, any>>;
@@ -18,6 +19,8 @@ export function initializeSharing({
   initTokens,
   initScope,
 }: Options): Promise<boolean> | boolean | void {
+  proxyShareScopeMap(webpackRequire);
+
   if (!initScope) initScope = [];
   // handling circular init calls
   var initToken = initTokens[shareScopeName];
@@ -39,7 +42,6 @@ export function initializeSharing({
       var initFn = (module: RemoteEntryExports) =>
         module &&
         module.init &&
-        // @ts-ignore
         module.init(webpackRequire.S![shareScopeName], initScope);
       if (module.then) return promises.push(module.then(initFn, handleError));
       var initResult = initFn(module);
@@ -53,13 +55,13 @@ export function initializeSharing({
   };
   const promises =
     webpackRequire.federation.instance!.initializeSharing(shareScopeName);
-  const bundlerRuntimeOptions = webpackRequire.federation.bundlerRuntimeOptions;
-  if (bundlerRuntimeOptions && bundlerRuntimeOptions.remotes) {
-    Object.keys(bundlerRuntimeOptions.remotes.idToRemoteMap).forEach(
+  const bundlerRuntimeRemotesOptions = webpackRequire.federation.bundlerRuntimeOptions.remotes;
+  if (bundlerRuntimeRemotesOptions) {
+    Object.keys(bundlerRuntimeRemotesOptions.idToRemoteMap).forEach(
       (moduleId) => {
-        const info = bundlerRuntimeOptions.remotes.idToRemoteMap[moduleId];
+        const info = bundlerRuntimeRemotesOptions.idToRemoteMap[moduleId];
         const externalModuleId =
-          bundlerRuntimeOptions.remotes.idToExternalAndNameMapping[moduleId][2];
+        bundlerRuntimeRemotesOptions.idToExternalAndNameMapping[moduleId][2];
         if (info.length > 1) {
           initExternal(externalModuleId);
         } else if (info.length === 1) {

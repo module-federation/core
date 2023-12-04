@@ -286,12 +286,15 @@ class ContainerEntryModule extends Module {
       `var init = ${runtimeTemplate.basicFunction('shareScope, initScope', [
         `if (!${RuntimeGlobals.shareScopeMap}) return;`,
         `if (!${federationGlobal}) return;`,
-        `var name = ${JSON.stringify(this._shareScope)}`,
-        //`var oldScope = ${RuntimeGlobals.shareScopeMap}[name];`,
-        // no need to verify shareScope, because shareScope will be proxied by global shareScope
-        //`if(oldScope && oldScope !== shareScope) throw new Error("Container initialization failed as it has already been initialized with a different share scope");`,
-        `${RuntimeGlobals.shareScopeMap}[name] = shareScope;`,
+        `${federationGlobal}.proxyShareScopeMap(${RuntimeGlobals.require});`,
         `${federationGlobal}.instance.initOptions({name:${federationGlobal}.initOptions.name, })`,
+      `if (${RuntimeGlobals.global}.__FEDERATION__.default){`,
+      Template.indent([
+        `${federationGlobal}.instance.addShareScope(name,shareScope)`,
+      ]),
+      '}',
+        `var name = ${JSON.stringify(this._shareScope)}`,
+        `${federationGlobal}.instance.addShareScope(name,shareScope)`,
         `return ${RuntimeGlobals.initializeSharing}(name, initScope);`,
       ])};`,
       `${initRuntimeModuleGetter}`,

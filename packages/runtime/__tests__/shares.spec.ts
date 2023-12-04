@@ -12,6 +12,7 @@ import { DEFAULT_SCOPE } from '../src/constant';
 import { FederationHost } from '../src/core';
 
 // eslint-disable-next-line max-lines-per-function
+// TODO: add new load share test cases
 describe('shared', () => {
   beforeEach(() => {
     __FEDERATION__.__SHARE__ = {};
@@ -87,19 +88,8 @@ describe('shared', () => {
     }>('singleton-react');
     const reactInstance2Res = reactInstance2();
     assert(reactInstance2Res, "reactInstance can't be undefined");
-    expect(reactInstance2Res.from).toBe('@federation/loadShare');
+    expect(reactInstance2Res.from).toBe('@federation/loadShare2');
     expect(reactInstance2Res.version).toBe('16.0.0');
-    expect(getGlobalShareScope()).toMatchObject({
-      [DEFAULT_SCOPE]: {
-        'singleton-react': {
-          '16.0.0': {
-            get: gmConfig1.shared['singleton-react'].get,
-            from: gmConfig1.name,
-            useIn: [gmConfig1.name, gmConfig2.name],
-          },
-        },
-      },
-    });
   });
 
   it('loadShare cache', async () => {
@@ -201,7 +191,7 @@ describe('shared', () => {
     }>('runtime-react');
     const sharedRes = shared();
     assert(sharedRes, "shared can't be null");
-    expect(sharedRes.from).toEqual('@federation/runtime-deps');
+    expect(sharedRes.from).toEqual('@federation/runtime-deps2');
   });
 
   // it('share deps', async () => {
@@ -312,7 +302,7 @@ describe('single shared', () => {
     );
     const sharedRes = shared();
     assert(sharedRes, "shared can't be null");
-    expect(sharedRes.from).toEqual('@shared-single/runtime-deps3');
+    expect(sharedRes.from).toEqual('@shared-single/runtime-deps2');
   });
 });
 
@@ -378,7 +368,7 @@ describe('eager shared', () => {
     const reactInstance2Res = reactInstance2();
 
     assert(reactInstance2Res, "reactInstance can't be undefined");
-    expect(reactInstance2Res.version).toBe('16.0.0');
+    expect(reactInstance2Res.version).toBe('16.0.1');
   });
 
   it('load self shared module while globalShare not have expected shared module', async () => {

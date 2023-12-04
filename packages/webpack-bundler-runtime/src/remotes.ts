@@ -1,3 +1,4 @@
+import { proxyShareScopeMap } from './proxyShareScopeMap';
 import type { RemoteEntryExports } from './types';
 import { RemotesOptions } from './types';
 
@@ -10,14 +11,7 @@ export function remotes(options: RemotesOptions) {
     webpackRequire,
     idToRemoteMap,
   } = options;
-
-  if (!webpackRequire.federation.bundlerRuntimeOptions) {
-    webpackRequire.federation.bundlerRuntimeOptions = {
-      remotes: options,
-    };
-  } else if (!webpackRequire.federation.bundlerRuntimeOptions.remotes) {
-    webpackRequire.federation.bundlerRuntimeOptions.remotes = options;
-  }
+  proxyShareScopeMap(webpackRequire);
 
   if (webpackRequire.o(chunkMapping, chunkId)) {
     chunkMapping[chunkId].forEach((id) => {

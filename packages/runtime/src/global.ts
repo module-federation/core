@@ -1,5 +1,5 @@
 import { FederationHost } from './core';
-import { RemoteEntryExports, GlobalShareScope, Remote, Optional } from './type';
+import { RemoteEntryExports, GlobalShareScopeMap, Remote, Optional } from './type';
 import { getFMId } from './utils/tool';
 import { GlobalModuleInfo, ModuleInfo } from '@module-federation/sdk';
 import { getBuilderId, isDebugMode } from './utils/env';
@@ -12,7 +12,7 @@ export interface Federation {
   moduleInfo: GlobalModuleInfo;
   __DEBUG_CONSTRUCTOR__?: typeof FederationHost;
   __INSTANCES__: Array<FederationHost>;
-  __SHARE__: GlobalShareScope;
+  __SHARE__: GlobalShareScopeMap;
   __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
   __PRELOADED_MAP__: Map<string, boolean>;
 };

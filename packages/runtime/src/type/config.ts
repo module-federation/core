@@ -76,12 +76,16 @@ export type Shared = {
   strategy: 'version-first' | 'loaded-first';
 };
 
-export type GlobalShareScope = {
+export type ShareScopeMap = {
   [scope: string]: {
     [pkgName: string]: {
       [sharedVersion: string]: Shared;
     };
   };
+};
+
+export type GlobalShareScopeMap = {
+  [instanceName: string]: ShareScopeMap
 };
 
 export type ShareInfos = {
@@ -119,8 +123,8 @@ export type RemoteEntryInitOptions = {
 export type RemoteEntryExports = {
   get: (id: string) => () => Promise<Module>;
   init: (
-    shareScope: GlobalShareScope[string],
-    initScope?: Array<Record<string, never>>,
+    shareScope: ShareScopeMap[string],
+    initScope?: Array<Record<string, any>>,
     remoteEntryInitOPtions?: RemoteEntryInitOptions,
   ) => void;
 };

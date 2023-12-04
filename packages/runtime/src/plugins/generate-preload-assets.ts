@@ -17,7 +17,7 @@ import { assignRemoteInfo } from './snapshot';
 import { getInfoWithoutType, getPreloaded, setPreloaded } from '../global';
 import { FederationHost } from '../core';
 import { defaultPreloadArgs, normalizePreloadExposes } from '../utils/preload';
-import { getGlobalShare } from '../utils/share';
+import { getRegisteredShare } from '../utils/share';
 import { getFMId, isPureRemoteEntry, isRemoteInfoWithEntry } from '../utils';
 
 declare global {
@@ -265,10 +265,10 @@ export function generatePreloadAssets(
       if (!shareInfo) {
         return;
       }
-      const globalShare = getGlobalShare(shared.sharedName, shareInfo);
+      const registeredShared = getRegisteredShare(origin.name,shared.sharedName, shareInfo);
       // If the global share does not exist, or the lib function does not exist, it means that the shared has not been loaded yet and can be preloaded.
 
-      if (globalShare && typeof globalShare.lib === 'function') {
+      if (registeredShared && typeof registeredShared.lib === 'function') {
         shared.assets.js.sync.forEach((asset) => {
           loadedSharedJsAssets.add(asset);
         });
