@@ -1,3 +1,15 @@
+## [2.0.1](https://github.com/module-federation/universe/compare/storybook-addon-2.0.0...storybook-addon-2.0.1) (2023-12-05)
+
+
+### Bug Fixes
+
+* **deps:** update dependency antd to v4.24.15 ([de857c4](https://github.com/module-federation/universe/commit/de857c45af92b3a2584cd3319263417a36f9977a))
+* **deps:** update dependency axios to v1.6.0 [security] ([71bd7be](https://github.com/module-federation/universe/commit/71bd7becbc201d69b11f0975d5a56548facb3242))
+* **deps:** update dependency core-js to v3.33.3 ([6100431](https://github.com/module-federation/universe/commit/6100431155a53c6e34092baf6c0e4d5dd578a53d))
+* **deps:** update dependency typedoc to v0.25.3 ([10477bf](https://github.com/module-federation/universe/commit/10477bf1f16d695b792d97919e83a8920ee15c01))
+* **deps:** update dependency unplugin to v1.5.1 ([e2ea98b](https://github.com/module-federation/universe/commit/e2ea98b1a8e67c53c79e41dab0398e8a75434362))
+* **storybook-addon:** add missing package peer dependencies ([4bf34e0](https://github.com/module-federation/universe/commit/4bf34e010f1af98ceb64fc088ddfdc93510450e5))
+
 # [2.0.0](https://github.com/module-federation/universe/compare/storybook-addon-1.0.0...storybook-addon-2.0.0) (2023-10-26)
 
 ### Bug Fixes
