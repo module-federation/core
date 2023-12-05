@@ -1,3 +1,21 @@
+# [1.1.0-canary.1](https://github.com/module-federation/universe/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
+
+
+### Bug Fixes
+
+* **sdk:** correct version ([#1713](https://github.com/module-federation/universe/issues/1713)) ([b6edb13](https://github.com/module-federation/universe/commit/b6edb130f539f89a3915869214b68c732203c585))
+* update lockfile ([de792c7](https://github.com/module-federation/universe/commit/de792c7e75b9a390cb8be1dd12b604b9b8d55cd2))
+* update publish config ([e913cb1](https://github.com/module-federation/universe/commit/e913cb1f23d8e44fd8f57d83192dc2465d0bbd02))
+
+
+### Features
+
+* **runtime:** add hook for handle preloadRemote module ([#1712](https://github.com/module-federation/universe/issues/1712)) ([6efd3b8](https://github.com/module-federation/universe/commit/6efd3b85ee7377c20529ff50c22c153962b8e210))
+* **runtime:** add runtime license ([6de6468](https://github.com/module-federation/universe/commit/6de64687e4507c108e6da8f6552fc383b9ec1c09))
+* **sdk:** add sdk license ([56546a5](https://github.com/module-federation/universe/commit/56546a5b33940bfa6eca635c00846a171826b922))
+* **sdk:** fix version mismatch ([86bae7c](https://github.com/module-federation/universe/commit/86bae7c5112b129bda4be232e97d7ff1c7046acf))
+* **sdk:** fix version missmatch ([f4ed6f0](https://github.com/module-federation/universe/commit/f4ed6f0d40cb2de1cbea4189f2deb1ff2d8cc17d))
+
 # 1.0.0-canary.1 (2023-12-04)
 
 

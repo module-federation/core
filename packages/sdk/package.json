@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/sdk",
-  "version": "1.0.0-canary.3",
+  "version": "1.1.0-canary.1",
   "license": "MIT",
   "description": "A sdk for support module federation",
   "keywords": [
