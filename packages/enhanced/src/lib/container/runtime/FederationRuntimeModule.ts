@@ -13,7 +13,7 @@ class FederationRuntimeModule extends RuntimeModule {
     containerName: string,
     initOptionsWithoutShared: NormalizedRuntimeInitOptionsWithOutShared,
   ) {
-    super('federation runtime', RuntimeModule.STAGE_NORMAL + 1);
+    super('federation runtime', RuntimeModule.STAGE_NORMAL - 1);
     this.runtimeRequirements = runtimeRequirements;
     this.containerName = containerName;
     this.initOptionsWithoutShared = initOptionsWithoutShared;

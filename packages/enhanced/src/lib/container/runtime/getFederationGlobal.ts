@@ -28,6 +28,7 @@ function getFederationGlobal(
         // "instance: undefined,",
         `initOptions: ${initOptionsStrWithoutShared},`,
         `initialConsumes: undefined,`,
+				"bundlerRuntimeOptions: {}"
       ]),
       '};',
     ]),
