@@ -20,16 +20,16 @@ export default function (): FederationRuntimePlugin {
         });
       });
     },
-    loadRemoteMatch(args) {
-      console.log('loadRemoteMatch', args);
-      // randomly switch between different modules
-      if (Math.random() > 0.5) {
-        args.expose = './Button1';
-        return args;
-      }
+    // loadRemoteMatch(args) {
+    //   console.log('loadRemoteMatch', args);
+    //   // randomly switch between different modules
+    //   if (Math.random() > 0.5) {
+    //     args.expose = './Button1';
+    //     return args;
+    //   }
 
-      return args;
-    },
+    //   return args;
+    // },
     loadRemote(args) {
       console.log('loadRemote: ', args);
       return args;
