@@ -20,10 +20,5 @@ export default function (): FederationRuntimePlugin {
 
       return args;
     },
-    loadRemoteMatch(args) {
-      const { remote, origin } = args;
-      origin.initializeSharing(remote.shareScope);
-      return args;
-    },
   };
 }

@@ -110,7 +110,7 @@ export function remotes(options: RemotesOptions) {
         try {
           let remoteName = remoteInfos[0].remoteName;
           if (!remoteName) {
-            const [globalName, _entryUrl] = extractUrlAndGlobal(
+            const [_entryUrl, globalName ] = extractUrlAndGlobal(
               remoteInfos[0].request,
             );
             remoteName = globalName;
