@@ -119,3 +119,14 @@ To trigger releases manually:
 
 This ensures a consistent and automated release cycle across different channels, in line with modern CI/CD practices.
 
+### Creating new packages/projects
+
+To create a new package/project you can use any Nx generator you like/need, just make sure to add the `package` tag to the project and include the `release` target in the `package.json` file.
+
+The nx-semantic-release plugin does NOT know when the package was created, so we need to manually create the first tag for the package, also keep in mind that the first version of the package should be `1.0.0` and not `0.0.0`, so to create the first tag for the package you can run:
+
+```sh
+git tag -a <PROJECT_NAME>-<VERSION>
+```
+
+Note that this format is important for the nx-semantic-release plugin understand the version of the package, you can check the used format in this project on the `tagFormat` option in the `nxrelease.config.js` file.
