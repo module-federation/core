@@ -566,7 +566,7 @@ export class FederationHost {
       const activeVersion = versions[version];
       const activeVersionEager = Boolean(
         activeVersion &&
-          (activeVersion.eager || activeVersion.shareConfig.eager),
+          (activeVersion.eager || activeVersion.shareConfig?.eager),
       );
       if (
         !activeVersion ||
