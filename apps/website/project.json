@@ -81,7 +81,7 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "qwik-speak-extract --sourceFilesPaths=./apps/website/src --assetsPath=./apps/website/src/i18n --supportedLangs=en-US,pt-BR"
+          "qwik-speak-extract --sourceFilesPaths=./apps/website/src --assetsPath=./apps/website/src/i18n --supportedLangs=en-US,pt-BR,zh-CN"
         ]
       },
       "configurations": {},

@@ -1,0 +1,11 @@
+{
+  "navbar": {
+    "menu": {
+      "discover": "探索",
+      "documentation": "文档",
+      "enterprise": "企业",
+      "medusa": "Medusa",
+      "showcase": "案例展示"
+    }
+  }
+}
