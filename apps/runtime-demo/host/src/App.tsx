@@ -1,15 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { init, loadRemote } from '@module-federation/runtime';
+import Remote2Button from 'remote2/Button';
 import LocalButton from './Button';
 import customPlugin from './runtimePlugin';
 
 init({
-  name: 'app1',
+  // must the same as module-federation.config's name
+  name: 'runtime_demo_host',
   remotes: [
     {
-      name: 'runtime_demo_remote',
-      alias: 'app2',
+      name: 'runtime_demo_remote1',
+      alias: 'remote1',
       entry: 'http://localhost:3006/remoteEntry.js',
     },
   ],
@@ -39,8 +41,7 @@ init({
 function RemoteButton() {
   // @ts-ignore ignore
   const Comp = React.lazy(async () => {
-    //@ts-ignore
-    const Button = await loadRemote('app2/Button');
+    const Button = await loadRemote('remote1/Button');
     return Button;
   });
   return (
@@ -52,12 +53,12 @@ function RemoteButton() {
 
 const App = () => (
   <div>
-    <h1>Bi-Directional</h1>
-    <h2>App 1</h2>
+    <h2>host</h2>
     <LocalButton />
     <React.Suspense fallback="Loading Button">
       <RemoteButton />
     </React.Suspense>
+    <Remote2Button />
   </div>
 );
 

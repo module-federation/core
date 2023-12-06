@@ -6,6 +6,6 @@ const style = {
   padding: 12,
 };
 
-const Button = () => <button style={style}>App 1 Button</button>;
+const Button = () => <button style={style}>Host Button</button>;
 
 export default Button;
