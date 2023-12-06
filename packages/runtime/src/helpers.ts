@@ -17,14 +17,14 @@ import {
   getPreloaded,
   setPreloaded,
 } from './global';
-import { getGlobalShare, getGlobalShareScope } from './utils/share';
+import { getRegisteredShare, getGlobalShareScope } from './utils/share';
 
 interface IShareUtils {
-  getGlobalShare: typeof getGlobalShare;
+  getRegisteredShare: typeof getRegisteredShare;
   getGlobalShareScope: typeof getGlobalShareScope;
 }
 const ShareUtils: IShareUtils = {
-  getGlobalShare,
+  getRegisteredShare,
   getGlobalShareScope,
 };
 

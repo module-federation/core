@@ -1,5 +1,10 @@
 import { FederationHost } from './core';
-import { RemoteEntryExports, GlobalShareScope, Remote, Optional } from './type';
+import {
+  RemoteEntryExports,
+  GlobalShareScopeMap,
+  Remote,
+  Optional,
+} from './type';
 import { getFMId } from './utils/tool';
 import { GlobalModuleInfo, ModuleInfo } from '@module-federation/sdk';
 import { getBuilderId, isDebugMode } from './utils/env';
@@ -12,9 +17,8 @@ export interface Federation {
   moduleInfo: GlobalModuleInfo;
   __DEBUG_CONSTRUCTOR__?: typeof FederationHost;
   __INSTANCES__: Array<FederationHost>;
-  __SHARE__: GlobalShareScope;
+  __SHARE__: GlobalShareScopeMap;
   __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
-  __SHARE_SCOPE_LOADING__: Record<string, boolean | Promise<boolean>>;
   __PRELOADED_MAP__: Map<string, boolean>;
 }
 
@@ -56,7 +60,6 @@ if (nativeGlobal.__VMOK__) {
     moduleInfo: {},
     __SHARE__: {},
     __MANIFEST_LOADING__: {},
-    __SHARE_SCOPE_LOADING__: {},
     __PRELOADED_MAP__: new Map(),
   };
 
@@ -68,7 +71,6 @@ nativeGlobal.__FEDERATION__.__INSTANCES__ ??= [];
 nativeGlobal.__FEDERATION__.moduleInfo ??= {};
 nativeGlobal.__FEDERATION__.__SHARE__ ??= {};
 nativeGlobal.__FEDERATION__.__MANIFEST_LOADING__ ??= {};
-nativeGlobal.__FEDERATION__.__SHARE_SCOPE_LOADING__ ??= {};
 nativeGlobal.__FEDERATION__.__PRELOADED_MAP__ ??= new Map();
 
 export const Global = {
@@ -84,7 +86,6 @@ export function resetFederationGlobalInfo(): void {
   nativeGlobal.__FEDERATION__.moduleInfo = {};
   nativeGlobal.__FEDERATION__.__SHARE__ = {};
   nativeGlobal.__FEDERATION__.__MANIFEST_LOADING__ = {};
-  nativeGlobal.__FEDERATION__.__SHARE_SCOPE_LOADING__ = {};
 }
 
 export function getGlobalFederationInstance(
