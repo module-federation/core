@@ -530,10 +530,6 @@ export default {
     library: {
       $ref: '#/definitions/LibraryOptions',
     },
-    async: {
-      description: 'Enable async loading of entry chunks.',
-      type: 'boolean',
-    },
     name: {
       description: 'The name of the container.',
       type: 'string',
@@ -551,6 +547,14 @@ export default {
     },
     runtime: {
       $ref: '#/definitions/EntryRuntime',
+    },
+    runtimePlugins: {
+      type: 'array',
+      items: {
+        description: 'Runtime Plugin File Path.',
+        type: 'string',
+        minLength: 1,
+      },
     },
     shareScope: {
       description:

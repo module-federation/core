@@ -32,6 +32,8 @@ import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import makeSerializable from 'webpack/lib/util/makeSerializable';
 import { rangeToString, stringifyHoley } from 'webpack/lib/util/semver';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
+import { normalizeConsumeShareOptions } from './utils';
+
 export type ConsumeOptions = {
   /**
    * fallback request
@@ -281,12 +283,17 @@ class ConsumeSharedModule extends Module {
       fn += 'Fallback';
       args.push(fallbackCode);
     }
-    const code = runtimeTemplate.returningFunction(`${fn}(${args.join(', ')})`);
+    // const code = runtimeTemplate.returningFunction(`${fn}(${args.join(', ')})`);
     const sources = new Map();
-    sources.set('consume-shared', new RawSource(code));
+    sources.set('consume-shared', new RawSource(fallbackCode || '()=>()=>{}'));
+
+    const data = new Map();
+    data.set('consume-shared', normalizeConsumeShareOptions(this.options));
+
     return {
       runtimeRequirements,
       sources,
+      data,
     };
   }
 

@@ -8,7 +8,6 @@
 import { parseOptions } from '../container/options';
 import { ConsumeOptions } from './ConsumeSharedModule';
 import { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
-import { parseRange } from 'webpack/lib/util/semver';
 import { resolveMatchedConfigs } from './resolveMatchedConfigs';
 import {
   isRequiredVersion,
@@ -32,6 +31,8 @@ import LazySet from 'webpack/lib/util/LazySet';
 //@ts-ignore
 import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
 import { SemVerRange } from 'webpack/lib/util/semver';
+import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
+import ShareRuntimeModule from './ShareRuntimeModule';
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
@@ -79,7 +80,8 @@ class ConsumeSharedPlugin {
                 import: key,
                 shareScope: options.shareScope || 'default',
                 shareKey: key,
-                requiredVersion: parseRange(item),
+                // webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
+                requiredVersion: item,
                 strictVersion: true,
                 packageName: undefined,
                 singleton: false,
@@ -91,10 +93,8 @@ class ConsumeSharedPlugin {
         import: item.import === false ? undefined : item.import || key,
         shareScope: item.shareScope || options.shareScope || 'default',
         shareKey: item.shareKey || key,
-        requiredVersion:
-          typeof item.requiredVersion === 'string'
-            ? parseRange(item.requiredVersion)
-            : item.requiredVersion,
+        // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
+        requiredVersion: item.requiredVersion,
         strictVersion:
           typeof item.strictVersion === 'boolean'
             ? item.strictVersion
@@ -108,6 +108,9 @@ class ConsumeSharedPlugin {
   }
 
   apply(compiler: Compiler): void {
+    //@ts-ignore
+    new FederationRuntimePlugin().apply(compiler);
+
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation, { normalModuleFactory }) => {
@@ -238,7 +241,8 @@ class ConsumeSharedPlugin {
                     );
                     return resolve(undefined);
                   }
-                  resolve(parseRange(requiredVersion));
+                  // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
+                  resolve(requiredVersion);
                 },
               );
             }),
@@ -316,6 +320,8 @@ class ConsumeSharedPlugin {
               chunk,
               new ConsumeSharedRuntimeModule(set),
             );
+            // FIXME: need to remove webpack internal inject ShareRuntimeModule, otherwise there will be two ShareRuntimeModule
+            compilation.addRuntimeModule(chunk, new ShareRuntimeModule());
           },
         );
       },

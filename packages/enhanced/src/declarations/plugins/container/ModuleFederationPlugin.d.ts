@@ -148,6 +148,10 @@ export interface ModuleFederationPluginOptions {
    * Modules that should be shared in the share scope. When provided, property names are used to match requested modules in this compilation.
    */
   shared?: Shared;
+  /**
+   * Runtime plugin file paths or package name.
+   */
+  runtimePlugins?: string[];
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.

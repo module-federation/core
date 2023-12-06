@@ -26,6 +26,9 @@ import type {
 } from 'webpack/lib/Module';
 import type WebpackError from 'webpack/lib/WebpackError';
 import makeSerializable from 'webpack/lib/util/makeSerializable';
+import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import { getFederationGlobalScope } from './runtime/utils';
+import EntryDependency from 'webpack/lib/dependencies/EntryDependency';
 
 const SOURCE_TYPES = new Set(['javascript']);
 
@@ -44,6 +47,7 @@ class ContainerEntryModule extends Module {
   private _name: string;
   private _exposes: [string, ExposeOptions][];
   private _shareScope: string;
+  private _runtimePlugins: string[];
   /**
    * @param {string} name container entry name
    * @param {[string, ExposeOptions][]} exposes list of exposed modules
@@ -53,11 +57,13 @@ class ContainerEntryModule extends Module {
     name: string,
     exposes: [string, ExposeOptions][],
     shareScope: string,
+    runtimePlugins: string[],
   ) {
     super(JAVASCRIPT_MODULE_TYPE_DYNAMIC, null);
     this._name = name;
     this._exposes = exposes;
     this._shareScope = shareScope;
+    this._runtimePlugins = runtimePlugins;
   }
   /**
    * @param {ObjectDeserializerContext} context context
@@ -65,7 +71,7 @@ class ContainerEntryModule extends Module {
    */
   static deserialize(context: ObjectDeserializerContext): ContainerEntryModule {
     const { read } = context;
-    const obj = new ContainerEntryModule(read(), read(), read());
+    const obj = new ContainerEntryModule(read(), read(), read(), read());
     //@ts-ignore
     obj.deserialize(context);
     return obj;
@@ -170,6 +176,12 @@ class ContainerEntryModule extends Module {
       ) as unknown as Dependency,
     );
 
+    this.addDependency(
+      new EntryDependency(
+        FederationRuntimePlugin.getFilePath(this._name, this._runtimePlugins),
+      ),
+    );
+
     callback();
   }
 
@@ -238,6 +250,17 @@ class ContainerEntryModule extends Module {
       );
     }
 
+    const initRuntimeDep = this.dependencies[1];
+    const initRuntimeModuleGetter = runtimeTemplate.moduleRaw({
+      module: moduleGraph.getModule(initRuntimeDep),
+      chunkGraph,
+      // @ts-expect-error
+      request: initRuntimeDep.userRequest,
+      weak: false,
+      runtimeRequirements,
+    });
+    const federationGlobal = getFederationGlobalScope(RuntimeGlobals || {});
+
     const source = Template.asString([
       `var moduleMap = {`,
       Template.indent(getters.join(',\n')),
@@ -262,12 +285,19 @@ class ContainerEntryModule extends Module {
       ])};`,
       `var init = ${runtimeTemplate.basicFunction('shareScope, initScope', [
         `if (!${RuntimeGlobals.shareScopeMap}) return;`,
+        `if (!${federationGlobal}) return;`,
         `var name = ${JSON.stringify(this._shareScope)}`,
-        `var oldScope = ${RuntimeGlobals.shareScopeMap}[name];`,
-        `if(oldScope && oldScope !== shareScope) throw new Error("Container initialization failed as it has already been initialized with a different share scope");`,
-        `${RuntimeGlobals.shareScopeMap}[name] = shareScope;`,
+        `${federationGlobal}.instance.initOptions({name:${federationGlobal}.initOptions.name, })`,
+        `${federationGlobal}.instance.initShareScopeMap(name,shareScope)`,
+        `if (${RuntimeGlobals.global}.__FEDERATION__.__SHARE__.default){`,
+        Template.indent([
+          `${federationGlobal}.instance.initShareScopeMap(name,${RuntimeGlobals.global}.__FEDERATION__.__SHARE__.default)`,
+        ]),
+        '}',
+        `${federationGlobal}.proxyShareScopeMap(${RuntimeGlobals.require});`,
         `return ${RuntimeGlobals.initializeSharing}(name, initScope);`,
       ])};`,
+      `${initRuntimeModuleGetter}`,
       '',
       '// This exports getters to disallow modifications',
       `${RuntimeGlobals.definePropertyGetters}(exports, {`,
@@ -307,6 +337,7 @@ class ContainerEntryModule extends Module {
     write(this._name);
     write(this._exposes);
     write(this._shareScope);
+    write(this._runtimePlugins);
     //@ts-ignore
     super.serialize(context);
   }

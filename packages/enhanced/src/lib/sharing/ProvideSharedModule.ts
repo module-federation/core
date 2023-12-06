@@ -157,23 +157,22 @@ class ProvideSharedModule extends Module {
     chunkGraph,
   }: CodeGenerationContext): CodeGenerationResult {
     const runtimeRequirements = new Set([RuntimeGlobals.initializeSharing]);
+    const moduleGetter = this._eager
+      ? runtimeTemplate.syncModuleFactory({
+          dependency: this.dependencies[0],
+          chunkGraph,
+          request: this._request,
+          runtimeRequirements,
+        })
+      : runtimeTemplate.asyncModuleFactory({
+          block: this.blocks[0],
+          chunkGraph,
+          request: this._request,
+          runtimeRequirements,
+        });
     const code = `register(${JSON.stringify(this._name)}, ${JSON.stringify(
       this._version || '0',
-    )}, ${
-      this._eager
-        ? runtimeTemplate.syncModuleFactory({
-            dependency: this.dependencies[0],
-            chunkGraph,
-            request: this._request,
-            runtimeRequirements,
-          })
-        : runtimeTemplate.asyncModuleFactory({
-            block: this.blocks[0],
-            chunkGraph,
-            request: this._request,
-            runtimeRequirements,
-          })
-    }${this._eager ? ', 1' : ''});`;
+    )}, ${moduleGetter}${this._eager ? ', 1' : ''});`;
     const sources = new Map();
     const data = new Map();
     data.set('share-init', [
@@ -183,6 +182,13 @@ class ProvideSharedModule extends Module {
         init: code,
       },
     ]);
+    data.set('share-init-option', {
+      name: this._name,
+      version: JSON.stringify(this._version || '0'),
+      request: this._request,
+      getter: moduleGetter,
+      shareScope: [this._shareScope],
+    });
     return { sources, data, runtimeRequirements };
   }
 

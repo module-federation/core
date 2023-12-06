@@ -22,6 +22,7 @@ import {
   ContainerReferencePluginOptions,
   RemotesConfig,
 } from '../../declarations/plugins/container/ContainerReferencePlugin';
+import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
@@ -49,12 +50,14 @@ class ContainerReferencePlugin {
       (item) => ({
         external: Array.isArray(item) ? item : [item],
         shareScope: options.shareScope || 'default',
+        name: undefined,
       }),
       (item) => ({
         external: Array.isArray(item.external)
           ? item.external
           : [item.external],
         shareScope: item.shareScope || options.shareScope || 'default',
+        name: item.name,
       }),
     );
   }
@@ -66,6 +69,8 @@ class ContainerReferencePlugin {
    */
   apply(compiler: Compiler): void {
     const { _remotes: remotes, _remoteType: remoteType } = this;
+    // @ts-ignore
+    new FederationRuntimePlugin().apply(compiler);
 
     /** @type {Record<string, string>} */
     const remoteExternals: Record<string, string> = {};
@@ -131,6 +136,7 @@ class ContainerReferencePlugin {
                     `.${data.request.slice(key.length)}`,
                     //@ts-ignore
                     config.shareScope,
+                    config.name,
                   );
                 }
               }

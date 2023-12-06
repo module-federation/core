@@ -3,6 +3,7 @@
 	Author Tobias Koppers @sokra
 */
 
+import type { ConsumeOptions } from 'webpack/lib/sharing/ConsumeSharedModule';
 import { join, dirname, readJson, InputFileSystem } from 'webpack/lib/util/fs';
 
 // Extreme shorthand only for github. eg: foo/bar
@@ -423,4 +424,26 @@ export function getRequiredVersionFromDescriptionFile(
   ) {
     return normalizeVersion(data['devDependencies'][packageName]);
   }
+}
+
+export function normalizeConsumeShareOptions(consumeOptions: ConsumeOptions) {
+  const {
+    requiredVersion = false,
+    strictVersion,
+    singleton = false,
+    eager,
+    shareKey,
+    shareScope,
+  } = consumeOptions;
+  return {
+    shareConfig: {
+      fixedDependencies: false,
+      requiredVersion,
+      strictVersion,
+      singleton,
+      eager,
+    },
+    shareScope,
+    shareKey,
+  };
 }
