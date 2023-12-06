@@ -13,6 +13,8 @@ module.exports = (rollupConfig, projectOptions) => {
     helpers: 'packages/runtime/src/helpers.ts',
   };
 
+  rollupConfig.external = [rollupConfig.external, /node_modules/];
+
   const project = projectOptions.project;
   const pkg = require(project);
   const RELEASE_NUMBER = Number(
