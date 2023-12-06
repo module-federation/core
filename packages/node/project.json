@@ -11,8 +11,6 @@
         "outputPath": "dist/packages/node",
         "main": "packages/node/src/index.js",
         "tsConfig": "packages/node/tsconfig.lib.json",
-        "updateBuildableProjectDepsInPackageJson": true,
-        "buildableProjectDepsInPackageJsonType": "dependencies",
         "assets": ["packages/node/*.md"]
       },
       "dependsOn": [
@@ -23,18 +21,14 @@
       ]
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["packages/node/**/*.js"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/packages/node"],
       "options": {
-        "jestConfig": "packages/node/jest.config.js",
-        "passWithNoTests": true
+        "jestConfig": "packages/node/jest.config.js"
       }
     },
     "release": {

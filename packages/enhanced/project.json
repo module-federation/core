@@ -11,9 +11,7 @@
         "outputPath": "dist/packages/enhanced",
         "main": "packages/enhanced/src/index.ts",
         "tsConfig": "packages/enhanced/tsconfig.lib.json",
-        "assets": ["packages/enhanced/*.md"],
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true
+        "assets": ["packages/enhanced/*.md"]
       },
       "dependsOn": [
         {
@@ -26,24 +24,14 @@
       ]
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["packages/enhanced/**/*.ts"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/enhanced/jest.config.ts",
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
+        "jestConfig": "packages/enhanced/jest.config.ts"
       }
     },
     "release": {

@@ -15,15 +15,16 @@
     "access": "public"
   },
   "dependencies": {
+    "@module-federation/enhanced": "0.1.0",
+    "@module-federation/utilities": "3.0.0",
     "fast-glob": "^3.2.11",
-    "webpack-sources": "^3.2.3",
-    "eventemitter3": "^5.0.0"
+    "webpack-sources": "^3.2.3"
   },
   "peerDependencies": {
+    "@module-federation/node": "*",
     "webpack": "^5.40.0",
     "next": "^12 || ^13 || ^14",
     "react": "^17 || ^18",
-    "react-dom": "^17 || ^18",
     "styled-jsx": "*"
   },
   "peerDependenciesMeta": {

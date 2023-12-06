@@ -14,6 +14,7 @@ declare module 'webpack/lib/util/identifier';
 
 // globals.d.ts
 declare module globalThis {
+  /* eslint-disable no-var */
   var usedChunks: Set<string>;
   var flushChunks: () => Promise<Array<string>>;
   var __remote_scope__: {
@@ -24,4 +25,5 @@ declare module globalThis {
     };
   };
   var webpackChunkLoad: () => any;
+  /* eslint-enable no-var */
 }

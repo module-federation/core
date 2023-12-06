@@ -1,4 +1,4 @@
-name: Build affected packages
+name: Build, test and lint affected packages
 
 on:
   push:
@@ -6,21 +6,22 @@ on:
   pull_request:
     branches: ['main', 'next', 'canary']
 
+# Cancel any previous runs in progress
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   main:
     runs-on: ubuntu-latest
-    # Cancel any previous runs in progress
-    concurrency:
-      group: ${{ github.head_ref || github.run_id }}
-      cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: nrwl/nx-set-shas@v3
+
+      - uses: nrwl/nx-set-shas@v4
+
       - run: npm ci
 
       - run: npx nx format:check
-      - run: npx nx affected -t lint --parallel=3 --exclude='*,!tag:package'
-      - run: npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
-      - run: npx nx affected -t build --parallel=3 --exclude='*,!tag:package'
+      - run: npx nx affected -t lint,test,build --parallel=3 --exclude='*,!tag:package'

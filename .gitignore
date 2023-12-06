@@ -45,3 +45,5 @@ Thumbs.db
 .next
 .netlify
 migrations.json
+
+.nx/cache

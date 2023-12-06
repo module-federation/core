@@ -11,8 +11,6 @@
         "outputPath": "dist/packages/nextjs-mf",
         "main": "packages/nextjs-mf/src/index.js",
         "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true,
         "assets": ["packages/nextjs-mf/*.md"]
       },
       "dependsOn": [
@@ -23,18 +21,14 @@
       ]
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["packages/nextjs-mf/**/*.js"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/packages/nextjs-mf"],
       "options": {
-        "jestConfig": "packages/nextjs-mf/jest.config.js",
-        "passWithNoTests": true
+        "jestConfig": "packages/nextjs-mf/jest.config.js"
       }
     },
     "release": {

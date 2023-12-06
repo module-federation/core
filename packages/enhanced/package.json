@@ -7,6 +7,10 @@
   "publishConfig": {
     "access": "public"
   },
+  "dependencies": {
+    "tapable": "2.2.1",
+    "webpack-sources": "^3.2.3"
+  },
   "peerDependencies": {
     "webpack": "^5.0.0"
   }

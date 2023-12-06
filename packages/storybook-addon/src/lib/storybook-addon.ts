@@ -1,6 +1,5 @@
 import fs from 'fs';
 import { dirname, join } from 'path';
-import * as process from 'process';
 import VirtualModulesPlugin from 'webpack-virtual-modules';
 import { container, Configuration } from 'webpack';
 import { logger } from '@storybook/node-logger';

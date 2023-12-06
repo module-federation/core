@@ -1,7 +1,7 @@
 import fs from 'fs';
 import fetch from 'node-fetch';
 import path from 'path';
-import util from 'util';
+import util from 'node:util';
 import { pipeline } from 'stream';
 
 const pipelineAsync = util.promisify(pipeline);

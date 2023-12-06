@@ -35,23 +35,16 @@
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@module-federation/utilities": "3.0.0",
     "node-fetch": "^2.6.7",
-    "encoding": "^0.1.13"
+    "tapable": "2.2.1"
   },
   "peerDependencies": {
-    "webpack": "^5.40.0",
-    "react": "^16||^17||^18",
-    "react-dom": "^16||^17||^18",
-    "next": "^12||^13"
+    "@module-federation/enhanced": "*",
+    "webpack": "^5.40.0"
   },
   "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    },
-    "react-dom": {
-      "optional": true
-    },
-    "next": {
+    "@module-federation/enhanced": {
       "optional": true
     }
   }
