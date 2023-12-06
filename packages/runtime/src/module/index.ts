@@ -1,5 +1,4 @@
-import { getFMId, safeToString } from '../utils';
-import { assert } from '../utils/logger';
+import { getFMId, safeToString, assert } from '../utils';
 import { getRemoteEntry } from '../utils/load';
 import { FederationHost } from '../core';
 import { Global } from '../global';
