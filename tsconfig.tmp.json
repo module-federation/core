@@ -8,6 +8,9 @@
       "@module-federation/sdk/normalize-webpack-path": [
         "dist/packages/sdk/normalize-webpack-path.cjs.js"
       ],
+      "@module-federation/webpack-bundler-runtime": ["dist/packages/webpack-bundler-runtime/index.cjs.js"],
+      "@module-federation/runtime": ["dist/packages/runtime"],
+      "@module-federation/runtime/*": ["dist/packages/runtime/*"],
       "@module-federation/core": ["dist/packages/core/src/index.js"],
       "@module-federation/native-federation-tests": [
         "dist/packages/native-federation-tests/src/index.js"

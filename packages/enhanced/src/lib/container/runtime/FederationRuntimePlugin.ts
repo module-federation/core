@@ -39,7 +39,7 @@ class FederationRuntimePlugin {
 
   static getTemplate(runtimePlugins: string[]) {
     // internal runtime plugin
-    const internalRuntimePlugin = `import initializeRemoteEntryRuntimePlugin from '${InitializeRemoteEntryRuntimePluginPath}';\n`;
+    const internalRuntimePlugin = `import initializeRemoteEntryRuntimePlugin from '!${InitializeRemoteEntryRuntimePluginPath}';\n`;
     const internalRuntimePluginName = 'initializeRemoteEntryRuntimePlugin';
     let runtimePluginTemplates = '';
     const runtimePLuginNames: string[] = [];
