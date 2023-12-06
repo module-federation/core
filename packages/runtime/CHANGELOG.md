@@ -1,3 +1,10 @@
+## [1.0.1-canary.1](https://github.com/module-federation/universe/compare/runtime-1.0.0...runtime-1.0.1-canary.1) (2023-12-06)
+
+
+### Bug Fixes
+
+* **runtime:** shorthand utils imports ([f8e6805](https://github.com/module-federation/universe/commit/f8e68058417bf5c4d44e0f9e6b4c8726dfb271f0))
+
 # 1.0.0-canary.1 (2023-12-06)
 
 
