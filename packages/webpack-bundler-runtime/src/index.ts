@@ -4,6 +4,9 @@ import { remotes } from './remotes';
 import { consumes } from './consumes';
 import { initializeSharing } from './initializeSharing';
 import { installInitialConsumes } from './installInitialConsumes';
+import { proxyShareScopeMap } from './proxyShareScopeMap';
+
+export * from './types';
 
 const federation: Federation = {
   runtime,
@@ -16,5 +19,7 @@ const federation: Federation = {
     S: {},
     installInitialConsumes,
   },
+  proxyShareScopeMap,
+  bundlerRuntimeOptions: {},
 };
 export default federation;

@@ -1,5 +1,6 @@
 import * as runtime from '@module-federation/runtime';
 import { initializeSharing } from './initializeSharing';
+import { proxyShareScopeMap } from './proxyShareScopeMap';
 
 // FIXME: ideal situation => import { GlobalShareScope,UserOptions } from '@module-federation/runtime/type'
 type ExcludeUndefined<T> = T extends undefined ? never : T;
@@ -28,14 +29,8 @@ type InferredGlobalShareScope = {
   [scope: string]: InferredShareScope;
 };
 
-// shareScope, name, externalModuleId, externalType, remoteName
-type IdToExternalAndNameMappingItem = [
-  string,
-  string,
-  string | number,
-  string,
-  string,
-];
+// shareScope, name, externalModuleId
+type IdToExternalAndNameMappingItem = [string, string, string | number];
 
 interface IdToExternalAndNameMappingItemWithPromise
   extends IdToExternalAndNameMappingItem {
@@ -51,6 +46,7 @@ export interface WebpackRequire {
   I: typeof initializeSharing;
   S?: InferredGlobalShareScope;
   federation: Federation;
+  g: typeof globalThis;
 }
 
 interface ShareInfo {
@@ -65,6 +61,13 @@ interface ModuleToHandlerMappingItem {
   shareKey: string;
 }
 
+interface IdToRemoteMapItem {
+  externalType: string;
+  request: string;
+  remoteName?: string;
+  externalModuleId?: string | number;
+}
+
 export interface RemotesOptions {
   chunkId: string | number;
   promises: Promise<any>[];
@@ -73,6 +76,7 @@ export interface RemotesOptions {
     string,
     IdToExternalAndNameMappingItemWithPromise
   >;
+  idToRemoteMap: Record<string, IdToRemoteMapItem[]>;
   webpackRequire: WebpackRequire;
 }
 
@@ -105,11 +109,13 @@ export interface Federation {
   bundlerRuntime?: {
     remotes: (options: RemotesOptions) => void;
     consumes: (options: ConsumesOptions) => void;
-    I: (
-      name: string,
-      webpackRequire: WebpackRequire,
-    ) => Promise<boolean> | boolean;
+    I: typeof initializeSharing;
     S: InferredGlobalShareScope;
     installInitialConsumes: (options: InstallInitialConsumesOptions) => any;
   };
+  bundlerRuntimeOptions: {
+    remotes?: Exclude<RemotesOptions, 'chunkId' | 'promises'>;
+  };
+  proxyShareScopeMap?: typeof proxyShareScopeMap;
+  hasProxyShareScopeMap?: boolean;
 }
