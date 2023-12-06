@@ -408,10 +408,18 @@ export class FederationHost {
     assert(
       remoteSplitInfo,
       `
-        Unable to locate ${idRes} in ${this.options.name}. Potential reasons for failure include:\n
-        1. ${idRes} was not included in the 'remotes' parameter of ${this.options.name}.\n
-        2. ${idRes} could not be found in the 'remotes' of ${this.options.name} with either 'name' or 'alias' attributes.
-        3. The 'beforeLoadRemote' hook was provided but did not return the correct 'remoteInfo' when attempting to load ${idRes}.
+        Unable to locate ${idRes} in ${
+          this.options.name
+        }. Potential reasons for failure include:\n
+        1. ${idRes} was not included in the 'remotes' parameter of ${
+          this.options.name || 'the host'
+        }.\n
+        2. ${idRes} could not be found in the 'remotes' of ${
+          this.options.name
+        } with either 'name' or 'alias' attributes.
+        3. ${idRes} is not online, injected, or loaded.
+        4. ${idRes}  cannot be accessed on the expected.
+        5. The 'beforeLoadRemote' hook was provided but did not return the correct 'remoteInfo' when attempting to load ${idRes}.
       `,
     );
 
