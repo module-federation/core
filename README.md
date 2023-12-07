@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Module federation Banner" src="https://avatars.githubusercontent.com/u/61727377?s=200&v=4">
+  <img alt="Module federation Banner" src="https://github.com/module-federation/universe/assets/27547179/11234712-40fc-4696-a7fd-16e0c631005a">
 </p>
 
 
