@@ -24,6 +24,9 @@ The universe repository provides a set of tools to enhance module federation's c
 - [Native federation typescript](./packages/native-federation-typescript)
 - [Utilities](./packages/utilities)
 
+# 🧑‍💻 Community
+Come and chat with us on [Discord](https://discord.com/invite/T8c6yAxkbv)! The Module federation team and users are active there, and we're always looking for contributions.
+
 # 🤝 Contribution
 
 > New contributors welcome!
