@@ -32,7 +32,7 @@ Come and chat with us on [Discord](https://discord.com/invite/T8c6yAxkbv)! The M
 
 > New contributors welcome!
 
-Please read the [Contributing Guide](https://github.com/module-federation/universe/tree/canary).
+Please read the [Contributing Guide](https://github.com/module-federation/universe/blob/canary/CONTRIBUTING.md).
 
 ## 🙌 Code of Conduct
 
