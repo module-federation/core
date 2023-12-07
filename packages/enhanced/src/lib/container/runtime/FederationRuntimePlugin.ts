@@ -51,7 +51,7 @@ class FederationRuntimePlugin {
           ? runtimePlugin
           : path.join(process.cwd(), runtimePlugin);
 
-        runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
+        runtimePluginTemplates += `import ${runtimePluginName} from '!${runtimePluginPath}';\n`;
         runtimePLuginNames.push(runtimePluginName);
       });
     }
@@ -246,8 +246,10 @@ class FederationRuntimePlugin {
       if (typeof p !== 'object' || !p) {
         return false;
       }
-
-      return p['name'] === 'ModuleFederationPlugin';
+      return (
+        p['name'] === 'ModuleFederationPlugin' ||
+        p.constructor.name === 'ModuleFederationPlugin'
+      );
     });
 
     if (useModuleFederationPlugin && !this.options) {
@@ -260,7 +262,10 @@ class FederationRuntimePlugin {
         return false;
       }
 
-      return p['name'] === 'ContainerPlugin';
+      return (
+        p['name'] === 'ContainerPlugin' ||
+        p.constructor.name === 'ContainerPlugin'
+      );
     });
 
     if (useContainerPlugin && !this.options) {

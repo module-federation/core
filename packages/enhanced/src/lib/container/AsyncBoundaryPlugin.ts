@@ -94,7 +94,9 @@ class AsyncEntryStartupPlugin {
               'consume-shared',
             );
           const entryOptions = upperContext.chunk.getEntryOptions();
-          const initialChunks = Array.from(upperContext.chunk.getAllInitialChunks()).map((chunk:Chunk)=> chunk.id)
+          const initialChunks = Array.from(
+            upperContext.chunk.getAllInitialChunks(),
+          ).map((chunk: Chunk) => chunk.id);
           const chunksToRef = entryOptions?.dependOn
             ? [...entryOptions.dependOn, ...initialChunks]
             : [...initialChunks];
