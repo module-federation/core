@@ -25,6 +25,7 @@ The universe repository provides a set of tools to enhance module federation's c
 - [Utilities](./packages/utilities)
 
 # 🧑‍💻 Community
+
 Come and chat with us on [Discord](https://discord.com/invite/T8c6yAxkbv)! The Module federation team and users are active there, and we're always looking for contributions.
 
 # 🤝 Contribution
