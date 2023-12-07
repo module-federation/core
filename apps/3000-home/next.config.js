@@ -62,11 +62,25 @@ const nextConfig = {
     // used for testing build output snapshots
 
     const remotes = {
-      shop: createDelegatedModule(require.resolve('./remote-delegate.js'), {
-        remote: `shop@http://localhost:3001/_next/static/${
-          isServer ? 'ssr' : 'chunks'
-        }/remoteEntry.js`,
-      }),
+      // shop:   {
+      //   name: 'shop',
+      //   alias: 'shop',
+      //   entry: `http://localhost:3001/_next/static/${
+      //     isServer ? 'ssr' : 'chunks'
+      //   }/remoteEntry.js`,
+      // },
+      // checkout:   {
+      //   name: 'checkout',
+      //   alias: 'checkout',
+      //   entry: `http://localhost:3002/_next/static/${
+      //     isServer ? 'ssr' : 'chunks'
+      //   }/remoteEntry.js`,
+      // },
+      // shop: createDelegatedModule(require.resolve('./remote-delegate.js'), {
+      //   remote: `shop@http://localhost:3001/_next/static/${
+      //     isServer ? 'ssr' : 'chunks'
+      //   }/remoteEntry.js`,
+      // }),
       // checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
       //   remote: `checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
       // }),
@@ -75,6 +89,9 @@ const nextConfig = {
       //   isServer ? 'ssr' : 'chunks'
       // }/remoteEntry.js`,
       checkout: `checkout@http://localhost:3002/_next/static/${
+        isServer ? 'ssr' : 'chunks'
+      }/remoteEntry.js`,
+      shop: `shop@http://localhost:3001/_next/static/${
         isServer ? 'ssr' : 'chunks'
       }/remoteEntry.js`,
     };
