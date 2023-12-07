@@ -1,51 +1,35 @@
-# ModuleFederation
+<p align="center">
+  <img alt="Module federation Banner" src="https://avatars.githubusercontent.com/u/61727377?s=200&v=4">
+</p>
 
-# Documentation
 
-[module-federation/nextjs-mf](./packages/nextjs-mf)
+# Module Federation
 
-[module-federation/node](./packages/node)
+## 💡 What is Module Federation?
 
-[module-federation/utilities](./packages/utilities)
+* Module Federation is a concept that allows developers to share code and resources across multiple JavaScript applications
 
-[module-federation/typescript](./packages/typescript)
+* Module Federation can be used to split monolithic applications into micro-front-end architectures
 
-[module-federation/storybook-addon](./packages/storybook-addon)
+* Module Federation reuses common dependencies between modules as much as possible
 
-[module-federation/native-federation-typescript](./packages/native-federation-typescript)
 
-[module-federation/native-federation-tests](./packages/native-federation-tests)
+## 🔥 What does universe offer?
 
-## Generate an application
+The universe repository provides a set of tools to enhance module federation's capabilities. These include:
 
-Run `nx g @nx/next:app my-app` to generate an application.
+* [Next.js Module Federation](./packages/nextjs-mf)
+* [Node Module Federation](./packages/node)
+* [Storybook addon for Module Federation](./packages/storybook-addon)
 
-> You can use any of the plugins above to generate applications as well.
 
-When using Nx, you can create multiple applications and libraries in the same workspace.
 
-## Generate a library
+# 🤝 Contribution
 
-Run `nx g @nx/js:lib my-lib` to generate a library.
+> New contributors welcome!
 
-> You can also use any of the plugins above to generate libraries as well.
+Please read the [Contributing Guide](https://github.com/module-federation/universe/tree/canary).
 
-Libraries are shareable across libraries and applications. They can be imported from `@module-federation/mylib`.
+## 🙌 Code of Conduct
 
-## Development server
-
-Run `nx serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
-
-## Build
-
-Run `nx build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `nx test my-app` to execute the unit tests via [Jest](https://jestjs.io).
-
-Run `nx affected:test` to execute the unit tests affected by a change.
-
-## Social links
-
-We are excited to announce the new [Discord community](https://discord.gg/T8c6yAxkbv) for Module Federation has been recently launched! This space will be used to discuss and share knowledge about the latest advancements in module federation and how to use it effectively. See you there!
+This repo has adopted the Code of Conduct. Please check [Code of Conduct](./CODE_OF_CONDUCT.md) for more details.
