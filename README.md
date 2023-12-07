@@ -12,6 +12,8 @@
 
 - Module Federation reuses common dependencies between modules as much as possible
 
+[Learn more](https://module-federation.io/docs/en/mf-docs/0.2/getting-started/)
+
 ## 🔥 What does universe offer?
 
 The universe repository provides a set of tools to enhance module federation's capabilities. These include:
@@ -19,6 +21,8 @@ The universe repository provides a set of tools to enhance module federation's c
 - [Next.js Module Federation](./packages/nextjs-mf)
 - [Node Module Federation](./packages/node)
 - [Storybook addon for Module Federation](./packages/storybook-addon)
+- [Native federation typescript](./packages/native-federation-typescript)
+- [Utilities](./packages/utilities)
 
 # 🤝 Contribution
 
