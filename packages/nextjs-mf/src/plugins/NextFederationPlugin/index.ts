@@ -40,7 +40,7 @@ import { parseRemotes } from '@module-federation/node';
 export class NextFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
-
+  public name: string
   /**
    * Constructs the NextFederationPlugin with the provided options.
    *
@@ -50,6 +50,7 @@ export class NextFederationPlugin {
     const { mainOptions, extraOptions } = setOptions(options);
     this._options = mainOptions;
     this._extraOptions = extraOptions;
+    this.name = "ModuleFederationPlugin"
   }
 
   /**
