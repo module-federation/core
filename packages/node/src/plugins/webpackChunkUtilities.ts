@@ -183,7 +183,6 @@ export function generateLoadingCode(
                       ),
                     )};`,
 
-
                     `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
                     "const loadingStrategy = typeof process !== 'undefined' ?  'http-vm' : 'http-eval';",
                     `loadChunkStrategy(loadingStrategy, chunkName,${RuntimeGlobals.require}.federation.initOptions.name, ${RuntimeGlobals.require}.federation.initOptions.remotes, installChunkCallback);`,

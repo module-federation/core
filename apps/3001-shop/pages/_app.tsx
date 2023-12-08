@@ -39,7 +39,7 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Suspense fallback={"loading"}>
+      <Suspense fallback={'loading'}>
         <SharedNav />
       </Suspense>
       <Layout>

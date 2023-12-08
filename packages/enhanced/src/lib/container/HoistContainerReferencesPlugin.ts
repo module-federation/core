@@ -92,8 +92,8 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     const runtimeChunkIds =
       typeof chunk.runtime === 'string' || typeof chunk.runtime === 'number'
         ? [chunk.runtime]
-        //@ts-ignore
-        : [...chunk.runtime];
+        : //@ts-ignore
+          [...chunk.runtime];
     const containers = this.getContainers(runtimeChunkIds, chunkSet);
 
     for (const runtimeChunkId of runtimeChunkIds) {

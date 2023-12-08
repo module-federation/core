@@ -26,11 +26,10 @@ class InvertedContainerPlugin {
     }).apply(compiler);
 
     new AsyncBoundaryPlugin({
-      eager: (module) => /.federation/.test(module.identifier())
+      eager: (module) => /.federation/.test(module.identifier()),
       //@ts-ignore
     }).apply(compiler);
   }
 }
 
 export default InvertedContainerPlugin;
-

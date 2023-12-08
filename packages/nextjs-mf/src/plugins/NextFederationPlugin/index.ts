@@ -14,10 +14,7 @@ import type { Compiler } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
-import {
-  retrieveDefaultShared,
-  applyPathFixes,
-} from './next-fragments';
+import { retrieveDefaultShared, applyPathFixes } from './next-fragments';
 import { setOptions } from './set-options';
 import {
   validateCompilerOptions,
@@ -38,7 +35,7 @@ import { ModuleFederationPlugin } from '@module-federation/enhanced';
 export class NextFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
-  public name: string
+  public name: string;
   /**
    * Constructs the NextFederationPlugin with the provided options.
    *
@@ -48,7 +45,7 @@ export class NextFederationPlugin {
     const { mainOptions, extraOptions } = setOptions(options);
     this._options = mainOptions;
     this._extraOptions = extraOptions;
-    this.name = "ModuleFederationPlugin"
+    this.name = 'ModuleFederationPlugin';
   }
 
   /**
@@ -176,10 +173,9 @@ export class NextFederationPlugin {
     compiler: Compiler,
     normalFederationPluginOptions: ModuleFederationPluginOptions,
   ) {
-
     //@ts-ignore
     new ModuleFederationPlugin(
-      normalFederationPluginOptions
+      normalFederationPluginOptions,
       //@ts-ignore
     ).apply(compiler);
   }

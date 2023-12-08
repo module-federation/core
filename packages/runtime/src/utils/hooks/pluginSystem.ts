@@ -18,7 +18,7 @@ export class PluginSystem<T extends Record<string, any>> {
   }
   // workaround to react refresh loader which will inject $RefreshSig$ in "use" functions as it thinks its hook
   applyPlugin(plugin: Plugin<T>): void {
-    this.usePlugin(plugin)
+    this.usePlugin(plugin);
   }
   usePlugin(plugin: Plugin<T>): void {
     assert(isPlainObject(plugin), 'Plugin configuration is invalid.');

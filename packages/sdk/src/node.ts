@@ -19,17 +19,17 @@ export function createScriptNode(
     cb(new Error(`Invalid URL: ${e}`));
     return;
   }
-  if(!globalThis.fetch) {
+  if (!globalThis.fetch) {
     //@ts-ignore
     globalThis.fetch = __non_webpack_require__('node-fetch');
   }
   //@ts-ignore
-  console.log(require.federation,'fetching', urlObj.href)
+  console.log(require.federation, 'fetching', urlObj.href);
   fetch(urlObj)
     .then((res) => res.text())
     .then((data) => {
       //@ts-ignore
-      const path: typeof import('path') = __webpack_require__('path')
+      const path: typeof import('path') = __webpack_require__('path');
       const scriptContext = { exports: {}, module: { exports: {} } };
       const urlDirname = urlObj.pathname.split('/').slice(0, -1).join('/');
       const filename = path.basename(urlObj.pathname);
@@ -38,17 +38,27 @@ export function createScriptNode(
       try {
         const script = new vm.Script(
           `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
-          { filename }
+          { filename },
         );
-//@ts-ignore
-        script.runInThisContext()(scriptContext.exports, scriptContext.module, __non_webpack_require__, urlDirname, filename);
-        const exportedInterface: Record<string, any> = scriptContext.module.exports || scriptContext.exports;
-        if(attrs && exportedInterface && attrs['globalName']) {
+        //@ts-ignore
+        script.runInThisContext()(
+          scriptContext.exports,
+          scriptContext.module,
+          __non_webpack_require__,
+          urlDirname,
+          filename,
+        );
+        const exportedInterface: Record<string, any> =
+          scriptContext.module.exports || scriptContext.exports;
+        if (attrs && exportedInterface && attrs['globalName']) {
           const container = exportedInterface[attrs['globalName']];
           cb(undefined, container as keyof typeof scriptContext.module.exports);
           return;
         }
-        cb(undefined, exportedInterface as keyof typeof scriptContext.module.exports);
+        cb(
+          undefined,
+          exportedInterface as keyof typeof scriptContext.module.exports,
+        );
       } catch (e) {
         console.error('Error running script:', e);
         cb(new Error(`Script execution error: ${e}`));
@@ -75,8 +85,11 @@ export function loadScriptNode(
         } else {
           // Handle the loaded script context as needed
           console.log('Script loaded successfully:', scriptContext);
-          const remoteEntryKey = info?.attrs?.["globalName"] || `__FEDERATION_${info?.attrs?.['name']}:custom__`;
-          const entryExports = (globalThis as any)[remoteEntryKey] = scriptContext;
+          const remoteEntryKey =
+            info?.attrs?.['globalName'] ||
+            `__FEDERATION_${info?.attrs?.['name']}:custom__`;
+          const entryExports = ((globalThis as any)[remoteEntryKey] =
+            scriptContext);
           resolve(entryExports);
         }
       },

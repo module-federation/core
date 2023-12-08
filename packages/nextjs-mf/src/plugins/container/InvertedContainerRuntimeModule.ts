@@ -60,10 +60,12 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       'var innerRemote;',
       Template.indent([
         'function attachRemote (resolve) {',
-        `if(__webpack_require__.m[${JSON.stringify(
-          containerModuleId,
-        )}]) {`,
-        Template.indent(`innerRemote = __webpack_require__(${JSON.stringify(containerModuleId)});`),
+        `if(__webpack_require__.m[${JSON.stringify(containerModuleId)}]) {`,
+        Template.indent(
+          `innerRemote = __webpack_require__(${JSON.stringify(
+            containerModuleId,
+          )});`,
+        ),
         `}`,
         // can likely remove this logic
         `  if(${globalObject} && !${globalObject}[${JSON.stringify(name)}]) {`,

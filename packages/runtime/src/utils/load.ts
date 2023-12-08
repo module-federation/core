@@ -53,7 +53,10 @@ export async function loadEntryScript({
   }
 
   if (typeof document === 'undefined') {
-    return loadScriptNode(entry, { attrs: {name, globalName}, createScriptHook }).then(() => {
+    return loadScriptNode(entry, {
+      attrs: { name, globalName },
+      createScriptHook,
+    }).then(() => {
       const { remoteEntryKey, entryExports } = getRemoteEntryExports(
         name,
         globalName,

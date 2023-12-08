@@ -69,7 +69,7 @@ class NodeFederationPlugin {
   private preparePluginOptions(): ModuleFederationPluginOptions {
     return {
       ...this._options,
-      remotes: this._options.remotes || {}
+      remotes: this._options.remotes || {},
     };
   }
 
@@ -100,7 +100,9 @@ class NodeFederationPlugin {
       ModuleFederationPlugin =
         require('@module-federation/enhanced').ModuleFederationPlugin;
     } catch (e) {
-      console.error("Can't find @module-federation/enhanced, falling back to webpack ModuleFederationPlugin, this may not work");
+      console.error(
+        "Can't find @module-federation/enhanced, falling back to webpack ModuleFederationPlugin, this may not work",
+      );
       if (this.context.ModuleFederationPlugin) {
         ModuleFederationPlugin = this.context.ModuleFederationPlugin;
       } else if (
@@ -111,7 +113,6 @@ class NodeFederationPlugin {
         ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
       } else {
         ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
-
       }
       return ModuleFederationPlugin;
     }

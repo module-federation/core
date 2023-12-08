@@ -105,14 +105,20 @@ export async function httpVmStrategy(chunkName, remoteName, remotes, callback) {
       chunkName,
       // e,
     );
-    const container = remotes.find((remote)=>{
-      return remote.name === remoteName
+    const container = remotes.find((remote) => {
+      return remote.name === remoteName;
     });
-    if(__webpack_require__.federation.instance.name === remoteName) {
-      console.log('host is requesting', chunkName, 'from itself')
+    if (__webpack_require__.federation.instance.name === remoteName) {
+      console.log('host is requesting', chunkName, 'from itself');
     }
-    if(!container) {
-      console.log({ __dirname, chunkName, remoteName, remotes, host: __webpack_require__.federation.instance.name });
+    if (!container) {
+      console.log({
+        __dirname,
+        chunkName,
+        remoteName,
+        remotes,
+        host: __webpack_require__.federation.instance.name,
+      });
     }
     url = new URL(container.entry);
     const fileToReplace = path.basename(url.pathname);
