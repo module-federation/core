@@ -9,28 +9,6 @@ import {
   getDelegates,
 } from '../../internal';
 import { hasLoader, injectRuleLoader } from '../../loaders/helpers';
-import { ModuleFederationPlugin } from '@module-federation/enhanced';
-
-type ConstructableModuleFederationPlugin = new (
-  options: ModuleFederationPluginOptions,
-) => container.ModuleFederationPlugin;
-
-/**
- * Gets the appropriate ModuleFederationPlugin based on the environment.
- * @param {boolean} isServer - A flag to indicate if the environment is server-side or not.
- * @param {Compiler} compiler - The Webpack compiler instance.
- * @returns {ModuleFederationPlugin | undefined} The ModuleFederationPlugin or undefined if not applicable.
- */
-export function getModuleFederationPluginConstructor(
-  isServer: boolean,
-  compiler: Compiler,
-): ConstructableModuleFederationPlugin {
-  if (isServer) {
-    return require('@module-federation/node')
-      .NodeFederationPlugin as ConstructableModuleFederationPlugin;
-  }
-  return ModuleFederationPlugin as unknown as ConstructableModuleFederationPlugin;
-}
 
 /**
  * Set up default shared values based on the environment.

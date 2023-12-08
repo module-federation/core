@@ -15,7 +15,6 @@ import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
 import {
-  getModuleFederationPluginConstructor,
   retrieveDefaultShared,
   applyPathFixes,
 } from './next-fragments';
@@ -31,8 +30,7 @@ import {
   handleServerExternals,
 } from './apply-server-plugins';
 import { applyClientPlugins } from './apply-client-plugins';
-import ModuleFederationNextFork from '../container/ModuleFederationPlugin';
-import { parseRemotes } from '@module-federation/node';
+import { ModuleFederationPlugin } from '@module-federation/enhanced';
 
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
@@ -58,6 +56,8 @@ export class NextFederationPlugin {
    * @param compiler The webpack compiler object.
    */
   apply(compiler: Compiler) {
+    compiler.options.devtool = false;
+
     process.env['FEDERATION_WEBPACK_PATH'] = getWebpackPath(compiler);
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
@@ -162,34 +162,13 @@ export class NextFederationPlugin {
     return noop;
   }
 
-  private createEmbeddedOptions(
-    normalFederationPluginOptions: ModuleFederationPluginOptions,
-    isServer?: boolean,
-  ) {
-    return {
-      ...normalFederationPluginOptions,
-      name: 'host_inner_ctn',
-      runtime: isServer ? 'webpack-runtime' : 'webpack',
-      filename: `host_inner_ctn.js`,
-      remoteType: 'script',
-      library: {
-        ...normalFederationPluginOptions.library,
-        name: 'host_inner_ctn',
-      },
-    };
-  }
-
   private applyClientFederationPlugins(
     compiler: Compiler,
     normalFederationPluginOptions: ModuleFederationPluginOptions,
   ) {
-    const embeddedOptions = this.createEmbeddedOptions(
-      normalFederationPluginOptions,
-    );
-    new ModuleFederationNextFork(
+    new ModuleFederationPlugin(
       normalFederationPluginOptions,
       //@ts-ignore
-      embeddedOptions,
     ).apply(compiler);
   }
 
@@ -197,41 +176,11 @@ export class NextFederationPlugin {
     compiler: Compiler,
     normalFederationPluginOptions: ModuleFederationPluginOptions,
   ) {
-    const embeddedOptions = this.createEmbeddedOptions(
-      normalFederationPluginOptions,
-      true,
-    );
 
     //@ts-ignore
-    const serverSharedOptions = Object.keys(
+    new ModuleFederationPlugin(
+      normalFederationPluginOptions
       //@ts-ignore
-      normalFederationPluginOptions.shared,
-    ).reduce(
-      (acc, key) => ({
-        ...acc,
-        //@ts-ignore
-        [key]: { ...normalFederationPluginOptions.shared[key], eager: false },
-      }),
-      {},
-    );
-    const mainOptions = {
-      ...normalFederationPluginOptions,
-      shared: serverSharedOptions,
-    };
-    //@ts-ignore
-
-    const prepareRemote = (options) => {
-      return {
-        ...options,
-        remotes: options.remotes
-          ? parseRemotes(options.remotes as Record<string, any>)
-          : {},
-      };
-    };
-    //@ts-ignore
-    new ModuleFederationNextFork(
-      prepareRemote(mainOptions),
-      prepareRemote(embeddedOptions),
     ).apply(compiler);
   }
 
@@ -240,10 +189,6 @@ export class NextFederationPlugin {
     normalFederationPluginOptions: ModuleFederationPluginOptions,
     isServer: boolean,
   ) {
-    const ModuleFederationPlugin = getModuleFederationPluginConstructor(
-      isServer,
-      compiler,
-    );
     if (!isServer) {
       this.applyClientFederationPlugins(
         compiler,
