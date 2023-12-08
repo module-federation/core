@@ -235,9 +235,7 @@ class FederationRuntimePlugin {
   setRuntimeAlias(compiler: Compiler) {
     compiler.options.resolve.alias = {
       ...compiler.options.resolve.alias,
-      '@vmok/kit/runtime$': RuntimePath,
-      '@vmok/kit$': RuntimePath,
-      '@vmok/runtime$': RuntimePath,
+      '@module-federation/runtime$': RuntimePath,
     };
   }
 
