@@ -39,7 +39,7 @@ class FederationRuntimePlugin {
 
   static getTemplate(runtimePlugins: string[]) {
     // internal runtime plugin
-    const internalRuntimePlugin = `import initializeRemoteEntryRuntimePlugin from '${InitializeRemoteEntryRuntimePluginPath}';\n`;
+    const internalRuntimePlugin = `import initializeRemoteEntryRuntimePlugin from '!${InitializeRemoteEntryRuntimePluginPath}';\n`;
     const internalRuntimePluginName = 'initializeRemoteEntryRuntimePlugin';
     let runtimePluginTemplates = '';
     const runtimePLuginNames: string[] = [];
@@ -51,7 +51,7 @@ class FederationRuntimePlugin {
           ? runtimePlugin
           : path.join(process.cwd(), runtimePlugin);
 
-        runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
+        runtimePluginTemplates += `import ${runtimePluginName} from '!${runtimePluginPath}';\n`;
         runtimePLuginNames.push(runtimePluginName);
       });
     }
@@ -59,7 +59,7 @@ class FederationRuntimePlugin {
     runtimePLuginNames.push(internalRuntimePluginName);
 
     return Template.asString([
-      `import federation from '${BundlerRuntimePath}';`,
+      `import federation from '!${BundlerRuntimePath}';`,
       runtimePluginTemplates,
       `${federationGlobal} = {...federation,...${federationGlobal}};`,
       runtimePLuginNames.length
@@ -244,8 +244,10 @@ class FederationRuntimePlugin {
       if (typeof p !== 'object' || !p) {
         return false;
       }
-
-      return p['name'] === 'ModuleFederationPlugin';
+      return (
+        p['name'] === 'ModuleFederationPlugin' ||
+        p.constructor.name === 'ModuleFederationPlugin'
+      );
     });
 
     if (useModuleFederationPlugin && !this.options) {
@@ -258,7 +260,10 @@ class FederationRuntimePlugin {
         return false;
       }
 
-      return p['name'] === 'ContainerPlugin';
+      return (
+        p['name'] === 'ContainerPlugin' ||
+        p.constructor.name === 'ContainerPlugin'
+      );
     });
 
     if (useContainerPlugin && !this.options) {
