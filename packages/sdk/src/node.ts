@@ -20,19 +20,22 @@ export function createScriptNode(
     return;
   }
   if (!globalThis.fetch) {
+    //TODO: this shouldnt be coupled to webpack require
     //@ts-ignore
     globalThis.fetch = __non_webpack_require__('node-fetch');
   }
-  //@ts-ignore
+  //@ts-ignore debugging
   console.log(require.federation, 'fetching', urlObj.href);
   fetch(urlObj)
     .then((res) => res.text())
     .then((data) => {
+      //TODO: this shouldnt be coupled to webpack require
       //@ts-ignore
       const path: typeof import('path') = __webpack_require__('path');
       const scriptContext = { exports: {}, module: { exports: {} } };
       const urlDirname = urlObj.pathname.split('/').slice(0, -1).join('/');
       const filename = path.basename(urlObj.pathname);
+      //TODO: this shouldnt be coupled to webpack require
       //@ts-ignore
       const vm: typeof import('vm') = __non_webpack_require__('vm');
       try {
@@ -40,10 +43,11 @@ export function createScriptNode(
           `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
           { filename },
         );
-        //@ts-ignore
         script.runInThisContext()(
           scriptContext.exports,
           scriptContext.module,
+          //TODO: this shouldnt be coupled to webpack require
+          //@ts-ignore
           __non_webpack_require__,
           urlDirname,
           filename,
