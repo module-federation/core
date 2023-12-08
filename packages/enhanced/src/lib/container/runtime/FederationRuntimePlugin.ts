@@ -59,7 +59,7 @@ class FederationRuntimePlugin {
     runtimePLuginNames.push(internalRuntimePluginName);
 
     return Template.asString([
-      `import federation from '${BundlerRuntimePath}';`,
+      `import federation from '!${BundlerRuntimePath}';`,
       runtimePluginTemplates,
       `${federationGlobal} = {...federation,...${federationGlobal}};`,
       runtimePLuginNames.length
