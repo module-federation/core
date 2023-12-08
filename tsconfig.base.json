@@ -29,7 +29,7 @@
       "@module-federation/nextjs-mf/*": ["packages/nextjs-mf/*"],
       "@module-federation/node": ["packages/node/src"],
       "@module-federation/node/utils": ["packages/node/src/utils"],
-      "@module-federation/runtime": ["dist/packages/runtime"],
+      "@module-federation/runtime": ["packages/runtime/src/index.ts"],
       "@module-federation/runtime/type": ["packages/runtime/src/type/*"],
       "@module-federation/sdk": ["packages/sdk/src/index.ts"],
       "@module-federation/sdk/*": ["packages/sdk/src/*"],
