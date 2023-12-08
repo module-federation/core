@@ -59,7 +59,7 @@ class FederationRuntimePlugin {
     runtimePLuginNames.push(internalRuntimePluginName);
 
     return Template.asString([
-      `import federation from '${BundlerRuntimePath}';`,
+      `import federation from '!${BundlerRuntimePath}';`,
       runtimePluginTemplates,
       `${federationGlobal} = {...federation,...${federationGlobal}};`,
       runtimePLuginNames.length
@@ -235,9 +235,7 @@ class FederationRuntimePlugin {
   setRuntimeAlias(compiler: Compiler) {
     compiler.options.resolve.alias = {
       ...compiler.options.resolve.alias,
-      '@vmok/kit/runtime$': RuntimePath,
-      '@vmok/kit$': RuntimePath,
-      '@vmok/runtime$': RuntimePath,
+      '@module-federation/runtime$': RuntimePath,
     };
   }
 
