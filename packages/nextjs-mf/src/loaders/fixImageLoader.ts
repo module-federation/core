@@ -43,8 +43,8 @@ export async function fixImageLoader(
         Template.asString([
           'try {',
           Template.indent([
-            'const config = globalThis.__remote_scope__ &&',
-            'globalThis.__remote_scope__._config;',
+            //todo: needs more work
+            'const config =__webpack_require__.federation.initOptions.remotes;',
             `const remoteEntry = config[__webpack_runtime_id__] || ${publicPath}`,
             `if (remoteEntry) {`,
             Template.indent([
