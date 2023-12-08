@@ -162,26 +162,6 @@ export const parseRemotes = (
       }
 
       return { ...acc, [key]: value };
-
-      if (isStandardRemoteSyntax(value)) {
-        let resolvePath;
-        try {
-          resolvePath = require.resolve('./default-delegate.cjs');
-        } catch (e) {
-          resolvePath = require.resolve('./default-delegate');
-        }
-
-        // If the value is using the standard remote syntax, create a delegated module
-        return {
-          ...acc,
-          [key]: createDelegatedModule(resolvePath, {
-            remote: value,
-          }),
-        };
-      }
-
-      // If none of the above conditions are met, keep the original value
-      return { ...acc, [key]: value };
     },
     {} as Record<string, string>,
   );
