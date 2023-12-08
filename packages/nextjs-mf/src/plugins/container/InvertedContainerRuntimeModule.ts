@@ -16,7 +16,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
   private options: InvertedContainerRuntimeModuleOptions;
 
   constructor(options: InvertedContainerRuntimeModuleOptions) {
-    super('inverted container startup', RuntimeModule.STAGE_ATTACH + 3);
+    super('inverted container startup', RuntimeModule.STAGE_ATTACH);
     this.options = options;
   }
 
@@ -34,40 +34,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       this.compilation.chunkGraph.getChunkEntryModulesIterable(container);
     return Array.from(entryModules)[0];
   }
-  private generateSharedObjectString(): string {
-    const sharedObjects = [
-      {
-        key: 'react',
-        version: require('react/package.json').version,
-        path: './react',
-      },
-      {
-        key: 'next/router',
-        version: require('next/package.json').version,
-        path: './next/router',
-      },
-      {
-        key: 'react-dom',
-        version: require('react-dom/package.json').version,
-        path: './react-dom',
-      },
-    ];
-
-    return sharedObjects.reduce((acc, obj) => {
-      return (
-        acc +
-        `
-        "${obj.key}": {
-          "${obj.version}": {
-            loaded: true,
-            loaded: 1,
-            from: "roothost",
-            get() { return innerRemote.get("${obj.path}") }
-          }
-        },`
-      );
-    }, '');
-  }
 
   override generate(): string {
     if (!this.compilation || !this.chunk || !this.chunkGraph) {
@@ -83,22 +49,23 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
 
     const containerModuleId =
       containerEntryModule?.id || containerEntryModule?.debugId;
-    // const hasEnsurechunkHandlers = !this.compilation.runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers)) {
     const isPartialContainer = chunk.runtime === this.options.runtime;
     if (!(containerName && containerModuleId) || !isPartialContainer) {
       return '';
     }
     const globalObject = `globalThis.__remote_scope__`;
     const containerScope = `${RuntimeGlobals.global}`;
-    const sharedObjectString = this.generateSharedObjectString();
 
     return Template.asString([
       'var innerRemote;',
       Template.indent([
         'function attachRemote (resolve) {',
-        `  innerRemote = __webpack_require__(${JSON.stringify(
+        `if(__webpack_require__.m[${JSON.stringify(
           containerModuleId,
-        )});`,
+        )}]) {`,
+        Template.indent(`innerRemote = __webpack_require__(${JSON.stringify(containerModuleId)});`),
+        `}`,
+        // can likely remove this logic
         `  if(${globalObject} && !${globalObject}[${JSON.stringify(name)}]) {`,
         `    ${globalObject}[${JSON.stringify(name)}] = innerRemote;`,
         `  } else if(${containerScope} && !${containerScope}[${JSON.stringify(
@@ -106,24 +73,9 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         )}]) {`,
         `    ${containerScope}[${JSON.stringify(name)}] = innerRemote;`,
         '  }',
-        `  __webpack_require__.S.default = new Proxy({${sharedObjectString}}`,
-        ' , {',
-        '    get: function(target, property) {',
-        '      return target[property];',
-        '    },',
-        '    set: function(target, property, value) {',
-        '      target[property] = value;',
-        '      return true;',
-        '    }',
-        '  });',
         '  if(resolve) resolve(innerRemote);',
         '}',
       ]),
-      `if(!(${globalObject} && ${globalObject}[${JSON.stringify(
-        name,
-      )}]) && !(${containerScope} && ${containerScope}[${JSON.stringify(
-        name,
-      )}])) {`,
       Template.indent([
         '  if (__webpack_require__.O) {',
         `  __webpack_require__.O(0, ["${this.chunk.id}"], function() {`,
@@ -133,7 +85,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
         'attachRemote();',
         '}',
       ]),
-      '}',
     ]);
   }
 }
