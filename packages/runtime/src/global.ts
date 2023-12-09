@@ -130,7 +130,7 @@ export function setGlobalFederationConstructor(
 ): void {
   if (isDebugMode()) {
     Global.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = FederationConstructor;
-    Global.__FEDERATION__.__DEBUG_CONSTRUCTOR_VERSION__ = __VERSION__;
+    Global.__FEDERATION__.__DEBUG_CONSTRUCTOR_VERSION__ = '__VERSION__';
   }
 }
 
