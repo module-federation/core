@@ -30,7 +30,7 @@
       "@module-federation/node": ["packages/node/src"],
       "@module-federation/node/utils": ["packages/node/src/utils"],
       "@module-federation/runtime": ["packages/runtime/src/index.ts"],
-      "@module-federation/runtime/type": ["packages/runtime/src/type/*"],
+      "@module-federation/runtime/*": ["packages/runtime/src/*"],
       "@module-federation/sdk": ["packages/sdk/src/index.ts"],
       "@module-federation/sdk/*": ["packages/sdk/src/*"],
       "@module-federation/storybook-addon": [
