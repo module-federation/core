@@ -87,7 +87,7 @@ class ShareRuntimeModule extends RuntimeModule {
         }
       }
     }
-    const federationGlobal = getFederationGlobalScope(RuntimeGlobals || {});
+    const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
     return Template.asString([
       `${getFederationGlobalScope(
         RuntimeGlobals,

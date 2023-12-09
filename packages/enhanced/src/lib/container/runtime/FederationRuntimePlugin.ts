@@ -144,7 +144,7 @@ class FederationRuntimePlugin {
     const initOptionsWithoutShared = normalizeRuntimeInitOptionsWithOutShared(
       this.options,
     );
-    const federationGlobal = getFederationGlobalScope(RuntimeGlobals || {});
+    const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
