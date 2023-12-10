@@ -43,7 +43,6 @@ class FederationRuntimePlugin {
     const internalRuntimePluginName = 'initializeRemoteEntryRuntimePlugin';
     let runtimePluginTemplates = '';
     const runtimePLuginNames: string[] = [];
-
     if (Array.isArray(runtimePlugins)) {
       runtimePlugins.forEach((runtimePlugin, index) => {
         const runtimePluginName = `plugin_${index}`;

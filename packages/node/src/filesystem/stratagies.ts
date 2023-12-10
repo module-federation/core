@@ -109,7 +109,12 @@ export async function httpVmStrategy(chunkName, remoteName, remotes, callback) {
       return remote.name === remoteName;
     });
     if (__webpack_require__.federation.instance.name === remoteName) {
-      console.log('host is requesting', chunkName, 'from itself');
+      console.log(
+        __webpack_require__.federation.instance.name,
+        'is requesting',
+        chunkName,
+        'from itself',
+      );
     }
     if (!container) {
       console.log({

@@ -44,9 +44,6 @@ try {
 } catch (e) {
   /* empty */
 }
-const {
-  createDelegatedModule,
-} = require('@module-federation/nextjs-mf/utilities');
 
 /**
  * @type {import('@nrwl/next/plugins/with-nx').WithNxOptions}

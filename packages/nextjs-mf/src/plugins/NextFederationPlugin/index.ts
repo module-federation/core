@@ -28,7 +28,7 @@ import {
 } from './apply-server-plugins';
 import { applyClientPlugins } from './apply-client-plugins';
 import { ModuleFederationPlugin } from '@module-federation/enhanced';
-
+import path from 'path';
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
@@ -129,6 +129,12 @@ export class NextFederationPlugin {
       ...this._options,
       runtime: false,
       remoteType: 'script',
+      // @ts-ignore
+      runtimePlugins: [
+        //@ts-ignore
+        ...(this._options.runtimePlugins || []),
+        require.resolve(path.join(__dirname, '../container/runtimePlugin')),
+      ],
       exposes: {
         './noop': noop,
         './react': require.resolve('react'),
@@ -141,6 +147,7 @@ export class NextFederationPlugin {
       },
       remotes: {
         ...this._options.remotes,
+        // ...(this._options.name ? { [this._options.name]: `internal webpack/container/entry/${this._options.name}` } : {}),
       },
       shared: {
         ...defaultShared,

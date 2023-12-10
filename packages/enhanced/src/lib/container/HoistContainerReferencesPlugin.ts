@@ -1,23 +1,11 @@
-import {
+import type {
   Compiler,
-  Module,
-  Chunk,
   Compilation,
-  ChunkGroup,
+  Chunk,
   WebpackPluginInstance,
 } from 'webpack';
+import ContainerEntryModule from './ContainerEntryModule';
 
-/**
- * @typedef {import("webpack").Compiler} Compiler
- * @typedef {import("webpack").Compilation} Compilation
- * @typedef {import("webpack").Chunk} Chunk
- * @typedef {import("webpack").Module} Module
- */
-
-/**
- * This class is used to hoist container references in the code.
- * @constructor
- */
 export class HoistContainerReferences implements WebpackPluginInstance {
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
@@ -25,17 +13,11 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       (compilation: Compilation) => {
         compilation.hooks.afterOptimizeChunks.tap(
           'HoistContainerReferences',
-          (chunks: Iterable<Chunk>, chunkGroups: ChunkGroup[]) => {
-            const chunkSet = this.createChunkSet(chunks);
-            const externalRequests = new Set<Module>();
-
+          (chunks: Iterable<Chunk>) => {
             for (const chunk of chunks) {
-              this.handleRemoteModules(
-                chunk,
-                chunkSet,
-                externalRequests,
-                compilation,
-              );
+              if (this.chunkContainsContainerEntryModule(chunk, compilation)) {
+                this.hoistModulesInChunk(chunk, compilation);
+              }
             }
           },
         );
@@ -43,101 +25,40 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     );
   }
 
-  private createChunkSet(chunks: Iterable<Chunk>): Map<string | number, Chunk> {
-    const chunkSet = new Map<string | number, Chunk>();
-    for (const chunk of chunks) {
-      const ident = chunk.id || chunk.name;
-      if (ident) {
-        chunkSet.set(ident, chunk);
-      }
-    }
-    return chunkSet;
-  }
-
-  private handleRemoteModules(
+  private chunkContainsContainerEntryModule(
     chunk: Chunk,
-    chunkSet: Map<string | number, Chunk>,
-    externalRequests: Set<Module>,
     compilation: Compilation,
-  ): void {
-    const remoteModules =
-      compilation.chunkGraph.getChunkModulesIterableBySourceType(
-        chunk,
-        'remote',
-      );
-    if (!remoteModules) return;
+  ): boolean {
+    for (const module of compilation.chunkGraph.getChunkModulesIterable(
+      chunk,
+    )) {
+      if (module instanceof ContainerEntryModule) {
+        return true;
+      }
+    }
+    return false;
+  }
 
-    for (const remoteModule of remoteModules) {
-      for (const dep of remoteModule.dependencies) {
-        const mod = compilation.moduleGraph.getModule(dep);
-        if (mod !== null && chunk.runtime) {
-          externalRequests.add(mod);
-          this.connectModulesWithRuntimeChunk(
-            chunk,
-            mod,
-            chunkSet,
-            compilation,
-          );
-        }
+  private hoistModulesInChunk(chunk: Chunk, compilation: Compilation): void {
+    const chunkGraph = compilation.chunkGraph;
+    const runtimeChunks = this.getRuntimeChunks(chunk, compilation);
+
+    for (const module of chunkGraph.getChunkModulesIterable(chunk)) {
+      for (const runtimeChunk of runtimeChunks) {
+        chunkGraph.connectChunkAndModule(runtimeChunk, module);
       }
     }
   }
 
-  private connectModulesWithRuntimeChunk(
-    chunk: Chunk,
-    mod: Module,
-    chunkSet: Map<string | number, Chunk>,
-    compilation: Compilation,
-  ): void {
-    const runtimeChunkIds =
-      typeof chunk.runtime === 'string' || typeof chunk.runtime === 'number'
-        ? [chunk.runtime]
-        : //@ts-ignore
-          [...chunk.runtime];
-    const containers = this.getContainers(runtimeChunkIds, chunkSet);
-
-    for (const runtimeChunkId of runtimeChunkIds) {
-      const runtimeChunk = chunkSet.get(runtimeChunkId);
-      if (runtimeChunk) {
-        this.connectContainerModulesWithRuntimeChunk(
-          runtimeChunk,
-          containers,
-          compilation,
-        );
-        compilation.chunkGraph.connectChunkAndModule(runtimeChunk, mod);
+  private getRuntimeChunks(chunk: Chunk, compilation: Compilation): Chunk[] {
+    const runtimeChunks = [];
+    for (const c of compilation.chunks) {
+      if (c.hasRuntime() && c !== chunk) {
+        runtimeChunks.push(c);
       }
     }
-  }
-
-  private getContainers(
-    runtimeChunkIds: (string | number)[],
-    chunkSet: Map<string | number, Chunk>,
-  ): Chunk[] {
-    const containers: Chunk[] = [];
-    for (const runtimeChunkId of runtimeChunkIds) {
-      const runtimeChunk = chunkSet.get(runtimeChunkId);
-      const entryModule = runtimeChunk?.entryModule;
-      if (
-        entryModule &&
-        entryModule.identifier().startsWith('container entry')
-      ) {
-        containers.push(runtimeChunk);
-      }
-    }
-    return containers;
-  }
-
-  private connectContainerModulesWithRuntimeChunk(
-    runtimeChunk: Chunk,
-    containers: Chunk[],
-    compilation: Compilation,
-  ): void {
-    for (const container of containers) {
-      const roots = container.getModules();
-      for (const root of roots) {
-        compilation.chunkGraph.connectChunkAndModule(runtimeChunk, root);
-      }
-    }
+    return runtimeChunks;
   }
 }
+
 export default HoistContainerReferences;
