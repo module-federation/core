@@ -185,12 +185,20 @@ export class FederationHost {
     this.name = userOptions.name;
     this.options = defaultOptions;
     this.shareScopeMap = {};
+    this._setGlobalShareScopeMap();
     this.snapshotHandler = new SnapshotHandler(this);
     this.registerPlugins([
       ...defaultOptions.plugins,
       ...(userOptions.plugins || []),
     ]);
     this.options = this.formatOptions(defaultOptions, userOptions);
+  }
+
+  private _setGlobalShareScopeMap(): void {
+    const globalShareScopeMap = getGlobalShareScope();
+    if (!globalShareScopeMap[this.options.name]) {
+      globalShareScopeMap[this.options.name] = this.shareScopeMap;
+    }
   }
 
   initOptions(userOptions: UserOptions): Options {
@@ -600,7 +608,6 @@ export class FederationHost {
     return promises;
   }
 
-  // maybe move to bundler runtime is better
   initShareScopeMap(
     scopeName: string,
     shareScope: ShareScopeMap[string],
@@ -612,12 +619,8 @@ export class FederationHost {
     if ('region' in shareScope && typeof shareScope['region'] !== 'object') {
       return;
     }
-    const globalShareScope = getGlobalShareScope();
-    if (!globalShareScope[this.options.name]) {
-      globalShareScope[this.options.name] = {};
-    }
-    const localShareScopeMap = globalShareScope[this.options.name];
-    localShareScopeMap[scopeName] = shareScope;
+
+    this.shareScopeMap[scopeName] = shareScope;
   }
 
   private formatOptions(
@@ -752,35 +755,30 @@ export class FederationHost {
     loading?: Shared['loading'];
     get?: Shared['get'];
   }): void {
-    const globalShareScopeMap = getGlobalShareScope();
-    if (!globalShareScopeMap[this.options.name]) {
-      globalShareScopeMap[this.options.name] = {};
-    }
-    const target = globalShareScopeMap[this.options.name];
     const { version, scope = 'default', ...shareInfo } = shared;
     const scopes: string[] = Array.isArray(scope) ? scope : [scope];
     scopes.forEach((sc) => {
-      if (!target[sc]) {
-        target[sc] = {};
+      if (!this.shareScopeMap[sc]) {
+        this.shareScopeMap[sc] = {};
       }
-      if (!target[sc][pkgName]) {
-        target[sc][pkgName] = {};
+      if (!this.shareScopeMap[sc][pkgName]) {
+        this.shareScopeMap[sc][pkgName] = {};
       }
 
-      if (target[sc][pkgName][version]) {
+      if (this.shareScopeMap[sc][pkgName][version]) {
         warn(
           // eslint-disable-next-line max-len
           `The share \n ${safeToString({
             scope: sc,
             pkgName,
             version,
-            from: target[sc][pkgName][version].from,
+            from: this.shareScopeMap[sc][pkgName][version].from,
           })} has been registered`,
         );
         return;
       }
 
-      target[sc][pkgName][version] = {
+      this.shareScopeMap[sc][pkgName][version] = {
         version,
         scope: ['default'],
         ...shareInfo,
@@ -790,7 +788,7 @@ export class FederationHost {
       };
 
       if (get) {
-        target[sc][pkgName][version].get = get;
+        this.shareScopeMap[sc][pkgName][version].get = get;
       }
     });
   }

@@ -1,5 +1,5 @@
 import { ConsumesOptions } from './types';
-import { proxyShareScopeMap } from './proxyShareScopeMap';
+import { attachShareScopeMap } from './attachShareScopeMap';
 
 export function consumes(options: ConsumesOptions) {
   const {
@@ -10,7 +10,7 @@ export function consumes(options: ConsumesOptions) {
     moduleToHandlerMapping,
     webpackRequire,
   } = options;
-  proxyShareScopeMap(webpackRequire);
+  attachShareScopeMap(webpackRequire);
   if (webpackRequire.o(chunkMapping, chunkId)) {
     chunkMapping[chunkId].forEach((id) => {
       if (webpackRequire.o(installedModules, id)) {
