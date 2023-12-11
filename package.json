@@ -88,7 +88,7 @@
     "@nx/storybook": "16.10.0",
     "@nx/vite": "16.10.0",
     "@nx/web": "16.10.0",
-    "@nx/webpack": "16.10.0",
+    "@nx/webpack": "17.2.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^6.0.3",
