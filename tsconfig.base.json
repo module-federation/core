@@ -11,34 +11,65 @@
     "importHelpers": false,
     "target": "es2021",
     "module": "esnext",
-    "lib": ["es2021", "dom"],
+    "lib": [
+      "es2021",
+      "dom"
+    ],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@module-federation/core": ["packages/core/src/index.ts"],
-      "@module-federation/enhanced": ["packages/enhanced/src/index.ts"],
-      "@module-federation/enhanced/*": ["packages/enhanced/*"],
+      "@module-federation/core": [
+        "packages/core/src/index.ts"
+      ],
+      "@module-federation/enhanced": [
+        "packages/enhanced/src/index.ts"
+      ],
+      "@module-federation/enhanced/*": [
+        "packages/enhanced/*"
+      ],
       "@module-federation/native-federation-tests": [
         "packages/native-federation-tests/src/index.ts"
       ],
       "@module-federation/native-federation-typescript": [
         "packages/native-federation-typescript/src/index.ts"
       ],
-      "@module-federation/nextjs-mf": ["packages/nextjs-mf/src/index.ts"],
-      "@module-federation/nextjs-mf/*": ["packages/nextjs-mf/*"],
-      "@module-federation/node": ["packages/node/src"],
-      "@module-federation/node/utils": ["packages/node/src/utils"],
-      "@module-federation/runtime": ["packages/runtime/src/index.ts"],
-      "@module-federation/runtime/type": ["packages/runtime/src/type/*"],
-      "@module-federation/sdk": ["packages/sdk/src/index.ts"],
-      "@module-federation/sdk/*": ["packages/sdk/src/*"],
+      "@module-federation/nextjs-mf": [
+        "packages/nextjs-mf/src/index.ts"
+      ],
+      "@module-federation/nextjs-mf/*": [
+        "packages/nextjs-mf/*"
+      ],
+      "@module-federation/node": [
+        "packages/node/src"
+      ],
+      "@module-federation/node/utils": [
+        "packages/node/src/utils"
+      ],
+      "@module-federation/runtime": [
+        "packages/runtime/src/index.ts"
+      ],
+      "@module-federation/runtime/type": [
+        "packages/runtime/src/type/*"
+      ],
+      "@module-federation/sdk": [
+        "packages/sdk/src/index.ts"
+      ],
+      "@module-federation/sdk/*": [
+        "packages/sdk/src/*"
+      ],
       "@module-federation/storybook-addon": [
         "packages/storybook-addon/src/index.ts"
       ],
-      "@module-federation/typescript": ["packages/typescript/src/index.ts"],
-      "@module-federation/utilities": ["packages/utilities/src/index.ts"],
-      "@module-federation/utilities/*": ["packages/utilities/*"],
+      "@module-federation/typescript": [
+        "packages/typescript/src/index.ts"
+      ],
+      "@module-federation/utilities": [
+        "packages/utilities/src/index.ts"
+      ],
+      "@module-federation/utilities/*": [
+        "packages/utilities/*"
+      ],
       "@module-federation/webpack-bundler-runtime": [
         "packages/webpack-bundler-runtime/src/index.ts"
       ],
@@ -47,5 +78,8 @@
       ]
     }
   },
-  "exclude": ["node_modules", "tmp"]
+  "exclude": [
+    "node_modules",
+    "tmp"
+  ]
 }
