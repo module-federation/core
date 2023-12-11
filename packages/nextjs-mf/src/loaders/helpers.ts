@@ -52,6 +52,10 @@ export function hasLoader(rule: RuleSetRuleUnion, loaderName: string) {
             loader.loader.includes(`/${loaderName}/`))
         ) {
           return true;
+        } else if (typeof loader === 'string') {
+          if (loader === loaderName || loader.includes(`/${loaderName}/`)) {
+            return true;
+          }
         }
       }
     }
