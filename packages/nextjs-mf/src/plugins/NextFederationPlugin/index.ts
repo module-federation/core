@@ -58,7 +58,6 @@ export class NextFederationPlugin {
     process.env['FEDERATION_WEBPACK_PATH'] = getWebpackPath(compiler);
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
-    //@ts-ignore
     new CopyFederationPlugin(isServer).apply(compiler);
     this.applyConditionalPlugins(compiler, isServer);
     const normalFederationPluginOptions = this.getNormalFederationPluginOptions(
@@ -103,18 +102,14 @@ export class NextFederationPlugin {
       compiler.options.devtool = false;
     }
     if (isServer) {
-      //@ts-ignore
       configureServerCompilerOptions(compiler);
       configureServerLibraryAndFilename(this._options);
-      //@ts-ignore
       applyServerPlugins(compiler, this._options);
-      //@ts-ignore
       handleServerExternals(compiler, {
         ...this._options,
         shared: { ...retrieveDefaultShared(isServer), ...this._options.shared },
       });
     } else {
-      //@ts-ignore
       applyClientPlugins(compiler, this._options, this._extraOptions);
     }
   }
@@ -180,7 +175,6 @@ export class NextFederationPlugin {
     compiler: Compiler,
     normalFederationPluginOptions: ModuleFederationPluginOptions,
   ) {
-    //@ts-ignore
     new ModuleFederationPlugin(
       normalFederationPluginOptions,
       //@ts-ignore
