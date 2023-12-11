@@ -1,0 +1,28 @@
+{
+  "explore": {
+    "cards": {
+      "community-content": {
+        "action": "了解更多",
+        "title": "社区内容"
+      },
+      "conference-talks": {
+        "action": "立即观看",
+        "title": "会议演讲"
+      },
+      "implementing-module-federation": {
+        "action": "了解更多",
+        "title": "实现模块联邦"
+      },
+      "module-federation-courses": {
+        "action": "开始探索",
+        "subtitle": "立即获得模块联邦的专业知识并提高你的技能",
+        "title": "模块联邦课程"
+      },
+      "practical-module-federation": {
+        "action": "购买本书",
+        "title": "实用模块联邦"
+      }
+    },
+    "disabled": "即将推出"
+  }
+}

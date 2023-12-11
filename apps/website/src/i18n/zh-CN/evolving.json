@@ -1,0 +1,19 @@
+{
+  "evolving": {
+    "rfcs": {
+      "action": "现在就参加吧!",
+      "subtitle": "参与社区讨论，决定接下来会有哪些功能",
+      "title": "RFCs"
+    },
+    "roadmap": {
+      "action": "探索它!",
+      "subtitle": "探索模块联邦的未来",
+      "title": "模块联邦路线图"
+    },
+    "subtitle": "基于社区的反馈，模块联邦的世界正在不断发展和壮大。RFC面向所有参与讨论的人开放，并发布了路线图。",
+    "supported-bundlers": {
+      "title": "支持的打包工具"
+    },
+    "title": "不断发展的模块联邦"
+  }
+}
