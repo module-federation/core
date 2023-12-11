@@ -1,5 +1,5 @@
 import { FEDERATION_SUPPORTED_TYPES } from './constant';
-import { proxyShareScopeMap } from './proxyShareScopeMap';
+import { attachShareScopeMap } from './attachShareScopeMap';
 import { RemoteEntryExports, WebpackRequire } from './types';
 
 type InitToken = Record<string, Record<string, any>>;
@@ -53,7 +53,7 @@ export function initializeSharing({
   };
   const promises =
     webpackRequire.federation.instance!.initializeSharing(shareScopeName);
-  proxyShareScopeMap(webpackRequire);
+  attachShareScopeMap(webpackRequire);
 
   const bundlerRuntimeRemotesOptions =
     webpackRequire.federation.bundlerRuntimeOptions.remotes;

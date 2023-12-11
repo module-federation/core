@@ -1,6 +1,6 @@
 import * as runtime from '@module-federation/runtime';
 import { initializeSharing } from './initializeSharing';
-import { proxyShareScopeMap } from './proxyShareScopeMap';
+import { attachShareScopeMap } from './attachShareScopeMap';
 
 // FIXME: ideal situation => import { GlobalShareScope,UserOptions } from '@module-federation/runtime/type'
 type ExcludeUndefined<T> = T extends undefined ? never : T;
@@ -116,6 +116,6 @@ export interface Federation {
   bundlerRuntimeOptions: {
     remotes?: Exclude<RemotesOptions, 'chunkId' | 'promises'>;
   };
-  proxyShareScopeMap?: typeof proxyShareScopeMap;
-  hasProxyShareScopeMap?: boolean;
+  attachShareScopeMap?: typeof attachShareScopeMap;
+  hasAttachShareScopeMap?: boolean;
 }
