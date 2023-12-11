@@ -38,7 +38,7 @@ Please read the [Contributing Guide](https://github.com/module-federation/univer
 
 Thanks to:
 
-* The [vite-plugin-federation](https://github.com/originjs/vite-plugin-federation) project created by [@ruleeeer](https://github.com/ruleeeer), `@module-federation/runtime` fork `vite-plugin-federation` semver logic used to verify version
+- The [vite-plugin-federation](https://github.com/originjs/vite-plugin-federation) project created by [@ruleeeer](https://github.com/ruleeeer), `@module-federation/runtime` fork `vite-plugin-federation` semver logic used to verify version
 
 # 🙌 Code of Conduct
 
