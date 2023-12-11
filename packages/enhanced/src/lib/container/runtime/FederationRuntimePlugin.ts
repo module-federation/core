@@ -39,7 +39,7 @@ class FederationRuntimePlugin {
 
   static getTemplate(runtimePlugins: string[]) {
     // internal runtime plugin
-    const internalRuntimePlugin = `import initializeRemoteEntryRuntimePlugin from '!${InitializeRemoteEntryRuntimePluginPath}';\n`;
+    const internalRuntimePlugin = `import initializeRemoteEntryRuntimePlugin from '${InitializeRemoteEntryRuntimePluginPath}';\n`;
     const internalRuntimePluginName = 'initializeRemoteEntryRuntimePlugin';
     let runtimePluginTemplates = '';
     const runtimePLuginNames: string[] = [];
@@ -51,7 +51,7 @@ class FederationRuntimePlugin {
           ? runtimePlugin
           : path.join(process.cwd(), runtimePlugin);
 
-        runtimePluginTemplates += `import ${runtimePluginName} from '!${runtimePluginPath}';\n`;
+        runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
         runtimePLuginNames.push(runtimePluginName);
       });
     }
@@ -59,7 +59,7 @@ class FederationRuntimePlugin {
     runtimePLuginNames.push(internalRuntimePluginName);
 
     return Template.asString([
-      `import federation from '!${BundlerRuntimePath}';`,
+      `import federation from '${BundlerRuntimePath}';`,
       runtimePluginTemplates,
       `${federationGlobal} = {...federation,...${federationGlobal}};`,
       runtimePLuginNames.length
@@ -160,7 +160,6 @@ class FederationRuntimePlugin {
             runtimeRequirements.add(RuntimeGlobals.moduleCache);
             runtimeRequirements.add(RuntimeGlobals.compatGetDefaultExport);
             runtimeRequirements.add(federationGlobal);
-            runtimeRequirements.add(RuntimeGlobals.global);
             compilation.addRuntimeModule(
               chunk,
               new FederationRuntimeModule(
