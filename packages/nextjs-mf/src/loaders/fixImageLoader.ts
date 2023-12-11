@@ -40,12 +40,16 @@ export async function fixImageLoader(
   const computedAssetPrefix = isServer
     ? `${Template.asString([
         'function getSSRImagePath(){',
+        //TODO: use auto public path plugin instead
+        `const pubpath = ${publicPath};`,
+        'console.log("TEST123", {pubpath});',
         Template.asString([
           'try {',
           Template.indent([
-            //todo: needs more work
-            'const config =__webpack_require__.federation.initOptions.remotes;',
-            `const remoteEntry = config[__webpack_runtime_id__] || ${publicPath}`,
+            'const name = __webpack_require__.federation.instance.name',
+            'const cache = __webpack_require__.federation.instance.moduleCache',
+            'const remote = cache.get(name).remoteInfo',
+            `const remoteEntry = remote.entry;`,
             `if (remoteEntry) {`,
             Template.indent([
               `const splitted = remoteEntry.split('/_next')`,
