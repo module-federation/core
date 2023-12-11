@@ -294,7 +294,7 @@ class ContainerEntryModule extends Module {
           `${federationGlobal}.instance.initShareScopeMap(name,${RuntimeGlobals.global}.__FEDERATION__.__SHARE__.default)`,
         ]),
         '}',
-        `${federationGlobal}.proxyShareScopeMap(${RuntimeGlobals.require});`,
+        `${federationGlobal}.attachShareScopeMap(${RuntimeGlobals.require});`,
         `return ${RuntimeGlobals.initializeSharing}(name, initScope);`,
       ])};`,
       `${initRuntimeModuleGetter}`,
