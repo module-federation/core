@@ -5,9 +5,45 @@ const path = require('path');
 const { registerTsConfigPaths } = require('nx/src/plugins/js/utils/register');
 registerTsConfigPaths(path.join(workspaceRoot, 'tsconfig.tmp.json'));
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
+const fs = require('fs');
 
-// const { createDelegatedModule } = require('@module-federation/nextjs-mf/utilities');
+function renameDefaultDelegate() {
+  const filesToRename = [
+    {
+      oldPath: path.resolve(
+        __dirname,
+        '../../dist/packages/nextjs-mf/src/default-delegate.js',
+      ),
+      newPath: path.resolve(
+        __dirname,
+        '../../dist/packages/nextjs-mf/src/default-delegate.cjs',
+      ),
+    },
+    {
+      oldPath: path.resolve(
+        __dirname,
+        '../../dist/packages/nextjs-mf/src/federation-noop.js',
+      ),
+      newPath: path.resolve(
+        __dirname,
+        '../../dist/packages/nextjs-mf/src/federation-noop.cjs',
+      ),
+    },
+  ];
 
+  filesToRename.forEach(({ oldPath, newPath }) => {
+    fs.rename(oldPath, newPath, function (err) {
+      if (err) {
+        // Do not log error
+      }
+    });
+  });
+}
+try {
+  renameDefaultDelegate();
+} catch (e) {
+  /* empty */
+}
 /**
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
  **/
@@ -19,6 +55,12 @@ const nextConfig = {
   },
   webpack(config, options) {
     const { isServer } = options;
+    config.resolve.alias['@module-federation/runtime'] = require.resolve(
+      '../../dist/packages/runtime',
+    );
+    config.resolve.alias['@module-federation/sdk'] = require.resolve(
+      '../../dist/packages/sdk',
+    );
 
     config.plugins.push(
       new NextFederationPlugin({
@@ -44,9 +86,6 @@ const nextConfig = {
           //   }
           // ),
           home: `home_app@http://localhost:3000/_next/static/${
-            isServer ? 'ssr' : 'chunks'
-          }/remoteEntry.js`,
-          shop: `shop@http://localhost:3001/_next/static/${
             isServer ? 'ssr' : 'chunks'
           }/remoteEntry.js`,
           checkout: `checkout@http://localhost:3002/_next/static/${

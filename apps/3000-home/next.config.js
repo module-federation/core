@@ -58,6 +58,13 @@ const nextConfig = {
     const { isServer } = options;
     // used for testing build output snapshots
 
+    config.resolve.alias['@module-federation/runtime'] = require.resolve(
+      '../../dist/packages/runtime',
+    );
+    config.resolve.alias['@module-federation/sdk'] = require.resolve(
+      '../../dist/packages/sdk',
+    );
+
     const remotes = {
       // shop:   {
       //   name: 'shop',

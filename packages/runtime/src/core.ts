@@ -592,9 +592,9 @@ export class FederationHost {
     const initRemoteModule = async (key: string): Promise<void> => {
       const { module } = await this._getRemoteModuleAndOptions(key);
       const entry = await module.getEntry();
-      if(!module.inited){
+      if (!module.inited) {
         initFn(entry);
-        module.inited = true
+        module.inited = true;
       }
     };
     Object.keys(this.options.shared).forEach((shareName) => {

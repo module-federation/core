@@ -19,7 +19,12 @@ const nextConfig = {
   },
   webpack(config, options) {
     const { isServer } = options;
-
+    config.resolve.alias['@module-federation/runtime'] = require.resolve(
+      '../../dist/packages/runtime',
+    );
+    config.resolve.alias['@module-federation/sdk'] = require.resolve(
+      '../../dist/packages/sdk',
+    );
     config.plugins.push(
       new NextFederationPlugin({
         name: 'checkout',

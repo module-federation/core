@@ -194,6 +194,23 @@ class ContainerPlugin {
           callback();
         },
       );
+      compilation.addEntry(
+        compilation.options.context || '',
+        //@ts-ignore
+        dep,
+        {
+          name,
+          filename: undefined,
+          runtime: undefined,
+          library,
+        },
+        (error: WebpackError | null | undefined) => {
+          if (error) {
+            return callback(error);
+          }
+          callback();
+        },
+      );
     });
 
     compiler.hooks.thisCompilation.tap(
