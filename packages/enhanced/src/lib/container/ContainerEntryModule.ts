@@ -284,18 +284,15 @@ class ContainerEntryModule extends Module {
         'return getScope;',
       ])};`,
       `var init = ${runtimeTemplate.basicFunction('shareScope, initScope', [
-        `if (!${RuntimeGlobals.shareScopeMap}) return;`,
-        `if (!${federationGlobal}) return;`,
-        `var name = ${JSON.stringify(this._shareScope)}`,
-        `${federationGlobal}.instance.initOptions({name:${federationGlobal}.initOptions.name, })`,
-        `${federationGlobal}.instance.initShareScopeMap(name,shareScope)`,
-        `if (${RuntimeGlobals.global}.__FEDERATION__.__SHARE__.default){`,
-        Template.indent([
-          `${federationGlobal}.instance.initShareScopeMap(name,${RuntimeGlobals.global}.__FEDERATION__.__SHARE__.default)`,
-        ]),
-        '}',
-        `${federationGlobal}.attachShareScopeMap(${RuntimeGlobals.require});`,
-        `return ${RuntimeGlobals.initializeSharing}(name, initScope);`,
+        `return ${federationGlobal}.bundlerRuntime.initContainerEntry({${Template.indent(
+          [
+            `webpackRequire: ${RuntimeGlobals.require},`,
+            `shareScope: shareScope,`,
+            `initScope: initScope,`,
+            `shareScopeKey: ${JSON.stringify(this._shareScope)}`,
+          ],
+        )}`,
+        '})',
       ])};`,
       `${initRuntimeModuleGetter}`,
       '',

@@ -196,7 +196,7 @@ export class FederationHost {
 
   private _setGlobalShareScopeMap(): void {
     const globalShareScopeMap = getGlobalShareScope();
-    if (!globalShareScopeMap[this.options.name]) {
+    if (this.options.name && !globalShareScopeMap[this.options.name]) {
       globalShareScopeMap[this.options.name] = this.shareScopeMap;
     }
   }
