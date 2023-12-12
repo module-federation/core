@@ -196,7 +196,7 @@ export class FederationHost {
 
   private _setGlobalShareScopeMap(): void {
     const globalShareScopeMap = getGlobalShareScope();
-    if (!globalShareScopeMap[this.options.name]) {
+    if (this.options.name && !globalShareScopeMap[this.options.name]) {
       globalShareScopeMap[this.options.name] = this.shareScopeMap;
     }
   }
@@ -592,7 +592,10 @@ export class FederationHost {
     const initRemoteModule = async (key: string): Promise<void> => {
       const { module } = await this._getRemoteModuleAndOptions(key);
       const entry = await module.getEntry();
-      initFn(entry);
+      if(!module.inited){
+        initFn(entry);
+        module.inited = true
+      }
     };
     Object.keys(this.options.shared).forEach((shareName) => {
       const shared = this.options.shared[shareName];

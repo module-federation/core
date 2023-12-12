@@ -1,16 +1,6 @@
 import { FEDERATION_SUPPORTED_TYPES } from './constant';
 import { attachShareScopeMap } from './attachShareScopeMap';
-import { RemoteEntryExports, WebpackRequire } from './types';
-
-type InitToken = Record<string, Record<string, any>>;
-
-interface Options {
-  shareScopeName: string;
-  webpackRequire: WebpackRequire;
-  initPromises: Record<string, Promise<boolean> | boolean>;
-  initTokens: InitToken;
-  initScope: InitToken[];
-}
+import { RemoteEntryExports, InitializeSharingOptions } from './types';
 
 export function initializeSharing({
   shareScopeName,
@@ -18,7 +8,7 @@ export function initializeSharing({
   initPromises,
   initTokens,
   initScope,
-}: Options): Promise<boolean> | boolean | void {
+}: InitializeSharingOptions): Promise<boolean> | boolean | void {
   if (!initScope) initScope = [];
   // handling circular init calls
   var initToken = initTokens[shareScopeName];
