@@ -61,7 +61,9 @@ class FederationRuntimePlugin {
       `import federation from '${BundlerRuntimePath}';`,
       runtimePluginTemplates,
       `${federationGlobal} = {...federation,...${federationGlobal}};`,
-      runtimePLuginNames.length
+      `if(!${federationGlobal}.instance){`,
+      Template.indent([
+        runtimePLuginNames.length
         ? Template.asString([
             `${federationGlobal}.initOptions.plugins = ([`,
             Template.indent(runtimePLuginNames.map((item) => `${item}(),`)),
@@ -72,6 +74,8 @@ class FederationRuntimePlugin {
       `if(${federationGlobal}.installInitialConsumes){`,
       Template.indent([`${federationGlobal}.installInitialConsumes()`]),
       '}',
+      ]),
+    '}'
     ]);
   }
 
