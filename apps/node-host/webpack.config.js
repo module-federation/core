@@ -1,6 +1,6 @@
-const { registerTsConfigPaths } = require("nx/src/plugins/js/utils/register");
+const { registerTsConfigPaths } = require('nx/src/plugins/js/utils/register');
 const { workspaceRoot } = require('nx/src/utils/workspace-root');
-const path = require("path");
+const path = require('path');
 
 registerTsConfigPaths(path.join(workspaceRoot, 'tsconfig.tmp.json'));
 

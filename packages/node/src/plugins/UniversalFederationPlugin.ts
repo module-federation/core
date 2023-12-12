@@ -3,7 +3,7 @@
  */
 import StreamingTargetPlugin from './StreamingTargetPlugin';
 import NodeFederationPlugin from './NodeFederationPlugin';
-import {ModuleFederationPlugin} from '@module-federation/enhanced'
+import { ModuleFederationPlugin } from '@module-federation/enhanced';
 import { ModuleFederationPluginOptions } from '../types';
 import type { Compiler, container } from 'webpack';
 import {
@@ -47,7 +47,7 @@ class UniversalFederationPlugin {
   constructor(options: NodeFederationOptions, context: NodeFederationContext) {
     this._options = options || ({} as NodeFederationOptions);
     this.context = context || ({} as NodeFederationContext);
-    this.name = 'ModuleFederationPlugin'
+    this.name = 'ModuleFederationPlugin';
   }
 
   /**
