@@ -1,6 +1,7 @@
 import * as runtime from '@module-federation/runtime';
 import { initializeSharing } from './initializeSharing';
 import { attachShareScopeMap } from './attachShareScopeMap';
+import { initContainerEntry } from './initContainerEntry';
 
 // FIXME: ideal situation => import { GlobalShareScope,UserOptions } from '@module-federation/runtime/type'
 type ExcludeUndefined<T> = T extends undefined ? never : T;
@@ -14,6 +15,18 @@ type SharedConfig = NonUndefined<NonUndefined[string]['shareConfig']>;
 type ModuleCache = runtime.FederationHost['moduleCache'];
 type InferModule<T> = T extends Map<string, infer U> ? U : never;
 type InferredModule = InferModule<ModuleCache>;
+export type ShareScopeMap = runtime.FederationHost['shareScopeMap'];
+
+type InitToken = Record<string, Record<string, any>>;
+
+export interface InitializeSharingOptions {
+  shareScopeName: string;
+  webpackRequire: WebpackRequire;
+  initPromises: Record<string, Promise<boolean> | boolean>;
+  initTokens: InitToken;
+  initScope: InitToken[];
+}
+
 export type RemoteEntryExports = NonUndefined<
   InferredModule['remoteEntryExports']
 >;
@@ -43,7 +56,10 @@ export interface WebpackRequire {
   R: Array<string | number>;
   m: Record<string, (mod: any) => any>;
   c: Record<string, any>;
-  I: typeof initializeSharing;
+  I: (
+    scopeName: string,
+    initScope?: InitializeSharingOptions['initScope'],
+  ) => ReturnType<typeof initializeSharing>;
   S?: InferredGlobalShareScope;
   federation: Federation;
   g: typeof globalThis;
@@ -100,6 +116,12 @@ export interface ConsumesOptions {
   moduleToHandlerMapping: Record<string, ModuleToHandlerMappingItem>;
   webpackRequire: WebpackRequire;
 }
+export interface InitContainerEntryOptions {
+  shareScope: ShareScopeMap[string];
+  shareScopeKey: string;
+  webpackRequire: WebpackRequire;
+  initScope?: InitializeSharingOptions['initScope'];
+}
 
 export interface Federation {
   runtime?: typeof runtime;
@@ -112,6 +134,7 @@ export interface Federation {
     I: typeof initializeSharing;
     S: InferredGlobalShareScope;
     installInitialConsumes: (options: InstallInitialConsumesOptions) => any;
+    initContainerEntry: typeof initContainerEntry;
   };
   bundlerRuntimeOptions: {
     remotes?: Exclude<RemotesOptions, 'chunkId' | 'promises'>;
