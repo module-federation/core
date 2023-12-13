@@ -77,7 +77,7 @@ export default function (): FederationRuntimePlugin {
       }) {
         const host = globalThisVal['__FEDERATION__']['__INSTANCES__'][0]; // get root host instance
         const found = findVersion(shareScopeMap, scope, pkgName);
-
+        // if return function, then it skips findVersion key, if return key, it will use that to look up in shareScopeMap
         return function ({ localShareScopeMap, sc, pkgName }) {
           console.log({ localShareScopeMap, sc, pkgName });
           shareScopeMap[sc][pkgName][found] = host.options.shared[pkgName]; // replace local share scope manually with desired module
