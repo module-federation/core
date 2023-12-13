@@ -65,18 +65,18 @@ class FederationRuntimePlugin {
       `if(!${federationGlobal}.instance){`,
       Template.indent([
         runtimePLuginNames.length
-        ? Template.asString([
-            `${federationGlobal}.initOptions.plugins = ([`,
-            Template.indent(runtimePLuginNames.map((item) => `${item}(),`)),
-            '])',
-          ])
-        : '',
-      `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
-      `if(${federationGlobal}.installInitialConsumes){`,
-      Template.indent([`${federationGlobal}.installInitialConsumes()`]),
-      '}',
+          ? Template.asString([
+              `${federationGlobal}.initOptions.plugins = ([`,
+              Template.indent(runtimePLuginNames.map((item) => `${item}(),`)),
+              '])',
+            ])
+          : '',
+        `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
+        `if(${federationGlobal}.installInitialConsumes){`,
+        Template.indent([`${federationGlobal}.installInitialConsumes()`]),
+        '}',
       ]),
-    '}'
+      '}',
     ]);
   }
 
