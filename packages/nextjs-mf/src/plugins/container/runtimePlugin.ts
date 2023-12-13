@@ -1,6 +1,7 @@
 //@ts-nocheck
 import { FederationRuntimePlugin } from '@module-federation/runtime/type';
-// const globalThisVal = new Function('return globalThis')();
+
+const globalThisVal = new Function('return globalThis')();
 
 export default function (): FederationRuntimePlugin {
   return {
@@ -61,11 +62,28 @@ export default function (): FederationRuntimePlugin {
       return args;
     },
     loadShare(args) {
-      console.log('loadShare:', args);
+      // console.log('loadShare:', args);
       return args;
     },
     async beforeLoadShare(args) {
-      // console.log('beforeLoadShare:', args);
+      if (!args.pkgName === 'react' || !args.pkgName === 'react-dom')
+        return args;
+
+      args.shareInfo.strategy = function ({
+        shareScopeMap,
+        scope,
+        pkgName,
+        findVersion,
+      }) {
+        const host = globalThisVal['__FEDERATION__']['__INSTANCES__'][0]; // get root host instance
+        const found = findVersion(shareScopeMap, scope, pkgName);
+
+        return function ({ localShareScopeMap, sc, pkgName }) {
+          console.log({ localShareScopeMap, sc, pkgName });
+          shareScopeMap[sc][pkgName][found] = host.options.shared[pkgName]; // replace local share scope manually with desired module
+          return host.options.shared[pkgName];
+        };
+      };
       return args;
     },
   };

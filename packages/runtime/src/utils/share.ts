@@ -139,6 +139,11 @@ function findSingletonVersionOrderByLoaded(
 }
 
 function getFindShareFunction(strategy: Shared['strategy']) {
+  if (typeof strategy === 'function') {
+    return (shareScopeMap: ShareScopeMap, scope: string, pkgName: string) => {
+      return strategy({ shareScopeMap, scope, pkgName, findVersion });
+    };
+  }
   if (strategy === 'loaded-first') {
     return findSingletonVersionOrderByLoaded;
   }
@@ -173,6 +178,9 @@ export function getRegisteredShare(
           sc,
           pkgName,
         );
+        if (typeof singletonVersion === 'function') {
+          return singletonVersion({ localShareScopeMap, sc, pkgName });
+        }
         // eslint-disable-next-line max-depth
         if (
           typeof requiredVersion === 'string' &&
@@ -187,6 +195,7 @@ export function getRegisteredShare(
             } which needs ${requiredVersion})`,
           );
         }
+
         return localShareScopeMap[sc][pkgName][singletonVersion];
       } else {
         const maxVersion = getFindShareFunction(strategy)(
