@@ -1,5 +1,7 @@
 //@ts-nocheck
 import { FederationRuntimePlugin } from '@module-federation/runtime/type';
+// const globalThisVal = new Function('return globalThis')();
+
 export default function (): FederationRuntimePlugin {
   return {
     name: 'custom-plugin',
@@ -24,7 +26,22 @@ export default function (): FederationRuntimePlugin {
       return args;
     },
     init(args) {
-      // console.log('init: ', args);
+      // const host = globalThisVal['__FEDERATION__']['__INSTANCES__'][0]; //first instance is always host?
+      // if (host) {
+      //   // if (host.name !== args.origin.name) {
+      //   //   Object.keys(args.origin.shareScopeMap?.default || {}).forEach(
+      //   //     (key) => {
+      //   //       if (
+      //   //         key === 'react' ||
+      //   //         key === 'react-dom' ||
+      //   //         key.startsWith('next/')
+      //   //       ) {
+      //   //         delete args.origin.shareScopeMap?.default[key];
+      //   //       }
+      //   //     },
+      //   //   );
+      //   // }
+      // }
       return args;
     },
     beforeLoadRemote(args) {
@@ -43,11 +60,12 @@ export default function (): FederationRuntimePlugin {
       // console.log('loadRemote: ', args);
       return args;
     },
-    async loadShare(args) {
-      // console.log('loadShare:', args);
+    loadShare(args) {
+      console.log('loadShare:', args);
+      return args;
     },
     async beforeLoadShare(args) {
-      // console.log('beforeloadShare:', args);
+      // console.log('beforeLoadShare:', args);
       return args;
     },
   };
