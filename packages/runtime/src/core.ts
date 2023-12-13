@@ -462,6 +462,7 @@ export class FederationHost {
       module = new Module(moduleOptions);
       this.moduleCache.set(remote.name, module);
     }
+
     return {
       module,
       moduleOptions,
@@ -591,10 +592,12 @@ export class FederationHost {
 
     const initRemoteModule = async (key: string): Promise<void> => {
       const { module } = await this._getRemoteModuleAndOptions(key);
-      const entry = await module.getEntry();
-      if (!module.inited) {
-        initFn(entry);
-        module.inited = true;
+      if (module.getEntry) {
+        const entry = await module.getEntry();
+        if (!module.inited) {
+          initFn(entry);
+          module.inited = true;
+        }
       }
     };
     Object.keys(this.options.shared).forEach((shareName) => {
