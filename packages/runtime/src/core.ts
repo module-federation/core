@@ -117,7 +117,12 @@ export class FederationHost {
       shared: Options['shared'];
       origin: FederationHost;
     }>('beforeLoadShare'),
-    loadShare: new AsyncHook<[FederationHost, string, ShareInfos]>(),
+    loadShare: new AsyncHook<[{
+      origin:FederationHost;
+      pkgName:string;
+      shareInfo?: Shared;
+      shared: Shared;
+    }]>(),
     beforePreloadRemote: new AsyncHook<{
       preloadOps: Array<PreloadRemoteArgs>;
       options: Options;
@@ -237,10 +242,22 @@ export class FederationHost {
 
     if (globalShare && globalShare.lib) {
       addUniqueItem(globalShare.useIn, this.options.name);
+      await this.hooks.lifecycle.loadShare.emit({
+        pkgName,
+        shareInfo,
+        shared: globalShare,
+        origin: this,
+      });
       return globalShare.lib as () => T;
     } else if (globalShare && globalShare.loading) {
       const factory = await globalShare.loading;
       addUniqueItem(globalShare.useIn, this.options.name);
+      await this.hooks.lifecycle.loadShare.emit({
+        pkgName,
+        shareInfo,
+        shared: globalShare,
+        origin: this,
+      });
       return factory;
     } else if (globalShare) {
       const asyncLoadProcess = async () => {
@@ -251,6 +268,12 @@ export class FederationHost {
         if (gShared) {
           gShared.lib = factory;
         }
+        await this.hooks.lifecycle.loadShare.emit({
+          pkgName,
+          shareInfo,
+          shared: globalShare,
+          origin: this,
+        });
         return factory as () => T;
       };
       const loading = asyncLoadProcess();
@@ -275,6 +298,12 @@ export class FederationHost {
         if (gShared) {
           gShared.lib = factory;
         }
+        await this.hooks.lifecycle.loadShare.emit({
+          pkgName,
+          shareInfo,
+          shared: shareInfoRes,
+          origin: this,
+        });
         return factory as () => T;
       };
       const loading = asyncLoadProcess();
