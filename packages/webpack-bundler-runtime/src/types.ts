@@ -62,7 +62,6 @@ export interface WebpackRequire {
   ) => ReturnType<typeof initializeSharing>;
   S?: InferredGlobalShareScope;
   federation: Federation;
-  g: typeof globalThis;
 }
 
 interface ShareInfo {
