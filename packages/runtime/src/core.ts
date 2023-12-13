@@ -226,7 +226,7 @@ export class FederationHost {
     );
     if (shareInfo?.scope) {
       shareInfo.scope.forEach((shareScope) => {
-        this.initializeSharing(shareScope);
+        this.initializeSharing(shareScope,shareInfo.strategy);
       });
     }
     const loadShareRes = await this.hooks.lifecycle.beforeLoadShare.emit({
@@ -555,7 +555,7 @@ export class FederationHost {
    * If the share scope does not exist, it creates one.
    */
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  initializeSharing(shareScopeName = DEFAULT_SCOPE): Array<Promise<void>> {
+  initializeSharing(shareScopeName = DEFAULT_SCOPE,strategy?:Shared['strategy']): Array<Promise<void>> {
     const globalShareScope = Global.__FEDERATION__.__SHARE__;
     const hostName = this.options.name;
     if (!globalShareScope[hostName]) {
@@ -606,11 +606,15 @@ export class FederationHost {
         register(shareName, shared);
       }
     });
-    this.options.remotes.forEach((remote) => {
-      if (remote.shareScope === shareScopeName) {
-        promises.push(initRemoteModule(remote.name));
-      }
-    });
+
+    if(strategy==='version-first'){
+      this.options.remotes.forEach((remote) => {
+        if (remote.shareScope === shareScopeName) {
+          promises.push(initRemoteModule(remote.name));
+        }
+      });
+    }
+
     return promises;
   }
 
