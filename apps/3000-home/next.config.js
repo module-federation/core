@@ -58,6 +58,13 @@ const nextConfig = {
     const { isServer } = options;
     // used for testing build output snapshots
 
+    config.resolve.alias['@module-federation/runtime'] = require.resolve(
+      '../../dist/packages/runtime',
+    );
+    config.resolve.alias['@module-federation/sdk'] = require.resolve(
+      '../../dist/packages/sdk',
+    );
+
     const remotes = {
       // shop:   {
       //   name: 'shop',
@@ -86,6 +93,9 @@ const nextConfig = {
       //   isServer ? 'ssr' : 'chunks'
       // }/remoteEntry.js`,
       checkout: `checkout@http://localhost:3002/_next/static/${
+        isServer ? 'ssr' : 'chunks'
+      }/remoteEntry.js`,
+      home_app: `home_app@http://localhost:3000/_next/static/${
         isServer ? 'ssr' : 'chunks'
       }/remoteEntry.js`,
       shop: `shop@http://localhost:3001/_next/static/${
