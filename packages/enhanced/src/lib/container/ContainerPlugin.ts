@@ -188,31 +188,34 @@ class ContainerPlugin {
           library,
         },
         (error: WebpackError | null | undefined) => {
-          if (error) {
-            return callback(error);
+          if (error) return callback(error);
+          if (compilation.options.optimization.runtimeChunk) {
+            // Add to single runtime chunk as well.
+            // Allows for singleton runtime graph with all needed runtime modules for federation
+            addEntryToSingleRuntimeChunk();
           }
-          callback();
         },
       );
-      compilation.addEntry(
-        compilation.options.context || '',
-        //@ts-ignore
-        dep,
-        {
-          name,
-          filename: undefined,
-          runtime: undefined,
-          library,
-        },
-        (error: WebpackError | null | undefined) => {
-          if (error) {
-            return callback(error);
-          }
-          callback();
-        },
-      );
-    });
 
+      // Function to add entry for undefined runtime
+      const addEntryToSingleRuntimeChunk = () => {
+        compilation.addEntry(
+          compilation.options.context || '',
+          //@ts-ignore
+          dep,
+          {
+            name: name ? name + '_partial' : undefined, // give unique name name
+            // filename: filename?.replace('.', '_partial.'), //
+            runtime: undefined,
+            library,
+          },
+          (error: WebpackError | null | undefined) => {
+            if (error) return callback(error);
+            callback();
+          },
+        );
+      };
+    });
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
