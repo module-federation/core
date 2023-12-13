@@ -117,12 +117,16 @@ export class FederationHost {
       shared: Options['shared'];
       origin: FederationHost;
     }>('beforeLoadShare'),
-    loadShare: new AsyncHook<[{
-      origin:FederationHost;
-      pkgName:string;
-      shareInfo?: Shared;
-      shared: Shared;
-    }]>(),
+    loadShare: new AsyncHook<
+      [
+        {
+          origin: FederationHost;
+          pkgName: string;
+          shareInfo?: Shared;
+          shared: Shared;
+        },
+      ]
+    >(),
     beforePreloadRemote: new AsyncHook<{
       preloadOps: Array<PreloadRemoteArgs>;
       options: Options;
