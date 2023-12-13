@@ -130,7 +130,6 @@ export async function httpVmStrategy(
         if (!instance.moduleCache.has(remoteName)) return;
         const container = instance.moduleCache.get(remoteName);
         if (!container.remoteInfo) return;
-        console.log(container.remoteInfo.entry);
         return container.remoteInfo.entry;
       },
     );

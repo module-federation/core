@@ -46,8 +46,17 @@ export async function fixImageLoader(
         Template.asString([
           'try {',
           Template.indent([
+            "const globalThisVal = new Function('return globalThis')();",
             'const name = __webpack_require__.federation.instance.name',
-            'const cache = __webpack_require__.federation.instance.moduleCache',
+            `const container = globalThisVal['__FEDERATION__']['__INSTANCES__'].find(
+              (instance) => {
+                if (!instance.moduleCache.has(name)) return;
+                const container = instance.moduleCache.get(name);
+                if (!container.remoteInfo) return;
+                return container.remoteInfo.entry;
+              },
+            );`,
+            'const cache = container.moduleCache',
             'const remote = cache.get(name).remoteInfo',
             `const remoteEntry = remote.entry;`,
             `if (remoteEntry) {`,
