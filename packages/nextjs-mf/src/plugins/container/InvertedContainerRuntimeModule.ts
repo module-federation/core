@@ -51,8 +51,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     const containerScope = `${RuntimeGlobals.global}`;
 
     return Template.asString([
-      // '__webpack_require__.f.readFileVm = function(){console.log("ReadfileVM", arguments)}',
-      // '__webpack_require__.f.another = function(){console.log("custom", arguments)}',
       'var innerRemote;',
       Template.indent([
         'function attachRemote (resolve) {',
