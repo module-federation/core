@@ -21,7 +21,7 @@ export function initContainerEntry(
     remotes: [],
   });
   webpackRequire.federation.instance.initShareScopeMap(name, shareScope);
-  const prevShareScope = webpackRequire.g.__FEDERATION__.__SHARE__['default'];
+  const prevShareScope = globalThis.__FEDERATION__.__SHARE__['default'];
   if (prevShareScope) {
     webpackRequire.federation.instance.initShareScopeMap(
       name,
