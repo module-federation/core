@@ -156,6 +156,7 @@ export function getRegisteredShare(
   instanceName: string,
   pkgName: string,
   shareInfo: ShareInfos[keyof ShareInfos],
+  resolveShareHook: any,
 ): Shared | void {
   const globalShares = Global.__FEDERATION__.__SHARE__;
   const localShareScopeMap = globalShares[instanceName];
@@ -171,59 +172,54 @@ export function getRegisteredShare(
       localShareScopeMap[sc][pkgName]
     ) {
       const { requiredVersion } = shareConfig;
-      // eslint-disable-next-line max-depth
-      if (shareConfig.singleton) {
-        const singletonVersion = getFindShareFunction(strategy)(
-          localShareScopeMap,
-          sc,
-          pkgName,
-        );
-        if (typeof singletonVersion === 'function') {
-          return singletonVersion({ localShareScopeMap, sc, pkgName });
-        }
-        // eslint-disable-next-line max-depth
-        if (
-          typeof requiredVersion === 'string' &&
-          !satisfy(singletonVersion, requiredVersion)
-        ) {
-          warn(
-            `Version ${singletonVersion} from ${
-              singletonVersion &&
-              localShareScopeMap[sc][pkgName][singletonVersion].from
-            } of shared singleton module ${pkgName} does not satisfy the requirement of ${
-              shareInfo.from
-            } which needs ${requiredVersion})`,
-          );
-        }
+      const findShareFunction = getFindShareFunction(strategy);
+      const maxOrSingletonVersion = findShareFunction(
+        localShareScopeMap,
+        sc,
+        pkgName,
+      );
 
-        return localShareScopeMap[sc][pkgName][singletonVersion];
-      } else {
-        const maxVersion = getFindShareFunction(strategy)(
-          localShareScopeMap,
-          sc,
-          pkgName,
-        );
+      //@ts-ignore
+      const defaultResolver = () => {
+        if (shareConfig.singleton) {
+          if (
+            typeof requiredVersion === 'string' &&
+            !satisfy(maxOrSingletonVersion, requiredVersion)
+          ) {
+            warn(
+              `Version ${maxOrSingletonVersion} from ${
+                maxOrSingletonVersion &&
+                localShareScopeMap[sc][pkgName][maxOrSingletonVersion].from
+              } of shared singleton module ${pkgName} does not satisfy the requirement of ${
+                shareInfo.from
+              } which needs ${requiredVersion})`,
+            );
+          }
+          return localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
+        } else {
+          if (requiredVersion === false || requiredVersion === '*') {
+            return localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
+          }
 
-        // eslint-disable-next-line max-depth
-        if (requiredVersion === false || requiredVersion === '*') {
-          return localShareScopeMap[sc][pkgName][maxVersion];
-        }
-
-        // eslint-disable-next-line max-depth
-        if (satisfy(maxVersion, requiredVersion)) {
-          return localShareScopeMap[sc][pkgName][maxVersion];
-        }
-
-        // eslint-disable-next-line max-depth
-        for (const [versionKey, versionValue] of Object.entries(
-          localShareScopeMap[sc][pkgName],
-        )) {
-          // eslint-disable-next-line max-depth
-          if (satisfy(versionKey, requiredVersion)) {
-            return versionValue;
+          for (const [versionKey, versionValue] of Object.entries(
+            localShareScopeMap[sc][pkgName],
+          )) {
+            if (satisfy(versionKey, requiredVersion)) {
+              return versionValue;
+            }
           }
         }
-      }
+      };
+      const params = {
+        shareScopeMap: localShareScopeMap,
+        scope: sc,
+        pkgName,
+        version: maxOrSingletonVersion,
+        __FEDERATION__: Global.__FEDERATION__,
+        resolver: defaultResolver,
+      };
+      const resolveShared = resolveShareHook.emit(params);
+      return resolveShared.resolver();
     }
   }
 }

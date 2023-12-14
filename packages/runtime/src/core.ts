@@ -119,6 +119,7 @@ export class FederationHost {
       origin: FederationHost;
     }>('beforeLoadShare'),
     loadShare: new AsyncHook<[FederationHost, string, ShareInfos]>(),
+    resolveShare: new SyncHook<[FederationHost, string, ShareInfos], void>(),
     beforePreloadRemote: new AsyncHook<{
       preloadOps: Array<PreloadRemoteArgs>;
       options: Options;
@@ -246,6 +247,7 @@ export class FederationHost {
       this.options.name,
       pkgName,
       shareInfoRes,
+      this.hooks.lifecycle.resolveShare,
     );
 
     const addUseIn = (shared: Shared): void => {
@@ -280,6 +282,7 @@ export class FederationHost {
           this.options.name,
           pkgName,
           shareInfoRes,
+          this.hooks.lifecycle.resolveShare,
         );
         if (gShared) {
           gShared.lib = factory;
@@ -306,10 +309,12 @@ export class FederationHost {
         shareInfoRes.lib = factory;
         shareInfoRes.loaded = true;
         addUseIn(shareInfoRes);
+        //@ts-ignore
         const gShared = getRegisteredShare(
           this.options.name,
           pkgName,
           shareInfoRes,
+          this.hooks.lifecycle.resolveShare,
         );
         if (gShared) {
           gShared.lib = factory;
@@ -336,10 +341,12 @@ export class FederationHost {
   // 3. If the local get returns something other than Promise, then it will be used directly
   loadShareSync<T>(pkgName: string): () => T | never {
     const shareInfo = this.options.shared?.[pkgName];
+    //@ts-ignore
     const registeredShared = getRegisteredShare(
       this.options.name,
       pkgName,
       shareInfo,
+      this.hooks.lifecycle.resolveShare,
     );
 
     if (registeredShared && typeof registeredShared.lib === 'function') {
@@ -694,10 +701,12 @@ export class FederationHost {
     const sharedKeys = Object.keys(formatShareOptions);
     sharedKeys.forEach((sharedKey) => {
       const sharedVal = formatShareOptions[sharedKey];
+      //@ts-ignore
       const registeredShared = getRegisteredShare(
         userOptions.name,
         sharedKey,
         sharedVal,
+        this.hooks.lifecycle.resolveShare,
       );
       if (!registeredShared && sharedVal && sharedVal.lib) {
         this.setShared({
