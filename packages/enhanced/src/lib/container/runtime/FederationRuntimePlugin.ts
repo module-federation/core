@@ -20,9 +20,6 @@ const BundlerRuntimePath = require.resolve(
 const RuntimePath = require.resolve('@module-federation/runtime', {
   paths: [BundlerRuntimePath],
 });
-const InitializeRemoteEntryRuntimePluginPath = require.resolve(
-  './InitializeRemoteEntryRuntimePlugin',
-);
 
 const DEFAULT_REMOTE_ENTRY = 'remoteEntry.js';
 
@@ -39,8 +36,6 @@ class FederationRuntimePlugin {
 
   static getTemplate(runtimePlugins: string[]) {
     // internal runtime plugin
-    const internalRuntimePlugin = `import initializeRemoteEntryRuntimePlugin from '${InitializeRemoteEntryRuntimePluginPath}';\n`;
-    const internalRuntimePluginName = 'initializeRemoteEntryRuntimePlugin';
     let runtimePluginTemplates = '';
     const runtimePLuginNames: string[] = [];
 
@@ -55,8 +50,6 @@ class FederationRuntimePlugin {
         runtimePLuginNames.push(runtimePluginName);
       });
     }
-    runtimePluginTemplates += internalRuntimePlugin;
-    runtimePLuginNames.push(internalRuntimePluginName);
 
     return Template.asString([
       `import federation from '${BundlerRuntimePath}';`,
@@ -65,18 +58,18 @@ class FederationRuntimePlugin {
       `if(!${federationGlobal}.instance){`,
       Template.indent([
         runtimePLuginNames.length
-        ? Template.asString([
-            `${federationGlobal}.initOptions.plugins = ([`,
-            Template.indent(runtimePLuginNames.map((item) => `${item}(),`)),
-            '])',
-          ])
-        : '',
-      `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
-      `if(${federationGlobal}.installInitialConsumes){`,
-      Template.indent([`${federationGlobal}.installInitialConsumes()`]),
-      '}',
+          ? Template.asString([
+              `${federationGlobal}.initOptions.plugins = ([`,
+              Template.indent(runtimePLuginNames.map((item) => `${item}(),`)),
+              '])',
+            ])
+          : '',
+        `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
+        `if(${federationGlobal}.installInitialConsumes){`,
+        Template.indent([`${federationGlobal}.installInitialConsumes()`]),
+        '}',
       ]),
-    '}'
+      '}',
     ]);
   }
 
@@ -163,7 +156,6 @@ class FederationRuntimePlugin {
             runtimeRequirements.add(RuntimeGlobals.interceptModuleExecution);
             runtimeRequirements.add(RuntimeGlobals.moduleCache);
             runtimeRequirements.add(RuntimeGlobals.compatGetDefaultExport);
-            runtimeRequirements.add(RuntimeGlobals.global);
             runtimeRequirements.add(federationGlobal);
             compilation.addRuntimeModule(
               chunk,
