@@ -26,7 +26,7 @@ export function assignRemoteInfo(
 export function snapshotPlugin(): FederationRuntimePlugin {
   return {
     name: 'snapshot-plugin',
-    async loadRemoteMatch(args) {
+    async afterResolve(args) {
       const { remote, pkgNameOrAlias, expose, origin, remoteInfo } = args;
 
       if (!isRemoteInfoWithEntry(remote) || !isPureRemoteEntry(remote)) {
