@@ -29,7 +29,8 @@
     "extract-i18n:website": "nx run website:extract-i18n",
     "postinstall": "npm run sync:types:webpack",
     "sync:types:webpack": "cp -rf ./webpack/* ./node_modules/webpack",
-    "sync:pullMFTypes": "concurrently \"node ./packages/enhanced/pullts.js\""
+    "sync:pullMFTypes": "concurrently \"node ./packages/enhanced/pullts.js\"",
+    "commitlint": "commitlint --edit"
   },
   "dependencies": {
     "adm-zip": "0.5.10",
@@ -150,7 +151,7 @@
     "highlight.js": "10.7.3",
     "html-webpack-plugin": "5.5.3",
     "husky": "8.0.3",
-    "inquirer": "^9.2.12",
+    "inquirer": "8.2.6",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
     "jest-environment-node": "29.7.0",
