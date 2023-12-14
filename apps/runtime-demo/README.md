@@ -7,9 +7,9 @@ This example demos automatic-vendor-sharing, each host/remote will share all ven
 
 # Running Demo
 
-Run `nx serve runtime_demo_remote` to start remote
+Run `nx serve 3005_runtime_host` to start remote
 
-Run `nx serve runtime_demo_host` to start remote
+Run `nx serve 3006_runtime_remote` to start remote
 
 - [localhost:3005](http://localhost:3005/)
 - [localhost:3006](http://localhost:3006/)

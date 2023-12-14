@@ -20,5 +20,6 @@
     }
   },
   "files": [],
+  "exclude": ["webpack.config.js"],
   "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"]
 }

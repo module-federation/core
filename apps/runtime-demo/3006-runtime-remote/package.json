@@ -1,6 +1,7 @@
 {
-  "name": "runtime-demo-remote",
+  "name": "runtime-remote",
   "version": "0.0.0",
+  "private": true,
   "devDependencies": {
     "@module-federation/core": "*",
     "@module-federation/typescript": "3.0.1",
