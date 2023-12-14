@@ -4,7 +4,7 @@
 */
 
 'use strict';
-
+import type { Compiler } from 'webpack';
 import { parseOptions } from '../container/options';
 import ConsumeSharedPlugin from './ConsumeSharedPlugin';
 import ProvideSharedPlugin from './ProvideSharedPlugin';
@@ -14,8 +14,8 @@ import type {
   SharedConfig,
 } from '../../declarations/plugins/sharing/SharePlugin';
 import type { ConsumesConfig } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
-import type Compiler from 'webpack/lib/Compiler';
 import type { ProvidesConfig } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
+import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 class SharePlugin {
   private _shareScope: string;
@@ -77,6 +77,8 @@ class SharePlugin {
    * @returns {void}
    */
   apply(compiler: Compiler) {
+    process.env['FEDERATION_WEBPACK_PATH'] = process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+
     new ConsumeSharedPlugin({
       shareScope: this._shareScope,
       consumes: this._consumes,

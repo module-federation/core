@@ -1,19 +1,27 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type {Compiler,Compilation,Chunk,sources,Module,RuntimeGlobals,javascript} from 'webpack'
-import type {SyncWaterfallHook} from 'tapable';
-// @ts-ignore SortableSet type can not get from webpack default export
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type TSortableSet from 'webpack/lib/util/SortableSet';
+import type {
+  Compiler,
+  Compilation,
+  Chunk,
+  sources,
+  Module,
+  RuntimeGlobals,
+  javascript,
+} from 'webpack';
+import type { SyncWaterfallHook } from 'tapable';
 
-const SortableSet = require(normalizeWebpackPath(
-  'webpack/lib/util/SortableSet'
-)) as TSortableSet<any>;
+const SortableSet = require(
+  normalizeWebpackPath('webpack/lib/util/SortableSet'),
+) as typeof import('webpack/lib/util/SortableSet');
 
-
-type CompilationHooksJavascriptModulesPlugin = ReturnType<typeof javascript.JavascriptModulesPlugin.getCompilationHooks>
+type CompilationHooksJavascriptModulesPlugin = ReturnType<
+  typeof javascript.JavascriptModulesPlugin.getCompilationHooks
+>;
 type RenderStartup = CompilationHooksJavascriptModulesPlugin['renderStartup'];
 
-type InferStartupRenderContext<T> = T extends SyncWaterfallHook<[infer Source, infer Module, infer StartupRenderContext]>
+type InferStartupRenderContext<T> = T extends SyncWaterfallHook<
+  [infer Source, infer Module, infer StartupRenderContext]
+>
   ? StartupRenderContext
   : never;
 
@@ -280,7 +288,7 @@ class AsyncEntryStartupPlugin {
     initialEntryModules: string[],
     shared: string,
     remotes: string,
-    source: Source,
+    source: sources.Source,
   ) {
     const { Template } = compiler.webpack;
     if (

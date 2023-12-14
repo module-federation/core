@@ -2,8 +2,12 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra
 */
-
-import { join, dirname, readJson, InputFileSystem } from 'webpack/lib/util/fs';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import type { InputFileSystem } from 'webpack/lib/util/fs';
+const { join, dirname, readJson } = require(
+  normalizeWebpackPath('webpack/lib/util/fs'),
+) as typeof import('webpack/lib/util/fs');
 
 // Extreme shorthand only for github. eg: foo/bar
 const RE_URL_GITHUB_EXTREME_SHORT: RegExp =

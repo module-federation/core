@@ -2,8 +2,9 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-
-import { RawSource } from 'webpack-sources';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { Compilation, WebpackOptionsNormalized } from 'webpack';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type {
   CodeGenerationContext,
   CodeGenerationResult,
@@ -11,18 +12,29 @@ import type {
   NeedBuildContext,
   WebpackError,
 } from 'webpack/lib/Module';
-import Module from 'webpack/lib/Module';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
 import FallbackDependency from './FallbackDependency';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
-import type Compilation from 'webpack/lib/Compilation';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { InputFileSystem } from 'webpack/lib/FileSystemInfo';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { RequestShortener } from 'webpack/lib/RuntimeModule';
-import { WEBPACK_MODULE_TYPE_REMOTE } from 'webpack/lib/ModuleTypeConstants';
-import type { WebpackOptionsNormalized } from 'webpack/lib/WebpackOptionsDefaulter';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { ObjectDeserializerContext } from 'webpack/lib/serialization/ObjectMiddleware';
+
+const { RawSource } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack').sources;
+const { Module, RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const { WEBPACK_MODULE_TYPE_REMOTE } = require(
+  normalizeWebpackPath('webpack/lib/ModuleTypeConstants'),
+) as typeof import('webpack/lib/ModuleTypeConstants');
+const makeSerializable = require(
+  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
+) as typeof import('webpack/lib/util/makeSerializable');
 
 const TYPES: Set<string> = new Set(['remote', 'share-init']);
 const RUNTIME_REQUIREMENTS: Set<string> = new Set([RuntimeGlobals.module]);
@@ -86,6 +98,7 @@ class RemoteModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
+  // @ts-ignore
   override needBuild(
     context: NeedBuildContext,
     callback: (err: WebpackError | null, needsRebuild?: boolean) => void,
@@ -101,6 +114,7 @@ class RemoteModule extends Module {
    * @param {function(WebpackError=): void} callback callback function
    * @returns {void}
    */
+  // @ts-ignore
   override build(
     options: WebpackOptionsNormalized,
     compilation: Compilation,
@@ -151,10 +165,12 @@ class RemoteModule extends Module {
    * @param {CodeGenerationContext} context context for code generation
    * @returns {CodeGenerationResult} result
    */
+  // @ts-ignore
   override codeGeneration(
     context: CodeGenerationContext,
   ): CodeGenerationResult {
     const { runtimeTemplate, moduleGraph, chunkGraph } = context;
+    // @ts-ignore
     const module = moduleGraph.getModule(this.dependencies[0]);
     const id = module && chunkGraph.getModuleId(module);
     const sources = new Map();

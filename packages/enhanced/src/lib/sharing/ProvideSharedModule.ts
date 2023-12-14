@@ -2,14 +2,11 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
-
-import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
-import Module from 'webpack/lib/Module';
-import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
-import type Compilation from 'webpack/lib/Compilation';
-import WebpackError from 'webpack/lib/WebpackError';
-import { WEBPACK_MODULE_TYPE_PROVIDE } from 'webpack/lib/ModuleTypeConstants';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { Compilation } from 'webpack';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import type WebpackError from 'webpack/lib/WebpackError';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type {
   CodeGenerationContext,
   CodeGenerationResult,
@@ -20,9 +17,20 @@ import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/Module';
-import { InputFileSystem } from 'webpack/lib/util/fs';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import type { InputFileSystem } from 'webpack/lib/util/fs';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
-import { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';
+import type { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';
+
+const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const makeSerializable = require(
+  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
+) as typeof import('webpack/lib/util/makeSerializable');
+const { WEBPACK_MODULE_TYPE_PROVIDE } = require(
+  normalizeWebpackPath('webpack/lib/ModuleTypeConstants'),
+) as typeof import('webpack/lib/ModuleTypeConstants');
 
 const TYPES = new Set(['share-init']);
 
@@ -92,6 +100,7 @@ class ProvideSharedModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
+  // @ts-ignore
   override needBuild(
     context: NeedBuildContext,
     callback: (error?: WebpackError | null, needsRebuild?: boolean) => void,
@@ -107,6 +116,7 @@ class ProvideSharedModule extends Module {
    * @param {function(WebpackError=): void} callback callback function
    * @returns {void}
    */
+  // @ts-ignore
   override build(
     options: WebpackOptions,
     compilation: Compilation,
@@ -151,6 +161,7 @@ class ProvideSharedModule extends Module {
    * @param {CodeGenerationContext} context context for code generation
    * @returns {CodeGenerationResult} result
    */
+  // @ts-ignore
   override codeGeneration({
     runtimeTemplate,
     moduleGraph,
@@ -162,12 +173,14 @@ class ProvideSharedModule extends Module {
     )}, ${
       this._eager
         ? runtimeTemplate.syncModuleFactory({
+            // @ts-ignore
             dependency: this.dependencies[0],
             chunkGraph,
             request: this._request,
             runtimeRequirements,
           })
         : runtimeTemplate.asyncModuleFactory({
+            // @ts-ignore
             block: this.blocks[0],
             chunkGraph,
             request: this._request,

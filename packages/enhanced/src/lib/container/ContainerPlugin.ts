@@ -2,15 +2,17 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
-//@ts-ignore
-import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
+import { getWebpackPath, normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { Compiler, Compilation } from 'webpack';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { parseOptions } from './options';
-import type Compiler from 'webpack/lib/Compiler';
-import type Compilation from 'webpack/lib/Compilation';
 import type { ContainerPluginOptions } from '../../declarations/plugins/container/ContainerPlugin';
+
+const createSchemaValidation = require(
+  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
+) as typeof import('webpack/lib/util/create-schema-validation');
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
@@ -56,6 +58,8 @@ class ContainerPlugin {
   }
 
   apply(compiler: Compiler): void {
+    process.env['FEDERATION_WEBPACK_PATH'] = process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+
     const { name, exposes, shareScope, filename, library, runtime } =
       this._options;
 
@@ -95,8 +99,8 @@ class ContainerPlugin {
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
-          //@ts-ignore
           ContainerEntryDependency,
+          //@ts-ignore
           new ContainerEntryModuleFactory(),
         );
 

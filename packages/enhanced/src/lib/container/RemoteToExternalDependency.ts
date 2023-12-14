@@ -4,11 +4,16 @@
 */
 
 'use strict';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
-import ModuleDependency from 'webpack/lib/dependencies/ModuleDependency';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+const makeSerializable = require(
+  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
+) as typeof import('webpack/lib/util/makeSerializable');
+const { dependencies } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 
-class RemoteToExternalDependency extends ModuleDependency {
+class RemoteToExternalDependency extends dependencies.ModuleDependency {
   /**
    * @param {string} request request
    */

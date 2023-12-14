@@ -4,34 +4,44 @@
 */
 
 'use strict';
-
+import { getWebpackPath, normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { Compiler } from 'webpack';
 import { parseOptions } from '../container/options';
 import { ConsumeOptions } from './ConsumeSharedModule';
 import { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
-import { parseRange } from 'webpack/lib/util/semver';
 import { resolveMatchedConfigs } from './resolveMatchedConfigs';
 import {
   isRequiredVersion,
   getDescriptionFile,
   getRequiredVersionFromDescriptionFile,
 } from './utils';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import ConsumeSharedModule from './ConsumeSharedModule';
 import ConsumeSharedRuntimeModule from './ConsumeSharedRuntimeModule';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
-//@ts-ignore
-import ModuleNotFoundError from 'webpack/lib/ModuleNotFoundError';
-import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-//@ts-ignore
-import WebpackError from 'webpack/lib/WebpackError';
-//@ts-ignore
-import Compiler from 'webpack/lib/Compiler';
-//@ts-ignore
-import LazySet from 'webpack/lib/util/LazySet';
-//@ts-ignore
-import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
-import { SemVerRange } from 'webpack/lib/util/semver';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import type { SemVerRange } from 'webpack/lib/util/semver';
+
+const { parseRange } = require(
+  normalizeWebpackPath('webpack/lib/util/semver'),
+) as typeof import('webpack/lib/util/semver');
+const ModuleNotFoundError = require(
+  normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
+) as typeof import('webpack/lib/ModuleNotFoundError');
+const { RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const LazySet = require(
+  normalizeWebpackPath('webpack/lib/util/LazySet'),
+) as typeof import('webpack/lib/util/LazySet');
+const WebpackError = require(
+  normalizeWebpackPath('webpack/lib/WebpackError'),
+) as typeof import('webpack/lib/WebpackError');
+const createSchemaValidation = require(
+  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
+) as typeof import('webpack/lib/util/create-schema-validation');
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
@@ -108,6 +118,8 @@ class ConsumeSharedPlugin {
   }
 
   apply(compiler: Compiler): void {
+    process.env['FEDERATION_WEBPACK_PATH'] = process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation, { normalModuleFactory }) => {
@@ -129,6 +141,7 @@ class ConsumeSharedPlugin {
 
         const resolver = compilation.resolverFactory.get(
           'normal',
+          //@ts-ignore
           RESOLVE_OPTIONS,
         );
 
@@ -142,6 +155,7 @@ class ConsumeSharedPlugin {
               `No required version specified and unable to automatically determine one. ${details}`,
             );
             error.file = `shared module ${request}`;
+            //@ts-ignore
             compilation.warnings.push(error);
           };
           const directFallback =
@@ -172,6 +186,7 @@ class ConsumeSharedPlugin {
                   );
                   if (err) {
                     compilation.errors.push(
+                      //@ts-ignore
                       new ModuleNotFoundError(null, err, {
                         name: `resolving fallback for shared module ${request}`,
                       }),
@@ -287,6 +302,7 @@ class ConsumeSharedPlugin {
         );
         normalModuleFactory.hooks.createModule.tapPromise(
           PLUGIN_NAME,
+          //@ts-ignore
           ({ resource }, { context, dependencies }) => {
             if (
               dependencies[0] instanceof ConsumeSharedFallbackDependency ||
@@ -314,6 +330,7 @@ class ConsumeSharedPlugin {
             set.add(RuntimeGlobals.hasOwnProperty);
             compilation.addRuntimeModule(
               chunk,
+              //@ts-ignore
               new ConsumeSharedRuntimeModule(set),
             );
           },
