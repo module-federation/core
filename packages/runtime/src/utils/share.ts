@@ -139,11 +139,6 @@ function findSingletonVersionOrderByLoaded(
 }
 
 function getFindShareFunction(strategy: Shared['strategy']) {
-  if (typeof strategy === 'function') {
-    return (shareScopeMap: ShareScopeMap, scope: string, pkgName: string) => {
-      return strategy({ shareScopeMap, scope, pkgName, findVersion });
-    };
-  }
   if (strategy === 'loaded-first') {
     return findSingletonVersionOrderByLoaded;
   }

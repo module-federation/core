@@ -119,7 +119,18 @@ export class FederationHost {
       origin: FederationHost;
     }>('beforeLoadShare'),
     loadShare: new AsyncHook<[FederationHost, string, ShareInfos]>(),
-    resolveShare: new SyncHook<[FederationHost, string, ShareInfos], void>(),
+    resolveShare: new SyncHook<
+      [
+        {
+          shareScopeMap: ShareScopeMap;
+          scope: string;
+          pkgName: string;
+          version: string;
+          __FEDERATION__: GlobalModuleInfo['__FEDERATION__'];
+        },
+      ],
+      void
+    >(),
     beforePreloadRemote: new AsyncHook<{
       preloadOps: Array<PreloadRemoteArgs>;
       options: Options;
