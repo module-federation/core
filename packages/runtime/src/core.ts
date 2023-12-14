@@ -344,7 +344,6 @@ export class FederationHost {
   // 3. If the local get returns something other than Promise, then it will be used directly
   loadShareSync<T>(pkgName: string): () => T | never {
     const shareInfo = this.options.shared?.[pkgName];
-    //@ts-ignore
     const registeredShared = getRegisteredShare(
       this.options.name,
       pkgName,
