@@ -256,35 +256,32 @@ export class FederationHost {
     } else if (globalShare && globalShare.loading) {
       const factory = await globalShare.loading;
       addUniqueItem(globalShare.useIn, this.options.name);
+      globalShare.lib = factory;
       await this.hooks.lifecycle.loadShare.emit({
         pkgName,
         shareInfo,
         shared: globalShare,
         origin: this,
       });
-      return factory;
+      return globalShare.lib as () => T;
     } else if (globalShare) {
       const asyncLoadProcess = async () => {
         const factory = await globalShare.get();
-        shareInfoRes.lib = factory;
-        addUniqueItem(shareInfoRes.useIn, this.options.name);
-        const gShared = getGlobalShare(pkgName, shareInfoRes);
-        if (gShared) {
-          gShared.lib = factory;
-        }
+        globalShare.lib = factory;
+        addUniqueItem(globalShare.useIn, this.options.name);
         await this.hooks.lifecycle.loadShare.emit({
           pkgName,
           shareInfo,
           shared: globalShare,
           origin: this,
         });
-        return factory as () => T;
+        return globalShare.lib as () => T;
       };
       const loading = asyncLoadProcess();
       this.setShared({
         pkgName,
         loaded: true,
-        shared: shareInfoRes,
+        shared: globalShare,
         from: this.options.name,
         lib: null,
         loading,
@@ -308,7 +305,7 @@ export class FederationHost {
           shared: shareInfoRes,
           origin: this,
         });
-        return factory as () => T;
+        return shareInfoRes.lib as () => T;
       };
       const loading = asyncLoadProcess();
       this.setShared({
