@@ -20,9 +20,6 @@ const BundlerRuntimePath = require.resolve(
 const RuntimePath = require.resolve('@module-federation/runtime', {
   paths: [BundlerRuntimePath],
 });
-const InitializeRemoteEntryRuntimePluginPath = require.resolve(
-  './InitializeRemoteEntryRuntimePlugin',
-);
 
 const DEFAULT_REMOTE_ENTRY = 'remoteEntry.js';
 
@@ -39,8 +36,6 @@ class FederationRuntimePlugin {
 
   static getTemplate(runtimePlugins: string[]) {
     // internal runtime plugin
-    const internalRuntimePlugin = `import initializeRemoteEntryRuntimePlugin from '${InitializeRemoteEntryRuntimePluginPath}';\n`;
-    const internalRuntimePluginName = 'initializeRemoteEntryRuntimePlugin';
     let runtimePluginTemplates = '';
     const runtimePLuginNames: string[] = [];
     if (Array.isArray(runtimePlugins)) {
@@ -54,8 +49,6 @@ class FederationRuntimePlugin {
         runtimePLuginNames.push(runtimePluginName);
       });
     }
-    runtimePluginTemplates += internalRuntimePlugin;
-    runtimePLuginNames.push(internalRuntimePluginName);
 
     return Template.asString([
       `import federation from '${BundlerRuntimePath}';`,
@@ -162,7 +155,6 @@ class FederationRuntimePlugin {
             runtimeRequirements.add(RuntimeGlobals.interceptModuleExecution);
             runtimeRequirements.add(RuntimeGlobals.moduleCache);
             runtimeRequirements.add(RuntimeGlobals.compatGetDefaultExport);
-            runtimeRequirements.add(RuntimeGlobals.global);
             runtimeRequirements.add(federationGlobal);
             compilation.addRuntimeModule(
               chunk,
