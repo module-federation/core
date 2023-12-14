@@ -4,7 +4,10 @@
 */
 
 'use strict';
-import { getWebpackPath, normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import {
+  getWebpackPath,
+  normalizeWebpackPath,
+} from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler } from 'webpack';
 import { parseOptions } from '../container/options';
 import { ConsumeOptions } from './ConsumeSharedModule';
@@ -118,7 +121,8 @@ class ConsumeSharedPlugin {
   }
 
   apply(compiler: Compiler): void {
-    process.env['FEDERATION_WEBPACK_PATH'] = process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+    process.env['FEDERATION_WEBPACK_PATH'] =
+      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,

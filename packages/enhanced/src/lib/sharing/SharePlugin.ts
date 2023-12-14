@@ -77,7 +77,8 @@ class SharePlugin {
    * @returns {void}
    */
   apply(compiler: Compiler) {
-    process.env['FEDERATION_WEBPACK_PATH'] = process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+    process.env['FEDERATION_WEBPACK_PATH'] =
+      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
     new ConsumeSharedPlugin({
       shareScope: this._shareScope,

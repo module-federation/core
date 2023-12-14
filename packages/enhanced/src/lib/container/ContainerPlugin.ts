@@ -2,7 +2,10 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
-import { getWebpackPath, normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import {
+  getWebpackPath,
+  normalizeWebpackPath,
+} from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, Compilation } from 'webpack';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
@@ -58,7 +61,8 @@ class ContainerPlugin {
   }
 
   apply(compiler: Compiler): void {
-    process.env['FEDERATION_WEBPACK_PATH'] = process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+    process.env['FEDERATION_WEBPACK_PATH'] =
+      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
     const { name, exposes, shareScope, filename, library, runtime } =
       this._options;

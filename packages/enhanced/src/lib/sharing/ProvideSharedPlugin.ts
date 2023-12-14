@@ -4,7 +4,10 @@
 */
 
 'use strict';
-import { getWebpackPath, normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import {
+  getWebpackPath,
+  normalizeWebpackPath,
+} from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, Compilation } from 'webpack';
 import { parseOptions } from '../container/options';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
@@ -96,7 +99,8 @@ class ProvideSharedPlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
-    process.env['FEDERATION_WEBPACK_PATH'] = process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+    process.env['FEDERATION_WEBPACK_PATH'] =
+      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
     const compilationData: WeakMap<Compilation, ResolvedProvideMap> =
       new WeakMap();

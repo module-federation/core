@@ -6,7 +6,10 @@
 'use strict';
 
 import type { Compiler } from 'webpack';
-import { getWebpackPath, normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import {
+  getWebpackPath,
+  normalizeWebpackPath,
+} from '@module-federation/sdk/normalize-webpack-path';
 import isValidExternalsType from 'webpack/schemas/plugins/container/ExternalsType.check.js';
 import type { ModuleFederationPluginOptions } from './ModuleFederationPluginTypes';
 import SharePlugin from '../sharing/SharePlugin';
@@ -45,7 +48,8 @@ class ModuleFederationPlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
-    process.env['FEDERATION_WEBPACK_PATH'] = process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+    process.env['FEDERATION_WEBPACK_PATH'] =
+      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
     const { _options: options } = this;
     const library = options.library || { type: 'var', name: options.name };

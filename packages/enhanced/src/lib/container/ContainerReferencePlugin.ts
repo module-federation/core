@@ -3,7 +3,10 @@
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 import type { Compiler } from 'webpack';
-import { getWebpackPath, normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import {
+  getWebpackPath,
+  normalizeWebpackPath,
+} from '@module-federation/sdk/normalize-webpack-path';
 
 // import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import FallbackDependency from './FallbackDependency';
@@ -69,7 +72,8 @@ class ContainerReferencePlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
-    process.env['FEDERATION_WEBPACK_PATH'] = process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+    process.env['FEDERATION_WEBPACK_PATH'] =
+      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
     const { _remotes: remotes, _remoteType: remoteType } = this;
 
