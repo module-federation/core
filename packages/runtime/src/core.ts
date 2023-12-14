@@ -165,6 +165,9 @@ export class FederationHost {
       ],
       HTMLScriptElement | void
     >(),
+    fetch: new AsyncHook<[string, RequestInit], Response | void | false>(
+      'fetch',
+    ),
   });
   loadingShare: {
     [key: string]: Promise<any>;

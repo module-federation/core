@@ -1,5 +1,5 @@
 {
-  "name": "3006_runtime_remote",
+  "name": "3006-runtime-remote",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/runtime-demo/3006-runtime-remote/src",
   "projectType": "application",
@@ -47,16 +47,16 @@
       "executor": "@nx/react:module-federation-dev-server",
       "defaultConfiguration": "production",
       "options": {
-        "buildTarget": "3006_runtime_remote:build",
+        "buildTarget": "3006-runtime-remote:build",
         "hmr": true,
         "port": 3006
       },
       "configurations": {
         "development": {
-          "buildTarget": "3006_runtime_remote:build:development"
+          "buildTarget": "3006-runtime-remote:build:development"
         },
         "production": {
-          "buildTarget": "3006_runtime_remote:build:production",
+          "buildTarget": "3006-runtime-remote:build:production",
           "hmr": false
         }
       }

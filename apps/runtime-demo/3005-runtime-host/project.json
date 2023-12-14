@@ -1,5 +1,5 @@
 {
-  "name": "3005_runtime_host",
+  "name": "3005-runtime-host",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/runtime-demo/3005-runtime-host/src",
   "projectType": "application",
@@ -47,17 +47,17 @@
       "executor": "@nx/webpack:dev-server",
       "defaultConfiguration": "production",
       "options": {
-        "buildTarget": "3005_runtime_host:build",
+        "buildTarget": "3005-runtime-host:build",
         "hmr": true,
         "port": 3005,
-        "devRemotes": ["3006_runtime_remote"]
+        "devRemotes": ["3006-runtime-remote"]
       },
       "configurations": {
         "development": {
-          "buildTarget": "3005_runtime_host:build:development"
+          "buildTarget": "3005-runtime-host:build:development"
         },
         "production": {
-          "buildTarget": "3005_runtime_host:build:production",
+          "buildTarget": "3005-runtime-host:build:production",
           "hmr": false
         }
       }
@@ -73,15 +73,15 @@
       "executor": "@nx/web:file-server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "3005_runtime_host:build",
+        "buildTarget": "3005-runtime-host:build",
         "port": 3005
       },
       "configurations": {
         "development": {
-          "buildTarget": "3005_runtime_host:build:development"
+          "buildTarget": "3005-runtime-host:build:development"
         },
         "production": {
-          "buildTarget": "3005_runtime_host:build:production"
+          "buildTarget": "3005-runtime-host:build:production"
         }
       }
     }
