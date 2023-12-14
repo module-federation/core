@@ -5,9 +5,7 @@ const path = require('path');
 const { registerTsConfigPaths } = require('nx/src/plugins/js/utils/register');
 registerTsConfigPaths(path.join(workspaceRoot, 'tsconfig.tmp.json'));
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
-
-// const { createDelegatedModule } = require('@module-federation/nextjs-mf/utilities');
-
+const fs = require('fs');
 /**
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
  **/
@@ -19,6 +17,12 @@ const nextConfig = {
   },
   webpack(config, options) {
     const { isServer } = options;
+    config.resolve.alias['@module-federation/runtime'] = require.resolve(
+      '../../dist/packages/runtime',
+    );
+    config.resolve.alias['@module-federation/sdk'] = require.resolve(
+      '../../dist/packages/sdk',
+    );
 
     config.plugins.push(
       new NextFederationPlugin({
@@ -44,9 +48,6 @@ const nextConfig = {
           //   }
           // ),
           home: `home_app@http://localhost:3000/_next/static/${
-            isServer ? 'ssr' : 'chunks'
-          }/remoteEntry.js`,
-          shop: `shop@http://localhost:3001/_next/static/${
             isServer ? 'ssr' : 'chunks'
           }/remoteEntry.js`,
           checkout: `checkout@http://localhost:3002/_next/static/${

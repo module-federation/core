@@ -22,11 +22,12 @@ export function createScriptNode(
   if (!globalThis.fetch) {
     //TODO: this shouldnt be coupled to webpack require
     //@ts-ignore
-    globalThis.fetch = __non_webpack_require__('node-fetch');
+    globalThis.fetch = __non_webpack_require__(
+      'node-fetch',
+    ) as typeof import('node-fetch');
   }
-  //@ts-ignore debugging
-  console.log(require.federation, 'fetching', urlObj.href);
-  fetch(urlObj)
+  console.log('fetching', urlObj.href);
+  fetch(urlObj.href)
     .then((res) => res.text())
     .then((data) => {
       //TODO: this shouldnt be coupled to webpack require

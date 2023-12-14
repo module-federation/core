@@ -10,6 +10,7 @@
       "options": {
         "outputPath": "dist/packages/nextjs-mf",
         "main": "packages/nextjs-mf/src/index.js",
+        "additionalEntryPoints": ["packages/nextjs-mf/src/utils/index.js"],
         "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true,

@@ -43,7 +43,6 @@ class FederationRuntimePlugin {
     const internalRuntimePluginName = 'initializeRemoteEntryRuntimePlugin';
     let runtimePluginTemplates = '';
     const runtimePLuginNames: string[] = [];
-
     if (Array.isArray(runtimePlugins)) {
       runtimePlugins.forEach((runtimePlugin, index) => {
         const runtimePluginName = `plugin_${index}`;
@@ -65,18 +64,18 @@ class FederationRuntimePlugin {
       `if(!${federationGlobal}.instance){`,
       Template.indent([
         runtimePLuginNames.length
-        ? Template.asString([
-            `${federationGlobal}.initOptions.plugins = ([`,
-            Template.indent(runtimePLuginNames.map((item) => `${item}(),`)),
-            '])',
-          ])
-        : '',
-      `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
-      `if(${federationGlobal}.installInitialConsumes){`,
-      Template.indent([`${federationGlobal}.installInitialConsumes()`]),
-      '}',
+          ? Template.asString([
+              `${federationGlobal}.initOptions.plugins = ([`,
+              Template.indent(runtimePLuginNames.map((item) => `${item}(),`)),
+              '])',
+            ])
+          : '',
+        `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
+        `if(${federationGlobal}.installInitialConsumes){`,
+        Template.indent([`${federationGlobal}.installInitialConsumes()`]),
+        '}',
       ]),
-    '}'
+      '}',
     ]);
   }
 

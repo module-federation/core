@@ -28,7 +28,7 @@ import {
 } from './apply-server-plugins';
 import { applyClientPlugins } from './apply-client-plugins';
 import { ModuleFederationPlugin } from '@module-federation/enhanced';
-
+import path from 'path';
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
@@ -58,7 +58,6 @@ export class NextFederationPlugin {
     process.env['FEDERATION_WEBPACK_PATH'] = getWebpackPath(compiler);
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
-    //@ts-ignore
     new CopyFederationPlugin(isServer).apply(compiler);
     this.applyConditionalPlugins(compiler, isServer);
     const normalFederationPluginOptions = this.getNormalFederationPluginOptions(
@@ -103,18 +102,14 @@ export class NextFederationPlugin {
       compiler.options.devtool = false;
     }
     if (isServer) {
-      //@ts-ignore
       configureServerCompilerOptions(compiler);
       configureServerLibraryAndFilename(this._options);
-      //@ts-ignore
       applyServerPlugins(compiler, this._options);
-      //@ts-ignore
       handleServerExternals(compiler, {
         ...this._options,
         shared: { ...retrieveDefaultShared(isServer), ...this._options.shared },
       });
     } else {
-      //@ts-ignore
       applyClientPlugins(compiler, this._options, this._extraOptions);
     }
   }
@@ -129,6 +124,12 @@ export class NextFederationPlugin {
       ...this._options,
       runtime: false,
       remoteType: 'script',
+      // @ts-ignore
+      runtimePlugins: [
+        //@ts-ignore
+        ...(this._options.runtimePlugins || []),
+        require.resolve(path.join(__dirname, '../container/runtimePlugin')),
+      ],
       exposes: {
         './noop': noop,
         './react': require.resolve('react'),
@@ -141,6 +142,7 @@ export class NextFederationPlugin {
       },
       remotes: {
         ...this._options.remotes,
+        // ...(this._options.name ? { [this._options.name]: `internal webpack/container/entry/${this._options.name}` } : {}),
       },
       shared: {
         ...defaultShared,
@@ -173,7 +175,6 @@ export class NextFederationPlugin {
     compiler: Compiler,
     normalFederationPluginOptions: ModuleFederationPluginOptions,
   ) {
-    //@ts-ignore
     new ModuleFederationPlugin(
       normalFederationPluginOptions,
       //@ts-ignore

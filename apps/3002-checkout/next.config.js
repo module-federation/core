@@ -19,7 +19,12 @@ const nextConfig = {
   },
   webpack(config, options) {
     const { isServer } = options;
-
+    config.resolve.alias['@module-federation/runtime'] = require.resolve(
+      '../../dist/packages/runtime',
+    );
+    config.resolve.alias['@module-federation/sdk'] = require.resolve(
+      '../../dist/packages/sdk',
+    );
     config.plugins.push(
       new NextFederationPlugin({
         name: 'checkout',
@@ -38,9 +43,6 @@ const nextConfig = {
             isServer ? 'ssr' : 'chunks'
           }/remoteEntry.js`,
           shop: `shop@http://localhost:3001/_next/static/${
-            isServer ? 'ssr' : 'chunks'
-          }/remoteEntry.js`,
-          checkout: `checkout@http://localhost:3002/_next/static/${
             isServer ? 'ssr' : 'chunks'
           }/remoteEntry.js`,
         },

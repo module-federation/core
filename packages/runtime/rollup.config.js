@@ -38,7 +38,7 @@ module.exports = (rollupConfig, projectOptions) => {
       ],
     }),
     replace({
-      __VERSION__: `'${pkg.version}'`,
+      __VERSION__: pkg.version,
       FEDERATION_DEBUG: `'${FEDERATION_DEBUG}'`,
       __RELEASE_NUMBER__: RELEASE_NUMBER,
     }),

@@ -26,48 +26,6 @@ export const retrieveDefaultShared = (isServer: boolean): SharedObject => {
 };
 
 /**
- * Apply remote delegates.
- *
- * This function adds the remote delegates feature by configuring and injecting the appropriate loader that will look
- * for internal delegate hoist or delegate hoist container and load it using a custom delegateLoader.
- * Once loaded, it will then look for the available delegates that will be used to configure the remote
- * that the hoisted module will be dependent upon.
- *
- * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
- * @param {Compiler} compiler - The Webpack compiler instance.
- */
-export function applyRemoteDelegates(
-  options: ModuleFederationPluginOptions,
-  compiler: Compiler,
-) {
-  if (options.remotes) {
-    // Get the available delegates
-    const delegates = getDelegates(options.remotes);
-    compiler.options.module.rules.push({
-      enforce: 'pre',
-      test: [/_app/],
-      loader: require.resolve('../../loaders/patchDefaultSharedLoader'),
-    });
-    // Add the delegate loader for hoist and container to the module rules
-    compiler.options.module.rules.push({
-      enforce: 'pre',
-      test: [/internal-delegate-hoist/, /delegate-hoist-container/],
-      include: [
-        compiler.context,
-        /internal-delegate-hoist/,
-        /delegate-hoist-container/,
-        //eslint-disable-next-line
-        /next[\/]dist/,
-      ],
-      loader: require.resolve('../../loaders/delegateLoader'),
-      options: {
-        delegates,
-      },
-    });
-  }
-}
-
-/**
  * Apply path fixes.
  *
  * This function applies fixes to the path for certain loaders. It checks if the fix is enabled in the options
@@ -94,6 +52,19 @@ export const applyPathFixes = (compiler: Compiler, options: any) => {
     if (options.enableUrlLoaderFix && hasLoader(rule, 'url-loader')) {
       injectRuleLoader({
         loader: require.resolve('../../loaders/fixUrlLoader'),
+      });
+    }
+    //@ts-ignore
+    if (rule?.oneOf) {
+      //@ts-ignore
+      rule.oneOf.forEach((oneOfRule) => {
+        if (hasLoader(oneOfRule, 'react-refresh-utils')) {
+          oneOfRule.exclude = [
+            oneOfRule.exclude,
+            /enhanced\/src/,
+            /nextjs-mf\/src/,
+          ];
+        }
       });
     }
   });

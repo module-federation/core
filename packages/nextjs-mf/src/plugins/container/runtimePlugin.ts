@@ -4,7 +4,23 @@ export default function (): FederationRuntimePlugin {
   return {
     name: 'custom-plugin',
     beforeInit(args) {
-      // console.log('beforeInit: ', args);
+      if (!__webpack_runtime_id__.startsWith('webpack')) return args;
+      const attach =
+        typeof __webpack_require__?.federation?.attachRemote === 'function'
+          ? __webpack_require__.federation.attachRemote
+          : () => {
+              console.error('embedded container', args.id, 'is not found');
+              return false;
+            };
+
+      const { moduleCache } = args.origin;
+      const { name } = args.origin;
+
+      const attachedRemote = attach();
+      if (attachedRemote) {
+        moduleCache.set(name, attachedRemote);
+      }
+
       return args;
     },
     init(args) {
@@ -12,18 +28,9 @@ export default function (): FederationRuntimePlugin {
       return args;
     },
     beforeLoadRemote(args) {
-      // console.log('beforeLoadRemote: ', args);
       return args;
     },
     createScript(args) {
-      // anything can be script loader
-      // console.log('createScript', args);
-      // console.log(args);
-      // return fetch(args.url).then((res) => {
-      //   res.text().then((text) => {
-      //     eval(text);
-      //   });
-      // });
       return args;
     },
     loadRemoteMatch(args) {
