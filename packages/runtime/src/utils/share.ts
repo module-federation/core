@@ -156,6 +156,8 @@ export function getRegisteredShare(
   instanceName: string,
   pkgName: string,
   shareInfo: ShareInfos[keyof ShareInfos],
+  //@ts-ignore
+  loadShareHook,
 ): Shared | void {
   const globalShares = Global.__FEDERATION__.__SHARE__;
   const localShareScopeMap = globalShares[instanceName];
@@ -178,6 +180,9 @@ export function getRegisteredShare(
           sc,
           pkgName,
         );
+        // how to implement?
+        loadShareHook.emit({ localShareScopeMap, sc, pkgName });
+
         if (typeof singletonVersion === 'function') {
           return singletonVersion({ localShareScopeMap, sc, pkgName });
         }

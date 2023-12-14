@@ -246,6 +246,7 @@ export class FederationHost {
       this.options.name,
       pkgName,
       shareInfoRes,
+      this.hooks.lifecycle.loadShare,
     );
 
     const addUseIn = (shared: Shared): void => {
@@ -276,10 +277,12 @@ export class FederationHost {
         shareInfoRes.lib = factory;
         shareInfoRes.loaded = true;
         addUseIn(shareInfoRes);
+        //@ts-ignore
         const gShared = getRegisteredShare(
           this.options.name,
           pkgName,
           shareInfoRes,
+          this.hooks.lifecycle.loadShare,
         );
         if (gShared) {
           gShared.lib = factory;
@@ -306,10 +309,12 @@ export class FederationHost {
         shareInfoRes.lib = factory;
         shareInfoRes.loaded = true;
         addUseIn(shareInfoRes);
+        //@ts-ignore
         const gShared = getRegisteredShare(
           this.options.name,
           pkgName,
           shareInfoRes,
+          this.hooks.lifecycle.loadShare,
         );
         if (gShared) {
           gShared.lib = factory;
@@ -336,10 +341,12 @@ export class FederationHost {
   // 3. If the local get returns something other than Promise, then it will be used directly
   loadShareSync<T>(pkgName: string): () => T | never {
     const shareInfo = this.options.shared?.[pkgName];
+    //@ts-ignore
     const registeredShared = getRegisteredShare(
       this.options.name,
       pkgName,
       shareInfo,
+      this.hooks.lifecycle.loadShare,
     );
 
     if (registeredShared && typeof registeredShared.lib === 'function') {
@@ -694,6 +701,7 @@ export class FederationHost {
     const sharedKeys = Object.keys(formatShareOptions);
     sharedKeys.forEach((sharedKey) => {
       const sharedVal = formatShareOptions[sharedKey];
+      //@ts-ignore
       const registeredShared = getRegisteredShare(
         userOptions.name,
         sharedKey,
