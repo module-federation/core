@@ -29,7 +29,7 @@ describe('hooks', () => {
       init(args) {
         initArgs = args;
       },
-      beforeLoadRemote(args) {
+      beforeRequest(args) {
         return new Promise((resolve) => {
           beforeLoadRemoteArgs = args;
           setTimeout(
@@ -42,7 +42,7 @@ describe('hooks', () => {
           );
         });
       },
-      loadRemote(args) {
+      onLoad(args) {
         loadRemoteArgs = args;
       },
     });
