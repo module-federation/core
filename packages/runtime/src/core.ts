@@ -126,7 +126,8 @@ export class FederationHost {
           scope: string;
           pkgName: string;
           version: string;
-          __FEDERATION__: GlobalModuleInfo['__FEDERATION__'];
+          __FEDERATION__: Global;
+          resolver: () => Shared;
         },
       ],
       void
