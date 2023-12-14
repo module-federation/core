@@ -269,6 +269,7 @@ export function generatePreloadAssets(
         origin.name,
         shared.sharedName,
         shareInfo,
+        origin.hooks.lifecycle.resolveShare,
       );
       // If the global share does not exist, or the lib function does not exist, it means that the shared has not been loaded yet and can be preloaded.
 

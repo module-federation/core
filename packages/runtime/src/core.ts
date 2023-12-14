@@ -119,6 +119,7 @@ export class FederationHost {
       origin: FederationHost;
     }>('beforeLoadShare'),
     loadShare: new AsyncHook<[FederationHost, string, ShareInfos]>(),
+    resolveShare: new SyncHook<[FederationHost, string, ShareInfos], void>(),
     beforePreloadRemote: new AsyncHook<{
       preloadOps: Array<PreloadRemoteArgs>;
       options: Options;
@@ -246,7 +247,7 @@ export class FederationHost {
       this.options.name,
       pkgName,
       shareInfoRes,
-      this.hooks.lifecycle.loadShare,
+      this.hooks.lifecycle.resolveShare,
     );
 
     const addUseIn = (shared: Shared): void => {
@@ -277,12 +278,11 @@ export class FederationHost {
         shareInfoRes.lib = factory;
         shareInfoRes.loaded = true;
         addUseIn(shareInfoRes);
-        //@ts-ignore
         const gShared = getRegisteredShare(
           this.options.name,
           pkgName,
           shareInfoRes,
-          this.hooks.lifecycle.loadShare,
+          this.hooks.lifecycle.resolveShare,
         );
         if (gShared) {
           gShared.lib = factory;
@@ -314,7 +314,7 @@ export class FederationHost {
           this.options.name,
           pkgName,
           shareInfoRes,
-          this.hooks.lifecycle.loadShare,
+          this.hooks.lifecycle.resolveShare,
         );
         if (gShared) {
           gShared.lib = factory;
@@ -346,7 +346,7 @@ export class FederationHost {
       this.options.name,
       pkgName,
       shareInfo,
-      this.hooks.lifecycle.loadShare,
+      this.hooks.lifecycle.resolveShare,
     );
 
     if (registeredShared && typeof registeredShared.lib === 'function') {
@@ -706,6 +706,7 @@ export class FederationHost {
         userOptions.name,
         sharedKey,
         sharedVal,
+        this.hooks.lifecycle.resolveShare,
       );
       if (!registeredShared && sharedVal && sharedVal.lib) {
         this.setShared({
