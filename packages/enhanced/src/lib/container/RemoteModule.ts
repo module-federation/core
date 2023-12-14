@@ -23,9 +23,9 @@ import type { RequestShortener } from 'webpack/lib/RuntimeModule';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { ObjectDeserializerContext } from 'webpack/lib/serialization/ObjectMiddleware';
 
-const { RawSource } = require(
+const { sources: webpackSources } = require(
   normalizeWebpackPath('webpack'),
-) as typeof import('webpack').sources;
+) as typeof import('webpack');
 const { Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -174,7 +174,7 @@ class RemoteModule extends Module {
     const module = moduleGraph.getModule(this.dependencies[0]);
     const id = module && chunkGraph.getModuleId(module);
     const sources = new Map();
-    sources.set('remote', new RawSource(''));
+    sources.set('remote', new webpackSources.RawSource(''));
     const data = new Map();
     data.set('share-init', [
       {

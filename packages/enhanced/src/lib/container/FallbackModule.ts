@@ -24,9 +24,9 @@ import type {
 } from 'webpack/lib/Module';
 import FallbackItemDependency from './FallbackItemDependency';
 
-const { RawSource } = require(
+const { sources: webpackSources } = require(
   normalizeWebpackPath('webpack'),
-) as typeof import('webpack').sources;
+) as typeof import('webpack');
 const { Template, Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -183,7 +183,7 @@ class FallbackModule extends Module {
       'module.exports = loop();',
     ]);
     const sources = new Map();
-    sources.set('javascript', new RawSource(code));
+    sources.set('javascript', new webpackSources.RawSource(code));
     return { sources, runtimeRequirements: RUNTIME_REQUIREMENTS };
   }
 

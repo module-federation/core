@@ -10,9 +10,9 @@ import type { Dependency, Compilation } from 'webpack';
 const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 ) as typeof import('webpack/lib/util/makeSerializable');
-const { OriginalSource, RawSource } = require(
+const { sources: webpackSources } = require(
   normalizeWebpackPath('webpack'),
-) as typeof import('webpack').sources;
+) as typeof import('webpack');
 const { AsyncDependenciesBlock, Template, Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -291,8 +291,8 @@ class ContainerEntryModule extends Module {
     sources.set(
       'javascript',
       this.useSourceMap || this.useSimpleSourceMap
-        ? new OriginalSource(source, 'webpack/container-entry')
-        : new RawSource(source),
+        ? new webpackSources.OriginalSource(source, 'webpack/container-entry')
+        : new webpackSources.RawSource(source),
     );
 
     return {

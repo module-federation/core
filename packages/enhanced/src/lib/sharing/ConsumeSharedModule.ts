@@ -33,9 +33,9 @@ const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
 const { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } = require(
   normalizeWebpackPath('webpack/lib/ModuleTypeConstants'),
 ) as typeof import('webpack/lib/ModuleTypeConstants');
-const { RawSource } = require(
+const { sources: webpackSources } = require(
   normalizeWebpackPath('webpack'),
-) as typeof import('webpack').sources;
+) as typeof import('webpack');
 const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 ) as typeof import('webpack/lib/util/makeSerializable');
@@ -298,7 +298,7 @@ class ConsumeSharedModule extends Module {
     }
     const code = runtimeTemplate.returningFunction(`${fn}(${args.join(', ')})`);
     const sources = new Map();
-    sources.set('consume-shared', new RawSource(code));
+    sources.set('consume-shared', new webpackSources.RawSource(code));
     return {
       runtimeRequirements,
       sources,
