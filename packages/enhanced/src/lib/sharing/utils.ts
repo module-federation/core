@@ -3,7 +3,6 @@
 	Author Tobias Koppers @sokra
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { InputFileSystem } from 'webpack/lib/util/fs';
 const { join, dirname, readJson } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),

@@ -4,7 +4,6 @@
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation } from 'webpack';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
 
 const ModuleNotFoundError = require(
