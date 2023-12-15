@@ -32,13 +32,15 @@ describe('3002-checkout/', () => {
 
   describe('Routing checks', () => {
     it('check that clicking back and forwards in client side routeing still renders the content correctly', () => {
+      cy.visit('/');
       cy.visit('/checkout');
       cy.url().should('include', '/checkout');
       getH1().contains('checkout page');
       cy.get('.home-menu-link').click();
       //eslint-disable-next-line
-      cy.wait(6000);
+      cy.wait(5000);
       cy.url().should('include', '/');
+      cy.wait(300);
       getH1().contains('This is SPA combined');
     });
   });
