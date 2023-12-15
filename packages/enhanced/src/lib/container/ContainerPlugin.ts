@@ -205,7 +205,6 @@ class ContainerPlugin {
           dep,
           {
             name: name ? name + '_partial' : undefined, // give unique name name
-            // filename: filename?.replace('.', '_partial.'), //
             runtime: undefined,
             library,
           },

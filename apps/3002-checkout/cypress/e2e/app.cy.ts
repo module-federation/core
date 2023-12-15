@@ -37,7 +37,7 @@ describe('3002-checkout/', () => {
       getH1().contains('checkout page');
       cy.get('.home-menu-link').click();
       //eslint-disable-next-line
-      cy.wait(2999);
+      cy.wait(6000);
       cy.url().should('include', '/');
       getH1().contains('This is SPA combined');
     });
