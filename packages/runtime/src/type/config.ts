@@ -73,7 +73,8 @@ export type Shared = {
   loading?: null | Promise<any>;
   // compatibility with previous shared
   eager?: boolean;
-  strategy: 'version-first' | 'loaded-first';
+  //TODO: need to implement types or another api hook
+  strategy: 'version-first' | 'loaded-first' | any;
 };
 
 export type ShareScopeMap = {
