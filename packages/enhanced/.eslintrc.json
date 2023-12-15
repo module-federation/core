@@ -11,14 +11,11 @@
         "@typescript-eslint/no-restricted-imports": [
           "error",
           {
-            "patterns": ["webpack/lib/*"],
-            "paths": [
-              {
-                "name": "webpack",
-                "message": "Please use require(normalizeWebpackPath('webpack')) instead.",
-                "allowTypeImports": true
-              }
-            ]
+            "patterns": [{
+              "group": ["webpack", "webpack/*"],
+              "message": "Please use import-bar instead.",
+              "allowTypeImports": true
+            }]
           }
         ]
       }

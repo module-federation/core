@@ -7,7 +7,6 @@
 
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { ChunkGraph, Chunk } from 'webpack';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type {
   RequestShortener,
   LibIdentOptions,

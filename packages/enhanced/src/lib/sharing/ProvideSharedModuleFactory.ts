@@ -5,7 +5,6 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 import ProvideSharedModule from './ProvideSharedModule';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type {
   ModuleFactoryCreateData,
   ModuleFactoryResult,

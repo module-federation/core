@@ -11,7 +11,6 @@ const { dependencies } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,

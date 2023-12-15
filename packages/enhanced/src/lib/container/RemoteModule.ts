@@ -4,7 +4,6 @@
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation, WebpackOptionsNormalized } from 'webpack';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type {
   CodeGenerationContext,
   CodeGenerationResult,
@@ -14,13 +13,9 @@ import type {
 } from 'webpack/lib/Module';
 import FallbackDependency from './FallbackDependency';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { InputFileSystem } from 'webpack/lib/FileSystemInfo';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { RequestShortener } from 'webpack/lib/RuntimeModule';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { ObjectDeserializerContext } from 'webpack/lib/serialization/ObjectMiddleware';
 
 const { sources: webpackSources } = require(

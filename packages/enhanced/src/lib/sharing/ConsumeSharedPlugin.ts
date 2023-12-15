@@ -18,13 +18,11 @@ import {
   getDescriptionFile,
   getRequiredVersionFromDescriptionFile,
 } from './utils';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import ConsumeSharedModule from './ConsumeSharedModule';
 import ConsumeSharedRuntimeModule from './ConsumeSharedRuntimeModule';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { SemVerRange } from 'webpack/lib/util/semver';
 
 const { parseRange } = require(

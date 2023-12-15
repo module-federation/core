@@ -5,7 +5,6 @@
 
 'use strict';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type {
   WebpackOptions,
   Compilation,

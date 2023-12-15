@@ -4,9 +4,7 @@
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation } from 'webpack';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type WebpackError from 'webpack/lib/WebpackError';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type {
   CodeGenerationContext,
   CodeGenerationResult,
@@ -17,7 +15,6 @@ import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/Module';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { InputFileSystem } from 'webpack/lib/util/fs';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import type { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';

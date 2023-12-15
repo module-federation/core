@@ -24,7 +24,6 @@ const StaticExportsDependency = require(
 ) as typeof import('webpack/lib/dependencies/StaticExportsDependency');
 
 import ContainerExposedDependency from './ContainerExposedDependency';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type {
   LibIdentOptions,
   NeedBuildContext,
@@ -35,7 +34,6 @@ import type {
   InputFileSystem,
   ResolverWithOptions,
 } from 'webpack/lib/Module';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type WebpackError from 'webpack/lib/WebpackError';
 
 const SOURCE_TYPES = new Set(['javascript']);

@@ -12,7 +12,6 @@ import ContainerEntryDependency from './ContainerEntryDependency';
 const ModuleFactory = require(
   normalizeWebpackPath('webpack/lib/ModuleFactory'),
 ) as typeof import('webpack/lib/ModuleFactory');
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type {
   ModuleFactoryCreateData,
   ModuleFactoryResult,
