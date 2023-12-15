@@ -20,16 +20,21 @@ module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
-    config.plugins.push(new ModuleFederationPlugin({
-      name: 'runtime_remote',
-      // library: { type: 'var', name: 'runtime_remote' },
-      filename: 'remoteEntry.js',
-      exposes: {
-        './Button': './src/Button.tsx',
-        './Button1': './src/Button1.tsx',
-      },
-    }));
-    console.log('config.optimization?.runtimeChunk', config.optimization?.runtimeChunk);
+    config.plugins.push(
+      new ModuleFederationPlugin({
+        name: 'runtime_remote',
+        // library: { type: 'var', name: 'runtime_remote' },
+        filename: 'remoteEntry.js',
+        exposes: {
+          './Button': './src/Button.tsx',
+          './Button1': './src/Button1.tsx',
+        },
+      }),
+    );
+    console.log(
+      'config.optimization?.runtimeChunk',
+      config.optimization?.runtimeChunk,
+    );
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {
       if (p.constructor.name === 'ModuleFederationPlugin') {
