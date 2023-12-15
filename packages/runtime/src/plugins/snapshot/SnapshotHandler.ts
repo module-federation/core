@@ -48,11 +48,13 @@ export class SnapshotHandler {
       from: 'global' | 'manifest';
     }>('loadRemoteSnapshot'),
   });
+  loaderHook: FederationHost['loaderHook'];
   manifestLoading: Record<string, Promise<ModuleInfo>> =
     Global.__FEDERATION__.__MANIFEST_LOADING__;
 
   constructor(HostInstance: FederationHost) {
     this.HostInstance = HostInstance;
+    this.loaderHook = HostInstance.loaderHook;
   }
 
   async loadSnapshot(moduleInfo: Remote): Promise<{
@@ -330,7 +332,10 @@ export class SnapshotHandler {
         return manifestJson;
       }
       try {
-        const res = await fetch(manifestUrl);
+        let res = await this.loaderHook.lifecycle.fetch.emit(manifestUrl, {});
+        if (!res || !(res instanceof Response)) {
+          res = await fetch(manifestUrl, {});
+        }
         manifestJson = (await res.json()) as Manifest;
         assert(
           manifestJson.metaData && manifestJson.exposes && manifestJson.shared,

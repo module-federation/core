@@ -1,8 +1,10 @@
 {
-  "name": "runtime-demo-remote",
+  "name": "runtime-remote",
   "version": "0.0.0",
+  "private": true,
   "devDependencies": {
     "@module-federation/core": "*",
+    "@module-federation/enhance": "*",
     "@module-federation/typescript": "3.0.1",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "react-refresh": "0.14.0"

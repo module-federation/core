@@ -1,7 +1,7 @@
 {
-  "name": "runtime_demo_remote",
+  "name": "3005-runtime-host",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/runtime-demo/remote/src",
+  "sourceRoot": "apps/runtime-demo/3005-runtime-host/src",
   "projectType": "application",
   "targets": {
     "build": {
@@ -10,14 +10,14 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "swc",
-        "outputPath": "dist/apps/runtime-demo/remote",
-        "index": "apps/runtime-demo/remote/src/index.html",
+        "outputPath": "dist/apps/runtime-demo/3005-runtime-host",
+        "index": "apps/runtime-demo/3005-runtime-host/src/index.html",
         "baseHref": "/",
-        "main": "apps/runtime-demo/remote/src/index.ts",
-        "tsConfig": "apps/runtime-demo/remote/tsconfig.app.json",
+        "main": "apps/runtime-demo/3005-runtime-host/src/index.ts",
+        "tsConfig": "apps/runtime-demo/3005-runtime-host/tsconfig.app.json",
         "styles": [],
         "scripts": [],
-        "webpackConfig": "apps/runtime-demo/remote/webpack.config.js",
+        "webpackConfig": "apps/runtime-demo/3005-runtime-host/webpack.config.js",
         "babelUpwardRootMode": true
       },
       "configurations": {
@@ -44,19 +44,20 @@
       ]
     },
     "serve": {
-      "executor": "@nx/react:module-federation-dev-server",
+      "executor": "@nx/webpack:dev-server",
       "defaultConfiguration": "production",
       "options": {
-        "buildTarget": "runtime_demo_remote:build",
+        "buildTarget": "3005-runtime-host:build",
         "hmr": true,
-        "port": 3006
+        "port": 3005,
+        "devRemotes": ["3006-runtime-remote"]
       },
       "configurations": {
         "development": {
-          "buildTarget": "runtime_demo_remote:build:development"
+          "buildTarget": "3005-runtime-host:build:development"
         },
         "production": {
-          "buildTarget": "runtime_demo_remote:build:production",
+          "buildTarget": "3005-runtime-host:build:production",
           "hmr": false
         }
       }
@@ -65,23 +66,26 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/node-remote/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": ["apps/runtime-demo/host/**/*.{ts,tsx,js,jsx}"]
       }
     },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "defaultConfiguration": "development",
       "options": {
-        "jestConfig": "apps/node-remote/jest.config.ts",
-        "passWithNoTests": true
+        "buildTarget": "3005-runtime-host:build",
+        "port": 3005
       },
       "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
+        "development": {
+          "buildTarget": "3005-runtime-host:build:development"
+        },
+        "production": {
+          "buildTarget": "3005-runtime-host:build:production"
         }
       }
     }
   },
-  "tags": []
+  "tags": [],
+  "implicitDependencies": ["typescript"]
 }

@@ -1,8 +1,9 @@
 {
-  "name": "runtime-demo-host",
+  "name": "runtime-host",
   "version": "0.0.0",
   "devDependencies": {
     "@module-federation/core": "*",
+    "@module-federation/runtime": "*",
     "@module-federation/typescript": "3.0.1",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "react-refresh": "0.14.0"
