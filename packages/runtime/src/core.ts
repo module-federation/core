@@ -39,7 +39,7 @@ import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
 import { snapshotPlugin } from './plugins/snapshot';
 import { isBrowserEnv } from './utils/env';
 import { getRemoteInfo } from './utils/load';
-import { Global } from './global';
+import { Global, Federation } from './global';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from './constant';
 import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
 
@@ -126,7 +126,7 @@ export class FederationHost {
           scope: string;
           pkgName: string;
           version: string;
-          __FEDERATION__: Global;
+          __FEDERATION__: Federation;
           resolver: () => Shared;
         },
       ],
