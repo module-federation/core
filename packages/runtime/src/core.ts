@@ -126,7 +126,7 @@ export class FederationHost {
           scope: string;
           pkgName: string;
           version: string;
-          __FEDERATION__: Federation;
+          GlobalFederation: Federation;
           resolver: () => Shared;
         },
       ],

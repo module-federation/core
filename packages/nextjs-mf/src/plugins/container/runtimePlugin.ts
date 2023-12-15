@@ -49,9 +49,9 @@ export default function (): FederationRuntimePlugin {
       ) {
         return args;
       }
-      const { shareScopeMap, scope, pkgName, version, __FEDERATION__ } = args;
+      const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
 
-      const host = __FEDERATION__['__INSTANCES__'][0];
+      const host = GlobalFederation['__INSTANCES__'][0];
       if (!host) {
         return args;
       }

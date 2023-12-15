@@ -210,7 +210,7 @@ export function getRegisteredShare(
         scope: sc,
         pkgName,
         version: maxOrSingletonVersion,
-        __FEDERATION__: Global.__FEDERATION__,
+        GlobalFederation: Global.__FEDERATION__,
         resolver: defaultResolver,
       };
       const resolveShared = resolveShareHook.emit(params);
