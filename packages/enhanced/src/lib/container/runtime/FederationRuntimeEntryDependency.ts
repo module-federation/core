@@ -1,5 +1,11 @@
-import EntryDependency from 'webpack/lib/dependencies/EntryDependency';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+
+const makeSerializable = require(
+  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
+);
+const EntryDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
+) as typeof import('webpack/lib/dependencies/EntryDependency');
 
 class FederationRuntimeEntryDependency extends EntryDependency {
   // eslint-disable-next-line no-useless-constructor

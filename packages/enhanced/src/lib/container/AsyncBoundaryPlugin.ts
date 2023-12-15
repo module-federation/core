@@ -1,10 +1,31 @@
-import Compiler from 'webpack/lib/Compiler';
-import Compilation from 'webpack/lib/Compilation';
-import Chunk, { Source } from 'webpack/lib/Chunk';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import SortableSet from 'webpack/lib/util/SortableSet';
-import Module from 'webpack/lib/Module';
-import { StartupRenderContext } from 'webpack/lib/javascript/JavascriptModulesPlugin';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type {
+  Compiler,
+  Compilation,
+  Chunk,
+  sources,
+  Module,
+  RuntimeGlobals,
+  javascript,
+} from 'webpack';
+import type { SyncWaterfallHook } from 'tapable';
+
+const SortableSet = require(
+  normalizeWebpackPath('webpack/lib/util/SortableSet'),
+) as typeof import('webpack/lib/util/SortableSet');
+
+type CompilationHooksJavascriptModulesPlugin = ReturnType<
+  typeof javascript.JavascriptModulesPlugin.getCompilationHooks
+>;
+type RenderStartup = CompilationHooksJavascriptModulesPlugin['renderStartup'];
+
+type InferStartupRenderContext<T> = T extends SyncWaterfallHook<
+  [infer Source, infer Module, infer StartupRenderContext]
+>
+  ? StartupRenderContext
+  : never;
+
+type StartupRenderContext = InferStartupRenderContext<RenderStartup>;
 
 interface Options {
   eager?: RegExp | ((module: Module) => boolean);
@@ -52,7 +73,7 @@ class AsyncEntryStartupPlugin {
     ).renderStartup.tap(
       'AsyncEntryStartupPlugin',
       (
-        source: Source,
+        source: sources.Source,
         _renderContext: Module,
         upperContext: StartupRenderContext,
       ) => {
@@ -270,7 +291,7 @@ class AsyncEntryStartupPlugin {
     initialEntryModules: string[],
     shared: string,
     remotes: string,
-    source: Source,
+    source: sources.Source,
   ) {
     const { Template } = compiler.webpack;
     if (

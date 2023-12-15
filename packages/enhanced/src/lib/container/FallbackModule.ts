@@ -5,7 +5,8 @@
 
 'use strict';
 
-import { RawSource } from 'webpack-sources';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { ChunkGraph, Chunk } from 'webpack';
 import type {
   RequestShortener,
   LibIdentOptions,
@@ -20,14 +21,20 @@ import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/Module';
-import Module from 'webpack/lib/Module';
-import type ChunkGraph from 'webpack/lib/ChunkGraph';
-import Chunk from 'webpack/lib/Chunk';
-import { WEBPACK_MODULE_TYPE_FALLBACK } from 'webpack/lib/ModuleTypeConstants';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import Template from 'webpack/lib/Template';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
 import FallbackItemDependency from './FallbackItemDependency';
+
+const { sources: webpackSources } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const { Template, Module, RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const makeSerializable = require(
+  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
+) as typeof import('webpack/lib/util/makeSerializable');
+const { WEBPACK_MODULE_TYPE_FALLBACK } = require(
+  normalizeWebpackPath('webpack/lib/ModuleTypeConstants'),
+) as typeof import('webpack/lib/ModuleTypeConstants');
 
 const TYPES = new Set(['javascript']);
 const RUNTIME_REQUIREMENTS = new Set([RuntimeGlobals.module]);
@@ -87,6 +94,7 @@ class FallbackModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
+  // @ts-ignore
   override needBuild(
     context: NeedBuildContext,
     callback: (error: WebpackError | null, result?: boolean) => void,
@@ -102,6 +110,7 @@ class FallbackModule extends Module {
    * @param {function(WebpackError=): void} callback callback function
    * @returns {void}
    */
+  // @ts-ignore
   override build(
     options: WebpackOptions,
     compilation: Compilation,
@@ -140,6 +149,7 @@ class FallbackModule extends Module {
    * @param {CodeGenerationContext} context context for code generation
    * @returns {CodeGenerationResult} result
    */
+  // @ts-ignore
   override codeGeneration({
     runtimeTemplate,
     moduleGraph,
@@ -172,7 +182,7 @@ class FallbackModule extends Module {
       'module.exports = loop();',
     ]);
     const sources = new Map();
-    sources.set('javascript', new RawSource(code));
+    sources.set('javascript', new webpackSources.RawSource(code));
     return { sources, runtimeRequirements: RUNTIME_REQUIREMENTS };
   }
 

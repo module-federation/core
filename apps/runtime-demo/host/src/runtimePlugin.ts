@@ -6,8 +6,8 @@ export default function (): FederationRuntimePlugin {
       console.log('beforeInit: ', args);
       return args;
     },
-    beforeLoadRemote(args) {
-      console.log('beforeLoadRemote: ', args);
+    beforeRequest(args) {
+      console.log('beforeRequest: ', args);
       return args;
     },
     //@ts-ignore
@@ -20,18 +20,18 @@ export default function (): FederationRuntimePlugin {
         });
       });
     },
-    // loadRemoteMatch(args) {
-    //   console.log('loadRemoteMatch', args);
-    //   // randomly switch between different modules
-    //   if (Math.random() > 0.5) {
-    //     args.expose = './Button1';
-    //     return args;
-    //   }
+    afterResolve(args) {
+      console.log('afterResolve', args);
+      // randomly switch between different modules
+      if (Math.random() > 0.5) {
+        args.expose = './Button1';
+        return args;
+      }
 
-    //   return args;
-    // },
-    loadRemote(args) {
-      console.log('loadRemote: ', args);
+      return args;
+    },
+    onLoad(args) {
+      console.log('onLoad: ', args);
       return args;
     },
     async loadShare(args) {

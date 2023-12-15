@@ -203,7 +203,7 @@ function getDataConfig() {
 function RemotesDataPlugin() {
   return {
     name: 'data-config',
-    async beforeLoadRemote(args) {
+    async beforeRequest(args) {
       const remotes = await getDataConfig();
       origin.initOptions({
         remotes,
@@ -230,7 +230,7 @@ loadRemote('sub/utils').then((m) => {
 type Plugin = {
   name: string;
   core: {
-    beforeLoadRemote: AsyncWaterfallHook<{
+    beforeRequest: AsyncWaterfallHook<{
       id: string;
       options: Options;
       origin: VmokHost;

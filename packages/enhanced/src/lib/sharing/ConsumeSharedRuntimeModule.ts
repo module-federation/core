@@ -2,23 +2,23 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
-import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import Template from 'webpack/lib/Template';
-import {
+import type { Module, ChunkGraph, Compilation, Chunk } from 'webpack';
+import ConsumeSharedModule from './ConsumeSharedModule';
+import { getFederationGlobalScope } from '../container/runtime/utils';
+
+const { Template, RuntimeGlobals, RuntimeModule } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const {
   parseVersionRuntimeCode,
   versionLtRuntimeCode,
   rangeToStringRuntimeCode,
   satisfyRuntimeCode,
-} from 'webpack/lib/util/semver';
-import RuntimeModule from 'webpack/lib/RuntimeModule';
-import Module from 'webpack/lib/Module';
-import ConsumeSharedModule from './ConsumeSharedModule';
-import type ChunkGraph from 'webpack/lib/ChunkGraph';
-import type Compilation from 'webpack/lib/Compilation';
-import type Chunk from 'webpack/lib/Chunk';
-import { Source } from 'webpack-sources';
-import { getFederationGlobalScope } from '../container/runtime/utils';
+} = require(
+  normalizeWebpackPath('webpack/lib/util/semver'),
+) as typeof import('webpack/lib/util/semver');
 
 class ConsumeSharedRuntimeModule extends RuntimeModule {
   private _runtimeRequirements: ReadonlySet<string>;
@@ -53,15 +53,18 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
       list: (string | number)[],
     ) => {
       for (const m of modules) {
-        const module: ConsumeSharedModule = m as ConsumeSharedModule;
+        const module: ConsumeSharedModule = m as unknown as ConsumeSharedModule;
+        // @ts-ignore
         const id = chunkGraph.getModuleId(module);
         list.push(id);
         const moduleGetter = codeGenerationResults.getSource(
+          // @ts-ignore
           module,
           chunk.runtime,
           'consume-shared',
         );
         const shareOption = codeGenerationResults.getData(
+          // @ts-ignore
           module,
           chunk.runtime,
           'consume-shared',

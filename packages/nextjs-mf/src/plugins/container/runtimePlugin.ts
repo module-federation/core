@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { FederationRuntimePlugin } from '@module-federation/runtime/type';
 
 export default function (): FederationRuntimePlugin {
@@ -16,8 +17,7 @@ export default function (): FederationRuntimePlugin {
               return false;
             };
 
-      const { moduleCache } = args.origin;
-      const { name } = args.origin;
+      const { moduleCache, name } = args.origin;
 
       const attachedRemote = attach();
       if (attachedRemote) {

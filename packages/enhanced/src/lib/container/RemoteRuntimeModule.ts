@@ -2,17 +2,16 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import type Compilation from 'webpack/lib/Compilation';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { Compilation } from 'webpack';
 import RemoteModule from './RemoteModule';
-import RuntimeModule from 'webpack/lib/RuntimeModule';
-import Template from 'webpack/lib/Template';
-import extractUrlAndGlobal from 'webpack/lib/util/extractUrlAndGlobal';
-import { FEDERATION_SUPPORTED_TYPES } from './constant';
 import { getFederationGlobalScope } from './runtime/utils';
 import type ExternalModule from 'webpack/lib/ExternalModule';
 import type FallbackModule from './FallbackModule';
 import type { RemotesOptions } from '@module-federation/webpack-bundler-runtime';
+const { Template, RuntimeModule, RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 
 class RemoteRuntimeModule extends RuntimeModule {
   constructor() {
@@ -44,18 +43,21 @@ class RemoteRuntimeModule extends RuntimeModule {
       // @ts-ignore
       const remotes = (chunkToRemotesMapping[chunk.id] = []);
       for (const m of modules) {
-        const module: RemoteModule = m as RemoteModule;
+        const module: RemoteModule = m as unknown as RemoteModule;
         const name = module.internalRequest;
         const remoteName = module.remoteName;
+        // @ts-ignore
         const id = chunkGraph ? chunkGraph.getModuleId(module) : undefined;
         const { shareScope } = module;
         const dep = module.dependencies[0];
+        // @ts-ignore
         const externalModule = moduleGraph.getModule(dep) as
           | ExternalModule
           | FallbackModule;
         const externalModuleId =
           chunkGraph && externalModule
-            ? chunkGraph.getModuleId(externalModule)
+            ? // @ts-ignore
+              chunkGraph.getModuleId(externalModule)
             : undefined;
         if (id !== undefined) {
           //@ts-ignore
@@ -68,6 +70,7 @@ class RemoteRuntimeModule extends RuntimeModule {
             externalModule.dependencies.forEach((dependency) => {
               const remoteModule = moduleGraph.getModule(dependency);
               if (remoteModule) {
+                // @ts-ignore
                 remoteModules.push(remoteModule as ExternalModule);
               }
             });
@@ -80,6 +83,7 @@ class RemoteRuntimeModule extends RuntimeModule {
             const externalModuleId =
               chunkGraph &&
               remoteModule &&
+              // @ts-ignore
               chunkGraph.getModuleId(remoteModule);
             idToRemoteMap[id].push({
               externalType: remoteModule.externalType,

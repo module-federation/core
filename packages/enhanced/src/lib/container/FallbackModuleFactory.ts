@@ -4,13 +4,16 @@
 */
 
 'use strict';
-import {
+import type {
   ModuleFactoryCreateData,
   ModuleFactoryResult,
 } from 'webpack/lib/ModuleFactory';
-import ModuleFactory from 'webpack/lib/ModuleFactory';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import FallbackModule from './FallbackModule';
-import FallbackDependency from './FallbackDependency';
+
+const ModuleFactory = require(
+  normalizeWebpackPath('webpack/lib/ModuleFactory'),
+) as typeof import('webpack/lib/ModuleFactory');
 
 export default class FallbackModuleFactory extends ModuleFactory {
   /**
@@ -22,8 +25,9 @@ export default class FallbackModuleFactory extends ModuleFactory {
     data: ModuleFactoryCreateData,
     callback: (error: Error | null, result?: ModuleFactoryResult) => void,
   ): void {
-    const dependency = data.dependencies[0] as FallbackDependency;
+    const dependency = data.dependencies[0];
     callback(null, {
+      // @ts-ignore
       module: new FallbackModule(dependency.requests),
     });
   }
