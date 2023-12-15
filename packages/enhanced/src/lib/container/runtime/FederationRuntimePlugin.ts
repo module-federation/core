@@ -12,7 +12,7 @@ import path from 'path';
 import { TEMP_DIR } from '../constant';
 import type { ModuleFederationPluginOptions } from '../../../declarations/plugins/container/ModuleFederationPlugin';
 
-const { RuntimeGlobals,Template } = require(
+const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 const { mkdirpSync } = require(

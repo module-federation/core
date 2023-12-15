@@ -3,7 +3,7 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import getFederationGlobal from './getFederationGlobal';
 import { NormalizedRuntimeInitOptionsWithOutShared } from '../../../types/runtime';
 
-const { RuntimeModule,RuntimeGlobals,Template } = require(
+const { RuntimeModule, RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 

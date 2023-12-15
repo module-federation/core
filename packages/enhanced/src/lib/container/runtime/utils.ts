@@ -11,7 +11,6 @@ const extractUrlAndGlobal = require(
   normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),
 ) as typeof import('webpack/lib/util/extractUrlAndGlobal');
 
-
 type EntryStaticNormalized = Awaited<
   ReturnType<Extract<webpack.WebpackOptionsNormalized['entry'], () => any>>
 >;
