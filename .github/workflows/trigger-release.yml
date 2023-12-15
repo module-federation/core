@@ -39,12 +39,15 @@ jobs:
       - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
         run: npm audit signatures
 
+      - name: Check for un-formatted files
+        run: npx nx format:check
+
       - name: Release ${{ github.event.inputs.packages }} package(s)
         run: |
           if [[ ${{ github.event.inputs.packages }} == 'affected' ]]; then
             npx nx affected -t release --parallel=3 --exclude='*,!tag:package'
           elif [[ ${{ github.event.inputs.packages }} == 'all' ]]; then
-            npx nx run-many --target=release --all --parallel=3 -exclude='*,!tag:package'
+            npx nx run-many --target=release --all --parallel=3 --exclude='*,!tag:package'
           else
             npx nx run ${{ github.event.inputs.packages }}:release
           fi

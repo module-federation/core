@@ -1,51 +1,39 @@
-# ModuleFederation
+<p align="center">
+  <img alt="Module federation Banner"  width="260" src="https://github.com/module-federation/universe/assets/27547179/11234712-40fc-4696-a7fd-16e0c631005a">
+</p>
 
-# Documentation
+# Module Federation
 
-[module-federation/nextjs-mf](./packages/nextjs-mf)
+## 💡 What is Module Federation?
 
-[module-federation/node](./packages/node)
+- Module Federation is a concept that allows developers to share code and resources across multiple JavaScript applications
 
-[module-federation/utilities](./packages/utilities)
+- Module Federation can be used to split monolithic applications into micro-front-end architectures
 
-[module-federation/typescript](./packages/typescript)
+- Module Federation reuses common dependencies between modules as much as possible
 
-[module-federation/storybook-addon](./packages/storybook-addon)
+[Learn more](https://module-federation.io/docs/en/mf-docs/0.2/getting-started/)
 
-[module-federation/native-federation-typescript](./packages/native-federation-typescript)
+## 🔥 What does universe offer?
 
-[module-federation/native-federation-tests](./packages/native-federation-tests)
+The universe repository provides a set of tools to enhance module federation's capabilities. These include:
 
-## Generate an application
+- [Next.js Module Federation](./packages/nextjs-mf)
+- [Node Module Federation](./packages/node)
+- [Storybook addon for Module Federation](./packages/storybook-addon)
+- [Native federation typescript](./packages/native-federation-typescript)
+- [Utilities](./packages/utilities)
 
-Run `nx g @nx/next:app my-app` to generate an application.
+# 🧑‍💻 Community
 
-> You can use any of the plugins above to generate applications as well.
+Come and chat with us on [Discord](https://discord.com/invite/T8c6yAxkbv)! The Module federation team and users are active there, and we're always looking for contributions.
 
-When using Nx, you can create multiple applications and libraries in the same workspace.
+# 🤝 Contribution
 
-## Generate a library
+> New contributors welcome!
 
-Run `nx g @nx/js:lib my-lib` to generate a library.
+Please read the [Contributing Guide](https://github.com/module-federation/universe/blob/canary/CONTRIBUTING.md).
 
-> You can also use any of the plugins above to generate libraries as well.
+## 🙌 Code of Conduct
 
-Libraries are shareable across libraries and applications. They can be imported from `@module-federation/mylib`.
-
-## Development server
-
-Run `nx serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
-
-## Build
-
-Run `nx build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `nx test my-app` to execute the unit tests via [Jest](https://jestjs.io).
-
-Run `nx affected:test` to execute the unit tests affected by a change.
-
-## Social links
-
-We are excited to announce the new [Discord community](https://discord.gg/T8c6yAxkbv) for Module Federation has been recently launched! This space will be used to discuss and share knowledge about the latest advancements in module federation and how to use it effectively. See you there!
+This repo has adopted the Code of Conduct. Please check [Code of Conduct](./CODE_OF_CONDUCT.md) for more details.
