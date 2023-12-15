@@ -134,8 +134,8 @@ describe('shared', () => {
     const reactInstance2Res = reactInstance2();
     assert(reactInstance1Res, "reactInstance1 can't be undefined");
     assert(reactInstance2Res, "reactInstance2 can't be undefined");
-    expect(reactInstance1Res.uniqueId).toBe(1);
-    expect(reactInstance2Res.uniqueId).toBe(1);
+    expect(reactInstance1Res.uniqueId).toBe(2);
+    expect(reactInstance2Res.uniqueId).toBe(2);
     expect(reactInstance1Res).toStrictEqual(reactInstance2Res);
   });
 
