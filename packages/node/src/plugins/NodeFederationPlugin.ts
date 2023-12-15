@@ -97,8 +97,7 @@ class NodeFederationPlugin {
   private getModuleFederationPlugin(compiler: Compiler, webpack: any): any {
     let ModuleFederationPlugin;
     try {
-      ModuleFederationPlugin =
-        require('@module-federation/enhanced').ModuleFederationPlugin;
+      return require('@module-federation/enhanced').ModuleFederationPlugin;
     } catch (e) {
       console.error(
         "Can't find @module-federation/enhanced, falling back to webpack ModuleFederationPlugin, this may not work",
