@@ -1,3 +1,10 @@
+# [1.1.0-canary.1](https://github.com/module-federation/universe/compare/runtime-1.0.1-canary.1...runtime-1.1.0-canary.1) (2023-12-15)
+
+
+### Features
+
+* **runtime:** the runtime adds a fetch hook and processes fetch-related requests ([89dd452](https://github.com/module-federation/universe/commit/89dd452104feaf27d15f7dbec3fe719649f28bb0)), closes [#1757](https://github.com/module-federation/universe/issues/1757)
+
 ## [1.0.1-canary.1](https://github.com/module-federation/universe/compare/runtime-1.0.0...runtime-1.0.1-canary.1) (2023-12-06)
 
 
