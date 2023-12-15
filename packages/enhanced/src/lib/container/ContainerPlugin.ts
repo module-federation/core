@@ -2,8 +2,10 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
-//@ts-ignore
-import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
+import {
+  getWebpackPath,
+  normalizeWebpackPath,
+} from '@module-federation/sdk/normalize-webpack-path';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';
@@ -23,6 +25,11 @@ type OptimizationSplitChunksOptions = NonUndefined<
 
 type CacheGroups = OptimizationSplitChunksOptions['cacheGroups'];
 type CacheGroup = NonUndefined<CacheGroups>[string];
+
+
+const createSchemaValidation = require(
+  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
+) as typeof import('webpack/lib/util/create-schema-validation');
 
 const validate = createSchemaValidation(checkOptions, () => schema, {
   name: 'Container Plugin',
@@ -135,6 +142,8 @@ class ContainerPlugin {
   }
 
   apply(compiler: Compiler): void {
+    process.env['FEDERATION_WEBPACK_PATH'] =
+    process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
     const useModuleFederationPlugin = compiler.options.plugins.find((p) => {
       if (typeof p !== 'object' || !p) {
         return false;
@@ -148,15 +157,9 @@ class ContainerPlugin {
     }
 
     new FederationRuntimePlugin().apply(compiler);
-    const {
-      name,
-      exposes,
-      shareScope,
-      filename,
-      library,
-      runtime,
-      runtimePlugins,
-    } = this._options;
+
+    const { name, exposes, shareScope, filename, library, runtime } =
+      this._options;
 
     if (
       library &&
@@ -173,6 +176,7 @@ class ContainerPlugin {
         //@ts-ignore
         exposes,
         shareScope,
+        //@ts-ignore
         runtimePlugins,
       );
 
@@ -200,8 +204,8 @@ class ContainerPlugin {
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
-          //@ts-ignore
           ContainerEntryDependency,
+          //@ts-ignore
           new ContainerEntryModuleFactory(),
         );
 

@@ -6,6 +6,10 @@ import type {
 } from 'webpack';
 import ContainerEntryModule from './ContainerEntryModule';
 
+/**
+ * This class is used to hoist container references in the code.
+ * @constructor
+ */
 export class HoistContainerReferences implements WebpackPluginInstance {
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(

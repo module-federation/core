@@ -4,17 +4,24 @@
 */
 
 'use strict';
-
+import {
+  getWebpackPath,
+  normalizeWebpackPath,
+} from '@module-federation/sdk/normalize-webpack-path';
+import type { Compiler, Compilation } from 'webpack';
 import { parseOptions } from '../container/options';
-import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
-import WebpackError from 'webpack/lib/WebpackError';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import ProvideSharedDependency from './ProvideSharedDependency';
 import ProvideSharedModuleFactory from './ProvideSharedModuleFactory';
-import type Compiler from 'webpack/lib/Compiler';
-import type Compilation from 'webpack/lib/Compilation';
 import type { ProvideSharedPluginOptions } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
+
+const createSchemaValidation = require(
+  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
+) as typeof import('webpack/lib/util/create-schema-validation');
+const WebpackError = require(
+  normalizeWebpackPath('webpack/lib/WebpackError'),
+) as typeof import('webpack/lib/WebpackError');
 
 export type ProvideOptions = {
   shareKey: string;
@@ -93,8 +100,9 @@ class ProvideSharedPlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
-    // @ts-ignore
     new FederationRuntimePlugin().apply(compiler);
+    process.env['FEDERATION_WEBPACK_PATH'] =
+      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
     const compilationData: WeakMap<Compilation, ResolvedProvideMap> =
       new WeakMap();
@@ -155,6 +163,7 @@ class ProvideSharedPlugin {
                 `No version specified and unable to automatically determine one. ${details}`,
               );
               error.file = `shared module ${key} -> ${resource}`;
+              // @ts-ignore
               compilation.warnings.push(error);
             }
           }
@@ -247,6 +256,7 @@ class ProvideSharedPlugin {
         compilation.dependencyFactories.set(
           //@ts-ignore
           ProvideSharedDependency,
+          // @ts-ignore
           new ProvideSharedModuleFactory(),
         );
       },
