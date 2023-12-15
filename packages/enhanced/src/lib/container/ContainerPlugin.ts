@@ -157,8 +157,15 @@ class ContainerPlugin {
 
     new FederationRuntimePlugin().apply(compiler);
 
-    const { name, exposes, shareScope, filename, library, runtime } =
-      this._options;
+    const {
+      name,
+      exposes,
+      shareScope,
+      filename,
+      library,
+      runtime,
+      runtimePlugins,
+    } = this._options;
 
     if (
       library &&
@@ -175,7 +182,6 @@ class ContainerPlugin {
         //@ts-ignore
         exposes,
         shareScope,
-        //@ts-ignore
         runtimePlugins,
       );
 
