@@ -204,48 +204,50 @@ describe('hooks', () => {
     reset();
   });
 
-  it('loader fetch hooks', async ()=> {
+  it('loader fetch hooks', async () => {
     const data = {
-      "id": "@loader-hooks/app2",
-      "name": "@loader-hooks/app2",
-      "metaData": {
-        "name": "@loader-hooks/app2",
-        "publicPath": "http://localhost:1111/",
-        "type": "app",
-        "buildInfo": {
-          "buildVersion": "custom"
+      id: '@loader-hooks/app2',
+      name: '@loader-hooks/app2',
+      metaData: {
+        name: '@loader-hooks/app2',
+        publicPath: 'http://localhost:1111/',
+        type: 'app',
+        buildInfo: {
+          buildVersion: 'custom',
         },
-        "remoteEntry": {
-          "name": "federation-remote-entry.js",
-          "path": "resources/hooks/app2/"
+        remoteEntry: {
+          name: 'federation-remote-entry.js',
+          path: 'resources/hooks/app2/',
         },
-        "types": {
-          "name": "index.d.ts",
-          "path": "./"
+        types: {
+          name: 'index.d.ts',
+          path: './',
         },
-        "globalName": "@loader-hooks/app2"
+        globalName: '@loader-hooks/app2',
       },
-      "remotes": [],
-      "shared": [],
-      "exposes": []
+      remotes: [],
+      shared: [],
+      exposes: [],
     };
-    
+
     const responseBody = new Response(JSON.stringify(data), {
       status: 200,
-      statusText: "OK",
-      headers: { "Content-Type": "application/json" }
+      statusText: 'OK',
+      headers: { 'Content-Type': 'application/json' },
     });
 
-    const fetchPlugin: ()=> FederationRuntimePlugin = function (){
+    const fetchPlugin: () => FederationRuntimePlugin = function () {
       return {
         name: 'fetch-plugin',
-        fetch (url, options){
-          if (url === 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json') {
+        fetch(url, options) {
+          if (
+            url === 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json'
+          ) {
             return Promise.resolve(responseBody);
           }
-        }
-      }
-    }
+        },
+      };
+    };
 
     const INSTANCE = new FederationHost({
       name: '@loader-hooks/fetch',
@@ -255,9 +257,7 @@ describe('hooks', () => {
           entry: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
         },
       ],
-      plugins: [
-        fetchPlugin()
-      ],
+      plugins: [fetchPlugin()],
     });
 
     const res = await INSTANCE.loadRemote<() => string>(
@@ -265,6 +265,5 @@ describe('hooks', () => {
     );
     assert(res);
     expect(res()).toBe('hello app2');
-
   });
 });
