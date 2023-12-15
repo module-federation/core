@@ -53,8 +53,6 @@ export class NextFederationPlugin {
    * @param compiler The webpack compiler object.
    */
   apply(compiler: Compiler) {
-    compiler.options.devtool = false;
-
     process.env['FEDERATION_WEBPACK_PATH'] = getWebpackPath(compiler);
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
