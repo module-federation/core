@@ -58,13 +58,13 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
         const id = chunkGraph.getModuleId(module);
         list.push(id);
         const moduleGetter = codeGenerationResults.getSource(
-        // @ts-ignore
+          // @ts-ignore
           module,
           chunk.runtime,
           'consume-shared',
         );
         const shareOption = codeGenerationResults.getData(
-        // @ts-ignore
+          // @ts-ignore
           module,
           chunk.runtime,
           'consume-shared',

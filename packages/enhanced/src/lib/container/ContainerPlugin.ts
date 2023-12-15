@@ -26,7 +26,6 @@ type OptimizationSplitChunksOptions = NonUndefined<
 type CacheGroups = OptimizationSplitChunksOptions['cacheGroups'];
 type CacheGroup = NonUndefined<CacheGroups>[string];
 
-
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
@@ -143,7 +142,7 @@ class ContainerPlugin {
 
   apply(compiler: Compiler): void {
     process.env['FEDERATION_WEBPACK_PATH'] =
-    process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
     const useModuleFederationPlugin = compiler.options.plugins.find((p) => {
       if (typeof p !== 'object' || !p) {
         return false;

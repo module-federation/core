@@ -40,9 +40,6 @@ const EntryDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
 ) as typeof import('webpack/lib/dependencies/EntryDependency');
 
-
-
-
 const SOURCE_TYPES = new Set(['javascript']);
 
 export type ExposeOptions = {

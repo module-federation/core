@@ -50,14 +50,14 @@ class RemoteRuntimeModule extends RuntimeModule {
         const id = chunkGraph ? chunkGraph.getModuleId(module) : undefined;
         const { shareScope } = module;
         const dep = module.dependencies[0];
-      // @ts-ignore
+        // @ts-ignore
         const externalModule = moduleGraph.getModule(dep) as
           | ExternalModule
           | FallbackModule;
         const externalModuleId =
           chunkGraph && externalModule
-      // @ts-ignore
-            ? chunkGraph.getModuleId(externalModule)
+            ? // @ts-ignore
+              chunkGraph.getModuleId(externalModule)
             : undefined;
         if (id !== undefined) {
           //@ts-ignore
@@ -70,7 +70,7 @@ class RemoteRuntimeModule extends RuntimeModule {
             externalModule.dependencies.forEach((dependency) => {
               const remoteModule = moduleGraph.getModule(dependency);
               if (remoteModule) {
-      // @ts-ignore
+                // @ts-ignore
                 remoteModules.push(remoteModule as ExternalModule);
               }
             });
@@ -83,7 +83,7 @@ class RemoteRuntimeModule extends RuntimeModule {
             const externalModuleId =
               chunkGraph &&
               remoteModule &&
-      // @ts-ignore
+              // @ts-ignore
               chunkGraph.getModuleId(remoteModule);
             idToRemoteMap[id].push({
               externalType: remoteModule.externalType,

@@ -167,14 +167,14 @@ class ProvideSharedModule extends Module {
     const runtimeRequirements = new Set([RuntimeGlobals.initializeSharing]);
     const moduleGetter = this._eager
       ? runtimeTemplate.syncModuleFactory({
-        //@ts-ignore
+          //@ts-ignore
           dependency: this.dependencies[0],
           chunkGraph,
           request: this._request,
           runtimeRequirements,
         })
       : runtimeTemplate.asyncModuleFactory({
-        //@ts-ignore
+          //@ts-ignore
           block: this.blocks[0],
           chunkGraph,
           request: this._request,
