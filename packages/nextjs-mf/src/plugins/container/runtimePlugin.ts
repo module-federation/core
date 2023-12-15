@@ -2,7 +2,7 @@ import { FederationRuntimePlugin } from '@module-federation/runtime/type';
 
 export default function (): FederationRuntimePlugin {
   return {
-    name: 'custom-plugin',
+    name: 'next-internal-plugin',
     beforeInit(args) {
       if (!__webpack_runtime_id__.startsWith('webpack')) return args;
       const attach =
