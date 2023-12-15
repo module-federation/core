@@ -9,7 +9,7 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "parallel": false,
-        "outputPath": "dist/packages/webpack-bundler-runtime",
+        "outputPath": "packages/webpack-bundler-runtime/dist",
         "main": "packages/webpack-bundler-runtime/src/index.ts",
         "tsConfig": "packages/webpack-bundler-runtime/tsconfig.lib.json",
         "assets": [],

@@ -8,7 +8,7 @@
       "executor": "@nx/js:swc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/typescript",
+        "outputPath": "packages/typescript/dist",
         "main": "packages/typescript/src/index.ts",
         "tsConfig": "packages/typescript/tsconfig.lib.json",
         "assets": ["packages/typescript/*.md"],

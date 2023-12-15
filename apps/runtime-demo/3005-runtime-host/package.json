@@ -2,9 +2,9 @@
   "name": "runtime-host",
   "version": "0.0.0",
   "devDependencies": {
-    "@module-federation/core": "*",
-    "@module-federation/runtime": "*",
-    "@module-federation/typescript": "3.0.1",
+    "@module-federation/core": "workspace:*",
+    "@module-federation/runtime": "workspace:*",
+    "@module-federation/typescript": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "react-refresh": "0.14.0"
   }

@@ -1,0 +1,5 @@
+packages:
+  - 'packages/**'
+  - 'packages/enhance'
+  # - 'apps/runtime-demo/**'
+  - 'apps/runtime-demo/3005-runtime-host'

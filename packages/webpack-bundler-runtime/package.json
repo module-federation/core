@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/webpack-bundler-runtime",
-  "version": "1.0.0-canary.3",
+  "version": "0.0.3",
   "license": "MIT",
   "description": "Module Federation Runtime for webpack",
   "keywords": [

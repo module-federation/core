@@ -1,0 +1,17 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [
+    [
+      "@module-federation/runtime",
+      "@module-federation/enhanced",
+      "@module-federation/webpack-bundler-runtime"
+    ]
+  ],
+  "linked": [],
+  "access": "restricted",
+  "baseBranch": "canary",
+  "updateInternalDependencies": "patch",
+  "ignore": []
+}
