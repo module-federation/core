@@ -2,10 +2,13 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
+import type { Compiler } from 'webpack';
+import {
+  getWebpackPath,
+  normalizeWebpackPath,
+} from '@module-federation/sdk/normalize-webpack-path';
 
-import type Compiler from 'webpack/lib/Compiler';
-import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
+// import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import FallbackDependency from './FallbackDependency';
 import FallbackItemDependency from './FallbackItemDependency';
 import FallbackModuleFactory from './FallbackModuleFactory';
@@ -13,15 +16,19 @@ import RemoteModule from './RemoteModule';
 import RemoteRuntimeModule from './RemoteRuntimeModule';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
 import { parseOptions } from './options';
-import ExternalsPlugin from 'webpack/lib/ExternalsPlugin';
-import type Compilation from 'webpack/lib/Compilation';
-import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
-import NormalModuleFactory from 'webpack/lib/NormalModuleFactory';
 import {
   ExternalsType,
   ContainerReferencePluginOptions,
   RemotesConfig,
 } from '../../declarations/plugins/container/ContainerReferencePlugin';
+
+const { ExternalsPlugin } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+
+const createSchemaValidation = require(
+  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
+) as typeof import('webpack/lib/util/create-schema-validation');
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
@@ -65,6 +72,9 @@ class ContainerReferencePlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
+    process.env['FEDERATION_WEBPACK_PATH'] =
+      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+
     const { _remotes: remotes, _remoteType: remoteType } = this;
 
     /** @type {Record<string, string>} */
@@ -83,15 +93,11 @@ class ContainerReferencePlugin {
       }
     }
     const Externals = compiler.webpack.ExternalsPlugin || ExternalsPlugin;
-    //@ts-ignore
     new Externals(remoteType, remoteExternals).apply(compiler);
 
     compiler.hooks.compilation.tap(
       'ContainerReferencePlugin',
-      (
-        compilation: Compilation,
-        { normalModuleFactory }: { normalModuleFactory: NormalModuleFactory },
-      ) => {
+      (compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
           RemoteToExternalDependency,
           normalModuleFactory,
@@ -104,13 +110,14 @@ class ContainerReferencePlugin {
 
         compilation.dependencyFactories.set(
           FallbackDependency,
+          // @ts-ignore
           new FallbackModuleFactory(),
         );
 
         normalModuleFactory.hooks.factorize.tap(
           'ContainerReferencePlugin',
-          //@ts-ignore
-          (data: ResolveData): Module => {
+          // @ts-ignore
+          (data) => {
             if (!data.request.includes('!')) {
               for (const [key, config] of remotes) {
                 if (
@@ -139,13 +146,13 @@ class ContainerReferencePlugin {
         );
 
         compilation.hooks.runtimeRequirementInTree
-          .for(RuntimeGlobals.ensureChunkHandlers)
+          .for(compiler.webpack.RuntimeGlobals.ensureChunkHandlers)
           .tap('ContainerReferencePlugin', (chunk, set) => {
-            set.add(RuntimeGlobals.module);
-            set.add(RuntimeGlobals.moduleFactoriesAddOnly);
-            set.add(RuntimeGlobals.hasOwnProperty);
-            set.add(RuntimeGlobals.initializeSharing);
-            set.add(RuntimeGlobals.shareScopeMap);
+            set.add(compiler.webpack.RuntimeGlobals.module);
+            set.add(compiler.webpack.RuntimeGlobals.moduleFactoriesAddOnly);
+            set.add(compiler.webpack.RuntimeGlobals.hasOwnProperty);
+            set.add(compiler.webpack.RuntimeGlobals.initializeSharing);
+            set.add(compiler.webpack.RuntimeGlobals.shareScopeMap);
             compilation.addRuntimeModule(chunk, new RemoteRuntimeModule());
           });
       },

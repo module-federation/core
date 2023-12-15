@@ -2,11 +2,12 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import type Compilation from 'webpack/lib/Compilation';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { Compilation } from 'webpack';
 import RemoteModule from './RemoteModule';
-import RuntimeModule from 'webpack/lib/RuntimeModule';
-import Template from 'webpack/lib/Template';
+const { Template, RuntimeModule, RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 
 class RemoteRuntimeModule extends RuntimeModule {
   constructor() {
@@ -36,8 +37,9 @@ class RemoteRuntimeModule extends RuntimeModule {
       // @ts-ignore
       const remotes = (chunkToRemotesMapping[chunk.id] = []);
       for (const m of modules) {
-        const module: RemoteModule = m as RemoteModule;
+        const module: RemoteModule = m as unknown as RemoteModule;
         const name = module.internalRequest;
+        // @ts-ignore
         const id = chunkGraph ? chunkGraph.getModuleId(module) : undefined;
         const { shareScope } = module;
         const dep = module.dependencies[0];

@@ -4,16 +4,26 @@
 */
 
 'use strict';
-import AsyncDependenciesBlock from 'webpack/lib/AsyncDependenciesBlock';
-import Dependency from 'webpack/lib/Dependency';
-import Template from 'webpack/lib/Template';
-import Module from 'webpack/lib/Module';
-import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import { OriginalSource, RawSource } from 'webpack-sources';
-import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from 'webpack/lib/ModuleTypeConstants';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { Dependency, Compilation } from 'webpack';
+
+const makeSerializable = require(
+  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
+) as typeof import('webpack/lib/util/makeSerializable');
+const { sources: webpackSources } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const { AsyncDependenciesBlock, Template, Module, RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const { JAVASCRIPT_MODULE_TYPE_DYNAMIC } = require(
+  normalizeWebpackPath('webpack/lib/ModuleTypeConstants'),
+) as typeof import('webpack/lib/ModuleTypeConstants');
+const StaticExportsDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/StaticExportsDependency'),
+) as typeof import('webpack/lib/dependencies/StaticExportsDependency');
+
 import ContainerExposedDependency from './ContainerExposedDependency';
-import StaticExportsDependency from 'webpack/lib/dependencies/StaticExportsDependency';
-import type Compilation from 'webpack/lib/Compilation';
 import type {
   LibIdentOptions,
   NeedBuildContext,
@@ -25,7 +35,6 @@ import type {
   ResolverWithOptions,
 } from 'webpack/lib/Module';
 import type WebpackError from 'webpack/lib/WebpackError';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
 
 const SOURCE_TYPES = new Set(['javascript']);
 
@@ -106,6 +115,7 @@ class ContainerEntryModule extends Module {
    * @param {function((WebpackError | null)=, boolean=): void} callback callback function, returns true, if the module needs a rebuild
    * @returns {void}
    */
+  // @ts-ignore typeof webpack/lib !== typeof webpack/types
   override needBuild(
     context: NeedBuildContext,
     callback: (
@@ -124,6 +134,7 @@ class ContainerEntryModule extends Module {
    * @param {function(WebpackError): void} callback callback function
    * @returns {void}
    */
+  // @ts-ignore typeof webpack/lib !== typeof webpack/types
   override build(
     options: WebpackOptions,
     compilation: Compilation,
@@ -186,7 +197,6 @@ class ContainerEntryModule extends Module {
       RuntimeGlobals.exports,
     ]);
     const getters = [];
-    //@ts-ignore
     for (const block of this.blocks) {
       const { dependencies } = block;
 
@@ -200,10 +210,8 @@ class ContainerEntryModule extends Module {
       });
 
       let str;
-      //@ts-ignore
       if (modules.some((m) => !m.module)) {
         str = runtimeTemplate.throwMissingModuleErrorBlock({
-          //@ts-ignore
           request: modules.map((m) => m.request).join(', '),
         });
       } else {
@@ -281,8 +289,8 @@ class ContainerEntryModule extends Module {
     sources.set(
       'javascript',
       this.useSourceMap || this.useSimpleSourceMap
-        ? new OriginalSource(source, 'webpack/container-entry')
-        : new RawSource(source),
+        ? new webpackSources.OriginalSource(source, 'webpack/container-entry')
+        : new webpackSources.RawSource(source),
     );
 
     return {
@@ -301,17 +309,14 @@ class ContainerEntryModule extends Module {
   /**
    * @param {ObjectSerializerContext} context context
    */
-  //@ts-ignore
   override serialize(context: ObjectSerializerContext): void {
     const { write } = context;
     write(this._name);
     write(this._exposes);
     write(this._shareScope);
-    //@ts-ignore
     super.serialize(context);
   }
 }
-//@ts-ignore
 makeSerializable(
   ContainerEntryModule,
   'enhanced/lib/container/ContainerEntryModule',

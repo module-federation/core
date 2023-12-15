@@ -71,13 +71,13 @@ export class FederationHost {
       ],
       void
     >(),
-    beforeLoadRemote: new AsyncWaterfallHook<{
+    beforeRequest: new AsyncWaterfallHook<{
       id: string;
       options: Options;
       origin: FederationHost;
-    }>('beforeLoadRemote'),
-    loadRemoteMatch: new AsyncWaterfallHook<LoadRemoteMatch>('loadRemoteMatch'),
-    loadRemote: new AsyncHook<
+    }>('beforeRequest'),
+    afterResolve: new AsyncWaterfallHook<LoadRemoteMatch>('afterResolve'),
+    onLoad: new AsyncHook<
       [
         {
           id: string;
@@ -92,7 +92,7 @@ export class FederationHost {
         },
       ],
       void
-    >('loadRemote'),
+    >('onLoad'),
     handlePreloadModule: new SyncHook<
       {
         id: string;
@@ -359,7 +359,7 @@ export class FederationHost {
     moduleOptions: ModuleOptions;
     remoteMatchInfo: LoadRemoteMatch;
   }> {
-    const loadRemoteArgs = await this.hooks.lifecycle.beforeLoadRemote.emit({
+    const loadRemoteArgs = await this.hooks.lifecycle.beforeRequest.emit({
       id,
       options: this.options,
       origin: this,
@@ -386,13 +386,13 @@ export class FederationHost {
         } with either 'name' or 'alias' attributes.
         3. ${idRes} is not online, injected, or loaded.
         4. ${idRes}  cannot be accessed on the expected.
-        5. The 'beforeLoadRemote' hook was provided but did not return the correct 'remoteInfo' when attempting to load ${idRes}.
+        5. The 'beforeRequest' hook was provided but did not return the correct 'remoteInfo' when attempting to load ${idRes}.
       `,
     );
 
     const { remote: rawRemote } = remoteSplitInfo;
     const remoteInfo = getRemoteInfo(rawRemote);
-    const matchInfo = await this.hooks.lifecycle.loadRemoteMatch.emit({
+    const matchInfo = await this.hooks.lifecycle.afterResolve.emit({
       id: idRes,
       ...remoteSplitInfo,
       options: this.options,
@@ -403,7 +403,7 @@ export class FederationHost {
     const { remote, expose } = matchInfo;
     assert(
       remote && expose,
-      `The 'beforeLoadRemote' hook was executed, but it failed to return the correct 'remote' and 'expose' values while loading ${idRes}.`,
+      `The 'beforeRequest' hook was executed, but it failed to return the correct 'remote' and 'expose' values while loading ${idRes}.`,
     );
 
     let module: Module | undefined = this.moduleCache.get(remote.name);
@@ -450,7 +450,7 @@ export class FederationHost {
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
       const moduleOrFactory = (await module.get(expose, options)) as T;
 
-      await this.hooks.lifecycle.loadRemote.emit({
+      await this.hooks.lifecycle.onLoad.emit({
         id: idRes,
         pkgNameOrAlias,
         expose,

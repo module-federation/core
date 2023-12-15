@@ -1,4 +1,4 @@
-import {
+import type {
   Compiler,
   Module,
   Chunk,
@@ -6,13 +6,6 @@ import {
   ChunkGroup,
   WebpackPluginInstance,
 } from 'webpack';
-
-/**
- * @typedef {import("webpack").Compiler} Compiler
- * @typedef {import("webpack").Compilation} Compilation
- * @typedef {import("webpack").Chunk} Chunk
- * @typedef {import("webpack").Module} Module
- */
 
 /**
  * This class is used to hoist container references in the code.

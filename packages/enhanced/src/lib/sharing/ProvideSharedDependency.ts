@@ -3,8 +3,15 @@
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 
-import makeSerializable from 'webpack/lib/util/makeSerializable';
-import Dependency from 'webpack/lib/Dependency';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+
+const makeSerializable = require(
+  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
+) as typeof import('webpack/lib/util/makeSerializable');
+const { Dependency } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+
 import {
   ObjectDeserializerContext,
   ObjectSerializerContext,

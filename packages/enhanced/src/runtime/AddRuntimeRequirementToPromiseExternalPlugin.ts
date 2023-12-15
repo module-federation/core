@@ -1,4 +1,4 @@
-import { Compiler } from 'webpack';
+import type { Compiler } from 'webpack';
 
 export class AddRuntimeRequirementToPromiseExternal {
   apply(compiler: Compiler) {

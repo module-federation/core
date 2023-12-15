@@ -2,10 +2,16 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
-import type Compilation from 'webpack/lib/Compilation';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { Compilation } from 'webpack';
 import type { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
-import ModuleNotFoundError from 'webpack/lib/ModuleNotFoundError';
-import LazySet from 'webpack/lib/util/LazySet';
+
+const ModuleNotFoundError = require(
+  normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),
+) as typeof import('webpack/lib/ModuleNotFoundError');
+const LazySet = require(
+  normalizeWebpackPath('webpack/lib/util/LazySet'),
+) as typeof import('webpack/lib/util/LazySet');
 
 interface MatchedConfigs<T> {
   resolved: Map<string, T>;
@@ -29,6 +35,7 @@ export async function resolveMatchedConfigs<T>(
     contextDependencies: new LazySet<string>(),
     missingDependencies: new LazySet<string>(),
   };
+  // @ts-ignore
   const resolver = compilation.resolverFactory.get('normal', RESOLVE_OPTIONS);
   const context = compilation.compiler.context;
 
@@ -47,6 +54,7 @@ export async function resolveMatchedConfigs<T>(
               if (err || result === false) {
                 err = err || new Error(`Can't resolve ${request}`);
                 compilation.errors.push(
+                  // @ts-ignore
                   new ModuleNotFoundError(null, err, {
                     name: `shared module ${request}`,
                   }),

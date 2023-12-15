@@ -1,7 +1,9 @@
 'use strict';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
-import { RuntimeGlobals, RuntimeModule, Template } from 'webpack';
-
+const { Template, RuntimeGlobals, RuntimeModule } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 /**
  * Class representing a runtime module for federation module info.
  * @extends RuntimeModule
