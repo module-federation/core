@@ -2,7 +2,6 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
-//@ts-ignore
 import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
