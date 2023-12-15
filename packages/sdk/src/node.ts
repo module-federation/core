@@ -1,3 +1,11 @@
+function importNodeModule<T>(name: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    new Function(
+      'resolve',
+      `import("${name}").then((res)=>{resolve(res);}, (error)=> reject(error))`,
+    )(resolve);
+  });
+}
 export function createScriptNode(
   url: string,
   cb: (error?: Error, scriptContext?: any) => void,
@@ -19,60 +27,64 @@ export function createScriptNode(
     cb(new Error(`Invalid URL: ${e}`));
     return;
   }
-  if (!globalThis.fetch) {
-    //TODO: this shouldnt be coupled to webpack require
-    //@ts-ignore
-    globalThis.fetch = __non_webpack_require__(
-      'node-fetch',
-    ) as typeof import('node-fetch');
-  }
+  const getFetch = async () => {
+    if (typeof fetch === 'undefined') {
+      const fetchModule = await importNodeModule('node-fetch');
+      //@ts-ignore
+      return fetchModule?.default || fetchModule;
+    } else {
+      return fetch;
+    }
+  };
   console.log('fetching', urlObj.href);
-  fetch(urlObj.href)
-    .then((res) => res.text())
-    .then((data) => {
-      //TODO: this shouldnt be coupled to webpack require
-      //@ts-ignore
-      const path: typeof import('path') = __webpack_require__('path');
-      const scriptContext = { exports: {}, module: { exports: {} } };
-      const urlDirname = urlObj.pathname.split('/').slice(0, -1).join('/');
-      const filename = path.basename(urlObj.pathname);
-      //TODO: this shouldnt be coupled to webpack require
-      //@ts-ignore
-      const vm: typeof import('vm') = __non_webpack_require__('vm');
-      try {
-        const script = new vm.Script(
-          `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
-          { filename },
-        );
-        script.runInThisContext()(
-          scriptContext.exports,
-          scriptContext.module,
-          //TODO: this shouldnt be coupled to webpack require
-          //@ts-ignore
-          __non_webpack_require__,
-          urlDirname,
-          filename,
-        );
-        const exportedInterface: Record<string, any> =
-          scriptContext.module.exports || scriptContext.exports;
-        if (attrs && exportedInterface && attrs['globalName']) {
-          const container = exportedInterface[attrs['globalName']];
-          cb(undefined, container as keyof typeof scriptContext.module.exports);
-          return;
+  getFetch().then((f) => {
+    f(urlObj.href)
+      .then((res: Response) => res.text())
+      .then(async (data: string) => {
+        const [path, vm]: [typeof import('path'), typeof import('vm')] =
+          await Promise.all([
+            importNodeModule<typeof import('path')>('path'),
+            importNodeModule<typeof import('vm')>('vm'),
+          ]);
+        const scriptContext = { exports: {}, module: { exports: {} } };
+        const urlDirname = urlObj.pathname.split('/').slice(0, -1).join('/');
+        const filename = path.basename(urlObj.pathname);
+        try {
+          const script = new vm.Script(
+            `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
+            { filename },
+          );
+          script.runInThisContext()(
+            scriptContext.exports,
+            scriptContext.module,
+            eval('require'),
+            urlDirname,
+            filename,
+          );
+          const exportedInterface: Record<string, any> =
+            scriptContext.module.exports || scriptContext.exports;
+          if (attrs && exportedInterface && attrs['globalName']) {
+            const container = exportedInterface[attrs['globalName']];
+            cb(
+              undefined,
+              container as keyof typeof scriptContext.module.exports,
+            );
+            return;
+          }
+          cb(
+            undefined,
+            exportedInterface as keyof typeof scriptContext.module.exports,
+          );
+        } catch (e) {
+          console.error('Error running script:', e);
+          cb(new Error(`Script execution error: ${e}`));
         }
-        cb(
-          undefined,
-          exportedInterface as keyof typeof scriptContext.module.exports,
-        );
-      } catch (e) {
-        console.error('Error running script:', e);
-        cb(new Error(`Script execution error: ${e}`));
-      }
-    })
-    .catch((err) => {
-      console.error('Error fetching script:', err);
-      cb(new Error(`Fetch error: ${err}`));
-    });
+      })
+      .catch((err: Error) => {
+        console.error('Error fetching script:', err);
+        cb(err);
+      });
+  });
 }
 export function loadScriptNode(
   url: string,
