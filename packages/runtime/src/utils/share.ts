@@ -213,7 +213,7 @@ export function getRegisteredShare(
         GlobalFederation: Global.__FEDERATION__,
         resolver: defaultResolver,
       };
-      const resolveShared = resolveShareHook.emit(params);
+      const resolveShared = resolveShareHook.emit(params) || params;
       return resolveShared.resolver();
     }
   }
