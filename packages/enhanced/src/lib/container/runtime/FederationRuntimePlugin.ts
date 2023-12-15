@@ -1,6 +1,5 @@
 import type { Compiler, sources } from 'webpack';
-import { Template } from 'webpack';
-import RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import FederationRuntimeModule from './FederationRuntimeModule';
 import {
   getFederationGlobalScope,
@@ -8,11 +7,17 @@ import {
   modifyEntry,
   createHash,
 } from './utils';
-import { mkdirpSync } from 'webpack/lib/util/fs';
 import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '../constant';
 import type { ModuleFederationPluginOptions } from '../../../declarations/plugins/container/ModuleFederationPlugin';
+
+const { RuntimeGlobals,Template } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const { mkdirpSync } = require(
+  normalizeWebpackPath('webpack/lib/util/fs'),
+) as typeof import('webpack/lib/util/fs');
 
 const BundlerRuntimePath = require.resolve(
   '@module-federation/webpack-bundler-runtime',
