@@ -19,7 +19,7 @@ module.exports = {
   outputPath: 'dist/packages/${PROJECT_NAME}',
   tagFormat: '${PROJECT_NAME}-${VERSION}',
   commitMessage:
-    'chore(release): Release ${PROJECT_NAME} v${nextRelease.version} [skip ci]',
+    'chore(release): release ${PROJECT_NAME} v${nextRelease.version} [skip ci]',
   branches: [
     {
       name: 'main',

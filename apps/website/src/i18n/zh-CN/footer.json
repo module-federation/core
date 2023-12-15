@@ -1,0 +1,12 @@
+{
+  "footer": {
+    "menu": {
+      "documentation": "文档",
+      "examples": "案例",
+      "medusa": "尝试Medusa",
+      "practical-guide": "实用指南",
+      "privacy-policy": "隐私政策",
+      "sponsor": "成为赞助商"
+    }
+  }
+}

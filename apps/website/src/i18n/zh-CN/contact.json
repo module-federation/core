@@ -1,0 +1,34 @@
+{
+  "contact": {
+    "disclaimer": {
+      "action": "隐私政策",
+      "text": "通过提交此表单，我确认我已经阅读并理解"
+    },
+    "form": {
+      "action": "提交",
+      "company-email": {
+        "label": "公司电子邮件"
+      },
+      "company-size": {
+        "label": "公司规模"
+      },
+      "company-website": {
+        "label": "公司网站"
+      },
+      "how-can-we-help-you": {
+        "label": "我们能为您做些什么?"
+      },
+      "name": {
+        "label": "您的名字"
+      }
+    },
+    "quote": {
+      "author": {
+        "name": "Zack Jackson",
+        "title": "模块联邦的创建者"
+      },
+      "text": "以可检测的方式现在有4000家公司使用Module Federation。可能还有更多我们无法追踪的人，但4000个已知的数量仍然令人印象深刻。"
+    },
+    "title": "和我们的专家谈谈"
+  }
+}

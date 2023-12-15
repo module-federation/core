@@ -26,6 +26,10 @@ export const locales = [
     name: 'Port',
     lang: 'pt-BR',
   },
+  {
+    name: '中文',
+    lang: 'zh-CN',
+  },
 ];
 
 export interface NavbarProps {
