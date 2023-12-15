@@ -4,16 +4,15 @@
 */
 
 'use strict';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { Compilation, ChunkGraph } from 'webpack';
 
-import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import RuntimeModule from 'webpack/lib/RuntimeModule';
-import Template from 'webpack/lib/Template';
-import Compilation from 'webpack/lib/Compilation';
-import ChunkGraph from 'webpack/lib/ChunkGraph';
-import {
-  compareModulesByIdentifier,
-  compareStrings,
-} from 'webpack/lib/util/comparators';
+const { Template, RuntimeGlobals, RuntimeModule } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const { compareModulesByIdentifier, compareStrings } = require(
+  normalizeWebpackPath('webpack/lib/util/comparators'),
+) as typeof import('webpack/lib/util/comparators');
 
 class ShareRuntimeModule extends RuntimeModule {
   constructor() {
@@ -45,6 +44,7 @@ class ShareRuntimeModule extends RuntimeModule {
       const modules = chunkGraph.getOrderedChunkModulesIterableBySourceType(
         chunk,
         'share-init',
+        // @ts-ignore
         compareModulesByIdentifier,
       );
       if (!modules) continue;

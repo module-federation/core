@@ -5,9 +5,13 @@
 
 'use strict';
 
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import ContainerEntryModule from './ContainerEntryModule';
 import ContainerEntryDependency from './ContainerEntryDependency';
-import ModuleFactory from 'webpack/lib/ModuleFactory';
+
+const ModuleFactory = require(
+  normalizeWebpackPath('webpack/lib/ModuleFactory'),
+) as typeof import('webpack/lib/ModuleFactory');
 import type {
   ModuleFactoryCreateData,
   ModuleFactoryResult,
@@ -29,6 +33,7 @@ export default class ContainerEntryModuleFactory extends ModuleFactory {
     const dep = containerDependencies[0];
 
     callback(null, {
+      //@ts-ignore
       module: new ContainerEntryModule(dep.name, dep.exposes, dep.shareScope),
     });
   }

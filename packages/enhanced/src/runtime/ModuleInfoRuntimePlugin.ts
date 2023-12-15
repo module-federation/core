@@ -1,5 +1,9 @@
-import { Compilation, RuntimeGlobals, Compiler } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { Compiler, Compilation } from 'webpack';
 import { ModuleInfoRuntimeModule } from './ModuleInfoRuntimeModule';
+const { RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 
 class ModuleInfoRuntimePlugin {
   apply(compiler: Compiler) {
