@@ -42,7 +42,6 @@ export async function fixImageLoader(
         'function getSSRImagePath(){',
         //TODO: use auto public path plugin instead
         `const pubpath = ${publicPath};`,
-        'console.log("TEST123", {pubpath});',
         Template.asString([
           'try {',
           Template.indent([

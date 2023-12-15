@@ -45,7 +45,7 @@ export default function (): FederationRuntimePlugin {
       if (
         args.pkgName !== 'react' &&
         args.pkgName !== 'react-dom' &&
-        args.pkgName.startsWith('next/')
+        !args.pkgName.startsWith('next/')
       ) {
         return args;
       }
@@ -57,7 +57,7 @@ export default function (): FederationRuntimePlugin {
       }
       args.resolver = function () {
         shareScopeMap[scope][pkgName][version] = host.options.shared[pkgName]; // replace local share scope manually with desired module
-        return host.options.shared[pkgName];
+        return shareScopeMap[scope][pkgName][version];
       };
       return args;
     },
