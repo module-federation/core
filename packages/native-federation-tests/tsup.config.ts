@@ -15,6 +15,6 @@ export default defineConfig({
   clean: true,
   minify: true,
   format: ['cjs', 'esm'],
-  outDir: 'dist/packages/native-federation-tests/dist',
+  outDir: 'packages/native-federation-tests/dist',
   external: [join(__dirname, 'package.json')],
 });

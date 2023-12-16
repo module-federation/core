@@ -9,7 +9,7 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "packages/nextjs-mf/dist",
-        "main": "packages/nextjs-mf/src/index.js",
+        "main": "packages/nextjs-mf/src/index.ts",
         "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true,
@@ -21,6 +21,21 @@
           "dependencies": true
         }
       ]
+    },
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/nextjs-mf/dist",
+        "main": "packages/nextjs-mf/src/index.ts",
+        "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
+        "assets": [],
+        "generateExportsField": true,
+        "project": "packages/nextjs-mf/package.json",
+        "rollupConfig": "packages/nextjs-mf/rollup.config.js",
+        "compiler": "swc",
+        "format": ["cjs", "esm"]
+      }
     },
     "lint": {
       "executor": "@nx/linter:eslint",

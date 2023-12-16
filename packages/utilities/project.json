@@ -6,7 +6,7 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": ["{workspaceRoot}/packages/utilities/dist"],
       "options": {
         "outputPath": "packages/utilities/dist",
         "main": "packages/utilities/src/index.ts",
@@ -55,5 +55,17 @@
       "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
+  "pre": [
+    {
+      "executor": "@nx/js:tsc",
+      "options": {
+        "commands": [
+          {
+            "command": "rm -f dist"
+          }
+        ]
+      }
+    }
+  ],
   "tags": ["package"]
 }

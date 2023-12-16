@@ -4,7 +4,7 @@
   "private": true,
   "devDependencies": {
     "@module-federation/core": "workspace:*",
-    "@module-federation/enhance": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
     "@module-federation/typescript": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "react-refresh": "0.14.0"

@@ -2,6 +2,6 @@
   "name": "node-remote",
   "version": "1.0.0",
   "dependencies": {
-    "@module-federation/node": "1.0.7"
+    "@module-federation/node": "workspace:*"
   }
 }

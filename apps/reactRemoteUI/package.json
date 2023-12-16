@@ -2,7 +2,7 @@
   "name": "react-remote-ui",
   "version": "1.0.0",
   "devDependencies": {
-    "@module-federation/utilities": "3.0.0",
-    "@module-federation/storybook-addon": "1.0.0"
+    "@module-federation/utilities": "workspace:*",
+    "@module-federation/storybook-addon": "workspace:*"
   }
 }

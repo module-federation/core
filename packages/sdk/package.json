@@ -12,7 +12,17 @@
   },
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "sideEffects": false,
-  "main": "./index.cjs.js",
-  "module": "./index.esm.js",
-  "types": "./index.cjs.d.ts"
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.cjs.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs.js",
+      "types": "./dist/index.cjs.d.ts"
+    },
+    "./normalize-webpack-path": {
+      "require": "./dist/normalize-webpack-path.cjs.js",
+      "types": "./dist/src/normalize-webpack-path.cjs.d.ts"
+    }
+  }
 }

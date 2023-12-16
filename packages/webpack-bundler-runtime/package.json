@@ -14,5 +14,8 @@
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "main": "./index.cjs.js",
   "module": "./index.esm.js",
-  "types": "./index.cjs.d.ts"
+  "types": "./index.cjs.d.ts",
+  "dependencies": {
+    "@module-federation/runtime": "workspace:*"
+  }
 }

@@ -2,12 +2,27 @@
   "name": "@module-federation/enhanced",
   "version": "0.0.3",
   "type": "commonjs",
-  "main": "src/index.js",
-  "types": "src/index.d.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
   "peerDependencies": {
     "webpack": "^5.0.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/src/index.js",
+      "require": "./dist/src/index.js",
+      "types": "./dist/src/index.d.ts"
+    },
+    "./share-utils": {
+      "import": "./dist/src/lib/sharing/utils.js",
+      "types": "./dist/src/lib/sharing/utils.d.ts"
+    },
+    "./*": "./*"
+  },
+  "dependencies": {
+    "@module-federation/sdk": "workspace:*"
   }
 }

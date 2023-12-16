@@ -5,13 +5,14 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:swc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/js:tsc",
+      "outputs": ["{workspaceRoot}/packages/typescript/dist"],
       "options": {
         "outputPath": "packages/typescript/dist",
         "main": "packages/typescript/src/index.ts",
         "tsConfig": "packages/typescript/tsconfig.lib.json",
         "assets": ["packages/typescript/*.md"],
+        "skipTypeCheck": true,
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true
       },

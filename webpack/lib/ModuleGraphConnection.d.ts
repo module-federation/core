@@ -107,10 +107,6 @@ declare function addConnectionStates(
   a: ConnectionState,
   b: ConnectionState,
 ): ConnectionState;
-type TRANSITIVE_ONLY = typeof TRANSITIVE_ONLY;
-declare const TRANSITIVE_ONLY: typeof TRANSITIVE_ONLY;
-type CIRCULAR_CONNECTION = typeof CIRCULAR_CONNECTION;
-declare const CIRCULAR_CONNECTION: typeof CIRCULAR_CONNECTION;
 /** @typedef {import("./Dependency")} Dependency */
 /** @typedef {import("./Module")} Module */
 /** @typedef {import("./util/runtime").RuntimeSpec} RuntimeSpec */
