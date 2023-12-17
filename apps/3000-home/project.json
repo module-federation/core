@@ -22,7 +22,8 @@
           "target": "build",
           "dependencies": true
         }
-      ]
+      ],
+      "cache": false
     },
     "serve": {
       "executor": "@nx/next:server",

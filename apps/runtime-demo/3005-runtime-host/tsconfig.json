@@ -10,16 +10,12 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "paths": {
-      "@module-federation/runtime": ["dist/packages/runtime"],
-      "@module-federation/runtime/type": [
-        "dist/packages/runtime/type.cjs.d.ts"
-      ],
-      "@module-federation/sdk": ["dist/packages/sdk"]
-    }
+    "noFallthroughCasesInSwitch": true
   },
   "files": [],
-  "exclude": ["webpack.config.js"],
-  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"]
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ]
 }

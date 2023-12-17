@@ -10,11 +10,7 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "paths": {
-      "@module-federation/runtime": ["dist/packages/runtime"],
-      "@module-federation/sdk": ["dist/packages/sdk"]
-    }
+    "noFallthroughCasesInSwitch": true
   },
   "files": [],
   "references": [

@@ -16,6 +16,22 @@
         "updateBuildableProjectDepsInPackageJson": true
       }
     },
+
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/utilities/dist",
+        "main": "packages/utilities/src/index.ts",
+        "tsConfig": "packages/utilities/tsconfig.lib.json",
+        "assets": [],
+        "generateExportsField": true,
+        "project": "packages/utilities/package.json",
+        "additionalEntryPoints": ["packages/utilities/src/types/types.ts"],
+        "compiler": "swc",
+        "format": ["cjs", "esm"]
+      }
+    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],

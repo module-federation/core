@@ -9,8 +9,8 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "swc",
-        "outputPath": "dist/apps/runtime-demo/3006-runtime-remote",
+        "compiler": "babel",
+        "outputPath": "apps/runtime-demo/3006-runtime-remote",
         "index": "apps/runtime-demo/3006-runtime-remote/src/index.html",
         "baseHref": "/",
         "main": "apps/runtime-demo/3006-runtime-remote/src/index.ts",
@@ -44,7 +44,7 @@
       ]
     },
     "serve": {
-      "executor": "@nx/react:module-federation-dev-server",
+      "executor": "@nx/webpack:dev-server",
       "defaultConfiguration": "production",
       "options": {
         "buildTarget": "3006-runtime-remote:build",

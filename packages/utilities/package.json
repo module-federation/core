@@ -29,5 +29,21 @@
     "next": {
       "optional": true
     }
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs.js",
+      "types": "./dist/index.cjs.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.cjs.d.ts"
+      ],
+      "type": [
+        "./dist/type.cjs.d.ts"
+      ]
+    }
   }
 }

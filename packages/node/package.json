@@ -3,20 +3,20 @@
   "name": "@module-federation/node",
   "version": "2.1.0-canary.6",
   "type": "commonjs",
-  "main": "src/index.js",
+  "main": "./dist/src/index.js",
   "exports": {
     ".": {
-      "import": "./src/index.js",
-      "require": "./src/index.js"
+      "import": "./dist/src/index.js",
+      "require": "./dist/src/index.js"
     },
     "./package.json": "./package.json",
     "./utils": {
-      "import": "./src/utils/index.js",
-      "require": "./src/utils/index.js"
+      "import": "./dist//src/utils/index.js",
+      "require": "./dist/src/utils/index.js"
     },
-    "./src/plugins/RemotePublicPathPlugin.js": "./src/plugins/RemotePublicPathPlugin.js",
-    "./src/plugins/NodeFederationPlugin.js": "./src/plugins/NodeFederationPlugin.js",
-    "./src/": "./src/"
+    "./src/plugins/RemotePublicPathPlugin.js": "./dist/src/plugins/RemotePublicPathPlugin.js",
+    "./src/plugins/NodeFederationPlugin.js": "./dist/src/plugins/NodeFederationPlugin.js",
+    "./src/": "./dist/src/"
   },
   "publishConfig": {
     "access": "public"
@@ -36,7 +36,9 @@
   "license": "MIT",
   "dependencies": {
     "node-fetch": "2.7.0",
-    "@module-federation/enhanced": "workspace:*"
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/utilities": "workspace:*"
   },
   "peerDependencies": {
     "next": "^12||^13",

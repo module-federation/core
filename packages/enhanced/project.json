@@ -13,12 +13,10 @@
         "tsConfig": "packages/enhanced/tsconfig.lib.json",
         "assets": ["packages/enhanced/*.md"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true
+        "updateBuildableProjectDepsInPackageJson": true,
+        "external": ["@module-federation/sdk"]
       },
       "dependsOn": [
-        {
-          "target": "build"
-        },
         {
           "target": "build",
           "dependencies": true

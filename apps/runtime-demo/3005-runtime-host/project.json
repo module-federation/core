@@ -9,8 +9,8 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "swc",
-        "outputPath": "dist/apps/runtime-demo/3005-runtime-host",
+        "compiler": "babel",
+        "outputPath": "apps/runtime-demo/3005-runtime-host/dist",
         "index": "apps/runtime-demo/3005-runtime-host/src/index.html",
         "baseHref": "/",
         "main": "apps/runtime-demo/3005-runtime-host/src/index.ts",
