@@ -2,8 +2,8 @@
   "name": "@module-federation/nextjs-mf",
   "version": "8.1.0-canary.7",
   "license": "MIT",
-  "main": "dist/index.cjs.js",
-  "types": "dist/index.cjs.d.ts",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "type": "commonjs",
   "description": "Module Federation helper for NextJS",
   "repository": "https://github.com/module-federation/universe/tree/main/packages/nextjs-mf",
@@ -13,14 +13,24 @@
   ],
   "exports": {
     ".": {
-      "require": "./dist/index.cjs.js",
-      "types": "./dist/index.cjs.d.ts"
+      "require": "./dist/src/index.js",
+      "types": "./dist/src/index.d.ts"
     },
     "./utilities": {
       "require": "./dist/utilities.js",
       "types": "./dist/utilities.d.ts"
     },
     "./*": "./*"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/src/index.d.ts"
+      ],
+      "utilities": [
+        "./dist/utilities.d.ts"
+      ]
+    }
   },
   "publishConfig": {
     "access": "public"

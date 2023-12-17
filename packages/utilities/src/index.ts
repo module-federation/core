@@ -14,4 +14,4 @@ export { importRemote } from './utils/importRemote';
 export { Logger } from './Logger';
 export { getRuntimeRemotes } from './utils/getRuntimeRemotes';
 export { importDelegatedModule } from './utils/importDelegatedModule';
-export * from './utils/pure';
+export { extractUrlAndGlobal, loadScript } from './utils/pure';

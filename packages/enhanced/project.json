@@ -6,15 +6,12 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": ["{workspaceRoot}/packages/enhanced/dist"],
       "options": {
         "outputPath": "packages/enhanced/dist",
         "main": "packages/enhanced/src/index.ts",
         "tsConfig": "packages/enhanced/tsconfig.lib.json",
-        "assets": ["packages/enhanced/*.md"],
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true,
-        "external": ["@module-federation/sdk"]
+        "assets": ["packages/enhanced/*.md"]
       },
       "dependsOn": [
         {
