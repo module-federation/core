@@ -30,6 +30,7 @@
   },
   "exports": {
     ".": {
+      "import": "./dist/index.mjs",
       "require": "./dist/index.cjs.js",
       "types": "./dist/index.cjs.d.ts"
     },

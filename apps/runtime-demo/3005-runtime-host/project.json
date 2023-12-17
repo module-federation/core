@@ -60,7 +60,13 @@
           "buildTarget": "3005-runtime-host:build:production",
           "hmr": false
         }
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "lint": {
       "executor": "@nx/linter:eslint",
