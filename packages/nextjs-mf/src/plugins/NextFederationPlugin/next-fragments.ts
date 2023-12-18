@@ -118,5 +118,18 @@ export const applyPathFixes = (compiler: Compiler, options: any) => {
         loader: require.resolve('../../loaders/fixUrlLoader'),
       });
     }
+    //@ts-ignore
+    if (rule?.oneOf) {
+      //@ts-ignore
+      rule.oneOf.forEach((oneOfRule) => {
+        if (hasLoader(oneOfRule, 'react-refresh-utils')) {
+          oneOfRule.exclude = [
+            oneOfRule.exclude,
+            /enhanced\/src/,
+            /nextjs-mf\/src/,
+          ];
+        }
+      });
+    }
   });
 };
