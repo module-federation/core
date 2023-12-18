@@ -95,7 +95,7 @@
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^9.2.1",
-    "@semantic-release/npm": "^11.0.0",
+    "@semantic-release/npm": "^11.0.2",
     "@storybook/addon-essentials": "7.4.6",
     "@storybook/builder-webpack5": "7.4.6",
     "@storybook/core-common": "7.4.6",
