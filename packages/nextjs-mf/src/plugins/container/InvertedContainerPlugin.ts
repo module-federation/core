@@ -26,7 +26,8 @@ class InvertedContainerPlugin {
     }).apply(compiler);
 
     new AsyncBoundaryPlugin({
-      eager: (module) => /.federation/.test(module.identifier()),
+      // @ts-ignore
+      eager: (module) => /\.federation/.test(module?.request || ''),
       //@ts-ignore
     }).apply(compiler);
   }
