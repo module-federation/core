@@ -1,5 +1,5 @@
 {
-  "name": "node-local-remote",
+  "name": "node-host-e2e",
   "version": "1.0.0",
   "private": true,
   "dependencies": {

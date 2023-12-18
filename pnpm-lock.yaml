@@ -612,6 +612,18 @@ importers:
         specifier: workspace:*
         version: link:../../packages/utilities
 
+  apps/node-host:
+    dependencies:
+      '@module-federation/node':
+        specifier: workspace:*
+        version: link:../../packages/node
+
+  apps/node-host-e2e:
+    dependencies:
+      '@module-federation/node':
+        specifier: workspace:*
+        version: link:../../packages/node
+
   apps/node-local-remote:
     dependencies:
       '@module-federation/node':
