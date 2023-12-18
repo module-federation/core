@@ -66,7 +66,7 @@
     "@builder.io/partytown": "0.8.1",
     "@builder.io/qwik": "1.2.19",
     "@builder.io/qwik-city": "1.2.19",
-    "@commitlint/cli": "^17.7.2",
+    "@commitlint/cli": "^18.4.3",
     "@commitlint/config-conventional": "17.7.0",
     "@commitlint/config-nx-scopes": "^17.6.4",
     "@commitlint/cz-commitlint": "^17.7.2",
