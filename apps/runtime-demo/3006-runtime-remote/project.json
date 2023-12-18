@@ -10,7 +10,7 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "babel",
-        "outputPath": "apps/runtime-demo/3006-runtime-remote",
+        "outputPath": "apps/runtime-demo/3006-runtime-remote/dist",
         "index": "apps/runtime-demo/3006-runtime-remote/src/index.html",
         "baseHref": "/",
         "main": "apps/runtime-demo/3006-runtime-remote/src/index.ts",

@@ -9,11 +9,11 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "{options.outputPath}"
+        "outputPath": "dist/apps/3000-home"
       },
       "configurations": {
         "development": {
-          "outputPath": "{options.outputPath}"
+          "outputPath": "dist/apps/3000-home"
         },
         "production": {}
       },

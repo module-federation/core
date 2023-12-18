@@ -9,11 +9,11 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "{options.outputPath}"
+        "outputPath": "apps/3001-shop/dist"
       },
       "configurations": {
         "development": {
-          "outputPath": "{options.outputPath}"
+          "outputPath": "apps/3001-shop/dist"
         },
         "production": {}
       },
