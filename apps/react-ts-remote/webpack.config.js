@@ -7,28 +7,36 @@ const { ModuleFederationPlugin } = require('@module-federation/enhanced');
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
-const baseConfig = require('./module-federation.config');
-
-/**
- * @type {import('@nx/react/module-federation').ModuleFederationConfig}
- **/
-const defaultConfig = {
-  ...baseConfig,
-};
-
 module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
+    const baseConfig = {
+      name: 'react_ts_remote',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './Module': './src/app/nx-welcome.tsx',
+      },
+    };
+
+    config.plugins.push(new ModuleFederationPlugin(baseConfig));
+
+    const remotes = baseConfig.remotes?.reduce((remotes, remote) => {
+      const [name, url] = remote;
+      remotes[name] = url;
+      return remotes;
+    }, {});
+
     config.plugins.push(
-      new ModuleFederationPlugin({
-        name: 'react_ts_remote',
-        filename: 'remoteEntry.js',
-        exposes: {
-          './Module': './src/app/nx-welcome.tsx',
+      new FederatedTypesPlugin({
+        federationConfig: {
+          ...baseConfig,
+          filename: 'remoteEntry.js',
+          remotes,
         },
       }),
     );
+
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {
       if (p.constructor.name === 'ModuleFederationPlugin') {
