@@ -36,10 +36,12 @@ async function updatePackageVersions() {
 
   await new Promise((resolve) => setTimeout(resolve, 3000));
   const distPackagePaths = glob.sync('dist/packages/*');
-  console.log(distPackagePaths)
+  console.log(distPackagePaths);
   distPackagePaths.forEach((distPackagePath) => {
     console.log(`Publishing ${distPackagePath}`);
-    execSync(`cd ${distPackagePath}; npm publish --tag=experimental`, { stdio: 'inherit' });
+    execSync(`cd ${distPackagePath}; npm publish --tag=experimental`, {
+      stdio: 'inherit',
+    });
   });
 }
 
