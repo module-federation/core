@@ -121,15 +121,36 @@ export const applyPathFixes = (compiler: Compiler, options: any) => {
     //@ts-ignore
     if (rule?.oneOf) {
       //@ts-ignore
+      const badLoader = rule.oneOf.find((oneOfRule) => {
+        if (hasLoader(oneOfRule, 'react-refresh-utils')) {
+          return true;
+        }
+      });
+
+      //@ts-ignore
       rule.oneOf.forEach((oneOfRule) => {
         if (hasLoader(oneOfRule, 'react-refresh-utils')) {
           oneOfRule.exclude = [
             oneOfRule.exclude,
-            /enhanced\/src/,
-            /nextjs-mf\/src/,
+            /packages\/nextjs-mf/,
+            /packages\/node/,
           ];
         }
       });
+
+      if (badLoader) {
+        //@ts-ignore
+        rule.oneOf.push({
+          test: badLoader.test,
+          exclude: [badLoader.exclude[0]],
+          //@ts-ignore
+          use: badLoader.use.filter((l) => {
+            return (
+              typeof l !== 'string' && l.loader && l.loader.includes('swc')
+            );
+          }),
+        });
+      }
     }
   });
 };
