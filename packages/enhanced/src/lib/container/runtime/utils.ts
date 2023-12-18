@@ -58,6 +58,7 @@ export function normalizeRuntimeInitOptionsWithOutShared(
         name: name || globalName,
         entry: url,
         shareScope: shareScope,
+        // externalType
       });
     } catch (err) {
       return;

@@ -1,0 +1,87 @@
+{
+  "name": "kit",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/kit/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{workspaceRoot}/dist/packages/kit"],
+      "options": {
+        "parallel": false,
+        "outputPath": "dist/packages/kit",
+        "main": "packages/kit/src/index.ts",
+        "additionalEntryPoints": [
+          "packages/kit/src/runtime.ts",
+          "packages/kit/src/webpack-bundler-runtime.ts"
+        ],
+        "tsConfig": "packages/kit/tsconfig.lib.json",
+        "assets": [],
+        "project": "packages/kit/package.json",
+        "compiler": "swc",
+        "rollupConfig": "packages/kit/rollup.config.js",
+        "format": ["cjs", "esm"],
+        "external": [
+          "@module-federation/sdk",
+          "@module-federation/runtime",
+          "@module-federation/webpack-bundler-runtime"
+        ],
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/kit/**/*.ts",
+          "packages/kit/package.json"
+        ]
+      }
+    },
+    "release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run runtime:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run runtime:build",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run runtime:semantic-release",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "semantic-release": {
+      "executor": "@goestav/nx-semantic-release:semantic-release"
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "packages/kit/vitest.config.ts"
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    }
+  },
+  "tags": ["package"]
+}

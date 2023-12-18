@@ -266,7 +266,7 @@ export function generatePreloadAssets(
         return;
       }
       const registeredShared = getRegisteredShare(
-        origin.name,
+        origin.shareScopeMap,
         shared.sharedName,
         shareInfo,
       );

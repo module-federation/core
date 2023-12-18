@@ -19,6 +19,8 @@
       "@module-federation/core": ["packages/core/src/index.ts"],
       "@module-federation/enhanced": ["packages/enhanced/src/index.ts"],
       "@module-federation/enhanced/*": ["packages/enhanced/*"],
+      "@module-federation/kit": ["packages/kit/src/index.ts"],
+      "@module-federation/kit/*": ["packages/kit/src/*"],
       "@module-federation/native-federation-tests": [
         "packages/native-federation-tests/src/index.ts"
       ],

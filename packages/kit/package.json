@@ -1,0 +1,40 @@
+{
+  "name": "@module-federation/kit",
+  "version": "1.0.0",
+  "author": "zhanghang <hanric.zhang@gmail.com>",
+  "main": "./index.cjs",
+  "module": "./index.esm.js",
+  "types": "./index.cjs.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.esm.js",
+      "require": "./index.cjs.js"
+    },
+    "./runtime": {
+      "import": "./runtime.esm.js",
+      "require": "./runtime.cjs.js"
+    },
+    "./webpack-bundler-runtime": {
+      "import": "./webpack-bundler-runtime.esm.js",
+      "require": "./webpack-bundler-runtime.cjs.js"
+    },
+    "./*": "./*"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./index.cjs.d.ts"
+      ],
+      "runtime": [
+        "./runtime.cjs.d.ts"
+      ],
+      "webpack-bundler-runtime": [
+        "./webpack-bundler-runtime.cjs.d.ts"
+      ]
+    }
+  }
+}

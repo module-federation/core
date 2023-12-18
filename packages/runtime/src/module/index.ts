@@ -8,6 +8,7 @@ import {
   Remote,
   ShareInfos,
   RemoteInfo,
+  ShareScopeMap,
 } from '../type';
 import { composeKeyWithSeparator } from '@module-federation/sdk';
 
@@ -23,6 +24,7 @@ class Module {
   remoteEntryExports?: RemoteEntryExports;
   lib: RemoteEntryExports | undefined = undefined;
   loaderHook: FederationHost['loaderHook'];
+  shareScopeMap: ShareScopeMap;
   // loading: Record<string, undefined | Promise<RemoteEntryExports | void>> = {};
 
   constructor({
@@ -30,17 +32,20 @@ class Module {
     remoteInfo,
     shared,
     loaderHook,
+    shareScopeMap,
   }: {
     hostInfo: HostInfo;
     remoteInfo: RemoteInfo;
     shared: ShareInfos;
     plugins: Options['plugins'];
     loaderHook: FederationHost['loaderHook'];
+    shareScopeMap: ShareScopeMap;
   }) {
     this.hostInfo = hostInfo;
     this.remoteInfo = remoteInfo;
     this.shared = shared;
     this.loaderHook = loaderHook;
+    this.shareScopeMap = shareScopeMap;
   }
 
   async getEntry(): Promise<RemoteEntryExports> {
@@ -78,13 +83,7 @@ class Module {
     const remoteEntryExports = await this.getEntry();
 
     if (!this.inited) {
-      const globalShareScopeMap = Global.__FEDERATION__.__SHARE__;
-
-      if (!globalShareScopeMap[hostName]) {
-        globalShareScopeMap[hostName] = {};
-      }
-
-      const localShareScopeMap = globalShareScopeMap[hostName];
+      const localShareScopeMap = this.shareScopeMap;
       const remoteShareScope = this.remoteInfo.shareScope || 'default';
 
       if (!localShareScopeMap[remoteShareScope]) {
@@ -122,12 +121,11 @@ class Module {
           });
           if (
             !__FEDERATION__.__SHARE__['default'] &&
-            __FEDERATION__.__SHARE__[hostName] &&
-            __FEDERATION__.__SHARE__[hostName]['default']
+            this.shareScopeMap &&
+            this.shareScopeMap['default']
           ) {
             // @ts-ignore compat prev logic , and it will be optimized by supporting startup hook
-            __FEDERATION__.__SHARE__['default'] =
-              __FEDERATION__.__SHARE__[hostName]['default'];
+            __FEDERATION__.__SHARE__['default'] = this.shareScopeMap['default'];
           }
         }
       }
