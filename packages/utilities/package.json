@@ -2,8 +2,8 @@
   "name": "@module-federation/utilities",
   "version": "3.0.4",
   "type": "commonjs",
-  "main": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "main": "./dist/index.cjs.js",
+  "types": "./dist/index.cjs.d.ts",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -29,11 +29,7 @@
     }
   },
   "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs.js",
-      "types": "./dist/index.cjs.d.ts"
-    },
+    ".": "./dist/index.cjs.js",
     "./package.json": "./package.json"
   },
   "typesVersions": {
