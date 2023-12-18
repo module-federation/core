@@ -10,7 +10,7 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "babel",
-        "outputPath": "dist/apps/reactRemoteUI",
+        "outputPath": "apps/reactRemoteUI/dist",
         "index": "apps/reactRemoteUI/src/index.html",
         "baseHref": "/",
         "main": "apps/reactRemoteUI/src/main.ts",

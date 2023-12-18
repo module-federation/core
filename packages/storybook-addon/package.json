@@ -14,6 +14,21 @@
     "addon"
   ],
   "author": "Fiodorov Andrei <hello@fyodorovandrei.com> (https://github.com/fyodorovandrei)",
+  "exports": {
+    ".": {
+      "import": "./dist/src/index.js",
+      "require": "./dist/src/index.js",
+      "types": "./dist/src/indexd.ts"
+    },
+    "./*": "./*"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ]
+    }
+  },
   "devDependencies": {
     "@storybook/core-common": "7.4.6",
     "@storybook/node-logger": "7.4.6",
