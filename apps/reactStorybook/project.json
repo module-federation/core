@@ -10,7 +10,7 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "babel",
-        "outputPath": "dist/apps/reactStorybook",
+        "outputPath": "apps/reactStorybook/dist",
         "index": "apps/reactStorybook/src/index.html",
         "baseHref": "/",
         "main": "apps/reactStorybook/src/main.ts",
@@ -127,7 +127,7 @@
       "outputs": ["{options.outputDir}"],
       "options": {
         "uiFramework": "@storybook/react",
-        "outputDir": "dist/storybook/reactStorybook",
+        "outputDir": "storybook/reactStorybook/dist",
         "configDir": "apps/reactStorybook/.storybook"
       },
       "configurations": {
