@@ -15,6 +15,7 @@
         "generateExportsField": true,
         "project": "packages/utilities/package.json",
         "additionalEntryPoints": ["packages/utilities/src/types/types.ts"],
+        "external": ["@module-federation/*"],
         "compiler": "swc",
         "format": ["cjs", "esm"]
       }

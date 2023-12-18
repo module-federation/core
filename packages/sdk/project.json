@@ -13,6 +13,7 @@
         "tsConfig": "packages/sdk/tsconfig.lib.json",
         "assets": [],
         "generateExportsField": true,
+        "external": ["@module-federation/*"],
         "project": "packages/sdk/package.json",
         "additionalEntryPoints": ["packages/sdk/src/normalize-webpack-path.ts"],
         "rollupConfig": "packages/sdk/rollup.config.js",

@@ -21,7 +21,7 @@
         "compiler": "swc",
         "rollupConfig": "packages/runtime/rollup.config.js",
         "format": ["cjs", "esm"],
-        "external": ["@module-federation/sdk"],
+        "external": ["@module-federation/*"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true
       },
