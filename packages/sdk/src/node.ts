@@ -1,11 +1,15 @@
 function importNodeModule<T>(name: string): Promise<T> {
+  if (!name) {
+    throw new Error('import specifier is require');
+  }
   return new Promise((resolve, reject) => {
     new Function(
-      'resolve',
-      `import("${name}").then((res)=>{resolve(res);}, (error)=> reject(error))`,
-    )(resolve);
+      'callbacks',
+      `import("${name}").then((res)=>{callbacks.resolve(res);}, (error)=> callbacks.reject(error))`,
+    )({ resolve, reject });
   });
 }
+
 export function createScriptNode(
   url: string,
   cb: (error?: Error, scriptContext?: any) => void,
