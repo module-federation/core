@@ -1,5 +1,6 @@
 {
   "name": "runtime-host",
+  "private": true,
   "version": "0.0.0",
   "devDependencies": {
     "@module-federation/core": "workspace:*",
