@@ -12,14 +12,8 @@
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
   ],
   "exports": {
-    ".": {
-      "require": "./dist/src/index.js",
-      "types": "./dist/src/index.d.ts"
-    },
-    "./utilities": {
-      "require": "./dist/utilities.js",
-      "types": "./dist/utilities.d.ts"
-    },
+    ".": "./dist/src/index.js",
+    "./utilities": "./dist/utilities.js",
     "./*": "./*"
   },
   "typesVersions": {

@@ -5,19 +5,6 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{workspaceRoot}/packages/utilities/dist"],
-      "options": {
-        "outputPath": "packages/utilities/dist",
-        "main": "packages/utilities/src/index.ts",
-        "tsConfig": "packages/utilities/tsconfig.lib.json",
-        "assets": ["packages/utilities/*.md"],
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true
-      }
-    },
-
-    "build": {
       "executor": "@nx/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
