@@ -57,8 +57,8 @@ const nextConfig = {
   },
   webpack(config, options) {
     const { isServer } = options;
-    // used for testing build output snapshots
 
+    // used for testing build output snapshots
     const remotes = {
       shop: createDelegatedModule(require.resolve('./remote-delegate.js'), {
         remote: `shop@http://localhost:3001/_next/static/${
@@ -103,6 +103,12 @@ const nextConfig = {
         },
       }),
     );
+    config.plugins.push({
+      name: 'xxx',
+      apply(compiler) {
+        compiler.options.devtool = false;
+      },
+    });
     return config;
   },
 };
