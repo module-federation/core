@@ -10,7 +10,7 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "swc",
-        "outputPath": "dist/apps/react-ts-host",
+        "outputPath": "apps/react-ts-host/dist",
         "index": "apps/react-ts-host/src/index.html",
         "baseHref": "/",
         "main": "apps/react-ts-host/src/main.ts",

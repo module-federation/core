@@ -9,11 +9,11 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/apps/3002-checkout"
+        "outputPath": "apps/3002-checkout/dist"
       },
       "configurations": {
         "development": {
-          "outputPath": "dist/apps/3002-checkout"
+          "outputPath": "apps/3002-checkout/dist"
         },
         "production": {}
       },

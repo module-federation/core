@@ -10,7 +10,7 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/apps/docs-ui",
+        "outputPath": "apps/docs-ui/dist",
         "compiler": "babel",
         "main": "apps/docs-ui/src/main.ts",
         "tsConfig": "apps/docs-ui/tsconfig.app.json",
