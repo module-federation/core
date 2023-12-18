@@ -22,6 +22,8 @@ import {
   RemotesConfig,
 } from '../../declarations/plugins/container/ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import schema from '../../schemas/container/ContainerReferencePlugin';
+import checkOptions from '../../schemas/container/ContainerReferencePlugin.check';
 
 const { ExternalsPlugin } = require(
   normalizeWebpackPath('webpack'),
@@ -33,9 +35,8 @@ const createSchemaValidation = require(
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
-  require('webpack/schemas/plugins/container/ContainerReferencePlugin.check.js'),
-  () =>
-    require('webpack/schemas/plugins/container/ContainerReferencePlugin.json'),
+  checkOptions,
+  () => schema,
   {
     name: 'Container Reference Plugin',
     baseDataPath: 'options',

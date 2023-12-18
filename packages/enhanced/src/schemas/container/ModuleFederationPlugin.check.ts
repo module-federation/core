@@ -1,10 +1,5 @@
 /* eslint-disable */
 //@ts-nocheck
-/*
- * This file was automatically generated.
- * DO NOT MODIFY BY HAND.
- * Run `yarn special-lint-fix` to update
- */
 const absolutePathRegExp = /^(?:[A-Za-z]:[\\/]|\\\\|\/)/;
 
 const schema51 = {
@@ -293,6 +288,10 @@ const schema51 = {
               $ref: '#/definitions/RemotesItems',
             },
           ],
+        },
+        name: {
+          type: 'string',
+          minLength: 1,
         },
         shareScope: {
           type: 'string',
@@ -2170,6 +2169,10 @@ const schema73 = {
         },
       ],
     },
+    name: {
+      type: 'string',
+      minLength: 1,
+    },
     shareScope: {
       type: 'string',
       minLength: 1,
@@ -2260,7 +2263,9 @@ function validate67(
       } else {
         const _errs1 = errors;
         for (const key0 in data) {
-          if (!(key0 === 'external' || key0 === 'shareScope')) {
+          if (
+            !(key0 === 'external' || key0 === 'name' || key0 === 'shareScope')
+          ) {
             validate67.errors = [
               {
                 params: {
@@ -2355,8 +2360,8 @@ function validate67(
             var valid0 = true;
           }
           if (valid0) {
-            if (data.shareScope !== undefined) {
-              let data1 = data.shareScope;
+            if (data.name !== undefined) {
+              let data1 = data.name;
               const _errs8 = errors;
               if (errors === _errs8) {
                 if (typeof data1 === 'string') {
@@ -2382,6 +2387,36 @@ function validate67(
               var valid0 = _errs8 === errors;
             } else {
               var valid0 = true;
+            }
+            if (valid0) {
+              if (data.shareScope !== undefined) {
+                let data2 = data.shareScope;
+                const _errs10 = errors;
+                if (errors === _errs10) {
+                  if (typeof data2 === 'string') {
+                    if (data2.length < 1) {
+                      validate67.errors = [
+                        {
+                          params: {},
+                        },
+                      ];
+                      return false;
+                    }
+                  } else {
+                    validate67.errors = [
+                      {
+                        params: {
+                          type: 'string',
+                        },
+                      },
+                    ];
+                    return false;
+                  }
+                }
+                var valid0 = _errs10 === errors;
+              } else {
+                var valid0 = true;
+              }
             }
           }
         }

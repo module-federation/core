@@ -274,9 +274,9 @@ class FederationRuntimePlugin {
 
     if (!useContainerPlugin && !useModuleFederationPlugin) {
       this.options = {
-        ...this.options,
-        name: compiler.options.output.uniqueName || 'container',
         remotes: {},
+        name: compiler.options.output.uniqueName || 'container',
+        ...this.options,
       };
     }
 
