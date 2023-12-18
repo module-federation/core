@@ -23,10 +23,6 @@ module.exports = composePlugins(
         },
       }),
     );
-    console.log(
-      'config.optimization?.runtimeChunk',
-      config.optimization?.runtimeChunk,
-    );
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {
       if (p.constructor.name === 'ModuleFederationPlugin') {

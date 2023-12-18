@@ -44,8 +44,7 @@
           "sourceMap": false,
           "namedChunks": false,
           "extractLicenses": true,
-          "vendorChunk": false,
-          "webpackConfig": "apps/react-ts-remote/webpack.config.prod.js"
+          "vendorChunk": false
         }
       },
       "dependsOn": [

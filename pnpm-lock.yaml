@@ -629,6 +629,9 @@ importers:
       '@module-federation/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@module-federation/enhanced':
+        specifier: workspace:*
+        version: link:../../packages/enhanced
       '@module-federation/typescript':
         specifier: workspace:*
         version: link:../../packages/typescript
@@ -641,6 +644,9 @@ importers:
 
   apps/react-ts-remote:
     devDependencies:
+      '@module-federation/enhanced':
+        specifier: workspace:*
+        version: link:../../packages/enhanced
       '@module-federation/typescript':
         specifier: workspace:*
         version: link:../../packages/typescript
