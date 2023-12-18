@@ -18,7 +18,7 @@ function getPreviewVersion(branch) {
   return `0.0.0-${branch}-${Date.now()}`;
 }
 
-function updatePackageVersions() {
+async function updatePackageVersions() {
   const currentBranch = getCurrentGitBranch();
   const packageJsonPaths = glob.sync('packages/*/package.json');
 
@@ -30,6 +30,16 @@ function updatePackageVersions() {
 
     fs.writeFileSync(fullPath, JSON.stringify(packageJson, null, 2) + '\n');
     console.log(`Updated version in ${filePath}`);
+  });
+
+  execSync('npm run build', { stdio: 'inherit' });
+
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  const distPackagePaths = glob.sync('dist/packages/*');
+  console.log(distPackagePaths)
+  distPackagePaths.forEach((distPackagePath) => {
+    console.log(`Publishing ${distPackagePath}`);
+    execSync(`cd ${distPackagePath}; npm publish --tag=experimental`, { stdio: 'inherit' });
   });
 }
 
