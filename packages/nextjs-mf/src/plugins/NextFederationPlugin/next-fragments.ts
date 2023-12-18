@@ -133,7 +133,8 @@ export const applyPathFixes = (compiler: Compiler, options: any) => {
           oneOfRule.exclude = [
             oneOfRule.exclude,
             /packages\/nextjs-mf/,
-            /packages\/node/,
+            /packages\/node\/dist/,
+            /packages\/utilities\/dist/,
           ];
         }
       });
