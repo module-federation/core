@@ -13,6 +13,7 @@ import type {
 } from 'webpack/lib/Module';
 import FallbackDependency from './FallbackDependency';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
+import { WEBPACK_MODULE_TYPE_REMOTE } from '../Constants';
 import type { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
 import type { InputFileSystem } from 'webpack/lib/FileSystemInfo';
 import type { RequestShortener } from 'webpack/lib/RuntimeModule';
@@ -24,9 +25,6 @@ const { sources: webpackSources } = require(
 const { Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const { WEBPACK_MODULE_TYPE_REMOTE } = require(
-  normalizeWebpackPath('webpack/lib/ModuleTypeConstants'),
-) as typeof import('webpack/lib/ModuleTypeConstants');
 const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 ) as typeof import('webpack/lib/util/makeSerializable');

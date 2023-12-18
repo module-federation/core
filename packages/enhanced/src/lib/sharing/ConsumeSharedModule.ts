@@ -23,6 +23,7 @@ import type {
 } from 'webpack/lib/Module';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import { normalizeConsumeShareOptions } from './utils';
+import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from '../Constants';
 
 const { rangeToString, stringifyHoley } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
@@ -30,9 +31,6 @@ const { rangeToString, stringifyHoley } = require(
 const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } = require(
-  normalizeWebpackPath('webpack/lib/ModuleTypeConstants'),
-) as typeof import('webpack/lib/ModuleTypeConstants');
 const { sources: webpackSources } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
