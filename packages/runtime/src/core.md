@@ -82,7 +82,13 @@ initializeSharing(shareScopeName?: string): boolean | Promise<boolean>
 Initializes sharing sequences for shared scopes.
 
 ## Hooks
-`FederationHost` offers various lifecycle hooks for interacting at different stages of the module federation process.
+ `FederationHost` offers various lifecycle hooks for interacting at different stages of the module federation process. These hooks include:
+  - `init`: Called when the FederationHost is initialized.
+  - `loadRemote`: Called when a remote module is loaded.
+  - `loadShare`: Called when a shared module is loaded.
+  - `loadShareSync`: Called when a shared module is loaded synchronously.
+  - `preloadRemote`: Called when remote modules are preloaded.
+  - `initializeSharing`: Called when sharing sequences for shared scopes are initialized.
 
 ## Plugin System Integration
 `FederationHost` utilizes `PluginSystem` for extended capabilities and custom behavior integration, using `FederationRuntimePlugin`.
