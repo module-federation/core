@@ -6,7 +6,8 @@
     [
       "@module-federation/runtime",
       "@module-federation/enhanced",
-      "@module-federation/webpack-bundler-runtime"
+      "@module-federation/webpack-bundler-runtime",
+      "@module-federation/sdk"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],
