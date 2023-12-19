@@ -1,13 +1,14 @@
 function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
-    throw new Error('import specifier is require');
+    throw new Error('import specifier is required');
   }
-  return new Promise((resolve, reject) => {
-    new Function(
-      'callbacks',
-      `import("${name}").then((res)=>{callbacks.resolve(res);}, (error)=> callbacks.reject(error))`,
-    )({ resolve, reject });
-  });
+  const importModule = new Function('name', `return import(name)`);
+  return importModule(name)
+    .then((res: any) => res.default as T)
+    .catch((error: any) => {
+      console.error(`Error importing module ${name}:`, error);
+      throw error;
+    });
 }
 
 export function createScriptNode(
