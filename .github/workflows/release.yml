@@ -61,9 +61,9 @@ jobs:
           version: 'next'
           type: 'release'
           branch: ''
-          tools: 'modern'
+          tools: 'changeset'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.REPO_SCOPED_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           REPOSITORY: ${{ github.repository }}
           PULL_REQUEST_NUMBER: ${{ github.event.issue.number }}
@@ -105,9 +105,9 @@ jobs:
           version: ${{ github.event.inputs.version }}
           branch: ${{ github.event.inputs.branch }}
           type: 'release'
-          tools: 'modern'
+          tools: 'changeset'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.REPO_SCOPED_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           REPOSITORY: ${{ github.repository }}
           REF: ${{ github.ref }}
