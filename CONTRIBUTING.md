@@ -36,17 +36,27 @@ nvm use 18
 
 ### Install Dependencies
 
+```sh
+# Enable pnpm with corepack, only available on Node.js >= `v14.19.0`
+corepack enable
+```
+
+Add nx to global
+
+```bash
+pnpm add nx@latest -g
+```
+
 First, install NX globally:
 
-```bash
-npm install --global nx@latest
+```sh
+pnpm install
 ```
 
-Then, install Node.js dependencies:
+What this will do:
 
-```bash
-npm install
-```
+- Install all dependencies
+- Create symlinks between packages in the monorepo
 
 
 ## Testing
@@ -84,6 +94,37 @@ npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
 This command ensures that only relevant tests are executed, saving time and resources.
 
 
+## Submitting Changes
+
+### Add a Changeset
+
+Universe is using [Changesets](https://github.com/changesets/changesets) to manage the versioning and changelogs.
+
+If you've changed some packages, you need add a new changeset for the changes. Please run `change` command to select the changed packages and add the changeset info.
+
+```sh
+pnpm run changeset
+```
+
+### Committing your Changes
+
+Commit your changes to your forked repo, and [create a pull request](https://help.github.com/articles/creating-a-pull-request/).
+
+### Format of PR titles
+
+The format of PR titles follow Conventional Commits.
+
+An example:
+
+```
+feat(plugin-swc): Add `xxx` config
+^    ^    ^
+|    |    |__ Subject
+|    |_______ Scope
+|____________ Type
+```
+
+
 ## Release
 
 Module Federation uses GitHub Actions for automated versioning and publishing:
@@ -101,32 +142,3 @@ Releasing a version in Module Federation is now more efficient with specific com
   - Increment the project version.
   - Update versions of dependent projects.
 
-### Automated Releases in CI
-
-Releases are automated in CI, based on the branch they are merged into:
-
-- `main`: Stable channel.
-- `next`: Release candidate channel.
-- `canary`: Canary channel.
-
-To trigger releases manually:
-
-1. Go to the [Release Workflow](https://github.com/module-federation/universe/actions/workflows/trigger-release.yml) on GitHub.
-2. Select the target branch (`canary`, `main`, `next`).
-3. Choose the project from the dropdown menu.
-4. Trigger the release.
-5. Its suggested to trigger releases in order of consumption
-
-This ensures a consistent and automated release cycle across different channels, in line with modern CI/CD practices.
-
-### Creating new packages/projects
-
-To create a new package/project you can use any Nx generator you like/need, just make sure to add the `package` tag to the project and include the `release` target in the `package.json` file.
-
-The nx-semantic-release plugin does NOT know when the package was created, so we need to manually create the first tag for the package, also keep in mind that the first version of the package should be `1.0.0` and not `0.0.0`, so to create the first tag for the package you can run:
-
-```sh
-git tag -a <PROJECT_NAME>-<VERSION>
-```
-
-Note that this format is important for the nx-semantic-release plugin understand the version of the package, you can check the used format in this project on the `tagFormat` option in the `nxrelease.config.js` file.
