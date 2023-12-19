@@ -2,7 +2,8 @@
   "name": "module-federation",
   "version": "0.0.0",
   "engines": {
-    "node": ">=18"
+    "node": ">=18",
+    "pnpm": ">=8.11.0"
   },
   "private": true,
   "description": "Module Federation helper for NextJS",
