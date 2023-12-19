@@ -7,8 +7,6 @@ const { RuntimeModule, Template, RuntimeGlobals } = require(
 ) as typeof import('webpack');
 
 interface InvertedContainerRuntimeModuleOptions {
-  runtime: string;
-  remotes: Record<string, string>;
   name?: string;
 }
 

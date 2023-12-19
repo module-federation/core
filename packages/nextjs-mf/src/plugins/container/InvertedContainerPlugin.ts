@@ -22,7 +22,6 @@ class InvertedContainerPlugin {
     new EmbeddedContainerPlugin({
       runtime: this.options.runtime,
       container: this.options.container,
-      chunkToEmbed: this.options.chunkToEmbed,
     }).apply(compiler);
 
     new AsyncBoundaryPlugin({

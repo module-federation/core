@@ -4,7 +4,6 @@ import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
 export interface EmbeddedContainerOptions {
   runtime: string;
   container?: string;
-  chunkToEmbed: string;
 }
 
 class EmbeddedContainerPlugin {
@@ -22,17 +21,11 @@ class EmbeddedContainerPlugin {
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'EmbeddedContainerPlugin',
           (chunk, set) => {
-            const runtimeModuleOptions = {
-              runtime: this.options.runtime,
-              remotes: {},
-              name: this.options.container,
-              debug: false,
-              container: this.options.container,
-            };
-
             compilation.addRuntimeModule(
               chunk,
-              new InvertedContainerRuntimeModule(runtimeModuleOptions),
+              new InvertedContainerRuntimeModule({
+                name: this.options.container,
+              }),
             );
           },
         );
