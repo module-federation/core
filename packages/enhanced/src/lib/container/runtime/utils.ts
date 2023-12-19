@@ -37,25 +37,28 @@ export function normalizeRuntimeInitOptionsWithOutShared(
     (item) => ({
       external: Array.isArray(item) ? item : [item],
       shareScope: options.shareScope || 'default',
+      name: undefined,
     }),
     (item) => ({
       external: Array.isArray(item.external) ? item.external : [item.external],
       shareScope: item.shareScope || options.shareScope || 'default',
+      name: item.name,
     }),
   );
   const remoteOptions: Remotes = [];
   parsedOptions.forEach((parsedOption) => {
     const [alias, remoteInfos] = parsedOption;
     // TODO: Handle the case of multiple elements in the external array (处理 external 数组多元素的情况)
-    const { external, shareScope } = remoteInfos;
+    const { external, shareScope, name } = remoteInfos;
     try {
       // only fit for remoteType: 'script'
       const [url, globalName] = extractUrlAndGlobal(external[0]);
       remoteOptions.push({
         alias,
-        name: globalName,
+        name: name || globalName,
         entry: url,
         shareScope: shareScope,
+        // externalType
       });
     } catch (err) {
       return;

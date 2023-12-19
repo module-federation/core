@@ -148,13 +148,11 @@ function getFindShareFunction(strategy: Shared['strategy']) {
 // Details about shared resources
 // TODO: Implement strictVersion for alignment with module federation.
 export function getRegisteredShare(
-  instanceName: string,
+  localShareScopeMap: ShareScopeMap,
   pkgName: string,
   shareInfo: ShareInfos[keyof ShareInfos],
   resolveShareHook: any,
 ): Shared | void {
-  const globalShares = Global.__FEDERATION__.__SHARE__;
-  const localShareScopeMap = globalShares[instanceName];
   if (!localShareScopeMap) {
     return;
   }

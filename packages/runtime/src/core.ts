@@ -209,8 +209,9 @@ export class FederationHost {
 
   private _setGlobalShareScopeMap(): void {
     const globalShareScopeMap = getGlobalShareScope();
-    if (this.options.name && !globalShareScopeMap[this.options.name]) {
-      globalShareScopeMap[this.options.name] = this.shareScopeMap;
+    const identifier = this.options.id || this.options.name;
+    if (identifier && !globalShareScopeMap[identifier]) {
+      globalShareScopeMap[identifier] = this.shareScopeMap;
     }
   }
 
@@ -259,7 +260,7 @@ export class FederationHost {
 
     // Retrieve from cache
     const registeredShared = getRegisteredShare(
-      this.options.name,
+      this.shareScopeMap,
       pkgName,
       shareInfoRes,
       this.hooks.lifecycle.resolveShare,
@@ -294,7 +295,7 @@ export class FederationHost {
         shareInfoRes.loaded = true;
         addUseIn(shareInfoRes);
         const gShared = getRegisteredShare(
-          this.options.name,
+          this.shareScopeMap,
           pkgName,
           shareInfoRes,
           this.hooks.lifecycle.resolveShare,
@@ -326,7 +327,7 @@ export class FederationHost {
         addUseIn(shareInfoRes);
         //@ts-ignore
         const gShared = getRegisteredShare(
-          this.options.name,
+          this.shareScopeMap,
           pkgName,
           shareInfoRes,
           this.hooks.lifecycle.resolveShare,
@@ -357,7 +358,7 @@ export class FederationHost {
   loadShareSync<T>(pkgName: string): () => T | never {
     const shareInfo = this.options.shared?.[pkgName];
     const registeredShared = getRegisteredShare(
-      this.options.name,
+      this.shareScopeMap,
       pkgName,
       shareInfo,
       this.hooks.lifecycle.resolveShare,
@@ -477,6 +478,7 @@ export class FederationHost {
       shared: this.options.shared || {},
       plugins: this.options.plugins,
       loaderHook: this.loaderHook,
+      shareScopeMap: this.shareScopeMap,
     };
 
     if (!module) {
@@ -578,13 +580,8 @@ export class FederationHost {
     shareScopeName = DEFAULT_SCOPE,
     strategy?: Shared['strategy'],
   ): Array<Promise<void>> {
-    const globalShareScope = Global.__FEDERATION__.__SHARE__;
+    const shareScope = this.shareScopeMap;
     const hostName = this.options.name;
-    if (!globalShareScope[hostName]) {
-      globalShareScope[hostName] = {};
-    }
-    const shareScope = globalShareScope[hostName];
-
     // Creates a new share scope if necessary
     if (!shareScope[shareScopeName]) {
       shareScope[shareScopeName] = {};
@@ -724,7 +721,7 @@ export class FederationHost {
       const sharedVal = formatShareOptions[sharedKey];
       //@ts-ignore
       const registeredShared = getRegisteredShare(
-        userOptions.name,
+        this.shareScopeMap,
         sharedKey,
         sharedVal,
         this.hooks.lifecycle.resolveShare,

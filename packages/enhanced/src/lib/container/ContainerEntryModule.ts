@@ -20,6 +20,7 @@ import type {
 import type WebpackError from 'webpack/lib/WebpackError';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { getFederationGlobalScope } from './runtime/utils';
+import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from '../Constants';
 
 const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
@@ -30,9 +31,6 @@ const { sources: webpackSources } = require(
 const { AsyncDependenciesBlock, Template, Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const { JAVASCRIPT_MODULE_TYPE_DYNAMIC } = require(
-  normalizeWebpackPath('webpack/lib/ModuleTypeConstants'),
-) as typeof import('webpack/lib/ModuleTypeConstants');
 const StaticExportsDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/StaticExportsDependency'),
 ) as typeof import('webpack/lib/dependencies/StaticExportsDependency');

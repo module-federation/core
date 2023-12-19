@@ -15,8 +15,9 @@ import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/Module';
-import type { InputFileSystem } from 'webpack/lib/util/fs';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
+import { WEBPACK_MODULE_TYPE_PROVIDE } from '../Constants';
+import type { InputFileSystem } from 'webpack/lib/util/fs';
 import type { WebpackOptionsNormalized as WebpackOptions } from 'webpack/declarations/WebpackOptions';
 
 const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
@@ -25,9 +26,6 @@ const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
 const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 ) as typeof import('webpack/lib/util/makeSerializable');
-const { WEBPACK_MODULE_TYPE_PROVIDE } = require(
-  normalizeWebpackPath('webpack/lib/ModuleTypeConstants'),
-) as typeof import('webpack/lib/ModuleTypeConstants');
 
 const TYPES = new Set(['share-init']);
 
