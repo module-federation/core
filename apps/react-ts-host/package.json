@@ -1,6 +1,7 @@
 {
   "name": "react-ts-host",
   "version": "1.0.0",
+  "private": true,
   "devDependencies": {
     "@module-federation/core": "workspace:*",
     "@module-federation/typescript": "workspace:*",

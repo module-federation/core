@@ -1,5 +1,6 @@
 {
   "name": "react-ts-remote",
+  "private": true,
   "version": "1.0.0",
   "devDependencies": {
     "@module-federation/enhanced": "workspace:*",
