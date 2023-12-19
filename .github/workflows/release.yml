@@ -47,11 +47,8 @@ jobs:
           node-version: '18'
           cache: 'pnpm'
 
-      - name: Install npm v9
-        run: npm install -g npm@9
-
-      - uses: nrwl/nx-set-shas@v3
-      - run: pnpm install
+      - name: Install deps
+        run: pnpm install
 
       - name: Build and test Packages
         run: npx nx affected -t pre-release --parallel=3 --exclude='*,!tag:package' --base=origin/canary --head=${{ github.ref }}
@@ -89,11 +86,8 @@ jobs:
           node-version: '18'
           cache: 'pnpm'
 
-      - name: Install npm v9
-        run: npm install -g npm@9
-
-      - uses: nrwl/nx-set-shas@v3
-      - run: pnpm install
+      - name: Install deps
+        run: pnpm install
 
       - name: Build and test Packages
         run: |
