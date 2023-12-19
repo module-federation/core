@@ -52,6 +52,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
+      - name: Build and test Packages
+        run: npx nx affected -t pre-release --parallel=3 --exclude='*,!tag:package'
+
       - name: Release
         uses: web-infra-dev/actions@v2
         with:
@@ -93,8 +96,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Release package(s)
-        run: npx nx affected -t build --parallel=3 --exclude='*,!tag:package'
+      - name: Build and test Packages
+        run: npx nx affected -t pre-release --parallel=3 --exclude='*,!tag:package'
+
       - name: Release
         uses: web-infra-dev/actions@v2
         with:
@@ -103,7 +107,7 @@ jobs:
           type: 'release'
           tools: 'modern'
         env:
-          GITHUB_TOKEN: ${{ secrets.REPO_SCOPED_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           REPOSITORY: ${{ github.repository }}
           REF: ${{ github.ref }}
