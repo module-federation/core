@@ -6,20 +6,9 @@ export default function (): FederationRuntimePlugin {
     name: 'next-internal-plugin',
     beforeInit(args) {
       if (!__webpack_runtime_id__.startsWith('webpack')) return args;
-      const attach =
-        //@ts-ignore
-        typeof __webpack_require__?.federation?.attachRemote === 'function'
-          ? //@ts-ignore
-            __webpack_require__.federation.attachRemote
-          : () => {
-              //@ts-ignore
-              console.error('embedded container', args.id, 'is not found');
-              return false;
-            };
-
       const { moduleCache, name } = args.origin;
-
-      const attachedRemote = attach();
+      const gs = __webpack_require__.g || new Function('return globalThis');
+      const attachedRemote = gs[name];
       if (attachedRemote) {
         moduleCache.set(name, attachedRemote);
       }

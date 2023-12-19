@@ -5,12 +5,11 @@ import ContainerEntryModule from '@module-federation/enhanced/src/lib/container/
 const { RuntimeModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
+
 interface InvertedContainerRuntimeModuleOptions {
   runtime: string;
   remotes: Record<string, string>;
   name?: string;
-  debug?: boolean;
-  container?: string;
 }
 
 class InvertedContainerRuntimeModule extends RuntimeModule {
@@ -24,65 +23,49 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
   private findEntryModuleOfContainer(): Module | undefined {
     if (!this.chunk || !this.chunkGraph) return undefined;
     const modules = this.chunkGraph.getChunkModules(this.chunk);
-
     return Array.from(modules).find(
       (module) => module instanceof ContainerEntryModule,
     );
   }
 
   override generate(): string {
-    if (!this.compilation || !this.chunk || !this.chunkGraph) {
+    if (!this.compilation || !this.chunk || !this.compilation.chunkGraph) {
       return '';
     }
 
-    const { name, debug } = this.options;
+    const { name } = this.options;
     const containerEntryModule = this.findEntryModuleOfContainer() as
       | Module
       | undefined;
-    const chunk = this.chunk;
 
-    const containerModuleId =
-      containerEntryModule?.id || containerEntryModule?.debugId;
-    const isPartialContainer = chunk.runtime === this.options.runtime;
-    if (!containerModuleId || !isPartialContainer) {
+    const containerModuleId = containerEntryModule
+      ? this.compilation.chunkGraph.getModuleId(containerEntryModule)
+      : false;
+
+    if (!containerModuleId) {
       return '';
     }
-    const globalObject = `globalThis.__remote_scope__`;
-    const containerScope = `${RuntimeGlobals.global}`;
+
+    const containerModuleIdJSON = JSON.stringify(containerModuleId);
+    const nameJSON = JSON.stringify(name);
 
     return Template.asString([
-      'var innerRemote;',
+      `var innerRemote;`,
+      `function attachRemote (resolve) {`,
       Template.indent([
-        'function attachRemote (resolve) {',
-        `if(__webpack_require__.m[${JSON.stringify(containerModuleId)}]) {`,
+        `if(__webpack_require__.m[${containerModuleIdJSON}]) {`,
         Template.indent(
-          `innerRemote = __webpack_require__(${JSON.stringify(
-            containerModuleId,
-          )});`,
+          `innerRemote = __webpack_require__(${containerModuleIdJSON});`,
         ),
         `}`,
-        // can likely remove this logic
-        `  if(${globalObject} && !${globalObject}[${JSON.stringify(name)}]) {`,
-        `    ${globalObject}[${JSON.stringify(name)}] = innerRemote;`,
-        `  } else if(${containerScope} && !${containerScope}[${JSON.stringify(
-          name,
-        )}]) {`,
-        `    ${containerScope}[${JSON.stringify(name)}] = innerRemote;`,
-        '  }',
-        '  if(resolve) resolve(innerRemote);',
-        `return innerRemote`,
-        '}',
-        '__webpack_require__.federation.attachRemote = ()=> attachRemote();',
+        `var gs = ${RuntimeGlobals.global} || globalThis`,
+        `gs[${nameJSON}] = innerRemote`,
+        `if(resolve) resolve(innerRemote);`,
+        `return innerRemote;`,
       ]),
-      Template.indent([
-        '  if (__webpack_require__.O) {',
-        `  __webpack_require__.O(0, ["${this.chunk.id}"], function() {`,
-        '    attachRemote();',
-        '  }, 0);',
-        '} else {',
-        'attachRemote();',
-        '}',
-      ]),
+      `};`,
+      `${RuntimeGlobals.require}.federation.attachRemote = attachRemote;`,
+      `attachRemote();`,
     ]);
   }
 }
