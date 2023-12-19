@@ -36,7 +36,8 @@
     "@module-federation/utilities": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
-    "@module-federation/node": "workspace:*"
+    "@module-federation/node": "workspace:*",
+    "@module-federation/webpack-type": "workspace:*"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",

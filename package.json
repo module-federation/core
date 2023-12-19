@@ -29,8 +29,6 @@
     "serve:website": "nx run website:serve",
     "build:website": "nx run website:build.netlify",
     "extract-i18n:website": "nx run website:extract-i18n",
-    "postinstall": "npm run sync:types:webpack",
-    "sync:types:webpack": "cp -rf ./webpack/* ./node_modules/webpack",
     "sync:pullMFTypes": "concurrently \"node ./packages/enhanced/pullts.js\"",
     "app:next:dev": "nx run-many --target=serve --configuration=development -p 3000-home 3001-shop 3002-checkout",
     "app:next:prod": "nx run-many --target=serve --configuration=production -p 3000-home 3001-shop 3002-checkout",

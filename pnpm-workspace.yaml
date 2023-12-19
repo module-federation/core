@@ -4,3 +4,4 @@ packages:
   - 'packages/enhance'
   - 'apps/runtime-demo/*'
   - 'apps/*'
+  - 'webpack'

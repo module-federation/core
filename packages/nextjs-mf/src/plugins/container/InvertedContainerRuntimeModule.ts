@@ -1,11 +1,10 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { Module } from 'webpack';
-import { RuntimeModule, Template, RuntimeGlobals } from 'webpack';
+import type { Module } from '@module-federation/webpack-type';
 
 // @ts-nocheck
-// const { RuntimeModule, Template, RuntimeGlobals } = require(
-//   normalizeWebpackPath('webpack'),
-// ) as typeof import('webpack');
+const { RuntimeModule, Template, RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('@module-federation/webpack-type');
 
 interface InvertedContainerRuntimeModuleOptions {
   runtime: string;

@@ -799,6 +799,9 @@ importers:
       '@module-federation/utilities':
         specifier: workspace:*
         version: link:../utilities
+      '@module-federation/webpack-type':
+        specifier: workspace:*
+        version: link:../../webpack
       eventemitter3:
         specifier: ^5.0.0
         version: 5.0.1
@@ -925,6 +928,8 @@ importers:
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../runtime
+
+  webpack: {}
 
 packages:
   /@aashutoshrathi/word-wrap@1.2.6:
