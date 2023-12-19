@@ -24,5 +24,5 @@ jobs:
       - run: npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
       - run: npx nx affected -t build --parallel=10 --exclude='*,!tag:package'
       - run: npx nx run-many --target=serve --projects=3000-home,3001-shop,3002-checkout --parallel=3 & echo "Running Development Build Tests"
-      - run: sleep 5 && npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=3 --output-style=stream
+      - run: sleep 10 && npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1 --output-style=stream
       - run: lsof -ti tcp:3000,3001,3002 | xargs kill
