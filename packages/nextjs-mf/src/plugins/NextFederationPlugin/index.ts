@@ -62,11 +62,7 @@ export class NextFederationPlugin {
       compiler,
       isServer,
     );
-    this.applyModuleFederationPlugins(
-      compiler,
-      normalFederationPluginOptions,
-      isServer,
-    );
+    new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
   }
 
   private validateOptions(compiler: Compiler): boolean {
@@ -157,44 +153,6 @@ export class NextFederationPlugin {
       noop = require.resolve('../../federation-noop.cjs');
     }
     return noop;
-  }
-
-  private applyClientFederationPlugins(
-    compiler: Compiler,
-    normalFederationPluginOptions: ModuleFederationPluginOptions,
-  ) {
-    new ModuleFederationPlugin(
-      normalFederationPluginOptions,
-      //@ts-ignore
-    ).apply(compiler);
-  }
-
-  private applyServerFederationPlugins(
-    compiler: Compiler,
-    normalFederationPluginOptions: ModuleFederationPluginOptions,
-  ) {
-    new ModuleFederationPlugin(
-      normalFederationPluginOptions,
-      //@ts-ignore
-    ).apply(compiler);
-  }
-
-  private applyModuleFederationPlugins(
-    compiler: Compiler,
-    normalFederationPluginOptions: ModuleFederationPluginOptions,
-    isServer: boolean,
-  ) {
-    if (!isServer) {
-      this.applyClientFederationPlugins(
-        compiler,
-        normalFederationPluginOptions,
-      );
-    } else {
-      this.applyServerFederationPlugins(
-        compiler,
-        normalFederationPluginOptions,
-      );
-    }
   }
 }
 
