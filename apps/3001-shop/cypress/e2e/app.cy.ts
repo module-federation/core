@@ -31,17 +31,17 @@ describe('3001-shop/', () => {
   });
 
   describe('Routing checks', () => {
-    it('check that clicking back and forwards in client side routeing still renders the content correctly', () => {
+    it('check that clicking back and forwards in client-side routing still renders the content correctly', () => {
+      cy.visit('/shop');
+      cy.visit('/');
       cy.visit('/shop');
       cy.url().should('include', '/shop');
-      getH1().contains('Shop Page');
-      cy.wait(300);
+      cy.get('h1').should('contain', 'Shop Page'); //wait until h1 contains 'Shop Page';
+
       cy.get('.home-menu-link').click();
-      //eslint-disable-next-line
-      cy.wait(5000);
-      cy.url().should('include', '/');
-      cy.wait(300);
-      getH1().contains('This is SPA combined');
+      cy.url().should('include', '/'); //wait until URL changes to '/';
+
+      cy.get('h1').should('contain', 'This is SPA combined'); //wait until h1 contains 'This is SPA combined';
     });
   });
 
