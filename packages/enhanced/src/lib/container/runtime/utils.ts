@@ -26,7 +26,7 @@ interface ModifyEntryOptions {
 export function getFederationGlobalScope(
   runtimeGlobals: typeof RuntimeGlobals,
 ): string {
-  return `${runtimeGlobals?.require || '__webpack_require__'}.federation`;
+  return `${runtimeGlobals.require || '__webpack_require__'}.federation`;
 }
 
 export function normalizeRuntimeInitOptionsWithOutShared(
