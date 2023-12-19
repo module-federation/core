@@ -32,9 +32,11 @@ describe('3000-home/', () => {
 
   describe('Routing checks', () => {
     it('check that clicking back and forwards in client side routeing still renders the content correctly', () => {
+      cy.visit('/');
       cy.visit('/shop');
       cy.url().should('include', '/shop');
       getH1().contains('Shop Page');
+      cy.wait(300);
       cy.get('.home-menu-link').click();
       //eslint-disable-next-line
       cy.wait(2999);
