@@ -74,7 +74,7 @@ jobs:
 
   release:
     name: Release
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
