@@ -1,5 +1,8 @@
 name: Release
 on:
+  push:
+    branches:
+      - workflow/switch-to-pnpm
   workflow_dispatch:
     inputs:
       version:
@@ -102,7 +105,7 @@ jobs:
       - name: Release
         uses: web-infra-dev/actions@v2
         with:
-          version: ${{ github.event.inputs.version }}
+          version: ${{ github.event.inputs.version  || 'next' }}
           branch: ${{ github.event.inputs.branch }}
           type: 'release'
           tools: 'changeset'
