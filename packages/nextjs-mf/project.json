@@ -44,7 +44,7 @@
         "passWithNoTests": true
       }
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -56,16 +56,9 @@
           {
             "command": "nx run nextjs-mf:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run nextjs-mf:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
   "tags": ["package"]

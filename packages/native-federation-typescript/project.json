@@ -29,7 +29,7 @@
         "{workspaceRoot}/coverage/packages/native-federation-typescript"
       ]
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -41,10 +41,6 @@
           {
             "command": "nx run native-federation-typescript:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run native-federation-typescript:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }

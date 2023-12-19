@@ -1,60 +1,109 @@
 name: Release
-
 on:
   workflow_dispatch:
     inputs:
-      packages:
-        description: 'Package name (as in Nx)'
-        required: true
+      version:
         type: choice
+        description: 'Release Version (next, beta, alpha, latest)'
+        required: true
+        default: 'next'
         options:
-          - affected
-          - all
-          - nextjs-mf
-          - runtime
-          - sdk
-          - node
-          - storybook-addon
-          - typescript
-          - utils
-          - webpack-bundler-runtime
-          - native-federation-typescript
-          - native-federation-tests
-          - enhanced
+          - next
+          - beta
+          - alpha
+          - latest
+      branch:
+        description: 'Release Branch (confirm release branch)'
+        required: true
+        default: 'canary'
+  issue_comment:
+    types: [created]
+
+permissions:
+  id-token: write
 
 jobs:
-  release:
+  issue_comment:
+    name: Release with comment
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '!canary')
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # to be able to publish a GitHub release
-      issues: write # to be able to comment on released issues
-      pull-requests: write # to be able to comment on released pull requests
-      id-token: write # to enable use of OIDC for npm provenance
-    if: ${{ github.event.inputs.packages }}
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repo
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 1
+          ref: refs/pull/${{ github.event.issue.number }}/head
       - uses: nrwl/nx-set-shas@v3
       - run: npm ci
 
-      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
-        run: npm audit signatures
+      - name: Install Pnpm
+        run: corepack enable
 
-      - name: Check for un-formatted files
-        run: npx nx format:check
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
 
-      - name: Release ${{ github.event.inputs.packages }} package(s)
-        run: |
-          if [[ ${{ github.event.inputs.packages }} == 'affected' ]]; then
-            npx nx affected -t release --parallel=3 --exclude='*,!tag:package'
-          elif [[ ${{ github.event.inputs.packages }} == 'all' ]]; then
-            npx nx run-many --target=release --all --parallel=3 --exclude='*,!tag:package'
-          else
-            npx nx run ${{ github.event.inputs.packages }}:release
-          fi
+      - name: Install npm v9
+        run: npm install -g npm@9
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Release
+        uses: web-infra-dev/actions@v2
+        with:
+          version: 'next'
+          type: 'release'
+          branch: ''
+          tools: 'modern'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          # NPM_CONFIG_PROVENANCE: true
+          REPOSITORY: ${{ github.repository }}
+          PULL_REQUEST_NUMBER: ${{ github.event.issue.number }}
+          COMMENT: ${{ toJson(github.event.comment) }}
+
+  release:
+    name: Release
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 25
+      - uses: nrwl/nx-set-shas@v3
+      - run: npm ci
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install npm v9
+        run: npm install -g npm@9
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Release package(s)
+        run: npx nx affected -t build --parallel=3 --exclude='*,!tag:package'
+      - name: Release
+        uses: web-infra-dev/actions@v2
+        with:
+          version: ${{ github.event.inputs.version }}
+          branch: ${{ github.event.inputs.branch }}
+          type: 'release'
+          tools: 'modern'
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_SCOPED_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          REF: ${{ github.ref }}

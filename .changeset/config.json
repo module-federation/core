@@ -9,6 +9,7 @@
       "@module-federation/webpack-bundler-runtime"
     ]
   ],
+  "ignorePatterns": ["^alpha|^beta"],
   "linked": [],
   "access": "restricted",
   "baseBranch": "canary",

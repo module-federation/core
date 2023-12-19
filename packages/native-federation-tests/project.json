@@ -27,7 +27,7 @@
       "executor": "@nx/vite:test",
       "outputs": ["{workspaceRoot}/coverage/packages/native-federation-tests"]
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -39,16 +39,9 @@
           {
             "command": "nx run native-federation-tests:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run native-federation-tests:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
   "tags": ["package"],

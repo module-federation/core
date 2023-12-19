@@ -52,7 +52,7 @@
         }
       }
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -64,16 +64,9 @@
           {
             "command": "nx run webpack-bundler-runtime:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run webpack-bundler-runtime:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
   "tags": ["package"]

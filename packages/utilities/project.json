@@ -35,7 +35,7 @@
         "passWithNoTests": true
       }
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -47,16 +47,9 @@
           {
             "command": "nx run utils:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run utils:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
   "pre": [

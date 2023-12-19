@@ -45,7 +45,7 @@
         }
       }
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -57,16 +57,9 @@
           {
             "command": "nx run sdk:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run sdk:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
   "tags": ["package"]
