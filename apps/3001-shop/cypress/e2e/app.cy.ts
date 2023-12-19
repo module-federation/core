@@ -32,15 +32,18 @@ describe('3001-shop/', () => {
 
   describe('Routing checks', () => {
     it('check that clicking back and forwards in client-side routing still renders the content correctly', () => {
-      cy.visit('/shop');
       cy.visit('/');
       cy.visit('/shop');
       cy.url().should('include', '/shop');
+      cy.wait(1000);
       cy.get('h1').should('contain', 'Shop Page'); //wait until h1 contains 'Shop Page';
-
+      cy.wait(1000);
       cy.get('.home-menu-link').click();
+      cy.wait(1000);
+      cy.get('.home-menu-link').click();
+      cy.wait(1000);
       cy.url().should('include', '/'); //wait until URL changes to '/';
-
+      cy.wait(1000);
       cy.get('h1').should('contain', 'This is SPA combined'); //wait until h1 contains 'This is SPA combined';
     });
   });

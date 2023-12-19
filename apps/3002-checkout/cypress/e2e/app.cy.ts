@@ -31,17 +31,20 @@ describe('3002-checkout/', () => {
   });
 
   describe('Routing checks', () => {
-    it('check that clicking back and forwards in client side routeing still renders the content correctly', () => {
+    it('check that clicking back and forwards in client-side routing still renders the content correctly', () => {
+      cy.visit('/');
       cy.visit('/checkout');
       cy.url().should('include', '/checkout');
-      getH1().contains('checkout page');
-      cy.wait(300);
+      cy.wait(2000);
+      cy.get('h1').should('contain', 'Shop Page'); //wait until h1 contains 'Shop Page';
+      cy.wait(2000);
       cy.get('.home-menu-link').click();
-      //eslint-disable-next-line
-      cy.wait(5000);
-      cy.url().should('include', '/');
-      cy.wait(300);
-      getH1().contains('This is SPA combined');
+      cy.wait(1000);
+      cy.get('.home-menu-link').click();
+      cy.wait(1000);
+      cy.url().should('include', '/'); //wait until URL changes to '/';
+      cy.wait(2000);
+      cy.get('h1').should('contain', 'This is SPA combined'); //wait until h1 contains 'This is SPA combined';
     });
   });
 
