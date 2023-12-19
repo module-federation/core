@@ -1,8 +1,5 @@
 name: Release
 on:
-  push:
-    branches:
-      - workflow/switch-to-pnpm
   workflow_dispatch:
     inputs:
       version:

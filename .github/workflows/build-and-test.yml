@@ -17,8 +17,15 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Install Pnpm
+        run: corepack enable
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
       - uses: nrwl/nx-set-shas@v3
-      - run: npm ci
+      - run: pnpm install
       - run: npx nx format:check
       - run: npx nx affected -t lint --parallel=7 --exclude='*,!tag:package'
       - run: npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
