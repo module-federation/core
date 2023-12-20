@@ -19,7 +19,6 @@ const nextConfig = {
   },
   webpack(config, options) {
     const { isServer } = options;
-
     config.plugins.push(
       new NextFederationPlugin({
         name: 'checkout',

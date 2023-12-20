@@ -1,6 +1,9 @@
-const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
+const { registerTsConfigPaths } = require('nx/src/plugins/js/utils/register');
+const { workspaceRoot } = require('nx/src/utils/workspace-root');
+const path = require('path');
 
-registerPluginTSTranspiler();
+registerTsConfigPaths(path.join(workspaceRoot, 'tsconfig.tmp.json'));
+
 const { composePlugins, withNx } = require('@nx/webpack');
 const { UniversalFederationPlugin } = require('@module-federation/node');
 
@@ -22,7 +25,6 @@ module.exports = composePlugins(withNx(), (config) => {
           'commonjs ../../node-local-remote/dist/remoteEntry.js',
         node_remote: 'node_remote@http://localhost:3002/remoteEntry.js',
       },
-      experiments: {},
     }),
   );
   return config;

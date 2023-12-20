@@ -31,14 +31,20 @@ describe('3001-shop/', () => {
   });
 
   describe('Routing checks', () => {
-    it('check that clicking back and forwards in client side routeing still renders the content correctly', () => {
+    it('check that clicking back and forwards in client-side routing still renders the content correctly', () => {
+      cy.visit('/');
       cy.visit('/shop');
       cy.url().should('include', '/shop');
+      cy.wait(1000);
       getH1().contains('Shop Page');
+      cy.wait(1000);
       cy.get('.home-menu-link').click();
       //eslint-disable-next-line
-      cy.wait(2999);
+      cy.wait(1999);
+      cy.get('.home-menu-link').click();
+      cy.wait(1000);
       cy.url().should('include', '/');
+      cy.wait(1000);
       getH1().contains('This is SPA combined');
     });
   });
