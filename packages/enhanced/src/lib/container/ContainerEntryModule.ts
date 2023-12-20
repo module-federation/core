@@ -267,7 +267,9 @@ class ContainerEntryModule extends Module {
       weak: false,
       runtimeRequirements,
     });
-    const federationGlobal = getFederationGlobalScope(RuntimeGlobals || {});
+    const federationGlobal = getFederationGlobalScope(
+      RuntimeGlobals || ({} as typeof RuntimeGlobals),
+    );
 
     const source = Template.asString([
       `var moduleMap = {`,
