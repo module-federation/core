@@ -41,7 +41,7 @@ describe('3000-home/', () => {
       //eslint-disable-next-line
       cy.wait(5000);
       cy.url().should('include', '/');
-      cy.wait(300);
+      cy.wait(700);
       getH1().contains('This is SPA combined');
     });
   });
