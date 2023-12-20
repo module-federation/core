@@ -1,3 +1,4 @@
+//@ts-nocheck
 export async function fileSystemRunInContextStrategy(
   chunkId: string,
   rootOutputDir: string,
@@ -7,10 +8,8 @@ export async function fileSystemRunInContextStrategy(
   const fs = require('fs');
   const path = require('path');
   const vm = require('vm');
-  //@ts-ignore
   const filename = path.join(
     __dirname,
-    //@ts-ignore
     rootOutputDir + __webpack_require__.u(chunkId),
   );
   if (fs.existsSync(filename)) {
@@ -48,7 +47,6 @@ export async function httpEvalStrategy(
 ) {
   let url;
   try {
-    //@ts-ignore
     url = new URL(chunkName, __webpack_require__.p);
   } catch (e) {
     console.error(
@@ -58,9 +56,7 @@ export async function httpEvalStrategy(
       chunkName,
       e,
     );
-    //@ts-ignore
     url = new URL(remotes[remoteName]);
-    //@ts-ignore
     const getBasenameFromUrl = (url) => {
       const urlParts = url.split('/');
       return urlParts[urlParts.length - 1];
@@ -114,7 +110,6 @@ export async function httpVmStrategy(
   const globalThisVal = new Function('return globalThis')();
 
   try {
-    //@ts-ignore
     url = new URL(chunkName, __webpack_require__.p);
   } catch (e) {
     console.error(
@@ -122,6 +117,7 @@ export async function httpVmStrategy(
       remoteName,
       'for',
       chunkName,
+      e,
     );
     // search all instances to see if any have the remote
     const container = globalThisVal['__FEDERATION__']['__INSTANCES__'].find(
@@ -142,7 +138,6 @@ export async function httpVmStrategy(
     url.pathname = url.pathname.replace(fileToReplace, chunkName);
   }
   const protocol = url.protocol === 'https:' ? https : http;
-  console.log('fetching chunk', url.href);
   protocol.get(url.href, (res: import('http').IncomingMessage) => {
     let data = '';
     res.on('data', (chunk: Buffer) => {
@@ -158,8 +153,8 @@ export async function httpVmStrategy(
       )(chunk, require, urlDirname, chunkName);
       callback(null, chunk);
     });
-    res.on('error', (err: Error) => {
-      callback(new Error('error'), null);
+    res.on('error', (err) => {
+      callback(err, null);
     });
   });
 }

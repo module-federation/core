@@ -105,8 +105,6 @@ export function loadScriptNode(
         if (error) {
           reject(error);
         } else {
-          // Handle the loaded script context as needed
-          console.log('Script loaded successfully:', scriptContext);
           const remoteEntryKey =
             info?.attrs?.['globalName'] ||
             `__FEDERATION_${info?.attrs?.['name']}:custom__`;

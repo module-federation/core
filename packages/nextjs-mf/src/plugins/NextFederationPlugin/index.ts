@@ -136,7 +136,6 @@ export class NextFederationPlugin {
       },
       remotes: {
         ...this._options.remotes,
-        // ...(this._options.name ? { [this._options.name]: `internal webpack/container/entry/${this._options.name}` } : {}),
       },
       shared: {
         ...defaultShared,
