@@ -73,7 +73,9 @@ export async function loadEntryScript({
       );
 
       return entryExports;
-    });
+    }).catch((e) => {
+      return e
+    })
   }
 
   return loadScript(entry, { attrs: {}, createScriptHook }).then(() => {

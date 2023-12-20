@@ -519,11 +519,14 @@ export class FederationHost {
       });
       return moduleOrFactory;
     } catch (error) {
-      this.hooks.lifecycle.errorLoadRemote.emit({
+      const failover = await this.hooks.lifecycle.errorLoadRemote.emit({
         id,
         error,
       });
-      throw error;
+      if(!failover) {
+        throw error;
+      }
+      return failover
     }
   }
 

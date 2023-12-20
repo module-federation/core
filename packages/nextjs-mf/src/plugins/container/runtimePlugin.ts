@@ -4,6 +4,14 @@ import { FederationRuntimePlugin } from '@module-federation/runtime/type';
 export default function (): FederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
+    errorLoadRemote(args) {
+      console.log('errorLoadRemote', args.id);
+
+      return ()=> ({__esModule: true, default: ()=>{
+        console.log('Fake module', args.id);
+        return null
+        }});
+    },
     beforeInit(args) {
       if (
         typeof __webpack_runtime_id__ === 'string' &&
