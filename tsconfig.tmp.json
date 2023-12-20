@@ -1,17 +1,17 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "tsconfig.base.json",
   "compilerOptions": {
     "paths": {
       "@module-federation/enhanced": ["dist/packages/enhanced"],
       "@module-federation/enhanced/*": ["dist/packages/enhanced/*"],
-      "@module-federation/sdk": ["dist/packages/sdk/index.esm.js"],
+      "@module-federation/sdk": ["dist/packages/sdk"],
       "@module-federation/sdk/normalize-webpack-path": [
         "dist/packages/sdk/normalize-webpack-path.cjs.js"
       ],
       "@module-federation/webpack-bundler-runtime": [
-        "dist/packages/webpack-bundler-runtime/index.esm.js"
+        "dist/packages/webpack-bundler-runtime"
       ],
-      "@module-federation/runtime": ["dist/packages/runtime/index.esm.js"],
+      "@module-federation/runtime": ["dist/packages/runtime"],
       "@module-federation/runtime/*": ["dist/packages/runtime/*"],
       "@module-federation/core": ["dist/packages/core/src/index.js"],
       "@module-federation/native-federation-tests": [

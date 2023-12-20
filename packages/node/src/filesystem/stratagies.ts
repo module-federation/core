@@ -54,7 +54,7 @@ export async function httpEvalStrategy(
       remoteName,
       'for',
       chunkName,
-      e,
+      // e,
     );
     url = new URL(remotes[remoteName]);
     const getBasenameFromUrl = (url) => {
@@ -117,7 +117,7 @@ export async function httpVmStrategy(
       remoteName,
       'for',
       chunkName,
-      e,
+      // e,
     );
     // search all instances to see if any have the remote
     const container = globalThisVal['__FEDERATION__']['__INSTANCES__'].find(
