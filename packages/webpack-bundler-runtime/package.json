@@ -8,6 +8,10 @@
     "Module Federation",
     "bundler runtime"
   ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "publishConfig": {
     "access": "public"
   },

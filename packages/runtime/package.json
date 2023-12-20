@@ -9,6 +9,10 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.esm.js",

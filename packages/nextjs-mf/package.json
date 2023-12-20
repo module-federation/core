@@ -11,6 +11,10 @@
   "contributors": [
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
   ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "exports": {
     ".": "./dist/src/index.js",
     "./utilities": "./dist/utilities.js",
