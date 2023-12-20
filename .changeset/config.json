@@ -15,5 +15,11 @@
   "access": "restricted",
   "baseBranch": "canary",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [
+    "node-host",
+    "node-host-e2e",
+    "node-host-e2e",
+    "node-local-remote",
+    "node-remote"
+  ]
 }
