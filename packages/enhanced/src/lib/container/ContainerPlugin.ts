@@ -184,7 +184,8 @@ class ContainerPlugin {
         shareScope,
         runtimePlugins,
       );
-
+      const hasSingleRuntimeChunk =
+        compilation.options?.optimization?.runtimeChunk;
       dep.loc = { name };
       compilation.addEntry(
         compilation.options.context || '',
@@ -193,16 +194,38 @@ class ContainerPlugin {
         {
           name,
           filename,
-          runtime,
+          runtime: hasSingleRuntimeChunk ? false : runtime,
           library,
         },
         (error: WebpackError | null | undefined) => {
-          if (error) {
-            return callback(error);
+          if (error) return callback(error);
+          if (hasSingleRuntimeChunk) {
+            // Add to single runtime chunk as well.
+            // Allows for singleton runtime graph with all needed runtime modules for federation
+            addEntryToSingleRuntimeChunk();
+          } else {
+            callback();
           }
-          callback();
         },
       );
+
+      // Function to add entry for undefined runtime
+      const addEntryToSingleRuntimeChunk = () => {
+        compilation.addEntry(
+          compilation.options.context || '',
+          //@ts-ignore
+          dep,
+          {
+            name: name ? name + '_partial' : undefined, // give unique name name
+            runtime: undefined,
+            library,
+          },
+          (error: WebpackError | null | undefined) => {
+            if (error) return callback(error);
+            callback();
+          },
+        );
+      };
     });
 
     compiler.hooks.thisCompilation.tap(
