@@ -47,7 +47,6 @@ export async function httpEvalStrategy(
   callback: CallbackFunction,
 ) {
   let url;
-
   try {
     //@ts-ignore
     url = new URL(chunkName, __webpack_require__.p);

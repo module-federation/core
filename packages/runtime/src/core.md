@@ -40,8 +40,8 @@ Initializes `FederationHost` with user-defined options.
   - Manages snapshots in federation process.
 - **loaderHook: PluginSystem**
   - Plugin system for module loading operations.
-- **shareScopeMap: ShareScopeMap**
-  - Manages and tracks shared scopes.
+- **loadingShare: Object**
+  - Tracks loading state of shared modules.
 
 ## Methods
 

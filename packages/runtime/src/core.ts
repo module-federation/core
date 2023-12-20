@@ -325,7 +325,6 @@ export class FederationHost {
         shareInfoRes.lib = factory;
         shareInfoRes.loaded = true;
         addUseIn(shareInfoRes);
-        //@ts-ignore
         const gShared = getRegisteredShare(
           this.shareScopeMap,
           pkgName,
@@ -485,7 +484,6 @@ export class FederationHost {
       module = new Module(moduleOptions);
       this.moduleCache.set(remote.name, module);
     }
-
     return {
       module,
       moduleOptions,
@@ -719,7 +717,6 @@ export class FederationHost {
     const sharedKeys = Object.keys(formatShareOptions);
     sharedKeys.forEach((sharedKey) => {
       const sharedVal = formatShareOptions[sharedKey];
-      //@ts-ignore
       const registeredShared = getRegisteredShare(
         this.shareScopeMap,
         sharedKey,

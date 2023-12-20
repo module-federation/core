@@ -36,14 +36,14 @@ describe('3002-checkout/', () => {
       cy.visit('/');
       cy.visit('/checkout');
       cy.url().should('include', '/checkout');
-      cy.get('h1').should('contain', 'checkout page'); //wait until h1 contains 'Shop Page';
+      getH1().contains('checkout page');
       cy.get('.home-menu-link').click();
       cy.wait(1000);
       cy.get('.home-menu-link').click();
       cy.wait(8000);
-      cy.url().should('include', '/'); //wait until URL changes to '/';
+      cy.url().should('include', '/');
       cy.wait(2000);
-      cy.get('h1').should('contain', 'This is SPA combined'); //wait until h1 contains 'This is SPA combined';
+      getH1().contains('This is SPA combined');
     });
   });
 

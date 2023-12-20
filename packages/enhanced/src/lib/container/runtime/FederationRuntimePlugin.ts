@@ -43,6 +43,7 @@ class FederationRuntimePlugin {
     // internal runtime plugin
     let runtimePluginTemplates = '';
     const runtimePLuginNames: string[] = [];
+
     if (Array.isArray(runtimePlugins)) {
       runtimePlugins.forEach((runtimePlugin, index) => {
         const runtimePluginName = `plugin_${index}`;
@@ -145,7 +146,7 @@ class FederationRuntimePlugin {
     const initOptionsWithoutShared = normalizeRuntimeInitOptionsWithOutShared(
       this.options,
     );
-    const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
+    const federationGlobal = getFederationGlobalScope(RuntimeGlobals || {});
 
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
