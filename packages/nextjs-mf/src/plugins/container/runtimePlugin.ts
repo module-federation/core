@@ -1,30 +1,32 @@
 //@ts-nocheck
 import { FederationRuntimePlugin } from '@module-federation/runtime/type';
-import * as React from 'react';
 export default function (): FederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
     errorLoadRemote(args) {
-      console.log('errorLoadRemote', args.id);
       const pg = function () {
-        console.log('i should be executed in console');
-        return React.createElement('div', {}, 'testing');
+        console.error(args.id, 'offline', args.error);
+        return null;
       };
       // @ts-ignore
       pg.getInitialProps = function (ctx) {
-        console.log('in get initial props');
-        console.log(ctx);
+        return {};
       };
-      if(args.from==='build'){
-        return () => (({
+      let mod;
+      if (args.from === 'build') {
+        mod = () => ({
           __esModule: true,
-          default: function() {
-            console.log('i should be executed in console')
-            return 'testing'
-          }
-        }));
+          default: pg,
+          getServerSideProps: () => ({ props: {} }),
+        });
+      } else {
+        mod = {
+          default: pg,
+          getServerSideProps: () => ({ props: {} }),
+        };
       }
-      return { default: pg };
+
+      return mod;
     },
     beforeInit(args) {
       if (
@@ -53,12 +55,12 @@ export default function (): FederationRuntimePlugin {
     // createScript(args) {
     //   return args;
     // },
-    loadRemoteMatch(args) {
+    afterResolve(args) {
       return args;
     },
-    loadRemote(args) {
-      return args;
-    },
+    // onLoad(args) {
+    //   return args;
+    // },
     resolveShare(args) {
       if (
         args.pkgName !== 'react' &&
