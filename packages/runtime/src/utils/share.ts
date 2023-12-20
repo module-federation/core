@@ -1,5 +1,5 @@
 import { DEFAULT_SCOPE } from '../constant';
-import { Global } from '../global';
+import { Global, Federation } from '../global';
 import {
   GlobalShareScopeMap,
   Shared,
@@ -9,6 +9,7 @@ import {
 } from '../type';
 import { warn } from './logger';
 import { satisfy } from './semver';
+import { SyncWaterfallHook } from './hooks';
 
 export function formatShare(shareArgs: ShareArgs, from: string): Shared {
   let get: Shared['get'];
@@ -151,6 +152,14 @@ export function getRegisteredShare(
   localShareScopeMap: ShareScopeMap,
   pkgName: string,
   shareInfo: ShareInfos[keyof ShareInfos],
+  resolveShare: SyncWaterfallHook<{
+    shareScopeMap: ShareScopeMap;
+    scope: string;
+    pkgName: string;
+    version: string;
+    GlobalFederation: Federation;
+    resolver: () => Shared | undefined;
+  }>,
 ): Shared | void {
   if (!localShareScopeMap) {
     return;
@@ -164,55 +173,54 @@ export function getRegisteredShare(
       localShareScopeMap[sc][pkgName]
     ) {
       const { requiredVersion } = shareConfig;
-      // eslint-disable-next-line max-depth
-      if (shareConfig.singleton) {
-        const singletonVersion = getFindShareFunction(strategy)(
-          localShareScopeMap,
-          sc,
-          pkgName,
-        );
-        // eslint-disable-next-line max-depth
-        if (
-          typeof requiredVersion === 'string' &&
-          !satisfy(singletonVersion, requiredVersion)
-        ) {
-          warn(
-            `Version ${singletonVersion} from ${
-              singletonVersion &&
-              localShareScopeMap[sc][pkgName][singletonVersion].from
-            } of shared singleton module ${pkgName} does not satisfy the requirement of ${
-              shareInfo.from
-            } which needs ${requiredVersion})`,
-          );
-        }
-        return localShareScopeMap[sc][pkgName][singletonVersion];
-      } else {
-        const maxVersion = getFindShareFunction(strategy)(
-          localShareScopeMap,
-          sc,
-          pkgName,
-        );
+      const findShareFunction = getFindShareFunction(strategy);
+      const maxOrSingletonVersion = findShareFunction(
+        localShareScopeMap,
+        sc,
+        pkgName,
+      );
 
-        // eslint-disable-next-line max-depth
-        if (requiredVersion === false || requiredVersion === '*') {
-          return localShareScopeMap[sc][pkgName][maxVersion];
-        }
+      //@ts-ignore
+      const defaultResolver = () => {
+        if (shareConfig.singleton) {
+          if (
+            typeof requiredVersion === 'string' &&
+            !satisfy(maxOrSingletonVersion, requiredVersion)
+          ) {
+            warn(
+              `Version ${maxOrSingletonVersion} from ${
+                maxOrSingletonVersion &&
+                localShareScopeMap[sc][pkgName][maxOrSingletonVersion].from
+              } of shared singleton module ${pkgName} does not satisfy the requirement of ${
+                shareInfo.from
+              } which needs ${requiredVersion})`,
+            );
+          }
+          return localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
+        } else {
+          if (requiredVersion === false || requiredVersion === '*') {
+            return localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
+          }
 
-        // eslint-disable-next-line max-depth
-        if (satisfy(maxVersion, requiredVersion)) {
-          return localShareScopeMap[sc][pkgName][maxVersion];
-        }
-
-        // eslint-disable-next-line max-depth
-        for (const [versionKey, versionValue] of Object.entries(
-          localShareScopeMap[sc][pkgName],
-        )) {
-          // eslint-disable-next-line max-depth
-          if (satisfy(versionKey, requiredVersion)) {
-            return versionValue;
+          for (const [versionKey, versionValue] of Object.entries(
+            localShareScopeMap[sc][pkgName],
+          )) {
+            if (satisfy(versionKey, requiredVersion)) {
+              return versionValue;
+            }
           }
         }
-      }
+      };
+      const params = {
+        shareScopeMap: localShareScopeMap,
+        scope: sc,
+        pkgName,
+        version: maxOrSingletonVersion,
+        GlobalFederation: Global.__FEDERATION__,
+        resolver: defaultResolver,
+      };
+      const resolveShared = resolveShare.emit(params) || params;
+      return resolveShared.resolver();
     }
   }
 }
