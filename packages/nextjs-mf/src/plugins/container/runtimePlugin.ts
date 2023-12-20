@@ -15,6 +15,15 @@ export default function (): FederationRuntimePlugin {
         console.log('in get initial props');
         console.log(ctx);
       };
+      if(args.from==='build'){
+        return () => (({
+          __esModule: true,
+          default: function() {
+            console.log('i should be executed in console')
+            return 'testing'
+          }
+        }));
+      }
       return { default: pg };
     },
     beforeInit(args) {
