@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'pnpm'
-      - name: Install Pnpm
+      - name: Install cypress
         run: npx cypress install
       - uses: nrwl/nx-set-shas@v3
       - run: pnpm install
