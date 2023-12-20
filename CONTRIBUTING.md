@@ -106,6 +106,9 @@ If you've changed some packages, you need add a new changeset for the changes. P
 pnpm run changeset
 ```
 
+![image](https://github.com/module-federation/universe/assets/27547179/15505abf-8b0b-450f-b2d0-ffdc52e710a4)
+
+
 ### Committing your Changes
 
 Commit your changes to your forked repo, and [create a pull request](https://help.github.com/articles/creating-a-pull-request/).
@@ -130,4 +133,10 @@ feat(plugin-swc): Add `xxx` config
 Module Federation uses GitHub Actions for automated versioning and publishing:
 
 ## Action release
+
+* next: The timestamp version will be created when you release with the next version, which is suitable for testing on your own
+* beta|alpha: Suitable for releasing test versions
+* latest: Suitable for releasing stable versions in the trunk branch
+
+![image](https://github.com/module-federation/universe/assets/27547179/18580135-3326-4bff-9ba1-0570f40f9e2a)
 
