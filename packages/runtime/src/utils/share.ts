@@ -1,5 +1,5 @@
 import { DEFAULT_SCOPE } from '../constant';
-import { Global } from '../global';
+import { Global, Federation } from '../global';
 import {
   GlobalShareScopeMap,
   Shared,
@@ -9,6 +9,7 @@ import {
 } from '../type';
 import { warn } from './logger';
 import { satisfy } from './semver';
+import { SyncWaterfallHook } from './hooks';
 
 export function formatShare(shareArgs: ShareArgs, from: string): Shared {
   let get: Shared['get'];
@@ -151,7 +152,14 @@ export function getRegisteredShare(
   localShareScopeMap: ShareScopeMap,
   pkgName: string,
   shareInfo: ShareInfos[keyof ShareInfos],
-  resolveShareHook: any,
+  resolveShare: SyncWaterfallHook<{
+    shareScopeMap: ShareScopeMap;
+    scope: string;
+    pkgName: string;
+    version: string;
+    GlobalFederation: Federation;
+    resolver: () => Shared | undefined;
+  }>,
 ): Shared | void {
   if (!localShareScopeMap) {
     return;
@@ -211,7 +219,7 @@ export function getRegisteredShare(
         GlobalFederation: Global.__FEDERATION__,
         resolver: defaultResolver,
       };
-      const resolveShared = resolveShareHook.emit(params) || params;
+      const resolveShared = resolveShare.emit(params) || params;
       return resolveShared.resolver();
     }
   }
