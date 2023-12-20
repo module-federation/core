@@ -2,13 +2,13 @@
  * Extracts the URL and global from the module federation utilities.
  * @module @module-federation/utilities/src/utils/pure
  */
-export { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
+export { extractUrlAndGlobal } from '@module-federation/utilities';
 
 /**
  * Injects a script from the module federation utilities.
  * @module @module-federation/utilities/src/utils/common
  */
-export { injectScript } from '@module-federation/utilities/src/utils/common';
+export { injectScript } from '@module-federation/utilities';
 
 /**
  * Flushes chunks from the module federation node utilities.

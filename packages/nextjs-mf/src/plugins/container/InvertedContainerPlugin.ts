@@ -2,6 +2,7 @@ import type { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from './types';
 import EmbeddedContainerPlugin from './EmbeddedContainerPlugin';
 import { AsyncBoundaryPlugin } from '@module-federation/enhanced';
+import HoistPseudoEager from './HoistPseudoEagerModules';
 
 interface InvertedContainerOptions extends ModuleFederationPluginOptions {
   container?: string;

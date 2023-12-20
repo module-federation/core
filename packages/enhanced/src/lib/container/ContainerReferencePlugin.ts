@@ -33,6 +33,14 @@ const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
 
+const { ExternalsPlugin } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+
+const createSchemaValidation = require(
+  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
+) as typeof import('webpack/lib/util/create-schema-validation');
+
 const validate = createSchemaValidation(
   //eslint-disable-next-line
   checkOptions,

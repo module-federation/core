@@ -2,8 +2,12 @@
   "name": "@module-federation/core",
   "version": "1.0.0-canary.1",
   "type": "commonjs",
-  "main": "src/index.js",
-  "types": "src/index.d.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "license": "MIT",
   "publishConfig": {
     "access": "public"

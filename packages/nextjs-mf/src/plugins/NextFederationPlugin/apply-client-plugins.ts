@@ -5,7 +5,7 @@ import {
 } from '@module-federation/utilities';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import { HoistContainerReferences } from '@module-federation/enhanced/src/lib/container/HoistContainerReferencesPlugin';
+import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
 
 /**
  * Applies client-specific plugins.
@@ -37,8 +37,8 @@ export function applyClientPlugins(
   //@ts-ignore
   compiler.options.output.publicPath = 'auto';
   // Build will hang without this. Likely something in my plugin
-
-  new HoistContainerReferences().apply(compiler);
+  compiler.options.optimization.splitChunks = undefined;
+  new HoistContainerReferencesPlugin().apply(compiler);
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
   if (extraOptions.automaticPageStitching) {

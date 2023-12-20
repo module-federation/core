@@ -5,3 +5,5 @@
 **/*.hbs
 *.md
 !README.md
+pnpm-lock.yaml
+**/dist/**

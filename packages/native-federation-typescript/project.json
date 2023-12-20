@@ -6,13 +6,13 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/dist/packages/native-federation-typescript"],
+      "outputs": ["{workspaceRoot}/packages/native-federation-typescript/dist"],
       "options": {
         "parallel": false,
         "commands": [
           "tsup --config packages/native-federation-typescript/tsup.config.ts",
-          "cp packages/native-federation-typescript/package.json dist/packages/native-federation-typescript",
-          "cp packages/native-federation-typescript/*.md dist/packages/native-federation-typescript"
+          "cp packages/native-federation-typescript/package.json packages/native-federation-typescript/dist",
+          "cp packages/native-federation-typescript/*.md packages/native-federation-typescript/dist"
         ]
       }
     },
@@ -29,7 +29,7 @@
         "{workspaceRoot}/coverage/packages/native-federation-typescript"
       ]
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -41,10 +41,6 @@
           {
             "command": "nx run native-federation-typescript:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run native-federation-typescript:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }

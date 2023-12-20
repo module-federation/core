@@ -1,8 +1,6 @@
 const copy = require('rollup-plugin-copy');
 
 module.exports = (rollupConfig, projectOptions) => {
-  rollupConfig.external = [rollupConfig.external, /node_modules/];
-
   rollupConfig.plugins.push(
     copy({
       targets: [

@@ -34,6 +34,19 @@ const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 ) as typeof import('webpack/lib/util/makeSerializable');
 
+const { sources: webpackSources } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const { Template, Module, RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const makeSerializable = require(
+  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
+) as typeof import('webpack/lib/util/makeSerializable');
+const { WEBPACK_MODULE_TYPE_FALLBACK } = require(
+  normalizeWebpackPath('webpack/lib/ModuleTypeConstants'),
+) as typeof import('webpack/lib/ModuleTypeConstants');
+
 const TYPES = new Set(['javascript']);
 const RUNTIME_REQUIREMENTS = new Set([RuntimeGlobals.module]);
 

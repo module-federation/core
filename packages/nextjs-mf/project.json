@@ -8,13 +8,16 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/nextjs-mf",
-        "main": "packages/nextjs-mf/src/index.js",
-        "additionalEntryPoints": ["packages/nextjs-mf/src/utils/index.js"],
+        "outputPath": "packages/nextjs-mf/dist",
+        "main": "packages/nextjs-mf/src/index.ts",
         "tsConfig": "packages/nextjs-mf/tsconfig.lib.json",
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true,
-        "assets": ["packages/nextjs-mf/*.md"]
+        "assets": ["packages/nextjs-mf/*.md"],
+        "additionalEntryPoints": [
+          "packages/nextjs-mf/utilities.ts",
+          "packages/nextjs-mf/src/utils/index.js"
+        ]
       },
       "dependsOn": [
         {
@@ -41,7 +44,7 @@
         "passWithNoTests": true
       }
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -53,16 +56,9 @@
           {
             "command": "nx run nextjs-mf:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run nextjs-mf:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
   "tags": ["package"]

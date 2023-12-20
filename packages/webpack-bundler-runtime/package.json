@@ -1,12 +1,16 @@
 {
   "public": true,
   "name": "@module-federation/webpack-bundler-runtime",
-  "version": "1.0.0-canary.3",
+  "version": "0.0.4",
   "license": "MIT",
   "description": "Module Federation Runtime for webpack",
   "keywords": [
     "Module Federation",
     "bundler runtime"
+  ],
+  "files": [
+    "dist/",
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"
@@ -14,5 +18,8 @@
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "main": "./index.cjs.js",
   "module": "./index.esm.js",
-  "types": "./index.cjs.d.ts"
+  "types": "./index.cjs.d.ts",
+  "dependencies": {
+    "@module-federation/runtime": "workspace:*"
+  }
 }

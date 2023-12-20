@@ -8,6 +8,10 @@
     "remote types",
     "federated types"
   ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "publishConfig": {
     "access": "public"
   },

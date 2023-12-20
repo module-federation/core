@@ -7,7 +7,7 @@ import {
   RuntimeRemote,
   RuntimeRemotesMap,
   WebpackRemoteContainer,
-} from '@module-federation/utilities/src/types/index';
+} from '@module-federation/utilities';
 
 /**
  * Initializing pure as RemoteVars

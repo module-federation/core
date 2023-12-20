@@ -35,14 +35,19 @@ describe('3001-shop/', () => {
       cy.visit('/');
       cy.visit('/shop');
       cy.url().should('include', '/shop');
+      //eslint-disable-next-line
       cy.wait(1000);
       getH1().contains('Shop Page');
+      //eslint-disable-next-line
       cy.wait(1000);
       cy.get('.home-menu-link').click();
-      cy.wait(1000);
+      //eslint-disable-next-line
+      cy.wait(1999);
       cy.get('.home-menu-link').click();
+      //eslint-disable-next-line
       cy.wait(1000);
       cy.url().should('include', '/');
+      //eslint-disable-next-line
       cy.wait(1000);
       getH1().contains('This is SPA combined');
     });

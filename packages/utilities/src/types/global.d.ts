@@ -1,6 +1,6 @@
 /* eslint-disable no-var */
 /* eslint-disable @typescript-eslint/prefer-namespace-keyword */
-import type { WebpackRemoteContainer } from '../types';
+import type { WebpackRemoteContainer } from '.';
 
 export {};
 
