@@ -32,7 +32,6 @@ import {
 } from './apply-server-plugins';
 import { applyClientPlugins } from './apply-client-plugins';
 import ModuleFederationNextFork from '../container/ModuleFederationPlugin';
-import { parseRemotes } from '@module-federation/node';
 
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
@@ -40,7 +39,7 @@ import { parseRemotes } from '@module-federation/node';
 export class NextFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
-
+  public name: string;
   /**
    * Constructs the NextFederationPlugin with the provided options.
    *
@@ -50,6 +49,7 @@ export class NextFederationPlugin {
     const { mainOptions, extraOptions } = setOptions(options);
     this._options = mainOptions;
     this._extraOptions = extraOptions;
+    this.name = 'ModuleFederationPlugin';
   }
 
   /**
@@ -222,9 +222,7 @@ export class NextFederationPlugin {
     const prepareRemote = (options) => {
       return {
         ...options,
-        remotes: options.remotes
-          ? parseRemotes(options.remotes as Record<string, any>)
-          : {},
+        remotes: options.remotes ? options.remotes : {},
       };
     };
     //@ts-ignore
