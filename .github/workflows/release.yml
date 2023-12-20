@@ -89,7 +89,7 @@ jobs:
       - name: Build and test Packages
         run: |
           git fetch origin main
-          npx nx affected -t pre-release --parallel=3 --exclude='*,!tag:package' --base=main --head=${{ github.ref }}
+          npx nx affected -t pre-release --parallel=3 --exclude='*,!tag:package'
 
       - name: Release
         uses: web-infra-dev/actions@v2
