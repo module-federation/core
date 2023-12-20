@@ -36,7 +36,7 @@ describe('3000-home/', () => {
       cy.visit('/shop');
       cy.url().should('include', '/shop');
       getH1().contains('Shop Page');
-      cy.wait(300);
+      cy.wait(3000);
 
       cy.get('.home-menu-link').contains('Home 3000');
       cy.get('.home-menu-link').click();
