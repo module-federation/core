@@ -76,7 +76,7 @@ const Home = () => {
               Loading remote component (CheckoutTitle) from localhost:3002
               <br />
               <blockquote>
-                dynamic(()=&gt;import(&apos;checkout/CheckoutTitle&apos;))
+                lazy(()=&gt;import(&apos;checkout/CheckoutTitle&apos;))
               </blockquote>
             </td>
             <td>
