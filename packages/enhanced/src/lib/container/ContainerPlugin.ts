@@ -184,7 +184,8 @@ class ContainerPlugin {
         shareScope,
         runtimePlugins,
       );
-
+      const hasSingleRuntimeChunk =
+        compilation.options?.optimization?.runtimeChunk;
       dep.loc = { name };
       compilation.addEntry(
         compilation.options.context || '',
@@ -193,12 +194,12 @@ class ContainerPlugin {
         {
           name,
           filename,
-          runtime,
+          runtime: hasSingleRuntimeChunk ? false : runtime,
           library,
         },
         (error: WebpackError | null | undefined) => {
           if (error) return callback(error);
-          if (compilation.options.optimization.runtimeChunk) {
+          if (hasSingleRuntimeChunk) {
             // Add to single runtime chunk as well.
             // Allows for singleton runtime graph with all needed runtime modules for federation
             addEntryToSingleRuntimeChunk();
