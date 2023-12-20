@@ -13,6 +13,10 @@
     "storybook",
     "addon"
   ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "author": "Fiodorov Andrei <hello@fyodorovandrei.com> (https://github.com/fyodorovandrei)",
   "exports": {
     ".": {

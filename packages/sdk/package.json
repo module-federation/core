@@ -7,6 +7,10 @@
     "Module Federation",
     "sdk"
   ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "publishConfig": {
     "access": "public"
   },
