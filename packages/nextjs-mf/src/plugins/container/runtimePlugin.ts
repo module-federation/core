@@ -7,10 +7,13 @@ export default function (): FederationRuntimePlugin {
     errorLoadRemote(args) {
       console.log('errorLoadRemote', args.id);
 
-      return ()=> ({__esModule: true, default: ()=>{
-        console.log('Fake module', args.id);
-        return null
-        }});
+      return () => ({
+        __esModule: true,
+        default: () => {
+          console.log('Fake module', args.id);
+          return null;
+        },
+      });
     },
     beforeInit(args) {
       if (

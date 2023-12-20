@@ -523,10 +523,10 @@ export class FederationHost {
         id,
         error,
       });
-      if(!failover) {
+      if (!failover) {
         throw error;
       }
-      return failover
+      return failover;
     }
   }
 

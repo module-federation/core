@@ -56,26 +56,28 @@ export async function loadEntryScript({
     return loadScriptNode(entry, {
       attrs: { name, globalName },
       createScriptHook,
-    }).then(() => {
-      const { remoteEntryKey, entryExports } = getRemoteEntryExports(
-        name,
-        globalName,
-      );
+    })
+      .then(() => {
+        const { remoteEntryKey, entryExports } = getRemoteEntryExports(
+          name,
+          globalName,
+        );
 
-      assert(
-        entryExports,
-        `
+        assert(
+          entryExports,
+          `
         Unable to use the ${name}'s '${entry}' URL with ${remoteEntryKey}'s globalName to get remoteEntry exports.
         Possible reasons could be:\n
         1. '${entry}' is not the correct URL, or the remoteEntry resource or name is incorrect.\n
         2. ${remoteEntryKey} cannot be used to get remoteEntry exports in the window object.
       `,
-      );
+        );
 
-      return entryExports;
-    }).catch((e) => {
-      return e
-    })
+        return entryExports;
+      })
+      .catch((e) => {
+        return e;
+      });
   }
 
   return loadScript(entry, { attrs: {}, createScriptHook }).then(() => {
