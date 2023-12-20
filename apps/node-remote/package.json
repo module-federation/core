@@ -1,6 +1,5 @@
 {
   "name": "node-remote",
-  "private": true,
   "version": "1.0.0",
   "dependencies": {
     "@module-federation/node": "workspace:*"
