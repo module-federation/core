@@ -39,7 +39,7 @@ import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
 import { snapshotPlugin } from './plugins/snapshot';
 import { isBrowserEnv } from './utils/env';
 import { getRemoteInfo } from './utils/load';
-import { Global } from './global';
+import { Global, Federation } from './global';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from './constant';
 import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
 
@@ -119,6 +119,19 @@ export class FederationHost {
       origin: FederationHost;
     }>('beforeLoadShare'),
     loadShare: new AsyncHook<[FederationHost, string, ShareInfos]>(),
+    resolveShare: new SyncHook<
+      [
+        {
+          shareScopeMap: ShareScopeMap;
+          scope: string;
+          pkgName: string;
+          version: string;
+          GlobalFederation: Federation;
+          resolver: () => Shared;
+        },
+      ],
+      void
+    >(),
     beforePreloadRemote: new AsyncHook<{
       preloadOps: Array<PreloadRemoteArgs>;
       options: Options;
@@ -250,6 +263,7 @@ export class FederationHost {
       this.shareScopeMap,
       pkgName,
       shareInfoRes,
+      this.hooks.lifecycle.resolveShare,
     );
 
     const addUseIn = (shared: Shared): void => {
@@ -284,6 +298,7 @@ export class FederationHost {
           this.shareScopeMap,
           pkgName,
           shareInfoRes,
+          this.hooks.lifecycle.resolveShare,
         );
         if (gShared) {
           gShared.lib = factory;
@@ -314,6 +329,7 @@ export class FederationHost {
           this.shareScopeMap,
           pkgName,
           shareInfoRes,
+          this.hooks.lifecycle.resolveShare,
         );
         if (gShared) {
           gShared.lib = factory;
@@ -344,6 +360,7 @@ export class FederationHost {
       this.shareScopeMap,
       pkgName,
       shareInfo,
+      this.hooks.lifecycle.resolveShare,
     );
 
     if (registeredShared && typeof registeredShared.lib === 'function') {
@@ -594,10 +611,12 @@ export class FederationHost {
 
     const initRemoteModule = async (key: string): Promise<void> => {
       const { module } = await this._getRemoteModuleAndOptions(key);
-      const entry = await module.getEntry();
-      if (!module.inited) {
-        initFn(entry);
-        module.inited = true;
+      if (module.getEntry) {
+        const entry = await module.getEntry();
+        if (!module.inited) {
+          initFn(entry);
+          module.inited = true;
+        }
       }
     };
     Object.keys(this.options.shared).forEach((shareName) => {
@@ -702,6 +721,7 @@ export class FederationHost {
         this.shareScopeMap,
         sharedKey,
         sharedVal,
+        this.hooks.lifecycle.resolveShare,
       );
       if (!registeredShared && sharedVal && sharedVal.lib) {
         this.setShared({
