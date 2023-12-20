@@ -5,7 +5,7 @@ export default function (): FederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
     beforeInit(args) {
-      if (!__webpack_runtime_id__.startsWith('webpack')) return args;
+      if (!__webpack_runtime_id__?.startsWith('webpack')) return args;
       const { moduleCache, name } = args.origin;
       const gs = __webpack_require__.g || new Function('return globalThis');
       const attachedRemote = gs[name];
