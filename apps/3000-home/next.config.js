@@ -44,9 +44,6 @@ try {
 } catch (e) {
   /* empty */
 }
-const {
-  createDelegatedModule,
-} = require('@module-federation/nextjs-mf/utilities');
 
 /**
  * @type {import('@nrwl/next/plugins/with-nx').WithNxOptions}
@@ -59,7 +56,6 @@ const nextConfig = {
   },
   webpack(config, options) {
     const { isServer } = options;
-    // used for testing build output snapshots
 
     const remotes = {
       // shop:   {
