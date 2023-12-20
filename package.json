@@ -124,7 +124,7 @@
     "@types/adm-zip": "0.5.5",
     "@types/download": "8.0.5",
     "@types/express": "4.17.21",
-    "@types/jest": "29.5.10",
+    "@types/jest": "29.5.11",
     "@types/lodash.get": "4.4.9",
     "@types/node": "18.18.13",
     "@types/node-fetch": "2.6.9",
