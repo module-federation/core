@@ -100,7 +100,7 @@ This command ensures that only relevant tests are executed, saving time and reso
 
 Universe is using [Changesets](https://github.com/changesets/changesets) to manage the versioning and changelogs.
 
-If you've changed some packages, you need add a new changeset for the changes. Please run `change` command to select the changed packages and add the changeset info.
+If you've changed some packages, you need add a new changeset for the changes. Please run `changeset` command to select the changed packages and add the changeset info.
 
 ```sh
 pnpm run changeset
@@ -129,16 +129,5 @@ feat(plugin-swc): Add `xxx` config
 
 Module Federation uses GitHub Actions for automated versioning and publishing:
 
-## Version Release
-
-Releasing a version in Module Federation is now more efficient with specific commands and an automated CI process, utilizing the `@goestav/nx-semantic-release:semantic-release` for semantic versioning:
-
-- To manually release a version:
-  - Run: `nx run PROJECT-NAME:release`
-  - For additional configuration options, refer to the [nx-semantic-release documentation](https://github.com/goestav/nx-semantic-release).
-- Executing this command will:
-  - Tag your commit with the version.
-  - Generate a changelog.
-  - Increment the project version.
-  - Update versions of dependent projects.
+## Action release
 
