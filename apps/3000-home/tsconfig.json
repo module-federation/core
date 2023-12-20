@@ -3,6 +3,7 @@
   "compilerOptions": {
     "target": "es2017",
     "jsx": "preserve",
+    "module": "esnext",
     "allowJs": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

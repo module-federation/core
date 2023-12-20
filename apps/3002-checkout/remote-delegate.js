@@ -1,4 +1,4 @@
-import { importDelegatedModule } from '@module-federation/utilities/src/utils/importDelegatedModule';
+import { importDelegatedModule } from '@module-federation/utilities';
 /* eslint-disable no-undef */
 // eslint-disable-next-line no-async-promise-executor
 module.exports = new Promise(async (resolve, reject) => {
@@ -7,18 +7,20 @@ module.exports = new Promise(async (resolve, reject) => {
 
   const [global, url] = currentRequest.split('@');
 
-  importDelegatedModule({
-    global,
-    url: url + '?' + Date.now(),
-  })
-    .then(async (remote) => {
-      console.log(
-        __resourceQuery,
-        'resolved remote from',
-        __webpack_runtime_id__,
-      );
-
-      resolve(remote);
+  import('@module-federation/utilities').then((res) => {
+    importDelegatedModule({
+      global,
+      url: url + '?' + Date.now(),
     })
-    .catch((err) => reject(err));
+      .then(async (remote) => {
+        console.log(
+          __resourceQuery,
+          'resolved remote from',
+          __webpack_runtime_id__,
+        );
+
+        resolve(remote);
+      })
+      .catch((err) => reject(err));
+  });
 });

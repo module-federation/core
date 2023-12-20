@@ -1,13 +1,29 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.2.0-canary.5",
+  "version": "0.0.3",
   "type": "commonjs",
-  "main": "src/index.js",
-  "types": "src/index.d.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
   "peerDependencies": {
     "webpack": "^5.0.0"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/src/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/src/index.d.ts"
+      ]
+    }
+  },
+  "dependencies": {
+    "@module-federation/sdk": "workspace:*"
   }
 }

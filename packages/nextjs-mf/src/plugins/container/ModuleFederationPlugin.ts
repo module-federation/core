@@ -6,9 +6,11 @@
 'use strict';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { ModuleFederationPluginOptions } from './types';
-import SharePlugin from '@module-federation/enhanced/src/lib/sharing/SharePlugin';
-import ContainerPlugin from '@module-federation/enhanced/src/lib/container/ContainerPlugin';
-import ContainerReferencePlugin from '@module-federation/enhanced/src/lib/container/ContainerReferencePlugin';
+import {
+  SharePlugin,
+  ContainerPlugin,
+  ContainerReferencePlugin,
+} from '@module-federation/enhanced';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),

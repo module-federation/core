@@ -17,12 +17,21 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Install Pnpm
+        run: corepack enable
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+      - name: Install cypress
+        run: npx cypress install
       - uses: nrwl/nx-set-shas@v3
-      - run: npm ci
+      - run: pnpm install
       - run: npx nx format:check
+      - run: npx nx affected -t build --parallel=10 --exclude='*,!tag:package'
       - run: npx nx affected -t lint --parallel=7 --exclude='*,!tag:package'
       - run: npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
-      - run: npx nx affected -t build --parallel=10 --exclude='*,!tag:package'
       - run: npx nx run-many --target=serve --projects=3000-home,3001-shop,3002-checkout --parallel=3 & echo "done"
-      - run: sleep 3 && npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1
+      - run: sleep 6 && npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1
       - run: lsof -ti tcp:3000,3001,3002 | xargs kill

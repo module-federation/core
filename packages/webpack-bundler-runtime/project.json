@@ -9,14 +9,14 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "parallel": false,
-        "outputPath": "dist/packages/webpack-bundler-runtime",
+        "outputPath": "packages/webpack-bundler-runtime/dist",
         "main": "packages/webpack-bundler-runtime/src/index.ts",
         "tsConfig": "packages/webpack-bundler-runtime/tsconfig.lib.json",
         "assets": [],
         "project": "packages/webpack-bundler-runtime/package.json",
         "compiler": "swc",
         "format": ["cjs", "esm"],
-        "external": ["@module-federation/sdk", "@module-federation/runtime"],
+        "external": ["@module-federation/*"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true,
         "rollupConfig": "packages/webpack-bundler-runtime/rollup.config.js"
@@ -52,7 +52,7 @@
         }
       }
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -64,16 +64,9 @@
           {
             "command": "nx run webpack-bundler-runtime:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run webpack-bundler-runtime:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
   "tags": ["package"]

@@ -45,3 +45,7 @@ Thumbs.db
 .next
 .netlify
 migrations.json
+
+# build contnt
+packages/**/dist
+apps/**/dist

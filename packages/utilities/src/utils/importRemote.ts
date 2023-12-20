@@ -3,7 +3,7 @@ import type {
   WebpackRequire,
   WebpackShareScopes,
   RemoteData,
-} from '../types/index';
+} from '../types';
 
 /**
  * Type definition for RemoteUrl

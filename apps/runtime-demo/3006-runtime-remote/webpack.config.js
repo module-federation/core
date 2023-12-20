@@ -5,16 +5,8 @@ const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
 const path = require('path');
-const baseConfig = require('./module-federation.config');
 // const { withModuleFederation } = require('@nx/react/module-federation');
 const { ModuleFederationPlugin } = require('@module-federation/enhanced');
-
-/**
- * @type {import('@nx/react/module-federation').ModuleFederationConfig}
- **/
-const defaultConfig = {
-  ...baseConfig,
-};
 
 module.exports = composePlugins(
   withNx(),
@@ -30,10 +22,6 @@ module.exports = composePlugins(
           './Button1': './src/Button1.tsx',
         },
       }),
-    );
-    console.log(
-      'config.optimization?.runtimeChunk',
-      config.optimization?.runtimeChunk,
     );
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {

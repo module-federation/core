@@ -4,6 +4,7 @@
     "module": "commonjs",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "force": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
@@ -11,6 +12,7 @@
   },
   "files": [],
   "include": [],
+  "exclude": ["dist"],
   "references": [
     {
       "path": "./tsconfig.lib.json"

@@ -10,7 +10,7 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "swc",
-        "outputPath": "dist/apps/react-ts-host",
+        "outputPath": "apps/react-ts-host/dist",
         "index": "apps/react-ts-host/src/index.html",
         "baseHref": "/",
         "main": "apps/react-ts-host/src/main.ts",
@@ -44,8 +44,7 @@
           "sourceMap": false,
           "namedChunks": false,
           "extractLicenses": true,
-          "vendorChunk": false,
-          "webpackConfig": "apps/react-ts-host/webpack.config.prod.js"
+          "vendorChunk": false
         }
       },
       "dependsOn": [
@@ -56,7 +55,7 @@
       ]
     },
     "serve": {
-      "executor": "@nx/react:module-federation-dev-server",
+      "executor": "@nx/webpack:dev-server",
       "defaultConfiguration": "production",
       "options": {
         "buildTarget": "react_ts_host:build",

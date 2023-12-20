@@ -16,21 +16,13 @@ module.exports = (rollupConfig, projectOptions) => {
   const pkg = require(project);
 
   rollupConfig.plugins.push(
-    alias({
-      entries: [
-        {
-          find: '@module-federation/sdk',
-          replacement: path.resolve(__dirname, '../../dist/packages/sdk'),
-        },
-      ],
-    }),
     replace({
       __VERSION__: `'${pkg.version}'`,
       FEDERATION_DEBUG: `'${FEDERATION_DEBUG}'`,
     }),
     copy({
       targets: [
-        { src: 'packages/runtime/LICENSE', dest: 'dist/packages/runtime' },
+        { src: 'packages/runtime/LICENSE', dest: 'packages/runtime/dist' },
       ],
     }),
   );
