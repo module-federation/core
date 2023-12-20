@@ -157,6 +157,7 @@ export class FederationHost {
   name: string;
   moduleCache: Map<string, Module> = new Map();
   snapshotHandler: SnapshotHandler;
+  shareScopeMap: ShareScopeMap;
   loaderHook = new PluginSystem({
     // FIXME: may not be suitable
     getModuleInfo: new SyncHook<
@@ -176,8 +177,11 @@ export class FederationHost {
       ],
       HTMLScriptElement | void
     >(),
+    fetch: new AsyncHook<
+      [string, RequestInit],
+      Promise<Response> | void | false
+    >('fetch'),
   });
-  shareScopeMap: ShareScopeMap;
 
   constructor(userOptions: UserOptions) {
     // TODO: Validate the details of the options
@@ -216,10 +220,11 @@ export class FederationHost {
     const options = this.formatOptions(this.options, userOptions);
 
     this.options = options;
+
     return options;
   }
 
-  // overrideSharedOptions(shareScope: GlobalShareScopeMap[string]): void {}
+  // overrideSharedOptions(shareScope: GlobalShareScope[string]): void {}
 
   async loadShare<T>(
     pkgName: string,

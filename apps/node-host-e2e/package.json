@@ -1,0 +1,7 @@
+{
+  "name": "node-host-e2e",
+  "private": true,
+  "dependencies": {
+    "@module-federation/node": "workspace:*"
+  }
+}

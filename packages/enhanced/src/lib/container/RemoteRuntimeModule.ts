@@ -9,6 +9,7 @@ import { getFederationGlobalScope } from './runtime/utils';
 import type ExternalModule from 'webpack/lib/ExternalModule';
 import type FallbackModule from './FallbackModule';
 import type { RemotesOptions } from '@module-federation/webpack-bundler-runtime';
+
 const { Template, RuntimeModule, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
