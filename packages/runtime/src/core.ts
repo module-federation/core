@@ -516,9 +516,13 @@ export class FederationHost {
         options: moduleOptions,
         moduleInstance: module,
         origin: this,
-      })
+      });
       //@ts-ignore
-      console.log('moduleOrFactory', moduleOrFactory?.toString(), moduleOrFactory());
+      console.log(
+        'moduleOrFactory',
+        moduleOrFactory?.toString(),
+        moduleOrFactory(),
+      );
 
       return moduleOrFactory;
     } catch (error) {
