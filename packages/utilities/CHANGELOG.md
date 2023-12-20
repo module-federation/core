@@ -1,5 +1,11 @@
 # [3.1.0](https://github.com/module-federation/universe/compare/utils-3.0.2...utils-3.1.0) (2023-10-26)
 
+## 3.0.5
+
+### Patch Changes
+
+- 966c737: fix: Fixed an anomaly in exports Settings that caused an inability
+
 ### Bug Fixes
 
 - **deps:** update dependency axios to v1.5.1 ([ae9a06a](https://github.com/module-federation/universe/commit/ae9a06a0cc35fad27a0b493a25370b92617c39fb))
