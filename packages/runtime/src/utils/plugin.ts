@@ -24,7 +24,7 @@ export function registerPlugins(
   if (plugins && plugins.length > 0) {
     plugins.forEach((plugin) => {
       hookInstances.forEach((hookInstance) => {
-        hookInstance.applyPlugin(plugin);
+        hookInstance.usePlugin(plugin);
       });
     });
   }
