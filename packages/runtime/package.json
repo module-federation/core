@@ -39,8 +39,8 @@
       "helpers": [
         "./dist/helpers.cjs.d.ts"
       ],
-      "type": [
-        "./dist/type.cjs.d.ts"
+      "types": [
+        "./dist/types.cjs.d.ts"
       ]
     }
   },

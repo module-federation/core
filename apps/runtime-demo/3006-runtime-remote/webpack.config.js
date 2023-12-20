@@ -14,12 +14,11 @@ module.exports = composePlugins(
   async (config, context) => {
     config.plugins.push(
       new ModuleFederationPlugin({
-        name: 'runtime_remote',
+        name: 'runtime_remote1',
         // library: { type: 'var', name: 'runtime_remote' },
         filename: 'remoteEntry.js',
         exposes: {
           './Button': './src/Button.tsx',
-          './Button1': './src/Button1.tsx',
         },
       }),
     );

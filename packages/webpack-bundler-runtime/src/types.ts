@@ -3,7 +3,7 @@ import { initializeSharing } from './initializeSharing';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
 
-// FIXME: ideal situation => import { GlobalShareScope,UserOptions } from '@module-federation/runtime/type'
+// FIXME: ideal situation => import { GlobalShareScope,UserOptions } from '@module-federation/runtime/types'
 type ExcludeUndefined<T> = T extends undefined ? never : T;
 type NonUndefined<T = Shared> = ExcludeUndefined<T>;
 

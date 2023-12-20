@@ -23,13 +23,6 @@ const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
 ) as typeof import('webpack/lib/WebpackError');
 
-const createSchemaValidation = require(
-  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
-) as typeof import('webpack/lib/util/create-schema-validation');
-const WebpackError = require(
-  normalizeWebpackPath('webpack/lib/WebpackError'),
-) as typeof import('webpack/lib/WebpackError');
-
 export type ProvideOptions = {
   shareKey: string;
   shareScope: string;

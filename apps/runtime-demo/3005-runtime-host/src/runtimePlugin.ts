@@ -1,4 +1,4 @@
-import { FederationRuntimePlugin } from '@module-federation/runtime/type';
+import { FederationRuntimePlugin } from '@module-federation/runtime/types';
 export default function (): FederationRuntimePlugin {
   return {
     name: 'custom-plugin',

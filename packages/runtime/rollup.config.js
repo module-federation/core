@@ -1,5 +1,3 @@
-const path = require('path');
-const alias = require('@rollup/plugin-alias');
 const replace = require('@rollup/plugin-replace');
 const copy = require('rollup-plugin-copy');
 const semver = require('semver');
@@ -9,11 +7,9 @@ const FEDERATION_DEBUG = process.env.FEDERATION_DEBUG || '';
 module.exports = (rollupConfig, projectOptions) => {
   rollupConfig.input = {
     index: 'packages/runtime/src/index.ts',
-    type: 'packages/runtime/src/type/index.ts',
+    types: 'packages/runtime/src/types.ts',
     helpers: 'packages/runtime/src/helpers.ts',
   };
-
-  rollupConfig.external = [rollupConfig.external, /node_modules/];
 
   const project = projectOptions.project;
   const pkg = require(project);

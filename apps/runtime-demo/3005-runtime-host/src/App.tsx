@@ -8,7 +8,7 @@ init({
   name: 'app1',
   remotes: [
     {
-      name: 'runtime_remote',
+      name: 'runtime_remote1',
       alias: 'app2',
       entry: 'http://localhost:3006/remoteEntry.js',
     },

@@ -1,11 +1,11 @@
 import React from 'react';
 
 const style = {
-  background: 'red',
+  background: '#f00505',
   color: '#fff',
   padding: 12,
 };
 
-const Button = () => <button style={style}>App 2 Button</button>;
+const Button = () => <button style={style}>3007-remote2 Button</button>;
 
 export default Button;

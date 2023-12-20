@@ -28,6 +28,8 @@
     }
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*"
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/runtime": "workspace:*",
+    "@module-federation/webpack-bundler-runtime": "workspace:*"
   }
 }
