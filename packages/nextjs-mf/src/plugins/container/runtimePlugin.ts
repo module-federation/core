@@ -1,31 +1,33 @@
 //@ts-nocheck
-import { FederationRuntimePlugin } from '@module-federation/runtime/type';
-
-export default function (): FederationRuntimePlugin {
+import { FederationRuntimePlugin } from "@module-federation/runtime/type";
+import * as React from 'react'
+export default function(): FederationRuntimePlugin {
   return {
-    name: 'next-internal-plugin',
+    name: "next-internal-plugin",
     errorLoadRemote(args) {
-      console.log('errorLoadRemote', args.id);
-
-      return () => ({
-        __esModule: true,
-        default: () => {
-          console.log('Fake module', args.id);
-          return null;
-        },
-      });
+      console.log("errorLoadRemote", args.id);
+      const pg = function() {
+        console.log('i should be executed in console');
+        return React.createElement('div', {}, 'testing')
+      }
+      // @ts-ignore
+      pg.getInitialProps = function(ctx) {
+        console.log('in get initial props');
+        console.log(ctx)
+      }
+      return  ({default:pg})
     },
     beforeInit(args) {
       if (
-        typeof __webpack_runtime_id__ === 'string' &&
-        !__webpack_runtime_id__.startsWith('webpack')
+        typeof __webpack_runtime_id__ === "string" &&
+        !__webpack_runtime_id__.startsWith("webpack")
       ) {
         return args;
       }
 
       // if (__webpack_runtime_id__ && !__webpack_runtime_id__.startsWith('webpack')) return args;
       const { moduleCache, name } = args.origin;
-      const gs = __webpack_require__.g || new Function('return globalThis');
+      const gs = __webpack_require__.g || new Function("return globalThis");
       const attachedRemote = gs[name];
       if (attachedRemote) {
         moduleCache.set(name, attachedRemote);
@@ -50,19 +52,19 @@ export default function (): FederationRuntimePlugin {
     },
     resolveShare(args) {
       if (
-        args.pkgName !== 'react' &&
-        args.pkgName !== 'react-dom' &&
-        !args.pkgName.startsWith('next/')
+        args.pkgName !== "react" &&
+        args.pkgName !== "react-dom" &&
+        !args.pkgName.startsWith("next/")
       ) {
         return args;
       }
       const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
 
-      const host = GlobalFederation['__INSTANCES__'][0];
+      const host = GlobalFederation["__INSTANCES__"][0];
       if (!host) {
         return args;
       }
-      args.resolver = function () {
+      args.resolver = function() {
         shareScopeMap[scope][pkgName][version] = host.options.shared[pkgName]; // replace local share scope manually with desired module
         return shareScopeMap[scope][pkgName][version];
       };
@@ -70,6 +72,6 @@ export default function (): FederationRuntimePlugin {
     },
     async beforeLoadShare(args) {
       return args;
-    },
+    }
   };
 }

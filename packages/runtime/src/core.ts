@@ -516,7 +516,10 @@ export class FederationHost {
         options: moduleOptions,
         moduleInstance: module,
         origin: this,
-      });
+      })
+      //@ts-ignore
+      console.log('moduleOrFactory', moduleOrFactory?.toString(), moduleOrFactory());
+
       return moduleOrFactory;
     } catch (error) {
       const failover = await this.hooks.lifecycle.errorLoadRemote.emit({
@@ -526,6 +529,9 @@ export class FederationHost {
       if (!failover) {
         throw error;
       }
+      //@ts-ignore
+      console.log('failover', failover?.toString());
+
       return failover;
     }
   }

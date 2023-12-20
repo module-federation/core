@@ -314,7 +314,7 @@ export function generateLoadScript(runtimeTemplate: any): string {
                 init: function() {},
                 fake: true
               }
-              console.log(e);
+              console.log("HODOR");
               callback(e);
             }
           }`,
