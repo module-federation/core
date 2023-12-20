@@ -18,12 +18,16 @@
   "exports": {
     ".": "./dist/src/index.js",
     "./utilities": "./dist/utilities.js",
+    "./utils": "./dist/utils/index.js",
     "./*": "./*"
   },
   "typesVersions": {
     "*": {
       ".": [
         "./dist/src/index.d.ts"
+      ],
+      "utils": [
+        "./dist/utils/index.d.ts"
       ],
       "utilities": [
         "./dist/utilities.d.ts"
