@@ -183,22 +183,9 @@ export function generateLoadingCode(
                       ),
                     )};`,
 
-                    `var requestedRemote = globalThis.__remote_scope__[${JSON.stringify(
-                      name,
-                    )}]`,
-
-                    "if(typeof requestedRemote === 'function'){",
-                    Template.indent(
-                      'requestedRemote = await requestedRemote()',
-                    ),
-                    '}',
-
                     `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
                     "const loadingStrategy = typeof process !== 'undefined' ?  'http-vm' : 'http-eval';",
-
-                    `loadChunkStrategy(loadingStrategy, chunkName,${JSON.stringify(
-                      name,
-                    )}, globalThis.__remote_scope__,installChunkCallback);`,
+                    `loadChunkStrategy(loadingStrategy, chunkName,${RuntimeGlobals.require}.federation.initOptions.name, ${RuntimeGlobals.require}.federation.initOptions.remotes, installChunkCallback);`,
                   ]),
                   '}',
                 ]),
