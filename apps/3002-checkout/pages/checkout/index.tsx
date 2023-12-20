@@ -42,6 +42,7 @@ const Checkout = (props) => (
     `}</style>
   </div>
 );
+
 Checkout.getInitialProps = async () => {
   const timeout = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));

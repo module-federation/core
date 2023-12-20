@@ -3,8 +3,10 @@ export function isDevelopmentMode(): boolean {
 }
 
 export function getBuilderId(): string {
+  //@ts-ignore
   return typeof FEDERATION_BUILD_IDENTIFIER !== 'undefined'
-    ? FEDERATION_BUILD_IDENTIFIER
+    ? //@ts-ignore
+      FEDERATION_BUILD_IDENTIFIER
     : '';
 }
 

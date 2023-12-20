@@ -16,7 +16,6 @@ export class PluginSystem<T extends Record<string, any>> {
     this.lifecycle = lifecycle;
     this.lifecycleKeys = Object.keys(lifecycle);
   }
-
   usePlugin(plugin: Plugin<T>): void {
     assert(isPlainObject(plugin), 'Plugin configuration is invalid.');
     // The plugin's name is mandatory and must be unique

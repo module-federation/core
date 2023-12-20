@@ -34,7 +34,6 @@ export function applyServerPlugins(
       suffix,
     );
   }
-  new ModuleInfoRuntimePlugin().apply(compiler);
   // Hoist container references into runtime chunks
   //@ts-ignore
   new HoistContainerReferences().apply(compiler);
@@ -163,10 +162,6 @@ export function handleServerExternals(
       // Otherwise, return (null) to treat the module as internalizable
       return;
     };
-    // compiler.options.externals.push(crittersRegex)
-    // compiler.options.externals.push(reactRegex)
-    // compiler.options.externals.push(reactDomRegex)
-    // compiler.options.externals.push(nextCompiledRegex)
   }
 }
 

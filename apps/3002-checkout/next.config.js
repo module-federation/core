@@ -39,9 +39,6 @@ const nextConfig = {
           shop: `shop@http://localhost:3001/_next/static/${
             isServer ? 'ssr' : 'chunks'
           }/remoteEntry.js`,
-          checkout: `checkout@http://localhost:3002/_next/static/${
-            isServer ? 'ssr' : 'chunks'
-          }/remoteEntry.js`,
         },
         exposes: {
           './CheckoutTitle': './components/CheckoutTitle',

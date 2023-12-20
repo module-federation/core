@@ -95,7 +95,9 @@ class RemoteRuntimeModule extends RuntimeModule {
         }
       }
     }
-    const federationGlobal = getFederationGlobalScope(RuntimeGlobals || {});
+    const federationGlobal = getFederationGlobalScope(
+      RuntimeGlobals || ({} as typeof RuntimeGlobals),
+    );
 
     return Template.asString([
       `var chunkMapping = ${JSON.stringify(

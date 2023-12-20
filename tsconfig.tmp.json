@@ -9,7 +9,7 @@
         "dist/packages/sdk/normalize-webpack-path.cjs.js"
       ],
       "@module-federation/webpack-bundler-runtime": [
-        "dist/packages/webpack-bundler-runtime/index.cjs.js"
+        "dist/packages/webpack-bundler-runtime"
       ],
       "@module-federation/runtime": ["dist/packages/runtime"],
       "@module-federation/runtime/*": ["dist/packages/runtime/*"],
