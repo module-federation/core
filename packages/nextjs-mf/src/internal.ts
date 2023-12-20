@@ -4,9 +4,7 @@ import type {
   SharedObject,
 } from '@module-federation/utilities';
 import { createDelegatedModule } from '@module-federation/utilities';
-
-import { isRequiredVersion } from 'webpack/lib/sharing/utils';
-import { parseOptions } from 'webpack/lib/container/options';
+import { isRequiredVersion, parseOptions } from '@module-federation/enhanced';
 
 /**
  * @typedef SharedObject
@@ -34,13 +32,15 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     import: undefined,
   },
   'next/router': {
-    requiredVersion: undefined,
+    requiredVersion: false,
     singleton: true,
     import: undefined,
   },
   '@module-federation/utilities': {
     eager: true,
-    requiredVersion: false,
+    version: require('@module-federation/utilities/package.json').version,
+    requiredVersion: require('@module-federation/utilities/package.json')
+      .version,
   },
   'next/image': {
     requiredVersion: undefined,
@@ -54,22 +54,22 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   },
   react: {
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react/': {
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react-dom/': {
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react-dom': {
     singleton: true,
-    requiredVersion: undefined,
+    requiredVersion: false,
     import: false,
   },
   'react/jsx-dev-runtime': {
@@ -83,19 +83,22 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     // import: false,
   },
   'styled-jsx': {
-    requiredVersion: undefined,
     singleton: true,
     import: undefined,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
   },
   'styled-jsx/style': {
-    requiredVersion: false,
     singleton: true,
     import: false,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
   },
   'styled-jsx/css': {
-    requiredVersion: false,
     singleton: true,
     import: undefined,
+    version: require('styled-jsx/package.json').version,
+    requiredVersion: '^' + require('styled-jsx/package.json').version,
   },
 };
 
@@ -210,29 +213,34 @@ export const getDelegates = (
   );
 
 /**
- * Validates the shared item type and constructs a shared configuration object based on the item and key.
- * If the item is the same as the key or if the item does not require a specific version,
+ * This function validates the type of the shared item and constructs a shared configuration object based on the item and key.
+ * If the item is identical to the key or if the item does not necessitate a specific version,
  * the function returns an object with the import property set to the item.
  * Otherwise, it returns an object with the import property set to the key and the requiredVersion property set to the item.
  *
- * @param {string} item - The shared item to be validated and used in the shared configuration object.
+ * @param {string | string[]} item - The shared item to be validated and used to construct the shared configuration object. It can be a string or an array of strings.
  * @param {string} key - The key associated with the shared item.
  * @returns {object} - The constructed shared configuration object.
- * @throws {Error} - Throws an error if the item type is not a string.
+ * @throws {Error} - An error is thrown if the item type is not a string or an array of strings.
  */
-const getSharedConfig = (item: string, key: string) => {
-  if (typeof item !== 'string') {
-    throw new Error('Unexpected array in shared');
+const getSharedConfig = (item: string | string[], key: string) => {
+  if (Array.isArray(item)) {
+    // This handles the case where item is an array
+    // Replace the following line with your actual logic
+    return item.map((i) => ({
+      import: i === key || !isRequiredVersion(i) ? i : key,
+      requiredVersion: i === key || !isRequiredVersion(i) ? undefined : i,
+    }));
+  } else if (typeof item === 'string') {
+    // Handle the case where item is a string
+    return {
+      import: item === key || !isRequiredVersion(item) ? item : key,
+      requiredVersion:
+        item === key || !isRequiredVersion(item) ? undefined : item,
+    };
+  } else {
+    throw new Error('Unexpected type in shared');
   }
-
-  return item === key || !isRequiredVersion(item)
-    ? {
-        import: item,
-      }
-    : {
-        import: key,
-        requiredVersion: item,
-      };
 };
 
 /**
@@ -247,6 +255,7 @@ const getSharedConfig = (item: string, key: string) => {
  * @returns {Record<string, SharedConfig>} - An object containing the shared configuration for each shared item.
  */
 const parseShareOptions = (options: ModuleFederationPluginOptions) => {
+  if (!options.shared) return options;
   const sharedOptions: [string, SharedConfig][] = parseOptions(
     options.shared,
     getSharedConfig,

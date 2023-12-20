@@ -9,20 +9,16 @@ import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
-  SharedObject,
 } from '@module-federation/utilities';
-import type Compiler from 'webpack/lib/Compiler';
-import { createRuntimeVariables } from '@module-federation/utilities';
+import type { Compiler } from 'webpack';
+import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
-import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
 import {
-  applyRemoteDelegates,
   getModuleFederationPluginConstructor,
   retrieveDefaultShared,
   applyPathFixes,
 } from './next-fragments';
-import { removeUnnecessarySharedKeys } from './remove-unnecessary-shared-keys';
 import { setOptions } from './set-options';
 import {
   validateCompilerOptions,
@@ -35,7 +31,6 @@ import {
   handleServerExternals,
 } from './apply-server-plugins';
 import { applyClientPlugins } from './apply-client-plugins';
-import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import ModuleFederationNextFork from '../container/ModuleFederationPlugin';
 import { parseRemotes } from '@module-federation/node';
 
@@ -62,6 +57,7 @@ export class NextFederationPlugin {
    * @param compiler The webpack compiler object.
    */
   apply(compiler: Compiler) {
+    process.env['FEDERATION_WEBPACK_PATH'] = getWebpackPath(compiler);
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
     //@ts-ignore
@@ -81,7 +77,7 @@ export class NextFederationPlugin {
   private validateOptions(compiler: Compiler): boolean {
     const compilerValid = validateCompilerOptions(compiler);
     const pluginValid = validatePluginOptions(this._options);
-    const envValid = process.env.NEXT_PRIVATE_LOCAL_WEBPACK;
+    const envValid = process.env['NEXT_PRIVATE_LOCAL_WEBPACK'];
     if (compilerValid === undefined)
       console.error('Compiler validation failed');
     if (pluginValid === undefined) console.error('Plugin validation failed');
@@ -137,6 +133,9 @@ export class NextFederationPlugin {
       remoteType: 'script',
       exposes: {
         './noop': noop,
+        './react': require.resolve('react'),
+        './react-dom': require.resolve('react-dom'),
+        './next/router': require.resolve('next/router'),
         ...this._options.exposes,
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)
@@ -188,6 +187,7 @@ export class NextFederationPlugin {
     );
     new ModuleFederationNextFork(
       normalFederationPluginOptions,
+      //@ts-ignore
       embeddedOptions,
     ).apply(compiler);
   }

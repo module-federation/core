@@ -1,0 +1,76 @@
+{
+  "name": "runtime",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/runtime/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{workspaceRoot}/packages/runtime/dist"],
+      "options": {
+        "parallel": false,
+        "outputPath": "packages/runtime/dist",
+        "main": "packages/runtime/src/index.ts",
+        "additionalEntryPoints": [
+          "packages/runtime/src/types.ts",
+          "packages/runtime/src/helpers.ts"
+        ],
+        "tsConfig": "packages/runtime/tsconfig.lib.json",
+        "assets": [],
+        "project": "packages/runtime/package.json",
+        "compiler": "swc",
+        "rollupConfig": "packages/runtime/rollup.config.js",
+        "format": ["cjs", "esm"],
+        "external": ["@module-federation/*"],
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/runtime/**/*.ts",
+          "packages/runtime/package.json"
+        ]
+      }
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run runtime:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run runtime:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "packages/runtime/vitest.config.ts"
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    }
+  },
+  "tags": ["package"]
+}

@@ -43,7 +43,13 @@
           "dev": false,
           "port": 3000
         }
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "export": {
       "executor": "@nx/next:export",
@@ -56,6 +62,35 @@
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["apps/3000-home/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/3000-home/cypress.config.ts",
+        "testingType": "e2e",
+        "baseUrl": "http://localhost:3000"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "3000-home:serve:production"
+        }
+      }
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": true,
+        "commands": [
+          {
+            "command": "lsof -i :3000 || nx run 3000-home:serve",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "sleep 4 && nx run 3000-home:e2e",
+            "forwardAllArgs": true
+          }
+        ]
       }
     }
   },

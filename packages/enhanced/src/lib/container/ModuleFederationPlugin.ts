@@ -5,19 +5,26 @@
 
 'use strict';
 
-import type Compiler from 'webpack/lib/Compiler';
+import type { Compiler } from 'webpack';
+import {
+  getWebpackPath,
+  normalizeWebpackPath,
+} from '@module-federation/sdk/normalize-webpack-path';
 import isValidExternalsType from 'webpack/schemas/plugins/container/ExternalsType.check.js';
 import type { ModuleFederationPluginOptions } from './ModuleFederationPluginTypes';
 import SharePlugin from '../sharing/SharePlugin';
-import createSchemaValidation from 'webpack/lib/util/create-schema-validation';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
+import checkOptions from 'webpack/schemas/plugins/container/ModuleFederationPlugin.check.js';
+import schema from '../../schemas/container/ModuleFederationPlugin';
 
+const createSchemaValidation = require(
+  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
+) as typeof import('webpack/lib/util/create-schema-validation');
 const validate = createSchemaValidation(
   //eslint-disable-next-line
-  require('webpack/schemas/plugins/container/ModuleFederationPlugin.check.js'),
-  () =>
-    require('webpack/schemas/plugins/container/ModuleFederationPlugin.json'),
+  checkOptions,
+  () => schema,
   {
     name: 'Module Federation Plugin',
     baseDataPath: 'options',
@@ -41,6 +48,9 @@ class ModuleFederationPlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
+    process.env['FEDERATION_WEBPACK_PATH'] =
+      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
+
     const { _options: options } = this;
     const library = options.library || { type: 'var', name: options.name };
     const remoteType =

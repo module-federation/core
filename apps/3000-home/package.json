@@ -4,14 +4,15 @@
   "private": true,
   "dependencies": {
     "antd": "4.24.15",
+    "js-cookie": "3.0.5",
     "lodash": "4.17.21",
     "next": "13.5.6",
     "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "js-cookie": "3.0.5"
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
-    "@module-federation/nextjs-mf": "7.0.8",
-    "@module-federation/utilities": "3.0.0"
+    "@module-federation/nextjs-mf": "workspace:*",
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/utilities": "workspace:*"
   }
 }

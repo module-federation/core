@@ -1,6 +1,4 @@
-import Compiler from 'webpack/lib/Compiler';
-import { container } from 'webpack';
-import path from 'path';
+import type { container, Compiler } from 'webpack';
 import type {
   ModuleFederationPluginOptions,
   SharedObject,
@@ -11,7 +9,7 @@ import {
   getDelegates,
 } from '../../internal';
 import { hasLoader, injectRuleLoader } from '../../loaders/helpers';
-const { ModuleFederationPlugin } = require('@module-federation/enhanced');
+import { ModuleFederationPlugin } from '@module-federation/enhanced';
 
 type ConstructableModuleFederationPlugin = new (
   options: ModuleFederationPluginOptions,
@@ -119,6 +117,41 @@ export const applyPathFixes = (compiler: Compiler, options: any) => {
       injectRuleLoader({
         loader: require.resolve('../../loaders/fixUrlLoader'),
       });
+    }
+    //@ts-ignore
+    if (rule?.oneOf) {
+      //@ts-ignore
+      const badLoader = rule.oneOf.find((oneOfRule) => {
+        if (hasLoader(oneOfRule, 'react-refresh-utils')) {
+          return true;
+        }
+      });
+
+      //@ts-ignore
+      rule.oneOf.forEach((oneOfRule) => {
+        if (hasLoader(oneOfRule, 'react-refresh-utils')) {
+          oneOfRule.exclude = [
+            oneOfRule.exclude,
+            /packages\/nextjs-mf/,
+            /packages\/node\/dist/,
+            /packages\/utilities\/dist/,
+          ];
+        }
+      });
+
+      if (badLoader) {
+        //@ts-ignore
+        rule.oneOf.push({
+          test: badLoader.test,
+          exclude: [badLoader.exclude[0]],
+          //@ts-ignore
+          use: badLoader.use.filter((l) => {
+            return (
+              typeof l !== 'string' && l.loader && l.loader.includes('swc')
+            );
+          }),
+        });
+      }
     }
   });
 };

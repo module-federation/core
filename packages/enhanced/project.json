@@ -5,20 +5,15 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:swc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/js:tsc",
+      "outputs": ["{workspaceRoot}/packages/enhanced/dist"],
       "options": {
-        "outputPath": "dist/packages/enhanced",
+        "outputPath": "packages/enhanced/dist",
         "main": "packages/enhanced/src/index.ts",
         "tsConfig": "packages/enhanced/tsconfig.lib.json",
-        "assets": ["packages/enhanced/*.md"],
-        "buildableProjectDepsInPackageJsonType": "dependencies",
-        "updateBuildableProjectDepsInPackageJson": true
+        "assets": ["packages/enhanced/*.md"]
       },
       "dependsOn": [
-        {
-          "target": "build"
-        },
         {
           "target": "build",
           "dependencies": true
@@ -46,7 +41,7 @@
         }
       }
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -58,16 +53,9 @@
           {
             "command": "nx run enhanced:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run enhanced:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
   "tags": ["package"]

@@ -1,4 +1,8 @@
-import { Template, RuntimeGlobals, Chunk, ChunkGraph } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+const { RuntimeGlobals, Template } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+import type { Chunk, ChunkGraph } from 'webpack';
 
 /**
  * Generates the hot module replacement (HMR) code.
@@ -348,7 +352,6 @@ export function generateInstallChunk(
       '}',
     ]),
     '}',
-    // 'console.log("install chunk", chunkIds, installedChunks);',
     'if(runtime) runtime(__webpack_require__);',
     'for(var i = 0; i < chunkIds.length; i++) {',
     Template.indent([

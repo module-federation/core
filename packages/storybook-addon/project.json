@@ -8,7 +8,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/storybook-addon",
+        "outputPath": "packages/storybook-addon/dist",
         "main": "packages/storybook-addon/src/index.ts",
         "tsConfig": "packages/storybook-addon/tsconfig.lib.json",
         "assets": ["packages/storybook-addon/*.md"]
@@ -41,7 +41,7 @@
         }
       }
     },
-    "release": {
+    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
@@ -53,16 +53,9 @@
           {
             "command": "nx run storybook-addon:build",
             "forwardAllArgs": false
-          },
-          {
-            "command": "nx run storybook-addon:semantic-release",
-            "forwardAllArgs": true
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
   "tags": ["package"],

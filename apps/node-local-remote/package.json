@@ -1,7 +1,8 @@
 {
   "name": "node-local-remote",
   "version": "1.0.0",
+  "private": true,
   "dependencies": {
-    "@module-federation/node": "1.0.7"
+    "@module-federation/node": "workspace:*"
   }
 }

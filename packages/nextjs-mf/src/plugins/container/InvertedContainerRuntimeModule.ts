@@ -1,7 +1,10 @@
-import type Compiler from 'webpack/lib/Compiler';
-import type Module from 'webpack/lib/Module';
-import RuntimeModule from 'webpack/lib/RuntimeModule';
-import { RuntimeGlobals } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import type { Module } from '@module-federation/webpack-type';
+
+// @ts-nocheck
+const { RuntimeModule, Template, RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('@module-federation/webpack-type');
 
 interface InvertedContainerRuntimeModuleOptions {
   runtime: string;
@@ -15,7 +18,7 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
   private options: InvertedContainerRuntimeModuleOptions;
 
   constructor(options: InvertedContainerRuntimeModuleOptions) {
-    super('inverted container startup', RuntimeModule.STAGE_BASIC);
+    super('inverted container startup', RuntimeModule.STAGE_ATTACH + 3);
     this.options = options;
   }
 
@@ -32,6 +35,40 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     const entryModules =
       this.compilation.chunkGraph.getChunkEntryModulesIterable(container);
     return Array.from(entryModules)[0];
+  }
+  private generateSharedObjectString(): string {
+    const sharedObjects = [
+      {
+        key: 'react',
+        version: require('react/package.json').version,
+        path: './react',
+      },
+      {
+        key: 'next/router',
+        version: require('next/package.json').version,
+        path: './next/router',
+      },
+      {
+        key: 'react-dom',
+        version: require('react-dom/package.json').version,
+        path: './react-dom',
+      },
+    ];
+
+    return sharedObjects.reduce((acc, obj) => {
+      return (
+        acc +
+        `
+        "${obj.key}": {
+          "${obj.version}": {
+            loaded: true,
+            loaded: 1,
+            from: "roothost",
+            get() { return innerRemote.get("${obj.path}") }
+          }
+        },`
+      );
+    }, '');
   }
 
   override generate(): string {
@@ -55,55 +92,51 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     }
     const globalObject = `globalThis.__remote_scope__`;
     const containerScope = `${RuntimeGlobals.global}`;
+    const sharedObjectString = this.generateSharedObjectString();
 
-    return `
-      function attachRemote (resolve) {
-        var innerRemote = __webpack_require__(${JSON.stringify(
+    return Template.asString([
+      'var innerRemote;',
+      Template.indent([
+        'function attachRemote (resolve) {',
+        `  innerRemote = __webpack_require__(${JSON.stringify(
           containerModuleId,
-        )});
-        if(${globalObject} && !${globalObject}[${JSON.stringify(name)}]) {
-          ${globalObject}[${JSON.stringify(name)}] = innerRemote;
-        } else if(${containerScope} && !${containerScope}[${JSON.stringify(
+        )});`,
+        `  if(${globalObject} && !${globalObject}[${JSON.stringify(name)}]) {`,
+        `    ${globalObject}[${JSON.stringify(name)}] = innerRemote;`,
+        `  } else if(${containerScope} && !${containerScope}[${JSON.stringify(
           name,
-        )}]) {
-          ${containerScope}[${JSON.stringify(name)}] = innerRemote;
-        }
-        __webpack_require__.S.default = new Proxy({}, {
-          get: function(target, property) {
-            if(typeof target[property] === 'object' && target[property] !== null) {
-              for(const key in target[property]) {
-                if(property.startsWith('next/') || property.startsWith('react') || property.startsWith('next-dom')) {
-                  target[property][key].loaded = true
-                }
-              }
-            }
-            
-            return target[property];
-          },
-          set: function(target, property, value) {
-            if(!target[property]) {
-            target[property] = value;
-            }
-            return true;
-          }
-        });
-        
-        if(resolve) resolve(innerRemote);
-      }
-      if(!(${globalObject} && ${globalObject}[${JSON.stringify(
+        )}]) {`,
+        `    ${containerScope}[${JSON.stringify(name)}] = innerRemote;`,
+        '  }',
+        `  __webpack_require__.S.default = new Proxy({${sharedObjectString}}`,
+        ' , {',
+        '    get: function(target, property) {',
+        '      return target[property];',
+        '    },',
+        '    set: function(target, property, value) {',
+        '      target[property] = value;',
+        '      return true;',
+        '    }',
+        '  });',
+        '  if(resolve) resolve(innerRemote);',
+        '}',
+      ]),
+      `if(!(${globalObject} && ${globalObject}[${JSON.stringify(
         name,
       )}]) && !(${containerScope} && ${containerScope}[${JSON.stringify(
         name,
-      )}])) {
-        if (__webpack_require__.O) {
-        __webpack_require__.O(0, ["${this.chunk.id}"], function() {
-          attachRemote();
-        }, 0);
-      } else {
-        attachRemote();
-      }
-    }
-    `;
+      )}])) {`,
+      Template.indent([
+        '  if (__webpack_require__.O) {',
+        `  __webpack_require__.O(0, ["${this.chunk.id}"], function() {`,
+        '    attachRemote();',
+        '  }, 0);',
+        '} else {',
+        'attachRemote();',
+        '}',
+      ]),
+      '}',
+    ]);
   }
 }
 

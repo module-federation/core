@@ -1,21 +1,19 @@
 {
   "name": "@module-federation/utilities",
-  "version": "3.0.0",
+  "version": "3.0.4",
   "type": "commonjs",
-  "main": "src/index.js",
-  "types": "src/index.d.ts",
+  "main": "./dist/index.cjs.js",
+  "types": "./dist/index.cjs.d.ts",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
   "repository": "https://github.com/module-federation/universe/tree/main/packages/utilities",
   "devDependencies": {
-    "react": "18.2.0",
-    "next": "13.5.6"
+    "react": "18.2.0"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",
-    "next": "^12 || ^13",
     "react-dom": "^16 || ^17 || ^18",
     "react": "^16 || ^17 || ^18"
   },
@@ -28,6 +26,20 @@
     },
     "next": {
       "optional": true
+    }
+  },
+  "exports": {
+    ".": "./dist/index.cjs.js",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.cjs.d.ts"
+      ],
+      "type": [
+        "./dist/type.cjs.d.ts"
+      ]
     }
   }
 }

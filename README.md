@@ -34,6 +34,12 @@ Come and chat with us on [Discord](https://discord.com/invite/T8c6yAxkbv)! The M
 
 Please read the [Contributing Guide](https://github.com/module-federation/universe/blob/canary/CONTRIBUTING.md).
 
-## 🙌 Code of Conduct
+# Credits
+
+Thanks to:
+
+- The [vite-plugin-federation](https://github.com/originjs/vite-plugin-federation) project created by [@ruleeeer](https://github.com/ruleeeer), `@module-federation/runtime` fork `vite-plugin-federation` semver logic used to verify version
+
+# 🙌 Code of Conduct
 
 This repo has adopted the Code of Conduct. Please check [Code of Conduct](./CODE_OF_CONDUCT.md) for more details.

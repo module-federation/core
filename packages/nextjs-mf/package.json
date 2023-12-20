@@ -1,9 +1,9 @@
 {
   "name": "@module-federation/nextjs-mf",
-  "version": "8.1.1",
+  "version": "8.1.0-canary.7",
   "license": "MIT",
-  "main": "src/index.js",
-  "types": "src/index.d.ts",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "type": "commonjs",
   "description": "Module Federation helper for NextJS",
   "repository": "https://github.com/module-federation/universe/tree/main/packages/nextjs-mf",
@@ -11,13 +11,33 @@
   "contributors": [
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
   ],
+  "exports": {
+    ".": "./dist/src/index.js",
+    "./utilities": "./dist/utilities.js",
+    "./*": "./*"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/src/index.d.ts"
+      ],
+      "utilities": [
+        "./dist/utilities.d.ts"
+      ]
+    }
+  },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
     "fast-glob": "^3.2.11",
     "webpack-sources": "^3.2.3",
-    "eventemitter3": "^5.0.0"
+    "eventemitter3": "^5.0.0",
+    "@module-federation/utilities": "workspace:*",
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/node": "workspace:*",
+    "@module-federation/webpack-type": "workspace:*"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",

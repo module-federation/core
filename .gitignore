@@ -7,7 +7,7 @@
 /build
 /@mf-types
 /docs
-
+/.nx
 # dependencies
 node_modules
 
@@ -45,3 +45,7 @@ Thumbs.db
 .next
 .netlify
 migrations.json
+
+# build contnt
+packages/**/dist
+apps/**/dist

@@ -1,6 +1,10 @@
-import { RuntimeGlobals, RuntimeModule, Template, javascript } from 'webpack';
-//@ts-ignore
-import { getUndoPath } from 'webpack/lib/util/identifier';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+const { RuntimeGlobals, RuntimeModule, Template, javascript } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const { getUndoPath } = require(
+  normalizeWebpackPath('webpack/lib/util/identifier'),
+) as typeof import('webpack/lib/util/identifier');
 
 class AutoPublicPathRuntimeModule extends RuntimeModule {
   private options: any;
@@ -115,7 +119,6 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
             ]),
             '}',
           ]),
-      // 'console.log(\'scriptUrl\', scriptUrl);',
       '// When supporting server environments where an automatic publicPath is not supported, you must specify an output.publicPath manually via configuration',
       '// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.',
       'if (!scriptUrl) throw new Error("Unable to calculate automatic public path");',

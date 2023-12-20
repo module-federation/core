@@ -1,0 +1,46 @@
+{
+  "name": "@module-federation/runtime",
+  "version": "0.0.3",
+  "author": "zhouxiao <codingzx@gmail.com>",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.cjs.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "types": "./dist/index.cjs.d.ts"
+    },
+    "./helpers": {
+      "import": "./dist/helpers.esm.js",
+      "require": "./dist/helpers.cjs.js",
+      "types": "./dist/helpers.cjs.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types.esm.js",
+      "require": "./dist/types.cjs.js",
+      "types": "./dist/types.cjs.d.ts"
+    },
+    "./*": "./*"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.cjs.d.ts"
+      ],
+      "helpers": [
+        "./dist/helpers.cjs.d.ts"
+      ],
+      "type": [
+        "./dist/type.cjs.d.ts"
+      ]
+    }
+  },
+  "dependencies": {
+    "@module-federation/sdk": "workspace:*"
+  }
+}

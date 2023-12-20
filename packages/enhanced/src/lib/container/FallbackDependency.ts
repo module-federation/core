@@ -9,8 +9,14 @@ import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
 } from 'webpack/lib/Dependency';
-import Dependency from 'webpack/lib/Dependency';
-import makeSerializable from 'webpack/lib/util/makeSerializable';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+
+const makeSerializable = require(
+  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
+);
+const { Dependency } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 
 class FallbackDependency extends Dependency {
   requests: string[];
@@ -47,10 +53,6 @@ class FallbackDependency extends Dependency {
     super.serialize(context);
   }
 
-  /**
-   * @param {ObjectDeserializerContext} context context
-   * @returns {FallbackDependency} deserialize fallback dependency
-   */
   static deserialize(context: ObjectDeserializerContext): FallbackDependency {
     const { read } = context;
     const obj = new FallbackDependency(read());

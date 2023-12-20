@@ -6,7 +6,6 @@ import ButtonOldAnt from 'checkout/ButtonOldAnt';
 // const ButtonOldAnt = lazy(() => import('checkout/ButtonOldAnt'));
 const WebpackSvgRemote = lazy(() =>
   import('shop/WebpackSvg').then((m) => {
-    console.log(m);
     return m;
   }),
 );
@@ -77,7 +76,7 @@ const Home = () => {
               Loading remote component (CheckoutTitle) from localhost:3002
               <br />
               <blockquote>
-                dynamic(()=&gt;import(&apos;checkout/CheckoutTitle&apos;))
+                lazy(()=&gt;import(&apos;checkout/CheckoutTitle&apos;))
               </blockquote>
             </td>
             <td>
@@ -109,7 +108,7 @@ const Home = () => {
               <blockquote>(check publicPath fix in image-loader)</blockquote>
             </td>
             <td>
-              <img src="./webpack.png" />
+              <img className="home-webpack-png" src="./webpack.png" />
             </td>
             <td>
               <Suspense fallback="loading WebpackPngRemote">
