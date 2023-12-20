@@ -37,6 +37,7 @@ describe('3002-checkout/', () => {
       cy.visit('/checkout');
       cy.url().should('include', '/checkout');
       getH1().contains('checkout page');
+      cy.wait(1000);
       cy.get('.home-menu-link').click();
       cy.wait(1000);
       cy.get('.home-menu-link').click();
