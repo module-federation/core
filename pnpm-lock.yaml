@@ -541,9 +541,6 @@ importers:
       '@module-federation/nextjs-mf':
         specifier: workspace:*
         version: link:../../packages/nextjs-mf
-      '@module-federation/sdk':
-        specifier: workspace:*
-        version: link:../../packages/sdk
       '@module-federation/utilities':
         specifier: workspace:*
         version: link:../../packages/utilities

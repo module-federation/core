@@ -3,10 +3,7 @@ import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import {
-  ModuleFederationPlugin,
-  ModuleInfoRuntimePlugin,
-} from '@module-federation/enhanced';
+import { ModuleFederationPlugin } from '@module-federation/enhanced';
 /**
  * This function applies server-specific plugins to the webpack compiler.
  *
@@ -34,7 +31,6 @@ export function applyServerPlugins(
       suffix,
     );
   }
-  new ModuleInfoRuntimePlugin().apply(compiler);
   // Hoist container references into runtime chunks
   //@ts-ignore
   new HoistContainerReferencesPlugin().apply(compiler);
