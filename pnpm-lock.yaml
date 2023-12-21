@@ -97,8 +97,8 @@ importers:
         specifier: 0.8.1
         version: 0.8.1
       '@builder.io/qwik':
-        specifier: 1.2.19
-        version: 1.2.19(@types/node@18.18.13)(less@4.1.3)(stylus@0.59.0)(undici@5.26.2)
+        specifier: 1.3.1
+        version: 1.3.1(@types/node@18.18.13)(less@4.1.3)(stylus@0.59.0)(undici@5.26.2)
       '@builder.io/qwik-city':
         specifier: 1.3.1
         version: 1.3.1(@types/node@18.18.13)(less@4.1.3)(rollup@2.79.1)(stylus@0.59.0)
@@ -464,7 +464,7 @@ importers:
         version: 1.0.11(@swc-node/register@1.6.8)(@swc/core@1.3.99)(@types/node@18.18.13)(eslint@8.56.0)(nx@17.2.5)(typescript@5.3.3)(verdaccio@5.26.3)(vite@4.4.11)(vitest@0.32.4)
       qwik-speak:
         specifier: 0.12.2
-        version: 0.12.2(@builder.io/qwik@1.2.19)
+        version: 0.12.2(@builder.io/qwik@1.3.1)
       react-refresh:
         specifier: 0.14.0
         version: 0.14.0
@@ -2699,8 +2699,8 @@ packages:
       - terser
     dev: true
 
-  /@builder.io/qwik@1.2.19(@types/node@18.18.13)(less@4.1.3)(stylus@0.59.0)(undici@5.26.2):
-    resolution: {integrity: sha512-nmext30MPih1vSgsNpdx2jzBbeBKpsWjsLFI0Shs9+ec3z2QUrE9NJO+2P7cduxNt87hyul+twJ3UlJJ6pKxUQ==}
+  /@builder.io/qwik@1.3.1(@types/node@18.18.13)(less@4.1.3)(stylus@0.59.0)(undici@5.26.2):
+    resolution: {integrity: sha512-XbA/pzLVZJ7HXLApyk1jRVYTwZdHEq3vGcnOi/ZS7GKGvkEWKCRMWIV+5dVJKjBS0jxtYcj07w52HmkPbQiVMw==}
     engines: {node: '>=16.8.0 <18.0.0 || >=18.11'}
     hasBin: true
     peerDependencies:
@@ -2708,7 +2708,7 @@ packages:
     dependencies:
       csstype: 3.1.3
       undici: 5.26.2
-      vite: 4.4.11(@types/node@18.18.13)(less@4.1.3)(stylus@0.59.0)
+      vite: 5.0.10(@types/node@18.18.13)(less@4.1.3)(stylus@0.59.0)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -23133,14 +23133,14 @@ packages:
       - vitest
     dev: true
 
-  /qwik-speak@0.12.2(@builder.io/qwik@1.2.19):
+  /qwik-speak@0.12.2(@builder.io/qwik@1.3.1):
     resolution: {integrity: sha512-OcVALdSsYEYs3StazJRTMR1px5ra9y+IjPn5S9So//4tPPIvx76NedXR4upbabDVYYpuzPYYNKU0wAaFkf2aZw==}
     engines: {node: '>=16.0.0'}
     hasBin: true
     peerDependencies:
       '@builder.io/qwik': '>=1.0.0'
     dependencies:
-      '@builder.io/qwik': 1.2.19(@types/node@18.18.13)(less@4.1.3)(stylus@0.59.0)(undici@5.26.2)
+      '@builder.io/qwik': 1.3.1(@types/node@18.18.13)(less@4.1.3)(stylus@0.59.0)(undici@5.26.2)
     dev: true
 
   /rambda@7.5.0:
