@@ -152,6 +152,10 @@ export interface ModuleFederationPluginOptions {
    * Runtime plugin file paths or package name.
    */
   runtimePlugins?: string[];
+  /**
+   * Bundler runtime path
+   */
+  implementation?: string;
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.
