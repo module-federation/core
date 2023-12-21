@@ -39,7 +39,7 @@ class FederationRuntimePlugin {
     this.entryFilePath = '';
   }
 
-  static getTemplate(runtimePlugins: string[]) {
+  static getTemplate(runtimePlugins: string[], bundlerRuntimePath?: string) {
     // internal runtime plugin
     let runtimePluginTemplates = '';
     const runtimePLuginNames: string[] = [];
@@ -57,7 +57,7 @@ class FederationRuntimePlugin {
     }
 
     return Template.asString([
-      `import federation from '${BundlerRuntimePath}';`,
+      `import federation from '${bundlerRuntimePath || BundlerRuntimePath}';`,
       runtimePluginTemplates,
       `${federationGlobal} = {...federation,...${federationGlobal}};`,
       `if(!${federationGlobal}.instance){`,
@@ -78,9 +78,16 @@ class FederationRuntimePlugin {
     ]);
   }
 
-  static getFilePath(containerName: string, runtimePlugins: string[]) {
+  static getFilePath(
+    containerName: string,
+    runtimePlugins: string[],
+    bundlerRuntimePath?: string,
+  ) {
     const hash = createHash(
-      `${containerName} ${FederationRuntimePlugin.getTemplate(runtimePlugins)}`,
+      `${containerName} ${FederationRuntimePlugin.getTemplate(
+        runtimePlugins,
+        bundlerRuntimePath,
+      )}`,
     );
     return path.join(TEMP_DIR, `entry.${hash}.js`);
   }
@@ -112,7 +119,10 @@ class FederationRuntimePlugin {
       mkdirpSync(fs, TEMP_DIR);
       fs.writeFileSync(
         filePath,
-        FederationRuntimePlugin.getTemplate(this.options.runtimePlugins!),
+        FederationRuntimePlugin.getTemplate(
+          this.options.runtimePlugins!,
+          this.options.implementation,
+        ),
       );
     }
   }

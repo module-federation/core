@@ -527,6 +527,11 @@ export default {
       type: 'string',
       absolutePath: false,
     },
+    implementation: {
+      description: 'Bundler runtime path',
+      type: 'string',
+      minLength: 1,
+    },
     library: {
       $ref: '#/definitions/LibraryOptions',
     },
