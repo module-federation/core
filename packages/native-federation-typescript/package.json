@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/native-federation-typescript",
-  "version": "1.0.0-canary.1",
+  "version": "0.2.6",
   "description": "Bundler agnostic unplugin to share federated types",
   "keywords": [
     "module federation",

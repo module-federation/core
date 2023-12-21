@@ -56,6 +56,7 @@ class ContainerEntryModule extends Module {
   private _exposes: [string, ExposeOptions][];
   private _shareScope: string;
   private _runtimePlugins: string[];
+  private _bundlerRuntimePath?: string;
   /**
    * @param {string} name container entry name
    * @param {[string, ExposeOptions][]} exposes list of exposed modules
@@ -66,12 +67,14 @@ class ContainerEntryModule extends Module {
     exposes: [string, ExposeOptions][],
     shareScope: string,
     runtimePlugins: string[],
+    bundlerRuntimePath?: string,
   ) {
     super(JAVASCRIPT_MODULE_TYPE_DYNAMIC, null);
     this._name = name;
     this._exposes = exposes;
     this._shareScope = shareScope;
     this._runtimePlugins = runtimePlugins;
+    this._bundlerRuntimePath = bundlerRuntimePath;
   }
   /**
    * @param {ObjectDeserializerContext} context context
@@ -79,7 +82,13 @@ class ContainerEntryModule extends Module {
    */
   static deserialize(context: ObjectDeserializerContext): ContainerEntryModule {
     const { read } = context;
-    const obj = new ContainerEntryModule(read(), read(), read(), read());
+    const obj = new ContainerEntryModule(
+      read(),
+      read(),
+      read(),
+      read(),
+      read(),
+    );
     //@ts-ignore
     obj.deserialize(context);
     return obj;
@@ -189,7 +198,11 @@ class ContainerEntryModule extends Module {
     this.addDependency(
       // @ts-ignore
       new EntryDependency(
-        FederationRuntimePlugin.getFilePath(this._name, this._runtimePlugins),
+        FederationRuntimePlugin.getFilePath(
+          this._name,
+          this._runtimePlugins,
+          this._bundlerRuntimePath,
+        ),
       ),
     );
 
@@ -344,6 +357,7 @@ class ContainerEntryModule extends Module {
     write(this._exposes);
     write(this._shareScope);
     write(this._runtimePlugins);
+    write(this._bundlerRuntimePath);
     super.serialize(context);
   }
 }

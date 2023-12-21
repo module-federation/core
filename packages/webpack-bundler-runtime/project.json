@@ -16,6 +16,9 @@
         "project": "packages/webpack-bundler-runtime/package.json",
         "compiler": "swc",
         "format": ["cjs", "esm"],
+        "additionalEntryPoints": [
+          "packages/webpack-bundler-runtime/src/constant.ts"
+        ],
         "external": ["@module-federation/*"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true,
