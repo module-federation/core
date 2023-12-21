@@ -541,9 +541,6 @@ importers:
       '@module-federation/nextjs-mf':
         specifier: workspace:*
         version: link:../../packages/nextjs-mf
-      '@module-federation/sdk':
-        specifier: workspace:*
-        version: link:../../packages/sdk
       '@module-federation/utilities':
         specifier: workspace:*
         version: link:../../packages/utilities
@@ -759,18 +756,6 @@ importers:
         specifier: ^5.0.0
         version: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
 
-  packages/kit:
-    dependencies:
-      '@module-federation/enhanced':
-        specifier: workspace:*
-        version: link:../enhanced
-      '@module-federation/runtime':
-        specifier: workspace:*
-        version: link:../runtime
-      '@module-federation/webpack-bundler-runtime':
-        specifier: workspace:*
-        version: link:../webpack-bundler-runtime
-
   packages/native-federation-tests:
     dependencies:
       adm-zip:
@@ -890,6 +875,15 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
+
+  packages/runtime-tools:
+    dependencies:
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+      '@module-federation/webpack-bundler-runtime':
+        specifier: workspace:*
+        version: link:../webpack-bundler-runtime
 
   packages/sdk: {}
 

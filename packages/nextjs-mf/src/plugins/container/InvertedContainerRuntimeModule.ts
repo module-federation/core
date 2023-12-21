@@ -25,40 +25,6 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
       (module) => module instanceof ContainerEntryModule,
     );
   }
-  private generateSharedObjectString(): string {
-    const sharedObjects = [
-      {
-        key: 'react',
-        version: require('react/package.json').version,
-        path: './react',
-      },
-      {
-        key: 'next/router',
-        version: require('next/package.json').version,
-        path: './next/router',
-      },
-      {
-        key: 'react-dom',
-        version: require('react-dom/package.json').version,
-        path: './react-dom',
-      },
-    ];
-
-    return sharedObjects.reduce((acc, obj) => {
-      return (
-        acc +
-        `
-        "${obj.key}": {
-          "${obj.version}": {
-            loaded: true,
-            loaded: 1,
-            from: "roothost",
-            get() { return innerRemote.get("${obj.path}") }
-          }
-        },`
-      );
-    }, '');
-  }
 
   override generate(): string {
     if (!this.compilation || !this.chunk || !this.compilation.chunkGraph) {

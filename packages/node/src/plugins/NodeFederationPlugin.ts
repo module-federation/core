@@ -2,8 +2,6 @@
 
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
-import { extractUrlAndGlobal } from '@module-federation/utilities';
-import { ModuleInfoRuntimePlugin } from '@module-federation/enhanced';
 
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
@@ -56,7 +54,6 @@ class NodeFederationPlugin {
    */
   apply(compiler: Compiler) {
     const { webpack } = compiler;
-    new ModuleInfoRuntimePlugin().apply(compiler);
     const pluginOptions = this.preparePluginOptions();
     this.updateCompilerOptions(compiler);
     const ModuleFederationPlugin = this.getModuleFederationPlugin(
