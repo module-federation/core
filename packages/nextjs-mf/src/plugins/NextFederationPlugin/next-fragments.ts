@@ -59,11 +59,8 @@ export const applyPathFixes = (compiler: Compiler, options: any) => {
       //@ts-ignore
       rule.oneOf.forEach((oneOfRule) => {
         if (hasLoader(oneOfRule, 'react-refresh-utils')) {
-          oneOfRule.exclude = [
-            oneOfRule.exclude,
-            /enhanced\/src/,
-            /nextjs-mf\/src/,
-          ];
+          const originalExcludes = oneOfRule.exclude;
+          oneOfRule.exclude = [oneOfRule.exclude, /universe\/packages/];
         }
       });
     }
