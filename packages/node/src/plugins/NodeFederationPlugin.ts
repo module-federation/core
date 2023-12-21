@@ -2,7 +2,6 @@
 
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
-import { extractUrlAndGlobal } from '@module-federation/utilities/src/utils/pure';
 
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
