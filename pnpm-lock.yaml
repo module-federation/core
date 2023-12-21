@@ -759,7 +759,17 @@ importers:
         specifier: ^5.0.0
         version: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
 
-  packages/kit: {}
+  packages/kit:
+    dependencies:
+      '@module-federation/enhanced':
+        specifier: workspace:*
+        version: link:../enhanced
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+      '@module-federation/webpack-bundler-runtime':
+        specifier: workspace:*
+        version: link:../webpack-bundler-runtime
 
   packages/native-federation-tests:
     dependencies:
