@@ -46,7 +46,6 @@ class RemoteRuntimeModule extends RuntimeModule {
       for (const m of modules) {
         const module: RemoteModule = m as unknown as RemoteModule;
         const name = module.internalRequest;
-        const remoteName = module.remoteName;
         // @ts-ignore
         const id = chunkGraph ? chunkGraph.getModuleId(module) : undefined;
         const { shareScope } = module;
@@ -89,7 +88,6 @@ class RemoteRuntimeModule extends RuntimeModule {
             idToRemoteMap[id].push({
               externalType: remoteModule.externalType,
               request: remoteModule.request as string,
-              remoteName,
               externalModuleId,
             });
           });

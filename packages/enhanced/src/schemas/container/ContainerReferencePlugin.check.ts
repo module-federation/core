@@ -67,10 +67,6 @@ const schema40 = {
             },
           ],
         },
-        name: {
-          type: 'string',
-          minLength: 1,
-        },
         shareScope: {
           type: 'string',
           minLength: 1,
@@ -298,9 +294,7 @@ function validate39(
       } else {
         const _errs1 = errors;
         for (const key0 in data) {
-          if (
-            !(key0 === 'external' || key0 === 'name' || key0 === 'shareScope')
-          ) {
+          if (!(key0 === 'external' || key0 === 'shareScope')) {
             validate39.errors = [
               {
                 params: {

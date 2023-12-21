@@ -38,21 +38,18 @@ class RemoteModule extends Module {
   public externalRequests: string[];
   public internalRequest: string;
   public shareScope: string;
-  public remoteName: string;
 
   /**
    * @param {string} request request string
    * @param {string[]} externalRequests list of external requests to containers
    * @param {string} internalRequest name of exposed module in container
    * @param {string} shareScope the used share scope name
-   * @param {string} remoteName The name of remote instance
    */
   constructor(
     request: string,
     externalRequests: string[],
     internalRequest: string,
     shareScope: string,
-    remoteName: string,
   ) {
     super(WEBPACK_MODULE_TYPE_REMOTE);
     this.request = request;
@@ -62,7 +59,6 @@ class RemoteModule extends Module {
     this._identifier = `remote (${shareScope}) ${this.externalRequests.join(
       ' ',
     )} ${this.internalRequest}`;
-    this.remoteName = remoteName;
   }
 
   /**
@@ -188,7 +184,6 @@ class RemoteModule extends Module {
     write(this.externalRequests);
     write(this.internalRequest);
     write(this.shareScope);
-    write(this.remoteName);
     super.serialize(context);
   }
 
@@ -198,7 +193,7 @@ class RemoteModule extends Module {
    */
   static deserialize(context: ObjectDeserializerContext): RemoteModule {
     const { read } = context;
-    const obj = new RemoteModule(read(), read(), read(), read(), read());
+    const obj = new RemoteModule(read(), read(), read(), read());
     obj.deserialize(context);
     return obj;
   }

@@ -1,6 +1,8 @@
 import { attachShareScopeMap } from './attachShareScopeMap';
 import type { RemoteEntryExports } from './types';
 import { RemotesOptions } from './types';
+import { decodeName } from '@module-federation/sdk';
+import { ENCODE_NAME_PREFIX } from './constant';
 
 export function remotes(options: RemotesOptions) {
   const {
@@ -108,13 +110,11 @@ export function remotes(options: RemotesOptions) {
 
       const onRemoteLoaded = () => {
         try {
-          let remoteName = remoteInfos[0].remoteName;
-          if (!remoteName) {
-            const [_entryUrl, globalName] = extractUrlAndGlobal(
-              remoteInfos[0].request,
-            );
-            remoteName = globalName;
-          }
+          const [_entryUrl, globalName] = extractUrlAndGlobal(
+            remoteInfos[0].request,
+          );
+
+          const remoteName = decodeName(globalName, ENCODE_NAME_PREFIX);
 
           const remoteModuleName = remoteName + data[1].slice(1);
           return webpackRequire.federation.instance!.loadRemote(

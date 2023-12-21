@@ -20,6 +20,7 @@
   "module": "./dist/index.esm.js",
   "types": "./dist/index.cjs.d.ts",
   "dependencies": {
-    "@module-federation/runtime": "workspace:*"
+    "@module-federation/runtime": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
   }
 }

@@ -77,8 +77,4 @@ export interface RemotesConfig {
    * The name of the share scope shared with this remote.
    */
   shareScope?: string;
-  /**
-   * The name of remote instance
-   */
-  name?: string;
 }
