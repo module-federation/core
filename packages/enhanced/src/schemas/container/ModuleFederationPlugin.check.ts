@@ -1,6 +1,12 @@
 /* eslint-disable */
 //@ts-nocheck
+/*
+ * This file was automatically generated.
+ * DO NOT MODIFY BY HAND.
+ * Run `yarn special-lint-fix` to update
+ */
 const absolutePathRegExp = /^(?:[A-Za-z]:[\\/]|\\\\|\/)/;
+('use strict');
 
 const schema51 = {
   definitions: {
@@ -429,6 +435,10 @@ const schema51 = {
     filename: {
       type: 'string',
       absolutePath: false,
+    },
+    implementation: {
+      type: 'string',
+      minLength: 1,
     },
     library: {
       $ref: '#/definitions/LibraryOptions',
@@ -2350,8 +2360,8 @@ function validate67(
             var valid0 = true;
           }
           if (valid0) {
-            if (data.name !== undefined) {
-              let data1 = data.name;
+            if (data.shareScope !== undefined) {
+              let data1 = data.shareScope;
               const _errs8 = errors;
               if (errors === _errs8) {
                 if (typeof data1 === 'string') {
@@ -2377,36 +2387,6 @@ function validate67(
               var valid0 = _errs8 === errors;
             } else {
               var valid0 = true;
-            }
-            if (valid0) {
-              if (data.shareScope !== undefined) {
-                let data2 = data.shareScope;
-                const _errs10 = errors;
-                if (errors === _errs10) {
-                  if (typeof data2 === 'string') {
-                    if (data2.length < 1) {
-                      validate67.errors = [
-                        {
-                          params: {},
-                        },
-                      ];
-                      return false;
-                    }
-                  } else {
-                    validate67.errors = [
-                      {
-                        params: {
-                          type: 'string',
-                        },
-                      },
-                    ];
-                    return false;
-                  }
-                }
-                var valid0 = _errs10 === errors;
-              } else {
-                var valid0 = true;
-              }
             }
           }
         }
@@ -3534,30 +3514,20 @@ function validate48(
             var valid0 = true;
           }
           if (valid0) {
-            if (data.library !== undefined) {
+            if (data.implementation !== undefined) {
+              let data2 = data.implementation;
               const _errs5 = errors;
-              if (
-                !validate59(data.library, {
-                  instancePath: instancePath + '/library',
-                  parentData: data,
-                  parentDataProperty: 'library',
-                  rootData,
-                })
-              ) {
-                vErrors =
-                  vErrors === null
-                    ? validate59.errors
-                    : vErrors.concat(validate59.errors);
-                errors = vErrors.length;
-              }
-              var valid0 = _errs5 === errors;
-            } else {
-              var valid0 = true;
-            }
-            if (valid0) {
-              if (data.name !== undefined) {
-                const _errs6 = errors;
-                if (typeof data.name !== 'string') {
+              if (errors === _errs5) {
+                if (typeof data2 === 'string') {
+                  if (data2.length < 1) {
+                    validate48.errors = [
+                      {
+                        params: {},
+                      },
+                    ];
+                    return false;
+                  }
+                } else {
                   validate48.errors = [
                     {
                       params: {
@@ -3567,284 +3537,324 @@ function validate48(
                   ];
                   return false;
                 }
-                var valid0 = _errs6 === errors;
+              }
+              var valid0 = _errs5 === errors;
+            } else {
+              var valid0 = true;
+            }
+            if (valid0) {
+              if (data.library !== undefined) {
+                const _errs7 = errors;
+                if (
+                  !validate59(data.library, {
+                    instancePath: instancePath + '/library',
+                    parentData: data,
+                    parentDataProperty: 'library',
+                    rootData,
+                  })
+                ) {
+                  vErrors =
+                    vErrors === null
+                      ? validate59.errors
+                      : vErrors.concat(validate59.errors);
+                  errors = vErrors.length;
+                }
+                var valid0 = _errs7 === errors;
               } else {
                 var valid0 = true;
               }
               if (valid0) {
-                if (data.remoteType !== undefined) {
-                  let data4 = data.remoteType;
+                if (data.name !== undefined) {
                   const _errs8 = errors;
-                  const _errs9 = errors;
-                  let valid1 = false;
-                  let passing0 = null;
-                  const _errs10 = errors;
-                  if (
-                    data4 !== 'var' &&
-                    data4 !== 'module' &&
-                    data4 !== 'assign' &&
-                    data4 !== 'this' &&
-                    data4 !== 'window' &&
-                    data4 !== 'self' &&
-                    data4 !== 'global' &&
-                    data4 !== 'commonjs' &&
-                    data4 !== 'commonjs2' &&
-                    data4 !== 'commonjs-module' &&
-                    data4 !== 'commonjs-static' &&
-                    data4 !== 'amd' &&
-                    data4 !== 'amd-require' &&
-                    data4 !== 'umd' &&
-                    data4 !== 'umd2' &&
-                    data4 !== 'jsonp' &&
-                    data4 !== 'system' &&
-                    data4 !== 'promise' &&
-                    data4 !== 'import' &&
-                    data4 !== 'script' &&
-                    data4 !== 'node-commonjs'
-                  ) {
-                    const err0 = {
-                      params: {},
-                    };
-                    if (vErrors === null) {
-                      vErrors = [err0];
-                    } else {
-                      vErrors.push(err0);
-                    }
-                    errors++;
-                  }
-                  var _valid0 = _errs10 === errors;
-                  if (_valid0) {
-                    valid1 = true;
-                    passing0 = 0;
-                  }
-                  if (!valid1) {
-                    const err1 = {
-                      params: {
-                        passingSchemas: passing0,
+                  if (typeof data.name !== 'string') {
+                    validate48.errors = [
+                      {
+                        params: {
+                          type: 'string',
+                        },
                       },
-                    };
-                    if (vErrors === null) {
-                      vErrors = [err1];
-                    } else {
-                      vErrors.push(err1);
-                    }
-                    errors++;
-                    validate48.errors = vErrors;
+                    ];
                     return false;
-                  } else {
-                    errors = _errs9;
-                    if (vErrors !== null) {
-                      if (_errs9) {
-                        vErrors.length = _errs9;
-                      } else {
-                        vErrors = null;
-                      }
-                    }
                   }
                   var valid0 = _errs8 === errors;
                 } else {
                   var valid0 = true;
                 }
                 if (valid0) {
-                  if (data.remotes !== undefined) {
+                  if (data.remoteType !== undefined) {
+                    let data5 = data.remoteType;
+                    const _errs10 = errors;
+                    const _errs11 = errors;
+                    let valid1 = false;
+                    let passing0 = null;
                     const _errs12 = errors;
                     if (
-                      !validate65(data.remotes, {
-                        instancePath: instancePath + '/remotes',
-                        parentData: data,
-                        parentDataProperty: 'remotes',
-                        rootData,
-                      })
+                      data5 !== 'var' &&
+                      data5 !== 'module' &&
+                      data5 !== 'assign' &&
+                      data5 !== 'this' &&
+                      data5 !== 'window' &&
+                      data5 !== 'self' &&
+                      data5 !== 'global' &&
+                      data5 !== 'commonjs' &&
+                      data5 !== 'commonjs2' &&
+                      data5 !== 'commonjs-module' &&
+                      data5 !== 'commonjs-static' &&
+                      data5 !== 'amd' &&
+                      data5 !== 'amd-require' &&
+                      data5 !== 'umd' &&
+                      data5 !== 'umd2' &&
+                      data5 !== 'jsonp' &&
+                      data5 !== 'system' &&
+                      data5 !== 'promise' &&
+                      data5 !== 'import' &&
+                      data5 !== 'script' &&
+                      data5 !== 'node-commonjs'
                     ) {
-                      vErrors =
-                        vErrors === null
-                          ? validate65.errors
-                          : vErrors.concat(validate65.errors);
-                      errors = vErrors.length;
+                      const err0 = {
+                        params: {},
+                      };
+                      if (vErrors === null) {
+                        vErrors = [err0];
+                      } else {
+                        vErrors.push(err0);
+                      }
+                      errors++;
                     }
-                    var valid0 = _errs12 === errors;
+                    var _valid0 = _errs12 === errors;
+                    if (_valid0) {
+                      valid1 = true;
+                      passing0 = 0;
+                    }
+                    if (!valid1) {
+                      const err1 = {
+                        params: {
+                          passingSchemas: passing0,
+                        },
+                      };
+                      if (vErrors === null) {
+                        vErrors = [err1];
+                      } else {
+                        vErrors.push(err1);
+                      }
+                      errors++;
+                      validate48.errors = vErrors;
+                      return false;
+                    } else {
+                      errors = _errs11;
+                      if (vErrors !== null) {
+                        if (_errs11) {
+                          vErrors.length = _errs11;
+                        } else {
+                          vErrors = null;
+                        }
+                      }
+                    }
+                    var valid0 = _errs10 === errors;
                   } else {
                     var valid0 = true;
                   }
                   if (valid0) {
-                    if (data.runtime !== undefined) {
-                      let data6 = data.runtime;
-                      const _errs13 = errors;
-                      const _errs15 = errors;
-                      let valid4 = false;
-                      const _errs16 = errors;
-                      if (data6 !== false) {
-                        const err2 = {
-                          params: {},
-                        };
-                        if (vErrors === null) {
-                          vErrors = [err2];
-                        } else {
-                          vErrors.push(err2);
-                        }
-                        errors++;
+                    if (data.remotes !== undefined) {
+                      const _errs14 = errors;
+                      if (
+                        !validate65(data.remotes, {
+                          instancePath: instancePath + '/remotes',
+                          parentData: data,
+                          parentDataProperty: 'remotes',
+                          rootData,
+                        })
+                      ) {
+                        vErrors =
+                          vErrors === null
+                            ? validate65.errors
+                            : vErrors.concat(validate65.errors);
+                        errors = vErrors.length;
                       }
-                      var _valid1 = _errs16 === errors;
-                      valid4 = valid4 || _valid1;
-                      if (!valid4) {
-                        const _errs17 = errors;
-                        if (errors === _errs17) {
-                          if (typeof data6 === 'string') {
-                            if (data6.length < 1) {
-                              const err3 = {
-                                params: {},
-                              };
-                              if (vErrors === null) {
-                                vErrors = [err3];
-                              } else {
-                                vErrors.push(err3);
-                              }
-                              errors++;
-                            }
-                          } else {
-                            const err4 = {
-                              params: {
-                                type: 'string',
-                              },
-                            };
-                            if (vErrors === null) {
-                              vErrors = [err4];
-                            } else {
-                              vErrors.push(err4);
-                            }
-                            errors++;
-                          }
-                        }
-                        var _valid1 = _errs17 === errors;
-                        valid4 = valid4 || _valid1;
-                      }
-                      if (!valid4) {
-                        const err5 = {
-                          params: {},
-                        };
-                        if (vErrors === null) {
-                          vErrors = [err5];
-                        } else {
-                          vErrors.push(err5);
-                        }
-                        errors++;
-                        validate48.errors = vErrors;
-                        return false;
-                      } else {
-                        errors = _errs15;
-                        if (vErrors !== null) {
-                          if (_errs15) {
-                            vErrors.length = _errs15;
-                          } else {
-                            vErrors = null;
-                          }
-                        }
-                      }
-                      var valid0 = _errs13 === errors;
+                      var valid0 = _errs14 === errors;
                     } else {
                       var valid0 = true;
                     }
                     if (valid0) {
-                      if (data.runtimePlugins !== undefined) {
-                        let data7 = data.runtimePlugins;
-                        const _errs19 = errors;
-                        if (errors === _errs19) {
-                          if (Array.isArray(data7)) {
-                            var valid5 = true;
-                            const len0 = data7.length;
-                            for (let i0 = 0; i0 < len0; i0++) {
-                              let data8 = data7[i0];
-                              const _errs21 = errors;
-                              if (errors === _errs21) {
-                                if (typeof data8 === 'string') {
-                                  if (data8.length < 1) {
-                                    validate48.errors = [
-                                      {
-                                        params: {},
-                                      },
-                                    ];
-                                    return false;
-                                  }
-                                } else {
-                                  validate48.errors = [
-                                    {
-                                      params: {
-                                        type: 'string',
-                                      },
-                                    },
-                                  ];
-                                  return false;
-                                }
-                              }
-                              var valid5 = _errs21 === errors;
-                              if (!valid5) {
-                                break;
-                              }
-                            }
+                      if (data.runtime !== undefined) {
+                        let data7 = data.runtime;
+                        const _errs15 = errors;
+                        const _errs17 = errors;
+                        let valid4 = false;
+                        const _errs18 = errors;
+                        if (data7 !== false) {
+                          const err2 = {
+                            params: {},
+                          };
+                          if (vErrors === null) {
+                            vErrors = [err2];
                           } else {
-                            validate48.errors = [
-                              {
+                            vErrors.push(err2);
+                          }
+                          errors++;
+                        }
+                        var _valid1 = _errs18 === errors;
+                        valid4 = valid4 || _valid1;
+                        if (!valid4) {
+                          const _errs19 = errors;
+                          if (errors === _errs19) {
+                            if (typeof data7 === 'string') {
+                              if (data7.length < 1) {
+                                const err3 = {
+                                  params: {},
+                                };
+                                if (vErrors === null) {
+                                  vErrors = [err3];
+                                } else {
+                                  vErrors.push(err3);
+                                }
+                                errors++;
+                              }
+                            } else {
+                              const err4 = {
                                 params: {
-                                  type: 'array',
+                                  type: 'string',
                                 },
-                              },
-                            ];
-                            return false;
+                              };
+                              if (vErrors === null) {
+                                vErrors = [err4];
+                              } else {
+                                vErrors.push(err4);
+                              }
+                              errors++;
+                            }
+                          }
+                          var _valid1 = _errs19 === errors;
+                          valid4 = valid4 || _valid1;
+                        }
+                        if (!valid4) {
+                          const err5 = {
+                            params: {},
+                          };
+                          if (vErrors === null) {
+                            vErrors = [err5];
+                          } else {
+                            vErrors.push(err5);
+                          }
+                          errors++;
+                          validate48.errors = vErrors;
+                          return false;
+                        } else {
+                          errors = _errs17;
+                          if (vErrors !== null) {
+                            if (_errs17) {
+                              vErrors.length = _errs17;
+                            } else {
+                              vErrors = null;
+                            }
                           }
                         }
-                        var valid0 = _errs19 === errors;
+                        var valid0 = _errs15 === errors;
                       } else {
                         var valid0 = true;
                       }
                       if (valid0) {
-                        if (data.shareScope !== undefined) {
-                          let data9 = data.shareScope;
-                          const _errs23 = errors;
-                          if (errors === _errs23) {
-                            if (typeof data9 === 'string') {
-                              if (data9.length < 1) {
-                                validate48.errors = [
-                                  {
-                                    params: {},
-                                  },
-                                ];
-                                return false;
+                        if (data.runtimePlugins !== undefined) {
+                          let data8 = data.runtimePlugins;
+                          const _errs21 = errors;
+                          if (errors === _errs21) {
+                            if (Array.isArray(data8)) {
+                              var valid5 = true;
+                              const len0 = data8.length;
+                              for (let i0 = 0; i0 < len0; i0++) {
+                                let data9 = data8[i0];
+                                const _errs23 = errors;
+                                if (errors === _errs23) {
+                                  if (typeof data9 === 'string') {
+                                    if (data9.length < 1) {
+                                      validate48.errors = [
+                                        {
+                                          params: {},
+                                        },
+                                      ];
+                                      return false;
+                                    }
+                                  } else {
+                                    validate48.errors = [
+                                      {
+                                        params: {
+                                          type: 'string',
+                                        },
+                                      },
+                                    ];
+                                    return false;
+                                  }
+                                }
+                                var valid5 = _errs23 === errors;
+                                if (!valid5) {
+                                  break;
+                                }
                               }
                             } else {
                               validate48.errors = [
                                 {
                                   params: {
-                                    type: 'string',
+                                    type: 'array',
                                   },
                                 },
                               ];
                               return false;
                             }
                           }
-                          var valid0 = _errs23 === errors;
+                          var valid0 = _errs21 === errors;
                         } else {
                           var valid0 = true;
                         }
                         if (valid0) {
-                          if (data.shared !== undefined) {
+                          if (data.shareScope !== undefined) {
+                            let data10 = data.shareScope;
                             const _errs25 = errors;
-                            if (
-                              !validate75(data.shared, {
-                                instancePath: instancePath + '/shared',
-                                parentData: data,
-                                parentDataProperty: 'shared',
-                                rootData,
-                              })
-                            ) {
-                              vErrors =
-                                vErrors === null
-                                  ? validate75.errors
-                                  : vErrors.concat(validate75.errors);
-                              errors = vErrors.length;
+                            if (errors === _errs25) {
+                              if (typeof data10 === 'string') {
+                                if (data10.length < 1) {
+                                  validate48.errors = [
+                                    {
+                                      params: {},
+                                    },
+                                  ];
+                                  return false;
+                                }
+                              } else {
+                                validate48.errors = [
+                                  {
+                                    params: {
+                                      type: 'string',
+                                    },
+                                  },
+                                ];
+                                return false;
+                              }
                             }
                             var valid0 = _errs25 === errors;
                           } else {
                             var valid0 = true;
+                          }
+                          if (valid0) {
+                            if (data.shared !== undefined) {
+                              const _errs27 = errors;
+                              if (
+                                !validate75(data.shared, {
+                                  instancePath: instancePath + '/shared',
+                                  parentData: data,
+                                  parentDataProperty: 'shared',
+                                  rootData,
+                                })
+                              ) {
+                                vErrors =
+                                  vErrors === null
+                                    ? validate75.errors
+                                    : vErrors.concat(validate75.errors);
+                                errors = vErrors.length;
+                              }
+                              var valid0 = _errs27 === errors;
+                            } else {
+                              var valid0 = true;
+                            }
                           }
                         }
                       }
