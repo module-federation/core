@@ -358,8 +358,8 @@ importers:
         specifier: 6.7.1
         version: 6.7.1(eslint@8.56.0)
       eslint-plugin-prettier:
-        specifier: 5.0.1
-        version: 5.0.1(eslint-config-prettier@9.1.0)(eslint@8.56.0)(prettier@3.0.3)
+        specifier: 5.1.1
+        version: 5.1.1(eslint-config-prettier@9.1.0)(eslint@8.56.0)(prettier@3.0.3)
       eslint-plugin-qwik:
         specifier: 1.2.19
         version: 1.2.19(eslint@8.56.0)
@@ -14750,8 +14750,8 @@ packages:
       semver: 6.3.1
     dev: true
 
-  /eslint-plugin-prettier@5.0.1(eslint-config-prettier@9.1.0)(eslint@8.56.0)(prettier@3.0.3):
-    resolution: {integrity: sha512-m3u5RnR56asrwV/lDC4GHorlW75DsFfmUcjfCYylTUs85dBRnB7VM6xG8eCMJdeDRnppzmxZVf1GEPJvl1JmNg==}
+  /eslint-plugin-prettier@5.1.1(eslint-config-prettier@9.1.0)(eslint@8.56.0)(prettier@3.0.3):
+    resolution: {integrity: sha512-WQpV3mSmIobb77s4qiCZu3dBrZZ0rj8ckSfBtRrgNK9Wnh2s3eiaxNTWloz1LJ1WtvqZES/PAI7PLvsrGt/CEA==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
       '@types/eslint': '>=8.0.0'
