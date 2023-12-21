@@ -22,5 +22,26 @@
   "dependencies": {
     "@module-federation/runtime": "workspace:*",
     "@module-federation/sdk": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./constant": {
+      "import": "./dist/constant.esm.js",
+      "require": "./dist/constant.cjs.js"
+    },
+    "./*": "./*"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.cjs.d.ts"
+      ],
+      "constant": [
+        "./dist/constant.cjs.d.ts"
+      ]
+    }
   }
 }
