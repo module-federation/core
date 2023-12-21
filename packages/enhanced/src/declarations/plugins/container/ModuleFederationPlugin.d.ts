@@ -263,10 +263,6 @@ export interface RemotesConfig {
    * The name of the share scope shared with this remote.
    */
   shareScope?: string;
-  /**
-   * The name of the remote instance name.
-   */
-  name?: string;
 }
 /**
  * Modules that should be shared in the share scope. Property names are used to match requested modules in this compilation. Relative requests are resolved, module requests are matched unresolved, absolute paths will match resolved requests. A trailing slash will match all requests with this prefix. In this case shareKey must also have a trailing slash.

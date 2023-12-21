@@ -8,6 +8,7 @@ import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
 
 export * from './types';
+export { ENCODE_NAME_PREFIX } from './constant';
 
 const federation: Federation = {
   runtime,

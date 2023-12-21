@@ -58,14 +58,12 @@ class ContainerReferencePlugin {
       (item) => ({
         external: Array.isArray(item) ? item : [item],
         shareScope: options.shareScope || 'default',
-        name: undefined,
       }),
       (item) => ({
         external: Array.isArray(item.external)
           ? item.external
           : [item.external],
         shareScope: item.shareScope || options.shareScope || 'default',
-        name: item.name,
       }),
     );
   }
@@ -144,7 +142,6 @@ class ContainerReferencePlugin {
                     `.${data.request.slice(key.length)}`,
                     //@ts-ignore
                     config.shareScope,
-                    config.name,
                   );
                 }
               }

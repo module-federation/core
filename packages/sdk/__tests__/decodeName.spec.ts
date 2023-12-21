@@ -8,4 +8,11 @@ describe('decodeName', () => {
       expect(decodeName(transformedName)).toBe(name);
     });
   });
+
+  it('should directly return name if prefix not match', () => {
+    const name = 'runtime_demo';
+    expect(decodeName(name)).toBe('runtime-demo');
+
+    expect(decodeName(name, 'CUSTOM_PREFIX')).toBe(name);
+  });
 });

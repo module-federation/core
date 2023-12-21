@@ -114,6 +114,9 @@ const decodeName = /* @__PURE__ */ function (
   try {
     let decodedName = name;
     if (prefix) {
+      if (!decodedName.startsWith(prefix)) {
+        return decodedName;
+      }
       decodedName = decodedName.replace(new RegExp(prefix, 'g'), '');
     }
     decodedName = decodedName

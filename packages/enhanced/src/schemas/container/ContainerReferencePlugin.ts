@@ -70,11 +70,6 @@ export default {
             },
           ],
         },
-        name: {
-          description: 'The name of the remote instance name.',
-          type: 'string',
-          minLength: 1,
-        },
         shareScope: {
           description: 'The name of the share scope shared with this remote.',
           type: 'string',
