@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs",
   "module": "./dist/index.esm.js",
@@ -9,6 +9,10 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.esm.js",

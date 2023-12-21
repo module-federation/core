@@ -1,12 +1,16 @@
 {
   "public": true,
   "name": "@module-federation/webpack-bundler-runtime",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "license": "MIT",
   "description": "Module Federation Runtime for webpack",
   "keywords": [
     "Module Federation",
     "bundler runtime"
+  ],
+  "files": [
+    "dist/",
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"

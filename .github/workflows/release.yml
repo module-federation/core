@@ -15,7 +15,7 @@ on:
       branch:
         description: 'Release Branch (confirm release branch)'
         required: true
-        default: 'canary'
+        default: 'main'
   issue_comment:
     types: [created]
 
@@ -48,7 +48,7 @@ jobs:
         run: pnpm install
 
       - name: Build and test Packages
-        run: npx nx affected -t pre-release --parallel=3 --exclude='*,!tag:package' --base=origin/canary --head=${{ github.ref }}
+        run: npx nx run-many --target=build --exclude='*,!tag:package'
 
       - name: Release
         uses: web-infra-dev/actions@v2
@@ -88,8 +88,8 @@ jobs:
 
       - name: Build and test Packages
         run: |
-          git fetch origin canary
-          npx nx affected -t pre-release --parallel=3 --exclude='*,!tag:package' --base=origin/canary --head=${{ github.ref }}
+          git fetch origin main
+          npx nx run-many --target=build --exclude='*,!tag:package'
 
       - name: Release
         uses: web-infra-dev/actions@v2

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/utilities",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "type": "commonjs",
   "main": "./dist/index.cjs.js",
   "types": "./dist/index.cjs.d.ts",
@@ -8,6 +8,10 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "repository": "https://github.com/module-federation/universe/tree/main/packages/utilities",
   "devDependencies": {
     "react": "18.2.0"
