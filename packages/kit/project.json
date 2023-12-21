@@ -6,10 +6,10 @@
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
-      "outputs": ["{workspaceRoot}/dist/packages/kit"],
+      "outputs": ["{workspaceRoot}/packages/kit/dist"],
       "options": {
         "parallel": false,
-        "outputPath": "dist/packages/kit",
+        "outputPath": "packages/kit/dist",
         "main": "packages/kit/src/index.ts",
         "additionalEntryPoints": [
           "packages/kit/src/runtime.ts",

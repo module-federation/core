@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/kit",
-  "version": "1.0.0",
+  "version": "0.0.4",
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "main": "./index.cjs",
   "module": "./index.esm.js",
@@ -22,6 +22,10 @@
       "import": "./webpack-bundler-runtime.esm.js",
       "require": "./webpack-bundler-runtime.cjs.js"
     },
+    "./webpack-plugin": {
+      "import": "./webpack-plugin.esm.js",
+      "require": "./webpack-plugin.cjs.js"
+    },
     "./*": "./*"
   },
   "typesVersions": {
@@ -34,7 +38,15 @@
       ],
       "webpack-bundler-runtime": [
         "./webpack-bundler-runtime.cjs.d.ts"
+      ],
+      "webpack-plugin": [
+        "./webpack-bundler-runtime.cjs.d.ts"
       ]
     }
+  },
+  "dependencies": {
+    "@module-federation/runtime": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/webpack-bundler-runtime": "workspace:*"
   }
 }
