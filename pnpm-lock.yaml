@@ -190,8 +190,8 @@ importers:
         specifier: 3.1.9
         version: 3.1.9(rollup@2.79.1)
       '@rollup/plugin-replace':
-        specifier: 3.0.0
-        version: 3.0.0(rollup@2.79.1)
+        specifier: 3.1.0
+        version: 3.1.0(rollup@2.79.1)
       '@semantic-release/changelog':
         specifier: ^6.0.3
         version: 6.0.3(semantic-release@22.0.12)
@@ -6979,8 +6979,8 @@ packages:
       rollup: 2.79.1
     dev: true
 
-  /@rollup/plugin-replace@3.0.0(rollup@2.79.1):
-    resolution: {integrity: sha512-3c7JCbMuYXM4PbPWT4+m/4Y6U60SgsnDT/cCyAyUKwFHg7pTSfsSQzIpETha3a3ig6OdOKzZz87D9ZXIK3qsDg==}
+  /@rollup/plugin-replace@3.1.0(rollup@2.79.1):
+    resolution: {integrity: sha512-pA3XRUrSKybVYqmH5TqWNZpGxF+VV+1GrYchKgCNIj2vsSOX7CVm2RCtx8p2nrC7xvkziYyK+lSi74T93MU3YA==}
     peerDependencies:
       rollup: ^1.20.0 || ^2.0.0
     dependencies:

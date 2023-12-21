@@ -100,7 +100,7 @@
     "@nx/webpack": "17.2.5",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "@rollup/plugin-alias": "3.1.9",
-    "@rollup/plugin-replace": "3.0.0",
+    "@rollup/plugin-replace": "3.1.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
