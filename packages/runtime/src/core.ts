@@ -109,6 +109,7 @@ export class FederationHost {
           id: string;
           error: unknown;
           from: 'build' | 'runtime';
+          origin: FederationHost;
         },
       ],
       void
@@ -532,7 +533,9 @@ export class FederationHost {
         id,
         error,
         from,
+        origin: this,
       });
+
       if (!failOver) {
         throw error;
       }
