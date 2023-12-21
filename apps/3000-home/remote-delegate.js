@@ -1,19 +1,17 @@
-// import { importDelegatedModule } from '@module-federation/utilities';
+import { importDelegatedModule } from '@module-federation/utilities/src/utils/importDelegatedModule';
 /* eslint-disable no-undef */
 // eslint-disable-next-line no-async-promise-executor
 module.exports = new Promise((resolve, reject) => {
   //eslint-disable-next-line
   const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
   const [global, url] = currentRequest.split('@');
-  import('@module-federation/utilities').then((res) => {
-    const { importDelegatedModule } = res;
-    importDelegatedModule({
-      global,
-      url: url + '?' + Date.now(),
+
+  importDelegatedModule({
+    global,
+    url: url + '?' + Date.now(),
+  })
+    .then((remote) => {
+      resolve(remote);
     })
-      .then((remote) => {
-        resolve(remote);
-      })
-      .catch((err) => reject(err));
-  });
+    .catch((err) => reject(err));
 });
