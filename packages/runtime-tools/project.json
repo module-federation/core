@@ -1,31 +1,27 @@
 {
-  "name": "kit",
+  "name": "runtime-tools",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/kit/src",
+  "sourceRoot": "packages/runtime-tools/src",
   "projectType": "library",
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
-      "outputs": ["{workspaceRoot}/packages/kit/dist"],
+      "outputs": ["{workspaceRoot}/packages/runtime-tools/dist"],
       "options": {
         "parallel": false,
-        "outputPath": "packages/kit/dist",
-        "main": "packages/kit/src/index.ts",
+        "outputPath": "packages/runtime-tools/dist",
+        "main": "packages/runtime-tools/src/index.ts",
         "additionalEntryPoints": [
-          "packages/kit/src/runtime.ts",
-          "packages/kit/src/webpack-bundler-runtime.ts"
+          "packages/runtime-tools/src/runtime.ts",
+          "packages/runtime-tools/src/webpack-bundler-runtime.ts"
         ],
-        "tsConfig": "packages/kit/tsconfig.lib.json",
+        "tsConfig": "packages/runtime-tools/tsconfig.lib.json",
         "assets": [],
-        "project": "packages/kit/package.json",
+        "project": "packages/runtime-tools/package.json",
         "compiler": "swc",
-        "rollupConfig": "packages/kit/rollup.config.js",
+        "rollupConfig": "packages/runtime-tools/rollup.config.js",
         "format": ["cjs", "esm"],
-        "external": [
-          "@module-federation/sdk",
-          "@module-federation/runtime",
-          "@module-federation/webpack-bundler-runtime"
-        ],
+        "external": ["@module-federation/*"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true
       },
@@ -41,8 +37,8 @@
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [
-          "packages/kit/**/*.ts",
-          "packages/kit/package.json"
+          "packages/runtime-tools/**/*.ts",
+          "packages/runtime-tools/package.json"
         ]
       }
     },
@@ -73,7 +69,7 @@
       "executor": "@nx/vite:test",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "config": "packages/kit/vitest.config.ts"
+        "config": "packages/runtime-tools/vitest.config.ts"
       },
       "configurations": {
         "ci": {
