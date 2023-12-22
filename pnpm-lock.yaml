@@ -361,8 +361,8 @@ importers:
         specifier: 5.1.1
         version: 5.1.1(eslint-config-prettier@9.1.0)(eslint@8.56.0)(prettier@3.0.3)
       eslint-plugin-qwik:
-        specifier: 1.2.19
-        version: 1.2.19(eslint@8.56.0)
+        specifier: 1.3.1
+        version: 1.3.1(eslint@8.56.0)
       eslint-plugin-react:
         specifier: 7.33.2
         version: 7.33.2(eslint@8.56.0)
@@ -15090,8 +15090,8 @@ packages:
       synckit: 0.8.6
     dev: true
 
-  /eslint-plugin-qwik@1.2.19(eslint@8.56.0):
-    resolution: {integrity: sha512-/lfTq7e0MzTimUkS/x7HvvqzM+RhpHup8uuMcEv3d38sskkWEdD+KwMqsdUZShDLCuPGch7fj+ploud/179ZzA==}
+  /eslint-plugin-qwik@1.3.1(eslint@8.56.0):
+    resolution: {integrity: sha512-GbB2Wos1/oaIh9R1FBqUxz5CjFgTzf8dS/LCbS5FOTR5xld//1o8lxTI8i3pNZeov2QxqgbvbJwyhrf7iewPcA==}
     engines: {node: '>=16.8.0 <18.0.0 || >=18.11'}
     peerDependencies:
       eslint: ^8.45.0
