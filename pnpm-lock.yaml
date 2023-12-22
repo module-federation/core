@@ -402,12 +402,6 @@ importers:
       mammoth:
         specifier: 1.6.0
         version: 1.6.0
-      marked:
-        specifier: 9.1.6
-        version: 9.1.6
-      marked-terminal:
-        specifier: 6.1.0
-        version: 6.1.0(marked@9.1.6)
       merge-stream:
         specifier: 2.0.0
         version: 2.0.0
