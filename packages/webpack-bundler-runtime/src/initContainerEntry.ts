@@ -4,6 +4,18 @@ import {
   ShareScopeMap,
 } from './types';
 
+function isLegacyHost(
+  shareScope: InitContainerEntryOptions['shareScope'],
+): boolean {
+  if ('version' in shareScope && typeof shareScope['version'] !== 'object') {
+    return true;
+  }
+  if ('region' in shareScope && typeof shareScope['region'] !== 'object') {
+    return true;
+  }
+  return false;
+}
+
 export function initContainerEntry(
   options: InitContainerEntryOptions,
 ): WebpackRequire['I'] | void {
@@ -20,14 +32,18 @@ export function initContainerEntry(
     name: webpackRequire.federation.initOptions.name,
     remotes: [],
   });
-  webpackRequire.federation.instance.initShareScopeMap(name, shareScope);
-  const prevShareScope = globalThis.__FEDERATION__.__SHARE__['default'];
-  if (prevShareScope) {
-    webpackRequire.federation.instance.initShareScopeMap(
-      name,
-      prevShareScope as unknown as ShareScopeMap[string],
-    );
+  if (isLegacyHost(shareScope)) {
+    const prevShareScope = globalThis.__FEDERATION__.__SHARE__['default'];
+    if (prevShareScope) {
+      webpackRequire.federation.instance.initShareScopeMap(
+        name,
+        prevShareScope as unknown as ShareScopeMap[string],
+      );
+    }
+  } else {
+    webpackRequire.federation.instance.initShareScopeMap(name, shareScope);
   }
+
   webpackRequire.S[name] = shareScope;
   if (webpackRequire.federation.attachShareScopeMap) {
     webpackRequire.federation.attachShareScopeMap(webpackRequire);

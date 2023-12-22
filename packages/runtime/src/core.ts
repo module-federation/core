@@ -641,14 +641,6 @@ export class FederationHost {
     scopeName: string,
     shareScope: ShareScopeMap[string],
   ): void {
-    // compat prev consumers
-    if ('version' in shareScope && typeof shareScope['version'] !== 'object') {
-      return;
-    }
-    if ('region' in shareScope && typeof shareScope['region'] !== 'object') {
-      return;
-    }
-
     this.shareScopeMap[scopeName] = shareScope;
   }
 
