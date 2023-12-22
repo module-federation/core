@@ -1,20 +1,19 @@
-//@ts-nocheck
 import { FederationRuntimePlugin } from '@module-federation/runtime/types';
 
 export default function (): FederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
-    errorLoadRemote(args) {
+    errorLoadRemote({ id, error, from, origin }) {
       const pg = function () {
-        console.error(args.id, 'offline', args.error);
+        console.error(id, 'offline', error);
         return null;
       };
-      // @ts-ignore
-      pg.getInitialProps = function (ctx) {
+
+      pg.getInitialProps = function (ctx: any) {
         return {};
       };
       let mod;
-      if (args.from === 'build') {
+      if (from === 'build') {
         mod = () => ({
           __esModule: true,
           default: pg,
@@ -39,7 +38,7 @@ export default function (): FederationRuntimePlugin {
 
       // if (__webpack_runtime_id__ && !__webpack_runtime_id__.startsWith('webpack')) return args;
       const { moduleCache, name } = args.origin;
-      const gs = __webpack_require__.g || new Function('return globalThis');
+      const gs = (globalThis as any) || new Function('return globalThis')();
       const attachedRemote = gs[name];
       if (attachedRemote) {
         moduleCache.set(name, attachedRemote);
@@ -50,12 +49,12 @@ export default function (): FederationRuntimePlugin {
     init(args) {
       return args;
     },
-    beforeLoadRemote(args) {
+    beforeRequest(args) {
       return args;
     },
-    // createScript(args) {
-    //   return args;
-    // },
+    createScript({ url }) {
+      return;
+    },
     afterResolve(args) {
       return args;
     },
