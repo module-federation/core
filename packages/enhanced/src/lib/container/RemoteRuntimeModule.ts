@@ -84,7 +84,7 @@ class RemoteRuntimeModule extends RuntimeModule {
 
           idToRemoteMap[id] = [];
           remoteModules.forEach((remoteModule) => {
-            let remoteName;
+            let remoteName = '';
             try {
               const [_url, name] = extractUrlAndGlobal(
                 remoteModule.request as string,
@@ -100,7 +100,6 @@ class RemoteRuntimeModule extends RuntimeModule {
               chunkGraph.getModuleId(remoteModule);
             idToRemoteMap[id].push({
               externalType: remoteModule.externalType,
-              request: remoteModule.request as string,
               name: remoteModule.externalType === 'script' ? remoteName : '',
               externalModuleId,
             });
