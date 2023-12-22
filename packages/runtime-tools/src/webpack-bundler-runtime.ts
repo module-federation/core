@@ -1,1 +1,1 @@
-export * from '@module-federation/webpack-bundler-runtime';
+export { default } from '@module-federation/webpack-bundler-runtime';
