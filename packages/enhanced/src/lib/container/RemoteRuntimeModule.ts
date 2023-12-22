@@ -10,6 +10,10 @@ import type ExternalModule from 'webpack/lib/ExternalModule';
 import type FallbackModule from './FallbackModule';
 import type { RemotesOptions } from '@module-federation/webpack-bundler-runtime';
 
+const extractUrlAndGlobal = require(
+  normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),
+) as typeof import('webpack/lib/util/extractUrlAndGlobal');
+
 const { Template, RuntimeModule, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -80,6 +84,15 @@ class RemoteRuntimeModule extends RuntimeModule {
 
           idToRemoteMap[id] = [];
           remoteModules.forEach((remoteModule) => {
+            let remoteName;
+            try {
+              const [_url, name] = extractUrlAndGlobal(
+                remoteModule.request as string,
+              );
+              remoteName = name;
+            } catch (err) {
+              //noop
+            }
             const externalModuleId =
               chunkGraph &&
               remoteModule &&
@@ -88,6 +101,7 @@ class RemoteRuntimeModule extends RuntimeModule {
             idToRemoteMap[id].push({
               externalType: remoteModule.externalType,
               request: remoteModule.request as string,
+              name: remoteModule.externalType === 'script' ? remoteName : '',
               externalModuleId,
             });
           });
