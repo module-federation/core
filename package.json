@@ -201,7 +201,7 @@
     "tsup": "7.2.0",
     "typescript": "5.3.3",
     "url-loader": "4.1.1",
-    "verdaccio": "5.26.3",
+    "verdaccio": "5.29.0",
     "vinyl-fs": "4.0.0",
     "vite": "4.4.11",
     "vite-tsconfig-paths": "4.2.2",
