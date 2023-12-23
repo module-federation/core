@@ -3,7 +3,6 @@ const { workspaceRoot } = require('nx/src/utils/workspace-root');
 
 const path = require('path');
 const { registerTsConfigPaths } = require('nx/src/plugins/js/utils/register');
-registerTsConfigPaths(path.join(workspaceRoot, 'tsconfig.tmp.json'));
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 const fs = require('fs');
 
