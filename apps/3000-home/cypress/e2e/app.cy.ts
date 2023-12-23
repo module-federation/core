@@ -36,12 +36,12 @@ describe('3000-home/', () => {
       cy.visit('/shop');
       cy.url().should('include', '/shop');
       getH1().contains('Shop Page');
-      cy.wait(300);
+      cy.wait(1300);
       cy.get('.home-menu-link').click();
-      //eslint-disable-next-line
+      cy.wait(1000);
+      cy.get('.home-menu-link').click();
       cy.wait(1000);
       cy.url().should('include', '/');
-      //eslint-disable-next-line
       cy.wait(700);
       getH1().contains('This is SPA combined');
     });
