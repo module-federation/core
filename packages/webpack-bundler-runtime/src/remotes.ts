@@ -97,24 +97,12 @@ export function remotes(options: RemotesOptions) {
           module.exports = factory();
         };
       };
-      const extractUrlAndGlobal = (urlAndGlobal: string) => {
-        const index = urlAndGlobal.indexOf('@');
-        if (index <= 0 || index === urlAndGlobal.length - 1) {
-          throw new Error(`Invalid request "${urlAndGlobal}"`);
-        }
-        return [
-          urlAndGlobal.substring(index + 1),
-          urlAndGlobal.substring(0, index),
-        ];
-      };
-
       const onRemoteLoaded = () => {
         try {
-          const [_entryUrl, globalName] = extractUrlAndGlobal(
-            remoteInfos[0].request,
+          const remoteName = decodeName(
+            remoteInfos[0].name,
+            ENCODE_NAME_PREFIX,
           );
-
-          const remoteName = decodeName(globalName, ENCODE_NAME_PREFIX);
 
           const remoteModuleName = remoteName + data[1].slice(1);
           return webpackRequire.federation.instance!.loadRemote(
@@ -129,7 +117,7 @@ export function remotes(options: RemotesOptions) {
       const useRuntimeLoad =
         remoteInfos.length === 1 &&
         ['script'].includes(remoteInfos[0].externalType) &&
-        remoteInfos[0].request;
+        remoteInfos[0].name;
 
       if (useRuntimeLoad) {
         handleFunction(onRemoteLoaded, data[2], 0, 0, onFactory, 1);

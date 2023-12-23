@@ -62,7 +62,10 @@ export class NextFederationPlugin {
       compiler,
       isServer,
     );
-    new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
+    const mfp = new ModuleFederationPlugin(normalFederationPluginOptions);
+    // avoid generate mullite entry file
+    compiler.options.plugins.push(mfp);
+    mfp.apply(compiler);
   }
 
   private validateOptions(compiler: Compiler): boolean {

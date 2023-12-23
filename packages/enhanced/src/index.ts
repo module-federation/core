@@ -13,3 +13,4 @@ export {
 } from './lib/sharing/utils';
 export { parseOptions } from './lib/container/options';
 export { default as HoistContainerReferencesPlugin } from './lib/container/HoistContainerReferencesPlugin';
+export { default as FederationRuntimePlugin } from './lib/container/runtime/FederationRuntimePlugin';
