@@ -167,8 +167,7 @@ export function isManifestProvider(
 ): moduleInfo is ManifestProvider {
   if (
     'remoteEntry' in moduleInfo &&
-    moduleInfo.remoteEntry.startsWith('http') &&
-    new URL(moduleInfo.remoteEntry).pathname.endsWith(MANIFEST_EXT)
+    moduleInfo.remoteEntry.includes(MANIFEST_EXT)
   ) {
     return true;
   } else {
