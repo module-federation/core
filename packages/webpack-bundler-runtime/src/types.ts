@@ -78,7 +78,7 @@ interface ModuleToHandlerMappingItem {
 
 interface IdToRemoteMapItem {
   externalType: string;
-  request: string;
+  name: string;
   externalModuleId?: string | number;
 }
 
