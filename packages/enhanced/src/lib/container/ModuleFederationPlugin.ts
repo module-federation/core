@@ -55,6 +55,10 @@ class ModuleFederationPlugin {
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
+    if (!compiler.options.plugins.find((p) => p && p.name === PLUGIN_NAME)) {
+      compiler.options.plugins.push(ModuleFederationPlugin);
+    }
+
     const { _options: options } = this;
     // @ts-ignore
     new FederationRuntimePlugin(options).apply(compiler);
