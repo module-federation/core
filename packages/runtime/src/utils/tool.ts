@@ -28,7 +28,7 @@ export function isRemoteInfoWithEntry(
 }
 
 export function isPureRemoteEntry(remote: RemoteWithEntry): boolean {
-  return remote.entry.endsWith('.js');
+  return new URL(remote.entry).pathname.endsWith('.js');
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
