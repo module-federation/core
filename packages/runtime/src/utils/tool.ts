@@ -28,10 +28,7 @@ export function isRemoteInfoWithEntry(
 }
 
 export function isPureRemoteEntry(remote: RemoteWithEntry): boolean {
-  return (
-    remote.entry.startsWith('http') &&
-    new URL(remote.entry).pathname.endsWith('.js')
-  );
+  return !remote.entry.includes('.json') && remote.entry.includes('.js');
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
