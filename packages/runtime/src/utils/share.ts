@@ -184,7 +184,6 @@ export function getRegisteredShare(
 
       //@ts-ignore
       const defaultResolver = () => {
-        debugger;
         if (shareConfig.singleton) {
           if (
             typeof requiredVersion === 'string' &&
