@@ -352,8 +352,8 @@ importers:
         specifier: ^2.13.4
         version: 2.15.1(eslint@8.56.0)
       eslint-plugin-import:
-        specifier: 2.28.1
-        version: 2.28.1(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
+        specifier: 2.29.1
+        version: 2.29.1(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
       eslint-plugin-jsx-a11y:
         specifier: 6.7.1
         version: 6.7.1(eslint@8.56.0)
@@ -3705,7 +3705,7 @@ packages:
       cosmiconfig: 7.1.0
       remeda: 0.0.32
       semantic-release: 20.1.0(encoding@0.1.13)(typescript@5.3.3)
-      semantic-release-plugin-decorators: github.com/tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0)
+      semantic-release-plugin-decorators: git/github.com+tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0)
     transitivePeerDependencies:
       - encoding
       - nx
@@ -13257,7 +13257,7 @@ packages:
       normalize-path: 3.0.0
       schema-utils: 4.2.0
       serialize-javascript: 6.0.1
-      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /copy-webpack-plugin@11.0.0(webpack@5.88.2):
@@ -13544,7 +13544,7 @@ packages:
       postcss-modules-values: 4.0.0(postcss@8.4.32)
       postcss-value-parser: 4.2.0
       semver: 7.5.4
-      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /css-minimizer-webpack-plugin@5.0.1(esbuild@0.18.20)(webpack@5.88.2):
@@ -14911,8 +14911,8 @@ packages:
       '@typescript-eslint/parser': 6.7.5(eslint@8.56.0)(typescript@5.3.3)
       eslint: 8.56.0
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.28.1)(eslint@8.56.0)
-      eslint-plugin-import: 2.28.1(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
+      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.56.0)
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
       eslint-plugin-jsx-a11y: 6.7.1(eslint@8.56.0)
       eslint-plugin-react: 7.33.2(eslint@8.56.0)
       eslint-plugin-react-hooks: 4.6.0(eslint@8.56.0)
@@ -14941,7 +14941,7 @@ packages:
       - supports-color
     dev: true
 
-  /eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.28.1)(eslint@8.56.0):
+  /eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.56.0):
     resolution: {integrity: sha512-xgdptdoi5W3niYeuQxKmzVDTATvLYqhpwmykwsh7f6HIOStGWEIL9iqZgQDF9u9OEzrRwR8no5q2VT+bjAujTg==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
@@ -14952,7 +14952,7 @@ packages:
       enhanced-resolve: 5.15.0
       eslint: 8.56.0
       eslint-module-utils: 2.8.0(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
-      eslint-plugin-import: 2.28.1(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
       fast-glob: 3.3.2
       get-tsconfig: 4.7.2
       is-core-module: 2.13.1
@@ -14989,7 +14989,7 @@ packages:
       debug: 3.2.7(supports-color@8.1.1)
       eslint: 8.56.0
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.28.1)(eslint@8.56.0)
+      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.56.0)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -15003,8 +15003,8 @@ packages:
       globals: 13.24.0
     dev: true
 
-  /eslint-plugin-import@2.28.1(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0):
-    resolution: {integrity: sha512-9I9hFlITvOV55alzoKBI+K9q74kv0iKMeY6av5+umsNwayt59fz692daGyjR+oStBQgx6nwR9rXldDev3Clw+A==}
+  /eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0):
+    resolution: {integrity: sha512-BbPC0cuExzhiMo4Ff1BTVwHpjjv28C5R+btTOGaCRC7UEz801up0JadwkeSk5Ued6TG34uaczuVuH6qyy5YUxw==}
     engines: {node: '>=4'}
     peerDependencies:
       '@typescript-eslint/parser': '*'
@@ -15023,7 +15023,7 @@ packages:
       eslint: 8.56.0
       eslint-import-resolver-node: 0.3.9
       eslint-module-utils: 2.8.0(@typescript-eslint/parser@6.7.5)(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
-      has: 1.0.4
+      hasown: 2.0.0
       is-core-module: 2.13.1
       is-glob: 4.0.3
       minimatch: 3.1.2
@@ -16037,7 +16037,7 @@ packages:
       semver: 7.5.4
       tapable: 2.2.1
       typescript: 5.3.3
-      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /fork-ts-checker-webpack-plugin@8.0.0(typescript@5.3.3)(webpack@5.88.2):
@@ -18963,7 +18963,7 @@ packages:
     dependencies:
       klona: 2.0.6
       less: 4.1.3
-      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /less@4.1.3:
@@ -19007,7 +19007,7 @@ packages:
       webpack-sources:
         optional: true
     dependencies:
-      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
       webpack-sources: 3.2.3
     dev: true
 
@@ -20167,7 +20167,7 @@ packages:
       webpack: ^5.0.0
     dependencies:
       schema-utils: 4.2.0
-      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /mini-svg-data-uri@1.4.4:
@@ -22215,7 +22215,7 @@ packages:
       klona: 2.0.6
       postcss: 8.4.32
       semver: 7.5.4
-      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /postcss-merge-longhand@5.1.7(postcss@8.4.32):
@@ -24585,7 +24585,7 @@ packages:
       klona: 2.0.6
       neo-async: 2.6.2
       sass: 1.69.5
-      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /sass@1.69.5:
@@ -25213,7 +25213,7 @@ packages:
       abab: 2.0.6
       iconv-lite: 0.6.3
       source-map-js: 1.0.2
-      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /source-map-resolve@0.5.3:
@@ -25757,7 +25757,7 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
     dependencies:
-      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /style-to-object@0.4.4:
@@ -25833,7 +25833,7 @@ packages:
       fast-glob: 3.3.2
       normalize-path: 3.0.0
       stylus: 0.59.0
-      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /stylus@0.59.0:
@@ -26552,7 +26552,7 @@ packages:
       semver: 7.5.4
       source-map: 0.7.4
       typescript: 5.3.3
-      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /ts-node@10.9.1(@swc/core@1.3.99)(@types/node@18.18.13)(typescript@5.1.6):
@@ -28060,7 +28060,7 @@ packages:
       mime-types: 2.1.35
       range-parser: 1.2.1
       schema-utils: 4.2.0
-      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /webpack-dev-middleware@6.1.1(webpack@5.88.2):
@@ -28121,7 +28121,7 @@ packages:
       serve-index: 1.9.1
       sockjs: 0.3.24
       spdy: 4.0.2
-      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
       webpack-dev-middleware: 5.3.3(webpack@5.88.2)
       ws: 8.15.1
     transitivePeerDependencies:
@@ -28176,7 +28176,7 @@ packages:
     dependencies:
       html-webpack-plugin: 5.5.3(webpack@5.88.2)
       typed-assert: 1.0.9
-      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.88.2(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /webpack-virtual-modules@0.4.6:
@@ -28705,9 +28705,9 @@ packages:
       uglify-js: 3.14.5
     dev: true
 
-  github.com/tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0):
-    resolution: {tarball: https://codeload.github.com/tjg184/semantic-release-plugin-decorators/tar.gz/e3c3c66}
-    id: github.com/tjg184/semantic-release-plugin-decorators/e3c3c66
+  git/github.com+tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0):
+    resolution: {commit: e3c3c66, repo: git@github.com:tjg184/semantic-release-plugin-decorators.git, type: git}
+    id: git@github.com+tjg184/semantic-release-plugin-decorators/e3c3c66
     name: semantic-release-plugin-decorators
     version: 0.0.0-development
     peerDependencies:
