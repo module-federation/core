@@ -65,17 +65,12 @@
     "semantic-release": {
       "executor": "@goestav/nx-semantic-release:semantic-release"
     },
-    "test__DISABLED": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/core"],
       "options": {
-        "config": "packages/runtime-tools/vitest.config.ts"
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
+        "jestConfig": "packages/runtime-tools/jest.config.ts",
+        "passWithNoTests": true
       }
     }
   },

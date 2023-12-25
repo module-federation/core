@@ -44,6 +44,7 @@ export interface SharedConfig {
   singleton?: boolean;
   requiredVersion: false | string;
   eager?: boolean;
+  strictVersion?: boolean;
 }
 
 type SharedBaseArgs = {

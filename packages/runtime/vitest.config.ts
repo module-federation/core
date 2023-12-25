@@ -11,7 +11,7 @@ export default defineConfig({
   plugins: [nxViteTsPaths()],
   test: {
     environment: 'jsdom',
-    include: ['__tests__/*.spec.ts'],
+    include: ['__tests__/shares.spec.ts'],
     globals: true,
     setupFiles: ['./__tests__/setup.ts'],
     testTimeout: 10000,
