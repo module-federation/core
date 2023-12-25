@@ -38,6 +38,7 @@ describe('3000-home/', () => {
       getH1().contains('Shop Page');
       //eslint-disable-next-line
       cy.wait(3000);
+      cy.get('.home-menu-link').contains('Home 3000');
       cy.get('.home-menu-link').click();
       //eslint-disable-next-line
       cy.wait(1000);
