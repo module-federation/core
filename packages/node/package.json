@@ -39,7 +39,7 @@
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "node-fetch": "2.7.0",
+    "node-fetch": "3.3.2",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/utilities": "workspace:*"
