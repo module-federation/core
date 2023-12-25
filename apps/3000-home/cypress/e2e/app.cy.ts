@@ -31,7 +31,7 @@ describe('3000-home/', () => {
   });
 
   describe('Routing checks', () => {
-    xit('check that clicking back and forwards in client side routeing still renders the content correctly', () => {
+    it('check that clicking back and forwards in client side routeing still renders the content correctly', () => {
       cy.visit('/');
       cy.visit('/shop');
       cy.url().should('include', '/shop');

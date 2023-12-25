@@ -31,7 +31,7 @@ describe('3002-checkout/', () => {
   });
 
   describe('Routing checks', () => {
-    xit('check that clicking back and forwards in client-side routing still renders the content correctly', () => {
+    it('check that clicking back and forwards in client-side routing still renders the content correctly', () => {
       cy.visit('/checkout');
       cy.visit('/');
       cy.visit('/checkout');
