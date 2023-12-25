@@ -7,7 +7,7 @@ import {
   ShareInfos,
   ShareScopeMap,
 } from '../type';
-import { warn } from './logger';
+import { warn, error } from './logger';
 import { satisfy } from './semver';
 import { SyncWaterfallHook } from './hooks';
 
@@ -24,13 +24,15 @@ export function formatShare(shareArgs: ShareArgs, from: string): Shared {
     deps: [],
     useIn: [],
     from,
+    loading: null,
+    ...shareArgs,
     shareConfig: {
       requiredVersion: `^${shareArgs.version}`,
       singleton: false,
       eager: false,
+      strictVersion: false,
+      ...shareArgs.shareConfig,
     },
-    loading: null,
-    ...shareArgs,
     get,
     loaded: 'lib' in shareArgs ? true : undefined,
     scope: Array.isArray(shareArgs.scope) ? shareArgs.scope : ['default'],
@@ -182,19 +184,24 @@ export function getRegisteredShare(
 
       //@ts-ignore
       const defaultResolver = () => {
+        debugger;
         if (shareConfig.singleton) {
           if (
             typeof requiredVersion === 'string' &&
             !satisfy(maxOrSingletonVersion, requiredVersion)
           ) {
-            warn(
-              `Version ${maxOrSingletonVersion} from ${
-                maxOrSingletonVersion &&
-                localShareScopeMap[sc][pkgName][maxOrSingletonVersion].from
-              } of shared singleton module ${pkgName} does not satisfy the requirement of ${
-                shareInfo.from
-              } which needs ${requiredVersion})`,
-            );
+            const msg = `Version ${maxOrSingletonVersion} from ${
+              maxOrSingletonVersion &&
+              localShareScopeMap[sc][pkgName][maxOrSingletonVersion].from
+            } of shared singleton module ${pkgName} does not satisfy the requirement of ${
+              shareInfo.from
+            } which needs ${requiredVersion})`;
+
+            if (shareConfig.strictVersion) {
+              error(msg);
+            } else {
+              warn(msg);
+            }
           }
           return localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
         } else {
