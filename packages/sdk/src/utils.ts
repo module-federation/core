@@ -19,7 +19,7 @@ const parseEntry = (str: string, devVerOrUrl?: string): RemoteEntryInfo => {
     getProcessEnv()['NODE_ENV'] === 'development' && devVerOrUrl;
   const defaultVersion = '*';
   const isEntry = (s: string) =>
-    s.startsWith('http') || new URL(s).pathname.endsWith(MANIFEST_EXT);
+    s.startsWith('http') || s.includes(MANIFEST_EXT);
 
   // Check if the string starts with a type
   if (strSplit.length >= 2) {

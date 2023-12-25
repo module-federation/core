@@ -597,7 +597,7 @@ describe('loadRemote', () => {
     const loadedSrcs = [...document.querySelectorAll('script')].map(
       (i) => i.fakeSrc,
     );
-    expect(loadedSrcs.includes(`${remotePublicPath}/${jsSyncAssetPath}`));
+    expect(loadedSrcs.includes(`${remotePublicPath}${jsSyncAssetPath}`));
     reset();
   });
 });
