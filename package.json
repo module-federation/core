@@ -163,7 +163,7 @@
     "eslint-plugin-simple-import-sort": "10.0.0",
     "form-data": "4.0.0",
     "highlight.js": "10.7.3",
-    "html-webpack-plugin": "5.5.3",
+    "html-webpack-plugin": "5.6.0",
     "husky": "8.0.3",
     "inquirer": "8.2.6",
     "jest": "29.7.0",
