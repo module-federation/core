@@ -107,7 +107,7 @@ export function remotes(options: RemotesOptions) {
           const remoteModuleName = remoteName + data[1].slice(1);
           return webpackRequire.federation.instance!.loadRemote(
             remoteModuleName,
-            { loadFactory: false },
+            { loadFactory: false, from: 'build' },
           );
         } catch (error) {
           onError(error as Error);

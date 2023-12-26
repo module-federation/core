@@ -108,6 +108,8 @@ export class FederationHost {
         {
           id: string;
           error: unknown;
+          from: 'build' | 'runtime';
+          origin: FederationHost;
         },
       ],
       void
@@ -495,7 +497,7 @@ export class FederationHost {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async loadRemote<T>(
     id: string,
-    options?: { loadFactory?: boolean },
+    options?: { loadFactory?: boolean; from: 'build' | 'runtime' },
   ): Promise<T | null> {
     try {
       const { loadFactory = true } = options || { loadFactory: true };
@@ -522,13 +524,23 @@ export class FederationHost {
         moduleInstance: module,
         origin: this,
       });
+
       return moduleOrFactory;
     } catch (error) {
-      this.hooks.lifecycle.errorLoadRemote.emit({
+      const { from = 'runtime' } = options || { from: 'runtime' };
+
+      const failOver = await this.hooks.lifecycle.errorLoadRemote.emit({
         id,
         error,
+        from,
+        origin: this,
       });
-      throw error;
+
+      if (!failOver) {
+        throw error;
+      }
+
+      return failOver;
     }
   }
 

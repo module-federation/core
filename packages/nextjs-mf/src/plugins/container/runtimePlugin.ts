@@ -1,9 +1,33 @@
-//@ts-nocheck
 import { FederationRuntimePlugin } from '@module-federation/runtime/types';
 
 export default function (): FederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
+    errorLoadRemote({ id, error, from, origin }) {
+      const pg = function () {
+        console.error(id, 'offline', error);
+        return null;
+      };
+
+      pg.getInitialProps = function (ctx: any) {
+        return {};
+      };
+      let mod;
+      if (from === 'build') {
+        mod = () => ({
+          __esModule: true,
+          default: pg,
+          getServerSideProps: () => ({ props: {} }),
+        });
+      } else {
+        mod = {
+          default: pg,
+          getServerSideProps: () => ({ props: {} }),
+        };
+      }
+
+      return mod;
+    },
     beforeInit(args) {
       if (
         typeof __webpack_runtime_id__ === 'string' &&
@@ -14,7 +38,7 @@ export default function (): FederationRuntimePlugin {
 
       // if (__webpack_runtime_id__ && !__webpack_runtime_id__.startsWith('webpack')) return args;
       const { moduleCache, name } = args.origin;
-      const gs = __webpack_require__.g || new Function('return globalThis');
+      const gs = (globalThis as any) || new Function('return globalThis')();
       const attachedRemote = gs[name];
       if (attachedRemote) {
         moduleCache.set(name, attachedRemote);
@@ -25,18 +49,18 @@ export default function (): FederationRuntimePlugin {
     init(args) {
       return args;
     },
-    beforeLoadRemote(args) {
+    beforeRequest(args) {
       return args;
     },
-    // createScript(args) {
+    createScript({ url }) {
+      return;
+    },
+    afterResolve(args) {
+      return args;
+    },
+    // onLoad(args) {
     //   return args;
     // },
-    loadRemoteMatch(args) {
-      return args;
-    },
-    loadRemote(args) {
-      return args;
-    },
     resolveShare(args) {
       if (
         args.pkgName !== 'react' &&

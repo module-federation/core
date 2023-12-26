@@ -81,12 +81,12 @@ export function createScriptNode(
             exportedInterface as keyof typeof scriptContext.module.exports,
           );
         } catch (e) {
-          console.error('Error running script:', e);
+          // console.error('Error running script:', e);
           cb(new Error(`Script execution error: ${e}`));
         }
       })
       .catch((err: Error) => {
-        console.error('Error fetching script:', err);
+        // console.error('Error fetching script:', err);
         cb(err);
       });
   });

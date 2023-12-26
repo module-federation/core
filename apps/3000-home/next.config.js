@@ -1,9 +1,5 @@
 const { withNx } = require('@nx/next/plugins/with-nx');
-const { workspaceRoot } = require('nx/src/utils/workspace-root');
-
-const path = require('path');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
-const fs = require('fs');
 
 // function renameDefaultDelegate() {
 //   const filesToRename = [
