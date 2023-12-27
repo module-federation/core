@@ -56,7 +56,7 @@
     "tapable": "2.2.1",
     "tsup": "7.2.0",
     "typedoc": "0.25.4",
-    "undici": "5.26.2",
+    "undici": "5.28.2",
     "unplugin": "1.5.1"
   },
   "devDependencies": {
