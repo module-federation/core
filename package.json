@@ -52,7 +52,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-router-dom": "6.21.1",
-    "regenerator-runtime": "0.14.0",
+    "regenerator-runtime": "0.14.1",
     "tapable": "2.2.1",
     "tsup": "7.2.0",
     "typedoc": "0.25.4",
