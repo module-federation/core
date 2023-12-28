@@ -11,7 +11,7 @@
     },
     "./package.json": "./package.json",
     "./utils": {
-      "import": "./dist//src/utils/index.js",
+      "import": "./dist/src/utils/index.js",
       "require": "./dist/src/utils/index.js"
     },
     "./src/plugins/RemotePublicPathPlugin.js": "./dist/src/plugins/RemotePublicPathPlugin.js",
