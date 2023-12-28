@@ -61,7 +61,9 @@ function injector(current: Function, methodName: string) {
             (nEl as any)['fakeSrc'] = (element as any)[key];
           }
         }
-        const filePath = element.src.replace(matchInfo.baseUrl, '');
+        const filePath = element.src
+          .replace(matchInfo.baseUrl, '')
+          .replace(/\?.*$/, '');
 
         const execScriptContent = fs.readFileSync(
           path.resolve(matchInfo.baseDir, filePath),
