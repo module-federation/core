@@ -42,6 +42,18 @@
         ]
       }
     },
+    "build-debug": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "FEDERATION_DEBUG=true nx run runtime:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
     "pre-release": {
       "executor": "nx:run-commands",
       "options": {
