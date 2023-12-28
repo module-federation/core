@@ -10,6 +10,7 @@ import {
 import { DEFAULT_SCOPE } from '../src/constant';
 // import { assert } from '../src/utils/logger';
 import { FederationHost } from '../src/core';
+import { UserOptions, ShareScopeMap } from '../src/type';
 
 // eslint-disable-next-line max-lines-per-function
 // TODO: add new load share test cases
@@ -542,8 +543,204 @@ describe('strictVersion shared', () => {
     const shared = await FM2.loadShare<{ from: string; version: string }>(
       'runtime-react',
     );
+    assert(shared, "shared can't be null");
     const sharedRes = shared();
     assert(sharedRes, "shared can't be null");
     expect(sharedRes.from).toEqual('@shared-single/runtime-deps');
+  });
+});
+
+describe('with shareScope shared', () => {
+  it('use the same shareScope existed shared', async () => {
+    const existedShareScopeMap: ShareScopeMap = {
+      default: {
+        'runtime-react': {
+          '16.0.1': {
+            version: '16.0.1',
+            get: () => () => {
+              return { from: '@shared-single/runtime-deps3' };
+            },
+            lib: () => {
+              return { from: '@shared-single/runtime-deps3' };
+            },
+            shareConfig: {
+              requiredVersion: false,
+              singleton: true,
+              eager: false,
+              strictVersion: false,
+            },
+            scope: ['default'],
+            useIn: ['@shared-single/runtime-deps3'],
+            from: '@shared-single/runtime-deps3',
+            deps: [],
+            strategy: 'version-first',
+          },
+        },
+      },
+      old: {
+        'runtime-react': {
+          '16.0.2': {
+            version: '16.0.2',
+            get: () => () => {
+              return { from: '@shared-single/runtime-deps2' };
+            },
+            lib: () => {
+              return { from: '@shared-single/runtime-deps2' };
+            },
+            shareConfig: {
+              requiredVersion: false,
+              singleton: true,
+              eager: false,
+              strictVersion: false,
+            },
+            scope: ['old'],
+            useIn: ['@shared-single/runtime-deps2'],
+            from: '@shared-single/runtime-deps2',
+            deps: [],
+            strategy: 'version-first',
+          },
+        },
+      },
+    };
+
+    const federationConfig1: UserOptions = {
+      name: '@shared-single/runtime-deps',
+      remotes: [],
+      shared: {
+        'runtime-react': {
+          version: '16.0.0',
+          scope: 'default',
+          lib: () => {
+            return { from: '@shared-single/runtime-deps' };
+          },
+        },
+      },
+    };
+
+    const FM1 = new FederationHost(federationConfig1);
+    // initShareScopeMap will be called while container.init execute
+    FM1.initShareScopeMap('default', existedShareScopeMap['default']);
+
+    const shared = await FM1.loadShare<{ from: string; version: string }>(
+      'runtime-react',
+    );
+    assert(shared, "shared can't be null");
+
+    const sharedRes = shared();
+    assert(sharedRes, "sharedRes can't be null");
+    expect(sharedRes.from).toEqual('@shared-single/runtime-deps3');
+  });
+
+  it('use the specify shareScope shared', async () => {
+    const existedShareScopeMap: ShareScopeMap = {
+      default: {
+        'runtime-react': {
+          '16.0.1': {
+            version: '16.0.1',
+            get: () => () => {
+              return { from: '@shared-single/runtime-deps3' };
+            },
+            lib: () => {
+              return { from: '@shared-single/runtime-deps3' };
+            },
+            shareConfig: {
+              requiredVersion: false,
+              singleton: true,
+              eager: false,
+              strictVersion: false,
+            },
+            scope: ['default'],
+            useIn: ['@shared-single/runtime-deps3'],
+            from: '@shared-single/runtime-deps3',
+            deps: [],
+            strategy: 'version-first',
+          },
+        },
+      },
+      old: {
+        'runtime-react': {
+          '16.0.2': {
+            version: '16.0.2',
+            get: () => () => {
+              return { from: '@shared-single/runtime-deps2' };
+            },
+            lib: () => {
+              return { from: '@shared-single/runtime-deps2' };
+            },
+            shareConfig: {
+              requiredVersion: false,
+              singleton: true,
+              eager: false,
+              strictVersion: false,
+            },
+            scope: ['old'],
+            useIn: ['@shared-single/runtime-deps2'],
+            from: '@shared-single/runtime-deps2',
+            deps: [],
+            strategy: 'version-first',
+          },
+        },
+      },
+    };
+
+    const federationConfig1: UserOptions = {
+      name: '@shared-single/runtime-deps',
+      remotes: [],
+      shared: {
+        'runtime-react': {
+          version: '16.0.0',
+          scope: 'old',
+          lib: () => {
+            return { from: '@shared-single/runtime-deps' };
+          },
+        },
+      },
+    };
+
+    const FM1 = new FederationHost(federationConfig1);
+    // initShareScopeMap will be called while container.init execute
+    FM1.initShareScopeMap('old', existedShareScopeMap['old']);
+
+    const shared = await FM1.loadShare<{ from: string; version: string }>(
+      'runtime-react',
+    );
+    assert(shared, "shared can't be null");
+    const sharedRes = shared();
+    assert(sharedRes, "sharedRes can't be null");
+    expect(sharedRes.from).toEqual('@shared-single/runtime-deps');
+  });
+});
+
+describe('load share with customize consume info', () => {
+  it('return false while not matched shared', async () => {
+    const federationConfig1: UserOptions = {
+      name: '@shared-single/runtime-deps',
+      remotes: [],
+      shared: {
+        'runtime-react': {
+          version: '16.0.0',
+          scope: 'default',
+          lib: () => {
+            return { from: '@shared-single/runtime-deps' };
+          },
+        },
+      },
+    };
+
+    const FM1 = new FederationHost(federationConfig1);
+    const shared = await FM1.loadShare<{ from: string }>('runtime-react');
+    assert(shared, "shared can't be null");
+    const sharedRes = shared();
+    assert(sharedRes, "sharedRes can't be null");
+    expect(sharedRes.from).toEqual('@shared-single/runtime-deps');
+
+    const sharedWithCustomInfo = await FM1.loadShare('runtime-react', {
+      shareConfig: {
+        requiredVersion: '>17',
+        singleton: false,
+      },
+    });
+    console.log(sharedWithCustomInfo);
+    expect(sharedWithCustomInfo).toEqual(false);
   });
 });
