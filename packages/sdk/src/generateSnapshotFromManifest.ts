@@ -167,7 +167,7 @@ export function isManifestProvider(
 ): moduleInfo is ManifestProvider {
   if (
     'remoteEntry' in moduleInfo &&
-    moduleInfo.remoteEntry.endsWith(MANIFEST_EXT)
+    moduleInfo.remoteEntry.includes(MANIFEST_EXT)
   ) {
     return true;
   } else {

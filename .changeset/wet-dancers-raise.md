@@ -2,4 +2,4 @@
 '@module-federation/runtime': patch
 ---
 
-fix: add runtime api
+chore(runtime): support entry with query

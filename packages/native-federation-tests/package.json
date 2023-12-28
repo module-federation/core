@@ -1,10 +1,14 @@
 {
   "name": "@module-federation/native-federation-tests",
-  "version": "1.0.0-canary.1",
+  "version": "0.2.1",
   "description": "Bundler agnostic unplugin to share federated tests",
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
