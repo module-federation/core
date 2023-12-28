@@ -66,8 +66,8 @@ importers:
         specifier: 5.28.2
         version: 5.28.2
       unplugin:
-        specifier: 1.5.1
-        version: 1.5.1
+        specifier: 1.6.0
+        version: 1.6.0
     devDependencies:
       '@antora/cli':
         specifier: 3.1.5
@@ -8367,7 +8367,7 @@ packages:
     resolution: {integrity: sha512-SqdffT14+XNpf+7vA29Elur28VArXtFv4cXMlsCbswbRuY+a0A8vYNwVIfCUy9u4WHTcQX1/tUkDAMh80lrVRQ==}
     dependencies:
       '@storybook/csf-tools': 7.6.6
-      unplugin: 1.5.1
+      unplugin: 1.6.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -27231,6 +27231,15 @@ packages:
 
   /unplugin@1.5.1:
     resolution: {integrity: sha512-0QkvG13z6RD+1L1FoibQqnvTwVBXvS4XSPwAyinVgoOCl2jAgwzdUKmEj05o4Lt8xwQI85Hb6mSyYkcAGwZPew==}
+    dependencies:
+      acorn: 8.11.2
+      chokidar: 3.5.3
+      webpack-sources: 3.2.3
+      webpack-virtual-modules: 0.6.1
+    dev: false
+
+  /unplugin@1.6.0:
+    resolution: {integrity: sha512-BfJEpWBu3aE/AyHx8VaNE/WgouoQxgH9baAiH82JjX8cqVyi3uJQstqwD5J+SZxIK326SZIhsSZlALXVBCknTQ==}
     dependencies:
       acorn: 8.11.2
       chokidar: 3.5.3
