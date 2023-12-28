@@ -24,10 +24,9 @@ jobs:
         with:
           node-version: '18'
           cache: 'pnpm'
-      - name: Install cypress
-        run: npx cypress install
       - uses: nrwl/nx-set-shas@v3
       - run: pnpm install
+      - run: npx cypress install
       - run: npx nx format:check
       - run: npx nx affected -t build --parallel=10 --exclude='*,!tag:package'
       - run: npx nx affected -t lint --parallel=7 --exclude='*,!tag:package'
