@@ -59,16 +59,15 @@
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "executor": "nx:run-commands",
       "options": {
-        "config": "packages/runtime/vitest.config.ts"
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
+        "parallel": false,
+        "commands": [
+          {
+            "command": "vitest run -c packages/runtime/vitest.config.ts",
+            "forwardAllArgs": false
+          }
+        ]
       }
     }
   },
