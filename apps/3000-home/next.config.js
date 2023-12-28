@@ -114,8 +114,6 @@ const nextConfig = {
           exposePages: true,
           enableImageLoaderFix: true,
           enableUrlLoaderFix: true,
-          skipSharingNextInternals: false,
-          automaticPageStitching: false,
         },
       }),
     );
