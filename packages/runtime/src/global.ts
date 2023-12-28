@@ -48,7 +48,7 @@ if (
 export const globalLoading = globalThis.__GLOBAL_LOADING_REMOTE_ENTRY__;
 
 function setGlobalDefaultVal(target: typeof globalThis) {
-  if (!Object.hasOwnProperty.call(target, '__VMOK__')) {
+  if (Object.hasOwnProperty.call(target, '__VMOK__')) {
     Object.defineProperty(target, '__FEDERATION__', {
       value: target.__VMOK__,
       configurable: false,
@@ -66,6 +66,10 @@ function setGlobalDefaultVal(target: typeof globalThis) {
         __SHARE_SCOPE_LOADING__: {},
         __PRELOADED_MAP__: new Map(),
       },
+      configurable: false,
+    });
+    Object.defineProperty(target, '__VMOK__', {
+      value: target.__FEDERATION__,
       configurable: false,
     });
   }
