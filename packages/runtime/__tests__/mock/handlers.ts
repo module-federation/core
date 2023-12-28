@@ -31,7 +31,7 @@ export const handlers = [
       );
 
       const content = fs.readFileSync(filepath, 'utf-8');
-      if (typeof file === 'string' && file.endsWith('json')) {
+      if (typeof file === 'string' && file.includes('json')) {
         return res(ctx.status(200), ctx.json(JSON.parse(content)));
       } else {
         return res(ctx.status(200), ctx.text(content));

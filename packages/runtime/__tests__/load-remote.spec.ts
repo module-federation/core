@@ -267,6 +267,24 @@ describe('loadRemote', () => {
     reset();
   });
 
+  it('remote entry url with query', async () => {
+    const FederationInstance = new FederationHost({
+      name: '@federation-test/compatible',
+      remotes: [
+        {
+          name: '__FEDERATION_@federation-test/app2:custom__',
+          alias: 'app2',
+          entry:
+            'http://localhost:1111/resources/app2/federation-remote-entry.js?kk=2',
+        },
+      ],
+    });
+    const module =
+      await FederationInstance.loadRemote<() => string>('app2/say');
+    assert(module, 'module should be a function');
+    expect(module()).toBe('hello app2');
+  });
+
   it('different instance with same module', async () => {
     const reset = addGlobalSnapshot({
       '@module-federation/load-remote-different-instance': {
@@ -398,6 +416,25 @@ describe('loadRemote with manifest.json', () => {
 
     Global.__FEDERATION__.__INSTANCES__ = [];
     globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = undefined;
+  });
+
+  it('manifest.json with query', async () => {
+    const FM = new FederationHost({
+      name: '@demo/host',
+      remotes: [
+        {
+          name: '@demo/main',
+          entry:
+            'http://localhost:1111/resources/main/federation-manifest.json?query=2',
+        },
+      ],
+    });
+
+    const [module, ,] = await Promise.all([
+      FM.loadRemote<Promise<() => string>>('@demo/main/say'),
+    ]);
+    assert(module);
+    expect(module()).toBe('hello world');
   });
 });
 
@@ -560,7 +597,7 @@ describe('loadRemote', () => {
     const loadedSrcs = [...document.querySelectorAll('script')].map(
       (i) => i.fakeSrc,
     );
-    expect(loadedSrcs.includes(`${remotePublicPath}/${jsSyncAssetPath}`));
+    expect(loadedSrcs.includes(`${remotePublicPath}${jsSyncAssetPath}`));
     reset();
   });
 });
