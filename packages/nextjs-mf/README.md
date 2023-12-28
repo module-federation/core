@@ -257,144 +257,17 @@ const SampleComponent = lazy(() => import('next2/sampleComponent'));
 
 import Sample from 'next2/sampleComponent';
 ```
-
-## Delegate modules
-
-Delegated modules are now a standard feature in module federation, giving you the ability to manage the loading procedure of remote modules via an internally bundled file by webpack. This is facilitated by exporting a promise in the delegate file that resolves to a remote/container interface.
-
-A container interface represents the fundamental `{get, init}` API that remote entries present to a consuming app. Within the browser, a remote container could be `window.app1`, and in Node, it could be `globalThis.__remote_scope__.app1`.
-
-Implementing a method for script loading in the delegate file is necessary for the utilization of delegated modules. Although the built-in `__webpack_require__.l` method of webpack is a prevalent method, any method is suitable. This method is made available to the runtime and is identical to the method webpack employs internally to load remotes.
-
-Please note that using delegated modules demands a minimum version of `6.1.x` across all applications, given that consumers must be capable of handling the new container interface.
-
-Here's a sample usage of a delegated module with `__webpack_require__.l`:
-
-<details>
-  <summary>See Example: (click)  </summary>
-In this example, the delegated module exports a promise that loads the remote entry script located at "http://localhost:3000/_next/static/chunks/remoteEntry.js",
-based on the `__resourceQuery` variable set by webpack at runtime. 
-If an error surfaces while loading the script, a unique error object is generated, and the promise is rejected with this error.
-
-```js
-//next.config.js
-const { createDelegatedModule } = require('@module-federation/nextjs-mf/utilities');
-const remotes = {
-  checkout: createDelegatedModule(require.resolve('./remote-delegate.js'), {
-    remote: `checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
-    otherParam: 'testing',
-  }),
-};
-
-//remote-delegate.js
-// Delegates must utilize module.exports, not export default - this is due to a webpack constraint
-// ALL imports MUST BE dynamic imports in here like import()
-module.exports = new Promise(async (resolve, reject) => {
-  const { importDelegatedModule } = await import('@module-federation/nextjs-mf/importDelegatedModule');
-  // eslint-disable-next-line no-undef
-  const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
-  const [global, url] = currentRequest.split('@');
-  importDelegatedModule({
-    global,
-    url: url + '?' + Date.now(),
-  })
-    .then((remote) => {
-      resolve(remote);
-    })
-    .catch((err) => reject(err));
-});
-```
-
-</details>
-
-In the `next.config.js` file, where remotes are configured in the module federation plugin,
-you can use the internal hint to tell webpack to use an internal file as the remote entry.
-This is done by replacing the typical global@url syntax with `internal ./path/to/module`.
-
-Webpack has several hint types:
-
-- `internal `
-- `promise `
-- `import `
-- `external `
-- `script `
-
-The `global@url` syntax is actually script hint: `script global@url`
-
-If you want to use the same file for handling all remote entries, you can pass information to the delegate module using query parameters.
-Webpack will pass the query parameters to the module as a string, this is known as `__resourceQuery`.
-It allows you to pass information to the delegate module, so it knows what webpack is currently asking for.
-
-You can use query parameters to pass data to a module, webpack will pass the query parameters to the module as a string.
-
-For more information on `__resourceQuery` visit: https://webpack.js.org/api/module-variables/#__resourcequery-webpack-specific.
+## RuntimePlugins 
+To provide extensibility and "middleware" for federation, you can refer to `@module-federation/runtime`
 
 ```js
 // next.config.js
-// its advised you use {createDelegatedModule} from @module-federation/utilities (re-exported as @module-federation/nextjs-mf/utilities) instead of manually creating the delegate module
-const remotes = {
-  // pass pointer to remote-delegate, pass delegate remote name as query param,
-  // at runtime webpack will pass this as __resourceQuery
-  shop: `internal ./remote-delegate.js?remote=shop@http://localhost:3001/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
-  checkout: `internal ./remote-delegate.js?remote=checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
-};
+new NextFederationPlugin({
+  runtimePlugins: [
+    require.resolve('./path/to/myRuntimePlugin.js')
+  ]
+})
 ```
-
-#### Expand below to see a full example:
-
-<details>
-  <summary>See Full configuration with no helpers: (click) </summary>
-
-```js
-// next.config.js
-
-const remotes = {
-  // pass pointer to remote-delegate, pass deletae remote name as query param,
-  // at runtime webpack will pass this as __resourceQuery
-  shop: `internal ./remote-delegate.js?remote=shop@http://localhost:3001/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
-  checkout: `internal ./remote-delegate.js?remote=checkout@http://localhost:3002/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
-};
-
-// remote-delegate.js
-module.exports = new Promise((resolve, reject) => {
-  // some node specific for NodeFederation
-  if (!globalThis.__remote_scope__) {
-    // create a global scope for container, similar to how remotes are set on window in the browser
-    globalThis.__remote_scope__ = {
-      _config: {},
-    };
-  }
-  console.log('Delegate being called for', __resourceQuery);
-  // get "remote" off resource query, returns url@global
-  const currentRequest = new URLSearchParams(__resourceQuery).get('remote');
-  // parse syntax
-  const [containerGlobal, url] = currentRequest.split('@');
-  // if node server, register the containers known origins
-  if (typeof window === 'undefined') {
-    globalThis.__remote_scope__._config[global] = url;
-  }
-  const __webpack_error__ = new Error();
-  // if you use NodeFederationPlugin, ive build a server-side version of __webpack_require__.l, with the same api.
-  // this is how module federation works on the server, i wrote server-side chunk loading.
-  __webpack_require__.l(
-    url,
-    function (event) {
-      // resolve promise with container, for browser env or node env.
-      const container = typeof window === 'undefined' ? globalThis.__remote_scope__[containerGlobal] : window[containerGlobal];
-      console.log('delegate resolving', container);
-      if (typeof container !== 'undefined') return resolve(container);
-      var realSrc = event && event.target && event.target.src;
-      __webpack_error__.message = 'Loading script failed.\\n(' + event.message + ': ' + realSrc + ')';
-      __webpack_error__.name = 'ScriptExternalLoadError';
-      __webpack_error__.stack = event.stack;
-      reject(__webpack_error__);
-    },
-    containerGlobal,
-  );
-});
-```
-
-</details>
 
 ## Utilities
 
