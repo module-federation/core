@@ -25,6 +25,7 @@ module.exports = (rollupConfig, projectOptions) => {
 
   rollupConfig.plugins.push(
     replace({
+      preventAssignment: true,
       __VERSION__: `'${pkg.version}'`,
       FEDERATION_DEBUG: `'${FEDERATION_DEBUG}'`,
     }),

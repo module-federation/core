@@ -20,6 +20,7 @@ export interface Federation {
 
 // export const nativeGlobal: typeof global = new Function('return this')();
 export const nativeGlobal: typeof global = new Function('return this')();
+export const Global = nativeGlobal;
 
 declare global {
   // eslint-disable-next-line no-var
