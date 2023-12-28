@@ -116,7 +116,7 @@ importers:
         version: 17.8.1(nx@17.2.7)
       '@commitlint/cz-commitlint':
         specifier: ^17.7.2
-        version: 17.8.1(@swc/core@1.3.99)(commitizen@4.3.0)(inquirer@8.2.6)
+        version: 17.8.1(@swc/core@1.3.99)(commitizen@4.3.0)(inquirer@9.2.12)
       '@dqbd/tiktoken':
         specifier: 1.0.7
         version: 1.0.7
@@ -385,8 +385,8 @@ importers:
         specifier: 8.0.3
         version: 8.0.3
       inquirer:
-        specifier: 8.2.6
-        version: 8.2.6
+        specifier: 9.2.12
+        version: 9.2.12
       jest:
         specifier: 29.7.0
         version: 29.7.0(@types/node@18.19.3)(ts-node@10.9.1)
@@ -2960,7 +2960,7 @@ packages:
     dev: true
     optional: true
 
-  /@commitlint/cz-commitlint@17.8.1(@swc/core@1.3.99)(commitizen@4.3.0)(inquirer@8.2.6):
+  /@commitlint/cz-commitlint@17.8.1(@swc/core@1.3.99)(commitizen@4.3.0)(inquirer@9.2.12):
     resolution: {integrity: sha512-7/13k+NxxqwYnrrb52g70qrXs5NQS7r/qV9GAwcoE/8LLWoziV38nsgELajFu6sNgai9X8d8IX5UyiB1M1zGjg==}
     engines: {node: '>=v14'}
     peerDependencies:
@@ -2972,7 +2972,7 @@ packages:
       '@commitlint/types': 17.8.1
       chalk: 4.1.2
       commitizen: 4.3.0(typescript@5.3.3)
-      inquirer: 8.2.6
+      inquirer: 9.2.12
       lodash.isplainobject: 4.0.6
       word-wrap: 1.2.5
     transitivePeerDependencies:
@@ -4259,6 +4259,13 @@ packages:
 
   /@leichtgewicht/ip-codec@2.0.4:
     resolution: {integrity: sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==}
+    dev: true
+
+  /@ljharb/through@2.3.11:
+    resolution: {integrity: sha512-ccfcIDlogiXNq5KcbAwbaO7lMh3Tm1i3khMPYpxlK8hH/W53zN81KM9coerRLOnTGu3nfXIniAmQbRI9OxbC0w==}
+    engines: {node: '>= 0.4'}
+    dependencies:
+      call-bind: 1.0.5
     dev: true
 
   /@manypkg/find-root@1.1.0:
@@ -12829,6 +12836,11 @@ packages:
     engines: {node: '>= 10'}
     dev: true
 
+  /cli-width@4.1.0:
+    resolution: {integrity: sha512-ouuZd4/dm2Sw5Gmqy6bGyNNNe1qt9RpmxveLSO7KcgsTnU7RXfsw+/bukWGo1abgBiMAic068rclZsO4IWmmxQ==}
+    engines: {node: '>= 12'}
+    dev: true
+
   /client-only@0.0.1:
     resolution: {integrity: sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==}
 
@@ -17740,6 +17752,27 @@ packages:
       wrap-ansi: 6.2.0
     dev: true
 
+  /inquirer@9.2.12:
+    resolution: {integrity: sha512-mg3Fh9g2zfuVWJn6lhST0O7x4n03k7G8Tx5nvikJkbq8/CK47WDVm+UznF0G6s5Zi0KcyUisr6DU8T67N5U+1Q==}
+    engines: {node: '>=14.18.0'}
+    dependencies:
+      '@ljharb/through': 2.3.11
+      ansi-escapes: 4.3.2
+      chalk: 5.3.0
+      cli-cursor: 3.1.0
+      cli-width: 4.1.0
+      external-editor: 3.1.0
+      figures: 5.0.0
+      lodash: 4.17.21
+      mute-stream: 1.0.0
+      ora: 5.4.1
+      run-async: 3.0.0
+      rxjs: 7.8.1
+      string-width: 4.2.3
+      strip-ansi: 6.0.1
+      wrap-ansi: 6.2.0
+    dev: true
+
   /internal-slot@1.0.6:
     resolution: {integrity: sha512-Xj6dv+PsbtwyPpEflsejS+oIZxmMlV44zAhG479uYu89MsjcYOhCFnNyKrkJrihbsiasQyY0afoCl/9BLR65bg==}
     engines: {node: '>= 0.4'}
@@ -20719,6 +20752,11 @@ packages:
 
   /mute-stream@0.0.8:
     resolution: {integrity: sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==}
+    dev: true
+
+  /mute-stream@1.0.0:
+    resolution: {integrity: sha512-avsJQhyd+680gKXyG/sQc0nXaC6rBkPOfyHYcFb9+hdkqQkR9bdnkJ0AMZhke0oesPqIO+mFFJ+IdBc7mst4IA==}
+    engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dev: true
 
   /mv@2.1.1:
@@ -24853,6 +24891,11 @@ packages:
 
   /run-async@2.4.1:
     resolution: {integrity: sha512-tvVnVv01b8c1RrA6Ep7JkStj85Guv/YrMcwqYQnwjsAS2cTmmPGBBjAjpCW7RrSodNSoE2/qg9O4bceNvUuDgQ==}
+    engines: {node: '>=0.12.0'}
+    dev: true
+
+  /run-async@3.0.0:
+    resolution: {integrity: sha512-540WwVDOMxA6dN6We19EcT9sc3hkXPw5mzRNGM3FkdN/vtE9NFvj5lFAPNwUDmJjXidm3v7TC1cTE7t17Ulm1Q==}
     engines: {node: '>=0.12.0'}
     dev: true
 
