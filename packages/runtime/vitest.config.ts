@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-
+import path from 'path';
 export default defineConfig({
   define: {
     __DEV__: true,
@@ -11,9 +11,9 @@ export default defineConfig({
   plugins: [nxViteTsPaths()],
   test: {
     environment: 'jsdom',
-    include: ['__tests__/shares.spec.ts'],
+    include: [path.resolve(__dirname, '__tests__/*.spec.ts')],
     globals: true,
-    setupFiles: ['./__tests__/setup.ts'],
+    setupFiles: [path.resolve(__dirname, './__tests__/setup.ts')],
     testTimeout: 10000,
   },
 });
