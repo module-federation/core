@@ -53,7 +53,9 @@ export class NextFederationPlugin {
    * @param compiler The webpack compiler object.
    */
   apply(compiler: Compiler) {
-    process.env['FEDERATION_WEBPACK_PATH'] = getWebpackPath(compiler);
+    process.env['FEDERATION_WEBPACK_PATH'] =
+      process.env['FEDERATION_WEBPACK_PATH'] ||
+      getWebpackPath(compiler, { framework: 'nextjs' });
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
     new CopyFederationPlugin(isServer).apply(compiler);

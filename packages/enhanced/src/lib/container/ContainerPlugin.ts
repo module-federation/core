@@ -141,8 +141,6 @@ class ContainerPlugin {
   }
 
   apply(compiler: Compiler): void {
-    process.env['FEDERATION_WEBPACK_PATH'] =
-      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
     const useModuleFederationPlugin = compiler.options.plugins.find((p) => {
       if (typeof p !== 'object' || !p) {
         return false;

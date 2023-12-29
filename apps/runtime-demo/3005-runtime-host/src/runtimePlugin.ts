@@ -11,15 +11,15 @@ export default function (): FederationRuntimePlugin {
       return args;
     },
     //@ts-ignore
-    async createScript(args) {
-      // anything can be script loader
-      console.log('createScript', args);
-      return fetch(args.url).then((res) => {
-        res.text().then((text) => {
-          eval(text);
-        });
-      });
-    },
+    // async createScript(args) {
+    //   // anything can be script loader
+    //   console.log('createScript', args);
+    //   return fetch(args.url).then((res) => {
+    //     res.text().then((text) => {
+    //       eval(text);
+    //     });
+    //   });
+    // },
     afterResolve(args) {
       console.log('afterResolve', args);
       // randomly switch between different modules

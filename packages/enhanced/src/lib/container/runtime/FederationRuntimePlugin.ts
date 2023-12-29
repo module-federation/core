@@ -263,10 +263,7 @@ class FederationRuntimePlugin {
       if (typeof p !== 'object' || !p) {
         return false;
       }
-      return (
-        p['name'] === 'ModuleFederationPlugin' ||
-        p.constructor.name === 'ModuleFederationPlugin'
-      );
+      return p['name'] === 'ModuleFederationPlugin';
     });
 
     if (useModuleFederationPlugin && !this.options) {
@@ -279,10 +276,7 @@ class FederationRuntimePlugin {
         return false;
       }
 
-      return (
-        p['name'] === 'ContainerPlugin' ||
-        p.constructor.name === 'ContainerPlugin'
-      );
+      return p['name'] === 'ContainerPlugin';
     });
 
     if (useContainerPlugin && !this.options) {
