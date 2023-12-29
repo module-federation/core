@@ -16,7 +16,8 @@ export class PluginSystem<T extends Record<string, any>> {
     this.lifecycle = lifecycle;
     this.lifecycleKeys = Object.keys(lifecycle);
   }
-  usePlugin(plugin: Plugin<T>): void {
+
+  applyPlugin(plugin: Plugin<T>): void {
     assert(isPlainObject(plugin), 'Plugin configuration is invalid.');
     // The plugin's name is mandatory and must be unique
     const pluginName = plugin.name;
@@ -66,7 +67,7 @@ export class PluginSystem<T extends Record<string, any>> {
         !this.registerPlugins[pluginName],
         `The plugin "${pluginName}" has a conflict and cannot be inherited.`,
       );
-      this.usePlugin(registerPlugins[pluginName]);
+      this.applyPlugin(registerPlugins[pluginName]);
     });
   }
 }
