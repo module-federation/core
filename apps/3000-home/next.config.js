@@ -1,3 +1,4 @@
+process.env.NEXT_PRIVATE_LOCAL_WEBPACK = true;
 const { withNx } = require('@nx/next/plugins/with-nx');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 
