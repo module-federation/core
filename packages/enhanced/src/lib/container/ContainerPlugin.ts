@@ -153,7 +153,6 @@ class ContainerPlugin {
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
     }
     const federationRuntimePluginInstance = new FederationRuntimePlugin();
-
     federationRuntimePluginInstance.apply(compiler);
 
     const { name, exposes, shareScope, filename, library, runtime } =
