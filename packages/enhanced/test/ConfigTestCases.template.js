@@ -31,7 +31,7 @@ const categories = fs
         .sort(),
     };
   })
-  .filter((i) => i.name === 'sharing');
+  .filter((i) => i.name === 'container');
 
 const createLogger = (appendTarget) => {
   return {

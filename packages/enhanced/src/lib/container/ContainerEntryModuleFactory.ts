@@ -38,8 +38,7 @@ export default class ContainerEntryModuleFactory extends ModuleFactory {
         dep.name,
         dep.exposes,
         dep.shareScope,
-        dep.runtimePlugins,
-        dep.bundlerRuntimePath,
+        dep.injectRuntimeEntry,
       ),
     });
   }

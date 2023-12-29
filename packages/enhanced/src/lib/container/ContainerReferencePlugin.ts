@@ -74,9 +74,6 @@ class ContainerReferencePlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
-    process.env['FEDERATION_WEBPACK_PATH'] =
-      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
-
     const { _remotes: remotes, _remoteType: remoteType } = this;
     new FederationRuntimePlugin().apply(compiler);
 

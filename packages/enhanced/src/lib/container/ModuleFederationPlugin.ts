@@ -5,11 +5,8 @@
 
 'use strict';
 
-import type { Compiler } from 'webpack';
-import {
-  getWebpackPath,
-  normalizeWebpackPath,
-} from '@module-federation/sdk/normalize-webpack-path';
+import type { Compiler, WebpackPluginInstance } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import isValidExternalsType from 'webpack/schemas/plugins/container/ExternalsType.check.js';
 import type { ModuleFederationPluginOptions } from './ModuleFederationPluginTypes';
 import SharePlugin from '../sharing/SharePlugin';
@@ -32,17 +29,13 @@ const validate = createSchemaValidation(
   },
 );
 
-const PLUGIN_NAME = 'ModuleFederationPlugin';
-
-class ModuleFederationPlugin {
+class ModuleFederationPlugin implements WebpackPluginInstance {
   private _options: ModuleFederationPluginOptions;
-  name: string;
   /**
    * @param {ModuleFederationPluginOptions} options options
    */
   constructor(options: ModuleFederationPluginOptions) {
     validate(options);
-    this.name = PLUGIN_NAME;
     this._options = options;
   }
 
@@ -52,13 +45,6 @@ class ModuleFederationPlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
-    process.env['FEDERATION_WEBPACK_PATH'] =
-      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
-
-    if (!compiler.options.plugins.find((p) => p && p.name === PLUGIN_NAME)) {
-      compiler.options.plugins.push(this);
-    }
-
     const { _options: options } = this;
     // @ts-ignore
     new FederationRuntimePlugin(options).apply(compiler);

@@ -27,7 +27,7 @@ type InferStartupRenderContext<T> = T extends SyncWaterfallHook<
 
 type StartupRenderContext = InferStartupRenderContext<RenderStartup>;
 
-interface Options {
+export interface Options {
   eager?: RegExp | ((module: Module) => boolean);
   excludeChunk?: (chunk: Chunk) => boolean;
 }

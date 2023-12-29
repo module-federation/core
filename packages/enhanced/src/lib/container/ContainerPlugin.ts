@@ -141,8 +141,6 @@ class ContainerPlugin {
   }
 
   apply(compiler: Compiler): void {
-    process.env['FEDERATION_WEBPACK_PATH'] =
-      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
     const useModuleFederationPlugin = compiler.options.plugins.find((p) => {
       if (typeof p !== 'object' || !p) {
         return false;
@@ -154,18 +152,12 @@ class ContainerPlugin {
     if (!useModuleFederationPlugin) {
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
     }
+    const federationRuntimePluginInstance = new FederationRuntimePlugin();
 
-    new FederationRuntimePlugin().apply(compiler);
+    federationRuntimePluginInstance.apply(compiler);
 
-    const {
-      name,
-      exposes,
-      shareScope,
-      filename,
-      library,
-      runtime,
-      runtimePlugins,
-    } = this._options;
+    const { name, exposes, shareScope, filename, library, runtime } =
+      this._options;
 
     if (
       library &&
@@ -182,7 +174,7 @@ class ContainerPlugin {
         //@ts-ignore
         exposes,
         shareScope,
-        runtimePlugins,
+        federationRuntimePluginInstance.entryFilePath,
       );
       const hasSingleRuntimeChunk =
         compilation.options?.optimization?.runtimeChunk;
