@@ -77,9 +77,7 @@ function setGlobalDefaultVal(target: typeof globalThis) {
       __PRELOADED_MAP__: new Map(),
     });
 
-    if (!includeOwnProperty(target, '__FEDERATION__')) {
-      definePropertyGlobalVal(target, '__VMOK__', target.__FEDERATION__);
-    }
+    definePropertyGlobalVal(target, '__VMOK__', target.__FEDERATION__);
   }
 
   target.__FEDERATION__.__GLOBAL_PLUGIN__ ??= [];
