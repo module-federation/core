@@ -4,6 +4,7 @@ export * from './utils';
 export {
   generateSnapshotFromManifest,
   isManifestProvider,
+  simpleJoinRemoteEntry,
 } from './generateSnapshotFromManifest';
 export * from './logger';
 export * from './env';
