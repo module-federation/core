@@ -70,6 +70,11 @@ class FederationRuntimePlugin {
             ])
           : '',
         `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
+        `if(${federationGlobal}.attachShareScopeMap){`,
+        Template.indent([
+          `${federationGlobal}.attachShareScopeMap(${RuntimeGlobals.require})`,
+        ]),
+        '}',
         `if(${federationGlobal}.installInitialConsumes){`,
         Template.indent([`${federationGlobal}.installInitialConsumes()`]),
         '}',

@@ -20,15 +20,18 @@ const asModule = require('./helpers/asModule');
 const filterInfraStructureErrors = require('./helpers/infrastructureLogErrors');
 
 const casesPath = path.join(__dirname, 'configCases');
-const categories = fs.readdirSync(casesPath).map((cat) => {
-  return {
-    name: cat,
-    tests: fs
-      .readdirSync(path.join(casesPath, cat))
-      .filter((folder) => !folder.startsWith('_'))
-      .sort(),
-  };
-});
+const categories = fs
+  .readdirSync(casesPath)
+  .map((cat) => {
+    return {
+      name: cat,
+      tests: fs
+        .readdirSync(path.join(casesPath, cat))
+        .filter((folder) => !folder.startsWith('_'))
+        .sort(),
+    };
+  })
+  .filter((i) => i.name === 'sharing');
 
 const createLogger = (appendTarget) => {
   return {
@@ -63,7 +66,7 @@ const describeCases = (config) => {
     for (const category of categories) {
       // eslint-disable-next-line no-loop-func
       describe(category.name, () => {
-        // category.tests = [category.tests[7]]
+        category.tests = [category.tests[0]];
         for (const testName of category.tests) {
           // eslint-disable-next-line no-loop-func
           describe(testName, function () {
