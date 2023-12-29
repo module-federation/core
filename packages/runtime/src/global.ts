@@ -33,45 +33,53 @@ declare global {
     >;
 }
 
+function definePropertyGlobalVal(
+  target: typeof globalThis,
+  key: string,
+  val: any,
+) {
+  Object.defineProperty(target, key, {
+    value: val,
+    configurable: false,
+    writable: true,
+  });
+}
+
+function includeOwnProperty(target: typeof globalThis, key: string) {
+  return Object.hasOwnProperty.call(target, key);
+}
+
 // This section is to prevent encapsulation by certain microfrontend frameworks. Due to reuse policies, sandbox escapes.
 // The sandbox in the microfrontend does not replicate the value of 'configurable'.
 // If there is no loading content on the global object, this section defines the loading object.
-if (
-  !Object.hasOwnProperty.call(globalThis, '__GLOBAL_LOADING_REMOTE_ENTRY__')
-) {
-  Object.defineProperty(globalThis, '__GLOBAL_LOADING_REMOTE_ENTRY__', {
-    value: {},
-    configurable: false,
-  });
+if (!includeOwnProperty(globalThis, '__GLOBAL_LOADING_REMOTE_ENTRY__')) {
+  definePropertyGlobalVal(globalThis, '__GLOBAL_LOADING_REMOTE_ENTRY__', {});
 }
 
 export const globalLoading = globalThis.__GLOBAL_LOADING_REMOTE_ENTRY__;
 
 function setGlobalDefaultVal(target: typeof globalThis) {
-  if (Object.hasOwnProperty.call(target, '__VMOK__')) {
-    Object.defineProperty(target, '__FEDERATION__', {
-      value: target.__VMOK__,
-      configurable: false,
-    });
+  if (
+    includeOwnProperty(target, '__VMOK__') &&
+    !includeOwnProperty(target, '__FEDERATION__')
+  ) {
+    definePropertyGlobalVal(target, '__FEDERATION__', target.__VMOK__);
   }
 
-  if (!Object.hasOwnProperty.call(target, '__FEDERATION__')) {
-    Object.defineProperty(target, '__FEDERATION__', {
-      value: {
-        __GLOBAL_PLUGIN__: [],
-        __INSTANCES__: [],
-        moduleInfo: {},
-        __SHARE__: {},
-        __MANIFEST_LOADING__: {},
-        __SHARE_SCOPE_LOADING__: {},
-        __PRELOADED_MAP__: new Map(),
-      },
-      configurable: false,
+  if (!includeOwnProperty(target, '__FEDERATION__')) {
+    definePropertyGlobalVal(target, '__FEDERATION__', {
+      __GLOBAL_PLUGIN__: [],
+      __INSTANCES__: [],
+      moduleInfo: {},
+      __SHARE__: {},
+      __MANIFEST_LOADING__: {},
+      __SHARE_SCOPE_LOADING__: {},
+      __PRELOADED_MAP__: new Map(),
     });
-    Object.defineProperty(target, '__VMOK__', {
-      value: target.__FEDERATION__,
-      configurable: false,
-    });
+
+    if (!includeOwnProperty(target, '__FEDERATION__')) {
+      definePropertyGlobalVal(target, '__VMOK__', target.__FEDERATION__);
+    }
   }
 
   target.__FEDERATION__.__GLOBAL_PLUGIN__ ??= [];
