@@ -33,7 +33,7 @@
         "parallel": false,
         "commands": [
           {
-            "command": "node --expose-gc --max-old-space-size=4096 --experimental-vm-modules --trace-deprecation node_modules/jest-cli/bin/jest --logHeapUsage --config packages/enhanced/jest.config.ts",
+            "command": "node -e \"require('child_process').execSync('node --expose-gc --max-old-space-size=4096 --experimental-vm-modules --trace-deprecation ' + require.resolve('jest-cli/bin/jest') + ' --logHeapUsage --config packages/enhanced/jest.config.ts')\"",
             "forwardAllArgs": false
           }
         ]

@@ -31,7 +31,7 @@ const categories = fs
         .sort(),
     };
   })
-  .filter((i) => i.name === 'sharing');
+  .filter((i) => i.name === 'container');
 
 const createLogger = (appendTarget) => {
   return {
@@ -66,7 +66,7 @@ const describeCases = (config) => {
     for (const category of categories) {
       // eslint-disable-next-line no-loop-func
       describe(category.name, () => {
-        category.tests = [category.tests[0]];
+        // category.tests = [category.tests[0]];
         for (const testName of category.tests) {
           // eslint-disable-next-line no-loop-func
           describe(testName, function () {
