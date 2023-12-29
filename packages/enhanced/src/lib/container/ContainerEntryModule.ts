@@ -18,7 +18,6 @@ import type {
   ResolverWithOptions,
 } from 'webpack/lib/Module';
 import type WebpackError from 'webpack/lib/WebpackError';
-import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { getFederationGlobalScope } from './runtime/utils';
 import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from '../Constants';
 
@@ -55,8 +54,7 @@ class ContainerEntryModule extends Module {
   private _name: string;
   private _exposes: [string, ExposeOptions][];
   private _shareScope: string;
-  private _runtimePlugins: string[];
-  private _bundlerRuntimePath?: string;
+  private _injectRuntimeEntry: string;
   /**
    * @param {string} name container entry name
    * @param {[string, ExposeOptions][]} exposes list of exposed modules
@@ -66,15 +64,13 @@ class ContainerEntryModule extends Module {
     name: string,
     exposes: [string, ExposeOptions][],
     shareScope: string,
-    runtimePlugins: string[],
-    bundlerRuntimePath?: string,
+    injectRuntimeEntry: string,
   ) {
     super(JAVASCRIPT_MODULE_TYPE_DYNAMIC, null);
     this._name = name;
     this._exposes = exposes;
     this._shareScope = shareScope;
-    this._runtimePlugins = runtimePlugins;
-    this._bundlerRuntimePath = bundlerRuntimePath;
+    this._injectRuntimeEntry = injectRuntimeEntry;
   }
   /**
    * @param {ObjectDeserializerContext} context context
@@ -82,13 +78,7 @@ class ContainerEntryModule extends Module {
    */
   static deserialize(context: ObjectDeserializerContext): ContainerEntryModule {
     const { read } = context;
-    const obj = new ContainerEntryModule(
-      read(),
-      read(),
-      read(),
-      read(),
-      read(),
-    );
+    const obj = new ContainerEntryModule(read(), read(), read(), read());
     //@ts-ignore
     obj.deserialize(context);
     return obj;
@@ -197,13 +187,7 @@ class ContainerEntryModule extends Module {
 
     this.addDependency(
       // @ts-ignore
-      new EntryDependency(
-        FederationRuntimePlugin.getFilePath(
-          this._name,
-          this._runtimePlugins,
-          this._bundlerRuntimePath,
-        ),
-      ),
+      new EntryDependency(this._injectRuntimeEntry),
     );
 
     callback();
@@ -356,8 +340,7 @@ class ContainerEntryModule extends Module {
     write(this._name);
     write(this._exposes);
     write(this._shareScope);
-    write(this._runtimePlugins);
-    write(this._bundlerRuntimePath);
+    write(this._injectRuntimeEntry);
     super.serialize(context);
   }
 }

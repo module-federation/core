@@ -154,18 +154,11 @@ class ContainerPlugin {
     if (!useModuleFederationPlugin) {
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
     }
+    const federationRuntimePluginInstance = new FederationRuntimePlugin();
+    federationRuntimePluginInstance.apply(compiler);
 
-    new FederationRuntimePlugin().apply(compiler);
-
-    const {
-      name,
-      exposes,
-      shareScope,
-      filename,
-      library,
-      runtime,
-      runtimePlugins,
-    } = this._options;
+    const { name, exposes, shareScope, filename, library, runtime } =
+      this._options;
 
     if (
       library &&
@@ -182,7 +175,7 @@ class ContainerPlugin {
         //@ts-ignore
         exposes,
         shareScope,
-        runtimePlugins,
+        federationRuntimePluginInstance.entryFilePath,
       );
       const hasSingleRuntimeChunk =
         compilation.options?.optimization?.runtimeChunk;

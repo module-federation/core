@@ -17,29 +17,25 @@ class ContainerEntryDependency extends Dependency {
   public name: string;
   public exposes: [string, ExposeOptions][];
   public shareScope: string;
-  public runtimePlugins: string[];
-  public bundlerRuntimePath?: string;
+  public injectRuntimeEntry: string;
 
   /**
    * @param {string} name entry name
    * @param {[string, ExposeOptions][]} exposes list of exposed modules
    * @param {string} shareScope name of the share scope
-   * @param {string[]} runtimePlugins Runtime plugin file paths or package name.
-   * @param {string} bundlerRuntimePath bundler runtime path.
+   * @param {string[]} injectRuntimeEntry the path of injectRuntime file.
    */
   constructor(
     name: string,
     exposes: [string, ExposeOptions][],
     shareScope: string,
-    runtimePlugins: string[],
-    bundlerRuntimePath?: string,
+    injectRuntimeEntry: string,
   ) {
     super();
     this.name = name;
     this.exposes = exposes;
     this.shareScope = shareScope;
-    this.runtimePlugins = runtimePlugins;
-    this.bundlerRuntimePath = bundlerRuntimePath;
+    this.injectRuntimeEntry = injectRuntimeEntry;
   }
 
   /**

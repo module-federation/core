@@ -109,6 +109,7 @@ class FederationRuntimePlugin {
     this.entryFilePath = FederationRuntimePlugin.getFilePath(
       this.options.name!,
       this.options.runtimePlugins!,
+      this.options.implementation,
     );
     return this.entryFilePath;
   }
