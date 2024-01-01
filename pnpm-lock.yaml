@@ -298,8 +298,8 @@ importers:
         specifier: 0.34.4
         version: 0.34.4(vitest@0.32.4)
       '@vitest/ui':
-        specifier: 0.34.4
-        version: 0.34.4(vitest@0.32.4)
+        specifier: 0.34.7
+        version: 0.34.7(vitest@0.32.4)
       antora-navigator-extension:
         specifier: https://gitlab.com/opendevise/oss/antora-navigator-extension/-/archive/main/antora-navigator-extension-main.tar.gz
         version: '@gitlab.com/opendevise/oss/antora-navigator-extension/-/archive/main/antora-navigator-extension-main.tar.gz'
@@ -503,7 +503,7 @@ importers:
         version: 4.2.3(typescript@5.3.3)(vite@4.4.11)
       vitest:
         specifier: 0.32.4
-        version: 0.32.4(@vitest/ui@0.34.4)(less@4.1.3)(stylus@0.59.0)
+        version: 0.32.4(@vitest/ui@0.34.7)(less@4.1.3)(stylus@0.59.0)
       vitest-fetch-mock:
         specifier: ^0.2.2
         version: 0.2.2(encoding@0.1.13)(vitest@0.32.4)
@@ -3705,7 +3705,7 @@ packages:
       cosmiconfig: 7.1.0
       remeda: 0.0.32
       semantic-release: 20.1.0(encoding@0.1.13)(typescript@5.3.3)
-      semantic-release-plugin-decorators: github.com/tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0)
+      semantic-release-plugin-decorators: git/github.com+tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0)
     transitivePeerDependencies:
       - encoding
       - nx
@@ -6357,7 +6357,7 @@ packages:
       enquirer: 2.3.6
       tsconfig-paths: 4.2.0
       vite: 4.4.11(@types/node@18.19.3)(less@4.1.3)(stylus@0.59.0)
-      vitest: 0.32.4(@vitest/ui@0.34.4)(less@4.1.3)(stylus@0.59.0)
+      vitest: 0.32.4(@vitest/ui@0.34.7)(less@4.1.3)(stylus@0.59.0)
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -6385,7 +6385,7 @@ packages:
       enquirer: 2.3.6
       tsconfig-paths: 4.2.0
       vite: 4.4.11(@types/node@18.19.3)(less@4.1.3)(stylus@0.59.0)
-      vitest: 0.32.4(@vitest/ui@0.34.4)(less@4.1.3)(stylus@0.59.0)
+      vitest: 0.32.4(@vitest/ui@0.34.7)(less@4.1.3)(stylus@0.59.0)
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -10512,7 +10512,7 @@ packages:
       magic-string: 0.30.5
       picocolors: 1.0.0
       std-env: 3.6.0
-      vitest: 0.32.4(@vitest/ui@0.34.4)(less@4.1.3)(stylus@0.59.0)
+      vitest: 0.32.4(@vitest/ui@0.34.7)(less@4.1.3)(stylus@0.59.0)
     dev: true
 
   /@vitest/coverage-istanbul@0.34.4(vitest@0.32.4):
@@ -10527,7 +10527,7 @@ packages:
       istanbul-reports: 3.1.6
       picocolors: 1.0.0
       test-exclude: 6.0.0
-      vitest: 0.32.4(@vitest/ui@0.34.4)(less@4.1.3)(stylus@0.59.0)
+      vitest: 0.32.4(@vitest/ui@0.34.7)(less@4.1.3)(stylus@0.59.0)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -10562,19 +10562,19 @@ packages:
       tinyspy: 2.2.0
     dev: true
 
-  /@vitest/ui@0.34.4(vitest@0.32.4):
-    resolution: {integrity: sha512-gz0m0r9ErFG32r+DRdwuLJpUDpbi+jrMcw9nJZAau48Fs4LDIBg561PvczvGqyYxzbyFU7vgkSnSlSDfK0d53w==}
+  /@vitest/ui@0.34.7(vitest@0.32.4):
+    resolution: {integrity: sha512-iizUu9R5Rsvsq8FtdJ0suMqEfIsIIzziqnasMHe4VH8vG+FnZSA3UAtCHx6rLeRupIFVAVg7bptMmuvMcsn8WQ==}
     peerDependencies:
       vitest: '>=0.30.1 <1'
     dependencies:
-      '@vitest/utils': 0.34.4
+      '@vitest/utils': 0.34.7
       fast-glob: 3.3.2
       fflate: 0.8.1
       flatted: 3.2.9
       pathe: 1.1.1
       picocolors: 1.0.0
       sirv: 2.0.3
-      vitest: 0.32.4(@vitest/ui@0.34.4)(less@4.1.3)(stylus@0.59.0)
+      vitest: 0.32.4(@vitest/ui@0.34.7)(less@4.1.3)(stylus@0.59.0)
     dev: true
 
   /@vitest/utils@0.32.4:
@@ -10585,8 +10585,8 @@ packages:
       pretty-format: 29.7.0
     dev: true
 
-  /@vitest/utils@0.34.4:
-    resolution: {integrity: sha512-yR2+5CHhp/K4ySY0Qtd+CAL9f5Yh1aXrKfAT42bq6CtlGPh92jIDDDSg7ydlRow1CP+dys4TrOrbELOyNInHSg==}
+  /@vitest/utils@0.34.7:
+    resolution: {integrity: sha512-ziAavQLpCYS9sLOorGrFFKmy2gnfiNU0ZJ15TsMz/K92NAPS/rp9K4z6AJQQk5Y8adCy4Iwpxy7pQumQ/psnRg==}
     dependencies:
       diff-sequences: 29.6.3
       loupe: 2.3.7
@@ -11848,7 +11848,7 @@ packages:
       '@babel/core': 7.23.6
       find-cache-dir: 4.0.0
       schema-utils: 4.2.0
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /babel-plugin-const-enum@1.2.0(@babel/core@7.23.6):
@@ -13537,7 +13537,7 @@ packages:
       normalize-path: 3.0.0
       schema-utils: 4.2.0
       serialize-javascript: 6.0.1
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /copy-webpack-plugin@11.0.0(webpack@5.88.2):
@@ -13824,7 +13824,7 @@ packages:
       postcss-modules-values: 4.0.0(postcss@8.4.32)
       postcss-value-parser: 4.2.0
       semver: 7.5.4
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /css-minimizer-webpack-plugin@5.0.1(esbuild@0.18.20)(webpack@5.89.0):
@@ -16328,7 +16328,7 @@ packages:
       semver: 7.5.4
       tapable: 2.2.1
       typescript: 5.3.3
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /fork-ts-checker-webpack-plugin@8.0.0(typescript@5.3.3)(webpack@5.89.0):
@@ -19302,7 +19302,7 @@ packages:
     dependencies:
       klona: 2.0.6
       less: 4.1.3
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /less@4.1.3:
@@ -19346,7 +19346,7 @@ packages:
       webpack-sources:
         optional: true
     dependencies:
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
       webpack-sources: 3.2.3
     dev: true
 
@@ -20506,7 +20506,7 @@ packages:
       webpack: ^5.0.0
     dependencies:
       schema-utils: 4.2.0
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /mini-svg-data-uri@1.4.4:
@@ -22624,7 +22624,7 @@ packages:
       klona: 2.0.6
       postcss: 8.4.32
       semver: 7.5.4
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /postcss-merge-longhand@5.1.7(postcss@8.4.32):
@@ -24991,7 +24991,7 @@ packages:
       klona: 2.0.6
       neo-async: 2.6.2
       sass: 1.69.5
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /sass@1.69.5:
@@ -25619,7 +25619,7 @@ packages:
       abab: 2.0.6
       iconv-lite: 0.6.3
       source-map-js: 1.0.2
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /source-map-resolve@0.5.3:
@@ -26163,7 +26163,7 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
     dependencies:
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /style-to-object@0.4.4:
@@ -26239,7 +26239,7 @@ packages:
       fast-glob: 3.3.2
       normalize-path: 3.0.0
       stylus: 0.59.0
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /stylus@0.59.0:
@@ -26994,7 +26994,7 @@ packages:
       semver: 7.5.4
       source-map: 0.7.4
       typescript: 5.3.3
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /ts-node@10.9.1(@swc/core@1.3.99)(@types/node@18.19.3)(typescript@5.1.6):
@@ -28280,12 +28280,12 @@ packages:
       vitest: '>=0.16.0'
     dependencies:
       cross-fetch: 3.1.8(encoding@0.1.13)
-      vitest: 0.32.4(@vitest/ui@0.34.4)(less@4.1.3)(stylus@0.59.0)
+      vitest: 0.32.4(@vitest/ui@0.34.7)(less@4.1.3)(stylus@0.59.0)
     transitivePeerDependencies:
       - encoding
     dev: true
 
-  /vitest@0.32.4(@vitest/ui@0.34.4)(less@4.1.3)(stylus@0.59.0):
+  /vitest@0.32.4(@vitest/ui@0.34.7)(less@4.1.3)(stylus@0.59.0):
     resolution: {integrity: sha512-3czFm8RnrsWwIzVDu/Ca48Y/M+qh3vOnF16czJm98Q/AN1y3B6PBsyV8Re91Ty5s7txKNjEhpgtGPcfdbh2MZg==}
     engines: {node: '>=v14.18.0'}
     hasBin: true
@@ -28323,7 +28323,7 @@ packages:
       '@vitest/runner': 0.32.4
       '@vitest/snapshot': 0.32.4
       '@vitest/spy': 0.32.4
-      '@vitest/ui': 0.34.4(vitest@0.32.4)
+      '@vitest/ui': 0.34.7(vitest@0.32.4)
       '@vitest/utils': 0.32.4
       acorn: 8.11.2
       acorn-walk: 8.3.1
@@ -28511,7 +28511,7 @@ packages:
       mime-types: 2.1.35
       range-parser: 1.2.1
       schema-utils: 4.2.0
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /webpack-dev-middleware@6.1.1(webpack@5.89.0):
@@ -28572,7 +28572,7 @@ packages:
       serve-index: 1.9.1
       sockjs: 0.3.24
       spdy: 4.0.2
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
       webpack-dev-middleware: 5.3.3(webpack@5.89.0)
       ws: 8.15.1
     transitivePeerDependencies:
@@ -28627,7 +28627,7 @@ packages:
     dependencies:
       html-webpack-plugin: 5.6.0(webpack@5.88.2)
       typed-assert: 1.0.9
-      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.99)(esbuild@0.19.7)
     dev: true
 
   /webpack-virtual-modules@0.4.6:
@@ -29196,9 +29196,9 @@ packages:
       uglify-js: 3.14.5
     dev: true
 
-  github.com/tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0):
-    resolution: {tarball: https://codeload.github.com/tjg184/semantic-release-plugin-decorators/tar.gz/e3c3c66}
-    id: github.com/tjg184/semantic-release-plugin-decorators/e3c3c66
+  git/github.com+tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0):
+    resolution: {commit: e3c3c66, repo: git@github.com:tjg184/semantic-release-plugin-decorators.git, type: git}
+    id: git@github.com+tjg184/semantic-release-plugin-decorators/e3c3c66
     name: semantic-release-plugin-decorators
     version: 0.0.0-development
     peerDependencies:
