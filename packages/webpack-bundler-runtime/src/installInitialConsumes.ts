@@ -11,12 +11,7 @@ function handleInitialConsumes(options: HandleInitialConsumesOptions) {
   }
   const { shareKey, shareInfo } = moduleToHandlerMapping[moduleId];
 
-  if (!shareInfo.shareConfig.eager) {
-    throw new Error(
-      `Shared: "${shareKey}" cannot be loaded synchronously unless "eager:true" is set or async entry is enabled.`,
-    );
-  }
-  return federationInstance.loadShareSync(shareKey);
+  return federationInstance.loadShareSync(shareKey, shareInfo);
 }
 
 export function installInitialConsumes(options: InstallInitialConsumesOptions) {

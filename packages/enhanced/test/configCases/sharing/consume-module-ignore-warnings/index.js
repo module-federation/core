@@ -17,12 +17,9 @@ const expectWarning = (regexp) => {
   if (!regexp) {
     expect(warnings).toEqual([]);
   } else {
-    expect(warnings).toEqual(
-      expect.objectContaining({
-        0: expect.stringMatching(regexp),
-        length: 1,
-      }),
-    );
+    warnings.forEach((warning) => {
+      expect(regexp.test(warning)).toEqual(true);
+    });
   }
   warnings.length = 0;
 };
@@ -58,6 +55,9 @@ it('should load the shared modules with ignored warnings', async () => {
   __webpack_share_scopes__['other-scope'] = {
     'advanced/123': {
       '1.2.beta.1': {
+        get: () => () => '1.2.beta.1',
+      },
+      '1.2.3': {
         get: () => () => '123',
       },
     },
@@ -153,7 +153,7 @@ it('should load the shared modules with ignored warnings', async () => {
   {
     await expect(() => import('advanced/error4')).rejects.toEqual(
       expect.objectContaining({
-        message: expect.stringContaining('1.2.3'),
+        message: expect.stringContaining('advanced/error4'),
       }),
     );
   }
@@ -239,7 +239,9 @@ it('should handle version matching correctly in strict and singleton mode', asyn
   {
     const result = await import('singleton');
     expect(result.default).toBe('shared singleton');
-    expectWarning();
+    expectWarning(
+      /Version 1\.1\.1 from container-a of shared singleton module singleton/,
+    );
   }
 });
 

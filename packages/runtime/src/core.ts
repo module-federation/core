@@ -356,8 +356,20 @@ export class FederationHost {
   // 1. If the loaded shared already exists globally, then it will be reused
   // 2. If lib exists in local shared, it will be used directly
   // 3. If the local get returns something other than Promise, then it will be used directly
-  loadShareSync<T>(pkgName: string): () => T | never {
-    const shareInfo = this.options.shared?.[pkgName];
+  loadShareSync<T>(
+    pkgName: string,
+    customShareInfo?: Partial<Shared>,
+  ): () => T | never {
+    const shareInfo = Object.assign(
+      {},
+      this.options.shared?.[pkgName],
+      customShareInfo,
+    );
+    if (shareInfo?.scope) {
+      shareInfo.scope.forEach((shareScope) => {
+        this.initializeSharing(shareScope, shareInfo.strategy);
+      });
+    }
     const registeredShared = getRegisteredShare(
       this.shareScopeMap,
       pkgName,
@@ -365,15 +377,38 @@ export class FederationHost {
       this.hooks.lifecycle.resolveShare,
     );
 
-    if (registeredShared && typeof registeredShared.lib === 'function') {
-      addUniqueItem(registeredShared.useIn, this.options.name);
-      if (!registeredShared.loaded) {
-        registeredShared.loaded = true;
-        if (registeredShared.from === this.options.name) {
-          shareInfo.loaded = true;
+    const addUseIn = (shared: Shared): void => {
+      if (!shared.useIn) {
+        shared.useIn = [];
+      }
+      addUniqueItem(shared.useIn, this.options.name);
+    };
+
+    if (registeredShared) {
+      if (typeof registeredShared.lib === 'function') {
+        addUseIn(registeredShared);
+        if (!registeredShared.loaded) {
+          registeredShared.loaded = true;
+          if (registeredShared.from === this.options.name) {
+            shareInfo.loaded = true;
+          }
+        }
+        return registeredShared.lib as () => T;
+      }
+      if (typeof registeredShared.get === 'function') {
+        const module = registeredShared.get();
+        if (!(module instanceof Promise)) {
+          addUseIn(registeredShared);
+          this.setShared({
+            pkgName,
+            loaded: true,
+            from: this.options.name,
+            lib: module,
+            shared: registeredShared,
+          });
+          return module;
         }
       }
-      return registeredShared.lib as () => T;
     }
 
     if (shareInfo.lib) {

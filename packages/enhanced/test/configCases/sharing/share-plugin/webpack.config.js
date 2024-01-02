@@ -25,7 +25,7 @@ module.exports = {
           import: false,
           shareKey: 'store',
           version: '0',
-          requiredVersion: '0',
+          requiredVersion: false,
           strictVersion: true,
         },
         store: '0',

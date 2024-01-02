@@ -298,7 +298,10 @@ class ConsumeSharedModule extends Module {
     const sources = new Map();
     sources.set(
       'consume-shared',
-      new webpackSources.RawSource(fallbackCode || '()=>()=>{}'),
+      new webpackSources.RawSource(
+        fallbackCode ||
+          `()=>()=>{throw new Error("Can not get '${shareKey}'")}`,
+      ),
     );
 
     const data = new Map();
