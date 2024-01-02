@@ -171,7 +171,6 @@ class FederationRuntimePlugin {
       (compilation, { normalModuleFactory }) => {
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           this.constructor.name,
-          // Setup react-refresh globals with a Webpack runtime module
           (chunk, runtimeRequirements) => {
             if (runtimeRequirements.has(federationGlobal)) {
               return;

@@ -17,9 +17,6 @@ export {
 } from './lib/sharing/utils';
 export { parseOptions } from './lib/container/options';
 
-// not sure whether still need to export
-export { default as ContainerEntryModule } from './lib/container/ContainerEntryModule';
-
 export const container = {
   get ContainerEntryModule() {
     return require('./lib/container/ContainerEntryModule').default;

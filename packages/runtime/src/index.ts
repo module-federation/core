@@ -28,6 +28,9 @@ export function init(options: UserOptions): FederationHost {
   } else {
     // Merge options
     instance.initOptions(options);
+    if (!FederationInstance) {
+      FederationInstance = instance;
+    }
     return instance;
   }
 }
