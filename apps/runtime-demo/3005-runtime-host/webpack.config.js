@@ -12,11 +12,13 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
       remotes: {
         remote2: 'runtime_remote2@http://localhost:3007/remoteEntry.js',
       },
+      asyncBoundary: true,
       // library: { type: 'var', name: 'runtime_remote' },
       filename: 'remoteEntry.js',
       exposes: {
         './Button': './src/Button.tsx',
       },
+      shared: ['react', 'react-dom'],
       runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
     }),
   );

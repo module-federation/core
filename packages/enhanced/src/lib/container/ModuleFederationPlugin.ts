@@ -93,7 +93,12 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           ? options.remotes.length > 0
           : Object.keys(options.remotes).length > 0);
 
-      if (options.remotes && useContainerPlugin) {
+      if (
+        options.remotes &&
+        (Array.isArray(options.remotes)
+          ? options.remotes.length > 0
+          : Object.keys(options.remotes).length > 0)
+      ) {
         new ContainerReferencePlugin({
           //@ts-ignore
           remoteType,

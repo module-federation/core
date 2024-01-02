@@ -13,7 +13,7 @@
         "outputPath": "apps/runtime-demo/3005-runtime-host/dist",
         "index": "apps/runtime-demo/3005-runtime-host/src/index.html",
         "baseHref": "/",
-        "main": "apps/runtime-demo/3005-runtime-host/src/index.ts",
+        "main": "apps/runtime-demo/3005-runtime-host/src/index.tsx",
         "tsConfig": "apps/runtime-demo/3005-runtime-host/tsconfig.app.json",
         "styles": [],
         "scripts": [],

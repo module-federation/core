@@ -23,10 +23,10 @@ export default function (): FederationRuntimePlugin {
     afterResolve(args) {
       console.log('afterResolve', args);
       // randomly switch between different modules
-      if (Math.random() > 0.5) {
-        args.expose = './Button1';
-        return args;
-      }
+      // if (Math.random() > 0.5) {
+      //   args.expose = './Button1';
+      //   return args;
+      // }
 
       return args;
     },
