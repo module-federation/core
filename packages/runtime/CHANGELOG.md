@@ -1,5 +1,12 @@
 # @module-federation/runtime
 
+## 0.0.6
+
+### Patch Changes
+
+- b505deb: fix: rename usePlugins to prevent swc react-refresh from throwing errors when replacing variables
+  - @module-federation/sdk@0.0.6
+
 ## 0.0.5
 
 ### Patch Changes
