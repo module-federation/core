@@ -553,6 +553,10 @@ export default {
     runtime: {
       $ref: '#/definitions/EntryRuntime',
     },
+    asyncBoundary: {
+      type: 'boolean',
+      description: 'Enables Internal Async Boundary During Startup',
+    },
     runtimePlugins: {
       type: 'array',
       items: {

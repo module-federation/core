@@ -5,12 +5,13 @@
 
 'use strict';
 
-import type { Compiler, WebpackPluginInstance } from 'webpack';
+import type { Compiler, WebpackPluginInstance, Module } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import isValidExternalsType from 'webpack/schemas/plugins/container/ExternalsType.check.js';
 import type { ModuleFederationPluginOptions } from './ModuleFederationPluginTypes';
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
+import AsyncBoundaryPlugin from './AsyncBoundaryPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import checkOptions from '../../schemas/container/ModuleFederationPlugin.check';
 import schema from '../../schemas/container/ModuleFederationPlugin';
@@ -18,7 +19,7 @@ import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
-) as typeof import('webpack/lib/util/create-schema-validation');
+);
 const validate = createSchemaValidation(
   //eslint-disable-next-line
   checkOptions,
@@ -86,12 +87,13 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           //@ts-ignore
         }).apply(compiler);
       }
-      if (
+      const useContainerReferencePlugin =
         options.remotes &&
         (Array.isArray(options.remotes)
           ? options.remotes.length > 0
-          : Object.keys(options.remotes).length > 0)
-      ) {
+          : Object.keys(options.remotes).length > 0);
+
+      if (options.remotes && useContainerPlugin) {
         new ContainerReferencePlugin({
           //@ts-ignore
           remoteType,
@@ -103,6 +105,22 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         new SharePlugin({
           shared: options.shared,
           shareScope: options.shareScope,
+        }).apply(compiler);
+      }
+
+      if (
+        this._options.asyncBoundary &&
+        (useContainerReferencePlugin || options.shared)
+      ) {
+        new AsyncBoundaryPlugin({
+          //hoists require call out of async boundary. Needed because runtime is prepended to entrypoint, so runtime needs to initialize outside async boundary
+          eager: (module: Module) => {
+            if (!module) return false;
+            //@ts-ignore
+            if (!module.request) return false;
+            //@ts-ignore
+            return /\.federation/.test(module.request);
+          },
         }).apply(compiler);
       }
     });

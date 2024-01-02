@@ -121,6 +121,10 @@ export interface ModuleFederationPluginOptions {
    */
   filename?: string;
   /**
+   * Enables internal async boundary around app startup. If enabled, you do not need to use `import()` in entrypoints. Defaults to `false`.
+   */
+  asyncBoundary?: boolean;
+  /**
    * Options for library.
    */
   library?: LibraryOptions;
