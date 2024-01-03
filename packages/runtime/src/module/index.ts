@@ -2,45 +2,26 @@ import { getFMId, safeToString, assert } from '../utils';
 import { getRemoteEntry } from '../utils/load';
 import { FederationHost } from '../core';
 import { Global } from '../global';
-import {
-  RemoteEntryExports,
-  Options,
-  Remote,
-  ShareInfos,
-  RemoteInfo,
-} from '../type';
-import { composeKeyWithSeparator } from '@module-federation/sdk';
+import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';
 
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
 
-type HostInfo = Remote;
-
 class Module {
-  hostInfo: HostInfo;
   remoteInfo: RemoteInfo;
   inited = false;
-  shared: ShareInfos = {};
   remoteEntryExports?: RemoteEntryExports;
   lib: RemoteEntryExports | undefined = undefined;
-  loaderHook: FederationHost['loaderHook'];
-  // loading: Record<string, undefined | Promise<RemoteEntryExports | void>> = {};
+  host: FederationHost;
 
   constructor({
-    hostInfo,
     remoteInfo,
-    shared,
-    loaderHook,
+    host,
   }: {
-    hostInfo: HostInfo;
     remoteInfo: RemoteInfo;
-    shared: ShareInfos;
-    plugins: Options['plugins'];
-    loaderHook: FederationHost['loaderHook'];
+    host: FederationHost;
   }) {
-    this.hostInfo = hostInfo;
     this.remoteInfo = remoteInfo;
-    this.shared = shared;
-    this.loaderHook = loaderHook;
+    this.host = host;
   }
 
   async getEntry(): Promise<RemoteEntryExports> {
@@ -53,7 +34,7 @@ class Module {
       remoteInfo: this.remoteInfo,
       remoteEntryExports: this.remoteEntryExports,
       createScriptHook: (url: string) => {
-        const res = this.loaderHook.lifecycle.createScript.emit({ url });
+        const res = this.host.loaderHook.lifecycle.createScript.emit({ url });
         if (res instanceof HTMLScriptElement) {
           return res;
         }
@@ -84,29 +65,31 @@ class Module {
         globalShareScope[remoteShareScope] = {};
       }
       const shareScope = globalShareScope[remoteShareScope];
+      const initScope: InitScope = [];
 
-      // TODO: compat logic , it could be moved after providing startup hooks
       const remoteEntryInitOptions = {
         version: this.remoteInfo.version || '',
-        // @ts-ignore it will be passed by startup hooks
-        region: this.hostInfo.region,
       };
-      remoteEntryExports.init(shareScope, [], remoteEntryInitOptions);
-      const federationInstance = Global.__FEDERATION__.__INSTANCES__.find(
-        (i) =>
-          i.options.id ===
-          composeKeyWithSeparator(
-            this.remoteInfo.name,
-            this.remoteInfo.buildVersion,
-          ),
-      );
-      if (federationInstance) {
-        federationInstance.initOptions({
-          ...remoteEntryInitOptions,
-          remotes: [],
-          name: this.remoteInfo.name,
+
+      const initContainerOptions =
+        await this.host.hooks.lifecycle.beforeInitContainer.emit({
+          shareScope,
+          remoteEntryInitOptions,
+          initScope,
+          remoteInfo: this.remoteInfo,
+          origin: this.host,
         });
-      }
+
+      remoteEntryExports.init(
+        initContainerOptions.shareScope,
+        initContainerOptions.initScope,
+        initContainerOptions.remoteEntryInitOptions,
+      );
+
+      await this.host.hooks.lifecycle.initContainer.emit({
+        ...initContainerOptions,
+        remoteEntryExports,
+      });
     }
 
     this.lib = remoteEntryExports;

@@ -116,11 +116,13 @@ export type RemoteEntryInitOptions = {
   version: string;
 };
 
+export type InitScope = Array<Record<string, never>>;
+
 export type RemoteEntryExports = {
   get: (id: string) => () => Promise<Module>;
   init: (
     shareScope: GlobalShareScope[string],
-    initScope?: Array<Record<string, never>>,
+    initScope?: InitScope,
     remoteEntryInitOPtions?: RemoteEntryInitOptions,
   ) => void;
 };
