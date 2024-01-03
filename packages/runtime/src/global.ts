@@ -20,6 +20,7 @@ export interface Federation {
 
 // export const nativeGlobal: typeof global = new Function('return this')();
 export const nativeGlobal: typeof global = new Function('return this')();
+export const Global = nativeGlobal;
 
 declare global {
   // eslint-disable-next-line no-var
@@ -32,59 +33,72 @@ declare global {
     >;
 }
 
+function definePropertyGlobalVal(
+  target: typeof globalThis,
+  key: string,
+  val: any,
+) {
+  Object.defineProperty(target, key, {
+    value: val,
+    configurable: false,
+    writable: true,
+  });
+}
+
+function includeOwnProperty(target: typeof globalThis, key: string) {
+  return Object.hasOwnProperty.call(target, key);
+}
+
 // This section is to prevent encapsulation by certain microfrontend frameworks. Due to reuse policies, sandbox escapes.
 // The sandbox in the microfrontend does not replicate the value of 'configurable'.
 // If there is no loading content on the global object, this section defines the loading object.
-if (
-  !Object.hasOwnProperty.call(globalThis, '__GLOBAL_LOADING_REMOTE_ENTRY__')
-) {
-  Object.defineProperty(globalThis, '__GLOBAL_LOADING_REMOTE_ENTRY__', {
-    value: {},
-    configurable: false,
-  });
+if (!includeOwnProperty(globalThis, '__GLOBAL_LOADING_REMOTE_ENTRY__')) {
+  definePropertyGlobalVal(globalThis, '__GLOBAL_LOADING_REMOTE_ENTRY__', {});
 }
 
 export const globalLoading = globalThis.__GLOBAL_LOADING_REMOTE_ENTRY__;
 
-//
-if (nativeGlobal.__VMOK__) {
-  nativeGlobal.__FEDERATION__ = nativeGlobal.__VMOK__;
-} else if (!nativeGlobal.__FEDERATION__) {
-  nativeGlobal.__FEDERATION__ = {
-    __GLOBAL_PLUGIN__: [],
-    __INSTANCES__: [],
-    moduleInfo: {},
-    __SHARE__: {},
-    __MANIFEST_LOADING__: {},
-    __SHARE_SCOPE_LOADING__: {},
-    __PRELOADED_MAP__: new Map(),
-  };
+function setGlobalDefaultVal(target: typeof globalThis) {
+  if (
+    includeOwnProperty(target, '__VMOK__') &&
+    !includeOwnProperty(target, '__FEDERATION__')
+  ) {
+    definePropertyGlobalVal(target, '__FEDERATION__', target.__VMOK__);
+  }
 
-  nativeGlobal.__VMOK__ = nativeGlobal.__FEDERATION__;
+  if (!includeOwnProperty(target, '__FEDERATION__')) {
+    definePropertyGlobalVal(target, '__FEDERATION__', {
+      __GLOBAL_PLUGIN__: [],
+      __INSTANCES__: [],
+      moduleInfo: {},
+      __SHARE__: {},
+      __MANIFEST_LOADING__: {},
+      __SHARE_SCOPE_LOADING__: {},
+      __PRELOADED_MAP__: new Map(),
+    });
+
+    definePropertyGlobalVal(target, '__VMOK__', target.__FEDERATION__);
+  }
+
+  target.__FEDERATION__.__GLOBAL_PLUGIN__ ??= [];
+  target.__FEDERATION__.__INSTANCES__ ??= [];
+  target.__FEDERATION__.moduleInfo ??= {};
+  target.__FEDERATION__.__SHARE__ ??= {};
+  target.__FEDERATION__.__MANIFEST_LOADING__ ??= {};
+  target.__FEDERATION__.__SHARE_SCOPE_LOADING__ ??= {};
+  target.__FEDERATION__.__PRELOADED_MAP__ ??= new Map();
 }
 
-nativeGlobal.__FEDERATION__.__GLOBAL_PLUGIN__ ??= [];
-nativeGlobal.__FEDERATION__.__INSTANCES__ ??= [];
-nativeGlobal.__FEDERATION__.moduleInfo ??= {};
-nativeGlobal.__FEDERATION__.__SHARE__ ??= {};
-nativeGlobal.__FEDERATION__.__MANIFEST_LOADING__ ??= {};
-nativeGlobal.__FEDERATION__.__SHARE_SCOPE_LOADING__ ??= {};
-nativeGlobal.__FEDERATION__.__PRELOADED_MAP__ ??= new Map();
-
-export const Global = {
-  get __FEDERATION__(): (typeof nativeGlobal)['__FEDERATION__'] {
-    const globalThisVal = new Function('return globalThis')();
-    return globalThisVal.__FEDERATION__;
-  },
-};
+setGlobalDefaultVal(globalThis);
+setGlobalDefaultVal(nativeGlobal);
 
 export function resetFederationGlobalInfo(): void {
-  nativeGlobal.__FEDERATION__.__GLOBAL_PLUGIN__ = [];
-  nativeGlobal.__FEDERATION__.__INSTANCES__ = [];
-  nativeGlobal.__FEDERATION__.moduleInfo = {};
-  nativeGlobal.__FEDERATION__.__SHARE__ = {};
-  nativeGlobal.__FEDERATION__.__MANIFEST_LOADING__ = {};
-  nativeGlobal.__FEDERATION__.__SHARE_SCOPE_LOADING__ = {};
+  globalThis.__FEDERATION__.__GLOBAL_PLUGIN__ = [];
+  globalThis.__FEDERATION__.__INSTANCES__ = [];
+  globalThis.__FEDERATION__.moduleInfo = {};
+  globalThis.__FEDERATION__.__SHARE__ = {};
+  globalThis.__FEDERATION__.__MANIFEST_LOADING__ = {};
+  globalThis.__FEDERATION__.__SHARE_SCOPE_LOADING__ = {};
 }
 
 export function getGlobalFederationInstance(
@@ -92,7 +106,7 @@ export function getGlobalFederationInstance(
   version: string | undefined,
 ): FederationHost | undefined {
   const buildId = getBuilderId();
-  return Global.__FEDERATION__.__INSTANCES__.find((GMInstance) => {
+  return globalThis.__FEDERATION__.__INSTANCES__.find((GMInstance) => {
     if (buildId && GMInstance.options.id === getBuilderId()) {
       return true;
     }
@@ -119,21 +133,21 @@ export function getGlobalFederationInstance(
 export function setGlobalFederationInstance(
   FederationInstance: FederationHost,
 ): void {
-  Global.__FEDERATION__.__INSTANCES__.push(FederationInstance);
+  globalThis.__FEDERATION__.__INSTANCES__.push(FederationInstance);
 }
 
 export function getGlobalFederationConstructor():
   | typeof FederationHost
   | undefined {
-  return Global.__FEDERATION__.__DEBUG_CONSTRUCTOR__;
+  return globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__;
 }
 
 export function setGlobalFederationConstructor(
   FederationConstructor: typeof FederationHost,
 ): void {
   if (isDebugMode()) {
-    Global.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = FederationConstructor;
-    Global.__FEDERATION__.__DEBUG_CONSTRUCTOR_VERSION__ = __VERSION__;
+    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = FederationConstructor;
+    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR_VERSION__ = __VERSION__;
   }
 }
 
@@ -159,7 +173,7 @@ export function getInfoWithoutType<T extends object>(
 }
 
 export const getGlobalSnapshot = (): GlobalModuleInfo =>
-  Global.__FEDERATION__.moduleInfo;
+  nativeGlobal.__FEDERATION__.moduleInfo;
 
 export const getTargetSnapshotInfoByModuleInfo = (
   moduleInfo: Optional<Remote, 'alias'>,
@@ -196,7 +210,7 @@ export const getTargetSnapshotInfoByModuleInfo = (
     const { version, ...resModuleInfo } = moduleInfo;
     const moduleKeyWithoutVersion = getFMId(resModuleInfo);
     const getModuleInfoWithoutVersion = getInfoWithoutType(
-      Global.__FEDERATION__.moduleInfo,
+      nativeGlobal.__FEDERATION__.moduleInfo,
       moduleKeyWithoutVersion,
       getModuleInfoHook,
     ).value;
@@ -220,7 +234,7 @@ export const getGlobalSnapshotInfoByModuleInfo = (
 ): GlobalModuleInfo[string] | undefined =>
   getTargetSnapshotInfoByModuleInfo(
     moduleInfo,
-    Global.__FEDERATION__.moduleInfo,
+    nativeGlobal.__FEDERATION__.moduleInfo,
     extraOptions?.getModuleInfoHook,
   );
 
@@ -229,21 +243,21 @@ export const setGlobalSnapshotInfoByModuleInfo = (
   moduleDetailInfo: GlobalModuleInfo[string],
 ): GlobalModuleInfo => {
   const moduleKey = getFMId(remoteInfo);
-  Global.__FEDERATION__.moduleInfo[moduleKey] = moduleDetailInfo;
-  return Global.__FEDERATION__.moduleInfo;
+  nativeGlobal.__FEDERATION__.moduleInfo[moduleKey] = moduleDetailInfo;
+  return nativeGlobal.__FEDERATION__.moduleInfo;
 };
 
 export const addGlobalSnapshot = (
   moduleInfos: GlobalModuleInfo,
 ): (() => void) => {
-  Global.__FEDERATION__.moduleInfo = {
-    ...Global.__FEDERATION__.moduleInfo,
+  nativeGlobal.__FEDERATION__.moduleInfo = {
+    ...nativeGlobal.__FEDERATION__.moduleInfo,
     ...moduleInfos,
   };
   return () => {
     const keys = Object.keys(moduleInfos);
     for (const key of keys) {
-      delete Global.__FEDERATION__.moduleInfo[key];
+      delete nativeGlobal.__FEDERATION__.moduleInfo[key];
     }
   };
 };
@@ -270,7 +284,7 @@ export const getRemoteEntryExports = (
 export const registerGlobalPlugins = (
   plugins: Array<FederationRuntimePlugin>,
 ): void => {
-  const { __GLOBAL_PLUGIN__ } = Global.__FEDERATION__;
+  const { __GLOBAL_PLUGIN__ } = nativeGlobal.__FEDERATION__;
 
   plugins.forEach((plugin) => {
     if (__GLOBAL_PLUGIN__.findIndex((p) => p.name === plugin.name) === -1) {
@@ -282,9 +296,10 @@ export const registerGlobalPlugins = (
 };
 
 export const getGlobalHostPlugins = (): Array<FederationRuntimePlugin> =>
-  Global.__FEDERATION__.__GLOBAL_PLUGIN__;
+  nativeGlobal.__FEDERATION__.__GLOBAL_PLUGIN__;
 
 export const getPreloaded = (id: string) =>
-  Global.__FEDERATION__.__PRELOADED_MAP__.get(id);
+  globalThis.__FEDERATION__.__PRELOADED_MAP__.get(id);
+
 export const setPreloaded = (id: string) =>
-  Global.__FEDERATION__.__PRELOADED_MAP__.set(id, true);
+  globalThis.__FEDERATION__.__PRELOADED_MAP__.set(id, true);
