@@ -18,7 +18,13 @@ module.exports = composePlugins(
         // library: { type: 'var', name: 'runtime_remote' },
         filename: 'remoteEntry.js',
         exposes: {
-          './Button': './src/Button.tsx',
+          './ButtonOldAnt': './src/components/ButtonOldAnt',
+        },
+        shared: {
+          lodash: {},
+          antd: {},
+          react: {},
+          'react-dom': {},
         },
       }),
     );

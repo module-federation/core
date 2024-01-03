@@ -18,10 +18,22 @@ module.exports = composePlugins(
         // library: { type: 'var', name: 'runtime_remote' },
         filename: 'remoteEntry.js',
         exposes: {
-          './Button': './src/Button.tsx',
+          './useCustomRemoteHook': './src/components/useCustomRemoteHook',
+          './WebpackSvg': './src/components/WebpackSvg',
+          './WebpackPng': './src/components/WebpackPng',
+        },
+        shared: {
+          lodash: {},
+          antd: {},
+          react: {},
+          'react-dom': {},
         },
       }),
     );
+    // config.externals={
+    //   'react':'React',
+    //   'react-dom':'ReactDom'
+    // }
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {
       if (p.constructor.name === 'ModuleFederationPlugin') {

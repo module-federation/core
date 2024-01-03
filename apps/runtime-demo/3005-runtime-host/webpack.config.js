@@ -10,12 +10,19 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
     new ModuleFederationPlugin({
       name: 'runtime_host',
       remotes: {
-        remote2: 'runtime_remote2@http://localhost:3007/remoteEntry.js',
+        // remote2: 'runtime_remote2@http://localhost:3007/remoteEntry.js',
+        remote1: 'runtime_remote1@http://localhost:3006/remoteEntry.js',
       },
       // library: { type: 'var', name: 'runtime_remote' },
       filename: 'remoteEntry.js',
       exposes: {
         './Button': './src/Button.tsx',
+      },
+      shared: {
+        lodash: {},
+        antd: {},
+        react: {},
+        'react-dom': {},
       },
       runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
     }),
