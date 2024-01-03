@@ -121,6 +121,8 @@ export type RemoteEntryInitOptions = {
   version: string;
 };
 
+export type InitScope = Array<Record<string, never>>;
+
 export type RemoteEntryExports = {
   get: (id: string) => () => Promise<Module>;
   init: (

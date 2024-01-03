@@ -1,51 +1,26 @@
 import { getFMId, safeToString, assert } from '../utils';
 import { getRemoteEntry } from '../utils/load';
 import { FederationHost } from '../core';
-import { Global } from '../global';
-import {
-  RemoteEntryExports,
-  Options,
-  Remote,
-  ShareInfos,
-  RemoteInfo,
-  ShareScopeMap,
-} from '../type';
-import { composeKeyWithSeparator } from '@module-federation/sdk';
+import { RemoteEntryExports, InitScope, RemoteInfo } from '../type';
 
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
 
-type HostInfo = Remote;
-
 class Module {
-  hostInfo: HostInfo;
   remoteInfo: RemoteInfo;
   inited = false;
-  shared: ShareInfos = {};
   remoteEntryExports?: RemoteEntryExports;
   lib: RemoteEntryExports | undefined = undefined;
-  loaderHook: FederationHost['loaderHook'];
-  shareScopeMap: ShareScopeMap;
-  // loading: Record<string, undefined | Promise<RemoteEntryExports | void>> = {};
+  host: FederationHost;
 
   constructor({
-    hostInfo,
     remoteInfo,
-    shared,
-    loaderHook,
-    shareScopeMap,
+    host,
   }: {
-    hostInfo: HostInfo;
     remoteInfo: RemoteInfo;
-    shared: ShareInfos;
-    plugins: Options['plugins'];
-    loaderHook: FederationHost['loaderHook'];
-    shareScopeMap: ShareScopeMap;
+    host: FederationHost;
   }) {
-    this.hostInfo = hostInfo;
     this.remoteInfo = remoteInfo;
-    this.shared = shared;
-    this.loaderHook = loaderHook;
-    this.shareScopeMap = shareScopeMap;
+    this.host = host;
   }
 
   async getEntry(): Promise<RemoteEntryExports> {
@@ -58,11 +33,7 @@ class Module {
       remoteInfo: this.remoteInfo,
       remoteEntryExports: this.remoteEntryExports,
       createScriptHook: (url: string) => {
-        const res = this.loaderHook.lifecycle.createScript.emit({ url });
-        if (typeof document === 'undefined') {
-          //todo: needs real fix
-          return res as HTMLScriptElement;
-        }
+        const res = this.host.loaderHook.lifecycle.createScript.emit({ url });
         if (res instanceof HTMLScriptElement) {
           return res;
         }
@@ -81,58 +52,43 @@ class Module {
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   async get(expose: string, options?: { loadFactory?: boolean }) {
     const { loadFactory = true } = options || { loadFactory: true };
-    const hostName = this.hostInfo.name;
 
     // Get remoteEntry.js
     const remoteEntryExports = await this.getEntry();
 
     if (!this.inited) {
-      const localShareScopeMap = this.shareScopeMap;
+      const localShareScopeMap = this.host.shareScopeMap;
       const remoteShareScope = this.remoteInfo.shareScope || 'default';
 
       if (!localShareScopeMap[remoteShareScope]) {
         localShareScopeMap[remoteShareScope] = {};
       }
       const shareScope = localShareScopeMap[remoteShareScope];
+      const initScope: InitScope = [];
 
-      // TODO: compat logic , it could be moved after providing startup hooks
       const remoteEntryInitOptions = {
         version: this.remoteInfo.version || '',
-        // @ts-ignore it will be passed by startup hooks
-        region: this.hostInfo.region,
       };
-      remoteEntryExports.init(shareScope, [], remoteEntryInitOptions);
-      const federationInstance = Global.__FEDERATION__.__INSTANCES__.find(
-        (i) =>
-          i.options.id ===
-          composeKeyWithSeparator(
-            this.remoteInfo.name,
-            this.remoteInfo.buildVersion,
-          ),
+
+      const initContainerOptions =
+        await this.host.hooks.lifecycle.beforeInitContainer.emit({
+          shareScope,
+          remoteEntryInitOptions,
+          initScope,
+          remoteInfo: this.remoteInfo,
+          origin: this.host,
+        });
+
+      remoteEntryExports.init(
+        initContainerOptions.shareScope,
+        initContainerOptions.initScope,
+        initContainerOptions.remoteEntryInitOptions,
       );
 
-      if (federationInstance) {
-        // means the instance is prev vmok instance
-        if (
-          !federationInstance.releaseNumber ||
-          Number(federationInstance.releaseNumber) <= 100
-        ) {
-          // 兼容旧的生产者传参
-          federationInstance.initOptions({
-            ...remoteEntryInitOptions,
-            remotes: [],
-            name: this.remoteInfo.name,
-          });
-          if (
-            !__FEDERATION__.__SHARE__['default'] &&
-            this.shareScopeMap &&
-            this.shareScopeMap['default']
-          ) {
-            // @ts-ignore compat prev logic , and it will be optimized by supporting startup hook
-            __FEDERATION__.__SHARE__['default'] = this.shareScopeMap['default'];
-          }
-        }
-      }
+      await this.host.hooks.lifecycle.initContainer.emit({
+        ...initContainerOptions,
+        remoteEntryExports,
+      });
     }
 
     this.lib = remoteEntryExports;

@@ -24,6 +24,14 @@ module.exports = (rollupConfig, projectOptions) => {
       `RELEASE_NUMBER is not valid number , please check current pkg.version is valid.`,
     );
   }
+  if (rollupConfig.output.format === 'esm' && FEDERATION_DEBUG) {
+    rollupConfig.output.format = 'iife';
+    rollupConfig.output.inlineDynamicImports = true;
+    delete rollupConfig.external;
+    delete rollupConfig.input.type;
+    delete rollupConfig.input.helpers;
+  }
+
   rollupConfig.plugins.push(
     // alias({
     //   entries: [
@@ -34,7 +42,8 @@ module.exports = (rollupConfig, projectOptions) => {
     //   ],
     // }),
     replace({
-      __VERSION__: pkg.version,
+      preventAssignment: true,
+      __VERSION__: `'${pkg.version}'`,
       FEDERATION_DEBUG: `'${FEDERATION_DEBUG}'`,
       __RELEASE_NUMBER__: RELEASE_NUMBER,
     }),

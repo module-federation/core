@@ -11,6 +11,8 @@ import {
   UserOptions,
   RemoteInfo,
   ShareScopeMap,
+  InitScope,
+  RemoteEntryInitOptions,
 } from './type';
 import {
   assert,
@@ -78,6 +80,21 @@ export class FederationHost {
       origin: FederationHost;
     }>('beforeRequest'),
     afterResolve: new AsyncWaterfallHook<LoadRemoteMatch>('afterResolve'),
+    beforeInitContainer: new AsyncWaterfallHook<{
+      shareScope: ShareScopeMap[string];
+      initScope: InitScope;
+      remoteEntryInitOptions: RemoteEntryInitOptions;
+      remoteInfo: RemoteInfo;
+      origin: FederationHost;
+    }>('beforeInitContainer'),
+    initContainer: new AsyncWaterfallHook<{
+      shareScope: ShareScopeMap[string];
+      initScope: InitScope;
+      remoteEntryInitOptions: RemoteEntryInitOptions;
+      remoteInfo: RemoteInfo;
+      remoteEntryExports: RemoteEntryExports;
+      origin: FederationHost;
+    }>('initContainer'),
     onLoad: new AsyncHook<
       [
         {
@@ -224,8 +241,6 @@ export class FederationHost {
 
     return options;
   }
-
-  // overrideSharedOptions(shareScope: GlobalShareScope[string]): void {}
 
   async loadShare<T>(
     pkgName: string,
@@ -511,15 +526,8 @@ export class FederationHost {
     let module: Module | undefined = this.moduleCache.get(remote.name);
 
     const moduleOptions: ModuleOptions = {
-      hostInfo: {
-        name: this.options.name,
-        version: this.options.version || 'custom',
-      },
+      host: this,
       remoteInfo,
-      shared: this.options.shared || {},
-      plugins: this.options.plugins,
-      loaderHook: this.loaderHook,
-      shareScopeMap: this.shareScopeMap,
     };
 
     if (!module) {
