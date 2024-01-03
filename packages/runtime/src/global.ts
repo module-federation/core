@@ -97,10 +97,6 @@ export function getGlobalFederationInstance(
       return true;
     }
 
-    if (GMInstance.options.name === name && !version) {
-      return true;
-    }
-
     if (
       GMInstance.options.name === name &&
       version &&
