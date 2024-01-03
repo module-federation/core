@@ -70,8 +70,8 @@ importers:
         version: 1.6.0
     devDependencies:
       '@antora/cli':
-        specifier: 3.1.5
-        version: 3.1.5
+        specifier: 3.1.7
+        version: 3.1.7
       '@antora/lunr-extension':
         specifier: 1.0.0-alpha.8
         version: 1.0.0-alpha.8
@@ -998,13 +998,13 @@ packages:
       '@asciidoctor/core': 2.2.6
     dev: true
 
-  /@antora/cli@3.1.5:
-    resolution: {integrity: sha512-vuKSdhlxtlwZq+JGi97lEzs26m9girNxPyGfCcZLQ9J+sYWvB1cxEbj22ZUQlWnprZUyysNyPZIglLNLBOZgqg==}
+  /@antora/cli@3.1.7:
+    resolution: {integrity: sha512-yHo30VmiLLsZU4JW8VZR6fql9m5lIxocA2d0tduKQ+r4YSD1kt+bbwX3You3iMwW7oLoNo62zfU76F8CQBnm2g==}
     engines: {node: '>=16.0.0'}
     hasBin: true
     dependencies:
-      '@antora/logger': 3.1.5
-      '@antora/playbook-builder': 3.1.5
+      '@antora/logger': 3.1.7
+      '@antora/playbook-builder': 3.1.7
       '@antora/user-require-helper': 2.0.0
       commander: 10.0.1
     dev: true
@@ -1073,6 +1073,16 @@ packages:
       sonic-boom: 3.3.0
     dev: true
 
+  /@antora/logger@3.1.7:
+    resolution: {integrity: sha512-Z2tfNIi9G4BnAZq26Kp30974FxCVCtvH46FOi6ClnkJg6Uf2gTrVlJERmtsDTsHjWsf1qKbnj/4b99/AU31iQg==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@antora/expand-path-helper': 2.0.0
+      pino: 8.14.2
+      pino-pretty: 10.0.1
+      sonic-boom: 3.3.0
+    dev: true
+
   /@antora/lunr-extension@1.0.0-alpha.8:
     resolution: {integrity: sha512-vdBgW3rsvbnmA236kT2Dckh9n0Db5za2/WxiLnFLgZ05ZO1KJQa9+R2WHaIFuGE7bKKbY+lqfM/i3KiezbL9YQ==}
     engines: {node: '>=16.0.0'}
@@ -1101,6 +1111,16 @@ packages:
 
   /@antora/playbook-builder@3.1.5:
     resolution: {integrity: sha512-h3zD1FkN8BVnsmHSgB3CTatVu5Q8E8lqZs7Zfsh7uN5eQHhxsPjOvVByeM1RhCpQuY+o2hERY2XexoLb8V89TQ==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@iarna/toml': 2.2.5
+      convict: 6.2.4
+      js-yaml: 4.1.0
+      json5: 2.2.3
+    dev: true
+
+  /@antora/playbook-builder@3.1.7:
+    resolution: {integrity: sha512-lU80S1BqUy9DvqziEzRwpYTaWhOshxgrGAjf/F5VjAIaHCGVx0rZgfoI2rgFFkbVaH94kauOngdtTXDPXC1fPQ==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@iarna/toml': 2.2.5

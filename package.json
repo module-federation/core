@@ -60,7 +60,7 @@
     "unplugin": "1.6.0"
   },
   "devDependencies": {
-    "@antora/cli": "3.1.5",
+    "@antora/cli": "3.1.7",
     "@antora/lunr-extension": "1.0.0-alpha.8",
     "@antora/site-generator": "3.1.5",
     "@asciidoctor/core": "3.0.2",
