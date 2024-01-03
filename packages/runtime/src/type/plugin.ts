@@ -12,7 +12,7 @@ type SnapshotLifeCycleCyclePartial = Partial<{
   [k in keyof SnapshotLifeCycle]: Parameters<SnapshotLifeCycle[k]['on']>[0];
 }>;
 
-type ModuleLifeCycle = Module['loaderHook']['lifecycle'];
+type ModuleLifeCycle = Module['host']['loaderHook']['lifecycle'];
 type ModuleLifeCycleCyclePartial = Partial<{
   [k in keyof ModuleLifeCycle]: Parameters<ModuleLifeCycle[k]['on']>[0];
 }>;
