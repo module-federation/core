@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 0.0.7
+
+### Patch Changes
+
+- 7df24df: only both version and name matched instance can be re-use
+- 7df24df: feat: add initContainer and beforeInitContainer hook
+  - @module-federation/sdk@0.0.7
+
 ## 0.0.6
 
 ### Patch Changes
