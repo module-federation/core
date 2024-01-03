@@ -76,8 +76,8 @@ importers:
         specifier: 1.0.0-alpha.8
         version: 1.0.0-alpha.8
       '@antora/site-generator':
-        specifier: 3.1.5
-        version: 3.1.5
+        specifier: 3.1.7
+        version: 3.1.7
       '@asciidoctor/core':
         specifier: 3.0.2
         version: 3.0.2
@@ -989,11 +989,11 @@ packages:
       throttle-debounce: 5.0.0
     dev: false
 
-  /@antora/asciidoc-loader@3.1.5:
-    resolution: {integrity: sha512-gWqoNL0Sm5dzFGgUFw6xF4bDtZDJDMoWfckbROn5l8hb7CrnXOsoLLydDxya8dvEYIXlq9lOngpolEKjO1RHew==}
+  /@antora/asciidoc-loader@3.1.7:
+    resolution: {integrity: sha512-sM/poPtAi8Cx0g2oLGHoEYjTdE9pvIYLgbHW07fGf6c9wQYMd2DMsevtbhNKWp+xqxj/QinToz4JOaNLoy1nfg==}
     engines: {node: '>=16.0.0'}
     dependencies:
-      '@antora/logger': 3.1.5
+      '@antora/logger': 3.1.7
       '@antora/user-require-helper': 2.0.0
       '@asciidoctor/core': 2.2.6
     dev: true
@@ -1009,18 +1009,18 @@ packages:
       commander: 10.0.1
     dev: true
 
-  /@antora/content-aggregator@3.1.5:
-    resolution: {integrity: sha512-1KfbfjND/ox/EwM/GG6ri60nb0TA+aUO3Y2XAHr/hvnJaWcHMqT4NOIHwl8KyHYmem8WYf97q9w2lKV4usP+hA==}
+  /@antora/content-aggregator@3.1.7:
+    resolution: {integrity: sha512-2gBbxaDxqY4QRw9Vut0IbKNqI9zAAohxjT0zcA5Am10kE3ywvzXaBa3tvb+A7vUl/vRcCC0LPM7pO37RVrbsGA==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@antora/expand-path-helper': 2.0.0
-      '@antora/logger': 3.1.5
+      '@antora/logger': 3.1.7
       '@antora/user-require-helper': 2.0.0
       braces: 3.0.2
       cache-directory: 2.0.0
       glob-stream: 7.0.0
       hpagent: 1.2.0
-      isomorphic-git: 1.21.0
+      isomorphic-git: 1.25.2
       js-yaml: 4.1.0
       multi-progress: 4.0.0(progress@2.0.3)
       picomatch: 2.3.1
@@ -1030,21 +1030,21 @@ packages:
       vinyl: 2.2.1
     dev: true
 
-  /@antora/content-classifier@3.1.5:
-    resolution: {integrity: sha512-yFBjJfNuDcC0ioh2Czx4ggTFyc776gZfaL8cKIboDGlCP7b8NyAusTgtt35l99nyVpe2KhvO2p/4KViMOsfXSw==}
+  /@antora/content-classifier@3.1.7:
+    resolution: {integrity: sha512-94XwJ35pkWJU6dJqQg5oreJRCkaXwU6yw9XSyB731o4i/0romkazKnu7deHugqdgvzqn92AlMRG6R0clhJLEsw==}
     engines: {node: '>=16.0.0'}
     dependencies:
-      '@antora/asciidoc-loader': 3.1.5
-      '@antora/logger': 3.1.5
+      '@antora/asciidoc-loader': 3.1.7
+      '@antora/logger': 3.1.7
       mime-types: 2.1.35
       vinyl: 2.2.1
     dev: true
 
-  /@antora/document-converter@3.1.5:
-    resolution: {integrity: sha512-YjuYPWp9ejo6KWw1yp2T+m927n/tiY8V8Q4jdt3x8XhjjfkUqSx/Sd7wgc6pGLCLM7L2V31Lpd2lZWe4ANtHQA==}
+  /@antora/document-converter@3.1.7:
+    resolution: {integrity: sha512-cRVJf7QyclxjWbA0gWz7hncZYThIREikkwaxaa26LsRCfBNlw7wxs7lWejvIvEl1LVshupbinJwKUPPQPOsHhw==}
     engines: {node: '>=16.0.0'}
     dependencies:
-      '@antora/asciidoc-loader': 3.1.5
+      '@antora/asciidoc-loader': 3.1.7
     dev: true
 
   /@antora/expand-path-helper@2.0.0:
@@ -1052,8 +1052,8 @@ packages:
     engines: {node: '>=10.17.0'}
     dev: true
 
-  /@antora/file-publisher@3.1.5:
-    resolution: {integrity: sha512-C4Ikpv5X6MQ/SzYcatggVj84fgM7RbYZCZCWsnaDv8ax7mpsf4zK9W/kd5uQ8GqBqNWYLCiSqsdOCvUrZkQX9A==}
+  /@antora/file-publisher@3.1.7:
+    resolution: {integrity: sha512-UH2o0DJuv9BJvWgn+QSE3MhtHB3oN3lG5lJkV3fQi1jAV+qPIHoiTIYhbw02mj5KQ3Qbt7YWWAKZKuGl3rEdjg==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@antora/expand-path-helper': 2.0.0
@@ -1073,6 +1073,16 @@ packages:
       sonic-boom: 3.3.0
     dev: true
 
+  /@antora/logger@3.1.7:
+    resolution: {integrity: sha512-Z2tfNIi9G4BnAZq26Kp30974FxCVCtvH46FOi6ClnkJg6Uf2gTrVlJERmtsDTsHjWsf1qKbnj/4b99/AU31iQg==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@antora/expand-path-helper': 2.0.0
+      pino: 8.14.2
+      pino-pretty: 10.0.1
+      sonic-boom: 3.3.0
+    dev: true
+
   /@antora/lunr-extension@1.0.0-alpha.8:
     resolution: {integrity: sha512-vdBgW3rsvbnmA236kT2Dckh9n0Db5za2/WxiLnFLgZ05ZO1KJQa9+R2WHaIFuGE7bKKbY+lqfM/i3KiezbL9YQ==}
     engines: {node: '>=16.0.0'}
@@ -1083,18 +1093,18 @@ packages:
       lunr-languages: 1.9.0
     dev: true
 
-  /@antora/navigation-builder@3.1.5:
-    resolution: {integrity: sha512-xv/Bqje4q1JhPf7GKK9/S79PdaiXJG34WDIefKNLMetsJ+r/7+Mk1ZodYjkogGiCPWQ+E71cr8/uhICpGTljLA==}
+  /@antora/navigation-builder@3.1.7:
+    resolution: {integrity: sha512-QvMPb0qY1zfgyLCfuEhJOpO5qSVjaVe5X/bQjSii9vDGgpIEiC2yt/hgqER37E/3zsBGEZvCH5lSLk1c7x0+EQ==}
     engines: {node: '>=16.0.0'}
     dependencies:
-      '@antora/asciidoc-loader': 3.1.5
+      '@antora/asciidoc-loader': 3.1.7
     dev: true
 
-  /@antora/page-composer@3.1.5:
-    resolution: {integrity: sha512-63ld9s7exXvYtds0cj1ZBwinRnZCvnFkYPuHhCaD7uirRes922kuYXeowO1MKqQQ4Cqcx3OWIjU73W0Q2d1AGQ==}
+  /@antora/page-composer@3.1.7:
+    resolution: {integrity: sha512-zJMzYznPT6Vd59nEXio/2rolkX070Nup6g4a8d4RCz0WoE8dmMidw6XFgjAHr0Lyh14/FHgBPlYXfhkDFR16Mw==}
     engines: {node: '>=16.0.0'}
     dependencies:
-      '@antora/logger': 3.1.5
+      '@antora/logger': 3.1.7
       handlebars: 4.7.8
       require-from-string: 2.0.2
     dev: true
@@ -1109,50 +1119,60 @@ packages:
       json5: 2.2.3
     dev: true
 
-  /@antora/redirect-producer@3.1.5:
-    resolution: {integrity: sha512-BM5qk3Daj81wGu3sJ+wCyZGV7P9EC8nxK9stRzrTqUOGa9MriaZGZ+B3Xvakucj5jQTaFo0w7m3udxBOYicvgQ==}
+  /@antora/playbook-builder@3.1.7:
+    resolution: {integrity: sha512-lU80S1BqUy9DvqziEzRwpYTaWhOshxgrGAjf/F5VjAIaHCGVx0rZgfoI2rgFFkbVaH94kauOngdtTXDPXC1fPQ==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@iarna/toml': 2.2.5
+      convict: 6.2.4
+      js-yaml: 4.1.0
+      json5: 2.2.3
+    dev: true
+
+  /@antora/redirect-producer@3.1.7:
+    resolution: {integrity: sha512-6zAHfcOb0v0829nAbn/3HMilbactjbjU7zBT9Iy6JHQfbqXT/g/mUT9N13Lj/wbq/nm0qKQJweB0Mi6BS2fbMw==}
     engines: {node: '>=16.0.0'}
     dependencies:
       vinyl: 2.2.1
     dev: true
 
-  /@antora/site-generator@3.1.5:
-    resolution: {integrity: sha512-HNkzmPVDU/GBG962O9OnfIJWSC/L2LMDZ59H0T4LXRGKdDrPjaEQqv9AgxaCI0DQ+Cg9sHE3m/ISwkd0+FZabg==}
+  /@antora/site-generator@3.1.7:
+    resolution: {integrity: sha512-39KWip9bLdQ+4ssyqjI+O0COquKHxoeznxY2/3w5pNZEoeTg8cD7kOsnWfbocw0R3Rj+kJV5MnqICFNq0nuPeA==}
     engines: {node: '>=16.0.0'}
     dependencies:
-      '@antora/asciidoc-loader': 3.1.5
-      '@antora/content-aggregator': 3.1.5
-      '@antora/content-classifier': 3.1.5
-      '@antora/document-converter': 3.1.5
-      '@antora/file-publisher': 3.1.5
-      '@antora/logger': 3.1.5
-      '@antora/navigation-builder': 3.1.5
-      '@antora/page-composer': 3.1.5
-      '@antora/playbook-builder': 3.1.5
-      '@antora/redirect-producer': 3.1.5
-      '@antora/site-mapper': 3.1.5
-      '@antora/site-publisher': 3.1.5
-      '@antora/ui-loader': 3.1.5
+      '@antora/asciidoc-loader': 3.1.7
+      '@antora/content-aggregator': 3.1.7
+      '@antora/content-classifier': 3.1.7
+      '@antora/document-converter': 3.1.7
+      '@antora/file-publisher': 3.1.7
+      '@antora/logger': 3.1.7
+      '@antora/navigation-builder': 3.1.7
+      '@antora/page-composer': 3.1.7
+      '@antora/playbook-builder': 3.1.7
+      '@antora/redirect-producer': 3.1.7
+      '@antora/site-mapper': 3.1.7
+      '@antora/site-publisher': 3.1.7
+      '@antora/ui-loader': 3.1.7
       '@antora/user-require-helper': 2.0.0
     dev: true
 
-  /@antora/site-mapper@3.1.5:
-    resolution: {integrity: sha512-rSMFkOfq/yebJBRsT/P95YIW0Ig7WmaCNAg56CilYPh2QfzjNWZIuEOSeQcoIQ0t48W4KKo+KVjp32KERyz9wg==}
+  /@antora/site-mapper@3.1.7:
+    resolution: {integrity: sha512-x++89btbwk8FxyU2+H/RHQMnsC9sdvQvXcwXwNt11eXN1qj7t8TPiQZTalg7gkf0/osY4l7JRpGBY5JJfOJVig==}
     engines: {node: '>=16.0.0'}
     dependencies:
-      '@antora/content-classifier': 3.1.5
+      '@antora/content-classifier': 3.1.7
       vinyl: 2.2.1
     dev: true
 
-  /@antora/site-publisher@3.1.5:
-    resolution: {integrity: sha512-xf2r5Ey9Wu0rYktN80svKSYdHfc9lu/POrL7w9sauZFENx8G9H5KzMN8Qpgxg0dLqaWCXfKqldnklIVwXUBaYg==}
+  /@antora/site-publisher@3.1.7:
+    resolution: {integrity: sha512-zHaJc7UeBfFSIhBbQ5U5Ud4u671M84oqSJb3pPxlUiJDP7iVJlSl+0GNm0NAIoDizjPtVksUI88fzqCy5rfSUQ==}
     engines: {node: '>=16.0.0'}
     dependencies:
-      '@antora/file-publisher': 3.1.5
+      '@antora/file-publisher': 3.1.7
     dev: true
 
-  /@antora/ui-loader@3.1.5:
-    resolution: {integrity: sha512-CB3Apkf4gyj/Tf4f14EcMkI0KBtIEhE+yV9yVEnQYNEZERGpXP66W0FVk3nT2Y7iur4d9xgsBf1j4qpk9RvSuw==}
+  /@antora/ui-loader@3.1.7:
+    resolution: {integrity: sha512-79QuZB0c91dveoESa3RcE18ZZFJo0rDZX9aJKHVc20dInQBGCgfURPqB2OytkzaXD3lNtDJ41yjKNYZqsAQy1Q==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@antora/expand-path-helper': 2.0.0
@@ -18302,8 +18322,8 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /isomorphic-git@1.21.0:
-    resolution: {integrity: sha512-ZqCAUM63CYepA3fB8H7NVyPSiOkgzIbQ7T+QPrm9xtYgQypN9JUJ5uLMjB5iTfomdJf3mdm6aSxjZwnT6ubvEA==}
+  /isomorphic-git@1.25.2:
+    resolution: {integrity: sha512-GHMZVujE76NpZ7Za0Kus/46J6Y7UZsY+xcHMLnFHqvcGbJzkXB1LQCzpYaRq+xQinWGdkcjBDQoE+8Tv3StPCg==}
     engines: {node: '>=12'}
     hasBin: true
     dependencies:
