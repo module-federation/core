@@ -34,6 +34,10 @@ class Module {
       remoteEntryExports: this.remoteEntryExports,
       createScriptHook: (url: string) => {
         const res = this.host.loaderHook.lifecycle.createScript.emit({ url });
+        if (typeof document === 'undefined') {
+          //todo: needs real fix
+          return res as HTMLScriptElement;
+        }
         if (res instanceof HTMLScriptElement) {
           return res;
         }

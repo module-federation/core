@@ -69,8 +69,7 @@
       "options": {
         "cypressConfig": "apps/3000-home/cypress.config.ts",
         "testingType": "e2e",
-        "baseUrl": "http://localhost:3000",
-        "key": "27e40c91-5ac3-4433-8a87-651d10f51cf6"
+        "baseUrl": "http://localhost:3000"
       },
       "configurations": {
         "production": {
