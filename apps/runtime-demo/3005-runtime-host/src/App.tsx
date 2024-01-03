@@ -1,8 +1,6 @@
 import React, { Suspense, lazy } from 'react';
-// import ReactDOM from 'react-dom';
-import { init, loadRemote } from '@module-federation/runtime';
-// import Remote2Btn from 'remote2/Button'
 import TestRemoteHook from './test-remote-hook';
+import { loadRemote } from '@module-federation/runtime';
 import LocalBtn from './components/ButtonOldAnt';
 import WebpackPng from './webpack.png';
 import WebpackSvg from './webpack.svg';
@@ -56,9 +54,7 @@ const App = () => (
             </div>
           </td>
           <td>
-            <React.Suspense fallback="Loading Button">
-              <TestRemoteHook />
-            </React.Suspense>
+            <TestRemoteHook />
           </td>
         </tr>
         <tr>
@@ -69,7 +65,7 @@ const App = () => (
             <blockquote>(check publicPath fix in image-loader)</blockquote>
           </td>
           <td>
-            <img src={WebpackPng} />
+            <img className="home-webpack-png" src={WebpackPng} />
           </td>
           <td>
             <Suspense fallback="loading WebpackPngRemote">
@@ -85,13 +81,13 @@ const App = () => (
             <blockquote>(check publicPath fix in url-loader)</blockquote>
           </td>
           <td>
-            <img src={WebpackSvg} />
+            <img className="home-webpack-svg" src={WebpackSvg} />
           </td>
           <td>
             <Suspense fallback="loading WebpackSvgRemote">
               <WebpackSvgRemote />
             </Suspense>
-          </td>{' '}
+          </td>
         </tr>
       </tbody>
     </table>

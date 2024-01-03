@@ -193,63 +193,6 @@ class FederationRuntimePlugin {
     );
   }
 
-  // merge runtime chunk into container
-  mergeContainerRuntime(compiler: Compiler) {
-    if (!this.options) {
-      return;
-    }
-
-    const { name, filename } = this.options;
-    if (!name || !filename) {
-      return;
-    }
-
-    let enableRuntimeChunk = false;
-
-    if (compiler.options.optimization) {
-      switch (typeof compiler.options.optimization.runtimeChunk) {
-        case 'boolean':
-          enableRuntimeChunk = compiler.options.optimization.runtimeChunk;
-          break;
-        case 'object':
-          enableRuntimeChunk = true;
-          break;
-        default:
-          enableRuntimeChunk = false;
-          break;
-      }
-    }
-
-    // merge runtime into container
-    if (enableRuntimeChunk) {
-      compiler.hooks.emit.tap(
-        'EnableSingleRunTimeForFederationPlugin',
-        (compilation) => {
-          const { assets } = compilation;
-          const entryPoint = compilation.entrypoints.get(name);
-          if (!entryPoint) {
-            return;
-          }
-
-          const runtimeChunk = entryPoint.getRuntimeChunk();
-          if (!runtimeChunk) {
-            return;
-          }
-          const runtimeAssets: sources.Source[] = [];
-          runtimeChunk.files.forEach((fileName) => {
-            runtimeAssets.push(assets[fileName]);
-          });
-          const remoteEntry = assets[filename || DEFAULT_REMOTE_ENTRY];
-          const mergedSource = new compiler.webpack.sources.ConcatSource(
-            ...runtimeAssets,
-            remoteEntry,
-          );
-          assets[filename || DEFAULT_REMOTE_ENTRY] = mergedSource;
-        },
-      );
-    }
-  }
-
   setRuntimeAlias(compiler: Compiler) {
     compiler.options.resolve.alias = {
       ...compiler.options.resolve.alias,

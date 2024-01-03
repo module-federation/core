@@ -24,7 +24,9 @@ module.exports = composePlugins(
           lodash: {},
           antd: {},
           react: {},
+          'react/': {},
           'react-dom': {},
+          'react-dom/': {},
         },
       }),
     );
@@ -46,6 +48,7 @@ module.exports = composePlugins(
       scriptType: 'text/javascript',
     };
     config.optimization = {
+      ...config.optimization,
       runtimeChunk: false,
       minimize: false,
     };

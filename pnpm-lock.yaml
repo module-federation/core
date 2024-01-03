@@ -713,8 +713,8 @@ importers:
   apps/runtime-demo/3006-runtime-remote:
     dependencies:
       antd:
-        specifier: 4.24.15
-        version: 4.24.15(react-dom@18.2.0)(react@18.2.0)
+        specifier: 4.24.14
+        version: 4.24.14(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@module-federation/core':
         specifier: workspace:*
@@ -11325,6 +11325,59 @@ packages:
   /ansicolors@0.3.2:
     resolution: {integrity: sha512-QXu7BPrP29VllRxH8GwB7x5iX5qWKAAMLqKQGWTeLWVlNHNOpVMJ91dsxQAIWXpjuW5wqvxu3Jd/nRjrJ+0pqg==}
     dev: true
+
+  /antd@4.24.14(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-hY/MPm7XI0G+9MvjhTlbDkA2sf8oHVbhtrT0XRstlm9+fXYGNXz8oEh3d5qiA3/tY5NL2Kh2tF7Guh01hwWJdg==}
+    peerDependencies:
+      react: '>=16.9.0'
+      react-dom: '>=16.9.0'
+    dependencies:
+      '@ant-design/colors': 6.0.0
+      '@ant-design/icons': 4.8.1(react-dom@18.2.0)(react@18.2.0)
+      '@ant-design/react-slick': 1.0.2(react@18.2.0)
+      '@babel/runtime': 7.23.6
+      '@ctrl/tinycolor': 3.6.1
+      classnames: 2.5.0
+      copy-to-clipboard: 3.3.3
+      lodash: 4.17.21
+      moment: 2.29.4
+      rc-cascader: 3.7.3(react-dom@18.2.0)(react@18.2.0)
+      rc-checkbox: 3.0.1(react-dom@18.2.0)(react@18.2.0)
+      rc-collapse: 3.4.2(react-dom@18.2.0)(react@18.2.0)
+      rc-dialog: 9.0.2(react-dom@18.2.0)(react@18.2.0)
+      rc-drawer: 6.3.0(react-dom@18.2.0)(react@18.2.0)
+      rc-dropdown: 4.0.1(react-dom@18.2.0)(react@18.2.0)
+      rc-field-form: 1.34.2(react-dom@18.2.0)(react@18.2.0)
+      rc-image: 5.13.0(react-dom@18.2.0)(react@18.2.0)
+      rc-input: 0.1.4(react-dom@18.2.0)(react@18.2.0)
+      rc-input-number: 7.3.11(react-dom@18.2.0)(react@18.2.0)
+      rc-mentions: 1.13.1(react-dom@18.2.0)(react@18.2.0)
+      rc-menu: 9.8.4(react-dom@18.2.0)(react@18.2.0)
+      rc-motion: 2.9.0(react-dom@18.2.0)(react@18.2.0)
+      rc-notification: 4.6.1(react-dom@18.2.0)(react@18.2.0)
+      rc-pagination: 3.2.0(react-dom@18.2.0)(react@18.2.0)
+      rc-picker: 2.7.6(react-dom@18.2.0)(react@18.2.0)
+      rc-progress: 3.4.2(react-dom@18.2.0)(react@18.2.0)
+      rc-rate: 2.9.3(react-dom@18.2.0)(react@18.2.0)
+      rc-resize-observer: 1.4.0(react-dom@18.2.0)(react@18.2.0)
+      rc-segmented: 2.1.2(react-dom@18.2.0)(react@18.2.0)
+      rc-select: 14.1.18(react-dom@18.2.0)(react@18.2.0)
+      rc-slider: 10.0.1(react-dom@18.2.0)(react@18.2.0)
+      rc-steps: 5.0.0(react-dom@18.2.0)(react@18.2.0)
+      rc-switch: 3.2.2(react-dom@18.2.0)(react@18.2.0)
+      rc-table: 7.26.0(react-dom@18.2.0)(react@18.2.0)
+      rc-tabs: 12.5.10(react-dom@18.2.0)(react@18.2.0)
+      rc-textarea: 0.4.7(react-dom@18.2.0)(react@18.2.0)
+      rc-tooltip: 5.2.2(react-dom@18.2.0)(react@18.2.0)
+      rc-tree: 5.7.12(react-dom@18.2.0)(react@18.2.0)
+      rc-tree-select: 5.5.5(react-dom@18.2.0)(react@18.2.0)
+      rc-trigger: 5.3.4(react-dom@18.2.0)(react@18.2.0)
+      rc-upload: 4.3.5(react-dom@18.2.0)(react@18.2.0)
+      rc-util: 5.38.1(react-dom@18.2.0)(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      scroll-into-view-if-needed: 2.2.31
+    dev: false
 
   /antd@4.24.15(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-pXCNJB8cTSjQdqeW5RNadraiYiJkMec/Qt0Zh+fEKUK9UqwmD4TxIYs/xnEbyQIVtHHwtl0fW684xql73KhCyQ==}
@@ -23686,6 +23739,20 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
+  /rc-field-form@1.34.2(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-BdciU5C7dBO51/9ZKcMvK2f8zaaO12Lt1eBhlAo8nNv+6htlNcgY9DAkUlZ7gfyWjnCc1Oo4hHIXau1m6tLw1A==}
+    engines: {node: '>=8.x'}
+    peerDependencies:
+      react: '>=16.9.0'
+      react-dom: '>=16.9.0'
+    dependencies:
+      '@babel/runtime': 7.23.6
+      async-validator: 4.2.5
+      rc-util: 5.38.1(react-dom@18.2.0)(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
   /rc-field-form@1.38.2(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-O83Oi1qPyEv31Sg+Jwvsj6pXc8uQI2BtIAkURr5lvEYHVggXJhdU/nynK8wY1gbw0qR48k731sN5ON4egRCROA==}
     engines: {node: '>=8.x'}
@@ -29229,7 +29296,7 @@ packages:
     dev: true
 
   github.com/tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0):
-    resolution: {tarball: https://codeload.github.com/tjg184/semantic-release-plugin-decorators/tar.gz/e3c3c66}
+    resolution: {commit: e3c3c66, repo: git+ssh://git@github.com/tjg184/semantic-release-plugin-decorators.git, type: git}
     id: github.com/tjg184/semantic-release-plugin-decorators/e3c3c66
     name: semantic-release-plugin-decorators
     version: 0.0.0-development

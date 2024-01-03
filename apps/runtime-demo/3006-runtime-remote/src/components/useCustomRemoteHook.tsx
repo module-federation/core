@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function useCustomRemoteHook() {
   const [isOnline, setIsOnline] = useState(null);

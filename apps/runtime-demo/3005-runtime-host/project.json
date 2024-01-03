@@ -90,6 +90,39 @@
           "buildTarget": "3005-runtime-host:build:production"
         }
       }
+    },
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/runtime-demo/3005-runtime-host/cypress.config.ts",
+        "testingType": "e2e",
+        "baseUrl": "http://localhost:3005",
+        "browser": "chrome"
+      },
+      "configurations": {
+        "development": {
+          "runnerUi": true,
+          "browser": "electron",
+          "exit": false,
+          "watch": true
+        }
+      }
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": true,
+        "commands": [
+          {
+            "command": "lsof -i :3005 || nx run 3005-runtime-host:serve",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "sleep 4 && nx run 3005-runtime-host:e2e",
+            "forwardAllArgs": true
+          }
+        ]
+      }
     }
   },
   "tags": [],

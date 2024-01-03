@@ -241,9 +241,14 @@ export class FederationHost {
       customShareInfo,
     );
     if (shareInfo?.scope) {
-      shareInfo.scope.forEach((shareScope) => {
-        this.initializeSharing(shareScope, shareInfo.strategy);
-      });
+      await Promise.all(
+        shareInfo.scope.map(async (shareScope) => {
+          await Promise.all(
+            this.initializeSharing(shareScope, shareInfo.strategy),
+          );
+          return;
+        }),
+      );
     }
     const loadShareRes = await this.hooks.lifecycle.beforeLoadShare.emit({
       pkgName,

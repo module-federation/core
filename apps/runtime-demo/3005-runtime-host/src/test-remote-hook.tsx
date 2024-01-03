@@ -24,7 +24,12 @@ const TestRemoteHook = () => {
     <>
       <div>
         Page with custom remote hook. You must see text in red box below:
-        <div style={{ border: '1px solid red', padding: 5 }}>{text}</div>
+        <div
+          className="remote1-text"
+          style={{ border: '1px solid red', padding: 5 }}
+        >
+          {text}
+        </div>
       </div>
     </>
   );

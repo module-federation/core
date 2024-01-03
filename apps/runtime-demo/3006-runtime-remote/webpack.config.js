@@ -12,6 +12,8 @@ module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
+    // const webpack = require('/Users/bytedance/outter/universe/node_modules/.pnpm/webpack@5.89.0_@swc+core@1.3.99_esbuild@0.19.7/node_modules/webpack/lib/index.js')
+    // const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
     config.plugins.push(
       new ModuleFederationPlugin({
         name: 'runtime_remote1',
@@ -26,7 +28,9 @@ module.exports = composePlugins(
           lodash: {},
           antd: {},
           react: {},
+          'react/': {},
           'react-dom': {},
+          'react-dom/': {},
         },
       }),
     );
@@ -52,6 +56,7 @@ module.exports = composePlugins(
       scriptType: 'text/javascript',
     };
     config.optimization = {
+      ...config.optimization,
       runtimeChunk: false,
       minimize: false,
     };

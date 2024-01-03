@@ -5,7 +5,6 @@ import customPlugin from './runtimePlugin';
 import * as ReactDOM from 'react-dom/client';
 
 import App from './App';
-
 init({
   name: 'runtime_host',
   remotes: [
@@ -15,26 +14,6 @@ init({
       entry: 'http://localhost:3007/remoteEntry.js',
     },
   ],
-  // shared: {
-  //   react: {
-  //     version: '18.2.0',
-  //     scope: 'default',
-  //     lib: () => React,
-  //     shareConfig: {
-  //       singleton: true,
-  //       requiredVersion: '>17',
-  //     },
-  //   },
-  //   'react-dom': {
-  //     version: '18.2.0',
-  //     scope: 'default',
-  //     lib: () => ReactDOM,
-  //     shareConfig: {
-  //       singleton: true,
-  //       requiredVersion: '>17',
-  //     },
-  //   },
-  // },
   plugins: [customPlugin()],
 });
 
