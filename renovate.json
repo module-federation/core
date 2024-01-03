@@ -1,4 +1,10 @@
 {
   "extends": ["config:base"],
-  "ignorePaths": ["**/demo/**"]
+  "ignorePaths": ["**/demo/**"],
+  "schedule": {
+    "interval": "every thursday",
+    "timezone": "Asia/Shanghai",
+    "allowOverrides": true,
+    "ignoreNotifications": false
+  }
 }
