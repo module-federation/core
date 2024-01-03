@@ -8,7 +8,7 @@ export function registerPlugins(
   hookInstances: Array<
     | FederationHost['hooks']
     | FederationHost['snapshotHandler']['hooks']
-    | Module['loaderHook']
+    | Module['host']['loaderHook']
   >,
 ) {
   const globalPlugins = getGlobalHostPlugins();
