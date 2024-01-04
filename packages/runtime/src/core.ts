@@ -427,6 +427,7 @@ export class FederationHost {
         Possible reasons for failure: \n
         1. The ${pkgName} share was registered with the 'get' attribute, but loadShare was not used beforehand.\n
         2. The ${pkgName} share was not registered with the 'lib' attribute.\n
+        3. ${pkgName} is a eager module and there is no async boundary. use asyncBoundary: true, or ensure an async boundary exists\n
       `);
       }
 
