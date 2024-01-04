@@ -207,6 +207,8 @@ class FederationRuntimePlugin {
     compiler.options.resolve.alias = {
       ...compiler.options.resolve.alias,
       '@module-federation/runtime$': runtimePath,
+      '@module-federation/runtime-tools$':
+        this.options?.implementation || RuntimeToolsPath,
     };
   }
 
