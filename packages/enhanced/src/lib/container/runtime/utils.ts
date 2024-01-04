@@ -1,7 +1,7 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import crypto from 'crypto';
 import { parseOptions } from '../options';
-import type { init } from '@module-federation/runtime';
+import type { init } from '@module-federation/runtime-tools';
 import type webpack from 'webpack';
 import type RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import type { ModuleFederationPluginOptions } from '../../../declarations/plugins/container/ModuleFederationPlugin';
