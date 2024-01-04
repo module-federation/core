@@ -16,19 +16,21 @@ import {
   getGlobalHostPlugins,
   getPreloaded,
   setPreloaded,
+  Global,
 } from './global';
-import { getGlobalShare, getGlobalShareScope } from './utils/share';
+import { getRegisteredShare, getGlobalShareScope } from './utils/share';
 
 interface IShareUtils {
-  getGlobalShare: typeof getGlobalShare;
+  getRegisteredShare: typeof getRegisteredShare;
   getGlobalShareScope: typeof getGlobalShareScope;
 }
 const ShareUtils: IShareUtils = {
-  getGlobalShare,
+  getRegisteredShare,
   getGlobalShareScope,
 };
 
 interface IGlobalUtils {
+  Global: typeof Global;
   nativeGlobal: typeof global;
   resetFederationGlobalInfo: typeof resetFederationGlobalInfo;
   getGlobalFederationInstance: typeof getGlobalFederationInstance;
@@ -49,6 +51,7 @@ interface IGlobalUtils {
 }
 
 const GlobalUtils: IGlobalUtils = {
+  Global,
   nativeGlobal,
   resetFederationGlobalInfo,
   getGlobalFederationInstance,

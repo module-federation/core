@@ -27,7 +27,7 @@ type InferStartupRenderContext<T> = T extends SyncWaterfallHook<
 
 type StartupRenderContext = InferStartupRenderContext<RenderStartup>;
 
-interface Options {
+export interface Options {
   eager?: RegExp | ((module: Module) => boolean);
   excludeChunk?: (chunk: Chunk) => boolean;
 }
@@ -115,9 +115,12 @@ class AsyncEntryStartupPlugin {
               'consume-shared',
             );
           const entryOptions = upperContext.chunk.getEntryOptions();
+          const initialChunks = Array.from(
+            upperContext.chunk.getAllInitialChunks(),
+          ).map((chunk: Chunk) => chunk.id);
           const chunksToRef = entryOptions?.dependOn
-            ? [...entryOptions.dependOn, upperContext.chunk.id]
-            : [upperContext.chunk.id];
+            ? [...entryOptions.dependOn, ...initialChunks]
+            : [...initialChunks];
 
           remotes = this._getRemotes(
             compiler.webpack.RuntimeGlobals,

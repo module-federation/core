@@ -43,7 +43,13 @@
           "dev": false,
           "port": 3002
         }
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "export": {
       "executor": "@nx/next:export",

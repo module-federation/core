@@ -9,28 +9,6 @@ import {
   getDelegates,
 } from '../../internal';
 import { hasLoader, injectRuleLoader } from '../../loaders/helpers';
-import { ModuleFederationPlugin } from '@module-federation/enhanced';
-
-type ConstructableModuleFederationPlugin = new (
-  options: ModuleFederationPluginOptions,
-) => container.ModuleFederationPlugin;
-
-/**
- * Gets the appropriate ModuleFederationPlugin based on the environment.
- * @param {boolean} isServer - A flag to indicate if the environment is server-side or not.
- * @param {Compiler} compiler - The Webpack compiler instance.
- * @returns {ModuleFederationPlugin | undefined} The ModuleFederationPlugin or undefined if not applicable.
- */
-export function getModuleFederationPluginConstructor(
-  isServer: boolean,
-  compiler: Compiler,
-): ConstructableModuleFederationPlugin {
-  if (isServer) {
-    return require('@module-federation/node')
-      .NodeFederationPlugin as ConstructableModuleFederationPlugin;
-  }
-  return ModuleFederationPlugin as unknown as ConstructableModuleFederationPlugin;
-}
 
 /**
  * Set up default shared values based on the environment.
@@ -46,48 +24,6 @@ export const retrieveDefaultShared = (isServer: boolean): SharedObject => {
   // If the code is running on the client/browser, always bundle Next.js internals
   return DEFAULT_SHARE_SCOPE_BROWSER;
 };
-
-/**
- * Apply remote delegates.
- *
- * This function adds the remote delegates feature by configuring and injecting the appropriate loader that will look
- * for internal delegate hoist or delegate hoist container and load it using a custom delegateLoader.
- * Once loaded, it will then look for the available delegates that will be used to configure the remote
- * that the hoisted module will be dependent upon.
- *
- * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions instance.
- * @param {Compiler} compiler - The Webpack compiler instance.
- */
-export function applyRemoteDelegates(
-  options: ModuleFederationPluginOptions,
-  compiler: Compiler,
-) {
-  if (options.remotes) {
-    // Get the available delegates
-    const delegates = getDelegates(options.remotes);
-    compiler.options.module.rules.push({
-      enforce: 'pre',
-      test: [/_app/],
-      loader: require.resolve('../../loaders/patchDefaultSharedLoader'),
-    });
-    // Add the delegate loader for hoist and container to the module rules
-    compiler.options.module.rules.push({
-      enforce: 'pre',
-      test: [/internal-delegate-hoist/, /delegate-hoist-container/],
-      include: [
-        compiler.context,
-        /internal-delegate-hoist/,
-        /delegate-hoist-container/,
-        //eslint-disable-next-line
-        /next[\/]dist/,
-      ],
-      loader: require.resolve('../../loaders/delegateLoader'),
-      options: {
-        delegates,
-      },
-    });
-  }
-}
 
 /**
  * Apply path fixes.
@@ -121,37 +57,11 @@ export const applyPathFixes = (compiler: Compiler, options: any) => {
     //@ts-ignore
     if (rule?.oneOf) {
       //@ts-ignore
-      const badLoader = rule.oneOf.find((oneOfRule) => {
-        if (hasLoader(oneOfRule, 'react-refresh-utils')) {
-          return true;
-        }
-      });
-
-      //@ts-ignore
       rule.oneOf.forEach((oneOfRule) => {
         if (hasLoader(oneOfRule, 'react-refresh-utils')) {
-          oneOfRule.exclude = [
-            oneOfRule.exclude,
-            /packages\/nextjs-mf/,
-            /packages\/node\/dist/,
-            /packages\/utilities\/dist/,
-          ];
+          oneOfRule.exclude = [oneOfRule.exclude, /universe\/packages/];
         }
       });
-
-      if (badLoader) {
-        //@ts-ignore
-        rule.oneOf.push({
-          test: badLoader.test,
-          exclude: [badLoader.exclude[0]],
-          //@ts-ignore
-          use: badLoader.use.filter((l) => {
-            return (
-              typeof l !== 'string' && l.loader && l.loader.includes('swc')
-            );
-          }),
-        });
-      }
     }
   });
 };

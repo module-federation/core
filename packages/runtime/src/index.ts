@@ -10,6 +10,8 @@ import { assert } from './utils/logger';
 
 export { FederationHost } from './core';
 export { registerGlobalPlugins } from './global';
+export { loadScript } from '@module-federation/sdk';
+
 export type { Federation } from './global';
 
 let FederationInstance: FederationHost | null = null;
@@ -26,6 +28,9 @@ export function init(options: UserOptions): FederationHost {
   } else {
     // Merge options
     instance.initOptions(options);
+    if (!FederationInstance) {
+      FederationInstance = instance;
+    }
     return instance;
   }
 }

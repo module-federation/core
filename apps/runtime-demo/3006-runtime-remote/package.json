@@ -1,5 +1,5 @@
 {
-  "name": "runtime-remote",
+  "name": "runtime-remote1",
   "version": "0.0.0",
   "private": true,
   "devDependencies": {
@@ -8,5 +8,8 @@
     "@module-federation/typescript": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "react-refresh": "0.14.0"
+  },
+  "dependencies": {
+    "antd": "4.24.14"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime",
-  "version": "0.0.4",
+  "version": "0.0.7",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs",
   "module": "./dist/index.esm.js",
@@ -39,8 +39,8 @@
       "helpers": [
         "./dist/helpers.cjs.d.ts"
       ],
-      "type": [
-        "./dist/type.cjs.d.ts"
+      "types": [
+        "./dist/types.cjs.d.ts"
       ]
     }
   },

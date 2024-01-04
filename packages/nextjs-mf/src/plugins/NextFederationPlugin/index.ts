@@ -14,11 +14,7 @@ import type { Compiler } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
-import {
-  getModuleFederationPluginConstructor,
-  retrieveDefaultShared,
-  applyPathFixes,
-} from './next-fragments';
+import { retrieveDefaultShared, applyPathFixes } from './next-fragments';
 import { setOptions } from './set-options';
 import {
   validateCompilerOptions,
@@ -31,16 +27,15 @@ import {
   handleServerExternals,
 } from './apply-server-plugins';
 import { applyClientPlugins } from './apply-client-plugins';
-import ModuleFederationNextFork from '../container/ModuleFederationPlugin';
-import { parseRemotes } from '@module-federation/node';
-
+import { ModuleFederationPlugin } from '@module-federation/enhanced';
+import path from 'path';
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
 export class NextFederationPlugin {
   private _options: ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
-
+  public name: string;
   /**
    * Constructs the NextFederationPlugin with the provided options.
    *
@@ -50,6 +45,7 @@ export class NextFederationPlugin {
     const { mainOptions, extraOptions } = setOptions(options);
     this._options = mainOptions;
     this._extraOptions = extraOptions;
+    this.name = 'ModuleFederationPlugin';
   }
 
   /**
@@ -57,21 +53,18 @@ export class NextFederationPlugin {
    * @param compiler The webpack compiler object.
    */
   apply(compiler: Compiler) {
-    process.env['FEDERATION_WEBPACK_PATH'] = getWebpackPath(compiler);
+    process.env['FEDERATION_WEBPACK_PATH'] =
+      process.env['FEDERATION_WEBPACK_PATH'] ||
+      getWebpackPath(compiler, { framework: 'nextjs' });
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
-    //@ts-ignore
     new CopyFederationPlugin(isServer).apply(compiler);
     this.applyConditionalPlugins(compiler, isServer);
     const normalFederationPluginOptions = this.getNormalFederationPluginOptions(
       compiler,
       isServer,
     );
-    this.applyModuleFederationPlugins(
-      compiler,
-      normalFederationPluginOptions,
-      isServer,
-    );
+    new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
   }
 
   private validateOptions(compiler: Compiler): boolean {
@@ -105,18 +98,14 @@ export class NextFederationPlugin {
       compiler.options.devtool = false;
     }
     if (isServer) {
-      //@ts-ignore
       configureServerCompilerOptions(compiler);
       configureServerLibraryAndFilename(this._options);
-      //@ts-ignore
       applyServerPlugins(compiler, this._options);
-      //@ts-ignore
       handleServerExternals(compiler, {
         ...this._options,
         shared: { ...retrieveDefaultShared(isServer), ...this._options.shared },
       });
     } else {
-      //@ts-ignore
       applyClientPlugins(compiler, this._options, this._extraOptions);
     }
   }
@@ -131,6 +120,12 @@ export class NextFederationPlugin {
       ...this._options,
       runtime: false,
       remoteType: 'script',
+      // @ts-ignore
+      runtimePlugins: [
+        //@ts-ignore
+        ...(this._options.runtimePlugins || []),
+        require.resolve(path.join(__dirname, '../container/runtimePlugin')),
+      ],
       exposes: {
         './noop': noop,
         './react': require.resolve('react'),
@@ -159,101 +154,6 @@ export class NextFederationPlugin {
       noop = require.resolve('../../federation-noop.cjs');
     }
     return noop;
-  }
-
-  private createEmbeddedOptions(
-    normalFederationPluginOptions: ModuleFederationPluginOptions,
-    isServer?: boolean,
-  ) {
-    return {
-      ...normalFederationPluginOptions,
-      name: 'host_inner_ctn',
-      runtime: isServer ? 'webpack-runtime' : 'webpack',
-      filename: `host_inner_ctn.js`,
-      remoteType: 'script',
-      library: {
-        ...normalFederationPluginOptions.library,
-        name: 'host_inner_ctn',
-      },
-    };
-  }
-
-  private applyClientFederationPlugins(
-    compiler: Compiler,
-    normalFederationPluginOptions: ModuleFederationPluginOptions,
-  ) {
-    const embeddedOptions = this.createEmbeddedOptions(
-      normalFederationPluginOptions,
-    );
-    new ModuleFederationNextFork(
-      normalFederationPluginOptions,
-      //@ts-ignore
-      embeddedOptions,
-    ).apply(compiler);
-  }
-
-  private applyServerFederationPlugins(
-    compiler: Compiler,
-    normalFederationPluginOptions: ModuleFederationPluginOptions,
-  ) {
-    const embeddedOptions = this.createEmbeddedOptions(
-      normalFederationPluginOptions,
-      true,
-    );
-
-    //@ts-ignore
-    const serverSharedOptions = Object.keys(
-      //@ts-ignore
-      normalFederationPluginOptions.shared,
-    ).reduce(
-      (acc, key) => ({
-        ...acc,
-        //@ts-ignore
-        [key]: { ...normalFederationPluginOptions.shared[key], eager: false },
-      }),
-      {},
-    );
-    const mainOptions = {
-      ...normalFederationPluginOptions,
-      shared: serverSharedOptions,
-    };
-    //@ts-ignore
-
-    const prepareRemote = (options) => {
-      return {
-        ...options,
-        remotes: options.remotes
-          ? parseRemotes(options.remotes as Record<string, any>)
-          : {},
-      };
-    };
-    //@ts-ignore
-    new ModuleFederationNextFork(
-      prepareRemote(mainOptions),
-      prepareRemote(embeddedOptions),
-    ).apply(compiler);
-  }
-
-  private applyModuleFederationPlugins(
-    compiler: Compiler,
-    normalFederationPluginOptions: ModuleFederationPluginOptions,
-    isServer: boolean,
-  ) {
-    const ModuleFederationPlugin = getModuleFederationPluginConstructor(
-      isServer,
-      compiler,
-    );
-    if (!isServer) {
-      this.applyClientFederationPlugins(
-        compiler,
-        normalFederationPluginOptions,
-      );
-    } else {
-      this.applyServerFederationPlugins(
-        compiler,
-        normalFederationPluginOptions,
-      );
-    }
   }
 }
 

@@ -40,8 +40,6 @@ Initializes `FederationHost` with user-defined options.
   - Manages snapshots in federation process.
 - **loaderHook: PluginSystem**
   - Plugin system for module loading operations.
-- **loadingShare: Object**
-  - Tracks loading state of shared modules.
 
 ## Methods
 
@@ -82,7 +80,36 @@ initializeSharing(shareScopeName?: string): boolean | Promise<boolean>
 Initializes sharing sequences for shared scopes.
 
 ## Hooks
-`FederationHost` offers various lifecycle hooks for interacting at different stages of the module federation process.
+`FederationHost` offers various lifecycle hooks for interacting at different stages of the module federation process. These hooks include:
+
+- **`beforeInit`**: `SyncWaterfallHook<{ userOptions: UserOptions; options: Options; origin: FederationHost; shareInfo: ShareInfos; }>`
+  - Updates Federation Host configurations before the initialization process of remote containers.
+- **`init`**: `SyncHook<[{ options: Options; origin: FederationHost; }], void>`
+  - Called during the initialization of remote containers.
+- **`beforeRequest`**: `AsyncWaterfallHook<{ id: string; options: Options; origin: FederationHost; }>`
+  - Invoked before resolving a remote container, useful for injecting the container or updating something ahead of the lookup.
+- **`afterResolve`**: `AsyncWaterfallHook<LoadRemoteMatch>`
+  - Called after resolving a container, allowing redirection or modification of resolved information.
+- **`onLoad`**: `AsyncHook<[{ id: string; expose: string; pkgNameOrAlias: string; remote: Remote; options: ModuleOptions; origin: FederationHost; exposeModule: any; exposeModuleFactory: any; moduleInstance: Module; }], void>`
+  - Triggered once a federated module is loaded, allowing access and modification to the exports of the loaded file.
+- **`handlePreloadModule`**: `SyncHook<{ id: string; name: string; remoteSnapshot: ModuleInfo; preloadConfig: PreloadRemoteArgs; }, void>`
+  - Handles preloading logic for federated modules.
+- **`errorLoadRemote`**: `AsyncHook<[{ id: string; error: unknown; }], void>`
+  - Invoked if loading a federated module fails, enabling custom error handling.
+- **`beforeLoadShare`**: `AsyncWaterfallHook<{ pkgName: string; shareInfo?: Shared;
+
+ shared: Options['shared']; origin: FederationHost; }>`
+  - Called before attempting to load or negotiate shared modules between federated apps.
+- **`loadShare`**: `AsyncHook<[FederationHost, string, ShareInfos]>`
+  - Similar to `onLoad`, but for shared modules.
+- **`resolveShare`**: `SyncHook<[{ shareScopeMap: ShareScopeMap; scope: string; pkgName: string; version: string; GlobalFederation: Federation; resolver: () => Shared; }], void>`
+  - Allows manual resolution of shared module requests.
+- **`beforePreloadRemote`**: `AsyncHook<{ preloadOps: Array<PreloadRemoteArgs>; options: Options; origin: FederationHost; }>`
+  - Invoked before any preload logic is executed by the preload handler.
+- **`generatePreloadAssets`**: `AsyncHook<[{ origin: FederationHost; preloadOptions: PreloadOptions[number]; remote: Remote; remoteInfo: RemoteInfo; remoteSnapshot: ModuleInfo; globalSnapshot: GlobalModuleInfo; }], Promise<PreloadAssets>>`
+  - Called for generating preload assets based on configurations.
+- **`afterPreloadRemote`**: `AsyncHook<{ preloadOps: Array<PreloadRemoteArgs>; options: Options; origin: FederationHost; }>`
+  - Invoked after the remote modules are preloaded.
 
 ## Plugin System Integration
 `FederationHost` utilizes `PluginSystem` for extended capabilities and custom behavior integration, using `FederationRuntimePlugin`.

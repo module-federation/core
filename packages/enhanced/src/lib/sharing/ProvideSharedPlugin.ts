@@ -14,6 +14,7 @@ import ProvideForSharedDependency from './ProvideForSharedDependency';
 import ProvideSharedDependency from './ProvideSharedDependency';
 import ProvideSharedModuleFactory from './ProvideSharedModuleFactory';
 import type { ProvideSharedPluginOptions } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
+import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
@@ -99,6 +100,7 @@ class ProvideSharedPlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
+    new FederationRuntimePlugin().apply(compiler);
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 

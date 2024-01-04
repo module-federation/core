@@ -1,81 +1,26 @@
 import type {
   Compiler,
-  Module,
-  Chunk,
   Compilation,
-  ChunkGroup,
+  Chunk,
   WebpackPluginInstance,
 } from 'webpack';
+import ContainerEntryModule from './ContainerEntryModule';
 
 /**
  * This class is used to hoist container references in the code.
  * @constructor
  */
 export class HoistContainerReferences implements WebpackPluginInstance {
-  /**
-   * @function apply
-   * @param {Compiler} compiler The webpack compiler object
-   */
   apply(compiler: Compiler): void {
-    // Hook into the compilation process
     compiler.hooks.thisCompilation.tap(
       'HoistContainerReferences',
       (compilation: Compilation) => {
-        // After chunks are optimized, perform the hoisting
         compilation.hooks.afterOptimizeChunks.tap(
           'HoistContainerReferences',
-          (chunks: Iterable<Chunk>, chunkGroups: ChunkGroup[]) => {
-            // Create a map to store chunks by their id or name
-            /** @type {Map<(string|number), Chunk>} */
-            const chunkSet = new Map<string | number, Chunk>();
-            // Create a set to store external module requests
-            /** @type {Set<Module>} */
-            const externalRequests = new Set<Module>();
-            // Populate the chunkSet with chunks
+          (chunks: Iterable<Chunk>) => {
             for (const chunk of chunks) {
-              const ident = chunk.id || chunk.name;
-              if (ident) {
-                chunkSet.set(ident, chunk);
-              }
-            }
-            // Iterate over chunks again to handle remote modules
-            for (const chunk of chunks) {
-              // Get iterable of remote modules for the chunk
-              const remoteModules =
-                compilation.chunkGraph.getChunkModulesIterableBySourceType(
-                  chunk,
-                  'remote',
-                );
-              if (!remoteModules) continue;
-              // Iterate over remote modules
-              for (const remoteModule of remoteModules) {
-                // Iterate over dependencies of the remote module
-                for (const dep of remoteModule.dependencies) {
-                  // Get the module associated with the dependency
-                  const mod = compilation.moduleGraph.getModule(dep);
-                  // If the module exists and the chunk has a runtime, add the module to externalRequests
-                  if (mod !== null && chunk.runtime) {
-                    externalRequests.add(mod);
-                    // Get the runtime chunk(s) associated with the chunk
-                    const runtimeChunk =
-                      typeof chunk.runtime === 'string' ||
-                      typeof chunk.runtime === 'number'
-                        ? [chunk.runtime]
-                        : [...chunk.runtime];
-                    // Iterate over runtime chunks
-                    for (const runtimeChunkId of runtimeChunk) {
-                      // Get the runtime chunk from the chunkSet
-                      const runtimeChunk = chunkSet.get(runtimeChunkId);
-                      // If the runtime chunk exists, connect it with the module in the chunk graph
-                      if (runtimeChunk) {
-                        compilation.chunkGraph.connectChunkAndModule(
-                          runtimeChunk,
-                          mod,
-                        );
-                      }
-                    }
-                  }
-                }
+              if (this.chunkContainsContainerEntryModule(chunk, compilation)) {
+                this.hoistModulesInChunk(chunk, compilation);
               }
             }
           },
@@ -83,5 +28,41 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       },
     );
   }
+
+  private chunkContainsContainerEntryModule(
+    chunk: Chunk,
+    compilation: Compilation,
+  ): boolean {
+    for (const module of compilation.chunkGraph.getChunkModulesIterable(
+      chunk,
+    )) {
+      if (module instanceof ContainerEntryModule) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private hoistModulesInChunk(chunk: Chunk, compilation: Compilation): void {
+    const chunkGraph = compilation.chunkGraph;
+    const runtimeChunks = this.getRuntimeChunks(chunk, compilation);
+
+    for (const module of chunkGraph.getChunkModulesIterable(chunk)) {
+      for (const runtimeChunk of runtimeChunks) {
+        chunkGraph.connectChunkAndModule(runtimeChunk, module);
+      }
+    }
+  }
+
+  private getRuntimeChunks(chunk: Chunk, compilation: Compilation): Chunk[] {
+    const runtimeChunks = [];
+    for (const c of compilation.chunks) {
+      if (c.hasRuntime() && c !== chunk) {
+        runtimeChunks.push(c);
+      }
+    }
+    return runtimeChunks;
+  }
 }
+
 export default HoistContainerReferences;

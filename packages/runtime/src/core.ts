@@ -10,6 +10,9 @@ import {
   ShareInfos,
   UserOptions,
   RemoteInfo,
+  ShareScopeMap,
+  InitScope,
+  RemoteEntryInitOptions,
 } from './type';
 import {
   assert,
@@ -29,16 +32,16 @@ import {
   SyncWaterfallHook,
 } from './utils/hooks';
 import {
-  getGlobalShare,
   getGlobalShareScope,
   formatShareConfigs,
+  getRegisteredShare,
 } from './utils/share';
 import { formatPreloadArgs, preloadAssets } from './utils/preload';
 import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
 import { snapshotPlugin } from './plugins/snapshot';
 import { isBrowserEnv } from './utils/env';
 import { getRemoteInfo } from './utils/load';
-import { Global } from './global';
+import { Global, Federation } from './global';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from './constant';
 import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
 
@@ -77,6 +80,21 @@ export class FederationHost {
       origin: FederationHost;
     }>('beforeRequest'),
     afterResolve: new AsyncWaterfallHook<LoadRemoteMatch>('afterResolve'),
+    beforeInitContainer: new AsyncWaterfallHook<{
+      shareScope: ShareScopeMap[string];
+      initScope: InitScope;
+      remoteEntryInitOptions: RemoteEntryInitOptions;
+      remoteInfo: RemoteInfo;
+      origin: FederationHost;
+    }>('beforeInitContainer'),
+    initContainer: new AsyncWaterfallHook<{
+      shareScope: ShareScopeMap[string];
+      initScope: InitScope;
+      remoteEntryInitOptions: RemoteEntryInitOptions;
+      remoteInfo: RemoteInfo;
+      remoteEntryExports: RemoteEntryExports;
+      origin: FederationHost;
+    }>('initContainer'),
     onLoad: new AsyncHook<
       [
         {
@@ -107,6 +125,8 @@ export class FederationHost {
         {
           id: string;
           error: unknown;
+          from: 'build' | 'runtime';
+          origin: FederationHost;
         },
       ],
       void
@@ -118,6 +138,14 @@ export class FederationHost {
       origin: FederationHost;
     }>('beforeLoadShare'),
     loadShare: new AsyncHook<[FederationHost, string, ShareInfos]>(),
+    resolveShare: new SyncWaterfallHook<{
+      shareScopeMap: ShareScopeMap;
+      scope: string;
+      pkgName: string;
+      version: string;
+      GlobalFederation: Federation;
+      resolver: () => Shared | undefined;
+    }>('resolveShare'),
     beforePreloadRemote: new AsyncHook<{
       preloadOps: Array<PreloadRemoteArgs>;
       options: Options;
@@ -142,10 +170,12 @@ export class FederationHost {
       origin: FederationHost;
     }>(),
   });
-  version: string = __VERSION__;
+  releaseNumber = `__RELEASE_NUMBER__`;
+  version: string = `__VERSION__`;
   name: string;
   moduleCache: Map<string, Module> = new Map();
   snapshotHandler: SnapshotHandler;
+  shareScopeMap: ShareScopeMap;
   loaderHook = new PluginSystem({
     // FIXME: may not be suitable
     getModuleInfo: new SyncHook<
@@ -170,9 +200,6 @@ export class FederationHost {
       Promise<Response> | void | false
     >('fetch'),
   });
-  loadingShare: {
-    [key: string]: Promise<any>;
-  } = {};
 
   constructor(userOptions: UserOptions) {
     // TODO: Validate the details of the options
@@ -188,12 +215,22 @@ export class FederationHost {
 
     this.name = userOptions.name;
     this.options = defaultOptions;
+    this.shareScopeMap = {};
+    this._setGlobalShareScopeMap();
     this.snapshotHandler = new SnapshotHandler(this);
     this.registerPlugins([
       ...defaultOptions.plugins,
       ...(userOptions.plugins || []),
     ]);
     this.options = this.formatOptions(defaultOptions, userOptions);
+  }
+
+  private _setGlobalShareScopeMap(): void {
+    const globalShareScopeMap = getGlobalShareScope();
+    const identifier = this.options.id || this.options.name;
+    if (identifier && !globalShareScopeMap[identifier]) {
+      globalShareScopeMap[identifier] = this.shareScopeMap;
+    }
   }
 
   initOptions(userOptions: UserOptions): Options {
@@ -204,8 +241,6 @@ export class FederationHost {
 
     return options;
   }
-
-  // overrideSharedOptions(shareScope: GlobalShareScope[string]): void {}
 
   async loadShare<T>(
     pkgName: string,
@@ -220,7 +255,16 @@ export class FederationHost {
       this.options.shared?.[pkgName],
       customShareInfo,
     );
-
+    if (shareInfo?.scope) {
+      await Promise.all(
+        shareInfo.scope.map(async (shareScope) => {
+          await Promise.all(
+            this.initializeSharing(shareScope, shareInfo.strategy),
+          );
+          return;
+        }),
+      );
+    }
     const loadShareRes = await this.hooks.lifecycle.beforeLoadShare.emit({
       pkgName,
       shareInfo,
@@ -237,31 +281,58 @@ export class FederationHost {
     );
 
     // Retrieve from cache
-    const globalShare = getGlobalShare(pkgName, shareInfoRes);
+    const registeredShared = getRegisteredShare(
+      this.shareScopeMap,
+      pkgName,
+      shareInfoRes,
+      this.hooks.lifecycle.resolveShare,
+    );
 
-    if (globalShare && globalShare.lib) {
-      addUniqueItem(globalShare.useIn, this.options.name);
-      return globalShare.lib as () => T;
-    } else if (globalShare && globalShare.loading) {
-      const factory = await globalShare.loading;
-      addUniqueItem(globalShare.useIn, this.options.name);
+    const addUseIn = (shared: Shared): void => {
+      if (!shared.useIn) {
+        shared.useIn = [];
+      }
+      addUniqueItem(shared.useIn, this.options.name);
+    };
+
+    if (registeredShared && registeredShared.lib) {
+      addUseIn(registeredShared);
+      return registeredShared.lib as () => T;
+    } else if (
+      registeredShared &&
+      registeredShared.loading &&
+      !registeredShared.loaded
+    ) {
+      const factory = await registeredShared.loading;
+      registeredShared.loaded = true;
+      if (!registeredShared.lib) {
+        registeredShared.lib = factory;
+      }
+      addUseIn(registeredShared);
       return factory;
-    } else if (globalShare) {
+    } else if (registeredShared) {
       const asyncLoadProcess = async () => {
-        const factory = await globalShare.get();
+        const factory = await registeredShared.get();
         shareInfoRes.lib = factory;
-        addUniqueItem(shareInfoRes.useIn, this.options.name);
-        const gShared = getGlobalShare(pkgName, shareInfoRes);
+        shareInfoRes.loaded = true;
+        addUseIn(shareInfoRes);
+        const gShared = getRegisteredShare(
+          this.shareScopeMap,
+          pkgName,
+          shareInfoRes,
+          this.hooks.lifecycle.resolveShare,
+        );
         if (gShared) {
           gShared.lib = factory;
+          gShared.loaded = true;
         }
         return factory as () => T;
       };
       const loading = asyncLoadProcess();
       this.setShared({
         pkgName,
-        loaded: true,
-        shared: shareInfoRes,
+        loaded: false,
+        shared: registeredShared,
         from: this.options.name,
         lib: null,
         loading,
@@ -274,17 +345,24 @@ export class FederationHost {
       const asyncLoadProcess = async () => {
         const factory = await shareInfoRes.get();
         shareInfoRes.lib = factory;
-        addUniqueItem(shareInfoRes.useIn, this.options.name);
-        const gShared = getGlobalShare(pkgName, shareInfoRes);
+        shareInfoRes.loaded = true;
+        addUseIn(shareInfoRes);
+        const gShared = getRegisteredShare(
+          this.shareScopeMap,
+          pkgName,
+          shareInfoRes,
+          this.hooks.lifecycle.resolveShare,
+        );
         if (gShared) {
           gShared.lib = factory;
+          gShared.loaded = true;
         }
         return factory as () => T;
       };
       const loading = asyncLoadProcess();
       this.setShared({
         pkgName,
-        loaded: true,
+        loaded: false,
         shared: shareInfoRes,
         from: this.options.name,
         lib: null,
@@ -298,19 +376,59 @@ export class FederationHost {
   // 1. If the loaded shared already exists globally, then it will be reused
   // 2. If lib exists in local shared, it will be used directly
   // 3. If the local get returns something other than Promise, then it will be used directly
-  loadShareSync<T>(pkgName: string): () => T | never {
-    const shareInfo = this.options.shared?.[pkgName];
-    const globalShare = getGlobalShare(pkgName, shareInfo);
+  loadShareSync<T>(
+    pkgName: string,
+    customShareInfo?: Partial<Shared>,
+  ): () => T | never {
+    const shareInfo = Object.assign(
+      {},
+      this.options.shared?.[pkgName],
+      customShareInfo,
+    );
+    if (shareInfo?.scope) {
+      shareInfo.scope.forEach((shareScope) => {
+        this.initializeSharing(shareScope, shareInfo.strategy);
+      });
+    }
+    const registeredShared = getRegisteredShare(
+      this.shareScopeMap,
+      pkgName,
+      shareInfo,
+      this.hooks.lifecycle.resolveShare,
+    );
 
-    if (globalShare && typeof globalShare.lib === 'function') {
-      addUniqueItem(globalShare.useIn, this.options.name);
-      if (!globalShare.loaded) {
-        globalShare.loaded = true;
-        if (globalShare.from === this.options.name) {
-          shareInfo.loaded = true;
+    const addUseIn = (shared: Shared): void => {
+      if (!shared.useIn) {
+        shared.useIn = [];
+      }
+      addUniqueItem(shared.useIn, this.options.name);
+    };
+
+    if (registeredShared) {
+      if (typeof registeredShared.lib === 'function') {
+        addUseIn(registeredShared);
+        if (!registeredShared.loaded) {
+          registeredShared.loaded = true;
+          if (registeredShared.from === this.options.name) {
+            shareInfo.loaded = true;
+          }
+        }
+        return registeredShared.lib as () => T;
+      }
+      if (typeof registeredShared.get === 'function') {
+        const module = registeredShared.get();
+        if (!(module instanceof Promise)) {
+          addUseIn(registeredShared);
+          this.setShared({
+            pkgName,
+            loaded: true,
+            from: this.options.name,
+            lib: module,
+            shared: registeredShared,
+          });
+          return module;
         }
       }
-      return globalShare.lib as () => T;
     }
 
     if (shareInfo.lib) {
@@ -405,18 +523,11 @@ export class FederationHost {
       remote && expose,
       `The 'beforeRequest' hook was executed, but it failed to return the correct 'remote' and 'expose' values while loading ${idRes}.`,
     );
-
     let module: Module | undefined = this.moduleCache.get(remote.name);
 
     const moduleOptions: ModuleOptions = {
-      hostInfo: {
-        name: this.options.name,
-        version: this.options.version || 'custom',
-      },
+      host: this,
       remoteInfo,
-      shared: this.options.shared || {},
-      plugins: this.options.plugins,
-      loaderHook: this.loaderHook,
     };
 
     if (!module) {
@@ -434,7 +545,7 @@ export class FederationHost {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async loadRemote<T>(
     id: string,
-    options?: { loadFactory?: boolean },
+    options?: { loadFactory?: boolean; from: 'build' | 'runtime' },
   ): Promise<T | null> {
     try {
       const { loadFactory = true } = options || { loadFactory: true };
@@ -461,13 +572,23 @@ export class FederationHost {
         moduleInstance: module,
         origin: this,
       });
+
       return moduleOrFactory;
     } catch (error) {
-      this.hooks.lifecycle.errorLoadRemote.emit({
+      const { from = 'runtime' } = options || { from: 'runtime' };
+
+      const failOver = await this.hooks.lifecycle.errorLoadRemote.emit({
         id,
         error,
+        from,
+        origin: this,
       });
-      throw error;
+
+      if (!failOver) {
+        throw error;
+      }
+
+      return failOver;
     }
   }
 
@@ -515,14 +636,10 @@ export class FederationHost {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   initializeSharing(
     shareScopeName = DEFAULT_SCOPE,
-  ): boolean | Promise<boolean> {
-    const shareScopeLoading = Global.__FEDERATION__.__SHARE_SCOPE_LOADING__;
-    const shareScope = Global.__FEDERATION__.__SHARE__;
+    strategy?: Shared['strategy'],
+  ): Array<Promise<void>> {
+    const shareScope = this.shareScopeMap;
     const hostName = this.options.name;
-    // Executes only once
-    if (shareScopeLoading[shareScopeName]) {
-      return shareScopeLoading[shareScopeName];
-    }
     // Creates a new share scope if necessary
     if (!shareScope[shareScopeName]) {
       shareScope[shareScopeName] = {};
@@ -536,7 +653,7 @@ export class FederationHost {
       const activeVersion = versions[version];
       const activeVersionEager = Boolean(
         activeVersion &&
-          (activeVersion.eager || activeVersion.shareConfig.eager),
+          (activeVersion.eager || activeVersion.shareConfig?.eager),
       );
       if (
         !activeVersion ||
@@ -549,14 +666,18 @@ export class FederationHost {
       }
     };
     const promises: Promise<any>[] = [];
+    const initFn = (mod: RemoteEntryExports) =>
+      mod && mod.init && mod.init(shareScope[shareScopeName]);
 
     const initRemoteModule = async (key: string): Promise<void> => {
       const { module } = await this._getRemoteModuleAndOptions(key);
-
-      const initFn = (mod: RemoteEntryExports) =>
-        mod && mod.init && mod.init(shareScope[shareScopeName]);
-      const entry = await module.getEntry();
-      initFn(entry);
+      if (module.getEntry) {
+        const entry = await module.getEntry();
+        if (!module.inited) {
+          initFn(entry);
+          module.inited = true;
+        }
+      }
     };
     Object.keys(this.options.shared).forEach((shareName) => {
       const shared = this.options.shared[shareName];
@@ -564,18 +685,23 @@ export class FederationHost {
         register(shareName, shared);
       }
     });
-    this.options.remotes.forEach((remote) => {
-      if (remote.shareScope === shareScopeName) {
-        promises.push(initRemoteModule(remote.name));
-      }
-    });
 
-    if (!promises.length) {
-      return (shareScopeLoading[shareScopeName] = true);
+    if (strategy === 'version-first') {
+      this.options.remotes.forEach((remote) => {
+        if (remote.shareScope === shareScopeName) {
+          promises.push(initRemoteModule(remote.name));
+        }
+      });
     }
-    return (shareScopeLoading[shareScopeName] = Promise.all(promises).then(
-      () => (shareScopeLoading[shareScopeName] = true),
-    ));
+
+    return promises;
+  }
+
+  initShareScopeMap(
+    scopeName: string,
+    shareScope: ShareScopeMap[string],
+  ): void {
+    this.shareScopeMap[scopeName] = shareScope;
   }
 
   private formatOptions(
@@ -639,16 +765,22 @@ export class FederationHost {
       return res;
     }, globalOptionsRes.remotes);
 
-    // register shared include lib
+    // register shared in shareScopeMap
     const sharedKeys = Object.keys(formatShareOptions);
     sharedKeys.forEach((sharedKey) => {
       const sharedVal = formatShareOptions[sharedKey];
-      const globalShare = getGlobalShare(sharedKey, sharedVal);
-      if (!globalShare && sharedVal && sharedVal.lib) {
+      const registeredShared = getRegisteredShare(
+        this.shareScopeMap,
+        sharedKey,
+        sharedVal,
+        this.hooks.lifecycle.resolveShare,
+      );
+      if (!registeredShared && sharedVal && sharedVal.lib) {
         this.setShared({
           pkgName: sharedKey,
           lib: sharedVal.lib,
           get: sharedVal.get,
+          loaded: true,
           shared: sharedVal,
           from: userOptions.name,
         });
@@ -705,31 +837,30 @@ export class FederationHost {
     loading?: Shared['loading'];
     get?: Shared['get'];
   }): void {
-    const target = getGlobalShareScope();
     const { version, scope = 'default', ...shareInfo } = shared;
     const scopes: string[] = Array.isArray(scope) ? scope : [scope];
     scopes.forEach((sc) => {
-      if (!target[sc]) {
-        target[sc] = {};
+      if (!this.shareScopeMap[sc]) {
+        this.shareScopeMap[sc] = {};
       }
-      if (!target[sc][pkgName]) {
-        target[sc][pkgName] = {};
+      if (!this.shareScopeMap[sc][pkgName]) {
+        this.shareScopeMap[sc][pkgName] = {};
       }
 
-      if (target[sc][pkgName][version]) {
+      if (this.shareScopeMap[sc][pkgName][version]) {
         warn(
           // eslint-disable-next-line max-len
           `The share \n ${safeToString({
             scope: sc,
             pkgName,
             version,
-            from: target[sc][pkgName][version].from,
+            from: this.shareScopeMap[sc][pkgName][version].from,
           })} has been registered`,
         );
         return;
       }
 
-      target[sc][pkgName][version] = {
+      this.shareScopeMap[sc][pkgName][version] = {
         version,
         scope: ['default'],
         ...shareInfo,
@@ -739,7 +870,7 @@ export class FederationHost {
       };
 
       if (get) {
-        target[sc][pkgName][version].get = get;
+        this.shareScopeMap[sc][pkgName][version].get = get;
       }
     });
   }

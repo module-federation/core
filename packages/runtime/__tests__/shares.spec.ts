@@ -10,8 +10,10 @@ import {
 import { DEFAULT_SCOPE } from '../src/constant';
 // import { assert } from '../src/utils/logger';
 import { FederationHost } from '../src/core';
+import { UserOptions, ShareScopeMap } from '../src/type';
 
 // eslint-disable-next-line max-lines-per-function
+// TODO: add new load share test cases
 describe('shared', () => {
   beforeEach(() => {
     __FEDERATION__.__SHARE__ = {};
@@ -87,19 +89,8 @@ describe('shared', () => {
     }>('singleton-react');
     const reactInstance2Res = reactInstance2();
     assert(reactInstance2Res, "reactInstance can't be undefined");
-    expect(reactInstance2Res.from).toBe('@federation/loadShare');
+    expect(reactInstance2Res.from).toBe('@federation/loadShare2');
     expect(reactInstance2Res.version).toBe('16.0.0');
-    expect(getGlobalShareScope()).toMatchObject({
-      [DEFAULT_SCOPE]: {
-        'singleton-react': {
-          '16.0.0': {
-            get: gmConfig1.shared['singleton-react'].get,
-            from: gmConfig1.name,
-            useIn: [gmConfig1.name, gmConfig2.name],
-          },
-        },
-      },
-    });
   });
 
   it('loadShare cache', async () => {
@@ -144,8 +135,8 @@ describe('shared', () => {
     const reactInstance2Res = reactInstance2();
     assert(reactInstance1Res, "reactInstance1 can't be undefined");
     assert(reactInstance2Res, "reactInstance2 can't be undefined");
-    expect(reactInstance1Res.uniqueId).toBe(1);
-    expect(reactInstance2Res.uniqueId).toBe(1);
+    expect(reactInstance1Res.uniqueId).toBe(2);
+    expect(reactInstance2Res.uniqueId).toBe(2);
     expect(reactInstance1Res).toStrictEqual(reactInstance2Res);
   });
 
@@ -201,7 +192,7 @@ describe('shared', () => {
     }>('runtime-react');
     const sharedRes = shared();
     assert(sharedRes, "shared can't be null");
-    expect(sharedRes.from).toEqual('@federation/runtime-deps');
+    expect(sharedRes.from).toEqual('@federation/runtime-deps2');
   });
 
   // it('share deps', async () => {
@@ -312,7 +303,7 @@ describe('single shared', () => {
     );
     const sharedRes = shared();
     assert(sharedRes, "shared can't be null");
-    expect(sharedRes.from).toEqual('@shared-single/runtime-deps3');
+    expect(sharedRes.from).toEqual('@shared-single/runtime-deps2');
   });
 });
 
@@ -378,7 +369,7 @@ describe('eager shared', () => {
     const reactInstance2Res = reactInstance2();
 
     assert(reactInstance2Res, "reactInstance can't be undefined");
-    expect(reactInstance2Res.version).toBe('16.0.0');
+    expect(reactInstance2Res.version).toBe('16.0.1');
   });
 
   it('load self shared module while globalShare not have expected shared module', async () => {
@@ -459,5 +450,297 @@ describe('eager shared', () => {
         name: string;
       }>('none-eager-react');
     }).toThrowError('The loadShareSync');
+  });
+});
+
+describe('strictVersion shared', () => {
+  it('throw error while strictVersion is true, singleton is true and requiredVersion can not match. ', async () => {
+    const federationConfig1 = {
+      name: '@shared-single/runtime-deps',
+      remotes: [],
+      shared: {
+        'runtime-react': {
+          version: '16.0.0',
+          shareConfig: {},
+          get: async () => () => {
+            return { from: '@shared-single/runtime-deps2' };
+          },
+        },
+      },
+    };
+
+    const federationConfig2 = {
+      name: '@shared-single/runtime-deps2',
+      remotes: [],
+      shared: {
+        'runtime-react': {
+          version: '17.0.2',
+          shareConfig: {
+            strictVersion: true,
+            singleton: true,
+            requiredVersion: '^17.0.0',
+          },
+          lib: () => {
+            return { from: '@shared-single/runtime-deps' };
+          },
+        },
+      },
+    };
+
+    const FM1 = new FederationHost(federationConfig1);
+    const FM2 = new FederationHost(federationConfig2);
+
+    await FM1.loadShare<{ from: string; version: string }>('runtime-react');
+    FM2.initShareScopeMap('default', FM1.shareScopeMap['default']);
+
+    expect(function () {
+      FM2.loadShareSync<{
+        version: string;
+        name: string;
+      }>('runtime-react');
+    }).toThrowError('[ Federation Runtime ]: Version');
+  });
+
+  it('use self shared first , if strictVersion is true, singleton is false , requiredVersion is false ', async () => {
+    const federationConfig1 = {
+      name: '@shared-single/runtime-deps',
+      remotes: [],
+      shared: {
+        'runtime-react': {
+          version: '16.0.0',
+          shareConfig: {},
+          lib: () => {
+            return { from: '@shared-single/runtime-deps' };
+          },
+        },
+      },
+    };
+
+    const federationConfig2 = {
+      name: '@shared-single/runtime-deps2',
+      remotes: [],
+      shared: {
+        'runtime-react': {
+          version: '17.0.2',
+          shareConfig: {
+            strictVersion: true,
+            singleton: false,
+            requiredVersion: false,
+          },
+          get: async () => () => {
+            return { from: '@shared-single/runtime-deps2' };
+          },
+        },
+      },
+    };
+
+    const FM1 = new FederationHost(federationConfig1);
+    const FM2 = new FederationHost(federationConfig2);
+
+    await FM1.loadShare<{ from: string; version: string }>('runtime-react');
+    FM2.initShareScopeMap('default', FM1.shareScopeMap['default']);
+
+    const shared = await FM2.loadShare<{ from: string; version: string }>(
+      'runtime-react',
+    );
+    assert(shared, "shared can't be null");
+    const sharedRes = shared();
+    assert(sharedRes, "shared can't be null");
+    expect(sharedRes.from).toEqual('@shared-single/runtime-deps');
+  });
+});
+
+describe('with shareScope shared', () => {
+  it('use the same shareScope existed shared', async () => {
+    const existedShareScopeMap: ShareScopeMap = {
+      default: {
+        'runtime-react': {
+          '16.0.1': {
+            version: '16.0.1',
+            get: () => () => {
+              return { from: '@shared-single/runtime-deps3' };
+            },
+            lib: () => {
+              return { from: '@shared-single/runtime-deps3' };
+            },
+            shareConfig: {
+              requiredVersion: false,
+              singleton: true,
+              eager: false,
+              strictVersion: false,
+            },
+            scope: ['default'],
+            useIn: ['@shared-single/runtime-deps3'],
+            from: '@shared-single/runtime-deps3',
+            deps: [],
+            strategy: 'version-first',
+          },
+        },
+      },
+      old: {
+        'runtime-react': {
+          '16.0.2': {
+            version: '16.0.2',
+            get: () => () => {
+              return { from: '@shared-single/runtime-deps2' };
+            },
+            lib: () => {
+              return { from: '@shared-single/runtime-deps2' };
+            },
+            shareConfig: {
+              requiredVersion: false,
+              singleton: true,
+              eager: false,
+              strictVersion: false,
+            },
+            scope: ['old'],
+            useIn: ['@shared-single/runtime-deps2'],
+            from: '@shared-single/runtime-deps2',
+            deps: [],
+            strategy: 'version-first',
+          },
+        },
+      },
+    };
+
+    const federationConfig1: UserOptions = {
+      name: '@shared-single/runtime-deps',
+      remotes: [],
+      shared: {
+        'runtime-react': {
+          version: '16.0.0',
+          scope: 'default',
+          lib: () => {
+            return { from: '@shared-single/runtime-deps' };
+          },
+        },
+      },
+    };
+
+    const FM1 = new FederationHost(federationConfig1);
+    // initShareScopeMap will be called while container.init execute
+    FM1.initShareScopeMap('default', existedShareScopeMap['default']);
+
+    const shared = await FM1.loadShare<{ from: string; version: string }>(
+      'runtime-react',
+    );
+    assert(shared, "shared can't be null");
+
+    const sharedRes = shared();
+    assert(sharedRes, "sharedRes can't be null");
+    expect(sharedRes.from).toEqual('@shared-single/runtime-deps3');
+  });
+
+  it('use the specify shareScope shared', async () => {
+    const existedShareScopeMap: ShareScopeMap = {
+      default: {
+        'runtime-react': {
+          '16.0.1': {
+            version: '16.0.1',
+            get: () => () => {
+              return { from: '@shared-single/runtime-deps3' };
+            },
+            lib: () => {
+              return { from: '@shared-single/runtime-deps3' };
+            },
+            shareConfig: {
+              requiredVersion: false,
+              singleton: true,
+              eager: false,
+              strictVersion: false,
+            },
+            scope: ['default'],
+            useIn: ['@shared-single/runtime-deps3'],
+            from: '@shared-single/runtime-deps3',
+            deps: [],
+            strategy: 'version-first',
+          },
+        },
+      },
+      old: {
+        'runtime-react': {
+          '16.0.2': {
+            version: '16.0.2',
+            get: () => () => {
+              return { from: '@shared-single/runtime-deps2' };
+            },
+            lib: () => {
+              return { from: '@shared-single/runtime-deps2' };
+            },
+            shareConfig: {
+              requiredVersion: false,
+              singleton: true,
+              eager: false,
+              strictVersion: false,
+            },
+            scope: ['old'],
+            useIn: ['@shared-single/runtime-deps2'],
+            from: '@shared-single/runtime-deps2',
+            deps: [],
+            strategy: 'version-first',
+          },
+        },
+      },
+    };
+
+    const federationConfig1: UserOptions = {
+      name: '@shared-single/runtime-deps',
+      remotes: [],
+      shared: {
+        'runtime-react': {
+          version: '16.0.0',
+          scope: 'old',
+          lib: () => {
+            return { from: '@shared-single/runtime-deps' };
+          },
+        },
+      },
+    };
+
+    const FM1 = new FederationHost(federationConfig1);
+    // initShareScopeMap will be called while container.init execute
+    FM1.initShareScopeMap('old', existedShareScopeMap['old']);
+
+    const shared = await FM1.loadShare<{ from: string; version: string }>(
+      'runtime-react',
+    );
+    assert(shared, "shared can't be null");
+    const sharedRes = shared();
+    assert(sharedRes, "sharedRes can't be null");
+    expect(sharedRes.from).toEqual('@shared-single/runtime-deps');
+  });
+});
+
+describe('load share with customize consume info', () => {
+  it('return false while not matched shared', async () => {
+    const federationConfig1: UserOptions = {
+      name: '@shared-single/runtime-deps',
+      remotes: [],
+      shared: {
+        'runtime-react': {
+          version: '16.0.0',
+          scope: 'default',
+          lib: () => {
+            return { from: '@shared-single/runtime-deps' };
+          },
+        },
+      },
+    };
+
+    const FM1 = new FederationHost(federationConfig1);
+    const shared = await FM1.loadShare<{ from: string }>('runtime-react');
+    assert(shared, "shared can't be null");
+    const sharedRes = shared();
+    assert(sharedRes, "sharedRes can't be null");
+    expect(sharedRes.from).toEqual('@shared-single/runtime-deps');
+
+    const sharedWithCustomInfo = await FM1.loadShare('runtime-react', {
+      shareConfig: {
+        requiredVersion: '>17',
+        singleton: false,
+      },
+    });
+    console.log(sharedWithCustomInfo);
+    expect(sharedWithCustomInfo).toEqual(false);
   });
 });

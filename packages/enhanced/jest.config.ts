@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { readFileSync } from 'fs';
+import path from 'path';
 
 // Reading the SWC compilation config and remove the "exclude"
 // for the test files to be compiled by SWC
@@ -26,4 +27,13 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/enhanced',
+  rootDir: __dirname,
+  testMatch: [
+    '<rootDir>/test/*.test.js',
+    '<rootDir>/test/*.basictest.js',
+    '<rootDir>/test/*.longtest.js',
+    '<rootDir>/test/*.unittest.js',
+  ],
+  testEnvironment: path.resolve(__dirname, './test/patch-node-env.js'),
+  setupFilesAfterEnv: ['<rootDir>/test/setupTestFramework.js'],
 };

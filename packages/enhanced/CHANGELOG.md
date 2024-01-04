@@ -1,5 +1,24 @@
 # [0.2.0-canary.5](https://github.com/module-federation/universe/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.0.7
+
+### Patch Changes
+
+- @module-federation/sdk@0.0.7
+
+## 0.0.6
+
+### Patch Changes
+
+- @module-federation/sdk@0.0.6
+
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies [5a79cb3]
+  - @module-federation/sdk@0.0.5
+
 ## 0.0.4
 
 ### Patch Changes

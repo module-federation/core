@@ -1,5 +1,8 @@
+import { attachShareScopeMap } from './attachShareScopeMap';
 import type { RemoteEntryExports } from './types';
 import { RemotesOptions } from './types';
+import { decodeName } from '@module-federation/sdk';
+import { ENCODE_NAME_PREFIX } from './constant';
 
 export function remotes(options: RemotesOptions) {
   const {
@@ -8,7 +11,9 @@ export function remotes(options: RemotesOptions) {
     chunkMapping,
     idToExternalAndNameMapping,
     webpackRequire,
+    idToRemoteMap,
   } = options;
+  attachShareScopeMap(webpackRequire);
 
   if (webpackRequire.o(chunkMapping, chunkId)) {
     chunkMapping[chunkId].forEach((id) => {
@@ -17,6 +22,7 @@ export function remotes(options: RemotesOptions) {
         getScope = [];
       }
       const data = idToExternalAndNameMapping[id];
+      const remoteInfos = idToRemoteMap[id];
       // @ts-ignore seems not work
       if (getScope.indexOf(data) >= 0) {
         return;
@@ -84,7 +90,6 @@ export function remotes(options: RemotesOptions) {
         external: RemoteEntryExports,
         first: 1 | 0,
       ) => handleFunction(external.get, data[1], getScope, 0, onFactory, first);
-      const useRuntimeLoad = ['script'].includes(data[3]) && data[4];
       // eslint-disable-next-line no-var
       var onFactory = (factory: () => any) => {
         data.p = 1;
@@ -94,15 +99,26 @@ export function remotes(options: RemotesOptions) {
       };
       const onRemoteLoaded = () => {
         try {
-          const remoteModuleName = data[4] + data[1].slice(1);
+          const remoteName = decodeName(
+            remoteInfos[0].name,
+            ENCODE_NAME_PREFIX,
+          );
+
+          const remoteModuleName = remoteName + data[1].slice(1);
           return webpackRequire.federation.instance!.loadRemote(
             remoteModuleName,
-            { loadFactory: false },
+            { loadFactory: false, from: 'build' },
           );
         } catch (error) {
           onError(error as Error);
         }
       };
+
+      const useRuntimeLoad =
+        remoteInfos.length === 1 &&
+        ['script'].includes(remoteInfos[0].externalType) &&
+        remoteInfos[0].name;
+
       if (useRuntimeLoad) {
         handleFunction(onRemoteLoaded, data[2], 0, 0, onFactory, 1);
       } else {
