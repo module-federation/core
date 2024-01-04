@@ -5,10 +5,10 @@ import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 const PLUGIN_NAME = 'FederationRuntimePlugin';
 
 export default class FederationRuntimePlugin implements WebpackPluginInstance {
-  private _options: ModuleFederationPluginOptions;
+  private _options?: ModuleFederationPluginOptions;
   name: string;
 
-  constructor(options: ModuleFederationPluginOptions) {
+  constructor(options?: ModuleFederationPluginOptions) {
     this._options = options;
     this.name = PLUGIN_NAME;
   }
