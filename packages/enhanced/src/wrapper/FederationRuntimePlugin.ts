@@ -7,10 +7,12 @@ const PLUGIN_NAME = 'FederationRuntimePlugin';
 export default class FederationRuntimePlugin implements WebpackPluginInstance {
   private _options: ModuleFederationPluginOptions;
   name: string;
+  entryFilePath: string;
 
   constructor(options: ModuleFederationPluginOptions) {
     this._options = options;
     this.name = PLUGIN_NAME;
+    this.entryFilePath = '';
   }
 
   apply(compiler: Compiler) {
@@ -19,6 +21,9 @@ export default class FederationRuntimePlugin implements WebpackPluginInstance {
     const CoreFederationRuntimePlugin =
       require('../lib/container/runtime/FederationRuntimePlugin')
         .default as typeof import('../lib/container/runtime/FederationRuntimePlugin').default;
-    new CoreFederationRuntimePlugin(this._options).apply(compiler);
+    const pluginInstance = new CoreFederationRuntimePlugin(this._options);
+    pluginInstance.apply(compiler);
+
+    this.entryFilePath = pluginInstance.entryFilePath;
   }
 }
