@@ -72,7 +72,6 @@ class Module {
 
       const remoteEntryInitOptions = {
         version: this.remoteInfo.version || '',
-        hostId: this.host.options.id || this.host.name,
       };
 
       // Help to find host instance
@@ -85,6 +84,7 @@ class Module {
       const initContainerOptions =
         await this.host.hooks.lifecycle.beforeInitContainer.emit({
           shareScope,
+          // @ts-ignore hostId will be set by Object.defineProperty
           remoteEntryInitOptions,
           initScope,
           remoteInfo: this.remoteInfo,
