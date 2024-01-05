@@ -199,8 +199,8 @@ class FederationRuntimePlugin {
   setRuntimeAlias(compiler: Compiler) {
     let runtimePath = RuntimePath;
     if (this.options?.implementation) {
-      runtimePath = require.resolve(this.options.implementation, {
-        paths: [RuntimeToolsPath],
+      runtimePath = require.resolve('@module-federation/runtime', {
+        paths: [this.options.implementation],
       });
     }
 
