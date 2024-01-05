@@ -1,7 +1,7 @@
 import { getFMId, safeToString, assert } from '../utils';
 import { getRemoteEntry } from '../utils/load';
 import { FederationHost } from '../core';
-import { RemoteEntryExports, InitScope, RemoteInfo } from '../type';
+import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';
 
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
 
