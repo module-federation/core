@@ -290,17 +290,21 @@ class ContainerEntryModule extends Module {
         `${RuntimeGlobals.currentRemoteGetScope} = undefined;`,
         'return getScope;',
       ])};`,
-      `var init = ${runtimeTemplate.basicFunction('shareScope, initScope', [
-        `return ${federationGlobal}.bundlerRuntime.initContainerEntry({${Template.indent(
-          [
-            `webpackRequire: ${RuntimeGlobals.require},`,
-            `shareScope: shareScope,`,
-            `initScope: initScope,`,
-            `shareScopeKey: ${JSON.stringify(this._shareScope)}`,
-          ],
-        )}`,
-        '})',
-      ])};`,
+      `var init = ${runtimeTemplate.basicFunction(
+        'shareScope, initScope, remoteEntryInitOptions',
+        [
+          `return ${federationGlobal}.bundlerRuntime.initContainerEntry({${Template.indent(
+            [
+              `webpackRequire: ${RuntimeGlobals.require},`,
+              `shareScope: shareScope,`,
+              `initScope: initScope,`,
+              `remoteEntryInitOptions: remoteEntryInitOptions,`,
+              `shareScopeKey: ${JSON.stringify(this._shareScope)}`,
+            ],
+          )}`,
+          '})',
+        ],
+      )};`,
       `${initRuntimeModuleGetter}`,
       '',
       '// This exports getters to disallow modifications',

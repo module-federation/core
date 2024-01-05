@@ -36,10 +36,12 @@ const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 class FederationRuntimePlugin {
   options?: ModuleFederationPluginOptions;
   entryFilePath: string;
+  bundlerRuntimePath: string;
 
   constructor(options?: ModuleFederationPluginOptions) {
     this.options = options;
     this.entryFilePath = '';
+    this.bundlerRuntimePath = BundlerRuntimePath;
   }
 
   static getTemplate(runtimePlugins: string[], bundlerRuntimePath?: string) {
@@ -112,7 +114,7 @@ class FederationRuntimePlugin {
     this.entryFilePath = FederationRuntimePlugin.getFilePath(
       this.options.name!,
       this.options.runtimePlugins!,
-      this.options.implementation,
+      this.bundlerRuntimePath,
     );
     return this.entryFilePath;
   }
@@ -130,7 +132,7 @@ class FederationRuntimePlugin {
         filePath,
         FederationRuntimePlugin.getTemplate(
           this.options.runtimePlugins!,
-          this.options.implementation,
+          this.bundlerRuntimePath,
         ),
       );
     }
@@ -199,8 +201,8 @@ class FederationRuntimePlugin {
   setRuntimeAlias(compiler: Compiler) {
     let runtimePath = RuntimePath;
     if (this.options?.implementation) {
-      runtimePath = require.resolve(this.options.implementation, {
-        paths: [RuntimeToolsPath],
+      runtimePath = require.resolve('@module-federation/runtime', {
+        paths: [this.options.implementation],
       });
     }
 
@@ -248,6 +250,15 @@ class FederationRuntimePlugin {
       // the instance may get the same one if the name is the same https://github.com/module-federation/universe/blob/main/packages/runtime/src/index.ts#L18
       this.options.name =
         compiler.options.output.uniqueName || `container_${Date.now()}`;
+    }
+
+    if (this.options?.implementation) {
+      this.bundlerRuntimePath = require.resolve(
+        '@module-federation/webpack-bundler-runtime',
+        {
+          paths: [this.options.implementation],
+        },
+      );
     }
 
     this.prependEntry(compiler);

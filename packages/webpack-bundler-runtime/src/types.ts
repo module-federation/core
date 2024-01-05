@@ -1,4 +1,5 @@
 import * as runtime from '@module-federation/runtime';
+import type { RemoteEntryInitOptions } from '@module-federation/runtime/types';
 import { initializeSharing } from './initializeSharing';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
@@ -118,6 +119,7 @@ export interface InitContainerEntryOptions {
   shareScope: ShareScopeMap[string];
   shareScopeKey: string;
   webpackRequire: WebpackRequire;
+  remoteEntryInitOptions?: RemoteEntryInitOptions;
   initScope?: InitializeSharingOptions['initScope'];
 }
 
