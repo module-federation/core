@@ -6,7 +6,15 @@ import {
 
 function isLegacyHost(
   shareScope: InitContainerEntryOptions['shareScope'],
+  remoteEntryInitOptions: InitContainerEntryOptions['remoteEntryInitOptions'],
 ): boolean {
+  if (
+    remoteEntryInitOptions &&
+    typeof remoteEntryInitOptions === 'object' &&
+    remoteEntryInitOptions.hostId
+  ) {
+    return false;
+  }
   if ('version' in shareScope && typeof shareScope['version'] !== 'object') {
     return true;
   }
@@ -19,7 +27,13 @@ function isLegacyHost(
 export function initContainerEntry(
   options: InitContainerEntryOptions,
 ): WebpackRequire['I'] | void {
-  const { webpackRequire, shareScope, initScope, shareScopeKey } = options;
+  const {
+    webpackRequire,
+    shareScope,
+    initScope,
+    shareScopeKey,
+    remoteEntryInitOptions,
+  } = options;
   if (!webpackRequire.S) return;
   if (
     !webpackRequire.federation ||
@@ -31,8 +45,9 @@ export function initContainerEntry(
   webpackRequire.federation.instance.initOptions({
     name: webpackRequire.federation.initOptions.name,
     remotes: [],
+    ...remoteEntryInitOptions,
   });
-  if (isLegacyHost(shareScope)) {
+  if (isLegacyHost(shareScope, remoteEntryInitOptions)) {
     const prevShareScope = globalThis.__FEDERATION__.__SHARE__['default'];
     if (prevShareScope) {
       webpackRequire.federation.instance.initShareScopeMap(

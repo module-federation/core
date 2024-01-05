@@ -72,6 +72,7 @@ class Module {
 
       const remoteEntryInitOptions = {
         version: this.remoteInfo.version || '',
+        hostId: this.host.options.id || this.host.name,
       };
 
       const initContainerOptions =
