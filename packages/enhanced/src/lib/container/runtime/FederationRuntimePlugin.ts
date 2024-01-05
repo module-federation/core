@@ -19,14 +19,17 @@ const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
 
+const RuntimeToolsPath = require.resolve('@module-federation/runtime-tools');
+
 const BundlerRuntimePath = require.resolve(
   '@module-federation/webpack-bundler-runtime',
+  {
+    paths: [RuntimeToolsPath],
+  },
 );
 const RuntimePath = require.resolve('@module-federation/runtime', {
-  paths: [BundlerRuntimePath],
+  paths: [RuntimeToolsPath],
 });
-
-const DEFAULT_REMOTE_ENTRY = 'remoteEntry.js';
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
@@ -194,9 +197,18 @@ class FederationRuntimePlugin {
   }
 
   setRuntimeAlias(compiler: Compiler) {
+    let runtimePath = RuntimePath;
+    if (this.options?.implementation) {
+      runtimePath = require.resolve(this.options.implementation, {
+        paths: [RuntimeToolsPath],
+      });
+    }
+
     compiler.options.resolve.alias = {
       ...compiler.options.resolve.alias,
-      '@module-federation/runtime$': RuntimePath,
+      '@module-federation/runtime$': runtimePath,
+      '@module-federation/runtime-tools$':
+        this.options?.implementation || RuntimeToolsPath,
     };
   }
 
