@@ -80,6 +80,7 @@ export class FederationHost {
       origin: FederationHost;
     }>('beforeRequest'),
     afterResolve: new AsyncWaterfallHook<LoadRemoteMatch>('afterResolve'),
+    // maybe will change, temporarily for internal use only
     beforeInitContainer: new AsyncWaterfallHook<{
       shareScope: ShareScopeMap[string];
       initScope: InitScope;
@@ -87,6 +88,7 @@ export class FederationHost {
       remoteInfo: RemoteInfo;
       origin: FederationHost;
     }>('beforeInitContainer'),
+    // maybe will change, temporarily for internal use only
     initContainer: new AsyncWaterfallHook<{
       shareScope: ShareScopeMap[string];
       initScope: InitScope;
@@ -129,7 +131,7 @@ export class FederationHost {
           origin: FederationHost;
         },
       ],
-      void
+      void | unknown
     >('errorLoadRemote'),
     beforeLoadShare: new AsyncWaterfallHook<{
       pkgName: string;
@@ -137,6 +139,7 @@ export class FederationHost {
       shared: Options['shared'];
       origin: FederationHost;
     }>('beforeLoadShare'),
+    // not used yet
     loadShare: new AsyncHook<[FederationHost, string, ShareInfos]>(),
     resolveShare: new SyncWaterfallHook<{
       shareScopeMap: ShareScopeMap;
@@ -164,6 +167,7 @@ export class FederationHost {
       ],
       Promise<PreloadAssets>
     >('generatePreloadAssets'),
+    // not used yet
     afterPreloadRemote: new AsyncHook<{
       preloadOps: Array<PreloadRemoteArgs>;
       options: Options;
@@ -177,7 +181,7 @@ export class FederationHost {
   snapshotHandler: SnapshotHandler;
   shareScopeMap: ShareScopeMap;
   loaderHook = new PluginSystem({
-    // FIXME: may not be suitable
+    // FIXME: may not be suitable , not open to the public yet
     getModuleInfo: new SyncHook<
       [
         {
@@ -195,6 +199,7 @@ export class FederationHost {
       ],
       HTMLScriptElement | void
     >(),
+    // only work for manifest , so not open to the public yet
     fetch: new AsyncHook<
       [string, RequestInit],
       Promise<Response> | void | false
@@ -588,7 +593,7 @@ export class FederationHost {
         throw error;
       }
 
-      return failOver;
+      return failOver as T;
     }
   }
 

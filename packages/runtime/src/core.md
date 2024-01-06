@@ -90,11 +90,15 @@ Initializes sharing sequences for shared scopes.
   - Invoked before resolving a remote container, useful for injecting the container or updating something ahead of the lookup.
 - **`afterResolve`**: `AsyncWaterfallHook<LoadRemoteMatch>`
   - Called after resolving a container, allowing redirection or modification of resolved information.
+- **`beforeInitContainer`**: `AsyncWaterfallHook<{shareScope: ShareScopeMap[string];initScope: InitScope;remoteEntryInitOptions: RemoteEntryInitOptions;origin: FederationHost;}>`
+  - Get the init parameters and use them before the remote container init method is called.
+- **`initContainer`**: `AsyncWaterfallHook<{shareScope: ShareScopeMap[string];initScope: InitScope;remoteEntryInitOptions: RemoteEntryInitOptions;remoteEntryExports: RemoteEntryExports;origin: FederationHost;}>`
+  - Invoked after container.init is called
 - **`onLoad`**: `AsyncHook<[{ id: string; expose: string; pkgNameOrAlias: string; remote: Remote; options: ModuleOptions; origin: FederationHost; exposeModule: any; exposeModuleFactory: any; moduleInstance: Module; }], void>`
   - Triggered once a federated module is loaded, allowing access and modification to the exports of the loaded file.
 - **`handlePreloadModule`**: `SyncHook<{ id: string; name: string; remoteSnapshot: ModuleInfo; preloadConfig: PreloadRemoteArgs; }, void>`
   - Handles preloading logic for federated modules.
-- **`errorLoadRemote`**: `AsyncHook<[{ id: string; error: unknown; }], void>`
+- **`errorLoadRemote`**: `AsyncHook<[{ id: string; error: unknown; }], void | unknown>`
   - Invoked if loading a federated module fails, enabling custom error handling.
 - **`beforeLoadShare`**: `AsyncWaterfallHook<{ pkgName: string; shareInfo?: Shared;
 
