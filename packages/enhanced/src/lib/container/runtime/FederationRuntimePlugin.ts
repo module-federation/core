@@ -19,24 +19,29 @@ const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
 
+const RuntimeToolsPath = require.resolve('@module-federation/runtime-tools');
+
 const BundlerRuntimePath = require.resolve(
   '@module-federation/webpack-bundler-runtime',
+  {
+    paths: [RuntimeToolsPath],
+  },
 );
 const RuntimePath = require.resolve('@module-federation/runtime', {
-  paths: [BundlerRuntimePath],
+  paths: [RuntimeToolsPath],
 });
-
-const DEFAULT_REMOTE_ENTRY = 'remoteEntry.js';
 
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class FederationRuntimePlugin {
   options?: ModuleFederationPluginOptions;
   entryFilePath: string;
+  bundlerRuntimePath: string;
 
   constructor(options?: ModuleFederationPluginOptions) {
     this.options = options;
     this.entryFilePath = '';
+    this.bundlerRuntimePath = BundlerRuntimePath;
   }
 
   static getTemplate(runtimePlugins: string[], bundlerRuntimePath?: string) {
@@ -109,7 +114,7 @@ class FederationRuntimePlugin {
     this.entryFilePath = FederationRuntimePlugin.getFilePath(
       this.options.name!,
       this.options.runtimePlugins!,
-      this.options.implementation,
+      this.bundlerRuntimePath,
     );
     return this.entryFilePath;
   }
@@ -127,7 +132,7 @@ class FederationRuntimePlugin {
         filePath,
         FederationRuntimePlugin.getTemplate(
           this.options.runtimePlugins!,
-          this.options.implementation,
+          this.bundlerRuntimePath,
         ),
       );
     }
@@ -194,9 +199,18 @@ class FederationRuntimePlugin {
   }
 
   setRuntimeAlias(compiler: Compiler) {
+    let runtimePath = RuntimePath;
+    if (this.options?.implementation) {
+      runtimePath = require.resolve('@module-federation/runtime', {
+        paths: [this.options.implementation],
+      });
+    }
+
     compiler.options.resolve.alias = {
       ...compiler.options.resolve.alias,
-      '@module-federation/runtime$': RuntimePath,
+      '@module-federation/runtime$': runtimePath,
+      '@module-federation/runtime-tools$':
+        this.options?.implementation || RuntimeToolsPath,
     };
   }
 
@@ -236,6 +250,15 @@ class FederationRuntimePlugin {
       // the instance may get the same one if the name is the same https://github.com/module-federation/universe/blob/main/packages/runtime/src/index.ts#L18
       this.options.name =
         compiler.options.output.uniqueName || `container_${Date.now()}`;
+    }
+
+    if (this.options?.implementation) {
+      this.bundlerRuntimePath = require.resolve(
+        '@module-federation/webpack-bundler-runtime',
+        {
+          paths: [this.options.implementation],
+        },
+      );
     }
 
     this.prependEntry(compiler);

@@ -528,7 +528,7 @@ export default {
       absolutePath: false,
     },
     implementation: {
-      description: 'Bundler runtime path',
+      description: 'Runtime tools path',
       type: 'string',
       minLength: 1,
     },

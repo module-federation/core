@@ -119,6 +119,7 @@ export type LoadModuleOptions = {
 // Only for legacy federation provider
 export type RemoteEntryInitOptions = {
   version: string;
+  hostId: string;
 };
 
 export type InitScope = Array<Record<string, never>>;
@@ -127,7 +128,7 @@ export type RemoteEntryExports = {
   get: (id: string) => () => Promise<Module>;
   init: (
     shareScope: ShareScopeMap[string],
-    initScope?: Array<Record<string, any>>,
+    initScope?: InitScope,
     remoteEntryInitOPtions?: RemoteEntryInitOptions,
   ) => void;
 };
