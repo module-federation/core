@@ -1,5 +1,6 @@
 import type webpack from 'webpack';
 import path from 'path';
+
 export function getWebpackPath(
   compiler: webpack.Compiler,
   options: { framework: 'nextjs' | 'other' } = { framework: 'other' },
