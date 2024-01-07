@@ -1,8 +1,8 @@
 # `@module-federation/enhanced`
 
-Provide enhanced features for module federation.
+This package provides enhanced features for module federation.
 
-It exports the following items:
+The following items are exported:
 
 * ModuleFederationPlugin
 * ContainerPlugin
@@ -31,9 +31,9 @@ The name of the container.
 - Required: No
 - Default: `undefined`
 
-Used to determine the modules and file entry points exposed by MF. After configuration, the exposed modules will be extracted into a separate chunk, and if there are async chunks, they will be extracted into a separate chunk (the specific splitting behavior depends on the chunk splitting rules).
+Used to specify the modules and file entry points that are exposed via Module Federation. After configuration, the exposed modules will be extracted into a separate chunk, and if there are async chunks, they will also be extracted into a separate chunk (the specific splitting behavior depends on the chunk splitting rules).
 
-The `Exposes` type is as follows:
+The `Exposes` type is defined as follows:
 
 ```tsx
 type Exposes = (ExposesItem | ExposesObject)[] | ExposesObject;
@@ -47,7 +47,7 @@ interface ExposesObject {
 }
 ```
 
-Where `exposeKey` is basically the same as the [Package Entry Points](https://nodejs.org/api/packages.html#package-entry-points) specification (except that regular expression matching is not supported).
+Here, `exposeKey` is essentially the same as the [Package Entry Points](https://nodejs.org/api/packages.html#package-entry-points) specification (except that regular expression matching is not supported).
 
 For example:
 
@@ -69,15 +69,15 @@ module.exports = {
 
 ### remotes
 
-> Consumer-specific parameter. If remotes is set, it can be considered as a consumer.
+> This is a consumer-specific parameter. If remotes is set, it can be considered as a consumer.
 
 - Type: `Remotes`
 - Required: No
 - Default: `undefined`
 
-Used to determine how MF consumes remote modules.
+This is used to specify how Module Federation consumes remote modules.
 
-The `Remotes` type is as follows:
+The `Remotes` type is defined as follows:
 
 ```tsx
 type Remotes = (RemotesItem | RemotesObject)[] | RemotesObject;
@@ -90,7 +90,7 @@ interface RemotesObject {
 }
 ```
 
-Where `remoteAlias` is the name actually used by the user and can be configured arbitrarily. For example, if `remoteAlias` is set to `demo`, the consumption method is `import xx from 'demo'`.
+Here, `remoteAlias` is the name actually used by the user and can be configured arbitrarily. For example, if `remoteAlias` is set to `demo`, the consumption method is `import xx from 'demo'`.
 
 ### shared
 
@@ -101,7 +101,7 @@ Where `remoteAlias` is the name actually used by the user and can be configured 
 
 `shared` is used to share common dependencies between consumers and producers, reducing runtime download size and thus improving performance. 
 
-The `Shared` type is as follows:
+The `Shared` type is defined as follows:
 
 ```tsx
 type Shared = (SharedItem | SharedObject)[] | SharedObject;
@@ -119,7 +119,7 @@ interface SharedObject {
 - Required: No
 - Default: `false`
 
-Whether to allow only one version of the shared module in the shared scope (singleton mode).
+Determines whether only one version of the shared module is allowed in the shared scope (singleton mode).
 
 - If the value is true, singleton mode is enabled; if the value is false, singleton mode is not enabled.
 - If singleton mode is enabled, the shared dependencies of the remote application components and host application are loaded only once, and a higher version is loaded when the versions are not consistent. At this time, a warning will be given to the lower version side:
@@ -139,13 +139,14 @@ The required version can be a version range. The default value is the dependency
 #### eager
 :::warning
 When `eager` is set to true, the shared dependencies will be packaged into the entry file, which will cause the entry file to be too large. Please open with caution.
+`eager: true` is rarely recommended 
 :::
 
 - Type: `boolean`
 - Required: False
 - Default: `false`
 
-Whether to load shared modules immediately.
+Determines whether to load shared modules immediately.
 
 Under normal circumstances, you need to open the asynchronous entry, and then load shared asynchronously on demand. If you want to use shared but don't want to enable asynchronous entry, you can set `eager` to true .
 
