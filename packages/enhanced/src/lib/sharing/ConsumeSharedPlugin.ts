@@ -23,6 +23,8 @@ import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import ConsumeSharedModule from './ConsumeSharedModule';
 import ConsumeSharedRuntimeModule from './ConsumeSharedRuntimeModule';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
+import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
+import ShareRuntimeModule from './ShareRuntimeModule';
 import type { SemVerRange } from 'webpack/lib/util/semver';
 
 const { parseRange } = require(
@@ -90,7 +92,8 @@ class ConsumeSharedPlugin {
                 import: key,
                 shareScope: options.shareScope || 'default',
                 shareKey: key,
-                requiredVersion: parseRange(item),
+                // webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
+                requiredVersion: item,
                 strictVersion: true,
                 packageName: undefined,
                 singleton: false,
@@ -102,10 +105,8 @@ class ConsumeSharedPlugin {
         import: item.import === false ? undefined : item.import || key,
         shareScope: item.shareScope || options.shareScope || 'default',
         shareKey: item.shareKey || key,
-        requiredVersion:
-          typeof item.requiredVersion === 'string'
-            ? parseRange(item.requiredVersion)
-            : item.requiredVersion,
+        // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
+        requiredVersion: item.requiredVersion,
         strictVersion:
           typeof item.strictVersion === 'boolean'
             ? item.strictVersion
@@ -119,6 +120,8 @@ class ConsumeSharedPlugin {
   }
 
   apply(compiler: Compiler): void {
+    //@ts-ignore
+    new FederationRuntimePlugin().apply(compiler);
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
@@ -255,7 +258,8 @@ class ConsumeSharedPlugin {
                     );
                     return resolve(undefined);
                   }
-                  resolve(parseRange(requiredVersion));
+                  // @ts-ignore  webpack internal semver has some issue, use runtime semver , related issue: https://github.com/webpack/webpack/issues/17756
+                  resolve(requiredVersion);
                 },
               );
             }),
@@ -335,6 +339,8 @@ class ConsumeSharedPlugin {
               //@ts-ignore
               new ConsumeSharedRuntimeModule(set),
             );
+            // FIXME: need to remove webpack internal inject ShareRuntimeModule, otherwise there will be two ShareRuntimeModule
+            compilation.addRuntimeModule(chunk, new ShareRuntimeModule());
           },
         );
       },

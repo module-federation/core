@@ -28,17 +28,15 @@
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "executor": "nx:run-commands",
       "options": {
-        "jestConfig": "packages/enhanced/jest.config.ts",
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
+        "parallel": false,
+        "commands": [
+          {
+            "command": "node -e \"require('child_process').execSync('node --expose-gc --max-old-space-size=4096 --experimental-vm-modules --trace-deprecation ' + require.resolve('jest-cli/bin/jest') + ' --logHeapUsage --config packages/enhanced/jest.config.ts')\"",
+            "forwardAllArgs": false
+          }
+        ]
       }
     },
     "pre-release": {

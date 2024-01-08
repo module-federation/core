@@ -44,6 +44,7 @@ export interface SharedConfig {
   singleton?: boolean;
   requiredVersion: false | string;
   eager?: boolean;
+  strictVersion?: boolean;
 }
 
 type SharedBaseArgs = {
@@ -76,12 +77,16 @@ export type Shared = {
   strategy: 'version-first' | 'loaded-first';
 };
 
-export type GlobalShareScope = {
+export type ShareScopeMap = {
   [scope: string]: {
     [pkgName: string]: {
       [sharedVersion: string]: Shared;
     };
   };
+};
+
+export type GlobalShareScopeMap = {
+  [instanceName: string]: ShareScopeMap;
 };
 
 export type ShareInfos = {
@@ -114,6 +119,7 @@ export type LoadModuleOptions = {
 // Only for legacy federation provider
 export type RemoteEntryInitOptions = {
   version: string;
+  hostId: string;
 };
 
 export type InitScope = Array<Record<string, never>>;
@@ -121,7 +127,7 @@ export type InitScope = Array<Record<string, never>>;
 export type RemoteEntryExports = {
   get: (id: string) => () => Promise<Module>;
   init: (
-    shareScope: GlobalShareScope[string],
+    shareScope: ShareScopeMap[string],
     initScope?: InitScope,
     remoteEntryInitOPtions?: RemoteEntryInitOptions,
   ) => void;

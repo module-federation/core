@@ -1,4 +1,8 @@
-import { composeKeyWithSeparator, loadScript } from '@module-federation/sdk';
+import {
+  composeKeyWithSeparator,
+  loadScript,
+  loadScriptNode,
+} from '@module-federation/sdk';
 import { assert } from '../utils/logger';
 import { getRemoteEntryExports, globalLoading } from '../global';
 import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
@@ -48,24 +52,57 @@ export async function loadEntryScript({
     return remoteEntryExports;
   }
 
-  return loadScript(entry, { attrs: {}, createScriptHook }).then(() => {
-    const { remoteEntryKey, entryExports } = getRemoteEntryExports(
-      name,
-      globalName,
-    );
+  if (typeof document === 'undefined') {
+    return loadScriptNode(entry, {
+      attrs: { name, globalName },
+      createScriptHook,
+    })
+      .then(() => {
+        const { remoteEntryKey, entryExports } = getRemoteEntryExports(
+          name,
+          globalName,
+        );
 
-    assert(
-      entryExports,
-      `
+        assert(
+          entryExports,
+          `
+        Unable to use the ${name}'s '${entry}' URL with ${remoteEntryKey}'s globalName to get remoteEntry exports.
+        Possible reasons could be:\n
+        1. '${entry}' is not the correct URL, or the remoteEntry resource or name is incorrect.\n
+        2. ${remoteEntryKey} cannot be used to get remoteEntry exports in the window object.
+      `,
+        );
+        console.log(entryExports);
+
+        return entryExports;
+      })
+      .catch((e) => {
+        return e;
+      });
+  }
+
+  return loadScript(entry, { attrs: {}, createScriptHook })
+    .then(() => {
+      const { remoteEntryKey, entryExports } = getRemoteEntryExports(
+        name,
+        globalName,
+      );
+
+      assert(
+        entryExports,
+        `
       Unable to use the ${name}'s '${entry}' URL with ${remoteEntryKey}'s globalName to get remoteEntry exports.
       Possible reasons could be:\n
       1. '${entry}' is not the correct URL, or the remoteEntry resource or name is incorrect.\n
       2. ${remoteEntryKey} cannot be used to get remoteEntry exports in the window object.
     `,
-    );
+      );
 
-    return entryExports;
-  });
+      return entryExports;
+    })
+    .catch((e) => {
+      return e;
+    });
 }
 
 export async function getRemoteEntry({

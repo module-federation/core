@@ -63,6 +63,9 @@ class SharePlugin {
           shareScope: options.shareScope,
           version: options.version,
           eager: options.eager,
+          requiredVersion: options.requiredVersion,
+          strictVersion: options.strictVersion,
+          singleton: options.singleton,
         },
       }));
     //@ts-ignore

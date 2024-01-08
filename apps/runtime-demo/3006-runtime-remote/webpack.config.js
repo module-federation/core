@@ -12,17 +12,32 @@ module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
+    // const webpack = require('/Users/bytedance/outter/universe/node_modules/.pnpm/webpack@5.89.0_@swc+core@1.3.99_esbuild@0.19.7/node_modules/webpack/lib/index.js')
+    // const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
     config.plugins.push(
       new ModuleFederationPlugin({
-        name: 'runtime_remote',
+        name: 'runtime_remote1',
         // library: { type: 'var', name: 'runtime_remote' },
         filename: 'remoteEntry.js',
         exposes: {
-          './Button': './src/Button.tsx',
-          './Button1': './src/Button1.tsx',
+          './useCustomRemoteHook': './src/components/useCustomRemoteHook',
+          './WebpackSvg': './src/components/WebpackSvg',
+          './WebpackPng': './src/components/WebpackPng',
+        },
+        shared: {
+          lodash: {},
+          antd: {},
+          react: {},
+          'react/': {},
+          'react-dom': {},
+          'react-dom/': {},
         },
       }),
     );
+    // config.externals={
+    //   'react':'React',
+    //   'react-dom':'ReactDom'
+    // }
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {
       if (p.constructor.name === 'ModuleFederationPlugin') {
@@ -41,6 +56,7 @@ module.exports = composePlugins(
       scriptType: 'text/javascript',
     };
     config.optimization = {
+      ...config.optimization,
       runtimeChunk: false,
       minimize: false,
     };

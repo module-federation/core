@@ -22,6 +22,8 @@ import type {
   InputFileSystem,
 } from 'webpack/lib/Module';
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
+import { normalizeConsumeShareOptions } from './utils';
+import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from '../Constants';
 
 const { rangeToString, stringifyHoley } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
@@ -29,9 +31,6 @@ const { rangeToString, stringifyHoley } = require(
 const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } = require(
-  normalizeWebpackPath('webpack/lib/ModuleTypeConstants'),
-) as typeof import('webpack/lib/ModuleTypeConstants');
 const { sources: webpackSources } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -295,12 +294,23 @@ class ConsumeSharedModule extends Module {
       fn += 'Fallback';
       args.push(fallbackCode);
     }
-    const code = runtimeTemplate.returningFunction(`${fn}(${args.join(', ')})`);
+    // const code = runtimeTemplate.returningFunction(`${fn}(${args.join(', ')})`);
     const sources = new Map();
-    sources.set('consume-shared', new webpackSources.RawSource(code));
+    sources.set(
+      'consume-shared',
+      new webpackSources.RawSource(
+        fallbackCode ||
+          `()=>()=>{throw new Error("Can not get '${shareKey}'")}`,
+      ),
+    );
+
+    const data = new Map();
+    data.set('consume-shared', normalizeConsumeShareOptions(this.options));
+
     return {
       runtimeRequirements,
       sources,
+      data,
     };
   }
 

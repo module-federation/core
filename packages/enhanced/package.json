@@ -1,7 +1,6 @@
 {
   "name": "@module-federation/enhanced",
   "version": "0.0.7",
-  "type": "commonjs",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "files": [
@@ -27,7 +26,11 @@
       ]
     }
   },
+  "devDependencies": {
+    "@module-federation/webpack-bundler-runtime": "workspace:*"
+  },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*"
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/runtime-tools": "workspace:*"
   }
 }

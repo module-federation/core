@@ -1,4 +1,4 @@
-import { FederationRuntimePlugin } from '@module-federation/runtime/type';
+import { FederationRuntimePlugin } from '@module-federation/runtime/types';
 export default function (): FederationRuntimePlugin {
   return {
     name: 'custom-plugin',
@@ -11,22 +11,22 @@ export default function (): FederationRuntimePlugin {
       return args;
     },
     //@ts-ignore
-    async createScript(args) {
-      // anything can be script loader
-      console.log('createScript', args);
-      return fetch(args.url).then((res) => {
-        res.text().then((text) => {
-          eval(text);
-        });
-      });
-    },
+    // async createScript(args) {
+    //   // anything can be script loader
+    //   console.log('createScript', args);
+    //   return fetch(args.url).then((res) => {
+    //     res.text().then((text) => {
+    //       eval(text);
+    //     });
+    //   });
+    // },
     afterResolve(args) {
       console.log('afterResolve', args);
       // randomly switch between different modules
-      if (Math.random() > 0.5) {
-        args.expose = './Button1';
-        return args;
-      }
+      // if (Math.random() > 0.5) {
+      //   args.expose = './Button1';
+      //   return args;
+      // }
 
       return args;
     },

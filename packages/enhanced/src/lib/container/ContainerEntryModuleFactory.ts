@@ -33,8 +33,13 @@ export default class ContainerEntryModuleFactory extends ModuleFactory {
     const dep = containerDependencies[0];
 
     callback(null, {
-      //@ts-ignore
-      module: new ContainerEntryModule(dep.name, dep.exposes, dep.shareScope),
+      // @ts-ignore
+      module: new ContainerEntryModule(
+        dep.name,
+        dep.exposes,
+        dep.shareScope,
+        dep.injectRuntimeEntry,
+      ),
     });
   }
 }

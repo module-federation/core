@@ -1,6 +1,10 @@
 import type webpack from 'webpack';
 import path from 'path';
-export function getWebpackPath(compiler: webpack.Compiler): string {
+
+export function getWebpackPath(
+  compiler: webpack.Compiler,
+  options: { framework: 'nextjs' | 'other' } = { framework: 'other' },
+): string {
   try {
     // @ts-ignore just throw err
     compiler.webpack();
@@ -13,6 +17,12 @@ export function getWebpackPath(compiler: webpack.Compiler): string {
       .replace(/[^\(\)]+/, '')
       .slice(1, -1);
     const webpackPath = webpackLocationWithDetail.split(':').slice(0, -2)[0];
+    if (options?.framework === 'nextjs') {
+      if (webpackPath.endsWith('webpack.js')) {
+        return webpackPath.replace('webpack.js', 'index.js');
+      }
+      return '';
+    }
     return require.resolve('webpack', { paths: [webpackPath] });
   }
 }

@@ -21,6 +21,9 @@ import {
   ContainerReferencePluginOptions,
   RemotesConfig,
 } from '../../declarations/plugins/container/ContainerReferencePlugin';
+import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import schema from '../../schemas/container/ContainerReferencePlugin';
+import checkOptions from '../../schemas/container/ContainerReferencePlugin.check';
 
 const { ExternalsPlugin } = require(
   normalizeWebpackPath('webpack'),
@@ -32,9 +35,8 @@ const createSchemaValidation = require(
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
-  require('webpack/schemas/plugins/container/ContainerReferencePlugin.check.js'),
-  () =>
-    require('webpack/schemas/plugins/container/ContainerReferencePlugin.json'),
+  checkOptions,
+  () => schema,
   {
     name: 'Container Reference Plugin',
     baseDataPath: 'options',
@@ -72,10 +74,8 @@ class ContainerReferencePlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
-    process.env['FEDERATION_WEBPACK_PATH'] =
-      process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
-
     const { _remotes: remotes, _remoteType: remoteType } = this;
+    new FederationRuntimePlugin().apply(compiler);
 
     /** @type {Record<string, string>} */
     const remoteExternals: Record<string, string> = {};

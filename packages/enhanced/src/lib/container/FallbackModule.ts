@@ -22,6 +22,7 @@ import type {
   ObjectSerializerContext,
 } from 'webpack/lib/Module';
 import FallbackItemDependency from './FallbackItemDependency';
+import { WEBPACK_MODULE_TYPE_FALLBACK } from '../Constants';
 
 const { sources: webpackSources } = require(
   normalizeWebpackPath('webpack'),
@@ -32,15 +33,12 @@ const { Template, Module, RuntimeGlobals } = require(
 const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 ) as typeof import('webpack/lib/util/makeSerializable');
-const { WEBPACK_MODULE_TYPE_FALLBACK } = require(
-  normalizeWebpackPath('webpack/lib/ModuleTypeConstants'),
-) as typeof import('webpack/lib/ModuleTypeConstants');
 
 const TYPES = new Set(['javascript']);
 const RUNTIME_REQUIREMENTS = new Set([RuntimeGlobals.module]);
 
 class FallbackModule extends Module {
-  private requests: string[];
+  public requests: string[];
   private _identifier: string;
 
   /**

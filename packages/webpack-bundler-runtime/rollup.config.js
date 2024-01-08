@@ -6,7 +6,7 @@ module.exports = (rollupConfig, projectOptions) => {
       targets: [
         {
           src: 'packages/webpack-bundler-runtime/LICENSE',
-          dest: 'dist/packages/webpack-bundler-runtime',
+          dest: 'packages/webpack-bundler-runtime/dist',
         },
       ],
     }),

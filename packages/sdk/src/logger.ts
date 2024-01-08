@@ -10,7 +10,6 @@ function safeToString(info: any): string {
 }
 
 const DEBUG_LOG = '[ FEDERATION DEBUG ]';
-
 class Logger {
   enable = false;
   identifier: string;

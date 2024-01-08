@@ -39,8 +39,7 @@ describe('3001-shop/', () => {
       getH1().contains('Shop Page');
       cy.wait(1000);
       cy.get('.home-menu-link').click();
-      //eslint-disable-next-line
-      cy.wait(1999);
+      cy.wait(1000);
       cy.get('.home-menu-link').click();
       cy.wait(1000);
       cy.url().should('include', '/');

@@ -1,14 +1,13 @@
-const path = require('path');
-const alias = require('@rollup/plugin-alias');
 const replace = require('@rollup/plugin-replace');
 const copy = require('rollup-plugin-copy');
+const semver = require('semver');
 
 const FEDERATION_DEBUG = process.env.FEDERATION_DEBUG || '';
 
 module.exports = (rollupConfig, projectOptions) => {
   rollupConfig.input = {
     index: 'packages/runtime/src/index.ts',
-    type: 'packages/runtime/src/type/index.ts',
+    types: 'packages/runtime/src/types.ts',
     helpers: 'packages/runtime/src/helpers.ts',
   };
 
@@ -26,8 +25,8 @@ module.exports = (rollupConfig, projectOptions) => {
   rollupConfig.plugins.push(
     replace({
       preventAssignment: true,
-      __VERSION__: `'${pkg.version}'`,
-      FEDERATION_DEBUG: `'${FEDERATION_DEBUG}'`,
+      __VERSION__: JSON.stringify(pkg.version),
+      FEDERATION_DEBUG: JSON.stringify(FEDERATION_DEBUG),
     }),
     copy({
       targets: [

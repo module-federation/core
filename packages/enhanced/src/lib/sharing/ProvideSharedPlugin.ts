@@ -13,7 +13,13 @@ import { parseOptions } from '../container/options';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import ProvideSharedDependency from './ProvideSharedDependency';
 import ProvideSharedModuleFactory from './ProvideSharedModuleFactory';
-import type { ProvideSharedPluginOptions } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
+import type {
+  ProvideSharedPluginOptions,
+  ProvidesConfig,
+} from '../../declarations/plugins/sharing/ProvideSharedPlugin';
+import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
+import checkOptions from '../../schemas/sharing/ProviderSharedPlugin.check';
+import schema from '../../schemas/sharing/ProviderSharedPlugin';
 
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
@@ -22,12 +28,7 @@ const WebpackError = require(
   normalizeWebpackPath('webpack/lib/WebpackError'),
 ) as typeof import('webpack/lib/WebpackError');
 
-export type ProvideOptions = {
-  shareKey: string;
-  shareScope: string;
-  version: string | undefined | false;
-  eager: boolean;
-};
+export type ProvideOptions = ProvidesConfig;
 export type ResolvedProvideMap = Map<
   string,
   {
@@ -38,8 +39,8 @@ export type ResolvedProvideMap = Map<
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
-  require('webpack/schemas/plugins/sharing/ProvideSharedPlugin.check.js'),
-  () => require('webpack/schemas/plugins/sharing/ProvideSharedPlugin.json'),
+  checkOptions,
+  () => schema,
   {
     name: 'Provide Shared Plugin',
     baseDataPath: 'options',
@@ -71,11 +72,14 @@ class ProvideSharedPlugin {
         if (Array.isArray(item))
           throw new Error('Unexpected array of provides');
         /** @type {ProvideOptions} */
-        const result = {
+        const result: ProvideOptions = {
           shareKey: item,
           version: undefined,
           shareScope: options.shareScope || 'default',
           eager: false,
+          requiredVersion: false,
+          strictVersion: false,
+          singleton: false,
         };
         return result;
       },
@@ -84,6 +88,9 @@ class ProvideSharedPlugin {
         version: item.version,
         shareScope: item.shareScope || options.shareScope || 'default',
         eager: !!item.eager,
+        requiredVersion: item.requiredVersion || false,
+        strictVersion: item.strictVersion || false,
+        singleton: item.singleton || false,
       }),
     );
     this._provides.sort(([a], [b]) => {
@@ -99,6 +106,7 @@ class ProvideSharedPlugin {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
+    new FederationRuntimePlugin().apply(compiler);
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
@@ -223,11 +231,14 @@ class ProvideSharedPlugin {
                   compiler.context,
                   //@ts-ignore
                   new ProvideSharedDependency(
-                    config.shareScope,
-                    config.shareKey,
+                    config.shareScope!,
+                    config.shareKey!,
                     version || false,
                     resource,
-                    config.eager,
+                    config.eager!,
+                    config.requiredVersion!,
+                    config.strictVersion!,
+                    config.singleton!,
                   ),
                   {
                     name: undefined,

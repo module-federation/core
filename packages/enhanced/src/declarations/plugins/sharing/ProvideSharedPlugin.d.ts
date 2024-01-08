@@ -52,4 +52,16 @@ export interface ProvidesConfig {
    * Version of the provided module. Will replace lower matching versions, but not higher.
    */
   version?: false | string;
+  /**
+   * Version requirement from module in share scope.
+   */
+  requiredVersion?: false | string;
+  /**
+   * Allow only a single version of the shared module in share scope (disabled by default).
+   */
+  singleton?: boolean;
+  /**
+   * Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).
+   */
+  strictVersion?: boolean;
 }

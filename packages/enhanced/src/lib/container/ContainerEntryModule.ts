@@ -6,23 +6,6 @@
 'use strict';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Dependency, Compilation } from 'webpack';
-
-const makeSerializable = require(
-  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
-) as typeof import('webpack/lib/util/makeSerializable');
-const { sources: webpackSources } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { AsyncDependenciesBlock, Template, Module, RuntimeGlobals } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
-const { JAVASCRIPT_MODULE_TYPE_DYNAMIC } = require(
-  normalizeWebpackPath('webpack/lib/ModuleTypeConstants'),
-) as typeof import('webpack/lib/ModuleTypeConstants');
-const StaticExportsDependency = require(
-  normalizeWebpackPath('webpack/lib/dependencies/StaticExportsDependency'),
-) as typeof import('webpack/lib/dependencies/StaticExportsDependency');
-
 import ContainerExposedDependency from './ContainerExposedDependency';
 import type {
   LibIdentOptions,
@@ -35,6 +18,24 @@ import type {
   ResolverWithOptions,
 } from 'webpack/lib/Module';
 import type WebpackError from 'webpack/lib/WebpackError';
+import { getFederationGlobalScope } from './runtime/utils';
+import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from '../Constants';
+
+const makeSerializable = require(
+  normalizeWebpackPath('webpack/lib/util/makeSerializable'),
+) as typeof import('webpack/lib/util/makeSerializable');
+const { sources: webpackSources } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const { AsyncDependenciesBlock, Template, Module, RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+const StaticExportsDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/StaticExportsDependency'),
+) as typeof import('webpack/lib/dependencies/StaticExportsDependency');
+const EntryDependency = require(
+  normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
+) as typeof import('webpack/lib/dependencies/EntryDependency');
 
 const SOURCE_TYPES = new Set(['javascript']);
 
@@ -53,6 +54,7 @@ class ContainerEntryModule extends Module {
   private _name: string;
   private _exposes: [string, ExposeOptions][];
   private _shareScope: string;
+  private _injectRuntimeEntry: string;
   /**
    * @param {string} name container entry name
    * @param {[string, ExposeOptions][]} exposes list of exposed modules
@@ -62,11 +64,13 @@ class ContainerEntryModule extends Module {
     name: string,
     exposes: [string, ExposeOptions][],
     shareScope: string,
+    injectRuntimeEntry: string,
   ) {
     super(JAVASCRIPT_MODULE_TYPE_DYNAMIC, null);
     this._name = name;
     this._exposes = exposes;
     this._shareScope = shareScope;
+    this._injectRuntimeEntry = injectRuntimeEntry;
   }
   /**
    * @param {ObjectDeserializerContext} context context
@@ -74,7 +78,7 @@ class ContainerEntryModule extends Module {
    */
   static deserialize(context: ObjectDeserializerContext): ContainerEntryModule {
     const { read } = context;
-    const obj = new ContainerEntryModule(read(), read(), read());
+    const obj = new ContainerEntryModule(read(), read(), read(), read());
     //@ts-ignore
     obj.deserialize(context);
     return obj;
@@ -181,6 +185,11 @@ class ContainerEntryModule extends Module {
       ) as unknown as Dependency,
     );
 
+    this.addDependency(
+      // @ts-ignore
+      new EntryDependency(this._injectRuntimeEntry),
+    );
+
     callback();
   }
 
@@ -246,6 +255,19 @@ class ContainerEntryModule extends Module {
       );
     }
 
+    const initRuntimeDep = this.dependencies[1];
+    const initRuntimeModuleGetter = runtimeTemplate.moduleRaw({
+      module: moduleGraph.getModule(initRuntimeDep),
+      chunkGraph,
+      // @ts-expect-error
+      request: initRuntimeDep.userRequest,
+      weak: false,
+      runtimeRequirements,
+    });
+    const federationGlobal = getFederationGlobalScope(
+      RuntimeGlobals || ({} as typeof RuntimeGlobals),
+    );
+
     const source = Template.asString([
       `var moduleMap = {`,
       Template.indent(getters.join(',\n')),
@@ -268,14 +290,22 @@ class ContainerEntryModule extends Module {
         `${RuntimeGlobals.currentRemoteGetScope} = undefined;`,
         'return getScope;',
       ])};`,
-      `var init = ${runtimeTemplate.basicFunction('shareScope, initScope', [
-        `if (!${RuntimeGlobals.shareScopeMap}) return;`,
-        `var name = ${JSON.stringify(this._shareScope)}`,
-        `var oldScope = ${RuntimeGlobals.shareScopeMap}[name];`,
-        `if(oldScope && oldScope !== shareScope) throw new Error("Container initialization failed as it has already been initialized with a different share scope");`,
-        `${RuntimeGlobals.shareScopeMap}[name] = shareScope;`,
-        `return ${RuntimeGlobals.initializeSharing}(name, initScope);`,
-      ])};`,
+      `var init = ${runtimeTemplate.basicFunction(
+        'shareScope, initScope, remoteEntryInitOptions',
+        [
+          `return ${federationGlobal}.bundlerRuntime.initContainerEntry({${Template.indent(
+            [
+              `webpackRequire: ${RuntimeGlobals.require},`,
+              `shareScope: shareScope,`,
+              `initScope: initScope,`,
+              `remoteEntryInitOptions: remoteEntryInitOptions,`,
+              `shareScopeKey: ${JSON.stringify(this._shareScope)}`,
+            ],
+          )}`,
+          '})',
+        ],
+      )};`,
+      `${initRuntimeModuleGetter}`,
       '',
       '// This exports getters to disallow modifications',
       `${RuntimeGlobals.definePropertyGetters}(exports, {`,
@@ -314,6 +344,7 @@ class ContainerEntryModule extends Module {
     write(this._name);
     write(this._exposes);
     write(this._shareScope);
+    write(this._injectRuntimeEntry);
     super.serialize(context);
   }
 }

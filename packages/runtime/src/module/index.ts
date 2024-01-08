@@ -1,7 +1,6 @@
 import { getFMId, safeToString, assert } from '../utils';
 import { getRemoteEntry } from '../utils/load';
 import { FederationHost } from '../core';
-import { Global } from '../global';
 import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';
 
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
@@ -35,6 +34,10 @@ class Module {
       remoteEntryExports: this.remoteEntryExports,
       createScriptHook: (url: string) => {
         const res = this.host.loaderHook.lifecycle.createScript.emit({ url });
+        if (typeof document === 'undefined') {
+          //todo: needs real fix
+          return res as HTMLScriptElement;
+        }
         if (res instanceof HTMLScriptElement) {
           return res;
         }
@@ -58,22 +61,30 @@ class Module {
     const remoteEntryExports = await this.getEntry();
 
     if (!this.inited) {
-      const globalShareScope = Global.__FEDERATION__.__SHARE__;
+      const localShareScopeMap = this.host.shareScopeMap;
       const remoteShareScope = this.remoteInfo.shareScope || 'default';
 
-      if (!globalShareScope[remoteShareScope]) {
-        globalShareScope[remoteShareScope] = {};
+      if (!localShareScopeMap[remoteShareScope]) {
+        localShareScopeMap[remoteShareScope] = {};
       }
-      const shareScope = globalShareScope[remoteShareScope];
+      const shareScope = localShareScopeMap[remoteShareScope];
       const initScope: InitScope = [];
 
       const remoteEntryInitOptions = {
         version: this.remoteInfo.version || '',
       };
 
+      // Help to find host instance
+      Object.defineProperty(remoteEntryInitOptions, 'hostId', {
+        value: this.host.options.id || this.host.name,
+        // remoteEntryInitOptions will be traversed and assigned during container init, ,so this attribute is not allowed to be traversed
+        enumerable: false,
+      });
+
       const initContainerOptions =
         await this.host.hooks.lifecycle.beforeInitContainer.emit({
           shareScope,
+          // @ts-ignore hostId will be set by Object.defineProperty
           remoteEntryInitOptions,
           initScope,
           remoteInfo: this.remoteInfo,

@@ -1,5 +1,10 @@
 import { FederationHost } from './core';
-import { RemoteEntryExports, GlobalShareScope, Remote, Optional } from './type';
+import {
+  RemoteEntryExports,
+  GlobalShareScopeMap,
+  Remote,
+  Optional,
+} from './type';
 import { getFMId } from './utils/tool';
 import { GlobalModuleInfo, ModuleInfo } from '@module-federation/sdk';
 import { getBuilderId, isDebugMode } from './utils/env';
@@ -12,9 +17,8 @@ export interface Federation {
   moduleInfo: GlobalModuleInfo;
   __DEBUG_CONSTRUCTOR__?: typeof FederationHost;
   __INSTANCES__: Array<FederationHost>;
-  __SHARE__: GlobalShareScope;
+  __SHARE__: GlobalShareScopeMap;
   __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
-  __SHARE_SCOPE_LOADING__: Record<string, boolean | Promise<boolean>>;
   __PRELOADED_MAP__: Map<string, boolean>;
 }
 
@@ -73,7 +77,6 @@ function setGlobalDefaultVal(target: typeof globalThis) {
       moduleInfo: {},
       __SHARE__: {},
       __MANIFEST_LOADING__: {},
-      __SHARE_SCOPE_LOADING__: {},
       __PRELOADED_MAP__: new Map(),
     });
 
@@ -85,7 +88,6 @@ function setGlobalDefaultVal(target: typeof globalThis) {
   target.__FEDERATION__.moduleInfo ??= {};
   target.__FEDERATION__.__SHARE__ ??= {};
   target.__FEDERATION__.__MANIFEST_LOADING__ ??= {};
-  target.__FEDERATION__.__SHARE_SCOPE_LOADING__ ??= {};
   target.__FEDERATION__.__PRELOADED_MAP__ ??= new Map();
 }
 
@@ -98,7 +100,6 @@ export function resetFederationGlobalInfo(): void {
   globalThis.__FEDERATION__.moduleInfo = {};
   globalThis.__FEDERATION__.__SHARE__ = {};
   globalThis.__FEDERATION__.__MANIFEST_LOADING__ = {};
-  globalThis.__FEDERATION__.__SHARE_SCOPE_LOADING__ = {};
 }
 
 export function getGlobalFederationInstance(

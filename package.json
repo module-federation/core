@@ -30,9 +30,9 @@
     "build:website": "nx run website:build.netlify",
     "extract-i18n:website": "nx run website:extract-i18n",
     "sync:pullMFTypes": "concurrently \"node ./packages/enhanced/pullts.js\"",
-    "app:next:dev": "nx run-many --target=serve --configuration=development -p 3000-home 3001-shop 3002-checkout",
-    "app:next:prod": "nx run-many --target=serve --configuration=production -p 3000-home 3001-shop 3002-checkout",
-    "app:runtime:dev": "nx run-many --target=serve -p 3005-runtime-host 3006-runtime-remote",
+    "app:next:dev": "nx run-many --target=serve --configuration=development -p 3000-home,3001-shop,3002-checkout",
+    "app:next:prod": "nx run-many --target=serve --configuration=production -p 3000-home,3001-shop,3002-checkout",
+    "app:runtime:dev": "nx run-many --target=serve -p 3005-runtime-host,3006-runtime-remote,3007-runtime-remote",
     "commitlint": "commitlint --edit",
     "prepare": "husky install",
     "changeset": "changeset"
@@ -210,7 +210,11 @@
     "vue-tsc": "1.8.27",
     "webpack": "^5.88.2",
     "webpack-virtual-modules": "0.6.1",
-    "whatwg-fetch": "^3.6.2"
+    "whatwg-fetch": "^3.6.2",
+    "graceful-fs": "^4.2.9",
+    "rimraf": "^3.0.2",
+    "strip-ansi": "^6.0.0",
+    "wast-loader": "^1.11.5"
   },
   "config": {
     "commitizen": {

@@ -375,6 +375,9 @@ importers:
       form-data:
         specifier: 4.0.0
         version: 4.0.0
+      graceful-fs:
+        specifier: ^4.2.9
+        version: 4.2.11
       highlight.js:
         specifier: 10.7.3
         version: 10.7.3
@@ -462,12 +465,18 @@ importers:
       react-refresh:
         specifier: 0.14.0
         version: 0.14.0
+      rimraf:
+        specifier: ^3.0.2
+        version: 3.0.2
       rollup-plugin-copy:
         specifier: 3.5.0
         version: 3.5.0
       stopword:
         specifier: 2.0.8
         version: 2.0.8
+      strip-ansi:
+        specifier: ^6.0.0
+        version: 6.0.1
       swc-loader:
         specifier: 0.2.3
         version: 0.2.3(@swc/core@1.3.102)(webpack@5.88.2)
@@ -510,6 +519,9 @@ importers:
       vue-tsc:
         specifier: 1.8.27
         version: 1.8.27(typescript@5.3.3)
+      wast-loader:
+        specifier: ^1.11.5
+        version: 1.11.6
       webpack:
         specifier: ^5.88.2
         version: 5.88.2(@swc/core@1.3.102)(esbuild@0.19.11)
@@ -544,9 +556,6 @@ importers:
       '@module-federation/nextjs-mf':
         specifier: workspace:*
         version: link:../../packages/nextjs-mf
-      '@module-federation/sdk':
-        specifier: workspace:*
-        version: link:../../packages/sdk
       '@module-federation/utilities':
         specifier: workspace:*
         version: link:../../packages/utilities
@@ -683,10 +692,17 @@ importers:
         version: link:../../packages/utilities
 
   apps/runtime-demo/3005-runtime-host:
+    dependencies:
+      antd:
+        specifier: 4.24.15
+        version: 4.24.15(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@module-federation/core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@module-federation/enhanced':
+        specifier: workspace:*
+        version: link:../../../packages/enhanced
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../../../packages/runtime
@@ -701,6 +717,32 @@ importers:
         version: 0.14.0
 
   apps/runtime-demo/3006-runtime-remote:
+    dependencies:
+      antd:
+        specifier: 4.24.14
+        version: 4.24.14(react-dom@18.2.0)(react@18.2.0)
+    devDependencies:
+      '@module-federation/core':
+        specifier: workspace:*
+        version: link:../../../packages/core
+      '@module-federation/enhanced':
+        specifier: workspace:*
+        version: link:../../../packages/enhanced
+      '@module-federation/typescript':
+        specifier: workspace:*
+        version: link:../../../packages/typescript
+      '@pmmmwh/react-refresh-webpack-plugin':
+        specifier: 0.5.11
+        version: 0.5.11(react-refresh@0.14.0)(webpack@5.89.0)
+      react-refresh:
+        specifier: 0.14.0
+        version: 0.14.0
+
+  apps/runtime-demo/3007-runtime-remote:
+    dependencies:
+      antd:
+        specifier: 4.24.15
+        version: 4.24.15(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@module-federation/core':
         specifier: workspace:*
@@ -728,12 +770,19 @@ importers:
 
   packages/enhanced:
     dependencies:
+      '@module-federation/runtime-tools':
+        specifier: workspace:*
+        version: link:../runtime-tools
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
       webpack:
         specifier: ^5.0.0
         version: 5.88.2(@swc/core@1.3.102)(esbuild@0.19.11)
+    devDependencies:
+      '@module-federation/webpack-bundler-runtime':
+        specifier: workspace:*
+        version: link:../webpack-bundler-runtime
 
   packages/native-federation-tests:
     dependencies:
@@ -788,6 +837,9 @@ importers:
       '@module-federation/node':
         specifier: workspace:*
         version: link:../node
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../runtime
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -854,6 +906,15 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
+
+  packages/runtime-tools:
+    dependencies:
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+      '@module-federation/webpack-bundler-runtime':
+        specifier: workspace:*
+        version: link:../webpack-bundler-runtime
 
   packages/sdk: {}
 
@@ -923,6 +984,9 @@ importers:
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../runtime
+      '@module-federation/sdk':
+        specifier: workspace:*
+        version: link:../sdk
 
   webpack: {}
 
@@ -11240,6 +11304,59 @@ packages:
     resolution: {integrity: sha512-QXu7BPrP29VllRxH8GwB7x5iX5qWKAAMLqKQGWTeLWVlNHNOpVMJ91dsxQAIWXpjuW5wqvxu3Jd/nRjrJ+0pqg==}
     dev: true
 
+  /antd@4.24.14(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-hY/MPm7XI0G+9MvjhTlbDkA2sf8oHVbhtrT0XRstlm9+fXYGNXz8oEh3d5qiA3/tY5NL2Kh2tF7Guh01hwWJdg==}
+    peerDependencies:
+      react: '>=16.9.0'
+      react-dom: '>=16.9.0'
+    dependencies:
+      '@ant-design/colors': 6.0.0
+      '@ant-design/icons': 4.8.1(react-dom@18.2.0)(react@18.2.0)
+      '@ant-design/react-slick': 1.0.2(react@18.2.0)
+      '@babel/runtime': 7.23.6
+      '@ctrl/tinycolor': 3.6.1
+      classnames: 2.5.0
+      copy-to-clipboard: 3.3.3
+      lodash: 4.17.21
+      moment: 2.29.4
+      rc-cascader: 3.7.3(react-dom@18.2.0)(react@18.2.0)
+      rc-checkbox: 3.0.1(react-dom@18.2.0)(react@18.2.0)
+      rc-collapse: 3.4.2(react-dom@18.2.0)(react@18.2.0)
+      rc-dialog: 9.0.2(react-dom@18.2.0)(react@18.2.0)
+      rc-drawer: 6.3.0(react-dom@18.2.0)(react@18.2.0)
+      rc-dropdown: 4.0.1(react-dom@18.2.0)(react@18.2.0)
+      rc-field-form: 1.34.2(react-dom@18.2.0)(react@18.2.0)
+      rc-image: 5.13.0(react-dom@18.2.0)(react@18.2.0)
+      rc-input: 0.1.4(react-dom@18.2.0)(react@18.2.0)
+      rc-input-number: 7.3.11(react-dom@18.2.0)(react@18.2.0)
+      rc-mentions: 1.13.1(react-dom@18.2.0)(react@18.2.0)
+      rc-menu: 9.8.4(react-dom@18.2.0)(react@18.2.0)
+      rc-motion: 2.9.0(react-dom@18.2.0)(react@18.2.0)
+      rc-notification: 4.6.1(react-dom@18.2.0)(react@18.2.0)
+      rc-pagination: 3.2.0(react-dom@18.2.0)(react@18.2.0)
+      rc-picker: 2.7.6(react-dom@18.2.0)(react@18.2.0)
+      rc-progress: 3.4.2(react-dom@18.2.0)(react@18.2.0)
+      rc-rate: 2.9.3(react-dom@18.2.0)(react@18.2.0)
+      rc-resize-observer: 1.4.0(react-dom@18.2.0)(react@18.2.0)
+      rc-segmented: 2.1.2(react-dom@18.2.0)(react@18.2.0)
+      rc-select: 14.1.18(react-dom@18.2.0)(react@18.2.0)
+      rc-slider: 10.0.1(react-dom@18.2.0)(react@18.2.0)
+      rc-steps: 5.0.0(react-dom@18.2.0)(react@18.2.0)
+      rc-switch: 3.2.2(react-dom@18.2.0)(react@18.2.0)
+      rc-table: 7.26.0(react-dom@18.2.0)(react@18.2.0)
+      rc-tabs: 12.5.10(react-dom@18.2.0)(react@18.2.0)
+      rc-textarea: 0.4.7(react-dom@18.2.0)(react@18.2.0)
+      rc-tooltip: 5.2.2(react-dom@18.2.0)(react@18.2.0)
+      rc-tree: 5.7.12(react-dom@18.2.0)(react@18.2.0)
+      rc-tree-select: 5.5.5(react-dom@18.2.0)(react@18.2.0)
+      rc-trigger: 5.3.4(react-dom@18.2.0)(react@18.2.0)
+      rc-upload: 4.3.5(react-dom@18.2.0)(react@18.2.0)
+      rc-util: 5.38.1(react-dom@18.2.0)(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      scroll-into-view-if-needed: 2.2.31
+    dev: false
+
   /antd@4.24.15(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-pXCNJB8cTSjQdqeW5RNadraiYiJkMec/Qt0Zh+fEKUK9UqwmD4TxIYs/xnEbyQIVtHHwtl0fW684xql73KhCyQ==}
     peerDependencies:
@@ -11251,7 +11368,7 @@ packages:
       '@ant-design/react-slick': 1.0.2(react@18.2.0)
       '@babel/runtime': 7.23.6
       '@ctrl/tinycolor': 3.6.1
-      classnames: 2.3.2
+      classnames: 2.5.0
       copy-to-clipboard: 3.3.3
       lodash: 4.17.21
       moment: 2.29.4
@@ -12738,10 +12855,6 @@ packages:
       isobject: 3.0.1
       static-extend: 0.1.2
     dev: true
-
-  /classnames@2.3.2:
-    resolution: {integrity: sha512-CSbhY4cFEJRe6/GQzIk5qXZ4Jeg5pcsP7b5peFSDpffpe1cqjASH/n9UTjBwOp6XpMSTwQ8Za2K5V02ueA7Tmw==}
-    dev: false
 
   /classnames@2.5.0:
     resolution: {integrity: sha512-FQuRlyKinxrb5gwJlfVASbSrDlikDJ07426TrfPsdGLvtochowmkbnSFdQGJ2aoXrSetq5KqGV9emvWpy+91xA==}
@@ -23635,6 +23748,20 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
+  /rc-field-form@1.34.2(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-BdciU5C7dBO51/9ZKcMvK2f8zaaO12Lt1eBhlAo8nNv+6htlNcgY9DAkUlZ7gfyWjnCc1Oo4hHIXau1m6tLw1A==}
+    engines: {node: '>=8.x'}
+    peerDependencies:
+      react: '>=16.9.0'
+      react-dom: '>=16.9.0'
+    dependencies:
+      '@babel/runtime': 7.23.6
+      async-validator: 4.2.5
+      rc-util: 5.38.1(react-dom@18.2.0)(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
   /rc-field-form@1.38.2(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-O83Oi1qPyEv31Sg+Jwvsj6pXc8uQI2BtIAkURr5lvEYHVggXJhdU/nynK8wY1gbw0qR48k731sN5ON4egRCROA==}
     engines: {node: '>=8.x'}
@@ -28376,10 +28503,20 @@ packages:
       xml-name-validator: 4.0.0
     dev: true
 
+  /wabt@1.0.0-nightly.20180421:
+    resolution: {integrity: sha512-bsu9zk672KACjoabONcAS94IS20prRm05IbiIUGfa8eBpRLjWZv8ugocdinV/ONh0mFMfXrVWkvF1/BNtwIfUw==}
+    dev: true
+
   /walker@1.0.8:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
     dependencies:
       makeerror: 1.0.12
+    dev: true
+
+  /wast-loader@1.11.6:
+    resolution: {integrity: sha512-V0DRsaTKmnuvExSheKRZpX0c+ztCvG7NtDhjOviDPki8ahi6hFsoI3S9RVBRPNv7L1tjzAYzrFVhbeS9HFhJZw==}
+    dependencies:
+      wabt: 1.0.0-nightly.20180421
     dev: true
 
   /watchpack-chokidar2@2.0.1:

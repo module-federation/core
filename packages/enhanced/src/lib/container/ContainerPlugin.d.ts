@@ -4,6 +4,7 @@ declare class ContainerPlugin {
    * @param {ContainerPluginOptions} options options
    */
   constructor(options: ContainerPluginOptions);
+  name: string;
   _options: {
     name: string;
     shareScope: string;

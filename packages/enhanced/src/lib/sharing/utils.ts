@@ -2,6 +2,8 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra
 */
+
+import type { ConsumeOptions } from 'webpack/lib/sharing/ConsumeSharedModule';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { InputFileSystem } from 'webpack/lib/util/fs';
 const { join, dirname, readJson } = require(
@@ -426,4 +428,26 @@ export function getRequiredVersionFromDescriptionFile(
   ) {
     return normalizeVersion(data['devDependencies'][packageName]);
   }
+}
+
+export function normalizeConsumeShareOptions(consumeOptions: ConsumeOptions) {
+  const {
+    requiredVersion = false,
+    strictVersion,
+    singleton = false,
+    eager,
+    shareKey,
+    shareScope,
+  } = consumeOptions;
+  return {
+    shareConfig: {
+      fixedDependencies: false,
+      requiredVersion,
+      strictVersion,
+      singleton,
+      eager,
+    },
+    shareScope,
+    shareKey,
+  };
 }
