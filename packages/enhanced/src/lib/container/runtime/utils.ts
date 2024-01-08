@@ -46,7 +46,6 @@ export function normalizeRuntimeInitOptionsWithOutShared(
   const remoteOptions: Remotes = [];
   parsedOptions.forEach((parsedOption) => {
     const [alias, remoteInfos] = parsedOption;
-    // TODO: Handle the case of multiple elements in the external array (处理 external 数组多元素的情况)
     const { external, shareScope } = remoteInfos;
     try {
       // only fit for remoteType: 'script'

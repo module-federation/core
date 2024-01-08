@@ -13,7 +13,6 @@ function getFederationGlobal(
   initOptionsWithoutShared: NormalizedRuntimeInitOptionsWithOutShared,
 ): string {
   const federationGlobal = getFederationGlobalScope(runtimeGlobals);
-  // TODO: get shared getter
   const initOptionsStrWithoutShared = JSON.stringify(initOptionsWithoutShared);
 
   return template.asString([

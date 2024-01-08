@@ -28,7 +28,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
         'react-dom': {},
         'react-dom/': {},
       },
-      // runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
+      runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
     }),
   );
   config.optimization.runtimeChunk = false;

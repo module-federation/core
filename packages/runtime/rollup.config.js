@@ -32,14 +32,6 @@ module.exports = (rollupConfig, projectOptions) => {
     delete rollupConfig.input.helpers;
   }
 
-  if (rollupConfig.output.format === 'esm' && FEDERATION_DEBUG) {
-    rollupConfig.output.format = 'iife';
-    rollupConfig.output.inlineDynamicImports = true;
-    delete rollupConfig.external;
-    delete rollupConfig.input.type;
-    delete rollupConfig.input.helpers;
-  }
-
   rollupConfig.plugins.push(
     // alias({
     //   entries: [
