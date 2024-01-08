@@ -174,8 +174,7 @@ export class FederationHost {
       origin: FederationHost;
     }>(),
   });
-  releaseNumber = `__RELEASE_NUMBER__`;
-  version: string = `__VERSION__`;
+  version: string = __VERSION__;
   name: string;
   moduleCache: Map<string, Module> = new Map();
   snapshotHandler: SnapshotHandler;
