@@ -88,8 +88,8 @@ importers:
         specifier: ^7.23.3
         version: 7.23.6
       '@babel/plugin-transform-react-jsx':
-        specifier: 7.22.15
-        version: 7.22.15(@babel/core@7.23.6)
+        specifier: 7.23.4
+        version: 7.23.4(@babel/core@7.23.6)
       '@babel/preset-react':
         specifier: ^7.14.5
         version: 7.23.3(@babel/core@7.23.6)
@@ -2313,11 +2313,11 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.23.6
-      '@babel/plugin-transform-react-jsx': 7.22.15(@babel/core@7.23.6)
+      '@babel/plugin-transform-react-jsx': 7.23.4(@babel/core@7.23.6)
     dev: true
 
-  /@babel/plugin-transform-react-jsx@7.22.15(@babel/core@7.23.6):
-    resolution: {integrity: sha512-oKckg2eZFa8771O/5vi7XeTvmM6+O9cxZu+kanTU7tD4sin5nO/G8jGJhq8Hvt2Z0kUoEDRayuZLaUlYl8QuGA==}
+  /@babel/plugin-transform-react-jsx@7.23.4(@babel/core@7.23.6):
+    resolution: {integrity: sha512-5xOpoPguCZCRbo/JeHlloSkTA8Bld1J/E1/kLfD1nsuiW1m8tduTA1ERCgIZokDflX/IBzKcqR3l7VlRgiIfHA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -2598,7 +2598,7 @@ packages:
       '@babel/helper-plugin-utils': 7.22.5
       '@babel/helper-validator-option': 7.23.5
       '@babel/plugin-transform-react-display-name': 7.23.3(@babel/core@7.23.6)
-      '@babel/plugin-transform-react-jsx': 7.22.15(@babel/core@7.23.6)
+      '@babel/plugin-transform-react-jsx': 7.23.4(@babel/core@7.23.6)
       '@babel/plugin-transform-react-jsx-development': 7.22.5(@babel/core@7.23.6)
       '@babel/plugin-transform-react-pure-annotations': 7.23.3(@babel/core@7.23.6)
     dev: true
