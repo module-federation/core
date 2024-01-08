@@ -193,9 +193,7 @@ type PreloadRemoteArgs = {
 
 - Details
 
-::: info
-Only if the entry is manifest can more resources be loaded. The manifest plugin will be supported in 2024.Q1
-:::
+**Info**: Only if the entry is manifest can more resources be loaded. The manifest plugin will be supported in 2024.Q1
 
 Through `preloadRemote`, module resources can be preloaded at an earlier stage to avoid waterfall requests. `preloadRemote` can preload the following content:
 
