@@ -2,10 +2,7 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy, Marais Rossouw @maraisr
 */
-import {
-  getWebpackPath,
-  normalizeWebpackPath,
-} from '@module-federation/sdk/normalize-webpack-path';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import ContainerEntryDependency from './ContainerEntryDependency';
 import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';
@@ -126,7 +123,7 @@ class ContainerPlugin {
     if (!splitChunks) {
       return;
     }
-    // 修改 splitChunk.chunks
+    // patch splitChunk.chunks
     patchChunkSplit(splitChunks);
 
     const cacheGroups = splitChunks.cacheGroups;
@@ -134,7 +131,7 @@ class ContainerPlugin {
       return;
     }
 
-    // 修改 splitChunk.cacheGroups[key].chunks
+    // patch splitChunk.cacheGroups[key].chunks
     Object.keys(cacheGroups).forEach((cacheGroupKey) => {
       patchChunkSplit(cacheGroups[cacheGroupKey]);
     });
