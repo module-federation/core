@@ -54,7 +54,7 @@
     "react-router-dom": "6.21.1",
     "regenerator-runtime": "0.14.1",
     "tapable": "2.2.1",
-    "tsup": "7.2.0",
+    "tsup": "8.0.1",
     "typedoc": "0.25.4",
     "undici": "5.28.2",
     "unplugin": "1.6.0"
@@ -198,7 +198,7 @@
     "ts-jest": "29.1.1",
     "ts-node": "10.9.1",
     "tslib": "2.6.2",
-    "tsup": "7.2.0",
+    "tsup": "8.0.1",
     "typescript": "5.3.3",
     "url-loader": "4.1.1",
     "verdaccio": "5.29.0",
