@@ -89,6 +89,12 @@ export class FederationHost {
       origin: FederationHost;
     }>('beforeInitContainer'),
     // maybe will change, temporarily for internal use only
+    initContainerShareScopeMap: new AsyncWaterfallHook<{
+      shareScope: ShareScopeMap[string];
+      options: Options;
+      origin: FederationHost;
+    }>('initContainer'),
+    // maybe will change, temporarily for internal use only
     initContainer: new AsyncWaterfallHook<{
       shareScope: ShareScopeMap[string];
       initScope: InitScope;
@@ -706,6 +712,11 @@ export class FederationHost {
     shareScope: ShareScopeMap[string],
   ): void {
     this.shareScopeMap[scopeName] = shareScope;
+    this.hooks.lifecycle.initContainerShareScopeMap.emit({
+      shareScope,
+      options: this.options,
+      origin: this,
+    });
   }
 
   private formatOptions(

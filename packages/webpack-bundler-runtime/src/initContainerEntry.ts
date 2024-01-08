@@ -41,23 +41,16 @@ export function initContainerEntry(
     !webpackRequire.federation.initOptions
   )
     return;
+
+  const federationInstance = webpackRequire.federation.instance;
   var name = shareScopeKey || 'default';
-  webpackRequire.federation.instance.initOptions({
+  federationInstance.initOptions({
     name: webpackRequire.federation.initOptions.name,
     remotes: [],
     ...remoteEntryInitOptions,
   });
-  if (isLegacyHost(shareScope, remoteEntryInitOptions)) {
-    const prevShareScope = globalThis.__FEDERATION__.__SHARE__['default'];
-    if (prevShareScope) {
-      webpackRequire.federation.instance.initShareScopeMap(
-        name,
-        prevShareScope as unknown as ShareScopeMap[string],
-      );
-    }
-  } else {
-    webpackRequire.federation.instance.initShareScopeMap(name, shareScope);
-  }
+
+  federationInstance.initShareScopeMap(name, shareScope);
 
   webpackRequire.S[name] = shareScope;
   if (webpackRequire.federation.attachShareScopeMap) {
