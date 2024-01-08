@@ -39,6 +39,9 @@ class ProvideSharedModule extends Module {
   private _version: string | false;
   private _request: string;
   private _eager: boolean;
+  private _requiredVersion: string | false;
+  private _strictVersion: boolean;
+  private _singleton: boolean;
 
   /**
    * @constructor
@@ -47,6 +50,9 @@ class ProvideSharedModule extends Module {
    * @param {string | false} version version
    * @param {string} request request to the provided module
    * @param {boolean} eager include the module in sync way
+   * @param {boolean} requiredVersion version requirement
+   * @param {boolean} strictVersion don't use shared version even if version isn't valid
+   * @param {boolean} singleton use single global version
    */
   constructor(
     shareScope: string,
@@ -54,6 +60,9 @@ class ProvideSharedModule extends Module {
     version: string | false,
     request: string,
     eager: boolean,
+    requiredVersion: string | false,
+    strictVersion: boolean,
+    singleton: boolean,
   ) {
     super(WEBPACK_MODULE_TYPE_PROVIDE);
     this._shareScope = shareScope;
@@ -61,6 +70,9 @@ class ProvideSharedModule extends Module {
     this._version = version;
     this._request = request;
     this._eager = eager;
+    this._requiredVersion = requiredVersion;
+    this._strictVersion = strictVersion;
+    this._singleton = singleton;
   }
 
   /**
@@ -196,6 +208,12 @@ class ProvideSharedModule extends Module {
       request: this._request,
       getter: moduleGetter,
       shareScope: [this._shareScope],
+      shareConfig: {
+        eager: this._eager,
+        requiredVersion: this._requiredVersion,
+        strictVersion: this._strictVersion,
+        singleton: this._singleton,
+      },
     });
     return { sources, data, runtimeRequirements };
   }
@@ -210,6 +228,9 @@ class ProvideSharedModule extends Module {
     write(this._version);
     write(this._request);
     write(this._eager);
+    write(this._requiredVersion);
+    write(this._strictVersion);
+    write(this._singleton);
     super.serialize(context);
   }
 
@@ -219,7 +240,16 @@ class ProvideSharedModule extends Module {
    */
   static deserialize(context: ObjectDeserializerContext): ProvideSharedModule {
     const { read } = context;
-    const obj = new ProvideSharedModule(read(), read(), read(), read(), read());
+    const obj = new ProvideSharedModule(
+      read(),
+      read(),
+      read(),
+      read(),
+      read(),
+      read(),
+      read(),
+      read(),
+    );
     obj.deserialize(context);
     return obj;
   }

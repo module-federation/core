@@ -81,7 +81,8 @@ class ShareRuntimeModule extends RuntimeModule {
 					"${sharedOption.name}" : {
 						version: ${sharedOption.version},
 						get: ${sharedOption.getter},
-						scope: ${JSON.stringify(sharedOption.shareScope)}
+						scope: ${JSON.stringify(sharedOption.shareScope)},
+            shareConfig: ${JSON.stringify(sharedOption.shareConfig)}
 					},
 					`;
         }
