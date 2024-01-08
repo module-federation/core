@@ -5,7 +5,7 @@ import {
   setGlobalFederationInstance,
   setGlobalFederationConstructor,
 } from './global';
-import { UserOptions } from './type';
+import { UserOptions, FederationRuntimePlugin } from './type';
 import { assert } from './utils/logger';
 
 export { FederationHost } from './core';
@@ -13,6 +13,7 @@ export { registerGlobalPlugins } from './global';
 export { loadScript } from '@module-federation/sdk';
 
 export type { Federation } from './global';
+export type { FederationRuntimePlugin };
 
 let FederationInstance: FederationHost | null = null;
 export function init(options: UserOptions): FederationHost {
