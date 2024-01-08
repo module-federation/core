@@ -15,21 +15,12 @@ function getFederationGlobal(
   const federationGlobal = getFederationGlobalScope(runtimeGlobals);
   // TODO: get shared getter
   const initOptionsStrWithoutShared = JSON.stringify(initOptionsWithoutShared);
-  // return Template.asString([
-  // 	`if(!${federationGlobal}){`,
-  // 	"// inject vmok runtime",
-  // 	getRuntimeCode(),
-  // 	`${federationGlobal} = ${RuntimeGlobals.compatGetDefaultExport}(VmokBundlerRuntime)();`,
-  // 	`${federationGlobal}.initOptions = ${initOptionsStrWithoutShared};`,
-  // 	"}"
-  // ]);
+
   return template.asString([
     `if(!${federationGlobal}){`,
     template.indent([
       `${federationGlobal} = {`,
       template.indent([
-        // "runtime: undefined,",
-        // "instance: undefined,",
         `initOptions: ${initOptionsStrWithoutShared},`,
         `initialConsumes: undefined,`,
         'bundlerRuntimeOptions: {}',
@@ -37,9 +28,6 @@ function getFederationGlobal(
       '};',
     ]),
     '}',
-    // "// inject vmok runtime",
-    // getRuntimeCode(),
-    // `${federationGlobal}.runtime = VmokRuntime;`
   ]);
 }
 
