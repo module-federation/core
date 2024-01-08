@@ -1,5 +1,15 @@
 # [0.2.0-canary.5](https://github.com/module-federation/universe/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.0.8
+
+### Patch Changes
+
+- 98eb40d: feat: enhanced
+- Updated dependencies [98eb40d]
+- Updated dependencies [98eb40d]
+  - @module-federation/sdk@0.0.8
+  - @module-federation/runtime-tools@0.0.8
+
 ## 0.0.7
 
 ### Patch Changes

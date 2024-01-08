@@ -1,5 +1,12 @@
 # [1.1.0-canary.1](https://github.com/module-federation/universe/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.0.8
+
+### Patch Changes
+
+- 98eb40d: Support offline remotes recovery in errorLoadRemote. Allows hook to return a Module / factory / fallback mock when a request fails or container cannot be accessed
+- 98eb40d: feat: enhanced
+
 ## 0.0.7
 
 ## 0.0.6
