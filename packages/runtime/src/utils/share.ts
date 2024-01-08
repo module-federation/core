@@ -148,8 +148,6 @@ function getFindShareFunction(strategy: Shared['strategy']) {
   return findSingletonVersionOrderByVersion;
 }
 
-// Details about shared resources
-// TODO: Implement strictVersion for alignment with module federation.
 export function getRegisteredShare(
   localShareScopeMap: ShareScopeMap,
   pkgName: string,

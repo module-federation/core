@@ -762,7 +762,6 @@ export class FederationHost {
           remote.shareScope = DEFAULT_SCOPE;
         }
         if (!remote.type) {
-          // FIXME: The build plugin needs to support this field
           remote.type = DEFAULT_REMOTE_TYPE;
         }
         res.push(remote);
