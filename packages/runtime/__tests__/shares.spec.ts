@@ -11,6 +11,7 @@ import { DEFAULT_SCOPE } from '../src/constant';
 // import { assert } from '../src/utils/logger';
 import { FederationHost } from '../src/core';
 import { UserOptions, ShareScopeMap } from '../src/type';
+import { Global } from '../src/global';
 
 // eslint-disable-next-line max-lines-per-function
 // TODO: add new load share test cases
@@ -742,5 +743,91 @@ describe('load share with customize consume info', () => {
     });
     console.log(sharedWithCustomInfo);
     expect(sharedWithCustomInfo).toEqual(false);
+  });
+});
+
+describe('load share with different strategy', () => {
+  it('register all shared to shareScopeMap while strategy is "version-first"', async () => {
+    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = FederationHost;
+
+    const federationConfig1: UserOptions = {
+      name: '@shared-test/app1',
+      remotes: [
+        {
+          name: '__FEDERATION_@federation-test/version-strategy-app2:custom__',
+          alias: 'app2',
+          entry:
+            'http://localhost:1111/resources/version-strategy-app2/federation-remote-entry.js',
+        },
+      ],
+      shared: {
+        'runtime-react': {
+          version: '16.0.0',
+          scope: 'default',
+          strategy: 'version-first',
+          get: () => () => {
+            return { from: '@shared-test/app1' };
+          },
+        },
+      },
+    };
+
+    const FM1 = new FederationHost(federationConfig1);
+    const shared = await FM1.loadShare<{ from: string }>('runtime-react');
+
+    // should register remote shared to share scope map
+    expect(
+      Object.keys(FM1.shareScopeMap['default']['runtime-react']).length > 1,
+    ).toEqual(true);
+
+    assert(shared, "shared can't be null");
+    const sharedRes = shared();
+    assert(sharedRes, "sharedRes can't be null");
+    expect(sharedRes.from).toEqual('@shared-test/version-strategy-app2');
+
+    Global.__FEDERATION__.__INSTANCES__ = [];
+    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = undefined;
+  });
+
+  it('register only self shared to shareScopeMap while strategy is "loaded-first"', async () => {
+    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = FederationHost;
+
+    const federationConfig1: UserOptions = {
+      name: '@shared-test/app1',
+      remotes: [
+        {
+          name: '__FEDERATION_@federation-test/version-strategy-app2:custom__',
+          alias: 'app2',
+          entry:
+            'http://localhost:1111/resources/version-strategy-app2/federation-remote-entry.js',
+        },
+      ],
+      shared: {
+        'runtime-react': {
+          version: '16.0.0',
+          scope: 'default',
+          strategy: 'loaded-first',
+          get: () => () => {
+            return { from: '@shared-test/app1' };
+          },
+        },
+      },
+    };
+
+    const FM1 = new FederationHost(federationConfig1);
+    const shared = await FM1.loadShare<{ from: string }>('runtime-react');
+
+    // should not register remote shared to share scope map
+    expect(
+      Object.keys(FM1.shareScopeMap['default']['runtime-react']).length === 1,
+    ).toEqual(true);
+
+    assert(shared, "shared can't be null");
+    const sharedRes = shared();
+    assert(sharedRes, "sharedRes can't be null");
+    expect(sharedRes.from).toEqual('@shared-test/app1');
+
+    Global.__FEDERATION__.__INSTANCES__ = [];
+    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = undefined;
   });
 });
