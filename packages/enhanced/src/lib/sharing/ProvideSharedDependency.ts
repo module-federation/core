@@ -23,6 +23,9 @@ class ProvideSharedDependency extends Dependency {
   version: string | false;
   request: string;
   eager: boolean;
+  requiredVersion: string | false;
+  strictVersion: boolean;
+  singleton: boolean;
 
   /**
    * @param {string} shareScope share scope
@@ -30,6 +33,9 @@ class ProvideSharedDependency extends Dependency {
    * @param {string | false} version version
    * @param {string} request request
    * @param {boolean} eager true, if this is an eager dependency
+   * @param {boolean} requiredVersion version requirement
+   * @param {boolean} strictVersion don't use shared version even if version isn't valid
+   * @param {boolean} singleton use single global version
    */
   constructor(
     shareScope: string,
@@ -37,6 +43,9 @@ class ProvideSharedDependency extends Dependency {
     version: string | false,
     request: string,
     eager: boolean,
+    requiredVersion: string | false,
+    strictVersion: boolean,
+    singleton: boolean,
   ) {
     super();
     this.shareScope = shareScope;
@@ -44,6 +53,9 @@ class ProvideSharedDependency extends Dependency {
     this.version = version;
     this.request = request;
     this.eager = eager;
+    this.requiredVersion = requiredVersion;
+    this.strictVersion = strictVersion;
+    this.singleton = singleton;
   }
 
   override get type(): string {
@@ -68,6 +80,9 @@ class ProvideSharedDependency extends Dependency {
     context.write(this.request);
     context.write(this.version);
     context.write(this.eager);
+    context.write(this.requiredVersion);
+    context.write(this.strictVersion);
+    context.write(this.singleton);
     super.serialize(context);
   }
 
@@ -80,6 +95,9 @@ class ProvideSharedDependency extends Dependency {
   ): ProvideSharedDependency {
     const { read } = context;
     const obj = new ProvideSharedDependency(
+      read(),
+      read(),
+      read(),
       read(),
       read(),
       read(),
