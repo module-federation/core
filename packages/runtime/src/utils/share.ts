@@ -207,6 +207,9 @@ export function getRegisteredShare(
           if (requiredVersion === false || requiredVersion === '*') {
             return localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
           }
+          if (satisfy(maxOrSingletonVersion, requiredVersion)) {
+            return localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
+          }
 
           for (const [versionKey, versionValue] of Object.entries(
             localShareScopeMap[sc][pkgName],
