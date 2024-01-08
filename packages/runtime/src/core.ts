@@ -852,15 +852,6 @@ export class FederationHost {
       }
 
       if (this.shareScopeMap[sc][pkgName][version]) {
-        warn(
-          // eslint-disable-next-line max-len
-          `The share \n ${safeToString({
-            scope: sc,
-            pkgName,
-            version,
-            from: this.shareScopeMap[sc][pkgName][version].from,
-          })} has been registered`,
-        );
         return;
       }
 
