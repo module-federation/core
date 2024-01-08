@@ -817,7 +817,7 @@ describe('load share with different strategy', () => {
     const FM1 = new FederationHost(federationConfig1);
     const shared = await FM1.loadShare<{ from: string }>('runtime-react');
 
-    // should register remote shared to share scope map
+    // should not register remote shared to share scope map
     expect(
       Object.keys(FM1.shareScopeMap['default']['runtime-react']).length === 1,
     ).toEqual(true);
