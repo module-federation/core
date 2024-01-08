@@ -1,5 +1,16 @@
 # [1.0.0-canary.3](https://github.com/module-federation/universe/compare/webpack-bundler-runtime-1.0.0-canary.2...webpack-bundler-runtime-1.0.0-canary.3) (2023-11-23)
 
+## 0.0.8
+
+### Patch Changes
+
+- 98eb40d: Support offline remotes recovery in errorLoadRemote. Allows hook to return a Module / factory / fallback mock when a request fails or container cannot be accessed
+- 98eb40d: feat: enhanced
+- Updated dependencies [98eb40d]
+- Updated dependencies [98eb40d]
+  - @module-federation/runtime@0.0.8
+  - @module-federation/sdk@0.0.8
+
 ## 0.0.7
 
 ### Patch Changes

@@ -1,5 +1,17 @@
 # [8.1.0-canary.7](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.1.4
+
+### Patch Changes
+
+- 98eb40d: Support offline remotes recovery in errorLoadRemote. Allows hook to return a Module / factory / fallback mock when a request fails or container cannot be accessed
+- Updated dependencies [98eb40d]
+- Updated dependencies [98eb40d]
+  - @module-federation/runtime@0.0.8
+  - @module-federation/sdk@0.0.8
+  - @module-federation/enhanced@0.0.8
+  - @module-federation/node@2.0.6
+
 ## 8.1.3
 
 ### Patch Changes

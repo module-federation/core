@@ -1,5 +1,15 @@
 # @module-federation/runtime
 
+## 0.0.8
+
+### Patch Changes
+
+- 98eb40d: Support offline remotes recovery in errorLoadRemote. Allows hook to return a Module / factory / fallback mock when a request fails or container cannot be accessed
+- 98eb40d: feat: enhanced
+- Updated dependencies [98eb40d]
+- Updated dependencies [98eb40d]
+  - @module-federation/sdk@0.0.8
+
 ## 0.0.7
 
 ### Patch Changes
