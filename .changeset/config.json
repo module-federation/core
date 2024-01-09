@@ -14,7 +14,7 @@
   "ignorePatterns": ["^alpha|^beta"],
   "linked": [],
   "access": "restricted",
-  "baseBranch": "canary",
+  "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
     "node-host",
