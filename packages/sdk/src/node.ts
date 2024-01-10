@@ -43,9 +43,11 @@ export function createScriptNode(
   };
   console.log('fetching', urlObj.href);
   getFetch().then((f) => {
+    console.log('got fetch');
     f(urlObj.href)
       .then((res: Response) => res.text())
       .then(async (data: string) => {
+        console.log('got data');
         const [path, vm]: [typeof import('path'), typeof import('vm')] =
           await Promise.all([
             importNodeModule<typeof import('path')>('path'),
@@ -86,7 +88,7 @@ export function createScriptNode(
         }
       })
       .catch((err: Error) => {
-        // console.error('Error fetching script:', err);
+        console.error('Error fetching script:', err);
         cb(err);
       });
   });
@@ -103,6 +105,7 @@ export function loadScriptNode(
       url,
       (error, scriptContext) => {
         if (error) {
+          console.log('rejected');
           reject(error);
         } else {
           const remoteEntryKey =
