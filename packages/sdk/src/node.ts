@@ -86,7 +86,7 @@ export function createScriptNode(
         }
       })
       .catch((err: Error) => {
-        console.error('Error fetching script:', err);
+        // console.error('Error fetching script:', err);
         cb(err);
       });
   });
@@ -103,7 +103,6 @@ export function loadScriptNode(
       url,
       (error, scriptContext) => {
         if (error) {
-          console.log('rejected');
           reject(error);
         } else {
           const remoteEntryKey =

@@ -594,8 +594,6 @@ export class FederationHost {
         origin: this,
       });
 
-      console.log('failOver', failOver);
-
       if (!failOver) {
         throw error;
       }

@@ -4,7 +4,7 @@ export default function (): FederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
     errorLoadRemote({ id, error, from, origin }) {
-      console.error(id, 'offline', error);
+      console.error(id, 'offline');
       const pg = function () {
         console.error(id, 'offline', error);
         return null;
