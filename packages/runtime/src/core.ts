@@ -588,7 +588,7 @@ export class FederationHost {
     } catch (error) {
       console.log('FAILURE');
       const { from = 'runtime' } = options || { from: 'runtime' };
-
+      console.log(this);
       const failOver = await this.hooks.lifecycle.errorLoadRemote.emit({
         id,
         error,

@@ -45,7 +45,7 @@ export class NextFederationPlugin {
     const { mainOptions, extraOptions } = setOptions(options);
     this._options = mainOptions;
     this._extraOptions = extraOptions;
-    this.name = 'ModuleFederationPlugin';
+    this.name = 'NextFederationPlugin';
   }
 
   /**
