@@ -569,9 +569,8 @@ export class FederationHost {
       const { module, moduleOptions, remoteMatchInfo } =
         await this._getRemoteModuleAndOptions(id);
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
-      console.log('beofre module get');
       const moduleOrFactory = (await module.get(expose, options)) as T;
-      console.log('after module get');
+
       await this.hooks.lifecycle.onLoad.emit({
         id: idRes,
         pkgNameOrAlias,
@@ -586,9 +585,8 @@ export class FederationHost {
 
       return moduleOrFactory;
     } catch (error) {
-      console.log('FAILURE');
       const { from = 'runtime' } = options || { from: 'runtime' };
-      console.log(this);
+
       const failOver = await this.hooks.lifecycle.errorLoadRemote.emit({
         id,
         error,

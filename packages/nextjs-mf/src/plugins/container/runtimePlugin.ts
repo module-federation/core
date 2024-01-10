@@ -1,5 +1,5 @@
 import { FederationRuntimePlugin } from '@module-federation/runtime/types';
-console.log('runtime plugin exists');
+
 export default function (): FederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',

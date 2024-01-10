@@ -6,6 +6,7 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "packages/nextjs-mf/dist",
         "main": "packages/nextjs-mf/src/index.ts",
