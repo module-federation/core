@@ -138,12 +138,24 @@ Module Federation uses GitHub Actions for automated versioning and publishing:
 2. Make sure that both "use workflow from" and "release branch" are split for the test version you want to release
 3. Use the "next" TAB to release the test version
 
-![image](https://github.com/module-federation/universe/assets/27547179/18580135-3326-4bff-9ba1-0570f40f9e2a)
+![image](https://github.com/module-federation/universe/assets/27547179/f84fd796-d1d9-42f6-8bb2-95b07c6d7749)
+
 
 
 ## Release the official version
 
 1. Use the release pull request to release an official version
     * It will create a pull request that includes the changed version
+  
+![image](https://github.com/module-federation/universe/assets/27547179/b5ed83f3-4cf8-4a95-859b-729e3ad0e7eb)
+![image](https://github.com/module-federation/universe/assets/27547179/1cfc2e71-dbf9-41d8-84f8-3948eb636c7c)
+
+
+
 2. If the version is normal, release it using release workflow and then a branch of pull request
-3. Generate a release note based on the original tag after the release is complete
+![image](https://github.com/module-federation/universe/assets/27547179/5c66e9e5-7bd7-4466-a1aa-38420f1dac82)
+
+
+4. Generate a release note based on the original tag after the release is complete
+
+![image](https://github.com/module-federation/universe/assets/27547179/accc9626-9ffd-4074-8d47-14372ae77400)
