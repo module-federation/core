@@ -132,11 +132,18 @@ feat(plugin-swc): Add `xxx` config
 
 Module Federation uses GitHub Actions for automated versioning and publishing:
 
-## Action release
+## Release test version
 
-* next: The timestamp version will be created when you release with the next version, which is suitable for testing on your own
-* beta|alpha: Suitable for releasing test versions
-* latest: Suitable for releasing stable versions in the trunk branch
+1. Make sure your branch has added changeset files before releasing the test version
+2. Make sure that both "use workflow from" and "release branch" are split for the test version you want to release
+3. Use the "next" TAB to release the test version
 
 ![image](https://github.com/module-federation/universe/assets/27547179/18580135-3326-4bff-9ba1-0570f40f9e2a)
 
+
+## Release the official version
+
+1. Use the release pull request to release an official version
+    * It will create a pull request that includes the changed version
+2. If the version is normal, release it using release workflow and then a branch of pull request
+3. Generate a release note based on the original tag after the release is complete
