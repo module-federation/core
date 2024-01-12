@@ -14,7 +14,7 @@
         "assets": [
           "packages/enhanced/*.md",
           {
-            "glob": "src/declarations/**/**",
+            "glob": "src/**/*.d.ts",
             "input": "packages/enhanced",
             "ignore": [],
             "output": ""
