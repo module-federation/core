@@ -135,7 +135,12 @@ export async function getRemoteEntry({
       });
     }
   }
-  return globalLoading[uniqueKey];
+
+  return (globalLoading[uniqueKey] as Promise<RemoteEntryExports>).finally(
+    () => {
+      delete globalLoading[uniqueKey];
+    },
+  );
 }
 
 export function getRemoteInfo(remote: Remote): RemoteInfo {
