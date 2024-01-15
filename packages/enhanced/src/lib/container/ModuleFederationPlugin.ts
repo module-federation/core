@@ -7,7 +7,6 @@
 
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import isValidExternalsType from 'webpack/schemas/plugins/container/ExternalsType.check.js';
 import type { ModuleFederationPluginOptions } from './ModuleFederationPluginTypes';
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
@@ -15,6 +14,12 @@ import ContainerReferencePlugin from './ContainerReferencePlugin';
 import checkOptions from '../../schemas/container/ModuleFederationPlugin.check';
 import schema from '../../schemas/container/ModuleFederationPlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+
+const isValidExternalsType = require(
+  normalizeWebpackPath(
+    'webpack/schemas/plugins/container/ExternalsType.check.js',
+  ),
+) as typeof import('webpack/schemas/plugins/container/ExternalsType.check.js');
 
 const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),

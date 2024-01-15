@@ -205,13 +205,22 @@ class FederationRuntimePlugin {
         paths: [this.options.implementation],
       });
     }
+    if (Array.isArray(compiler.options.resolve.alias)) {
+      return;
+    }
 
     compiler.options.resolve.alias = {
       ...compiler.options.resolve.alias,
-      '@module-federation/runtime$': runtimePath,
-      '@module-federation/runtime-tools$':
-        this.options?.implementation || RuntimeToolsPath,
     };
+
+    if (!compiler.options.resolve.alias['@module-federation/runtime$']) {
+      compiler.options.resolve.alias['@module-federation/runtime$'] =
+        runtimePath;
+    }
+    if (!compiler.options.resolve.alias['@module-federation/runtime-tools$']) {
+      compiler.options.resolve.alias['@module-federation/runtime-tools$'] =
+        this.options?.implementation || RuntimeToolsPath;
+    }
   }
 
   apply(compiler: Compiler) {

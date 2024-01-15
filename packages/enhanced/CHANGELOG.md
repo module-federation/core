@@ -1,5 +1,17 @@
 # [0.2.0-canary.5](https://github.com/module-federation/universe/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.0.9
+
+### Patch Changes
+
+- 1147f48: fix: not duplicate set resolve.alias
+- cf8634d: fix: copy decalaration files to output
+- 2ad29a6: fix: remove duplicate init shareScopeMap
+  fix: normalize schemas path
+  fix: shared is loaded if it has lib attr
+  - @module-federation/runtime-tools@0.0.9
+  - @module-federation/sdk@0.0.9
+
 ## 0.0.8
 
 ### Patch Changes
