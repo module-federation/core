@@ -64,6 +64,8 @@ export class NextFederationPlugin {
       compiler,
       isServer,
     );
+    // ContainerPlugin will get NextFederationPlugin._options, so NextFederationPlugin._options should be the same as normalFederationPluginOptions
+    this._options = normalFederationPluginOptions;
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
   }
 
