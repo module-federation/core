@@ -108,7 +108,7 @@
     "@semantic-release/npm": "^11.0.0",
     "@storybook/addon-essentials": "7.6.7",
     "@storybook/builder-webpack5": "7.6.7",
-    "@storybook/core-common": "7.6.7",
+    "@storybook/core-common": "7.6.8",
     "@storybook/core-server": "7.6.7",
     "@storybook/manager-webpack5": "6.5.16",
     "@storybook/node-logger": "7.6.7",
