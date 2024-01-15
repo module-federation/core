@@ -52,7 +52,6 @@ export function initContainerEntry(
 
   federationInstance.initShareScopeMap(name, shareScope);
 
-  webpackRequire.S[name] = shareScope;
   if (webpackRequire.federation.attachShareScopeMap) {
     webpackRequire.federation.attachShareScopeMap(webpackRequire);
   }
