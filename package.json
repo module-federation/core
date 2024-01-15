@@ -146,7 +146,7 @@
     "comment-parser": "1.4.1",
     "commitizen": "^4.3.0",
     "concurrently": "8.2.2",
-    "copy-webpack-plugin": "11.0.0",
+    "copy-webpack-plugin": "12.0.1",
     "cypress": "^13.0.0",
     "directory-tree": "3.5.1",
     "esbuild": "0.19.11",
