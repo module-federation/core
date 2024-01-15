@@ -48,8 +48,17 @@ const createSchemaValidation = require(
 
 const validate = createSchemaValidation(
   //eslint-disable-next-line
-  require('webpack/schemas/plugins/sharing/ConsumeSharedPlugin.check.js'),
-  () => require('webpack/schemas/plugins/sharing/ConsumeSharedPlugin.json'),
+  require(
+    normalizeWebpackPath(
+      'webpack/schemas/plugins/sharing/ConsumeSharedPlugin.check.js',
+    ),
+  ),
+  () =>
+    require(
+      normalizeWebpackPath(
+        'webpack/schemas/plugins/sharing/ConsumeSharedPlugin.json',
+      ),
+    ),
   {
     name: 'Consume Shared Plugin',
     baseDataPath: 'options',
