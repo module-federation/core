@@ -75,6 +75,7 @@ const processChunk = async (chunk, shareMap, hostStats) => {
   // If the remote is not defined in the global config, return
   //@ts-ignore
   const hasCachedModule = globalThis.__FEDERATION__.__INSTANCES__.find(
+    //@ts-ignore
     (instance) => {
       return instance.moduleCache.has(remote);
     },
