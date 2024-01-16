@@ -51,7 +51,7 @@ jobs:
         run: npx nx run-many --target=serve --projects=3000-home,3001-shop,3002-checkout --parallel=3 & echo "done"
 
       - name: E2E Test for 3000-home, 3001-shop, 3002-checkout
-        run: sleep 10 && npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1
+        run: sleep 15 && npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1
 
       - name: Kill Processes on Ports 3000, 3001, 3002
         run: lsof -ti tcp:3000,3001,3002 | xargs kill
