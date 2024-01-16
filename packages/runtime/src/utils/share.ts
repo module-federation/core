@@ -105,6 +105,10 @@ const findVersion = (
   }, 0) as string;
 };
 
+const isLoaded = (shared: Shared) => {
+  return Boolean(shared.loaded) || typeof shared.lib === 'function';
+};
+
 function findSingletonVersionOrderByVersion(
   shareScopeMap: ShareScopeMap,
   scope: string,
@@ -112,7 +116,7 @@ function findSingletonVersionOrderByVersion(
 ): string {
   const versions = shareScopeMap[scope][pkgName];
   const callback = function (prev: string, cur: string): boolean {
-    return !versions[prev].loaded && versionLt(prev, cur);
+    return !isLoaded(versions[prev]) && versionLt(prev, cur);
   };
 
   return findVersion(shareScopeMap, scope, pkgName, callback);
@@ -124,15 +128,16 @@ function findSingletonVersionOrderByLoaded(
   pkgName: string,
 ): string {
   const versions = shareScopeMap[scope][pkgName];
+
   const callback = function (prev: string, cur: string): boolean {
-    if (versions[cur].loaded) {
-      if (versions[prev].loaded) {
+    if (isLoaded(versions[cur])) {
+      if (isLoaded(versions[prev])) {
         return Boolean(versionLt(prev, cur));
       } else {
         return true;
       }
     }
-    if (versions[prev].loaded) {
+    if (isLoaded(versions[prev])) {
       return false;
     }
     return versionLt(prev, cur);

@@ -1,5 +1,15 @@
 # @module-federation/runtime
 
+## 0.0.9
+
+### Patch Changes
+
+- 2ad29a6: fix: remove duplicate init shareScopeMap
+  fix: normalize schemas path
+  fix: shared is loaded if it has lib attr
+- b129098: fix: window.location.origin will be "null" in iframe srcDoc
+  - @module-federation/sdk@0.0.9
+
 ## 0.0.8
 
 ### Patch Changes

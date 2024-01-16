@@ -11,7 +11,15 @@
         "outputPath": "packages/enhanced/dist",
         "main": "packages/enhanced/src/index.ts",
         "tsConfig": "packages/enhanced/tsconfig.lib.json",
-        "assets": ["packages/enhanced/*.md"]
+        "assets": [
+          "packages/enhanced/*.md",
+          {
+            "glob": "src/**/*.d.ts",
+            "input": "packages/enhanced",
+            "ignore": [],
+            "output": ""
+          }
+        ]
       },
       "dependsOn": [
         {

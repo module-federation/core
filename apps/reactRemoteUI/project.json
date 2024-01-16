@@ -18,7 +18,6 @@
         "assets": ["apps/reactRemoteUI/src/favicon.ico"],
         "styles": ["apps/reactRemoteUI/src/styles.scss"],
         "scripts": [],
-        "isolatedConfig": true,
         "webpackConfig": "apps/reactRemoteUI/webpack.config.js"
       },
       "configurations": {
