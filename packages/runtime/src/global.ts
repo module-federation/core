@@ -144,9 +144,10 @@ export function getGlobalFederationConstructor():
 }
 
 export function setGlobalFederationConstructor(
-  FederationConstructor: typeof FederationHost,
+  FederationConstructor: typeof FederationHost | undefined,
+  isDebug = isDebugMode(),
 ): void {
-  if (isDebugMode()) {
+  if (isDebug) {
     globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = FederationConstructor;
     globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR_VERSION__ = __VERSION__;
   }

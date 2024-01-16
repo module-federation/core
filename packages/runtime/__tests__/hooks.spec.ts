@@ -186,8 +186,8 @@ describe('hooks', () => {
     );
     assert(res);
     expect(res()).toBe('hello app2');
-    // @ts-ignore fakeSrc is local mock attr, which value is the same as src
     const testLoadedScript = [...document.querySelectorAll('script')].find(
+      // @ts-ignore fakeSrc is local mock attr, which value is the same as src
       (script) => script.fakeSrc === testRemoteEntry,
     );
     assert(testLoadedScript);
