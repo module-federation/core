@@ -73,7 +73,15 @@ const processChunk = async (chunk, shareMap, hostStats) => {
   const [remote, request] = chunk.split('->');
 
   // If the remote is not defined in the global config, return
-  if (!globalThis.__remote_scope__._config[remote]) {
+  //@ts-ignore
+  const hasCachedModule = globalThis.__FEDERATION__.__INSTANCES__.find(
+    (acc, instance) => {
+      return instance.moduleCache.has(remote);
+    },
+    {},
+  );
+
+  if (!hasCachedModule) {
     console.error(
       `flush chunks:`,
       `Remote ${remote} is not defined in the global config`,
@@ -85,7 +93,7 @@ const processChunk = async (chunk, shareMap, hostStats) => {
     // Extract the remote name from the URL
     //@ts-ignore
     const remoteName = new URL(
-      globalThis.__remote_scope__._config[remote],
+      hasCachedModule.moduleCache.get(remote).remoteInfo.entry,
     ).pathname
       .split('/')
       .pop();
