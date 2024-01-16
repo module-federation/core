@@ -562,7 +562,7 @@ const customSharedPlugin: () => FederationRuntimePlugin =
     return {
       name: 'custom-shared-plugin',
       resolveShare(args) {
-        const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
+        const { shareScopeMap, scope, pkgName, version } = args;
 
         if (
           pkgName !== 'react' 
@@ -571,7 +571,9 @@ const customSharedPlugin: () => FederationRuntimePlugin =
         }
 
         args.resolver = function () {
-          shareScopeMap[scope][pkgName][version] = window.React; // replace local share scope manually with desired module
+          shareScopeMap[scope][pkgName][version] = {
+            lib: ()=> window.React
+          }; // replace local share scope manually with desired module
           return shareScopeMap[scope][pkgName][version];
         };
         return args;

@@ -779,13 +779,12 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
-      webpack:
-        specifier: ^5.0.0
-        version: 5.88.2(@swc/core@1.3.102)(esbuild@0.19.11)
-    devDependencies:
       '@module-federation/webpack-bundler-runtime':
         specifier: workspace:*
         version: link:../webpack-bundler-runtime
+      webpack:
+        specifier: ^5.0.0
+        version: 5.88.2(@swc/core@1.3.102)(esbuild@0.19.11)
 
   packages/native-federation-tests:
     dependencies:
