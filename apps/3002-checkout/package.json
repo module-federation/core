@@ -12,6 +12,7 @@
   "devDependencies": {
     "@module-federation/nextjs-mf": "workspace:*",
     "@module-federation/sdk": "workspace:*",
+    "@module-federation/runtime": "workspace:*",
     "@module-federation/utilities": "workspace:*"
   }
 }
