@@ -37,7 +37,6 @@ describe('snapshot', () => {
 
     const globalSnapshot = getGlobalSnapshot();
 
-    // console.log('xxxxx', globalSnapshot);
     assert(globalSnapshot['@snapshot/host']);
     expect(globalSnapshot['@snapshot/host']).toMatchObject({
       version: '0.0.3',

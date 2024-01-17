@@ -12,7 +12,8 @@ import {
   setGlobalSnapshotInfoByModuleInfo,
   Global,
   addGlobalSnapshot,
-  GetSnapshotInfoWithHook,
+  getGlobalSnapshotInfoByModuleInfo,
+  getInfoWithoutType,
 } from '../../global';
 import { PluginSystem, AsyncHook, AsyncWaterfallHook } from '../../utils/hooks';
 import { FederationHost } from '../../core';
@@ -51,12 +52,10 @@ export class SnapshotHandler {
   loaderHook: FederationHost['loaderHook'];
   manifestLoading: Record<string, Promise<ModuleInfo>> =
     Global.__FEDERATION__.__MANIFEST_LOADING__;
-  getSnapshotInfoHandler: GetSnapshotInfoWithHook;
 
   constructor(HostInstance: FederationHost) {
     this.HostInstance = HostInstance;
     this.loaderHook = HostInstance.loaderHook;
-    this.getSnapshotInfoHandler = new GetSnapshotInfoWithHook(this.loaderHook);
   }
 
   async loadSnapshot(moduleInfo: Remote): Promise<{
@@ -97,11 +96,10 @@ export class SnapshotHandler {
       moduleInfo,
     });
 
-    let hostSnapshot =
-      this.getSnapshotInfoHandler.getGlobalSnapshotInfoByModuleInfo({
-        name: this.HostInstance.options.name,
-        version: this.HostInstance.options.version,
-      });
+    let hostSnapshot = getGlobalSnapshotInfoByModuleInfo({
+      name: this.HostInstance.options.name,
+      version: this.HostInstance.options.version,
+    });
 
     if (!hostSnapshot) {
       hostSnapshot = {
@@ -119,10 +117,7 @@ export class SnapshotHandler {
     if (
       hostSnapshot &&
       'remotesInfo' in hostSnapshot &&
-      !this.getSnapshotInfoHandler.getInfoWithoutTypeWithHook(
-        hostSnapshot.remotesInfo,
-        moduleInfo.name,
-      ).value
+      !getInfoWithoutType(hostSnapshot.remotesInfo, moduleInfo.name).value
     ) {
       if ('version' in moduleInfo || 'entry' in moduleInfo) {
         hostSnapshot.remotesInfo = {
@@ -226,42 +221,36 @@ export class SnapshotHandler {
     globalSnapshot: ReturnType<typeof getGlobalSnapshot>;
     remoteSnapshot: GlobalModuleInfo[string] | undefined;
   } {
-    const hostGlobalSnapshot =
-      this.getSnapshotInfoHandler.getGlobalSnapshotInfoByModuleInfo({
-        name: this.HostInstance.options.name,
-        version: this.HostInstance.options.version,
-      });
+    const hostGlobalSnapshot = getGlobalSnapshotInfoByModuleInfo({
+      name: this.HostInstance.options.name,
+      version: this.HostInstance.options.version,
+    });
 
     // get remote detail info from global
     const globalRemoteInfo =
       hostGlobalSnapshot &&
       'remotesInfo' in hostGlobalSnapshot &&
       hostGlobalSnapshot.remotesInfo &&
-      this.getSnapshotInfoHandler.getInfoWithoutTypeWithHook(
-        hostGlobalSnapshot.remotesInfo,
-        moduleInfo.name,
-      ).value;
+      getInfoWithoutType(hostGlobalSnapshot.remotesInfo, moduleInfo.name).value;
 
     if (globalRemoteInfo && globalRemoteInfo.matchedVersion) {
       return {
         hostGlobalSnapshot,
         globalSnapshot: getGlobalSnapshot(),
-        remoteSnapshot:
-          this.getSnapshotInfoHandler.getGlobalSnapshotInfoByModuleInfo({
-            name: moduleInfo.name,
-            version: globalRemoteInfo.matchedVersion,
-          }),
+        remoteSnapshot: getGlobalSnapshotInfoByModuleInfo({
+          name: moduleInfo.name,
+          version: globalRemoteInfo.matchedVersion,
+        }),
       };
     }
 
     return {
       hostGlobalSnapshot: undefined,
       globalSnapshot: getGlobalSnapshot(),
-      remoteSnapshot:
-        this.getSnapshotInfoHandler.getGlobalSnapshotInfoByModuleInfo({
-          name: moduleInfo.name,
-          version: 'version' in moduleInfo ? moduleInfo.version : undefined,
-        }),
+      remoteSnapshot: getGlobalSnapshotInfoByModuleInfo({
+        name: moduleInfo.name,
+        version: 'version' in moduleInfo ? moduleInfo.version : undefined,
+      }),
     };
   }
 

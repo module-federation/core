@@ -14,7 +14,7 @@ import {
   RemoteInfoOptionalVersion,
 } from '../type';
 import { assignRemoteInfo } from './snapshot';
-import { GetSnapshotInfoWithHook, getPreloaded, setPreloaded } from '../global';
+import { getInfoWithoutType, getPreloaded, setPreloaded } from '../global';
 import { FederationHost } from '../core';
 import { defaultPreloadArgs, normalizePreloadExposes } from '../utils/preload';
 import { getRegisteredShare } from '../utils/share';
@@ -61,12 +61,10 @@ function traverseModuleInfo(
   ) => void,
   isRoot: boolean,
   memo: Record<string, boolean> = {},
-  getSnapshotInfoWithHook: GetSnapshotInfoWithHook,
   remoteSnapshot?: ModuleInfo,
 ): void {
   const id = getFMId(remoteInfo);
-  const { value: snapshotValue } =
-    getSnapshotInfoWithHook.getInfoWithoutTypeWithHook(globalSnapshot, id);
+  const { value: snapshotValue } = getInfoWithoutType(globalSnapshot, id);
   const effectiveRemoteSnapshot = remoteSnapshot || snapshotValue;
   if (effectiveRemoteSnapshot && !isManifestProvider(effectiveRemoteSnapshot)) {
     traverse(effectiveRemoteSnapshot, remoteInfo, isRoot);
@@ -88,7 +86,6 @@ function traverseModuleInfo(
           traverse,
           false,
           memo,
-          getSnapshotInfoWithHook,
           undefined,
         );
       }
@@ -239,7 +236,6 @@ export function generatePreloadAssets(
     },
     true,
     memo,
-    origin.snapshotHandler.getSnapshotInfoHandler,
     remoteSnapshot,
   );
 
