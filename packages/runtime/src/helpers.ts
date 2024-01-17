@@ -5,10 +5,10 @@ import {
   setGlobalFederationInstance,
   getGlobalFederationConstructor,
   setGlobalFederationConstructor,
-  getInfoWithoutType,
+  // getInfoWithoutType,
   getGlobalSnapshot,
-  getTargetSnapshotInfoByModuleInfo,
-  getGlobalSnapshotInfoByModuleInfo,
+  // getTargetSnapshotInfoByModuleInfo,
+  // getGlobalSnapshotInfoByModuleInfo,
   setGlobalSnapshotInfoByModuleInfo,
   addGlobalSnapshot,
   getRemoteEntryExports,
@@ -37,10 +37,7 @@ interface IGlobalUtils {
   setGlobalFederationInstance: typeof setGlobalFederationInstance;
   getGlobalFederationConstructor: typeof getGlobalFederationConstructor;
   setGlobalFederationConstructor: typeof setGlobalFederationConstructor;
-  getInfoWithoutType: typeof getInfoWithoutType;
   getGlobalSnapshot: typeof getGlobalSnapshot;
-  getTargetSnapshotInfoByModuleInfo: typeof getTargetSnapshotInfoByModuleInfo;
-  getGlobalSnapshotInfoByModuleInfo: typeof getGlobalSnapshotInfoByModuleInfo;
   setGlobalSnapshotInfoByModuleInfo: typeof setGlobalSnapshotInfoByModuleInfo;
   addGlobalSnapshot: typeof addGlobalSnapshot;
   getRemoteEntryExports: typeof getRemoteEntryExports;
@@ -58,10 +55,7 @@ const GlobalUtils: IGlobalUtils = {
   setGlobalFederationInstance,
   getGlobalFederationConstructor,
   setGlobalFederationConstructor,
-  getInfoWithoutType,
   getGlobalSnapshot,
-  getTargetSnapshotInfoByModuleInfo,
-  getGlobalSnapshotInfoByModuleInfo,
   setGlobalSnapshotInfoByModuleInfo,
   addGlobalSnapshot,
   getRemoteEntryExports,
