@@ -2,13 +2,13 @@ const { composePlugins, withNx } = require('@nx/webpack');
 const { UniversalFederationPlugin } = require('@module-federation/node');
 
 // Nx plugins for webpack.
-module.exports = composePlugins(withNx(), (config) => {
+module.exports = composePlugins(withNx(), async (config) => {
   // Update the webpack config as needed here.
   // e.g. `config.plugins.push(new MyPlugin())`
   config.cache = false;
   config.devtool = false;
   config.output.publicPath = '/testing';
-
+  await new Promise((r) => setTimeout(r, 400));
   config.module.rules.pop();
   config.plugins.push(
     new UniversalFederationPlugin({
