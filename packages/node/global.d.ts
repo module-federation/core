@@ -11,9 +11,10 @@ declare global {
         };
       };
       webpackChunkLoad: () => any;
+
       __FEDERATION__: {
         __INSTANCES__: Array<{
-          moduleCache?: Map<any, any>;
+          moduleCache?: Map<string, Module>;
         }>;
       };
     }
@@ -21,7 +22,7 @@ declare global {
 
   var __FEDERATION__: {
     __INSTANCES__: Array<{
-      moduleCache?: Map<any, any>;
+      moduleCache?: Map<string, Module>;
     }>;
   };
 }

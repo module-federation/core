@@ -1,3 +1,5 @@
+import { getAllKnownRemotes } from './flush-chunks';
+
 const hashmap = {} as Record<string, string>;
 import { Federation } from '@module-federation/runtime';
 import crypto from 'crypto';
@@ -17,9 +19,6 @@ export const performReload = (shouldReload: any) => {
     //@ts-ignore
     req = __non_webpack_require__ as NodeRequire;
   }
-
-  //@ts-ignore
-  globalThis.__remote_scope__ = {};
 
   Object.keys(req.cache).forEach((key) => {
     if (requireCacheRegex.test(key)) {
@@ -93,10 +92,10 @@ export const checkFakeRemote = (remoteScope: any) => {
 
 export const fetchRemote = (remoteScope: any, fetchModule: any) => {
   const fetches = [];
-  for (const property in remoteScope._config) {
+  for (const property in remoteScope) {
     const name = property;
-    const url = remoteScope._config[property];
-
+    const container = remoteScope[property];
+    const url = container.entry;
     const fetcher = fetchModule(url)
       .then((re: Response) => {
         if (!re.ok) {
@@ -110,7 +109,6 @@ export const fetchRemote = (remoteScope: any, fetchModule: any) => {
       })
       .then((contents: string): void | boolean => {
         const hash = crypto.createHash('md5').update(contents).digest('hex');
-
         if (hashmap[name]) {
           if (hashmap[name] !== hash) {
             hashmap[name] = hash;
@@ -137,52 +135,20 @@ export const fetchRemote = (remoteScope: any, fetchModule: any) => {
 };
 //@ts-ignore
 export const revalidate = (
-  //@ts-ignore
-  remoteScope: any = globalThis.__remote_scope__ || {},
   fetchModule: any = getFetchModule() || (() => {}),
 ) => {
-  console.log('revalidating remote scope');
-  const federationController: Federation = globalThis.__FEDERATION__;
-  // Initialize an empty object
-  let result = {};
-
-  // Reduce over instances and get each instance's moduleCache values and keys which are in a new Map()
-  federationController.__INSTANCES__.forEach((instance) => {
-    // Check if the current instance has a moduleCache and it's a Map
-    if (instance.moduleCache && instance.moduleCache instanceof Map) {
-      // Convert Map keys and values to an object and merge it with the result
-      result = {
-        ...result,
-        ...(mapToObject(instance.moduleCache) as Record<string, unknown>),
-      };
-    }
-  });
-
-  // Helper function to convert Map to object
-  function mapToObject(map: Map<any, any>): Record<string, unknown> {
-    return Array.from(map).reduce(
-      (obj: Record<string, unknown>, [key, value]: [any, any]) => {
-        obj[key] = value;
-        return obj;
-      },
-      {},
-    );
-  }
+  const remotesFromAPI = getAllKnownRemotes();
   //@ts-ignore
   return new Promise((res) => {
-    if (checkUnreachableRemote(remoteScope)) {
-      res(true);
-    }
-    // @ts-ignore
-    if (checkMedusaConfigChange(remoteScope, fetchModule)) {
+    if (checkMedusaConfigChange(remotesFromAPI, fetchModule)) {
       res(true);
     }
 
-    if (checkFakeRemote(remoteScope)) {
+    if (checkFakeRemote(remotesFromAPI)) {
       res(true);
     }
 
-    fetchRemote(remoteScope, fetchModule).then(() => res(false));
+    fetchRemote(remotesFromAPI, fetchModule).then(() => res(false));
   }).then((shouldReload) => {
     return performReload(shouldReload);
   });

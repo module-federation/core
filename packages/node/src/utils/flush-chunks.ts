@@ -24,6 +24,30 @@ const loadHostStats = () => {
   }
 };
 
+export const getAllKnownRemotes = function () {
+  // Attempt to access the global federation controller safely
+  const federationController = new Function('return globalThis')()
+    .__FEDERATION__;
+  if (!federationController || !federationController.__INSTANCES__) {
+    // If the federation controller or instances are not defined, return an empty object
+    return {};
+  }
+
+  var collected = {};
+  // Use a for...of loop to iterate over all federation instances
+  for (const instance of federationController.__INSTANCES__) {
+    // Use another for...of loop to iterate over the module cache Map entries
+    for (const [key, cacheModule] of instance.moduleCache) {
+      // Check if the cacheModule has remoteInfo and use it to collect remote names
+      if (cacheModule.remoteInfo) {
+        //@ts-ignore
+        collected[cacheModule.remoteInfo.name] = cacheModule.remoteInfo;
+      }
+    }
+  }
+  return collected;
+};
+
 /**
  * Create a shareMap based on the loaded modules.
  * @returns {object} shareMap - An object containing the shareMap data.
@@ -72,10 +96,11 @@ const processChunk = async (chunk, shareMap, hostStats) => {
 
   // Split the chunk string into remote and request
   const [remote, request] = chunk.split('->');
+  const knownRemotes = getAllKnownRemotes();
 
   // If the remote is not defined in the global config, return
   //@ts-ignore
-  if (!globalThis.__remote_scope__._config[remote]) {
+  if (!knownRemotes[remote]) {
     console.error(
       `flush chunks:`,
       `Remote ${remote} is not defined in the global config`,
@@ -84,6 +109,7 @@ const processChunk = async (chunk, shareMap, hostStats) => {
   }
 
   try {
+    console.log('remote', knownRemotes);
     // Extract the remote name from the URL
     //@ts-ignore
     const remoteName = new URL(
