@@ -91,86 +91,66 @@ const createShareMap = () => {
  */
 // @ts-ignore
 const processChunk = async (chunk, shareMap, hostStats) => {
-  // Create a set to store the chunks
   const chunks = new Set();
-
-  // Split the chunk string into remote and request
   const [remote, req] = chunk.split('/');
   const request = './' + req;
   const knownRemotes = getAllKnownRemotes();
-
-  // If the remote is not defined in the global config, return
   //@ts-ignore
   if (!knownRemotes[remote]) {
     console.error(
-      `flush chunks:`,
-      `Remote ${remote} is not defined in,  the global config`,
+      `flush chunks: Remote ${remote} is not defined in the global config`,
     );
     return;
   }
 
   try {
-    // Extract the remote name from the URL
     //@ts-ignore
-    const remoteName = new URL(
-      //@ts-ignore
-      knownRemotes[remote].entry,
-    ).pathname
+    const remoteName = new URL(knownRemotes[remote].entry).pathname
       .split('/')
       .pop();
-
-    // Construct the stats file URL from the remote config
     //@ts-ignore
+
     const statsFile = knownRemotes[remote].entry
       .replace(remoteName, 'federated-stats.json')
       .replace('ssr', 'chunks');
-    //@ts-ignore
     let stats = {};
+
     try {
-      // Fetch the remote config and stats file
       stats = await fetch(statsFile).then((res) => res.json());
     } catch (e) {
       console.error('flush error', e);
     }
+    //@ts-ignore
 
-    // Add the main chunk to the chunks set
-    //TODO: ensure host doesnt embed its own remote in ssr, this causes crash
-    // chunks.add(
-    //   global.__remote_scope__._config[remote].replace('ssr', 'chunks')
-    // );
+    const [prefix] = knownRemotes[remote].entry.split('static/');
+    //@ts-ignore
 
-    // Extract the prefix from the remote config
-    const [prefix] =
-      //@ts-ignore
-      knownRemotes[remote].entry.split('static/');
-
-    // Process federated modules from the stats object
-    // @ts-ignore
     if (stats.federatedModules) {
-      // @ts-ignore
+      //@ts-ignore
+
       stats.federatedModules.forEach((modules) => {
-        // Process exposed modules
         if (modules.exposes?.[request]) {
-          // @ts-ignore
+          //@ts-ignore
+
           modules.exposes[request].forEach((chunk) => {
             chunks.add([prefix, chunk].join(''));
 
-            //TODO: reimplement this
             Object.values(chunk).forEach((chunk) => {
-              // Add files to the chunks set
-              // @ts-ignore
+              //@ts-ignore
+
               if (chunk.files) {
-                // @ts-ignore
+                //@ts-ignore
+
                 chunk.files.forEach((file) => {
                   chunks.add(prefix + file);
                 });
               }
-              // Process required modules
-              // @ts-ignore
+              //@ts-ignore
+
               if (chunk.requiredModules) {
-                // @ts-ignore
+                //@ts-ignore
+
                 chunk.requiredModules.forEach((module) => {
-                  // Check if the module is in the shareMap
                   if (shareMap[module]) {
                     // If the module is from the host, log the host stats
                   }
@@ -182,7 +162,6 @@ const processChunk = async (chunk, shareMap, hostStats) => {
       });
     }
 
-    // Return the array of chunks
     return Array.from(chunks);
   } catch (e) {
     console.error('flush error:', e);
