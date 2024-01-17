@@ -103,13 +103,12 @@ const processChunk = async (chunk, shareMap, hostStats) => {
   if (!knownRemotes[remote]) {
     console.error(
       `flush chunks:`,
-      `Remote ${remote} is not defined in the global config`,
+      `Remote ${remote} is not defined in,  the global config`,
     );
     return;
   }
 
   try {
-    console.log('remote', knownRemotes);
     // Extract the remote name from the URL
     //@ts-ignore
     const remoteName = new URL(
@@ -124,7 +123,7 @@ const processChunk = async (chunk, shareMap, hostStats) => {
     const statsFile = globalThis.__remote_scope__._config[remote]
       .replace(remoteName, 'federated-stats.json')
       .replace('ssr', 'chunks');
-
+    //@ts-ignore
     let stats = {};
     try {
       // Fetch the remote config and stats file
@@ -196,7 +195,7 @@ const processChunk = async (chunk, shareMap, hostStats) => {
 export const flushChunks = async () => {
   const hostStats = loadHostStats();
   const shareMap = createShareMap();
-
+  console.log('collected chunks', usedChunks);
   const allFlushed = await Promise.all(
     Array.from(usedChunks).map(async (chunk) =>
       processChunk(chunk, shareMap, hostStats),

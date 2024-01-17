@@ -1,7 +1,6 @@
 import { getAllKnownRemotes } from './flush-chunks';
 
 const hashmap = {} as Record<string, string>;
-import { Federation } from '@module-federation/runtime';
 import crypto from 'crypto';
 
 const requireCacheRegex =

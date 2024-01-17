@@ -32,7 +32,7 @@ export default function (): FederationRuntimePlugin {
     beforeInit(args) {
       const { userOptions, shareInfo } = args;
       const { shared } = userOptions;
-
+      if (!globalThis.usedChunks) globalThis.usedChunks = new Set();
       if (shared) {
         Object.keys(shared || {}).forEach((sharedKey) => {
           if (!shared[sharedKey].strategy) {
@@ -70,9 +70,35 @@ export default function (): FederationRuntimePlugin {
     afterResolve(args) {
       return args;
     },
-    // onLoad(args) {
-    //   return args;
-    // },
+    onLoad(args) {
+      const { exposeModuleFactory, exposeModule, id } = args;
+
+      const moduleOrFactory = exposeModuleFactory || exposeModule;
+      const exposedModuleExports = moduleOrFactory();
+      const handler = {
+        //@ts-ignore
+        get: function (target, prop, receiver) {
+          const origMethod = target[prop];
+          if (typeof origMethod === 'function') {
+            //@ts-ignore
+            return function (...args) {
+              globalThis.usedChunks.add(
+                //@ts-ignore
+                id,
+              );
+
+              console.log(`function as called to ${prop}`, id);
+              //@ts-ignore
+              return origMethod.apply(this, args);
+            };
+          } else {
+            return Reflect.get(target, prop, receiver);
+          }
+        },
+      };
+
+      return () => new Proxy(exposedModuleExports, handler);
+    },
     resolveShare(args) {
       if (
         args.pkgName !== 'react' &&
