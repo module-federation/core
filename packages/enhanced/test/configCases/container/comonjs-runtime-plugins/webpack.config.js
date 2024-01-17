@@ -1,12 +1,6 @@
 const { ModuleFederationPlugin } = require('../../../../dist/src');
 const path = require('path');
 const common = {
-  name: 'comonjsRuntimePlugins',
-  exposes: {
-    './ComponentA': {
-      import: './ComponentA',
-    },
-  },
   shared: {
     react: {
       version: false,
@@ -18,17 +12,19 @@ const common = {
 
 module.exports = [
   {
+    entry: './index.js',
     output: {
       filename: '[name].js',
-      uniqueName: 'comonjs-runtime-plugins',
+      uniqueName: 'comonjs-runtime-plugins-consumer',
     },
     plugins: [
       new ModuleFederationPlugin({
+        name: 'consumer',
         library: { type: 'commonjs-module' },
-        filename: 'container.js',
         remotes: {
           containerA: {
-            external: 'comonjsRuntimePlugins@./container.js',
+            external: './provider/container.js',
+            name: 'provider',
           },
         },
         ...common,
@@ -36,20 +32,19 @@ module.exports = [
     ],
   },
   {
-    experiments: {
-      outputModule: true,
-    },
     output: {
-      filename: 'module/[name].mjs',
-      uniqueName: 'comonjs-runtime-plugins-mjs',
+      filename: 'provider/[name].js',
+      uniqueName: 'comonjs-runtime-plugins-provider',
     },
+    entry: 'data:application/node;base64,',
     plugins: [
       new ModuleFederationPlugin({
-        library: { type: 'module' },
-        filename: 'module/container.mjs',
-        remotes: {
-          containerA: {
-            external: './container.mjs',
+        name: 'provider',
+        library: { type: 'commonjs-module' },
+        filename: 'provider/container.js',
+        exposes: {
+          './ComponentA': {
+            import: './ComponentA',
           },
         },
         ...common,

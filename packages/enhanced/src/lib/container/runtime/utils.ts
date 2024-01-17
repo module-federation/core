@@ -47,18 +47,20 @@ export function normalizeRuntimeInitOptionsWithOutShared(
     (item) => ({
       external: Array.isArray(item) ? item : [item],
       shareScope: options.shareScope || 'default',
+      name: undefined,
     }),
     (item) => ({
       external: Array.isArray(item.external) ? item.external : [item.external],
       shareScope: item.shareScope || options.shareScope || 'default',
+      name: item.name,
     }),
   );
   const remoteOptions: Remotes = [];
 
   parsedOptions.forEach((parsedOption) => {
     const [alias, remoteInfos] = parsedOption;
-    const { external, shareScope } = remoteInfos;
-    external.forEach((externalItem, index) => {
+    const { external, shareScope, name } = remoteInfos;
+    external.forEach((externalItem) => {
       try {
         const { externalType, requestPath } = getExternalTypeAndRequestPath(
           options,
@@ -73,7 +75,7 @@ export function normalizeRuntimeInitOptionsWithOutShared(
             const [url, globalName] = extractUrlAndGlobal(externalItem);
             remoteOptions.push({
               alias,
-              name: globalName,
+              name: name || globalName,
               entry: url,
               shareScope: shareScope,
             });
@@ -84,14 +86,13 @@ export function normalizeRuntimeInitOptionsWithOutShared(
           case 'commonjs-module':
           case 'commonjs-static':
           case 'node-commonjs': {
-            // temp workaround
-            // TODO: support object remote which type like this: { name:string;entry:string;shareScope?:string }
-            const [url, globalName] = extractUrlAndGlobal(externalItem);
-            external[index] = `${externalType} ${url}`;
+            if (!name) {
+              break;
+            }
             remoteOptions.push({
               alias,
-              name: globalName,
-              entry: url,
+              name: name,
+              entry: requestPath,
               type: 'cjs',
               shareScope: shareScope,
             });

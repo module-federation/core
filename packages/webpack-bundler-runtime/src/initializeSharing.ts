@@ -1,6 +1,7 @@
 import { FEDERATION_SUPPORTED_TYPES } from './constant';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import { RemoteEntryExports, InitializeSharingOptions } from './types';
+import { canUseMFRuntimeLoad } from './utils';
 
 export function initializeSharing({
   shareScopeName,
@@ -54,13 +55,8 @@ export function initializeSharing({
         const info = bundlerRuntimeRemotesOptions.idToRemoteMap[moduleId];
         const externalModuleId =
           bundlerRuntimeRemotesOptions.idToExternalAndNameMapping[moduleId][2];
-        if (info.length > 1) {
+        if (!canUseMFRuntimeLoad(info)) {
           initExternal(externalModuleId);
-        } else if (info.length === 1) {
-          const remoteInfo = info[0];
-          if (!FEDERATION_SUPPORTED_TYPES.includes(remoteInfo.externalType)) {
-            initExternal(externalModuleId);
-          }
         }
       },
     );

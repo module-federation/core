@@ -3,6 +3,7 @@ import type { RemoteEntryExports } from './types';
 import { RemotesOptions } from './types';
 import { decodeName } from '@module-federation/sdk';
 import { ENCODE_NAME_PREFIX, FEDERATION_SUPPORTED_TYPES } from './constant';
+import { canUseMFRuntimeLoad } from './utils';
 
 export function remotes(options: RemotesOptions) {
   const {
@@ -114,10 +115,7 @@ export function remotes(options: RemotesOptions) {
         }
       };
 
-      const useRuntimeLoad =
-        remoteInfos.length === 1 &&
-        FEDERATION_SUPPORTED_TYPES.includes(remoteInfos[0].externalType) &&
-        remoteInfos[0].name;
+      const useRuntimeLoad = canUseMFRuntimeLoad(remoteInfos);
 
       if (useRuntimeLoad) {
         handleFunction(onRemoteLoaded, data[2], 0, 0, onFactory, 1);

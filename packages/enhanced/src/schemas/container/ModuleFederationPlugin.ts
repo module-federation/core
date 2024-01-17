@@ -345,6 +345,11 @@ export default {
           type: 'string',
           minLength: 1,
         },
+        name: {
+          description: 'The name of remote instance.',
+          type: 'string',
+          minLength: 1,
+        },
       },
       required: ['external'],
     },

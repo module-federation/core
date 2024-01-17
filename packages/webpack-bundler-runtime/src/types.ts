@@ -77,7 +77,7 @@ interface ModuleToHandlerMappingItem {
   shareKey: string;
 }
 
-interface IdToRemoteMapItem {
+export interface IdToRemoteMapItem {
   externalType: string;
   name: string;
   externalModuleId?: string | number;

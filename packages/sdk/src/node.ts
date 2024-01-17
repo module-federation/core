@@ -24,12 +24,8 @@ export function createScriptNode(
     }
   }
   // file path
-  if (
-    attrs &&
-    attrs['type'] === 'cjs' &&
-    /^(\/|[A-Za-z]:\\|\\\\|\.\.?(\/|$))/.test(url)
-  ) {
-    const requireClient = eval('require');
+  if (/^(?!http[s]?:\/\/|\/\/).+/i.test(url)) {
+    const requireClient = eval('require') as typeof require;
     const path = requireClient('path') as typeof import('path');
     const vm = requireClient('vm') as typeof import('vm');
     const fs = requireClient('fs') as typeof import('fs');
@@ -54,7 +50,16 @@ export function createScriptNode(
             )(
               context.exports,
               context.module,
-              requireClient,
+              function (modulePath: string) {
+                let realPath = modulePath;
+                if (path.isAbsolute(modulePath)) {
+                  realPath = modulePath;
+                  // relative file path
+                } else if (/^(\.\/|\.\.\/)/.test(modulePath)) {
+                  realPath = path.join(path.dirname(absFilePath), modulePath);
+                }
+                return requireClient(realPath);
+              },
               path.dirname(absFilePath),
               filename,
             );

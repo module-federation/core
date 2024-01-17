@@ -60,10 +60,10 @@ export async function loadEntryScript({
       attrs: { name, globalName, type },
       createScriptHook,
     })
-      .then(() => {
-        // if(type==='cjs' && exportedInterface){
-        //   return exportedInterface
-        // }
+      .then((exportedInterface) => {
+        if (type === 'cjs' && exportedInterface) {
+          return exportedInterface;
+        }
         const { remoteEntryKey, entryExports } = getRemoteEntryExports(
           name,
           globalName,
