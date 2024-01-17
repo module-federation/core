@@ -879,6 +879,9 @@ importers:
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../enhanced
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../runtime
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk

@@ -17,6 +17,7 @@ export const { usedChunks } = globalThis;
  */
 const loadHostStats = () => {
   try {
+    //@ts-ignore
     return __non_webpack_require__('../federated-stats.json');
   } catch (e) {
     return {};
@@ -73,6 +74,7 @@ const processChunk = async (chunk, shareMap, hostStats) => {
   const [remote, request] = chunk.split('->');
 
   // If the remote is not defined in the global config, return
+  //@ts-ignore
   if (!globalThis.__remote_scope__._config[remote]) {
     console.error(
       `flush chunks:`,
@@ -85,12 +87,14 @@ const processChunk = async (chunk, shareMap, hostStats) => {
     // Extract the remote name from the URL
     //@ts-ignore
     const remoteName = new URL(
+      //@ts-ignore
       globalThis.__remote_scope__._config[remote],
     ).pathname
       .split('/')
       .pop();
 
     // Construct the stats file URL from the remote config
+    //@ts-ignore
     const statsFile = globalThis.__remote_scope__._config[remote]
       .replace(remoteName, 'federated-stats.json')
       .replace('ssr', 'chunks');
@@ -111,6 +115,7 @@ const processChunk = async (chunk, shareMap, hostStats) => {
 
     // Extract the prefix from the remote config
     const [prefix] =
+      //@ts-ignore
       globalThis.__remote_scope__._config[remote].split('static/');
 
     // Process federated modules from the stats object

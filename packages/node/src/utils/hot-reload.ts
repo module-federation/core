@@ -1,4 +1,5 @@
 const hashmap = {} as Record<string, string>;
+import { Federation } from '@module-federation/runtime';
 import crypto from 'crypto';
 
 const requireCacheRegex =
@@ -9,9 +10,11 @@ export const performReload = (shouldReload: any) => {
     return false;
   }
   let req: NodeRequire;
+  //@ts-ignore
   if (typeof __non_webpack_require__ === 'undefined') {
     req = require;
   } else {
+    //@ts-ignore
     req = __non_webpack_require__ as NodeRequire;
   }
 
@@ -134,9 +137,38 @@ export const fetchRemote = (remoteScope: any, fetchModule: any) => {
 };
 //@ts-ignore
 export const revalidate = (
+  //@ts-ignore
   remoteScope: any = globalThis.__remote_scope__ || {},
   fetchModule: any = getFetchModule() || (() => {}),
 ) => {
+  console.log('revalidating remote scope');
+  const federationController: Federation = globalThis.__FEDERATION__;
+  // Initialize an empty object
+  let result = {};
+
+  // Reduce over instances and get each instance's moduleCache values and keys which are in a new Map()
+  federationController.__INSTANCES__.forEach((instance) => {
+    // Check if the current instance has a moduleCache and it's a Map
+    if (instance.moduleCache && instance.moduleCache instanceof Map) {
+      // Convert Map keys and values to an object and merge it with the result
+      result = {
+        ...result,
+        ...(mapToObject(instance.moduleCache) as Record<string, unknown>),
+      };
+    }
+  });
+
+  // Helper function to convert Map to object
+  function mapToObject(map: Map<any, any>): Record<string, unknown> {
+    return Array.from(map).reduce(
+      (obj: Record<string, unknown>, [key, value]: [any, any]) => {
+        obj[key] = value;
+        return obj;
+      },
+      {},
+    );
+  }
+  //@ts-ignore
   return new Promise((res) => {
     if (checkUnreachableRemote(remoteScope)) {
       res(true);
@@ -159,6 +191,7 @@ export const revalidate = (
 export function getFetchModule() {
   //@ts-ignore
   const loadedModule =
+    //@ts-ignore
     globalThis.webpackChunkLoad || global.webpackChunkLoad || global.fetch;
   if (loadedModule) {
     return loadedModule;

@@ -1,4 +1,5 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+
 const { RuntimeGlobals, RuntimeModule, Template, javascript } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -52,7 +53,10 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
         contentHashType: 'javascript',
       },
     );
-    const undoPath = getUndoPath(chunkName, path, false);
+    let undoPath;
+    if (chunkName && path) {
+      undoPath = getUndoPath(chunkName, path, false);
+    }
     const ident = Template.toIdentifier(uniqueName || '');
 
     // Define potential lookup keys
@@ -65,6 +69,58 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
         return `remoteReg[${JSON.stringify(lookup)}]`;
       })
       .join(' || ');
+
+    const remotesFromFederation = Template.indent([
+      'var result = {};',
+      '// Assuming the federationController is already defined on globalThis',
+      'const federationController = globalThis.__FEDERATION__;',
+      '// Function to convert Map to Object',
+      'function mapToObject(map) {',
+      Template.indent([
+        'const obj = {};',
+        'map.forEach((value, key) => {',
+        Template.indent('obj[key] = value;'),
+        '});',
+        'return obj;',
+      ]),
+      '}',
+      "console.log('instance', __webpack_require__.federation.instance.name);",
+      '// Iterate over each instance in federationController',
+      'federationController.__INSTANCES__.forEach(instance => {',
+      Template.indent([
+        "// Check if the current instance has a moduleCache and it's a Map",
+        'if (instance.moduleCache) {',
+        Template.indent([
+          '// Convert Map keys and values to an object and merge it with the result',
+          'result = {...result, ...mapToObject(instance.moduleCache)};',
+        ]),
+        '}',
+      ]),
+      '});',
+      "console.log('RESULTS', result);",
+      '// Logic to determine the value of p, using result',
+      `if(!result[${JSON.stringify(lookupString)}]) return false`,
+      `return result[${JSON.stringify(lookupString)}]`,
+    ]);
+
+    const importMetaLookup = Template.indent([
+      `scriptUrl = new Function('return typeof ${importMetaName}.url === "string" ? ${importMetaName}.url : undefined;')();`,
+    ]);
+    const federationLookup = Template.asString([
+      'Object.defineProperty(__webpack_require__, "p", {',
+      Template.indent([
+        'get: function() {',
+        Template.indent([
+          'try {',
+          importMetaLookup,
+          '} catch(e) {',
+          remotesFromFederation,
+          '}',
+        ]),
+        '}',
+      ]),
+      '});',
+    ]);
 
     return Template.asString([
       'var scriptUrl;',
@@ -82,9 +138,7 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
       chunkLoading
         ? Template.asString([
             'try {',
-            Template.indent([
-              `scriptUrl = new Function('return typeof ${importMetaName}.url === "string" ? ${importMetaName}.url : undefined;')();`,
-            ]),
+
             '} catch (e) {',
             Template.indent([
               'if (typeof remoteContainerRegistry.url === "string") {',
