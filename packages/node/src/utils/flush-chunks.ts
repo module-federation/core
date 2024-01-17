@@ -95,7 +95,8 @@ const processChunk = async (chunk, shareMap, hostStats) => {
   const chunks = new Set();
 
   // Split the chunk string into remote and request
-  const [remote, request] = chunk.split('->');
+  const [remote, req] = chunk.split('/');
+  const request = './' + req;
   const knownRemotes = getAllKnownRemotes();
 
   // If the remote is not defined in the global config, return
@@ -113,14 +114,14 @@ const processChunk = async (chunk, shareMap, hostStats) => {
     //@ts-ignore
     const remoteName = new URL(
       //@ts-ignore
-      globalThis.__remote_scope__._config[remote],
+      knownRemotes[remote].entry,
     ).pathname
       .split('/')
       .pop();
 
     // Construct the stats file URL from the remote config
     //@ts-ignore
-    const statsFile = globalThis.__remote_scope__._config[remote]
+    const statsFile = knownRemotes[remote].entry
       .replace(remoteName, 'federated-stats.json')
       .replace('ssr', 'chunks');
     //@ts-ignore
@@ -141,7 +142,7 @@ const processChunk = async (chunk, shareMap, hostStats) => {
     // Extract the prefix from the remote config
     const [prefix] =
       //@ts-ignore
-      globalThis.__remote_scope__._config[remote].split('static/');
+      knownRemotes[remote].entry.split('static/');
 
     // Process federated modules from the stats object
     // @ts-ignore
@@ -195,7 +196,6 @@ const processChunk = async (chunk, shareMap, hostStats) => {
 export const flushChunks = async () => {
   const hostStats = loadHostStats();
   const shareMap = createShareMap();
-  console.log('collected chunks', usedChunks);
   const allFlushed = await Promise.all(
     Array.from(usedChunks).map(async (chunk) =>
       processChunk(chunk, shareMap, hostStats),
