@@ -33,6 +33,7 @@ class Module {
       remoteInfo: this.remoteInfo,
       remoteEntryExports: this.remoteEntryExports,
       createScriptHook: (url: string) => {
+        console.log('xxxxxxx', this.host.loaderHook);
         const res = this.host.loaderHook.lifecycle.createScript.emit({ url });
         if (typeof document === 'undefined') {
           //todo: needs real fix

@@ -154,91 +154,85 @@ export function setGlobalFederationConstructor(
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export function getInfoWithoutType<T extends object>(
+function getInfoWithoutType<T extends object>(
   target: T,
   key: keyof T,
-  getModuleInfoHook?: (
-    target: any,
-    key: string | number | symbol,
-  ) => { value: any | undefined; key: string } | void,
 ): { value: T[keyof T] | undefined; key: string } {
-  let res: { value: T[keyof T] | undefined; key: string } = {
+  return {
     value: target[key],
     key: key as string,
   };
+}
 
-  if (getModuleInfoHook) {
-    const hookRes = getModuleInfoHook(target, key);
-    res = hookRes || res;
+export class GetSnapshotInfoWithHook {
+  loaderHook: FederationHost['loaderHook'];
+  constructor(loaderHook: FederationHost['loaderHook']) {
+    this.loaderHook = loaderHook;
   }
-  return res;
+  getInfoWithoutTypeWithHook<T extends object>(target: T, key: keyof T) {
+    let res = getInfoWithoutType(target, key);
+    const hookRes = this.loaderHook.lifecycle.getModuleInfo.emit({
+      target,
+      key,
+    });
+    if (hookRes && !(hookRes instanceof Promise)) {
+      res = hookRes || res;
+    }
+    return res;
+  }
+
+  getTargetSnapshotInfoByModuleInfo(
+    moduleInfo: Optional<Remote, 'alias'>,
+    snapshot: GlobalModuleInfo,
+  ) {
+    // Check if the remote is included in the hostSnapshot
+    const moduleKey = getFMId(moduleInfo);
+    const getModuleInfo = this.getInfoWithoutTypeWithHook(
+      snapshot,
+      moduleKey,
+    ).value;
+
+    // The remoteSnapshot might not include a version
+    if (
+      getModuleInfo &&
+      !getModuleInfo.version &&
+      'version' in moduleInfo &&
+      moduleInfo['version']
+    ) {
+      getModuleInfo.version = moduleInfo['version'];
+    }
+
+    if (getModuleInfo) {
+      return getModuleInfo;
+    }
+
+    // If the remote is not included in the hostSnapshot, deploy a micro app snapshot
+    if ('version' in moduleInfo && moduleInfo['version']) {
+      const { version, ...resModuleInfo } = moduleInfo;
+      const moduleKeyWithoutVersion = getFMId(resModuleInfo);
+      const getModuleInfoWithoutVersion = this.getInfoWithoutTypeWithHook(
+        nativeGlobal.__FEDERATION__.moduleInfo,
+        moduleKeyWithoutVersion,
+      ).value;
+
+      if (getModuleInfoWithoutVersion?.version === version) {
+        return getModuleInfoWithoutVersion;
+      }
+    }
+
+    return;
+  }
+
+  getGlobalSnapshotInfoByModuleInfo(moduleInfo: Optional<Remote, 'alias'>) {
+    return this.getTargetSnapshotInfoByModuleInfo(
+      moduleInfo,
+      nativeGlobal.__FEDERATION__.moduleInfo,
+    );
+  }
 }
 
 export const getGlobalSnapshot = (): GlobalModuleInfo =>
   nativeGlobal.__FEDERATION__.moduleInfo;
-
-export const getTargetSnapshotInfoByModuleInfo = (
-  moduleInfo: Optional<Remote, 'alias'>,
-  snapshot: GlobalModuleInfo,
-  getModuleInfoHook?: (
-    target: any,
-    key: string | number | symbol,
-  ) => { value: any | undefined; key: string } | void,
-): GlobalModuleInfo[string] | undefined => {
-  // Check if the remote is included in the hostSnapshot
-  const moduleKey = getFMId(moduleInfo);
-  const getModuleInfo = getInfoWithoutType(
-    snapshot,
-    moduleKey,
-    getModuleInfoHook,
-  ).value;
-
-  // The remoteSnapshot might not include a version
-  if (
-    getModuleInfo &&
-    !getModuleInfo.version &&
-    'version' in moduleInfo &&
-    moduleInfo['version']
-  ) {
-    getModuleInfo.version = moduleInfo['version'];
-  }
-
-  if (getModuleInfo) {
-    return getModuleInfo;
-  }
-
-  // If the remote is not included in the hostSnapshot, deploy a micro app snapshot
-  if ('version' in moduleInfo && moduleInfo['version']) {
-    const { version, ...resModuleInfo } = moduleInfo;
-    const moduleKeyWithoutVersion = getFMId(resModuleInfo);
-    const getModuleInfoWithoutVersion = getInfoWithoutType(
-      nativeGlobal.__FEDERATION__.moduleInfo,
-      moduleKeyWithoutVersion,
-      getModuleInfoHook,
-    ).value;
-
-    if (getModuleInfoWithoutVersion?.version === version) {
-      return getModuleInfoWithoutVersion;
-    }
-  }
-
-  return;
-};
-
-export const getGlobalSnapshotInfoByModuleInfo = (
-  moduleInfo: Optional<Remote, 'alias'>,
-  extraOptions?: {
-    getModuleInfoHook?: (
-      target: any,
-      key: string | number | symbol,
-    ) => { value: any | undefined; key: string } | void;
-  },
-): GlobalModuleInfo[string] | undefined =>
-  getTargetSnapshotInfoByModuleInfo(
-    moduleInfo,
-    nativeGlobal.__FEDERATION__.moduleInfo,
-    extraOptions?.getModuleInfoHook,
-  );
 
 export const setGlobalSnapshotInfoByModuleInfo = (
   remoteInfo: Remote,
