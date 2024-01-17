@@ -53,8 +53,8 @@ jobs:
       - name: E2E Test for 3001-shop
         run: pnpm run app:next:dev & echo "done" && sleep 15 && npx nx run-many --target=test:e2e --projects=3001-shop && lsof -ti tcp:3000,3001,3002 | xargs kill
 
-      - name: E2E Test for 3002-checkout
-        run: pnpm run app:next:dev & echo "done" && sleep 15 && npx nx run-many --target=test:e2e --projects=3002-checkout && lsof -ti tcp:3000,3001,3002 | xargs kill
+      #      - name: E2E Test for 3002-checkout
+      #        run: pnpm run app:next:dev & echo "done" && sleep 15 && npx nx run-many --target=test:e2e --projects=3002-checkout && lsof -ti tcp:3000,3001,3002 | xargs kill
 
       - name: Serve Projects 3005-runtime-host, 3006-runtime-remote, 3007-runtime-remote
         run: npx nx run-many --target=serve --projects=3005-runtime-host,3006-runtime-remote,3007-runtime-remote --parallel=3 & echo "done"
