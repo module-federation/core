@@ -1,5 +1,4 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-
 const { RuntimeGlobals, RuntimeModule, Template, javascript } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -34,15 +33,7 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
       compilation?.getPath(publicPath || '', {
         hash: compilation?.hash || 'XXXX',
       });
-    // If publicPath is not "auto", return the static value
-    // if (publicPath !== 'auto') {
-    //   const path = getPath();
-    //   return Template.asString([
-    //     `${RuntimeGlobals.publicPath} = ${JSON.stringify(path)};`,
-    //     'var addProtocol = (url)=> url.startsWith(\'//\') ? \'https:\' + url : url;',
-    //     `globalThis.currentVmokPublicPath = addProtocol(${RuntimeGlobals.publicPath}) || '/';`,
-    //   ]);
-    // }
+
     const chunkName = compilation?.getPath(
       javascript.JavascriptModulesPlugin.getChunkFilenameTemplate(
         this.chunk,
@@ -53,138 +44,116 @@ class AutoPublicPathRuntimeModule extends RuntimeModule {
         contentHashType: 'javascript',
       },
     );
-    let undoPath;
+
+    let undoPath: string | null = null;
     if (chunkName && path) {
       undoPath = getUndoPath(chunkName, path, false);
     }
-    const ident = Template.toIdentifier(uniqueName || '');
 
-    // Define potential lookup keys
-    const potentialLookups = [this.chunk?.name, ident, uniqueName];
+    const getPathFromFederation = `
+function getPathFromFederation() {
+  // Access the global federation manager or create a fallback object
+  var federationManager = globalThis.__FEDERATION__ || {};
+  // Access the current Webpack instance's federation details or create a fallback object
+  var instance = __webpack_require__.federation.instance || {};
 
-    // Generate lookup string using potential keys
-    const lookupString = potentialLookups
-      .filter(Boolean)
-      .map((lookup) => {
-        return `remoteReg[${JSON.stringify(lookup)}]`;
-      })
-      .join(' || ');
+  // Function to aggregate all known remote module paths
+  var getAllKnownRemotes = function() {
+    var found = {};
+    // Iterate over all federation instances to collect module cache entries
+    (federationManager.__INSTANCES__ || []).forEach((instance) => {
+      instance.moduleCache.forEach((value, key) => {
+        found[key] = value;
+      });
+    });
+    return found;
+  };
 
-    const remotesFromFederation = Template.indent([
-      'var result = {};',
-      '// Assuming the federationController is already defined on globalThis',
-      'const federationController = globalThis.__FEDERATION__;',
-      '// Function to convert Map to Object',
-      'function mapToObject(map) {',
-      Template.indent([
-        'const obj = {};',
-        'map.forEach((value, key) => {',
-        Template.indent('obj[key] = value;'),
-        '});',
-        'return obj;',
-      ]),
-      '}',
-      "console.log('instance', __webpack_require__.federation.instance.name);",
-      '// Iterate over each instance in federationController',
-      'federationController.__INSTANCES__.forEach(instance => {',
-      Template.indent([
-        "// Check if the current instance has a moduleCache and it's a Map",
-        'if (instance.moduleCache) {',
-        Template.indent([
-          '// Convert Map keys and values to an object and merge it with the result',
-          'result = {...result, ...mapToObject(instance.moduleCache)};',
-        ]),
-        '}',
-      ]),
-      '});',
-      "console.log('RESULTS', result);",
-      '// Logic to determine the value of p, using result',
-      `if(!result[${JSON.stringify(lookupString)}]) return false`,
-      `return result[${JSON.stringify(lookupString)}]`,
-    ]);
+  // Retrieve the combined remote cache from all federation instances
+  const combinedRemoteCache = getAllKnownRemotes();
+  // Get the name of the current host from the instance
+  const hostName = instance.name;
+  // Find the path for the current host in the remote cache
+  const foundPath = combinedRemoteCache[hostName];
+  // If a path is not found, return undefined to indicate the absence of an entry path
+  if (!foundPath) { return undefined; }
+  // Return the entry path for the found remote module
+  const entryPath = foundPath.remoteInfo.entry;
+  return entryPath;
+}
+`;
+    const definePropertyCode = `
+Object.defineProperty(__webpack_require__, "p", {
+  get: function() {
+    var scriptUrl;
 
-    const importMetaLookup = Template.indent([
-      `scriptUrl = new Function('return typeof ${importMetaName}.url === "string" ? ${importMetaName}.url : undefined;')();`,
-    ]);
-    const federationLookup = Template.asString([
-      'Object.defineProperty(__webpack_require__, "p", {',
-      Template.indent([
-        'get: function() {',
-        Template.indent([
-          'try {',
-          importMetaLookup,
-          '} catch(e) {',
-          remotesFromFederation,
-          '}',
-        ]),
-        '}',
-      ]),
-      '});',
-    ]);
+    // Attempt to get the script URL based on the environment
+    var scriptType = ${JSON.stringify(scriptType)};
+    var chunkLoading = ${JSON.stringify(chunkLoading)};
+    var isModuleEnvironment = ['module', 'node', 'async-node', 'require'].includes(scriptType) || chunkLoading;
 
-    return Template.asString([
-      'var scriptUrl;',
-      // its an esproxy so nesting into _config directly is not possible
-      `
-      let remoteContainerRegistry = {
-        get url() {
-          var remoteReg = globalThis.__remote_scope__ ? globalThis.__remote_scope__._config : {};
-          return ${lookupString}
+    if (isModuleEnvironment) {
+      try {
+        // Use Function constructor to avoid direct reference to import.meta in environments that do not support it
+        scriptUrl = (new Function('return typeof ${importMetaName}.url === "string" ? ${importMetaName}.url : undefined;'))();
+      } catch (e) {
+        // Handle cases where import.meta is not available or other errors occur
+        var scriptPath = getPathFromFederation();
+        if (scriptPath) {
+          scriptUrl = scriptPath;
+        } else if (typeof __filename !== "undefined") {
+          scriptUrl = __filename;
+        } else {
+          scriptUrl = ${
+            publicPath !== 'auto' ? JSON.stringify(getPath()) : 'undefined'
+          };
         }
-      };
-      `,
+      }
+    } else {
+      // Fallback for non-module environments, such as browsers
+      if (${RuntimeGlobals.global}.importScripts) {
+        scriptUrl = ${RuntimeGlobals.global}.location + "";
+      }
+      var document = ${RuntimeGlobals.global}.document;
+      if (!scriptUrl && document) {
+        if (document.currentScript) {
+          scriptUrl = document.currentScript.src;
+        } else {
+          var scripts = document.getElementsByTagName("script");
+          if (scripts.length) {
+            scriptUrl = scripts[scripts.length - 1].src;
+          }
+        }
+      }
+    }
 
-      ['module', 'node', 'async-node', 'require'].includes(scriptType || '') ||
-      chunkLoading
-        ? Template.asString([
-            'try {',
+    if (!scriptUrl) {
+      throw new Error("Unable to calculate automatic public path");
+    }
 
-            '} catch (e) {',
-            Template.indent([
-              'if (typeof remoteContainerRegistry.url === "string") {',
-              Template.indent('scriptUrl = remoteContainerRegistry.url;'),
-              '} else if(typeof __filename !== "undefined") {',
-              Template.indent('scriptUrl = __filename;'),
-              '} else {',
-              Template.indent([
-                `scriptUrl = ${
-                  publicPath !== 'auto'
-                    ? JSON.stringify(getPath())
-                    : 'undefined'
-                }`,
-              ]),
-              '}',
-            ]),
-            '}',
-          ])
-        : Template.asString([
-            `if (${RuntimeGlobals.global}.importScripts) scriptUrl = ${RuntimeGlobals.global}.location + "";`,
-            `var document = ${RuntimeGlobals.global}.document;`,
-            'if (!scriptUrl && document) {',
-            Template.indent([
-              'if (document.currentScript)',
-              Template.indent('scriptUrl = document.currentScript.src'),
-              'if (!scriptUrl) {',
-              Template.indent([
-                'var scripts = document.getElementsByTagName("script");',
-                'if(scripts.length) scriptUrl = scripts[scripts.length - 1].src',
-              ]),
-              '}',
-            ]),
-            '}',
-          ]),
-      '// When supporting server environments where an automatic publicPath is not supported, you must specify an output.publicPath manually via configuration',
-      '// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.',
-      'if (!scriptUrl) throw new Error("Unable to calculate automatic public path");',
-      'scriptUrl = scriptUrl.replace(/#.*$/, "").replace(/\\?.*$/, "").replace(/\\/[^\\/]+$/, "/");',
-      !undoPath
-        ? `${RuntimeGlobals.publicPath} = scriptUrl;`
-        : `${RuntimeGlobals.publicPath} = scriptUrl + ${JSON.stringify(
-            undoPath,
-          )};`,
-      "var addProtocol = (url)=> url.startsWith('//') ? 'https:' + url : url;",
-      `globalThis.currentVmokPublicPath = addProtocol(${RuntimeGlobals.publicPath}) || '/';`,
-    ]);
+    // Clean up the script URL by removing any hash or query parameters
+    scriptUrl = scriptUrl.replace(/#.*$/, "").replace(/\\?.*$/, "").replace(/\\/[^\\/]+$/, "/");
+
+    // Apply any undo path that might be necessary for nested public paths
+    var finalScript = ${JSON.stringify(
+      undoPath,
+    )} ? scriptUrl + ${JSON.stringify(undoPath)} : scriptUrl;
+
+    // Helper function to ensure the URL has a protocol if it starts with '//'
+    var addProtocol = function(url) {
+      return url.startsWith('//') ? 'https:' + url : url;
+    };
+
+    // Set the global variable for the public path
+    globalThis.currentVmokPublicPath = addProtocol(finalScript) || '/';
+
+    // Return the final public path
+    return finalScript
+  }
+});
+`;
+
+    return Template.asString([getPathFromFederation, definePropertyCode]);
   }
 }
 
