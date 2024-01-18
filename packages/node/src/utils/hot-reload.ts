@@ -42,7 +42,7 @@ export const performReload = (shouldReload: any) => {
       delete gs[i.name];
     }
   });
-
+  gs.__FEDERATION__.__INSTANCES__ = [];
   return true;
 };
 
