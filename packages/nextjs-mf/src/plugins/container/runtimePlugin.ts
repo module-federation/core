@@ -30,10 +30,6 @@ export default function (): FederationRuntimePlugin {
       return mod;
     },
     beforeInit(args) {
-      console.log('######################init again');
-      console.log('######################init again');
-      console.log('######################init again');
-      console.log('######################init again');
       const { userOptions, shareInfo } = args;
       const { shared } = userOptions;
       if (!globalThis.usedChunks) globalThis.usedChunks = new Set();

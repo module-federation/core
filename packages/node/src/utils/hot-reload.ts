@@ -4,7 +4,7 @@ const hashmap = {} as Record<string, string>;
 import crypto from 'crypto';
 
 const requireCacheRegex =
-  /(remote|server|hot-reload|react-loadable-manifest|runtime)/;
+  /(remote|server|hot-reload|react-loadable-manifest|runtime|styled-jsx)/;
 
 export const performReload = (shouldReload: any) => {
   if (!shouldReload) {
@@ -29,9 +29,6 @@ export const performReload = (shouldReload: any) => {
   });
 
   const gs = new Function('return globalThis')();
-  Object.values(remotesFromAPI).forEach((r) => {
-    //@ts-ignore
-  });
   //@ts-ignore
   __webpack_require__.federation.instance.moduleCache.clear();
   gs.__GLOBAL_LOADING_REMOTE_ENTRY__ = {};
@@ -157,10 +154,15 @@ export const fetchRemote = (remoteScope: any, fetchModule: any) => {
 //@ts-ignore
 export const revalidate = (
   fetchModule: any = getFetchModule() || (() => {}),
+  force: boolean = false,
 ) => {
   const remotesFromAPI = getAllKnownRemotes();
   //@ts-ignore
   return new Promise((res) => {
+    if (force) {
+      res(true);
+      return;
+    }
     if (checkMedusaConfigChange(remotesFromAPI, fetchModule)) {
       res(true);
     }
@@ -173,7 +175,7 @@ export const revalidate = (
       res(val);
     });
   }).then((shouldReload) => {
-    return performReload(shouldReload);
+    return performReload(force || shouldReload);
   });
 };
 
