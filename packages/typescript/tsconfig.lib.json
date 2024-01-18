@@ -2,7 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "declaration": true,"declarationMap": true
+    "declaration": true,
+    "declarationMap": true,
     "types": [],
     "skipLibCheck": true
   },

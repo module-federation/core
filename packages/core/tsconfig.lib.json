@@ -3,7 +3,8 @@
   "compilerOptions": {
     "jsx": "react",
     "outDir": "../../dist/out-tsc",
-    "declaration": true,"declarationMap": true
+    "declaration": true,
+    "declarationMap": true,
     "types": ["node"]
   },
   "include": ["**/*.ts", "**/*.d.ts"],

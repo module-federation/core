@@ -6,7 +6,8 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "declaration": true,"declarationMap": true
+    "declaration": true,
+    "declarationMap": true,
     "module": "commonjs",
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
