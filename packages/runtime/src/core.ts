@@ -571,7 +571,7 @@ export class FederationHost {
       const { pkgNameOrAlias, remote, expose, id: idRes } = remoteMatchInfo;
       const moduleOrFactory = (await module.get(expose, options)) as T;
 
-      await this.hooks.lifecycle.onLoad.emit({
+      const moduleWrapper = await this.hooks.lifecycle.onLoad.emit({
         id: idRes,
         pkgNameOrAlias,
         expose,
@@ -582,6 +582,10 @@ export class FederationHost {
         moduleInstance: module,
         origin: this,
       });
+
+      if (typeof moduleWrapper === 'function') {
+        return moduleWrapper as T;
+      }
 
       return moduleOrFactory;
     } catch (error) {
