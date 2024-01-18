@@ -8,6 +8,7 @@ import {
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
+    // await revalidate();
     const initialProps = await Document.getInitialProps(ctx);
     const chunks = await flushChunks();
     ctx?.res?.on('finish', () => {

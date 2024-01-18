@@ -30,6 +30,10 @@ export default function (): FederationRuntimePlugin {
       return mod;
     },
     beforeInit(args) {
+      console.log('######################init again');
+      console.log('######################init again');
+      console.log('######################init again');
+      console.log('######################init again');
       const { userOptions, shareInfo } = args;
       const { shared } = userOptions;
       if (!globalThis.usedChunks) globalThis.usedChunks = new Set();
@@ -50,7 +54,7 @@ export default function (): FederationRuntimePlugin {
 
       // if (__webpack_runtime_id__ && !__webpack_runtime_id__.startsWith('webpack')) return args;
       const { moduleCache, name } = args.origin;
-      const gs = (globalThis as any) || new Function('return globalThis')();
+      const gs = new Function('return globalThis')();
       const attachedRemote = gs[name];
       if (attachedRemote) {
         moduleCache.set(name, attachedRemote);
@@ -87,7 +91,7 @@ export default function (): FederationRuntimePlugin {
                 id,
               );
 
-              console.log(`function as called to ${prop}`, id);
+              // console.log(`function as called to ${prop}`, id);
               //@ts-ignore
               return origMethod.apply(this, args);
             };

@@ -4,12 +4,14 @@ const hashmap = {} as Record<string, string>;
 import crypto from 'crypto';
 
 const requireCacheRegex =
-  /(remote|runtime|server|hot-reload|react-loadable-manifest)/;
+  /(remote|server|hot-reload|react-loadable-manifest|runtime)/;
 
 export const performReload = (shouldReload: any) => {
   if (!shouldReload) {
     return false;
   }
+  const remotesFromAPI = getAllKnownRemotes();
+
   let req: NodeRequire;
   //@ts-ignore
   if (typeof __non_webpack_require__ === 'undefined') {
@@ -20,8 +22,24 @@ export const performReload = (shouldReload: any) => {
   }
 
   Object.keys(req.cache).forEach((key) => {
+    delete req.cache[key];
     if (requireCacheRegex.test(key)) {
       delete req.cache[key];
+    }
+  });
+
+  const gs = new Function('return globalThis')();
+  Object.values(remotesFromAPI).forEach((r) => {
+    //@ts-ignore
+  });
+  //@ts-ignore
+  __webpack_require__.federation.instance.moduleCache.clear();
+  gs.__GLOBAL_LOADING_REMOTE_ENTRY__ = {};
+  //@ts-ignore
+  gs.__FEDERATION__.__INSTANCES__.map((i) => {
+    i.moduleCache.clear();
+    if (gs[i.name]) {
+      delete gs[i.name];
     }
   });
 
@@ -91,6 +109,7 @@ export const checkFakeRemote = (remoteScope: any) => {
 
 export const fetchRemote = (remoteScope: any, fetchModule: any) => {
   const fetches = [];
+  let needReload = false;
   for (const property in remoteScope) {
     const name = property;
     const container = remoteScope[property];
@@ -111,6 +130,7 @@ export const fetchRemote = (remoteScope: any, fetchModule: any) => {
         if (hashmap[name]) {
           if (hashmap[name] !== hash) {
             hashmap[name] = hash;
+            needReload = true;
             console.log(name, 'hash is different - must hot reload server');
             return true;
           }
@@ -130,7 +150,9 @@ export const fetchRemote = (remoteScope: any, fetchModule: any) => {
 
     fetches.push(fetcher);
   }
-  return Promise.all(fetches);
+  return Promise.all(fetches).then(() => {
+    return needReload;
+  });
 };
 //@ts-ignore
 export const revalidate = (
@@ -147,7 +169,9 @@ export const revalidate = (
       res(true);
     }
 
-    fetchRemote(remotesFromAPI, fetchModule).then(() => res(false));
+    fetchRemote(remotesFromAPI, fetchModule).then((val) => {
+      res(val);
+    });
   }).then((shouldReload) => {
     return performReload(shouldReload);
   });
