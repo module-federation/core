@@ -25,18 +25,58 @@ export function generateHmrCode(
       'return new Promise(function(resolve, reject) {',
       Template.indent([
         // Construct filename for the updated chunk
-        `var filename = require('path').join(__dirname, ${JSON.stringify(
+        `var filename = (await import('path')).join(__dirname, ${JSON.stringify(
           rootOutputDir,
         )} + ${RuntimeGlobals.getChunkUpdateScriptFilename}(chunkId));`,
         // Read the updated chunk file
-        "require('fs').readFile(filename, 'utf-8', function(err, content) {",
+        "(await import('fs')).readFile(filename, 'utf-8', function(err, content) {",
         Template.indent([
           'if(err) return reject(err);',
           'var update = {};',
           // Execute the updated chunk in the current context
-          "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
-            "(update, require, require('path').dirname(filename), filename);",
-          'var updatedModules = update.modules;',
+          // "require('vm').runInThisContext('(function(exports, require, __dirname, __filename) {' + content + '\\n})', filename)" +
+          //   "(update, require, require('path').dirname(filename), filename);",
+
+          `
+         const mod = new vm.SourceTextModule(content,
+          { 
+                  // @ts-ignore
+                  importModuleDynamically: async (specifier) => {
+                      const mod = await import(/* webpackIgnore */ specifier)
+                      const exports = Object.keys(mod)
+                      const module = new vm.SyntheticModule(exports, function() {
+                          for (const k of exports) {
+                              this.setExport(k, mod[k])
+                          }
+                      });
+                        // @ts-ignore
+                        await module.link(()=>{});
+                        await module.evaluate();
+                        return module;
+                  },
+                  
+                  initializeImportMeta: (meta, module)=>{
+                      // @ts-ignore
+                      meta.url = import.meta.url 
+                  }
+              }
+          )
+          
+          await mod.link(async (specifier, parent) => {
+              const mod = await import(specifier)
+              const exports = Object.keys(mod)
+              return new vm.SyntheticModule(exports, function () {
+                  for (const k of exports) {
+                      this.setExport(k, mod[k])
+                  }
+              })
+          
+          })
+          
+          await mod.evaluate()
+         `,
+
+          'var updatedModules = mod.namespace;',
           'var runtime = update.runtime;',
           // Iterate over the updated modules
           'for(var moduleId in updatedModules) {',
@@ -157,8 +197,9 @@ export function generateLoadingCode(
                     'installChunk(chunk);',
                   ]),
                   '}',
-                  'var fs = typeof process !== "undefined" ? require(\'fs\') : false;',
-                  `var filename = typeof process !== "undefined" ? require('path').join(__dirname, ${JSON.stringify(
+                  'var fs = typeof process !== "undefined" ? __WEBPACK_EXTERNAL_createRequire(import.meta.url)(\'fs\') : false;',
+                  `const __dirname = __WEBPACK_EXTERNAL_createRequire(import.meta.url)('path').dirname(__WEBPACK_EXTERNAL_createRequire(import.meta.url)('url').fileURLToPath(import.meta.url))`,
+                  `var filename = typeof process !== "undefined" ? __WEBPACK_EXTERNAL_createRequire(import.meta.url)('path').join(__dirname, ${JSON.stringify(
                     rootOutputDir,
                   )} + ${
                     RuntimeGlobals.getChunkScriptFilename
@@ -221,10 +262,10 @@ export function generateHmrManifestCode(
     Template.indent([
       'return new Promise(function(resolve, reject) {',
       Template.indent([
-        `var filename = require('path').join(__dirname, ${JSON.stringify(
+        `var filename = (await import('path')).join(__dirname, ${JSON.stringify(
           rootOutputDir,
         )} + ${RuntimeGlobals.getUpdateManifestFilename}());`,
-        "require('fs').readFile(filename, 'utf-8', function(err, content) {",
+        "(await import('fs')).readFile(filename, 'utf-8', function(err, content) {",
         Template.indent([
           'if(err) {',
           Template.indent([
@@ -290,14 +331,45 @@ export function generateLoadScript(runtimeTemplate: any): string {
               const scriptContent = await (globalThis.webpackChunkLoad || globalThis.fetch || require("node-fetch"))(url).then(res => res.text());
               let remote;
               if (typeof process !== 'undefined') {
-                const vm = require('vm');
-                const m = require('module');
-                const remoteCapsule = vm.runInThisContext(m.wrap(scriptContent), 'node-federation-loader-' + name + '.vm')
-                const exp = {};
-                remote = {exports:{}};
-                remoteCapsule(exp,require,remote,'node-federation-loader-' + name + '.vm',__dirname);
-                remote = remote.exports || remote;
+                const mod = new vm.SourceTextModule(data,
+                  { 
+                          // @ts-ignore
+                          importModuleDynamically: async (specifier) => {
+                              const mod = importModule(specifier) //await import(/* webpackIgnore: true */specifier)
+                              const exports = Object.keys(mod)
+                              const module = new vm.SyntheticModule(exports, function() {
+                                  for (const k of exports) {
+                                      this.setExport(k, mod[k])
+                                  }
+                              });
+                                // @ts-ignore
+                                await module.link(()=>{});
+                                await module.evaluate();
+                                return module;
+                          },
+                          
+                          initializeImportMeta: (meta, module)=>{
+                              // @ts-ignore
+                              meta.url = import.meta.url 
+                          }
+                      }
+                  )
+                  
+                  await mod.link(async (specifier, parent) => {
+                      const mod = await import(/* webpackIgnore: true */ specifier)
+                      const exports = Object.keys(mod)
+                      return new vm.SyntheticModule(exports, function () {
+                          for (const k of exports) {
+                              this.setExport(k, mod[k])
+                          }
+                      })
+                  
+                  })
+                  
+                  await mod.evaluate()
+                  remote = mod.namespace
               } else {
+                // TODO: htis is no longer gracefulf fallback lel
                 remote = eval('let module = {};' + scriptContent + '\\nmodule.exports')
               }
               globalThis.__remote_scope__[remoteName] = remote[remoteName] || remote;

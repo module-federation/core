@@ -48,34 +48,70 @@ export function createScriptNode(
       .then(async (data: string) => {
         const [path, vm]: [typeof import('path'), typeof import('vm')] =
           await Promise.all([
-            importNodeModule<typeof import('path')>('path'),
-            importNodeModule<typeof import('vm')>('vm'),
+            import(/* webpackIgnore: true */ 'path'),
+            import(/* webpackIgnore: true */ 'vm'),
           ]);
         const scriptContext = { exports: {}, module: { exports: {} } };
-        const urlDirname = urlObj.pathname.split('/').slice(0, -1).join('/');
-        const filename = path.basename(urlObj.pathname);
+        // const urlDirname = urlObj.pathname.split('/').slice(0, -1).join('/');
+        // const filename = path.basename(urlObj.pathname);
         try {
-          const script = new vm.Script(
-            `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
-            { filename },
-          );
-          script.runInThisContext()(
-            scriptContext.exports,
-            scriptContext.module,
-            eval('require'),
-            urlDirname,
-            filename,
-          );
-          const exportedInterface: Record<string, any> =
-            scriptContext.module.exports || scriptContext.exports;
-          if (attrs && exportedInterface && attrs['globalName']) {
-            const container = exportedInterface[attrs['globalName']];
-            cb(
-              undefined,
-              container as keyof typeof scriptContext.module.exports,
-            );
-            return;
-          }
+          const importModule = new Function('name', `return import(name)`);
+
+          const mod = new vm.SourceTextModule(data, {
+            // @ts-ignore
+            importModuleDynamically: async (specifier) => {
+              const mod = await importModule(specifier); //await import(/* webpackIgnore: true */specifier)
+              const exports = Object.keys(mod);
+              const module = new vm.SyntheticModule(exports, function () {
+                for (const k of exports) {
+                  this.setExport(k, mod[k]);
+                }
+              });
+              // @ts-ignore
+              await module.link(() => {});
+              await module.evaluate();
+              return module;
+            },
+
+            initializeImportMeta: (meta, module) => {
+              // @ts-ignore
+              meta.url = IMPORTMETAURL;
+            },
+          });
+
+          await mod.link(async (specifier, parent) => {
+            const mod = await importModule(specifier);
+            const exports = Object.keys(mod);
+            return new vm.SyntheticModule(exports, function () {
+              for (const k of exports) {
+                this.setExport(k, mod[k]);
+              }
+            });
+          });
+
+          await mod.evaluate();
+          const exportedInterface: any = mod.namespace;
+          // const script = new vm.Script(
+          //   `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
+          //   { filename },
+          // );
+          // script.runInThisContext()(
+          //   scriptContext.exports,
+          //   scriptContext.module,
+          //   eval('require'),
+          //   urlDirname,
+          //   filename,
+          // );
+          // const exportedInterface: Record<string, any> =
+          //   scriptContext.module.exports || scriptContext.exports;
+          //   if (attrs && exportedInterface && attrs['globalName']) {
+          //     const container = exportedInterface[attrs['globalName']];
+          //     cb(
+          //       undefined,
+          //       container as keyof typeof scriptContext.module.exports,
+          //     );
+          //     return;
+          //   }
           cb(
             undefined,
             exportedInterface as keyof typeof scriptContext.module.exports,

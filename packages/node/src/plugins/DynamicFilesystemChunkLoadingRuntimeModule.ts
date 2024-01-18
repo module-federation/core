@@ -24,7 +24,8 @@ import {
   generateExternalInstallChunkCode,
 } from './webpackChunkUtilities';
 import {
-  fileSystemRunInContextStrategy,
+  NODE_ESM_httpEvalStrategyString,
+  NODE_ESM_httpVmStrategy,
   httpEvalStrategy,
   httpVmStrategy,
 } from '../filesystem/stratagies';
@@ -78,11 +79,22 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
       return `${RuntimeGlobals.baseURI} = ${JSON.stringify(options.baseUri)};`;
     }
 
-    return `${RuntimeGlobals.baseURI} = require("url").pathToFileURL(${
-      rootOutputDir
-        ? `__dirname + ${JSON.stringify('/' + rootOutputDir)}`
-        : '__filename'
-    });`;
+    // return `${RuntimeGlobals.baseURI} = require("url").pathToFileURL(${
+    //   rootOutputDir
+    //     ? `__dirname + ${JSON.stringify('/' + rootOutputDir)}`
+    //     : '__filename'
+    // });`;
+    return `${
+      RuntimeGlobals.baseURI
+    } = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("url").pathToFileURL(
+      ${
+        rootOutputDir
+          ? `__WEBPACK_EXTERNAL_createRequire(import.meta.url)("path").dirname(__WEBPACK_EXTERNAL_createRequire(import.meta.url)("url").fileURLToPath(new URL(import.meta.url))) + ${JSON.stringify(
+              '/' + rootOutputDir,
+            )}`
+          : `__WEBPACK_EXTERNAL_createRequire(import.meta.url)("url").fileURLToPath(import.meta.url)`
+      }
+  )`;
   }
 
   /**
@@ -137,9 +149,79 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
       : undefined;
 
     const dynamicFilesystemChunkLoadingPluginCode = Template.asString([
-      fileSystemRunInContextStrategy.toString(),
-      httpEvalStrategy.toString(),
-      httpVmStrategy.toString(),
+      // fileSystemRunInContextStrategy.toString(),
+      `
+      async function fileSystemRunInContextStrategy(chunkId, rootOutputDir, remotes, callback) {
+          const fs = await import('fs');
+          const path = await import('path');
+          const vm = await import('vm');
+          const url = await import("url")
+          const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
+          const filename = path.join(__dirname, rootOutputDir + __webpack_require__.u(chunkId));
+          if (fs.existsSync(filename)) {
+              fs.readFile(filename, 'utf-8', async (err, content) => {
+                  if (err) {
+                      callback(err, null);
+                      return;
+                  }
+                  const chunk = {};
+                  try {
+                      const mod = new vm.SourceTextModule(content,
+                          {
+                              importModuleDynamically: async (specifier) => {
+                                  const mod = await import(specifier)
+                                  const exports = Object.keys(mod)
+                                  const module = new vm.SyntheticModule(exports, function () {
+                                      for (const k of exports) {
+                                          this.setExport(k, mod[k])
+                                      }
+                                  });
+      
+                                  await module.link(() => { });
+                                  await module.evaluate();
+                                  return module;
+                              },
+      
+                              initializeImportMeta: (meta, module) => {
+                                  // Unclear to me if this should be the same or the passed in url like in the canary branch
+                                  // It seems like it sometimes uses the current __dirname but in canary it seems like its using the url in some way (in the runtime) 
+                                  meta.url = import.meta.url
+                              }
+                          }
+                      )
+      
+                      await mod.link(async (specifier, parent) => {
+                          const mod = await import(specifier)
+                          const exports = Object.keys(mod)
+                          return new vm.SyntheticModule(exports, function () {
+                              for (const k of exports) {
+                                  this.setExport(k, mod[k])
+                              }
+                          })
+      
+                      })
+      
+                      await mod.evaluate()
+      
+                      chunk = mod.namespace
+                      callback(null, chunk);
+                  }
+                  catch (e) {
+                      console.log("'runInThisContext threw'", e);
+                      callback(e, null);
+                  }
+              });
+          }
+          else {
+              const err = new Error(\`File \${filename} does not exist\`);
+              callback(err, null);
+          }
+      }
+      `,
+      // httpEvalStrategy.toString(),
+      NODE_ESM_httpEvalStrategyString,
+      // httpVmStrategy.toString(),
+      NODE_ESM_httpVmStrategy,
       'const loadChunkStrategy = async (strategyType,chunkId,rootOutputDir, remotes, callback) => {',
       Template.indent([
         'switch (strategyType) {',
