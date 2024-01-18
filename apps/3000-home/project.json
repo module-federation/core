@@ -8,11 +8,11 @@
       "executor": "@nx/next:build",
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/apps/3000-home"
+        "outputPath": "apps/3000-home/dist"
       },
       "configurations": {
         "development": {
-          "outputPath": "dist/apps/3000-home"
+          "outputPath": "apps/3000-home/dist"
         },
         "production": {}
       },
