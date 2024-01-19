@@ -271,8 +271,8 @@ importers:
         specifier: 18.19.8
         version: 18.19.8
       '@types/node-fetch':
-        specifier: 2.6.10
-        version: 2.6.10
+        specifier: 2.6.11
+        version: 2.6.11
       '@types/react':
         specifier: 18.2.48
         version: 18.2.48
@@ -10011,6 +10011,13 @@ packages:
 
   /@types/node-fetch@2.6.10:
     resolution: {integrity: sha512-PPpPK6F9ALFTn59Ka3BaL+qGuipRfxNE8qVgkp0bVixeiR2c2/L+IVOiBdu9JhhT22sWnQEp6YyHGI2b2+CMcA==}
+    dependencies:
+      '@types/node': 18.19.8
+      form-data: 4.0.0
+    dev: true
+
+  /@types/node-fetch@2.6.11:
+    resolution: {integrity: sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==}
     dependencies:
       '@types/node': 18.19.8
       form-data: 4.0.0
