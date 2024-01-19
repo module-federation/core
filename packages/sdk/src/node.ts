@@ -42,21 +42,23 @@ export function createScriptNode(
     }
   };
   console.log('fetching', urlObj.href);
+  const importModule = new Function('name', `return import(name)`);
+
   getFetch().then((f) => {
     f(urlObj.href)
       .then((res: Response) => res.text())
       .then(async (data: string) => {
         const [path, vm]: [typeof import('path'), typeof import('vm')] =
           await Promise.all([
-            import(/* webpackIgnore: true */ 'path'),
-            import(/* webpackIgnore: true */ 'vm'),
+            importModule('path'),
+            importModule('vm'),
+            // import(/* webpackIgnore: true */ 'path'),
+            // import(/* webpackIgnore: true */ 'vm'),
           ]);
         const scriptContext = { exports: {}, module: { exports: {} } };
         // const urlDirname = urlObj.pathname.split('/').slice(0, -1).join('/');
         // const filename = path.basename(urlObj.pathname);
         try {
-          const importModule = new Function('name', `return import(name)`);
-
           const mod = new vm.SourceTextModule(data, {
             // @ts-ignore
             importModuleDynamically: async (specifier) => {
