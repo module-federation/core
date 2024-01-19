@@ -113,7 +113,7 @@ class ProvideSharedPlugin {
     const compilationData: WeakMap<Compilation, ResolvedProvideMap> =
       new WeakMap();
 
-    compiler.hooks.compilation.tap(
+    compiler.hooks.thisCompilation.tap(
       'ProvideSharedPlugin',
       (compilation: Compilation, { normalModuleFactory }) => {
         const resolvedProvideMap: ResolvedProvideMap = new Map();
@@ -254,7 +254,7 @@ class ProvideSharedPlugin {
       },
     );
 
-    compiler.hooks.compilation.tap(
+    compiler.hooks.thisCompilation.tap(
       'ProvideSharedPlugin',
       (compilation: Compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
