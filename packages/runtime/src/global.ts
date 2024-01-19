@@ -167,7 +167,7 @@ export function getInfoWithoutType<T extends object>(
       };
     } else {
       const targetKeys = Object.keys(target);
-      for (let targetKey of targetKeys) {
+      for (const targetKey of targetKeys) {
         const [targetTypeOrName, _] = targetKey.split(':');
         const nKey = `${targetTypeOrName}:${key}` as unknown as keyof T;
         const typeWithKeyRes = target[nKey];
