@@ -100,8 +100,8 @@ importers:
         specifier: 1.3.1
         version: 1.3.1(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)(undici@5.28.2)
       '@builder.io/qwik-city':
-        specifier: 1.3.2
-        version: 1.3.2(@types/node@18.19.8)(less@4.1.3)(rollup@2.79.1)(stylus@0.59.0)
+        specifier: 1.4.0
+        version: 1.4.0(@types/node@18.19.8)(less@4.1.3)(rollup@2.79.1)(stylus@0.59.0)
       '@changesets/cli':
         specifier: ^2.27.1
         version: 2.27.1
@@ -2752,18 +2752,18 @@ packages:
     hasBin: true
     dev: true
 
-  /@builder.io/qwik-city@1.3.2(@types/node@18.19.8)(less@4.1.3)(rollup@2.79.1)(stylus@0.59.0):
-    resolution: {integrity: sha512-NLb/vtAgbPB+4B5PqotWQ2CLTgfwRSGKyVMO/YckpffDAFJJ3I0362Blcik5BVM6Ana4ztMSk59vqGYAD1pB3A==}
+  /@builder.io/qwik-city@1.4.0(@types/node@18.19.8)(less@4.1.3)(rollup@2.79.1)(stylus@0.59.0):
+    resolution: {integrity: sha512-6/ThkI+thTjO/bMAW6kas5wmRS/IOTCCLLg6z7DJPZ3PK/0YX/geBhxHC9udO9B7CxhgVJP3O0Mftl0DAZtztw==}
     engines: {node: '>=16.8.0 <18.0.0 || >=18.11'}
     dependencies:
       '@mdx-js/mdx': 2.3.0
       '@types/mdx': 2.0.10
       source-map: 0.7.4
-      svgo: 3.1.0
+      svgo: 3.2.0
       undici: 5.28.2
       vfile: 6.0.1
-      vite: 5.0.10(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)
-      vite-imagetools: 6.2.8(rollup@2.79.1)
+      vite: 5.0.11(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)
+      vite-imagetools: 6.2.9(rollup@2.79.1)
       zod: 3.22.4
     transitivePeerDependencies:
       - '@types/node'
@@ -17669,8 +17669,8 @@ packages:
     dev: true
     optional: true
 
-  /imagetools-core@6.0.3:
-    resolution: {integrity: sha512-3J7Dww03g0dZU5NLbuDRqCqH/AnedR0T3mOl7AP0Curqt/OEtghiDw7Py+Dwa17xL7yJ0uemdEutWkOZm6CnaQ==}
+  /imagetools-core@6.0.4:
+    resolution: {integrity: sha512-N1qs5qn7u9nR3kboISkYuvJm8MohiphCfBa+wx1UOropVaFis9/mh6wuDPLHJNhl6/64C7q2Pch5NASVKAaSrg==}
     engines: {node: '>=12.0.0'}
     dependencies:
       sharp: 0.33.1
@@ -26456,6 +26456,20 @@ packages:
       picocolors: 1.0.0
     dev: true
 
+  /svgo@3.2.0:
+    resolution: {integrity: sha512-4PP6CMW/V7l/GmKRKzsLR8xxjdHTV4IMvhTnpuHwwBazSIlw5W/5SmPjN8Dwyt7lKbSJrRDgp4t9ph0HgChFBQ==}
+    engines: {node: '>=14.0.0'}
+    hasBin: true
+    dependencies:
+      '@trysound/sax': 0.2.0
+      commander: 7.2.0
+      css-select: 5.1.0
+      css-tree: 2.3.1
+      css-what: 6.1.0
+      csso: 5.0.5
+      picocolors: 1.0.0
+    dev: true
+
   /swc-loader@0.2.3(@swc/core@1.3.102)(webpack@5.88.2):
     resolution: {integrity: sha512-D1p6XXURfSPleZZA/Lipb3A8pZ17fP4NObZvFCDjK/OKljroqDpPmsBdTraWhVBqUNpcWBQY1imWdoPScRlQ7A==}
     peerDependencies:
@@ -28239,12 +28253,12 @@ packages:
       teex: 1.0.1
     dev: true
 
-  /vite-imagetools@6.2.8(rollup@2.79.1):
-    resolution: {integrity: sha512-52r/BvprawSlUXayDn5ncX3mqaoxBbOaYG4eakzwREoCXEOTvp+A4HDXrDoeS6PM9T/3ZH7CqBhgmIYm6B/mpQ==}
+  /vite-imagetools@6.2.9(rollup@2.79.1):
+    resolution: {integrity: sha512-C4ZYhgj2vAj43/TpZ06XlDNP0p/7LIeYbgUYr+xG44nM++4HGX6YZBKAYpiBNgiCFUTJ6eXkRppWBrfPMevgmg==}
     engines: {node: '>=12.0.0'}
     dependencies:
       '@rollup/pluginutils': 5.1.0(rollup@2.79.1)
-      imagetools-core: 6.0.3
+      imagetools-core: 6.0.4
     transitivePeerDependencies:
       - rollup
     dev: true
@@ -28328,6 +28342,44 @@ packages:
 
   /vite@5.0.10(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0):
     resolution: {integrity: sha512-2P8J7WWgmc355HUMlFrwofacvr98DAjoE52BfdbwQtyLH06XKwaL/FMnmKM2crF0iX4MpmMKoDlNCB1ok7zHCw==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+    peerDependencies:
+      '@types/node': ^18.0.0 || >=20.0.0
+      less: '*'
+      lightningcss: ^1.21.0
+      sass: '*'
+      stylus: '*'
+      sugarss: '*'
+      terser: ^5.4.0
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      less:
+        optional: true
+      lightningcss:
+        optional: true
+      sass:
+        optional: true
+      stylus:
+        optional: true
+      sugarss:
+        optional: true
+      terser:
+        optional: true
+    dependencies:
+      '@types/node': 18.19.8
+      esbuild: 0.19.11
+      less: 4.1.3
+      postcss: 8.4.32
+      rollup: 4.9.1
+      stylus: 0.59.0
+    optionalDependencies:
+      fsevents: 2.3.3
+    dev: true
+
+  /vite@5.0.11(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0):
+    resolution: {integrity: sha512-XBMnDjZcNAw/G1gEiskiM1v6yzM4GE5aMGvhWTlHAYYhxb7S3/V1s3m2LDHa8Vh6yIWYYB0iJwsEaS523c4oYA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
