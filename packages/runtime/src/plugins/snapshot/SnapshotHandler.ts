@@ -155,6 +155,9 @@ export class SnapshotHandler {
         const globalSnapshotRes = setGlobalSnapshotInfoByModuleInfo(
           {
             ...moduleInfo,
+            // The global remote may be overridden
+            // Therefore, set the snapshot key to the global address of the actual request
+            entry: globalRemoteSnapshot.remoteEntry,
           },
           moduleSnapshot,
         );
