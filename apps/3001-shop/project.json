@@ -8,11 +8,11 @@
       "executor": "@nx/next:build",
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "apps/3001-shop/dist"
+        "outputPath": "apps/3001-shop"
       },
       "configurations": {
         "development": {
-          "outputPath": "apps/3001-shop/dist"
+          "outputPath": "apps/3001-shop"
         },
         "production": {}
       },
