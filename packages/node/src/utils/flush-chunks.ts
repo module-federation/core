@@ -175,6 +175,7 @@ const processChunk = async (chunk, shareMap, hostStats) => {
 export const flushChunks = async () => {
   const hostStats = loadHostStats();
   const shareMap = createShareMap();
+
   const allFlushed = await Promise.all(
     Array.from(usedChunks).map(async (chunk) =>
       processChunk(chunk, shareMap, hostStats),

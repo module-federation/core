@@ -22,7 +22,7 @@ export const performReload = (shouldReload: any) => {
   }
 
   Object.keys(req.cache).forEach((key) => {
-    delete req.cache[key];
+    //delete req.cache[key];
     if (requireCacheRegex.test(key)) {
       delete req.cache[key];
     }
