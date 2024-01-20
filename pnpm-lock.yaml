@@ -534,36 +534,9 @@ importers:
 
   apps/3000-home:
     dependencies:
-      acorn:
-        specifier: 7.4.1
-        version: 7.4.1
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.2.0)(react@18.2.0)
-      buffer:
-        specifier: 5.7.1
-        version: 5.7.1
-      chrome-trace-event:
-        specifier: 1.0.3
-        version: 1.0.3
-      encoding:
-        specifier: 0.1.13
-        version: 0.1.13
-      enhanced-resolve:
-        specifier: 5.15.0
-        version: 5.15.0
-      eslint-scope:
-        specifier: 7.2.2
-        version: 7.2.2
-      eventemitter3:
-        specifier: 5.0.1
-        version: 5.0.1
-      events:
-        specifier: 3.3.0
-        version: 3.3.0
-      fast-glob:
-        specifier: 3.3.2
-        version: 3.3.2
       js-cookie:
         specifier: 3.0.5
         version: 3.0.5
@@ -573,42 +546,12 @@ importers:
       next:
         specifier: 13.5.6
         version: 13.5.6(@babel/core@7.23.6)(react-dom@18.2.0)(react@18.2.0)
-      node-fetch:
-        specifier: 2.7.0
-        version: 2.7.0(encoding@0.1.13)
       react:
         specifier: 18.2.0
         version: 18.2.0
       react-dom:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
-      schema-utils:
-        specifier: 3.3.0
-        version: 3.3.0
-      semver:
-        specifier: 6.3.1
-        version: 6.3.1
-      styled-jsx:
-        specifier: 5.1.2
-        version: 5.1.2(@babel/core@7.23.6)(react@18.2.0)
-      tapable:
-        specifier: 2.2.1
-        version: 2.2.1
-      terser-webpack-plugin:
-        specifier: 5.3.9
-        version: 5.3.9(@swc/core@1.3.102)(esbuild@0.19.11)(webpack@5.89.0)
-      typescript:
-        specifier: 5.3.3
-        version: 5.3.3
-      url:
-        specifier: 0.11.3
-        version: 0.11.3
-      util:
-        specifier: 0.12.5
-        version: 0.12.5
-      webpack-sources:
-        specifier: 3.2.3
-        version: 3.2.3
     devDependencies:
       '@module-federation/nextjs-mf':
         specifier: workspace:*
@@ -619,78 +562,21 @@ importers:
 
   apps/3001-shop:
     dependencies:
-      acorn:
-        specifier: 7.4.1
-        version: 7.4.1
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.2.0)(react@18.2.0)
-      buffer:
-        specifier: 5.7.1
-        version: 5.7.1
-      chrome-trace-event:
-        specifier: 1.0.3
-        version: 1.0.3
-      encoding:
-        specifier: 0.1.13
-        version: 0.1.13
-      enhanced-resolve:
-        specifier: 5.15.0
-        version: 5.15.0
-      eslint-scope:
-        specifier: 7.2.2
-        version: 7.2.2
-      eventemitter3:
-        specifier: 5.0.1
-        version: 5.0.1
-      events:
-        specifier: 3.3.0
-        version: 3.3.0
-      fast-glob:
-        specifier: 3.3.2
-        version: 3.3.2
       lodash:
         specifier: 4.17.21
         version: 4.17.21
       next:
         specifier: 13.5.6
         version: 13.5.6(@babel/core@7.23.6)(react-dom@18.2.0)(react@18.2.0)
-      node-fetch:
-        specifier: 2.7.0
-        version: 2.7.0(encoding@0.1.13)
       react:
         specifier: 18.2.0
         version: 18.2.0
       react-dom:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
-      schema-utils:
-        specifier: 3.3.0
-        version: 3.3.0
-      semver:
-        specifier: 6.3.1
-        version: 6.3.1
-      styled-jsx:
-        specifier: 5.1.2
-        version: 5.1.2(@babel/core@7.23.6)(react@18.2.0)
-      tapable:
-        specifier: 2.2.1
-        version: 2.2.1
-      terser-webpack-plugin:
-        specifier: 5.3.9
-        version: 5.3.9(@swc/core@1.3.102)(esbuild@0.19.11)(webpack@5.89.0)
-      typescript:
-        specifier: 5.3.3
-        version: 5.3.3
-      url:
-        specifier: 0.11.3
-        version: 0.11.3
-      util:
-        specifier: 0.12.5
-        version: 0.12.5
-      webpack-sources:
-        specifier: 3.2.3
-        version: 3.2.3
     devDependencies:
       '@module-federation/nextjs-mf':
         specifier: workspace:*
@@ -704,78 +590,21 @@ importers:
 
   apps/3002-checkout:
     dependencies:
-      acorn:
-        specifier: 7.4.1
-        version: 7.4.1
       antd:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.2.0)(react@18.2.0)
-      buffer:
-        specifier: 5.7.1
-        version: 5.7.1
-      chrome-trace-event:
-        specifier: 1.0.3
-        version: 1.0.3
-      encoding:
-        specifier: 0.1.13
-        version: 0.1.13
-      enhanced-resolve:
-        specifier: 5.15.0
-        version: 5.15.0
-      eslint-scope:
-        specifier: 7.2.2
-        version: 7.2.2
-      eventemitter3:
-        specifier: 5.0.1
-        version: 5.0.1
-      events:
-        specifier: 3.3.0
-        version: 3.3.0
-      fast-glob:
-        specifier: 3.3.2
-        version: 3.3.2
       lodash:
         specifier: 4.17.21
         version: 4.17.21
       next:
         specifier: 13.5.6
         version: 13.5.6(@babel/core@7.23.6)(react-dom@18.2.0)(react@18.2.0)
-      node-fetch:
-        specifier: 2.7.0
-        version: 2.7.0(encoding@0.1.13)
       react:
         specifier: 18.2.0
         version: 18.2.0
       react-dom:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
-      schema-utils:
-        specifier: 3.3.0
-        version: 3.3.0
-      semver:
-        specifier: 6.3.1
-        version: 6.3.1
-      styled-jsx:
-        specifier: 5.1.2
-        version: 5.1.2(@babel/core@7.23.6)(react@18.2.0)
-      tapable:
-        specifier: 2.2.1
-        version: 2.2.1
-      terser-webpack-plugin:
-        specifier: 5.3.9
-        version: 5.3.9(@swc/core@1.3.102)(esbuild@0.19.11)(webpack@5.89.0)
-      typescript:
-        specifier: 5.3.3
-        version: 5.3.3
-      url:
-        specifier: 0.11.3
-        version: 0.11.3
-      util:
-        specifier: 0.12.5
-        version: 0.12.5
-      webpack-sources:
-        specifier: 3.2.3
-        version: 3.2.3
     devDependencies:
       '@module-federation/nextjs-mf':
         specifier: workspace:*
@@ -11271,6 +11100,7 @@ packages:
     resolution: {integrity: sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+    dev: true
 
   /acorn@8.11.2:
     resolution: {integrity: sha512-nc0Axzp/0FILLEVsm4fNwLCwMttvhEI263QtVPQcbpfZZ3ts0hLsZGOpE6czNlid7CJ9MlyH8reXkpsf3YUY4w==}
@@ -12009,6 +11839,7 @@ packages:
   /available-typed-arrays@1.0.5:
     resolution: {integrity: sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==}
     engines: {node: '>= 0.4'}
+    dev: true
 
   /aws-sign2@0.7.0:
     resolution: {integrity: sha512-08kcGqnYf/YmjoRhfxyu+CLxBjUtHLXLXX/vUfx9l2LYzG3c1m61nrpyFUZI6zeS+Li/wWMMidD9KgrqtGq3mA==}
@@ -12298,6 +12129,7 @@ packages:
 
   /base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
+    dev: true
 
   /base@0.11.2:
     resolution: {integrity: sha512-5T6P4xPgpp0YDFvSWwEZ4NoE3aM4QBQXDzmVbraCkFj8zHM+mba8SyqB5DbZWyR7mYHo6Y7BdQo3MoA4m0TeQg==}
@@ -12644,6 +12476,7 @@ packages:
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
+    dev: true
 
   /buffer@6.0.3:
     resolution: {integrity: sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==}
@@ -15723,6 +15556,7 @@ packages:
     dependencies:
       esrecurse: 4.3.0
       estraverse: 5.3.0
+    dev: true
 
   /eslint-visitor-keys@3.4.3:
     resolution: {integrity: sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag==}
@@ -16539,6 +16373,7 @@ packages:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
     dependencies:
       is-callable: 1.2.7
+    dev: true
 
   /for-in@1.0.2:
     resolution: {integrity: sha512-7EwmXrOjyL+ChxMhmG5lnW9MPt1aIeZEwKhQzoBUdTV0N3zuwWDZYVJatDvZ2OyzPUvdIAZDsCetk3coyMfcnQ==}
@@ -17372,6 +17207,7 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       has-symbols: 1.0.3
+    dev: true
 
   /has-unicode@2.0.1:
     resolution: {integrity: sha512-8Rf9Y83NBReMnx0gFzA8JImQACstCYWUplepDa9xprwwtmgEZUF0h/i5xSA625zB/I37EtrswSST6OXxwaaIJQ==}
@@ -17845,6 +17681,7 @@ packages:
 
   /ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
+    dev: true
 
   /iferr@0.1.5:
     resolution: {integrity: sha512-DUNFN5j7Tln0D+TxzloUjKB+CtVu6myn0JEFak6dG18mNt9YkQ6lzGCdafwofISZ1lLF3xRHJ98VKy9ynkcFaA==}
@@ -18126,6 +17963,7 @@ packages:
     dependencies:
       call-bind: 1.0.5
       has-tostringtag: 1.0.0
+    dev: true
 
   /is-array-buffer@3.0.2:
     resolution: {integrity: sha512-y+FyyR/w8vfIRq4eQcM1EYgSTnmHXPqaF+IgzgraytCFq5Xh8lllDVmAZolPJiZttZLeFSINPYMaEJ7/vWUa1w==}
@@ -18198,6 +18036,7 @@ packages:
   /is-callable@1.2.7:
     resolution: {integrity: sha512-1BC0BVFhS/p0qtw6enp8e+8OD0UrK0oFLztSjNzhcKA3WDuJxxAPXzPuPtKkjEY9UUoEWlX/8fgKeu2S8i9JTA==}
     engines: {node: '>= 0.4'}
+    dev: true
 
   /is-ci@3.0.1:
     resolution: {integrity: sha512-ZYvCgrefwqoQ6yTyYUbQu64HsITZ3NfKX1lzaEYdkTDcfKzzCI/wthRRYKkdjHKFVgNiXKAKm65Zo1pk2as/QQ==}
@@ -18299,6 +18138,7 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       has-tostringtag: 1.0.0
+    dev: true
 
   /is-glob@3.1.0:
     resolution: {integrity: sha512-UFpDDrPgM6qpnFNI+rh/p3bUaq9hKLZN8bMUWzxmcnZVS3omf4IPK+BrewlnWjO1WmUsMYuSjKh4UJuV4+Lqmw==}
@@ -18533,6 +18373,7 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       which-typed-array: 1.1.13
+    dev: true
 
   /is-typedarray@1.0.0:
     resolution: {integrity: sha512-cyA56iCMHAh5CdzjJIa4aohJyeO1YbwLi3Jc35MmRU6poroFjIGZzUzupGiRPOjgHg9TLu43xbpwXk523fMxKA==}
@@ -23699,6 +23540,7 @@ packages:
 
   /punycode@1.4.1:
     resolution: {integrity: sha512-jmYNElW7yvO7TV33CjSmvSiE2yco3bV2czu/OzDKdMNVZQWfxCblURLhf+47syQRBntjfLdd/H0egrzIG+oaFQ==}
+    dev: true
 
   /punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
@@ -23731,6 +23573,7 @@ packages:
     engines: {node: '>=0.6'}
     dependencies:
       side-channel: 1.0.4
+    dev: true
 
   /querystring-es3@0.2.1:
     resolution: {integrity: sha512-773xhDQnZBMFobEiztv8LIl70ch5MSF/jUQVlhwFyBILqq96anmoctVIYz+ZRp0qbCKATTn6ev02M3r7Ga5vqA==}
@@ -26928,6 +26771,7 @@ packages:
       serialize-javascript: 6.0.1
       terser: 5.26.0
       webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
+    dev: true
 
   /terser@4.8.1:
     resolution: {integrity: sha512-4GnLC0x667eJG0ewJTa6z/yXrbLGv80D9Ru6HIpCQmO+Q4PfEtBFi0ObSckqwL6VyQv/7ENJieXHo2ANmdQwgw==}
@@ -28049,6 +27893,7 @@ packages:
     dependencies:
       punycode: 1.4.1
       qs: 6.11.2
+    dev: true
 
   /use-callback-ref@1.3.0(@types/react@18.2.48)(react@18.2.0):
     resolution: {integrity: sha512-3FT9PRuRdbB9HfXhEq35u4oZkvpJ5kuYbpqhCfmiZyReuRgpnhDlbr2ZEnnuS0RrJAPn6l23xjFg9kpDM+Ms7w==}
@@ -28121,6 +27966,7 @@ packages:
       is-generator-function: 1.0.10
       is-typed-array: 1.1.12
       which-typed-array: 1.1.13
+    dev: true
 
   /utila@0.4.0:
     resolution: {integrity: sha512-Z0DbgELS9/L/75wZbro8xAnT50pBVFQZ+hUEueGDU5FN51YSCYM+jdxsfCiHjwNP/4LCDD0i/graKpeBnOXKRA==}
@@ -29083,6 +28929,7 @@ packages:
       - '@swc/core'
       - esbuild
       - uglify-js
+    dev: true
 
   /websocket-driver@0.7.4:
     resolution: {integrity: sha512-b17KeDIQVjvb0ssuSDF2cYXSg2iztliJ4B9WdsuB6J952qCPKmnVq4DyW5motImXHDC1cBT/1UezrJVsKw5zjg==}
@@ -29194,6 +29041,7 @@ packages:
       for-each: 0.3.3
       gopd: 1.0.1
       has-tostringtag: 1.0.0
+    dev: true
 
   /which@1.3.1:
     resolution: {integrity: sha512-HxJdYWq1MTIQbJ3nw0cqssHoTNU267KlrDuGZ1WYlxDStUtKUhOaJmh112/TZmHxxUfuJqPXSOm7tDyas0OSIQ==}
