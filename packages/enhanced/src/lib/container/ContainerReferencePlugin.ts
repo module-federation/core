@@ -3,7 +3,10 @@
 	Author Tobias Koppers @sokra and Zackary Jackson @ScriptedAlchemy
 */
 import type { Compiler } from 'webpack';
-import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import {
+  getWebpackPath,
+  normalizeWebpackPath,
+} from '@module-federation/sdk/normalize-webpack-path';
 
 // import * as RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import FallbackDependency from './FallbackDependency';

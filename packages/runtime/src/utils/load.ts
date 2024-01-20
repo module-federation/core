@@ -1,5 +1,4 @@
 import {
-  RemoteEntryType,
   composeKeyWithSeparator,
   loadScript,
   loadScriptNode,
@@ -37,13 +36,11 @@ export async function loadEntryScript({
   name,
   globalName,
   entry,
-  type,
   createScriptHook,
 }: {
   name: string;
   globalName: string;
   entry: string;
-  type: RemoteEntryType;
   createScriptHook?: (url: string) => HTMLScriptElement | void;
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
@@ -57,13 +54,10 @@ export async function loadEntryScript({
 
   if (typeof document === 'undefined') {
     return loadScriptNode(entry, {
-      attrs: { name, globalName, type },
+      attrs: { name, globalName },
       createScriptHook,
     })
       .then(() => {
-        // if(type==='cjs' && exportedInterface){
-        //   return exportedInterface
-        // }
         const { remoteEntryKey, entryExports } = getRemoteEntryExports(
           name,
           globalName,
@@ -81,7 +75,7 @@ export async function loadEntryScript({
 
         return entryExports;
       })
-      .catch((e: any) => {
+      .catch((e) => {
         return e;
       });
   }
@@ -105,7 +99,7 @@ export async function loadEntryScript({
 
       return entryExports;
     })
-    .catch((e: any) => {
+    .catch((e) => {
       return e;
     });
 }
@@ -136,7 +130,6 @@ export async function getRemoteEntry({
         name,
         globalName: entryGlobalName,
         entry,
-        type,
         createScriptHook,
       });
     }

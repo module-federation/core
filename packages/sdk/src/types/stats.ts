@@ -1,6 +1,6 @@
 import type { RemoteWithEntry, RemoteWithVersion } from './common';
 
-export type RemoteEntryType = 'esm' | 'global' | 'cjs';
+export type RemoteEntryType = 'esm' | 'global';
 
 interface ResourceInfo {
   path: string;

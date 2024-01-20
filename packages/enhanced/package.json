@@ -27,9 +27,11 @@
       ]
     }
   },
+  "devDependencies": {
+    "@module-federation/webpack-bundler-runtime": "workspace:*"
+  },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
-    "@module-federation/runtime-tools": "workspace:*",
-    "@module-federation/webpack-bundler-runtime": "workspace:*"
+    "@module-federation/runtime-tools": "workspace:*"
   }
 }
