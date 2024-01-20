@@ -12,16 +12,31 @@ declare module 'webpack/lib/Template';
 declare module 'webpack/lib/util/compileBooleanMatcher';
 declare module 'webpack/lib/util/identifier';
 
-// globals.d.ts
-declare module globalThis {
-  var usedChunks: Set<string>;
-  var flushChunks: () => Promise<Array<string>>;
-  var __remote_scope__: {
-    _config: Record<string, any>;
-    _medusa?: Record<string, any>;
-    [K: string]: {
-      fake?: boolean;
-    };
+declare global {
+  namespace NodeJS {
+    interface Global {
+      usedChunks: Set<string>;
+      flushChunks: () => Promise<Array<string>>;
+      __remote_scope__: {
+        _config: Record<string, any>;
+        _medusa?: Record<string, any>;
+        [K: string]: {
+          fake?: boolean;
+        };
+      };
+      webpackChunkLoad: () => any;
+
+      __FEDERATION__: {
+        __INSTANCES__: Array<{
+          moduleCache?: Map<string, Module>;
+        }>;
+      };
+    }
+  }
+
+  var __FEDERATION__: {
+    __INSTANCES__: Array<{
+      moduleCache?: Map<string, Module>;
+    }>;
   };
-  var webpackChunkLoad: () => any;
 }
