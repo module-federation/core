@@ -33,6 +33,7 @@ declare global {
       };
     }
   }
+  var usedChunks: Set<string>;
 
   var __FEDERATION__: {
     __INSTANCES__: Array<{
