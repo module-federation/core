@@ -79,8 +79,8 @@ importers:
         specifier: 3.1.7
         version: 3.1.7
       '@asciidoctor/core':
-        specifier: 3.0.2
-        version: 3.0.2
+        specifier: 3.0.3
+        version: 3.0.3
       '@asciidoctor/tabs':
         specifier: 1.0.0-beta.6
         version: 1.0.0-beta.6
@@ -1270,8 +1270,8 @@ packages:
       unxhr: 1.0.1
     dev: true
 
-  /@asciidoctor/core@3.0.2:
-    resolution: {integrity: sha512-GbQWpqLlM/kN+90QrlLYISdU/vbGkUSeHsBQR9BzYNmVHDd6CEb/xfQZIFUo//EtT7e+QS3Sv3yYDzgjr96TbA==}
+  /@asciidoctor/core@3.0.3:
+    resolution: {integrity: sha512-XCIRZnYblltGc5COGCtgSQfUqENds1xAHds9GSK31pALfHmxudX1ZAvM7mvwFpZDKUAdWpB3KrDY6oWK7VGM1g==}
     engines: {node: '>=16', npm: '>=8'}
     dependencies:
       '@asciidoctor/opal-runtime': 3.0.1
