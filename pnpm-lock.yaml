@@ -176,7 +176,7 @@ importers:
         version: 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(cypress@13.6.1)(eslint@8.56.0)(js-yaml@4.1.0)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)
       '@nx/vite':
         specifier: 17.2.8
-        version: 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.4.11)(vitest@0.32.4)
+        version: 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.5.2)(vitest@0.32.4)
       '@nx/web':
         specifier: 17.2.8
         version: 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)
@@ -458,7 +458,7 @@ importers:
         version: 16.2.0
       qwik-nx:
         specifier: 1.1.1
-        version: 1.1.1(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(eslint@8.56.0)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.4.11)(vitest@0.32.4)
+        version: 1.1.1(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(eslint@8.56.0)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.5.2)(vitest@0.32.4)
       qwik-speak:
         specifier: 0.19.0
         version: 0.19.0(@builder.io/qwik@1.3.1)
@@ -505,11 +505,11 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       vite:
-        specifier: 4.4.11
-        version: 4.4.11(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)
+        specifier: 4.5.2
+        version: 4.5.2(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)
       vite-tsconfig-paths:
         specifier: 4.2.3
-        version: 4.2.3(typescript@5.3.3)(vite@4.4.11)
+        version: 4.2.3(typescript@5.3.3)(vite@4.5.2)
       vitest:
         specifier: 0.32.4
         version: 0.32.4(@vitest/ui@0.34.4)(less@4.1.3)(stylus@0.59.0)
@@ -5139,10 +5139,10 @@ packages:
       - debug
     dev: true
 
-  /@nrwl/vite@16.10.0(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.4.11)(vitest@0.32.4):
+  /@nrwl/vite@16.10.0(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.5.2)(vitest@0.32.4):
     resolution: {integrity: sha512-15ARYsaiauksgj077YJuJW5uKTOWdA7IZ4fm5ewRUWQyNNZeVSG9Fm3bkJWB9YLjnce3/Fuop+ynm0j3C01Phg==}
     dependencies:
-      '@nx/vite': 16.10.0(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.4.11)(vitest@0.32.4)
+      '@nx/vite': 16.10.0(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.5.2)(vitest@0.32.4)
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -5158,10 +5158,10 @@ packages:
       - vitest
     dev: true
 
-  /@nrwl/vite@17.2.8(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.4.11)(vitest@0.32.4):
+  /@nrwl/vite@17.2.8(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.5.2)(vitest@0.32.4):
     resolution: {integrity: sha512-j0VBt+euPvpuHZ0thR3J7hkWrh90G0jmKJbT/yvECzcoFWhUvgsR3NJ0Y6a+EEediWbKHhmIeDZWMvWceOebLw==}
     dependencies:
-      '@nx/vite': 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.4.11)(vitest@0.32.4)
+      '@nx/vite': 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.5.2)(vitest@0.32.4)
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -6448,20 +6448,20 @@ packages:
       - verdaccio
     dev: true
 
-  /@nx/vite@16.10.0(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.4.11)(vitest@0.32.4):
+  /@nx/vite@16.10.0(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.5.2)(vitest@0.32.4):
     resolution: {integrity: sha512-xJ/ME2x/ebMy3qdwrA0IUZAamsCje9wH+Ms5z3PSKzf4Xc4VEEsXHVKr4UZADC4Y9YbG0QnzCQdo+VdKCIGlIQ==}
     peerDependencies:
       vite: ^4.3.4
       vitest: '>=0.31.0 <1.0.0'
     dependencies:
-      '@nrwl/vite': 16.10.0(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.4.11)(vitest@0.32.4)
+      '@nrwl/vite': 16.10.0(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.5.2)(vitest@0.32.4)
       '@nx/devkit': 16.10.0(nx@17.2.8)
       '@nx/js': 16.10.0(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.3.3)
       '@swc/helpers': 0.5.3
       enquirer: 2.3.6
       tsconfig-paths: 4.2.0
-      vite: 4.4.11(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)
+      vite: 4.5.2(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)
       vitest: 0.32.4(@vitest/ui@0.34.4)(less@4.1.3)(stylus@0.59.0)
     transitivePeerDependencies:
       - '@babel/traverse'
@@ -6476,20 +6476,20 @@ packages:
       - verdaccio
     dev: true
 
-  /@nx/vite@17.2.8(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.4.11)(vitest@0.32.4):
+  /@nx/vite@17.2.8(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.5.2)(vitest@0.32.4):
     resolution: {integrity: sha512-EGRNRtJOG/zA3mtN29+KO5jh3MeAjD0En6Ab9rMOmc46FWf6uxb5BfzdVGHKk6MXEwXYv0d7AHe2qBiCk7TCWQ==}
     peerDependencies:
       vite: ^5.0.0
       vitest: '>=0.34.6'
     dependencies:
-      '@nrwl/vite': 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.4.11)(vitest@0.32.4)
+      '@nrwl/vite': 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.5.2)(vitest@0.32.4)
       '@nx/devkit': 17.2.8(nx@17.2.8)
       '@nx/js': 17.2.8(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.3.3)
       '@swc/helpers': 0.5.3
       enquirer: 2.3.6
       tsconfig-paths: 4.2.0
-      vite: 4.4.11(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)
+      vite: 4.5.2(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)
       vitest: 0.32.4(@vitest/ui@0.34.4)(less@4.1.3)(stylus@0.59.0)
     transitivePeerDependencies:
       - '@babel/traverse'
@@ -23611,13 +23611,13 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /qwik-nx@1.1.1(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(eslint@8.56.0)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.4.11)(vitest@0.32.4):
+  /qwik-nx@1.1.1(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(eslint@8.56.0)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.5.2)(vitest@0.32.4):
     resolution: {integrity: sha512-3g+PJKLcConEOL1x4FE1xtaCbPsKmhOgXRgMdWQnSNO1MuvlIlpAZWsSNvSqhBOJoyqwq9a7WoYzoX7aF7fUcQ==}
     dependencies:
       '@nx/devkit': 16.10.0(nx@17.2.8)
       '@nx/js': 16.10.0(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)
       '@nx/linter': 16.10.0(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(eslint@8.56.0)(nx@17.2.8)(verdaccio@5.29.0)
-      '@nx/vite': 16.10.0(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.4.11)(vitest@0.32.4)
+      '@nx/vite': 16.10.0(@swc-node/register@1.6.8)(@swc/core@1.3.102)(@types/node@18.19.8)(nx@17.2.8)(typescript@5.3.3)(verdaccio@5.29.0)(vite@4.5.2)(vitest@0.32.4)
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -28289,7 +28289,7 @@ packages:
       mlly: 1.4.2
       pathe: 1.1.1
       picocolors: 1.0.0
-      vite: 4.4.11(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)
+      vite: 4.5.2(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -28301,7 +28301,7 @@ packages:
       - terser
     dev: true
 
-  /vite-tsconfig-paths@4.2.3(typescript@5.3.3)(vite@4.4.11):
+  /vite-tsconfig-paths@4.2.3(typescript@5.3.3)(vite@4.5.2):
     resolution: {integrity: sha512-xVsA2xe6QSlzBujtWF8q2NYexh7PAUYfzJ4C8Axpe/7d2pcERYxuxGgph9F4f0iQO36g5tyGq6eBUYIssdUrVw==}
     peerDependencies:
       vite: '*'
@@ -28312,14 +28312,14 @@ packages:
       debug: 4.3.4(supports-color@8.1.1)
       globrex: 0.1.2
       tsconfck: 2.1.2(typescript@5.3.3)
-      vite: 4.4.11(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)
+      vite: 4.5.2(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)
     transitivePeerDependencies:
       - supports-color
       - typescript
     dev: true
 
-  /vite@4.4.11(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0):
-    resolution: {integrity: sha512-ksNZJlkcU9b0lBwAGZGGaZHCMqHsc8OpgtoYhsQ4/I2v5cnpmmmqe5pM4nv/4Hn6G/2GhTdj0DhZh2e+Er1q5A==}
+  /vite@4.5.2(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0):
+    resolution: {integrity: sha512-tBCZBNSBbHQkaGyhGCDUGqeo2ph8Fstyp6FMSvTtsXeZSPpSMGlviAOav2hxVTqFcx8Hj/twtWKsMJXNY0xI8w==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
     peerDependencies:
@@ -28459,7 +28459,7 @@ packages:
       strip-literal: 1.3.0
       tinybench: 2.5.1
       tinypool: 0.5.0
-      vite: 4.4.11(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)
+      vite: 4.5.2(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)
       vite-node: 0.32.4(@types/node@18.19.8)(less@4.1.3)(stylus@0.59.0)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
