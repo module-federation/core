@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/typescript",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "description": "Webpack plugin to stream typescript for module federation apps/components",
   "license": "MIT",
   "type": "commonjs",
@@ -34,7 +34,8 @@
     "react-dom": "*"
   },
   "dependencies": {
-    "node-fetch": "2.7.0"
+    "node-fetch": "2.7.0",
+    "unplugin": "^1.6.0"
   },
   "peerDependenciesMeta": {
     "react": {
@@ -52,8 +53,16 @@
   },
   "exports": {
     ".": {
-      "require": "./dist/src/index.js",
-      "types": "./dist/src/index.d.ts"
+      "require": "./src/index.js",
+      "types": "./src/index.d.ts"
+    },
+    "./webpack": {
+      "types": "./src/webpack.d.ts",
+      "require": "./src/webpack.js"
+    },
+    "./rspack": {
+      "types": "./src/rspack.d.ts",
+      "require": "./src/rspack.js"
     }
   }
 }

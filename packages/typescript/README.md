@@ -1,6 +1,6 @@
 # Federated Types
 
-This plugin enables **Typescript Types** support for Module Federated Components.
+This plugin enables **Typescript Types** support for Module Federated Components in both webpack and rspack.
 
 ## Installation
 
@@ -8,13 +8,14 @@ This plugin enables **Typescript Types** support for Module Federated Components
 $ npm i @module-federation/typescript
 ```
 
-## Usage
+## Rspack
 
-Register the plugin in `webpack configuration (webpack.config.js)` file
+## Webpack
+
+Register the plugin in `rspack configuration (rspack.config.js)` file
 
 ```typescript
-import webpack from 'webpack';
-const { FederatedTypesPlugin } = require('@module-federation/typescript');
+const { FederatedTypes } = require('@module-federation/typescript');
 
 const federationConfig = {
   name: 'my-app',
@@ -34,13 +35,49 @@ module.exports = {
   /* ... */
   plugins: [
     // ...
-    new FederatedTypesPlugin({
+    FederatedTypes.rspack({
       federationConfig,
       // ...
     }),
   ],
 };
 ```
+
+## Webpack
+
+Register the plugin in `webpack configuration (webpack.config.js)` file
+
+```typescript
+import webpack from 'webpack';
+const { FederatedTypes } = require('@module-federation/typescript');
+
+const federationConfig = {
+  name: 'my-app',
+  filename: 'remoteEntry.js',
+  exposes: {
+    //...exposed components
+    './Button': './src/Button',
+    './Input': './src/Input',
+  },
+  remotes: {
+    app2: 'app2@http://localhost:3002/remoteEntry.js', // or Just the URL 'http://localhost:3002'
+  },
+  shared: ['react', 'react-dom'],
+};
+
+module.exports = {
+  /* ... */
+  plugins: [
+    // ...
+    FederatedTypes.webpack({
+      federationConfig,
+      // ...
+    }),
+  ],
+};
+```
+
+## Additional configuration
 
 If you are running multiple remotes that use bi-directional module sharing, you may run into race conditions while starting up the webpack-dev-servers. The library now supports configuring retry options (which are enabled by default), along with the ability to serve the types out of the webpack compiler in a separate HTTP host.
 
@@ -51,7 +88,7 @@ module.exports = {
   /* ... */
   plugins: [
     // ...
-    new FederatedTypesPlugin({
+    FederatedTypes(.rspack or .webpack){
       federationConfig,
       typeFetchOptions: {
         /** The maximum time to wait for downloading remote types in milliseconds.
@@ -131,12 +168,12 @@ Sample code:
 
 ```typescript
 // next.config.js
-const FederatedTypesPlugin = require('@module-federation/typescript');
+const { FederatedTypes } = require('@module-federation/typescript');
 
 module.exports = {
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     config.plugins.push(
-      new FederatedTypesPlugin({
+      FederatedTypes.webpack({
         federationConfig: {
           ...federationConfig,
           remotes: { app2: 'app2@http://localhost:3000/remoteEntry.js' },
