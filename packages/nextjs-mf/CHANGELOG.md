@@ -1,5 +1,21 @@
 # [8.1.0-canary.7](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.1.7
+
+### Patch Changes
+
+- 8e35e49: Remove default delegate module files, as well as remove the delegate loaders. Replaced by runtimePlugins
+- 73eb07e: Rewrite chunk flushing and hot reloading to use federation runtime apis
+- Updated dependencies [2d774d1]
+- Updated dependencies [51b18e0]
+- Updated dependencies [2b34e46]
+- Updated dependencies [2097daa]
+- Updated dependencies [73eb07e]
+  - @module-federation/runtime@0.0.10
+  - @module-federation/enhanced@0.0.10
+  - @module-federation/node@2.0.8
+  - @module-federation/sdk@0.0.10
+
 ## 8.1.6
 
 ### Patch Changes
