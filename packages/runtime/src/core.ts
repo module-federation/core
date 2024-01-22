@@ -125,6 +125,7 @@ export class FederationHost {
         name: string;
         remoteSnapshot: ModuleInfo;
         preloadConfig: PreloadRemoteArgs;
+        origin: FederationHost;
       },
       void
     >('handlePreloadModule'),
