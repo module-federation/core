@@ -55,11 +55,11 @@ type SharedBaseArgs = {
   strategy?: 'version-first' | 'loaded-first';
 };
 
-export type ShareArgs =
-  | (SharedBaseArgs & { get: () => () => Module | Promise<() => Module> })
-  | (SharedBaseArgs & { lib: () => Module });
+export type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
 
-export type SharedGetter = () => () => Promise<() => Module> | Module;
+export type ShareArgs =
+  | (SharedBaseArgs & { get: SharedGetter })
+  | (SharedBaseArgs & { lib: () => Module });
 
 export type Shared = {
   version: string;
