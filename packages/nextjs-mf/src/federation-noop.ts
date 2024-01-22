@@ -9,5 +9,5 @@ require('next/amp');
 require('styled-jsx');
 require('styled-jsx/style');
 require('next/image');
-require('react/jsx-dev-runtime');
+// require('react/jsx-dev-runtime');
 require('react/jsx-runtime');

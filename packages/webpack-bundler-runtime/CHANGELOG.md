@@ -1,5 +1,17 @@
 # [1.0.0-canary.3](https://github.com/module-federation/universe/compare/webpack-bundler-runtime-1.0.0-canary.2...webpack-bundler-runtime-1.0.0-canary.3) (2023-11-23)
 
+## 0.0.9
+
+### Patch Changes
+
+- 2ad29a6: fix: remove duplicate init shareScopeMap
+  fix: normalize schemas path
+  fix: shared is loaded if it has lib attr
+- Updated dependencies [2ad29a6]
+- Updated dependencies [b129098]
+  - @module-federation/runtime@0.0.9
+  - @module-federation/sdk@0.0.9
+
 ## 0.0.8
 
 ### Patch Changes

@@ -53,3 +53,4 @@ apps/**/dist
 # test cases
 !packages/enhanced/test/configCases/**/**/node_modules
 packages/enhanced/test/js
+.ignored

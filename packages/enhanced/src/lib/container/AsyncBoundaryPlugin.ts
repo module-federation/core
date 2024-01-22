@@ -67,6 +67,20 @@ class AsyncEntryStartupPlugin {
     });
   }
 
+  getChunkByName(
+    compilation: Compilation,
+    dependOn: string[],
+  ): (string | number | undefined)[] {
+    const byname = [];
+    for (const name of dependOn) {
+      const chunk = compilation.namedChunks.get(name);
+      if (chunk) {
+        byname.push(chunk.id || chunk.name);
+      }
+    }
+    return byname;
+  }
+
   private _handleRenderStartup(compiler: Compiler, compilation: Compilation) {
     compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
       compilation,
@@ -118,9 +132,9 @@ class AsyncEntryStartupPlugin {
           const initialChunks = Array.from(
             upperContext.chunk.getAllInitialChunks(),
           ).map((chunk: Chunk) => chunk.id);
-          const chunksToRef = entryOptions?.dependOn
-            ? [...entryOptions.dependOn, ...initialChunks]
-            : [...initialChunks];
+          const dependOn = entryOptions?.dependOn || [];
+          const dependOnIDs = this.getChunkByName(compilation, dependOn);
+          const chunksToRef = [...dependOnIDs, ...initialChunks];
 
           remotes = this._getRemotes(
             compiler.webpack.RuntimeGlobals,
@@ -181,7 +195,7 @@ class AsyncEntryStartupPlugin {
     runtimeGlobals: typeof RuntimeGlobals,
     requirements: ReadonlySet<string>,
     hasRemoteModules: boolean,
-    chunksToRef: (Chunk['id'] | null)[],
+    chunksToRef: (Chunk['id'] | null | undefined)[],
     remotes: string,
   ): string {
     if (
@@ -202,7 +216,7 @@ class AsyncEntryStartupPlugin {
         ];
 
     for (const chunkId of chunksToRef) {
-      if (chunkId !== null) {
+      if (chunkId !== null && chunkId !== undefined) {
         remotesParts.push(
           ` __webpack_require__.f.remotes(${JSON.stringify(
             chunkId,
@@ -219,7 +233,7 @@ class AsyncEntryStartupPlugin {
     runtimeGlobals: typeof RuntimeGlobals,
     requirements: ReadonlySet<string>,
     consumeShares: boolean,
-    chunksToRef: (Chunk['id'] | null)[],
+    chunksToRef: (Chunk['id'] | null | undefined)[],
     shared: string,
   ): string {
     if (
@@ -240,7 +254,7 @@ class AsyncEntryStartupPlugin {
         ];
 
     for (const chunkId of chunksToRef) {
-      if (chunkId !== null) {
+      if (chunkId !== null && chunkId !== undefined) {
         sharedParts.push(
           ` __webpack_require__.f.consumes(${JSON.stringify(
             chunkId,

@@ -1,5 +1,24 @@
 # [8.1.0-canary.7](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.1.6
+
+### Patch Changes
+
+- Updated dependencies [1147f48]
+- Updated dependencies [cf8634d]
+- Updated dependencies [2ad29a6]
+- Updated dependencies [b129098]
+  - @module-federation/enhanced@0.0.9
+  - @module-federation/runtime@0.0.9
+  - @module-federation/node@2.0.7
+  - @module-federation/sdk@0.0.9
+
+## 8.1.5
+
+### Patch Changes
+
+- d7e037c: Fix production build issue causing errorLoadRemote hook to not execute during next static render
+
 ## 8.1.4
 
 ### Patch Changes

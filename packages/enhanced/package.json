@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "files": [
@@ -16,6 +16,7 @@
   "exports": {
     ".": {
       "require": "./dist/src/index.js",
+      "import": "./dist/src/index.js",
       "types": "./dist/index.d.ts"
     }
   },
