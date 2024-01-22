@@ -11,6 +11,6 @@
     "react-refresh": "0.14.0"
   },
   "dependencies": {
-    "antd": "4.24.15"
+    "antd": "5.13.2"
   }
 }

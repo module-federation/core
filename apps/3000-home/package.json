@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "antd": "4.24.15",
+    "antd": "5.13.2",
     "js-cookie": "3.0.5",
     "lodash": "4.17.21",
     "next": "13.5.6",
