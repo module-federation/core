@@ -280,9 +280,20 @@ export function generateLoadScript(runtimeTemplate: any): string {
             if (!name) {
               throw new Error('__webpack_require__.l name is required for ' + url);
             }
+
+            if(${RuntimeGlobals.require}.federation.instance.moduleCache.has(name)) {
+               console.log('container',name, 'found in module cache')
+            }
+
+console.log(${RuntimeGlobals.require}.federation);
+
+
             return ${RuntimeGlobals.require}.federation.runtime.loadScriptNode(url, {attrs: {}}).then(function(res){
-            globalThis[name] = res[name] || res;
-            callback(globalThis[name]);
+            ${RuntimeGlobals.require}.federation.bundlerRuntime.initContainerEntry(res)
+            // ${RuntimeGlobals.require}.federation.instance.moduleCache.set(name, res);
+            // const containerRef = ${RuntimeGlobals.require}.federation.instance.moduleCache.get(name) || res[name]  || res;
+            // callback(globalThis[name]);
+            callback(res);
             }).catch(callback)
           }`,
           `executeLoad(url,callback,chunkId)`,
