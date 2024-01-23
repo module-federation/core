@@ -284,7 +284,7 @@ export function generateLoadScript(runtimeTemplate: any): string {
                 const regex = /__webpack_require__\\.federation\\.instance\\.moduleCache\\.get\\(([^)]+)\\)/;
                 const match = name.match(regex);
                 if (match !== null) {
-                    name = match[1];
+                    name = match[1].replace(/["']/g, "");
                 }
             }
 

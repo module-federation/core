@@ -10,16 +10,9 @@ export default function () {
           const { alias } = remote;
           if (alias) {
             remote.name = remote.alias;
-
-            // const rawRemote = rawRemotes.find(rawR => rawR.alias === alias);
-            // if (rawRemote) {
-            //   remote.name = rawRemote.name;
-            // }
           }
         });
       }
-      console.log(userOptions);
-
       return args;
     },
     init(args) {
@@ -31,19 +24,11 @@ export default function () {
           /__webpack_require__\.federation\.instance\.moduleCache\.get\(([^)]+)\)/;
         const match = args.id.match(regex);
         if (match !== null) {
-          args.id = match[1];
+          const req = args.id.replace(match[0], '');
+          const remoteID = match[1].replace(/["']/g, '');
+          args.id = [remoteID, req].join('');
         }
       }
-      console.log(args.id);
-      return args;
-    },
-    createScript({ url }) {
-      return;
-    },
-    afterResolve(args) {
-      return args;
-    },
-    async beforeLoadShare(args) {
       return args;
     },
   };
