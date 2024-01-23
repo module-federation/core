@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "type": "commonjs",
   "main": "./dist/src/index.js",
   "exports": {
