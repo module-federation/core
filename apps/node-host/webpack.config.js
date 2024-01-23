@@ -14,7 +14,7 @@ module.exports = composePlugins(withNx(), async (config) => {
     new UniversalFederationPlugin({
       isServer: true,
       name: 'node_host',
-      runtimePlugins: [require.resolve('./runtimePlugin.ts')],
+      // runtimePlugins: [require.resolve('./runtimePlugin.ts')],
       remotes: {
         node_local_remote:
           'commonjs ../../node-local-remote/dist/remoteEntry.js',
