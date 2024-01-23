@@ -19,12 +19,10 @@ export default function () {
         });
       }
       console.log(userOptions);
-      debugger;
 
       return args;
     },
     init(args) {
-      debugger;
       return args;
     },
     beforeRequest(args) {

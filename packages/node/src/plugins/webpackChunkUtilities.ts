@@ -281,7 +281,11 @@ export function generateLoadScript(runtimeTemplate: any): string {
               throw new Error('__webpack_require__.l name is required for ' + url);
             }
             if(name.startsWith('__webpack_require__')) {
-            name =
+                const regex = /__webpack_require__\\.federation\\.instance\\.moduleCache\\.get\\(([^)]+)\\)/;
+                const match = name.match(regex);
+                if (match !== null) {
+                    name = match[1];
+                }
             }
 
             if(${RuntimeGlobals.require}.federation.instance.moduleCache.has(name)) {
