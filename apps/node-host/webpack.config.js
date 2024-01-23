@@ -18,8 +18,9 @@ module.exports = composePlugins(withNx(), async (config) => {
         node_local_remote:
           'commonjs ../../node-local-remote/dist/remoteEntry.js',
         // node_local_remote: '__webpack_require__.federation.instance.moduleCache.get("node_local_remote")',
-        node_remote:
-          '__webpack_require__.federation.instance.moduleCache.get("node_remote")@http://localhost:3002/remoteEntry.js',
+        // node_remote:
+        //   '__webpack_require__.federation.instance.moduleCache.get("node_remote")@http://localhost:3002/remoteEntry.js',
+        node_remote: 'node_remote@http://localhost:3002/remoteEntry.js',
       },
     }),
   );
