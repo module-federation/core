@@ -491,17 +491,18 @@ export class FederationHost {
       name,
       entry: url,
     });
+
     const moduleOptions: ModuleOptions = {
       host: this,
       remoteInfo,
     };
-    const remoteByAlias = this.options.remotes.find((remote) => {
-      return remote.name === name;
-    });
-    const cacheName = remoteByAlias?.alias || name;
+
     const module = new Module(moduleOptions);
+
     module.remoteEntryExports = container;
-    this.moduleCache.set(cacheName, module);
+
+    this.moduleCache.set(name, module);
+
     return module;
   }
 
