@@ -280,6 +280,9 @@ export function generateLoadScript(runtimeTemplate: any): string {
             if (!name) {
               throw new Error('__webpack_require__.l name is required for ' + url);
             }
+            if(name.startsWith('__webpack_require__')) {
+            name =
+            }
 
             if(${RuntimeGlobals.require}.federation.instance.moduleCache.has(name)) {
                console.log('container',name, 'found in module cache')
@@ -287,7 +290,9 @@ export function generateLoadScript(runtimeTemplate: any): string {
 
             const federation = ${RuntimeGlobals.require}.federation;
 
+
             return ${RuntimeGlobals.require}.federation.runtime.loadScriptNode(url, {attrs: {}}).then(async function(res){
+            debugger;
             const enhancedRemote = await federation.instance.initRawContainer(name,url, res);
             globalThis[name] = enhancedRemote
             callback(enhancedRemote);
