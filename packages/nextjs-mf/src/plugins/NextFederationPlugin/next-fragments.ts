@@ -1,6 +1,7 @@
 import type { container, Compiler } from 'webpack';
 import type {
   ModuleFederationPluginOptions,
+  Shared,
   SharedObject,
 } from '@module-federation/utilities';
 import {
@@ -21,6 +22,7 @@ export const retrieveDefaultShared = (isServer: boolean): SharedObject => {
   if (isServer) {
     return DEFAULT_SHARE_SCOPE;
   }
+
   // If the code is running on the client/browser, always bundle Next.js internals
   return DEFAULT_SHARE_SCOPE_BROWSER;
 };
@@ -58,10 +60,16 @@ export const applyPathFixes = (compiler: Compiler, options: any) => {
     if (rule?.oneOf) {
       //@ts-ignore
       rule.oneOf.forEach((oneOfRule) => {
-        if (hasLoader(oneOfRule, 'react-refresh-utils')) {
+        if (hasLoader(oneOfRule, 'react-refresh-utils') && oneOfRule.exclude) {
           oneOfRule.exclude = [oneOfRule.exclude, /universe\/packages/];
         }
       });
     }
   });
+};
+
+export const hasAppDir = (compiler: Compiler) => {
+  return Object.keys(compiler.options.resolve.alias || {}).includes(
+    'private-next-app-dir',
+  );
 };

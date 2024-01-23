@@ -151,7 +151,10 @@ class FederationRuntimePlugin {
             // TODO: maybe set this variable as constant is better https://github.com/webpack/webpack/blob/main/lib/config/defaults.js#L176
             entryItem.import = ['./src'];
           }
-          if (!entryItem.import.includes(entryFilePath)) {
+          if (
+            !entryItem.import.includes(entryFilePath) &&
+            entryItem.layer !== 'rsc' // TODO: remove this when adding support for RSC
+          ) {
             entryItem.import.unshift(entryFilePath);
           }
         });
