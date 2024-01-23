@@ -285,15 +285,15 @@ export function generateLoadScript(runtimeTemplate: any): string {
                console.log('container',name, 'found in module cache')
             }
 
-console.log(${RuntimeGlobals.require}.federation);
+const federation = ${RuntimeGlobals.require}.federation;
 
 
-            return ${RuntimeGlobals.require}.federation.runtime.loadScriptNode(url, {attrs: {}}).then(function(res){
-            ${RuntimeGlobals.require}.federation.bundlerRuntime.initContainerEntry(res)
-            // ${RuntimeGlobals.require}.federation.instance.moduleCache.set(name, res);
-            // const containerRef = ${RuntimeGlobals.require}.federation.instance.moduleCache.get(name) || res[name]  || res;
+            return ${RuntimeGlobals.require}.federation.runtime.loadScriptNode(url, {attrs: {}}).then(async function(res){
+            const enhancedRemote = await federation.instance.initRawContainer(name,url, res);
+console.log('loading remote', enhancedRemote)
+
             // callback(globalThis[name]);
-            callback(res);
+            callback(enhancedRemote);
             }).catch(callback)
           }`,
           `executeLoad(url,callback,chunkId)`,
