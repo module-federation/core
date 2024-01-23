@@ -7,8 +7,8 @@ export default function () {
       const { userOptions } = args;
       if (userOptions.remotes) {
         userOptions.remotes.forEach((remote) => {
-          const { alias } = remote;
-          if (alias) {
+          const { alias, name } = remote;
+          if (alias && name.startsWith('__webpack_require__')) {
             remote.name = remote.alias;
           }
         });
