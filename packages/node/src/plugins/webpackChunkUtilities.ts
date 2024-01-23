@@ -280,7 +280,8 @@ export function generateLoadScript(runtimeTemplate: any): string {
             if (!name) {
               throw new Error('__webpack_require__.l name is required for ' + url);
             }
-            if (name.startsWith('__webpack_require__')) {
+            const usesInternalRef = name.startsWith('__webpack_require__')
+            if (usesInternalRef) {
               const regex = /__webpack_require__\\.federation\\.instance\\.moduleCache\\.get\\(([^)]+)\\)/;
               const match = name.match(regex);
               if (match) {
@@ -290,7 +291,11 @@ export function generateLoadScript(runtimeTemplate: any): string {
             try {
               const federation = ${RuntimeGlobals.require}.federation;
               const res = await ${RuntimeGlobals.require}.federation.runtime.loadScriptNode(url, { attrs: {} });
-              const enhancedRemote = await federation.instance.initRawContainer(name, url, res);
+              const enhancedRemote = federation.instance.initRawContainer(name, url, res);
+              // use normal global assignment
+              if(!usesInternalRef && !globalThis[name]) {
+                globalThis[name] = enhancedRemote
+              }
               callback(enhancedRemote);
             } catch (error) {
               callback(error);
