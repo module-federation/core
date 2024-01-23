@@ -26,6 +26,15 @@ export default function () {
       return args;
     },
     beforeRequest(args) {
+      if (args.id.startsWith('__webpack_require__')) {
+        const regex =
+          /__webpack_require__\.federation\.instance\.moduleCache\.get\(([^)]+)\)/;
+        const match = args.id.match(regex);
+        if (match !== null) {
+          args.id = match[1];
+        }
+      }
+      console.log(args.id);
       return args;
     },
     createScript({ url }) {

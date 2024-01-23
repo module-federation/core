@@ -296,9 +296,9 @@ export function generateLoadScript(runtimeTemplate: any): string {
 
 
             return ${RuntimeGlobals.require}.federation.runtime.loadScriptNode(url, {attrs: {}}).then(async function(res){
-            debugger;
             const enhancedRemote = await federation.instance.initRawContainer(name,url, res);
-            globalThis[name] = enhancedRemote
+            // globalThis[name] = enhancedRemote
+
             callback(enhancedRemote);
             }).catch(callback)
           }`,
