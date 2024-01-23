@@ -263,45 +263,6 @@ export function handleOnChunkLoad(
     return '// no on chunks loaded';
   }
 }
-/**
- * Generates the load script for server-side execution. This function creates a script that loads a remote module
- * and executes it in the current context. It supports both browser and Node.js environments.
- * @param {any} runtimeTemplate - The runtime template used to generate the load script.
- * @returns {string} - The generated load script.
- */
-export function generateLoadScript(runtimeTemplate: any): string {
-  return Template.asString([
-    '// load script equivalent for server side',
-    `${RuntimeGlobals.loadScript} = ${runtimeTemplate.basicFunction(
-      'url, callback, chunkId',
-      [
-        Template.indent([
-          `async function executeLoad(url, callback, name) {
-            if (!name) {
-              throw new Error('__webpack_require__.l name is required for ' + url);
-            }
-            if (name.startsWith('__webpack_require__')) {
-              const regex = /__webpack_require__\\.federation\\.instance\\.moduleCache\\.get\\(([^)]+)\\)/;
-              const match = name.match(regex);
-              if (match) {
-                name = match[1].replace(/["']/g, '');
-              }
-            }
-            try {
-              const federation = ${RuntimeGlobals.require}.federation;
-              const res = await ${RuntimeGlobals.require}.federation.runtime.loadScriptNode(url, { attrs: {} });
-              const enhancedRemote = await federation.instance.initRawContainer(name, url, res);
-              callback(enhancedRemote);
-            } catch (error) {
-              callback(error);
-            }
-          }`,
-          `executeLoad(url, callback, chunkId);`,
-        ]),
-      ],
-    )}`,
-  ]);
-}
 export function generateInstallChunk(
   runtimeTemplate: any,
   withOnChunkLoad: boolean,

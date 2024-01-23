@@ -487,10 +487,20 @@ export class FederationHost {
     url: string,
     container: RemoteEntryExports,
   ): Module {
-    const remoteInfo = getRemoteInfo({ name, entry: url });
-    const module = new Module({ host: this, remoteInfo });
+    const remoteInfo = getRemoteInfo({
+      name,
+      entry: url,
+    });
+
+    const moduleOptions: ModuleOptions = {
+      host: this,
+      remoteInfo,
+    };
+
+    const module = new Module(moduleOptions);
 
     module.remoteEntryExports = container;
+
     this.moduleCache.set(name, module);
 
     return module;
