@@ -132,13 +132,18 @@ export class NextFederationPlugin {
   ): ModuleFederationPluginOptions {
     const defaultShared = retrieveDefaultShared(isServer);
 
-    if (hasAppDir(compiler)) {
-      // These shared deps cause issues with the appDir. Any ideas around this?
-      delete defaultShared['react'];
-      delete defaultShared['react/'];
-      delete defaultShared['react-dom'];
-      delete defaultShared['react-dom/'];
-    }
+    // if (hasAppDir(compiler)) {
+    //   // These shared deps cause issues with the appDir. Any ideas around this?
+    //   delete defaultShared['react'];
+    //   delete defaultShared['react/'];
+    //   delete defaultShared['react/cjs/react.development'];
+    //   delete defaultShared['react/react.shared-subset'];
+    //   delete defaultShared['react-dom'];
+    //   delete defaultShared['react-dom/'];
+    //   delete defaultShared['react-dom/client'];
+    //   delete defaultShared['react-dom/server'];
+    //   delete defaultShared['react-dom/server.node'];
+    // }
 
     const noop = this.getNoopPath();
     return {
@@ -154,8 +159,6 @@ export class NextFederationPlugin {
       exposes: {
         './noop': noop,
         './react': require.resolve('react'),
-        './react-dom': require.resolve('react-dom'),
-        './next/router': require.resolve('next/router'),
         ...this._options.exposes,
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)

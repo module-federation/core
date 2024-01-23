@@ -100,6 +100,7 @@ export default function (): FederationRuntimePlugin {
       return () => new Proxy(exposedModuleExports, handler);
     },
     resolveShare(args) {
+      console.log(args.pkgName);
       if (
         args.pkgName !== 'react' &&
         args.pkgName !== 'react-dom' &&

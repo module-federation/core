@@ -35,12 +35,6 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     import: undefined,
   },
-  '@module-federation/utilities': {
-    eager: true,
-    version: require('@module-federation/utilities/package.json').version,
-    requiredVersion: require('@module-federation/utilities/package.json')
-      .version,
-  },
   'next/image': {
     requiredVersion: undefined,
     singleton: true,
@@ -51,25 +45,28 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     import: undefined,
   },
-  react: {
+  'next/dist/compiled/react': {
     singleton: true,
     requiredVersion: false,
-    import: false,
+    import: undefined,
   },
-  'react/': {
+  'next/dist/compiled/react/': {
     singleton: true,
     requiredVersion: false,
-    import: false,
+    import: undefined,
   },
-  'react-dom/': {
+  'next/dist/compiled/react-dom/': {
     singleton: true,
     requiredVersion: false,
-    import: false,
+    import: undefined,
   },
-  'react-dom': {
+  'next/dist/compiled/next-server/app-page-runtime': {
+    singleton: true,
+  },
+  'next/dist/compiled/react-dom': {
     singleton: true,
     requiredVersion: false,
-    import: false,
+    import: undefined,
   },
   'react/jsx-dev-runtime': {
     singleton: true,
@@ -79,8 +76,9 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
   'react/jsx-runtime': {
     singleton: true,
     requiredVersion: undefined,
-    // import: false,
+    import: undefined,
   },
+  // 'next/dist/compiled/react':{},
   'styled-jsx': {
     singleton: true,
     import: undefined,
@@ -118,7 +116,7 @@ export const DEFAULT_SHARE_SCOPE_BROWSER: SharedObject = Object.entries(
 
   // Set eager and import to undefined for all entries, except for the ones specified above
   acc[key] = { ...value, import: undefined };
-
+  delete acc['next/dist/compiled/next-server/app-page-runtime'];
   return acc;
 }, {} as SharedObject);
 
