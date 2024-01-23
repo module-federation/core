@@ -67,3 +67,6 @@ jobs:
 
       - name: Build Next.js Apps in Production Mode
         run: pnpm app:next:build
+
+      - name: E2E Node Federation
+        run: npx nx run node-host-e2e:e2e
