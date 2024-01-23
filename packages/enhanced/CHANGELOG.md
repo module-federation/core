@@ -1,5 +1,13 @@
 # [0.2.0-canary.5](https://github.com/module-federation/universe/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.0.10
+
+### Patch Changes
+
+- 51b18e0: Fix bug in AyncBoundaryPlugin when chunkID is not set to named and dependOn exists
+  - @module-federation/runtime-tools@0.0.10
+  - @module-federation/sdk@0.0.10
+
 ## 0.0.9
 
 ### Patch Changes

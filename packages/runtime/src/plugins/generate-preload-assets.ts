@@ -62,17 +62,9 @@ function traverseModuleInfo(
   isRoot: boolean,
   memo: Record<string, boolean> = {},
   remoteSnapshot?: ModuleInfo,
-  getModuleInfoHook?: (
-    target: any,
-    key: string | number | symbol,
-  ) => { value: any | undefined; key: string } | void,
 ): void {
   const id = getFMId(remoteInfo);
-  const { value: snapshotValue } = getInfoWithoutType(
-    globalSnapshot,
-    id,
-    getModuleInfoHook,
-  );
+  const { value: snapshotValue } = getInfoWithoutType(globalSnapshot, id);
   const effectiveRemoteSnapshot = remoteSnapshot || snapshotValue;
   if (effectiveRemoteSnapshot && !isManifestProvider(effectiveRemoteSnapshot)) {
     traverse(effectiveRemoteSnapshot, remoteInfo, isRoot);
@@ -95,7 +87,6 @@ function traverseModuleInfo(
           false,
           memo,
           undefined,
-          getModuleInfoHook,
         );
       }
     }
@@ -246,16 +237,6 @@ export function generatePreloadAssets(
     true,
     memo,
     remoteSnapshot,
-    (target, key) => {
-      const res = origin.loaderHook.lifecycle.getModuleInfo.emit({
-        target,
-        key,
-      });
-      if (res && !(res instanceof Promise)) {
-        return res;
-      }
-      return;
-    },
   );
 
   if (remoteSnapshot.shared) {
