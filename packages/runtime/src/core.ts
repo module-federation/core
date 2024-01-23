@@ -482,6 +482,20 @@ export class FederationHost {
     );
   }
 
+  initRawContainer(
+    name: string,
+    url: string,
+    container: RemoteEntryExports,
+  ): Module {
+    const remoteInfo = getRemoteInfo({ name, entry: url });
+    const module = new Module({ host: this, remoteInfo });
+
+    module.remoteEntryExports = container;
+    this.moduleCache.set(name, module);
+
+    return module;
+  }
+
   private async _getRemoteModuleAndOptions(id: string): Promise<{
     module: Module;
     moduleOptions: ModuleOptions;
