@@ -6,7 +6,8 @@ if (typeof __webpack_require__ !== 'undefined' && __webpack_require__.l) {
       if (!name) {
         throw new Error('__webpack_require__.l name is required for ' + url);
       }
-      if (name.startsWith('__webpack_require__')) {
+      const usesInternalRef = name.startsWith('__webpack_require__');
+      if (usesInternalRef) {
         const regex =
           /__webpack_require__\.federation\.instance\.moduleCache\.get\(([^)]+)\)/;
         const match = name.match(regex);
@@ -25,6 +26,10 @@ if (typeof __webpack_require__ !== 'undefined' && __webpack_require__.l) {
           url,
           res,
         );
+        // use normal global assignment
+        if (!usesInternalRef && !globalThis[name]) {
+          globalThis[name] = enhancedRemote;
+        }
         callback(enhancedRemote);
       } catch (error) {
         callback(error);
