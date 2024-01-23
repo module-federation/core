@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 0.0.10
+
+### Patch Changes
+
+- 2d774d1: onLoad hook will allow you to return a custom module factory or proxy
+- 2097daa: feat(runtime): automatically complete the snapshot so that devtool can visualize it
+  - @module-federation/sdk@0.0.10
+
 ## 0.0.9
 
 ### Patch Changes

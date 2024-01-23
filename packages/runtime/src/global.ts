@@ -144,9 +144,10 @@ export function getGlobalFederationConstructor():
 }
 
 export function setGlobalFederationConstructor(
-  FederationConstructor: typeof FederationHost,
+  FederationConstructor: typeof FederationHost | undefined,
+  isDebug = isDebugMode(),
 ): void {
-  if (isDebugMode()) {
+  if (isDebug) {
     globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = FederationConstructor;
     globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR_VERSION__ = __VERSION__;
   }
@@ -156,21 +157,35 @@ export function setGlobalFederationConstructor(
 export function getInfoWithoutType<T extends object>(
   target: T,
   key: keyof T,
-  getModuleInfoHook?: (
-    target: any,
-    key: string | number | symbol,
-  ) => { value: any | undefined; key: string } | void,
 ): { value: T[keyof T] | undefined; key: string } {
-  let res: { value: T[keyof T] | undefined; key: string } = {
-    value: target[key],
-    key: key as string,
-  };
-
-  if (getModuleInfoHook) {
-    const hookRes = getModuleInfoHook(target, key);
-    res = hookRes || res;
+  if (typeof key === 'string') {
+    const keyRes = target[key];
+    if (keyRes) {
+      return {
+        value: target[key],
+        key: key as string,
+      };
+    } else {
+      const targetKeys = Object.keys(target);
+      for (const targetKey of targetKeys) {
+        const [targetTypeOrName, _] = targetKey.split(':');
+        const nKey = `${targetTypeOrName}:${key}` as unknown as keyof T;
+        const typeWithKeyRes = target[nKey];
+        if (typeWithKeyRes) {
+          return {
+            value: typeWithKeyRes,
+            key: nKey as string,
+          };
+        }
+      }
+      return {
+        value: undefined,
+        key: key as string,
+      };
+    }
+  } else {
+    throw new Error('key must be string');
   }
-  return res;
 }
 
 export const getGlobalSnapshot = (): GlobalModuleInfo =>
@@ -179,18 +194,10 @@ export const getGlobalSnapshot = (): GlobalModuleInfo =>
 export const getTargetSnapshotInfoByModuleInfo = (
   moduleInfo: Optional<Remote, 'alias'>,
   snapshot: GlobalModuleInfo,
-  getModuleInfoHook?: (
-    target: any,
-    key: string | number | symbol,
-  ) => { value: any | undefined; key: string } | void,
 ): GlobalModuleInfo[string] | undefined => {
   // Check if the remote is included in the hostSnapshot
   const moduleKey = getFMId(moduleInfo);
-  const getModuleInfo = getInfoWithoutType(
-    snapshot,
-    moduleKey,
-    getModuleInfoHook,
-  ).value;
+  const getModuleInfo = getInfoWithoutType(snapshot, moduleKey).value;
 
   // The remoteSnapshot might not include a version
   if (
@@ -213,7 +220,6 @@ export const getTargetSnapshotInfoByModuleInfo = (
     const getModuleInfoWithoutVersion = getInfoWithoutType(
       nativeGlobal.__FEDERATION__.moduleInfo,
       moduleKeyWithoutVersion,
-      getModuleInfoHook,
     ).value;
 
     if (getModuleInfoWithoutVersion?.version === version) {
@@ -226,17 +232,10 @@ export const getTargetSnapshotInfoByModuleInfo = (
 
 export const getGlobalSnapshotInfoByModuleInfo = (
   moduleInfo: Optional<Remote, 'alias'>,
-  extraOptions?: {
-    getModuleInfoHook?: (
-      target: any,
-      key: string | number | symbol,
-    ) => { value: any | undefined; key: string } | void;
-  },
 ): GlobalModuleInfo[string] | undefined =>
   getTargetSnapshotInfoByModuleInfo(
     moduleInfo,
     nativeGlobal.__FEDERATION__.moduleInfo,
-    extraOptions?.getModuleInfoHook,
   );
 
 export const setGlobalSnapshotInfoByModuleInfo = (
