@@ -22,8 +22,14 @@ export interface Federation {
   __PRELOADED_MAP__: Map<string, boolean>;
 }
 
-// export const nativeGlobal: typeof global = new Function('return this')();
-export const nativeGlobal: typeof global = new Function('return this')();
+export const nativeGlobal: typeof global = (() => {
+  try {
+    return new Function('return this');
+  } catch {
+    return globalThis;
+  }
+})() as typeof global;
+
 export const Global = nativeGlobal;
 
 declare global {
