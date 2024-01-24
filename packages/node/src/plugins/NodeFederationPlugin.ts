@@ -71,10 +71,6 @@ class NodeFederationPlugin {
   }
 
   private updateCompilerOptions(compiler: Compiler): void {
-    if (compiler.options && compiler.options.output) {
-      //todo, need to change / remove
-      compiler.options.output.importMetaName = 'remoteContainerRegistry';
-    }
     const chunkFileName = compiler.options?.output?.chunkFilename;
     const uniqueName =
       compiler?.options?.output?.uniqueName || this._options.name;

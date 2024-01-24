@@ -130,6 +130,7 @@ export function generateLoadingCode(
     return '// no chunk loading';
   }
 
+  return '';
   return Template.asString([
     '// Dynamic filesystem chunk loading for javascript',
     `${fn}.readFileVm = function(chunkId, promises) {`,

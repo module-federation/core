@@ -50,6 +50,22 @@ class UniversalFederationPlugin {
     this.name = 'ModuleFederationPlugin';
   }
 
+  private updateCompilerOptions(compiler: Compiler): void {
+    const chunkFileName = compiler.options?.output?.chunkFilename;
+    const uniqueName =
+      compiler?.options?.output?.uniqueName || this._options.name;
+    if (
+      typeof chunkFileName === 'string' &&
+      uniqueName &&
+      !chunkFileName.includes(uniqueName)
+    ) {
+      const suffix = `-[chunkhash].js`;
+      compiler.options.output.chunkFilename = chunkFileName.replace(
+        '.js',
+        suffix,
+      );
+    }
+  }
   /**
    * Apply the plugin to the compiler
    * @param {Compiler} compiler - The webpack compiler
@@ -66,8 +82,12 @@ class UniversalFederationPlugin {
       compiler.options.target === 'node' ||
       compiler.options.target === 'async-node'
     ) {
-      new NodeFederationPlugin(options, this.context).apply(compiler);
-      new StreamingTargetPlugin({ ...options, debug }).apply(compiler);
+      this.updateCompilerOptions(compiler);
+      //@ts-ignore
+      const { experiments, debug, ...opts } = options;
+      new ModuleFederationPlugin(opts).apply(compiler);
+      // new NodeFederationPlugin(options, this.context).apply(compiler);
+      // new StreamingTargetPlugin({ ...options, debug }).apply(compiler);
     } else {
       new ModuleFederationPlugin(options).apply(compiler);
     }

@@ -621,6 +621,9 @@ importers:
 
   apps/node-host:
     dependencies:
+      '@module-federation/enhanced':
+        specifier: workspace:*
+        version: link:../../packages/enhanced
       '@module-federation/node':
         specifier: workspace:*
         version: link:../../packages/node
