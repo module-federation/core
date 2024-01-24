@@ -163,7 +163,6 @@ class ContainerPlugin {
     ) {
       compiler.options.output.enabledLibraryTypes.push(library.type);
     }
-    debugger;
 
     new compiler.webpack.EntryPlugin(
       compiler.options.context || '',
@@ -228,7 +227,6 @@ class ContainerPlugin {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
-        debugger;
         compilation.dependencyFactories.set(
           ContainerEntryDependency,
           //@ts-ignore
