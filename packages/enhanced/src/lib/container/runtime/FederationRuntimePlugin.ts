@@ -1,6 +1,7 @@
 import type { Compiler, sources } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import FederationRuntimeModule from './FederationRuntimeModule';
+import FederationInitModule from './FederationInitModule';
 import {
   getFederationGlobalScope,
   normalizeRuntimeInitOptionsWithOutShared,
@@ -142,21 +143,24 @@ class FederationRuntimePlugin {
     this.ensureFile();
     const entryFilePath = this.getFilePath();
 
-    modifyEntry({
-      compiler,
-      prependEntry: (entry) => {
-        Object.keys(entry).forEach((entryName) => {
-          const entryItem = entry[entryName];
-          if (!entryItem.import) {
-            // TODO: maybe set this variable as constant is better https://github.com/webpack/webpack/blob/main/lib/config/defaults.js#L176
-            entryItem.import = ['./src'];
-          }
-          if (!entryItem.import.includes(entryFilePath)) {
-            entryItem.import.unshift(entryFilePath);
-          }
-        });
-      },
-    });
+    // modifyEntry({
+    //   compiler,
+    //   prependEntry: (entry) => {
+    //     Object.keys(entry).forEach((entryName) => {
+    //       const entryItem = entry[entryName];
+    //       if (!entryItem.import) {
+    //         // TODO: maybe set this variable as constant is better https://github.com/webpack/webpack/blob/main/lib/config/defaults.js#L176
+    //         entryItem.import = ['./src'];
+    //       }
+    //       if (
+    //         !entryItem.import.includes(entryFilePath) &&
+    //         entryItem.layer !== 'rsc' // TODO: remove this when adding support for RSC
+    //       ) {
+    //         entryItem.import.unshift(entryFilePath);
+    //       }
+    //     });
+    //   },
+    // });
   }
 
   injectRuntime(compiler: Compiler) {
@@ -187,6 +191,14 @@ class FederationRuntimePlugin {
             compilation.addRuntimeModule(
               chunk,
               new FederationRuntimeModule(
+                runtimeRequirements,
+                name,
+                initOptionsWithoutShared,
+              ),
+            );
+            compilation.addRuntimeModule(
+              chunk,
+              new FederationInitModule(
                 runtimeRequirements,
                 name,
                 initOptionsWithoutShared,
