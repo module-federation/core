@@ -1,4 +1,4 @@
-import type { Compiler, sources } from 'webpack';
+import type { Chunk, Compilation, Compiler, sources } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import FederationRuntimeModule from './FederationRuntimeModule';
 import FederationInitModule from './FederationInitModule';
@@ -12,6 +12,8 @@ import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '../constant';
 import type { ModuleFederationPluginOptions } from '../../../declarations/plugins/container/ModuleFederationPlugin';
+import HoistContainerReferences from '../HoistContainerReferencesPlugin';
+import ContainerEntryModule from '../ContainerEntryModule';
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -139,6 +141,8 @@ class FederationRuntimePlugin {
     }
   }
 
+  getModuleIdByFilePath() {}
+
   prependEntry(compiler: Compiler) {
     this.ensureFile();
     const entryFilePath = this.getFilePath();
@@ -196,14 +200,7 @@ class FederationRuntimePlugin {
                 initOptionsWithoutShared,
               ),
             );
-            compilation.addRuntimeModule(
-              chunk,
-              new FederationInitModule(
-                runtimeRequirements,
-                name,
-                initOptionsWithoutShared,
-              ),
-            );
+            compilation.addRuntimeModule(chunk, new FederationInitModule(name));
           },
         );
       },
@@ -281,7 +278,8 @@ class FederationRuntimePlugin {
         },
       );
     }
-
+    const hoistContainer = new HoistContainerReferences();
+    hoistContainer.apply(compiler);
     this.prependEntry(compiler);
     this.injectRuntime(compiler);
     this.setRuntimeAlias(compiler);

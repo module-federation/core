@@ -3,6 +3,7 @@ import type {
   Compilation,
   Chunk,
   WebpackPluginInstance,
+  Module,
 } from 'webpack';
 import ContainerEntryModule from './ContainerEntryModule';
 
@@ -11,6 +12,16 @@ import ContainerEntryModule from './ContainerEntryModule';
  * @constructor
  */
 export class HoistContainerReferences implements WebpackPluginInstance {
+  private containerEntryModules: Set<ContainerEntryModule>;
+
+  constructor() {
+    this.containerEntryModules = new Set<ContainerEntryModule>();
+  }
+
+  public getContainerEntryModules(): Set<ContainerEntryModule> {
+    return this.containerEntryModules;
+  }
+
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       'HoistContainerReferences',
@@ -37,6 +48,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       chunk,
     )) {
       if (module instanceof ContainerEntryModule) {
+        this.containerEntryModules.add(module);
         return true;
       }
     }
@@ -55,7 +67,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   }
 
   private getRuntimeChunks(chunk: Chunk, compilation: Compilation): Chunk[] {
-    const runtimeChunks = [];
+    const runtimeChunks: Chunk[] = [];
     for (const c of compilation.chunks) {
       if (c.hasRuntime() && c !== chunk) {
         runtimeChunks.push(c);
