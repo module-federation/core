@@ -174,7 +174,11 @@ class FederationRuntimePlugin {
                 initOptionsWithoutShared,
               ),
             );
-            compilation.addRuntimeModule(chunk, new FederationInitModule(name));
+
+            compilation.addRuntimeModule(
+              chunk,
+              new FederationInitModule(name, this.getFilePath()),
+            );
           },
         );
       },
@@ -252,6 +256,7 @@ class FederationRuntimePlugin {
         },
       );
     }
+    this.ensureFile();
     this.injectRuntime(compiler);
     this.setRuntimeAlias(compiler);
     new HoistContainerReferences().apply(compiler);

@@ -9,20 +9,23 @@ const { RuntimeModule, Template } = require(
 
 class FederationInitModule extends RuntimeModule {
   containerName: string;
+  entryFilePath: string;
 
-  constructor(containerName: string) {
+  constructor(containerName: string, entryFilePath: string) {
     super('federation runtime init', RuntimeModule.STAGE_ATTACH - 1);
     this.containerName = containerName;
+    this.entryFilePath = entryFilePath;
   }
 
   private chunkContainsContainerEntryModule(
     chunk: Chunk,
     compilation: Compilation,
-  ): ContainerEntryModule | null {
+  ): Module | null {
     for (const module of compilation.chunkGraph.getChunkModulesIterable(
       chunk,
     )) {
-      if (module instanceof ContainerEntryModule) {
+      //@ts-ignore
+      if (module.request === this.entryFilePath) {
         return module;
       }
     }
