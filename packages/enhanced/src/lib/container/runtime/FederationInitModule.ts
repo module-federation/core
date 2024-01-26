@@ -38,7 +38,6 @@ class FederationInitModule extends RuntimeModule {
   getModuleByInstance() {
     const compilation: Compilation = this.compilation!;
     const chunks = compilation.chunks;
-    debugger;
 
     for (const chunk of chunks) {
       if (!chunk.hasRuntime()) continue;

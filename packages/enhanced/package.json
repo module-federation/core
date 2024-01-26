@@ -28,7 +28,8 @@
     }
   },
   "devDependencies": {
-    "@module-federation/webpack-bundler-runtime": "workspace:*"
+    "@module-federation/webpack-bundler-runtime": "workspace:*",
+    "terser-webpack-plugin": "^5.3.10"
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
