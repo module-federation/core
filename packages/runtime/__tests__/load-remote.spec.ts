@@ -3,7 +3,12 @@ import { assert, describe, it } from 'vitest';
 import { FederationHost, init } from '../src/index';
 import { mockRemoteSnapshot } from './mock/utils';
 import { matchRemoteWithNameAndExpose } from '../src/utils/manifest';
-import { addGlobalSnapshot, getGlobalSnapshot, Global } from '../src/global';
+import {
+  addGlobalSnapshot,
+  getGlobalSnapshot,
+  Global,
+  setGlobalFederationConstructor,
+} from '../src/global';
 import { requestList } from './mock/env';
 
 describe('matchRemote', () => {
@@ -395,7 +400,7 @@ describe('loadRemote with manifest.json', () => {
   });
 
   it('circulate deps', async () => {
-    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = FederationHost;
+    setGlobalFederationConstructor(FederationHost, true);
     const FM = init({
       name: '@circulate-deps/app1',
       remotes: [
@@ -415,7 +420,7 @@ describe('loadRemote with manifest.json', () => {
     expect(res).toBe('@circulate-deps/app2');
 
     Global.__FEDERATION__.__INSTANCES__ = [];
-    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = undefined;
+    setGlobalFederationConstructor(undefined, true);
   });
 
   it('manifest.json with query', async () => {
@@ -479,6 +484,10 @@ describe('lazy loadRemote add remote into snapshot', () => {
     });
     const snapshot = getGlobalSnapshot();
     const hostModuleInfo = snapshot['@demo/app1'];
+    assert(
+      hostModuleInfo && 'remotesInfo' in hostModuleInfo,
+      'hostModuleInfo Cannot be empty',
+    );
     const beforeHostRemotesInfo = hostModuleInfo.remotesInfo;
     const beforeRemotesLength = Object.keys(beforeHostRemotesInfo).length;
     expect(beforeRemotesLength).toBe(0);
@@ -519,6 +528,10 @@ describe('lazy loadRemote add remote into snapshot', () => {
     });
     const snapshot = getGlobalSnapshot();
     const hostModuleInfo = snapshot['@demo/app1'];
+    assert(
+      hostModuleInfo && 'remotesInfo' in hostModuleInfo,
+      'hostModuleInfo Cannot be empty',
+    );
     const beforeHostRemotesInfo = hostModuleInfo.remotesInfo;
     const beforeRemotesLength = Object.keys(beforeHostRemotesInfo).length;
     expect(beforeRemotesLength).toBe(0);
@@ -595,7 +608,7 @@ describe('loadRemote', () => {
     );
     // @ts-ignore fakeSrc is local mock attr, which value is the same as src
     const loadedSrcs = [...document.querySelectorAll('script')].map(
-      (i) => i.fakeSrc,
+      (i) => (i as any).fakeSrc,
     );
     expect(loadedSrcs.includes(`${remotePublicPath}${jsSyncAssetPath}`));
     reset();

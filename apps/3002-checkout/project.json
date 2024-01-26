@@ -8,11 +8,11 @@
       "executor": "@nx/next:build",
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "{options.outputPath}"
+        "outputPath": "apps/3002-checkout"
       },
       "configurations": {
         "development": {
-          "outputPath": "apps/3002-checkout/dist"
+          "outputPath": "apps/3002-checkout"
         },
         "production": {}
       },
