@@ -25,7 +25,10 @@ class FederationInitModule extends RuntimeModule {
       chunk,
     )) {
       //@ts-ignore
-      if (module.request === this.entryFilePath) {
+      if (
+        typeof module.identifier === 'function' &&
+        module.identifier().includes(this.entryFilePath)
+      ) {
         return module;
       }
     }
@@ -35,6 +38,7 @@ class FederationInitModule extends RuntimeModule {
   getModuleByInstance() {
     const compilation: Compilation = this.compilation!;
     const chunks = compilation.chunks;
+    debugger;
 
     for (const chunk of chunks) {
       if (!chunk.hasRuntime()) continue;
@@ -59,6 +63,7 @@ class FederationInitModule extends RuntimeModule {
       typeof entryModuleID === 'number'
         ? entryModuleID
         : JSON.stringify(entryModuleID);
+
     return Template.asString([
       'console.log("init runtime")',
       `const mfRuntimeModuleID = ${mfRuntimeModuleID}`,
