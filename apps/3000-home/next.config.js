@@ -2,7 +2,7 @@ const { withNx } = require('@nx/next/plugins/with-nx');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 
 /**
- * @type {import('@nrwl/next/plugins/with-nx').WithNxOptions}
+ * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
  **/
 const nextConfig = {
   nx: {
@@ -39,8 +39,8 @@ const nextConfig = {
           './menu': './components/menu',
         },
         shared: {
-          lodash: {},
-          antd: {},
+          'lodash/': {},
+          'antd/': {},
         },
         extraOptions: {
           debug: false,
