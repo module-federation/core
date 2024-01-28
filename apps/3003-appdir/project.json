@@ -1,0 +1,55 @@
+{
+  "name": "3003-appdir",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/3003-appdir",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build",
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "apps/3003-appdir"
+      },
+      "configurations": {
+        "development": {
+          "outputPath": "apps/3003-appdir"
+        },
+        "production": {}
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "serve": {
+      "executor": "@nx/next:server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "3003-appdir:build",
+        "dev": true,
+        "port": 3003
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "3003-appdir:build:development",
+          "dev": true,
+          "port": 3003
+        },
+        "production": {
+          "buildTarget": "3003-appdir:build:production",
+          "dev": false,
+          "port": 3003
+        }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    }
+  },
+  "tags": []
+}

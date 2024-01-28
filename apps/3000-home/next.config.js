@@ -37,6 +37,7 @@ const nextConfig = {
         exposes: {
           './SharedNav': './components/SharedNav',
           './menu': './components/menu',
+          './button': './components/button',
         },
         shared: {
           lodash: {},
