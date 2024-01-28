@@ -65,7 +65,6 @@ class ProvideSharedPlugin {
    */
   constructor(options: ProvideSharedPluginOptions) {
     validate(options);
-    //@ts-ignore
     this._provides = parseOptions(
       options.provides,
       (item) => {

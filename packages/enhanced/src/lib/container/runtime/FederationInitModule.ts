@@ -12,7 +12,7 @@ class FederationInitModule extends RuntimeModule {
   entryFilePath: string;
 
   constructor(containerName: string, entryFilePath: string) {
-    super('federation runtime init', RuntimeModule.STAGE_ATTACH - 1);
+    super('federation runtime init', RuntimeModule.STAGE_TRIGGER);
     this.containerName = containerName;
     this.entryFilePath = entryFilePath;
   }
@@ -64,7 +64,6 @@ class FederationInitModule extends RuntimeModule {
         : JSON.stringify(entryModuleID);
 
     return Template.asString([
-      'console.log("init runtime")',
       `const mfRuntimeModuleID = ${mfRuntimeModuleID}`,
       '__webpack_require__(mfRuntimeModuleID);',
     ]);

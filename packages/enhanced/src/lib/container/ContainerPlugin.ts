@@ -172,7 +172,6 @@ class ContainerPlugin {
         shareScope,
         federationRuntimePluginInstance.entryFilePath,
       );
-      console.log(federationRuntimePluginInstance.entryFilePath);
       const hasSingleRuntimeChunk =
         compilation.options?.optimization?.runtimeChunk;
       dep.loc = { name };
