@@ -63,10 +63,12 @@ class FederationInitModule extends RuntimeModule {
     const { moduleId, chunk } = entryModule;
     const mfRuntimeModuleID =
       typeof moduleId === 'number' ? moduleId : JSON.stringify(moduleId);
-    const thisChunk = this;
-    console.log(thisChunk);
-    debugger;
+    let wrapCall;
+    if (this.chunk && this.chunk.id) {
+      wrapCall = chunk.id !== this.chunk.id;
+    }
     return Template.asString([
+      wrapCall ? 'console.log("wrap")' : '',
       `const mfRuntimeModuleID = ${mfRuntimeModuleID}`,
       '__webpack_require__(mfRuntimeModuleID);',
     ]);
