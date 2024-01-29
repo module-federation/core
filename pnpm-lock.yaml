@@ -21,8 +21,8 @@ importers:
         specifier: 1.6.7
         version: 1.6.7
       core-js:
-        specifier: 3.34.0
-        version: 3.34.0
+        specifier: 3.35.1
+        version: 3.35.1
       encoding:
         specifier: ^0.1.13
         version: 0.1.13
@@ -3816,7 +3816,7 @@ packages:
       cosmiconfig: 7.1.0
       remeda: 0.0.32
       semantic-release: 20.1.0(encoding@0.1.13)(typescript@5.3.3)
-      semantic-release-plugin-decorators: github.com/tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0)
+      semantic-release-plugin-decorators: git/github.com+tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0)
     transitivePeerDependencies:
       - encoding
       - nx
@@ -8410,7 +8410,7 @@ packages:
       '@storybook/router': 6.5.16(react-dom@18.2.0)(react@18.2.0)
       '@storybook/theming': 6.5.16(react-dom@18.2.0)(react@18.2.0)
       '@types/webpack-env': 1.18.4
-      core-js: 3.34.0
+      core-js: 3.35.1
       global: 4.4.0
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -8430,7 +8430,7 @@ packages:
       '@storybook/router': 6.5.16(react-dom@18.2.0)(react@18.2.0)
       '@storybook/semver': 7.3.2
       '@storybook/theming': 6.5.16(react-dom@18.2.0)(react@18.2.0)
-      core-js: 3.34.0
+      core-js: 3.35.1
       fast-deep-equal: 3.1.3
       global: 4.4.0
       lodash: 4.17.21
@@ -8569,7 +8569,7 @@ packages:
       '@storybook/channels': 6.5.16
       '@storybook/client-logger': 6.5.16
       '@storybook/core-events': 6.5.16
-      core-js: 3.34.0
+      core-js: 3.35.1
       global: 4.4.0
       qs: 6.11.2
       telejson: 6.0.8
@@ -8580,7 +8580,7 @@ packages:
     dependencies:
       '@storybook/channels': 6.5.16
       '@storybook/client-logger': 6.5.16
-      core-js: 3.34.0
+      core-js: 3.35.1
       global: 4.4.0
       telejson: 6.0.8
     dev: true
@@ -8588,7 +8588,7 @@ packages:
   /@storybook/channels@6.5.16:
     resolution: {integrity: sha512-VylzaWQZaMozEwZPJdyJoz+0jpDa8GRyaqu9TGG6QGv+KU5POoZaGLDkRE7TzWkyyP0KQLo80K99MssZCpgSeg==}
     dependencies:
-      core-js: 3.34.0
+      core-js: 3.35.1
       ts-dedent: 2.2.0
       util-deprecate: 1.0.2
     dev: true
@@ -8619,7 +8619,7 @@ packages:
       '@storybook/store': 6.5.16(react-dom@18.2.0)(react@18.2.0)
       '@types/qs': 6.9.10
       '@types/webpack-env': 1.18.4
-      core-js: 3.34.0
+      core-js: 3.35.1
       fast-deep-equal: 3.1.3
       global: 4.4.0
       lodash: 4.17.21
@@ -8637,7 +8637,7 @@ packages:
   /@storybook/client-logger@6.5.16:
     resolution: {integrity: sha512-pxcNaCj3ItDdicPTXTtmYJE3YC1SjxFrBmHcyrN+nffeNyiMuViJdOOZzzzucTUG0wcOOX8jaSyak+nnHg5H1Q==}
     dependencies:
-      core-js: 3.34.0
+      core-js: 3.35.1
       global: 4.4.0
     dev: true
 
@@ -8656,7 +8656,7 @@ packages:
       '@storybook/client-logger': 6.5.16
       '@storybook/csf': 0.0.2--canary.4566f4d.1
       '@storybook/theming': 6.5.16(react-dom@18.2.0)(react@18.2.0)
-      core-js: 3.34.0
+      core-js: 3.35.1
       memoizerific: 1.11.3
       qs: 6.11.2
       react: 18.2.0
@@ -8711,7 +8711,7 @@ packages:
       '@storybook/ui': 6.5.16(react-dom@18.2.0)(react@18.2.0)
       airbnb-js-shims: 2.2.1
       ansi-to-html: 0.6.15
-      core-js: 3.34.0
+      core-js: 3.35.1
       global: 4.4.0
       lodash: 4.17.21
       qs: 6.11.2
@@ -8772,7 +8772,7 @@ packages:
       babel-plugin-macros: 3.1.0
       babel-plugin-polyfill-corejs3: 0.1.7(@babel/core@7.23.6)
       chalk: 4.1.2
-      core-js: 3.34.0
+      core-js: 3.35.1
       express: 4.18.2
       file-system-cache: 1.1.0
       find-up: 5.0.0
@@ -8837,7 +8837,7 @@ packages:
   /@storybook/core-events@6.5.16:
     resolution: {integrity: sha512-qMZQwmvzpH5F2uwNUllTPg6eZXr2OaYZQRRN8VZJiuorZzDNdAFmiVWMWdkThwmyLEJuQKXxqCL8lMj/7PPM+g==}
     dependencies:
-      core-js: 3.34.0
+      core-js: 3.35.1
     dev: true
 
   /@storybook/core-events@7.6.10:
@@ -9015,7 +9015,7 @@ packages:
       babel-loader: 8.3.0(@babel/core@7.23.6)(webpack@5.89.0)
       case-sensitive-paths-webpack-plugin: 2.4.0
       chalk: 4.1.2
-      core-js: 3.34.0
+      core-js: 3.35.1
       css-loader: 5.2.7(webpack@5.89.0)
       express: 4.18.2
       find-up: 5.0.0
@@ -9063,7 +9063,7 @@ packages:
     dependencies:
       '@types/npmlog': 4.1.6
       chalk: 4.1.2
-      core-js: 3.34.0
+      core-js: 3.35.1
       npmlog: 5.0.1
       pretty-hrtime: 1.0.3
     dev: true
@@ -9108,7 +9108,7 @@ packages:
       '@storybook/csf': 0.0.2--canary.4566f4d.1
       '@storybook/store': 6.5.16(react-dom@18.2.0)(react@18.2.0)
       ansi-to-html: 0.6.15
-      core-js: 3.34.0
+      core-js: 3.35.1
       global: 4.4.0
       lodash: 4.17.21
       qs: 6.11.2
@@ -9182,7 +9182,7 @@ packages:
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       '@storybook/client-logger': 6.5.16
-      core-js: 3.34.0
+      core-js: 3.35.1
       memoizerific: 1.11.3
       qs: 6.11.2
       react: 18.2.0
@@ -9203,7 +9203,7 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
     dependencies:
-      core-js: 3.34.0
+      core-js: 3.35.1
       find-up: 4.1.0
     dev: true
 
@@ -9217,7 +9217,7 @@ packages:
       '@storybook/client-logger': 6.5.16
       '@storybook/core-events': 6.5.16
       '@storybook/csf': 0.0.2--canary.4566f4d.1
-      core-js: 3.34.0
+      core-js: 3.35.1
       fast-deep-equal: 3.1.3
       global: 4.4.0
       lodash: 4.17.21
@@ -9255,7 +9255,7 @@ packages:
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       '@storybook/client-logger': 6.5.16
-      core-js: 3.34.0
+      core-js: 3.35.1
       memoizerific: 1.11.3
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -9300,7 +9300,7 @@ packages:
       '@storybook/router': 6.5.16(react-dom@18.2.0)(react@18.2.0)
       '@storybook/semver': 7.3.2
       '@storybook/theming': 6.5.16(react-dom@18.2.0)(react@18.2.0)
-      core-js: 3.34.0
+      core-js: 3.35.1
       memoizerific: 1.11.3
       qs: 6.11.2
       react: 18.2.0
@@ -12007,7 +12007,7 @@ packages:
       '@babel/core': 7.23.6
       find-cache-dir: 4.0.0
       schema-utils: 4.2.0
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /babel-plugin-const-enum@1.2.0(@babel/core@7.23.6):
@@ -13676,7 +13676,7 @@ packages:
       normalize-path: 3.0.0
       schema-utils: 4.2.0
       serialize-javascript: 6.0.1
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /copy-webpack-plugin@11.0.0(webpack@5.88.2):
@@ -13710,8 +13710,8 @@ packages:
     requiresBuild: true
     dev: true
 
-  /core-js@3.34.0:
-    resolution: {integrity: sha512-aDdvlDder8QmY91H88GzNi9EtQi2TjvQhpCX6B1v/dAZHU1AuLgHvRh54RiOerpEhEW46Tkf+vgAViB/CWC0ag==}
+  /core-js@3.35.1:
+    resolution: {integrity: sha512-IgdsbxNyMskrTFxa9lWHyMwAJU5gXOPP+1yO+K59d50VLVAIDAbs7gIv705KzALModfK3ZrSZTPNpC0PQgIZuw==}
     requiresBuild: true
 
   /core-util-is@1.0.2:
@@ -13963,7 +13963,7 @@ packages:
       postcss-modules-values: 4.0.0(postcss@8.4.32)
       postcss-value-parser: 4.2.0
       semver: 7.5.4
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /css-minimizer-webpack-plugin@5.0.1(esbuild@0.18.20)(webpack@5.89.0):
@@ -16495,7 +16495,7 @@ packages:
       semver: 7.5.4
       tapable: 2.2.1
       typescript: 5.3.3
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /fork-ts-checker-webpack-plugin@8.0.0(typescript@5.3.3)(webpack@5.89.0):
@@ -19414,7 +19414,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.6
       app-root-dir: 1.0.2
-      core-js: 3.34.0
+      core-js: 3.35.1
       dotenv: 8.6.0
       dotenv-expand: 5.1.0
     dev: true
@@ -19456,7 +19456,7 @@ packages:
     dependencies:
       klona: 2.0.6
       less: 4.1.3
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /less@4.1.3:
@@ -19500,7 +19500,7 @@ packages:
       webpack-sources:
         optional: true
     dependencies:
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
       webpack-sources: 3.2.3
     dev: true
 
@@ -20660,7 +20660,7 @@ packages:
       webpack: ^5.0.0
     dependencies:
       schema-utils: 4.2.0
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /mini-svg-data-uri@1.4.4:
@@ -22792,7 +22792,7 @@ packages:
       klona: 2.0.6
       postcss: 8.4.32
       semver: 7.5.4
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /postcss-merge-longhand@5.1.7(postcss@8.4.32):
@@ -25171,7 +25171,7 @@ packages:
       klona: 2.0.6
       neo-async: 2.6.2
       sass: 1.69.5
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /sass@1.69.5:
@@ -25799,7 +25799,7 @@ packages:
       abab: 2.0.6
       iconv-lite: 0.6.3
       source-map-js: 1.0.2
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /source-map-resolve@0.5.3:
@@ -26343,7 +26343,7 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
     dependencies:
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /style-to-object@0.4.4:
@@ -26419,7 +26419,7 @@ packages:
       fast-glob: 3.3.2
       normalize-path: 3.0.0
       stylus: 0.59.0
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /stylus@0.59.0:
@@ -27174,7 +27174,7 @@ packages:
       semver: 7.5.4
       source-map: 0.7.4
       typescript: 5.3.3
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /ts-node@10.9.1(@swc/core@1.3.102)(@types/node@18.19.10)(typescript@5.1.6):
@@ -28681,7 +28681,7 @@ packages:
       mime-types: 2.1.35
       range-parser: 1.2.1
       schema-utils: 4.2.0
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /webpack-dev-middleware@6.1.1(webpack@5.89.0):
@@ -28742,7 +28742,7 @@ packages:
       serve-index: 1.9.1
       sockjs: 0.3.24
       spdy: 4.0.2
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
       webpack-dev-middleware: 5.3.3(webpack@5.89.0)
       ws: 8.15.1
     transitivePeerDependencies:
@@ -28797,7 +28797,7 @@ packages:
     dependencies:
       html-webpack-plugin: 5.6.0(webpack@5.88.2)
       typed-assert: 1.0.9
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /webpack-virtual-modules@0.4.6:
@@ -29366,9 +29366,9 @@ packages:
       uglify-js: 3.14.5
     dev: true
 
-  github.com/tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0):
-    resolution: {tarball: https://codeload.github.com/tjg184/semantic-release-plugin-decorators/tar.gz/e3c3c66}
-    id: github.com/tjg184/semantic-release-plugin-decorators/e3c3c66
+  git/github.com+tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0):
+    resolution: {commit: e3c3c66, repo: git@github.com:tjg184/semantic-release-plugin-decorators.git, type: git}
+    id: git@github.com+tjg184/semantic-release-plugin-decorators/e3c3c66
     name: semantic-release-plugin-decorators
     version: 0.0.0-development
     peerDependencies:
