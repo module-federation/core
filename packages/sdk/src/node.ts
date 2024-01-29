@@ -16,6 +16,7 @@ export function createScriptNode(
   cb: (error?: Error, scriptContext?: any) => void,
   attrs?: Record<string, any>,
   createScriptHook?: (url: string) => any | void,
+  fetchHook?: (input: string, init?: RequestInit) => Promise<Response | void | false>,
 ) {
   if (createScriptHook) {
     const hookResult = createScriptHook(url);
@@ -32,7 +33,7 @@ export function createScriptNode(
     cb(new Error(`Invalid URL: ${e}`));
     return;
   }
-  const getFetch = async () => {
+  const resolveFetch = async () => {
     if (typeof fetch === 'undefined') {
       const fetchModule = await importNodeModule('node-fetch');
       //@ts-ignore
@@ -41,6 +42,20 @@ export function createScriptNode(
       return fetch;
     }
   };
+  const getFetch = async () => {
+    if (!fetchHook) {
+      return resolveFetch();
+    }
+
+    return async (input: string, init?: RequestInit) => {
+      const response = await fetchHook(input, init);
+      if (response) {
+        return response;
+      }
+      return await resolveFetch().then(f => f(input, init));
+    }
+  };
+
   console.log('fetching', urlObj.href);
   getFetch().then((f) => {
     f(urlObj.href)
@@ -96,6 +111,7 @@ export function loadScriptNode(
   info: {
     attrs?: Record<string, any>;
     createScriptHook?: (url: string) => void;
+    fetchHook?: (input: string, init?: RequestInit) => Promise<Response | void | false>;
   },
 ) {
   return new Promise<void>((resolve, reject) => {
@@ -115,6 +131,7 @@ export function loadScriptNode(
       },
       info.attrs,
       info.createScriptHook,
+      info.fetchHook
     );
   });
 }

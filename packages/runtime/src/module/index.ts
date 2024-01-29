@@ -43,6 +43,10 @@ class Module {
         }
         return;
       },
+      fetchHook: async (input, init) => {
+        const response = await this.host.loaderHook.lifecycle.fetch.emit(input, init ?? {});
+        return response;
+      },
     });
     assert(
       remoteEntryExports,

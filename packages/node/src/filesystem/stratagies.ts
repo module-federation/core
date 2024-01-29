@@ -22,8 +22,8 @@ export async function fileSystemRunInContextStrategy(
       try {
         vm.runInThisContext(
           '(function(exports, require, __dirname, __filename) {' +
-            content +
-            '\n})',
+          content +
+          '\n})',
           filename,
         )(chunk, require, path.dirname(filename), filename);
         callback(null, chunk);
@@ -102,12 +102,20 @@ export async function httpVmStrategy(
   remotes: Remotes,
   callback: CallbackFunction,
 ): Promise<void> {
-  const http = require('http') as typeof import('http');
-  const https = require('https') as typeof import('https');
   const vm = require('vm') as typeof import('vm');
   const path = require('path') as typeof import('path');
   let url: URL;
   const globalThisVal = new Function('return globalThis')();
+
+  // search all instances to see if any have the remote
+  const container = globalThisVal['__FEDERATION__']['__INSTANCES__'].find(
+    (instance: any) => {
+      if (!instance.moduleCache.has(remoteName)) return;
+      const container = instance.moduleCache.get(remoteName);
+      if (!container.remoteInfo) return;
+      return container.remoteInfo.entry;
+    },
+  );
 
   try {
     url = new URL(chunkName, __webpack_require__.p);
@@ -119,15 +127,6 @@ export async function httpVmStrategy(
       chunkName,
       // e,
     );
-    // search all instances to see if any have the remote
-    const container = globalThisVal['__FEDERATION__']['__INSTANCES__'].find(
-      (instance: any) => {
-        if (!instance.moduleCache.has(remoteName)) return;
-        const container = instance.moduleCache.get(remoteName);
-        if (!container.remoteInfo) return;
-        return container.remoteInfo.entry;
-      },
-    );
 
     if (!container) {
       throw new Error('Container not found');
@@ -137,24 +136,49 @@ export async function httpVmStrategy(
     const fileToReplace = path.basename(url.pathname);
     url.pathname = url.pathname.replace(fileToReplace, chunkName);
   }
-  const protocol = url.protocol === 'https:' ? https : http;
-  protocol.get(url.href, (res: import('http').IncomingMessage) => {
-    let data = '';
-    res.on('data', (chunk: Buffer) => {
-      data += chunk.toString();
-    });
-    res.on('end', () => {
-      const chunk = {};
-      const urlDirname = url.pathname.split('/').slice(0, -1).join('/');
 
-      vm.runInThisContext(
-        `(function(exports, require, __dirname, __filename) {${data}\n})`,
-        chunkName,
-      )(chunk, require, urlDirname, chunkName);
-      callback(null, chunk);
+  try {
+    const data = await fetchViaHook(container, url) ?? fetchViaHttp(url);
+
+    const chunk = {};
+    const urlDirname = url.pathname.split('/').slice(0, -1).join('/');
+
+    vm.runInThisContext(
+      `(function(exports, require, __dirname, __filename) {${data}\n})`,
+      chunkName,
+    )(chunk, require, urlDirname, chunkName);
+
+    callback(null, chunk);
+  } catch (error) {
+    callback(error, null);
+  }
+
+  function fetchViaHttp(url: URL) {
+    const promise = new Promise<string>((resolve, reject) => {
+      const http = require('http') as typeof import('http');
+      const https = require('https') as typeof import('https');
+      const protocol = url.protocol === 'https:' ? https : http;
+
+      protocol.get(url.href, (res: import('http').IncomingMessage) => {
+        let data = '';
+        res.on('data', (chunk: Buffer) => {
+          data += chunk.toString();
+        });
+        res.on('end', () => {
+          resolve(data);
+        });
+        res.on('error', (err) => {
+          reject(err);
+        });
+      });
     });
-    res.on('error', (err) => {
-      callback(err, null);
-    });
-  });
+
+    return promise;
+  }
+
+  async function fetchViaHook(federationInstance: any, url: URL) {
+    if (!federationInstance?.loaderHook?.lifecycle?.fetch) return;
+    const data = await federationInstance.loaderHook.lifecycle.fetch.emit(url, {});
+    if (data) return await data.text();
+  }
 }
