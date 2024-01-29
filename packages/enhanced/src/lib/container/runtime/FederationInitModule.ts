@@ -40,13 +40,15 @@ class FederationInitModule extends RuntimeModule {
     const chunks = compilation.chunks;
 
     for (const chunk of chunks) {
-      if (!chunk.hasRuntime()) continue;
       const hasEntry = this.chunkContainsContainerEntryModule(
         chunk,
         compilation,
       ) as unknown as Module;
       if (hasEntry) {
-        return compilation.chunkGraph.getModuleId(hasEntry);
+        return {
+          moduleId: compilation.chunkGraph.getModuleId(hasEntry),
+          chunk,
+        };
       }
     }
     return null;
@@ -56,13 +58,14 @@ class FederationInitModule extends RuntimeModule {
    * @returns {string | null} runtime code
    */
   override generate() {
-    const entryModuleID = this.getModuleByInstance();
-    if (!entryModuleID) return null;
+    const entryModule = this.getModuleByInstance();
+    if (!entryModule) return null;
+    const { moduleId, chunk } = entryModule;
     const mfRuntimeModuleID =
-      typeof entryModuleID === 'number'
-        ? entryModuleID
-        : JSON.stringify(entryModuleID);
-
+      typeof moduleId === 'number' ? moduleId : JSON.stringify(moduleId);
+    const thisChunk = this;
+    console.log(thisChunk);
+    debugger;
     return Template.asString([
       `const mfRuntimeModuleID = ${mfRuntimeModuleID}`,
       '__webpack_require__(mfRuntimeModuleID);',
