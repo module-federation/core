@@ -134,9 +134,9 @@ export class NextFederationPlugin {
       remoteType: 'script',
       // @ts-ignore
       runtimePlugins: [
+        require.resolve(path.join(__dirname, '../container/runtimePlugin')),
         //@ts-ignore
         ...(this._options.runtimePlugins || []),
-        require.resolve(path.join(__dirname, '../container/runtimePlugin')),
       ],
       exposes: {
         './noop': noop,
