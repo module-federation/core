@@ -31,8 +31,8 @@ const nextConfig = {
           './menu': './components/menu',
         },
         shared: {
-          lodash: {},
-          antd: {},
+          'lodash/': {},
+          'antd/': {},
         },
         extraOptions: {
           exposePages: true,

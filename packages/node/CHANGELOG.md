@@ -1,5 +1,18 @@
 # [2.1.0-canary.6](https://github.com/module-federation/universe/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.0.8
+
+### Patch Changes
+
+- 2b34e46: Refactor AutomaticPublicPath plugin to use federation global manager for auto path resolution in node.js
+- 73eb07e: Rewrite chunk flushing and hot reloading to use federation runtime apis
+- Updated dependencies [2d774d1]
+- Updated dependencies [51b18e0]
+- Updated dependencies [2097daa]
+  - @module-federation/runtime@0.0.10
+  - @module-federation/enhanced@0.0.10
+  - @module-federation/sdk@0.0.10
+
 ## 2.0.7
 
 ### Patch Changes

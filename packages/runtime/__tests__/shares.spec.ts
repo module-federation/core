@@ -7,11 +7,10 @@ import {
   mergeShareInfo3,
   localMergeShareInfos,
 } from './share';
-import { DEFAULT_SCOPE } from '../src/constant';
 // import { assert } from '../src/utils/logger';
 import { FederationHost } from '../src/core';
-import { UserOptions, ShareScopeMap } from '../src/type';
-import { Global } from '../src/global';
+import { UserOptions, ShareScopeMap, Options } from '../src/type';
+import { Global, setGlobalFederationConstructor } from '../src/global';
 
 // eslint-disable-next-line max-lines-per-function
 // TODO: add new load share test cases
@@ -79,6 +78,7 @@ describe('shared', () => {
       version: string;
       from: string;
     }>('singleton-react');
+    assert(reactInstance);
     const reactInstanceRes = reactInstance();
     assert(reactInstanceRes, "reactInstance can't be undefined");
     expect(reactInstanceRes.from).toBe('@federation/loadShare');
@@ -88,6 +88,7 @@ describe('shared', () => {
       version: string;
       from: string;
     }>('singleton-react');
+    assert(reactInstance2);
     const reactInstance2Res = reactInstance2();
     assert(reactInstance2Res, "reactInstance can't be undefined");
     expect(reactInstance2Res.from).toBe('@federation/loadShare2');
@@ -132,6 +133,8 @@ describe('shared', () => {
         uniqueId: number;
       }>('react'),
     ]);
+    assert(reactInstance1);
+    assert(reactInstance2);
     const reactInstance1Res = reactInstance1();
     const reactInstance2Res = reactInstance2();
     assert(reactInstance1Res, "reactInstance1 can't be undefined");
@@ -191,6 +194,7 @@ describe('shared', () => {
       from: string;
       version: string;
     }>('runtime-react');
+    assert(shared);
     const sharedRes = shared();
     assert(sharedRes, "shared can't be null");
     expect(sharedRes.from).toEqual('@federation/runtime-deps2');
@@ -302,6 +306,7 @@ describe('single shared', () => {
     const shared = await FM2.loadShare<{ from: string; version: string }>(
       'runtime-react',
     );
+    assert(shared);
     const sharedRes = shared();
     assert(sharedRes, "shared can't be null");
     expect(sharedRes.from).toEqual('@shared-single/runtime-deps2');
@@ -462,7 +467,7 @@ describe('strictVersion shared', () => {
       shared: {
         'runtime-react': {
           version: '16.0.0',
-          shareConfig: {},
+          // shareConfig: {},
           get: async () => () => {
             return { from: '@shared-single/runtime-deps2' };
           },
@@ -509,7 +514,7 @@ describe('strictVersion shared', () => {
       shared: {
         'runtime-react': {
           version: '16.0.0',
-          shareConfig: {},
+          // shareConfig: {},
           lib: () => {
             return { from: '@shared-single/runtime-deps' };
           },
@@ -517,7 +522,7 @@ describe('strictVersion shared', () => {
       },
     };
 
-    const federationConfig2 = {
+    const federationConfig2: UserOptions = {
       name: '@shared-single/runtime-deps2',
       remotes: [],
       shared: {
@@ -748,7 +753,7 @@ describe('load share with customize consume info', () => {
 
 describe('load share with different strategy', () => {
   it('register all shared to shareScopeMap while strategy is "version-first"', async () => {
-    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = FederationHost;
+    setGlobalFederationConstructor(FederationHost, true);
 
     const federationConfig1: UserOptions = {
       name: '@shared-test/app1',
@@ -786,11 +791,11 @@ describe('load share with different strategy', () => {
     expect(sharedRes.from).toEqual('@shared-test/version-strategy-app2');
 
     Global.__FEDERATION__.__INSTANCES__ = [];
-    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = undefined;
+    setGlobalFederationConstructor(undefined, true);
   });
 
   it('register only self shared to shareScopeMap while strategy is "loaded-first"', async () => {
-    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = FederationHost;
+    setGlobalFederationConstructor(FederationHost, true);
 
     const federationConfig1: UserOptions = {
       name: '@shared-test/app1',
@@ -828,6 +833,6 @@ describe('load share with different strategy', () => {
     expect(sharedRes.from).toEqual('@shared-test/app1');
 
     Global.__FEDERATION__.__INSTANCES__ = [];
-    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = undefined;
+    setGlobalFederationConstructor(undefined, true);
   });
 });

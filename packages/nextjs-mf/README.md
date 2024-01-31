@@ -12,7 +12,7 @@ This plugin enables Module Federation on Next.js
 
 ## Supports
 
-- next ^14 || ^13 || ^12(?)
+- next ^14 || ^13 || ^12
 - SSR included!
 - App router included (experimental)
 
