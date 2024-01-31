@@ -14,6 +14,7 @@ This plugin enables Module Federation on Next.js
 
 - next ^14 || ^13 || ^12
 - SSR included!
+- App router included (experimental)
 
 I highly recommend referencing this application which takes advantage of the best capabilities:
 https://github.com/module-federation/module-federation-examples
@@ -257,16 +258,16 @@ const SampleComponent = lazy(() => import('next2/sampleComponent'));
 
 import Sample from 'next2/sampleComponent';
 ```
-## RuntimePlugins 
+
+## RuntimePlugins
+
 To provide extensibility and "middleware" for federation, you can refer to `@module-federation/runtime`
 
 ```js
 // next.config.js
 new NextFederationPlugin({
-  runtimePlugins: [
-    require.resolve('./path/to/myRuntimePlugin.js')
-  ]
-})
+  runtimePlugins: [require.resolve('./path/to/myRuntimePlugin.js')],
+});
 ```
 
 ## Utilities
