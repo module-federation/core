@@ -10,23 +10,15 @@ function safeToString(info: any): string {
 }
 
 const DEBUG_LOG = '[ FEDERATION DEBUG ]';
-
-function safeGetLocalStorageItem() {
-  try {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      return localStorage.getItem(BROWSER_LOG_KEY) === BROWSER_LOG_VALUE;
-    }
-  } catch (error) {
-    return typeof typeof document !== 'undefined';
-  }
-  return false;
-}
 class Logger {
   enable = false;
   identifier: string;
   constructor(identifier?: string) {
     this.identifier = identifier || DEBUG_LOG;
-    if (isBrowserEnv() && safeGetLocalStorageItem()) {
+    if (
+      isBrowserEnv() &&
+      localStorage.getItem(BROWSER_LOG_KEY) === BROWSER_LOG_VALUE
+    ) {
       this.enable = true;
     } else if (isDebugMode()) {
       this.enable = true;
