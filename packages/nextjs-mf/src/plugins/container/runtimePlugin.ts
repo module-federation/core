@@ -32,6 +32,19 @@ export default function (): FederationRuntimePlugin {
     beforeInit(args) {
       const { userOptions, shareInfo } = args;
       const { shared } = userOptions;
+      try {
+        // if(typeof window !== 'undefined') {
+        //   //@ts-ignore
+        //   const path = new URL(document.currentScript.src);
+        //   //@ts-ignore
+        //   path.pathname = __webpack_require__.p;
+        //   path.search = ""
+        //   //@ts-ignore
+        //   __webpack_require__.p = path.toString();
+        // }
+      } catch (e) {
+        //issue
+      }
       if (!globalThis.usedChunks) globalThis.usedChunks = new Set();
       if (shared) {
         Object.keys(shared || {}).forEach((sharedKey) => {
@@ -58,7 +71,30 @@ export default function (): FederationRuntimePlugin {
 
       return args;
     },
-    init(args) {
+    async init(args) {
+      const host = __FEDERATION__['__INSTANCES__'][0];
+      console.log('init runtime id', __webpack_runtime_id__);
+      if (__webpack_runtime_id__ === 'webpack') {
+        try {
+          console.log('setting react');
+
+          const react = import('react').then((exp) => {
+            //@ts-ignore
+            window.reactLib = () => exp;
+            //@ts-ignore
+            return window.reactLib;
+          });
+          await import('react-dom');
+          //@ts-ignore
+          window.hostsReact = react;
+        } catch (e) {
+          //
+        }
+      }
+      if (typeof window !== 'undefined') {
+        //@ts-ignore
+        await window.hostsReact;
+      }
       return args;
     },
     beforeRequest(args) {
@@ -107,12 +143,59 @@ export default function (): FederationRuntimePlugin {
       ) {
         return args;
       }
+
+      console.log(args.pkgName, __webpack_runtime_id__);
       const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
 
       const host = GlobalFederation['__INSTANCES__'][0];
-      if (!host) {
+      if (__webpack_runtime_id__ === 'webpack-runtime') {
         return args;
       }
+      if (!host) {
+        if (typeof window !== 'undefined') {
+          if (pkgName === 'react') {
+            const orig = args.resolver;
+            args.resolver = function () {
+              //@ts-ignore
+              console.log(args, ' resolver for react');
+              //@ts-ignore
+              shareScopeMap[scope][pkgName][version].get = window.reactLib;
+              shareScopeMap[scope][pkgName][version].from = 'host';
+              //@ts-ignore
+              shareScopeMap[scope][pkgName][version].lib = window.reactLib;
+              //@ts-ignore
+              console.log(shareScopeMap[scope][pkgName][version]);
+              //@ts-ignore
+              console.log(window.reactLib, window.hostsReact);
+              // shareScopeMap[scope][pkgName][version] = window.hostsReact; // replace local share scope manually with desired module
+              // return shareScopeMap[scope][pkgName][version];
+              return shareScopeMap[scope][pkgName][version];
+            };
+          }
+        }
+        return args;
+      }
+
+      console.log(host, 'exists');
+
+      // if(typeof window !== 'undefined') {
+      //   if(pkgName === 'react') {
+      //     const orig = args.resolver
+      //     args.resolver = function() {
+      //       //@ts-ignore
+      //       console.log(args, ' resolver for react', window.hostsReact)
+      //       //@ts-ignore
+      //       console.log(shareScopeMap[scope][pkgName][version]);
+      //
+      //       //@ts-ignore
+      //       shareScopeMap[scope][pkgName][version] = window.hostsReact; // replace local share scope manually with desired module
+      //       // return shareScopeMap[scope][pkgName][version];
+      //       return orig()
+      //     };
+      //   }
+      // }
+      console.log('resolveing', host.options.shared[pkgName]);
+
       args.resolver = function () {
         shareScopeMap[scope][pkgName][version] = host.options.shared[pkgName]; // replace local share scope manually with desired module
         return shareScopeMap[scope][pkgName][version];

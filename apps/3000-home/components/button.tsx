@@ -1,4 +1,10 @@
+import { useState, useEffect } from 'react';
+
 const SimpleButton = () => {
+  const [state, setState] = useState('test');
+  useEffect(() => {
+    setState('test');
+  }, []);
   return (
     <button
       style={{
@@ -10,7 +16,7 @@ const SimpleButton = () => {
         cursor: 'pointer',
       }}
     >
-      A button from home app
+      A button from home app {state}
     </button>
   );
 };

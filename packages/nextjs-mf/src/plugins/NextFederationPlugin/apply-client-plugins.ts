@@ -34,8 +34,6 @@ export function applyClientPlugins(
 ): void {
   const { webpack } = compiler;
   const { remotes, name } = options;
-  //@ts-ignore
-  compiler.options.output.publicPath = 'auto';
   // Build will hang without this. Likely something in my plugin
   compiler.options.optimization.splitChunks = undefined;
   new HoistContainerReferencesPlugin().apply(compiler);

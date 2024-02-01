@@ -71,6 +71,46 @@ export class NextFederationPlugin {
     // ContainerPlugin will get NextFederationPlugin._options, so NextFederationPlugin._options should be the same as normalFederationPluginOptions
     this._options = normalFederationPluginOptions;
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
+    //@ts-ignore
+    // compiler.hooks.beforeCompile.tapAsync('NextFederationPlugin', async (compilparams, callback) => {
+    //@ts-ignore
+    const options = compiler.options;
+    const patchEntry = async () => {
+      if (typeof compiler.options.entry === 'function') {
+        // debugger;
+        const prevEntryFn = compiler.options.entry;
+        compiler.options.entry = async () => {
+          const res = await prevEntryFn();
+
+          for (const key in res) {
+            if (res[key]?.layer === 'rsc') {
+              //@ts-ignore
+              res[key].import = res[key].import.filter(
+                (imp) => !imp.includes('.federation'),
+              );
+            }
+          }
+          return res;
+        };
+      } else {
+        // debugger;
+      }
+    };
+
+    patchEntry();
+    // for (const key in originalEntry) {
+    //   console.log(originalEntry[key]);
+    //   debugger;
+    //   if (originalEntry[key].layer?.startsWith('app') || originalEntry[key].layer?.startsWith('rsc')) {
+    //     if (Array.isArray(originalEntry[key].import) && originalEntry[key].import.length > 0 && originalEntry[key].import[0].includes('.federation')) {
+    //       // @ts-ignore
+    //       originalEntry[key].import.shift();
+    //       console.log({[key]:originalEntry[key]})
+    //     }
+    //   }
+    // }
+    // callback();
+    // });
 
     const runtimeESMPath = require.resolve(
       '@module-federation/runtime/dist/index.esm.js',
@@ -104,6 +144,7 @@ export class NextFederationPlugin {
   }
 
   private isServerCompiler(compiler: Compiler): boolean {
+    console.log(compiler.options.name);
     return compiler.options.name === 'server';
   }
 
@@ -134,7 +175,9 @@ export class NextFederationPlugin {
 
     if (hasAppDir(compiler)) {
       // These shared deps cause issues with the appDir. Any ideas around this?
-      delete defaultShared['react'];
+      if (compiler.name !== 'client') {
+        delete defaultShared['react'];
+      }
       delete defaultShared['react/'];
       delete defaultShared['react-dom'];
       delete defaultShared['react-dom/'];
