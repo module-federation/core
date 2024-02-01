@@ -136,8 +136,6 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         const allAssociatedModules = getRecursiveConnections();
 
         for (const mod of allAssociatedModules) {
-          const roots = Array.from(chunkGraph.getChunkRootModules(chunk));
-          debugger;
           if (!chunkGraph.isModuleInChunk(mod, chunk)) continue;
           chunkGraph.disconnectChunkAndModule(chunk, mod);
         }
@@ -179,7 +177,6 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       }
     }
 
-    debugger;
     for (const [name, entrypoint] of namedChunks) {
       if (realContainers.has(name)) continue;
       for (const [runtimeName, container] of realContainers) {
