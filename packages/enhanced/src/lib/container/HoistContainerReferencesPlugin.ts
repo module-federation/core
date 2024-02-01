@@ -36,7 +36,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     compiler.hooks.thisCompilation.tap(
       'HoistContainerReferences',
       (compilation: Compilation) => {
-        compilation.hooks.optimizeChunkModules.tap(
+        compilation.hooks.afterOptimizeChunks.tap(
           'HoistContainerReferences',
           (chunks: Iterable<Chunk>) => {
             const realContainers: Map<Chunk['name'], Chunk> = new Map();
