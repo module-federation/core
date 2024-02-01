@@ -150,6 +150,7 @@ class FederationRuntimePlugin {
         entry['federation-runtime'] = {
           import: [entryFilePath],
         };
+
         Object.keys(entry).forEach((entryName) => {
           const entryItem = entry[entryName];
           if (!entryItem.import) {

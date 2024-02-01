@@ -37,9 +37,10 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         }
       }
     }
-    if (!sameRuntime && !chunkA.hasRuntime()) {
-      return;
-    }
+    // if (!sameRuntime && !chunkA.hasRuntime()) {
+    //   debugger;
+    //   return;
+    // }
 
     if (chunkA.name && chunkB.name) {
       if (
@@ -73,9 +74,6 @@ export class HoistContainerReferences implements WebpackPluginInstance {
 
     // getChunkModules is used here to create a clone, because disconnectChunkAndModule modifies
     for (const module of chunkGraph.getChunkModules(chunkB)) {
-      const cb = chunkB;
-      const ca = chunkA;
-
       // chunkGraph.disconnectChunkAndModule(chunkB, module);
       chunkGraph.connectChunkAndModule(chunkA, module);
     }
@@ -89,7 +87,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
 
     for (const chunkGroup of chunkB.groupsIterable) {
       chunkGroup.replaceChunk(chunkB, chunkA);
-      // chunkA.addGroup(chunkGroup);
+      chunkA.addGroup(chunkGroup);
       chunkB.removeGroup(chunkGroup);
     }
     webpack.ChunkGraph.clearChunkGraphForChunk(chunkB);
@@ -168,6 +166,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     const runtimeChunks = this.getRuntimeChunks(chunk, compilation);
     const federationRuntimeChunk =
       compilation.namedChunks.get('federation-runtime');
+
     if (!federationRuntimeChunk) return;
     // for (const module of chunkGraph.getChunkModulesIterable(federationRuntimeChunk)) {
     for (const runtimeChunk of runtimeChunks) {

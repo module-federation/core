@@ -21,35 +21,47 @@ class FederationInitModule extends RuntimeModule {
     chunk: Chunk,
     compilation: Compilation,
   ): Module | null {
-    for (const module of compilation.chunkGraph.getChunkModulesIterable(
-      chunk,
-    )) {
+    const chunkEntryModule =
+      compilation.chunkGraph.getChunkEntryModulesIterable(chunk);
+
+    const modChunks = compilation.chunkGraph.getChunkModulesIterable(chunk);
+    let mod = null;
+
+    console.log(chunkEntryModule);
+    console.log(chunkEntryModule);
+    console.log(chunkEntryModule);
+    debugger;
+    for (const module of modChunks) {
       //@ts-ignore
       if (
         typeof module.identifier === 'function' &&
-        module.identifier().includes(this.entryFilePath)
+        module.identifier().includes('.federation')
       ) {
-        return module;
+        mod = module;
+        break;
       }
     }
-    return null;
+    return mod;
   }
 
   getModuleByInstance() {
     const compilation: Compilation = this.compilation!;
+    const thisChunk = this.chunk;
+    //@ts-ignore
+    const federationRuntimeEntry =
+      this.compilation.namedChunks.get('federation-runtime');
     const chunks = compilation.chunks;
+    const currentHasEntry = this.chunkContainsContainerEntryModule(
+      //@ts-ignore
+      federationRuntimeEntry,
+      compilation,
+    ) as unknown as Module;
 
-    for (const chunk of chunks) {
-      const hasEntry = this.chunkContainsContainerEntryModule(
-        chunk,
-        compilation,
-      ) as unknown as Module;
-      if (hasEntry) {
-        return {
-          moduleId: compilation.chunkGraph.getModuleId(hasEntry),
-          chunk,
-        };
-      }
+    if (currentHasEntry) {
+      return {
+        moduleId: compilation.chunkGraph.getModuleId(currentHasEntry),
+        chunk: federationRuntimeEntry,
+      };
     }
     return null;
   }
@@ -58,15 +70,16 @@ class FederationInitModule extends RuntimeModule {
    * @returns {string | null} runtime code
    */
   override generate() {
+    if (!this.compilation) return '';
     const entryModule = this.getModuleByInstance();
     if (!entryModule) return null;
     const { moduleId, chunk } = entryModule;
     const mfRuntimeModuleID =
       typeof moduleId === 'number' ? moduleId : JSON.stringify(moduleId);
     let wrapCall;
-    if (this.chunk && this.chunk.id) {
-      wrapCall = chunk.id !== this.chunk.id;
-    }
+    // if (this.chunk && this.chunk.id) {
+    //   wrapCall = chunk.id !== this.chunk.id;
+    // }
     return Template.asString([
       wrapCall ? 'console.log("wrap")' : '',
       `const mfRuntimeModuleID = ${mfRuntimeModuleID}`,
@@ -74,4 +87,5 @@ class FederationInitModule extends RuntimeModule {
     ]);
   }
 }
+
 export default FederationInitModule;
