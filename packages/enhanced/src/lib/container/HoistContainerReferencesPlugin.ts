@@ -160,35 +160,6 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     }
     return false;
   }
-
-  private hoistModulesInChunk(chunk: Chunk, compilation: Compilation): void {
-    const chunkGraph = compilation.chunkGraph;
-    const runtimeChunks = this.getRuntimeChunks(chunk, compilation);
-    const federationRuntimeChunk =
-      compilation.namedChunks.get('federation-runtime');
-
-    if (!federationRuntimeChunk) return;
-    // for (const module of chunkGraph.getChunkModulesIterable(federationRuntimeChunk)) {
-    for (const runtimeChunk of runtimeChunks) {
-      //@ts-ignore
-      chunkGraph.attachDependentHashModules(
-        runtimeChunk,
-        chunkGraph.getChunkModulesIterable(federationRuntimeChunk),
-      );
-      // chunkGraph.disconnectChunkAndModule(federationRuntimeChunk, module);
-    }
-    // }
-  }
-
-  private getRuntimeChunks(chunk: Chunk, compilation: Compilation): Chunk[] {
-    const runtimeChunks = [];
-    for (const c of compilation.chunks) {
-      if (c.hasRuntime()) {
-        runtimeChunks.push(c);
-      }
-    }
-    return runtimeChunks;
-  }
 }
 
 export default HoistContainerReferences;

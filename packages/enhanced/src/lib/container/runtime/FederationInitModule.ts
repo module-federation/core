@@ -27,10 +27,6 @@ class FederationInitModule extends RuntimeModule {
     const modChunks = compilation.chunkGraph.getChunkModulesIterable(chunk);
     let mod = null;
 
-    console.log(chunkEntryModule);
-    console.log(chunkEntryModule);
-    console.log(chunkEntryModule);
-    debugger;
     for (const module of modChunks) {
       //@ts-ignore
       if (
@@ -49,7 +45,7 @@ class FederationInitModule extends RuntimeModule {
     const thisChunk = this.chunk;
     //@ts-ignore
     const federationRuntimeEntry =
-      this.compilation.namedChunks.get('federation-runtime');
+      compilation.namedChunks.get('federation-runtime');
     const chunks = compilation.chunks;
     const currentHasEntry = this.chunkContainsContainerEntryModule(
       //@ts-ignore
