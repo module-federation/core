@@ -1,6 +1,7 @@
 import type { Compiler, sources } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import FederationRuntimeModule from './FederationRuntimeModule';
+import FederationInitModule from './FederationInitModule';
 import {
   getFederationGlobalScope,
   normalizeRuntimeInitOptionsWithOutShared,
@@ -11,6 +12,7 @@ import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '../constant';
 import type { ModuleFederationPluginOptions } from '../../../declarations/plugins/container/ModuleFederationPlugin';
+import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -145,15 +147,18 @@ class FederationRuntimePlugin {
     modifyEntry({
       compiler,
       prependEntry: (entry) => {
+        entry['federation-runtime'] = {
+          import: [entryFilePath],
+        };
         Object.keys(entry).forEach((entryName) => {
           const entryItem = entry[entryName];
           if (!entryItem.import) {
             // TODO: maybe set this variable as constant is better https://github.com/webpack/webpack/blob/main/lib/config/defaults.js#L176
             entryItem.import = ['./src'];
           }
-          if (!entryItem.import.includes(entryFilePath)) {
-            entryItem.import.unshift(entryFilePath);
-          }
+          // if (!entryItem.import.includes(entryFilePath)) {
+          //   entryItem.import.unshift(entryFilePath);
+          // }
         });
       },
     });
@@ -191,6 +196,10 @@ class FederationRuntimePlugin {
                 name,
                 initOptionsWithoutShared,
               ),
+            );
+            compilation.addRuntimeModule(
+              chunk,
+              new FederationInitModule(name, this.getFilePath()),
             );
           },
         );
@@ -273,6 +282,8 @@ class FederationRuntimePlugin {
     this.prependEntry(compiler);
     this.injectRuntime(compiler);
     this.setRuntimeAlias(compiler);
+
+    new HoistContainerReferences().apply(compiler);
   }
 }
 
