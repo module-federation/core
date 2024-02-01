@@ -5,14 +5,15 @@ import {
   generateSnapshotFromManifest,
   isManifestProvider,
 } from '@module-federation/sdk';
-import { Options, Remote } from '../../type';
+import { Optional, Options, Remote } from '../../type';
 import { isRemoteInfoWithEntry, error } from '../../utils';
 import {
-  getGlobalSnapshotInfoByModuleInfo,
   getGlobalSnapshot,
-  getInfoWithoutType,
   setGlobalSnapshotInfoByModuleInfo,
   Global,
+  addGlobalSnapshot,
+  getGlobalSnapshotInfoByModuleInfo,
+  getInfoWithoutType,
 } from '../../global';
 import { PluginSystem, AsyncHook, AsyncWaterfallHook } from '../../utils/hooks';
 import { FederationHost } from '../../core';
@@ -89,47 +90,34 @@ export class SnapshotHandler {
       }>
     | never {
     const { options } = this.HostInstance;
-    const hostSnapshot = getGlobalSnapshotInfoByModuleInfo(
-      {
-        name: this.HostInstance.options.name,
-        version: this.HostInstance.options.version,
-      },
-      {
-        getModuleInfoHook: (target, key) => {
-          const res = this.HostInstance.loaderHook.lifecycle.getModuleInfo.emit(
-            { target, key },
-          );
-          if (res && !(res instanceof Promise)) {
-            return res;
-          }
-          return;
-        },
-      },
-    );
 
     await this.hooks.lifecycle.beforeLoadRemoteSnapshot.emit({
       options,
       moduleInfo,
     });
 
+    let hostSnapshot = getGlobalSnapshotInfoByModuleInfo({
+      name: this.HostInstance.options.name,
+      version: this.HostInstance.options.version,
+    });
+
+    if (!hostSnapshot) {
+      hostSnapshot = {
+        version: this.HostInstance.options.version || '',
+        remoteEntry: '',
+        remotesInfo: {},
+      };
+      addGlobalSnapshot({
+        [this.HostInstance.options.name]: hostSnapshot,
+      });
+    }
+
     // In dynamic loadRemote scenarios, incomplete remotesInfo delivery may occur. In such cases, the remotesInfo in the host needs to be completed in the snapshot at runtime.
     // This ensures the snapshot's integrity and helps the chrome plugin correctly identify all producer modules, ensuring that proxyable producer modules will not be missing.
     if (
       hostSnapshot &&
       'remotesInfo' in hostSnapshot &&
-      !getInfoWithoutType(
-        hostSnapshot.remotesInfo,
-        moduleInfo.name,
-        (target, key) => {
-          const res = this.HostInstance.loaderHook.lifecycle.getModuleInfo.emit(
-            { target, key },
-          );
-          if (res && !(res instanceof Promise)) {
-            return res;
-          }
-          return;
-        },
-      ).value
+      !getInfoWithoutType(hostSnapshot.remotesInfo, moduleInfo.name).value
     ) {
       if ('version' in moduleInfo || 'entry' in moduleInfo) {
         hostSnapshot.remotesInfo = {
@@ -167,6 +155,9 @@ export class SnapshotHandler {
         const globalSnapshotRes = setGlobalSnapshotInfoByModuleInfo(
           {
             ...moduleInfo,
+            // The global remote may be overridden
+            // Therefore, set the snapshot key to the global address of the actual request
+            entry: globalRemoteSnapshot.remoteEntry,
           },
           moduleSnapshot,
         );
@@ -233,90 +224,36 @@ export class SnapshotHandler {
     globalSnapshot: ReturnType<typeof getGlobalSnapshot>;
     remoteSnapshot: GlobalModuleInfo[string] | undefined;
   } {
-    const hostGlobalSnapshot = getGlobalSnapshotInfoByModuleInfo(
-      {
-        name: this.HostInstance.options.name,
-        version: this.HostInstance.options.version,
-      },
-      {
-        getModuleInfoHook: (target, key) => {
-          const res = this.HostInstance.loaderHook.lifecycle.getModuleInfo.emit(
-            { target, key },
-          );
-          if (res && !(res instanceof Promise)) {
-            return res;
-          }
-          return;
-        },
-      },
-    );
+    const hostGlobalSnapshot = getGlobalSnapshotInfoByModuleInfo({
+      name: this.HostInstance.options.name,
+      version: this.HostInstance.options.version,
+    });
 
     // get remote detail info from global
     const globalRemoteInfo =
       hostGlobalSnapshot &&
       'remotesInfo' in hostGlobalSnapshot &&
       hostGlobalSnapshot.remotesInfo &&
-      getInfoWithoutType(
-        hostGlobalSnapshot.remotesInfo,
-        moduleInfo.name,
-        (target, key) => {
-          const res = this.HostInstance.loaderHook.lifecycle.getModuleInfo.emit(
-            { target, key },
-          );
-          if (res && !(res instanceof Promise)) {
-            return res;
-          }
-          return;
-        },
-      ).value;
+      getInfoWithoutType(hostGlobalSnapshot.remotesInfo, moduleInfo.name).value;
 
     if (globalRemoteInfo && globalRemoteInfo.matchedVersion) {
       return {
         hostGlobalSnapshot,
         globalSnapshot: getGlobalSnapshot(),
-        remoteSnapshot: getGlobalSnapshotInfoByModuleInfo(
-          {
-            name: moduleInfo.name,
-            version: globalRemoteInfo.matchedVersion,
-          },
-          {
-            getModuleInfoHook: (target, key) => {
-              const res =
-                this.HostInstance.loaderHook.lifecycle.getModuleInfo.emit({
-                  target,
-                  key,
-                });
-              if (res && !(res instanceof Promise)) {
-                return res;
-              }
-              return;
-            },
-          },
-        ),
+        remoteSnapshot: getGlobalSnapshotInfoByModuleInfo({
+          name: moduleInfo.name,
+          version: globalRemoteInfo.matchedVersion,
+        }),
       };
     }
+
     return {
       hostGlobalSnapshot: undefined,
       globalSnapshot: getGlobalSnapshot(),
-      remoteSnapshot: getGlobalSnapshotInfoByModuleInfo(
-        {
-          name: moduleInfo.name,
-          version: 'version' in moduleInfo ? moduleInfo.version : undefined,
-        },
-        {
-          getModuleInfoHook: (target, key) => {
-            const res =
-              this.HostInstance.loaderHook.lifecycle.getModuleInfo.emit({
-                target,
-                key,
-              });
-            if (res && !(res instanceof Promise)) {
-              return res;
-            }
-            return;
-          },
-        },
-      ),
+      remoteSnapshot: getGlobalSnapshotInfoByModuleInfo({
+        name: moduleInfo.name,
+        version: 'version' in moduleInfo ? moduleInfo.version : undefined,
+      }),
     };
   }
 

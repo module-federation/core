@@ -8,14 +8,20 @@ import {
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
+    await revalidate().then((shouldUpdate) => {
+      if (shouldUpdate) {
+        ctx.res.writeHead(307, { Location: ctx.req.url });
+        ctx.res.end();
+      }
+    });
     const initialProps = await Document.getInitialProps(ctx);
     const chunks = await flushChunks();
     ctx?.res?.on('finish', () => {
-      revalidate().then((shouldUpdate) => {
-        if (shouldUpdate) {
-          console.log('should HMR', shouldUpdate);
-        }
-      });
+      // revalidate().then((shouldUpdate) => {
+      //   if (shouldUpdate) {
+      //     console.log('should HMR', shouldUpdate);
+      //   }
+      // });
     });
 
     return {

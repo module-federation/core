@@ -67,6 +67,16 @@ export class NextFederationPlugin {
     // ContainerPlugin will get NextFederationPlugin._options, so NextFederationPlugin._options should be the same as normalFederationPluginOptions
     this._options = normalFederationPluginOptions;
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
+
+    const runtimeESMPath = require.resolve(
+      '@module-federation/runtime/dist/index.esm.js',
+    );
+    compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
+      compiler.options.resolve.alias = {
+        ...compiler.options.resolve.alias,
+        '@module-federation/runtime$': runtimeESMPath,
+      };
+    });
   }
 
   private validateOptions(compiler: Compiler): boolean {
@@ -124,9 +134,9 @@ export class NextFederationPlugin {
       remoteType: 'script',
       // @ts-ignore
       runtimePlugins: [
+        require.resolve(path.join(__dirname, '../container/runtimePlugin')),
         //@ts-ignore
         ...(this._options.runtimePlugins || []),
-        require.resolve(path.join(__dirname, '../container/runtimePlugin')),
       ],
       exposes: {
         './noop': noop,

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime-tools",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "main": "./dist/index.cjs",
   "module": "./dist/index.esm.js",

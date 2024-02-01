@@ -127,7 +127,7 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
     );
     const rootOutputDir = getUndoPath(
       outputName,
-      compilation.outputOptions.path,
+      compilation.outputOptions.path || '',
       false,
     );
     const stateExpression = this.runtimeRequirements.has(
