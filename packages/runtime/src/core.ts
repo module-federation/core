@@ -650,7 +650,7 @@ export class FederationHost {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   initializeSharing(
     shareScopeName = DEFAULT_SCOPE,
-    strategy?: Shared['strategy'],
+    strategy: Shared['strategy'] = 'version-first',
   ): Array<Promise<void>> {
     const shareScope = this.shareScopeMap;
     const hostName = this.options.name;
@@ -693,14 +693,15 @@ export class FederationHost {
         }
       }
     };
-    Object.keys(this.options.shared).forEach((shareName) => {
-      const shared = this.options.shared[shareName];
-      if (shared.scope.includes(shareScopeName)) {
-        register(shareName, shared);
-      }
-    });
 
     if (strategy === 'version-first') {
+      Object.keys(this.options.shared).forEach((shareName) => {
+        const shared = this.options.shared[shareName];
+        if (shared.scope.includes(shareScopeName)) {
+          register(shareName, shared);
+        }
+      });
+
       this.options.remotes.forEach((remote) => {
         if (remote.shareScope === shareScopeName) {
           promises.push(initRemoteModule(remote.name));
