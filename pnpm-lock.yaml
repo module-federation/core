@@ -783,6 +783,9 @@ importers:
       '@module-federation/webpack-bundler-runtime':
         specifier: workspace:*
         version: link:../webpack-bundler-runtime
+      terser-webpack-plugin:
+        specifier: ^5.3.10
+        version: 5.3.10(@swc/core@1.3.102)(esbuild@0.19.11)(webpack@5.88.2)
 
   packages/native-federation-tests:
     dependencies:
@@ -12007,7 +12010,7 @@ packages:
       '@babel/core': 7.23.6
       find-cache-dir: 4.0.0
       schema-utils: 4.2.0
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /babel-plugin-const-enum@1.2.0(@babel/core@7.23.6):
@@ -13676,7 +13679,7 @@ packages:
       normalize-path: 3.0.0
       schema-utils: 4.2.0
       serialize-javascript: 6.0.1
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /copy-webpack-plugin@11.0.0(webpack@5.88.2):
@@ -13963,7 +13966,7 @@ packages:
       postcss-modules-values: 4.0.0(postcss@8.4.32)
       postcss-value-parser: 4.2.0
       semver: 7.5.4
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /css-minimizer-webpack-plugin@5.0.1(esbuild@0.18.20)(webpack@5.89.0):
@@ -16495,7 +16498,7 @@ packages:
       semver: 7.5.4
       tapable: 2.2.1
       typescript: 5.3.3
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /fork-ts-checker-webpack-plugin@8.0.0(typescript@5.3.3)(webpack@5.89.0):
@@ -19456,7 +19459,7 @@ packages:
     dependencies:
       klona: 2.0.6
       less: 4.1.3
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /less@4.1.3:
@@ -19500,7 +19503,7 @@ packages:
       webpack-sources:
         optional: true
     dependencies:
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
       webpack-sources: 3.2.3
     dev: true
 
@@ -20660,7 +20663,7 @@ packages:
       webpack: ^5.0.0
     dependencies:
       schema-utils: 4.2.0
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /mini-svg-data-uri@1.4.4:
@@ -22792,7 +22795,7 @@ packages:
       klona: 2.0.6
       postcss: 8.4.32
       semver: 7.5.4
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /postcss-merge-longhand@5.1.7(postcss@8.4.32):
@@ -25171,7 +25174,7 @@ packages:
       klona: 2.0.6
       neo-async: 2.6.2
       sass: 1.69.5
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /sass@1.69.5:
@@ -25799,7 +25802,7 @@ packages:
       abab: 2.0.6
       iconv-lite: 0.6.3
       source-map-js: 1.0.2
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /source-map-resolve@0.5.3:
@@ -26343,7 +26346,7 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
     dependencies:
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /style-to-object@0.4.4:
@@ -26419,7 +26422,7 @@ packages:
       fast-glob: 3.3.2
       normalize-path: 3.0.0
       stylus: 0.59.0
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /stylus@0.59.0:
@@ -26733,6 +26736,32 @@ packages:
       webpack: 4.47.0
       webpack-sources: 1.4.3
       worker-farm: 1.7.0
+    dev: true
+
+  /terser-webpack-plugin@5.3.10(@swc/core@1.3.102)(esbuild@0.19.11)(webpack@5.88.2):
+    resolution: {integrity: sha512-BKFPWlPDndPs+NGGCr1U59t0XScL5317Y0UReNrHaw9/FwhPENlq6bfgs+4yPfyP51vqC1bQ4rp1EfXW5ZSH9w==}
+    engines: {node: '>= 10.13.0'}
+    peerDependencies:
+      '@swc/core': '*'
+      esbuild: '*'
+      uglify-js: '*'
+      webpack: ^5.1.0
+    peerDependenciesMeta:
+      '@swc/core':
+        optional: true
+      esbuild:
+        optional: true
+      uglify-js:
+        optional: true
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.20
+      '@swc/core': 1.3.102(@swc/helpers@0.5.3)
+      esbuild: 0.19.11
+      jest-worker: 27.5.1
+      schema-utils: 3.3.0
+      serialize-javascript: 6.0.1
+      terser: 5.26.0
+      webpack: 5.88.2(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /terser-webpack-plugin@5.3.9(@swc/core@1.3.102)(esbuild@0.18.20)(webpack@5.89.0):
@@ -27174,7 +27203,7 @@ packages:
       semver: 7.5.4
       source-map: 0.7.4
       typescript: 5.3.3
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /ts-node@10.9.1(@swc/core@1.3.102)(@types/node@18.19.10)(typescript@5.1.6):
@@ -28681,7 +28710,7 @@ packages:
       mime-types: 2.1.35
       range-parser: 1.2.1
       schema-utils: 4.2.0
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /webpack-dev-middleware@6.1.1(webpack@5.89.0):
@@ -28742,7 +28771,7 @@ packages:
       serve-index: 1.9.1
       sockjs: 0.3.24
       spdy: 4.0.2
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
       webpack-dev-middleware: 5.3.3(webpack@5.89.0)
       ws: 8.15.1
     transitivePeerDependencies:
@@ -28797,7 +28826,7 @@ packages:
     dependencies:
       html-webpack-plugin: 5.6.0(webpack@5.88.2)
       typed-assert: 1.0.9
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.19.11)
     dev: true
 
   /webpack-virtual-modules@0.4.6:

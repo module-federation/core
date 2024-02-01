@@ -169,6 +169,7 @@ class ContainerPlugin {
       federationRuntimePluginInstance.entryFilePath,
       {
         name,
+        runtime,
       },
     ).apply(compiler);
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
