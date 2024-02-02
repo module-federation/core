@@ -56,9 +56,9 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
 
     // getChunkModules is used here to create a clone, because disconnectChunkAndModule modifies
     for (const module of chunkGraph.getChunkModules(chunkB)) {
-      if (chunkB.name !== 'federation-runtime') {
-        chunkGraph.disconnectChunkAndModule(chunkB, module);
-      }
+      // if (chunkB.name !== 'federation-runtime') {
+      chunkGraph.disconnectChunkAndModule(chunkB, module);
+      // }
       chunkGraph.connectChunkAndModule(chunkA, module);
     }
 
