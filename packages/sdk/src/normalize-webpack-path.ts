@@ -16,7 +16,10 @@ export function getWebpackPath(
     const webpackLocationWithDetail = webpackErrLocation
       .replace(/[^\(\)]+/, '')
       .slice(1, -1);
-    const webpackPath = webpackLocationWithDetail.split(':').slice(0, -2)[0];
+    const webpackPath = webpackLocationWithDetail
+      .split(':')
+      .slice(0, -2)
+      .join(':');
     if (options?.framework === 'nextjs') {
       if (webpackPath.endsWith('webpack.js')) {
         return webpackPath.replace('webpack.js', 'index.js');
