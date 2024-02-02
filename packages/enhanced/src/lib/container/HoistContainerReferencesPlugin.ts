@@ -21,26 +21,27 @@ const webpack = require(
  */
 export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
   integrateChunks(chunkA: Chunk, chunkB: Chunk, chunkGraph: ChunkGraph): void {
-    if (chunkA.name && chunkB.name) {
-      if (
-        chunkGraph.getNumberOfEntryModules(chunkA) > 0 ===
-        chunkGraph.getNumberOfEntryModules(chunkB) > 0
-      ) {
-        // When both chunks have entry modules or none have one, use
-        // shortest name
-        if (chunkA.name.length !== chunkB.name.length) {
-          chunkA.name =
-            chunkA.name.length < chunkB.name.length ? chunkA.name : chunkB.name;
-        } else {
-          chunkA.name = chunkA.name < chunkB.name ? chunkA.name : chunkB.name;
-        }
-      } else if (chunkGraph.getNumberOfEntryModules(chunkB) > 0) {
-        // Pick the name of the chunk with the entry module
-        chunkA.name = chunkB.name;
-      }
-    } else if (chunkB.name) {
-      chunkA.name = chunkB.name;
-    }
+    // do not sort chunk by smallest name
+    // if (chunkA.name && chunkB.name) {
+    //   if (
+    //     chunkGraph.getNumberOfEntryModules(chunkA) > 0 ===
+    //     chunkGraph.getNumberOfEntryModules(chunkB) > 0
+    //   ) {
+    //     // When both chunks have entry modules or none have one, use
+    //     // shortest name
+    //     if (chunkA.name.length !== chunkB.name.length) {
+    //       chunkA.name =
+    //         chunkA.name.length < chunkB.name.length ? chunkA.name : chunkB.name;
+    //     } else {
+    //       chunkA.name = chunkA.name < chunkB.name ? chunkA.name : chunkB.name;
+    //     }
+    //   } else if (chunkGraph.getNumberOfEntryModules(chunkB) > 0) {
+    //     // Pick the name of the chunk with the entry module
+    //     chunkA.name = chunkB.name;
+    //   }
+    // } else if (chunkB.name) {
+    //   chunkA.name = chunkB.name;
+    // }
     //
     // // Merge id name hints
     for (const hint of chunkB.idNameHints) {
