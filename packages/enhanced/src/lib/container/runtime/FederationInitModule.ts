@@ -1,7 +1,6 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { NormalizedRuntimeInitOptionsWithOutShared } from '../../../types/runtime';
 import type { Chunk, Compilation, Module } from 'webpack';
-import ContainerEntryModule from '../ContainerEntryModule';
 
 const { RuntimeModule, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -21,65 +20,44 @@ class FederationInitModule extends RuntimeModule {
     chunk: Chunk,
     compilation: Compilation,
   ): Module | null {
-    const chunkEntryModule =
-      compilation.chunkGraph.getChunkEntryModulesIterable(chunk);
-
-    const modChunks = compilation.chunkGraph.getChunkModulesIterable(chunk);
-    let mod = null;
-
-    for (const module of modChunks) {
-      //@ts-ignore
-      if (
-        typeof module.identifier === 'function' &&
-        module.identifier().includes('.federation')
-      ) {
-        mod = module;
-        break;
+    for (const module of compilation.chunkGraph.getChunkModulesIterable(
+      chunk,
+    )) {
+      if (module.identifier && module.identifier().includes('.federation')) {
+        return module;
       }
-    }
-    return mod;
-  }
-
-  getModuleByInstance() {
-    const compilation: Compilation = this.compilation!;
-    const thisChunk = this.chunk;
-    //@ts-ignore
-    const federationRuntimeEntry =
-      compilation.namedChunks.get('federation-runtime');
-    const chunks = compilation.chunks;
-    const currentHasEntry = this.chunkContainsContainerEntryModule(
-      //@ts-ignore
-      federationRuntimeEntry,
-      compilation,
-    ) as unknown as Module;
-
-    if (currentHasEntry) {
-      return {
-        moduleId: compilation.chunkGraph.getModuleId(currentHasEntry),
-        chunk: federationRuntimeEntry,
-      };
     }
     return null;
   }
 
-  /**
-   * @returns {string | null} runtime code
-   */
-  override generate() {
+  getModuleByInstance(): { moduleId: string | number; chunk: Chunk } | null {
+    if (!this.compilation || !this.chunk || !this.compilation.chunkGraph)
+      return null;
+    const chunk = this.chunk;
+    const currentHasEntry = chunk.hasRuntime()
+      ? this.chunkContainsContainerEntryModule(chunk, this.compilation)
+      : false;
+    if (currentHasEntry) {
+      const moduleId = this.compilation.chunkGraph.getModuleId(currentHasEntry);
+      if (moduleId !== undefined) {
+        return {
+          moduleId: moduleId,
+          chunk: chunk,
+        };
+      }
+    }
+    return null;
+  }
+  override generate(): string | null {
     if (!this.compilation) return '';
     const entryModule = this.getModuleByInstance();
     if (!entryModule) return null;
-    const { moduleId, chunk } = entryModule;
+    const { moduleId } = entryModule;
     const mfRuntimeModuleID =
       typeof moduleId === 'number' ? moduleId : JSON.stringify(moduleId);
-    let wrapCall;
-    // if (this.chunk && this.chunk.id) {
-    //   wrapCall = chunk.id !== this.chunk.id;
-    // }
     return Template.asString([
-      wrapCall ? 'console.log("wrap")' : '',
-      `const mfRuntimeModuleID = ${mfRuntimeModuleID}`,
-      '__webpack_require__(mfRuntimeModuleID);',
+      `const mfRuntimeModuleID = ${mfRuntimeModuleID};`,
+      'try {__webpack_require__(mfRuntimeModuleID);} catch(e) {}',
     ]);
   }
 }

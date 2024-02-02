@@ -19,29 +19,8 @@ const webpack = require(
  * This class is used to hoist container references in the code.
  * @constructor
  */
-export class HoistContainerReferences implements WebpackPluginInstance {
+export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
   integrateChunks(chunkA: Chunk, chunkB: Chunk, chunkGraph: ChunkGraph): void {
-    // Decide for one name (deterministic)
-    const RuntimeA =
-      typeof chunkA.runtime === 'string' ? [chunkA.runtime] : chunkA.runtime;
-    const RuntimeB =
-      typeof chunkB.runtime === 'string' ? [chunkB.runtime] : chunkB.runtime;
-    let sameRuntime = false;
-    if (RuntimeA && RuntimeB) {
-      for (const runtimeAElement of RuntimeA) {
-        for (const runtimeBElement of RuntimeB) {
-          if (runtimeAElement === runtimeBElement) {
-            sameRuntime = true;
-            break;
-          }
-        }
-      }
-    }
-    // if (!sameRuntime && !chunkA.hasRuntime()) {
-    //   debugger;
-    //   return;
-    // }
-
     if (chunkA.name && chunkB.name) {
       if (
         chunkGraph.getNumberOfEntryModules(chunkA) > 0 ===
@@ -62,8 +41,8 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     } else if (chunkB.name) {
       chunkA.name = chunkB.name;
     }
-
-    // Merge id name hints
+    //
+    // // Merge id name hints
     for (const hint of chunkB.idNameHints) {
       chunkA.idNameHints.add(hint);
     }
@@ -74,15 +53,18 @@ export class HoistContainerReferences implements WebpackPluginInstance {
 
     // getChunkModules is used here to create a clone, because disconnectChunkAndModule modifies
     for (const module of chunkGraph.getChunkModules(chunkB)) {
-      // chunkGraph.disconnectChunkAndModule(chunkB, module);
+      if (chunkB.name !== 'federation-runtime') {
+        chunkGraph.disconnectChunkAndModule(chunkB, module);
+      }
       chunkGraph.connectChunkAndModule(chunkA, module);
     }
 
     for (const [module, chunkGroup] of Array.from(
       chunkGraph.getChunkEntryModulesWithChunkGroupIterable(chunkB),
     )) {
-      chunkGraph.disconnectChunkAndEntryModule(chunkB, module);
-      // chunkGraph.connectChunkAndEntryModule(chunkA, module, chunkGroup);
+      // chunkGraph.disconnectChunkAndEntryModule(chunkB, module);
+      chunkGraph.connectChunkAndModule(chunkA, module);
+      // chunkGraph.connectChunkAndEntryModule(chunkA, module,chunkGroup);
     }
 
     for (const chunkGroup of chunkB.groupsIterable) {
@@ -91,56 +73,45 @@ export class HoistContainerReferences implements WebpackPluginInstance {
       chunkB.removeGroup(chunkGroup);
     }
     webpack.ChunkGraph.clearChunkGraphForChunk(chunkB);
-    // this.clearChunkGraphForChunk(chunkB);
   }
 
   apply(compiler: Compiler): void {
     compiler.hooks.compilation.tap(
-      'MergeDuplicateChunksPlugin',
+      'HoistContainerReferencesPluginPlugin',
       (compilation: Compilation) => {
         compilation.hooks.optimizeChunks.tap(
           {
-            name: 'MergeDuplicateChunksPlugin',
-            stage: 10,
+            name: 'HoistContainerReferencesPluginPlugin',
+            stage: 10, // advanced stage chunk optimization
           },
           (chunks: Iterable<Chunk>) => {
             const { chunkGraph } = compilation;
-
-            // Identify the federation-runtime chunk
-            const federationRuntimeChunk = Array.from(chunks).find(
-              (chunk) => chunk.name === 'federation-runtime',
-            );
+            const federationRuntimeChunk =
+              compilation.namedChunks.get('federation-runtime');
             if (!federationRuntimeChunk) return;
-            const runtimeEntryModule =
-              chunkGraph.getChunkEntryModulesWithChunkGroupIterable(
-                federationRuntimeChunk,
-              );
-
             // For each chunk that has a runtime, merge the federation-runtime chunk into it
             for (const chunk of chunks) {
               if (chunk.hasRuntime() && chunk !== federationRuntimeChunk) {
-                // Ensure we can merge the chunks
-                // if (chunkGraph.canChunksBeIntegrated(chunk, federationRuntimeChunk)) {
+                // Do not re-integrate chunks with containers in them. Like remoteEntry - this will destroy entry module
+                if (this.chunkContainsContainerEntryModule(chunk, compilation))
+                  continue;
                 this.integrateChunks(chunk, federationRuntimeChunk, chunkGraph);
-                // Note: Depending on your webpack version and setup, you might need to manually handle the removal of the federation-runtime chunk from the compilation, or adjust how modules/assets are merged.
-                // }
               }
             }
           },
         );
-      },
-    );
-    compiler.hooks.thisCompilation.tap(
-      'HoistContainerReferences',
-      (compilation: Compilation) => {
-        compilation.hooks.afterOptimizeChunkModules.tap(
-          'HoistContainerReferences',
-          (chunks: Iterable<Chunk>) => {
-            for (const chunk of chunks) {
-              // if (this.chunkContainsContainerEntryModule(chunk, compilation)) {
-              // this.hoistModulesInChunk(chunk, compilation);
-              // }
-            }
+
+        compilation.hooks.beforeChunkAssets.tap(
+          'MergeDuplicateChunksPlugin',
+          () => {
+            // the federation-runtime chunk is integrated into multiple other runtime chunks, like main, or runtime.js
+            // because this entrypoint is integrated using chunk group updates - this chunk cannot be emitted without causing multiple writes to same runtime
+            // the federation-runtime serves no output process, it is used as a reference to hoist federation runtime once into all runtime chunks for eager consumption
+            // this plugin serves
+            const federationRuntimeChunk =
+              compilation.namedChunks.get('federation-runtime');
+            if (federationRuntimeChunk)
+              compilation.chunks.delete(federationRuntimeChunk);
           },
         );
       },
@@ -151,15 +122,17 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     chunk: Chunk,
     compilation: Compilation,
   ): boolean {
+    let hasContainerEntryModule = false;
     for (const module of compilation.chunkGraph.getChunkModulesIterable(
       chunk,
     )) {
       if (module instanceof ContainerEntryModule) {
-        return true;
+        hasContainerEntryModule = true;
+        break;
       }
     }
-    return false;
+    return hasContainerEntryModule;
   }
 }
 
-export default HoistContainerReferences;
+export default HoistContainerReferencesPlugin;

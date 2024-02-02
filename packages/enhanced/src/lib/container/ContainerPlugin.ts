@@ -213,7 +213,7 @@ class ContainerPlugin {
           //@ts-ignore
           dep,
           {
-            name: name ? name + '_partial' : undefined, // give unique name name
+            name: 'federation-runtime', // merge container into federation entrypoint added to compilation
             runtime: undefined,
             library,
           },
