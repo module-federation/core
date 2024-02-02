@@ -24,7 +24,7 @@ export interface Federation {
 
 export const nativeGlobal: typeof global = (() => {
   try {
-    return new Function('return this');
+    return new Function('return this')();
   } catch {
     return globalThis;
   }
