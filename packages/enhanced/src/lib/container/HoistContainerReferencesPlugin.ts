@@ -3,7 +3,6 @@ import type {
   Compilation,
   Chunk,
   WebpackPluginInstance,
-  ChunkGraph,
 } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import ContainerEntryModule from './ContainerEntryModule';
@@ -11,17 +10,20 @@ import ContainerEntryModule from './ContainerEntryModule';
 const runtime = require(
   normalizeWebpackPath('webpack/lib/util/runtime'),
 ) as typeof import('webpack/lib/util/runtime');
-const webpack = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
 
 /**
  * This class is used to hoist container references in the code.
  * @constructor
  */
 export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
-  integrateChunks(chunkA: Chunk, chunkB: Chunk, chunkGraph: ChunkGraph): void {
-    // do not sort chunk by smallest name
+  integrateChunks(
+    chunkA: Chunk,
+    chunkB: Chunk,
+    compilation: Compilation,
+  ): void {
+    const { chunkGraph, compiler } = compilation;
+    // do not sort chunk by smallest name, this will cause non-deterministic chunk integration
+
     // if (chunkA.name && chunkB.name) {
     //   if (
     //     chunkGraph.getNumberOfEntryModules(chunkA) > 0 ===
@@ -73,16 +75,16 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
       chunkA.addGroup(chunkGroup);
       chunkB.removeGroup(chunkGroup);
     }
-    webpack.ChunkGraph.clearChunkGraphForChunk(chunkB);
+    compiler.webpack.ChunkGraph.clearChunkGraphForChunk(chunkB);
   }
 
   apply(compiler: Compiler): void {
     compiler.hooks.compilation.tap(
-      'HoistContainerReferencesPluginPlugin',
+      'HoistContainerReferencesPlugin',
       (compilation: Compilation) => {
         compilation.hooks.optimizeChunks.tap(
           {
-            name: 'HoistContainerReferencesPluginPlugin',
+            name: 'HoistContainerReferencesPlugin',
             stage: 10, // advanced stage chunk optimization
           },
           (chunks: Iterable<Chunk>) => {
@@ -96,7 +98,11 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
                 // Do not re-integrate chunks with containers in them. Like remoteEntry - this will destroy entry module
                 if (this.chunkContainsContainerEntryModule(chunk, compilation))
                   continue;
-                this.integrateChunks(chunk, federationRuntimeChunk, chunkGraph);
+                this.integrateChunks(
+                  chunk,
+                  federationRuntimeChunk,
+                  compilation,
+                );
               }
             }
           },

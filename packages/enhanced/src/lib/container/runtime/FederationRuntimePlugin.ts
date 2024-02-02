@@ -156,17 +156,6 @@ class FederationRuntimePlugin {
         entry['federation-runtime'] = {
           import: [entryFilePath],
         };
-
-        Object.keys(entry).forEach((entryName) => {
-          const entryItem = entry[entryName];
-          if (!entryItem.import) {
-            // TODO: maybe set this variable as constant is better https://github.com/webpack/webpack/blob/main/lib/config/defaults.js#L176
-            entryItem.import = ['./src'];
-          }
-          // if (!entryItem.import.includes(entryFilePath)) {
-          //   entryItem.import.unshift(entryFilePath);
-          // }
-        });
       },
     });
   }

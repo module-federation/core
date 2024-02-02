@@ -1,5 +1,4 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { NormalizedRuntimeInitOptionsWithOutShared } from '../../../types/runtime';
 import type { Chunk, Compilation, Module } from 'webpack';
 
 const { RuntimeModule, Template } = require(
@@ -11,7 +10,7 @@ class FederationInitModule extends RuntimeModule {
   entryFilePath: string;
 
   constructor(containerName: string, entryFilePath: string) {
-    super('federation runtime init', RuntimeModule.STAGE_TRIGGER);
+    super('federation runtime init', RuntimeModule.STAGE_ATTACH);
     this.containerName = containerName;
     this.entryFilePath = entryFilePath;
   }
@@ -57,7 +56,7 @@ class FederationInitModule extends RuntimeModule {
       typeof moduleId === 'number' ? moduleId : JSON.stringify(moduleId);
     return Template.asString([
       `const mfRuntimeModuleID = ${mfRuntimeModuleID};`,
-      'try {__webpack_require__(mfRuntimeModuleID);} catch(e) {}',
+      '__webpack_require__(mfRuntimeModuleID)',
     ]);
   }
 }
