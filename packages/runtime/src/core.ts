@@ -671,8 +671,7 @@ export class FederationHost {
       );
       if (
         !activeVersion ||
-        (!activeVersion.loading &&
-          !activeVersion.loaded &&
+        (!activeVersion.loaded &&
           (Boolean(!eager) !== !activeVersionEager
             ? eager
             : hostName > activeVersion.from))
