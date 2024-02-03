@@ -20,9 +20,9 @@ export async function loadEsmEntry({
       if (!remoteEntryExports) {
         // eslint-disable-next-line no-eval
         new Function(
-          'resolve',
+          'resolve', 'reject',
           `import("${entry}").then((res)=>{resolve(res);}, (error)=> reject(error))`,
-        )(resolve);
+        )(resolve, reject);
       } else {
         resolve(remoteEntryExports);
       }
