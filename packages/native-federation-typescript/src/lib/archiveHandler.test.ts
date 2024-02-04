@@ -80,13 +80,13 @@ describe('archiveHandler', () => {
 
       axios.get = vi.fn().mockRejectedValue(new Error(message));
 
-      expect(() =>
+      await expect(() =>
         downloadTypesArchive(hostOptions)([
           destinationFolder,
           fileToDownload,
         ])
       ).rejects.toThrowError(`Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${message}'`);
-      expect(axios.get).toHaveBeenCalledTimes(1);
+      expect(axios.get).toHaveBeenCalledTimes(hostOptions.maxRetries);
       expect(axios.get).toHaveBeenCalledWith(fileToDownload, {
         responseType: 'arraybuffer',
       });
