@@ -4,15 +4,14 @@ import typescript from 'typescript';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 
-const defaultOptions: Partial<RemoteOptions> = {
+const defaultOptions = {
   tsConfigPath: './tsconfig.json',
   typesFolder: '@mf-types',
   compiledTypesFolder: 'compiled-types',
   deleteTypesFolder: true,
   additionalFilesToCompile: [],
   compilerInstance: 'tsc' as const,
-  maxRetries: 3
-};
+} satisfies Partial<RemoteOptions>;
 
 const readTsConfig = ({
   tsConfigPath,

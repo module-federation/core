@@ -63,7 +63,6 @@ describe('hostPlugin', () => {
           deleteTypesFolder: true,
           moduleFederationConfig,
           compilerInstance: 'tsc',
-          maxRetries: 3
         });
       });
 

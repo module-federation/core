@@ -51,6 +51,7 @@ describe('archiveHandler', () => {
       moduleFederationConfig: {},
       typesFolder: tmpDir,
       deleteTypesFolder: true,
+      maxRetries: 1,
     };
 
     it('throws for unexisting url', async () => {
@@ -59,7 +60,6 @@ describe('archiveHandler', () => {
       ).rejects.toThrowError(
         'Network error: Unable to download federated mocks',
       );
-      // .rejects.toThrowError('getaddrinfo ENOTFOUND foo.it')
     });
 
     it('correctly extract downloaded archive', async () => {
