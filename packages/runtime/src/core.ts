@@ -671,7 +671,8 @@ export class FederationHost {
       );
       if (
         !activeVersion ||
-        (!activeVersion.loaded &&
+        (activeVersion.strategy !== 'loaded-first' &&
+          !activeVersion.loaded &&
           (Boolean(!eager) !== !activeVersionEager
             ? eager
             : hostName > activeVersion.from))
@@ -699,7 +700,6 @@ export class FederationHost {
         register(shareName, shared);
       }
     });
-
     if (strategy === 'version-first') {
       this.options.remotes.forEach((remote) => {
         if (remote.shareScope === shareScopeName) {
