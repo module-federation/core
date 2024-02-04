@@ -8,8 +8,6 @@ import { afterAll, describe, expect, it, vi } from 'vitest';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { createTypesArchive, downloadTypesArchive } from './archiveHandler';
 
-vi.mock('axios');
-
 describe('archiveHandler', () => {
   const tmpDir = mkdtempSync(join(os.tmpdir(), 'archive-handler'));
   const tsConfig = {
@@ -56,44 +54,42 @@ describe('archiveHandler', () => {
       maxRetries: 3,
     };
 
-    const axiosGet = vi.mocked(axios.get)
+    const destinationFolder = 'typesHostFolder';
+    const fileToDownload = 'https://foo.it';
 
-    beforeEach(() => {
-      axiosGet.mockReset()
-    })
-
-    it('correctly extract downloaded archive', async () => {
-      const archivePath = join(tmpDir, 'typesHostFolder');
+    it('correctly extracts downloaded archive', async () => {
+      const archivePath = join(tmpDir, destinationFolder);
       const zip = new AdmZip();
       await zip.addLocalFolderPromise(tmpDir, {});
 
-      axiosGet.mockResolvedValueOnce({ data: zip.toBuffer() });
+      axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
       await downloadTypesArchive(hostOptions)([
-        'typesHostFolder',
-        'https://foo.it',
+        destinationFolder,
+        fileToDownload,
       ]);
       expect(existsSync(archivePath)).toBeTruthy();
-      expect(axiosGet).toHaveBeenCalledTimes(1)
-      expect(axiosGet).toHaveBeenCalledWith('https://foo.it', { responseType: 'arraybuffer' })
+      expect(axios.get).toHaveBeenCalledTimes(1);
+      expect(axios.get).toHaveBeenCalledWith(fileToDownload, {
+        responseType: 'arraybuffer',
+      });
     });
 
-    it.only('correctly handle network exceptions', async () => {
-      const errorMessage = 'Rejected value'
-      const zip = new AdmZip();
-      await zip.addLocalFolderPromise(tmpDir, {});
+    it('correctly handles exception', async () => {
+      const message = 'Rejected value';
 
-      axiosGet.mockRejectedValue({ message: errorMessage });
+      axios.get = vi.fn().mockRejectedValue(new Error(message));
 
       expect(() =>
         downloadTypesArchive(hostOptions)([
-          'typesHostFolder',
-          'https://foo.it',
-        ]),
-      ).rejects.toThrowError(`Network error: Unable to download federated mocks for 'typesHostFolder' from 'https://foo.it' because '${errorMessage}'`);
-
-      expect(axiosGet).toHaveBeenCalledTimes(3)
-      expect(axiosGet).toHaveBeenCalledWith('https://foo.it', { responseType: 'arraybuffer' })
+          destinationFolder,
+          fileToDownload,
+        ])
+      ).rejects.toThrowError(`Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${message}'`);
+      expect(axios.get).toHaveBeenCalledTimes(1);
+      expect(axios.get).toHaveBeenCalledWith(fileToDownload, {
+        responseType: 'arraybuffer',
+      });
     });
   });
 });
