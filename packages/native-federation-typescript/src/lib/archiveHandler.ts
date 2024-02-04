@@ -30,8 +30,10 @@ export const createTypesArchive = async (
 
 const downloadErrorLogger =
   (destinationFolder: string, fileToDownload: string) => (reason: Error) => {
-    reason.message = `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}'`;
-    throw reason;
+    throw {
+      ...reason,
+      message: `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}'`
+    };
   };
 
 export const downloadTypesArchive =
@@ -51,6 +53,9 @@ export const downloadTypesArchive =
           break;
         } catch (error: any) {
           console.error(ansiColors.red(`Error during types archive download: ${error?.message || 'unknown error'}`));
+          if (retries >= hostOptions.maxRetries) {
+            throw error;
+          }
         }
       }
     };
