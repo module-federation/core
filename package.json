@@ -13,7 +13,8 @@
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "contributors": [
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)",
-    "Kyle Tsang (https://github.com/kyletsang)"
+    "Kyle Tsang (https://github.com/kyletsang)",
+    "Matteo Pietro Dazzi (https://github.com/ilteoood)"
   ],
   "license": "MIT",
   "scripts": {

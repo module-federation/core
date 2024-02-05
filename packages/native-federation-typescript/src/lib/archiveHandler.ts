@@ -32,31 +32,36 @@ const downloadErrorLogger =
   (destinationFolder: string, fileToDownload: string) => (reason: Error) => {
     throw {
       ...reason,
-      message: `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}'`
+      message: `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}'`,
     };
   };
 
-export const downloadTypesArchive =
-  (hostOptions: Required<HostOptions>) => {
-    let retries = 0;
-    return async ([destinationFolder, fileToDownload]: string[]) => {
-      const destinationPath = join(hostOptions.typesFolder, destinationFolder);
+export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
+  let retries = 0;
+  return async ([destinationFolder, fileToDownload]: string[]) => {
+    const destinationPath = join(hostOptions.typesFolder, destinationFolder);
 
-      while (retries++ < hostOptions.maxRetries) {
-        try {
-          const response = await axios
-            .get(fileToDownload, { responseType: 'arraybuffer' })
-            .catch(downloadErrorLogger(destinationFolder, fileToDownload));
+    while (retries++ < hostOptions.maxRetries) {
+      try {
+        const response = await axios
+          .get(fileToDownload, { responseType: 'arraybuffer' })
+          .catch(downloadErrorLogger(destinationFolder, fileToDownload));
 
-          const zip = new AdmZip(Buffer.from(response.data));
-          zip.extractAllTo(destinationPath, true);
-          break;
-        } catch (error: any) {
-          console.error(ansiColors.red(`Error during types archive download: ${error?.message || 'unknown error'}`));
-          if (retries >= hostOptions.maxRetries) {
-            throw error;
-          }
+        const zip = new AdmZip(Buffer.from(response.data));
+        zip.extractAllTo(destinationPath, true);
+        break;
+      } catch (error: any) {
+        console.error(
+          ansiColors.red(
+            `Error during types archive download: ${
+              error?.message || 'unknown error'
+            }`,
+          ),
+        );
+        if (retries >= hostOptions.maxRetries) {
+          throw error;
         }
       }
-    };
-  }
+    }
+  };
+};
