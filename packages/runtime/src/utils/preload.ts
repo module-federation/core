@@ -1,5 +1,4 @@
-import { createScript } from '@module-federation/sdk';
-
+import { createLink } from '@module-federation/sdk';
 import {
   PreloadAssets,
   PreloadConfig,
@@ -110,32 +109,50 @@ export function preloadAssets(
 
     const fragment = document.createDocumentFragment();
     cssAssets.forEach((cssUrl) => {
-      const cssEl = document.createElement('link');
-      cssEl.setAttribute('rel', 'preload');
-      cssEl.setAttribute('href', cssUrl);
-      cssEl.setAttribute('as', 'style');
-      fragment.appendChild(cssEl);
-    });
-    document.head.appendChild(fragment);
-
-    jsAssetsWithoutEntry.forEach((jsUrl) => {
-      const { script: scriptEl } = createScript(
-        jsUrl,
-        () => {
-          // noop
+      const { link: cssEl, needAttach } = createLink(
+        cssUrl,
+        () => {},
+        {
+          rel: 'preload',
+          as: 'style',
         },
-        {},
         (url: string) => {
-          const res = host.loaderHook.lifecycle.createScript.emit({
+          const res = host.loaderHook.lifecycle.createLink.emit({
             url,
           });
-          if (res instanceof HTMLScriptElement) {
+          if (res instanceof HTMLLinkElement) {
             return res;
           }
           return;
         },
       );
-      document.head.appendChild(scriptEl);
+
+      needAttach && fragment.appendChild(cssEl);
     });
+
+    jsAssetsWithoutEntry.forEach((jsUrl) => {
+      const { link: linkEl, needAttach } = createLink(
+        jsUrl,
+        () => {
+          // noop
+        },
+        {
+          rel: 'preload',
+          as: 'style',
+        },
+        (url: string) => {
+          const res = host.loaderHook.lifecycle.createLink.emit({
+            url,
+          });
+          if (res instanceof HTMLLinkElement) {
+            return res;
+          }
+          return;
+        },
+      );
+      needAttach && document.head.appendChild(linkEl);
+    });
+
+    document.head.appendChild(fragment);
   }
 }

@@ -204,6 +204,14 @@ export class FederationHost {
       ],
       HTMLScriptElement | void
     >(),
+    createLink: new SyncHook<
+      [
+        {
+          url: string;
+        },
+      ],
+      HTMLLinkElement | void
+    >(),
     // only work for manifest , so not open to the public yet
     fetch: new AsyncHook<
       [string, RequestInit],
