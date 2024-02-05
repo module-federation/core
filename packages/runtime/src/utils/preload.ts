@@ -138,7 +138,7 @@ export function preloadAssets(
         },
         {
           rel: 'preload',
-          as: 'style',
+          as: 'script',
         },
         (url: string) => {
           const res = host.loaderHook.lifecycle.createLink.emit({
