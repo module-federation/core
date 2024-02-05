@@ -35,12 +35,6 @@ export const DEFAULT_SHARE_SCOPE: SharedObject = {
     singleton: true,
     import: undefined,
   },
-  '@module-federation/utilities': {
-    eager: true,
-    version: require('@module-federation/utilities/package.json').version,
-    requiredVersion: require('@module-federation/utilities/package.json')
-      .version,
-  },
   'next/image': {
     requiredVersion: undefined,
     singleton: true,

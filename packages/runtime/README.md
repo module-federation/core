@@ -276,6 +276,9 @@ const runtimePlugin: () => FederationRuntimePlugin =
         console.log('beforeInit: ', args);
         return args;
       },
+      errorLoadRemote(args) {
+        return args
+      },
       beforeRequest(args) {
         console.log('beforeRequest: ', args);
         return args;
@@ -287,6 +290,9 @@ const runtimePlugin: () => FederationRuntimePlugin =
       onLoad(args) {
         console.log('onLoad: ', args);
         return args;
+      },
+      resolveShare(args) {
+        return args
       },
       async loadShare(args) {
         console.log('loadShare:', args);
@@ -514,7 +520,7 @@ loadRemote('app2/un-existed-module').then(mod=>{
 
 `AsyncWaterfallHook`
 
-Called before attempting to load or negotiate shared modules between federated apps.
+  between federated apps.
 
 * type
 
