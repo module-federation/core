@@ -93,7 +93,7 @@
     "@nx/js": "17.2.8",
     "@nx/linter": "17.2.8",
     "@nx/next": "17.2.8",
-    "@nx/node": "17.2.8",
+    "@nx/node": "18.0.1",
     "@nx/react": "17.2.8",
     "@nx/rollup": "17.2.8",
     "@nx/storybook": "17.2.8",
