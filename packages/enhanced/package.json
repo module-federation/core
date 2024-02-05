@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "files": [
@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
-    "@module-federation/runtime-tools": "workspace:*"
+    "@module-federation/runtime-tools": "workspace:*",
+    "upath": "2.0.1"
   }
 }
