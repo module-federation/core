@@ -17,7 +17,7 @@ function safeGetLocalStorageItem() {
       return localStorage.getItem(BROWSER_LOG_KEY) === BROWSER_LOG_VALUE;
     }
   } catch (error) {
-    return typeof typeof document !== 'undefined';
+    return typeof document !== 'undefined';
   }
   return false;
 }
