@@ -1,0 +1,7 @@
+{
+  "name": "modernjs",
+  "private": true,
+  "dependencies": {
+    "@module-federation/node": "workspace:*"
+  }
+}

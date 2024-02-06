@@ -787,6 +787,12 @@ importers:
         specifier: workspace:*
         version: link:../../packages/utilities
 
+  apps/modernjs:
+    dependencies:
+      '@module-federation/node':
+        specifier: workspace:*
+        version: link:../../packages/node
+
   apps/node-host:
     dependencies:
       '@module-federation/node':
