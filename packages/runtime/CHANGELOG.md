@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 0.0.13
+
+### Patch Changes
+
+- 804447c: fix(runtime): use link to preload js
+- Updated dependencies [804447c]
+  - @module-federation/sdk@0.0.13
+
 ## 0.0.12
 
 ### Patch Changes
