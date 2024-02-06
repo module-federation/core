@@ -1,16 +1,14 @@
 {
-  "extends": "../../tsconfig.tmp.json",
-  "files": [],
-  "include": [],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
-  ],
+  "extends": "@modern-js/tsconfig/base",
   "compilerOptions": {
-    "esModuleInterop": true
-  }
+    "declaration": false,
+    "jsx": "preserve",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/*": ["./shared/*"]
+    }
+  },
+  "include": ["src", "shared", "config", "modern.config.ts"],
+  "exclude": ["**/node_modules"]
 }

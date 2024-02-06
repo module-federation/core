@@ -163,13 +163,14 @@ class ContainerPlugin {
     ) {
       compiler.options.output.enabledLibraryTypes.push(library.type);
     }
+    const hasSingleRuntimeChunk = compiler.options?.optimization?.runtimeChunk;
 
     new compiler.webpack.EntryPlugin(
       compiler.options.context || '',
       federationRuntimePluginInstance.entryFilePath,
       {
         name,
-        runtime,
+        runtime: hasSingleRuntimeChunk ? false : runtime,
       },
     ).apply(compiler);
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
@@ -183,7 +184,7 @@ class ContainerPlugin {
       const hasSingleRuntimeChunk =
         compilation.options?.optimization?.runtimeChunk;
       dep.loc = { name };
-
+      console.log(hasSingleRuntimeChunk);
       compilation.addEntry(
         compilation.options.context || '',
         //@ts-ignore

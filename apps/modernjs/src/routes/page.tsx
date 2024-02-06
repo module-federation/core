@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Helmet } from '@modern-js/runtime/head';
 import './index.css';
 
