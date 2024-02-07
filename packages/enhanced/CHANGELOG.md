@@ -1,5 +1,21 @@
 # [0.2.0-canary.5](https://github.com/module-federation/universe/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.0.13
+
+### Patch Changes
+
+- Updated dependencies [804447c]
+  - @module-federation/sdk@0.0.13
+  - @module-federation/runtime-tools@0.0.13
+
+## 0.0.12
+
+### Patch Changes
+
+- 4ca0c7b: fix(enhanced): use upath to against more edge cases between different OS
+  - @module-federation/sdk@0.0.12
+  - @module-federation/runtime-tools@0.0.12
+
 ## 0.0.11
 
 ### Patch Changes

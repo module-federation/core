@@ -17,6 +17,7 @@ function getLinkInfos(): Array<LinkInfo> {
   const linkInfos: Array<LinkInfo> = [...links].map((link) => ({
     type: link.getAttribute('as') || '',
     href: link.getAttribute('href') || '',
+    rel: link.getAttribute('rel') || '',
   }));
   return linkInfos;
 }
