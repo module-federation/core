@@ -9,7 +9,7 @@ import { retrieveHostConfig } from './configurations/hostPlugin';
 import { retrieveRemoteConfig } from './configurations/remotePlugin';
 import { HostOptions } from './interfaces/HostOptions';
 import { RemoteOptions } from './interfaces/RemoteOptions';
-import { createTypesArchive, downloadTypesArchive } from './lib/archiveHandler';
+import { createTestsArchive, downloadTypesArchive } from './lib/archiveHandler';
 import { cleanMocksFolder } from './lib/mocksClean';
 
 export const NativeFederationTestsRemote = createUnplugin(
@@ -35,7 +35,7 @@ export const NativeFederationTestsRemote = createUnplugin(
         try {
           await build(buildConfig);
 
-          await createTypesArchive(remoteOptions, compiledFilesFolder);
+          await createTestsArchive(remoteOptions, compiledFilesFolder);
 
           if (remoteOptions.deleteTestsFolder) {
             await rm(compiledFilesFolder, { recursive: true, force: true });
