@@ -63,8 +63,8 @@ importers:
         specifier: 0.25.7
         version: 0.25.7(typescript@5.3.3)
       undici:
-        specifier: 5.28.2
-        version: 5.28.2
+        specifier: 5.28.3
+        version: 5.28.3
       unplugin:
         specifier: 1.6.0
         version: 1.6.0
@@ -98,7 +98,7 @@ importers:
         version: 0.8.1
       '@builder.io/qwik':
         specifier: 1.3.1
-        version: 1.3.1(@types/node@18.19.10)(less@4.1.3)(stylus@0.59.0)(undici@5.28.2)
+        version: 1.3.1(@types/node@18.19.10)(less@4.1.3)(stylus@0.59.0)(undici@5.28.3)
       '@builder.io/qwik-city':
         specifier: 1.3.2
         version: 1.3.2(@types/node@18.19.10)(less@4.1.3)(rollup@2.79.1)(stylus@0.59.0)
@@ -2766,7 +2766,7 @@ packages:
       '@types/mdx': 2.0.10
       source-map: 0.7.4
       svgo: 3.1.0
-      undici: 5.28.2
+      undici: 5.28.3
       vfile: 6.0.1
       vite: 5.0.10(@types/node@18.19.10)(less@4.1.3)(stylus@0.59.0)
       vite-imagetools: 6.2.8(rollup@2.79.1)
@@ -2783,7 +2783,7 @@ packages:
       - terser
     dev: true
 
-  /@builder.io/qwik@1.3.1(@types/node@18.19.10)(less@4.1.3)(stylus@0.59.0)(undici@5.28.2):
+  /@builder.io/qwik@1.3.1(@types/node@18.19.10)(less@4.1.3)(stylus@0.59.0)(undici@5.28.3):
     resolution: {integrity: sha512-XbA/pzLVZJ7HXLApyk1jRVYTwZdHEq3vGcnOi/ZS7GKGvkEWKCRMWIV+5dVJKjBS0jxtYcj07w52HmkPbQiVMw==}
     engines: {node: '>=16.8.0 <18.0.0 || >=18.11'}
     hasBin: true
@@ -2791,7 +2791,7 @@ packages:
       undici: ^5.14.0
     dependencies:
       csstype: 3.1.3
-      undici: 5.28.2
+      undici: 5.28.3
       vite: 5.0.10(@types/node@18.19.10)(less@4.1.3)(stylus@0.59.0)
     transitivePeerDependencies:
       - '@types/node'
@@ -4026,7 +4026,7 @@ packages:
       cosmiconfig: 7.1.0
       remeda: 0.0.32
       semantic-release: 20.1.0(encoding@0.1.13)(typescript@5.3.3)
-      semantic-release-plugin-decorators: github.com/tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0)
+      semantic-release-plugin-decorators: git/github.com+tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0)
     transitivePeerDependencies:
       - encoding
       - nx
@@ -12216,7 +12216,7 @@ packages:
       '@babel/core': 7.23.6
       find-cache-dir: 4.0.0
       schema-utils: 4.2.0
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
     dev: true
 
   /babel-plugin-const-enum@1.2.0(@babel/core@7.23.6):
@@ -13858,7 +13858,7 @@ packages:
       normalize-path: 3.0.0
       schema-utils: 4.2.0
       serialize-javascript: 6.0.1
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
     dev: true
 
   /copy-webpack-plugin@11.0.0(webpack@5.88.2):
@@ -14145,7 +14145,7 @@ packages:
       postcss-modules-values: 4.0.0(postcss@8.4.32)
       postcss-value-parser: 4.2.0
       semver: 7.5.4
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
     dev: true
 
   /css-minimizer-webpack-plugin@5.0.1(esbuild@0.18.20)(webpack@5.89.0):
@@ -16701,7 +16701,7 @@ packages:
       semver: 7.5.4
       tapable: 2.2.1
       typescript: 5.3.3
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
     dev: true
 
   /fork-ts-checker-webpack-plugin@8.0.0(typescript@5.3.3)(webpack@5.89.0):
@@ -19662,7 +19662,7 @@ packages:
     dependencies:
       klona: 2.0.6
       less: 4.1.3
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
     dev: true
 
   /less@4.1.3:
@@ -19704,7 +19704,7 @@ packages:
       webpack:
         optional: true
     dependencies:
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
       webpack-sources: 3.2.3
     dev: true
 
@@ -20875,7 +20875,7 @@ packages:
       webpack: ^5.0.0
     dependencies:
       schema-utils: 4.2.0
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
     dev: true
 
   /mini-svg-data-uri@1.4.4:
@@ -23014,7 +23014,7 @@ packages:
       klona: 2.0.6
       postcss: 8.4.32
       semver: 7.5.4
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
     dev: true
 
   /postcss-merge-longhand@5.1.7(postcss@8.4.32):
@@ -23902,7 +23902,7 @@ packages:
     peerDependencies:
       '@builder.io/qwik': '>=1.3.1'
     dependencies:
-      '@builder.io/qwik': 1.3.1(@types/node@18.19.10)(less@4.1.3)(stylus@0.59.0)(undici@5.28.2)
+      '@builder.io/qwik': 1.3.1(@types/node@18.19.10)(less@4.1.3)(stylus@0.59.0)(undici@5.28.3)
     dev: true
 
   /rambda@7.5.0:
@@ -25397,7 +25397,7 @@ packages:
       klona: 2.0.6
       neo-async: 2.6.2
       sass: 1.69.5
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
     dev: true
 
   /sass@1.69.5:
@@ -26025,7 +26025,7 @@ packages:
       abab: 2.0.6
       iconv-lite: 0.6.3
       source-map-js: 1.0.2
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
     dev: true
 
   /source-map-resolve@0.5.3:
@@ -26569,7 +26569,7 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
     dependencies:
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
     dev: true
 
   /style-to-object@0.4.4:
@@ -26645,7 +26645,7 @@ packages:
       fast-glob: 3.3.2
       normalize-path: 3.0.0
       stylus: 0.59.0
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
     dev: true
 
   /stylus@0.59.0:
@@ -27400,7 +27400,7 @@ packages:
       semver: 7.5.4
       source-map: 0.7.4
       typescript: 5.3.3
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
     dev: true
 
   /ts-node@10.9.1(@swc/core@1.3.102)(@types/node@18.19.10)(typescript@5.1.6):
@@ -27847,8 +27847,8 @@ packages:
   /undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
-  /undici@5.28.2:
-    resolution: {integrity: sha512-wh1pHJHnUeQV5Xa8/kyQhO7WFa8M34l026L5P/+2TYiakvGy5Rdc8jWZVyG7ieht/0WgJLEd3kcU5gKx+6GC8w==}
+  /undici@5.28.3:
+    resolution: {integrity: sha512-3ItfzbrhDlINjaP0duwnNsKpDQk3acHI3gVJ1z4fmwMK31k5G9OVIAMLSIaP6w4FaGkaAkN6zaQO9LUvZ1t7VA==}
     engines: {node: '>=14.0'}
     dependencies:
       '@fastify/busboy': 2.1.0
@@ -28903,7 +28903,7 @@ packages:
       mime-types: 2.1.35
       range-parser: 1.2.1
       schema-utils: 4.2.0
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
     dev: true
 
   /webpack-dev-middleware@6.1.1(webpack@5.89.0):
@@ -28964,7 +28964,7 @@ packages:
       serve-index: 1.9.1
       sockjs: 0.3.24
       spdy: 4.0.2
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
       webpack-dev-middleware: 5.3.3(webpack@5.89.0)
       ws: 8.15.1
     transitivePeerDependencies:
@@ -29019,7 +29019,7 @@ packages:
     dependencies:
       html-webpack-plugin: 5.6.0(webpack@5.88.2)
       typed-assert: 1.0.9
-      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.18.20)
+      webpack: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.0)
     dev: true
 
   /webpack-virtual-modules@0.4.6:
@@ -29575,9 +29575,9 @@ packages:
       uglify-js: 3.14.5
     dev: true
 
-  github.com/tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0):
-    resolution: {tarball: https://codeload.github.com/tjg184/semantic-release-plugin-decorators/tar.gz/e3c3c66}
-    id: github.com/tjg184/semantic-release-plugin-decorators/e3c3c66
+  git/github.com+tjg184/semantic-release-plugin-decorators/e3c3c66(semantic-release@20.1.0):
+    resolution: {commit: e3c3c66, repo: git@github.com:tjg184/semantic-release-plugin-decorators.git, type: git}
+    id: git@github.com+tjg184/semantic-release-plugin-decorators/e3c3c66
     name: semantic-release-plugin-decorators
     version: 0.0.0-development
     peerDependencies:
