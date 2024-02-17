@@ -1,4 +1,4 @@
-import type { Compiler, sources } from 'webpack';
+import type { Compiler, Chunk } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import FederationRuntimeModule from './FederationRuntimeModule';
 import FederationInitModule from './FederationInitModule';
@@ -147,7 +147,6 @@ class FederationRuntimePlugin {
       prependEntry: (entry) => {
         entry['mfp-runtime-plugins'] = {
           import: [this.pluginsFilePath],
-          dependOn: ['federation-runtime'],
         };
         entry['federation-runtime'] = {
           import: [this.entryFilePath],
@@ -171,6 +170,19 @@ class FederationRuntimePlugin {
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation, { normalModuleFactory }) => {
+        let chunksRuntimePluginsDependsOn: Set<Chunk> | undefined = undefined;
+        compilation.hooks.afterOptimizeChunks.tap(
+          this.constructor.name,
+          (chunk) => {
+            const runtimePluginEntry = compilation.namedChunks.get(
+              'mfp-runtime-plugins',
+            );
+            if (runtimePluginEntry) {
+              chunksRuntimePluginsDependsOn =
+                runtimePluginEntry.getAllReferencedChunks();
+            }
+          },
+        );
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           this.constructor.name,
           (chunk, runtimeRequirements) => {
@@ -178,7 +190,6 @@ class FederationRuntimePlugin {
               return;
             }
             runtimeRequirements.add(RuntimeGlobals.interceptModuleExecution);
-            runtimeRequirements.add(RuntimeGlobals.ensureChunkIncludeEntries);
             runtimeRequirements.add(RuntimeGlobals.moduleCache);
             runtimeRequirements.add(RuntimeGlobals.compatGetDefaultExport);
             runtimeRequirements.add(federationGlobal);
@@ -192,7 +203,11 @@ class FederationRuntimePlugin {
             );
             compilation.addRuntimeModule(
               chunk,
-              new FederationInitModule(name, this.entryFilePath),
+              new FederationInitModule(
+                name,
+                this.entryFilePath,
+                chunksRuntimePluginsDependsOn,
+              ),
             );
           },
         );

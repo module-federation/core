@@ -9,69 +9,118 @@ class FederationInitModule extends RuntimeModule {
   constructor(
     public containerName: string,
     public entryFilePath: string,
+    public chunksRuntimePluginsDependsOn: Set<Chunk> | undefined,
   ) {
-    super('federation runtime init', RuntimeModule.STAGE_ATTACH);
+    super('federation runtime init', RuntimeModule.STAGE_TRIGGER);
   }
 
-  private chunkContainsContainerEntryModule(
+  private chunkContainsFederationRuntime(
     chunk: Chunk,
     compilation: Compilation,
-  ): Module | null {
-    let foundModule = null;
+  ): {
+    federationRuntimeModule: Module | null;
+    federationRuntimePluginModule: Module | null;
+  } {
+    let federationRuntimeModule: Module | null = null;
+    let federationRuntimePluginModule: Module | null = null;
     for (const module of compilation.chunkGraph.getChunkModulesIterable(
       chunk,
     )) {
-      if (module.identifier?.()?.includes('.federation/federation')) {
-        foundModule = module;
-        break;
+      if (
+        !federationRuntimeModule &&
+        module.identifier?.()?.includes('.federation/federation')
+      ) {
+        federationRuntimeModule = module;
+      } else if (
+        !federationRuntimePluginModule &&
+        module.identifier?.()?.includes('.federation/plugin')
+      ) {
+        federationRuntimePluginModule = module;
       }
+      if (federationRuntimeModule && federationRuntimePluginModule) break;
     }
-    return foundModule;
+    return { federationRuntimeModule, federationRuntimePluginModule };
   }
-
-  getModuleByInstance(): { moduleId: string | number; chunk: Chunk } | null {
-    if (!this.compilation || !this.chunk || !this.compilation.chunkGraph)
+  getModuleByInstance(): {
+    federationRuntimeModuleId: string | number | undefined;
+    runtimePluginModuleId: string | number | undefined;
+    chunk: Chunk;
+  } | null {
+    if (
+      !this.compilation ||
+      !this.chunk ||
+      !this.compilation.chunkGraph ||
+      !this.chunk.hasRuntime()
+    )
       return null;
-    const currentHasEntry =
-      this.chunk.hasRuntime() &&
-      this.chunkContainsContainerEntryModule(this.chunk, this.compilation);
-    if (currentHasEntry) {
-      const moduleId = this.compilation.chunkGraph.getModuleId(currentHasEntry);
-      if (moduleId !== undefined) {
-        return { moduleId, chunk: this.chunk };
-      }
+
+    const { federationRuntimeModule, federationRuntimePluginModule } =
+      this.chunkContainsFederationRuntime(this.chunk, this.compilation);
+    let runtimePluginModuleId: string | number | undefined;
+    let federationRuntimeModuleId: string | number | undefined;
+
+    if (federationRuntimeModule) {
+      federationRuntimeModuleId = this.compilation.chunkGraph.getModuleId(
+        federationRuntimeModule,
+      );
     }
-    return null;
+
+    if (federationRuntimePluginModule) {
+      runtimePluginModuleId = this.compilation.chunkGraph.getModuleId(
+        federationRuntimePluginModule,
+      );
+    }
+
+    return {
+      federationRuntimeModuleId,
+      runtimePluginModuleId,
+      chunk: this.chunk,
+    };
   }
   override generate(): string | null {
-    if (!this.compilation) return '';
-    const runtimePluginEntry = this.compilation.namedChunks.get(
-      'mfp-runtime-plugins',
-    );
-    const entryModule = this.getModuleByInstance();
-    if (!entryModule) return null;
-    const mfRuntimeModuleID = JSON.stringify(entryModule.moduleId);
-    const runtimePluginUrl = runtimePluginEntry
-      ? Template.asString([
-          `const runtimePluginUrl = __webpack_require__.p + __webpack_require__.u(${JSON.stringify(
-            runtimePluginEntry.id,
-          )});`,
-        ])
-      : '';
-    const loadRuntimePlugin = runtimePluginUrl
-      ? Template.asString([
-          `__webpack_require__.l(runtimePluginUrl, function(){`,
-          Template.indent(
-            `console.log("runtime plugins loaded from script loader");`,
-          ),
-          `})`,
-        ])
-      : '';
-    return Template.asString([
-      `__webpack_require__(${mfRuntimeModuleID});`,
-      runtimePluginUrl,
-      loadRuntimePlugin,
-    ]);
+    if (!this.compilation || !this.chunk) return '';
+    const moduleInstance = this.getModuleByInstance();
+
+    const federationRuntimeModuleId = moduleInstance?.federationRuntimeModuleId;
+    const runtimePluginModuleId = moduleInstance?.runtimePluginModuleId;
+
+    const requireStatements = [];
+
+    if (federationRuntimeModuleId) {
+      requireStatements.push(
+        `__webpack_require__(${JSON.stringify(federationRuntimeModuleId)});`,
+      );
+    }
+    const boundaryChunks = this.chunksRuntimePluginsDependsOn;
+
+    if (runtimePluginModuleId && boundaryChunks) {
+      const chunkConsumesStatements = Array.from(boundaryChunks)
+        .map(
+          (chunk) =>
+            `__webpack_require__.f.consumes(${JSON.stringify(
+              chunk.id || chunk.name,
+            )}, consumes);`,
+        )
+        .join('\n');
+
+      requireStatements.push(
+        Template.asString([
+          `var consumes = [];`,
+          `if(__webpack_require__.f && __webpack_require__.f.consumes){`,
+          Template.indent(chunkConsumesStatements),
+          `}`,
+          'console.log(consumes);',
+          `Promise.all(consumes).then(function() {`,
+          Template.indent([
+            `__webpack_require__(${JSON.stringify(runtimePluginModuleId)});`,
+          ]),
+          `});`,
+        ]),
+      );
+    }
+
+    return Template.asString(requireStatements);
   }
 }
+
 export default FederationInitModule;

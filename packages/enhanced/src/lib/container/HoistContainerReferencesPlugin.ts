@@ -91,6 +91,9 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
             const { chunkGraph } = compilation;
             const federationRuntimeChunk =
               compilation.namedChunks.get('federation-runtime');
+            const federationRuntimePlugins = compilation.namedChunks.get(
+              'mfp-runtime-plugins',
+            );
             if (!federationRuntimeChunk) return;
             // For each chunk that has a runtime, merge the federation-runtime chunk into it
             for (const chunk of chunks) {
@@ -103,6 +106,16 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
                   federationRuntimeChunk,
                   compilation,
                 );
+                if (
+                  federationRuntimePlugins &&
+                  chunk !== federationRuntimePlugins
+                ) {
+                  this.integrateChunks(
+                    chunk,
+                    federationRuntimePlugins,
+                    compilation,
+                  );
+                }
               }
             }
           },
@@ -117,8 +130,15 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
             // this plugin serves
             const federationRuntimeChunk =
               compilation.namedChunks.get('federation-runtime');
+
+            const federationRuntimePluginsChunk = compilation.namedChunks.get(
+              'mfp-runtime-plugins',
+            );
             if (federationRuntimeChunk)
               compilation.chunks.delete(federationRuntimeChunk);
+
+            if (federationRuntimePluginsChunk)
+              compilation.chunks.delete(federationRuntimePluginsChunk);
           },
         );
       },
