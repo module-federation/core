@@ -82,7 +82,7 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
     compiler.hooks.compilation.tap(
       'HoistContainerReferencesPlugin',
       (compilation: Compilation) => {
-        compilation.hooks.optimizeChunks.tap(
+        compilation.hooks.afterOptimizeChunks.tap(
           {
             name: 'HoistContainerReferencesPlugin',
             stage: 10, // advanced stage chunk optimization
@@ -109,7 +109,7 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
         );
 
         compilation.hooks.beforeChunkAssets.tap(
-          'MergeDuplicateChunksPlugin',
+          'HoistContainerReferencesPlugin',
           () => {
             // the federation-runtime chunk is integrated into multiple other runtime chunks, like main, or runtime.js
             // because this entrypoint is integrated using chunk group updates - this chunk cannot be emitted without causing multiple writes to same runtime
