@@ -8,7 +8,7 @@ const defaultOptions = {
   distFolder: './dist',
   deleteTestsFolder: true,
   additionalBundlerConfig: {},
-};
+} satisfies Partial<RemoteOptions>;
 
 const EXTENSIONS = ['ts', 'tsx', 'js', 'jsx', 'mjs'];
 

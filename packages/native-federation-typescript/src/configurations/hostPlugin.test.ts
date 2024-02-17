@@ -32,6 +32,7 @@ describe('hostPlugin', () => {
           moduleFederationConfig,
           typesFolder: '@mf-types',
           deleteTypesFolder: true,
+          maxRetries: 3,
         });
 
         expect(mapRemotesToDownload).toStrictEqual({
@@ -44,6 +45,7 @@ describe('hostPlugin', () => {
           moduleFederationConfig,
           typesFolder: 'custom-types',
           deleteTypesFolder: false,
+          maxRetries: 1,
         };
 
         const { hostOptions, mapRemotesToDownload } =
