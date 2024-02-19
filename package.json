@@ -78,7 +78,7 @@
     "@commitlint/cli": "^17.7.2",
     "@commitlint/config-conventional": "17.8.1",
     "@commitlint/config-nx-scopes": "^17.6.4",
-    "@commitlint/cz-commitlint": "^17.7.2",
+    "@commitlint/cz-commitlint": "^18.6.1",
     "@dqbd/tiktoken": "1.0.7",
     "@fontsource/roboto": "5.0.8",
     "@fontsource/roboto-mono": "5.0.15",
