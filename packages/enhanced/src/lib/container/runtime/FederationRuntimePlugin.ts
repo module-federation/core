@@ -11,7 +11,7 @@ import {
 import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '../constant';
-import type { ModuleFederationPluginOptions } from '../../../declarations/plugins/container/ModuleFederationPlugin';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -35,11 +35,11 @@ const RuntimePath = require.resolve('@module-federation/runtime', {
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class FederationRuntimePlugin {
-  options?: ModuleFederationPluginOptions;
+  options?: moduleFederationPlugin.ModuleFederationPluginOptions;
   entryFilePath: string;
   bundlerRuntimePath: string;
 
-  constructor(options?: ModuleFederationPluginOptions) {
+  constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options;
     this.entryFilePath = '';
     this.bundlerRuntimePath = BundlerRuntimePath;

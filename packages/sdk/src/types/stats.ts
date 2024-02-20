@@ -75,7 +75,7 @@ export type StatsRemote<T = StatsRemoteVal> =
 
 export interface StatsModuleInfo {
   name: string;
-  file: string;
+  file: string[];
 }
 
 export interface ManifestModuleInfos {
@@ -85,7 +85,7 @@ export interface ManifestModuleInfos {
 export interface StatsExpose {
   id: string;
   name: string;
-  path?: string; // 对线上已有数据兼容过渡至 2023-05-26
+  path?: string;
   file: string;
   requires: string[];
   assets: StatsAssets;

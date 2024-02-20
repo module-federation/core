@@ -1,0 +1,73 @@
+import { LOCAL_BUILD_VERSION } from './constant';
+import {
+  ContainerOptionsFormat,
+  NormalizeSimple,
+  NormalizeOptions,
+  ProcessFN,
+  ParsedContainerOptions,
+} from './types';
+
+function processFn<T, R>(
+  options: ContainerOptionsFormat<T>,
+  normalizeSimple: NormalizeSimple<R>,
+  normalizeOptions: NormalizeOptions<T, R>,
+  fn: ProcessFN<R>,
+): void {
+  const object = (obj: Record<string, string | string[] | T>): void => {
+    for (const [key, value] of Object.entries(obj)) {
+      if (typeof value === 'string') {
+        fn(key, normalizeSimple(value, key));
+      } else {
+        fn(key, normalizeOptions(value as T, key));
+      }
+    }
+  };
+
+  const array = (
+    items: (string | Record<string, string | string[] | T>)[],
+  ): void => {
+    for (const item of items) {
+      if (typeof item === 'string') {
+        fn(item, normalizeSimple(item, item));
+      } else if (item && typeof item === 'object') {
+        object(item as Record<string, string | string[] | T>);
+      } else {
+        throw new Error('Unexpected options format');
+      }
+    }
+  };
+
+  if (!options) {
+    return;
+  } else if (Array.isArray(options)) {
+    array(options);
+  } else if (typeof options === 'object') {
+    object(options);
+  } else {
+    throw new Error('Unexpected options format');
+  }
+}
+
+export function parseOptions<T, R>(
+  options: ContainerOptionsFormat<T>,
+  normalizeSimple: NormalizeSimple<R>,
+  normalizeOptions: NormalizeOptions<T, R>,
+): ParsedContainerOptions<R> {
+  const items: ParsedContainerOptions<R> = [];
+  processFn(options, normalizeSimple, normalizeOptions, (key, value) => {
+    items.push([key, value]);
+  });
+
+  return items;
+}
+
+export function getBuildVersion(): string {
+  return process.env['MF_BUILD_VERSION'] || LOCAL_BUILD_VERSION;
+}
+
+// RegExp for version string
+const VERSION_PATTERN_REGEXP: RegExp = /^([\d^=v<>~]|[*xX]$)/;
+
+export function isRequiredVersion(str: string): boolean {
+  return VERSION_PATTERN_REGEXP.test(str);
+}

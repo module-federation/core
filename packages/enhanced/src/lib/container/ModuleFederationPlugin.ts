@@ -7,7 +7,7 @@
 
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { ModuleFederationPluginOptions } from './ModuleFederationPluginTypes';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
@@ -35,11 +35,11 @@ const validate = createSchemaValidation(
 );
 
 class ModuleFederationPlugin implements WebpackPluginInstance {
-  private _options: ModuleFederationPluginOptions;
+  private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   /**
-   * @param {ModuleFederationPluginOptions} options options
+   * @param {moduleFederationPlugin.ModuleFederationPluginOptions} options options
    */
-  constructor(options: ModuleFederationPluginOptions) {
+  constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
     validate(options);
     this._options = options;
   }
