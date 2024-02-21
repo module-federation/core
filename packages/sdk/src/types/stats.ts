@@ -1,3 +1,4 @@
+import { ModuleType } from '../constant';
 import type { RemoteWithEntry, RemoteWithVersion } from './common';
 
 export type RemoteEntryType = 'esm' | 'global';
@@ -18,8 +19,10 @@ export interface BasicStatsMetaData {
   globalName: string;
   buildInfo: StatsBuildInfo;
   remoteEntry: ResourceInfo;
-  prefetchEntry: ResourceInfo;
+  prefetchEntry?: ResourceInfo;
   types: Omit<ResourceInfo, 'type'>;
+  type: ModuleType;
+  pluginVersion: string;
 }
 
 type StatsMetaDataWithGetPublicPath<T = BasicStatsMetaData> = T & {

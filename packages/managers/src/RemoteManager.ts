@@ -139,7 +139,7 @@ class RemoteManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
   }
 
   override init(
-    options: containerReferencePlugin.ContainerReferencePluginOptions,
+    options: moduleFederationPlugin.ModuleFederationPluginOptions,
   ): void {
     this.setOptions(options);
     this.normalizeOptions(options.remotes);

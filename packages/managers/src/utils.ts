@@ -65,6 +65,10 @@ export function getBuildVersion(): string {
   return process.env['MF_BUILD_VERSION'] || LOCAL_BUILD_VERSION;
 }
 
+export function getBuildName(): string | undefined {
+  return process.env['MF_BUILD_NAME'];
+}
+
 // RegExp for version string
 const VERSION_PATTERN_REGEXP: RegExp = /^([\d^=v<>~]|[*xX]$)/;
 

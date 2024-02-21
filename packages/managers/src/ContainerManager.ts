@@ -1,5 +1,7 @@
 import path from 'path';
+import { generateExposeFilename } from '@module-federation/sdk';
 import type {
+  containerPlugin,
   ManifestModuleInfos,
   moduleFederationPlugin,
 } from '@module-federation/sdk';
@@ -29,11 +31,55 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
     );
   }
 
-  get globalEntryName(): string {
-    const { name } = this.options;
-    const version = getBuildVersion();
+  get globalEntryName(): string | undefined {
+    const { name, library } = this.options;
 
-    return `__MF_${name}:${version}__`;
+    if (library) {
+      if (typeof library.name === 'string') {
+        return library.name;
+      }
+      return undefined;
+    }
+
+    return name;
+  }
+
+  get containerPluginExposesOptions(): containerPlugin.ContainerPluginOptions['exposes'] {
+    const { exposes } = this.options;
+    const parsedOptions = parseOptions(
+      exposes!,
+      (item, key) => ({
+        import: Array.isArray(item) ? item : [item],
+        name: generateExposeFilename(key, false),
+      }),
+      (item, key) => ({
+        import: Array.isArray(item.import) ? item.import : [item.import],
+        name: item.name || generateExposeFilename(key, false),
+      }),
+    );
+    // @ts-ignore
+    return parsedOptions;
+  }
+  // { '.' : './src/Button.jsx' } => { '__federation_expose_Component' : 'src/Buttton' }
+  get exposeFileNameImportMap(): Record<string, string> {
+    const { exposes } = this.options;
+    const parsedOptions = parseOptions(
+      exposes!,
+      (item, key) => ({
+        import: Array.isArray(item) ? item : [item],
+        name: generateExposeFilename(key, false),
+      }),
+      (item, key) => ({
+        import: Array.isArray(item.import) ? item.import : [item.import],
+        name: item.name || generateExposeFilename(key, false),
+      }),
+    );
+
+    return Object.keys(parsedOptions).reduce((sum, exposeKey) => {
+      const { name, import: importPath } = parsedOptions[exposeKey];
+      sum[name] = importPath;
+      return sum;
+    }, {});
   }
 
   // { '.' : './src/Button.jsx' } => { '.' : ['src/Button'] }

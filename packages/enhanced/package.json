@@ -33,6 +33,8 @@
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
     "@module-federation/runtime-tools": "workspace:*",
+    "@module-federation/manifest": "workspace:*",
+    "@module-federation/managers": "workspace:*",
     "upath": "2.0.1"
   }
 }

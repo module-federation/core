@@ -111,6 +111,11 @@ export type Shared = (SharedItem | SharedObject)[] | SharedObject;
  */
 export type SharedItem = string;
 
+export interface PluginManifestOptions {
+  filePath?: string;
+  disableAssetsAnalyze?: boolean;
+}
+
 export interface ModuleFederationPluginOptions {
   /**
    * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
@@ -156,6 +161,8 @@ export interface ModuleFederationPluginOptions {
    * Bundler runtime path
    */
   implementation?: string;
+
+  manifest?: boolean | PluginManifestOptions;
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.

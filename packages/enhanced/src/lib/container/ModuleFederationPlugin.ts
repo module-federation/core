@@ -14,6 +14,7 @@ import ContainerReferencePlugin from './ContainerReferencePlugin';
 import checkOptions from '../../schemas/container/ModuleFederationPlugin.check';
 import schema from '../../schemas/container/ModuleFederationPlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import { StatsPlugin } from '@module-federation/manifest';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -25,6 +26,7 @@ const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
 const validate = createSchemaValidation(
+  // TODO: remove checkOptions
   //eslint-disable-next-line
   checkOptions,
   () => schema,
@@ -111,6 +113,9 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         }).apply(compiler);
       }
     });
+
+    const pkg = require('../../../../package.json');
+    new StatsPlugin(options, { pluginVersion: pkg.version }).apply(compiler);
   }
 }
 

@@ -1,32 +1,27 @@
 import { Compiler, WebpackPluginInstance } from 'webpack';
-import { PluginOptions } from '@/types';
-import { StatsManager } from '@/managers/StatsManager';
-import { RemoteManager } from '@/managers/RemoteManager';
-import { SharedManager } from '@/managers/SharedManager';
-import { ManifestManager } from '@/managers/ManifestManager';
+import { moduleFederationPlugin } from '@module-federation/sdk';
+import { ManifestManager } from './ManifestManager';
+import { StatsManager } from './StatsManager';
 
 export class StatsPlugin implements WebpackPluginInstance {
   readonly name = 'StatsPlugin';
-  private _options: PluginOptions;
+  private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _statsManager: StatsManager;
   private _manifestManager: ManifestManager;
-  private _declarationFileName: string;
 
-  constructor(options: PluginOptions, declarationFileName: string) {
+  constructor(
+    options: moduleFederationPlugin.ModuleFederationPluginOptions,
+    { pluginVersion }: { pluginVersion: string },
+  ) {
     this._options = options;
     this._statsManager = new StatsManager();
-    this._statsManager.init(this._options);
+    this._statsManager.init(this._options, { pluginVersion });
     this._manifestManager = new ManifestManager();
     this._manifestManager.init(this._options);
-    this._declarationFileName = declarationFileName;
   }
 
   apply(compiler: Compiler): void {
     this._statsManager.validate(compiler);
-    const remoteManager = new RemoteManager();
-    remoteManager.init(this._options);
-    const sharedManager = new SharedManager();
-    sharedManager.init(this._options);
 
     compiler.hooks.thisCompilation.tap('generateStats', (compilation) => {
       compilation.hooks.processAssets.tapPromise(
@@ -36,13 +31,10 @@ export class StatsPlugin implements WebpackPluginInstance {
           stage: compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
         },
         async () => {
-          if (!this._options?.manifest?.disableGenerate) {
+          if (this._options.manifest) {
             const stats = await this._statsManager.generateStats(
               compiler,
               compilation,
-              {
-                declarationFileName: this._declarationFileName,
-              },
             );
             this._manifestManager.generateManifest({
               compilation,
