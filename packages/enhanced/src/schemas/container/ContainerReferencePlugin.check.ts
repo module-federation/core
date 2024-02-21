@@ -753,8 +753,7 @@ function validate36(
   data,
   { instancePath = '', parentData, parentDataProperty, rootData = data } = {},
 ) {
-  /*# sourceURL="file:///Users/bytedance/work/webpack/schemas/plugins/container/ContainerReferencePlugin.json" */ let vErrors =
-    null;
+  /*# sourceURL="" */ let vErrors = null;
   let errors = 0;
   if (errors === 0) {
     if (data && typeof data == 'object' && !Array.isArray(data)) {
