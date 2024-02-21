@@ -11,7 +11,7 @@ class FederationInitModule extends RuntimeModule {
     public entryFilePath: string,
     public chunksRuntimePluginsDependsOn: Set<Chunk> | undefined,
   ) {
-    super('federation runtime init', RuntimeModule.STAGE_TRIGGER);
+    super('federation runtime init', RuntimeModule.STAGE_ATTACH);
   }
 
   private chunkContainsFederationRuntime(
@@ -103,13 +103,13 @@ class FederationInitModule extends RuntimeModule {
         )
         .join('\n');
 
+      console.log(chunkConsumesStatements);
       requireStatements.push(
         Template.asString([
           `var consumes = [];`,
           `if(__webpack_require__.f && __webpack_require__.f.consumes){`,
           Template.indent(chunkConsumesStatements),
           `}`,
-          'console.log(consumes);',
           `Promise.all(consumes).then(function() {`,
           Template.indent([
             `__webpack_require__(${JSON.stringify(runtimePluginModuleId)});`,
