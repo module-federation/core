@@ -114,8 +114,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       }
     });
 
-    const pkg = require('../../../../package.json');
-    new StatsPlugin(options, { pluginVersion: pkg.version }).apply(compiler);
+    if (options.manifest) {
+      const pkg = require('../../../../package.json');
+      new StatsPlugin(options, { pluginVersion: pkg.version }).apply(compiler);
+    }
   }
 }
 

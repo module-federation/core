@@ -1,0 +1,15 @@
+{
+  "name": "3010-rspack-provider",
+  "version": "0.0.0",
+  "private": true,
+  "devDependencies": {
+    "@module-federation/core": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/typescript": "workspace:*",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
+    "react-refresh": "0.14.0"
+  },
+  "dependencies": {
+    "antd": "4.24.15"
+  }
+}
