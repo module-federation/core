@@ -33,7 +33,7 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
     const { name } = this.options;
     const version = getBuildVersion();
 
-    return `__VMOK_${name}:${version}__`;
+    return `__MF_${name}:${version}__`;
   }
 
   // { '.' : './src/Button.jsx' } => { '.' : ['src/Button'] }

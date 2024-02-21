@@ -40,7 +40,7 @@ class FederationRuntimePlugin {
   bundlerRuntimePath: string;
 
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
-    this.options = options;
+    this.options = { ...options };
     this.entryFilePath = '';
     this.bundlerRuntimePath = BundlerRuntimePath;
   }
