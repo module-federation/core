@@ -60,6 +60,7 @@ module.exports = composePlugins(
       runtimeChunk: false,
       minimize: false,
     };
+    config.output.publicPath = 'auto';
     // const mf = await withModuleFederation(defaultConfig);
     return config;
     /** @type {import('webpack').Configuration} */

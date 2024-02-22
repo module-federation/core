@@ -74,9 +74,9 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
         name: item.name || generateExposeFilename(key, false),
       }),
     );
-
-    return Object.keys(parsedOptions).reduce((sum, exposeKey) => {
-      const { name, import: importPath } = parsedOptions[exposeKey];
+    return parsedOptions.reduce((sum, item) => {
+      const [_exposeKey, exposeObj] = item;
+      const { name, import: importPath } = exposeObj;
       sum[name] = importPath;
       return sum;
     }, {});

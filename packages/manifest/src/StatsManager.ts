@@ -3,6 +3,7 @@
 /* eslint-disable max-depth */
 
 import path from 'path';
+import chalk from 'chalk';
 import {
   StatsShared,
   StatsExpose,
@@ -24,6 +25,7 @@ import {
   getAssetsByChunkIDs,
   getSharedModules,
   assert,
+  getFileNameWithOutExt,
 } from './utils';
 import {
   ContainerManager,
@@ -32,8 +34,7 @@ import {
   PKGJsonManager,
   utils,
 } from '@module-federation/managers';
-
-declare const __VERSION__: string;
+import { PLUGIN_IDENTIFIER } from './constants';
 
 class StatsManager {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions = {};
@@ -81,7 +82,7 @@ class StatsManager {
       );
       assert(remoteEntryNameChunk, 'Can not get remoteEntry chunk!');
       assert(
-        remoteEntryNameChunk.files.size > 1,
+        remoteEntryNameChunk.files.size === 1,
         'remoteEntry chunk should not have multiple files!',
       );
 
@@ -284,7 +285,7 @@ class StatsManager {
       const remotes: StatsRemote[] = [];
       const remotesConsumerMap: { [remoteKey: string]: StatsRemote } = {};
 
-      const exposesMap: { [exposeKey: string]: StatsExpose } = {};
+      const exposesMap: { [exposeImportValue: string]: StatsExpose } = {};
       const sharedMap: { [sharedKey: string]: StatsShared } = {};
 
       const remoteManagerNormalizedOptions =
@@ -292,6 +293,31 @@ class StatsManager {
       const sharedManagerNormalizedOptions =
         this._sharedManager.normalizedOptions;
 
+      const initShared = (pkgName: string, pkgVersion: string) => {
+        if (sharedMap[pkgName]) {
+          return;
+        }
+        sharedMap[pkgName] = {
+          ...sharedManagerNormalizedOptions[pkgName],
+          id: `${name}:${pkgName}`,
+          name: pkgName,
+          version: pkgVersion,
+          assets: {
+            js: {
+              async: [],
+              sync: [],
+            },
+            css: {
+              async: [],
+              sync: [],
+            },
+          },
+          // @ts-ignore to deduplicate
+          usedIn: new Set(),
+        };
+      };
+
+      // handle remote/expose
       filteredModules.forEach(({ identifier, reasons, nameForCondition }) => {
         if (!identifier) {
           return;
@@ -351,7 +377,8 @@ class StatsManager {
         } else if (data[0] === 'container' && data[1] === 'entry') {
           JSON.parse(data[3]).forEach(([prefixedName, file]) => {
             const exposeModuleName = prefixedName.replace('./', '');
-            exposesMap[file.import[0]] = {
+            // TODO: support multiple import
+            exposesMap[getFileNameWithOutExt(file.import[0])] = {
               path: prefixedName,
               id: `${name}:${exposeModuleName}`,
               name: exposeModuleName,
@@ -373,6 +400,7 @@ class StatsManager {
         }
       });
 
+      // handle shared
       filteredModules.forEach((mod) => {
         const { identifier, issuerName, reasons, moduleType } = mod;
         if (!identifier) {
@@ -392,51 +420,10 @@ class StatsManager {
             pkgName = data[2];
             pkgVersion = sharedManagerNormalizedOptions[pkgName].version;
           }
-
-          sharedMap[pkgName] = {
-            ...sharedMap[pkgName],
-            ...sharedManagerNormalizedOptions[pkgName],
-            id: name!,
-            name: pkgName,
-            version: pkgVersion,
-            assets: {
-              js: {
-                async: [],
-                sync: [],
-              },
-              css: {
-                async: [],
-                sync: [],
-              },
-            },
-            // @ts-ignore to deduplicate
-            usedIn: new Set(),
-          };
-          if (issuerName) {
-            // This is a hack
-            if (exposesMap[issuerName]) {
-              // @ts-ignore to deduplicate
-              exposesMap[issuerName].requires.add(pkgName);
-              // @ts-ignore to deduplicate
-              sharedMap[pkgName].usedIn.add(issuerName);
-            }
-          }
-          if (reasons) {
-            reasons.forEach(({ module }) => {
-              // filters out entrypoints
-              if (module) {
-                if (exposesMap[module]) {
-                  // @ts-ignore to deduplicate
-                  exposesMap[module].requires.add(pkgName);
-                  // @ts-ignore to deduplicate
-                  sharedMap[pkgName].usedIn.add(module);
-                }
-              }
-            });
-          }
+          initShared(pkgName, pkgVersion);
         }
 
-        if (moduleType === 'vmok-consume-shared-module') {
+        if (moduleType === 'consume-shared-module') {
           const data = identifier.split('|');
           let pkgVersion = '';
           const pkgName = data[2];
@@ -444,45 +431,45 @@ class StatsManager {
           if (data[3].startsWith('=')) {
             pkgVersion = data[3].replace('=', '');
           } else {
-            pkgVersion = sharedManagerNormalizedOptions[pkgName].version;
+            if (sharedManagerNormalizedOptions[pkgName]) {
+              pkgVersion = sharedManagerNormalizedOptions[pkgName].version;
+            } else {
+              const fullPkgName = pkgName.split('/').slice(0, -1).join('/');
+              // react-dom/
+              if (sharedManagerNormalizedOptions[`${fullPkgName}/`]) {
+                if (sharedManagerNormalizedOptions[fullPkgName]) {
+                  pkgVersion =
+                    sharedManagerNormalizedOptions[fullPkgName].version;
+                } else {
+                  pkgVersion =
+                    sharedManagerNormalizedOptions[`${fullPkgName}/`].version;
+                }
+              }
+            }
           }
 
-          sharedMap[pkgName] = {
-            ...sharedManagerNormalizedOptions[pkgName],
-            id: pkgName,
-            name: pkgName,
-            version: pkgVersion,
-            assets: {
-              js: {
-                async: [],
-                sync: [],
-              },
-              css: {
-                async: [],
-                sync: [],
-              },
-            },
-            // @ts-ignore to deduplicate
-            usedIn: new Set(),
-          };
+          initShared(pkgName, pkgVersion);
+
           if (issuerName) {
-            // This is a hack
-            if (exposesMap[issuerName]) {
-              // @ts-ignore to deduplicate
-              exposesMap[issuerName].requires.add(pkgName);
-              // @ts-ignore to deduplicate
-              sharedMap[pkgName].usedIn.add(issuerName);
+            if (exposesMap[getFileNameWithOutExt(issuerName)]) {
+              const expose = exposesMap[getFileNameWithOutExt(issuerName)];
+              // @ts-ignore use Set to deduplicate
+              expose.requires.add(pkgName);
+              // @ts-ignore use Set to deduplicate
+              sharedMap[pkgName].usedIn.add(expose.path);
             }
           }
           if (reasons) {
-            reasons.forEach(({ module }) => {
+            reasons.forEach(({ resolvedModule }) => {
               // filters out entrypoints
-              if (module) {
-                if (exposesMap[module]) {
+              if (resolvedModule) {
+                if (exposesMap[getFileNameWithOutExt(resolvedModule)]) {
+                  const expose =
+                    exposesMap[getFileNameWithOutExt(resolvedModule)];
                   // @ts-ignore to deduplicate
-                  exposesMap[module].requires.add(pkgName);
+                  expose.requires.add(pkgName);
                   // @ts-ignore to deduplicate
-                  sharedMap[pkgName].usedIn.add(module);
+                  sharedMap[pkgName].usedIn.add(expose.path);
                 }
               }
             });
@@ -608,7 +595,9 @@ class StatsManager {
     } = compiler.options;
 
     if (typeof publicPath !== 'string') {
-      console.error('PublicPath can only be string!');
+      console.error(
+        chalk`{bold {red [ ${PLUGIN_IDENTIFIER} ]: PublicPath can only be string, but got ${publicPath}}}`,
+      );
       process.exit(1);
     }
   }

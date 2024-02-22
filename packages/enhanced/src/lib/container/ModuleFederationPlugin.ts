@@ -26,9 +26,8 @@ const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
 const validate = createSchemaValidation(
-  // TODO: remove checkOptions
-  //eslint-disable-next-line
-  checkOptions,
+  // just use schema to validate
+  () => false,
   () => schema,
   {
     name: 'Module Federation Plugin',

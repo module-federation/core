@@ -1,4 +1,5 @@
 import { Chunk, Compilation, StatsCompilation, StatsModule } from 'webpack';
+import path from 'path';
 import { StatsAssets } from '@module-federation/sdk';
 import { PLUGIN_IDENTIFIER } from './constants';
 
@@ -181,9 +182,13 @@ export function assert(condition: any, msg: string): asserts condition {
 }
 
 export function error(msg: string | Error | unknown): never {
-  throw new Error(`${PLUGIN_IDENTIFIER}: ${msg}`);
+  throw new Error(`[ ${PLUGIN_IDENTIFIER} ]: ${msg}`);
 }
 
 export function isDev(): boolean {
   return process.env['NODE_ENV'] === 'development';
+}
+
+export function getFileNameWithOutExt(str: string): string {
+  return str.replace(path.extname(str), '');
 }
