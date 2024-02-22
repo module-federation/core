@@ -2,18 +2,14 @@
 /* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable max-depth */
 
-import path from 'path';
 import chalk from 'chalk';
 import {
-  StatsShared,
-  StatsExpose,
   StatsRemote,
   StatsBuildInfo,
   BasicStatsMetaData,
   StatsMetaData,
   Stats,
   StatsAssets,
-  StatsRemoteVal,
   StatsFileName,
   moduleFederationPlugin,
   simpleJoinRemoteEntry,
@@ -25,7 +21,6 @@ import {
   getAssetsByChunkIDs,
   getSharedModules,
   assert,
-  getFileNameWithOutExt,
 } from './utils';
 import {
   ContainerManager,
@@ -35,11 +30,13 @@ import {
   utils,
 } from '@module-federation/managers';
 import { PLUGIN_IDENTIFIER } from './constants';
+import { ModuleHandler } from './ModuleHandler';
 
 class StatsManager {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions = {};
   private _publicPath?: string;
   private _pluginVersion?: string;
+  private _bundler: 'webpack' | 'rspack' = 'webpack';
   private _containerManager: ContainerManager = new ContainerManager();
   private _remoteManager: RemoteManager = new RemoteManager();
   private _sharedManager: SharedManager = new SharedManager();
@@ -75,14 +72,17 @@ class StatsManager {
         return '';
       }
 
-      const remoteEntryPoint = compilation.entrypoints.get(name!);
+      assert(name, 'name is required');
+
+      const remoteEntryPoint = compilation.entrypoints.get(name);
       assert(remoteEntryPoint, 'Can not get remoteEntry entryPoint!');
-      const remoteEntryNameChunk = remoteEntryPoint.chunks.find(
-        (c) => c.name && c.name === name,
-      );
+
+      const remoteEntryNameChunk = compilation.namedChunks.get(name);
+
       assert(remoteEntryNameChunk, 'Can not get remoteEntry chunk!');
+      debugger;
       assert(
-        remoteEntryNameChunk.files.size === 1,
+        Array.from(remoteEntryNameChunk.files).length === 1,
         'remoteEntry chunk should not have multiple files!',
       );
 
@@ -191,12 +191,12 @@ class StatsManager {
         const chunk = findChunk(chunkID, compilation.chunks);
 
         manifestOverrideChunkIDMap[sharedModuleName].sync.add(chunkID);
-        chunk!.getAllInitialChunks().forEach((syncChunk) => {
+        Array.from(chunk!.getAllInitialChunks()).forEach((syncChunk) => {
           syncChunk.id &&
             manifestOverrideChunkIDMap[sharedModuleName].sync.add(syncChunk.id);
         });
 
-        chunk!.getAllAsyncChunks().forEach((asyncChunk) => {
+        Array.from(chunk!.getAllAsyncChunks()).forEach((asyncChunk) => {
           asyncChunk.id &&
             manifestOverrideChunkIDMap[sharedModuleName].async.add(
               asyncChunk.id,
@@ -282,200 +282,10 @@ class StatsManager {
       });
 
       const filteredModules = this._getFilteredModules(webpackStats);
-      const remotes: StatsRemote[] = [];
-      const remotesConsumerMap: { [remoteKey: string]: StatsRemote } = {};
-
-      const exposesMap: { [exposeImportValue: string]: StatsExpose } = {};
-      const sharedMap: { [sharedKey: string]: StatsShared } = {};
-
-      const remoteManagerNormalizedOptions =
-        this._remoteManager.normalizedOptions;
-      const sharedManagerNormalizedOptions =
-        this._sharedManager.normalizedOptions;
-
-      const initShared = (pkgName: string, pkgVersion: string) => {
-        if (sharedMap[pkgName]) {
-          return;
-        }
-        sharedMap[pkgName] = {
-          ...sharedManagerNormalizedOptions[pkgName],
-          id: `${name}:${pkgName}`,
-          name: pkgName,
-          version: pkgVersion,
-          assets: {
-            js: {
-              async: [],
-              sync: [],
-            },
-            css: {
-              async: [],
-              sync: [],
-            },
-          },
-          // @ts-ignore to deduplicate
-          usedIn: new Set(),
-        };
-      };
-
-      // handle remote/expose
-      filteredModules.forEach(({ identifier, reasons, nameForCondition }) => {
-        if (!identifier) {
-          return;
-        }
-        const data = identifier.split(' ');
-        if (data[0] === 'remote') {
-          if (data.length === 4) {
-            const moduleName = data[3].replace('./', '');
-            const remoteAlias = data[2].replace(
-              'webpack/container/reference/',
-              '',
-            );
-            const normalizedRemote =
-              remoteManagerNormalizedOptions[remoteAlias];
-            const basicRemote: StatsRemoteVal = {
-              alias: normalizedRemote.alias,
-              consumingGarfishModuleName: name,
-              garfishModuleName:
-                remoteManagerNormalizedOptions[remoteAlias].name,
-              moduleName,
-              // @ts-ignore to deduplicate
-              usedIn: new Set(),
-            };
-            if (!nameForCondition) {
-              return;
-            }
-            let remote: StatsRemote;
-            if ('version' in normalizedRemote) {
-              remote = {
-                ...basicRemote,
-                version: normalizedRemote.version,
-              };
-            } else {
-              remote = {
-                ...basicRemote,
-                entry: normalizedRemote.entry,
-              };
-            }
-
-            remotes.push(remote);
-            remotesConsumerMap[nameForCondition] = remote;
-          }
-          if (reasons) {
-            reasons.forEach(({ userRequest, resolvedModule, type }) => {
-              if (
-                userRequest &&
-                resolvedModule &&
-                remotesConsumerMap[userRequest]
-              ) {
-                // @ts-ignore to deduplicate
-                remotesConsumerMap[userRequest].usedIn.add(
-                  resolvedModule.replace('./', ''),
-                );
-              }
-            });
-          }
-        } else if (data[0] === 'container' && data[1] === 'entry') {
-          JSON.parse(data[3]).forEach(([prefixedName, file]) => {
-            const exposeModuleName = prefixedName.replace('./', '');
-            // TODO: support multiple import
-            exposesMap[getFileNameWithOutExt(file.import[0])] = {
-              path: prefixedName,
-              id: `${name}:${exposeModuleName}`,
-              name: exposeModuleName,
-              // @ts-ignore to deduplicate
-              requires: new Set(),
-              file: path.relative(process.cwd(), file.import[0]),
-              assets: {
-                js: {
-                  async: [],
-                  sync: [],
-                },
-                css: {
-                  async: [],
-                  sync: [],
-                },
-              },
-            };
-          });
-        }
+      const moduleHandler = new ModuleHandler(this._options, filteredModules, {
+        bundler: this._bundler,
       });
-
-      // handle shared
-      filteredModules.forEach((mod) => {
-        const { identifier, issuerName, reasons, moduleType } = mod;
-        if (!identifier) {
-          return;
-        }
-        if (moduleType === 'provide-module') {
-          const data = identifier.split(' ');
-          let pkgName, pkgVersion;
-          if (data[3].startsWith('@')) {
-            const splitInfo = data[3].split('@');
-            splitInfo[0] = '@';
-            pkgName = splitInfo[0] + splitInfo[1];
-            pkgVersion = splitInfo[2];
-          } else if (data[3].includes('@')) {
-            [pkgName, pkgVersion] = data[3].split('@');
-          } else {
-            pkgName = data[2];
-            pkgVersion = sharedManagerNormalizedOptions[pkgName].version;
-          }
-          initShared(pkgName, pkgVersion);
-        }
-
-        if (moduleType === 'consume-shared-module') {
-          const data = identifier.split('|');
-          let pkgVersion = '';
-          const pkgName = data[2];
-
-          if (data[3].startsWith('=')) {
-            pkgVersion = data[3].replace('=', '');
-          } else {
-            if (sharedManagerNormalizedOptions[pkgName]) {
-              pkgVersion = sharedManagerNormalizedOptions[pkgName].version;
-            } else {
-              const fullPkgName = pkgName.split('/').slice(0, -1).join('/');
-              // react-dom/
-              if (sharedManagerNormalizedOptions[`${fullPkgName}/`]) {
-                if (sharedManagerNormalizedOptions[fullPkgName]) {
-                  pkgVersion =
-                    sharedManagerNormalizedOptions[fullPkgName].version;
-                } else {
-                  pkgVersion =
-                    sharedManagerNormalizedOptions[`${fullPkgName}/`].version;
-                }
-              }
-            }
-          }
-
-          initShared(pkgName, pkgVersion);
-
-          if (issuerName) {
-            if (exposesMap[getFileNameWithOutExt(issuerName)]) {
-              const expose = exposesMap[getFileNameWithOutExt(issuerName)];
-              // @ts-ignore use Set to deduplicate
-              expose.requires.add(pkgName);
-              // @ts-ignore use Set to deduplicate
-              sharedMap[pkgName].usedIn.add(expose.path);
-            }
-          }
-          if (reasons) {
-            reasons.forEach(({ resolvedModule }) => {
-              // filters out entrypoints
-              if (resolvedModule) {
-                if (exposesMap[getFileNameWithOutExt(resolvedModule)]) {
-                  const expose =
-                    exposesMap[getFileNameWithOutExt(resolvedModule)];
-                  // @ts-ignore to deduplicate
-                  expose.requires.add(pkgName);
-                  // @ts-ignore to deduplicate
-                  sharedMap[pkgName].usedIn.add(expose.path);
-                }
-              }
-            });
-          }
-        }
-      });
+      const { remotes, exposesMap, sharedMap } = moduleHandler.collect();
 
       await Promise.all([
         new Promise<void>((resolve) => {
@@ -553,10 +363,15 @@ class StatsManager {
 
   init(
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
-    { pluginVersion }: { pluginVersion: string },
+    {
+      pluginVersion,
+      bundler,
+    }: { pluginVersion: string; bundler: 'webpack' | 'rspack' },
   ): void {
     this._options = options;
     this._pluginVersion = pluginVersion;
+    this._bundler = bundler;
+
     this._containerManager = new ContainerManager();
     this._containerManager.init(options);
     this._remoteManager = new RemoteManager();

@@ -11,11 +11,14 @@ export class StatsPlugin implements WebpackPluginInstance {
 
   constructor(
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
-    { pluginVersion }: { pluginVersion: string },
+    {
+      pluginVersion,
+      bundler,
+    }: { pluginVersion: string; bundler: 'webpack' | 'rspack' },
   ) {
     this._options = options;
     this._statsManager = new StatsManager();
-    this._statsManager.init(this._options, { pluginVersion });
+    this._statsManager.init(this._options, { pluginVersion, bundler });
     this._manifestManager = new ManifestManager();
     this._manifestManager.init(this._options);
   }

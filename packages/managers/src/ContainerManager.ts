@@ -57,8 +57,12 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
         name: item.name || generateExposeFilename(key, false),
       }),
     );
-    // @ts-ignore
-    return parsedOptions;
+
+    return parsedOptions.reduce((sum, item) => {
+      const [exposeKey, exposeObj] = item;
+      sum[exposeKey] = exposeObj;
+      return sum;
+    }, {});
   }
   // { '.' : './src/Button.jsx' } => { '__federation_expose_Component' : 'src/Buttton' }
   get exposeFileNameImportMap(): Record<string, string> {

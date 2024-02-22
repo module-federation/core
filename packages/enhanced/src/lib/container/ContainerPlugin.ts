@@ -12,7 +12,6 @@ import type { containerPlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import checkOptions from '../../schemas/container/ContainerPlugin.check';
 import schema from '../../schemas/container/ContainerPlugin';
-import { ContainerManager } from '@module-federation/managers';
 
 type ExcludeUndefined<T> = T extends undefined ? never : T;
 type NonUndefined<T> = ExcludeUndefined<T>;
@@ -45,9 +44,6 @@ class ContainerPlugin {
     validate(options);
     this.name = PLUGIN_NAME;
 
-    const containerManager = new ContainerManager();
-    containerManager.init(options);
-
     this._options = {
       name: options.name,
       shareScope: options.shareScope || 'default',
@@ -57,7 +53,18 @@ class ContainerPlugin {
       },
       runtime: options.runtime,
       filename: options.filename || undefined,
-      exposes: containerManager.containerPluginExposesOptions,
+      //@ts-ignore
+      exposes: parseOptions(
+        options.exposes,
+        (item) => ({
+          import: Array.isArray(item) ? item : [item],
+          name: undefined,
+        }),
+        (item) => ({
+          import: Array.isArray(item.import) ? item.import : [item.import],
+          name: item.name || undefined,
+        }),
+      ),
       runtimePlugins: options.runtimePlugins,
     };
   }

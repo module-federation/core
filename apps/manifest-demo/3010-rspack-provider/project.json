@@ -5,36 +5,16 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
+      "executor": "@nx/rspack:rspack",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "babel",
+        "target": "web",
         "outputPath": "apps/manifest-demo/3010-rspack-provider/dist",
-        "index": "apps/manifest-demo/3010-rspack-provider/src/index.html",
-        "baseHref": "/",
+        "indexHtml": "apps/manifest-demo/3010-rspack-provider/src/index.html",
         "main": "apps/manifest-demo/3010-rspack-provider/src/index.ts",
         "tsConfig": "apps/manifest-demo/3010-rspack-provider/tsconfig.app.json",
-        "styles": [],
-        "scripts": [],
-        "webpackConfig": "apps/manifest-demo/3010-rspack-provider/webpack.config.js",
-        "babelUpwardRootMode": true
-      },
-      "configurations": {
-        "development": {
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
-        },
-        "production": {
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": true,
-          "vendorChunk": false
-        }
+        "rspackConfig": "apps/manifest-demo/3010-rspack-provider/rspack.config.js"
       },
       "dependsOn": [
         {
@@ -44,12 +24,13 @@
       ]
     },
     "serve": {
-      "executor": "@nx/webpack:dev-server",
+      "executor": "@nx/rspack:dev-server",
       "defaultConfiguration": "production",
       "options": {
+        "rspackConfig": "apps/manifest-demo/3010-rspack-provider/rspack.config.js",
         "buildTarget": "3010-rspack-provider:build",
         "hmr": true,
-        "port": 3007
+        "port": 3010
       },
       "configurations": {
         "development": {

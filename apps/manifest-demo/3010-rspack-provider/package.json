@@ -3,11 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "devDependencies": {
-    "@module-federation/core": "workspace:*",
-    "@module-federation/enhanced": "workspace:*",
-    "@module-federation/typescript": "workspace:*",
+    "@module-federation/enhanced-rspack": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
-    "react-refresh": "0.14.0"
+    "react-refresh": "0.14.0",
+    "@rspack/plugin-react-refresh": "0.5.4"
   },
   "dependencies": {
     "antd": "4.24.15"

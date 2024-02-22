@@ -15,6 +15,7 @@ import checkOptions from '../../schemas/container/ModuleFederationPlugin.check';
 import schema from '../../schemas/container/ModuleFederationPlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { StatsPlugin } from '@module-federation/manifest';
+import { ContainerManager } from '@module-federation/managers';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -71,6 +72,12 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
     }
 
+    if (options.manifest && useContainerPlugin) {
+      const containerManager = new ContainerManager();
+      containerManager.init(options);
+      options.exposes = containerManager.containerPluginExposesOptions;
+    }
+
     if (
       library &&
       !compiler.options.output.enabledLibraryTypes?.includes(library.type)
@@ -115,7 +122,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
 
     if (options.manifest) {
       const pkg = require('../../../../package.json');
-      new StatsPlugin(options, { pluginVersion: pkg.version }).apply(compiler);
+      new StatsPlugin(options, {
+        pluginVersion: pkg.version,
+        bundler: 'webpack',
+      }).apply(compiler);
     }
   }
 }
