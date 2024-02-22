@@ -14,7 +14,7 @@ import { TEMP_DIR } from '../constant';
 import type { ModuleFederationPluginOptions } from '../../../declarations/plugins/container/ModuleFederationPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 
-const { RuntimeGlobals, Template, EntryPlugin } = require(
+const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
 const { mkdirpSync } = require(
@@ -286,13 +286,6 @@ class FederationRuntimePlugin {
         },
       );
     }
-
-    this.ensureFiles();
-    new EntryPlugin(
-      compiler.context,
-      this.pluginsFilePath,
-      'mfp-runtime-plugins',
-    ).apply(compiler);
 
     this.prependEntry(compiler);
     this.injectRuntime(compiler);
