@@ -58,7 +58,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     this._patchChunkSplit(compiler, options.name);
 
     options.implementation = options.implementation || RuntimeToolsPath;
-    debugger;
+
     if (options.manifest && options.exposes) {
       const containerManager = new ContainerManager();
       containerManager.init(options);
@@ -69,17 +69,17 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       options as unknown as ModuleFederationPluginOptions,
     ).apply(compiler);
 
-    const runtimeESMPath = require.resolve(
-      '@module-federation/runtime/dist/index.esm.js',
-      { paths: [options.implementation] },
-    );
+    // const runtimeESMPath = require.resolve(
+    //   '@module-federation/runtime/dist/index.esm.js',
+    //   { paths: [options.implementation] },
+    // );
 
-    compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
-      compiler.options.resolve.alias = {
-        ...compiler.options.resolve.alias,
-        '@module-federation/runtime$': runtimeESMPath,
-      };
-    });
+    // compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
+    //   compiler.options.resolve.alias = {
+    //     ...compiler.options.resolve.alias,
+    //     '@module-federation/runtime$': runtimeESMPath,
+    //   };
+    // });
 
     if (options.manifest) {
       new StatsPlugin(options, {

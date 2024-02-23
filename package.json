@@ -102,6 +102,8 @@
     "@nx/web": "17.2.8",
     "@nx/webpack": "17.2.8",
     "@nx/rspack": "17.2.8",
+    "@rspack/dev-server": "^0.5.4",
+    "@rspack/core": "^0.5.4",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "@rollup/plugin-alias": "5.1.0",
     "@rollup/plugin-replace": "5.0.5",

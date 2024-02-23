@@ -61,29 +61,44 @@ module.exports = composePlugins(
         manifest: true,
       }),
     );
-    // config.optimization.runtimeChunk = false;
-    // config.plugins.forEach((p) => {
-    //   if (p.constructor.name === 'ModuleFederationPlugin') {
-    //     //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-    //     p._options.library = undefined;
-    //   }
-    // });
+    (config.devServer = {
+      port: 3010,
+      devMiddleware: {
+        writeToDisk: true,
+      },
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods':
+          'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+        'Access-Control-Allow-Headers':
+          'X-Requested-With, content-type, Authorization',
+      },
+    }),
+      // config.optimization.runtimeChunk = false;
+      // config.plugins.forEach((p) => {
+      //   if (p.constructor.name === 'ModuleFederationPlugin') {
+      //     //Temporary workaround - https://github.com/nrwl/nx/issues/16983
+      //     p._options.library = undefined;
+      //   }
+      // });
 
-    // //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-    // config.experiments = { outputModule: false };
+      // //Temporary workaround - https://github.com/nrwl/nx/issues/16983
+      // config.experiments = { outputModule: false };
 
-    // // Update the webpack config as needed here.
-    // // e.g. `config.plugins.push(new MyPlugin())`
-    // config.output = {
-    //   ...config.output,
-    //   scriptType: 'text/javascript',
-    // };
-    config.optimization = {
-      ...config.optimization,
-      runtimeChunk: false,
-      minimize: false,
-    };
+      // // Update the webpack config as needed here.
+      // // e.g. `config.plugins.push(new MyPlugin())`
+      // config.output = {
+      //   ...config.output,
+      //   scriptType: 'text/javascript',
+      // };
+      (config.optimization = {
+        ...config.optimization,
+        runtimeChunk: false,
+        minimize: false,
+      });
+    config.output.clean = true;
     // const mf = await withModuleFederation(defaultConfig);
+
     return config;
   },
 );

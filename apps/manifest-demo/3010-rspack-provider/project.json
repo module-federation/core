@@ -29,16 +29,16 @@
       "options": {
         "rspackConfig": "apps/manifest-demo/3010-rspack-provider/rspack.config.js",
         "buildTarget": "3010-rspack-provider:build",
-        "hmr": true,
         "port": 3010
       },
       "configurations": {
         "development": {
-          "buildTarget": "3010-rspack-provider:build:development"
+          "buildTarget": "3010-rspack-provider:build:development",
+          "port": 3010
         },
         "production": {
           "buildTarget": "3010-rspack-provider:build:production",
-          "hmr": false
+          "port": 3010
         }
       }
     },
