@@ -22,17 +22,19 @@ export const performReload = async (shouldReload: any) => {
   }
 
   const gs = new Function('return globalThis')();
-  const entries = Array.from(gs.nextEntryCache);
+  const entries = Array.from(gs.nextEntryCache || []);
 
-  // no need to clear whole cache
-  // Object.keys(req.cache).forEach((key) => {
-  //   //delete req.cache[key];
-  //   if (requireCacheRegex.test(key)) {
-  //     delete req.cache[key];
-  //   }
-  // });
+  if (!gs.nextEntryCache) {
+    Object.keys(req.cache).forEach((key) => {
+      //delete req.cache[key];
+      if (requireCacheRegex.test(key)) {
+        delete req.cache[key];
+      }
+    });
+  } else {
+    gs.nextEntryCache.clear();
+  }
 
-  gs.nextEntryCache.clear();
   for (const entry of entries) {
     //@ts-ignore
     delete __non_webpack_require__.cache[entry];
