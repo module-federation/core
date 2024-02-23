@@ -51,6 +51,7 @@ describe('3000-home/', () => {
   describe('3000-home/checkout', () => {
     beforeEach(() => {
       cy.visit('/checkout');
+      cy.visit('/');
       cy.visit('/checkout');
     });
 
