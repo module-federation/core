@@ -79,7 +79,7 @@
     "@commitlint/config-conventional": "17.8.1",
     "@commitlint/config-nx-scopes": "^17.6.4",
     "@commitlint/cz-commitlint": "^17.7.2",
-    "@dqbd/tiktoken": "1.0.7",
+    "@dqbd/tiktoken": "1.0.13",
     "@fontsource/roboto": "5.0.8",
     "@fontsource/roboto-mono": "5.0.15",
     "@goestav/nx-semantic-release": "1.0.0",
