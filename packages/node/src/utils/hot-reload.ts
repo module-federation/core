@@ -22,12 +22,7 @@ export const performReload = (shouldReload: any) => {
   }
 
   const gs = new Function('return globalThis')();
-
-  for (const entry of gs.nextEntryCache) {
-    delete require.cache[entry];
-  }
-  gs.nextEntryCache.clear();
-
+  // no need to clear whole cache
   // Object.keys(req.cache).forEach((key) => {
   //   //delete req.cache[key];
   //   if (requireCacheRegex.test(key)) {
@@ -46,6 +41,23 @@ export const performReload = (shouldReload: any) => {
     }
   });
   gs.__FEDERATION__.__INSTANCES__ = [];
+
+  // reinit the runtime here
+  //@ts-ignore
+  __webpack_require__.federation.instance =
+    __webpack_require__.federation.runtime.init(
+      __webpack_require__.federation.initOptions,
+    );
+  //@ts-ignore
+  if (__webpack_require__.federation.attachShareScopeMap) {
+    //@ts-ignore
+    __webpack_require__.federation.attachShareScopeMap(__webpack_require__);
+  }
+  //@ts-ignore
+  if (__webpack_require__.federation.installInitialConsumes) {
+    //@ts-ignore
+    __webpack_require__.federation.installInitialConsumes();
+  }
   return true;
 };
 
