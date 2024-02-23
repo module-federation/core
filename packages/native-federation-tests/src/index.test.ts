@@ -132,7 +132,9 @@ describe('index', () => {
       ) as UnpluginOptions;
       await expect(unplugin.writeBundle?.()).resolves.not.toThrow();
 
-      expect(dirTree(options.mocksFolder)).toMatchObject({
+      const testsFolder = join(projectRoot, options.mocksFolder);
+
+      expect(dirTree(testsFolder)).toMatchObject({
         name: '__mocks__',
         children: [
           {

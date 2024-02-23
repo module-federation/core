@@ -33,6 +33,7 @@ describe('hostPlugin', () => {
           testsFolder: '@mf-tests',
           deleteTestsFolder: true,
           mocksFolder: './__mocks__',
+          maxRetries: 3,
         });
 
         expect(mapRemotesToDownload).toStrictEqual({
@@ -46,6 +47,7 @@ describe('hostPlugin', () => {
           mocksFolder: './__mocks__',
           testsFolder: 'custom-tests',
           deleteTestsFolder: false,
+          maxRetries: 1,
         };
 
         const { hostOptions, mapRemotesToDownload } =

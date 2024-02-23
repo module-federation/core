@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.0.10",
+  "version": "0.0.13",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "files": [
@@ -28,11 +28,11 @@
     }
   },
   "devDependencies": {
-    "@module-federation/webpack-bundler-runtime": "workspace:*",
-    "terser-webpack-plugin": "^5.3.10"
+    "@module-federation/webpack-bundler-runtime": "workspace:*"
   },
   "dependencies": {
+    "@module-federation/sdk": "workspace:*",
     "@module-federation/runtime-tools": "workspace:*",
-    "@module-federation/sdk": "workspace:*"
+    "upath": "2.0.1"
   }
 }
