@@ -107,7 +107,7 @@ class ManifestManager {
 
     if (isDev()) {
       console.log(
-        chalk`{bold {greenBright [ ${PLUGIN_IDENTIFIER} ]} {greenBright Vmok Link:} {cyan ${publicPath}${manifestFileName}}}`,
+        chalk`{bold {greenBright [ ${PLUGIN_IDENTIFIER} ]} {greenBright Manifest Link:} {cyan ${publicPath}${manifestFileName}}}`,
       );
     }
   }

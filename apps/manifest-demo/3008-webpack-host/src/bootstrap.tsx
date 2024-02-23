@@ -6,12 +6,12 @@ import * as ReactDOM from 'react-dom/client';
 
 import App from './App';
 init({
-  name: 'runtime_host',
+  name: 'manifest_host',
   remotes: [
     {
-      name: 'runtime_remote2',
+      name: 'rspack_provider',
       alias: 'dynamic-remote',
-      entry: 'http://localhost:3007/remoteEntry.js',
+      entry: 'http://localhost:3010/mf-manifest.json',
     },
   ],
   plugins: [customPlugin()],

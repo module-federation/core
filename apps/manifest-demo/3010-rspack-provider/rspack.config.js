@@ -17,35 +17,40 @@ module.exports = composePlugins(
       context.context.root,
       'apps/manifest-demo/3010-rspack-provider',
     );
-    config.module.rules.push({
-      test: /\.tsx$/,
-      use: {
-        loader: 'builtin:swc-loader',
-        options: {
-          sourceMap: true,
-          jsc: {
-            parser: {
-              syntax: 'typescript',
-              tsx: true,
-            },
-            transform: {
-              react: {
-                runtime: 'automatic',
+    // @nx/rspack not sync the latest rspack changes currently, so just override rules
+    config.module.rules = [
+      {
+        test: /\.tsx$/,
+        use: {
+          loader: 'builtin:swc-loader',
+          options: {
+            sourceMap: true,
+            jsc: {
+              parser: {
+                syntax: 'typescript',
+                tsx: true,
+              },
+              transform: {
+                react: {
+                  runtime: 'automatic',
+                },
               },
             },
           },
         },
+        type: 'javascript/auto',
       },
-      type: 'javascript/auto',
-    });
+    ];
     config.resolve = {
       extensions: ['*', '.js', '.jsx', '.tsx', '.ts'],
       tsConfigPath: path.resolve(__dirname, 'tsconfig.app.json'),
     };
+    // publicPath must be specific url
+    config.output.publicPath = 'http://localhost:3010/';
+
     config.plugins.push(
       new ModuleFederationPlugin({
-        name: 'runtime_remote2',
-        // library: { type: 'var', name: 'runtime_remote' },
+        name: 'rspack_provider',
         filename: 'remoteEntry.js',
         exposes: {
           './ButtonOldAnt': './src/components/ButtonOldAnt',
@@ -62,6 +67,10 @@ module.exports = composePlugins(
       }),
     );
     (config.devServer = {
+      // devDeps are installed in root package.json , so shared.version can not be gotten
+      client: {
+        overlay: false,
+      },
       port: 3010,
       devMiddleware: {
         writeToDisk: true,
@@ -74,30 +83,12 @@ module.exports = composePlugins(
           'X-Requested-With, content-type, Authorization',
       },
     }),
-      // config.optimization.runtimeChunk = false;
-      // config.plugins.forEach((p) => {
-      //   if (p.constructor.name === 'ModuleFederationPlugin') {
-      //     //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-      //     p._options.library = undefined;
-      //   }
-      // });
-
-      // //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-      // config.experiments = { outputModule: false };
-
-      // // Update the webpack config as needed here.
-      // // e.g. `config.plugins.push(new MyPlugin())`
-      // config.output = {
-      //   ...config.output,
-      //   scriptType: 'text/javascript',
-      // };
       (config.optimization = {
         ...config.optimization,
         runtimeChunk: false,
         minimize: false,
       });
     config.output.clean = true;
-    // const mf = await withModuleFederation(defaultConfig);
 
     return config;
   },
