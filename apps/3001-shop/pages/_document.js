@@ -20,13 +20,6 @@ class MyDocument extends Document {
 
     const initialProps = await Document.getInitialProps(ctx);
     const chunks = await flushChunks();
-    // ctx?.res?.on('finish', () => {
-    //   revalidate().then((shouldUpdate) => {
-    //     if (shouldUpdate) {
-    //       console.log('should HMR', shouldUpdate);
-    //     }
-    //   });
-    // });
 
     return {
       ...initialProps,

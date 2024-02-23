@@ -12,7 +12,7 @@ class MyDocument extends Document {
   static async getInitialProps(ctx) {
     if (ctx.pathname) {
       if (!ctx.pathname.endsWith('_error')) {
-        await revalidate(undefined, true).then((shouldUpdate) => {
+        await revalidate().then((shouldUpdate) => {
           if (shouldUpdate) {
             console.log('should HMR', shouldUpdate);
           }
@@ -23,13 +23,13 @@ class MyDocument extends Document {
     const initialProps = await Document.getInitialProps(ctx);
 
     const chunks = await flushChunks();
-    ctx?.res?.on('finish', () => {
-      // revalidate().then((shouldUpdate) => {
-      //   if (shouldUpdate) {
-      //     console.log('should HMR', shouldUpdate);
-      //   }
-      // });
-    });
+    // ctx?.res?.on('finish', () => {
+    //   // revalidate().then((shouldUpdate) => {
+    //   //   if (shouldUpdate) {
+    //   //     console.log('should HMR', shouldUpdate);
+    //   //   }
+    //   // });
+    // });
 
     return {
       ...initialProps,
