@@ -1,5 +1,7 @@
 import { FederationRuntimePlugin } from '@module-federation/runtime/types';
 import react from 'react';
+//@ts-ignore
+const mm = __webpack_require__.m;
 export default function (): FederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
@@ -108,7 +110,6 @@ export default function (): FederationRuntimePlugin {
         return args;
       }
       const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
-      console.log(args.pkgName);
       const host = GlobalFederation['__INSTANCES__'][0];
       if (!host) {
         return args;

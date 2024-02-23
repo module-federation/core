@@ -21,14 +21,20 @@ export const performReload = (shouldReload: any) => {
     req = __non_webpack_require__ as NodeRequire;
   }
 
-  Object.keys(req.cache).forEach((key) => {
-    //delete req.cache[key];
-    if (requireCacheRegex.test(key)) {
-      delete req.cache[key];
-    }
-  });
-
   const gs = new Function('return globalThis')();
+
+  for (const entry of gs.nextEntryCache) {
+    delete require.cache[entry];
+  }
+  gs.nextEntryCache.clear();
+
+  // Object.keys(req.cache).forEach((key) => {
+  //   //delete req.cache[key];
+  //   if (requireCacheRegex.test(key)) {
+  //     delete req.cache[key];
+  //   }
+  // });
+
   //@ts-ignore
   __webpack_require__.federation.instance.moduleCache.clear();
   gs.__GLOBAL_LOADING_REMOTE_ENTRY__ = {};
