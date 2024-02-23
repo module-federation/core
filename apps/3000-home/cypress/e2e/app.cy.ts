@@ -49,7 +49,10 @@ describe('3000-home/', () => {
   });
 
   describe('3000-home/checkout', () => {
-    beforeEach(() => cy.visit('/checkout'));
+    beforeEach(() => {
+      cy.visit('/checkout');
+      cy.visit('/checkout');
+    });
 
     describe('Welcome message', () => {
       it('should display welcome message', () => {
