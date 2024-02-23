@@ -7,6 +7,7 @@ import {
   normalizeRuntimeInitOptionsWithOutShared,
   modifyEntry,
   createHash,
+  normalizeToPosixPath,
 } from './utils';
 import fs from 'fs';
 import path from 'path';
@@ -49,9 +50,9 @@ class FederationRuntimePlugin {
   }
 
   static getTemplate(bundlerRuntimePath: string) {
-    const normalizedBundlerRuntimePath = bundlerRuntimePath.replaceAll(
-      '\\',
-      '/',
+    // internal runtime plugin
+    const normalizedBundlerRuntimePath = normalizeToPosixPath(
+      bundlerRuntimePath || BundlerRuntimePath,
     );
     return Template.asString([
       `import federation from '${normalizedBundlerRuntimePath}';`,
@@ -79,11 +80,11 @@ class FederationRuntimePlugin {
     if (Array.isArray(runtimePlugins)) {
       runtimePlugins.forEach((runtimePlugin, index) => {
         const runtimePluginName = `plugin_${index}`;
-        const runtimePluginPath = (
+        const runtimePluginPath = normalizeToPosixPath(
           path.isAbsolute(runtimePlugin)
             ? runtimePlugin
-            : path.join(process.cwd(), runtimePlugin)
-        ).replaceAll('\\', '/');
+            : path.join(process.cwd(), runtimePlugin),
+        );
 
         runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
         runtimePluginNames.push(runtimePluginName);

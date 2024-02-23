@@ -1,5 +1,27 @@
 # @module-federation/runtime
 
+## 0.0.13
+
+### Patch Changes
+
+- 804447c: fix(runtime): use link to preload js
+- Updated dependencies [804447c]
+  - @module-federation/sdk@0.0.13
+
+## 0.0.12
+
+### Patch Changes
+
+- @module-federation/sdk@0.0.12
+
+## 0.0.11
+
+### Patch Changes
+
+- b2ead7a: fix(runtime): nativeGlobal is undefined
+- 589a3bd: fix(runtime): runtime should not pre-register shared while strategy is 'loaded-first'
+  - @module-federation/sdk@0.0.11
+
 ## 0.0.10
 
 ### Patch Changes

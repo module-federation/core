@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/native-federation-typescript",
-  "version": "0.2.6",
+  "version": "0.3.0",
   "description": "Bundler agnostic unplugin to share federated types",
   "keywords": [
     "module federation",
@@ -54,9 +54,9 @@
   "dependencies": {
     "adm-zip": "^0.5.10",
     "ansi-colors": "^4.1.3",
-    "axios": "^1.3.4",
-    "rambda": "^7.5.0",
-    "unplugin": "^1.3.1"
+    "axios": "^1.6.7",
+    "rambda": "^9.0.1",
+    "unplugin": "^1.6.0"
   },
   "peerDependencies": {
     "typescript": "^4.9.0 || ^5.0.0",

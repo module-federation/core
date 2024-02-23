@@ -106,7 +106,7 @@ init({
     {
       name: '@demo/app2',
       alias: 'app2',
-      entry: "http://localhost:3006/remoteEntry.js",
+      entry: 'http://localhost:3006/remoteEntry.js',
     },
   ],
 });
@@ -229,32 +229,32 @@ init({
 // Filter resource information that contains ignore in the resource name
 // Only preload sub-dependent @demo/sub1-button modules
 preloadRemote([
-    {
-        nameOrAlias: '@demo/sub1',
-        filter(assetUrl) {
-            return assetUrl.indexOf('ignore') === -1;
-        },
-        depsRemote: [{ nameOrAlias: '@demo/sub1-button' }],
+  {
+    nameOrAlias: '@demo/sub1',
+    filter(assetUrl) {
+      return assetUrl.indexOf('ignore') === -1;
     },
+    depsRemote: [{ nameOrAlias: '@demo/sub1-button' }],
+  },
 ]);
 
 // Preload @demo/sub2 module
 // Preload all exposes under @demo/sub2
 // Preload the synchronous resources and asynchronous resources of @demo/sub2
 preloadRemote([
-    {
-        nameOrAlias: '@demo/sub2',
-        resourceCategory: 'all',
-    },
+  {
+    nameOrAlias: '@demo/sub2',
+    resourceCategory: 'all',
+  },
 ]);
 
 // Preload expose of @demo/sub3 module
 preloadRemote([
-    {
-        nameOrAlias: '@demo/sub3',
-        resourceCategory: 'all',
-        exposes: ['add'],
-    },
+  {
+    nameOrAlias: '@demo/sub3',
+    resourceCategory: 'all',
+    exposes: ['add'],
+  },
 ]);
 ```
 
@@ -262,58 +262,51 @@ preloadRemote([
 
 Lifecycle hooks for FederationHost interaction.
 
-* example
+- example
 
 ```ts
-import { init } from '@module-federation/runtime'
+import { init } from '@module-federation/runtime';
 import type { FederationRuntimePlugin } from '@module-federation/runtime';
 
-const runtimePlugin: () => FederationRuntimePlugin =
-  function () {
-    return {
-      name: 'my-runtime-plugin',
-      beforeInit(args) {
-        console.log('beforeInit: ', args);
-        return args;
-      },
-      errorLoadRemote(args) {
-        return args
-      },
-      beforeRequest(args) {
-        console.log('beforeRequest: ', args);
-        return args;
-      },
-      afterResolve(args) {
-        console.log('afterResolve', args);
-        return args;
-      },
-      onLoad(args) {
-        console.log('onLoad: ', args);
-        return args;
-      },
-      resolveShare(args) {
-        return args
-      },
-      async loadShare(args) {
-        console.log('loadShare:', args);
-      },
-      async beforeLoadShare(args) {
-        console.log('beforeloadShare:', args);
-        return args;
-      },
-    };
+const runtimePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'my-runtime-plugin',
+    beforeInit(args) {
+      console.log('beforeInit: ', args);
+      return args;
+    },
+    beforeRequest(args) {
+      console.log('beforeRequest: ', args);
+      return args;
+    },
+    afterResolve(args) {
+      console.log('afterResolve', args);
+      return args;
+    },
+    onLoad(args) {
+      console.log('onLoad: ', args);
+      return args;
+    },
+    async loadShare(args) {
+      console.log('loadShare:', args);
+    },
+    async beforeLoadShare(args) {
+      console.log('beforeloadShare:', args);
+      return args;
+    },
   };
+};
 
 init({
-    name: '@demo/app-main',
-    remotes: [
-        {
-            name: "@demo/app2",
-            entry: "http://localhost:3006/remoteEntry.js",
-            alias: "app2"
-        },
-    ],
-    plugins: [runtimePlugin()]
+  name: '@demo/app-main',
+  remotes: [
+    {
+      name: '@demo/app2',
+      entry: 'http://localhost:3006/remoteEntry.js',
+      alias: 'app2',
+    },
+  ],
+  plugins: [runtimePlugin()],
 });
 ```
 
@@ -323,17 +316,17 @@ init({
 
 Updates Federation Host configurations before the initialization process of remote containers.
 
-* type
+- type
 
 ```ts
-function beforeInit(args: BeforeInitOptions): BeforeInitOptions
+function beforeInit(args: BeforeInitOptions): BeforeInitOptions;
 
-type BeforeInitOptions ={
-    userOptions: UserOptions;
-    options: FederationRuntimeOptions;
-    origin: FederationHost;
-    shareInfo: ShareInfos;
-}
+type BeforeInitOptions = {
+  userOptions: UserOptions;
+  options: FederationRuntimeOptions;
+  origin: FederationHost;
+  shareInfo: ShareInfos;
+};
 
 interface FederationRuntimeOptions {
   id?: string;
@@ -352,15 +345,15 @@ interface FederationRuntimeOptions {
 
 Called during the initialization of remote containers.
 
-* type
+- type
 
 ```ts
-function init(args: InitOptions): void
+function init(args: InitOptions): void;
 
-type InitOptions ={
+type InitOptions = {
   options: FederationRuntimeOptions;
   origin: FederationHost;
-}
+};
 ```
 
 ### beforeRequest
@@ -369,16 +362,16 @@ type InitOptions ={
 
 Invoked before resolving a remote container, useful for injecting the container or updating something ahead of the lookup.
 
-* type
+- type
 
 ```ts
-async function beforeRequest(args: BeforeRequestOptions): Promise<BeforeRequestOptions>
+async function beforeRequest(args: BeforeRequestOptions): Promise<BeforeRequestOptions>;
 
-type BeforeRequestOptions ={
+type BeforeRequestOptions = {
   id: string;
   options: FederationRuntimeOptions;
   origin: FederationHost;
-}
+};
 ```
 
 ### afterResolve
@@ -387,12 +380,12 @@ type BeforeRequestOptions ={
 
 Called after resolving a container, allowing redirection or modification of resolved information.
 
-* type
+- type
 
 ```ts
-async function afterResolve(args: AfterResolveOptions): Promise<AfterResolveOptions>
+async function afterResolve(args: AfterResolveOptions): Promise<AfterResolveOptions>;
 
-type AfterResolveOptions ={
+type AfterResolveOptions = {
   id: string;
   pkgNameOrAlias: string;
   expose: string;
@@ -401,7 +394,7 @@ type AfterResolveOptions ={
   origin: FederationHost;
   remoteInfo: RemoteInfo;
   remoteSnapshot?: ModuleInfo;
-}
+};
 ```
 
 ### onLoad
@@ -410,12 +403,12 @@ type AfterResolveOptions ={
 
 Triggered once a federated module is loaded, allowing access and modification to the exports of the loaded file.
 
-* type
+- type
 
 ```ts
-async function onLoad(args: OnLoadOptions): Promise<void>
+async function onLoad(args: OnLoadOptions): Promise<void>;
 
-type OnLoadOptions ={
+type OnLoadOptions = {
   id: string;
   expose: string;
   pkgNameOrAlias: string;
@@ -425,12 +418,12 @@ type OnLoadOptions ={
   exposeModule: any;
   exposeModuleFactory: any;
   moduleInstance: Module;
-}
+};
 
 type ModuleOptions = {
-    remoteInfo: RemoteInfo;
-    host: FederationHost;
-}
+  remoteInfo: RemoteInfo;
+  host: FederationHost;
+};
 
 interface RemoteInfo {
   name: string;
@@ -449,17 +442,17 @@ interface RemoteInfo {
 
 Handles preloading logic for federated modules.
 
-* type
+- type
 
 ```ts
-function handlePreloadModule(args: HandlePreloadModuleOptions): void
+function handlePreloadModule(args: HandlePreloadModuleOptions): void;
 
-type HandlePreloadModuleOptions ={
+type HandlePreloadModuleOptions = {
   id: string;
   name: string;
   remoteSnapshot: ModuleInfo;
   preloadConfig: PreloadRemoteArgs;
-}
+};
 ```
 
 ### errorLoadRemote
@@ -468,71 +461,70 @@ type HandlePreloadModuleOptions ={
 
 Invoked if loading a federated module fails, enabling custom error handling.
 
-* type
+- type
 
 ```ts
-async function errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<void | unknown>
+async function errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<void | unknown>;
 
-type ErrorLoadRemoteOptions ={
+type ErrorLoadRemoteOptions = {
   id: string;
   error: unknown;
   from: 'build' | 'runtime';
   origin: FederationHost;
-}
+};
 ```
-* example 
+
+- example
 
 ```ts
-import { init, loadRemote } from '@module-federation/runtime'
+import { init, loadRemote } from '@module-federation/runtime';
 
 import type { FederationRuntimePlugin } from '@module-federation/runtime';
 
-const fallbackPlugin: () => FederationRuntimePlugin =
-  function () {
-    return {
-      name: 'fallback-plugin',
-      errorLoadRemote(args) {
-        const fallback = 'fallback'
-        return fallback;
-      },
-    };
+const fallbackPlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'fallback-plugin',
+    errorLoadRemote(args) {
+      const fallback = 'fallback';
+      return fallback;
+    },
   };
-
+};
 
 init({
-    name: '@demo/app-main',
-    remotes: [
-        {
-            name: "@demo/app2",
-            entry: "http://localhost:3006/remoteEntry.js",
-            alias: "app2"
-        },
-    ],
-    plugins: [fallbackPlugin()]
+  name: '@demo/app-main',
+  remotes: [
+    {
+      name: '@demo/app2',
+      entry: 'http://localhost:3006/remoteEntry.js',
+      alias: 'app2',
+    },
+  ],
+  plugins: [fallbackPlugin()],
 });
 
-loadRemote('app2/un-existed-module').then(mod=>{
+loadRemote('app2/un-existed-module').then((mod) => {
   expect(mod).toEqual('fallback');
-})
+});
 ```
 
 ### beforeLoadShare
 
 `AsyncWaterfallHook`
 
-  between federated apps.
+Called before attempting to load or negotiate shared modules between federated apps.
 
-* type
+- type
 
 ```ts
-async function beforeLoadShare(args: BeforeLoadShareOptions): Promise<BeforeLoadShareOptions>
+async function beforeLoadShare(args: BeforeLoadShareOptions): Promise<BeforeLoadShareOptions>;
 
-type BeforeLoadShareOptions ={
+type BeforeLoadShareOptions = {
   pkgName: string;
   shareInfo?: Shared;
   shared: Options['shared'];
   origin: FederationHost;
-}
+};
 ```
 
 ### resolveShare
@@ -541,70 +533,66 @@ type BeforeLoadShareOptions ={
 
 Allows manual resolution of shared module requests.
 
-* type
+- type
 
 ```ts
-function resolveShare(args: ResolveShareOptions): ResolveShareOptions
+function resolveShare(args: ResolveShareOptions): ResolveShareOptions;
 
-type ResolveShareOptions ={
+type ResolveShareOptions = {
   shareScopeMap: ShareScopeMap;
   scope: string;
   pkgName: string;
   version: string;
   GlobalFederation: Federation;
   resolver: () => Shared | undefined;
-}
+};
 ```
 
-* example 
+- example
 
 ```ts
-import { init, loadRemote } from '@module-federation/runtime'
+import { init, loadRemote } from '@module-federation/runtime';
 
 import type { FederationRuntimePlugin } from '@module-federation/runtime';
 
-const customSharedPlugin: () => FederationRuntimePlugin =
-  function () {
-    return {
-      name: 'custom-shared-plugin',
-      resolveShare(args) {
-        const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
+const customSharedPlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'custom-shared-plugin',
+    resolveShare(args) {
+      const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
 
-        if (
-          pkgName !== 'react' 
-        ) {
-          return args;
-        }
-
-        args.resolver = function () {
-          shareScopeMap[scope][pkgName][version] = window.React; // replace local share scope manually with desired module
-          return shareScopeMap[scope][pkgName][version];
-        };
+      if (pkgName !== 'react') {
         return args;
-      },
-    };
-  };
+      }
 
+      args.resolver = function () {
+        shareScopeMap[scope][pkgName][version] = window.React; // replace local share scope manually with desired module
+        return shareScopeMap[scope][pkgName][version];
+      };
+      return args;
+    },
+  };
+};
 
 init({
-    name: '@demo/app-main',
-    shared: {
-      react: {
-        version: '17.0.0',
-        scope: 'default',
-        lib: () => React,
-        shareConfig: {
-          singleton: true,
-          requiredVersion: '^17.0.0',
-        },
+  name: '@demo/app-main',
+  shared: {
+    react: {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => React,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
       },
     },
-    plugins: [customSharedPlugin()]
+  },
+  plugins: [customSharedPlugin()],
 });
 
-window.React = ()=> 'Desired Shared';
+window.React = () => 'Desired Shared';
 
-loadShare("react").then((reactFactory)=>{
+loadShare('react').then((reactFactory) => {
   expect(reactFactory()).toEqual(window.React());
 });
 ```
@@ -615,16 +603,16 @@ loadShare("react").then((reactFactory)=>{
 
 Invoked before any preload logic is executed by the preload handler.
 
-* type
+- type
 
 ```ts
-async function beforePreloadRemote(args: BeforePreloadRemoteOptions): BeforePreloadRemoteOptions
+async function beforePreloadRemote(args: BeforePreloadRemoteOptions): BeforePreloadRemoteOptions;
 
-type BeforePreloadRemoteOptions ={
+type BeforePreloadRemoteOptions = {
   preloadOps: Array<PreloadRemoteArgs>;
   options: Options;
   origin: FederationHost;
-}
+};
 ```
 
 ### generatePreloadAssets
@@ -633,19 +621,19 @@ type BeforePreloadRemoteOptions ={
 
 Called for generating preload assets based on configurations.
 
-* type
+- type
 
 ```ts
-async function generatePreloadAssets(args: GeneratePreloadAssetsOptions): Promise<PreloadAssets>
+async function generatePreloadAssets(args: GeneratePreloadAssetsOptions): Promise<PreloadAssets>;
 
-type GeneratePreloadAssetsOptions ={
+type GeneratePreloadAssetsOptions = {
   origin: FederationHost;
   preloadOptions: PreloadOptions[number];
   remote: Remote;
   remoteInfo: RemoteInfo;
   remoteSnapshot: ModuleInfo;
   globalSnapshot: GlobalModuleInfo;
-}
+};
 
 interface PreloadAssets {
   cssAssets: Array<string>;
@@ -662,35 +650,34 @@ Plugin system for module loading operations.
 
 `SyncHook`
 
-* type
+- type
 
 ```ts
-function createScript(args: CreateScriptOptions): HTMLScriptElement | void
+function createScript(args: CreateScriptOptions): HTMLScriptElement | void;
 
-type CreateScriptOptions ={
+type CreateScriptOptions = {
   url: string;
-}
+};
 ```
 
-* example
+- example
 
 ```ts
-import { init } from '@module-federation/runtime'
+import { init } from '@module-federation/runtime';
 import type { FederationRuntimePlugin } from '@module-federation/runtime';
 
-const changeScriptAttributePlugin: () => FederationRuntimePlugin =
-  function () {
-    return {
-      name: 'change-script-attribute',
-      createScript({ url }) {
-        if (url === testRemoteEntry) {
-          let script = document.createElement('script');
-          script.src = testRemoteEntry;
-          script.setAttribute('loader-hooks', 'isTrue');
-          script.setAttribute('crossorigin', 'anonymous');
-          return script;
-        }
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'change-script-attribute',
+    createScript({ url }) {
+      if (url === testRemoteEntry) {
+        let script = document.createElement('script');
+        script.src = testRemoteEntry;
+        script.setAttribute('loader-hooks', 'isTrue');
+        script.setAttribute('crossorigin', 'anonymous');
+        return script;
       }
-    };
+    },
   };
+};
 ```

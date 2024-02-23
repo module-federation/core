@@ -1,5 +1,38 @@
 # [8.1.0-canary.7](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.1.10
+
+### Patch Changes
+
+- Updated dependencies [804447c]
+  - @module-federation/runtime@0.0.13
+  - @module-federation/sdk@0.0.13
+  - @module-federation/node@2.0.11
+  - @module-federation/enhanced@0.0.13
+
+## 8.1.9
+
+### Patch Changes
+
+- Updated dependencies [4ca0c7b]
+  - @module-federation/enhanced@0.0.12
+  - @module-federation/node@2.0.10
+  - @module-federation/runtime@0.0.12
+  - @module-federation/sdk@0.0.12
+
+## 8.1.8
+
+### Patch Changes
+
+- 845bc52: fix(nextjs-mf): errorLoadRemote hook not to be overridden
+- Updated dependencies [b2ead7a]
+- Updated dependencies [589a3bd]
+- Updated dependencies [5c17bc4]
+  - @module-federation/runtime@0.0.11
+  - @module-federation/enhanced@0.0.11
+  - @module-federation/node@2.0.9
+  - @module-federation/sdk@0.0.11
+
 ## 8.1.7
 
 ### Patch Changes

@@ -130,5 +130,5 @@ export type RemoteEntryExports = {
     shareScope: ShareScopeMap[string],
     initScope?: InitScope,
     remoteEntryInitOPtions?: RemoteEntryInitOptions,
-  ) => void;
+  ) => void | Promise<void>;
 };
