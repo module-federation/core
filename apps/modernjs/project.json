@@ -33,7 +33,7 @@
         "commands": [
           {
             "command": "cd apps/modernjs; pnpm run dev",
-            "forwardAllArgs": true
+            "forwardAllArgs": false
           }
         ]
       }
@@ -61,11 +61,11 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :8080 || nx run modernjs:serve",
+            "command": "lsof -i :8080 || nx run modernjs:serve & echo 'done'",
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 4 && nx run modernjs:e2e",
+            "command": "sleep 20 && nx run modernjs:e2e",
             "forwardAllArgs": true
           }
         ]
