@@ -45,6 +45,7 @@ This plugin is used to download the concatenated components mock that will be us
     testsFolder?: string; // folder where all the files have been stored, default is '@mf-tests',
     mocksFolder?: string; // folder where the concatenated files will be stored, default is './__mocks__',
     deleteTestsFolder?: boolean; // indicate if the tests mock folder will be deleted before the job starts, default is 'true'
+    maxRetries?: number; // The number of times the plugin will try to download the mocks before failing, default is 3
 }
 ```
 

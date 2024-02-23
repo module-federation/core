@@ -51,45 +51,44 @@ describe('archiveHandler', () => {
       moduleFederationConfig: {},
       typesFolder: tmpDir,
       deleteTypesFolder: true,
+      maxRetries: 3,
     };
 
-    it('throws for unexisting url', async () => {
-      expect(
-        downloadTypesArchive(hostOptions)([tmpDir, 'https://foo.it']),
-      ).rejects.toThrowError(
-        'Network error: Unable to download federated mocks',
-      );
-      // .rejects.toThrowError('getaddrinfo ENOTFOUND foo.it')
-    });
+    const destinationFolder = 'typesHostFolder';
+    const fileToDownload = 'https://foo.it';
 
-    it('correctly extract downloaded archive', async () => {
-      const archivePath = join(tmpDir, 'typesHostFolder');
+    it('correctly extracts downloaded archive', async () => {
+      const archivePath = join(tmpDir, destinationFolder);
       const zip = new AdmZip();
       await zip.addLocalFolderPromise(tmpDir, {});
 
       axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
       await downloadTypesArchive(hostOptions)([
-        'typesHostFolder',
-        'https://foo.it',
+        destinationFolder,
+        fileToDownload,
       ]);
       expect(existsSync(archivePath)).toBeTruthy();
+      expect(axios.get).toHaveBeenCalledTimes(1);
+      expect(axios.get).toHaveBeenCalledWith(fileToDownload, {
+        responseType: 'arraybuffer',
+      });
     });
 
-    it('correctly handle exception', async () => {
+    it('correctly handles exception', async () => {
       const message = 'Rejected value';
 
-      const zip = new AdmZip();
-      await zip.addLocalFolderPromise(tmpDir, {});
+      axios.get = vi.fn().mockRejectedValue(new Error(message));
 
-      axios.get = vi.fn().mockRejectedValueOnce({ message });
-
-      expect(() =>
-        downloadTypesArchive(hostOptions)([
-          'typesHostFolder',
-          'https://foo.it',
-        ]),
-      ).rejects.toThrowError(message);
+      await expect(() =>
+        downloadTypesArchive(hostOptions)([destinationFolder, fileToDownload]),
+      ).rejects.toThrowError(
+        `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${message}'`,
+      );
+      expect(axios.get).toHaveBeenCalledTimes(hostOptions.maxRetries);
+      expect(axios.get).toHaveBeenCalledWith(fileToDownload, {
+        responseType: 'arraybuffer',
+      });
     });
   });
 });

@@ -3,4 +3,5 @@ export interface HostOptions {
   testsFolder?: string;
   mocksFolder?: string;
   deleteTestsFolder?: boolean;
+  maxRetries?: number;
 }
