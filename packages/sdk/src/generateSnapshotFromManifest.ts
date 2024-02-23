@@ -137,13 +137,12 @@ export function generateSnapshotFromManifest(
     })),
   };
 
-  if (manifest.metaData?.prefetchEntry) {
-    const { path, name, type } = manifest.metaData.prefetchEntry;
+  if (manifest.metaData?.prefetchInterface) {
+    const prefetchInterface = manifest.metaData.prefetchInterface;
 
     basicRemoteSnapshot = {
       ...basicRemoteSnapshot,
-      prefetchEntry: simpleJoinRemoteEntry(path, name),
-      prefetchEntryType: type,
+      prefetchInterface,
     };
   }
 
