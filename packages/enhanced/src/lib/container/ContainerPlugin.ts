@@ -184,7 +184,6 @@ class ContainerPlugin {
       const hasSingleRuntimeChunk =
         compilation.options?.optimization?.runtimeChunk;
       dep.loc = { name };
-      console.log(hasSingleRuntimeChunk);
       compilation.addEntry(
         compilation.options.context || '',
         //@ts-ignore

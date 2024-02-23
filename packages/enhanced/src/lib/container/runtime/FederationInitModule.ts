@@ -103,7 +103,6 @@ class FederationInitModule extends RuntimeModule {
         )
         .join('\n');
 
-      console.log(chunkConsumesStatements);
       requireStatements.push(
         Template.asString([
           `var consumes = [];`,
