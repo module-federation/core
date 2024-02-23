@@ -3,7 +3,8 @@ import { HostOptions } from '../interfaces/HostOptions';
 const defaultOptions = {
   typesFolder: '@mf-types',
   deleteTypesFolder: true,
-};
+  maxRetries: 3,
+} satisfies Partial<HostOptions>;
 
 const retrieveRemoteStringUrl = (remote: string) => {
   const splittedRemote = remote.split('@');

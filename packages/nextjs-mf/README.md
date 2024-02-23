@@ -257,16 +257,16 @@ const SampleComponent = lazy(() => import('next2/sampleComponent'));
 
 import Sample from 'next2/sampleComponent';
 ```
-## RuntimePlugins 
+
+## RuntimePlugins
+
 To provide extensibility and "middleware" for federation, you can refer to `@module-federation/runtime`
 
 ```js
 // next.config.js
 new NextFederationPlugin({
-  runtimePlugins: [
-    require.resolve('./path/to/myRuntimePlugin.js')
-  ]
-})
+  runtimePlugins: [require.resolve('./path/to/myRuntimePlugin.js')],
+});
 ```
 
 ## Utilities

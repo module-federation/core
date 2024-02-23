@@ -9,7 +9,7 @@ import { RemoteOptions } from '../interfaces/RemoteOptions';
 const retrieveTestsZipPath = (remoteOptions: Required<RemoteOptions>) =>
   join(remoteOptions.distFolder, `${remoteOptions.testsFolder}.zip`);
 
-export const createTypesArchive = async (
+export const createTestsArchive = async (
   remoteOptions: Required<RemoteOptions>,
   compiledFilesFolder: string,
 ) => {
@@ -20,25 +20,38 @@ export const createTypesArchive = async (
 
 const downloadErrorLogger =
   (destinationFolder: string, fileToDownload: string) => (reason: Error) => {
-    reason.message = ansiColors.red(
-      `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}', skipping...`,
-    );
-    throw reason;
+    throw {
+      ...reason,
+      message: `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}'`,
+    };
   };
 
-export const downloadTypesArchive =
-  (hostOptions: Required<HostOptions>) =>
-  async ([destinationFolder, fileToDownload]: string[]) => {
-    try {
-      const response = await axios.get(fileToDownload, {
-        responseType: 'arraybuffer',
-      });
+export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
+  let retries = 0;
+  return async ([destinationFolder, fileToDownload]: string[]) => {
+    const destinationPath = join(hostOptions.mocksFolder, destinationFolder);
 
-      const destinationPath = join(hostOptions.mocksFolder, destinationFolder);
+    while (retries++ < hostOptions.maxRetries) {
+      try {
+        const response = await axios
+          .get(fileToDownload, { responseType: 'arraybuffer' })
+          .catch(downloadErrorLogger(destinationFolder, fileToDownload));
 
-      const zip = new AdmZip(Buffer.from(response.data));
-      zip.extractAllTo(destinationPath, true);
-    } catch (error) {
-      downloadErrorLogger(destinationFolder, fileToDownload)(error as Error);
+        const zip = new AdmZip(Buffer.from(response.data));
+        zip.extractAllTo(destinationPath, true);
+        break;
+      } catch (error: any) {
+        console.error(
+          ansiColors.red(
+            `Error during types archive download: ${
+              error?.message || 'unknown error'
+            }`,
+          ),
+        );
+        if (retries >= hostOptions.maxRetries) {
+          throw error;
+        }
+      }
     }
   };
+};

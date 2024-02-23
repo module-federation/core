@@ -206,6 +206,14 @@ export class FederationHost {
       ],
       HTMLScriptElement | void
     >(),
+    createLink: new SyncHook<
+      [
+        {
+          url: string;
+        },
+      ],
+      HTMLLinkElement | void
+    >(),
     // only work for manifest , so not open to the public yet
     fetch: new AsyncHook<
       [string, RequestInit],
@@ -673,7 +681,8 @@ export class FederationHost {
       );
       if (
         !activeVersion ||
-        (!activeVersion.loaded &&
+        (activeVersion.strategy !== 'loaded-first' &&
+          !activeVersion.loaded &&
           (Boolean(!eager) !== !activeVersionEager
             ? eager
             : hostName > activeVersion.from))
@@ -701,7 +710,6 @@ export class FederationHost {
         register(shareName, shared);
       }
     });
-
     if (strategy === 'version-first') {
       this.options.remotes.forEach((remote) => {
         if (remote.shareScope === shareScopeName) {
