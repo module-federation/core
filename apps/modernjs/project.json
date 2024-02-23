@@ -61,7 +61,7 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :8080 || nx run modernjs:serve",
+            "command": "lsof -i :8080 || nx run modernjs:serve && echo 'done'",
             "forwardAllArgs": false
           },
           {
