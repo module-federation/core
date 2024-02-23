@@ -1,7 +1,5 @@
 import { FederationRuntimePlugin } from '@module-federation/runtime/types';
 import react from 'react';
-//@ts-ignore
-const mm = __webpack_require__.m;
 export default function (): FederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
