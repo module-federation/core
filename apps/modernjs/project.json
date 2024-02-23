@@ -5,71 +5,73 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
-      "defaultConfiguration": "production",
+      "executor": "nx:run-commands",
       "options": {
-        "target": "node",
-        "compiler": "tsc",
-        "outputPath": "apps/modernjs/dist",
-        "main": "apps/modernjs/src/main.js",
-        "tsConfig": "apps/modernjs/tsconfig.app.json",
-        "assets": ["apps/modernjs/src/assets"],
-        "webpackConfig": "apps/modernjs/webpack.config.js"
-      },
-      "configurations": {
-        "development": {},
-        "production": {}
-      },
-      "dependsOn": [
-        {
-          "target": "build",
-          "dependencies": true
-        }
-      ]
+        "dependsOn": [
+          {
+            "target": "build",
+            "dependencies": true
+          }
+        ],
+        "commands": [
+          {
+            "command": "cd apps/modernjs; pnpm run build",
+            "forwardAllArgs": true
+          }
+        ]
+      }
     },
     "serve": {
-      "executor": "@nx/js:node",
-      "defaultConfiguration": "development",
-      "dependsOn": [
-        {
-          "target": "build",
-          "dependencies": true
-        }
-      ],
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": ["modernjs:build", "node-remote:build"]
+        "dependsOn": [
+          {
+            "target": "build",
+            "dependencies": true
+          }
+        ],
+        "commands": [
+          {
+            "command": "cd apps/modernjs; pnpm run dev",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/modernjs/cypress.config.ts",
+        "testingType": "e2e",
+        "baseUrl": "http://localhost:8080",
+        "browser": "chrome"
       },
       "configurations": {
         "development": {
-          "buildTarget": "modernjs:build:development"
-        },
-        "production": {
-          "buildTarget": "modernjs:build:production"
+          "runnerUi": true,
+          "browser": "electron",
+          "exit": false,
+          "watch": true
         }
       }
     },
-    "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+    "test:e2e": {
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/modernjs/**/*.ts"]
-      }
-    },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "apps/modernjs/jest.config.ts",
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
+        "parallel": true,
+        "commands": [
+          {
+            "command": "lsof -i :8080 || nx run modernjs:serve",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "sleep 4 && nx run modernjs:e2e",
+            "forwardAllArgs": true
+          }
+        ]
       }
     }
   },
-  "tags": []
+  "tags": [],
+  "implicitDependencies": ["typescript"]
 }

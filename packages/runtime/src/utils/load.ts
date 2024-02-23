@@ -72,7 +72,6 @@ export async function loadEntryScript({
         2. ${remoteEntryKey} cannot be used to get remoteEntry exports in the window object.
       `,
         );
-        console.log(entryExports);
 
         return entryExports;
       })
