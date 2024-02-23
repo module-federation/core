@@ -1,11 +1,9 @@
 import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
-// import HotReloader from 'next/dist/server/dev/hot-reloader-webpack'
 import {
   revalidate,
   FlushedChunks,
   flushChunks,
-  performReload,
 } from '@module-federation/nextjs-mf/utils';
 
 class MyDocument extends Document {
@@ -23,13 +21,6 @@ class MyDocument extends Document {
     const initialProps = await Document.getInitialProps(ctx);
 
     const chunks = await flushChunks();
-    // ctx?.res?.on('finish', () => {
-    //   // revalidate().then((shouldUpdate) => {
-    //   //   if (shouldUpdate) {
-    //   //     console.log('should HMR', shouldUpdate);
-    //   //   }
-    //   // });
-    // });
 
     return {
       ...initialProps,
