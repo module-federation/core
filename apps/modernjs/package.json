@@ -1,5 +1,5 @@
 {
-  "name": "mjs",
+  "name": "modernjs",
   "version": "0.1.0",
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
