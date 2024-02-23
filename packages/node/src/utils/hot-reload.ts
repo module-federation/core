@@ -45,7 +45,9 @@ export const performReload = (shouldReload: any) => {
   // reinit the runtime here
   //@ts-ignore
   __webpack_require__.federation.instance =
+    //@ts-ignore
     __webpack_require__.federation.runtime.init(
+      //@ts-ignore
       __webpack_require__.federation.initOptions,
     );
   //@ts-ignore

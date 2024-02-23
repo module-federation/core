@@ -49,6 +49,7 @@ export async function fixImageLoader(
             'const name = __webpack_require__.federation.instance.name',
             `const container = globalThisVal['__FEDERATION__']['__INSTANCES__'].find(
               (instance) => {
+              console.log(instance);
                 if (!instance.moduleCache.has(name)) return;
                 const container = instance.moduleCache.get(name);
                 if (!container.remoteInfo) return;
