@@ -162,6 +162,13 @@ export const revalidate = (
   fetchModule: any = getFetchModule() || (() => {}),
   force: boolean = false,
 ) => {
+  const gs = new Function('return globalThis')();
+  for (const entry of gs.nextEntryCache) {
+    //@ts-ignore
+    delete __non_webpack_require__.cache[entry];
+  }
+  gs.nextEntryCache.clear();
+
   const remotesFromAPI = getAllKnownRemotes();
   //@ts-ignore
   return new Promise((res) => {
