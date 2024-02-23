@@ -143,7 +143,7 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
     );
     return this._manifestModuleInfos;
   }
-  // { '.' : './src/Button.jsx' } => { index: './src/Button.jsx' }
+  // { '.' : './src/Button.jsx' } => { index: ['./src/Button.jsx'] }
   get webpackEntry(): EntryObject {
     return Object.values(this.manifestModuleInfos).reduce((sum, cur) => {
       const entry =

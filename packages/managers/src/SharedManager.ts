@@ -40,7 +40,7 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
     return this._normalizedOptions;
   }
 
-  private _findPkg(
+  findPkg(
     name: string,
     shareConfig: sharePlugin.SharedConfig,
   ): {
@@ -119,7 +119,7 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
 
     sharedOptions.forEach((item) => {
       const [sharedName, sharedOptions] = item;
-      const pkgInfo = this._findPkg(sharedName, sharedOptions);
+      const pkgInfo = this.findPkg(sharedName, sharedOptions);
       const sharedConfig = this.transformSharedConfig(
         sharedOptions[sharedName],
       );

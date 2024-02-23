@@ -31,7 +31,7 @@ function getEntry(
 }
 
 class RemoteManager extends BasicPluginOptionsManager<moduleFederationPlugin.ModuleFederationPluginOptions> {
-  private _normalizedOptions: NormalizedRemote = {};
+  normalizedOptions: NormalizedRemote = {};
   private _pkgJsonManager: PKGJsonManager = new PKGJsonManager();
 
   override get enable(): boolean {
@@ -43,14 +43,10 @@ class RemoteManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
     );
   }
 
-  get normalizedOptions(): NormalizedRemote {
-    return this._normalizedOptions;
-  }
-
   get statsRemoteWithEmptyUsedIn(): StatsRemote[] {
     const { name } = this.options;
-    return Object.keys(this._normalizedOptions).reduce((sum, cur) => {
-      const normalizedOption = this._normalizedOptions[cur];
+    return Object.keys(this.normalizedOptions).reduce((sum, cur) => {
+      const normalizedOption = this.normalizedOptions[cur];
       let curObj: StatsRemote;
       if ('entry' in normalizedOption) {
         curObj = {
@@ -82,8 +78,8 @@ class RemoteManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
   //   'micro-app-sub3': @garfish/micro-app-sub3:0.0.4
   // }
   get dtsRemotes(): Record<string, string> {
-    return Object.keys(this._normalizedOptions).reduce((sum, remoteAlias) => {
-      const remoteInfo = this._normalizedOptions[remoteAlias];
+    return Object.keys(this.normalizedOptions).reduce((sum, remoteAlias) => {
+      const remoteInfo = this.normalizedOptions[remoteAlias];
       sum[remoteAlias] = composeKeyWithSeparator(
         remoteInfo.name,
         'entry' in remoteInfo ? remoteInfo.entry : remoteInfo.version,
@@ -102,7 +98,7 @@ class RemoteManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
   ): void {
     const type = this._pkgJsonManager.getExposeGarfishModuleType();
 
-    this._normalizedOptions = Object.keys(options).reduce(
+    this.normalizedOptions = Object.keys(options).reduce(
       (sum, remoteAlias: string) => {
         if (Array.isArray(options)) {
           return sum;
