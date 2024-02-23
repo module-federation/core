@@ -101,6 +101,7 @@ describe('3000-home/', () => {
           });
       });
       it('should check that shop-webpack-png images are not 404 between route clicks', () => {
+        cy.visit('/');
         cy.visit('/shop');
         cy.url().should('include', '/shop');
         getH1().contains('Shop Page');
