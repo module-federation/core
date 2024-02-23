@@ -64,6 +64,7 @@
     "unplugin": "1.6.0"
   },
   "devDependencies": {
+    "terser-webpack-plugin": "^5.3.10",
     "@antora/cli": "3.1.5",
     "@antora/lunr-extension": "1.0.0-alpha.8",
     "@antora/site-generator": "3.1.7",
