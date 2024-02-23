@@ -8,12 +8,6 @@ import {
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
-    // await revalidate().then((shouldUpdate) => {
-    //   if (shouldUpdate) {
-    //     ctx.res.writeHead(307, { Location: ctx.req.url });
-    //     ctx.res.end();
-    //   }
-    // });
     if (ctx.pathname) {
       if (!ctx.pathname.endsWith('_error')) {
         await revalidate(undefined, true).then((shouldUpdate) => {
