@@ -6,7 +6,7 @@ import crypto from 'crypto';
 const requireCacheRegex =
   /(remote|server|hot-reload|react-loadable-manifest|runtime|styled-jsx)/;
 
-export const performReload = (shouldReload: any) => {
+export const performReload = async (shouldReload: any) => {
   if (!shouldReload) {
     return false;
   }
@@ -22,6 +22,8 @@ export const performReload = (shouldReload: any) => {
   }
 
   const gs = new Function('return globalThis')();
+  const entries = Array.from(gs.nextEntryCache);
+
   // no need to clear whole cache
   // Object.keys(req.cache).forEach((key) => {
   //   //delete req.cache[key];
@@ -29,6 +31,12 @@ export const performReload = (shouldReload: any) => {
   //     delete req.cache[key];
   //   }
   // });
+
+  gs.nextEntryCache.clear();
+  for (const entry of entries) {
+    //@ts-ignore
+    delete __non_webpack_require__.cache[entry];
+  }
 
   //@ts-ignore
   __webpack_require__.federation.instance.moduleCache.clear();
@@ -42,24 +50,10 @@ export const performReload = (shouldReload: any) => {
   });
   gs.__FEDERATION__.__INSTANCES__ = [];
 
-  // reinit the runtime here
-  //@ts-ignore
-  __webpack_require__.federation.instance =
-    //@ts-ignore
-    __webpack_require__.federation.runtime.init(
-      //@ts-ignore
-      __webpack_require__.federation.initOptions,
-    );
-  //@ts-ignore
-  if (__webpack_require__.federation.attachShareScopeMap) {
-    //@ts-ignore
-    __webpack_require__.federation.attachShareScopeMap(__webpack_require__);
+  for (const entry of entries) {
+    await __non_webpack_require__(entry);
   }
-  //@ts-ignore
-  if (__webpack_require__.federation.installInitialConsumes) {
-    //@ts-ignore
-    __webpack_require__.federation.installInitialConsumes();
-  }
+
   return true;
 };
 
@@ -172,17 +166,10 @@ export const fetchRemote = (remoteScope: any, fetchModule: any) => {
   });
 };
 //@ts-ignore
-export const revalidate = (
+export const revalidate = async (
   fetchModule: any = getFetchModule() || (() => {}),
   force: boolean = false,
 ) => {
-  const gs = new Function('return globalThis')();
-  for (const entry of gs.nextEntryCache) {
-    //@ts-ignore
-    delete __non_webpack_require__.cache[entry];
-  }
-  gs.nextEntryCache.clear();
-
   const remotesFromAPI = getAllKnownRemotes();
   //@ts-ignore
   return new Promise((res) => {
