@@ -10,14 +10,14 @@ import { isRequiredVersion, parseOptions } from './utils';
 type SharePluginOptions = ConstructorParameters<typeof sharing.SharePlugin>[0];
 
 class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.ModuleFederationPluginOptions> {
-  private _normalizedOptions: NormalizedSharedOptions = {};
+  normalizedOptions: NormalizedSharedOptions = {};
 
   override get enable(): boolean {
     return Boolean(Object.keys(this.sharedPluginOptions.shared).length);
   }
 
   get sharedPluginOptions(): SharePluginOptions {
-    const normalizedShared = this._normalizedOptions;
+    const normalizedShared = this.normalizedOptions;
     const shared = Object.keys(normalizedShared).reduce((sum, cur) => {
       const { singleton, requiredVersion, version, eager, shareScope } =
         normalizedShared[cur];
@@ -34,10 +34,6 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
       shared,
       shareScope: 'default',
     };
-  }
-
-  get normalizedOptions(): NormalizedSharedOptions {
-    return this._normalizedOptions;
   }
 
   findPkg(
@@ -135,7 +131,7 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
       };
     });
 
-    this._normalizedOptions = normalizedShared;
+    this.normalizedOptions = normalizedShared;
   }
 
   override init(
