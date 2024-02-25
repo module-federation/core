@@ -35,9 +35,19 @@ class ManifestManager {
     this._options = options;
   }
 
+  get fileName(): string {
+    const { manifest: manifestOptions = {} } = this._options;
+
+    let manifestFilePath =
+      typeof manifestOptions === 'boolean'
+        ? ''
+        : manifestOptions.filePath || '';
+
+    return simpleJoinRemoteEntry(manifestFilePath, ManifestFileName);
+  }
+
   generateManifest(options: GenerateManifestOptions): void {
     const { compilation, publicPath, stats, compiler } = options;
-    const { manifest: manifestOptions = {} } = this._options;
     const manifest: Manifest = {
       ...stats,
     };
@@ -90,15 +100,8 @@ class ManifestManager {
     }, [] as ManifestRemote[]);
 
     this._manifest = manifest;
-    let manifestFilePath =
-      typeof manifestOptions === 'boolean'
-        ? ''
-        : manifestOptions.filePath || '';
 
-    const manifestFileName = simpleJoinRemoteEntry(
-      manifestFilePath,
-      ManifestFileName,
-    );
+    const manifestFileName = this.fileName;
 
     compilation.emitAsset(
       manifestFileName,

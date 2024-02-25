@@ -43,13 +43,22 @@ class StatsManager {
   private _pkgJsonManager: PKGJsonManager = new PKGJsonManager();
 
   get buildInfo(): StatsBuildInfo {
-    const type = this._pkgJsonManager.getExposeGarfishModuleType();
     const pkg = this._pkgJsonManager.readPKGJson(process.cwd());
 
     return {
       buildVersion: utils.getBuildVersion(),
       buildName: utils.getBuildName() || pkg['name'],
     };
+  }
+
+  get fileName(): string {
+    const { manifest: manifestOptions = {} } = this._options;
+    let statsFilePath =
+      typeof manifestOptions === 'boolean'
+        ? ''
+        : manifestOptions.filePath || '';
+
+    return simpleJoinRemoteEntry(statsFilePath, StatsFileName);
   }
 
   private _getMetaData(
@@ -80,7 +89,6 @@ class StatsManager {
       const remoteEntryNameChunk = compilation.namedChunks.get(name);
 
       assert(remoteEntryNameChunk, 'Can not get remoteEntry chunk!');
-      debugger;
       assert(
         Array.from(remoteEntryNameChunk.files).length === 1,
         'remoteEntry chunk should not have multiple files!',
@@ -387,15 +395,9 @@ class StatsManager {
   ): Promise<Stats> {
     try {
       const stats = await this._generateStats(compiler, compilation);
-      const { manifest: manifestOptions = {} } = this._options;
-      let statsFilePath =
-        typeof manifestOptions === 'boolean'
-          ? ''
-          : manifestOptions.filePath || '';
 
-      const statsFileName = simpleJoinRemoteEntry(statsFilePath, StatsFileName);
       compilation.emitAsset(
-        statsFileName,
+        this.fileName,
         new compiler.webpack.sources.RawSource(JSON.stringify(stats, null, 2)),
       );
       return stats;
