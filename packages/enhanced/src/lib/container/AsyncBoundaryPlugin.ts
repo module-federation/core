@@ -322,13 +322,6 @@ class AsyncEntryStartupPlugin {
       ]);
     }
     return Template.asString([
-      `if(typeof module !== 'undefined') {
-        globalThis.nextEntryCache = globalThis.nextEntryCache || new Set();
-        globalThis.nextEntryCache.add(module.filename);
-        module.children.forEach(function(c) {
-          globalThis.nextEntryCache.add(c.filename);
-        })
-      }`,
       'var promiseTrack = [];',
       Template.asString(initialEntryModules),
       shared,

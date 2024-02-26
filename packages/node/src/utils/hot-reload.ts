@@ -22,9 +22,9 @@ export const performReload = async (shouldReload: any) => {
   }
 
   const gs = new Function('return globalThis')();
-  const entries = Array.from(gs.nextEntryCache || []);
+  const entries = Array.from(gs.entryChunkCache || []);
 
-  if (!gs.nextEntryCache) {
+  if (!gs.entryChunkCache) {
     Object.keys(req.cache).forEach((key) => {
       //delete req.cache[key];
       if (requireCacheRegex.test(key)) {
@@ -32,12 +32,7 @@ export const performReload = async (shouldReload: any) => {
       }
     });
   } else {
-    gs.nextEntryCache.clear();
-  }
-
-  for (const entry of entries) {
-    //@ts-ignore
-    delete __non_webpack_require__.cache[entry];
+    gs.entryChunkCache.clear();
   }
 
   //@ts-ignore
@@ -51,6 +46,11 @@ export const performReload = async (shouldReload: any) => {
     }
   });
   gs.__FEDERATION__.__INSTANCES__ = [];
+
+  for (const entry of entries) {
+    //@ts-ignore
+    delete __non_webpack_require__.cache[entry];
+  }
 
   for (const entry of entries) {
     await __non_webpack_require__(entry);
@@ -176,8 +176,12 @@ export const revalidate = async (
   //@ts-ignore
   return new Promise((res) => {
     if (force) {
-      res(true);
-      return;
+      if (Object.keys(hashmap).length !== 0) {
+        console.log('hashmap exists', hashmap);
+
+        res(true);
+        return;
+      }
     }
     if (checkMedusaConfigChange(remotesFromAPI, fetchModule)) {
       res(true);
@@ -191,7 +195,7 @@ export const revalidate = async (
       res(val);
     });
   }).then((shouldReload) => {
-    return performReload(force || shouldReload);
+    return performReload(shouldReload);
   });
 };
 
