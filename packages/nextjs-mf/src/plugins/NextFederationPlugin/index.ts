@@ -29,6 +29,9 @@ import {
 import { applyClientPlugins } from './apply-client-plugins';
 import { ModuleFederationPlugin } from '@module-federation/enhanced';
 import path from 'path';
+
+import { createRsbuild, defineConfig } from '@rsbuild/core';
+
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
@@ -48,6 +51,48 @@ export class NextFederationPlugin {
     this.name = 'ModuleFederationPlugin';
   }
 
+  async offloadNodeModules(compiler: Compiler) {
+    //@ts-ignore
+    const defiend = compiler.options.plugins.find(
+      (p) => p.constructor.name === 'DefinePlugin',
+    ).definitions;
+    try {
+      console.log(compiler.options.output.path);
+      const config = defineConfig({
+        output: {
+          cleanDistPath: false,
+          distPath: {
+            root: compiler.options.output.path + '/rsbuld',
+          },
+          //@ts-ignore
+          targets: ['web'],
+        },
+        source: {
+          entry: {
+            rsbuild: require.resolve('../../federation-noop'),
+          },
+          define: defiend,
+        },
+        moduleFederation: {
+          options: {
+            name: 'remote',
+            exposes: {
+              './noop': require.resolve('../../federation-noop'),
+            },
+            shared: ['react/'],
+            filename: 'remoteEntry.js',
+          },
+        },
+      });
+      const rsbuild = await createRsbuild({ rsbuildConfig: config });
+      const build = await rsbuild.build();
+      return build;
+    } catch (e) {
+      console.error(e);
+      return e;
+    }
+  }
+
   /**
    * The apply method is called by the webpack compiler and allows the plugin to hook into the webpack process.
    * @param compiler The webpack compiler object.
@@ -58,6 +103,11 @@ export class NextFederationPlugin {
       getWebpackPath(compiler, { framework: 'nextjs' });
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
+    if (!isServer) {
+      compiler.hooks.afterEmit.tap('NextFederationPlugin', () => {
+        return this.offloadNodeModules(compiler);
+      });
+    }
     new CopyFederationPlugin(isServer).apply(compiler);
     this.applyConditionalPlugins(compiler, isServer);
     const normalFederationPluginOptions = this.getNormalFederationPluginOptions(

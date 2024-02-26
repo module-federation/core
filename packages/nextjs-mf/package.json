@@ -46,7 +46,8 @@
     "@module-federation/sdk": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
-    "@module-federation/webpack-type": "workspace:*"
+    "@module-federation/webpack-type": "workspace:*",
+    "@rsbuild/core": "^0.4.6"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",
