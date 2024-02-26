@@ -24,6 +24,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
         'react-dom': {},
         'react-dom/': {},
       },
+      manifest: true,
       runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
     }),
   );
@@ -46,5 +47,6 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
     runtimeChunk: false,
     minimize: false,
   };
+  config.output.publicPath = 'http://localhost:3008/';
   return config;
 });

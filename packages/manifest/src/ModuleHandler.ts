@@ -206,8 +206,9 @@ class ModuleHandler {
       const normalizedRemote = remoteManagerNormalizedOptions[remoteAlias];
       const basicRemote: StatsRemoteVal = {
         alias: normalizedRemote.alias,
-        consumingGarfishModuleName: name,
-        garfishModuleName: remoteManagerNormalizedOptions[remoteAlias].name,
+        consumingFederationContainerName: this._options.name || '',
+        federationContainerName:
+          remoteManagerNormalizedOptions[remoteAlias].name,
         moduleName,
         // @ts-ignore to deduplicate
         usedIn: new Set(),

@@ -116,6 +116,7 @@ class StatsManager {
       remoteEntry: {
         name: getRemoteEntryName(),
         path: '',
+        // same as the types supported by runtime, currently only global/var/script is supported
         type: 'global',
       },
       types: {

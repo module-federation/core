@@ -111,6 +111,8 @@ class RemoteManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
         try {
           parsedOptions = parseEntry(
             typeof remoteInfo === 'string' ? remoteInfo : getEntry(remoteInfo),
+            '',
+            '@',
           );
         } catch (e) {
           // noop
