@@ -5,7 +5,7 @@
   "dependencies": {
     "acorn": "7.4.1",
     "antd": "4.24.15",
-    "buffer": "5.7.1",
+    "buffer": "6.0.3",
     "chrome-trace-event": "1.0.3",
     "encoding": "0.1.13",
     "enhanced-resolve": "5.15.0",
