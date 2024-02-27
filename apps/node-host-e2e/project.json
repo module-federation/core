@@ -11,6 +11,30 @@
         "passWithNoTests": true
       }
     },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": true,
+        "commands": [
+          {
+            "command": "nx run node-remote:serve",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run node-local-remote:serve",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run node-host:serve",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "sleep 10 && nx run node-host-e2e:e2e",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
