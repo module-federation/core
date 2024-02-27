@@ -97,7 +97,11 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
             if (!federationRuntimeChunk) return;
             // For each chunk that has a runtime, merge the federation-runtime chunk into it
             for (const chunk of chunks) {
-              if (chunk.hasRuntime() && chunk !== federationRuntimeChunk) {
+              if (
+                chunk.hasRuntime() &&
+                chunk !== federationRuntimeChunk &&
+                chunk !== federationRuntimePlugins
+              ) {
                 // Do not re-integrate chunks with containers in them. Like remoteEntry - this will destroy entry module
                 if (this.chunkContainsContainerEntryModule(chunk, compilation))
                   continue;

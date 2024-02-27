@@ -280,42 +280,24 @@ export function generateLoadScript(runtimeTemplate: any): string {
             if (!name) {
               throw new Error('__webpack_require__.l name is required for ' + url);
             }
-            var remoteName = name;
-            if(name.includes('__remote_scope__')) {
-              remoteName = name.split('__remote_scope__.')[1]
+            if(__webpack_require__.federation.instance.moduleCache.has(name)){
+            globalThis[name] = __webpack_require__.federation.instance.moduleCache.get(name)
+               return callback(globalThis[name])
             }
-            if (typeof globalThis.__remote_scope__[remoteName] !== 'undefined') return callback(globalThis.__remote_scope__[remoteName]);
-            globalThis.__remote_scope__._config[remoteName] = url;
+            let er
             try {
-              const scriptContent = await (globalThis.webpackChunkLoad || globalThis.fetch || require("node-fetch"))(url).then(res => res.text());
-              let remote;
-              if (typeof process !== 'undefined') {
-                const vm = require('vm');
-                const m = require('module');
-                const remoteCapsule = vm.runInThisContext(m.wrap(scriptContent), 'node-federation-loader-' + name + '.vm')
-                const exp = {};
-                remote = {exports:{}};
-                remoteCapsule(exp,require,remote,'node-federation-loader-' + name + '.vm',__dirname);
-                remote = remote.exports || remote;
-              } else {
-                remote = eval('let module = {};' + scriptContent + '\\nmodule.exports')
-              }
-              globalThis.__remote_scope__[remoteName] = remote[remoteName] || remote;
-              globalThis.__remote_scope__._config[remoteName] = url;
-              callback(globalThis.__remote_scope__[remoteName])
-            } catch (e) {
-              e.target = {src: url};
-              globalThis.__remote_scope__[remoteName] = {
-                get: function() {
-                  return function() {
-                    return ()=>null
-                  }
-                },
-                init: function() {},
-                fake: true
-              }
-              callback(e);
+              await __webpack_require__.federation.runtime.loadRemote(name);
+            } catch(e) {
+              er = e
             }
+
+            if(__webpack_require__.federation.instance.moduleCache.has(name)){
+              globalThis[name] = __webpack_require__.federation.instance.moduleCache.get(name)
+               return callback(globalThis[name])
+            } else {
+             callback(er)
+            }
+
           }`,
           `executeLoad(url,callback,chunkId)`,
         ]),
