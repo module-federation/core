@@ -52,6 +52,7 @@ export const performReload = async (shouldReload: any) => {
     delete __non_webpack_require__.cache[entry];
   }
 
+  //reload entries again
   for (const entry of entries) {
     await __non_webpack_require__(entry);
   }
