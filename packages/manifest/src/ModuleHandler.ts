@@ -155,9 +155,9 @@ class ModuleHandler {
         pkgName = res.name;
         pkgVersion = res.version;
       } else {
-        const pkgName = data[2];
+        pkgName = data[2];
         const pkgVersionRange = data[3];
-        let pkgVersion = '';
+        pkgVersion = '';
         if (pkgVersionRange.startsWith('=')) {
           pkgVersion = data[3].replace('=', '');
         } else {
