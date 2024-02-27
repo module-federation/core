@@ -130,7 +130,6 @@ export function handleServerExternals(
       if (
         ctx.request &&
         (ctx.request.includes('@module-federation/utilities') ||
-          ctx.request.includes('internal-delegate-hoist') ||
           Object.keys(options.shared || {}).some((key) => {
             return (
               //@ts-ignore
