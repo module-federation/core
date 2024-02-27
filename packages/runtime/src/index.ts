@@ -10,7 +10,7 @@ import { assert } from './utils/logger';
 
 export { FederationHost } from './core';
 export { registerGlobalPlugins } from './global';
-export { loadScript } from '@module-federation/sdk';
+export { loadScript, loadScriptNode } from '@module-federation/sdk';
 
 export type { Federation } from './global';
 export type { FederationRuntimePlugin };
