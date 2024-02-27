@@ -20,6 +20,9 @@ function normalizeExposeModuleName(exposeKey: string): string {
 
 class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.ModuleFederationPluginOptions> {
   private _manifestModuleInfos?: ManifestModuleInfos;
+  private _parsedOptions?: Array<
+    [exposeKey: string, { import: string[]; name?: string }]
+  >;
 
   override get enable(): boolean {
     return Boolean(
@@ -90,13 +93,10 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
   get exposeObject(): Record<string, string> {
     const parsedOptions = this._parseOptions();
 
-    return Object.keys(parsedOptions).reduce((sum, exposeKey) => {
-      const parsedOption = parsedOptions[exposeKey];
+    return parsedOptions.reduce((sum, item) => {
+      const [exposeKey, exposeObject] = item;
       sum[exposeKey] = [];
-      let importArr = Array.isArray(parsedOption.import)
-        ? parsedOption.import
-        : [parsedOption.import];
-      importArr.forEach((item) => {
+      exposeObject.import.forEach((item) => {
         const relativePath = path.relative(
           '.',
           item.replace(path.extname(item), ''),
@@ -111,12 +111,10 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
   get exposeFiles(): string[] {
     const parsedOptions = this._parseOptions();
 
-    return Object.keys(parsedOptions).reduce((sum, exposeKey) => {
-      const parsedOption = parsedOptions[exposeKey];
-      let importArr = Array.isArray(parsedOption.import)
-        ? parsedOption.import
-        : [parsedOption.import];
-      sum.push(...importArr);
+    return parsedOptions.reduce((sum, item) => {
+      const [_exposeKey, exposeObject] = item;
+
+      sum.push(...exposeObject.import);
       return sum;
     }, [] as string[]);
   }
@@ -128,19 +126,14 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
     // { '.' : './src/Button.jsx' } => { '.' : {  name: 'ExposeEntry', file: './src/Button.jsx', requires: {} } }
     const parsedOptions = this._parseOptions();
 
-    this._manifestModuleInfos = Object.keys(parsedOptions).reduce(
-      (sum, exposeKey) => {
-        const parsedOption = parsedOptions[exposeKey];
-        sum[exposeKey] = {
-          name: parsedOption.name || normalizeExposeModuleName(exposeKey),
-          file: Array.isArray(parsedOption.import)
-            ? parsedOption.import
-            : [parsedOption.import],
-        };
-        return sum;
-      },
-      {} as ManifestModuleInfos,
-    );
+    this._manifestModuleInfos = parsedOptions.reduce((sum, item) => {
+      const [exposeKey, exposeObject] = item;
+      sum[exposeKey] = {
+        name: exposeObject.name || normalizeExposeModuleName(exposeKey),
+        file: exposeObject.import,
+      };
+      return sum;
+    }, {} as ManifestModuleInfos);
     return this._manifestModuleInfos;
   }
   // { '.' : './src/Button.jsx' } => { index: ['./src/Button.jsx'] }
@@ -156,17 +149,22 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
   }
 
   private _parseOptions() {
-    return parseOptions(
+    if (this._parsedOptions) {
+      return this._parsedOptions;
+    }
+    this._parsedOptions = parseOptions(
       this.options.exposes!,
       (item) => ({
-        import: item,
+        import: Array.isArray(item) ? item : [item],
         name: undefined,
       }),
       (item) => ({
-        import: item.import,
+        import: Array.isArray(item.import) ? item.import : [item.import],
         name: undefined,
       }),
     );
+
+    return this._parsedOptions;
   }
 
   override init(
