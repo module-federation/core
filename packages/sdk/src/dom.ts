@@ -95,6 +95,76 @@ export function createScript(
   return { script, needAttach };
 }
 
+export function createLink(
+  url: string,
+  cb: (value: void | PromiseLike<void>) => void,
+  attrs?: Record<string, any>,
+  createLinkHook?: (url: string) => HTMLLinkElement | void,
+) {
+  // <link rel="preload" href="script.js" as="script">
+
+  // Retrieve the existing script element by its src attribute
+  let link: HTMLLinkElement | null = null;
+  let needAttach = true;
+  const links = document.getElementsByTagName('link');
+  for (let i = 0; i < links.length; i++) {
+    const l = links[i];
+    const linkHref = l.getAttribute('href');
+    if (linkHref && isStaticResourcesEqual(linkHref, url)) {
+      link = l;
+      needAttach = false;
+      break;
+    }
+  }
+
+  if (!link) {
+    link = document.createElement('link');
+    link.setAttribute('href', url);
+
+    if (createLinkHook) {
+      const createLinkRes = createLinkHook(url);
+      if (createLinkRes instanceof HTMLLinkElement) {
+        link = createLinkRes;
+      }
+    }
+  }
+
+  if (attrs) {
+    Object.keys(attrs).forEach((name) => {
+      if (link) {
+        link.setAttribute(name, attrs[name]);
+      }
+    });
+  }
+
+  const onLinkComplete = (
+    prev: OnErrorEventHandler | GlobalEventHandlers['onload'] | null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    event: any,
+  ): void => {
+    // Prevent memory leaks in IE.
+    if (link) {
+      link.onerror = null;
+      link.onload = null;
+      safeWrapper(() => {
+        link?.parentNode && link.parentNode.removeChild(link);
+      });
+      if (prev) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const res = (prev as any)(event);
+        cb();
+        return res;
+      }
+    }
+    cb();
+  };
+
+  link.onerror = onLinkComplete.bind(null, link.onerror);
+  link.onload = onLinkComplete.bind(null, link.onload);
+
+  return { link, needAttach };
+}
+
 export function loadScript(
   url: string,
   info: {

@@ -1,5 +1,11 @@
 # [1.0.0-canary.1](https://github.com/module-federation/universe/compare/native-federation-tests-0.2.1...native-federation-tests-1.0.0-canary.1) (2023-11-06)
 
+## 0.3.0
+
+### Minor Changes
+
+- bb0302b: feat: configurable maxRetries package unzip
+
 ### Bug Fixes
 
 - **deps:** update dependency antd to v4.24.11 ([#1029](https://github.com/module-federation/universe/issues/1029)) ([f9e64c0](https://github.com/module-federation/universe/commit/f9e64c04aa1e5802fdc0cdc8f07f2ee728c3ff1c))

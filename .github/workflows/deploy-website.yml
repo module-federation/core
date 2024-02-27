@@ -20,7 +20,7 @@ jobs:
       website-changed: ${{ steps.website-changed.outputs.website-changed }}
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.12.0
+        uses: styfle/cancel-workflow-action@0.12.1
         if: github.event_name == 'pull_request'
         with:
           access_token: ${{ secrets.GITHUB_TOKEN }}
