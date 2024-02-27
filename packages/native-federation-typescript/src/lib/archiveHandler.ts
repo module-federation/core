@@ -30,21 +30,38 @@ export const createTypesArchive = async (
 
 const downloadErrorLogger =
   (destinationFolder: string, fileToDownload: string) => (reason: Error) => {
-    reason.message = ansiColors.red(
-      `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}', skipping...`,
-    );
-    throw reason;
+    throw {
+      ...reason,
+      message: `Network error: Unable to download federated mocks for '${destinationFolder}' from '${fileToDownload}' because '${reason.message}'`,
+    };
   };
 
-export const downloadTypesArchive =
-  (hostOptions: Required<HostOptions>) =>
-  async ([destinationFolder, fileToDownload]: string[]) => {
-    const response = await axios
-      .get(fileToDownload, { responseType: 'arraybuffer' })
-      .catch(downloadErrorLogger(destinationFolder, fileToDownload));
-
+export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
+  let retries = 0;
+  return async ([destinationFolder, fileToDownload]: string[]) => {
     const destinationPath = join(hostOptions.typesFolder, destinationFolder);
 
-    const zip = new AdmZip(Buffer.from(response.data));
-    zip.extractAllTo(destinationPath, true);
+    while (retries++ < hostOptions.maxRetries) {
+      try {
+        const response = await axios
+          .get(fileToDownload, { responseType: 'arraybuffer' })
+          .catch(downloadErrorLogger(destinationFolder, fileToDownload));
+
+        const zip = new AdmZip(Buffer.from(response.data));
+        zip.extractAllTo(destinationPath, true);
+        break;
+      } catch (error: any) {
+        console.error(
+          ansiColors.red(
+            `Error during types archive download: ${
+              error?.message || 'unknown error'
+            }`,
+          ),
+        );
+        if (retries >= hostOptions.maxRetries) {
+          throw error;
+        }
+      }
+    }
   };
+};

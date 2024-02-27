@@ -17,6 +17,7 @@ function getLinkInfos(): Array<LinkInfo> {
   const linkInfos: Array<LinkInfo> = [...links].map((link) => ({
     type: link.getAttribute('as') || '',
     href: link.getAttribute('href') || '',
+    rel: link.getAttribute('rel') || '',
   }));
   return linkInfos;
 }
@@ -334,6 +335,7 @@ describe('preload-remote inBrowser', () => {
       },
     ]);
     expect(getPreloadElInfos()).toMatchSnapshot();
+
     expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(1);
     expect(
       Global.__FEDERATION__.__PRELOADED_MAP__.get('@federation/sub3/add'),

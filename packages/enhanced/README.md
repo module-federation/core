@@ -4,15 +4,15 @@ This package provides enhanced features for module federation.
 
 The following items are exported:
 
-* ModuleFederationPlugin
-* ContainerPlugin
-* ContainerReferencePlugin
-* SharePlugin
-* ConsumeSharedPlugin
-* ProvideSharedPlugin
-* FederationRuntimePlugin
-* AsyncBoundaryPlugin
-* HoistContainerReferencesPlugin
+- ModuleFederationPlugin
+- ContainerPlugin
+- ContainerReferencePlugin
+- SharePlugin
+- ConsumeSharedPlugin
+- ProvideSharedPlugin
+- FederationRuntimePlugin
+- AsyncBoundaryPlugin
+- HoistContainerReferencesPlugin
 
 ## ModuleFederationPlugin
 
@@ -58,10 +58,10 @@ module.exports = {
       name: 'mfButton',
       exposes: {
         // Note: "./" is not supported
-        ".": "./src/index.tsx",
-        "./add": "./src/utils/add.ts",
-        "./Button": "./src/components/Button.tsx",
-      }
+        '.': './src/index.tsx',
+        './add': './src/utils/add.ts',
+        './Button': './src/components/Button.tsx',
+      },
     }),
   ],
 };
@@ -98,8 +98,7 @@ Here, `remoteAlias` is the name actually used by the user and can be configured 
 - Required: No
 - Default: `undefined`
 
-
-`shared` is used to share common dependencies between consumers and producers, reducing runtime download size and thus improving performance. 
+`shared` is used to share common dependencies between consumers and producers, reducing runtime download size and thus improving performance.
 
 The `Shared` type is defined as follows:
 
@@ -137,9 +136,10 @@ The required version can be a version range. The default value is the dependency
 - When one side sets requiredVersion and the other side sets singleton, the dependency of requiredVersion will be loaded, and the singleton side will directly use the dependency of requiredVersion, regardless of the version.
 
 #### eager
+
 :::warning
 When `eager` is set to true, the shared dependencies will be packaged into the entry file, which will cause the entry file to be too large. Please open with caution.
-`eager: true` is rarely recommended 
+`eager: true` is rarely recommended
 :::
 
 - Type: `boolean`

@@ -34,6 +34,8 @@ describe('3000-home/', () => {
     xit('check that clicking back and forwards in client side routeing still renders the content correctly', () => {
       cy.visit('/');
       cy.visit('/shop');
+      cy.visit('/');
+      cy.visit('/shop');
       cy.wait(3000);
       cy.url().should('include', '/shop');
       getH1().contains('Shop Page');

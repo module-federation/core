@@ -1,5 +1,15 @@
 # [1.1.0-canary.1](https://github.com/module-federation/universe/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.0.13
+
+### Patch Changes
+
+- 804447c: fix(runtime): use link to preload js
+
+## 0.0.12
+
+## 0.0.11
+
 ## 0.0.10
 
 ## 0.0.9
