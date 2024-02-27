@@ -783,6 +783,9 @@ importers:
       '@module-federation/nextjs-mf':
         specifier: workspace:*
         version: link:../../packages/nextjs-mf
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
@@ -847,6 +850,9 @@ importers:
       '@module-federation/node':
         specifier: workspace:*
         version: link:../../packages/node
+      '@module-federation/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
 
   apps/node-host-e2e:
     dependencies:
