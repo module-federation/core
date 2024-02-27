@@ -56,16 +56,17 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
 
     // getChunkModules is used here to create a clone, because disconnectChunkAndModule modifies
     for (const module of chunkGraph.getChunkModules(chunkB)) {
-      // if (chunkB.name !== 'federation-runtime') {
-      chunkGraph.disconnectChunkAndModule(chunkB, module);
-      // }
+      // dont disconnect as module may need to be copied into multiple chunks
+      // chunkGraph.disconnectChunkAndModule(chunkB, module);
       chunkGraph.connectChunkAndModule(chunkA, module);
     }
 
     for (const [module, chunkGroup] of Array.from(
       chunkGraph.getChunkEntryModulesWithChunkGroupIterable(chunkB),
     )) {
+      // dont disconnect as module may need to be copied into multiple chunks
       // chunkGraph.disconnectChunkAndEntryModule(chunkB, module);
+      //connect as normal module not entry module to preserve existing entrypoint modules
       chunkGraph.connectChunkAndModule(chunkA, module);
       // chunkGraph.connectChunkAndEntryModule(chunkA, module,chunkGroup);
     }
@@ -97,7 +98,11 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
             if (!federationRuntimeChunk) return;
             // For each chunk that has a runtime, merge the federation-runtime chunk into it
             for (const chunk of chunks) {
-              if (chunk.hasRuntime() && chunk !== federationRuntimeChunk) {
+              if (
+                chunk.hasRuntime() &&
+                chunk !== federationRuntimeChunk &&
+                chunk !== federationRuntimePlugins
+              ) {
                 // Do not re-integrate chunks with containers in them. Like remoteEntry - this will destroy entry module
                 if (this.chunkContainsContainerEntryModule(chunk, compilation))
                   continue;
