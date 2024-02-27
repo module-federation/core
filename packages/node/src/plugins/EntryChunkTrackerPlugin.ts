@@ -77,9 +77,11 @@ class EntryChunkTrackerPlugin {
       `if(typeof module !== 'undefined') {
         globalThis.entryChunkCache = globalThis.entryChunkCache || new Set();
         globalThis.entryChunkCache.add(module.filename);
+        if(module.children) {
         module.children.forEach(function(c) {
           globalThis.entryChunkCache.add(c.filename);
         })
+}
       }`,
       Template.indent(source.source().toString()),
     ]);
