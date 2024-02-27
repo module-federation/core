@@ -65,7 +65,7 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
     }, {});
   }
   // { '.' : './src/Button.jsx' } => { '__federation_expose_Component' : 'src/Buttton' }
-  get exposeFileNameImportMap(): Record<string, string> {
+  get exposeFileNameImportMap(): Record<string, string[]> {
     const { exposes } = this.options;
     const parsedOptions = parseOptions(
       exposes!,

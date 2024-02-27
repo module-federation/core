@@ -21,6 +21,7 @@ import {
   getAssetsByChunkIDs,
   getSharedModules,
   assert,
+  getFileNameWithOutExt,
 } from './utils';
 import {
   ContainerManager,
@@ -162,8 +163,9 @@ class StatsManager {
         typeof chunk.name === 'string' &&
         exposeFileNameImportMap[chunk.name]
       ) {
-        const exposeKey = exposeFileNameImportMap[chunk.name];
-        assets[exposeKey] = getAssetsByChunk(chunk);
+        // TODO: support multiple import
+        const exposeKey = exposeFileNameImportMap[chunk.name][0];
+        assets[getFileNameWithOutExt(exposeKey)] = getAssetsByChunk(chunk);
       }
     });
 
