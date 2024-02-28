@@ -92,14 +92,21 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
           },
           (chunks: Iterable<Chunk>) => {
             const { chunkGraph } = compilation;
-            const federationRuntimeChunk =
-              compilation.namedChunks.get('federation-runtime');
-            const federationRuntimePlugins = compilation.namedChunks.get(
-              'mfp-runtime-plugins',
-            );
-            if (!federationRuntimeChunk) return;
+
             // For each chunk that has a runtime, merge the federation-runtime chunk into it
             for (const chunk of chunks) {
+              const federationRuntimeChunk =
+                compilation.namedChunks.get(
+                  'federation-runtime-' + chunk.runtime,
+                ) || compilation.namedChunks.get('federation-runtime');
+              const federationRuntimePlugins =
+                compilation.namedChunks.get(
+                  'mfp-runtime-plugins-' + chunk.runtime,
+                ) || compilation.namedChunks.get('mfp-runtime-plugins');
+              if (!federationRuntimeChunk) continue;
+              //@ts-ignore
+              // chunkGraph.integrateChunks(federationRuntimeChunk, federationRuntimePlugins)
+
               if (
                 chunk.hasRuntime() &&
                 chunk !== federationRuntimeChunk &&
@@ -126,23 +133,23 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
               }
             }
 
-            for (const module of chunkGraph.getChunkModules(
-              federationRuntimeChunk,
-            )) {
-              chunkGraph.disconnectChunkAndModule(
-                federationRuntimeChunk,
-                module,
-              );
-            }
-            if (!federationRuntimePlugins) return;
-            for (const module of chunkGraph.getChunkModules(
-              federationRuntimePlugins,
-            )) {
-              chunkGraph.disconnectChunkAndModule(
-                federationRuntimePlugins,
-                module,
-              );
-            }
+            // for (const module of chunkGraph.getChunkModules(
+            //   federationRuntimeChunk,
+            // )) {
+            //   chunkGraph.disconnectChunkAndModule(
+            //     federationRuntimeChunk,
+            //     module,
+            //   );
+            // }
+            // if (!federationRuntimePlugins) return;
+            // for (const module of chunkGraph.getChunkModules(
+            //   federationRuntimePlugins,
+            // )) {
+            //   chunkGraph.disconnectChunkAndModule(
+            //     federationRuntimePlugins,
+            //     module,
+            //   );
+            // }
           },
         );
 
@@ -156,14 +163,22 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
             const federationRuntimeChunk =
               compilation.namedChunks.get('federation-runtime');
 
-            const federationRuntimePluginsChunk = compilation.namedChunks.get(
-              'mfp-runtime-plugins',
-            );
-            if (federationRuntimeChunk)
-              compilation.chunks.delete(federationRuntimeChunk);
+            for (const [name, chunk] of compilation.namedChunks) {
+              const federationRuntimeChunk =
+                compilation.namedChunks.get(
+                  'federation-runtime-' + chunk.runtime,
+                ) || compilation.namedChunks.get('federation-runtime');
+              const federationRuntimePlugins =
+                compilation.namedChunks.get(
+                  'mfp-runtime-plugins-' + chunk.runtime,
+                ) || compilation.namedChunks.get('mfp-runtime-plugins');
 
-            if (federationRuntimePluginsChunk)
-              compilation.chunks.delete(federationRuntimePluginsChunk);
+              // if (federationRuntimeChunk)
+              //   compilation.chunks.delete(federationRuntimeChunk);
+              //
+              // if (federationRuntimePlugins)
+              //   compilation.chunks.delete(federationRuntimePlugins);
+            }
           },
         );
       },

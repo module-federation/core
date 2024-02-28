@@ -146,12 +146,36 @@ class FederationRuntimePlugin {
     modifyEntry({
       compiler,
       prependEntry: (entry) => {
-        entry['mfp-runtime-plugins'] = {
-          import: [this.pluginsFilePath],
-        };
-        entry['federation-runtime'] = {
-          import: [this.entryFilePath],
-        };
+        //@ts-ignore
+        const runtimes: Set<string> = Object.values(entry).reduce((acc, i) => {
+          if (i.runtime) acc.add(i.runtime);
+          return acc;
+        }, new Set());
+
+        if (runtimes.size !== 0) {
+          if (this.options?.name) {
+            entry['mfp-runtime-plugins-' + this.options?.name] = {
+              import: [this.pluginsFilePath],
+            };
+          }
+          runtimes.forEach((runtimeName) => {
+            entry['mfp-runtime-plugins-' + runtimeName] = {
+              import: [this.pluginsFilePath],
+              runtime: runtimeName,
+            };
+            entry['federation-runtime-' + runtimeName] = {
+              import: [this.entryFilePath],
+              runtime: runtimeName,
+            };
+          });
+        } else {
+          entry['mfp-runtime-plugins'] = {
+            import: [this.pluginsFilePath],
+          };
+          entry['federation-runtime'] = {
+            import: [this.entryFilePath],
+          };
+        }
       },
     });
   }
@@ -175,9 +199,9 @@ class FederationRuntimePlugin {
         compilation.hooks.afterOptimizeChunks.tap(
           this.constructor.name,
           (chunk) => {
-            const runtimePluginEntry = compilation.namedChunks.get(
-              'mfp-runtime-plugins',
-            );
+            const runtimePluginEntry =
+              compilation.namedChunks.get('mfp-runtime-plugins-' + name) ||
+              compilation.namedChunks.get('mfp-runtime-plugins');
             if (runtimePluginEntry) {
               chunksRuntimePluginsDependsOn =
                 runtimePluginEntry.getAllInitialChunks();

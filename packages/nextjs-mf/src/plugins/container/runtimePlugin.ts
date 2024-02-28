@@ -106,6 +106,7 @@ export default function (): FederationRuntimePlugin {
       ) {
         return args;
       }
+      console.log(args.pkgName);
       const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
       const host = GlobalFederation['__INSTANCES__'][0];
       if (!host) {
