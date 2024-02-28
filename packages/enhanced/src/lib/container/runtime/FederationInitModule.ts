@@ -4,6 +4,9 @@ import type { Chunk, Compilation, Module } from 'webpack';
 const { RuntimeModule, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
+const runtime = require(
+  normalizeWebpackPath('webpack/lib/util/runtime'),
+) as typeof import('webpack/lib/util/runtime');
 
 class FederationInitModule extends RuntimeModule {
   constructor(
@@ -54,6 +57,11 @@ class FederationInitModule extends RuntimeModule {
     )
       return null;
 
+    if (this.chunk?.name && this.compilation) {
+      //@ts-ignore
+      console.log(runtime.getEntryRuntime(this.compilation, this.chunk.name));
+    }
+
     const { federationRuntimeModule, federationRuntimePluginModule } =
       this.chunkContainsFederationRuntime(this.chunk, this.compilation);
     let runtimePluginModuleId: string | number | undefined;
@@ -83,6 +91,8 @@ class FederationInitModule extends RuntimeModule {
 
     const federationRuntimeModuleId = moduleInstance?.federationRuntimeModuleId;
     const runtimePluginModuleId = moduleInstance?.runtimePluginModuleId;
+
+    console.log(runtimePluginModuleId);
 
     const requireStatements = [];
 

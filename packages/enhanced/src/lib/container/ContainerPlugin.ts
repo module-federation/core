@@ -184,6 +184,13 @@ class ContainerPlugin {
       const hasSingleRuntimeChunk =
         compilation.options?.optimization?.runtimeChunk;
       dep.loc = { name };
+
+      const runtimes: Set<string> = Object.values(
+        compilation.options.entry,
+      ).reduce((acc, i) => {
+        acc.add(i.runtime);
+        return acc;
+      }, new Set());
       compilation.addEntry(
         compilation.options.context || '',
         //@ts-ignore

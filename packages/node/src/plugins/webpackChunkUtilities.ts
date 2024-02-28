@@ -273,33 +273,36 @@ export function generateLoadScript(runtimeTemplate: any): string {
   return Template.asString([
     '// load script equivalent for server side',
     `${RuntimeGlobals.loadScript} = ${runtimeTemplate.basicFunction(
-      'url,callback,chunkId',
+      'url, callback, chunkId',
       [
         Template.indent([
           `async function executeLoad(url, callback, name) {
             if (!name) {
               throw new Error('__webpack_require__.l name is required for ' + url);
             }
-            if(__webpack_require__.federation.instance.moduleCache.has(name)){
-            globalThis[name] = __webpack_require__.federation.instance.moduleCache.get(name)
-               return callback(globalThis[name])
+            const usesInternalRef = name.startsWith('__webpack_require__')
+            if (usesInternalRef) {
+              const regex = /__webpack_require__\\.federation\\.instance\\.moduleCache\\.get\\(([^)]+)\\)/;
+              const match = name.match(regex);
+              if (match) {
+                name = match[1].replace(/["']/g, '');
+              }
             }
-            let er
             try {
-              await __webpack_require__.federation.runtime.loadRemote(name);
-            } catch(e) {
-              er = e
-            }
-
-            if(__webpack_require__.federation.instance.moduleCache.has(name)){
-              globalThis[name] = __webpack_require__.federation.instance.moduleCache.get(name)
-               return callback(globalThis[name])
-            } else {
-             callback(er)
+              const federation = ${RuntimeGlobals.require}.federation;
+              const res = await ${RuntimeGlobals.require}.federation.runtime.loadScriptNode(url, { attrs: {} });
+              const enhancedRemote = federation.instance.initRawContainer(name, url, res);
+              // use normal global assignment
+              if(!usesInternalRef && !globalThis[name]) {
+                globalThis[name] = enhancedRemote
+              }
+              callback(enhancedRemote);
+            } catch (error) {
+              callback(error);
             }
 
           }`,
-          `executeLoad(url,callback,chunkId)`,
+          `executeLoad(url, callback, chunkId);`,
         ]),
       ],
     )}`,

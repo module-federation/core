@@ -18,8 +18,14 @@ const app = express();
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-app.get('/api', (req, res) => {
-  res.send({ message: 'Welcome to node-host!' });
+app.get('/api', async (req, res) => {
+  res.send({
+    message: 'Welcome to node-host!',
+    remotes: {
+      node_remote: await remoteMsg,
+      node_local_remote,
+    },
+  });
 });
 
 const port = process.env.PORT || 3333;

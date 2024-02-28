@@ -25,6 +25,7 @@ class InvertedContainerPlugin {
     }).apply(compiler);
 
     new AsyncBoundaryPlugin({
+      // excludeChunk: chunk => chunk.name === this.options.container,
       // @ts-ignore
       eager: (module) => /\.federation/.test(module?.request || ''),
       //@ts-ignore
