@@ -30,7 +30,7 @@ import {
   PKGJsonManager,
   utils,
 } from '@module-federation/managers';
-import { PLUGIN_IDENTIFIER } from './constants';
+import { HOT_UPDATE_SUFFIX, PLUGIN_IDENTIFIER } from './constants';
 import { ModuleHandler } from './ModuleHandler';
 
 class StatsManager {
@@ -91,8 +91,12 @@ class StatsManager {
 
       assert(remoteEntryNameChunk, 'Can not get remoteEntry chunk!');
       assert(
-        Array.from(remoteEntryNameChunk.files).length === 1,
-        'remoteEntry chunk should not have multiple files!',
+        Array.from(remoteEntryNameChunk.files).filter(
+          (f) => !f.includes(HOT_UPDATE_SUFFIX),
+        ).length === 1,
+        `remoteEntry chunk should not have multiple files!, current files: ${Array.from(
+          remoteEntryNameChunk.files,
+        ).join(',')}`,
       );
 
       const remoteEntryName = [...remoteEntryNameChunk.files][0];

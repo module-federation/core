@@ -1,7 +1,7 @@
 import { Chunk, Compilation, StatsCompilation, StatsModule } from 'webpack';
 import path from 'path';
 import { StatsAssets } from '@module-federation/sdk';
-import { PLUGIN_IDENTIFIER } from './constants';
+import { HOT_UPDATE_SUFFIX, PLUGIN_IDENTIFIER } from './constants';
 
 function getSharedModuleName(name: string): string {
   const [_type, _shared, _module, _shareScope, sharedInfo] = name.split(' ');
@@ -31,7 +31,7 @@ export function getAssetsByChunkIDs(
             assetMap[key].css.add(asset);
           } else {
             if (process.env['NODE_ENV'] === 'development') {
-              if (!asset.includes('.hot-update')) {
+              if (!asset.includes(HOT_UPDATE_SUFFIX)) {
                 assetMap[key].js.add(asset);
               }
             } else {
