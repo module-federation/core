@@ -32,7 +32,7 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
     }, {});
     return {
       shared,
-      shareScope: 'default',
+      shareScope: this.options.shareScope || 'default',
     };
   }
 

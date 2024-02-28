@@ -7,7 +7,6 @@ import {
   moduleFederationPlugin,
 } from '@module-federation/sdk';
 import { BasicPluginOptionsManager } from './BasicPluginOptionsManager';
-import { PKGJsonManager } from './PKGJsonManager';
 
 interface NormalizedRemote {
   [remoteName: string]: RemoteEntryInfo & {
@@ -32,7 +31,6 @@ function getEntry(
 
 class RemoteManager extends BasicPluginOptionsManager<moduleFederationPlugin.ModuleFederationPluginOptions> {
   normalizedOptions: NormalizedRemote = {};
-  private _pkgJsonManager: PKGJsonManager = new PKGJsonManager();
 
   override get enable(): boolean {
     return Boolean(
@@ -92,12 +90,10 @@ class RemoteManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
     return this.options.remotes;
   }
 
-  // only support remoteType: script now
+  // INFO: only support remoteType: script now
   normalizeOptions(
     options: containerReferencePlugin.ContainerReferencePluginOptions['remotes'] = {},
   ): void {
-    const type = this._pkgJsonManager.getExposeGarfishModuleType();
-
     this.normalizedOptions = Object.keys(options).reduce(
       (sum, remoteAlias: string) => {
         if (Array.isArray(options)) {

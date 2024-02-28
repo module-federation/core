@@ -1,17 +1,19 @@
-// import pkgJsonManager from '../src/managers/PKGJsonManager';
+import { ModuleType } from '@module-federation/sdk';
+import { PKGJsonManager } from '../src/PKGJsonManager';
 
 describe('PKGJsonManager', () => {
-  // const pkg = pkgJsonManager.readPKGJson(process.cwd());
-  // // eslint-disable-next-line @typescript-eslint/no-var-requires
-  // const cPkg = require('../package.json');
-
-  it('get pkg as expected', () => {
-    // expect(pkg).toEqual(cPkg);
+  it('return "app" type by default', () => {
+    const pkgManager = new PKGJsonManager();
+    expect(pkgManager.getExposeGarfishModuleType()).toEqual(ModuleType.APP);
   });
 
-  // it('get correct expose garfish module type', () => {
-  //   expect(pkgJsonManager.getExposeGarfishModuleType(process.cwd())).toEqual(
-  //     'app',
-  //   );
-  // });
+  it('return "npm" type if pkg.mf.type===npm', () => {
+    const pkgManager = new PKGJsonManager();
+    pkgManager.setPKGJson({
+      mf: {
+        type: ModuleType.NPM,
+      },
+    });
+    expect(pkgManager.getExposeGarfishModuleType()).toEqual(ModuleType.NPM);
+  });
 });
