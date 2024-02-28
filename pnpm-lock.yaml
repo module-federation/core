@@ -537,6 +537,18 @@ importers:
 
   apps/3000-home:
     dependencies:
+      '@module-federation/runtime':
+        specifier: 0.0.8
+        version: 0.0.8
+      '@module-federation/runtime-tools':
+        specifier: 0.0.8
+        version: 0.0.8
+      '@module-federation/sdk':
+        specifier: 0.0.8
+        version: 0.0.8
+      '@module-federation/webpack-bundler-runtime':
+        specifier: 0.0.8
+        version: 0.0.8
       acorn:
         specifier: 7.4.1
         version: 7.4.1
@@ -603,6 +615,9 @@ importers:
       typescript:
         specifier: 5.3.3
         version: 5.3.3
+      upath:
+        specifier: 2.0.1
+        version: 2.0.1
       url:
         specifier: 0.11.3
         version: 0.11.3
@@ -707,6 +722,18 @@ importers:
 
   apps/3002-checkout:
     dependencies:
+      '@module-federation/runtime':
+        specifier: 0.0.8
+        version: 0.0.8
+      '@module-federation/runtime-tools':
+        specifier: 0.0.8
+        version: 0.0.8
+      '@module-federation/sdk':
+        specifier: 0.0.8
+        version: 0.0.8
+      '@module-federation/webpack-bundler-runtime':
+        specifier: 0.0.8
+        version: 0.0.8
       acorn:
         specifier: 7.4.1
         version: 7.4.1
@@ -770,6 +797,9 @@ importers:
       typescript:
         specifier: 5.3.3
         version: 5.3.3
+      upath:
+        specifier: 2.0.1
+        version: 2.0.1
       url:
         specifier: 0.11.3
         version: 0.11.3
@@ -783,12 +813,6 @@ importers:
       '@module-federation/nextjs-mf':
         specifier: workspace:*
         version: link:../../packages/nextjs-mf
-      '@module-federation/runtime':
-        specifier: workspace:*
-        version: link:../../packages/runtime
-      '@module-federation/sdk':
-        specifier: workspace:*
-        version: link:../../packages/sdk
       '@module-federation/utilities':
         specifier: workspace:*
         version: link:../../packages/utilities
@@ -5923,24 +5947,20 @@ packages:
     dependencies:
       '@module-federation/runtime': 0.0.8
       '@module-federation/webpack-bundler-runtime': 0.0.8
-    dev: true
 
   /@module-federation/runtime@0.0.8:
     resolution: {integrity: sha512-Hi9g10aHxHdQ7CbchSvke07YegYwkf162XPOmixNmJr5Oy4wVa2d9yIVSrsWFhBRbbvM5iJP6GrSuEq6HFO3ug==}
     dependencies:
       '@module-federation/sdk': 0.0.8
-    dev: true
 
   /@module-federation/sdk@0.0.8:
     resolution: {integrity: sha512-lkasywBItjUTNT0T0IskonDE2E/2tXE9UhUCPVoDL3NteDUSFGg4tpkF+cey1pD8mHh0XJcGrCuOW7s96peeAg==}
-    dev: true
 
   /@module-federation/webpack-bundler-runtime@0.0.8:
     resolution: {integrity: sha512-ULwrTVzF47+6XnWybt6SIq97viEYJRv4P/DByw5h7PSX9PxSGyMm5pHfXdhcb7tno7VknL0t2V8F48fetVL9kA==}
     dependencies:
       '@module-federation/runtime': 0.0.8
       '@module-federation/sdk': 0.0.8
-    dev: true
 
   /@mole-inc/bin-wrapper@8.0.1:
     resolution: {integrity: sha512-sTGoeZnjI8N4KS+sW2AN95gDBErhAguvkw/tWdCjeM8bvxpz5lqrnd0vOJABA1A+Ic3zED7PYoLP/RANLgVotA==}
