@@ -2,7 +2,14 @@ function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
     throw new Error('import specifier is required');
   }
-  const importModule = new Function('name', `return import(name)`);
+  let importModule = new Function('name', `return import(name)`);
+  importModule(name).catch((e: any) => {
+    try {
+      return Promise.resolve(eval('require')(name));
+    } catch (err) {
+      return Promise.reject(e);
+    }
+  });
   return importModule(name)
     .then((res: any) => res.default as T)
     .catch((error: any) => {
