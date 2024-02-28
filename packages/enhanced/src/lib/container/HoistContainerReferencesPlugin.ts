@@ -51,8 +51,10 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
     }
 
     // Merge runtime
-    //@ts-ignore
-    chunkA.runtime = runtime.mergeRuntime(chunkA.runtime, chunkB.runtime);
+    if (chunkA.name === chunkA.runtime) {
+      //@ts-ignore
+      chunkA.runtime = runtime.mergeRuntime(chunkA.runtime, chunkB.runtime);
+    }
 
     // getChunkModules is used here to create a clone, because disconnectChunkAndModule modifies
     for (const module of chunkGraph.getChunkModules(chunkB)) {
@@ -122,6 +124,24 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
                   );
                 }
               }
+            }
+
+            for (const module of chunkGraph.getChunkModules(
+              federationRuntimeChunk,
+            )) {
+              chunkGraph.disconnectChunkAndModule(
+                federationRuntimeChunk,
+                module,
+              );
+            }
+            if (!federationRuntimePlugins) return;
+            for (const module of chunkGraph.getChunkModules(
+              federationRuntimePlugins,
+            )) {
+              chunkGraph.disconnectChunkAndModule(
+                federationRuntimePlugins,
+                module,
+              );
             }
           },
         );
