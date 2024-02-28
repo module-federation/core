@@ -1,10 +1,33 @@
-import React, { StrictMode } from 'react';
+import React, { StrictMode, lazy } from 'react';
 import { init } from '@module-federation/runtime';
+import * as ReactDOM from 'react-dom/client';
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
+  RouterProvider,
+} from 'react-router-dom';
+import App from './App';
+import Root from './Root';
 import customPlugin from './runtimePlugin';
 
-import * as ReactDOM from 'react-dom/client';
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Root />,
+    children: [
+      {
+        path: 'basic',
+        element: <App />,
+      },
+      {
+        path: 'race',
+        Component: lazy(() => import('./Race')),
+      },
+    ],
+  },
+]);
 
-import App from './App';
 init({
   name: 'manifest_host',
   remotes: [
@@ -22,6 +45,6 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <StrictMode>
-    <App />
+    <RouterProvider router={router} />
   </StrictMode>,
 );

@@ -7,6 +7,6 @@ function useCustomRemoteHook() {
     console.log('some custom hook');
   }, []);
 
-  return 'Custom hook from localhost:3006 works!';
+  return 'Custom hook from localhost:3009 works!';
 }
 export default useCustomRemoteHook;

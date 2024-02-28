@@ -29,7 +29,7 @@ const WebpackPngRemote = lazy(() => import('remote1/WebpackPng'));
 
 const App = () => (
   <div>
-    <h1>Runtime Demo</h1>
+    <h1>Manifest Basic Usage</h1>
     <h2>Host</h2>
     <h3>check static remote</h3>
     <table border={1} cellPadding={5}>
@@ -44,12 +44,12 @@ const App = () => (
       <tbody>
         <tr>
           <td>✅</td>
-          <td>Test hook from remote localhost:3006</td>
+          <td>Test hook from remote localhost:3009</td>
           <td>
             <div>
               Page with custom remote hook. You must see text in red box below:
               <div style={{ border: '1px solid red', padding: 5 }}>
-                Custom hook from localhost:3006 works!
+                Custom hook from localhost:3009 works!
               </div>
             </div>
           </td>
@@ -60,7 +60,7 @@ const App = () => (
         <tr>
           <td>✅</td>
           <td>
-            Loading remote component with PNG image from localhost:3006
+            Loading remote component with PNG image from localhost:3009
             <br />
             <blockquote>(check publicPath fix in image-loader)</blockquote>
           </td>
@@ -76,7 +76,7 @@ const App = () => (
         <tr>
           <td>✅</td>
           <td>
-            Loading remote component with SVG from localhost:3006
+            Loading remote component with SVG from localhost:3009
             <br />
             <blockquote>(check publicPath fix in url-loader)</blockquote>
           </td>
@@ -105,7 +105,7 @@ const App = () => (
       <tbody>
         <tr>
           <td>✅</td>
-          <td>Loading dynamic remote Button from localhost:3007</td>
+          <td>Loading dynamic remote Button from localhost:3010</td>
           <td>
             <LocalBtn />
           </td>

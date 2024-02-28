@@ -4,6 +4,6 @@ const style = {
   padding: 12,
 };
 
-const Button = () => <button style={style}>3007-remote2 Button</button>;
+const Button = () => <button style={style}>3010-remote2 Button</button>;
 
 export default Button;

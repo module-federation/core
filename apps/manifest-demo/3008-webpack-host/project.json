@@ -49,8 +49,7 @@
       "options": {
         "buildTarget": "3008-webpack-host:build",
         "hmr": true,
-        "port": 3005,
-        "devRemotes": ["3006-runtime-remote"]
+        "port": 3008
       },
       "configurations": {
         "development": {
@@ -80,7 +79,7 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "3008-webpack-host:build",
-        "port": 3005
+        "port": 3008
       },
       "configurations": {
         "development": {
