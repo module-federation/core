@@ -186,7 +186,7 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
 
   // solves strange issues where next doesnt create a runtime chunk
   // might be related to if an api route exists or not
-  // compiler.options.optimization.runtimeChunk = {
-  //   name: 'webpack-runtime',
-  // };
+  compiler.options.optimization.runtimeChunk = {
+    name: 'webpack-runtime',
+  };
 }
