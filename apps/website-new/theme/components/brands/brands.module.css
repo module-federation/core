@@ -1,0 +1,30 @@
+@keyframes slide {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animation-container {
+  position: relative;
+}
+
+.animated {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+
+  animation-direction: normal;
+  animation-fill-mode: none;
+  animation-play-state: running;
+}
+
+.animated--0 {
+  animation: slide 30s linear infinite;
+}
+.animated--1 {
+  animation: slide 40s linear infinite;
+}

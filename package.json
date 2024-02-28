@@ -5,6 +5,7 @@
     "node": ">=18",
     "pnpm": ">=8.11.0"
   },
+  "packageManager": "pnpm@8.11.0",
   "private": true,
   "description": "Module Federation helper for NextJS",
   "main": "src/index.js",
@@ -193,7 +194,7 @@
     "prettier": "3.0.3",
     "prettier-eslint": "16.2.0",
     "qwik-nx": "1.1.1",
-    "qwik-speak": "0.19.0",
+    "qwik-speak": "0.12.2",
     "react-refresh": "0.14.0",
     "rimraf": "^3.0.2",
     "rollup-plugin-copy": "3.5.0",
