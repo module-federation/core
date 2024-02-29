@@ -8,7 +8,7 @@ const Root = () => {
       <nav>
         <ul>
           <li>
-            <a href={`/race`}>race</a>
+            <a href={`/preload`}>preload</a>
           </li>
           <li>
             <a href={`/basic`}>basic usage</a>

@@ -21,8 +21,8 @@ const router = createBrowserRouter([
         element: <App />,
       },
       {
-        path: 'race',
-        Component: lazy(() => import('./Race')),
+        path: 'preload',
+        Component: lazy(() => import('./Preload')),
       },
     ],
   },

@@ -29,8 +29,7 @@ const WebpackPngRemote = lazy(() => import('remote1/WebpackPng'));
 
 const App = () => (
   <div>
-    <h1>Manifest Basic Usage</h1>
-    <h2>Host</h2>
+    <h2>Manifest Basic Usage</h2>
     <h3>check static remote</h3>
     <table border={1} cellPadding={5}>
       <thead>

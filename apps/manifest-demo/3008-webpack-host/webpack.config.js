@@ -11,6 +11,10 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       name: 'manifest_host',
       remotes: {
         remote1: 'webpack_provider@http://localhost:3009/mf-manifest.json',
+        'manifest-provider':
+          'rspack_manifest_provider@http://localhost:3011/mf-manifest.json',
+        'js-entry-provider':
+          'rspack_js_entry_provider@http://localhost:3012/remoteEntry.js',
       },
       filename: 'remoteEntry.js',
       exposes: {
@@ -35,7 +39,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       p._options.library = undefined;
     }
   });
-
+  config.devServer.client.overlay = false;
   //Temporary workaround - https://github.com/nrwl/nx/issues/16983
   config.experiments = { outputModule: false };
 

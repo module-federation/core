@@ -95,7 +95,7 @@
       "options": {
         "cypressConfig": "apps/manifest-demo/3008-webpack-host/cypress.config.ts",
         "testingType": "e2e",
-        "baseUrl": "http://localhost:3005",
+        "baseUrl": "http://localhost:3008",
         "browser": "chrome"
       },
       "configurations": {
@@ -113,7 +113,7 @@
         "parallel": true,
         "commands": [
           {
-            "command": "lsof -i :3005 || nx run 3008-webpack-host:serve",
+            "command": "lsof -i :3008 || nx run 3008-webpack-host:serve",
             "forwardAllArgs": false
           },
           {
