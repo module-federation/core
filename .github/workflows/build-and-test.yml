@@ -78,4 +78,7 @@ jobs:
         run: pnpm app:next:build
 
       - name: E2E Node Federation
-        run: npx nx run node-host-e2e:e2e
+        run: npx nx run node-host-e2e:test:e2e
+
+      - name: Kill Processes on Ports 3333, 3002, 3003
+        run: lsof -ti tcp:3333,3002,3003,3011,3012 | xargs kill
