@@ -9,9 +9,7 @@ module.exports = composePlugins(withNx(), (config) => {
   config.target = 'node';
   config.devtool = false;
   config.cache = false;
-  if (config.mode === 'development') {
-    config.devServer.devMiddleware.writeToDisk = true;
-  }
+  config.devServer.devMiddleware.writeToDisk = true;
 
   config.plugins.push(
     new UniversalFederationPlugin({
