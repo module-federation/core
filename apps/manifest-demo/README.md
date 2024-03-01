@@ -1,17 +1,17 @@
-# runtime-demo
+# manifest-demo
 
-This example demos automatic-vendor-sharing, each host/remote will share all vendors possible, with react listed as a singleton
+This example demos manifest
 
-- `host` consumes remote.
-- `remote1` exposes a blue button component.
-- `remote2` exposes a red button component.
-
-host declare remote2 in webpack.config.js, and use `@module-federation/runtime` to load remote1 dynamic
+- `3008-webpack-host` consumes remote  and generate manifest.
+- `3009-webpack-provider` exposes a blue button component  and generate manifest.
+- `3010-rspack-provider` exposes a red button component  and generate manifest.
+- `3011-rspack-manifest-provider`: expose component and generate manifest.
+- `3012-rspack-js-entry-provider`: expose component and not generate manifest.
 
 # Running Demo
 
-Run `npm run app:runtime:dev` to start host, remote1, remote2
+Run `pnpm run app:manifest:dev` to start examples
 
-- host: [localhost:3005](http://localhost:3005/)
-- remote1: [localhost:3006](http://localhost:3006/)
-- remote2: [localhost:3007](http://localhost:3007/)
+- 3008-webpack-host: [localhost:3008](http://localhost:3008/)
+  - view http://localhost:3008/basic to see the basic usage with manifest provider , just the same as js entry provider.
+  - view http://localhost:3008/preload to see manifest provider can use preloadRemote to optimize page performance
