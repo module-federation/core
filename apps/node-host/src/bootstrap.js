@@ -5,14 +5,8 @@
 
 import express from 'express';
 import * as path from 'path';
-import fs from 'fs';
 
 const remoteMsg = import('node_remote/test').then((m) => {
-  console.log('\x1b[32m%s\x1b[0m', m.default || m);
-  return m.default || m;
-});
-
-const localRemoteMsg = import('node_local_remote/test').then((m) => {
   console.log('\x1b[32m%s\x1b[0m', m.default || m);
   return m.default || m;
 });
@@ -22,31 +16,11 @@ const app = express();
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 app.get('/api', async (req, res) => {
-  console.log('__filename: ', __filename);
-  console.log('pwd: ', process.cwd());
-  const dir = path.resolve(__dirname, '../../node-local-remote/dist');
-  console.log('dir name: ', dir);
-  fs.readdir(dir, (err, files) => {
-    if (err) {
-      console.error('Could not list the directory.', err);
-      process.exit(1);
-    }
-
-    files.forEach((file) => {
-      let filePath = path.join(dir, file);
-
-      fs.stat(filePath, (err, stat) => {
-        if (err) {
-          console.error('Error stating file.', err);
-          return;
-        }
-
-        if (stat.isFile()) console.log('%s is a file.', filePath);
-        else if (stat.isDirectory())
-          console.log('%s is a directory.', filePath);
-      });
-    });
+  const localRemoteMsg = import('node_local_remote/test').then((m) => {
+    console.log('\x1b[32m%s\x1b[0m', m.default || m);
+    return m.default || m;
   });
+
   res.send({
     message: 'Welcome to node-host!',
     remotes: {
