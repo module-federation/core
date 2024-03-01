@@ -872,6 +872,10 @@ importers:
         version: 0.14.0
 
   apps/manifest-demo/3011-rspack-manifest-provider:
+    dependencies:
+      lodash:
+        specifier: 4.17.21
+        version: 4.17.21
     devDependencies:
       '@module-federation/enhanced-rspack':
         specifier: workspace:*
@@ -887,6 +891,10 @@ importers:
         version: 0.14.0
 
   apps/manifest-demo/3012-rspack-js-entry-provider:
+    dependencies:
+      lodash:
+        specifier: 4.17.21
+        version: 4.17.21
     devDependencies:
       '@module-federation/enhanced-rspack':
         specifier: workspace:*
