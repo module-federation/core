@@ -11,7 +11,6 @@ import type { moduleFederationPlugin } from '@module-federation/sdk';
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
-import checkOptions from '../../schemas/container/ModuleFederationPlugin.check';
 import schema from '../../schemas/container/ModuleFederationPlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { StatsPlugin } from '@module-federation/manifest';
