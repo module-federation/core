@@ -88,8 +88,7 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
       // chunkB.removeGroup(chunkGroup);
     }
 
-    debugger;
-    // compiler.webpack.ChunkGraph.clearChunkGraphForChunk(chunkB);
+    compiler.webpack.ChunkGraph.clearChunkGraphForChunk(chunkB);
   }
 
   apply(compiler: Compiler): void {
@@ -194,6 +193,8 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
 
             const runtimeTools = runtime;
             for (const runtime of runtimes) {
+              const runtimeChunk = compilation.namedChunks.get(runtime);
+              if (!runtimeChunk) continue;
               const baseRuntimeName = 'federation-runtime';
               const basePluginsName = 'mfp-runtime-plugins';
               const newFederationRuntimeChunkName = `${baseRuntimeName}-${runtime}`;
@@ -201,7 +202,7 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
               //@ts-ignore
               if (
                 this.chunkContainsContainerEntryModule(
-                  compilation.namedChunks.get(runtime),
+                  runtimeChunk,
                   compilation,
                 )
               )
@@ -280,9 +281,8 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
                 newPluginsRuntimeChunk,
                 compilation,
               );
-              debugger;
-              // compilation.chunks.delete(newFederationRuntimeChunk)
-              // compilation.chunks.delete(newPluginsRuntimeChunk)
+              compilation.chunks.delete(newFederationRuntimeChunk);
+              compilation.chunks.delete(newPluginsRuntimeChunk);
             }
           },
         );

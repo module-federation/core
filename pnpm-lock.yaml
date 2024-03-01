@@ -700,6 +700,9 @@ importers:
       typescript:
         specifier: 5.3.3
         version: 5.3.3
+      upath:
+        specifier: 2.0.1
+        version: 2.0.1
       url:
         specifier: 0.11.3
         version: 0.11.3
