@@ -56,32 +56,14 @@ jobs:
       #      - name: E2E Test for 3002-checkout
       #        run: pnpm run app:next:dev & echo "done" && sleep 15 && npx nx run-many --target=test:e2e --projects=3002-checkout && lsof -ti tcp:3000,3001,3002 | xargs kill
 
-      - name: Kill Processes on Ports 3000, 3001, 3002
-        run: lsof -ti tcp:3000,3001,3002 | xargs kill
-
-      - name: Serve Projects 3005-runtime-host, 3006-runtime-remote, 3007-runtime-remote
-        run: npx nx run-many --target=serve --projects=3005-runtime-host,3006-runtime-remote,3007-runtime-remote --parallel=3 & echo "done"
-
       - name: E2E Test for 3005-runtime-host
-        run: sleep 6 && npx nx run-many --target=test:e2e --projects=3005-runtime-host --parallel=1
-
-      - name: Kill Processes on Ports 3005, 3006, 3007
-        run: lsof -ti tcp:3005,3006,3007 | xargs kill
-
-      - name: Serve Projects 3008-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider
-        run: npx nx run-many --target=serve --parallel=5 -p 3008-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider & echo "done"
+        run: pnpm run app:runtime:dev & echo "done" && sleep 6 && npx nx run-many --target=test:e2e --projects=3005-runtime-host --parallel=1 && lsof -ti tcp:3005,3006,3007 | xargs kill
 
       - name: E2E Test for 3008-webpack-host
-        run: sleep 6 && npx nx run-many --target=test:e2e --projects=3008-webpack-host --parallel=1
-
-      - name: Kill Processes on Ports 3008, 3009, 3010, 3011, 3012
-        run: lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
+        run: pnpm run app:manifest:dev & echo "done" && sleep 6 && npx nx run-many --target=test:e2e --projects=3008-webpack-host --parallel=1 && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
 
       - name: Build Next.js Apps in Production Mode
         run: pnpm app:next:build
 
       - name: E2E Node Federation
-        run: npx nx run node-host-e2e:test:e2e
-
-      - name: Kill Processes on Ports 3333, 3002, 3003
-        run: lsof -ti tcp:3333,3002,3003,3011,3012 | xargs kill
+        run: pnpm run app:node:dev & echo "done" && sleep 6 && npx nx run node-host-e2e:e2e && lsof -ti tcp:3333,3002,3003 | xargs kill
