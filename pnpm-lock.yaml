@@ -442,8 +442,8 @@ importers:
         specifier: 9.0.1
         version: 9.0.1(postcss@8.4.35)
       postcss-custom-properties:
-        specifier: 13.3.4
-        version: 13.3.4(postcss@8.4.35)
+        specifier: 13.3.5
+        version: 13.3.5(postcss@8.4.35)
       postcss-import:
         specifier: 15.1.0
         version: 15.1.0(postcss@8.4.35)
@@ -3565,8 +3565,28 @@ packages:
       '@csstools/css-tokenizer': 2.2.3
     dev: true
 
+  /@csstools/cascade-layer-name-parser@1.0.8(@csstools/css-parser-algorithms@2.6.0)(@csstools/css-tokenizer@2.2.3):
+    resolution: {integrity: sha512-xHxXavWvXB5nAA9IvZtjEzkONM3hPXpxqYK4cEw60LcqPiFjq7ZlEFxOyYFPrG4UdANKtnucNtRVDy7frjq6AA==}
+    engines: {node: ^14 || ^16 || >=18}
+    peerDependencies:
+      '@csstools/css-parser-algorithms': ^2.6.0
+      '@csstools/css-tokenizer': ^2.2.3
+    dependencies:
+      '@csstools/css-parser-algorithms': 2.6.0(@csstools/css-tokenizer@2.2.3)
+      '@csstools/css-tokenizer': 2.2.3
+    dev: true
+
   /@csstools/css-parser-algorithms@2.5.0(@csstools/css-tokenizer@2.2.3):
     resolution: {integrity: sha512-abypo6m9re3clXA00eu5syw+oaPHbJTPapu9C4pzNsJ4hdZDzushT50Zhu+iIYXgEe1CxnRMn7ngsbV+MLrlpQ==}
+    engines: {node: ^14 || ^16 || >=18}
+    peerDependencies:
+      '@csstools/css-tokenizer': ^2.2.3
+    dependencies:
+      '@csstools/css-tokenizer': 2.2.3
+    dev: true
+
+  /@csstools/css-parser-algorithms@2.6.0(@csstools/css-tokenizer@2.2.3):
+    resolution: {integrity: sha512-YfEHq0eRH98ffb5/EsrrDspVWAuph6gDggAE74ZtjecsmyyWpW768hOyiONa8zwWGbIWYfa2Xp4tRTrpQQ00CQ==}
     engines: {node: ^14 || ^16 || >=18}
     peerDependencies:
       '@csstools/css-tokenizer': ^2.2.3
@@ -3586,6 +3606,15 @@ packages:
       postcss-selector-parser: ^6.0.13
     dependencies:
       postcss-selector-parser: 6.0.13
+    dev: true
+
+  /@csstools/utilities@1.0.0(postcss@8.4.35):
+    resolution: {integrity: sha512-tAgvZQe/t2mlvpNosA4+CkMiZ2azISW5WPAcdSalZlEjQvUfghHxfQcrCiK/7/CrfAWVxyM88kGFYO82heIGDg==}
+    engines: {node: ^14 || ^16 || >=18}
+    peerDependencies:
+      postcss: ^8.4
+    dependencies:
+      postcss: 8.4.35
     dev: true
 
   /@ctrl/tinycolor@3.6.1:
@@ -25785,15 +25814,16 @@ packages:
       postcss-value-parser: 4.2.0
     dev: true
 
-  /postcss-custom-properties@13.3.4(postcss@8.4.35):
-    resolution: {integrity: sha512-9YN0gg9sG3OH+Z9xBrp2PWRb+O4msw+5Sbp3ZgqrblrwKspXVQe5zr5sVqi43gJGwW/Rv1A483PRQUzQOEewvA==}
+  /postcss-custom-properties@13.3.5(postcss@8.4.35):
+    resolution: {integrity: sha512-xHg8DTCMfN2nrqs2CQTF+0m5jgnzKL5zrW5Y05KF6xBRO0uDPxiplBm/xcr1o49SLbyJXkMuaRJKhRzkrquKnQ==}
     engines: {node: ^14 || ^16 || >=18}
     peerDependencies:
       postcss: ^8.4
     dependencies:
-      '@csstools/cascade-layer-name-parser': 1.0.7(@csstools/css-parser-algorithms@2.5.0)(@csstools/css-tokenizer@2.2.3)
-      '@csstools/css-parser-algorithms': 2.5.0(@csstools/css-tokenizer@2.2.3)
+      '@csstools/cascade-layer-name-parser': 1.0.8(@csstools/css-parser-algorithms@2.6.0)(@csstools/css-tokenizer@2.2.3)
+      '@csstools/css-parser-algorithms': 2.6.0(@csstools/css-tokenizer@2.2.3)
       '@csstools/css-tokenizer': 2.2.3
+      '@csstools/utilities': 1.0.0(postcss@8.4.35)
       postcss: 8.4.35
       postcss-value-parser: 4.2.0
     dev: true
