@@ -38,7 +38,6 @@ export function applyClientPlugins(
   compiler.options.output.publicPath = 'auto';
   // Build will hang without this. Likely something in my plugin
   compiler.options.optimization.splitChunks = undefined;
-  new HoistContainerReferencesPlugin().apply(compiler);
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
   if (extraOptions.automaticPageStitching) {
