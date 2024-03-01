@@ -39,7 +39,9 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       p._options.library = undefined;
     }
   });
-  config.devServer.client.overlay = false;
+  if (config.devServer) {
+    config.devServer.client.overlay = false;
+  }
   //Temporary workaround - https://github.com/nrwl/nx/issues/16983
   config.experiments = { outputModule: false };
 

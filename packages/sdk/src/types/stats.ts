@@ -1,4 +1,4 @@
-import { ModuleType } from '../constant';
+import { MFModuleType } from '../constant';
 import type { RemoteWithEntry, RemoteWithVersion } from './common';
 
 export type RemoteEntryType = 'esm' | 'global';
@@ -21,7 +21,7 @@ export interface BasicStatsMetaData {
   remoteEntry: ResourceInfo;
   prefetchEntry?: ResourceInfo;
   types: Omit<ResourceInfo, 'type'>;
-  type: ModuleType;
+  type: string;
   pluginVersion: string;
 }
 

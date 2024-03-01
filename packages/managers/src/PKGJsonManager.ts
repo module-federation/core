@@ -1,7 +1,7 @@
 import path from 'path';
 import finder from 'find-pkg';
 import fs from 'fs';
-import { ModuleType } from '@module-federation/sdk';
+import { MFModuleType } from '@module-federation/sdk';
 
 export class PKGJsonManager {
   private _pkg?: Record<string, any>;
@@ -33,10 +33,10 @@ export class PKGJsonManager {
     }
   }
 
-  getExposeGarfishModuleType(ctx = process.cwd()): ModuleType {
+  getExposeGarfishModuleType(ctx = process.cwd()): string {
     const pkg = this.readPKGJson(ctx);
-    return pkg?.['mf']?.type === ModuleType.NPM
-      ? ModuleType.NPM
-      : ModuleType.APP;
+    return pkg?.['mf']?.type === MFModuleType.NPM
+      ? MFModuleType.NPM
+      : MFModuleType.APP;
   }
 }
