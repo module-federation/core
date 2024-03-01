@@ -29,7 +29,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "sleep 10 && nx run node-host-e2e:e2e",
+            "command": "sleep 10 && nx run node-host-e2e:e2e && echo 'done'",
             "forwardAllArgs": true
           }
         ]
