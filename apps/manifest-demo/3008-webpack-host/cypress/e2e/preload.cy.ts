@@ -11,6 +11,9 @@ describe('3008-webpack-host/preload', () => {
 
   describe('Manifest provider will load component more quickly than js entry provider', () => {
     it('manifest provider will load component more quickly than js entry provider', () => {
+      // simulate browser idle time
+      cy.wait(2000);
+
       // should load remote successfully
       // load manifest provider component
       cy.get('#loadManifestProvider').click();
