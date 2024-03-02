@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@module-federation/runtime": "0.0.8",
-    "@module-federation/runtime-tools": "0.0.8",
-    "@module-federation/sdk": "0.0.8",
-    "@module-federation/webpack-bundler-runtime": "0.0.8",
     "acorn": "7.4.1",
     "antd": "4.24.15",
     "buffer": "5.7.1",
