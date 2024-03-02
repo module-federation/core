@@ -202,7 +202,7 @@
     "stopword": "2.0.8",
     "strip-ansi": "^6.0.0",
     "swc-loader": "0.2.3",
-    "tailwindcss": "3.4.0",
+    "tailwindcss": "3.4.1",
     "ts-jest": "29.1.2",
     "ts-node": "10.9.1",
     "tslib": "2.6.2",

@@ -33,7 +33,6 @@ export function applyServerPlugins(
   }
   // Hoist container references into runtime chunks
   //@ts-ignore
-  new HoistContainerReferencesPlugin().apply(compiler);
 
   // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
   new StreamingTargetPlugin(options, {
@@ -130,7 +129,6 @@ export function handleServerExternals(
       if (
         ctx.request &&
         (ctx.request.includes('@module-federation/utilities') ||
-          ctx.request.includes('internal-delegate-hoist') ||
           Object.keys(options.shared || {}).some((key) => {
             return (
               //@ts-ignore

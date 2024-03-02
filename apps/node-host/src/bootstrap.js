@@ -8,9 +8,9 @@ import * as path from 'path';
 import { loadRemote } from '@module-federation/runtime';
 import node_local_remote from 'node_local_remote/test';
 console.log(loadRemote);
-import('node_remote/test').then((m) => {
+const remoteMsg = import('node_remote/test').then((m) => {
   console.log('\x1b[32m%s\x1b[0m', m.default || m);
-  //eslint-disable-next-line
+  return m.default || m;
 });
 console.log('\x1b[32m%s\x1b[0m', node_local_remote);
 
@@ -18,8 +18,14 @@ const app = express();
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-app.get('/api', (req, res) => {
-  res.send({ message: 'Welcome to node-host!' });
+app.get('/api', async (req, res) => {
+  res.send({
+    message: 'Welcome to node-host!',
+    remotes: {
+      node_remote: await remoteMsg,
+      node_local_remote,
+    },
+  });
 });
 
 const port = process.env.PORT || 3333;

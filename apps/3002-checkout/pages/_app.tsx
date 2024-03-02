@@ -1,6 +1,5 @@
 import React, { Suspense, lazy, useState } from 'react';
 import App from 'next/app';
-import dynamic from 'next/dynamic';
 import { Layout, version } from 'antd';
 import Router, { useRouter } from 'next/router';
 

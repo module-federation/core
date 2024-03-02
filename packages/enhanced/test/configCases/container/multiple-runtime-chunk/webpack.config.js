@@ -28,6 +28,7 @@ const commonMF = {
 /** @type {import("../../../../").Configuration[]} */
 module.exports = [
   {
+    mode: 'production',
     ...common,
     output: {
       filename: '[name].js',
