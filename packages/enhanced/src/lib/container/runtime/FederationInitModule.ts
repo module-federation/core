@@ -93,15 +93,17 @@ class FederationInitModule extends RuntimeModule {
     }
     const boundaryChunks = this.chunksRuntimePluginsDependsOn;
 
-    if (runtimePluginModuleId && boundaryChunks) {
-      const chunkConsumesStatements = Array.from(boundaryChunks)
-        .map(
-          (chunk) =>
-            `__webpack_require__.f.consumes(${JSON.stringify(
-              chunk.id || chunk.name,
-            )}, consumes);`,
-        )
-        .join('\n');
+    if (runtimePluginModuleId) {
+      const chunkConsumesStatements = boundaryChunks
+        ? Array.from(boundaryChunks)
+            .map(
+              (chunk) =>
+                `__webpack_require__.f.consumes(${JSON.stringify(
+                  chunk.id || chunk.name,
+                )}, consumes);`,
+            )
+            .join('\n')
+        : '';
 
       requireStatements.push(
         Template.asString([
