@@ -25,6 +25,9 @@ module.exports = [
       filename: '[name].js',
       uniqueName: '0-container-full',
     },
+    optimization: {
+      runtimeChunk: 'multiple',
+    },
     plugins: [
       new ModuleFederationPlugin({
         library: { type: 'commonjs-module' },
