@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "acorn": "7.4.1",
+    "acorn": "8.11.3",
     "antd": "4.24.15",
     "buffer": "5.7.1",
     "chrome-trace-event": "1.0.3",
