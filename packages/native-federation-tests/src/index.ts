@@ -3,7 +3,7 @@ import { rm } from 'fs/promises';
 import { resolve } from 'path';
 import { mergeDeepRight, mergeRight } from 'rambda';
 import { build } from 'tsup';
-import { createUnplugin } from 'unplugin';
+import { UnpluginOptions, createUnplugin } from 'unplugin';
 
 import { retrieveHostConfig } from './configurations/hostPlugin';
 import { retrieveRemoteConfig } from './configurations/remotePlugin';
@@ -47,7 +47,25 @@ export const NativeFederationTestsRemote = createUnplugin(
           );
         }
       },
+      get vite() {
+        return process.env.NODE_ENV === 'production'
+          ? undefined
+          : {
+              buildStart: (this as UnpluginOptions).writeBundle,
+              watchChange: (this as UnpluginOptions).writeBundle,
+            };
+      },
       webpack: (compiler) => {
+        compiler.options.devServer = mergeDeepRight(
+          compiler.options.devServer || {},
+          {
+            static: {
+              directory: resolve(remoteOptions.distFolder),
+            },
+          },
+        );
+      },
+      rspack: (compiler) => {
         compiler.options.devServer = mergeDeepRight(
           compiler.options.devServer || {},
           {
@@ -80,6 +98,14 @@ export const NativeFederationTestsHost = createUnplugin(
 
         await Promise.allSettled(downloadPromises);
         console.log(ansiColors.green('Federated mocks extraction completed'));
+      },
+      get vite() {
+        return process.env.NODE_ENV === 'production'
+          ? undefined
+          : {
+              buildStart: (this as UnpluginOptions).writeBundle,
+              watchChange: (this as UnpluginOptions).writeBundle,
+            };
       },
     };
   },

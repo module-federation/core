@@ -95,6 +95,49 @@ describe('index', () => {
         },
       });
     });
+
+    it('correctly enrich rspack config', async () => {
+      const options = {
+        moduleFederationConfig: {
+          name: 'moduleFederationTypescript',
+          filename: 'remoteEntry.js',
+          exposes: {
+            './index': exposedIndex,
+          },
+          shared: {
+            react: { singleton: true, eager: true },
+            'react-dom': { singleton: true, eager: true },
+          },
+        },
+        deleteTestsFolder: false,
+        testsFolder: '@mf-tests',
+      };
+
+      const rspackCompiler = {
+        options: {
+          devServer: {
+            foo: {},
+          },
+        },
+      } as any;
+
+      const unplugin = NativeFederationTestsRemote.rollup(
+        options,
+      ) as UnpluginOptions;
+
+      unplugin.rspack?.(rspackCompiler);
+
+      expect(rspackCompiler).toStrictEqual({
+        options: {
+          devServer: {
+            foo: {},
+            static: {
+              directory: resolve('./dist'),
+            },
+          },
+        },
+      });
+    });
   });
 
   describe('NativeFederationTestsHost', () => {
