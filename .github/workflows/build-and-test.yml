@@ -69,4 +69,4 @@ jobs:
         run: pnpm app:next:build
 
       - name: E2E Node Federation
-        run: npx nx run node-host-e2e:e2e
+        run: npx nx run-many --target=serve --projects=node-local-remote,node-remote --parallel=3 & echo "done" && sleep 10 && npx nx run-many --target=serve --projects=node-host & echo "done" && npx nx run node-host-e2e:test:e2e
