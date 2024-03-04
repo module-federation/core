@@ -25,7 +25,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "nx run node-host:serve",
+            "command": "sleep 5 && nx run node-host:serve",
             "forwardAllArgs": false
           },
           {
