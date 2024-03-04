@@ -89,7 +89,7 @@
     "@nx/devkit": "17.2.8",
     "@nx/esbuild": "17.2.8",
     "@nx/eslint-plugin": "17.2.8",
-    "@nx/express": "17.2.8",
+    "@nx/express": "18.1.0",
     "@nx/jest": "17.2.8",
     "@nx/js": "17.2.8",
     "@nx/linter": "17.2.8",
