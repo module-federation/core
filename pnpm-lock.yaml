@@ -116,7 +116,7 @@ importers:
         version: 17.8.1(nx@17.2.8)
       '@commitlint/cz-commitlint':
         specifier: ^17.7.2
-        version: 17.8.1(@swc/core@1.3.102)(commitizen@4.3.0)(inquirer@9.2.14)
+        version: 17.8.1(@swc/core@1.3.102)(commitizen@4.3.0)(inquirer@9.2.15)
       '@dqbd/tiktoken':
         specifier: 1.0.13
         version: 1.0.13
@@ -388,8 +388,8 @@ importers:
         specifier: 8.0.3
         version: 8.0.3
       inquirer:
-        specifier: 9.2.14
-        version: 9.2.14
+        specifier: 9.2.15
+        version: 9.2.15
       jest:
         specifier: 29.7.0
         version: 29.7.0(@types/node@18.19.18)(ts-node@10.9.1)
@@ -3343,7 +3343,7 @@ packages:
     dev: true
     optional: true
 
-  /@commitlint/cz-commitlint@17.8.1(@swc/core@1.3.102)(commitizen@4.3.0)(inquirer@9.2.14):
+  /@commitlint/cz-commitlint@17.8.1(@swc/core@1.3.102)(commitizen@4.3.0)(inquirer@9.2.15):
     resolution: {integrity: sha512-7/13k+NxxqwYnrrb52g70qrXs5NQS7r/qV9GAwcoE/8LLWoziV38nsgELajFu6sNgai9X8d8IX5UyiB1M1zGjg==}
     engines: {node: '>=v14'}
     peerDependencies:
@@ -3355,7 +3355,7 @@ packages:
       '@commitlint/types': 17.8.1
       chalk: 4.1.2
       commitizen: 4.3.0(typescript@5.3.3)
-      inquirer: 9.2.14
+      inquirer: 9.2.15
       lodash.isplainobject: 4.0.6
       word-wrap: 1.2.5
     transitivePeerDependencies:
@@ -20897,8 +20897,8 @@ packages:
       wrap-ansi: 6.2.0
     dev: true
 
-  /inquirer@9.2.14:
-    resolution: {integrity: sha512-4ByIMt677Iz5AvjyKrDpzaepIyMewNvDcvwpVVRZNmy9dLakVoVgdCHZXbK1SlVJra1db0JZ6XkJyHsanpdrdQ==}
+  /inquirer@9.2.15:
+    resolution: {integrity: sha512-vI2w4zl/mDluHt9YEQ/543VTCwPKWiHzKtm9dM2V0NdFcqEexDAjUHzO1oA60HRNaVifGXXM1tRRNluLVHa0Kg==}
     engines: {node: '>=18'}
     dependencies:
       '@ljharb/through': 2.3.12
