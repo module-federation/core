@@ -17,19 +17,7 @@
         "parallel": true,
         "commands": [
           {
-            "command": "nx run node-remote:serve",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "nx run node-local-remote:serve",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "sleep 5 && nx run node-host:serve",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "sleep 10 && nx run node-host-e2e:e2e",
+            "command": "sleep 10 && nx run node-host-e2e:e2e && lsof -ti tcp:3002,3003,3333 | xargs kill",
             "forwardAllArgs": true
           }
         ]
