@@ -1,5 +1,11 @@
 # [3.1.0](https://github.com/module-federation/universe/compare/utils-3.0.2...utils-3.1.0) (2023-10-26)
 
+## 3.0.6
+
+### Patch Changes
+
+- a050645: Remove delegate module code from utils
+
 ## 3.0.5
 
 ### Patch Changes
