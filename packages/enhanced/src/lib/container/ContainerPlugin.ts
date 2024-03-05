@@ -173,6 +173,7 @@ class ContainerPlugin {
         runtime: hasSingleRuntimeChunk ? false : runtime,
       },
     ).apply(compiler);
+
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
       const dep = new ContainerEntryDependency(
         name,

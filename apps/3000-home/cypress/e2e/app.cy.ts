@@ -51,7 +51,11 @@ describe('3000-home/', () => {
   });
 
   describe('3000-home/checkout', () => {
-    beforeEach(() => cy.visit('/checkout'));
+    beforeEach(() => {
+      cy.visit('/checkout');
+      cy.visit('/');
+      cy.visit('/checkout');
+    });
 
     describe('Welcome message', () => {
       it('should display welcome message', () => {
@@ -102,7 +106,8 @@ describe('3000-home/', () => {
             cy.request(src).its('status').should('eq', 200);
           });
       });
-      xit('should check that shop-webpack-png images are not 404 between route clicks', () => {
+      it('should check that shop-webpack-png images are not 404 between route clicks', () => {
+        cy.visit('/');
         cy.visit('/shop');
         cy.url().should('include', '/shop');
         getH1().contains('Shop Page');

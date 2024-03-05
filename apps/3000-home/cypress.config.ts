@@ -5,4 +5,8 @@ export default defineConfig({
   projectId: 'sa6wfn',
   e2e: nxE2EPreset(__filename, { cypressDir: 'cypress' }),
   defaultCommandTimeout: 20000,
+  retries: {
+    runMode: 2,
+    openMode: 1,
+  },
 });

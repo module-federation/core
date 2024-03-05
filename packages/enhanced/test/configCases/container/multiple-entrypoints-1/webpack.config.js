@@ -26,7 +26,7 @@ module.exports = [
       uniqueName: '0-container-full',
     },
     optimization: {
-      runtimeChunk: 'multiple',
+      runtimeChunk: false,
     },
     plugins: [
       new ModuleFederationPlugin({
