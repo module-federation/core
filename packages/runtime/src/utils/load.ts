@@ -21,7 +21,7 @@ export async function loadEsmEntry({
         // eslint-disable-next-line no-eval
         new Function(
           'callbacks',
-          `return import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
+          `import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
         )([resolve, reject]);
       } else {
         resolve(remoteEntryExports);
