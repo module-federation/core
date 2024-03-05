@@ -1,7 +1,7 @@
 import type { Compiler } from 'webpack';
 
 import RemotePublicPathRuntimeModule from './RemotePublicPathRuntimeModule';
-
+//eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface PluginOptions {}
 
 class RemotePublicPathPlugin {

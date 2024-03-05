@@ -2,6 +2,7 @@ import { removeUnnecessarySharedKeys } from './remove-unnecessary-shared-keys';
 
 describe('removeUnnecessarySharedKeys', () => {
   beforeEach(() => {
+    //eslint-disable-next-line
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 

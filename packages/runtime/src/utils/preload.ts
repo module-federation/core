@@ -111,6 +111,7 @@ export function preloadAssets(
     cssAssets.forEach((cssUrl) => {
       const { link: cssEl, needAttach } = createLink(
         cssUrl,
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         () => {},
         {
           rel: 'preload',

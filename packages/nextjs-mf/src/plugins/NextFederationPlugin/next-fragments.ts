@@ -48,7 +48,6 @@ export const applyPathFixes = (compiler: Compiler, options: any) => {
     }
 
     // url-loader fix for which adds remote's hostname to the assets url
-    //@ts-ignore
     if (options.enableUrlLoaderFix && hasLoader(rule, 'url-loader')) {
       injectRuleLoader({
         loader: require.resolve('../../loaders/fixUrlLoader'),

@@ -33,10 +33,7 @@ export type { FlushedChunksProps } from './flushedChunks';
  * If the function is called on the server side, it imports the revalidate function from the module federation node utilities and returns the result of calling that function.
  * @returns {Promise<boolean>} A promise that resolves with a boolean.
  */
-export const revalidate = (
-  fetchModule: any = undefined,
-  force: boolean = false,
-) => {
+export const revalidate = (fetchModule: any = undefined, force = false) => {
   if (typeof window !== 'undefined') {
     console.error('revalidate should only be called server-side');
     return Promise.resolve(false);

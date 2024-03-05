@@ -153,8 +153,9 @@ export const fetchRemote = (remoteScope: any, fetchModule: any) => {
 };
 //@ts-ignore
 export const revalidate = (
-  fetchModule: any = getFetchModule() || (() => {}),
-  force: boolean = false,
+  //eslint-disable-next-line @typescript-eslint/no-empty-function
+  fetchModule = getFetchModule() || (() => {}),
+  force = false,
 ) => {
   const remotesFromAPI = getAllKnownRemotes();
   //@ts-ignore
