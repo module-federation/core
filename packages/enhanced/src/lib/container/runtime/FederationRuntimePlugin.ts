@@ -146,12 +146,22 @@ class FederationRuntimePlugin {
     modifyEntry({
       compiler,
       prependEntry: (entry) => {
-        entry['mfp-runtime-plugins'] = {
-          import: [this.pluginsFilePath],
-        };
-        entry['federation-runtime'] = {
-          import: [this.entryFilePath],
-        };
+        Object.keys(entry).forEach((key) => {
+          const entryItem = entry[key];
+          const prefix = entryItem.runtime ? `-${entryItem.runtime}` : '';
+          const runtimePluginKey = `mfp-runtime-plugins${prefix}`;
+          const federationRuntimeKey = `federation-runtime${prefix}`;
+
+          entry[runtimePluginKey] = {
+            import: [this.pluginsFilePath],
+            runtime: entryItem.runtime,
+          };
+
+          entry[federationRuntimeKey] = {
+            import: [this.entryFilePath],
+            runtime: entryItem.runtime,
+          };
+        });
       },
     });
   }

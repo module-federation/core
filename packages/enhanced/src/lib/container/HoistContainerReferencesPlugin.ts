@@ -11,25 +11,19 @@ const runtime = require(
   normalizeWebpackPath('webpack/lib/util/runtime'),
 ) as typeof import('webpack/lib/util/runtime');
 
-/**
- * This class is used to hoist container references in the code.
- * @constructor
- */
 export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
+  private integratedChunks: Set<Chunk> = new Set();
   integrateChunks(
     chunkA: Chunk,
     chunkB: Chunk,
     compilation: Compilation,
   ): void {
     const { chunkGraph, compiler } = compilation;
-    // do not sort chunk by smallest name, this will cause non-deterministic chunk integration
-
-    //
-    // // Merge id name hints
+    // Merge id name hints
     for (const hint of chunkB.idNameHints) {
       chunkA.idNameHints.add(hint);
     }
-
+    this.integratedChunks.add(chunkB);
     // Merge runtime
     //@ts-ignore
     chunkA.runtime = runtime.mergeRuntime(chunkA.runtime, chunkB.runtime);
@@ -56,38 +50,6 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
       chunkA.addGroup(chunkGroup);
       chunkB.removeGroup(chunkGroup);
     }
-    compiler.webpack.ChunkGraph.clearChunkGraphForChunk(chunkB);
-  }
-
-  duplicateChunk(
-    chunkA: Chunk,
-    chunkB: Chunk,
-    compilation: Compilation,
-    name: string,
-  ): void {
-    const { chunkGraph, compiler } = compilation;
-    //@ts-ignore
-    chunkA.runtime = chunkB.runtime;
-
-    // getChunkModules is used here to create a clone, because disconnectChunkAndModule modifies
-    for (const module of chunkGraph.getChunkModules(chunkB)) {
-      // dont disconnect as module may need to be copied into multiple chunks
-      chunkGraph.connectChunkAndModule(chunkA, module);
-    }
-
-    for (const [module, entry] of Array.from(
-      chunkGraph.getChunkEntryModulesWithChunkGroupIterable(chunkB),
-    )) {
-      //@ts-ignore
-      chunkGraph.connectChunkAndEntryModule(chunkA, module, entry);
-    }
-
-    for (const chunkGroup of chunkB.groupsIterable) {
-      // chunkGroup.replaceChunk(chunkB, chunkA);
-      chunkA.addGroup(chunkGroup);
-      // chunkB.removeGroup(chunkGroup);
-    }
-
     compiler.webpack.ChunkGraph.clearChunkGraphForChunk(chunkB);
   }
 
@@ -118,173 +80,9 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
         compilation.hooks.afterOptimizeChunks.tap(
           {
             name: 'HoistContainerReferencesPlugin',
-            stage: 10, // advanced stage chunk optimization
+            stage: 10, // Advanced stage chunk optimization.
           },
-          (chunks: Iterable<Chunk>) => {
-            const { chunkGraph } = compilation;
-            for (const chunk of chunks) {
-              if (!chunk.runtime) continue;
-              if (typeof chunk.runtime === 'string') {
-                runtimes.add(chunk.runtime);
-              } else {
-                Array.from(chunk.runtime).forEach((runtime) =>
-                  runtimes.add(runtime),
-                );
-              }
-            }
-
-            if (!compiler.options.optimization.runtimeChunk) {
-              console.log('#######');
-              console.log('#######');
-              console.log('#######');
-              console.log('#######');
-              const federationRuntimeChunk =
-                compilation.namedChunks.get('federation-runtime');
-              const federationRuntimePlugins = compilation.namedChunks.get(
-                'mfp-runtime-plugins',
-              );
-              if (!federationRuntimeChunk) return;
-              // For each chunk that has a runtime, merge the federation-runtime chunk into it
-              for (const chunk of chunks) {
-                if (chunk.hasRuntime()) {
-                  // Do not re-integrate chunks with containers in them. Like remoteEntry - this will destroy entry module
-                  if (
-                    this.chunkContainsContainerEntryModule(chunk, compilation)
-                  )
-                    continue;
-
-                  this.integrateChunks(
-                    chunk,
-                    federationRuntimeChunk,
-                    compilation,
-                  );
-                  if (
-                    federationRuntimePlugins &&
-                    chunk !== federationRuntimePlugins
-                  ) {
-                    this.integrateChunks(
-                      chunk,
-                      federationRuntimePlugins,
-                      compilation,
-                    );
-                  }
-                }
-              }
-
-              for (const module of chunkGraph.getChunkModules(
-                federationRuntimeChunk,
-              )) {
-                chunkGraph.disconnectChunkAndModule(
-                  federationRuntimeChunk,
-                  module,
-                );
-              }
-              if (!federationRuntimePlugins) return;
-              for (const module of chunkGraph.getChunkModules(
-                federationRuntimePlugins,
-              )) {
-                chunkGraph.disconnectChunkAndModule(
-                  federationRuntimePlugins,
-                  module,
-                );
-              }
-              return;
-            }
-
-            const runtimeTools = runtime;
-            for (const runtime of runtimes) {
-              const runtimeChunk = compilation.namedChunks.get(runtime);
-              if (!runtimeChunk) continue;
-              const baseRuntimeName = 'federation-runtime';
-              const basePluginsName = 'mfp-runtime-plugins';
-              const newFederationRuntimeChunkName = `${baseRuntimeName}-${runtime}`;
-              const newPluginsRuntimeChunkName = `${basePluginsName}-${runtime}`;
-              //@ts-ignore
-              if (
-                this.chunkContainsContainerEntryModule(
-                  runtimeChunk,
-                  compilation,
-                )
-              )
-                continue;
-              const federationRuntimeChunk =
-                compilation.namedChunks.get(baseRuntimeName);
-              const pluginsRuntimeChunk =
-                compilation.namedChunks.get(basePluginsName);
-              if (!federationRuntimeChunk || !pluginsRuntimeChunk) continue;
-              // Creating a new chunk as a duplicate for federation runtime
-              const newFederationRuntimeChunk = compilation.addChunk(
-                newFederationRuntimeChunkName,
-              );
-              // Creating a new chunk as a duplicate for plugins runtime
-              const newPluginsRuntimeChunk = compilation.addChunk(
-                newPluginsRuntimeChunkName,
-              );
-
-              // Set properties from the original federation runtime chunk to the new one
-              newFederationRuntimeChunk.filenameTemplate =
-                federationRuntimeChunk.filenameTemplate;
-              newFederationRuntimeChunk.rendered =
-                federationRuntimeChunk.rendered;
-              if (newFederationRuntimeChunk.name) {
-                // Adding the new federation runtime chunk to the namedChunks collection
-                compilation.namedChunks.set(
-                  newFederationRuntimeChunk.name,
-                  newFederationRuntimeChunk,
-                );
-              }
-
-              // Set properties from the original plugins runtime chunk to the new one
-              newPluginsRuntimeChunk.filenameTemplate =
-                pluginsRuntimeChunk.filenameTemplate;
-              newPluginsRuntimeChunk.rendered = pluginsRuntimeChunk.rendered;
-              if (newPluginsRuntimeChunk.name) {
-                // Adding the new plugins runtime chunk to the namedChunks collection
-                compilation.namedChunks.set(
-                  newPluginsRuntimeChunk.name,
-                  newPluginsRuntimeChunk,
-                );
-              }
-
-              //@ts-ignore
-              newFederationRuntimeChunk.runtime = runtime;
-              newPluginsRuntimeChunk.runtime = runtime;
-              this.duplicateChunk(
-                newFederationRuntimeChunk,
-                federationRuntimeChunk,
-                compilation,
-                //@ts-ignore
-
-                newFederationRuntimeChunk.name,
-              );
-
-              this.duplicateChunk(
-                newPluginsRuntimeChunk,
-                pluginsRuntimeChunk,
-                compilation,
-                //@ts-ignore
-
-                newPluginsRuntimeChunk.name,
-              );
-
-              //@ts-ignore
-              this.integrateChunks(
-                //@ts-ignore
-                compilation.namedChunks.get(runtime),
-                newFederationRuntimeChunk,
-                compilation,
-              );
-              // //
-              this.integrateChunks(
-                //@ts-ignore
-                compilation.namedChunks.get(runtime),
-                newPluginsRuntimeChunk,
-                compilation,
-              );
-              compilation.chunks.delete(newFederationRuntimeChunk);
-              compilation.chunks.delete(newPluginsRuntimeChunk);
-            }
-          },
+          (chunks: Iterable<Chunk>) => this.processChunks(chunks, compilation),
         );
 
         compilation.hooks.beforeChunkAssets.tap(
@@ -300,14 +98,160 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
             const federationRuntimePluginsChunk = compilation.namedChunks.get(
               'mfp-runtime-plugins',
             );
-            if (federationRuntimeChunk)
-              compilation.chunks.delete(federationRuntimeChunk);
 
-            if (federationRuntimePluginsChunk)
+            if (federationRuntimeChunk) {
+              compilation.chunks.delete(federationRuntimeChunk);
+              this.integratedChunks.delete(federationRuntimeChunk);
+            }
+
+            if (federationRuntimePluginsChunk) {
               compilation.chunks.delete(federationRuntimePluginsChunk);
+              this.integratedChunks.delete(federationRuntimePluginsChunk);
+            }
+
+            compilation.namedChunks.delete('federation-runtime');
+            compilation.namedChunks.delete('mfp-runtime-plugins');
+
+            for (const chunk of this.integratedChunks) {
+              compilation.chunks.delete(chunk);
+              if (chunk.name) compilation.namedChunks.delete(chunk.name);
+            }
           },
         );
       },
+    );
+  }
+
+  processChunks(chunks: Iterable<Chunk>, compilation: Compilation) {
+    const { chunkGraph, compiler } = compilation;
+    const runtimes = new Set<string>();
+    this.collectRuntimes(chunks, runtimes);
+
+    if (!compiler.options.optimization.runtimeChunk) {
+      this.optimizeWithoutRuntimeChunk(chunks, compilation);
+    } else {
+      this.optimizeWithRuntimeChunk(compilation, runtimes);
+    }
+  }
+
+  collectRuntimes(chunks: Iterable<Chunk>, runtimes: Set<string>) {
+    for (const chunk of chunks) {
+      if (!chunk.runtime) continue;
+      if (typeof chunk.runtime === 'string') {
+        runtimes.add(chunk.runtime);
+      } else {
+        for (const runtime of chunk.runtime) {
+          runtimes.add(runtime);
+        }
+      }
+    }
+  }
+
+  optimizeWithoutRuntimeChunk(
+    chunks: Iterable<Chunk>,
+    compilation: Compilation,
+  ) {
+    const federationRuntimeChunk =
+      compilation.namedChunks.get('federation-runtime');
+    const federationRuntimePlugins = compilation.namedChunks.get(
+      'mfp-runtime-plugins',
+    );
+
+    if (federationRuntimeChunk && federationRuntimePlugins) {
+      this.integrateRuntimeChunks(
+        chunks,
+        federationRuntimeChunk,
+        federationRuntimePlugins,
+        compilation,
+      );
+      this.disconnectModulesFromChunk(compilation, federationRuntimeChunk);
+      this.disconnectModulesFromChunk(compilation, federationRuntimePlugins);
+    }
+  }
+
+  integrateRuntimeChunks(
+    chunks: Iterable<Chunk>,
+    federationRuntimeChunk: Chunk,
+    federationRuntimePlugins: Chunk,
+    compilation: Compilation,
+  ) {
+    for (const chunk of chunks) {
+      if (
+        chunk.hasRuntime() &&
+        !this.chunkContainsContainerEntryModule(chunk, compilation)
+      ) {
+        if (chunk !== federationRuntimeChunk) {
+          this.integrateChunks(chunk, federationRuntimeChunk, compilation);
+        }
+        if (chunk !== federationRuntimePlugins) {
+          this.integrateChunks(chunk, federationRuntimePlugins, compilation);
+        }
+      }
+    }
+  }
+
+  disconnectModulesFromChunk(compilation: Compilation, chunk: Chunk) {
+    const { chunkGraph } = compilation;
+    for (const module of chunkGraph.getChunkModules(chunk)) {
+      chunkGraph.disconnectChunkAndModule(chunk, module);
+    }
+  }
+
+  optimizeWithRuntimeChunk(compilation: Compilation, runtimes: Set<string>) {
+    const baseRuntimeName = 'federation-runtime';
+    const basePluginsName = 'mfp-runtime-plugins';
+
+    for (const runtime of runtimes) {
+      this.handleRuntimeChunks(
+        compilation,
+        runtime,
+        baseRuntimeName,
+        basePluginsName,
+      );
+    }
+  }
+
+  handleRuntimeChunks(
+    compilation: Compilation,
+    runtime: string,
+    baseRuntimeName: string,
+    basePluginsName: string,
+  ) {
+    const runtimeChunk = compilation.namedChunks.get(runtime);
+    if (
+      !runtimeChunk ||
+      this.chunkContainsContainerEntryModule(runtimeChunk, compilation)
+    )
+      return;
+
+    const federationRuntimeChunk = this.getNamedChunk(
+      compilation,
+      `${baseRuntimeName}-${runtime}`,
+      baseRuntimeName,
+    );
+    const pluginsRuntimeChunk = this.getNamedChunk(
+      compilation,
+      `${basePluginsName}-${runtime}`,
+      basePluginsName,
+    );
+
+    if (federationRuntimeChunk) {
+      this.integrateChunks(runtimeChunk, federationRuntimeChunk, compilation);
+    }
+    if (pluginsRuntimeChunk) {
+      this.integrateChunks(runtimeChunk, pluginsRuntimeChunk, compilation);
+    }
+  }
+
+  getNamedChunk(
+    compilation: Compilation,
+    newChunkName: string,
+    defaultChunkName: string,
+  ): Chunk | undefined {
+    return (
+      // search for runtime allocated entry chunk, fall back to default runtime chunk (undefined, false, etc)
+      compilation.namedChunks.get(newChunkName) ||
+      compilation.namedChunks.get(defaultChunkName)
     );
   }
 

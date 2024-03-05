@@ -41,6 +41,7 @@ class FederationInitModule extends RuntimeModule {
     }
     return { federationRuntimeModule, federationRuntimePluginModule };
   }
+
   getModuleByInstance(): {
     federationRuntimeModuleId: string | number | undefined;
     runtimePluginModuleId: string | number | undefined;
@@ -77,45 +78,56 @@ class FederationInitModule extends RuntimeModule {
       chunk: this.chunk,
     };
   }
+
   override generate(): string | null {
     if (!this.compilation || !this.chunk) return '';
+
     const moduleInstance = this.getModuleByInstance();
+    // Early return if no moduleInstance is found
+    if (!moduleInstance) return '';
 
-    const federationRuntimeModuleId = moduleInstance?.federationRuntimeModuleId;
-    const runtimePluginModuleId = moduleInstance?.runtimePluginModuleId;
+    const { federationRuntimeModuleId, runtimePluginModuleId } = moduleInstance;
+    const requireStatements: string[] = [];
 
-    const requireStatements = [];
-
+    // Directly push federationRuntimeModuleId require statement if it exists
     if (federationRuntimeModuleId) {
       requireStatements.push(
         `__webpack_require__(${JSON.stringify(federationRuntimeModuleId)});`,
       );
     }
-    const boundaryChunks = this.chunksRuntimePluginsDependsOn;
 
-    if (runtimePluginModuleId && boundaryChunks) {
-      const chunkConsumesStatements = Array.from(boundaryChunks)
-        .map(
-          (chunk) =>
-            `__webpack_require__.f.consumes(${JSON.stringify(
-              chunk.id || chunk.name,
-            )}, consumes);`,
-        )
-        .join('\n');
+    if (runtimePluginModuleId) {
+      // check if needs async boundary
+      const chunkConsumesStatements = this.chunksRuntimePluginsDependsOn
+        ? Array.from(this.chunksRuntimePluginsDependsOn)
+            .map(
+              (chunk) =>
+                `__webpack_require__.f.consumes(${JSON.stringify(
+                  chunk.id || chunk.name,
+                )}, consumes);`,
+            )
+            .join('\n')
+        : '';
 
-      requireStatements.push(
-        Template.asString([
-          `var consumes = [];`,
-          `if(__webpack_require__.f && __webpack_require__.f.consumes){`,
-          Template.indent(chunkConsumesStatements),
-          `}`,
-          `Promise.all(consumes).then(function() {`,
-          Template.indent([
-            `__webpack_require__(${JSON.stringify(runtimePluginModuleId)});`,
+      if (chunkConsumesStatements) {
+        requireStatements.push(
+          Template.asString([
+            `var consumes = [];`,
+            `if(__webpack_require__.f && __webpack_require__.f.consumes){`,
+            Template.indent(chunkConsumesStatements),
+            `}`,
+            `Promise.all(consumes).then(function() {`,
+            Template.indent(
+              `__webpack_require__(${JSON.stringify(runtimePluginModuleId)});`,
+            ),
+            `});`,
           ]),
-          `});`,
-        ]),
-      );
+        );
+      } else {
+        requireStatements.push(
+          `__webpack_require__(${JSON.stringify(runtimePluginModuleId)});`,
+        );
+      }
     }
 
     return Template.asString(requireStatements);
