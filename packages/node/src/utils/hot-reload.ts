@@ -178,8 +178,6 @@ export const revalidate = async (
   return new Promise((res) => {
     if (force) {
       if (Object.keys(hashmap).length !== 0) {
-        console.log('hashmap exists', hashmap);
-
         res(true);
         return;
       }
