@@ -12,6 +12,7 @@ const runtime = require(
 ) as typeof import('webpack/lib/util/runtime');
 
 export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
+  private integratedChunks: Set<Chunk> = new Set();
   integrateChunks(
     chunkA: Chunk,
     chunkB: Chunk,
@@ -22,7 +23,7 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
     for (const hint of chunkB.idNameHints) {
       chunkA.idNameHints.add(hint);
     }
-
+    this.integratedChunks.add(chunkB);
     // Merge runtime
     //@ts-ignore
     chunkA.runtime = runtime.mergeRuntime(chunkA.runtime, chunkB.runtime);
@@ -97,14 +98,23 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
               'mfp-runtime-plugins',
             );
 
-            if (federationRuntimeChunk)
+            if (federationRuntimeChunk) {
               compilation.chunks.delete(federationRuntimeChunk);
+              this.integratedChunks.delete(federationRuntimeChunk);
+            }
 
-            if (federationRuntimePluginsChunk)
+            if (federationRuntimePluginsChunk) {
               compilation.chunks.delete(federationRuntimePluginsChunk);
+              this.integratedChunks.delete(federationRuntimePluginsChunk);
+            }
 
             compilation.namedChunks.delete('federation-runtime');
             compilation.namedChunks.delete('mfp-runtime-plugins');
+
+            for (const chunk of this.integratedChunks) {
+              compilation.chunks.delete(chunk);
+              if (chunk.name) compilation.namedChunks.delete(chunk.name);
+            }
           },
         );
       },
@@ -169,7 +179,9 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
         chunk.hasRuntime() &&
         !this.chunkContainsContainerEntryModule(chunk, compilation)
       ) {
-        this.integrateChunks(chunk, federationRuntimeChunk, compilation);
+        if (chunk !== federationRuntimeChunk) {
+          this.integrateChunks(chunk, federationRuntimeChunk, compilation);
+        }
         if (chunk !== federationRuntimePlugins) {
           this.integrateChunks(chunk, federationRuntimePlugins, compilation);
         }
