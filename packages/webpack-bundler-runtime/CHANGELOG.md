@@ -1,5 +1,16 @@
 # [1.0.0-canary.3](https://github.com/module-federation/universe/compare/webpack-bundler-runtime-1.0.0-canary.2...webpack-bundler-runtime-1.0.0-canary.3) (2023-11-23)
 
+## 0.0.14
+
+### Patch Changes
+
+- Updated dependencies [a050645]
+- Updated dependencies [4fc20cc]
+- Updated dependencies [cd8c7bf]
+- Updated dependencies [5576c6b]
+  - @module-federation/runtime@0.0.14
+  - @module-federation/sdk@0.0.14
+
 ## 0.0.13
 
 ### Patch Changes
