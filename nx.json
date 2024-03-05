@@ -41,6 +41,13 @@
     },
     "e2e": {
       "inputs": ["default", "^production"]
+    },
+    "@nx/webpack:webpack": {
+      "inputs": [
+        {
+          "env": "NX_MF_DEV_SERVER_STATIC_REMOTES"
+        }
+      ]
     }
   },
   "namedInputs": {
