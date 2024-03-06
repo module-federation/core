@@ -20,9 +20,9 @@ export async function loadEsmEntry({
       if (!remoteEntryExports) {
         // eslint-disable-next-line no-eval
         new Function(
-          'resolve',
-          `import("${entry}").then((res)=>{resolve(res);}, (error)=> reject(error))`,
-        )(resolve);
+          'callbacks',
+          `import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
+        )([resolve, reject]);
       } else {
         resolve(remoteEntryExports);
       }
@@ -72,7 +72,6 @@ export async function loadEntryScript({
         2. ${remoteEntryKey} cannot be used to get remoteEntry exports in the window object.
       `,
         );
-        console.log(entryExports);
 
         return entryExports;
       })

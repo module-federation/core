@@ -14,7 +14,7 @@
     "events": "3.3.0",
     "fast-glob": "3.3.2",
     "lodash": "4.17.21",
-    "next": "13.5.6",
+    "next": "14.1.2",
     "node-fetch": "2.7.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -31,6 +31,7 @@
   "devDependencies": {
     "@module-federation/nextjs-mf": "workspace:*",
     "@module-federation/sdk": "workspace:*",
+    "@module-federation/runtime": "workspace:*",
     "@module-federation/utilities": "workspace:*"
   },
   "scripts": {
