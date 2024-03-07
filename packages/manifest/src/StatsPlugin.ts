@@ -9,6 +9,7 @@ export class StatsPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions = {};
   private _statsManager: StatsManager = new StatsManager();
   private _manifestManager: ManifestManager = new ManifestManager();
+  private _enable: boolean = true;
 
   constructor(
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
@@ -26,10 +27,14 @@ export class StatsPlugin implements WebpackPluginInstance {
         err.message = `[ ${PLUGIN_IDENTIFIER} ]: Manifest will not generate, because: ${err.message}`;
       }
       console.error(err);
+      this._enable = false;
     }
   }
 
   apply(compiler: Compiler): void {
+    if (!this._enable) {
+      return;
+    }
     const res = this._statsManager.validate(compiler);
     if (!res) {
       return;
