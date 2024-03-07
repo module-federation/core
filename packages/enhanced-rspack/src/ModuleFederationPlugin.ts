@@ -59,11 +59,20 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     this._patchChunkSplit(compiler, options.name);
 
     options.implementation = options.implementation || RuntimeToolsPath;
+    let disableManifest = options.manifest === false;
 
-    if (options.manifest && options.exposes) {
-      const containerManager = new ContainerManager();
-      containerManager.init(options);
-      options.exposes = containerManager.containerPluginExposesOptions;
+    if (!disableManifest && options.exposes) {
+      try {
+        const containerManager = new ContainerManager();
+        containerManager.init(options);
+        options.exposes = containerManager.containerPluginExposesOptions;
+      } catch (err) {
+        if (err instanceof Error) {
+          err.message = `[ ModuleFederationPlugin ]: Manifest will not generate, because: ${err.message}`;
+        }
+        console.warn(err);
+        disableManifest = true;
+      }
     }
 
     new compiler.webpack.container.ModuleFederationPlugin(
@@ -82,7 +91,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       };
     });
 
-    if (options.manifest) {
+    if (!disableManifest) {
       new StatsPlugin(options, {
         pluginVersion: __VERSION__,
         bundler: 'rspack',
