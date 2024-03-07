@@ -17,5 +17,6 @@ import federation from '@module-federation/webpack-bundler-runtime';
 __webpack_require__.federation = federation;
 
 __webpack_require__.f.remotes = __webpack_require__.federation.remotes(options);
-__webpack_require__.f.consumes = __webpack_require__.federation.remotes(options);
+__webpack_require__.f.consumes =
+  __webpack_require__.federation.remotes(options);
 ```

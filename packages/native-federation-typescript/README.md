@@ -55,7 +55,10 @@ This plugin is used to download the federated types.
 
 ```ts
 // vite.config.ts
-import { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } from '@module-federation/native-federation-typescript/vite';
+import {
+  NativeFederationTypeScriptHost,
+  NativeFederationTypeScriptRemote,
+} from '@module-federation/native-federation-typescript/vite';
 
 export default defineConfig({
   plugins: [
@@ -93,7 +96,10 @@ export default defineConfig({
 
 ```ts
 // rollup.config.js
-import { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } from '@module-federation/native-federation-typescript/rollup';
+import {
+  NativeFederationTypeScriptHost,
+  NativeFederationTypeScriptRemote,
+} from '@module-federation/native-federation-typescript/rollup';
 
 export default {
   plugins: [
@@ -114,7 +120,10 @@ export default {
 
 ```ts
 // webpack.config.js
-const { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } = require('@module-federation/native-federation-typescript/webpack');
+const {
+  NativeFederationTypeScriptHost,
+  NativeFederationTypeScriptRemote,
+} = require('@module-federation/native-federation-typescript/webpack');
 module.exports = {
   /* ... */
   plugins: [
@@ -136,7 +145,10 @@ module.exports = {
 ```ts
 // esbuild.config.js
 import { build } from 'esbuild';
-import { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } from '@module-federation/native-federation-typescript/esbuild';
+import {
+  NativeFederationTypeScriptHost,
+  NativeFederationTypeScriptRemote,
+} from '@module-federation/native-federation-typescript/esbuild';
 
 build({
   plugins: [
@@ -157,7 +169,10 @@ build({
 
 ```ts
 // rspack.config.js
-const { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } = require('@module-federation/native-federation-typescript/rspack');
+const {
+  NativeFederationTypeScriptHost,
+  NativeFederationTypeScriptRemote,
+} = require('@module-federation/native-federation-typescript/rspack');
 module.exports = {
   /* ... */
   plugins: [

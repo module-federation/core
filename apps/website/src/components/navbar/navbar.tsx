@@ -87,7 +87,7 @@ export default component$((props: NavbarProps) => {
         document.removeEventListener('scroll', listener);
       };
     },
-    { strategy: 'document-ready' },
+    { strategy: 'document-ready' }
   );
 
   const changeLocale$ = $((locale: string) => {
@@ -99,7 +99,7 @@ export default component$((props: NavbarProps) => {
       } else {
         url.pathname = url.pathname.replace(
           new RegExp(`(/${loc.params.lang}/)|(/${loc.params.lang}$)`),
-          '/',
+          '/'
         );
       }
     } else if (newLocale.lang !== config.defaultLocale.lang) {
@@ -290,8 +290,8 @@ export default component$((props: NavbarProps) => {
                 class="border-blue-gray-900 w-1/2 px-4 py-1.5 pr-8 bg-mf-gray hover:bg-white focus:bg-mf-gray text-lg focus:border-ui-blue"
                 name="language"
                 id="language"
-                onChange$={async (event, el) => {
-                  await changeLocale$(event.target.value as any);
+                onChange$={async (event: any, el) => {
+                  await changeLocale$(event.target?.value as any);
                 }}
               >
                 {locales.map((locale) => {

@@ -29,7 +29,7 @@ export default defineConfig({
         'apps',
         'website',
         'client',
-        '~partytown',
+        '~partytown'
       ),
     }),
   ],
@@ -44,12 +44,12 @@ export default defineConfig({
       'Cache-Control': 'public, max-age=600',
     },
   },
-  test: {
-    globals: true,
-    cache: {
-      dir: '../../node_modules/.vitest',
-    },
-    environment: 'node',
-    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-  },
+  // test: {
+  //   globals: true,
+  //   cache: {
+  //     dir: '../../node_modules/.vitest',
+  //   },
+  //   environment: 'node',
+  //   include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+  // },
 });

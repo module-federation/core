@@ -198,7 +198,9 @@ module.exports = {
       new NextFederationPlugin({
         name: 'next2',
         remotes: {
-          next1: `next1@http://localhost:3001/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+          next1: `next1@http://localhost:3001/_next/static/${
+            isServer ? 'ssr' : 'chunks'
+          }/remoteEntry.js`,
         },
         filename: 'static/chunks/remoteEntry.js',
         exposes: {
@@ -208,7 +210,7 @@ module.exports = {
         shared: {
           // whatever else
         },
-      }),
+      })
     );
 
     return config;
@@ -228,9 +230,11 @@ module.exports = {
       new NextFederationPlugin({
         name: 'next1',
         remotes: {
-          next2: `next2@http://localhost:3000/_next/static/${isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
+          next2: `next2@http://localhost:3000/_next/static/${
+            isServer ? 'ssr' : 'chunks'
+          }/remoteEntry.js`,
         },
-      }),
+      })
     );
 
     return config;
@@ -246,7 +250,7 @@ import React, { lazy } from 'react';
 const SampleComponent = lazy(() =>
   window.next2.get('./sampleComponent').then((factory) => {
     return { default: factory() };
-  }),
+  })
 );
 
 // or

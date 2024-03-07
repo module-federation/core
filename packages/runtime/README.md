@@ -12,20 +12,22 @@
 import { init, loadRemote } from '@module-federation/runtime';
 
 init({
-    name: '@demo/app-main',
-    remotes: [
-        {
-            name: "@demo/app2",
-            entry: "http://localhost:3006/remoteEntry.js",
-            alias: "app2"
-        },
-    ],
+  name: '@demo/app-main',
+  remotes: [
+    {
+      name: '@demo/app2',
+      entry: 'http://localhost:3006/remoteEntry.js',
+      alias: 'app2',
+    },
+  ],
 });
 
 // Load by alias
-loadRemote<{add: (...args: Array<number>)=> number }>("app2/util").then((md)=>{
-    md.add(1,2,3);
-});
+loadRemote <
+  { add: (...args: Array<number>) => number } >
+  'app2/util'.then((md) => {
+    md.add(1, 2, 3);
+  });
 ```
 
 ### init
@@ -365,7 +367,9 @@ Invoked before resolving a remote container, useful for injecting the container 
 - type
 
 ```ts
-async function beforeRequest(args: BeforeRequestOptions): Promise<BeforeRequestOptions>;
+async function beforeRequest(
+  args: BeforeRequestOptions
+): Promise<BeforeRequestOptions>;
 
 type BeforeRequestOptions = {
   id: string;
@@ -383,7 +387,9 @@ Called after resolving a container, allowing redirection or modification of reso
 - type
 
 ```ts
-async function afterResolve(args: AfterResolveOptions): Promise<AfterResolveOptions>;
+async function afterResolve(
+  args: AfterResolveOptions
+): Promise<AfterResolveOptions>;
 
 type AfterResolveOptions = {
   id: string;
@@ -464,7 +470,9 @@ Invoked if loading a federated module fails, enabling custom error handling.
 - type
 
 ```ts
-async function errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<void | unknown>;
+async function errorLoadRemote(
+  args: ErrorLoadRemoteOptions
+): Promise<void | unknown>;
 
 type ErrorLoadRemoteOptions = {
   id: string;
@@ -517,7 +525,9 @@ Called before attempting to load or negotiate shared modules between federated a
 - type
 
 ```ts
-async function beforeLoadShare(args: BeforeLoadShareOptions): Promise<BeforeLoadShareOptions>;
+async function beforeLoadShare(
+  args: BeforeLoadShareOptions
+): Promise<BeforeLoadShareOptions>;
 
 type BeforeLoadShareOptions = {
   pkgName: string;
@@ -606,7 +616,9 @@ Invoked before any preload logic is executed by the preload handler.
 - type
 
 ```ts
-async function beforePreloadRemote(args: BeforePreloadRemoteOptions): BeforePreloadRemoteOptions;
+async function beforePreloadRemote(
+  args: BeforePreloadRemoteOptions
+): BeforePreloadRemoteOptions;
 
 type BeforePreloadRemoteOptions = {
   preloadOps: Array<PreloadRemoteArgs>;
@@ -624,7 +636,9 @@ Called for generating preload assets based on configurations.
 - type
 
 ```ts
-async function generatePreloadAssets(args: GeneratePreloadAssetsOptions): Promise<PreloadAssets>;
+async function generatePreloadAssets(
+  args: GeneratePreloadAssetsOptions
+): Promise<PreloadAssets>;
 
 type GeneratePreloadAssetsOptions = {
   origin: FederationHost;

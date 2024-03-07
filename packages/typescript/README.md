@@ -142,7 +142,7 @@ module.exports = {
           remotes: { app2: 'app2@http://localhost:3000/remoteEntry.js' },
         },
         // ...
-      }),
+      })
     );
     return config;
   },
