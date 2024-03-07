@@ -49,9 +49,15 @@ Shop.getInitialProps = async () => {
   const timeout = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
 
-  const fetchPromise = fetch('https://swapi.dev/api/people/1').then((res) =>
-    res.json(),
-  );
+  const fetchPromise = fetch('https://swapi.dev/api/people/1')
+    .then((res) => res.json())
+    .catch((err) => {
+      if (err instanceof Error) {
+        err.message = `fetchPromise failed: ${err.message}`;
+      }
+      console.error(err);
+      return Promise.resolve(fallback);
+    });
 
   const fallback = {
     name: 'Luke Skywalker',
