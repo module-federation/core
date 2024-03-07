@@ -406,7 +406,13 @@ class StatsManager {
         typeof manifestOptions === 'object' &&
         manifestOptions.additionalData
       ) {
-        const ret = await manifestOptions.additionalData(stats);
+        const ret = await manifestOptions.additionalData({
+          stats,
+          pluginOptions: this._options,
+          compiler,
+          compilation,
+          bundler: this._bundler,
+        });
         stats = ret || stats;
       }
 

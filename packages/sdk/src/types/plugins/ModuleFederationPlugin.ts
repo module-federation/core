@@ -1,3 +1,4 @@
+import type webpack from 'webpack';
 import { Stats } from '../stats';
 /**
  * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
@@ -106,11 +107,20 @@ export type Shared = (SharedItem | SharedObject)[] | SharedObject;
  */
 export type SharedItem = string;
 
+export interface AdditionalDataOptions {
+  stats: Stats;
+  pluginOptions: ModuleFederationPluginOptions;
+  compiler: webpack.Compiler;
+  compilation: webpack.Compilation;
+  bundler: 'webpack' | 'rspack';
+}
 export interface PluginManifestOptions {
   filePath?: string;
   disableAssetsAnalyze?: boolean;
   fileName?: string;
-  additionalData?: (stats: Stats) => Promise<Stats | void> | Stats | void;
+  additionalData?: (
+    options: AdditionalDataOptions,
+  ) => Promise<Stats | void> | Stats | void;
 }
 
 export interface ModuleFederationPluginOptions {

@@ -225,8 +225,7 @@ export function getFileName(
     return `${name}${JSON_EXT}`;
   };
   const insertSuffix = (name: string, suffix: string): string => {
-    const [filename, ext] = name.split(JSON_EXT);
-    return `${filename}${suffix}${ext}`;
+    return name.replace(JSON_EXT, `${suffix}${JSON_EXT}`);
   };
   const manifestFileName = fileName ? addExt(fileName) : ManifestFileName;
   const statsFileName = fileName
