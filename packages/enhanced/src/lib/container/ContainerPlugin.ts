@@ -78,7 +78,7 @@ class ContainerPlugin {
         case 'string':
         case 'function':
           break;
-        //  cacheGroup.chunks 会继承 splitChunks.chunks ，因此只需要对单独设置了 chunks 的 做修改
+        //  cacheGroup.chunks will inherit splitChunks.chunks, so you only need to modify the chunks that are set separately
         case 'object':
           {
             if (cacheGroup instanceof RegExp) {
