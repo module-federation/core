@@ -98,7 +98,7 @@ export function createScript(
 export function createLink(
   url: string,
   cb: (value: void | PromiseLike<void>) => void,
-  attrs?: Record<string, any>,
+  attrs: Record<string, string> = {},
   createLinkHook?: (url: string) => HTMLLinkElement | void,
 ) {
   // <link rel="preload" href="script.js" as="script">
@@ -110,7 +110,12 @@ export function createLink(
   for (let i = 0; i < links.length; i++) {
     const l = links[i];
     const linkHref = l.getAttribute('href');
-    if (linkHref && isStaticResourcesEqual(linkHref, url)) {
+    const linkRef = l.getAttribute('ref');
+    if (
+      linkHref &&
+      isStaticResourcesEqual(linkHref, url) &&
+      linkRef === attrs['ref']
+    ) {
       link = l;
       needAttach = false;
       break;
