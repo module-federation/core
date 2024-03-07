@@ -176,7 +176,7 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
 
   validate(name?: string): void {
     if (!name) {
-      throw new Error(`name can not be empty!`);
+      throw new Error(`container name can not be empty!`);
     }
   }
 }

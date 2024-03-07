@@ -67,16 +67,24 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         ? options.exposes.length > 0
         : Object.keys(options.exposes).length > 0);
 
-    const disableManifest = options.manifest === false;
+    let disableManifest = options.manifest === false;
     if (useContainerPlugin) {
       // @ts-ignore
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
     }
 
     if (!disableManifest && useContainerPlugin) {
-      const containerManager = new ContainerManager();
-      containerManager.init(options);
-      options.exposes = containerManager.containerPluginExposesOptions;
+      try {
+        const containerManager = new ContainerManager();
+        containerManager.init(options);
+        options.exposes = containerManager.containerPluginExposesOptions;
+      } catch (err) {
+        if (err instanceof Error) {
+          err.message = `[ ModuleFederationPlugin ]: Manifest will not generate, because: ${err.message}`;
+        }
+        console.warn(err);
+        disableManifest = true;
+      }
     }
 
     if (

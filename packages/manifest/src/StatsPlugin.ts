@@ -2,12 +2,13 @@ import { Compiler, WebpackPluginInstance } from 'webpack';
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import { ManifestManager } from './ManifestManager';
 import { StatsManager } from './StatsManager';
+import { PLUGIN_IDENTIFIER } from './constants';
 
 export class StatsPlugin implements WebpackPluginInstance {
   readonly name = 'StatsPlugin';
-  private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
-  private _statsManager: StatsManager;
-  private _manifestManager: ManifestManager;
+  private _options: moduleFederationPlugin.ModuleFederationPluginOptions = {};
+  private _statsManager: StatsManager = new StatsManager();
+  private _manifestManager: ManifestManager = new ManifestManager();
 
   constructor(
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
@@ -16,11 +17,16 @@ export class StatsPlugin implements WebpackPluginInstance {
       bundler,
     }: { pluginVersion: string; bundler: 'webpack' | 'rspack' },
   ) {
-    this._options = options;
-    this._statsManager = new StatsManager();
-    this._statsManager.init(this._options, { pluginVersion, bundler });
-    this._manifestManager = new ManifestManager();
-    this._manifestManager.init(this._options);
+    try {
+      this._options = options;
+      this._statsManager.init(this._options, { pluginVersion, bundler });
+      this._manifestManager.init(this._options);
+    } catch (err) {
+      if (err instanceof Error) {
+        err.message = `[ ${PLUGIN_IDENTIFIER} ]: Manifest will not generate, because: ${err.message}`;
+      }
+      console.error(err);
+    }
   }
 
   apply(compiler: Compiler): void {
