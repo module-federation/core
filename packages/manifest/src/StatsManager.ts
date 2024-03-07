@@ -420,17 +420,24 @@ class StatsManager {
     }
   }
 
-  validate(compiler: Compiler): void {
+  validate(compiler: Compiler): boolean {
     const {
       output: { publicPath },
     } = compiler.options;
 
     if (typeof publicPath !== 'string') {
       console.error(
-        chalk`{bold {red [ ${PLUGIN_IDENTIFIER} ]: PublicPath can only be string, but got ${publicPath}}}`,
+        chalk`{bold {red [ ${PLUGIN_IDENTIFIER} ]: Manifest will not generate, because publicPath can only be string, but got '${publicPath}' }}`,
       );
-      process.exit(1);
+      return false;
+    } else if (publicPath === 'auto') {
+      console.error(
+        chalk`{bold {red [ ${PLUGIN_IDENTIFIER} ]: Manifest will not generate, because publicPath can only be absolute path, but got '${publicPath}'}}`,
+      );
+      return false;
     }
+
+    return true;
   }
 }
 

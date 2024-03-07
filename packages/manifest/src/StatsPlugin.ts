@@ -24,8 +24,10 @@ export class StatsPlugin implements WebpackPluginInstance {
   }
 
   apply(compiler: Compiler): void {
-    this._statsManager.validate(compiler);
-
+    const res = this._statsManager.validate(compiler);
+    if (!res) {
+      return;
+    }
     compiler.hooks.thisCompilation.tap('generateStats', (compilation) => {
       compilation.hooks.processAssets.tapPromise(
         {
