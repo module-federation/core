@@ -1,9 +1,4 @@
-/*
- * This file was automatically generated.
- * DO NOT MODIFY BY HAND.
- * Run `yarn special-lint-fix` to update
- */
-
+import { Stats } from '../stats';
 /**
  * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
  */
@@ -115,6 +110,7 @@ export interface PluginManifestOptions {
   filePath?: string;
   disableAssetsAnalyze?: boolean;
   fileName?: string;
+  additionalData?: (stats: Stats) => Promise<Stats | void> | Stats | void;
 }
 
 export interface ModuleFederationPluginOptions {

@@ -399,7 +399,16 @@ class StatsManager {
     extraOptions?: {},
   ): Promise<Stats> {
     try {
-      const stats = await this._generateStats(compiler, compilation);
+      const { manifest: manifestOptions = {} } = this._options;
+      let stats = await this._generateStats(compiler, compilation);
+
+      if (
+        typeof manifestOptions === 'object' &&
+        manifestOptions.additionalData
+      ) {
+        const ret = await manifestOptions.additionalData(stats);
+        stats = ret || stats;
+      }
 
       compilation.emitAsset(
         this.fileName,
