@@ -1,6 +1,12 @@
 import { Chunk, Compilation, StatsCompilation, StatsModule } from 'webpack';
 import path from 'path';
-import { StatsAssets } from '@module-federation/sdk';
+import {
+  StatsAssets,
+  moduleFederationPlugin,
+  simpleJoinRemoteEntry,
+  ManifestFileName,
+  StatsFileName,
+} from '@module-federation/sdk';
 import { HOT_UPDATE_SUFFIX, PLUGIN_IDENTIFIER } from './constants';
 
 function getSharedModuleName(name: string): string {
@@ -191,4 +197,44 @@ export function isDev(): boolean {
 
 export function getFileNameWithOutExt(str: string): string {
   return str.replace(path.extname(str), '');
+}
+
+export function getFileName(
+  manifestOptions?: moduleFederationPlugin.ModuleFederationPluginOptions['manifest'],
+): {
+  statsFileName: string;
+  manifestFileName: string;
+} {
+  if (!manifestOptions) {
+    return {
+      statsFileName: StatsFileName,
+      manifestFileName: ManifestFileName,
+    };
+  }
+
+  let filePath =
+    typeof manifestOptions === 'boolean' ? '' : manifestOptions.filePath || '';
+  let fileName =
+    typeof manifestOptions === 'boolean' ? '' : manifestOptions.fileName || '';
+
+  const JSON_EXT = '.json';
+  const addExt = (name: string): string => {
+    if (name.endsWith(JSON_EXT)) {
+      return name;
+    }
+    return `${name}${JSON_EXT}`;
+  };
+  const insertSuffix = (name: string, suffix: string): string => {
+    const [filename, ext] = name.split(JSON_EXT);
+    return `${filename}${suffix}${ext}`;
+  };
+  const manifestFileName = fileName ? addExt(fileName) : ManifestFileName;
+  const statsFileName = fileName
+    ? insertSuffix(manifestFileName, '-stats')
+    : StatsFileName;
+
+  return {
+    statsFileName: simpleJoinRemoteEntry(filePath, statsFileName),
+    manifestFileName: simpleJoinRemoteEntry(filePath, manifestFileName),
+  };
 }

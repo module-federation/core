@@ -114,6 +114,7 @@ export type SharedItem = string;
 export interface PluginManifestOptions {
   filePath?: string;
   disableAssetsAnalyze?: boolean;
+  fileName?: string;
 }
 
 export interface ModuleFederationPluginOptions {

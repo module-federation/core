@@ -12,7 +12,7 @@ import {
   StatsRemote,
   moduleFederationPlugin,
 } from '@module-federation/sdk';
-import { isDev } from './utils';
+import { getFileName, isDev } from './utils';
 import type { Compilation, Compiler } from 'webpack';
 import { PLUGIN_IDENTIFIER } from './constants';
 
@@ -36,14 +36,7 @@ class ManifestManager {
   }
 
   get fileName(): string {
-    const { manifest: manifestOptions = {} } = this._options;
-
-    let manifestFilePath =
-      typeof manifestOptions === 'boolean'
-        ? ''
-        : manifestOptions.filePath || '';
-
-    return simpleJoinRemoteEntry(manifestFilePath, ManifestFileName);
+    return getFileName(this._options.manifest).manifestFileName;
   }
 
   generateManifest(options: GenerateManifestOptions): void {

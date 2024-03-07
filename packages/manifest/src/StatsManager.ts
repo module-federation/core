@@ -10,9 +10,7 @@ import {
   StatsMetaData,
   Stats,
   StatsAssets,
-  StatsFileName,
   moduleFederationPlugin,
-  simpleJoinRemoteEntry,
 } from '@module-federation/sdk';
 import { Compilation, Compiler, StatsCompilation, StatsModule } from 'webpack';
 import {
@@ -22,6 +20,7 @@ import {
   getSharedModules,
   assert,
   getFileNameWithOutExt,
+  getFileName,
 } from './utils';
 import {
   ContainerManager,
@@ -53,13 +52,7 @@ class StatsManager {
   }
 
   get fileName(): string {
-    const { manifest: manifestOptions = {} } = this._options;
-    let statsFilePath =
-      typeof manifestOptions === 'boolean'
-        ? ''
-        : manifestOptions.filePath || '';
-
-    return simpleJoinRemoteEntry(statsFilePath, StatsFileName);
+    return getFileName(this._options.manifest).statsFileName;
   }
 
   private _getMetaData(
