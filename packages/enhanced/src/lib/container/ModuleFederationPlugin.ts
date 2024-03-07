@@ -66,12 +66,14 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       (Array.isArray(options.exposes)
         ? options.exposes.length > 0
         : Object.keys(options.exposes).length > 0);
+
+    const disableManifest = options.manifest === false;
     if (useContainerPlugin) {
       // @ts-ignore
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
     }
 
-    if (options.manifest && useContainerPlugin) {
+    if (!disableManifest && useContainerPlugin) {
       const containerManager = new ContainerManager();
       containerManager.init(options);
       options.exposes = containerManager.containerPluginExposesOptions;
@@ -119,7 +121,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       }
     });
 
-    if (options.manifest) {
+    if (!disableManifest) {
       const pkg = require('../../../../package.json');
       new StatsPlugin(options, {
         pluginVersion: pkg.version,
