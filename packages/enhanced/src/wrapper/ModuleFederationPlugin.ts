@@ -1,14 +1,15 @@
 import type { WebpackPluginInstance, Compiler } from 'webpack';
-import type { ModuleFederationPluginOptions } from '../lib/container/ModuleFederationPluginTypes';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
+
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 const PLUGIN_NAME = 'ModuleFederationPlugin';
 
 export default class ModuleFederationPlugin implements WebpackPluginInstance {
-  private _options: ModuleFederationPluginOptions;
+  private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   name: string;
 
-  constructor(options: ModuleFederationPluginOptions) {
+  constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this._options = options;
     this.name = PLUGIN_NAME;
   }
