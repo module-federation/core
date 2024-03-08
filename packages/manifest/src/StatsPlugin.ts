@@ -47,7 +47,7 @@ export class StatsPlugin implements WebpackPluginInstance {
           stage: compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
         },
         async () => {
-          if (this._options.manifest) {
+          if (this._options.manifest !== false) {
             const stats = await this._statsManager.generateStats(
               compiler,
               compilation,
