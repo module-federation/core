@@ -83,16 +83,17 @@ class StatsManager {
       const remoteEntryNameChunk = compilation.namedChunks.get(name);
 
       assert(remoteEntryNameChunk, 'Can not get remoteEntry chunk!');
+      const files = Array.from(remoteEntryNameChunk.files).filter(
+        (f) => !f.includes(HOT_UPDATE_SUFFIX),
+      );
       assert(
-        Array.from(remoteEntryNameChunk.files).filter(
-          (f) => !f.includes(HOT_UPDATE_SUFFIX),
-        ).length === 1,
-        `remoteEntry chunk should not have multiple files!, current files: ${Array.from(
-          remoteEntryNameChunk.files,
-        ).join(',')}`,
+        files.length === 1,
+        `remoteEntry chunk should not have multiple files!, current files: ${files.join(
+          ',',
+        )}`,
       );
 
-      const remoteEntryName = [...remoteEntryNameChunk.files][0];
+      const remoteEntryName = files[0];
 
       return remoteEntryName;
     };
