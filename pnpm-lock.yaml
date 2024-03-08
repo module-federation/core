@@ -121,11 +121,11 @@ importers:
         specifier: 1.0.13
         version: 1.0.13
       '@fontsource/roboto':
-        specifier: 5.0.8
-        version: 5.0.8
+        specifier: 5.0.12
+        version: 5.0.12
       '@fontsource/roboto-mono':
-        specifier: 5.0.15
-        version: 5.0.15
+        specifier: 5.0.17
+        version: 5.0.17
       '@goestav/nx-semantic-release':
         specifier: 1.0.0
         version: 1.0.0(encoding@0.1.13)(nx@17.2.8)(typescript@5.3.3)
@@ -4535,12 +4535,12 @@ packages:
     resolution: {integrity: sha512-OfX7E2oUDYxtBvsuS4e/jSn4Q9Qb6DzgeYtsAdkPZ47znpoNsMgZw0+tVijiv3uGNR6dgNlty6r9rzIzHjtd/A==}
     dev: true
 
-  /@fontsource/roboto-mono@5.0.15:
-    resolution: {integrity: sha512-2YeXokbjzPUFicaw3L2dH8xnfVPxDF1gjYRtpZpdQr4DDOtRcJBJ6ys5fVc9o+kAmG5yp8UXHwDbjHrxigSM0g==}
+  /@fontsource/roboto-mono@5.0.17:
+    resolution: {integrity: sha512-MU6FrAyG7DWMCL8mu0JDPvB2tnFcn/lYvVKixzqHb2uefRsLaD6OBFfF1q5RMFsKcFHyPySHM7ZcGw/Q6A1/FA==}
     dev: true
 
-  /@fontsource/roboto@5.0.8:
-    resolution: {integrity: sha512-XxPltXs5R31D6UZeLIV1td3wTXU3jzd3f2DLsXI8tytMGBkIsGcc9sIyiupRtA8y73HAhuSCeweOoBqf6DbWCA==}
+  /@fontsource/roboto@5.0.12:
+    resolution: {integrity: sha512-x0o17jvgoSSbS9OZnUX2+xJmVRvVCfeaYJjkS7w62iN7CuJWtMf5vJj8LqgC7ibqIkitOHVW+XssRjgrcHn62g==}
     dev: true
 
   /@formily/core@2.3.1:
