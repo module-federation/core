@@ -1,5 +1,17 @@
 # [0.2.0-canary.5](https://github.com/module-federation/universe/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.0.15
+
+### Patch Changes
+
+- ba5bedd: feat: support manifest
+- Updated dependencies [3a45d99]
+- Updated dependencies [ba5bedd]
+  - @module-federation/sdk@0.0.15
+  - @module-federation/managers@0.0.15
+  - @module-federation/manifest@0.0.15
+  - @module-federation/runtime-tools@0.0.15
+
 ## 0.0.14
 
 ### Patch Changes
