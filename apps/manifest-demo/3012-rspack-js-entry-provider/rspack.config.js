@@ -69,7 +69,7 @@ module.exports = composePlugins(
           'react-dom': {},
           'react-dom/': {},
         },
-        // manifest: true,
+        manifest: false,
       }),
     );
     (config.devServer = {

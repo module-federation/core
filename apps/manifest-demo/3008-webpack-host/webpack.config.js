@@ -28,7 +28,6 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
         'react-dom': {},
         'react-dom/': {},
       },
-      manifest: true,
       runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
     }),
   );
