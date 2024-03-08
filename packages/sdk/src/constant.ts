@@ -22,3 +22,11 @@ export const EncodedNameTransformMap = {
 };
 
 export const SEPARATOR = ':';
+
+export const ManifestFileName = 'mf-manifest.json';
+export const StatsFileName = 'mf-stats.json';
+
+export const MFModuleType = {
+  NPM: 'npm',
+  APP: 'app',
+};

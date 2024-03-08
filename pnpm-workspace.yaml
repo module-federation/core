@@ -3,5 +3,6 @@ packages:
   - 'packages/*'
   - 'packages/enhance'
   - 'apps/runtime-demo/*'
+  - 'apps/manifest-demo/*'
   - 'apps/*'
   - 'webpack'
