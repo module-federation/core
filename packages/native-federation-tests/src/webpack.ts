@@ -1,7 +1,16 @@
+import { WebpackPluginInstance } from 'unplugin';
+
 import {
   NativeFederationTestsHost as GeneralHost,
   NativeFederationTestsRemote as GeneralRemote,
 } from '.';
 
-export const NativeFederationTestsRemote = GeneralRemote.webpack;
-export const NativeFederationTestsHost = GeneralHost.webpack;
+import { HostOptions } from './interfaces/HostOptions';
+import { RemoteOptions } from './interfaces/RemoteOptions';
+
+export const NativeFederationTestsRemote: (
+  options: RemoteOptions,
+) => WebpackPluginInstance = GeneralRemote.webpack;
+export const NativeFederationTestsHost: (
+  options: HostOptions,
+) => WebpackPluginInstance = GeneralHost.webpack;
