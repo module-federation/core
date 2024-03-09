@@ -316,8 +316,8 @@ importers:
         specifier: https://gitlab.com/opendevise/oss/antora-navigator-extension/-/archive/main/antora-navigator-extension-main.tar.gz
         version: '@gitlab.com/opendevise/oss/antora-navigator-extension/-/archive/main/antora-navigator-extension-main.tar.gz'
       autoprefixer:
-        specifier: 10.4.17
-        version: 10.4.17(postcss@8.4.35)
+        specifier: 10.4.18
+        version: 10.4.18(postcss@8.4.35)
       babel-jest:
         specifier: 29.7.0
         version: 29.7.0(@babel/core@7.24.0)
@@ -8322,7 +8322,7 @@ packages:
       '@rollup/plugin-image': 2.1.1(rollup@2.79.1)
       '@rollup/plugin-json': 4.1.0(rollup@2.79.1)
       '@rollup/plugin-node-resolve': 13.3.0(rollup@2.79.1)
-      autoprefixer: 10.4.17(postcss@8.4.35)
+      autoprefixer: 10.4.18(postcss@8.4.35)
       babel-plugin-transform-async-to-promises: 0.8.18
       chalk: 4.1.2
       fast-glob: 3.3.2
@@ -14869,6 +14869,22 @@ packages:
 
   /autoprefixer@10.4.17(postcss@8.4.35):
     resolution: {integrity: sha512-/cpVNRLSfhOtcGflT13P2794gVSgmPgTR+erw5ifnMLZb0UnSlkK4tquLmkd3BhA+nLo5tX8Cu0upUsGKvKbmg==}
+    engines: {node: ^10 || ^12 || >=14}
+    hasBin: true
+    peerDependencies:
+      postcss: ^8.1.0
+    dependencies:
+      browserslist: 4.23.0
+      caniuse-lite: 1.0.30001596
+      fraction.js: 4.3.7
+      normalize-range: 0.1.2
+      picocolors: 1.0.0
+      postcss: 8.4.35
+      postcss-value-parser: 4.2.0
+    dev: true
+
+  /autoprefixer@10.4.18(postcss@8.4.35):
+    resolution: {integrity: sha512-1DKbDfsr6KUElM6wg+0zRNkB/Q7WcKYAaK+pzXn+Xqmszm/5Xa9coeNdtP88Vi+dPzZnMjhge8GIV49ZQkDa+g==}
     engines: {node: ^10 || ^12 || >=14}
     hasBin: true
     peerDependencies:
