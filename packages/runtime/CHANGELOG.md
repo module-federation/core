@@ -1,5 +1,14 @@
 # @module-federation/runtime
 
+## 0.0.15
+
+### Patch Changes
+
+- 6e9b6d5: fix(runtime): preserve error.stack instead of throwing new error
+- Updated dependencies [3a45d99]
+- Updated dependencies [ba5bedd]
+  - @module-federation/sdk@0.0.15
+
 ## 0.0.14
 
 ### Patch Changes

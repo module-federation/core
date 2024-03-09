@@ -5,9 +5,7 @@
 
 import express from 'express';
 import * as path from 'path';
-import { loadRemote } from '@module-federation/runtime';
 import node_local_remote from 'node_local_remote/test';
-console.log(loadRemote);
 const remoteMsg = import('node_remote/test').then((m) => {
   console.log('\x1b[32m%s\x1b[0m', m.default || m);
   return m.default || m;
