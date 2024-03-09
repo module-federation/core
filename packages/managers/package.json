@@ -1,0 +1,43 @@
+{
+  "name": "@module-federation/managers",
+  "version": "0.0.15",
+  "license": "MIT",
+  "description": "Provide managers for helping handle mf data .",
+  "keywords": [
+    "Module Federation"
+  ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "hanric <hanric.zhang@gmail.com>",
+  "sideEffects": false,
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.cjs.d.ts",
+  "dependencies": {
+    "@module-federation/sdk": "workspace:*",
+    "find-pkg": "2.0.0",
+    "fs-extra": "9.1.0"
+  },
+  "devDependencies": {
+    "webpack": "5.75.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "types": "./dist/index.cjs.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.cjs.d.ts"
+      ]
+    }
+  }
+}

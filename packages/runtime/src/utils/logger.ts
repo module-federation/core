@@ -8,9 +8,18 @@ export function assert(condition: any, msg: string): asserts condition {
 }
 
 export function error(msg: string | Error | unknown): never {
+  if (msg instanceof Error) {
+    msg.message = `${LOG_CATEGORY}: ${msg.message}`;
+    throw msg;
+  }
   throw new Error(`${LOG_CATEGORY}: ${msg}`);
 }
 
 export function warn(msg: Parameters<typeof console.warn>[0]): void {
-  console.warn(`${LOG_CATEGORY}: ${msg}`);
+  if (msg instanceof Error) {
+    msg.message = `${LOG_CATEGORY}: ${msg.message}`;
+    console.warn(msg);
+  } else {
+    console.warn(`${LOG_CATEGORY}: ${msg}`);
+  }
 }

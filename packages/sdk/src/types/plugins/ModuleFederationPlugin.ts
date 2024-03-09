@@ -1,9 +1,5 @@
-/*
- * This file was automatically generated.
- * DO NOT MODIFY BY HAND.
- * Run `yarn special-lint-fix` to update
- */
-
+import type webpack from 'webpack';
+import { Stats } from '../stats';
 /**
  * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
  */
@@ -111,6 +107,22 @@ export type Shared = (SharedItem | SharedObject)[] | SharedObject;
  */
 export type SharedItem = string;
 
+export interface AdditionalDataOptions {
+  stats: Stats;
+  pluginOptions: ModuleFederationPluginOptions;
+  compiler: webpack.Compiler;
+  compilation: webpack.Compilation;
+  bundler: 'webpack' | 'rspack';
+}
+export interface PluginManifestOptions {
+  filePath?: string;
+  disableAssetsAnalyze?: boolean;
+  fileName?: string;
+  additionalData?: (
+    options: AdditionalDataOptions,
+  ) => Promise<Stats | void> | Stats | void;
+}
+
 export interface ModuleFederationPluginOptions {
   /**
    * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
@@ -152,6 +164,12 @@ export interface ModuleFederationPluginOptions {
    * Runtime plugin file paths or package name.
    */
   runtimePlugins?: string[];
+  /**
+   * Bundler runtime path
+   */
+  implementation?: string;
+
+  manifest?: boolean | PluginManifestOptions;
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.
@@ -263,10 +281,6 @@ export interface RemotesConfig {
    * The name of the share scope shared with this remote.
    */
   shareScope?: string;
-  /**
-   * The name of remote instance
-   */
-  name?: string;
 }
 /**
  * Modules that should be shared in the share scope. Property names are used to match requested modules in this compilation. Relative requests are resolved, module requests are matched unresolved, absolute paths will match resolved requests. A trailing slash will match all requests with this prefix. In this case shareKey must also have a trailing slash.
