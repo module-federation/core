@@ -70,8 +70,9 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     if (useContainerPlugin) {
       // @ts-ignore
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
+      ContainerPlugin.patchChunkSplit(compiler, 'federation-runtime');
+      ContainerPlugin.patchChunkSplit(compiler, 'mfp-runtime-plugins');
     }
-    ContainerPlugin.patchChunkSplit(compiler, 'federation-runtime');
 
     if (!disableManifest && useContainerPlugin) {
       try {
