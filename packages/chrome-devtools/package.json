@@ -11,7 +11,6 @@
     "serve": "modern serve",
     "new": "modern new",
     "lint": "modern lint",
-    "prepare": "husky install",
     "upgrade": "modern upgrade"
   },
   "engines": {
@@ -50,7 +49,6 @@
     "@types/node": "~16.11.7",
     "@types/react": "~18.2.0",
     "@types/react-dom": "~18.2.0",
-    "husky": "~8.0.1",
     "lint-staged": "~13.1.0",
     "prettier": "~2.8.1",
     "rimraf": "~3.0.2",
