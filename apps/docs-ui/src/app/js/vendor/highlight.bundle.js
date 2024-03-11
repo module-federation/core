@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const hljs = require('highlight.js/lib/highlight');
+  const hljs = require('highlight.js/lib');
   hljs.registerLanguage(
     'asciidoc',
     require('highlight.js/lib/languages/asciidoc'),

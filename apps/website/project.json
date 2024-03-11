@@ -9,7 +9,7 @@
       "executor": "qwik-nx:build",
       "options": {
         "runSequence": ["website:build.client", "website:build.ssr"],
-        "outputPath": "apps/website/dist",
+        "outputPath": "dist/apps/website",
         "skipTypeCheck": false
       },
       "configurations": {
@@ -20,7 +20,7 @@
     "build.client": {
       "executor": "@nrwl/vite:build",
       "options": {
-        "outputPath": "apps/website/dist",
+        "outputPath": "dist/apps/website",
         "configFile": "apps/website/vite.config.ts"
       }
     },
@@ -28,7 +28,7 @@
       "executor": "@nrwl/vite:build",
       "defaultConfiguration": "preview",
       "options": {
-        "outputPath": "apps/website/dist"
+        "outputPath": "dist/apps/website"
       },
       "configurations": {
         "preview": {
