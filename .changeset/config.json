@@ -11,7 +11,8 @@
       "@module-federation/sdk",
       "@module-federation/runtime-tools",
       "@module-federation/managers",
-      "@module-federation/manifest"
+      "@module-federation/manifest",
+      "@module-federation/dev-server"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],
