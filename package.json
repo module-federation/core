@@ -190,7 +190,7 @@
     "nodejieba": "2.6.0",
     "nx": "17.2.8",
     "nx-cloud": "16.5.2",
-    "open": "^10.0.0",
+    "open": "^10.1.0",
     "openai": "3.3.0",
     "pdf-parse": "1.1.1",
     "postcss-calc": "9.0.1",
