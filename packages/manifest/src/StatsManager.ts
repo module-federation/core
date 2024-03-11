@@ -293,7 +293,7 @@ class StatsManager {
         statsOptions['cached'] = true;
         statsOptions['cachedModules'] = true;
       }
-      const webpackStats = liveStats.toJson();
+      const webpackStats = liveStats.toJson(statsOptions);
 
       const filteredModules = this._getFilteredModules(webpackStats);
       const moduleHandler = new ModuleHandler(this._options, filteredModules, {
