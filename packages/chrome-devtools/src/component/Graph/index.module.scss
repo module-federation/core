@@ -1,0 +1,14 @@
+.depWrapper {
+  border: 1px solid #e5e6ec;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-radius: 8px;
+
+  .table {
+    margin: 8px 0 20px;
+  }
+
+  .graph {
+    height: 80vh !important;
+  }
+}

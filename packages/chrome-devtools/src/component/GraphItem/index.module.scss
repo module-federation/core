@@ -1,0 +1,21 @@
+.Wrapper {
+  border: 4px solid #3a95ff;
+  border-radius: 10px;
+  padding: 16px;
+  width: 300px;
+
+  .group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 3px;
+
+    .name {
+      margin-left: 0.8vw;
+    }
+  }
+
+  .version {
+    display: flex;
+    justify-content: center;
+  }
+}

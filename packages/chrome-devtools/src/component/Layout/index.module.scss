@@ -1,0 +1,55 @@
+.select {
+  margin-top: 1vh;
+}
+
+.card {
+  display: flex;
+  height: 4vh;
+  align-items: center;
+
+  & .appName {
+    margin: 1vh 0;
+  }
+}
+
+.tagContainer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1vh;
+  color: rgb(78, 89, 105);
+
+  & .tag {
+    margin-left: 1vw;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin: 1vh 0;
+
+  & .add {
+    margin: 0 0.5vw;
+  }
+
+  & .title {
+    margin: 0 0.5vw;
+  }
+
+  & .status {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+    align-items: center;
+
+    & .switch {
+      margin-left: 0.5vw;
+    }
+  }
+
+  & .badge {
+    display: flex;
+    transform: scale(1.6);
+    margin: 0 0.6vw;
+  }
+}
