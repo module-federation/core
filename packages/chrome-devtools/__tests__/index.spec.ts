@@ -5,7 +5,7 @@ let devtoolsPage: any;
 
 test.beforeEach(async ({ page, context: browserContext, extensionId }) => {
   // const openUrl = 'http://localhost:8080';
-  const openUrl = 'https://garfish.bytedance.net/vmok-e2e/edenx-demo-app1';
+  const openUrl = 'mf.com';
   targetPage = await browserContext.newPage();
   await targetPage.goto(openUrl);
   devtoolsPage = await browserContext.newPage();
@@ -17,7 +17,6 @@ test.beforeEach(async ({ page, context: browserContext, extensionId }) => {
         url: `${openUrl}/*`,
       })
       .then(tabs => {
-        // @ts-expect-error
         window.targetTab = tabs[0];
       });
   }, openUrl);
