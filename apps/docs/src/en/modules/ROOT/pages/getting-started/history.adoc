@@ -1,0 +1,33 @@
+= History of Module Federation
+
+Module Federation is a relatively new feature in the world of web development, first introduced in Webpack 5. In this guide, we'll explore the history of Module Federation, including its origins, evolution, and the major milestones that led to its development.
+
+== Origins of Module Federation
+
+The idea of sharing code between multiple applications is not a new one. In fact, it has been a common practice in software development for many years. However, the rise of microservices and the need for highly modular and scalable architectures in web development created a new demand for code sharing across multiple applications.
+
+The first attempts to solve this problem involved using iframes or server-side includes to embed code from one application into another. However, these approaches had significant limitations in terms of performance, flexibility, and security.
+
+== Webpack 5 and the Birth of Module Federation
+
+In 2020, Webpack 5 was released with a new feature called "Module Federation". This feature was a significant step forward in the evolution of code sharing in web development.
+
+Module Federation allowed developers to share entire modules between multiple applications, not just Redux-related code. This was accomplished by extending the Webpack module bundler to support remote loading of modules and using a runtime called the "Module Federation Runtime" to handle the loading and dependency resolution of remote modules.
+
+== Evolution of Module Federation
+
+Since its introduction in Webpack 5, Module Federation has continued to evolve and improve. In Webpack 5, it was limited to sharing modules between applications built with Webpack. However, in Webpack 5.1, support was added for sharing modules between applications built with different module bundlers, such as Rollup or Parcel.
+
+In addition, the community has developed a number of tools and plugins to extend the capabilities of Module Federation, including the "Module Federation Plugin" for Next.js, and the "Federation Plugin" for Snowpack.
+
+== Future of Module Federation
+
+Module Federation has the potential to significantly change the way we approach code sharing in web development. As it continues to evolve and improve, it is likely that we will see more widespread adoption and integration with other tools and frameworks.
+
+Some potential future directions for Module Federation include:
+
+- Improved support for sharing dynamic and asynchronous modules.
+- Integration with serverless functions and other backend services.
+- Support for sharing modules across multiple programming languages and environments.
+
+As Module Federation continues to evolve, we will continue updating documentation, to provide you with the best techniques on how to adopt and integrate with other tools and frameworks.

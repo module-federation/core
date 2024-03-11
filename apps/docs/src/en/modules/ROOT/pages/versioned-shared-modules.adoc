@@ -1,4 +1,4 @@
-= Module Federation: Versioned Shared Modules
+= Versioned Shared Modules
 
 This article covers the enhanced features of Module Federation, focusing on the concept of versioned shared modules. This concept introduces a new system based on the versions of shared modules, thus improving the federated builds' management, especially in complex host-remote relationship scenarios.
 
@@ -49,13 +49,14 @@ module.exports = {
 
 === Object syntax
 
-While specifying shared packages, it is also essential to manage their versions correctly. By default, the system infers the versions from your `package.json` file. However, you can explicitly specify the version or a range of versions using [Semantic Versioning https://semver.org/[SemVer]
+While specifying shared packages, it is also essential to manage their versions correctly. By default, the system infers the versions from your `package.json` file. However, you can explicitly specify the version or a range of versions using https://semver.org/[Semantic Versioning]
 
 Here are some examples that further illustrate how to specify package versions for shared modules:
 
+==== Example 1: Do not provide a local version, emit a warning if the shared vue is < 2.6.5 or >= 3
+
 [source, javascript]
 ----
-// Example 6: Do not provide a local version, emit a warning if the shared vue is < 2.6.5 or >= 3
 shared: {
   "vue": {
     import: false,
@@ -65,15 +66,17 @@ shared: {
 }
 ----
 
-[source, javascript]
-----
-// Example 7: Add all dependencies as shared modules, using versions from package.json
-shared: require("./package.json").dependencies
-----
+==== Example 2: Add all dependencies as shared modules, using versions from package.json
 
 [source, javascript]
 ----
-// Example 8: Change specific entries using object spread
+shared: require("./package.json").dependencies
+----
+
+==== Example 3: Change specific entries using object spread
+
+[source, javascript]
+----
 const deps = require("./package.json").dependencies;
 shared: {
   ...deps,
@@ -84,9 +87,10 @@ shared: {
 }
 ----
 
+==== Example 4: Configure shared module with specific requirements
+
 [source, javascript]
 ----
-// Example 9: Configure shared module with specific requirements
 shared: {
   "my-vue": { 
     import: "vue", 
@@ -131,7 +135,7 @@ module.exports = {
 
 `boolean``
 
-This hint will allow webpack to include the provided and fallback module directly instead of fetching the library via an asynchronous request. In other words, this allows to use this shared module in the initial chunk. Also, be careful that all provided and fallback modules will always be downloaded when this hint is enabled.
+This hint will allow Webpack to include the provided and fallback module directly instead of fetching the library via an asynchronous request. In other words, this allows to use of this shared module in the initial chunk. Also, be careful that all provided and fallback modules will always be downloaded when this hint is enabled.
 
 ==== `import`
 
@@ -175,7 +179,7 @@ In cases where there are multiple versions of the same dependency in the shared 
 
 `boolean`
 
-The `strictVersion` property plays a crucial role in managing shared modules. If `strictVersion` is set to `true`, the shared module won't be used unless the version is valid. In such cases, singleton or modules without fallback will throw an error, otherwise the fallback module is used.
+The `strictVersion` property plays a crucial role in managing shared modules. If `strictVersion` is set to `true`, the shared module won't be used unless the version is valid. In such cases, singleton or modules without fallback will throw an error, otherwise, the fallback module is used.
 
 When a fallback module is provided, it is recommended to set `strictVersion` to `true` as it will ensure that the shared module is only used if its version is valid. If the shared module's version is not valid, then the fallback module will be used instead, providing a safe fallback mechanism.
 
@@ -183,31 +187,34 @@ When a fallback module is provided, it is recommended to set `strictVersion` to 
 
 `false` | `string`
 
-The version of the provided module. It allows webpack to replace lower matching versions, but not higher.
+The version of the provided module. It allows Webpack to replace lower matching versions, but not higher.
 
 By default, Webpack uses the version from the package.json file of the dependency.
 
 == Example Scenarios
 
- Here are a few examples that illustrate the various possibilities:
+Here are a few examples that illustrate the various possibilities:
+
+==== Example 1: Always use the higher version found
 
 [source, javascript]
 ----
-// Example 1: Always use the higher version found
 shared: ["react"]
 ----
 
+==== Example 2: Use the highest moment version that is >= 2.20 and < 3
+
 [source, javascript]
 ----
-// Example 2: Use the highest moment version that is >= 2.20 and < 3
 shared: {
   "moment": "^2.20.0"
 }
 ----
 
+==== Example 3: Use the shared version, but print a warning when the shared react is < 16.7 or >= 17
+
 [source, javascript]
 ----
-// Example 3: Use the shared version, but print a warning when the shared react is < 16.7 or >= 17
 shared: {
   "react": {
     requiredVersion: "^16.7.0",
@@ -216,9 +223,10 @@ shared: {
 }
 ----
 
+==== Example 4: Emit a warning if the shared vue is < 2.6.5 or >= 3
+
 [source, javascript]
 ----
-// Example 4: Emit a warning if the shared vue is < 2.6.5 or >= 3
 shared: {
   "vue": {
     import: false,
@@ -227,9 +235,10 @@ shared: {
 }
 ----
 
+==== Example 5: Throw an error when the shared vue is < 2.6.5 or >= 3
+
 [source, javascript]
 ----
-// Example 5: Throw an error when the shared vue is < 2.6.5 or >= 3
 shared: {
   "vue": {
     import: false,
@@ -241,11 +250,11 @@ shared: {
 
 In these examples, the shared property defines the shared modules, either as an array of module names or as an object with additional configuration options.
 
-It's important to note that while hosts previously had clear control from host to remote, the new system based on shared module versions allows remotes to provide a higher version of a shared module to the federated app. This change also permits two remotes to share a module without the host being involved, or to share two different (major) versions of a module, while still reusing compatible versions.
+It's important to note that while hosts previously had clear control from host to remote, the new system based on shared module versions allows remotes to provide a higher version of a shared module to the federated app. This change also permits two remotes to share a module without the host being involved or to share two different (major) versions of a module, while still reusing compatible versions.
 
 == Shared Module Initialization
 
-Remember that an initialization phase allows all remotes (including remotes of remotes) to provide shared modules. This phase is crucial, as some deeply nested remote might need a higher version of a shared module and should have the opportunity to provide it. Asynchronous loading is available for all remotes during this initialization phase.
+Remember that an initialization phase allows all remotes (including remotes of remotes) to provide shared modules. This phase is crucial, as some deeply nested remotes might need a higher version of a shared module and should have the opportunity to provide it. Asynchronous loading is available for all remotes during this initialization phase.
 
 By implementing and understanding these concepts, you can effectively manage the versions of shared modules in a Module Federation context, ensuring smoother collaboration and more reliable app performance.
 
@@ -282,18 +291,17 @@ Also, you may want your shared modules to be provided synchronously by making th
 
 [source, javascript]
 ----
-// Example 10: Providing an eager module
-     shared: {
-        ...deps,
-        react: {
-          eager: true,
-          singleton: true,
-          requiredVersion: deps.react,
-        },
-        "react-dom": {
-          eager: true,
-          singleton: true,
-          requiredVersion: deps["react-dom"],
-        },
-      },
+shared: {
+   ...deps,
+   react: {
+     eager: true,
+     singleton: true,
+     requiredVersion: deps.react,
+   },
+   "react-dom": {
+     eager: true,
+     singleton: true,
+     requiredVersion: deps["react-dom"],
+   },
+ },
 ----

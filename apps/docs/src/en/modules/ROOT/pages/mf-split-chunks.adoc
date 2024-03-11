@@ -1,4 +1,4 @@
-= Module Federation: SplitChunksPlugin & Sharing and Bundling Multiple Vendor Bundles Into One Vendor Bundle
+= SplitChunksPlugin & Sharing and Bundling Multiple Vendor Bundles Into One Vendor Bundle
 
 == Introduction
 

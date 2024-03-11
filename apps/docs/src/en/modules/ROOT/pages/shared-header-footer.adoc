@@ -1,4 +1,4 @@
-= Where to start: Shared Header or Footer using Module Federation
+= Where to start: Shared Header or Footer
 
 In this guide, you will learn how to create a shared header and footer component using Module Federation, and how to use them in two different applications. You will also learn how to handle routing, authentication, and styling in the shared components.
 

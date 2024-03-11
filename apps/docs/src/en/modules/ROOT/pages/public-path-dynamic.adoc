@@ -2,7 +2,7 @@
 
 In this guide, we'll cover how to set the public path dynamically for Module Federation. This is particularly useful when deploying federated modules to different environments with varying public paths. 
 
-One of the challenges of using Module Federation is to configure the public path of each Webpack build correctly, so that it can load remote modules from other builds at runtime. The public path is the base URL for all assets (including JavaScript files) in a Webpack build. By default, Webpack sets the public path to the current HTML document's base URL or location. However, this may not work well for Module Federation scenarios, where the public path needs to point to the location of the remote container that exposes the modules.
+One of the challenges of using Module Federation is to configure the public path of each Webpack build correctly so that it can load remote modules from other builds at runtime. The public path is the base URL for all assets (including JavaScript files) in a Webpack build. By default, Webpack sets the public path to the current HTML document's base URL or location. However, this may not work well for Module Federation scenarios, where the public path needs to point to the location of the remote container that exposes the modules.
 
 There are three ways to set the public path dynamically for Module Federation: using an inline script tag, using a custom entry point, or using startup code.
 
@@ -12,7 +12,7 @@ One way to set the public path dynamically is to use an inline script tag in the
 
 For example:
 
-[, html]
+[source, html]
 ----
 <script>
   // Set the public path to the location of the remote container
@@ -77,11 +77,11 @@ This approach has the advantage of being more flexible and robust, as it allows 
 
 Startup code is an implementation tactic to attach additional runtime code to a remote container startup sequence. This is useful for scenarios where the public path needs to be set based on some logic or environment variables that are not available at build time.
 
-To use startup code, we need to do the following steps:
+To use the startup code, we need to do the following steps:
 
-. Create an entry point with the same name as the name we place in ModuleFederationPlugin. This merges the two "chunks" together. When a remoteEntry is placed on the page, the code in this entry point will execute as part of the `remoteEntry` startup.
-. In the entry point, import a module that sets the `__webpack_public_path__` variable to the desired public path based on some logic or environment variables.
-. Exclude the entry point chunk from the HTML document, as it will be loaded by the `remoteEntry`.
+1. Create an entry point with the same name as the name we place in ModuleFederationPlugin. This merges the two "chunks" together. When a remoteEntry is placed on the page, the code in this entry point will execute as part of the `remoteEntry` startup.
+2. In the entry point, import a module that sets the `__webpack_public_path__` variable to the desired public path based on some logic or environment variables.
+3. Exclude the entry point chunk from the HTML document, as it will be loaded by the `remoteEntry`.
 
 For example, let's say we have a remote container named "app1" that exposes some modules. We want to set its public path based on an environment variable called `PUBLIC_PATH`. Here is how we can use startup code to achieve this:
 
@@ -162,7 +162,9 @@ This way, we can set the public path of app1 dynamically at runtime based on the
 
 == Conclusion
 
-Setting the public path dynamically for Module Federation is an important step to ensure that remote modules can be loaded correctly at runtime. There are three ways to do this: using an inline script tag, using a custom entry point, or using startup code. Each approach has its own advantages and disadvantages, and developers should choose the one that suits their needs and preferences best.
+Setting the public path dynamically for Module Federation is an important step to ensure that remote modules can be loaded correctly at runtime. There are three ways to do this: using an inline script tag, using a custom entry point, or using startup code.
+
+Each approach has its own advantages and disadvantages, and developers should choose the one that suits their needs and preferences best.
 
 Using an inline script tag is simple and straightforward, but it may not work well with code splitting or lazy loading, and it may cause issues with caching or CDNs. Using a custom entry point is more flexible and robust, but it may add some complexity and overhead to the webpack configuration, and it may not work well with HMR. Using startup code is a powerful and advanced technique that allows injecting custom code into the webpack runtime, but it may require some familiarity with webpack internals and Module Federation.
 

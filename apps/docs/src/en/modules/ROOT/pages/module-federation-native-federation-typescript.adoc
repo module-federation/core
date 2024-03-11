@@ -146,7 +146,7 @@ To have the type definitions automatically found for imports, add paths to the `
 
 [source, javascript]
 ----
-{
+{  
   "paths": {
     "*": ["./@mf-types/*"]
   }

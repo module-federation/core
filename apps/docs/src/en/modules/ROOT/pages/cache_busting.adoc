@@ -61,7 +61,7 @@ In this configuration, `[contenthash]` is replaced with a hash of the content of
 
 === Further Reading
 
-- https://github.com/module-federation/module-federation-examples/issues/566[Dynamic remoteEntry.js URL plugin - GitHub Issue]()
+- https://github.com/module-federation/module-federation-examples/issues/566[Dynamic remoteEntry.js URL plugin - GitHub Issue]
 - https://webpack.js.org/guides/caching/[Webpack Documentation on Caching]
 
 ---

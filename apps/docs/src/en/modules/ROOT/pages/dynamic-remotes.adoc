@@ -1,4 +1,4 @@
-= Using Dynamic Remotes in Module Federation
+= Using Dynamic Remotes
 
 This documentation page will discuss how to use dynamic remotes in Module Federation to deploy micro frontend applications across various environments. This guide is intended to provide elaborate and understandable instructions for implementing dynamic remotes in your projects.
 
@@ -59,11 +59,11 @@ plugins: [
 
 === Advantages and Limitations
 
-All you need to do is define window.appAUrl and window.appBUrl within our application before you load any code from the remote applications.
+All you need to do is define `window.appAUrl` and window.appBUrl within your application before you load any code from the remote applications.
 
-Now you have the flexibility to define our URLs however you want. For example, you could maintain a map of the host URLs to remote URLs for each environment, use server-side rendering to allow the backend to define the URLs, create a custom configuration management service, and many other methods.
+Now you have the flexibility to define your URLs however you want. For example, you could maintain a map of the host URLs to remote URLs for each environment, use server-side rendering to allow the backend to define the URLs, create a custom configuration management service, and many other methods.
 
-This approach is fully dynamic and would solve our use cases, but there is still a slight limitation with this approach. We do not have complete control over the loading lifecycle.
+This approach is fully dynamic and would solve the use cases, but there is still a slight limitation with this approach. We do not have complete control over the loading lifecycle.
 
 == Promise-Based Dynamic Remotes
 
@@ -73,7 +73,7 @@ Module Federation allows you to define remote URLs as promises instead of URL st
 
 ==== Webpack Configuration
 
-[source, json]
+[source, javascript]
 ----
 // Webpack config:
 module.exports = {
@@ -91,7 +91,7 @@ module.exports = {
 
 ==== Fetching Remote A Dynamically
 
-[source, json]
+[source, javascript]
 ----
 // Fetch Remote A dynamically:
 const fetchRemoteA = (resolve) => {
@@ -130,8 +130,8 @@ Dynamic remote containers allow you to load remote applications programmatically
 === Implementation 
 
 1. Remove the remotes field from the ModuleFederationPlugin configuration:
-
-[source, json]
++
+[source, javascript]
 ----
 plugins: [
   new ModuleFederationPlugin({
@@ -142,8 +142,8 @@ plugins: [
 ----
 
 2. Before loading any remote apps, fetch the remote module using a dynamic script tag and manually initialize the remote container:
-
-[source,js]
++
+[source, javascript]
 ----
 (async () => {
   // Initializes the shared scope. Fills it with known provided modules from this build and all remotes
@@ -154,12 +154,18 @@ plugins: [
   const module = await container.get("./module");
 })();
 ----
-
++
 Here, `container` refers to a remote app configured in the `remotes` field in the host app's Webpack configuration, and module refers to one of the items defined in the `exposes` field in the remote app's Webpack configuration.
-
++
 By injecting a script tag to fetch the remote container and storing it in `window.someContainer`, you can ensure the code resolves to the same `get/init` pattern used in earlier examples.
-
++
 To use one of the modules exposed by the remote app, call `container.get(moduleName)` as demonstrated in the example above.
+
+=== Advantages and Limitations
+
+Dynamic Remote Containers in Module Federation enhance deployment flexibility by supporting A/B testing through the dynamic loading of different versions of a shared module. This capability allows for updates and feature enhancements to be applied dynamically, improving user experiences without necessitating full application redeployments. The approach also includes fallback mechanisms to maintain application stability by handling redundant module loads with warnings and ignoring unnecessary shared modules.
+
+On the other hand, implementing Dynamic Remote Containers presents challenges. The complexity of setting up these containers requires a thorough understanding of Module Federation. Performance considerations are critical, as dynamically loading modules may add latency, requiring optimizations to ensure a responsive user experience. Additionally, managing dependencies across dynamically loaded modules is essential to avoid runtime errors and ensure seamless application functionality.
 
 == Summary and Recommendations
 

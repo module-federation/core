@@ -1,4 +1,4 @@
-= Brownfield vs. Greenfield Development with Module Federation
+= Brownfield vs. Greenfield Development
 
 In this documentation page, we'll explore two different approaches to implementing Module Federation in your projects: Brownfield and Greenfield development. This guide is intended for advanced users and will provide a thorough understanding of the differences, advantages, and drawbacks of each approach.
 
@@ -13,7 +13,7 @@ When considering implementing Module Federation in your projects, you'll often c
 
 This guide aims to provide an in-depth understanding of both development strategies to help you make an informed decision on whether to start from scratch, or lean more towards a refactoring-way.
 
-== Brownfield Development with Module Federation
+== Brownfield Development 
 
 Brownfield development refers to integrating Module Federation into an existing application. This can be a complex process, as it may involve refactoring existing code and adapting your application's architecture to work with Module Federation.
 
@@ -34,11 +34,7 @@ Brownfield development refers to integrating Module Federation into an existing 
 - Plan your refactoring: Develop a detailed plan to refactor your application and integrate Module Federation. Consider breaking the process into smaller, manageable tasks.
 - Test thoroughly: Ensure you have a robust testing strategy in place to catch potential issues during the refactoring process.
 
-=== Refactoring Example 
-
-//TODO: 
-
-== Greenfield Development with Module Federation
+== Greenfield Development
 
 Greenfield development refers to building a new application from scratch, with Module Federation in mind from the beginning. This approach allows you to design and architect your application to take full advantage of Module Federation's capabilities.
 

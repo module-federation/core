@@ -1,33 +1,35 @@
 .Getting Started
 * xref:history.adoc[History of Module Federation]
-* xref:getting-started.adoc[What is Module Federation?]
-* xref:setup.adoc[Setting up Environment]
-* xref:getting-started-practical.adoc[Getting Started]
+* xref:what-is-mf.adoc[What is Module Federation?]
 * xref:use-cases.adoc[Use Cases]
 * xref:pros-cons.adoc[Pros and Cons of Module Federation]
+* xref:setup.adoc[Setting up Environment]
+* xref:getting-started-practical.adoc[Getting Started]
 * xref:best-practices.adoc[Best Practices and Tips]
 
 .Core Features
-* xref:dynamic-remotes.adoc[Dynamic Remotes in Module Federation]
-* xref:shared-api.adoc[]
-* xref:delegate-modules.adoc[]
-* xref:versioned-shared-modules.adoc[]
-* xref:cache_busting.adoc[]
+* xref:dynamic-remotes.adoc[Using Dynamic Remotes]
+* xref:shared-api.adoc[Module Federation Shared API]
+* xref:delegate-modules.adoc[Delegate Modules]
+* xref:versioned-shared-modules.adoc[Versioned Shared Modules]
+* xref:cache_busting.adoc[Cache Busting]
 
 .Recipes
-* xref:examples-demos.adoc[]
-* xref:mf-ssr.adoc[]
-* xref:team-collaboration-review.adoc[]
-* xref:unit-testing.adoc[]
-* xref:public-path-dynamic.adoc[]
-* xref:resiliency-failovers.adoc[]
-* xref:naming-convention-tips.adoc[Naming Conventions for Modules and Exports ]
-* xref:shared-header-footer.adoc[]
-* xref:composable-commerce-PBC-edition.adoc[]
+* xref:examples-demos.adoc[Examples and Demos]
+* xref:mf-ssr.adoc[Server-Side Rendering with Module Federation]
+* xref:unit-testing.adoc[Unit Tests for Distributed Code]
+* xref:public-path-dynamic.adoc[Setting the Dynamic Public Path]
+* xref:resiliency-failovers.adoc[Improving Resiliency and Failovers]
+* xref:naming-convention-tips.adoc[Strategies for Naming Modules and Exports]
+* xref:shared-header-footer.adoc[Shared Header and Footer]
+// * xref:composable-commerce-simple.adoc[Composable Commerce: Simple Edition]
+* xref:composable-commerce-PBC-edition.adoc[Composable Commerce with Module Federation]
 
 .Concepts
 * xref:component-level-ownership.adoc[Component Level Ownership]
-* xref:brown-green.adoc[]
+* xref:brown-green.adoc[Brownfield vs. Greenfield Development]
+* xref:component-vs-mf.adoc[Difference Between a Component and a Micro-Frontend]
+* xref:antipatterns.adoc[Antipatterns in Module Federation]
 
 .Packages
 * xref:module-federation-node.adoc[@module-federation/node]
@@ -36,3 +38,33 @@
 * xref:module-federation-native-federation-typescript.adoc[@module-federation/native-federation-typescript - v0.2.6]
 * xref:module-federation-native-federation-tests.adoc[@module-federation/native-federation-tests - v0.2.1]
 
+.Angular Specific
+* xref:angular-way/index.adoc[Angular Module Federation Overview]
+* xref:angular-way/auth0.adoc[Auth0 Authentication with Angular Module Federation]
+* xref:angular-way/okta-auth.adoc[Okta Authentication with Angular Module Federation]
+// * xref:angular-way/i18n-angular.adoc[Internationalization in Angular with Module Federation]
+* xref:angular-way/mf-ssr-angular.adoc[Server-Side Rendering in Angular with Module Federation]
+* xref:angular-way/service-workers-mf.adoc[Service Workers in Angular with Module Federation]
+* xref:angular-way/splitting-to-mf-part1.adoc[Splitting an Angular App to Module Federation: Part 1]
+* xref:angular-way/splitting-to-mf-part2.adoc[Splitting an Angular App to Module Federation: Part 2]
+
+.React Specific
+* xref:react-way/index.adoc[Micro-frontend Projects with Module Federation and React]
+* xref:react-way/i18n-react.adoc[Internationalization in React with Module Federation]
+
+.Vue Specific
+* xref:vue-way/index.adoc[Setting Up Module Federation in a Vue 2 Application]
+
+.Miscellaneous
+* xref:agnostic-way/index.adoc[Framework Agnostic Approaches in Module Federation]
+* xref:loc-dev-deployment.adoc[Simplifying Local Development and Deployment]
+* xref:mf-enterprise.adoc[Module Federation for Enterprise]
+* xref:mf-rollupjs.adoc[Implementing Module Federation in Rollup.JS]
+* xref:mf-split-chunks.adoc[Consolidating Multiple Vendor Bundles with SplitChunksPlugin]
+* xref:mf-typescript-plugin.adoc[TypeScript with Module Federation in Next.js Applications]
+* xref:sentry-logging.adoc[Sentry Logging in Module Federation]
+* xref:state-management-redux.adoc[State Management with Redux in Module Federation]
+* xref:tailwind-mf.adoc[Tailwind CSS in Module Federation]
+
+.Documentation Contribution and Tools
+* xref:weblate_contribution_guide.adoc[Weblate Contribution Guide]

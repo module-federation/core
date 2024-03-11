@@ -1,4 +1,4 @@
-= Module Federation: How to Create Unit Tests for Distributed Code
+= How to Create Unit Tests for Distributed Code
 
 In this guide, we'll cover the best practices for creating unit tests for distributed code when using Module Federation. We'll discuss the challenges and advantages of testing federated modules, along with techniques to ensure your tests are thorough and maintainable.
 
@@ -10,7 +10,7 @@ Unit testing is crucial for ensuring the reliability and maintainability of your
 
 Testing federated modules can be more challenging than testing traditional code due to factors such as:
 
-- At-runtime orchestration and code sharing 
+- At-runtime orchestration and code-sharing 
 - Asynchronous module loading
 - Remote dependencies and entry points
 - Diverse application environments
@@ -43,7 +43,7 @@ Let's take a look at an example that demonstrates federated unit testing with Je
 
 Consider an application with a form that imports a federated button.
 
-[, javascript]
+[source, javascript]
 ----
 import React, { Suspense } from "react";
 import lazy from "react-lazy-ssr";
@@ -123,7 +123,7 @@ Both Button and Form are exposed for liability testing.
 
 With the test builds in place, you can use Jest to run tests against a Webpack-built test of test files. This allows you to utilize Webpack's async capabilities to import federated modules and test them.
 
-[, javascript]
+[source, javascript]
 ----
 // federated.test.js
 import React from "react";
@@ -159,7 +159,7 @@ In this example, Jest processes an already-built test file, allowing you to use 
 
 To enable federated testing with Jest, you need a special Webpack build that compiles `.test.js` files only.
 
-[, javascript]
+[source, javascript]
 ----
 // jest test/bundle.test.js
 

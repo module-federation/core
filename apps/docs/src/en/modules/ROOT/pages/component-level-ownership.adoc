@@ -1,4 +1,4 @@
-= Module Federation: Component Level Ownership
+= Component Level Ownership
 
 In this guide, we will delve into the concept of Component Level Ownership in the context of Module Federation, a feature introduced in Webpack 5. You will learn how this ownership model works, its benefits, and how to implement it within your projects.
 

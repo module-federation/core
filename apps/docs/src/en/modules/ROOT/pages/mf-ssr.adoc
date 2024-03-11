@@ -1,18 +1,10 @@
-= Setting up Module Federation with Server-Side Rendering
+= Server-Side Rendering with Module Federation
 
-In this guide, we will walk you through setting up Module Federation with Server-Side Rendering (SSR) in a framework-agnostic manner. We assume you already have a basic understanding of Module Federation and have set it up in your project. If you need a refresher, please refer to the Module Federation setup guide. This guide focuses on the steps required to enable SSR with Module Federation.
-Table of Contents
-
-- Understanding the Challenges with SSR and Module Federation
-- Server-Side Bundle Configuration
-- Loading Remote Modules on the Server
-- Rendering Federated Modules on the Server
-- Hydrating the Client-Side Application
-- Conclusion
+In this guide, we will walk you through setting up Module Federation with Server-Side Rendering (SSR) in a framework-agnostic manner. We assume you already have a basic understanding of Module Federation and have set it up in your project. If you need a refresher, please refer to the Module Federation xref:getting-started-practical.adoc[setup guide]. This guide focuses on the steps required to enable SSR with Module Federation.
 
 == Understanding the Challenges with SSR and Module Federation
 
-Server-Side Rendering (SSR) is a technique used to improve the initial load time and SEO of web applications by rendering the HTML on the server and sending it to the client. Module Federation, on the other hand, is a feature introduced in Webpack 5 that allows sharing code and dependencies across multiple applications at runtime.
+Server-Side Rendering (SSR) is a technique used to improve the initial load time and SEO of web applications by rendering the HTML on the server and sending it to the client. Module Federation, on the other hand, is a feature introduced in Webpack 5 that allows the sharing of code and dependencies across multiple applications at runtime.
 
 While both techniques offer significant benefits, integrating them can be challenging. Module Federation relies on dynamic imports, which are not natively supported during server-side rendering. This guide will demonstrate how to overcome these challenges and set up Module Federation with SSR.
 
@@ -22,7 +14,7 @@ To enable SSR with Module Federation, you need to create a separate Webpack conf
 
 Create a new webpack.server.config.js file with the following configuration:
 
-[, js]
+[source, js]
 ----
 const path = require('path');
 const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
@@ -58,7 +50,7 @@ With the server-side bundle configuration in place, the next step is to load the
 
 In your `src/server.js` file, add the following code to load the remote entry:
 
-[, js]
+[source, js]
 ----
 const path = require('path');
 const { ModuleFederationPlugin } = require('webpack/lib/container/ModuleFederationPlugin');
@@ -76,7 +68,7 @@ Now that we have loaded the remote modules, we need to render them on the server
 
 1. Import the federated module in your server-side rendering code:
 +
-[, js]
+[source, js]
 ----
 const serverComponent = require('serverApp/serverComponent');
 ----
@@ -87,7 +79,7 @@ This step will depend on your specific framework. Most frameworks provide a meth
 +
 Here's an example of how you might render the federated module using a hypothetical renderToString function:
 +
-[, js]
+[source, js]
 ----
 const renderedHTML = renderToString(serverComponent);
 ----
@@ -98,7 +90,7 @@ Once you have the rendered HTML, send it as part of the response to the client. 
 +
 Here's an example using Express.js:
 +
-[, js]
+[source, js]
 ----
 app.get('/', (req, res) => {
   res.send(`
@@ -125,14 +117,14 @@ With the server-side rendering complete, the final step is to hydrate the client
 
 1. Load the remote entry file in your client-side `index.html`:
 +
-[, html]
+[source, html]
 ----
 <script src="/remoteEntry.js"></script>
 ----
 +
 2. Import the federated module in your client-side application:
 +
-[, js]
+[source, js]
 ----
 import('./bootstrap.js');
 ----
@@ -143,7 +135,7 @@ This step will depend on your specific framework. Most frameworks provide a meth
 +
 Here's an example of how you might hydrate the client-side application using a hypothetical `hydrate` function:
 +
-[, js]
+[source, js]
 ----
 import { hydrate } from 'your-framework';
 import ClientComponent from './ClientComponent';
@@ -156,12 +148,3 @@ hydrate(<ClientComponent />, document.getElementById('root'));
 In this guide, we've shown you how to set up Module Federation with Server-Side Rendering in a framework-agnostic manner. By following these steps, you can enjoy the benefits of both Module Federation and SSR, enabling a better user experience, improved initial load times, and enhanced SEO.
 
 Remember that the exact implementation will depend on your specific framework and server setup. Always consult the framework's documentation for detailed guidance and best practices.
-
-For non-framework-agnostic guides, please refer to the following resources:
-
-- React: Module Federation with Server-Side Rendering
-- Vue.js: Module Federation with Server-Side Rendering
-- Angular: Module Federation with Server-Side Rendering
-- Svelte: Module Federation with Server-Side Rendering
-
-These guides will provide you with specific instructions and examples tailored to each respective framework.

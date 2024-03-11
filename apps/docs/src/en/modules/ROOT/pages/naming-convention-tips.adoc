@@ -1,4 +1,4 @@
-== Naming conventions for modules and their exports to avoid naming collisions
+== Strategies for Naming Modules and Exports to Prevent Naming Collisions
 
 When using Module Federation you may face some challenges when it comes to naming your modules and their exports. Since you are loading modules from different sources, you need to make sure that they don't conflict with each other or with the host application. Otherwise, you might end up with unexpected behavior, errors, or broken functionality.
 
@@ -30,7 +30,7 @@ The key of the `exposes` object is the name of the module that you want to expos
 When you expose a module, you need to follow some naming conventions to avoid collisions with other modules. Here are some tips:
 
 - Use a unique prefix for your modules. This can be based on your project name, domain name, or any other identifier that distinguishes your modules from others. For example, if your project is called `my-app`, you can prefix your modules with `my-app/`, like this:
-
++
 [source, javascript]
 -----
 module.exports = {
@@ -45,9 +45,9 @@ module.exports = {
   ],
 };
 -----
-
++
 - Avoid using generic or common names for your modules. For example, don't expose a module as `./react` or `./lodash`, as these might conflict with other bundles that use the same libraries. Instead, use more specific names that reflect the purpose or content of your modules. For example, if you have a custom React component library, you can expose it as `my-app/components`, like this:
-
++
 [source, javascript]
 -----
 module.exports = {
@@ -62,7 +62,7 @@ module.exports = {
   ],
 };
 -----
-
++
 - Use consistent naming conventions across your modules. For example, if you use camelCase for your module names, stick to it throughout your project. Don't mix it with snake_case or kebab-case. This will make your modules easier to find and import.
 
 == Naming your exports
@@ -76,7 +76,7 @@ For example, suppose you want to import the `utils` module that we exposed earli
 import utils from "my-app/utils";
 -----
 
-Or like this:
+or like this:
 
 [source, javascript]
 -----
@@ -90,19 +90,18 @@ The name of the export that you import is the same as the name of the module tha
 When you export values or functions from your modules, you need to follow some naming conventions to avoid collisions with other exports. Here are some tips:
 
 - Use descriptive and meaningful names for your exports. For example, don't export a function as `foo` or `bar`, as these might conflict with other functions that have the same name. Instead, use more specific names that reflect what the function does or returns. For example, if you have a function that calculates the area of a circle, you can export it as `calculateCircleArea`, like this:
-
++
 [source, javascript]
 -----
 export function calculateCircleArea(radius) {
   return Math.PI * radius * radius;
 }
 -----
-
++
 - Use consistent naming conventions across your exports. For example, if you use camelCase for your export names, stick to it throughout your project. Don't mix it with snake_case or kebab-case. This will make your exports easier to find and import.
-
++
 - Avoid using default exports for your modules. Default exports are anonymous and can be imported with any name. This can lead to confusion and inconsistency when importing modules from different sources. For example, if you have a module that exports a React component as the default export, you can import it like this:
-
-
++
 [tabs]
 ======
 Approach 1::
@@ -128,7 +127,7 @@ import Bar from "my-app/components";
 ======
 
 As you can see, the name of the import does not match the name of the module or the component. This can make it hard to track where the component comes from and what it does. Instead, use named exports for your modules and import them with the same name. For example, if you have a module that exports a React component as a named export, you can export and import it like the following:
-
++
 [tabs]
 ======
 Export::
@@ -145,7 +144,7 @@ Import::
 import { MyComponent } from "my-app/components";
 -----
 ======
-
++
 This way, the name of the import matches the name of the module and the component. This will make your code more readable and maintainable.
 
 == Handling naming collisions
@@ -155,7 +154,7 @@ Sometimes, despite following the naming conventions, you might encounter naming 
 Webpack provides some options to handle naming collisions and resolve them in a way that suits your needs. Here are some of them:
 
 - Use aliases to rename modules or exports when importing them. Aliases are alternative names that you can assign to modules or exports when importing them. This can help you avoid conflicts and confusion when dealing with modules or exports that have the same or similar names. For example, suppose you want to import two modules that both expose a `utils` module. You can use aliases to rename one of them when importing it, like this:
-
++
 [tabs]
 ======
 Approach 1::
@@ -174,11 +173,11 @@ import { utils as myUtils } from "my-app/utils"; // Import utils from my-app and
 import { utils as otherUtils } from "other-app/utils"; // Import utils from other-app and rename it as otherUtils
 -----
 ======
-
++
 This way, you can avoid naming collisions and use both modules without confusion.
-
++
 - Use scopes to group modules or exports under a common namespace. Scopes are prefixes that you can add to your module or export names to create a hierarchy or a category for them. This can help you organize your modules or exports and avoid conflicts with other sources that use the same or similar names. For example, suppose you want to expose some modules under a scope called `my-app`. You can add the scope to your module names when exposing them, like this:
-
++
 [source, javascript]
 -----
 module.exports = {
@@ -194,7 +193,7 @@ module.exports = {
   ],
 };
 -----
-
++
 Then, you can import them with the scope included, like this:
 
 [source, javascript]
@@ -202,11 +201,11 @@ Then, you can import them with the scope included, like this:
 import utils from "my-app/utils"; // Import utils from my-app scope
 import components from "my-app/components"; // Import components from my-app scope
 -----
-
++
 This way, you can avoid naming collisions and use your modules without confusion.
-
++
 - Use remotes to specify where to load modules from. Remotes are references to other bundles or applications that expose modules using Module Federation. You can use remotes to specify where to load modules from when importing them. This can help you avoid conflicts and confusion when dealing with modules that have the same or similar names but come from different sources. For example, suppose you want to import a module called `utils` from another bundle called `other-app`. You can use remotes to specify where to load the module from, like this:
-
++
 [source, javascript]
 -----
 module.exports = {
@@ -222,14 +221,14 @@ module.exports = {
   ],
 };
 -----
-
++
 Then, you can import the module with the remote name included, like this:
-
++
 [source, javascript]
 -----
 import utils from "other-app/utils"; // Import utils from other-app remote
 -----
-
++
 This way, you can avoid naming collisions and use the module without confusion.
 
 == Conclusion

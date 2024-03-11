@@ -1,4 +1,4 @@
-= Getting Started: The Practical Part
+= Module Federation: Getting Started: The Practical Part
 
 == Introduction
 
@@ -171,7 +171,7 @@ Now that we have two independent SPAs running, let's go ahead and make each of t
 
 We'll start by adding the `ModuleFederationPlugin` to Application A:
 
-[source, javascript]
+[source,js]
 ----
 // packages/application-a/webpack.config.js
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -229,7 +229,7 @@ This specifies that Application A exposes its `App` component to the world as a 
 
 We will do the same thing for Application B, specifying that it exposes its `App` component as `SayHelloFromB` and whenever we import from `application_a`, those modules should come from Application A at runtime:
 
-[source, javascript]
+[source,js]
 ----
 // packages/application-b/webpack.config.js
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -285,7 +285,7 @@ module.exports = {
 
 The last step before we can start to utilize the exposed components is to specify for the runtime where the Remote Entries for the Containers you wish to consume are located. We do this by adding a script tag to the HTML template of the remotes you wish to consume.
 
-[source, html]
+[source,html]
 ----
 // packages/application-a/public/index.html
 <head>
@@ -294,7 +294,7 @@ The last step before we can start to utilize the exposed components is to specif
 </head>
 ----
 
-[source, html]
+[source,html]
 ----
 // packages/application-b/public/index.html
 <head>
@@ -308,11 +308,11 @@ The remote entry files are tiny mappings for Webpack to resolve the individually
 
 == Consuming Federated Components
 
-Now that our two SPA applications are Container Hosts and Consumers, we can start to consume the shared components. In the Webpack configuration we had specified the names of the containers as `application_a` and `application_b`, so that is where we will import the components from.
+Now that our two SPA applications are Container Hosts and Consumers, we can start to consume the shared components. In the Цebpack config we had specified the names of the containers as `application_a` and `application_b`, so that is where we will import the components from.
 
 Starting with Application A, we can render the `SayHelloFromB` component like so from within the bootstrap file:
 
-[source, jsx]
+[source,jsx]
 ----
 // packages/application-a/src/bootstrap.jsx
 import React from 'react';
@@ -333,7 +333,7 @@ ReactDOM.render(
 
 Application B will look very similar, just importing from `application_a` instead:
 
-[source, jsx]
+[source,jsx]
 ----
 // packages/application-b/src/bootstrap.jsx
 import React from 'react';
@@ -358,7 +358,7 @@ Looking at the network log for Application A you will see that we load two files
 
 //TODO: image
 
-Visiting Application B for the first time, you'll notice we have already cached the remoteEntries for both Application B and Application A.
+Visiting Application B for the first time, you’ll notice we have already cached the remoteEntries for both Application B and Application A.
 
 //TODO: image   
 
