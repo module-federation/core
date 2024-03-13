@@ -11,6 +11,8 @@ const defaultOptions = {
   deleteTypesFolder: true,
   additionalFilesToCompile: [],
   compilerInstance: 'tsc' as const,
+  compileInChildProcess: false,
+  implementation: '',
 } satisfies Partial<RemoteOptions>;
 
 const readTsConfig = ({

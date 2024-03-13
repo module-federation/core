@@ -33,6 +33,10 @@ describe('hostPlugin', () => {
           typesFolder: '@mf-types',
           deleteTypesFolder: true,
           maxRetries: 3,
+          implementation: '',
+          devServer: {
+            typesReload: true,
+          },
         });
 
         expect(mapRemotesToDownload).toStrictEqual({
@@ -46,6 +50,10 @@ describe('hostPlugin', () => {
           typesFolder: 'custom-types',
           deleteTypesFolder: false,
           maxRetries: 1,
+          implementation: '',
+          devServer: {
+            typesReload: true,
+          },
         };
 
         const { hostOptions, mapRemotesToDownload } =

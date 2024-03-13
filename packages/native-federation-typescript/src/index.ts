@@ -1,51 +1,32 @@
-import ansiColors from 'ansi-colors';
-import { rm } from 'fs/promises';
 import { resolve } from 'path';
 import { mergeDeepRight } from 'rambda';
-import { UnpluginOptions, createUnplugin } from 'unplugin';
-
-import { retrieveHostConfig } from './configurations/hostPlugin';
-import { retrieveRemoteConfig } from './configurations/remotePlugin';
-import { HostOptions } from './interfaces/HostOptions';
-import { RemoteOptions } from './interfaces/RemoteOptions';
-import { createTypesArchive, downloadTypesArchive } from './lib/archiveHandler';
+import { createUnplugin } from 'unplugin';
 import {
-  compileTs,
-  retrieveMfTypesPath,
+  RemoteOptions,
+  HostOptions,
+  retrieveRemoteConfig,
+  getDTSManagerConstructor,
   retrieveOriginalOutDir,
-} from './lib/typeScriptCompiler';
+} from '@module-federation/dts-kit';
 
 export const NativeFederationTypeScriptRemote = createUnplugin(
   (options: RemoteOptions) => {
-    const { remoteOptions, tsConfig, mapComponentsToExpose } =
-      retrieveRemoteConfig(options);
+    const DTSManagerConstructor = getDTSManagerConstructor(
+      options.implementation,
+    );
+    const dtsManager = new DTSManagerConstructor({ remote: options });
+    const { remoteOptions, tsConfig } = retrieveRemoteConfig(options);
     return {
       name: 'native-federation-typescript/remote',
       async writeBundle() {
-        try {
-          compileTs(mapComponentsToExpose, tsConfig, remoteOptions);
-
-          await createTypesArchive(tsConfig, remoteOptions);
-
-          if (remoteOptions.deleteTypesFolder) {
-            await rm(retrieveMfTypesPath(tsConfig, remoteOptions), {
-              recursive: true,
-              force: true,
-            });
-          }
-          console.log(ansiColors.green('Federated types created correctly'));
-        } catch (error) {
-          console.error(
-            ansiColors.red(`Unable to compile federated types, ${error}`),
-          );
-        }
+        await dtsManager.generateTypes();
       },
       get vite() {
         return process.env.NODE_ENV === 'production'
           ? undefined
           : {
-              buildStart: (this as UnpluginOptions).writeBundle,
-              watchChange: (this as UnpluginOptions).writeBundle,
+              buildStart: dtsManager.generateTypes,
+              watchChange: dtsManager.generateTypes,
             };
       },
       webpack: (compiler) => {
@@ -78,34 +59,21 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
 
 export const NativeFederationTypeScriptHost = createUnplugin(
   (options: HostOptions) => {
-    const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(options);
+    const DTSManagerConstructor = getDTSManagerConstructor(
+      options.implementation,
+    );
+    const dtsManager = new DTSManagerConstructor({ host: options });
     return {
       name: 'native-federation-typescript/host',
       async writeBundle() {
-        if (hostOptions.deleteTypesFolder) {
-          await rm(hostOptions.typesFolder, {
-            recursive: true,
-            force: true,
-          }).catch((error) =>
-            console.error(
-              ansiColors.red(`Unable to remove types folder, ${error}`),
-            ),
-          );
-        }
-
-        const typesDownloader = downloadTypesArchive(hostOptions);
-        const downloadPromises =
-          Object.entries(mapRemotesToDownload).map(typesDownloader);
-
-        await Promise.allSettled(downloadPromises);
-        console.log(ansiColors.green('Federated types extraction completed'));
+        await dtsManager.consumeTypes();
       },
       get vite() {
         return process.env.NODE_ENV === 'production'
           ? undefined
           : {
-              buildStart: (this as UnpluginOptions).writeBundle,
-              watchChange: (this as UnpluginOptions).writeBundle,
+              buildStart: dtsManager.consumeTypes,
+              watchChange: dtsManager.consumeTypes,
             };
       },
     };

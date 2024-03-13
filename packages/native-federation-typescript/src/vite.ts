@@ -1,9 +1,10 @@
+import { RemoteOptions, HostOptions } from '@module-federation/dts-kit';
+
 import {
   NativeFederationTypeScriptHost as GeneralHost,
   NativeFederationTypeScriptRemote as GeneralRemote,
 } from '.';
-import { HostOptions } from './interfaces/HostOptions';
-import { RemoteOptions } from './interfaces/RemoteOptions';
+
 export const NativeFederationTypeScriptRemote = GeneralRemote.vite as (
   options: RemoteOptions,
 ) => any;

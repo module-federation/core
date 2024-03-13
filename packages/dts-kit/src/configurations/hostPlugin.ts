@@ -4,6 +4,10 @@ const defaultOptions = {
   typesFolder: '@mf-types',
   deleteTypesFolder: true,
   maxRetries: 3,
+  implementation: '',
+  devServer: {
+    typesReload: true,
+  },
 } satisfies Partial<HostOptions>;
 
 const retrieveRemoteStringUrl = (remote: string) => {

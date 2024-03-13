@@ -52,6 +52,10 @@ describe('archiveHandler', () => {
       typesFolder: tmpDir,
       deleteTypesFolder: true,
       maxRetries: 3,
+      implementation: '',
+      devServer: {
+        typesReload: true,
+      },
     };
 
     const destinationFolder = 'typesHostFolder';

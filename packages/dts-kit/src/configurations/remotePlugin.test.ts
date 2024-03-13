@@ -63,6 +63,8 @@ describe('hostPlugin', () => {
           deleteTypesFolder: true,
           moduleFederationConfig,
           compilerInstance: 'tsc',
+          compileInChildProcess: false,
+          implementation: '',
         });
       });
 
@@ -107,6 +109,8 @@ describe('hostPlugin', () => {
           deleteTypesFolder: false,
           moduleFederationConfig,
           compilerInstance: 'vue-tsc',
+          compileInChildProcess: false,
+          implementation: '',
         });
       });
     });

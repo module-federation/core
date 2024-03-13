@@ -3,4 +3,8 @@ export interface HostOptions {
   typesFolder?: string;
   deleteTypesFolder?: boolean;
   maxRetries?: number;
+  devServer?: {
+    typesReload?: boolean;
+  };
+  implementation?: string;
 }

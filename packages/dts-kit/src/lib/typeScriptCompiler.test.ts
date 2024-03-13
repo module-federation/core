@@ -26,6 +26,8 @@ describe('typeScriptCompiler', () => {
     tsConfigPath: './tsconfig.json',
     deleteTypesFolder: false,
     compilerInstance: 'tsc',
+    compileInChildProcess: false,
+    implementation: '',
   };
 
   it('retrieveMfTypesPath correctly calculate path', () => {
