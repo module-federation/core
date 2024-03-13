@@ -2,31 +2,29 @@ import { resolve } from 'path';
 import { mergeDeepRight } from 'rambda';
 import { createUnplugin } from 'unplugin';
 import {
+  consumeTypes,
+  generateTypes,
   RemoteOptions,
   HostOptions,
   retrieveRemoteConfig,
-  getDTSManagerConstructor,
   retrieveOriginalOutDir,
+  retrieveHostConfig,
 } from '@module-federation/dts-kit';
 
 export const NativeFederationTypeScriptRemote = createUnplugin(
   (options: RemoteOptions) => {
-    const DTSManagerConstructor = getDTSManagerConstructor(
-      options.implementation,
-    );
-    const dtsManager = new DTSManagerConstructor({ remote: options });
     const { remoteOptions, tsConfig } = retrieveRemoteConfig(options);
     return {
       name: 'native-federation-typescript/remote',
       async writeBundle() {
-        await dtsManager.generateTypes();
+        await generateTypes({ remote: options });
       },
       get vite() {
         return process.env.NODE_ENV === 'production'
           ? undefined
           : {
-              buildStart: dtsManager.generateTypes,
-              watchChange: dtsManager.generateTypes,
+              buildStart: () => generateTypes({ remote: options }),
+              watchChange: () => generateTypes({ remote: options }),
             };
       },
       webpack: (compiler) => {
@@ -59,21 +57,19 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
 
 export const NativeFederationTypeScriptHost = createUnplugin(
   (options: HostOptions) => {
-    const DTSManagerConstructor = getDTSManagerConstructor(
-      options.implementation,
-    );
-    const dtsManager = new DTSManagerConstructor({ host: options });
+    retrieveHostConfig(options);
+
     return {
       name: 'native-federation-typescript/host',
       async writeBundle() {
-        await dtsManager.consumeTypes();
+        await consumeTypes({ host: options });
       },
       get vite() {
         return process.env.NODE_ENV === 'production'
           ? undefined
           : {
-              buildStart: dtsManager.consumeTypes,
-              watchChange: dtsManager.consumeTypes,
+              buildStart: () => consumeTypes({ host: options }),
+              watchChange: () => consumeTypes({ host: options }),
             };
       },
     };

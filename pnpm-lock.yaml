@@ -1158,6 +1158,9 @@ importers:
 
   packages/dts-kit:
     dependencies:
+      '@module-federation/dev-server':
+        specifier: workspace:*
+        version: link:../dev-server
       adm-zip:
         specifier: ^0.5.10
         version: 0.5.10

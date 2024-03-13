@@ -1,14 +1,12 @@
 import { join } from 'path';
 import { defineConfig } from 'tsup';
 
-const SUPPORTED_BUNDLERS = ['esbuild', 'rollup', 'vite', 'webpack', 'rspack'];
+const ENTRYIES = ['src/index.ts', 'src/forkGenerateTypes.ts'];
 
 export default defineConfig({
   entry: [
     join(__dirname, 'src', 'index.ts'),
-    ...SUPPORTED_BUNDLERS.map((bundler) =>
-      join(__dirname, 'src', `${bundler}.ts`),
-    ),
+    ...ENTRYIES.map((e) => join(__dirname, 'src', `${e}.ts`)),
   ],
   dts: true,
   splitting: true,

@@ -3,6 +3,7 @@ import { dirname, join, resolve } from 'path';
 import typescript from 'typescript';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
+import { validateOptions } from '../lib/utils';
 
 const defaultOptions = {
   tsConfigPath: './tsconfig.json',
@@ -75,9 +76,7 @@ const resolveExposes = (remoteOptions: RemoteOptions) => {
 };
 
 export const retrieveRemoteConfig = (options: RemoteOptions) => {
-  if (!options.moduleFederationConfig) {
-    throw new Error('moduleFederationConfig is required');
-  }
+  validateOptions(options);
 
   const remoteOptions: Required<RemoteOptions> = {
     ...defaultOptions,

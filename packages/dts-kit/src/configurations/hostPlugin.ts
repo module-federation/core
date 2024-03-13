@@ -1,4 +1,5 @@
 import { HostOptions } from '../interfaces/HostOptions';
+import { validateOptions } from '../lib/utils';
 
 const defaultOptions = {
   typesFolder: '@mf-types',
@@ -41,9 +42,7 @@ const resolveRemotes = (hostOptions: Required<HostOptions>) => {
 };
 
 export const retrieveHostConfig = (options: HostOptions) => {
-  if (!options.moduleFederationConfig) {
-    throw new Error('moduleFederationConfig is required');
-  }
+  validateOptions(options);
 
   const hostOptions: Required<HostOptions> = { ...defaultOptions, ...options };
   const mapRemotesToDownload = resolveRemotes(hostOptions);
