@@ -28,6 +28,7 @@ import {
   __ENABLE_FAST_REFRESH__,
   MODULE_DEVTOOL_IDENTIFIER,
   BROWSER_ENV_KEY,
+  __FEDERATION_DEVTOOLS__,
 } from '../../template/constant';
 
 interface FormItemType {
@@ -72,7 +73,12 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
         if (!filterFormData.length) {
           await removeStorage(activeTab, MODULE_DEVTOOL_IDENTIFIER);
           await removeStorage(activeTab, BROWSER_ENV_KEY);
-          await removeStorageKey(activeTab, 'overrides');
+          // eslint-disable-next-line prettier/prettier
+          await removeStorageKey(
+            activeTab,
+            __FEDERATION_DEVTOOLS__,
+            'overrides',
+          );
           await injectScript(reloadPage, activeTab, false);
           setCondition(statusInfo.noProxy);
           setSnapshot(window.__FEDERATION__.originModuleInfo);
@@ -83,7 +89,13 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
         const snapshotJson = JSON.stringify(moduleInfo);
         await setStorage(activeTab, MODULE_DEVTOOL_IDENTIFIER, snapshotJson);
         await setStorage(activeTab, BROWSER_ENV_KEY);
-        await mergeStorage(activeTab, 'overrides', overrides);
+        // eslint-disable-next-line prettier/prettier
+        await mergeStorage(
+          activeTab,
+          __FEDERATION_DEVTOOLS__,
+          'overrides',
+          overrides,
+        );
         await injectScript(reloadPage, activeTab, false);
         window.__FEDERATION__.moduleInfo = moduleInfo;
         setSnapshot(moduleInfo);
@@ -165,9 +177,18 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
       [ENABLEHMR]: on,
     });
     if (on) {
-      mergeStorage(activeTab, __ENABLE_FAST_REFRESH__, on);
+      mergeStorage(
+        activeTab,
+        __FEDERATION_DEVTOOLS__,
+        __ENABLE_FAST_REFRESH__,
+        on,
+      );
     } else {
-      removeStorageKey(activeTab, __ENABLE_FAST_REFRESH__);
+      removeStorageKey(
+        activeTab,
+        __FEDERATION_DEVTOOLS__,
+        __ENABLE_FAST_REFRESH__,
+      );
     }
     injectScript(reloadPage, activeTab, false);
   };

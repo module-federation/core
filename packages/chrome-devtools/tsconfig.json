@@ -16,7 +16,8 @@
     "config",
     "modern.config.ts",
     "playwright.config.ts",
-    "__tests__"
+    "__tests__",
+    "e2e"
   ],
   "exclude": ["**/node_modules"]
 }

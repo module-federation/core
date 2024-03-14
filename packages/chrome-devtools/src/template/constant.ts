@@ -56,4 +56,4 @@ export const MODULE_DEVTOOL_IDENTIFIER = 'garfishModuleDebug';
 
 export const BROWSER_ENV_KEY = 'VMOK_ENV';
 
-export const __VMOK_DEVTOOLS__ = '__VMOK_DEVTOOLS__';
+export const __FEDERATION_DEVTOOLS__ = '__VMOK_DEVTOOLS__';

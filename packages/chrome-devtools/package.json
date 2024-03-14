@@ -5,8 +5,10 @@
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
     "build": "modern build && node postpack.js",
-    "test": "E2ETEST=true pnpm build && playwright test",
-    "test:ui": "E2ETEST=true pnpm build && playwright test --ui",
+    "build:debug": "DEBUG=true modern build && node postpack.js",
+    "test": "vitest run",
+    "test:e2e": "E2ETEST=true pnpm build && playwright test",
+    "test:e2e:ui": "E2ETEST=true pnpm build && playwright test --ui",
     "start": "modern start",
     "serve": "modern serve",
     "new": "modern new",
@@ -52,6 +54,7 @@
     "lint-staged": "~13.1.0",
     "prettier": "~2.8.1",
     "rimraf": "~3.0.2",
-    "typescript": "~5.0.4"
+    "typescript": "~5.0.4",
+    "vitest": "1.2.2"
   }
 }

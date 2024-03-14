@@ -30,7 +30,7 @@ if (process.env.NODE_ENV === 'development') {
 (async () => {
   const queryParams = {
     active: true,
-    currentWindow: true,
+    currentWindow: !process.env.DEBUG,
   };
   const activeTab = (await getTabs(queryParams))[0];
   window.targetTab = activeTab;

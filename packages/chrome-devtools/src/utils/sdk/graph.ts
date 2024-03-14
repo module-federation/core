@@ -25,6 +25,13 @@ export interface EdgeType {
   type: Edge;
 }
 
+const validateSemver = (schema: string) => {
+  // https://regex101.com/r/vkijKf/1
+  const reg =
+    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/gm;
+  return reg.test(schema);
+};
+
 const splitModuleId = (target: string) => {
   const array = target.split(':');
   const { length } = array;
@@ -44,7 +51,7 @@ const splitModuleId = (target: string) => {
     if (
       nameOrVersion === '*' ||
       nameOrVersion === 'latest' ||
-      !isNaN(Number(nameOrVersion))
+      validateSemver(nameOrVersion)
     ) {
       return array[0];
     } else {

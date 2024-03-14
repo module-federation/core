@@ -66,3 +66,5 @@ export const getModuleInfo = async (
     overrides,
   };
 };
+
+export * from './snapshot';

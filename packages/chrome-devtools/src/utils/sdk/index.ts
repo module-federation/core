@@ -9,19 +9,19 @@ export const removeLocalStorage = (key: string) => {
   }
 };
 
-export const mergeLocalStorage = (key: string, value: any) => {
-  const str = localStorage.getItem('__VMOK_DEVTOOLS__');
+export const mergeLocalStorage = (target: string, key: string, value: any) => {
+  const str = localStorage.getItem(target);
   const obj = JSON.parse(str || '{}');
   obj[key] = value;
-  localStorage.setItem('__VMOK_DEVTOOLS__', JSON.stringify(obj));
+  localStorage.setItem(target, JSON.stringify(obj));
 };
 
-export const removeLocalStorageKey = (key: string) => {
-  const str = localStorage.getItem('__VMOK_DEVTOOLS__');
+export const removeLocalStorageKey = (target: string, key: string) => {
+  const str = localStorage.getItem(target);
   if (str) {
     const obj = JSON.parse(str || '{}');
     delete obj[key];
-    localStorage.setItem('__VMOK_DEVTOOLS__', JSON.stringify(obj));
+    localStorage.setItem(target, JSON.stringify(obj));
   }
 };
 

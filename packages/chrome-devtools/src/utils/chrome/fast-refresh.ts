@@ -3,7 +3,7 @@ import { loadScript } from '@module-federation/sdk';
 
 import { isObject, getUnpkgUrl } from '../index';
 import { definePropertyGlobalVal } from '../sdk';
-import { __VMOK_DEVTOOLS__ } from '../../template';
+import { __FEDERATION_DEVTOOLS__ } from '../../template';
 
 const fastRefreshPlugin = (): FederationRuntimePlugin => {
   return {
@@ -13,7 +13,7 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
       let enableFastRefresh: boolean;
       let devtoolsMessage;
 
-      const devtoolsMessageStr = localStorage.getItem(__VMOK_DEVTOOLS__);
+      const devtoolsMessageStr = localStorage.getItem(__FEDERATION_DEVTOOLS__);
       if (devtoolsMessageStr) {
         try {
           devtoolsMessage = JSON.parse(devtoolsMessageStr);
