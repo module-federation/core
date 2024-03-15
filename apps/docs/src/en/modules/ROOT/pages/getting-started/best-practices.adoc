@@ -1,0 +1,79 @@
+= Best Practices and Tips
+
+Module Federation is a powerful tool for sharing modules between multiple applications, but designing your application to take advantage of this feature requires careful planning and consideration. In this guide, we'll explore some best practices and tips for designing your application to more easily use Module Federation.
+
+== Modular Application Architecture
+
+One of the most important considerations when designing an application for Module Federation is the architecture of the application itself. Applications that are designed with a modular architecture are better suited for sharing modules using Module Federation.
+
+A modular architecture involves breaking down an application into smaller, more manageable modules. Each module should have a well-defined set of responsibilities and should be designed to be as self-contained as possible. By designing an application in this way, modules can be more easily shared between different applications using Module Federation.
+
+== Versioning and Compatibility
+
+When sharing modules between different applications, it is important to ensure that those modules are compatible with each other. This requires careful versioning and compatibility testing to ensure that changes to one module do not break other applications that rely on it.
+
+To ensure compatibility between shared modules, it is important to establish a clear xref:core-features/versioned-shared-modules.adoc[versioning strategy]. This strategy should define how versions are numbered, how backward compatibility is maintained, and how changes to modules are communicated to other applications that rely on them.
+
+To learn more about the versioning of modules, proceed to the dedicated xref:core-features/versioned-shared-modules.adoc[Versioned Shared Modules] documentation page.
+
+== Code Organization and Structure
+
+To more easily use Module Federation, it is important to structure your code in a way that is well-suited to sharing modules. This involves organizing your code into modules and packages that can be more easily shared between different applications.
+
+In addition to organizing code into modules and packages, it is important to establish clear boundaries between different modules. This can be achieved through the use of well-defined interfaces and APIs, which allow different modules to communicate with each other in a standardized way.
+
+== Dependency Management
+
+Effective dependency management is critical for designing an application that is well-suited for Module Federation. This involves carefully managing dependencies between modules to ensure that they can be easily shared between different applications.
+
+To more easily manage dependencies between modules, it is important to establish a clear dependency hierarchy. This hierarchy should define the relationships between different modules and should be designed to minimize dependencies between modules wherever possible.
+
+== Communication Protocols
+
+When sharing modules between different applications, it is important to establish clear communication protocols. This involves defining how different modules communicate with each other, and how data is passed between different applications.
+
+To establish clear communication protocols, it is important to standardize interfaces and APIs. This allows different modules to communicate with each consistently and predictably, which can help to reduce errors and improve maintainability.
+
+== Testability
+
+To more easily use Module Federation, it is important to design your application with testability in mind. This involves designing modules and packages that can be easily tested in isolation, as well as designing tests that can be easily run against shared modules.
+
+By designing modules and packages that are easily testable, developers can more easily ensure that changes to those modules do not break other applications that rely on them. This can help to reduce the risk of errors and improve the overall quality of the application.
+
+To learn more about the testing of modules, proceed to the dedicated xref:recipes/unit-testing.adoc[How to Create Unit Tests for Distributed Code] documentation page.
+
+== Security
+
+When sharing modules between different applications, it is important to consider security implications. This involves designing modules and packages that are secure by default, as well as implementing security measures to protect shared modules from unauthorized access or modification.
+
+To ensure the security of shared modules, it is important to establish clear access control policies. This involves defining who has access to shared modules, as well as implementing authentication and authorization mechanisms to control access to those modules.
+
+== Monitoring and Metrics
+
+To more easily use Module Federation, it is important to design your application with monitoring and metrics in mind. This involves designing modules and packages that can be easily monitored, as well as designing monitoring tools that can be used to track the performance of shared modules.
+
+By designing modules and packages that are easily monitorable, developers can more easily identify performance issues and other problems that may affect the overall quality of the application. This can help to improve the overall reliability and performance of the application.
+
+To get more visibility of your federated modules, we suggest using https://www.medusa.codes/[Medusa]. Medusa provides visibility of tracking how every new feature update influences the performance, compares current, historical, and upcoming versions, discover insights, and take data-driven decisions.
+
+== Performance
+
+To more easily use Module Federation, it is important to design your application with performance in mind. This involves designing modules and packages that are optimized for performance, as well as designing tools that can be used to monitor and optimize the performance of shared modules.
+
+By designing modules and packages that are optimized for performance, developers can ensure that shared modules do not negatively impact the performance of the overall application. This can help to improve the user experience and ensure that the application can scale to meet increasing demand.
+
+== Error Handling
+
+When sharing modules between different applications, it is important to consider error handling. This involves designing modules and packages that are robust and resilient to errors, as well as designing error-handling mechanisms to handle errors that occur in shared modules.
+
+To ensure that errors are handled effectively, it is important to establish clear error-handling guidelines. This involves defining how errors should be logged and reported, as well as defining how errors should be handled in different contexts.
+
+== Documentation
+
+To more easily use Module Federation, it is important to document shared modules and their APIs. This involves designing clear and comprehensive documentation for shared modules, as well as ensuring that the documentation is kept up-to-date as shared modules evolve over time.
+
+By designing clear and comprehensive documentation for shared modules, developers can more easily understand how different modules communicate with each other, and how data is passed between different applications. This can help to reduce errors and improve maintainability.
+
+== Conclusion
+
+Designing an application to more easily use Module Federation requires careful planning and consideration. By adopting a modular architecture, establishing clear versioning and compatibility strategies, organizing code effectively, and managing dependencies, developers can create applications that are well-suited for sharing modules between different applications using Module Federation. By following these best practices and tips, developers can take full advantage of the power and flexibility of Module Federation to create more modular and flexible web applications.
