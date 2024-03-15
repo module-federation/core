@@ -4,6 +4,6 @@
  * Run `yarn special-lint-fix` to update
  */
 declare const check: (
-  options: import('../../../declarations/plugins/container/ModuleFederationPlugin').ModuleFederationPluginOptions,
+  options: import('@module-federation/sdk').moduleFederationPlugin.ModuleFederationPluginOptions,
 ) => boolean;
 export = check;

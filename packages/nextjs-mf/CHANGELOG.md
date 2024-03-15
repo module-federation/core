@@ -1,5 +1,32 @@
 # [8.1.0-canary.7](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.2.3
+
+### Patch Changes
+
+- @module-federation/enhanced@0.0.16
+- @module-federation/node@2.0.14
+- @module-federation/runtime@0.0.16
+- @module-federation/sdk@0.0.16
+
+## 8.2.2
+
+### Patch Changes
+
+- 49867bb: Fix issue with function proxy not returning static methods
+
+## 8.2.1
+
+### Patch Changes
+
+- Updated dependencies [3a45d99]
+- Updated dependencies [ba5bedd]
+- Updated dependencies [6e9b6d5]
+  - @module-federation/sdk@0.0.15
+  - @module-federation/enhanced@0.0.15
+  - @module-federation/runtime@0.0.15
+  - @module-federation/node@2.0.13
+
 ## 8.2.0
 
 ### Minor Changes

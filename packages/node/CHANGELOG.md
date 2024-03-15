@@ -1,5 +1,24 @@
 # [2.1.0-canary.6](https://github.com/module-federation/universe/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.0.14
+
+### Patch Changes
+
+- @module-federation/enhanced@0.0.16
+- @module-federation/runtime@0.0.16
+- @module-federation/sdk@0.0.16
+
+## 2.0.13
+
+### Patch Changes
+
+- Updated dependencies [3a45d99]
+- Updated dependencies [ba5bedd]
+- Updated dependencies [6e9b6d5]
+  - @module-federation/sdk@0.0.15
+  - @module-federation/enhanced@0.0.15
+  - @module-federation/runtime@0.0.15
+
 ## 2.0.12
 
 ### Patch Changes
