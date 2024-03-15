@@ -25,7 +25,7 @@
     "@module-federation/managers": "workspace:*"
   },
   "devDependencies": {
-    "@rspack/core": "0.5.0"
+    "@rspack/core": "0.5.7"
   },
   "exports": {
     ".": {
