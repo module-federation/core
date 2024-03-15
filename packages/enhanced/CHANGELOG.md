@@ -1,5 +1,45 @@
 # [0.2.0-canary.5](https://github.com/module-federation/universe/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.0.17
+
+### Patch Changes
+
+- @module-federation/runtime-tools@0.0.17
+- @module-federation/sdk@0.0.17
+- @module-federation/managers@0.0.17
+- @module-federation/manifest@0.0.17
+
+## 0.0.16
+
+### Patch Changes
+
+- Updated dependencies [ccafac3]
+  - @module-federation/manifest@0.0.16
+  - @module-federation/sdk@0.0.16
+  - @module-federation/runtime-tools@0.0.16
+  - @module-federation/managers@0.0.16
+
+## 0.0.15
+
+### Patch Changes
+
+- ba5bedd: feat: support manifest
+- Updated dependencies [3a45d99]
+- Updated dependencies [ba5bedd]
+  - @module-federation/sdk@0.0.15
+  - @module-federation/managers@0.0.15
+  - @module-federation/manifest@0.0.15
+  - @module-federation/runtime-tools@0.0.15
+
+## 0.0.14
+
+### Patch Changes
+
+- Updated dependencies [cd8c7bf]
+- Updated dependencies [5576c6b]
+  - @module-federation/sdk@0.0.14
+  - @module-federation/runtime-tools@0.0.14
+
 ## 0.0.13
 
 ### Patch Changes

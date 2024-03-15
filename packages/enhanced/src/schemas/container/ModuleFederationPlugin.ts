@@ -513,6 +513,21 @@ export default {
         'If `output.libraryTarget` is set to umd and `output.library` is set, setting this to true will name the AMD module.',
       type: 'boolean',
     },
+    Manifest: {
+      description: 'Used to config manifest.',
+      type: 'object',
+      properties: {
+        filePath: {
+          description: 'The file path of the vmok manifest.',
+          type: 'string',
+        },
+        disableAssetsAnalyze: {
+          description:
+            'Used to disable assets analyze in dev. If the value is set to true, manifest will neither have shared and exposes fields nor have remotes detail. Generally, it will be set to true in dev if the project is a pure consumer.',
+          type: 'boolean',
+        },
+      },
+    },
   },
   title: 'ModuleFederationPluginOptions',
   type: 'object',
@@ -560,6 +575,17 @@ export default {
         type: 'string',
         minLength: 1,
       },
+    },
+    manifest: {
+      description: 'Used to config manifest.',
+      anyOf: [
+        {
+          $ref: '#/definitions/Manifest',
+        },
+        {
+          type: 'boolean',
+        },
+      ],
     },
     shareScope: {
       description:

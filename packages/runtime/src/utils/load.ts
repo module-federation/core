@@ -20,9 +20,9 @@ export async function loadEsmEntry({
       if (!remoteEntryExports) {
         // eslint-disable-next-line no-eval
         new Function(
-          'resolve',
-          `import("${entry}").then((res)=>{resolve(res);}, (error)=> reject(error))`,
-        )(resolve);
+          'callbacks',
+          `import("${entry}").then(callbacks[0]).catch(callbacks[1])`,
+        )([resolve, reject]);
       } else {
         resolve(remoteEntryExports);
       }
@@ -104,6 +104,11 @@ export async function loadEntryScript({
     });
 }
 
+export function getRemoteEntryUniqueKey(remoteInfo: RemoteInfo): string {
+  const { entry, name } = remoteInfo;
+  return composeKeyWithSeparator(name, entry);
+}
+
 export async function getRemoteEntry({
   remoteEntryExports,
   remoteInfo,
@@ -114,7 +119,7 @@ export async function getRemoteEntry({
   createScriptHook?: (url: string) => HTMLScriptElement | void;
 }): Promise<RemoteEntryExports | void> {
   const { entry, name, type, entryGlobalName } = remoteInfo;
-  const uniqueKey = composeKeyWithSeparator(name, entry);
+  const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
   if (remoteEntryExports) {
     return remoteEntryExports;
   }

@@ -177,6 +177,29 @@ module.exports = {
 <br>
 </details>
 
+<details>
+<summary>Rolldown</summary><br>
+
+```ts
+// rolldown.config.js
+const { NativeFederationTestsHost, NativeFederationTestsRemote } = require('@module-federation/native-federation-tests/rolldown');
+
+export default {
+  /* ... */
+  plugins: [
+    NativeFederationTestsRemote({
+      /* options */
+    }),
+    NativeFederationTestsHost({
+      /* options */
+    }),
+  ],
+};
+```
+
+<br>
+</details>
+
 ## Examples
 
 To use it in a `host` module, refer to [this example](https://github.com/module-federation/module-federation-examples/tree/master/native-federation-tests-typescript-plugins/host).  

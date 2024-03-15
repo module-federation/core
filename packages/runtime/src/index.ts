@@ -69,5 +69,13 @@ export function preloadRemote(
   return FederationInstance.preloadRemote.apply(FederationInstance, args);
 }
 
+export function registerRemotes(
+  ...args: Parameters<FederationHost['registerRemotes']>
+): ReturnType<FederationHost['registerRemotes']> {
+  assert(FederationInstance, 'Please call init first');
+  // eslint-disable-next-line prefer-spread
+  return FederationInstance.registerRemotes.apply(FederationInstance, args);
+}
+
 // Inject for debug
 setGlobalFederationConstructor(FederationHost);
