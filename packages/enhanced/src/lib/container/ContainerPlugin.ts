@@ -165,14 +165,6 @@ class ContainerPlugin {
       compiler.options.output.enabledLibraryTypes.push(library.type);
     }
 
-    new compiler.webpack.EntryPlugin(
-      compiler.options.context || '',
-      federationRuntimePluginInstance.entryFilePath,
-      {
-        name,
-        runtime,
-      },
-    ).apply(compiler);
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
       const dep = new ContainerEntryDependency(
         name,

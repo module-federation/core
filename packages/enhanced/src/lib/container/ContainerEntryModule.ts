@@ -184,6 +184,11 @@ class ContainerEntryModule extends Module {
         false,
       ) as unknown as Dependency,
     );
+
+    this.addDependency(
+      // @ts-ignore
+      new EntryDependency(this._injectRuntimeEntry),
+    );
     callback();
   }
 
@@ -249,6 +254,15 @@ class ContainerEntryModule extends Module {
       );
     }
 
+    const initRuntimeDep = this.dependencies[1];
+    const initRuntimeModuleGetter = runtimeTemplate.moduleRaw({
+      module: moduleGraph.getModule(initRuntimeDep),
+      chunkGraph,
+      // @ts-expect-error
+      request: initRuntimeDep.userRequest,
+      weak: false,
+      runtimeRequirements,
+    });
     const federationGlobal = getFederationGlobalScope(
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
@@ -290,6 +304,7 @@ class ContainerEntryModule extends Module {
           '})',
         ],
       )};`,
+      `${initRuntimeModuleGetter}`,
       '',
       '// This exports getters to disallow modifications',
       `${RuntimeGlobals.definePropertyGetters}(exports, {`,
