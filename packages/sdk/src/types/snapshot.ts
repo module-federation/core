@@ -26,6 +26,8 @@ export interface BasicProviderModuleInfo extends BasicModuleInfo {
     assets: StatsAssets;
   }>;
   prefetchInterface?: boolean;
+  prefetchEntry?: string;
+  prefetchEntryType?: RemoteEntryType;
 }
 
 interface BasicProviderModuleInfoWithPublicPath
