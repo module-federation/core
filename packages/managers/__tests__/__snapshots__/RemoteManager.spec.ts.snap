@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RemoteManager dtsRemotes 1`] = `
+{
+  "remote-default": "remote3:*",
+  "remote-entry": "remote1:http://localhost:3000/remoteEntry.js",
+  "remote-version": "remote2:1.2.3",
+}
+`;
+
+exports[`RemoteManager statsRemoteWithEmptyUsedIn 1`] = `
+[
+  {
+    "alias": "remote-entry",
+    "consumingFederationContainerName": "@module-federation/remote-managers-test",
+    "entry": "http://localhost:3000/remoteEntry.js",
+    "federationContainerName": "remote1",
+    "moduleName": "remote1",
+    "usedIn": [],
+  },
+  {
+    "alias": "remote-version",
+    "consumingFederationContainerName": "@module-federation/remote-managers-test",
+    "federationContainerName": "remote2",
+    "moduleName": "remote2",
+    "usedIn": [],
+    "version": "1.2.3",
+  },
+  {
+    "alias": "remote-default",
+    "consumingFederationContainerName": "@module-federation/remote-managers-test",
+    "federationContainerName": "remote3",
+    "moduleName": "remote3",
+    "usedIn": [],
+    "version": "*",
+  },
+]
+`;

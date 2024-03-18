@@ -1,14 +1,16 @@
 import type { WebpackPluginInstance, Compiler } from 'webpack';
-import type { ContainerReferencePluginOptions } from '../declarations/plugins/container/ContainerReferencePlugin';
+import type { containerReferencePlugin } from '@module-federation/sdk';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 const PLUGIN_NAME = 'ContainerReferencePlugin';
 
 export default class ContainerReferencePlugin implements WebpackPluginInstance {
-  private _options: ContainerReferencePluginOptions;
+  private _options: containerReferencePlugin.ContainerReferencePluginOptions;
   name: string;
 
-  constructor(options: ContainerReferencePluginOptions) {
+  constructor(
+    options: containerReferencePlugin.ContainerReferencePluginOptions,
+  ) {
     this._options = options;
     this.name = PLUGIN_NAME;
   }

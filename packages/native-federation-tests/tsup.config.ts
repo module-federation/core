@@ -1,7 +1,14 @@
 import { join } from 'path';
 import { defineConfig } from 'tsup';
 
-const SUPPORTED_BUNDLERS = ['esbuild', 'rollup', 'vite', 'webpack', 'rspack'];
+const SUPPORTED_BUNDLERS = [
+  'esbuild',
+  'rollup',
+  'vite',
+  'webpack',
+  'rspack',
+  'rolldown',
+];
 
 export default defineConfig({
   entry: [
