@@ -100,7 +100,7 @@
     "@nx/react": "17.2.8",
     "@nx/rollup": "17.2.8",
     "@nx/storybook": "17.2.8",
-    "@nx/vite": "17.2.8",
+    "@nx/vite": "18.0.4",
     "@nx/web": "17.2.8",
     "@nx/webpack": "17.2.8",
     "@nx/rspack": "17.2.8",
