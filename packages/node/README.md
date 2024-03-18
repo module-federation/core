@@ -152,7 +152,7 @@ revalidate().then((shouldReload) => {
 });
 ```
 
-### Overrideing default http chunk fetch
+### Overriding default http chunk fetch
 
 ```js
 const chunkFetcher = globalThis.webpackChunkLoad || globalThis.fetch || fetchPolyfill;
@@ -165,8 +165,7 @@ chunkFetcher(url)
   });
 ```
 
-if you want to use your own custom fetch, or add fetch headers, either in the entrypoint of webpack or outside
-of webpack scope, like in express server- you can override the default chunk fetcher by setting the globalThis.webpackChunkLoad variable.
+If you want to use your own custom fetch, or add fetch headers, either in the entrypoint of webpack or outside of webpack scope, like in express server you can override the default chunk fetcher by setting the `globalThis.webpackChunkLoad` variable.
 
 ```js
 globalThis.webpackChunkLoad = async (url) => {
