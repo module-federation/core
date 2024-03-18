@@ -146,6 +146,16 @@ export function generateSnapshotFromManifest(
     };
   }
 
+  if (manifest.metaData?.prefetchEntry) {
+    const { path, name, type } = manifest.metaData.prefetchEntry;
+
+    basicRemoteSnapshot = {
+      ...basicRemoteSnapshot,
+      prefetchEntry: simpleJoinRemoteEntry(path, name),
+      prefetchEntryType: type,
+    };
+  }
+
   if ('publicPath' in manifest.metaData) {
     remoteSnapshot = {
       ...basicRemoteSnapshot,

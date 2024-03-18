@@ -19,8 +19,8 @@ export interface BasicStatsMetaData {
   globalName: string;
   buildInfo: StatsBuildInfo;
   remoteEntry: ResourceInfo;
-  prefetchEntry?: ResourceInfo;
   prefetchInterface?: boolean;
+  prefetchEntry?: ResourceInfo;
   types: Omit<ResourceInfo, 'type'>;
   type: string;
   pluginVersion: string;
