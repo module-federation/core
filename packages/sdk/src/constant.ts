@@ -30,3 +30,5 @@ export const MFModuleType = {
   NPM: 'npm',
   APP: 'app',
 };
+
+export const HEADERS_KEY = 'FEDERATION_HEADERS';

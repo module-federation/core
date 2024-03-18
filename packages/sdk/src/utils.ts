@@ -5,6 +5,7 @@ import {
   EncodedNameTransformMap,
   SEPARATOR,
   MANIFEST_EXT,
+  HEADERS_KEY,
 } from './constant';
 import { Logger } from './logger';
 import { getProcessEnv } from './env';
@@ -205,7 +206,19 @@ const warn = (msg: Parameters<typeof console.warn>[0]): void => {
   console.warn(`${LOG_CATEGORY}: ${msg}`);
 };
 
+const getHeaders = (): Record<string, string> => {
+  if (typeof window !== 'undefined') {
+    return JSON.parse(localStorage.getItem(HEADERS_KEY) || '{}');
+  }
+  const headersStr = getProcessEnv()[HEADERS_KEY] || '{}';
+
+  return {
+    ...JSON.parse(headersStr),
+  };
+};
+
 export {
+  getHeaders,
   parseEntry,
   logger,
   decodeName,

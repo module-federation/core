@@ -4,6 +4,7 @@ import {
   ModuleInfo,
   generateSnapshotFromManifest,
   isManifestProvider,
+  getHeaders,
 } from '@module-federation/sdk';
 import { Optional, Options, Remote } from '../../type';
 import { isRemoteInfoWithEntry, error } from '../../utils';
@@ -269,9 +270,12 @@ export class SnapshotHandler {
         return manifestJson;
       }
       try {
-        let res = await this.loaderHook.lifecycle.fetch.emit(manifestUrl, {});
+        const headers = getHeaders();
+        let res = await this.loaderHook.lifecycle.fetch.emit(manifestUrl, {
+          headers,
+        });
         if (!res || !(res instanceof Response)) {
-          res = await fetch(manifestUrl, {});
+          res = await fetch(manifestUrl, { headers });
         }
         manifestJson = (await res.json()) as Manifest;
         assert(
