@@ -14,13 +14,22 @@ export interface StatsBuildInfo {
   buildName: string;
 }
 
+export interface MetaDataTypes {
+  path: string;
+  name: string;
+  apiTypesName: string;
+  apiTypesPath: string;
+  zipName: string;
+  zipPath: string;
+}
+
 export interface BasicStatsMetaData {
   name: string;
   globalName: string;
   buildInfo: StatsBuildInfo;
   remoteEntry: ResourceInfo;
   prefetchEntry?: ResourceInfo;
-  types: Omit<ResourceInfo, 'type'>;
+  types: MetaDataTypes;
   type: string;
   pluginVersion: string;
 }

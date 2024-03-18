@@ -8,11 +8,12 @@ import {
   HostOptions,
   retrieveRemoteConfig,
   retrieveOriginalOutDir,
-  retrieveHostConfig,
+  validateOptions,
 } from '@module-federation/dts-kit';
 
 export const NativeFederationTypeScriptRemote = createUnplugin(
   (options: RemoteOptions) => {
+    validateOptions(options);
     const { remoteOptions, tsConfig } = retrieveRemoteConfig(options);
     return {
       name: 'native-federation-typescript/remote',
@@ -57,7 +58,7 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
 
 export const NativeFederationTypeScriptHost = createUnplugin(
   (options: HostOptions) => {
-    retrieveHostConfig(options);
+    validateOptions(options);
 
     return {
       name: 'native-federation-typescript/host',

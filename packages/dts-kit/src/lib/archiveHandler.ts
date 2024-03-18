@@ -38,7 +38,9 @@ const downloadErrorLogger =
 
 export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
   let retries = 0;
-  return async ([destinationFolder, fileToDownload]: string[]) => {
+  return async ([destinationFolder, fileToDownload]: string[]): Promise<
+    [string, string] | undefined
+  > => {
     const destinationPath = join(hostOptions.typesFolder, destinationFolder);
 
     while (retries++ < hostOptions.maxRetries) {
@@ -49,7 +51,7 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
 
         const zip = new AdmZip(Buffer.from(response.data));
         zip.extractAllTo(destinationPath, true);
-        break;
+        return [destinationFolder, destinationPath];
       } catch (error: any) {
         console.error(
           ansiColors.red(

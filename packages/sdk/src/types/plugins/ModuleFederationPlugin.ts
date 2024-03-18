@@ -170,6 +170,12 @@ export interface ModuleFederationPluginOptions {
   implementation?: string;
 
   manifest?: boolean | PluginManifestOptions;
+
+  dev?: {
+    disableLiveReload?: boolean;
+    disableGenerateTypes?: boolean;
+  };
+  dts?: {};
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.

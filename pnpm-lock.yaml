@@ -1161,6 +1161,9 @@ importers:
       '@module-federation/dev-server':
         specifier: workspace:*
         version: link:../dev-server
+      '@module-federation/sdk':
+        specifier: workspace:*
+        version: link:../sdk
       adm-zip:
         specifier: ^0.5.10
         version: 0.5.10

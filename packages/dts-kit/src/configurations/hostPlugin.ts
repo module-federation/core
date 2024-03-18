@@ -1,4 +1,5 @@
-import { HostOptions } from '../interfaces/HostOptions';
+import { MANIFEST_EXT } from '@module-federation/sdk';
+import { HostOptions, RemoteInfo } from '../interfaces/HostOptions';
 import { validateOptions } from '../lib/utils';
 
 const defaultOptions = {
@@ -11,15 +12,12 @@ const defaultOptions = {
   },
 } satisfies Partial<HostOptions>;
 
-const retrieveRemoteStringUrl = (remote: string) => {
-  const splittedRemote = remote.split('@');
-  return splittedRemote[splittedRemote.length - 1];
-};
+const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {
+  const remoteUrl = new URL(url);
 
-const buildZipUrl = (hostOptions: Required<HostOptions>, remote: string) => {
-  const remoteStringUrl = retrieveRemoteStringUrl(remote);
-  const remoteUrl = new URL(remoteStringUrl);
-
+  if (remoteUrl.href.includes(MANIFEST_EXT)) {
+    return undefined;
+  }
   const pathnameWithoutEntry = remoteUrl.pathname
     .split('/')
     .slice(0, -1)
@@ -29,15 +27,47 @@ const buildZipUrl = (hostOptions: Required<HostOptions>, remote: string) => {
   return remoteUrl.href;
 };
 
+const buildApiTypeUrl = (zipUrl?: string) => {
+  if (!zipUrl) {
+    return undefined;
+  }
+  return zipUrl.replace('.zip', '.d.ts');
+};
+
+const retrieveRemoteInfo = (options: {
+  hostOptions: Required<HostOptions>;
+  remoteAlias: string;
+  remote: string;
+}): RemoteInfo => {
+  const { hostOptions, remoteAlias, remote } = options;
+
+  const splittedRemote = remote.split('@');
+
+  const url = splittedRemote[splittedRemote.length - 1];
+  const zipUrl = buildZipUrl(hostOptions, url);
+
+  return {
+    name: splittedRemote[0] || remoteAlias,
+    url: url,
+    zipUrl,
+    apiTypeUrl: buildApiTypeUrl(zipUrl),
+    alias: remoteAlias,
+  };
+};
+
 const resolveRemotes = (hostOptions: Required<HostOptions>) => {
   return Object.entries(
     hostOptions.moduleFederationConfig.remotes as Record<string, string>,
   ).reduce(
     (accumulator, [key, remote]) => {
-      accumulator[key] = buildZipUrl(hostOptions, remote);
+      accumulator[key] = retrieveRemoteInfo({
+        hostOptions,
+        remoteAlias: key,
+        remote,
+      });
       return accumulator;
     },
-    {} as Record<string, string>,
+    {} as Record<string, RemoteInfo>,
   );
 };
 

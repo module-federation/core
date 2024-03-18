@@ -14,6 +14,7 @@ const defaultOptions = {
   compilerInstance: 'tsc' as const,
   compileInChildProcess: false,
   implementation: '',
+  generateAPITypes: false,
 } satisfies Partial<RemoteOptions>;
 
 const readTsConfig = ({

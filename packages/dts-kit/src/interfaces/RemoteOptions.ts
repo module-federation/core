@@ -1,5 +1,7 @@
+import { moduleFederationPlugin } from '@module-federation/sdk';
+
 export interface RemoteOptions {
-  moduleFederationConfig: any;
+  moduleFederationConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
   tsConfigPath?: string;
   typesFolder?: string;
   compiledTypesFolder?: string;
@@ -8,4 +10,5 @@ export interface RemoteOptions {
   compilerInstance?: 'tsc' | 'vue-tsc';
   compileInChildProcess?: boolean;
   implementation?: string;
+  generateAPITypes?: boolean;
 }

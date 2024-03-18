@@ -1,5 +1,7 @@
+import { moduleFederationPlugin } from '@module-federation/sdk';
+
 export interface HostOptions {
-  moduleFederationConfig: any;
+  moduleFederationConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
   typesFolder?: string;
   deleteTypesFolder?: boolean;
   maxRetries?: number;
@@ -7,4 +9,12 @@ export interface HostOptions {
     typesReload?: boolean;
   };
   implementation?: string;
+}
+
+export interface RemoteInfo {
+  name: string;
+  url: string;
+  alias: string;
+  zipUrl?: string;
+  apiTypeUrl?: string;
 }

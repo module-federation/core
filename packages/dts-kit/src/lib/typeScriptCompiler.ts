@@ -34,6 +34,7 @@ export const retrieveMfTypesPath = (
   tsConfig: typescript.CompilerOptions,
   remoteOptions: Required<RemoteOptions>,
 ) => normalize(tsConfig.outDir!.replace(remoteOptions.compiledTypesFolder, ''));
+
 export const retrieveOriginalOutDir = (
   tsConfig: typescript.CompilerOptions,
   remoteOptions: Required<RemoteOptions>,
@@ -42,6 +43,15 @@ export const retrieveOriginalOutDir = (
     tsConfig
       .outDir!.replace(remoteOptions.compiledTypesFolder, '')
       .replace(remoteOptions.typesFolder, ''),
+  );
+
+export const retrieveMfAPITypesPath = (
+  tsConfig: typescript.CompilerOptions,
+  remoteOptions: Required<RemoteOptions>,
+) =>
+  join(
+    retrieveOriginalOutDir(tsConfig, remoteOptions),
+    `${remoteOptions.typesFolder}.d.ts`,
   );
 
 const createHost = (
