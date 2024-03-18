@@ -1,5 +1,5 @@
 import { existsSync } from 'fs';
-import { dirname, join, resolve } from 'path';
+import { dirname, join, resolve, extname } from 'path';
 import typescript from 'typescript';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
@@ -15,14 +15,16 @@ const defaultOptions = {
   compileInChildProcess: false,
   implementation: '',
   generateAPITypes: false,
+  context: process.cwd(),
 } satisfies Partial<RemoteOptions>;
 
 const readTsConfig = ({
   tsConfigPath,
   typesFolder,
   compiledTypesFolder,
+  context,
 }: Required<RemoteOptions>): typescript.CompilerOptions => {
-  const resolvedTsConfigPath = resolve(tsConfigPath);
+  const resolvedTsConfigPath = resolve(context, tsConfigPath);
 
   const readResult = typescript.readConfigFile(
     resolvedTsConfigPath,
@@ -34,6 +36,7 @@ const readTsConfig = ({
     dirname(resolvedTsConfigPath),
   );
   const outDir = join(
+    context,
     configContent.options.outDir || 'dist',
     typesFolder,
     compiledTypesFolder,
@@ -50,10 +53,15 @@ const readTsConfig = ({
 
 const TS_EXTENSIONS = ['ts', 'tsx', 'vue', 'svelte'];
 
-const resolveWithExtension = (exposedPath: string) => {
-  const cwd = process.cwd();
+const resolveWithExtension = (exposedPath: string, context: string) => {
+  if (extname(exposedPath)) {
+    return join(context, exposedPath);
+  }
   for (const extension of TS_EXTENSIONS) {
-    const exposedPathWithExtension = join(cwd, `${exposedPath}.${extension}`);
+    const exposedPathWithExtension = join(
+      context,
+      `${exposedPath}.${extension}`,
+    );
     if (existsSync(exposedPathWithExtension)) {
       return exposedPathWithExtension;
     }
@@ -61,14 +69,17 @@ const resolveWithExtension = (exposedPath: string) => {
   return undefined;
 };
 
-const resolveExposes = (remoteOptions: RemoteOptions) => {
+const resolveExposes = (remoteOptions: Required<RemoteOptions>) => {
   return Object.entries(
     remoteOptions.moduleFederationConfig.exposes as Record<string, string>,
   ).reduce(
     (accumulator, [exposedEntry, exposedPath]) => {
       accumulator[exposedEntry] =
-        resolveWithExtension(exposedPath) ||
-        resolveWithExtension(join(exposedPath, 'index')) ||
+        resolveWithExtension(exposedPath, remoteOptions.context) ||
+        resolveWithExtension(
+          join(exposedPath, 'index'),
+          remoteOptions.context,
+        ) ||
         exposedPath;
       return accumulator;
     },

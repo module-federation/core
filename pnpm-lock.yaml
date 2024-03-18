@@ -999,9 +999,9 @@ importers:
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../../packages/enhanced
-      '@module-federation/typescript':
+      '@module-federation/native-federation-typescript':
         specifier: workspace:*
-        version: link:../../packages/typescript
+        version: link:../../packages/native-federation-typescript
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.5.11
         version: 0.5.11(react-refresh@0.14.0)(webpack@5.90.3)
@@ -1014,9 +1014,9 @@ importers:
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../../packages/enhanced
-      '@module-federation/typescript':
+      '@module-federation/native-federation-typescript':
         specifier: workspace:*
-        version: link:../../packages/typescript
+        version: link:../../packages/native-federation-typescript
       file-loader:
         specifier: 6.2.0
         version: 6.2.0(webpack@5.90.3)

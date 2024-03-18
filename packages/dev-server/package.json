@@ -15,23 +15,23 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/index.js"
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
     },
     "./launch-web-client": {
-      "import": "./dist/iife/launch-web-client.js",
-      "require": "./dist/iife/launch-web-client.js",
-      "types": "./dist/launch-web-client.d.ts"
+      "import": "./dist/launch-web-client.iife.js",
+      "require": "./dist/launch-web-client.iife.js",
+      "types": "./dist/launch-web-client.iife.d.ts"
     },
     "./*": "./*"
   },
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.d.ts"
+        "./dist/index.cjs.d.ts"
       ],
       "launch-web-client": [
-        "./dist/launch-web-client.d.ts"
+        "./dist/launch-web-client.iife.d.ts"
       ]
     }
   },

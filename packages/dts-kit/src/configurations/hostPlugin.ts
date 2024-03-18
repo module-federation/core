@@ -7,6 +7,7 @@ const defaultOptions = {
   deleteTypesFolder: true,
   maxRetries: 3,
   implementation: '',
+  context: process.cwd(),
   devServer: {
     typesReload: true,
   },

@@ -5,6 +5,7 @@ export interface HostOptions {
   typesFolder?: string;
   deleteTypesFolder?: boolean;
   maxRetries?: number;
+  context?: string;
   devServer?: {
     typesReload?: boolean;
   };

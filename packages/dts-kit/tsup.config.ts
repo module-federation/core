@@ -11,7 +11,6 @@ export default defineConfig({
   dts: true,
   splitting: true,
   clean: true,
-  minify: true,
   format: ['cjs', 'esm'],
   outDir: 'packages/dts-kit/dist',
   external: [join(__dirname, 'package.json')],

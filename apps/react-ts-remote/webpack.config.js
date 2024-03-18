@@ -1,8 +1,9 @@
 const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 
 registerPluginTSTranspiler();
-const { withModuleFederation } = require('@nx/react/module-federation');
-const { FederatedTypesPlugin } = require('@module-federation/typescript');
+const {
+  NativeFederationTypeScriptRemote,
+} = require('@module-federation/native-federation-typescript/webpack');
 const { ModuleFederationPlugin } = require('@module-federation/enhanced');
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
@@ -28,12 +29,14 @@ module.exports = composePlugins(
     }, {});
 
     config.plugins.push(
-      new FederatedTypesPlugin({
-        federationConfig: {
+      NativeFederationTypeScriptRemote({
+        moduleFederationConfig: {
           ...baseConfig,
           filename: 'remoteEntry.js',
           remotes,
         },
+        // FIXME: auto set in webpack plugin
+        context: __dirname,
       }),
     );
 

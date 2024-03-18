@@ -9,7 +9,7 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "swc",
+        "compiler": "babel",
         "outputPath": "apps/react-ts-remote/dist",
         "index": "apps/react-ts-remote/src/index.html",
         "baseHref": "/",

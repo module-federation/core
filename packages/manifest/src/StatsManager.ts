@@ -121,6 +121,10 @@ class StatsManager {
       types: {
         name: '',
         path: '',
+        zipName: '',
+        zipPath: '',
+        apiTypesName: '',
+        apiTypesPath: '',
       },
       globalName: globalName,
       pluginVersion: this._pluginVersion,

@@ -41,7 +41,11 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
   return async ([destinationFolder, fileToDownload]: string[]): Promise<
     [string, string] | undefined
   > => {
-    const destinationPath = join(hostOptions.typesFolder, destinationFolder);
+    const destinationPath = join(
+      hostOptions.context,
+      hostOptions.typesFolder,
+      destinationFolder,
+    );
 
     while (retries++ < hostOptions.maxRetries) {
       try {
