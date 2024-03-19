@@ -7,11 +7,11 @@ const getNavbar = (lang: string) => {
   const getLink = (str: string) => `${prefix}${str}`;
   const getText = (cnText: string, enText: string) => (cn ? cnText : enText);
   return [
-    // {
-    //   text: getText('指南', 'Guide'),
-    //   link: getLink('/guides/get-started/introduction'),
-    //   activeMatch: '/guides/',
-    // },
+    {
+      text: getText('指南', 'Guide'),
+      link: getLink('/guide/start/index'),
+      activeMatch: '/guide/',
+    },
     {
       text: getText('社区', 'Community'),
       link: getLink('/community/showcase'),
@@ -28,27 +28,33 @@ export default defineConfig({
   lang: 'en',
   logo: {
     light: '/module-federation-logo.svg',
-    dark: '/module-federation-logo.svg',
+    dark: '/module-federation-logo-white.svg',
+  },
+  markdown: {
+    checkDeadLinks: true,
   },
   themeConfig: {
     locales: [
-      // {
-      //   lang: 'zh',
-      //   title: 'Modern.js',
-      //   description:
-      //     'A Progressive React Framework for modern web development.',
-      //   nav: getNavbar('zh'),
-      //   label: '简体中文',
-      // },
+      {
+        lang: 'zh',
+        title: 'Module federation',
+        description: '将你的 Web 应用微前端架构化',
+        // nav: getNavbar('zh'),
+        label: '简体中文',
+      },
       {
         lang: 'en',
         title: 'Module federation',
-        description:
-          'A Progressive React Framework for modern web development.',
-        nav: getNavbar('en'),
+        description: "Architecture your web application's micro-front end",
+        // nav: getNavbar('en'),
         label: 'English',
       },
     ],
+    editLink: {
+      docRepoBaseUrl:
+        'https://github.com/module-federation/universe/tree/main/apps/website-new/docs',
+      text: 'Edit this page on GitHub',
+    },
     socialLinks: [
       {
         icon: 'github',

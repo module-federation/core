@@ -15,18 +15,6 @@ function useFooterData() {
           title: t('quickStart'),
           link: getLink('/guide/quick-start'),
         },
-        {
-          title: t('features'),
-          link: getLink('/guide/language-support'),
-        },
-        {
-          title: t('compatibility'),
-          link: getLink('/guide/loader-compat'),
-        },
-        {
-          title: t('migration'),
-          link: getLink('/guide/migrate-from-webpack'),
-        },
       ],
     },
     {
@@ -36,19 +24,19 @@ function useFooterData() {
           title: t('cli'),
           link: getLink('/api/cli'),
         },
-        {
-          title: 'Loader API',
-          link: getLink('/api/loader-api'),
-        },
-        {
-          title: 'Plugin API',
-          link: getLink('/api/plugin-api'),
-        },
       ],
     },
     {
       title: t('friendLink'),
       items: [
+        {
+          title: 'Web Infra',
+          link: 'https://webinfra.org',
+        },
+        {
+          title: 'Rspack',
+          link: 'https://www.rspack.dev/',
+        },
         {
           title: 'Modern.js Framework',
           link: 'https://modernjs.dev/en/',
@@ -56,14 +44,6 @@ function useFooterData() {
         {
           title: 'Rspress',
           link: 'https://rspress.dev/',
-        },
-        {
-          title: 'Rspack',
-          link: 'https://www.rspack.dev/',
-        },
-        {
-          title: 'Web Infra',
-          link: 'https://webinfra.org',
         },
       ],
     },
@@ -74,10 +54,10 @@ function useFooterData() {
           title: 'GitHub',
           link: 'https://github.com/module-federation/universe',
         },
-        {
-          title: 'Discord',
-          link: 'https://discord.gg/ab2Rv4BXwf',
-        },
+        // {
+        //   title: 'Discord',
+        //   link: 'https://discord.gg/ab2Rv4BXwf',
+        // },
       ],
     },
   ];

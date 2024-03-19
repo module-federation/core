@@ -1,0 +1,12 @@
+[
+  {
+    "text": "指南",
+    "link": "/guide/start/",
+    "activeMatch": "/guide/"
+  },
+  {
+    "text": "社区",
+    "link": "/community/showcase/",
+    "activeMatch": "/community/"
+  }
+]

@@ -3,13 +3,14 @@ pageType: home
 
 hero:
   name: Module Federation
-  text: streamline your microfrontends
+  text: Microfront-end Architecture
+  tagline: Divide and conquer your web application
   actions:
     - theme: brand
-      text: Quick Start
+      text: Introduction
       link: /guide/
     - theme: alt
-      text: Github
+      text: Quick Start
       link: https://github.com/web-infra-dev/rspress
   image:
     src: /svg.svg
@@ -22,15 +23,15 @@ features:
     details: Applications can be split into smaller, self-contained modules that can be developed, tested, and deployed independently.
     icon: 📦
   - title: Flexibility
-    details: Module Federation gives developers the freedom to choose and implement the architecture that best suits their needs, promoting a modular and scalable approach to application development.
+    details: Module Federation gives developers the freedom to choose and implement the architecture that best suits their needs.
     icon: 🎯
-  - title: Federated runtime
-    details: The modules can be combined and federated at runtime, allowing for greater collaboration and faster development times.
-    icon: 🛠️
-  - title: Blazing fast build speed
-    details: The core compilation module is based on the Rust front-end toolchain, providing a more ultimate development experience.
+  - title: Rspack
+    details: Both rspack and webpack builds are supported to speed up your application build.
+    icon: 🦀
+  - title: Development experience
+    details: Module federation supports dynamically typed hints and chrome devtool to improve the development experience.
     icon: 🚀
-  - title: Built-in full-text search
-    details: Automatically generates a full-text search index for you during construction, providing out-of-the-box full-text search capabilities.
+  - title: Plugin System
+    details: Hooks allow you to quickly define your own plugins to control the behavior of module loading
     icon: 🎨
 ---
