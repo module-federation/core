@@ -47,6 +47,25 @@
       "import": "./dist/rspack.mjs"
     }
   },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "esbuild": [
+        "./dist/esbuild.d.ts"
+      ],
+      "rollup": [
+        "./dist/rollup.d.ts"
+      ],
+      "vite": [
+        "./dist/vite.d.ts"
+      ],
+      "webpack": [
+        "./dist/webpack.d.ts"
+      ]
+    }
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "author": "Matteo Pietro Dazzi <matteopietro.dazzi@gmail.com> (https://github.com/ilteoood)",

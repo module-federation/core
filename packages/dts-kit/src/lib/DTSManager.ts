@@ -6,7 +6,11 @@ import { UpdateMode, fileLog } from '@module-federation/dev-server';
 import { MANIFEST_EXT, Manifest } from '@module-federation/sdk';
 
 import { retrieveRemoteConfig } from '../configurations/remotePlugin';
-import { createTypesArchive, downloadTypesArchive } from './archiveHandler';
+import {
+  createTypesArchive,
+  downloadTypesArchive,
+  retrieveTypesZipPath,
+} from './archiveHandler';
 import {
   compileTs,
   retrieveMfAPITypesPath,
@@ -87,14 +91,19 @@ class DTSManager {
         }
       }
 
+      const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
+      const mfTypesZipPath = retrieveTypesZipPath(mfTypesPath, remoteOptions);
+
       if (hasRemotes) {
         await this.consumeArchiveTypes({
           moduleFederationConfig: remoteOptions.moduleFederationConfig,
-          typesFolder: path.join(remoteOptions.typesFolder, 'node_modules'),
+          typesFolder: path.join(mfTypesPath, 'node_modules'),
+          remoteTypesFolder: path.join(remoteOptions.typesFolder),
           deleteTypesFolder: true,
           devServer: {
             typesReload: false,
           },
+          context: remoteOptions.context,
           implementation: remoteOptions.implementation,
         });
       }
@@ -103,9 +112,10 @@ class DTSManager {
 
       await createTypesArchive(tsConfig, remoteOptions);
 
+      let apiTypesPath = '';
       if (remoteOptions.generateAPITypes) {
         const apiTypes = this.generateAPITypes(mapComponentsToExpose);
-        const apiTypesPath = retrieveMfAPITypesPath(tsConfig, remoteOptions);
+        apiTypesPath = retrieveMfAPITypesPath(tsConfig, remoteOptions);
         fs.writeFileSync(apiTypesPath, apiTypes);
       }
 
@@ -116,10 +126,19 @@ class DTSManager {
         });
       }
       console.log(ansiColors.green('Federated types created correctly'));
+
+      return {
+        apiTypesPath: apiTypesPath,
+        zipTypesPath: mfTypesZipPath,
+      };
     } catch (error) {
       console.error(
         ansiColors.red(`Unable to compile federated types, ${error}`),
       );
+      return {
+        apiTypesPath: '',
+        zipTypesPath: '',
+      };
     }
   }
 
@@ -189,18 +208,32 @@ class DTSManager {
     if (!apiTypeUrl) {
       return;
     }
-    const res = await axios({
-      method: 'get',
-      url: apiTypeUrl,
-    });
-    const apiTypeFile = res.data as string;
-    apiTypeFile.replaceAll(REMOTE_ALIAS_IDENTIFIER, remoteInfo.alias);
-    const filePath = path.join(destinationPath, REMOTE_API_TYPES_FILE_NAME);
-    fs.writeFileSync(filePath, apiTypeFile);
-    this.loadedRemoteAPIAlias.push(remoteInfo.alias);
+    try {
+      const res = await axios({
+        method: 'get',
+        url: apiTypeUrl,
+      });
+      let apiTypeFile = res.data as string;
+      apiTypeFile = apiTypeFile.replaceAll(
+        REMOTE_ALIAS_IDENTIFIER,
+        remoteInfo.alias,
+      );
+      const filePath = path.join(destinationPath, REMOTE_API_TYPES_FILE_NAME);
+      fs.writeFileSync(filePath, apiTypeFile);
+      this.loadedRemoteAPIAlias.push(remoteInfo.alias);
+    } catch (err) {
+      console.error(
+        ansiColors.red(
+          `Unable to download "${remoteInfo.name}" api types, ${err}`,
+        ),
+      );
+    }
   }
 
   consumeAPITypes(hostOptions: Required<HostOptions>) {
+    if (!this.loadedRemoteAPIAlias.length) {
+      return;
+    }
     const packageTypes: string[] = [];
     const remoteKeys: string[] = [];
 
@@ -235,7 +268,11 @@ class DTSManager {
     `;
 
     fs.writeFileSync(
-      path.join(hostOptions.typesFolder, HOST_API_TYPES_FILE_NAME),
+      path.join(
+        hostOptions.context,
+        hostOptions.typesFolder,
+        HOST_API_TYPES_FILE_NAME,
+      ),
       fileStr,
     );
   }

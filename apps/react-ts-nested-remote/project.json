@@ -1,7 +1,7 @@
 {
-  "name": "react_ts_host",
+  "name": "react_ts_nested_remote",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/react-ts-host/src",
+  "sourceRoot": "apps/react-ts-nested-remote/src",
   "projectType": "application",
   "targets": {
     "build": {
@@ -10,19 +10,19 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "babel",
-        "outputPath": "apps/react-ts-host/dist",
-        "index": "apps/react-ts-host/src/index.html",
+        "outputPath": "apps/react-ts-nested-remote/dist",
+        "index": "apps/react-ts-nested-remote/src/index.html",
         "baseHref": "/",
-        "main": "apps/react-ts-host/src/main.ts",
-        "polyfills": "apps/react-ts-host/src/polyfills.ts",
-        "tsConfig": "apps/react-ts-host/tsconfig.app.json",
+        "main": "apps/react-ts-nested-remote/src/main.ts",
+        "polyfills": "apps/react-ts-nested-remote/src/polyfills.ts",
+        "tsConfig": "apps/react-ts-nested-remote/tsconfig.app.json",
         "assets": [
-          "apps/react-ts-host/src/favicon.ico",
-          "apps/react-ts-host/src/assets"
+          "apps/react-ts-nested-remote/src/favicon.ico",
+          "apps/react-ts-nested-remote/src/assets"
         ],
-        "styles": [],
+        "styles": ["apps/react-ts-nested-remote/src/styles.css"],
         "scripts": [],
-        "webpackConfig": "apps/react-ts-host/webpack.config.js",
+        "webpackConfig": "apps/react-ts-nested-remote/webpack.config.js",
         "babelUpwardRootMode": true
       },
       "configurations": {
@@ -35,8 +35,8 @@
         "production": {
           "fileReplacements": [
             {
-              "replace": "apps/react-ts-host/src/environments/environment.ts",
-              "with": "apps/react-ts-host/src/environments/environment.prod.ts"
+              "replace": "apps/react-ts-nested-remote/src/environments/environment.ts",
+              "with": "apps/react-ts-nested-remote/src/environments/environment.prod.ts"
             }
           ],
           "optimization": true,
@@ -56,19 +56,18 @@
     },
     "serve": {
       "executor": "@nx/webpack:dev-server",
-      "defaultConfiguration": "production",
+      "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "react_ts_host:build",
+        "buildTarget": "react_ts_nested_remote:build",
         "hmr": true,
-        "port": 3003,
-        "devRemotes": ["react_ts_remote"]
+        "port": 3005
       },
       "configurations": {
         "development": {
-          "buildTarget": "react_ts_host:build:development"
+          "buildTarget": "react_ts_nested_remote:build:development"
         },
         "production": {
-          "buildTarget": "react_ts_host:build:production",
+          "buildTarget": "react_ts_nested_remote:build:production",
           "hmr": false
         }
       }
@@ -77,26 +76,25 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/react-ts-host/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": ["apps/react-ts-nested-remote/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "serve-static": {
       "executor": "@nx/web:file-server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "react_ts_host:build",
-        "port": 3003
+        "buildTarget": "react_ts_nested_remote:build",
+        "port": 3005
       },
       "configurations": {
         "development": {
-          "buildTarget": "react_ts_host:build:development"
+          "buildTarget": "react_ts_nested_remote:build:development"
         },
         "production": {
-          "buildTarget": "react_ts_host:build:production"
+          "buildTarget": "react_ts_nested_remote:build:production"
         }
       }
     }
   },
-  "tags": [],
-  "implicitDependencies": ["typescript"]
+  "tags": []
 }

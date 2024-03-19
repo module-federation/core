@@ -1,14 +1,14 @@
 import AdmZip from 'adm-zip';
 import ansiColors from 'ansi-colors';
 import axios from 'axios';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import typescript from 'typescript';
 
 import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { retrieveMfTypesPath } from './typeScriptCompiler';
 
-const retrieveTypesZipPath = (
+export const retrieveTypesZipPath = (
   mfTypesPath: string,
   remoteOptions: Required<RemoteOptions>,
 ) =>
@@ -41,7 +41,7 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
   return async ([destinationFolder, fileToDownload]: string[]): Promise<
     [string, string] | undefined
   > => {
-    const destinationPath = join(
+    const destinationPath = resolve(
       hostOptions.context,
       hostOptions.typesFolder,
       destinationFolder,

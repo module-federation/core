@@ -3,6 +3,7 @@ import { moduleFederationPlugin } from '@module-federation/sdk';
 export interface HostOptions {
   moduleFederationConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
   typesFolder?: string;
+  remoteTypesFolder?: string;
   deleteTypesFolder?: boolean;
   maxRetries?: number;
   context?: string;

@@ -1,14 +1,17 @@
 import * as React from 'react';
 import NxWelcome from './nx-welcome';
 import { Link, Route, Routes } from 'react-router-dom';
+import { loadRemote } from '@module-federation/runtime';
 import useDynamicModule from './useDynamicRemote';
 
-const ReactTsRemote = React.lazy(() => import('react_ts_remote/Module'));
-
+const ReactTsRemote = React.lazy(() => import('react_ts_nested_remote/Module'));
+loadRemote('react_ts_nested_remote/Button').then((Button) => {
+  console.log(Button);
+});
 const DynamicReactTsRemote = React.lazy(() =>
   useDynamicModule({
-    name: 'react_ts_remote',
-    url: 'http://localhost:3004/remoteEntry.js',
+    name: 'react_ts_nested_remote',
+    url: 'http://localhost:3005/remoteEntry.js',
     modulePath: './Module',
   }),
 );
@@ -29,7 +32,10 @@ export function App() {
       </ul>
       <Routes>
         <Route path="/" element={<NxWelcome title="react-ts-host" />} />
-        <Route path="/react-ts-remote" element={<ReactTsRemote />} />
+        <Route
+          path="/react-ts-remote"
+          element={<ReactTsRemote title="xxx" />}
+        />
         <Route
           path="/dynamic-react-ts-remote"
           element={

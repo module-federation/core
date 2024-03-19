@@ -9,13 +9,13 @@ async function generateTypesInChildProcess(
   return dtsWorker.controlledPromise;
 }
 
-async function generateTypes(options: DTSManagerOptions): Promise<void> {
+async function generateTypes(options: DTSManagerOptions) {
   const DTSManagerConstructor = getDTSManagerConstructor(
     options.remote?.implementation,
   );
   const dtsManager = new DTSManagerConstructor(options);
 
-  await dtsManager.generateTypes();
+  return dtsManager.generateTypes();
 }
 
 export { generateTypes, generateTypesInChildProcess };

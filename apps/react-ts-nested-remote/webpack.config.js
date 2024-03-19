@@ -3,6 +3,7 @@ const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 registerPluginTSTranspiler();
 const {
   NativeFederationTypeScriptRemote,
+  NativeFederationTypeScriptHost,
 } = require('@module-federation/native-federation-typescript/webpack');
 const { ModuleFederationPlugin } = require('@module-federation/enhanced');
 const { composePlugins, withNx } = require('@nx/webpack');
@@ -12,11 +13,19 @@ module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
+    // FIXME: auto set in webpack plugin
+    config.watchOptions = {
+      ignored: ['**/node_modules/**', '**/@mf-types/**'],
+    };
     const baseConfig = {
-      name: 'react_ts_remote',
+      name: 'react_ts_nested_remote',
       filename: 'remoteEntry.js',
       exposes: {
         './Module': './src/app/nx-welcome.tsx',
+        './Button': './src/app/Button.tsx',
+      },
+      remotes: {
+        react_ts_remote: 'react_ts_remote@http://localhost:3004/remoteEntry.js',
       },
     };
 
@@ -26,8 +35,18 @@ module.exports = composePlugins(
       NativeFederationTypeScriptRemote({
         moduleFederationConfig: {
           ...baseConfig,
+          filename: 'remoteEntry.js',
         },
         generateAPITypes: true,
+        // FIXME: auto set in webpack plugin
+        context: __dirname,
+      }),
+      NativeFederationTypeScriptHost({
+        moduleFederationConfig: {
+          ...baseConfig,
+          filename: 'remoteEntry.js',
+        },
+        deleteTypesFolder: false,
         // FIXME: auto set in webpack plugin
         context: __dirname,
       }),

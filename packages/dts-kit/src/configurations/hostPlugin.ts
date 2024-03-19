@@ -4,6 +4,7 @@ import { validateOptions } from '../lib/utils';
 
 const defaultOptions = {
   typesFolder: '@mf-types',
+  remoteTypesFolder: '@mf-types',
   deleteTypesFolder: true,
   maxRetries: 3,
   implementation: '',
@@ -23,7 +24,7 @@ const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {
     .split('/')
     .slice(0, -1)
     .join('/');
-  remoteUrl.pathname = `${pathnameWithoutEntry}/${hostOptions.typesFolder}.zip`;
+  remoteUrl.pathname = `${pathnameWithoutEntry}/${hostOptions.remoteTypesFolder}.zip`;
 
   return remoteUrl.href;
 };

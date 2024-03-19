@@ -1,0 +1,11 @@
+{
+  "name": "react-ts-nested-remote",
+  "private": true,
+  "version": "1.0.0",
+  "devDependencies": {
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/native-federation-typescript": "workspace:*",
+    "react-refresh": "0.14.0",
+    "file-loader": "6.2.0"
+  }
+}
