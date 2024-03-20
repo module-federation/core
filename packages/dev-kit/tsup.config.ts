@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { defineConfig } from 'tsup';
 
-const ENTRYIES = ['src/index.ts'];
+const ENTRYIES = ['src/index.ts', 'src/lib/forkDevWorker.ts'];
 
 export default defineConfig({
   entry: [
@@ -12,6 +12,6 @@ export default defineConfig({
   splitting: true,
   clean: true,
   format: ['cjs', 'esm'],
-  outDir: 'packages/dts-kit/dist',
+  outDir: 'packages/dev-kit/dist',
   external: [join(__dirname, 'package.json')],
 });

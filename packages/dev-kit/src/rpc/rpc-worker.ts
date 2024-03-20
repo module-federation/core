@@ -6,7 +6,7 @@ import type { RpcMethod, RpcRemoteMethod } from './types';
 import { wrapRpc } from './wrap-rpc';
 import { RpcGMCallTypes } from './types';
 
-const VMOK_WORKER_DATA_ENV_KEY = 'VMOK_WORKER_DATA_ENV';
+const FEDERATION_WORKER_DATA_ENV_KEY = 'VMOK_WORKER_DATA_ENV';
 
 function uuid(): string {
   return new Array(4)
@@ -34,7 +34,7 @@ function createRpcWorker<T extends RpcMethod>(
   const options: ForkOptions = {
     env: {
       ...process.env,
-      [VMOK_WORKER_DATA_ENV_KEY]: JSON.stringify(data || {}),
+      [FEDERATION_WORKER_DATA_ENV_KEY]: JSON.stringify(data || {}),
     },
     stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
     serialization: 'advanced',
@@ -94,7 +94,7 @@ function createRpcWorker<T extends RpcMethod>(
 }
 
 function getRpcWorkerData(): unknown {
-  return JSON.parse(process.env[VMOK_WORKER_DATA_ENV_KEY] || '{}');
+  return JSON.parse(process.env[FEDERATION_WORKER_DATA_ENV_KEY] || '{}');
 }
 
 export { createRpcWorker, getRpcWorkerData };

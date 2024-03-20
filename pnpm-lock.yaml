@@ -1137,6 +1137,39 @@ importers:
         specifier: ^5.40.0
         version: 5.89.0(@swc/core@1.3.102)(esbuild@0.20.1)
 
+  packages/dev-kit:
+    dependencies:
+      '@module-federation/dev-server':
+        specifier: workspace:*
+        version: link:../dev-server
+      '@module-federation/dts-kit':
+        specifier: workspace:*
+        version: link:../dts-kit
+      '@module-federation/sdk':
+        specifier: workspace:*
+        version: link:../sdk
+      adm-zip:
+        specifier: ^0.5.10
+        version: 0.5.10
+      ansi-colors:
+        specifier: ^4.1.3
+        version: 4.1.3
+      axios:
+        specifier: ^1.6.7
+        version: 1.6.7
+      fs-extra:
+        specifier: 9.1.0
+        version: 9.1.0
+      rambda:
+        specifier: ^9.1.0
+        version: 9.1.0
+      typescript:
+        specifier: ^4.9.0 || ^5.0.0
+        version: 5.0.4
+      vue-tsc:
+        specifier: ^1.0.24
+        version: 1.8.27(typescript@5.0.4)
+
   packages/dev-server:
     dependencies:
       '@module-federation/sdk':
@@ -1191,6 +1224,9 @@ importers:
       axios:
         specifier: ^1.6.7
         version: 1.6.7
+      fs-extra:
+        specifier: 9.1.0
+        version: 9.1.0
       rambda:
         specifier: ^9.1.0
         version: 9.1.0
@@ -1299,6 +1335,9 @@ importers:
 
   packages/native-federation-typescript:
     dependencies:
+      '@module-federation/dev-kit':
+        specifier: workspace:*
+        version: link:../dev-kit
       '@module-federation/dts-kit':
         specifier: workspace:*
         version: link:../dts-kit

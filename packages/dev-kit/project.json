@@ -1,0 +1,52 @@
+{
+  "name": "dev-kit",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/dev-kit/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/dev-kit/dist"],
+      "options": {
+        "parallel": false,
+        "commands": [
+          "tsup --config packages/dev-kit/tsup.config.ts",
+          "cp packages/dev-kit/package.json packages/dev-kit/dist",
+          "cp packages/dev-kit/*.md packages/dev-kit/dist"
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/dev-kit/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/packages/dev-kit"]
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run dev-kit:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run dev-kit:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
+    "semantic-release": {
+      "executor": "@goestav/nx-semantic-release:semantic-release"
+    }
+  },
+  "tags": ["package"],
+  "implicitDependencies": []
+}

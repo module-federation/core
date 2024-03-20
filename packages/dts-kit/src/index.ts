@@ -1,11 +1,12 @@
 export { retrieveRemoteConfig } from './configurations/remotePlugin';
 export { retrieveHostConfig } from './configurations/hostPlugin';
 export { getDTSManagerConstructor, validateOptions } from './lib/utils';
-export { retrieveOriginalOutDir } from './lib/typeScriptCompiler';
 export {
-  generateTypes,
-  generateTypesInChildProcess,
-} from './lib/generateTypes';
+  retrieveOriginalOutDir,
+  retrieveMfTypesPath,
+} from './lib/typeScriptCompiler';
+export { retrieveTypesZipPath } from './lib/archiveHandler';
+export { generateTypes } from './lib/generateTypes';
 export { consumeTypes } from './lib/consumeTypes';
 export { DTSManager } from './lib/DTSManager';
 

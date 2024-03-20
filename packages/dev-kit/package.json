@@ -1,13 +1,6 @@
 {
-  "name": "@module-federation/dts-kit",
+  "name": "@module-federation/dev-kit",
   "version": "0.3.1",
-  "description": "Bundler federated types",
-  "keywords": [
-    "module federation",
-    "typescript",
-    "remote types",
-    "federated types"
-  ],
   "files": [
     "dist/",
     "README.md"
@@ -24,7 +17,7 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "author": "Matteo Pietro Dazzi <matteopietro.dazzi@gmail.com> (https://github.com/ilteoood)",
+  "author": "zhanghang <hanric.zhang@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "adm-zip": "^0.5.10",
@@ -33,6 +26,7 @@
     "rambda": "^9.1.0",
     "fs-extra": "9.1.0",
     "@module-federation/dev-server": "workspace:*",
+    "@module-federation/dts-kit": "workspace:*",
     "@module-federation/sdk": "workspace:*"
   },
   "peerDependencies": {

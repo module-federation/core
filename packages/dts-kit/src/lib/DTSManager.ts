@@ -36,12 +36,14 @@ interface UpdateTypesOptions {
 
 class DTSManager {
   options: DTSManagerOptions;
+  extraOptions: Record<string, any>;
   runtimePkgs: string[];
   remoteAliasMap: Record<string, Required<RemoteInfo>>;
   loadedRemoteAPIAlias: string[];
 
-  constructor(options: DTSManagerOptions) {
+  constructor(options: DTSManagerOptions, extraOptions?: Record<string, any>) {
     this.options = options;
+    this.extraOptions = extraOptions || {};
     this.runtimePkgs = [
       '@module-federation/runtime',
       '@module-federation/runtime-tools',
