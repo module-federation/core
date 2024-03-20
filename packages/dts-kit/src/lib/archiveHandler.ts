@@ -36,14 +36,23 @@ const downloadErrorLogger =
     };
   };
 
+export const retrieveTypesArchiveDestinationPath = (
+  hostOptions: Required<HostOptions>,
+  destinationFolder: string,
+) => {
+  return resolve(
+    hostOptions.context,
+    hostOptions.typesFolder,
+    destinationFolder,
+  );
+};
 export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
   let retries = 0;
   return async ([destinationFolder, fileToDownload]: string[]): Promise<
     [string, string] | undefined
   > => {
-    const destinationPath = resolve(
-      hostOptions.context,
-      hostOptions.typesFolder,
+    const destinationPath = retrieveTypesArchiveDestinationPath(
+      hostOptions,
       destinationFolder,
     );
 

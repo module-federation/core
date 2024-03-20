@@ -4,6 +4,7 @@ import fs from 'fs';
 import {
   consumeTypes,
   generateTypes,
+  generateTypesInChildProcess,
   RemoteOptions,
   HostOptions,
   validateOptions,
@@ -12,28 +13,44 @@ import {
 export const NativeFederationTypeScriptRemote = createUnplugin(
   (options: RemoteOptions) => {
     validateOptions(options);
+    const isProd = process.env.NODE_ENV === 'production';
+
+    const getGenerateTypesFn = () => {
+      let fn: typeof generateTypes | typeof generateTypesInChildProcess =
+        generateTypes;
+      let res: ReturnType<typeof generateTypes>;
+      if (options.compileInChildProcess) {
+        fn = generateTypesInChildProcess;
+      }
+      if (isProd) {
+        res = fn({ remote: options });
+        return () => res;
+      }
+      return fn;
+    };
+    const generateTypesFn = getGenerateTypesFn();
     return {
       name: 'native-federation-typescript/remote',
       rollup: {
         writeBundle: async () => {
-          await generateTypes({ remote: options });
+          await generateTypesFn({ remote: options });
         },
       },
       vite: {
         buildStart: async () => {
-          if (process.env.NODE_ENV === 'production') {
+          if (isProd) {
             return;
           }
-          await generateTypes({ remote: options });
+          await generateTypesFn({ remote: options });
         },
         watchChange: async () => {
-          if (process.env.NODE_ENV === 'production') {
+          if (isProd) {
             return;
           }
-          await generateTypes({ remote: options });
+          await generateTypesFn({ remote: options });
         },
         writeBundle: async () => {
-          await generateTypes({ remote: options });
+          await generateTypesFn({ remote: options });
         },
       },
       webpack: (compiler) => {
@@ -46,7 +63,7 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
                 compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
             },
             async () => {
-              const { zipTypesPath, apiTypesPath } = await generateTypes({
+              const { zipTypesPath, apiTypesPath } = await generateTypesFn({
                 remote: options,
               });
               const zipName = path.basename(zipTypesPath);
@@ -82,7 +99,7 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
                 compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
             },
             async () => {
-              const { zipTypesPath, apiTypesPath } = await generateTypes({
+              const { zipTypesPath, apiTypesPath } = await generateTypesFn({
                 remote: options,
               });
               const zipName = path.basename(zipTypesPath);

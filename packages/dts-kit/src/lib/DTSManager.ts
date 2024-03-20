@@ -102,9 +102,6 @@ class DTSManager {
           typesFolder: path.join(mfTypesPath, 'node_modules'),
           remoteTypesFolder: path.join(remoteOptions.typesFolder),
           deleteTypesFolder: true,
-          devServer: {
-            typesReload: false,
-          },
           context: remoteOptions.context,
           implementation: remoteOptions.implementation,
         });
@@ -339,10 +336,6 @@ class DTSManager {
   }
 
   async updateTypes(options: UpdateTypesOptions): Promise<void> {
-    const enableLiveReload = this.options.host?.devServer?.typesReload;
-    if (!enableLiveReload) {
-      return;
-    }
     const { remoteName, remoteTarPath, updateMode } = options;
     const hostName = this.options?.host?.moduleFederationConfig?.name;
     fileLog(

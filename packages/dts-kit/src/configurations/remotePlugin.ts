@@ -55,10 +55,10 @@ const TS_EXTENSIONS = ['ts', 'tsx', 'vue', 'svelte'];
 
 const resolveWithExtension = (exposedPath: string, context: string) => {
   if (extname(exposedPath)) {
-    return join(context, exposedPath);
+    return resolve(context, exposedPath);
   }
   for (const extension of TS_EXTENSIONS) {
-    const exposedPathWithExtension = join(
+    const exposedPathWithExtension = resolve(
       context,
       `${exposedPath}.${extension}`,
     );

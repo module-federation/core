@@ -9,9 +9,6 @@ const defaultOptions = {
   maxRetries: 3,
   implementation: '',
   context: process.cwd(),
-  devServer: {
-    typesReload: true,
-  },
 } satisfies Partial<HostOptions>;
 
 const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {

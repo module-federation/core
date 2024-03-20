@@ -27,7 +27,9 @@ describe('typeScriptCompiler', () => {
     deleteTypesFolder: false,
     compilerInstance: 'tsc',
     compileInChildProcess: false,
+    generateAPITypes: false,
     implementation: '',
+    context: process.cwd(),
   };
 
   it('retrieveMfTypesPath correctly calculate path', () => {

@@ -1,4 +1,4 @@
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { describe, expect, it } from 'vitest';
 
 import { retrieveRemoteConfig } from './remotePlugin';
@@ -47,7 +47,10 @@ describe('hostPlugin', () => {
           emitDeclarationOnly: true,
           noEmit: false,
           declaration: true,
-          outDir: 'dist/@mf-types/compiled-types',
+          outDir: resolve(
+            remoteOptions.context,
+            'dist/@mf-types/compiled-types',
+          ),
         });
 
         expect(mapComponentsToExpose).toStrictEqual({
@@ -65,6 +68,8 @@ describe('hostPlugin', () => {
           compilerInstance: 'tsc',
           compileInChildProcess: false,
           implementation: '',
+          generateAPITypes: false,
+          context: process.cwd(),
         });
       });
 
@@ -93,7 +98,10 @@ describe('hostPlugin', () => {
           emitDeclarationOnly: true,
           noEmit: false,
           declaration: true,
-          outDir: 'dist/typesFolder/compiledTypesFolder',
+          outDir: resolve(
+            remoteOptions.context,
+            'dist/typesFolder/compiledTypesFolder',
+          ),
         });
 
         expect(mapComponentsToExpose).toStrictEqual({
@@ -110,7 +118,9 @@ describe('hostPlugin', () => {
           moduleFederationConfig,
           compilerInstance: 'vue-tsc',
           compileInChildProcess: false,
+          generateAPITypes: false,
           implementation: '',
+          context: process.cwd(),
         });
       });
     });

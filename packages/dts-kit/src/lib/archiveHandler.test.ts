@@ -7,6 +7,7 @@ import { afterAll, describe, expect, it, vi } from 'vitest';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { createTypesArchive, downloadTypesArchive } from './archiveHandler';
+import { HostOptions } from '../interfaces/HostOptions';
 
 describe('archiveHandler', () => {
   const tmpDir = mkdtempSync(join(os.tmpdir(), 'archive-handler'));
@@ -47,15 +48,14 @@ describe('archiveHandler', () => {
   });
 
   describe('downloadTypesArchive', () => {
-    const hostOptions = {
+    const hostOptions: Required<HostOptions> = {
       moduleFederationConfig: {},
       typesFolder: tmpDir,
+      remoteTypesFolder: tmpDir,
       deleteTypesFolder: true,
       maxRetries: 3,
       implementation: '',
-      devServer: {
-        typesReload: true,
-      },
+      context: process.cwd(),
     };
 
     const destinationFolder = 'typesHostFolder';

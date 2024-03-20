@@ -185,7 +185,7 @@ process.on('message', (message: RpcMessage) => {
   );
   if (message.type === RpcGMCallTypes.EXIT) {
     fileLog(
-      `ChildProcess(${process.pid}) SIGTERM, Vmok DevServer will exit...`,
+      `ChildProcess(${process.pid}) SIGTERM, Federation DevServer will exit...`,
       'forkDevWorker',
       'error',
     );

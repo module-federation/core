@@ -2,22 +2,23 @@ import AdmZip from 'adm-zip';
 import axios from 'axios';
 import dirTree from 'directory-tree';
 import { rm } from 'fs/promises';
-import { join, resolve } from 'path';
+import { join } from 'path';
 import { UnpluginOptions } from 'unplugin';
 import { describe, expect, it, vi } from 'vitest';
+import webpack from 'webpack';
+import { rspack } from '@rspack/core';
 
-import type { Compiler } from 'webpack';
 import {
   NativeFederationTypeScriptHost,
   NativeFederationTypeScriptRemote,
 } from './index';
+import { RemoteOptions } from '@module-federation/dts-kit';
 
 describe('index', () => {
   const projectRoot = join(__dirname, '..', '..', '..');
 
   describe('NativeFederationTypeScriptRemote', () => {
     it('throws for missing moduleFederationConfig', () => {
-      // @ts-expect-error missing moduleFederationConfig
       const writeBundle = () => NativeFederationTypeScriptRemote.rollup({});
       expect(writeBundle).toThrowError('moduleFederationConfig is required');
     });
@@ -48,36 +49,12 @@ describe('index', () => {
         options,
       ) as UnpluginOptions;
       await unplugin.writeBundle?.();
-
       expect(dirTree(distFolder)).toMatchObject({
         name: '@mf-types',
         children: [
           {
             name: 'compiled-types',
-            children: [
-              {
-                name: 'configurations',
-                children: [
-                  { name: 'hostPlugin.d.ts' },
-                  { name: 'remotePlugin.d.ts' },
-                ],
-              },
-              { name: 'index.d.ts' },
-              {
-                name: 'interfaces',
-                children: [
-                  { name: 'HostOptions.d.ts' },
-                  { name: 'RemoteOptions.d.ts' },
-                ],
-              },
-              {
-                name: 'lib',
-                children: [
-                  { name: 'archiveHandler.d.ts' },
-                  { name: 'typeScriptCompiler.d.ts' },
-                ],
-              },
-            ],
+            children: [{ name: 'index.d.ts' }],
           },
           { name: 'index.d.ts' },
         ],
@@ -85,7 +62,7 @@ describe('index', () => {
     });
 
     it('correctly enrich webpack config', async () => {
-      const options = {
+      const options: RemoteOptions = {
         moduleFederationConfig: {
           name: 'moduleFederationTypescript',
           filename: 'remoteEntry.js',
@@ -97,32 +74,48 @@ describe('index', () => {
             'react-dom': { singleton: true, eager: true },
           },
         },
-        deleteTestsFolder: false,
-        testsFolder: '@mf-tests',
+        deleteTypesFolder: false,
+        typesFolder: '@mf-tests-webpack',
       };
 
-      const webpackCompiler = {
-        options: {
-          devServer: {
-            foo: {},
-          },
+      const webpackCompiler = webpack({
+        target: 'web',
+        entry: 'data:application/node;base64,',
+        output: {
+          publicPath: '/',
         },
-      } as unknown as Compiler;
+        plugins: [NativeFederationTypeScriptRemote.webpack(options)],
+      });
 
-      const unplugin = NativeFederationTypeScriptRemote.rollup(
-        options,
-      ) as UnpluginOptions;
-      await unplugin.webpack?.(webpackCompiler);
+      const assets = (await new Promise((resolve, reject) => {
+        webpackCompiler.run((err, stats) => {
+          if (err) {
+            reject(err);
+          }
+          webpackCompiler.close((closeErr) => {
+            if (closeErr) {
+              reject(closeErr);
+            } else {
+              resolve(stats?.toJson().assets as webpack.StatsAsset[]);
+            }
+          });
+        });
+      })) as webpack.StatsAsset[];
 
-      expect(webpackCompiler).toStrictEqual({
-        options: {
-          devServer: {
-            foo: {},
-            static: {
-              directory: resolve('./dist'),
-            },
+      expect(
+        Boolean(assets.find((asset) => asset.name === '@mf-tests-webpack.zip')),
+      ).toEqual(true);
+      const distFolder = join(projectRoot, 'dist', options.typesFolder!);
+
+      expect(dirTree(distFolder)).toMatchObject({
+        name: '@mf-tests-webpack',
+        children: [
+          {
+            name: 'compiled-types',
+            children: [{ name: 'index.d.ts' }],
           },
-        },
+          { name: 'index.d.ts' },
+        ],
       });
     });
 
@@ -139,40 +132,55 @@ describe('index', () => {
             'react-dom': { singleton: true, eager: true },
           },
         },
-        deleteTestsFolder: false,
-        testsFolder: '@mf-tests',
+        deleteTypesFolder: false,
+        typesFolder: '@mf-tests-rspack',
       };
 
-      const rspackCompiler = {
-        options: {
-          devServer: {
-            foo: {},
-          },
+      const rspackCompiler = rspack({
+        target: 'web',
+        entry: 'data:application/node;base64,',
+        output: {
+          publicPath: '/',
         },
-      } as any;
+        // @ts-expect-error ignore
+        plugins: [NativeFederationTypeScriptRemote.rspack(options)],
+      });
 
-      const unplugin = NativeFederationTypeScriptRemote.rollup(
-        options,
-      ) as UnpluginOptions;
+      const assets = (await new Promise((resolve, reject) => {
+        rspackCompiler.run((err, stats) => {
+          if (err) {
+            reject(err);
+          }
+          rspackCompiler.close((closeErr) => {
+            if (closeErr) {
+              reject(closeErr);
+            } else {
+              resolve(stats?.toJson().assets as webpack.StatsAsset[]);
+            }
+          });
+        });
+      })) as webpack.StatsAsset[];
 
-      unplugin.rspack?.(rspackCompiler);
+      expect(
+        Boolean(assets.find((asset) => asset.name === '@mf-tests-rspack.zip')),
+      ).toEqual(true);
+      const distFolder = join(projectRoot, 'dist', options.typesFolder!);
 
-      expect(rspackCompiler).toStrictEqual({
-        options: {
-          devServer: {
-            foo: {},
-            static: {
-              directory: resolve('./dist'),
-            },
+      expect(dirTree(distFolder)).toMatchObject({
+        name: '@mf-tests-rspack',
+        children: [
+          {
+            name: 'compiled-types',
+            children: [{ name: 'index.d.ts' }],
           },
-        },
+          { name: 'index.d.ts' },
+        ],
       });
     });
   });
 
   describe('NativeFederationTypeScriptHost', () => {
     it('throws for missing moduleFederationConfig', () => {
-      // @ts-expect-error missing moduleFederationConfig
       const writeBundle = () => NativeFederationTypeScriptHost.rollup({});
       expect(writeBundle).toThrowError('moduleFederationConfig is required');
     });
@@ -205,7 +213,6 @@ describe('index', () => {
       await expect(unplugin.writeBundle?.()).resolves.not.toThrow();
 
       const typesFolder = join(projectRoot, options.typesFolder);
-
       expect(dirTree(typesFolder)).toMatchObject({
         name: '@mf-types',
         children: [
@@ -216,28 +223,7 @@ describe('index', () => {
                 name: 'compiled-types',
                 children: [
                   {
-                    name: 'configurations',
-                    children: [
-                      { name: 'hostPlugin.d.ts' },
-                      { name: 'remotePlugin.d.ts' },
-                    ],
-                  },
-                  {
                     name: 'index.d.ts',
-                  },
-                  {
-                    name: 'interfaces',
-                    children: [
-                      { name: 'HostOptions.d.ts' },
-                      { name: 'RemoteOptions.d.ts' },
-                    ],
-                  },
-                  {
-                    name: 'lib',
-                    children: [
-                      { name: 'archiveHandler.d.ts' },
-                      { name: 'typeScriptCompiler.d.ts' },
-                    ],
                   },
                 ],
               },

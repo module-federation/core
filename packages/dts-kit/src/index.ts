@@ -7,6 +7,7 @@ export {
 } from './lib/typeScriptCompiler';
 export { retrieveTypesZipPath } from './lib/archiveHandler';
 export { generateTypes } from './lib/generateTypes';
+export { generateTypesInChildProcess } from './lib/generateTypesInChildProcess';
 export { consumeTypes } from './lib/consumeTypes';
 export { DTSManager } from './lib/DTSManager';
 
