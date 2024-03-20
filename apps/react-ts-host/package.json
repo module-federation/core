@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "devDependencies": {
-    "@module-federation/native-federation-typescript": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/core": "workspace:*",
     "@module-federation/runtime": "workspace:*",

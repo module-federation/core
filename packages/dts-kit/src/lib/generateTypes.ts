@@ -1,14 +1,11 @@
 import { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
 import { getDTSManagerConstructor } from './utils';
 
-async function generateTypes(
-  options: DTSManagerOptions,
-  extraOptions?: Record<string, any>,
-) {
+async function generateTypes(options: DTSManagerOptions) {
   const DTSManagerConstructor = getDTSManagerConstructor(
     options.remote?.implementation,
   );
-  const dtsManager = new DTSManagerConstructor(options, extraOptions);
+  const dtsManager = new DTSManagerConstructor(options);
 
   return dtsManager.generateTypes();
 }

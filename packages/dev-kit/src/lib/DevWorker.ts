@@ -14,11 +14,9 @@ export class DevWorker {
   private _rpcWorker: RpcWorker<RpcMethod>;
   private _options: DevWorkerOptions;
   private _res: Promise<any>;
-  private _extraOptions: Record<string, any>;
 
-  constructor(options: DevWorkerOptions, extraOptions?: Record<string, any>) {
+  constructor(options: DevWorkerOptions) {
     this._options = options;
-    this._extraOptions = extraOptions || {};
     this._rpcWorker = createRpcWorker(
       path.resolve(__dirname, './forkDevWorker.js'),
       {},
@@ -26,7 +24,7 @@ export class DevWorker {
       false,
     );
 
-    this._res = this._rpcWorker.connect(this._options, this._extraOptions);
+    this._res = this._rpcWorker.connect(this._options);
   }
 
   get controlledPromise(): Promise<any> {
@@ -38,7 +36,7 @@ export class DevWorker {
       this._rpcWorker.process.send({
         type: RpcGMCallTypes.CALL,
         id: this._rpcWorker.id,
-        args: [undefined, undefined, 'update'],
+        args: [undefined, 'update'],
       });
   }
 

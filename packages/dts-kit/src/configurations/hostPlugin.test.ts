@@ -38,6 +38,7 @@ describe('hostPlugin', () => {
           maxRetries: 3,
           implementation: '',
           context: process.cwd(),
+          abortOnError: true,
         });
 
         expect(mapRemotesToDownload).toStrictEqual({
@@ -60,6 +61,7 @@ describe('hostPlugin', () => {
           maxRetries: 1,
           implementation: '',
           context: process.cwd(),
+          abortOnError: true,
         };
 
         const { hostOptions, mapRemotesToDownload } =

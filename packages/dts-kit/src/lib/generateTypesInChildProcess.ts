@@ -1,11 +1,8 @@
 import { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
 import { DtsWorker } from './DtsWorker';
 
-async function generateTypesInChildProcess(
-  options: DTSManagerOptions,
-  extraOptions?: Record<string, any>,
-) {
-  const dtsWorker = new DtsWorker(options, extraOptions);
+async function generateTypesInChildProcess(options: DTSManagerOptions) {
+  const dtsWorker = new DtsWorker(options);
   return dtsWorker.controlledPromise;
 }
 

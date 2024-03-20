@@ -1,7 +1,7 @@
 import AdmZip from 'adm-zip';
 import ansiColors from 'ansi-colors';
 import axios from 'axios';
-import { join, resolve } from 'path';
+import { resolve, join } from 'path';
 import typescript from 'typescript';
 
 import { HostOptions } from '../interfaces/HostOptions';
@@ -74,7 +74,10 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
           ),
         );
         if (retries >= hostOptions.maxRetries) {
-          throw error;
+          if (hostOptions.abortOnError) {
+            throw error;
+          }
+          return undefined;
         }
       }
     }

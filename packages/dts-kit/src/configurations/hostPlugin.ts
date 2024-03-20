@@ -1,4 +1,5 @@
 import { MANIFEST_EXT } from '@module-federation/sdk';
+import { utils } from '@module-federation/managers';
 import { HostOptions, RemoteInfo } from '../interfaces/HostOptions';
 import { validateOptions } from '../lib/utils';
 
@@ -9,6 +10,7 @@ const defaultOptions = {
   maxRetries: 3,
   implementation: '',
   context: process.cwd(),
+  abortOnError: true,
 } satisfies Partial<HostOptions>;
 
 const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {
@@ -55,10 +57,21 @@ const retrieveRemoteInfo = (options: {
 };
 
 const resolveRemotes = (hostOptions: Required<HostOptions>) => {
-  return Object.entries(
-    hostOptions.moduleFederationConfig.remotes as Record<string, string>,
-  ).reduce(
-    (accumulator, [key, remote]) => {
+  const parsedOptions = utils.parseOptions(
+    hostOptions.moduleFederationConfig.remotes || {},
+    (item, key) => ({
+      remote: Array.isArray(item) ? item[0] : item,
+      key,
+    }),
+    (item, key) => ({
+      remote: Array.isArray(item.external) ? item.external[0] : item.external,
+      key,
+    }),
+  );
+
+  return parsedOptions.reduce(
+    (accumulator, item) => {
+      const { key, remote } = item[1];
       accumulator[key] = retrieveRemoteInfo({
         hostOptions,
         remoteAlias: key,

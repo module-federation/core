@@ -64,6 +64,16 @@ function getLocalRemoteNames(options?: HostOptions): Remote[] {
           ip,
         });
       }
+    } else {
+      const ip = getIpFromEntry(remoteInfo.url);
+      if (!ip) {
+        return sum;
+      }
+      sum.push({
+        name: remoteInfo.name,
+        entry: remoteInfo.url,
+        ip,
+      });
     }
     return sum;
   }, [] as Remote[]);
@@ -95,18 +105,14 @@ async function updateCallback(options: UpdateCallbackOptions): Promise<void> {
 
 export async function forkDevWorker(
   options: Options,
-  extraOptions: Record<string, any>,
   action?: string,
 ): Promise<void> {
   if (!typesManager) {
     const { name, remote, host } = options;
-    typesManager = new DTSManager(
-      {
-        remote,
-        host,
-      },
-      extraOptions,
-    );
+    typesManager = new DTSManager({
+      remote,
+      host,
+    });
     if (!options.disableGenerateTypes && remote) {
       const { remoteOptions, tsConfig } = retrieveRemoteConfig(remote);
       const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
@@ -159,7 +165,6 @@ export async function forkDevWorker(
     }
 
     if (!cacheOptions.disableGenerateTypes) {
-      // TODO: 连续快速更新
       typesManager &&
         typesManager
           .updateTypes({

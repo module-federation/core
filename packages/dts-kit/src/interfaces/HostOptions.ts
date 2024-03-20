@@ -1,11 +1,7 @@
 import { moduleFederationPlugin } from '@module-federation/sdk';
 
-export interface HostOptions {
+export interface HostOptions extends moduleFederationPlugin.DtsHostOptions {
   moduleFederationConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
-  typesFolder?: string;
-  remoteTypesFolder?: string;
-  deleteTypesFolder?: boolean;
-  maxRetries?: number;
   context?: string;
   implementation?: string;
 }

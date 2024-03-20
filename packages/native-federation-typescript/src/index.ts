@@ -132,17 +132,19 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
 export const NativeFederationTypeScriptHost = createUnplugin(
   (options: HostOptions) => {
     validateOptions(options);
+    const consumeTypesPromise = consumeTypes({ host: options });
     return {
       name: 'native-federation-typescript/host',
       async writeBundle() {
-        await consumeTypes({ host: options });
+        await consumeTypesPromise;
       },
       get vite() {
         return process.env.NODE_ENV === 'production'
           ? undefined
           : {
-              buildStart: () => consumeTypes({ host: options }),
-              watchChange: () => consumeTypes({ host: options }),
+              buildStart: async () => {
+                await consumeTypesPromise;
+              },
             };
       },
     };

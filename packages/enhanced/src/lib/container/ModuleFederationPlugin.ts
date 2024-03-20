@@ -7,14 +7,23 @@
 
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { moduleFederationPlugin } from '@module-federation/sdk';
+import {
+  normalizeOptions,
+  type moduleFederationPlugin,
+} from '@module-federation/sdk';
+import { StatsPlugin } from '@module-federation/manifest';
+import { ContainerManager } from '@module-federation/managers';
+import { DevPlugin } from '@module-federation/dev-plugin';
+import {
+  NativeFederationTypeScriptHost,
+  NativeFederationTypeScriptRemote,
+} from '@module-federation/native-federation-typescript/webpack';
+
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import schema from '../../schemas/container/ModuleFederationPlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
-import { StatsPlugin } from '@module-federation/manifest';
-import { ContainerManager } from '@module-federation/managers';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -128,6 +137,36 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         }).apply(compiler);
       }
     });
+
+    new DevPlugin(options).apply(compiler);
+
+    const normalizedDtsOptions =
+      normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
+        true,
+        {
+          disableGenerateTypes: false,
+          remote: { generateAPITypes: true, compileInChildProcess: true },
+          host: {},
+        },
+        'mfOptions.dts',
+      )(options.dts);
+    if (
+      typeof normalizedDtsOptions === 'object' &&
+      !normalizedDtsOptions.disableGenerateTypes
+    ) {
+      NativeFederationTypeScriptRemote({
+        implementation: normalizedDtsOptions.implementation,
+        context: compiler.context,
+        moduleFederationConfig: options,
+        ...normalizedDtsOptions.remote,
+      }).apply(compiler);
+      NativeFederationTypeScriptHost({
+        implementation: normalizedDtsOptions.implementation,
+        context: compiler.context,
+        moduleFederationConfig: options,
+        ...normalizedDtsOptions.host,
+      }).apply(compiler);
+    }
 
     if (!disableManifest) {
       const pkg = require('../../../../package.json');

@@ -36,14 +36,12 @@ interface UpdateTypesOptions {
 
 class DTSManager {
   options: DTSManagerOptions;
-  extraOptions: Record<string, any>;
   runtimePkgs: string[];
   remoteAliasMap: Record<string, Required<RemoteInfo>>;
   loadedRemoteAPIAlias: string[];
 
-  constructor(options: DTSManagerOptions, extraOptions?: Record<string, any>) {
+  constructor(options: DTSManagerOptions) {
     this.options = options;
-    this.extraOptions = extraOptions || {};
     this.runtimePkgs = [
       '@module-federation/runtime',
       '@module-federation/runtime-tools',
@@ -96,15 +94,33 @@ class DTSManager {
       const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
       const mfTypesZipPath = retrieveTypesZipPath(mfTypesPath, remoteOptions);
 
+      fileLog(
+        `hostName: ${
+          remoteOptions.moduleFederationConfig.name
+        } generateTypes run,
+      mapComponentsToExpose: ${JSON.stringify(mapComponentsToExpose)}
+      remoteOptions: ${JSON.stringify(remoteOptions)}
+      tsConfig: ${JSON.stringify(tsConfig)}
+      `,
+        MODULE_DTS_MANAGER_IDENTIFIER,
+        'info',
+      );
       if (hasRemotes) {
-        await this.consumeArchiveTypes({
+        const tempHostOptions = {
           moduleFederationConfig: remoteOptions.moduleFederationConfig,
           typesFolder: path.join(mfTypesPath, 'node_modules'),
           remoteTypesFolder: path.join(remoteOptions.typesFolder),
           deleteTypesFolder: true,
           context: remoteOptions.context,
           implementation: remoteOptions.implementation,
-        });
+        };
+        const hostOptions = options.host;
+        if (hostOptions) {
+          tempHostOptions.typesFolder =
+            hostOptions.typesFolder || tempHostOptions.typesFolder;
+        }
+
+        await this.consumeArchiveTypes(tempHostOptions);
       }
 
       compileTs(mapComponentsToExpose, tsConfig, remoteOptions);
@@ -308,6 +324,7 @@ class DTSManager {
   }
 
   async consumeTypes() {
+    console.log('start consumeTypes');
     const { options } = this;
     if (!options.host) {
       throw new Error('options.host is required if you want to consumeTypes');
@@ -348,6 +365,14 @@ class DTSManager {
       this.generateTypes();
     } else {
       const { options, remoteAliasMap } = this;
+      fileLog(
+        // eslint-disable-next-line max-len
+        `updateTypes run,update remote types, options.host: ${JSON.stringify(
+          options.host,
+        )}, remoteAliasMap: ${JSON.stringify(remoteAliasMap)}`,
+        MODULE_DTS_MANAGER_IDENTIFIER,
+        'info',
+      );
       if (!options.host) {
         throw new Error('options.host is required if you want to consumeTypes');
       }

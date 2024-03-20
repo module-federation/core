@@ -10,11 +10,9 @@ export class DtsWorker {
   private _rpcWorker: RpcWorker<RpcMethod>;
   private _options: DtsWorkerOptions;
   private _res: Promise<any>;
-  private _extraOptions: Record<string, any>;
 
-  constructor(options: DtsWorkerOptions, extraOptions?: Record<string, any>) {
+  constructor(options: DtsWorkerOptions) {
     this._options = options;
-    this._extraOptions = extraOptions || {};
 
     this._rpcWorker = createRpcWorker(
       path.resolve(__dirname, './forkGenerateDts.js'),
@@ -23,7 +21,7 @@ export class DtsWorker {
       true,
     );
 
-    this._res = this._rpcWorker.connect(this._options, this._extraOptions);
+    this._res = this._rpcWorker.connect(this._options);
     Promise.resolve(this._res).then(() => {
       this.exit();
     });

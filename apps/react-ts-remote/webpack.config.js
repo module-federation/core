@@ -1,12 +1,10 @@
 const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 
 registerPluginTSTranspiler();
-const {
-  NativeFederationTypeScriptRemote,
-} = require('@module-federation/native-federation-typescript/webpack');
 const { ModuleFederationPlugin } = require('@module-federation/enhanced');
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
+process.env.FEDERATION_DEBUG = true;
 
 module.exports = composePlugins(
   withNx(),
@@ -21,17 +19,6 @@ module.exports = composePlugins(
     };
 
     config.plugins.push(new ModuleFederationPlugin(baseConfig));
-
-    config.plugins.push(
-      NativeFederationTypeScriptRemote({
-        moduleFederationConfig: {
-          ...baseConfig,
-        },
-        generateAPITypes: true,
-        // FIXME: auto set in webpack plugin
-        context: __dirname,
-      }),
-    );
 
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {

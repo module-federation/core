@@ -236,7 +236,11 @@ export class Broker {
 
     if (!this._publisherMap.has(identifier)) {
       fileLog(
-        `[${ActionKind.UPDATE_PUBLISHER}] ${identifier} has been started, this action will be ignored`,
+        `[${
+          ActionKind.UPDATE_PUBLISHER
+        }] ${identifier} has not been started, this action will be ignored
+        this._publisherMap: ${JSON.stringify(this._publisherMap.entries())}
+        `,
         'Broker',
         'warn',
       );
@@ -374,6 +378,11 @@ export class Broker {
       }
 
       try {
+        fileLog(
+          `[${ActionKind.EXIT_SUBSCRIBER}], ${identifier} will exit `,
+          'Broker',
+          'INFO',
+        );
         registeredPublisher.removeSubscriber(subscriberIdentifier);
         this._clearTmpSubScriberRelation(identifier);
 

@@ -1,8 +1,8 @@
 export enum RpcGMCallTypes {
-  CALL = 'vmok_call',
-  RESOLVE = 'vmok_resolve',
-  REJECT = 'vmok_reject',
-  EXIT = 'vmok_exit',
+  CALL = 'mf_call',
+  RESOLVE = 'mf_resolve',
+  REJECT = 'mf_reject',
+  EXIT = 'mf_exit',
 }
 interface RpcCallMessage {
   type: RpcGMCallTypes.CALL;

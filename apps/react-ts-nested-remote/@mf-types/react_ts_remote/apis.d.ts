@@ -1,4 +1,4 @@
-export type RemoteKeys = 'REMOTE_ALIAS_IDENTIFIER/Module';
-type PackageType<T> = T extends 'REMOTE_ALIAS_IDENTIFIER/Module'
-  ? typeof import('REMOTE_ALIAS_IDENTIFIER/Module')
+export type RemoteKeys = 'react_ts_remote/Module';
+type PackageType<T> = T extends 'react_ts_remote/Module'
+  ? typeof import('react_ts_remote/Module')
   : any;

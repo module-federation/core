@@ -1,5 +1,6 @@
 import { existsSync } from 'fs';
 import { dirname, join, resolve, extname } from 'path';
+import { utils } from '@module-federation/managers';
 import typescript from 'typescript';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
@@ -35,7 +36,7 @@ const readTsConfig = ({
     typescript.sys,
     dirname(resolvedTsConfigPath),
   );
-  const outDir = join(
+  const outDir = resolve(
     context,
     configContent.options.outDir || 'dist',
     typesFolder,
@@ -70,17 +71,27 @@ const resolveWithExtension = (exposedPath: string, context: string) => {
 };
 
 const resolveExposes = (remoteOptions: Required<RemoteOptions>) => {
-  return Object.entries(
-    remoteOptions.moduleFederationConfig.exposes as Record<string, string>,
-  ).reduce(
-    (accumulator, [exposedEntry, exposedPath]) => {
-      accumulator[exposedEntry] =
-        resolveWithExtension(exposedPath, remoteOptions.context) ||
+  const parsedOptions = utils.parseOptions(
+    remoteOptions.moduleFederationConfig.exposes || {},
+    (item, key) => ({
+      exposePath: Array.isArray(item) ? item[0] : item,
+      key,
+    }),
+    (item, key) => ({
+      exposePath: Array.isArray(item.import) ? item.import[0] : item.import[0],
+      key,
+    }),
+  );
+  return parsedOptions.reduce(
+    (accumulator, item) => {
+      const { exposePath, key } = item[1];
+      accumulator[key] =
+        resolveWithExtension(exposePath, remoteOptions.context) ||
         resolveWithExtension(
-          join(exposedPath, 'index'),
+          join(exposePath, 'index'),
           remoteOptions.context,
         ) ||
-        exposedPath;
+        exposePath;
       return accumulator;
     },
     {} as Record<string, string>,

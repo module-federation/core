@@ -269,7 +269,13 @@ export class ModuleFederationDevServer {
         this._subscriberWebsocketMap[identifier].send(
           JSON.stringify(exitSubscriber),
         );
-        fileLog(`${identifier} exit`, MF_SERVER_IDENTIFIER, 'warn');
+        fileLog(
+          `${identifier} exit,
+        error: ${err instanceof Error ? err.toString() : JSON.stringify(err)}
+        `,
+          MF_SERVER_IDENTIFIER,
+          'warn',
+        );
       }
     });
 

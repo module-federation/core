@@ -63,6 +63,9 @@
       ],
       "webpack": [
         "./dist/webpack.d.ts"
+      ],
+      "rspack": [
+        "./dist/rspack.d.ts"
       ]
     }
   },

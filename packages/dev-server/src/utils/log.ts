@@ -26,7 +26,10 @@ function fileLog(msg: string, module: string, level: string) {
   const logger4 = log4js.getLogger(module);
   logger4.level = 'debug';
   // @ts-ignore
-  logger4[level](msg);
+  if (logger4[level]) {
+    // @ts-ignore
+    logger4[level](msg);
+  }
 }
 
 function error(error: unknown, action: ActionKind, from: string): string {

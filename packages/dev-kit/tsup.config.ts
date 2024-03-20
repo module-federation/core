@@ -1,13 +1,11 @@
 import { join } from 'path';
 import { defineConfig } from 'tsup';
 
-const ENTRYIES = ['src/index.ts', 'src/lib/forkDevWorker.ts'];
-
 export default defineConfig({
-  entry: [
-    join(__dirname, 'src', 'index.ts'),
-    ...ENTRYIES.map((e) => join(__dirname, 'src', `${e}.ts`)),
-  ],
+  entry: {
+    index: join(__dirname, 'src/index.ts'),
+    forkDevWorker: join(__dirname, 'src/lib/forkDevWorker.ts'),
+  },
   dts: true,
   splitting: true,
   clean: true,

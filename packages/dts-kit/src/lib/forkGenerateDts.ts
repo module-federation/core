@@ -4,11 +4,8 @@ import { exposeRpc } from '../rpc/expose-rpc';
 import { RpcGMCallTypes, type RpcMessage } from '../rpc/types';
 import { generateTypes } from './generateTypes';
 
-export async function forkGenerateDts(
-  options: DtsWorkerOptions,
-  extraOptions?: Record<string, any>,
-) {
-  return generateTypes(options, extraOptions);
+export async function forkGenerateDts(options: DtsWorkerOptions) {
+  return generateTypes(options);
 }
 
 process.on('message', (message: RpcMessage) => {

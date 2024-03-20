@@ -35,6 +35,8 @@
     "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/manifest": "workspace:*",
     "@module-federation/managers": "workspace:*",
+    "@module-federation/dev-plugin": "workspace:*",
+    "@module-federation/native-federation-typescript": "workspace:*",
     "upath": "2.0.1"
   }
 }

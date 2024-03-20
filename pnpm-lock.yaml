@@ -999,9 +999,6 @@ importers:
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../../packages/enhanced
-      '@module-federation/native-federation-typescript':
-        specifier: workspace:*
-        version: link:../../packages/native-federation-typescript
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
@@ -1017,9 +1014,6 @@ importers:
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../../packages/enhanced
-      '@module-federation/native-federation-typescript':
-        specifier: workspace:*
-        version: link:../../packages/native-federation-typescript
       file-loader:
         specifier: 6.2.0
         version: 6.2.0(webpack@5.90.3)
@@ -1032,9 +1026,6 @@ importers:
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../../packages/enhanced
-      '@module-federation/native-federation-typescript':
-        specifier: workspace:*
-        version: link:../../packages/native-federation-typescript
       file-loader:
         specifier: 6.2.0
         version: 6.2.0(webpack@5.90.3)
@@ -1170,6 +1161,33 @@ importers:
         specifier: ^1.0.24
         version: 1.8.27(typescript@5.0.4)
 
+  packages/dev-plugin:
+    dependencies:
+      '@module-federation/dev-kit':
+        specifier: workspace:*
+        version: link:../dev-kit
+      '@module-federation/dev-server':
+        specifier: workspace:*
+        version: link:../dev-server
+      '@module-federation/sdk':
+        specifier: workspace:*
+        version: link:../sdk
+      chalk:
+        specifier: 3.0.0
+        version: 3.0.0
+      fs-extra:
+        specifier: 9.1.0
+        version: 9.1.0
+      shorthash:
+        specifier: 0.0.2
+        version: 0.0.2
+      typescript:
+        specifier: ^4.9.0 || ^5.0.0
+        version: 5.0.4
+      vue-tsc:
+        specifier: ^1.0.24
+        version: 1.8.27(typescript@5.0.4)
+
   packages/dev-server:
     dependencies:
       '@module-federation/sdk':
@@ -1212,6 +1230,9 @@ importers:
       '@module-federation/dev-server':
         specifier: workspace:*
         version: link:../dev-server
+      '@module-federation/managers':
+        specifier: workspace:*
+        version: link:../managers
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -1239,12 +1260,18 @@ importers:
 
   packages/enhanced:
     dependencies:
+      '@module-federation/dev-plugin':
+        specifier: workspace:*
+        version: link:../dev-plugin
       '@module-federation/managers':
         specifier: workspace:*
         version: link:../managers
       '@module-federation/manifest':
         specifier: workspace:*
         version: link:../manifest
+      '@module-federation/native-federation-typescript':
+        specifier: workspace:*
+        version: link:../native-federation-typescript
       '@module-federation/runtime-tools':
         specifier: workspace:*
         version: link:../runtime-tools
@@ -30139,6 +30166,10 @@ packages:
       jsonc-parser: 3.2.1
       vscode-oniguruma: 1.7.0
       vscode-textmate: 8.0.0
+    dev: false
+
+  /shorthash@0.0.2:
+    resolution: {integrity: sha512-L/QRElsfTaCCzA7AJPXuin6/jgWjgmTfjdaXucQ5PauPypmqAZ7t4GueaCv+Jti0M8S2Iv1C/ryD+aWY/KUGCA==}
     dev: false
 
   /should-proxy@1.0.4:
