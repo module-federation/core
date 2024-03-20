@@ -1,0 +1,64 @@
+= Remotes' Name Map
+
+The Enhanced Federation Plugin API introduces a feature called Remotes' Name Map. This feature allows you to create a list of all available remotes for consumption. This guide will walk you through how to use this feature.
+
+== Creating a Remotes' Name Map
+
+To create a Remotes' Name Map, you need to define the remotes in your `ModuleFederationEnhancedPlugin` configuration. 
+
+Here's an example:
+
+[source, javascript]
+----
+const ModuleFederationEnhancedPlugin = require("@schirrel/module-federation-enhanced-plugin");
+
+module.exports = {
+  //... rest of your config
+  plugins: [
+    new ModuleFederationEnhancedPlugin({
+      name: 'myMainModule',
+      // same as the ModuleFederationPlugin config
+      remotes: {
+        app1: "app1@myApp1.com/remoteEntry.js",
+        app2: "app2@coolAppRunningOnCloud.com.br/remoteEntry.js",
+      },
+    }),
+  ],
+};
+----
+
+In this example, `app1` and `app2` are defined as remotes. You can replace these with the remotes you want to define in your application.
+
+This configuration will export a list with `['app1', 'app2']`. It will expose this as a low-level API.
+
+== Using the Remotes' Name Map
+
+Once you've created a Remotes' Name Map, you can use it in your application. Here's an example of how to do this:
+
+[source, javascript]
+----
+const remoteNameListFactory = await window.myMainModule.get('./remoteNameList')
+const remoteNameList = remoteNameListFactory()
+----
+
+In this example, `remoteNameList` will be an array containing the names of the remotes defined by `myMainModule`.
+
+== Using the Remotes' Name Map with Import
+
+To use the Remotes' Name Map with import, your main module must be in your remote entries. Here's an example of how to do this:
+
+[source, javascript]
+----
+remotes: {
+  myMainModule: "myMainModule@myMainModule.com/remoteEntry.js",
+  app1: "app1@myApp1.com/remoteEntry.js",
+  app2: "app2@coolAppRunningOnCloud.com.br/remoteEntry.js",
+},
+----
+
+Then, you can import the Remotes' Name Map as follows:
+
+[source, javascript]
+----
+import remoteNameList from "myRemoteModule/remoteNameList";
+----

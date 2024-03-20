@@ -1,0 +1,44 @@
+= Default Async
+
+The Enhanced Federation Plugin API introduces a powerful feature: Default Async. This feature allows you to control the asynchronous loading of your remotes and modules, providing flexibility and robustness to your application. This guide will walk you through how to use this feature.
+
+== Default Async Behavior
+
+By default, all remotes and modules are converted to asynchronous loading using the Promise-based approach as described in the Webpack documentation. This means that your remotes and modules will not block the loading of your application, improving its performance and user experience.
+
+== Disabling Default Async
+
+If you prefer not to have all remotes load asynchronously by default, you can disable this feature by setting the `defaultAsync` property to `false` in your `ModuleFederationEnhancedPlugin` configuration. Here's an example:
+
+[source, javascript]
+----
+new ModuleFederationEnhancedPlugin({
+  defaultAsync: false
+})
+----
+
+== Enabling Async for Specific Remotes
+
+Even if you've disabled the default async behavior, you can still enable asynchronous loading for specific remotes. To do this, add the `async: true` property to your remote declaration. Here's an example:
+
+[source, javascript]
+----
+new ModuleFederationEnhancedPlugin({
+  defaultAsync: false,
+  remotes: {
+    app1: {
+      name: "app1",
+      url: 'myApp1.com/remoteEntry.js'
+    },
+    app2: {
+      async: true,
+      name: "app2",
+      url: 'myApp2.com/remoteEntry.js'
+    }
+  }
+})
+----
+
+In this example, `app1` will load synchronously, while `app2` will load asynchronously.
+
+The Default Async feature of the Enhanced Federation Plugin API provides you with the flexibility to control how your remotes and modules load, allowing you to optimize your application's performance based on your specific needs.
