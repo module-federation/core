@@ -1,0 +1,128 @@
+= TypeScript with Module Federation in Next.js Applications
+
+== Introduction
+
+This documentation guide focuses on integrating TypeScript in Module Federation using the `@module-federation/nextjs-mf` plugin (formerly known as `@module-federation/typescript`). Module Federation, a feature of Webpack v5, enables you to build and orchestrate multiple applications as if they were a single cohesive unit.
+
+In this guide, we will develop three Next.js micro-frontends: two of them will expose distinct functionalities (a component and a common function), and the third will consume these functionalities.
+
+== Prerequisites
+
+- **Next.js Version**: Ensure your Next.js application is v10.2 or higher to support Webpack 5. This tutorial uses Next.js 13 (excluding the app directory).
+- **TypeScript**: Familiarity with TypeScript is required.
+- **Module Federation**: Basic understanding of Module Federation in Webpack v5.
+
+== Implementation Steps
+
+=== 1. Creating the Projects
+
+Initialize three Next.js applications with TypeScript support:
+
+[source, bash]
+----
+npx create-next-app@latest --typescript [project-name]
+----
+
+Do this for each micro-frontend project.
+
+=== 2. Installing Dependencies
+
+In each project, install the `@module-federation/nextjs-mf` library:
+
+[source, bash]
+----
+npm install @module-federation/nextjs-mf
+----
+
+=== 3. Developing the Micro-frontends
+
+==== Micro-frontend 1: Header Component
+
+In the first project, create a simple Header component:
+
+1. Inside the `src` folder, create a `components` folder.
+2. Create `Header.tsx` with your desired content.
+
+Example `Header.tsx`:
+
+[source, typescript]
+----
+export function Header() {
+  return (
+    <header style={{ ... }}>
+      {/* Header content */}
+    </header>
+  );
+}
+----
+
+==== Configuring Module Federation
+
+In `next.config.js`, configure Module Federation:
+
+[source, javascript]
+----
+const NextFederationPlugin = require("@module-federation/nextjs-mf");
+
+module.exports = {
+  webpack(config, options) {
+    // Webpack configuration
+    config.plugins.push(
+      new NextFederationPlugin({
+        name: "header",
+        filename: "static/chunks/remoteEntry.js",
+        exposes: {
+          "./component/Header": "./src/components/Header.tsx",
+        },
+        shared: {},
+      })
+    );
+    return config;
+  },
+};
+----
+
+==== Micro-frontend 2: Consumer
+
+Create a consumer micro-frontend:
+
+1. In the consumer project, create `index.tsx`.
+2. Import and use the Header component dynamically.
+
+Example `index.tsx`:
+
+[source, typescript]
+----
+import dynamic from "next/dynamic";
+
+const Header = dynamic(
+  () => import("header/component/Header").then((m) => m.Header),
+  { ssr: false }
+);
+
+export default function Home() {
+  return (
+    <>
+      <h1>Micro-frontends in Next.js</h1>
+      <Header />
+    </>
+  );
+};
+----
+
+=== 4. Resolving Module Federation Issues
+
+If encountering module resolution errors, create a TypeScript declaration:
+
+1. Create a `@types` folder.
+2. Inside it, create `module.d.ts`.
+3. Declare the non-existent module:
+
+[source, typescript]
+----
+declare module "header/component/Header";
+----
+
+== Conclusion
+
+You now have a foundational setup for using TypeScript with Module Federation in Next.js. For advanced use cases and further configurations, refer to the respective documentation pages.

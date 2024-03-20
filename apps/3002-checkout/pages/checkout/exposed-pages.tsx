@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { loadRemote } from '@module-federation/runtime';
 
 import { injectScript } from '@module-federation/nextjs-mf/utils';
 
@@ -7,17 +8,15 @@ export default function ExposedPages() {
   const [pageMapV2, setPageMapV2] = useState('');
 
   useEffect(() => {
-    injectScript('checkout')
-      .then((container) => container.get('./pages-map'))
-      .then((data) => {
-        setPageMap(data);
-      });
+    loadRemote('checkout/pages-map').then((data) => {
+      //@ts-ignore
+      setPageMap(data);
+    });
 
-    injectScript('checkout')
-      .then((container) => container.get('./pages-map-v2'))
-      .then((data) => {
-        setPageMapV2(data);
-      });
+    loadRemote('checkout/pages-map-v2').then((data) => {
+      //@ts-ignore
+      setPageMapV2(data);
+    });
   }, []);
 
   return (

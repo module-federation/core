@@ -3,7 +3,6 @@ export type { ImportRemoteOptions } from './utils/importRemote';
 export type { LoggerInstance } from './Logger';
 
 export {
-  createDelegatedModule,
   createRuntimeVariables,
   getContainer,
   injectScript,

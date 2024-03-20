@@ -6,11 +6,12 @@ import {
   normalizeRuntimeInitOptionsWithOutShared,
   modifyEntry,
   createHash,
+  normalizeToPosixPath,
 } from './utils';
 import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '../constant';
-import type { ModuleFederationPluginOptions } from '../../../declarations/plugins/container/ModuleFederationPlugin';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -34,21 +35,21 @@ const RuntimePath = require.resolve('@module-federation/runtime', {
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 class FederationRuntimePlugin {
-  options?: ModuleFederationPluginOptions;
+  options?: moduleFederationPlugin.ModuleFederationPluginOptions;
   entryFilePath: string;
   bundlerRuntimePath: string;
 
-  constructor(options?: ModuleFederationPluginOptions) {
-    this.options = options;
+  constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
+    this.options = options ? { ...options } : undefined;
     this.entryFilePath = '';
     this.bundlerRuntimePath = BundlerRuntimePath;
   }
 
   static getTemplate(runtimePlugins: string[], bundlerRuntimePath?: string) {
     // internal runtime plugin
-    const normalizedBundlerRuntimePath = (
-      bundlerRuntimePath || BundlerRuntimePath
-    ).replaceAll('\\', '/');
+    const normalizedBundlerRuntimePath = normalizeToPosixPath(
+      bundlerRuntimePath || BundlerRuntimePath,
+    );
 
     let runtimePluginTemplates = '';
     const runtimePLuginNames: string[] = [];
@@ -56,11 +57,11 @@ class FederationRuntimePlugin {
     if (Array.isArray(runtimePlugins)) {
       runtimePlugins.forEach((runtimePlugin, index) => {
         const runtimePluginName = `plugin_${index}`;
-        const runtimePluginPath = (
+        const runtimePluginPath = normalizeToPosixPath(
           path.isAbsolute(runtimePlugin)
             ? runtimePlugin
-            : path.join(process.cwd(), runtimePlugin)
-        ).replaceAll('\\', '/');
+            : path.join(process.cwd(), runtimePlugin),
+        );
 
         runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
         runtimePLuginNames.push(runtimePluginName);

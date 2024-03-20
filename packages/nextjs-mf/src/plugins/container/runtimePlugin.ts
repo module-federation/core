@@ -72,33 +72,74 @@ export default function (): FederationRuntimePlugin {
     },
     onLoad(args) {
       const { exposeModuleFactory, exposeModule, id } = args;
-
       const moduleOrFactory = exposeModuleFactory || exposeModule;
-      const exposedModuleExports = moduleOrFactory();
-      const handler = {
-        //@ts-ignore
-        get: function (target, prop, receiver) {
-          const origMethod = target[prop];
-          if (typeof origMethod === 'function') {
-            //@ts-ignore
-            return function (...args) {
-              globalThis.usedChunks.add(
-                //@ts-ignore
-                id,
-              );
+      if (!moduleOrFactory) return; // Ensure moduleOrFactory is defined
+      let exposedModuleExports: any = moduleOrFactory();
 
-              // console.log(`function as called to ${prop}`, id);
-              //@ts-ignore
-              return origMethod.apply(this, args);
-            };
-          } else {
+      if (typeof window === 'undefined') {
+        const handler: ProxyHandler<any> = {
+          get(target, prop, receiver) {
+            // Check if accessing a static property of the function itself
+            if (
+              target === exposedModuleExports &&
+              typeof exposedModuleExports[prop] === 'function'
+            ) {
+              return function (this: unknown, ...args: any[]) {
+                globalThis.usedChunks.add(id);
+                return exposedModuleExports[prop].apply(this, args);
+              };
+            }
+
+            const originalMethod = target[prop];
+            if (typeof originalMethod === 'function') {
+              const proxiedFunction = function (this: unknown, ...args: any[]) {
+                globalThis.usedChunks.add(id);
+                return originalMethod.apply(this, args);
+              };
+
+              // Copy all enumerable properties from the original method to the proxied function
+              Object.keys(originalMethod).forEach((prop) => {
+                Object.defineProperty(proxiedFunction, prop, {
+                  value: originalMethod[prop],
+                  writable: true,
+                  enumerable: true,
+                  configurable: true,
+                });
+              });
+
+              return proxiedFunction;
+            }
+
             return Reflect.get(target, prop, receiver);
-          }
-        },
-      };
+          },
+        };
 
-      return () => new Proxy(exposedModuleExports, handler);
+        if (typeof exposedModuleExports === 'function') {
+          // If the module export is a function, we create a proxy that can handle both its
+          // call (as a function) and access to its properties (including static methods).
+          exposedModuleExports = new Proxy(exposedModuleExports, handler);
+
+          // Proxy static properties specifically
+          const staticProps = Object.getOwnPropertyNames(exposedModuleExports);
+          staticProps.forEach((prop) => {
+            if (typeof exposedModuleExports[prop] === 'function') {
+              exposedModuleExports[prop] = new Proxy(
+                exposedModuleExports[prop],
+                handler,
+              );
+            }
+          });
+        } else {
+          // For objects, just wrap the exported object itself
+          exposedModuleExports = new Proxy(exposedModuleExports, handler);
+        }
+
+        return () => exposedModuleExports;
+      }
+
+      return args;
     },
+
     resolveShare(args) {
       if (
         args.pkgName !== 'react' &&

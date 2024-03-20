@@ -6,7 +6,6 @@ const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
 module.exports = composePlugins(withNx(), withReact(), (config, context) => {
-  // const webpack = require('/Users/bytedance/outter/universe/node_modules/.pnpm/webpack@5.89.0_@swc+core@1.3.99_esbuild@0.19.7/node_modules/webpack/lib/index.js')
   // const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
   config.plugins.push(
     new ModuleFederationPlugin({

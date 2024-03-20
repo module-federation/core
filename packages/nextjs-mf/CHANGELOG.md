@@ -1,5 +1,98 @@
 # [8.1.0-canary.7](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.2.4
+
+### Patch Changes
+
+- Updated dependencies [ce0597e]
+  - @module-federation/runtime@0.0.17
+  - @module-federation/node@2.0.15
+  - @module-federation/enhanced@0.0.17
+  - @module-federation/sdk@0.0.17
+
+## 8.2.3
+
+### Patch Changes
+
+- @module-federation/enhanced@0.0.16
+- @module-federation/node@2.0.14
+- @module-federation/runtime@0.0.16
+- @module-federation/sdk@0.0.16
+
+## 8.2.2
+
+### Patch Changes
+
+- 49867bb: Fix issue with function proxy not returning static methods
+
+## 8.2.1
+
+### Patch Changes
+
+- Updated dependencies [3a45d99]
+- Updated dependencies [ba5bedd]
+- Updated dependencies [6e9b6d5]
+  - @module-federation/sdk@0.0.15
+  - @module-federation/enhanced@0.0.15
+  - @module-federation/runtime@0.0.15
+  - @module-federation/node@2.0.13
+
+## 8.2.0
+
+### Minor Changes
+
+- a51ee43: Fix nextjs 14 loader rule errors
+
+## 8.1.11
+
+### Patch Changes
+
+- a050645: remove tech debt leftover from before federation enhanced apis
+- Updated dependencies [a050645]
+- Updated dependencies [4fc20cc]
+- Updated dependencies [cd8c7bf]
+- Updated dependencies [5576c6b]
+- Updated dependencies [a050645]
+- Updated dependencies [d21216a]
+  - @module-federation/runtime@0.0.14
+  - @module-federation/node@2.0.12
+  - @module-federation/sdk@0.0.14
+  - @module-federation/utilities@3.0.6
+  - @module-federation/enhanced@0.0.14
+
+## 8.1.10
+
+### Patch Changes
+
+- Updated dependencies [804447c]
+  - @module-federation/runtime@0.0.13
+  - @module-federation/sdk@0.0.13
+  - @module-federation/node@2.0.11
+  - @module-federation/enhanced@0.0.13
+
+## 8.1.9
+
+### Patch Changes
+
+- Updated dependencies [4ca0c7b]
+  - @module-federation/enhanced@0.0.12
+  - @module-federation/node@2.0.10
+  - @module-federation/runtime@0.0.12
+  - @module-federation/sdk@0.0.12
+
+## 8.1.8
+
+### Patch Changes
+
+- 845bc52: fix(nextjs-mf): errorLoadRemote hook not to be overridden
+- Updated dependencies [b2ead7a]
+- Updated dependencies [589a3bd]
+- Updated dependencies [5c17bc4]
+  - @module-federation/runtime@0.0.11
+  - @module-federation/enhanced@0.0.11
+  - @module-federation/node@2.0.9
+  - @module-federation/sdk@0.0.11
+
 ## 8.1.7
 
 ### Patch Changes

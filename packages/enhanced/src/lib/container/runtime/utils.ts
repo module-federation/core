@@ -1,10 +1,12 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import upath from 'upath';
+import path from 'path';
 import crypto from 'crypto';
 import { parseOptions } from '../options';
 import type { init } from '@module-federation/runtime-tools';
 import type webpack from 'webpack';
 import type RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import type { ModuleFederationPluginOptions } from '../../../declarations/plugins/container/ModuleFederationPlugin';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 import { NormalizedRuntimeInitOptionsWithOutShared } from '../../../types/runtime';
 
 const extractUrlAndGlobal = require(
@@ -30,7 +32,7 @@ export function getFederationGlobalScope(
 }
 
 export function normalizeRuntimeInitOptionsWithOutShared(
-  options: ModuleFederationPluginOptions,
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
 ): NormalizedRuntimeInitOptionsWithOutShared {
   const parsedOptions = parseOptions(
     options.remotes || [],
@@ -102,3 +104,6 @@ export function modifyEntry(options: ModifyEntryOptions): void {
 export function createHash(contents: string): string {
   return crypto.createHash('md5').update(contents).digest('hex');
 }
+
+export const normalizeToPosixPath = (p: string) =>
+  upath.normalizeSafe(path.normalize(p || ''));

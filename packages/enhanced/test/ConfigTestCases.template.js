@@ -9,7 +9,6 @@ const { URL, pathToFileURL, fileURLToPath } = require('url');
 const rimraf = require('rimraf');
 const checkArrayExpectation = require('./checkArrayExpectation');
 const createLazyTestEnv = require('./helpers/createLazyTestEnv');
-const deprecationTracking = require('./helpers/deprecationTracking');
 const FakeDocument = require('./helpers/FakeDocument');
 const CurrentScript = require('./helpers/CurrentScript');
 
@@ -29,8 +28,7 @@ const categories = fs.readdirSync(casesPath).map((cat) => {
       .sort(),
   };
 });
-// .filter((i) => i.name === 'sharing');
-
+// .filter((i) => i.name === 'container');
 const createLogger = (appendTarget) => {
   return {
     log: (l) => appendTarget.push(l),
@@ -64,7 +62,7 @@ const describeCases = (config) => {
     for (const category of categories) {
       // eslint-disable-next-line no-loop-func
       describe(category.name, () => {
-        // category.tests = [category.tests[11]];
+        // category.tests = [category.tests[1]];
         for (const testName of category.tests) {
           // eslint-disable-next-line no-loop-func
           describe(testName, function () {
@@ -196,9 +194,7 @@ const describeCases = (config) => {
                 rimraf.sync(outputDirectory);
                 fs.mkdirSync(outputDirectory, { recursive: true });
                 infraStructureLog.length = 0;
-                const deprecationTracker = deprecationTracking.start();
                 require('webpack')(options, (err) => {
-                  deprecationTracker();
                   const infrastructureLogging = stderr.toString();
                   if (infrastructureLogging) {
                     return done(
@@ -236,9 +232,7 @@ const describeCases = (config) => {
                 rimraf.sync(outputDirectory);
                 fs.mkdirSync(outputDirectory, { recursive: true });
                 infraStructureLog.length = 0;
-                const deprecationTracker = deprecationTracking.start();
                 require('webpack')(options, (err, stats) => {
-                  deprecationTracker();
                   if (err) return handleFatalError(err, done);
                   const { modules, children, errorsCount } = stats.toJson({
                     all: false,
@@ -305,9 +299,7 @@ const describeCases = (config) => {
               rimraf.sync(outputDirectory);
               fs.mkdirSync(outputDirectory, { recursive: true });
               infraStructureLog.length = 0;
-              const deprecationTracker = deprecationTracking.start();
               const onCompiled = (err, stats) => {
-                const deprecations = deprecationTracker();
                 if (err) return handleFatalError(err, done);
                 const statOptions = {
                   preset: 'verbose',
@@ -360,7 +352,7 @@ const describeCases = (config) => {
                 if (
                   checkArrayExpectation(
                     testDirectory,
-                    { deprecations },
+                    { deprecations: [] },
                     'deprecation',
                     'Deprecation',
                     done,

@@ -1,14 +1,14 @@
 import type { WebpackPluginInstance, Compiler } from 'webpack';
-import type { ContainerPluginOptions } from '../declarations/plugins/container/ContainerPlugin';
+import type { containerPlugin } from '@module-federation/sdk';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 const PLUGIN_NAME = 'ContainerPlugin';
 
 export default class ContainerPlugin implements WebpackPluginInstance {
-  private _options: ContainerPluginOptions;
+  private _options: containerPlugin.ContainerPluginOptions;
   name: string;
 
-  constructor(options: ContainerPluginOptions) {
+  constructor(options: containerPlugin.ContainerPluginOptions) {
     this._options = options;
     this.name = PLUGIN_NAME;
   }

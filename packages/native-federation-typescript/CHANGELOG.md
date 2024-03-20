@@ -1,5 +1,17 @@
 # [1.0.0-canary.1](https://github.com/module-federation/universe/compare/native-federation-typescript-0.2.6...native-federation-typescript-1.0.0-canary.1) (2023-11-06)
 
+## 0.3.1
+
+### Patch Changes
+
+- bc053b8: fix: behaviour during vite dev mode
+
+## 0.3.0
+
+### Minor Changes
+
+- bb0302b: feat: configurable maxRetries package unzip
+
 ### Bug Fixes
 
 - **deps:** update dependency antd to v4.24.14 ([#1309](https://github.com/module-federation/universe/issues/1309)) ([d0a2314](https://github.com/module-federation/universe/commit/d0a231470e37dbad85a11df1f12695657ba3b984))

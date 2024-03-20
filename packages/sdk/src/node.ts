@@ -84,7 +84,8 @@ export function createScriptNode(
           const exportedInterface: Record<string, any> =
             scriptContext.module.exports || scriptContext.exports;
           if (attrs && exportedInterface && attrs['globalName']) {
-            const container = exportedInterface[attrs['globalName']];
+            const container =
+              exportedInterface[attrs['globalName']] || exportedInterface;
             cb(
               undefined,
               container as keyof typeof scriptContext.module.exports,

@@ -1,38 +1,86 @@
 .Getting Started
-* xref:history.adoc[History of Module Federation]
-* xref:getting-started.adoc[What is Module Federation?]
-* xref:setup.adoc[Setting up Environment]
-* xref:getting-started-practical.adoc[Getting Started]
-* xref:use-cases.adoc[Use Cases]
-* xref:pros-cons.adoc[Pros and Cons of Module Federation]
-* xref:best-practices.adoc[Best Practices and Tips]
+* xref:getting-started/what-is-mf.adoc[What is Module Federation?]
+* xref:getting-started/history.adoc[History of Module Federation]
+* xref:getting-started/use-cases.adoc[Use Cases]
+* xref:getting-started/pros-cons.adoc[Pros and Cons of Module Federation]
+* xref:getting-started/setup.adoc[Setting up Environment]
+* xref:getting-started/getting-started-practical.adoc[Practical Getting Started]
+* xref:getting-started/best-practices.adoc[Best Practices and Tips]
+* xref:getting-started/loc-dev-deployment.adoc[Simplifying Local Development and Deployment]
 
 .Core Features
-* xref:dynamic-remotes.adoc[Dynamic Remotes in Module Federation]
-* xref:shared-api.adoc[]
-* xref:delegate-modules.adoc[]
-* xref:versioned-shared-modules.adoc[]
-* xref:cache_busting.adoc[]
+* xref:core-features/dynamic-remotes.adoc[Using Dynamic Remotes]
+* xref:core-features/shared-api.adoc[Module Federation Shared API]
+* xref:core-features/delegate-modules.adoc[Delegate Modules]
+* xref:core-features/versioned-shared-modules.adoc[Versioned Shared Modules]
+* xref:core-features/cache_busting.adoc[Cache Busting]
 
 .Recipes
-* xref:examples-demos.adoc[]
-* xref:mf-ssr.adoc[]
-* xref:team-collaboration-review.adoc[]
-* xref:unit-testing.adoc[]
-* xref:public-path-dynamic.adoc[]
-* xref:resiliency-failovers.adoc[]
-* xref:naming-convention-tips.adoc[Naming Conventions for Modules and Exports ]
-* xref:shared-header-footer.adoc[]
-* xref:composable-commerce-PBC-edition.adoc[]
+* xref:recipes/examples-demos.adoc[Examples and Demos]
+* xref:recipes/mf-ssr.adoc[Server-Side Rendering with Module Federation]
+* xref:recipes/unit-testing.adoc[Unit Tests for Distributed Code]
+* xref:recipes/public-path-dynamic.adoc[Setting the Dynamic Public Path]
+* xref:recipes/resiliency-failovers.adoc[Improving Resiliency and Failovers]
+* xref:recipes/naming-convention-tips.adoc[Strategies for Naming Modules and Exports]
+* xref:recipes/sentry-logging.adoc[Sentry Logging in Module Federation]
+* xref:recipes/shared-header-footer.adoc[Shared Header and Footer]
+// * xref:composable-commerce-simple.adoc[Composable Commerce: Simple Edition]
+* xref:recipes/composable-commerce-PBC-edition.adoc[Composable Commerce with Module Federation]
+* xref:recipes/state-management-redux.adoc[State Management with Redux in Module Federation]
+* xref:recipes/tailwind-mf.adoc[Tailwind CSS in Module Federation]
+* xref:agnostic-way/index.adoc[Framework Agnostic Approaches in Module Federation]
+
+* xref:recipes/mf-enterprise.adoc[Module Federation for Enterprise]
+* xref:recipes/mf-rollupjs.adoc[Implementing Module Federation in Rollup.JS]
+* xref:recipes/mf-typescript-plugin.adoc[TypeScript with Module Federation in Next.js Applications]
+* xref:recipes/mf-split-chunks.adoc[Consolidating Multiple Vendor Bundles with SplitChunksPlugin]
 
 .Concepts
-* xref:component-level-ownership.adoc[Component Level Ownership]
-* xref:brown-green.adoc[]
+* xref:concepts/component-level-ownership.adoc[Component Level Ownership]
+* xref:concepts/brown-green.adoc[Brownfield vs. Greenfield Development]
+* xref:concepts/component-vs-mf.adoc[Difference Between a Component and a Micro-Frontend]
+* xref:concepts/antipatterns.adoc[Antipatterns in Module Federation]
 
 .Packages
-* xref:module-federation-node.adoc[@module-federation/node]
-* xref:module-federation-typescript.adoc[@module-federation/typescript - v2.4.2]
-* xref:module-federation-utilities.adoc[@module-federation/utilities]
-* xref:module-federation-native-federation-typescript.adoc[@module-federation/native-federation-typescript - v0.2.6]
-* xref:module-federation-native-federation-tests.adoc[@module-federation/native-federation-tests - v0.2.1]
+* xref:packages/module-federation-node.adoc[@module-federation/node]
+* xref:packages/module-federation-typescript.adoc[@module-federation/typescript - v2.4.2]
+* xref:packages/module-federation-utilities.adoc[@module-federation/utilities]
+* xref:packages/module-federation-native-federation-typescript.adoc[@module-federation/native-federation-typescript - v0.2.6]
+* xref:packages/module-federation-native-federation-tests.adoc[@module-federation/native-federation-tests - v0.2.1]
 
+.Plugins
+* Enhanced API Plugin
+** xref:enhanced_api/about.adoc[About]
+** xref:enhanced_api/installation.adoc[Installation]
+** xref:enhanced_api/getting_started.adoc[Getting Started]
+** xref:enhanced_api/features_default_async.adoc[Feature: Default Async]
+** xref:enhanced_api/features_module_name_map.adoc[Feature: Modules' Name Map]
+** xref:enhanced_api/features_remotes_name_map.adoc[Feature: Remotes' Name Map]
+** xref:enhanced_api/features_remotes_url.adoc[Feature: Remotes' URL]
+** xref:enhanced_api/features_remote_object_definition.adoc[Feature: Object Definition]
+* Helper
+** xref:enhanced_api/helper_about.adoc[About]
+** xref:enhanced_api/helper_installation.adoc[Install]
+** xref:enhanced_api/helper_getModule.adoc[Feature: getModule]
+** xref:enhanced_api/helper_dynamicLoad.adoc[Feature: dynamicLoad]
+
+.Angular Specific
+* xref:angular-way/index.adoc[Setting Up MF in an Angular CLI Application]
+* xref:angular-way/index2.adoc[Setting Up MF in an Angular Application]
+* xref:angular-way/auth0.adoc[Auth0 Authentication with Angular Module Federation]
+* xref:angular-way/okta-auth.adoc[Okta Authentication with Angular Module Federation]
+// * xref:angular-way/i18n-angular.adoc[Internationalization in Angular with Module Federation]
+* xref:angular-way/mf-ssr-angular.adoc[Server-Side Rendering in Angular with Module Federation]
+* xref:angular-way/service-workers-mf.adoc[Service Workers in Angular with Module Federation]
+* xref:angular-way/splitting-to-mf-part1.adoc[Splitting an Angular App to Module Federation: Part 1]
+* xref:angular-way/splitting-to-mf-part2.adoc[Splitting an Angular App to Module Federation: Part 2]
+
+.React Specific
+* xref:react-way/index.adoc[Micro-frontend Projects with Module Federation and React]
+* xref:react-way/i18n-react.adoc[Internationalization in React with Module Federation]
+
+.Vue Specific
+* xref:vue-way/index.adoc[Setting Up Module Federation in a Vue 2 Application]
+
+.Website Contribution and Tools
+* xref:weblate_contribution_guide.adoc[Weblate Contribution Guide]

@@ -1,0 +1,64 @@
+{
+  "name": "managers",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/managers/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/managers/dist",
+        "main": "packages/managers/src/index.ts",
+        "tsConfig": "packages/managers/tsconfig.lib.json",
+        "assets": [],
+        "external": ["@module-federation/*"],
+        "project": "packages/managers/package.json",
+        "rollupConfig": "packages/managers/rollup.config.js",
+        "compiler": "swc",
+        "format": ["cjs", "esm"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/managers/**/*.ts",
+          "packages/managers/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/managers/jest.config.js",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run managers:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run managers:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    }
+  },
+  "tags": ["package"]
+}

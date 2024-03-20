@@ -1,5 +1,78 @@
 # [2.1.0-canary.6](https://github.com/module-federation/universe/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.0.15
+
+### Patch Changes
+
+- Updated dependencies [ce0597e]
+  - @module-federation/runtime@0.0.17
+  - @module-federation/enhanced@0.0.17
+  - @module-federation/sdk@0.0.17
+
+## 2.0.14
+
+### Patch Changes
+
+- @module-federation/enhanced@0.0.16
+- @module-federation/runtime@0.0.16
+- @module-federation/sdk@0.0.16
+
+## 2.0.13
+
+### Patch Changes
+
+- Updated dependencies [3a45d99]
+- Updated dependencies [ba5bedd]
+- Updated dependencies [6e9b6d5]
+  - @module-federation/sdk@0.0.15
+  - @module-federation/enhanced@0.0.15
+  - @module-federation/runtime@0.0.15
+
+## 2.0.12
+
+### Patch Changes
+
+- a050645: Expose node script loaders to bundler runtime. Replace require.loadScript from federation/node to use federation.runtime.loadScriptNode
+- d21216a: add encoding peer dependency for node-fetch
+- Updated dependencies [a050645]
+- Updated dependencies [4fc20cc]
+- Updated dependencies [cd8c7bf]
+- Updated dependencies [5576c6b]
+- Updated dependencies [a050645]
+  - @module-federation/runtime@0.0.14
+  - @module-federation/sdk@0.0.14
+  - @module-federation/utilities@3.0.6
+  - @module-federation/enhanced@0.0.14
+
+## 2.0.11
+
+### Patch Changes
+
+- Updated dependencies [804447c]
+  - @module-federation/runtime@0.0.13
+  - @module-federation/sdk@0.0.13
+  - @module-federation/enhanced@0.0.13
+
+## 2.0.10
+
+### Patch Changes
+
+- Updated dependencies [4ca0c7b]
+  - @module-federation/enhanced@0.0.12
+  - @module-federation/runtime@0.0.12
+  - @module-federation/sdk@0.0.12
+
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [b2ead7a]
+- Updated dependencies [589a3bd]
+- Updated dependencies [5c17bc4]
+  - @module-federation/runtime@0.0.11
+  - @module-federation/enhanced@0.0.11
+  - @module-federation/sdk@0.0.11
+
 ## 2.0.8
 
 ### Patch Changes

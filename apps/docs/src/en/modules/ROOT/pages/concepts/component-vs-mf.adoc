@@ -1,0 +1,48 @@
+= What's the Difference Between a Component and a Micro-Frontend?
+
+== Introduction
+
+In the evolving landscape of web development, the concepts of components and micro-frontends play crucial roles. While both are essential in building modern web applications, they serve distinct purposes and operate at different granularities. This documentation aims to clarify the differences between a component and a micro-frontend, providing insights into their specific roles within the context of web development.
+
+== What is a Component?
+
+A component represents a reusable building block within a web application. It encapsulates a piece of the user interface (UI), including its functionality and styling, which can be reused across different parts of an application or even across different applications.
+
+=== Characteristics of a Component
+
+- **Reusability**: Components are designed to be reused in different contexts within an application.
+- **Encapsulation**: They encapsulate their behavior and styling, separating their internal workings from the rest of the application.
+- **Interactivity**: Components can interact with their environment, receiving inputs and emitting events or outputs.
+
+=== Example: Button Component
+
+Consider a checkbox component in a web application. This simple UI element allows users to make a selection, typically a binary choice, and its appearance and behavior can be customized through various properties:
+
+- Change the checkbox's size.
+- Modify the checkmark color.
+- Control whether the checkbox is initially checked or unchecked.
+- Alter the label associated with the checkbox.
+
+In this example, the checkbox component's properties and behavior are controlled by its parent component or container, illustrating the component's adaptability and encapsulation within different parts of an application.
+
+== What is a Micro-Frontend?
+
+Micro-frontends extend the concept of microservices to the frontend development realm. A micro-frontend is a self-contained portion of a web application, representing a specific business or domain aspect. It allows teams to develop, test, and deploy parts of the application independently.
+
+=== Characteristics of a Micro-Frontend
+
+- **Independence**: Micro-frontends can be developed, tested, and deployed independently of other parts of the application.
+- **Domain-specific**: They are closely aligned with a specific business domain or functionality.
+- **Self-contained**: Each micro-frontend is responsible for its own data fetching, processing, and rendering.
+
+=== Example: User Profile Micro-Frontend
+
+Consider a user profile section in a web application, developed as a micro-frontend. This self-contained unit is responsible for displaying and managing user information, including user preferences, contact details, and account settings. It operates independently, with its own backend services for fetching and updating user data, and its own frontend for presenting and interacting with this data.
+
+In this example, the user profile micro-frontend encapsulates all the functionality related to managing user profiles, demonstrating its independence and domain-specific focus. It can be developed, tested, and deployed independently of other features in the application, showcasing the core principles of micro-frontend architecture.through well-defined interfaces.
+
+== Summary
+
+*Component:* A component is a technical solution that encapsulates a specific behavior within a frontend element. This behavior can be modified or controlled by a parent component or container, allowing for reusable and encapsulated UI building blocks within the application.
+
+*Micro-Frontend:* A micro-frontend, in the context of module federation, is a technical representation of a business subdomain. It possesses its own behavior and logic, which are driven and controlled by itself rather than by external entities. This self-contained approach facilitates independent development and deployment, aligning closely with specific business functionalities or domains.

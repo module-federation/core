@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ContainerManager manifestModuleInfos 1`] = `
+{
+  "./Button": {
+    "file": [
+      "./src/Button.jsx",
+    ],
+    "name": "Button",
+  },
+  "./Button2": {
+    "file": [
+      "./src/Button2.jsx",
+    ],
+    "name": "Button2",
+  },
+}
+`;
+
+exports[`ContainerManager webpackEntry 1`] = `
+{
+  "button": [
+    "./src/Button.jsx",
+  ],
+  "button2": [
+    "./src/Button2.jsx",
+  ],
+}
+`;

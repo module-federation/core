@@ -79,6 +79,12 @@ initializeSharing(shareScopeName?: string): boolean | Promise<boolean>
 ```
 Initializes sharing sequences for shared scopes.
 
+### `registerRemotes`
+```typescript
+registerRemotes(remotes: Remote[], options?: { force?: boolean }): void
+```
+Register remotes after init.
+
 ## Hooks
 `FederationHost` offers various lifecycle hooks for interacting at different stages of the module federation process. These hooks include:
 

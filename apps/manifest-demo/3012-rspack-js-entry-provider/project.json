@@ -1,0 +1,47 @@
+{
+  "name": "3012-rspack-js-entry-provider",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/manifest-demo/3012-rspack-js-entry-provider/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "web",
+        "outputPath": "apps/manifest-demo/3012-rspack-js-entry-provider/dist",
+        "indexHtml": "apps/manifest-demo/3012-rspack-js-entry-provider/src/index.html",
+        "main": "apps/manifest-demo/3012-rspack-js-entry-provider/src/index.jsx",
+        "tsConfig": "apps/manifest-demo/3012-rspack-js-entry-provider/tsconfig.app.json",
+        "rspackConfig": "apps/manifest-demo/3012-rspack-js-entry-provider/rspack.config.js"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "serve": {
+      "executor": "@nx/rspack:dev-server",
+      "defaultConfiguration": "production",
+      "options": {
+        "rspackConfig": "apps/manifest-demo/3012-rspack-js-entry-provider/rspack.config.js",
+        "buildTarget": "3012-rspack-js-entry-provider:build",
+        "port": 3012
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "3012-rspack-js-entry-provider:build:development",
+          "port": 3012
+        },
+        "production": {
+          "buildTarget": "3012-rspack-js-entry-provider:build:production",
+          "port": 3012
+        }
+      }
+    }
+  },
+  "tags": []
+}

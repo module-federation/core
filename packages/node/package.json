@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "2.0.8",
+  "version": "2.0.15",
   "type": "commonjs",
   "main": "./dist/src/index.js",
   "exports": {
@@ -39,6 +39,7 @@
   "author": "Zack Jackson <zackary.l.jackson@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "encoding": "^0.1.13",
     "node-fetch": "2.7.0",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/sdk": "workspace:*",

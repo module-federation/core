@@ -1,0 +1,51 @@
+= About Enhanced Federation Plugin API
+
+The Enhanced Federation Plugin API is a powerful tool designed to augment the capabilities of Module Federation, a feature provided by Webpack. This document aims to provide a comprehensive overview of the Enhanced Federation Plugin API, its features, and how it can be used to improve your development workflow.
+
+== Async by Default
+
+One of the key improvements offered by the Enhanced Federation Plugin API is the introduction of asynchronous loading by default. With the standard Module Federation Plugin, all applications are loaded at startup. While this is fine for dependencies, it can cause issues when integrating other applications. For instance, if one application is temporarily unavailable, the entire shell application fails to load.
+
+To mitigate this issue, the Enhanced Federation Plugin API encapsulates the Promise Based Dynamic Remotes approach, making it a default behavior. This means that applications are loaded asynchronously, preventing a single application's failure from affecting the entire shell application. However, if you prefer, you can disable this feature for all remotes or selectively enable or disable it for individual ones.
+
+== Object Remote
+
+The Enhanced Federation Plugin API introduces a more flexible way to define remotes, making it easier to manage and customize them. Instead of having to repeatedly add `remoteEntry.js` to all remotes and perform string concatenation for environment variables or validations, you can now split the definition of the name and URL.
+
+For example, you can define a remote as follows:
+
+[source, javascript]
+----
+{
+  authRemote: {
+    name: "auth",
+    url: process.env.authUrl
+  },
+  dsRemote: {
+    name: "ds",
+    url: () => someValidation ? process.env.dsUrl : "http://mydefaultds.com",
+    remoteEntry: "dsEntryVersion.js" 
+  },
+}
+----
+
+This will generate:
+
+----
+auth@authUrlFromEnv.com/remoteEntry.js
+ds@dsUrlAfteValidation/dsEntryVersion.js
+----
+
+This approach simplifies the process of defining remotes and makes your code cleaner and more maintainable.
+
+== Lists
+
+As the number of remotes and exposed modules increases, you may find it necessary to dynamically load or monitor each one. To facilitate this, the Enhanced Federation Plugin API provides several list methods. These include:
+
+- Listing of remote names consumed in a remote
+- List of modules exposed from a remote
+- List of remote names and URLs (also available as an object Map)
+
+These list methods provide a convenient way to manage and monitor your remotes and modules, making it easier to maintain large and complex applications.
+
+We hope this overview of the Enhanced Federation Plugin API has been helpful. This plugin is designed to enhance the capabilities of Module Federation, making it easier and more efficient to develop and manage your applications. We encourage you to explore its features and see how it can improve your development workflow.

@@ -95,7 +95,7 @@ class Module {
           origin: this.host,
         });
 
-      remoteEntryExports.init(
+      await remoteEntryExports.init(
         initContainerOptions.shareScope,
         initContainerOptions.initScope,
         initContainerOptions.remoteEntryInitOptions,

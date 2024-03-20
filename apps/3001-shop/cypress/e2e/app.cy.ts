@@ -1,7 +1,12 @@
 import { getH1, getH3 } from '../support/app.po';
 
 describe('3001-shop/', () => {
-  beforeEach(() => cy.visit('/'));
+  beforeEach(() => {
+    cy.visit('/');
+    cy.visit('/shop');
+    cy.visit('/checkout');
+    cy.visit('/');
+  });
 
   describe('Welcome message', () => {
     it('should display welcome message', () => {
@@ -100,7 +105,7 @@ describe('3001-shop/', () => {
             cy.request(src).its('status').should('eq', 200);
           });
       });
-      xit('should check that shop-webpack-png images are not 404 between route clicks', () => {
+      it('should check that shop-webpack-png images are not 404 between route clicks', () => {
         cy.visit('/shop');
         cy.url().should('include', '/shop');
         getH1().contains('Shop Page');

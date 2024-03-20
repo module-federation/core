@@ -17,6 +17,7 @@ function getLinkInfos(): Array<LinkInfo> {
   const linkInfos: Array<LinkInfo> = [...links].map((link) => ({
     type: link.getAttribute('as') || '',
     href: link.getAttribute('href') || '',
+    rel: link.getAttribute('rel') || '',
   }));
   return linkInfos;
 }
@@ -237,7 +238,7 @@ describe('preload-remote inBrowser', () => {
   beforeEach(() => {
     document.head.innerHTML = '';
     document.body.innerHTML = '';
-    globalThis.__FEDERATION__.__PRELOADED_MAP__.clear();
+    Global.__FEDERATION__.__PRELOADED_MAP__.clear();
   });
 
   const FMInstance = init({
@@ -284,14 +285,12 @@ describe('preload-remote inBrowser', () => {
     ]);
 
     expect(getPreloadElInfos()).toMatchSnapshot();
-    expect(globalThis.__FEDERATION__.__PRELOADED_MAP__.size).toBe(2);
+    expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(2);
     expect(
-      globalThis.__FEDERATION__.__PRELOADED_MAP__.get(
-        '@federation/sub1/button',
-      ),
+      Global.__FEDERATION__.__PRELOADED_MAP__.get('@federation/sub1/button'),
     ).toBe(true);
     expect(
-      globalThis.__FEDERATION__.__PRELOADED_MAP__.get(
+      Global.__FEDERATION__.__PRELOADED_MAP__.get(
         '@federation/sub1-button/button',
       ),
     ).toBe(true);
@@ -309,21 +308,17 @@ describe('preload-remote inBrowser', () => {
     ]);
 
     expect(getPreloadElInfos()).toMatchSnapshot();
-    expect(globalThis.__FEDERATION__.__PRELOADED_MAP__.size).toBe(3);
+    expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(3);
     expect(
-      globalThis.__FEDERATION__.__PRELOADED_MAP__.get(
-        '@federation/sub2/button',
-      ),
+      Global.__FEDERATION__.__PRELOADED_MAP__.get('@federation/sub2/button'),
     ).toBe(true);
     expect(
-      globalThis.__FEDERATION__.__PRELOADED_MAP__.get(
+      Global.__FEDERATION__.__PRELOADED_MAP__.get(
         '@federation/sub2-button/button',
       ),
     ).toBe(true);
     expect(
-      globalThis.__FEDERATION__.__PRELOADED_MAP__.get(
-        '@federation/sub2-add/add',
-      ),
+      Global.__FEDERATION__.__PRELOADED_MAP__.get('@federation/sub2-add/add'),
     ).toBe(true);
     reset();
   });
@@ -331,7 +326,7 @@ describe('preload-remote inBrowser', () => {
   it('3 preload with expose config ', async () => {
     const reset = addGlobalSnapshot(mockSnapshot);
 
-    expect(globalThis.__FEDERATION__.__PRELOADED_MAP__.size).toBe(0);
+    expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(0);
     await FMInstance.preloadRemote([
       {
         nameOrAlias: '@federation/sub3',
@@ -341,9 +336,9 @@ describe('preload-remote inBrowser', () => {
     ]);
     expect(getPreloadElInfos()).toMatchSnapshot();
 
-    expect(globalThis.__FEDERATION__.__PRELOADED_MAP__.size).toBe(1);
+    expect(Global.__FEDERATION__.__PRELOADED_MAP__.size).toBe(1);
     expect(
-      globalThis.__FEDERATION__.__PRELOADED_MAP__.get('@federation/sub3/add'),
+      Global.__FEDERATION__.__PRELOADED_MAP__.get('@federation/sub3/add'),
     ).toBe(true);
 
     await FMInstance.preloadRemote([

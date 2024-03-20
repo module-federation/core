@@ -40,8 +40,8 @@ import { formatPreloadArgs, preloadAssets } from './utils/preload';
 import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
 import { snapshotPlugin } from './plugins/snapshot';
 import { isBrowserEnv } from './utils/env';
-import { getRemoteInfo } from './utils/load';
-import { Global, Federation } from './global';
+import { getRemoteEntryUniqueKey, getRemoteInfo } from './utils/load';
+import { Global, Federation, globalLoading } from './global';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from './constant';
 import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
 
@@ -203,6 +203,14 @@ export class FederationHost {
         },
       ],
       HTMLScriptElement | void
+    >(),
+    createLink: new SyncHook<
+      [
+        {
+          url: string;
+        },
+      ],
+      HTMLLinkElement | void
     >(),
     // only work for manifest , so not open to the public yet
     fetch: new AsyncHook<
@@ -482,6 +490,20 @@ export class FederationHost {
     );
   }
 
+  initRawContainer(
+    name: string,
+    url: string,
+    container: RemoteEntryExports,
+  ): Module {
+    const remoteInfo = getRemoteInfo({ name, entry: url });
+    const module = new Module({ host: this, remoteInfo });
+
+    module.remoteEntryExports = container;
+    this.moduleCache.set(name, module);
+
+    return module;
+  }
+
   private async _getRemoteModuleAndOptions(id: string): Promise<{
     module: Module;
     moduleOptions: ModuleOptions;
@@ -671,7 +693,8 @@ export class FederationHost {
       );
       if (
         !activeVersion ||
-        (!activeVersion.loaded &&
+        (activeVersion.strategy !== 'loaded-first' &&
+          !activeVersion.loaded &&
           (Boolean(!eager) !== !activeVersionEager
             ? eager
             : hostName > activeVersion.from))
@@ -699,7 +722,6 @@ export class FederationHost {
         register(shareName, shared);
       }
     });
-
     if (strategy === 'version-first') {
       this.options.remotes.forEach((remote) => {
         if (remote.shareScope === shareScopeName) {
@@ -747,39 +769,7 @@ export class FederationHost {
     const userRemotes = userOptionsRes.remotes || [];
 
     const remotes = userRemotes.reduce((res, remote) => {
-      if (!res.find((item) => item.name === remote.name)) {
-        if (remote.alias) {
-          // Validate if alias equals the prefix of remote.name and remote.alias, if so, throw an error
-          // As multi-level path references cannot guarantee unique names, alias being a prefix of remote.name is not supported
-          const findEqual = res.find(
-            (item) =>
-              remote.alias &&
-              (item.name.startsWith(remote.alias) ||
-                item.alias?.startsWith(remote.alias)),
-          );
-          assert(
-            !findEqual,
-            `The alias ${remote.alias} of remote ${
-              remote.name
-            } is not allowed to be the prefix of ${
-              findEqual && findEqual.name
-            } name or alias`,
-          );
-        }
-        // Set the remote entry to a complete path
-        if ('entry' in remote) {
-          if (isBrowserEnv() && !remote.entry.startsWith('http')) {
-            remote.entry = new URL(remote.entry, window.location.origin).href;
-          }
-        }
-        if (!remote.shareScope) {
-          remote.shareScope = DEFAULT_SCOPE;
-        }
-        if (!remote.type) {
-          remote.type = DEFAULT_REMOTE_TYPE;
-        }
-        res.push(remote);
-      }
+      this.registerRemote(remote, res, { force: false });
       return res;
     }, globalOptionsRes.remotes);
 
@@ -881,6 +871,99 @@ export class FederationHost {
       if (get) {
         this.shareScopeMap[sc][pkgName][version].get = get;
       }
+    });
+  }
+
+  private removeRemote(remote: Remote): void {
+    const { name } = remote;
+    const remoteIndex = this.options.remotes.findIndex(
+      (item) => item.name === name,
+    );
+    if (remoteIndex !== -1) {
+      this.options.remotes.splice(remoteIndex, 1);
+    }
+    const loadedModule = this.moduleCache.get(remote.name);
+    if (loadedModule) {
+      const key = loadedModule.remoteInfo
+        .entryGlobalName as keyof typeof globalThis;
+      if (globalThis[key]) {
+        delete globalThis[key];
+      }
+      const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
+        loadedModule.remoteInfo,
+      );
+      if (globalLoading[remoteEntryUniqueKey]) {
+        delete globalLoading[remoteEntryUniqueKey];
+      }
+      this.moduleCache.delete(remote.name);
+    }
+  }
+
+  private registerRemote(
+    remote: Remote,
+    targetRemotes: Remote[],
+    options?: { force?: boolean },
+  ): void {
+    const normalizeRemote = () => {
+      if (remote.alias) {
+        // Validate if alias equals the prefix of remote.name and remote.alias, if so, throw an error
+        // As multi-level path references cannot guarantee unique names, alias being a prefix of remote.name is not supported
+        const findEqual = targetRemotes.find(
+          (item) =>
+            remote.alias &&
+            (item.name.startsWith(remote.alias) ||
+              item.alias?.startsWith(remote.alias)),
+        );
+        assert(
+          !findEqual,
+          `The alias ${remote.alias} of remote ${
+            remote.name
+          } is not allowed to be the prefix of ${
+            findEqual && findEqual.name
+          } name or alias`,
+        );
+      }
+      // Set the remote entry to a complete path
+      if ('entry' in remote) {
+        if (isBrowserEnv() && !remote.entry.startsWith('http')) {
+          remote.entry = new URL(remote.entry, window.location.origin).href;
+        }
+      }
+      if (!remote.shareScope) {
+        remote.shareScope = DEFAULT_SCOPE;
+      }
+      if (!remote.type) {
+        remote.type = DEFAULT_REMOTE_TYPE;
+      }
+    };
+    const registeredRemote = targetRemotes.find(
+      (item) => item.name === remote.name,
+    );
+    if (!registeredRemote) {
+      normalizeRemote();
+      targetRemotes.push(remote);
+    } else {
+      const messages = [
+        `The remote "${remote.name}" is already registered.`,
+        options?.force
+          ? 'Hope you have known that OVERRIDE it may have some unexpected errors'
+          : 'If you want to merge the remote, you can set "force: true".',
+      ];
+      if (options?.force) {
+        // remove registered remote
+        this.removeRemote(registeredRemote);
+        normalizeRemote();
+        targetRemotes.push(remote);
+      }
+      warn(messages.join(' '));
+    }
+  }
+
+  registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
+    remotes.forEach((remote) => {
+      this.registerRemote(remote, this.options.remotes, {
+        force: options?.force,
+      });
     });
   }
 }
