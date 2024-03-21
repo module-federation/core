@@ -1,0 +1,170 @@
+= Setting the Dynamic Public Path 
+
+In this guide, we'll cover how to set the public path dynamically for Module Federation. This is particularly useful when deploying federated modules to different environments with varying public paths. 
+
+One of the challenges of using Module Federation is to configure the public path of each Webpack build correctly so that it can load remote modules from other builds at runtime. The public path is the base URL for all assets (including JavaScript files) in a Webpack build. By default, Webpack sets the public path to the current HTML document's base URL or location. However, this may not work well for Module Federation scenarios, where the public path needs to point to the location of the remote container that exposes the modules.
+
+There are three ways to set the public path dynamically for Module Federation: using an inline script tag, using a custom entry point, or using startup code.
+
+== Using an inline script tag
+
+One way to set the public path dynamically is to use an inline script tag in the HTML document that hosts the Webpack build. The script tag should assign the `__webpack_public_path__` variable to the desired public path before loading the main JavaScript file. 
+
+For example:
+
+[source, html]
+----
+<script>
+  // Set the public path to the location of the remote container
+  __webpack_public_path__ = "https://example.com/remote/";
+</script>
+<script src="main.js"></script>
+----
+
+This approach has the advantage of being simple and straightforward, but it has some drawbacks:
+
+- It requires modifying the HTML document for each webpack build, which may not be feasible or desirable in some cases.
+- It may not work well with code splitting or lazy loading, as the public path needs to be set before any JavaScript file is loaded.
+- It may cause issues with caching or content delivery networks (CDNs), as the public path is hard-coded in the HTML document and cannot be changed dynamically.
+
+== Using a custom entry point
+
+Another way to set the public path dynamically is to use a custom entry point in the webpack configuration. The custom entry point should import a module that sets the `__webpack_public_path__` variable to the desired public path based on some logic or environment variables. 
+
+For example:
+
+[tabs]
+======
+entry.js::
++
+[source, js]
+----
+// entry.js
+// Import a module that sets the public path
+import "./set-public-path.js";
+// Import other modules as usual
+import "./app.js";
+----
+
+set-public-path.js::
++
+[source, js]
+----
+// set-public-path.js
+// Set the public path based on some logic or environment variables
+__webpack_public_path__ = process.env.PUBLIC_PATH || "https://example.com/remote/";
+----
+
+webpack.config.js::
++
+[source, js]
+----
+// webpack.config.js
+module.exports = {
+  // Use the custom entry point
+  entry: "./entry.js",
+  // Other configuration options...
+};
+----
+======
+
+This approach has the advantage of being more flexible and robust, as it allows setting the public path based on any logic or environment variables. It also works well with code splitting or lazy loading, as the public path is set before any remote module is loaded. However, it has some drawbacks:
+
+- It requires creating a custom entry point and a module that sets the public path, which may add some complexity and overhead to the webpack configuration.
+- It may not work well with hot module replacement (HMR), as changing the public path may require reloading the entire application.
+
+== Using startup code
+
+Startup code is an implementation tactic to attach additional runtime code to a remote container startup sequence. This is useful for scenarios where the public path needs to be set based on some logic or environment variables that are not available at build time.
+
+To use the startup code, we need to do the following steps:
+
+1. Create an entry point with the same name as the name we place in ModuleFederationPlugin. This merges the two "chunks" together. When a remoteEntry is placed on the page, the code in this entry point will execute as part of the `remoteEntry` startup.
+2. In the entry point, import a module that sets the `__webpack_public_path__` variable to the desired public path based on some logic or environment variables.
+3. Exclude the entry point chunk from the HTML document, as it will be loaded by the `remoteEntry`.
+
+For example, let's say we have a remote container named "app1" that exposes some modules. We want to set its public path based on an environment variable called `PUBLIC_PATH`. Here is how we can use startup code to achieve this:
+
+[tabs]
+======
+entry.js::
++
+[source, js]
+----
+// entry.js
+// Import a module that sets the public path
+import "./set-public-path.js";
+// Import other modules as usual import "./app.js";
+----
+
+set-public-path.js::
++
+[source, js]
+----
+// set-public-path.js
+// Set the public path based on an environment variable
+__webpack_public_path__ = process.env.PUBLIC_PATH || "https://example.com/remote/";
+----
+
+webpack.config.js::
++
+[source, js]
+----
+// webpack.config.js
+module.exports = {
+  // Use the custom entry point
+  entry: {
+    // we add an entrypoint with the same name as our name in ModuleFederationPlugin.
+    // This merges the two "chunks" together. When a remoteEntry is placed on the page,
+    // the code in this app1 entrypoint will execute as part of the remoteEntry startup.
+    app1: "./src/set-public-path.js",
+    main: "./src/index.js",
+  },
+  mode: "development",
+  output: {
+    // public path can be what it normally is, not a absolute, hardcoded url
+    publicPath: "/",
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "app1",
+      remotes: {
+        app2: "app2@http://localhost:3002/remoteEntry.js",
+      },
+      shared: {
+        react: {
+          singleton: true,
+        },
+        "react-dom": {
+          singleton: true,
+        },
+      },
+    }),
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+      // exclude app1 chunk, just incase HTML webpack plugin tries to do something silly.
+      // It doesn't have the best MF support right now when it comes to advanced implementations
+      excludeChunks: ["app1"],
+    }),
+  ],
+};
+----
+======
+
+This way, we can set the public path of app1 dynamically at runtime based on the PUBLIC_PATH environment variable. If it is not defined, we fall back to a default value of "https://example.com/remote/".
+
+== Additional Reading
+
+- https://github.com/module-federation/module-federation-examples/tree/master/startup-code[Basic host remote example, with startup code that sets the remotes public path dynamically.]
+- https://github.com/module-federation/module-federation-examples/issues/102[Dicscussion on GitHub related to Dynamic publicPath]
+- https://scriptedalchemy.medium.com/micro-fe-architecture-webpack-5-module-federation-and-custom-startup-code-9cb3fcd066c[Micro-FE Architecture: Webpack 5, Module Federation, and custom startup code by Zack Jackson]
+- https://dev.to/waldronmatt/tutorial-a-guide-to-module-federation-for-enterprise-n5[Tutorial - A Guide to Module Federation for Enterprise ]
+
+== Conclusion
+
+Setting the public path dynamically for Module Federation is an important step to ensure that remote modules can be loaded correctly at runtime. There are three ways to do this: using an inline script tag, using a custom entry point, or using startup code.
+
+Each approach has its own advantages and disadvantages, and developers should choose the one that suits their needs and preferences best.
+
+Using an inline script tag is simple and straightforward, but it may not work well with code splitting or lazy loading, and it may cause issues with caching or CDNs. Using a custom entry point is more flexible and robust, but it may add some complexity and overhead to the webpack configuration, and it may not work well with HMR. Using startup code is a powerful and advanced technique that allows injecting custom code into the webpack runtime, but it may require some familiarity with webpack internals and Module Federation.
+

@@ -1,0 +1,60 @@
+= Setting up Module Federation
+
+Module Federation is a feature of Webpack that allows you to share code between micro-frontends in a decentralized way. This documentation is intended for beginner users and will guide you through the process of setting up Module Federation.
+
+== Prerequisites
+
+Before we begin, make sure you have a fresh version of Node.js installed. The current Long Term Support (LTS) release is an ideal starting point. You may run into a variety of issues with the older versions as they may be missing functionality Webpack and/or its related packages require.
+
+- You need to have `Node.js` and `npm` installed on your machine.
+- You need to have a basic understanding of front-end development concepts.
+- You need to have multiple applications that can load JavaScript modules
+
+For more detailed information on the installation of Webpack 5, please, refer to the official https://webpack.js.org/guides/installation/[Installation Instructions]
+
+== Installation Instructions
+
+To install Module Federation, follow these steps:
+
+- Open a terminal and navigate to your project directory.
+- Run the following command to install Webpack and its dependencies:
+
+`npm install webpack webpack-cli webpack-dev-server --save-dev`
+
+- Create a Webpack configuration file in the root of each application that will be using Module Federation.
+- In each configuration file, add the following code to enable Module Federation:
+
+[source, json]
+----
+const { ModuleFederationPlugin } = require("webpack").container;
+module.exports = {
+  // ...
+  plugins: [
+	new ModuleFederationPlugin({
+  	// ...
+	}),
+  ],
+};
+----
+
+== Configuration Options
+
+Once you have enabled Module Federation in your Webpack configuration files, you can start configuring it. The following options are available:
+
+- name (required): The name of the application module.
+- filename (optional): The filename of the remote entry file.
+- exposes (optional): An object that maps local module names to the modules that should be exposed to other applications.
+- remotes (optional): An object that maps the names of remote applications to the URLs where they are hosted.
+- shared (optional): An object that lists the modules that should be shared between applications.
+
+== Using Module Federation
+
+To use Module Federation, you need to:
+
+. Identify the modules you want to share between applications.
+. Add those modules to a shared package or repository.
+. Make sure that each application has access to the shared package or repository.
+. Configure each application's Webpack configuration file to use Module Federation.
+. Use the shared modules in your applications as needed.
+
+For more information and advanced configuration options, please refer to the official Webpack documentation.

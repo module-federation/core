@@ -1,0 +1,154 @@
+= Extending Angular Apps with Module Federation: A Step-by-Step Guide
+
+Welcome to the second part of our series on enhancing Angular applications using Module Federation (MF). In this guide, we'll delve into how to seamlessly incorporate MF into an existing plain Angular application.
+
+== Understanding Our Tools: @angular-architects/module-federation
+
+It's important to note that, by default, Angular CLI does not facilitate the loading of custom Webpack configurations. To address this, our approach involves updating the Angular CLI builder with a specialized custom builder. This modification enables the extension of the Webpack config file, crucial for integrating advanced features like Module Federation.
+
+While this guide focuses on utilizing the custom builder provided by the `@angular-architects/module-federation` library, you have the flexibility to replace it with an alternative builder, should your expertise permit. For those interested in exploring how to implement custom Webpack configurations within Angular CLI builders, we suggest reading the following article https://www.digitalocean.com/community/tutorials/angular-custom-webpack-config["How To Use Custom webpack Configurations with Angular CLI Builders"]. This resource offers valuable insights and practical steps for customizing your Angular build process beyond the standard configurations.
+
+=== Library Functions
+
+- **Updates Build Configuration**: It enables the extension of the Webpack configuration file.
+- **Application Serving**: Facilitates serving applications individually, either through standard browser interaction or as a micro-frontend.
+
+== Setting Up Module Federation in the Main App
+
+1. **Initialization with Schematics**:
++
+Run the following command in your project's root directory:
++
+[source, bash]
+----
+ng add @angular-architects/module-federation --project app-micro --type dynamic-host --port 4200
+----
++
+This command configures your main project for Module Federation, updates Angular CLI configurations, creates a manifest file for loading remote entries, and reorganizes the bootstrap process.
++
+2. **Handling Schematic Conflicts**:
++
+Some Angular schematics like `@angular/pwa` and `@angular/material` expect bootstrapping in `main.ts`. If you plan to use these, toggle the bootstrapping process temporarily:
++
+[source, bash]
+----
+ng g @angular-architects/module-federation:boot-async false --project [YOUR_MAIN_PROJECT]
+ng add [YOUR_LIBRARIES_OF_CHOICE] --project yourProject
+ng g @angular-architects/module-federation:boot-async true --project [YOUR_MAIN_PROJECT]
+----
++
+3. **Updating the Manifest File**:
++
+After implementing the schematic changes, it's essential to modify the manifest file (`mf.manifest.json`) and the application routing configuration (`app-routing.module.ts`) to ensure proper functioning of your Angular application.
++
+The default configuration in `mf.manifest.json` is set to serve a file on port `4200`. However, this port is typically used for the main application.
++
+To avoid conflicts, update the port for serving the secondary application. For example, change the port to 4201. Your `mf.manifest.json` should reflect this change as follows:
++
+[source, json]
+----
+{
+"login": "http://localhost:4201/remoteEntry.js"
+}
+----
++
+By updating these configurations, you establish a clear and functional structure for running your main and secondary Angular applications on distinct ports, facilitating their independent operation and integration.
++
+- *Simplified Example:* In this guide, the manifest configuration is statically defined in a JSON file for simplicity.
++
+- *Dynamic Configuration in Production:* For real-life applications, it's recommended to serve the manifest configuration dynamically. This can be achieved by either:
++
+Replacing the static JSON file with a production version.
+Setting up an endpoint on your server that returns the manifest configuration.
++
+NOTE: When opting for dynamic serving, update the main.ts file to modify the URL used by the initFederation function to retrieve the manifest data. Be aware that in this configuration, if there's no internet connection, the application will fail to load. However, with a static configuration, you can handle connection errors, particularly if your app has been previously cached.
++
+4. **Integrating the Manifest in Routing**:
+
+*Modify the Manifest File:*
+
+- Adjust the port in the mf.manifest.json file if necessary, as described in previous sections.
+
+*Update the Application Routing (`app-routing.module.ts)`:*
+
+- Remove the existing import code (e.g., `import('@@login')`).
+- Replace it with a call to the `loadRemoteModule` function (imported from the `@angular-architects/module-federation module`).
+- Configure the `loadRemoteModule` function with the following object:
++
+[source, json]
+---
+{
+  "type": "manifest",
+  "remoteName": "login",
+  "exposedModule": "./Module",
+}
+---
+
+- `type`: Denotes the remote configuration type (`'manifest'` in this case).
+- `remoteName`: The module's name as declared in the manifest.
+- `exposedModule`: Path of the module in the secondary app.
+
+The final result should look similar to the following example:
+
+[source, typescript]
+----
+const routes: Routes = [
+  ...
+  {
+    path: '',
+    canMatch: [isNotLogged],
+    loadChildren: () =>
+      loadRemoteModule({ type: 'manifest', remoteName: 'login', exposedModule: './Module' }).then(
+        (m) => m.LoginModule,
+      ),
+  },
+  ...
+];
+----
+
+Having followed these steps, the main application is now configured to load other applications remotely. The next phase involves setting up the secondary applications to ensure they can be loaded in this manner.
+
+== Configuring Secondary Apps for Remote Loading
+
+Upon configuring the secondary applications, similar to the main app, several project components will be updated. Notably, this process does not create a manifest file, but it does modify the `webpack.config.js` file, adding more details than what is typically found in the main application's configuration.
+
+[source, bash]
+----
+ng add @angular-architects/module-federation --project login --type remote --port 4201
+----
+
+NOTE: Instead of using `--type dynamic-host`, we are going to use `--type remote` instead.
+
+=== Understanding the 'exposes' Property
+
+- *Role of 'exposes':* The exposes property within the `webpack.config.js` file plays a crucial role. It contains an object configuration where each key-value pair resembles a route. This property dictates the modules to be exposed to the loader.
+- *Linking to 'exposedModule':* This relates to our earlier step where we used the exposedModule property in the route configuration, signifying the specific module route to load.
+
+=== Necessary Adjustments in Webpack Configuration
+
+*Identifying Configuration Mismatch:* In the current setup, the route configuration attempts to load a module named './Module', but this isn't specified in the existing Webpack configuration.
+
+To rectify this, modify the `webpack.config.js` file:
+
+- Remove the existing './Component' key.
+- Add a new './Module' key, ensuring it points to the correct path for loading the application module. For example:
++
+[source, javascript]
+----
+exposes: {
+  './Module': './projects/login/src/app/feature/login/login.module.ts',
+},
+----
+
+With this update, the secondary applications are correctly configured to expose the necessary modules, aligning with the remote loading requirements set in the main application.
+
+== Testing and Running the Applications
+
+- **Run the Main App**: `ng serve`
+- **Serve the Secondary App**: `ng serve login`
+- After serving both apps, refresh the main application to see the integration in action. The secondary app should now load correctly within the main app.
+- Moreover, by navigating to `localhost:4201` in your browser, you can observe the login application operating as a standalone entity.
+
+== Next Steps: Optimizing Build Configuration
+
+While we currently use `shareAll` from the `@angular-architects/module-federation/webpack` package, a more refined approach involves sharing only necessary dependencies using the `share` function. This selective sharing optimizes the application's performance and resource utilization.

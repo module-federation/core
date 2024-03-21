@@ -1,0 +1,93 @@
+= How to Contribute to the "Module Federation Documentation" via Weblate
+
+==  Overview
+
+Welcome, and thank you for taking the time to learn how to contribute translations to the "Module Federation Documentation" project through Weblate. This comprehensive guide will walk you through the entire process of translation, from locating the project to submitting your first contributions.
+
+NOTE: You don't necessarily need a Weblate account to contribute. Anonymous suggestions are also accepted after a brief review period.
+
+==  Table of Contents
+
+. xref:setting-up-your-weblate-account[Setting Up Your Weblate Account (Optional)]
+. xref:navigating-to-the-module-federation-documentation-project[Navigating to the "Module Federation Documentation" Project]
+. xref:selecting-a-language[Selecting a Language]
+. xref:translating-content[Translating Content]
+. xref:reviewing-translations[Reviewing Translations]
+. xref:submitting-your-translations[Submitting Your Translations]
+. xref:monitoring-your-contributions[Monitoring Your Contributions]
+
+[[setting-up-your-weblate-account]]
+==  Setting Up Your Weblate Account (Optional)
+
+Creating a Weblate account is entirely optional but recommended for those who plan to contribute regularly. Having an account allows you to monitor your contributions and interact with the community. Here's how to set one up:
+
+. Visit link:https://weblate.org/saml2/login/?next=/en/[Weblate's registration page].
+. Complete the registration form with your details.
+. Verify your email address through the confirmation link sent to your inbox.
+. Once verified, log in to your newly minted Weblate account.
+
+CAUTION: Make sure to remember your login credentials, as you'll need them to review and track your contributions.
+
+[[navigating-to-the-module-federation-documentation-project]]
+==  Navigating to the "Module Federation Documentation" Project
+
+To find the "Module Federation Documentation" project, visit the following link link:https://hosted.weblate.org/projects/module-federation-documentation-oss/[Module Federation Documentation]
+
+TIP: Bookmark the project page for easy access in the future.
+
+[[selecting-a-language]]
+==  Selecting a Language
+
+Once you're on the project page, you'll see a list of components and languages that are open for translation. If you're fluent in one of those languages, you're all set to contribute!
+
+. Scroll through the list of languages displayed on the project page.
+. Click on the language you wish to translate to. This will open a new page dedicated to that language's translation status and needs.
+
+NOTE: If you don't see your language listed, it might be fully translated or not yet added. You can request its addition through community channels or the project's administrators.
+
+[[translating-content]]
+==  Translating Content
+
+Translating content involves going through individual strings of text that need to be translated. Each string corresponds to a specific section or line in the documentation. Here's how to do it:
+
+. On the language-specific page, you'll find a list of strings awaiting translation. Each string has its status indicated.
+. Click on a string to open the translation editor.
+. In the editor, you'll see the source text at the top and a text box below it where you can enter your translation.
+. Type your translation into this box.
+
+IMPORTANT: Maintain any special formatting, placeholders, or variables present in the source text. Also, look out for any context or comments provided to help you understand the string's meaning better.
+
+[[reviewing-translations]]
+==  Reviewing Translations
+
+Even seasoned translators make mistakes, and context can sometimes be elusive. It's a good practice to review your translations for accuracy, context, and syntax.
+
+. After entering your translation, don't rush to save it. Take a moment to read it again.
+. Use the 'Previous' and 'Next' navigation buttons in the translation editor to review adjacent strings. This can help you maintain consistency and context.
+. Pay attention to grammar, syntax, and idiomatic expressions to ensure the translation is natural and accurate.
+
+[[submitting-your-translations]]
+==  Submitting Your Translations
+
+Submitting your translations is the final step in your contribution journey. Here's how:
+
+. Once you're satisfied with the accuracy and context of your translation, click the 'Save' button in the translation editor.
+. If you're not entirely confident about your translation, you can mark it as "Needs review." This allows other contributors to verify your translation.
+
+IMPORTANT: Anonymous users can also submit translations. These will be flagged for review by registered users or project administrators.
+
+[[monitoring-your-contributions]]
+==  Monitoring Your Contributions
+
+If you've created a Weblate account, you can keep an eye on the status of your contributions easily.
+
+. Go to your Weblate dashboard by clicking on your profile picture in the top-right corner.
+. Navigate to the "Contributions" tab. Here you'll see a list of all your submitted translations, their current status, and any ongoing discussions or reviews related to them.
+
+NOTE: If you contributed anonymously, you won't be able to track your contributions in this manner.
+
+==  Conclusion
+
+Congratulations, you've successfully contributed to translating the "Module Federation Documentation" project via Weblate! Your efforts significantly help in making this documentation accessible to a global audience. If you have further questions or encounter any issues, feel free to reach out to the project maintainers or participate in the community channels.
+
+Thank you for your valuable contribution!
