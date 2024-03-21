@@ -17,7 +17,6 @@ module.exports = composePlugins(
         './Module': './src/app/nx-welcome.tsx',
       },
     };
-
     config.plugins.push(new ModuleFederationPlugin(baseConfig));
 
     config.optimization.runtimeChunk = false;

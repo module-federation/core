@@ -1,6 +1,10 @@
 export { retrieveRemoteConfig } from './configurations/remotePlugin';
 export { retrieveHostConfig } from './configurations/hostPlugin';
-export { getDTSManagerConstructor, validateOptions } from './lib/utils';
+export {
+  getDTSManagerConstructor,
+  validateOptions,
+  retrieveTypesAssetsInfo,
+} from './lib/utils';
 export {
   retrieveOriginalOutDir,
   retrieveMfTypesPath,

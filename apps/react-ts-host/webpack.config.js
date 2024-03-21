@@ -4,6 +4,7 @@ registerPluginTSTranspiler();
 const { ModuleFederationPlugin } = require('@module-federation/enhanced');
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
+process.env.FEDERATION_DEBUG = true;
 
 module.exports = composePlugins(
   withNx(),
@@ -18,7 +19,8 @@ module.exports = composePlugins(
       filename: 'remoteEntry.js',
       remotes: {
         react_ts_nested_remote:
-          'react_ts_nested_remote@http://localhost:3005/remoteEntry.js',
+          // 'react_ts_nested_remote@http://localhost:3005/remoteEntry.js',
+          'react_ts_nested_remote@http://localhost:3005/mf-manifest.json',
       },
     };
     config.plugins.push(new ModuleFederationPlugin(baseConfig));

@@ -22,7 +22,9 @@ module.exports = composePlugins(
         './utils': './src/app/utils.ts',
       },
       remotes: {
-        react_ts_remote: 'react_ts_remote@http://localhost:3004/remoteEntry.js',
+        // react_ts_remote: 'react_ts_remote@http://localhost:3004/remoteEntry.js',
+        react_ts_remote:
+          'react_ts_remote@http://localhost:3004/mf-manifest.json',
       },
     };
 

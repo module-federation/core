@@ -23,6 +23,7 @@
   "types": "./dist/index.cjs.d.ts",
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
+    "@module-federation/dts-kit": "workspace:*",
     "@module-federation/managers": "workspace:*",
     "find-pkg": "2.0.0",
     "chalk": "3.0.0"

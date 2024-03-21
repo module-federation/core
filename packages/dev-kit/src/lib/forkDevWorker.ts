@@ -6,7 +6,7 @@ import {
   retrieveTypesZipPath,
   HostOptions,
 } from '@module-federation/dts-kit';
-import { MANIFEST_EXT, parseEntry } from '@module-federation/sdk';
+import { MANIFEST_EXT } from '@module-federation/sdk';
 import {
   Remote,
   UpdateCallbackOptions,
@@ -51,19 +51,16 @@ function getLocalRemoteNames(options?: HostOptions): Remote[] {
 
   return Object.keys(mapRemotesToDownload).reduce((sum, remoteModuleName) => {
     const remoteInfo = mapRemotesToDownload[remoteModuleName];
-    if (remoteInfo.url.endsWith(MANIFEST_EXT)) {
-      const parsedInfo = parseEntry(remoteInfo.url);
-      if ('entry' in parsedInfo) {
-        const ip = getIpFromEntry(parsedInfo.entry);
-        if (!ip) {
-          return sum;
-        }
-        sum.push({
-          name: parsedInfo.name,
-          entry: parsedInfo.entry,
-          ip,
-        });
+    if (remoteInfo.url.includes(MANIFEST_EXT)) {
+      const ip = getIpFromEntry(remoteInfo.url);
+      if (!ip) {
+        return sum;
       }
+      sum.push({
+        name: remoteInfo.name,
+        entry: remoteInfo.url,
+        ip,
+      });
     } else {
       const ip = getIpFromEntry(remoteInfo.url);
       if (!ip) {

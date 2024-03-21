@@ -1,4 +1,5 @@
 import { Chunk, Compilation, StatsCompilation, StatsModule } from 'webpack';
+import chalk from 'chalk';
 import path from 'path';
 import {
   StatsAssets,
@@ -6,7 +7,10 @@ import {
   simpleJoinRemoteEntry,
   ManifestFileName,
   StatsFileName,
+  normalizeOptions,
+  MetaDataTypes,
 } from '@module-federation/sdk';
+import { retrieveTypesAssetsInfo } from '@module-federation/dts-kit';
 import { HOT_UPDATE_SUFFIX, PLUGIN_IDENTIFIER } from './constants';
 
 function getSharedModuleName(name: string): string {
@@ -236,4 +240,68 @@ export function getFileName(
     statsFileName: simpleJoinRemoteEntry(filePath, statsFileName),
     manifestFileName: simpleJoinRemoteEntry(filePath, manifestFileName),
   };
+}
+
+export function getTypesMetaInfo(
+  pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions,
+  context: string,
+): MetaDataTypes {
+  const defaultRemoteOptions = {
+    generateAPITypes: true,
+    compileInChildProcess: true,
+  };
+  const defaultTypesMetaInfo = {
+    path: '',
+    name: '',
+    apiTypesName: '',
+    apiTypesPath: '',
+    zipName: '',
+    zipPath: '',
+  };
+  try {
+    const normalizedDtsOptions =
+      normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
+        true,
+        {
+          disableGenerateTypes: false,
+          remote: defaultRemoteOptions,
+          host: {},
+        },
+        'mfOptions.dts',
+      )(pluginOptions.dts);
+    if (normalizedDtsOptions === false) {
+      return defaultTypesMetaInfo;
+    }
+
+    const normalizedRemote =
+      normalizeOptions<moduleFederationPlugin.DtsRemoteOptions>(
+        true,
+        defaultRemoteOptions,
+        'mfOptions.dts.remote',
+      )(normalizedDtsOptions.remote);
+
+    if (normalizedRemote === false) {
+      return defaultTypesMetaInfo;
+    }
+
+    const { apiFileName, zipName } = retrieveTypesAssetsInfo({
+      ...normalizedRemote,
+      context,
+      moduleFederationConfig: pluginOptions,
+    });
+
+    return {
+      path: '',
+      name: '',
+      apiTypesName: apiFileName,
+      apiTypesPath: '',
+      zipName: zipName,
+      zipPath: '',
+    };
+  } catch (err) {
+    console.warn(
+      chalk`{bold {yellow [ ${PLUGIN_IDENTIFIER} ]: getTypesMetaInfo failed, it will use the default types meta info, and the errors as belows: ${err} }}`,
+    );
+    return defaultTypesMetaInfo;
+  }
 }

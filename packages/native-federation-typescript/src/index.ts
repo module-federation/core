@@ -1,4 +1,3 @@
-import path from 'path';
 import { createUnplugin } from 'unplugin';
 import fs from 'fs';
 import {
@@ -8,6 +7,7 @@ import {
   RemoteOptions,
   HostOptions,
   validateOptions,
+  retrieveTypesAssetsInfo,
 } from '@module-federation/dts-kit';
 
 export const NativeFederationTypeScriptRemote = createUnplugin(
@@ -63,27 +63,33 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
                 compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
             },
             async () => {
-              const { zipTypesPath, apiTypesPath } = await generateTypesFn({
-                remote: options,
-              });
-              const zipName = path.basename(zipTypesPath);
-              compilation.emitAsset(
-                zipName,
-                new compiler.webpack.sources.RawSource(
-                  fs.readFileSync(zipTypesPath),
-                  false,
-                ),
-              );
+              try {
+                await generateTypesFn({
+                  remote: options,
+                });
+                const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
+                  retrieveTypesAssetsInfo(options);
+                if (zipTypesPath) {
+                  compilation.emitAsset(
+                    zipName,
+                    new compiler.webpack.sources.RawSource(
+                      fs.readFileSync(zipTypesPath),
+                      false,
+                    ),
+                  );
+                }
 
-              if (apiTypesPath) {
-                const apiFileName = path.basename(apiTypesPath);
-                compilation.emitAsset(
-                  apiFileName,
-                  new compiler.webpack.sources.RawSource(
-                    fs.readFileSync(apiTypesPath),
-                    false,
-                  ),
-                );
+                if (apiTypesPath) {
+                  compilation.emitAsset(
+                    apiFileName,
+                    new compiler.webpack.sources.RawSource(
+                      fs.readFileSync(apiTypesPath),
+                      false,
+                    ),
+                  );
+                }
+              } catch (err) {
+                console.error(err);
               }
             },
           );
@@ -99,27 +105,33 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
                 compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
             },
             async () => {
-              const { zipTypesPath, apiTypesPath } = await generateTypesFn({
-                remote: options,
-              });
-              const zipName = path.basename(zipTypesPath);
-              compilation.emitAsset(
-                zipName,
-                new compiler.webpack.sources.RawSource(
-                  fs.readFileSync(zipTypesPath),
-                  false,
-                ),
-              );
+              try {
+                await generateTypesFn({
+                  remote: options,
+                });
+                const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
+                  retrieveTypesAssetsInfo(options);
+                if (zipTypesPath) {
+                  compilation.emitAsset(
+                    zipName,
+                    new compiler.webpack.sources.RawSource(
+                      fs.readFileSync(zipTypesPath),
+                      false,
+                    ),
+                  );
+                }
 
-              if (apiTypesPath) {
-                const apiFileName = path.basename(apiTypesPath);
-                compilation.emitAsset(
-                  apiFileName,
-                  new compiler.webpack.sources.RawSource(
-                    fs.readFileSync(apiTypesPath),
-                    false,
-                  ),
-                );
+                if (apiTypesPath) {
+                  compilation.emitAsset(
+                    apiFileName,
+                    new compiler.webpack.sources.RawSource(
+                      fs.readFileSync(apiTypesPath),
+                      false,
+                    ),
+                  );
+                }
+              } catch (err) {
+                console.error(err);
               }
             },
           );

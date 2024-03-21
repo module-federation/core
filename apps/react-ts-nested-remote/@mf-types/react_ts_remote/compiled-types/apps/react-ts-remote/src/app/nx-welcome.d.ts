@@ -4,4 +4,4 @@ export declare function NxWelcome({
   title: string;
 }): import('react/jsx-runtime').JSX.Element;
 export default NxWelcome;
-export declare const kk = 1;
+export declare const kk322222222 = 1;

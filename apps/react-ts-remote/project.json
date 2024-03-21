@@ -41,6 +41,75 @@
           "port": 3004
         }
       }
+    },
+
+    "build:webpack": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "babel",
+        "outputPath": "apps/react-ts-remote/dist",
+        "index": "apps/react-ts-remote/src/index.html",
+        "baseHref": "/",
+        "main": "apps/react-ts-remote/src/main.ts",
+        "polyfills": "apps/react-ts-remote/src/polyfills.ts",
+        "tsConfig": "apps/react-ts-remote/tsconfig.app.json",
+        "assets": [
+          "apps/react-ts-remote/src/favicon.ico",
+          "apps/react-ts-remote/src/assets"
+        ],
+        "styles": ["apps/react-ts-remote/src/styles.css"],
+        "scripts": [],
+        "webpackConfig": "apps/react-ts-remote/webpack.config.js",
+        "babelUpwardRootMode": true
+      },
+      "configurations": {
+        "development": {
+          "extractLicenses": false,
+          "optimization": false,
+          "sourceMap": true,
+          "vendorChunk": true
+        },
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/react-ts-remote/src/environments/environment.ts",
+              "with": "apps/react-ts-remote/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "serve:webpack": {
+      "executor": "@nx/webpack:dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "react_ts_remote:build",
+        "hmr": true,
+        "port": 3005
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "react_ts_remote:build:development"
+        },
+        "production": {
+          "buildTarget": "react_ts_remote:build:production",
+          "hmr": false
+        }
+      }
     }
   },
   "tags": []

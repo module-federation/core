@@ -1332,6 +1332,9 @@ importers:
 
   packages/manifest:
     dependencies:
+      '@module-federation/dts-kit':
+        specifier: workspace:*
+        version: link:../dts-kit
       '@module-federation/managers':
         specifier: workspace:*
         version: link:../managers

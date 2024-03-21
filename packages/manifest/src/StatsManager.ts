@@ -21,6 +21,7 @@ import {
   assert,
   getFileNameWithOutExt,
   getFileName,
+  getTypesMetaInfo,
 } from './utils';
 import {
   ContainerManager,
@@ -61,7 +62,6 @@ class StatsManager {
     extraOptions?: {},
   ): StatsMetaData {
     const { context } = compiler.options;
-
     const {
       _options: { name },
       buildInfo,
@@ -118,14 +118,7 @@ class StatsManager {
         // same as the types supported by runtime, currently only global/var/script is supported
         type: 'global',
       },
-      types: {
-        name: '',
-        path: '',
-        zipName: '',
-        zipPath: '',
-        apiTypesName: '',
-        apiTypesPath: '',
-      },
+      types: getTypesMetaInfo(this._options, compiler.context),
       globalName: globalName,
       pluginVersion: this._pluginVersion,
     };
@@ -437,13 +430,13 @@ class StatsManager {
     } = compiler.options;
 
     if (typeof publicPath !== 'string') {
-      console.error(
-        chalk`{bold {red [ ${PLUGIN_IDENTIFIER} ]: Manifest will not generate, because publicPath can only be string, but got '${publicPath}' }}`,
+      console.warn(
+        chalk`{bold {yellow [ ${PLUGIN_IDENTIFIER} ]: Manifest will not generate, because publicPath can only be string, but got '${publicPath}' }}`,
       );
       return false;
     } else if (publicPath === 'auto') {
-      console.error(
-        chalk`{bold {red [ ${PLUGIN_IDENTIFIER} ]: Manifest will not generate, because publicPath can only be absolute path, but got '${publicPath}'}}`,
+      console.warn(
+        chalk`{bold {yellow [ ${PLUGIN_IDENTIFIER} ]: Manifest will not generate, because publicPath can only be absolute path, but got '${publicPath}'}}`,
       );
       return false;
     }
