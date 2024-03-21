@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/dev-plugin",
-  "version": "0.3.1",
+  "version": "0.0.17",
   "files": [
     "dist/",
     "README.md"

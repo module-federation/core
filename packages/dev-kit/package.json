@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/dev-kit",
-  "version": "0.3.1",
+  "version": "0.0.17",
   "files": [
     "dist/",
     "README.md"
