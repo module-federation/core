@@ -8,6 +8,8 @@ interface BasicModuleInfo {
   version: string;
   buildVersion: string;
   remoteTypes: string;
+  remoteTypesZip: string;
+  remoteTypesAPI?: string;
   remotesInfo: Record<string, { matchedVersion: string }>;
   shared: Array<{
     sharedName: string;
