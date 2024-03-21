@@ -121,12 +121,14 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
         context: compiler.context,
         moduleFederationConfig: options,
         ...normalizedDtsOptions.remote,
+        // @ts-ignore
       }).apply(compiler);
       NativeFederationTypeScriptHost({
         implementation: normalizedDtsOptions.implementation,
         context: compiler.context,
         moduleFederationConfig: options,
         ...normalizedDtsOptions.host,
+        // @ts-ignore
       }).apply(compiler);
     }
 
