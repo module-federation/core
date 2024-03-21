@@ -125,14 +125,13 @@ export function generateSnapshotFromManifest(
     remoteEntry: simpleJoinRemoteEntry(remoteEntryPath, remoteEntryName),
     remoteEntryType,
     remoteTypes: simpleJoinRemoteEntry(remoteTypes.path, remoteTypes.name),
-    remoteTypesZip: simpleJoinRemoteEntry(
-      remoteTypes.zipPath,
-      remoteTypes.zipName,
-    ),
-    remoteTypesAPI: simpleJoinRemoteEntry(
-      remoteTypes.apiTypesPath,
-      remoteTypes.apiTypesName,
-    ),
+    remoteTypesZip:
+      simpleJoinRemoteEntry(remoteTypes.zipPath, remoteTypes.zipName) || '',
+    remoteTypesAPI:
+      simpleJoinRemoteEntry(
+        remoteTypes.apiTypesPath,
+        remoteTypes.apiTypesName,
+      ) || '',
     remotesInfo,
     shared: manifest?.shared.map((item) => ({
       assets: item.assets,
