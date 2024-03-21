@@ -1,3 +1,71 @@
 # 介绍
 
 ### 💡 什么是 Module Federation？
+
+Module Federation 是一种 JavaScript 应用分治的架构模式（类似于服务端的微服务），它允许你在多个 JavaScript 应用程序（或微前端）之间共享代码和资源。这可以帮助你：
+
+- 减少代码重复
+- 提高代码可维护性
+- 降低应用程序的整体大小
+- 提高应用程序的性能
+
+### 🔥 特性
+
+Module Federation 具有以下特性：
+
+- 代码共享：可以在多个应用程序之间共享代码、样式和资源。
+- 按需加载：仅在需要时加载代码，从而提高性能。
+- 动态更新：可以动态更新应用程序中的代码，无需重新部署整个应用程序。
+- 支持多种框架：支持 React、Vue、Angular 等多种框架。
+- 支持多种构建工具：Webpack、Rspack、Vite。
+
+### 🎯 定位
+
+Module Federation 适用于以下场景：
+
+- 大型应用程序：对于大型应用程序，可以将应用程序拆分为多个微前端，并使用 Module Federation 在它们之间共享代码和资源。
+- 微前端架构：Module Federation 是构建微前端架构的理想工具。
+- 多团队开发：Module Federation 可以帮助多团队协作开发大型应用程序。
+
+### 🕠 Module Federation 历史
+
+Module Federation 是 Webpack 5 中引入的一个新功能，但它的历史可以追溯到 2017 年。当时，Webpack 团队开始研究一种在多个应用程序之间共享代码的方法。
+
+- 2018 年，Webpack 4.20 发布，引入了 module 钩子，这为 Module Federation 的开发奠定了基础。
+
+- 2019 年，Webpack 5 发布，正式引入了 Module Federation 功能。
+
+Module Federation 已经成为构建现代 Web 应用程序的强大工具。
+
+### 🕰️ Module Federation 未来
+
+Module Federation 希望能成为构建大型 Web 应用的一个架构方式，类似后端的微服务。Module Federation 将会提供更多的能力来满足大型 Web 应用分治所需要的基础能力，目前会包括这几部分内容：
+
+- 提供 Devtool 工具
+- 提供更多的上层框架能力 Router、SSR、Sandbox
+- 提供大型 Web 应用基于 Module Federation 的最佳实践
+
+## ✨ 下一步
+
+你可能想要：
+
+import NextSteps from '@components/NextSteps';
+import Step from '@components/Step';
+
+<NextSteps>
+  <Step
+    href="/guide/start/quick-start"
+    title="快速上手"
+    description="了解如何使用 Module Federation"
+  />
+  <Step
+    href="/guide/start/features"
+    title="功能导航"
+    description="了解 Module Federation 提供的所有功能"
+  />
+  <Step
+    href="/guide/basic/configure-module-federation"
+    title="查阅配置"
+    description="了解如何配置 Module Federation"
+  />
+</NextSteps>

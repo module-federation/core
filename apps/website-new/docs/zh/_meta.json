@@ -5,6 +5,11 @@
     "activeMatch": "/guide/"
   },
   {
+    "text": "配置",
+    "link": "/configure/",
+    "activeMatch": "/configure/"
+  },
+  {
     "text": "社区",
     "link": "/community/showcase/",
     "activeMatch": "/community/"
