@@ -10,6 +10,7 @@ const defaultOptions = {
   tsConfigPath: './tsconfig.json',
   typesFolder: '@mf-types',
   compiledTypesFolder: 'compiled-types',
+  hostRemoteTypesFolder: '@mf-types',
   deleteTypesFolder: true,
   additionalFilesToCompile: [],
   compilerInstance: 'tsc' as const,
@@ -31,6 +32,11 @@ const readTsConfig = ({
     resolvedTsConfigPath,
     typescript.sys.readFile,
   );
+
+  if (readResult.error) {
+    throw new Error(readResult.error.messageText.toString());
+  }
+
   const configContent = typescript.parseJsonConfigFileContent(
     readResult.config,
     typescript.sys,

@@ -1,7 +1,5 @@
 const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
-const {
-  NativeFederationTypeScriptHost,
-} = require('@module-federation/native-federation-typescript/webpack');
+
 registerPluginTSTranspiler();
 const { ModuleFederationPlugin } = require('@module-federation/enhanced');
 const { composePlugins, withNx } = require('@nx/webpack');
@@ -11,7 +9,7 @@ module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
-    // FIXME: auto set in webpack plugin
+    // prevent cyclic updates
     config.watchOptions = {
       ignored: ['**/node_modules/**', '**/@mf-types/**'],
     };
@@ -24,16 +22,6 @@ module.exports = composePlugins(
       },
     };
     config.plugins.push(new ModuleFederationPlugin(baseConfig));
-
-    config.plugins.push(
-      NativeFederationTypeScriptHost({
-        moduleFederationConfig: {
-          ...baseConfig,
-          filename: 'remoteEntry.js',
-        },
-        context: __dirname,
-      }),
-    );
 
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {
@@ -56,50 +44,6 @@ module.exports = composePlugins(
       runtimeChunk: false,
       minimize: false,
     };
-    // const mf = await withModuleFederation(defaultConfig);
     return config;
-
-    // const mf = await withModuleFederation(defaultConfig);
-
-    // /** @type {import('webpack').Configuration} */
-    // const parsedConfig = mf(config, context);
-
-    // const remotes = baseConfig.remotes.reduce((remotes, remote) => {
-    //   const [name, url] = remote;
-    //   remotes[name] = url;
-    //   return remotes;
-    // }, {});
-
-    // parsedConfig.plugins.forEach((plugin) => {
-    //   if (plugin.constructor.name === 'ModuleFederationPlugin') {
-    //     //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-    //     plugin._options.library = undefined;
-    //   }
-    // });
-
-    // parsedConfig.plugins.push(
-    //   new FederatedTypesPlugin({
-    //     federationConfig: {
-    //       ...baseConfig,
-    //       filename: 'remoteEntry.js',
-    //       remotes,
-    //     },
-    //   }),
-    // );
-
-    // parsedConfig.infrastructureLogging = {
-    //   level: 'verbose',
-    //   colors: true,
-    // };
-
-    // //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-    // parsedConfig.experiments = { outputModule: false };
-
-    // parsedConfig.output = {
-    //   ...parsedConfig.output,
-    //   scriptType: 'text/javascript',
-    // };
-
-    // return parsedConfig;
   },
 );

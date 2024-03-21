@@ -4,9 +4,17 @@ import {
   RspackPluginInstance,
 } from '@rspack/core';
 import { getIdentifier } from './utils';
-import { moduleFederationPlugin } from '@module-federation/sdk';
+import {
+  moduleFederationPlugin,
+  normalizeOptions,
+} from '@module-federation/sdk';
 import { StatsPlugin } from '@module-federation/manifest';
 import { ContainerManager } from '@module-federation/managers';
+import { DevPlugin } from '@module-federation/dev-plugin';
+import {
+  NativeFederationTypeScriptHost,
+  NativeFederationTypeScriptRemote,
+} from '@module-federation/native-federation-typescript/rspack';
 
 type ExcludeFalse<T> = T extends undefined | false ? never : T;
 type SplitChunks = Compiler['options']['optimization']['splitChunks'];
@@ -90,6 +98,37 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
         '@module-federation/runtime$': runtimeESMPath,
       };
     });
+
+    // @ts-ignore
+    new DevPlugin(options).apply(compiler);
+
+    const normalizedDtsOptions =
+      normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
+        true,
+        {
+          disableGenerateTypes: false,
+          remote: { generateAPITypes: true, compileInChildProcess: true },
+          host: {},
+        },
+        'mfOptions.dts',
+      )(options.dts);
+    if (
+      typeof normalizedDtsOptions === 'object' &&
+      !normalizedDtsOptions.disableGenerateTypes
+    ) {
+      NativeFederationTypeScriptRemote({
+        implementation: normalizedDtsOptions.implementation,
+        context: compiler.context,
+        moduleFederationConfig: options,
+        ...normalizedDtsOptions.remote,
+      }).apply(compiler);
+      NativeFederationTypeScriptHost({
+        implementation: normalizedDtsOptions.implementation,
+        context: compiler.context,
+        moduleFederationConfig: options,
+        ...normalizedDtsOptions.host,
+      }).apply(compiler);
+    }
 
     if (!disableManifest) {
       new StatsPlugin(options, {

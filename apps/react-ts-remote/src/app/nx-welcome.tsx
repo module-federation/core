@@ -818,9 +818,4 @@ export function NxWelcome({ title }: { title: string }) {
 }
 
 export default NxWelcome;
-
-export const kkk = 1;
-export const kkk22 = 1;
-export const nnnn21 = 1;
-export const ttttt21 = 1;
-export const k1 = 1;
+export const kk = 1;

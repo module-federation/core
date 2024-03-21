@@ -5,9 +5,11 @@ import { loadRemote } from '@module-federation/runtime';
 import useDynamicModule from './useDynamicRemote';
 
 const ReactTsRemote = React.lazy(() => import('react_ts_nested_remote/Module'));
-loadRemote('react_ts_nested_remote/Button').then((Button) => {
-  console.log(Button);
+
+loadRemote('react_ts_nested_remote/utils').then((utils) => {
+  console.log(utils.add(1, 2, 3) + utils.sub(1, 2, 3));
 });
+
 const DynamicReactTsRemote = React.lazy(() =>
   useDynamicModule({
     name: 'react_ts_nested_remote',

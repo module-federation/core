@@ -74,7 +74,7 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
           ),
         );
         if (retries >= hostOptions.maxRetries) {
-          if (hostOptions.abortOnError) {
+          if (hostOptions.abortOnError !== false) {
             throw error;
           }
           return undefined;

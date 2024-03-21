@@ -1023,9 +1023,9 @@ importers:
 
   apps/react-ts-remote:
     devDependencies:
-      '@module-federation/enhanced':
+      '@module-federation/enhanced-rspack':
         specifier: workspace:*
-        version: link:../../packages/enhanced
+        version: link:../../packages/enhanced-rspack
       file-loader:
         specifier: 6.2.0
         version: 6.2.0(webpack@5.90.3)
@@ -1291,12 +1291,18 @@ importers:
 
   packages/enhanced-rspack:
     dependencies:
+      '@module-federation/dev-plugin':
+        specifier: workspace:*
+        version: link:../dev-plugin
       '@module-federation/managers':
         specifier: workspace:*
         version: link:../managers
       '@module-federation/manifest':
         specifier: workspace:*
         version: link:../manifest
+      '@module-federation/native-federation-typescript':
+        specifier: workspace:*
+        version: link:../native-federation-typescript
       '@module-federation/runtime-tools':
         specifier: workspace:*
         version: link:../runtime-tools

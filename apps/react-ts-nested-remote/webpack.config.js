@@ -9,7 +9,8 @@ module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
-    // FIXME: auto set in webpack plugin
+    config.output.publicPath = 'http://localhost:3005/';
+    // prevent cyclic updates
     config.watchOptions = {
       ignored: ['**/node_modules/**', '**/@mf-types/**'],
     };
@@ -18,7 +19,7 @@ module.exports = composePlugins(
       filename: 'remoteEntry.js',
       exposes: {
         './Module': './src/app/nx-welcome.tsx',
-        './Button': './src/app/Button.tsx',
+        './utils': './src/app/utils.ts',
       },
       remotes: {
         react_ts_remote: 'react_ts_remote@http://localhost:3004/remoteEntry.js',

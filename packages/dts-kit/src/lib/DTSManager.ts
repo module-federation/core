@@ -109,17 +109,13 @@ class DTSManager {
         const tempHostOptions = {
           moduleFederationConfig: remoteOptions.moduleFederationConfig,
           typesFolder: path.join(mfTypesPath, 'node_modules'),
-          remoteTypesFolder: path.join(remoteOptions.typesFolder),
+          remoteTypesFolder:
+            remoteOptions?.hostRemoteTypesFolder || remoteOptions.typesFolder,
           deleteTypesFolder: true,
           context: remoteOptions.context,
           implementation: remoteOptions.implementation,
+          abortOnError: false,
         };
-        const hostOptions = options.host;
-        if (hostOptions) {
-          tempHostOptions.typesFolder =
-            hostOptions.typesFolder || tempHostOptions.typesFolder;
-        }
-
         await this.consumeArchiveTypes(tempHostOptions);
       }
 

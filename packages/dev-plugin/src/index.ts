@@ -167,8 +167,9 @@ export class DevPlugin implements WebpackPluginInstance {
             context: compiler.context,
             moduleFederationConfig: {
               ...this._options,
-              // remotes: [],
             },
+            hostRemoteTypesFolder:
+              normalizedDtsOptions.remote.typesFolder || '@mf-types',
             ...normalizedDtsOptions.remote,
             typesFolder: `.dev-server`,
           };
