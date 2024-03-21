@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import Koa from 'koa';
 import { getFreePort, getIPV4 } from './utils';
+import { DEFAULT_TAR_NAME } from './constant';
 
 interface CreateKoaServerOptions {
   typeTarPath: string;
@@ -17,7 +18,7 @@ export async function createKoaServer(
   const app = new Koa();
 
   app.use(async (ctx, next) => {
-    if (ctx.path === '/types.tar.gz') {
+    if (ctx.path === `/${DEFAULT_TAR_NAME}`) {
       ctx.status = 200;
       ctx.body = fs.createReadStream(typeTarPath);
       ctx.response.type = 'application/x-gzip';

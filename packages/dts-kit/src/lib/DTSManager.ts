@@ -301,10 +301,16 @@ class DTSManager {
     const downloadPromises = Object.entries(mapRemotesToDownload).map(
       async (item) => {
         const remoteInfo = item[1];
-        const requiredRemoteInfo = await this.requestRemoteManifest(remoteInfo);
-        this.remoteAliasMap[remoteInfo.alias] =
-          this.remoteAliasMap[remoteInfo.alias] || requiredRemoteInfo;
-        return this.consumeTargetRemotes(hostOptions, requiredRemoteInfo);
+        if (!this.remoteAliasMap[remoteInfo.alias]) {
+          const requiredRemoteInfo =
+            await this.requestRemoteManifest(remoteInfo);
+          this.remoteAliasMap[remoteInfo.alias] = requiredRemoteInfo;
+        }
+
+        return this.consumeTargetRemotes(
+          hostOptions,
+          this.remoteAliasMap[remoteInfo.alias],
+        );
       },
     );
 
@@ -357,6 +363,7 @@ class DTSManager {
   }
 
   async updateTypes(options: UpdateTypesOptions): Promise<void> {
+    // can use remoteTarPath directly in the future
     const { remoteName, remoteTarPath, updateMode } = options;
     const hostName = this.options?.host?.moduleFederationConfig?.name;
     fileLog(
@@ -393,11 +400,15 @@ class DTSManager {
           return item.name === remoteName;
         });
         if (remoteInfo) {
-          const requiredRemoteInfo =
-            await this.requestRemoteManifest(remoteInfo);
-          this.remoteAliasMap[remoteInfo.alias] =
-            this.remoteAliasMap[remoteInfo.alias] || requiredRemoteInfo;
-          await this.consumeTargetRemotes(hostOptions, requiredRemoteInfo);
+          if (!this.remoteAliasMap[remoteInfo.alias]) {
+            const requiredRemoteInfo =
+              await this.requestRemoteManifest(remoteInfo);
+            this.remoteAliasMap[remoteInfo.alias] = requiredRemoteInfo;
+          }
+          await this.consumeTargetRemotes(
+            hostOptions,
+            this.remoteAliasMap[remoteInfo.alias],
+          );
         }
       } else {
         await this.consumeTargetRemotes(hostOptions, loadedRemoteInfo);

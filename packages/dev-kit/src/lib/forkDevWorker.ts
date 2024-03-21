@@ -16,6 +16,7 @@ import {
   createKoaServer,
   fileLog,
   getIPV4,
+  DEFAULT_TAR_NAME,
 } from '@module-federation/dev-server';
 
 import { DevWorkerOptions } from './DevWorker';
@@ -142,7 +143,7 @@ export async function forkDevWorker(
       name: options.name,
       remotes: getLocalRemoteNames(host),
       updateCallback,
-      remoteTypeTarPath: `${serverAddress}/types.tar.gz`,
+      remoteTypeTarPath: `${serverAddress}/${DEFAULT_TAR_NAME}`,
     });
     cacheOptions = options;
   }
