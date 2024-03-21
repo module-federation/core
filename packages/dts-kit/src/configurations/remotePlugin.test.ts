@@ -71,6 +71,7 @@ describe('hostPlugin', () => {
           implementation: '',
           generateAPITypes: false,
           context: process.cwd(),
+          abortOnError: true,
         });
       });
 
@@ -124,6 +125,7 @@ describe('hostPlugin', () => {
           generateAPITypes: false,
           implementation: '',
           context: process.cwd(),
+          abortOnError: true,
         });
       });
     });

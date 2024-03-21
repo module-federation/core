@@ -44,7 +44,7 @@ const retrieveRemoteInfo = (options: {
 
   const parsedInfo = parseEntry(remote, undefined, '@');
 
-  const url = 'entry' in parsedInfo ? parsedInfo.entry : parsedInfo.version;
+  const url = 'entry' in parsedInfo ? parsedInfo.entry : parsedInfo.name;
   const zipUrl = buildZipUrl(hostOptions, url);
 
   return {

@@ -145,8 +145,12 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         true,
         {
           disableGenerateTypes: false,
-          remote: { generateAPITypes: true, compileInChildProcess: true },
-          host: {},
+          remote: {
+            generateAPITypes: true,
+            compileInChildProcess: true,
+            abortOnError: false,
+          },
+          host: { abortOnError: false },
         },
         'mfOptions.dts',
       )(options.dts);

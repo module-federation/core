@@ -74,6 +74,7 @@ describe('index', () => {
             'react-dom': { singleton: true, eager: true },
           },
         },
+        tsConfigPath: join(__dirname, '..', './tsconfig.json'),
         deleteTypesFolder: false,
         typesFolder: '@mf-tests-webpack',
       };
@@ -132,6 +133,7 @@ describe('index', () => {
             'react-dom': { singleton: true, eager: true },
           },
         },
+        tsConfigPath: join(__dirname, '..', './tsconfig.json'),
         deleteTypesFolder: false,
         typesFolder: '@mf-tests-rspack',
       };

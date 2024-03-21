@@ -149,6 +149,7 @@ export interface DtsRemoteOptions {
   compileInChildProcess?: boolean;
   compilerInstance?: 'tsc' | 'vue-tsc';
   generateAPITypes?: boolean;
+  abortOnError?: boolean;
 }
 
 export interface PluginDtsOptions {

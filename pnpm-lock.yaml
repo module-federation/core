@@ -408,6 +408,9 @@ importers:
       jest:
         specifier: 29.7.0
         version: 29.7.0(@types/node@18.19.18)(ts-node@10.9.1)
+      jest-cli:
+        specifier: 29.7.0
+        version: 29.7.0(@types/node@18.19.18)(ts-node@10.9.1)
       jest-environment-jsdom:
         specifier: 29.7.0
         version: 29.7.0

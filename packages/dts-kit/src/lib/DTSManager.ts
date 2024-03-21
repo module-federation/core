@@ -136,9 +136,13 @@ class DTSManager {
       }
       console.log(ansiColors.green('Federated types created correctly'));
     } catch (error) {
-      console.error(
-        ansiColors.red(`Unable to compile federated types, ${error}`),
-      );
+      if (this.options.remote?.abortOnError === false) {
+        console.error(
+          ansiColors.red(`Unable to compile federated types, ${error}`),
+        );
+      } else {
+        throw error;
+      }
     }
   }
 
@@ -312,34 +316,44 @@ class DTSManager {
   }
 
   async consumeTypes() {
-    const { options } = this;
-    if (!options.host) {
-      throw new Error('options.host is required if you want to consumeTypes');
-    }
-    const { mapRemotesToDownload } = retrieveHostConfig(options.host);
-    if (!Object.keys(mapRemotesToDownload).length) {
-      return;
-    }
-    const { downloadPromisesResult, hostOptions } =
-      await this.consumeArchiveTypes(options.host);
+    try {
+      const { options } = this;
+      if (!options.host) {
+        throw new Error('options.host is required if you want to consumeTypes');
+      }
+      const { mapRemotesToDownload } = retrieveHostConfig(options.host);
+      if (!Object.keys(mapRemotesToDownload).length) {
+        return;
+      }
+      const { downloadPromisesResult, hostOptions } =
+        await this.consumeArchiveTypes(options.host);
 
-    // download apiTypes
-    await Promise.all(
-      downloadPromisesResult.map(async (item) => {
-        if (item.status === 'rejected' || !item.value) {
-          return;
-        }
-        const [alias, destinationPath] = item.value;
-        const remoteInfo = this.remoteAliasMap[alias];
-        if (!remoteInfo) {
-          return;
-        }
-        await this.downloadAPITypes(remoteInfo, destinationPath);
-      }),
-    );
-    this.consumeAPITypes(hostOptions);
+      // download apiTypes
+      await Promise.all(
+        downloadPromisesResult.map(async (item) => {
+          if (item.status === 'rejected' || !item.value) {
+            return;
+          }
+          const [alias, destinationPath] = item.value;
+          const remoteInfo = this.remoteAliasMap[alias];
+          if (!remoteInfo) {
+            return;
+          }
+          await this.downloadAPITypes(remoteInfo, destinationPath);
+        }),
+      );
+      this.consumeAPITypes(hostOptions);
 
-    console.log(ansiColors.green('Federated types extraction completed'));
+      console.log(ansiColors.green('Federated types extraction completed'));
+    } catch (err) {
+      if (this.options.host?.abortOnError === false) {
+        console.error(
+          ansiColors.red(`Unable to consume federated types, ${err}`),
+        );
+      } else {
+        throw err;
+      }
+    }
   }
 
   async updateTypes(options: UpdateTypesOptions): Promise<void> {
