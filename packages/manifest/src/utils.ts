@@ -250,13 +250,11 @@ export function getTypesMetaInfo(
     generateAPITypes: true,
     compileInChildProcess: true,
   };
-  const defaultTypesMetaInfo = {
+  const defaultTypesMetaInfo: MetaDataTypes = {
     path: '',
     name: '',
-    apiTypesName: '',
-    apiTypesPath: '',
-    zipName: '',
-    zipPath: '',
+    zip: '',
+    api: '',
   };
   try {
     const normalizedDtsOptions =
@@ -293,10 +291,8 @@ export function getTypesMetaInfo(
     return {
       path: '',
       name: '',
-      apiTypesName: apiFileName,
-      apiTypesPath: '',
-      zipName: zipName,
-      zipPath: '',
+      zip: zipName,
+      api: apiFileName,
     };
   } catch (err) {
     console.warn(

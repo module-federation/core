@@ -17,10 +17,8 @@ export interface StatsBuildInfo {
 export interface MetaDataTypes {
   path: string;
   name: string;
-  apiTypesName: string;
-  apiTypesPath: string;
-  zipName: string;
-  zipPath: string;
+  api: string;
+  zip: string;
 }
 
 export interface BasicStatsMetaData {
