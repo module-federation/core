@@ -37,7 +37,10 @@ class DTSManager {
   loadedRemoteAPIAlias: string[];
 
   constructor(options: DTSManagerOptions) {
-    this.options = options;
+    this.options = {
+      host: options.host ? { ...options.host } : undefined,
+      remote: options.remote ? { ...options.remote } : undefined,
+    };
     this.runtimePkgs = [
       '@module-federation/runtime',
       '@module-federation/runtime-tools',
