@@ -13,7 +13,7 @@ export class DtsWorker {
 
   constructor(options: DtsWorkerOptions) {
     this._options = options;
-
+    this.removeUnSerializationOptions();
     this._rpcWorker = createRpcWorker(
       path.resolve(__dirname, './forkGenerateDts.js'),
       {},
@@ -25,6 +25,15 @@ export class DtsWorker {
     Promise.resolve(this._res).then(() => {
       this.exit();
     });
+  }
+
+  removeUnSerializationOptions() {
+    if (this._options.remote?.moduleFederationConfig?.manifest) {
+      delete this._options.remote?.moduleFederationConfig?.manifest;
+    }
+    if (this._options.host?.moduleFederationConfig?.manifest) {
+      delete this._options.host?.moduleFederationConfig?.manifest;
+    }
   }
 
   get controlledPromise(): ReturnType<DTSManager['generateTypes']> {

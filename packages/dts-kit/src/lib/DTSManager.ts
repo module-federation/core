@@ -81,6 +81,7 @@ class DTSManager {
 
       const { remoteOptions, tsConfig, mapComponentsToExpose } =
         retrieveRemoteConfig(options.remote);
+
       if (!Object.keys(mapComponentsToExpose).length) {
         return;
       }

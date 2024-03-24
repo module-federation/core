@@ -17,6 +17,7 @@ export class DevWorker {
 
   constructor(options: DevWorkerOptions) {
     this._options = options;
+    this.removeUnSerializationOptions();
     this._rpcWorker = createRpcWorker(
       path.resolve(__dirname, './forkDevWorker.js'),
       {},
@@ -25,6 +26,15 @@ export class DevWorker {
     );
 
     this._res = this._rpcWorker.connect(this._options);
+  }
+
+  removeUnSerializationOptions() {
+    if (this._options.remote?.moduleFederationConfig?.manifest) {
+      delete this._options.remote?.moduleFederationConfig?.manifest;
+    }
+    if (this._options.host?.moduleFederationConfig?.manifest) {
+      delete this._options.host?.moduleFederationConfig?.manifest;
+    }
   }
 
   get controlledPromise(): Promise<any> {
