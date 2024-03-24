@@ -35,6 +35,7 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
         ? enhancedOptions.extraOptions
         : undefined;
 
+    let hasRegistered = false;
     validateOptions(options);
     const isProd = process.env.NODE_ENV === 'production';
     const generateTypesOptions = {
@@ -80,6 +81,9 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
         },
       },
       webpack: (compiler) => {
+        if (hasRegistered) {
+          return;
+        }
         compiler.hooks.thisCompilation.tap('generateTypes', (compilation) => {
           compilation.hooks.processAssets.tapPromise(
             {
@@ -118,8 +122,12 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
             },
           );
         });
+        hasRegistered = true;
       },
       rspack: (compiler) => {
+        if (hasRegistered) {
+          return;
+        }
         compiler.hooks.thisCompilation.tap('generateTypes', (compilation) => {
           compilation.hooks.processAssets.tapPromise(
             {
@@ -158,6 +166,7 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
             },
           );
         });
+        hasRegistered = true;
       },
     };
   },
