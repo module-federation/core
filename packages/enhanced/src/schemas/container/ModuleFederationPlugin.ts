@@ -528,6 +528,132 @@ export default {
         },
       },
     },
+    DtsRemoteOptions: {
+      description: 'Used to config generate types.',
+      type: 'object',
+      properties: {
+        tsConfigPath: {
+          description: 'The tsconfig path of the project.',
+          type: 'string',
+        },
+        typesFolder: {
+          description: 'The generated folder path of the types.',
+          type: 'string',
+        },
+        compiledTypesFolder: {
+          description: 'The compiled folder path of the types.',
+          type: 'string',
+        },
+        deleteTypesFolder: {
+          description: 'Whether delete the types folder.',
+          type: 'boolean',
+        },
+        additionalFilesToCompile: {
+          description: 'The additional files to compile.',
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+        compileInChildProcess: {
+          description: 'Whether compile types in child process.',
+          type: 'boolean',
+        },
+        compilerInstance: {
+          description: 'The compiler instance of the project.',
+          enum: ['tsc', 'vue-tsc'],
+        },
+        generateAPITypes: {
+          description: 'Whether generate runtime api types.',
+          type: 'boolean',
+        },
+        abortOnError: {
+          description: 'Whether abort the process while generate types failed.',
+          type: 'boolean',
+        },
+      },
+    },
+    DtsHostOptions: {
+      description: 'Used to config consume types.',
+      type: 'object',
+      properties: {
+        typesFolder: {
+          description: 'The consumed folder path of the types.',
+          type: 'string',
+        },
+        remoteTypesFolder: {
+          description: 'The consumed remote folder path of the types.',
+          type: 'string',
+        },
+        deleteTypesFolder: {
+          description: 'Whether delete the types folder.',
+          type: 'boolean',
+        },
+        abortOnError: {
+          description: 'Whether abort the process while consume types failed.',
+          type: 'boolean',
+        },
+        maxRetries: {
+          description: 'The max retries count of consume types.',
+          type: 'number',
+          minimum: 1,
+        },
+      },
+    },
+    Dts: {
+      description: 'Used to get types support.',
+      type: 'object',
+      properties: {
+        disableGenerateTypes: {
+          description: 'Disable generate types.',
+          type: 'boolean',
+        },
+        remote: {
+          description: 'Used to config generate types.',
+          ref: '#/definitions/DtsRemoteOptions',
+        },
+        host: {
+          description: 'Used to config consume types.',
+          ref: '#/definitions/DtsHostOptions',
+        },
+        implementation: {
+          description: 'The implementation of the DTS Manager.',
+          type: 'string',
+          minLength: 1,
+        },
+      },
+    },
+    DevServer: {
+      description: 'Dev Server options.',
+      type: 'object',
+      properties: {
+        disableLiveReload: {
+          description: 'Disable live reload.',
+          type: 'boolean',
+        },
+        disableHotTypesReload: {
+          description: 'Disable hot types reload.',
+          type: 'boolean',
+        },
+      },
+    },
+    Dev: {
+      description: 'Used to config dev.',
+      type: 'object',
+      properties: {
+        devServer: {
+          description: 'Dev Server options.',
+          anyOf: [
+            {
+              $ref: '#/definitions/DevServer',
+            },
+            {
+              type: 'boolean',
+            },
+          ],
+        },
+      },
+    },
   },
   title: 'ModuleFederationPluginOptions',
   type: 'object',
@@ -595,6 +721,28 @@ export default {
     },
     shared: {
       $ref: '#/definitions/Shared',
+    },
+    dts: {
+      description: 'Used to get types support.',
+      anyOf: [
+        {
+          $ref: '#/definitions/Dts',
+        },
+        {
+          type: 'boolean',
+        },
+      ],
+    },
+    dev: {
+      description: 'Dev options.',
+      anyOf: [
+        {
+          $ref: '#/definitions/Dev',
+        },
+        {
+          type: 'boolean',
+        },
+      ],
     },
   },
 };
