@@ -35,7 +35,6 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
         ? enhancedOptions.extraOptions
         : undefined;
 
-    let hasRegistered = false;
     validateOptions(options);
     const isProd = process.env.NODE_ENV === 'production';
     const generateTypesOptions = {
@@ -81,13 +80,18 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
         },
       },
       webpack: (compiler) => {
-        if (hasRegistered) {
-          return;
-        }
         compiler.hooks.thisCompilation.tap('generateTypes', (compilation) => {
+          const hookName = 'mf:generateTypes';
+          if (
+            compilation.hooks.processAssets.taps.find(
+              (t) => t.name === hookName,
+            )
+          ) {
+            return;
+          }
           compilation.hooks.processAssets.tapPromise(
             {
-              name: 'generateTypes',
+              name: hookName,
               stage:
                 // @ts-expect-error use runtime variable in case peer dep not installed
                 compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
@@ -122,16 +126,21 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
             },
           );
         });
-        hasRegistered = true;
       },
       rspack: (compiler) => {
-        if (hasRegistered) {
-          return;
-        }
         compiler.hooks.thisCompilation.tap('generateTypes', (compilation) => {
+          const hookName = 'mf:generateTypes';
+          // @ts-expect-error rspack is the same as webpack
+          if (
+            compilation.hooks.processAssets.taps.find(
+              (t) => t.name === hookName,
+            )
+          ) {
+            return;
+          }
           compilation.hooks.processAssets.tapPromise(
             {
-              name: 'generateTypes',
+              name: hookName,
               stage:
                 // @ts-expect-error use runtime variable in case peer dep not installed
                 compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
@@ -166,7 +175,6 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
             },
           );
         });
-        hasRegistered = true;
       },
     };
   },
