@@ -79,6 +79,8 @@ describe('index', () => {
         typesFolder: '@mf-tests-webpack',
       };
 
+      console.log('webpack options: ', JSON.stringify(options));
+
       const webpackCompiler = webpack({
         target: 'web',
         entry: 'data:application/node;base64,',
@@ -104,6 +106,7 @@ describe('index', () => {
           });
         });
       })) as webpack.StatsAsset[];
+      console.log('compile webpack done');
 
       expect(
         Boolean(assets.find((asset) => asset.name === '@mf-tests-webpack.zip')),
