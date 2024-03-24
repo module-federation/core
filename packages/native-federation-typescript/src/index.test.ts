@@ -91,10 +91,12 @@ describe('index', () => {
       const assets = (await new Promise((resolve, reject) => {
         webpackCompiler.run((err, stats) => {
           if (err) {
+            console.error(err);
             reject(err);
           }
           webpackCompiler.close((closeErr) => {
             if (closeErr) {
+              console.error(closeErr);
               reject(closeErr);
             } else {
               resolve(stats?.toJson().assets as webpack.StatsAsset[]);
@@ -137,6 +139,7 @@ describe('index', () => {
         deleteTypesFolder: false,
         typesFolder: '@mf-tests-rspack',
       };
+      console.log('rspack options: ', JSON.stringify(options));
 
       const rspackCompiler = rspack({
         target: 'web',
@@ -151,10 +154,12 @@ describe('index', () => {
       const assets = (await new Promise((resolve, reject) => {
         rspackCompiler.run((err, stats) => {
           if (err) {
+            console.error(err);
             reject(err);
           }
           rspackCompiler.close((closeErr) => {
             if (closeErr) {
+              console.error(closeErr);
               reject(closeErr);
             } else {
               resolve(stats?.toJson().assets as webpack.StatsAsset[]);
@@ -162,7 +167,7 @@ describe('index', () => {
           });
         });
       })) as webpack.StatsAsset[];
-
+      console.log('compile rspack done');
       expect(
         Boolean(assets.find((asset) => asset.name === '@mf-tests-rspack.zip')),
       ).toEqual(true);

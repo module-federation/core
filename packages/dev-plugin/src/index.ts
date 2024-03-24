@@ -37,7 +37,9 @@ export class DevPlugin implements WebpackPluginInstance {
   ): void {
     ensureTempDir(filePath);
     const liveReloadEntry = fs
-      .readFileSync(require.resolve('@module-federation/dev-server'))
+      .readFileSync(
+        require.resolve('@module-federation/dev-server/launch-web-client'),
+      )
       .toString('utf-8');
     const liveReloadEntryWithOptions = liveReloadEntry.replace(
       WEB_CLIENT_OPTIONS_IDENTIFIER,
