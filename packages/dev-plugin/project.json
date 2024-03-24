@@ -23,10 +23,6 @@
         "lintFilePatterns": ["packages/dev-plugin/**/*.ts"]
       }
     },
-    "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/packages/dev-plugin"]
-    },
     "pre-release": {
       "executor": "nx:run-commands",
       "options": {

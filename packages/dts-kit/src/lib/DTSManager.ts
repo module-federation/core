@@ -4,6 +4,7 @@ import { rm } from 'fs/promises';
 import fs from 'fs';
 import { UpdateMode, fileLog } from '@module-federation/dev-server';
 import { MANIFEST_EXT, Manifest } from '@module-federation/sdk';
+import cloneDeepWith from 'lodash.clonedeepwith';
 
 import { retrieveRemoteConfig } from '../configurations/remotePlugin';
 import { createTypesArchive, downloadTypesArchive } from './archiveHandler';
@@ -38,10 +39,12 @@ class DTSManager {
   extraOptions: Record<string, any>;
 
   constructor(options: DTSManagerOptions) {
-    this.options = {
-      host: options.host ? { ...options.host } : undefined,
-      remote: options.remote ? { ...options.remote } : undefined,
-    };
+    this.options = cloneDeepWith(options, (_value, key) => {
+      // moduleFederationConfig.manifest may have un serialization options
+      if (key === 'manifest') {
+        return false;
+      }
+    });
     this.runtimePkgs = [
       '@module-federation/runtime',
       '@module-federation/runtime-tools',

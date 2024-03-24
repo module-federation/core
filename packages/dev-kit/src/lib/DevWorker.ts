@@ -1,4 +1,5 @@
 import path from 'path';
+import cloneDeepWith from 'lodash.clonedeepwith';
 import { DTSManagerOptions } from '@module-federation/dts-kit';
 
 import { RpcWorker, createRpcWorker } from '../rpc';
@@ -16,7 +17,12 @@ export class DevWorker {
   private _res: Promise<any>;
 
   constructor(options: DevWorkerOptions) {
-    this._options = options;
+    this._options = cloneDeepWith(options, (_value, key) => {
+      // moduleFederationConfig.manifest may have un serialization options
+      if (key === 'manifest') {
+        return false;
+      }
+    });
     this.removeUnSerializationOptions();
     this._rpcWorker = createRpcWorker(
       path.resolve(__dirname, './forkDevWorker.js'),

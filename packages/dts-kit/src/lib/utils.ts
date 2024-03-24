@@ -13,7 +13,11 @@ import ansiColors from 'ansi-colors';
 export function getDTSManagerConstructor(
   implementation?: string,
 ): typeof DTSManager {
-  return implementation ? require(implementation) : DTSManager;
+  if (implementation) {
+    const NewConstructor = require(implementation);
+    return NewConstructor.default ? NewConstructor.default : NewConstructor;
+  }
+  return DTSManager;
 }
 export const validateOptions = (options: HostOptions) => {
   if (!options.moduleFederationConfig) {

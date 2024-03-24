@@ -27,7 +27,8 @@
     "fs-extra": "9.1.0",
     "@module-federation/dev-server": "workspace:*",
     "@module-federation/dts-kit": "workspace:*",
-    "@module-federation/sdk": "workspace:*"
+    "@module-federation/sdk": "workspace:*",
+    "lodash.clonedeepwith": "4.5.0"
   },
   "peerDependencies": {
     "typescript": "^4.9.0 || ^5.0.0",

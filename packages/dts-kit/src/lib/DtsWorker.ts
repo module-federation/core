@@ -1,4 +1,6 @@
 import path from 'path';
+import cloneDeepWith from 'lodash.clonedeepwith';
+
 import { type RpcWorker, createRpcWorker } from '../rpc';
 import type { RpcMethod } from '../rpc/types';
 import type { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
@@ -12,7 +14,12 @@ export class DtsWorker {
   private _res: Promise<any>;
 
   constructor(options: DtsWorkerOptions) {
-    this._options = options;
+    this._options = cloneDeepWith(options, (_value, key) => {
+      // moduleFederationConfig.manifest may have un serialization options
+      if (key === 'manifest') {
+        return false;
+      }
+    });
     this.removeUnSerializationOptions();
     this._rpcWorker = createRpcWorker(
       path.resolve(__dirname, './forkGenerateDts.js'),
