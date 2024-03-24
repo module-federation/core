@@ -157,6 +157,7 @@ export class DevPlugin implements WebpackPluginInstance {
           disableGenerateTypes: false,
           remote: { compileInChildProcess: true },
           host: {},
+          extraOptions: {},
         },
         'mfOptions.dts',
       )(dts);
@@ -183,11 +184,14 @@ export class DevPlugin implements WebpackPluginInstance {
             abortOnError: false,
             ...normalizedDtsOptions.host,
           };
-
+    const extraOptions = normalizedDtsOptions
+      ? normalizedDtsOptions.extraOptions || {}
+      : {};
     this._devWorker = createDevWorker({
       name,
       remote: remote,
       host: host,
+      extraOptions: extraOptions,
       disableLiveReload: normalizedDevServer.disableHotTypesReload,
       disableGenerateTypes: !normalizedDtsOptions,
     });

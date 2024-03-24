@@ -35,6 +35,7 @@ class DTSManager {
   runtimePkgs: string[];
   remoteAliasMap: Record<string, Required<RemoteInfo>>;
   loadedRemoteAPIAlias: string[];
+  extraOptions: Record<string, any>;
 
   constructor(options: DTSManagerOptions) {
     this.options = {
@@ -47,6 +48,7 @@ class DTSManager {
     ];
     this.loadedRemoteAPIAlias = [];
     this.remoteAliasMap = {};
+    this.extraOptions = options?.extraOptions || {};
   }
 
   generateAPITypes(mapComponentsToExpose: Record<string, string>) {

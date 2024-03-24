@@ -156,6 +156,7 @@ export interface PluginDtsOptions {
   disableGenerateTypes?: boolean;
   remote?: DtsRemoteOptions;
   host?: DtsHostOptions;
+  extraOptions?: Record<string, any>;
   implementation?: string;
 }
 

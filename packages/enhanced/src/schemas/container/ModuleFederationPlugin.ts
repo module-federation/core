@@ -616,12 +616,18 @@ export default {
           description: 'Used to config consume types.',
           ref: '#/definitions/DtsHostOptions',
         },
+        extraOptions: {
+          description: 'Extra options for DTS Manager.',
+          type: 'object',
+          additionalProperties: true,
+        },
         implementation: {
           description: 'The implementation of the DTS Manager.',
           type: 'string',
           minLength: 1,
         },
       },
+      additionalProperties: false,
     },
     DevServer: {
       description: 'Dev Server options.',

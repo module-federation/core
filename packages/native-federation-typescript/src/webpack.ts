@@ -1,14 +1,15 @@
 import { WebpackPluginInstance } from 'unplugin';
-import { RemoteOptions, HostOptions } from '@module-federation/dts-kit';
 
 import {
   NativeFederationTypeScriptHost as GeneralHost,
   NativeFederationTypeScriptRemote as GeneralRemote,
-} from '.';
+  EnhancedRemoteOptions,
+  EnhancedHostOptions,
+} from './index';
 
 export const NativeFederationTypeScriptRemote: (
-  options: RemoteOptions,
+  options: EnhancedRemoteOptions,
 ) => WebpackPluginInstance = GeneralRemote.webpack;
 export const NativeFederationTypeScriptHost: (
-  options: HostOptions,
+  options: EnhancedHostOptions,
 ) => WebpackPluginInstance = GeneralHost.webpack;

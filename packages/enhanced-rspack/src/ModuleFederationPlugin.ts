@@ -109,6 +109,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
           disableGenerateTypes: false,
           remote: { generateAPITypes: true, compileInChildProcess: true },
           host: {},
+          extraOptions: {},
         },
         'mfOptions.dts',
       )(options.dts);
@@ -117,17 +118,23 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       !normalizedDtsOptions.disableGenerateTypes
     ) {
       NativeFederationTypeScriptRemote({
-        implementation: normalizedDtsOptions.implementation,
-        context: compiler.context,
-        moduleFederationConfig: options,
-        ...normalizedDtsOptions.remote,
+        remote: {
+          implementation: normalizedDtsOptions.implementation,
+          context: compiler.context,
+          moduleFederationConfig: options,
+          ...normalizedDtsOptions.remote,
+        },
+        extraOptions: normalizedDtsOptions.extraOptions || {},
         // @ts-ignore
       }).apply(compiler);
       NativeFederationTypeScriptHost({
-        implementation: normalizedDtsOptions.implementation,
-        context: compiler.context,
-        moduleFederationConfig: options,
-        ...normalizedDtsOptions.host,
+        host: {
+          implementation: normalizedDtsOptions.implementation,
+          context: compiler.context,
+          moduleFederationConfig: options,
+          ...normalizedDtsOptions.host,
+        },
+        extraOptions: normalizedDtsOptions.extraOptions || {},
         // @ts-ignore
       }).apply(compiler);
     }

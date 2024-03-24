@@ -10,11 +10,37 @@ import {
   retrieveTypesAssetsInfo,
 } from '@module-federation/dts-kit';
 
+export type EnhancedRemoteOptions =
+  | {
+      remote: RemoteOptions;
+      extraOptions: Record<string, any>;
+    }
+  | RemoteOptions;
+
+export type EnhancedHostOptions =
+  | {
+      host: HostOptions;
+      extraOptions: Record<string, any>;
+    }
+  | HostOptions;
+
 export const NativeFederationTypeScriptRemote = createUnplugin(
-  (options: RemoteOptions) => {
+  (enhancedOptions: EnhancedRemoteOptions) => {
+    const options =
+      'extraOptions' in enhancedOptions
+        ? enhancedOptions.remote
+        : enhancedOptions;
+    const extraOptions =
+      'extraOptions' in enhancedOptions
+        ? enhancedOptions.extraOptions
+        : undefined;
+
     validateOptions(options);
     const isProd = process.env.NODE_ENV === 'production';
-
+    const generateTypesOptions = {
+      remote: options,
+      extraOptions,
+    };
     const getGenerateTypesFn = () => {
       let fn: typeof generateTypes | typeof generateTypesInChildProcess =
         generateTypes;
@@ -23,7 +49,7 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
         fn = generateTypesInChildProcess;
       }
       if (isProd) {
-        res = fn({ remote: options });
+        res = fn(generateTypesOptions);
         return () => res;
       }
       return fn;
@@ -33,7 +59,7 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
       name: 'native-federation-typescript/remote',
       rollup: {
         writeBundle: async () => {
-          await generateTypesFn({ remote: options });
+          await generateTypesFn(generateTypesOptions);
         },
       },
       vite: {
@@ -41,16 +67,16 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
           if (isProd) {
             return;
           }
-          await generateTypesFn({ remote: options });
+          await generateTypesFn(generateTypesOptions);
         },
         watchChange: async () => {
           if (isProd) {
             return;
           }
-          await generateTypesFn({ remote: options });
+          await generateTypesFn(generateTypesOptions);
         },
         writeBundle: async () => {
-          await generateTypesFn({ remote: options });
+          await generateTypesFn(generateTypesOptions);
         },
       },
       webpack: (compiler) => {
@@ -64,9 +90,7 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
             },
             async () => {
               try {
-                await generateTypesFn({
-                  remote: options,
-                });
+                await generateTypesFn(generateTypesOptions);
                 const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
                   retrieveTypesAssetsInfo(options);
                 if (zipTypesPath) {
@@ -106,9 +130,7 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
             },
             async () => {
               try {
-                await generateTypesFn({
-                  remote: options,
-                });
+                await generateTypesFn(generateTypesOptions);
                 const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
                   retrieveTypesAssetsInfo(options);
                 if (zipTypesPath) {
@@ -142,9 +164,22 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
 );
 
 export const NativeFederationTypeScriptHost = createUnplugin(
-  (options: HostOptions) => {
+  (enhancedOptions: EnhancedHostOptions) => {
+    const options =
+      'extraOptions' in enhancedOptions
+        ? enhancedOptions.host
+        : enhancedOptions;
+    const extraOptions =
+      'extraOptions' in enhancedOptions
+        ? enhancedOptions.extraOptions
+        : undefined;
+
     validateOptions(options);
-    const consumeTypesPromise = consumeTypes({ host: options });
+    const consumeTypesOptions = {
+      host: options,
+      extraOptions,
+    };
+    const consumeTypesPromise = consumeTypes(consumeTypesOptions);
     return {
       name: 'native-federation-typescript/host',
       async writeBundle() {
