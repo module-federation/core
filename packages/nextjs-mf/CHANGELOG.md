@@ -1,5 +1,12 @@
 # [8.1.0-canary.7](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.2.5
+
+### Patch Changes
+
+- d942a1c: only call module factory in valid conditions in runtime plugin
+- 5f7b084: Prevent application from compiling if AppDir is used at all
+
 ## 8.2.4
 
 ### Patch Changes
