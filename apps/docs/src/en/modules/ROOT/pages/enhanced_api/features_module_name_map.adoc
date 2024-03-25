@@ -1,0 +1,43 @@
+= Modules' Name Map
+
+The Enhanced Federation Plugin API introduces a feature called Modules' Name Map. This feature allows you to create a list of all available modules from a single remote. This guide will walk you through how to use this feature.
+
+== Creating a Modules' Name Map
+
+To create a Modules' Name Map, you need to define the modules you want to expose in your `ModuleFederationEnhancedPlugin` configuration. Here's an example:
+
+[source, javascript]
+----
+const ModuleFederationEnhancedPlugin = require("@schirrel/module-federation-enhanced-plugin");
+
+module.exports = {
+  //... rest of your config
+  plugins: [
+    new ModuleFederationEnhancedPlugin({
+      name: 'myRemoteModule',
+      // same as the ModuleFederationPlugin config
+      exposes: {
+        Button: "./src/Button",
+        Input: "./src/Input"
+      },
+    }),
+  ],
+};
+----
+
+In this example, the `Button` and `Input` components from the `src` directory are exposed. You can replace these with the modules you want to expose in your application.
+
+This configuration will export a list with `['Button', 'Input']` for `myRemoteModule`.
+
+== Using the Modules' Name Map
+
+Once you've created a Modules' Name Map, you can use it in any other application. To do this, you can import `remoteNameList` from your remote module. Here's an example:
+
+[source, javascript]
+----
+import remoteNameList from "myRemoteModule/remoteNameList";
+----
+
+In this example, `remoteNameList` will be an array containing the names of the modules exposed by `myRemoteModule`.
+
+The Modules' Name Map feature of the Enhanced Federation Plugin API provides a convenient way to manage and access the modules exposed by your remotes.
