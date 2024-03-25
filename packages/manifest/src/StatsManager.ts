@@ -399,7 +399,7 @@ class StatsManager {
     try {
       const existedStats = compilation.getAsset(this.fileName);
       if (existedStats) {
-        return JSON.parse(existedStats.source.toString());
+        return JSON.parse(existedStats.source.source().toString());
       }
       const { manifest: manifestOptions = {} } = this._options;
       let stats = await this._generateStats(compiler, compilation);
