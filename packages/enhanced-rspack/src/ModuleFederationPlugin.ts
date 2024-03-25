@@ -107,8 +107,12 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
         true,
         {
           disableGenerateTypes: false,
-          remote: { generateAPITypes: true, compileInChildProcess: true },
-          host: {},
+          remote: {
+            generateAPITypes: true,
+            compileInChildProcess: true,
+            abortOnError: false,
+          },
+          host: { abortOnError: false },
           extraOptions: {},
         },
         'mfOptions.dts',

@@ -14,6 +14,11 @@ export { generateTypes } from './lib/generateTypes';
 export { generateTypesInChildProcess } from './lib/generateTypesInChildProcess';
 export { consumeTypes } from './lib/consumeTypes';
 export { DTSManager } from './lib/DTSManager';
+export {
+  HOST_API_TYPES_FILE_NAME,
+  REMOTE_ALIAS_IDENTIFIER,
+  REMOTE_API_TYPES_FILE_NAME,
+} from './constant';
 
 export { DTSManagerOptions } from './interfaces/DTSManagerOptions';
 export { HostOptions } from './interfaces/HostOptions';
