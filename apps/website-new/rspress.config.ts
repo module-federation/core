@@ -1,5 +1,6 @@
 import * as path from 'path';
 import { defineConfig } from 'rspress/config';
+import { moduleFederationPluginOverview } from './src/moduleFederationPluginOverview';
 
 const getNavbar = (lang: string) => {
   const cn = lang === 'zh';
@@ -64,6 +65,7 @@ export default defineConfig({
     ],
   },
   builderConfig: {
+    plugins: [moduleFederationPluginOverview],
     tools: {
       postcss: (config, { addPlugins }) => {
         addPlugins([require('tailwindcss/nesting'), require('tailwindcss')]);

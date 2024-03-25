@@ -4,8 +4,8 @@
 需要 Rspack 0.5.0 及以上版本
 :::
 
-- 使用 `Rspack` 构建工具的应用构建出满足 `Module Federation` 加载规范的模块
-- 能够在构建插件里面使用别名消费微模块
+- 能够构建出满足 `Module Federation` 加载规范的模块
+- 能够使用别名消费 `Module Federation` 规范的模块
 - 能够设置模块的共享依赖配置，当加载模块的宿主环境已经存在对应依赖时将不会重复加载
 - 当模块具备远程类型时将会自动把远程模块的类型下载下来消费
 - 消费远程模块时将具备热更新能力
@@ -27,44 +27,54 @@ import { PackageManagerTabs } from '@theme';
   }}
 />
 
-### 创建 Module Federation Config
-
-创建 `module-federation.config.ts` 文件，内容如下：
-
-```ts title='vmok.config.ts'
-import { createVmokConfig } from '@module-federation/enhanced-rspack';
-
-export default createVmokConfig({
-  // 目前同一个 scm 目前只能绑定一个 Vmok 名称，请谨慎选择您的 Vmok name!!!
-  // 若仅为体验使用，请使用 @demo 来作为空间
-  // 正式项目请谨慎使用 scope，最好以团队+项目作为名称，并且将团队相关的组件都放置同一个 scope 下
-  name: '@demo/host',
-  remotes: {
-    provider: '@demo/provider:http://localhost:2004/vmok-manifest.json',
-  },
-  exposes: {
-    './Button': './src/components/Button.tsx',
-  },
-  shared: {
-    react: {
-      singleton: true,
-    },
-    'react-dom': {
-      singleton: true,
-    },
-  },
-});
-```
-
 ### 注册插件
 
-在 `Rspack` 中，你可以通过 `plugins` 配置项来添加插件：
+在 `Rspack` 中，你可以通过 `rspack.config.js` 配置文件中的 `plugins` 配置项来添加插件：
 
-```js title='webpack.config.js'
-const { VmokPlugin } = require('@vmok/kit/rspack');
-const vmokConfig = require('./vmok.config');
-
+```ts title='rspack.config.js'
+import { ModuleFederationPlugin } from '@module-federation/enhanced-rspack';
 module.exports = {
-  plugins: [new VmokPlugin(vmokConfig)],
+  devServer: {
+    port: 2000,
+  },
+  output: {
+    // 使用 manifest 必须要配置 publicPath
+    publicPath: 'http://localhost:2000/',
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'rspack_provider',
+      filename: 'remoteEntry.js',
+      exposes: {
+        // 设置需要导出的模块，default 导出为 .
+        './button': './src/components/button',
+      },
+      shared: {
+        react: {
+          singleton: true,
+        },
+        'react-dom': {
+          singleton: true,
+        },
+      },
+    }),
+  ],
 };
 ```
+
+## 配置构建插件
+
+- Type: `ModuleFederationPlugin(options: ModuleFederationOptions)`
+
+- Module federation 插件的配置结构如下所示：
+
+```ts
+type ModuleFederationOptions {
+    name: string;
+    filename?: string,
+    remotes?: Array<RemoteInfo>;
+    shared?: ShareInfos;
+};
+```
+
+你可以在 [Config 总览](../../configure/index) 页面找到所有配置项的详细说明。
