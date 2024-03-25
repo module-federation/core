@@ -397,6 +397,10 @@ class StatsManager {
     extraOptions?: {},
   ): Promise<Stats> {
     try {
+      const existedStats = compilation.getAsset(this.fileName);
+      if (existedStats) {
+        return JSON.parse(existedStats.source.toString());
+      }
       const { manifest: manifestOptions = {} } = this._options;
       let stats = await this._generateStats(compiler, compilation);
 

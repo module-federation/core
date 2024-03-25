@@ -82,13 +82,6 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
       webpack: (compiler) => {
         compiler.hooks.thisCompilation.tap('generateTypes', (compilation) => {
           const hookName = 'mf:generateTypes';
-          if (
-            compilation.hooks.processAssets.taps.find(
-              (t) => t.name === hookName,
-            )
-          ) {
-            return;
-          }
           compilation.hooks.processAssets.tapPromise(
             {
               name: hookName,
@@ -98,9 +91,13 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
             },
             async () => {
               try {
-                await generateTypesFn(generateTypesOptions);
                 const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
                   retrieveTypesAssetsInfo(options);
+                if (zipName && compilation.getAsset(zipName)) {
+                  return;
+                }
+                await generateTypesFn(generateTypesOptions);
+
                 if (zipTypesPath) {
                   compilation.emitAsset(
                     zipName,
@@ -130,14 +127,6 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
       rspack: (compiler) => {
         compiler.hooks.thisCompilation.tap('generateTypes', (compilation) => {
           const hookName = 'mf:generateTypes';
-          // @ts-expect-error rspack is the same as webpack
-          if (
-            compilation.hooks.processAssets.taps.find(
-              (t) => t.name === hookName,
-            )
-          ) {
-            return;
-          }
           compilation.hooks.processAssets.tapPromise(
             {
               name: hookName,
@@ -147,9 +136,13 @@ export const NativeFederationTypeScriptRemote = createUnplugin(
             },
             async () => {
               try {
-                await generateTypesFn(generateTypesOptions);
                 const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
                   retrieveTypesAssetsInfo(options);
+                if (zipName && compilation.getAsset(zipName)) {
+                  return;
+                }
+
+                await generateTypesFn(generateTypesOptions);
                 if (zipTypesPath) {
                   compilation.emitAsset(
                     zipName,
