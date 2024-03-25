@@ -1,11 +1,10 @@
 name: mf-docs
-title: Module Federation Documentation (Beta)
+title: Module Federation Documentation
 version: 0.20
 display_version: '0.20'
-start_page: ROOT:getting-started.adoc
+start_page: ROOT:getting-started/getting-started-practical.adoc
 nav:
   - modules/ROOT/nav.adoc
-  - modules/enhanced_api/nav.adoc
 asciidoc:
   attributes:
     idprefix: '@'

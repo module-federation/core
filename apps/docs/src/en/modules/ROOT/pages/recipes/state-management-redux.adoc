@@ -1,0 +1,235 @@
+= Global State Management in Micro-Frontends with Redux and Redux Toolkit
+
+== Introduction
+
+Modern web development practices have shifted towards more modular architectures like micro front-ends. This approach allows for greater flexibility and scalability. In this context, managing global state efficiently becomes paramount. Redux and Redux Toolkit are essential in achieving a centralized state management system. The following documentation will guide you through the integration process of these tools within a micro front-end setup.
+
+== Prerequisites
+
+Before proceeding, ensure you have a basic understanding of React, TypeScript, and state management principles. Familiarity with Redux and the Redux Toolkit is also recommended.
+
+== Installation
+
+=== Setting Up Dependencies
+
+The first step involves adding Redux and Redux Toolkit to your project. These libraries will enable you to manage the application's state globally.
+
+Execute the installation command:
+
+[source, bash]
+----
+npm install @reduxjs/toolkit react-redux
+----
+
+=== Store Configuration
+The store acts as the central hub for your application's state. Setting it up correctly is critical for the smooth functioning of Redux.
+
+Create a new directory and file for the store:
+
+[source, bash]
+----
+mkdir src/store && touch src/store/index.ts
+----
+
+Add the store configuration code in `index.ts`. This configuration binds the reducers to the store, which in turn manage specific slices of state.
+
+[source, typescript]
+----
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "./features/counter/counterSlice";
+
+export const store = configureStore({
+    reducer: {
+        counter: counterReducer,
+    },
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+----
+
+=== Feature Slice Creation
+A feature slice represents a specific domain of your application's state. It contains the reducer logic and action creators for that domain.
+
+Set up a directory structure for the counter feature slice:
+
+[source, bash]
+----
+mkdir src/store/features/counter && touch src/store/features/counter/counterSlice.ts
+----
+
+Define the counter feature slice in `counterSlice.ts`. Here, you're creating actions and a reducer to manage a counter's state.
+
+[source, typescript]
+----
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+
+interface CounterState {
+    value: number;
+}
+
+const initialState: CounterState = {
+    value: 0,
+};
+
+export const counterSlice = createSlice({
+name: "counter",
+initialState,
+reducers: {
+    increment: (state) => {
+        state.value += 1;
+    },
+    decrement: (state) => {
+        state.value -= 1;
+    },
+    incrementByAmount: (state, action: PayloadAction<number>) => {
+        state.value += action.payload;
+    },
+},
+});
+
+export const { increment, decrement, incrementByAmount } = counterSlice.actions;
+export default counterSlice.reducer;
+----
+
+=== Defining Types for Store State
+Type definitions ensure that you are interacting with the store in a type-safe manner.
+
+Create a `storeState.ts` file to define types:
+
+[source, bash]
+----
+touch src/types/storeState.ts
+----
+
+Within `storeState.ts`, define the structure of the counter's slice of state:
+
+[source, typescript]
+----
+export interface CounterState {
+    value: number;
+}
+----
+
+=== Optional: Generating Types with Module Federation
+
+If you're using Module Federation to share components and logic across different front-ends, you'll need to generate types to ensure type safety.
+
+Configure `federation.config.json` accordingly and use the command to generate the types:
+
+[source, json]
+----
+{
+    "name": "container",
+    "exposes": {
+        "./Button": "./src/components/Button.tsx",
+        "./types/storeState": "./src/types/storeState.ts"
+    }
+}
+----
+
+Run the generation script:
+
+[source, bash]
+----
+npx make-federated-types
+----
+
+Verify the output in `container.d.ts` to ensure the types are correctly exported.
+
+=== Creating Store Hooks
+Hooks provide a way to interact with the Redux store in a React component.
+
+==== Dispatch Hook
+Create a `useStoreDispatch.ts` hook to dispatch actions to the store:
+
+[source, bash]
+----
+touch src/hooks/useStoreDispatch.ts
+----
+
+Define the dispatch hook in `useStoreDispatch.ts`. This custom hook returns the dispatch function from the Redux store, allowing you to dispatch actions from your components.
+
+[source, typescript]
+----
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../store";
+
+export const useStoreDispatch = () => useDispatch<AppDispatch>();
+----
+
+==== Selector Hook
+Similarly, create a `useStoreSelector.ts` hook to retrieve state from the store:
+
+[source, bash]
+----
+touch src/hooks/useStoreSelector.ts
+----
+
+Define the selector hook in `useStoreSelector.ts`. This hook is a typed version of the `useSelector` hook provided by `react-redux`. It allows you to select data from the store's state.
+
+[source, typescript]
+----
+import { useSelector, TypedUseSelectorHook } from "react-redux";
+import type { RootState } from "../store";
+
+export const useStoreSelector: TypedUseSelectorHook<RootState> =
+
+    useSelector;
+----
+
+=== Wrapping the Application with the Store Provider
+The `StoreProvider` is a component that wraps your React application, providing the Redux store context to all components.
+
+Create the `StoreProvider` component:
+
+[source, bash]
+----
+touch src/providers/StoreProvider.tsx
+----
+
+Implement the provider in `StoreProvider.tsx`. This will make the Redux store available to any nested components.
+
+[source, jsx]
+----
+import React from "react";
+import { Provider } from "react-redux";
+import { store } from "../store";
+
+export default function StoreProvider({ children }) {
+    return <Provider store={store}>{children}</Provider>;
+}
+----
+
+=== Exporting Constructs with Webpack
+If you are using a micro-frontend setup with module federation, you will need to expose the hooks and provider through the Webpack configuration.
+
+Add the necessary exposes to your `webpack.config.js`:
+
+[source, javascript]
+----
+// ...webpack configuration...
+exposes: {
+    "./hooks/useStore": "./src/hooks/useStore.ts",
+    "./hooks/useStoreSelector": "./src/hooks/useStoreSelector.ts",
+    "./providers/StoreProvider": "./src/providers/StoreProvider.tsx",
+  // ...other exposes...
+},
+// ...
+----
+
+This configuration allows other micro front-ends to use the store, hooks, and provider from this codebase.
+
+== Running the Application
+
+After setting up Redux and Redux Toolkit, you can start your application to see the global state in action.
+
+[source, bash]
+----
+cd container && npm run start
+cd remote && npm run start
+----
+
+You should now have a running application with a properly configured Redux store, utilizing the Redux Toolkit for efficient global state management.
+
+This expanded explanation provides a deeper understanding of each step, ensuring that developers with varying levels of familiarity with Redux can follow along and integrate these tools into their micro front-end architecture.

@@ -1,0 +1,77 @@
+= Micro-Frontend Architecture: Navigating Common Anti-Patterns
+
+== Introduction
+
+In the realm of front-end development, the concept of micro-frontends, an offshoot of the microservices architecture, has gained traction. Despite the abundance of tools, libraries, and frameworks in JavaScript, there's a prevailing sense of confusion about their optimal use. Micro-frontend architecture promises flexibility in choosing libraries and frameworks, but it's not without its challenges, notably in performance and complexity.
+
+== Understanding Anti-Patterns
+
+An anti-pattern in software development refers to commonly used practices that are counterproductive. Identifying and avoiding these in micro-frontend development is crucial for efficient and effective software design.
+
+== Anti-Pattern 1: Micro-Frontend Vs. Component
+
+Micro-frontends are technical embodiments of business subdomains, characterized by:
+
+* Business Domain Representation
+* Autonomous Codebase
+* Independent Deployment
+* Single Team Ownership
+
+Micro-frontends and components serve different purposes and are not mutually exclusive. While components represent reusable UI elements (e.g., buttons with various properties like labels, icons, and animations), micro-frontends encapsulate a technical representation of a business subdomain, enabling independent implementation and deployment. The critical distinction lies in their scope and autonomy; micro-frontends operate independently and are domain-aware, contrasting with components that are often context-driven.
+
+To avoid this anti-pattern, delineate micro-frontend boundaries based on business subdomains and avoid treating components as micro-frontends, as the latter represent entire business domains. For further clarity, refer to the xref:concepts/component-vs-mf.adoc["What's the Difference Between a Component and a Micro-Frontend?"] documentation page.
+
+== Anti-Pattern 2: Multi-Framework Approach
+
+Setting up a micro-frontend involves deciding on a domain and establishing an application shell. Micro-frontends offer the freedom to choose any framework, but this freedom comes with its challenges:
+
+* Performance issues
+* Dependency clashes
+* Increased bundle size
+
+In cases where multiple teams use different technologies, a unified approach using a single framework is often more beneficial, avoiding inconsistency and negative user experiences. However, a multiframework approach can be advantageous in certain scenarios, like fostering a dynamic development environment that accelerates business logic deployment without impacting production.
+
+== Anti-Pattern 3: Overengineering Solutions
+
+Designing micro-frontends that attempt to cover too broad a functionality spectrum can complicate communication and integration within an application. Focusing on single responsibilities and utilizing appropriate communication patterns (e.g., event emitters for intra-view communication) can enhance modularity and maintainability.
+
+Solutions:
+
+* Single Responsibility Principle: Enforce the single responsibility principle for micro-frontends by ensuring each micro-frontend is focused on a specific business domain or functionality.
+* Modular Communication Patterns: Adopt and enforce standardized communication patterns (e.g., event bus, custom events) to facilitate loose coupling and modular composition of micro-frontends.
+* Incremental Development: Adopt an incremental development approach, starting with the minimal viable functionality and extending based on user feedback and actual requirements.
+
+== Anti-Pattern 4: Dependency Hell
+
+Independence is a hallmark of both microservices and micro frontends. However, this can lead to "dependency hell," a term used to describe the frustration of managing software packages with interdependent versions. For example, if a core library used by multiple micro frontends updates, it can cause conflicts with existing implementations or extensions. 
+
+Favoring composition over inheritance and maintaining clear boundaries between shared resources can alleviate these issues. It's crucial to evaluate the necessity of external dependencies and strive for minimal coupling to avoid escalating complexity. 
+
+*To mitigate this:*
+
+* Decouple libraries from feature extensions using wrappers
+* Ensure consistent library versioning across micro-frontends
+* Evaluate the necessity of external dependencies and avoid them if possible
+* Maintain accurate documentation for all dependencies
+
+== Anti-Pattern 5: API Consumption and Efficiency
+
+Multiple micro-frontends making redundant calls to the same API endpoints can strain the backend infrastructure and degrade performance. Rationalizing the frontend architecture to minimize duplicate requests, considering API gateways, and optimizing backend services are vital steps in mitigating this issue.
+
+*Solutions:*
+
+* API Aggregation Layer: Introduce an API aggregation layer or backend-for-frontend (BFF) to consolidate API calls from micro-frontends, reducing redundancy and improving performance.
+* Caching Strategies: Implement caching mechanisms at the micro-frontend, API gateway, or server level to prevent duplicate data fetching and reduce load on backend services.
+* Domain-Driven Design: Reassess and realign micro-frontends according to domain boundaries to ensure that API calls are logically grouped and minimize overlap, facilitating more efficient data retrieval.
+
+== Anti-Pattern 6: Organizational and Architectural Coupling
+
+Micro-frontends sometimes need to communicate, especially in UIs managed by different teams. For instance, updating a mini-basket when a user adds an item requires communication among micro frontends. While a global state might seem like a straightforward solution, it contradicts the principle of independence in micro-frontends. 
+
+Employing event-driven communication and ensuring micro-frontends remain loosely coupled through well-defined interfaces can preserve independence and facilitate easier integration and evolution of the ecosystem.
+
+*Alternatives include:*
+
+* Avoiding shared state to maintain segregation
+* Using an event emitter-based approach for communication
+* Individual micro frontends managing their own state, akin to microservices

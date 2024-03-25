@@ -1,0 +1,113 @@
+= getModule
+
+The `getModule` function is a part of the Enhanced Federation Plugin API's Helper. It allows you to load a module from a remote using a low-level API. This function is particularly useful when dynamic import `import()` doesn't work with dynamically passed names. This guide will walk you through how to use the `getModule` function.
+
+== Usage
+
+The `getModule` function can be used in both asynchronous and promise-based contexts.
+
+=== Asynchronous Usage
+
+Here's an example of how to use `getModule` asynchronously:
+
+[source, javascript]
+----
+const module = await getModule({ remote: "myApp", module: "./Component" });
+
+const module = await getModule({
+  remote: "myApp",
+  module: "./ListOfSomethingNeeded",
+});
+----
+
+In this example, `getModule` is used to load the `Component` module from the `myApp` remote.
+
+=== Promise-based Usage
+
+If you prefer to use promises, you can use `getModule` as follows:
+
+[source, javascript]
+----
+getModule({ remote: "myApp", module: "./Component" }).then((module) => {});
+----
+
+Again, `getModule` is used to load the `Component` module from the `myApp` remote.
+
+== Examples
+
+The `getModule` function can be used in various contexts, including vanilla JavaScript, Vue, and React.
+
+=== Vanilla JavaScript
+
+Here's an example of how to use `getModule` in vanilla JavaScript:
+
+[source, javascript]
+----
+const listOfSomethingNeeded = await getModule({
+  remote: "myApp",
+  module: "./ListOfSomethingNeeded",
+});
+
+listOfSomethingNeeded.forEach(callMethodToDealWithData);
+----
+
+=== Vue
+
+In Vue, you can use `getModule` to load components dynamically:
+
+[source, javascript]
+----
+<template>
+    <section>
+         <template v-for="product in products" :key="product.id">
+            <ProductCard :product="product">
+         </template>
+         <NewMarketingInfo/>
+    </section>
+</template>
+<script>
+export default {
+    components: {
+    ProductCard: () =>  getModule(
+       remote: "productRemote", module: "./ProductCard"
+    ),
+    NewMarketingInfo: () => getModule(
+       remote: "marketing", module: "./NewMarketingInfo", url: "http://marketing.info.com/remoteEntry.js"
+    );
+  },
+    props: ['products'],
+}
+</script>
+----
+
+=== React
+
+In React, you can use `getModule` with `React.lazy` to load components dynamically:
+
+[source, javascript]
+----
+import React from "react";
+
+const ProductCard = React.lazy(
+  () => await getModule({ remote: "productRemote", module: "./ProductCard" })
+);
+const NewMarketingInfo = React.lazy(
+  () =>
+    await getModule({
+      remote: "marketing",
+      module: "./NewMarketingInfo",
+      url: "http://marketing.info.com/remoteEntry.js",
+    })
+);
+
+const Products = ({ products }) => (
+  <section>
+    {products.map((product) => (
+      <ProductCard product={product} />
+    ))}
+    <NewMarketingInfo />
+  </section>
+);
+
+export default Products;
+----

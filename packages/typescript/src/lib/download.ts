@@ -47,7 +47,7 @@ export default async function download(options: DownloadOptions) {
   });
 
   await pipelineAsync(
-    response.body,
+    response.body!,
     fs.createWriteStream(fileDest, {
       flags: 'w',
     }),
