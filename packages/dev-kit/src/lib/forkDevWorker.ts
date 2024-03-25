@@ -1,4 +1,5 @@
 import {
+  getDTSManagerConstructor,
   DTSManager,
   retrieveHostConfig,
   retrieveRemoteConfig,
@@ -107,7 +108,10 @@ export async function forkDevWorker(
 ): Promise<void> {
   if (!typesManager) {
     const { name, remote, host } = options;
-    typesManager = new DTSManager({
+    const DTSManagerConstructor = getDTSManagerConstructor(
+      remote?.implementation,
+    );
+    typesManager = new DTSManagerConstructor({
       remote,
       host,
     });

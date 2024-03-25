@@ -3,7 +3,7 @@ import { getDTSManagerConstructor } from './utils';
 
 async function consumeTypes(options: DTSManagerOptions): Promise<void> {
   const DTSManagerConstructor = getDTSManagerConstructor(
-    options.remote?.implementation,
+    options.host?.implementation,
   );
   const dtsManager = new DTSManagerConstructor(options);
 

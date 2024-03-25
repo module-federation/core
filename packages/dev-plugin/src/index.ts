@@ -167,6 +167,7 @@ export class DevPlugin implements WebpackPluginInstance {
       normalizedDtsOptions === false
         ? { moduleFederationConfig: this._options }
         : {
+            implementation: normalizedDtsOptions.implementation,
             context: compiler.context,
             moduleFederationConfig: {
               ...this._options,
@@ -180,6 +181,7 @@ export class DevPlugin implements WebpackPluginInstance {
       normalizedDtsOptions === false
         ? { moduleFederationConfig: this._options }
         : {
+            implementation: normalizedDtsOptions.implementation,
             context: compiler.context,
             moduleFederationConfig: this._options,
             typesFolder: '@mf-types',
