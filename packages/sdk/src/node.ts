@@ -57,7 +57,7 @@ export function createScriptNode(
         try {
           const script = new vm.Script(
             `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
-            { filename },
+            filename,
           );
           script.runInThisContext()(
             scriptContext.exports,

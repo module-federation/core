@@ -149,6 +149,8 @@ class ContainerPlugin {
 
     if (!useModuleFederationPlugin) {
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
+      ContainerPlugin.patchChunkSplit(compiler, 'federation-runtime');
+      ContainerPlugin.patchChunkSplit(compiler, 'mfp-runtime-plugins');
     }
     const federationRuntimePluginInstance = new FederationRuntimePlugin();
     federationRuntimePluginInstance.apply(compiler);
@@ -164,6 +166,16 @@ class ContainerPlugin {
     ) {
       compiler.options.output.enabledLibraryTypes.push(library.type);
     }
+    const hasSingleRuntimeChunk = compiler.options?.optimization?.runtimeChunk;
+
+    new compiler.webpack.EntryPlugin(
+      compiler.options.context || '',
+      federationRuntimePluginInstance.entryFilePath,
+      {
+        name,
+        runtime: hasSingleRuntimeChunk ? false : runtime,
+      },
+    ).apply(compiler);
 
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
       const dep = new ContainerEntryDependency(
@@ -176,7 +188,6 @@ class ContainerPlugin {
       const hasSingleRuntimeChunk =
         compilation.options?.optimization?.runtimeChunk;
       dep.loc = { name };
-
       compilation.addEntry(
         compilation.options.context || '',
         //@ts-ignore
@@ -200,21 +211,45 @@ class ContainerPlugin {
       );
 
       // Function to add entry for undefined runtime
-      const addEntryToSingleRuntimeChunk = () => {
-        compilation.addEntry(
-          compilation.options.context || '',
-          //@ts-ignore
-          dep,
-          {
-            name: name ? name + '_partial' : undefined, // give unique name name
-            runtime: undefined,
-            library,
-          },
-          (error: WebpackError | null | undefined) => {
-            if (error) return callback(error);
-            callback();
-          },
-        );
+      const addEntryToSingleRuntimeChunk = async () => {
+        const entries =
+          typeof compiler.options.entry === 'function'
+            ? await compiler.options.entry()
+            : compiler.options.entry;
+        const runtimes: Set<undefined | string | false> = new Set();
+
+        Object.keys(entries).forEach((key) => {
+          if (entries[key].runtime) {
+            runtimes.add(entries[key].runtime);
+          } else if (entries[key].runtime === undefined) {
+            runtimes.add(undefined);
+          }
+        });
+
+        //Add container entry for each runtime that exists
+        for (const runtime of runtimes) {
+          const name = runtime
+            ? 'federation-runtime-' + runtime
+            : 'federation-runtime';
+          await new Promise((resolve, reject) => {
+            compilation.addEntry(
+              compilation.options.context || '',
+              //@ts-ignore
+              dep,
+              {
+                name: name, // merge container into federation entrypoint added to compilation
+                runtime: runtime,
+                library,
+              },
+              (error: WebpackError | null | undefined) => {
+                if (error) return reject(error);
+                resolve(true);
+              },
+            );
+          }).catch(callback);
+        }
+
+        callback();
       };
     });
 

@@ -2,7 +2,7 @@
 
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
-
+import EntryChunkTrackerPlugin from './EntryChunkTrackerPlugin';
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
  * @interface
@@ -61,6 +61,7 @@ class NodeFederationPlugin {
       webpack,
     );
     new ModuleFederationPlugin(pluginOptions).apply(compiler);
+    new EntryChunkTrackerPlugin({}).apply(compiler);
   }
 
   private preparePluginOptions(): ModuleFederationPluginOptions {

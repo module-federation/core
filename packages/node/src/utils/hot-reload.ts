@@ -6,7 +6,7 @@ import crypto from 'crypto';
 const requireCacheRegex =
   /(remote|server|hot-reload|react-loadable-manifest|runtime|styled-jsx)/;
 
-export const performReload = (shouldReload: any) => {
+export const performReload = async (shouldReload: any) => {
   if (!shouldReload) {
     return false;
   }
@@ -21,14 +21,20 @@ export const performReload = (shouldReload: any) => {
     req = __non_webpack_require__ as NodeRequire;
   }
 
-  Object.keys(req.cache).forEach((key) => {
-    //delete req.cache[key];
-    if (requireCacheRegex.test(key)) {
-      delete req.cache[key];
-    }
-  });
-
   const gs = new Function('return globalThis')();
+  const entries = Array.from(gs.entryChunkCache || []);
+
+  if (!gs.entryChunkCache) {
+    Object.keys(req.cache).forEach((key) => {
+      //delete req.cache[key];
+      if (requireCacheRegex.test(key)) {
+        delete req.cache[key];
+      }
+    });
+  } else {
+    gs.entryChunkCache.clear();
+  }
+
   //@ts-ignore
   __webpack_require__.federation.instance.moduleCache.clear();
   gs.__GLOBAL_LOADING_REMOTE_ENTRY__ = {};
@@ -40,6 +46,17 @@ export const performReload = (shouldReload: any) => {
     }
   });
   gs.__FEDERATION__.__INSTANCES__ = [];
+
+  for (const entry of entries) {
+    //@ts-ignore
+    delete __non_webpack_require__.cache[entry];
+  }
+
+  //reload entries again
+  for (const entry of entries) {
+    await __non_webpack_require__(entry);
+  }
+
   return true;
 };
 
@@ -152,7 +169,7 @@ export const fetchRemote = (remoteScope: any, fetchModule: any) => {
   });
 };
 //@ts-ignore
-export const revalidate = (
+export const revalidate = async (
   fetchModule: any = getFetchModule() || (() => {}),
   force: boolean = false,
 ) => {
@@ -160,8 +177,10 @@ export const revalidate = (
   //@ts-ignore
   return new Promise((res) => {
     if (force) {
-      res(true);
-      return;
+      if (Object.keys(hashmap).length !== 0) {
+        res(true);
+        return;
+      }
     }
     if (checkMedusaConfigChange(remotesFromAPI, fetchModule)) {
       res(true);
@@ -175,7 +194,7 @@ export const revalidate = (
       res(val);
     });
   }).then((shouldReload) => {
-    return performReload(force || shouldReload);
+    return performReload(shouldReload);
   });
 };
 

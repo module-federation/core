@@ -300,6 +300,7 @@ export function generateLoadScript(runtimeTemplate: any): string {
             } catch (error) {
               callback(error);
             }
+
           }`,
           `executeLoad(url, callback, chunkId);`,
         ]),

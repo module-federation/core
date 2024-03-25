@@ -24,7 +24,6 @@ module.exports = composePlugins(withNx(), (config) => {
       exposes: {
         './test': './src/expose.js',
       },
-      experiments: {},
     }),
   );
   return config;
