@@ -22,6 +22,7 @@ import {
   HOST_API_TYPES_FILE_NAME,
 } from '../constant';
 import axios from 'axios';
+import { replaceLocalhost } from './utils';
 
 export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
 
@@ -162,9 +163,10 @@ class DTSManager {
       if (!remoteInfo.url.includes(MANIFEST_EXT)) {
         return remoteInfo as Required<RemoteInfo>;
       }
+      const url = replaceLocalhost(remoteInfo.url);
       const res = await axios({
         method: 'get',
-        url: remoteInfo.url,
+        url,
       });
       const manifestJson = res.data as unknown as Manifest;
       if (!manifestJson.metaData.types.zip) {
@@ -218,9 +220,10 @@ class DTSManager {
       return;
     }
     try {
+      const url = replaceLocalhost(apiTypeUrl);
       const res = await axios({
         method: 'get',
-        url: apiTypeUrl,
+        url,
       });
       let apiTypeFile = res.data as string;
       apiTypeFile = apiTypeFile.replaceAll(

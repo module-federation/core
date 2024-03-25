@@ -7,7 +7,7 @@ import {
   retrieveTypesZipPath,
   HostOptions,
 } from '@module-federation/dts-kit';
-import { MANIFEST_EXT } from '@module-federation/sdk';
+import { decodeName } from '@module-federation/sdk';
 import {
   Remote,
   UpdateCallbackOptions,
@@ -45,7 +45,10 @@ let typesManager: DTSManager,
   moduleServer: ModuleFederationDevServer,
   cacheOptions: Options;
 
-function getLocalRemoteNames(options?: HostOptions): Remote[] {
+function getLocalRemoteNames(
+  options?: HostOptions,
+  encodeNameIdentifier?: string,
+): Remote[] {
   if (!options) {
     return [];
   }
@@ -53,27 +56,18 @@ function getLocalRemoteNames(options?: HostOptions): Remote[] {
 
   return Object.keys(mapRemotesToDownload).reduce((sum, remoteModuleName) => {
     const remoteInfo = mapRemotesToDownload[remoteModuleName];
-    if (remoteInfo.url.includes(MANIFEST_EXT)) {
-      const ip = getIpFromEntry(remoteInfo.url);
-      if (!ip) {
-        return sum;
-      }
-      sum.push({
-        name: remoteInfo.name,
-        entry: remoteInfo.url,
-        ip,
-      });
-    } else {
-      const ip = getIpFromEntry(remoteInfo.url);
-      if (!ip) {
-        return sum;
-      }
-      sum.push({
-        name: remoteInfo.name,
-        entry: remoteInfo.url,
-        ip,
-      });
+    const name = encodeNameIdentifier
+      ? decodeName(remoteInfo.name, encodeNameIdentifier)
+      : remoteInfo.name;
+    const ip = getIpFromEntry(remoteInfo.url);
+    if (!ip) {
+      return sum;
     }
+    sum.push({
+      name: name,
+      entry: remoteInfo.url,
+      ip,
+    });
     return sum;
   }, [] as Remote[]);
 }
@@ -107,13 +101,14 @@ export async function forkDevWorker(
   action?: string,
 ): Promise<void> {
   if (!typesManager) {
-    const { name, remote, host } = options;
+    const { name, remote, host, extraOptions } = options;
     const DTSManagerConstructor = getDTSManagerConstructor(
       remote?.implementation,
     );
     typesManager = new DTSManagerConstructor({
       remote,
       host,
+      extraOptions,
     });
     if (!options.disableGenerateTypes && remote) {
       const { remoteOptions, tsConfig } = retrieveRemoteConfig(remote);
@@ -145,7 +140,7 @@ export async function forkDevWorker(
 
     moduleServer = new ModuleFederationDevServer({
       name: options.name,
-      remotes: getLocalRemoteNames(host),
+      remotes: getLocalRemoteNames(host, extraOptions?.encodeNameIdentifier),
       updateCallback,
       remoteTypeTarPath: `${serverAddress}/${DEFAULT_TAR_NAME}`,
     });

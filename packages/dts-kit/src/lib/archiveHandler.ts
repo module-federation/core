@@ -7,6 +7,7 @@ import typescript from 'typescript';
 import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { retrieveMfTypesPath } from './typeScriptCompiler';
+import { replaceLocalhost } from './utils';
 
 export const retrieveTypesZipPath = (
   mfTypesPath: string,
@@ -58,9 +59,10 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
 
     while (retries++ < hostOptions.maxRetries) {
       try {
+        const url = replaceLocalhost(fileToDownload);
         const response = await axios
-          .get(fileToDownload, { responseType: 'arraybuffer' })
-          .catch(downloadErrorLogger(destinationFolder, fileToDownload));
+          .get(url, { responseType: 'arraybuffer' })
+          .catch(downloadErrorLogger(destinationFolder, url));
 
         const zip = new AdmZip(Buffer.from(response.data));
         zip.extractAllTo(destinationPath, true);
