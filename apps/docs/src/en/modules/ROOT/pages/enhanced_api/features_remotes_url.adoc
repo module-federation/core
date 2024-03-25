@@ -1,0 +1,76 @@
+= Remotes' URL
+
+The Enhanced Federation Plugin API introduces a feature called Remotes' URL. This feature allows you to create a list or a map of all available remotes along with their URLs for consumption. This guide will walk you through how to use this feature.
+
+== Creating a Remotes' URL List
+
+To create a Remotes' URL List, you need to define the remotes in your `ModuleFederationEnhancedPlugin` configuration. Here's an example:
+
+[source, javascript]
+----
+const ModuleFederationEnhancedPlugin = require("@schirrel/module-federation-enhanced-plugin");
+
+module.exports = {
+  //... rest of your config
+  plugins: [
+    new ModuleFederationEnhancedPlugin({
+      name: 'myMainModule',
+      // same as the ModuleFederationPlugin config
+      remotes: {
+        app1: "app1@myApp1.com/remoteEntry.js",
+        app2: "app2@coolAppRunningOnCloud.com.br/remoteEntry.js",
+      },
+    }),
+  ],
+};
+----
+
+In this example, `app1` and `app2` are defined as remotes. You can replace these with the remotes you want to define in your application.
+
+This configuration will export a list as:
+
+[source, json]
+----
+[
+ { "app1": "myApp1.com/remoteEntry.js" },
+ { "app2": "coolAppRunningOnCloud.com.br/remoteEntry.js" }
+]
+----
+
+== Using the Remotes' URL List
+
+Once you've created a Remotes' URL List, you can use it in your application. Here's an example of how to do this:
+
+[source, javascript]
+----
+const moduleUrlListFactory = await window.myMainModule.get("./remoteUrlList");
+const moduleList = moduleUrlListFactory();
+----
+
+In this example, `moduleList` will be an array containing the names and URLs of the remotes defined by `myMainModule`.
+
+== Creating a Remotes' URL Map
+
+In addition to creating a list, you can also create a map of remotes and their URLs. The configuration is the same as for the list, but the output will be an object map:
+
+[source, json]
+----
+{
+ "app1": "myApp1.com/remoteEntry.js",
+ "app2": "coolAppRunningOnCloud.com.br/remoteEntry.js"
+}
+----
+
+== Using the Remotes' URL Map
+
+Once you've created a Remotes' URL Map, you can use it in your application. Here's an example of how to do this:
+
+[source, javascript]
+----
+const moduleUrlMapFactory = await window.myMainModule.get("./remoteUrlMap");
+const remoteNameList = moduleUrlMapFactory();
+----
+
+In this example, `remoteNameList` will be an object map containing the names and URLs of the remotes defined by `myMainModule`.
+
+The Remotes' URL feature of the Enhanced Federation Plugin API provides a convenient way to manage and access your remotes.

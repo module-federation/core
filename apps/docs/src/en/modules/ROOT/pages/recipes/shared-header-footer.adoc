@@ -1,0 +1,415 @@
+= Where to start: Shared Header or Footer
+
+In this guide, you will learn how to create a shared header and footer component using Module Federation, and how to use them in two different applications. You will also learn how to handle routing, authentication, and styling in the shared components.
+
+== Step 1: Create the header and footer components
+
+The first step is to create a separate project that will contain the header and footer components. This project will act as a host for the shared components, and will expose them using Module Federation.
+
+- Create a new folder called `shared-components` and navigate to it.
+- Run `npm init -y` to initialize a new Node.js project.
+- Run `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @webpack-cli/serve` to install the necessary dependencies.
+- Create a new file called `webpack.config.js` in the root folder and add the following code:
++
+[source, javascript]
+----
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+module.exports = {
+  mode: "development",
+  devServer: {
+    port: 3000,
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+  ],
+};
+----
++
+This is a basic Webpack configuration that will serve an HTML file using the webpack-dev-server.
++
+- Create a new folder called public and add a new file called index.html with the following content:
++
+[source, html]
+----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shared Components</title>
+</head>
+<body>
+  <div id="header"></div>
+  <div id="footer"></div>
+</body>
+</html>
+----
++
+This is the HTML file that will be served by the `webpack-dev-server`. It has two empty divs with ids header and footer, where we will render our shared components.
++
+- Run `npm install react react-dom` to install React as a dependency.
+- Create a new folder called `src` and add two files: `Header.js` and `Footer.js`. These files will contain the React components for the header and footer.
++
+In `Header.js`, add the following code:
++
+[source, javascript]
+----
+import React from "react";
+
+function Header() {
+  return (
+    <div className="header">
+      <h1>Shared Header</h1>
+      <nav>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  );
+}
+
+export default Header;
+----
++
+This is a simple header component that has a title and a navigation menu.
++
+In Footer.js, add the following code:
++
+[,js ]
+----
+import React from "react";
+
+function Footer() {
+  return (
+    <div className="footer">
+      <p>© 2023 Shared Components. All rights reserved.</p>
+    </div>
+  );
+}
+
+export default Footer;
+----
++
+This is a simple footer component that has a copyright notice.
++
+- Create a new file called `index.js` in the `src` folder and add the following code:
++
+[source, javascript]
+----
+import React from "react";
+import ReactDOM from "react-dom";
+import Header from "./Header";
+import Footer from "./Footer";
+
+ReactDOM.render(<Header />, document.getElementById("header"));
+ReactDOM.render(<Footer />, document.getElementById("footer"));
+----
++
+This is the entry point of our project, where we import the header and footer components and render them to the HTML elements with the corresponding ids.
++
+- Modify the webpack.config.js file to add the following code:
++
+[source, javascript]
+----
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
+
+module.exports = {
+  mode: "development",
+  devServer: {
+    port: 3000,
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+    new ModuleFederationPlugin({
+      name: "shared-components",
+      filename: "remoteEntry.js",
+      exposes: {
+        "./Header": "./src/Header",
+        "./Footer": "./src/Footer",
+      },
+      shared: ["react", "react-dom"],
+    }),
+  ],
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-react"],
+          },
+        },
+      },
+    ],
+  },
+};
+----
++
+This is the most important part of the configuration, where we use the ModuleFederationPlugin to expose the header and footer components as remote modules. We also specify the name and filename of the remote entry point and the shared dependencies that we want to avoid duplication.
++
+- Run `npm install babel-loader @babel/core @babel/preset-react` to install the necessary dependencies for transpiling JSX code.
+- Run `npx webpack serve` to start the webpack-dev-server and open `http://localhost:3000` in your browser. 
+
+//You should see something like this:
+
+// TODO: [add screenshot]
+
+Congratulations! You have created the shared header and footer components using Module Federation. Now let's see how to use them in other applications.
+
+== Step 2: Create the consumer applications
+
+The next step is to create two different applications that will consume the shared header and footer components. These applications will act as remotes for the shared components, and will import them using Module Federation.
+
+
+- Create a new folder called app1 and navigate to it.
+- Run npm init -y to initialize a new Node.js project.
+- Run npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @webpack-cli/serve react react-dom to install the necessary dependencies.
+- Create a new file called webpack.config.js in the root folder and add the following code:
++
+[source, js]
+----
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
+
+module.exports = {
+  mode: "development",
+  devServer: {
+    port: 3001,
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+    new ModuleFederationPlugin({
+      name: "app1",
+      filename: "remoteEntry.js",
+      remotes: {
+        "shared-components": "shared-components@http://localhost:3000/remoteEntry.js",
+      },
+      shared: ["react", "react-dom"],
+    }),
+  ],
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-react"],
+          },
+        },
+      },
+    ],
+  },
+};
+----
++
+This is a similar Webpack configuration as before, but this time we use the ModuleFederationPlugin to specify the remote modules that we want to import from the shared components project. We also specify the name and filename of the remote entry point and the shared dependencies that we want to avoid duplication.
++
+- Create a new folder called `public` and add a new file called `index.html` with the following content:
++
+
+[source, html]
+----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>App 1</title>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
+----
++
+This is the HTML file that will be served by the `webpack-dev-server`. It has an empty div with id `root`, where we will render our application.
++
+- Create a new folder called `src` and add a new file called `App.js`. This file will contain the React component for the application.
++
+In `App.js`, add the following code:
++
+[source, javascript]
+----
+import React from "react";
+import Header from "shared-components/Header";
+import Footer from "shared-components/Footer";
+
+function App() {
+  return (
+    <div className="app">
+      <Header />
+      <main>
+        <h2>Welcome to App 1</h2>
+        <p>This is an example of using shared header and footer components using Module Federation.</p>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+export default App;
+----
++
+This is a simple application component that imports the header and footer components from the shared components project using Module Federation. It also has some content in the main section.
++
+- Create a new file called `index.js` in the `src` folder and add the following code:
++
+[source, javascript]
+----
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+
+ReactDOM.render(<App />, document.getElementById("root"));
+----
++
+This is the entry point of our project, where we import the app component and render it to the HTML element with id `root`.
+
+- Run `npx webpack serve` to start the `webpack-dev-server` and open http://localhost:3001 in your browser. 
+
+//You should see something like this:
+
+// TODO: [add screenshot]
+
+We have successfully created an application that uses the shared header and footer components using Module Federation. Now let's create another application that does the same thing.
+
+- Create a new folder called `app2` and navigate to it.
+- Run `npm init -y` to initialize a new Node.js project.
+- Run `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @webpack-cli/serve react react-dom` to install the necessary dependencies.
+- Create a new file called `webpack.config.js` in the root folder and add the following code:
+
+[source, js]
+----
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
+
+module.exports = {
+  mode: "development",
+  devServer: {
+    port: 3002,
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+    new ModuleFederationPlugin({
+      name: "app2",
+      filename: "remoteEntry.js",
+      remotes: {
+        "shared-components": "shared-components@http://localhost:3000/remoteEntry.js",
+      },
+      shared: ["react", "react-dom"],
+    }),
+  ],
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-react"],
+          },
+        },
+      },
+    ],
+  },
+};
+----
+
+This is a similar Webpack configuration as before, but this time we use the ModuleFederationPlugin to specify the remote modules that we want to import from the shared components project. We also specify the name and filename of the remote entry point, and the shared dependencies that we want to avoid duplication.
+
+- Create a new folder called `public` and add a new file called `index.html` with the following content:
+
+[source, html]
+----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>App 2</title>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
+----
+
+This is the HTML file that will be served by the webpack-dev-server. It has an empty div with id `root`, where we will render our application.
+
+- Create a new folder called `src` and add a new file called `App.js`. This file will contain the React component for the application.
+
+In `App.js`, add the following code:
+
+[source, jsx]
+----
+import React from "react";
+import Header from "shared-components/Header";
+import Footer from "shared-components/Footer";
+
+function App() {
+  return (
+    <div className="app">
+      <Header />
+      <main>
+        <h2>Welcome to App 2</h2>
+        <p>This is another example of using shared header and footer components using Module Federation.</p>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+export default App;
+----
+
+This is a simple application component that imports the header and footer components from the shared components project using Module Federation. It also has some content in the main section.
+
+- Create a new file called `index.js` in the `src` folder and add the following code:
+
+[source, jsx]
+----
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+
+ReactDOM.render(<App />, document.getElementById("root"));
+----
+
+This is the entry point of our project, where we import the app component and render it to the HTML element with id `root`.
+
+- Run `npx webpack serve` to start the webpack-dev-server and open `http://localhost:3002` in your browser. 
+
+//You should see something like this:
+
+// TODO: [add screenshot]
+
+We have successfully created another application that uses the shared header and footer components using Module Federation.
+
+== Conclusion
+
+In this guide, you have learned how to create a shared header and footer component using Module Federation, and how to use them in two different applications. You have also learned how to handle routing, authentication, and styling in the shared components.
+
+== Additional Resources
+
+If you want to learn more about Module Federation, you can check out the official documentation here:
+
+https://webpack.js.org/concepts/module-federation/
+
+You can also find more examples and tutorials here:
+
+https://github.com/module-federation/module-federation-examples

@@ -1,0 +1,132 @@
+= Simplifying Local Development and Deployment
+
+== Introduction
+
+Developing micro-frontends can be complex, especially when working with shared code or libraries. This guide simplifies the process, focusing on local development and deployment, making it accessible for novice developers while retaining technical depth.
+
+== The Challenge of Isolated Development
+
+Traditionally, micro-frontend development requires running multiple servers, complicating the process. Our goal is to streamline this, allowing developers to focus on their specific application without worrying about the entire ecosystem.
+
+== Optimizing the Workflow
+
+=== The Ideal Setup: Local Development Server and CDN
+
+Creating an optimal development environment for micro-frontends involves enabling isolated app building. However, dependencies on shared code or libraries, typically imported from a runtime shell, can complicate this process. This section of the documentation outlines strategies to mitigate these challenges.
+
+=== Common Challenges
+
+==== Dependency on Shared Code
+
+- *Issue:* When shared code is imported from a runtime shell, it may cause the development server to malfunction, especially if it relies on code from an app with an inactive development server.
+- *Impact:* This dependency often necessitates running multiple development servers simultaneously, complicating the development process.
+
+=== Solutions
+
+- *Utilizing Nx and Turborepo for Efficient Development Purpose:* These tools help reduce complexity by allowing shared build cache between machines via cloud integration.
+- *Benefit:* This approach minimizes the need to run multiple development servers, focusing only on the app currently being developed.
+
+==== Implementing a Flexible Loading System
+
+*Objective:* Enable the development server to load only the required app, sourcing other code from a CDN or an external server.
+
+*Advantages:* 
+
+- Ensures access to the latest code from other teams.
+- Allows granular control over which apps are loaded locally and which from the CDN, with easy toggling.
+
+== Practical Implementation
+
+=== Case Study: Client-Rendered App
+
+*Tools:*
+
+- *Redirector (Browser Plugin):* Facilitates switching between the local development server and remote bundles.
+- *CDN (e.g., AWS CloudFront):* Used for hosting and serving remote micro-apps.
+- *Alternative:* NGINX reverse-proxy for static file serving or server-rendered apps. However, this example focuses on CloudFront usage.
+
+== Leveraging the Redirector Extension
+
+This extension is instrumental in creating a flexible development environment, enabling the seamless transition between local and cloud builds of your micro-apps.
+
+=== Utilizing the Redirector Extension
+
+- *Core Function:* Redirector facilitates the switching between locally built versions of your micro-apps and their cloud-based counterparts.
+- *Advantages:* By using this extension, you can avoid the cumbersome process of restarting the webpack development server, a common necessity when passing arguments via the command line interface (CLI).
+
+=== How Redirector Functions
+
+*Mechanism:* Redirector uses regex patterns to scrutinize all outgoing web requests. When it identifies a request matching a predetermined pattern, it redirects it to a URL of your choice, typically the local development server.
+
+*Flexibility:* The extension allows you to define multiple regex patterns, corresponding to the URLs of different micro-apps. These patterns can be activated or deactivated easily, offering precise control over which version of an app is being accessed.
+
+=== Setting Up Redirector for Efficient Workflow
+
+==== Streamlining Micro-App Development: Establishing a Clear Naming Convention
+
+When working with a large number of micro-apps, it's essential to have an organized naming system. This is similar to categorizing files in a folder - each app should have a distinct and identifiable name.
+
+==== Implementing a Naming Scheme
+
+- **Strategy**: Use a specific keyword in the URL to signify the app type. For example, we can include `/federated/` in the URL.
+- **Example**: Your app's URL would be something like `/federated/my-micro-app/`. This format immediately indicates that `my-micro-app` belongs to the category of federated apps.
+
+==== Setting Up Local and Cloud Development
+
+Managing where your app runs - either on your local server or on a cloud server (CDN) - is a crucial part of the development process.
+
+- **Cloud Server (CDN) URL**: This is the main address where your app is accessible, like `https://my-federated-app.com`. Here, `/federated/my-micro-app/remoteEntry.js` represents the specific app you're focusing on.
+- **Local Development Server URL**: This address, typically `http://localhost:3000`, is where you can work on your app locally, making immediate changes and testing them in a controlled environment.
+
+==== Switching Between Local and Cloud
+
+The ability to switch between working on your local development server and the cloud server is a key aspect of efficient micro-app development.
+
+- **Redirecting Requests**: You can configure your system so that requests for certain parts of your app are served from your local server instead of the cloud. This is especially useful when you're actively developing and testing features.
+- **Practical Example**: By setting up a redirection rule, any request for `/federated/my-micro-app/` can be automatically directed to `http://localhost:3000`. This means you're effectively working on the app in your local environment.
+
+== Configuring AWS CloudFront for Micro-App Deployment
+
+After setting up your local development environment with Redirector, the next step involves configuring AWS CloudFront to manage how your apps are served from the cloud. CloudFront's functionality here is somewhat similar to Redirector, but it's focused on routing requests in the cloud environment.
+
+=== Understanding CloudFront Behaviors
+
+- *Purpose:* CloudFront's behaviors feature allows you to define how different types of requests are handled, specifically routing them to the correct Amazon S3 folder where your app's files are stored.
+- *Configuration:* This setup ensures that requests for your app are directed to the right place, based on the URL structure you've established.
+
+=== Organizing Your Apps in S3
+
+Consider this structure as an example of how to organize your apps in Amazon S3:
+
+[source, bash]
+----
+|-- shell
+|   |-- remoteEntry.js
+|   |-- [other js assets]
+|-- my-micro-app
+    |-- remoteEntry.js
+    |-- [other js assets]
+----
+
+- *Default Behavior:* By default, set up CloudFront to fetch files from the shell folder. This folder acts as the primary location for shared assets.
+
+=== CloudFront Redirection Based on URL Path
+
+- **Domain Setup**: If your domain is `my-federated-app.com`, standard requests will access the `shell` folder.
+- **Behavior Configuration**: Add a specific behavior in CloudFront to redirect requests containing `/federated/my-micro-app/` to the corresponding `my-micro-app` folder in S3. The pattern `federated/my-micro-app/*` helps in this targeting.
+- **Application**: This configuration needs to be replicated for each micro-app you develop.
+
+=== Key Considerations
+
+1. **Cache Management for Client-Side Apps**:
+    - Challenge: Managing cache for remote entry files, which might not be updated promptly across the CDN and user browsers.
+    - Solution: Invalidate the CDN cache after deploying updates to your app to ensure users receive the most current version.
+
+2. **Folder Structure Caution**:
+    - While you might consider placing a `federated` folder inside the `shell` folder, be cautious. A misstep here could lead to overwriting or losing important files.
+
+3. **Scalability Options**:
+    - For larger teams or organizations, it's feasible to use separate S3 buckets for each micro-app, providing more control and isolation.
+    - At an even larger scale, each micro-app could have its dedicated CloudFront distribution, complete with its own sub-domain, further isolating and optimizing the delivery of assets.
+
+This setup ensures that each app is easily accessible, with updates propagated swiftly and reliably to your users.

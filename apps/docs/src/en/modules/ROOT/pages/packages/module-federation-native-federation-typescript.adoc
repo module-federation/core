@@ -1,0 +1,160 @@
+= @module-federation/native-federation-typescript - v0.2.6
+
+= native-federation-typescript
+
+Bundler agnostic plugins to share federated types.
+
+== Install
+
+[source, javascript]
+----
+npm i -D @module-federation/native-federation-typescript
+
+----
+
+This module provides two plugins:
+
+=== NativeFederationTypeScriptRemote
+
+This plugin is used to build the federated types.
+
+==== Configuration
+
+[source, javascript]
+----
+{
+    moduleFederationConfig: any; // the configuration same configuration provided to the module federation plugin, it is MANDATORY
+    tsConfigPath?: string; // path where the tsconfig file is located, default is ''./tsconfig.json'
+    typesFolder?: string; // folder where all the files will be stored, default is '@mf-types',
+    compiledTypesFolder?: string; // folder where the federated modules types will be stored, default is 'compiled-types'
+    deleteTypesFolder?: boolean; // indicate if the types folder will be deleted when the job completes, default is 'true'
+    additionalFilesToCompile?: string[] // The path of each additional file which should be emitted
+    compilerInstance?: 'tsc' | 'vue-tsc' // The compiler to use to emit files, default is 'tsc'
+}
+
+----
+
+==== Additional configuration
+
+Note that, for Webpack, the plugin automatically inject the `devServer.static.directory` configuration.For the other bundlers, you should configure it by yourself.
+
+=== NativeFederationTypeScriptHost
+
+This plugin is used to download the federated types.
+
+=== Configuration
+
+[source, javascript]
+----
+{
+    moduleFederationConfig: any; // the configuration same configuration provided to the module federation plugin, it is MANDATORY
+    typesFolder?: string; // folder where all the files will be stored, default is '@mf-types',
+    deleteTypesFolder?: boolean; // indicate if the types folder will be deleted before the job starts, default is 'true'
+}
+
+----
+
+== Bundler configuration
+
+[source, javascript]
+----
+// vite.config.ts
+import {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} from '@module-federation/native-federation-typescript/vite'
+export default defineConfig({
+  plugins: [
+    NativeFederationTypeScriptRemote({ /* options */ }),
+    NativeFederationTypeScriptHost({ /* options */ }),
+  ],
+  /* ... */
+  server: { // This is needed to emulate the devServer.static.directory of WebPack and correctly serve the zip file
+    /* ... */
+    proxy: {
+      '/@mf-types.zip': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+          rewrite: () => `/@fs/${process.cwd()}/dist/@mf-types.zip`
+      }
+    },
+    fs: {
+      /* ... */
+      allow: ['./dist']
+      /* ... */
+    }
+  }
+})
+
+----
+
+[source, javascript]
+----
+// rollup.config.js
+import {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} from '@module-federation/native-federation-typescript/rollup'
+export default {
+  plugins: [
+    NativeFederationTypeScriptRemote({ /* options */ }),
+    NativeFederationTypeScriptHost({ /* options */ }),
+  ],
+}
+
+----
+
+[source, javascript]
+----
+// webpack.config.js
+const {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} = require('@module-federation/native-federation-typescript/webpack')
+module.exports = {
+  /* ... */
+  plugins: [
+    NativeFederationTypeScriptRemote({ /* options */ }),
+    NativeFederationTypeScriptHost({ /* options */ })
+  ]
+}
+
+----
+
+[source, javascript]
+----
+// esbuild.config.js
+import { build } from 'esbuild'
+import {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} from '@module-federation/native-federation-typescript/esbuild'
+build({
+  plugins: [
+    NativeFederationTypeScriptRemote({ /* options */ }),
+    NativeFederationTypeScriptHost({ /* options */ })
+  ],
+})
+
+----
+
+[source, javascript]
+----
+// rspack.config.js
+const {NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote} = require('@module-federation/native-federation-typescript/rspack')
+module.exports = {
+  /* ... */
+  plugins: [
+    NativeFederationTypeScriptRemote({ /* options */ }),
+    NativeFederationTypeScriptHost({ /* options */ })
+  ]
+}
+
+----
+
+== TypeScript configuration
+
+To have the type definitions automatically found for imports, add paths to the `compilerOptions` in the `tsconfig.json`:
+
+[source, javascript]
+----
+{  
+  "paths": {
+    "*": ["./@mf-types/*"]
+  }
+}
+
+----
+
+== Examples
+
+To use it in a `host` module, refer to https://github.com/module-federation/module-federation-examples/tree/master/native-federation-tests-typescript-plugins/host[this example] .To use it in a `remote` module, refer to https://github.com/module-federation/module-federation-examples/tree/master/native-federation-tests-typescript-plugins/host[this example] https://github.com/module-federation/module-federation-examples/tree/master/native-federation-tests-typescript-plugins/remote[this example] .
+

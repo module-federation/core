@@ -73,10 +73,11 @@ export default function (): FederationRuntimePlugin {
     onLoad(args) {
       const { exposeModuleFactory, exposeModule, id } = args;
       const moduleOrFactory = exposeModuleFactory || exposeModule;
-      if (!moduleOrFactory) return; // Ensure moduleOrFactory is defined
-      let exposedModuleExports: any = moduleOrFactory();
+      if (!moduleOrFactory) return args; // Ensure moduleOrFactory is defined
 
       if (typeof window === 'undefined') {
+        let exposedModuleExports: any = moduleOrFactory();
+
         const handler: ProxyHandler<any> = {
           get(target, prop, receiver) {
             // Check if accessing a static property of the function itself

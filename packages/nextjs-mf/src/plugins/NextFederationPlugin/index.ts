@@ -80,6 +80,19 @@ export class NextFederationPlugin {
   }
 
   private validateOptions(compiler: Compiler): boolean {
+    const manifestPlugin = compiler.options.plugins.find(
+      (p) => p?.constructor.name === 'BuildManifestPlugin',
+    );
+
+    if (manifestPlugin) {
+      //@ts-ignore
+      if (manifestPlugin?.appDirEnabled) {
+        throw new Error(
+          'App Directory is not supported by nextjs-mf. Use only pages directory, do not open git issues about this',
+        );
+      }
+    }
+
     const compilerValid = validateCompilerOptions(compiler);
     const pluginValid = validatePluginOptions(this._options);
     const envValid = process.env['NEXT_PRIVATE_LOCAL_WEBPACK'];
@@ -109,6 +122,7 @@ export class NextFederationPlugin {
     if (this._extraOptions.debug) {
       compiler.options.devtool = false;
     }
+
     if (isServer) {
       configureServerCompilerOptions(compiler);
       configureServerLibraryAndFilename(this._options);
