@@ -12,6 +12,16 @@
   {
     "text": "社区",
     "link": "/community/showcase/",
-    "activeMatch": "/community/"
+    "activeMatch": "/community/",
+    "items": [
+      {
+        "text": "Showcase",
+        "link": "/community/showcase/"
+      },
+      {
+        "text": "Practical Module Federation",
+        "link": "https://module-federation.myshopify.com/products/practical-module-federation"
+      }
+    ]
   }
 ]
