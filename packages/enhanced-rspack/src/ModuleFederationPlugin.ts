@@ -71,6 +71,9 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     options.implementation = options.implementation || RuntimeToolsPath;
     let disableManifest = options.manifest === false;
 
+    // @ts-ignore
+    new DevPlugin(options).apply(compiler);
+
     if (!disableManifest && options.exposes) {
       try {
         const containerManager = new ContainerManager();
@@ -101,8 +104,6 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       };
     });
 
-    // @ts-ignore
-    new DevPlugin(options).apply(compiler);
     const isTSProject = (tsConfigPath?: string, context = process.cwd()) => {
       try {
         let filepath = tsConfigPath

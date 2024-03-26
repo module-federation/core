@@ -83,6 +83,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
     }
 
+    new DevPlugin(options).apply(compiler);
+
     if (!disableManifest && useContainerPlugin) {
       try {
         const containerManager = new ContainerManager();
@@ -138,8 +140,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         }).apply(compiler);
       }
     });
-
-    new DevPlugin(options).apply(compiler);
 
     const isTSProject = (tsConfigPath?: string, context = process.cwd()) => {
       try {
