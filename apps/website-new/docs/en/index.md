@@ -8,10 +8,10 @@ hero:
   actions:
     - theme: brand
       text: Introduction
-      link: /guide/
+      link: /en/guide/start/index.html
     - theme: alt
       text: Quick Start
-      link: https://github.com/web-infra-dev/rspress
+      link: /en/guide/start/quick-start.html
   image:
     src: /svg.svg
     alt: module federation Logo

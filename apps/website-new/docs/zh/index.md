@@ -7,11 +7,11 @@ hero:
   tagline: 分治你的 Web 应用程序
   actions:
     - theme: brand
-      text: Quick Start
+      text: 介绍
       link: /zh/guide/start/index.html
     - theme: alt
       text: 快速开始
-      link: https://github.com/web-infra-dev/rspress
+      link: /zh/guide/start/quick-start.html
   image:
     src: /svg.svg
     alt: module federation Logo

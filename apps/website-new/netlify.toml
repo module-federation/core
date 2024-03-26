@@ -1,2 +1,2 @@
 [build]
-publish = "doc_build"
+publish = "apps/website-new/doc_build"
