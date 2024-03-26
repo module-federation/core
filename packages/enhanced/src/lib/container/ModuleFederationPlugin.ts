@@ -4,7 +4,8 @@
 */
 
 'use strict';
-
+import path from 'path';
+import fs from 'fs';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import {
@@ -140,9 +141,23 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
 
     new DevPlugin(options).apply(compiler);
 
+    const isTSProject = (tsConfigPath?: string, context = process.cwd()) => {
+      try {
+        let filepath = tsConfigPath
+          ? tsConfigPath
+          : path.resolve(context, './tsconfig.json');
+        if (!path.isAbsolute(filepath)) {
+          filepath = path.resolve(context, filepath);
+        }
+        return fs.existsSync(filepath);
+      } catch (err) {
+        return false;
+      }
+    };
+
     const normalizedDtsOptions =
       normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
-        true,
+        isTSProject(undefined, compiler.context),
         {
           disableGenerateTypes: false,
           remote: {
