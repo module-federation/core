@@ -1,0 +1,332 @@
+= Setting Up Module Federation in a Vue 2 Application
+
+== Overview
+
+This documentation provides a step-by-step guide on how to set up Module Federation in a Vue 2 application. This guide assumes that you are familiar with the basics of Module Federation and Vue 2.
+
+== Prerequisites
+
+Two pre-configured Vue 2 projects. For assistance with Vue project setup, consult the https://cli.vuejs.org/guide/creating-a-project.html#vue-create[Vue documentation.]
+
+== Installing Development Dependencies
+
+To properly configure Webpack for Module Federation, you'll need to add some development dependencies to both of your Vue 2 projects.
+
+Run the following command to add the required dev dependencies:
+
+[source, bash]
+----
+yarn add webpack webpack-cli webpack-dev-server vue-loader url-loader sass-loader mini-css-extract-plugin html-webpack-plugin dart-sass css-loader -D
+----
+
+After installing the dependencies, add a start script to your package.json file. This script will use Webpack-CLI to start the server. The purpose of this script is to leverage Webpack-CLI for server initialization, rather than using `vue-cli`.
+
+In your package.json, update the scripts section as follows:
+
+[source, json]
+----
+"scripts": {
+"serve": "vue-cli-service serve",
+"build": "vue-cli-service build",
+"start": "webpack-cli serve",
+"lint": "vue-cli-service lint"
+},
+----
+
+== Webpack Configuration
+
+Create a `webpack.config.js` file in the root directory of both projects.
+
+=== Basic Configuration
+
+The `webpack.config.js` file in each application must include the following code, with distinct port variables assigned to the two projects.
+
+[source, javascript]
+----
+const path = require("path");
+const { VueLoaderPlugin } = require("vue-loader");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const port = 8080;
+
+module.exports = {
+  mode: "development",
+  cache: false,
+  devtool: "source-map",
+  target: "web",
+  optimization: {
+    minimize: false
+  },
+  entry: path.resolve(__dirname, "./src/main.ts"), // <1>
+  output: { // <2>
+    path: path.resolve(__dirname, "./dist"),
+    publicPath: `http://localhost:${port}/`
+  },
+  resolve: { // <3>
+    extensions: [".ts", ".js", ".vue", ".json"],
+    alias: {
+      vue: "vue/dist/vue.runtime.esm.js",
+      "@": path.resolve(__dirname, "./src"),
+      "@assets": path.resolve(__dirname, 'src/assets')
+    }
+  },
+  module: {
+    rules: [ // <4>
+      { test: /\.vue$/, loader: "vue-loader" },
+      {
+        test: /\.ts$/,
+        loader: "ts-loader",
+        options: { appendTsSuffixTo: [/\.vue$/] }
+      },
+      {
+        test: /\.css|.sass|.scss$/,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              esModule: false
+            }
+          },
+          "css-loader",
+          "sass-loader"
+        ]
+      },
+      {
+        test: /\.png$/,
+        use: {
+          loader: "url-loader",
+          options: {
+            esModule: false,
+            name: "[name].[ext]",
+            limit: 8192
+          }
+        }
+      }
+    ]
+  },
+  plugins: [ // <5>
+    new VueLoaderPlugin(),
+    new MiniCssExtractPlugin({
+      filename: "[name].css"
+    }),
+  ],
+  devServer: { // <6>
+    static: {
+      directory: path.join(__dirname, "public")
+    },
+    compress: true,
+    port,
+    hot: true,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+      "Access-Control-Allow-Headers":
+        "X-Requested-With, content-type, Authorization",
+    },
+  },
+};
+----
+<1> https://webpack.js.org/concepts/entry-points/[Entry Point]: The entry point is the file that Webpack uses as the starting point for bundling. In Vue applications, this is usually `src/main.ts`.
+<2> https://webpack.js.org/concepts/output/[Output]: Specify the directory where the bundled application should be placed. By default, Vue applications are built into the `dist` directory.
+<3> https://webpack.js.org/configuration/resolve/#resolveextensions[Resolve]: This section is for setting module resolution and aliases. For example, you can add a shortcut to the assets folder by adding the @assets property in resolve.alias.
+<4> https://webpack.js.org/concepts/loaders/[Rules]: Webpack by default understands only JavaScript and JSON files. Loaders enable Webpack to understand other file types like TypeScript, Vue, CSS, etc. We have added loaders for these types in our configuration.
+<5> https://webpack.js.org/configuration/plugins/[Plugins]: Plugins serve to tailor the Webpack build process through various customization options.
+<6> https://webpack.js.org/configuration/dev-server/#devserver[devServer]: This section contains configurations for the development server, including the port number and other options.
+
+Upon executing the `yarn start` command, the server should initialize successfully.
+
+=== Debugging
+
+After completing the `webpack.config.js` configuration, navigate to `http://localhost:${port}`. You may notice an empty page without the application's logo, indicating server issues. To resolve this, update the dynamic variables in the `public/index.html` file as shown below:
+
+[source, html]
+----
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="./favicon.ico">
+    <title>micro-main</title>
+  </head>
+  <body>
+    <noscript>
+      <strong>We're sorry but micro-main doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <div id="app"></div>
+  </body>
+</html>
+----
+
+If the page remains blank, inspect the console for potential errors related to environment variables in the router.
+
+To address this, add a new plugin to your `webpack.config.js` to enable the use of `process.env`. Update the `plugins` array as follows:
+
+[source, javascript]
+----
+const webpack = require('webpack');
+
+// Existing webpack.config.js content
+module.exports = {
+  // ...
+  plugins: [
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),
+    // Other existing plugins
+  ],
+  // ...
+};
+----
+
+After implementing these changes, reload your application. The server and application should now function as expected.
+
+== Implementing Module Federation
+
+Upon successfully setting up Webpack and initializing your development servers, the next step is to implement Module Federation.
+
+=== Configuration for `web_common` Project
+
+The `ModuleFederationPlugin` is central to setting up Module Federation. Below is an example configuration for the `web_common` project:
+
+[source, javascript]
+----
+// Existing imports and configurations
+const { ModuleFederationPlugin } = require('webpack').container;
+
+module.exports = {
+  // ... existing configurations
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "web_common",
+      remotes: {},
+      filename: "remoteEntry.js",
+      exposes: {
+        "./HelloWorld": "./src/components/HelloWorld.vue"
+      },
+      // ... other configurations
+    }),
+    // ... other existing plugins
+  ],
+  // ... existing configurations
+};
+----
+
+==== Key Points:
+
+- Import `ModuleFederationPlugin` from `require("webpack").container`, not directly from `require("webpack")`.
+- The `exposes` object is responsible for sharing code from the project. The keys should be in the format `./[KEY_NAME]`.
+- The `filename` can be any name, though `remoteEntry` or `web_commonRemoteEntry` are recommended.
+- The `name` can also be any name, but it's advisable to use the name of the project.
+
+=== Configuration for `micro_main` Project
+
+Here is an example configuration for the `micro_main` project:
+
+[source, javascript]
+----
+// Existing imports and configurations
+const { ModuleFederationPlugin } = require('webpack').container;
+
+module.exports = {
+  // ... existing configurations
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "micro_main",
+      remotes: {
+        web_common: "web_common@http://localhost:8082/remoteEntry.js"
+      },
+      // ... other configurations
+    }),
+    // ... other existing plugins
+  ],
+  // ... existing configurations
+};
+----
+
+==== Key Points:
+
+- The `remotes` object is where you specify projects from which you are receiving shared code.
+- The `web_common` is the name of the project from which code is being shared.
+- The remote format should be `[PROJECT_NAME]@[PROJECT_URL]/[PROJECT_filename]`. In this case, the filename is `remoteEntry.js`.
+
+By following these configurations, you should be able to successfully implement Module Federation in your Vue 2 projects.
+
+== Testing the Module Federation Implementation
+
+=== Importing the Component Globally
+
+To validate the Module Federation setup, import the HelloWorld component globally in your main project.
+
+[source, javascript]
+----
+import Vue from "vue";
+import App from "./App.vue";
+import router from "./router";
+import store from "./store";
+
+Vue.component("HelloWorld", () => import("web_common/HelloWorld"));
+Vue.config.productionTip = false;
+
+new Vue({
+  router,
+  store,
+  render: (h) => h(App),
+}).$mount("#app");
+----
+
+=== TypeScript Configuration
+
+If your project uses TypeScript, you'll need to declare `web_common` as a module. Add the following declarations:
+
+[source, typescript]
+----
+declare module "*.vue" {
+  import Vue from "vue";
+  export default Vue;
+}
+
+declare module "web_common/*";
+----
+
+Upon completing these steps, your server should operate without issues.
+
+=== Using the HelloWorld Component
+
+You can now utilize the `HelloWorld` component in your main project as shown below:
+
+[source, html]
+----
+<template>
+  <div class="home">
+    <img alt="Vue logo" src="../assets/logo.png" />
+    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" />
+  </div>
+</template>
+
+<script lang="ts">
+import { Component, Vue } from "vue-property-decorator";
+@Component({
+})
+export default class Home extends Vue {}
+</script>
+----
+
+=== Handling 404 Errors
+
+If you encounter 404 errors when navigating to different routes and reloading the page, you can resolve this by enabling `historyApiFallback` in your `webpack.config.js`:
+
+[source, jabascript]
+----
+// webpack.config.js
+module.exports = {
+  // ...
+  devServer: {
+    historyApiFallback: true,
+  },
+};
+----
+
+== Conclusion
+
+This documentation provides a comprehensive guide for setting up Module Federation in a Vue 2 application. If you encounter any issues or have specific use cases not covered here, feel free to seek further assistance in our communication channels, we're always there to help you. 

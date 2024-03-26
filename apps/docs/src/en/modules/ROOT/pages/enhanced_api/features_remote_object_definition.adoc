@@ -1,0 +1,55 @@
+= Remote Object Definition
+
+The Enhanced Federation Plugin API introduces a feature called Remote Object Definition. This feature allows you to define your remotes as objects, which can be particularly useful when using remote names and URLs from environment variables or callback functions. This guide will walk you through how to use this feature.
+
+== Creating a Remote Object Definition
+
+To create a Remote Object Definition, you need to define the remotes in your `ModuleFederationEnhancedPlugin` configuration. 
+
+Here's an example:
+
+[source, javascript]
+----
+const ModuleFederationEnhancedPlugin = require("@schirrel/module-federation-enhanced-plugin");
+
+module.exports = {
+  //... rest of your config
+  plugins: [
+    new ModuleFederationEnhancedPlugin({
+      remotes: {
+        app1: {
+          name: "app1",
+          url: "myApp1.com"
+        },
+        app2: {
+          name: process.env.app2NameByEnv,
+          url: process.env.app2UrlByEnv
+        },
+        app3: {
+          name: () => myVar.remoteName,
+          url: () => myVar.remoteUrl
+        },
+        otherApp: {
+          name: "otherApp",
+          url: "coolSubdomain.myAwesomeRemotes.com/some-subdir"
+        },
+      }
+    }),
+  ],
+};
+----
+
+In this example, `app1`, `app2`, `app3`, and `otherApp` are defined as remotes. You can replace these with the remotes you want to define in your application.
+
+== Remote Object Definition Properties
+
+The properties for the object definition are:
+
+- `name`: The name/scope of the remote, what comes before the `@` on the string-based remote configuration. This can be a string or a function.
+- `url`: The URL of the JS file for the remote, what comes after the `@` on the string-based remote configuration. This can be a string or a function. It is extremely important not to use the last slash (`/`) on the URL.
+- `remoteEntry`: The name of the remoteEntry file you are using. If you use the default and widely used `remoteEntry.js`, no need to fill this up. This can be a string or a function.
+- `async`: The property you can use to disable the async behavior for a specific remote. This is a boolean.
+
+If you decide to disable the async behavior for any remote, the plugin will convert your object to a string-based configuration.
+
+The Remote Object Definition feature of the Enhanced Federation Plugin API provides a flexible way to define and manage your remotes. We hope this guide has been helpful in understanding and using this feature. Happy coding!

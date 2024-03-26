@@ -1,0 +1,43 @@
+= Module Federation Documentation
+:url_angular: ../angular-way/index.adoc
+:url_react: ../react-way/index.adoc
+:url_vue: ../vue-way/index.adoc
+:url_agnostic: ../agnostic-way/index.adoc
+
+This introductory page is architected as the starting point for developers looking to integrate modular architecture using Module Federation with frameworks such as Vue, React, Angular, or a framework-agnostic approach. The subsequent sections provide a brief exposition of Module Federation, elucidating its significance and mechanism in modern web development.
+
+The documentation ahead is structured to furnish detailed guides for each prominent framework, delineating the procedure to incorporate Module Federation within your projects. These guides are engineered to cater to varying levels of technical expertise, ensuring a comprehensive understanding of the concepts and implementation of Module Federation.
+
+As you move to the framework-specific guides, you are set to explore Module Federation more deeply with clear knowledge, good practices, and real-world examples. The separate sections for Vue, React, Angular, and the framework-agnostic setup are carefully put together to help you smoothly shift towards a modular frontend architecture. This documentation marks the start of your journey in mastering Module Federation in the framework you choose.
+
+
+.Choose your framework:
+
+[.overview-table]
+[cols="a,a"]
+|===
+|
+.xref:{url_angular}[Angular Framework]
+*****
+Discover how Angular projects transcend monolithic boundaries with Module Federation, ushering in a new era of scalable frontend development. 
+*****
+|
+[.overview-title]
+.xref:{url_react}[React Framework]
+*****
+Explore the seamless fusion of Module Federation with React, empowering you to construct decoupled and efficient micro-frontends
+*****
+|
+[.overview-title]
+.xref:{url_vue}[Vue Framework]
+*****
+Delve into the intricacies of integrating Module Federation within Vue projects to foster a modular frontend architecture.
+*****
+|
+[.overview-title]
+.xref:{url_agnostic}[Framework Agnostic]
+*****
+Traverse the realm of framework-agnostic Module Federation setup, a pathway to harmonizing disparate frontend frameworks in a unified architecture.
+*****
+|
+|===

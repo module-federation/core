@@ -1,0 +1,42 @@
+= Getting Started
+
+This guide provides a step-by-step walkthrough on how to get started with the Enhanced Federation Plugin API. The process is straightforward and builds on your existing knowledge of the Module Federation Plugin.
+
+== Configuration
+
+To start using the Enhanced Federation Plugin API, you need to import it into your `webpack.config` file, or `vue.config` if you're using Vue.js. Here's how you can do it:
+
+[source, javascript]
+----
+const ModuleFederationEnhancedPlugin = require("@schirrel/module-federation-enhanced-plugin");
+----
+
+Next, replace the existing Module Federation Plugin usage with the Enhanced Federation Plugin API. Here's an example of how to do this:
+
+[source, javascript]
+----
+const ModuleFederationEnhancedPlugin = require("@schirrel/module-federation-enhanced-plugin");
+
+module.exports = {
+  //... rest of your config
+  plugins: [
+    new ModuleFederationEnhancedPlugin({
+      // same as the ModuleFederationPlugin config
+      exposes: {
+        Button: "./src/Button",
+        Input: "./src/Input",
+      },
+    }),
+  ],
+};
+----
+
+In this example, the `Button` and `Input` components from the `src` directory are exposed. You can replace these with the components you want to expose in your application.
+
+The Enhanced Federation Plugin API extends all behaviors from the Module Federation Plugin and uses the same default configuration options. This means that your existing Module Federation Plugin configuration will work perfectly with the Enhanced Federation Plugin API.
+
+== Next Steps
+
+After configuring the Enhanced Federation Plugin API, you're ready to start using its features in your project. Refer to the xref:enhanced_api/about.adoc[Features] guide for more information on what you can do with the Enhanced Federation Plugin API.
+
+If you encounter any issues or have any questions, feel free to reach out for support.

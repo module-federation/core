@@ -1,0 +1,141 @@
+= Micro-frontend Projects with Module Federation and React
+
+This guide walks you through the process of setting up two React applications using Module Federation to share a simple button component between them.
+
+== Prerequisites
+
+Ensure you have the following installed on your machine:
+
+Node.js (version 14 or above)
+Yarn (version 1.22 or above)
+Webpack (version 5 or above)
+
+== Step 1: Setup React Applications
+
+Firstly, create two separate React applications and navigate into each application's root directory to install the necessary dependencies. In this guide, we're using Yarn due to its detailed report feature and compatibility with the latest React release.
+
+[source, bash]
+----
+npx create-react-app mfe1
+cd mfe1
+yarn add webpack webpack-cli html-webpack-plugin babel-loader webpack-dev-server
+
+npx create-react-app mfe2
+cd mfe2
+yarn add webpack webpack-cli html-webpack-plugin babel-loader webpack-dev-server css-loader
+----
+
+Ensure that Webpack version 5 or above is installed by checking the installation report provided by Yarn.
+
+== Step 2: Update Entry Files
+
+In both applications, rename the `index.js` file to `bootstrap.js`. This change allows `bootstrap.js` to load asynchronously, which is essential for Module Federation to function correctly between the two applications.
+
+[source, bash]
+----
+mv src/index.js src/bootstrap.js
+----
+
+Update the contents of bootstrap.js to the following:
+
+[source, javascript]
+----
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+
+ReactDOM.render(
+  <App />,
+  document.getElementById('root')
+);
+----
+
+Now, create a new `index.js` file in both applications with the following content to import `bootstrap.js`:
+
+[source, javascript]
+----
+import('./bootstrap');
+----
+
+== Step 3: Create and Expose a Button Component in MFE1
+
+=== 3.1 Create Button Component
+
+In `MFE1`, create a new file named `Button.js` in the src directory with the following content:
+
+[source, javascript]
+----
+import React from 'react';
+
+const Button = () => (
+  <button>MFE1 Button</button>
+);
+
+export default Button;
+----
+
+=== 3.2 Update App.js
+
+Update `App.js` in `MFE1` to import and render the Button component:
+
+[source, javascript]
+----
+import React from 'react';
+import Button from './Button';
+
+function App() {
+  return (
+    <div>
+      <h1>MFE1</h1>
+      <Button />
+    </div>
+  );
+}
+
+export default App;
+----
+
+== Step 4: Configure Webpack in MFE1
+
+Create a `webpack.config.js` file in the root directory of `MFE1` with the following configuration:
+
+[source, javascript]
+----
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
+
+module.exports = {
+  mode: 'development',
+  devServer: {
+    port: 8083,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env', '@babel/preset-react'],
+        },
+      },
+    ],
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'MFE1',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './Button': './src/Button',
+      },
+    }),
+    new HtmlWebpackPlugin({
+      template: './public/index.html',
+    }),
+  ],
+};
+----
+
+This configuration sets up Module Federation in `MFE1`, exposing the Button component through `http://localhost:8083/remoteEntry.js`. When you run the development server, Webpack renders this on `http://localhost:8083.`
+
+The guide above sets the foundation for creating micro-frontend projects with Module Federation and React. You can now proceed to configure `MFE2` to consume the `Button` component from `MFE1` and further extend your micro-frontends setup as needed.

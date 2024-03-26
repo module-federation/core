@@ -60,7 +60,7 @@ jobs:
         run: pnpm run app:runtime:dev & echo "done" && sleep 6 && npx nx run-many --target=test:e2e --projects=3005-runtime-host --parallel=1 && lsof -ti tcp:3005,3006,3007 | xargs kill
 
       - name: E2E Test for 3008-webpack-host
-        run: pnpm run app:manifest:dev & echo "done" && sleep 6 && npx nx run-many --target=test:e2e --projects=3008-webpack-host --parallel=1 && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
+        run: pnpm run app:manifest:dev & echo "done" && sleep 6 && npx nx run-many --target=e2e --projects=3008-webpack-host --parallel=1 && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
 
       - name: Build Next.js Apps in Production Mode
         run: pnpm app:next:build

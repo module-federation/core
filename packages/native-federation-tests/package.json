@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/native-federation-tests",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Bundler agnostic unplugin to share federated tests",
   "publishConfig": {
     "access": "public"
@@ -57,6 +57,6 @@
     "axios": "^1.6.7",
     "rambda": "^9.1.0",
     "tsup": "^7.0.0",
-    "unplugin": "^1.7.1"
+    "unplugin": "^1.9.0"
   }
 }

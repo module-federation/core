@@ -1,5 +1,12 @@
 # @module-federation/runtime
 
+## 0.0.17
+
+### Patch Changes
+
+- ce0597e: feat: add registerRemotes api
+  - @module-federation/sdk@0.0.17
+
 ## 0.0.16
 
 ### Patch Changes

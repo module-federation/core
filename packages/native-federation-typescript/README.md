@@ -174,6 +174,28 @@ module.exports = {
 <br>
 </details>
 
+<details>
+<summary>Rolldown</summary><br>
+
+```ts
+// rolldown.config.js
+import { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } from '@module-federation/native-federation-typescript/rolldown';
+
+export default {
+  plugins: [
+    NativeFederationTypeScriptRemote({
+      /* options */
+    }),
+    NativeFederationTypeScriptHost({
+      /* options */
+    }),
+  ],
+};
+```
+
+<br>
+</details>
+
 ## TypeScript configuration
 
 To have the type definitions automatically found for imports, add paths to the `compilerOptions` in the `tsconfig.json`:

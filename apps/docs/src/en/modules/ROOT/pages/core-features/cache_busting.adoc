@@ -1,0 +1,69 @@
+= Cache Busting
+
+== Introduction to Cache Busting
+
+Cache busting is a technique used to prevent browsers from serving outdated or cached files. In the context of Module Federation, cache busting ensures that the latest versions of federated modules are loaded, even if a browser has cached an older version.
+
+== Cache Invalidation Techniques
+
+=== Random Query String
+
+One of the common techniques for cache invalidation in Module Federation involves appending a random query string to the end of the `remoteEntry.js`. This can be controlled to generate the same random string within a specific time window.
+
+=== Example Usage
+
+Here's an example of how you can implement this technique:
+
+[source, javascript]
+----
+// webpack.config.js
+plugins: [
+  new ModuleFederationPlugin({
+    name: 'my-app',
+    remotes: {
+      'my-remote-1': 'my-remote-1@[window.remote-1-domain]/remoteEntry.js?[getRandomString()]',
+      // ...
+    },
+    shared: {...}
+  }),
+  new ExternalTemplateRemotesPlugin(), //no parameter
+  // ...otherPlugins
+]
+----
+
+In this example, the `getRandomString()` function will generate the same random string in a 5-minute window based on the current epoch time. This ensures better control over cache invalidation.
+
+=== Using the External Remotes Plugin
+
+An npm package named `external-remotes-plugin` has been published to simplify the implementation of this technique. You can find it https://www.npmjs.com/package/external-remotes-plugin[on npm].
+
+== Including Hashes in Filenames
+
+Another effective technique for cache busting in Module Federation is including hashes in filenames. This ensures that any change in the file content will result in a new hash, forcing the browser to load the updated file.
+
+=== Webpack Configuration
+
+You can configure Webpack to include content hashes in the filenames as follows:
+
+[source, javascript]
+----
+// webpack.config.js
+module.exports = {
+  output: {
+    filename: '[name].[contenthash].js',
+    publicPath: '/dist/',
+  },
+  // ...
+};
+----
+
+In this configuration, `[contenthash]` is replaced with a hash of the content of the output file, ensuring that the file is reloaded whenever its content changes.
+
+=== Further Reading
+
+- https://github.com/module-federation/module-federation-examples/issues/566[Dynamic remoteEntry.js URL plugin - GitHub Issue]
+- https://webpack.js.org/guides/caching/[Webpack Documentation on Caching]
+
+---
+
+If you have any questions or need further assistance, please don't hesitate to reach out. Happy coding!

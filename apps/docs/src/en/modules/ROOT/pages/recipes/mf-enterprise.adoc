@@ -1,0 +1,226 @@
+= Module Federation for Enterprise: Advanced Multi-Environment Setup
+
+== Introduction
+
+In the "Module Federation for Enterprise" series, our initial discussion revolved around managing multiple testing environments in Module Federation, focusing on removing hardcoded URLs in webpack configurations. This method, though effective, was quite complex. In this continuation, we delve into a more simplified approach, making the setup more accessible and understandable, especially for developers new to Module Federation and webpack.
+
+== Before We Begin: Alternative Approaches
+
+It's essential to consider other existing methods that might be more suited to your project's needs:
+
+1. **Promise-Based Dynamic Inference**: Module Federation allows for promise-based logic to dynamically determine remote paths and versions at runtime. This can be seen in the official Webpack documentation and expanded upon in comments by experts like Zack Jackson.
+
+2. **Environment Variables and Plugins**: Using `.env` files or webpack plugins like `EnvironmentPlugin` is a common strategy for managing environment-specific configurations. The Module Federation examples repository showcases practical implementations of this method.
+
+== High-Level Overview
+
+Our focus is on leveraging Webpack's `NormalModuleReplacementPlugin` to dynamically infer remote URLs at runtime across various environments. This plugin is a part of Webpack's core functionality and provides a robust, integrated solution without relying on third-party plugins.
+
+== Project Structure
+
+A clear project structure is vital for maintaining an organized codebase:
+
+- `public/` and `src/`: Contain the application's frontend code and assets.
+- `configs/`: Holds webpack configuration files for different build environments.
+- `environments/`: Includes configuration files that define settings for various environments (development, production, etc.).
+
+=== Sample Monorepo Structure
+
+[source, shell]
+----
+| Module Federation Monorepo
+| -----------
+| packages/
+|   host/
+|       configs/
+|       environments/
+|       public/
+|       src/
+|           bootstrap.js
+|           app.js
+|           init-remote.js
+|   remote/
+|       configs/
+|       public/
+|       src/
+|           bootstrap.js
+|           app.js
+----
+
+== Utilizing NormalModuleReplacementPlugin
+
+This plugin is a powerful tool in webpack's arsenal, allowing for the substitution of modules during the build process based on specific conditions.
+
+=== Implementing Environment-Specific Configurations
+
+Create `dev.js` and `prod.js` in the `environments/` directory:
+
+[source, javascript]
+----
+// dev.js
+export default {
+  FormApp: "http://localhost:3001",
+};
+
+// prod.js
+export default {
+  FormApp: "https://module-federation-template-remote.netlify.app",
+};
+----
+
+These files define the URLs for your remote applications in different environments.
+
+=== Setting Up Initial Remotes
+
+Implement `init-remotes.js` to import the correct environment configuration and log the URL:
+
+[source, javascript]
+----
+// init-remotes.js
+import config from "../environments/TARGET_ENV";
+
+console.log("Remote URL for FormApp:", config.FormApp);
+----
+
+=== Integrating Webpack Variable
+
+Configure scripts in `package.json` to pass the `TARGET_ENV` variable for environment-specific builds:
+
+[source, json]
+----
+"scripts": {
+  "dev": "webpack serve --env development TARGET_ENV=dev --config configs/webpack.dev.js",
+  "build": "webpack --env production TARGET_ENV=prod --config configs/webpack.prod.js"
+},
+----
+
+=== Webpack Configuration
+
+Use `NormalModuleReplacementPlugin` in `webpack.common.js` to replace `TARGET_ENV` with the selected environment:
+
+[source, javascript]
+----
+const webpack = require("webpack");
+
+// Common webpack configuration
+const commonConfig = (env) => {
+  const targetEnv = env.TARGET_ENV || "prod";
+
+  return {
+    // Other configurations...
+    plugins: [
+      new webpack.NormalModuleReplacementPlugin(
+        /(.*)TARGET_ENV(\.*)/,
+        (resource) => {
+          resource.request = resource.request.replace(
+            /TARGET_ENV/,
+            `${targetEnv}`
+          );
+        }
+      ),
+    ],
+  };
+};
+
+module.exports = commonConfig;
+----
+
+== Code for Dynamic Remote Initialization
+
+The goal is to dynamically load and initialize remote modules depending on the environment.
+
+=== Creating and Loading Script Tags
+
+Implement a function to create and load script tags for remote containers:
+
+[source, javascript]
+----
+const setRemoteScript = (endpoint) => {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = `${endpoint}/remoteEntry.js`;
+    script.onload = resolve;
+    script.onerror = () => reject(new Error(`Failed to load script at ${endpoint}`));
+    document.head.appendChild(script);
+  });
+};
+----
+
+=== Connecting to Remote Containers
+
+Develop a function to dynamically connect to remote containers:
+
+[source, javascript]
+----
+const loadComponent = (scope, module) => {
+  return async () => {
+    await __webpack_init_sharing__("default");
+    const container = window[scope];
+    await container.init(__webpack_share_scopes__.default);
+    const factory = await window[scope].get(module);
+   
+
+ return factory();
+  };
+};
+----
+
+=== Loading Modules from Remotes
+
+Create a function to load the default module from a remote:
+
+[source, javascript]
+----
+const loadModuleFrom = async (remote) => {
+  try {
+    const module = await remote();
+    return module.default();
+  } catch (err) {
+    console.error("Error loading module from remote:", err);
+  }
+};
+----
+
+=== Comprehensive Remote Initialization
+
+Combine all these steps in a single function for initializing remotes:
+
+[source, javascript]
+----
+const initRemote = async (remoteScope, remoteModule) => {
+  try {
+    await setRemoteScript(config[remoteScope]);
+    const loadedComponent = loadComponent(remoteScope, remoteModule);
+    await loadModuleFrom(loadedComponent);
+  } catch (err) {
+    console.error(`Error initializing remote ${remoteScope}:`, err);
+  }
+};
+----
+
+=== Lazy Loading in `app.js`
+
+Implement lazy loading to optimize application performance:
+
+[source, javascript]
+----
+import(/* webpackChunkName: "FormApp" */ "./init-remote")
+  .then((module) => {
+    const initRemote = module.default;
+    initRemote("FormApp", "./initContactForm").then(() => {
+      console.log("Remote FormApp initialized successfully");
+    });
+  })
+  .catch((err) => {
+    console.error("Error initializing lazy loaded remote:", err);
+  });
+----
+
+== Personal Configuration Insights
+
+- **Remote Configuration**: Utilizing the `Module Federation Live Reloading Plugin` for on-the-fly updates.
+- **Host Configuration**: Adopting the `Automatic Vendor Federation Plugin` for efficient dependency management.
+
+== Conclusion
+
+This expanded guide provides a comprehensive overview of setting up a simplified, yet robust, multi-environment module federation using Webpack's `NormalModuleReplacementPlugin`. The detailed explanations and code samples aim to make the concepts clear even to developers new to Module Federation and webpack. The complete implementation is available in my `module-federation-template` repository. Your feedback and experiences with this setup are invaluable for the community. Share your insights and preferred strategies for Module Federation projects!

@@ -1,0 +1,48 @@
+= Installation Instructions
+
+This guide provides step-by-step instructions on how to install the Enhanced Federation Plugin API. The installation process is straightforward and can be completed using your preferred terminal and package manager.
+
+== Prerequisites
+
+Before you begin, ensure that you have Node.js and npm installed on your machine. If you're using a different package manager, such as Yarn or pnpm, make sure they're installed as well.
+
+== Installation
+
+To install the Enhanced Federation Plugin API, you can use npm, Yarn, or pnpm. Here are the commands for each package manager:
+
+=== Using npm
+
+To install the Enhanced Federation Plugin API using npm, open your terminal and run the following command:
+
+[source, bash]
+----
+npm i @schirrel/module-federation-enhanced-plugin --save-dev
+----
+
+This command installs the Enhanced Federation Plugin API as a devDependency in your project.
+
+=== Using Yarn
+
+If you prefer to use Yarn, you can install the Enhanced Federation Plugin API with the following command:
+
+[source, bash]
+----
+yarn add @schirrel/module-federation-enhanced-plugin -D
+----
+
+Like the npm command, this installs the Enhanced Federation Plugin API as a devDependency.
+
+=== Using pnpm
+
+For those who prefer pnpm, use the following command to install the Enhanced Federation Plugin API:
+
+[source, bash]
+----
+pnpm add -D @schirrel/module-federation-enhanced-plugin
+----
+
+Again, this command installs the Enhanced Federation Plugin API as a devDependency.
+
+== Next Steps
+
+After successfully installing the Enhanced Federation Plugin API, you're ready to start using it in your project. Refer to the xref:getting-started/getting-started-practical.adoc[Getting Started] guide for instructions on how to begin.

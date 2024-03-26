@@ -1,0 +1,236 @@
+= Logging with Sentry: A Comprehensive Guide
+
+== Introduction to Distributed Logging Challenges
+
+In the complex landscape of distributed JavaScript applications, logging poses unique challenges. With multiple teams managing different segments of a single application, traditional logging methods often fall short. This guide explores the integration of Sentry with Webpack's Module Federation to enable distributed logging, ensuring errors are reported to the appropriate team, regardless of where they occur. This approach not only enhances error visibility but also significantly reduces the time required for rollback deployments.
+
+== The Importance of Observability
+
+In a federated system, applications are no longer monolithic but are composed of various independently deployable components owned by different teams. This setup highlights a common issue: when errors arise in shared components, they're often logged under the consuming application, obscuring the true source of the problem from the component's owners. This distribution of ownership necessitates a logging system capable of not only capturing errors efficiently but also routing them to the appropriate team's dashboard. Without such a system, diagnosing and fixing issues can become a tangled web of communication and manual error tracking.
+
+== Setting Up Sentry in a Federated Environment
+
+To tailor Sentry for a federated setup, it's essential to configure Sentry clients dynamically across the federated landscape. This involves registering each application or component with its own Sentry DSN (Data Source Name), thus segregating the error logs based on the component's ownership.
+
+=== Prerequisites
+
+To utilize the features discussed, ensure you have the following versions or higher:
+
+- `@sentry/webpack-plugin`: Version `2.5.0+`
+- `@sentry/rollup-plugin`, `@sentry/vite-plugin`, `@sentry/esbuild-plugin`: Version `2.7.0+`
+- For integrating `ModuleMetadata`, Sentry SDK version `7.59.0+` is required.
+
+=== Injecting Error Source Metadata
+
+Injecting metadata into your application's bundles allows Sentry to trace errors back to their source more accurately. This is facilitated by enabling the `_experiments.moduleMetadata` option in Sentry's bundler plugins.
+
+=== Enhanced Webpack Configuration
+
+Consider the following example for configuring your webpack.config.js. 
+
+[source, javascript]
+----
+// webpack.config.js
+const SentryWebpackPlugin = require("@sentry/webpack-plugin");
+
+module.exports = {
+  devtool: "source-map",
+  plugins: [
+    new SentryWebpackPlugin({
+      // Include any other necessary Sentry configuration options here
+      _experiments: {
+        moduleMetadata: ({ org, project, release }) => ({
+          // This example injects a team identifier and the release version as metadata
+          team: "frontend",
+          release,
+        }),
+      },
+    }),
+  ],
+};
+----
+
+*Explanation:* The above configuration leverages the _experiments.moduleMetadata option to inject custom metadata into each module compiled by Webpack. The metadata, in this case, includes identifiers for the team responsible for the frontend and the release version, facilitating easier identification of error origins.
+
+=== Leveraging ModuleMetadata for Enhanced Error Insight
+
+After successfully injecting metadata into your modules, Sentry's `ModuleMetadataIntegration` enables the association of this metadata with error stack frames, enriching error reports with valuable context.
+
+==== Sentry Setup with ModuleMetadata Integration
+
+[source, javascript]
+----
+import * as Sentry from "@sentry/browser";
+
+Sentry.init({
+  dsn: "https://examplePublicKey@o0.ingest.sentry.io/0",
+  integrations: [Sentry.moduleMetadataIntegration()],
+  beforeSend: (event) => {
+    const frames = event?.exception?.values?.[0]?.stacktrace?.frames || [];
+    // Extracting team names from frames that contain module metadata
+    const teams = frames
+      .filter((frame) => frame.module_metadata?.team)
+      .map((frame) => frame.module_metadata.team);
+
+    if (teams.length) {
+      // Adding the team names to the event's extra data for further insights
+      event.extra = { ...event.extra, teams };
+    }
+
+    return event;
+  },
+});
+
+Sentry.captureException(new Error("oh no!"));
+----
+
+*Explanation:* This snippet initializes Sentry with the `ModuleMetadataIntegration`, enabling Sentry to utilize the injected metadata. The `beforeSend` callback is used to process each error event, extracting and attaching team names from the error's stack frames to the event. This enriches the error data with context about which team's code is involved in the error, aiding in quicker identification and resolution.
+
+=== Advanced Error Routing Based on Metadata
+
+In environments with multiple bundles or micro-frontends, it can be beneficial to route errors to specific Sentry projects based on the source of the error. This is where advanced routing configurations come into play.
+
+==== Conditional Routing with Feature Tags
+
+The following TypeScript example showcases how to route events to different Sentry projects based on feature tags:
+
+[source, javascript]
+----
+// Import necessary Sentry functionalities for browser environments, including error capturing and initialization.
+import { captureException, init, makeFetchTransport } from "@sentry/browser";
+// Import Sentry's core functionality to enable multiplexed transport, allowing for dynamic DSN routing.
+import { makeMultiplexedTransport } from "@sentry/core";
+// Import Sentry types for better type checking and IntelliSense support in TypeScript.
+import { Envelope, EnvelopeItemType } from "@sentry/types";
+
+/**
+ * Defines the structure for parameters expected by the `dsnFromFeature` function,
+ * detailing the properties of the envelope and a method to retrieve the event from it.
+ */
+interface MatchParam {
+  /** The envelope object representing the batch of events sent to Sentry. */
+  envelope: Envelope;
+  /**
+   * A method provided to extract a specific event from the envelope.
+   * This can be filtered by specifying an array of EnvelopeItemType(s).
+   * By default, it retrieves only error events.
+   *
+   * @param types An optional array of envelope item types to filter the events by.
+   * @returns The first event that matches the specified types, or undefined if no match is found.
+   */
+  getEvent(types?: EnvelopeItemType[]): Event | undefined;
+}
+
+/**
+ * Determines the appropriate DSN (Data Source Name) for an event based on its 'feature' tag.
+ * This enables routing different events to specific Sentry projects based on their features.
+ * 
+ * @param {MatchParam} matchParam - Parameters including the method to extract the event.
+ * @returns An array of objects containing DSN and release info for routing, or an empty array for default routing.
+ */
+function dsnFromFeature({ getEvent }: MatchParam) {
+  // Extract the event from the envelope.
+  const event = getEvent();
+  // Switch case to determine routing based on the event's 'feature' tag.
+  switch (event?.tags?.feature) {
+    case "cart":
+      // Route cart-related errors to a specific Sentry project.
+      return [{ dsn: "__CART_DSN__", release: "cart@1.0.0" }];
+    case "gallery":
+      // Route gallery-related errors to a different specific Sentry project.
+      return [{ dsn: "__GALLERY_DSN__", release: "gallery@1.2.0" }];
+    default:
+      // Default routing if no feature matches.
+      return [];
+  }
+}
+
+// Initialize Sentry with a fallback DSN and a custom transport logic.
+init({
+  dsn: "__FALLBACK_DSN__",
+  // Configure the transport to use the `makeMultiplexedTransport` function for dynamic routing.
+  transport: makeMultiplexedTransport(makeFetchTransport, dsnFromFeature),
+});
+
+// Example of capturing an exception and tagging it for specific routing.
+captureException(new Error("oh no!"), (scope) => {
+  // Apply a 'feature' tag to the error event to influence its routing based on the logic defined in `dsnFromFeature`.
+  scope.setTag("feature", "cart");
+  // Return the modified scope to ensure the tag is applied.
+  return scope;
+});
+----
+
+*Explanation*: This setup employs the `makeMultiplexedTransport` function to dynamically route error events to different Sentry projects based on the presence of a `feature` tag. By examining the feature associated with an error, it can be directed to the appropriate project, ensuring that errors are managed by the right team and context, optimizing the debugging and resolution process.
+
+=== Combining Strategies for Ultimate Flexibility
+
+By combining metadata injection with dynamic routing, you can create a highly flexible and efficient error management setup tailored to complex applications.
+
+==== Comprehensive Configuration Example
+
+First, we adjust the Webpack's webpack.config.js configuration to include both DSN and release information as metadata:
+
+[source, javascript]
+----
+// webpack.config.js
+const SentryWebpackPlugin = require("@sentry/webpack-plugin");
+
+module.exports = {
+  devtool: "source-map",
+  plugins: [
+    new SentryWebpackPlugin({
+      _experiments: {
+        moduleMetadata: ({ release }) => ({
+          // Injecting DSN and release information as module metadata
+          dsn: "__MODULE_DSN__", release
+        }),
+      },
+    }),
+  ],
+};
+----
+
+*Explanation*: This configuration ensures each module compiled by Webpack includes metadata about its DSN and release version, laying the groundwork for sophisticated error routing.
+
+Next, we integrate this metadata within Sentry's setup to facilitate dynamic error routing:
+
+[source, javascript]
+----
+import { init, makeFetchTransport, moduleMetadataIntegration, makeMultiplexedTransport } from "@sentry/browser";
+
+const EXTRA_KEY = "ROUTE_TO";
+
+const transport = makeMultiplexedTransport(makeFetchTransport, (args) => {
+  const event = args.getEvent();
+  if (event && event.extra && EXTRA_KEY in event.extra && Array.isArray(event.extra[EXTRA_KEY])) {
+    // Routing based on the extracted DSN information from event metadata
+    return event.extra[EXTRA_KEY];
+  }
+  return [];
+});
+
+init({
+  dsn: "__DEFAULT_DSN__",
+  integrations: [moduleMetadataIntegration()],
+  transport,
+  beforeSend: (event) => {
+    // Logic to attach the DSN routing information to the event
+    if (event?.exception?.values?.[0]?.stacktrace?.frames) {
+      const frames = event.exception.values[0].stacktrace.frames;
+      const routeTo = frames
+        .filter((frame) => frame.module_metadata?.dsn)
+        .map((v) => v.module_metadata)
+        .slice(-1); // Customizing frame selection as needed
+
+      if (routeTo.length) {
+        event.extra = { ...event.extra, [EXTRA_KEY]: routeTo };
+      }
+    }
+
+    return event;
+  },
+});
+----
+
+*Explanation:* This setup combines the injected module metadata with dynamic event routing, enabling errors to be routed based on detailed module information. This allows for the precise management of errors, ensuring they are handled by the most relevant project or team, thus significantly improving error resolution efficiency and application stability.

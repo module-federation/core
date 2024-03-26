@@ -1,5 +1,14 @@
 # [0.2.0-canary.5](https://github.com/module-federation/universe/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.0.17
+
+### Patch Changes
+
+- @module-federation/runtime-tools@0.0.17
+- @module-federation/sdk@0.0.17
+- @module-federation/managers@0.0.17
+- @module-federation/manifest@0.0.17
+
 ## 0.0.16
 
 ### Patch Changes

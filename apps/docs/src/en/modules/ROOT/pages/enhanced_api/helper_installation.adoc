@@ -1,0 +1,50 @@
+= Installation
+
+This guide provides step-by-step instructions on how to install the Helper for the Enhanced Federation Plugin API. The installation process is straightforward and can be completed using your preferred terminal and package manager.
+
+== Prerequisites
+
+Before you begin, ensure that you have Node.js and npm installed on your machine. If you're using a different package manager, such as Yarn or pnpm, make sure they're installed as well.
+
+== Installation
+
+To install the Helper for the Enhanced Federation Plugin API, you can use npm, Yarn, or pnpm. Here are the commands for each package manager:
+
+=== Using npm
+
+To install the Helper using npm, open your terminal and run the following command:
+
+[source, bash]
+----
+npm i @schirrel/module-federation-enhanced-plugin-helper
+----
+
+This command installs the Helper as a dependency in your project.
+
+=== Using Yarn
+
+If you prefer to use Yarn, you can install the Helper with the following command:
+
+[source, bash]
+----
+yarn add @schirrel/module-federation-enhanced-plugin-helper
+----
+
+Like the npm command, this installs the Helper as a dependency.
+
+=== Using pnpm
+
+For those who prefer pnpm, use the following command to install the Helper:
+
+[source, bash]
+----
+pnpm add @schirrel/module-federation-enhanced-plugin-helper
+----
+
+Again, this command installs the Helper as a dependency.
+
+== Next Steps
+
+After successfully installing the Helper for the Enhanced Federation Plugin API, you're ready to start using it in your project. Refer to the xref:enhanced_api/helper_dynamicLoad.adoc[`getModule`] and xref:enhanced_api/helper_getModule.adoc[`dynamicLoad`] guide sections for instructions on how to use the Helper.
+
+If you encounter any issues during the installation process, feel free to reach out for support.
