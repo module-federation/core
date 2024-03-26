@@ -160,6 +160,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         isTSProject(undefined, compiler.context),
         {
           disableGenerateTypes: false,
+          disableConsumeTypes: false,
           remote: {
             generateAPITypes: true,
             compileInChildProcess: true,
@@ -170,30 +171,31 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         },
         'mfOptions.dts',
       )(options.dts);
-    if (
-      typeof normalizedDtsOptions === 'object' &&
-      !normalizedDtsOptions.disableGenerateTypes
-    ) {
-      NativeFederationTypeScriptRemote({
-        remote: {
-          implementation: normalizedDtsOptions.implementation,
-          context: compiler.context,
-          moduleFederationConfig: options,
-          ...normalizedDtsOptions.remote,
-        },
-        extraOptions: normalizedDtsOptions.extraOptions || {},
-        // @ts-ignore
-      }).apply(compiler);
-      NativeFederationTypeScriptHost({
-        host: {
-          implementation: normalizedDtsOptions.implementation,
-          context: compiler.context,
-          moduleFederationConfig: options,
-          ...normalizedDtsOptions.host,
-        },
-        extraOptions: normalizedDtsOptions.extraOptions || {},
-        // @ts-ignore
-      }).apply(compiler);
+    if (typeof normalizedDtsOptions === 'object') {
+      if (!normalizedDtsOptions.disableGenerateTypes) {
+        NativeFederationTypeScriptRemote({
+          remote: {
+            implementation: normalizedDtsOptions.implementation,
+            context: compiler.context,
+            moduleFederationConfig: options,
+            ...normalizedDtsOptions.remote,
+          },
+          extraOptions: normalizedDtsOptions.extraOptions || {},
+          // @ts-ignore
+        }).apply(compiler);
+      }
+      if (!normalizedDtsOptions.disableConsumeTypes) {
+        NativeFederationTypeScriptHost({
+          host: {
+            implementation: normalizedDtsOptions.implementation,
+            context: compiler.context,
+            moduleFederationConfig: options,
+            ...normalizedDtsOptions.host,
+          },
+          extraOptions: normalizedDtsOptions.extraOptions || {},
+          // @ts-ignore
+        }).apply(compiler);
+      }
     }
 
     if (!disableManifest) {

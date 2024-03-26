@@ -177,7 +177,9 @@ export class DevPlugin implements WebpackPluginInstance {
       )(dts);
     const remote =
       normalizedDtsOptions === false
-        ? { moduleFederationConfig: this._options }
+        ? undefined
+        : normalizedDtsOptions.disableGenerateTypes
+        ? undefined
         : {
             implementation: normalizedDtsOptions.implementation,
             context: compiler.context,
@@ -191,7 +193,9 @@ export class DevPlugin implements WebpackPluginInstance {
           };
     const host =
       normalizedDtsOptions === false
-        ? { moduleFederationConfig: this._options }
+        ? undefined
+        : normalizedDtsOptions.disableConsumeTypes
+        ? undefined
         : {
             implementation: normalizedDtsOptions.implementation,
             context: compiler.context,

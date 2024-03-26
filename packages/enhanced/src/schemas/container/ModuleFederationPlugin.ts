@@ -608,6 +608,10 @@ export default {
           description: 'Disable generate types.',
           type: 'boolean',
         },
+        disableConsumeTypes: {
+          description: 'Disable consume types.',
+          type: 'boolean',
+        },
         remote: {
           description: 'Used to config generate types.',
           ref: '#/definitions/DtsRemoteOptions',

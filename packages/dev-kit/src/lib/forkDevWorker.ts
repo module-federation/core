@@ -74,7 +74,7 @@ function getLocalRemoteNames(
 
 async function updateCallback(options: UpdateCallbackOptions): Promise<void> {
   const { updateMode, name, remoteTypeTarPath } = options;
-  const { disableGenerateTypes, disableLiveReload } = cacheOptions || {};
+  const { disableHotTypesReload, disableLiveReload } = cacheOptions || {};
   fileLog(
     `sync remote module ${name}, types to vmok ${cacheOptions?.name},typesManager.updateTypes run`,
     'forkDevWorker',
@@ -87,7 +87,7 @@ async function updateCallback(options: UpdateCallbackOptions): Promise<void> {
     });
   }
 
-  if (!disableGenerateTypes && typesManager) {
+  if (!disableHotTypesReload && typesManager) {
     await typesManager.updateTypes({
       updateMode,
       remoteName: name,
@@ -110,7 +110,7 @@ export async function forkDevWorker(
       host,
       extraOptions,
     });
-    if (!options.disableGenerateTypes && remote) {
+    if (!options.disableHotTypesReload && remote) {
       const { remoteOptions, tsConfig } = retrieveRemoteConfig(remote);
       const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
       const mfTypesZipPath = retrieveTypesZipPath(mfTypesPath, remoteOptions);
@@ -161,7 +161,7 @@ export async function forkDevWorker(
         });
     }
 
-    if (!cacheOptions.disableGenerateTypes) {
+    if (!cacheOptions.disableHotTypesReload) {
       typesManager &&
         typesManager
           .updateTypes({

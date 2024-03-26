@@ -389,7 +389,7 @@ class DTSManager {
         'info',
       );
       if (!options.host) {
-        throw new Error('options.host is required if you want to consumeTypes');
+        return;
       }
       const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(
         options.host,

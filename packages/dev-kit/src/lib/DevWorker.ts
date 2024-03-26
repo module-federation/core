@@ -8,7 +8,7 @@ import { RpcGMCallTypes, RpcMethod } from '../rpc/types';
 export interface DevWorkerOptions extends DTSManagerOptions {
   name: string;
   disableLiveReload?: boolean;
-  disableGenerateTypes?: boolean;
+  disableHotTypesReload?: boolean;
 }
 
 export class DevWorker {
