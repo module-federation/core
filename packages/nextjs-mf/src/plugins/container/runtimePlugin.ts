@@ -61,7 +61,19 @@ export default function (): FederationRuntimePlugin {
     init(args) {
       return args;
     },
-    beforeRequest(args) {
+    beforeRequest: (args) => {
+      const { options, id } = args;
+      const remoteName = id.split('/').shift();
+      const remote = options.remotes.find(
+        (remote) => remote.name === remoteName,
+      );
+      if (!remote) return args;
+      //@ts-ignore
+      if (remote?.entry?.includes('?t=')) {
+        return args;
+      }
+      //@ts-ignore
+      remote.entry = `${remote?.entry}?t=${Date.now()}`;
       return args;
     },
     createScript({ url }) {
