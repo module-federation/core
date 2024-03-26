@@ -213,7 +213,7 @@ export class DevPlugin implements WebpackPluginInstance {
       host: host,
       extraOptions: extraOptions,
       disableLiveReload: normalizedDevServer.disableHotTypesReload,
-      disableGenerateTypes: !normalizedDtsOptions,
+      disableHotTypesReload: normalizedDevServer.disableHotTypesReload,
     });
 
     this._stopWhenSIGTERMOrSIGINT();

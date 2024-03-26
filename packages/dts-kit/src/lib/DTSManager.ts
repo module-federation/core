@@ -377,22 +377,25 @@ class DTSManager {
       'info',
     );
     if (updateMode === UpdateMode.POSITIVE && remoteName === hostName) {
+      if (!this.options.remote) {
+        return;
+      }
       this.generateTypes();
     } else {
-      const { options, remoteAliasMap } = this;
+      const { remoteAliasMap } = this;
       fileLog(
         // eslint-disable-next-line max-len
         `updateTypes run,update remote types, options.host: ${JSON.stringify(
-          options.host,
+          this.options.host,
         )}, remoteAliasMap: ${JSON.stringify(remoteAliasMap)}`,
         MODULE_DTS_MANAGER_IDENTIFIER,
         'info',
       );
-      if (!options.host) {
+      if (!this.options.host) {
         return;
       }
       const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(
-        options.host,
+        this.options.host,
       );
 
       const loadedRemoteInfo = Object.values(remoteAliasMap).find(
