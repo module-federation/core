@@ -26,8 +26,8 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
     this.integratedChunks.add(chunkB);
     // Merge runtime
     //@ts-ignore
-    chunkA.runtime = runtime.mergeRuntime(chunkA.runtime, chunkB.runtime);
-
+    // chunkA.runtime = runtime.mergeRuntime(chunkA.runtime, chunkB.runtime);
+    chunkB.runtime = chunkA.runtime;
     // getChunkModules is used here to create a clone, because disconnectChunkAndModule modifies
     for (const module of chunkGraph.getChunkModules(chunkB)) {
       // chunkGraph.disconnectChunkAndModule(chunkB, module);
