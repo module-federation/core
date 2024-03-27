@@ -213,6 +213,8 @@ export function generatePreloadAssets(
             name: remoteInfo.name,
             remoteSnapshot: moduleInfoSnapshot,
             preloadConfig,
+            remote: remoteInfo,
+            origin,
           });
           const preloaded = getPreloaded(exposeFullPath);
           if (preloaded) {

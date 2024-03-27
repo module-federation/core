@@ -39,7 +39,8 @@
     "app:manifest:dev": "nx run-many --target=serve --parallel=5 -p 3008-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider",
     "commitlint": "commitlint --edit",
     "prepare": "husky install",
-    "changeset": "changeset"
+    "changeset": "changeset",
+    "build:packages": "npx nx affected -t build --parallel=10 --exclude='*,!tag:package'"
   },
   "dependencies": {
     "adm-zip": "0.5.10",
@@ -65,6 +66,7 @@
     "unplugin": "1.9.0"
   },
   "devDependencies": {
+    "terser-webpack-plugin": "^5.3.10",
     "@antora/cli": "3.1.5",
     "@antora/lunr-extension": "1.0.0-alpha.8",
     "@antora/site-generator": "3.1.7",

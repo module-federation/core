@@ -1,5 +1,4 @@
 import { FederationRuntimePlugin } from '@module-federation/runtime/types';
-
 export default function (): FederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
@@ -168,7 +167,6 @@ export default function (): FederationRuntimePlugin {
         return args;
       }
       const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
-
       const host = GlobalFederation['__INSTANCES__'][0];
       if (!host) {
         return args;

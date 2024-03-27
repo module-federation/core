@@ -25,7 +25,9 @@ function MyApp({ Component, pageProps }) {
     }
   };
   // handle first route hit.
-  React.useMemo(() => handleRouteChange(asPath), [asPath]);
+  React.useEffect(() => {
+    handleRouteChange(asPath);
+  }, [asPath]);
 
   //handle route change
   React.useEffect(() => {

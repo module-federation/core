@@ -23,15 +23,16 @@
     "styled-jsx": "5.1.2",
     "tapable": "2.2.1",
     "terser-webpack-plugin": "5.3.10",
+    "typescript": "5.3.3",
+    "upath": "2.0.1",
     "url": "0.11.3",
     "util": "0.12.5",
-    "webpack-sources": "3.2.3",
-    "typescript": "5.3.3"
+    "webpack-sources": "3.2.3"
   },
   "devDependencies": {
     "@module-federation/nextjs-mf": "workspace:*",
-    "@module-federation/sdk": "workspace:*",
     "@module-federation/runtime": "workspace:*",
+    "@module-federation/sdk": "workspace:*",
     "@module-federation/utilities": "workspace:*"
   },
   "scripts": {

@@ -3,9 +3,6 @@ import { getH1, getH3 } from '../support/app.po';
 describe('3001-shop/', () => {
   beforeEach(() => {
     cy.visit('/');
-    cy.visit('/shop');
-    cy.visit('/checkout');
-    cy.visit('/');
   });
 
   describe('Welcome message', () => {

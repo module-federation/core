@@ -287,26 +287,42 @@ loadRemote('home/exposedModule')
 ```
 
 **revalidate**
+### Hot Reloading with `revalidate` in Production Environments
 
-Enables hot reloading of node server (not client) in production.
-This is recommended, without it - servers will not be able to pull remote updates without a full restart.
+In production environments, ensuring that your server can dynamically reload and update without requiring a full restart is crucial for maintaining uptime and providing the latest features to your users without disruption. The `revalidate` utility from `@module-federation/nextjs-mf/utils` facilitates this by enabling hot reloading of the node server (not the client). This section outlines two implementations for integrating `revalidate` into your Next.js application to leverage hot reloading capabilities.
 
-More info here: https://github.com/module-federation/nextjs-mf/tree/main/packages/node#utilities
+#### Preferred Implementation: Blocking Updates Before Rendering
+
+This implementation is recommended for most use cases as it helps avoid hydration errors by ensuring that the server and client are always in sync. By blocking and checking for updates before rendering, you can guarantee that your application is always up-to-date without negatively impacting the user experience.
+
+**How it Works:**
+
+- **Before rendering the page**, the server checks if there are any updates available.
+- **If updates are available**, it proceeds with Hot Module Replacement (HMR) before responding to the client request.
+- **This method ensures** that all users receive the latest version of the application without encountering inconsistencies between the server-rendered and client-rendered content.
+
+**Implementation Example:**
 
 ```js
 // __document.js
 
 import { revalidate } from '@module-federation/nextjs-mf/utils';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
+
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
-    await revalidate().then((shouldUpdate) => {
-      console.log('finished sending response', shouldUpdate);
-    });
-    const initialProps = await Document.getInitialProps(ctx);
+    if (ctx?.pathname && !ctx?.pathname?.endsWith('_error')) {
+      await revalidate().then((shouldUpdate) => {
+        if (shouldUpdate) {
+          console.log('Hot Module Replacement (HMR) activated', shouldUpdate);
+        }
+      });
+    }
 
+    const initialProps = await Document.getInitialProps(ctx);
     return initialProps;
   }
+
   render() {
     return (
       <Html>
@@ -319,6 +335,27 @@ class MyDocument extends Document {
     );
   }
 }
+```
+
+#### Stale Method: Post-Response Update Checks
+
+While not recommended due to the potential for hydration errors, this method involves listening for the 'finish' event on the response object and then checking for updates. This could be useful in specific scenarios where updates can be applied less frequently or where immediate consistency between server and client is not as critical.
+
+**How it Works:**
+
+- **After responding to the client**, the server listens for the 'finish' event on the response object.
+- **Once the response has been sent**, it checks for updates.
+- **If updates are found**, it logs or acts upon these updates, although the updates will only apply to subsequent requests.
+
+**Implementation Example:**
+
+```js
+// Included in the `getInitialProps` method as shown in the preferred implementation
+ctx?.res?.on('finish', () => {
+  revalidate().then((shouldUpdate) => {
+    console.log('Response sent, checking for updates:', shouldUpdate);
+  });
+});
 ```
 
 ## For Express.js
