@@ -1,5 +1,22 @@
 # [2.1.0-canary.6](https://github.com/module-federation/universe/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.1.0
+
+### Minor Changes
+
+- df3ef24: entry tracking and improved hot reloading for node
+
+### Patch Changes
+
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+  - @module-federation/enhanced@0.1.0
+  - @module-federation/runtime@0.1.0
+  - @module-federation/sdk@0.1.0
+
 ## 2.0.15
 
 ### Patch Changes
