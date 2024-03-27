@@ -124,15 +124,6 @@ const isInternalOrPromise = (value: string): boolean =>
   ['internal ', 'promise '].some((prefix) => value.startsWith(prefix));
 
 /**
- * Checks if the remote value is using the standard remote syntax.
- *
- * @param {string} value - The remote value to check.
- * @returns {boolean} - True if the value is using the standard remote syntax, false otherwise.
- */
-const isStandardRemoteSyntax = (value: string): boolean => {
-  return value.includes('@');
-};
-/**
  * Parses the remotes object and checks if they are using a custom promise template or not.
  * If it's a custom promise template, the remote syntax is parsed to get the module name and version number.
  * If the remote value is using the standard remote syntax, a delegated module is created.
@@ -182,74 +173,6 @@ export const getDelegates = (
       isInternalDelegate(value) ? { ...acc, [key]: value } : acc,
     {},
   );
-
-/**
- * This function validates the type of the shared item and constructs a shared configuration object based on the item and key.
- * If the item is identical to the key or if the item does not necessitate a specific version,
- * the function returns an object with the import property set to the item.
- * Otherwise, it returns an object with the import property set to the key and the requiredVersion property set to the item.
- *
- * @param {string | string[]} item - The shared item to be validated and used to construct the shared configuration object. It can be a string or an array of strings.
- * @param {string} key - The key associated with the shared item.
- * @returns {object} - The constructed shared configuration object.
- * @throws {Error} - An error is thrown if the item type is not a string or an array of strings.
- */
-const getSharedConfig = (item: string | string[], key: string) => {
-  if (Array.isArray(item)) {
-    // This handles the case where item is an array
-    // Replace the following line with your actual logic
-    return item.map((i) => ({
-      import: i === key || !isRequiredVersion(i) ? i : key,
-      requiredVersion: i === key || !isRequiredVersion(i) ? undefined : i,
-    }));
-  } else if (typeof item === 'string') {
-    // Handle the case where item is a string
-    return {
-      import: item === key || !isRequiredVersion(item) ? item : key,
-      requiredVersion:
-        item === key || !isRequiredVersion(item) ? undefined : item,
-    };
-  } else {
-    throw new Error('Unexpected type in shared');
-  }
-};
-
-/**
- * Parses the share options from the provided ModuleFederationPluginOptions object and constructs a new object containing all shared configurations.
- * This newly constructed object is then used as the value for the 'shared' property of the Module Federation Plugin Options.
- * The function uses the 'parseOptions' utility function from webpack to parse the 'shared' property of the provided options object.
- * The 'getSharedConfig' function is used as the 'config' argument for 'parseOptions' to construct the shared configuration object for each shared item.
- * The 'item' argument for 'parseOptions' is a function that simply returns the item as it is.
- * The function then reduces the parsed shared options into a new object with the shared configuration for each shared item.
- *
- * @param {ModuleFederationPluginOptions} options - The ModuleFederationPluginOptions object to parse the share options from.
- * @returns {Record<string, SharedConfig>} - An object containing the shared configuration for each shared item.
- */
-const parseShareOptions = (options: ModuleFederationPluginOptions) => {
-  if (!options.shared) return options;
-  const sharedOptions: [string, SharedConfig][] = parseOptions(
-    options.shared,
-    getSharedConfig,
-    (item: any) => item,
-  );
-
-  return sharedOptions.reduce(
-    (acc, [key, options]) => {
-      acc[key] = {
-        import: options.import,
-        shareKey: options.shareKey || key,
-        shareScope: options.shareScope,
-        requiredVersion: options.requiredVersion,
-        strictVersion: options.strictVersion,
-        singleton: options.singleton,
-        packageName: options.packageName,
-        eager: options.eager,
-      };
-      return acc;
-    },
-    {} as Record<string, SharedConfig>,
-  );
-};
 
 /**
  * Takes an error object and formats it into a displayable string.

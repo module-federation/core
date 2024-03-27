@@ -1,5 +1,23 @@
 # @module-federation/runtime
 
+## 0.1.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.1.1
+
+## 0.1.0
+
+### Patch Changes
+
+- df3ef24: chore: adjust add federation init process
+- df3ef24: chore: redefine prefetch types
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+  - @module-federation/sdk@0.1.0
+
 ## 0.0.17
 
 ### Patch Changes

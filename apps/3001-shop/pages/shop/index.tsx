@@ -49,7 +49,7 @@ Shop.getInitialProps = async () => {
   const timeout = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
 
-  const fetchPromise = fetch('https://swapi.dev/api/people/1')
+  const fetchPromise = fetch('http://swapi.dev/api/planets/1/')
     .then((res) => res.json())
     .catch((err) => {
       if (err instanceof Error) {
