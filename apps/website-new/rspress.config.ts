@@ -75,6 +75,7 @@ export default defineConfig({
       alias: {
         '@site': path.resolve(__dirname),
         '@components': path.join(__dirname, 'src/components'),
+        '@public': path.join(__dirname, 'docs/public'),
       },
     },
   },

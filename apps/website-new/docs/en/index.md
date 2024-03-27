@@ -3,35 +3,35 @@ pageType: home
 
 hero:
   name: Module Federation
-  text: Microfront-end Architecture
-  tagline: Divide and conquer your web application
+  text: Microfrontend Architecture
+  tagline: Decentralize Your Web Applications
   actions:
     - theme: brand
       text: Introduction
-      link: /en/guide/start/index.html
+      link: /guide/start/index.html
     - theme: alt
       text: Quick Start
-      link: /en/guide/start/quick-start.html
+      link: /guide/start/quick-start.html
   image:
     src: /svg.svg
     alt: module federation Logo
 features:
-  - title: Decentralized code sharing
-    details: Module Federation allows developers to share code between multiple projects in a decentralized manner, making it easier to manage complex applications.
+  - title: Code Sharing
+    details: Module Federation allows developers to share code between multiple projects in a decentralized way, making it easier to manage complex applications.
     icon: ⚡
-  - title: Modular architecture
-    details: Applications can be split into smaller, self-contained modules that can be developed, tested, and deployed independently.
+  - title: Modularization
+    details: Applications can be split into smaller, self-contained modules that can be independently developed, tested, and deployed.
     icon: 📦
   - title: Flexibility
-    details: Module Federation gives developers the freedom to choose and implement the architecture that best suits their needs.
+    details: Module federation offers developers the freedom to choose and implement the architecture that best suits their needs.
     icon: 🎯
   - title: Rspack
-    details: Both rspack and webpack builds are supported to speed up your application build.
+    details: Supports Rspack and Webpack builds, accelerating your application builds.
     icon: 🦀
-  - title: Development experience
-    details: Module federation supports dynamically typed hints and chrome devtool to improve the development experience.
+  - title: Development Experience
+    details: Module federation supports dynamic type hints and chrome devtool to enhance the development experience.
     icon: 🚀
   - title: Plugin System
-    details: Hooks allow you to quickly define your own plugins to control the behavior of module loading
+    details: Hooks allow you to quickly define your own plugins to control the behavior of module loading.
     icon: 🎨
 ---

@@ -1,0 +1,499 @@
+# 插件系统
+
+Module Federation 提供了一套轻量的运行时插件系统，用以实现自身的大多数功能，并允许用户进行扩展。
+
+开发者编写的插件能够修改 `Module Federation` 的默认行为，并添加各类额外功能，包括但不限于：
+
+- 获取上下文信息
+- 注册生命周期钩子
+- 修改 Module Federation 配置
+- ...
+
+## 开发插件
+
+插件提供类似 `() => FederationRuntimePlugin` 的函数作。
+
+### 插件示例
+
+```ts title="custom-runtime-plugin.ts"
+import type { FederationRuntimePlugin } from '@module-federation/runtime';
+
+const runtimePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'my-runtime-plugin',
+    beforeInit(args) {
+      console.log('beforeInit: ', args);
+      return args;
+    },
+    beforeRequest(args) {
+      console.log('beforeRequest: ', args);
+      return args;
+    },
+    afterResolve(args) {
+      console.log('afterResolve', args);
+      return args;
+    },
+    onLoad(args) {
+      console.log('onLoad: ', args);
+      return args;
+    },
+    async loadShare(args) {
+      console.log('loadShare:', args);
+    },
+    async beforeLoadShare(args) {
+      console.log('beforeloadShare:', args);
+      return args;
+    },
+  };
+};
+export default runtimePlugin;
+```
+
+注册插件（两种方式选择一种即可）：
+
+- 构建注册插件
+
+```ts title="rspack.config.ts"
+const path = require('path');
+module.exports = {
+  plugins: [
+    new ModuleFederation({
+      name: 'host',
+      remotes: {
+        'manifest-provider':
+          'manifest_provider@http://localhost:3011/mf-manifest.json',
+      },
+      runtimePlugins: [path.resolve(__dirname, './custom-runtime-plugin.ts')],
+    }),
+  ],
+};
+```
+
+- runtime 注册插件
+
+```ts
+import runtimePlugin from 'custom-runtime-plugin.ts';
+init({
+  name: '@demo/app-main',
+  remotes: [
+    {
+      name: '@demo/app2',
+      entry: 'http://localhost:3006/mf-manifest.json',
+      alias: 'app2',
+    },
+  ],
+  plugins: [runtimePlugin()],
+});
+```
+
+### 插件结构
+
+函数形式的插件可以 **接受选项对象** 并 **返回插件实例**，并通过闭包机制管理内部状态。
+
+其中各部分的作用分别为：
+
+- `name` 属性用于标注插件名称。
+- `fn` 各类钩子。
+
+### 命名规范
+
+插件的命名规范如下：
+
+- 插件的函数命名为 `xxx-plugin`，并通过具名导出。
+- 插件的 `name` 采用 `xxx-plugin` 格式。
+
+下面是一个例子：
+
+```ts
+import type { FederationRuntimePlugin } from '@module-federation/runtime';
+const pluginFooBar = (): FederationRuntimePlugin => ({
+  name: 'xxx-plugin',
+  //...
+});
+
+export default pluginFooBar;
+```
+
+## hooks
+
+当然，这里是上述内容的中文翻译：
+
+### beforeInit
+
+`SyncWaterfallHook`
+
+在远程容器的初始化过程之前更新联合主机配置。
+
+- 类型
+
+```ts
+function beforeInit(args: BeforeInitOptions): BeforeInitOptions;
+
+type BeforeInitOptions = {
+  userOptions: UserOptions;
+  options: FederationRuntimeOptions;
+  origin: FederationHost;
+  shareInfo: ShareInfos;
+};
+
+interface FederationRuntimeOptions {
+  id?: string;
+  name: string;
+  version?: string;
+  remotes: Array<Remote>;
+  shared: ShareInfos;
+  plugins: Array<FederationRuntimePlugin>;
+  inBrowser: boolean;
+}
+```
+
+### init
+
+`SyncHook`
+
+在远程容器初始化期间调用。
+
+- 类型
+
+```ts
+function init(args: InitOptions): void;
+
+type InitOptions = {
+  options: FederationRuntimeOptions;
+  origin: FederationHost;
+};
+```
+
+### beforeRequest
+
+`AsyncWaterfallHook`
+
+在解析远程容器之前调用，用于注入容器或在查找之前更新某些内容。
+
+- 类型
+
+```ts
+async function beforeRequest(
+  args: BeforeRequestOptions,
+): Promise<BeforeRequestOptions>;
+
+type BeforeRequestOptions = {
+  id: string;
+  options: FederationRuntimeOptions;
+  origin: FederationHost;
+};
+```
+
+### afterResolve
+
+`AsyncWaterfallHook`
+
+在解析容器后调用，允许重定向或修改已解析的信息。
+
+- 类型
+
+```ts
+async function afterResolve(
+  args: AfterResolveOptions,
+): Promise<AfterResolveOptions>;
+
+type AfterResolveOptions = {
+  id: string;
+  pkgNameOrAlias: string;
+  expose: string;
+  remote: Remote;
+  options: FederationRuntimeOptions;
+  origin: FederationHost;
+  remoteInfo: RemoteInfo;
+  remoteSnapshot?: ModuleInfo;
+};
+```
+
+### onLoad
+
+`AsyncHook`
+
+联合模块加载完毕时触发，允许访问和修改已加载文件的导出内容。
+
+- 类型
+
+```ts
+async function onLoad(args: OnLoadOptions): Promise<void>;
+
+type OnLoadOptions = {
+  id: string;
+  expose: string;
+  pkgNameOrAlias: string;
+  remote: Remote;
+  options: ModuleOptions;
+  origin: FederationHost;
+  exposeModule: any;
+  exposeModuleFactory: any;
+  moduleInstance: Module;
+};
+
+type ModuleOptions = {
+  remoteInfo: RemoteInfo;
+  host: FederationHost;
+};
+
+interface RemoteInfo {
+  name: string;
+  version?: string;
+  buildVersion?: string;
+  entry: string;
+  type: RemoteEntryType;
+  entryGlobalName: string;
+  shareScope: string;
+}
+```
+
+### handlePreloadModule
+
+`SyncHook`
+
+处理联合模块预加载逻辑。
+
+- 类型
+
+```ts
+function handlePreloadModule(args: HandlePreloadModuleOptions): void;
+
+type HandlePreloadModuleOptions = {
+  id: string;
+  name: string;
+  remoteSnapshot: ModuleInfo;
+  preloadConfig: PreloadRemoteArgs;
+};
+```
+
+### errorLoadRemote
+
+`AsyncHook`
+
+如果加载联合模块失败，则调用，允许自定义错误处理。
+
+- 类型
+
+```ts
+async function errorLoadRemote(
+  args: ErrorLoadRemoteOptions,
+): Promise<void | unknown>;
+
+type ErrorLoadRemoteOptions = {
+  id: string;
+  error: unknown;
+  from: 'build' | 'runtime';
+  origin: FederationHost;
+};
+```
+
+- 示例
+
+```ts
+import { init, loadRemote } from '@module-federation/runtime';
+
+import type { FederationRuntimePlugin } from '@module-federation/runtime';
+
+const fallbackPlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'fallback-plugin',
+    errorLoadRemote(args) {
+      const fallback = 'fallback';
+      return fallback;
+    },
+  };
+};
+
+init({
+  name: '@demo/app-main',
+  remotes: [
+    {
+      name: '@demo/app2',
+      entry: 'http://localhost:3006/remoteEntry.js',
+      alias: 'app2',
+    },
+  ],
+  plugins: [fallbackPlugin()],
+});
+
+loadRemote('app2/un-existed-module').then((mod) => {
+  expect(mod).toEqual('fallback');
+});
+```
+
+### beforeLoadShare
+
+`AsyncWaterfallHook`
+
+在尝试加载或协商联合应用之间的共享模块之前调用。
+
+- 类型
+
+```ts
+async function beforeLoadShare(
+  args: BeforeLoadShareOptions,
+): Promise<BeforeLoadShareOptions>;
+
+type BeforeLoadShareOptions = {
+  pkgName: string;
+  shareInfo?: Shared;
+  shared: Options['shared'];
+  origin: FederationHost;
+};
+```
+
+### resolveShare
+
+`SyncWaterfallHook`
+
+允许手动解析共享模块请求。
+
+- 类型
+
+```ts
+function resolveShare(args: ResolveShareOptions): ResolveShareOptions;
+
+type ResolveShareOptions = {
+  shareScopeMap: ShareScopeMap;
+  scope: string;
+  pkgName: string;
+  version: string;
+  GlobalFederation: Federation;
+  resolver: () => Shared | undefined;
+};
+```
+
+- 示例
+
+```ts
+import { init, loadRemote } from '@module-federation/runtime';
+
+import type { FederationRuntimePlugin } from '@module-federation/runtime';
+
+const customSharedPlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'custom-shared-plugin',
+    resolveShare(args) {
+      const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
+
+      if (pkgName !== 'react') {
+        return args;
+      }
+
+      args.resolver = function () {
+        shareScopeMap[scope][pkgName][version] = window.React; // replace local share scope manually with desired module
+        return shareScopeMap[scope][pkgName][version];
+      };
+      return args;
+    },
+  };
+};
+
+init({
+  name: '@demo/app-main',
+  shared: {
+    react: {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => React,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+  },
+  plugins: [customSharedPlugin()],
+});
+
+window.React = () => 'Desired Shared';
+
+loadShare('react').then((reactFactory) => {
+  expect(reactFactory()).toEqual(window.React());
+});
+```
+
+### beforePreloadRemote
+
+`AsyncHook`
+
+在预加载处理程序执行任何预加载逻辑之前调用。
+
+- 类型
+
+```ts
+async function beforePreloadRemote(
+  args: BeforePreloadRemoteOptions,
+): BeforePreloadRemoteOptions;
+
+type BeforePreloadRemoteOptions = {
+  preloadOps: Array<PreloadRemoteArgs>;
+  options: Options;
+  origin: FederationHost;
+};
+```
+
+### generatePreloadAssets
+
+`AsyncHook`
+
+根据配置生成预加载资产。
+
+- 类型
+
+```ts
+async function generatePreloadAssets(
+  args: GeneratePreloadAssetsOptions,
+): Promise<PreloadAssets>;
+
+type GeneratePreloadAssetsOptions = {
+  origin: FederationHost;
+  preloadOptions: PreloadOptions[number];
+  remote: Remote;
+  remoteInfo: RemoteInfo;
+  remoteSnapshot: ModuleInfo;
+  globalSnapshot: GlobalModuleInfo;
+};
+
+interface PreloadAssets {
+  cssAssets: Array<string>;
+  jsAssetsWithoutEntry: Array<string>;
+  entryAssets: Array<EntryAssets>;
+}
+```
+
+### createScript
+
+`SyncHook`
+
+- 类型
+
+```ts
+function createScript(args: CreateScriptOptions): HTMLScriptElement | void;
+
+type CreateScriptOptions = {
+  url: string;
+};
+```
+
+- 示例
+
+```ts
+import { init } from '@module-federation/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/runtime';
+
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'change-script-attribute',
+    createScript({ url }) {
+      if (url === testRemoteEntry) {
+        let script = document.createElement('script');
+        script.src = testRemoteEntry;
+        script.setAttribute('loader-hooks', 'isTrue');
+        script.setAttribute('crossorigin', 'anonymous');
+        return script;
+      }
+    },
+  };
+};
+```

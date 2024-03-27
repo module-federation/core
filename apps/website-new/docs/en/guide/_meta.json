@@ -1,1 +1,22 @@
-["index"]
+[
+  {
+    "type": "dir",
+    "name": "start",
+    "label": "Getting Started"
+  },
+  {
+    "type": "dir",
+    "name": "basic",
+    "label": "Features"
+  },
+  {
+    "type": "dir",
+    "name": "framework",
+    "label": "Frameworks"
+  },
+  {
+    "type": "dir",
+    "name": "advanced",
+    "label": "Advanced Topics"
+  }
+]

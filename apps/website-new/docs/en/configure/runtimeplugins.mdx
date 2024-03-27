@@ -1,16 +1,16 @@
 # runtimePlugins
 
-- 类型：`string[]`
-- 是否必填：否
-- 默认值：`undefined`
+- Type: `string[]`
+- Required: No
+- Default: `undefined`
 
-用于添加运行时需要的额外插件，值为具体插件的路径，支持绝对/相对路径、包名，通过「[插件系统](../plugin/dev/index)」了解更多关于如何开发 runtimePlugin 细节。
+The `runtimePlugins` configuration is used to add additional plugins needed at runtime. The value should be the path to the specific plugin, which can be an absolute/relative path or a package name. You can learn more about how to develop `runtimePlugin` details by visiting the [Plugin System](../plugin/dev/index).
 
-设置后，运行时插件会自动在构建时注入并使用。
+Once set, runtime plugins will be automatically injected and used during the build process.
 
-- examples
+- Examples
 
-创建运行时插件文件： `custom-runtime-plugin.ts`
+To create a runtime plugin file, you can name it `custom-runtime-plugin.ts`:
 
 ```ts title="custom-runtime-plugin.ts"
 import { FederationRuntimePlugin } from '@module-federation/runtime/types';
@@ -24,14 +24,13 @@ export default function (): FederationRuntimePlugin {
     },
     beforeLoadShare(args) {
       console.log('[build time inject] beforeLoadShare: ', args);
-
       return args;
     },
   };
 }
 ```
 
-在构建配置应用此插件：
+Then, apply this plugin in your build configuration:
 
 ```ts title="rspack.config.ts"
 const path = require('path');

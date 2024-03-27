@@ -1,0 +1,46 @@
+# Remotes
+
+- Type: `PluginRemoteOptions`
+- Required: No
+- Default: `undefined`
+- Usage: Used for consuming remote modules in `Module Federation`
+
+:::tip
+A parameter unique to consumers. If `remotes` is set, it can be considered that this is a consumer.
+
+:::
+
+The `PluginRemoteOptions` type is as follows:
+
+```tsx
+type ModuleFederationInfo = string;
+interface PluginRemoteOptions {
+  [remoteAlias: string]: ModuleFederationInfo;
+}
+```
+
+- `remoteAlias` is the name actually used for reference by the consumer and can be configured as needed. For example, if `remoteAlias` is set to `demo`, then the consumption method would be `import xx from 'demo'`.
+- `ModuleFederationInfo` is composed of `ModuleFederation name` + `@` + `ModuleFederation entry`
+  - `ModuleFederation name` is the name set by the producer
+  - `entry` can be either `mf-manifest.json` or `remoteEntry.js`
+  - When `entry` is `mf-manifest.json`, it has the following additional capabilities:
+    - Dynamic module type hints
+    - Resource preloading
+    - Chrome devtool debugging tool
+
+```js
+module.exports = {
+  plugins: [
+    new ModuleFederation({
+      name: 'host',
+      // The `remotes` below defines two remotes, named `manifest-provider` for the project started on port 3011 and `js-entry-provider` for the project started on port 3012
+      remotes: {
+        'manifest-provider':
+          'manifest_provider@http://localhost:3011/mf-manifest.json',
+        'js-entry-provider':
+          'js_entry_provider@http://localhost:3012/remoteEntry.js',
+      },
+    }),
+  ],
+};
+```

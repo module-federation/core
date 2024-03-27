@@ -10,6 +10,11 @@
     "activeMatch": "/configure/"
   },
   {
+    "text": "插件",
+    "link": "/plugin/dev/index",
+    "activeMatch": "/plugin/"
+  },
+  {
     "text": "社区",
     "link": "/community/showcase/",
     "activeMatch": "/community/",
@@ -17,6 +22,10 @@
       {
         "text": "Showcase",
         "link": "/community/showcase/"
+      },
+      {
+        "text": "Module Federation Examples",
+        "link": "https://github.com/module-federation/module-federation-examples"
       },
       {
         "text": "Practical Module Federation",
