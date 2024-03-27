@@ -1,5 +1,34 @@
 # [0.2.0-canary.5](https://github.com/module-federation/universe/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.1.1
+
+### Patch Changes
+
+- ee57fb0: update chunk integration for entry modules
+  - @module-federation/sdk@0.1.1
+  - @module-federation/runtime-tools@0.1.1
+  - @module-federation/managers@0.1.1
+  - @module-federation/manifest@0.1.1
+
+## 0.1.0
+
+### Minor Changes
+
+- df3ef24: use chunk integration to initalize federation runtime and plugins in runtime bootstrap
+
+### Patch Changes
+
+- df3ef24: Support multiple runtime chunks, single runtime chunks in reference hoisting
+- df3ef24: chore: adjust add federation init process
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+  - @module-federation/sdk@0.1.0
+  - @module-federation/runtime-tools@0.1.0
+  - @module-federation/managers@0.1.0
+  - @module-federation/manifest@0.1.0
+
 ## 0.0.17
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # [1.1.0-canary.1](https://github.com/module-federation/universe/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.1.1
+
+## 0.1.0
+
+### Patch Changes
+
+- df3ef24: chore: adjust add federation init process
+- df3ef24: Remove log of container exports in sdk
+- df3ef24: chore: redefine prefetch types
+- df3ef24: use chunk integration to initalize federation runtime and plugins in runtime bootstrap
+
 ## 0.0.17
 
 ## 0.0.16

@@ -40,7 +40,8 @@
     "app:ts:dev": "nx run-many --target=serve -p react_ts_host,react_ts_nested_remote,react_ts_remote",
     "commitlint": "commitlint --edit",
     "prepare": "husky install",
-    "changeset": "changeset"
+    "changeset": "changeset",
+    "build:packages": "npx nx affected -t build --parallel=10 --exclude='*,!tag:package'"
   },
   "dependencies": {
     "adm-zip": "0.5.10",
@@ -49,7 +50,7 @@
     "axios": "1.6.7",
     "core-js": "3.34.0",
     "encoding": "^0.1.13",
-    "express": "4.18.2",
+    "express": "4.19.2",
     "fast-glob": "3.3.2",
     "lodash.get": "4.4.2",
     "next": "14.1.2",
@@ -66,6 +67,7 @@
     "unplugin": "1.9.0"
   },
   "devDependencies": {
+    "terser-webpack-plugin": "^5.3.10",
     "@antora/cli": "3.1.5",
     "@antora/lunr-extension": "1.0.0-alpha.8",
     "@antora/site-generator": "3.1.7",
@@ -137,7 +139,7 @@
     "@types/jest": "29.5.12",
     "@types/lodash.clonedeepwith": "^4.5.9",
     "@types/lodash.get": "4.4.9",
-    "@types/node": "18.19.18",
+    "@types/node": "18.19.26",
     "@types/node-fetch": "2.6.11",
     "@types/react": "18.2.62",
     "@types/react-dom": "18.2.19",

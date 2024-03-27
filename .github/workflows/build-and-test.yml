@@ -47,11 +47,14 @@ jobs:
       - name: Run Affected Test
         run: npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
 
-      - name: E2E Test for 3000-home
-        run: pnpm run app:next:dev & echo "done" && sleep 20 && npx nx run-many --target=test:e2e --projects=3000-home && lsof -ti tcp:3000,3001,3002 | xargs kill
+      - name: E2E Test for Next.js
+        run: pnpm run app:next:dev & echo "done" && sleep 50 && npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=2 && lsof -ti tcp:3000,3001,3002 | xargs kill
 
-      - name: E2E Test for 3001-shop
-        run: pnpm run app:next:dev & echo "done" && sleep 20 && npx nx run-many --target=test:e2e --projects=3001-shop && lsof -ti tcp:3000,3001,3002 | xargs kill
+      #      - name: E2E Test for 3001-shop
+      #        run: pnpm run app:next:dev & echo "done" && sleep 20 && npx nx run-many --target=test:e2e --projects=3001-shop && lsof -ti tcp:3000,3001,3002 | xargs kill
+
+      - name: E2E Test for ModernJS
+        run: npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && lsof -ti tcp:8080 | xargs kill
 
       #      - name: E2E Test for 3002-checkout
       #        run: pnpm run app:next:dev & echo "done" && sleep 15 && npx nx run-many --target=test:e2e --projects=3002-checkout && lsof -ti tcp:3000,3001,3002 | xargs kill

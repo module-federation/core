@@ -62,7 +62,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
    */
   apply(compiler: Compiler): void {
     const { _options: options } = this;
-    // @ts-ignore
     new FederationRuntimePlugin(options).apply(compiler);
     const library = options.library || { type: 'var', name: options.name };
     const remoteType =
@@ -81,6 +80,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     if (useContainerPlugin) {
       // @ts-ignore
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
+      ContainerPlugin.patchChunkSplit(compiler, 'federation-runtime');
+      ContainerPlugin.patchChunkSplit(compiler, 'mfp-runtime-plugins');
     }
 
     new DevPlugin(options).apply(compiler);
@@ -117,7 +118,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           //@ts-ignore
           exposes: options.exposes,
           runtimePlugins: options.runtimePlugins,
-          //@ts-ignore
         }).apply(compiler);
       }
       if (

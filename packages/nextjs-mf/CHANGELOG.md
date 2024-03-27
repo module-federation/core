@@ -1,5 +1,48 @@
 # [8.1.0-canary.7](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.3.1
+
+### Patch Changes
+
+- Updated dependencies [ee57fb0]
+  - @module-federation/enhanced@0.1.1
+  - @module-federation/node@2.1.1
+  - @module-federation/runtime@0.1.1
+  - @module-federation/sdk@0.1.1
+
+## 8.3.0
+
+### Minor Changes
+
+- df3ef24: use chunk integration to initalize federation runtime and plugins in runtime bootstrap
+
+### Patch Changes
+
+- d3d8003: deprecate injectScript and module-federation/utilities usage
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+  - @module-federation/enhanced@0.1.0
+  - @module-federation/node@2.1.0
+  - @module-federation/runtime@0.1.0
+  - @module-federation/sdk@0.1.0
+
+## 8.2.6
+
+### Patch Changes
+
+- 1e2c8a3: cache bust remote entry
+
+## 8.2.5
+
+### Patch Changes
+
+- d942a1c: only call module factory in valid conditions in runtime plugin
+- 5f7b084: Prevent application from compiling if AppDir is used at all
+
 ## 8.2.4
 
 ### Patch Changes
