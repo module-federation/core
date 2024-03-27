@@ -4,9 +4,7 @@ import dirTree from 'directory-tree';
 import { rm } from 'fs/promises';
 import fs from 'fs';
 import { join } from 'path';
-import { UnpluginOptions } from 'unplugin';
 import { describe, expect, it, vi } from 'vitest';
-import { HostOptions } from '../interfaces/HostOptions';
 import { DTSManager } from './DTSManager';
 import { UpdateMode } from '@module-federation/dev-server';
 
