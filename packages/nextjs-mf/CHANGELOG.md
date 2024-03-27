@@ -1,5 +1,11 @@
 # [8.1.0-canary.7](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.2.6
+
+### Patch Changes
+
+- 1e2c8a3: cache bust remote entry
+
 ## 8.2.5
 
 ### Patch Changes

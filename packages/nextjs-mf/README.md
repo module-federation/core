@@ -165,18 +165,12 @@ new NextFederationPlugin({
   extraOptions: {
     debug: boolean, // `false` by default
     exposePages: boolean, // `false` by default
-    enableImageLoaderFix: boolean, // `false` by default
-    enableUrlLoaderFix: boolean, // `false` by default
-    skipSharingNextInternals: boolean, // `false` by default
   },
 });
 ```
 
 - `debug` – enables debug mode. It will print additional information about what is going on under the hood.
 - `exposePages` – exposes automatically all nextjs pages for you and theirs `./pages-map`.
-- `enableImageLoaderFix` – adds public hostname to all assets bundled by `nextjs-image-loader`. So if you serve remoteEntry from `http://example.com` then all bundled assets will get this hostname in runtime. It's something like Base URL in HTML but for federated modules.
-- `enableUrlLoaderFix` – adds public hostname to all assets bundled by `url-loader`.
-- `skipSharingNextInternals` – disables sharing of next internals. You can use it if you want to share next internals yourself or want to use this plugin on non next applications
 
 ## Demo
 
@@ -273,22 +267,23 @@ new NextFederationPlugin({
 
 Ive added a util for dynamic chunk loading, in the event you need to load remote containers dynamically.
 
-**InjectScript**
 
 ```js
-import { injectScript } from '@module-federation/nextjs-mf/utils';
+import { loadRemote, init } from '@module-federation/runtime';
 // if i have remotes in my federation plugin, i can pass the name of the remote
-injectScript('home').then((remoteContainer) => {
-  remoteContainer.get('./exposedModule');
-});
+loadRemote('home/exposedModule')
 // if i want to load a custom remote not known at build time.
-
-injectScript({
-  global: 'home',
-  url: 'http://somthing.com/remoteEntry.js',
-}).then((remoteContainer) => {
-  remoteContainer.get('./exposedModule');
-});
+init({
+  name: 'hostname',
+  remotes: [
+    {
+      name: 'home',
+      entry: 'http://somthing.com/remoteEntry.js'
+    }
+  ],
+  force: true // may be needed to sideload remotes after the fact. 
+})
+loadRemote('home/exposedModule')
 ```
 
 **revalidate**
@@ -316,7 +311,7 @@ import Document, { Html, Head, Main, NextScript } from 'next/document';
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
-    if (ctx.pathname && !ctx.pathname.endsWith('_error')) {
+    if (ctx?.pathname && !ctx?.pathname?.endsWith('_error')) {
       await revalidate().then((shouldUpdate) => {
         if (shouldUpdate) {
           console.log('Hot Module Replacement (HMR) activated', shouldUpdate);
