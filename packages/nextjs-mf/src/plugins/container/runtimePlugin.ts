@@ -61,7 +61,19 @@ export default function (): FederationRuntimePlugin {
     init(args) {
       return args;
     },
-    beforeRequest(args) {
+    beforeRequest: (args) => {
+      const { options, id } = args;
+      const remoteName = id.split('/').shift();
+      const remote = options.remotes.find(
+        (remote) => remote.name === remoteName,
+      );
+      if (!remote) return args;
+      //@ts-ignore
+      if (remote?.entry?.includes('?t=')) {
+        return args;
+      }
+      //@ts-ignore
+      remote.entry = `${remote?.entry}?t=${Date.now()}`;
       return args;
     },
     createScript({ url }) {
@@ -76,7 +88,12 @@ export default function (): FederationRuntimePlugin {
       if (!moduleOrFactory) return args; // Ensure moduleOrFactory is defined
 
       if (typeof window === 'undefined') {
-        let exposedModuleExports: any = moduleOrFactory();
+        let exposedModuleExports: any;
+        try {
+          exposedModuleExports = moduleOrFactory();
+        } catch (e) {
+          exposedModuleExports = moduleOrFactory;
+        }
 
         const handler: ProxyHandler<any> = {
           get(target, prop, receiver) {
@@ -130,12 +147,13 @@ export default function (): FederationRuntimePlugin {
               );
             }
           });
+          return () => exposedModuleExports;
         } else {
           // For objects, just wrap the exported object itself
           exposedModuleExports = new Proxy(exposedModuleExports, handler);
         }
 
-        return () => exposedModuleExports;
+        return exposedModuleExports;
       }
 
       return args;
