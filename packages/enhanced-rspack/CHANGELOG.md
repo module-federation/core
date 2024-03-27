@@ -1,5 +1,18 @@
 # @module-federation/enhanced-rspack
 
+## 0.1.0
+
+### Patch Changes
+
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+  - @module-federation/sdk@0.1.0
+  - @module-federation/runtime-tools@0.1.0
+  - @module-federation/managers@0.1.0
+  - @module-federation/manifest@0.1.0
+
 ## 0.0.17
 
 ### Patch Changes
