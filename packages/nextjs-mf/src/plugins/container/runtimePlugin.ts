@@ -88,7 +88,12 @@ export default function (): FederationRuntimePlugin {
       if (!moduleOrFactory) return args; // Ensure moduleOrFactory is defined
 
       if (typeof window === 'undefined') {
-        let exposedModuleExports: any = moduleOrFactory();
+        let exposedModuleExports: any;
+        try {
+          exposedModuleExports = moduleOrFactory();
+        } catch (e) {
+          exposedModuleExports = moduleOrFactory;
+        }
 
         const handler: ProxyHandler<any> = {
           get(target, prop, receiver) {
@@ -142,12 +147,13 @@ export default function (): FederationRuntimePlugin {
               );
             }
           });
+          return () => exposedModuleExports;
         } else {
           // For objects, just wrap the exported object itself
           exposedModuleExports = new Proxy(exposedModuleExports, handler);
         }
 
-        return () => exposedModuleExports;
+        return exposedModuleExports;
       }
 
       return args;
