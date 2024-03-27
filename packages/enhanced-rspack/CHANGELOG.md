@@ -1,5 +1,14 @@
 # @module-federation/enhanced-rspack
 
+## 0.1.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.1.1
+- @module-federation/runtime-tools@0.1.1
+- @module-federation/managers@0.1.1
+- @module-federation/manifest@0.1.1
+
 ## 0.1.0
 
 ### Patch Changes
