@@ -221,10 +221,7 @@ class DTSManager {
     }
     try {
       const url = replaceLocalhost(apiTypeUrl);
-      const res = await axios({
-        method: 'get',
-        url,
-      });
+      const res = await axios.get(url);
       let apiTypeFile = res.data as string;
       apiTypeFile = apiTypeFile.replaceAll(
         REMOTE_ALIAS_IDENTIFIER,

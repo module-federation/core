@@ -25,6 +25,9 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "author": "Matteo Pietro Dazzi <matteopietro.dazzi@gmail.com> (https://github.com/ilteoood)",
+  "contributors": [
+    "zhanghang <hanric.zhang@gmail.com> https://github.com/2heal1"
+  ],
   "license": "MIT",
   "dependencies": {
     "adm-zip": "^0.5.10",

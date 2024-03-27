@@ -1,1 +1,1 @@
-# @module-federation/dev-server
+# @module-federation/dev-plugin

@@ -56,6 +56,7 @@ describe('archiveHandler', () => {
       maxRetries: 3,
       implementation: '',
       context: process.cwd(),
+      abortOnError: true,
     };
 
     const destinationFolder = 'typesHostFolder';
@@ -93,6 +94,26 @@ describe('archiveHandler', () => {
       expect(axios.get).toHaveBeenCalledWith(fileToDownload, {
         responseType: 'arraybuffer',
       });
+    });
+
+    it('not throw error while set abortOnError: false ', async () => {
+      const message = 'Rejected value';
+      const hostOptions: Required<HostOptions> = {
+        moduleFederationConfig: {},
+        typesFolder: tmpDir,
+        remoteTypesFolder: tmpDir,
+        deleteTypesFolder: true,
+        maxRetries: 3,
+        implementation: '',
+        context: process.cwd(),
+        abortOnError: false,
+      };
+      axios.get = vi.fn().mockRejectedValue(new Error(message));
+      const res = await downloadTypesArchive(hostOptions)([
+        destinationFolder,
+        fileToDownload,
+      ]);
+      expect(res).toEqual(undefined);
     });
   });
 });
