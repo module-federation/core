@@ -1,6 +1,7 @@
 import ansiColors from 'ansi-colors';
-import { dirname, join, normalize, relative } from 'path';
+import { dirname, join, normalize, relative, resolve } from 'path';
 import typescript from 'typescript';
+import { ThirdPartyExtractor } from '@module-federation/third-party-dts-extractor';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 
@@ -58,6 +59,7 @@ const createHost = (
   mapComponentsToExpose: Record<string, string>,
   tsConfig: typescript.CompilerOptions,
   remoteOptions: Required<RemoteOptions>,
+  cb: (dts: string) => void,
 ) => {
   const host = typescript.createCompilerHost(tsConfig);
   const originalWriteFile = host.writeFile;
@@ -101,6 +103,8 @@ const createHost = (
         );
       }
     }
+
+    cb(text);
   };
 
   return host;
@@ -131,7 +135,18 @@ export const compileTs = (
   tsConfig: typescript.CompilerOptions,
   remoteOptions: Required<RemoteOptions>,
 ) => {
-  const tsHost = createHost(mapComponentsToExpose, tsConfig, remoteOptions);
+  const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);
+  const thirdPartyExtractor = new ThirdPartyExtractor(
+    resolve(mfTypePath, 'node_modules'),
+    remoteOptions.context,
+  );
+
+  const tsHost = createHost(
+    mapComponentsToExpose,
+    tsConfig,
+    remoteOptions,
+    thirdPartyExtractor.collectPkgs.bind(thirdPartyExtractor),
+  );
   const filesToCompile = [
     ...Object.values(mapComponentsToExpose),
     ...remoteOptions.additionalFilesToCompile,
@@ -146,4 +161,5 @@ export const compileTs = (
 
   const { diagnostics = [] } = tsProgram.emit();
   diagnostics.forEach(reportCompileDiagnostic);
+  thirdPartyExtractor.copyDts();
 };

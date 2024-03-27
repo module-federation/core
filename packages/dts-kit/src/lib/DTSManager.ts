@@ -196,6 +196,7 @@ class DTSManager {
       ).href;
       return remoteInfo as Required<RemoteInfo>;
     } catch (_err) {
+      console.error(_err);
       return remoteInfo as Required<RemoteInfo>;
     }
   }

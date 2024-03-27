@@ -17,177 +17,177 @@ import { RemoteOptions } from '@module-federation/dts-kit';
 describe('index', () => {
   const projectRoot = join(__dirname, '..', '..', '..');
 
-  // describe('NativeFederationTypeScriptRemote', () => {
-  //   it('throws for missing moduleFederationConfig', () => {
-  //     const writeBundle = () => NativeFederationTypeScriptRemote.rollup({});
-  //     expect(writeBundle).toThrowError('moduleFederationConfig is required');
-  //   });
+  describe('NativeFederationTypeScriptRemote', () => {
+    it('throws for missing moduleFederationConfig', () => {
+      const writeBundle = () => NativeFederationTypeScriptRemote.rollup({});
+      expect(writeBundle).toThrowError('moduleFederationConfig is required');
+    });
 
-  //   it('correctly writeBundle', async () => {
-  //     const options = {
-  //       moduleFederationConfig: {
-  //         name: 'moduleFederationTypescript',
-  //         filename: 'remoteEntry.js',
-  //         exposes: {
-  //           './index': join(__dirname, './index.ts'),
-  //         },
-  //         shared: {
-  //           react: { singleton: true, eager: true },
-  //           'react-dom': { singleton: true, eager: true },
-  //         },
-  //       },
-  //       tsConfigPath: join(__dirname, '..', './tsconfig.json'),
-  //       typesFolder: '@mf-types',
-  //       compiledTypesFolder: 'compiled-types',
-  //       deleteTypesFolder: false,
-  //       additionalFilesToCompile: [],
-  //     };
+    it('correctly writeBundle', async () => {
+      const options = {
+        moduleFederationConfig: {
+          name: 'moduleFederationTypescript',
+          filename: 'remoteEntry.js',
+          exposes: {
+            './index': join(__dirname, './index.ts'),
+          },
+          shared: {
+            react: { singleton: true, eager: true },
+            'react-dom': { singleton: true, eager: true },
+          },
+        },
+        tsConfigPath: join(__dirname, '..', './tsconfig.json'),
+        typesFolder: '@mf-types',
+        compiledTypesFolder: 'compiled-types',
+        deleteTypesFolder: false,
+        additionalFilesToCompile: [],
+      };
 
-  //     const distFolder = join(projectRoot, 'dist', options.typesFolder);
+      const distFolder = join(projectRoot, 'dist', options.typesFolder);
 
-  //     const unplugin = NativeFederationTypeScriptRemote.rollup(
-  //       options,
-  //     ) as UnpluginOptions;
-  //     await unplugin.writeBundle?.();
-  //     expect(dirTree(distFolder)).toMatchObject({
-  //       name: '@mf-types',
-  //       children: [
-  //         {
-  //           name: 'compiled-types',
-  //           children: [{ name: 'index.d.ts' }],
-  //         },
-  //         { name: 'index.d.ts' },
-  //       ],
-  //     });
-  //   });
+      const unplugin = NativeFederationTypeScriptRemote.rollup(
+        options,
+      ) as UnpluginOptions;
+      await unplugin.writeBundle?.();
+      expect(dirTree(distFolder, { exclude: /node_modules/ })).toMatchObject({
+        name: '@mf-types',
+        children: [
+          {
+            name: 'compiled-types',
+            children: [{ name: 'index.d.ts' }],
+          },
+          { name: 'index.d.ts' },
+        ],
+      });
+    });
 
-  //   it('correctly enrich webpack config', async () => {
-  //     const options: RemoteOptions = {
-  //       moduleFederationConfig: {
-  //         name: 'moduleFederationTypescript',
-  //         filename: 'remoteEntry.js',
-  //         exposes: {
-  //           './index': join(__dirname, './index.ts'),
-  //         },
-  //         shared: {
-  //           react: { singleton: true, eager: true },
-  //           'react-dom': { singleton: true, eager: true },
-  //         },
-  //       },
-  //       tsConfigPath: join(__dirname, '..', './tsconfig.json'),
-  //       deleteTypesFolder: false,
-  //       typesFolder: '@mf-tests-webpack',
-  //     };
+    it('correctly enrich webpack config', async () => {
+      const options: RemoteOptions = {
+        moduleFederationConfig: {
+          name: 'moduleFederationTypescript',
+          filename: 'remoteEntry.js',
+          exposes: {
+            './index': join(__dirname, './index.ts'),
+          },
+          shared: {
+            react: { singleton: true, eager: true },
+            'react-dom': { singleton: true, eager: true },
+          },
+        },
+        tsConfigPath: join(__dirname, '..', './tsconfig.json'),
+        deleteTypesFolder: false,
+        typesFolder: '@mf-tests-webpack',
+      };
 
-  //     console.log('webpack options: ', JSON.stringify(options));
+      console.log('webpack options: ', JSON.stringify(options));
 
-  //     const webpackCompiler = webpack({
-  //       target: 'web',
-  //       entry: 'data:application/node;base64,',
-  //       output: {
-  //         publicPath: '/',
-  //       },
-  //       plugins: [NativeFederationTypeScriptRemote.webpack(options)],
-  //     });
+      const webpackCompiler = webpack({
+        target: 'web',
+        entry: 'data:application/node;base64,',
+        output: {
+          publicPath: '/',
+        },
+        plugins: [NativeFederationTypeScriptRemote.webpack(options)],
+      });
 
-  //     const assets = (await new Promise((resolve, reject) => {
-  //       webpackCompiler.run((err, stats) => {
-  //         if (err) {
-  //           console.error(err);
-  //           reject(err);
-  //         }
-  //         webpackCompiler.close((closeErr) => {
-  //           if (closeErr) {
-  //             console.error(closeErr);
-  //             reject(closeErr);
-  //           } else {
-  //             resolve(stats?.toJson().assets as webpack.StatsAsset[]);
-  //           }
-  //         });
-  //       });
-  //     })) as webpack.StatsAsset[];
-  //     console.log('compile webpack done');
+      const assets = (await new Promise((resolve, reject) => {
+        webpackCompiler.run((err, stats) => {
+          if (err) {
+            console.error(err);
+            reject(err);
+          }
+          webpackCompiler.close((closeErr) => {
+            if (closeErr) {
+              console.error(closeErr);
+              reject(closeErr);
+            } else {
+              resolve(stats?.toJson().assets as webpack.StatsAsset[]);
+            }
+          });
+        });
+      })) as webpack.StatsAsset[];
+      console.log('compile webpack done');
 
-  //     expect(
-  //       Boolean(assets.find((asset) => asset.name === '@mf-tests-webpack.zip')),
-  //     ).toEqual(true);
-  //     const distFolder = join(projectRoot, 'dist', options.typesFolder!);
+      expect(
+        Boolean(assets.find((asset) => asset.name === '@mf-tests-webpack.zip')),
+      ).toEqual(true);
+      const distFolder = join(projectRoot, 'dist', options.typesFolder!);
 
-  //     expect(dirTree(distFolder)).toMatchObject({
-  //       name: '@mf-tests-webpack',
-  //       children: [
-  //         {
-  //           name: 'compiled-types',
-  //           children: [{ name: 'index.d.ts' }],
-  //         },
-  //         { name: 'index.d.ts' },
-  //       ],
-  //     });
-  //   });
+      expect(dirTree(distFolder, { exclude: /node_modules/ })).toMatchObject({
+        name: '@mf-tests-webpack',
+        children: [
+          {
+            name: 'compiled-types',
+            children: [{ name: 'index.d.ts' }],
+          },
+          { name: 'index.d.ts' },
+        ],
+      });
+    });
 
-  //   it('correctly enrich rspack config', async () => {
-  //     const options = {
-  //       moduleFederationConfig: {
-  //         name: 'moduleFederationTypescript',
-  //         filename: 'remoteEntry.js',
-  //         exposes: {
-  //           './index': join(__dirname, './index.ts'),
-  //         },
-  //         shared: {
-  //           react: { singleton: true, eager: true },
-  //           'react-dom': { singleton: true, eager: true },
-  //         },
-  //       },
-  //       tsConfigPath: join(__dirname, '..', './tsconfig.json'),
-  //       deleteTypesFolder: false,
-  //       typesFolder: '@mf-tests-rspack',
-  //     };
-  //     console.log('rspack options: ', JSON.stringify(options));
+    it('correctly enrich rspack config', async () => {
+      const options = {
+        moduleFederationConfig: {
+          name: 'moduleFederationTypescript',
+          filename: 'remoteEntry.js',
+          exposes: {
+            './index': join(__dirname, './index.ts'),
+          },
+          shared: {
+            react: { singleton: true, eager: true },
+            'react-dom': { singleton: true, eager: true },
+          },
+        },
+        tsConfigPath: join(__dirname, '..', './tsconfig.json'),
+        deleteTypesFolder: false,
+        typesFolder: '@mf-tests-rspack',
+      };
+      console.log('rspack options: ', JSON.stringify(options));
 
-  //     const rspackCompiler = rspack({
-  //       target: 'web',
-  //       entry: 'data:application/node;base64,',
-  //       output: {
-  //         publicPath: '/',
-  //       },
-  //       // @ts-expect-error ignore
-  //       plugins: [NativeFederationTypeScriptRemote.rspack(options)],
-  //     });
+      const rspackCompiler = rspack({
+        target: 'web',
+        entry: 'data:application/node;base64,',
+        output: {
+          publicPath: '/',
+        },
+        // @ts-expect-error ignore
+        plugins: [NativeFederationTypeScriptRemote.rspack(options)],
+      });
 
-  //     const assets = (await new Promise((resolve, reject) => {
-  //       rspackCompiler.run((err, stats) => {
-  //         if (err) {
-  //           console.error(err);
-  //           reject(err);
-  //         }
-  //         rspackCompiler.close((closeErr) => {
-  //           if (closeErr) {
-  //             console.error(closeErr);
-  //             reject(closeErr);
-  //           } else {
-  //             resolve(stats?.toJson().assets as webpack.StatsAsset[]);
-  //           }
-  //         });
-  //       });
-  //     })) as webpack.StatsAsset[];
-  //     console.log('compile rspack done');
-  //     expect(
-  //       Boolean(assets.find((asset) => asset.name === '@mf-tests-rspack.zip')),
-  //     ).toEqual(true);
-  //     const distFolder = join(projectRoot, 'dist', options.typesFolder!);
+      const assets = (await new Promise((resolve, reject) => {
+        rspackCompiler.run((err, stats) => {
+          if (err) {
+            console.error(err);
+            reject(err);
+          }
+          rspackCompiler.close((closeErr) => {
+            if (closeErr) {
+              console.error(closeErr);
+              reject(closeErr);
+            } else {
+              resolve(stats?.toJson().assets as webpack.StatsAsset[]);
+            }
+          });
+        });
+      })) as webpack.StatsAsset[];
+      console.log('compile rspack done');
+      expect(
+        Boolean(assets.find((asset) => asset.name === '@mf-tests-rspack.zip')),
+      ).toEqual(true);
+      const distFolder = join(projectRoot, 'dist', options.typesFolder!);
 
-  //     expect(dirTree(distFolder)).toMatchObject({
-  //       name: '@mf-tests-rspack',
-  //       children: [
-  //         {
-  //           name: 'compiled-types',
-  //           children: [{ name: 'index.d.ts' }],
-  //         },
-  //         { name: 'index.d.ts' },
-  //       ],
-  //     });
-  //   });
-  // });
+      expect(dirTree(distFolder, { exclude: /node_modules/ })).toMatchObject({
+        name: '@mf-tests-rspack',
+        children: [
+          {
+            name: 'compiled-types',
+            children: [{ name: 'index.d.ts' }],
+          },
+          { name: 'index.d.ts' },
+        ],
+      });
+    });
+  });
 
   describe('NativeFederationTypeScriptHost', () => {
     it('throws for missing moduleFederationConfig', () => {
@@ -223,7 +223,7 @@ describe('index', () => {
       await expect(unplugin.writeBundle?.()).resolves.not.toThrow();
 
       const typesFolder = join(projectRoot, options.typesFolder);
-      expect(dirTree(typesFolder)).toMatchObject({
+      expect(dirTree(typesFolder, { exclude: /node_modules/ })).toMatchObject({
         name: '@mf-types-host',
         children: [
           {
