@@ -24,6 +24,7 @@
     "tapable": "2.2.1",
     "terser-webpack-plugin": "5.3.10",
     "typescript": "5.3.3",
+    "upath": "2.0.1",
     "url": "0.11.3",
     "util": "0.12.5",
     "webpack-sources": "3.2.3"
