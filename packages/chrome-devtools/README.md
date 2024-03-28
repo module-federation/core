@@ -1,37 +1,30 @@
-# Modern.js App
+# Module Federation Chrome Devtools
+
+## Ability
+* Proxy online Module Federation remote module to local
+* Let proxied remote module get hmr
 
 ## Setup
-
-Install the dependencies:
 
 ```bash
 pnpm install
 ```
 
-## Get Started
-
-Start the dev server:
+ ## Run
 
 ```bash
 pnpm dev
 ```
 
-Enable optional features or add a new entry:
+## Build
 
 ```bash
-pnpm new
+pnpm run build
 ```
 
-Build the app for production:
+ ## Test
 
 ```bash
-pnpm build
+pnpm run test
 ```
 
-Preview the production build locally:
-
-```bash
-pnpm serve
-```
-
-For more information, see the [Modern.js documentation](https://modernjs.dev/en).

@@ -1,5 +1,5 @@
 module.exports = {
-  root: true,
+  // root: true,
   extends: ['@modern-js'],
   env: {
     webextensions: true,

@@ -264,6 +264,9 @@ importers:
       '@types/adm-zip':
         specifier: 0.5.5
         version: 0.5.5
+      '@types/chrome':
+        specifier: ^0.0.260
+        version: 0.0.260
       '@types/download':
         specifier: 8.0.5
         version: 8.0.5
@@ -1119,8 +1122,8 @@ importers:
         specifier: 2.46.1
         version: 2.46.1(@types/react-dom@18.2.19)(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)(webpack@5.91.0)
       '@module-federation/sdk':
-        specifier: ^0.0.13
-        version: 0.0.13
+        specifier: workspace:*
+        version: link:../sdk
       '@types/dagre':
         specifier: ^0.7.52
         version: 0.7.52
@@ -1156,8 +1159,8 @@ importers:
         specifier: 2.46.1
         version: 2.46.1
       '@module-federation/runtime':
-        specifier: ^0.0.13
-        version: 0.0.13
+        specifier: workspace:*
+        version: link:../runtime
       '@playwright/test':
         specifier: ^1.42.1
         version: 1.42.1
@@ -6184,20 +6187,11 @@ packages:
       '@module-federation/webpack-bundler-runtime': 0.0.8
     dev: true
 
-  /@module-federation/runtime@0.0.13:
-    resolution: {integrity: sha512-c7TCfNQZvNV4ITCLQyDC7AG7AN3uPxFvBW7xNZ38EOIjuQjBm0JoAr8pxIoK6cdNf5VToIbVHaEJ1D+9DaJZmA==}
-    dependencies:
-      '@module-federation/sdk': 0.0.13
-    dev: true
-
   /@module-federation/runtime@0.0.8:
     resolution: {integrity: sha512-Hi9g10aHxHdQ7CbchSvke07YegYwkf162XPOmixNmJr5Oy4wVa2d9yIVSrsWFhBRbbvM5iJP6GrSuEq6HFO3ug==}
     dependencies:
       '@module-federation/sdk': 0.0.8
     dev: true
-
-  /@module-federation/sdk@0.0.13:
-    resolution: {integrity: sha512-ALapAGystaXSlwqGTcioPzGEhzKDVq+2U+MLXpm71/L/SaDOD54l8sqy8I/bdofay4c7rcrstlAlZfAwMmWW1g==}
 
   /@module-federation/sdk@0.0.8:
     resolution: {integrity: sha512-lkasywBItjUTNT0T0IskonDE2E/2tXE9UhUCPVoDL3NteDUSFGg4tpkF+cey1pD8mHh0XJcGrCuOW7s96peeAg==}
@@ -17444,10 +17438,10 @@ packages:
         optional: true
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
-      cssnano: 6.1.0(postcss@8.4.38)
+      cssnano: 6.1.0(postcss@8.4.35)
       esbuild: 0.17.19
       jest-worker: 29.7.0
-      postcss: 8.4.38
+      postcss: 8.4.35
       schema-utils: 4.2.0
       serialize-javascript: 6.0.2
       webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.17.19)
@@ -17514,10 +17508,10 @@ packages:
         optional: true
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
-      cssnano: 6.1.0(postcss@8.4.38)
+      cssnano: 6.1.0(postcss@8.4.35)
       esbuild: 0.20.1
       jest-worker: 29.7.0
-      postcss: 8.4.38
+      postcss: 8.4.35
       schema-utils: 4.2.0
       serialize-javascript: 6.0.2
       webpack: 5.90.3(@swc/core@1.3.102)(esbuild@0.20.1)
@@ -17760,17 +17754,6 @@ packages:
       cssnano-preset-default: 6.1.0(postcss@8.4.35)
       lilconfig: 3.1.1
       postcss: 8.4.35
-    dev: true
-
-  /cssnano@6.1.0(postcss@8.4.38):
-    resolution: {integrity: sha512-e2v4w/t3OFM6HTuSweI4RSdABaqgVgHlJp5FZrQsopHnKKHLFIvK2D3C4kHWeFIycN/1L1J5VIrg5KlDzn3r/g==}
-    engines: {node: ^14 || ^16 || >=18.0}
-    peerDependencies:
-      postcss: ^8.4.31
-    dependencies:
-      cssnano-preset-default: 6.1.0(postcss@8.4.38)
-      lilconfig: 3.1.1
-      postcss: 8.4.38
     dev: true
 
   /csso@4.2.0:
@@ -23709,6 +23692,8 @@ packages:
       webpack: '*'
     peerDependenciesMeta:
       webpack:
+        optional: true
+      webpack-sources:
         optional: true
     dependencies:
       webpack: 5.90.3(@swc/core@1.3.102)(esbuild@0.18.20)

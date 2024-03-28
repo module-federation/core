@@ -52,8 +52,6 @@ export const statusInfo: Record<
 
 export const __ENABLE_FAST_REFRESH__ = 'enableFastRefresh';
 
-export const MODULE_DEVTOOL_IDENTIFIER = 'garfishModuleDebug';
-
 export const BROWSER_ENV_KEY = 'VMOK_ENV';
 
 export const __FEDERATION_DEVTOOLS__ = '__VMOK_DEVTOOLS__';

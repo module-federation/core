@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useDebounceFn, useUpdateEffect } from 'ahooks';
 import { Form, FormInstance } from '@arco-design/web-react';
-import { GlobalModuleInfo } from '@module-federation/sdk';
+import {
+  GlobalModuleInfo,
+  MODULE_DEVTOOL_IDENTIFIER,
+} from '@module-federation/sdk';
 
 import FormComponent from '../Form';
 import Dependency from '../Graph';
@@ -26,7 +29,6 @@ import {
   statusInfo,
   ENABLEHMR,
   __ENABLE_FAST_REFRESH__,
-  MODULE_DEVTOOL_IDENTIFIER,
   BROWSER_ENV_KEY,
   __FEDERATION_DEVTOOLS__,
 } from '../../template/constant';
@@ -48,7 +50,7 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
   const activeTab = window.targetTab;
 
   const { run } = useDebounceFn(
-    async formData => {
+    async (formData) => {
       window.__FEDERATION__.moduleInfo = JSON.parse(
         JSON.stringify(window.__FEDERATION__.originModuleInfo),
       );
@@ -115,7 +117,7 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
   }, [moduleInfo]);
 
   useEffect(() => {
-    getScope().then(async scope => {
+    getScope().then(async (scope) => {
       const data = await chrome.storage.sync.get([FormID]);
       const config = data?.[FormID]?.[scope];
 
@@ -137,7 +139,7 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
   }, []);
 
   useEffect(() => {
-    chrome.storage.sync.get([ENABLEHMR]).then(data => {
+    chrome.storage.sync.get([ENABLEHMR]).then((data) => {
       const enable = data[ENABLEHMR];
       if (typeof enable === 'boolean') {
         onHMRChange(enable);

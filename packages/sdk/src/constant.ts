@@ -30,3 +30,5 @@ export const MFModuleType = {
   NPM: 'npm',
   APP: 'app',
 };
+
+export const MODULE_DEVTOOL_IDENTIFIER = 'garfishModuleDebug';

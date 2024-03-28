@@ -1,3 +1,5 @@
+import { MODULE_DEVTOOL_IDENTIFIER } from '@module-federation/sdk';
+
 import { FederationRuntimePlugin } from '../index';
 import runtimeHelpers from '../helpers';
 
@@ -14,8 +16,9 @@ const chromeDevtoolsPlugin: () => FederationRuntimePlugin = function () {
 
       if (options.inBrowser) {
         const realLocalStorage = nativeGlobal.localStorage || localStorage;
-        const debugModuleInfoStr =
-          realLocalStorage.getItem('garfishModuleDebug');
+        const debugModuleInfoStr = realLocalStorage.getItem(
+          MODULE_DEVTOOL_IDENTIFIER,
+        );
         if (
           debugModuleInfoStr &&
           !nativeGlobal.__INIT_VMOK_CHROME_DEVTOOL_PLUGIN__ &&
