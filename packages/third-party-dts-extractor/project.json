@@ -23,6 +23,10 @@
         "lintFilePatterns": ["packages/third-party-dts-extractor/**/*.ts"]
       }
     },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/packages/third-party-dts-extractor"]
+    },
     "pre-release": {
       "executor": "nx:run-commands",
       "options": {

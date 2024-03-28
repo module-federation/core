@@ -19,6 +19,8 @@ const defaultOptions = {
   generateAPITypes: false,
   context: process.cwd(),
   abortOnError: true,
+  extractRemoteTypes: false,
+  extractThirdParty: false,
 } satisfies Partial<RemoteOptions>;
 
 const readTsConfig = ({

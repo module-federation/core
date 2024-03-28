@@ -169,8 +169,9 @@ export class DevPlugin implements WebpackPluginInstance {
         isTSProject(undefined, compiler.context),
         {
           disableGenerateTypes: false,
+          //  remote types dist(.dev-server) not be used currently, so no need to set extractThirdParty etc
           remote: { compileInChildProcess: true },
-          host: {},
+          host: { consumeAPITypes: true },
           extraOptions: {},
         },
         'mfOptions.dts',

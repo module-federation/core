@@ -28,6 +28,8 @@ describe('DTSManager advance usage', () => {
     additionalFilesToCompile: [],
     context: process.cwd(),
     generateAPITypes: true,
+    extractRemoteTypes: true,
+    extractThirdParty: true,
   };
 
   const hostOptions = {
@@ -43,6 +45,7 @@ describe('DTSManager advance usage', () => {
       },
     },
     typesFolder: 'dist/@mf-types-dts-test-consume-types-advance',
+    consumeAPITypes: true,
   };
 
   const dtsManager = new DTSManager({

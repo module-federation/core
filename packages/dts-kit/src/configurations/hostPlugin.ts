@@ -11,6 +11,7 @@ const defaultOptions = {
   implementation: '',
   context: process.cwd(),
   abortOnError: true,
+  consumeAPITypes: false,
 } satisfies Partial<HostOptions>;
 
 const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {

@@ -16,6 +16,7 @@
       "@module-federation/dev-kit",
       "@module-federation/dev-plugin",
       "@module-federation/dts-kit",
+      "@module-federation/third-party-dts-extractor",
       "@module-federation/native-federation-typescript"
     ]
   ],

@@ -72,6 +72,8 @@ describe('hostPlugin', () => {
           generateAPITypes: false,
           context: process.cwd(),
           abortOnError: true,
+          extractRemoteTypes: false,
+          extractThirdParty: false,
         });
       });
 
@@ -126,6 +128,8 @@ describe('hostPlugin', () => {
           implementation: '',
           context: process.cwd(),
           abortOnError: true,
+          extractRemoteTypes: false,
+          extractThirdParty: false,
         });
       });
     });

@@ -141,12 +141,11 @@ export const compileTs = (
     remoteOptions.context,
   );
 
-  const tsHost = createHost(
-    mapComponentsToExpose,
-    tsConfig,
-    remoteOptions,
-    thirdPartyExtractor.collectPkgs.bind(thirdPartyExtractor),
-  );
+  const cb = remoteOptions.extractThirdParty
+    ? thirdPartyExtractor.collectPkgs.bind(thirdPartyExtractor)
+    : () => undefined;
+
+  const tsHost = createHost(mapComponentsToExpose, tsConfig, remoteOptions, cb);
   const filesToCompile = [
     ...Object.values(mapComponentsToExpose),
     ...remoteOptions.additionalFilesToCompile,
@@ -161,5 +160,8 @@ export const compileTs = (
 
   const { diagnostics = [] } = tsProgram.emit();
   diagnostics.forEach(reportCompileDiagnostic);
-  thirdPartyExtractor.copyDts();
+
+  if (remoteOptions.extractThirdParty) {
+    thirdPartyExtractor.copyDts();
+  }
 };

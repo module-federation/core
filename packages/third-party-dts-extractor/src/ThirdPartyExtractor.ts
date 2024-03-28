@@ -17,6 +17,54 @@ class ThirdPartyExtractor {
     this.pattern = /(from|import\()\s*['"]([^'"]+)['"]/g;
   }
 
+  inferPkgDir(importPath: string): string | void {
+    if (this.pkgs[importPath]) {
+      return;
+    }
+    if (path.isAbsolute(importPath)) {
+      return;
+    }
+    if (importPath.startsWith('.')) {
+      return;
+    }
+
+    try {
+      const pkgJsonPath = findPkg.sync(
+        require.resolve(importPath, { paths: [this.context] }),
+      ) as string;
+      const dir = path.dirname(pkgJsonPath);
+      const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8')) as Record<
+        string,
+        any
+      >;
+      const types = pkg.types || pkg.typings;
+      if (dir === this.context) {
+        return;
+      }
+
+      if (types) {
+        this.pkgs[pkg.name] = dir;
+        return dir;
+      } else if (fs.existsSync(path.resolve(dir, 'index.d.ts'))) {
+        this.pkgs[pkg.name] = dir;
+        return dir;
+      } else {
+        const typedPkgName = getTypedName(pkg.name);
+        const typedPkgJsonPath = findPkg.sync(
+          resolve.sync(`${typedPkgName}/package.json`, {
+            basedir: this.context,
+          }),
+        ) as string;
+        const typedDir = path.dirname(typedPkgJsonPath);
+        fs.readFileSync(typedPkgJsonPath, 'utf-8');
+        this.pkgs[typedPkgName] = typedDir;
+        return typedDir;
+      }
+    } catch (_err) {
+      return;
+    }
+  }
+
   collectPkgs(str: string) {
     const { pattern } = this;
     let match;
@@ -27,48 +75,7 @@ class ThirdPartyExtractor {
     }
 
     [...imports].forEach((importPath) => {
-      if (this.pkgs[importPath]) {
-        return;
-      }
-      if (path.isAbsolute(importPath)) {
-        return;
-      }
-      if (importPath.startsWith('.')) {
-        return;
-      }
-
-      try {
-        const pkgJsonPath = findPkg.sync(
-          require.resolve(importPath, { paths: [this.context] }),
-        ) as string;
-        const dir = path.dirname(pkgJsonPath);
-        const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8')) as Record<
-          string,
-          any
-        >;
-        const types = pkg.types || pkg.typings;
-        if (dir === this.context) {
-          return;
-        }
-
-        if (types) {
-          this.pkgs[pkg.name] = dir;
-        } else if (fs.existsSync(path.resolve(dir, 'index.d.ts'))) {
-          this.pkgs[pkg.name] = dir;
-        } else {
-          const typedPkgName = getTypedName(pkg.name);
-          const typedPkgJsonPath = findPkg.sync(
-            resolve.sync(`${typedPkgName}/package.json`, {
-              basedir: this.context,
-            }),
-          ) as string;
-          const typedDir = path.dirname(typedPkgJsonPath);
-          fs.readFileSync(typedPkgJsonPath, 'utf-8');
-          this.pkgs[typedPkgName] = typedDir;
-        }
-      } catch (_err) {
-        return;
-      }
+      this.inferPkgDir(importPath);
     });
   }
 

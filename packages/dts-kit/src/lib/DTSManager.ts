@@ -74,6 +74,49 @@ class DTSManager {
     type PackageType<T> = ${packageType}`;
   }
 
+  async extractRemoteTypes(options: ReturnType<typeof retrieveRemoteConfig>) {
+    const { remoteOptions, tsConfig, mapComponentsToExpose } = options;
+
+    if (!remoteOptions.extractRemoteTypes) {
+      return;
+    }
+
+    let hasRemotes = false;
+    const remotes = remoteOptions.moduleFederationConfig.remotes;
+    if (remotes) {
+      if (Array.isArray(remotes)) {
+        hasRemotes = Boolean(remotes.length);
+      } else if (typeof remotes === 'object') {
+        hasRemotes = Boolean(Object.keys(remotes).length);
+      }
+    }
+
+    const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
+
+    fileLog(
+      `hostName: ${remoteOptions.moduleFederationConfig.name} generateTypes run,
+    mapComponentsToExpose: ${JSON.stringify(mapComponentsToExpose)}
+    remoteOptions: ${JSON.stringify(remoteOptions)}
+    tsConfig: ${JSON.stringify(tsConfig)}
+    `,
+      MODULE_DTS_MANAGER_IDENTIFIER,
+      'info',
+    );
+    if (hasRemotes) {
+      const tempHostOptions = {
+        moduleFederationConfig: remoteOptions.moduleFederationConfig,
+        typesFolder: path.join(mfTypesPath, 'node_modules'),
+        remoteTypesFolder:
+          remoteOptions?.hostRemoteTypesFolder || remoteOptions.typesFolder,
+        deleteTypesFolder: true,
+        context: remoteOptions.context,
+        implementation: remoteOptions.implementation,
+        abortOnError: false,
+      };
+      await this.consumeArchiveTypes(tempHostOptions);
+    }
+  }
+
   async generateTypes() {
     try {
       const { options } = this;
@@ -90,42 +133,11 @@ class DTSManager {
         return;
       }
 
-      let hasRemotes = false;
-      const remotes = remoteOptions.moduleFederationConfig.remotes;
-      if (remotes) {
-        if (Array.isArray(remotes)) {
-          hasRemotes = Boolean(remotes.length);
-        } else if (typeof remotes === 'object') {
-          hasRemotes = Boolean(Object.keys(remotes).length);
-        }
-      }
-
-      const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
-
-      fileLog(
-        `hostName: ${
-          remoteOptions.moduleFederationConfig.name
-        } generateTypes run,
-      mapComponentsToExpose: ${JSON.stringify(mapComponentsToExpose)}
-      remoteOptions: ${JSON.stringify(remoteOptions)}
-      tsConfig: ${JSON.stringify(tsConfig)}
-      `,
-        MODULE_DTS_MANAGER_IDENTIFIER,
-        'info',
-      );
-      if (hasRemotes) {
-        const tempHostOptions = {
-          moduleFederationConfig: remoteOptions.moduleFederationConfig,
-          typesFolder: path.join(mfTypesPath, 'node_modules'),
-          remoteTypesFolder:
-            remoteOptions?.hostRemoteTypesFolder || remoteOptions.typesFolder,
-          deleteTypesFolder: true,
-          context: remoteOptions.context,
-          implementation: remoteOptions.implementation,
-          abortOnError: false,
-        };
-        await this.consumeArchiveTypes(tempHostOptions);
-      }
+      this.extractRemoteTypes({
+        remoteOptions,
+        tsConfig,
+        mapComponentsToExpose,
+      });
 
       compileTs(mapComponentsToExpose, tsConfig, remoteOptions);
 
@@ -241,6 +253,9 @@ class DTSManager {
   }
 
   consumeAPITypes(hostOptions: Required<HostOptions>) {
+    if (!hostOptions.consumeAPITypes) {
+      return;
+    }
     if (!this.loadedRemoteAPIAlias.length) {
       return;
     }

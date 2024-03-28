@@ -138,6 +138,7 @@ export interface DtsHostOptions {
   remoteTypesFolder?: string;
   deleteTypesFolder?: boolean;
   maxRetries?: number;
+  consumeAPITypes?: boolean;
 }
 
 export interface DtsRemoteOptions {
@@ -149,6 +150,8 @@ export interface DtsRemoteOptions {
   compileInChildProcess?: boolean;
   compilerInstance?: 'tsc' | 'vue-tsc';
   generateAPITypes?: boolean;
+  extractThirdParty?: boolean;
+  extractRemoteTypes?: boolean;
   abortOnError?: boolean;
 }
 
