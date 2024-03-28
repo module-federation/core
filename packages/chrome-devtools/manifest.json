@@ -17,7 +17,9 @@
         "static/js/post-message.js",
         "static/js/post-message-start.js",
         "static/js/fast-refresh-init.js",
-        "static/js/fast-refresh.js"
+        "static/js/fast-refresh.js",
+        "static/js/snapshot-plugin-init.js",
+        "static/js/snapshot-plugin.js"
       ],
       "matches": ["<all_urls>"]
     }
@@ -35,7 +37,8 @@
       "js": [
         "static/js/post-message-init.js",
         "static/js/post-message-listener.js",
-        "static/js/fast-refresh-init.js"
+        "static/js/fast-refresh-init.js",
+        "static/js/snapshot-plugin-init.js"
       ],
       "run_at": "document_start"
     }

@@ -1,17 +1,19 @@
 import { MODULE_DEVTOOL_IDENTIFIER } from '@module-federation/sdk';
+import runtimeHelpers from '@module-federation/runtime/helpers';
 
-import { FederationRuntimePlugin } from '../index';
-import runtimeHelpers from '../helpers';
+import type { FederationRuntimePlugin } from '@module-federation/runtime/types';
+
+import { definePropertyGlobalVal } from '../sdk';
 
 declare global {
-  // eslint-disable-next-line no-var
+  // eslint-disable-next-line no-var, no-inner-declarations
   var __INIT_VMOK_CHROME_DEVTOOL_PLUGIN__: boolean | undefined;
 }
 
 const chromeDevtoolsPlugin: () => FederationRuntimePlugin = function () {
   return {
-    name: 'chrome-devtool',
-    beforeLoadRemoteSnapshot({ moduleInfo, options, ...info }) {
+    name: 'chrome-devtools-plugin',
+    beforeLoadRemoteSnapshot({ options }) {
       const { nativeGlobal } = runtimeHelpers.global;
 
       if (options.inBrowser) {
@@ -35,4 +37,13 @@ const chromeDevtoolsPlugin: () => FederationRuntimePlugin = function () {
   };
 };
 
-export default chromeDevtoolsPlugin;
+if (!window?.__FEDERATION__) {
+  definePropertyGlobalVal(window, '__FEDERATION__', {});
+  definePropertyGlobalVal(window, '__VMOK__', window.__FEDERATION__);
+}
+
+if (!window?.__FEDERATION__.__GLOBAL_PLUGIN__) {
+  window.__FEDERATION__.__GLOBAL_PLUGIN__ = [];
+}
+
+window.__FEDERATION__.__GLOBAL_PLUGIN__?.push(chromeDevtoolsPlugin());

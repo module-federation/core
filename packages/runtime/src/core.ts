@@ -44,7 +44,6 @@ import { getRemoteEntryUniqueKey, getRemoteInfo } from './utils/load';
 import { Global, Federation, globalLoading } from './global';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from './constant';
 import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
-import chromeDevtoolsPlugin from './plugins/chrome-devtools';
 
 interface LoadRemoteMatch {
   id: string;
@@ -228,11 +227,7 @@ export class FederationHost {
     const defaultOptions: Options = {
       id: getBuilderId(),
       name: userOptions.name,
-      plugins: [
-        snapshotPlugin(),
-        generatePreloadAssetsPlugin(),
-        chromeDevtoolsPlugin(),
-      ],
+      plugins: [snapshotPlugin(), generatePreloadAssetsPlugin()],
       remotes: [],
       shared: {},
       inBrowser: isBrowserEnv(),
