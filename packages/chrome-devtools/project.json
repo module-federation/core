@@ -5,42 +5,21 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "builder": "@nrwl/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
-        "commands": ["pnpm build"],
-        "cwd": "packages/chrome-devtools"
-      }
-    },
-    "lint": {
-      "eslintConfig": "packages/chrome-devtools/.eslintrc.js",
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["packages/chrome-devtools/**/*.ts"]
+        "commands": ["npm run build --prefix packages/chrome-devtools"]
       }
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "outputs": ["{workspaceRoot}/coverage/packages/chrome-devtools"],
-      "options": {
-        "jestConfig": "packages/chrome-devtools/vitest.config.ts",
-        "passWithNoTests": true
-      }
-    },
-    "pre-release": {
       "executor": "nx:run-commands",
       "options": {
-        "parallel": false,
-        "commands": [
-          {
-            "command": "nx run chrome-devtools:test",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "nx run chrome-devtools:build",
-            "forwardAllArgs": false
-          }
-        ]
+        "commands": ["npm run test --prefix packages/chrome-devtools"]
+      }
+    },
+    "e2e:devtools": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run test:e2e --prefix packages/chrome-devtools"]
       }
     }
   },
