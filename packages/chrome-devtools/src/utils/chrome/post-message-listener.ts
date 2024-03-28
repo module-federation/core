@@ -1,7 +1,7 @@
 if (window.moduleHandler) {
   window.removeEventListener('message', window.moduleHandler);
 } else {
-  window.moduleHandler = event => {
+  window.moduleHandler = (event) => {
     const { origin, data } = event;
     if (!data.moduleInfo) {
       return;

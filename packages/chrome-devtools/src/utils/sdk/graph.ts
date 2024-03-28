@@ -40,7 +40,7 @@ const splitModuleId = (target: string) => {
   } else if (length >= 3) {
     // @xxx:https://xxx.xxx.json
     if (array[length - 1].endsWith('.json')) {
-      const idx = array.findIndex(t => t.startsWith('http'));
+      const idx = array.findIndex((t) => t.startsWith('http'));
       return array[idx - 1];
     } else {
       // type:@xxx:https://xxx.xxx.json
@@ -102,7 +102,7 @@ export class DependencyGraph {
       return;
     }
 
-    Object.keys(remotesInfo).forEach(dep => {
+    Object.keys(remotesInfo).forEach((dep) => {
       const { matchedVersion } = remotesInfo![dep];
       let childId = dep;
       if (matchedVersion && matchedVersion !== '') {
@@ -183,7 +183,7 @@ export class DependencyGraph {
       targetGraph[targetWithoutType] || targetGraph[target] || {},
     );
 
-    graphChilden.forEach(dep => {
+    graphChilden.forEach((dep) => {
       this.addEdge(id + dep, id, id + dep);
       this.run(targetGraph[targetWithoutType], dep, type, id + dep);
     });

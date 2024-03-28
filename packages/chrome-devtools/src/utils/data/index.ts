@@ -5,12 +5,12 @@ import { calculateSnapshot, calculateMicroAppSnapshot } from './snapshot';
 export const separateType = (moduleInfo: GlobalModuleInfo) => {
   const consumers: Record<string, GlobalModuleInfo[string]> = {};
   const producer: Array<string> = [];
-  Object.keys(moduleInfo).forEach(key => {
+  Object.keys(moduleInfo).forEach((key) => {
     const remotesInfo = (moduleInfo[key] as ConsumerModuleInfo)?.remotesInfo;
     if (remotesInfo) {
       const moduleIds = Object.keys(remotesInfo);
       if (moduleIds.length) {
-        moduleIds.forEach(id => {
+        moduleIds.forEach((id) => {
           let formatId = id;
           if (id.includes(':')) {
             formatId = id.split(':').pop() as string;
@@ -43,7 +43,7 @@ export const getModuleInfo = async (
   const { consumers } = separateType(moduleInfo);
   const overrides: Record<string, string> = {};
 
-  const isMicroMode = Object.keys(consumers).some(moduleId => {
+  const isMicroMode = Object.keys(consumers).some((moduleId) => {
     // @ts-expect-error
     const subApps = consumers[moduleId].consumerList;
     return Array.isArray(subApps) && subApps.length;

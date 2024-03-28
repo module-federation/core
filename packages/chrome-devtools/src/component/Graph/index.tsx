@@ -42,17 +42,17 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
     ) => {
       dagreGraph.setGraph({ rankdir: direction });
 
-      nodes.forEach(node => {
+      nodes.forEach((node) => {
         dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
       });
 
-      edges.forEach(edge => {
+      edges.forEach((edge) => {
         dagreGraph.setEdge(edge.source, edge.target);
       });
 
       dagre.layout(dagreGraph);
 
-      nodes.forEach(node => {
+      nodes.forEach((node) => {
         const nodeWithPosition = dagreGraph.node(node.id);
         node.position = {
           x: nodeWithPosition.x - nodeWidth / 2,
@@ -107,7 +107,7 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
 
   const onConnect = useCallback(
     (params: Edge | Connection) =>
-      setEdges(eds =>
+      setEdges((eds) =>
         addEdge(
           { ...params, type: ConnectionLineType.SmoothStep, animated: true },
           eds,

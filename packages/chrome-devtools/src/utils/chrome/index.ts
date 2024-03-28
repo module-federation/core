@@ -5,7 +5,7 @@ import { definePropertyGlobalVal } from '../sdk';
 export * from './storage';
 
 const sleep = (num: number) => {
-  return new Promise<void>(resolve => {
+  return new Promise<void>((resolve) => {
     setTimeout(() => {
       resolve();
     }, num);
@@ -39,7 +39,7 @@ export const getGlobalModuleInfo = async (
       );
       if (data?.updateModule) {
         const moduleIds = Object.keys(window.__FEDERATION__.originModuleInfo);
-        const shouldUpdate = !moduleIds.some(id =>
+        const shouldUpdate = !moduleIds.some((id) =>
           id.includes(data.updateModule.name),
         );
         if (shouldUpdate) {
@@ -89,7 +89,7 @@ export const injectScript = async (
     .then(() => {
       console.log('InjectScript success, excuteScript:', args);
     })
-    .catch(e => {
+    .catch((e) => {
       console.log(e, 'InjectScript fail, excuteScript:', args);
     });
 };
@@ -119,7 +119,7 @@ export const injectToast = (toastUtilUrl: string, e2eFlag: string) => {
 };
 
 export const setChromeStorage = (formData: Record<string, any>) => {
-  getScope().then(async scope => {
+  getScope().then(async (scope) => {
     const data = await chrome.storage.sync.get('FormID');
 
     const storeData = data[FormID];

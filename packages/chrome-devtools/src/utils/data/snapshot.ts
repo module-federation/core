@@ -16,7 +16,7 @@ export const calculateSnapshot = (
   );
   const newSnapshot = JSON.parse(JSON.stringify(originSnapshot));
   const moduleIds = Object.keys(originSnapshot);
-  moduleIds.forEach(moduleId => {
+  moduleIds.forEach((moduleId) => {
     const module = originSnapshot[moduleId] as ModuleInfo;
     if ('remotesInfo' in module) {
       const remoteIds = Object.keys(module.remotesInfo);
@@ -49,7 +49,7 @@ export const calculateMicroAppSnapshot = (
   let masterApp: ModuleInfo | null = null;
   const newSnapshot = JSON.parse(JSON.stringify(originSnapshot));
   const moduleIds = Object.keys(originSnapshot);
-  moduleIds.forEach(moduleId => {
+  moduleIds.forEach((moduleId) => {
     const module = newSnapshot[moduleId] as ModuleInfo;
     if (
       'consumerList' in module &&
@@ -70,7 +70,7 @@ export const calculateMicroAppSnapshot = (
   for (let i = 0; i < microAppsCount; i++) {
     let overrideTarget = '';
     const microApp = microApps[i];
-    const idWithVersion = Object.keys(overrides).find(id => {
+    const idWithVersion = Object.keys(overrides).find((id) => {
       let target = id;
       if (id.includes(':')) {
         const [, name] = id.split(':');

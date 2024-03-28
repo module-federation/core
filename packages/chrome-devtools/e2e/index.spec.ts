@@ -11,7 +11,7 @@ const proxyUrl = 'http://localhost:3009/mf-manifest.json';
 const mockUrl = 'http://localhost:6666/mf-manifest.json';
 
 const sleep = (timeout: number) =>
-  new Promise<void>(resolve => {
+  new Promise<void>((resolve) => {
     setTimeout(() => {
       resolve();
     }, timeout);
@@ -44,7 +44,7 @@ test.beforeEach(async ({ context: browserContext, extensionId }) => {
       .query({
         url: `${openUrl}/*`,
       })
-      .then(tabs => {
+      .then((tabs) => {
         window.targetTab = tabs[0];
       });
   }, openUrl);
@@ -68,7 +68,7 @@ test('test proxy', async ({ request }) => {
   targetPage.on('request', afterHandler);
   const response = await request.fetch(proxyUrl);
   const json = await response.json();
-  await targetPage.route(mockUrl, async route => {
+  await targetPage.route(mockUrl, async (route) => {
     await route.fulfill({ json });
   });
   await targetPage.bringToFront();

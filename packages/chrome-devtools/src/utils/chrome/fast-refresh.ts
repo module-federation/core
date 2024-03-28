@@ -25,10 +25,10 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
 
       if (isObject(shareInfo)) {
         let orderResolve: (value?: unknown) => void;
-        const orderPromise = new Promise(resolve => {
+        const orderPromise = new Promise((resolve) => {
           orderResolve = resolve;
         });
-        Object.keys(shareInfo).forEach(async share => {
+        Object.keys(shareInfo).forEach(async (share) => {
           let get: () => any;
           if (share === 'react') {
             get = () =>

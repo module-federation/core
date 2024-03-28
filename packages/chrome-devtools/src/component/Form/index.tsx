@@ -57,13 +57,13 @@ const FormComponent = (props: FormProps) => {
   const { moduleInfo } = window.__FEDERATION__;
   let { producer } = separateType(moduleInfo);
   const filterDupMap = new Map();
-  producer = producer.filter(t => {
+  producer = producer.filter((t) => {
     const [typeOrName, name] = t.split(':');
     const marked = filterDupMap.get(name || typeOrName);
     filterDupMap.set(name || typeOrName, true);
     return !marked;
   });
-  const formatProducer = producer.map(id => {
+  const formatProducer = producer.map((id) => {
     const hasType = id.includes(':');
     if (hasType) {
       return {
@@ -229,7 +229,7 @@ const FormComponent = (props: FormProps) => {
                         allowClear
                         showSearch
                       >
-                        {formatProducer.map(item => (
+                        {formatProducer.map((item) => (
                           <Option key={item.value} value={item.value}>
                             {item.label}
                           </Option>
