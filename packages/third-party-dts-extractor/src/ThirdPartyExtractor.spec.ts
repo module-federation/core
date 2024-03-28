@@ -1,7 +1,6 @@
 import fs from 'fs-extra';
 import { join } from 'path';
 import { describe, expect, it } from 'vitest';
-import dirTree from 'directory-tree';
 import { ThirdPartyExtractor } from './ThirdPartyExtractor';
 
 describe('ThirdPartyExtractor', () => {
