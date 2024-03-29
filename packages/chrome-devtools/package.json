@@ -12,7 +12,8 @@
     "start": "modern start",
     "serve": "modern serve",
     "new": "modern new",
-    "upgrade": "modern upgrade"
+    "upgrade": "modern upgrade",
+    "postinstall": "bash install-deps.bash"
   },
   "engines": {
     "node": ">=16.18.1"
