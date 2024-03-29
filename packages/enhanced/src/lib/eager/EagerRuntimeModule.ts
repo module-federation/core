@@ -116,11 +116,11 @@ class EagerRuntimeModule extends RuntimeModule {
       // Immediately execute the first initialization function
       initFunction();
       // If there's chunkEnsure logic for the first item, include it here
+       ${chunkEnsure}
     } else {
       // For subsequent items, ensure all existing promises are resolved before execution
       if(promises.length > 0) {
-           ${chunkEnsure}
-           Promise.all(promises).then(function(){initFunction()});
+         Promise.all(promises).then(function(){initFunction()});
       } else {
         initFunction();
       }
