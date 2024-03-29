@@ -134,6 +134,14 @@ export const WEBPACK_MODULE_TYPE_PROVIDE: Readonly<'provide-module'> =
   'provide-module';
 
 /**
+ * @type {Readonly<"eager-module">}
+ * This is the module type used for the ModuleFederation feature's EagerModule class.
+ * TODO: Document this better.
+ */
+export const WEBPACK_MODULE_TYPE_EAGER: Readonly<'eager-module'> =
+  'eager-module';
+
+/**
  * @type {Readonly<"consume-shared-module">}
  * This is the module type used for the ModuleFederation feature's ConsumeSharedModule class.
  */

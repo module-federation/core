@@ -1,7 +1,7 @@
 packages:
   - '!**/dist/**'
   - 'packages/*'
-  - 'packages/enhance'
+  - 'packages/enhanced'
   - 'apps/runtime-demo/*'
   - 'apps/manifest-demo/*'
   - 'apps/*'

@@ -26,8 +26,7 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
     this.integratedChunks.add(chunkB);
     // Merge runtime
     //@ts-ignore
-    // chunkA.runtime = runtime.mergeRuntime(chunkA.runtime, chunkB.runtime);
-    chunkB.runtime = chunkA.runtime;
+    chunkB.runtime = runtime.mergeRuntime(chunkA.runtime, chunkB.runtime);
     // getChunkModules is used here to create a clone, because disconnectChunkAndModule modifies
     for (const module of chunkGraph.getChunkModules(chunkB)) {
       // chunkGraph.disconnectChunkAndModule(chunkB, module);
@@ -107,7 +106,9 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
               compilation.chunks.delete(federationRuntimePluginsChunk);
               this.integratedChunks.delete(federationRuntimePluginsChunk);
             }
-
+            //@ts-ignore
+            //             compilation.chunks.delete(compilation.namedChunks.get('backup'))
+            //             compilation.namedChunks.delete('backup');
             compilation.namedChunks.delete('federation-runtime');
             compilation.namedChunks.delete('mfp-runtime-plugins');
 

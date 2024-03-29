@@ -1,7 +1,7 @@
 import type { Compiler, Chunk } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import FederationRuntimeModule from './FederationRuntimeModule';
-import FederationInitModule from './FederationInitModule';
+import EagerRuntimeModule from '../../eager/EagerRuntimeModule';
 import {
   getFederationGlobalScope,
   normalizeRuntimeInitOptionsWithOutShared,
@@ -14,6 +14,7 @@ import path from 'path';
 import { TEMP_DIR } from '../constant';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
+import ProvideEagerModulePlugin from '../../eager/ProvideEagerModulePlugin';
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -146,24 +147,48 @@ class FederationRuntimePlugin {
     modifyEntry({
       compiler,
       prependEntry: (entry) => {
-        Object.keys(entry).forEach((key) => {
-          const entryItem = entry[key];
-          const prefix = entryItem.runtime ? `-${entryItem.runtime}` : '';
-          const runtimePluginKey = `mfp-runtime-plugins${prefix}`;
-          const federationRuntimeKey = `federation-runtime${prefix}`;
-
-          entry[runtimePluginKey] = {
-            import: [this.pluginsFilePath],
-            runtime: entryItem.runtime,
-          };
-
-          entry[federationRuntimeKey] = {
-            import: [this.entryFilePath],
-            runtime: entryItem.runtime,
-          };
-        });
+        // Object.keys(entry).forEach((key) => {
+        //   const entryItem = entry[key];
+        //   const prefix = entryItem.runtime ? `-${entryItem.runtime}` : '';
+        //   const runtimePluginKey = `mfp-runtime-plugins${prefix}`;
+        //   const federationRuntimeKey = `federation-runtime${prefix}`;
+        //
+        // entry[runtimePluginKey] = {
+        //   import: [this.pluginsFilePath],
+        //   runtime: entryItem.runtime,
+        // };
+        //
+        // entry[federationRuntimeKey] = {
+        //   import: [this.entryFilePath],
+        //   runtime: entryItem.runtime,
+        // };
+        // });
       },
     });
+    new ProvideEagerModulePlugin({
+      provides: [
+        {
+          [this.entryFilePath]: {
+            shareKey: this.entryFilePath,
+            shareScope: undefined,
+            version: false,
+            eager: true,
+            requiredVersion: false,
+            strictVersion: undefined,
+            singleton: undefined,
+          },
+          [this.pluginsFilePath]: {
+            shareKey: this.pluginsFilePath,
+            shareScope: undefined,
+            version: false,
+            eager: true,
+            requiredVersion: false,
+            strictVersion: undefined,
+            singleton: undefined,
+          },
+        },
+      ],
+    }).apply(compiler);
   }
 
   injectRuntime(compiler: Compiler) {
@@ -204,6 +229,12 @@ class FederationRuntimePlugin {
             runtimeRequirements.add(RuntimeGlobals.moduleCache);
             runtimeRequirements.add(RuntimeGlobals.compatGetDefaultExport);
             runtimeRequirements.add(federationGlobal);
+
+            const includesEagerModules =
+              compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                chunk,
+                'eager-init',
+              );
             compilation.addRuntimeModule(
               chunk,
               new FederationRuntimeModule(
@@ -212,14 +243,9 @@ class FederationRuntimePlugin {
                 initOptionsWithoutShared,
               ),
             );
-            compilation.addRuntimeModule(
-              chunk,
-              new FederationInitModule(
-                name,
-                this.entryFilePath,
-                chunksRuntimePluginsDependsOn,
-              ),
-            );
+            if (includesEagerModules) {
+              compilation.addRuntimeModule(chunk, new EagerRuntimeModule());
+            }
           },
         );
       },

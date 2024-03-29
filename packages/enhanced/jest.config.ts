@@ -29,7 +29,7 @@ export default {
   transform: {
     '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig],
   },
-  moduleFileExtensions: ['ts', 'js', 'html'],
+  moduleFileExtensions: ['ts', 'js', 'html', 'json'],
   coverageDirectory: '../../coverage/packages/enhanced',
   rootDir: __dirname,
   testMatch: [
