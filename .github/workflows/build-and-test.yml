@@ -73,7 +73,13 @@ jobs:
 
       - name: Configuration xvfb
         shell: bash
-        run: sudo apt-get update && sudo apt-get install xvfb
+        run: |
+          sudo apt-get update
+          sudo apt-get install xvfb
 
       - name: E2E Chrome Devtools
-        run: npx playwright install-deps && npx playwright install && npx nx run-many --target=e2e:devtools
+        run: |
+          npx playwright install-deps
+          pnpm install
+          npx playwright install
+          npx nx run-many --target=e2e:devtools
