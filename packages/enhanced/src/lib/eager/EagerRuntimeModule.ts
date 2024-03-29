@@ -85,15 +85,36 @@ class EagerRuntimeModule extends RuntimeModule {
     const federationGlobal = getFederationGlobalScope(
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
-    return Template.asString([
-      `var eagerBoot = [${sharedInitOptionsStr}]`,
-      `
-      eagerBoot.forEach(factoryFunction => {
-        const requireFunction = factoryFunction();
+    const currentChunk = this.chunk;
+    const chunkEnsure = currentChunk?.id
+      ? `${RuntimeGlobals.ensureChunkHandlers}.consumes(${JSON.stringify(
+          currentChunk.id,
+        )}, promises)`
+      : '';
 
-        requireFunction();
+    return Template.asString([
+      `
+  // Define eagerBoot with initialization options and initialize promises with a resolved promise
+  var eagerBoot = [${sharedInitOptionsStr.join(',')}];
+  var promises = [Promise.resolve()];
+
+  eagerBoot.forEach(function(initFunctionFactory, index) {
+    // Invoke the factory function to get the initialization function
+    const initFunction = initFunctionFactory();
+
+    if (index === 0) {
+      // Immediately execute the first initialization function
+      initFunction();
+      // If there's chunkEnsure logic for the first item, include it here
+      ${chunkEnsure}
+    } else {
+      // For subsequent items, ensure all existing promises are resolved before execution
+      Promise.all(promises).then(function() {
+        initFunction();
       });
-      `,
+    }
+  });
+  `,
     ]);
   }
 }
