@@ -44,7 +44,7 @@
     "@modern-js/eslint-config": "2.46.1",
     "@modern-js/tsconfig": "2.46.1",
     "@module-federation/runtime": "workspace:*",
-    "@playwright/test": "^1.42.1",
+    "@playwright/test": "1.36.1",
     "@types/chrome": "^0.0.260",
     "@types/jest": "~29.2.4",
     "@types/node": "~16.11.7",
