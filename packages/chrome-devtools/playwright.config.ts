@@ -16,4 +16,26 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
+  // webServer: [
+  //   {
+  //     command: 'npx nx serve 3008-webpack-host',
+  //     url: 'http://localhost:3008/index.html',
+  //   },
+  //   // {
+  //   //   command: 'npx nx serve 3009-webpack-provider',
+  //   //   url: 'http://localhost:3009/index.html',
+  //   // },
+  //   {
+  //     command: 'npx nx serve 3010-rspack-provider',
+  //     url: 'http://localhost:3010/index.html',
+  //   },
+  //   {
+  //     command: 'npx nx serve 3011-rspack-manifest-provider',
+  //     url: 'http://localhost:3011/index.html',
+  //   },
+  //   {
+  //     command: 'npx nx serve 3012-rspack-js-entry-provider',
+  //     url: 'http://localhost:3012/index.html',
+  //   },
+  // ],
 });

@@ -44,5 +44,7 @@ jobs:
 
       - name: E2E Chrome Devtools
         run: |
-          pnpm run app:manifest:dev & echo "done" && sleep 6 && npx nx run-many --target=e2e --projects=3008-webpack-host --parallel=1 && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
-          pnpm install && npx nx run-many --target=e2e:devtools
+          pnpm run  app:manifest:dev & echo "done" &&
+          sleep 50 &&
+          nx e2e:devtools chrome-devtools
+          && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill

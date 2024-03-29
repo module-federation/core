@@ -21,6 +21,12 @@
       "options": {
         "commands": ["npm run test:e2e --prefix packages/chrome-devtools"]
       }
+    },
+    "e2e:devtools:ui": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm run test:e2e:ui --prefix packages/chrome-devtools"]
+      }
     }
   },
   "tags": ["package"]
