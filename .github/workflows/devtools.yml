@@ -5,6 +5,10 @@ on:
     branches: ['main']
   pull_request:
 
+env:
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1 # Skip downloading during yarn install
+  PLAYWRIGHT_BROWSERS_PATH: 0 # Places binaries to node_modules/@playwright/test
+
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -23,7 +27,7 @@ jobs:
       - name: Setup Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '17'
           cache: 'pnpm'
 
       - name: Set Nx SHA
