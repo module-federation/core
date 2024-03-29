@@ -1,4 +1,4 @@
-name: Build affected packages
+name: Devtools
 
 on:
   push:
