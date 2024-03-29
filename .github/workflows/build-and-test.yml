@@ -76,4 +76,4 @@ jobs:
         run: sudo apt-get update && sudo apt-get install xvfb
 
       - name: E2E Chrome Devtools
-        run: pnpm run app:manifest:dev && npx nx run-many --target=e2e:devtools
+        run: npx nx run-many --target=e2e:devtools
