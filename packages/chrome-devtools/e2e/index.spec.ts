@@ -56,7 +56,7 @@ test('test proxy', async ({ request }) => {
   await devtoolsPage.click('div[data-set-e2e=e2eProxyKey]');
   const moduleKeys = await devtoolsPage.$$('.arco-select-option');
   for (let i = 0; i < moduleKeys.length; i++) {
-    let optionEl = moduleKeys[i];
+    const optionEl = moduleKeys[i];
     const text = await (await optionEl.getProperty('textContent')).jsonValue();
     if (text === 'webpack_provider') {
       await optionEl.click();

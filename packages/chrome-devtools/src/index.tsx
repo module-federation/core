@@ -36,6 +36,7 @@ if (process.env.NODE_ENV === 'development') {
   window.targetTab = activeTab;
 
   if (process.env.NODE_ENV === 'development') {
+    // @ts-expect-error
     await import('../mock');
   }
   const container = document.getElementById('root') as HTMLElement;

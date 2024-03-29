@@ -75,7 +75,7 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
         if (!filterFormData.length) {
           await removeStorage(activeTab, MODULE_DEVTOOL_IDENTIFIER);
           await removeStorage(activeTab, BROWSER_ENV_KEY);
-          // eslint-disable-next-line prettier/prettier
+
           await removeStorageKey(
             activeTab,
             __FEDERATION_DEVTOOLS__,
@@ -91,7 +91,7 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
         const snapshotJson = JSON.stringify(moduleInfo);
         await setStorage(activeTab, MODULE_DEVTOOL_IDENTIFIER, snapshotJson);
         await setStorage(activeTab, BROWSER_ENV_KEY);
-        // eslint-disable-next-line prettier/prettier
+
         await mergeStorage(
           activeTab,
           __FEDERATION_DEVTOOLS__,

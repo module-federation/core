@@ -1,12 +1,12 @@
 import { expect, describe, it } from 'vitest';
 
+import { calculateSnapshot, calculateMicroAppSnapshot } from '../src/utils';
 import {
   singleAppSnapshot,
   microAppSnapshot,
   expectMicroAppSnapshot,
   expectSingleAppSnapshot,
 } from './mock';
-import { calculateSnapshot, calculateMicroAppSnapshot } from '../src/utils';
 
 describe('test calculate snapshot sdk', () => {
   it('singleApp', () => {
