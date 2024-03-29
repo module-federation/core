@@ -1,0 +1,43 @@
+name: Build affected packages
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.head_ref || github.run_id }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run Affected Build
+        run: npx nx affected -t build --parallel=10 --exclude='*,!tag:package'
+
+      - name: Configuration xvfb
+        shell: bash
+        run: sudo apt-get update && sudo apt-get install xvfb
+
+      - name: E2E Chrome Devtools
+        run: pnpm run app:manifest:dev && npx playwright install-deps && pnpm install && npx playwright install && npx nx run-many --target=e2e:devtools
