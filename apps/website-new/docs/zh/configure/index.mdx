@@ -10,13 +10,17 @@ type ModuleFederationOptions {
     filename?: string,
     // module federation remotes 远程模块别名和 entry 信息
     remotes?: Array<RemoteInfo>;
+    // module federation expose 的模块信息
+    expose?: PluginExposesOptions;
     // 共享依赖配置
     shared?: ShareInfos;
     // 动态 publicPath
     getPublicPath?: string;
     // 运行时插件
     runtimePlugins?: Array<string>;
-    // runtime
+    // 动态 publicPath
+    getPublicPath?: string;
+    // runtime pkg 依赖
     implementation?: string;
 };
 ```

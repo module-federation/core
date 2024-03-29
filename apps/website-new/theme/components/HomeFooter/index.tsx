@@ -13,16 +13,16 @@ function useFooterData() {
       items: [
         {
           title: t('quickStart'),
-          link: getLink('/guide/quick-start'),
+          link: getLink('/guide/start/quick-start'),
         },
       ],
     },
     {
-      title: 'API',
+      title: 'Configuration',
       items: [
         {
-          title: t('cli'),
-          link: getLink('/api/cli'),
+          title: t('Configuration'),
+          link: getLink('/configure/index'),
         },
       ],
     },
@@ -85,7 +85,7 @@ export function HomeFooter() {
       </div>
       <div className="flex flex-center">
         <h2 className="font-normal text-sm text-gray-600 dark:text-light-600 py-4">
-          © 2022-present Module federation team. All Rights Reserved.
+          © 2024-present Module federation team. All Rights Reserved.
         </h2>
       </div>
     </div>

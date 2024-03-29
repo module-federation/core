@@ -1,4 +1,5 @@
 export const EN_US = {
+  Configuration: 'Configuration',
   coldStart: 'Cold Start',
   coldBuild: 'Cold Build',
   hmrRoot: 'HMR(Root Changed)',

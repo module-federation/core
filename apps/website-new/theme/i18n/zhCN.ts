@@ -1,6 +1,7 @@
 import { EN_US } from './enUS';
 
 export const ZH_CN: Record<keyof typeof EN_US, string> = {
+  Configuration: '配置',
   coldStart: '冷启动（dev）',
   coldBuild: '冷构建',
   hmrRoot: '热更新（根模块变动）',

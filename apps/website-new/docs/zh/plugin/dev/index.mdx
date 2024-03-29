@@ -11,7 +11,7 @@ Module Federation 提供了一套轻量的运行时插件系统，用以实现�
 
 ## 开发插件
 
-插件提供类似 `() => FederationRuntimePlugin` 的函数作。
+插件提供类似 `() => FederationRuntimePlugin` 的函数。
 
 ### 插件示例
 
@@ -51,7 +51,7 @@ export default runtimePlugin;
 
 注册插件（两种方式选择一种即可）：
 
-- 构建注册插件
+- 构建配置中注册插件
 
 ```ts title="rspack.config.ts"
 const path = require('path');
@@ -69,7 +69,7 @@ module.exports = {
 };
 ```
 
-- runtime 注册插件
+- 运行时注册插件
 
 ```ts
 import runtimePlugin from 'custom-runtime-plugin.ts';
@@ -99,7 +99,7 @@ init({
 
 插件的命名规范如下：
 
-- 插件的函数命名为 `xxx-plugin`，并通过具名导出。
+- 插件的函数通过 default 导出。
 - 插件的 `name` 采用 `xxx-plugin` 格式。
 
 下面是一个例子：

@@ -22,7 +22,7 @@ interface PluginRemoteOptions {
 - `remoteAlias` 为实际用户引用的名称，可自行配置，例如设置了 `remoteAlias` 为 `demo` ，那么消费方式为 `import xx from 'demo'` 。
 - `ModuleFederationInfo` 由 `ModuleFederation name` + `@` + `ModuleFederation entry` 组成
   - `ModuleFederation name` 是生产者设置的名称
-  - `entry` 可以为 `mf-manifest.json` 何 `remoteEntry.js`
+  - `entry` 可以为 `mf-manifest.json` 和 `remoteEntry.js`
   - `entry` 为 `mf-manifest.json` 拥有以下额外能力
     - 动态模块类型提示
     - 资源预加载

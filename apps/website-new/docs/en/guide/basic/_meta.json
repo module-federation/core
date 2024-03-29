@@ -1,1 +1,1 @@
-["runtime", "rspack", "webpack"]
+["runtime", "rspack", "webpack", "type-prompt", "chrome-devtool"]

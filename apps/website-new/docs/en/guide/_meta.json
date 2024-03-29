@@ -7,16 +7,11 @@
   {
     "type": "dir",
     "name": "basic",
-    "label": "Features"
+    "label": "basic"
   },
   {
     "type": "dir",
     "name": "framework",
     "label": "Frameworks"
-  },
-  {
-    "type": "dir",
-    "name": "advanced",
-    "label": "Advanced Topics"
   }
 ]

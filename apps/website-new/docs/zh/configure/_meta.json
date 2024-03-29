@@ -38,5 +38,10 @@
     "type": "file",
     "name": "getpublicpath",
     "label": "getPublicPath"
+  },
+  {
+    "type": "file",
+    "name": "implementation",
+    "label": "implementation"
   }
 ]
