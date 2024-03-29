@@ -86,17 +86,27 @@ class EagerRuntimeModule extends RuntimeModule {
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
     const currentChunk = this.chunk;
-    const chunkEnsure = currentChunk?.id
-      ? `${RuntimeGlobals.ensureChunkHandlers}.consumes(${JSON.stringify(
-          currentChunk.id,
-        )}, promises)`
-      : '';
+    const hasShared =
+      currentChunk &&
+      compilation.chunkGraph.getChunkModulesIterableBySourceType(
+        currentChunk,
+        'consume-shared',
+      );
+
+    const chunkEnsure =
+      hasShared && currentChunk?.id
+        ? `if(${RuntimeGlobals.ensureChunkHandlers} && ${
+            RuntimeGlobals.ensureChunkHandlers
+          }.consumes){ ${
+            RuntimeGlobals.ensureChunkHandlers
+          }.consumes(${JSON.stringify(currentChunk.id)}, promises);}`
+        : '';
 
     return Template.asString([
       `
   // Define eagerBoot with initialization options and initialize promises with a resolved promise
   var eagerBoot = [${sharedInitOptionsStr.join(',')}];
-  var promises = [Promise.resolve()];
+  var promises = [];
 
   eagerBoot.forEach(function(initFunctionFactory, index) {
     // Invoke the factory function to get the initialization function
@@ -106,12 +116,14 @@ class EagerRuntimeModule extends RuntimeModule {
       // Immediately execute the first initialization function
       initFunction();
       // If there's chunkEnsure logic for the first item, include it here
-      ${chunkEnsure}
     } else {
       // For subsequent items, ensure all existing promises are resolved before execution
-      Promise.all(promises).then(function() {
+      if(promises.length > 0) {
+           ${chunkEnsure}
+           Promise.all(promises).then(function(){initFunction()});
+      } else {
         initFunction();
-      });
+      }
     }
   });
   `,

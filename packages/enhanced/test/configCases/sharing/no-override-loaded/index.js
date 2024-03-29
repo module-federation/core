@@ -8,6 +8,10 @@ it('should not override an already loaded shared module version', async () => {
       },
     },
   };
+
   await __webpack_init_sharing__('default');
   expect(require('package')).toBe(42);
+  await new Promise((r) => {
+    setTimeout(r, 1000);
+  });
 });
