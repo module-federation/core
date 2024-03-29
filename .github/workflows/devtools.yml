@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1 # Skip downloading during yarn install
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1 # Skip downloading during pnpm install
   PLAYWRIGHT_BROWSERS_PATH: 0 # Places binaries to node_modules/@playwright/test
 
 jobs:
@@ -32,9 +32,6 @@ jobs:
 
       - name: Set Nx SHA
         uses: nrwl/nx-set-shas@v3
-
-      - name: Install Dependencies
-        run: pnpm install
 
       - name: Run Affected Build
         run: npx nx affected -t build --parallel=10 --exclude='*,!tag:package'
