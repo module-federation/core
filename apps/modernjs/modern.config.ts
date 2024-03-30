@@ -5,13 +5,18 @@ import {
 } from '@module-federation/enhanced';
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
+  dev: {
+    port: 4001,
+  },
   runtime: {
     router: true,
   },
   plugins: [appTools()],
   tools: {
     webpack: (config, { webpack, appendPlugins }) => {
-      config.output.publicPath = 'auto';
+      if (config?.output) {
+        config.output.publicPath = 'http://localhost:4001';
+      }
 
       appendPlugins([
         new AsyncBoundaryPlugin({
