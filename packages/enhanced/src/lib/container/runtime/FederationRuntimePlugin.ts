@@ -144,27 +144,6 @@ class FederationRuntimePlugin {
 
   prependEntry(compiler: Compiler) {
     this.ensureFiles();
-    // modifyEntry({
-    //   compiler,
-    //   prependEntry: (entry) => {
-    //     // Object.keys(entry).forEach((key) => {
-    //     //   const entryItem = entry[key];
-    //     //   const prefix = entryItem.runtime ? `-${entryItem.runtime}` : '';
-    //     //   const runtimePluginKey = `mfp-runtime-plugins${prefix}`;
-    //     //   const federationRuntimeKey = `federation-runtime${prefix}`;
-    //     //
-    //     // entry[runtimePluginKey] = {
-    //     //   import: [this.pluginsFilePath],
-    //     //   runtime: entryItem.runtime,
-    //     // };
-    //     //
-    //     // entry[federationRuntimeKey] = {
-    //     //   import: [this.entryFilePath],
-    //     //   runtime: entryItem.runtime,
-    //     // };
-    //     // });
-    //   },
-    // });
     new ProvideEagerModulePlugin({
       provides: [
         {
@@ -206,19 +185,6 @@ class FederationRuntimePlugin {
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation, { normalModuleFactory }) => {
-        let chunksRuntimePluginsDependsOn: Set<Chunk> | undefined = undefined;
-        compilation.hooks.afterOptimizeChunks.tap(
-          this.constructor.name,
-          (chunk) => {
-            const runtimePluginEntry = compilation.namedChunks.get(
-              'mfp-runtime-plugins',
-            );
-            if (runtimePluginEntry) {
-              chunksRuntimePluginsDependsOn =
-                runtimePluginEntry.getAllInitialChunks();
-            }
-          },
-        );
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           this.constructor.name,
           (chunk, runtimeRequirements) => {
