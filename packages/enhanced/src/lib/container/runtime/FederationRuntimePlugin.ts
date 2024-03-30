@@ -144,27 +144,27 @@ class FederationRuntimePlugin {
 
   prependEntry(compiler: Compiler) {
     this.ensureFiles();
-    modifyEntry({
-      compiler,
-      prependEntry: (entry) => {
-        // Object.keys(entry).forEach((key) => {
-        //   const entryItem = entry[key];
-        //   const prefix = entryItem.runtime ? `-${entryItem.runtime}` : '';
-        //   const runtimePluginKey = `mfp-runtime-plugins${prefix}`;
-        //   const federationRuntimeKey = `federation-runtime${prefix}`;
-        //
-        // entry[runtimePluginKey] = {
-        //   import: [this.pluginsFilePath],
-        //   runtime: entryItem.runtime,
-        // };
-        //
-        // entry[federationRuntimeKey] = {
-        //   import: [this.entryFilePath],
-        //   runtime: entryItem.runtime,
-        // };
-        // });
-      },
-    });
+    // modifyEntry({
+    //   compiler,
+    //   prependEntry: (entry) => {
+    //     // Object.keys(entry).forEach((key) => {
+    //     //   const entryItem = entry[key];
+    //     //   const prefix = entryItem.runtime ? `-${entryItem.runtime}` : '';
+    //     //   const runtimePluginKey = `mfp-runtime-plugins${prefix}`;
+    //     //   const federationRuntimeKey = `federation-runtime${prefix}`;
+    //     //
+    //     // entry[runtimePluginKey] = {
+    //     //   import: [this.pluginsFilePath],
+    //     //   runtime: entryItem.runtime,
+    //     // };
+    //     //
+    //     // entry[federationRuntimeKey] = {
+    //     //   import: [this.entryFilePath],
+    //     //   runtime: entryItem.runtime,
+    //     // };
+    //     // });
+    //   },
+    // });
     new ProvideEagerModulePlugin({
       provides: [
         {
