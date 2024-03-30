@@ -46,5 +46,5 @@ jobs:
         run: |
           pnpm run  app:manifest:dev & echo "done" &&
           sleep 50 &&
-          nx e2e:devtools chrome-devtools
+          npx nx e2e:devtools chrome-devtools
           && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
