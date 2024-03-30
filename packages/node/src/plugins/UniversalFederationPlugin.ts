@@ -66,7 +66,10 @@ class UniversalFederationPlugin {
       compiler.options.target === 'node' ||
       compiler.options.target === 'async-node'
     ) {
-      new NodeFederationPlugin(options, this.context).apply(compiler);
+      new NodeFederationPlugin(
+        { remoteType: 'script', ...options },
+        this.context,
+      ).apply(compiler);
       new StreamingTargetPlugin({ ...options, debug }).apply(compiler);
     } else {
       new ModuleFederationPlugin(options).apply(compiler);

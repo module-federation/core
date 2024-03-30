@@ -65,8 +65,8 @@ jobs:
       - name: E2E Test for 3008-webpack-host
         run: pnpm run app:manifest:dev & echo "done" && sleep 8 && npx nx run-many --target=e2e --projects=3008-webpack-host --parallel=1 && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
 
+      - name: E2E Node Federation
+        run: npx nx run-many --target=serve --projects=node-local-remote,node-remote --parallel=3 & echo "done" && sleep 15 && npx nx run-many --target=serve --projects=node-host & echo "done" && sleep 5 && npx nx run node-host-e2e:test:e2e
+
       - name: Build Next.js Apps in Production Mode
         run: pnpm app:next:build
-
-      - name: E2E Node Federation
-        run: npx nx run-many --target=serve --projects=node-local-remote,node-remote --parallel=3 & echo "done" && sleep 10 && npx nx run-many --target=serve --projects=node-host & echo "done" && npx nx run node-host-e2e:test:e2e
