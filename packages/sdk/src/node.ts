@@ -2,11 +2,25 @@ function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
     throw new Error('import specifier is required');
   }
-  const importModule = new Function('name', `return import(name)`);
-  return importModule(name)
-    .then((res: any) => res.default as T)
+  const req = eval('typeof require !== "undefined" ? require : undefined');
+  const importModule = new Function(
+    'name,require',
+    `
+      if (typeof require !== 'undefined') {
+        // Node.js environment, use require
+        return Promise.resolve(require(name));
+      } else {
+        // Browser environment or where require is undefined, use dynamic import
+        return import(name);
+      }
+    `,
+  );
+
+  return importModule(name, req)
+    .then((res: any) => res?.default || (res as T))
     .catch((error: any) => {
-      console.error(`Error importing module ${name}:`, error);
+      console.error(`Error importing module ${name}:`);
+      console.error(error);
       throw error;
     });
 }
