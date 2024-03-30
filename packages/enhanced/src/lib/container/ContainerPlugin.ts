@@ -226,8 +226,6 @@ class ContainerPlugin {
           }
         });
 
-        console.log(runtimes);
-
         // Add container entry for each runtime that exists
         for (const runtime of runtimes) {
           const name = runtime
