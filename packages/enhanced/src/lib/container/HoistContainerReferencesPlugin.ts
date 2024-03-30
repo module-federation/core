@@ -150,26 +150,16 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
   ) {
     const federationRuntimeChunk =
       compilation.namedChunks.get('federation-runtime');
-    const federationRuntimePlugins = compilation.namedChunks.get(
-      'mfp-runtime-plugins',
-    );
 
-    if (federationRuntimeChunk && federationRuntimePlugins) {
-      this.integrateRuntimeChunks(
-        chunks,
-        federationRuntimeChunk,
-        federationRuntimePlugins,
-        compilation,
-      );
+    if (federationRuntimeChunk) {
+      this.integrateRuntimeChunks(chunks, federationRuntimeChunk, compilation);
       this.disconnectModulesFromChunk(compilation, federationRuntimeChunk);
-      this.disconnectModulesFromChunk(compilation, federationRuntimePlugins);
     }
   }
 
   integrateRuntimeChunks(
     chunks: Iterable<Chunk>,
     federationRuntimeChunk: Chunk,
-    federationRuntimePlugins: Chunk,
     compilation: Compilation,
   ) {
     for (const chunk of chunks) {
@@ -179,9 +169,6 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
       ) {
         if (chunk !== federationRuntimeChunk) {
           this.integrateChunks(chunk, federationRuntimeChunk, compilation);
-        }
-        if (chunk !== federationRuntimePlugins) {
-          this.integrateChunks(chunk, federationRuntimePlugins, compilation);
         }
       }
     }
@@ -196,15 +183,9 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
 
   optimizeWithRuntimeChunk(compilation: Compilation, runtimes: Set<string>) {
     const baseRuntimeName = 'federation-runtime';
-    const basePluginsName = 'mfp-runtime-plugins';
 
     for (const runtime of runtimes) {
-      this.handleRuntimeChunks(
-        compilation,
-        runtime,
-        baseRuntimeName,
-        basePluginsName,
-      );
+      this.handleRuntimeChunks(compilation, runtime, baseRuntimeName);
     }
   }
 
@@ -212,7 +193,6 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
     compilation: Compilation,
     runtime: string,
     baseRuntimeName: string,
-    basePluginsName: string,
   ) {
     const runtimeChunk = compilation.namedChunks.get(runtime);
     if (
@@ -226,15 +206,9 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
       `${baseRuntimeName}-${runtime}`,
       baseRuntimeName,
     );
-    const pluginsRuntimeChunk = this.getNamedChunk(
-      compilation,
-      `${basePluginsName}-${runtime}`,
-      basePluginsName,
-    );
 
     if (federationRuntimeChunk) {
       this.integrateChunks(runtimeChunk, federationRuntimeChunk, compilation);
-      compilation.chunks.delete(federationRuntimeChunk);
     }
   }
 
