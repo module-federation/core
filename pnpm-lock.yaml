@@ -69,8 +69,8 @@ importers:
         specifier: 5.28.3
         version: 5.28.3
       unplugin:
-        specifier: 1.9.0
-        version: 1.9.0
+        specifier: 1.10.1
+        version: 1.10.1
     devDependencies:
       '@antora/cli':
         specifier: 3.1.5
@@ -1221,8 +1221,8 @@ importers:
         specifier: ^7.0.0
         version: 7.2.0(@swc/core@1.3.102)(postcss@8.4.38)(ts-node@10.9.1)(typescript@5.3.3)
       unplugin:
-        specifier: ^1.9.0
-        version: 1.9.0
+        specifier: ^1.10.1
+        version: 1.10.1
 
   packages/native-federation-typescript:
     dependencies:
@@ -1242,8 +1242,8 @@ importers:
         specifier: ^4.9.0 || ^5.0.0
         version: 5.3.3
       unplugin:
-        specifier: ^1.9.0
-        version: 1.9.0
+        specifier: ^1.10.1
+        version: 1.10.1
       vue-tsc:
         specifier: ^1.0.24
         version: 1.8.27(typescript@5.3.3)
@@ -11534,7 +11534,7 @@ packages:
     resolution: {integrity: sha512-xTHv9BUh3bkDVCvcbmdfVF0/e96BdrEgqPJ3G3RmKbSzWLOkQ2U9yiPfHzT0KJWPhVwj12fjfZp0zunu+pcS6Q==}
     dependencies:
       '@storybook/csf-tools': 7.6.17
-      unplugin: 1.9.0
+      unplugin: 1.10.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -32492,8 +32492,8 @@ packages:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
     engines: {node: '>= 0.8'}
 
-  /unplugin@1.9.0:
-    resolution: {integrity: sha512-14PslvMY3gNbXnQtNIRB566Q057L5Fe7f5LDEamxVi0QQVxoz5hrveBwwZLcKyHtZ09ysmipxRRj5Lv+BGz2Iw==}
+  /unplugin@1.10.1:
+    resolution: {integrity: sha512-d6Mhq8RJeGA8UfKCu54Um4lFA0eSaRa3XxdAJg8tIdxbu1ubW0hBCZUL7yI2uGyYCRndvbK8FLHzqy2XKfeMsg==}
     engines: {node: '>=14.0.0'}
     dependencies:
       acorn: 8.11.3
@@ -33354,7 +33354,7 @@ packages:
       '@types/ws': 8.5.10
       ansi-html-community: 0.0.8
       bonjour-service: 1.2.1
-      chokidar: 3.5.3
+      chokidar: 3.6.0
       colorette: 2.0.20
       compression: 1.7.4
       connect-history-api-fallback: 2.0.0

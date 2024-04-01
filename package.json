@@ -63,7 +63,7 @@
     "tsup": "7.2.0",
     "typedoc": "0.25.8",
     "undici": "5.28.3",
-    "unplugin": "1.9.0"
+    "unplugin": "1.10.1"
   },
   "devDependencies": {
     "terser-webpack-plugin": "^5.3.10",
