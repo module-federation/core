@@ -9,7 +9,6 @@
 '@module-federation/dev-kit': patch
 '@module-federation/dts-kit': patch
 '@module-federation/sdk': patch
-'@module-federation/third-party-dts-extractor': patch
 ---
 
 feat: enhance type capability
