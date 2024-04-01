@@ -99,7 +99,7 @@
     "@nx/next": "17.2.8",
     "@nx/node": "17.2.8",
     "@nx/react": "17.2.8",
-    "@nx/rollup": "17.2.8",
+    "@nx/rollup": "18.2.1",
     "@nx/storybook": "17.2.8",
     "@nx/vite": "17.2.8",
     "@nx/web": "17.2.8",
