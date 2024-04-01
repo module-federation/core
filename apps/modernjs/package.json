@@ -34,7 +34,7 @@
     "@modern-js/app-tools": "2.46.1",
     "@modern-js/eslint-config": "2.46.1",
     "@modern-js/tsconfig": "2.46.1",
-    "@modern-js-app/eslint-config": "2.46.1",
+    "@modern-js-app/eslint-config": "2.48.4",
     "typescript": "~5.0.4",
     "@types/jest": "~29.5.0",
     "@types/node": "~16.11.7",
