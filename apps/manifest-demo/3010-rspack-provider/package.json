@@ -6,7 +6,7 @@
     "@module-federation/enhanced-rspack": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "react-refresh": "0.14.0",
-    "@rspack/plugin-react-refresh": "0.5.8"
+    "@rspack/plugin-react-refresh": "0.5.9"
   },
   "dependencies": {
     "antd": "4.24.15"
