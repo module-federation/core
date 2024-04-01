@@ -1,0 +1,17 @@
+= About
+
+The Enhanced Federation Plugin API provides a client-side/in-app helper to load remotes and their modules. This helper is particularly useful in scenarios where the app shell only has remotes that expose what is needed there. 
+
+== Scenario
+
+Consider a scenario where you need to install a Progressive Web App (PWA) offline and cache all features, including remotes. Many of these remotes might be used in some sort of "lazy chunk load" or require "manual" early registration, which can be a pain to manage.
+
+== Solution: dynamicLoad
+
+To address this, the Enhanced Federation Plugin API provides a feature called xref:enhanced_api/helper_getModule.adoc[`dynamicLoad`]. This feature ensures that all files needed for remotes are loaded and cached. This means that even in offline scenarios, your PWA can still access and use the remotes it needs.
+
+== Benefits
+
+By using the xref:enhanced_api/helper_getModule.adoc[`dynamicLoad`] feature, you can simplify the management of your remotes and improve the reliability of your application, especially in offline scenarios. This feature is part of the Enhanced Federation Plugin API's commitment to making Module Federation as easy and efficient as possible.
+
+In the next sections, we will delve into how to install and use the helper, and how to use the xref:enhanced_api/helper_dynamicLoad.adoc[`getModule`] and xref:enhanced_api/helper_getModule.adoc[`dynamicLoad`] features. 

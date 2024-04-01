@@ -3,13 +3,13 @@ import { rm } from 'fs/promises';
 import { resolve } from 'path';
 import { mergeDeepRight, mergeRight } from 'rambda';
 import { build } from 'tsup';
-import { createUnplugin } from 'unplugin';
+import { UnpluginOptions, createUnplugin } from 'unplugin';
 
 import { retrieveHostConfig } from './configurations/hostPlugin';
 import { retrieveRemoteConfig } from './configurations/remotePlugin';
 import { HostOptions } from './interfaces/HostOptions';
 import { RemoteOptions } from './interfaces/RemoteOptions';
-import { createTypesArchive, downloadTypesArchive } from './lib/archiveHandler';
+import { createTestsArchive, downloadTypesArchive } from './lib/archiveHandler';
 import { cleanMocksFolder } from './lib/mocksClean';
 
 export const NativeFederationTestsRemote = createUnplugin(
@@ -25,7 +25,7 @@ export const NativeFederationTestsRemote = createUnplugin(
       async writeBundle() {
         const buildConfig = mergeRight(remoteOptions.additionalBundlerConfig, {
           external: externalDeps.map(
-            (externalDep) => new RegExp(`^${externalDep}`)
+            (externalDep) => new RegExp(`^${externalDep}`),
           ),
           entry: mapComponentsToExpose,
           outDir: compiledFilesFolder,
@@ -35,7 +35,7 @@ export const NativeFederationTestsRemote = createUnplugin(
         try {
           await build(buildConfig);
 
-          await createTypesArchive(remoteOptions, compiledFilesFolder);
+          await createTestsArchive(remoteOptions, compiledFilesFolder);
 
           if (remoteOptions.deleteTestsFolder) {
             await rm(compiledFilesFolder, { recursive: true, force: true });
@@ -43,9 +43,17 @@ export const NativeFederationTestsRemote = createUnplugin(
           console.log(ansiColors.green('Federated mocks created correctly'));
         } catch (error) {
           console.error(
-            ansiColors.red(`Unable to build federated mocks: ${error}`)
+            ansiColors.red(`Unable to build federated mocks: ${error}`),
           );
         }
+      },
+      get vite() {
+        return process.env.NODE_ENV === 'production'
+          ? undefined
+          : {
+              buildStart: (this as UnpluginOptions).writeBundle,
+              watchChange: (this as UnpluginOptions).writeBundle,
+            };
       },
       webpack: (compiler) => {
         compiler.options.devServer = mergeDeepRight(
@@ -54,11 +62,21 @@ export const NativeFederationTestsRemote = createUnplugin(
             static: {
               directory: resolve(remoteOptions.distFolder),
             },
-          }
+          },
+        );
+      },
+      rspack: (compiler) => {
+        compiler.options.devServer = mergeDeepRight(
+          compiler.options.devServer || {},
+          {
+            static: {
+              directory: resolve(remoteOptions.distFolder),
+            },
+          },
         );
       },
     };
-  }
+  },
 );
 
 export const NativeFederationTestsHost = createUnplugin(
@@ -70,7 +88,7 @@ export const NativeFederationTestsHost = createUnplugin(
         if (hostOptions.deleteTestsFolder) {
           await cleanMocksFolder(
             hostOptions,
-            Object.keys(mapRemotesToDownload)
+            Object.keys(mapRemotesToDownload),
           );
         }
 
@@ -81,6 +99,14 @@ export const NativeFederationTestsHost = createUnplugin(
         await Promise.allSettled(downloadPromises);
         console.log(ansiColors.green('Federated mocks extraction completed'));
       },
+      get vite() {
+        return process.env.NODE_ENV === 'production'
+          ? undefined
+          : {
+              buildStart: (this as UnpluginOptions).writeBundle,
+              watchChange: (this as UnpluginOptions).writeBundle,
+            };
+      },
     };
-  }
+  },
 );

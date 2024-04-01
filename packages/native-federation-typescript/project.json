@@ -6,38 +6,21 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/dist/packages/native-federation-typescript"
-      ],
+      "outputs": ["{workspaceRoot}/packages/native-federation-typescript/dist"],
       "options": {
         "parallel": false,
         "commands": [
           "tsup --config packages/native-federation-typescript/tsup.config.ts",
-          "cp packages/native-federation-typescript/package.json dist/packages/native-federation-typescript",
-          "cp packages/native-federation-typescript/*.md dist/packages/native-federation-typescript"
+          "cp packages/native-federation-typescript/package.json packages/native-federation-typescript/dist",
+          "cp packages/native-federation-typescript/*.md packages/native-federation-typescript/dist"
         ]
       }
     },
-    "publish": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "node tools/scripts/publish.mjs native-federation-typescript {args.ver} {args.tag}"
-      },
-      "dependsOn": [
-        {
-          "target": "build"
-        }
-      ]
-    },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/native-federation-typescript/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/native-federation-typescript/**/*.ts"]
       }
     },
     "test": {
@@ -46,33 +29,26 @@
         "{workspaceRoot}/coverage/packages/native-federation-typescript"
       ]
     },
-    "version": {
-      "executor": "@jscutlery/semver:version",
+    "pre-release": {
+      "executor": "nx:run-commands",
       "options": {
-        "postTargets": [
-          "native-federation-typescript:npm",
-          "native-federation-typescript:github"
-        ],
-        "trackDeps": true,
-        "push": true
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run native-federation-typescript:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run native-federation-typescript:build",
+            "forwardAllArgs": false
+          }
+        ]
       }
     },
-    "github": {
-      "executor": "@jscutlery/semver:github",
-      "options": {
-        "tag": "${tag}",
-        "notes": "${notes}"
-      }
-    },
-    "npm": {
-      "executor": "ngx-deploy-npm:deploy",
-      "options": {
-        "access": "public",
-        "tag": "next",
-        "distFolderPath": "dist/packages/native-federation-typescript"
-      }
+    "semantic-release": {
+      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   },
-  "tags": [],
+  "tags": ["package"],
   "implicitDependencies": []
 }

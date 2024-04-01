@@ -18,12 +18,12 @@ content:
       edit_url: '{web_url}/blob/{refname}/{path}'
 ui:
   bundle:
-    url: ./../../../dist/apps/docs-ui
+    url: ./../../../apps/docs-ui/dist
     snapshot: false
   # supplemental_files: ./../../../node_modules/antora-navigator-extension/data/
 output:
   clean: true
-  dir: ./../../../dist/apps/docs/es
+  dir: ./../../../apps/docs/dist/es
 runtime:
   fetch: true
   cache_dir: ./../../../tmp/docs-cache/es

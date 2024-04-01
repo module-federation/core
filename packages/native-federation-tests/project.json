@@ -6,72 +6,44 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/dist/packages/native-federation-tests"
-      ],
+      "outputs": ["{workspaceRoot}/packages/native-federation-tests/dist"],
       "options": {
         "parallel": false,
         "commands": [
           "tsup --config packages/native-federation-tests/tsup.config.ts",
-          "cp packages/native-federation-tests/package.json dist/packages/native-federation-tests",
-          "cp packages/native-federation-tests/*.md dist/packages/native-federation-tests"
+          "cp packages/native-federation-tests/package.json packages/native-federation-tests/dist",
+          "cp packages/native-federation-tests/*.md packages/native-federation-tests/dist"
         ]
       }
     },
-    "publish": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "node tools/scripts/publish.mjs native-federation-tests {args.ver} {args.tag}"
-      },
-      "dependsOn": [
-        {
-          "target": "build"
-        }
-      ]
-    },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/native-federation-tests/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/native-federation-tests/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nx/vite:test",
-      "outputs": [
-        "{workspaceRoot}/coverage/packages/native-federation-tests"
-      ]
+      "outputs": ["{workspaceRoot}/coverage/packages/native-federation-tests"]
     },
-    "version": {
-      "executor": "@jscutlery/semver:version",
+    "pre-release": {
+      "executor": "nx:run-commands",
       "options": {
-        "postTargets": [
-          "native-federation-tests:npm",
-          "native-federation-tests:github"
-        ],
-        "trackDeps": true,
-        "push": true
-      }
-    },
-    "github": {
-      "executor": "@jscutlery/semver:github",
-      "options": {
-        "tag": "${tag}",
-        "notes": "${notes}"
-      }
-    },
-    "npm": {
-      "executor": "ngx-deploy-npm:deploy",
-      "options": {
-        "access": "public",
-        "tag": "next"
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run native-federation-tests:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run native-federation-tests:build",
+            "forwardAllArgs": false
+          }
+        ]
       }
     }
   },
-  "tags": [],
+  "tags": ["package"],
   "implicitDependencies": []
 }

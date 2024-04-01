@@ -2,7 +2,7 @@ import { RuntimeRemote, WebpackRemoteContainer } from '../types';
 import { loadScript } from './pure';
 
 export const importDelegatedModule = async (
-  keyOrRuntimeRemoteItem: string | RuntimeRemote
+  keyOrRuntimeRemoteItem: string | RuntimeRemote,
 ) => {
   // @ts-ignore
   return loadScript(keyOrRuntimeRemoteItem)
@@ -38,7 +38,7 @@ export const importDelegatedModule = async (
                           //@ts-ignore
                           globalThis.usedChunks.add(
                             //@ts-ignore
-                            `${keyOrRuntimeRemoteItem.global}->${arg}`
+                            `${keyOrRuntimeRemoteItem.global}->${arg}`,
                           );
                         }
                         //eslint-disable-next-line prefer-rest-params
@@ -55,7 +55,7 @@ export const importDelegatedModule = async (
                         //@ts-ignore
                         globalThis.usedChunks.add(
                           //@ts-ignore
-                          `${keyOrRuntimeRemoteItem.global}->${arg}`
+                          `${keyOrRuntimeRemoteItem.global}->${arg}`,
                         );
                       }
 
@@ -80,4 +80,3 @@ export const importDelegatedModule = async (
       }
     });
 };
-

@@ -1,0 +1,68 @@
+{
+  "name": "enhanced",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/enhanced/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{workspaceRoot}/packages/enhanced/dist"],
+      "options": {
+        "outputPath": "packages/enhanced/dist",
+        "main": "packages/enhanced/src/index.ts",
+        "tsConfig": "packages/enhanced/tsconfig.lib.json",
+        "assets": [
+          "packages/enhanced/*.md",
+          {
+            "glob": "src/**/*.d.ts",
+            "input": "packages/enhanced",
+            "ignore": [],
+            "output": ""
+          }
+        ]
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/enhanced/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "node -e \"require('child_process').execSync('node --expose-gc --max-old-space-size=4096 --experimental-vm-modules --trace-deprecation ' + require.resolve('jest-cli/bin/jest') + ' --logHeapUsage --config packages/enhanced/jest.config.ts')\"",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run enhanced:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run enhanced:build",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    }
+  },
+  "tags": ["package"]
+}

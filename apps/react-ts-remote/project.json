@@ -6,13 +6,11 @@
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "compiler": "swc",
-        "outputPath": "dist/apps/react-ts-remote",
+        "outputPath": "apps/react-ts-remote/dist",
         "index": "apps/react-ts-remote/src/index.html",
         "baseHref": "/",
         "main": "apps/react-ts-remote/src/main.ts",
@@ -22,9 +20,7 @@
           "apps/react-ts-remote/src/favicon.ico",
           "apps/react-ts-remote/src/assets"
         ],
-        "styles": [
-          "apps/react-ts-remote/src/styles.css"
-        ],
+        "styles": ["apps/react-ts-remote/src/styles.css"],
         "scripts": [],
         "webpackConfig": "apps/react-ts-remote/webpack.config.js",
         "babelUpwardRootMode": true
@@ -48,8 +44,7 @@
           "sourceMap": false,
           "namedChunks": false,
           "extractLicenses": true,
-          "vendorChunk": false,
-          "webpackConfig": "apps/react-ts-remote/webpack.config.prod.js"
+          "vendorChunk": false
         }
       },
       "dependsOn": [
@@ -60,8 +55,8 @@
       ]
     },
     "serve": {
-      "executor": "@nx/react:module-federation-dev-server",
-      "defaultConfiguration": "production",
+      "executor": "@nx/webpack:dev-server",
+      "defaultConfiguration": "development",
       "options": {
         "buildTarget": "react_ts_remote:build",
         "hmr": true,
@@ -79,13 +74,9 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "apps/react-ts-remote/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/react-ts-remote/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "serve-static": {

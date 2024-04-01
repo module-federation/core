@@ -6,7 +6,7 @@ import { join } from 'path';
 import { afterAll, describe, expect, it, vi } from 'vitest';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
-import { createTypesArchive, downloadTypesArchive } from './archiveHandler';
+import { createTestsArchive, downloadTypesArchive } from './archiveHandler';
 
 describe('archiveHandler', () => {
   const tmpDir = mkdtempSync(join(os.tmpdir(), 'archive-handler'));
@@ -29,14 +29,14 @@ describe('archiveHandler', () => {
     it('correctly creates archive', async () => {
       const archivePath = join(tmpDir, `${remoteOptions.testsFolder}.zip`);
 
-      const archiveCreated = await createTypesArchive(remoteOptions, outDir);
+      const archiveCreated = await createTestsArchive(remoteOptions, outDir);
 
       expect(archiveCreated).toBeTruthy();
       expect(existsSync(archivePath)).toBeTruthy();
     });
 
     it('throws for unexisting outDir', async () => {
-      expect(createTypesArchive(remoteOptions, '/foo')).rejects.toThrowError();
+      expect(createTestsArchive(remoteOptions, '/foo')).rejects.toThrowError();
     });
   });
 
@@ -47,13 +47,14 @@ describe('archiveHandler', () => {
       mocksFolder: archivePath,
       testsFolder: tmpDir,
       deleteTestsFolder: true,
+      maxRetries: 3,
     };
 
     it('throws for unexisting url', async () => {
       expect(
-        downloadTypesArchive(hostOptions)([tmpDir, 'https://foo.it'])
+        downloadTypesArchive(hostOptions)([tmpDir, 'https://foo.it']),
       ).rejects.toThrowError(
-        'Network error: Unable to download federated mocks'
+        'Network error: Unable to download federated mocks',
       );
       // .rejects.toThrowError('getaddrinfo ENOTFOUND foo.it')
     });

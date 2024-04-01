@@ -1,0 +1,81 @@
+name: Deploy Website
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+env:
+  BASE_REF: ${{ github.event_name == 'pull_request' && format('remotes/origin/{0}', github.base_ref) || 'HEAD~1' }}
+  CACHE_NODE_MODULES_PATH: |
+    ~/.npm
+    node_modules
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      # Pre-determine if website app is affected
+      website-changed: ${{ steps.website-changed.outputs.website-changed }}
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        if: github.event_name == 'pull_request'
+        with:
+          access_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        with:
+          fetch-depth: 0
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: ${{ env.CACHE_NODE_MODULES_PATH }}
+          key: build-${{ hashFiles('**/package-lock.json') }}
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm i
+      - name: Check changes "website"
+        id: website-changed
+        run: echo "website-changed=$(node tools/scripts/ci-is-affected.mjs --appName=website --base=${{ env.BASE_REF}} --head=HEAD)" >> $GITHUB_OUTPUT
+      - name: Log variables
+        run: |
+          echo "steps.cache.outputs.cache-hit:" ${{ steps.cache.outputs.cache-hit }}
+          echo "steps.website-changed.outputs.website-changed:" ${{ steps.website-changed.outputs.website-changed }}
+
+  deploy-website:
+    name: 'Deploy to Netlify'
+    runs-on: ubuntu-latest
+    needs: setup
+    if: ${{ needs.setup.outputs.website-changed == 'true' && github.event_name == 'push' }}
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.CACHE_NODE_MODULES_PATH }}
+          key: build-${{ hashFiles('**/package-lock.json') }}
+      - run: npm run build:website
+      - run: 'npx netlify deploy --build --prod --message "Deploy from GitHub Actions" --filter website'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_NEXT_PLUGIN_SKIP: true
+
+  preview-website:
+    name: 'Deploy Netlify Preview'
+    runs-on: ubuntu-latest
+    needs: setup
+    if: ${{ needs.setup.outputs.website-changed == 'true' && github.event_name == 'pull_request' }}
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.CACHE_NODE_MODULES_PATH }}
+          key: build-${{ hashFiles('**/package-lock.json') }}
+      - uses: nelonoel/branch-name@v1.0.1
+      - run: npm run build:website
+      - run: 'npx netlify deploy --build --message "Deploy Preview from GitHub Actions" --alias "${{ env.BRANCH_NAME }}" --filter website'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_NEXT_PLUGIN_SKIP: true

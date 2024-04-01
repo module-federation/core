@@ -12,7 +12,9 @@ describe('importDelegatedModule', () => {
       get: jest.fn(),
       init: jest.fn(),
     };
-    (loadScript as jest.Mock).mockImplementation(() => Promise.resolve(mockRuntimeRemote));
+    (loadScript as jest.Mock).mockImplementation(() =>
+      Promise.resolve(mockRuntimeRemote),
+    );
   });
 
   afterEach(() => {
@@ -30,7 +32,7 @@ describe('importDelegatedModule', () => {
     expect(loadScript).toHaveBeenCalledWith({ global: 'test' });
     expect(result).toBe(mockRuntimeRemote);
   });
-  
+
   // Test case for when the module has a function property
   it('should return a Promise that resolves to the result when the module is a Promise', async () => {
     (global as any).window = undefined;
@@ -42,13 +44,15 @@ describe('importDelegatedModule', () => {
   // Test case for when the module has a non-function property
   xit('should define a non-function property on the result when the module has a non-function property', async () => {
     (global as any).window = undefined;
-    mockRuntimeRemote.get.mockImplementation(() => Promise.resolve(() => ({ testProp: 'test' })));
+    mockRuntimeRemote.get.mockImplementation(() =>
+      Promise.resolve(() => ({ testProp: 'test' })),
+    );
     const result = await importDelegatedModule({ global: 'test' });
     const getterFunction = await result.get('testProp');
     const getter = getterFunction();
     expect(getter).toBe('test');
   });
-  
+
   // Test case for when the module is a Promise
   it('should return a Promise that resolves to the result when the module is a Promise', async () => {
     (global as any).window = undefined;

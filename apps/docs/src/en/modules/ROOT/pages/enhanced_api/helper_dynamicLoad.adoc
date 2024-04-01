@@ -1,0 +1,23 @@
+= dynamicLoad
+
+The `dynamicLoad` function is a part of the Enhanced Federation Plugin API's Helper. It allows you to load all necessary and available modules for consumption. This function is particularly useful in scenarios where the app shell only has remotes that expose what is needed there. This guide will walk you through how to use the `dynamicLoad` function.
+
+== Scenario
+
+Consider a scenario where you need to install a Progressive Web App (PWA) offline and cache all features, including remotes. Many of these remotes might be used in some sort of "lazy chunk load" or require "manual" early registration, which can be a pain to manage.
+
+== Solution: dynamicLoad
+
+To address this, the Enhanced Federation Plugin API provides a feature called `dynamicLoad`. This feature ensures that all files needed for remotes are loaded and cached. This means that even in offline scenarios, your PWA can still access and use the remotes it needs.
+
+== Steps
+
+The `dynamicLoad` function follows these steps:
+
+1. Get `remoteUrlMap` to know remotes.
+2. Dynamically register by calling xref:enhanced_api/helper_dynamicLoad.adoc[`getModule`].
+3. List all remotes available for consumption using `moduleNameList` for each remote.
+4. Load all modules for each remote.
+5. Return all modules to the app-shell, root-remote.
+
+By using the `dynamicLoad` function, you can simplify the management of your remotes and improve the reliability of your application, especially in offline scenarios.

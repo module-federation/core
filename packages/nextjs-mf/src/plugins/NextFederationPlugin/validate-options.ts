@@ -1,4 +1,4 @@
-import { Compiler } from 'webpack';
+import type { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 
 /**
@@ -33,8 +33,8 @@ export function validateCompilerOptions(compiler: Compiler): boolean {
  * as they are required for using Module Federation.
  */
 export function validatePluginOptions(
-  options: ModuleFederationPluginOptions
-): void {
+  options: ModuleFederationPluginOptions,
+): boolean | void {
   // Throw an error if the filename option is not defined in the options
   if (!options.filename) {
     throw new Error('filename is not defined in NextFederation options');
@@ -44,4 +44,5 @@ export function validatePluginOptions(
   if (!options.name) {
     throw new Error('Module federation "name" option must be specified');
   }
+  return true;
 }

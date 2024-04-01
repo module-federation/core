@@ -1,71 +1,105 @@
 name: Release
-
 on:
   workflow_dispatch:
     inputs:
-      package:
-        description: 'Packages to Publish'
-        required: true
+      version:
         type: choice
+        description: 'Release Version (next, beta, alpha, latest)'
+        required: true
+        default: 'next'
         options:
-          - all
-          - nextjs-mf
-          - node
-          - storybook-addon
-          - typescript
-          - utils
-          - native-federation-typescript
-          - native-federation-tests
+          - next
+          - beta
+          - alpha
+          - latest
+      branch:
+        description: 'Release Branch (confirm release branch)'
+        required: true
+        default: 'main'
+  issue_comment:
+    types: [created]
+
+permissions:
+  id-token: write
 
 jobs:
-  release:
+  issue_comment:
+    name: Release with comment
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '!canary')
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4
+      - name: Checkout Repo
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-      - name: Use Node.js
+          fetch-depth: 1
+          ref: refs/pull/${{ github.event.issue.number }}/head
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
-      - name: Setup Git
-        run: |
-          git config user.name "GitHub Bot"
-          git config user.email "gituser@example.com"
-      - name: Install packages
-        run: npm i
-      - name: Lint
-        shell: bash
-        run: |
-          PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=origin/main)
-          if [[ "$PROJECTS" ]]; then
-            yarn nx run-many --target=lint --projects="$PROJECTS"
-          else
-            echo "No changes, Skipping lint check."
-          fi
-      - name: Build
-        shell: bash
-        run: |
-          yarn nx run-many --target=build --projects=typescript,utils,node,nextjs-mf,storybook-addon,native-federation-typescript,native-federation-tests
-      - name: Version
-        shell: bash
-        run: |
-          npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
-          PROJECTS=${{ inputs.package }}
+          cache: 'pnpm'
 
-          if [[ $PROJECTS == "all" ]]; then
-            PROJECTS=$($(yarn bin)/nx print-affected --type=lib --select=projects --base=last-release)
-          fi;
+      - name: Install deps
+        run: pnpm install
 
-          echo "Projects to version: $PROJECTS"
+      - name: Build and test Packages
+        run: npx nx run-many --target=build --exclude='*,!tag:package'
 
-          yarn nx run-many --target=version --projects="$PROJECTS" --parallel=1 --allowEmptyRelease
+      - name: Release
+        uses: web-infra-dev/actions@v2
+        with:
+          version: 'next'
+          type: 'release'
+          branch: ''
+          tools: 'changeset'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.REPO_SCOPED_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Tag last-release
-        shell: bash
+          REPOSITORY: ${{ github.repository }}
+          PULL_REQUEST_NUMBER: ${{ github.event.issue.number }}
+          COMMENT: ${{ toJson(github.event.comment) }}
+
+  release:
+    name: Release
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 25
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install
+
+      - name: Build and test Packages
         run: |
-          git tag -f last-release
-          git push origin last-release --force
+          git fetch origin main
+          npx nx run-many --target=build --exclude='*,!tag:package'
+
+      - name: Release
+        uses: web-infra-dev/actions@v2
+        with:
+          version: ${{ github.event.inputs.version  || 'next' }}
+          branch: ${{ github.event.inputs.branch }}
+          type: 'release'
+          tools: 'changeset'
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_SCOPED_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          REF: ${{ github.ref }}

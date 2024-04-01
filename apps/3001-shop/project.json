@@ -6,16 +6,13 @@
   "targets": {
     "build": {
       "executor": "@nx/next:build",
-      "outputs": [
-        "{options.outputPath}"
-      ],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/apps/3001-shop"
+        "outputPath": "apps/3001-shop"
       },
       "configurations": {
         "development": {
-          "outputPath": "dist/apps/3001-shop"
+          "outputPath": "apps/3001-shop"
         },
         "production": {}
       },
@@ -45,7 +42,13 @@
           "dev": false,
           "port": 3001
         }
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "export": {
       "executor": "@nx/next:export",
@@ -55,13 +58,38 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "apps/3001-shop/**/*.{ts,tsx,js,jsx}"
+        "lintFilePatterns": ["apps/3001-shop/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": true,
+        "commands": [
+          {
+            "command": "lsof -i :3001 || nx run 3001-shop:serve",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "sleep 10 && nx run 3001-shop:e2e",
+            "forwardAllArgs": true
+          }
         ]
+      }
+    },
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/3001-shop/cypress.config.ts",
+        "testingType": "e2e",
+        "baseUrl": "http://localhost:3001"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "3001-shop:serve:production"
+        }
       }
     }
   },

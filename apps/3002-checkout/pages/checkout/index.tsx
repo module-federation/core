@@ -42,9 +42,23 @@ const Checkout = (props) => (
     `}</style>
   </div>
 );
+
 Checkout.getInitialProps = async () => {
-  return await fetch(
-      'https://jsonplaceholder.typicode.com/todos/1'
-    ).then((res) => res.json());
+  const timeout = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
+  const fetchPromise = fetch('http://swapi.dev/api/planets/1/').then((res) =>
+    res.json(),
+  );
+
+  // this will resolve after 3 seconds
+  const timerPromise = timeout(3000).then(() => ({
+    userId: 1,
+    id: 1,
+    title: 'delectus aut autem',
+    completed: false,
+  }));
+
+  return Promise.race([fetchPromise, timerPromise]);
 };
 export default Checkout;

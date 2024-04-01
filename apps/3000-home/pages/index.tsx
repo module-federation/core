@@ -1,15 +1,13 @@
 import React, { Suspense, lazy } from 'react';
 import Head from 'next/head';
-// import CheckoutTitle from 'checkout/CheckoutTitle';
+import CheckoutTitle from 'checkout/CheckoutTitle';
 import ButtonOldAnt from 'checkout/ButtonOldAnt';
-console.log(ButtonOldAnt);
-const CheckoutTitle = lazy(() => import('checkout/CheckoutTitle'));
+// const CheckoutTitle = lazy(() => import('checkout/CheckoutTitle'));
 // const ButtonOldAnt = lazy(() => import('checkout/ButtonOldAnt'));
 const WebpackSvgRemote = lazy(() =>
   import('shop/WebpackSvg').then((m) => {
-    console.log(m);
     return m;
-  })
+  }),
 );
 const WebpackPngRemote = lazy(() => import('shop/WebpackPng'));
 
@@ -78,7 +76,7 @@ const Home = () => {
               Loading remote component (CheckoutTitle) from localhost:3002
               <br />
               <blockquote>
-                dynamic(()=&gt;import(&apos;checkout/CheckoutTitle&apos;))
+                lazy(()=&gt;import(&apos;checkout/CheckoutTitle&apos;))
               </blockquote>
             </td>
             <td>
@@ -95,11 +93,11 @@ const Home = () => {
             <td>
               Load federated component from checkout with old antd version
             </td>
-            <td>[Button from antd@4.20.0]</td>
+            <td>[Button from antd@4.24.15]</td>
             <td>
-              {/* <Suspense fallback="loading ButtonOldAnt">
+              <Suspense fallback="loading ButtonOldAnt">
                 <ButtonOldAnt />
-              </Suspense> */}
+              </Suspense>
             </td>
           </tr>
           <tr>
@@ -110,12 +108,12 @@ const Home = () => {
               <blockquote>(check publicPath fix in image-loader)</blockquote>
             </td>
             <td>
-              <img src="./webpack.png" />
+              <img className="home-webpack-png" src="./webpack.png" />
             </td>
             <td>
-              {/* <Suspense fallback="loading WebpackPngRemote">
+              <Suspense fallback="loading WebpackPngRemote">
                 <WebpackPngRemote />
-              </Suspense> */}
+              </Suspense>
             </td>
           </tr>
           <tr>
@@ -129,9 +127,9 @@ const Home = () => {
               <img src="./webpack.svg" />
             </td>
             <td>
-              {/* <Suspense fallback="loading WebpackSvgRemote">
+              <Suspense fallback="loading WebpackSvgRemote">
                 <WebpackSvgRemote />
-              </Suspense> */}
+              </Suspense>
             </td>
           </tr>
         </tbody>

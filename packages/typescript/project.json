@@ -5,17 +5,16 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:swc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nx/js:tsc",
+      "outputs": ["{workspaceRoot}/packages/typescript/dist"],
       "options": {
-        "outputPath": "dist/packages/typescript",
+        "outputPath": "packages/typescript/dist",
         "main": "packages/typescript/src/index.ts",
         "tsConfig": "packages/typescript/tsconfig.lib.json",
-        "assets": [
-          "packages/typescript/*.md"
-        ]
+        "assets": ["packages/typescript/*.md"],
+        "skipTypeCheck": true,
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true
       },
       "dependsOn": [
         {
@@ -24,56 +23,44 @@
         }
       ]
     },
-    "publish": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "node tools/scripts/publish.mjs typescript {args.ver} {args.tag}"
-      },
-      "dependsOn": [
-        {
-          "target": "build"
-        }
-      ]
-    },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/typescript/**/*.ts"
+        "lintFilePatterns": ["packages/typescript/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/typescript/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    },
+    "pre-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run typescript:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run typescript:build",
+            "forwardAllArgs": false
+          }
         ]
-      }
-    },
-    "version": {
-      "executor": "@jscutlery/semver:version",
-      "options": {
-        "postTargets": [
-          "typescript:npm",
-          "typescript:github"
-        ],
-        "trackDeps": true,
-        "push": true
-      }
-    },
-    "github": {
-      "executor": "@jscutlery/semver:github",
-      "options": {
-        "tag": "${tag}",
-        "notes": "${notes}"
-      }
-    },
-    "npm": {
-      "executor": "ngx-deploy-npm:deploy",
-      "options": {
-        "access": "public",
-        "tag": "next"
       }
     }
   },
-  "tags": [],
-  "implicitDependencies": [
-    "utils"
-  ]
+  "tags": ["package"],
+  "implicitDependencies": ["utils"]
 }

@@ -44,6 +44,7 @@ This plugin is used to download the federated types.
     moduleFederationConfig: any; // the configuration same configuration provided to the module federation plugin, it is MANDATORY
     typesFolder?: string; // folder where all the files will be stored, default is '@mf-types',
     deleteTypesFolder?: boolean; // indicate if the types folder will be deleted before the job starts, default is 'true'
+    maxRetries?: number; // The number of times the plugin will try to download the types before failing, default is 3
 }
 ```
 
@@ -159,6 +160,28 @@ build({
 const { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } = require('@module-federation/native-federation-typescript/rspack');
 module.exports = {
   /* ... */
+  plugins: [
+    NativeFederationTypeScriptRemote({
+      /* options */
+    }),
+    NativeFederationTypeScriptHost({
+      /* options */
+    }),
+  ],
+};
+```
+
+<br>
+</details>
+
+<details>
+<summary>Rolldown</summary><br>
+
+```ts
+// rolldown.config.js
+import { NativeFederationTypeScriptHost, NativeFederationTypeScriptRemote } from '@module-federation/native-federation-typescript/rolldown';
+
+export default {
   plugins: [
     NativeFederationTypeScriptRemote({
       /* options */

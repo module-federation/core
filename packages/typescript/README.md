@@ -25,7 +25,7 @@ const federationConfig = {
     './Input': './src/Input',
   },
   remotes: {
-    app2: 'app2@http://localhost:3002/remoteEntry.js', // or Just the URL 'http://localhost:3002/remoteEntry.js'
+    app2: 'app2@http://localhost:3002/remoteEntry.js', // or Just the URL 'http://localhost:3002'
   },
   shared: ['react', 'react-dom'],
 };
@@ -36,6 +36,47 @@ module.exports = {
     // ...
     new FederatedTypesPlugin({
       federationConfig,
+      // ...
+    }),
+  ],
+};
+```
+
+If you are running multiple remotes that use bi-directional module sharing, you may run into race conditions while starting up the webpack-dev-servers. The library now supports configuring retry options (which are enabled by default), along with the ability to serve the types out of the webpack compiler in a separate HTTP host.
+
+Remember to only use <b>typeServeOptions</b> if you need to host them outside of webpack-dev-server locally, you'll also need to set the federationConfig for this plugin to reflect that new http server url.
+
+```typescript
+module.exports = {
+  /* ... */
+  plugins: [
+    // ...
+    new FederatedTypesPlugin({
+      federationConfig,
+      typeFetchOptions: {
+        /** The maximum time to wait for downloading remote types in milliseconds.
+         * @default 2000  */
+        downloadRemoteTypesTimeout?: number;
+        /** The maximum number of retry attempts.
+         * @default 3  */
+        maxRetryAttempts?: number;
+        /** The default number of milliseconds between retries.
+         * @default 1000  */
+        retryDelay?: number;
+        /** Should retry if no types are found in destination. This could be due to another instance still compiling.
+         * @default true  */
+        shouldRetryOnTypesNotFound?: boolean;
+        /** Should retry type fetching operations.
+         * @default true  */
+        shouldRetry?: boolean;
+      },
+      // Only enable if you need to serve types outside of webpack-dev-server
+      typeServeOptions: {
+        /** The port to serve type files on, this is separate from the webpack dev server port. */
+        port?: number;
+        /** The host to serve type files on. Example: 'localhost' */
+        host?: string;
+      }
       // ...
     }),
   ],
@@ -101,7 +142,7 @@ module.exports = {
           remotes: { app2: 'app2@http://localhost:3000/remoteEntry.js' },
         },
         // ...
-      })
+      }),
     );
     return config;
   },

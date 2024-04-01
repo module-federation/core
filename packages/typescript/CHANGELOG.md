@@ -1,211 +1,246 @@
+## [3.1.1](https://github.com/module-federation/universe/compare/typescript-3.1.0...typescript-3.1.1) (2023-11-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency antd to v4.24.15 ([de857c4](https://github.com/module-federation/universe/commit/de857c45af92b3a2584cd3319263417a36f9977a))
+* **deps:** update dependency axios to v1.6.0 [security] ([71bd7be](https://github.com/module-federation/universe/commit/71bd7becbc201d69b11f0975d5a56548facb3242))
+* **deps:** update dependency core-js to v3.33.3 ([6100431](https://github.com/module-federation/universe/commit/6100431155a53c6e34092baf6c0e4d5dd578a53d))
+* **deps:** update dependency typedoc to v0.25.3 ([10477bf](https://github.com/module-federation/universe/commit/10477bf1f16d695b792d97919e83a8920ee15c01))
+* **deps:** update dependency unplugin to v1.5.1 ([e2ea98b](https://github.com/module-federation/universe/commit/e2ea98b1a8e67c53c79e41dab0398e8a75434362))
+
+# [3.1.0](https://github.com/module-federation/universe/compare/typescript-3.0.1...typescript-3.1.0) (2023-11-13)
+
+### Bug Fixes
+
+- add missing comma ([541dd28](https://github.com/module-federation/universe/commit/541dd28959dae614e8dc2717eafe2c567cdda1f6))
+- **deps:** update dependency typedoc to v0.25.2 ([46c6524](https://github.com/module-federation/universe/commit/46c65247e187cee9e15625402c1570ac351bb1fe))
+- **deps:** update dependency undici to v5.26.2 [security] ([410a8b8](https://github.com/module-federation/universe/commit/410a8b8bd1558dfb5119ae10941d2b3816a0d0e0))
+- override semantic-release-plugin-decorators ([18675de](https://github.com/module-federation/universe/commit/18675defef65570d2b3bb6a9caa3fd039badee29))
+- switch to @goestav/nx-semantic-release ([63a3350](https://github.com/module-federation/universe/commit/63a3350a6a1a12235e3c9f1e7c724d54f0476356))
+
+### Features
+
+- add test setup to typescript package ([bccb789](https://github.com/module-federation/universe/commit/bccb7893d321357e5de54752d30e9b18ba6e5f0d))
+- new actions, remove gpt integration ([370229e](https://github.com/module-federation/universe/commit/370229e02cc352fcfaeaa0f3cf1f9f2d4966d1bb))
+
 # Changelog
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
+
+## [3.0.1](https://github.com/module-federation/nextjs-mf/compare/typescript-3.0.0...typescript-3.0.1) (2023-10-05)
 
 # [3.0.0](https://github.com/module-federation/nextjs-mf/compare/typescript-2.4.2...typescript-3.0.0) (2023-09-13)
 
 ### Dependency Updates
 
-* `utils` updated to version `3.0.0`
+- `utils` updated to version `3.0.0`
 
 ### Features
 
-* core package for module federation ([#1093](https://github.com/module-federation/nextjs-mf/issues/1093)) ([d460400](https://github.com/module-federation/nextjs-mf/commit/d46040053e9b627321b5fe8e05556c5bb727c238)), closes [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#835](https://github.com/module-federation/nextjs-mf/issues/835) [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#871](https://github.com/module-federation/nextjs-mf/issues/871) [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#872](https://github.com/module-federation/nextjs-mf/issues/872) [#875](https://github.com/module-federation/nextjs-mf/issues/875) [#884](https://github.com/module-federation/nextjs-mf/issues/884) [#887](https://github.com/module-federation/nextjs-mf/issues/887) [#893](https://github.com/module-federation/nextjs-mf/issues/893) [#885](https://github.com/module-federation/nextjs-mf/issues/885) [#899](https://github.com/module-federation/nextjs-mf/issues/899) [#904](https://github.com/module-federation/nextjs-mf/issues/904) [#932](https://github.com/module-federation/nextjs-mf/issues/932) [#936](https://github.com/module-federation/nextjs-mf/issues/936) [#959](https://github.com/module-federation/nextjs-mf/issues/959) [#960](https://github.com/module-federation/nextjs-mf/issues/960) [#969](https://github.com/module-federation/nextjs-mf/issues/969) [#971](https://github.com/module-federation/nextjs-mf/issues/971) [#1234](https://github.com/module-federation/nextjs-mf/issues/1234) [#1235](https://github.com/module-federation/nextjs-mf/issues/1235)
-* **typedoc-parsetr:** merged main ([2ff0d5a](https://github.com/module-federation/nextjs-mf/commit/2ff0d5a075df3f241742cc7e516cd0378e8e1b3e))
-* **typedoc-parsetr:** python script implementation ([0a533cb](https://github.com/module-federation/nextjs-mf/commit/0a533cb60e0c3ca269ab45df740c1367be175e80))
-
+- core package for module federation ([#1093](https://github.com/module-federation/nextjs-mf/issues/1093)) ([d460400](https://github.com/module-federation/nextjs-mf/commit/d46040053e9b627321b5fe8e05556c5bb727c238)), closes [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#835](https://github.com/module-federation/nextjs-mf/issues/835) [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#871](https://github.com/module-federation/nextjs-mf/issues/871) [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#872](https://github.com/module-federation/nextjs-mf/issues/872) [#875](https://github.com/module-federation/nextjs-mf/issues/875) [#884](https://github.com/module-federation/nextjs-mf/issues/884) [#887](https://github.com/module-federation/nextjs-mf/issues/887) [#893](https://github.com/module-federation/nextjs-mf/issues/893) [#885](https://github.com/module-federation/nextjs-mf/issues/885) [#899](https://github.com/module-federation/nextjs-mf/issues/899) [#904](https://github.com/module-federation/nextjs-mf/issues/904) [#932](https://github.com/module-federation/nextjs-mf/issues/932) [#936](https://github.com/module-federation/nextjs-mf/issues/936) [#959](https://github.com/module-federation/nextjs-mf/issues/959) [#960](https://github.com/module-federation/nextjs-mf/issues/960) [#969](https://github.com/module-federation/nextjs-mf/issues/969) [#971](https://github.com/module-federation/nextjs-mf/issues/971) [#1234](https://github.com/module-federation/nextjs-mf/issues/1234) [#1235](https://github.com/module-federation/nextjs-mf/issues/1235)
+- **typedoc-parsetr:** merged main ([2ff0d5a](https://github.com/module-federation/nextjs-mf/commit/2ff0d5a075df3f241742cc7e516cd0378e8e1b3e))
+- **typedoc-parsetr:** python script implementation ([0a533cb](https://github.com/module-federation/nextjs-mf/commit/0a533cb60e0c3ca269ab45df740c1367be175e80))
 
 ### BREAKING CHANGES
 
-* automaticAsyncBoundary option has been removed
+- automaticAsyncBoundary option has been removed
 
-* fix: exclude specific pages from page map automatically
+- fix: exclude specific pages from page map automatically
 
-* refactor: conslidate codebase
+- refactor: conslidate codebase
 
-* fix: improve hot reload share recovery
+- fix: improve hot reload share recovery
 
-* refactor: remove server jsonp template
+- refactor: remove server jsonp template
 
-* chore: remove dead code from runtime modules
+- chore: remove dead code from runtime modules
 
-* fix: clean up jsonp getCustomJsonpCode
-
-getting chunk loading global from compiler output options
-
-* feat: adding cleanInitArrays runtime helper
-
-* chore: remove share scope hoist and module hoisting system
-
-* chore: cleanup code
-
-* chore: remove dead code from add module runtime plugin
-
-likely can remove whole plugin in future
-
-* chore: remove logs from delegate modules
-
-* chore: remove old utils
-
-* fix: add warning on auto page stitch
-
-* fix: remove commented out code from InvertedContainerPlugin.ts
-
-* chore: improve logging to see if its local load or remote load
-
-* chore: clean up old custom promises factories
-
-* fix: remove container proxy code
-
-* fix: remove container proxy code
-* automaticAsyncBoundary option has been removed
-
-* fix: exclude specific pages from page map automatically
-
-* refactor: conslidate codebase
-
-* fix: improve hot reload share recovery
-
-* refactor: remove server jsonp template
-
-* chore: remove dead code from runtime modules
-
-* fix: clean up jsonp getCustomJsonpCode
+- fix: clean up jsonp getCustomJsonpCode
 
 getting chunk loading global from compiler output options
 
-* feat: adding cleanInitArrays runtime helper
+- feat: adding cleanInitArrays runtime helper
 
-* chore: remove share scope hoist and module hoisting system
+- chore: remove share scope hoist and module hoisting system
 
-* chore: cleanup code
+- chore: cleanup code
 
-* chore: remove dead code from add module runtime plugin
+- chore: remove dead code from add module runtime plugin
 
 likely can remove whole plugin in future
 
-* chore: remove logs from delegate modules
+- chore: remove logs from delegate modules
 
-* chore: remove old utils
+- chore: remove old utils
 
-* fix: add warning on auto page stitch
+- fix: add warning on auto page stitch
 
-* fix: remove commented out code from InvertedContainerPlugin.ts
+- fix: remove commented out code from InvertedContainerPlugin.ts
 
-* chore: improve logging to see if its local load or remote load
+- chore: improve logging to see if its local load or remote load
 
-* chore: clean up old custom promises factories
+- chore: clean up old custom promises factories
 
-* fix: remove container proxy code
+- fix: remove container proxy code
 
-* fix: remove container proxy code
+- fix: remove container proxy code
+- automaticAsyncBoundary option has been removed
 
-* chore: fix project.json
+- fix: exclude specific pages from page map automatically
 
-* debugging
+- refactor: conslidate codebase
 
-* fix: resolve backmerge issues with build
+- fix: improve hot reload share recovery
 
-* Merge branch 'kill_child_compilers' into fix_backmerge_issues
+- refactor: remove server jsonp template
+
+- chore: remove dead code from runtime modules
+
+- fix: clean up jsonp getCustomJsonpCode
+
+getting chunk loading global from compiler output options
+
+- feat: adding cleanInitArrays runtime helper
+
+- chore: remove share scope hoist and module hoisting system
+
+- chore: cleanup code
+
+- chore: remove dead code from add module runtime plugin
+
+likely can remove whole plugin in future
+
+- chore: remove logs from delegate modules
+
+- chore: remove old utils
+
+- fix: add warning on auto page stitch
+
+- fix: remove commented out code from InvertedContainerPlugin.ts
+
+- chore: improve logging to see if its local load or remote load
+
+- chore: clean up old custom promises factories
+
+- fix: remove container proxy code
+
+- fix: remove container proxy code
+
+- chore: fix project.json
+
+- debugging
+
+- fix: resolve backmerge issues with build
+
+- Merge branch 'kill_child_compilers' into fix_backmerge_issues
 
 # Conflicts:
-#	package-lock.json
-#	package.json
-#	packages/nextjs-mf/src/plugins/NextFederationPlugin/index.ts
-#	packages/nextjs-mf/src/plugins/container/InvertedContainerPlugin.ts
-#	packages/nextjs-mf/src/plugins/container/InvertedContainerRuntimeModule.ts
 
-* feat: enable eager sharing
+# package-lock.json
 
-* refactor: improve module hooks for eager loading and search
+# package.json
 
-* refactor: cleanup custom jsonp and make es5
+# packages/nextjs-mf/src/plugins/NextFederationPlugin/index.ts
 
-* refactor: cleanup inverted container code
+# packages/nextjs-mf/src/plugins/container/InvertedContainerPlugin.ts
 
-* refactor: cleanup inverted container code
-* automaticAsyncBoundary option has been removed
+# packages/nextjs-mf/src/plugins/container/InvertedContainerRuntimeModule.ts
 
-* fix: exclude specific pages from page map automatically
+- feat: enable eager sharing
 
-* refactor: conslidate codebase
+- refactor: improve module hooks for eager loading and search
 
-* fix: improve hot reload share recovery
+- refactor: cleanup custom jsonp and make es5
 
-* refactor: remove server jsonp template
+- refactor: cleanup inverted container code
 
-* chore: remove dead code from runtime modules
+- refactor: cleanup inverted container code
+- automaticAsyncBoundary option has been removed
 
-* fix: clean up jsonp getCustomJsonpCode
+- fix: exclude specific pages from page map automatically
+
+- refactor: conslidate codebase
+
+- fix: improve hot reload share recovery
+
+- refactor: remove server jsonp template
+
+- chore: remove dead code from runtime modules
+
+- fix: clean up jsonp getCustomJsonpCode
 
 getting chunk loading global from compiler output options
 
-* feat: adding cleanInitArrays runtime helper
+- feat: adding cleanInitArrays runtime helper
 
-* chore: remove share scope hoist and module hoisting system
+- chore: remove share scope hoist and module hoisting system
 
-* chore: cleanup code
+- chore: cleanup code
 
-* chore: remove dead code from add module runtime plugin
+- chore: remove dead code from add module runtime plugin
 
 likely can remove whole plugin in future
 
-* chore: remove logs from delegate modules
+- chore: remove logs from delegate modules
 
-* chore: remove old utils
+- chore: remove old utils
 
-* fix: add warning on auto page stitch
+- fix: add warning on auto page stitch
 
-* fix: remove commented out code from InvertedContainerPlugin.ts
+- fix: remove commented out code from InvertedContainerPlugin.ts
 
-* chore: improve logging to see if its local load or remote load
+- chore: improve logging to see if its local load or remote load
 
-* chore: clean up old custom promises factories
+- chore: clean up old custom promises factories
 
-* fix: remove container proxy code
+- fix: remove container proxy code
 
-* fix: remove container proxy code
+- fix: remove container proxy code
 
-* fix: resolve backmerge issues with build
+- fix: resolve backmerge issues with build
 
-* Merge branch 'kill_child_compilers' into fix_backmerge_issues
+- Merge branch 'kill_child_compilers' into fix_backmerge_issues
 
 # Conflicts:
-#	package-lock.json
-#	package.json
-#	packages/nextjs-mf/src/plugins/NextFederationPlugin/index.ts
-#	packages/nextjs-mf/src/plugins/container/InvertedContainerPlugin.ts
-#	packages/nextjs-mf/src/plugins/container/InvertedContainerRuntimeModule.ts
 
-* feat: enable eager sharing
+# package-lock.json
 
-* refactor: improve module hooks for eager loading and search
+# package.json
 
-* refactor: cleanup custom jsonp and make es5
+# packages/nextjs-mf/src/plugins/NextFederationPlugin/index.ts
 
-* refactor: cleanup inverted container code
+# packages/nextjs-mf/src/plugins/container/InvertedContainerPlugin.ts
 
-* refactor: cleanup inverted container code
+# packages/nextjs-mf/src/plugins/container/InvertedContainerRuntimeModule.ts
 
-* ci: fix install step with npm and NX
+- feat: enable eager sharing
 
-* test: remove tests for now
+- refactor: improve module hooks for eager loading and search
 
-* chore(utils): release version 1.7.3-beta.0
+- refactor: cleanup custom jsonp and make es5
 
-* chore(utils): release version 1.7.3
+- refactor: cleanup inverted container code
 
-* chore(node): release version 0.14.4-beta.0
+- refactor: cleanup inverted container code
 
-* chore(node): release version 0.14.4
+- ci: fix install step with npm and NX
 
-* chore(nextjs-mf): release version 6.4.1-beta.4
+- test: remove tests for now
 
-* fix: remove debugging runtime variable
+- chore(utils): release version 1.7.3-beta.0
 
-* chore(nextjs-mf): release version 6.4.1-beta.5
+- chore(utils): release version 1.7.3
 
+- chore(node): release version 0.14.4-beta.0
 
+- chore(node): release version 0.14.4
+
+- chore(nextjs-mf): release version 6.4.1-beta.4
+
+- fix: remove debugging runtime variable
+
+- chore(nextjs-mf): release version 6.4.1-beta.5
 
 ## [2.4.2](https://github.com/module-federation/nextjs-mf/compare/typescript-2.4.1...typescript-2.4.2) (2023-08-09)
 

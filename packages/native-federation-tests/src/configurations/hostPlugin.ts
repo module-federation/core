@@ -4,7 +4,8 @@ const defaultOptions = {
   testsFolder: '@mf-tests',
   mocksFolder: './__mocks__',
   deleteTestsFolder: true,
-};
+  maxRetries: 3,
+} satisfies Partial<HostOptions>;
 
 const retrieveRemoteStringUrl = (remote: string) => {
   const splittedRemote = remote.split('@');
@@ -26,11 +27,14 @@ const buildZipUrl = (hostOptions: Required<HostOptions>, remote: string) => {
 
 const resolveRemotes = (hostOptions: Required<HostOptions>) => {
   return Object.entries(
-    hostOptions.moduleFederationConfig.remotes as Record<string, string>
-  ).reduce((accumulator, [key, remote]) => {
-    accumulator[key] = buildZipUrl(hostOptions, remote);
-    return accumulator;
-  }, {} as Record<string, string>);
+    hostOptions.moduleFederationConfig.remotes as Record<string, string>,
+  ).reduce(
+    (accumulator, [key, remote]) => {
+      accumulator[key] = buildZipUrl(hostOptions, remote);
+      return accumulator;
+    },
+    {} as Record<string, string>,
+  );
 };
 
 export const retrieveHostConfig = (options: HostOptions) => {

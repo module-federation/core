@@ -8,7 +8,7 @@ const defaultOptions = {
   distFolder: './dist',
   deleteTestsFolder: true,
   additionalBundlerConfig: {},
-};
+} satisfies Partial<RemoteOptions>;
 
 const EXTENSIONS = ['ts', 'tsx', 'js', 'jsx', 'mjs'];
 
@@ -25,14 +25,17 @@ const resolveWithExtension = (exposedPath: string) => {
 
 const resolveExposes = (remoteOptions: RemoteOptions) => {
   return Object.entries(
-    remoteOptions.moduleFederationConfig.exposes as Record<string, string>
-  ).reduce((accumulator, [exposedEntry, exposedPath]) => {
-    accumulator[exposedEntry] =
-      resolveWithExtension(exposedPath) ||
-      resolveWithExtension(join(exposedPath, 'index')) ||
-      exposedPath;
-    return accumulator;
-  }, {} as Record<string, string>);
+    remoteOptions.moduleFederationConfig.exposes as Record<string, string>,
+  ).reduce(
+    (accumulator, [exposedEntry, exposedPath]) => {
+      accumulator[exposedEntry] =
+        resolveWithExtension(exposedPath) ||
+        resolveWithExtension(join(exposedPath, 'index')) ||
+        exposedPath;
+      return accumulator;
+    },
+    {} as Record<string, string>,
+  );
 };
 
 export const retrieveRemoteConfig = (options: RemoteOptions) => {
@@ -46,11 +49,11 @@ export const retrieveRemoteConfig = (options: RemoteOptions) => {
   };
   const mapComponentsToExpose = resolveExposes(remoteOptions);
   const externalDeps = Object.keys(
-    options.moduleFederationConfig.shared || {}
+    options.moduleFederationConfig.shared || {},
   ).concat(Object.keys(options.moduleFederationConfig.remotes || {}));
   const compiledFilesFolder = join(
     remoteOptions.distFolder,
-    remoteOptions.testsFolder
+    remoteOptions.testsFolder,
   );
 
   return {

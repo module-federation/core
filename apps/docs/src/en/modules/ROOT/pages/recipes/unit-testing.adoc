@@ -1,0 +1,267 @@
+= How to Create Unit Tests for Distributed Code
+
+In this guide, we'll cover the best practices for creating unit tests for distributed code when using Module Federation. We'll discuss the challenges and advantages of testing federated modules, along with techniques to ensure your tests are thorough and maintainable.
+
+== Introduction to Unit Testing in Module Federation
+
+Unit testing is crucial for ensuring the reliability and maintainability of your code, especially when working with distributed systems like Module Federation. It helps you catch errors early, verify the correctness of your code, and ensure that changes don't introduce unexpected behavior.
+
+== Challenges in Testing Federated Modules
+
+Testing federated modules can be more challenging than testing traditional code due to factors such as:
+
+- At-runtime orchestration and code-sharing 
+- Asynchronous module loading
+- Remote dependencies and entry points
+- Diverse application environments
+
+Despite these challenges, it's essential to create robust unit tests for your distributed code to ensure its reliability and maintainability.
+
+==  Best Practices for Testing Distributed Code
+
+Follow these best practices to ensure your unit tests for federated modules are effective and maintainable:
+
+=== Isolate Test Cases
+
+Write independent test cases for each component or module to ensure that they can be tested in isolation. This approach helps you identify issues more easily and prevents cascading failures.
+
+=== Test Various Scenarios
+
+Test your federated modules in different scenarios to ensure that they work correctly across various application environments and configurations.
+
+=== Ensure Test Coverage
+
+Ensure that your test suite provides comprehensive coverage of your distributed code, including edge cases and potential error conditions.
+
+== Federated Unit Tests
+
+The concept of federated unit testing builds upon the idea of federating features in Module Federation. In this approach, you create a test build for each repository involved in the federation, essentially creating a commonjs "server" build that exposes the features as commonjs modules. This allows you to test the federated components in isolation and perform liability testing.
+
+Let's take a look at an example that demonstrates federated unit testing with Jest:
+
+=== 1. Example Application
+
+Consider an application with a form that imports a federated button.
+
+[source, javascript]
+----
+import React, { Suspense } from "react";
+import lazy from "react-lazy-ssr";
+const Button = lazy(
+  () => import("federated/Button"), { chunkId: "federated/Button" }
+);
+
+const Form = () => (
+  <form>
+    <input type="text" />
+    <Suspense fallback={"failed"} loading={"loading"}>
+      <Button />
+    </Suspense>
+  </form>
+);
+
+export default Form;
+----
+
+In this scenario, there are two aspects to test:
+
+- Button: supplied by its own Webpack build
+- Form: supplied by its own Webpack build
+
+=== 2. Creating Test Builds
+
+To enable federated unit testing, create test builds for each repository involved in the federation. In this example, we create test builds for both the `form_app` and the `dsl` repositories:
+
+[tabs]
+======
+form_app repository::
++
+[source, javascript]
+----
+new ModuleFederationPlugin({
+  name: "form_app",
+  filename: "remoteEntry.js",
+  library: { type: "commonjs-module", name: "form_app" },
+  remotes: {
+    "dsl": reunited(
+      path.resolve(__dirname, "../dsl/dist-test/remoteEntry.js"),
+      "dsl"
+    ),
+  },
+  exposes: {
+    "./Form": "./federated-cross-test/form.js",
+  },
+  shared: {
+    react: deps.devDependencies.react,
+    "react-dom": deps.devDependencies["react-dom"],
+  },
+});
+----
+
+dsl repository::
++
+[source, javascript]
+----
+new ModuleFederationPlugin({
+  name: "dsl",
+  filename: "remoteEntry.js",
+  library: { type: "commonjs-module", name: "dsl" },
+  exposes: {
+    "./Button": "./src/Button.js",
+  },
+  shared: {
+    react: deps.devDependencies.react,
+    "react-dom": deps.devDependencies["react-dom"],
+  },
+});
+----
+======
+
+Both Button and Form are exposed for liability testing.
+
+=== 3. Federated Unit Testing with Jest
+
+With the test builds in place, you can use Jest to run tests against a Webpack-built test of test files. This allows you to utilize Webpack's async capabilities to import federated modules and test them.
+
+[source, javascript]
+----
+// federated.test.js
+import React from "react";
+import { shallow, mount, render } from "enzyme";
+// Form and Button are federated imports
+const Form = import("form_app/Form");
+const Button = import("dsl/Button");
+import suspenseRender from "./suspenseRender";
+
+describe("Federation", function () {
+  it("is rendering Nested Suspense", async () => {
+    const from = await Form;
+    console.log(await suspenseRender(from.default));
+  });
+
+  it("Testing Button from Remote", async function () {
+    const Btn = (await Button).default;
+    const wrapper = render(<Btn />);
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it("Testing Button from Form", async function () {
+    const Frm = (await Form).default;
+    const wrapper = mount(<Frm />);
+    expect(wrapper).toMatchSnapshot();
+  });
+});
+----
+
+In this example, Jest processes an already-built test file, allowing you to use federated imports in your tests. This is made possible by using Webpack to compile the test files instead of Babel.
+
+=== 4. Federated Test Build
+
+To enable federated testing with Jest, you need a special Webpack build that compiles `.test.js` files only.
+
+[source, javascript]
+----
+// jest test/bundle.test.js
+
+// The webpack build that creates the test bundle.
+const path = require("path");
+const glob = require("glob");
+const thisFile = path.basename(__filename);
+const nodeExternals = require("webpack-node-externals");
+const { ModuleFederationPlugin } = require("webpack").container;
+const ReactLazySsrPlugin = require("react-lazy-ssr/webpack");
+const reunited = require("../index");
+const testFiles = glob
+  .sync("!(node_modules)/**/*.test.js")
+  .filter(function (element) {
+    return (
+      element != "test/bundle.test.js" && !element.includes(thisFile)
+    );
+  })
+  .map(function (element) {
+    return "./" + element;
+  });
+
+module.exports = {
+  entry: { "bundle.test": testFiles },
+  output: {
+    path: path.resolve(__dirname, "."),
+    filename: "[name].js",
+  },
+  target: "node",
+  resolve: {
+    fallback: {
+      path: false,
+    },
+  },
+  externals: [
+    nodeExternals({
+      allowlist: [/^webpack\/container\/reference\//, /react/],
+    }),
+  ],
+  mode: "none",
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: "babel-loader",
+      },
+    ],
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "test_bundle",
+      library: { type: "commonjs-module", name: "test_bundle" },
+      filename: "remoteEntry.js",
+      exposes: {
+        "./render": "./test/suspenseRender.js",
+      },
+      remotes: {
+        form_app: reunited(
+          path.resolve(__dirname, "../form_app/dist/test/remoteEntry.js"),
+          "form_app"
+        ),
+        dsl: reunited(
+          path.resolve(__dirname, "../dsl/dist/remoteEntry.js"),
+          "dsl"
+        ),
+      },
+    }),
+    new ReactLazySsrPlugin(),
+  ],
+};
+----
+
+This build configuration includes the `ModuleFederationPlugin` and imports both the `form_app` and `dsl` repositories' test builds.
+
+=== 5. CI Integration and Code Streaming
+
+Integrating federated unit testing into your CI pipeline can be accomplished in a few ways:
+
+. Pull down other repositories or storage buckets and execute them locally within the test container. This is a rudimentary but effective approach.
+. Use code streaming (not publicly available yet and planned to be commercial). This approach makes Node work like a browser by requiring modules over sockets, HTTP, or S3. It simplifies CI integration and offers a "just works" architecture.
+
+The goal of code streaming is to provide a more straightforward deployment mechanism, considering the vast resources spent on CI.
+
+For a complete example of federated unit testing, refer to the following repository:
+
+https://github.com/module-federation/reunited[reunited: An example of federated unit testing]
+
+This example demonstrates the core concept of having Jest process an already-built test file, enabling the use of federated imports in your tests.
+
+== Conclusion
+
+By following the steps and examples outlined in this guide, you can create a robust and maintainable testing strategy for your federated applications. By setting up the correct build configurations and leveraging the power of Module Federation, you can ensure that your distributed code remains functional and reliable.
+
+In summary, the essential steps to create unit tests for distributed code using Module Federation are:
+
+. Expose components from each repository for testing.
+. Create a test build for each repository that exposes components as CommonJS modules.
+. Write federated test cases using Jest and the exposed components.
+. Set up a special Webpack build configuration to compile `.test.js` files.
+. Integrate federated unit testing into your CI pipeline using local execution or code streaming.
+
+With this approach, you can achieve a high degree of confidence that your federated modules will work correctly across different codebases and repositories. Moreover, by having individual teams take part in liability tests, you can ensure that updates and changes to federated modules do not cause unexpected issues in the consuming applications.
+
+The future of federated unit testing includes further simplifications and optimizations, such as code streaming, which will make the process even more seamless and accessible. By adopting these best practices and staying up-to-date with the latest advancements in Module Federation, you can continue to build and maintain high-quality distributed applications with ease.

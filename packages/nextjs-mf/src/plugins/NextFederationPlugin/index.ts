@@ -5,26 +5,16 @@
  */
 'use strict';
 
-
 import type {
   ModuleFederationPluginOptions,
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
-  SharedObject,
 } from '@module-federation/utilities';
-import { createRuntimeVariables } from '@module-federation/utilities';
-import type { Compiler, container } from 'webpack';
+import type { Compiler } from 'webpack';
+import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
-import {
-  applyRemoteDelegates,
-  getModuleFederationPluginConstructor,
-  retrieveDefaultShared,
-  applyPathFixes,
-} from './next-fragments';
-import { parseRemotes } from '../../internal';
-import AddRuntimeRequirementToPromiseExternal from '../AddRuntimeRequirementToPromiseExternalPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
-import { removeUnnecessarySharedKeys } from './remove-unnecessary-shared-keys';
+import { retrieveDefaultShared, applyPathFixes } from './next-fragments';
 import { setOptions } from './set-options';
 import {
   validateCompilerOptions,
@@ -36,16 +26,16 @@ import {
   configureServerLibraryAndFilename,
   handleServerExternals,
 } from './apply-server-plugins';
-
 import { applyClientPlugins } from './apply-client-plugins';
-
+import { ModuleFederationPlugin } from '@module-federation/enhanced';
+import path from 'path';
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
 export class NextFederationPlugin {
-  _options: ModuleFederationPluginOptions;
-  _extraOptions: NextFederationPluginExtraOptions;
-
+  private _options: ModuleFederationPluginOptions;
+  private _extraOptions: NextFederationPluginExtraOptions;
+  public name: string;
   /**
    * Constructs the NextFederationPlugin with the provided options.
    *
@@ -55,6 +45,7 @@ export class NextFederationPlugin {
     const { mainOptions, extraOptions } = setOptions(options);
     this._options = mainOptions;
     this._extraOptions = extraOptions;
+    this.name = 'ModuleFederationPlugin';
   }
 
   /**
@@ -62,150 +53,139 @@ export class NextFederationPlugin {
    * @param compiler The webpack compiler object.
    */
   apply(compiler: Compiler) {
-    // Validate the compiler options
-    const validCompile = validateCompilerOptions(compiler);
-    if (!validCompile) {
-      return;
-    }
-    // Validate the NextFederationPlugin options
-    validatePluginOptions(this._options);
-
-    // Check if the compiler is for the server or client
-    const isServer = compiler.options.name === 'server';
-    const { webpack } = compiler;
-
-    // Apply the CopyFederationPlugin
+    process.env['FEDERATION_WEBPACK_PATH'] =
+      process.env['FEDERATION_WEBPACK_PATH'] ||
+      getWebpackPath(compiler, { framework: 'nextjs' });
+    if (!this.validateOptions(compiler)) return;
+    const isServer = this.isServerCompiler(compiler);
     new CopyFederationPlugin(isServer).apply(compiler);
+    this.applyConditionalPlugins(compiler, isServer);
+    const normalFederationPluginOptions = this.getNormalFederationPluginOptions(
+      compiler,
+      isServer
+    );
+    // ContainerPlugin will get NextFederationPlugin._options, so NextFederationPlugin._options should be the same as normalFederationPluginOptions
+    this._options = normalFederationPluginOptions;
+    new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
 
-    // If shared modules are provided, remove unnecessary shared keys from the default share scope
-    // @ts-ignore
-    if (this._options.shared) {
-     // removeUnnecessarySharedKeys(this._options.shared as SharedObject);
+    const runtimeESMPath = require.resolve(
+      '@module-federation/runtime/dist/index.esm.js'
+    );
+    compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
+      compiler.options.resolve.alias = {
+        ...compiler.options.resolve.alias,
+        '@module-federation/runtime$': runtimeESMPath,
+      };
+    });
+  }
+
+  private validateOptions(compiler: Compiler): boolean {
+    const manifestPlugin = compiler.options.plugins.find(
+      (p) => p?.constructor.name === 'BuildManifestPlugin'
+    );
+
+    if (manifestPlugin) {
+      //@ts-ignore
+      if (manifestPlugin?.appDirEnabled) {
+        throw new Error(
+          'App Directory is not supported by nextjs-mf. Use only pages directory, do not open git issues about this'
+        );
+      }
     }
 
-    const ModuleFederationPlugin: container.ModuleFederationPlugin =
-      getModuleFederationPluginConstructor(isServer, compiler);
-    // const { SharePlugin } = webpack.sharing;
-    //
-    // new SharePlugin({
-    //   shareScope: 'default',
-    //   shared: {
-    //     react: {
-    //       eager: true
-    //     }
-    //   }
-    // }).apply(compiler);
+    const compilerValid = validateCompilerOptions(compiler);
+    const pluginValid = validatePluginOptions(this._options);
+    const envValid = process.env['NEXT_PRIVATE_LOCAL_WEBPACK'];
+    if (compilerValid === undefined)
+      console.error('Compiler validation failed');
+    if (pluginValid === undefined) console.error('Plugin validation failed');
+    const validCompilerTarget =
+      compiler.options.name === 'server' || compiler.options.name === 'client';
+    if (!envValid)
+      throw new Error(
+        'process.env.NEXT_PRIVATE_LOCAL_WEBPACK is not set to true, please set it to true, and "npm install webpack"'
+      );
+    return (
+      compilerValid !== undefined &&
+      pluginValid !== undefined &&
+      validCompilerTarget
+    );
+  }
 
-    const defaultShared = retrieveDefaultShared(isServer);
+  private isServerCompiler(compiler: Compiler): boolean {
+    return compiler.options.name === 'server';
+  }
+
+  private applyConditionalPlugins(compiler: Compiler, isServer: boolean) {
+    compiler.options.output.uniqueName = this._options.name;
+    applyPathFixes(compiler, this._extraOptions);
+    if (this._extraOptions.debug) {
+      compiler.options.devtool = false;
+    }
+
     if (isServer) {
-      // Refactored server condition
       configureServerCompilerOptions(compiler);
       configureServerLibraryAndFilename(this._options);
-
       applyServerPlugins(compiler, this._options);
       handleServerExternals(compiler, {
-        // @ts-ignore
         ...this._options,
-        // @ts-ignore
-        shared: { ...defaultShared, ...this._options.shared },
+        shared: {
+          ...(this._extraOptions.skipSharingNextInternals
+            ? {}
+            : retrieveDefaultShared(isServer)),
+          ...this._options.shared,
+        },
       });
     } else {
       applyClientPlugins(compiler, this._options, this._extraOptions);
     }
-    // compiler.options.output.publicPath = 'auto';
+  }
 
-    //@ts-ignore
-    applyPathFixes(compiler, this._extraOptions);
-let noop;
-try {
-  noop = require.resolve('../../federation-noop');
-} catch (e) {
-  noop = require.resolve('../../federation-noop.cjs');
-}
-    // @ts-ignore
-    const hostFederationPluginOptions: ModuleFederationPluginOptions = {
-      // @ts-ignore
+  private getNormalFederationPluginOptions(
+    compiler: Compiler,
+    isServer: boolean
+  ): ModuleFederationPluginOptions {
+    const defaultShared = retrieveDefaultShared(isServer);
+    const noop = this.getNoopPath();
+    return {
       ...this._options,
       runtime: false,
-      //@ts-ignore
       remoteType: 'script',
+      // @ts-ignore
+      runtimePlugins: [
+        require.resolve(path.join(__dirname, '../container/runtimePlugin')),
+        //@ts-ignore
+        ...(this._options.runtimePlugins || []),
+      ],
       exposes: {
-        //something must be exposed in order to generate a remote entry, which is needed to kickstart runtime
         './noop': noop,
+        './react': require.resolve('react'),
+        './react-dom': require.resolve('react-dom'),
+        './next/router': require.resolve('next/router'),
+        ...this._options.exposes,
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)
           : {}),
-        // @ts-ignore
-        ...this._options.exposes,
       },
       remotes: {
-        //@ts-ignore
         ...this._options.remotes,
       },
-      // shared: {
-      //   ...defaultShared,
-      //   ...this._options.shared,
-      // },
+      shared: {
+        ...defaultShared,
+        ...this._options.shared,
+      },
     };
+  }
 
-    // if (this._extraOptions.debug) {
-      compiler.options.devtool = false;
-    // }
-    // @ts-ignore
-    compiler.options.output.uniqueName = this._options.name;
-
-    // inject module hoisting system
-    applyRemoteDelegates(this._options, compiler);
-    //@ts-ignore
-    if (this._extraOptions.automaticAsyncBoundary) {
-      console.warn('[nextjs-mf]: automaticAsyncBoundary is deprecated');
+  private getNoopPath(): string {
+    let noop;
+    try {
+      noop = require.resolve('../../federation-noop');
+    } catch (e) {
+      noop = require.resolve('../../federation-noop.cjs');
     }
-
-    //todo runtime variable creation needs to be applied for server as well. this is just for client
-    // TODO: this needs to be refactored into something more comprehensive. this is just a quick fix
-    new webpack.DefinePlugin({
-      // @ts-ignore
-
-      'process.env.REMOTES': createRuntimeVariables(this._options.remotes),
-      // @ts-ignore
-
-      'process.env.CURRENT_HOST': JSON.stringify(this._options.name),
-    }).apply(compiler);
-
-    // @ts-ignore
-    new ModuleFederationPlugin({
-      ...hostFederationPluginOptions,
-      // @ts-ignore
-      shared: Object.keys(hostFederationPluginOptions.shared).reduce((acc, key) => ({ ...acc, [key]: { ...hostFederationPluginOptions.shared[key], version: "0" } }), {}),
-    }).apply(compiler);
-    // @ts-ignore
-
-    const hasRemotesOrExposes = Object.keys(this._options?.remotes || {}).length > 0 || Object.keys(this._options?.exposes || {}).length > 0;
-    if (hasRemotesOrExposes) {
-      const commonOptions = {
-        // @ts-ignore
-        ...hostFederationPluginOptions,
-        name: 'host_inner_ctn',
-        runtime: isServer ? 'webpack-runtime' : 'webpack',
-        filename: `host_inner_ctn.js`,
-        remoteType: 'script',
-        // @ts-ignore
-        library: { ...hostFederationPluginOptions.library, name: this._options.name },
-        shared: { ...hostFederationPluginOptions.shared, ...defaultShared },
-      };
-
-     // @ts-ignore
-      new ModuleFederationPlugin({
-        ...commonOptions,
-      }).apply(compiler);
-    }
-
-    new AddRuntimeRequirementToPromiseExternal().apply(compiler);
+    return noop;
   }
 }
 
-/**
- * Exporting NextFederationPlugin as default
- */
 export default NextFederationPlugin;
-

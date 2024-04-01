@@ -23,12 +23,14 @@ const prodConfig = {
    *   ['app2', 'http://example.com/path/to/app2/remoteEntry.js'],
    * ]
    */
-  remotes: [['reactRemoteUI', 'http://localhost:4201/']],
+  // remotes: {
+  //   reactRemoteUI: 'reactRemoteUI@http://localhost:4201/remoteEntry.js',
+  // },
 };
 
 // Nx plugins for webpack to build config object from Nx options and context.
 module.exports = composePlugins(
   withNx(),
   withReact(),
-  withModuleFederation(prodConfig)
+  withModuleFederation(prodConfig),
 );

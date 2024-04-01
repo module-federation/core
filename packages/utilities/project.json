@@ -5,76 +5,64 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/utilities",
+        "outputPath": "packages/utilities/dist",
         "main": "packages/utilities/src/index.ts",
         "tsConfig": "packages/utilities/tsconfig.lib.json",
-        "assets": [
-          "packages/utilities/*.md"
-        ]
+        "assets": [],
+        "generateExportsField": true,
+        "project": "packages/utilities/package.json",
+        "additionalEntryPoints": ["packages/utilities/src/types/types.ts"],
+        "external": ["@module-federation/*"],
+        "compiler": "swc",
+        "format": ["cjs", "esm"]
       }
-    },
-    "publish": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "node tools/scripts/publish.mjs utils {args.ver} {args.tag}"
-      },
-      "dependsOn": [
-        {
-          "target": "build"
-        }
-      ]
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/utilities/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/utilities/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/packages/utilities"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/utilities"],
       "options": {
         "jestConfig": "packages/utilities/jest.config.ts",
         "passWithNoTests": true
       }
     },
-    "version": {
-      "executor": "@jscutlery/semver:version",
+    "pre-release": {
+      "executor": "nx:run-commands",
       "options": {
-        "postTargets": [
-          "utils:npm",
-          "utils:github"
-        ],
-        "trackDeps": true,
-        "push": true
-      }
-    },
-    "github": {
-      "executor": "@jscutlery/semver:github",
-      "options": {
-        "tag": "${tag}",
-        "notes": "${notes}"
-      }
-    },
-    "npm": {
-      "executor": "ngx-deploy-npm:deploy",
-      "options": {
-        "access": "public",
-        "tag": "next"
+        "parallel": false,
+        "commands": [
+          {
+            "command": "nx run utils:test",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "nx run utils:build",
+            "forwardAllArgs": false
+          }
+        ]
       }
     }
   },
-  "tags": []
+  "pre": [
+    {
+      "executor": "@nx/js:tsc",
+      "options": {
+        "commands": [
+          {
+            "command": "rm -f dist"
+          }
+        ]
+      }
+    }
+  ],
+  "tags": ["package"]
 }

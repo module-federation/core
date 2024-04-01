@@ -1,266 +1,603 @@
+# [2.1.0-canary.6](https://github.com/module-federation/universe/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
+
+## 2.1.1
+
+### Patch Changes
+
+- Updated dependencies [ee57fb0]
+  - @module-federation/enhanced@0.1.1
+  - @module-federation/runtime@0.1.1
+  - @module-federation/sdk@0.1.1
+
+## 2.1.0
+
+### Minor Changes
+
+- df3ef24: entry tracking and improved hot reloading for node
+
+### Patch Changes
+
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+  - @module-federation/enhanced@0.1.0
+  - @module-federation/runtime@0.1.0
+  - @module-federation/sdk@0.1.0
+
+## 2.0.15
+
+### Patch Changes
+
+- Updated dependencies [ce0597e]
+  - @module-federation/runtime@0.0.17
+  - @module-federation/enhanced@0.0.17
+  - @module-federation/sdk@0.0.17
+
+## 2.0.14
+
+### Patch Changes
+
+- @module-federation/enhanced@0.0.16
+- @module-federation/runtime@0.0.16
+- @module-federation/sdk@0.0.16
+
+## 2.0.13
+
+### Patch Changes
+
+- Updated dependencies [3a45d99]
+- Updated dependencies [ba5bedd]
+- Updated dependencies [6e9b6d5]
+  - @module-federation/sdk@0.0.15
+  - @module-federation/enhanced@0.0.15
+  - @module-federation/runtime@0.0.15
+
+## 2.0.12
+
+### Patch Changes
+
+- a050645: Expose node script loaders to bundler runtime. Replace require.loadScript from federation/node to use federation.runtime.loadScriptNode
+- d21216a: add encoding peer dependency for node-fetch
+- Updated dependencies [a050645]
+- Updated dependencies [4fc20cc]
+- Updated dependencies [cd8c7bf]
+- Updated dependencies [5576c6b]
+- Updated dependencies [a050645]
+  - @module-federation/runtime@0.0.14
+  - @module-federation/sdk@0.0.14
+  - @module-federation/utilities@3.0.6
+  - @module-federation/enhanced@0.0.14
+
+## 2.0.11
+
+### Patch Changes
+
+- Updated dependencies [804447c]
+  - @module-federation/runtime@0.0.13
+  - @module-federation/sdk@0.0.13
+  - @module-federation/enhanced@0.0.13
+
+## 2.0.10
+
+### Patch Changes
+
+- Updated dependencies [4ca0c7b]
+  - @module-federation/enhanced@0.0.12
+  - @module-federation/runtime@0.0.12
+  - @module-federation/sdk@0.0.12
+
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [b2ead7a]
+- Updated dependencies [589a3bd]
+- Updated dependencies [5c17bc4]
+  - @module-federation/runtime@0.0.11
+  - @module-federation/enhanced@0.0.11
+  - @module-federation/sdk@0.0.11
+
+## 2.0.8
+
+### Patch Changes
+
+- 2b34e46: Refactor AutomaticPublicPath plugin to use federation global manager for auto path resolution in node.js
+- 73eb07e: Rewrite chunk flushing and hot reloading to use federation runtime apis
+- Updated dependencies [2d774d1]
+- Updated dependencies [51b18e0]
+- Updated dependencies [2097daa]
+  - @module-federation/runtime@0.0.10
+  - @module-federation/enhanced@0.0.10
+  - @module-federation/sdk@0.0.10
+
+## 2.0.7
+
+### Patch Changes
+
+- Updated dependencies [1147f48]
+- Updated dependencies [cf8634d]
+- Updated dependencies [2ad29a6]
+  - @module-federation/enhanced@0.0.9
+  - @module-federation/sdk@0.0.9
+
+## 2.0.6
+
+### Patch Changes
+
+- Updated dependencies [98eb40d]
+- Updated dependencies [98eb40d]
+  - @module-federation/sdk@0.0.8
+  - @module-federation/enhanced@0.0.8
+
+## 2.0.5
+
+### Patch Changes
+
+- @module-federation/enhanced@0.0.7
+- @module-federation/sdk@0.0.7
+
+## 2.0.4
+
+### Patch Changes
+
+- @module-federation/enhanced@0.0.6
+- @module-federation/sdk@0.0.6
+
+## 2.0.3
+
+### Patch Changes
+
+- Updated dependencies [5a79cb3]
+  - @module-federation/sdk@0.0.5
+  - @module-federation/enhanced@0.0.5
+
+## 2.0.2
+
+### Patch Changes
+
+- Updated dependencies [966c737]
+  - @module-federation/utilities@3.0.5
+  - @module-federation/enhanced@0.0.4
+  - @module-federation/sdk@0.0.4
+
+### Bug Fixes
+
+- align with bytedance linting ([8000055](https://github.com/module-federation/universe/commit/800005571f37e0d1b31590834ddcd4d98bbd3086))
+- **enhanced:** refactory async boundary plugin ([230a105](https://github.com/module-federation/universe/commit/230a105b230ba108318d3e0aab6bea8e94fb3699))
+
+# [2.1.0-canary.5](https://github.com/module-federation/universe/compare/node-2.1.0-canary.4...node-2.1.0-canary.5) (2023-11-20)
+
+### Bug Fixes
+
+- **enhanced:** use getAllReferencedChunks api for federation indexing ([b8846be](https://github.com/module-federation/universe/commit/b8846be5135c58841c3c22453e45751bebbecdeb))
+- **nextjs-mf:** Improved async startup dep track ([839e47b](https://github.com/module-federation/universe/commit/839e47bc7e1b887f0729c17257e6dd17cc3e3a5d))
+- nx build dep sync ([38c0902](https://github.com/module-federation/universe/commit/38c09025aeee8b3bb91f45721678d59ff814b8ba))
+- rename plugin took tap ([b1e0f58](https://github.com/module-federation/universe/commit/b1e0f58d689a60223b03277fbffe3c5bd18dd481))
+
+### Features
+
+- **enhanced:** ✨ Reference Hoisting ([6ab3e72](https://github.com/module-federation/universe/commit/6ab3e72b147bf8338a4e50fee2ff49cc79c53195))
+- **enhanced:** HoistContainerReferencesPlugin ([adc00e7](https://github.com/module-federation/universe/commit/adc00e744522d3a96cbac7ff4f6fdfa435f77896))
+- **nextjs-mf:** Use HoistReferencePlugin over DelegatePlugin ([e8f1e43](https://github.com/module-federation/universe/commit/e8f1e437f13ad0b922c7e147c4911d83ebf1b226))
+
+# [2.1.0-canary.4](https://github.com/module-federation/universe/compare/node-2.1.0-canary.3...node-2.1.0-canary.4) (2023-11-08)
+
+### Bug Fixes
+
+- **enhanced:** correct schema validation issues ([5a04a81](https://github.com/module-federation/universe/commit/5a04a812f505ab8287d206abd0a6996057a994fc))
+
+# [2.1.0-canary.3](https://github.com/module-federation/universe/compare/node-2.1.0-canary.2...node-2.1.0-canary.3) (2023-11-08)
+
+### Bug Fixes
+
+- fix version missmatch ([2d45df4](https://github.com/module-federation/universe/commit/2d45df485e72471bd2d5b116a050a0ae2416acc1))
+
+# [2.1.0-canary.2](https://github.com/module-federation/universe/compare/node-2.1.0-canary.1...node-2.1.0-canary.2) (2023-11-07)
+
+### Bug Fixes
+
+- issues with integrated runtime chunk ([edc4d97](https://github.com/module-federation/universe/commit/edc4d97393c8ad04adecc53062f40a80735defb7))
+- issues with integrated runtime chunk ([d4fa90d](https://github.com/module-federation/universe/commit/d4fa90de214e5b15957c208436878d82ce223a22))
+- issues with integrated runtime chunk ([aa1b137](https://github.com/module-federation/universe/commit/aa1b13791e353433d2a219addbef1443b853c2f0))
+
+### Features
+
+- **enhanced:** AsyncBoundary support ESM targets and remix_run framework outputs ([0100694](https://github.com/module-federation/universe/commit/0100694a07044460dc44a73cfb4ecff619177457))
+
+# [2.1.0-canary.1](https://github.com/module-federation/universe/compare/node-2.0.1...node-2.1.0-canary.1) (2023-11-06)
+
+### Bug Fixes
+
+- add exported file ([19b1afb](https://github.com/module-federation/universe/commit/19b1afbd58572897f36b16926f841e35d154c712))
+- add missing serialize method on RemoteModule ([e7ac801](https://github.com/module-federation/universe/commit/e7ac801151b08dbb5ca025bd8ac03683f792f92f))
+- add override to remoteModule ([875038a](https://github.com/module-federation/universe/commit/875038ad68dfed05822c1bc7c68ae91e57282f4f))
+- Auto Public Path, detect multiple output targets ([65f17b1](https://github.com/module-federation/universe/commit/65f17b189f37e0ad9e72bb0bf04463e9c5455929))
+- bad impleentation during federation port ([cc2e53f](https://github.com/module-federation/universe/commit/cc2e53f0351fb94c9068223ad6b8d990a913ab53))
+- broken versioning issues in consumes ([e7fada2](https://github.com/module-federation/universe/commit/e7fada211b1e58dc52eafeff4210a9ce62636f9d))
+- change exports for module info runtime ([f40c538](https://github.com/module-federation/universe/commit/f40c538221353a61938cadf624c9235ec8eb4cce))
+- chunk flushing ([c9df545](https://github.com/module-federation/universe/commit/c9df5451c84e6458b392884492bf669bf7383d5c))
+- **deps:** update dependency axios to v1.5.1 ([ae9a06a](https://github.com/module-federation/universe/commit/ae9a06a0cc35fad27a0b493a25370b92617c39fb))
+- **deps:** update dependency core-js to v3.33.0 ([30894ca](https://github.com/module-federation/universe/commit/30894cafbe5dea4350dc7c633548038d7ec5f8a8))
+- **deps:** update dependency typedoc to v0.25.2 ([46c6524](https://github.com/module-federation/universe/commit/46c65247e187cee9e15625402c1570ac351bb1fe))
+- **deps:** update dependency undici to v5.25.2 ([da3e539](https://github.com/module-federation/universe/commit/da3e539a41ed23ccb5086b1dd428fbee0f8d652c))
+- **deps:** update dependency undici to v5.25.4 ([1d4f91e](https://github.com/module-federation/universe/commit/1d4f91ec93da4326c8a42eef28f150d5d09738bb))
+- **deps:** update dependency undici to v5.26.2 [security] ([410a8b8](https://github.com/module-federation/universe/commit/410a8b8bd1558dfb5119ae10941d2b3816a0d0e0))
+- **deps:** update dependency unplugin to v1.5.0 ([936b3f8](https://github.com/module-federation/universe/commit/936b3f8d8061fd9d481d1788fb35b88588928d14))
+- dont crash offline remotes ([f0d7671](https://github.com/module-federation/universe/commit/f0d7671569ac34f64017a303739b54880f5220e6))
+- **enhanced:** module info duplication ([49b4a57](https://github.com/module-federation/universe/commit/49b4a5736714c1db4510d10cdd5fe0277123caa8))
+- **enhanced:** syntax issue in proxy ([2e5848b](https://github.com/module-federation/universe/commit/2e5848b4be3e3bba46508a427c1bc8f2d3043c8d))
+- ensure chunk handler exists before calling it ([98ba838](https://github.com/module-federation/universe/commit/98ba838f979bbef11f5d678c3bf27a4de534cf9d))
+- ensure custom FS works with target: node or async node preset ([a08fcab](https://github.com/module-federation/universe/commit/a08fcab7dde903966d34be9dab0b34c8896948ca))
+- export parseRemotes ([12ed54c](https://github.com/module-federation/universe/commit/12ed54c87ba539bc2a79cdee86058f0a2776653e))
+- hot reloading system ([99f733b](https://github.com/module-federation/universe/commit/99f733bbdbd727a99fbaaeab3f92f4b65fa568dd))
+- import utils manually ([2767191](https://github.com/module-federation/universe/commit/2767191467d9d685704b747d42b5f170da233847))
+- improve backward compat **remote_scope** global ([ac0efa3](https://github.com/module-federation/universe/commit/ac0efa37d975a130aa3badc657fa66d723865a5b))
+- improve logic in runtime module info proxy ([8eea1a8](https://github.com/module-federation/universe/commit/8eea1a84ae6a12f69dbb16d00f52ec902efbdda6))
+- legacy scope duplication on recreation ([347e4c9](https://github.com/module-federation/universe/commit/347e4c96e87ff4f28dce319fc6b2fe40f1cbabee))
+- no external helpers ([6c47fd4](https://github.com/module-federation/universe/commit/6c47fd4ce19f2292f6718d201005fba4a8552252))
+- **node:** use ES6 imports and override method in FederationModuleInfoRuntimeModule (#bytedance) ([d420ad9](https://github.com/module-federation/universe/commit/d420ad94b7515123254af45c61704abcc0971511))
+- override semantic-release-plugin-decorators ([18675de](https://github.com/module-federation/universe/commit/18675defef65570d2b3bb6a9caa3fd039badee29))
+- package data ([992d298](https://github.com/module-federation/universe/commit/992d2985c29d0bf86de6739f728fbf64749e7fd0))
+- remote global share scope ([e05d32f](https://github.com/module-federation/universe/commit/e05d32f489880d6b4e0fc21a3807e619a40bc5b3))
+- remove ensure remote runtime module ([d06c082](https://github.com/module-federation/universe/commit/d06c0823435063dcd277897ab551cd3a9c996d3d))
+- remove logger in filesystem ([c370ed5](https://github.com/module-federation/universe/commit/c370ed5fdc5fe3423703f29daa40a4227ac51cf2))
+- remove logging on DFS ([40b8c28](https://github.com/module-federation/universe/commit/40b8c28fac9c39fec8623415a36e487152c2ef34))
+- remove logs from flush chunks ([b7d317c](https://github.com/module-federation/universe/commit/b7d317c4b2b0eda2f3530315dbf471289fa6918b))
+- search registry for both ident and unique name ([f22dc25](https://github.com/module-federation/universe/commit/f22dc25e5a6374273b1bc51b0e101b57226c5906))
+- simplify template ([b4e633b](https://github.com/module-federation/universe/commit/b4e633b6624264456800bc7351c6d815430d42b5))
+- stats plugin updates ([c1db325](https://github.com/module-federation/universe/commit/c1db325d3311b2126964f4ad2ddbfa9d82a50674))
+- switch to @goestav/nx-semantic-release ([63a3350](https://github.com/module-federation/universe/commit/63a3350a6a1a12235e3c9f1e7c724d54f0476356))
+- Ts import error ([6e7974c](https://github.com/module-federation/universe/commit/6e7974c22874378122ab31eea27dddd0604505db))
+- TS imports to webpack ([d506b49](https://github.com/module-federation/universe/commit/d506b492b724ccfb7fdcf6234196ac421564c153))
+- TS imports, missing module methods ([8eb422d](https://github.com/module-federation/universe/commit/8eb422d30e149cb0d96835f036ec73ce1ccafe53))
+- ts in template string ([579b341](https://github.com/module-federation/universe/commit/579b341a5eb38ca6396da15f9667729ab84d2ff6))
+- ts in template string ([37e790a](https://github.com/module-federation/universe/commit/37e790a7b46ff6d8c8fd2c12cfd5629900db1b53))
+- ts in template string ([0edbbea](https://github.com/module-federation/universe/commit/0edbbeaa42503237b88132252e29a34a79bade51))
+- ts in template string ([1d56efd](https://github.com/module-federation/universe/commit/1d56efdf3d0bc78d19d187fe561fbbf453bada87))
+- ts in template string ([9b8f652](https://github.com/module-federation/universe/commit/9b8f652f96bf6f29d5fc238bb616e19187158a57))
+- ts in template string ([113d703](https://github.com/module-federation/universe/commit/113d7037de8238ed0bcf9418ac1bf3d082fbea66))
+- typescript issues ([0a07481](https://github.com/module-federation/universe/commit/0a07481552e1df6b35506165cbc649996004c318))
+
+### Features
+
+- add auto public path support for remote modules (node_auto_public_path) ([b12c984](https://github.com/module-federation/universe/commit/b12c9841aa55027cb7b77e768ff9c0b456120d51))
+- additional plugin exports ([0604461](https://github.com/module-federation/universe/commit/0604461ea8806d4e064955f5edef571a9a45d8d0))
+- AddRuntimeRequirementToPromiseExternal ([9bc5a20](https://github.com/module-federation/universe/commit/9bc5a20b54228de7d1f2554eee10360a34e8d8a1))
+- AsyncBoundaryPlugin ([00227ca](https://github.com/module-federation/universe/commit/00227cabf3a1e7286148e84d5714e020391771f7))
+- checkInvalidContext as tapable hook ([a3eb553](https://github.com/module-federation/universe/commit/a3eb5537ff462ead2230615f578569ec46199f50))
+- **ContainerEntryModule:** fix TypeScript issue, enhance needBuild method [#398](https://github.com/module-federation/universe/issues/398)a60e ([c561e11](https://github.com/module-federation/universe/commit/c561e111a54b253fd194c3b75041577dda50ad4b)), closes [#398a60](https://github.com/module-federation/universe/issues/398a60)
+- create and expose AutomaticPublicPathPlugin.ts ([9d0fcdd](https://github.com/module-federation/universe/commit/9d0fcdd2e36fae971f2eec3269980baedf276b35))
+- Dynamic Filesystem ([#1274](https://github.com/module-federation/universe/issues/1274)) ([2bec98a](https://github.com/module-federation/universe/commit/2bec98a2472b44898a7f14ec6868a2368cfb6d82))
+- **enhanced:** Fork Module Federation ([8682990](https://github.com/module-federation/universe/commit/8682990e7fec6309ce20572958916f747737af90))
+- **enhanced:** new async boundary plugin design ([a4ac1ac](https://github.com/module-federation/universe/commit/a4ac1acff974f74db6395c31134de14d9c344b6f))
+- **enhanced:** Refactor ContainerEntryDependency and ContainerEntryModule for better code readability and maintainability ([e93e7d2](https://github.com/module-federation/universe/commit/e93e7d2fafe2e22f7d2c613095ce1900d7531f29))
+- **enhanced:** Rewrite Async Boundary based on bytedance version ([fa05dd6](https://github.com/module-federation/universe/commit/fa05dd6bce2dd577b1e3fd84533459a04dbe195a))
+- **enhanced:** Support Async Mode and option ([3c33b8e](https://github.com/module-federation/universe/commit/3c33b8ea3b483de5dcc3e5da9fb40c9826fdb7f7))
+- FederationModuleInfo Runtime Module ([50a1a0c](https://github.com/module-federation/universe/commit/50a1a0c7a37bbe42ab6f2f5559b411567fee0fe9))
+- FederationModuleInfo Runtime Module ([7b09ef6](https://github.com/module-federation/universe/commit/7b09ef6c0f4ee68a1b5caa5f021632059c522b8f))
+- fork module federation ([0ad7430](https://github.com/module-federation/universe/commit/0ad7430f6170458a47144be392133b7b2fa1ade0))
+- implement Bytedance Infra Node Plugin ([82e6801](https://github.com/module-federation/universe/commit/82e680157bbad68fa93800a69149c4c28652cfed))
+- implement Bytedance Infra Node Plugin ([97f283e](https://github.com/module-federation/universe/commit/97f283e4746bf6f048ee27584adde5249c8e577c))
+- improve options logic in node federation plugin ([b69b70d](https://github.com/module-federation/universe/commit/b69b70d200c63e3557089e8a0669fc43330c988c))
+- improved async init ([17b1419](https://github.com/module-federation/universe/commit/17b1419ef31ec5661fa06b9f0c297e2771e2a86c))
+- improved async init ([bb19b07](https://github.com/module-federation/universe/commit/bb19b07b5be1bbc28bd6b049ea7aea6510ad17a2))
+- improved async init ([ae3a450](https://github.com/module-federation/universe/commit/ae3a4503ff9de86492b13029d6334b281ddd9493))
+- improved async init ([019694e](https://github.com/module-federation/universe/commit/019694e55fe1f6bebfdab0701bf9087bf0034b8f))
+- native self forming node federation ([#1291](https://github.com/module-federation/universe/issues/1291)) ([1dd5ed1](https://github.com/module-federation/universe/commit/1dd5ed17c981e036336925e807203e94b58c36d6))
+- new actions, remove gpt integration ([370229e](https://github.com/module-federation/universe/commit/370229e02cc352fcfaeaa0f3cf1f9f2d4966d1bb))
+- **node-remote:** Improve module federation runtime compatibility ([5eb2092](https://github.com/module-federation/universe/commit/5eb209249c44d525c12eff5739bf23a93db08e4f))
+- **node:** auto set public path and improve chunk loading strategy #node_auto_public_path ([65989da](https://github.com/module-federation/universe/commit/65989dab95ee2acee7ec9a5ab321921a278cd078))
+- **node:** enhance error handling and remote container registry in RemotePublicPathRuntimeModule (#bytedance) ([061285e](https://github.com/module-federation/universe/commit/061285e0b6210baa1dd502dc94fd57fd9a8af822))
+- **NodeFederationPlugin:** assign remoteContainerRegistry to importMetaName ([ca33d98](https://github.com/module-federation/universe/commit/ca33d98df63fdb8dac402b1cc0ec8bf95f9f1971))
+- **node:** remove unused import from DynamicFilesystemRuntimeModule ([f9787a9](https://github.com/module-federation/universe/commit/f9787a9a67da936679db388e5c66e012e7452d8a))
+- remove old loadScript hack ([fbe19bc](https://github.com/module-federation/universe/commit/fbe19bc76694c14b6a95c577669c2e8656ede1ba))
+- Static fallback to non auto public path ([3c58780](https://github.com/module-federation/universe/commit/3c587809f1e936fba291eab3d7c790115be5102c))
+- support lazy compilation ([29c234c](https://github.com/module-federation/universe/commit/29c234c14315e000acefc60d635ee486205ca83e))
+- support vmok conventions ([0501da8](https://github.com/module-federation/universe/commit/0501da86eaaab6ea79a3397c2c683086cc591309))
+- support vmok conventions ([d53b586](https://github.com/module-federation/universe/commit/d53b5867719eb7fff32bee2edd3255023d598f44))
+- Use enhanced Federation Plugin ([e021d66](https://github.com/module-federation/universe/commit/e021d6667996962f154137d164bed13f53a6a135))
+- **utilities:** update DelegateModulesPlugin and tests (#node_auto_public_path) ([df8bb79](https://github.com/module-federation/universe/commit/df8bb791c3fedef299cb15960546ff5ad9c665ef))
+
 # Changelog
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
-## [2.0.2-beta.2](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.1...node-2.0.2-beta.2) (2023-09-15)
+## [2.0.2-beta.6](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.5...node-2.0.2-beta.6) (2023-10-07)
 
-
-### Bug Fixes
-
-* Auto Public Path, detect multiple output targets ([65f17b1](https://github.com/module-federation/nextjs-mf/commit/65f17b189f37e0ad9e72bb0bf04463e9c5455929))
-* ensure custom FS works with target: node or async node preset ([a08fcab](https://github.com/module-federation/nextjs-mf/commit/a08fcab7dde903966d34be9dab0b34c8896948ca))
-
-
-
-## [2.0.2-beta.1](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.0...node-2.0.2-beta.1) (2023-09-14)
-
-
-
-## [2.0.2-beta.0](https://github.com/module-federation/nextjs-mf/compare/node-2.0.1...node-2.0.2-beta.0) (2023-09-14)
-
+## [2.0.2-beta.5](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.4...node-2.0.2-beta.5) (2023-10-04)
 
 ### Bug Fixes
 
-* import utils manually ([2767191](https://github.com/module-federation/nextjs-mf/commit/2767191467d9d685704b747d42b5f170da233847))
-* **node:** use ES6 imports and override method in FederationModuleInfoRuntimeModule (#bytedance) ([d420ad9](https://github.com/module-federation/nextjs-mf/commit/d420ad94b7515123254af45c61704abcc0971511))
-* remove ensure remote runtime module ([d06c082](https://github.com/module-federation/nextjs-mf/commit/d06c0823435063dcd277897ab551cd3a9c996d3d))
+- remove logs from flush chunks ([b7d317c](https://github.com/module-federation/nextjs-mf/commit/b7d317c4b2b0eda2f3530315dbf471289fa6918b))
 
+## [2.0.2-beta.4](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.3...node-2.0.2-beta.4) (2023-10-03)
+
+## [2.0.2-beta.3](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.2...node-2.0.2-beta.3) (2023-10-03)
+
+### Bug Fixes
+
+- add exported file ([19b1afb](https://github.com/module-federation/nextjs-mf/commit/19b1afbd58572897f36b16926f841e35d154c712))
+- bad impleentation during federation port ([cc2e53f](https://github.com/module-federation/nextjs-mf/commit/cc2e53f0351fb94c9068223ad6b8d990a913ab53))
+- chunk flushing ([c9df545](https://github.com/module-federation/nextjs-mf/commit/c9df5451c84e6458b392884492bf669bf7383d5c))
+- dont crash offline remotes ([f0d7671](https://github.com/module-federation/nextjs-mf/commit/f0d7671569ac34f64017a303739b54880f5220e6))
+- export parseRemotes ([12ed54c](https://github.com/module-federation/nextjs-mf/commit/12ed54c87ba539bc2a79cdee86058f0a2776653e))
+- hot reloading system ([99f733b](https://github.com/module-federation/nextjs-mf/commit/99f733bbdbd727a99fbaaeab3f92f4b65fa568dd))
+- remove logger in filesystem ([c370ed5](https://github.com/module-federation/nextjs-mf/commit/c370ed5fdc5fe3423703f29daa40a4227ac51cf2))
+- remove logging on DFS ([40b8c28](https://github.com/module-federation/nextjs-mf/commit/40b8c28fac9c39fec8623415a36e487152c2ef34))
+- search registry for both ident and unique name ([f22dc25](https://github.com/module-federation/nextjs-mf/commit/f22dc25e5a6374273b1bc51b0e101b57226c5906))
+- simplify template ([b4e633b](https://github.com/module-federation/nextjs-mf/commit/b4e633b6624264456800bc7351c6d815430d42b5))
+- stats plugin updates ([c1db325](https://github.com/module-federation/nextjs-mf/commit/c1db325d3311b2126964f4ad2ddbfa9d82a50674))
+- ts in template string ([0edbbea](https://github.com/module-federation/nextjs-mf/commit/0edbbeaa42503237b88132252e29a34a79bade51))
+- ts in template string ([9b8f652](https://github.com/module-federation/nextjs-mf/commit/9b8f652f96bf6f29d5fc238bb616e19187158a57))
 
 ### Features
 
-* add auto public path support for remote modules (node_auto_public_path) ([b12c984](https://github.com/module-federation/nextjs-mf/commit/b12c9841aa55027cb7b77e768ff9c0b456120d51))
-* Dynamic Filesystem ([#1274](https://github.com/module-federation/nextjs-mf/issues/1274)) ([2bec98a](https://github.com/module-federation/nextjs-mf/commit/2bec98a2472b44898a7f14ec6868a2368cfb6d82))
-* FederationModuleInfo Runtime Module ([50a1a0c](https://github.com/module-federation/nextjs-mf/commit/50a1a0c7a37bbe42ab6f2f5559b411567fee0fe9))
-* FederationModuleInfo Runtime Module ([7b09ef6](https://github.com/module-federation/nextjs-mf/commit/7b09ef6c0f4ee68a1b5caa5f021632059c522b8f))
-* implement Bytedance Infra Node Plugin ([82e6801](https://github.com/module-federation/nextjs-mf/commit/82e680157bbad68fa93800a69149c4c28652cfed))
-* implement Bytedance Infra Node Plugin ([97f283e](https://github.com/module-federation/nextjs-mf/commit/97f283e4746bf6f048ee27584adde5249c8e577c))
-* native self forming node federation  ([#1291](https://github.com/module-federation/nextjs-mf/issues/1291)) ([1dd5ed1](https://github.com/module-federation/nextjs-mf/commit/1dd5ed17c981e036336925e807203e94b58c36d6))
-* **node-remote:** Improve module federation runtime compatibility ([5eb2092](https://github.com/module-federation/nextjs-mf/commit/5eb209249c44d525c12eff5739bf23a93db08e4f))
-* **node:** auto set public path and improve chunk loading strategy #node_auto_public_path ([65989da](https://github.com/module-federation/nextjs-mf/commit/65989dab95ee2acee7ec9a5ab321921a278cd078))
-* **node:** enhance error handling and remote container registry in RemotePublicPathRuntimeModule (#bytedance) ([061285e](https://github.com/module-federation/nextjs-mf/commit/061285e0b6210baa1dd502dc94fd57fd9a8af822))
-* **NodeFederationPlugin:** assign remoteContainerRegistry to importMetaName ([ca33d98](https://github.com/module-federation/nextjs-mf/commit/ca33d98df63fdb8dac402b1cc0ec8bf95f9f1971))
-* **node:** remove unused import from DynamicFilesystemRuntimeModule ([f9787a9](https://github.com/module-federation/nextjs-mf/commit/f9787a9a67da936679db388e5c66e012e7452d8a))
-* remove old loadScript hack ([fbe19bc](https://github.com/module-federation/nextjs-mf/commit/fbe19bc76694c14b6a95c577669c2e8656ede1ba))
-* **utilities:** update DelegateModulesPlugin and tests (#node_auto_public_path) ([df8bb79](https://github.com/module-federation/nextjs-mf/commit/df8bb791c3fedef299cb15960546ff5ad9c665ef))
+- create and expose AutomaticPublicPathPlugin.ts ([9d0fcdd](https://github.com/module-federation/nextjs-mf/commit/9d0fcdd2e36fae971f2eec3269980baedf276b35))
+- improve options logic in node federation plugin ([b69b70d](https://github.com/module-federation/nextjs-mf/commit/b69b70d200c63e3557089e8a0669fc43330c988c))
+- improved async init ([bb19b07](https://github.com/module-federation/nextjs-mf/commit/bb19b07b5be1bbc28bd6b049ea7aea6510ad17a2))
+- improved async init ([019694e](https://github.com/module-federation/nextjs-mf/commit/019694e55fe1f6bebfdab0701bf9087bf0034b8f))
+- Static fallback to non auto public path ([3c58780](https://github.com/module-federation/nextjs-mf/commit/3c587809f1e936fba291eab3d7c790115be5102c))
+- support vmok conventions ([0501da8](https://github.com/module-federation/nextjs-mf/commit/0501da86eaaab6ea79a3397c2c683086cc591309))
+- support vmok conventions ([d53b586](https://github.com/module-federation/nextjs-mf/commit/d53b5867719eb7fff32bee2edd3255023d598f44))
+- Use enhanced Federation Plugin ([e021d66](https://github.com/module-federation/nextjs-mf/commit/e021d6667996962f154137d164bed13f53a6a135))
 
+## [2.0.2-beta.2](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.1...node-2.0.2-beta.2) (2023-09-15)
 
+### Bug Fixes
+
+- Auto Public Path, detect multiple output targets ([65f17b1](https://github.com/module-federation/nextjs-mf/commit/65f17b189f37e0ad9e72bb0bf04463e9c5455929))
+- ensure custom FS works with target: node or async node preset ([a08fcab](https://github.com/module-federation/nextjs-mf/commit/a08fcab7dde903966d34be9dab0b34c8896948ca))
+
+## [2.0.2-beta.1](https://github.com/module-federation/nextjs-mf/compare/node-2.0.2-beta.0...node-2.0.2-beta.1) (2023-09-14)
+
+## [2.0.2-beta.0](https://github.com/module-federation/nextjs-mf/compare/node-2.0.1...node-2.0.2-beta.0) (2023-09-14)
+
+### Bug Fixes
+
+- import utils manually ([2767191](https://github.com/module-federation/nextjs-mf/commit/2767191467d9d685704b747d42b5f170da233847))
+- **node:** use ES6 imports and override method in FederationModuleInfoRuntimeModule (#bytedance) ([d420ad9](https://github.com/module-federation/nextjs-mf/commit/d420ad94b7515123254af45c61704abcc0971511))
+- remove ensure remote runtime module ([d06c082](https://github.com/module-federation/nextjs-mf/commit/d06c0823435063dcd277897ab551cd3a9c996d3d))
+
+### Features
+
+- add auto public path support for remote modules (node_auto_public_path) ([b12c984](https://github.com/module-federation/nextjs-mf/commit/b12c9841aa55027cb7b77e768ff9c0b456120d51))
+- Dynamic Filesystem ([#1274](https://github.com/module-federation/nextjs-mf/issues/1274)) ([2bec98a](https://github.com/module-federation/nextjs-mf/commit/2bec98a2472b44898a7f14ec6868a2368cfb6d82))
+- FederationModuleInfo Runtime Module ([50a1a0c](https://github.com/module-federation/nextjs-mf/commit/50a1a0c7a37bbe42ab6f2f5559b411567fee0fe9))
+- FederationModuleInfo Runtime Module ([7b09ef6](https://github.com/module-federation/nextjs-mf/commit/7b09ef6c0f4ee68a1b5caa5f021632059c522b8f))
+- implement Bytedance Infra Node Plugin ([82e6801](https://github.com/module-federation/nextjs-mf/commit/82e680157bbad68fa93800a69149c4c28652cfed))
+- implement Bytedance Infra Node Plugin ([97f283e](https://github.com/module-federation/nextjs-mf/commit/97f283e4746bf6f048ee27584adde5249c8e577c))
+- native self forming node federation ([#1291](https://github.com/module-federation/nextjs-mf/issues/1291)) ([1dd5ed1](https://github.com/module-federation/nextjs-mf/commit/1dd5ed17c981e036336925e807203e94b58c36d6))
+- **node-remote:** Improve module federation runtime compatibility ([5eb2092](https://github.com/module-federation/nextjs-mf/commit/5eb209249c44d525c12eff5739bf23a93db08e4f))
+- **node:** auto set public path and improve chunk loading strategy #node_auto_public_path ([65989da](https://github.com/module-federation/nextjs-mf/commit/65989dab95ee2acee7ec9a5ab321921a278cd078))
+- **node:** enhance error handling and remote container registry in RemotePublicPathRuntimeModule (#bytedance) ([061285e](https://github.com/module-federation/nextjs-mf/commit/061285e0b6210baa1dd502dc94fd57fd9a8af822))
+- **NodeFederationPlugin:** assign remoteContainerRegistry to importMetaName ([ca33d98](https://github.com/module-federation/nextjs-mf/commit/ca33d98df63fdb8dac402b1cc0ec8bf95f9f1971))
+- **node:** remove unused import from DynamicFilesystemRuntimeModule ([f9787a9](https://github.com/module-federation/nextjs-mf/commit/f9787a9a67da936679db388e5c66e012e7452d8a))
+- remove old loadScript hack ([fbe19bc](https://github.com/module-federation/nextjs-mf/commit/fbe19bc76694c14b6a95c577669c2e8656ede1ba))
+- **utilities:** update DelegateModulesPlugin and tests (#node_auto_public_path) ([df8bb79](https://github.com/module-federation/nextjs-mf/commit/df8bb791c3fedef299cb15960546ff5ad9c665ef))
 
 ## [2.0.1](https://github.com/module-federation/nextjs-mf/compare/node-2.0.0...node-2.0.1) (2023-09-13)
 
 ### Dependency Updates
 
-* `utils` updated to version `3.0.1`
-* `utils` updated to version `3.0.1`
-
+- `utils` updated to version `3.0.1`
+- `utils` updated to version `3.0.1`
 
 # [2.0.0](https://github.com/module-federation/nextjs-mf/compare/node-1.0.6...node-2.0.0) (2023-09-09)
 
 ### Dependency Updates
 
-* `utils` updated to version `3.0.0`
-* `utils` updated to version `3.0.0`
+- `utils` updated to version `3.0.0`
+- `utils` updated to version `3.0.0`
 
 ### Bug Fixes
 
-* workaround to self ref module error in prod ([#1205](https://github.com/module-federation/nextjs-mf/issues/1205)) ([1d88beb](https://github.com/module-federation/nextjs-mf/commit/1d88beb0da629f036e132573fee9f05494b1f540))
-
+- workaround to self ref module error in prod ([#1205](https://github.com/module-federation/nextjs-mf/issues/1205)) ([1d88beb](https://github.com/module-federation/nextjs-mf/commit/1d88beb0da629f036e132573fee9f05494b1f540))
 
 ### Features
 
-* core package for module federation ([#1093](https://github.com/module-federation/nextjs-mf/issues/1093)) ([d460400](https://github.com/module-federation/nextjs-mf/commit/d46040053e9b627321b5fe8e05556c5bb727c238)), closes [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#835](https://github.com/module-federation/nextjs-mf/issues/835) [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#871](https://github.com/module-federation/nextjs-mf/issues/871) [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#872](https://github.com/module-federation/nextjs-mf/issues/872) [#875](https://github.com/module-federation/nextjs-mf/issues/875) [#884](https://github.com/module-federation/nextjs-mf/issues/884) [#887](https://github.com/module-federation/nextjs-mf/issues/887) [#893](https://github.com/module-federation/nextjs-mf/issues/893) [#885](https://github.com/module-federation/nextjs-mf/issues/885) [#899](https://github.com/module-federation/nextjs-mf/issues/899) [#904](https://github.com/module-federation/nextjs-mf/issues/904) [#932](https://github.com/module-federation/nextjs-mf/issues/932) [#936](https://github.com/module-federation/nextjs-mf/issues/936) [#959](https://github.com/module-federation/nextjs-mf/issues/959) [#960](https://github.com/module-federation/nextjs-mf/issues/960) [#969](https://github.com/module-federation/nextjs-mf/issues/969) [#971](https://github.com/module-federation/nextjs-mf/issues/971) [#1234](https://github.com/module-federation/nextjs-mf/issues/1234) [#1235](https://github.com/module-federation/nextjs-mf/issues/1235)
-
+- core package for module federation ([#1093](https://github.com/module-federation/nextjs-mf/issues/1093)) ([d460400](https://github.com/module-federation/nextjs-mf/commit/d46040053e9b627321b5fe8e05556c5bb727c238)), closes [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#835](https://github.com/module-federation/nextjs-mf/issues/835) [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#871](https://github.com/module-federation/nextjs-mf/issues/871) [#851](https://github.com/module-federation/nextjs-mf/issues/851) [#864](https://github.com/module-federation/nextjs-mf/issues/864) [#872](https://github.com/module-federation/nextjs-mf/issues/872) [#875](https://github.com/module-federation/nextjs-mf/issues/875) [#884](https://github.com/module-federation/nextjs-mf/issues/884) [#887](https://github.com/module-federation/nextjs-mf/issues/887) [#893](https://github.com/module-federation/nextjs-mf/issues/893) [#885](https://github.com/module-federation/nextjs-mf/issues/885) [#899](https://github.com/module-federation/nextjs-mf/issues/899) [#904](https://github.com/module-federation/nextjs-mf/issues/904) [#932](https://github.com/module-federation/nextjs-mf/issues/932) [#936](https://github.com/module-federation/nextjs-mf/issues/936) [#959](https://github.com/module-federation/nextjs-mf/issues/959) [#960](https://github.com/module-federation/nextjs-mf/issues/960) [#969](https://github.com/module-federation/nextjs-mf/issues/969) [#971](https://github.com/module-federation/nextjs-mf/issues/971) [#1234](https://github.com/module-federation/nextjs-mf/issues/1234) [#1235](https://github.com/module-federation/nextjs-mf/issues/1235)
 
 ### BREAKING CHANGES
 
-* automaticAsyncBoundary option has been removed
+- automaticAsyncBoundary option has been removed
 
-* fix: exclude specific pages from page map automatically
+- fix: exclude specific pages from page map automatically
 
-* refactor: conslidate codebase
+- refactor: conslidate codebase
 
-* fix: improve hot reload share recovery
+- fix: improve hot reload share recovery
 
-* refactor: remove server jsonp template
+- refactor: remove server jsonp template
 
-* chore: remove dead code from runtime modules
+- chore: remove dead code from runtime modules
 
-* fix: clean up jsonp getCustomJsonpCode
-
-getting chunk loading global from compiler output options
-
-* feat: adding cleanInitArrays runtime helper
-
-* chore: remove share scope hoist and module hoisting system
-
-* chore: cleanup code
-
-* chore: remove dead code from add module runtime plugin
-
-likely can remove whole plugin in future
-
-* chore: remove logs from delegate modules
-
-* chore: remove old utils
-
-* fix: add warning on auto page stitch
-
-* fix: remove commented out code from InvertedContainerPlugin.ts
-
-* chore: improve logging to see if its local load or remote load
-
-* chore: clean up old custom promises factories
-
-* fix: remove container proxy code
-
-* fix: remove container proxy code
-* automaticAsyncBoundary option has been removed
-
-* fix: exclude specific pages from page map automatically
-
-* refactor: conslidate codebase
-
-* fix: improve hot reload share recovery
-
-* refactor: remove server jsonp template
-
-* chore: remove dead code from runtime modules
-
-* fix: clean up jsonp getCustomJsonpCode
+- fix: clean up jsonp getCustomJsonpCode
 
 getting chunk loading global from compiler output options
 
-* feat: adding cleanInitArrays runtime helper
+- feat: adding cleanInitArrays runtime helper
 
-* chore: remove share scope hoist and module hoisting system
+- chore: remove share scope hoist and module hoisting system
 
-* chore: cleanup code
+- chore: cleanup code
 
-* chore: remove dead code from add module runtime plugin
+- chore: remove dead code from add module runtime plugin
 
 likely can remove whole plugin in future
 
-* chore: remove logs from delegate modules
+- chore: remove logs from delegate modules
 
-* chore: remove old utils
+- chore: remove old utils
 
-* fix: add warning on auto page stitch
+- fix: add warning on auto page stitch
 
-* fix: remove commented out code from InvertedContainerPlugin.ts
+- fix: remove commented out code from InvertedContainerPlugin.ts
 
-* chore: improve logging to see if its local load or remote load
+- chore: improve logging to see if its local load or remote load
 
-* chore: clean up old custom promises factories
+- chore: clean up old custom promises factories
 
-* fix: remove container proxy code
+- fix: remove container proxy code
 
-* fix: remove container proxy code
+- fix: remove container proxy code
+- automaticAsyncBoundary option has been removed
 
-* chore: fix project.json
+- fix: exclude specific pages from page map automatically
 
-* debugging
+- refactor: conslidate codebase
 
-* fix: resolve backmerge issues with build
+- fix: improve hot reload share recovery
 
-* Merge branch 'kill_child_compilers' into fix_backmerge_issues
+- refactor: remove server jsonp template
+
+- chore: remove dead code from runtime modules
+
+- fix: clean up jsonp getCustomJsonpCode
+
+getting chunk loading global from compiler output options
+
+- feat: adding cleanInitArrays runtime helper
+
+- chore: remove share scope hoist and module hoisting system
+
+- chore: cleanup code
+
+- chore: remove dead code from add module runtime plugin
+
+likely can remove whole plugin in future
+
+- chore: remove logs from delegate modules
+
+- chore: remove old utils
+
+- fix: add warning on auto page stitch
+
+- fix: remove commented out code from InvertedContainerPlugin.ts
+
+- chore: improve logging to see if its local load or remote load
+
+- chore: clean up old custom promises factories
+
+- fix: remove container proxy code
+
+- fix: remove container proxy code
+
+- chore: fix project.json
+
+- debugging
+
+- fix: resolve backmerge issues with build
+
+- Merge branch 'kill_child_compilers' into fix_backmerge_issues
 
 # Conflicts:
-#	package-lock.json
-#	package.json
-#	packages/nextjs-mf/src/plugins/NextFederationPlugin/index.ts
-#	packages/nextjs-mf/src/plugins/container/InvertedContainerPlugin.ts
-#	packages/nextjs-mf/src/plugins/container/InvertedContainerRuntimeModule.ts
 
-* feat: enable eager sharing
+# package-lock.json
 
-* refactor: improve module hooks for eager loading and search
+# package.json
 
-* refactor: cleanup custom jsonp and make es5
+# packages/nextjs-mf/src/plugins/NextFederationPlugin/index.ts
 
-* refactor: cleanup inverted container code
+# packages/nextjs-mf/src/plugins/container/InvertedContainerPlugin.ts
 
-* refactor: cleanup inverted container code
-* automaticAsyncBoundary option has been removed
+# packages/nextjs-mf/src/plugins/container/InvertedContainerRuntimeModule.ts
 
-* fix: exclude specific pages from page map automatically
+- feat: enable eager sharing
 
-* refactor: conslidate codebase
+- refactor: improve module hooks for eager loading and search
 
-* fix: improve hot reload share recovery
+- refactor: cleanup custom jsonp and make es5
 
-* refactor: remove server jsonp template
+- refactor: cleanup inverted container code
 
-* chore: remove dead code from runtime modules
+- refactor: cleanup inverted container code
+- automaticAsyncBoundary option has been removed
 
-* fix: clean up jsonp getCustomJsonpCode
+- fix: exclude specific pages from page map automatically
+
+- refactor: conslidate codebase
+
+- fix: improve hot reload share recovery
+
+- refactor: remove server jsonp template
+
+- chore: remove dead code from runtime modules
+
+- fix: clean up jsonp getCustomJsonpCode
 
 getting chunk loading global from compiler output options
 
-* feat: adding cleanInitArrays runtime helper
+- feat: adding cleanInitArrays runtime helper
 
-* chore: remove share scope hoist and module hoisting system
+- chore: remove share scope hoist and module hoisting system
 
-* chore: cleanup code
+- chore: cleanup code
 
-* chore: remove dead code from add module runtime plugin
+- chore: remove dead code from add module runtime plugin
 
 likely can remove whole plugin in future
 
-* chore: remove logs from delegate modules
+- chore: remove logs from delegate modules
 
-* chore: remove old utils
+- chore: remove old utils
 
-* fix: add warning on auto page stitch
+- fix: add warning on auto page stitch
 
-* fix: remove commented out code from InvertedContainerPlugin.ts
+- fix: remove commented out code from InvertedContainerPlugin.ts
 
-* chore: improve logging to see if its local load or remote load
+- chore: improve logging to see if its local load or remote load
 
-* chore: clean up old custom promises factories
+- chore: clean up old custom promises factories
 
-* fix: remove container proxy code
+- fix: remove container proxy code
 
-* fix: remove container proxy code
+- fix: remove container proxy code
 
-* fix: resolve backmerge issues with build
+- fix: resolve backmerge issues with build
 
-* Merge branch 'kill_child_compilers' into fix_backmerge_issues
+- Merge branch 'kill_child_compilers' into fix_backmerge_issues
 
 # Conflicts:
-#	package-lock.json
-#	package.json
-#	packages/nextjs-mf/src/plugins/NextFederationPlugin/index.ts
-#	packages/nextjs-mf/src/plugins/container/InvertedContainerPlugin.ts
-#	packages/nextjs-mf/src/plugins/container/InvertedContainerRuntimeModule.ts
 
-* feat: enable eager sharing
+# package-lock.json
 
-* refactor: improve module hooks for eager loading and search
+# package.json
 
-* refactor: cleanup custom jsonp and make es5
+# packages/nextjs-mf/src/plugins/NextFederationPlugin/index.ts
 
-* refactor: cleanup inverted container code
+# packages/nextjs-mf/src/plugins/container/InvertedContainerPlugin.ts
 
-* refactor: cleanup inverted container code
+# packages/nextjs-mf/src/plugins/container/InvertedContainerRuntimeModule.ts
 
-* ci: fix install step with npm and NX
+- feat: enable eager sharing
 
-* test: remove tests for now
+- refactor: improve module hooks for eager loading and search
 
-* chore(utils): release version 1.7.3-beta.0
+- refactor: cleanup custom jsonp and make es5
 
-* chore(utils): release version 1.7.3
+- refactor: cleanup inverted container code
 
-* chore(node): release version 0.14.4-beta.0
+- refactor: cleanup inverted container code
 
-* chore(node): release version 0.14.4
+- ci: fix install step with npm and NX
 
-* chore(nextjs-mf): release version 6.4.1-beta.4
+- test: remove tests for now
 
-* fix: remove debugging runtime variable
+- chore(utils): release version 1.7.3-beta.0
 
-* chore(nextjs-mf): release version 6.4.1-beta.5
+- chore(utils): release version 1.7.3
 
+- chore(node): release version 0.14.4-beta.0
 
+- chore(node): release version 0.14.4
+
+- chore(nextjs-mf): release version 6.4.1-beta.4
+
+- fix: remove debugging runtime variable
+
+- chore(nextjs-mf): release version 6.4.1-beta.5
 
 ## [1.0.7](https://github.com/module-federation/nextjs-mf/compare/node-1.0.6...node-1.0.7) (2023-08-14)
 

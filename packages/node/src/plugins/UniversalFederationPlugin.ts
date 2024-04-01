@@ -3,8 +3,13 @@
  */
 import StreamingTargetPlugin from './StreamingTargetPlugin';
 import NodeFederationPlugin from './NodeFederationPlugin';
+import { ModuleFederationPlugin } from '@module-federation/enhanced';
 import { ModuleFederationPluginOptions } from '../types';
 import type { Compiler, container } from 'webpack';
+import {
+  getWebpackPath,
+  normalizeWebpackPath,
+} from '@module-federation/sdk/normalize-webpack-path';
 
 /**
  * Interface for NodeFederationOptions
@@ -32,6 +37,7 @@ interface NodeFederationContext {
 class UniversalFederationPlugin {
   private _options: NodeFederationOptions;
   private context: NodeFederationContext;
+  private name: string;
 
   /**
    * Create a UniversalFederationPlugin
@@ -41,6 +47,7 @@ class UniversalFederationPlugin {
   constructor(options: NodeFederationOptions, context: NodeFederationContext) {
     this._options = options || ({} as NodeFederationOptions);
     this.context = context || ({} as NodeFederationContext);
+    this.name = 'ModuleFederationPlugin';
   }
 
   /**
@@ -50,21 +57,19 @@ class UniversalFederationPlugin {
   apply(compiler: Compiler) {
     const { isServer, debug, ...options } = this._options;
     const { webpack } = compiler;
-
+    if (!process.env['FEDERATION_WEBPACK_PATH']) {
+      process.env['FEDERATION_WEBPACK_PATH'] = getWebpackPath(compiler);
+    }
     if (
       isServer ||
       compiler.options.name === 'server' ||
-      compiler.options.target === 'node'||
+      compiler.options.target === 'node' ||
       compiler.options.target === 'async-node'
     ) {
       new NodeFederationPlugin(options, this.context).apply(compiler);
       new StreamingTargetPlugin({ ...options, debug }).apply(compiler);
     } else {
-      new (this.context.ModuleFederationPlugin ||
-        (webpack && webpack.container.ModuleFederationPlugin) ||
-        require('webpack/lib/container/ModuleFederationPlugin'))(options).apply(
-        compiler
-      );
+      new ModuleFederationPlugin(options).apply(compiler);
     }
   }
 }

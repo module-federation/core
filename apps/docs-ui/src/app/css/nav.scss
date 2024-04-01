@@ -8,7 +8,12 @@
   }
 
   .subnav-item {
+    .flex.gap-2.items-center > div {
+      min-width: 4px !important;
+      min-height: 4px !important;
+    }
     ul {
+      margin-top: 1rem;
       padding-left: 10px;
     }
     &.closed {

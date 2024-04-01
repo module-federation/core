@@ -1,0 +1,40 @@
+{
+  "name": "@module-federation/enhanced",
+  "version": "0.1.1",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "webpack": "^5.0.0"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/src/index.js",
+      "import": "./dist/src/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/src/index.d.ts"
+      ]
+    }
+  },
+  "devDependencies": {
+    "@module-federation/webpack-bundler-runtime": "workspace:*"
+  },
+  "dependencies": {
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/runtime-tools": "workspace:*",
+    "@module-federation/manifest": "workspace:*",
+    "@module-federation/managers": "workspace:*",
+    "upath": "2.0.1"
+  }
+}

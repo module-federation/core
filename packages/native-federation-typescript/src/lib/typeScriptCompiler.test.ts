@@ -39,7 +39,7 @@ describe('typeScriptCompiler', () => {
     const expectedPath = tmpDir + sep;
     const retrievedOriginalOutDir = retrieveOriginalOutDir(
       tsConfig,
-      remoteOptions
+      remoteOptions,
     );
 
     expect(retrievedOriginalOutDir).toBe(expectedPath);
@@ -63,7 +63,7 @@ describe('typeScriptCompiler', () => {
         compileTs(
           {},
           { ...tsConfig, emitDeclarationOnly: true },
-          { ...remoteOptions, compilerInstance: 'vue-tsc' }
+          { ...remoteOptions, compilerInstance: 'vue-tsc' },
         );
       expect(compile).not.toThrow();
 

@@ -6,11 +6,11 @@ import { join, resolve } from 'path';
 import { UnpluginOptions } from 'unplugin';
 import { describe, expect, it, vi } from 'vitest';
 
+import type { Compiler } from 'webpack';
 import {
   NativeFederationTypeScriptHost,
   NativeFederationTypeScriptRemote,
 } from './index';
-import type { Compiler } from 'webpack';
 
 describe('index', () => {
   const projectRoot = join(__dirname, '..', '..', '..');
@@ -45,7 +45,7 @@ describe('index', () => {
       const distFolder = join(projectRoot, 'dist', options.typesFolder);
 
       const unplugin = NativeFederationTypeScriptRemote.rollup(
-        options
+        options,
       ) as UnpluginOptions;
       await unplugin.writeBundle?.();
 
@@ -110,11 +110,54 @@ describe('index', () => {
       } as unknown as Compiler;
 
       const unplugin = NativeFederationTypeScriptRemote.rollup(
-        options
+        options,
       ) as UnpluginOptions;
       await unplugin.webpack?.(webpackCompiler);
 
       expect(webpackCompiler).toStrictEqual({
+        options: {
+          devServer: {
+            foo: {},
+            static: {
+              directory: resolve('./dist'),
+            },
+          },
+        },
+      });
+    });
+
+    it('correctly enrich rspack config', async () => {
+      const options = {
+        moduleFederationConfig: {
+          name: 'moduleFederationTypescript',
+          filename: 'remoteEntry.js',
+          exposes: {
+            './index': join(__dirname, './index.ts'),
+          },
+          shared: {
+            react: { singleton: true, eager: true },
+            'react-dom': { singleton: true, eager: true },
+          },
+        },
+        deleteTestsFolder: false,
+        testsFolder: '@mf-tests',
+      };
+
+      const rspackCompiler = {
+        options: {
+          devServer: {
+            foo: {},
+          },
+        },
+      } as any;
+
+      const unplugin = NativeFederationTypeScriptRemote.rollup(
+        options,
+      ) as UnpluginOptions;
+
+      unplugin.rspack?.(rspackCompiler);
+
+      expect(rspackCompiler).toStrictEqual({
         options: {
           devServer: {
             foo: {},
@@ -157,7 +200,7 @@ describe('index', () => {
       axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
       const unplugin = NativeFederationTypeScriptHost.rollup(
-        options
+        options,
       ) as UnpluginOptions;
       await expect(unplugin.writeBundle?.()).resolves.not.toThrow();
 

@@ -6,20 +6,15 @@
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "target": "node",
         "compiler": "tsc",
-        "outputPath": "dist/apps/node-host",
+        "outputPath": "apps/node-host/dist",
         "main": "apps/node-host/src/main.js",
         "tsConfig": "apps/node-host/tsconfig.app.json",
-        "assets": [
-          "apps/node-host/src/assets"
-        ],
-        "isolatedConfig": true,
+        "assets": ["apps/node-host/src/assets"],
         "webpackConfig": "apps/node-host/webpack.config.js"
       },
       "configurations": {
@@ -43,10 +38,7 @@
         }
       ],
       "options": {
-        "buildTarget": [
-          "node-host:build",
-          "node-remote:build"
-        ]
+        "buildTarget": ["node-host:build", "node-remote:build"]
       },
       "configurations": {
         "development": {
@@ -59,20 +51,14 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "apps/node-host/**/*.ts"
-        ]
+        "lintFilePatterns": ["apps/node-host/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "jestConfig": "apps/node-host/jest.config.ts",
         "passWithNoTests": true

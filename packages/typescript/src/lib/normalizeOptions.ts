@@ -3,7 +3,7 @@ import { Compiler } from 'webpack';
 import get from 'lodash.get';
 import path from 'path';
 
-import type { FederatedTypesPluginOptions } from '../types';
+import type { FederatedTypesPluginOptions, TypeServeOptions } from '../types';
 
 import {
   TYPESCRIPT_COMPILED_FOLDER_NAME,
@@ -13,8 +13,12 @@ import {
 
 export type NormalizeOptions = ReturnType<typeof normalizeOptions>;
 
+export const DEFAULT_FETCH_TIMEOUT = 3000;
+export const DEFAULT_FETCH_MAX_RETRY_ATTEMPTS = 3;
+export const DEFAULT_FETCH_RETRY_DELAY = 1000;
+
 const defaultOptions: Required<
-  Omit<FederatedTypesPluginOptions, 'federationConfig'>
+  Omit<FederatedTypesPluginOptions, 'federationConfig' | 'typeServeOptions'>
 > = {
   compiler: 'tsc',
   disableDownloadingRemoteTypes: false,
@@ -22,7 +26,27 @@ const defaultOptions: Required<
   typescriptFolderName: TYPESCRIPT_FOLDER_NAME,
   typescriptCompiledFolderName: TYPESCRIPT_COMPILED_FOLDER_NAME,
   additionalFilesToCompile: [],
-  downloadRemoteTypesTimeout: 2000,
+  typeFetchOptions: {
+    downloadRemoteTypesTimeout: DEFAULT_FETCH_TIMEOUT,
+    maxRetryAttempts: DEFAULT_FETCH_MAX_RETRY_ATTEMPTS,
+    retryDelay: DEFAULT_FETCH_RETRY_DELAY,
+    shouldRetryOnTypesNotFound: true,
+    shouldRetry: true,
+  },
+};
+
+export const validateTypeServeOptions = (options: TypeServeOptions) => {
+  if (!options) {
+    throw new Error('TypeServeOptions is required');
+  }
+
+  if (!options.host) {
+    throw new Error('TypeServeOptions.host is required');
+  }
+
+  if (!options.port || !Number.isInteger(options.port)) {
+    throw new Error('TypeServeOptions.port is required');
+  }
 };
 
 export const isObjectEmpty = <T extends object>(obj: T) => {
@@ -34,7 +58,7 @@ export const isObjectEmpty = <T extends object>(obj: T) => {
 
 export const normalizeOptions = (
   options: FederatedTypesPluginOptions,
-  compiler: Compiler
+  compiler: Compiler,
 ) => {
   const webpackCompilerOptions = compiler.options;
 
@@ -49,7 +73,13 @@ export const normalizeOptions = (
     ...options,
   };
 
-  const federationFileName = federationConfig.filename as string;
+  const typeFetchOptions = {
+    ...defaultOptions.typeFetchOptions,
+    ...(options.typeFetchOptions ?? {}),
+  };
+
+  const federationFileName = (federationConfig.filename ??
+    'remoteEntry.js') as string;
   const distPath =
     get(webpackCompilerOptions, 'devServer.static.directory') ||
     get(webpackCompilerOptions, 'output.path') ||
@@ -57,12 +87,12 @@ export const normalizeOptions = (
 
   const typesPath = federationFileName.substring(
     0,
-    federationFileName.lastIndexOf('/')
+    federationFileName.lastIndexOf('/'),
   );
 
   const typesIndexJsonFilePath = path.join(
     typesPath,
-    TYPES_INDEX_JSON_FILE_NAME
+    TYPES_INDEX_JSON_FILE_NAME,
   );
 
   const distDir = path.join(distPath, typesPath, typescriptFolderName);
@@ -93,6 +123,7 @@ export const normalizeOptions = (
 
   return {
     ...restOptions,
+    typeFetchOptions,
     distDir,
     publicPath,
     tsCompilerOptions,

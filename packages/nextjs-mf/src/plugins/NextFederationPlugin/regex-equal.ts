@@ -1,4 +1,4 @@
-import { RuleSetConditionAbsolute } from 'webpack';
+import type { RuleSetConditionAbsolute } from 'webpack';
 
 /**
  * Compares two regular expressions or other types of conditions to see if they are equal.
@@ -19,7 +19,7 @@ export const regexEqual = (
     | ((value: string) => boolean)
     | RuleSetConditionAbsolute[]
     | undefined,
-  y: RegExp
+  y: RegExp,
 ): boolean => {
   return (
     x instanceof RegExp &&

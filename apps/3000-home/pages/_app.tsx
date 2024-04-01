@@ -3,11 +3,9 @@ import { useState } from 'react';
 import App from 'next/app';
 import { Layout, version } from 'antd';
 import Router, { useRouter } from 'next/router';
-
-import SharedNav from '../components/SharedNav';
+const SharedNav = React.lazy(() => import('../components/SharedNav'));
 import HostAppMenu from '../components/menu';
 import 'antd/dist/antd.css';
-console.log(__webpack_share_scopes__);
 function MyApp(props) {
   const { Component, pageProps } = props;
   const { asPath } = useRouter();
@@ -15,18 +13,20 @@ function MyApp(props) {
   const handleRouteChange = async (url) => {
     if (url.startsWith('/shop')) {
       // @ts-ignore
-      // const RemoteAppMenu = (await import('shop/menu')).default;
-      // setMenuComponent(() => RemoteAppMenu);
+      const RemoteAppMenu = (await import('shop/menu')).default;
+      setMenuComponent(() => RemoteAppMenu);
     } else if (url.startsWith('/checkout')) {
       // @ts-ignore
-      // const RemoteAppMenu = (await import('checkout/menu')).default;
-      // setMenuComponent(() => RemoteAppMenu);
+      const RemoteAppMenu = (await import('checkout/menu')).default;
+      setMenuComponent(() => RemoteAppMenu);
     } else {
       setMenuComponent(() => HostAppMenu);
     }
   };
   // handle first route hit.
-  React.useMemo(() => handleRouteChange(asPath), [asPath]);
+  React.useEffect(() => {
+    handleRouteChange(asPath);
+  }, [asPath]);
 
   //handle route change
   React.useEffect(() => {
@@ -39,7 +39,9 @@ function MyApp(props) {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <SharedNav />
+      <React.Suspense>
+        <SharedNav />
+      </React.Suspense>
       <Layout>
         <Layout.Sider width={200}>
           <MenuComponent />

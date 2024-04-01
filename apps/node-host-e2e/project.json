@@ -1,29 +1,33 @@
 {
   "name": "node-host-e2e",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "implicitDependencies": [
-    "node-host"
-  ],
+  "implicitDependencies": ["node-host"],
   "targets": {
     "e2e": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/{e2eProjectRoot}"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{e2eProjectRoot}"],
       "options": {
         "jestConfig": "apps/node-host-e2e/jest.config.ts",
         "passWithNoTests": true
       }
     },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": true,
+        "commands": [
+          {
+            "command": "sleep 10 && nx run node-host-e2e:e2e && lsof -ti tcp:3002,3003,3333 | xargs kill",
+            "forwardAllArgs": true
+          }
+        ]
+      }
+    },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "apps/node-host-e2e/**/*.{js,ts}"
-        ]
+        "lintFilePatterns": ["apps/node-host-e2e/**/*.{js,ts}"]
       }
     }
   }

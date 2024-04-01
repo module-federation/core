@@ -1,4 +1,8 @@
-import { Template, RuntimeGlobals, Chunk, ChunkGraph } from 'webpack';
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+const { RuntimeGlobals, Template } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
+import type { Chunk, ChunkGraph } from 'webpack';
 
 /**
  * Generates the hot module replacement (HMR) code.
@@ -8,7 +12,7 @@ import { Template, RuntimeGlobals, Chunk, ChunkGraph } from 'webpack';
  */
 export function generateHmrCode(
   withHmr: boolean,
-  rootOutputDir: string
+  rootOutputDir: string,
 ): string {
   if (!withHmr) {
     return '// no HMR';
@@ -22,7 +26,7 @@ export function generateHmrCode(
       Template.indent([
         // Construct filename for the updated chunk
         `var filename = require('path').join(__dirname, ${JSON.stringify(
-          rootOutputDir
+          rootOutputDir,
         )} + ${RuntimeGlobals.getChunkUpdateScriptFilename}(chunkId));`,
         // Read the updated chunk file
         "require('fs').readFile(filename, 'utf-8', function(err, content) {",
@@ -57,7 +61,7 @@ export function generateHmrCode(
     // Replace placeholders in the HMR runtime code
     Template.getFunctionContent(
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('webpack/lib/hmr/JavascriptHotModuleReplacement.runtime.js')
+      require('webpack/lib/hmr/JavascriptHotModuleReplacement.runtime.js'),
     )
       .replace(/\$key\$/g, 'readFileVm')
       .replace(/\$installedChunks\$/g, 'installedChunks')
@@ -69,11 +73,11 @@ export function generateHmrCode(
       .replace(/\$hmrModuleData\$/g, RuntimeGlobals.hmrModuleData)
       .replace(
         /\$hmrDownloadUpdateHandlers\$/g,
-        RuntimeGlobals.hmrDownloadUpdateHandlers
+        RuntimeGlobals.hmrDownloadUpdateHandlers,
       )
       .replace(
         /\$hmrInvalidateModuleHandlers\$/g,
-        RuntimeGlobals.hmrInvalidateModuleHandlers
+        RuntimeGlobals.hmrInvalidateModuleHandlers,
       ),
   ]);
 }
@@ -87,7 +91,7 @@ export function generateHmrCode(
 export function getInitialChunkIds(
   chunk: Chunk,
   chunkGraph: ChunkGraph,
-  chunkHasJs: any
+  chunkHasJs: any,
 ) {
   const initialChunkIds = new Set(chunk.ids);
   for (const c of chunk.getAllInitialChunks()) {
@@ -120,14 +124,13 @@ export function generateLoadingCode(
   hasJsMatcher: any,
   rootOutputDir: string,
   remotes: Record<string, string>,
-  name: string | undefined
+  name: string | undefined,
 ): string {
   if (!withLoading) {
     return '// no chunk loading';
   }
 
   return Template.asString([
-    // `if(!globalThis.__remote_scope__) globalThis.__remote_scope__ = ${RuntimeGlobals.require}.federation`,
     '// Dynamic filesystem chunk loading for javascript',
     `${fn}.readFileVm = function(chunkId, promises) {`,
     hasJsMatcher !== false
@@ -156,7 +159,7 @@ export function generateLoadingCode(
                   '}',
                   'var fs = typeof process !== "undefined" ? require(\'fs\') : false;',
                   `var filename = typeof process !== "undefined" ? require('path').join(__dirname, ${JSON.stringify(
-                    rootOutputDir
+                    rootOutputDir,
                   )} + ${
                     RuntimeGlobals.getChunkScriptFilename
                   }(chunkId)) : false;`,
@@ -164,33 +167,25 @@ export function generateLoadingCode(
                   'if(fs && fs.existsSync(filename)) {',
                   Template.indent([
                     `loadChunkStrategy('filesystem', chunkId, ${JSON.stringify(
-                      rootOutputDir
+                      rootOutputDir,
                     )}, remotes, installChunkCallback);`,
                   ]),
                   '} else { ',
                   Template.indent([
                     `var remotes = ${JSON.stringify(
-                      Object.values(remotes).reduce((acc, remote) => {
-                        const [global, url] = remote.split('@');
-                        acc[global] = url;
-                        return acc;
-                      }, {} as Record<string, string>)
+                      Object.values(remotes).reduce(
+                        (acc, remote) => {
+                          const [global, url] = remote.split('@');
+                          acc[global] = url;
+                          return acc;
+                        },
+                        {} as Record<string, string>,
+                      ),
                     )};`,
-
-                    `var requestedRemote = globalThis.__remote_scope__[${JSON.stringify(name)}]`,
-
-                    "if(typeof requestedRemote === 'function'){",
-                    Template.indent(
-                      'requestedRemote = await requestedRemote()'
-                    ),
-                    '}',
 
                     `var chunkName = ${RuntimeGlobals.getChunkScriptFilename}(chunkId);`,
                     "const loadingStrategy = typeof process !== 'undefined' ?  'http-vm' : 'http-eval';",
-
-                    `loadChunkStrategy(loadingStrategy, chunkName,${JSON.stringify(
-                      name
-                    )}, globalThis.__remote_scope__,installChunkCallback);`,
+                    `loadChunkStrategy(loadingStrategy, chunkName,${RuntimeGlobals.require}.federation.initOptions.name, ${RuntimeGlobals.require}.federation.initOptions.remotes, installChunkCallback);`,
                   ]),
                   '}',
                 ]),
@@ -215,7 +210,7 @@ export function generateLoadingCode(
  */
 export function generateHmrManifestCode(
   withHmrManifest: boolean,
-  rootOutputDir: string
+  rootOutputDir: string,
 ): string {
   if (!withHmrManifest) {
     return '// no HMR manifest';
@@ -227,7 +222,7 @@ export function generateHmrManifestCode(
       'return new Promise(function(resolve, reject) {',
       Template.indent([
         `var filename = require('path').join(__dirname, ${JSON.stringify(
-          rootOutputDir
+          rootOutputDir,
         )} + ${RuntimeGlobals.getUpdateManifestFilename}());`,
         "require('fs').readFile(filename, 'utf-8', function(err, content) {",
         Template.indent([
@@ -255,14 +250,14 @@ export function generateHmrManifestCode(
  */
 export function handleOnChunkLoad(
   withOnChunkLoad: boolean,
-  runtimeTemplate: any
+  runtimeTemplate: any,
 ): string {
   if (withOnChunkLoad) {
     return `${
       RuntimeGlobals.onChunksLoaded
     }.readFileVm = ${runtimeTemplate.returningFunction(
       'installedChunks[chunkId] === 0',
-      'chunkId'
+      'chunkId',
     )};`;
   } else {
     return '// no on chunks loaded';
@@ -278,49 +273,45 @@ export function generateLoadScript(runtimeTemplate: any): string {
   return Template.asString([
     '// load script equivalent for server side',
     `${RuntimeGlobals.loadScript} = ${runtimeTemplate.basicFunction(
-      'url,callback,chunkId',
+      'url, callback, chunkId',
       [
         Template.indent([
           `async function executeLoad(url, callback, name) {
-            console.log('in execute load', name, url)
             if (!name) {
               throw new Error('__webpack_require__.l name is required for ' + url);
             }
-            var remoteName = name;
-            if(name.includes('__remote_scope__')) {
-              remoteName = name.split('__remote_scope__.')[1]
-            }
-            if (typeof globalThis.__remote_scope__[remoteName] !== 'undefined') return callback(globalThis.__remote_scope__[remoteName]);
-            globalThis.__remote_scope__._config[remoteName] = url;
-            try {
-              const scriptContent = await (globalThis.webpackChunkLoad || globalThis.fetch || require("node-fetch"))(url).then(res => res.text());
-              let remote;
-              if (typeof process !== 'undefined') {
-                const vm = require('vm');
-                const m = require('module');
-                const remoteCapsule = vm.runInThisContext(m.wrap(scriptContent), 'node-federation-loader-' + name + '.vm')
-                const exp = {};
-                remote = {exports:{}};
-                remoteCapsule(exp,require,remote,'node-federation-loader-' + name + '.vm',__dirname);
-                remote = remote.exports || remote;
-              } else {
-                remote = eval('let module = {};' + scriptContent + '\\nmodule.exports')
+            const usesInternalRef = name.startsWith('__webpack_require__')
+            if (usesInternalRef) {
+              const regex = /__webpack_require__\\.federation\\.instance\\.moduleCache\\.get\\(([^)]+)\\)/;
+              const match = name.match(regex);
+              if (match) {
+                name = match[1].replace(/["']/g, '');
               }
-              globalThis.__remote_scope__[remoteName] = remote[remoteName] || remote;
-              globalThis.__remote_scope__._config[remoteName] = url;
-              callback(globalThis.__remote_scope__[remoteName])
-            } catch (e) {
-              e.target = {src: url};
-              callback(e);
             }
+            try {
+              const federation = ${RuntimeGlobals.require}.federation;
+              const res = await ${RuntimeGlobals.require}.federation.runtime.loadScriptNode(url, { attrs: {} });
+              const enhancedRemote = federation.instance.initRawContainer(name, url, res);
+              // use normal global assignment
+              if(!usesInternalRef && !globalThis[name]) {
+                globalThis[name] = enhancedRemote
+              }
+              callback(enhancedRemote);
+            } catch (error) {
+              callback(error);
+            }
+
           }`,
-          `executeLoad(url,callback,chunkId)`,
+          `executeLoad(url, callback, chunkId);`,
         ]),
-      ]
+      ],
     )}`,
   ]);
 }
-export function generateInstallChunk(runtimeTemplate: any, withOnChunkLoad: boolean): string {
+export function generateInstallChunk(
+  runtimeTemplate: any,
+  withOnChunkLoad: boolean,
+): string {
   return `var installChunk = ${runtimeTemplate.basicFunction('chunk', [
     'var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;',
     'for(var moduleId in moreModules) {',
@@ -332,7 +323,6 @@ export function generateInstallChunk(runtimeTemplate: any, withOnChunkLoad: bool
       '}',
     ]),
     '}',
-    // 'console.log("install chunk", chunkIds, installedChunks);',
     'if(runtime) runtime(__webpack_require__);',
     'for(var i = 0; i < chunkIds.length; i++) {',
     Template.indent([
@@ -345,7 +335,10 @@ export function generateInstallChunk(runtimeTemplate: any, withOnChunkLoad: bool
     withOnChunkLoad ? `${RuntimeGlobals.onChunksLoaded}();` : '',
   ])};`;
 }
-export  function generateExternalInstallChunkCode(withExternalInstallChunk: boolean, debug: boolean | undefined): string {
+export function generateExternalInstallChunkCode(
+  withExternalInstallChunk: boolean,
+  debug: boolean | undefined,
+): string {
   if (!withExternalInstallChunk) {
     return '// no external install chunk';
   }
@@ -353,11 +346,9 @@ export  function generateExternalInstallChunkCode(withExternalInstallChunk: bool
   return Template.asString([
     'module.exports = __webpack_require__;',
     `${RuntimeGlobals.externalInstallChunk} = function(){`,
-   true
+    debug
       ? `console.debug('node: webpack installing to install chunk id:', arguments['0'].id);`
       : '',
     `return installChunk.apply(this, arguments)};`,
   ]);
 }
-
-

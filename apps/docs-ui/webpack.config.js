@@ -7,9 +7,9 @@ module.exports = composePlugins(withNx(), withWeb(), (config) => {
   config.plugins.push(
     new CopyWebpackPlugin({
       patterns: staticAssets.map((a) => ({ from: `src/app/${a}`, to: a })),
-    })
+    }),
   );
-  // Update the webpack config as needed here.
+  // Update th  e webpack config as needed here.
   // e.g. `config.plugins.push(new MyPlugin())`
   return config;
 });

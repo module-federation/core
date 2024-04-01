@@ -1,17 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-export NVM_DIR="$HOME/.nvm/nvm.sh"
 
-if [ -f "$NVM_DIR" ]; then
-  . "$(dirname $NVM_DIR)/nvm.sh"
-
-  export NVM_DIR="$HOME/.nvm"
-  a=$(nvm ls | grep 'node')
-  b=${a#*(-> }
-  v=${b%%[)| ]*}
-
-  export PATH="$NVM_DIR/versions/node/$v/bin:$PATH"
-fi
-
-npx --no -- commitlint --edit
+npm run commitlint ${1}

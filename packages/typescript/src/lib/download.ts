@@ -35,7 +35,7 @@ export default async function download(options: DownloadOptions) {
 
   if (!response.ok) {
     throw new Error(
-      `Error ${response.status}. Failed to fetch types for URL: ${url}`
+      `Error ${response.status}. Failed to fetch types for URL: ${url}`,
     );
   }
 
@@ -47,9 +47,9 @@ export default async function download(options: DownloadOptions) {
   });
 
   await pipelineAsync(
-    response.body,
+    response.body!,
     fs.createWriteStream(fileDest, {
       flags: 'w',
-    })
+    }),
   );
 }
