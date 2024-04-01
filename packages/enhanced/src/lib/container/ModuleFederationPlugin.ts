@@ -4,27 +4,18 @@
 */
 
 'use strict';
-import path from 'path';
-import fs from 'fs';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import {
-  normalizeOptions,
-  type moduleFederationPlugin,
-} from '@module-federation/sdk';
+import { type moduleFederationPlugin } from '@module-federation/sdk';
 import { StatsPlugin } from '@module-federation/manifest';
 import { ContainerManager } from '@module-federation/managers';
 import { DevPlugin } from '@module-federation/dev-plugin';
-import {
-  NativeFederationTypeScriptHost,
-  NativeFederationTypeScriptRemote,
-} from '@module-federation/native-federation-typescript/webpack';
-
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import schema from '../../schemas/container/ModuleFederationPlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import { TypesPlugin } from './TypesPlugin';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -141,65 +132,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       }
     });
 
-    const isTSProject = (tsConfigPath?: string, context = process.cwd()) => {
-      try {
-        let filepath = tsConfigPath
-          ? tsConfigPath
-          : path.resolve(context, './tsconfig.json');
-        if (!path.isAbsolute(filepath)) {
-          filepath = path.resolve(context, filepath);
-        }
-        return fs.existsSync(filepath);
-      } catch (err) {
-        return false;
-      }
-    };
-
-    const normalizedDtsOptions =
-      normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
-        isTSProject(undefined, compiler.context),
-        {
-          disableGenerateTypes: false,
-          disableConsumeTypes: false,
-          remote: {
-            generateAPITypes: true,
-            compileInChildProcess: true,
-            abortOnError: false,
-            extractThirdParty: true,
-            extractRemoteTypes: true,
-          },
-          host: { abortOnError: false, consumeAPITypes: true },
-          extraOptions: {},
-        },
-        'mfOptions.dts',
-      )(options.dts);
-    if (typeof normalizedDtsOptions === 'object') {
-      if (!normalizedDtsOptions.disableGenerateTypes) {
-        NativeFederationTypeScriptRemote({
-          remote: {
-            implementation: normalizedDtsOptions.implementation,
-            context: compiler.context,
-            moduleFederationConfig: options,
-            ...normalizedDtsOptions.remote,
-          },
-          extraOptions: normalizedDtsOptions.extraOptions || {},
-          // @ts-ignore
-        }).apply(compiler);
-      }
-      if (!normalizedDtsOptions.disableConsumeTypes) {
-        NativeFederationTypeScriptHost({
-          host: {
-            implementation: normalizedDtsOptions.implementation,
-            context: compiler.context,
-            moduleFederationConfig: options,
-            ...normalizedDtsOptions.host,
-          },
-          extraOptions: normalizedDtsOptions.extraOptions || {},
-          // @ts-ignore
-        }).apply(compiler);
-      }
-    }
-
+    new TypesPlugin(options).apply(compiler);
     if (!disableManifest) {
       const pkg = require('../../../../package.json');
       new StatsPlugin(options, {

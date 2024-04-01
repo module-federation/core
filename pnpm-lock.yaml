@@ -1574,6 +1574,9 @@ importers:
 
   packages/utilities:
     dependencies:
+      '@module-federation/sdk':
+        specifier: workspace:*
+        version: link:../sdk
       react-dom:
         specifier: ^16 || ^17 || ^18
         version: 18.2.0(react@18.2.0)

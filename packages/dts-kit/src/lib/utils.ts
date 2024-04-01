@@ -65,3 +65,7 @@ export function retrieveTypesAssetsInfo(options: RemoteOptions) {
 export function replaceLocalhost(url: string): string {
   return url.replace('localhost', '127.0.0.1');
 }
+
+export function isDebugMode() {
+  return Boolean(process.env.FEDERATION_DEBUG);
+}
