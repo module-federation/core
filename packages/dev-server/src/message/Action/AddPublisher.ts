@@ -7,15 +7,9 @@ export interface AddPublisherActionPayload extends BaseContext {
 
 export class AddPublisherAction extends Action<AddPublisherActionPayload> {
   constructor(payload: AddPublisherActionPayload) {
-    const { name, remoteTypeTarPath, ip } = payload;
-
     super(
       {
-        payload: {
-          name,
-          ip,
-          remoteTypeTarPath,
-        },
+        payload,
       },
       ActionKind.ADD_PUBLISHER,
     );

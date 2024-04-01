@@ -48,8 +48,6 @@ export class DtsWorker {
   }
 
   exit(): void {
-    if (this._rpcWorker) {
-      this._rpcWorker.terminate();
-    }
+    this._rpcWorker?.terminate();
   }
 }

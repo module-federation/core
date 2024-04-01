@@ -7,14 +7,9 @@ export interface AddSubscriberActionPayload extends BaseContext {
 
 export class AddSubscriberAction extends Action<AddSubscriberActionPayload> {
   constructor(payload: AddSubscriberActionPayload) {
-    const { name, publishers, ip } = payload;
     super(
       {
-        payload: {
-          name,
-          publishers,
-          ip,
-        },
+        payload,
       },
       ActionKind.ADD_SUBSCRIBER,
     );

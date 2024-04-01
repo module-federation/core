@@ -54,26 +54,32 @@ function getLocalRemoteNames(
   }
   const { mapRemotesToDownload } = retrieveHostConfig(options);
 
-  return Object.keys(mapRemotesToDownload).reduce((sum, remoteModuleName) => {
-    const remoteInfo = mapRemotesToDownload[remoteModuleName];
-    const name = encodeNameIdentifier
-      ? decodeName(remoteInfo.name, encodeNameIdentifier)
-      : remoteInfo.name;
-    const ip = getIpFromEntry(remoteInfo.url);
-    if (!ip) {
+  return Object.keys(mapRemotesToDownload).reduce<Remote[]>(
+    (sum, remoteModuleName) => {
+      const remoteInfo = mapRemotesToDownload[remoteModuleName];
+      const name = encodeNameIdentifier
+        ? decodeName(remoteInfo.name, encodeNameIdentifier)
+        : remoteInfo.name;
+      const ip = getIpFromEntry(remoteInfo.url);
+      if (!ip) {
+        return sum;
+      }
+      sum.push({
+        name: name,
+        entry: remoteInfo.url,
+        ip,
+      });
       return sum;
-    }
-    sum.push({
-      name: name,
-      entry: remoteInfo.url,
-      ip,
-    });
-    return sum;
-  }, [] as Remote[]);
+    },
+    [],
+  );
 }
 
-async function updateCallback(options: UpdateCallbackOptions): Promise<void> {
-  const { updateMode, name, remoteTypeTarPath } = options;
+async function updateCallback({
+  updateMode,
+  name,
+  remoteTypeTarPath,
+}: UpdateCallbackOptions): Promise<void> {
   const { disableHotTypesReload, disableLiveReload } = cacheOptions || {};
   fileLog(
     `sync remote module ${name}, types to vmok ${cacheOptions?.name},typesManager.updateTypes run`,
@@ -139,7 +145,7 @@ export async function forkDevWorker(
     }
 
     moduleServer = new ModuleFederationDevServer({
-      name: options.name,
+      name: name,
       remotes: getLocalRemoteNames(host, extraOptions?.encodeNameIdentifier),
       updateCallback,
       remoteTypeTarPath: `${serverAddress}/${DEFAULT_TAR_NAME}`,
@@ -154,27 +160,24 @@ export async function forkDevWorker(
       'info',
     );
     if (!cacheOptions.disableLiveReload) {
-      moduleServer &&
-        moduleServer.update({
-          updateKind: UpdateKind.RELOAD_PAGE,
-          updateMode: UpdateMode.POSITIVE,
-        });
+      moduleServer?.update({
+        updateKind: UpdateKind.RELOAD_PAGE,
+        updateMode: UpdateMode.POSITIVE,
+      });
     }
 
     if (!cacheOptions.disableHotTypesReload) {
-      typesManager &&
-        typesManager
-          .updateTypes({
+      typesManager
+        ?.updateTypes({
+          updateMode: UpdateMode.POSITIVE,
+          remoteName: cacheOptions.name,
+        })
+        .then(() => {
+          moduleServer?.update({
+            updateKind: UpdateKind.UPDATE_TYPE,
             updateMode: UpdateMode.POSITIVE,
-            remoteName: cacheOptions.name,
-          })
-          .then(() => {
-            moduleServer &&
-              moduleServer.update({
-                updateKind: UpdateKind.UPDATE_TYPE,
-                updateMode: UpdateMode.POSITIVE,
-              });
           });
+        });
     }
   }
 }

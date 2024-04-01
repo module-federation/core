@@ -14,9 +14,7 @@ async function startBroker(): Promise<void> {
 
   await broker.start();
 
-  if (process.send) {
-    process.send('ready');
-  }
+  process.send?.('ready');
 }
 
 // * Broker won't start until this process receives a 'start'

@@ -5,15 +5,14 @@ import { DevWorker, DevWorkerOptions } from './DevWorker';
 
 async function removeLogFile(): Promise<void> {
   try {
-    const logDir = path.resolve(process.cwd(), '.vmok/typesGenerate.log');
+    const logDir = path.resolve(process.cwd(), '.mf/typesGenerate.log');
     await fse.remove(logDir);
   } catch (err) {
-    console.log('removeLogFile error', 'forkDevWorker', 'error');
+    console.error('removeLogFile error', 'forkDevWorker', err);
   }
 }
 
 export function createDevWorker(options: DevWorkerOptions): DevWorker {
   removeLogFile();
-  const dtsWorker = new DevWorker({ ...options });
-  return dtsWorker;
+  return new DevWorker({ ...options });
 }

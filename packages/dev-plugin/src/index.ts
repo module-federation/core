@@ -15,15 +15,13 @@ import {
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import path from 'path';
 
-const MF_DEV_PLUGIN = 'MFDevPlugin';
-
 enum PROCESS_EXIT_CODE {
   SUCCESS = 0,
   FAILURE = 1,
 }
 
 export class DevPlugin implements WebpackPluginInstance {
-  readonly name = MF_DEV_PLUGIN;
+  readonly name = 'MFDevPlugin';
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _devWorker?: DevWorker;
 
@@ -82,17 +80,12 @@ export class DevPlugin implements WebpackPluginInstance {
   }
 
   private _exit(exitCode = 0): void {
-    if (this._devWorker) {
-      this._devWorker.exit();
-      process.exit(exitCode);
-    }
+    this._devWorker?.exit();
     process.exit(exitCode);
   }
 
   private _afterEmit(): void {
-    if (this._devWorker) {
-      this._devWorker.update();
-    }
+    this._devWorker?.update();
   }
 
   apply(compiler: Compiler): void {
@@ -153,9 +146,7 @@ export class DevPlugin implements WebpackPluginInstance {
     }
     const isTSProject = (tsConfigPath?: string, context = process.cwd()) => {
       try {
-        let filepath = tsConfigPath
-          ? tsConfigPath
-          : path.resolve(context, './tsconfig.json');
+        let filepath = tsConfigPath ?? path.resolve(context, './tsconfig.json');
         if (!path.isAbsolute(filepath)) {
           filepath = path.resolve(context, filepath);
         }
@@ -220,6 +211,6 @@ export class DevPlugin implements WebpackPluginInstance {
     this._stopWhenSIGTERMOrSIGINT();
     this._handleUnexpectedExit();
 
-    compiler.hooks.afterEmit.tap(MF_DEV_PLUGIN, this._afterEmit.bind(this));
+    compiler.hooks.afterEmit.tap(this.name, this._afterEmit.bind(this));
   }
 }

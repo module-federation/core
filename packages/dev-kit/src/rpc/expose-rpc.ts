@@ -29,35 +29,26 @@ export function exposeRpc(fn: (...args: any[]) => any) {
         return;
       }
 
-      let value: unknown, error: unknown;
       try {
-        value = await fn(...message.args);
+        const value = await fn(...message.args);
+        await sendMessage({
+          type: RpcGMCallTypes.RESOLVE,
+          id: message.id,
+          value,
+        });
       } catch (fnError) {
-        error = fnError;
-      }
-
-      try {
-        if (error) {
+        try {
           await sendMessage({
             type: RpcGMCallTypes.REJECT,
             id: message.id,
-            error,
+            error: fnError,
           });
-        } else {
-          await sendMessage({
-            type: RpcGMCallTypes.RESOLVE,
-            id: message.id,
-            value,
-          });
-        }
-      } catch (sendError) {
-        // we can't send things back to the parent process - let's use stdout to communicate error
-        if (error) {
-          if (error instanceof Error) {
-            console.error(error);
+        } catch (err) {
+          if (fnError instanceof Error) {
+            console.error(fnError);
           }
+          console.error(err);
         }
-        console.error(sendError);
       }
     }
   };
