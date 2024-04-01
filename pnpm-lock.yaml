@@ -5437,7 +5437,7 @@ packages:
     dependencies:
       '@mdx-js/mdx': 2.3.0
       source-map: 0.7.4
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.1)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -10728,6 +10728,17 @@ packages:
       react-refresh: 0.14.0
     dev: true
 
+  /@rspack/plugin-react-refresh@0.5.8(react-refresh@0.14.0):
+    resolution: {integrity: sha512-y6wp0r4u+QxReP5DmKI2MTG5VfOATHIsFmbujhrM/C1Afon7azGZL7by7Rn+pc6A2ul2jigTph7Mlp7vVC3tbQ==}
+    peerDependencies:
+      react-refresh: '>=0.10.0 <1.0.0'
+    peerDependenciesMeta:
+      react-refresh:
+        optional: true
+    dependencies:
+      react-refresh: 0.14.0
+    dev: false
+
   /@rspack/plugin-react-refresh@0.5.9(react-refresh@0.14.0):
     resolution: {integrity: sha512-jsXA/8v4OaNLKo14+jqXKzAOKXWJs06ld6rzW97K9m2Q8hLd88jHiElxAgFsIiaSybu7tOs3ZKhhG/sGs4JspQ==}
     peerDependencies:
@@ -10737,6 +10748,7 @@ packages:
         optional: true
     dependencies:
       react-refresh: 0.14.0
+    dev: true
 
   /@rspress/core@1.16.0(@swc/helpers@0.5.3)(webpack@5.91.0):
     resolution: {integrity: sha512-hN/3sbQdnieuWJjZkA1/BdDYfMCnnEZA/rbJ9Ez+whUAX+xNbrgPajGLLN8KpIJu3L2f3smEYiU6785H9wzCCQ==}
@@ -31211,7 +31223,7 @@ packages:
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
-      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.1)
+      webpack: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
     dev: false
 
   /string-width@4.2.3:
