@@ -96,7 +96,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       };
     });
 
-    new TypesPlugin(options).apply(this);
+    new TypesPlugin(options).apply(compiler);
 
     if (!disableManifest) {
       new StatsPlugin(options, {
