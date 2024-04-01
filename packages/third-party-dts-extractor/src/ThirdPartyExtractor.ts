@@ -4,6 +4,8 @@ import path from 'path';
 import resolve from 'resolve';
 import { getTypedName } from './utils';
 
+const ignoredPkgs = ['typescript'];
+
 class ThirdPartyExtractor {
   pkgs: Record<string, string>;
   pattern: RegExp;
@@ -15,6 +17,13 @@ class ThirdPartyExtractor {
     this.context = context;
     this.pkgs = {};
     this.pattern = /(from|import\()\s*['"]([^'"]+)['"]/g;
+  }
+
+  addPkgs(pkgName: string, dirName: string): void {
+    if (ignoredPkgs.includes(pkgName)) {
+      return;
+    }
+    this.pkgs[pkgName] = dirName;
   }
 
   inferPkgDir(importPath: string): string | void {
@@ -43,10 +52,10 @@ class ThirdPartyExtractor {
       }
 
       if (types) {
-        this.pkgs[pkg.name] = dir;
+        this.addPkgs(pkg.name, dir);
         return dir;
       } else if (fs.existsSync(path.resolve(dir, 'index.d.ts'))) {
-        this.pkgs[pkg.name] = dir;
+        this.addPkgs(pkg.name, dir);
         return dir;
       } else {
         const typedPkgName = getTypedName(pkg.name);
@@ -57,7 +66,7 @@ class ThirdPartyExtractor {
         ) as string;
         const typedDir = path.dirname(typedPkgJsonPath);
         fs.readFileSync(typedPkgJsonPath, 'utf-8');
-        this.pkgs[typedPkgName] = typedDir;
+        this.addPkgs(typedPkgName, typedDir);
         return typedDir;
       }
     } catch (_err) {
