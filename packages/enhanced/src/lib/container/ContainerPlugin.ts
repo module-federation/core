@@ -168,14 +168,14 @@ class ContainerPlugin {
     }
     const hasSingleRuntimeChunk = compiler.options?.optimization?.runtimeChunk;
 
-    new compiler.webpack.EntryPlugin(
-      compiler.options.context || '',
-      federationRuntimePluginInstance.entryFilePath,
-      {
-        name,
-        runtime: hasSingleRuntimeChunk ? false : runtime,
-      },
-    ).apply(compiler);
+    // new compiler.webpack.EntryPlugin(
+    //   compiler.options.context || '',
+    //   federationRuntimePluginInstance.entryFilePath,
+    //   {
+    //     name,
+    //     runtime: hasSingleRuntimeChunk ? false : runtime,
+    //   },
+    // ).apply(compiler);
 
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
       const dep = new ContainerEntryDependency(
@@ -226,7 +226,7 @@ class ContainerPlugin {
           }
         });
 
-        //Add container entry for each runtime that exists
+        // Add container entry for each runtime that exists
         for (const runtime of runtimes) {
           const name = runtime
             ? 'federation-runtime-' + runtime
