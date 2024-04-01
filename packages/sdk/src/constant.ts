@@ -31,4 +31,4 @@ export const MFModuleType = {
   APP: 'app',
 };
 
-export const MODULE_DEVTOOL_IDENTIFIER = 'garfishModuleDebug';
+export const MODULE_DEVTOOL_IDENTIFIER = '__MF_DEVTOOLS_MODULE_INFO__';

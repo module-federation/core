@@ -18,59 +18,73 @@ export const injectPostMessage = (postMessageUrl: string) => {
   document.getElementsByTagName('head')[0].appendChild(script);
 };
 
+export const TabInfo = {
+  currentTabId: 0,
+};
+
+export function getCurrentTabId() {
+  return TabInfo.currentTabId;
+}
+
+export function getInspectWindowTabId() {
+  return new Promise((resolve, reject) => {
+    chrome.devtools.inspectedWindow.eval(
+      'typeof window.__FEDERATION__ !== "undefined" || typeof window.__VMOK__ !== "undefined"',
+      function (info, error) {
+        const tabId = chrome.devtools.inspectedWindow.tabId;
+        TabInfo.currentTabId = tabId;
+        resolve(tabId);
+        if (error) {
+          reject(error);
+        }
+      },
+    );
+  });
+}
+
 export const getGlobalModuleInfo = async (
   callback: React.Dispatch<React.SetStateAction<GlobalModuleInfo>>,
 ) => {
   await sleep(300);
-  const activeTab = window.targetTab;
-  console.log('activeTab', activeTab);
-  if (activeTab) {
-    chrome.runtime.onMessage.addListener(
-      (message: { origin: string; data: any }) => {
-        const { origin, data } = message;
-        if (!data || data?.appInfos || !activeTab?.url?.includes(origin)) {
-          return;
-        }
-        if (!window?.__FEDERATION__) {
-          definePropertyGlobalVal(window, '__FEDERATION__', {});
-          definePropertyGlobalVal(window, '__VMOK__', window.__FEDERATION__);
-        }
-        console.log('xxxxx', data);
-        window.__FEDERATION__.originModuleInfo = JSON.parse(
-          JSON.stringify(data?.moduleInfo),
+
+  chrome.runtime.onMessage.addListener(
+    (message: { origin: string; data: any }) => {
+      const { origin, data } = message;
+
+      if (!data || data?.appInfos) {
+        return;
+      }
+      if (!window?.__FEDERATION__) {
+        definePropertyGlobalVal(window, '__FEDERATION__', {});
+        definePropertyGlobalVal(window, '__VMOK__', window.__FEDERATION__);
+      }
+      window.__FEDERATION__.originModuleInfo = JSON.parse(
+        JSON.stringify(data?.moduleInfo),
+      );
+      if (data?.updateModule) {
+        const moduleIds = Object.keys(window.__FEDERATION__.originModuleInfo);
+        const shouldUpdate = !moduleIds.some((id) =>
+          id.includes(data.updateModule.name),
         );
-        if (data?.updateModule) {
-          const moduleIds = Object.keys(window.__FEDERATION__.originModuleInfo);
-          const shouldUpdate = !moduleIds.some((id) =>
-            id.includes(data.updateModule.name),
-          );
-          if (shouldUpdate) {
-            const destination =
-              data.updateModule.entry || data.updateModule.version;
-            window.__FEDERATION__.originModuleInfo[
-              `${data.updateModule.name}:${destination}`
-            ] = {
-              remoteEntry: destination,
-              version: destination,
-            };
-          }
+        if (shouldUpdate) {
+          const destination =
+            data.updateModule.entry || data.updateModule.version;
+          window.__FEDERATION__.originModuleInfo[
+            `${data.updateModule.name}:${destination}`
+          ] = {
+            remoteEntry: destination,
+            version: destination,
+          };
         }
-        window.__FEDERATION__.moduleInfo = JSON.parse(
-          JSON.stringify(window.__FEDERATION__.originModuleInfo),
-        );
-        callback(window.__FEDERATION__.moduleInfo);
-      },
-    );
-    const postMessageStartUrl = getUrl('post-message-start.js');
-    await injectScript(
-      injectPostMessage,
-      activeTab,
-      false,
-      postMessageStartUrl,
-    );
-  } else {
-    throw Error('no activeTab');
-  }
+      }
+      window.__FEDERATION__.moduleInfo = JSON.parse(
+        JSON.stringify(window.__FEDERATION__.originModuleInfo),
+      );
+      callback(window.__FEDERATION__.moduleInfo);
+    },
+  );
+  const postMessageStartUrl = getUrl('post-message-start.js');
+  await injectScript(injectPostMessage, false, postMessageStartUrl);
 };
 
 export const getTabs = (queryOptions = {}) => chrome.tabs.query(queryOptions);
@@ -83,14 +97,14 @@ export const getScope = async () => {
 
 export const injectScript = async (
   excuteScript: (...args: Array<any>) => any,
-  target: chrome.tabs.Tab,
   world = false,
   ...args: any
 ) => {
+  await getInspectWindowTabId();
   chrome.scripting
     .executeScript({
       target: {
-        tabId: target?.id as number,
+        tabId: getCurrentTabId(),
       },
       func: excuteScript,
       world: world ? 'MAIN' : 'ISOLATED',

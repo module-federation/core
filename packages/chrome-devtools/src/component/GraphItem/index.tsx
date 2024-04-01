@@ -11,9 +11,8 @@ const GraphItem = (props: {
   let version;
 
   const { info = '', color, remote } = props.data;
-
   const infoArray = info.split(':');
-  if (info.endsWith('.json')) {
+  if (info.endsWith('.json') || info.endsWith('.js')) {
     name = infoArray.shift();
     version = infoArray.join(':');
   } else {

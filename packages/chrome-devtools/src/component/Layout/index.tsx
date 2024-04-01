@@ -81,7 +81,7 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
             __FEDERATION_DEVTOOLS__,
             'overrides',
           );
-          await injectScript(reloadPage, activeTab, false);
+          await injectScript(reloadPage, false);
           setCondition(statusInfo.noProxy);
           setSnapshot(window.__FEDERATION__.originModuleInfo);
           return;
@@ -92,13 +92,8 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
         await setStorage(activeTab, MODULE_DEVTOOL_IDENTIFIER, snapshotJson);
         await setStorage(activeTab, BROWSER_ENV_KEY);
 
-        await mergeStorage(
-          activeTab,
-          __FEDERATION_DEVTOOLS__,
-          'overrides',
-          overrides,
-        );
-        await injectScript(reloadPage, activeTab, false);
+        await mergeStorage(__FEDERATION_DEVTOOLS__, 'overrides', overrides);
+        await injectScript(reloadPage, false);
         window.__FEDERATION__.moduleInfo = moduleInfo;
         setSnapshot(moduleInfo);
         setCondition(statusInfo[status]);
@@ -179,12 +174,7 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
       [ENABLEHMR]: on,
     });
     if (on) {
-      mergeStorage(
-        activeTab,
-        __FEDERATION_DEVTOOLS__,
-        __ENABLE_FAST_REFRESH__,
-        on,
-      );
+      mergeStorage(__FEDERATION_DEVTOOLS__, __ENABLE_FAST_REFRESH__, on);
     } else {
       removeStorageKey(
         activeTab,
@@ -192,7 +182,7 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
         __ENABLE_FAST_REFRESH__,
       );
     }
-    injectScript(reloadPage, activeTab, false);
+    injectScript(reloadPage, false);
   };
 
   return (

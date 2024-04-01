@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { GlobalModuleInfo } from '@module-federation/sdk';
 
 import App from './App';
-import { getTabs } from './utils';
+import { getInspectWindowTabId } from './utils';
 
 declare global {
   interface Window {
@@ -28,15 +28,6 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 (async () => {
-  const queryParams = {
-    active: true,
-    currentWindow: !process.env.DEBUG,
-  };
-  const activeTab = (await getTabs(queryParams))[0];
-  console.log('activeTab', activeTab, queryParams);
-
-  window.targetTab = activeTab;
-
   if (process.env.NODE_ENV === 'development') {
     // @ts-expect-error
     await import('../mock');

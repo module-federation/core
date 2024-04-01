@@ -52,6 +52,6 @@ export const statusInfo: Record<
 
 export const __ENABLE_FAST_REFRESH__ = 'enableFastRefresh';
 
-export const BROWSER_ENV_KEY = 'VMOK_ENV';
+export const BROWSER_ENV_KEY = 'MF_ENV';
 
-export const __FEDERATION_DEVTOOLS__ = '__VMOK_DEVTOOLS__';
+export const __FEDERATION_DEVTOOLS__ = '__MF_DEVTOOLS__';

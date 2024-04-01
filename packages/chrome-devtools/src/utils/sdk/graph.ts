@@ -45,7 +45,10 @@ const splitModuleId = (target: string) => {
     return target;
   } else if (length >= 3) {
     // @xxx:https://xxx.xxx.json
-    if (array[length - 1].endsWith('.json')) {
+    if (
+      array[length - 1].endsWith('.json') ||
+      array[length - 1].endsWith('.js')
+    ) {
       const idx = array.findIndex((t) => t.startsWith('http'));
       return array[idx - 1];
     } else {
