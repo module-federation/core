@@ -39,7 +39,7 @@ class EagerRuntimeModule extends RuntimeModule {
       throw new Error('ChunkGraph is undefined');
     }
     const initCodePerScope: Map<string, Map<number, Set<string>>> = new Map();
-    const sharedInitOptionsStr = [];
+    const sharedInitOptionsStr: Record<string, () => void> = {};
 
     for (const chunk of this.chunk?.getAllReferencedChunks() || []) {
       if (!chunk) {
@@ -78,7 +78,15 @@ class EagerRuntimeModule extends RuntimeModule {
           'eager-init-option',
         );
         if (sharedOption) {
-          sharedInitOptionsStr.push(sharedOption.getter);
+          if (sharedOption.name.includes('federation.')) {
+            sharedInitOptionsStr['runtime'] = sharedOption.getter;
+          } else if (sharedOption.name.includes('plugins.')) {
+            sharedInitOptionsStr['plugins'] = sharedOption.getter;
+          } else if (sharedOption.name.includes('async.')) {
+            sharedInitOptionsStr['async'] = sharedOption.getter;
+          } else {
+            sharedInitOptionsStr[sharedOption.name] = sharedOption.getter;
+          }
         }
       }
     }
@@ -105,27 +113,28 @@ class EagerRuntimeModule extends RuntimeModule {
     return Template.asString([
       `
   // Define eagerBoot with initialization options and initialize promises with a resolved promise
-  var eagerBoot = [${sharedInitOptionsStr.join(',')}];
   var promises = [];
-
-  eagerBoot.forEach(function(initFunctionFactory, index) {
-    // Invoke the factory function to get the initialization function
-    const initFunction = initFunctionFactory();
-
-    if (index === 0) {
-      // Immediately execute the first initialization function
-      initFunction();
-      // If there's chunkEnsure logic for the first item, include it here
-       ${chunkEnsure}
-    } else {
-      // For subsequent items, ensure all existing promises are resolved before execution
-      if(promises.length > 0) {
-         Promise.all(promises).then(function(){initFunction()});
-      } else {
-        initFunction();
-      }
-    }
-  });
+  ${
+    sharedInitOptionsStr['runtime']
+      ? `var runtimeFactory = ${sharedInitOptionsStr['runtime']}();\nruntimeFactory()\n`
+      : ''
+  }
+  ${
+    sharedInitOptionsStr['plugins']
+      ? `var pluginsFactory = ${sharedInitOptionsStr['plugins']}();\npluginsFactory()\n`
+      : ''
+  }
+  ${
+    sharedInitOptionsStr['async']
+      ? `var asyncPluginsFactory = ${sharedInitOptionsStr['async']}();\n`
+      : ''
+  }
+  ${chunkEnsure}
+  ${
+    sharedInitOptionsStr['async']
+      ? `Promise.all(promises).then(function(){asyncPluginsFactory()});\n`
+      : ''
+  }
   `,
     ]);
   }
