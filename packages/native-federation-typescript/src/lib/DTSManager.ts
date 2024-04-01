@@ -75,7 +75,7 @@ class DTSManager {
   }
 
   async extractRemoteTypes(options: ReturnType<typeof retrieveRemoteConfig>) {
-    const { remoteOptions, tsConfig, mapComponentsToExpose } = options;
+    const { remoteOptions, tsConfig } = options;
 
     if (!remoteOptions.extractRemoteTypes) {
       return;
