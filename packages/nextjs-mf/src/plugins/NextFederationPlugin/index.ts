@@ -62,14 +62,14 @@ export class NextFederationPlugin {
     this.applyConditionalPlugins(compiler, isServer);
     const normalFederationPluginOptions = this.getNormalFederationPluginOptions(
       compiler,
-      isServer
+      isServer,
     );
     // ContainerPlugin will get NextFederationPlugin._options, so NextFederationPlugin._options should be the same as normalFederationPluginOptions
     this._options = normalFederationPluginOptions;
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
 
     const runtimeESMPath = require.resolve(
-      '@module-federation/runtime/dist/index.esm.js'
+      '@module-federation/runtime/dist/index.esm.js',
     );
     compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
       compiler.options.resolve.alias = {
@@ -81,14 +81,14 @@ export class NextFederationPlugin {
 
   private validateOptions(compiler: Compiler): boolean {
     const manifestPlugin = compiler.options.plugins.find(
-      (p) => p?.constructor.name === 'BuildManifestPlugin'
+      (p) => p?.constructor.name === 'BuildManifestPlugin',
     );
 
     if (manifestPlugin) {
       //@ts-ignore
       if (manifestPlugin?.appDirEnabled) {
         throw new Error(
-          'App Directory is not supported by nextjs-mf. Use only pages directory, do not open git issues about this'
+          'App Directory is not supported by nextjs-mf. Use only pages directory, do not open git issues about this',
         );
       }
     }
@@ -103,7 +103,7 @@ export class NextFederationPlugin {
       compiler.options.name === 'server' || compiler.options.name === 'client';
     if (!envValid)
       throw new Error(
-        'process.env.NEXT_PRIVATE_LOCAL_WEBPACK is not set to true, please set it to true, and "npm install webpack"'
+        'process.env.NEXT_PRIVATE_LOCAL_WEBPACK is not set to true, please set it to true, and "npm install webpack"',
       );
     return (
       compilerValid !== undefined &&
@@ -138,7 +138,7 @@ export class NextFederationPlugin {
 
   private getNormalFederationPluginOptions(
     compiler: Compiler,
-    isServer: boolean
+    isServer: boolean,
   ): ModuleFederationPluginOptions {
     const defaultShared = this._extraOptions.skipSharingNextInternals
       ? {}
