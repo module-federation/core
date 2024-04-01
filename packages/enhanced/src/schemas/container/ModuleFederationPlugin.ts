@@ -1,4 +1,32 @@
 //@ts-nocheck
+
+const runtimePlugin = {
+  type: 'array',
+  items: {
+    anyOf: [
+      {
+        type: 'string',
+        minLength: 1,
+        description: 'Runtime Plugin File Path.',
+      },
+      {
+        type: 'object',
+        required: ['import', 'async'],
+        properties: {
+          import: {
+            type: 'string',
+            minLength: 1,
+            description: 'Runtime Plugin File Path.',
+          },
+          async: {
+            type: 'boolean',
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
+  },
+};
 export default {
   definitions: {
     AmdContainer: {
@@ -568,14 +596,7 @@ export default {
     runtime: {
       $ref: '#/definitions/EntryRuntime',
     },
-    runtimePlugins: {
-      type: 'array',
-      items: {
-        description: 'Runtime Plugin File Path.',
-        type: 'string',
-        minLength: 1,
-      },
-    },
+    runtimePlugins: runtimePlugin,
     manifest: {
       description: 'Used to config manifest.',
       anyOf: [

@@ -150,7 +150,6 @@ class ContainerPlugin {
     if (!useModuleFederationPlugin) {
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
       ContainerPlugin.patchChunkSplit(compiler, 'federation-runtime');
-      ContainerPlugin.patchChunkSplit(compiler, 'mfp-runtime-plugins');
     }
     const federationRuntimePluginInstance = new FederationRuntimePlugin();
     federationRuntimePluginInstance.apply(compiler);
