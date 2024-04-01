@@ -12,7 +12,7 @@ declare global {
 
 const chromeDevtoolsPlugin: () => FederationRuntimePlugin = function () {
   return {
-    name: 'chrome-devtools-plugin',
+    name: 'mf-chrome-devtools-inject-snapshot-plugin',
     beforeLoadRemoteSnapshot({ options }) {
       const { nativeGlobal } = runtimeHelpers.global;
 

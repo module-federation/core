@@ -7,7 +7,7 @@ import { __FEDERATION_DEVTOOLS__ } from '../../template';
 
 const fastRefreshPlugin = (): FederationRuntimePlugin => {
   return {
-    name: 'fast-refresh-plugin',
+    name: 'mf-fast-refresh-plugin',
     // @ts-expect-error
     beforeInit({ origin, userOptions, options, shareInfo }) {
       let enableFastRefresh: boolean;

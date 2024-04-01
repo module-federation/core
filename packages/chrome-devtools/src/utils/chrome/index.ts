@@ -23,44 +23,54 @@ export const getGlobalModuleInfo = async (
 ) => {
   await sleep(300);
   const activeTab = window.targetTab;
-
-  chrome.runtime.onMessage.addListener(
-    (message: { origin: string; data: any }) => {
-      const { origin, data } = message;
-      if (!data || data?.appInfos || !activeTab?.url?.includes(origin)) {
-        return;
-      }
-      if (!window?.__FEDERATION__) {
-        definePropertyGlobalVal(window, '__FEDERATION__', {});
-        definePropertyGlobalVal(window, '__VMOK__', window.__FEDERATION__);
-      }
-      window.__FEDERATION__.originModuleInfo = JSON.parse(
-        JSON.stringify(data?.moduleInfo),
-      );
-      if (data?.updateModule) {
-        const moduleIds = Object.keys(window.__FEDERATION__.originModuleInfo);
-        const shouldUpdate = !moduleIds.some((id) =>
-          id.includes(data.updateModule.name),
-        );
-        if (shouldUpdate) {
-          const destination =
-            data.updateModule.entry || data.updateModule.version;
-          window.__FEDERATION__.originModuleInfo[
-            `${data.updateModule.name}:${destination}`
-          ] = {
-            remoteEntry: destination,
-            version: destination,
-          };
+  console.log('activeTab', activeTab);
+  if (activeTab) {
+    chrome.runtime.onMessage.addListener(
+      (message: { origin: string; data: any }) => {
+        const { origin, data } = message;
+        if (!data || data?.appInfos || !activeTab?.url?.includes(origin)) {
+          return;
         }
-      }
-      window.__FEDERATION__.moduleInfo = JSON.parse(
-        JSON.stringify(window.__FEDERATION__.originModuleInfo),
-      );
-      callback(window.__FEDERATION__.moduleInfo);
-    },
-  );
-  const postMessageStartUrl = getUrl('post-message-start.js');
-  await injectScript(injectPostMessage, activeTab, false, postMessageStartUrl);
+        if (!window?.__FEDERATION__) {
+          definePropertyGlobalVal(window, '__FEDERATION__', {});
+          definePropertyGlobalVal(window, '__VMOK__', window.__FEDERATION__);
+        }
+        console.log('xxxxx', data);
+        window.__FEDERATION__.originModuleInfo = JSON.parse(
+          JSON.stringify(data?.moduleInfo),
+        );
+        if (data?.updateModule) {
+          const moduleIds = Object.keys(window.__FEDERATION__.originModuleInfo);
+          const shouldUpdate = !moduleIds.some((id) =>
+            id.includes(data.updateModule.name),
+          );
+          if (shouldUpdate) {
+            const destination =
+              data.updateModule.entry || data.updateModule.version;
+            window.__FEDERATION__.originModuleInfo[
+              `${data.updateModule.name}:${destination}`
+            ] = {
+              remoteEntry: destination,
+              version: destination,
+            };
+          }
+        }
+        window.__FEDERATION__.moduleInfo = JSON.parse(
+          JSON.stringify(window.__FEDERATION__.originModuleInfo),
+        );
+        callback(window.__FEDERATION__.moduleInfo);
+      },
+    );
+    const postMessageStartUrl = getUrl('post-message-start.js');
+    await injectScript(
+      injectPostMessage,
+      activeTab,
+      false,
+      postMessageStartUrl,
+    );
+  } else {
+    throw Error('no activeTab');
+  }
 };
 
 export const getTabs = (queryOptions = {}) => chrome.tabs.query(queryOptions);

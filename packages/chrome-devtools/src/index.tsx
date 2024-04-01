@@ -33,6 +33,8 @@ if (process.env.NODE_ENV === 'development') {
     currentWindow: !process.env.DEBUG,
   };
   const activeTab = (await getTabs(queryParams))[0];
+  console.log('activeTab', activeTab, queryParams);
+
   window.targetTab = activeTab;
 
   if (process.env.NODE_ENV === 'development') {

@@ -1,17 +1,13 @@
 import type { FederationRuntimePlugin } from '@module-federation/runtime/types';
 
 import { definePropertyGlobalVal } from '../sdk';
+import helpers from '@module-federation/runtime/helpers';
 
 const getModuleInfo = (): FederationRuntimePlugin => {
   return {
-    name: 'devtool-getModuleInfo-plugin',
-    loadSnapshot({
-      options,
-      moduleInfo,
-      hostGlobalSnapshot,
-      remoteSnapshot,
-      globalSnapshot,
-    }) {
+    name: 'mf-devtool-getModuleInfo-plugin',
+    loadRemoteSnapshot({ options, moduleInfo, remoteSnapshot, ...res }) {
+      const globalSnapshot = helpers.global.getGlobalSnapshot();
       if (options.inBrowser) {
         window.postMessage(
           {
@@ -24,9 +20,8 @@ const getModuleInfo = (): FederationRuntimePlugin => {
       return {
         options,
         moduleInfo,
-        hostGlobalSnapshot,
         remoteSnapshot,
-        globalSnapshot,
+        ...res,
       };
     },
   };

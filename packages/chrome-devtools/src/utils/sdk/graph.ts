@@ -1,4 +1,5 @@
 import { ConsumerModuleInfo, GlobalModuleInfo } from '@module-federation/sdk';
+import { MarkerType } from 'reactflow';
 
 export interface NodeCustomData {
   info: string;
@@ -16,13 +17,18 @@ export interface NodeType {
   data: NodeCustomData;
 }
 
-export type Edge = 'default' | 'straight' | 'step' | 'smoothstep';
+export type Edge = 'default' | 'straight' | 'step' | 'smoothstep' | 'bezier';
 
 export interface EdgeType {
   id: string;
   source: string;
   target: string;
   type: Edge;
+  markerEnd: {
+    type: MarkerType;
+    width: number;
+    height: number;
+  };
 }
 
 const validateSemver = (schema: string) => {
@@ -143,11 +149,16 @@ export class DependencyGraph {
     });
   }
 
-  addEdge(id: string, source: string, target: string, type: Edge = 'straight') {
+  addEdge(id: string, source: string, target: string, type: Edge = 'default') {
     this.edge.push({
       id,
       source,
       target,
+      markerEnd: {
+        type: MarkerType.Arrow,
+        width: 30,
+        height: 30,
+      },
       type,
     });
   }
@@ -176,6 +187,7 @@ export class DependencyGraph {
 
     this.addNode(id, type, 0, 0, {
       info,
+      remote,
       color: this.identifyMap.get(targetWithoutType) as string,
     });
 

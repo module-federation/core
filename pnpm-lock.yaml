@@ -1155,7 +1155,7 @@ importers:
         specifier: ~18.2.0
         version: 18.2.0(react@18.2.0)
       reactflow:
-        specifier: ^11.10.4
+        specifier: 11.10.4
         version: 11.10.4(@types/react@18.2.62)(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@modern-js-app/eslint-config':

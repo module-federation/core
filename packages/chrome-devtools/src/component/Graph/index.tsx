@@ -4,7 +4,6 @@ import ReactFlow, {
   ConnectionLineType,
   useNodesState,
   useEdgesState,
-  MiniMap,
   Controls,
   Node,
   Edge,
@@ -128,7 +127,6 @@ const Graph = (props: { snapshot: GlobalModuleInfo }) => {
         nodeTypes={nodeTypes}
         fitView={true}
       >
-        <MiniMap />
         <Controls />
       </ReactFlow>
     </div>
