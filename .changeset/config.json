@@ -12,11 +12,7 @@
       "@module-federation/runtime-tools",
       "@module-federation/managers",
       "@module-federation/manifest",
-      "@module-federation/dev-server",
-      "@module-federation/dev-kit",
-      "@module-federation/dev-plugin",
-      "@module-federation/dts-kit",
-      "@module-federation/third-party-dts-extractor",
+      "@module-federation/dts-plugin",
       "@module-federation/native-federation-typescript"
     ]
   ],

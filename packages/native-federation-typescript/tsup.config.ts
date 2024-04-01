@@ -13,6 +13,8 @@ const SUPPORTED_BUNDLERS = [
 export default defineConfig({
   entry: [
     join(__dirname, 'src', 'index.ts'),
+    join(__dirname, 'src', 'helpers.ts'),
+    join(__dirname, 'src', 'lib/forkGenerateDts.ts'),
     ...SUPPORTED_BUNDLERS.map((bundler) =>
       join(__dirname, 'src', `${bundler}.ts`),
     ),

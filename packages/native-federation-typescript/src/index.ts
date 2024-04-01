@@ -8,7 +8,7 @@ import {
   HostOptions,
   validateOptions,
   retrieveTypesAssetsInfo,
-} from '@module-federation/dts-kit';
+} from './helpers';
 
 export type EnhancedRemoteOptions =
   | {

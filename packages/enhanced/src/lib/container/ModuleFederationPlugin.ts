@@ -9,13 +9,12 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import { type moduleFederationPlugin } from '@module-federation/sdk';
 import { StatsPlugin } from '@module-federation/manifest';
 import { ContainerManager } from '@module-federation/managers';
-import { DevPlugin } from '@module-federation/dev-plugin';
+import { DtsPlugin } from '@module-federation/dts-plugin';
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import schema from '../../schemas/container/ModuleFederationPlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
-import { TypesPlugin } from './TypesPlugin';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -75,8 +74,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       ContainerPlugin.patchChunkSplit(compiler, 'mfp-runtime-plugins');
     }
 
-    new DevPlugin(options).apply(compiler);
-
     if (!disableManifest && useContainerPlugin) {
       try {
         const containerManager = new ContainerManager();
@@ -90,6 +87,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         disableManifest = true;
       }
     }
+
+    new DtsPlugin(options).apply(compiler);
 
     if (
       library &&
@@ -132,7 +131,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       }
     });
 
-    new TypesPlugin(options).apply(compiler);
     if (!disableManifest) {
       const pkg = require('../../../../package.json');
       new StatsPlugin(options, {

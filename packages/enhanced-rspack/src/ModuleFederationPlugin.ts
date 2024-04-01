@@ -7,8 +7,7 @@ import { getIdentifier } from './utils';
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import { StatsPlugin } from '@module-federation/manifest';
 import { ContainerManager } from '@module-federation/managers';
-import { DevPlugin } from '@module-federation/dev-plugin';
-import { TypesPlugin } from './TypesPlugin';
+import { DtsPlugin } from '@module-federation/dts-plugin';
 
 type ExcludeFalse<T> = T extends undefined | false ? never : T;
 type SplitChunks = Compiler['options']['optimization']['splitChunks'];
@@ -64,7 +63,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     let disableManifest = options.manifest === false;
 
     // @ts-ignore
-    new DevPlugin(options).apply(compiler);
+    new DtsPlugin(options).apply(compiler);
 
     if (!disableManifest && options.exposes) {
       try {
@@ -95,8 +94,6 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
         '@module-federation/runtime$': runtimeESMPath,
       };
     });
-
-    new TypesPlugin(options).apply(compiler);
 
     if (!disableManifest) {
       new StatsPlugin(options, {
