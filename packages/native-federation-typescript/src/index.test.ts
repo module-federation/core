@@ -44,6 +44,7 @@ describe('index', () => {
       };
 
       const distFolder = join(projectRoot, 'dist', options.typesFolder);
+      await rm(distFolder, { recursive: true, force: true });
 
       const unplugin = NativeFederationTypeScriptRemote.rollup(
         options,
@@ -80,6 +81,8 @@ describe('index', () => {
       };
 
       console.log('webpack options: ', JSON.stringify(options));
+      const distFolder = join(projectRoot, 'dist', options.typesFolder!);
+      await rm(distFolder, { recursive: true, force: true });
 
       const webpackCompiler = webpack({
         target: 'web',
@@ -111,7 +114,6 @@ describe('index', () => {
       expect(
         Boolean(assets.find((asset) => asset.name === '@mf-tests-webpack.zip')),
       ).toEqual(true);
-      const distFolder = join(projectRoot, 'dist', options.typesFolder!);
 
       expect(dirTree(distFolder, { exclude: /node_modules/ })).toMatchObject({
         name: '@mf-tests-webpack',
@@ -143,6 +145,9 @@ describe('index', () => {
         typesFolder: '@mf-tests-rspack',
       };
       console.log('rspack options: ', JSON.stringify(options));
+      const distFolder = join(projectRoot, 'dist', options.typesFolder!);
+
+      await rm(distFolder, { recursive: true, force: true });
 
       const rspackCompiler = rspack({
         target: 'web',
@@ -174,7 +179,6 @@ describe('index', () => {
       expect(
         Boolean(assets.find((asset) => asset.name === '@mf-tests-rspack.zip')),
       ).toEqual(true);
-      const distFolder = join(projectRoot, 'dist', options.typesFolder!);
 
       expect(dirTree(distFolder, { exclude: /node_modules/ })).toMatchObject({
         name: '@mf-tests-rspack',
@@ -227,18 +231,20 @@ describe('index', () => {
         name: '@mf-types-host',
         children: [
           {
-            name: 'remotes',
             children: [
               {
-                name: 'compiled-types',
                 children: [
                   {
                     name: 'index.d.ts',
                   },
                 ],
+                name: 'compiled-types',
               },
-              { name: 'index.d.ts' },
+              {
+                name: 'index.d.ts',
+              },
             ],
+            name: 'remotes',
           },
         ],
       });
