@@ -1,11 +1,11 @@
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="../../../../node_modules/webpack/module.d.ts" />
+import { moduleFederationPlugin } from '@module-federation/sdk';
 
 import type { container, WebpackOptionsNormalized } from 'webpack';
 
-export type ModuleFederationPluginOptions = ConstructorParameters<
-  typeof container.ModuleFederationPlugin
->['0'];
+export type ModuleFederationPluginOptions =
+  moduleFederationPlugin.ModuleFederationPluginOptions;
 
 export type WebpackRequire = {
   l: (

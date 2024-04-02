@@ -171,6 +171,8 @@ export class NextFederationPlugin {
         ...defaultShared,
         ...this._options.shared,
       },
+      // nextjs project needs to add config.watchOptions = ['**/node_modules/**', '**/@mf-types/**'] to prevent loop types update
+      dts: this._options.dts ?? false,
     };
   }
 

@@ -35,6 +35,7 @@
     "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/manifest": "workspace:*",
     "@module-federation/managers": "workspace:*",
+    "@module-federation/dts-plugin": "workspace:*",
     "upath": "2.0.1"
   }
 }

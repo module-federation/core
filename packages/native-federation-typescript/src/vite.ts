@@ -1,12 +1,13 @@
 import {
   NativeFederationTypeScriptHost as GeneralHost,
   NativeFederationTypeScriptRemote as GeneralRemote,
-} from '.';
-import { HostOptions } from './interfaces/HostOptions';
-import { RemoteOptions } from './interfaces/RemoteOptions';
+  EnhancedRemoteOptions,
+  EnhancedHostOptions,
+} from './index';
+
 export const NativeFederationTypeScriptRemote = GeneralRemote.vite as (
-  options: RemoteOptions,
+  options: EnhancedRemoteOptions,
 ) => any;
 export const NativeFederationTypeScriptHost = GeneralHost.vite as (
-  options: HostOptions,
+  options: EnhancedHostOptions,
 ) => any;
