@@ -1,0 +1,55 @@
+{
+  "name": "Module Federation",
+  "description": "Tool for Module Federation",
+  "version": "versionPlaceholder",
+  "manifest_version": 3,
+  "action": {
+    "default_title": "Module Federation",
+    "default_icon": {
+      "16": "public/favicon.ico",
+      "48": "public/favicon.ico",
+      "128": "public/favicon.ico"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "static/js/post-message.js",
+        "static/js/post-message-start.js",
+        "static/js/fast-refresh-init.js",
+        "static/js/fast-refresh.js",
+        "static/js/snapshot-plugin-init.js",
+        "static/js/snapshot-plugin.js"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "permissions": [
+    "storage",
+    "scripting",
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "static/js/post-message-init.js",
+        "static/js/post-message-listener.js",
+        "static/js/fast-refresh-init.js",
+        "static/js/snapshot-plugin-init.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "background": {
+    "service_worker": "static/js/worker.js"
+  },
+  "devtools_page": "public/createDevtools.html",
+  "icons": {
+    "16": "public/favicon.ico",
+    "48": "public/favicon.ico",
+    "128": "public/favicon.ico"
+  }
+}

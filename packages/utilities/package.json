@@ -16,6 +16,9 @@
   "devDependencies": {
     "react": "18.2.0"
   },
+  "dependencies": {
+    "@module-federation/sdk": "workspace:*"
+  },
   "peerDependencies": {
     "webpack": "^5.40.0",
     "react-dom": "^16 || ^17 || ^18",
