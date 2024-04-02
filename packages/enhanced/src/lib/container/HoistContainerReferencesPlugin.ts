@@ -52,24 +52,6 @@ export class HoistContainerReferencesPlugin implements WebpackPluginInstance {
   }
 
   apply(compiler: Compiler): void {
-    let hasMultipleRuntime = 0;
-    compiler.hooks.make.tapPromise(
-      this.constructor.name,
-      async (compilation) => {
-        let entry: any;
-        if (typeof compilation.options.entry === 'function') {
-          entry = await compilation.options.entry();
-        } else {
-          entry = compilation.options.entry;
-        }
-
-        Object.keys(entry).forEach((entryItem) => {
-          if (entry[entryItem].runtime) {
-            hasMultipleRuntime++;
-          }
-        });
-      },
-    );
     compiler.hooks.compilation.tap(
       'HoistContainerReferencesPlugin',
       (compilation: Compilation) => {

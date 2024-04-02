@@ -177,6 +177,10 @@ class ContainerPlugin {
     // ).apply(compiler);
 
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
+      const initialEntrypoints =
+        typeof compiler.options.entry === 'function'
+          ? compiler.options.entry()
+          : compiler.options.entry;
       const dep = new ContainerEntryDependency(
         name,
         //@ts-ignore
@@ -211,11 +215,8 @@ class ContainerPlugin {
 
       // Function to add entry for undefined runtime
       const addEntryToSingleRuntimeChunk = async () => {
-        const entries =
-          typeof compiler.options.entry === 'function'
-            ? await compiler.options.entry()
-            : compiler.options.entry;
         const runtimes: Set<undefined | string | false> = new Set();
+        const entries = await initialEntrypoints;
 
         Object.keys(entries).forEach((key) => {
           if (entries[key].runtime) {
