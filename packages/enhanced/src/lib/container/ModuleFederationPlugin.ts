@@ -4,17 +4,17 @@
 */
 
 'use strict';
-
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { moduleFederationPlugin } from '@module-federation/sdk';
+import { type moduleFederationPlugin } from '@module-federation/sdk';
+import { StatsPlugin } from '@module-federation/manifest';
+import { ContainerManager } from '@module-federation/managers';
+import { DtsPlugin } from '@module-federation/dts-plugin';
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import schema from '../../schemas/container/ModuleFederationPlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
-import { StatsPlugin } from '@module-federation/manifest';
-import { ContainerManager } from '@module-federation/managers';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -87,6 +87,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         disableManifest = true;
       }
     }
+
+    new DtsPlugin(options).apply(compiler);
 
     if (
       library &&

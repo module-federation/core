@@ -14,6 +14,13 @@ export interface StatsBuildInfo {
   buildName: string;
 }
 
+export interface MetaDataTypes {
+  path: string;
+  name: string;
+  api: string;
+  zip: string;
+}
+
 export interface BasicStatsMetaData {
   name: string;
   globalName: string;
@@ -21,7 +28,7 @@ export interface BasicStatsMetaData {
   remoteEntry: ResourceInfo;
   prefetchInterface?: boolean;
   prefetchEntry?: ResourceInfo;
-  types: Omit<ResourceInfo, 'type'>;
+  types: MetaDataTypes;
   type: string;
   pluginVersion: string;
 }

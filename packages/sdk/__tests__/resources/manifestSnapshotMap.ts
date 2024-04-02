@@ -18,6 +18,8 @@ const manifest: { [key: string]: Stats } = {
       types: {
         name: 'index.d.ts',
         path: '',
+        api: '@mf-types.d.ts',
+        zip: '@mf-types.zip',
       },
       globalName: '__FEDERATION_@garfish/micro-app-sub2:1.0.0.1517__',
       publicPath: 'https://__CDN_PREFIX__/micro-app-sub2/1.0.0.1517/',
@@ -138,6 +140,8 @@ const manifest: { [key: string]: Stats } = {
       types: {
         name: 'index.d.ts',
         path: '',
+        api: '',
+        zip: '',
       },
       globalName: '__FEDERATION_@garfish/micro-app-sub3:1.0.0.1513__',
       getPublicPath:
@@ -263,6 +267,8 @@ const manifest: { [key: string]: Stats } = {
       types: {
         name: 'index.d.ts',
         path: '',
+        api: '',
+        zip: '',
       },
       globalName: '__FEDERATION_@garfish/micro-app-sub2:local__',
       publicPath: 'http://localhost:2004/',
@@ -394,6 +400,8 @@ const manifest: { [key: string]: Stats } = {
       types: {
         name: 'index.d.ts',
         path: '',
+        api: '',
+        zip: '',
       },
       globalName: '__FEDERATION_@garfish/micro-app-sub3:local__',
       getPublicPath: "return 'http://localhost:2005/'",
@@ -518,6 +526,8 @@ const snapshot: { [key: string]: ModuleInfo } = {
     remoteEntry: 'federation-remote-entry.js',
     remoteEntryType: 'global',
     remoteTypes: 'index.d.ts',
+    remoteTypesAPI: '',
+    remoteTypesZip: '',
     remotesInfo: {
       '@garfish/micro-app-sub3': {
         matchedVersion: 'http://localhost:2005/vmok-manifest.json',
@@ -611,6 +621,8 @@ const snapshot: { [key: string]: ModuleInfo } = {
     remoteEntry: 'federation-remote-entry.js',
     remoteEntryType: 'global',
     remoteTypes: 'index.d.ts',
+    remoteTypesAPI: '',
+    remoteTypesZip: '',
     remotesInfo: {
       '@garfish/micro-app-sub3': {
         matchedVersion: 'http://localhost:2005/vmok-manifest.json',
@@ -704,6 +716,8 @@ const snapshot: { [key: string]: ModuleInfo } = {
     remoteEntry: 'federation-remote-entry.js',
     remoteEntryType: 'global',
     remoteTypes: 'index.d.ts',
+    remoteTypesAPI: '',
+    remoteTypesZip: '',
     remotesInfo: {},
     shared: [],
     modules: [
@@ -807,6 +821,8 @@ const snapshot: { [key: string]: ModuleInfo } = {
     remoteEntry: 'federation-remote-entry496985d3.js',
     remoteEntryType: 'global',
     remoteTypes: 'index.d.ts',
+    remoteTypesAPI: '@mf-types.d.ts',
+    remoteTypesZip: '@mf-types.zip',
     remotesInfo: {
       '@garfish/micro-app-sub3': {
         matchedVersion: '*',
@@ -894,6 +910,8 @@ const snapshot: { [key: string]: ModuleInfo } = {
     remoteEntry: 'federation-remote-entryc26257dd.js',
     remoteEntryType: 'global',
     remoteTypes: 'index.d.ts',
+    remoteTypesAPI: '',
+    remoteTypesZip: '',
     remotesInfo: {},
     shared: [],
     modules: [
@@ -991,6 +1009,8 @@ const snapshot: { [key: string]: ModuleInfo } = {
     remoteEntry: 'federation-remote-entry496985d3.js',
     remoteEntryType: 'global',
     remoteTypes: 'index.d.ts',
+    remoteTypesAPI: '@mf-types.d.ts',
+    remoteTypesZip: '@mf-types.zip',
     remotesInfo: {
       '@garfish/micro-app-sub3': {
         matchedVersion: '1.0.4',
@@ -1081,6 +1101,8 @@ const snapshot: { [key: string]: ModuleInfo } = {
     remoteEntry: 'federation-remote-entry.js',
     remoteEntryType: 'global',
     remoteTypes: 'index.d.ts',
+    remoteTypesAPI: '',
+    remoteTypesZip: '',
     remotesInfo: {
       '@garfish/micro-app-sub3': {
         matchedVersion: '1.0.3',
@@ -1174,6 +1196,8 @@ const snapshot: { [key: string]: ModuleInfo } = {
     remoteEntry: 'federation-remote-entry.js',
     remoteEntryType: 'global',
     remoteTypes: 'index.d.ts',
+    remoteTypesAPI: '',
+    remoteTypesZip: '',
     remotesInfo: {
       '@garfish/micro-app-sub3': {
         matchedVersion: '1.0.3',
@@ -1267,6 +1291,8 @@ const snapshot: { [key: string]: ModuleInfo } = {
     remoteEntry: 'federation-remote-entry.js',
     remoteEntryType: 'global',
     remoteTypes: 'index.d.ts',
+    remoteTypesAPI: '',
+    remoteTypesZip: '',
     remotesInfo: {
       '@garfish/micro-app-sub3': {
         matchedVersion: '1.0.3',
@@ -1357,6 +1383,8 @@ const snapshot: { [key: string]: ModuleInfo } = {
     remoteEntry: 'federation-remote-entry.js',
     remoteEntryType: 'global',
     remoteTypes: 'index.d.ts',
+    remoteTypesAPI: '',
+    remoteTypesZip: '',
     remotesInfo: {
       '@garfish/micro-app-sub3': {
         matchedVersion: '1.0.4',
@@ -1450,6 +1478,8 @@ const snapshot: { [key: string]: ModuleInfo } = {
     remoteEntry: 'federation-remote-entry.js',
     remoteEntryType: 'global',
     remoteTypes: 'index.d.ts',
+    remoteTypesAPI: '',
+    remoteTypesZip: '',
     remotesInfo: {
       '@garfish/micro-app-sub3': {
         matchedVersion: '1.0.4',

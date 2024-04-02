@@ -1,111 +1,207 @@
-import ansiColors from 'ansi-colors';
-import { rm } from 'fs/promises';
-import { resolve } from 'path';
-import { mergeDeepRight } from 'rambda';
-import { UnpluginOptions, createUnplugin } from 'unplugin';
-
-import { retrieveHostConfig } from './configurations/hostPlugin';
-import { retrieveRemoteConfig } from './configurations/remotePlugin';
-import { HostOptions } from './interfaces/HostOptions';
-import { RemoteOptions } from './interfaces/RemoteOptions';
-import { createTypesArchive, downloadTypesArchive } from './lib/archiveHandler';
+import { createUnplugin } from 'unplugin';
+import fs from 'fs';
 import {
-  compileTs,
-  retrieveMfTypesPath,
-  retrieveOriginalOutDir,
-} from './lib/typeScriptCompiler';
+  consumeTypes,
+  generateTypes,
+  generateTypesInChildProcess,
+  RemoteOptions,
+  HostOptions,
+  validateOptions,
+  retrieveTypesAssetsInfo,
+} from './helpers';
+
+export type EnhancedRemoteOptions =
+  | {
+      remote: RemoteOptions;
+      extraOptions: Record<string, any>;
+    }
+  | RemoteOptions;
+
+export type EnhancedHostOptions =
+  | {
+      host: HostOptions;
+      extraOptions: Record<string, any>;
+    }
+  | HostOptions;
 
 export const NativeFederationTypeScriptRemote = createUnplugin(
-  (options: RemoteOptions) => {
-    const { remoteOptions, tsConfig, mapComponentsToExpose } =
-      retrieveRemoteConfig(options);
+  (enhancedOptions: EnhancedRemoteOptions) => {
+    const options =
+      'extraOptions' in enhancedOptions
+        ? enhancedOptions.remote
+        : enhancedOptions;
+    const extraOptions =
+      'extraOptions' in enhancedOptions
+        ? enhancedOptions.extraOptions
+        : undefined;
+
+    validateOptions(options);
+    const isProd = process.env.NODE_ENV === 'production';
+    const generateTypesOptions = {
+      remote: options,
+      extraOptions,
+    };
+    const getGenerateTypesFn = () => {
+      let fn: typeof generateTypes | typeof generateTypesInChildProcess =
+        generateTypes;
+      let res: ReturnType<typeof generateTypes>;
+      if (options.compileInChildProcess) {
+        fn = generateTypesInChildProcess;
+      }
+      if (isProd) {
+        res = fn(generateTypesOptions);
+        return () => res;
+      }
+      return fn;
+    };
+    const generateTypesFn = getGenerateTypesFn();
     return {
       name: 'native-federation-typescript/remote',
-      async writeBundle() {
-        try {
-          compileTs(mapComponentsToExpose, tsConfig, remoteOptions);
-
-          await createTypesArchive(tsConfig, remoteOptions);
-
-          if (remoteOptions.deleteTypesFolder) {
-            await rm(retrieveMfTypesPath(tsConfig, remoteOptions), {
-              recursive: true,
-              force: true,
-            });
-          }
-          console.log(ansiColors.green('Federated types created correctly'));
-        } catch (error) {
-          console.error(
-            ansiColors.red(`Unable to compile federated types, ${error}`),
-          );
-        }
+      rollup: {
+        writeBundle: async () => {
+          await generateTypesFn(generateTypesOptions);
+        },
       },
-      get vite() {
-        return process.env.NODE_ENV === 'production'
-          ? undefined
-          : {
-              buildStart: (this as UnpluginOptions).writeBundle,
-              watchChange: (this as UnpluginOptions).writeBundle,
-            };
+      vite: {
+        buildStart: async () => {
+          if (isProd) {
+            return;
+          }
+          await generateTypesFn(generateTypesOptions);
+        },
+        watchChange: async () => {
+          if (isProd) {
+            return;
+          }
+          await generateTypesFn(generateTypesOptions);
+        },
+        writeBundle: async () => {
+          await generateTypesFn(generateTypesOptions);
+        },
       },
       webpack: (compiler) => {
-        compiler.options.devServer = mergeDeepRight(
-          compiler.options.devServer || {},
-          {
-            static: {
-              directory: resolve(
-                retrieveOriginalOutDir(tsConfig, remoteOptions),
-              ),
+        compiler.hooks.thisCompilation.tap('generateTypes', (compilation) => {
+          const hookName = 'mf:generateTypes';
+          compilation.hooks.processAssets.tapPromise(
+            {
+              name: hookName,
+              stage:
+                // @ts-expect-error use runtime variable in case peer dep not installed
+                compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
             },
-          },
-        );
+            async () => {
+              try {
+                const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
+                  retrieveTypesAssetsInfo(options);
+                if (zipName && compilation.getAsset(zipName)) {
+                  return;
+                }
+                await generateTypesFn(generateTypesOptions);
+
+                if (zipTypesPath) {
+                  compilation.emitAsset(
+                    zipName,
+                    new compiler.webpack.sources.RawSource(
+                      fs.readFileSync(zipTypesPath),
+                      false,
+                    ),
+                  );
+                }
+
+                if (apiTypesPath) {
+                  compilation.emitAsset(
+                    apiFileName,
+                    new compiler.webpack.sources.RawSource(
+                      fs.readFileSync(apiTypesPath),
+                      false,
+                    ),
+                  );
+                }
+              } catch (err) {
+                console.error(err);
+              }
+            },
+          );
+        });
       },
       rspack: (compiler) => {
-        compiler.options.devServer = mergeDeepRight(
-          compiler.options.devServer || {},
-          {
-            static: {
-              directory: resolve(
-                retrieveOriginalOutDir(tsConfig, remoteOptions),
-              ),
+        compiler.hooks.thisCompilation.tap('generateTypes', (compilation) => {
+          const hookName = 'mf:generateTypes';
+          compilation.hooks.processAssets.tapPromise(
+            {
+              name: hookName,
+              stage:
+                // @ts-expect-error use runtime variable in case peer dep not installed
+                compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
             },
-          },
-        );
+            async () => {
+              try {
+                const { zipTypesPath, apiTypesPath, zipName, apiFileName } =
+                  retrieveTypesAssetsInfo(options);
+                if (zipName && compilation.getAsset(zipName)) {
+                  return;
+                }
+
+                await generateTypesFn(generateTypesOptions);
+                if (zipTypesPath) {
+                  compilation.emitAsset(
+                    zipName,
+                    new compiler.webpack.sources.RawSource(
+                      fs.readFileSync(zipTypesPath),
+                      false,
+                    ),
+                  );
+                }
+
+                if (apiTypesPath) {
+                  compilation.emitAsset(
+                    apiFileName,
+                    new compiler.webpack.sources.RawSource(
+                      fs.readFileSync(apiTypesPath),
+                      false,
+                    ),
+                  );
+                }
+              } catch (err) {
+                console.error(err);
+              }
+            },
+          );
+        });
       },
     };
   },
 );
 
 export const NativeFederationTypeScriptHost = createUnplugin(
-  (options: HostOptions) => {
-    const { hostOptions, mapRemotesToDownload } = retrieveHostConfig(options);
+  (enhancedOptions: EnhancedHostOptions) => {
+    const options =
+      'extraOptions' in enhancedOptions
+        ? enhancedOptions.host
+        : enhancedOptions;
+    const extraOptions =
+      'extraOptions' in enhancedOptions
+        ? enhancedOptions.extraOptions
+        : undefined;
+
+    validateOptions(options);
+    const consumeTypesOptions = {
+      host: options,
+      extraOptions,
+    };
+    const consumeTypesPromise = consumeTypes(consumeTypesOptions);
     return {
       name: 'native-federation-typescript/host',
       async writeBundle() {
-        if (hostOptions.deleteTypesFolder) {
-          await rm(hostOptions.typesFolder, {
-            recursive: true,
-            force: true,
-          }).catch((error) =>
-            console.error(
-              ansiColors.red(`Unable to remove types folder, ${error}`),
-            ),
-          );
-        }
-
-        const typesDownloader = downloadTypesArchive(hostOptions);
-        const downloadPromises =
-          Object.entries(mapRemotesToDownload).map(typesDownloader);
-
-        await Promise.allSettled(downloadPromises);
-        console.log(ansiColors.green('Federated types extraction completed'));
+        await consumeTypesPromise;
       },
       get vite() {
         return process.env.NODE_ENV === 'production'
           ? undefined
           : {
-              buildStart: (this as UnpluginOptions).writeBundle,
-              watchChange: (this as UnpluginOptions).writeBundle,
+              buildStart: async () => {
+                await consumeTypesPromise;
+              },
             };
       },
     };

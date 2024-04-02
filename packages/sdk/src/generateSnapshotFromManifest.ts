@@ -125,6 +125,8 @@ export function generateSnapshotFromManifest(
     remoteEntry: simpleJoinRemoteEntry(remoteEntryPath, remoteEntryName),
     remoteEntryType,
     remoteTypes: simpleJoinRemoteEntry(remoteTypes.path, remoteTypes.name),
+    remoteTypesZip: remoteTypes.zip || '',
+    remoteTypesAPI: remoteTypes.api || '',
     remotesInfo,
     shared: manifest?.shared.map((item) => ({
       assets: item.assets,

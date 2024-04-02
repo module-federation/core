@@ -1,0 +1,1 @@
+export { ThirdPartyExtractor } from './ThirdPartyExtractor';
