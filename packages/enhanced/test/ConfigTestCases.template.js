@@ -24,10 +24,11 @@ const categories = fs.readdirSync(casesPath).map((cat) => {
     name: cat,
     tests: fs
       .readdirSync(path.join(casesPath, cat))
-      .filter((folder) => !folder.startsWith('_'))
+      .filter((folder) => !folder.startsWith('_') && !folder.startsWith('.'))
       .sort(),
   };
 });
+console.log(333, categories);
 // .filter((i) => i.name === 'container');
 const createLogger = (appendTarget) => {
   return {
@@ -93,11 +94,11 @@ const describeCases = (config) => {
                 if (options.optimization.minimize === undefined)
                   options.optimization.minimize = false;
                 if (options.optimization.minimizer === undefined) {
-                  options.optimization.minimizer = [
-                    new (require('terser-webpack-plugin'))({
-                      parallel: false,
-                    }),
-                  ];
+                  // options.optimization.minimizer = [
+                  //   new (require('terser-webpack-plugin'))({
+                  //     parallel: false,
+                  //   }),
+                  // ];
                 }
                 if (!options.entry) options.entry = './index.js';
                 if (!options.target) options.target = 'async-node';

@@ -68,6 +68,8 @@ class NodeFederationPlugin {
     return {
       ...this._options,
       remotes: this._options.remotes || {},
+      // enable dts in browser by default
+      dts: this._options.dts ?? false,
     };
   }
 

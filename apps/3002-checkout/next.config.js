@@ -12,6 +12,9 @@ const nextConfig = {
   },
   webpack(config, options) {
     const { isServer } = options;
+    config.watchOptions = {
+      ignored: ['**/node_modules/**', '**/@mf-types/**'],
+    };
     config.plugins.push(
       new NextFederationPlugin({
         name: 'checkout',
