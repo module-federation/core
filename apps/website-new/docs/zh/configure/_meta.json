@@ -43,5 +43,15 @@
     "type": "file",
     "name": "implementation",
     "label": "implementation"
+  },
+  {
+    "type": "file",
+    "name": "dts",
+    "label": "dts"
+  },
+  {
+    "type": "file",
+    "name": "dev",
+    "label": "dev"
   }
 ]
