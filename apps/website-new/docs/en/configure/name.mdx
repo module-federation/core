@@ -6,19 +6,3 @@
 `Module Federation` module name, the name must be unique.
 
 `Module Federation` uses the name for runtime data retrieval and global chunk storage variable references.
-
-The naming convention is essentially the same as the [npm#name](https://docs.npmjs.com/cli/v9/configuring-npm/package-json#name) specification.
-
-- Maximum of 128 characters
-- All lowercase, hyphens (-) are allowed, but not consecutive hyphens (--)
-- Underscores (\\\_) are not allowed, and certain special characters are not permitted: “~'!()\*”)’, no spaces, and no special names like node_modules or favicon.ico are allowed.
-
-Example:
-
-**Compliant Names**
-
-```bash
-mf_provider
-
-@demo/button
-```
