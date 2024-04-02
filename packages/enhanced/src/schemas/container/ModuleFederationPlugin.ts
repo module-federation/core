@@ -604,19 +604,11 @@ export default {
       description: 'Used to get types support.',
       type: 'object',
       properties: {
-        disableGenerateTypes: {
-          description: 'Disable generate types.',
-          type: 'boolean',
-        },
-        disableConsumeTypes: {
-          description: 'Disable consume types.',
-          type: 'boolean',
-        },
-        remote: {
+        generateTypes: {
           description: 'Used to config generate types.',
           ref: '#/definitions/DtsRemoteOptions',
         },
-        host: {
+        consumeTypes: {
           description: 'Used to config consume types.',
           ref: '#/definitions/DtsHostOptions',
         },
@@ -633,8 +625,8 @@ export default {
       },
       additionalProperties: false,
     },
-    DevServer: {
-      description: 'Dev Server options.',
+    Dev: {
+      description: 'Used to config dev.',
       type: 'object',
       properties: {
         disableLiveReload: {
@@ -644,23 +636,6 @@ export default {
         disableHotTypesReload: {
           description: 'Disable hot types reload.',
           type: 'boolean',
-        },
-      },
-    },
-    Dev: {
-      description: 'Used to config dev.',
-      type: 'object',
-      properties: {
-        devServer: {
-          description: 'Dev Server options.',
-          anyOf: [
-            {
-              $ref: '#/definitions/DevServer',
-            },
-            {
-              type: 'boolean',
-            },
-          ],
         },
       },
     },

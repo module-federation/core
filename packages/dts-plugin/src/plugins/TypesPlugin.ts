@@ -1,5 +1,3 @@
-import path from 'path';
-import fs from 'fs';
 import {
   normalizeOptions,
   type moduleFederationPlugin,
@@ -9,6 +7,7 @@ import {
   NativeFederationTypeScriptHost,
   NativeFederationTypeScriptRemote,
 } from '@module-federation/native-federation-typescript/webpack';
+import { isTSProject } from './utils';
 
 class TypesPlugin implements WebpackPluginInstance {
   options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -18,58 +17,60 @@ class TypesPlugin implements WebpackPluginInstance {
 
   apply(compiler: Compiler) {
     const { options } = this;
-    const isTSProject = (tsConfigPath?: string, context = process.cwd()) => {
-      try {
-        let filepath = tsConfigPath
-          ? tsConfigPath
-          : path.resolve(context, './tsconfig.json');
-        if (!path.isAbsolute(filepath)) {
-          filepath = path.resolve(context, filepath);
-        }
-        return fs.existsSync(filepath);
-      } catch (err) {
-        return false;
-      }
-    };
 
+    const defaultGenerateTypes = {
+      generateAPITypes: true,
+      compileInChildProcess: true,
+      abortOnError: false,
+      extractThirdParty: true,
+      extractRemoteTypes: true,
+    };
+    const defaultConsumeTypes = { abortOnError: false, consumeAPITypes: true };
     const normalizedDtsOptions =
       normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
         isTSProject(undefined, compiler.context),
         {
-          disableGenerateTypes: false,
-          disableConsumeTypes: false,
-          remote: {
-            generateAPITypes: true,
-            compileInChildProcess: true,
-            abortOnError: false,
-            extractThirdParty: true,
-            extractRemoteTypes: true,
-          },
-          host: { abortOnError: false, consumeAPITypes: true },
+          generateTypes: defaultGenerateTypes,
+          consumeTypes: defaultConsumeTypes,
           extraOptions: {},
         },
         'mfOptions.dts',
       )(options.dts);
+
     if (typeof normalizedDtsOptions === 'object') {
-      if (!normalizedDtsOptions.disableGenerateTypes) {
+      const normalizedGenerateTypes =
+        normalizeOptions<moduleFederationPlugin.DtsRemoteOptions>(
+          true,
+          defaultGenerateTypes,
+          'mfOptions.dts.generateTypes',
+        )(normalizedDtsOptions.generateTypes);
+
+      if (normalizedGenerateTypes) {
         NativeFederationTypeScriptRemote({
           remote: {
             implementation: normalizedDtsOptions.implementation,
             context: compiler.context,
             moduleFederationConfig: options,
-            ...normalizedDtsOptions.remote,
+            ...normalizedGenerateTypes,
           },
           extraOptions: normalizedDtsOptions.extraOptions || {},
           // @ts-ignore
         }).apply(compiler);
       }
-      if (!normalizedDtsOptions.disableConsumeTypes) {
+
+      const normalizedConsumeTypes =
+        normalizeOptions<moduleFederationPlugin.DtsRemoteOptions>(
+          true,
+          defaultConsumeTypes,
+          'mfOptions.dts.consumeTypes',
+        )(normalizedDtsOptions.consumeTypes);
+      if (normalizedConsumeTypes) {
         NativeFederationTypeScriptHost({
           host: {
             implementation: normalizedDtsOptions.implementation,
             context: compiler.context,
             moduleFederationConfig: options,
-            ...normalizedDtsOptions.host,
+            ...normalizedConsumeTypes,
           },
           extraOptions: normalizedDtsOptions.extraOptions || {},
           // @ts-ignore

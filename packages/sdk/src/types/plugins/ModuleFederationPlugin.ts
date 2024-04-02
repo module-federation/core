@@ -123,13 +123,9 @@ export interface PluginManifestOptions {
   ) => Promise<Stats | void> | Stats | void;
 }
 
-export interface PluginDevServerOptions {
+export interface PluginDevOptions {
   disableLiveReload?: boolean;
   disableHotTypesReload?: boolean;
-}
-
-export interface PluginDevOptions {
-  devServer?: boolean | PluginDevServerOptions;
 }
 
 export interface DtsHostOptions {
@@ -156,10 +152,8 @@ export interface DtsRemoteOptions {
 }
 
 export interface PluginDtsOptions {
-  disableGenerateTypes?: boolean;
-  disableConsumeTypes?: boolean;
-  remote?: DtsRemoteOptions;
-  host?: DtsHostOptions;
+  generateTypes?: boolean | DtsRemoteOptions;
+  consumeTypes?: boolean | DtsHostOptions;
   extraOptions?: Record<string, any>;
   implementation?: string;
 }

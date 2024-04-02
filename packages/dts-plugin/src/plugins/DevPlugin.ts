@@ -8,6 +8,7 @@ import {
 import { WEB_CLIENT_OPTIONS_IDENTIFIER, WebClientOptions } from '../server';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import path from 'path';
+import { isTSProject } from './utils';
 
 enum PROCESS_EXIT_CODE {
   SUCCESS = 0,
@@ -102,10 +103,8 @@ export class DevPlugin implements WebpackPluginInstance {
       normalizeOptions<moduleFederationPlugin.PluginDevOptions>(
         true,
         {
-          devServer: {
-            disableLiveReload: true,
-            disableHotTypesReload: false,
-          },
+          disableLiveReload: true,
+          disableHotTypesReload: false,
         },
         'mfOptions.dev',
       )(dev);
@@ -114,20 +113,9 @@ export class DevPlugin implements WebpackPluginInstance {
       return;
     }
 
-    const normalizedDevServer =
-      normalizeOptions<moduleFederationPlugin.PluginDevServerOptions>(
-        true,
-        {
-          disableLiveReload: true,
-          disableHotTypesReload: false,
-        },
-        'mfOptions.dev.devServer',
-      )(normalizedDev.devServer);
-
     if (
-      !normalizedDevServer ||
-      (normalizedDevServer.disableHotTypesReload &&
-        normalizedDevServer.disableLiveReload)
+      normalizedDev.disableHotTypesReload &&
+      normalizedDev.disableLiveReload
     ) {
       return;
     }
@@ -135,7 +123,7 @@ export class DevPlugin implements WebpackPluginInstance {
       throw new Error('name is required if you want to enable dev server!');
     }
 
-    if (!normalizedDevServer.disableLiveReload) {
+    if (!normalizedDev.disableLiveReload) {
       const TEMP_DIR = path.join(
         `${process.cwd()}/node_modules`,
         `.federation`,
@@ -149,57 +137,74 @@ export class DevPlugin implements WebpackPluginInstance {
         }).apply(compiler);
       });
     }
-    const isTSProject = (tsConfigPath?: string, context = process.cwd()) => {
-      try {
-        let filepath = tsConfigPath ?? path.resolve(context, './tsconfig.json');
-        if (!path.isAbsolute(filepath)) {
-          filepath = path.resolve(context, filepath);
-        }
-        return fs.existsSync(filepath);
-      } catch (err) {
-        return false;
-      }
-    };
+
+    const defaultGenerateTypes = { compileInChildProcess: true };
+    const defaultConsumeTypes = { consumeAPITypes: true };
     const normalizedDtsOptions =
       normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
         isTSProject(undefined, compiler.context),
         {
-          disableGenerateTypes: false,
           //  remote types dist(.dev-server) not be used currently, so no need to set extractThirdParty etc
-          remote: { compileInChildProcess: true },
-          host: { consumeAPITypes: true },
+          generateTypes: defaultGenerateTypes,
+          consumeTypes: defaultConsumeTypes,
           extraOptions: {},
         },
         'mfOptions.dts',
       )(dts);
+
+    const normalizedGenerateTypes =
+      normalizeOptions<moduleFederationPlugin.DtsRemoteOptions>(
+        normalizedDtsOptions === false,
+        defaultGenerateTypes,
+        'mfOptions.dts.generateTypes',
+      )(
+        normalizedDtsOptions === false
+          ? undefined
+          : normalizedDtsOptions.generateTypes,
+      );
+
     const remote =
-      normalizedDtsOptions === false
-        ? undefined
-        : normalizedDtsOptions.disableGenerateTypes
+      normalizedGenerateTypes === false
         ? undefined
         : {
-            implementation: normalizedDtsOptions.implementation,
+            implementation:
+              normalizedDtsOptions === false
+                ? undefined
+                : normalizedDtsOptions.implementation,
             context: compiler.context,
             moduleFederationConfig: {
               ...this._options,
             },
             hostRemoteTypesFolder:
-              normalizedDtsOptions.remote?.typesFolder || '@mf-types',
-            ...normalizedDtsOptions.remote,
+              normalizedGenerateTypes.typesFolder || '@mf-types',
+            ...normalizedGenerateTypes,
             typesFolder: `.dev-server`,
           };
+
+    const normalizedConsumeTypes =
+      normalizeOptions<moduleFederationPlugin.DtsHostOptions>(
+        Boolean(normalizedDtsOptions),
+        defaultConsumeTypes,
+        'mfOptions.dts.consumeTypes',
+      )(
+        normalizedDtsOptions === false
+          ? undefined
+          : normalizedDtsOptions.consumeTypes,
+      );
+
     const host =
-      normalizedDtsOptions === false
-        ? undefined
-        : normalizedDtsOptions.disableConsumeTypes
+      normalizedConsumeTypes === false
         ? undefined
         : {
-            implementation: normalizedDtsOptions.implementation,
+            implementation:
+              normalizedDtsOptions === false
+                ? undefined
+                : normalizedDtsOptions.implementation,
             context: compiler.context,
             moduleFederationConfig: this._options,
             typesFolder: '@mf-types',
             abortOnError: false,
-            ...normalizedDtsOptions.host,
+            ...normalizedConsumeTypes,
           };
     const extraOptions = normalizedDtsOptions
       ? normalizedDtsOptions.extraOptions || {}
@@ -209,8 +214,8 @@ export class DevPlugin implements WebpackPluginInstance {
       remote: remote,
       host: host,
       extraOptions: extraOptions,
-      disableLiveReload: normalizedDevServer.disableHotTypesReload,
-      disableHotTypesReload: normalizedDevServer.disableHotTypesReload,
+      disableLiveReload: normalizedDev.disableHotTypesReload,
+      disableHotTypesReload: normalizedDev.disableHotTypesReload,
     });
 
     this._stopWhenSIGTERMOrSIGINT();
