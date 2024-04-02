@@ -95,6 +95,7 @@ module.exports = {
 ----
 // Fetch Remote A dynamically:
 const fetchRemoteA = (resolve) => {
+const fetchRemoteA = (resolve, reject) => {
   // We define a script tag to use the browser for fetching the remoteEntry.js file
   const script = document.createElement("script");
   script.src = window.appAUrl; // This could be defined anywhere
@@ -112,10 +113,14 @@ const fetchRemoteA = (resolve) => {
       },
     };
     resolve(module);
-  }
+  };
+  // Reject promise in case of network error
+  script.onerror = () => {
+    reject(new Error('Remote A init error'));
+  };
   // Lastly we inject the script tag into the document's head to trigger the script load
   document.head.appendChild(script);
-}
+};
 ----
 
 === Advantages and Limitations
