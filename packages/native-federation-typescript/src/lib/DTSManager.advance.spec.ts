@@ -1,9 +1,9 @@
 import AdmZip from 'adm-zip';
 import axios from 'axios';
 import dirTree from 'directory-tree';
-import fs from 'fs';
+import { readFileSync, rmSync } from 'fs';
 import { join } from 'path';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, afterAll } from 'vitest';
 import { DTSManager } from './DTSManager';
 
 describe('DTSManager advance usage', () => {
@@ -53,12 +53,20 @@ describe('DTSManager advance usage', () => {
     host: hostOptions,
   });
 
+  afterAll(() => {
+    [
+      join(projectRoot, 'dist', remoteOptions.typesFolder),
+      join(projectRoot, hostOptions.typesFolder),
+    ].forEach((tmpDir) => {
+      rmSync(tmpDir, { recursive: true });
+    });
+  });
   it('generate types with api declaration file', async () => {
     const distFolder = join(projectRoot, 'dist', remoteOptions.typesFolder);
     await dtsManager.generateTypes();
 
     const apiFile = `${distFolder}.d.ts`;
-    expect(fs.readFileSync(apiFile, 'utf8')).toEqual(`
+    expect(readFileSync(apiFile, 'utf8')).toEqual(`
     export type RemoteKeys = 'REMOTE_ALIAS_IDENTIFIER/index';
     type PackageType<T> = T extends 'REMOTE_ALIAS_IDENTIFIER/index' ? typeof import('REMOTE_ALIAS_IDENTIFIER/index') :any;`);
   });
@@ -75,7 +83,7 @@ describe('DTSManager advance usage', () => {
       if (url.includes('.d.ts')) {
         return vi
           .fn()
-          .mockResolvedValueOnce({ data: fs.readFileSync(apiFile, 'utf8') })();
+          .mockResolvedValueOnce({ data: readFileSync(apiFile, 'utf8') })();
       }
       return vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() })();
     };

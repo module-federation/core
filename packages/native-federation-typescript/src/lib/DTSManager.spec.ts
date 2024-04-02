@@ -1,10 +1,9 @@
 import AdmZip from 'adm-zip';
 import axios from 'axios';
 import dirTree from 'directory-tree';
-import { rm } from 'fs/promises';
-import fs from 'fs';
+import { rmSync, existsSync } from 'fs';
 import { join } from 'path';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, afterAll } from 'vitest';
 import { DTSManager } from './DTSManager';
 import { UpdateMode } from '../constant';
 
@@ -49,6 +48,15 @@ describe('DTSManager', () => {
   const dtsManager = new DTSManager({
     remote: remoteOptions,
     host: hostOptions,
+  });
+
+  afterAll(() => {
+    [
+      join(projectRoot, 'dist', remoteOptions.typesFolder),
+      join(projectRoot, hostOptions.typesFolder),
+    ].forEach((tmpDir) => {
+      rmSync(tmpDir, { recursive: true });
+    });
   });
 
   it('generate types', async () => {
@@ -273,8 +281,8 @@ describe('DTSManager', () => {
 
   it('update self while updateMode is POSITIVE', async () => {
     const distFolder = join(projectRoot, 'dist', remoteOptions.typesFolder);
-    await rm(distFolder, { recursive: true, force: true });
-    expect(fs.existsSync(distFolder)).toEqual(false);
+    rmSync(distFolder, { recursive: true });
+    expect(existsSync(distFolder)).toEqual(false);
     await dtsManager.updateTypes({
       remoteName: remoteOptions.moduleFederationConfig.name,
       remoteTarPath: '',
@@ -384,9 +392,8 @@ describe('DTSManager', () => {
 
   it('update specific remote while updateMode is PASSIVE', async () => {
     const targetFolder = join(projectRoot, hostOptions.typesFolder);
-
-    await rm(targetFolder, { recursive: true, force: true });
-    expect(fs.existsSync(targetFolder)).toEqual(false);
+    rmSync(targetFolder, { recursive: true });
+    expect(existsSync(targetFolder)).toEqual(false);
 
     const distFolder = join(projectRoot, 'dist', typesFolder);
     const zip = new AdmZip();

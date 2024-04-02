@@ -1,10 +1,10 @@
 import AdmZip from 'adm-zip';
 import axios from 'axios';
 import dirTree from 'directory-tree';
-import { rm } from 'fs/promises';
+import { rmSync } from 'fs';
 import { join } from 'path';
 import { UnpluginOptions } from 'unplugin';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, afterAll } from 'vitest';
 import webpack from 'webpack';
 import { rspack } from '@rspack/core';
 
@@ -16,7 +16,16 @@ import { RemoteOptions } from './helpers';
 
 describe('index', () => {
   const projectRoot = join(__dirname, '..', '..', '..');
-
+  afterAll(() => {
+    [
+      join(projectRoot, 'dist', '@mf-types'),
+      join(projectRoot, 'dist', '@mf-tests-webpack'),
+      join(projectRoot, 'dist', '@mf-tests-rspack'),
+      join(projectRoot, 'dist', '@mf-types-host'),
+    ].forEach((tmpDir) => {
+      rmSync(tmpDir, { recursive: true });
+    });
+  });
   describe('NativeFederationTypeScriptRemote', () => {
     it('throws for missing moduleFederationConfig', () => {
       const writeBundle = () => NativeFederationTypeScriptRemote.rollup({});
@@ -44,7 +53,6 @@ describe('index', () => {
       };
 
       const distFolder = join(projectRoot, 'dist', options.typesFolder);
-      await rm(distFolder, { recursive: true, force: true });
 
       const unplugin = NativeFederationTypeScriptRemote.rollup(
         options,
@@ -171,7 +179,6 @@ describe('index', () => {
 
       console.log('webpack options: ', JSON.stringify(options));
       const distFolder = join(projectRoot, 'dist', options.typesFolder!);
-      await rm(distFolder, { recursive: true, force: true });
 
       const webpackCompiler = webpack({
         target: 'web',
@@ -324,8 +331,6 @@ describe('index', () => {
       };
       console.log('rspack options: ', JSON.stringify(options));
       const distFolder = join(projectRoot, 'dist', options.typesFolder!);
-
-      await rm(distFolder, { recursive: true, force: true });
 
       const rspackCompiler = rspack({
         target: 'web',
@@ -598,7 +603,6 @@ describe('index', () => {
           },
         ],
       });
-      await rm(options.typesFolder, { recursive: true, force: true });
     });
   });
 });
