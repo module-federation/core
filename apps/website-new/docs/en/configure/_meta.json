@@ -46,6 +46,16 @@
   },
   {
     "type": "file",
+    "name": "dts",
+    "label": "dts"
+  },
+  {
+    "type": "file",
+    "name": "dev",
+    "label": "dev"
+  },
+  {
+    "type": "file",
     "name": "manifest",
     "label": "manifest"
   }

@@ -22,5 +22,9 @@ type ModuleFederationOptions = {
   implementation?: string;
   // manifest configuration
   manifest?: boolean | PluginManifestOptions;
+  // control page liveReload and types hot reload
+  dev?: boolean | PluginDevOptions;
+  // control types
+  dts?: boolean | PluginDtsOptions;
 };
 ```

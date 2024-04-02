@@ -24,5 +24,9 @@ type ModuleFederationOptions {
     implementation?: string;
     // manifest 配置
     manifest?: boolean | PluginManifestOptions
+    // 控制页面热重载和类型热重载
+    dev?: boolean | PluginDevOptions;
+    // 控制类型生成
+    dts?: boolean | PluginDtsOptions;
 };
 ```

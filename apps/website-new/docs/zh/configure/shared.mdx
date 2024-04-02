@@ -12,10 +12,8 @@
 type PluginSharedOptions = string[] | SharedObject;
 
 interface SharedObject {
-  [sharedName: string]: SharedStrategy | SharedConfig;
+  [sharedName: string]: SharedConfig;
 }
-
-type SharedStrategy = 'loose';
 
 interface SharedConfig {
   singleton?: boolean;
@@ -24,23 +22,7 @@ interface SharedConfig {
 }
 ```
 
-当前仅支持一种共享依赖策略：
-
-- **loose**：宽松模式，默认对符合当前依赖版本区间的共享依赖进行复用。若不满足版本规范则会使用高版本的依赖，且在控制台警告。
-  其中版本区间范围（requiredVersion）取值为：
-
-  - `^${require('project/package.json')[devDeps | dep]['depName']}`
-
-  该策略对应的配置：
-
-  ```tsx
-  {
-      singleton: true,
-      requiredVersion: require('project/package.json')[devDeps | dep]['depName']
-  }
-  ```
-
-* Example
+- Example
 
 ```ts
 new ModuleFederationPlugin({
