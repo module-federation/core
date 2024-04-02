@@ -22,7 +22,8 @@
     "@module-federation/sdk": "workspace:*",
     "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/manifest": "workspace:*",
-    "@module-federation/managers": "workspace:*"
+    "@module-federation/managers": "workspace:*",
+    "@module-federation/dts-plugin": "workspace:*"
   },
   "devDependencies": {
     "@rspack/core": "0.5.0"

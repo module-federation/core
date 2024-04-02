@@ -13,6 +13,8 @@ const SUPPORTED_BUNDLERS = [
 export default defineConfig({
   entry: [
     join(__dirname, 'src', 'index.ts'),
+    join(__dirname, 'src', 'helpers.ts'),
+    join(__dirname, 'src', 'lib/forkGenerateDts.ts'),
     ...SUPPORTED_BUNDLERS.map((bundler) =>
       join(__dirname, 'src', `${bundler}.ts`),
     ),
@@ -20,7 +22,6 @@ export default defineConfig({
   dts: true,
   splitting: true,
   clean: true,
-  minify: true,
   format: ['cjs', 'esm'],
   outDir: 'packages/native-federation-typescript/dist',
   external: [join(__dirname, 'package.json')],

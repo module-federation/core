@@ -7,6 +7,7 @@ import { afterAll, describe, expect, it, vi } from 'vitest';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { createTypesArchive, downloadTypesArchive } from './archiveHandler';
+import { HostOptions } from '../interfaces/HostOptions';
 
 describe('archiveHandler', () => {
   const tmpDir = mkdtempSync(join(os.tmpdir(), 'archive-handler'));
@@ -47,11 +48,16 @@ describe('archiveHandler', () => {
   });
 
   describe('downloadTypesArchive', () => {
-    const hostOptions = {
+    const hostOptions: Required<HostOptions> = {
       moduleFederationConfig: {},
       typesFolder: tmpDir,
+      remoteTypesFolder: tmpDir,
       deleteTypesFolder: true,
       maxRetries: 3,
+      implementation: '',
+      context: process.cwd(),
+      abortOnError: true,
+      consumeAPITypes: false,
     };
 
     const destinationFolder = 'typesHostFolder';
@@ -89,6 +95,27 @@ describe('archiveHandler', () => {
       expect(axios.get).toHaveBeenCalledWith(fileToDownload, {
         responseType: 'arraybuffer',
       });
+    });
+
+    it('not throw error while set abortOnError: false ', async () => {
+      const message = 'Rejected value';
+      const hostOptions: Required<HostOptions> = {
+        moduleFederationConfig: {},
+        typesFolder: tmpDir,
+        remoteTypesFolder: tmpDir,
+        deleteTypesFolder: true,
+        maxRetries: 3,
+        implementation: '',
+        context: process.cwd(),
+        abortOnError: false,
+        consumeAPITypes: false,
+      };
+      axios.get = vi.fn().mockRejectedValue(new Error(message));
+      const res = await downloadTypesArchive(hostOptions)([
+        destinationFolder,
+        fileToDownload,
+      ]);
+      expect(res).toEqual(undefined);
     });
   });
 });

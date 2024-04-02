@@ -1,5 +1,11 @@
 # [8.1.0-canary.7](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.3.2
+
+### Patch Changes
+
+- da8729f: implement skipSharingNextInternals option again
+
 ## 8.3.1
 
 ### Patch Changes
