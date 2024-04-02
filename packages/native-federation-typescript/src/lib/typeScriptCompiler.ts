@@ -1,6 +1,7 @@
 import ansiColors from 'ansi-colors';
-import { dirname, join, normalize, relative } from 'path';
+import { dirname, join, normalize, relative, resolve } from 'path';
 import typescript from 'typescript';
+import { ThirdPartyExtractor } from '@module-federation/third-party-dts-extractor';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 
@@ -34,6 +35,7 @@ export const retrieveMfTypesPath = (
   tsConfig: typescript.CompilerOptions,
   remoteOptions: Required<RemoteOptions>,
 ) => normalize(tsConfig.outDir!.replace(remoteOptions.compiledTypesFolder, ''));
+
 export const retrieveOriginalOutDir = (
   tsConfig: typescript.CompilerOptions,
   remoteOptions: Required<RemoteOptions>,
@@ -44,10 +46,20 @@ export const retrieveOriginalOutDir = (
       .replace(remoteOptions.typesFolder, ''),
   );
 
+export const retrieveMfAPITypesPath = (
+  tsConfig: typescript.CompilerOptions,
+  remoteOptions: Required<RemoteOptions>,
+) =>
+  join(
+    retrieveOriginalOutDir(tsConfig, remoteOptions),
+    `${remoteOptions.typesFolder}.d.ts`,
+  );
+
 const createHost = (
   mapComponentsToExpose: Record<string, string>,
   tsConfig: typescript.CompilerOptions,
   remoteOptions: Required<RemoteOptions>,
+  cb: (dts: string) => void,
 ) => {
   const host = typescript.createCompilerHost(tsConfig);
   const originalWriteFile = host.writeFile;
@@ -91,6 +103,8 @@ const createHost = (
         );
       }
     }
+
+    cb(text);
   };
 
   return host;
@@ -121,7 +135,17 @@ export const compileTs = (
   tsConfig: typescript.CompilerOptions,
   remoteOptions: Required<RemoteOptions>,
 ) => {
-  const tsHost = createHost(mapComponentsToExpose, tsConfig, remoteOptions);
+  const mfTypePath = retrieveMfTypesPath(tsConfig, remoteOptions);
+  const thirdPartyExtractor = new ThirdPartyExtractor(
+    resolve(mfTypePath, 'node_modules'),
+    remoteOptions.context,
+  );
+
+  const cb = remoteOptions.extractThirdParty
+    ? thirdPartyExtractor.collectPkgs.bind(thirdPartyExtractor)
+    : () => undefined;
+
+  const tsHost = createHost(mapComponentsToExpose, tsConfig, remoteOptions, cb);
   const filesToCompile = [
     ...Object.values(mapComponentsToExpose),
     ...remoteOptions.additionalFilesToCompile,
@@ -136,4 +160,8 @@ export const compileTs = (
 
   const { diagnostics = [] } = tsProgram.emit();
   diagnostics.forEach(reportCompileDiagnostic);
+
+  if (remoteOptions.extractThirdParty) {
+    thirdPartyExtractor.copyDts();
+  }
 };
