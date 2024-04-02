@@ -140,7 +140,9 @@ export class NextFederationPlugin {
     compiler: Compiler,
     isServer: boolean,
   ): ModuleFederationPluginOptions {
-    const defaultShared = retrieveDefaultShared(isServer);
+    const defaultShared = this._extraOptions.skipSharingNextInternals
+      ? {}
+      : retrieveDefaultShared(isServer);
     const noop = this.getNoopPath();
     return {
       ...this._options,
