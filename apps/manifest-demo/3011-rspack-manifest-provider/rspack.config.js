@@ -7,7 +7,7 @@ const path = require('path');
 // const { withModuleFederation } = require('@nx/react/module-federation');
 const {
   ModuleFederationPlugin,
-} = require('@module-federation/enhanced-rspack');
+} = require('@module-federation/enhanced/rspack');
 
 module.exports = composePlugins(
   withNx(),
