@@ -149,6 +149,7 @@
     "@types/webpack-sources": "3.2.3",
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
+    "@types/chrome": "^0.0.260",
     "@vitest/coverage-istanbul": "1.2.2",
     "@vitest/coverage-v8": "1.2.2",
     "@vitest/ui": "1.2.2",
