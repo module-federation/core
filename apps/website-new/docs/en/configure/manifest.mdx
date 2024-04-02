@@ -1,0 +1,44 @@
+# manifest
+
+- Type: `boolean | PluginManifestOptions`
+- Default value: `undefined`
+
+Used to control whether to generate a manifest and the corresponding generation configuration.
+
+The `PluginManifestOptions` types are as follows:
+
+```ts
+interface PluginManifestOptions {
+  filePath?: string;
+  disableAssetsAnalyze?: boolean;
+  fileName?: string;
+}
+```
+
+## filePath
+
+- Type: `string`
+- Default value: `undefined`
+
+manifest filePath
+
+## fileName
+
+- Type: `string`
+- Default value: `'mf-manifest.json'`
+
+manifest fileName
+
+## disableAssetsAnalyze
+
+:::warning
+It is not recommended to set this configuration. After setting, the preload function will be disabled!
+:::
+
+- Type: `boolean`
+- Required: No
+- Default value: `undefined`
+
+When analyzing assets in complex projects, it can take a long time. By setting this option to `true`, asset analysis will be disabled, optimizing build time.
+If the project is purely consumer-oriented, it will be set to `true` in dev by default.
+If set to `true`, the `shared` and `exposes` fields will not be present in the manifest, and `assets` will not be present in `remotes`.

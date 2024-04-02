@@ -53,5 +53,10 @@
     "type": "file",
     "name": "dev",
     "label": "dev"
+  },
+  {
+    "type": "file",
+    "name": "manifest",
+    "label": "manifest"
   }
 ]
