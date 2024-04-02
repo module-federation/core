@@ -29,7 +29,7 @@ const expectWarning = (regexp) => {
 
 it('should load the component from container', () => {
   return import('./App').then(({ default: App }) => {
-    // FIXME: Vmok runtime 打印的 warning 和原先不一致
+    // FIXME: Federation runtime 打印的 warning 和原先不一致
     // expectWarning(
     // 	/Unsatisfied version 8 from 2-container-full of shared singleton module react \(required \^2\)/
     // );

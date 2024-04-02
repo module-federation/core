@@ -18,12 +18,36 @@
       "require": "./dist/src/index.js",
       "import": "./dist/src/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./webpack": {
+      "require": "./dist/src/webpack.js",
+      "import": "./dist/src/webpack.js",
+      "types": "./dist/webpack.d.ts"
+    },
+    "./rspack": {
+      "require": "./dist/src/rspack.js",
+      "import": "./dist/src/rspack.js",
+      "types": "./dist/rspack.d.ts"
+    },
+    "./runtime": {
+      "require": "./dist/src/runtime.js",
+      "import": "./dist/src/runtime.js",
+      "types": "./dist/runtime.d.ts"
     }
   },
   "typesVersions": {
     "*": {
       ".": [
         "./dist/src/index.d.ts"
+      ],
+      "webpack": [
+        "./dist/src/webpack.d.ts"
+      ],
+      "rspack": [
+        "./dist/src/rspack.d.ts"
+      ],
+      "runtime": [
+        "./dist/src/runtime.d.ts"
       ]
     }
   },
@@ -35,6 +59,8 @@
     "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/manifest": "workspace:*",
     "@module-federation/managers": "workspace:*",
+    "@module-federation/dts-plugin": "workspace:*",
+    "@module-federation/enhanced-rspack": "workspace:*",
     "upath": "2.0.1"
   }
 }

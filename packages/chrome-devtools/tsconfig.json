@@ -1,0 +1,24 @@
+{
+  "extends": "@modern-js/tsconfig/base",
+  "compilerOptions": {
+    "declaration": false,
+    "jsx": "preserve",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/*": ["./shared/*"]
+    },
+    "types": ["chrome"],
+    "allowJs": false
+  },
+  "include": [
+    "src",
+    "shared",
+    "config",
+    "modern.config.ts",
+    "playwright.config.ts",
+    "__tests__",
+    "e2e"
+  ],
+  "exclude": ["**/node_modules"]
+}

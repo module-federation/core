@@ -1,7 +1,6 @@
-import type { container } from 'webpack';
+import { moduleFederationPlugin } from '@module-federation/sdk';
 
-export type ModuleFederationPluginOptions = ConstructorParameters<
-  typeof container.ModuleFederationPlugin
->['0'];
+export type ModuleFederationPluginOptions =
+  moduleFederationPlugin.ModuleFederationPluginOptions;
 
 export type RemotesObject = ModuleFederationPluginOptions['remotes'];
