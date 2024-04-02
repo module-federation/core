@@ -11,8 +11,8 @@
 }
 
 .card {
-  display: block;
-  cursor: pointer;
+  display: flex;
+  position: relative;
   age-break-inside: avoid;
   break-inside: avoid;
   border-radius: 20px;
@@ -41,6 +41,12 @@
 
 .bottom {
   padding: 12px 18px 14px;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  background: #e5e7eb;
+  width: 100%;
+  opacity: 90%;
 }
 
 .name {
@@ -76,8 +82,13 @@
   -webkit-background-clip: text;
 }
 
+:global(.dark) .bottom {
+  background: #2f2f30;
+}
+
 .domain {
   font-size: 13px;
   line-height: 24px;
   color: var(--rp-c-text-2);
+  cursor: pointer;
 }
