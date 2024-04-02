@@ -261,9 +261,8 @@ export function getTypesMetaInfo(
       normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
         true,
         {
-          disableGenerateTypes: false,
-          remote: defaultRemoteOptions,
-          host: {},
+          generateTypes: defaultRemoteOptions,
+          consumeTypes: {},
         },
         'mfOptions.dts',
       )(pluginOptions.dts);
@@ -275,8 +274,8 @@ export function getTypesMetaInfo(
       normalizeOptions<moduleFederationPlugin.DtsRemoteOptions>(
         true,
         defaultRemoteOptions,
-        'mfOptions.dts.remote',
-      )(normalizedDtsOptions.remote);
+        'mfOptions.dts.generateTypes',
+      )(normalizedDtsOptions.generateTypes);
 
     if (normalizedRemote === false) {
       return defaultTypesMetaInfo;
