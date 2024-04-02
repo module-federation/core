@@ -244,9 +244,6 @@ class DTSManager {
   }
 
   consumeAPITypes(hostOptions: Required<HostOptions>) {
-    if (!hostOptions.consumeAPITypes) {
-      return;
-    }
     if (!this.loadedRemoteAPIAlias.length) {
       return;
     }
@@ -343,20 +340,23 @@ class DTSManager {
         await this.consumeArchiveTypes(options.host);
 
       // download apiTypes
-      await Promise.all(
-        downloadPromisesResult.map(async (item) => {
-          if (item.status === 'rejected' || !item.value) {
-            return;
-          }
-          const [alias, destinationPath] = item.value;
-          const remoteInfo = this.remoteAliasMap[alias];
-          if (!remoteInfo) {
-            return;
-          }
-          await this.downloadAPITypes(remoteInfo, destinationPath);
-        }),
-      );
-      this.consumeAPITypes(hostOptions);
+      if (hostOptions.consumeAPITypes) {
+        await Promise.all(
+          downloadPromisesResult.map(async (item) => {
+            if (item.status === 'rejected' || !item.value) {
+              return;
+            }
+            const [alias, destinationPath] = item.value;
+            const remoteInfo = this.remoteAliasMap[alias];
+            if (!remoteInfo) {
+              return;
+            }
+
+            await this.downloadAPITypes(remoteInfo, destinationPath);
+          }),
+        );
+        this.consumeAPITypes(hostOptions);
+      }
 
       console.log(ansiColors.green('Federated types extraction completed'));
     } catch (err) {
