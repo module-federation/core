@@ -12,10 +12,8 @@ The `PluginSharedOptions` type is as follows:
 type PluginSharedOptions = string[] | SharedObject;
 
 interface SharedObject {
-  [sharedName: string]: SharedStrategy | SharedConfig;
+  [sharedName: string]: SharedConfig;
 }
-
-type SharedStrategy = 'loose';
 
 interface SharedConfig {
   singleton?: boolean;
@@ -24,23 +22,7 @@ interface SharedConfig {
 }
 ```
 
-Currently, only one sharing strategy is supported:
-
-- **loose**: Loose mode, which defaults to reusing shared dependencies that match the current dependency version range. If the version specification is not met, a higher version of the dependency will be used, with a warning in the console.
-  The version range is taken as:
-
-  - `^${require('project/package.json')[devDeps | dep]['depName']}`
-
-  The corresponding configuration for this strategy is:
-
-  ```tsx
-  {
-    singleton: true,
-    requiredVersion: require('project/package.json')[devDeps | dep]['depName']
-  }
-  ```
-
-* Example
+- Example
 
 ```ts
 new ModuleFederationPlugin({
