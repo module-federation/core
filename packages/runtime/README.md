@@ -340,6 +340,7 @@ function registerPlugins(plugins: Array<FederationRuntimePlugin>) {}
 
 - Details:
   Allows plugins to be registered dynamically or lazily. Lazy plugins will be called after normal runtime plugins. 
+  Similar function as registerRemote, but for runtime plugins. 
 * Example
 
 ```ts
@@ -353,10 +354,14 @@ init({
       entry: 'http://localhost:2001/mf-manifest.json',
     }
   ],
+  plugins: [
+    //normal/eager runtime plugins
+  ]
 });
 
 import('./runtime-plugin').then(plugin => {
   registerPlugins([
+    //more plugins loaded lazyily or dynamically 
     plugin
   ]);
 })
