@@ -155,7 +155,7 @@ class FederationRuntimePlugin {
               '];',
             ])
           : '',
-        `${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`, //init again with plugins attached.
+        `${federationGlobal}.runtime.registerPlugins(${federationGlobal}.initOptions.plugins);`, // async register plugins after eager init
       ]),
       '}',
     ]);

@@ -325,6 +325,43 @@ registerRemotes([
 ]);
 ```
 
+### registerPlugins
+
+- Type: `registerPlugins(plugins: Array<FederationRuntimePlugin>): void`
+- Used to register remotes after init .
+
+- Type
+
+```typescript
+import type { FederationRuntimePlugin } from '@module-federation/runtime';
+
+function registerPlugins(plugins: Array<FederationRuntimePlugin>) {}
+```
+
+- Details:
+  Allows plugins to be registered dynamically or lazily. Lazy plugins will be called after normal runtime plugins. 
+* Example
+
+```ts
+import { init, registerPlugins } from '@module-federation/runtime';
+
+init({
+  name: '@demo/register-new-remotes',
+  remotes: [
+    {
+      name: '@demo/sub1',
+      entry: 'http://localhost:2001/mf-manifest.json',
+    }
+  ],
+});
+
+import('./runtime-plugin').then(plugin => {
+  registerPlugins([
+    plugin
+  ]);
+})
+```
+
 ## hooks
 
 Lifecycle hooks for FederationHost interaction.
