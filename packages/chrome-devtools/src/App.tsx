@@ -12,7 +12,6 @@ const { Content } = Layout;
 const App = () => {
   const [module, setModule] = useState({});
 
-  console.log('module', module);
   useEffect(() => {
     getGlobalModuleInfo(setModule);
   }, []);
