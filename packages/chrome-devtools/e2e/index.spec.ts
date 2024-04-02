@@ -53,6 +53,22 @@ test.beforeEach(async ({ context: browserContext, extensionId }) => {
 test('test proxy', async ({ request }) => {
   targetPage.removeListener('request', beforeHandler);
 
+  // Check the page proxy status
+  let targetPageModuleInfo = await targetPage.evaluate(() => {
+    return (window as any)?.__FEDERATION__?.moduleInfo ?? {};
+  });
+
+  expect(targetPageModuleInfo).toMatchObject({
+    manifest_host: {
+      remotesInfo: {
+        webpack_provider: {
+          matchedVersion: proxyUrl,
+        },
+      },
+    },
+  });
+
+  // Setting proxy logic
   await devtoolsPage.click('div[data-set-e2e=e2eProxyKey]');
   const moduleKeys = await devtoolsPage.$$('.arco-select-option');
   for (let i = 0; i < moduleKeys.length; i++) {
@@ -64,21 +80,42 @@ test('test proxy', async ({ request }) => {
     }
   }
 
-  await sleep(5000);
+  await sleep(3000);
+  // Configure resource forwarding in advance
   targetPage.on('request', afterHandler);
   const response = await request.fetch(proxyUrl);
   const json = await response.json();
   await targetPage.route(mockUrl, async (route) => {
     await route.fulfill({ json });
   });
-  await targetPage.bringToFront();
+  await sleep(2000);
 
   await devtoolsPage.getByPlaceholder('Custom Manifest URL').fill(mockUrl);
-  await sleep(5000);
+
+  await sleep(1000);
+
+  await targetPage.bringToFront();
+
   expect(beforeProxyRequest).toContain(proxyUrl);
   expect(beforeProxyRequest).not.toContain(mockUrl);
 
   expect(afterProxyRequest).toContain(mockUrl);
   expect(afterProxyRequest).not.toContain(proxyUrl);
+
+  // check proxy snapshot
+  let targetPageModuleInfoNew = await targetPage.evaluate(() => {
+    return (window as any)?.__FEDERATION__?.moduleInfo ?? {};
+  });
+
+  expect(targetPageModuleInfoNew).toMatchObject({
+    manifest_host: {
+      remotesInfo: {
+        webpack_provider: {
+          matchedVersion: mockUrl,
+        },
+      },
+    },
+  });
+
   console.log(beforeProxyRequest, afterProxyRequest);
 });

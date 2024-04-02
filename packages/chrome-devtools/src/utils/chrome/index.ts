@@ -28,17 +28,32 @@ export function getCurrentTabId() {
 
 export function getInspectWindowTabId() {
   return new Promise((resolve, reject) => {
-    chrome.devtools.inspectedWindow.eval(
-      'typeof window.__FEDERATION__ !== "undefined" || typeof window.__VMOK__ !== "undefined"',
-      function (info, error) {
-        const tabId = chrome.devtools.inspectedWindow.tabId;
+    if (chrome?.devtools?.inspectedWindow) {
+      chrome.devtools.inspectedWindow.eval(
+        'typeof window.__FEDERATION__ !== "undefined" || typeof window.__VMOK__ !== "undefined"',
+        function (info, error) {
+          const tabId = chrome.devtools.inspectedWindow.tabId;
+          console.log(
+            'chrome.devtools.inspectedWindow.tabId',
+            chrome.devtools.inspectedWindow.tabId,
+          );
+          TabInfo.currentTabId = tabId;
+          resolve(tabId);
+          if (error) {
+            reject(error);
+          }
+        },
+      );
+    } else {
+      // chrome devtool e2e test，The test window opens independently
+      if (window.targetTab && window.targetTab.id) {
+        const tabId = window.targetTab.id;
         TabInfo.currentTabId = tabId;
         resolve(tabId);
-        if (error) {
-          reject(error);
-        }
-      },
-    );
+      } else {
+        throw Error(`can't get active tab`);
+      }
+    }
   });
 }
 
