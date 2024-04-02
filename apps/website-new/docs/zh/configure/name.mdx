@@ -6,19 +6,3 @@
 `Module Federation` 模块名称，name 必须保证唯一。
 
 `Module Federation` 通过 name 进行关联。name 将用于运行时数据获取以及 chunk 全局存储变量
-
-命名规范与 [npm#name](https://docs.npmjs.com/cli/v9/configuring-npm/package-json#name) 规范基本一致
-
-- 最多为 128 个字符
-- 全部小写，允许使用横杠（-），但不允许连续横杠（--）
-- 不允许使用下划线（\_），不允许使用某些特殊字符：“~\’!()\*”)’，不允许有空格，不允许使用node_modules 或 favicon.ico等特殊名字
-
-举例说明 :
-
-**合规名称**
-
-```bash
-mf_provider
-
-@demo/button
-```
