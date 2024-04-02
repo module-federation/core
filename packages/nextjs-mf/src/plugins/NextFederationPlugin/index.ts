@@ -28,12 +28,14 @@ import {
 } from './apply-server-plugins';
 import { applyClientPlugins } from './apply-client-plugins';
 import { ModuleFederationPlugin } from '@module-federation/enhanced';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
+
 import path from 'path';
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
  */
 export class NextFederationPlugin {
-  private _options: ModuleFederationPluginOptions;
+  private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _extraOptions: NextFederationPluginExtraOptions;
   public name: string;
   /**
@@ -140,25 +142,31 @@ export class NextFederationPlugin {
     compiler: Compiler,
     isServer: boolean,
   ): ModuleFederationPluginOptions {
+    console.log(this._extraOptions.skipSharingNextInternals);
     const defaultShared = this._extraOptions.skipSharingNextInternals
       ? {}
       : retrieveDefaultShared(isServer);
     const noop = this.getNoopPath();
+
+    const defaultExpose = this._extraOptions.skipSharingNextInternals
+      ? {}
+      : {
+          './noop': noop,
+          './react': require.resolve('react'),
+          './react-dom': require.resolve('react-dom'),
+          './next/router': require.resolve('next/router'),
+        };
     return {
       ...this._options,
       runtime: false,
       remoteType: 'script',
-      // @ts-ignore
       runtimePlugins: [
         require.resolve(path.join(__dirname, '../container/runtimePlugin')),
-        //@ts-ignore
         ...(this._options.runtimePlugins || []),
       ],
+      //@ts-ignore
       exposes: {
-        './noop': noop,
-        './react': require.resolve('react'),
-        './react-dom': require.resolve('react-dom'),
-        './next/router': require.resolve('next/router'),
+        ...(this._extraOptions.skipSharingNextInternals ? {} : defaultExpose),
         ...this._options.exposes,
         ...(this._extraOptions.exposePages
           ? exposeNextjsPages(compiler.options.context as string)
