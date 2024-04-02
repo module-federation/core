@@ -20,5 +20,9 @@ type ModuleFederationOptions = {
   runtimePlugins?: Array<string>;
   // The runtime implementation to use
   implementation?: string;
+  // control page liveReload and types hot reload
+  dev?: boolean | PluginDevOptions;
+  // control types
+  dts?: boolean | PluginDtsOptions;
 };
 ```
