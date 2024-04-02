@@ -11,11 +11,14 @@ export default defineConfig({
   runtime: {
     router: true,
   },
+  // source: {
+  //   enableAsyncEntry: true,
+  // },
   plugins: [appTools()],
   tools: {
     webpack: (config, { webpack, appendPlugins }) => {
       if (config?.output) {
-        config.output.publicPath = 'http://localhost:4001';
+        config.output.publicPath = 'http://localhost:4001/';
       }
 
       appendPlugins([
