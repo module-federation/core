@@ -43,5 +43,10 @@
     "type": "file",
     "name": "implementation",
     "label": "implementation"
+  },
+  {
+    "type": "file",
+    "name": "manifest",
+    "label": "manifest"
   }
 ]
