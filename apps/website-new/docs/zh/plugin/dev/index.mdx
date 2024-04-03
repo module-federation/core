@@ -16,7 +16,7 @@ Module Federation 提供了一套轻量的运行时插件系统，用以实现�
 ### 插件示例
 
 ```ts title="custom-runtime-plugin.ts"
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 const runtimePlugin: () => FederationRuntimePlugin = function () {
   return {
@@ -105,7 +105,7 @@ init({
 下面是一个例子：
 
 ```ts
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 const pluginFooBar = (): FederationRuntimePlugin => ({
   name: 'xxx-plugin',
   //...
@@ -291,9 +291,9 @@ type ErrorLoadRemoteOptions = {
 - 示例
 
 ```ts
-import { init, loadRemote } from '@module-federation/runtime';
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
 
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 const fallbackPlugin: () => FederationRuntimePlugin = function () {
   return {
@@ -367,9 +367,9 @@ type ResolveShareOptions = {
 - 示例
 
 ```ts
-import { init, loadRemote } from '@module-federation/runtime';
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
 
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 const customSharedPlugin: () => FederationRuntimePlugin = function () {
   return {
@@ -479,8 +479,8 @@ type CreateScriptOptions = {
 - 示例
 
 ```ts
-import { init } from '@module-federation/runtime';
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
   return {

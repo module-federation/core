@@ -18,16 +18,16 @@ You can install the plugin with the following commands:
 
 ```bash
 # For npm users
-npm add @module-federation/enhanced-rspack --save
+npm add @module-federation/enhanced --save
 
 # For yarn users
-yarn add @module-federation/enhanced-rspack --save
+yarn add @module-federation/enhanced --save
 
 # For pnpm users
-pnpm add @module-federation/enhanced-rspack --save
+pnpm add @module-federation/enhanced --save
 
 # For bun users
-bun add @module-federation/enhanced-rspack --save
+bun add @module-federation/enhanced --save
 ```
 
 ### Register the Plugin
@@ -35,7 +35,7 @@ bun add @module-federation/enhanced-rspack --save
 In `Rspack`, you can add the plugin through the `plugins` configuration item in the `rspack.config.js` file:
 
 ```ts title='rspack.config.js'
-import { ModuleFederationPlugin } from '@module-federation/enhanced-rspack';
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 module.exports = {
   devServer: {
     port: 2000,

@@ -17,10 +17,10 @@ import { PackageManagerTabs } from '@theme';
 
 <PackageManagerTabs
   command={{
-    npm: 'npm add @module-federation/runtime --save',
-    yarn: 'yarn add @module-federation/runtime --save',
-    pnpm: 'pnpm add @module-federation/runtime --save',
-    bun: 'bun add @module-federation/runtime --save',
+    npm: 'npm add @module-federation/enhanced --save',
+    yarn: 'yarn add @module-federation/enhanced --save',
+    pnpm: 'pnpm add @module-federation/enhanced --save',
+    bun: 'bun add @module-federation/enhanced --save',
   }}
 />
 
@@ -29,7 +29,7 @@ import { PackageManagerTabs } from '@theme';
 ```javascript
 // 可以只使用运行时加载模块，而不依赖于构建插件
 // 当不使用构建插件时，共享的依赖项不能自动设置细节
-import { init, loadRemote } from '@module-federation/runtime';
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
 
 init({
     name: '@demo/app-main',
@@ -117,7 +117,7 @@ type Share = {
 - Example
 
 ```javascript
-import { init, loadRemote } from '@module-federation/runtime';
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
 
 init({
   name: '@demo/main-app',
@@ -146,7 +146,7 @@ loadRemote('app2/util').then((m) => m.add(1, 2, 3));
 - Example
 
 ```js
-import { init, loadRemote, loadShare } from '@module-federation/runtime';
+import { init, loadRemote, loadShare } from '@module-federation/enhanced/runtime';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -226,7 +226,7 @@ type PreloadRemoteArgs = {
 * Example
 
 ```ts
-import { init, preloadRemote } from '@module-federation/runtime';
+import { init, preloadRemote } from '@module-federation/enhanced/runtime';
 
 init({
   name: '@demo/preload-remote',
@@ -317,7 +317,7 @@ interface RemoteWithVersion {
 - Example
 
 ```ts
-import { init, registerRemotes } from '@module-federation/runtime';
+import { init, registerRemotes } from '@module-federation/enhanced/runtime';
 
 init({
   name: '@demo/register-new-remotes',

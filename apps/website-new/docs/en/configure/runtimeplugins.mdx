@@ -13,7 +13,7 @@ Once set, runtime plugins will be automatically injected and used during the bui
 To create a runtime plugin file, you can name it `custom-runtime-plugin.ts`:
 
 ```ts title="custom-runtime-plugin.ts"
-import { FederationRuntimePlugin } from '@module-federation/runtime/types';
+import { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 export default function (): FederationRuntimePlugin {
   return {

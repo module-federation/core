@@ -35,19 +35,19 @@ import { PackageManagerTabs } from '@theme';
   command={{
     npm: `
 cd federation_provider
-npm add @module-federation/enhanced-rspack
+npm add @module-federation/enhanced
     `,
     yarn: `
 cd federation_provider
-yarn add @module-federation/enhanced-rspack
+yarn add @module-federation/enhanced
     `,
     pnpm: `
 cd federation_provider
-pnpm add @module-federation/enhanced-rspack
+pnpm add @module-federation/enhanced
     `,
     bun: `
 cd federation_provider
-bun add @module-federation/enhanced-rspack
+bun add @module-federation/enhanced
     `,
   }}
 />
@@ -69,7 +69,7 @@ export default function Button() {
 //rsbuild.config.ts
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
-import { ModuleFederationPlugin } from '@module-federation/enhanced-rspack';
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 
 export default defineConfig({
   server: {
@@ -156,19 +156,19 @@ start   Compiling...
   command={{
     npm: `
 cd federation_consumer
-npm add @module-federation/enhanced-rspack
+npm add @module-federation/enhanced
     `,
     yarn: `
 cd federation_consumer
-yarn add @module-federation/enhanced-rspack
+yarn add @module-federation/enhanced
     `,
     pnpm: `
 cd federation_consumer
-pnpm add @module-federation/enhanced-rspack
+pnpm add @module-federation/enhanced
     `,
     bun: `
 cd federation_consumer
-bun add @module-federation/enhanced-rspack
+bun add @module-federation/enhanced
     `,
   }}
 />
@@ -181,7 +181,7 @@ bun add @module-federation/enhanced-rspack
 // rsbuild.config.ts
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
-import { ModuleFederationPlugin } from '@module-federation/enhanced-rspack';
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 
 export default defineConfig({
   server: {

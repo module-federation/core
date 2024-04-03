@@ -16,7 +16,7 @@ Plugins are provided in the form of a function similar to `() => FederationRunti
 ### Plugin Example
 
 ```typescript title="custom-runtime-plugin.ts"
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 const runtimePlugin: () => FederationRuntimePlugin = function () {
   return {
@@ -105,7 +105,7 @@ The naming conventions for plugins are as follows:
 Here is an example:
 
 ```typescript
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 const pluginFooBar = (): FederationRuntimePlugin => ({
   name: 'xxx-plugin',
   //...
@@ -291,9 +291,9 @@ type ErrorLoadRemoteOptions = {
 - Example
 
 ```typescript
-import { init, loadRemote } from '@module-federation/runtime';
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
 
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 const fallbackPlugin: () => FederationRuntimePlugin = function () {
   return {
@@ -367,9 +367,9 @@ type ResolveShareOptions = {
 - Example
 
 ```typescript
-import { init, loadRemote } from '@module-federation/runtime';
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
 
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 const customSharedPlugin: () => FederationRuntimePlugin = function () {
   return {
@@ -479,8 +479,8 @@ type CreateScriptOptions = {
 - Example
 
 ```typescript
-import { init } from '@module-federation/runtime';
-import type { FederationRuntimePlugin } from '@module-federation/runtime';
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
   return {

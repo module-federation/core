@@ -25,10 +25,10 @@ import { PackageManagerTabs } from '@theme';
 
 ### 注册插件
 
-在 `Rspack` 中，你可以通过 `rspack.config.js` 配置文件中的 `plugins` 配置项来添加插件：
+在 `Webpack` 中，你可以通过 `webpack.config.js` 配置文件中的 `plugins` 配置项来添加插件：
 
 ```ts title='webpack.config.js'
-import { ModuleFederationPlugin } from '@module-federation/enhanced';
+import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 module.exports = {
   devServer: {
     port: 2000,

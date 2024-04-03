@@ -15,16 +15,16 @@ Before reading this section, it is assumed that you have already understood:
 
 ```bash
 # For npm users
-npm add @module-federation/runtime --save
+npm add @module-federation/enhanced --save
 
 # For yarn users
-yarn add @module-federation/runtime --save
+yarn add @module-federation/enhanced --save
 
 # For pnpm users
-pnpm add @module-federation/runtime --save
+pnpm add @module-federation/enhanced --save
 
 # For bun users
-bun add @module-federation/runtime --save
+bun add @module-federation/enhanced --save
 ```
 
 ## API
@@ -32,7 +32,7 @@ bun add @module-federation/runtime --save
 ```javascript
 // You can use the runtime to load modules without depending on the build plugin
 // When not using the build plugin, shared dependencies cannot be automatically configured
-import { init, loadRemote } from '@module-federation/runtime';
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
 
 init({
   name: '@demo/app-main',
@@ -120,7 +120,7 @@ type Share = {
 - Example
 
 ```javascript
-import { init, loadRemote } from '@module-federation/runtime';
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
 
 init({
   name: '@demo/main-app',
@@ -149,7 +149,7 @@ loadRemote('app2/util').then((m) => m.add(1, 2, 3));
 - Example
 
 ```javascript
-import { init, loadRemote, loadShare } from '@module-federation/runtime';
+import { init, loadRemote, loadShare } from '@module-federation/enhanced/runtime';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -229,7 +229,7 @@ Through `preloadRemote`, module resources can be preloaded at an earlier stage t
 * Example
 
 ```typescript
-import { init, preloadRemote } from '@module-federation/runtime';
+import { init, preloadRemote } from '@module-federation/enhanced/runtime';
 
 init({
   name: '@demo/preload-remote',
@@ -320,7 +320,7 @@ If `force: true` is set, it will merge remotes (including those already loaded),
 - Example
 
 ```typescript
-import { init, registerRemotes } from '@module-federation/runtime';
+import { init, registerRemotes } from '@module-federation/enhanced/runtime';
 
 init({
   name: '@demo/register-new-remotes',
