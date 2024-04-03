@@ -1,0 +1,29 @@
+# Module Federation Enhanced v0.1 发布
+
+> April 3, 2024
+
+我们很高兴地宣布 **[Module Federation enhanced](https://github.com/module-federation/universe)** **v0.1** 的发布！
+
+`Module Federation Enhanced` 不同于 `Webpack5` 内置的 `Module Federation` 它不仅仅提供了 `Module Federation` 有的：模块导出、模块加载、依赖共享，还提供了额外的动态类型提示、Manifest、Federation Runtime、Runtime Plugin、Rspack 构建工具，这些功能够让大型 Web 应用更好的通过 `Module Federation` 来实现微前端架构。
+
+
+### 🔥 特性
+
+`Module Federation Enhanced` 具备以下特性：
+
+- **动态类型提示**：`Module Federation` 采用运行时动态，使得它不支持 `TypeScript` 的类型提示，这对于项目的稳定性和可维护性带来了很大的影响，因此在 `Module Federation Enhanced` 中支持了开箱即用的类型导出和动态类型加载能力和类型热更新能力，体验就像是加载本地的 `NPM` 模块一样。
+
+- **Manifest**：`Module Federation` 在过去的主要使用 `remoteEntry.js` 来作为 `Module Federation` 模块的入口，远程模块中无法存放更多的原信息，例如：类型文件、expose、remotes 等信息，在 Enhanced 中我们支持设置 `remote` 为 `mf-manifest.json` 这可以支持更多进阶的能力：类型提示、资源预加载、可视化依赖关系、共享依赖分析、与部署平台打通、“服务发现”。
+
+- **Federation Runtime**：`Module Federation` 在过去存在一个非常大的弊端就是，如何支持不同构建工具的支持，在 `Webpack 5` 中内置了对于 `Module Federation` 模块转换成远程模块的构建操作和运行时加载逻辑，模块的加载和依赖复用都耦合在 `Webpack Runtime` 中，这导致可维护性很差并且其他构建工具想要支持也非常困难而且无法再不支持的构建工具中加载 `Module Federation` 模块，因此在 `Enhanced` 中我们抽离了 `Federation Runtime` 作为独立的 SDK 维护，并且新版 `Webpack` 和 `Rspack` 的 `Module Federation` 都基于该 Runtime 实现，也可以脱离构建插件加载 `Module Federation` 模块和共享依赖，任何其他构建工具都可以基于 `Federation Runtime` 实现能够极大的降低实现和维护成本。
+
+- **Rspack**：Rspack 中的 `Module Federation` 基于 `Enhanced` 的 `Federation Runtime` 实现，因此能够享受 `Module Federation Enhanced` 所有额外的能力，并且由于 `Module Federation` 分治的架构思想，你可以将你的大型项目通过 `Module Federation` 渐进式迁移至 `Rspack`。
+
+
+### 💡 下一步
+
+目前 `Module Federation Enhanced` 仍在快速迭代中，并计划引入更多强大的新特性。
+
+比如，我们正在开发 **Module Federation Chrome Devtool**，这是一个易用 `Module Federation` 调试和代理工具，它能够将线上项目的 `Module Federation` 模块直接代理到本地，并且能够实时热更新，它提供可视化的依赖图能够看到 `Module Federation` 依赖关系以及 `Shared` 设置情况。
+
+同时我们将会提供更多框架上层的能力建设，比如：`Modern.js SSR`、`React Server Component`、`Router`、`Web Component`、`cross-frame`
