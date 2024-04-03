@@ -12,6 +12,7 @@ import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '../constant';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
+import HoistContainerReferencesPlugin from '../HoistContainerReferencesPlugin';
 
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
@@ -280,6 +281,7 @@ class FederationRuntimePlugin {
     this.prependEntry(compiler);
     this.injectRuntime(compiler);
     this.setRuntimeAlias(compiler);
+    new HoistContainerReferencesPlugin(this.options?.name).apply(compiler);
   }
 }
 

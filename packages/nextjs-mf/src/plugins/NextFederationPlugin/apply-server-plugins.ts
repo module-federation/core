@@ -31,10 +31,6 @@ export function applyServerPlugins(
       suffix,
     );
   }
-  // Hoist container references into runtime chunks
-  //@ts-ignore
-  new HoistContainerReferencesPlugin().apply(compiler);
-
   // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
   new StreamingTargetPlugin(options, {
     ModuleFederationPlugin: ModuleFederationPlugin,

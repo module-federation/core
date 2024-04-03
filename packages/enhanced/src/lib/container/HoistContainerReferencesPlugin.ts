@@ -11,6 +11,11 @@ import ContainerEntryModule from './ContainerEntryModule';
  * @constructor
  */
 export class HoistContainerReferences implements WebpackPluginInstance {
+  private containerName?: string | undefined;
+
+  constructor(name?: string | undefined) {
+    this.containerName = name;
+  }
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       'HoistContainerReferences',
@@ -50,6 +55,8 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     for (const module of chunkGraph.getChunkModulesIterable(chunk)) {
       for (const runtimeChunk of runtimeChunks) {
         chunkGraph.connectChunkAndModule(runtimeChunk, module);
+      }
+      if (chunk.name === this.containerName) {
         chunkGraph.disconnectChunkAndModule(chunk, module);
       }
     }
