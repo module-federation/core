@@ -3,7 +3,7 @@
  */
 import StreamingTargetPlugin from './StreamingTargetPlugin';
 import NodeFederationPlugin from './NodeFederationPlugin';
-import { ModuleFederationPlugin } from '@module-federation/enhanced';
+import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import { ModuleFederationPluginOptions } from '../types';
 import type { Compiler, container } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
