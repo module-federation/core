@@ -29,7 +29,7 @@ To get started with Module Federation, see the [Quick Start](https://module-fede
 
 # 🧑‍💻 Community
 
-Come and chat with us on [Discord](https://discord.com/invite/T8c6yAxkbv)! The Module federation team and users are active there, and we're always looking for contributions.
+Come and chat with us on [Discussions](https://github.com/module-federation/universe/discussions)! The Module federation team and users are active there, and we're always looking for contributions.
 
 # 🤝 Contribution
 
