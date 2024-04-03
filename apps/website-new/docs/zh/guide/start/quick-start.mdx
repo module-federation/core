@@ -54,6 +54,26 @@ bun add @module-federation/enhanced
 
 ### 3. 生产者导出模块
 
+> 将入口改为异步
+
+```tsx
+// 移动 src/index.tsx 到新建的 src/bootstrap.tsx 文件中
+// src/index.tsx
+import('./bootstrap');
+
+// src/bootstrap.tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);
+```
+
 > 增加 Button 组件
 
 ```tsx
