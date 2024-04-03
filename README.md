@@ -12,7 +12,7 @@
 
 - Module Federation reuses common dependencies between modules as much as possible
 
-[Learn more](https://module-federation.io/docs/en/mf-docs/0.2/getting-started/)
+[Learn more](https://module-federation.io/)
 
 ## 🔥 What does universe offer?
 
