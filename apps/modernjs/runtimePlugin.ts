@@ -1,5 +1,5 @@
-import React from 'react';
-console.log(React);
+// import React from 'react';
+// console.log(React);
 console.log('runtime plugins active');
 export default function () {
   return {
