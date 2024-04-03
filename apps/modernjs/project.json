@@ -43,7 +43,7 @@
       "options": {
         "cypressConfig": "apps/modernjs/cypress.config.ts",
         "testingType": "e2e",
-        "baseUrl": "http://localhost:8080",
+        "baseUrl": "http://localhost:4001",
         "browser": "chrome"
       },
       "configurations": {

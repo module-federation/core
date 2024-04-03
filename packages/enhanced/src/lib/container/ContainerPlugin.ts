@@ -187,16 +187,16 @@ class ContainerPlugin {
       compiler.options.output.enabledLibraryTypes.push(library.type);
     }
     const hasSingleRuntimeChunk = compiler.options?.optimization?.runtimeChunk;
-
-    // new compiler.webpack.EntryPlugin(
-    //   compiler.options.context || '',
-    //   federationRuntimePluginInstance.entryFilePath,
-    //   {
-    //     name,
-    //     runtime: hasSingleRuntimeChunk ? false : runtime,
-    //   },
-    // ).apply(compiler);
-
+    if (hasSingleRuntimeChunk) {
+      new compiler.webpack.EntryPlugin(
+        compiler.options.context || '',
+        federationRuntimePluginInstance.entryFilePath,
+        {
+          name: 'federation-runtime',
+          runtime: hasSingleRuntimeChunk ? undefined : runtime,
+        },
+      ).apply(compiler);
+    }
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
       const initialEntrypoints =
         typeof compiler.options.entry === 'function'

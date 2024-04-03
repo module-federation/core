@@ -26,6 +26,12 @@ describe('typeScriptCompiler', () => {
     tsConfigPath: './tsconfig.json',
     deleteTypesFolder: false,
     compilerInstance: 'tsc',
+    compileInChildProcess: false,
+    generateAPITypes: false,
+    implementation: '',
+    context: process.cwd(),
+    hostRemoteTypesFolder: '@mf-types',
+    abortOnError: true,
   };
 
   it('retrieveMfTypesPath correctly calculate path', () => {
@@ -54,7 +60,9 @@ describe('typeScriptCompiler', () => {
       const compile = () => compileTs({}, tsConfig, remoteOptions);
       expect(compile).not.toThrow();
 
-      const directoryStructure = dirTree(join(tsConfig.outDir, '..'));
+      const directoryStructure = dirTree(join(tsConfig.outDir, '..'), {
+        exclude: /node_modules/,
+      });
       expect(directoryStructure).toMatchObject({});
     });
 
@@ -67,7 +75,9 @@ describe('typeScriptCompiler', () => {
         );
       expect(compile).not.toThrow();
 
-      const directoryStructure = dirTree(join(tsConfig.outDir, '..'));
+      const directoryStructure = dirTree(join(tsConfig.outDir, '..'), {
+        exclude: /node_modules/,
+      });
       expect(directoryStructure).toMatchObject({});
     });
 
@@ -79,7 +89,9 @@ describe('typeScriptCompiler', () => {
       const compile = () => compileTs(mapToExpose, tsConfig, remoteOptions);
       expect(compile).not.toThrow();
 
-      const directoryStructure = dirTree(join(tsConfig.outDir, '..'));
+      const directoryStructure = dirTree(join(tsConfig.outDir, '..'), {
+        exclude: /node_modules/,
+      });
       const expectedStructure = {
         name: 'typesRemoteFolder',
         children: [
@@ -128,7 +140,9 @@ describe('typeScriptCompiler', () => {
         });
       expect(compile).not.toThrow();
 
-      const directoryStructure = dirTree(join(tsConfig.outDir, '..'));
+      const directoryStructure = dirTree(join(tsConfig.outDir, '..'), {
+        exclude: /node_modules/,
+      });
       const expectedStructure = {
         name: 'typesRemoteFolder',
         children: [

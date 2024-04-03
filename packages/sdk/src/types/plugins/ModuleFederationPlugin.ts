@@ -123,6 +123,41 @@ export interface PluginManifestOptions {
   ) => Promise<Stats | void> | Stats | void;
 }
 
+export interface PluginDevOptions {
+  disableLiveReload?: boolean;
+  disableHotTypesReload?: boolean;
+}
+
+export interface DtsHostOptions {
+  typesFolder?: string;
+  abortOnError?: boolean;
+  remoteTypesFolder?: string;
+  deleteTypesFolder?: boolean;
+  maxRetries?: number;
+  consumeAPITypes?: boolean;
+}
+
+export interface DtsRemoteOptions {
+  tsConfigPath?: string;
+  typesFolder?: string;
+  compiledTypesFolder?: string;
+  deleteTypesFolder?: boolean;
+  additionalFilesToCompile?: string[];
+  compileInChildProcess?: boolean;
+  compilerInstance?: 'tsc' | 'vue-tsc';
+  generateAPITypes?: boolean;
+  extractThirdParty?: boolean;
+  extractRemoteTypes?: boolean;
+  abortOnError?: boolean;
+}
+
+export interface PluginDtsOptions {
+  generateTypes?: boolean | DtsRemoteOptions;
+  consumeTypes?: boolean | DtsHostOptions;
+  extraOptions?: Record<string, any>;
+  implementation?: string;
+}
+
 export interface ModuleFederationPluginOptions {
   /**
    * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
@@ -170,6 +205,9 @@ export interface ModuleFederationPluginOptions {
   implementation?: string;
 
   manifest?: boolean | PluginManifestOptions;
+
+  dev?: boolean | PluginDevOptions;
+  dts?: boolean | PluginDtsOptions;
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.

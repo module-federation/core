@@ -30,3 +30,5 @@ export const MFModuleType = {
   NPM: 'npm',
   APP: 'app',
 };
+
+export const MODULE_DEVTOOL_IDENTIFIER = '__MF_DEVTOOLS_MODULE_INFO__';
