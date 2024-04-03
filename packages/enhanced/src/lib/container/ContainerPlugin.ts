@@ -90,6 +90,13 @@ class ContainerPlugin {
             if (typeof cacheGroup.chunks === 'function') {
               const prevChunks = cacheGroup.chunks;
               cacheGroup.chunks = (chunk) => {
+                let hasEager;
+                for (const module of chunk.getModules()) {
+                  hasEager = module.type === 'eager-module';
+                  if (hasEager) break;
+                }
+                if (hasEager) return false;
+
                 if (chunk.name && chunk.name === name) {
                   return false;
                 }
@@ -100,6 +107,13 @@ class ContainerPlugin {
 
             if (cacheGroup.chunks === 'all') {
               cacheGroup.chunks = (chunk) => {
+                let hasEager;
+                for (const module of chunk.getModules()) {
+                  hasEager = module.type === 'eager-module';
+                  if (hasEager) break;
+                }
+                if (hasEager) return false;
+
                 if (chunk.name && chunk.name === name) {
                   return false;
                 }
@@ -109,6 +123,13 @@ class ContainerPlugin {
             }
             if (cacheGroup.chunks === 'initial') {
               cacheGroup.chunks = (chunk) => {
+                let hasEager;
+                for (const module of chunk.getModules()) {
+                  hasEager = module.type === 'eager-module';
+                  if (hasEager) break;
+                }
+                if (hasEager) return false;
+
                 if (chunk.name && chunk.name === name) {
                   return false;
                 }
