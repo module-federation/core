@@ -13,9 +13,6 @@ env:
 jobs:
   main:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.head_ref || github.run_id }}
-      cancel-in-progress: false
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
