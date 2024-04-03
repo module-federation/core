@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
