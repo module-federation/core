@@ -18,11 +18,14 @@
 
 The universe repository provides a set of tools to enhance module federation's capabilities. These include:
 
+- [Module Federation Runtime](https://module-federation.io/guide/basic/runtime.html)
+- [Rspack Module Federation](https://module-federation.io/guide/basic/rspack.html)
+- [Webpack Module Federation](https://module-federation.io/guide/basic/webpack.html)
 - [Next.js Module Federation](./packages/nextjs-mf)
-- [Node Module Federation](./packages/node)
-- [Storybook addon for Module Federation](./packages/storybook-addon)
-- [Native federation typescript](./packages/native-federation-typescript)
-- [Utilities](./packages/utilities)
+
+## 📚 Getting Started
+
+To get started with Module Federation, see the [Quick Start](https://module-federation.io/guide/start/quick-start.html).
 
 # 🧑‍💻 Community
 
