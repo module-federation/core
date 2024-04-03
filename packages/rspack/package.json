@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/enhanced-rspack",
+  "name": "@module-federation/rspack",
   "version": "0.1.1",
   "license": "MIT",
   "keywords": [

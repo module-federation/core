@@ -2,7 +2,7 @@ import type { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import { ModuleFederationPlugin } from '@module-federation/enhanced';
+import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 /**
  * This function applies server-specific plugins to the webpack compiler.
  *
