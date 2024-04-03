@@ -1,9 +1,11 @@
 name: Devtools
 
 on:
-  push:
-    branches: ['main']
   pull_request:
+    branches: [main]
+
+  push:
+    branches: [main]
 
 env:
   PLAYWRIGHT_BROWSERS_PATH: 0 # Places binaries to node_modules/@playwright/test
