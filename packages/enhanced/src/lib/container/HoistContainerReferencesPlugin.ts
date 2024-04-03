@@ -16,6 +16,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   constructor(name?: string | undefined) {
     this.containerName = name;
   }
+
   apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(
       'HoistContainerReferences',
@@ -53,11 +54,11 @@ export class HoistContainerReferences implements WebpackPluginInstance {
     const runtimeChunks = this.getRuntimeChunks(chunk, compilation);
 
     for (const module of chunkGraph.getChunkModulesIterable(chunk)) {
+      if (!chunk.hasRuntime()) {
+        chunkGraph.disconnectChunkAndModule(chunk, module);
+      }
       for (const runtimeChunk of runtimeChunks) {
         chunkGraph.connectChunkAndModule(runtimeChunk, module);
-      }
-      if (chunk.name === this.containerName) {
-        chunkGraph.disconnectChunkAndModule(chunk, module);
       }
     }
   }
