@@ -245,6 +245,19 @@ root.render(
 );
 ```
 
+> 在 `tsconfig.json` 中声明 `Module Federation` 类型路径
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "*": ["./@mf-types/*"]
+    }
+  }
+}
+```
+
+
 > 引用远程模块
 
 ```tsx
