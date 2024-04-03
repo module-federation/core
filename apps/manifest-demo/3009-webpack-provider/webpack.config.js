@@ -4,7 +4,9 @@ registerPluginTSTranspiler();
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
-const { ModuleFederationPlugin } = require('@module-federation/enhanced');
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
 
 module.exports = composePlugins(
   withNx(),
