@@ -12,8 +12,8 @@ module.exports = (rollupConfig, projectOptions) => {
     copy({
       targets: [
         {
-          src: 'packages/enhanced-rspack/LICENSE',
-          dest: 'packages/enhanced-rspack/dist',
+          src: 'packages/rspack/LICENSE',
+          dest: 'packages/rspack/dist',
         },
       ],
     }),

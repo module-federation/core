@@ -1,20 +1,20 @@
 {
-  "name": "enhanced-rspack",
+  "name": "rspack",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/enhanced-rspack/src",
+  "sourceRoot": "packages/rspack/src",
   "projectType": "library",
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "packages/enhanced-rspack/dist",
-        "main": "packages/enhanced-rspack/src/index.ts",
-        "tsConfig": "packages/enhanced-rspack/tsconfig.lib.json",
+        "outputPath": "packages/rspack/dist",
+        "main": "packages/rspack/src/index.ts",
+        "tsConfig": "packages/rspack/tsconfig.lib.json",
         "assets": [],
         "external": ["@module-federation/*"],
-        "project": "packages/enhanced-rspack/package.json",
-        "rollupConfig": "packages/enhanced-rspack/rollup.config.js",
+        "project": "packages/rspack/package.json",
+        "rollupConfig": "packages/rspack/rollup.config.js",
         "compiler": "swc",
         "format": ["cjs", "esm"]
       }
@@ -24,8 +24,8 @@
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [
-          "packages/enhanced-rspack/**/*.ts",
-          "packages/enhanced-rspack/package.json"
+          "packages/rspack/**/*.ts",
+          "packages/rspack/package.json"
         ]
       }
     },
@@ -33,7 +33,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/enhanced-rspack/jest.config.js",
+        "jestConfig": "packages/rspack/jest.config.js",
         "passWithNoTests": true
       },
       "configurations": {
@@ -49,11 +49,11 @@
         "parallel": false,
         "commands": [
           {
-            "command": "nx run enhanced-rspack:test",
+            "command": "nx run rspack:test",
             "forwardAllArgs": false
           },
           {
-            "command": "nx run enhanced-rspack:build",
+            "command": "nx run rspack:build",
             "forwardAllArgs": false
           }
         ]

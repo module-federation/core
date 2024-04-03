@@ -60,7 +60,6 @@
     "@module-federation/manifest": "workspace:*",
     "@module-federation/managers": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
-    "@module-federation/enhanced-rspack": "workspace:*",
     "upath": "2.0.1"
   }
 }
