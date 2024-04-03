@@ -21,7 +21,7 @@ The universe repository provides a set of tools to enhance module federation's c
 - [Module Federation Runtime](https://module-federation.io/guide/basic/runtime.html)
 - [Rspack Module Federation](https://module-federation.io/guide/basic/rspack.html)
 - [Webpack Module Federation](https://module-federation.io/guide/basic/webpack.html)
-- [Next.js Module Federation](./packages/nextjs-mf)
+- [Next.js Module Federation](https://module-federation.io/guide/framework/nextjs.html)
 
 ## 📚 Getting Started
 
