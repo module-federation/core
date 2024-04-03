@@ -882,9 +882,9 @@ importers:
         specifier: 4.24.15
         version: 4.24.15(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
-      '@module-federation/rspack':
+      '@module-federation/enhanced':
         specifier: workspace:*
-        version: link:../../../packages/rspack
+        version: link:../../../packages/enhanced
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.5.11
         version: 0.5.11(react-refresh@0.14.0)(webpack@5.91.0)
@@ -901,9 +901,9 @@ importers:
         specifier: 4.17.21
         version: 4.17.21
     devDependencies:
-      '@module-federation/rspack':
+      '@module-federation/enhanced':
         specifier: workspace:*
-        version: link:../../../packages/rspack
+        version: link:../../../packages/enhanced
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.5.11
         version: 0.5.11(react-refresh@0.14.0)(webpack@5.91.0)
@@ -920,9 +920,9 @@ importers:
         specifier: 4.17.21
         version: 4.17.21
     devDependencies:
-      '@module-federation/rspack':
+      '@module-federation/enhanced':
         specifier: workspace:*
-        version: link:../../../packages/rspack
+        version: link:../../../packages/enhanced
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: 0.5.11
         version: 0.5.11(react-refresh@0.14.0)(webpack@5.91.0)
@@ -1044,9 +1044,9 @@ importers:
 
   apps/react-ts-remote:
     devDependencies:
-      '@module-federation/rspack':
+      '@module-federation/enhanced':
         specifier: workspace:*
-        version: link:../../packages/rspack
+        version: link:../../packages/enhanced
       file-loader:
         specifier: 6.2.0
         version: 6.2.0(webpack@5.91.0)
@@ -1291,6 +1291,9 @@ importers:
       '@module-federation/manifest':
         specifier: workspace:*
         version: link:../manifest
+      '@module-federation/rspack':
+        specifier: workspace:*
+        version: link:../rspack
       '@module-federation/runtime-tools':
         specifier: workspace:*
         version: link:../runtime-tools
