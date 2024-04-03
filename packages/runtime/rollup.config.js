@@ -1,6 +1,5 @@
 const replace = require('@rollup/plugin-replace');
 const copy = require('rollup-plugin-copy');
-const semver = require('semver');
 
 const FEDERATION_DEBUG = process.env.FEDERATION_DEBUG || '';
 

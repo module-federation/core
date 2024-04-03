@@ -1,0 +1,44 @@
+# 名词解释
+
+## Module Federation
+
+模块联邦（Module Federation，简称 MF）是一种 JavaScript 应用分治的架构模式（类似于服务端的微服务），它允许你在多个 JavaScript 应用程序（或微前端）之间共享代码和资源。如果使用联邦模块的应用缺少联邦代码所需的依赖项，将从该联邦的构建源下载缺失的依赖项。
+
+这使得可以创建微前端风格的应用程序，多个系统可以共享代码，并在不需要重新构建整个应用程序的情况下进行动态更新。
+
+## 生产者
+
+通过 Module federation 构建插件设置了 `exposes` 暴露其他模块给其他 JavaScript 应用消费的应用在 Module federation 中称之为 Provider（生产者），生产者可以同时作为一个消费者。
+
+## 消费者
+
+通过 Module federation 构建插件设置了 `remotes` 消费其他生产者的模块称之为 Consumer （消费者），消费者可以同时作为一个生产者。
+
+## Micro-frontend
+
+微前端（Micro-frontend，简称 MFE）是一种类似于微服务的架构，是一种由独立交付的多个前端应用组成整体的架构风格，它将前端应用分解成一些更小、更简单的能够独立开发、测试、部署的应用，而在用户看来仍然是内聚的单个产品。
+
+它主要解决了两个问题：
+
+随着项目迭代应用越来越庞大，难以维护。
+跨团队或跨部门协作开发项目导致效率低下的问题。
+
+## Bundler
+
+指 [Rspack](https://rspack.dev/)、[Webpack](https://webpack.js.org/) 等模块打包工具。
+
+打包工具的主要目标是将 JavaScript、CSS 等文件打包在一起，打包后的文件可以在浏览器、Node.js 等环境中使用。当 Bundler 处理 Web 应用时，它会构建一个依赖关系图，其中包含应用需要的各个模块，然后将所有模块打包成一个或多个 bundle。
+
+## Rspack
+
+[Rspack](https://www.rspack.dev/) 是一个基于 Rust 的高性能 Web 构建工具，具备与 webpack 生态系统的互操作性，可以被 webpack 项目低成本集成，并提供更好的构建性能。
+
+相较于 webpack，Rspack 的构建性能有明显提升，除了 Rust 带来的语言优势，这也来自于它的并行架构和增量编译等特性。经过 benchmark 验证，Rspack 可以带来 5 ～ 10 倍编译性能的提升。
+
+## Rsbuild
+
+[Rsbuild](https://rsbuild.dev/) 是一个基于 Rspack 的 web 构建工具，具备以下特点：
+
+- Rsbuild 是一个增强版的 Rspack CLI，更易用、更开箱即用。
+- Rsbuild 是 Rspack 团队对于 web 构建最佳实践的探索和实现。
+- Rsbuild 是 Webpack 应用迁移到 Rspack 的最佳方案，减少 90% 配置，构建快 10 倍。

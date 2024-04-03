@@ -5,6 +5,7 @@
     "node": ">=18",
     "pnpm": ">=8.11.0"
   },
+  "packageManager": "pnpm@8.11.0",
   "private": true,
   "description": "Module Federation helper for NextJS",
   "main": "src/index.js",

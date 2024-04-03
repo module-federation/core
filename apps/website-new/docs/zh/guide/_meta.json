@@ -1,0 +1,17 @@
+[
+  {
+    "type": "dir",
+    "name": "start",
+    "label": "开始"
+  },
+  {
+    "type": "dir",
+    "name": "basic",
+    "label": "基础"
+  },
+  {
+    "type": "dir",
+    "name": "framework",
+    "label": "框架"
+  }
+]

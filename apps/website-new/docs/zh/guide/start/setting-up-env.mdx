@@ -1,0 +1,52 @@
+# 设置环境
+
+Module Federation 是一种 JavaScript 应用分治的架构模式（类似于服务端的微服务），它允许你在多个 JavaScript 应用程序（或微前端）之间共享代码和资源。本文档面向初学者用户，将指导你完成设置 Module federation 的基础环境。
+
+## 前置知识
+
+在开始前，我们需要你具备以下前置条件，下文中遇到不熟的名词请查看[名词解释](../start/glossary)：
+
+- 你需要了解 Module Federation 的[基本概念和适用场景](../start/index)
+- 你需要在你的机器上安装 Node.js 和 npm，参考下面的 [初始化环境](#初始环境)。
+- 你需要掌握以下 Web 应用开发必备的技术：
+  - 熟练掌握 [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML) 和 [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_Overview)
+  - 了解 [Node.js](https://nodejs.org/en/about/)
+  - 熟练运用 [npm](https://www.npmjs.com/package/npm)
+- 你需要拥有可以加载 JavaScript 模块的应用程序
+
+## 初始环境
+
+在开始 Module federation 使用前，你需要安装 [Node.js](https://nodejs.org/)，并保证 Node.js 版本 >= 16，**我们推荐使用 Node.js 20 的 LTS 版本**。
+
+你可以通过以下命令检查当前使用的 Node.js 版本：
+
+```bash
+node -v
+```
+
+如果你当前的环境中尚未安装 Node.js，或是安装的版本过低，可以通过 [nvm](https://github.com/nvm-sh/nvm) 或 [fnm](https://github.com/Schniz/fnm) 安装需要的版本。
+
+下面是通过 nvm 安装 Node.js 20 LTS 版本的例子：
+
+```bash
+# 安装 Node.js 20 的长期支持版本
+nvm install 20 --lts
+
+# 将刚安装的 Node.js 20 设置为默认版本
+nvm alias default 20
+
+# 切换到刚安装的 Node.js 20
+nvm use 20
+```
+
+## 使用 Module Federation
+
+要使用 Module Federation，你需要遵循以下步骤：
+
+- 识别共享模块: 确定要在应用程序之间共享的模块。
+- 创建共享包/仓库: 将这些模块添加到共享包或代码仓库中。
+- 确保访问权限: 确保每个应用程序都可以访问共享包或代码仓库。
+- 配置构建插件: 配置每个应用程序的 [Webpack](../basic/webpack)、[Rspack](../basic/rspack) 配置文件以使用 Module Federation。
+- 使用共享模块: 根据需要在应用程序中使用共享模块。
+
+有关更多信息和高级配置选项，请参考 [构建配置](../../configure/index) 文档。
