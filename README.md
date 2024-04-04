@@ -27,6 +27,16 @@ The universe repository provides a set of tools to enhance module federation's c
 
 To get started with Module Federation, see the [Quick Start](https://module-federation.io/guide/start/quick-start.html).
 
+
+## 📦 Packages
+
+Some of the underlying dependencies of the past are listed here, and [enhanced](https://module-federation.io/) access is recommended for direct use.
+
+- [Node Module Federation](./packages/node)
+- [Storybook addon for Module Federation](./packages/storybook-addon)
+- [Native federation typescript](./packages/native-federation-typescript)
+- [Utilities](./packages/utilities)
+
 # 🧑‍💻 Community
 
 Come and chat with us on [Discussions](https://github.com/module-federation/universe/discussions)! The Module federation team and users are active there, and we're always looking for contributions.
