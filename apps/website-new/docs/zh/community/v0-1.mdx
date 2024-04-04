@@ -2,7 +2,7 @@
 
 > April 3, 2024
 
-我们最近发布了 **[Module Federation enhanced](https://github.com/module-federation/universe)** **v0.1** 版本！
+我们最近发布了 **[Module Federation enhanced](https://github.com/module-federation/universe)** **v0.1** 版本（你可以简单将其理解为 Module Federation 2.0 的早期版本）！
 
 `Module Federation Enhanced` 不同于 `Webpack5` 内置的 `Module Federation` 它提供了除 `Module Federation` 有的：模块导出、模块加载、依赖共享，还提供了额外的动态类型提示、`Manifest`、`Federation Runtime`、`Runtime Plugin`，这些功能能让 `Module Federation` 更适合作为大型 `Web` 应用的微前端架构。
 
@@ -11,7 +11,7 @@
 
 `Module Federation` 具备以下特性：
 
-- **新版文档**：`Module Federation` 上线了全新的文档，能够帮助你更好的了解和使用 `Module Federation`。
+- **新版文档**：`Module Federation` 上线了[全新的文档](https://module-federation.io/)，能够帮助你更好的了解和使用 `Module Federation`。
 
 - **动态类型提示**：`Module Federation` 采用运行时动态，使得它不支持 `TypeScript` 的类型提示，这对于项目的稳定性和可维护性带来了很大的影响，因此在 `Module Federation` 中支持了开箱即用的类型导出和动态类型加载能力和类型热更新能力，体验就像是加载本地的 `NPM` 模块一样。
 
@@ -19,8 +19,7 @@
 
 - **Federation Runtime**：`Federation Runtime` 是一种独立的软件开发工具包（SDK），它解决了模块联合（Module Federation）在不同构建工具中的兼容性问题。在早期，`Module Federation` 的实现与 `Webpack 5` 紧密耦合，这使得其他构建工具难以支持，并且可维护性差。通过将 `Federation Runtime` 作为独立组件，新版的 `Webpack` 和 `Rspack` 以及其他构建工具都能够更容易地实现和维护 `Module Federation` 功能，提高了模块加载和依赖共享的灵活性和效率。
 
-
-- **Rspack**：Rspack 中的 `Module Federation` 基于 `Federation Runtime`，因此能够享受 `Module Federation` 所有额外的能力，并且由于 `Module Federation` 分治的架构思想，你可以将你的大型项目通过 `Module Federation` 渐进式迁移至 `Rspack`。
+- **Rspack**：Rspack 中的 `Module Federation` 基于 `Federation Runtime`，因此能够享受 `Module Federation Enhanced` 所有额外的能力，并且由于 `Module Federation` 分治的架构思想，你可以将你的大型项目通过 `Module Federation` 渐进式迁移至 `Rspack`。
 
 
 ### 💡 下一步
@@ -30,3 +29,7 @@
 比如，我们正在开发 **Module Federation Chrome Devtool**，这是一个易用 `Module Federation` 调试和代理工具，它能够将线上项目的 `Module Federation` 模块直接代理到本地，并且能够实时热更新，它提供可视化的依赖图能够看到 `Module Federation` 依赖关系以及 `Shared` 设置情况。
 
 同时我们将会提供更多框架上层的能力建设，比如：`Modern.js SSR`、`React Server Component`、`Router`、`Web Component`、`cross-frame`
+
+### 🙏 致谢
+
+`Module Federation Enhanced` 的 `0.1` 发布离不开 `Module Federation` 的反馈和建议、 [`Universe`](https://github.com/module-federation/universe) 仓库贡献者做出的努力。
