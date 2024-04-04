@@ -63,7 +63,9 @@ function createRpcWorker<T extends RpcMethod>(
       }
 
       if (!remoteMethod) {
-        return Promise.reject(new Error('Worker is not connected - cannot perform RPC.'));
+        return Promise.reject(
+          new Error('Worker is not connected - cannot perform RPC.'),
+        );
       }
 
       return remoteMethod(...args);
