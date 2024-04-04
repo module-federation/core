@@ -1,5 +1,7 @@
 # utils
 
+For warning： [`@module-federation/runtime`](https://module-federation.io/guide/basic/runtime.html) is recommended as a replacement
+
 This library was generated with [Nx](https://nx.dev).
 
 ## Building
