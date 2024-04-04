@@ -2,7 +2,6 @@ import process from 'process';
 import { RpcGMCallTypes } from './types';
 import type { RpcMessage } from './types';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function exposeRpc(fn: (...args: any[]) => any) {
   const sendMessage = (message: RpcMessage) =>
     new Promise<void>((resolve, reject) => {

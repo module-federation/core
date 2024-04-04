@@ -63,7 +63,6 @@ function createRpcWorker<T extends RpcMethod>(
       }
 
       if (!remoteMethod) {
-        // eslint-disable-next-line prefer-promise-reject-errors
         return Promise.reject('Worker is not connected - cannot perform RPC.');
       }
 

@@ -23,7 +23,6 @@ function createControlledPromise<T = unknown>() {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function wrapRpc<T extends (...args: any[]) => any>(
   childProcess: ChildProcess,
   options: WrapRpcOptions,
@@ -57,14 +56,12 @@ export function wrapRpc<T extends (...args: any[]) => any>(
           resolveResult(message.value as T);
           if (once) {
             // declare below
-            // eslint-disable-next-line @typescript-eslint/no-use-before-define
             removeHandlers();
           }
         } else if (message.type === RpcGMCallTypes.REJECT) {
           rejectResult(message.error);
           if (once) {
             // declare below
-            // eslint-disable-next-line @typescript-eslint/no-use-before-define
             removeHandlers();
           }
         }
@@ -88,7 +85,6 @@ export function wrapRpc<T extends (...args: any[]) => any>(
         ),
       );
       // declare below
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       removeHandlers();
     };
 
