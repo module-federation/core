@@ -54,16 +54,8 @@ export function wrapRpc<T extends (...args: any[]) => any>(
         if (message.type === RpcGMCallTypes.RESOLVE) {
           // assume the contract is respected
           resolveResult(message.value as T);
-          if (once) {
-            // declare below
-            removeHandlers();
-          }
         } else if (message.type === RpcGMCallTypes.REJECT) {
           rejectResult(message.error);
-          if (once) {
-            // declare below
-            removeHandlers();
-          }
         }
       }
     };
@@ -95,11 +87,18 @@ export function wrapRpc<T extends (...args: any[]) => any>(
     };
 
     // add event listeners
-    childProcess.on('message', handleMessage);
-    childProcess.on('close', handleClose);
+    if (once) {
+      childProcess.once('message', handleMessage);
+      childProcess.once('close', handleClose);
+    } else {
+      childProcess.on('message', handleMessage);
+      childProcess.on('close', handleClose);
+    }
+
     childProcess.on('error', (err) => {
       console.error(err);
     });
+
     // send call message
     childProcess.send(
       {
