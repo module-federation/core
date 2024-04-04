@@ -16,6 +16,8 @@ import type { moduleFederationPlugin } from '@module-federation/sdk';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import ProvideEagerModulePlugin from '../../eager/ProvideEagerModulePlugin';
 
+type RuntimePlugin = string | { import: string; async: boolean };
+
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -41,12 +43,14 @@ class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
   entryFilePath: string;
   pluginsFilePath: string; // New path for plugins file
+  asyncPluginsFilePath: string; // New path for ASYNC plugins file
   bundlerRuntimePath: string;
 
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
     this.entryFilePath = '';
     this.pluginsFilePath = ''; // Initialize plugins file path
+    this.asyncPluginsFilePath = ''; // Initialize plugins file path
     this.bundlerRuntimePath = BundlerRuntimePath;
   }
 
@@ -74,17 +78,22 @@ class FederationRuntimePlugin {
     ]);
   }
 
-  static getPluginsTemplate(runtimePlugins: string[]) {
+  static getPluginsTemplate(runtimePlugins: RuntimePlugin[]) {
     let runtimePluginTemplates = '';
     const runtimePluginNames: string[] = [];
 
     if (Array.isArray(runtimePlugins)) {
       runtimePlugins.forEach((runtimePlugin, index) => {
+        let plugin;
+        if (typeof runtimePlugin === 'string') {
+          plugin = runtimePlugin;
+        } else {
+          plugin = runtimePlugin.import;
+          if (runtimePlugin.async) return;
+        }
         const runtimePluginName = `plugin_${index}`;
         const runtimePluginPath = normalizeToPosixPath(
-          path.isAbsolute(runtimePlugin)
-            ? runtimePlugin
-            : path.join(process.cwd(), runtimePlugin),
+          path.isAbsolute(plugin) ? plugin : path.join(process.cwd(), plugin),
         );
 
         runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
@@ -110,6 +119,47 @@ class FederationRuntimePlugin {
       '}',
     ]);
   }
+  static getAsyncPluginsTemplate(runtimePlugins: RuntimePlugin[]) {
+    let runtimePluginTemplates = '';
+    const runtimePluginNames: string[] = [];
+
+    if (Array.isArray(runtimePlugins)) {
+      runtimePlugins.forEach((runtimePlugin, index) => {
+        let plugin;
+        if (typeof runtimePlugin === 'string') {
+          plugin = runtimePlugin;
+        } else {
+          plugin = runtimePlugin.import;
+          if (!runtimePlugin.async) return;
+        }
+        const runtimePluginName = `async_plugin_${index}`;
+        const runtimePluginPath = normalizeToPosixPath(
+          path.isAbsolute(plugin) ? plugin : path.join(process.cwd(), plugin),
+        );
+
+        runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
+        runtimePluginNames.push(runtimePluginName);
+      });
+    }
+
+    return Template.asString([
+      runtimePluginTemplates,
+      `if(${federationGlobal}.instance){`,
+      Template.indent([
+        runtimePluginNames.length
+          ? Template.asString([
+              `${federationGlobal}.initOptions.plugins = ${federationGlobal}.initOptions.plugins ? ${federationGlobal}.initOptions.plugins.concat([`,
+              Template.indent(runtimePluginNames.map((item) => `${item}(),`)),
+              ']) : [',
+              Template.indent(runtimePluginNames.map((item) => `${item}(),`)),
+              '];',
+            ])
+          : '',
+        `${federationGlobal}.runtime.registerPlugins(${federationGlobal}.initOptions.plugins);`, // async register plugins after eager init
+      ]),
+      '}',
+    ]);
+  }
 
   ensureFiles() {
     if (!this.options) {
@@ -122,15 +172,25 @@ class FederationRuntimePlugin {
     const pluginsTemplate = FederationRuntimePlugin.getPluginsTemplate(
       this.options.runtimePlugins || [],
     );
+    const asyncPluginsTemplate =
+      FederationRuntimePlugin.getAsyncPluginsTemplate(
+        this.options.runtimePlugins || [],
+      );
 
     const federationHash = createHash(federationTemplate);
     const pluginsHash = createHash(pluginsTemplate);
+    const asyncPluginsHash = createHash(asyncPluginsTemplate);
 
     this.entryFilePath = path.join(TEMP_DIR, `federation.${federationHash}.js`);
     this.pluginsFilePath = path.join(TEMP_DIR, `plugins.${pluginsHash}.js`);
+    this.asyncPluginsFilePath = path.join(
+      TEMP_DIR,
+      `async.${asyncPluginsHash}.js`,
+    );
 
     this.writeFile(this.entryFilePath, federationTemplate);
     this.writeFile(this.pluginsFilePath, pluginsTemplate);
+    this.writeFile(this.asyncPluginsFilePath, asyncPluginsTemplate);
   }
 
   writeFile(filePath: string, content: string) {
@@ -158,6 +218,15 @@ class FederationRuntimePlugin {
           },
           [this.pluginsFilePath]: {
             shareKey: this.pluginsFilePath,
+            shareScope: undefined,
+            version: false,
+            eager: true,
+            requiredVersion: false,
+            strictVersion: undefined,
+            singleton: undefined,
+          },
+          [this.asyncPluginsFilePath]: {
+            shareKey: this.asyncPluginsFilePath,
             shareScope: undefined,
             version: false,
             eager: true,

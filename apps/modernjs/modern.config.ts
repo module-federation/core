@@ -30,7 +30,12 @@ export default defineConfig({
           exposes: {
             './thing': './src/test.ts',
           },
-          runtimePlugins: ['./runtimePlugin.ts'],
+          runtimePlugins: [
+            {
+              import: './runtimePlugin.ts',
+              async: true,
+            },
+          ],
           shared: {
             react: { singleton: true },
             'react-dom': { singleton: true },

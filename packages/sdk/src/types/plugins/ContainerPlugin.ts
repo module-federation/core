@@ -66,6 +66,8 @@ export type UmdNamedDefine = boolean;
  */
 export type EntryRuntime = false | string;
 
+export type RuntimePlugin = string | { import: string; async: boolean };
+
 export interface ContainerPluginOptions {
   /**
    * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
@@ -94,7 +96,7 @@ export interface ContainerPluginOptions {
   /**
    * Runtime plugin file paths or package name.
    */
-  runtimePlugins?: string[];
+  runtimePlugins?: RuntimePlugin[];
 }
 /**
  * Modules that should be exposed by this container. Property names are used as public paths.

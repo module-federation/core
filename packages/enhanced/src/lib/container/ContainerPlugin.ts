@@ -90,6 +90,13 @@ class ContainerPlugin {
             if (typeof cacheGroup.chunks === 'function') {
               const prevChunks = cacheGroup.chunks;
               cacheGroup.chunks = (chunk) => {
+                let hasEager;
+                for (const module of chunk.getModules()) {
+                  hasEager = module.type === 'eager-module';
+                  if (hasEager) break;
+                }
+                if (hasEager) return false;
+
                 if (chunk.name && chunk.name === name) {
                   return false;
                 }
@@ -100,6 +107,13 @@ class ContainerPlugin {
 
             if (cacheGroup.chunks === 'all') {
               cacheGroup.chunks = (chunk) => {
+                let hasEager;
+                for (const module of chunk.getModules()) {
+                  hasEager = module.type === 'eager-module';
+                  if (hasEager) break;
+                }
+                if (hasEager) return false;
+
                 if (chunk.name && chunk.name === name) {
                   return false;
                 }
@@ -109,6 +123,13 @@ class ContainerPlugin {
             }
             if (cacheGroup.chunks === 'initial') {
               cacheGroup.chunks = (chunk) => {
+                let hasEager;
+                for (const module of chunk.getModules()) {
+                  hasEager = module.type === 'eager-module';
+                  if (hasEager) break;
+                }
+                if (hasEager) return false;
+
                 if (chunk.name && chunk.name === name) {
                   return false;
                 }
@@ -150,7 +171,6 @@ class ContainerPlugin {
     if (!useModuleFederationPlugin) {
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
       ContainerPlugin.patchChunkSplit(compiler, 'federation-runtime');
-      ContainerPlugin.patchChunkSplit(compiler, 'mfp-runtime-plugins');
     }
     const federationRuntimePluginInstance = new FederationRuntimePlugin();
     federationRuntimePluginInstance.apply(compiler);
@@ -167,17 +187,21 @@ class ContainerPlugin {
       compiler.options.output.enabledLibraryTypes.push(library.type);
     }
     const hasSingleRuntimeChunk = compiler.options?.optimization?.runtimeChunk;
-
-    // new compiler.webpack.EntryPlugin(
-    //   compiler.options.context || '',
-    //   federationRuntimePluginInstance.entryFilePath,
-    //   {
-    //     name,
-    //     runtime: hasSingleRuntimeChunk ? false : runtime,
-    //   },
-    // ).apply(compiler);
-
+    if (hasSingleRuntimeChunk) {
+      new compiler.webpack.EntryPlugin(
+        compiler.options.context || '',
+        federationRuntimePluginInstance.entryFilePath,
+        {
+          name: 'federation-runtime',
+          runtime: hasSingleRuntimeChunk ? undefined : runtime,
+        },
+      ).apply(compiler);
+    }
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, callback) => {
+      const initialEntrypoints =
+        typeof compiler.options.entry === 'function'
+          ? compiler.options.entry()
+          : compiler.options.entry;
       const dep = new ContainerEntryDependency(
         name,
         //@ts-ignore
@@ -212,11 +236,8 @@ class ContainerPlugin {
 
       // Function to add entry for undefined runtime
       const addEntryToSingleRuntimeChunk = async () => {
-        const entries =
-          typeof compiler.options.entry === 'function'
-            ? await compiler.options.entry()
-            : compiler.options.entry;
         const runtimes: Set<undefined | string | false> = new Set();
+        const entries = await initialEntrypoints;
 
         Object.keys(entries).forEach((key) => {
           if (entries[key].runtime) {
