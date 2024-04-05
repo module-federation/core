@@ -14,6 +14,9 @@ module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
+    config.watchOptions = {
+      ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
+    };
     config.plugins.push(
       new ModuleFederationPlugin({
         name: 'runtime_remote2',
@@ -23,12 +26,30 @@ module.exports = composePlugins(
           './ButtonOldAnt': './src/components/ButtonOldAnt',
         },
         shared: {
-          lodash: {},
-          antd: {},
-          react: {},
-          'react/': {},
-          'react-dom': {},
-          'react-dom/': {},
+          lodash: {
+            singleton: true,
+            requiredVersion: '^4.0.0',
+          },
+          antd: {
+            singleton: true,
+            requiredVersion: '^4.0.0',
+          },
+          react: {
+            singleton: true,
+            requiredVersion: '^18.2.0',
+          },
+          'react/': {
+            singleton: true,
+            requiredVersion: '^18.2.0',
+          },
+          'react-dom': {
+            singleton: true,
+            requiredVersion: '^18.2.0',
+          },
+          'react-dom/': {
+            singleton: true,
+            requiredVersion: '^18.2.0',
+          },
         },
       }),
     );
@@ -47,6 +68,7 @@ module.exports = composePlugins(
     // e.g. `config.plugins.push(new MyPlugin())`
     config.output = {
       ...config.output,
+      publicPath: 'http://localhost:3007/',
       scriptType: 'text/javascript',
     };
     config.optimization = {

@@ -11,7 +11,7 @@ init({
     {
       name: 'runtime_remote2',
       alias: 'dynamic-remote',
-      entry: 'http://localhost:3007/remoteEntry.js',
+      entry: 'http://localhost:3007/mf-manifest.json',
     },
   ],
   plugins: [customPlugin()],

@@ -8,13 +8,16 @@ const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
 module.exports = composePlugins(withNx(), withReact(), (config, context) => {
+  config.watchOptions = {
+    ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
+  };
   // const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
   config.plugins.push(
     new ModuleFederationPlugin({
       name: 'runtime_host',
       remotes: {
         // remote2: 'runtime_remote2@http://localhost:3007/remoteEntry.js',
-        remote1: 'runtime_remote1@http://localhost:3006/remoteEntry.js',
+        remote1: 'runtime_remote1@http://localhost:3006/mf-manifest.json',
       },
       // library: { type: 'var', name: 'runtime_remote' },
       filename: 'remoteEntry.js',
@@ -22,12 +25,30 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
         './Button': './src/Button.tsx',
       },
       shared: {
-        lodash: {},
-        antd: {},
-        react: {},
-        'react/': {},
-        'react-dom': {},
-        'react-dom/': {},
+        lodash: {
+          singleton: true,
+          requiredVersion: '^4.0.0',
+        },
+        antd: {
+          singleton: true,
+          requiredVersion: '^4.0.0',
+        },
+        react: {
+          singleton: true,
+          requiredVersion: '^18.2.0',
+        },
+        'react/': {
+          singleton: true,
+          requiredVersion: '^18.2.0',
+        },
+        'react-dom': {
+          singleton: true,
+          requiredVersion: '^18.2.0',
+        },
+        'react-dom/': {
+          singleton: true,
+          requiredVersion: '^18.2.0',
+        },
       },
       runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
     }),
