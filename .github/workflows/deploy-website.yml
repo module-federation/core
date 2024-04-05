@@ -57,7 +57,7 @@ jobs:
     if: ${{ needs.setup.outputs.website-changed == 'true' && github.event_name == 'push' }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
-      - run: npm run build:website
+      - run: npx nx run website-new:build
       - run: 'npx netlify deploy --build --prod --message "Deploy from GitHub Actions" --filter website'
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
@@ -72,7 +72,7 @@ jobs:
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
       - uses: nelonoel/branch-name@v1.0.1
-      - run: npm run build:website
+      - run: npx nx run website-new:build
       - run: 'npx netlify deploy --build --message "Deploy Preview from GitHub Actions" --alias "${{ env.BRANCH_NAME }}" --filter website-new'
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
