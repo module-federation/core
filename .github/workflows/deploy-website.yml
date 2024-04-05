@@ -31,7 +31,7 @@ jobs:
         id: cache
         with:
           path: ${{ env.CACHE_NODE_MODULES_PATH }}
-          key: build-${{ hashFiles('**/package-lock.json') }}
+          key: build-${{ hashFiles('**/pnpm-lock.yaml') }}
       - name: Install Dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: npm i
@@ -67,7 +67,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: ${{ env.CACHE_NODE_MODULES_PATH }}
-          key: build-${{ hashFiles('**/package-lock.json') }}
+          key: build-${{ hashFiles('**/pnpm-lock.yaml') }}
       - uses: nelonoel/branch-name@v1.0.1
       - run: npm run build:website
       - run: 'npx netlify deploy --build --message "Deploy Preview from GitHub Actions" --alias "${{ env.BRANCH_NAME }}" --filter website-new'
