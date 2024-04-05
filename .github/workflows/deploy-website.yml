@@ -71,10 +71,6 @@ jobs:
     if: ${{ needs.setup.outputs.website-changed == 'true' && github.event_name == 'pull_request' }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
-      - uses: actions/cache@v3
-        with:
-          path: ${{ env.CACHE_NODE_MODULES_PATH }}
-          key: build-${{ hashFiles('**/pnpm-lock.yaml') }}
       - uses: nelonoel/branch-name@v1.0.1
       - run: npm run build:website
       - run: 'npx netlify deploy --build --message "Deploy Preview from GitHub Actions" --alias "${{ env.BRANCH_NAME }}" --filter website-new'
