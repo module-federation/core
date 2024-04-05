@@ -1,10 +1,11 @@
 import React, { StrictMode } from 'react';
-import { init } from '@module-federation/runtime';
-import customPlugin from './runtimePlugin';
-
+import {
+  init,
+  registerGlobalPlugins,
+} from '@module-federation/enhanced/runtime';
 import * as ReactDOM from 'react-dom/client';
-
 import App from './App';
+
 init({
   name: 'runtime_host',
   remotes: [
@@ -14,7 +15,6 @@ init({
       entry: 'http://localhost:3007/mf-manifest.json',
     },
   ],
-  plugins: [customPlugin()],
 });
 
 const root = ReactDOM.createRoot(

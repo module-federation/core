@@ -24,12 +24,7 @@
       "matches": ["<all_urls>"]
     }
   ],
-  "permissions": [
-    "storage",
-    "scripting",
-    "declarativeNetRequest",
-    "declarativeNetRequestFeedback"
-  ],
+  "permissions": ["storage", "scripting"],
   "host_permissions": ["<all_urls>"],
   "content_scripts": [
     {

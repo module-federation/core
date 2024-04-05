@@ -15,7 +15,7 @@ module.exports = composePlugins(
   withReact(),
   async (config, context) => {
     config.watchOptions = {
-      ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
+      ignored: ['**/dist/**'],
     };
     config.plugins.push(
       new ModuleFederationPlugin({
@@ -50,6 +50,9 @@ module.exports = composePlugins(
             singleton: true,
             requiredVersion: '^18.2.0',
           },
+        },
+        dev: {
+          disableLiveReload: true,
         },
       }),
     );

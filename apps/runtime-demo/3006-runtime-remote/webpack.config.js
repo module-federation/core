@@ -17,7 +17,7 @@ module.exports = composePlugins(
   async (config, context) => {
     // const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
     config.watchOptions = {
-      ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
+      ignored: ['**/dist/**'],
     };
 
     config.plugins.push(
@@ -56,6 +56,7 @@ module.exports = composePlugins(
             requiredVersion: '^18.2.0',
           },
         },
+        runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
       }),
     );
     // config.externals={
