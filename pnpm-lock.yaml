@@ -561,6 +561,9 @@ importers:
       whatwg-fetch:
         specifier: ^3.6.2
         version: 3.6.20
+      yargs:
+        specifier: ^17.7.2
+        version: 17.7.2
 
   apps/3000-home:
     dependencies:
@@ -24621,8 +24624,6 @@ packages:
       webpack: '*'
     peerDependenciesMeta:
       webpack:
-        optional: true
-      webpack-sources:
         optional: true
     dependencies:
       webpack: 5.90.3(@swc/core@1.3.102)(esbuild@0.20.2)
