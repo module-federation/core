@@ -116,18 +116,21 @@ class FederationRuntimePlugin {
       Template.indent([
         asyncRuntimePluginTemplates.length
           ? Template.asString([
-              `${federationGlobal}.initOptions.plugins = ${federationGlobal}.initOptions.plugins ? ${federationGlobal}.initOptions.plugins.concat([`,
-              Template.indent(
-                asyncRuntimePluginNames.map((item) => `${item}(),`),
-              ),
-              ']) : [',
-              Template.indent(
-                asyncRuntimePluginNames.map((item) => `${item}(),`),
-              ),
-              '];',
+              asyncRuntimePluginTemplates,
+              `const asyncPlugins = Promise.all([${Template.indent(
+                asyncRuntimePluginNames.map((item) => `${item},`),
+              )}]).then(plugins => plugins.map((plugin)=>{
+                if(plugin?.default) {
+                  return plugin.default()
+                }
+                return plugin()
+              }));`,
+              `asyncPlugins.then((resolvedPlugins)=>{`,
+              `${federationGlobal}.initOptions.plugins = ${federationGlobal}.initOptions.plugins ? ${federationGlobal}.initOptions.plugins.concat(resolvedPlugins) : resolvedPlugins;`,
+              `${federationGlobal}.runtime.registerPlugins(${federationGlobal}.initOptions.plugins);`,
+              `});`,
             ])
           : '',
-        `${federationGlobal}.runtime.registerPlugins(${federationGlobal}.initOptions.plugins);`,
       ]),
     ]);
   }
