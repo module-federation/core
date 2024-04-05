@@ -27,14 +27,21 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           fetch-depth: 0
-      - uses: actions/cache@v3
-        id: cache
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
         with:
-          path: ${{ env.CACHE_NODE_MODULES_PATH }}
-          key: build-${{ hashFiles('**/pnpm-lock.yaml') }}
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
       - name: Install Dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: npm i
+        run: pnpm install
+
       - name: Check changes "website"
         id: website-changed
         run: echo "website-changed=$(node tools/scripts/ci-is-affected.mjs --appName=website-new --base=${{ env.BASE_REF}} --head=HEAD)" >> $GITHUB_OUTPUT
