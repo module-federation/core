@@ -5,3 +5,4 @@ publish = "apps/website-new/doc_build"
 from = "/*"
 to = "/"
 status = 200
+
