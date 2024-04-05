@@ -27,7 +27,7 @@ import {
   handleServerExternals,
 } from './apply-server-plugins';
 import { applyClientPlugins } from './apply-client-plugins';
-import { ModuleFederationPlugin } from '@module-federation/enhanced';
+import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 import path from 'path';

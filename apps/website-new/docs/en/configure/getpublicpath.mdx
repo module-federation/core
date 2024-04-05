@@ -1,0 +1,25 @@
+# GetPublicPath
+
+- Type: `string`
+- Required: No
+- Default value: `undefined`
+- Purpose: Used to set a dynamic `publicPath`. Once set, the corresponding remote module resources will also use this `publicPath`. For instance, if the deployed project dynamically serves a `cdn_prefix`, `getPublicPath` can be set to `return "https:" + window.navigator.cdn_host + "/resource/app/"`.
+
+- Example:
+
+In the example below, `getPublicPath` is set. When other consumers load this provider, the code for `getPublicPath` will be executed using `new Function` to obtain the return value. The content of the return value will be used as the `publicPath` prefix for the static resources of the module.
+
+```ts title="rspack.config.ts"
+module.exports = {
+  plugins: [
+    new ModuleFederation({
+      name: 'provider',
+      exposes: {
+        './Button': './src/components/Button.tsx',
+      },
+      // ...
+      getPublicPath: `return "https:" + window.navigator.cdn_host + "/resource/app/"`,
+    }),
+  ],
+};
+```

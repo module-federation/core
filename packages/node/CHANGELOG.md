@@ -1,5 +1,20 @@
 # [2.1.0-canary.6](https://github.com/module-federation/universe/compare/node-2.1.0-canary.5...node-2.1.0-canary.6) (2023-11-21)
 
+## 2.1.2
+
+### Patch Changes
+
+- 1bb03d1: chore: enhanced export runtime
+- Updated dependencies [c1efbbf]
+- Updated dependencies [c8c0ad2]
+- Updated dependencies [1bb03d1]
+- Updated dependencies [1bb03d1]
+- Updated dependencies [f9335c7]
+  - @module-federation/enhanced@0.1.2
+  - @module-federation/sdk@0.1.2
+  - @module-federation/utilities@3.0.7
+  - @module-federation/runtime@0.1.2
+
 ## 2.1.1
 
 ### Patch Changes

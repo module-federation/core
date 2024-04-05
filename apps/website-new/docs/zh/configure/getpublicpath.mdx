@@ -1,0 +1,25 @@
+# getPublicPath
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`undefined`
+- 作用：用于设置动态 publicPath，设置后，对应的远程模块资源也将使用此 publicPath。例如，部署的项目是动态下发 `cdn_prefix` ，那么可以设置 `getPublicPath` 为 `return "https:" + window.navigator.cdn_host + "/resource/app/"`
+
+- 示例：
+
+下面的示例中，设置了 `getPublicPath`，在其他消费者加载该生产者时，将会通过 `new Function` 的方式执行 `getPublicPath` 的代码获取到返回值，将会把返回值的内容作为该模块的 `publicPath` 静态资源前缀
+
+```ts title="rspack.config.ts"
+module.exports = {
+  plugins: [
+    new ModuleFederation({
+      name: 'provider',
+      exposes: {
+        './Button': './src/components/Button.tsx',
+      },
+      // ...
+      getPublicPath: `return "https:" + window.navigator.cdn_host + "/resource/app/"`,
+    }),
+  ],
+};
+```

@@ -3,7 +3,7 @@ import { ModuleFederationPluginOptions } from '@module-federation/utilities';
 import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import { ModuleFederationPlugin } from '@module-federation/enhanced';
+import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 /**
  * This function applies server-specific plugins to the webpack compiler.
  *

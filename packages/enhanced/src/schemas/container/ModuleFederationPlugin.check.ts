@@ -7,6 +7,33 @@
  */
 const absolutePathRegExp = /^(?:[A-Za-z]:[\\/]|\\\\|\/)/;
 ('use strict');
+const runtimePlugin = {
+  type: 'array',
+  items: {
+    anyOf: [
+      {
+        type: 'string',
+        minLength: 1,
+        description: 'Runtime Plugin File Path.',
+      },
+      {
+        type: 'object',
+        required: ['import', 'async'],
+        properties: {
+          import: {
+            type: 'string',
+            minLength: 1,
+            description: 'Runtime Plugin File Path.',
+          },
+          async: {
+            type: 'boolean',
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
+  },
+};
 
 const schema51 = {
   definitions: {
@@ -459,13 +486,7 @@ const schema51 = {
     runtime: {
       $ref: '#/definitions/EntryRuntime',
     },
-    runtimePlugins: {
-      type: 'array',
-      items: {
-        type: 'string',
-        minLength: 1,
-      },
-    },
+    runtimePlugins: runtimePlugin,
     shareScope: {
       type: 'string',
       minLength: 1,

@@ -1,0 +1,46 @@
+# remotes
+
+- 类型：`PluginRemoteOptions`
+- 是否必填：否
+- 默认值：`undefined`
+- 使用场景：用 `Module Federation` 消费远程模块
+
+:::tip
+消费者者特有参数，设置了 `remotes` 则可认为这是一个消费者
+
+:::
+
+`PluginRemoteOptions` 类型如下：
+
+```tsx
+type ModuleFederationInfo = string;
+interface PluginRemoteOptions {
+  [remoteAlias: string]: ModuleFederationInfo;
+}
+```
+
+- `remoteAlias` 为实际用户引用的名称，可自行配置，例如设置了 `remoteAlias` 为 `demo` ，那么消费方式为 `import xx from 'demo'` 。
+- `ModuleFederationInfo` 由 `ModuleFederation name` + `@` + `ModuleFederation entry` 组成
+  - `ModuleFederation name` 是生产者设置的名称
+  - `entry` 可以为 `mf-manifest.json` 和 `remoteEntry.js`
+  - `entry` 为 `mf-manifest.json` 拥有以下额外能力
+    - 动态模块类型提示
+    - 资源预加载
+    - chrome devtool 调试工具
+
+```js
+module.exports = {
+  plugins: [
+    new ModuleFederation({
+      name: 'host',
+      // 下面的 remotes 中定义了两个 remote，分别是名称为：manifest_provider 在 3011 端口启动的项目、js_entry_provider 在 3012 端口启动的项目
+      remotes: {
+        'manifest-provider':
+          'manifest_provider@http://localhost:3011/mf-manifest.json',
+        'js-entry-provider':
+          'js_entry_provider@http://localhost:3012/remoteEntry.js',
+      },
+    }),
+  ],
+};
+```

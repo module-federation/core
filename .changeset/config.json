@@ -6,7 +6,7 @@
     [
       "@module-federation/runtime",
       "@module-federation/enhanced",
-      "@module-federation/enhanced-rspack",
+      "@module-federation/rspack",
       "@module-federation/webpack-bundler-runtime",
       "@module-federation/sdk",
       "@module-federation/runtime-tools",

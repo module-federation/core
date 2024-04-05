@@ -1,0 +1,36 @@
+[
+  {
+    "text": "指南",
+    "link": "/guide/start/",
+    "activeMatch": "/guide/"
+  },
+  {
+    "text": "配置",
+    "link": "/configure/",
+    "activeMatch": "/configure/"
+  },
+  {
+    "text": "插件",
+    "link": "/plugin/dev/index",
+    "activeMatch": "/plugin/"
+  },
+  {
+    "text": "社区",
+    "link": "/community/showcaseå",
+    "activeMatch": "/community/",
+    "items": [
+      {
+        "text": "Showcase",
+        "link": "/community/showcase/"
+      },
+      {
+        "text": "Module Federation Examples",
+        "link": "https://github.com/module-federation/module-federation-examples"
+      },
+      {
+        "text": "Practical Module Federation",
+        "link": "https://module-federation.myshopify.com/products/practical-module-federation"
+      }
+    ]
+  }
+]
