@@ -57,6 +57,23 @@ jobs:
     if: ${{ needs.setup.outputs.website-changed == 'true' && github.event_name == 'push' }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        with:
+          fetch-depth: 0
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Install Dependencies
+        run: pnpm install
+
       - run: npx nx run website-new:build
       - run: 'npx netlify deploy --build --prod --message "Deploy from GitHub Actions" --filter website'
         env:
@@ -71,6 +88,23 @@ jobs:
     if: ${{ needs.setup.outputs.website-changed == 'true' && github.event_name == 'pull_request' }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        with:
+          fetch-depth: 0
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Install Dependencies
+        run: pnpm install
+
       - uses: nelonoel/branch-name@v1.0.1
       - run: npx nx run website-new:build
       - run: 'npx netlify deploy --build --message "Deploy Preview from GitHub Actions" --alias "${{ env.BRANCH_NAME }}" --filter website-new'
