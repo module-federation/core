@@ -37,7 +37,7 @@ jobs:
         run: npm i
       - name: Check changes "website"
         id: website-changed
-        run: echo "website-changed=$(node tools/scripts/ci-is-affected.mjs --appName=website --base=${{ env.BASE_REF}} --head=HEAD)" >> $GITHUB_OUTPUT
+        run: echo "website-changed=$(node tools/scripts/ci-is-affected.mjs --appName=website-new --base=${{ env.BASE_REF}} --head=HEAD)" >> $GITHUB_OUTPUT
       - name: Log variables
         run: |
           echo "steps.cache.outputs.cache-hit:" ${{ steps.cache.outputs.cache-hit }}
@@ -50,10 +50,6 @@ jobs:
     if: ${{ needs.setup.outputs.website-changed == 'true' && github.event_name == 'push' }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
-      - uses: actions/cache@v3
-        with:
-          path: ${{ env.CACHE_NODE_MODULES_PATH }}
-          key: build-${{ hashFiles('**/package-lock.json') }}
       - run: npm run build:website
       - run: 'npx netlify deploy --build --prod --message "Deploy from GitHub Actions" --filter website'
         env:
@@ -74,7 +70,7 @@ jobs:
           key: build-${{ hashFiles('**/package-lock.json') }}
       - uses: nelonoel/branch-name@v1.0.1
       - run: npm run build:website
-      - run: 'npx netlify deploy --build --message "Deploy Preview from GitHub Actions" --alias "${{ env.BRANCH_NAME }}" --filter website'
+      - run: 'npx netlify deploy --build --message "Deploy Preview from GitHub Actions" --alias "${{ env.BRANCH_NAME }}" --filter website-new'
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
