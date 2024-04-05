@@ -14,6 +14,8 @@ import { TEMP_DIR } from '../constant';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import HoistContainerReferencesPlugin from '../HoistContainerReferencesPlugin';
 
+type RuntimePlugin = string | { import: string; async: boolean };
+
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -46,26 +48,42 @@ class FederationRuntimePlugin {
     this.bundlerRuntimePath = BundlerRuntimePath;
   }
 
-  static getTemplate(runtimePlugins: string[], bundlerRuntimePath?: string) {
+  static getTemplate(
+    runtimePlugins: RuntimePlugin[],
+    bundlerRuntimePath?: string,
+  ) {
     // internal runtime plugin
     const normalizedBundlerRuntimePath = normalizeToPosixPath(
       bundlerRuntimePath || BundlerRuntimePath,
     );
 
     let runtimePluginTemplates = '';
-    const runtimePLuginNames: string[] = [];
+    let asyncRuntimePluginTemplates = '';
+    const runtimePluginNames: string[] = [];
+    const asyncRuntimePluginNames: string[] = [];
 
     if (Array.isArray(runtimePlugins)) {
       runtimePlugins.forEach((runtimePlugin, index) => {
+        let plugin;
+        let async = false;
+        if (typeof runtimePlugin === 'string') {
+          plugin = runtimePlugin;
+        } else {
+          plugin = runtimePlugin.import;
+          async = runtimePlugin.async;
+        }
         const runtimePluginName = `plugin_${index}`;
         const runtimePluginPath = normalizeToPosixPath(
-          path.isAbsolute(runtimePlugin)
-            ? runtimePlugin
-            : path.join(process.cwd(), runtimePlugin),
+          path.isAbsolute(plugin) ? plugin : path.join(process.cwd(), plugin),
         );
 
-        runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
-        runtimePLuginNames.push(runtimePluginName);
+        if (async) {
+          asyncRuntimePluginTemplates += `const ${runtimePluginName} = import('${runtimePluginPath}');\n`;
+          asyncRuntimePluginNames.push(runtimePluginName);
+        } else {
+          runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
+          runtimePluginNames.push(runtimePluginName);
+        }
       });
     }
 
@@ -75,11 +93,13 @@ class FederationRuntimePlugin {
       `${federationGlobal} = {...federation,...${federationGlobal}};`,
       `if(!${federationGlobal}.instance){`,
       Template.indent([
-        runtimePLuginNames.length
+        runtimePluginNames.length
           ? Template.asString([
-              `${federationGlobal}.initOptions.plugins = ([`,
-              Template.indent(runtimePLuginNames.map((item) => `${item}(),`)),
-              '])',
+              `${federationGlobal}.initOptions.plugins = ${federationGlobal}.initOptions.plugins ? ${federationGlobal}.initOptions.plugins.concat([`,
+              Template.indent(runtimePluginNames.map((item) => `${item}(),`)),
+              ']) : [',
+              Template.indent(runtimePluginNames.map((item) => `${item}(),`)),
+              '];',
             ])
           : '',
         `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
@@ -93,6 +113,22 @@ class FederationRuntimePlugin {
         '}',
       ]),
       '}',
+      Template.indent([
+        asyncRuntimePluginTemplates.length
+          ? Template.asString([
+              `${federationGlobal}.initOptions.plugins = ${federationGlobal}.initOptions.plugins ? ${federationGlobal}.initOptions.plugins.concat([`,
+              Template.indent(
+                asyncRuntimePluginNames.map((item) => `${item}(),`),
+              ),
+              ']) : [',
+              Template.indent(
+                asyncRuntimePluginNames.map((item) => `${item}(),`),
+              ),
+              '];',
+            ])
+          : '',
+        `${federationGlobal}.runtime.registerPlugins(${federationGlobal}.initOptions.plugins);`,
+      ]),
     ]);
   }
 

@@ -1,0 +1,46 @@
+# Glossary of Terms
+
+## Module Federation
+
+Module Federation (MF) is an architectural pattern for partitioning JavaScript applications, similar to microservices on the server side. It allows you to share code and resources between multiple JavaScript applications (or micro frontends). If an application using federated modules lacks the dependencies required by the federated code, the missing dependencies will be downloaded from the build source or a peer that is able to share it.
+
+This enables the creation of micro-frontend style applications where multiple systems can share code and update dynamically without the need to rebuild the entire application.
+
+This also enabled a wider set of use cases on the server side, as federation operates universally, it has several dynamic backend use cases.
+
+## Producer (Remote)
+
+An application that exposes other modules to be consumed by other JavaScript applications through the Module Federation build plugin with the `exposes` configuration is referred to as a Provider (Producer) in Module Federation. A Producer can also act as a Consumer.
+
+## Consumer (Host)
+
+An application that consumes modules from other Producers through the Module Federation build plugin with the `remotes` configuration is referred to as a Consumer (Consumer). A Consumer can also act as a Producer.
+
+## Micro-frontend
+
+Micro-frontend (MFE) is an architectural style similar to microservices, where a cohesive single product is composed of multiple independently delivered frontend applications. It breaks down a frontend application into smaller, simpler applications that can be independently developed, tested, and deployed, while still appearing as a single product to the user.
+
+It primarily addresses two issues:
+
+- The increasing size and maintenance difficulty of applications as they evolve through iterations.
+- The low efficiency of cross-team or cross-department collaboration in project development.
+
+## Bundler
+
+Refers to module bundling tools such as [Rspack](https://rspack.dev/), [Webpack](https://webpack.js.org/).
+
+The main goal of a bundler is to package JavaScript, CSS, and other files together. The packaged files can be used in browsers, Node.js, and other environments. When a Bundler processes a web application, it constructs a dependency graph that includes all the modules required by the application and then packages all modules into one or more bundles.
+
+## Rspack
+
+[Rspack](https://www.rspack.dev/) is a high-performance web construction tool based on Rust, with interoperability with the webpack ecosystem. It can be integrated into webpack projects at a low cost and offers better build performance.
+
+Compared to webpack, Rspack has significantly improved build performance, thanks to the language advantages brought by Rust, as well as its parallel architecture and incremental compilation features. Benchmark tests have shown that Rspack can bring a 5 to 10 times increase in compilation performance.
+
+## Rsbuild
+
+[Rsbuild](https://rsbuild.dev/) is a web construction tool based on Rspack, with the following features:
+
+- Rsbuild is an enhanced version of the Rspack CLI, more user-friendly and ready out of the box.
+- Rsbuild represents the Rspack team's exploration and implementation of best practices for web construction.
+- Rsbuild is the best solution for migrating Webpack applications to Rspack, reducing configuration by 90% and speeding up builds by 10 times.

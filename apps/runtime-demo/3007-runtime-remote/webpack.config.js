@@ -6,7 +6,9 @@ const { withReact } = require('@nx/react');
 
 const path = require('path');
 // const { withModuleFederation } = require('@nx/react/module-federation');
-const { ModuleFederationPlugin } = require('@module-federation/enhanced');
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
 
 module.exports = composePlugins(
   withNx(),

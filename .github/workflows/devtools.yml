@@ -1,9 +1,11 @@
 name: Devtools
 
 on:
-  push:
-    branches: ['main']
   pull_request:
+    branches: [main]
+
+  push:
+    branches: [main]
 
 env:
   PLAYWRIGHT_BROWSERS_PATH: 0 # Places binaries to node_modules/@playwright/test
@@ -11,9 +13,6 @@ env:
 jobs:
   main:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.head_ref || github.run_id }}
-      cancel-in-progress: true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -26,7 +25,7 @@ jobs:
       - name: Setup Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: '17'
+          node-version: '18'
           cache: 'pnpm'
 
       - name: Set Nx SHA
@@ -36,7 +35,7 @@ jobs:
         run: pnpm install
 
       - name: Run Affected Build
-        run: npx nx affected -t build --parallel=10 --exclude='*,!tag:package'
+        run: npx nx build --parallel=10 --exclude='*,!tag:package'
 
       - name: Configuration xvfb
         shell: bash

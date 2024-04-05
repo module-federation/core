@@ -1,0 +1,50 @@
+# runtimePlugins
+
+- 类型：`string[]`
+- 是否必填：否
+- 默认值：`undefined`
+
+用于添加运行时需要的额外插件，值为具体插件的路径，支持绝对/相对路径、包名，通过「[插件系统](../plugin/dev/index)」了解更多关于如何开发 runtimePlugin 细节。
+
+设置后，运行时插件会自动在构建时注入并使用。
+
+- examples
+
+创建运行时插件文件： `custom-runtime-plugin.ts`
+
+```ts title="custom-runtime-plugin.ts"
+import { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function (): FederationRuntimePlugin {
+  return {
+    name: 'custom-plugin-build',
+    beforeInit(args) {
+      console.log('[build time inject] beforeInit: ', args);
+      return args;
+    },
+    beforeLoadShare(args) {
+      console.log('[build time inject] beforeLoadShare: ', args);
+
+      return args;
+    },
+  };
+}
+```
+
+在构建配置应用此插件：
+
+```ts title="rspack.config.ts"
+const path = require('path');
+module.exports = {
+  plugins: [
+    new ModuleFederation({
+      name: 'host',
+      remotes: {
+        'manifest-provider':
+          'manifest_provider@http://localhost:3011/mf-manifest.json',
+      },
+      runtimePlugins: [path.resolve(__dirname, './custom-runtime-plugin.ts')],
+    }),
+  ],
+};
+```

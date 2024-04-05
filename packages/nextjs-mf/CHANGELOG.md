@@ -1,5 +1,22 @@
 # [8.1.0-canary.7](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.3.3
+
+### Patch Changes
+
+- 1bb03d1: chore: enhanced export runtime
+- f9335c7: no default expose when skip sharing next internals enabled
+- Updated dependencies [c1efbbf]
+- Updated dependencies [c8c0ad2]
+- Updated dependencies [1bb03d1]
+- Updated dependencies [1bb03d1]
+- Updated dependencies [f9335c7]
+  - @module-federation/enhanced@0.1.2
+  - @module-federation/sdk@0.1.2
+  - @module-federation/node@2.1.2
+  - @module-federation/utilities@3.0.7
+  - @module-federation/runtime@0.1.2
+
 ## 8.3.2
 
 ### Patch Changes

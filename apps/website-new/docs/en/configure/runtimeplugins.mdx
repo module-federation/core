@@ -1,0 +1,49 @@
+# runtimePlugins
+
+- Type: `string[]`
+- Required: No
+- Default: `undefined`
+
+The `runtimePlugins` configuration is used to add additional plugins needed at runtime. The value should be the path to the specific plugin, which can be an absolute/relative path or a package name. You can learn more about how to develop `runtimePlugin` details by visiting the [Plugin System](../plugin/dev/index).
+
+Once set, runtime plugins will be automatically injected and used during the build process.
+
+- Examples
+
+To create a runtime plugin file, you can name it `custom-runtime-plugin.ts`:
+
+```ts title="custom-runtime-plugin.ts"
+import { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function (): FederationRuntimePlugin {
+  return {
+    name: 'custom-plugin-build',
+    beforeInit(args) {
+      console.log('[build time inject] beforeInit: ', args);
+      return args;
+    },
+    beforeLoadShare(args) {
+      console.log('[build time inject] beforeLoadShare: ', args);
+      return args;
+    },
+  };
+}
+```
+
+Then, apply this plugin in your build configuration:
+
+```ts title="rspack.config.ts"
+const path = require('path');
+module.exports = {
+  plugins: [
+    new ModuleFederation({
+      name: 'host',
+      remotes: {
+        'manifest-provider':
+          'manifest_provider@http://localhost:3011/mf-manifest.json',
+      },
+      runtimePlugins: [path.resolve(__dirname, './custom-runtime-plugin.ts')],
+    }),
+  ],
+};
+```

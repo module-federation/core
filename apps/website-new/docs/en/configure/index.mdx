@@ -1,0 +1,30 @@
+# Configuration Overview
+
+The current page lists all the configuration options for `Module Federation`. Please refer to the documentation for [`Rspack Plugin`](../guide/basic/rspack) and [`Webpack Plugin`](../guide/basic/webpack) to understand how to use them.
+
+```ts
+type ModuleFederationOptions = {
+  // Name for module federation
+  name: string;
+  // Name for the remoteEntry file
+  filename?: string;
+  // Configuration for remote modules and entry information in module federation
+  remotes?: Array<RemoteInfo>;
+  // module federation expose module information
+  expose?: PluginExposesOptions;
+  // Shared dependency configuration
+  shared?: ShareInfos;
+  // Dynamic publicPath
+  getPublicPath?: string;
+  // Runtime plugins
+  runtimePlugins?: Array<string>;
+  // The runtime implementation to use
+  implementation?: string;
+  // manifest configuration
+  manifest?: boolean | PluginManifestOptions;
+  // control page liveReload and types hot reload
+  dev?: boolean | PluginDevOptions;
+  // control types
+  dts?: boolean | PluginDtsOptions;
+};
+```

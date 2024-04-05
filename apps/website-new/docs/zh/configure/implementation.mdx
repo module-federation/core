@@ -1,0 +1,19 @@
+# implementation
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`undefined`
+
+用于修改实际 bundler runtime 版本。 值为 `@module-federation/runtime-tools` 的路径。
+
+```javascript
+module.exports = {
+  // ...other configurations
+  plugins: [
+    new ModuleFederation({
+      // ...other Module Federation options
+      implementation: require.resolve('@module-federation/runtime-tools'),
+    }),
+  ],
+};
+```

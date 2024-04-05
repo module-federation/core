@@ -1,0 +1,124 @@
+# shared
+
+`shared` 用于在消费者和生产间共享公共依赖，降低运行时下载体积从而提升性能，`shared` 可以配置依赖版本的复用规则，可以通过 [FAQ](#faq) 了解 `shared` 适用场景以及如何使用 `shared`
+
+- 类型：`PluginSharedOptions`
+- 是否必填：否
+- 默认值：`undefined`
+
+`PluginSharedOptions` 类型如下：
+
+```tsx
+type PluginSharedOptions = string[] | SharedObject;
+
+interface SharedObject {
+  [sharedName: string]: SharedConfig;
+}
+
+interface SharedConfig {
+  singleton?: boolean;
+  requiredVersion?: string;
+  eager?: boolean;
+}
+```
+
+- Example
+
+```ts
+new ModuleFederationPlugin({
+  name: '@demo/host',
+  shared: {
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+  //...
+});
+```
+
+## singleton
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`true`
+
+是否在共享作用域中只允许共享模块的一个版本 (单例模式).
+
+- 如果值为 true，开启单例模式；值为 false，不开启单例模式。
+- 如果启用单例模式，那么 remote 应用组件和 host 应用共享的依赖只加载一次，当版本不一致时加载更高的版本。此时对于版本更低的那一方会给出警告：
+- 不开启单例模式下，如果 remote 应用和 host 应用共享依赖的版本不一致，则 remote 应用和 host 应用加载各自的依赖
+
+## requiredVersion
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`require('project/package.json')[devDeps | dep]['depName']`
+
+所需版本，可以是一个版本区间。默认值为当前应用的依赖版本。
+
+- 在使用共享依赖时，会判断该依赖版本是否大于等于 requiredVersion ，如果是则会正常使用。如果小于 requiredVersion 那么会在控制台警告，并使用当前共享依赖中最小的版本。
+- 当一方设置 requiredVersion ，另一方设置 singleton 时，会加载 requiredVersion 的依赖，singleton 方直接使用 requiredVersion 的依赖，不论版本高低
+
+## eager
+
+:::warning
+`eager` 设置为 true 后，会将共享依赖打包到入口文件，从而导致入口文件体积过大。请谨慎开启。
+:::
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`false`
+
+是否立即加载共享模块。
+
+正常情况下，需要开启异步入口，随后按需异步加载 shared 。 若想使用 shared ，但又不想开启异步入口，那么可以设置 `eager` 为 true 。
+
+## FAQ
+
+### 何时使用共享依赖
+
+跨项目消费模块往往会碰到**重复依赖加载**、**依赖单例限制**等问题，这些问题可以通过设置 `shared` 来解决。
+
+- （消费者消费）生产者提供的模块中，使用的第三方包会在消费者中大量使用，例如 `lodash.get`
+- （消费者消费）生产者提供的模块中，使用的第三方包有单例要求，例如 `react`
+- （消费者消费）生产者提供的模块中，使用的第三方包会在消费者中使用，依赖体积很大并且不支持 treeshake，例如 `lodash` （未按需引用）
+- （消费者消费）生产者提供的模块中，使用的第三方包会在消费者中使用，依赖体积很大，支持 treeshake，但暴露的模块基本都使用到，例如 `antd`
+
+那么此时可以在 shared 配置中添加对应的依赖。
+
+### 如何使用共享依赖
+
+根据使用场景，`Module Federation` 支持两种形式配置共享依赖，分别是 数组、对象。前者适用于大部分场景，后者适用于复杂的定制需求。
+
+**数组格式（通用场景）**
+
+仅需在 `Module Federation` 构建配置中的 `shared` 配置添加对应的依赖即可，例如：
+
+```ts
+new ModuleFederationPlugin({
+  name: '@demo/button',
+  shared: ['react', 'react-dom'],
+  //...
+});
+```
+
+**对象格式（定制化配置）**
+
+在 `Module Federation Plugin` 中的 `shared` 配置添加需要共享的依赖， `key` 为依赖名称，`value` 为提供的配置。
+
+```ts
+new ModuleFederationPlugin({
+  name: '@demo/button',
+    shared: {
+      react: {
+        singleton: true,
+        requiredVersion: '~18.2.0'
+        fixedDependencies: true
+      }
+    }
+  //...
+});
+```
