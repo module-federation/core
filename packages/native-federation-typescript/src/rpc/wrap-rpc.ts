@@ -89,11 +89,11 @@ export function wrapRpc<T extends (...args: any[]) => any>(
     // add event listeners
     if (once) {
       childProcess.once('message', handleMessage);
-      childProcess.once('close', handleClose);
     } else {
       childProcess.on('message', handleMessage);
-      childProcess.on('close', handleClose);
     }
+
+    childProcess.on('close', handleClose);
 
     childProcess.on('error', (err) => {
       console.error(err);
