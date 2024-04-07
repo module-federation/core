@@ -12,6 +12,7 @@ export {
 export { retrieveTypesZipPath } from './lib/archiveHandler';
 export { generateTypes } from './lib/generateTypes';
 export { generateTypesInChildProcess } from './lib/generateTypesInChildProcess';
+export { DtsWorker } from './lib/DtsWorker';
 export { consumeTypes } from './lib/consumeTypes';
 export { DTSManager } from './lib/DTSManager';
 export {

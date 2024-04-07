@@ -58,6 +58,9 @@ export function wrapRpc<T extends (...args: any[]) => any>(
           rejectResult(message.error);
         }
       }
+      if (once && childProcess?.kill) {
+        childProcess.kill('SIGTERM');
+      }
     };
     const handleClose = (
       code: string | number | null,
@@ -94,10 +97,6 @@ export function wrapRpc<T extends (...args: any[]) => any>(
     }
 
     childProcess.on('close', handleClose);
-
-    childProcess.on('error', (err) => {
-      console.error(err);
-    });
 
     // send call message
     childProcess.send(
