@@ -25,6 +25,10 @@ This plugin is used to build the federated types.
     deleteTypesFolder?: boolean; // indicate if the types folder will be deleted when the job completes, default is 'true'
     additionalFilesToCompile?: string[] // The path of each additional file which should be emitted
     compilerInstance?: 'tsc' | 'vue-tsc' // The compiler to use to emit files, default is 'tsc'
+    generateAPITypes?: boolean; // whether to generate the `loadRemote` type in `Federation Runtime`
+    extractThirdParty?: boolean; // whether to extract third-party package types, eg: react
+    extractRemoteTypes?: boolean; // whether to extract the type of `remotes`
+    abortOnError?: boolean; // whether to throw an error when a problem is encountered during type generation
 }
 ```
 
@@ -45,6 +49,7 @@ This plugin is used to download the federated types.
     typesFolder?: string; // folder where all the files will be stored, default is '@mf-types',
     deleteTypesFolder?: boolean; // indicate if the types folder will be deleted before the job starts, default is 'true'
     maxRetries?: number; // The number of times the plugin will try to download the types before failing, default is 3
+    consumeAPITypes?: boolean; // whether to generate the type of runtime `loadRemote` API
 }
 ```
 
