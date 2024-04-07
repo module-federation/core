@@ -29,6 +29,7 @@ This plugin is used to build the federated types.
     extractThirdParty?: boolean; // whether to extract third-party package types, eg: react
     extractRemoteTypes?: boolean; // whether to extract the type of `remotes`
     abortOnError?: boolean; // whether to throw an error when a problem is encountered during type generation
+    compileInChildProcess?: boolean; // whether generate types in child process
 }
 ```
 
