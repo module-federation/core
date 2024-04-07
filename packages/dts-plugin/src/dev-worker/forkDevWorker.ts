@@ -185,7 +185,7 @@ export async function forkDevWorker(
   }
 }
 
-process.on('message', (message: rpc.RpcMessage) => {
+process.on('message', (message: typeof rpc.RpcMessage) => {
   fileLog(
     `ChildProcess(${process.pid}), message: ${JSON.stringify(message)} `,
     'forkDevWorker',

@@ -12,7 +12,7 @@ export interface DevWorkerOptions extends DTSManagerOptions {
 }
 
 export class DevWorker {
-  private _rpcWorker: rpc.RpcWorker<rpc.RpcMethod>;
+  private _rpcWorker: typeof rpc.RpcWorker<typeof rpc.RpcMethod>;
   private _options: DevWorkerOptions;
   private _res: Promise<any>;
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { join } from 'path';
 import dirTree from 'directory-tree';
-import pidusage from 'pidusage';
+import { execSync } from 'child_process';
 
 describe('generateTypesInChildProcess', () => {
   const projectRoot = join(__dirname, '..', '..', '..', '..');
@@ -54,9 +54,19 @@ describe('generateTypesInChildProcess', () => {
     if (!pid) {
       throw new Error('pid must be existed!');
     }
-    pidusage(pid, function (err) {
-      expect(Boolean(err)).toEqual(false);
-    });
+    const checkProcess = () => {
+      try {
+        const stdout = execSync(`ps -p ${pid} | grep -v '<defunct>'`)
+          .toString()
+          .split('\n');
+        console.log('stdout: ', stdout);
+        return Boolean(stdout[1].length);
+      } catch (err) {
+        console.error(err);
+        return false;
+      }
+    };
+    expect(checkProcess()).toEqual(true);
     await dtsWorker.controlledPromise;
     expect(dirTree(distFolder, { exclude: /node_modules/ })).toMatchObject({
       name: '@mf-types-dts-test-child-process',
@@ -158,10 +168,6 @@ describe('generateTypesInChildProcess', () => {
       ],
     });
     // the child process should be killed after generateTypes
-    pidusage(pid, function (err) {
-      expect(Boolean(err)).toEqual(true);
-    });
-
-    // expect()
+    expect(checkProcess()).toEqual(false);
   });
 });

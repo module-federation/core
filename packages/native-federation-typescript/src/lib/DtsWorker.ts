@@ -29,9 +29,6 @@ export class DtsWorker {
     );
 
     this._res = this.rpcWorker.connect(this._options);
-    Promise.resolve(this._res).then(() => {
-      this.exit();
-    });
   }
 
   removeUnSerializationOptions() {
@@ -44,7 +41,9 @@ export class DtsWorker {
   }
 
   get controlledPromise(): ReturnType<DTSManager['generateTypes']> {
-    return this._res as unknown as ReturnType<DTSManager['generateTypes']>;
+    return Promise.resolve(this._res).then(() => {
+      this.exit();
+    });
   }
 
   exit(): void {
