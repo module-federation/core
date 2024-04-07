@@ -1,0 +1,498 @@
+# Plugin System
+
+Module Federation provides a lightweight runtime plugin system for implementing most of its features and allowing users to extend functionalities.
+
+Plugins developed by developers can modify the default behavior of `Module Federation` and add various additional features, including but not limited to:
+
+- Obtaining context information
+- Registering lifecycle hooks
+- Modifying Module Federation configurations
+- ...
+
+## Developing Plugins
+
+Plugins are provided in the form of a function similar to `() => FederationRuntimePlugin`.
+
+### Plugin Example
+
+```typescript title="custom-runtime-plugin.ts"
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const runtimePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'my-runtime-plugin',
+    beforeInit(args) {
+      console.log('beforeInit: ', args);
+      return args;
+    },
+    beforeRequest(args) {
+      console.log('beforeRequest: ', args);
+      return args;
+    },
+    afterResolve(args) {
+      console.log('afterResolve', args);
+      return args;
+    },
+    onLoad(args) {
+      console.log('onLoad: ', args);
+      return args;
+    },
+    async loadShare(args) {
+      console.log('loadShare:', args);
+    },
+    async beforeLoadShare(args) {
+      console.log('beforeloadShare:', args);
+      return args;
+    },
+  };
+};
+export default runtimePlugin;
+```
+
+Registering plugins (either method is acceptable):
+
+- Build-time registration of plugins
+
+```typescript title="rspack.config.ts"
+const path = require('path');
+module.exports = {
+  plugins: [
+    new ModuleFederation({
+      name: 'host',
+      remotes: {
+        'manifest-provider':
+          'manifest_provider@http://localhost:3011/mf-manifest.json',
+      },
+      runtimePlugins: [path.resolve(__dirname, './custom-runtime-plugin.ts')],
+    }),
+  ],
+};
+```
+
+- Runtime registration of plugins
+
+```typescript
+import runtimePlugin from 'custom-runtime-plugin.ts';
+init({
+  name: '@demo/app-main',
+  remotes: [
+    {
+      name: '@demo/app2',
+      entry: 'http://localhost:3006/mf-manifest.json',
+      alias: 'app2',
+    },
+  ],
+  plugins: [runtimePlugin()],
+});
+```
+
+### Plugin Structure
+
+Function-based plugins can **accept an options object** and **return a plugin instance**, managing internal state through closure mechanisms.
+
+The roles of each part are as follows:
+
+- The `name` property is used to label the plugin name.
+- `fn` Various hooks.
+
+### Naming Conventions
+
+The naming conventions for plugins are as follows:
+
+- The plugin function is named `xxx-plugin` and is exported with a name.
+- The `name` of the plugin follows the `xxx-plugin` format.
+
+Here is an example:
+
+```typescript
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+const pluginFooBar = (): FederationRuntimePlugin => ({
+  name: 'xxx-plugin',
+  //...
+});
+
+export default pluginFooBar;
+```
+
+## Hooks
+
+
+### beforeInit
+
+`SyncWaterfallHook`
+
+Updates the federated host configuration before the initialization process of the remote container.
+
+- Type
+
+```typescript
+function beforeInit(args: BeforeInitOptions): BeforeInitOptions;
+
+type BeforeInitOptions = {
+  userOptions: UserOptions;
+  options: FederationRuntimeOptions;
+  origin: FederationHost;
+  shareInfo: ShareInfos;
+};
+
+interface FederationRuntimeOptions {
+  id?: string;
+  name: string;
+  version?: string;
+  remotes: Array<Remote>;
+  shared: ShareInfos;
+  plugins: Array<FederationRuntimePlugin>;
+  inBrowser: boolean;
+}
+```
+
+### init
+
+`SyncHook`
+
+Called during the initialization of the remote container.
+
+- Type
+
+```typescript
+function init(args: InitOptions): void;
+
+type InitOptions = {
+  options: FederationRuntimeOptions;
+  origin: FederationHost;
+};
+```
+
+### beforeRequest
+
+`AsyncWaterfallHook`
+
+Called before resolving the remote container, used to inject containers or update certain content before lookup.
+
+- Type
+
+```typescript
+async function beforeRequest(
+  args: BeforeRequestOptions,
+): Promise<BeforeRequestOptions>;
+
+type BeforeRequestOptions = {
+  id: string;
+  options: FederationRuntimeOptions;
+  origin: FederationHost;
+};
+```
+
+### afterResolve
+
+`AsyncWaterfallHook`
+
+Called after the container is resolved, allows for redirection or modification of the resolved information.
+
+- Type
+
+```typescript
+async function afterResolve(
+  args: AfterResolveOptions,
+): Promise<AfterResolveOptions>;
+
+type AfterResolveOptions = {
+  id: string;
+  pkgNameOrAlias: string;
+  expose: string;
+  remote: Remote;
+  options: FederationRuntimeOptions;
+  origin: FederationHost;
+  remoteInfo: RemoteInfo;
+  remoteSnapshot?: ModuleInfo;
+};
+```
+
+### onLoad
+
+`AsyncHook`
+
+Triggered when the federated module is fully loaded, allowing access to and modification of the exported content of the loaded file.
+
+- Type
+
+```typescript
+async function onLoad(args: OnLoadOptions): Promise<void>;
+
+type OnLoadOptions = {
+  id: string;
+  expose: string;
+  pkgNameOrAlias: string;
+  remote: Remote;
+  options: ModuleOptions;
+  origin: FederationHost;
+  exposeModule: any;
+  exposeModuleFactory: any;
+  moduleInstance: Module;
+};
+
+type ModuleOptions = {
+  remoteInfo: RemoteInfo;
+  host: FederationHost;
+};
+
+interface RemoteInfo {
+  name: string;
+  version?: string;
+  buildVersion?: string;
+  entry: string;
+  type: RemoteEntryType;
+  entryGlobalName: string;
+  shareScope: string;
+}
+```
+
+### handlePreloadModule
+
+`SyncHook`
+
+Handles the logic for preloading federated modules.
+
+- Type
+
+```typescript
+function handlePreloadModule(args: HandlePreloadModuleOptions): void;
+
+type HandlePreloadModuleOptions = {
+  id: string;
+  name: string;
+  remoteSnapshot: ModuleInfo;
+  preloadConfig: PreloadRemoteArgs;
+};
+```
+
+### errorLoadRemote
+
+`AsyncHook`
+
+Called if loading a federated module fails, allowing for custom error handling.
+
+- Type
+
+```typescript
+async function errorLoadRemote(
+  args: ErrorLoadRemoteOptions,
+): Promise<void | unknown>;
+
+type ErrorLoadRemoteOptions = {
+  id: string;
+  error: unknown;
+  from: 'build' | 'runtime';
+  origin: FederationHost;
+};
+```
+
+- Example
+
+```typescript
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
+
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const fallbackPlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'fallback-plugin',
+    errorLoadRemote(args) {
+      const fallback = 'fallback';
+      return fallback;
+    },
+  };
+};
+
+init({
+  name: '@demo/app-main',
+  remotes: [
+    {
+      name: '@demo/app2',
+      entry: 'http://localhost:3006/remoteEntry.js',
+      alias: 'app2',
+    },
+  ],
+  plugins: [fallbackPlugin()],
+});
+
+loadRemote('app2/un-existed-module').then((mod) => {
+  expect(mod).toEqual('fallback');
+});
+```
+
+### beforeLoadShare
+
+`AsyncWaterfallHook`
+
+Called before attempting to load or negotiate shared modules between federated applications.
+
+- Type
+
+```typescript
+async function beforeLoadShare(
+  args: BeforeLoadShareOptions,
+): Promise<BeforeLoadShareOptions>;
+
+type BeforeLoadShareOptions = {
+  pkgName: string;
+  shareInfo?: Shared;
+  shared: Options['shared'];
+  origin: FederationHost;
+};
+```
+
+### resolveShare
+
+`SyncWaterfallHook`
+
+Allows for manual resolution of shared module requests.
+
+- Type
+
+```typescript
+function resolveShare(args: ResolveShareOptions): ResolveShareOptions;
+
+type ResolveShareOptions = {
+  shareScopeMap: ShareScopeMap;
+  scope: string;
+  pkgName: string;
+  version: string;
+  GlobalFederation: Federation;
+  resolver: () => Shared | undefined;
+};
+```
+
+- Example
+
+```typescript
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
+
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const customSharedPlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'custom-shared-plugin',
+    resolveShare(args) {
+      const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
+
+      if (pkgName !== 'react') {
+        return args;
+      }
+
+      args.resolver = function () {
+        shareScopeMap[scope][pkgName][version] = window.React; // Manually replace the local share scope with the desired module
+        return shareScopeMap[scope][pkgName][version];
+      };
+      return args;
+    },
+  };
+};
+
+init({
+  name: '@demo/app-main',
+  shared: {
+    react: {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => React,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+  },
+  plugins: [customSharedPlugin()],
+});
+
+window.React = () => 'Desired Shared';
+
+loadShare('react').then((reactFactory) => {
+  expect(reactFactory()).toEqual(window.React());
+});
+```
+
+### beforePreloadRemote
+
+`AsyncHook`
+
+Called before the preload handler executes any preload logic.
+
+- Type
+
+```typescript
+async function beforePreloadRemote(
+  args: BeforePreloadRemoteOptions,
+): BeforePreloadRemoteOptions;
+
+type BeforePreloadRemoteOptions = {
+  preloadOps: Array<PreloadRemoteArgs>;
+  options: Options;
+  origin: FederationHost;
+};
+```
+
+### generatePreloadAssets
+
+`AsyncHook`
+
+Generates preload assets based on configuration.
+
+- Type
+
+```typescript
+async function generatePreloadAssets(
+  args: GeneratePreloadAssetsOptions,
+): Promise<PreloadAssets>;
+
+type GeneratePreloadAssetsOptions = {
+  origin: FederationHost;
+  preloadOptions: PreloadOptions[number];
+  remote: Remote;
+  remoteInfo: RemoteInfo;
+  remoteSnapshot: ModuleInfo;
+  globalSnapshot: GlobalModuleInfo;
+};
+
+interface PreloadAssets {
+  cssAssets: Array<string>;
+  jsAssetsWithoutEntry: Array<string>;
+  entryAssets: Array<EntryAssets>;
+}
+```
+
+### createScript
+
+`SyncHook`
+
+- Type
+
+```typescript
+function createScript(args: CreateScriptOptions): HTMLScriptElement | void;
+
+type CreateScriptOptions = {
+  url: string;
+};
+```
+
+- Example
+
+```typescript
+import { init } from '@module-federation/enhanced/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'change-script-attribute',
+    createScript({ url }) {
+      if (url === testRemoteEntry) {
+        let script = document.createElement('script');
+        script.src = testRemoteEntry;
+        script.setAttribute('loader-hooks', 'isTrue');
+        script.setAttribute('crossorigin', 'anonymous');
+        return script;
+      }
+    },
+  };
+};
+```

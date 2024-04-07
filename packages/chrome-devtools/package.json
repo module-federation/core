@@ -1,6 +1,7 @@
 {
   "name": "@module-federation/devtools",
-  "version": "0.0.17",
+  "version": "0.0.18",
+  "private": true,
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
@@ -27,6 +28,9 @@
     "node_modules/",
     "dist/"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@arco-design/web-react": "^2.59.1",
     "@modern-js/runtime": "2.46.1",

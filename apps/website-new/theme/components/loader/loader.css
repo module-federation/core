@@ -1,0 +1,61 @@
+.animation {
+  animation-duration: 0.8s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes first {
+  0% {
+    background-color: #cad1ea;
+  }
+  33% {
+    background-color: #1c2135;
+  }
+  66% {
+    background-color: #6c79a4;
+  }
+  100% {
+    background-color: #cad1ea;
+  }
+}
+
+@keyframes second {
+  0% {
+    background-color: #6c79a4;
+  }
+  33% {
+    background-color: #cad1ea;
+  }
+  66% {
+    background-color: #1c2135;
+  }
+  100% {
+    background-color: #6c79a4;
+  }
+}
+
+@keyframes third {
+  0% {
+    background-color: #1c2135;
+  }
+  33% {
+    background-color: #6c79a4;
+  }
+  66% {
+    background-color: #cad1ea;
+  }
+  100% {
+    background-color: #1c2135;
+  }
+}
+
+.animation--first {
+  animation-name: first;
+}
+
+.animation--second {
+  animation-name: second;
+}
+
+.animation--third {
+  animation-name: third;
+}

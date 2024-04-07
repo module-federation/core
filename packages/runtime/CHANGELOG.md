@@ -1,5 +1,12 @@
 # @module-federation/runtime
 
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies [c8c0ad2]
+  - @module-federation/sdk@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes

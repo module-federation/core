@@ -1,9 +1,4 @@
-import type {
-  ModuleFederationPluginOptions,
-  SharedConfig,
-  SharedObject,
-} from '@module-federation/utilities';
-import { isRequiredVersion, parseOptions } from '@module-federation/enhanced';
+import type { SharedConfig, SharedObject } from '@module-federation/utilities';
 
 /**
  * @typedef SharedObject

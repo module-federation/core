@@ -12,13 +12,26 @@
 
 - Module Federation reuses common dependencies between modules as much as possible
 
-[Learn more](https://module-federation.io/docs/en/mf-docs/0.2/getting-started/)
+[Learn more](https://module-federation.io/)
 
 ## 🔥 What does universe offer?
 
 The universe repository provides a set of tools to enhance module federation's capabilities. These include:
 
-- [Next.js Module Federation](./packages/nextjs-mf)
+- [Module Federation Runtime](https://module-federation.io/guide/basic/runtime.html)
+- [Rspack Module Federation](https://module-federation.io/guide/basic/rspack.html)
+- [Webpack Module Federation](https://module-federation.io/guide/basic/webpack.html)
+- [Next.js Module Federation](https://module-federation.io/guide/framework/nextjs.html)
+
+## 📚 Getting Started
+
+To get started with Module Federation, see the [Quick Start](https://module-federation.io/guide/start/quick-start.html).
+
+
+## 📦 Packages
+
+Some of the underlying dependencies of the past are listed here, and [enhanced](https://module-federation.io/) access is recommended for direct use.
+
 - [Node Module Federation](./packages/node)
 - [Storybook addon for Module Federation](./packages/storybook-addon)
 - [Native federation typescript](./packages/native-federation-typescript)
@@ -26,7 +39,7 @@ The universe repository provides a set of tools to enhance module federation's c
 
 # 🧑‍💻 Community
 
-Come and chat with us on [Discord](https://discord.com/invite/T8c6yAxkbv)! The Module federation team and users are active there, and we're always looking for contributions.
+Come and chat with us on [Discussions](https://github.com/module-federation/universe/discussions)! The Module federation team and users are active there, and we're always looking for contributions.
 
 # 🤝 Contribution
 

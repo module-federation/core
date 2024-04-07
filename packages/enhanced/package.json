@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "files": [
@@ -60,7 +60,7 @@
     "@module-federation/manifest": "workspace:*",
     "@module-federation/managers": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
-    "@module-federation/enhanced-rspack": "workspace:*",
+    "@module-federation/rspack": "workspace:*",
     "upath": "2.0.1"
   }
 }

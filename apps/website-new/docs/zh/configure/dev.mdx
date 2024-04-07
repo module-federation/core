@@ -1,0 +1,31 @@
+# dev
+
+- 类型：`boolean | PluginDevOptions`
+- 是否必填：否
+- 默认值：`true`
+- 使用场景：用于控制 `Module Federation` dev 行为
+
+`PluginDevOptions` 类型如下：
+
+```ts
+interface PluginDevOptions {
+  disableLiveReload?: boolean;
+  disableHotTypesReload?: boolean;
+}
+```
+
+## disableHotTypesReload
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`false`
+
+是否禁用类型热重载
+
+## disableLiveReload
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`false`
+
+是否禁用 `liveReload`，设置 `true` 后，生产者的任何更新，都不会触发消费者的**页面** `liveReload`

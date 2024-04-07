@@ -1,0 +1,76 @@
+# Type rompt
+
+Just like NPM Packages, `Module Federation` products also generate types and enjoy type hot reloading, although the products are hosted on a remote CDN.
+
+`@module-federation/enhanced` enables the type prompt function by default. This article will introduce several common usage scenarios and specific configurations.
+
+## Use Cases
+
+### Generate type
+
+Building using the build plugin provided by `@module-federation/enhanced` will automatically generate type files.
+
+### Consume type
+
+1. Consumer modifies `tsconfig.json`
+
+add `paths` to `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "*": ["./@mf-types/*"]
+    }
+  }
+}
+```
+
+2. Start consumer and provider
+
+> info: No need to care the startup sequence of provider and consumer
+
+After startup, the consumer will automatically pull the provider's type file.
+
+### Type hot reload
+
+After modifying the producer code, the consumer will automatically pull the producer's type.
+
+![hot-types-reload-static](@public/guide/type-prompt/hot-types-reload-static.gif)
+
+### Federation Runtime API type prompt
+
+Using `Federation Runtime`'s `loadRemote` can also enjoy type hints and type hot reloading:
+
+![hot-types-reload](@public/guide/type-prompt/hot-types-reload.gif)
+
+### Third-party package type extraction
+
+`Module Federation` will automatically extract third-party package types to ensure that `exposes` file types can be accessed normally.
+
+![third-party](@public/guide/type-prompt/third-party.jpg)
+
+### Nested type re-export
+
+`Module Federation` supports nested remotes and will automatically extract the nested remotes type.
+
+![nested-remote](@public/guide/type-prompt/nested-remote.jpg)
+
+## Configuration
+
+- [dts](../../configure/dts)：generate/load type
+- [dev](../../configure/dev)：type hot reload
+
+## FAQ
+
+1. The project compiles in a loop and cannot be terminated
+
+A: It is most likely caused by the compiler monitoring changes in the type folder or `dist`. Just add `@mf-types` to the ignore file.
+
+Take webpack/rspack as an example:
+
+```ts
+config.watchOptions = {
+  ignored: ['**/node_modules/**', '**/@mf-types/**'],
+};
+```
