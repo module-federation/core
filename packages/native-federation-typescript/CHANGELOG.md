@@ -1,15 +1,3 @@
-# [1.0.0-canary.1](https://github.com/module-federation/universe/compare/native-federation-typescript-0.2.6...native-federation-typescript-1.0.0-canary.1) (2023-11-06)
-
-## 0.1.2
-
-### Patch Changes
-
-- c8c0ad2: feat: enhance type capability
-- Updated dependencies [c8c0ad2]
-  - @module-federation/third-party-dts-extractor@0.0.18
-  - @module-federation/sdk@0.1.2
-  - @module-federation/managers@0.1.2
-
 ## 0.4.0
 
 ### Minor Changes
