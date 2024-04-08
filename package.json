@@ -209,7 +209,7 @@
     "qwik-nx": "1.1.1",
     "qwik-speak": "0.12.2",
     "react-refresh": "0.14.0",
-    "rimraf": "^3.0.2",
+    "rimraf": "^5.0.5",
     "rollup-plugin-copy": "3.5.0",
     "stopword": "2.0.8",
     "strip-ansi": "^6.0.0",

@@ -57,7 +57,7 @@
     "@types/react-dom": "~18.2.0",
     "lint-staged": "~13.1.0",
     "prettier": "~2.8.1",
-    "rimraf": "~3.0.2",
+    "rimraf": "~5.0.5",
     "typescript": "~5.0.4",
     "vitest": "1.2.2"
   }
