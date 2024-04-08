@@ -24,7 +24,7 @@
     "fs-extra": "9.1.0"
   },
   "devDependencies": {
-    "webpack": "5.76.0"
+    "webpack": "5.91.0"
   },
   "exports": {
     ".": {

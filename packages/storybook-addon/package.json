@@ -36,7 +36,7 @@
   "devDependencies": {
     "@storybook/core-common": "7.6.17",
     "@storybook/node-logger": "7.6.17",
-    "webpack": "5.89.0",
+    "webpack": "5.91.0",
     "webpack-virtual-modules": "0.6.1",
     "@module-federation/utilities": "workspace:*",
     "@nx/react": "^17.1.3",
