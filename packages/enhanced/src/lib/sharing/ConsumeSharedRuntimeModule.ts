@@ -135,7 +135,19 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
       initialConsumes.length > 0
         ? Template.asString([
             `var initialConsumes = ${JSON.stringify(initialConsumes)};`,
-            `${federationGlobal}.installInitialConsumes= ()=>${federationGlobal}.bundlerRuntime.installInitialConsumes({initialConsumes, installedModules, moduleToHandlerMapping, webpackRequire:${RuntimeGlobals.require}});`,
+            runtimeTemplate.returningFunction(
+              Template.asString([
+                `${federationGlobal}.bundlerRuntime.installInitialConsumes({`,
+                Template.indent([
+                  'initialConsumes: initialConsumes,',
+                  'installedModules:installedModules,',
+                  'moduleToHandlerMapping:moduleToHandlerMapping,',
+                  `webpackRequire: ${RuntimeGlobals.require}`,
+                ]),
+                `});`,
+              ]),
+              '',
+            ),
           ])
         : '// no consumes in initial chunks',
       this._runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers)
@@ -148,7 +160,14 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
             `${
               RuntimeGlobals.ensureChunkHandlers
             }.consumes = ${runtimeTemplate.basicFunction('chunkId, promises', [
-              `${federationGlobal}.bundlerRuntime.consumes({chunkMapping, installedModules, chunkId, moduleToHandlerMapping, promises, webpackRequire:${RuntimeGlobals.require}});`,
+              `${federationGlobal}.bundlerRuntime.consumes({`,
+              'chunkMapping: chunkMapping,',
+              'installedModules: installedModules,',
+              'chunkId: chunkId,',
+              'moduleToHandlerMapping: moduleToHandlerMapping,',
+              'promises: promises,',
+              `webpackRequire:${RuntimeGlobals.require}`,
+              '});',
             ])}`,
           ])
         : '// no chunk loading of consumes',
