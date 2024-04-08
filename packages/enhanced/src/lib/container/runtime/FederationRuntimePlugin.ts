@@ -78,7 +78,7 @@ class FederationRuntimePlugin {
         );
 
         if (async) {
-          asyncRuntimePluginTemplates += `const ${runtimePluginName} = import('${runtimePluginPath}');\n`;
+          asyncRuntimePluginTemplates += `const ${runtimePluginName} = import(/*webpackMode: "eager"*/'${runtimePluginPath}');\n`;
           asyncRuntimePluginNames.push(runtimePluginName);
         } else {
           runtimePluginTemplates += `import ${runtimePluginName} from '${runtimePluginPath}';\n`;
@@ -116,6 +116,10 @@ class FederationRuntimePlugin {
       Template.indent([
         asyncRuntimePluginTemplates.length
           ? Template.asString([
+              'var promises = []',
+              `${RuntimeGlobals.ensureChunkHandlers}.consumes(${RuntimeGlobals.runtimeId},promises)`,
+              'console.log(promises);',
+              'Promise.all(promises).then(()=>{',
               asyncRuntimePluginTemplates,
               `const asyncPlugins = Promise.all([${Template.indent(
                 asyncRuntimePluginNames.map((item) => `${item},`),
@@ -128,6 +132,7 @@ class FederationRuntimePlugin {
               `asyncPlugins.then((resolvedPlugins)=>{`,
               `${federationGlobal}.initOptions.plugins = ${federationGlobal}.initOptions.plugins ? ${federationGlobal}.initOptions.plugins.concat(resolvedPlugins) : resolvedPlugins;`,
               `${federationGlobal}.runtime.registerPlugins(${federationGlobal}.initOptions.plugins);`,
+              `});`,
               `});`,
             ])
           : '',
