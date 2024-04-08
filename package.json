@@ -211,7 +211,7 @@
     "react-refresh": "0.14.0",
     "rimraf": "^3.0.2",
     "rollup-plugin-copy": "3.5.0",
-    "stopword": "2.0.8",
+    "stopword": "3.0.1",
     "strip-ansi": "^6.0.0",
     "swc-loader": "0.2.3",
     "tailwindcss": "3.4.1",
