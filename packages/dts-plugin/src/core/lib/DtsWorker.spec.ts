@@ -70,72 +70,10 @@ describe('generateTypesInChildProcess', () => {
     await dtsWorker.controlledPromise;
     expect(dirTree(distFolder, { exclude: /node_modules/ })).toMatchObject({
       name: '@mf-types-dts-test-child-process',
+
       children: [
         {
           children: [
-            {
-              children: [
-                {
-                  name: 'hostPlugin.d.ts',
-                },
-                {
-                  name: 'remotePlugin.d.ts',
-                },
-              ],
-              name: 'configurations',
-            },
-            {
-              name: 'constant.d.ts',
-            },
-            {
-              name: 'helpers.d.ts',
-            },
-            {
-              name: 'index.d.ts',
-            },
-            {
-              children: [
-                {
-                  name: 'DTSManagerOptions.d.ts',
-                },
-                {
-                  name: 'HostOptions.d.ts',
-                },
-                {
-                  name: 'RemoteOptions.d.ts',
-                },
-              ],
-              name: 'interfaces',
-            },
-            {
-              children: [
-                {
-                  name: 'DTSManager.d.ts',
-                },
-                {
-                  name: 'DtsWorker.d.ts',
-                },
-                {
-                  name: 'archiveHandler.d.ts',
-                },
-                {
-                  name: 'consumeTypes.d.ts',
-                },
-                {
-                  name: 'generateTypes.d.ts',
-                },
-                {
-                  name: 'generateTypesInChildProcess.d.ts',
-                },
-                {
-                  name: 'typeScriptCompiler.d.ts',
-                },
-                {
-                  name: 'utils.d.ts',
-                },
-              ],
-              name: 'lib',
-            },
             {
               children: [
                 {
@@ -238,29 +176,6 @@ describe('generateTypesInChildProcess', () => {
                 },
               ],
               name: 'packages',
-            },
-            {
-              children: [
-                {
-                  name: 'expose-rpc.d.ts',
-                },
-                {
-                  name: 'index.d.ts',
-                },
-                {
-                  name: 'rpc-error.d.ts',
-                },
-                {
-                  name: 'rpc-worker.d.ts',
-                },
-                {
-                  name: 'types.d.ts',
-                },
-                {
-                  name: 'wrap-rpc.d.ts',
-                },
-              ],
-              name: 'rpc',
             },
           ],
           name: 'compiled-types',
