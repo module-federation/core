@@ -99,7 +99,9 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
         'consume-shared',
       );
       if (!modules) continue;
-      if (!chunk.id) continue;
+      // chunk.id may equal 0
+      if (chunk.id === null || (typeof chunk.id === 'string' && !chunk.id))
+        continue;
 
       addModules(
         modules,
