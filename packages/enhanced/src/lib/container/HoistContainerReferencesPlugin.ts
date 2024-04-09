@@ -67,7 +67,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
   private getRuntimeChunks(chunk: Chunk, compilation: Compilation): Chunk[] {
     const runtimeChunks = [];
     for (const c of compilation.chunks) {
-      if (c.hasRuntime() && c !== chunk && c.name !== this.containerName) {
+      if (c.hasRuntime() && c !== chunk) {
         runtimeChunks.push(c);
       }
     }
