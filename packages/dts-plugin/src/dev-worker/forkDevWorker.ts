@@ -8,7 +8,7 @@ import {
   retrieveMfTypesPath,
   retrieveTypesZipPath,
   HostOptions,
-} from '@module-federation/native-federation-typescript/helpers';
+} from '../core/index';
 import { decodeName } from '@module-federation/sdk';
 import {
   Remote,
@@ -185,7 +185,7 @@ export async function forkDevWorker(
   }
 }
 
-process.on('message', (message: typeof rpc.RpcMessage) => {
+process.on('message', (message: rpc.RpcMessage) => {
   fileLog(
     `ChildProcess(${process.pid}), message: ${JSON.stringify(message)} `,
     'forkDevWorker',

@@ -22,6 +22,10 @@ export const tsup: Options[] = generateConfigurations([
   [
     {
       index: join(__dirname, 'src/index.ts'),
+      core: join(__dirname, 'src/core/index.ts'),
+      forkDevWorker: join(__dirname, 'src/dev-worker/forkDevWorker.ts'),
+      startBroker: join(__dirname, 'src/server/broker/startBroker.ts'),
+      forkGenerateDts: join(__dirname, 'src/core/lib/forkGenerateDts.ts'),
     },
     {
       format: ['cjs'],
@@ -34,15 +38,6 @@ export const tsup: Options[] = generateConfigurations([
     {
       format: ['iife'],
       platform: 'browser',
-    },
-  ],
-  [
-    {
-      forkDevWorker: join(__dirname, 'src/dev-worker/forkDevWorker.ts'),
-      startBroker: join(__dirname, 'src/server/broker/startBroker.ts'),
-    },
-    {
-      format: ['cjs'],
     },
   ],
 ]);

@@ -1261,12 +1261,24 @@ importers:
 
   packages/dts-plugin:
     dependencies:
-      '@module-federation/native-federation-typescript':
+      '@module-federation/managers':
         specifier: workspace:*
-        version: link:../native-federation-typescript
+        version: link:../managers
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
+      '@module-federation/third-party-dts-extractor':
+        specifier: workspace:*
+        version: link:../third-party-dts-extractor
+      adm-zip:
+        specifier: ^0.5.10
+        version: 0.5.10
+      ansi-colors:
+        specifier: ^4.1.3
+        version: 4.1.3
+      axios:
+        specifier: ^1.6.7
+        version: 1.6.7
       chalk:
         specifier: 3.0.0
         version: 3.0.0
@@ -1288,6 +1300,9 @@ importers:
       node-schedule:
         specifier: 2.1.0
         version: 2.1.0
+      rambda:
+        specifier: ^9.1.0
+        version: 9.2.0
       typescript:
         specifier: ^4.9.0 || ^5.0.0
         version: 5.3.3
@@ -1357,12 +1372,12 @@ importers:
 
   packages/manifest:
     dependencies:
+      '@module-federation/dts-plugin':
+        specifier: workspace:*
+        version: link:../dts-plugin
       '@module-federation/managers':
         specifier: workspace:*
         version: link:../managers
-      '@module-federation/native-federation-typescript':
-        specifier: workspace:*
-        version: link:../native-federation-typescript
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk

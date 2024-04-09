@@ -18,26 +18,38 @@
       "import": "./dist/index.js",
       "require": "./dist/index.js"
     },
+    "./core": {
+      "import": "./dist/core.js",
+      "require": "./dist/core.js"
+    },
     "./*": "./*"
   },
   "typesVersions": {
     "*": {
       ".": [
         "./dist/index.d.ts"
+      ],
+      "core": [
+        "./dist/core.d.ts"
       ]
     }
   },
   "dependencies": {
+    "adm-zip": "^0.5.10",
+    "ansi-colors": "^4.1.3",
+    "axios": "^1.6.7",
+    "rambda": "^9.1.0",
     "@module-federation/sdk": "workspace:*",
-    "@module-federation/native-federation-typescript": "workspace:*",
+    "@module-federation/managers": "workspace:*",
+    "lodash.clonedeepwith": "4.5.0",
+    "@module-federation/third-party-dts-extractor": "workspace:*",
     "chalk": "3.0.0",
     "fs-extra": "9.1.0",
     "isomorphic-ws": "5.0.0",
     "koa": "2.11.0",
     "log4js": "6.9.1",
     "node-schedule": "2.1.0",
-    "ws": "8.5.0",
-    "lodash.clonedeepwith": "4.5.0"
+    "ws": "8.5.0"
   },
   "devDependencies": {
     "@types/ws": "8.5.3",

@@ -1,4 +1,4 @@
-import { UpdateMode } from '@module-federation/native-federation-typescript/helpers';
+import { UpdateMode } from '../../../core/index';
 import { API, APIKind } from './API';
 
 export interface ReloadWebClientAPIPayload {
