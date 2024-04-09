@@ -24,6 +24,7 @@ export default defineConfig({
       appendPlugins([
         new AsyncBoundaryPlugin({
           excludeChunk: chunk => chunk.name === 'app1',
+          eager: module => /\.federation/.test(module?.request || ''),
         }),
         new ModuleFederationPlugin({
           name: 'app1',
