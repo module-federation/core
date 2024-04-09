@@ -15,6 +15,7 @@ import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import schema from '../../schemas/container/ModuleFederationPlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import HoistContainerReferencesPlugin from './HoistContainerReferencesPlugin';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(

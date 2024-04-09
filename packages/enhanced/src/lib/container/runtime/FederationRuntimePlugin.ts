@@ -281,7 +281,6 @@ class FederationRuntimePlugin {
     this.prependEntry(compiler);
     this.injectRuntime(compiler);
     this.setRuntimeAlias(compiler);
-    new HoistContainerReferencesPlugin(this.options?.name).apply(compiler);
   }
 }
 

@@ -5,7 +5,7 @@ import {
 } from '@module-federation/utilities';
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-
+import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
 /**
  * Applies client-specific plugins.
  *
@@ -62,6 +62,8 @@ export function applyClientPlugins(
     ],
     //@ts-ignore
   }).apply(compiler);
+
+  new HoistContainerReferencesPlugin().apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler
   new InvertedContainerPlugin({

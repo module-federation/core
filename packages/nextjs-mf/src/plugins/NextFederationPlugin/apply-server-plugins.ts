@@ -36,6 +36,8 @@ export function applyServerPlugins(
     ModuleFederationPlugin: ModuleFederationPlugin,
   }).apply(compiler);
 
+  new HoistContainerReferencesPlugin().apply(compiler);
+
   // Add a new commonjs chunk loading plugin to the compiler
   new InvertedContainerPlugin({
     runtime: 'webpack-runtime',

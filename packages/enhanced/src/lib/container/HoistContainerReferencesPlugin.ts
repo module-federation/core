@@ -58,6 +58,7 @@ export class HoistContainerReferences implements WebpackPluginInstance {
         chunkGraph.disconnectChunkAndModule(chunk, module);
       }
       for (const runtimeChunk of runtimeChunks) {
+        if (runtimeChunk.containsModule(module)) continue;
         chunkGraph.connectChunkAndModule(runtimeChunk, module);
       }
     }

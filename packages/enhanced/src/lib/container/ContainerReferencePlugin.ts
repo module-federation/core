@@ -20,6 +20,7 @@ import { containerReferencePlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import schema from '../../schemas/container/ContainerReferencePlugin';
 import checkOptions from '../../schemas/container/ContainerReferencePlugin.check';
+import HoistContainerReferencesPlugin from './HoistContainerReferencesPlugin';
 
 const { ExternalsPlugin } = require(
   normalizeWebpackPath('webpack'),
@@ -74,7 +75,6 @@ class ContainerReferencePlugin {
   apply(compiler: Compiler): void {
     const { _remotes: remotes, _remoteType: remoteType } = this;
     new FederationRuntimePlugin().apply(compiler);
-
     /** @type {Record<string, string>} */
     const remoteExternals: Record<string, string> = {};
 
