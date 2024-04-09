@@ -1411,15 +1411,6 @@ importers:
 
   packages/native-federation-typescript:
     dependencies:
-      '@module-federation/managers':
-        specifier: workspace:*
-        version: link:../managers
-      '@module-federation/sdk':
-        specifier: workspace:*
-        version: link:../sdk
-      '@module-federation/third-party-dts-extractor':
-        specifier: workspace:*
-        version: link:../third-party-dts-extractor
       adm-zip:
         specifier: ^0.5.10
         version: 0.5.10
@@ -1429,12 +1420,6 @@ importers:
       axios:
         specifier: ^1.6.7
         version: 1.6.7
-      fs-extra:
-        specifier: 9.1.0
-        version: 9.1.0
-      lodash.clonedeepwith:
-        specifier: 4.5.0
-        version: 4.5.0
       rambda:
         specifier: ^9.1.0
         version: 9.2.0

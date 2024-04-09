@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import path from 'path';
 
 import { retrieveHostConfig } from './hostPlugin';
-import { retrieveTypesArchiveDestinationPath } from '../lib/archiveHandler';
 
 describe('hostPlugin', () => {
   const moduleFederationConfig = {
@@ -33,23 +31,12 @@ describe('hostPlugin', () => {
         expect(hostOptions).toStrictEqual({
           moduleFederationConfig,
           typesFolder: '@mf-types',
-          remoteTypesFolder: '@mf-types',
           deleteTypesFolder: true,
           maxRetries: 3,
-          implementation: '',
-          context: process.cwd(),
-          abortOnError: true,
-          consumeAPITypes: false,
         });
 
         expect(mapRemotesToDownload).toStrictEqual({
-          moduleFederationTypescript: {
-            alias: 'moduleFederationTypescript',
-            apiTypeUrl: 'http://localhost:3000/@mf-types.d.ts',
-            name: 'http://localhost:3000/remoteEntry.js',
-            url: 'http://localhost:3000/remoteEntry.js',
-            zipUrl: 'http://localhost:3000/@mf-types.zip',
-          },
+          moduleFederationTypescript: 'http://localhost:3000/@mf-types.zip',
         });
       });
 
@@ -57,13 +44,8 @@ describe('hostPlugin', () => {
         const options = {
           moduleFederationConfig,
           typesFolder: 'custom-types',
-          remoteTypesFolder: '@remote-mf-types',
           deleteTypesFolder: false,
           maxRetries: 1,
-          implementation: '',
-          context: process.cwd(),
-          abortOnError: true,
-          consumeAPITypes: false,
         };
 
         const { hostOptions, mapRemotesToDownload } =
@@ -72,26 +54,8 @@ describe('hostPlugin', () => {
         expect(hostOptions).toStrictEqual(options);
 
         expect(mapRemotesToDownload).toStrictEqual({
-          moduleFederationTypescript: {
-            alias: 'moduleFederationTypescript',
-            apiTypeUrl: 'http://localhost:3000/@remote-mf-types.d.ts',
-            name: 'http://localhost:3000/remoteEntry.js',
-            url: 'http://localhost:3000/remoteEntry.js',
-            zipUrl: 'http://localhost:3000/@remote-mf-types.zip',
-          },
+          moduleFederationTypescript: 'http://localhost:3000/custom-types.zip',
         });
-
-        const destinationPath = path.resolve(
-          hostOptions.context,
-          hostOptions.typesFolder,
-          'moduleFederationTypescript',
-        );
-        expect(
-          retrieveTypesArchiveDestinationPath(
-            hostOptions,
-            'moduleFederationTypescript',
-          ),
-        ).toStrictEqual(destinationPath);
       });
     });
 
@@ -109,13 +73,8 @@ describe('hostPlugin', () => {
       });
 
       expect(mapRemotesToDownload).toStrictEqual({
-        moduleFederationTypescript: {
-          alias: 'moduleFederationTypescript',
-          apiTypeUrl: 'http://localhost:3000/subpatha/subpathb/@mf-types.d.ts',
-          name: 'http://localhost:3000/subpatha/subpathb/remoteEntry.js',
-          url: 'http://localhost:3000/subpatha/subpathb/remoteEntry.js',
-          zipUrl: 'http://localhost:3000/subpatha/subpathb/@mf-types.zip',
-        },
+        moduleFederationTypescript:
+          'http://localhost:3000/subpatha/subpathb/@mf-types.zip',
       });
     });
   });

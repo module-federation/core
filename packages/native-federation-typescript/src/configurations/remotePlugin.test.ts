@@ -1,4 +1,4 @@
-import { join, resolve } from 'path';
+import { join } from 'path';
 import { describe, expect, it } from 'vitest';
 
 import { retrieveRemoteConfig } from './remotePlugin';
@@ -47,10 +47,7 @@ describe('hostPlugin', () => {
           emitDeclarationOnly: true,
           noEmit: false,
           declaration: true,
-          outDir: resolve(
-            remoteOptions.context,
-            'dist/@mf-types/compiled-types',
-          ),
+          outDir: 'dist/@mf-types/compiled-types',
         });
 
         expect(mapComponentsToExpose).toStrictEqual({
@@ -63,17 +60,9 @@ describe('hostPlugin', () => {
           tsConfigPath,
           typesFolder: '@mf-types',
           compiledTypesFolder: 'compiled-types',
-          hostRemoteTypesFolder: '@mf-types',
           deleteTypesFolder: true,
           moduleFederationConfig,
           compilerInstance: 'tsc',
-          compileInChildProcess: false,
-          implementation: '',
-          generateAPITypes: false,
-          context: process.cwd(),
-          abortOnError: true,
-          extractRemoteTypes: false,
-          extractThirdParty: false,
         });
       });
 
@@ -84,7 +73,6 @@ describe('hostPlugin', () => {
             moduleFederationConfig,
             tsConfigPath,
             typesFolder: 'typesFolder',
-            hostRemoteTypesFolder: '@mf-types',
             compiledTypesFolder: 'compiledTypesFolder',
             deleteTypesFolder: false,
             compilerInstance: 'vue-tsc',
@@ -103,10 +91,7 @@ describe('hostPlugin', () => {
           emitDeclarationOnly: true,
           noEmit: false,
           declaration: true,
-          outDir: resolve(
-            remoteOptions.context,
-            'dist/typesFolder/compiledTypesFolder',
-          ),
+          outDir: 'dist/typesFolder/compiledTypesFolder',
         });
 
         expect(mapComponentsToExpose).toStrictEqual({
@@ -118,18 +103,10 @@ describe('hostPlugin', () => {
           additionalFilesToCompile: [],
           tsConfigPath,
           typesFolder: 'typesFolder',
-          hostRemoteTypesFolder: '@mf-types',
           compiledTypesFolder: 'compiledTypesFolder',
           deleteTypesFolder: false,
           moduleFederationConfig,
           compilerInstance: 'vue-tsc',
-          compileInChildProcess: false,
-          generateAPITypes: false,
-          implementation: '',
-          context: process.cwd(),
-          abortOnError: true,
-          extractRemoteTypes: false,
-          extractThirdParty: false,
         });
       });
     });
