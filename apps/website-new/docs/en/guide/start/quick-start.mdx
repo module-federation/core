@@ -56,6 +56,27 @@ bun add @module-federation/enhanced
 
 ### 3. Exporting Modules by the Producer
 
+> Change the entry file to asynchronous
+
+
+```tsx
+// Move src/index.tsx to a newly created src/bootstrap.tsx file
+// src/index.tsx
+import('./bootstrap');
+
+// src/bootstrap.tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);
+```
+
 > Add a Button Component
 
 ```tsx
@@ -204,7 +225,7 @@ root.render(
 ```json
 {
   "Compiler options": {
-    "path":{
+    "paths":{
       "*": ["./@mf-types/*"]
     }
   }
@@ -254,7 +275,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
     <App />
