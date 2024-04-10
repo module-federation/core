@@ -73,6 +73,7 @@ class ContainerPlugin {
   // container should not be affected by splitChunks
   static patchChunkSplit(compiler: Compiler, name: string): void {
     const { splitChunks } = compiler.options.optimization;
+    const partialName = name + '_partial';
     const patchChunkSplit = (cacheGroup: CacheGroup) => {
       switch (typeof cacheGroup) {
         case 'boolean':
@@ -91,7 +92,10 @@ class ContainerPlugin {
             if (typeof cacheGroup.chunks === 'function') {
               const prevChunks = cacheGroup.chunks;
               cacheGroup.chunks = (chunk) => {
-                if (chunk.name && chunk.name === name) {
+                if (
+                  chunk.name &&
+                  (chunk.name === name || chunk.name == partialName)
+                ) {
                   return false;
                 }
                 return prevChunks(chunk);
@@ -101,7 +105,10 @@ class ContainerPlugin {
 
             if (cacheGroup.chunks === 'all') {
               cacheGroup.chunks = (chunk) => {
-                if (chunk.name && chunk.name === name) {
+                if (
+                  chunk.name &&
+                  (chunk.name === name || chunk.name == partialName)
+                ) {
                   return false;
                 }
                 return true;
@@ -110,7 +117,10 @@ class ContainerPlugin {
             }
             if (cacheGroup.chunks === 'initial') {
               cacheGroup.chunks = (chunk) => {
-                if (chunk.name && chunk.name === name) {
+                if (
+                  chunk.name &&
+                  (chunk.name === name || chunk.name == partialName)
+                ) {
                   return false;
                 }
                 return chunk.isOnlyInitial();
@@ -151,6 +161,7 @@ class ContainerPlugin {
     if (!useModuleFederationPlugin) {
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
     }
+
     const federationRuntimePluginInstance = new FederationRuntimePlugin();
     federationRuntimePluginInstance.apply(compiler);
 
@@ -201,12 +212,16 @@ class ContainerPlugin {
 
       // Function to add entry for undefined runtime
       const addEntryToSingleRuntimeChunk = () => {
+        const patchSplitName = name
+          ? name + '_partial'
+          : compilation.outputOptions.uniqueName;
+
         compilation.addEntry(
           compilation.options.context || '',
           //@ts-ignore
           dep,
           {
-            name: name ? name + '_partial' : undefined, // give unique name name
+            name: patchSplitName,
             runtime: undefined,
             library,
           },

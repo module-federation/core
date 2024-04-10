@@ -49,16 +49,6 @@ Shop.getInitialProps = async () => {
   const timeout = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
 
-  const fetchPromise = fetch('http://swapi.dev/api/planets/1/')
-    .then((res) => res.json())
-    .catch((err) => {
-      if (err instanceof Error) {
-        err.message = `fetchPromise failed: ${err.message}`;
-      }
-      console.error(err);
-      return Promise.resolve(fallback);
-    });
-
   const fallback = {
     name: 'Luke Skywalker',
     height: '172',
@@ -91,7 +81,7 @@ Shop.getInitialProps = async () => {
 
   const timerPromise = timeout(3000).then(() => fallback);
 
-  return Promise.race([fetchPromise, timerPromise]);
+  return Promise.race([timerPromise]);
 };
 
 export default Shop;
