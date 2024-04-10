@@ -1,0 +1,17 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Framework Overview"
+  },
+  {
+    "type": "dir",
+    "name": "angular",
+    "label": "Angular"
+  },
+  {
+    "type": "dir",
+    "name": "react",
+    "label": "React"
+  }
+]
