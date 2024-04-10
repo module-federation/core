@@ -1,5 +1,15 @@
 # @module-federation/manifest
 
+## 0.1.3
+
+### Patch Changes
+
+- f926b6c: chore: split types plugins implementation
+- Updated dependencies [f926b6c]
+  - @module-federation/dts-plugin@0.1.3
+  - @module-federation/sdk@0.1.3
+  - @module-federation/managers@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes
