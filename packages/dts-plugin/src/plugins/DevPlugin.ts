@@ -8,7 +8,7 @@ import {
 import { WEB_CLIENT_OPTIONS_IDENTIFIER, WebClientOptions } from '../server';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import path from 'path';
-import { isTSProject } from './utils';
+import { isTSProject, isDev } from './utils';
 
 enum PROCESS_EXIT_CODE {
   SUCCESS = 0,
@@ -22,10 +22,6 @@ function ensureTempDir(filePath: string): void {
   } catch (_err) {
     // noop
   }
-}
-
-function isDev(): boolean {
-  return process.env['NODE_ENV'] === 'development';
 }
 
 export class DevPlugin implements WebpackPluginInstance {

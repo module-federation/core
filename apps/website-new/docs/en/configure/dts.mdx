@@ -32,6 +32,7 @@ interface DtsRemoteOptions {
   deleteTypesFolder?: boolean;
   additionalFilesToCompile?: string[];
   compilerInstance?: 'tsc' | 'vue-tsc';
+  compileInChildProcess?: boolean;
   generateAPITypes?: boolean;
   extractThirdParty?: boolean;
   extractRemoteTypes?: boolean;
@@ -46,7 +47,8 @@ When configuring `generateTypes` to `true`, the following configuration will be 
   "generateAPITypes": true,
   "abortOnError": false,
   "extractThirdParty": true,
-  "extractRemoteTypes": true
+  "extractRemoteTypes": true,
+  "compileInChildProcess": true
 }
 ```
 
@@ -78,6 +80,14 @@ Whether to extract third-party package types.
 - Example: [Federation Runtime API type prompt](../guide/basic/type-prompt#federation-runtime-api-type-prompt)
 
 Whether to generate the `loadRemote` type in `Federation Runtime`
+
+#### compileInChildProcess
+
+- Type: `boolean`
+- Required: No
+- Default value: `undefined`
+
+Whether generate types in child process
 
 #### abortOnError
 

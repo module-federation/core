@@ -1,19 +1,13 @@
 import * as child_process from 'child_process';
 import type { ChildProcess, ForkOptions } from 'child_process';
 import * as process from 'process';
+import { randomUUID } from 'crypto';
 
 import type { RpcMethod, RpcRemoteMethod } from './types';
 import { wrapRpc } from './wrap-rpc';
 import { RpcGMCallTypes } from './types';
 
 const FEDERATION_WORKER_DATA_ENV_KEY = 'VMOK_WORKER_DATA_ENV';
-
-function uuid(): string {
-  return new Array(4)
-    .fill(0)
-    .map(() => Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16))
-    .join('-');
-}
 
 interface RpcWorkerBase {
   connect(...args: unknown[]): any;
@@ -45,7 +39,7 @@ function createRpcWorker<T extends RpcMethod>(
   let childProcess: ChildProcess | undefined,
     remoteMethod: RpcRemoteMethod<T> | undefined;
 
-  const id = uuid();
+  const id = randomUUID();
 
   const worker: RpcWorkerBase = {
     connect(...args: unknown[]): any {
@@ -63,21 +57,20 @@ function createRpcWorker<T extends RpcMethod>(
       }
 
       if (!remoteMethod) {
-        // eslint-disable-next-line prefer-promise-reject-errors
-        return Promise.reject('Worker is not connected - cannot perform RPC.');
+        return Promise.reject(
+          new Error('Worker is not connected - cannot perform RPC.'),
+        );
       }
 
       return remoteMethod(...args);
     },
     terminate() {
-      if (childProcess) {
-        childProcess.send({
-          type: RpcGMCallTypes.EXIT,
-          id,
-        });
-        childProcess = undefined;
-        remoteMethod = undefined;
-      }
+      childProcess?.send?.({
+        type: RpcGMCallTypes.EXIT,
+        id,
+      });
+      childProcess = undefined;
+      remoteMethod = undefined;
     },
     get connected() {
       return Boolean(childProcess?.connected);

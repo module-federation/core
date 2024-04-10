@@ -67,5 +67,5 @@ export function replaceLocalhost(url: string): string {
 }
 
 export function isDebugMode() {
-  return Boolean(process.env.FEDERATION_DEBUG);
+  return Boolean(process.env['FEDERATION_DEBUG']);
 }

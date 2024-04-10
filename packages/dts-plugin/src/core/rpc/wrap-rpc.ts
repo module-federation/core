@@ -23,7 +23,6 @@ function createControlledPromise<T = unknown>() {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function wrapRpc<T extends (...args: any[]) => any>(
   childProcess: ChildProcess,
   options: WrapRpcOptions,
@@ -55,19 +54,12 @@ export function wrapRpc<T extends (...args: any[]) => any>(
         if (message.type === RpcGMCallTypes.RESOLVE) {
           // assume the contract is respected
           resolveResult(message.value as T);
-          if (once) {
-            // declare below
-            // eslint-disable-next-line @typescript-eslint/no-use-before-define
-            removeHandlers();
-          }
         } else if (message.type === RpcGMCallTypes.REJECT) {
           rejectResult(message.error);
-          if (once) {
-            // declare below
-            // eslint-disable-next-line @typescript-eslint/no-use-before-define
-            removeHandlers();
-          }
         }
+      }
+      if (once && childProcess?.kill) {
+        childProcess.kill('SIGTERM');
       }
     };
     const handleClose = (
@@ -88,7 +80,6 @@ export function wrapRpc<T extends (...args: any[]) => any>(
         ),
       );
       // declare below
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       removeHandlers();
     };
 
@@ -99,11 +90,14 @@ export function wrapRpc<T extends (...args: any[]) => any>(
     };
 
     // add event listeners
-    childProcess.on('message', handleMessage);
+    if (once) {
+      childProcess.once('message', handleMessage);
+    } else {
+      childProcess.on('message', handleMessage);
+    }
+
     childProcess.on('close', handleClose);
-    childProcess.on('error', (err) => {
-      console.error(err);
-    });
+
     // send call message
     childProcess.send(
       {

@@ -12,8 +12,7 @@
       "@module-federation/runtime-tools",
       "@module-federation/managers",
       "@module-federation/manifest",
-      "@module-federation/dts-plugin",
-      "@module-federation/native-federation-typescript"
+      "@module-federation/dts-plugin"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],

@@ -1,0 +1,164 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`wrapRpc > once > rejects on process close with %p { code: -1, signal: undefined, message: 'Process 1234 exited with code -1' } 1`] = `
+[
+  Any<Function>,
+]
+`;
+
+exports[`wrapRpc > once > rejects on process close with %p { code: -1, signal: undefined, message: 'Process 1234 exited with code -1' } 2`] = `
+{
+  "close": [],
+  "message": [],
+}
+`;
+
+exports[`wrapRpc > once > rejects on process close with %p { code: 100, signal: 'SIGINT', message: 'Process 1234 exited with code 100 [SIGINT]' } 1`] = `
+[
+  Any<Function>,
+]
+`;
+
+exports[`wrapRpc > once > rejects on process close with %p { code: 100, signal: 'SIGINT', message: 'Process 1234 exited with code 100 [SIGINT]' } 2`] = `
+{
+  "close": [],
+  "message": [],
+}
+`;
+
+exports[`wrapRpc > once > rejects on process close with %p { code: undefined, signal: undefined, message: 'Process 1234 exited' } 1`] = `
+[
+  Any<Function>,
+]
+`;
+
+exports[`wrapRpc > once > rejects on process close with %p { code: undefined, signal: undefined, message: 'Process 1234 exited' } 2`] = `
+{
+  "close": [],
+  "message": [],
+}
+`;
+
+exports[`wrapRpc > once > rejects on valid reject message 1`] = `
+[
+  Any<Function>,
+]
+`;
+
+exports[`wrapRpc > once > resolves on valid resolve message and all handlers will be cleared 1`] = `
+[
+  Any<Function>,
+]
+`;
+
+exports[`wrapRpc > resident process > ignores invalid message 1`] = `
+[
+  Any<Function>,
+]
+`;
+
+exports[`wrapRpc > resident process > ignores invalid message 2`] = `
+{
+  "close": [
+    Any<Function>,
+  ],
+  "message": [
+    Any<Function>,
+  ],
+}
+`;
+
+exports[`wrapRpc > resident process > rejects on process close with %p { code: -1, signal: undefined, message: 'Process 1234 exited with code -1' } 1`] = `
+[
+  Any<Function>,
+]
+`;
+
+exports[`wrapRpc > resident process > rejects on process close with %p { code: -1, signal: undefined, message: 'Process 1234 exited with code -1' } 2`] = `
+{
+  "close": [],
+  "message": [],
+}
+`;
+
+exports[`wrapRpc > resident process > rejects on process close with %p { code: 100, signal: 'SIGINT', message: 'Process 1234 exited with code 100 [SIGINT]' } 1`] = `
+[
+  Any<Function>,
+]
+`;
+
+exports[`wrapRpc > resident process > rejects on process close with %p { code: 100, signal: 'SIGINT', message: 'Process 1234 exited with code 100 [SIGINT]' } 2`] = `
+{
+  "close": [],
+  "message": [],
+}
+`;
+
+exports[`wrapRpc > resident process > rejects on process close with %p { code: undefined, signal: undefined, message: 'Process 1234 exited' } 1`] = `
+[
+  Any<Function>,
+]
+`;
+
+exports[`wrapRpc > resident process > rejects on process close with %p { code: undefined, signal: undefined, message: 'Process 1234 exited' } 2`] = `
+{
+  "close": [],
+  "message": [],
+}
+`;
+
+exports[`wrapRpc > resident process > rejects on send error 1`] = `
+{
+  "close": [
+    Any<Function>,
+  ],
+  "message": [
+    Any<Function>,
+  ],
+}
+`;
+
+exports[`wrapRpc > resident process > rejects on valid reject message 1`] = `
+[
+  Any<Function>,
+]
+`;
+
+exports[`wrapRpc > resident process > rejects on valid reject message 2`] = `
+{
+  "close": [
+    Any<Function>,
+  ],
+  "message": [
+    Any<Function>,
+  ],
+}
+`;
+
+exports[`wrapRpc > resident process > resolves on valid resolve message 1`] = `
+[
+  Any<Function>,
+]
+`;
+
+exports[`wrapRpc > resident process > resolves on valid resolve message 2`] = `
+{
+  "close": [
+    Any<Function>,
+  ],
+  "message": [
+    Any<Function>,
+  ],
+}
+`;
+
+exports[`wrapRpc > resident process > sends a call message 1`] = `
+{
+  "close": [
+    Any<Function>,
+  ],
+  "message": [
+    Any<Function>,
+  ],
+}
+`;

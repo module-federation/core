@@ -1,7 +1,7 @@
 import path from 'path';
 import cloneDeepWith from 'lodash.clonedeepwith';
 
-import { type RpcWorker, createRpcWorker } from '../rpc';
+import { type RpcWorker, createRpcWorker } from '../rpc/index';
 import type { RpcMethod } from '../rpc/types';
 import type { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
 import type { DTSManager } from './DTSManager';
@@ -9,7 +9,7 @@ import type { DTSManager } from './DTSManager';
 export type DtsWorkerOptions = DTSManagerOptions;
 
 export class DtsWorker {
-  private _rpcWorker: RpcWorker<RpcMethod>;
+  rpcWorker: RpcWorker<RpcMethod>;
   private _options: DtsWorkerOptions;
   private _res: Promise<any>;
 
@@ -21,17 +21,14 @@ export class DtsWorker {
       }
     });
     this.removeUnSerializationOptions();
-    this._rpcWorker = createRpcWorker(
-      path.resolve(__dirname, './lib/forkGenerateDts.js'),
+    this.rpcWorker = createRpcWorker(
+      path.resolve(__dirname, './forkGenerateDts.js'),
       {},
       undefined,
       true,
     );
 
-    this._res = this._rpcWorker.connect(this._options);
-    Promise.resolve(this._res).then(() => {
-      this.exit();
-    });
+    this._res = this.rpcWorker.connect(this._options);
   }
 
   removeUnSerializationOptions() {
@@ -44,10 +41,12 @@ export class DtsWorker {
   }
 
   get controlledPromise(): ReturnType<DTSManager['generateTypes']> {
-    return this._res as unknown as ReturnType<DTSManager['generateTypes']>;
+    return Promise.resolve(this._res).then(() => {
+      this.exit();
+    });
   }
 
   exit(): void {
-    this._rpcWorker?.terminate();
+    this.rpcWorker?.terminate();
   }
 }
