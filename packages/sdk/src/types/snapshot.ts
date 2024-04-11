@@ -13,6 +13,7 @@ interface BasicModuleInfo {
   remotesInfo: Record<string, { matchedVersion: string }>;
   shared: Array<{
     sharedName: string;
+    version?: string;
     assets: StatsAssets;
   }>;
 }

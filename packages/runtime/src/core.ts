@@ -19,7 +19,6 @@ import {
   warn,
   getBuilderId,
   addUniqueItem,
-  safeToString,
   matchRemoteWithNameAndExpose,
   registerPlugins,
 } from './utils';
@@ -35,6 +34,7 @@ import {
   getGlobalShareScope,
   formatShareConfigs,
   getRegisteredShare,
+  getTargetSharedOptions,
 } from './utils/share';
 import { formatPreloadArgs, preloadAssets } from './utils/preload';
 import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
@@ -264,17 +264,22 @@ export class FederationHost {
 
   async loadShare<T>(
     pkgName: string,
-    customShareInfo?: Partial<Shared>,
+    extraOptions?: {
+      customShareInfo?: Partial<Shared>;
+      resolver?: (sharedOptions: ShareInfos[string]) => Shared;
+    },
   ): Promise<false | (() => T | undefined)> {
     // This function performs the following steps:
     // 1. Checks if the currently loaded share already exists, if not, it throws an error
     // 2. Searches globally for a matching share, if found, it uses it directly
     // 3. If not found, it retrieves it from the current share and stores the obtained share globally.
-    const shareInfo = Object.assign(
-      {},
-      this.options.shared?.[pkgName],
-      customShareInfo,
-    );
+
+    const shareInfo = getTargetSharedOptions({
+      pkgName,
+      extraOptions,
+      sharedOptions: this.options.shared,
+    });
+
     if (shareInfo?.scope) {
       await Promise.all(
         shareInfo.scope.map(async (shareScope) => {
@@ -359,7 +364,7 @@ export class FederationHost {
       });
       return loading;
     } else {
-      if (customShareInfo) {
+      if (extraOptions?.customShareInfo) {
         return false;
       }
       const asyncLoadProcess = async () => {
@@ -398,13 +403,17 @@ export class FederationHost {
   // 3. If the local get returns something other than Promise, then it will be used directly
   loadShareSync<T>(
     pkgName: string,
-    customShareInfo?: Partial<Shared>,
+    extraOptions?: {
+      customShareInfo?: Partial<Shared>;
+      resolver?: (sharedOptions: ShareInfos[string]) => Shared;
+    },
   ): () => T | never {
-    const shareInfo = Object.assign(
-      {},
-      this.options.shared?.[pkgName],
-      customShareInfo,
-    );
+    const shareInfo = getTargetSharedOptions({
+      pkgName,
+      extraOptions,
+      sharedOptions: this.options.shared,
+    });
+
     if (shareInfo?.scope) {
       shareInfo.scope.forEach((shareScope) => {
         this.initializeSharing(shareScope, shareInfo.strategy);
@@ -720,9 +729,11 @@ export class FederationHost {
     };
     Object.keys(this.options.shared).forEach((shareName) => {
       const shared = this.options.shared[shareName];
-      if (shared.scope.includes(shareScopeName)) {
-        register(shareName, shared);
-      }
+      shared.forEach((s) => {
+        if (s.scope.includes(shareScopeName)) {
+          register(shareName, s);
+        }
+      });
     });
     if (strategy === 'version-first') {
       this.options.remotes.forEach((remote) => {
@@ -755,10 +766,25 @@ export class FederationHost {
       userOptions.shared || {},
       userOptions.name,
     );
+
     const shared = {
       ...globalOptions.shared,
-      ...formatShareOptions,
     };
+
+    Object.keys(formatShareOptions).forEach((shareKey) => {
+      if (!shared[shareKey]) {
+        shared[shareKey] = formatShareOptions[shareKey];
+      } else {
+        formatShareOptions[shareKey].forEach((newUserSharedOptions) => {
+          const isSameVersion = shared[shareKey].find(
+            (s) => s.version === newUserSharedOptions.version,
+          );
+          if (!isSameVersion) {
+            shared[shareKey].push(newUserSharedOptions);
+          }
+        });
+      }
+    });
 
     const { userOptions: userOptionsRes, options: globalOptionsRes } =
       this.hooks.lifecycle.beforeInit.emit({
@@ -779,22 +805,24 @@ export class FederationHost {
     const sharedKeys = Object.keys(formatShareOptions);
     sharedKeys.forEach((sharedKey) => {
       const sharedVal = formatShareOptions[sharedKey];
-      const registeredShared = getRegisteredShare(
-        this.shareScopeMap,
-        sharedKey,
-        sharedVal,
-        this.hooks.lifecycle.resolveShare,
-      );
-      if (!registeredShared && sharedVal && sharedVal.lib) {
-        this.setShared({
-          pkgName: sharedKey,
-          lib: sharedVal.lib,
-          get: sharedVal.get,
-          loaded: true,
-          shared: sharedVal,
-          from: userOptions.name,
-        });
-      }
+      sharedVal.forEach((s) => {
+        const registeredShared = getRegisteredShare(
+          this.shareScopeMap,
+          sharedKey,
+          s,
+          this.hooks.lifecycle.resolveShare,
+        );
+        if (!registeredShared && s && s.lib) {
+          this.setShared({
+            pkgName: sharedKey,
+            lib: s.lib,
+            get: s.get,
+            loaded: true,
+            shared: s,
+            from: userOptions.name,
+          });
+        }
+      });
     });
 
     const plugins = [...globalOptionsRes.plugins];
@@ -847,7 +875,7 @@ export class FederationHost {
     get,
   }: {
     pkgName: string;
-    shared: ShareInfos[keyof ShareInfos];
+    shared: Shared;
     from: string;
     lib: any;
     loaded?: boolean;

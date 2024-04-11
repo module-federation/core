@@ -741,9 +741,11 @@ describe('load share with customize consume info', () => {
     expect(sharedRes.from).toEqual('@shared-single/runtime-deps');
 
     const sharedWithCustomInfo = await FM1.loadShare('runtime-react', {
-      shareConfig: {
-        requiredVersion: '>17',
-        singleton: false,
+      customShareInfo: {
+        shareConfig: {
+          requiredVersion: '>17',
+          singleton: false,
+        },
       },
     });
     console.log(sharedWithCustomInfo);

@@ -38,7 +38,7 @@ export function consumes(options: ConsumesOptions) {
         const { shareKey, getter, shareInfo } = moduleToHandlerMapping[id];
 
         const promise = federationInstance
-          .loadShare(shareKey, shareInfo)
+          .loadShare(shareKey, { customShareInfo: shareInfo })
           .then((factory: any) => {
             if (factory === false) {
               return getter();

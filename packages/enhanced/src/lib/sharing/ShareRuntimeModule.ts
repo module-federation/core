@@ -39,7 +39,7 @@ class ShareRuntimeModule extends RuntimeModule {
       throw new Error('ChunkGraph is undefined');
     }
     const initCodePerScope: Map<string, Map<number, Set<string>>> = new Map();
-    let sharedInitOptionsStr = '';
+    const sharedInitOptions: Record<string, any[]> = {};
 
     for (const chunk of this.chunk?.getAllReferencedChunks() || []) {
       if (!chunk) {
@@ -77,21 +77,45 @@ class ShareRuntimeModule extends RuntimeModule {
           'share-init-option',
         );
         if (sharedOption) {
-          sharedInitOptionsStr += `
-					"${sharedOption.name}" : {
-						version: ${sharedOption.version},
-						get: ${sharedOption.getter},
-						scope: ${JSON.stringify(sharedOption.shareScope)},
-            shareConfig: ${JSON.stringify(sharedOption.shareConfig)}
-					},
-					`;
+          sharedInitOptions[sharedOption.name] =
+            sharedInitOptions[sharedOption.name] || [];
+          const isSameVersion = sharedInitOptions[sharedOption.name].find(
+            (s) => s.version === sharedOption.version,
+          );
+          if (!isSameVersion) {
+            sharedInitOptions[sharedOption.name].push(sharedOption);
+          }
         }
       }
     }
+
+    const sharedInitOptionsStr = Object.keys(sharedInitOptions).reduce(
+      (sum, sharedName) => {
+        const sharedOptions = sharedInitOptions[sharedName];
+        let str = '';
+        sharedOptions.forEach((sharedOption) => {
+          str += `{${Template.indent([
+            `version: ${sharedOption.version},`,
+            `get: ${sharedOption.getter},`,
+            `scope: ${JSON.stringify(sharedOption.shareScope)},`,
+            `shareConfig: ${JSON.stringify(sharedOption.shareConfig)}`,
+          ])}},`;
+        });
+        str = `[${str}]`;
+
+        sum += `${Template.indent([`"${sharedName}": ${str},`])}`;
+
+        return sum;
+      },
+      '',
+    );
+
     const federationGlobal = getFederationGlobalScope(
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
     return Template.asString([
+      `var rawSharedOptions = [${sharedInitOptionsStr}];`,
+      `var sharedOptions = {};`,
       `${getFederationGlobalScope(
         RuntimeGlobals,
       )}.initOptions.shared = {${sharedInitOptionsStr}}`,

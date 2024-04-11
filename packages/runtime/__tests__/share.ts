@@ -56,32 +56,36 @@ export const mergeShareInfo3 = {
 };
 
 export const localMergeShareInfos: Options['shared'] = {
-  react: {
-    version: '16.0.0',
-    from: mergeShareInfo1.name,
-    get: mergeShareInfo1.shared.react.get,
-    shareConfig: {
-      singleton: true,
-      requiredVersion: '^16.0.0',
-      eager: false,
+  react: [
+    {
+      version: '16.0.0',
+      from: mergeShareInfo1.name,
+      get: mergeShareInfo1.shared.react.get,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^16.0.0',
+        eager: false,
+      },
+      scope: ['default'],
+      useIn: [],
+      deps: [],
+      strategy: 'version-first',
     },
-    scope: ['default'],
-    useIn: [],
-    deps: [],
-    strategy: 'version-first',
-  },
-  'react-dom': {
-    version: '17.0.0',
-    from: mergeShareInfo2.name,
-    get: mergeShareInfo2.shared['react-dom'].get,
-    shareConfig: {
-      singleton: false,
-      requiredVersion: '^17.0.0',
-      eager: false,
+  ],
+  'react-dom': [
+    {
+      version: '17.0.0',
+      from: mergeShareInfo2.name,
+      get: mergeShareInfo2.shared['react-dom'].get,
+      shareConfig: {
+        singleton: false,
+        requiredVersion: '^17.0.0',
+        eager: false,
+      },
+      scope: ['default', 'sub2'],
+      useIn: [],
+      deps: [],
+      strategy: 'version-first',
     },
-    scope: ['default', 'sub2'],
-    useIn: [],
-    deps: [],
-    strategy: 'version-first',
-  },
+  ],
 };

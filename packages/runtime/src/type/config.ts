@@ -25,6 +25,11 @@ export type RemoteInfoOptionalVersion = {
 
 export type Remote = (RemoteWithEntry | RemoteWithVersion) & RemoteInfoCommon;
 
+export type LoadShareExtraOptions = {
+  customShareInfo?: Partial<Shared>;
+  resolver?: (sharedOptions: ShareInfos[string]) => Shared;
+};
+
 export interface RemoteInfo {
   name: string;
   version?: string;
@@ -90,7 +95,7 @@ export type GlobalShareScopeMap = {
 };
 
 export type ShareInfos = {
-  [pkgName: string]: Shared;
+  [pkgName: string]: Shared[];
 };
 
 export interface Options {
@@ -108,7 +113,7 @@ export type UserOptions = Omit<
   'shared' | 'inBrowser'
 > & {
   shared?: {
-    [pkgName: string]: ShareArgs;
+    [pkgName: string]: ShareArgs | ShareArgs[];
   };
 };
 

@@ -12,13 +12,19 @@ import {
   PreloadConfig,
   PreloadOptions,
   RemoteInfoOptionalVersion,
+  Shared,
 } from '../type';
 import { assignRemoteInfo } from './snapshot';
 import { getInfoWithoutType, getPreloaded, setPreloaded } from '../global';
 import { FederationHost } from '../core';
 import { defaultPreloadArgs, normalizePreloadExposes } from '../utils/preload';
 import { getRegisteredShare } from '../utils/share';
-import { getFMId, isPureRemoteEntry, isRemoteInfoWithEntry } from '../utils';
+import {
+  arrayOptions,
+  getFMId,
+  isPureRemoteEntry,
+  isRemoteInfoWithEntry,
+} from '../utils';
 
 declare global {
   // eslint-disable-next-line no-var
@@ -242,28 +248,41 @@ export function generatePreloadAssets(
   );
 
   if (remoteSnapshot.shared) {
-    remoteSnapshot.shared.forEach((shared) => {
-      const shareInfo = options.shared?.[shared.sharedName];
-      // When data is downgraded, the shared configuration may be different.
-      if (!shareInfo) {
-        return;
-      }
+    const collectSharedAssets = (
+      shareInfo: Shared,
+      snapshotShared: ModuleInfo['shared'][0],
+    ) => {
       const registeredShared = getRegisteredShare(
         origin.shareScopeMap,
-        shared.sharedName,
+        snapshotShared.sharedName,
         shareInfo,
         origin.hooks.lifecycle.resolveShare,
       );
       // If the global share does not exist, or the lib function does not exist, it means that the shared has not been loaded yet and can be preloaded.
 
       if (registeredShared && typeof registeredShared.lib === 'function') {
-        shared.assets.js.sync.forEach((asset) => {
+        snapshotShared.assets.js.sync.forEach((asset) => {
           loadedSharedJsAssets.add(asset);
         });
-        shared.assets.css.sync.forEach((asset) => {
+        snapshotShared.assets.css.sync.forEach((asset) => {
           loadedSharedCssAssets.add(asset);
         });
       }
+    };
+    remoteSnapshot.shared.forEach((shared) => {
+      const shareInfos = options.shared?.[shared.sharedName];
+      // if no version, preload all shared
+      const shareInfo = shared.version
+        ? shareInfos.find((s) => s.version === shared.version)
+        : shareInfos;
+      // When data is downgraded, the shared configuration may be different.
+      if (!shareInfo) {
+        return;
+      }
+      const arrayShareInfo = arrayOptions(shareInfo);
+      arrayShareInfo.forEach((s) => {
+        collectSharedAssets(s, shared);
+      });
     });
   }
 
