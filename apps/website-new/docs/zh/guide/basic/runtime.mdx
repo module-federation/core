@@ -73,7 +73,8 @@ type InitOptions {
     // Shared 在运行时传入时必须在版本实例引用中手动传入，因为它不能在运行时直接传入。
     shared?: {
       [pkgName: string]: ShareArgs | ShareArgs[];
-    };};
+    };
+  };
 
 type ShareArgs =
   | (SharedBaseArgs & { get: SharedGetter })
