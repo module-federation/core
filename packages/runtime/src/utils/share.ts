@@ -246,10 +246,13 @@ export function getGlobalShareScope(): GlobalShareScopeMap {
 export function getTargetSharedOptions(options: {
   pkgName: string;
   extraOptions?: LoadShareExtraOptions;
-  sharedOptions: ShareInfos;
+  shareInfos: ShareInfos;
 }) {
-  const { pkgName, extraOptions, sharedOptions } = options;
+  const { pkgName, extraOptions, shareInfos } = options;
   const defaultResolver = (sharedOptions: ShareInfos[string]) => {
+    if (!sharedOptions) {
+      return undefined;
+    }
     const shareVersionMap: ShareScopeMap[string][string] = {};
     sharedOptions.forEach((shared) => {
       shareVersionMap[shared.version] = shared;
@@ -266,7 +269,7 @@ export function getTargetSharedOptions(options: {
 
   return Object.assign(
     {},
-    resolver(sharedOptions[pkgName]),
+    resolver(shareInfos[pkgName]),
     extraOptions?.customShareInfo,
   );
 }

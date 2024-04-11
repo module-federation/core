@@ -114,8 +114,6 @@ class ShareRuntimeModule extends RuntimeModule {
       RuntimeGlobals || ({} as typeof RuntimeGlobals),
     );
     return Template.asString([
-      `var rawSharedOptions = [${sharedInitOptionsStr}];`,
-      `var sharedOptions = {};`,
       `${getFederationGlobalScope(
         RuntimeGlobals,
       )}.initOptions.shared = {${sharedInitOptionsStr}}`,

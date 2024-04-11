@@ -277,7 +277,7 @@ export class FederationHost {
     const shareInfo = getTargetSharedOptions({
       pkgName,
       extraOptions,
-      sharedOptions: this.options.shared,
+      shareInfos: this.options.shared,
     });
 
     if (shareInfo?.scope) {
@@ -411,7 +411,7 @@ export class FederationHost {
     const shareInfo = getTargetSharedOptions({
       pkgName,
       extraOptions,
-      sharedOptions: this.options.shared,
+      shareInfos: this.options.shared,
     });
 
     if (shareInfo?.scope) {
