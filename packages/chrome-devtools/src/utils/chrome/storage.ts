@@ -10,17 +10,14 @@ export const mergeStorage = async (...args: any[]) => {
   await injectScript(mergeLocalStorage, false, ...args);
 };
 
-export const removeStorageKey = async (
-  tab: chrome.tabs.Tab,
-  ...args: any[]
-) => {
+export const removeStorageKey = async (...args: any[]) => {
   await injectScript(removeLocalStorageKey, false, ...args);
 };
 
-export const removeStorage = async (tab: chrome.tabs.Tab, ...args: any[]) => {
+export const removeStorage = async (...args: any[]) => {
   await injectScript(removeLocalStorage, false, ...args);
 };
 
-export const setStorage = async (tab: chrome.tabs.Tab, ...args: any[]) => {
+export const setStorage = async (...args: any[]) => {
   await injectScript(setLocalStorage, false, ...args);
 };

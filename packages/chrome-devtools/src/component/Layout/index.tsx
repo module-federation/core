@@ -47,7 +47,6 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
   const [snapshot, setSnapshot] = useState(moduleInfo);
   const [form] = Form.useForm();
   const [enableHMR, setEnalbeHMR] = useState('disable');
-  const activeTab = window.targetTab;
 
   const { run } = useDebounceFn(
     async (formData) => {
@@ -73,14 +72,10 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
       try {
         setCondition(statusInfo.processing);
         if (!filterFormData.length) {
-          await removeStorage(activeTab, MODULE_DEVTOOL_IDENTIFIER);
-          await removeStorage(activeTab, BROWSER_ENV_KEY);
+          await removeStorage(MODULE_DEVTOOL_IDENTIFIER);
+          await removeStorage(BROWSER_ENV_KEY);
 
-          await removeStorageKey(
-            activeTab,
-            __FEDERATION_DEVTOOLS__,
-            'overrides',
-          );
+          await removeStorageKey(__FEDERATION_DEVTOOLS__, 'overrides');
           await injectScript(reloadPage, false);
           setCondition(statusInfo.noProxy);
           setSnapshot(window.__FEDERATION__.originModuleInfo);
@@ -89,8 +84,8 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
         const { moduleInfo, status, overrides } =
           await getModuleInfo(filterFormData);
         const snapshotJson = JSON.stringify(moduleInfo);
-        await setStorage(activeTab, MODULE_DEVTOOL_IDENTIFIER, snapshotJson);
-        await setStorage(activeTab, BROWSER_ENV_KEY);
+        await setStorage(MODULE_DEVTOOL_IDENTIFIER, snapshotJson);
+        await setStorage(BROWSER_ENV_KEY);
 
         await mergeStorage(__FEDERATION_DEVTOOLS__, 'overrides', overrides);
         await injectScript(reloadPage, false);
@@ -176,11 +171,7 @@ const Layout = (props: { moduleInfo: GlobalModuleInfo }) => {
     if (on) {
       mergeStorage(__FEDERATION_DEVTOOLS__, __ENABLE_FAST_REFRESH__, on);
     } else {
-      removeStorageKey(
-        activeTab,
-        __FEDERATION_DEVTOOLS__,
-        __ENABLE_FAST_REFRESH__,
-      );
+      removeStorageKey(__FEDERATION_DEVTOOLS__, __ENABLE_FAST_REFRESH__);
     }
     injectScript(reloadPage, false);
   };

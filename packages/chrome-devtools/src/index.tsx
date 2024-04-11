@@ -2,7 +2,6 @@ import { createRoot } from 'react-dom/client';
 import { GlobalModuleInfo } from '@module-federation/sdk';
 
 import App from './App';
-import { getInspectWindowTabId } from './utils';
 
 declare global {
   interface Window {

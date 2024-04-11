@@ -35,6 +35,7 @@
     "@arco-design/web-react": "^2.59.1",
     "@modern-js/runtime": "2.46.1",
     "@module-federation/sdk": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
     "@types/dagre": "^0.7.52",
     "ahooks": "^3.7.10",
     "axios": "^1.6.7",
