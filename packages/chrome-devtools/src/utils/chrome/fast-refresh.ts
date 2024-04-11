@@ -29,49 +29,44 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
           orderResolve = resolve;
         });
         Object.keys(shareInfo).forEach(async (share) => {
+          const shared = shareInfo[share][0];
           let get: () => any;
           if (share === 'react') {
             get = () =>
-              loadScript(
-                getUnpkgUrl(share, shareInfo[share].version) as string,
-                {
-                  attrs: { defer: true, async: false },
-                },
-              ).then(() => {
+              loadScript(getUnpkgUrl(share, shared.version) as string, {
+                attrs: { defer: true, async: false },
+              }).then(() => {
                 orderResolve();
               });
           }
           if (share === 'react-dom') {
             get = () =>
               orderPromise.then(() =>
-                loadScript(
-                  getUnpkgUrl(share, shareInfo[share].version) as string,
-                  {
-                    attrs: { defer: true, async: false },
-                  },
-                ),
+                loadScript(getUnpkgUrl(share, shared.version) as string, {
+                  attrs: { defer: true, async: false },
+                }),
               );
           }
           // @ts-expect-error
           if (enableFastRefresh && typeof get === 'function') {
             if (share === 'react') {
-              shareInfo[share].get = async () => {
+              shared.get = async () => {
                 if (!window.React) {
                   await get();
                   console.warn(
                     '[Module Federation HMR]: You are using Module Federation Devtools to debug online host, it will cause your project load Dev mode React and ReactDOM. If not in this mode, please disable it in Module Federation Devtools',
                   );
                 }
-                shareInfo[share].lib = () => window.React;
+                shared.lib = () => window.React;
                 return () => window.React;
               };
             }
             if (share === 'react-dom') {
-              shareInfo[share].get = async () => {
+              shared.get = async () => {
                 if (!window.ReactDOM) {
                   await get();
                 }
-                shareInfo[share].lib = () => window.ReactDOM;
+                shared.lib = () => window.ReactDOM;
                 return () => window.ReactDOM;
               };
             }
