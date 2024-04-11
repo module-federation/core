@@ -13,8 +13,12 @@ const LOG_CATEGORY = '[ Federation Runtime ]';
 
 // entry: name:version   version : 1.0.0 | ^1.2.3
 // entry: name:entry  entry:  https://localhost:9000/federation-manifest.json
-const parseEntry = (str: string, devVerOrUrl?: string): RemoteEntryInfo => {
-  const strSplit = str.split(SEPARATOR);
+const parseEntry = (
+  str: string,
+  devVerOrUrl?: string,
+  separator = SEPARATOR,
+): RemoteEntryInfo => {
+  const strSplit = str.split(separator);
   const devVersionOrUrl =
     getProcessEnv()['NODE_ENV'] === 'development' && devVerOrUrl;
   const defaultVersion = '*';
@@ -24,7 +28,7 @@ const parseEntry = (str: string, devVerOrUrl?: string): RemoteEntryInfo => {
   // Check if the string starts with a type
   if (strSplit.length >= 2) {
     const [name, ...versionOrEntryArr] = strSplit;
-    const versionOrEntry = devVersionOrUrl || versionOrEntryArr.join(SEPARATOR);
+    const versionOrEntry = devVersionOrUrl || versionOrEntryArr.join(separator);
     if (isEntry(versionOrEntry)) {
       return {
         name,

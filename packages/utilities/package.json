@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/utilities",
-  "version": "3.0.5",
+  "version": "3.0.8",
   "type": "commonjs",
   "main": "./dist/index.cjs.js",
   "types": "./dist/index.cjs.d.ts",
@@ -15,6 +15,9 @@
   "repository": "https://github.com/module-federation/universe/tree/main/packages/utilities",
   "devDependencies": {
     "react": "18.2.0"
+  },
+  "dependencies": {
+    "@module-federation/sdk": "workspace:*"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",

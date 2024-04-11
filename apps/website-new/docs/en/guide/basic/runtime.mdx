@@ -1,0 +1,382 @@
+# Federation Runtime
+
+:::tip
+Before reading this section, it is assumed that you have already understood:
+
+- The [features and capabilities](../start/index) of Module Federation
+- The [glossary of terms](../start/glossary) for Module Federation
+- How to [consume and expose modules](../start/quick-start)
+
+:::
+
+`Federation Runtime` is one of the main features of the new version of `Module Federation`. It supports registering shared dependencies at runtime, dynamically registering and loading remote modules. To understand the design principles of Runtime, you can refer to: [Why Runtime](#why-runtime).
+
+## Install Dependencies
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/enhanced --save',
+    yarn: 'yarn add @module-federation/enhanced --save',
+    pnpm: 'pnpm add @module-federation/enhanced --save',
+    bun: 'bun add @module-federation/enhanced --save',
+  }}
+/>
+
+## API
+
+```javascript
+// You can use the runtime to load modules without depending on the build plugin
+// When not using the build plugin, shared dependencies cannot be automatically configured
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
+
+init({
+  name: '@demo/app-main',
+  remotes: [
+    {
+      name: "@demo/app1",
+      // mf-manifest.json is a file type generated in the new version of Module Federation build tools, providing richer functionality compared to remoteEntry
+      // Preloading depends on the use of the mf-manifest.json file type
+      entry: "http://localhost:3005/mf-manifest.json",
+      alias: "app1"
+    },
+    {
+      name: "@demo/app2",
+      entry: "http://localhost:3006/remoteEntry.js",
+      alias: "app2"
+    },
+  ],
+});
+
+// Load using alias
+loadRemote<{add: (...args: Array<number>)=> number }>("app2/util").then((md)=>{
+  md.add(1,2,3);
+});
+```
+
+### init
+
+- Type: `init(options: InitOptions): void`
+- Creates a runtime instance, which can be dynamically re-registered, but only one instance exists.
+- InitOptions:
+
+```typescript
+type InitOptions = {
+  // The name of the current consumer
+  name: string;
+  // The list of remote modules to depend on
+  // When using the version content, it needs to be used with snapshot, which is still under construction
+  remotes: Array<RemoteInfo>;
+  // The list of dependencies that the current consumer needs to share
+  // When using the build plugin, users can configure the dependencies to be shared in the build plugin, and the build plugin will inject the shared dependencies into the runtime sharing configuration
+  // Shared must be manually passed in the version instance when passed at runtime because it cannot be directly passed at runtime.
+  shared?: ShareInfos;
+};
+
+type RemoteInfo = (RemotesWithEntry | RemotesWithVersion) & {
+  alias?: string;
+};
+
+interface RemotesWithVersion {
+  name: string;
+  version: string;
+}
+
+interface RemotesWithEntry {
+  name: string;
+  entry: string;
+}
+
+type ShareInfos = {
+  // The name of the dependency, basic information about the dependency, and sharing strategy
+  [pkgName: string]: Share;
+};
+
+type Share = {
+  // The version of the shared dependency
+  version: string;
+  // Which modules are currently consuming this dependency
+  useIn?: Array<string>;
+  // From which module does the shared dependency come?
+  from?: string;
+  // Factory function to get the shared dependency instance. When no other existing dependencies, it will load its own shared dependencies.
+  lib: () => Module;
+  // Sharing strategy, which strategy will be used to decide whether to reuse the dependency
+  shareConfig?: SharedConfig;
+  // The scope where the shared dependency is located, the default value is default
+  scope?: string | Array<string>;
+};
+```
+
+### loadRemote
+
+- Type: `loadRemote(id: string)`
+- Used to load initialized remote modules. When used with the build plugin, it can be directly loaded through the native `import("remote name/expose")` syntax, and the build plugin will automatically convert it to `loadRemote("remote name/expose")` usage.
+
+- Example
+
+```javascript
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
+
+init({
+  name: '@demo/main-app',
+  remotes: [
+    {
+      name: '@demo/app2',
+      alias: 'app2',
+      entry: 'http://localhost:3006/remoteEntry.js',
+    },
+  ],
+});
+
+// remoteName + expose
+loadRemote('@demo/app2/util').then((m) => m.add(1, 2, 3));
+
+// alias + expose
+loadRemote('app2/util').then((m) => m.add(1, 2, 3));
+```
+
+### loadShare
+
+- Type: `loadShare(pkgName: string)`
+- Obtains the `share` dependency. When a "shared" dependency matching the current consumer exists in the global environment, the existing and eligible dependency will be reused first. Otherwise, it loads its own dependency and stores it in the global cache.
+- This `API` is usually not called directly by users but is used by the build plugin to convert its own dependencies.
+
+- Example
+
+```javascript
+import { init, loadRemote, loadShare } from '@module-federation/enhanced/runtime';
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+init({
+  name: '@demo/main-app',
+  remotes: [],
+  shared: {
+    react: {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => React,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+    'react-dom': {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => ReactDOM,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+  },
+});
+
+loadShare('react').then((reactFactory) => {
+  console.log(reactFactory());
+});
+```
+
+### preloadRemote
+
+:::warning
+The preloadRemote interface is only valid when the entry is a manifest file protocol
+:::
+
+- Type: `preloadRemote(preloadOptions: Array<PreloadRemoteArgs>)`
+- Used to preload remote resources of modules, such as `remote-entry.js` and other js chunks, css files, using the preloadRemote API.
+
+- Type
+
+```typescript
+async function preloadRemote(preloadOptions: Array<PreloadRemoteArgs>) {}
+
+type depsPreloadArg = Omit<PreloadRemoteArgs, 'depsRemote'>;
+type PreloadRemoteArgs = {
+  // The name and alias of the preloaded remote module
+  nameOrAlias: string;
+  // The specific expose of the preloaded remote module
+  // By default, all exposes are preloaded
+  // When provides exposes, only specific exposes are preloaded
+  exposes?: Array<string>; // Default request
+  // Default is sync, only preloads synchronous chunks referenced in expose
+  // Set to all to load both synchronous and asynchronous referenced chunks
+  resourceCategory?: 'all' | 'sync';
+  // By default, true, loads all sub-module dependencies of the current module
+  // After configuring dependencies, only the required resources are loaded
+  depsRemote?: boolean | Array<depsPreloadArg>;
+  // No filtering by default
+  // After configuration, unnecessary resources are filtered out
+  filter?: (assetUrl: string) => boolean;
+};
+```
+
+- Details
+
+Through `preloadRemote`, module resources can be preloaded at an earlier stage to avoid waterfall requests. `preloadRemote` can preload the following:
+
+- The `remote entry` of `remote`
+- The `expose` resources in `remote`
+- Synchronous and asynchronous resources in `remote`
+- Dependencies of `remote` in `remote`
+
+* Example
+
+```typescript
+import { init, preloadRemote } from '@module-federation/enhanced/runtime';
+
+init({
+  name: '@demo/preload-remote',
+  remotes: [
+    {
+      name: '@demo/sub1',
+      entry: 'http://localhost:2001/vmok-manifest.json',
+    },
+    {
+      name: '@demo/sub2',
+      entry: 'http://localhost:2002/vmok-manifest.json',
+    },
+    {
+      name: '@demo/sub3',
+      entry: 'http://localhost:2003/vmok-manifest.json',
+    },
+  ],
+});
+
+// Preload the @demo/sub1 module
+// Filter out resource information with 'ignore' in the resource name
+// Only preload the sub-dependency @demo/sub1-button module
+preloadRemote([
+  {
+    nameOrAlias: '@demo/sub1',
+    filter(assetUrl) {
+      return assetUrl.indexOf('ignore') === -1;
+    },
+    depsRemote: [{ nameOrAlias: '@demo/sub1-button' }],
+  },
+]);
+
+// Preload the @demo/sub2 module
+// Preload all exposes of @demo/sub2
+// Preload synchronous and asynchronous resources of @demo/sub2
+preloadRemote([
+  {
+    nameOrAlias: '@demo/sub2',
+    resourceCategory: 'all',
+  },
+]);
+
+// Preload the 'add' expose of the @demo/sub3 module
+preloadRemote([
+  {
+    nameOrAlias: '@demo/sub3',
+    resourceCategory: 'all',
+    exposes: ['add'],
+  },
+]);
+```
+
+### registerRemotes
+
+- Type: `registerRemotes(remotes: Remote[], options?: { force?: boolean }): void`
+- Used to register remote modules after initialization.
+
+- Type
+
+```typescript
+function registerRemotes(remotes: Remote[], options?: { force?: boolean }) {}
+
+type Remote = (RemoteWithEntry | RemoteWithVersion) & RemoteInfoCommon;
+
+interface RemoteInfoCommon {
+  alias?: string;
+  shareScope?: string;
+  type?: RemoteEntryType;
+  entryGlobalName?: string;
+}
+
+interface RemoteWithEntry {
+  name: string;
+  entry: string;
+}
+
+interface RemoteWithVersion {
+  name: string;
+  version: string;
+}
+```
+
+- Details
+  **info**: Be cautious when setting `force: true`!
+
+If `force: true` is set, it will merge remotes (including those already loaded), remove the loaded remote cache, and use `console.warn` to warn that this operation may be risky.
+
+- Example
+
+```typescript
+import { init, registerRemotes } from '@module-federation/enhanced/runtime';
+
+init({
+  name: '@demo/register-new-remotes',
+  remotes: [
+    {
+      name: '@demo/sub1',
+      entry: 'http://localhost:2001/mf-manifest.json',
+    },
+  ],
+});
+
+// Add new remote @demo/sub2
+registerRemotes([
+  {
+    name: '@demo/sub2',
+    entry: 'http://localhost:2002/mf-manifest.json',
+  },
+]);
+
+// Override the previous remote @demo/sub1
+registerRemotes([
+  {
+    name: '@demo/sub1',
+    entry: 'http://localhost:2003/mf-manifest.json',
+  },
+]);
+```
+
+## FAQ
+
+### Differences Between Build Plugins and Runtime
+
+`Federation Runtime` is one of the main features of the new version of `Module Federation`. It supports registering shared dependencies at runtime, dynamically registering and loading remote modules, and can expand the capabilities of `Module Federation` at runtime through `Plugin`. Build plugins are based on the basic implementation of Runtime.
+
+There are the following differences between `Federation Runtime` and `Builder Plugin`:
+
+| Federation Runtime                                                                                                           | Builder Plugin                                                                                 |
+| ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Can be used independently of build plugins, and can directly use pure runtime for module loading in projects like `webpack4` | Build plugins require webpack5, Rspack, Vite, or above                                         |
+| Supports dynamic registration of modules                                                                                     | Does not support dynamic registration of modules                                               |
+| Does not support loading modules with `import` syntax                                                                        | Supports loading modules synchronously with `import` syntax                                    |
+| Supports `loadRemote` for loading modules                                                                                    | Supports `loadRemote` for loading modules                                                      |
+| `shared` must provide specific version and instance information                                                              | `shared` only requires configuration rules, no specific version or instance information needed |
+| `shared` dependencies can only be used externally, cannot use external `shared` dependencies                                 | `shared` dependencies can be shared bidirectionally according to specific rules                |
+| Can affect the loading process through `runtime`'s `plugin` mechanism                                                        | Can affect the loading process through `runtimePlugin` configuration                           |
+| Pure runtime does not support remote type hints                                                                              | Supports remote type hints                                                                     |
+
+### Why Runtime
+
+`Runtime` may be a completely new concept for users who previously used the built-in `Module Federation` build plugin in `Webpack`. In the previous Webpack's Module Federation, both exporting and consuming modules were purely build behaviors, with all module loading processes encapsulated by the build tool.
+Compared to module loaders like Systemjs and esmodule, this brings the following two benefits:
+
+- The cost of exporting modules in existing projects is very low. No need to install excessive additional dependencies and build configurations, just declare the module name and the path of the exported module to complete the module export.
+- Consuming remote modules only requires declaring the name and address of the remote module, which can be used like `NPM` dependencies with `import`.
+
+However, this model also brings the following impacts on the flexibility of the project and the maintenance cost of the build plugin:
+
+- Different build tools such as Webpack, Rspack, and Vite all need to implement Module Federation separately: Builder build tools and runtime, which affects maintenance costs and feature consistency.
+- Unable to consume remote modules in build plugins that do not support Module Federation, such as Webpack 4.
+- Lack of flexibility, unable to dynamically add modules, change module behavior, and add more framework capabilities.
+
+Therefore, in the new version of `Module Federation` design, `Runtime` has been separated, and different build tools implement the export build of modules, collection of shared module information, and handling of remote module references based on `Runtime`. Other specific behaviors such as shared dependency reuse and remote module loading are all built into Runtime.

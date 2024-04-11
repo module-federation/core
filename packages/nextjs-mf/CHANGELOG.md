@@ -1,5 +1,144 @@
 # [8.1.0-canary.7](https://github.com/module-federation/universe/compare/nextjs-mf-8.1.0-canary.6...nextjs-mf-8.1.0-canary.7) (2023-11-21)
 
+## 8.3.4
+
+### Patch Changes
+
+- Updated dependencies [6b3b210]
+- Updated dependencies [32eba3c]
+- Updated dependencies [6b3b210]
+  - @module-federation/runtime@0.1.3
+  - @module-federation/enhanced@0.1.3
+  - @module-federation/node@2.1.3
+  - @module-federation/sdk@0.1.3
+  - @module-federation/utilities@3.0.8
+
+## 8.3.3
+
+### Patch Changes
+
+- 1bb03d1: chore: enhanced export runtime
+- f9335c7: no default expose when skip sharing next internals enabled
+- Updated dependencies [c1efbbf]
+- Updated dependencies [c8c0ad2]
+- Updated dependencies [1bb03d1]
+- Updated dependencies [1bb03d1]
+- Updated dependencies [f9335c7]
+  - @module-federation/enhanced@0.1.2
+  - @module-federation/sdk@0.1.2
+  - @module-federation/node@2.1.2
+  - @module-federation/utilities@3.0.7
+  - @module-federation/runtime@0.1.2
+
+## 8.3.2
+
+### Patch Changes
+
+- da8729f: implement skipSharingNextInternals option again
+
+## 8.3.1
+
+### Patch Changes
+
+- Updated dependencies [ee57fb0]
+  - @module-federation/enhanced@0.1.1
+  - @module-federation/node@2.1.1
+  - @module-federation/runtime@0.1.1
+  - @module-federation/sdk@0.1.1
+
+## 8.3.0
+
+### Minor Changes
+
+- df3ef24: use chunk integration to initalize federation runtime and plugins in runtime bootstrap
+
+### Patch Changes
+
+- d3d8003: deprecate injectScript and module-federation/utilities usage
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+  - @module-federation/enhanced@0.1.0
+  - @module-federation/node@2.1.0
+  - @module-federation/runtime@0.1.0
+  - @module-federation/sdk@0.1.0
+
+## 8.2.6
+
+### Patch Changes
+
+- 1e2c8a3: cache bust remote entry
+
+## 8.2.5
+
+### Patch Changes
+
+- d942a1c: only call module factory in valid conditions in runtime plugin
+- 5f7b084: Prevent application from compiling if AppDir is used at all
+
+## 8.2.4
+
+### Patch Changes
+
+- Updated dependencies [ce0597e]
+  - @module-federation/runtime@0.0.17
+  - @module-federation/node@2.0.15
+  - @module-federation/enhanced@0.0.17
+  - @module-federation/sdk@0.0.17
+
+## 8.2.3
+
+### Patch Changes
+
+- @module-federation/enhanced@0.0.16
+- @module-federation/node@2.0.14
+- @module-federation/runtime@0.0.16
+- @module-federation/sdk@0.0.16
+
+## 8.2.2
+
+### Patch Changes
+
+- 49867bb: Fix issue with function proxy not returning static methods
+
+## 8.2.1
+
+### Patch Changes
+
+- Updated dependencies [3a45d99]
+- Updated dependencies [ba5bedd]
+- Updated dependencies [6e9b6d5]
+  - @module-federation/sdk@0.0.15
+  - @module-federation/enhanced@0.0.15
+  - @module-federation/runtime@0.0.15
+  - @module-federation/node@2.0.13
+
+## 8.2.0
+
+### Minor Changes
+
+- a51ee43: Fix nextjs 14 loader rule errors
+
+## 8.1.11
+
+### Patch Changes
+
+- a050645: remove tech debt leftover from before federation enhanced apis
+- Updated dependencies [a050645]
+- Updated dependencies [4fc20cc]
+- Updated dependencies [cd8c7bf]
+- Updated dependencies [5576c6b]
+- Updated dependencies [a050645]
+- Updated dependencies [d21216a]
+  - @module-federation/runtime@0.0.14
+  - @module-federation/node@2.0.12
+  - @module-federation/sdk@0.0.14
+  - @module-federation/utilities@3.0.6
+  - @module-federation/enhanced@0.0.14
+
 ## 8.1.10
 
 ### Patch Changes

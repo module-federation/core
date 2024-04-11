@@ -1,5 +1,42 @@
 # [1.1.0-canary.1](https://github.com/module-federation/universe/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.1.3
+
+## 0.1.2
+
+### Patch Changes
+
+- c8c0ad2: feat: enhance type capability
+
+## 0.1.1
+
+## 0.1.0
+
+### Patch Changes
+
+- df3ef24: chore: adjust add federation init process
+- df3ef24: Remove log of container exports in sdk
+- df3ef24: chore: redefine prefetch types
+- df3ef24: use chunk integration to initalize federation runtime and plugins in runtime bootstrap
+
+## 0.0.17
+
+## 0.0.16
+
+## 0.0.15
+
+### Patch Changes
+
+- 3a45d99: fix: Avoid style loss due to reuse of link without distinguishing purpose
+- ba5bedd: feat: support manifest
+
+## 0.0.14
+
+### Patch Changes
+
+- cd8c7bf: fix(sdk): wrong exportedInterface interface in createScriptNode
+- 5576c6b: Resolving issue where localstorage is disabled, for cases like android WebView, where it will be null. This wraps localstorage checks in try catch will fallback to see if document is not undefined
+
 ## 0.0.13
 
 ### Patch Changes

@@ -1,0 +1,36 @@
+[
+  {
+    "text": "Guide",
+    "link": "/guide/start/",
+    "activeMatch": "/guide/"
+  },
+  {
+    "text": "Configuration",
+    "link": "/configure/",
+    "activeMatch": "/configure/"
+  },
+  {
+    "text": "Plugins",
+    "link": "/plugin/dev/index",
+    "activeMatch": "/plugin/"
+  },
+  {
+    "text": "Community",
+    "link": "/community/showcase",
+    "activeMatch": "/community/",
+    "items": [
+      {
+        "text": "Showcase",
+        "link": "/community/showcase/"
+      },
+      {
+        "text": "Module Federation Examples",
+        "link": "https://github.com/module-federation/module-federation-examples"
+      },
+      {
+        "text": "Practical Module Federation",
+        "link": "https://module-federation.myshopify.com/products/practical-module-federation"
+      }
+    ]
+  }
+]

@@ -125,6 +125,8 @@ export function generateSnapshotFromManifest(
     remoteEntry: simpleJoinRemoteEntry(remoteEntryPath, remoteEntryName),
     remoteEntryType,
     remoteTypes: simpleJoinRemoteEntry(remoteTypes.path, remoteTypes.name),
+    remoteTypesZip: remoteTypes.zip || '',
+    remoteTypesAPI: remoteTypes.api || '',
     remotesInfo,
     shared: manifest?.shared.map((item) => ({
       assets: item.assets,
@@ -136,6 +138,15 @@ export function generateSnapshotFromManifest(
       assets: expose.assets,
     })),
   };
+
+  if (manifest.metaData?.prefetchInterface) {
+    const prefetchInterface = manifest.metaData.prefetchInterface;
+
+    basicRemoteSnapshot = {
+      ...basicRemoteSnapshot,
+      prefetchInterface,
+    };
+  }
 
   if (manifest.metaData?.prefetchEntry) {
     const { path, name, type } = manifest.metaData.prefetchEntry;

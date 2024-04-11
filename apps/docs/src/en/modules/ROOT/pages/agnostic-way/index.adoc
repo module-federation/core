@@ -1,0 +1,242 @@
+= Framework-agnostic Micro-frontends with Angular, React, and Vue
+
+This article explores the technical implementation of injecting React and Vue remote modules into an Angular shell app using Webpack 5's ModuleFederationPlugin.
+
+== Case for framework-agnostic Micro-frontends
+
+Consider a scenario where multiple applications share common components, such as a PROFILE page and a SETTINGS page. Micro-frontends offer compelling advantages in such cases:
+
+- Decentralized Development: By delegating the development of PROFILE and SETTINGS modules to standalone teams, they can work independently and potentially at a faster pace.
+- Framework Agnosticism: If the main app uses a different framework or version, Module Federation enables the PROFILE and SETTINGS modules to be developed and maintained independently, even if they use a different framework.
+- Modularity: In the case of a large application, Module Federation helps break it down into smaller, more manageable pieces. This makes it easier to upgrade one module at a time without affecting the rest of the app.
+- Faster Deployment: Deploying the PROFILE and SETTINGS modules separately from the main app allows for more flexibility and faster deployment times. The main app doesn't need to be rebuilt and redeployed every time a change is made to one of these modules.
+
+Now, let's dive into the technical implementation of using Module Federation to achieve these benefits.
+
+=== Developing the React "Profile" Remote Module
+
+The React "Profile" module contains a simple form where users can edit their name and email. The implementation is straightforward, but it's worth noting that the bootstrap.js file is mandatory due to a https://stackoverflow.com/questions/71228191/shared-module-is-not-available-for-eager-consumption-angular-13[bug].
+
+To run the Profile module, navigate to the app folder and execute the following commands:
+
+[source, bash]
+----
+yarn
+yarn start
+----
+
+You can access the form at http://localhost:3001.
+
+==== ModuleFederationPlugin Settings (React)
+
+In the webpack.config.js file, the ModuleFederationPlugin settings for the React "Profile" module are as follows:
+
+[source, javascript]
+----
+new ModuleFederationPlugin({
+  name: 'profile_user',
+  filename: 'remoteEntry.js',
+  exposes: {
+    './ProfileReactComponent': './src/ProfileReactComponent',
+  },
+  shared: {
+    react: {
+      singleton: true,
+      requiredVersion: deps.react,
+      eager: true,
+    },
+    'react-dom': {
+      singleton: true,
+      requiredVersion: deps['react-dom'],
+      eager: true,
+    },
+  },
+}),
+----
+
+In this context, the `ReactProfileComponent` was made available for external use, and the React libraries were shared. It's important to highlight that any imported code, including elements like CSS styles (`profile-style.css` in our example), will be packaged within the exposes module alongside the `ReactProfileComponent.tsx`.
+
+=== Developing the Vue Settings Remote Module
+
+The Vue "Settings" module is created to run as an isolated element within the shadow DOM to avoid conflicts between React and Vue in the Angular shell app.
+
+To run the Vue Settings module, navigate to the app folder and execute the following commands:
+
+[source, bash]
+----
+yarn
+yarn start
+----
+
+You can access the module at `http://localhost:3002.`
+
+==== ModuleFederationPlugin Settings (Vue)
+
+In the `webpack.config.js` file for the Vue Settings component, the ModuleFederationPlugin settings are as follows:
+
+[source, javascript]
+----
+new ModuleFederationPlugin({
+  name: 'settings_user',
+  filename: 'remoteEntry.js',
+  exposes: {
+    './Settings': './src/components/Settings',
+  },
+  shared: {
+    vue: {
+      eager: true,
+      requiredVersion: deps.vue,
+    },
+  },
+}),
+----
+
+The configuration ensures that the Vue module can be used within the Angular shell app.
+
+NOTE: To mitigate potential conflicts between React and Vue in the Angular shell app, Vue 3 introduces the use of `defineCustomElement`. This feature enables the creation of Vue components as self-contained elements within the shadow DOM.
+
+=== Integrating React and Vue into the Angular Shell
+
+In the Angular shell application, we'll integrate the React "Profile" module and Vue "Settings" module as remote components.
+
+The timing of when these remote components should be loaded into the Angular shell app varies based on the specific app's needs. In our scenario, we want the React and Vue components to be visible on the homepage of the Angular shell app, so we run the `LoadRemoteModule` methods as part of the app's initialization process.
+
+In the app.module.ts file, the initialization process is defined:
+
+[source, typescript]
+----
+export function initializeApp(): () => void {
+return () => {
+  loadRemoteModule({
+    remoteEntry: "http://localhost:3001/remoteEntry.js",
+    remoteName: "profile_user",
+    exposedModule: "./ProfileReactComponent",
+  });
+  loadRemoteModule({
+    remoteEntry: "http://localhost:3002/remoteEntry.js",
+    remoteName: "settings_user",
+    exposedModule: "./Settings",
+  });
+};
+}
+
+@NgModule({
+declarations: [AppComponent],
+imports: [BrowserModule, RouterModule.forRoot(routes)],
+providers: [
+  {
+    provide: APP_INITIALIZER,
+    useFactory: initializeApp,
+    multi: true,
+  },
+],
+----
+
+Webpack config settings in `webpack.config.ts` for the Angular shell define remotes and shared React libraries, allowing the shell to be a federated module
+
+[source, typescript]
+----
+new container.ModuleFederationPlugin({
+  name: "angular-shell",
+  filename: "remoteEntry.js",
+  remotes: {
+    profile_user: `profile_user@http://localhost:3001/remoteEntry.js`,
+    settings_user: `settings_user@http://localhost:3002/remoteEntry.js`,
+  },
+  shared: {
+    react: {
+      singleton: true,
+      requiredVersion: deps.react,
+    },
+    "react-dom": {
+      singleton: true,
+      requiredVersion: deps["react-dom"],
+    },
+  },
+}),
+----
+
+Additionally, Webpack devServer headers with `"Access-Control-Allow-Origin": "*"` are set to avoid CORS errors.
+
+To adapt the Angular application, you'll need to modify the `angular.json` file, replacing the default Webpack configuration with a custom one. 
+
+The changes are the following:
+
+[source, json]
+----
+...
+          "builder": "@angular-builders/custom-webpack:browser",
+...
+          "scripts": [],
+            "customWebpackConfig": {
+              "path": "webpack.config.ts",
+              "replaceDuplicatePlugins": true
+            }
+...
+          "cli": {
+            "packageManager": "yarn"
+          }
+----
+
+Next, we'll focus on injecting the React component into the Angular shell. To achieve this, a `profile-user.component.ts` container has been created to integrate the React component. The ProfileReactComponent is loaded asynchronously within the `ngAfterViewInit` lifecycle hook. Additionally, a `decl.d.ts` file has been introduced to inform Angular that `"profile_user"` is a valid import directory.
+
+Here's the code from `angular-shell/src/app/profile-user/profile-user.component.ts``:
+
+[source, typescript]
+----
+ngAfterViewInit() {
+    this.root = createRoot(this.containerRef.nativeElement);
+    this.root.render("Loading script...");
+    try {
+        import("profile_user/ProfileReactComponent").then((val) => {
+            this.root.render(
+                React.createElement(val.ProfileReactComponent, {
+                    ...this.user,
+                    onClick: this.updateCurrentUser,
+                })
+            );
+        });
+    } catch (error) {
+        console.log("Error", error);
+    }
+}
+----
+
+The React Profile component interacts with the Angular shell through the `onClick` function. This allows the Angular shell app to update user data when changes are made to the name and email in the React component.
+
+Similarly, the Vue Settings component is injected into the `settings.component.ts` wrapper. The approach closely resembles that of the React Profile component. Here's the code from angular-shell/src/app/settings/settings.component.ts:
+
+[source, typescript]
+----
+import("settings_user/Settings").then((val) => {
+    this.renderer.appendChild(
+        this.containerVueRef.nativeElement,
+        new val.default()
+    );
+});
+----
+
+To run the Angular shell app, please take note of using `yarn`. This is necessary to override the webpack version for the Angular CLI. In the `angular-shell` folder, execute the following commands:
+
+1. Create a new Angular app (skip the installation step):
++
+[source, bash]
+----
+ng new --skip-install
+----
++
+2. Configure the CLI to use `yarn` as the package manager:
++
+[source, bash]
+----
+ng config cli.packageManager yarn
+----
++
+3. Install the dependencies:
++
+[source, bash]
+----
+yarn install
+----
+
+The app can be accessed via http://localhost:4201.

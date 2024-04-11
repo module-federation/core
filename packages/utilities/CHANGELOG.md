@@ -1,5 +1,25 @@
 # [3.1.0](https://github.com/module-federation/universe/compare/utils-3.0.2...utils-3.1.0) (2023-10-26)
 
+## 3.0.8
+
+### Patch Changes
+
+- @module-federation/sdk@0.1.3
+
+## 3.0.7
+
+### Patch Changes
+
+- f9335c7: no default expose when skip sharing next internals enabled
+- Updated dependencies [c8c0ad2]
+  - @module-federation/sdk@0.1.2
+
+## 3.0.6
+
+### Patch Changes
+
+- a050645: Remove delegate module code from utils
+
 ## 3.0.5
 
 ### Patch Changes

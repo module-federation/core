@@ -47,9 +47,9 @@ Checkout.getInitialProps = async () => {
   const timeout = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
 
-  const fetchPromise = fetch(
-    'https://jsonplaceholder.typicode.com/todos/1',
-  ).then((res) => res.json());
+  const fetchPromise = fetch('http://swapi.dev/api/planets/1/').then((res) =>
+    res.json(),
+  );
 
   // this will resolve after 3 seconds
   const timerPromise = timeout(3000).then(() => ({

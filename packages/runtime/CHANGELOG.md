@@ -1,5 +1,69 @@
 # @module-federation/runtime
 
+## 0.1.3
+
+### Patch Changes
+
+- 6b3b210: Add Register plugins api
+  - @module-federation/sdk@0.1.3
+
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies [c8c0ad2]
+  - @module-federation/sdk@0.1.2
+
+## 0.1.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.1.1
+
+## 0.1.0
+
+### Patch Changes
+
+- df3ef24: chore: adjust add federation init process
+- df3ef24: chore: redefine prefetch types
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+  - @module-federation/sdk@0.1.0
+
+## 0.0.17
+
+### Patch Changes
+
+- ce0597e: feat: add registerRemotes api
+  - @module-federation/sdk@0.0.17
+
+## 0.0.16
+
+### Patch Changes
+
+- @module-federation/sdk@0.0.16
+
+## 0.0.15
+
+### Patch Changes
+
+- 6e9b6d5: fix(runtime): preserve error.stack instead of throwing new error
+- Updated dependencies [3a45d99]
+- Updated dependencies [ba5bedd]
+  - @module-federation/sdk@0.0.15
+
+## 0.0.14
+
+### Patch Changes
+
+- a050645: Expose node script loaders to bundler runtime. Replace require.loadScript from federation/node to use federation.runtime.loadScriptNode
+- 4fc20cc: adding reject to args in loadEsmEntry
+- Updated dependencies [cd8c7bf]
+- Updated dependencies [5576c6b]
+  - @module-federation/sdk@0.0.14
+
 ## 0.0.13
 
 ### Patch Changes

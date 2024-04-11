@@ -1,0 +1,64 @@
+{
+  "name": "@module-federation/devtools",
+  "version": "0.0.19",
+  "private": true,
+  "scripts": {
+    "reset": "npx rimraf ./**/node_modules",
+    "dev": "modern dev",
+    "build": "modern build && node postpack.js",
+    "build:debug": "DEBUG=true modern build && node postpack.js",
+    "test": "vitest run",
+    "test:e2e": "E2ETEST=true pnpm build && playwright test",
+    "test:e2e:ui": "E2ETEST=true pnpm build && playwright test --ui",
+    "start": "modern start",
+    "serve": "modern serve",
+    "new": "modern new",
+    "upgrade": "modern upgrade",
+    "postinstall": "bash install-deps.bash"
+  },
+  "engines": {
+    "node": ">=16.18.1"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs}": [
+      "node --max_old_space_size=8192 ./node_modules/eslint/bin/eslint.js --fix --color --cache --quiet"
+    ]
+  },
+  "eslintIgnore": [
+    "node_modules/",
+    "dist/"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@arco-design/web-react": "^2.59.1",
+    "@modern-js/runtime": "2.46.1",
+    "@module-federation/sdk": "workspace:*",
+    "@types/dagre": "^0.7.52",
+    "ahooks": "^3.7.10",
+    "axios": "^1.6.7",
+    "dagre": "^0.8.5",
+    "react": "~18.2.0",
+    "react-dom": "~18.2.0",
+    "reactflow": "11.10.4"
+  },
+  "devDependencies": {
+    "@modern-js-app/eslint-config": "2.46.1",
+    "@modern-js/app-tools": "2.46.1",
+    "@modern-js/eslint-config": "2.46.1",
+    "@modern-js/tsconfig": "2.46.1",
+    "@module-federation/runtime": "workspace:*",
+    "@playwright/test": "1.36.1",
+    "@types/chrome": "^0.0.260",
+    "@types/jest": "~29.2.4",
+    "@types/node": "~16.11.7",
+    "@types/react": "~18.2.0",
+    "@types/react-dom": "~18.2.0",
+    "lint-staged": "~13.1.0",
+    "prettier": "~2.8.1",
+    "rimraf": "~3.0.2",
+    "typescript": "~5.0.4",
+    "vitest": "1.2.2"
+  }
+}

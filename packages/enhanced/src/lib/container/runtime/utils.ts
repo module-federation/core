@@ -6,7 +6,7 @@ import { parseOptions } from '../options';
 import type { init } from '@module-federation/runtime-tools';
 import type webpack from 'webpack';
 import type RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
-import type { ModuleFederationPluginOptions } from '../../../declarations/plugins/container/ModuleFederationPlugin';
+import type { moduleFederationPlugin } from '@module-federation/sdk';
 import { NormalizedRuntimeInitOptionsWithOutShared } from '../../../types/runtime';
 
 const extractUrlAndGlobal = require(
@@ -32,7 +32,7 @@ export function getFederationGlobalScope(
 }
 
 export function normalizeRuntimeInitOptionsWithOutShared(
-  options: ModuleFederationPluginOptions,
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
 ): NormalizedRuntimeInitOptionsWithOutShared {
   const parsedOptions = parseOptions(
     options.remotes || [],

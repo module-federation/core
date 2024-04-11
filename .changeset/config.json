@@ -6,9 +6,13 @@
     [
       "@module-federation/runtime",
       "@module-federation/enhanced",
+      "@module-federation/rspack",
       "@module-federation/webpack-bundler-runtime",
       "@module-federation/sdk",
-      "@module-federation/runtime-tools"
+      "@module-federation/runtime-tools",
+      "@module-federation/managers",
+      "@module-federation/manifest",
+      "@module-federation/dts-plugin"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],

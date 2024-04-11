@@ -8,10 +8,11 @@ import ContainerEntryModuleFactory from './ContainerEntryModuleFactory';
 import ContainerExposedDependency from './ContainerExposedDependency';
 import { parseOptions } from './options';
 import type { optimize, Compiler, Compilation } from 'webpack';
-import type { ContainerPluginOptions } from '../../declarations/plugins/container/ContainerPlugin';
+import type { containerPlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import checkOptions from '../../schemas/container/ContainerPlugin.check';
 import schema from '../../schemas/container/ContainerPlugin';
+import HoistContainerReferencesPlugin from './HoistContainerReferencesPlugin';
 
 type ExcludeUndefined<T> = T extends undefined ? never : T;
 type NonUndefined<T> = ExcludeUndefined<T>;
@@ -35,14 +36,15 @@ const validate = createSchemaValidation(checkOptions, () => schema, {
 const PLUGIN_NAME = 'ContainerPlugin';
 
 class ContainerPlugin {
-  _options: ContainerPluginOptions;
+  _options: containerPlugin.ContainerPluginOptions;
   name: string;
   /**
-   * @param {ContainerPluginOptions} options options
+   * @param {containerPlugin.ContainerPluginOptions} options options
    */
-  constructor(options: ContainerPluginOptions) {
+  constructor(options: containerPlugin.ContainerPluginOptions) {
     validate(options);
     this.name = PLUGIN_NAME;
+
     this._options = {
       name: options.name,
       shareScope: options.shareScope || 'default',
@@ -77,7 +79,7 @@ class ContainerPlugin {
         case 'string':
         case 'function':
           break;
-        //  cacheGroup.chunks 会继承 splitChunks.chunks ，因此只需要对单独设置了 chunks 的 做修改
+        //  cacheGroup.chunks will inherit splitChunks.chunks, so you only need to modify the chunks that are set separately
         case 'object':
           {
             if (cacheGroup instanceof RegExp) {

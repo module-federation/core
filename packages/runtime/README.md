@@ -212,15 +212,15 @@ init({
   remotes: [
     {
       name: '@demo/sub1',
-      entry: 'http://localhost:2001/vmok-manifest.json',
+      entry: 'http://localhost:2001/mf-manifest.json',
     },
     {
       name: '@demo/sub2',
-      entry: 'http://localhost:2001/vmok-manifest.json',
+      entry: 'http://localhost:2001/mf-manifest.json',
     },
     {
       name: '@demo/sub3',
-      entry: 'http://localhost:2001/vmok-manifest.json',
+      entry: 'http://localhost:2001/mf-manifest.json',
     },
   ],
 });
@@ -256,6 +256,115 @@ preloadRemote([
     exposes: ['add'],
   },
 ]);
+```
+
+### registerRemotes
+
+- Type: `registerRemotes(remotes: Remote[], options?: { force?: boolean }): void`
+- Used to register remotes after init .
+
+- Type
+
+```typescript
+function registerRemotes(remotes: Remote[], options?: { force?: boolean }) {}
+
+type Remote = (RemoteWithEntry | RemoteWithVersion) & RemoteInfoCommon;
+
+interface RemoteInfoCommon {
+  alias?: string;
+  shareScope?: string;
+  type?: RemoteEntryType;
+  entryGlobalName?: string;
+}
+
+interface RemoteWithEntry {
+    name: string;
+    entry: string;
+}
+
+interface RemoteWithVersion {
+    name: string;
+    version: string;
+}
+```
+
+- Details
+**info**: Please be careful when setting `force:true` !
+
+If set `force: true`, it will merge remote(include loaded remote), and remove loaded remote cache , as well as console.warn to tell this action may have risks.
+
+* Example
+
+```ts
+import { init, registerRemotes } from '@module-federation/runtime';
+
+init({
+  name: '@demo/register-new-remotes',
+  remotes: [
+    {
+      name: '@demo/sub1',
+      entry: 'http://localhost:2001/mf-manifest.json',
+    }
+  ],
+});
+
+// add new remote @demo/sub2
+registerRemotes([
+  {
+      name: '@demo/sub2',
+      entry: 'http://localhost:2002/mf-manifest.json',
+  }
+]);
+
+// override previous remote @demo/sub1
+registerRemotes([
+  {
+      name: '@demo/sub1',
+      entry: 'http://localhost:2003/mf-manifest.json',
+  }
+]);
+```
+
+### registerPlugins
+
+- Type: `registerPlugins(plugins: Array<FederationRuntimePlugin>): void`
+- Used to register remotes after init .
+
+- Type
+
+```typescript
+import type { FederationRuntimePlugin } from '@module-federation/runtime';
+
+function registerPlugins(plugins: Array<FederationRuntimePlugin>) {}
+```
+
+- Details:
+  Allows plugins to be registered dynamically or lazily. Lazy plugins will be called after normal runtime plugins. 
+  Similar function as registerRemote, but for runtime plugins. 
+* Example
+
+```ts
+import { init, registerPlugins } from '@module-federation/runtime';
+
+init({
+  name: '@demo/register-new-remotes',
+  remotes: [
+    {
+      name: '@demo/sub1',
+      entry: 'http://localhost:2001/mf-manifest.json',
+    }
+  ],
+  plugins: [
+    //normal/eager runtime plugins
+  ]
+});
+
+import('./runtime-plugin').then(plugin => {
+  registerPlugins([
+    //more plugins loaded lazyily or dynamically 
+    plugin
+  ]);
+})
 ```
 
 ## hooks

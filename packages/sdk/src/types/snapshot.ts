@@ -8,6 +8,8 @@ interface BasicModuleInfo {
   version: string;
   buildVersion: string;
   remoteTypes: string;
+  remoteTypesZip: string;
+  remoteTypesAPI?: string;
   remotesInfo: Record<string, { matchedVersion: string }>;
   shared: Array<{
     sharedName: string;
@@ -25,6 +27,7 @@ export interface BasicProviderModuleInfo extends BasicModuleInfo {
     modulePath?: string;
     assets: StatsAssets;
   }>;
+  prefetchInterface?: boolean;
   prefetchEntry?: string;
   prefetchEntryType?: RemoteEntryType;
 }

@@ -4,16 +4,18 @@
 */
 
 'use strict';
-
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { ModuleFederationPluginOptions } from './ModuleFederationPluginTypes';
+import { type moduleFederationPlugin } from '@module-federation/sdk';
+import { StatsPlugin } from '@module-federation/manifest';
+import { ContainerManager } from '@module-federation/managers';
+import { DtsPlugin } from '@module-federation/dts-plugin';
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
-import checkOptions from '../../schemas/container/ModuleFederationPlugin.check';
 import schema from '../../schemas/container/ModuleFederationPlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import HoistContainerReferencesPlugin from './HoistContainerReferencesPlugin';
 
 const isValidExternalsType = require(
   normalizeWebpackPath(
@@ -25,8 +27,8 @@ const createSchemaValidation = require(
   normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
 ) as typeof import('webpack/lib/util/create-schema-validation');
 const validate = createSchemaValidation(
-  //eslint-disable-next-line
-  checkOptions,
+  // just use schema to validate
+  () => false,
   () => schema,
   {
     name: 'Module Federation Plugin',
@@ -35,11 +37,11 @@ const validate = createSchemaValidation(
 );
 
 class ModuleFederationPlugin implements WebpackPluginInstance {
-  private _options: ModuleFederationPluginOptions;
+  private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   /**
-   * @param {ModuleFederationPluginOptions} options options
+   * @param {moduleFederationPlugin.ModuleFederationPluginOptions} options options
    */
-  constructor(options: ModuleFederationPluginOptions) {
+  constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
     validate(options);
     this._options = options;
   }
@@ -65,10 +67,28 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       (Array.isArray(options.exposes)
         ? options.exposes.length > 0
         : Object.keys(options.exposes).length > 0);
+
+    let disableManifest = options.manifest === false;
     if (useContainerPlugin) {
       // @ts-ignore
       ContainerPlugin.patchChunkSplit(compiler, this._options.name);
     }
+
+    if (!disableManifest && useContainerPlugin) {
+      try {
+        const containerManager = new ContainerManager();
+        containerManager.init(options);
+        options.exposes = containerManager.containerPluginExposesOptions;
+      } catch (err) {
+        if (err instanceof Error) {
+          err.message = `[ ModuleFederationPlugin ]: Manifest will not generate, because: ${err.message}`;
+        }
+        console.warn(err);
+        disableManifest = true;
+      }
+    }
+
+    new DtsPlugin(options).apply(compiler);
 
     if (
       library &&
@@ -111,6 +131,14 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
         }).apply(compiler);
       }
     });
+
+    if (!disableManifest) {
+      const pkg = require('../../../../package.json');
+      new StatsPlugin(options, {
+        pluginVersion: pkg.version,
+        bundler: 'webpack',
+      }).apply(compiler);
+    }
   }
 }
 

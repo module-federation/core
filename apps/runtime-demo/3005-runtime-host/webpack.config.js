@@ -1,11 +1,16 @@
 const path = require('path');
 const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 registerPluginTSTranspiler();
-const { ModuleFederationPlugin } = require('@module-federation/enhanced');
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
 
 module.exports = composePlugins(withNx(), withReact(), (config, context) => {
+  config.watchOptions = {
+    ignored: ['**/node_modules/**', '**/@mf-types/**'],
+  };
   // const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
   config.plugins.push(
     new ModuleFederationPlugin({

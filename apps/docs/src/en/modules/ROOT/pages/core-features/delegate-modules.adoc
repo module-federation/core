@@ -1,0 +1,168 @@
+= Delegate Modules: An In-Depth Guide
+
+In this comprehensive guide, we will delve into the powerful feature of Delegate Modules in Module Federation version 7, exploring their purpose, use cases, and implementation techniques. We will also discuss how they can enhance the flexibility and control of your Webpack configuration, empowering you to create more sophisticated applications
+
+== Understanding Delegate Modules
+
+Delegate modules have been introduced to tackle a longstanding challenge in the module federation space - dynamic remotes. These modules offer a more streamlined and scalable way to control the "glue" code that connects remote applications, without sacrificing the advantages of Webpack.
+
+To get more familiar with the concept of Dynamic Remotes, we suggest reading a dedicated documentation page: xref:core-features/dynamic-remotes.adoc[Dynamic Remotes]
+
+Traditionally, managing dynamic remotes involved injecting a script using the low-level module federation API, which resulted in losing many of Webpack's features. With delegate modules, you can now instruct Webpack that a remote entry is a code within the Webpack build itself, enabling you to bundle various entry-point logic and export back a promise that resolves to a federated remote.
+
+Compared to using the promise `new Promise syntax`, delegate modules are bundled into Webpack and can utilize `require` and `import` statements. This makes them ideal for handling complex requirements such as loading remote modules or customizing the federation API. However, it's important to note that delegate modules are an advanced feature and may not be necessary for the majority of users.
+
+== Advantages of Using Delegate Modules
+
+Delegate modules provide several benefits when compared to the older implementation involving the "promise new promise" syntax. By adopting delegate modules, you can:
+
+. Gain fine-grained control over the glue code part of when Webpack requests a remote and how it retrieves the container, without the brittleness and restrictions of traditional methods.
+. Bundle a diverse range of entry point logic, effectively creating a framework-like structure for managing federated remotes.
+. Access various methods for retrieving containers, including HTTP, file systems, or even databases, without waiting for support from the module federation team.
+. Implement robust middleware between the connection points of Webpack graphs, gaining unprecedented control over graphs and their behavior.
+. Seamlessly integrate with different environments, such as edge workers or server-side applications, without the need for complex top-to-bottom implementation.
+
+== Exploring Use Cases
+
+=== Fallbacks
+
+One of the primary use cases for delegate modules is handling fallbacks. In scenarios where a remote is not available when expected, you can use delegate modules to recover the federated remote seamlessly. This middleware approach allows you to redirect Webpack to retrieve alternative code while maintaining the same import interface, resulting in a more resilient application.
+
+=== Server-Side Integration
+
+Delegate modules can also be employed for server-side integration. They can be used to fetch remote entries from various sources, such as databases or file systems, without relying solely on HTTP. This approach offers enhanced security and control over user-based access and data retrieval, allowing for more granular access control and data protection.
+
+=== Edge Side Includes (ESI) and Key Value (KV) Integration
+
+Delegate modules can support ESI and KV integration on edge networks by fetching HTML and returning it as React components. This approach enables a more agnostic method for distributed systems without requiring a complete top-to-bottom implementation for edge deployment. By leveraging delegate modules, you can simplify the process of implementing edge-side applications and enhance their performance.
+
+
+== How Delegate Modules Work
+
+A delegate module is a federated module that does not contain any code of its own, but instead delegates the loading and execution of another module to a different remote build. The delegate module acts as a placeholder for the actual module until it is requested by the application.
+
+The delegate module has two main properties: `remote` and `remoteType`. The `remote` property specifies the name of the remote build that contains the actual module. The `remoteType` property specifies the type of the remote build, such as `var`, `script`, `module`, etc.
+
+The delegate module also has a `get` method that returns a promise that resolves to the actual module. The `get` method takes care of loading the remote build and requesting the actual module from it.
+
+The delegate module can be exposed by any remote build using the `exposes` option in the Module Federation plugin configuration. For example, if you have a remote build named `app1` that exposes a delegate module named `delegate`, you can configure it like this:
+
+[source, javascript]
+----
+// webpack.config.js for app1
+module.exports = {
+  // ...
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "app1",
+      filename: "remoteEntry.js",
+      exposes: {
+        "./delegate": "./src/delegate.js",
+      },
+    }),
+  ],
+};
+----
+
+The `src/delegate.js` file contains the code for the delegate module. For example, if you want to delegate the loading of a module named `foo` from another remote build named `app2`, you can write it like this:
+
+[source, javascript]
+----
+// src/delegate.js for app1
+import { get } from "webpack/container/entry/dynamic-remotes";
+
+export default {
+  // Specify the name and type of the remote build
+  remote: "app2",
+  remoteType: "var",
+
+  // Define a getter function that returns a promise for the actual module
+  get: () => get("app2/foo"),
+};
+----
+
+The `get` function uses the `get` function from the `webpack/container/entry/dynamic-remotes` module, which is a helper function provided by webpack for loading dynamic remotes. It takes the name of the remote build and the name of the exposed module as arguments, and returns a promise that resolves to the actual module.
+
+The delegate module can then be consumed by any application that has access to the remote build that exposes it. For example, if you have an application named `host` that consumes the delegate module from `app1`, you can configure it like this:
+
+[source, javascript]
+----
+// webpack.config.js for host
+module.exports = {
+  // ...
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "host",
+      remotes: {
+        // Specify the URL of the remote build that exposes the delegate module
+        app1: "app1@http://localhost:3001/remoteEntry.js",
+      },
+    }),
+  ],
+};
+----
+
+The application can then import and use the delegate module like any other federated module. For example:
+
+[source, javascript]
+----
+// src/index.js for host
+import("./bootstrap");
+
+async function bootstrap() {
+  // Import the delegate module from app1
+  const delegate = await import("app1/delegate");
+
+  // Use the delegate module to get the actual module from app2
+  const foo = await delegate.get();
+
+  // Use the actual module as usual
+  foo.doSomething();
+}
+
+bootstrap();
+----
+
+As you can see, the application does not need to know anything about the remote build that contains the actual module. It only needs to know the name of the remote build that exposes the delegate module. The delegate module takes care of loading and resolving the actual module dynamically.
+
+== How to Use Delegate Modules
+
+Delegate modules are useful when you want to share code across multiple remote builds without having to expose them directly. For example, you may have a common library that is used by several remote builds, but you don't want to expose it as a federated module because it may change frequently or have different versions. Instead, you can expose a delegate module that delegates the loading of the common library to another remote build that is responsible for maintaining and updating it.
+
+To use delegate modules, you need to follow these steps:
+
+. Create a remote build that contains the actual module you want to share. For example, if you have a common library named `foo`, you can create a remote build named `app2` that exposes it as a federated module.
+. Create a delegate module that delegates the loading of the actual module to the remote build that contains it. For example, if you want to delegate the loading of `foo` from `app2`, you can create a `delegate` module named delegate in another remote build named `app1`.
+. Expose the delegate module as a federated module in the remote build that contains it. For example, you can expose `delegate` as a federated module in `app1`.
+. Consume the delegate module from any application or remote build that has access to the remote build that exposes it. For example, you can consume `delegate` from an application named `host` or another remote build named `app3`.
+
+By using delegate modules, you can achieve several benefits:
+
+- You can avoid duplication and version conflicts between federated modules. For example, if you have multiple remote builds that depend on `foo`, you don't need to expose and load `foo` multiple times. You only need to load it once through the delegate module.
+- You can decouple your remote builds from each other. For example, if you change or update `foo`, you don't need to rebuild or redeploy your other remote builds that depend on it. You only need to rebuild or redeploy `app2`, and the other remote builds will get the latest version of `foo` through the delegate module.
+- You can abstract away the details of your remote builds from your consumers. For example, if you want to change the name or type of your remote build that contains `foo`, you don't need to update your consumers that use it. You only need to update your delegate module that points to it.
+
+== Cautions for Using Delegate Modules
+
+Delegate modules are powerful and flexible, but they also come with some caveats and limitations that you need to be aware of when using them.
+
+- Delegate modules introduce an extra level of indirection and complexity in your Module Federation setup. You need to make sure that your consumers know how to access and use your delegate modules correctly, and that your delegate modules point to the right remote builds and modules.
+- Delegate modules rely on dynamic remotes, which means that they load remote builds at runtime instead of at compile time. This may have some implications for performance and security. For example, you may need to add some caching and prefetching strategies to improve loading speed, and some authentication and authorization mechanisms to prevent unauthorized access.
+- Delegate modules may not work well with some types of remote builds or modules. For example, if your remote build uses a different bundler than webpack, or if your module uses some non-standard features or syntax, you may encounter some compatibility issues or errors when loading them through delegate modules.
+
+Therefore, before using delegate modules, you should carefully evaluate your use case and requirements, and weigh the pros and cons of using them versus other alternatives.
+
+== Conclusion
+
+Delegate modules are a special type of federated module that allows you to dynamically load and resolve other modules from different remote builds at runtime. They enable you to share code across multiple applications without having to rebuild or redeploy them every time you make a change.
+
+In this guide, you learned everything you need to know about delegate modules, how they work, how to use them, and what benefits they bring to your Module Federation setup. You also learned some of the caveats and limitations of using delegate modules, and what to watch out for when using them.
+
+Delegate modules are a powerful and flexible feature of Webpack that can help you improve your code sharing and decoupling across multiple applications. However, they are not a silver bullet, and they may not suit every use case or scenario. Therefore, you should always test and verify your Module Federation setup before deploying it to production.
+
+If you want to learn more about Module Federation and delegate modules, you can check out the following resources:
+
+- https://webpack.js.org/concepts/module-federation/[Module Federation documentation]
+- https://webpack.js.org/concepts/module-federation/#dynamic-remotes[Dynamic Remotes documentation]
+- https://github.com/module-federation/module-federation-examples[Module Federation examples]
+- https://medium.com/@ScriptedAlchemy[Module Federation blog posts]

@@ -1,33 +1,31 @@
 const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
 
 registerPluginTSTranspiler();
-const { withModuleFederation } = require('@nx/react/module-federation');
-const { FederatedTypesPlugin } = require('@module-federation/typescript');
-const { ModuleFederationPlugin } = require('@module-federation/enhanced');
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
 const { composePlugins, withNx } = require('@nx/webpack');
 const { withReact } = require('@nx/react');
+process.env.FEDERATION_DEBUG = true;
 
 module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
+    // prevent cyclic updates
+    config.watchOptions = {
+      ignored: ['**/node_modules/**', '**/@mf-types/**'],
+    };
     const baseConfig = {
       name: 'react_ts_host',
       filename: 'remoteEntry.js',
       remotes: {
-        react_ts_remote: 'react_ts_remote@http://localhost:3004/remoteEntry.js',
+        react_ts_nested_remote:
+          // 'react_ts_nested_remote@http://localhost:3005/remoteEntry.js',
+          'react_ts_nested_remote@http://localhost:3005/mf-manifest.json',
       },
     };
     config.plugins.push(new ModuleFederationPlugin(baseConfig));
-
-    config.plugins.push(
-      new FederatedTypesPlugin({
-        federationConfig: {
-          ...baseConfig,
-          filename: 'remoteEntry.js',
-        },
-      }),
-    );
 
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {
@@ -50,50 +48,6 @@ module.exports = composePlugins(
       runtimeChunk: false,
       minimize: false,
     };
-    // const mf = await withModuleFederation(defaultConfig);
     return config;
-
-    // const mf = await withModuleFederation(defaultConfig);
-
-    // /** @type {import('webpack').Configuration} */
-    // const parsedConfig = mf(config, context);
-
-    // const remotes = baseConfig.remotes.reduce((remotes, remote) => {
-    //   const [name, url] = remote;
-    //   remotes[name] = url;
-    //   return remotes;
-    // }, {});
-
-    // parsedConfig.plugins.forEach((plugin) => {
-    //   if (plugin.constructor.name === 'ModuleFederationPlugin') {
-    //     //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-    //     plugin._options.library = undefined;
-    //   }
-    // });
-
-    // parsedConfig.plugins.push(
-    //   new FederatedTypesPlugin({
-    //     federationConfig: {
-    //       ...baseConfig,
-    //       filename: 'remoteEntry.js',
-    //       remotes,
-    //     },
-    //   }),
-    // );
-
-    // parsedConfig.infrastructureLogging = {
-    //   level: 'verbose',
-    //   colors: true,
-    // };
-
-    // //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-    // parsedConfig.experiments = { outputModule: false };
-
-    // parsedConfig.output = {
-    //   ...parsedConfig.output,
-    //   scriptType: 'text/javascript',
-    // };
-
-    // return parsedConfig;
   },
 );

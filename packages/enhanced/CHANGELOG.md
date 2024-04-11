@@ -1,5 +1,106 @@
 # [0.2.0-canary.5](https://github.com/module-federation/universe/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.1.3
+
+### Patch Changes
+
+- 32eba3c: fix: chunkId may equal number 0
+- 6b3b210: revert chunk integration
+- Updated dependencies [f926b6c]
+  - @module-federation/dts-plugin@0.1.3
+  - @module-federation/manifest@0.1.3
+  - @module-federation/runtime-tools@0.1.3
+  - @module-federation/rspack@0.1.3
+  - @module-federation/sdk@0.1.3
+  - @module-federation/managers@0.1.3
+
+## 0.1.2
+
+### Patch Changes
+
+- c1efbbf: chore: convergence of all package entries
+  chore: 收敛所有包的入口
+- c8c0ad2: feat: enhance type capability
+- 1bb03d1: chore: rename @module-federation/enhanced-rspack to @module-federation/rspack
+- 1bb03d1: chore: enhanced export runtime
+- Updated dependencies [c8c0ad2]
+- Updated dependencies [1bb03d1]
+  - @module-federation/rspack@0.1.2
+  - @module-federation/dts-plugin@0.1.2
+  - @module-federation/manifest@0.1.2
+  - @module-federation/sdk@0.1.2
+  - @module-federation/managers@0.1.2
+  - @module-federation/runtime-tools@0.1.2
+
+## 0.1.1
+
+### Patch Changes
+
+- ee57fb0: update chunk integration for entry modules
+  - @module-federation/sdk@0.1.1
+  - @module-federation/runtime-tools@0.1.1
+  - @module-federation/managers@0.1.1
+  - @module-federation/manifest@0.1.1
+
+## 0.1.0
+
+### Minor Changes
+
+- df3ef24: use chunk integration to initalize federation runtime and plugins in runtime bootstrap
+
+### Patch Changes
+
+- df3ef24: Support multiple runtime chunks, single runtime chunks in reference hoisting
+- df3ef24: chore: adjust add federation init process
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+- Updated dependencies [df3ef24]
+  - @module-federation/sdk@0.1.0
+  - @module-federation/runtime-tools@0.1.0
+  - @module-federation/managers@0.1.0
+  - @module-federation/manifest@0.1.0
+
+## 0.0.17
+
+### Patch Changes
+
+- @module-federation/runtime-tools@0.0.17
+- @module-federation/sdk@0.0.17
+- @module-federation/managers@0.0.17
+- @module-federation/manifest@0.0.17
+
+## 0.0.16
+
+### Patch Changes
+
+- Updated dependencies [ccafac3]
+  - @module-federation/manifest@0.0.16
+  - @module-federation/sdk@0.0.16
+  - @module-federation/runtime-tools@0.0.16
+  - @module-federation/managers@0.0.16
+
+## 0.0.15
+
+### Patch Changes
+
+- ba5bedd: feat: support manifest
+- Updated dependencies [3a45d99]
+- Updated dependencies [ba5bedd]
+  - @module-federation/sdk@0.0.15
+  - @module-federation/managers@0.0.15
+  - @module-federation/manifest@0.0.15
+  - @module-federation/runtime-tools@0.0.15
+
+## 0.0.14
+
+### Patch Changes
+
+- Updated dependencies [cd8c7bf]
+- Updated dependencies [5576c6b]
+  - @module-federation/sdk@0.0.14
+  - @module-federation/runtime-tools@0.0.14
+
 ## 0.0.13
 
 ### Patch Changes

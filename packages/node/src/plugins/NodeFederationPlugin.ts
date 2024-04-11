@@ -2,7 +2,7 @@
 
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
-
+import EntryChunkTrackerPlugin from './EntryChunkTrackerPlugin';
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
  * @interface
@@ -61,12 +61,15 @@ class NodeFederationPlugin {
       webpack,
     );
     new ModuleFederationPlugin(pluginOptions).apply(compiler);
+    new EntryChunkTrackerPlugin({}).apply(compiler);
   }
 
   private preparePluginOptions(): ModuleFederationPluginOptions {
     return {
       ...this._options,
       remotes: this._options.remotes || {},
+      // enable dts in browser by default
+      dts: this._options.dts ?? false,
     };
   }
 

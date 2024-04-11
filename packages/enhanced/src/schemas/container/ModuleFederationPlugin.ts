@@ -1,4 +1,32 @@
 //@ts-nocheck
+
+const runtimePlugin = {
+  type: 'array',
+  items: {
+    anyOf: [
+      {
+        type: 'string',
+        minLength: 1,
+        description: 'Runtime Plugin File Path.',
+      },
+      {
+        type: 'object',
+        required: ['import', 'async'],
+        properties: {
+          import: {
+            type: 'string',
+            minLength: 1,
+            description: 'Runtime Plugin File Path.',
+          },
+          async: {
+            type: 'boolean',
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
+  },
+};
 export default {
   definitions: {
     AmdContainer: {
@@ -513,6 +541,132 @@ export default {
         'If `output.libraryTarget` is set to umd and `output.library` is set, setting this to true will name the AMD module.',
       type: 'boolean',
     },
+    Manifest: {
+      description: 'Used to config manifest.',
+      type: 'object',
+      properties: {
+        filePath: {
+          description: 'The file path of the vmok manifest.',
+          type: 'string',
+        },
+        disableAssetsAnalyze: {
+          description:
+            'Used to disable assets analyze in dev. If the value is set to true, manifest will neither have shared and exposes fields nor have remotes detail. Generally, it will be set to true in dev if the project is a pure consumer.',
+          type: 'boolean',
+        },
+      },
+    },
+    DtsRemoteOptions: {
+      description: 'Used to config generate types.',
+      type: 'object',
+      properties: {
+        tsConfigPath: {
+          description: 'The tsconfig path of the project.',
+          type: 'string',
+        },
+        typesFolder: {
+          description: 'The generated folder path of the types.',
+          type: 'string',
+        },
+        compiledTypesFolder: {
+          description: 'The compiled folder path of the types.',
+          type: 'string',
+        },
+        deleteTypesFolder: {
+          description: 'Whether delete the types folder.',
+          type: 'boolean',
+        },
+        additionalFilesToCompile: {
+          description: 'The additional files to compile.',
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+        compileInChildProcess: {
+          description: 'Whether compile types in child process.',
+          type: 'boolean',
+        },
+        compilerInstance: {
+          description: 'The compiler instance of the project.',
+          enum: ['tsc', 'vue-tsc'],
+        },
+        generateAPITypes: {
+          description: 'Whether generate runtime api types.',
+          type: 'boolean',
+        },
+        abortOnError: {
+          description: 'Whether abort the process while generate types failed.',
+          type: 'boolean',
+        },
+      },
+    },
+    DtsHostOptions: {
+      description: 'Used to config consume types.',
+      type: 'object',
+      properties: {
+        typesFolder: {
+          description: 'The consumed folder path of the types.',
+          type: 'string',
+        },
+        remoteTypesFolder: {
+          description: 'The consumed remote folder path of the types.',
+          type: 'string',
+        },
+        deleteTypesFolder: {
+          description: 'Whether delete the types folder.',
+          type: 'boolean',
+        },
+        abortOnError: {
+          description: 'Whether abort the process while consume types failed.',
+          type: 'boolean',
+        },
+        maxRetries: {
+          description: 'The max retries count of consume types.',
+          type: 'number',
+          minimum: 1,
+        },
+      },
+    },
+    Dts: {
+      description: 'Used to get types support.',
+      type: 'object',
+      properties: {
+        generateTypes: {
+          description: 'Used to config generate types.',
+          ref: '#/definitions/DtsRemoteOptions',
+        },
+        consumeTypes: {
+          description: 'Used to config consume types.',
+          ref: '#/definitions/DtsHostOptions',
+        },
+        extraOptions: {
+          description: 'Extra options for DTS Manager.',
+          type: 'object',
+          additionalProperties: true,
+        },
+        implementation: {
+          description: 'The implementation of the DTS Manager.',
+          type: 'string',
+          minLength: 1,
+        },
+      },
+      additionalProperties: false,
+    },
+    Dev: {
+      description: 'Used to config dev.',
+      type: 'object',
+      properties: {
+        disableLiveReload: {
+          description: 'Disable live reload.',
+          type: 'boolean',
+        },
+        disableHotTypesReload: {
+          description: 'Disable hot types reload.',
+          type: 'boolean',
+        },
+      },
+    },
   },
   title: 'ModuleFederationPluginOptions',
   type: 'object',
@@ -553,13 +707,17 @@ export default {
     runtime: {
       $ref: '#/definitions/EntryRuntime',
     },
-    runtimePlugins: {
-      type: 'array',
-      items: {
-        description: 'Runtime Plugin File Path.',
-        type: 'string',
-        minLength: 1,
-      },
+    runtimePlugins: runtimePlugin,
+    manifest: {
+      description: 'Used to config manifest.',
+      anyOf: [
+        {
+          $ref: '#/definitions/Manifest',
+        },
+        {
+          type: 'boolean',
+        },
+      ],
     },
     shareScope: {
       description:
@@ -569,6 +727,28 @@ export default {
     },
     shared: {
       $ref: '#/definitions/Shared',
+    },
+    dts: {
+      description: 'Used to get types support.',
+      anyOf: [
+        {
+          $ref: '#/definitions/Dts',
+        },
+        {
+          type: 'boolean',
+        },
+      ],
+    },
+    dev: {
+      description: 'Dev options.',
+      anyOf: [
+        {
+          $ref: '#/definitions/Dev',
+        },
+        {
+          type: 'boolean',
+        },
+      ],
     },
   },
 };

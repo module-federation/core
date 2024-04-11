@@ -1,0 +1,8 @@
+[build]
+publish = "apps/website-new/doc_build"
+
+[[redirects]]
+from = "/*"
+to = "/"
+status = 200
+

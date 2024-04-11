@@ -6,12 +6,17 @@ const { withReact } = require('@nx/react');
 
 const path = require('path');
 // const { withModuleFederation } = require('@nx/react/module-federation');
-const { ModuleFederationPlugin } = require('@module-federation/enhanced');
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
 
 module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
+    config.watchOptions = {
+      ignored: ['**/node_modules/**', '**/@mf-types/**'],
+    };
     // const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
     config.plugins.push(
       new ModuleFederationPlugin({

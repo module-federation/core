@@ -1,0 +1,45 @@
+{
+  "name": "@module-federation/manifest",
+  "version": "0.1.3",
+  "license": "MIT",
+  "description": "Provide manifest/stats for webpack/rspack MF project .",
+  "keywords": [
+    "Module Federation",
+    "Webpack",
+    "Rspack",
+    "Manifest"
+  ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "hanric <hanric.zhang@gmail.com>",
+  "sideEffects": false,
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.cjs.d.ts",
+  "dependencies": {
+    "@module-federation/sdk": "workspace:*",
+    "@module-federation/dts-plugin": "workspace:*",
+    "@module-federation/managers": "workspace:*",
+    "find-pkg": "2.0.0",
+    "chalk": "3.0.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "types": "./dist/index.cjs.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.cjs.d.ts"
+      ]
+    }
+  }
+}

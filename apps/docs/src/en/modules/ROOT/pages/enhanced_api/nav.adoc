@@ -1,0 +1,16 @@
+.Plugins/Packages
+* Enhanced API Plugin
+** xref:about.adoc[About]
+** xref:installation.adoc[Installation]
+** xref:getting_started.adoc[Getting Started]
+* Features
+** xref:features_default_async.adoc[Default Async]
+** xref:features_module_name_map.adoc[Modules' Name Map]
+** xref:features_remotes_name_map.adoc[Remotes' Name Map]
+** xref:features_remotes_url.adoc[Remotes' URL]
+** xref:features_remote_object_definition.adoc[Object Definition]
+* Helper
+** xref:helper_about.adoc[About]
+** xref:helper_installation.adoc[Install]
+** xref:helper_getModule.adoc[getModule]
+** xref:helper_dynamicLoad.adoc[dynamicLoad]

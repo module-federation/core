@@ -6,7 +6,6 @@ import {
 import { ChunkCorrelationPlugin } from '@module-federation/node';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
-
 /**
  * Applies client-specific plugins.
  *
@@ -38,7 +37,6 @@ export function applyClientPlugins(
   compiler.options.output.publicPath = 'auto';
   // Build will hang without this. Likely something in my plugin
   compiler.options.optimization.splitChunks = undefined;
-  new HoistContainerReferencesPlugin().apply(compiler);
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
   if (extraOptions.automaticPageStitching) {
@@ -64,6 +62,8 @@ export function applyClientPlugins(
     ],
     //@ts-ignore
   }).apply(compiler);
+
+  new HoistContainerReferencesPlugin().apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler
   new InvertedContainerPlugin({

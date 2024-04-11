@@ -1,0 +1,208 @@
+# dts
+
+- 类型：`boolean | PluginDtsOptions`
+- 是否必填：否
+- 默认值：`true`
+- 使用场景：用于控制 `Module Federation` 生成/消费类型行为
+
+配置之后，生产者会在构建时自动生成一个压缩的类型文件 `@mf-types.zip`（默认名称），消费者会自动拉取 `remotes` 的类型文件并解压至 `@mf-types`（默认名称）。
+
+`PluginDtsOptions` 类型如下：
+
+```ts
+interface PluginDtsOptions {
+  generateTypes?: boolean | DtsRemoteOptions;
+  consumeTypes?: boolean | DtsHostOptions;
+}
+```
+
+### generateTypes
+
+- 类型：`boolean | DtsRemoteOptions`
+- 是否必填：否
+- 默认值：`true`
+- 使用场景：用于控制 `Module Federation` 生成类型行为
+
+`DtsRemoteOptions` 类型如下：
+
+```ts
+interface DtsRemoteOptions {
+  tsConfigPath?: string;
+  typesFolder?: string;
+  deleteTypesFolder?: boolean;
+  additionalFilesToCompile?: string[];
+  compilerInstance?: 'tsc' | 'vue-tsc';
+  compileInChildProcess?: boolean;
+  generateAPITypes?: boolean;
+  extractThirdParty?: boolean;
+  extractRemoteTypes?: boolean;
+  abortOnError?: boolean;
+}
+```
+
+当配置 `generateTypes` 为 `true` 时，默认会生成下列配置：
+
+```json
+{
+  "generateAPITypes": true,
+  "abortOnError": false,
+  "extractThirdParty": true,
+  "extractRemoteTypes": true,
+  "compileInChildProcess": true
+}
+```
+
+#### extractRemoteTypes
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`undefined`
+- 使用场景：当生产者 `exposes` 的内容中有重导出自身的 `remotes` 模块，那么 `extractRemoteTypes: true` 能够确保消费者能正常获取生产者 `exposes` 的模块类型
+- 示例：[嵌套类型重导出](../guide/basic/type-prompt#嵌套类型重导出)
+
+是否抽取 `remotes` 的类型。
+
+#### extractThirdParty
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`undefined`
+- 使用场景：当生产者 `exposes` 的内容中有包含 `antd` 的模块，并且消费者没装 `antd` ，那么 `extractThirdParty: true` 能够确保消费者能正常获取生产者 `exposes` 的模块类型
+- 示例：[第三方包类型抽取](../guide/basic/type-prompt#第三方包类型抽取)
+
+是否抽取第三方包类型。
+
+#### generateAPITypes
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`undefined`
+- 示例：[Federation Runtime API 类型提示](../guide/basic/type-prompt#federation-runtime-api-类型提示)
+
+是否生成 `Federation Runtime` 中 `loadRemote` 类型
+
+#### compileInChildProcess
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`undefined`
+
+是否在子进程中编译生成类型
+
+#### abortOnError
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`false`
+
+是否抛出错误当类型生成过程中碰到问题
+
+#### tsConfigPath
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`path.join(process.cwd(),'./tsconfig.json')`
+
+tsconfig 配置文件路径
+
+#### typesFolder
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`'@mf-types'`
+
+生成的压缩类型文件名称，例如设置了typesFolder为 `custom`，那么生成的压缩类型文件名称为： `custom.zip`
+
+#### deleteTypesFolder
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`true`
+
+是否删除生成的类型文件夹
+
+#### compilerInstance
+
+- 类型：`'tsc' | 'vue-tsc'`
+- 是否必填：否
+- 默认值：`'tsc'`
+
+编译类型的示例
+
+### consumeTypes
+
+- 类型：`boolean | DtsHostOptions`
+- 是否必填：否
+- 默认值：`true`
+- 使用场景：用于控制 `Module Federation` 消费（加载）类型行为
+
+`DtsHostOptions` 类型如下：
+
+```ts
+interface DtsHostOptions {
+  typesFolder?: string;
+  abortOnError?: boolean;
+  remoteTypesFolder?: string;
+  deleteTypesFolder?: boolean;
+  maxRetries?: number;
+  consumeAPITypes?: boolean;
+}
+```
+
+当配置 `consumeTypes` 为 `true` 时，默认会生成下列配置：
+
+```json
+{
+  "abortOnError": false,
+  "consumeAPITypes": true
+}
+```
+
+#### consumeAPITypes
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`true`
+- 示例：[Federation Runtime API 类型提示](../guide/basic/type-prompt#federation-runtime-api-类型提示)
+
+是否生成运行时 `loadRemote` API 的类型
+
+#### maxRetries
+
+- 类型：`number`
+- 是否必填：否
+- 默认值：`3`
+
+最大加载失败重试次数
+
+#### abortOnError
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`false`
+
+是否抛出错误当类型加载过程中碰到问题
+
+#### typesFolder
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`'@mf-types'`
+
+加载成功后的的类型存放目录
+
+#### deleteTypesFolder
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`true`
+
+加载类型文件之前，是否删除之前加载的 `typesFolder` 目录
+
+#### remoteTypesFolder
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`'@mf-types'`
+
+对应 `remotes` 目录配置的 `typesFolder`

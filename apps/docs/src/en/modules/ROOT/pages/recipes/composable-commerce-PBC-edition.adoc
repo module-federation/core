@@ -1,0 +1,819 @@
+= Composable Commerce with Module Federation
+
+Composable Commerce is a new approach to building e-commerce applications that allows you to customize and extend every aspect of your online store. With Composable Commerce, you can leverage best-of-breed solutions from different vendors and combine them into a unified shopping experience for your customers.
+
+In this guide, you will learn how to use Composable Commerce and Module Federation to create a modular and scalable e-commerce application. You will learn see how to:
+
+- Figure out Composable Commerce concept;
+- Benefits of Composable Commerce to e-commerce;
+- Define the architecture and components of your application;
+- Configure Webpack to enable Module Federation;
+- Expose and consume modules from different bundles;
+- Implement common e-commerce features such as product catalog, cart, checkout, and payment using Module Federation;
+
+== What is Composable Commerce?
+
+Composable commerce is an approach to e-commerce development that follows the principles of microservices, domain-driven design and API-first design. It breaks down the monolithic e-commerce application into smaller, loosely coupled components that can be composed together to create a customized and adaptable user experience. Each component is responsible for a specific business domain or functionality, such as product catalog, shopping cart, checkout, payment, etc. These components communicate with each other through well-defined APIs and events.
+
+Composable commerce enables you to:
+
+- Choose the best components for your business needs from different vendors or develop your own.
+- Mix and match components from different sources and technologies without worrying about compatibility or integration issues.
+- Replace or upgrade components without affecting the rest of the application or requiring downtime.
+- Experiment with new features or functionalities without risking the stability of the application.
+- Scale each component independently according to the demand and traffic.
+
+For example, suppose you have an e-commerce application that sells books online. You can use composable commerce to create your application from different components such as:
+
+- A product catalog component that provides the data and UI for browsing and searching books by title, author, genre, etc.
+- A shopping cart component that provides the data and UI for adding, removing and updating items in the cart.
+- A checkout component that provides the data and UI for entering shipping and billing information, applying discounts and coupons, etc.
+- A payment component that provides the data and UI for choosing and processing payment methods such as credit card, PayPal, etc.
+- A review component that provides the data and UI for rating and reviewing books after purchase.
+
+Each component can be developed by a different team using a different technology stack. For example, the product catalog component can be developed using React and GraphQL, the shopping cart component can be developed using Angular and RESTful APIs, the checkout component can be developed using Vue and Firebase, etc. Each component can also be deployed and updated separately on different servers or domains.
+
+To compose your application from these components, you need to define how they interact with each other through APIs and events. For example, you can define an API for the product catalog component that exposes endpoints for querying books by various criteria. You can also define an event for the shopping cart component that emits a message when an item is added to or removed from the cart. You can then use these APIs and events to connect your components together and create a seamless user experience.
+
+== What are the benefits of Module Federation + Composable Commerce?
+
+By using Module Federation + Composable Commerce, you can achieve the following benefits:
+
+- *Faster time to market*: You can reuse existing code and components from different sources without having to rebuild or redeploy them. You can also update or replace any component at any time without affecting the rest of the system.
+- *Greater flexibility and scalability*: You can choose the best-of-breed vendors that provide the functionality you need for each business capability, such as product catalog, checkout, payment, etc. You can also scale each component independently according to your traffic and performance needs.
+- *Better customer experience*: You can deliver consistent and engaging product experiences across multiple channels and touchpoints, such as web, mobile, social media, etc. You can also customize and optimize each component according to your customer preferences and behavior.
+
+For example, suppose you want to add a new feature to your e-commerce application that allows customers to create personalized book recommendations based on their preferences. You can use composable commerce to achieve this by:
+
+- Reusing an existing component that provides a survey service to collect customer preferences.
+- Developing a new component that provides a recommendation engine to generate book suggestions based on customer preferences.
+- Integrating these components with your existing product catalog component using APIs and events.
+- Deploying these components separately without affecting the rest of the application or requiring downtime.
+
+This way, you can deliver this new feature faster, cheaper and more reliably than if you had to modify your monolithic application.
+
+== How does Module Federation + Composable Commerce work?
+
+Module Federation + Composable Commerce works by breaking down your e-commerce solution into modular building blocks called Packaged Business Capabilities (PBCs). Each PBC represents a specific business function, such as product search, cart, reviews, etc. Each PBC can be deployed and scaled independently, and can communicate with other PBCs via APIs. You can choose the PBCs that suit your business requirements from different vendors or sources, or create your own PBCs if needed. You can then compose them together into a custom e-commerce application that meets your specific needs.
+
+== Migration to Composable Commerce using Module Federation
+
+Module federation is a feature of Webpack 5 that allows you to dynamically load modules from remote applications at runtime. It also enables you to share modules across different applications without duplicating code or creating dependencies. Module federation can help you migrate your existing e-commerce application to a composable commerce architecture by allowing you to:
+
+- Split your monolithic application into smaller modules that can be loaded on demand by different applications.
+- Create a shell application that acts as a container for loading and rendering different modules based on the user's context and actions.
+- Share common modules such as authentication,  navigation, UI components, etc.across different applications to ensure consistency and avoid duplication.
+- Leverage existing modules from third-party vendors or open source projects to enhance your application's functionality and user experience.
+
+To use module federation, you need to:
+
+- Configure Webpack 5 in each module and shell application to expose and consume remote modules using the `ModuleFederationPlugin`.
+- Define the entry points, dependencies and fallbacks for each remote module using the `exposes`, `remotes` and `shared` options in the plugin configuration.
+- Use dynamic imports or custom hooks to load and use remote modules in your shell or module applications.
+
+In this example, we have four PBCs: Product Catalog, Cart, Checkout and Payment. Each PBC is provided by a different vendor or source:
+
+
+
+- *Product Catalog*: This PBC is provided by https://api.akeneo.com/[Akeneo], a product information management (PIM) platform that helps you manage and enrich your product data across multiple channels.
+- *Cart:* This PBC is provided by https://www.shopify.com/ca/enterprise/composable-commerce[Shopify], a leading e-commerce platform that offers a powerful cart functionality with features such as discounts, taxes, shipping rates, etc.
+- *Checkout:* This PBC is provided by https://www.sitecore.com/blog/commerce/what-is-composable-commerce[Sitecore], a digital experience platform that enables you to create personalized and optimized checkout experiences for your customers.
+*Payment:* This PBC is provided by https://api.stripe.com/[Stripe], a payment platform that supports various payment methods, currencies, fraud prevention, etc.
+
+Each PBC is exposed as a remote module that can be loaded at runtime from its container. The containers are created using webpack's Module Federation plugin, which allows sharing code between different builds. The containers are connected via APIs that enable data exchange and orchestration between the PBCs.
+
+The front-end application is built using React. The front-end application acts as the host that consumes the remote modules from the containers and renders them on the web page. The front-end application can also customize and extend the functionality of the remote modules if needed.
+
+== How to get started with Module Federation + Composable Commerce?
+
+To get started with Module Federation + Composable Commerce, you will need the following:
+
+- A basic understanding of JavaScript, React and webpack
+- A code editor of your choice
+- A terminal or command-line interface
+- Node.js and npm installed on your machine
+- An account with each of the vendors or sources that provide the PBCs you want to use
+
+The following steps will guide you through creating a simple e-commerce application using Module Federation and Composable Commerce:
+
+1. Create a new folder for your project and navigate to it in your terminal or command-line interface.
+2. Initialize a new npm project by running `npm init -y`.
+3. Install webpack and its dependencies by running `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @module-federation/module-federation-plugin --save-dev`.
+4. Create a `webpack.config.js` file in the root folder of your project and add the following code:
++
+[source, javascript]
+----
+// webpack.config.js
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const ModuleFederationPlugin = require("@module-federation/module-federation-plugin");
+
+module.exports = {
+  mode: "development",
+  devServer: {
+    port: 3000,
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+    new ModuleFederationPlugin({
+      name: "host",
+      remotes: {
+        productCatalog: "productCatalog@http://localhost:3001/remoteEntry.js",
+        cart: "cart@http://localhost:3002/remoteEntry.js",
+        checkout: "checkout@http://localhost:3003/remoteEntry.js",
+        payment: "payment@http://localhost:3004/remoteEntry.js",
+      },
+    }),
+  ],
+};
+----
++
+This code configures webpack to create a development server on port 3000 and to use Module Federation plugin to define the host application and the remote modules from the containers. Each remote module has a name and a URL that points to its container entry.
++
+5. Create a `public` folder in the root folder of your project and add an `index.html` file with the following code:
++
+[source, html]
+----
+<!-- index.html -->
+<html>
+  <head>
+    <title>Module Federation + Composable Commerce</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="main.js"></script>
+  </body>
+</html>
+----
++
+This code defines the HTML template for the host application and loads the main JavaScript bundle.
++
+6. Create a `src` folder in the root folder of your project and add an `index.js` file with the following code:
++
+[source, javascript]
+----
+// index.js
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+
+ReactDOM.render(<App />, document.getElementById("root"));
+----
++
+This code imports React and ReactDOM libraries and renders the App component on the web page.
++
+7. In the same `src` folder, create an `App.js` file with the following code:
++
+[source, javascript]
+----
+// App.js
+import React, { lazy, Suspense } from "react";
+
+const ProductCatalog = lazy(() => import("productCatalog/ProductCatalog"));
+const Cart = lazy(() => import("cart/Cart"));
+const Checkout = lazy(() => import("checkout/Checkout"));
+const Payment = lazy(() => import("payment/Payment"));
+
+const App = () => {
+  return (
+    <div>
+      <h1>Module Federation + Composable Commerce</h1>
+      <Suspense fallback={<div>Loading...</div>}>
+        <ProductCatalog />
+        <Cart />
+        <Checkout />
+        <Payment />
+      </Suspense>
+    </div>
+  );
+};
+
+export default App;
+----
++
+This code imports React and its lazy and Suspense features, which allow loading components asynchronously. It also imports the remote modules from the containers using their names defined in the webpack configuration. It then renders each component on the web page using Suspense to handle loading states.
++
+8. In your terminal or command-line interface, run `npm start` to start the development server and open your browser to `http://localhost:3000`. You should see a web page with a title and four loading messages.
++
+9. Congratulations! You have successfully created a host application that consumes remote modules from different containers using Module Federation + Composable Commerce. The next steps are to create each container application and expose its PBC as a remote module. For simplicity, we will use React for each container application, but you can use any framework or library of your choice.
++
+10. To create the Product Catalog container application, follow these steps:
++
+- Create a new folder for your project and navigate to it in your terminal or command-line interface.
+- Initialize a new npm project by running `npm init -y`.
+- Install webpack and its dependencies by running `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @module-federation/module-federation-plugin --save-dev`.
+- Create a `webpack.config.js` file in the root folder of your project and add the following code:
++
+[source, javascript]
+----
+// webpack.config.js
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const ModuleFederationPlugin = require("@module-federation/module-federation-plugin");
+
+module.exports = {
+  mode: "development",
+  devServer: {
+    port: 3001,
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+    new ModuleFederationPlugin({
+      name: "productCatalog",
+      filename: "remoteEntry.js",
+      exposes: {
+        "./ProductCatalog": "./src/ProductCatalog",
+      },
+    }),
+  ],
+};
+----
++
+This code configures webpack to create a development server on port 3001 and to use Module Federation plugin to expose the Product Catalog PBC as a remote module with the name `productCatalog` and the filename `remoteEntry.js`.
++
+- Create a `public` folder in the root folder of your project and add an `index.html` file with the following code:
++
+[source, html]
+----
+<!-- index.html -->
+<html>
+  <head>
+    <title>Product Catalog</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="remoteEntry.js"></script>
+  </body>
+</html>
+----
++
+This code defines the HTML template for the container application and loads the remote entry JavaScript bundle.
++
+- Create an `src` folder in the root folder of your project and add a `ProductCatalog.js` file with the following code:
+
+[source, javascript]
+----
+// ProductCatalog.js
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+const ProductCatalog = () => {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    // Fetch products from Akeneo PIM using its REST API
+    // For simplicity, we hardcode the authentication token and the query parameters
+    // In a real scenario, you would use a dynamic way to get these values
+    const token = "Bearer xxx"; // Replace with your own token
+    const query = {
+      search: JSON.stringify({
+        enabled: [{ operator: "=", value: true }],
+      }),
+      scope: "e-commerce",
+      locales: "en_US",
+      limit: 10,
+      with_attribute_options: true,
+    };
+    axios
+      .get("https://demo.akeneo.com/api/rest/v1/products", {
+        headers: {
+          Authorization: token,
+          Accept: "application/json",
+        },
+        params: query,
+      })
+      .then((response) => {
+        // Extract the product data from the response
+        const products = response.data._embedded.items.map((item) => {
+          return {
+            id: item.identifier,
+            name: item.values.name.en_US[0].data,
+            description: item.values.description.en_US[0].data,
+            price: item.values.price[0].data[0].amount,
+            image: item.values.images[0].data,
+          };
+        });
+        // Update the state with the product data
+        setProducts(products);
+      })
+      .catch((error) => {
+        // Handle errors
+        console.error(error);
+      });
+  }, []);
+
+  return (
+    <div>
+      <h2>Product Catalog</h2>
+      <ul>
+        {products.map((product) => (
+          <li key={product.id}>
+            <img src={product.image} alt={product.name} width="100" />
+            <h3>{product.name}</h3>
+            <p>{product.description}</p>
+            <p>${product.price}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default ProductCatalog;
+----
++
+This code imports React and its useState and useEffect hooks, as well as axios library for making HTTP requests. It defines a ProductCatalog component that fetches products from Akeneo PIM using its REST API² and renders them on the web page.
++
+- In your terminal or command-line interface, run `npm start` to start the development server and open your browser to `http://localhost:3001`. You should see a web page with a title and a list of products.
++
+11. To create the Cart container application, follow these steps:
++
+- Create a new folder for your project and navigate to it in your terminal or command-line interface.
+- Initialize a new npm project by running `npm init -y`.
+- Install webpack and its dependencies by running `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @module-federation/module-federation-plugin --save-dev`.
+- Create a `webpack.config.js` file in the root folder of your project and add the following code:
++
+[source, javascript]
+----
+// webpack.config.js
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const ModuleFederationPlugin = require("@module-federation/module-federation-plugin");
+
+module.exports = {
+  mode: "development",
+  devServer: {
+    port: 3002,
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+    new ModuleFederationPlugin({
+      name: "cart",
+      filename: "remoteEntry.js",
+      exposes: {
+        "./Cart": "./src/Cart",
+      },
+    }),
+  ],
+};
+----
++
+This code configures webpack to create a development server on port 3002 and to use Module Federation plugin to expose the Cart PBC as a remote module with the name `cart` and the filename `remoteEntry.js`.
++
+- Create a `public` folder in the root folder of your project and add an `index.html` file with the following code:
+
+[source, html]
+----
+<!-- index.html -->
+<html>
+  <head>
+    <title>Cart</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="remoteEntry.js"></script>
+  </body>
+</html>
+----
++
+This code defines the HTML template for the container application and loads the remote entry JavaScript bundle.
++
+- Create a `src` folder in the root folder of your project and add a `Cart.js` file with the following code:
++
+[source, javascript]
+----
+// Cart.js
+import React, { useState } from "react";
+
+const Cart = () => {
+  const [items, setItems] = useState([]);
+
+  const addToCart = (product) => {
+    // Add the product to the cart items
+    setItems([...items, product]);
+  };
+
+  const removeFromCart = (id) => {
+    // Remove the product from the cart items by its id
+    setItems(items.filter((item) => item.id !== id));
+  };
+
+  const getTotal = () => {
+    // Calculate the total price of the cart items
+    return items.reduce((total, item) => total + parseFloat(item.price), 0);
+  };
+
+  return (
+    <div>
+      <h2>Cart</h2>
+      <ul>
+        {items.map((item) => (
+          <li key={item.id}>
+            <img src={item.image} alt={item.name} width="100" />
+            <h3>{item.name}</h3>
+            <p>${item.price}</p>
+            <button onClick={() => removeFromCart(item.id)}>Remove</button>
+          </li>
+        ))}
+      </ul>
+      <p>Total: ${getTotal()}</p>
+    </div>
+  );
+};
+
+export default Cart;
+----
++
+This code imports React and its useState hook. It defines a Cart component that manages an array of cart items and provides functions to add, remove and calculate the total price of the items. It also renders the cart items on the web page.
++
+- In your terminal or command-line interface, run `npm start` to start the development server and open your browser to `http://localhost:3002`. You should see a web page with a title and an empty cart.
++
+12. To create the Checkout container application, follow these steps:
++
+- Create a new folder for your project and navigate to it in your terminal or command-line interface.
+- Initialize a new npm project by running `npm init -y`.
+- Install webpack and its dependencies by running `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @module-federation/module-federation-plugin --save-dev`.
+- Create a `webpack.config.js` file in the root folder of your project and add the following code:
++
+[source, javascript]
+----
+// webpack.config.js
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const ModuleFederationPlugin = require("@module-federation/module-federation-plugin");
+
+module.exports = {
+  mode: "development",
+  devServer: {
+    port: 3003,
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+    new ModuleFederationPlugin({
+      name: "checkout",
+      filename: "remoteEntry.js",
+      exposes: {
+        "./Checkout": "./src/Checkout",
+      },
+    }),
+  ],
+};
+----
++
+This code configures webpack to create a development server on port 3003 and to use Module Federation plugin to expose the Checkout PBC as a remote module with the name `checkout` and the filename `remoteEntry.js`.
++
+- Create a `public` folder in the root folder of your project and add an `index.html` file with the following code:
+
+[source, html]
+----
+<!-- index.html -->
+<html>
+  <head>
+    <title>Checkout</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="remoteEntry.js"></script>
+  </body>
+</html>
+----
++
+This code defines the HTML template for the container application and loads the remote entry JavaScript bundle.
++
+- Create an `src` folder in the root folder of your project and add a `Checkout.js` file with the following code:
++
+[source, javascript]
+----
+// Checkout.js
+import React, { useState } from "react";
+
+const Checkout = () => {
+  const [customer, setCustomer] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
+    country: "",
+  });
+
+  const handleChange = (event) => {
+    // Update the customer state with the input value
+    const { name, value } = event.target;
+    setCustomer({ ...customer, [name]: value });
+  };
+
+  const handleSubmit = (event) => {
+    // Prevent the default form submission behavior
+    event.preventDefault();
+    // Validate the customer data and send it to Sitecore using its REST API
+    // For simplicity, we hardcode the authentication token and the base URL
+    // In a real scenario, you would use a dynamic way to get these values
+    const token = "Bearer xxx"; // Replace with your own token
+    const baseURL = "https://demo.sitecore.com/api/checkout"; // Replace with your own URL
+    axios
+      .post(
+        `${baseURL}/customer`,
+        {
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          email: customer.email,
+          address: customer.address,
+          city: customer.city,
+          state: customer.state,
+          zip: customer.zip,
+          country: customer.country,
+        },
+        {
+          headers: {
+            Authorization: token,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((response) => {
+        // Handle success
+        console.log(response.data);
+      })
+      .catch((error) => {
+        // Handle errors
+        console.error(error);
+      });
+  };
+
+  return (
+    <div>
+      <h2>Checkout</h2>
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="firstName">First name</label>
+        <input
+          type="text"
+          id="firstName"
+          name="firstName"
+          value={customer.firstName}
+          onChange={handleChange}
+          required
+        />
+        <label htmlFor="lastName">Last name</label>
+        <input
+          type="text"
+          id="lastName"
+          name="lastName"
+          value={customer.lastName}
+          onChange={handleChange}
+          required
+        />
+        <label htmlFor="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value={customer.email}
+          onChange={handleChange}
+          required
+        />
+        <label htmlFor="address">Address</label>
+        <input
+          type="text"
+          id="address"
+          name="address"
+          value={customer.address}
+          onChange={handleChange}
+          required
+        />
+        <label htmlFor="city">City</label>
+        <input
+          type="text"
+          id="city"
+          name="city"
+          value={customer.city}
+          onChange={handleChange}
+          required
+        />
+        <label htmlFor="state">State</label>
+        <input
+          type="text"
+          id="state"
+          name="state"
+          value={customer.state}
+          onChange={handleChange}
+          required
+        />
+        <label htmlFor="zip">Zip code</label>
+        <input
+          type="text"
+          id="zip"
+          name="zip"
+          value={customer.zip}
+          onChange={handleChange}
+          required
+        />
+        <label htmlFor="country">Country</label>
+        <input
+          type="text"
+          id="country"
+          name="country"
+          value={customer.country}
+          onChange={handleChange}
+          required
+        />
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  );
+};
+
+export default Checkout;
+----
++
+This code imports React and its useState hook. It defines a Checkout component that manages an object of customer data and provides functions to handle input changes and form submission. It also renders a form with the customer data on the web page.
++
+- In your terminal or command-line interface, run `npm start` to start the development server and open your browser to `http://localhost:3003`. You should see a web page with a title and a form.
++
+13. To create the Payment container application, follow these steps:
++
+- Create a new folder for your project and navigate to it in your terminal or command-line interface.
+- Initialize a new npm project by running `npm init -y`.
+- Install webpack and its dependencies by running `npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @module-federation/module-federation-plugin --save-dev`.
+- Create a `webpack.config.js` file in the root folder of your project and add the following code:
++
+[source, javascript]
+----
+// webpack.config.js
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const ModuleFederationPlugin = require("@module-federation/module-federation-plugin");
+
+module.exports = {
+  mode: "development",
+  devServer: {
+    port: 3004,
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+    new ModuleFederationPlugin({
+      name: "payment",
+      filename: "remoteEntry.js",
+      exposes: {
+        "./Payment": "./src/Payment",
+      },
+    }),
+  ],
+};
+----
++
+This code configures Webpack to create a development server on port 3004 and to use Module Federation plugin to expose the Payment PBC as a remote module with the name `payment` and the filename `remoteEntry.js`.
++
+- Create a `public` folder in the root folder of your project and add an `index.html` file with the following code:
++
+[source, html]
+----
+<!-- index.html -->
+<html>
+  <head>
+    <title>Payment</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="remoteEntry.js"></script>
+  </body>
+</html>
+----
++
+This code defines the HTML template for the container application and loads the remote entry JavaScript bundle.
++
+- Create an `src` folder in the root folder of your project and add a `Payment.js` file with the following code:
++
+[source, javascript]
+----
+// Payment.js
+import React, { useState } from "react";
+import { loadStripe } from "@stripe/stripe-js";
+
+const Payment = () => {
+  const [paymentIntent, setPaymentIntent] = useState(null);
+
+  const handlePayment = async () => {
+    // Create a Stripe instance using your publishable key
+    // For simplicity, we hardcode the key here
+    // In a real scenario, you would use a dynamic way to get this value
+    const stripe = await loadStripe(
+      "test_key_XXXXXXXXXXX"
+    );
+    // Create a payment intent using Stripe's REST API
+    // For simplicity, we hardcode the authentication token and the amount here
+    // In a real scenario, you would use a dynamic way to get these values
+    const token = "Bearer xxx"; // Replace with your own token
+    const amount = 100; // Replace with your own amount
+    const response = await fetch("https://api.stripe.com/v1/payment_intents", {
+      method: "POST",
+      headers: {
+        Authorization: token,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: `amount=${amount}&currency=usd`,
+    });
+    const data = await response.json();
+    // Update the state with the payment intent data
+    setPaymentIntent(data);
+    // Confirm the payment using Stripe's JavaScript library
+    const result = await stripe.confirmCardPayment(data.client_secret, {
+      payment_method: {
+        card: {
+          number: "4242424242424242", // Replace with your own card number
+          exp_month: 12, // Replace with your own card expiration month
+          exp_year: 2025, // Replace with your own card expiration year
+          cvc: "123", // Replace with your own card CVC
+        },
+      },
+    });
+    // Handle the payment result
+    if (result.error) {
+      // Show error message to the customer
+      console.error(result.error.message);
+    } else {
+      if (result.paymentIntent.status === "succeeded") {
+        // Show success message to the customer
+        console.log("Payment succeeded");
+      }
+    }
+  };
+
+  return (
+    <div>
+      <h2>Payment</h2>
+      <button onClick={handlePayment}>Pay</button>
+      {paymentIntent && (
+        <div>
+          <p>Payment intent ID: {paymentIntent.id}</p>
+          <p>Payment intent status: {paymentIntent.status}</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Payment;
+----
++
+This code imports React and its useState hook, as well as Stripe's JavaScript library for creating and confirming payments. It defines a Payment component that manages an object of payment intent data and provides a function to handle payment using Stripe's REST API and JavaScript library. It also renders a button and the payment intent data on the web page.
++
+- In your terminal or command-line interface, run `npm start` to start the development server and open your browser to `http://localhost:3004`. You should see a web page with a title and a button.
++
+14. You have now created four container applications that expose their PBCs as remote modules using Module Federation. To test the integration of these modules with the host application, go back to the host application folder in your terminal or command-line interface and run `npm start` again. Then open your browser to `http://localhost:3000`. You should see a web page with four components: Product Catalog, Cart, Checkout and Payment.
++
+15. To interact with these components, follow these steps:
++
+- Click on any product image or name in the Product Catalog component to add it to the Cart component.
+- Click on the Remove button in the Cart component to remove any product from the cart.
+- Fill in the form in the Checkout component with your customer details and click on the Submit button to send them to Sitecore.
+- Click on the Pay button in the Payment component to pay for your order using Stripe.
+- Check the console logs in your browser's developer tools to see the responses from Sitecore and Stripe.
++
+16. Congratulations! You have successfully created an e-commerce application using Module Federation + Composable Commerce.
+
+== Next steps
+
+This guide has shown you how to create a simple e-commerce application using Module Federation + Composable Commerce. However, there are many more features and possibilities that you can explore with this approach. Here are some ideas for further improvement:
+
+- Add more PBCs from different vendors or sources, such as product reviews, recommendations, loyalty programs, etc.
+- Add more functionality and customization options to each PBC, such as filters, sorting, pagination, etc.
+- Add more validation and error handling logic to each PBC, such as input validation, API error handling, etc.
+- Add more security and authentication mechanisms to each PBC, such as HTTPS, CORS, CSRF protection, etc.
+- Add more testing and debugging tools to each PBC, such as unit tests, integration tests, code coverage, logging, etc.
+- Add more performance and optimization techniques to each PBC, such as caching, compression, minification, code splitting, lazy loading, etc.
+
+== Best Practices for Composable Commerce with Module Federation
+
+To ensure a successful migration to composable commerce with module federation, you should follow some best practices such as:
+
+- Design your modules based on business domains or functionalities rather than technical layers or features. This will help you achieve high cohesion and low coupling among your modules.
+- Define clear contracts and interfaces for your modules using APIs and events. This will help you ensure interoperability and compatibility among your modules.
+- Use versioning and semantic versioning for your modules to manage changes and updates without breaking dependencies.
+- Use feature flags or toggles to enable or disable features or functionalities in your modules without redeploying them.
+- Use testing tools such as Jest or Cypress to test your modules individually and integrally. This will help you ensure the quality and reliability of your modules.
+- Use monitoring tools such as Sentry or New Relic to track the performance, errors, and usage of your modules. This will help you optimize and troubleshoot your modules.
+
+For example, suppose you want to update the cart component in the `cart-app` to show more information about the items such as quantity, price, subtotal, etc. You can use semantic versioning to indicate that this is a minor update that adds new functionality without breaking existing functionality. You can also use feature flags to enable this new functionality only for a subset of users for testing purposes. You can then deploy the updated `cart-app` without affecting the rest of the application or requiring downtime.
+
+== Conclusion
+
+Composable commerce with module federation is a powerful way to migrate your existing e-commerce application to a modular, flexible, and scalable architecture. It allows you to leverage existing components from different sources or create your components that can be composed together to create a customized user experience. It also enables you to update or replace components without affecting the rest of the application or requiring downtime.
+
+In this guide, you learned what composable commerce is, what benefits it provides for e-commerce businesses, how to use module federation to migrate your monolithic e-commerce application to a composable commerce architecture, what best practices you should follow, and how to use code examples to illustrate the steps.
+
+If you want to learn more about composable commerce, you can check out these resources, we relied on them while writing this documentation:
+
+- https://www.akeneo.com/blog/what-is-composable-commerce/[Akneo: What Is Composable Commerce?]
+- https://webpack.js.org/concepts/module-federation/[Webpack 5 Module Federation]
+- https://www.composablecommercehub.com/[Composable Commerce Hub]
+- https://www.udemy.com/course/microfrontend-course/[Building Micro Frontends with React]
+- https://commercelayer.io/blog/composable-commerce-with-micro-frontends[Composable commerce with micro frontends]
+- https://fabric.inc/blog/composable-commerce/[What Is Composable Commerce?]

@@ -10,6 +10,7 @@ import { assert } from './utils/logger';
 
 export { FederationHost } from './core';
 export { registerGlobalPlugins } from './global';
+export { getRemoteEntry, getRemoteInfo } from './utils';
 export { loadScript, loadScriptNode } from '@module-federation/sdk';
 
 export type { Federation } from './global';
@@ -66,6 +67,22 @@ export function preloadRemote(
   assert(FederationInstance, 'Please call init first');
   // eslint-disable-next-line prefer-spread
   return FederationInstance.preloadRemote.apply(FederationInstance, args);
+}
+
+export function registerRemotes(
+  ...args: Parameters<FederationHost['registerRemotes']>
+): ReturnType<FederationHost['registerRemotes']> {
+  assert(FederationInstance, 'Please call init first');
+  // eslint-disable-next-line prefer-spread
+  return FederationInstance.registerRemotes.apply(FederationInstance, args);
+}
+
+export function registerPlugins(
+  ...args: Parameters<FederationHost['registerPlugins']>
+): ReturnType<FederationHost['registerRemotes']> {
+  assert(FederationInstance, 'Please call init first');
+  // eslint-disable-next-line prefer-spread
+  return FederationInstance.registerPlugins.apply(FederationInstance, args);
 }
 
 // Inject for debug

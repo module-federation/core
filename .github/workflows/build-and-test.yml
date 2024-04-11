@@ -1,16 +1,15 @@
 name: Build affected packages
 
 on:
-  push:
-    branches: ['main']
   pull_request:
+    branches: [main]
+
+  push:
+    branches: [main]
 
 jobs:
   main:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.head_ref || github.run_id }}
-      cancel-in-progress: true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -47,23 +46,23 @@ jobs:
       - name: Run Affected Test
         run: npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
 
-      - name: E2E Test for 3000-home
-        run: pnpm run app:next:dev & echo "done" && sleep 20 && npx nx run-many --target=test:e2e --projects=3000-home && lsof -ti tcp:3000,3001,3002 | xargs kill
+      - name: E2E Test for Next.js
+        run: pnpm run app:next:dev & echo "done" && sleep 50 && npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=2 && lsof -ti tcp:3000,3001,3002 | xargs kill
 
-      - name: E2E Test for 3001-shop
-        run: pnpm run app:next:dev & echo "done" && sleep 20 && npx nx run-many --target=test:e2e --projects=3001-shop && lsof -ti tcp:3000,3001,3002 | xargs kill
+      #      - name: E2E Test for 3001-shop
+      #        run: pnpm run app:next:dev & echo "done" && sleep 20 && npx nx run-many --target=test:e2e --projects=3001-shop && lsof -ti tcp:3000,3001,3002 | xargs kill
+
+      - name: E2E Test for ModernJS
+        run: npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && lsof -ti tcp:4001 | xargs kill
 
       #      - name: E2E Test for 3002-checkout
       #        run: pnpm run app:next:dev & echo "done" && sleep 15 && npx nx run-many --target=test:e2e --projects=3002-checkout && lsof -ti tcp:3000,3001,3002 | xargs kill
 
-      - name: Serve Projects 3005-runtime-host, 3006-runtime-remote, 3007-runtime-remote
-        run: npx nx run-many --target=serve --projects=3005-runtime-host,3006-runtime-remote,3007-runtime-remote --parallel=3 & echo "done"
-
       - name: E2E Test for 3005-runtime-host
-        run: sleep 6 && npx nx run-many --target=test:e2e --projects=3005-runtime-host --parallel=1
+        run: pnpm run app:runtime:dev & echo "done" && sleep 6 && npx nx run-many --target=test:e2e --projects=3005-runtime-host --parallel=1 && lsof -ti tcp:3005,3006,3007 | xargs kill
 
-      - name: Kill Processes on Ports 3005, 3006, 3007
-        run: lsof -ti tcp:3005,3006,3007 | xargs kill
+      - name: E2E Test for 3008-webpack-host
+        run: pnpm run app:manifest:dev & echo "done" && sleep 6 && npx nx run-many --target=e2e --projects=3008-webpack-host --parallel=1 && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
 
       - name: Build Next.js Apps in Production Mode
         run: pnpm app:next:build

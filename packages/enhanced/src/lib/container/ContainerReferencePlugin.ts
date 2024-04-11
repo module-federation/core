@@ -16,14 +16,11 @@ import RemoteModule from './RemoteModule';
 import RemoteRuntimeModule from './RemoteRuntimeModule';
 import RemoteToExternalDependency from './RemoteToExternalDependency';
 import { parseOptions } from './options';
-import {
-  ExternalsType,
-  ContainerReferencePluginOptions,
-  RemotesConfig,
-} from '../../declarations/plugins/container/ContainerReferencePlugin';
+import { containerReferencePlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import schema from '../../schemas/container/ContainerReferencePlugin';
 import checkOptions from '../../schemas/container/ContainerReferencePlugin.check';
+import HoistContainerReferencesPlugin from './HoistContainerReferencesPlugin';
 
 const { ExternalsPlugin } = require(
   normalizeWebpackPath('webpack'),
@@ -46,10 +43,12 @@ const validate = createSchemaValidation(
 const slashCode = '/'.charCodeAt(0);
 
 class ContainerReferencePlugin {
-  private _remoteType: ExternalsType;
-  private _remotes: [string, RemotesConfig][];
+  private _remoteType: containerReferencePlugin.ExternalsType;
+  private _remotes: [string, containerReferencePlugin.RemotesConfig][];
 
-  constructor(options: ContainerReferencePluginOptions) {
+  constructor(
+    options: containerReferencePlugin.ContainerReferencePluginOptions,
+  ) {
     validate(options);
 
     this._remoteType = options.remoteType;
@@ -76,7 +75,6 @@ class ContainerReferencePlugin {
   apply(compiler: Compiler): void {
     const { _remotes: remotes, _remoteType: remoteType } = this;
     new FederationRuntimePlugin().apply(compiler);
-
     /** @type {Record<string, string>} */
     const remoteExternals: Record<string, string> = {};
 

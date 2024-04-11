@@ -1,0 +1,76 @@
+# 类型提示
+
+就像 NPM Package 一样，`Module Federation` 产物同样会生成类型，并且享有类型热加载，尽管产物托管在远程 CDN 上。
+
+`@module-federation/enhanced` 默认开启类型提示功能，本文将介绍几种常见的使用场景以及具体配置。
+
+## 使用场景
+
+### 生成类型
+
+使用 `@module-federation/enhanced` 提供的构建插件进行构建，会自动生成类型文件。
+
+### 加载类型
+
+1. 消费者修改 `tsconfig.json`
+
+在 `tsconfig.json` 添加 `paths` ：
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "*": ["./@mf-types/*"]
+    }
+  }
+}
+```
+
+2. 启动消费者和生产者
+
+> info: 不需要关注生产者和消费者的启动顺序
+
+启动后，消费者会自动取拉取生产者的类型文件。
+
+### 类型热重载
+
+修改生产者代码后，消费者会自动拉取生产者的类型。
+
+![hot-types-reload-static](@public/guide/type-prompt/hot-types-reload-static.gif)
+
+### Federation Runtime API 类型提示
+
+使用 `Federation Runtime` `loadRemote` 同样可以享有类型提示以及类型热重载：
+
+![hot-types-reload](@public/guide/type-prompt/hot-types-reload.gif)
+
+### 第三方包类型抽取
+
+`Module Federation` 会自动抽取第三方包类型，确保 `exposes` 文件类型能正常访问。
+
+![third-party](@public/guide/type-prompt/third-party.jpg)
+
+### 嵌套类型重导出
+
+`Module Federation` 支持嵌套 remotes ，并会自动抽取嵌套的 remotes 类型。
+
+![nested-remote](@public/guide/type-prompt/nested-remote.jpg)
+
+## 配置
+
+- [dts](../../configure/dts)：类型生成/加载
+- [dev](../../configure/dev)：类型热重载
+
+## FAQ
+
+1. 项目循环编译，无法终止
+
+A: 大概率是编译器监听了类型文件夹或者 `dist` 里的变动导致，将 `@mf-types` 添加至忽略文件即可。
+
+以 webpack/rspack 为例：
+
+```ts
+config.watchOptions = {
+  ignored: ['**/node_modules/**', '**/@mf-types/**'],
+};
+```
