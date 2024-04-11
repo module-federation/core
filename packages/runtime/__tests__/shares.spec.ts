@@ -886,18 +886,18 @@ describe('load share while shared has multiple versions', () => {
       shared: {
         'runtime-react': [
           {
-            version: '16.0.0',
+            version: '17.0.0',
             scope: 'default',
             // pass lib means the shared has loaded
             lib: () => {
-              return { from: '@shared/multiple-versions', version: '16.0.0' };
+              return { from: '@shared/multiple-versions', version: '17.0.0' };
             },
           },
           {
-            version: '17.0.0',
+            version: '16.0.0',
             scope: 'default',
             get: async () => () => {
-              return { from: '@shared/multiple-versions', version: '17.0.0' };
+              return { from: '@shared/multiple-versions', version: '16.0.0' };
             },
           },
         ],
@@ -908,13 +908,13 @@ describe('load share while shared has multiple versions', () => {
     const shared = await FM1.loadShare<{ version: string }>('runtime-react', {
       resolver: (sharedOptions) => {
         return (
-          sharedOptions.find((i) => i.version === '17.0.0') ?? sharedOptions[0]
+          sharedOptions.find((i) => i.version === '16.0.0') ?? sharedOptions[0]
         );
       },
     });
     assert(shared, "shared can't be null");
     const sharedRes = shared();
     assert(sharedRes, "sharedRes can't be null");
-    expect(sharedRes.version).toEqual('17.0.0');
+    expect(sharedRes.version).toEqual('16.0.0');
   });
 });

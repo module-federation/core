@@ -50,8 +50,24 @@ type InitOptions {
     // List of dependencies that need to be shared by the current host
     // When using the build plugin, users can configure the dependencies that need to be shared in the build plugin, and the build plugin will inject the dependencies that need to be shared into the runtime shared configuration.
     // Shared must be manually passed in the version instance reference when it is passed in at runtime, because it cannot be directly passed in at runtime.
-    shared?: ShareInfos;
+    shared?: {
+      [pkgName: string]: ShareArgs | ShareArgs[];
+    };
 };
+
+type ShareArgs =
+  | (SharedBaseArgs & { get: SharedGetter })
+  | (SharedBaseArgs & { lib: () => Module });
+
+type SharedBaseArgs = {
+  version: string;
+  shareConfig?: SharedConfig;
+  scope?: string | Array<string>;
+  deps?: Array<string>;
+  strategy?: 'version-first' | 'loaded-first';
+};
+
+type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
 
 type RemoteInfo = (RemotesWithEntry | RemotesWithVersion) & {
    alias?: string;
@@ -120,7 +136,7 @@ loadRemote('app2/util').then((m) => m.add(1, 2, 3));
 
 ### loadShare
 
-- Type: `loadShare(pkgName: string)`
+- Type: `loadShare(pkgName: string, extraOptions?: { customShareInfo?: Partial<Shared>;resolver?: (sharedOptions: ShareInfos[string]) => Shared;})`
 - Gets the `share` dependency. When there are `share` dependencies that match the current `host` in the global environment, the existing and satisfying `share` dependencies will be reused first. Otherwise, load its own dependencies and store them in the global cache.
 - This `API` is generally not called directly by users, but is used by build plugins to convert their own dependencies.
 
@@ -158,6 +174,50 @@ init({
 
 loadShare('react').then((reactFactory) => {
   console.log(reactFactory());
+});
+```
+
+If has set multiple version shared, `loadShare` will return the loaded and has max version shared. The behavior can be controlled by set `extraOptions.resolver`: 
+
+```js
+import { init, loadRemote, loadShare } from '@module-federation/runtime';
+
+init({
+  name: '@demo/main-app',
+  remotes: [],
+  shared: {
+    react: [
+      {
+        version: '17.0.0',
+        scope: 'default',
+        get: async ()=>() => ({ version: '17.0.0)' }),
+        shareConfig: {
+          singleton: true,
+          requiredVersion: '^17.0.0',
+        },
+      },
+      {
+        version: '18.0.0',
+        scope: 'default',
+        // pass lib means the shared has loaded
+        lib: () => ({ version: '18.0.0)' }),
+        shareConfig: {
+          singleton: true,
+          requiredVersion: '^18.0.0',
+        },
+      },      
+    ],
+  },
+});
+
+loadShare('react', { 
+   resolver: (sharedOptions) => {
+      return (
+        sharedOptions.find((i) => i.version === '17.0.0') ?? sharedOptions[0]
+      );
+  },
+ }).then((reactFactory) => {
+  console.log(reactFactory()); // { version: '17.0.0)' }
 });
 ```
 

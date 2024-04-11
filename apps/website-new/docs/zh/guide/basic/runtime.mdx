@@ -71,8 +71,23 @@ type InitOptions {
     // 当前消费者需要共享的依赖项列表
     // 当使用构建插件时，用户可以在构建插件中配置需要共享的依赖项，而构建插件会将需要共享的依赖项注入到运行时共享配置中
     // Shared 在运行时传入时必须在版本实例引用中手动传入，因为它不能在运行时直接传入。
-    shared?: ShareInfos;
+    shared?: {
+      [pkgName: string]: ShareArgs | ShareArgs[];
+    };};
+
+type ShareArgs =
+  | (SharedBaseArgs & { get: SharedGetter })
+  | (SharedBaseArgs & { lib: () => Module });
+
+type SharedBaseArgs = {
+  version: string;
+  shareConfig?: SharedConfig;
+  scope?: string | Array<string>;
+  deps?: Array<string>;
+  strategy?: 'version-first' | 'loaded-first';
 };
+
+type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
 
 type RemoteInfo = (RemotesWithEntry | RemotesWithVersion) & {
    alias?: string;
@@ -139,7 +154,7 @@ loadRemote('app2/util').then((m) => m.add(1, 2, 3));
 
 ### loadShare
 
-- Type: `loadShare(pkgName: string)`
+- Type: `loadShare(pkgName: string, extraOptions?: { customShareInfo?: Partial<Shared>;resolver?: (sharedOptions: ShareInfos[string]) => Shared;})`
 - 获取 `share` 依赖项。当全局环境中存在与当前消费者匹配的“共享”依赖时，现有的和符合共享条件的依赖将首先被复用。否则，加载它自己的依赖项并将它们存储在全局缓存中。
 - 这个 `API` 通常不是由用户直接调用，而是由构建插件使用来转换它们自己的依赖项。
 
@@ -177,6 +192,50 @@ init({
 
 loadShare('react').then((reactFactory) => {
   console.log(reactFactory());
+});
+```
+
+如果设置了多个版本 shared，默认会返回已加载且最高版本的 shared 。可以通过设置 `extraOptions.resolver` 来改变这个行为：
+
+```js
+import { init, loadRemote, loadShare } from '@module-federation/runtime';
+
+init({
+  name: '@demo/main-app',
+  remotes: [],
+  shared: {
+    react: [
+      {
+        version: '17.0.0',
+        scope: 'default',
+        get: async ()=>() => ({ version: '17.0.0)' }),
+        shareConfig: {
+          singleton: true,
+          requiredVersion: '^17.0.0',
+        },
+      },
+      {
+        version: '18.0.0',
+        scope: 'default',
+        // pass lib means the shared has loaded
+        lib: () => ({ version: '18.0.0)' }),
+        shareConfig: {
+          singleton: true,
+          requiredVersion: '^18.0.0',
+        },
+      },
+    ],
+  },
+});
+
+loadShare('react', {
+   resolver: (sharedOptions) => {
+      return (
+        sharedOptions.find((i) => i.version === '17.0.0') ?? sharedOptions[0]
+      );
+  },
+ }).then((reactFactory) => {
+  console.log(reactFactory()); // { version: '17.0.0)' }
 });
 ```
 
