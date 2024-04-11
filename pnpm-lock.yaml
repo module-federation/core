@@ -324,9 +324,6 @@ importers:
       '@vitest/ui':
         specifier: 1.2.2
         version: 1.2.2(vitest@1.2.2)
-      antora-navigator-extension:
-        specifier: https://gitlab.com/opendevise/oss/antora-navigator-extension/-/archive/main/antora-navigator-extension-main.tar.gz
-        version: '@gitlab.com/opendevise/oss/antora-navigator-extension/-/archive/main/antora-navigator-extension-main.tar.gz'
       autoprefixer:
         specifier: 10.4.17
         version: 10.4.17(postcss@8.4.38)
@@ -1020,6 +1017,9 @@ importers:
 
   apps/node-remote:
     dependencies:
+      '@module-federation/enhanced':
+        specifier: workspace:*
+        version: link:../../packages/enhanced
       '@module-federation/node':
         specifier: workspace:*
         version: link:../../packages/node
@@ -23144,6 +23144,7 @@ packages:
   /is-glob@3.1.0:
     resolution: {integrity: sha512-UFpDDrPgM6qpnFNI+rh/p3bUaq9hKLZN8bMUWzxmcnZVS3omf4IPK+BrewlnWjO1WmUsMYuSjKh4UJuV4+Lqmw==}
     engines: {node: '>=0.10.0'}
+    requiresBuild: true
     dependencies:
       is-extglob: 2.1.1
     dev: true
@@ -27619,6 +27620,7 @@ packages:
 
   /path-dirname@1.0.2:
     resolution: {integrity: sha512-ALzNPpyNq9AqXMBjeymIjFDAkAFH06mHJH/cSBHAgU0s4vfpBn6b2nf8tiRLvagKD8RbTpq2FKTBg7cl9l3c7Q==}
+    requiresBuild: true
     dev: true
 
   /path-exists@3.0.0:
@@ -33712,12 +33714,6 @@ packages:
     resolution: {integrity: sha512-Y7HYmWaFwPUmkoQCUIAYpKqkOf+SbVj/2fJJZ4RJMCfZp0rTGwRbzQD+HghfnhKOjL9E01okqz+ncJskGYfBNw==}
     dev: true
 
-  /uglify-js@3.14.5:
-    resolution: {integrity: sha512-qZukoSxOG0urUTvjc2ERMTcAy+BiFh3weWAkeurLwjrCba73poHmG3E36XEjd/JGukMzwTL7uCxZiAexj8ppvQ==}
-    engines: {node: '>=0.8.0'}
-    hasBin: true
-    dev: true
-
   /uglify-js@3.17.4:
     resolution: {integrity: sha512-T9q82TJI9e/C1TAxYvfb16xO120tMVFZrGA3f9/P4424DNu6ypK103y0GPFVa17yotwSyZW5iYXgjYHkGrJW/g==}
     engines: {node: '>=0.8.0'}
@@ -35806,13 +35802,3 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
-
-  '@gitlab.com/opendevise/oss/antora-navigator-extension/-/archive/main/antora-navigator-extension-main.tar.gz':
-    resolution: {tarball: https://gitlab.com/opendevise/oss/antora-navigator-extension/-/archive/main/antora-navigator-extension-main.tar.gz}
-    name: antora-navigator-extension
-    version: 1.0.0-alpha.0
-    engines: {node: '>=12.21.0'}
-    dependencies:
-      '@antora/expand-path-helper': 2.0.0
-      uglify-js: 3.14.5
-    dev: true

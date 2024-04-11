@@ -15,10 +15,11 @@ module.exports = composePlugins(withNx(), async (config) => {
   config.plugins.push(
     new ModuleFederationPlugin({
       name: 'node_host',
+      dts: false,
       runtimePlugins: [require.resolve('./runtimePlugin.ts')],
       remotes: {
-        node_local_remote:
-          'commonjs ../../node-local-remote/dist/remoteEntry.js',
+        // node_local_remote:
+        //   'commonjs ../../node-local-remote/dist/remoteEntry.js',
         // node_local_remote: '__webpack_require__.federation.instance.moduleCache.get("node_local_remote")',
         // node_remote:
         //   '__webpack_require__.federation.instance.moduleCache.get("node_remote")@http://localhost:3002/remoteEntry.js',
