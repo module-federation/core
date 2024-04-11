@@ -1,15 +1,14 @@
 import AdmZip from 'adm-zip';
 import ansiColors from 'ansi-colors';
 import axios from 'axios';
-import { resolve, join } from 'path';
+import { join } from 'path';
 import typescript from 'typescript';
 
 import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { retrieveMfTypesPath } from './typeScriptCompiler';
-import { isDebugMode, replaceLocalhost } from './utils';
 
-export const retrieveTypesZipPath = (
+const retrieveTypesZipPath = (
   mfTypesPath: string,
   remoteOptions: Required<RemoteOptions>,
 ) =>
@@ -37,51 +36,30 @@ const downloadErrorLogger =
     };
   };
 
-export const retrieveTypesArchiveDestinationPath = (
-  hostOptions: Required<HostOptions>,
-  destinationFolder: string,
-) => {
-  return resolve(
-    hostOptions.context,
-    hostOptions.typesFolder,
-    destinationFolder,
-  );
-};
 export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
   let retries = 0;
-  return async ([destinationFolder, fileToDownload]: string[]): Promise<
-    [string, string] | undefined
-  > => {
-    const destinationPath = retrieveTypesArchiveDestinationPath(
-      hostOptions,
-      destinationFolder,
-    );
+  return async ([destinationFolder, fileToDownload]: string[]) => {
+    const destinationPath = join(hostOptions.typesFolder, destinationFolder);
 
     while (retries++ < hostOptions.maxRetries) {
       try {
-        const url = replaceLocalhost(fileToDownload);
         const response = await axios
-          .get(url, { responseType: 'arraybuffer' })
-          .catch(downloadErrorLogger(destinationFolder, url));
+          .get(fileToDownload, { responseType: 'arraybuffer' })
+          .catch(downloadErrorLogger(destinationFolder, fileToDownload));
 
         const zip = new AdmZip(Buffer.from(response.data));
         zip.extractAllTo(destinationPath, true);
-        return [destinationFolder, destinationPath];
+        break;
       } catch (error: any) {
-        if (isDebugMode()) {
-          console.error(
-            ansiColors.red(
-              `Error during types archive download: ${
-                error?.message || 'unknown error'
-              }`,
-            ),
-          );
-        }
+        console.error(
+          ansiColors.red(
+            `Error during types archive download: ${
+              error?.message || 'unknown error'
+            }`,
+          ),
+        );
         if (retries >= hostOptions.maxRetries) {
-          if (hostOptions.abortOnError !== false) {
-            throw error;
-          }
-          return undefined;
+          throw error;
         }
       }
     }

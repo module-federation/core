@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/manifest",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "license": "MIT",
   "description": "Provide manifest/stats for webpack/rspack MF project .",
   "keywords": [
@@ -23,7 +23,7 @@
   "types": "./dist/index.cjs.d.ts",
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
-    "@module-federation/native-federation-typescript": "workspace:*",
+    "@module-federation/dts-plugin": "workspace:*",
     "@module-federation/managers": "workspace:*",
     "find-pkg": "2.0.0",
     "chalk": "3.0.0"

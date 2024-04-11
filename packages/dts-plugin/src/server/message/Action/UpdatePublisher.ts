@@ -1,4 +1,4 @@
-import { UpdateMode } from '@module-federation/native-federation-typescript/helpers';
+import { UpdateMode } from '../../../core/index';
 import { BaseContext } from '../../types';
 import { Action, ActionKind } from './Action';
 import { UpdateKind } from './Update';

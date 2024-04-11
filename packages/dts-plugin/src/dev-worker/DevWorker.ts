@@ -1,9 +1,6 @@
 import path from 'path';
 import cloneDeepWith from 'lodash.clonedeepwith';
-import {
-  DTSManagerOptions,
-  rpc,
-} from '@module-federation/native-federation-typescript/helpers';
+import { DTSManagerOptions, rpc } from '../core/index';
 
 export interface DevWorkerOptions extends DTSManagerOptions {
   name: string;

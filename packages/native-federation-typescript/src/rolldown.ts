@@ -1,7 +1,7 @@
 import {
   NativeFederationTypeScriptHost as GeneralHost,
   NativeFederationTypeScriptRemote as GeneralRemote,
-} from './index';
+} from '.';
 
 export const NativeFederationTypeScriptRemote = GeneralRemote.rolldown;
 export const NativeFederationTypeScriptHost = GeneralHost.rolldown;

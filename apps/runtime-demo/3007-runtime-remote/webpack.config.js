@@ -14,6 +14,9 @@ module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
+    config.watchOptions = {
+      ignored: ['**/node_modules/**', '**/@mf-types/**'],
+    };
     config.plugins.push(
       new ModuleFederationPlugin({
         name: 'runtime_remote2',
