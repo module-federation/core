@@ -271,15 +271,18 @@ export function generatePreloadAssets(
     };
     remoteSnapshot.shared.forEach((shared) => {
       const shareInfos = options.shared?.[shared.sharedName];
-      // if no version, preload all shared
-      const shareInfo = shared.version
-        ? shareInfos.find((s) => s.version === shared.version)
-        : shareInfos;
-      // When data is downgraded, the shared configuration may be different.
-      if (!shareInfo) {
+      if (!shareInfos) {
         return;
       }
-      const arrayShareInfo = arrayOptions(shareInfo);
+      // if no version, preload all shared
+      const sharedOptions = shared.version
+        ? shareInfos.find((s) => s.version === shared.version)
+        : shareInfos;
+
+      if (!sharedOptions) {
+        return;
+      }
+      const arrayShareInfo = arrayOptions(sharedOptions);
       arrayShareInfo.forEach((s) => {
         collectSharedAssets(s, shared);
       });
