@@ -1,6 +1,18 @@
 let warnings = [];
 let oldWarn;
 
+if (global.__FEDERATION__) {
+  global.__GLOBAL_LOADING_REMOTE_ENTRY__ = {};
+  //@ts-ignore
+  global.__FEDERATION__.__INSTANCES__.map((i) => {
+    i.moduleCache.clear();
+    if (global[i.name]) {
+      delete global[i.name];
+    }
+  });
+  global.__FEDERATION__.__INSTANCES__ = [];
+}
+
 beforeEach((done) => {
   oldWarn = console.warn;
   console.warn = (m) => warnings.push(m);
@@ -28,6 +40,7 @@ const expectWarning = (regexp) => {
 };
 
 it('should load the component from container', () => {
+  debugger;
   return import('./App').then(({ default: App }) => {
     // FIXME: Federation runtime 打印的 warning 和原先不一致
     // expectWarning(
