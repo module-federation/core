@@ -89,3 +89,36 @@ export const localMergeShareInfos: Options['shared'] = {
     },
   ],
 };
+
+export const arrayShared = {
+  name: '@federation/array-shared',
+  remotes: [],
+  shared: {
+    'react-dom': [
+      {
+        version: '16.0.0',
+        scope: ['default', 'sub2'],
+        get: () =>
+          Promise.resolve(() => ({
+            default: 'react-dom',
+            version: '16.0.0',
+            from: '@federation/array-shared',
+          })),
+      },
+      {
+        version: '17.0.0',
+        scope: ['default', 'sub2'],
+        get: () =>
+          Promise.resolve(() => ({
+            default: 'react-dom',
+            version: '17.0.0',
+            from: '@federation/array-shared',
+          })),
+      },
+    ],
+  },
+};
+
+export const arraySharedInfos = {
+  'react-dom': arrayShared.shared['react-dom'],
+};
