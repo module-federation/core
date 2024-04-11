@@ -10,6 +10,7 @@
       "require": "./dist/src/index.js"
     },
     "./package.json": "./package.json",
+    "./runtimePlugin": "./dist/src/runtimePlugin.js",
     "./utils": {
       "import": "./dist/src/utils/index.js",
       "require": "./dist/src/utils/index.js"

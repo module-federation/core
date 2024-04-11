@@ -161,6 +161,9 @@ export class NextFederationPlugin {
       runtime: false,
       remoteType: 'script',
       runtimePlugins: [
+        ...(isServer
+          ? [require.resolve('@module-federation/node/runtimePlugin')]
+          : []),
         require.resolve(path.join(__dirname, '../container/runtimePlugin')),
         ...(this._options.runtimePlugins || []),
       ],

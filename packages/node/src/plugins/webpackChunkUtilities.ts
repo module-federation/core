@@ -130,7 +130,6 @@ export function generateLoadingCode(
     return '// no chunk loading';
   }
 
-  return '';
   return Template.asString([
     '// Dynamic filesystem chunk loading for javascript',
     `${fn}.readFileVm = function(chunkId, promises) {`,
@@ -263,6 +262,51 @@ export function handleOnChunkLoad(
   } else {
     return '// no on chunks loaded';
   }
+}
+/**
+ * Generates the load script for server-side execution. This function creates a script that loads a remote module
+ * and executes it in the current context. It supports both browser and Node.js environments.
+ * @param {any} runtimeTemplate - The runtime template used to generate the load script.
+ * @returns {string} - The generated load script.
+ */
+export function generateLoadScript(runtimeTemplate: any): string {
+  return Template.asString([
+    '// load script equivalent for server side',
+    `${RuntimeGlobals.loadScript} = ${runtimeTemplate.basicFunction(
+      'url, callback, chunkId',
+      [
+        Template.indent([
+          `async function executeLoad(url, callback, name) {
+            if (!name) {
+              throw new Error('__webpack_require__.l name is required for ' + url);
+            }
+            const usesInternalRef = name.startsWith('__webpack_require__')
+            if (usesInternalRef) {
+              const regex = /__webpack_require__\\.federation\\.instance\\.moduleCache\\.get\\(([^)]+)\\)/;
+              const match = name.match(regex);
+              if (match) {
+                name = match[1].replace(/["']/g, '');
+              }
+            }
+            try {
+              const federation = ${RuntimeGlobals.require}.federation;
+              const res = await ${RuntimeGlobals.require}.federation.runtime.loadScriptNode(url, { attrs: {} });
+              const enhancedRemote = federation.instance.initRawContainer(name, url, res);
+              // use normal global assignment
+              if(!usesInternalRef && !globalThis[name]) {
+                globalThis[name] = enhancedRemote
+              }
+              callback(enhancedRemote);
+            } catch (error) {
+              callback(error);
+            }
+
+          }`,
+          `executeLoad(url, callback, chunkId);`,
+        ]),
+      ],
+    )}`,
+  ]);
 }
 export function generateInstallChunk(
   runtimeTemplate: any,

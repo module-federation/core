@@ -1,6 +1,3 @@
-import { FederationRuntimePlugin } from '@module-federation/runtime/types';
-import fs from 'fs';
-
 if (typeof __webpack_require__ !== 'undefined') {
   __webpack_require__.l = (url, callback, chunkId) => {
     console.log('execute load', url);
@@ -267,13 +264,14 @@ if (__webpack_require__.f) {
             const chunkName = __webpack_require__.u(chunkId);
             const loadingStrategy =
               typeof process !== 'undefined' ? 'http-vm' : 'http-eval';
-            loadChunkStrategy(
+            await loadChunkStrategy(
               loadingStrategy,
               chunkName,
               __webpack_require__.federation.initOptions.name,
               __webpack_require__.federation.initOptions.remotes,
               installChunkCallback,
             );
+            console.log('installing');
           });
           promises.push((installedChunkData[2] = promise));
         }

@@ -19,6 +19,7 @@ import {
   generateLoadingCode,
   generateHmrManifestCode,
   handleOnChunkLoad,
+  generateLoadScript,
   generateInstallChunk,
   generateExternalInstallChunkCode,
 } from './webpackChunkUtilities';
@@ -183,6 +184,9 @@ class DynamicFilesystemChunkLoadingRuntimeModule extends RuntimeModule {
         this.runtimeRequirements.has(RuntimeGlobals.onChunksLoaded),
       ),
       '',
+      this.runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers)
+        ? generateLoadScript(runtimeTemplate)
+        : '// no remote script loader needed',
       this.runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers)
         ? generateLoadingCode(
             this.runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers),
