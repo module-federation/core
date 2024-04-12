@@ -1,4 +1,7 @@
-import type { FederationRuntimePlugin } from '@module-federation/runtime/types';
+import type {
+  FederationRuntimePlugin,
+  Shared,
+} from '@module-federation/runtime/types';
 import { loadScript } from '@module-federation/sdk';
 
 import { isObject, getUnpkgUrl } from '../index';
@@ -29,7 +32,10 @@ const fastRefreshPlugin = (): FederationRuntimePlugin => {
           orderResolve = resolve;
         });
         Object.keys(shareInfo).forEach(async (share) => {
-          const shared = shareInfo[share][0];
+          // @ts-expect-error legacy runtime shareInfo[share] is shared , and latest i shard[]
+          const shared: Shared = Array.isArray(shareInfo[share])
+            ? shareInfo[share][0]
+            : shareInfo[share];
           let get: () => any;
           if (share === 'react') {
             get = () =>
