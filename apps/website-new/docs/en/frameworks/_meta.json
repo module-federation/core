@@ -6,12 +6,12 @@
   },
   {
     "type": "dir",
-    "name": "angular",
-    "label": "Angular"
+    "name": "react",
+    "label": "React"
   },
   {
     "type": "dir",
-    "name": "react",
-    "label": "React"
+    "name": "angular",
+    "label": "Angular"
   }
 ]
