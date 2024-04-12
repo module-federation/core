@@ -2,6 +2,8 @@
 title: "Server-Side Rendering"
 ---
 
+import {Steps} from '@theme'
+
 # Angular Module Federation with Server-Side Rendering
 
 Historically, Module Federation was limited to Client-Side Rendering (CSR), primarily benefiting Single Page Applications (SPAs). However, the evolving web development landscape has increasingly favored Server-Side Rendering (SSR) for its myriad benefits.
@@ -26,9 +28,11 @@ This integration not only harnesses the full potential of SSR but also maintains
 
 We'll start by creating a host application named 'dashboard' and a remote application called 'login'.
 
+<Steps>
+
 ### Creating the Nx Workspace
 
-1. Begin by executing the following command to create a new Nx workspace:
+Begin by executing the following command to create a new Nx workspace:
 
 ```bash
 npx create-nx-workspace@latest myorganization
@@ -38,9 +42,11 @@ During this process, you'll encounter prompts regarding the workspace type and p
 
 Respond to the prompts as follows:
 
-- Workspace type: *integrated*
-- Workspace content: *apps*
-- Enable distributed caching (CI speed enhancement): *No*
+```bash
+- Workspace type: "integrated"
+- Workspace content: "apps"
+- Enable distributed caching (CI speed enhancement): "No"
+```
 
 **Opting for Nx Cloud (Optional)**
 
@@ -48,27 +54,29 @@ While setting up your workspace, you'll also be asked about adding Nx Cloud. Thi
 
 ### Installing Nx Angular Plugin
 
-1. After creating the workspace, navigate to it:
+After creating the workspace, navigate to it:
 
 ```bash
 cd myorganization
 ```
 
-2. Install the Official Nx Angular Plugin:
+#### Install the Official Nx Angular Plugin:
 
 ```bash
-npm install @nrwl/angular
+npm install @nx/angular
 ```
+
 
 ### Generating the Applications
 
-1. Use a single command to scaffold your Module Federation architecture with SSR:
+Use a single command to scaffold your Module Federation architecture with SSR:
 
 ```bash
 npx nx g host dashboard --remotes=login --ssr
 ```
 
 This command generates two Angular Universal (SSR) applications and configures Webpack for both browser and server with Module Federation.
+
 
 ### Serving the Applications
 
@@ -79,13 +87,14 @@ npx nx serve-ssr dashboard
 ```
 
 This builds the browser and server bundles for the 'login' application and runs it using Node.js. Note that the 'login' application runs without file watchers, so changes in its code won't automatically reflect.
+</Steps>
 
-### Caching and Real-Time Updates
+## Caching and Real-Time Updates
 
 - Nx caches the build of the browser and server bundles for the 'login' application. On subsequent runs, it uses this cache instead of rebuilding the application.
 - For the 'dashboard' application, the server build includes file watchers, enabling real-time updates to the code.
 
-### Verifying the Setup
+## Verifying the Setup
 
 1. Upon successful compilation, you'll see a success message indicating the server's listening address, typically `http://localhost:4200`.
 2. Open this address in your browser and inspect the Network tab in DevTools.

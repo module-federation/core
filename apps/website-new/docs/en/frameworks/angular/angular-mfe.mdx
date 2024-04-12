@@ -105,6 +105,8 @@ Then, update your `angular.json` file to use this custom builder for both the bu
 
 ## Webpack Configuration for Shell Application
 
+<Steps>
+
 ### Unique Output Name Configuration
 
 Webpack uses the name from the `package.json` by default. However, to avoid conflicts, especially in monorepos, it's recommended to manually define a unique name.
@@ -139,7 +141,6 @@ import { Configuration, container } from 'webpack';
 
 export default (config: Configuration, options: CustomWebpackBrowserSchema, targetOptions: TargetOptions) => {
   // ... existing configuration
-
   config.plugins.push(
     new container.ModuleFederationPlugin({
       remotes: {
@@ -158,25 +159,13 @@ export default (config: Configuration, options: CustomWebpackBrowserSchema, targ
 ```
 
 Here, in the `remotes` object, we map remote module names to their respective locations. The key ('mf1' in this example) is the name used to import the module in the shell application. The value specifies the location of the remote file, which in this example is `http://localhost:4300/mf1.js`.
-### Shared Dependencies between Shell and Remote Module
 
-#### Importance of Shared Dependencies
+</Steps>
+## Configuring the Remote Module/Application
 
-The `shared` section in the Webpack configuration plays a pivotal role in defining modules that are common between the shell and the remote module. Doing so can significantly reduce the bundle size, enhancing the user experience.
+<Steps>
 
-#### Handling Version Mismatches
-
-Webpack will emit runtime errors if there are major version incompatibilities between the shell and remote apps. Harmonizing versioning across development teams is essential to prevent such issues.
-
-#### Semantic Versioning and Flexibility
-
-Webpack adheres to semantic versioning when resolving shared dependencies. It’s advisable to allow some flexibility in version selection using operators like `^` or `>=`. This ensures that only the necessary versions are loaded, minimizing the risk of loading multiple conflicting versions of a library.
-
-### Configuring the Remote Module/Application
-
-#### Webpack Configuration for Remote Module
-
-##### Setting Unique Output Name and Disabling Runtime Chunk
+### Setting Unique Output Name and Disabling Runtime Chunk
 
 Similar to the shell application, define a unique output name and disable the `runtimeChunk` optimization:
 
@@ -185,7 +174,7 @@ config.output.uniqueName = 'contact';
 config.optimization.runtimeChunk = false;
 ```
 
-##### Adding Module Federation Plugin
+### Adding Module Federation Plugin
 
 Configure the `ModuleFederationPlugin` as follows:
 
@@ -218,20 +207,21 @@ export default (config: Configuration, options: CustomWebpackBrowserSchema, targ
 
 Here, the `filename` and `name` properties specify the JavaScript file's name and the namespace for the module container in the global window object. These are the exact values used by the shell application when loading the remote module.
 
-#### Exposing Modules
+### Exposing Modules
 
 The `exposes` object specifies the modules to be exported. In this example:
 
 - `./Contact` exports an Angular `NgModule` with child routes.
 - `./Clock` exports an Angular component for runtime rendering.
 
-#### Using Module Federation in Angular Routing
+</Steps>
 
-##### Declare Remote Modules
+## Angular Routing
+
+
+#### Declare Remote Modules
 
 Before you can use the remote modules, you need to inform TypeScript about their existence as they will be loaded dynamically at runtime.
-
-###### How to Declare?
 
 Create a new TypeScript definition file, `remote-modules.d.ts`, next to your routing module:
 
@@ -240,11 +230,9 @@ declare module 'mf1/Contact';
 declare module 'mf1/Clock';
 ```
 
-##### Lazy-Loading Remote Modules in Routes
+#### Lazy-Loading Remote Modules in Routes
 
 Just like you would with native lazy-loaded modules, you can now import remote modules into your Angular routing configuration.
-
-###### How to Load?
 
 Modify your route configuration as follows:
 
@@ -262,11 +250,12 @@ const routes: Routes = [
 ];
 ```
 
-##### Dynamic Component Creation of Remote Modules
+## Dynamic Component Creation of Remote Modules
 
-Creating components dynamically from remote modules offers a more advanced level of integration. This involves setting up a service and a directive to handle the dynamic rendering.
+Creating components dynamically from remote modules offers a more advanced level of integration.
+This involves setting up a service and a directive to handle the dynamic rendering.
 
-###### The Remote Module Loader Service
+### The Remote Module Loader Service
 
 This service is responsible for dynamically loading remote modules and resolving component factories.
 
@@ -289,7 +278,7 @@ export class RemoteModuleLoader {
 }
 ```
 
-###### The Remote Component Renderer Directive
+### The Remote Component Renderer Directive
 
 This structural directive dynamically creates components within its own view container using the component factory obtained from the Remote Module Loader Service.
 ```typescript
@@ -310,14 +299,29 @@ export class RemoteComponentRenderer implements OnInit {
 }
 ```
 
-==== Usage in View
+#### Usage in View
 
 In your Angular view, you can use the directive as follows:
 ```html
 <ng-container *remoteComponentRenderer="'ClockComponent'; module:'mf1/Clock'"></ng-container>
 ```
 
-== Summary
+## Shared Dependencies
+
+#### Importance of Shared Dependencies
+
+The `shared` section in the Webpack configuration plays a pivotal role in defining modules that are common between the shell and the remote module. Doing so can significantly reduce the bundle size, enhancing the user experience.
+
+#### Handling Version Mismatches
+
+Webpack may throw runtime errors due to major version mismatches between the shell and remote apps. Consistent version sync is important for shared `singletons`
+
+#### Semantic Versioning and Flexibility
+
+Webpack adheres to semantic versioning when resolving shared dependencies. It’s advisable to allow some flexibility in version selection using operators like `^` or `>=`. This ensures that only the necessary versions are loaded, minimizing the risk of loading multiple conflicting versions of a library.
+
+
+## Summary
 
 This guide has walked you through the dynamic integration of remote modules in an Angular application leveraging Webpack's Module Federation. Specifically, you've learned:
 
