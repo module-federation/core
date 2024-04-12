@@ -2,53 +2,54 @@
 title: "Micro-frontends with Angular"
 ---
 
+import {Steps, Tabs, Tab} from '@theme';
+
 # Micro-frontends with Angular and Webpack Module Federation
 
 ## Overview
 
-Module Federation has been a game-changer in the micro-frontends landscape. When combined with Angular, it offers a robust and scalable solution for distributed front-end architecture. This guide goes beyond the basics and explores a practical example, detailing how to configure the Webpack `ModuleFederationPlugin` in an Angular shell and a remote application.
+Module Federation has significantly impacted the micro-frontends landscape. When integrated with Angular, it provides a robust and scalable solution for distributed front-end architecture. This guide explores a practical example, detailing the configuration of the Webpack `ModuleFederationPlugin` in an Angular shell and a remote application.
+
 
 ### Prerequisites
+
 Before diving into the setup, ensure you meet the following prerequisites:
 
-- **Node.js and npm:** Make sure Node.js and npm are installed on your machine.
-- **Angular and Webpack Knowledge:** A basic understanding of Angular and Webpack is required.
-- **Module Federation:** Since this article assumes you're familiar with Module Federation, make sure you've covered its foundational concepts.
+- **Node.js and npm:** Ensure Node.js and npm are installed.
+- **Angular and Webpack Knowledge:** Basic understanding of Angular and Webpack is necessary.
+- **Module Federation:** Familiarity with Module Federation is assumed.
 
 ## Preparatory Steps
 
-### Force Resolution of Webpack 5
+<Steps>
 
-#### Why Force Webpack 5?
+### Force Resolution of Webpack 5
 
 Angular CLI projects often come pre-configured with Webpack, but to ensure that Module Federation is fully supported, you need to opt-in to Webpack 5.
 
-#### How to Force?
-
-Open your `package.json` and add a `resolutions` key to force the use of Webpack 5:
-
-```json
-{
-  "resolutions": {
-    "webpack": "^5.0.0"
+<Tabs>
+<Tab label="Yarn">
+  Open your `package.json` and add a `resolutions` key to force the use of Webpack 5:
+  ```json title="package.json"
+  {
+    "resolutions": {
+      "webpack": "^5.0.0"
+    }
   }
-}
-```
+  ```
+</Tab>
+<Tab label="Npm">
+  The `resolutions` key is not natively supported by npm. <br/>
+  It's advisable to use Yarn as your package manager.<br/>
+  Alternatively, you can try using the `npm-force-resolutions` package, although it hasn't been extensively tested for this setup.
+</Tab>
+</Tabs>
 
-:::tip
-NOTE: The `resolutions` key is not natively supported by npm. It's advisable to use Yarn as your package manager. Alternatively, you can try using the `npm-force-resolutions` package, although it hasn't been extensively tested for this setup.
-:::
+
 ### Specify Package Manager in Angular CLI
 
-#### Why Specify?
 
-If you opt to use Yarn, you'll need to inform the Angular CLI to use it as the default package manager.
-
-#### How to Specify?
-
-In your `angular.json` file, add the following configuration:
-
-```json
+```json title="angular.json"
 {
   "cli": {
     "packageManager": "yarn"
@@ -56,15 +57,13 @@ In your `angular.json` file, add the following configuration:
 }
 ```
 
+
+
 ### Add Customizable Webpack Configuration
 
-#### Why Customize?
+You have a couple of options for exposing the Webpack configuration, such as using `Ngx-build-plus` or `@angular-builders/custom-webpack`.
 
-While Angular does use Webpack internally, it doesn't expose the Webpack configuration for customization by default.
-
-#### How to Customize?
-
-You have a couple of options for exposing the Webpack configuration, such as using `Ngx-build-plus` or `@angular-builders/custom-webpack`. In this example, we'll use the latter.
+In this example, we'll use the latter.
 
 First, install the package:
 
@@ -76,7 +75,7 @@ npm i -D @angular-builders/custom-webpack
 
 Then, update your `angular.json` file to use this custom builder for both the build and serve commands:
 
-```json
+```json title="angular.json"
 {
   "projects": {
     "your-project-name": {
@@ -97,52 +96,44 @@ Then, update your `angular.json` file to use this custom builder for both the bu
   }
 }
 ```
-:::tip
-NOTE: The custom Webpack configuration will be merged with Angular's default configuration, allowing you to specify only the changes needed for Module Federation.
-:::
+
+<div className={"rspress-directive tip"}>
+ The custom Webpack configuration will be merged with Angular's default configuration, allowing you to specify only the changes needed for Module Federation.
+</div>
+
+</Steps>
+
 ## Webpack Configuration for Shell Application
 
 ### Unique Output Name Configuration
 
-#### Why Define a Unique Name?
-
 Webpack uses the name from the `package.json` by default. However, to avoid conflicts, especially in monorepos, it's recommended to manually define a unique name.
 
-#### How to Define?
 
-In your `webpack.config.ts`, set the `uniqueName` of the output configuration:
 
-```javascript
+```javascript title="webpack.config.ts"
 config.output.uniqueName = 'shell';
 ```
 :::tip
 NOTE: If you're not using a monorepo and your `package.json` already has unique names, you can skip this step.
 :::
-## Runtime Chunk Optimization
 
-### Why Disable?
+### Runtime Chunk Optimization
+
 
 Due to a current bug, setting the `runtimeChunk` optimization to `false` is essential; otherwise, the Module Federation setup will break.
 
-### How to Disable?
 
-In your `webpack.config.ts`, disable the `runtimeChunk` optimization:
-
-```javascript
+```javascript title="webpack.config.ts"
 config.optimization.runtimeChunk = false;
 ```
 
-## Adding Module Federation Plugin Configuration
+### Adding Module Federation Plugin
 
-### Why Add This Plugin?
-
-The `ModuleFederationPlugin` is crucial for defining how modules from remote applications will be consumed in the shell application.
-
-### How to Add?
 
 In your `webpack.config.ts`, add the `ModuleFederationPlugin` to the plugins array:
 
-```typescript
+```typescript title="webpack.config.ts"
 import { CustomWebpackBrowserSchema, TargetOptions } from '@angular-builders/custom-webpack';
 import { Configuration, container } from 'webpack';
 
