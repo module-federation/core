@@ -217,7 +217,7 @@ loadShare('react', {
       );
   },
  }).then((reactFactory) => {
-  console.log(reactFactory()); // { version: '17.0.0)' }
+  console.log(reactFactory()); // { version: '17.0.0' }
 });
 ```
 
