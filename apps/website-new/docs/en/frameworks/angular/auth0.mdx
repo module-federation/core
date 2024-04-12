@@ -37,8 +37,7 @@ npm i @auth0/auth0-angular
 
 Import the `AuthModule` from `@auth0/auth0-angular` into the AppModule of both the shell application and the micro frontend(s).
 
-```typescript
-// In both the shell and micro frontend's app.module.ts files
+```typescript title="app.module.ts"
 
 import { AuthModule } from '@auth0/auth0-angular';
 
@@ -61,8 +60,7 @@ Replace `YOUR_AUTH0_DOMAIN` and `YOUR_AUTH0_CLIENT_ID` with the actual values fr
 
 In your shell application, use the `AuthService` to implement the login functionality.
 
-```typescript
-// projects/shell/src/app/home/home.component.ts
+```typescript title="projects/shell/src/app/home/home.component.ts"
 
 import { Component } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
@@ -87,9 +85,7 @@ export class HomeComponent {
 
 In the shell's home component, display the logged-in user's name.
 
-```html
-<!-- projects/shell/src/app/home/home.component.html -->
-
+```html title="projects/shell/src/app/home/home.component.html"
 <h1>Welcome!</h1>
 
 <p *ngIf="user$ | async as user">
@@ -105,9 +101,7 @@ In the shell's home component, display the logged-in user's name.
 
 In your micro frontend components, you can similarly use `AuthService` to access the current user's information.
 
-```typescript
-// Example from a micro frontend's address.component.ts
-
+```typescript title="address.component.ts"
 import { AuthService } from '@auth0/auth0-angular';
 import { FormBuilder } from '@angular/forms';
 import { take } from 'rxjs/operators';
@@ -117,17 +111,14 @@ import { take } from 'rxjs/operators';
 })
 export class AddressComponent {
   // component properties...
-
   constructor(
     private auth: AuthService,
     private fb: FormBuilder) {
-
     this.auth.user$.pipe(take(1)).subscribe(user => {
       if (!user) return;
       // Use user information to pre-fill form, etc.
     });
   }
-
   // other component methods...
 }
 ```
