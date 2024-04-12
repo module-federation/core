@@ -23,6 +23,7 @@ import {
 } from '../constant';
 import axios from 'axios';
 import { replaceLocalhost } from './utils';
+import { fileLog } from '../../server';
 
 export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
 
@@ -199,7 +200,11 @@ class DTSManager {
       ).href;
       return remoteInfo as Required<RemoteInfo>;
     } catch (_err) {
-      console.error(_err);
+      fileLog(
+        `fetch manifest failed, ${_err}, ${remoteInfo.name} will be ignored`,
+        'requestRemoteManifest',
+        'error',
+      );
       return remoteInfo as Required<RemoteInfo>;
     }
   }
@@ -235,10 +240,10 @@ class DTSManager {
       fs.writeFileSync(filePath, apiTypeFile);
       this.loadedRemoteAPIAlias.push(remoteInfo.alias);
     } catch (err) {
-      console.error(
-        ansiColors.red(
-          `Unable to download "${remoteInfo.name}" api types, ${err}`,
-        ),
+      fileLog(
+        `Unable to download "${remoteInfo.name}" api types, ${err}`,
+        'consumeTargetRemotes',
+        'error',
       );
     }
   }
@@ -297,8 +302,10 @@ class DTSManager {
         recursive: true,
         force: true,
       }).catch((error) =>
-        console.error(
-          ansiColors.red(`Unable to remove types folder, ${error}`),
+        fileLog(
+          `Unable to remove types folder, ${error}`,
+          'consumeArchiveTypes',
+          'error',
         ),
       );
     }
@@ -361,8 +368,10 @@ class DTSManager {
       console.log(ansiColors.green('Federated types extraction completed'));
     } catch (err) {
       if (this.options.host?.abortOnError === false) {
-        console.error(
-          ansiColors.red(`Unable to consume federated types, ${err}`),
+        fileLog(
+          `Unable to consume federated types, ${err}`,
+          'consumeTypes',
+          'error',
         );
       } else {
         throw err;
