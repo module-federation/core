@@ -11,6 +11,10 @@
       {
         "text": "Frameworks",
         "link": "/frameworks/index"
+      },
+      {
+        "text": "Practices & Concepts",
+        "link": "/practices/anti-patterns/index"
       }
     ]
   },

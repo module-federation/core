@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Overview"
+  },
+  {
+    "type": "dir",
+    "name": "start",
+    "label": "Getting Started"
+  },
+  {
+    "type": "dir",
+    "name": "anti-patterns",
+    "label": "Anti Patterns"
+  },
+  {
+    "type": "dir",
+    "name": "concepts",
+    "label": "Concepts"
+  }
+]
