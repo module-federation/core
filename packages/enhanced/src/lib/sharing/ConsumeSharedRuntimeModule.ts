@@ -135,7 +135,7 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
       initialConsumes.length > 0
         ? Template.asString([
             `var initialConsumes = ${JSON.stringify(initialConsumes)};`,
-            runtimeTemplate.returningFunction(
+            `${federationGlobal}.installInitialConsumes = ${runtimeTemplate.returningFunction(
               Template.asString([
                 `${federationGlobal}.bundlerRuntime.installInitialConsumes({`,
                 Template.indent([
@@ -144,10 +144,10 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
                   'moduleToHandlerMapping:moduleToHandlerMapping,',
                   `webpackRequire: ${RuntimeGlobals.require}`,
                 ]),
-                `});`,
+                `})`,
               ]),
               '',
-            ),
+            )}`,
           ])
         : '// no consumes in initial chunks',
       this._runtimeRequirements.has(RuntimeGlobals.ensureChunkHandlers)

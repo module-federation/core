@@ -1,0 +1,23 @@
+{
+  "name": "legacy-assets-test",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/legacy-assets-test/src",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run build",
+        "cwd": "apps/legacy-assets-test"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run dev",
+        "cwd": "apps/legacy-assets-test"
+      }
+    }
+  },
+  "tags": []
+}
