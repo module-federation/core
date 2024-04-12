@@ -11,14 +11,17 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/index.cjs.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js"
     },
     "./runtime": {
+      "types": "./dist/runtime.cjs.d.ts",
       "import": "./dist/runtime.esm.js",
       "require": "./dist/runtime.cjs.js"
     },
     "./webpack-bundler-runtime": {
+      "types": "./dist/webpack-bundler-runtime.cjs.d.ts",
       "import": "./dist/webpack-bundler-runtime.esm.js",
       "require": "./dist/webpack-bundler-runtime.cjs.js"
     },
