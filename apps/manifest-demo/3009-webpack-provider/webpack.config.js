@@ -12,6 +12,9 @@ module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
+    config.watchOptions = {
+      ignored: ['**/node_modules/**', '**/@mf-types/**'],
+    };
     // publicPath must be specific url
     config.output.publicPath = 'http://localhost:3009/';
     config.plugins.push(
