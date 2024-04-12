@@ -734,8 +734,21 @@ const customSharedPlugin: () => FederationRuntimePlugin = function () {
         return args;
       }
 
+      // set lib
       args.resolver = function () {
-        shareScopeMap[scope][pkgName][version] = window.React; // replace local share scope manually with desired module
+        shareScopeMap[scope][pkgName][version] = {
+          lib: ()=>window.React,
+          loaded:true,
+          loading: Promise.resolve(()=>window.React)
+        }; // Manually replace the local share scope with the desired module
+        return shareScopeMap[scope][pkgName][version];
+      };
+
+      // set get
+      args.resolver = function () {
+        shareScopeMap[scope][pkgName][version] = {
+          get: async ()=>()=>window.React,
+        }; // Manually replace the local share scope with the desired module
         return shareScopeMap[scope][pkgName][version];
       };
       return args;
