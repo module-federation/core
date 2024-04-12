@@ -88,7 +88,9 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       }
     }
 
-    new DtsPlugin(options).apply(compiler);
+    if (options.dts !== false) {
+      new DtsPlugin(options).apply(compiler);
+    }
 
     if (
       library &&
