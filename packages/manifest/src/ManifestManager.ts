@@ -21,6 +21,8 @@ interface GenerateManifestOptions {
   stats: Stats;
   publicPath: string;
   compiler: Compiler;
+  bundler: 'webpack' | 'rspack';
+  additionalData?: moduleFederationPlugin.PluginManifestOptions['additionalData'];
 }
 
 class ManifestManager {
@@ -39,8 +41,15 @@ class ManifestManager {
     return getFileName(this._options.manifest).manifestFileName;
   }
 
-  generateManifest(options: GenerateManifestOptions): void {
-    const { compilation, publicPath, stats, compiler } = options;
+  async generateManifest(options: GenerateManifestOptions): Promise<void> {
+    const {
+      compilation,
+      publicPath,
+      stats,
+      compiler,
+      bundler,
+      additionalData,
+    } = options;
     const manifest: Manifest = {
       ...stats,
     };
@@ -96,9 +105,23 @@ class ManifestManager {
 
     const manifestFileName = this.fileName;
 
+    if (additionalData) {
+      const ret = await additionalData({
+        manifest: this._manifest,
+        stats,
+        pluginOptions: this._options,
+        compiler,
+        compilation,
+        bundler,
+      });
+      this._manifest = ret || this._manifest;
+    }
+
     compilation.emitAsset(
       manifestFileName,
-      new compiler.webpack.sources.RawSource(JSON.stringify(manifest, null, 2)),
+      new compiler.webpack.sources.RawSource(
+        JSON.stringify(this._manifest, null, 2),
+      ),
     );
 
     if (isDev()) {
