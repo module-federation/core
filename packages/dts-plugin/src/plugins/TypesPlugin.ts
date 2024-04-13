@@ -26,7 +26,12 @@ class TypesPlugin implements WebpackPluginInstance {
     const defaultConsumeTypes = { abortOnError: false, consumeAPITypes: true };
     const normalizedDtsOptions =
       normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
-        isTSProject(undefined, compiler.context),
+        isTSProject(
+          typeof options.dts === 'object'
+            ? options.dts.tsConfigPath
+            : undefined,
+          compiler.context,
+        ),
         {
           generateTypes: defaultGenerateTypes,
           consumeTypes: defaultConsumeTypes,
