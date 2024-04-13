@@ -1,5 +1,7 @@
 //@ts-nocheck
 
+import path from 'path';
+
 (() => {
   function fileSystemRunInContextStrategy(
     chunkId,
@@ -45,11 +47,13 @@
     try {
       url = new URL(chunkName, __webpack_require__.p);
     } catch (e) {
-      console.error(
+      console.warn(
         'module-federation: failed to construct absolute chunk path of',
         remoteName,
         'for',
         chunkName,
+        'public path:',
+        __webpack_require__.p,
       );
       url = new URL(remotes[remoteName]);
       var getBasenameFromUrl = function (url) {
@@ -95,6 +99,8 @@
         remoteName,
         'for',
         chunkName,
+        'for public path',
+        __webpack_require__.p,
       );
       // search all instances to see if any have the remote
 
@@ -109,7 +115,7 @@
       );
 
       if (container) {
-        entryUrl = container.remoteInfo.entry;
+        entryUrl = container.moduleCache.get(remoteName).remoteInfo.entry;
       } else {
         var currentName = __webpack_require__.federation.initOptions.name;
         var backupContainer = __FEDERATION__.__INSTANCES__.find(
@@ -134,16 +140,19 @@
           entryUrl = backupRemote.entry;
         }
       }
+      console.log('ENTRYURL', entryUrl);
 
       if (!entryUrl) {
-        throw new Error('Container not found');
+        // var mockChunk = { modules: {}, ids: [], runtime: false };
+        return callback(null);
+        // throw new Error('Container not found');
       }
 
-      console.log('#########');
+      console.log(entryUrl);
+
       url = new URL(entryUrl);
       var fileToReplace = path.basename(url.pathname);
       url.pathname = url.pathname.replace(fileToReplace, chunkName);
-      console.log(url);
     }
     var protocol = url.protocol === 'https:' ? https : http;
     protocol.get(url.href, function (res) {
@@ -251,6 +260,7 @@
         if (!usesInternalRef && !globalThis[chunkId]) {
           globalThis[chunkId] = enhancedRemote;
         }
+        console.log('adding remote', chunkId);
         callback(enhancedRemote);
       })
       .catch(function (error) {
@@ -266,19 +276,28 @@
       if (installedChunkData) {
         promises.push(installedChunkData[2]);
       } else {
+        console.log(
+          'is outbound chunk handler ref',
+          __webpack_require__.federation.chunkMatcher(chunkId),
+        );
+        // console.log(__webpack_require__.federation.bundlerRuntimeOptions);
+        // console.log(__webpack_require__.federation.initOptions.name);
         if (
-          !__webpack_require__.federation.bundlerRuntimeOptions.remotes
-            .chunkMapping[chunkId]
+          // check if real chunk for handler. Federation makes virtual chunks that are handled by other handlers
+          __webpack_require__.federation.chunkMatcher(chunkId)
+          // or call mock chunk callback on chunk load failure
+          // eslint-disable-next-line
+          // true
         ) {
           // all chunks have JS
           // load the chunk and return promise to it
-          var promise = new Promise(async function (resolve, reject) {
+          var promise = new Promise(function (resolve, reject) {
             installedChunkData = installedChunks[chunkId] = [resolve, reject];
 
             function installChunkCallback(error, chunk) {
               if (error) return reject(error);
               // console.log(installChunk, __webpack_require__.C, __webpack_require__.federation.initOptions.name)
-              installChunk(chunk);
+              if (chunk) installChunk(chunk);
               resolve(chunk);
             }
 
@@ -287,31 +306,24 @@
               typeof process !== 'undefined'
                 ? require('path').join(
                     __dirname,
-                    '' + __webpack_require__.u(chunkId),
+                    __webpack_require__.federation.rootOutputDir || '',
+                    __webpack_require__.u(chunkId),
                   )
                 : false;
-            var remotes = {
-              home_app: 'http://localhost:3000/_next/static/ssr/remoteEntry.js',
-              checkout: 'http://localhost:3002/_next/static/ssr/remoteEntry.js',
-            };
-            const currentName = __webpack_require__.federation.initOptions.name;
-            const url = __FEDERATION__.__INSTANCES__.find((hostInstance) => {
-              return hostInstance.options.remotes.find((remote) => {
-                return (
-                  remote.name === currentName || remote.alias === currentName
-                );
-              });
-            });
+
             if (fs && fs.existsSync(filename)) {
+              // loadChunkStrategy('filesystem', chunkId, "chunks/", remotes, installChunkCallback);
+
               loadChunkStrategy(
                 'filesystem',
                 chunkId,
-                '',
-                remotes,
+                __webpack_require__.federation.rootOutputDir || '',
+                undefined,
                 installChunkCallback,
               );
             } else {
               var chunkName = __webpack_require__.u(chunkId);
+
               const loadingStrategy =
                 typeof process !== 'undefined' ? 'http-vm' : 'http-eval';
               loadChunkStrategy(

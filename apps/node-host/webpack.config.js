@@ -10,7 +10,7 @@ module.exports = composePlugins(withNx(), async (config) => {
   config.target = 'async-node';
   config.output.publicPath = '/testing';
   config.output.chunkFilename = '[id]-[chunkhash].js';
-  config.optimization.chunkIds = 'named'
+  config.optimization.chunkIds = 'named';
   await new Promise((r) => setTimeout(r, 400));
   config.module.rules.pop();
   config.plugins.push(

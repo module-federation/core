@@ -47,7 +47,7 @@ jobs:
         run: npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
 
       - name: E2E Test for Next.js
-        run: pnpm run app:next:dev & echo "done" && sleep 50 && npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=2 && lsof -ti tcp:3000,3001,3002 | xargs kill
+        run: pnpm run app:next:dev & echo "done" && sleep 55 && npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=2 && lsof -ti tcp:3000,3001,3002 | xargs kill
 
       #      - name: E2E Test for 3001-shop
       #        run: pnpm run app:next:dev & echo "done" && sleep 20 && npx nx run-many --target=test:e2e --projects=3001-shop && lsof -ti tcp:3000,3001,3002 | xargs kill
@@ -68,4 +68,4 @@ jobs:
         run: pnpm app:next:build
 
       - name: E2E Node Federation
-        run: npx nx run-many --target=serve --projects=node-local-remote,node-remote --parallel=3 & echo "done" && sleep 10 && npx nx run-many --target=serve --projects=node-host & echo "done" && npx nx run node-host-e2e:test:e2e
+        run: npx nx run-many --target=serve --projects=node-local-remote,node-remote --parallel=3 & echo "done" && sleep 20 && npx nx run-many --target=serve --projects=node-host & echo "done" && npx nx run node-host-e2e:test:e2e

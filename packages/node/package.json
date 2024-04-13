@@ -48,7 +48,6 @@
     "@module-federation/runtime": "workspace:*"
   },
   "peerDependencies": {
-    "next": "^12||^13",
     "react": "^16||^17||^18",
     "react-dom": "^16||^17||^18",
     "webpack": "^5.40.0"

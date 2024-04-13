@@ -10,6 +10,8 @@ const { Template } = require(
 function getFederationGlobal(
   template: typeof Template,
   runtimeGlobals: typeof RuntimeGlobals,
+  matcher: string | boolean,
+  rootOutputDir: string | undefined,
   initOptionsWithoutShared: NormalizedRuntimeInitOptionsWithOutShared,
 ): string {
   const federationGlobal = getFederationGlobalScope(runtimeGlobals);
@@ -21,6 +23,8 @@ function getFederationGlobal(
       `${federationGlobal} = {`,
       template.indent([
         `initOptions: ${initOptionsStrWithoutShared},`,
+        `chunkMatcher: function(chunkId) {return ${matcher}},`,
+        rootOutputDir ? `rootOutputDir: ${JSON.stringify(rootOutputDir)},` : '',
         `initialConsumes: undefined,`,
         'bundlerRuntimeOptions: {}',
       ]),

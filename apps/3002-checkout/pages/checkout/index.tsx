@@ -47,7 +47,6 @@ Checkout.getInitialProps = async () => {
   const timeout = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
 
-
   // this will resolve after 3 seconds
   const timerPromise = timeout(3000).then(() => ({
     userId: 1,

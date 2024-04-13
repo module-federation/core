@@ -35,6 +35,6 @@
     "@module-federation/utilities": "workspace:*"
   },
   "scripts": {
-    "start": "next start"
+    "start": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build"
   }
 }

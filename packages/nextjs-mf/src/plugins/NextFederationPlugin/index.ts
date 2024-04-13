@@ -73,6 +73,12 @@ export class NextFederationPlugin {
     const runtimeESMPath = require.resolve(
       '@module-federation/runtime/dist/index.esm.js',
     );
+    if (!compiler.options.ignoreWarnings) {
+      compiler.options.ignoreWarnings = [
+        //@ts-ignore
+        (message) => /your target environment does not appear/.test(message),
+      ];
+    }
     compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
       compiler.options.resolve.alias = {
         ...compiler.options.resolve.alias,

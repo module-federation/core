@@ -49,7 +49,6 @@ Shop.getInitialProps = async () => {
   const timeout = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
 
-
   const fallback = {
     name: 'Luke Skywalker',
     height: '172',

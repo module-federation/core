@@ -25,6 +25,7 @@ export function applyServerPlugins(
     uniqueName &&
     !chunkFileName.includes(uniqueName)
   ) {
+    compiler.options.optimization.minimize = false;
     const suffix = `-[chunkhash].js`;
     compiler.options.output.chunkFilename = chunkFileName.replace(
       '.js',
