@@ -5,8 +5,8 @@
 
 import express from 'express';
 import * as path from 'path';
-// import node_local_remote from 'node_local_remote/test';
-console.log('loading test');
+import node_local_remote from 'node_local_remote/test';
+console.log('app started');
 
 const remoteMsg = import('node_remote/test').then((m) => {
   console.log('heres the load');
@@ -26,7 +26,7 @@ app.get('/api', async (req, res) => {
     message: 'Welcome to node-host!',
     remotes: {
       node_remote: await remoteMsg,
-      // node_local_remote,
+      node_local_remote,
     },
   });
 });

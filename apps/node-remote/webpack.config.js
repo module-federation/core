@@ -18,7 +18,7 @@ module.exports = composePlugins(withNx(), (config) => {
   config.plugins.push(
     new ModuleFederationPlugin({
       dts: false,
-      runtimePlugins: [require.resolve('./runtimePlugin.ts')],
+      runtimePlugins: [require.resolve('@module-federation/node/runtimePlugin')],
       name: 'node_remote',
       library: { type: 'commonjs-module' },
       filename: 'remoteEntry.js',
