@@ -13,6 +13,7 @@ The `PluginDtsOptions` types are as follows:
 interface PluginDtsOptions {
   generateTypes?: boolean | DtsRemoteOptions;
   consumeTypes?: boolean | DtsHostOptions;
+  tsConfigPath?: string;
 }
 ```
 
@@ -102,7 +103,7 @@ Whether to throw an error when a problem is encountered during type generation
 - Type: `string`
 - Required: No
 - Default value: `path.join(process.cwd(),'./tsconfig.json')`
-
+> priority: dts.generateTypes.tsConfigPath > dts.tsConfigPath
 tsconfig configuration file path
 
 #### typesFolder
@@ -206,3 +207,11 @@ Before loading type files, whether to delete the previously loaded `typesFolder`
 - Default value: `'@mf-types'`
 
 `typesFolder` corresponding to `remotes` directory configuration
+
+### tsConfigPath
+
+- Type: `string`
+- Required: No
+- Default value: `path.join(process.cwd(),'./tsconfig.json')`
+
+tsconfig configuration file path
