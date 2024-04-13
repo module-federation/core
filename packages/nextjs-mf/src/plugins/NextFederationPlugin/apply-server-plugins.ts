@@ -33,9 +33,9 @@ export function applyServerPlugins(
     );
   }
   // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
-  new StreamingTargetPlugin(options, {
-    ModuleFederationPlugin: ModuleFederationPlugin,
-  }).apply(compiler);
+  // new StreamingTargetPlugin(options, {
+  //   ModuleFederationPlugin: ModuleFederationPlugin,
+  // }).apply(compiler);
 
   new HoistContainerReferencesPlugin().apply(compiler);
 

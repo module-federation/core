@@ -9,9 +9,9 @@ import path from 'path';
     remotes,
     callback,
   ) {
-    var fs = require('fs');
-    var path = require('path');
-    var vm = require('vm');
+    var fs = __non_webpack_require__('fs');
+    var path = __non_webpack_require__('path');
+    var vm = __non_webpack_require__('vm');
     var filename = path.join(
       __dirname,
       rootOutputDir + __webpack_require__.u(chunkId),
@@ -29,7 +29,7 @@ import path from 'path';
               content +
               '\n})',
             filename,
-          )(chunk, require, path.dirname(filename), filename);
+          )(chunk, __non_webpack_require__, path.dirname(filename), filename);
           callback(null, chunk);
         } catch (e) {
           console.log("'runInThisContext threw'", e);
@@ -75,7 +75,7 @@ import path from 'path';
             '(function(exports, require, __dirname, __filename) {' +
               data +
               '\n})',
-          )(chunk, require, urlDirname, chunkName);
+          )(chunk, __non_webpack_require__, urlDirname, chunkName);
           callback(null, chunk);
         } catch (e) {
           callback(e, null);
@@ -84,10 +84,10 @@ import path from 'path';
   }
 
   function httpVmStrategy(chunkName, remoteName, remotes, callback) {
-    var http = require('http');
-    var https = require('https');
-    var vm = require('vm');
-    var path = require('path');
+    var http = __non_webpack_require__('http');
+    var https = __non_webpack_require__('https');
+    var vm = __non_webpack_require__('vm');
+    var path = __non_webpack_require__('path');
     var url;
 
     var globalThisVal = new Function('return globalThis')();
@@ -168,7 +168,7 @@ import path from 'path';
             data +
             '\n})',
           chunkName,
-        )(chunk, require, urlDirname, chunkName);
+        )(chunk, __non_webpack_require__, urlDirname, chunkName);
         callback(null, chunk);
       });
       res.on('error', function (err) {
@@ -268,79 +268,90 @@ import path from 'path';
       });
   };
   // Dynamic filesystem chunk loading for javascript
-  __webpack_require__.f.readFileVm = function (chunkId, promises) {
-    var installedChunkData = installedChunks[chunkId];
-    if (installedChunkData !== 0) {
-      // 0 means "already installed".
-      // array of [resolve, reject, promise] means "currently loading"
-      if (installedChunkData) {
-        promises.push(installedChunkData[2]);
-      } else {
-        console.log(
-          'is outbound chunk handler ref',
-          __webpack_require__.federation.chunkMatcher(chunkId),
-        );
-        // console.log(__webpack_require__.federation.bundlerRuntimeOptions);
-        // console.log(__webpack_require__.federation.initOptions.name);
-        if (
-          // check if real chunk for handler. Federation makes virtual chunks that are handled by other handlers
-          __webpack_require__.federation.chunkMatcher(chunkId)
-          // or call mock chunk callback on chunk load failure
-          // eslint-disable-next-line
-          // true
-        ) {
-          // all chunks have JS
-          // load the chunk and return promise to it
-          var promise = new Promise(function (resolve, reject) {
-            installedChunkData = installedChunks[chunkId] = [resolve, reject];
+  if (__webpack_require__.f) {
+    const handle = function (chunkId, promises) {
+      var installedChunkData = installedChunks[chunkId];
+      if (installedChunkData !== 0) {
+        // 0 means "already installed".
+        // array of [resolve, reject, promise] means "currently loading"
+        if (installedChunkData) {
+          promises.push(installedChunkData[2]);
+        } else {
+          console.log(
+            'is outbound chunk handler ref',
+            __webpack_require__.federation.chunkMatcher(chunkId),
+          );
+          // console.log(__webpack_require__.federation.bundlerRuntimeOptions);
+          // console.log(__webpack_require__.federation.initOptions.name);
+          if (
+            // check if real chunk for handler. Federation makes virtual chunks that are handled by other handlers
+            __webpack_require__.federation.chunkMatcher(chunkId)
+            // or call mock chunk callback on chunk load failure
+            // eslint-disable-next-line
+            // true
+          ) {
+            // all chunks have JS
+            // load the chunk and return promise to it
+            var promise = new Promise(function (resolve, reject) {
+              installedChunkData = installedChunks[chunkId] = [resolve, reject];
 
-            function installChunkCallback(error, chunk) {
-              if (error) return reject(error);
-              // console.log(installChunk, __webpack_require__.C, __webpack_require__.federation.initOptions.name)
-              if (chunk) installChunk(chunk);
-              resolve(chunk);
-            }
+              function installChunkCallback(error, chunk) {
+                if (error) return reject(error);
+                // console.log(installChunk, __webpack_require__.C, __webpack_require__.federation.initOptions.name)
+                if (chunk) installChunk(chunk);
+                resolve(chunk);
+              }
 
-            var fs = typeof process !== 'undefined' ? require('fs') : false;
-            var filename =
-              typeof process !== 'undefined'
-                ? require('path').join(
-                    __dirname,
-                    __webpack_require__.federation.rootOutputDir || '',
-                    __webpack_require__.u(chunkId),
-                  )
-                : false;
+              var fs =
+                typeof process !== 'undefined'
+                  ? __non_webpack_require__('fs')
+                  : false;
+              var filename =
+                typeof process !== 'undefined'
+                  ? __non_webpack_require__('path').join(
+                      __dirname,
+                      __webpack_require__.federation.rootOutputDir || '',
+                      __webpack_require__.u(chunkId),
+                    )
+                  : false;
 
-            if (fs && fs.existsSync(filename)) {
-              // loadChunkStrategy('filesystem', chunkId, "chunks/", remotes, installChunkCallback);
+              if (fs && fs.existsSync(filename)) {
+                loadChunkStrategy(
+                  'filesystem',
+                  chunkId,
+                  __webpack_require__.federation.rootOutputDir || '',
+                  undefined,
+                  installChunkCallback,
+                );
+              } else {
+                var chunkName = __webpack_require__.u(chunkId);
 
-              loadChunkStrategy(
-                'filesystem',
-                chunkId,
-                __webpack_require__.federation.rootOutputDir || '',
-                undefined,
-                installChunkCallback,
-              );
-            } else {
-              var chunkName = __webpack_require__.u(chunkId);
-
-              const loadingStrategy =
-                typeof process !== 'undefined' ? 'http-vm' : 'http-eval';
-              loadChunkStrategy(
-                loadingStrategy,
-                chunkName,
-                __webpack_require__.federation.initOptions.name,
-                __webpack_require__.federation.initOptions.remotes,
-                installChunkCallback,
-              );
-            }
-          });
-          promises.push((installedChunkData[2] = promise));
-        } else installedChunks[chunkId] = 0;
+                const loadingStrategy =
+                  typeof process !== 'undefined' ? 'http-vm' : 'http-eval';
+                loadChunkStrategy(
+                  loadingStrategy,
+                  chunkName,
+                  __webpack_require__.federation.initOptions.name,
+                  __webpack_require__.federation.initOptions.remotes,
+                  installChunkCallback,
+                );
+              }
+            });
+            promises.push((installedChunkData[2] = promise));
+          } else installedChunks[chunkId] = 0;
+        }
       }
+    };
+    if (__webpack_require__.f.require) {
+      console.warn(
+        'build target is not set to "async-node", attempting to patch additional chunk handlers',
+      );
+      __webpack_require__.f.require = handle;
     }
-  };
-
+    if (__webpack_require__.f.readFileVm) {
+      __webpack_require__.f.readFileVm = handle;
+    }
+  }
   // no HMR
 
   // no HMR manifest
