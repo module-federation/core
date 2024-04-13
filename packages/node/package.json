@@ -43,13 +43,13 @@
     "node-fetch": "2.7.0",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/sdk": "workspace:*",
-    "@module-federation/utilities": "workspace:*",
-    "@module-federation/runtime": "workspace:*"
+    "tapable": "^2.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "@types/jest": "^29.5.12"
   },
   "peerDependencies": {
-    "next": "^12||^13",
-    "react": "^16||^17||^18",
-    "react-dom": "^16||^17||^18",
     "webpack": "^5.40.0"
   },
   "peerDependenciesMeta": {
