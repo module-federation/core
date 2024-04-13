@@ -1456,12 +1456,6 @@ importers:
       '@module-federation/utilities':
         specifier: workspace:*
         version: link:../utilities
-      '@module-federation/webpack-type':
-        specifier: workspace:*
-        version: link:../../webpack
-      eventemitter3:
-        specifier: ^5.0.0
-        version: 5.0.1
       fast-glob:
         specifier: ^3.2.11
         version: 3.3.2
@@ -1480,9 +1474,6 @@ importers:
       webpack:
         specifier: ^5.40.0
         version: 5.91.0(@swc/core@1.3.102)(esbuild@0.20.2)
-      webpack-sources:
-        specifier: ^3.2.3
-        version: 3.2.3
 
   packages/node:
     dependencies:
