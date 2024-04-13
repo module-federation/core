@@ -47,14 +47,14 @@ import path from 'path';
     try {
       url = new URL(chunkName, __webpack_require__.p);
     } catch (e) {
-      console.warn(
-        'module-federation: failed to construct absolute chunk path of',
-        remoteName,
-        'for',
-        chunkName,
-        'public path:',
-        __webpack_require__.p,
-      );
+      // console.warn(
+      //   'module-federation: failed to construct absolute chunk path of',
+      //   remoteName,
+      //   'for',
+      //   chunkName,
+      //   'public path:',
+      //   __webpack_require__.p,
+      // );
       url = new URL(remotes[remoteName]);
       var getBasenameFromUrl = function (url) {
         var urlParts = url.split('/');
@@ -344,7 +344,8 @@ import path from 'path';
     };
     if (__webpack_require__.f.require) {
       console.warn(
-        'build target is not set to "async-node", attempting to patch additional chunk handlers',
+        '\x1b[33m%s\x1b[0m',
+        'CAUTION: build target is not set to "async-node", attempting to patch additional chunk handlers',
       );
       __webpack_require__.f.require = handle;
     }
