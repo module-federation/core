@@ -78,8 +78,12 @@ class FederationRuntimePlugin {
         runtimePLuginNames.length
           ? Template.asString([
               `${federationGlobal}.initOptions.plugins = ([`,
-              Template.indent(runtimePLuginNames.map((item) => `${item}(),`)),
-              '])',
+              Template.indent(
+                runtimePLuginNames.map(
+                  (item) => `${item} ? ${item}() : false,`,
+                ),
+              ),
+              '].filter(Boolean))',
             ])
           : '',
         `${federationGlobal}.instance = ${federationGlobal}.runtime.init(${federationGlobal}.initOptions);`,
