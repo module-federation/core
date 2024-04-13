@@ -1,5 +1,21 @@
 # [0.2.0-canary.5](https://github.com/module-federation/universe/compare/enhanced-0.2.0-canary.4...enhanced-0.2.0-canary.5) (2023-11-20)
 
+## 0.1.4
+
+### Patch Changes
+
+- 8f3a440: fix: detect whether the project is ts
+- 2f697b9: fix: fixed type declaration in pkg
+- 8f3a440: allow dts plugin to be disabled
+- Updated dependencies [8f3a440]
+- Updated dependencies [2f697b9]
+  - @module-federation/dts-plugin@0.1.4
+  - @module-federation/sdk@0.1.4
+  - @module-federation/runtime-tools@0.1.4
+  - @module-federation/manifest@0.1.4
+  - @module-federation/rspack@0.1.4
+  - @module-federation/managers@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # [1.1.0-canary.1](https://github.com/module-federation/universe/compare/sdk-1.0.0...sdk-1.1.0-canary.1) (2023-12-05)
 
+## 0.1.4
+
+### Patch Changes
+
+- 8f3a440: fix: detect whether the project is ts
+- 2f697b9: fix: fixed type declaration in pkg
+
 ## 0.1.3
 
 ## 0.1.2
