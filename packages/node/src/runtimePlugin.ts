@@ -216,19 +216,10 @@
 
   // load script equivalent for server side
   __webpack_require__.l = function (url, callback, chunkId) {
-    console.log('LOADING CONTAINER', url);
     if (!chunkId) {
       throw new Error('__webpack_require__.l name is required for ' + url);
     }
-    var usesInternalRef = chunkId.indexOf('__webpack_require__') === 0;
-    if (usesInternalRef) {
-      var regex =
-        /__webpack_require__\.federation\.instance\.moduleCache\.get\(([^)]+)\)/;
-      var match = chunkId.match(regex);
-      if (match) {
-        chunkId = match[1].replace(/["']/g, '');
-      }
-    }
+
     __webpack_require__.federation.runtime
       .loadScriptNode(url, { attrs: {} })
       .then(function (res) {
