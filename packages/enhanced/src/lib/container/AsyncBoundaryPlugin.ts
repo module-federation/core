@@ -118,36 +118,43 @@ class AsyncEntryStartupPlugin {
 
           const requirements =
             compilation.chunkGraph.getTreeRuntimeRequirements(runtimeItem);
-          const hasRemoteModules =
-            compilation.chunkGraph.getChunkModulesIterableBySourceType(
-              upperContext.chunk,
-              'remote',
-            );
-          const consumeShares =
-            compilation.chunkGraph.getChunkModulesIterableBySourceType(
-              upperContext.chunk,
-              'consume-shared',
-            );
+
           const entryOptions = upperContext.chunk.getEntryOptions();
-          const initialChunks = Array.from(
-            upperContext.chunk.getAllInitialChunks(),
-          ).map((chunk: Chunk) => chunk.id);
+          const chunkInitials = Array.from(
+            // upperContext.chunk.getAllInitialChunks()
+            compilation.chunkGraph.getChunkEntryDependentChunksIterable(upperContext.chunk)
+          )
+
+          chunkInitials.push(upperContext.chunk);
+
+          const initialChunks = chunkInitials.map((chunk: Chunk) => chunk.id);
+          const hasRemoteModules = chunkInitials.some((chunk: Chunk) => compilation.chunkGraph.getChunkModulesIterableBySourceType(chunk,'remote'));
+          const consumeShares = chunkInitials.some((chunk: Chunk) => compilation.chunkGraph.getChunkModulesIterableBySourceType(chunk,'consume-shared'));
+
           const dependOn = entryOptions?.dependOn || [];
           const dependOnIDs = this.getChunkByName(compilation, dependOn);
-          const chunksToRef = [...dependOnIDs, ...initialChunks];
+
+          const chunkIds = Array.from(
+            compilation.chunkGraph.getChunkEntryDependentChunksIterable(upperContext.chunk)
+          ).map(chunk => {
+            return chunk.id;
+          });
+
+          chunkIds.unshift(upperContext.chunk.id);
 
           remotes = this._getRemotes(
             compiler.webpack.RuntimeGlobals,
             requirements,
-            Boolean(hasRemoteModules),
-            chunksToRef,
+            hasRemoteModules,
+            initialChunks,
             remotes,
           );
+
           shared = this._getShared(
             compiler.webpack.RuntimeGlobals,
             requirements,
-            Boolean(consumeShares),
-            chunksToRef,
+            consumeShares,
+            initialChunks,
             shared,
           );
         }
