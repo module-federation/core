@@ -24,8 +24,17 @@ jobs:
           node-version: '18'
           cache: 'pnpm'
 
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
       - name: Install Dependencies
         run: pnpm install
+
+      - name: Install Cypress
+        run: npx cypress install
+
+      - name: Check Code Format
+        run: npx nx format:check
 
       - name: Run Affected Build
         run: npx nx affected -t build --parallel=10
