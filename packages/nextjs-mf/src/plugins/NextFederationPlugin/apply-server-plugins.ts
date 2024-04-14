@@ -174,7 +174,7 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     ...compiler.options.node,
     global: false,
   };
-  compiler.options.target = 'async-node'
+  compiler.options.target = 'async-node';
 
   // solves strange issues where next doesnt create a runtime chunk
   // might be related to if an api route exists or not

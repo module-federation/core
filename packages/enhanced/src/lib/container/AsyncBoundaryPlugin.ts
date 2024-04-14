@@ -122,21 +122,35 @@ class AsyncEntryStartupPlugin {
           const entryOptions = upperContext.chunk.getEntryOptions();
           const chunkInitials = Array.from(
             // upperContext.chunk.getAllInitialChunks()
-            compilation.chunkGraph.getChunkEntryDependentChunksIterable(upperContext.chunk)
-          )
+            compilation.chunkGraph.getChunkEntryDependentChunksIterable(
+              upperContext.chunk,
+            ),
+          );
 
           chunkInitials.push(upperContext.chunk);
 
           const initialChunks = chunkInitials.map((chunk: Chunk) => chunk.id);
-          const hasRemoteModules = chunkInitials.some((chunk: Chunk) => compilation.chunkGraph.getChunkModulesIterableBySourceType(chunk,'remote'));
-          const consumeShares = chunkInitials.some((chunk: Chunk) => compilation.chunkGraph.getChunkModulesIterableBySourceType(chunk,'consume-shared'));
+          const hasRemoteModules = chunkInitials.some((chunk: Chunk) =>
+            compilation.chunkGraph.getChunkModulesIterableBySourceType(
+              chunk,
+              'remote',
+            ),
+          );
+          const consumeShares = chunkInitials.some((chunk: Chunk) =>
+            compilation.chunkGraph.getChunkModulesIterableBySourceType(
+              chunk,
+              'consume-shared',
+            ),
+          );
 
           const dependOn = entryOptions?.dependOn || [];
           const dependOnIDs = this.getChunkByName(compilation, dependOn);
 
           const chunkIds = Array.from(
-            compilation.chunkGraph.getChunkEntryDependentChunksIterable(upperContext.chunk)
-          ).map(chunk => {
+            compilation.chunkGraph.getChunkEntryDependentChunksIterable(
+              upperContext.chunk,
+            ),
+          ).map((chunk) => {
             return chunk.id;
           });
 
