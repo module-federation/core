@@ -35,6 +35,13 @@ export function applyClientPlugins(
   const { remotes, name } = options;
   //@ts-ignore
   compiler.options.output.publicPath = 'auto';
+  // Build will hang without this. Likely something in my plugin
+  // compiler.options.optimization.minimize = false
+  compiler.options.optimization.moduleIds = 'named';
+  compiler.options.optimization.chunkIds = 'named';
+  // if( compiler.options.optimization.splitChunks) {
+  //   compiler.options.optimization.splitChunks.chunks = 'async';
+  // }
 
   // If automatic page stitching is enabled, add a new rule to the compiler's module rules
   if (extraOptions.automaticPageStitching) {
