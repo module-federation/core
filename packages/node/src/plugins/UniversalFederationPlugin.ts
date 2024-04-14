@@ -7,6 +7,8 @@ import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import { ModuleFederationPluginOptions } from '../types';
 import type { Compiler, container } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+import { run } from 'jest-cli';
+import RuntimePlugin from '../runtimePlugin';
 
 /**
  * Interface for NodeFederationOptions
@@ -64,6 +66,13 @@ class UniversalFederationPlugin {
       compiler.options.target === 'async-node'
     ) {
       new NodeFederationPlugin(options, this.context).apply(compiler);
+      if (options.runtimePlugins) {
+        options.runtimePlugins.push('@module-federation/node/runtimePlugin');
+      } else {
+        options.runtimePlugins = ['@module-federation/node/runtimePlugin'];
+      }
+      new ModuleFederationPlugin(options).apply(compiler);
+
       new StreamingTargetPlugin({ ...options, debug }).apply(compiler);
     } else {
       new ModuleFederationPlugin(options).apply(compiler);
