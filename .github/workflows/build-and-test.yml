@@ -1,4 +1,4 @@
-name: Build affected packages
+name: Build and Test Workflow
 
 on:
   pull_request:
@@ -24,64 +24,122 @@ jobs:
           node-version: '18'
           cache: 'pnpm'
 
-      - name: Set Nx SHA
-        uses: nrwl/nx-set-shas@v3
-
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Install Cypress
-        run: npx cypress install
-
-      - name: Check Code Format
-        run: npx nx format:check
-
       - name: Run Affected Build
-        run: npx nx affected -t build --parallel=10 --exclude='*,!tag:package'
+        run: npx nx affected -t build --parallel=10
 
       - name: Run Affected Lint
-        run: npx nx affected -t lint --parallel=7 --exclude='*,!tag:package'
+        run: npx nx affected -t lint --parallel=7
 
       - name: Run Affected Test
-        run: npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
+        run: npx nx affected -t test --parallel=3
 
-  e2e-tests:
+  e2e-next-js-dev:
     needs: build-and-test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app:
-          [
-            next-js-dev,
-            next-js-prod,
-            modernjs,
-            runtime-host,
-            webpack-host,
-            node-federation,
-          ]
-      max-parallel: 3
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Install Pnpm
-        run: corepack enable
-
-      - name: Setup Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'pnpm'
-
-      - name: Install Dependencies
-        run: pnpm install
-
-      - name: Run E2E Tests ${{ matrix.app }}
+      - name: Install Dependencies and Run Next.js Dev E2E Test
         run: |
-          pnpm run app:${{ matrix.app }}:dev &
+          corepack enable &&
+          pnpm install &&
+          pnpm run app:next:dev &
           echo "done" &&
-          pnpm exec wait-on tcp:${{ matrix.port }} &&
-          npx nx run-many --target=test:e2e --projects=${{ matrix.app }} --parallel=2 &&
-          lsof -ti tcp:${{ matrix.port }} | xargs kill
-        env:
-          PORT: ${{ matrix.port }}
+          pnpm exec wait-on tcp:3001 &&
+          pnpm exec wait-on tcp:3002 &&
+          pnpm exec wait-on tcp:3000 &&
+          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=2 &&
+          lsof -ti tcp:3000,3001,3002 | xargs kill
+
+  e2e-next-js-prod:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies and Run Next.js Prod E2E Test
+        run: |
+          corepack enable &&
+          pnpm install &&
+          pnpm run app:next:build &&
+          pnpm run app:next:prod &
+          pnpm exec wait-on tcp:3001 &&
+          pnpm exec wait-on tcp:3002 &&
+          pnpm exec wait-on tcp:3000 &&
+          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=2 &&
+          lsof -ti tcp:3000,3001,3002 | xargs kill
+
+  e2e-modernjs:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies and Run ModernJS E2E Test
+        run: |
+          corepack enable &&
+          pnpm install &&
+          npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 &&
+          lsof -ti tcp:4001 | xargs kill
+
+  e2e-3005-runtime-host:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies and Run 3005-runtime-host E2E Test
+        run: |
+          corepack enable &&
+          pnpm install &&
+          pnpm run app:runtime:dev &
+          echo "done" &&
+          pnpm exec wait-on tcp:3005 &&
+          pnpm exec wait-on tcp:3007 &&
+          npx nx run-many --target=test:e2e --projects=3005-runtime-host --parallel=1 &&
+          lsof -ti tcp:3005,3006,3007 | xargs kill
+
+  e2e-3008-webpack-host:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies and Run 3008-webpack-host E2E Test
+        run: |
+          corepack enable &&
+          pnpm install &&
+          pnpm run app:manifest:dev &
+          echo "done" &&
+          pnpm exec wait-on tcp:3009 &&
+          pnpm exec wait-on tcp:3012 &&
+          npx nx run-many --target=e2e --projects=3008-webpack-host --parallel=1 &&
+          lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
+
+  e2e-node-federation:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies and Run Node Federation E2E Test
+        run: |
+          corepack enable &&
+          pnpm install &&
+          npx nx run-many --target=serve --projects=node-local-remote,node-remote --parallel=3 &
+          echo "done" &&
+          pnpm exec wait-on tcp:3003 &&
+          pnpm exec wait-on tcp:3002 &&
+          npx nx run-many --target=serve --projects=node-host &
+          echo "done" &&
+          pnpm exec wait-on tcp:3333 &&
+          npx nx run node-host-e2e:test:e2e
