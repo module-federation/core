@@ -7,8 +7,6 @@ import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
 import { ModuleFederationPluginOptions } from '../types';
 import type { Compiler, container } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { run } from 'jest-cli';
-import RuntimePlugin from '../runtimePlugin';
 
 /**
  * Interface for NodeFederationOptions
@@ -20,6 +18,7 @@ interface NodeFederationOptions extends ModuleFederationPluginOptions {
   isServer: boolean;
   promiseBaseURI?: string;
   debug?: boolean;
+  useRuntimePlugin?: boolean;
 }
 
 /**
@@ -65,15 +64,18 @@ class UniversalFederationPlugin {
       compiler.options.target === 'node' ||
       compiler.options.target === 'async-node'
     ) {
-      new NodeFederationPlugin(options, this.context).apply(compiler);
-      if (options.runtimePlugins) {
-        options.runtimePlugins.push('@module-federation/node/runtimePlugin');
+      if (this._options.useRuntimePlugin) {
+        new ModuleFederationPlugin({
+          ...options,
+          runtimePlugins: [
+            require.resolve('../runtimePlugin'),
+            ...(options.runtimePlugins || []),
+          ],
+        }).apply(compiler);
       } else {
-        options.runtimePlugins = ['@module-federation/node/runtimePlugin'];
+        new NodeFederationPlugin(options, this.context).apply(compiler);
+        new StreamingTargetPlugin({ ...options, debug }).apply(compiler);
       }
-      new ModuleFederationPlugin(options).apply(compiler);
-
-      new StreamingTargetPlugin({ ...options, debug }).apply(compiler);
     } else {
       new ModuleFederationPlugin(options).apply(compiler);
     }

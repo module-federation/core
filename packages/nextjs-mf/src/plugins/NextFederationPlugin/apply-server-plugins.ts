@@ -16,29 +16,20 @@ export function applyServerPlugins(
   compiler: Compiler,
   options: ModuleFederationPluginOptions,
 ): void {
-  // Import the StreamingTargetPlugin from @module-federation/node
-  const { StreamingTargetPlugin } = require('@module-federation/node');
   const chunkFileName = compiler.options?.output?.chunkFilename;
   const uniqueName = compiler?.options?.output?.uniqueName || options.name;
-
-  // compiler.options.target= 'async-node';
 
   if (
     typeof chunkFileName === 'string' &&
     uniqueName &&
     !chunkFileName.includes(uniqueName)
   ) {
-    compiler.options.optimization.minimize = false;
     const suffix = `-[chunkhash].js`;
     compiler.options.output.chunkFilename = chunkFileName.replace(
       '.js',
       suffix,
     );
   }
-  // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
-  // new StreamingTargetPlugin(options, {
-  //   ModuleFederationPlugin: ModuleFederationPlugin,
-  // }).apply(compiler);
 
   new HoistContainerReferencesPlugin().apply(compiler);
 
