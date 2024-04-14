@@ -46,11 +46,22 @@ jobs:
       - name: Run Affected Test
         run: npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
 
-      - name: E2E Test for Next.js Prod
-        run: pnpm run app:next:build && pnpm i --force && pnpm run app:next:prod & pnpm exec wait-on tcp:3001 && pnpm exec wait-on tcp:3002 && pnpm exec wait-on tcp:3000 && npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=1 && lsof -ti tcp:3000,3001,3002 | xargs kill
-
       - name: E2E Test for Next.js Dev
-        run: pnpm run app:next:dev & echo "done" && pnpm exec wait-on tcp:3001 && pnpm exec wait-on tcp:3002 && pnpm exec wait-on tcp:3000 && npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=2 && lsof -ti tcp:3000,3001,3002 | xargs kill
+        run: |
+          pnpm run app:next:dev & echo "done" &&
+          pnpm exec wait-on tcp:3001 &&
+          pnpm exec wait-on tcp:3002 &&
+          pnpm exec wait-on tcp:3000 &&
+          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=2 &&
+          lsof -ti tcp:3000,3001,3002 | xargs kill
+
+      - name: E2E Test for Next.js Prod
+        run: |
+          pnpm run --filter @module-federation/3002-checkout --filter @module-federation/3000-home --filter @module-federation/3001-shop build &&
+          pnpm run app:next:prod & pnpm exec wait-on tcp:3001 &&
+          pnpm exec wait-on tcp:3002 && pnpm exec wait-on tcp:3000 &&
+          npx nx run-many --target=test:e2e --projects=3000-home,3001-shop,3002-checkout --parallel=3 &&
+          lsof -ti tcp:3000,3001,3002 | xargs kill
 
       - name: E2E Test for ModernJS
         run: npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && lsof -ti tcp:4001 | xargs kill
@@ -60,9 +71,6 @@ jobs:
 
       - name: E2E Test for 3008-webpack-host
         run: pnpm run app:manifest:dev & echo "done" && pnpm exec wait-on tcp:3009 && pnpm exec wait-on tcp:3012 && npx nx run-many --target=e2e --projects=3008-webpack-host --parallel=1 && lsof -ti tcp:3008,3009,3010,3011,3012 | xargs kill
-
-      - name: Build Next.js Apps in Production Mode
-        run: pnpm app:next:build
 
       - name: E2E Node Federation
         run: npx nx run-many --target=serve --projects=node-local-remote,node-remote --parallel=3 & echo "done" && pnpm exec wait-on tcp:3003 && pnpm exec wait-on tcp:3002 && npx nx run-many --target=serve --projects=node-host & echo "done" && pnpm exec wait-on tcp:3333 && npx nx run node-host-e2e:test:e2e

@@ -35,6 +35,6 @@
   },
   "scripts": {
     "start": "next start",
-    "build": "NEXT_PRIVATE_LOCAL_WEBPACK=true next start"
+    "build": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build"
   }
 }
