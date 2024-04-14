@@ -37,13 +37,13 @@ jobs:
         run: npx nx format:check
 
       - name: Run Affected Build
-        run: npx nx affected -t build --parallel=10
+        run: npx nx affected -t build --parallel=10 --exclude='*,!tag:package'
 
       - name: Run Affected Lint
-        run: npx nx affected -t lint --parallel=7
+        run: npx nx affected -t lint --parallel=7 --exclude='*,!tag:package'
 
       - name: Run Affected Test
-        run: npx nx affected -t test --parallel=3
+        run: npx nx affected -t test --parallel=3 --exclude='*,!tag:package'
 
   e2e-next-js-dev:
     needs: build-and-test
@@ -51,11 +51,23 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-      - name: Install Dependencies and Run Next.js Dev E2E Test
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install Dependencies
         run: |
           corepack enable &&
           pnpm install &&
+          npx nx affected -t build --parallel=10 --exclude='*,!tag:package'
+
+      - name: Run Next.js Dev E2E Test
+        run: |
           pnpm run app:next:dev &
           echo "done" &&
           pnpm exec wait-on tcp:3001 &&
@@ -70,10 +82,20 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
 
       - name: Install Dependencies and Run Next.js Prod E2E Test
         run: |
-          corepack enable &&
           pnpm install &&
           pnpm run app:next:build &&
           pnpm run app:next:prod &
@@ -89,10 +111,20 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
 
       - name: Install Dependencies and Run ModernJS E2E Test
         run: |
-          corepack enable &&
           pnpm install &&
           npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 &&
           lsof -ti tcp:4001 | xargs kill
@@ -103,10 +135,20 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
 
       - name: Install Dependencies and Run 3005-runtime-host E2E Test
         run: |
-          corepack enable &&
           pnpm install &&
           pnpm run app:runtime:dev &
           echo "done" &&
@@ -121,10 +163,20 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
 
       - name: Install Dependencies and Run 3008-webpack-host E2E Test
         run: |
-          corepack enable &&
           pnpm install &&
           pnpm run app:manifest:dev &
           echo "done" &&
@@ -139,10 +191,20 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pnpm
+        run: corepack enable
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
 
       - name: Install Dependencies and Run Node Federation E2E Test
         run: |
-          corepack enable &&
           pnpm install &&
           npx nx run-many --target=serve --projects=node-local-remote,node-remote --parallel=3 &
           echo "done" &&
