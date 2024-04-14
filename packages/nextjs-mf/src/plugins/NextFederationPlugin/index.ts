@@ -148,7 +148,6 @@ export class NextFederationPlugin {
     compiler: Compiler,
     isServer: boolean,
   ): ModuleFederationPluginOptions {
-    console.log(this._extraOptions.skipSharingNextInternals);
     const defaultShared = this._extraOptions.skipSharingNextInternals
       ? {}
       : retrieveDefaultShared(isServer);

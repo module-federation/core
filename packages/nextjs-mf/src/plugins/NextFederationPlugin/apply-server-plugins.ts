@@ -46,11 +46,7 @@ export function applyServerPlugins(
   new InvertedContainerPlugin({
     runtime: 'webpack-runtime',
     container: options.name,
-    chunkToEmbed: 'host_inner_ctn',
     remotes: options.remotes as Record<string, string>,
-    shared: options.shared as any,
-    shareScope: 'default',
-    exposes: options.exposes as any,
     debug: false,
     //@ts-ignore
   }).apply(compiler);
@@ -106,11 +102,6 @@ export function handleServerExternals(
   compiler: Compiler,
   options: ModuleFederationPluginOptions,
 ): void {
-  // Use a regex to match the required external modules
-  // const crittersRegex = 'critters';
-  // const reactRegex = /^react$/;
-  // const reactDomRegex = /^react-dom$/;
-  // const nextCompiledRegex = /next\/dist\/compiled\/(?!server|client|shared).*/;
   if (
     Array.isArray(compiler.options.externals) &&
     compiler.options.externals[0]
@@ -139,7 +130,7 @@ export function handleServerExternals(
               (key.endsWith('/') ? req.includes(key) : req === key)
             );
           }) ||
-          ctx.request.includes('@module-federation/dashboard-plugin'))
+          ctx.request.includes('@module-federation/'))
       ) {
         // If the module should not be treated as external, return without calling the original externals function
         return;
@@ -183,8 +174,7 @@ export function configureServerCompilerOptions(compiler: Compiler): void {
     ...compiler.options.node,
     global: false,
   };
-  // no custom chunk rules
-  compiler.options.optimization.splitChunks = undefined;
+  compiler.options.target = 'async-node'
 
   // solves strange issues where next doesnt create a runtime chunk
   // might be related to if an api route exists or not
