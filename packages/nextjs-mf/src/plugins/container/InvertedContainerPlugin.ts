@@ -3,12 +3,11 @@ import { ModuleFederationPluginOptions } from './types';
 import EmbeddedContainerPlugin from './EmbeddedContainerPlugin';
 import { AsyncBoundaryPlugin } from '@module-federation/enhanced';
 
-interface InvertedContainerOptions extends ModuleFederationPluginOptions {
+interface InvertedContainerOptions {
   container?: string;
   remotes: Record<string, string>;
   runtime: string;
   debug?: boolean;
-  chunkToEmbed: string;
 }
 
 class InvertedContainerPlugin {
@@ -25,9 +24,9 @@ class InvertedContainerPlugin {
     }).apply(compiler);
 
     new AsyncBoundaryPlugin({
+      excludeChunk: chunk => (chunk.name === this.options.container || chunk.name === this.options.container + '_partial'),
       // @ts-ignore
       eager: (module) => /\.federation/.test(module?.request || ''),
-      //@ts-ignore
     }).apply(compiler);
   }
 }
