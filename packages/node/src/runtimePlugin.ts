@@ -249,10 +249,6 @@
         if (installedChunkData) {
           promises.push(installedChunkData[2]);
         } else {
-          console.log(
-            'is outbound chunk handler ref',
-            __webpack_require__.federation.chunkMatcher(chunkId),
-          );
           if (__webpack_require__.federation.chunkMatcher(chunkId)) {
             // check if real chunk for handler
             var promise = new Promise(function (resolve, reject) {
@@ -307,7 +303,7 @@
     if (__webpack_require__.f.require) {
       console.warn(
         '\x1b[33m%s\x1b[0m',
-        'CAUTION: build target is not set to "async-node", attempting to patch additional chunk handlers',
+        'CAUTION: build target is not set to "async-node", attempting to patch additional chunk handlers. This may not work',
       );
       __webpack_require__.f.require = handle;
     }
