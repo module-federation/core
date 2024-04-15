@@ -822,8 +822,8 @@ export class FederationHost {
     return optionsRes;
   }
 
-  private registerPlugins(plugins: UserOptions['plugins']) {
-    const pluginRes = registerPlugins(plugins, [
+  registerPlugins(plugins: UserOptions['plugins']) {
+    registerPlugins(plugins, [
       this.hooks,
       this.snapshotHandler.hooks,
       this.loaderHook,

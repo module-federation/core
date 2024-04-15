@@ -13,6 +13,7 @@ The `PluginDtsOptions` types are as follows:
 interface PluginDtsOptions {
   generateTypes?: boolean | DtsRemoteOptions;
   consumeTypes?: boolean | DtsHostOptions;
+  tsConfigPath?: string;
 }
 ```
 
@@ -32,6 +33,7 @@ interface DtsRemoteOptions {
   deleteTypesFolder?: boolean;
   additionalFilesToCompile?: string[];
   compilerInstance?: 'tsc' | 'vue-tsc';
+  compileInChildProcess?: boolean;
   generateAPITypes?: boolean;
   extractThirdParty?: boolean;
   extractRemoteTypes?: boolean;
@@ -46,7 +48,8 @@ When configuring `generateTypes` to `true`, the following configuration will be 
   "generateAPITypes": true,
   "abortOnError": false,
   "extractThirdParty": true,
-  "extractRemoteTypes": true
+  "extractRemoteTypes": true,
+  "compileInChildProcess": true
 }
 ```
 
@@ -79,6 +82,14 @@ Whether to extract third-party package types.
 
 Whether to generate the `loadRemote` type in `Federation Runtime`
 
+#### compileInChildProcess
+
+- Type: `boolean`
+- Required: No
+- Default value: `undefined`
+
+Whether generate types in child process
+
 #### abortOnError
 
 - Type: `boolean`
@@ -92,7 +103,7 @@ Whether to throw an error when a problem is encountered during type generation
 - Type: `string`
 - Required: No
 - Default value: `path.join(process.cwd(),'./tsconfig.json')`
-
+> priority: dts.generateTypes.tsConfigPath > dts.tsConfigPath
 tsconfig configuration file path
 
 #### typesFolder
@@ -196,3 +207,11 @@ Before loading type files, whether to delete the previously loaded `typesFolder`
 - Default value: `'@mf-types'`
 
 `typesFolder` corresponding to `remotes` directory configuration
+
+### tsConfigPath
+
+- Type: `string`
+- Required: No
+- Default value: `path.join(process.cwd(),'./tsconfig.json')`
+
+tsconfig configuration file path

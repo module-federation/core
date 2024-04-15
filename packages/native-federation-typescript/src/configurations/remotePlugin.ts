@@ -1,52 +1,35 @@
 import { existsSync } from 'fs';
-import { dirname, join, resolve, extname } from 'path';
-import { utils } from '@module-federation/managers';
+import { dirname, join, resolve } from 'path';
 import typescript from 'typescript';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
-import { validateOptions } from '../lib/utils';
 
 const defaultOptions = {
   tsConfigPath: './tsconfig.json',
   typesFolder: '@mf-types',
   compiledTypesFolder: 'compiled-types',
-  hostRemoteTypesFolder: '@mf-types',
   deleteTypesFolder: true,
   additionalFilesToCompile: [],
   compilerInstance: 'tsc' as const,
-  compileInChildProcess: false,
-  implementation: '',
-  generateAPITypes: false,
-  context: process.cwd(),
-  abortOnError: true,
-  extractRemoteTypes: false,
-  extractThirdParty: false,
 } satisfies Partial<RemoteOptions>;
 
 const readTsConfig = ({
   tsConfigPath,
   typesFolder,
   compiledTypesFolder,
-  context,
 }: Required<RemoteOptions>): typescript.CompilerOptions => {
-  const resolvedTsConfigPath = resolve(context, tsConfigPath);
+  const resolvedTsConfigPath = resolve(tsConfigPath);
 
   const readResult = typescript.readConfigFile(
     resolvedTsConfigPath,
     typescript.sys.readFile,
   );
-
-  if (readResult.error) {
-    throw new Error(readResult.error.messageText.toString());
-  }
-
   const configContent = typescript.parseJsonConfigFileContent(
     readResult.config,
     typescript.sys,
     dirname(resolvedTsConfigPath),
   );
-  const outDir = resolve(
-    context,
+  const outDir = join(
     configContent.options.outDir || 'dist',
     typesFolder,
     compiledTypesFolder,
@@ -63,15 +46,10 @@ const readTsConfig = ({
 
 const TS_EXTENSIONS = ['ts', 'tsx', 'vue', 'svelte'];
 
-const resolveWithExtension = (exposedPath: string, context: string) => {
-  if (extname(exposedPath)) {
-    return resolve(context, exposedPath);
-  }
+const resolveWithExtension = (exposedPath: string) => {
+  const cwd = process.cwd();
   for (const extension of TS_EXTENSIONS) {
-    const exposedPathWithExtension = resolve(
-      context,
-      `${exposedPath}.${extension}`,
-    );
+    const exposedPathWithExtension = join(cwd, `${exposedPath}.${extension}`);
     if (existsSync(exposedPathWithExtension)) {
       return exposedPathWithExtension;
     }
@@ -79,28 +57,15 @@ const resolveWithExtension = (exposedPath: string, context: string) => {
   return undefined;
 };
 
-const resolveExposes = (remoteOptions: Required<RemoteOptions>) => {
-  const parsedOptions = utils.parseOptions(
-    remoteOptions.moduleFederationConfig.exposes || {},
-    (item, key) => ({
-      exposePath: Array.isArray(item) ? item[0] : item,
-      key,
-    }),
-    (item, key) => ({
-      exposePath: Array.isArray(item.import) ? item.import[0] : item.import[0],
-      key,
-    }),
-  );
-  return parsedOptions.reduce(
-    (accumulator, item) => {
-      const { exposePath, key } = item[1];
-      accumulator[key] =
-        resolveWithExtension(exposePath, remoteOptions.context) ||
-        resolveWithExtension(
-          join(exposePath, 'index'),
-          remoteOptions.context,
-        ) ||
-        exposePath;
+const resolveExposes = (remoteOptions: RemoteOptions) => {
+  return Object.entries(
+    remoteOptions.moduleFederationConfig.exposes as Record<string, string>,
+  ).reduce(
+    (accumulator, [exposedEntry, exposedPath]) => {
+      accumulator[exposedEntry] =
+        resolveWithExtension(exposedPath) ||
+        resolveWithExtension(join(exposedPath, 'index')) ||
+        exposedPath;
       return accumulator;
     },
     {} as Record<string, string>,
@@ -108,7 +73,9 @@ const resolveExposes = (remoteOptions: Required<RemoteOptions>) => {
 };
 
 export const retrieveRemoteConfig = (options: RemoteOptions) => {
-  validateOptions(options);
+  if (!options.moduleFederationConfig) {
+    throw new Error('moduleFederationConfig is required');
+  }
 
   const remoteOptions: Required<RemoteOptions> = {
     ...defaultOptions,

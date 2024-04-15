@@ -15,6 +15,9 @@ module.exports = composePlugins(
   withNx(),
   withReact(),
   async (config, context) => {
+    config.watchOptions = {
+      ignored: ['**/node_modules/**', '**/@mf-types/**'],
+    };
     // const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
     config.watchOptions = {
       ignored: ['**/dist/**'],

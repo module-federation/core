@@ -1,5 +1,21 @@
 # @module-federation/runtime
 
+## 0.1.4
+
+### Patch Changes
+
+- 2f697b9: fix: fixed type declaration in pkg
+- Updated dependencies [8f3a440]
+- Updated dependencies [2f697b9]
+  - @module-federation/sdk@0.1.4
+
+## 0.1.3
+
+### Patch Changes
+
+- 6b3b210: Add Register plugins api
+  - @module-federation/sdk@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes

@@ -3,10 +3,8 @@ import {
   type moduleFederationPlugin,
 } from '@module-federation/sdk';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
-import {
-  NativeFederationTypeScriptHost,
-  NativeFederationTypeScriptRemote,
-} from '@module-federation/native-federation-typescript/webpack';
+import { ConsumeTypesPlugin } from './ConsumeTypesPlugin';
+import { GenerateTypesPlugin } from './GenerateTypesPlugin';
 import { isTSProject } from './utils';
 
 class TypesPlugin implements WebpackPluginInstance {
@@ -28,7 +26,12 @@ class TypesPlugin implements WebpackPluginInstance {
     const defaultConsumeTypes = { abortOnError: false, consumeAPITypes: true };
     const normalizedDtsOptions =
       normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
-        isTSProject(undefined, compiler.context),
+        isTSProject(
+          typeof options.dts === 'object'
+            ? options.dts.tsConfigPath
+            : undefined,
+          compiler.context,
+        ),
         {
           generateTypes: defaultGenerateTypes,
           consumeTypes: defaultConsumeTypes,
@@ -37,46 +40,20 @@ class TypesPlugin implements WebpackPluginInstance {
         'mfOptions.dts',
       )(options.dts);
 
-    if (typeof normalizedDtsOptions === 'object') {
-      const normalizedGenerateTypes =
-        normalizeOptions<moduleFederationPlugin.DtsRemoteOptions>(
-          true,
-          defaultGenerateTypes,
-          'mfOptions.dts.generateTypes',
-        )(normalizedDtsOptions.generateTypes);
-
-      if (normalizedGenerateTypes) {
-        NativeFederationTypeScriptRemote({
-          remote: {
-            implementation: normalizedDtsOptions.implementation,
-            context: compiler.context,
-            moduleFederationConfig: options,
-            ...normalizedGenerateTypes,
-          },
-          extraOptions: normalizedDtsOptions.extraOptions || {},
-          // @ts-ignore
-        }).apply(compiler);
-      }
-
-      const normalizedConsumeTypes =
-        normalizeOptions<moduleFederationPlugin.DtsRemoteOptions>(
-          true,
-          defaultConsumeTypes,
-          'mfOptions.dts.consumeTypes',
-        )(normalizedDtsOptions.consumeTypes);
-      if (normalizedConsumeTypes) {
-        NativeFederationTypeScriptHost({
-          host: {
-            implementation: normalizedDtsOptions.implementation,
-            context: compiler.context,
-            moduleFederationConfig: options,
-            ...normalizedConsumeTypes,
-          },
-          extraOptions: normalizedDtsOptions.extraOptions || {},
-          // @ts-ignore
-        }).apply(compiler);
-      }
+    if (typeof normalizedDtsOptions !== 'object') {
+      return;
     }
+
+    new GenerateTypesPlugin(
+      options,
+      normalizedDtsOptions,
+      defaultGenerateTypes,
+    ).apply(compiler);
+    new ConsumeTypesPlugin(
+      options,
+      normalizedDtsOptions,
+      defaultConsumeTypes,
+    ).apply(compiler);
   }
 }
 

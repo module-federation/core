@@ -8,7 +8,7 @@ import {
   retrieveMfTypesPath,
   retrieveTypesZipPath,
   HostOptions,
-} from '@module-federation/native-federation-typescript/helpers';
+} from '../core/index';
 import { decodeName } from '@module-federation/sdk';
 import {
   Remote,

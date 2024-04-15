@@ -1,5 +1,5 @@
 import WebSocket from 'isomorphic-ws';
-import { UpdateMode } from '@module-federation/native-federation-typescript/helpers';
+import { UpdateMode } from '../core/index';
 import { Broker } from './broker/Broker';
 import { fib, getIdentifier, getIPV4, fileLog } from './utils';
 import { Message } from './message/Message';

@@ -1,5 +1,6 @@
 import type { Compiler } from 'webpack';
 import { ModuleFederationPluginOptions } from '@module-federation/utilities';
+import { HoistContainerReferencesPlugin } from '@module-federation/enhanced';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/webpack';
@@ -30,13 +31,12 @@ export function applyServerPlugins(
       suffix,
     );
   }
-  // Hoist container references into runtime chunks
-  //@ts-ignore
-
   // Add the StreamingTargetPlugin with the ModuleFederationPlugin from the webpack container
   new StreamingTargetPlugin(options, {
     ModuleFederationPlugin: ModuleFederationPlugin,
   }).apply(compiler);
+
+  new HoistContainerReferencesPlugin().apply(compiler);
 
   // Add a new commonjs chunk loading plugin to the compiler
   new InvertedContainerPlugin({

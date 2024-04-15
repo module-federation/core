@@ -1,5 +1,5 @@
 import { IncomingMessage, createServer } from 'http';
-import { UpdateMode } from '@module-federation/native-federation-typescript/helpers';
+import { UpdateMode } from '../../core/index';
 import WebSocket from 'isomorphic-ws';
 import schedule from 'node-schedule';
 import { parse } from 'url';
