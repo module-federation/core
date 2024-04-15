@@ -122,3 +122,35 @@ export const arrayShared = {
 export const arraySharedInfos = {
   'react-dom': arrayShared.shared['react-dom'],
 };
+
+export const shareInfoWithoutLibAndGetConsumer = {
+  name: '@federation/shared-config-consumer',
+  remotes: [],
+  shared: {
+    'react-dom': {
+      scope: ['default'],
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^16.0.0',
+        eager: false,
+      },
+    },
+  },
+};
+
+export const shareInfoWithoutLibAndGetProvider = {
+  name: '@federation/shared-config-provider',
+  remotes: [],
+  shared: {
+    'react-dom': {
+      version: '16.0.0',
+      scope: ['default'],
+      get: () =>
+        Promise.resolve(() => ({
+          default: 'react-dom',
+          version: '16.0.0',
+          from: '@federation/shared-config-provider',
+        })),
+    },
+  },
+};

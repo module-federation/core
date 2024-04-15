@@ -7,6 +7,8 @@ import {
   localMergeShareInfos,
   arrayShared,
   arraySharedInfos,
+  shareInfoWithoutLibAndGetConsumer,
+  shareInfoWithoutLibAndGetProvider,
 } from './share';
 // import { assert } from '../src/utils/logger';
 import { FederationHost } from '../src/core';
@@ -33,6 +35,29 @@ describe('shared', () => {
   it('init array shared', () => {
     const FederationInstance = init(arrayShared);
     expect(FederationInstance.options.shared).toMatchObject(arraySharedInfos);
+  });
+
+  it('init shared without lib and get', async () => {
+    const provider = init(shareInfoWithoutLibAndGetProvider);
+
+    await provider.loadShare<{
+      version: string;
+      from: string;
+    }>('react-dom');
+
+    const consumer = init(shareInfoWithoutLibAndGetConsumer);
+    consumer.initShareScopeMap('default', provider.shareScopeMap['default']);
+
+    debugger;
+    const reactDomInstance = await consumer.loadShare<{
+      version: string;
+      from: string;
+    }>('react-dom');
+    assert(reactDomInstance);
+    const reactDomInstanceRes = reactDomInstance();
+    assert(reactDomInstanceRes, "reactInstance can't be undefined");
+    expect(reactDomInstanceRes.from).toBe('@federation/shared-config-provider');
+    expect(reactDomInstanceRes.version).toBe('16.0.0');
   });
 
   it('loadShare singleton', async () => {
