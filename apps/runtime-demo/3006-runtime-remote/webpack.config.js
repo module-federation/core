@@ -22,6 +22,7 @@ module.exports = composePlugins(
     config.watchOptions = {
       ignored: ['**/dist/**'],
     };
+    config.devServer.host = '127.0.0.1';
 
     config.plugins.push(
       new ModuleFederationPlugin({

@@ -17,7 +17,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
       name: 'runtime_host',
       remotes: {
         // remote2: 'runtime_remote2@http://localhost:3007/remoteEntry.js',
-        remote1: 'runtime_remote1@http://localhost:3006/mf-manifest.json',
+        remote1: 'runtime_remote1@http://127.0.0.1:3006/mf-manifest.json',
       },
       // library: { type: 'var', name: 'runtime_remote' },
       filename: 'remoteEntry.js',
@@ -54,6 +54,7 @@ module.exports = composePlugins(withNx(), withReact(), (config, context) => {
     }),
   );
   config.optimization.runtimeChunk = false;
+  config.devServer.host = '127.0.0.1';
   config.plugins.forEach((p) => {
     if (p.constructor.name === 'ModuleFederationPlugin') {
       //Temporary workaround - https://github.com/nrwl/nx/issues/16983

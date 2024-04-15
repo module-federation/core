@@ -56,6 +56,7 @@ module.exports = composePlugins(
         },
       }),
     );
+    config.devServer.host = '127.0.0.1';
     config.optimization.runtimeChunk = false;
     config.plugins.forEach((p) => {
       if (p.constructor.name === 'ModuleFederationPlugin') {
