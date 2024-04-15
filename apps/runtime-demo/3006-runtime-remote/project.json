@@ -49,8 +49,7 @@
       "options": {
         "buildTarget": "3006-runtime-remote:build",
         "hmr": true,
-        "port": 3006,
-        "host": "0.0.0.0"
+        "port": 3006
       },
       "configurations": {
         "development": {
