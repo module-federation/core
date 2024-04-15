@@ -1,5 +1,6 @@
 ---
 '@module-federation/runtime': patch
+'@module-federation/enhanced': patch
 ---
 
-feat: align with shared import:false
+feat: support config shared import:false in runtime
