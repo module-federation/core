@@ -48,7 +48,6 @@ describe('shared', () => {
     const consumer = init(shareInfoWithoutLibAndGetConsumer);
     consumer.initShareScopeMap('default', provider.shareScopeMap['default']);
 
-    debugger;
     const reactDomInstance = await consumer.loadShare<{
       version: string;
       from: string;

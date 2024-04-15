@@ -12,7 +12,8 @@
       "@module-federation/runtime-tools",
       "@module-federation/managers",
       "@module-federation/manifest",
-      "@module-federation/dts-plugin"
+      "@module-federation/dts-plugin",
+      "@module-federation/third-party-dts-extractor"
     ]
   ],
   "ignorePatterns": ["^alpha|^beta"],
