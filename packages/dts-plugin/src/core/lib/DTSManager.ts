@@ -61,7 +61,14 @@ class DTSManager {
     const exposePaths: Set<string> = new Set();
     const packageType = Object.keys(mapComponentsToExpose).reduce(
       (sum: string, exposeKey: string) => {
-        const exposePath = path.join(REMOTE_ALIAS_IDENTIFIER, exposeKey);
+        let exposePath = path.join(REMOTE_ALIAS_IDENTIFIER, exposeKey);
+
+        // If we're on Windows, need to convert "\" to "/" in the import path since it
+        // was derived from platform-specific file system path.
+        if (path.sep === '\\') {
+          exposePath = exposePath.split(path.sep).join('/');
+        }
+
         exposePaths.add(`'${exposePath}'`);
         const curType = `T extends '${exposePath}' ? typeof import('${exposePath}') :`;
         sum = curType + sum;
