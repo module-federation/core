@@ -46,5 +46,5 @@
       }
     }
   },
-  "tags": ["package"]
+  "tags": ["type:pkg"]
 }
